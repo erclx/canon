@@ -6,6 +6,7 @@ import { isMarked } from '@/sweep/exempt-marker'
 import { gitEnv } from '@/git/env'
 import { listRuleFiles } from '@/gov/payload'
 import { parseFrontmatter } from '@/indexes/frontmatter'
+import { movedStandardPath } from '@/standards/read'
 import { findBacktickSpans } from '@/markdown/backticks'
 
 /**
@@ -177,8 +178,9 @@ export function classifySpan(span: string): CitationForm | undefined {
  *
  * A standard name takes the authoring root alone, matching `standardRoots` in
  * `@/standards/read`, which reads `standards/` at the working root and then the
- * package corpus. This verb refuses a tree holding no rule corpus, so it runs
- * only where those two roots are one directory. `internal/standards/` is
+ * package corpus, plus the skill reference a retired name moved to. This verb
+ * refuses a tree holding no rule corpus, so it runs only where those two roots
+ * are one directory. `internal/standards/` is
  * deliberately absent: `canon standards <name>` never reaches it, so admitting it
  * here would pass a citation that refuses for the session opening it, which is a
  * gate failing open.
@@ -191,7 +193,11 @@ function candidatesFor(
   cited: string,
   ruleFile: string,
 ): string[] {
-  if (form === 'standard') return [join('standards', `${cited}.md`)]
+  if (form === 'standard') {
+    const moved = movedStandardPath(cited)
+
+    return [join('standards', `${cited}.md`), ...(moved ? [moved] : [])]
+  }
   if (form === 'sibling') return [join(dirname(ruleFile), cited)]
   return [cited]
 }

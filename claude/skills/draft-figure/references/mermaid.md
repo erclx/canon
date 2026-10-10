@@ -1,55 +1,64 @@
 ---
-title: Mermaid path
-description: The hand-drawn render config, the SVG and PNG pair, the hex rewrite, the scoped overflow fallback, the label check, and the PNG read-back with its two-pass stop, read by draft-figure once a figure routes through Mermaid
+title: Mermaid reference
+description: Direction and layout, node and edge budgets, accessibility fields, label punctuation, and render verification for a Mermaid diagram
 ---
 
-# Mermaid path
+# Mermaid reference
 
-`draft-figure` reads this file when Step 3 routes a figure through Mermaid, whether the subject is graph-shaped or an architecture view the architecture set already shaped.
+Applies to every Mermaid fence, wherever it is written. A fence sits inside a document some other standard shapes, so this file reaches the drawing and stops at the fence markers.
 
-## Draft the fence
+## Scope
 
-- Draft the fence against `${CLAUDE_SKILL_DIR}/../../standards/mermaid.md` for direction, node and edge budgets, `accTitle` and `accDescr`, and quoted labels. Do not work the layout or the budgets from memory.
-- Read every node and subgraph label against the banned characters `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md` lists. The audit hook skips every line inside a fence, so a label carrying a banned character passes silently while the same character in the caption is caught. Reading the labels is the only gate they have. A colon works as a replacement inside a label.
+Governs the Mermaid attribute wherever a fence is written, naming no path because an attribute standard governs a drawing rather than a document type: direction and layout, node and edge budgets, the accessibility fields, how punctuation reaches a label, and how a rendered diagram is verified. It carries no template, since a fence has no document shape of its own and sits inside one another standard sets.
 
-## Render
+Does not govern:
 
-Render with the hand-drawn look and the figure font stack, writing scratch files under `.canon/tmp/figures/`:
+- Which architecture view a figure draws and what question it answers: the `draft-figure` skill's architecture set
+- Language, word choice, punctuation, and formatting in the prose around a fence: `markdown.md`
+- Voice, rhythm, and sentence construction in that prose: the `write-human` skill
+- The mechanism behind any component a diagram draws: `context.md`
 
-```bash
-mkdir -p .canon/tmp/figures
-cat <<'EOF' >.canon/tmp/figures/<slug>.json
-{"look": "handDrawn", "themeVariables": {"fontFamily": "Virgil, Excalifont, cursive"}}
-EOF
-bunx -y @mermaid-js/mermaid-cli -i .canon/tmp/figures/<slug>.mmd -o .canon/tmp/figures/<slug>.svg -c .canon/tmp/figures/<slug>.json
-bunx -y @mermaid-js/mermaid-cli -i .canon/tmp/figures/<slug>.mmd -o .canon/tmp/figures/<slug>.png -c .canon/tmp/figures/<slug>.json
-```
+## What a working diagram looks like
 
-Render both formats in one pass. The SVG is what ships inside the `<figure>`, and the PNG is what the read-back below judges, since an SVG's markup carries no recoverable spatial meaning.
+A diagram works when a reviewer holding the rendered image, and nothing else, answers yes four times:
 
-Use `bunx` when bun is available, falling back to `npx -y @mermaid-js/mermaid-cli ...` otherwise.
+- Did the declared direction hold?
+- Is every row of siblings free of a sequential reading the system does not have?
+- Is every convergence free of a crossing edge bundle?
+- Is it taller than wide, outside a sequence diagram?
 
-Before the first render in a project, say what is about to block:
+A diagram failing these is non-conforming even when it satisfies every shape rule below. The rules are the means. These four questions are the test.
 
-```plaintext
-Rendering to verify layout. The first run downloads the Mermaid CLI and takes about 15 seconds.
-```
+## Layout
 
-## Rewrite the colors
+- Declare `flowchart TB` by default. Mermaid ignores a subgraph's direction whenever that subgraph links outward, and an architecture diagram links across its subgraphs as the normal case, so top-bottom is a declaration rather than a guarantee.
+- Restructure a diagram that renders diagonal or left-to-right. Repeating the direction keyword does not fix it.
+- Render a context, component, or pipeline diagram taller than wide. A `sequenceDiagram` is wide by construction and is exempt.
+- Do not let independent nodes render in a row. A row of siblings reads as a sequential chain and asserts a pipeline the system does not have.
+- Do not converge many edges on one node from one side. A crossing bundle is unreadable whatever it encodes.
+- Keep node labels short. Three or four words max. Detail goes in the paragraph below the diagram.
+- Use `<br/>` for a second short line on a node when the label is two ideas, never for a sentence.
+- Subgraphs are for grouping unrelated lanes such as offline versus online or browser versus server. Do not subgraph a single linear flow.
 
-Rewrite every stroke, fill, and text color the renderer wrote as a literal hex value into the custom property the host stylesheet defines, per the color rule in `${CLAUDE_SKILL_DIR}/../../standards/figures.md`. Mermaid's own theme has no notion of a custom property, so this is a source edit made to the rendered SVG, not a config option.
+## Budgets
 
-## Clipped titles
+- Hold a diagram to roughly 5 to 10 nodes. Split it past 15.
+- Watch edge count harder than node count. It binds first, and a diagram whose edges outnumber its nodes is already too dense to read.
+- Treat a diagram that cannot be described in one sentence as two diagrams.
+- Warn rather than refuse on a budget, and name the split that would fix it. These numbers come from published Mermaid practice rather than from a measurement against a corpus, so a hard refusal on them will be wrong sometimes and unarguable when it is.
 
-- Expect a group title or a long label to clip once the destination shows it in the hand font, since the renderer sized its box in a fallback face.
-- When the in-page check shows a clipped title, add a `<style>` inside the SVG, scoped to that SVG's own id, that sets `overflow: visible` on the clipped label's `foreignObject` and centers the label within it, so the wider text spills past both edges evenly. The style hides the mismatch for a title and does nothing for a node label crowding its box, which takes a shorter label instead.
+## Labels
 
-## Fonts
+- Apply the punctuation bans in `markdown.md` to node and subgraph labels. A label is not prose, so a check scoped to prose does not reach it, and reading the labels before shipping is the only gate they have.
+- Treat the prose around a fence and the text inside it as two surfaces. The paragraphs are prose and follow `markdown.md` and the `write-human` skill. The fenced block is not, which is why a check scoped to prose is the wrong thing to rely on for what sits inside it.
 
-Check whether the project ran `canon design css --figures`. The figure and figcaption styling ships unconditionally either way, but that flag alone embeds the Virgil and Excalifont font files. Without it, the figure falls back to the browser's own generic `cursive` face rather than the intended hand-drawn font, and the output names that gap when the flag was not passed.
+## Accessibility
 
-## Read the render back
+- Give every diagram `accTitle` and `accDescr`. `accTitle` names what the diagram answers. `accDescr` states the structure in one sentence for a reader who cannot see the render.
 
-- Read the rendered PNG and judge it against what the figure means to say, applying the verification properties in the mermaid standard. A source satisfying every rule there can still render as a picture asserting something false, so the image is what gets judged.
-- Fix the Mermaid source and re-render on a defect. Stop after two correction passes. When a defect survives, keep the figure and name the defect in the output rather than reporting a false verification.
-- When the render fails for any reason, no browser engine, no network, no package manager, continue to the confirm step and name the skipped check. A missing renderer degrades the loop rather than failing it.
+## Verification
+
+- Judge a diagram from its rendered image, not from its source. Direction, sibling rows, and edge bundles are visible only in the output.
+- Render to PNG. An SVG export reads back as markup with no recoverable spatial meaning.
+- Apply the four questions above as a reviewer, against the same render the author judged.
+- State which verification was skipped when no renderer is available. A diagram written without a render is still shippable, and one reported as verified without a render is not.

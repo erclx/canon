@@ -51,7 +51,7 @@ Shipping a dependency beside its consumer connects them only when the consumer's
 
 Thirty-one standards carry a row below, all at the flat root. Each carries its purpose and the home it routes to. `arrived` marks a home the guidance already sits in, and `## Withdrawn` holds the destinations re-decided rather than built.
 
-The corpus stands at 34, so four standards carry no row. `mermaid.md` reaches a session through the `draft-figure` skill, which the generated markdown rule names, since no glob can read whether a file holds a fence. `docs.md` reaches one through the `docs-sync` read list, the destination a skill takes when no rule globs the folder, since the root file states that none is scoped at `docs/`. `wiki.md` takes the ordinary document-type route: `governance/rules/standards/wiki.md` globs `wiki/**/*.md` and points at it. It ships through `base` like every generated rule, since the standard and `draft-doc` already reach targets and the glob matches nothing where no `wiki/` exists.
+The corpus stands at 34, so four standards carry no row. `mermaid.md` reaches a session through the `draft-figure` skill, which the generated markdown rule names, since no glob can read whether a file holds a fence. `docs.md` reaches one through the `docs-sync` read list, the destination a skill takes when no rule globs the folder, since the root file states that none is scoped at `docs/`. `wiki.md` reaches a session through the `draft-doc` skill's wiki kind, which names it at `references/wiki.md`. No rule globs the wiki folder any longer, since the standard moved into the skill with its one reader.
 
 `figures.md` is a fragment standard with no document type of its own to glob, so no rule carries it. It reaches a session through the citation each caller's own body writes, the fallback form a flat standard takes when nothing globs it.
 
@@ -74,8 +74,8 @@ The corpus stands at 34, so four standards carry no row. `mermaid.md` reaches a 
 - `plan.md` fixes the plan file and the suggested-and-answer contract a worker executes. `governance/rules/standards/plan.md`.
 - `plan-lifecycle.md` fixes when a plan is written, how it is amended, and its move to the archive. `governance/rules/standards/plan.md`, through a pointer bullet. Split from `plan.md` for the same ceiling, which `plan.md` still sits one line under.
 - `readme.md` fixes the voice and structure of the page a project leads with. `governance/rules/standards/readme.md`.
-- `ready.md` fixes the finished-file handoff folder, its overview frontmatter, and the thin-plan contract that ships it. `governance/rules/standards/ready.md`.
-- `requirements.md` fixes the problem, goals, and non-goals record. `governance/rules/standards/requirements.md`.
+- `ready.md` fixes the finished-file handoff folder, its overview frontmatter, and the thin-plan contract that ships it.
+- `requirements.md` fixes the problem, goals, and non-goals record.
 - `rule.md` fixes a path-scoped governance rule. `governance/rules/standards/rule.md`.
 - `session.md` fixes the pre-compaction handoff. `governance/rules/standards/session.md`, which globs the `session-` file alone because `governance/rules/standards/tasks.md` globs the board around it and one rule over both shapes would carry two.
 - `skill.md` fixes the skill folder, its frontmatter, and its invocation contract. `governance/rules/standards/skill.md`.
@@ -85,7 +85,7 @@ The corpus stands at 34, so four standards carry no row. `mermaid.md` reaches a 
 - `standard.md` fixes a standard's frontmatter, scope statement, and success criterion. `governance/rules/standards/standard.md`.
 - `tasks.md` fixes the task file, its filename, its origin lines, and its archiving. `governance/rules/standards/tasks.md`.
 - `tasks-decline.md` fixes the declined folder, the `Declined:` line, and what declining does to a plan and a board row. `governance/rules/standards/tasks.md`, through a pointer bullet. Split from `tasks.md` for the same ceiling.
-- `teach.md` fixes the learning workspace layout, its ordinal naming, and its mission and record formats. `governance/rules/standards/teach.md`, which most targets never fire, since they open no workspace. The pedagogy stays in `teach-workspace`, which is the split the architecture record already fixes.
+- `teach.md` fixes the learning workspace layout, its ordinal naming, and its mission and record formats. The pedagogy stays in `teach-workspace`, which is the split the architecture record already fixes.
 - `wireframes.md` fixes layout and interaction intent before any UI exists. `governance/rules/standards/wireframes.md`.
 
 ### To a skill, cited from the flat root

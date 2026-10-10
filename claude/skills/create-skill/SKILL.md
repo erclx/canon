@@ -10,9 +10,10 @@ metadata:
 Read these files in parallel:
 
 - `${CLAUDE_SKILL_DIR}/../../standards/skill.md`: skill structure, skill types, frontmatter fields, invocation rules
-- `${CLAUDE_SKILL_DIR}/../../standards/skill-requirement.md`: what `REQUIREMENT.md` must answer, its sections, and its template
-- `${CLAUDE_SKILL_DIR}/../../standards/skill-paths.md`: which root a path in the body resolves against, and how the body cites a standard
+- `${CLAUDE_SKILL_DIR}/references/skill-requirement.md`: what `REQUIREMENT.md` must answer, its sections, and its template
+- `${CLAUDE_SKILL_DIR}/references/skill-paths.md`: which root a path in the body resolves against, and how the body cites a standard
 - `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md`: punctuation and formatting for skill body text
+- `${CLAUDE_SKILL_DIR}/references/skill-practice.md`, when the skill carries engineering practice: the closing sections a practice skill owes and the anatomy behind them
 - The `write-human` skill: voice, rhythm, and sentence construction for skill body text
 
 ## Guards

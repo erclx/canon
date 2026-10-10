@@ -11,7 +11,7 @@ metadata:
 
 Run a learning workspace on one subject across sessions. The workspace holds what the learner has been through, so a session weeks later resumes from the folder rather than from the conversation.
 
-The shape of the workspace is fixed by `${CLAUDE_SKILL_DIR}/../../standards/teach.md`. Read it before writing anything into the folder. The glossary answers to `${CLAUDE_SKILL_DIR}/../../standards/glossary.md` wherever it lands. The pedagogy sits in `${CLAUDE_SKILL_DIR}/references/pedagogy.md`, the lesson craft and its build in `${CLAUDE_SKILL_DIR}/references/lesson-craft.md` and `lesson-build.md`, the record's revisit schedule in `revisit.md`, and the promotion routing in `${CLAUDE_SKILL_DIR}/references/promotion.md`.
+The shape of the workspace is fixed by `${CLAUDE_SKILL_DIR}/references/teach.md`. Read it before writing anything into the folder. The glossary answers to `${CLAUDE_SKILL_DIR}/references/glossary.md` wherever it lands. The pedagogy sits in `${CLAUDE_SKILL_DIR}/references/pedagogy.md`, the lesson craft and its build in `${CLAUDE_SKILL_DIR}/references/lesson-craft.md` and `lesson-build.md`, the record's revisit schedule in `revisit.md`, and the promotion routing in `${CLAUDE_SKILL_DIR}/references/promotion.md`.
 
 ## Guards
 

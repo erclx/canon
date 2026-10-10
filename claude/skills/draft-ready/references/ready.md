@@ -1,10 +1,6 @@
 ---
 title: Ready reference
 description: Folder layout, ordinal naming, the overview frontmatter, the thin-plan contract, and the archive lifecycle for a finished-file handoff
-paths:
-  - '.canon/ready/**'
-rule:
-  - 'Load the `canon:draft-ready` skill to write a ready folder, its overview, the thin plan, and the task row. It owns the procedure. Report it rather than proceeding silently when it does not resolve, since it ships with the plugin and this rule ships with the CLI.'
 ---
 
 # Ready reference
@@ -12,6 +8,18 @@ rule:
 Applies to a ready folder at `.canon/ready/<nn>-<slug>/`. A warm session that has already written a skill, a rule, or another finished file uses it to hand the exact text to the worker that ships it, since a plan only describes a change and a cold worker reading a description writes the file again from scratch. The folder holds the finished files themselves, laid out at their destination paths, so the worker's job is to copy rather than to author.
 
 The folder is gitignored, and backed wherever a records remote is configured: `canon records push` and `canon records pull` protect it against the machine being lost there, refuse with `no-remote` where it is not, and protect nothing against a folder deleted before anyone has pushed. That is why the archive step below is a move rather than a cleanup.
+
+## Contents
+
+- [Scope](#scope)
+- [What a working ready folder looks like](#what-a-working-ready-folder-looks-like)
+- [Folder name](#folder-name)
+- [00-overview.md](#00-overviewmd) <!-- canon-allow-reference: a heading anchor, not a pull request number -->
+- [The mirrored tree](#the-mirrored-tree)
+- [The thin-plan contract](#the-thin-plan-contract)
+- [Lifecycle](#lifecycle)
+- [Anti-patterns](#anti-patterns)
+- [Template](#template)
 
 ## Scope
 
@@ -68,7 +76,7 @@ Below the frontmatter, state in prose what the worker still owns beyond copying 
 
 ## The mirrored tree
 
-- Every other file in the folder sits at the same relative path its destination has in the project, so `standards/ready.md` inside the destination tree sits at `<nn>-<slug>/standards/ready.md` inside the ready folder.
+- Every other file in the folder sits at the same relative path its destination has in the project, so `standards/ready.md` inside the destination tree sits at `<nn>-<slug>/standards/ready.md` inside the ready folder. <!-- canon-allow-reference: the example shows a target tree, where the standard sits under standards/ -->
 - Carry no file the destination tree would not carry. A ready folder is a source for `git mv`-shaped copies, not a scratch pad for the warm session's own notes. Anything else belongs in the plan or in the pull request body.
 - Write each file exactly as it should land. The worker copies verbatim and edits only what the gate or the overview's own list requires, so a placeholder or a half-finished passage ships as written.
 

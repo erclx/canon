@@ -50,7 +50,7 @@ stage_setup() {
   log_info "lesson : the same workspace with no stylesheet, so the next lesson writes one"
   log_info ""
   log_info "Invoke the prefixed form. The dev-skill injection copies SKILL.md alone,"
-  log_info "so the unprefixed copy cannot resolve the bundled standards/teach.md."
+  log_info "so the unprefixed copy cannot resolve the bundled references/teach.md."
   log_info "Launch with: claude --plugin-dir <worktree-root>/claude --model sonnet"
 
   select_or_route_scenario "Which scenario?" "open" "resume" "promote" "lesson"

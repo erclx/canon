@@ -5,7 +5,7 @@ description: The five architecture views with each one's question, source signal
 
 # Architecture set
 
-`draft-figure` reads this file when the request names an architecture view. It shapes the subject, then the figure goes through `${CLAUDE_SKILL_DIR}/references/mermaid.md` like any other graph-shaped figure. The destination stays the one the user named.
+`draft-figure` reads this file when the request names an architecture view. It shapes the subject, then the figure goes through `${CLAUDE_SKILL_DIR}/references/mermaid-path.md` like any other graph-shaped figure. The destination stays the one the user named.
 
 ## The five views
 

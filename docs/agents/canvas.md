@@ -5,7 +5,7 @@ description: The canvas server, its content format, and the verbs that list, arr
 
 # Canvas
 
-`canon canvas` serves a local canvas of pages and HTML frames and gives an agent the verbs the operator's mouse has. A page is a folder under `.canon/canvas/`, a frame is one HTML file in it, and `layout.json` beside them holds each frame's box. `standards/canvas.md` fixes that content format, and the `canvas` skill carries the procedure a session follows to drive the canvas.
+`canon canvas` serves a local canvas of pages and HTML frames and gives an agent the verbs the operator's mouse has. A page is a folder under `.canon/canvas/`, a frame is one HTML file in it, and `layout.json` beside them holds each frame's box. `claude/skills/canvas/references/canvas.md` fixes that content format, and the `canvas` skill carries the procedure a session follows to drive the canvas.
 
 ## Serve
 

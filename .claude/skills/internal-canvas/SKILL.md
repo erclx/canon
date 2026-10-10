@@ -32,5 +32,5 @@ The canvas exists for Claude to draw frames the operator reviews. Do not add new
 - `canon/context/features/canvas.md`: structure, content format, capture, gotchas
 - `docs/agents/canvas.md`: every verb, record, and refusal
 - `claude/skills/canvas/`: the procedure a session follows to drive the canvas, which is the shipped skill's concern rather than this one's
-- `canon standards canvas`: the frame content format both writers share
+- `claude/skills/canvas/references/canvas.md`: the frame content format both writers share
 - `canon/context/development/evidence.md`: which `evidence` folders are dev baselines and which are prod captures, before committing a walk's states

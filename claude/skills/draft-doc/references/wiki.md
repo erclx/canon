@@ -1,53 +1,73 @@
 ---
-title: Wiki kind
-description: The root guard, both placement tests, catalog collision, sourcing from the owner, and vendor-folder regen for a brand-new wiki reference page, read by draft-doc once the request resolves to the wiki kind
+title: Wiki reference
+description: Folder split, frontmatter, naming convention, and sourcing for a wiki reference page
 ---
 
-# Wiki kind
+# Wiki reference
 
-`draft-doc` reads this file when the request resolves to a wiki reference page. A page that already exists is edited against the same standard, never drafted a second time.
+Applies to each authored page in the `wiki` folder at the project root. Skip for `index.md` at any depth, which is a hand-maintained catalog rather than a reference page, and carries `subtitle` rather than `description`.
 
-The standard's `## Placement` section names the folder a page lands in and the vendor subfolder under it. Resolve both from the project root and call them `<wiki-root>` and `<vendor>` below, so the standard stays the one owner of the path.
+## Scope
 
-## Guards
+Governs each authored page in the `wiki` folder at the project root: which folder it belongs in, its frontmatter, its filename, and how it cites the subject it documents.
 
-- If `<wiki-root>` does not resolve, say so and ask whether to create it before drafting. A project carrying no such folder has never taken the standard's placement rule, so creating it is a decision rather than a step.
+Does not govern:
+
+- Voice, rhythm, sentence construction, and information density: the `write-human` skill
+- Headings, punctuation, word choice, and file references: `markdown.md`
+
+## What a working wiki page looks like
+
+A page works when a reader who has never opened it settles two things without asking anyone:
+
+- Which folder holds it, decided from the subject alone rather than from where it happened to get written
+- Where the content came from, so a claim can be checked against its owner rather than against this repository
+
+A page failing either is non-conforming even when it satisfies every shape rule below.
 
 ## Placement
 
-The standard sets two tests and a page has to pass both. Run them before drafting anything, since a page failing either is non-conforming however well it is written.
+- Write a page here only when its subject is owned outside this repository. Route anything about how this repository works to `docs/`, `canon/context/`, or a skill body instead.
+- File the page in the `claude` subfolder of the `wiki` folder. A subject Anthropic does not own, whether a third-party tool or a vendor-neutral concept, is out of scope for this folder split. Route it to `docs/` or a skill body instead of adding a second wiki folder for it.
 
-- **Owned outside this repository.** A subject describing how this repository works fails. Refuse and offer the docs or context kind of this skill: `❌ <subject> is owned by this project, so it belongs in the docs surface or a context entry. Re-run draft-doc naming that destination.`
-- **Owned by the vendor the folder split covers.** The standard names one owner and one subfolder. A third-party tool or a vendor-neutral concept fails, however reference-like it reads. Refuse: `❌ <subject> is outside the wiki's folder split. Route it to the docs surface or a skill body rather than adding a second folder for it.`
+## Frontmatter
 
-Do not widen the split to admit a subject. Adding a sibling folder is a change to the standard, argued there, rather than a placement this kind takes on its own.
+- `title` (required): sentence case, naming the subject
+- `description` (required): one line naming what the page covers
 
-## Collision
+## Naming
 
-- Derive the page slug per the standard's `## Naming` section and check whether `<wiki-root>/<vendor>/<slug>.md` already exists. If it does, stop: `❌ <path> already covers this subject. Edit that page against the standard instead of drafting a second one.`
-- Read `<wiki-root>/<vendor>/index.md` and check every title and description it lists against the subject. Stop on a match: `❌ <path> already covers this subject under a different name. Edit that page instead.`
+- Name a page by its kebab subject alone. The vendor folder it sits in already names the vendor, so a prefix repeats the folder.
+- The `codebase-layout` skill carries the same rule for every folder in a project, beyond the wiki.
 
-## Source
+## Sourcing
 
-The standard forbids working from training knowledge, so the draft is built on a read rather than on recall.
+- Close the intro paragraph with a `Source:` sentence naming the owner. Link the canonical page where one exists, and name the owner alone where the subject has no single URL.
+- Link a docs page in its fetchable form, `https://code.claude.com/docs/en/<page>.md`, so a session reads the live text rather than a copy.
+- Fetch current information through the `claude-code-guide` agent when the subject is Claude Code. Do not work from training knowledge.
+- Propose an addition or correction and wait for confirmation. Do not write to a wiki file unasked.
 
-- Fetch current information through the `claude-code-guide` agent for any subject that agent covers. Its answer is the source the page is written from.
-- Reach a subject the agent does not cover through the owner's own published documentation. Invoke `canon:search-craft` with the skill tool before searching for it, since finding the owner's documentation is the field-and-authority step that skill carries, and report it rather than proceeding silently when the skill does not resolve.
-- Say the fetch failed and stop rather than substituting recall, even for a subject the session believes it knows. A page sourced from memory ships looking identical to one that was checked.
-- Close the intro with the `Source:` sentence the standard requires, linking the canonical page where one exists and naming the owner alone where the subject has no single URL.
-- Stamp the read date on a source revised without notice, as `read <date>`. A claim traced to an undated read cannot be checked against what was actually read.
+## Shape
 
-## Draft
+- Keep a page thin: the `Source:` sentence, an orientation paragraph, and lesson sections. The source owns the reference detail and a paraphrase of it falls behind within days.
+- Apply the lesson test per section: keep a fact about the subject only when the source page does not state it. Such a fact is a gotcha this project hit, a constraint it relies on, or how it uses the feature.
+- Read the current source before keeping or cutting a section. A fact kept from memory is the drift this shape exists to prevent.
+- Send a session that wants reference detail to the source and fetch it live. The page answers orientation and lessons only.
+- Leave a page with no lessons as the source link and the orientation paragraph. A catalog routes a reader by page, so the stub stays.
 
-- Draft `title` and `description` frontmatter against the standard's contract, then the intro paragraph closing on `Source:` as a short orientation, then the lesson sections. Let the read of the source decide what is a lesson: keep a fact only when the source page does not state it, and leave reference detail to the source.
-- Write what the fetch returned rather than what the subject is assumed to do.
-- Answer one question per section and stop. A reader arrives to settle something specific rather than to read the page through.
-- Mark a claim the fetch left unsettled rather than smoothing over it. An unmarked gap reads as a checked fact.
+## Template
 
-## Preview
+```markdown
+---
+title: <Subject>
+description: <one line naming what this page covers>
+---
 
-Add `**Source:** <owner, and the read it came from>`, and confirm the source with the path, since the standard states outright that a wiki file is not written unasked.
+# <Subject>
 
-## Write
+<What the subject is and why it matters, in a short orientation.> Source: <owner, with a link to the canonical page where one exists>.
 
-Regenerate `<wiki-root>/<vendor>`, naming the folder the page landed in rather than the root above it. The verb rewrites the `index.md` in the folder it is given and does not walk down, so regenerating at the root leaves the vendor catalog untouched. A page absent there is invisible to the next run's Collision step, which then drafts a second page on the same subject.
+## <Lesson>
+
+<A fact the source page does not state.>
+```

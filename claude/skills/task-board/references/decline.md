@@ -7,7 +7,7 @@ description: How task-board gathers the reason a task is decided against, runs c
 
 The Decline mode of `task-board`. The session reads this file when the request names a task decided against.
 
-Read `${CLAUDE_SKILL_DIR}/../../standards/tasks-decline.md` first. It holds the declined folder, the `Declined:` line, and what the move does to a plan and a board row.
+Read `${CLAUDE_SKILL_DIR}/references/tasks-decline.md` first. It holds the declined folder, the `Declined:` line, and what the move does to a plan and a board row.
 
 A task decided against carries no `post-merge` hook of its own, so every decline request arrives here directly rather than through work the hook already did.
 

@@ -27,7 +27,7 @@ export const CORPORA: readonly string[] = [
 ]
 
 /**
- * The practice skills `standards/skill-practice.md` describes, keyed by corpus-relative
+ * The practice skills `claude/skills/create-skill/references/skill-practice.md` describes, keyed by corpus-relative
  * folder rather than by name, so a target's own `.claude/skills/` folder that
  * shares a name is never swept in. The list lives here rather than in a skill's
  * frontmatter because a skill declaring its own kind could exempt itself.

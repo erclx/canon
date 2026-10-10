@@ -30,7 +30,7 @@ export interface TeachRefused {
   readonly detail: readonly string[]
 }
 
-/** The files and folders `standards/teach.md` fixes for a workspace. */
+/** The files and folders `claude/skills/teach-workspace/references/teach.md` fixes for a workspace. */
 export const TEACH_MISSION = 'MISSION.md'
 export const TEACH_RESOURCES = 'RESOURCES.md'
 export const TEACH_GLOSSARY = 'GLOSSARY.md'

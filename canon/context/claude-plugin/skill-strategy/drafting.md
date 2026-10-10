@@ -17,7 +17,7 @@ The folder is `.canon/proposals/<nn>-<slug>/`, named for what it holds rather th
 
 The skill takes the concern and the surface it audits as invocation inputs rather than constants, which is what lets a second concern reuse the skill rather than fork it.
 
-The format spec that would ordinarily be a standard, on the pattern `standards/teach.md` set for a workspace shape, stays inside the skill's own `references/format.md` instead, since this repository's own citation rule says a file only one skill reads ships inside it rather than into a corpus a second reader would have to find.
+The format spec that would ordinarily be a standard, on the pattern `claude/skills/teach-workspace/references/teach.md` set for a workspace shape, stays inside the skill's own `references/format.md` instead, since this repository's own citation rule says a file only one skill reads ships inside it rather than into a corpus a second reader would have to find.
 
 The variant format states `### N.` for a change and `#### A/B/C` for a variant explicitly, which is the shape that holds across a run producing several labelled bets on an invented change against one replacement on a corrected claim.
 

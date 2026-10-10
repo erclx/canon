@@ -7,7 +7,7 @@ description: How teach-workspace Step 5 writes a learning record's Revisit secti
 
 Part of Step 5 of `teach-workspace`. The session reads this file once the record's lessons, retrievals, and wrong answers are written, before restating the mission's success lines.
 
-Then write `## Revisit`, one bullet per item, in the shape `${CLAUDE_SKILL_DIR}/../../standards/teach.md` fixes:
+Then write `## Revisit`, one bullet per item, in the shape `${CLAUDE_SKILL_DIR}/references/teach.md` fixes:
 
 ```markdown
 ## Revisit

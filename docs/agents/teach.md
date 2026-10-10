@@ -5,7 +5,7 @@ description: Listing learning workspaces with what their records schedule next, 
 
 # Teach
 
-Learning workspaces sit under `.canon/teach/<nn>-<topic>/`, and `standards/teach.md` fixes their layout, naming, and file formats, apart from the glossary, whose shape `standards/glossary.md` fixes, cited from the `teach-workspace` skill, so it travels with the file wherever a promotion lands it. Every verb here resolves that folder against the main worktree root rather than against the working directory, so a session standing in a linked worktree reaches the one workspace the learner has rather than opening a second.
+Learning workspaces sit under `.canon/teach/<nn>-<topic>/`, and `claude/skills/teach-workspace/references/teach.md` fixes their layout, naming, and file formats, apart from the glossary, whose shape `claude/skills/teach-workspace/references/glossary.md` fixes, cited from the `teach-workspace` skill, so it travels with the file wherever a promotion lands it. Every verb here resolves that folder against the main worktree root rather than against the working directory, so a session standing in a linked worktree reaches the one workspace the learner has rather than opening a second.
 
 Passing `--root` a path already named `teach` reaches that folder directly rather than wrapping it in the `.canon/`-or-`.claude/` record-root lookup, which is what lets a workspace committed outside the record root, such as a worked example kept in version control on purpose, take every verb below the same as one under `.canon/teach/`.
 

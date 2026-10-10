@@ -29,7 +29,7 @@ A standard governing a file path carries a rule routing to it, so an edit loads 
 - `governance/rules/standards/context.md` carries a write-time policy beside its read-time one, so editing a domain leaves its context entry conforming. It ships to every `base` consumer, so each write-time bullet states an outcome of the edit rather than a backlog to drain, which also reads correctly in a project with no entries yet.
 - `governance/rules/standards/groundwork.md` and `governance/rules/standards/intake.md` route the two track folders and sit beside `governance/rules/standards/tasks.md` in `base`, so the three workflow surfaces share one roster. A skill-local reference would load only with its skill, never when a returning session opens the folder directly.
 - Each of those two carries the directives that ship silently when violated, the answer contract and the re-measure floor, and points at its standard for the rest. The write scope stays in the skill body, since a misrouted write lands on a path the glob never matches.
-- `governance/rules/standards/teach.md` globs `.canon/teach/**`, a folder most targets never open, so it costs nothing where no workspace exists. `governance/rules/standards/session.md` globs `.canon/tasks/session-*.md` alone inside the folder `governance/rules/standards/tasks.md` globs whole, because the board and the handoff are two shapes and one rule over both would carry two.
+- `governance/rules/standards/session.md` globs `.canon/tasks/session-*.md` alone inside the folder `governance/rules/standards/tasks.md` globs whole, because the board and the handoff are two shapes and one rule over both would carry two.
 
 ### Directives beside the pointer
 
@@ -43,11 +43,11 @@ No rule carries a directive for the root file and no standard governs it, so the
 
 A rule citing a standard names `canon standards <name>`, whose resolver falls through to the corpus the package ships. A rule loads on a glob match with no skill context, so `${CLAUDE_SKILL_DIR}` expands to nothing and the plugin-root path a skill body spells is unavailable. Spelled in prose, that path also reads ambiguously against the project-root `standards/` folder.
 
-The verb ships with the CLI and so does the rule, so the two never arrive apart and a verb citation owes no report-the-gap bullet. The bullet is owed only where the carrier ships on the other channel, which is why `governance/rules/standards/teach.md` keeps one on its glossary bullet.
+The verb ships with the CLI and so does the rule, so the two never arrive apart and a verb citation owes no report-the-gap bullet. The bullet is owed only where the carrier ships on the other channel, which is why a reference shipped on the plugin channel names the gap itself.
 
 Test the target for a guard before writing `Load` into a rule. `write-human` is advisory, with no guard and nothing it starts, so the `writing/markdown` rule can say load. `teach-workspace` runs a workspace, stops on a missing subject, and resumes a matching one, so a rule telling a session to load it for a glossary shape gets a refusal or a workspace.
 
-`governance/rules/standards/teach.md` names `references/glossary.md` to read and says not to invoke the skill. `canon/context/standards/scope.md` carries what this narrows on the standards side.
+`teach-workspace` reads its own `references/glossary.md`. `canon/context/standards/scope.md` carries what this narrows on the standards side.
 
 ### Surfaces reached by something other than a glob
 

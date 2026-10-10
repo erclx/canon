@@ -29,7 +29,7 @@ From `addyosmani/agent-skills@2686b620`, [`skills/api-and-interface-design/SKILL
 
 **Idempotency.** A stored key honored on retry, an atomic claim under a unique constraint, a reused key with a different body failing loudly, and retention past the longest retry. Adopted as four rules, keeping the reused-key rule, which is the one most often left out.
 
-**Excuses, red flags, and a closing checklist.** The same source's skill anatomy, adopted toolkit-wide through `${CLAUDE_SKILL_DIR}/../../standards/skill-practice.md`. Each excuse row here rebuts a reason a session gives when it is about to break a caller, such as "nobody depends on that field".
+**Excuses, red flags, and a closing checklist.** The same source's skill anatomy, adopted toolkit-wide through `${CLAUDE_SKILL_DIR}/../create-skill/references/skill-practice.md`. Each excuse row here rebuts a reason a session gives when it is about to break a caller, such as "nobody depends on that field".
 
 ## Declined
 

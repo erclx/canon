@@ -29,16 +29,16 @@ A fact more than one domain reads is canonical. A fact one domain reads belongs 
 
 Load the skill before editing anything in its domain.
 
-| Task type                                               | Skill                 |
-| ------------------------------------------------------- | --------------------- |
-| `src/`, `scripts/`, `sandbox/`                          | `internal-scripts`    |
-| `tooling/`, manifests, golden configs, seeds            | `internal-tooling`    |
-| `standards/`, `docs/`, `canon/context/`                 | `internal-standards`  |
-| `governance/rules/`, `governance/stacks/`               | `internal-governance` |
-| `claude/skills/`, `claude/README.md`, `.claude/skills/` | `internal-claude`     |
-| `web/`, `assets/`, the landing page                     | `internal-web`        |
-| `src/teach/`, `examples/teach/`, `standards/teach.md`   | `internal-teach`      |
-| `src/canvas/`, `src/commands/canvas.ts`                 | `internal-canvas`     |
+| Task type                                                                    | Skill                 |
+| ---------------------------------------------------------------------------- | --------------------- |
+| `src/`, `scripts/`, `sandbox/`                                               | `internal-scripts`    |
+| `tooling/`, manifests, golden configs, seeds                                 | `internal-tooling`    |
+| `standards/`, `docs/`, `canon/context/`                                      | `internal-standards`  |
+| `governance/rules/`, `governance/stacks/`                                    | `internal-governance` |
+| `claude/skills/`, `claude/README.md`, `.claude/skills/`                      | `internal-claude`     |
+| `web/`, `assets/`, the landing page                                          | `internal-web`        |
+| `src/teach/`, `examples/teach/`, `claude/skills/teach-workspace/references/` | `internal-teach`      |
+| `src/canvas/`, `src/commands/canvas.ts`                                      | `internal-canvas`     |
 
 @canon/REQUIREMENTS.md
 @canon/ARCHITECTURE.md
