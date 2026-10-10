@@ -1,6 +1,6 @@
 ---
 name: create-skill
-description: What skill creation is for, the gaps it closes, and why it confirms before writing
+description: What skill creation is for, the gaps it closes, and why it confirms before writing where a person can answer
 ---
 
 # Create skill requirement
@@ -14,20 +14,21 @@ A skill born without its requirement is the second failure, and it surfaces much
 A third failure is a folder created for a moment a rule, a verb, or an existing skill already reaches, or for a procedure no session would get wrong from first principles. Nothing caught that before the folder existed, so the corpus grew by a skill an inward audit later had to argue for removing, with only a commit body recording the argument.
 
 A fourth failure is dated provenance in the body. A target asked for an edit citing a measurement taken that day, and the draft carried "measured on" and the date inline, with the authoring standard, the markdown audit, and this skill all passing it. A body collecting those notes reads as history rather than as the rule a session follows.
+A fifth failure is the confirmation itself. A worker running a plan that adds a skill reached Step 4, asked a person nobody had dispatched, and the chain parked on a question nobody read. The same description named only the installed `.claude/skills/` root, which the toolkit's checkout forbids authoring into.
 
 ## Must
 
 - Read the authoring standard and the prose standard before drafting, so the draft starts conformant rather than getting corrected into shape
 - Answer, in writing, whether a rule, a verb, or an existing skill already reaches this moment, and whether the body carries a procedure a session would get wrong from first principles. A folder that fails either belongs to the surface that already covers it, not to a new skill.
 - Draft the sibling `REQUIREMENT.md` beside the body, from what the skill is for rather than from the drafted body
-- Confirm the name and both files with the user before writing. The name is the routing key and a folder that disagrees with its frontmatter fails silently.
-- Write to the conventional skills path, so discovery finds it without configuration
+- Confirm the name and both files with the user before writing, where a person is present to answer. The name is the routing key and a folder that disagrees with its frontmatter fails silently. Where nobody is present, record the three answers and both paths in the output and write.
+- Write to the conventional skills path, so discovery finds it without configuration. That is `claude/skills/` in the toolkit's own checkout and `.claude/skills/` in a target project, chosen by whether the project root holds `claude/.claude-plugin/plugin.json`
 - Leave the skills audit's dated-provenance check clean for the new folder before reporting it, with each incident moved to the requirement's `Gap`
 
 ## Must not
 
 - Auto-trigger. Creation is a deliberate act and a skill invented from an ambiguous request is worse than none.
-- Write either file before the user has seen it
+- Write either file before the user has seen it, where a user is present
 - Derive the requirement from the drafted body, which records the draft's overfitting as the requirement
 - Gate creation on whether anything will invoke the new skill beyond the author typing its name. That question has no answer yet.
 
