@@ -33,7 +33,7 @@ A fact goes to `.claude/rules/` when it fires on a specific path being edited an
 
 Firing is one axis of three. The second is conditional presence, which a rule buys and a line in `CLAUDE.md` or a seed cannot, since an eager line loads into every session. The third is updatability, which is what makes the nine rules `base` installs with no `paths:` glob correct as rules, six under `canon/` and three under `claude/`: a rule installed through governance sync carries a later fix to every project that installed it, where a seed line stays fixed at the scaffold it was written into. Measured at `b6835a56` on 2026-09-26.
 
-The test ships as `governance/rules/claude/592-claude-md.md`, attached to an edit of the root file in every target that installed governance. A project scaffolding without governance is reached by neither surface, since the seed does not state the test.
+The test no longer ships as a rule, so it reaches a session through this entry alone. A target holds it only where this context folder exists, and the seed does not state it.
 
 ### What bounds the eager tier
 

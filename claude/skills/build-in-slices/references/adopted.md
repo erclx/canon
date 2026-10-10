@@ -30,7 +30,7 @@ External sources were read and filtered rather than imported. This file is the r
 
 **Rule 0, simplicity first, and the abstraction red flags.** Declined because `code-craft` owns when an abstraction earns its place and when to write the plainest code that passes. Restating it here would put two owners on one rule.
 
-**The rest of its scope section.** Declined because `565-behavior` already carries the scope floors every session loads, being minimal edits, no unrequested features, and edits limited to what the user named. Only the noticed list was new.
+**The rest of its scope section.** Declined as a scope call this skill makes: its slices already keep to the plan, and minimal edits, no unrequested features, and edits limited to what the user named restate that in different words. Only the noticed list was new.
 
 **Rule 3, feature flags for incomplete features.** Declined because the slices of one branch merge together as one pull request rather than reaching trunk one at a time, so nothing incomplete is exposed between them.
 

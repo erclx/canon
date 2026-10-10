@@ -23,7 +23,7 @@ The ship chain assumed the work arrives uncommitted. `git-ship` ran `git-stage` 
 
 ## Must not
 
-- Restate the scope floors `565-behavior` already carries for every session
+- Restate the scope floors of minimal edits and no unrequested features, which a scope call the skill makes already holds
 - Carry simplicity or abstraction rules, which `code-craft` owns
 - Name a feature flag pattern, since the slices of one branch merge as one pull request rather than reaching trunk one at a time
 - Name a framework, a test runner, or a line-count threshold, none of which holds across stacks

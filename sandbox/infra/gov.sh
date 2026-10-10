@@ -54,8 +54,8 @@ stage_setup() {
   # overwrite. Together they are the before state the run is judged against.
   echo "# orphan, no source anywhere" >regen/.claude/rules/canon/claude/999-orphan.md
   mkdir -p regen/.claude/rules/canon/claude
-  cp "$src_rules/claude/565-behavior.md" regen/.claude/rules/canon/claude/565-behavior.md
-  echo "# stale" >>regen/.claude/rules/canon/claude/565-behavior.md
+  cp "$src_rules/claude/566-output.md" regen/.claude/rules/canon/claude/566-output.md
+  echo "# stale" >>regen/.claude/rules/canon/claude/566-output.md
 
   git add .
   git commit -m "chore(sandbox): scaffold gov test directories" --no-verify -q
@@ -129,7 +129,7 @@ stage_setup() {
     bun "$PROJECT_ROOT/src/cli.ts" gov regen --root regen/
     log_step "Produced regen/.claude/rules"
     find regen/.claude/rules -type f -name "*.md" | sort | sed "s|^regen/.claude/rules/||"
-    log_info "599-sandbox-local.md present, 999-orphan.md gone, 565-behavior.md restored"
+    log_info "599-sandbox-local.md present, 999-orphan.md gone, 566-output.md restored"
     ;;
   "test-order")
     # Both streams and the status land on disk, because `canon sandbox check`

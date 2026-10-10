@@ -47,15 +47,15 @@ describe('gov install', () => {
     expect(installedRuleFiles(target)).toHaveLength(base.rules.length)
   })
 
-  it('should write the behavior rule at its group path', () => {
+  it('should write the output rule at its group path', () => {
     runCli(['gov', 'install', 'base', target], { cwd: target })
 
     expect(
       readFileSync(
-        join(target, '.claude/rules/canon/claude/565-behavior.md'),
+        join(target, '.claude/rules/canon/claude/566-output.md'),
         'utf8',
       ),
-    ).toContain('# Behavior standards')
+    ).toContain('# Output standards')
   })
 })
 
@@ -65,7 +65,7 @@ describe('gov sync', () => {
   })
 
   it('should replace a local edit to an installed rule', () => {
-    const path = join(target, '.claude/rules/canon/claude/565-behavior.md')
+    const path = join(target, '.claude/rules/canon/claude/566-output.md')
     writeFileSync(path, `${readFileSync(path, 'utf8')}\n<!-- local edit -->\n`)
 
     const run = runCli(['gov', 'sync', target], { cwd: target })

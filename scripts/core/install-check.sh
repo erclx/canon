@@ -103,7 +103,7 @@ log_step "Assert scaffold"
 # rule paths stand for the `claude` and `canon` groups `base` takes whole.
 for path in "CLAUDE.md" ".claude/wiki/index.md" ".claude" "canon/context/index.md" "canon/wireframes/index.md" \
   ".prettierrc" ".editorconfig" ".lintstagedrc" ".husky/pre-commit" ".github/workflows/verify.yml" "scripts/verify.sh" \
-  ".claude/rules/canon/claude/565-behavior.md" ".claude/rules/canon/canon/604-scratch.md"; do
+  ".claude/rules/canon/claude/566-output.md" ".claude/rules/canon/canon/604-scratch.md"; do
   if [ ! -e "$TARGET_DIR/$path" ]; then
     log_error "Missing after canon init: $path"
   fi

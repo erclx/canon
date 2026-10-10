@@ -296,7 +296,7 @@ export function register(program: Command): void {
         '  1  refused, with the reason on stderr',
         '',
         'Reports rather than gates. Whether a bullet belongs in a rule is the',
-        'judgment 592-claude-md states, and naming a path is evidence for it',
+        'judgment canon/context/context-model/overview.md states, and naming a path is evidence for it',
         'rather than the answer.',
         '',
         'Examples:',

@@ -172,7 +172,7 @@ describe('coveringRule', () => {
   const globs = [
     { rule: 'claude/510-context.md', globs: ['canon/context/**'] },
     { rule: 'claude/501-markdown.md', globs: ['**/*.md'] },
-    { rule: 'claude/592-claude-md.md', globs: ['CLAUDE.md'] },
+    { rule: 'claude/596-claude-md.md', globs: ['CLAUDE.md'] },
     { rule: 'core/097-non-interactive.md', globs: ['src/**/*.ts'] },
   ]
 
@@ -185,7 +185,7 @@ describe('coveringRule', () => {
   })
 
   it('should match a named file against the rule anchored to it', () => {
-    expect(coveringRule('CLAUDE.md', globs)).toBe('claude/592-claude-md.md')
+    expect(coveringRule('CLAUDE.md', globs)).toBe('claude/596-claude-md.md')
   })
 
   it('should not count a corpus-wide glob as covering a path', () => {

@@ -30,7 +30,6 @@ These two groups hold the skills no single moment in a project's life calls for,
 | Skill                       | When to use                                                                                                                                                            |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `canon:canon-cli`           | Before running an unfamiliar verb, a sync, or an install, to learn which command to run, which reference doc covers it, or what it overwrites, merges, or leaves alone |
-| `canon:index-lookup`        | To find where a topic is documented across the tracked `index.md` catalogs                                                                                             |
 | `canon:youtube-transcripts` | When a video transcript is wanted in the repo as context                                                                                                               |
 | `canon:read-frames`         | To read a recorded demo back frame by frame and report what each one shows, with no verdict on whether the recording looks right                                       |
 | `canon:teach-workspace`     | To learn a subject across sessions, in a workspace that holds the progress                                                                                             |

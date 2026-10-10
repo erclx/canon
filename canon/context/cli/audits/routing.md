@@ -23,7 +23,7 @@ The resolver sits beside `listSkills` rather than inside it. `src/counts/catalog
 
 ## The routing report
 
-`canon claude routing` reports per `CLAUDE.md` section how many top-level bullets name a path and how many of those a path-scoped rule already covers. It answers what the always-loaded file is paying for, which the tier test in `592-claude-md` decides case by case.
+`canon claude routing` reports per `CLAUDE.md` section how many top-level bullets name a path and how many of those a path-scoped rule already covers. It answers what the always-loaded file is paying for, which the tier test in `canon/context/context-model/overview.md` decides case by case.
 
 Two readings decide what it says, and both are narrower than they sound. A bullet counts as path-scoped when it names a path, which is evidence for the tier judgment rather than the judgment itself, so a bullet naming a folder can still apply every session and one firing on a path it never spells is invisible here. `src/claude/routing.ts` states that where a reader meets the function, since a count phrased as a verdict is the shape this measure is easiest to misread as.
 

@@ -57,7 +57,7 @@ The cost is that a project-authored rule's leading digit stops naming its domain
 
 The reservation above divides one pair, being a shipped set against the rules a project wrote for itself. A third source, a rule set held back from targets and installed only where it was authored, needs its own division too. This repository is the one place all three sources exist at once, and it divides the third pair two ways at once rather than one: `canon/` and `internal/` separate a shipped rule from an internal one by location, the same way `project/` separates a project-authored one, and within each subdirectory the numbering still divides by source as well, one source taking the top of the band and the other the gaps between the tens.
 
-The numbering half stays because location alone does not carry to a reader who only sees the number, such as one comparing `claude/567-planning.md` against a citation written before the rules moved into `canon/`.
+The numbering half stays because location alone does not carry to a reader who only sees the number, such as one comparing `claude/566-output.md` against a citation written before the rules moved into `canon/`.
 
 The collision this prevents is silent. Two rules that resolve to the same `<n>-<slug>` path leave one file in the installed folder, and neither the install nor the session that reads it reports which source lost. Nothing checks a division outside the reserved bands, so it holds only while both sources follow it. Separating `canon/` from `internal/` by folder removes the filename-collision case specifically, since the two no longer install to the same directory, but the number still carries the source signal for a reader who has only the number in view.
 
