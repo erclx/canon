@@ -61,17 +61,19 @@ Announce which tier decided, naming the tier rather than the path alone. On tier
 
 ## Step 4: name the decision and the arms
 
-Follow `${CLAUDE_SKILL_DIR}/../draft-and-pick/SKILL.md` Step 1, with the decision fixed rather than derived: "the project's logo mark and its composition into the social card." Vary the mark's shape or style across arms, keeping the card's type and layout fixed, per that skill's one-property rule. Draft each arm already inside the full 1200x630 card frame, mark and type together, so the pick settles the shape and the composition in one choice. Arm 0 is the current mark when the folder from Step 3 already holds a logo file (`favicon.svg`, `favicon.ico`, `logo.svg`, or similar). Arms start at 1 otherwise.
+Follow `${CLAUDE_SKILL_DIR}/../draft-and-pick/SKILL.md` Step 1, with the decision fixed rather than derived: "the project's logo mark and its composition into the social card." Vary the mark's shape or style across arms, keeping the card's type and layout fixed, per that skill's one-property rule. Draft each arm already inside the full 1200x630 card frame, mark and type together, and add its canvas frame at `--width 1200 --height 630`, so the pick settles the shape and the composition in one choice. Arm 0 is the current mark when the folder from Step 3 already holds a logo file (`favicon.svg`, `favicon.ico`, `logo.svg`, or similar). Arms start at 1 otherwise.
 
 Structure every arm as a `.mark` element, the inline SVG alone, nested inside a `.card` element, the full composition, so Step 6 can address either without re-deriving them.
 
 ## Step 5: draft, render, pick, and loop
 
-Follow `${CLAUDE_SKILL_DIR}/../draft-and-pick/SKILL.md` Steps 2 through 5 against the arms from Step 4: author the page, render and hand off, take the pick, and loop on it.
+Follow `${CLAUDE_SKILL_DIR}/../draft-and-pick/SKILL.md` Steps 2 through 5 against the arms from Step 4: draft the arms as frames on a canvas page, render and hand off, take the pick, and loop on it.
+
+The final icon and card renders below are not arms, so they stay off the canvas. Call the folder they render from `<dest>`, being `.canon/tmp/<slug>/` under the slug `draft-and-pick` Step 1 derived, which is where this project puts every temporary write.
 
 ## Step 6: finalize the mark and the icons
 
-This step and Step 7 replace `draft-and-pick`'s own Step 6, since the pick here produces several final files rather than one applied surface.
+This step and Step 7 replace `draft-and-pick`'s own Step 6 items 1 and 2, since the pick here produces several final files rather than one applied surface. Its archive capture, its page delete, and its server stop still run, after Step 7.
 
 1. Extract the picked arm's `.mark` markup as the final vector source. Write it to `<write-folder>/favicon.svg`.
 2. Under `<dest>/render/`, write one `icon-<w>x<h>.html` page per Step 2 size, carrying the picked `.mark` markup. Give every page's captured element the shared class `.render`, so one capture call renders the whole batch regardless of the size spread. `canon capture` opens every page at a fixed 2x device scale factor and screenshots the element at that scale, so declare each `.render` element at half its target dimension, `<w>/2` by `<h>/2`, to land the captured PNG on the literal target size rather than double it. Declare no font on them, since each holds the mark alone and `canon capture` skips the font check on an element with no text. A generic family such as `system-ui` would be refused if text ever sat inside one.
@@ -135,9 +137,9 @@ canon capture <dest>/render/og-image.html --selector .render --out <write-folder
 
 It takes its own call rather than riding Step 6's batch, since Step 6 runs before this step chooses a path and the batch is already captured by the time the choice is made. Say that the card shipped as a PNG with no source, and that the project gains one when it grows a route to hold the composition.
 
-### Closing the scratch folder
+### Closing the scratch folder and the canvas
 
-Delete `<dest>` per `draft-and-pick`'s own scratch-folder rule. The route is not a leftover variant that rule forbids: a variant is one of several candidates none of which was chosen, and the route holds the arm the operator picked. The losing arms are what that rule is about, and they are already archived and deleted by the step it belongs to.
+Delete `<dest>` once both captures land, then close the canvas through `draft-and-pick` Step 6 items 3 to 8, which archive every arm and delete the pages the run added. The route is not a leftover variant that close forbids: a variant is one of several candidates none of which was chosen, and the route holds the arm the operator picked.
 
 A project whose card was generated before this route existed keeps its PNG. Say so rather than regenerating it, since re-running the pick loop spends an operator's attention on a file nobody complained about, and the next real edit to the card picks up the route.
 
@@ -158,6 +160,6 @@ Card source: <the route, captured through the card server|a scratch page, since 
 Cite these rather than restating them.
 
 - `draft-and-pick` owns Steps 1 through 5 of the render-and-pick loop, cited above
-- `canvas` carries a picked direction into `canon/DESIGN.md`. This skill only reads it.
+- `canon:canvas` carries a picked direction into `canon/DESIGN.md`. This skill only reads it.
 - `canon capture` owns the render mechanics, its font refusal, its fixed 2x scale factor, and its reported dimensions. It already reads an `http(s)://` source, where `--out` names the destination PNG rather than a directory, so the route capture needs nothing added to it.
 - The `astro` tooling stack owns the card route's scaffold, its second config, and the exclusion check, read with `canon tooling reference astro`. This skill writes into the route and never reshapes it.

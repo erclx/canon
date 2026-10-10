@@ -38,7 +38,7 @@ A cell no source anchors ends in `? verify`, and the preview shows that marker b
 - `canon:ui-checklist` for what a reviewer has to look at after UI changes, and what ships without a test
 - `canon:ux-audit` for UX gap detection on existing surfaces
 - `canon:ux-measure` for what a running surface costs to paint, read against published thresholds
-- `canon:draft-and-pick` for a call settled by looking, drafting several candidates onto one page and taking your pick
+- `canon:draft-and-pick` for a call settled by looking, drafting several candidates as frames on the canvas and taking your pick
 - `canon:canvas` for a direction worked out over several turns, drawn as HTML frames you drag, select, and restyle in the browser while the session reads your changes back. Only the pick moves into `canon/DESIGN.md`, since the canvas folder is gitignored
 - `canon:draft-identity` to draft a project's logo mark and compose it into an icon sequence and a social card, through `draft-and-pick`'s own render-and-pick loop. On an Astro project holding the card route scaffold, the card lands as a route the project keeps and is captured through a running server, so it reads the project's real stylesheet rather than typed copies of every color. Everywhere else it ships as a PNG and the run says so.
 - Anthropic's `frontend-design` plugin optional for light visual steering

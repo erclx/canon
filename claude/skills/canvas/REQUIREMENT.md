@@ -43,6 +43,6 @@ When the operator picks a frame, the session leaves the decision on the canvas a
 
 - What the canvas verbs do internally, which is the CLI's own contract
 - The content format a frame and a layout take, which the canvas standard fixes
-- Drafting candidates for a taste decision and taking the pick, which `draft-and-pick` runs on its own render path
+- Drafting candidates for a taste decision and taking the pick, which `draft-and-pick` runs on this canvas through the same verbs
 - Tracing reference images into design values or writing the design document from code, which no skill owns now
 - Backing up the canvas folder off one disk

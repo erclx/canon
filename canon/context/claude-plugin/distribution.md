@@ -33,7 +33,7 @@ A guard on a standard's presence names the file under the plugin root rather tha
 
 ### The first executable in a skill
 
-`role-orchestrator/scripts/` holds the poll and the watch as TypeScript, `poll.ts` and `watch.ts`, with the `repo.ts` they share, so the plugin carries code a target runs as well as prose. It sits in `scripts/` rather than beside the runbook that invokes it, because `standards/skill.md` splits a skill folder by role and assigns `references/` to detail and `scripts/` to deterministic operations. Other tracked non-markdown files, `review-ui/scripts/pw.sh` and `draft-and-pick/references/frame.html`, sit beside them.
+`role-orchestrator/scripts/` holds the poll and the watch as TypeScript, `poll.ts` and `watch.ts`, with the `repo.ts` they share, so the plugin carries code a target runs as well as prose. It sits in `scripts/` rather than beside the runbook that invokes it, because `standards/skill.md` splits a skill folder by role and assigns `references/` to detail and `scripts/` to deterministic operations. One other tracked non-markdown file, `review-ui/scripts/pw.sh`, sits beside them.
 
 The three shell stages no longer reach the TypeScript scripts. `check:shell` and both shfmt stages glob `claude` for `.sh` files only, so `review-ui/scripts/pw.sh` is all they cover there. The type check reaches the scripts through the `claude/skills/*/scripts/**/*.ts` entry in `tsconfig.json`, which `include` needs because it names `src` alone otherwise and an unchecked shipped program is the gap a rewrite exists to close. Prettier formats them with the rest of `claude/`. The boundary walk needs no entry of its own, since it reads every file rather than every markdown file.
 
