@@ -57,7 +57,6 @@ Each row sits under the group its skill's `metadata.family` names. The landing p
 
 | Skill                   | When to use                                                                       |
 | ----------------------- | --------------------------------------------------------------------------------- |
-| `canon:review-branch`   | On the local branch diff, before anything is pushed                               |
 | `canon:document-health` | When the documents themselves have to answer for length, placement, and staleness |
 | `canon:ux-audit`        | To read UI source for missing states, edge cases, and inconsistencies             |
 | `canon:ux-measure`      | To start the interface and measure paint, processor, and layout cost              |
@@ -105,6 +104,5 @@ Each row sits under the group its skill's `metadata.family` names. The landing p
 | Skill                         | When to use                                                                            |
 | ----------------------------- | -------------------------------------------------------------------------------------- |
 | `canon:target-check`          | In a target project, to report per domain what it holds against what the toolkit ships |
-| `canon:seed-sync`             | After a toolkit update, to reconcile installed seeds without losing customizations     |
 | `canon:canon-feedback`        | When something in the toolkit is broken, missing, or off, to open an issue on it       |
 | `canon:canon-feedback-triage` | In the toolkit repo, to file the open feedback issues into an intake folder            |
