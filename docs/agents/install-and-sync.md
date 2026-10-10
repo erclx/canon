@@ -30,8 +30,8 @@ applies, and the target's git diff is the record afterwards. `canon sync
 The `standards` band is the largest such move. Each rule that only routed a
 path to a standard now ships under that standard's name at
 `.claude/rules/canon/standards/<standard>.md`, so a target holding
-`canon/658-plan.md` or `writing/801-markdown.md` syncs onto `standards/plan.md`
-and `standards/markdown.md`. Those rules carry no number, and their globs and
+`canon/658-plan.md` or `writing/800-prose.md` syncs onto `standards/plan.md`
+and `writing/markdown.md`. Those rules carry no number, and their globs and
 bullets come from the standard's own frontmatter.
 
 A project's own rules belong under `.claude/rules/project/`, where

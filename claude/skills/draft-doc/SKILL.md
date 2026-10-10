@@ -30,7 +30,7 @@ Each kind has one standard and one reference. Load the reference for the resolve
 Read these in parallel, from the project root where a path is relative:
 
 - The kind's standard from the table above: the reader the document serves, its frontmatter, its structure, and what it links out to rather than restates
-- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: punctuation and formatting for all generated text
+- `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md`: punctuation and formatting for all generated text
 - The `write-human` skill: voice, rhythm, and sentence construction for all generated text
 - The kind's reference from the table above
 

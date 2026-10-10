@@ -7,7 +7,7 @@ description: The design-extract skill's source and greenfield paths, why one ski
 
 ## Overview
 
-`canon:design-extract` drafts `canon/DESIGN.md` and picks one of two paths from what the project has. Both read `CLAUDE.md`, `canon/REQUIREMENTS.md`, and `standards/markdown.md`, load the `write-human` skill for tone, fill the same seed, and end at the same render. Install it in a target through `canon claude install` and invoke it with `/canon:design-extract`.
+`canon:design-extract` drafts `canon/DESIGN.md` and picks one of two paths from what the project has. Both read `CLAUDE.md`, `canon/REQUIREMENTS.md`, and `claude/skills/markdown-craft/references/markdown.md`, load the `write-human` skill for tone, fill the same seed, and end at the same render. Install it in a target through `canon claude install` and invoke it with `/canon:design-extract`.
 
 ## Decisions
 

@@ -10,7 +10,7 @@ metadata:
 Read these files in parallel:
 
 - `${CLAUDE_SKILL_DIR}/../../standards/commit.md`: format, types, scopes, and constraints
-- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: punctuation and formatting for all generated text
+- `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md`: punctuation and formatting for all generated text
 - The `write-human` skill: voice, rhythm, and sentence construction for all generated text
 
 ## Context

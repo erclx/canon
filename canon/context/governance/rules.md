@@ -57,7 +57,7 @@ An always-loaded rule still reaches a target through `canon gov sync` rather tha
 
 The output is committed rather than produced inside `canon gov install` and `canon gov sync`. Install, sync, `canon sync --check`, `canon gov list`, the citation and restated stages, and the bash sandbox helpers all read rules as files under `governance/rules/`, and `readNewRules` needs a file in git history to see a new rule at all. Generating at install would thread a virtual source through each of them for the same output a target receives. The Consumed copies stage asserts the band is committed.
 
-A rule pointing at a skill rather than a standard stays authored, as do `800-prose`, `460-design-taste`, and `internal/rules/claude/595-tooling-reference.md`, whose standard never ships.
+A rule pointing at a skill rather than a standard stays authored, as do the `writing/markdown` rule, `460-design-taste`, and `internal/rules/claude/595-tooling-reference.md`, whose standard never ships.
 
 ## Gotchas
 

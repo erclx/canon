@@ -90,7 +90,7 @@ Read `ok` and `reason` out of that record rather than the exit. An operator's sh
 - Update only the sections affected by session decisions.
 - Do not rewrite sections unrelated to what changed.
 - Rewrite a restated or superseded statement in place rather than appending the replacement beside it. State the fact that stands and keep the earlier reasoning only where it is the alternative that lost, per `${CLAUDE_SKILL_DIR}/../../standards/context.md` and `${CLAUDE_SKILL_DIR}/../../standards/architecture.md`.
-- Follow `${CLAUDE_SKILL_DIR}/../../standards/markdown.md` and the `write-human` skill for all edits.
+- Follow `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md` and the `write-human` skill for all edits.
 - Write a session decision into the `canon/context/` entry for the domain it constrains, under that entry's `## Decisions`, by default.
 - Touch `canon/ARCHITECTURE.md` only when a plan a matched task's `Plan:` line names states a decision filling a slot `${CLAUDE_SKILL_DIR}/../../standards/architecture.md` names. A slot decision no plan carries goes to the domain entry.
 - Read the entry cap the record states before adding a decision to it. At the cap, merge two decisions or retire one to the domain entry it constrains, and name which in the report. Never compress a decision's prose to fit, and never pack two decisions under one heading.

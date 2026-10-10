@@ -7,7 +7,7 @@ description: The bullet, paragraph, and depth checkpoints, where each number sit
 
 ## The paragraph and bullet checkpoints
 
-- The paragraph check closed a gap in the standard rather than working around it. A sentence cap alone is satisfied by writing fewer and longer sentences, and 486 paragraphs across the corpus sit inside four sentences and past 400 characters, so the weight half was added to `standards/markdown.md` and parses as its own checkpoint.
+- The paragraph check closed a gap in the standard rather than working around it. A sentence cap alone is satisfied by writing fewer and longer sentences, and 486 paragraphs across the corpus sit inside four sentences and past 400 characters, so the weight half was added to `claude/skills/markdown-craft/references/markdown.md` and parses as its own checkpoint.
 - Borrowing the bullet number was the first shape and it fails twice over: an author reading the sentence cap finds no weight rule to read, and retuning the bullet rule moves a paragraph rule nobody edited. The two numbers diverge, at 400 for a bullet and 700 for a paragraph, because each was read against its own corpus once the shapes were measured apart.
 - The sentence cap counts a paragraph whose next sentence opens on a code span. `SENTENCE_END` requires a capital after the terminal punctuation, which a command name never carries, so the backtick sits in the lookahead as its own alternative. The price is a span opening a fragment mid-paragraph reading as a sentence start.
 
@@ -15,7 +15,7 @@ The bullet number stays at 400. Findings sampled at 404, 420, and 458 characters
 
 The paragraph weight number moves from 600 to 700. Samples at 604, 633, and 677 characters each read as an ordinary four-sentence paragraph on one topic, which is a finding reading well past its checkpoint and the signal that the number is low. Density arrives around 760 and is plain by 860, so 700 is where the reading stops being comfortable. The move takes the weight half from 146 findings to 78 and leaves the sentence cap untouched, since 96 of its hits sit at 700 characters or under and fire on sentence count alone.
 
-Moving a number in a standard is two edits rather than one. `DEFAULT_CHECKPOINTS` in `src/markdown/structure.ts` holds the value applied when the standard's sentence cannot be parsed, and `structure.test.ts` parses `standards/markdown.md` and asserts the result against that constant, so a number moved in prose alone fails the test and leaves the fallback measuring against the retired figure. The parse is what runs on every ordinary invocation, which is why the mirror is easy to miss and why the test is the thing that catches it.
+Moving a number in a standard is two edits rather than one. `DEFAULT_CHECKPOINTS` in `src/markdown/structure.ts` holds the value applied when the standard's sentence cannot be parsed, and `structure.test.ts` parses `claude/skills/markdown-craft/references/markdown.md` and asserts the result against that constant, so a number moved in prose alone fails the test and leaves the fallback measuring against the retired figure. The parse is what runs on every ordinary invocation, which is why the mirror is easy to miss and why the test is the thing that catches it.
 
 ## Depth and section markers
 

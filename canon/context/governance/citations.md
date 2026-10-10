@@ -89,7 +89,7 @@ Each rule and standard below cites its skill with the `canon:` prefix plus a rep
 - `governance/rules/lang/120-bash.md` cites `canon:bash-cli-script`.
 - `governance/rules/standards/teach.md` and `standards/teach.md` both cite `canon:teach-workspace`, the standard's fallback reading "say so and stop".
 - `governance/rules/standards/skill.md` cites `canon:create-skill` twice.
-- `standards/markdown.md` cites `canon:write-human` in ordinary prose stating where a markdown edit routes, which reads as a directive rather than as a scope boundary.
+- `claude/skills/markdown-craft/references/markdown.md` cites `canon:write-human` in ordinary prose stating where a markdown edit routes, which reads as a directive rather than as a scope boundary.
 
 ### Moot: the target cannot reach the governed surface
 
@@ -103,8 +103,7 @@ A rule scoped to a folder only a plugin skill creates is inert rather than broke
 
 ### Clean pointer, no other note
 
-- `governance/rules/writing/800-prose.md` → the `write-human` skill, named with the fallback line.
-- `governance/rules/standards/markdown.md` → `canon standards markdown`.
+- `governance/rules/writing/markdown.md` → the `markdown-craft` and `write-human` skills, each named with the fallback line.
 - `standards/skill.md` → several sibling standards by path, all within the flat `standards/` corpus every delivery route carries whole.
 - `standards/tasks.md` → `standards/versioning.md` and `standards/plan.md`, for the same reason.
 

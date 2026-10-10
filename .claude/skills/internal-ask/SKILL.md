@@ -74,7 +74,7 @@ Do not guess. Do not read source files. Do not grep the whole repo.
 
 - Direct. Developer-level technical knowledge assumed.
 - No marketing words, no hedging clusters, no filler lead-ins
-- Follow `standards/markdown.md` and the `write-human` skill for any multi-line answer
+- Follow `claude/skills/markdown-craft/references/markdown.md` and the `write-human` skill for any multi-line answer
 - Prose by default. Use bullets only when the answer is a discrete list already present in the source file.
 
 ## Do not

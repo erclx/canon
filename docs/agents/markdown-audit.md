@@ -113,4 +113,4 @@ The verb reads the two attribute standards and nothing else. The five standards 
 
 That standard's cross-reference rule is out of reach rather than merely unimplemented. It resolves by destination, bare where the destination auto-links a pull request or issue number and backticked where it does not, so this verb sees only the half where the backticked form is correct. A check here would report every compliant reference in the tree and reach none of the published text that goes wrong, which is why the rule holds on reading alone.
 
-The list-density rule at `standards/markdown.md` is out of scope on purpose, since it carries no number and what a density figure should measure is still open.
+The list-density rule at `claude/skills/markdown-craft/references/markdown.md` is out of scope on purpose, since it carries no number and what a density figure should measure is still open.

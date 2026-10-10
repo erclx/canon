@@ -16,7 +16,7 @@ The array and the list below are two copies of one set with nothing comparing th
 - `claude/skills/*/SKILL.md`: `bun --bun vitest run src/claude/cases/all.test.ts`, then `bun --bun vitest run src/claude/skills-headings.test.ts`
 - `governance/rules/ui/*.md` frontmatter globs: `bun --bun vitest run src/gov/list.test.ts`
 - `governance/rules/` category folders: `bun --bun vitest run src/gov/adapter.test.ts`
-- `standards/markdown.md`: `bun --bun vitest run src/standards/read.test.ts`
+- `claude/skills/markdown-craft/references/markdown.md`: `bun --bun vitest run src/standards/read.test.ts`
 - `tooling/base/reference.md`: `bun --bun vitest run src/tooling/read.test.ts`
 - `.claude/hooks/` and `tooling/claude/seeds/.claude/hooks/`: `bun --bun vitest run src/hooks/guard.test.ts`
 - `claude/skills/role-orchestrator/scripts/poll.ts`: `bun --bun vitest run src/claude/orchestrate-poll.test.ts`

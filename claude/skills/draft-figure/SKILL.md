@@ -19,7 +19,7 @@ Decide whether a requested figure reduces to a graph Mermaid can draw, is one of
 Read these in parallel:
 
 - `${CLAUDE_SKILL_DIR}/../../standards/figures.md`: when a figure earns its place, the render-first policy, wrapping and captioning, and the color and accessibility rules
-- `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`: formatting for the caption prose
+- `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md`: formatting for the caption prose
 - The `write-human` skill: voice and rhythm for the caption prose
 
 ## Step 2: does it earn its place

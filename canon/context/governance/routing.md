@@ -37,7 +37,7 @@ A claude rule carries operative directives beside its pointer, since a rule arri
 
 `592-claude-md` carries directives and no pointer. No standard governs the root file, so there is no structure to reproduce, and the seed and `seed-sync` hold the role a standard would.
 
-`800-prose` and `governance/rules/standards/markdown.md` stay pointer-only for two different reasons. `governance/rules/standards/markdown.md` points at a standard whose bans ship as package data, so restating part of the list puts a second copy beside the one `canon markdown audit` reads. `800-prose` points at the `write-human` skill and carries the instruction to load it rather than a compressed sample, since the compressible half of that guidance does the least work.
+`governance/rules/writing/markdown.md` stays pointer-only on both halves it routes. Its format half points at the `markdown-craft` skill and its voice half at the `write-human` skill, and it carries the instruction to load each rather than a compressed sample, since the compressible half of that guidance does the least work. The one inline line names the two characters `src/markdown/bans.ts` owns, so a ban added there is a one-line edit to the rule rather than a silent gap.
 
 ### A rule cites a standard through the read verb
 
@@ -45,7 +45,7 @@ A rule citing a standard names `canon standards <name>`, whose resolver falls th
 
 The verb ships with the CLI and so does the rule, so the two never arrive apart and a verb citation owes no report-the-gap bullet. The bullet is owed only where the carrier ships on the other channel, which is why `governance/rules/standards/teach.md` keeps one on its glossary bullet.
 
-Test the target for a guard before writing `Load` into a rule. `write-human` is advisory, with no guard and nothing it starts, so `800-prose` can say load. `teach-workspace` runs a workspace, stops on a missing subject, and resumes a matching one, so a rule telling a session to load it for a glossary shape gets a refusal or a workspace.
+Test the target for a guard before writing `Load` into a rule. `write-human` is advisory, with no guard and nothing it starts, so the `writing/markdown` rule can say load. `teach-workspace` runs a workspace, stops on a missing subject, and resumes a matching one, so a rule telling a session to load it for a glossary shape gets a refusal or a workspace.
 
 `governance/rules/standards/teach.md` names `references/glossary.md` to read and says not to invoke the skill. `canon/context/standards/scope.md` carries what this narrows on the standards side.
 

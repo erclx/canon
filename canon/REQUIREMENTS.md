@@ -39,4 +39,4 @@ A developer handing real work to an agent has no way to run it from plan to merg
 - Agent-first: every command has a non-interactive path, and data on stdout pipes clean through any wrapper.
 - The toolkit is the authoritative source. Target projects consume through install and sync and never author in place.
 - Skills call the CLI and never reimplement it.
-- Authored content follows `standards/markdown.md` and the `write-human` skill.
+- Authored content follows the `markdown-craft` and `write-human` skills.
