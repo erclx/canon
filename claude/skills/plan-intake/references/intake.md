@@ -1,8 +1,6 @@
 ---
 title: Intake reference
 description: Folder layout, ordinal naming, reserved index number, frontmatter and dating, the item template, the answer contract, and retrieval
-paths:
-  - '.canon/intake/**'
 ---
 
 # Intake reference
@@ -10,6 +8,23 @@ paths:
 Applies to an intake folder at `.canon/intake/<nn>-<slug>/`. One folder holds one dump, filed by domain, and every finding in it is an item carrying a measured problem, one proposed fix, and a verdict.
 
 The folder is gitignored, and backed wherever a records remote is configured: `canon records push` and `canon records pull` protect it against the machine being lost there, refuse with `no-remote` where it is not, and neither protects against a compaction dropping a session's reasoning before anyone has pushed. No check reaches its contents, so the shape below survives only by being read.
+
+<!-- canon-length-exempt: the folder shape and the item template share one reader, and a split into a second reference is queued as its own change -->
+
+## Contents
+
+- [Scope](#scope)
+- [Folder name](#folder-name)
+- [What a working intake looks like](#what-a-working-intake-looks-like)
+- [Files](#files)
+- [Frontmatter and dating](#frontmatter-and-dating)
+- [00-overview.md](#00-overviewmd) <!-- canon-allow-reference: a heading anchor, not a pull request number -->
+- [Item format](#item-format)
+- [The answer contract](#the-answer-contract)
+- [Retrieval](#retrieval)
+- [Conventions](#conventions)
+- [Anti-patterns](#anti-patterns)
+- [Template](#template)
 
 ## Scope
 

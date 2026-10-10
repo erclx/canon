@@ -29,7 +29,7 @@ Each section states what an arm's declaration proves and what it leaves open, so
 
 `claude/task-board.sh` carries separate `create` and `archive` arms, because the two paths have disjoint preconditions and one arm running both would assert the second against a tree the first mutated. Both stage the board rather than inheriting one, since `SANDBOX_INJECT_SEEDS` leaves `.canon/tasks/` holding only the seeded `index.md`.
 
-- `canon tasks archive` is a typed verb whose refusals `src/tasks/archive.test.ts` covers, so the archive arm stages a board that satisfies every gate and asserts the successful move. The create path has no CLI verb, so the skill writes the file from `standards/tasks.md` and that arm covers prose with nothing underneath it.
+- `canon tasks archive` is a typed verb whose refusals `src/tasks/archive.test.ts` covers, so the archive arm stages a board that satisfies every gate and asserts the successful move. The create path has no CLI verb, so the skill writes the file from `claude/skills/task-board/references/tasks.md` and that arm covers prose with nothing underneath it.
 - The create board runs three consecutive versions with no gaps, which forces the next one, and a `.canon/tasks/` reply fragment pins the proposed label.
 - The archive task carries a `Pull request:` line, which satisfies the work-reached-main check without a remote, and its `Plan:` line points at a live plan no other task cites, which puts the plan move under assertion.
 - `priority.md` puts the archived task's row first and a control row second. An `absent` entry cannot express a removed table row, so the arm pins the separator line and the row that follows it.

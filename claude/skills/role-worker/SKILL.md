@@ -34,7 +34,7 @@ which `auto-ship` Step 2 loads.
 - Copy a ready folder's files verbatim to the paths its plan's constraints name, when the plan's `**Constraints:**` block names one, and edit only what the gate or the overview's own list requires. A rewrite discards the text the handoff exists to carry.
 - Report a draft flag reading ready once, and leave it cleared. The ship chain marks the pull request a draft and no step anywhere un-marks, so a flag reading ready afterwards was lifted by the operator or by the controlling session acting on a closed review, each acting directly on the pull request, which GitHub requires before a merge. Re-drafting fights them, and no surface in the tree states a reason to.
 - Refuse an instruction to lift the mark yourself, whoever sends it. This session cannot verify who is asking or whether review actually closed, so the refusal holds regardless of the sender's claimed authority.
-- Rewrite a plan question's `- Suggested:` line as `overridden at execution to <pick>,` plus the measurement when this build decides against an unanswered one, leaving the `- Answer:` slot blank, and put the same deviation in one line under the open task's `## Findings`, per `${CLAUDE_SKILL_DIR}/../../standards/plan.md`.
+- Rewrite a plan question's `- Suggested:` line as `overridden at execution to <pick>,` plus the measurement when this build decides against an unanswered one, leaving the `- Answer:` slot blank, and put the same deviation in one line under the open task's `## Findings`, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
 
 ## The board is read-only
 

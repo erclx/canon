@@ -95,7 +95,7 @@ A file a skill body cites has to arrive by the channel the skill itself travels 
 
 The three orchestrator runbooks settle the rule: they sit in `role-orchestrator`'s own `references/`, cited with `${CLAUDE_SKILL_DIR}`, which resolves from any working directory in any target. What this narrows to is a test on readership rather than on topic: a file one skill reads ships inside it, and a file several surfaces reach stays in the catalog that publishes it.
 
-The test cuts both ways. `plan-groundwork` and `plan-intake` are each edited by sessions that never invoked the skill, so their folder format lives at `standards/groundwork.md` and `standards/intake.md` instead, with a rule routing each path.
+The test cuts both ways. `plan-groundwork` and `plan-intake` are each edited by sessions that never invoked the skill, so their folder format lives at `claude/skills/plan-groundwork/references/groundwork.md` and `claude/skills/plan-intake/references/intake.md` instead, with a rule routing each path.
 
 The sharpest failure of the same test is a citation naming no toolkit file at all. A body sending a reader to a named section of the consuming project's own `CLAUDE.md` resolves to nothing in every known target while reading as an ordinary pointer, so bodies name `session-worktree` instead, which ships in the same plugin and pins no heading a retitling can break. `src/claude/skills-headings.test.ts` walks `claude/skills/` and fails on the shape, which is a prose pattern rather than a resolution because no check can read a target's own root file. It bans this instance and not the class: a body citing any part of the consuming project's file is the wider defect and nothing measures it.
 

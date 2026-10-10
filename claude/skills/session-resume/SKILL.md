@@ -13,7 +13,7 @@ Resolve `.canon/plans/`, `.canon/compact/`, and `.canon/tasks/` at the main work
 
 Read these in parallel, skipping any that do not exist:
 
-- the newest `.canon/compact/*.md`, then the newest `.canon/tasks/session-*.md`: the handoff a previous session wrote before a compaction. The first is the note `session-compact` writes, and the second is the board-side map per `${CLAUDE_SKILL_DIR}/../../standards/session.md`, which stays readable. Whichever exists leads the report rather than the reads, and both lead it when both exist.
+- the newest `.canon/compact/*.md`, then the newest `.canon/tasks/session-*.md`: the handoff a previous session wrote before a compaction. The first is the note `session-compact` writes, and the second is the board-side map per `${CLAUDE_SKILL_DIR}/../session-map/references/session.md`, which stays readable. Whichever exists leads the report rather than the reads, and both lead it when both exist.
 - `.canon/tasks/index.md`: the folder catalog. Read this before any individual task file, and take the task list from it by dropping the `index`, `priority`, `backlog`, and `session-` rows, which are siblings rather than tasks.
 - `.canon/plans/*.md`: execution detail for in-progress tasks
 
@@ -39,7 +39,7 @@ End with one line: `Start with: <first Up next item>` and note whether it has a 
 
 When the board is empty and a handoff was found, name what the handoff leaves open instead: `Start with: <the open thread the handoff names>`. A recommendation slot filled with nothing reads as a failed run, and a handoff on an empty board is the shape a session leaves when it was reasoning rather than shipping.
 
-Do not offer to remove entries. A completed task is archived out of `.canon/tasks/` when work ships. The git log is the authoritative record of shipped work. Plan files are archived per the lifecycle rule in `${CLAUDE_SKILL_DIR}/../../standards/plan-lifecycle.md`.
+Do not offer to remove entries. A completed task is archived out of `.canon/tasks/` when work ships. The git log is the authoritative record of shipped work. Plan files are archived per the lifecycle rule in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan-lifecycle.md`.
 
 ## Writing the next one
 

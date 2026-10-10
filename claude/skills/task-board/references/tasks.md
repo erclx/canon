@@ -1,12 +1,6 @@
 ---
 title: Tasks reference
 description: Folder layout, filename convention, file format, origin lines, and archiving for task files under .canon/tasks/
-paths:
-  - '.canon/tasks/**'
-rule:
-  - 'Follow the board standard for `priority.md` and `backlog.md`, their readiness groups, and row order. Read it with `canon standards board`.'
-  - 'Never hand-edit `.canon/tasks/index.md`. A hook regenerates it from sibling frontmatter.'
-  - 'Follow the task decline standard for a task decided against. Read it with `canon standards tasks-decline`.'
 ---
 
 # Tasks reference
@@ -16,6 +10,18 @@ Applies to `.canon/tasks/`. Tracks what is being built and why, at the level of 
 Update when a task starts, completes, or changes scope. When to open a task at all is project policy, not a shape rule, and lives in `CLAUDE.md`.
 
 The folder is gitignored. Board state changes when work ships rather than when a branch is written, so committing it would put a claim about the future into the diff of an unrelated pull request. The git log records what shipped.
+
+## Contents
+
+- [Scope](#scope)
+- [Layout](#layout)
+- [Filenames](#filenames)
+- [Frontmatter](#frontmatter)
+- [File format](#file-format)
+- [Origin](#origin)
+- [What goes in](#what-goes-in)
+- [What does not go in](#what-does-not-go-in)
+- [Archiving](#archiving)
 
 ## Scope
 

@@ -41,7 +41,7 @@ A fixture a headless or subagent run is pointed at has to live outside the repos
 
 ### A format spec is not an instruction
 
-A coverage audit reading a standard can mistake documenting the shape of X for instructing X, and the two are indistinguishable in a grep. `standards/tasks.md` covers the `Plan:` link, the `../plans/` path, and the archive destination in full, which predicted the Tasks ablation as a null, and both pairs falsify that. The cut halves create no plan at all, since the standard only specifies a pointer's format while the seed bullets carry the instruction to create one.
+A coverage audit reading a standard can mistake documenting the shape of X for instructing X, and the two are indistinguishable in a grep. `claude/skills/task-board/references/tasks.md` covers the `Plan:` link, the `../plans/` path, and the archive destination in full, which predicted the Tasks ablation as a null, and both pairs falsify that. The cut halves create no plan at all, since the standard only specifies a pointer's format while the seed bullets carry the instruction to create one.
 
 ### An unrelated arm is a control
 

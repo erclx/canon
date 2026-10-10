@@ -7,7 +7,7 @@ metadata:
 
 # Session map
 
-Write the pre-compaction handoff for the current session. `${CLAUDE_SKILL_DIR}/../../standards/session.md` fixes the filename, the frontmatter, the three core sections, the numbered write procedure, and the citation rule. Follow that document rather than this body, which states when the procedure runs and what it runs against and leaves the shape where it already lives.
+Write the pre-compaction handoff for the current session. `${CLAUDE_SKILL_DIR}/references/session.md` fixes the filename, the frontmatter, the three core sections, the numbered write procedure, and the citation rule. Follow that document rather than this body, which states when the procedure runs and what it runs against and leaves the shape where it already lives.
 
 Any session writes one. Do not assert a role on invocation, and do not add a role's sections to a map written by a session holding no such role.
 

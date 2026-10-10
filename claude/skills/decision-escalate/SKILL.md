@@ -69,7 +69,7 @@ An operator who answers some and not others has answered those. Continue on the 
 
 Restate each pick in one line, then continue the work.
 
-A pick that changes a written artifact goes into that artifact under the rule its own standard sets. An answer to an open plan question rewrites that question's `- Suggested:` line to the pick and names the operator as its source, leaving the `- Answer:` slot blank, per `${CLAUDE_SKILL_DIR}/../../standards/plan.md`. The standard bars a session from filling that slot even when the operator supplied the pick, and the blank slot resolves to the rewritten suggestion, so the record carries the operator's decision either way. A pick that settles nothing written stays in the session.
+A pick that changes a written artifact goes into that artifact under the rule its own standard sets. An answer to an open plan question rewrites that question's `- Suggested:` line to the pick and names the operator as its source, leaving the `- Answer:` slot blank, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`. The standard bars a session from filling that slot even when the operator supplied the pick, and the blank slot resolves to the rewritten suggestion, so the record carries the operator's decision either way. A pick that settles nothing written stays in the session.
 
 Output after the answers land:
 

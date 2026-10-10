@@ -50,7 +50,7 @@ This gate runs ahead of the two collision checks because it is the cheapest read
 
 It also reads the plan rather than a cell describing one, which is the input the gate below it does not have. The conflict check reads the sets a dispatcher wrote into the constraints and the Touches column, so a cell omitting a renamed or relocated path clears a check the tree would fail, and what catches it then is a worker's message rather than any check.
 
-A blank `- Answer:` is not an unanswered question. `${CLAUDE_SKILL_DIR}/../../standards/plan.md` fixes an empty slot as accepting the `- Suggested:` line above it, which is what makes a plan decision-ready in one pass. The narrow case this reads is `- Suggested: needs your call, <why>` and its two demonstrated paraphrases, `needs operator's call` and `needs the operator's call`, over an empty slot, the form that same standard writes where the answer turns on preference rather than on a technical default. A gate reading every blank slot as open would refuse every plan in the folder.
+A blank `- Answer:` is not an unanswered question. `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md` fixes an empty slot as accepting the `- Suggested:` line above it, which is what makes a plan decision-ready in one pass. The narrow case this reads is `- Suggested: needs your call, <why>` and its two demonstrated paraphrases, `needs operator's call` and `needs the operator's call`, over an empty slot, the form that same standard writes where the answer turns on preference rather than on a technical default. A gate reading every blank slot as open would refuse every plan in the folder.
 
 What it prevents is a halt nobody is watching for. `role-worker` instructs a session to stop on a question written as needing the operator's call, correctly and by its own body, so a dispatch that never reads the plan lands a worker in a wait for a person who does not know it is waiting. The worker's halt is not the defect, and the dispatch that made it necessary is.
 
@@ -84,7 +84,7 @@ No count binds this, and a shared file does not either. Hold a candidate behind 
 
 1. Dependency. The row or plan cites the track as something it waits on or builds over, including a stacked slice based on the other's branch.
 2. Contract. One plan changes a contract the other consumes, such as an exported signature, a CLI verb's flags or JSON record, a skill step another skill cites, or a config or frontmatter key, read off the changing plan's `**Risks:**`.
-3. Relocation. One plan moves, renames, splits, or deletes a path the other writes or reads, which a rebase cannot settle mechanically. Both sides of a rename sit before the colon of a `**Files to touch:**` entry, per `${CLAUDE_SKILL_DIR}/../../standards/plan.md`.
+3. Relocation. One plan moves, renames, splits, or deletes a path the other writes or reads, which a rebase cannot settle mechanically. Both sides of a rename sit before the colon of a `**Files to touch:**` entry, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
 4. Sweep. One plan rewrites a file or folder wholesale, such as a terminology pass or a `canon/context/` reflow, and the other writes inside it.
 5. A stated reason, written on the hold: a singleton resource, or tracks interacting where no file reading shows, as a row creating a skill does with one counting that catalog. Nothing verifies the reason, so this hold stands only while the dispatcher applies it.
 

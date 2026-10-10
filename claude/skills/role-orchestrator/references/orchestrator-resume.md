@@ -6,7 +6,7 @@ description: What to read back after a compaction, and how to treat a groundwork
 Resume as orchestrator after a compaction. Read the board and the groundwork behind the live work before answering anything, because a compaction summary keeps conclusions and drops the reasoning that produced them.
 
 1. Resolve the main worktree root with `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd`. Every path below resolves against it.
-2. Read `.canon/tasks/priority.md` for the ordering and what each task waits on. Read the newest `.canon/tasks/session-*.md` when one exists, per `${CLAUDE_SKILL_DIR}/../../standards/session.md`, and treat it as the previous session's scratch rather than a source.
+2. Read `.canon/tasks/priority.md` for the ordering and what each task waits on. Read the newest `.canon/tasks/session-*.md` when one exists, per `${CLAUDE_SKILL_DIR}/../session-map/references/session.md`, and treat it as the previous session's scratch rather than a source.
 3. Read the task file for every entry under `## Run now`, plus any entry a live pull request names.
 4. Read the groundwork folder each of those tasks cites. Read `README.md` for the file map, then `06-decision.md` when the track is closed, or `07-next-session.md` and the numbered topic files when it is open. A task's Findings section is a lossy summary of its track, so planning against the summary re-derives what the folder already settled.
 5. Run `gh pr list --state open` and `git log --oneline -5` to see what shipped since the folder was written.

@@ -59,18 +59,25 @@ export function standardRoots(root: string): StandardRoot[] {
  * map goes with the verb in the last slice of the retirement.
  */
 const MOVED_STANDARDS: Readonly<Record<string, string>> = {
+  board: 'claude/skills/task-board/references/board.md',
   markdown: 'claude/skills/markdown-craft/references/markdown.md',
   canvas: 'claude/skills/canvas/references/canvas.md',
   glossary: 'claude/skills/teach-workspace/references/glossary.md',
+  groundwork: 'claude/skills/plan-groundwork/references/groundwork.md',
   'groundwork-spikes':
     'claude/skills/plan-groundwork/references/groundwork-spikes.md',
+  intake: 'claude/skills/plan-intake/references/intake.md',
   mermaid: 'claude/skills/draft-figure/references/mermaid.md',
+  plan: 'claude/skills/plan-feature/references/plan.md',
+  'plan-lifecycle': 'claude/skills/plan-feature/references/plan-lifecycle.md',
   ready: 'claude/skills/draft-ready/references/ready.md',
   requirements: 'claude/skills/draft-doc/references/requirements.md',
   'skill-paths': 'claude/skills/create-skill/references/skill-paths.md',
   'skill-practice': 'claude/skills/create-skill/references/skill-practice.md',
+  session: 'claude/skills/session-map/references/session.md',
   'skill-requirement':
     'claude/skills/create-skill/references/skill-requirement.md',
+  tasks: 'claude/skills/task-board/references/tasks.md',
   'tasks-decline': 'claude/skills/task-board/references/tasks-decline.md',
   teach: 'claude/skills/teach-workspace/references/teach.md',
   wiki: 'claude/skills/draft-doc/references/wiki.md',

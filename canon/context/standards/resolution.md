@@ -49,7 +49,7 @@ A file under a skill's own `references/` is always hand-authored and skill-local
 
 ## Standards read by more than one session
 
-`standards/groundwork.md` and `standards/intake.md` sit in the flat root rather than a skill's `references/`, since both govern a folder edited routinely by sessions that never invoke the skill that names them. A skill-local reference is right for a file only that skill reads. A standard a session opens directly is not that file. Each skill cites its standard at the plugin root, the single form every shipped body takes.
+`claude/skills/plan-groundwork/references/groundwork.md` and `claude/skills/plan-intake/references/intake.md` sit in the flat root rather than a skill's `references/`, since both govern a folder edited routinely by sessions that never invoke the skill that names them. A skill-local reference is right for a file only that skill reads. A standard a session opens directly is not that file. Each skill cites its standard at the plugin root, the single form every shipped body takes.
 
 Both govern a gitignored folder no check reaches, which puts them in one class with the plan standard. `.claude/hooks/standards-audit.sh` exits early on the scratch paths, so all four are enforced by a session reading them and by nothing else. `canon records validate <kind>` reports against each of the four without writing, which is what makes a verb safe over a folder with no history to recover from.
 
@@ -70,7 +70,7 @@ The resolve has exactly one caller, `src/commands/standards.ts`, and no shipped 
 - Do not hand-edit `standards/index.md` here. `canon indexes regen` rewrites it from the frontmatter of whatever is present, and a standard missing `title` or `description` fails that regen.
 - `bun run check` regenerates nothing for this corpus, and the Consumed copies stage names `.claude/rules` alone. Editing `standards/<name>.md` needs no second file staged behind it. No skill-reference fan-out exists either: a `references/` file is skill-local and edited in place.
 - A grep for `standards install` or `standards sync` in a skill body or a doc is a stale citation, not a verb. Neither exists.
-- A standard citing a `docs/agents/` page resolves as a path here and nowhere else, since neither root carries a `docs/` tree. `standards/tasks.md` carries the first such pointer.
+- A standard citing a `docs/agents/` page resolves as a path here and nowhere else, since neither root carries a `docs/` tree. `claude/skills/task-board/references/tasks.md` carries the first such pointer.
 - `canon docs <name>` resolves a sub-area file by its bare name, so `canon docs tasks` is the spelling the pointer above can run. A name two folders of one root share still resolves to neither, and across roots `docs/` answers first.
 - The two read routes return different bytes. `canon standards <name>` runs its file through `stripFrontmatter` at `src/standards/read.ts:99`, so stdout opens at the H1, while the `content` field of `canon standards list --json` carries the source whole. Anything comparing a target's leftover copy against the corpus reads the catalog, since an install once copied the source file whole and the verb's output differs from it by the frontmatter block. Measured 2026-08-28: the catalog's `content` for `slug` is byte-identical to `standards/slug.md`.
 

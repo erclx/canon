@@ -43,7 +43,7 @@ A plan's `**Files to touch:**` list is a measurement taken when the plan was wri
 
 The decay is the ordinary case rather than the exception: a branch routinely writes paths its own plan never declared, mostly because the ship chain writes past the plan rather than because a session widened scope. Surfaces `bun run check` regenerates and asserts drift on, plus the test and sandbox siblings a source change drags in, account for most of the gap. The cost lands on the dispatch gate, which compares declared sets and therefore clears against a prediction: a track can cross a file set it had cleared against without breaking a merge, which is why `canon tasks plan-reach` reports rather than gates.
 
-Reading every backticked span in a `**Files to touch:**` entry doubles the noise, since a reason can cite a file the entry is not about, which is a form the standard invites: a plan can cite one path inside a reason whose subject is a different file being renamed, and its branch never writes the cited path. `standards/plan.md` fixes the colon as the seam, so the parse reads a form the standard states rather than one the verb invented.
+Reading every backticked span in a `**Files to touch:**` entry doubles the noise, since a reason can cite a file the entry is not about, which is a form the standard invites: a plan can cite one path inside a reason whose subject is a different file being renamed, and its branch never writes the cited path. `claude/skills/plan-feature/references/plan.md` fixes the colon as the seam, so the parse reads a form the standard states rather than one the verb invented.
 
 ### Files to touch can answer an open question early
 

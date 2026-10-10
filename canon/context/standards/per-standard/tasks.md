@@ -7,7 +7,7 @@ description: The tasks readiness test widened to admit a row waiting on an exter
 
 ## Tasks readiness test
 
-`standards/board.md` admits a row to `## Up next` on a written plan plus a stated reason the task cannot start, and that group's `Waiting on` cell carries a collision, a sibling task, or an external condition. The three forms are stated under the group they govern rather than under the header they share. A test naming only the first two leaves a planned task waiting on a condition outside the board passing neither it nor the `## Needs a plan` test below it.
+`claude/skills/task-board/references/board.md` admits a row to `## Up next` on a written plan plus a stated reason the task cannot start, and that group's `Waiting on` cell carries a collision, a sibling task, or an external condition. The three forms are stated under the group they govern rather than under the header they share. A test naming only the first two leaves a planned task waiting on a condition outside the board passing neither it nor the `## Needs a plan` test below it.
 
 A fourth heading lost, and the standard bans one, because a board grouped under names of its own reads as empty to anything counting rows under a heading. Widening a test costs one clause and keeps the three headings every reader already parses.
 
@@ -23,7 +23,7 @@ The `## Needs a plan` cell takes the same treatment. It states why the row sits 
 
 ## Board split from tasks
 
-`standards/board.md` carries `priority.md`, `backlog.md`, and the generated index, and `standards/tasks.md` keeps the task file. The two govern different documents with their own templates, and cutting the ordering and backlog rules down inside one file would have cut live rules to fit the length ceiling. `governance/rules/standards/tasks.md` globs the whole folder, so it routes to both.
+`claude/skills/task-board/references/board.md` carries `priority.md`, `backlog.md`, and the generated index, and `claude/skills/task-board/references/tasks.md` keeps the task file. The two govern different documents with their own templates, and cutting the ordering and backlog rules down inside one file would have cut live rules to fit the length ceiling. `governance/rules/canon/tasks.md` globs the whole folder, so it routes to both.
 
 ## Tasks origin and archiving
 

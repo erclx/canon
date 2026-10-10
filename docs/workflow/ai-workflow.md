@@ -16,7 +16,7 @@ Project docs split across three roots at the project root. What the project auth
 
 ```plaintext
 canon/
-├── REQUIREMENTS.md  ← goals, non-goals, MVP scope
+├── REQUIREMENTS.md  ← problem, goals, non-goals
 ├── ARCHITECTURE.md  ← technical design decisions
 ├── DESIGN.md        ← visual intent and token decisions (UI projects)
 ├── wireframes/      ← regions, states, UI copy, and interaction rules (UI projects)

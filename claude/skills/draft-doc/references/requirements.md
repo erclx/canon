@@ -9,7 +9,7 @@ Applies to `canon/REQUIREMENTS.md`. Describes what the product does and why, not
 
 ## Scope
 
-Governs the product-scope document at `canon/REQUIREMENTS.md`: problem, goals, non-goals, MVP features, distribution, and constraints.
+Governs the product-scope document at `canon/REQUIREMENTS.md`: goals and non-goals, with constraints and worldview when the project has them.
 
 Does not govern:
 
@@ -19,11 +19,10 @@ Does not govern:
 
 ## What goes in
 
-- The problem being solved and for whom
+- The problem being solved and for whom, as the record's opening line under the title
 - User-facing goals stated as outcomes, not implementation
 - Explicit non-goals that prevent feature creep. Mark deferred items "(deferred)" so they read as paused, not excluded. A non-goal resting on how an outside tool, an installer, or the model behaves may close with one `Revisit when <finding>.` sentence, and a non-goal resting on scope alone takes none.
-- MVP features as a numbered list: feature name and one-line description
-- Hard constraints that shape every decision
+- Hard constraints that shape every decision, when the project has any
 
 ## What does not go in
 
@@ -34,7 +33,7 @@ Does not govern:
 
 ## Sections
 
-Use `## Problem`, `## Goals`, `## Non-goals`, `## MVP features`, and `## Constraints`. Add `## Distribution` when the rule below applies. Add `## Worldview` when the project holds beliefs that shape every decision, and keep a belief there only when it changes a decision, since a padded worldview turns into a second goals list. Add `## Premise` when the project exists to answer a question, stated as the question and what would count as an answer, never as the answer measured so far. Drop a section rather than pad it with filler.
+Require `## Goals` and `## Non-goals`. Add `## Constraints` when the project holds hard limits that shape every decision. Add `## Worldview` when the project holds beliefs that shape every decision, and keep a belief there only when it changes a decision, since a padded worldview turns into a second goals list. Drop a section rather than pad it with filler.
 
 ## Length
 
@@ -42,36 +41,22 @@ This file loads into every session, so its weight is paid before any work starts
 
 ## Lifecycle
 
-Once every entry in the MVP list, or in a later scope section, has shipped, delete the section. Git keeps the old text, and the document states the project as it stands. Do not annotate an entry as shipped and leave it in place. While any entry is unshipped, do not renumber the list or append to it.
-
 The record may carry an optional `reviewed: YYYY-MM-DD` frontmatter field naming the day someone last read it whole for identity drift. Whoever finishes that review sets it as the review's last edit, and `canon records stale canonical` reads it to count the releases shipped since. A record with no field reads as never reviewed.
 
-Later scope arrives as a new section rather than as an extension of the MVP list. Name the section for what it delivers and state its entries as outcomes, the same way the goals are stated. Nothing sequences either list into versions. Work reaches the board as discrete tasks under `tasks.md`, and `board.md` orders them by readiness, so a section here states what is wanted and never when it lands.
-
-## Distribution
-
-Include `## Distribution` only when the project ships to consumers outside its own repository. An internal service or a monorepo application has nothing to put in it, and a section every project is told to fill is one most projects pad. Place it after `## MVP features`.
-
-State each entry as an outcome the consumer reaches, never as the mechanism that delivers it. A registry name, a manifest format, a version scheme, or a release tool is implementation and belongs in `canon/ARCHITECTURE.md`. Distribution pulls harder toward mechanism than any other section, which is why the rule is repeated here.
+Later scope arrives as a new section rather than as an extension of the goals. Name the section for what it delivers and state its entries as outcomes, the same way the goals are stated. Once every entry in it has shipped, delete the section, since version history keeps the old text and the document states the project as it stands. Nothing sequences a section into versions. Work reaches the board as discrete tasks under `tasks.md`, and `board.md` orders them by readiness, so a section here states what is wanted and never when it lands.
 
 ## Template
 
 ```markdown
 # Requirements
 
-This record holds at most 600 words.
+[One line: the problem and who has it]
 
-## Problem
+This record holds at most 600 words.
 
 ## Goals
 
 ## Non-goals
 
-## MVP features
-
-1. Feature: description
-
-<!-- ## Distribution: include only when shipping outside the repository -->
-
-## Constraints
+<!-- ## Constraints: include only when hard limits shape every decision -->
 ```
