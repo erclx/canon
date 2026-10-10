@@ -37,7 +37,7 @@ Read `canon/context/scripts/index.md` for structure, file inventory, and lib res
 
 When adding a command to any `manage-*.sh`:
 
-- Update the corresponding scenario list in `sandbox/infra/*.sh`
+- Update the corresponding scenario list in `sandbox/infra/*.ts`
 - Update the CLI table in `README.md`
 
 After editing scripts in a domain that has a sandbox scenario:
