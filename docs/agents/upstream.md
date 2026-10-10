@@ -50,7 +50,7 @@ Prints a heading per section and a line per entry. With `--json` it prints one r
 
 ## advance
 
-Writes `cursor.json` and the fetched `llms.txt` under the upstream record folder at the main worktree root, each through a temp file and a rename. `--no-llms` keeps the stored `llms.txt` and fetches nothing. The record is `version`, `intake`, and `advanced`.
+Writes `cursor.json` and the fetched `llms.txt` under the upstream record folder at the main worktree root, each through a temp file and a rename. `--no-llms` keeps the stored `llms.txt` and fetches nothing. The record is `version`, `intake`, `advanced`, and `llms`, which reads `stored` when a fresh copy was written and `kept` when the stored one stayed, whether by `--no-llms` or because the fetch failed.
 
 The cursor file holds `version`, `date`, and `intake`. The folder is a backed record folder, so `canon records push` carries it.
 

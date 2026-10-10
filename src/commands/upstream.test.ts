@@ -114,6 +114,7 @@ describe('canon upstream', () => {
         version: '2.1.289',
         intake: 'a-slug',
         advanced: true,
+        llms: 'kept',
       })
       expect(back.record).toMatchObject({ reason: 'older-than-cursor' })
       expect(back.exitCode).toBe(1)

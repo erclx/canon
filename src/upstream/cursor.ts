@@ -46,7 +46,11 @@ export function readCursor(root: string): Cursor | null {
   const path = cursorPath(root)
   if (!existsSync(path)) return null
 
-  return JSON.parse(readFileSync(path, 'utf8')) as Cursor
+  try {
+    return JSON.parse(readFileSync(path, 'utf8')) as Cursor
+  } catch {
+    return null
+  }
 }
 
 export function readLastLlms(root: string): string | null {

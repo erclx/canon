@@ -262,11 +262,12 @@ async function runAdvance(
 
   intro('canon upstream advance')
 
+  const llms = opts.llms ? await fetchLlms() : null
   const outcome = await advanceCursor(root, {
     version,
     intake: opts.intake,
     today: new Date().toISOString().slice(0, 10),
-    llms: opts.llms ? await fetchLlms() : null,
+    llms,
   })
   if (outcome.kind === 'refused') {
     return refuse(outcome.reason, { version }, emitJson)
@@ -274,11 +275,19 @@ async function runAdvance(
 
   logStep('Cursor')
   logInfo(`Moved to ${version}, filed as ${opts.intake}`)
+  if (opts.llms && llms === null) {
+    logWarn('llms.txt could not be fetched, so the stored copy is unchanged')
+  }
   outro()
 
   if (emitJson) {
     process.stdout.write(
-      `${JSON.stringify({ version, intake: opts.intake, advanced: true })}\n`,
+      `${JSON.stringify({
+        version,
+        intake: opts.intake,
+        advanced: true,
+        llms: llms === null ? 'kept' : 'stored',
+      })}\n`,
     )
   }
 

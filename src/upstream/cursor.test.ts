@@ -1,4 +1,10 @@
-import { mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -23,6 +29,13 @@ afterEach(() => {
 
 describe('readCursor', () => {
   it('should read a missing cursor as null', () => {
+    expect(readCursor(ROOT)).toBeNull()
+  })
+
+  it('should read a corrupted cursor as missing rather than throwing', () => {
+    mkdirSync(join(ROOT, '.canon', 'upstream'))
+    writeFileSync(join(ROOT, '.canon', 'upstream', 'cursor.json'), '{not json')
+
     expect(readCursor(ROOT)).toBeNull()
   })
 })
