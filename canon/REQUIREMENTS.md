@@ -13,7 +13,8 @@ This record holds at most 600 words.
 - Humans stay in the loop only where judgment is non-obvious. Process and planning are where the return is largest.
 - The toolkit is agent-first throughout. Human-friendly UX layers on top where needed.
 - Consistency is a prompt. Same patterns across domains reduce context load and make refactors cheap.
-- A rule a model can ignore needs a check that fails. Prose sets the intent and a hook, a stage, or a gate is what makes it hold.
+- A rule a model can ignore needs a check that fails. Prose sets the intent, and a hook, a stage, a gate, or a verb makes it hold and says what it does when its inputs are missing rather than reporting a pass.
+- A safe behavior sits on the default path, not behind a flag.
 - A custom mechanism is preferred over a platform-native one only until the platform ships an equivalent.
 - A bottleneck is a defect to remove, not a constant to design around.
 
