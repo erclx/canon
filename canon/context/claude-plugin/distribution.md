@@ -23,7 +23,7 @@ The check pipeline does not follow the two symlinks. The index walker's glob, th
 
 ### Location enforces the plugin boundary
 
-Toolkit-internal content lives under `internal/`, which nothing inside `claude/` reaches, and the marketplace sources the plugin from `./claude` rather than the root. `src/gate/boundaries.ts` enforces the first half, and `### What a symlink costs` below carries how it measures what an install copies.
+Toolkit-internal content lives under `internal/`, which nothing inside `claude/` reaches, and the marketplace sources the plugin from `./claude` rather than the root. `src/gate/boundaries.ts` enforces the first half, and the symlink section below carries how it measures what an install copies.
 
 Sourcing from the root was the alternative, and the dependency install measured above is the cost that still rules it out.
 
