@@ -29,34 +29,36 @@ Without this skill, a session facing a decision nobody can settle from a diff:
 - Judges a lower layer through a finished higher one, so an operator asked about composition looks at the palette instead and answers about that.
 - Hands over the combined page alone for a decision about layout, where every arm sits in a column while the media queries answer to the whole window, so no arm is ever seen at its own viewport and a fault that appears only narrower survives the pick.
 - Rebuilds a navigation harness by hand on a run with several rounds, since each round writes its own folder and nothing reaches all of them from one address. Two design tracks hand-wrote the same page picker and theme toggle.
+- Meets a session with no canvas server and drafts into a file instead, which leaves the operator a second surface to open and the run a second close to remember. The canvas is the one drafting surface, so a run without one starts it rather than falling back.
 - Puts the pick question with no address in its output, after capturing the page and reading the image back. The operator then has to ask for a served page before they can look, so the question goes unanswered or gets answered blind.
 - Sets the theme on an arm that persists its own and reads it back on load, so the control reports one theme while the arm renders the other and the set is compared across two.
 
 ## Must
 
 - Produce three to five arms with the shipping state among them, each carrying an id, a label, and what the arm costs.
-- Author the whole candidate set as one self-contained page and render it once, so the comparison arrives as one image, except where the surface under decision is a running app: there the page links a copy of the built stylesheet rather than inlining it, per `references/live-arms.md`.
+- Draft every arm of a round as one self-contained frame on one canvas page and capture that page once as a composite, so the comparison arrives as one image, except where the surface under decision is a running app: there each frame links a copy of the built stylesheet inside the page folder rather than inlining it, per `references/live-arms.md`.
+- Start the canvas when none is serving, and stop on a canvas that refuses to start or answers with a blank shell, rather than drafting into a file.
 - Emit the layer in the run's own output, drawn from the catalog `design-taste` fixes rather than from a word invented per run, and vary the arms at that layer alone. A layer held privately is one nothing can report missing, which is how the instruction went unfollowed while every round passed its own rules.
 - Grey-box the set when the declared layer sits below typography, and say the set is grey-boxed when handing it over, so the operator reads a flat page as the question rather than as unfinished work.
-- Render every arm in one theme at a time, with a control that sets the whole set, so the comparison holds still while the operator reads it, and set the theme in a way that survives an arm reading its own stored preference back on load.
-- Hand over the per-arm file addresses beside the combined page where the declared layer is composition, layout or space, since only a whole-page file at a real viewport answers how an arm behaves at a width, and the browser's own device toolbar is the control.
-- Write a frame from `references/frame.html` where the run has several rounds, so a picker reaches every round from one address. The frame carries no width control of its own.
+- Theme every arm off the attribute the canvas toggle sets on each frame, so one control sets the whole set and the comparison holds still while the operator reads it, and give no arm a script that reads a stored preference back on load over the toggle.
+- Give each frame the width the arm is judged at, since a frame renders at its own layout width and answers how an arm behaves at a width where a column on a shared page could not.
 - Judge each render against a stated bar before handing it over, name the weakest thing on the page, and fix it where that sentence would embarrass the work.
-- Write each iteration to its own folder rather than narrowing the previous one in place, so every earlier round stays openable.
+- Write each iteration to its own canvas page rather than narrowing the previous one in place, so every earlier round stays openable from the canvas page list.
 - Write the run's renders inside the record that cites them wherever one exists, and reserve the scratch path for inputs that are re-runnable and cited by nothing.
 - Render before reporting on any arm, and report a missing browser binary as a refusal naming the repair rather than describing an arm nobody has seen.
-- Take the pick through the structured question surface, with the recommendation ranked first and marked, and every option carrying its cost.
-- Keep every write inside the run's scratch folder until the pick is final.
+- Take the pick through the structured question surface, with the recommendation ranked first and marked, and every option carrying its cost. Read the canvas selection only to resolve an answer that points at it, and treat an empty or stale selection as no answer.
+- Keep every write inside the run's own canvas pages until the pick is final.
 - Apply the winning arm in one change.
-- Capture every arm from the final round as an image before deleting the run's scratch folder, rather than discarding the losing arms with it.
+- Capture every arm from the final round as an image named for its frame before deleting the run's pages, rather than discarding the losing arms with them.
+- Delete only the canvas pages the run itself added, recorded as it adds them, and stop only a canvas server the run itself started.
 - Resolve the archival capture's destination against the main worktree root, never against a linked worktree the run happens to be building in.
-- Serve the candidates on every run, whatever the decision's layer, and emit the local link ahead of the first pick question, so the operator can open the page the question is about and a still is never the only address.
+- Put the candidates on the canvas on every run, whatever the decision's layer, and emit the canvas link ahead of the first pick question, so the operator can open the page the question is about and a still is never the only address.
 
 ## Must not
 
 - Take the pick where two arms are both defensible and the difference is taste. That call is the operator's, and taking it silently is the failure this skill exists to prevent.
 - Draft candidates for a decision the operator has not asked to make. Each arm costs a render, and a run offering options everywhere spends their attention rather than saving it.
-- Restate the mechanics of the render, the address, or the probes. `canon capture`, `canon serve`, and `canon drive` own those and their help text is the source, so a second copy here hands one case two answers.
+- Restate the mechanics of the canvas, the render, or the probes. `canon canvas` and `canon drive` own those and their help text is the source, so a second copy here hands one case two answers.
 - Read a `canon drive` finding as a gate over the arms.
 - Fire on a request that already names one answer.
 
@@ -71,14 +73,14 @@ The refusal strings sit in the body, since the runtime loads that file and ignor
 - `ux-measure` measures what a running interface costs to paint. This measures whatever a visual claim depends on, which is usually geometry or contrast rather than cost.
 - `ui-checklist` writes what to look at on a change already made. This runs before there is a change to look at.
 - `draft-screencast` scripts a recording of something already built. This has nothing built yet.
-- `canon capture`, `canon serve`, and `canon drive` own the render, the address, and the probes, and are invoked rather than reimplemented.
+- `canon canvas` owns the page, the frames, the selection, the address, and the render, and `canon drive` owns the probes. Both are invoked rather than reimplemented.
 
 ### What did not travel
 
-This descends from a project-local skill whose interactive half was written against one repository. Three of its capabilities do not travel, and the three verbs above are what stands in their place:
+This descends from a project-local skill whose interactive half was written against one repository. Three of its capabilities do not travel, and the two verbs above are what stands in their place:
 
-- An arm switcher compiled into the project's own page, driven by a query parameter. `canon serve` over a self-contained scratch page replaces it, which puts the arms in scratch rather than in the source and removes the call site a run had to remember to delete.
+- An arm switcher compiled into the project's own page, driven by a query parameter. A canvas page of frames replaces it, which puts the arms on the canvas rather than in the source and removes the call site a run had to remember to delete.
 - A copy cycle keyed to canonical page text held in a second repository. No toolkit surface has that shape, so a project holding one owns the second edit and this skill states nothing about it.
 - A walker that reads every control on every page and groups them by treatment. `canon drive` probes one page and reports findings, so a sweep across every surface of a site is out of reach here and a run needing one measures by hand.
 
-The capture mechanics traveled with a change of owner rather than being lost. They sat in a project-local path-scoped rule that fired whether or not the skill ran, and `canon capture` owns them here, which is why this file bars restating them rather than naming a rule to defer to.
+The capture mechanics traveled with a change of owner rather than being lost. They sat in a project-local path-scoped rule that fired whether or not the skill ran, and `canon canvas capture` owns them here, which is why this file bars restating them rather than naming a rule to defer to.
