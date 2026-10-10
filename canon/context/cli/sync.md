@@ -9,6 +9,16 @@ description: The sync engine and its adapters, ownership by location and by name
 
 The folder splits by job: the git workflow across `target.ts`, `git.ts`, and `workflow.ts`, the stamp in `stamp.ts`, the drift report in `check.ts`, and the history fallback in `history.ts`.
 
+## Decisions
+
+### Something other than the model resolving a file by path decides whether it installs
+
+A domain installs as a file when something other than the model resolves it by path, and ships as a command when only a session's own judgment would open it. The harness glob-loads a rule, and a target's build tooling reads a config or `.claude/design/base.css` off its path, so each installs. A standard is opened by the model on purpose, so `canon standards` carries no install and no sync.
+
+Deciding case by case lost to writing the criterion down. `canon/context/standards/resolution.md` carries the closed install channel.
+
+Revisit when Claude Code loads a document on demand from a catalog of its own.
+
 ## The sync engine and its adapters
 
 - An adapter supplies only a source lookup and, optionally, surfaces the file walk cannot see. `src/gov/adapter.ts` needs no widening the engine itself does not already offer, which is evidence `SyncAdapter` generalizes rather than describing gov alone. Treat a required engine change in a later adapter as a finding, and prefer widening the adapter interface over branching inside the engine.

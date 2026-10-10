@@ -7,11 +7,11 @@ description: Three-tier context loading, which tier holds what, what each projec
 
 ## Overview
 
-Cross-domain design doc for how a project splits agent context across loading tiers, and the operating manual for `canon/context/` itself. It governs every entry in this folder rather than describing one domain, so it sits alongside them rather than inside any one. It stays one file past the length checkpoint because `canon/ARCHITECTURE.md` cites its path for three decisions, and every section answers the same question of where a fact belongs.
+Cross-domain design doc for how a project splits agent context across loading tiers, and the operating manual for `canon/context/` itself. It governs every entry in this folder rather than describing one domain, so it sits alongside them rather than inside any one. It stays one file past the length checkpoint because it holds the two decisions that sort every fact between tiers and roots, `CLAUDE.md` cites its path for the test, and every section answers the same question of where a fact belongs.
 
 Target projects scale by splitting context across three loading tiers:
 
-- Always loaded: the root `CLAUDE.md`, `canon/REQUIREMENTS.md`, and `canon/ARCHITECTURE.md`, eager at session start, holding cross-cutting behavior, product scope, and project-wide invariants
+- Always loaded: the root `CLAUDE.md` and `canon/REQUIREMENTS.md`, eager at session start, holding cross-cutting behavior and product scope
 - Path-scoped lazy: `.claude/rules/<scope>.md` with `paths:` frontmatter, loaded by glob match when files are read, holding do and don't rules and naming conventions for a file scope
 - On-demand lookup: `canon/context/<domain>.md` and `.claude/wiki/<page>.md`, read when the domain is touched, holding per-domain narrative and tooling or workflow reference, indexed for discovery
 
@@ -27,6 +27,12 @@ Flat by default: one `.md` per domain (`canon/context/web.md`, `canon/context/ap
 
 ## Decisions
 
+### Three tiers of context
+
+`CLAUDE.md` and `canon/REQUIREMENTS.md` load eagerly, `.claude/rules/` load on glob match, and `canon/context/` is read on demand through its `index.md` catalog. One large `CLAUDE.md` was the alternative, and it grows without bound. Nested `CLAUDE.md` files load cheaply but announce nothing, so a session never learns they exist.
+
+Revisit when Claude Code tells a session which nested memory files exist before it opens them.
+
 ### Which tier a fact belongs in
 
 A fact goes to `.claude/rules/` when it fires on a specific path being edited and violating it ships silently, and to a context entry or a skill body otherwise. Recording it in an entry's `## Gotchas` reaches too little, and eager loading does not substitute: a rule delivered at session start competes with the whole file, while a glob-matched one arrives attached to the action. The test rejects most of what it is run over, because a rule per gotcha rebuilds the `CLAUDE.md` the tiers exist to prevent.
@@ -37,13 +43,17 @@ The test no longer ships as a rule, so it reaches a session through this entry a
 
 ### What bounds the eager tier
 
-`canon/ARCHITECTURE.md` holds the slot rule. Reach always passes as a test, since nearly every decision touches two domains, which is how the record once grew to forty entries and about 15k tokens loaded into every session. A numeric ceiling on the file's length was tried first and dropped, since nothing enforced it and every merge drifted past it. The entry cap held where that ceiling did not because a gate stage fails a push on it, and the per-decision word cap and risk bullet cap are gated the same way for the same reason.
+`canon/REQUIREMENTS.md` states a word cap the Canonical records stage gates. `CLAUDE.md` states none, and trims hold it instead, each moving a bullet into the skill or entry that reads it. Reach never bounds either file, since nearly every fact touches two domains. That test is how an eager architecture record once grew to forty entries and about 15k tokens loaded into every session, and a numeric ceiling on its length was tried first and dropped, since nothing enforced it and every merge drifted past it.
 
-A decision moved out of the record to a context entry leaves a pointer behind with no check on it, since nothing compares a slot entry against the entry it defers to.
+That record is retired here. A decision several domains read lands in the entry of the domain it constrains most, so a session pays for it on demand rather than at every start. Each other entry it touches points there, and the pointer carries no check, since nothing compares an entry against the one it defers to.
 
 ### What each root holds
 
-The project root splits three ways: `.claude/` holds what Claude Code reads by path, `canon/` holds what the toolkit authors and commits, and `.canon/` holds every gitignored session record. One ignore line covers `.canon/`, so a record folder added later needs no row here, no ignore entry, and no manifest edit. `canon/ARCHITECTURE.md` carries the two tests and the alternatives they beat.
+The project root splits three ways: `.claude/` holds what Claude Code reads by path, `canon/` holds what the toolkit authors and commits, and `.canon/` holds every gitignored session record. One ignore line covers `.canon/`, so a record folder added later needs no row here, no ignore entry, and no manifest edit.
+
+Two tests sort the roots in order. Whether a file is committed separates `.canon/` from the rest. Whether Claude Code reads it by path then separates `.claude/`, holding `rules`, `skills`, `hooks`, and `settings.json`, from `canon/`. Both lines are mechanical, which is their value. Sorting by what a folder is for was the alternative, and every new folder then needed a judgment and an ignore line.
+
+Revisit when Claude Code reads its files from a root a project can configure.
 
 Five surfaces under `.claude/` are Claude Code's own, and the toolkit invented none of them:
 
@@ -55,7 +65,7 @@ Five surfaces under `.claude/` are Claude Code's own, and the toolkit invented n
 
 Two more sit under `.claude/` as the harness's rather than the toolkit's. `.claude/worktrees/` is where `EnterWorktree` creates a worktree and requires its target to sit, and nothing in this repository names `.claude/scheduled_tasks.lock`.
 
-The toolkit's committed surfaces sit under `canon/`: `canon/context/`, read on demand through its catalog, `canon/config/`, holding `baseline.json` for `canon audits` and `pr-labels.toml` for the pull request label map, the two eager documents, and `canon/DESIGN.md`, read by `canon design render` and the design skills. The install stamp and the audits baseline sit at `canon/config/` behind the same read fallback the rest of the corpus carries, since neither is a file Claude Code loads by path.
+The toolkit's committed surfaces sit under `canon/`: `canon/context/`, read on demand through its catalog, `canon/config/`, holding `baseline.json` for `canon audits` and `pr-labels.toml` for the pull request label map, the eager `canon/REQUIREMENTS.md`, and `canon/DESIGN.md`, read by `canon design render` and the design skills. The install stamp and the audits baseline sit at `canon/config/` behind the same read fallback the rest of the corpus carries, since neither is a file Claude Code loads by path.
 
 `.tmp/`, when it exists, is the old gitignored scratch spelling, which the scratch rule does not name, carried for a project the record move has not reached and retired once `canon migrate records` has moved the last one off it.
 
