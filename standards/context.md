@@ -18,7 +18,6 @@ Governs per-domain narrative entries under `canon/context/`: their structure, th
 
 Does not govern:
 
-- Decisions filling a stack, delivery, boundary, layout, or build-principle slot, and system-wide risks: `architecture.md`
 - Product scope, goals, and non-goals: `requirements.md`
 - Path-scoped coding rules: `rule.md`
 - Wireframes, which answer layout questions an entry hands off: `wireframes.md`
@@ -88,10 +87,10 @@ Only the `development` entry carries this section. It is not a general-purpose h
 ## What goes in
 
 - Per-domain narrative on how the code is structured and why
-- Decisions that constrain the domain, whether or not their reasoning touches another one. This is a decision's default home, and `canon/ARCHITECTURE.md` takes only a decision that fills one of the slots its standard names.
+- Decisions that constrain the domain, whether or not their reasoning touches another one. A decision lives in the entry of the domain it constrains.
 - Constraints, gotchas, things tried and rejected
 - Domain-specific conventions that do not fit a `paths:`-scoped rule
-- A measured figure, anchored the way `architecture.md` states under `## Verification anchors`, so an entry and the architecture record date a number the same way.
+- A measured figure, closed with a trailing `Measured at <short-sha> on <YYYY-MM-DD>.` naming a commit rather than a pull request number or a branch. Carry one anchor per figure and rewrite it in place when the number is re-read, whether or not it moved. An absent anchor reads as unchecked.
 - A reference to another entry, spelled as the path that entry sits at rather than as its bare filename. A bare name resolves against whichever folder the reader is already in, so a domain that splits into subfolders strands every inbound reference and the break surfaces nowhere. A reference to a seed, a standard, or a file the project owns elsewhere keeps the form its own surface uses.
 
 ## What does not go in
@@ -103,7 +102,7 @@ Only the `development` entry carries this section. It is not a general-purpose h
 - Rules. Those go in `.claude/rules/<scope>.md` with a `paths:` glob.
 - Tutorials or human onboarding. Those go in `docs/` if a public audience exists.
 - Generated content (API references). Generate, do not write by hand.
-- Anything already in `canon/REQUIREMENTS.md` or `canon/ARCHITECTURE.md`.
+- Anything already in `canon/REQUIREMENTS.md`.
 - The history of how the domain reached its current shape. An entry describes the repository as it stands, so a change number, release label, or date attached to a change goes wherever the project tracks work.
 - A rejected alternative's provenance, which is the same rule at the one place the section above admits history. Keep what was tried and why it lost. Cut who tried it and when.
 - The route to a decision: the rounds of candidates, the tuning steps a threshold passed through, the review pass that caught a miss. State the decision, what lost, and why, once and in the present tense. Cut the route. Git and the change that introduced it keep it.

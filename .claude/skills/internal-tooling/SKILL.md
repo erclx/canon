@@ -54,7 +54,7 @@ When adding deps or scripts to `manifest.toml`:
 
 ## Seed naming
 
-- Agent-facing prose seeds under `tooling/*/seeds/` use lowercase filenames (`development.md`, `ci.md`). Reserve CAPS (`CLAUDE.md`, `REQUIREMENTS.md`, `ARCHITECTURE.md`) for state and planning files that agents read as known paths.
+- Agent-facing prose seeds under `tooling/*/seeds/` use lowercase filenames (`development.md`, `ci.md`). Reserve CAPS (`CLAUDE.md`, `REQUIREMENTS.md`) for state and planning files that agents read as known paths.
 - Base agent-context seeds land at `tooling/base/seeds/canon/context/` and install to target projects' `canon/context/`, or beside the entries an unmoved project still holds under `.claude/context/`. <!-- canon-keep-surface-root --> This matches the three-tier context model documented in the `internal-claude` seed. Do not seed agent-facing content under `tooling/*/seeds/docs/`. The `docs/` location is reserved for human-facing prose.
 
 ## Cspell seeds

@@ -70,7 +70,7 @@ Qualifying it against `erclx/canon` fixes nothing, because a reader holding only
 
 Write `owner/repo#123` and `owner/repo@abc1234` for a citation of a different, resolvable repository, across every such surface. `canon gate run` fails a push on a bare reference there, and a line whose bare form is the point carries `canon-allow-reference: <reason>` on itself or on the line above.
 
-Choose the number over the sha where the citation names a decided change, since a pull request number resolves to the diff and the review behind it. Take the sha only for a tree or measurement state, the `Measured at <sha>` shape `canon/ARCHITECTURE.md` already uses. The choice holds for both spellings this section fixes, the bare form a remote auto-links and the qualified form a cross-repository citation carries.
+Choose the number over the sha where the citation names a decided change, since a pull request number resolves to the diff and the review behind it. Take the sha only for a tree or measurement state, the `Measured at <sha>` shape a context entry already uses. The choice holds for both spellings this section fixes, the bare form a remote auto-links and the qualified form a cross-repository citation carries.
 
 A commit message takes the bare form even though it is also read through the log, where nothing links. The remote is what the form is chosen for, since a reader in the log loses only a link that plain text never carried.
 
