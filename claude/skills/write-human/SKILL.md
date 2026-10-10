@@ -1,6 +1,6 @@
 ---
 name: write-human
-description: Carries the voice, word choice, rhythm, sentence construction, and information density rules a banned-character scan cannot express, plus the catalog of machine tells that survive a clean ban scan. Use when writing or revising prose a person will read, when a passage reads flat or uniform, or when asked to "make this read like a person", "fix the cadence", "this reads like AI wrote it", "vary the sentences", or "tighten this without gutting it". Do NOT use for banned characters, which `markdown.md` states and `canon markdown audit` gates, and do NOT use to restate text that already exists in plainer words, which is `restate-plainly`, whose body loads these rules from here.
+description: Carries the voice, word choice, rhythm, sentence construction, and information density rules a banned-character scan cannot express, plus the catalog of machine tells that survive a clean ban scan. Use when writing or revising prose a person will read, when a passage reads flat or uniform, or when asked to "make this read like a person", "fix the cadence", "this reads like AI wrote it", "vary the sentences", or "tighten this without gutting it". Do NOT use for banned characters, which `markdown.md` states and `canon markdown audit` gates.
 metadata:
   family: answer
 ---

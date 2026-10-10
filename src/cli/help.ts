@@ -58,7 +58,6 @@ export const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
       ['sessions [cmd]', 'Resolve live sessions to worktree and branch'],
       ['worktrees [cmd]', 'Reclaim worktrees whose branches merged'],
       ['hooks [cmd]', 'Run the steps a git hook drives (post-merge)'],
-      ['autoship [cmd]', 'Decide whether a changed set needs review'],
       ['pr [cmd]', 'Read a pull request (key-changes, head, checks)'],
       ['upstream [cmd]', 'Read Claude Code releases (fetch, catalog, advance)'],
       ['feedback', 'File toolkit feedback as a GitHub issue'],

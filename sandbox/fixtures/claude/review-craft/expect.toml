@@ -1,5 +1,5 @@
-# What a correct `/canon:review-branch` run leaves behind once `review-craft`
-# carries the axes. Read by `canon sandbox check`. Patterns use TOML literal
+# What a correct request to load `review-craft` and review the branch leaves
+# behind once it carries the axes, with the findings file the request names. Read by `canon sandbox check`. Patterns use TOML literal
 # strings so a regex needs no backslash escaping.
 #
 # The declaration sits at the command root, which is the unnamed arm. The

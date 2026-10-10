@@ -37,7 +37,7 @@ An unmigrated domain counts as a marker because `detectUnmigrated` fires only on
 
 ### Seeds
 
-Seeds get their own reader in `src/sync/seeds-report.ts` rather than a `SyncAdapter`. Three things blocked the adapter. `listInstalled` globs `**/*.md` under one root while seeds span the target root for `CLAUDE.md`, `.claude/` for the rest, and include a `.json` and four `.sh` files. And `planSync` queues a copy for every non-matching file, which would overwrite `CLAUDE.md` wholesale and defeat the section merge `seed-sync` exists to run.
+Seeds get their own reader in `src/sync/seeds-report.ts` rather than a `SyncAdapter`. Three things blocked the adapter. `listInstalled` globs `**/*.md` under one root while seeds span the target root for `CLAUDE.md`, `.claude/` for the rest, and include a `.json` and four `.sh` files. And `planSync` queues a copy for every non-matching file, which would overwrite `CLAUDE.md` wholesale and defeat the hand merge a drifted seed needs.
 
 The reader reuses `readHistoryIndex` and `findInstalledOrigin` directly, because `recoverAttribution` is private to the engine and takes an adapter seeds have no way to supply. Seeds carry no stamp, so `customized` is unreachable and an unattributed difference stays `drifted`.
 

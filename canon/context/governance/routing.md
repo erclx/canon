@@ -35,7 +35,7 @@ A standard governing a file path carries a rule routing to it, so an edit loads 
 
 A claude rule carries operative directives beside its pointer, since a rule arrives attached to the edit while a pointer reaches a session only if that session opens the file. Five directives is the cap, and past it a rule reproduces the standard's structure rather than stating what must not go wrong. The standard keeps the full specification either way, so a drift is a rule falling behind rather than two files disagreeing, and nothing checks it.
 
-No rule carries a directive for the root file and no standard governs it, so there is no structure to reproduce, and the seed and `seed-sync` hold the role a standard would.
+No rule carries a directive for the root file and no standard governs it, so there is no structure to reproduce, and the seed holds the role a standard would.
 
 `governance/rules/writing/markdown.md` stays pointer-only on both halves it routes. Its format half points at the `markdown-craft` skill and its voice half at the `write-human` skill, and it carries the instruction to load each rather than a compressed sample, since the compressible half of that guidance does the least work. The one inline line names the two characters `src/markdown/bans.ts` owns, so a ban added there is a one-line edit to the rule rather than a silent gap.
 

@@ -82,17 +82,17 @@ PR. The merge stays a manual human gate. Reliability comes from the plan being
 complete enough that the cold session does not come back with questions, and
 from merging promptly so the next PR does not rot against a moving main.
 
-## Two review layers
+## The review layer
 
-The worker's self-review and the orchestrator's review are not the same pass run
-twice. They differ by vantage.
+The worker's chain carries no review step. The session that wrote the code is
+structurally blind to its own misreadings, because the same misreading wrote
+both the code and any review of it, so the first review a change gets is the
+orchestrator's.
 
-- Worker self-review, inside `auto-ship`: the session that wrote the code. Its job is "did I build the plan and does it pass?" Mechanical, and structurally blind to its own misreadings, because the same misreading wrote both the code and the review. This is the green gate that decides whether the PR opens.
+- Worker gate, inside `auto-ship`: the session that wrote the code. Its job is "did I build the plan and does it pass?" The verify commands and the test order read decide whether the PR opens, and the draft mark holds the merge.
 - Orchestrator review, via `review-pr`: a fresh session with cross-feature context (the board, a sibling PR in flight, a downstream contract). Its job is "is this right and does it fit?" It can question the plan itself. This is the merge gate.
 
-They collide only if the worker also runs a deep pass. Keep the worker's review
-light and let the orchestrator own the deep, independent one. The human read at
-merge is the final gate. No layer repeats another.
+The human read at merge is the final gate. No layer repeats another.
 
 The orchestrator's pass also reads the pull request body against itself, which is
 a vantage the worker never has. This repository squash-merges, so the body

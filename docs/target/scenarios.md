@@ -17,7 +17,7 @@ claude
 
 In the session, invoke `canon:target-setup`. The skill detects no framework and resolves tooling to `base` and governance to `base`. The preview marks both stacks as fallbacks, since neither came from a match, then the chain runs `canon init`.
 
-Ongoing: run `canon sync --check .` to see what has drifted, then invoke `canon:seed-sync` for seed drift or `canon sync .` for a catch-all refresh.
+Ongoing: run `canon sync --check .` to see what has drifted, then merge seed drift by hand against the toolkit copy, or run `canon sync .` for a catch-all refresh.
 
 ## Web application
 
@@ -31,7 +31,7 @@ Invoke `canon:target-setup`. The skill reads `package.json` and the Vite config,
 Ongoing maintenance:
 
 - What has drifted: `canon sync --check .`
-- Seed drift: invoke `canon:seed-sync`
+- Seed drift: merge by hand against the toolkit copy
 - Catch-all sync: `canon sync .`
 - Governance rule refresh only: `canon gov sync .`
 - Layer a new rule on top, for example `260-shadcn` after adopting shadcn: `canon gov install react --add 260-shadcn .`

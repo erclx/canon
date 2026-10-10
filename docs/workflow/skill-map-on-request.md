@@ -33,7 +33,6 @@ These two groups hold the skills no single moment in a project's life calls for,
 | `canon:teach-workspace`     | To learn a subject across sessions, in a workspace that holds the progress                                                                                             |
 | `canon:markdown-craft`      | Before a substantial markdown edit, for the format and structure rules and the audit that follows                                                                      |
 | `canon:write-human`         | Before drafting or revising prose, for voice, rhythm, and density                                                                                                      |
-| `canon:restate-plainly`     | When an answer or a document has to be read again in plain words                                                                                                       |
 
 Every row answers a question rather than marking a point in a project's life, so filing one under a phase on the [skill map](skill-map.md) would send a reader to the wrong group.
 

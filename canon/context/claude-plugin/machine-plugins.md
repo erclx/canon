@@ -40,9 +40,8 @@ path. That is the one row whose install is not the two commands above.
 
 ## What the list does not settle
 
-`code-review` overlapped `review-branch` when it was picked, on the reading that
-the two run in different places, the plugin on a pull request and the skill on a
-local diff. Claude Code now ships a `/code-review` command of its own, which
+`code-review` was picked on the reading that it runs on a pull request,
+where a local review skill that stood beside it ran on a local diff. Claude Code now ships a `/code-review` command of its own, which
 makes that row the most likely of the four to be overtaken, and no read has
 tested it against what the harness carries. Every row is last verified against
 the tree `setup-plugins` was written in rather than the current one.

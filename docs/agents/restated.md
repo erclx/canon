@@ -46,7 +46,7 @@ Every record names the anchors its match rested on, so a reader can weigh a find
 
 ## The three classes
 
-- **Mirror.** Both files sit on a declared path pair whose duplication is deliberate. `CLAUDE.md` and the seed are the one pair, since the seed is authored from it and `seed-sync` exists to reconcile the two. Excluding by pair rather than by content is the point: the duplication is a location fact this repository already records, and a content test would rediscover it on every run.
+- **Mirror.** Both files sit on a declared path pair whose duplication is deliberate. `CLAUDE.md` and the seed are the one pair, since the seed is authored from it and a hand merge reconciles the two. Excluding by pair rather than by content is the point: the duplication is a location fact this repository already records, and a content test would rediscover it on every run.
 - **Repetition.** Two surfaces state one rule and neither is declared a copy of the other.
 - **Contradiction.** The prohibition falls on one surface alone, on a match strong enough to read that as a disagreement. This is a polarity reading rather than a judgment about meaning, so weigh each against the surfaces it names.
 

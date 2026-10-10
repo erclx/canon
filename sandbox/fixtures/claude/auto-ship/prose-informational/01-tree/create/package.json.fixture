@@ -1,9 +1,0 @@
-{
-  "name": "sandbox-autoship-prose",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "check": "echo 'format ok'"
-  }
-}

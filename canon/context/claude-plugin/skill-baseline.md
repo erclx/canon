@@ -1,11 +1,11 @@
 ---
 title: Skill diff baseline
-description: The merge-base block six skills share, the read against write asymmetry when it fails to resolve, and the narrower test and classifier verb autoship carries
+description: The merge-base block three skills share, and the read against write asymmetry when it fails to resolve
 ---
 
 # Skill diff baseline
 
-The diff baseline is a block six skills share, `context-fold` and five ported copies. It resolves a merge base against `origin/main`, falls back to local `main`, and scopes what a skill reads to the change under review. Preferring the remote is what stops a local `main` trailing behind from pulling other people's merged commits into the set.
+The diff baseline is a block three skills share, `context-fold` and two ported copies. It resolves a merge base against `origin/main`, falls back to local `main`, and scopes what a skill reads to the change under review. Preferring the remote is what stops a local `main` trailing behind from pulling other people's merged commits into the set.
 
 ## An unresolvable baseline
 
@@ -19,57 +19,17 @@ The anchor sweep only reports, and the whole tree costs it a different way: ever
 
 That baseline is the worked case behind a rule split across two skills. One step in `context-fold` resolves the diff baseline and several consume it, and a fallback written against the marking step, which only reads, would let the step that writes rewrite every context entry.
 
-So `plan-feature` obliges a plan that establishes a resource with more than one consumer to list them and mark each read or write, and `review-pr` carries the matching lens beside Integration and Contract. Both skills ship to target projects, where a consumer is a call site, a module, or a component rather than a skill step, so the clause names the unit generically. The review half is what catches the miss, since an author who never noticed the resource was shared will not notice the authoring clause either. `review-branch` stays out of it, because an author reviewing their own change cannot catch a consumer they never enumerated.
+So `plan-feature` obliges a plan that establishes a resource with more than one consumer to list them and mark each read or write, and `review-pr` carries the matching lens beside Integration and Contract. Both skills ship to target projects, where a consumer is a call site, a module, or a component rather than a skill step, so the clause names the unit generically. The review half is what catches the miss, since an author who never noticed the resource was shared will not notice the authoring clause either.
 
 Root `CLAUDE.md` and the `CLAUDE.md` seed each own the policy statement, and the skill owns only the mechanism, so the skill states what it does without re-deriving why. The seed keeps its own copy because a scaffolded project cannot point at the toolkit's file.
 
 ## The baseline in the ported skills
 
-`review-branch`, `docs-sync`, and `git-pr` each resolve a base against `<base>`, the same merge-base preference stated above, rather than against bare local `main`. A bare local `main` drops every committed change on the branch it was cut from, so a skill reading it reports a clean result rather than admitting it cannot see the work.
+`docs-sync` and `git-pr` each resolve a base against `<base>`, the same merge-base preference stated above, rather than against bare local `main`. A bare local `main` drops every committed change on the branch it was cut from, so a skill reading it reports a clean result rather than admitting it cannot see the work.
 
 `git-pr` reads both its diff and its commit log against `<base>`. A two-dot range such as `git diff main..HEAD` compares tips rather than resolving a merge base, so it reads reversed or incomplete whenever local `main` trails `origin/main`. Reading `<base>` on both sides is what keeps the commits and the changes describing one branch.
 
 A skill reading the committed half alone treats a baseline as unusable when it equals HEAD, whichever ref resolved it, rather than only when the ref came from local `main`. The narrower test misses a feature branch before its first commit, where `origin/main` resolves a merge base that also equals HEAD, so it would go blind on the sessions these skills run in. `context-fold` needs neither test: it unions the committed, working, and untracked sets, so the committed half going empty costs it nothing.
-
-## What the review selection reads past the baseline
-
-`review-branch` Step 2 reads one range, `git diff <base>`, and unions its name-only list with `git ls-files --others --exclude-standard`. The range compares the base against the working tree, so the committed, staged, and unstaged halves arrive together, and the untracked listing covers the file git has never tracked and no diff can reach. Nothing selects between the halves.
-
-A narrower read, taking the staged set when it is non-empty and the committed diff otherwise, would still miss the working tree either way: a branch carrying one commit with nothing staged would read as usable and be reviewed on its committed half alone. That shape is what `auto-ship` Step 6 reviews whenever a plan's test lands in a commit ahead of the implementation it covers, per the ordering `canon gov test-order` measures. A test commit moves HEAD off the base while the implementation is still uncommitted, so a committed-only read would see the tests and never the code they cover.
-
-The classifier one step earlier already diffs the base against the working tree, so reading `review-branch` the same way keeps both steps in one chain agreeing about what the branch is. The base equaling HEAD is not an unusable case here, since `git diff <base>` then degenerates to `git diff HEAD` and reads the branch whole rather than half of it.
-
-The rule is prose in a skill body rather than a verb, so nothing stops a later editor reintroducing a staged-first read. Moving it behind a `canon` verb was the alternative and it loses on the two-speeds lag `canon/ARCHITECTURE.md` records, since the skill ships with the plugin and a verb reaches a target only once a release publishes it. The sandbox arm carries the cost instead: `claude:review-branch` stages a bug in each of the four halves and asserts one content entry per half, so a report naming the committed file alone goes red.
-
-## The narrower test autoship carries
-
-`auto-ship`'s classifier decides whether a review runs at all, so widening what it sees would turn a branch that reads as prose-only into a mixed one and change behavior rather than only correctness.
-
-Its unusable test is narrower than two of the three ported skills', which is the wider rule applied rather than an exception to it. A skill reading the committed half alone needs the base-equals-HEAD arm. The classifier diffs the base against the working tree instead, so uncommitted work stays in the set without it. `review-branch` drops the arm on the same reasoning, since its Step 2 reads one range, leaving `docs-sync` and `git-pr` as the two still carrying it.
-
-`auto-ship` reaches Step 6 before `git-stage` commits, and its Step 2 may or may not have committed slices by then, so the base equals HEAD on any run that committed nothing yet, and the arm ported verbatim would stop each of those. The skill body states the omission at that point, because the next reader porting the block would otherwise add it back.
-
-An empty changed-file list stops the chain instead of routing into review. Routing it into review would re-create a silent skip by a longer path, since a review of no files produces no findings and the findings step reads that as a clean pass.
-
-### The classifier is data a verb parses
-
-`canon autoship classify` returns the decision, the file that decided it, and which of the two tests that file failed, reading the prefixes from `src/autoship/paths.ts`. It is an instance of the rule `canon/ARCHITECTURE.md` states: a rule a session can talk itself out of moves into a verb rather than staying prose a body applies by hand. Being machine-parsed also exempts the set from any design that folds a list back into the surface citing it, on the clause `canon/context/standards/resolution.md` carries, since `classifyChanges` reads it rather than a person.
-
-The verb takes the changed set as arguments and reads no git. `git-ship` and `review-branch` already share one diff baseline, and a classifier resolving its own range could disagree with the set the chain measured, so handing the names over keeps one baseline for the whole chain.
-
-What it costs is another surface reached by the two-speed release. The verb ships with the CLI and the step ships with the plugin, so a target on an older binary meets a missing subcommand, and the body keeps the written list as the fallback rather than refusing. The fallback may never be a skip: failing open is the defect the verb closes, so an absent subcommand that routed to a skip would ship every branch unreviewed. Two copies of the path set is the price, standing until a release retires the written half, and nothing compares them.
-
-### What the classifier admits
-
-The skip test reads the file extension and the path together: a changed set skips only when every file matches `*.md` or `*.txt` and none sits under a behavior path.
-
-Removing the skip entirely was considered and declined on cost, since a documentation branch reaching review burns tokens for no signal, which is the case the skip exists to catch.
-
-Every entry carries both spellings, because the split this repository runs on gives one surface two paths. Standards and rules author at a project root and install under `.claude/`, and a list naming only the authoring half matches nothing in a target, where the installed half is the only one present. `claude/skills/` is absent from a target as well, since skills load from the plugin root rather than being copied in, so an authoring-only list would leave `.claude/skills/` as the single entry that ever fires and the fix close to a no-op wherever the skill ships.
-
-Two entries are neither a skill nor a consumed copy. `tooling/` holds the stack references and the seed documents handed to every target, so its markdown is a target's own instruction file rather than a description of one. Root `CLAUDE.md` is named as a file because a path prefix reaches nothing sitting in no folder, and a branch changing it alone is how a cross-cutting rule lands here.
-
-A plan whose output is entirely gitignored still reaches the stop rather than a fix, which is a separate defect that surfaces six steps later at `git-stage`. The stop names that case apart from a plan yet to produce output, since the two want opposite responses and a single message covering both sends the operator to the wrong check. Advising a re-run once the output is tracked is the wrong fix for scratch that is gitignored by design, and followed literally it commits scratch to close a stopped run.
 
 ## What no gate reads in a skill body
 

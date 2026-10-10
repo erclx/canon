@@ -49,5 +49,5 @@ Scoping a later pass off GitHub's review stamp skipped real work. On 2026-09-07 
 ## Out of scope
 
 - Fixing what it finds, which `review-address` owns. The split is by side of the channel: this one posts findings from an independent session and that one consumes them.
-- Reviewing local uncommitted work, which `review-branch` owns. That one writes to disk for the session that wrote the code, and this one posts to a pull request it did not write.
+- Reviewing local uncommitted work. This skill posts to a pull request it did not write.
 - Merging, which stays the human's decision

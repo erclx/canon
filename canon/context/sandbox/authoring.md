@@ -33,7 +33,7 @@ A scenario's hooks run in a bash child through `scripts/sandbox-hook.sh`, and th
 
 Two steps in `src/sandbox/provision.ts` commit, and the flag reaches only the second. Provisioning injects seeds and rules and closes on the environment commit. Only afterwards does the stage run `stage_setup`, then `injectChangedSkills`, then `commitScenarioChanges`, which is the commit the flag guards.
 
-That order lets an arm stage a deliberately dirty tree. Work `stage_setup` leaves staged, unstaged, or untracked survives provisioning under the flag, because the unconditional commit already ran. `claude:review-branch` depends on it, staging one bug in each of four halves so the selection rule has all four to read.
+That order lets an arm stage a deliberately dirty tree. Work `stage_setup` leaves staged, unstaged, or untracked survives provisioning under the flag, because the unconditional commit already ran.
 
 ### Injecting changed skills
 
