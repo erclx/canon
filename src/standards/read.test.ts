@@ -61,18 +61,39 @@ describe('resolveStandard', () => {
   })
 
   it('should fall back to the package copy when the project installed none', () => {
-    const resolved = resolveStandard(ROOT, 'markdown.md')
+    const resolved = resolveStandard(ROOT, 'plan.md')
 
     expect(resolved).toEqual({
-      path: join(PROJECT_ROOT, 'standards', 'markdown.md'),
-      source: join('<canon>', 'standards', 'markdown.md'),
+      path: join(PROJECT_ROOT, 'standards', 'plan.md'),
+      source: join('<canon>', 'standards', 'plan.md'),
     })
+  })
+
+  it('should answer a moved standard from the skill reference that took it', () => {
+    expect(resolveStandard(ROOT, 'markdown')).toEqual({
+      path: join(
+        PROJECT_ROOT,
+        'claude/skills/markdown-craft/references/markdown.md',
+      ),
+      source: join(
+        '<canon>',
+        'claude/skills/markdown-craft/references/markdown.md',
+      ),
+    })
+  })
+
+  it('should keep an authored standard ahead of the moved map', () => {
+    writeStandard('standards/markdown.md', '# Authored\n')
+
+    expect(resolveStandard(ROOT, 'markdown')?.path).toBe(
+      join(ROOT, 'standards', 'markdown.md'),
+    )
   })
 
   it('should spell the package source so nothing joins it to a project root', () => {
     // The field promises a repo-relative path everywhere else, and a package
     // copy is the one source that promise cannot cover.
-    expect(resolveStandard(ROOT, 'markdown.md')?.source).toContain('<canon>')
+    expect(resolveStandard(ROOT, 'plan.md')?.source).toContain('<canon>')
   })
 
   it('should take a name carrying no extension', () => {
@@ -91,6 +112,12 @@ describe('resolveStandard', () => {
 describe('listStandards', () => {
   it('should name a project standard once when the package carries it too', () => {
     writeStandard('standards/markdown.md', '# Authored\n')
+    const names = listStandards(ROOT)
+
+    expect(names.filter((name) => name === 'markdown')).toEqual(['markdown'])
+  })
+
+  it('should name a moved standard once', () => {
     const names = listStandards(ROOT)
 
     expect(names.filter((name) => name === 'markdown')).toEqual(['markdown'])

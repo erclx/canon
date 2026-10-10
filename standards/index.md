@@ -20,7 +20,6 @@ Reference docs for consistent authoring across the toolkit and target projects.
 - [Groundwork spikes reference](groundwork-spikes.md): What each spike in a track's 08-spikes.md records, the sample rule, and the three folders that hold what a spike produced
 - [Groundwork reference](groundwork.md): Folder layout, ordinal naming, reserved numbering, frontmatter and dating, required file contents, and conventions for a measurement track
 - [Intake reference](intake.md): Folder layout, ordinal naming, reserved index number, frontmatter and dating, the item template, the answer contract, and retrieval
-- [Markdown reference](markdown.md): Headings, paragraph and list structure, code spans, the date form, punctuation, emphasis, file references, American spelling, and frontmatter wording
 - [Memory reference](memory.md): Filename and type prefix, frontmatter, the body shape per type, links between entries, and the lifecycle from write to retire
 - [Mermaid reference](mermaid.md): Direction and layout, node and edge budgets, accessibility fields, label punctuation, and render verification for a Mermaid diagram
 - [Plan lifecycle reference](plan-lifecycle.md): When a feature plan is written, where it lives, how it changes mid-flight, and its move to the archive

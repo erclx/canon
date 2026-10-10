@@ -67,6 +67,11 @@ export const AUTHORING_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
+      'Which characters does the markdown standard ban, and how should I shape the headings in this doc?',
+    expect: 'markdown-craft',
+  },
+  {
+    prompt:
       'Pull the captions off this YouTube link and save them with metadata.',
     expect: 'youtube-transcripts',
   },
