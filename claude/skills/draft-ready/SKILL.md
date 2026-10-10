@@ -11,7 +11,7 @@ A warm session that has already written a change hands the exact text to the wor
 
 Read these in parallel before writing:
 
-- `${CLAUDE_SKILL_DIR}/../../standards/ready.md`: the folder layout, the overview frontmatter, the mirrored tree, and the thin-plan contract
+- `${CLAUDE_SKILL_DIR}/references/ready.md`: the folder layout, the overview frontmatter, the mirrored tree, and the thin-plan contract
 - `${CLAUDE_SKILL_DIR}/../../standards/plan.md`: the plan's sections and its answer contract
 - `${CLAUDE_SKILL_DIR}/../../standards/tasks.md`: the task file's shape and origin lines
 - `${CLAUDE_SKILL_DIR}/references/assembly.md`: the overview and thin-plan templates and the destination match check

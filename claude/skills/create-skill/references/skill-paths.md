@@ -41,6 +41,7 @@ Know which root a file lives under before referencing it.
 No standard installs into a project, so a body cites one place rather than choosing between two.
 
 - Cite `${CLAUDE_SKILL_DIR}/../../standards/X.md`. The plugin ships the whole standards folder beside `skills/`, so the path resolves in every install.
+- Cite another skill's reference as `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md`. A standard that moved into the skill owning it lives there, and the plugin ships the skills side by side, so the sibling path resolves in every install. Name the owner skill rather than copying the file.
 - Never cite `.claude/standards/X.md` from a shipped body. A target holds no such folder. <!-- audit-ignore-citations: .claude/standards/X.md -->
 - Name `canon standards X` instead where the body wants the document rather than a path to open, such as a value it captures or reports. That verb resolves `standards/` at the project root and then the corpus inside the package.
 - State the path once per body, at the site that reads the standard. A later mention of a standard the body already read stays bare, since repeating the path at every mention is noise rather than instruction.

@@ -43,7 +43,7 @@ console.log('regen-web-previews: wrote web/public/previews/design-tokens/')
  * chrome over a scratch copy holding this one workspace alone is what keeps
  * the jump menus from naming anything else.
  *
- * `.canon/teach/` is gitignored session scratch, per `standards/teach.md`, so
+ * `.canon/teach/` is gitignored session scratch, per `claude/skills/teach-workspace/references/teach.md`, so
  * it exists on the machine that authored the lesson and nowhere else,
  * including CI. `web/public/previews/teach-workspace/` is therefore the
  * durable copy: committed once the workspace exists, regenerated here as a

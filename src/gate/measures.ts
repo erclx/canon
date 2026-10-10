@@ -415,7 +415,7 @@ export const skillProvenance: Measure = async (ctx) => {
 /**
  * Every listed practice skill against the closing sections, and every skill on
  * the wider ledger list against the ledger, both of which
- * `standards/skill-practice.md` requires.
+ * `claude/skills/create-skill/references/skill-practice.md` requires.
  *
  * Read in-process for the reason `skillProvenance` is, so the verb keeps its
  * missing-requirement-only exit. The list names shipped folders alone, so a

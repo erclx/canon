@@ -5,7 +5,7 @@ description: The overview and thin-plan templates for a ready folder, and the ma
 
 # Assembly
 
-Loaded from Step 3 and Step 5 of `draft-ready`. The shape rules live in `${CLAUDE_SKILL_DIR}/../../standards/ready.md` and `${CLAUDE_SKILL_DIR}/../../standards/plan.md`, so this file holds the fill-in forms and the one check that compares them.
+Loaded from Step 3 and Step 5 of `draft-ready`. The shape rules live in `${CLAUDE_SKILL_DIR}/references/ready.md` and `${CLAUDE_SKILL_DIR}/../../standards/plan.md`, so this file holds the fill-in forms and the one check that compares them.
 
 ## The overview
 

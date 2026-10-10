@@ -12,7 +12,7 @@ Read `canon/context/claude-plugin/` for the shipped plugin, starting at its `ind
 - When updating an internal skill, write to `{base-dir}/SKILL.md` where `{base-dir}` is the path shown in the skill header at load time.
 - Read `canon/context/claude-plugin/skill-strategy/overview.md` before adding a plugin skill and `canon/context/claude-internal/skills.md` before adding an internal one. Run `canon claude skills list` for the plugin roster, which no entry restates.
 - Follow `standards/skill.md` for skill structure and frontmatter conventions.
-- Audit skill bodies against `standards/skill.md`, `standards/skill-paths.md`, `claude/skills/markdown-craft/references/markdown.md`, and the `write-human` skill. The first covers structure and frontmatter. The second covers which root a path resolves against and how a body cites a standard. The third covers the body's word choice, punctuation, and formatting. The fourth covers its voice and rhythm.
+- Audit skill bodies against `standards/skill.md`, `claude/skills/create-skill/references/skill-paths.md`, `claude/skills/markdown-craft/references/markdown.md`, and the `write-human` skill. The first covers structure and frontmatter. The second covers which root a path resolves against and how a body cites a standard. The third covers the body's word choice, punctuation, and formatting. The fourth covers its voice and rhythm.
 
 ## Authoring conventions
 

@@ -1,6 +1,6 @@
 # Requirements
 
-Authoring guidance: `standards/requirements.md`.
+Authoring guidance: `claude/skills/draft-doc/references/requirements.md`.
 
 This record holds at most 600 words.
 

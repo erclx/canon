@@ -7,7 +7,7 @@ metadata:
 
 # Canvas
 
-Drive the canvas the operator is looking at. A page is a folder of HTML frames and a frame is one file, so a session draws by writing files and the operator sees each write land in the browser. The content format is fixed by `${CLAUDE_SKILL_DIR}/../../standards/canvas.md`. Read it before writing a frame.
+Drive the canvas the operator is looking at. A page is a folder of HTML frames and a frame is one file, so a session draws by writing files and the operator sees each write land in the browser. The content format is fixed by `${CLAUDE_SKILL_DIR}/references/canvas.md`. Read it before writing a frame.
 
 Every verb below is `canon canvas`. Run `canon docs canvas` for the full verb reference, its records, and its refusals.
 

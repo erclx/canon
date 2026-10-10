@@ -1,13 +1,13 @@
 ---
 name: internal-teach
-description: Learning workspace implementation, the committed fixture, and the teach standards. Use for `src/teach/`, `examples/teach/`, `standards/teach.md`, `standards/glossary.md`, or any `canon teach` verb.
+description: Learning workspace implementation, the committed fixture, and the teach standards. Use for `src/teach/`, `examples/teach/`, `claude/skills/teach-workspace/references/teach.md`, `claude/skills/teach-workspace/references/glossary.md`, or any `canon teach` verb.
 ---
 
 # Teach
 
 Read `canon/context/features/teach.md` for structure, the render pipeline, and the decisions behind the surface before editing, and `canon/context/features/teach-chrome.md` before editing the chrome, its styles, or `src/teach/browser/`.
 
-`governance/rules/standards/teach.md` already routes a `.canon/teach/**` edit to both standards, and it ships to targets. This skill covers the implementation and the fixture, which that rule does not reach.
+The `teach-workspace` skill owns the workspace shape and the glossary, and its references ship to targets. This skill covers the implementation and the fixture, which the skill does not reach.
 
 ## Authoring a lesson
 
@@ -32,7 +32,7 @@ After changing the render pipeline or the workspace shape:
 
 After changing what a workspace's files must contain:
 
-- Update `standards/teach.md` or `standards/glossary.md` rather than encoding the shape here. A standard governs the artifact and this skill governs the procedure.
+- Update `claude/skills/teach-workspace/references/teach.md` or `glossary.md` there rather than encoding the shape here. A standard governs the artifact and this skill governs the procedure.
 - Update the affected consumer docs through `canon:docs-sync` rather than editing `docs/` directly.
 
 ## Reference

@@ -7,7 +7,7 @@ description: Glossary of terms for writing rules, prompts, and standards
 
 A running bank of terms worth reaching for when authoring rules, prompts, skills, and standards. Each entry is term, one-line gloss, and one-line use-when. Entries are grouped by category and alphabetical within each. Append new terms as they come up, and prune or consolidate during periodic sweeps.
 
-This page departs from `standards/glossary.md` on one rule and states the departure as that reference requires. Each entry closes with a use-when rather than naming where the term first appears, because the bank is drawn from every session that produced a term rather than from one body of material, so there is no first appearance to point at. The use-when carries what the reader came for in its place, which is whether to reach for the term at all.
+This page departs from `claude/skills/teach-workspace/references/glossary.md` on one rule and states the departure as that reference requires. Each entry closes with a use-when rather than naming where the term first appears, because the bank is drawn from every session that produced a term rather than from one body of material, so there is no first appearance to point at. The use-when carries what the reader came for in its place, which is whether to reach for the term at all.
 
 Source: this repo itself. The vocabulary is the toolkit's own working surface, growing a term at a time and getting pruned in place, with no target project consuming it, which is what makes `internal/` its home per `CLAUDE.md`'s content-ownership section.
 
