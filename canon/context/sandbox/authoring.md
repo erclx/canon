@@ -11,7 +11,7 @@ A scenario is a `.ts` file whose default export declares its config, its anchor 
 
 `sandbox/<category>/<command>.ts` default-exports `scenario()` from `src/sandbox/scenario.ts`, and `sandbox/git/pr.ts` shows the shape. `config` holds what `use_config` exported, `anchor: true` stands in for `use_anchor`, and `arms` maps each arm name to a function staging the tree through its context. Arm order is routing order, so a headless caller naming none gets the first. A lone arm named `default` routes nothing.
 
-The arms run in the harness process, so the context is the only way into the tree. Every command it runs takes `ctx.dir` as its `cwd`, and a scenario never calls `process.chdir` or spawns a child itself. A failing command stops the arm with its status as `set -e` did, `allowFailure` is the `|| true`, `ctx.exec` hands the run to a verb, `ctx.capture` holds a command's status and streams, and `prepare` runs ahead of routing. Narration stays as `ctx.log` calls, so `canon sandbox equivalence` compares a port's log byte for byte.
+The arms run in the harness process, so the context is the only way into the tree. Every command it runs takes `ctx.dir` as its `cwd`, and a scenario never calls `process.chdir` or spawns a child itself. A failing command stops the arm with its status as `set -e` did, `allowFailure` is the `|| true`, `ctx.exec` hands the run to a verb, `ctx.capture` holds a command's status and streams, `prepare` runs ahead of routing, and `prompt` names the picker. Narration stays as `ctx.log` calls, so `canon sandbox equivalence` compares a port's log byte for byte.
 
 ## Decisions
 

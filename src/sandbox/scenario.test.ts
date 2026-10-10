@@ -302,6 +302,47 @@ describe('stageScenarioInProcess', () => {
     expect([seen, after]).toEqual(['yes', undefined])
   })
 
+  it('should refuse a prepare hook that is not a function', () => {
+    const file = scenarioModule(
+      "export default { prepare: 'nope', arms: { default: () => {} } }\n",
+    )
+
+    expect(() => loadScenario(file)).toThrow('prepare is not a function')
+  })
+
+  it('should indent borrowed output and print nothing for an empty body', async () => {
+    const writes: string[] = []
+    vi.spyOn(process.stderr, 'write').mockImplementation((chunk) => {
+      writes.push(String(chunk))
+      return true
+    })
+    const definition = definitionOf({
+      default: (ctx) => {
+        ctx.log.pipe('')
+        ctx.log.pipe('one\ntwo\n')
+      },
+    })
+
+    await stage(definition)
+
+    expect(writes.join('')).toMatch(/^.*│.*  one\n.*│.*  two\n$/)
+  })
+
+  it('should drop the stderr of a captured command told to ignore it', async () => {
+    let captured: ReturnType<StageContext['capture']> | undefined
+    const definition = definitionOf({
+      default: (ctx) => {
+        captured = ctx.capture('sh', ['-c', 'echo err >&2'], {
+          stderr: 'ignore',
+        })
+      },
+    })
+
+    await stage(definition)
+
+    expect(captured?.stderr).toBe('')
+  })
+
   it('should end an arm that execs a verb as replaced', async () => {
     const definition = definitionOf({
       default: (ctx) => ctx.exec('sh', ['-c', 'exit 4']),
