@@ -13,6 +13,8 @@ A scenario is a `.ts` file whose default export declares its config, its anchor 
 
 The arms run in the harness process, so the context is the only way into the tree. Every command it runs takes `ctx.dir` as its `cwd`, and a scenario never calls `process.chdir` or spawns a child itself. A failing command stops the arm with its status as `set -e` did, `allowFailure` is the `|| true`, and `ctx.exec` hands the run to a verb. Narration stays as `ctx.log` calls, so `canon sandbox equivalence` compares a port's log byte for byte.
 
+Three declarations carry what a bash scenario did around its picker. `prepare` runs before routing, for the staging and narration that sat ahead of `select_or_route_scenario`, so the picker's echo lands after it on the frame. `prompt` replaces the default picker message. `ctx.capture` runs a command and returns its status and both streams, for the `>file 2>file || status=$?` shape, and takes a `cwd` and an `input` where the bash form used a subshell `cd` or a redirect from a file.
+
 ## Decisions
 
 ### Two scenario forms until the retire slice

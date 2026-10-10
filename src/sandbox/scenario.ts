@@ -8,10 +8,19 @@ import {
   readFileSync,
   statSync,
   writeFileSync,
+  writeSync,
 } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join, relative } from 'node:path'
-import { logError, logInfo, logStep, logWarn, palette, select } from '@/cli/ui'
+import {
+  logError,
+  logInfo,
+  logStep,
+  logWarn,
+  palette,
+  pipeOutput,
+  select,
+} from '@/cli/ui'
 
 /**
  * The TypeScript form of a sandbox scenario: `sandbox/<category>/<command>.ts`,
@@ -33,7 +42,7 @@ export const FIXTURE_SUFFIX = '.fixture'
 /** A scenario whose only arm carries this name routes none, as a bash file with no picker did. */
 export const DEFAULT_ARM_NAME = 'default'
 
-/** Every bash scenario passed this prompt to `select_or_route_scenario`. */
+/** What a bash scenario passed to `select_or_route_scenario` unless it named another. */
 const ROUTE_PROMPT = 'Which scenario?'
 
 /** Every scenario that sets the anchor pushes to this one throwaway repository. */
@@ -50,6 +59,14 @@ export interface ScenarioDefinition {
   readonly config?: Readonly<Record<string, string>>
   /** Stages the tree from the anchor fixture and names the throwaway remote. */
   readonly anchor?: boolean
+  /**
+   * Stages and narrates what the bash form did ahead of `select_or_route_scenario`,
+   * so the picker's echo lands after it on the frame. Runs before the arm is
+   * routed, which leaves `ctx.arm` undefined.
+   */
+  readonly prepare?: ArmSetup
+  /** The picker's message, for a bash scenario that passed something other than the default. */
+  readonly prompt?: string
   /** In routing order, so the first arm is the one a headless caller gets. */
   readonly arms: Readonly<Record<string, ArmSetup>>
 }
@@ -144,7 +161,7 @@ export function loadScenario(file: string): ScenarioDefinition {
   if (!isRecord(definition))
     throw new Error(`${file} has no default export from scenario()`)
 
-  const { arms, config, anchor } = definition
+  const { arms, config, anchor, prepare, prompt } = definition
   if (!isRecord(arms) || Object.keys(arms).length === 0)
     throw new Error(`${file} declares no arms`)
   for (const [name, setup] of Object.entries(arms))
@@ -158,6 +175,10 @@ export function loadScenario(file: string): ScenarioDefinition {
     throw new Error(`${file} config holds a value that is not a string`)
   if (anchor !== undefined && typeof anchor !== 'boolean')
     throw new Error(`${file} anchor is not a boolean`)
+  if (prepare !== undefined && typeof prepare !== 'function')
+    throw new Error(`${file} prepare is not a function`)
+  if (prompt !== undefined && typeof prompt !== 'string')
+    throw new Error(`${file} prompt is not a string`)
 
   return definition as unknown as ScenarioDefinition
 }
@@ -225,6 +246,24 @@ export interface RunOptions {
   readonly stderr?: 'inherit' | 'ignore'
   /** Returns a failing status rather than stopping the arm, the `|| true` of the bash form. */
   readonly allowFailure?: boolean
+  /** Set for this command alone, the `NAME=value command` prefix of the bash form. */
+  readonly env?: Readonly<Record<string, string>>
+}
+
+export interface CaptureOptions {
+  /** Relative to the tree, the `cd` of a bash subshell. */
+  readonly cwd?: string
+  /** Fed to the command's stdin, the `<file` or `<<<` of the bash form. */
+  readonly input?: string
+  readonly env?: Readonly<Record<string, string>>
+  /** `inherit` leaves the stream on the terminal, where `pipe` hands it back for a file. */
+  readonly stderr?: 'pipe' | 'inherit' | 'ignore'
+}
+
+export interface Captured {
+  readonly status: number
+  readonly stdout: string
+  readonly stderr: string
 }
 
 export interface StageContext {
@@ -240,6 +279,8 @@ export interface StageContext {
     warn(message: string): void
     /** A bare frame line, the `echo -e "${GREY}│${NC}"` of the bash form. */
     bar(): void
+    /** Indents borrowed output inside the frame, the `pipe_output` of the bash form. */
+    pipe(text: string): void
   }
   fixtures(category: string, command: string, arm: string, stage: string): void
   git(...args: string[]): void
@@ -248,6 +289,18 @@ export interface StageContext {
   run(command: string, args: readonly string[], options?: RunOptions): number
   /** Runs a command and returns its stdout, stopping the arm on a failure. */
   read(command: string, args: readonly string[], options?: RunOptions): string
+  /**
+   * Runs a command and returns both streams with its status, never stopping the
+   * arm. For the `>file 2>file || status=$?` shape, where the outcome is the
+   * record the arm exists to hold.
+   */
+  capture(
+    command: string,
+    args: readonly string[],
+    options?: CaptureOptions,
+  ): Captured
+  /** Writes to a stream the way a bare `cat` or `echo` did, in order with the commands around it. */
+  print(text: string, stream?: 'stdout' | 'stderr'): void
   write(path: string, content: string): void
   append(path: string, content: string): void
   mkdir(path: string): void
@@ -291,14 +344,24 @@ export function createStageContext(options: ContextOptions): StageContext {
     args: readonly string[],
     stdout: 'inherit' | 'ignore' | 'pipe',
     stderr: 'inherit' | 'ignore' | 'pipe',
+    extra: {
+      cwd?: string
+      input?: string
+      env?: Readonly<Record<string, string>>
+    } = {},
   ) => {
-    const stdio: StdioOptions = ['ignore', stdout, stderr]
+    const stdio: StdioOptions = [
+      extra.input === undefined ? 'ignore' : 'pipe',
+      stdout,
+      stderr,
+    ]
 
     return spawnSync(command, [...args], {
-      cwd: dir,
-      env,
+      cwd: extra.cwd === undefined ? dir : join(dir, extra.cwd),
+      env: extra.env === undefined ? env : { ...env, ...extra.env },
       encoding: 'utf8',
       stdio,
+      input: extra.input,
     })
   }
 
@@ -312,6 +375,7 @@ export function createStageContext(options: ContextOptions): StageContext {
       args,
       runOptions.stdout ?? 'inherit',
       runOptions.stderr ?? 'inherit',
+      { env: runOptions.env },
     )
     const status = result.status ?? 1
     if (status !== 0 && runOptions.allowFailure !== true)
@@ -325,12 +389,38 @@ export function createStageContext(options: ContextOptions): StageContext {
     args: readonly string[],
     runOptions: RunOptions = {},
   ): string => {
-    const result = spawn(command, args, 'pipe', runOptions.stderr ?? 'inherit')
+    const result = spawn(
+      command,
+      args,
+      'pipe',
+      runOptions.stderr ?? 'inherit',
+      { env: runOptions.env },
+    )
     const status = result.status ?? 1
     if (status !== 0 && runOptions.allowFailure !== true)
       throw new ScenarioStop(status, 'exited')
 
     return status === 0 ? result.stdout : ''
+  }
+
+  const capture = (
+    command: string,
+    args: readonly string[],
+    captureOptions: CaptureOptions = {},
+  ): Captured => {
+    const result = spawn(
+      command,
+      args,
+      'pipe',
+      captureOptions.stderr ?? 'pipe',
+      captureOptions,
+    )
+
+    return {
+      status: result.status ?? 1,
+      stdout: result.stdout ?? '',
+      stderr: result.stderr ?? '',
+    }
   }
 
   const git = (...args: string[]): void => {
@@ -476,12 +566,20 @@ export function createStageContext(options: ContextOptions): StageContext {
         const { GREY, NC } = palette(process.stderr)
         process.stderr.write(`${GREY}│${NC}\n`)
       },
+      // `pipe_output` read lines, so an empty body printed nothing at all.
+      pipe: (text) => {
+        if (text !== '') pipeOutput(text)
+      },
     },
     fixtures,
     git,
     commit: (subject) => git('commit', '-m', subject, '--no-verify', '-q'),
     run,
     read,
+    capture,
+    print: (text, stream = 'stdout') => {
+      writeSync(stream === 'stdout' ? 1 : 2, text)
+    },
     write: (path, content) => {
       mkdirSync(dirname(inTree(path)), { recursive: true })
       writeFileSync(inTree(path), content)
@@ -510,11 +608,12 @@ export function createStageContext(options: ContextOptions): StageContext {
 async function routeArm(
   names: readonly string[],
   env: NodeJS.ProcessEnv,
+  prompt: string,
 ): Promise<string> {
   const echo = (name: string): string => {
     const { GREY, NC, WHITE } = palette(process.stderr)
     process.stderr.write(
-      `${GREY}│${NC}\n${GREY}◇${NC} ${ROUTE_PROMPT} ${WHITE}${name}${NC}\n`,
+      `${GREY}│${NC}\n${GREY}◇${NC} ${prompt} ${WHITE}${name}${NC}\n`,
     )
 
     return name
@@ -533,13 +632,13 @@ async function routeArm(
 
   if (!process.stdin.isTTY) {
     logError(
-      `${ROUTE_PROMPT} requires a TTY. Pass an argument or set CANON_NON_INTERACTIVE=1.`,
+      `${prompt} requires a TTY. Pass an argument or set CANON_NON_INTERACTIVE=1.`,
     )
     throw new ScenarioStop(1, 'exited')
   }
 
   return select({
-    message: ROUTE_PROMPT,
+    message: prompt,
     options: names.map((name) => ({ value: name, label: name })),
   })
 }
@@ -560,8 +659,13 @@ export async function stageScenarioInProcess(
 ): Promise<StageOutcome> {
   try {
     const names = armNames(definition)
+    await definition.prepare?.(
+      createStageContext({ ...options, arm: undefined }),
+    )
     const name =
-      names.length === 0 ? DEFAULT_ARM_NAME : await routeArm(names, options.env)
+      names.length === 0
+        ? DEFAULT_ARM_NAME
+        : await routeArm(names, options.env, definition.prompt ?? ROUTE_PROMPT)
     const setup = Object.hasOwn(definition.arms, name)
       ? definition.arms[name]
       : undefined

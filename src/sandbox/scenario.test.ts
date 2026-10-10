@@ -17,6 +17,7 @@ import {
   loadScenario,
   resolveScenarioFile,
   type ScenarioDefinition,
+  type StageContext,
   stageScenarioInProcess,
 } from '@/sandbox/scenario'
 
@@ -211,6 +212,94 @@ describe('stageScenarioInProcess', () => {
     const outcome = await stage(definition)
 
     expect(outcome).toEqual({ status: 1, ending: 'exited' })
+  })
+
+  it('should run the prepare hook before the arm is routed', async () => {
+    const ran: string[] = []
+    const definition: ScenarioDefinition = {
+      prepare: (ctx) => {
+        ran.push(`prepare:${String(ctx.arm)}`)
+      },
+      arms: {
+        first: () => {
+          ran.push('first')
+        },
+        second: (ctx) => {
+          ran.push(`second:${ctx.arm}`)
+        },
+      },
+    }
+
+    await stage(definition, { SANDBOX_SCENARIO: 'second' })
+
+    expect(ran).toEqual(['prepare:undefined', 'second:second'])
+  })
+
+  it('should echo the prompt a scenario names when it routes', async () => {
+    const writes: string[] = []
+    vi.spyOn(process.stderr, 'write').mockImplementation((chunk) => {
+      writes.push(String(chunk))
+      return true
+    })
+    const definition: ScenarioDefinition = {
+      prompt: 'Which arm?',
+      arms: { first: () => {}, second: () => {} },
+    }
+
+    await stage(definition, { SANDBOX_SCENARIO: 'second' })
+
+    expect(writes.join('')).toContain('Which arm? ')
+  })
+
+  it('should return the status and both streams of a captured command', async () => {
+    let captured: ReturnType<StageContext['capture']> | undefined
+    const definition = definitionOf({
+      default: (ctx) => {
+        captured = ctx.capture(
+          'sh',
+          ['-c', 'cat; echo out; echo err >&2; exit 2'],
+          { input: 'in\n' },
+        )
+      },
+    })
+
+    const outcome = await stage(definition)
+
+    expect([outcome.status, captured]).toEqual([
+      0,
+      { status: 2, stdout: 'in\nout\n', stderr: 'err\n' },
+    ])
+  })
+
+  it('should run a captured command from the folder it names', async () => {
+    mkdirSync(join(tree, 'sub'))
+    let cwd = ''
+    const definition = definitionOf({
+      default: (ctx) => {
+        cwd = ctx.capture('pwd', [], { cwd: 'sub' }).stdout.trim()
+      },
+    })
+
+    await stage(definition)
+
+    expect(cwd).toBe(join(tree, 'sub'))
+  })
+
+  it('should pass a per-command variable without changing the arm environment', async () => {
+    let seen = ''
+    let after: string | undefined
+    const definition = definitionOf({
+      default: (ctx) => {
+        seen = ctx.read('sh', ['-c', 'printf %s "$ONLY_HERE"'], {
+          env: { ONLY_HERE: 'yes' },
+        })
+        after = ctx.env.ONLY_HERE
+      },
+    })
+
+    await stage(definition)
+
+    expect([seen, after]).toEqual(['yes', undefined])
   })
 
   it('should end an arm that execs a verb as replaced', async () => {
