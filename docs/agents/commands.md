@@ -116,9 +116,7 @@ Each domain exposes a consistent shape where applicable: `list`, `install`, `syn
 - `context`, in `context-audit.md`: `audit`, `classify diff`, `classify sweep`, `classifier show`, `classifier set`
 - `markdown`, in `markdown-audit.md`: `audit`
 - `repo`, described below: `metadata propose`, `metadata apply`
-- `upstream`, in `upstream.md`: `fetch`, `catalog`, `advance`
-
-Common patterns:
+  Common patterns:
 
 - `list --json` → machine-readable catalog on stdout.
 - `install <name> <path>` → install a specific entry into a target project.

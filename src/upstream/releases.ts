@@ -43,7 +43,7 @@ export type Walk =
       readonly message: string
     }
 
-// Ported from the groundwork's prefilter. The first group anchors on the line
+// Ported from the groundwork's mechanical-drop script. The first group anchors on the line
 // start, the rest match anywhere because the surface they name can sit mid-line.
 const DROP =
   /^(Fixed|\[VSCode\]|\[Claude Tag\]|\[Code Review\]|Windows:|Self-hosted)|apps gateway|managed setting|OpenTelemetry|Bedrock|Vertex|screen reader/i
