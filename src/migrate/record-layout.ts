@@ -346,9 +346,9 @@ function entriesOf(dir: string, isDirectory: boolean): string[] {
 }
 
 /**
- * What `draft-and-pick` Step 6 and `sketch-design` write into the folder they
- * archive a choice to: a capture per arm, named `arm-<id>`, and a design
- * handoff. A folder carrying neither is evidence.
+ * What `draft-and-pick` Step 6 writes into the folder it archives a choice to:
+ * a capture per canvas frame, named `arm-<id>`. A design handoff marks a pick
+ * folder an earlier skill wrote. A folder carrying neither is evidence.
  */
 const PICK_FILE = /^(?:arm-[^.]+\..+|design-handoff\.md)$/
 
