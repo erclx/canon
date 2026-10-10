@@ -76,7 +76,7 @@ Put the choice to the operator through the structured question surface, since a 
 - Rank the recommendation first and mark it `(Recommended)`.
 - Author the real arms only. The surface appends its own escapes for a free-text answer and for reopening the question, so writing either as an option ships a duplicate the tool rejects.
 - Take no pick on the operator's behalf when two arms are both defensible and the difference is taste. That call is theirs, and a silent one is the failure this skill exists to prevent.
-- Read `canon canvas selection --json` when the answer points at the canvas rather than naming an arm, such as "the selected one". A selected `arm-<id>` frame on this run's page is the pick, and a fresh element inside one is a correction Step 5 carries by its `index`.
+- Read `canon canvas selection --json` when the answer points at the canvas rather than naming an arm, such as "the selected one". Resolve it against the record's `page` as well as its `frame`, since every round names its arms `arm-<id>` from the same ids. A selected frame on the current round's page is the pick. One on an earlier round's page picks that round's arm, which is a revert, so name the round back to the operator before acting on it. A fresh element inside a picked frame is a correction Step 5 carries by its `index`.
 - Treat `selection: null`, a frame on a page this run did not add, or an element carrying `stale: true` as no answer, and ask again rather than guessing.
 
 ## Step 5: loop on the pick
