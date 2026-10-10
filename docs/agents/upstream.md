@@ -15,9 +15,10 @@ Run them as `bun src/cli.ts upstream ...` from this repository's root. The globa
 | ----------------------------------- | ---------------------------------------------------------------------------- |
 | `fetch [--since <version>]`         | List the release lines since the cursor, with the mechanical noise dropped   |
 | `catalog`                           | List the skills, verbs, hooks, and gate stages the tree holds, one line each |
+| `due`                               | Say whether a digest is due, from the cursor and the installed version       |
 | `advance <version> --intake <slug>` | Move the cursor to a version, and store the current `llms.txt` beside it     |
 
-Every verb takes `--root <path>` for the repository to read and `--json` for a record on stdout. `fetch` and `catalog` write nothing. `advance` is the only writer, and the digest skill runs it after the findings are filed, so a run that dies midway reads the same range next time.
+Every verb takes `--root <path>` for the repository to read and `--json` for a record on stdout. `fetch` and `catalog` write nothing, and `due` writes only its day cache. `advance` is the only writer of the cursor, and the digest skill runs it after the findings are filed, so a run that dies midway reads the same range next time.
 
 ## fetch
 
@@ -47,6 +48,29 @@ The request sends `GH_TOKEN` or `GITHUB_TOKEN` when either is set. Unauthenticat
 ## catalog
 
 Prints a heading per section and a line per entry. With `--json` it prints one record whose fields are `skills`, `internalSkills`, `verbs`, `hooks`, `gate`, and `gaps`, each entry as `name` and `text`. A skill folder with no `SKILL.md` or no description appears in `gaps` rather than dropping out. A hook's text is the first comment line after its shebang.
+
+## due
+
+```bash
+bun src/cli.ts upstream due --json
+```
+
+Answers whether a digest is worth running now. It exits 0 whether or not one is due, so branch on the record rather than the exit. The installed version comes from `claude --version`, and the cursor from the main worktree root.
+
+| Reason            | `due`   | Meaning                                                                    |
+| ----------------- | ------- | -------------------------------------------------------------------------- |
+| `no-cursor`       | `true`  | No digest has been run, so a first run is prompted                         |
+| `week`            | `true`  | The cursor is seven or more days old and the install is ahead of it        |
+| `vocabulary`      | `true`  | An `Added` line in the gap names a plugin, skill, hook, worktree, or so on |
+| `current`         | `false` | The install is at or below the cursor, as after a downgrade                |
+| `recent`          | `false` | The cursor is under a week old and no line in the gap matches              |
+| `unknown-version` | `false` | `claude --version` could not be read                                       |
+
+The record is `due`, `reason`, `releases`, `installed`, and `cursor`. `releases` counts the releases in the gap and is `null` when the feed was not read, so a `week` result can arrive without a count.
+
+The gap is read from GitHub only when the install is ahead of the cursor, and the result is cached for a day under the scratch folder at `.canon/tmp/upstream-due/check.json`. A failed read is cached too, so a rate limit hit by one session is not retried by the next. Nothing here moves the cursor.
+
+The `.claude/hooks/upstream-due.sh` hook runs the verb at an attended session start and shows the operator one line when it is due. It stays silent in a background session, on a resume, a clear, or a compaction, and on any failure.
 
 ## advance
 
