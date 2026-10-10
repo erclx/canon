@@ -26,7 +26,7 @@ It reports and never writes. It moves, archives, and rewrites no entry, matching
 
 ## What makes an entry due
 
-An entry is due when its frontmatter carries no `reviewed` date, or one older than `--days`. The field is optional, and a review that keeps an entry is what writes it, per `standards/memory.md`. A `reviewed` value that is not a `YYYY-MM-DD` calendar date reads as never reviewed, and the record carries the raw value as `invalidReviewed` so a review can see it rather than the verb throwing over one hand edit.
+An entry is due when its frontmatter carries no `reviewed` date, or one older than `--days`. The field is optional, and a review that keeps an entry is what writes it. A `reviewed` value that is not a `YYYY-MM-DD` calendar date reads as never reviewed, and the record carries the raw value as `invalidReviewed` so a review can see it rather than the verb throwing over one hand edit.
 
 The field is read off the raw frontmatter block rather than a parsed value, since a YAML parser resolves a bare date to a date object on one schema and a string on another.
 

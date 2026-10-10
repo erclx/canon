@@ -13,7 +13,7 @@ const run = promisify(execFile)
 /** Every settle on an observer or a transition is bounded explicitly. */
 const SETTLE = { timeout: 5_000 }
 
-/** The capture itself launches a browser and shoots sixteen frames. */
+/** The capture itself launches a browser and shoots seventeen frames. */
 const CAPTURE_TIMEOUT = 180_000
 
 const HARNESS = fileURLToPath(
