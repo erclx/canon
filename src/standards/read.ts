@@ -76,6 +76,16 @@ const MOVED_STANDARDS: Readonly<Record<string, string>> = {
   wiki: 'claude/skills/draft-doc/references/wiki.md',
 }
 
+/**
+ * The package-relative path a retired standard now lives at, so a caller that
+ * resolves against a root of its own tests the same map the verb reads.
+ */
+export function movedStandardPath(name: string): string | undefined {
+  if (!Object.hasOwn(MOVED_STANDARDS, name)) return undefined
+
+  return MOVED_STANDARDS[name]
+}
+
 function filename(name: string): string {
   return name.endsWith('.md') ? name : `${name}.md`
 }

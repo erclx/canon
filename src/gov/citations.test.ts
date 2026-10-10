@@ -260,6 +260,19 @@ describe('readCitations', () => {
     expect(withStatus(report, 'dead')).toEqual(['tooling-reference'])
   })
 
+  it('should resolve a standard the verb answers from the skill that took it', async () => {
+    write('claude/skills/create-skill/references/skill-paths.md', '# Paths')
+    writeRule(
+      'claude/561-skill.md',
+      '- Read it with `canon standards skill-paths`.',
+    )
+    git('add', '--all')
+
+    const report = await readCitations(ROOT)
+
+    expect(withStatus(report, 'resolved')).toEqual(['skill-paths'])
+  })
+
   it('should name a standard the verb cites that neither root carries', async () => {
     writeRule(
       'claude/561-teach.md',

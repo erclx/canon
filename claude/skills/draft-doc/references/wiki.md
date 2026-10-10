@@ -5,11 +5,11 @@ description: Folder split, frontmatter, naming convention, and sourcing for a wi
 
 # Wiki reference
 
-Applies to each authored page under `wiki/`. Skip for `index.md` at any depth, which is a hand-maintained catalog rather than a reference page, and carries `subtitle` rather than `description`.
+Applies to each authored page in the `wiki` folder at the project root. Skip for `index.md` at any depth, which is a hand-maintained catalog rather than a reference page, and carries `subtitle` rather than `description`.
 
 ## Scope
 
-Governs each authored page under `wiki/`: which folder it belongs in, its frontmatter, its filename, and how it cites the subject it documents.
+Governs each authored page in the `wiki` folder at the project root: which folder it belongs in, its frontmatter, its filename, and how it cites the subject it documents.
 
 Does not govern:
 
@@ -28,7 +28,7 @@ A page failing either is non-conforming even when it satisfies every shape rule 
 ## Placement
 
 - Write a page here only when its subject is owned outside this repository. Route anything about how this repository works to `docs/`, `canon/context/`, or a skill body instead.
-- File the page under `wiki/claude/`. A subject Anthropic does not own, whether a third-party tool or a vendor-neutral concept, is out of scope for this folder split. Route it to `docs/` or a skill body instead of adding a second wiki folder for it.
+- File the page in the `claude` subfolder of the `wiki` folder. A subject Anthropic does not own, whether a third-party tool or a vendor-neutral concept, is out of scope for this folder split. Route it to `docs/` or a skill body instead of adding a second wiki folder for it.
 
 ## Frontmatter
 
