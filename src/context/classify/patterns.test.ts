@@ -16,7 +16,6 @@ describe('diffPatternVerdict', () => {
 
   it('should flag a repeated move as HISTORY', () => {
     const result = diffPatternVerdict(
-      'canon/context/cli/overview.md',
       'Both counts moved again on `feature-cut-provisions-at-headings`, taking the total to 725.',
     )
 

@@ -94,7 +94,7 @@ stage_setup() {
     stage_fixtures claude context-fold classify-findings 02-remeasure
 
     log_step "Scenario ready: context-fold classifies what it writes"
-    log_info "Context: one uncommitted edit stages the shape Step 9 exists to catch"
+    log_info "Context: one uncommitted edit stages the shape Step 8 exists to catch"
     log_info "  canon/context/retrieval.md appended a branch-narrated re-measurement"
     log_info "  below the count it restates, instead of rewriting it in place"
     log_info ""
