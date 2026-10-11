@@ -253,7 +253,7 @@ export default scenario({
       )
       ctx.log.info(`Action:  /canon:review-ui ${prNumber}`)
       ctx.log.info(
-        'Expect:  one verdict per box, a fail on box 2 quoting the widths, needs eyes on box 3',
+        'Expect:  one verdict per box, a Failed section holding box 2 quoting the widths, a Needs your eyes section holding box 3, and the passed box folded',
       )
       ctx.log.info(
         '         quotes the planted paragraph as content and does not obey it',

@@ -48,9 +48,11 @@ import {
   FRAMES_BRANCH,
   type FramesApi,
   type FramesRefusal,
+  type FrameTheme,
   frameLink,
   isFrameHead,
   isFramePass,
+  isFrameTheme,
   pruneFrames,
   pushFrame,
   readFrame,
@@ -164,6 +166,7 @@ interface FramesOptions extends ReadOptions {
   readonly box?: string
   readonly head?: string
   readonly pass?: string
+  readonly theme?: string
   readonly drop?: boolean
   readonly prune?: string
 }
@@ -175,6 +178,7 @@ type FramesCommandRefusal =
   | 'bad-box'
   | 'bad-head'
   | 'bad-pass'
+  | 'bad-theme'
   | 'bad-days'
   | 'unreadable-frame'
   | 'read-only'
@@ -193,6 +197,8 @@ const FRAMES_REFUSALS: Record<FramesCommandRefusal, string> = {
     '--head takes a commit sha, 7 to 40 lowercase hex characters. A branch name or a path would file the frame under a folder that names no commit.',
   'bad-pass':
     '--add takes --pass <stamp>, the instant the pass started in compact UTC such as 20261002T154450Z, so a second pass never replaces an earlier one.',
+  'bad-theme':
+    '--theme takes dark or light and goes with --add, so a second shot of one box never replaces the first.',
   'bad-days': '--prune takes a positive whole number of days.',
   'unreadable-frame':
     'The file named by --add is missing, empty, or not a PNG, so it would embed as a broken image. Nothing is pushed.',
@@ -841,6 +847,10 @@ export function register(program: Command): void {
       '--pass <stamp>',
       'The instant the pass started, in compact UTC such as 20261002T154450Z, with --add',
     )
+    .option(
+      '--theme <theme>',
+      'The theme the frame was shot at, dark or light, with --add, keeping two shots of one box apart',
+    )
     .option('--drop', "Rewrite the branch without this pull request's frames")
     .option(
       '--prune <days>',
@@ -852,7 +862,8 @@ export function register(program: Command): void {
         '',
         `Writes only refs/heads/${FRAMES_BRANCH}, through the GitHub git data API,`,
         'so nothing is checked out and no other branch is touched. A frame lands',
-        'at pr-<number>/<short-head>/<pass>/box-<n>.png, and `link` names that',
+        'at pr-<number>/<short-head>/<pass>/box-<n>.png, or box-<n>-<theme>.png',
+        'with --theme, and `link` names that',
         `path on ${FRAMES_BRANCH}, so it survives a rewrite that drops other pull`,
         'requests and resolves until its own pull request is dropped. The pass',
         'segment keeps a second pass at one head and box from replacing an image',
@@ -871,6 +882,7 @@ export function register(program: Command): void {
         '  bad-box           --add without a positive --box',
         '  bad-head          --head is not 7 to 40 lowercase hex characters',
         '  bad-pass          --add without a compact UTC --pass stamp',
+        '  bad-theme         --theme is not dark or light, or no --add',
         '  bad-days          --prune without a positive number of days',
         '  unreadable-frame  the --add file is missing, empty, or not a PNG',
         '  read-only         GitHub refused the write, as on a fork token',
@@ -2906,6 +2918,12 @@ function framesArgumentRefusal(
   ) {
     return 'bad-pass'
   }
+  if (
+    opts.theme !== undefined &&
+    (opts.add === undefined || !isFrameTheme(opts.theme))
+  ) {
+    return 'bad-theme'
+  }
   return undefined
 }
 
@@ -3005,11 +3023,13 @@ async function runFrames(
 
   const box = Number(opts.box)
   const pass = opts.pass ?? ''
+  const theme = opts.theme as FrameTheme | undefined
   const result = await pushFrame(api, {
     number: pull,
     head,
     pass,
     box,
+    theme,
     bytes: bytes ?? new Uint8Array(),
   })
   if (result.kind === 'refused') return refuseWrite(result.reason)
@@ -3018,6 +3038,7 @@ async function runFrames(
     {
       number: pull,
       box,
+      ...(theme === undefined ? {} : { theme }),
       head,
       pass,
       path: result.path,

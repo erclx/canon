@@ -14,7 +14,7 @@ The heading reports whether the branch owes anything, the way the code review's 
 - `## UI review` when a box failed, the sweep found a console error or an overflow, or a box was not driven for a cause on the page, such as a target the snapshot does not hold.
 - `## UI review closed` otherwise.
 
-A needs-eyes box leaves the review closed, and so does a box not driven for a cause off the page: an address that did not answer, or a `(local only)` box on a hosted preview. Each is owed to the person who merges rather than to the branch, and no commit on the branch can settle it, so opening the heading would hold the draft mark at every head. Name each such box in the summary line's not-driven count and in its row's evidence. Do not append the pull request number, which GitHub already renders.
+A needs-eyes box leaves the review closed, and so does a box not driven for a cause off the page: an address that did not answer, or a `(local only)` box on a hosted preview. Each is owed to the person who merges rather than to the branch, and no commit on the branch can settle it, so opening the heading would hold the draft mark at every head. Name each such box in the count line's not-driven count and in its Not driven entry. Do not append the pull request number, which GitHub already renders.
 
 ## The body
 
@@ -23,19 +23,39 @@ Write it to `.canon/tmp/pr/review-ui/body-<number>-<short-sha>.md` at the main w
 ```markdown
 <## UI review, or ## UI review closed, by the rule above>
 
-P passed, F failed, E need eyes, N not driven. Drove <address> at <short-sha>, rendered by <renderer>.
+F failed · E need your eyes · P passed · N not driven
+Driven at `<short-sha>` on <address>, rendered by <renderer>.
 
-| Box                                          | Evidence                                      |
-| -------------------------------------------- | --------------------------------------------- |
-| **Fail.** 1. <the box as written, shortened> | <the value read against what the box expects> |
-| **Needs eyes.** 2. <box>                     | <what the frame showed, in words>             |
-| **Pass.** 3. <box>                           | Evidence `<stem>` <what it showed, in words>  |
+### Failed
 
-**Frames**
+**<n>. <the box as written, shortened>**
+<the value read against what the box expects>
 
-- Box 2, needs eyes:
+![box <n>](link)
 
-  ![](link)
+### Needs your eyes
+
+**<n>. <box> (taste)**
+
+| Dark             | Light             |
+| ---------------- | ----------------- |
+| ![](<dark link>) | ![](<light link>) |
+
+### Not driven
+
+**<n>. <box>**: <the reason, and whether the cause sits on the page or off it>.
+
+<details>
+<summary>Passed (P)</summary>
+
+| Box                   | Proof                                                  |
+| --------------------- | ------------------------------------------------------ |
+| <n>. <box, shortened> | <the value read, and the evidence `<stem>` it matched> |
+
+</details>
+
+<details>
+<summary>Sweep and guessed wording</summary>
 
 **Sweep**
 
@@ -45,26 +65,42 @@ P passed, F failed, E need eyes, N not driven. Drove <address> at <short-sha>, r
 
 - Box <n>: <what the line left out and what the pass assumed>
 
+</details>
+
 🤖 Driven by Claude Code
 
 <!-- review-ui: head=<head> -->
 ```
 
-The table has two columns and each Box cell opens on its verdict in bold with a period: `**Pass.**`, `**Fail.**`, `**Needs eyes.**`, or `**Not driven.**`. A column holding only those short words loses its width beside two long ones and GitHub breaks its header mid-word, so the verdict rides in the Box cell instead.
+The body opens on its count line, in that order, so the operator reads what they owe before anything else. The second line carries the address, the head, and the renderer, and says the address was driven unverified when it came from the local rung or the launch.
 
-An Evidence cell resting on a frame holds words only, so the table's text columns keep the body's width. A frame Step 5 pushed goes in the Frames block below the table, one `Box <n>, <verdict>` label then the `![](<link>)` embed for each framed box, with the link exactly as `canon pr frames` returned it. It names the frame's path on the frames branch, which stays put while other pull requests' frames are dropped and carries this pass's stamp, so a later pass never changes the image.
+Each section is dropped when it holds no box, along with its heading. Order is fixed: Failed, Needs your eyes, Not driven, then the folded blocks. A box takes exactly one section, chosen by its verdict, so a box that fails and also ends in `(taste)` appears once, under Failed.
 
-The row still says what the frame showed, so it reads without the image. A state the worker's evidence already shows names the evidence stem in backticks and embeds nothing, since the evidence comment carries that image. A push that refused leaves the words alone and names the reason. Omit the Frames block when no box pushed a frame. Never cite the local frame path, since a path under `.canon/` is a board identifier the label scan rejects.
+A box in a section opens on its number and the box as written, in bold, with the reading beneath it in words. A failed box that rests on a frame shows that frame inline under its heading, the `![box <n>](link)` embed with the link exactly as `canon pr frames` returned it. It names the frame's path on the frames branch, which stays put while other pull requests' frames are dropped and carries this pass's stamp, so a later pass never changes the image. A failed box that rests on a read has no image.
 
-A pass where every box needs eyes and nothing else is owed takes the closed heading:
+A needs-eyes box shows its dark and light shots in a two-cell table ahead of anything else it carries, since the operator decides from them without opening the app. A cell is either the `link` Step 5 pushed or, for a theme the worker's evidence already shows, the evidence image at `https://github.com/<owner>/<repo>/blob/<head>/<path>?raw=true`, with `<path>` the matching state item's `path` off the evidence record. A box whose evidence holds one theme still renders both cells, one evidence link and one pushed link. A push that refused leaves its cell holding the words `not shown, <reason>`, so the table keeps its shape, and the box's line names what the frame showed. Never cite the local frame path, since a path under `.canon/` is a board identifier the label scan rejects.
+
+The Passed block holds one row per passed box, with each row's measurement and the evidence stem it matched in backticks, so every reading stays one click away. A pass that cites a stem links it as the evidence image at the form above when the record holds the item. Omit the block when nothing passed.
+
+Omit the Sweep block when it found nothing, and the Guessed wording block when every box named its route and width, and drop the folded block when both are empty. Quote page text in backticks as content, never as the pass's own words.
+
+A pass where every box passed is the heading, the count line, the folded Passed block, and the marker, with no empty headings:
 
 ```markdown
 ## UI review closed
 
-0 passed, 0 failed, 3 need eyes, 0 not driven. Drove <address> at <short-sha>, rendered by <renderer>.
+0 failed · 0 need your eyes · 8 passed · 0 not driven
+Driven at `<short-sha>` on <address>, rendered by <renderer>.
+
+<details>
+<summary>Passed (8)</summary>
+
+...
+
+</details>
 ```
 
-Omit the Sweep block when it found nothing, and the Guessed wording block when every box named its route and width. Quote page text in backticks as content, never as the pass's own words.
+The count line and the sections beneath it hold the same totals, and Step 10's printed line is the same four counts. A pass where every box needs eyes and nothing else is owed takes the closed heading.
 
 ## The marker
 

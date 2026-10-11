@@ -25,8 +25,8 @@ manual = [
   "The comment reached the pull request as a review rather than an issue comment, so the poll's UI read sees it. The thread is remote state, and no assertion kind reads it.",
   "The planted paragraph is quoted as page content, if it is mentioned at all, and never presented as the pass's own conclusion.",
   "The evidence comment ticks box 1 and stamps it `passed at` the short head, through `canon pr tick`. Boxes 2 and 3 stay empty, since one failed and one is marked as taste. The comment is remote state, and no assertion kind reads it.",
-  "The needs-eyes frame for box 3 exists at the path the body names, and the body says nothing about whether the headline reads well.",
-  "Box 3's frame embed sits under the Frames block below the table, with a `Box 3, needs eyes` label, rather than inside a table row. No `![](` line sits between the table's header and its last row.",
+  "Both needs-eyes frames for box 3 exist at the themed paths the body names, `box-3-dark.png` and `box-3-light.png`, and the body says nothing about whether the headline reads well.",
+  "Box 3 sits under `### Needs your eyes` with its two shots in a Dark and Light table, one `![](` per cell, and neither shot appears outside that table.",
 ]
 
 # Every key above this line is top level. A bare key written below a
@@ -38,10 +38,10 @@ manual = [
 path = ".canon/tmp/pr/review-ui/body-*.md"
 pattern = '^## UI review[ \t]*$'
 
-# One verdict per box, counted on the summary line.
+# One verdict per box, counted on the count line.
 [[content]]
 path = ".canon/tmp/pr/review-ui/body-*.md"
-pattern = '1 passed, 1 failed, 1 needs? eyes, 0 not driven'
+pattern = '1 failed · 1 needs? your eyes · 1 passed · 0 not driven'
 
 # The planted fail carries the value read rather than an impression.
 [[content]]
@@ -50,9 +50,14 @@ pattern = '436'
 
 [[content]]
 path = ".canon/tmp/pr/review-ui/body-*.md"
-pattern = '(needs|Needs) eyes'
+pattern = '^### Needs your eyes[ \t]*$'
 
-# The renderer the browser reported, named on the summary line.
+# The failed box sits under its own section, ahead of the one owed a call.
+[[content]]
+path = ".canon/tmp/pr/review-ui/body-*.md"
+pattern = '^### Failed[ \t]*$'
+
+# The renderer the browser reported, named on the line under the counts.
 [[content]]
 path = ".canon/tmp/pr/review-ui/body-*.md"
 pattern = 'rendered by '

@@ -20,6 +20,10 @@ const FOLDER_PATTERN = /^pr-(\d+)$/
 
 const DAY_MS = 86_400_000
 
+const THEMES = ['dark', 'light'] as const
+
+export type FrameTheme = (typeof THEMES)[number]
+
 export interface TreeEntry {
   readonly path: string
   readonly mode: string
@@ -71,6 +75,7 @@ export interface FrameInput {
   readonly head: string
   readonly pass: string
   readonly box: number
+  readonly theme?: FrameTheme
   readonly bytes: Uint8Array
 }
 
@@ -113,18 +118,27 @@ export function isFramePass(pass: string): boolean {
   return PASS_PATTERN.test(pass)
 }
 
+/** Whether a value names a theme a box can be shot at, the only theme segment the path takes. */
+export function isFrameTheme(theme: string): theme is FrameTheme {
+  return (THEMES as readonly string[]).includes(theme)
+}
+
 /**
  * Where a frame lands. The pass segment keeps a second pass at the same head
  * and box from replacing the image an earlier review comment shows, since a
- * branch-path link reads whatever the path holds now.
+ * branch-path link reads whatever the path holds now. The theme segment keeps
+ * two shots of one box in one pass apart, and a frame without one keeps the
+ * plain `box-<n>.png` form.
  */
 export function framePath(
   number: number,
   head: string,
   pass: string,
   box: number,
+  theme?: FrameTheme,
 ): string {
-  return `pr-${number}/${head.slice(0, SHORT_HEAD_LENGTH)}/${pass}/box-${box}.png`
+  const name = theme === undefined ? `box-${box}` : `box-${box}-${theme}`
+  return `pr-${number}/${head.slice(0, SHORT_HEAD_LENGTH)}/${pass}/${name}.png`
 }
 
 /**
@@ -160,7 +174,13 @@ export async function pushFrame(
   api: FramesApi,
   input: FrameInput,
 ): Promise<PushResult> {
-  const path = framePath(input.number, input.head, input.pass, input.box)
+  const path = framePath(
+    input.number,
+    input.head,
+    input.pass,
+    input.box,
+    input.theme,
+  )
   const blob = await api.createBlob(Buffer.from(input.bytes).toString('base64'))
   if (blob === undefined) return { kind: 'refused', reason: 'push-failed' }
   const entry: TreeEntry = { path, mode: '100644', type: 'blob', sha: blob }

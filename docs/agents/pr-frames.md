@@ -12,6 +12,7 @@ the `canon-frames` branch and returns a link to its path there.
 
 ```bash
 canon pr frames 1341 --add frames/3.png --box 3 --head <sha> --pass 20261002T154450Z --json
+canon pr frames 1341 --add frames/3-dark.png --box 3 --theme dark --head <sha> --pass 20261002T154450Z --json
 canon pr frames 1341 --drop --json
 canon pr frames --prune 30 --json
 ```
@@ -23,7 +24,10 @@ through the GitHub git data API, being blobs, trees, commits, and that one ref,
 so nothing is checked out, no worktree is entered, and neither `main` nor any
 branch a pull request holds is touched. The branch never merges.
 
-A frame lands at `pr-<number>/<short-head>/<pass>/box-<n>.png`. `--head` names
+A frame lands at `pr-<number>/<short-head>/<pass>/box-<n>.png`, or at
+`box-<n>-<theme>.png` when `--theme` names `dark` or `light`, so two shots of
+one box in one pass never take the same path. A frame without `--theme` keeps
+the plain form. `--head` names
 the commit the pass drove, 7 to 40 lowercase hex characters, and defaults to
 the head the pull request object reports. `--pass` is the instant the pass
 started, in compact UTC as `date -u +%Y%m%dT%H%M%SZ` prints it, which
@@ -59,6 +63,7 @@ be published with it.
 | `bad-box`          | `--add` carried no positive `--box`.                                             |
 | `bad-head`         | `--head`, or the head the pull request reported, is not a 7 to 40 character sha. |
 | `bad-pass`         | `--add` carried no `--pass` stamp in compact UTC.                                |
+| `bad-theme`        | `--theme` is neither `dark` nor `light`, or came without `--add`.                |
 | `bad-days`         | `--prune` carried no positive number of days.                                    |
 | `unreadable-frame` | The `--add` file is missing, empty, or not a PNG. Nothing is called.             |
 | `read-only`        | GitHub refused a write with 403 or 404, which is what a fork's token gets.       |
@@ -69,7 +74,7 @@ be published with it.
 | `gh-missing`       | `gh` is not on the path.                                                         |
 | `gh-failed`        | `gh` could not name the repository or read the pull request.                     |
 
-An add's `ok` record carries `link`, `commit`, `path`, `box`, `head`, `pass`,
+An add's `ok` record carries `link`, `commit`, `path`, `box`, `theme` when one was passed, `head`, `pass`,
 and `created`, which is true when the add made the branch. A drop's carries
 `removed`, the pull requests whose folders went, plus `commit` for the rewrite
 or `deleted` when it emptied the branch. A prune adds `kept` and `unread`.
