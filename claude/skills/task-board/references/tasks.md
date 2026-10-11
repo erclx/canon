@@ -60,7 +60,7 @@ The `task-board` skill creates and declines task files. The `task-complete` skil
 
 `vXX.Y-<slug>.md`, where the version is the phase label zero-padded to two digits and the slug is kebab-case.
 
-Padding is load-bearing. Index entries sort by filename and nothing else, so a bare `v9.0` sorts after `v15.0` and the catalog reads out of board order. `standards/versioning.md` governs the label itself and permits free renumbering, so expect the occasional rename. Nothing points at a task filename, since a `Plan:` line runs from task to plan rather than the reverse. <!-- canon-allow-reference: illustrates the padding rule's own sort collision, not a citation of a real task -->
+Padding is load-bearing. Index entries sort by filename and nothing else, so a bare `v9.0` sorts after `v15.0` and the catalog reads out of board order. `${CLAUDE_SKILL_DIR}/../git-commit/references/versioning.md` governs the label itself and permits free renumbering, so expect the occasional rename. Nothing points at a task filename, since a `Plan:` line runs from task to plan rather than the reverse. <!-- canon-allow-reference: illustrates the padding rule's own sort collision, not a citation of a real task -->
 
 ## Frontmatter
 

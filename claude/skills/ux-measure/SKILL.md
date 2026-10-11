@@ -108,7 +108,7 @@ Report the reading and stop there. A remedy for a poor verdict is a change with 
 
 ### Persist
 
-Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. Fall back to `latest` on an empty result.
+Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`. Fall back to `latest` on an empty result.
 
 Write the full reading directly to `.canon/review/ux-measure-<slug>.md` at the main worktree root, not the current worktree. Resolve that root the way `session-worktree` does. Create the directory if it does not exist. Always overwrite.
 

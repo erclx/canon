@@ -26,7 +26,7 @@ Read these in parallel before writing:
 
 1. Take each finished file with the destination path the operator gave it. A file arriving with no destination is asked for once, since the mirrored tree cannot place it.
 2. Read every file whole. The overview states what the worker still owns beyond copying, and that comes off the files, not off the operator's description of them.
-3. Take the branch type from `${CLAUDE_SKILL_DIR}/../../standards/branch.md`, never from a list carried here.
+3. Take the branch type from `${CLAUDE_SKILL_DIR}/../git-branch/references/branch.md`, never from a list carried here.
 4. Derive one kebab slug for the change. The folder, the plan, and the task all carry it.
 
 ## Step 2: allocate the ordinal and the label

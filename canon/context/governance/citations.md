@@ -88,7 +88,7 @@ A rule scoped to a folder only a plugin skill creates is inert rather than broke
 
 - `governance/rules/writing/markdown.md` → the `markdown-craft` and `write-human` skills, each named with the fallback line.
 - `claude/skills/create-skill/references/skill.md` → sibling references by the `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md` form `skill-paths.md` states, which resolves in every install since the plugin ships the skills side by side.
-- `claude/skills/task-board/references/tasks.md` → `standards/versioning.md` and `claude/skills/plan-feature/references/plan.md`, for the same reason.
+- `claude/skills/task-board/references/tasks.md` → `claude/skills/git-commit/references/versioning.md` and `claude/skills/plan-feature/references/plan.md`, for the same reason.
 
 ### Standards corpus, examined and excluded
 

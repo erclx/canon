@@ -32,6 +32,7 @@ The draft mark fails from both ends. On 2026-08-31 four sessions re-drafted a pu
 - Defer the addressee resolution to `session-relay` and keep only the operator ask and the last-rung inference, which discriminates here because a worker holds a feature branch and a controller does not, and which falls back to the roster and says so, since an operator's own launch names nobody
 - Keep refusing a dispatcher a first-class move carrying its evidence, since the halts measured so far were correct and the cost of each fell where it belonged
 - State that a held body may be older than the branch under it, since a plugin skill loads from the marketplace cache rather than from the working tree
+- Carry a talk clause for a launch whose operator is in the session, asking them at a judgment call and sending a close message when they end the conversation, since a cold worker's halt-toward-the-controller and merge-ends-the-role rules contradict a brief that asks it to talk
 - Point at `session-worktree`, `auto-ship`, and `review-address` for the steps each already owns
 
 ## Must not

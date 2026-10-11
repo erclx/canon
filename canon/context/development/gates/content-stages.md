@@ -98,7 +98,7 @@ The walk passes `dot: true`, which is what reaches the seeds. `Bun.Glob` skips a
 
 The commit-sha pattern reads 7 to 40 contiguous hex characters with no narrower width check, so a URL-encoded hex color inside shipped prose can collide with it. `%23e0724b`, the percent-encoding of `#e0724b`, decodes to a `#` the check does not see and eight trailing hex characters it reads as a short sha. Write such a color as `rgb(224,114,75)` rather than a hex literal.
 
-The marker mutes a line and nothing narrower, because `isMarked` reads the line itself and the one above and stops there. A real citation later added beside a marked line ships unreported. `isMarked` also reads a code span exactly as it reads a comment, so a token documented inside a code span on its own line arms the marker over that line and the line below it with nothing naming them as exempt, which is how `standards/publish.md` states its convention.
+The marker mutes a line and nothing narrower, because `isMarked` reads the line itself and the one above and stops there. A real citation later added beside a marked line ships unreported. `isMarked` also reads a code span exactly as it reads a comment, so a token documented inside a code span on its own line arms the marker over that line and the line below it with nothing naming them as exempt, which is how `claude/skills/git-pr/references/publish.md` states its convention.
 
 ## Raw-field file references
 

@@ -54,7 +54,7 @@ A missing tracking ref is no longer a guard. An open pull request proves the bra
    - A body a person edited by hand between rounds gets no special handling: judge it against the tree the same way regardless of who wrote it last, since a hand-edit the fix commit has made stale is the exact drift this sync exists to close.
 8. Route on the invocation and the comment count for the reply alone.
    - When invoked with `reply-owned`, skip this step: the caller posts its own reply.
-   - Otherwise, if the count is above zero, the followup addresses review feedback: post a one-line summary of the fix with `gh api -X POST repos/{owner}/{repo}/issues/<number>/comments -f body="<summary>" --silent`, first running the scan in `${CLAUDE_SKILL_DIR}/../../standards/publish.md` against it, since the hook does not see an inline comment body. The `pull_request` check the git-pr surface carries triggers on a push or an open rather than a plain edit, so neither this comment nor the title and body step 7 synced reaches it.
+   - Otherwise, if the count is above zero, the followup addresses review feedback: post a one-line summary of the fix with `gh api -X POST repos/{owner}/{repo}/issues/<number>/comments -f body="<summary>" --silent`, first running the scan in `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md` against it, since the hook does not see an inline comment body. The `pull_request` check the git-pr surface carries triggers on a push or an open rather than a plain edit, so neither this comment nor the title and body step 7 synced reaches it.
    - If it is zero, nothing further runs. The sync in step 7 already did this branch's job.
 
 ## After completion

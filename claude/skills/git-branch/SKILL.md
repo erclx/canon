@@ -9,7 +9,7 @@ metadata:
 
 Before generating a branch name, read:
 
-- `${CLAUDE_SKILL_DIR}/../../standards/branch.md`: format, types, length limit, and constraints
+- `${CLAUDE_SKILL_DIR}/references/branch.md`: format, types, length limit, and constraints
 
 Follow it exactly.
 

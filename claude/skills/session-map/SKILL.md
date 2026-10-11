@@ -22,7 +22,7 @@ Decline where the session holds no reasoning a reader could not get faster from 
 ## Guards
 
 - If `git rev-parse --git-dir` does not resolve, stop: `❌ Not a git repository. A session map takes its filename from the branch.`
-- Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. An empty result falls back to `latest` rather than stopping, since a handoff is scratch and a stop loses the reasoning the file exists to save.
+- Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`. An empty result falls back to `latest` rather than stopping, since a handoff is scratch and a stop loses the reasoning the file exists to save.
 - Resolve the containing folder at the main worktree root with `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`. The guard above already stopped where that read has no repository to answer from, so it takes no fallback.
 
 ## Step 1: recover the commit the drift step reads

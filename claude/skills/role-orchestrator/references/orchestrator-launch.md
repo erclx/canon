@@ -1,6 +1,6 @@
 ---
 title: Orchestrator launch runbook
-description: The launch every dispatch kind shares, being the build, cloud build, review-address, and planning templates, the session name and controller id each carries, why the command sits at position zero, and what the brief may carry
+description: The launch every dispatch kind shares, being the build, cloud build, review-address, planning, and talk templates, the session name and controller id each carries, why the command sits at position zero, and what the brief may carry
 ---
 
 Run this once `orchestrator-dispatch.md` has cleared a row, or from its planning or review-address shape below when that runbook's checks do not bind. The model each template names comes from `## Pick the model` in that runbook.
@@ -88,6 +88,28 @@ None of the three checks in `orchestrator-dispatch.md` binds this shape. The bra
 What a planning dispatch owes instead is the reverse reading, because the plan it produces carries a constraint per track in flight and a row planned during a wave is planned against a tree that wave is changing. `role-planner` composes the session roster with the pull request list for that read rather than reading pull requests alone, which is why the brief carries no branch list for it: the planner takes this reading itself either way.
 
 One row per dispatch. A session reused across a batch pays the context load once and ages its picture of the tree while it works, which is what puts the in-flight read on the task rather than on the batch, and one that compacts mid-batch loses the reasoning behind its earlier plans with nothing reporting it. Cap a reused session where the saving is worth it and say what the cap was.
+
+## Dispatch a talk session
+
+A planner or worker the operator will talk with takes the same launch as its cold shape above, with two changes. It carries a `-talk` suffix on its name, and its brief gains one sentence. A cold session works alone and reports back, and a talk session stays open after its plan or pull request lands so the operator can keep shaping the row with it.
+
+Take the planning shape or the build shape and change those two things:
+
+```bash
+claude --bg --model <model> -n "planner-<project>-<slug>-talk" "Run /canon:role-planner, then /canon:plan-feature <task>. This is a talk session: the operator will talk with you here, so run your role's talk clause, and message your controller when the operator ends the conversation. Your controller is the session whose sessionId is <dispatcher-id>. ..."
+claude --bg --model <model> -n "worker-<project>-<slug>-talk" "/canon:auto-ship <plan>
+This is a talk session: the operator will talk with you here, so run your role's talk clause, and message your controller when the operator ends the conversation. Your controller is the session whose sessionId is <dispatcher-id>. ..."
+```
+
+The ellipsis stands for the rest of the cold template's message clauses, unchanged. The build variant keeps `/canon:auto-ship <plan>` at position zero with nothing before it, per the rule above.
+
+Keep the role prefix and add the suffix rather than inventing a prefix. `orchestrator-handoff.md` separates dispatched sessions from hand-launched ones by `worker-` and `planner-`, so a new prefix would read as a hand launch and fall outside the retirement act.
+
+Read the session's `sessionId` off the launch output and carry it in this session's own context, then write it into the map's `## Talk sessions held open` section at the next handoff. The map exists only once the handoff writes it, so the launches this session made, read from its own context with the prior map, are the source the first wind-down reads talk sessions from. The client can rename a session after launch and drop the suffix, so the id is the durable marker and the suffix is only for display.
+
+A talk session is retired only on the operator's word, which `orchestrator-handoff.md` states under the retirement act. That runbook is the one place the rule lives, so do not restate it in a launch report.
+
+Reviewers get no talk shape, since a reviewer's pass holds no operator dialogue.
 
 ## Dispatch a reviewer
 

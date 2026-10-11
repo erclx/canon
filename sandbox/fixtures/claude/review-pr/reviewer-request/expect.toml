@@ -9,7 +9,7 @@
 # standing in for the canned line, rather than forcing the review open.
 
 # Same absence the `review` arm asserts, for the same reason: no target here
-# installed the corpus, so `${CLAUDE_SKILL_DIR}/../../standards/pr.md` is the
+# installed the corpus, so `${CLAUDE_SKILL_DIR}/../git-pr/references/pr.md` is the
 # only route left, and a local copy would silently swap the standard the pass
 # read the Testing discipline from.
 absent = [".claude/standards/pr.md", "standards/pr.md"]

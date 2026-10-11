@@ -16,3 +16,4 @@ The task, plan, and ready artifacts coordinating multi-session work, the board t
 - [Reclaim](reclaim.md): The reading canon worktrees list takes to decide which worktree is safe to remove after its work ships, why it refuses on an unreadable input, and the removal routes it reports
 - [Review](review.md): The review trigger and its poll and watch loops, where the poll lives and keeps its baseline, and the handback dispatch that carries a posted finding to the worker
 - [Runbooks](runbooks.md): The orchestrator runbooks under role-orchestrator, the session map a compaction writes and resume reads, and the parked-row pass the sweep fires
+- [Talk launch](talk.md): The launch shape for a planner or worker the operator talks with, why retirement is exempted until the operator ends the conversation, and why the controller does not relay the dialogue

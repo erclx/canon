@@ -63,6 +63,17 @@ describe('listStandardEntries', () => {
     expect(entry?.source).toBe(join('<canon>', 'standards', 'standard.md'))
   })
 
+  it('should list a moved standard once with its owner skill source', () => {
+    const matches = listStandardEntries(ROOT).filter(
+      (each) => each.name === 'publish',
+    )
+
+    expect(matches).toHaveLength(1)
+    expect(matches[0]?.source).toBe(
+      join('<canon>', 'claude/skills/git-pr/references/publish.md'),
+    )
+  })
+
   it('should list each name once and spell the toolkit root without a label when both roots are one folder', () => {
     const entries = listStandardEntries(PROJECT_ROOT)
     const names = entries.map((each) => each.name)

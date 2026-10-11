@@ -152,7 +152,7 @@ export function register(program: Command): void {
         'a target project carries none, rather than reaching the network or',
         'forcing a new dependency.',
         '',
-        "It also grades the title alone against standards/pr.md's ## Title",
+        "It also grades the title alone against claude/skills/git-pr/references/pr.md's ## Title",
         'section: the `<type>(<scope>)[!]: <subject>` structure, lowercase casing',
         'for the type, the scope, and the first subject word, and a 72-',
         'character length cap. A scan given no title, whether from a review',
@@ -164,7 +164,7 @@ export function register(program: Command): void {
         '  1  refused, with the reason on stderr or in the JSON record',
         '  2  the title or body carries a phase label, a board identifier, a',
         '     session link, a title word no dictionary holds, or a title',
-        "     breaking standards/pr.md's format, casing, or length",
+        "     breaking claude/skills/git-pr/references/pr.md's format, casing, or length",
         '',
         'Examples:',
         '  canon labels scan --event "$GITHUB_EVENT_PATH"',
@@ -378,7 +378,7 @@ async function runScan(opts: ScanOptions): Promise<number> {
     )
   } else {
     logWarn(
-      `${plural(titleFormatIssues.length, 'title format issue')} against standards/pr.md's ## Title section.`,
+      `${plural(titleFormatIssues.length, 'title format issue')} against claude/skills/git-pr/references/pr.md's ## Title section.`,
     )
     for (const issue of titleFormatIssues) logWarn(TITLE_FORMAT_MESSAGES[issue])
   }

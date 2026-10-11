@@ -15,7 +15,7 @@ It asks rather than grades, so it stays out of the finding counts. Whether a hum
 
 A question riding on a close-out would land on a thread reporting nothing owed, the dispatch would never fire, and the one party who can answer would never see it, so the lens sits under the same unified threshold as everything else: the threshold reads anything owed rather than any finding, which covers a bare question alongside a graded finding without separating them, and the summary line names the question count beside the three that stay zero.
 
-What it tests against is `standards/pr.md`, which says what makes a human required: a capability the agent lacks, never the cost of the run. A refusal the author actually met counts and names itself, and a refusal predicted and never met does not. `review-pr` reads that file off the plugin root through the fallback citation form, the same route every skill citing it takes.
+What it tests against is `claude/skills/git-pr/references/pr.md`, which says what makes a human required: a capability the agent lacks, never the cost of the run. A refusal the author actually met counts and names itself, and a refusal predicted and never met does not. `review-pr` reads that file through the sibling path `${CLAUDE_SKILL_DIR}/../git-pr/references/pr.md`, the same route every skill citing it from outside `git-pr` takes.
 
 ## The stale ticked box
 
@@ -29,7 +29,7 @@ That resolution comes off `canon pr head --json`, taking the record's `tip`, rat
 
 ## The reviewer request section
 
-`standards/pr.md` defines `## For the reviewer` as what the reviewer should confirm, one bullet per request, and names that reader as the reviewing session rather than leaving it ambiguous between a person and a session. A lens reads that section and stops there.
+`claude/skills/git-pr/references/pr.md` defines `## For the reviewer` as what the reviewer should confirm, one bullet per request, and names that reader as the reviewing session rather than leaving it ambiguous between a person and a session. A lens reads that section and stops there.
 
 Answering a request takes the Testing question's shape rather than new machinery, since the two match on the surface: an item that is not a finding still has to survive to a reader, still has to avoid the merge-blocking counts, and still has to keep the thread open until it is settled. The output block sits beside the Testing block in Step 4 for the same reason the lens sits beside the Testing lens in Step 3.
 
