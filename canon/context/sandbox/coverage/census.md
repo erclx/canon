@@ -21,7 +21,7 @@ An arm reports as `<category>:<command>/<arm>` rather than bare. A skill two sce
 
 ### Pairing
 
-Pairing tries two spellings, `<category>-<command>` first and bare `<command>` second. The fallback is what pairs `claude/target-setup.sh` to `target-setup` rather than to a `claude-target-setup` that does not exist. The rule lives in `skillForScenario`.
+Pairing tries two spellings, `<category>-<command>` first and bare `<command>` second. The fallback is what pairs `claude/target-setup.ts` to `target-setup` rather than to a `claude-target-setup` that does not exist. The rule lives in `skillForScenario`.
 
 `SANDBOX_ASSERTED_FLOOR` in `src/gate/measures.ts` pins the asserted-skill count, so a rename that drops a pairing fails the push it ships on. The `Sandbox coverage` gate stage counts scenarios that declare an expectation rather than skills a scenario reaches, and the two numbers move independently, so without the floor a wave of renames would drop pairings under a green gate.
 
