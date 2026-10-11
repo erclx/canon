@@ -88,7 +88,7 @@ Escalate only for real web apps. The `target-setup` skill reads `package.json` a
 
 In a monorepo the skill reads each folder holding a `package.json`, `pyproject.toml`, `go.mod`, `composer.json`, or `Cargo.toml` to depth two, skipping what git ignores. Each of those folders gets its own tooling stack and a `canon tooling sync <stack> <folder> --skip base` in the preview. Governance still installs once at the root, since a rule's `paths:` globs reach every subfolder, so a subfolder's language rules join the root install through `--add`.
 
-`node-server` is named rather than detected. It carries the server-side security and persistence rules for a project writing request handlers or a persistence layer in TypeScript, and the detect step matches a runtime or a framework against stack names, so nothing there marks a project as a backend. Pass it deliberately with `canon init --stack node-server` or `canon gov install node-server <target>`.
+`node-server` is named rather than detected. It carries the server-side security and persistence rules for a project writing request handlers or a persistence layer in TypeScript, and the detect step matches a runtime or a framework against stack names, so the stack never resolves on its own. `canon gov detect` proposes its two rules from a server framework or database client in the manifest, which you confirm in the preview. Pass the stack deliberately with `canon init --stack node-server` or `canon gov install node-server <target>`.
 
 Markdown-heavy projects, CLI tools, docs sites, research notebooks, and scripting repos stay on `base`. Escalation is a ceiling move, not a default.
 
