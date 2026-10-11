@@ -389,7 +389,7 @@ export function register(program: Command): void {
         '  unresolved a path written partially, or one past its first comma,',
         '             which can credit a changed file and never accuse one',
         '',
-        `Only ## ${KEY_CHANGES} is read. ## Technical Context legitimately names`,
+        `Only ## ${KEY_CHANGES} is read. ## Technical context legitimately names`,
         'files a branch never touched, so widening the read manufactures findings.',
         '',
         'One class survives the reader: a bullet citing where something is defined',

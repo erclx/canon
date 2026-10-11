@@ -147,7 +147,7 @@ describe('pullRequestBody', () => {
         '',
         'Sync claude, governance from toolkit.',
         '',
-        '## Key Changes',
+        '## Key changes',
         '',
         '- Update `claude/` .gitignore.',
         '- Add `governance/` 010-testing.md.',

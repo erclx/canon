@@ -29,7 +29,7 @@ function body(...bullets: string[]): string {
     '',
     'Prose.',
     '',
-    '## Key Changes',
+    '## Key changes',
     '',
     ...bullets,
   ].join('\n')
@@ -41,7 +41,7 @@ function pathsOf(...bullets: string[]): string[] {
 }
 
 describe('readSection', () => {
-  it('should return nothing when the body carries no Key Changes heading', () => {
+  it('should return nothing when the body carries no Key changes heading', () => {
     const read = extractKeyChangePaths('## Summary\n\nProse.\n', ROOTS)
 
     expect(read.kind).toBe('no-section')
@@ -49,19 +49,19 @@ describe('readSection', () => {
 
   it('should stop at the next heading of the same level', () => {
     const text = [
-      '## Key Changes',
+      '## Key changes',
       '',
       '- Add `src/pr/paths.ts`.',
       '',
-      '## Technical Context',
+      '## Technical context',
       '',
       '- The stamp lands at `docs/agents/index.md` inside a target.',
     ].join('\n')
 
-    expect(readSection(text, 'Key Changes')).not.toContain('docs/agents')
+    expect(readSection(text, 'Key changes')).not.toContain('docs/agents')
   })
 
-  it('should read a body written with carriage returns', () => {
+  it('should still read a body written in the old title case, with carriage returns', () => {
     const text = '## Key Changes\r\n\r\n- Add `src/pr/paths.ts`.\r\n'
 
     const read = extractKeyChangePaths(text, ROOTS)

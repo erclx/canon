@@ -96,7 +96,7 @@ export function pullRequestBody(changes: readonly DomainChange[]): string {
     '',
     `Sync ${domains} from toolkit.`,
     '',
-    '## Key Changes',
+    '## Key changes',
     '',
   ]
 
