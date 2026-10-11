@@ -5,11 +5,10 @@ description: Validating the session records and the standards corpus, the per-ki
 
 # Records validate
 
-`canon records validate <kind>` reports where a file and the standard governing it disagree. Five kinds are gitignored folders under the record root, resolved at `.canon/` first: `plans`, `groundwork`, `intake`, `memory`, and `teach`. The sixth is `standards`, the authoring corpus, which is tracked and installed rather than scratch.
+`canon records validate <kind>` reports where a file and the standard governing it disagree. Four kinds are gitignored folders under the record root, resolved at `.canon/` first: `plans`, `groundwork`, `intake`, and `teach`. The fifth is `standards`, the authoring corpus, which is tracked and installed rather than scratch.
 
 ```bash
 canon records validate plans
-canon records validate memory
 canon records validate standards
 canon records validate intake --json
 ```
@@ -23,7 +22,7 @@ It reads and never writes, and the reason splits by kind. A session record is pe
 
 `standards` reads the authoring root at `standards/` where it exists and a copy at `.claude/standards/` otherwise. The authoring root wins because it is the only tree anyone authors in and the only one the resolver answers from, so a finding fixed anywhere else is fixed where nothing reads it. No repository generates the second candidate any more, which leaves it as a floor under a target holding a copy an older toolkit installed. The walk stays flat, matching the catalog.
 
-Nothing fires it automatically. The five record folders are gitignored, so the standards-audit hook exits early on them and any check reading changed files from git never lists one. The corpus is tracked and still unreached, since the markdown audit reads content across the files git lists and rules on no filename. The verb runs at the moment a session claims the record is finished, which is the same placement `canon tasks validate` takes over the board.
+Nothing fires it automatically. The four record folders are gitignored, so the standards-audit hook exits early on them and any check reading changed files from git never lists one. The corpus is tracked and still unreached, since the markdown audit reads content across the files git lists and rules on no filename. The verb runs at the moment a session claims the record is finished, which is the same placement `canon tasks validate` takes over the board.
 
 The two record roots every kind resolves at are in `records.md`.
 
@@ -34,15 +33,12 @@ The two record roots every kind resolves at are in `records.md`.
 | `plans`      | A filename that is not `feature-<slug>.md`, a missing `# Feature:` heading, a missing required section, a files-to-touch entry naming no file or saying nothing about one, a question carrying no suggestion or no answer slot, and a batch still staged with a `**Batch N**` sub-heading inside the one file rather than split into its own plan |
 | `groundwork` | A track with no `README.md` or no `01-current-state.md`, a file missing `title` or `description`, a `README.md` with no `date` as `YYYY-MM-DD`, an unnumbered file, and a track holding a decision without its handoff or the reverse                                                                                                             |
 | `intake`     | A dump with no `00-overview.md`, the same frontmatter and numbering checks, an item missing any of `Problem`, `Fix`, `Worth it`, or `You`, and an item carrying `Open` with no `Suggested`                                                                                                                                                        |
-| `memory`     | A filename whose prefix names none of the four types, an entry missing `title`, `description`, or `category`, a `category` disagreeing with that prefix, a title repeating the filename, and a rule-bearing body missing a part                                                                                                                   |
 | `standards`  | A standard missing `title` or `description`, an absent `## Scope` section, a scope section carrying no `Does not govern:` list, a statement anchoring nothing, and a filename naming no part of the path the statement governs                                                                                                                    |
 | `teach`      | A workspace folder carrying no two-digit ordinal, an absent `MISSION.md`, `RESOURCES.md`, or `GLOSSARY.md`, a file missing `title` or `description`, a mission with no `date` as `YYYY-MM-DD` or no `## Success looks like` section, an unnumbered learning record, and a reference page opening with an ordinal                                  |
 
 The half-closed track is the groundwork check a reader cannot run by eye. A folder holding `06` without `07` reads as closed to anyone scanning filenames while the file a returning session actually opens is absent.
 
-The item check skips `00-overview.md` and `99-next-session.md`, since neither holds items and running it over the handoff would report every heading it carries. The memory walk skips `index.md` for the same reason, since the catalog is generated from its siblings rather than authored as an entry.
-
-A memory `category` is compared against the sentence-case form of the filename prefix rather than checked field by field, so one finding covers a prefix outside the four types, a field disagreeing with the prefix, and a casing drift that would open a second group in the catalog. The body check runs on `feedback` and `project` entries alone, because a `user` or `reference` entry is a single sentence by design and has no rule to apply.
+The item check skips `00-overview.md` and `99-next-session.md`, since neither holds items and running it over the handoff would report every heading it carries.
 
 The standards filename check derives a word from the governed path rather than counting words in the name. Every member of the corpus is named for the artifact its scope statement governs, and one word is what that produces rather than the rule itself, so a check keyed on word count would pass a conforming single word naming the wrong artifact. Each path segment offers its own word, a dotted container segment offers none, a hyphenated segment offers its parts, and the singular and the plural both match.
 
