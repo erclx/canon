@@ -1,7 +1,9 @@
+import { execFileSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { gitEnv } from '@/git/env'
 import { detectRules, staleDetectKeys } from '@/gov/detect'
 
 let root: string
@@ -97,6 +99,18 @@ describe('detectRules', () => {
     )
 
     expect(await proposedRules()).toEqual(['340-pydantic'])
+  })
+
+  it('should match a literal evidence path git would ignore', async () => {
+    seedToolkit(
+      `${DETECT}["480-canvas"]\ndeps = []\nfiles = [".canon/canvas"]\n`,
+    )
+    write(root, 'governance/rules/ui/480-canvas.md', '# canvas\n')
+    write(target, '.gitignore', '.canon/\n')
+    write(target, '.canon/canvas/board.json', '{}\n')
+    execFileSync('git', ['init', '-q', target], { env: gitEnv() })
+
+    expect(await proposedRules()).toEqual(['480-canvas'])
   })
 
   it('should read a manifest in a workspace package at depth two', async () => {

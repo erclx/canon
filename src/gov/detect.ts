@@ -231,8 +231,19 @@ function readDependencies(
   return deps
 }
 
+/** A glob carrying no wildcard names one path rather than a pattern. */
+function isLiteral(pattern: string): boolean {
+  return !/[*?[\]{}]/.test(pattern)
+}
+
+/**
+ * A literal pattern is also tested on disk, since evidence such as
+ * `.canon/canvas` sits in a folder a target's own `.gitignore` excludes, and
+ * the git listing never carries it.
+ */
 function matchEntry(
   entry: DetectEntry,
+  target: string,
   deps: ReadonlyMap<string, readonly string[]>,
   paths: readonly string[],
 ): Evidence[] {
@@ -245,7 +256,11 @@ function matchEntry(
 
   for (const pattern of entry.files) {
     const glob = new Bun.Glob(pattern)
-    const hit = paths.find((path) => glob.match(path))
+    const hit =
+      paths.find((path) => glob.match(path)) ??
+      (isLiteral(pattern) && existsSync(join(target, pattern))
+        ? pattern
+        : undefined)
     if (hit !== undefined)
       evidence.push({ kind: 'file', match: pattern, path: hit })
   }
@@ -278,7 +293,7 @@ export async function detectRules(
   const proposals = loadDetectEntries(root)
     .filter((entry) => live.has(entry.rule) && !covered.has(entry.rule))
     .flatMap((entry) => {
-      const evidence = matchEntry(entry, deps, paths)
+      const evidence = matchEntry(entry, target, deps, paths)
       return evidence.length === 0 ? [] : [{ rule: entry.rule, evidence }]
     })
 
