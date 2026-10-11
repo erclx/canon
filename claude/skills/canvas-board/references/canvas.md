@@ -72,7 +72,7 @@ Applies to an explanation frame only. A mockup of the project's interface render
 - Render an explanation frame about 1100px wide.
 - Take colors from the project's custom properties. A frame that defines colors of its own sets the dark values on `:root` and the light ones under `[data-theme="light"]`, since the shell sets `data-theme` on each frame's root.
 - Make each box tall enough to show all its content, with no scrollbar and no clipped line.
-- Read frames left to right in reading order. Add a frame with no `--x` so the verb places it after the last with the standard gap.
+- Read frames left to right in reading order. Let `frame add` place each frame after the last with the standard gap, and move one only when the operator asks for a position.
 
 ## Layout
 
