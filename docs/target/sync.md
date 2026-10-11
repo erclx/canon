@@ -78,7 +78,7 @@ Standards take no part in that run. Nothing installed them, so there is no copy 
 
 - Claude seed docs such as `CLAUDE.md` and `canon/REQUIREMENTS.md`: merge by hand against the toolkit copy, section by section, keeping the project's customizations. A `stale` seed is safe to take whole.
 - Governance rules already installed: `canon gov sync <path>` diffs and applies, and never adds new rules. A rule your recorded stack lists reports as `missing` instead.
-- Tooling configs and seeds: `canon tooling <stack> <path>` overwrites golden configs and merges seeds
+- Tooling configs and seeds: `canon tooling <stack> <path>` overwrites golden configs and merges dictionary seeds, and drops every other seed once
 - Reference docs for a stack: `canon tooling reference <stack>` reads and never writes, so there is nothing to sync
 - Index regeneration after markdown edits: `canon indexes regen`
 

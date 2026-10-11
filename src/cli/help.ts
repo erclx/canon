@@ -10,6 +10,8 @@ type HelpStream = { isTTY?: boolean }
 
 // The grouping mirrors the README's domain table and has no other source, so a
 // command added to the program needs a row here or help-option.test.ts fails.
+// A row here also needs a `canon <verb>` line in claude/skills/canon-cli, or a
+// name in TOOLKIT_ONLY in canon-cli-skill.test.ts, which reads this list.
 export const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
   {
     title: 'Project',
@@ -25,7 +27,7 @@ export const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
     title: 'Domains',
     rows: [
       ['gov [cmd]', 'Governance rules (install, sync, list)'],
-      ['standards [cmd]', 'Standards (install, sync, list, <name>)'],
+      ['standards [cmd]', 'Standards (list, <name>)'],
       ['tooling [cmd]', 'Tooling stacks (sync, ref, create)'],
       ['claude [cmd]', 'Claude workflow (init, sync, setup)'],
       ['wiki [cmd]', 'Wiki pages (init)'],
