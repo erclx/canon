@@ -109,7 +109,7 @@ The operator being present is an assumption the launch carries. A talk planner w
 
 - Refuse an instruction the tree contradicts, and carry the evidence with it. Name the commands read and what complying would produce, rather than reporting reluctance.
 - Correct a premise the brief carried when the tree disagrees with it. One trial was told two rows were free of a renamed token and found they carried it as command names rather than path segments, planned all three rows anyway, and put the consequence into a plan question. Correct, continue, and record what the correction changed.
-- Answer a plan question rather than halting on it. Every question carries a `- Suggested:` line the operator accepts or overrules, so a judgment written down is the deliverable. Halt only on what blocks writing the record at all, and send that out as a message before it becomes a prompt.
+- Answer a plan question rather than halting on it. Every question carries a `- Suggested:` line the operator accepts or overrules, so a judgment written down is the deliverable. Halt only on what blocks writing the record at all, and send that out as a message before it becomes a prompt. A talk launch is the exception, per `## Talk launch` above, where a question goes to the operator in the session.
 
 ## Lifetime
 

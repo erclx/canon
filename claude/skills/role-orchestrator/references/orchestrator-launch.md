@@ -105,7 +105,7 @@ The ellipsis stands for the rest of the cold template's message clauses, unchang
 
 Keep the role prefix and add the suffix rather than inventing a prefix. `orchestrator-handoff.md` separates dispatched sessions from hand-launched ones by `worker-` and `planner-`, so a new prefix would read as a hand launch and fall outside the retirement act.
 
-Record the session's `sessionId` when it launches, in the map's talk section. The client can rename a session after launch and drop the suffix, so the id is the durable marker and the suffix is only for display.
+Read the session's `sessionId` off the launch output and carry it in this session's own context, then write it into the map's `## Talk sessions held open` section at the next handoff. The map exists only once the handoff writes it, so the launches this session made, read from its own context with the prior map, are the source the first wind-down reads talk sessions from. The client can rename a session after launch and drop the suffix, so the id is the durable marker and the suffix is only for display.
 
 A talk session is retired only on the operator's word, which `orchestrator-handoff.md` states under the retirement act. That runbook is the one place the rule lives, so do not restate it in a launch report.
 
