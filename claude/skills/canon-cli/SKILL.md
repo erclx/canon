@@ -27,15 +27,14 @@ Consult to pick the `canon` verb for a job, and before running a verb that write
 
 ## Domains
 
-| Job                                                             | Verb              |
-| --------------------------------------------------------------- | ----------------- |
-| Install or sync governance rules                                | `canon gov`       |
-| Read an authoring standard by name                              | `canon standards` |
-| Sync a tooling stack's configs and seeds, or read its reference | `canon tooling`   |
-| Set up or sync the Claude workflow                              | `canon claude`    |
-| Scaffold a wiki                                                 | `canon wiki`      |
-| Regenerate the `index.md` files                                 | `canon indexes`   |
-| Read a toolkit reference doc                                    | `canon docs`      |
+| Job                                                             | Verb            |
+| --------------------------------------------------------------- | --------------- |
+| Install or sync governance rules                                | `canon gov`     |
+| Sync a tooling stack's configs and seeds, or read its reference | `canon tooling` |
+| Set up or sync the Claude workflow                              | `canon claude`  |
+| Scaffold a wiki                                                 | `canon wiki`    |
+| Regenerate the `index.md` files                                 | `canon indexes` |
+| Read a toolkit reference doc                                    | `canon docs`    |
 
 ## Author and render
 
@@ -89,7 +88,7 @@ Read the doc each line names before running one of these. `canon docs install-an
 - `canon migrate --write` rewrites files that cite a retired name or layout. It reports and writes nothing without the flag. See `canon docs migrate`.
 - `canon indexes regen` rewrites each generated `index.md` from the folder's current state, so a hand edit there is lost. See `canon docs indexes`.
 
-No command writes a standard into a project, so `canon standards` is safe to run. `CLAUDE.md` and the other seed docs are copy-once, and no sync updates them. Merge those by hand against the toolkit copy.
+`CLAUDE.md` and the other seed docs are copy-once, and no sync updates them. Merge those by hand against the toolkit copy.
 
 ## Source of truth
 

@@ -5,7 +5,7 @@ description: What each section of a compact handoff carries, what stays out, and
 
 # Handoff note
 
-The shape `session-compact` writes. It lives here rather than in `standards/` because one skill reads it and a standard nothing else cites has no second reader to correct it.
+The shape `session-compact` writes. It lives in this skill's `references/` because one skill reads it, and a shape nothing else cites has no second reader to correct it.
 
 ## The test every line passes
 

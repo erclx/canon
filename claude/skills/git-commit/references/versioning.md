@@ -39,19 +39,19 @@ External release identity used in git tags and release notes. Independent of pha
 
 ## Where each appears
 
-| Surface                                                             | Phase labels | Semver tags                         |
-| ------------------------------------------------------------------- | ------------ | ----------------------------------- |
-| `.canon/tasks/`                                                     | yes          | no                                  |
-| Chat with the operator                                              | yes          | no                                  |
-| Tracked prose (context entries)                                     | conditional  | no                                  |
-| Shipped prose (`standards/`, `claude/skills/`, `governance/rules/`) | no           | no                                  |
-| PR titles                                                           | no           | only when the PR cuts a release     |
-| PR bodies                                                           | no           | only when the PR cuts a release     |
-| Review comments                                                     | no           | only when referencing a release     |
-| Issue titles and bodies                                             | no           | only when referencing a release     |
-| Commit messages                                                     | no           | only when the commit cuts a release |
-| Git tags                                                            | no           | yes                                 |
-| README and `CHANGELOG.md`                                           | no           | yes                                 |
+| Surface                                               | Phase labels | Semver tags                         |
+| ----------------------------------------------------- | ------------ | ----------------------------------- |
+| `.canon/tasks/`                                       | yes          | no                                  |
+| Chat with the operator                                | yes          | no                                  |
+| Tracked prose (context entries)                       | conditional  | no                                  |
+| Shipped prose (`claude/skills/`, `governance/rules/`) | no           | no                                  |
+| PR titles                                             | no           | only when the PR cuts a release     |
+| PR bodies                                             | no           | only when the PR cuts a release     |
+| Review comments                                       | no           | only when referencing a release     |
+| Issue titles and bodies                               | no           | only when referencing a release     |
+| Commit messages                                       | no           | only when the commit cuts a release |
+| Git tags                                              | no           | yes                                 |
+| README and `CHANGELOG.md`                             | no           | yes                                 |
 
 ## Rules
 

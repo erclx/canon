@@ -9,7 +9,7 @@ metadata:
 
 Some decisions are settled by looking rather than by reasoning, and no draft is wrong until one is picked. Every step here puts several candidates in front of the operator and keeps the real surface untouched until they have chosen.
 
-The candidates live on the local design canvas, the surface `canon:canvas-board` drives. Every verb below is `canon canvas`, and `canon standards canvas` fixes the content format a frame takes. Read that standard before writing the first frame.
+The candidates live on the local design canvas, the surface `canon:canvas-board` drives. Every verb below is `canon canvas`, and `${CLAUDE_SKILL_DIR}/../canvas-board/references/canvas.md` fixes the content format a frame takes. Read that reference before writing the first frame.
 
 ## Guards
 
