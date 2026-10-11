@@ -1339,6 +1339,7 @@ async function runInstall(
 function isAddWithoutStack(stack: string | undefined, target: string): boolean {
   if (stack === undefined) return true
   if (target !== '.') return false
+  if (stack === '.' || stack.includes('/')) return true
   return !govStackExists(PROJECT_ROOT, stack)
 }
 

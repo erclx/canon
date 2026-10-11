@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, rmSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -58,6 +58,19 @@ describe('gov install --add with no stack', () => {
 
     expect(run.status).toBe(0)
     expect(existsSync(canonRule('canon', 'tasks'))).toBe(true)
+  })
+
+  it('should read a positional carrying a slash as the target even when it names a stack', () => {
+    mkdirSync(join(target, 'node'))
+
+    const run = install(['--add', 'tasks', './node'], target)
+
+    expect(run.status).toBe(0)
+    expect(
+      existsSync(
+        join(target, 'node', '.claude', 'rules', 'canon', 'canon', 'tasks.md'),
+      ),
+    ).toBe(true)
   })
 
   it('should keep the chain an earlier stack install recorded', () => {
