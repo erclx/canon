@@ -5,9 +5,9 @@ description: The post-merge hook that closes a shipped task, how a pull request 
 
 # Skill archiving on merge
 
-Which task closes is decided from the diff, not the session. `context-fold` resolves a merge base against `origin/main`, unions the committed diff with the working tree and untracked files, then matches unchecked outcomes on the board against what shipped. Completion is a fact about the repository, so a session that shipped a queued task without ever discussing it still leaves the board correct.
+Which task closes is decided from the diff, not the session. `task-complete` resolves a merge base against `origin/main`, unions the committed diff with the working tree and untracked files, then matches unchecked outcomes on the board against what shipped. Completion is a fact about the repository, so a session that shipped a queued task without ever discussing it still leaves the board correct.
 
-Requirements, decisions, and design stay session-sourced, because those are judgments a diff cannot carry. The same baseline feeds the context refresh, so it reads something when run on `main` itself. See `canon/context/claude-plugin/skill-baseline.md` for how that baseline resolves and which skills share it.
+Requirements, decisions, and design stay session-sourced, because those are judgments a diff cannot carry, and `context-fold` folds them into the context entries from the same baseline. See `canon/context/claude-plugin/skill-baseline.md` for how that baseline resolves and which skills share it.
 
 The `post-merge` git hook chains the archive. Every other step fires from `auto-ship` or `git-ship`, both of which finish while the pull request is still open, and a task archived there closes for work that may be abandoned. The hook is the only event that lands late enough, and the board being gitignored rules out reading it from anywhere but the operator's own machine.
 
@@ -27,7 +27,7 @@ That number has to name an open pull request. `gh pr view` resolves by head bran
 
 The gates all live in `canon tasks archive` rather than in the shell. A hook that pre-filtered would duplicate them in a language where the outcome test already needed an errexit comment, and the skill calling the same command is what stops the attended and unattended paths archiving differently.
 
-Each gate refuses with a non-zero exit rather than reporting, since a caller with nobody watching cannot act on a warning. A task whose outcomes are not all closed, whose plan is still live, which shares its pull request number with another task, or which still names a branch on its `Pending branch:` line all refuse and print why. `task-board` keeps the one check the command cannot make, which is confirming the work reached `main` when a person archives by name rather than by merge.
+Each gate refuses with a non-zero exit rather than reporting, since a caller with nobody watching cannot act on a warning. A task whose outcomes are not all closed, whose plan is still live, which shares its pull request number with another task, or which still names a branch on its `Pending branch:` line all refuse and print why. `task-complete` keeps the one check the command cannot make, which is confirming the work reached `main` when a person archives by name rather than by merge.
 
 The merge settles the plan too, not the tick that precedes it. `canon tasks archive` moves the plan into `.canon/plans/archive/` and retargets the archived task's `Plan:` line in the same act, because a tick is a claim a session makes about a branch and a merge is a fact about the trunk, and only the second is evidence the plan is finished. `canon tasks validate` compares a `## Run now` row's Plan column against the task's own `Plan:` line. A gate refusing until a plans sweep ran is the alternative, and it holds a correct board hostage to a sweep that already ran. The trade is one release of lag, since the hook runs the installed `canon` binary rather than this checkout's source. Measured at `dbe83429` on 2026-09-01.
 

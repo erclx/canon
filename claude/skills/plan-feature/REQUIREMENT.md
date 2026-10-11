@@ -40,4 +40,4 @@ Without this skill, implementation starts before anyone knows what it touches. A
 
 - Executing the plan, which is the ship pipeline
 - Task-board state, which `task-board` owns. A plan links to its task and does not create one.
-- Reconciling the planning docs after the work lands, which `context-fold` owns
+- Reconciling the context entries after the work lands, which `context-fold` owns, and marking the board, which `task-complete` owns

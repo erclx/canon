@@ -5,19 +5,19 @@ description: The merge-base block three skills share, and the read against write
 
 # Skill diff baseline
 
-The diff baseline is a block three skills share, `context-fold` and two ported copies. It resolves a merge base against `origin/main`, falls back to local `main`, and scopes what a skill reads to the change under review. Preferring the remote is what stops a local `main` trailing behind from pulling other people's merged commits into the set.
+The diff baseline is a block four skills share, `context-fold`, `task-complete`, and two ported copies. It resolves a merge base against `origin/main`, falls back to local `main`, and scopes what a skill reads to the change under review. Preferring the remote is what stops a local `main` trailing behind from pulling other people's merged commits into the set.
 
 ## An unresolvable baseline
 
-A `git init` project on `main` with no remote resolves no usable baseline, which is the ordinary shape of a scaffolded target project rather than an edge case. That costs only the committed half of the diff, since the working tree and untracked files still scope correctly. The marking step recovers the committed half by reading `git log -p -1`, which supplies content where a bare file list would not.
+A `git init` project on `main` with no remote resolves no usable baseline, which is the ordinary shape of a scaffolded target project rather than an edge case. That costs only the committed half of the diff, since the working tree and untracked files still scope correctly. `task-complete`'s marking step recovers the committed half by reading `git log -p -1`, which supplies content where a bare file list would not.
 
-The context refresh runs on the working tree and untracked files, and skips only when that set is empty. It never substitutes the whole tree for a missing baseline, since it writes and a set that wide rewrites every context entry.
+`context-fold`'s context refresh runs on the working tree and untracked files, and skips only when that set is empty. It never substitutes the whole tree for a missing baseline, since it writes and a set that wide rewrites every context entry.
 
 The asymmetry between the marking step and the steps that write is deliberate and worth keeping: on a scaffolded project the last commit is the scaffold commit, so the `git log -p -1` recovery is the whole tree by another route, which a step that only reads can tolerate and a step that writes cannot. Widening what a step reads is safe. Widening what a step writes is not.
 
 ## The shared-resource rule
 
-That baseline is the worked case behind a rule split across two skills. One step in `context-fold` resolves the diff baseline and several consume it, and a fallback written against the marking step, which only reads, would let the step that writes rewrite every context entry.
+That baseline is the worked case behind a rule split across two skills. When one `context-fold` step resolved the diff baseline and several consumed it, a fallback written against the marking step, which only reads, would have let the step that writes rewrite every context entry. The marking step now lives in `task-complete` with its own copy of the block, which keeps the two fallbacks apart by construction.
 
 So `plan-feature` obliges a plan that establishes a resource with more than one consumer to list them and mark each read or write, and `review-pr` carries the matching lens beside Integration and Contract. Both skills ship to target projects, where a consumer is a call site, a module, or a component rather than a skill step, so the clause names the unit generically. The review half is what catches the miss, since an author who never noticed the resource was shared will not notice the authoring clause either.
 
