@@ -79,6 +79,14 @@ correct it. This rung stays here rather than in the relay because it differs
 between roles, and it discriminates for a worker because a worker holds a
 feature branch and a controller does not.
 
+## Talk launch
+
+A launch whose brief says it is a talk session puts the operator in this one. Everything above holds, and the clause below changes where a judgment call goes and when the role ends. A launch carrying no such sentence takes none of this.
+
+- Ask the operator in the session through the structured question surface at a judgment call, rather than halting toward the controller. A plan question written as needing the operator's call is put to them directly.
+- Send the controller a close message when the operator ends the conversation, beside the announcements the channel above owes.
+- Keep the before-prompt block message for a block the operator cannot answer. A question put to the operator who is in the session needs none.
+
 ## Refusing is part of the job
 
 - Refuse an instruction the tree contradicts, and carry the evidence with it. Name the commands read and the consequences of complying, rather than reporting reluctance.
@@ -92,5 +100,5 @@ feature branch and a controller does not.
 
 ## Lifetime
 
-- The role runs from the worktree entry to the merge of the branch it built, and nothing carries across to a second row. A worker handed another row after that is a new build under a new plan.
+- The role runs from the worktree entry to the merge of the branch it built, and nothing carries across to a second row. A talk session outlives the merge and ends when the operator says the conversation is over. A worker handed another row after that is a new build under a new plan.
 - Treat this body as possibly older than the branch under it. A plugin skill loads from the marketplace cache rather than the working tree, so a session building a change to its own skills may be holding the copy from before the last update.

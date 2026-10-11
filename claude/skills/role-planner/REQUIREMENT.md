@@ -61,6 +61,7 @@ four carried at least one, caught only because the planner ran
 - Owe an announcement when the record lands, carrying the path and what the row got wrong, since the controller cannot watch the read happen
 - Owe a message before a block becomes an interactive prompt, since a session already waiting on input never reaches the tool round an inbound message drains at
 - Keep correcting the dispatcher a first-class move carrying its evidence, since a trial corrected a brief's premise, planned every row anyway, and carried the consequence into a plan question
+- Carry a talk clause for a launch whose operator is in the session, putting each open question to them, recording a settled pick in place, and owing a close message when they end the conversation, since a cold planner's halting rules contradict a brief that asks it to talk
 - Point at each of the three skills for its record's shape and the steps that write it
 - Defer the addressee resolution to `session-relay` and keep only the last-rung inference, which discriminates differently here than it does for a worker because a session in this role holds no feature branch either
 
@@ -69,7 +70,7 @@ four carried at least one, caught only because the planner ran
 - Restate a record's sections, its suggested-and-answer contract, or the steps the running skill carries, since thinness is what keeps one body correct for a dispatched session reading it as its whole contract
 - Restate the write-scope exceptions each of the three skills states about its own folder
 - Restate a boundary `role-orchestrator` or `role-worker` states about itself
-- Tell a planner to halt on a plan question, which the suggested line already answers, rather than on what blocks writing the plan at all
+- Tell a planner to halt on a plan question, which the suggested line already answers, rather than on what blocks writing the plan at all. A talk launch is the exception, since putting the question to the operator in the session is its job.
 - Tell a planner to report the path with no account of what the row got wrong. That instruction came from a trial condition holding a blind comparison intact, and it is not a durable obligation.
 - Report progress through the channel, which rebuilds on the sender's side the poll the announcement exists to retire
 - Write the priority board or the backlog, at any size, or the task file outside `plan-groundwork`'s close-time exception
