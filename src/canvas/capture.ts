@@ -157,7 +157,7 @@ export async function captureCanvas(
   })
 }
 
-type ServeRefused = {
+export type ServeRefused = {
   readonly ok: false
   readonly reason: 'no-server' | 'capture-failed'
   readonly detail: string
@@ -168,20 +168,34 @@ async function serveFor<T>(
   deps: CaptureDeps,
   run: (base: string, capture: CaptureEngine) => Promise<T>,
 ): Promise<T | ServeRefused> {
-  const start = deps.start ?? startCanvas
+  return serveCanvas(root, deps.start, async (base) => {
+    const capture =
+      deps.capture ?? (await import('@/capture/render')).captureSources
+    return run(base, capture)
+  })
+}
+
+/**
+ * Runs a call against a canvas served on a free port for its length, so a verb
+ * that renders frames reads the same address the board shows.
+ */
+export async function serveCanvas<T>(
+  root: string,
+  startOverride: CaptureDeps['start'],
+  run: (base: string) => Promise<T>,
+): Promise<T | ServeRefused> {
+  const start = startOverride ?? startCanvas
   const server = start(root, { port: 0, shell: new Response('') })
   if (!server.ok) {
     return {
       ok: false,
       reason: 'no-server',
-      detail: `${server.detail}, so run canon canvas serve and capture again`,
+      detail: `${server.detail}, so run canon canvas serve and try again`,
     }
   }
 
   try {
-    const capture =
-      deps.capture ?? (await import('@/capture/render')).captureSources
-    return await run(server.url, capture)
+    return await run(server.url)
   } catch (error) {
     return {
       ok: false,
