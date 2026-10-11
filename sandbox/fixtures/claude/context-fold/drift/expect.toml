@@ -27,9 +27,11 @@ absent = [
 
 # The arm runs under `bypassPermissions`, because no permission mode both allows
 # writes under `.claude/` and scopes them. This is what replaces the denial count
-# the envelope can no longer supply. The record root is named beside it, since a
-# run that moved a plan would write there and nowhere under `.claude/`.
-write_scope = [".claude/**", ".canon/**"]
+# the envelope can no longer supply. `canon/context/**` is the one tracked folder
+# the fold writes, and the storage rewrite the manual list expects lands there.
+# The record root is named beside it, since a run that moved a plan would write
+# there and nowhere under `.claude/`.
+write_scope = [".claude/**", "canon/context/**", ".canon/**"]
 
 # Prose the checker cannot assert, each with the reason it stays here. Kept beside
 # the mechanical assertions rather than left in the scenario's log lines, which is
