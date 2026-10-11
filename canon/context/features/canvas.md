@@ -9,7 +9,7 @@ description: The canvas server, the shell's regions, states, and behavior, the p
 
 ## Overview
 
-`canon canvas` serves a local surface of pages and HTML frames that the operator drags, selects, and edits in the browser, and gives an agent a verb for each thing the mouse does. The `canvas` plugin skill tells a session how to drive it, and `claude/skills/canvas/references/canvas.md` fixes the content format both sides write. The verb reference, with every record and refusal, is `docs/agents/canvas.md`.
+`canon canvas` serves a local surface of pages and HTML frames that the operator drags, selects, and edits in the browser, and gives an agent a verb for each thing the mouse does. The `canvas-board` plugin skill tells a session how to drive it, and `claude/skills/canvas-board/references/canvas.md` fixes the content format both sides write. The verb reference, with every record and refusal, is `docs/agents/canvas.md`.
 
 The canvas exists for Claude to draw frames the operator reviews. No further design-tool features are added unless the operator asks, so a later planner does not propose new inspector or navigation features unprompted.
 
@@ -18,7 +18,7 @@ The canvas exists for Claude to draw frames the operator reviews. No further des
 - `src/canvas/` owns the server, the content reader and writers, element addressing, the inline-style editor, token resolution, and capture
 - `src/canvas/client/` owns the browser shell, built by Bun's HTML bundler when the server starts
 - `src/canvas/client/inspector/` owns the inspector's field, section, size field, alignment grid, color field and picker, value formatting and color parsing, and its own stylesheet, composed by `inspector.tsx`
-- `claude/skills/canvas/` owns the procedure a session follows
+- `claude/skills/canvas-board/` owns the procedure a session follows
 - `.canon/canvas/` at the main worktree root owns the content, gitignored
 
 ## Surface

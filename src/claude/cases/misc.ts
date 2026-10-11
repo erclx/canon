@@ -25,7 +25,7 @@ export const MISC_CASES: readonly SkillCase[] = [
   {
     prompt:
       'Draw the signup screen as a frame on the canvas, then restyle the element I just selected there.',
-    expect: 'canvas',
+    expect: 'canvas-board',
   },
   {
     prompt:

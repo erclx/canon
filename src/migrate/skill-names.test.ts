@@ -92,9 +92,9 @@ describe('renameText under the canvas citation rows', () => {
   })
 
   it('should rewrite the skill folder path', () => {
-    expect(
-      renameText('claude/skills/canvas/SKILL.md', SKILL_NAME_RULES),
-    ).toBe('claude/skills/canvas-board/SKILL.md')
+    expect(renameText('claude/skills/canvas/SKILL.md', SKILL_NAME_RULES)).toBe(
+      'claude/skills/canvas-board/SKILL.md',
+    )
   })
 
   it.each([

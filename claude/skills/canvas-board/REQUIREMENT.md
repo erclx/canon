@@ -1,9 +1,9 @@
 ---
-name: canvas
+name: canvas-board
 description: Scope boundary for driving the local design canvas, and the line between a drafted frame and the design it feeds
 ---
 
-# Canvas requirement
+# Canvas board requirement
 
 ## Gap
 

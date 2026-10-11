@@ -1,4 +1,4 @@
-# What a correct `/canvas` run leaves behind on the open arm.
+# What a correct `/canvas-board` run leaves behind on the open arm.
 # Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
 # needs no backslash escaping.
 
