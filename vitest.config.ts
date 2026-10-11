@@ -8,5 +8,10 @@ export default defineConfig({
   test: {
     include: ['src/**/*.test.{ts,tsx}', 'web/src/**/*.test.ts', '*.test.ts'],
     setupFiles: ['./vitest.setup.ts'],
+    // One suite's spawn tests need headroom the machine lock cannot provide.
+    // The lock stops two suites running at once and cannot see ambient load,
+    // and vitest's default fills a 32-core box on its own once each worker
+    // spawns a child. CI runs one suite per runner, so it keeps the default.
+    maxWorkers: process.env.CI === undefined ? '50%' : undefined,
   },
 })
