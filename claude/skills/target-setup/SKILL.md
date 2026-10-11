@@ -33,7 +33,7 @@ rather than a step within it, so the full chain never runs it separately.
 
 ## Non-interactive path
 
-Every phase runs under `CANON_NON_INTERACTIVE=1` with no TTY. Two phases
+Every phase runs under `CANON_NON_INTERACTIVE=1` with no TTY. Three phases
 otherwise pause, and each takes an argument that answers its prompt ahead of
 time:
 
@@ -41,11 +41,15 @@ time:
   takes every candidate the scan found, and `--folders <a>,<b>` takes a named
   set. With neither, and with no TTY, the phase reports its candidates and stops
   rather than choosing for the operator.
+- `install` and `gov` confirm the proposed extras with the operator.
+  `--extras <a>,<b>` takes a named set and `--extras none` takes none. With
+  neither, and with nobody to answer, both take every proposal and list each in
+  the report rather than stopping.
 - `gov` stops on a detected technology with no matching rule. `--skip-gaps`
   proceeds with the matched layer and lists the gap in the report.
 
 Claude Code's tool permission dialog is the confirmation gate for everything
-else. Do not pause for a separate confirmation.
+else. Do not pause for a separate confirmation beyond the extras question.
 
 ## Scope
 
@@ -71,7 +75,8 @@ the `install` and `gov` phases share rather than each stating.
 
 ## Phase: install
 
-Run the chain in order, starting immediately after the preview. Run from the
+Run the chain in order, starting once the operator has confirmed the extras the
+preview proposed, per the detect reference. Run from the
 target project's current directory. Do not cd into the toolkit source tree. The
 `canon` CLI is global.
 
@@ -116,7 +121,8 @@ Do not generate ESLint, Vitest, or Playwright configs. They ship as golden files
 ## Phase: gov
 
 Governance rules and nothing else, for a project declining the tooling layer.
-Resolve exactly as the detect reference states, then run:
+Resolve exactly as the detect reference states, confirm the proposed extras
+there, then run:
 
 ```bash
 CANON_NON_INTERACTIVE=1 canon gov install <stack> --add <extras> <target>

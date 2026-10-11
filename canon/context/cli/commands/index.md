@@ -13,6 +13,7 @@ Command registration and migration off bash, what earns a verb, writing files an
 - [Writing files and output](output.md): Stdout against stderr, writing into a target, record-root resolution, batching edits into one invocation, and validators with their repairs
 - [Overview](overview.md): What a command owes, commander registration, migrating a domain off bash verb by verb, and the gotchas in wiring a command and testing one
 - [Pull request evidence comparison](pr-evidence.md): What canon pr evidence reads and why it reads the API rather than the checkout, how the comment is found by its marker, what the record reports, how cases group by view, how image widths are chosen, and what counts as evidence
+- [The pull request draft lift](pr-lift.md): The decision canon pr lift reverses about who lifts a draft mark, why the gate order and the re-read sit where they do, the poll's port of the base-standing read, and why the cloud reviewer still cannot lift
 - [Pull request verbs](pr.md): The pr verbs that key on a commit rather than the pull request object, the review-state marker, evidence and preview comments, the local server read, and the check-run shapes that read as a false green
 - [Prompts and unattended callers](prompts.md): Declined prompts, headless refusals, decision seams, record-driven branching for callers behind a shell wrapper, the refusal reason split, and driving a prompt through a PTY
 - [Upgrade and skew](upgrade.md): The upgrade verb, the version skew read and its two callers, and the record shapes that keep a behind report honest

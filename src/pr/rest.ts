@@ -17,6 +17,9 @@ export interface RestPull {
   readonly head?: { readonly ref?: string; readonly sha?: string }
   readonly base?: { readonly ref?: string }
   readonly mergeable_state?: string
+  readonly state?: string
+  readonly draft?: boolean
+  readonly node_id?: string
 }
 
 /** One row of `repos/{owner}/{repo}/pulls/<n>/reviews`. */

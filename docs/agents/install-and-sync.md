@@ -112,6 +112,10 @@ Every documented agent path already passes the argument, including
 `canon init`. The confirm-then-apply prompt after it still resolves to `Yes`
 headlessly, so a call that names its stack is unchanged.
 
+`--add` with no stack installs the named rules into the one positional, or the
+current directory, and keeps the recorded chain. Pass `./node` to force a target
+named like a stack. [Rule detection](gov-detect.md) proposes the names.
+
 `canon gov install` also refuses the toolkit root as a target. It resolves the
 target before anything else, so a path that does not exist fails rather than
 being scaffolded.

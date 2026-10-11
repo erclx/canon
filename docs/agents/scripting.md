@@ -15,7 +15,8 @@ Use these to discover what's available instead of hardcoding names.
 | --------------------------------- | ---------------------------------------------------------------- |
 | `canon tooling list --json`       | Stacks, extends chain, dep and script counts                     |
 | `canon standards list --json`     | Standards docs and the paths each governs                        |
-| `canon gov list --json`           | Governance stacks, rule sets, and unreferenced rules             |
+| `canon gov list --json`           | Governance stacks, rule sets, evidence, and unreferenced rules   |
+| `canon gov detect --json`         | Opt-in rules a target's dependencies and paths propose           |
 | `canon claude seeds list --json`  | Seed doc sources with content                                    |
 | `canon claude skills list --json` | Plugin skills, descriptions, requirement flag, family vocabulary |
 | `canon docs list --json`          | Consumer docs plus per-domain context                            |

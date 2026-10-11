@@ -60,6 +60,16 @@ import {
 } from '@/pr/frames'
 import { type HeadRefusal, resolveHead, resolveTip } from '@/pr/head'
 import {
+  DEFAULT_WAIT_SECONDS,
+  type EvidenceGate,
+  type GitRunner,
+  lift,
+  type LiftApi,
+  type LiftRefusal,
+  type PullState,
+  readBaseStanding,
+} from '@/pr/lift'
+import {
   dropAddressLine,
   findLocalServer,
   type Listener,
@@ -84,6 +94,7 @@ import { type TickRefusal, tickBoxes } from '@/pr/tick'
 import {
   commentRowOf,
   identityOf,
+  mergeStateOf,
   type PullIdentity,
   parseJsonLines,
   type RestComment,
@@ -93,6 +104,7 @@ import {
   selectBranchPull,
 } from '@/pr/rest'
 import { resolveReviewScope } from '@/pr/review-scope'
+import { PROJECT_ROOT } from '@/roots/project'
 import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
 
 const GH_TIMEOUT_MS = 30_000
@@ -117,6 +129,11 @@ interface EvidenceOptions extends ReadOptions {
   readonly checklist?: string
   readonly local?: string
   readonly check?: boolean
+}
+
+interface LiftCommandOptions extends ReadOptions {
+  readonly check?: boolean
+  readonly wait?: string
 }
 
 interface LocalOptions extends ReadOptions {
@@ -654,6 +671,62 @@ export function register(program: Command): void {
     )
     .action(async (number: string | undefined, opts: EvidenceOptions) => {
       process.exitCode = await runEvidence(number, opts)
+    })
+
+  pr.command('lift')
+    .description(
+      "Lift a pull request's draft mark once its reviews, evidence, standing, and CI all read clear at the head",
+    )
+    .argument('[number]', 'Pull request to lift, defaulting to this branch')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--root <path>', 'Repository to read, defaulting to the cwd')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .option('--check', 'Report every gate and write nothing')
+    .option(
+      '--wait <seconds>',
+      `Hold for a pending CI run up to this long, default ${DEFAULT_WAIT_SECONDS}`,
+    )
+    .addHelpText(
+      'after',
+      [
+        '',
+        'The verb reads the gate itself, so any session that closes a review can',
+        'run it and nobody has to vouch for who is asking. Gates, in the order',
+        'they are read:',
+        '  review    the newest `## Review` is closed at the head, off its marker',
+        '  ui        the newest `## UI review` is closed at the head, bound only',
+        '            where `canon pr evidence --check` carries a checklist',
+        '  evidence  the evidence check reads settled',
+        '  standing  the head is fresh against the base, not stale or conflicted',
+        '  ci        every check run on the tip passed, waited on up to --wait',
+        '',
+        'Review state, UI state, evidence, and standing are read before the CI',
+        'wait, so a reviewer whose partner is still driving refuses at once. The',
+        'head and the reviews are read again before the mutation.',
+        '',
+        'Reasons:',
+        '  lifted, already-ready, clear (--check)',
+        '  pull-closed, review-missing, review-open, review-unmarked,',
+        '  review-behind, ui-missing, ui-open, ui-unmarked, ui-behind,',
+        '  evidence-owed, standing-stale, standing-conflict, standing-unknown,',
+        '  ci-pending (--check), ci-failing, ci-conflicted, ci-timeout,',
+        '  head-moved, gh-failed',
+        '',
+        'Every read is REST. The mutation is the one GraphQL call.',
+        '',
+        'Exit codes:',
+        '  0  lifted, already-ready, or every gate clear under --check',
+        '  1  refused, with the reason in the JSON record',
+        '',
+        'Examples:',
+        '  canon pr lift 1341 --json',
+        '  canon pr lift 1341 --check --json',
+        '  canon pr lift --wait 600',
+        '',
+      ].join('\n'),
+    )
+    .action(async (number: string | undefined, opts: LiftCommandOptions) => {
+      process.exitCode = await runLift(number, opts)
     })
 
   pr.command('preview')
@@ -3048,6 +3121,287 @@ async function runFrames(
     },
     [link],
   )
+}
+
+const LIFT_REFUSALS: Record<LiftRefusal | 'bad-wait' | 'gh-missing', string> = {
+  'bad-wait': '--wait takes a whole number of seconds, zero or more.',
+  'gh-missing': PULL_REFUSALS['gh-missing'],
+  'pull-closed': 'The pull request is closed, so there is no mark to lift.',
+  'review-missing': 'The thread carries no code review, so none has closed.',
+  'review-open':
+    'The newest code review is open, so a finding still owes a fix.',
+  'review-unmarked':
+    'The newest code review carries no read-time marker, so the commit it covers is a GitHub stamp this gate does not trust.',
+  'review-behind':
+    'The newest code review closed on an earlier commit than the head.',
+  'ui-missing':
+    'The evidence comment carries a checklist and no UI review has been posted.',
+  'ui-open': 'The newest UI review is open, so a box still owes a fix.',
+  'ui-unmarked':
+    'The newest UI review carries no head marker, so the commit it covers is a GitHub stamp this gate does not trust.',
+  'ui-behind':
+    'The newest UI review closed on an earlier commit than the head.',
+  'evidence-owed':
+    'The evidence check reads owed, so the ship chain left a step undone.',
+  'standing-stale':
+    'The base moved under a path this branch writes since it branched, so CI measured a tree that is gone.',
+  'standing-conflict': 'The head does not merge cleanly into the base.',
+  'standing-unknown':
+    'The head or the base did not resolve, which a fork or a deleted head leaves, so its standing is unread and waits on a person.',
+  'ci-pending': 'A check run on the tip has yet to conclude.',
+  'ci-failing': 'A check run on the tip failed.',
+  'ci-conflicted':
+    'The branch conflicts with its base, so no run will start for the tip.',
+  'ci-timeout': 'A check run was still pending when --wait ran out.',
+  'head-moved':
+    'A push landed during the wait, so the gates cleared a commit that is no longer the head.',
+  'gh-failed':
+    'A read or the mutation was refused, so nothing is reported as lifted.',
+}
+
+const READY_MUTATION =
+  'mutation($id: ID!) { markPullRequestReadyForReview(input: {pullRequestId: $id}) { pullRequest { isDraft } } }'
+
+function gitRunner(root: string): GitRunner {
+  return async (args) => {
+    const result = await execa('git', ['-C', root, ...args], {
+      reject: false,
+      timeout: GH_TIMEOUT_MS,
+      env: gitEnv(),
+      extendEnv: false,
+    })
+    return result.exitCode === 0 ? String(result.stdout) : undefined
+  }
+}
+
+/**
+ * Reads the evidence check through this checkout's own CLI rather than a
+ * second copy of its logic, so the lift and a caller running
+ * `canon pr evidence --check` read one answer.
+ */
+async function readEvidenceGate(
+  root: string,
+  number: string,
+): Promise<EvidenceGate | undefined> {
+  const result = await execa(
+    process.execPath,
+    [
+      join(PROJECT_ROOT, 'src', 'cli.ts'),
+      'pr',
+      'evidence',
+      number,
+      '--check',
+      '--json',
+      '--root',
+      root,
+    ],
+    {
+      cwd: root,
+      reject: false,
+      timeout: GH_TIMEOUT_MS * 2,
+      env: { ...gitEnv(), CANON_NON_INTERACTIVE: '1' },
+      extendEnv: false,
+    },
+  )
+  const last = String(result.stdout)
+    .split('\n')
+    .filter((line) => line.trim() !== '')
+    .at(-1)
+  if (last === undefined) return undefined
+
+  let record: { reason?: unknown; owed?: unknown; checklist?: unknown }
+  try {
+    record = JSON.parse(last)
+  } catch {
+    return undefined
+  }
+  if (record.reason !== 'settled' && record.reason !== 'owed') return undefined
+
+  return {
+    isSettled: record.reason === 'settled',
+    owed: Array.isArray(record.owed) ? record.owed.map(String) : [],
+    hasChecklist:
+      typeof record.checklist === 'string' && record.checklist !== '',
+  }
+}
+
+function liftApi(root: string, number: string, baseRef: string): LiftApi {
+  const git = gitRunner(root)
+
+  return {
+    readPull: async (): Promise<PullState | undefined> => {
+      const stdout = await gh(root, [
+        'api',
+        `repos/{owner}/{repo}/pulls/${number}`,
+      ])
+      if (stdout === null) return undefined
+      try {
+        const row = JSON.parse(stdout) as RestPull
+        if (row.node_id === undefined || row.head?.ref === undefined) {
+          return undefined
+        }
+        return {
+          isDraft: row.draft === true,
+          isOpen: row.state === 'open',
+          nodeId: row.node_id,
+          branch: row.head.ref,
+          head: row.head.sha ?? '',
+        }
+      } catch {
+        return undefined
+      }
+    },
+    readTip: async (branch) => {
+      const resolved = await resolveTip(branch, refReader(root))
+      return resolved.kind === 'read' ? resolved.tip : undefined
+    },
+    readReviews: async () => {
+      const reviews = await listReviews(root, number)
+      return reviews.kind === 'read' ? reviews.rows.map(reviewRowOf) : undefined
+    },
+    readEvidence: () => readEvidenceGate(root, number),
+    readStanding: (head) =>
+      readBaseStanding(git, Number(number), head, baseRef),
+    readChecks: async (tip) => {
+      const [listed, pulled] = await Promise.all([
+        gh(root, [
+          'api',
+          `repos/{owner}/{repo}/commits/${tip}/check-runs?per_page=100`,
+        ]),
+        gh(root, ['api', `repos/{owner}/{repo}/pulls/${number}`]),
+      ])
+      if (listed === null) return undefined
+      try {
+        const mergeState =
+          pulled === null
+            ? undefined
+            : mergeStateOf((JSON.parse(pulled) as RestPull).mergeable_state)
+        const reading = withMergeState(
+          mergeState,
+          collapseChecks(tip, JSON.parse(listed) as CheckRunListing),
+        )
+        return { state: reading.state, isConflicted: reading.conflicted }
+      } catch {
+        return undefined
+      }
+    },
+    markReady: async (nodeId) => {
+      const result = await execa(
+        'gh',
+        [
+          'api',
+          'graphql',
+          '-f',
+          `query=${READY_MUTATION}`,
+          '-f',
+          `id=${nodeId}`,
+        ],
+        {
+          cwd: root,
+          reject: false,
+          timeout: GH_TIMEOUT_MS,
+          env: gitEnv(),
+          extendEnv: false,
+        },
+      )
+      if (result.exitCode !== 0) return false
+      // The flag is read back rather than the exit trusted, since the
+      // mutation can answer 200 with an errors array and no change.
+      try {
+        const body = JSON.parse(String(result.stdout)) as {
+          data?: {
+            markPullRequestReadyForReview?: {
+              pullRequest?: { isDraft?: boolean }
+            }
+          }
+        }
+        return (
+          body.data?.markPullRequestReadyForReview?.pullRequest?.isDraft ===
+          false
+        )
+      } catch {
+        return false
+      }
+    },
+    sleep: (ms) => new Promise((done) => setTimeout(done, ms)),
+    now: () => Date.now(),
+  }
+}
+
+async function runLift(
+  number: string | undefined,
+  opts: LiftCommandOptions,
+): Promise<number> {
+  const root = resolve(opts.root ?? process.cwd())
+  const emitJson = opts.json ?? false
+
+  intro('canon pr lift')
+
+  let waitSeconds = DEFAULT_WAIT_SECONDS
+  if (opts.wait !== undefined) {
+    if (!/^\d+$/.test(opts.wait)) {
+      return refuseWith('bad-wait', LIFT_REFUSALS['bad-wait'], emitJson, root)
+    }
+    waitSeconds = Number(opts.wait)
+  }
+
+  if (Bun.which('gh') === null) {
+    return refuseWith('gh-missing', LIFT_REFUSALS['gh-missing'], emitJson, root)
+  }
+
+  const resolved = await resolvePullNumber(root, number)
+  if (resolved.kind === 'refused') {
+    return refuseWith(
+      resolved.reason,
+      PULL_REFUSALS[resolved.reason],
+      emitJson,
+      root,
+    )
+  }
+
+  // Read once up front for the base the standing is measured against. The
+  // injected `readPull` re-reads the object on every gate that needs it.
+  const initial = await readPull(root, resolved.number)
+  if (initial.kind === 'refused') {
+    return refuseWith(
+      initial.reason,
+      PULL_REFUSALS[initial.reason],
+      emitJson,
+      root,
+    )
+  }
+  const base = initial.row.base?.ref
+  if (base === undefined || base === '') {
+    return refuseWith('gh-failed', LIFT_REFUSALS['gh-failed'], emitJson, root)
+  }
+
+  const record = await lift(liftApi(root, resolved.number, `origin/${base}`), {
+    isCheck: opts.check ?? false,
+    waitSeconds,
+  })
+
+  logStep(record.reason)
+  logInfo(
+    record.reason === 'lifted'
+      ? `#${resolved.number} is ready for review at ${record.head?.slice(0, 8)}`
+      : record.reason === 'already-ready'
+        ? `#${resolved.number} is already ready for review`
+        : record.reason === 'clear'
+          ? `every gate reads clear for #${resolved.number}`
+          : LIFT_REFUSALS[record.reason],
+  )
+  for (const gate of record.gates) {
+    if (!gate.isOk) logWarn(`${gate.gate}: ${gate.reason ?? 'not clear'}`)
+  }
+  outro()
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({ root, number: Number(resolved.number), ...record })}\n`,
+    )
+  }
+
+  return record.isOk ? 0 : 1
 }
 
 /**

@@ -80,7 +80,8 @@ root.
 - **Stack:** pick the closest governance stack by matching the repository root's detected runtime or framework against stack names in the catalog. If the root matched nothing, `base` is the stack, including when subfolders matched, since no subfolder owns the repository and picking one by order would state a preference nobody gave. Mark it `fallback` in the preview only when no root matched anywhere.
 - **Tooling stack:** for each language root, pick the closest tooling stack from `canon tooling list --json` (e.g. `vite-react`, `astro`, `nextjs`). Distinct from the governance stack. Fall back to `base` for a root with no framework or language match, and carry that fallback into its preview row.
 - **Next.js:** map `next` in a root's `package.json` dependencies, or a `next.config.ts`/`.js`/`.mjs` file in that root, to the `nextjs` governance stack and the `nextjs` tooling stack. The dependency name does not match either stack name by itself.
-- **Extras:** identify technologies not already covered by the picked governance stack, across every language root. A subfolder that matched a governance stack of its own contributes that stack's rules, read from `canon gov list --json`, and every root contributes its language rule. For each technology, find a rule whose `description` or `paths` points at it and pass it via `--add`. Dedupe against the picked stack's own rules. Do not add a rule the stack already pulls in.
+- **Extras:** run `canon gov detect <target> --stack <stack> --json` from the target and take its `proposals` array as the candidate extras. Each proposal names a `rule` and the `evidence` that matched it across every language root to depth two. The verb already leaves out every rule the picked stack resolves, so do not dedupe again, and do not match a rule's `description` or `paths` by hand.
+- **Subfolder language rules:** a language root below the repository root whose language the picked stack does not carry contributes its language rule by name, read from `canon gov list --json`. The verb proposes no language rule, since a stack reaches each one.
 - **Subfolder tooling:** a language root below the repository root takes its own `canon tooling sync <stack> <path> --skip base`, since `canon init` already lands `base` once at the root. Leave a root whose stack resolves to `base` out of the commands, since that sync would land nothing. A repository-root `package.json` hosting only formatters and hooks is that case, and it adds no row.
 - **Skip (`--skip`):** `wiki` installs by default. Add `--skip wiki` only when the user explicitly wants it left out.
 
@@ -112,7 +113,7 @@ Before executing, output:
 - **Detected:** each technology with its evidence file, path included, so a subfolder marker reads as one
 - **Stack:** picked governance stack and resolved rule count. Mark it `fallback` when no detected runtime or framework matched a catalog name.
 - **Tooling stack:** one row per language root, each carrying its path, its picked tooling stack, a `fallback` mark on the same test, and its own command. On the repository root's row, name what `base` lands: configs, seeds, and gitignore entries in every case, plus the JavaScript development dependencies, scripts, and hook activation wherever a `package.json` exists to carry them. A project outside that ecosystem runs none of the second group and keeps the first. Omit these rows entirely on the `gov` phase, which syncs no tooling.
-- **Extras:** each `--add` rule with a one-line reason, listed in full. A second matched stack reaches the install only through this list, since `canon init --stack` takes one stack, so a shortened list reads as that stack dropped.
+- **Extras:** each proposal with the evidence the verb returned, plus each subfolder language rule, listed in full as the list the operator confirms. A second matched stack reaches the install only through this list, since `canon init --stack` takes one stack, so a shortened list reads as that stack dropped.
 - **Skip:** any `--skip` entries with reason
 - **Target:** resolved target path
 - **Commands:** the full chain that will run
@@ -120,3 +121,19 @@ Before executing, output:
 A resolved name and a fallback read alike once written, so mark the fallback
 here rather than in the report. The preview is the last point before the first
 write, and the report runs after the files have landed.
+
+### Confirm the extras
+
+The extras are the one part of the preview the operator confirms before the
+install runs, since a proposal is evidence that a project might want a rule
+rather than proof that it does. Put the list through the structured question
+surface with three options: take every proposal, which is the recommended
+first option, take none, or name a subset, which the operator types as a
+comma-separated list. Pass what they kept to `--add` and drop the flag when
+they kept nothing.
+
+An `--extras` argument answers ahead of time and skips the question.
+`--extras <a>,<b>` takes the named rules, and `--extras none` takes none. With
+neither and no one to answer, take every proposal and list each in the report,
+since a proposed rule costs one file to delete and stopping would break every
+headless setup.

@@ -1,0 +1,201 @@
+# Evidence that marks a project as wanting an opt-in rule. Each table is keyed by
+# a rule basename, the same key `renames.toml` and the stacks use, so a rename
+# sweep reaches this file too. `canon gov detect` reads it and proposes every
+# rule whose evidence a target holds, and `target-setup` puts those proposals to
+# the operator before anything installs.
+#
+# `deps` are package names read from `package.json` (`dependencies` and
+# `devDependencies`), `pyproject.toml`, `go.mod`, and `composer.json`, at the
+# root and in every folder to depth two. `files` are globs matched against the
+# target's git-listed paths to depth two, and against each folder on those
+# paths, so `.github/workflows` matches a folder holding a workflow. A glob with
+# no wildcard is also tested on disk, which reaches a gitignored path such as
+# `.canon/canvas`.
+#
+# Every rule no stack reaches needs a table here, which the `unreferenced-rules`
+# gate stage checks, along with every key naming a live rule. A table for a rule
+# a stack already reaches is harmless, since the verb leaves out every rule the
+# caller's stack resolves.
+
+["skill"]
+deps = []
+files = [".claude/skills", "claude/skills"]
+
+["700-ci-workflow"]
+deps = []
+files = [".github/workflows"]
+
+["765-spelling"]
+deps = ["cspell"]
+files = [".cspell", "cspell.json", ".cspell.json", "cspell.config.*"]
+
+["775-dependencies"]
+deps = []
+files = ["**/package.json", "**/pyproject.toml", "**/go.mod", "**/composer.json"]
+
+["780-config-comments"]
+deps = []
+files = [".editorconfig", "**/Dockerfile*", "**/*.config.*", "**/.env.example"]
+
+["790-code-comments"]
+deps = []
+files = ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "**/*.sh", "**/*.py"]
+
+["130-go"]
+deps = []
+files = ["**/go.mod"]
+
+["140-php"]
+deps = []
+files = ["**/composer.json"]
+
+["200-react"]
+deps = ["react"]
+files = []
+
+["210-astro"]
+deps = ["astro"]
+files = ["**/astro.config.*"]
+
+["220-fastapi"]
+deps = ["fastapi"]
+files = []
+
+["230-nextjs"]
+deps = ["next"]
+files = ["**/next.config.*"]
+
+["250-tailwind"]
+deps = ["tailwindcss", "@tailwindcss/vite", "@tailwindcss/postcss"]
+files = ["**/tailwind.config.*"]
+
+["260-shadcn"]
+deps = []
+files = ["**/components.json"]
+
+["305-e2e-reliability"]
+deps = ["@playwright/test", "playwright", "cypress"]
+files = ["**/e2e"]
+
+["306-test-scope"]
+deps = ["@playwright/test", "playwright", "cypress"]
+files = ["**/e2e"]
+
+["310-zod"]
+deps = ["zod"]
+files = []
+
+["320-tanstack-query"]
+deps = [
+  "@tanstack/react-query",
+  "@tanstack/vue-query",
+  "@tanstack/solid-query",
+  "@tanstack/svelte-query",
+  "@tanstack/query-core",
+]
+files = []
+
+["335-testing-go"]
+deps = []
+files = ["**/go.mod"]
+
+["336-testing-php"]
+deps = ["phpunit/phpunit", "pestphp/pest"]
+files = ["**/phpunit.xml", "**/phpunit.xml.dist"]
+
+["340-pydantic"]
+deps = ["pydantic"]
+files = []
+
+["350-security-web"]
+deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
+files = ["index.html", "*/index.html"]
+
+["360-security-server"]
+deps = [
+  "express",
+  "fastify",
+  "hono",
+  "koa",
+  "elysia",
+  "@nestjs/core",
+  "fastapi",
+  "django",
+  "flask",
+  "starlette",
+  "laravel/framework",
+  "symfony/http-kernel",
+  "slim/slim",
+  "github.com/gin-gonic/gin",
+  "github.com/labstack/echo/v4",
+  "github.com/go-chi/chi/v5",
+  "github.com/gofiber/fiber/v2",
+]
+files = []
+
+["370-database"]
+deps = [
+  "prisma",
+  "@prisma/client",
+  "drizzle-orm",
+  "typeorm",
+  "sequelize",
+  "knex",
+  "kysely",
+  "mongoose",
+  "pg",
+  "mysql2",
+  "better-sqlite3",
+  "sqlalchemy",
+  "alembic",
+  "psycopg",
+  "psycopg2",
+  "psycopg2-binary",
+  "asyncpg",
+  "django",
+  "doctrine/orm",
+  "illuminate/database",
+  "gorm.io/gorm",
+  "github.com/jackc/pgx/v5",
+]
+files = ["**/migrations", "**/schema.prisma", "**/*.sql"]
+
+["400-ui"]
+deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
+files = ["index.html", "*/index.html"]
+
+["410-a11y"]
+deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
+files = ["index.html", "*/index.html"]
+
+["420-forms"]
+deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
+files = ["index.html", "*/index.html"]
+
+["430-ux-completeness"]
+deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
+files = ["index.html", "*/index.html"]
+
+["440-surface-capture"]
+deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
+files = ["index.html", "*/index.html"]
+
+["450-link-behavior"]
+deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
+files = ["index.html", "*/index.html"]
+
+["460-design-taste"]
+deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
+files = ["canon/DESIGN.md", "index.html", "*/index.html"]
+
+["465-interface-casing"]
+deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
+files = ["index.html", "*/index.html"]
+
+["470-motion"]
+deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
+files = ["index.html", "*/index.html"]
+
+["480-canvas"]
+deps = []
+files = [".canon/canvas"]

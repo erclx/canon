@@ -1,6 +1,6 @@
 ---
 title: Stacks
-description: How a stack resolves its rule set, why an entry may name a whole folder, the extras flag, the unreferenced-rules stage, and adding a stack
+description: How a stack resolves its rule set, why an entry may name a whole folder, the extras flag, the unreferenced-rules stage and the evidence it requires, and adding a stack
 ---
 
 # Stacks
@@ -38,7 +38,7 @@ The consequence is that those six folders are opt-out. A rule authored into `gov
 
 The stack carries those two rules and nothing else. `300-testing-ts` and `310-zod` would read as reasonable on a backend, and pulling either in is a separate decision about a Node backend's default that costs one line once a target asks.
 
-Nothing detects the stack. `target-setup` matches a detected runtime or framework against stack names, and a Node backend detects the runtime, so it lands on `node` and resolves neither server rule. `--add 360-security-server,370-database` reaches the pair from a `node` target, and `node-server` is named deliberately until that skill carries a rule for what evidence marks a project as a backend.
+Nothing detects the stack. `target-setup` matches a detected runtime or framework against stack names, and a Node backend detects the runtime, so it lands on `node` and resolves neither server rule. `canon gov detect` proposes the pair from a server framework or database client in the manifest, which the operator confirms, and `--add 360-security-server,370-database` reaches it by hand.
 
 ### A meta-framework takes a child stack rather than a rule in its parent
 
@@ -54,17 +54,17 @@ Moving a rule between stacks changes what a new install writes and nothing on a 
 
 `--add` takes rule names alone and does not expand a folder, since the flag layers onto a resolved stack rather than defining one. An unknown name warns rather than aborting, so `--add code` is loud rather than silent. A Go or PHP target reaching `335-testing-go` or `336-testing-php` through `--add` therefore gets no `code/` rule, which is why those two keep their `canon:test-craft` pointer where `300-testing-ts` and `330-testing-py` dropped it. Extras are deduped against the stack's resolved rules, so a rule already in the stack is a no-op.
 
+With no stack named, `--add` installs its rules alone, which `install.md` covers.
+
 ## Gotchas
 
 ### A rule in an unnamed folder installs for nobody
 
 A rule authored in a folder no stack names reaches no target. The five folders `base`, `node`, and `python` take whole close that, and every other folder needs the rule's name in a stack file.
 
-### The unreferenced stage stays advisory
+### The unreferenced stage fails on a rule nothing proposes
 
-The `Unreferenced rules` stage reports rules no stack reaches and never fails. It compares the catalog against `GOV_EXPECTED_UNREFERENCED` in `src/gate/measures.ts`, which records each deliberate case: `260-shadcn` and `320-tanstack-query` are opt-in libraries, and `130-go`, `140-php`, `335-testing-go`, and `336-testing-php` are opt-in until a Go or PHP stack ships, reached through `--add` when `target-setup` detects the language. `480-canvas` is opt-in for a project that draws on the canvas.
-
-A rule outside that list reads as new and the stage warns. A failing gate would fail every push over the deliberate cases, so reconsider failing only if the set keeps growing by accident rather than by design.
+A rule no stack names reaches a target only through `canon gov detect`, so the `Unreferenced rules` stage fails when such a rule has no table in `governance/detect.toml`, and when a table there names no live rule. The stage replaced a fixed `GOV_EXPECTED_UNREFERENCED` list in `src/gate/measures.ts` that warned and never failed. Once the stacks are thin, the unreferenced set is most of the catalog, and a list rewritten on every new rule is one nobody compares against.
 
 ## Adding a stack
 
