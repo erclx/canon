@@ -100,4 +100,6 @@ A scenario needing a live session record for a roster read, such as testing occu
 
 Bound the staged process well under a day, so the record drops out of the live roster on its own rather than sitting there for every consumer. Key the record's filename on the process's pid, so a second drive gets its own record instead of orphaning the first run's process.
 
+A TypeScript scenario spawns the staged process without `detached: true` and drops its handle from the event loop, so it stays in the provisioning process group. `canon sandbox equivalence` reaps a provisioned arm by killing that group, and a detached occupant would escape it and leak a six-hour `sleep` on every run while the manifest still read identical. `canon sandbox clean` does not reap it. The process bounds itself, as the bash form did.
+
 Such a record does not read as a nested dispatch, because the runner snapshots the registry after provisioning and the staged record is already on the before side. Stage it in the scenario script rather than from inside the driven session, where it would be reported.

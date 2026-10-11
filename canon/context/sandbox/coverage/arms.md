@@ -27,7 +27,7 @@ Each section states what an arm's declaration proves and what it leaves open, so
 
 ## Task board
 
-`claude/task-board.sh` carries the `create` arm and `claude/task-complete.sh` the `archive` arm, because the two paths have disjoint preconditions and one arm running both would assert the second against a tree the first mutated. Both stage the board rather than inheriting one, since `SANDBOX_INJECT_SEEDS` leaves `.canon/tasks/` holding only the seeded `index.md`.
+`claude/task-board.ts` carries the `create` arm and `claude/task-complete.ts` the `archive` arm, because the two paths have disjoint preconditions and one arm running both would assert the second against a tree the first mutated. Both stage the board rather than inheriting one, since `SANDBOX_INJECT_SEEDS` leaves `.canon/tasks/` holding only the seeded `index.md`.
 
 - `canon tasks archive` is a typed verb whose refusals `src/tasks/archive.test.ts` covers, so the archive arm stages a board that satisfies every gate and asserts the successful move. The create path has no CLI verb, so the skill writes the file from `claude/skills/task-board/references/tasks.md` and that arm covers prose with nothing underneath it.
 - The create board runs three consecutive versions with no gaps, which forces the next one, and a `.canon/tasks/` reply fragment pins the proposed label.
@@ -37,7 +37,7 @@ Each section states what an arm's declaration proves and what it leaves open, so
 
 ## Intake
 
-`claude/plan-intake.sh` writes a folder that is gitignored in every target, so no check anywhere reads its shape, and a wrong numbering leaves a record cited for weeks with nothing reporting the drift.
+`claude/plan-intake.ts` writes a folder that is gitignored in every target, so no check anywhere reads its shape, and a wrong numbering leaves a record cited for weeks with nothing reporting the drift.
 
 - The `file` arm pins the slug through the invocation, since `paths` and `content` match exact paths. The numbering is still asserted, because the index links its cluster files and the pattern requires a two-digit number and a domain name in each link.
 - The `route` arm asserts a refusal. Its three `absent` entries name the folders a wrong turn would create, and the reply pin catches a stop that refuses without naming where the question goes. Why the run refused stays in `manual`.
