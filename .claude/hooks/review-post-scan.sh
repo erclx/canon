@@ -77,7 +77,7 @@ case "$file" in
 esac
 
 # A body written by the same call does not exist when this hook runs, so the
-# post would go out unscanned. Blocking is the only verdict that holds.
+# post would go out unread by the scan. Blocking is the only verdict that holds.
 [ -f "$file" ] || deny "The body file $file does not exist yet, so the label scan cannot read it. Write the body in an earlier call, then post it."
 
 # No --title: a review body carries none, and a title would grade it as an
