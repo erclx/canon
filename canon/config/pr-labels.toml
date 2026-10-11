@@ -73,10 +73,7 @@ context = [
 ]
 # Repository configuration belonging to no domain, this map included. The
 # toolkit-owned folder takes a folder prefix rather than this file's own path,
-# so a second file landing beside it is labelled without another census. The
-# row also takes a project-root file authored by the project and consumed by
-# one CLI verb, not toolkit source, which is what `inventory.toml` is: read by
-# `src/inventory/config.ts` for one verb, same shape as this file's own.
+# so a second file landing beside it is labelled without another census.
 repo = [
   ".gitignore",
   ".vscode/",
@@ -87,7 +84,6 @@ repo = [
   "vitest.setup.ts",
   "commitlint.config.js",
   "commitlint.config.test.ts",
-  "inventory.toml",
 ]
 
 # Deliberately unlabelled, measured across the 138 commits between `3a0fd695`,
