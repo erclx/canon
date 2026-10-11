@@ -7,6 +7,7 @@ import {
   findEvidenceLocal,
   findEvidencePreview,
   groupEvidence,
+  type EvidenceItem,
   type EvidenceState,
   hasMarkedEvidenceComment,
   type OwedInput,
@@ -330,7 +331,7 @@ describe('renderEvidenceBody', () => {
       '',
       '**Preview:** https://feat-thing.annex.pages.dev',
       '',
-      '**Base:** `aaaa000` · **Head:** `bbbb111`',
+      '**Base:** [`aaaa000`](https://github.com/erclx/annex/commit/aaaa000) · **Head:** [`bbbb111`](https://github.com/erclx/annex/commit/bbbb111)',
     ])
     expect(body).toContain('<summary>dark (1)</summary>')
   })
@@ -520,6 +521,187 @@ describe('renderEvidenceBody', () => {
     })
   })
 
+  describe('view grouping', () => {
+    const THEMES = ['dark', 'light'] as const
+    const WIDTHS = [320, 768, 1024, 1440]
+
+    function viewItems(view: string, added: boolean): EvidenceItem[] {
+      return THEMES.flatMap((theme) =>
+        WIDTHS.map((width) => ({
+          path: `evidence/${view}-${theme}-${width}.png`,
+          stem: `${view}-${theme}-${width}`,
+          added,
+        })),
+      )
+    }
+
+    function render(items: EvidenceItem[], state = ''): string {
+      return renderEvidenceBody([{ state, items }], 'o/r', 'aaaa000', 'bbbb111')
+    }
+
+    it('should render eight view cases as one block with four width rows', () => {
+      const body = render(viewItems('grid', true))
+
+      expect(body.match(/<details/g)).toHaveLength(1)
+      expect(body).toContain('<summary>grid (8)</summary>')
+      expect(body).toContain('| Width | Dark | Light |')
+      expect(body.match(/^\| (320|768|1024|1440) \|/gm)).toHaveLength(4)
+      expect(countEvidenceCases(body)).toBe(8)
+    })
+
+    it('should place a width row dark then light and sort the widths numerically', () => {
+      const body = render(viewItems('grid', true))
+
+      const rows = body.split('\n').filter((line) => /^\| \d+ \|/.test(line))
+      expect(rows.map((row) => row.split(' | ')[0])).toEqual([
+        '| 320',
+        '| 768',
+        '| 1024',
+        '| 1440',
+      ])
+      expect(rows[0]).toMatch(/grid-dark-320 head.*grid-light-320 head/)
+    })
+
+    it('should split a view name that carries a hyphen at the theme rather than the first hyphen', () => {
+      const body = render([
+        {
+          path: 'evidence/menu-open-light-1440.png',
+          stem: 'menu-open-light-1440',
+          added: true,
+        },
+      ])
+
+      expect(body).toContain('<summary>menu-open (1)</summary>')
+      expect(body).toContain('| Width | Light |')
+    })
+
+    it('should render four columns when a view already exists at the base', () => {
+      const body = render(viewItems('grid', false))
+
+      expect(body).toContain(
+        '| Width | Dark base | Dark head | Light base | Light head |',
+      )
+      expect(body).toContain('alt="grid-dark-320 base"')
+      expect(countEvidenceCases(body)).toBe(8)
+    })
+
+    it('should show new in the base cell of the theme that is new and keep both base columns', () => {
+      const body = render([
+        {
+          path: 'evidence/grid-dark-320.png',
+          stem: 'grid-dark-320',
+          added: false,
+        },
+        {
+          path: 'evidence/grid-light-320.png',
+          stem: 'grid-light-320',
+          added: true,
+        },
+      ])
+
+      expect(body).toContain(
+        '| Width | Dark base | Dark head | Light base | Light head |',
+      )
+      expect(body).toMatch(
+        /\| 320 \| <img [^>]*> \| <img [^>]*> \| \*\(new\)\* \| <img/,
+      )
+      expect(countEvidenceCases(body)).toBe(2)
+    })
+
+    it('should leave a missing cell empty and still count three cases', () => {
+      const body = render([
+        { path: 'e/g-dark-320.png', stem: 'g-dark-320', added: true },
+        { path: 'e/g-dark-768.png', stem: 'g-dark-768', added: true },
+        { path: 'e/g-light-320.png', stem: 'g-light-320', added: true },
+      ])
+
+      expect(body).toMatch(/\| 768 \| <img [^>]*> \|  \|/)
+      expect(countEvidenceCases(body)).toBe(3)
+    })
+
+    it('should name a block by its state and view when the state directory is not empty', () => {
+      const body = render(
+        [
+          {
+            path: 'evidence/before/grid-dark-320.png',
+            stem: 'grid-dark-320',
+            added: true,
+          },
+        ],
+        'before',
+      )
+
+      expect(body).toContain('<summary>before / grid (1)</summary>')
+    })
+
+    it('should render a single case as a one row table', () => {
+      const body = render([
+        { path: 'e/g-dark-320.png', stem: 'g-dark-320', added: true },
+      ])
+
+      expect(body).toContain('| Width | Dark |')
+      expect(body.match(/^\| 320 \|/gm)).toHaveLength(1)
+    })
+
+    it('should escape the view in the summary and the alt text', () => {
+      const body = render([
+        { path: 'e/a.png', stem: 'a|<b>"-dark-320', added: true },
+      ])
+
+      expect(body).toContain('<summary>a&#124;&lt;b&gt;&quot; (1)</summary>')
+      expect(body).toContain('alt="a&#124;&lt;b&gt;&quot;-dark-320 head"')
+      expect(countEvidenceCases(body)).toBe(1)
+    })
+
+    it('should land a name outside the form in a flat fallback block and count it', () => {
+      const body = render([
+        ...viewItems('grid', true).slice(0, 2),
+        { path: 'evidence/board.png', stem: 'board', added: true },
+      ])
+
+      expect(body).toContain('<summary>grid (2)</summary>')
+      expect(body).toContain('<summary>evidence (1)</summary>')
+      expect(body).toContain('| Case | Head |')
+      expect(countEvidenceCases(body)).toBe(3)
+    })
+
+    it('should send a second file sharing a view cell to the flat block so both still show', () => {
+      const body = render([
+        {
+          path: 'evidence/grid-dark-320.png',
+          stem: 'grid-dark-320',
+          added: true,
+        },
+        {
+          path: 'evidence/grid-dark-320.webp',
+          stem: 'grid-dark-320',
+          added: true,
+        },
+      ])
+
+      expect(body).toContain('<summary>grid (1)</summary>')
+      expect(body).toContain('<summary>evidence (1)</summary>')
+      expect(countEvidenceCases(body)).toBe(2)
+    })
+
+    it('should open every block together while the whole comment is within the image limit', () => {
+      const body = render(viewItems('grid', true).slice(0, 6))
+
+      expect(body.match(/^<details open>$/gm)).toHaveLength(1)
+    })
+
+    it('should count as many cases as the body has head images', () => {
+      const body = render([
+        ...viewItems('grid', false),
+        ...viewItems('card', true),
+        { path: 'evidence/board.png', stem: 'board', added: false },
+      ])
+
+      expect(countEvidenceCases(body)).toBe(17)
+      expect(body.match(/alt="[^"]* head"/g)).toHaveLength(17)
+    })
+  })
+
   describe('commit line', () => {
     const states = [
       {
@@ -528,24 +710,26 @@ describe('renderEvidenceBody', () => {
       },
     ]
 
-    it('should name both commits as short shas right after the heading', () => {
+    it('should link both commits as short shas right after the heading', () => {
       const body = renderEvidenceBody(states, 'o/r', 'aaaa000', 'bbbb111')
 
       const lines = body.split('\n')
       expect(lines.slice(0, 3)).toEqual([
         '## Evidence',
         '',
-        '**Base:** `aaaa000` · **Head:** `bbbb111`',
+        '**Base:** [`aaaa000`](https://github.com/o/r/commit/aaaa000) · **Head:** [`bbbb111`](https://github.com/o/r/commit/bbbb111)',
       ])
     })
 
-    it('should show seven characters while the image urls keep the full sha', () => {
+    it('should show seven characters while the links and image urls keep the full sha', () => {
       const base = 'a'.repeat(40)
       const head = 'b'.repeat(40)
 
       const body = renderEvidenceBody(states, 'o/r', base, head)
 
-      expect(body).toContain('**Base:** `aaaaaaa` · **Head:** `bbbbbbb`')
+      expect(body).toContain(
+        `**Base:** [\`aaaaaaa\`](https://github.com/o/r/commit/${base}) · **Head:** [\`bbbbbbb\`](https://github.com/o/r/commit/${head})`,
+      )
       expect(body).toContain(`/blob/${head}/evidence/dark/hero.png?raw=true`)
     })
 
