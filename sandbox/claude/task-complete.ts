@@ -65,8 +65,13 @@ export default scenario({
       ctx.git('add', '.')
       ctx.commit('feat(api): rate limit the task endpoints (#41)')
 
+      ctx.fixtures('claude', 'task-complete', 'archive', '03-board')
+
       ctx.log.step(
         'Scenario ready: one shipped task archived off a two-task board',
+      )
+      ctx.log.info(
+        'Board   : staged untracked under .canon/, so no commit follows it',
       )
       ctx.log.info(
         'Context: v01.0-rate-limit is all [x], names pull request #41, and its',

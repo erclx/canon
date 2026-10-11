@@ -13,7 +13,6 @@ Source this in any script that needs terminal output. It provides the framed log
 
 - `open_timeline` and `close_timeline`: open `┌` with an optional banner and close `└` on stderr. Pair with `trap … EXIT`
 - `log_info`, `log_warn`, `log_error`, `log_step`, `log_add`, and `log_rem`: framed log lines on stderr. `log_error` exits 1
-- `guard_root`: rejects the toolkit root as a target
 - `pipe_output`: indents borrowed output inside the frame
 
 ## Gotchas
