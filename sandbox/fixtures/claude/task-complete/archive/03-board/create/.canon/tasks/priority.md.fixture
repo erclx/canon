@@ -1,0 +1,13 @@
+---
+title: Priority
+subtitle: The order tasks run in
+---
+
+# Priority
+
+## Run now
+
+| Task | Touches | Plan |
+| ---- | ------- | ---- |
+| [v01.0 rate limit](v01.0-rate-limit.md) | `src/rate-limit.ts`, `src/routes/tasks.ts` | [feature-rate-limit](../plans/feature-rate-limit.md) |
+| [v02.0 pagination](v02.0-pagination.md) | `src/routes/tasks.ts`, `src/store.ts` | [feature-pagination](../plans/feature-pagination.md) |
