@@ -37,37 +37,41 @@ async function runScan(args: string[]): Promise<ScanRecord> {
   return { ...record, exitCode: result.exitCode ?? -1 }
 }
 
-describe('canon labels scan title format gate', () => {
-  let cwdDir: string
+describe(
+  'canon labels scan title format gate',
+  { timeout: RUN_TIMEOUT_MS },
+  () => {
+    let cwdDir: string
 
-  beforeEach(async () => {
-    cwdDir = await mkdtemp(join(tmpdir(), 'canon-labels-scan-'))
-  })
+    beforeEach(async () => {
+      cwdDir = await mkdtemp(join(tmpdir(), 'canon-labels-scan-'))
+    })
 
-  afterEach(async () => {
-    await rm(cwdDir, { recursive: true, force: true })
-  })
+    afterEach(async () => {
+      await rm(cwdDir, { recursive: true, force: true })
+    })
 
-  it('should skip the title format grade when --body-file carries no title', async () => {
-    const bodyFile = join(cwdDir, 'reply.md')
-    await writeFile(bodyFile, 'Looks good, one nit below.\n')
+    it('should skip the title format grade when --body-file carries no title', async () => {
+      const bodyFile = join(cwdDir, 'reply.md')
+      await writeFile(bodyFile, 'Looks good, one nit below.\n')
 
-    const { titleFormatIssues } = await runScan(['--body-file', bodyFile])
+      const { titleFormatIssues } = await runScan(['--body-file', bodyFile])
 
-    expect(titleFormatIssues).toEqual([])
-  })
+      expect(titleFormatIssues).toEqual([])
+    })
 
-  it('should still grade a supplied title against the format rules', async () => {
-    const { titleFormatIssues } = await runScan([
-      '--title',
-      'not a conventional title',
-    ])
+    it('should still grade a supplied title against the format rules', async () => {
+      const { titleFormatIssues } = await runScan([
+        '--title',
+        'not a conventional title',
+      ])
 
-    expect(titleFormatIssues).toEqual(['structure'])
-  })
-})
+      expect(titleFormatIssues).toEqual(['structure'])
+    })
+  },
+)
 
-describe('canon labels scan text checks', () => {
+describe('canon labels scan text checks', { timeout: RUN_TIMEOUT_MS }, () => {
   let cwdDir: string
 
   beforeEach(async () => {
