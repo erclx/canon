@@ -209,15 +209,12 @@ export function register(program: Command): void {
   records
     .command('stale')
     .description(
-      'Report which entries are due for review and which cite paths the tree no longer holds',
+      'Report when the requirements record was last reviewed and how many releases have shipped since',
     )
     .argument('<kind>', `Record folder: ${STALE_KINDS.join(', ')}`)
     .helpOption('-h, --help', 'Show this help message')
     .option('--json', 'Add a machine-readable record on stdout')
-    .option(
-      '--root <path>',
-      'Project root, defaulting to the main worktree except on canonical',
-    )
+    .option('--root <path>', 'Project root, defaulting to the current worktree')
     .addHelpText(
       'after',
       [

@@ -804,6 +804,20 @@ describe('a tree whose records sit under both roots', () => {
     expect(outcome.message).toContain(join('.claude', 'tasks'))
   })
 
+  it('should refuse a push over a stranded memory folder the index may still track', async () => {
+    await makeRecordsRepo(ROOT, ORIGIN)
+    halfMigrate(ROOT, '')
+    mkdirSync(join(ROOT, '.claude', 'memory'), { recursive: true })
+    writeFileSync(join(ROOT, '.claude', 'memory', 'entry.md'), '# memory\n')
+
+    const outcome = await pushRecords(ROOT)
+
+    expect(outcome.ok).toBe(false)
+    if (outcome.ok) return
+    expect(outcome.reason).toBe('split-roots')
+    expect(outcome.message).toContain(join('.claude', 'memory'))
+  })
+
   it('should refuse a pull on the same reading', async () => {
     await makeRecordsRepo(ROOT, ORIGIN)
     halfMigrate(ROOT, 'plans')

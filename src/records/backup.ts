@@ -51,6 +51,15 @@ export const BACKED_FOLDERS = [
 ] as const
 
 /**
+ * Folders a retired kind left at a legacy `.claude` root that the allowlist
+ * must still read, so a half-finished move that strands one still trips
+ * `split-roots`. Absent from `BACKED_FOLDERS` because nothing writes them, and
+ * absent from `RETIRED_FOLDERS` because that list stages a deletion and this
+ * folder is an archive to keep.
+ */
+const LEGACY_RECORD_FOLDERS = ['memory'] as const
+
+/**
  * Names that have left `BACKED_FOLDERS` and whose removal still has to reach a
  * records history once.
  *
@@ -123,7 +132,9 @@ function isExcluded(name: string): boolean {
  */
 function foldersAt(dir: string): string[] {
   if (basename(dir) === '.claude') {
-    return BACKED_FOLDERS.filter((folder) => existsSync(join(dir, folder)))
+    return [...BACKED_FOLDERS, ...LEGACY_RECORD_FOLDERS].filter((folder) =>
+      existsSync(join(dir, folder)),
+    )
   }
 
   const entries = existsSync(dir)
