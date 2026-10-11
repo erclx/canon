@@ -45,17 +45,15 @@ Each source also installs into its own folder: `.claude/rules/canon/`, `.claude/
 
 ### Rules group by the audience they serve
 
-A rule's folder names who the rule serves: `code/` for a project writing code, `claude/` for session conduct and `.claude/` authoring, `canon/` for the toolkit workflow and its record folders, where the two record rules for `.canon/tasks/**` and `.canon/plans/**` sit unnumbered as `writing/markdown.md` does, `tooling/` for dev setup, `writing/` for prose and document shape, and `standards/` for the generated rules routing a path to its standard. `base` takes the last five whole and the code stacks add `code`, so a docs or writing project loads no rule it can never apply. The old `core/` mixed four of those audiences, and `base` took it whole.
+A rule's folder names who the rule serves: `code/` for a project writing code, `claude/` for session conduct and `.claude/` authoring, `canon/` for the toolkit workflow and its record folders, where the record rules `canon/context.md`, `canon/tasks.md`, and `canon/plan.md` sit unnumbered as `writing/markdown.md` does, `tooling/` for dev setup, and `writing/` for prose and document shape, with `claude/skill.md` unnumbered the same way. `base` takes the last four whole and the code stacks add `code`, so a docs or writing project loads no rule it can never apply. The old `core/` mixed four of those audiences, and `base` took it whole.
 
 Grouping along the repository's three roots, `tooling/`, `claude/`, and `canon/`, was the alternative, and it left two groups with no honest home: the generic code rules are not tooling, and the prose rules are not about Claude.
 
 An always-loaded rule still reaches a target through `canon gov sync` rather than through a seeded root file nothing refreshes, since every group `base` names is taken whole. A `CLAUDE.md` bullet carries the same session-start priority, so the group is the only thing a move from a seed changes. The no-choice code rules retired rather than moving, and `code/000-code.md` keeps only the bullets a model does not follow by default.
 
-### A rule that only routes to a standard is generated from it
+### The generator retired once its last standard did
 
-`canon gov regen` writes `governance/rules/standards/<standard>.md` from each standard carrying `paths:` in its frontmatter, with a pointer bullet built from the standard's `description` and any `rule:` bullets after it. The standard owns its glob, so adding one or changing its scope is one file. These rules carry no number, since the band holds no read order worth stating, and the generator refuses a standard named like a band folder or an authored rule.
-
-The output is committed rather than produced inside `canon gov install` and `canon gov sync`. Install, sync, `canon sync --check`, `canon gov list`, the citation and restated stages, and the bash sandbox helpers all read rules as files under `governance/rules/`, and `readNewRules` needs a file in git history to see a new rule at all. Generating at install would thread a virtual source through each of them for the same output a target receives. The Consumed copies stage asserts the band is committed.
+`canon gov regen` once wrote a pointer rule under `governance/rules/standards/` for each standard carrying `paths:`, and it went when the last such standard moved into its owner skill, since keeping a generator with nothing to generate left a gate stage watching an empty path and a band any restored `paths:` field would regrow.
 
 A rule pointing at a skill rather than a standard stays authored, as do the `writing/markdown` rule, `460-design-taste`, and `internal/rules/claude/595-tooling-reference.md`, whose standard never ships.
 

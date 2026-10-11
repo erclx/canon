@@ -10,7 +10,7 @@ description: The teach and glossary split, the workspace ordinal naming, the Mer
 `claude/skills/teach-workspace/references/teach.md` fixes the layout, the ordinal naming, the frontmatter, and the mission and learning-record formats of a learning workspace, while the pedagogy that decides what to teach next sits in `teach-workspace/references/`.
 
 - An attribute standard beside `markdown.md` lost on the second-reader test, since a standard nothing else cites has no owner to correct it.
-- Folding the pedagogy into `teach.md` lost to `governance/rules/standards/standard.md`, since a standard governs one document type or one attribute rather than both.
+- Folding the pedagogy into `teach.md` lost to the `standard.md` meta-standard, since a standard governs one document type or one attribute rather than both.
 - `teach.md` names the skill's reference in prose rather than as a path a check could resolve, since `canon gov citations` never opens `standards/`. Measured at `285723bc` on 2026-09-06.
 
 ## Workspace ordinals
