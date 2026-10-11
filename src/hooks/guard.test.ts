@@ -1468,6 +1468,25 @@ describe('memory-guard.sh boundaries', () => {
     ],
     ['a here-string naming the folder', shell(`cat <<< ${home}/memory/n.md`)],
     ['a read of the folder through grep', shell(`grep -rn x ${home}/memory`)],
+    [
+      'a write after a here-string whose word starts with a letter',
+      shell(`cat <<< x\ncp a ${home}/memory/n.md`),
+    ],
+    [
+      'a write after a here-string with no space',
+      shell(`cat <<<x\ncp a ${home}/memory/n.md`),
+    ],
+    ['a write inside bash -c', shell(`bash -c 'cp a ${home}/memory/n.md'`)],
+    [
+      'a write in the body of a bash heredoc',
+      shell(`bash <<EOF\ncp a ${home}/memory/n.md\nEOF`),
+    ],
+    [
+      'a write in the body of a python heredoc',
+      shell(
+        `python3 - <<'EOF'\nopen('${home}/memory/n.md', 'w').write('x')\nEOF`,
+      ),
+    ],
   ]
 
   const silent: ReadonlyArray<readonly [string, string]> = [
@@ -1514,6 +1533,10 @@ describe('memory-guard.sh boundaries', () => {
       shell(`gh api x -f body='denied: ${home}/memory/n.md'`),
     ],
     ['a separator inside quotes', shell(`echo 'a; cp x ${home}/memory/n.md'`)],
+    [
+      'prose after an interpreter command has ended',
+      shell(`bash -c 'ls'; git commit -m "see ${home}/memory notes"`),
+    ],
     [
       'a CLAUDE_CONFIG_DIR path in a heredoc body',
       shell(`cat <<EOF\n$CLAUDE_CONFIG_DIR/projects/-a/memory/n.md\nEOF`),

@@ -40,37 +40,51 @@ target=${target:1}
 # with a small awk pass that drops heredoc bodies, comments, and quoted spans
 # holding whitespace, and the shape is matched on what is left. A write target
 # is a path and carries no whitespace, so no verb list is needed, and a bare or
-# whitespace-free quoted token naming the folder still denies. This is a
+# whitespace-free quoted token naming the folder still denies. A span or a
+# heredoc body handed to an interpreter is code rather than a target, so it
+# is kept when the command word is a shell, python, node, perl, ruby, or eval.
+# This is a
 # scanner and not a shell parser, so a substitution inside double quotes is
 # read as quoted text. The cut is copied from review-post-scan.sh, which is
 # seeded and so cannot be sourced from this unseeded hook.
 if [ "$kind" = B ]; then
   IFS= read -r -d '' cutter <<'AWK'
 { s = s (NR > 1 ? "\n" : "") $0 }
-function keep(quote, text) {
-  if (text ~ /[ \t\n]/) return " "
+function keep(quote, text, isCode) {
+  if (!isCode && text ~ /[ \t\n]/) return " "
   return quote text quote
 }
+function runsCode(word) {
+  sub(/.*\//, "", word)
+  return word ~ /^(sh|bash|zsh|dash|eval|python[0-9.]*|node|perl|ruby)$/
+}
 END {
-  n = length(s); q = ""; quoted = ""; out = ""; nt = 0; i = 1
+  n = length(s); q = ""; quoted = ""; out = ""; nt = 0; i = 1; leading = 1; cw = ""
   while (i <= n) {
     c = substr(s, i, 1)
     if (q == "'") {
-      if (c == "'") { out = out keep(q, quoted); q = ""; quoted = "" } else quoted = quoted c
+      if (c == "'") { out = out keep(q, quoted, spanIsCode); q = ""; quoted = "" } else quoted = quoted c
       i++; continue
     }
     if (q == "\"") {
       if (c == "\\") { quoted = quoted c substr(s, i + 1, 1); i += 2; continue }
-      if (c == "\"") { out = out keep(q, quoted); q = ""; quoted = ""; i++; continue }
+      if (c == "\"") { out = out keep(q, quoted, spanIsCode); q = ""; quoted = ""; i++; continue }
       quoted = quoted c; i++; continue
     }
+    if (c ~ /[;|&(`\n]/) { leading = 1; cw = "" }
+    else if (leading) {
+      if (c ~ /[ \t]/) { if (cw != "") leading = 0 }
+      else if (c == "'" || c == "\"") leading = 0
+      else cw = cw c
+    }
     if (c == "\\") { out = out c substr(s, i + 1, 1); i += 2; continue }
-    if (c == "'" || c == "\"") { q = c; quoted = ""; i++; continue }
+    if (c == "'" || c == "\"") { q = c; quoted = ""; spanIsCode = !leading && runsCode(cw); i++; continue }
     if (c == "#" && (out == "" || substr(out, length(out), 1) ~ /[ \t\n]/)) {
       while (i <= n && substr(s, i, 1) != "\n") i++
       continue
     }
-    if (c == "<" && substr(s, i, 2) == "<<" && substr(s, i, 3) != "<<<") {
+    if (c == "<" && substr(s, i, 3) == "<<<") { out = out "<<<"; i += 3; continue }
+    if (c == "<" && substr(s, i, 2) == "<<") {
       j = i + 2; dash = 0
       if (substr(s, j, 1) == "-") { dash = 1; j++ }
       while (substr(s, j, 1) ~ /[ \t]/) j++
@@ -79,7 +93,10 @@ END {
       tag = ""
       while (substr(s, j, 1) ~ /[A-Za-z0-9_]/) { tag = tag substr(s, j, 1); j++ }
       if (oq == "'" || oq == "\"") j++
-      if (tag != "") { nt++; tags[nt] = tag; dashes[nt] = dash; i = j; continue }
+      if (tag != "") {
+        nt++; tags[nt] = tag; dashes[nt] = dash; codes[nt] = !leading && runsCode(cw)
+        i = j; continue
+      }
     }
     if (c == "\n") {
       out = out c; i++
@@ -87,8 +104,10 @@ END {
         while (i <= n) {
           e = index(substr(s, i), "\n")
           if (e == 0) { line = substr(s, i); i = n + 1 } else { line = substr(s, i, e - 1); i += e }
-          if (dashes[t]) sub(/^\t+/, "", line)
-          if (line == tags[t]) break
+          body = line
+          if (dashes[t]) sub(/^\t+/, "", body)
+          if (body == tags[t]) break
+          if (codes[t]) out = out line "\n"
         }
       }
       nt = 0; continue
