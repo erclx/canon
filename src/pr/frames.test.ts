@@ -10,6 +10,7 @@ import {
   framePath,
   isFrameHead,
   isFramePass,
+  isFrameTheme,
   type PullClosure,
   pruneFrames,
   pushFrame,
@@ -188,6 +189,26 @@ describe('framePath', () => {
     const path = framePath(12, HEAD, PASS, 3)
 
     expect(path).toBe(`pr-12/abcdef0/${PASS}/box-3.png`)
+  })
+
+  it('should keep a dark and a light shot of one box at distinct paths', () => {
+    const paths = [
+      framePath(12, HEAD, PASS, 3, 'dark'),
+      framePath(12, HEAD, PASS, 3, 'light'),
+    ]
+
+    expect(paths).toEqual([
+      `pr-12/abcdef0/${PASS}/box-3-dark.png`,
+      `pr-12/abcdef0/${PASS}/box-3-light.png`,
+    ])
+  })
+})
+
+describe('isFrameTheme', () => {
+  it('should accept dark and light and nothing else', () => {
+    const answers = ['dark', 'light', 'Dark', 'sepia', ''].map(isFrameTheme)
+
+    expect(answers).toEqual([true, true, false, false, false])
   })
 })
 
