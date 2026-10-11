@@ -25,7 +25,6 @@ import {
   skillFamily,
   skillPracticeShape,
   skillProvenance,
-  standardCriteria,
   unreferencedRules,
   visualPathGlobs,
 } from '@/gate/measures'
@@ -501,11 +500,6 @@ export const STAGES: readonly Stage[] = [
     id: 'skill-family',
     label: 'Skill family',
     checks: [{ kind: 'measure', measure: skillFamily }],
-  },
-  {
-    id: 'standard-criteria',
-    label: 'Standard success criteria',
-    checks: [{ kind: 'measure', measure: standardCriteria }],
   },
   {
     id: 'sandbox-coverage',

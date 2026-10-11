@@ -505,7 +505,7 @@ export const documentCeiling: Measure = async (ctx) => {
  * Whether a path's stem, its basename up to the first `.`, repeats its
  * immediate parent folder, either whole or as a `<folder>-` prefix.
  *
- * Exact rather than singular-aware, so `standards/standard.md` passes. A false
+ * Exact rather than singular-aware, so `skills/skill.md` passes. A false
  * positive on a gate stage teaches a contributor to route around it, and a
  * widened match is cheap to add once a real echo slips through.
  */
@@ -772,28 +772,6 @@ export function seedEntryCount(payload: string): number {
 }
 
 /**
- * Scoped to arrival rather than the corpus, since `standards/standard.md`
- * forbids writing a criterion into an existing standard outside the change that
- * exercises it. Gating the known gaps would fail every push until someone
- * closed them all, which is the sweep that rule exists to prevent.
- */
-export const standardCriteria: Measure = async (ctx) => {
-  const run = await ctx.cli(['standards', 'audit', '--arrivals-only'])
-
-  if (run.exitCode === 0) {
-    return { emissions: [info('Arriving standards carry a success criterion')] }
-  }
-
-  return {
-    emissions: [output(run.all)],
-    failure:
-      run.exitCode === 2
-        ? 'A standard new to this branch carries no success-criterion section. Run bun src/cli.ts standards audit.'
-        : 'canon standards audit could not read which standards arrived on this branch. Run bun src/cli.ts standards audit --json to see why.',
-  }
-}
-
-/**
  * Every file in the gated corpus, walked from `ctx.root` rather than from the
  * changed set.
  *
@@ -841,8 +819,8 @@ function describeShippedReference(reference: ShippedReference): string {
       return 'a pull request number that resolves elsewhere for a reader in a target'
     case 'docs-path':
       return 'a path into this repository that a registry install never carries'
-    case 'standards-path':
-      return 'a bare standards/ path that has nothing to expand it in an installed plugin cache'
+    case 'retired-verb':
+      return 'a call to canon standards, a verb no installed CLI carries'
     case 'phase-label':
       return 'a phase label that names a board no target holds'
     case 'rule-path':
@@ -903,8 +881,8 @@ export const shippedReferences: Measure = async (ctx) => {
     ),
     failure:
       found.length === 1
-        ? `One reference in the shipped corpora resolves wrong for a reader in a target. Qualify a cross-repository citation as owner/repo#123 or owner/repo@abc1234, cite a docs page through canon docs <name>, rewrite a bare standards/ path under claude/skills/ as \${CLAUDE_SKILL_DIR}/../../standards/<name>.md, state a same-repository citation or a phase label as a fact instead and relocate the evidence to the owning canon/context/ entry, state the fact a shipped skill body's cited rule enforces instead of its path, or mark the line ${REFERENCE_MARKER}: <reason> where the bare form is the point.`
-        : `${found.length} references in the shipped corpora resolve wrong for a reader in a target. Qualify a cross-repository citation as owner/repo#123 or owner/repo@abc1234, cite a docs page through canon docs <name>, rewrite a bare standards/ path under claude/skills/ as \${CLAUDE_SKILL_DIR}/../../standards/<name>.md, state a same-repository citation or a phase label as a fact instead and relocate the evidence to the owning canon/context/ entry, state the fact a shipped skill body's cited rule enforces instead of its path, or mark each line ${REFERENCE_MARKER}: <reason> where the bare form is the point.`,
+        ? `One reference in the shipped corpora resolves wrong for a reader in a target. Qualify a cross-repository citation as owner/repo#123 or owner/repo@abc1234, cite a docs page through canon docs <name>, cite the owner skill's reference in place of a canon standards call, state a same-repository citation or a phase label as a fact instead and relocate the evidence to the owning canon/context/ entry, state the fact a shipped skill body's cited rule enforces instead of its path, or mark the line ${REFERENCE_MARKER}: <reason> where the bare form is the point.`
+        : `${found.length} references in the shipped corpora resolve wrong for a reader in a target. Qualify a cross-repository citation as owner/repo#123 or owner/repo@abc1234, cite a docs page through canon docs <name>, cite the owner skill's reference in place of a canon standards call, state a same-repository citation or a phase label as a fact instead and relocate the evidence to the owning canon/context/ entry, state the fact a shipped skill body's cited rule enforces instead of its path, or mark each line ${REFERENCE_MARKER}: <reason> where the bare form is the point.`,
   }
 }
 
