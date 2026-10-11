@@ -31,7 +31,7 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      'Fold what we decided this session into the context entries and mark off what shipped on the task board.',
+      'Fold what we decided this session into the context entries before this branch goes out.',
     expect: 'context-fold',
   },
   {

@@ -1,67 +1,59 @@
 ---
 name: context-fold
-description: What the planning-doc reconcile is for, the gaps it closes, and why the diff decides completion alone
+description: What the context-entry fold is for, the gaps it closes, and why it audits its own writes before it reports
 ---
 
 # Context fold requirement
 
 ## Gap
 
-Without this skill, the planning docs describe the scope the session opened with. An outcome the diff shipped stays unchecked, so the board reports finished work as open and the next session re-plans it. A decision a plan settled mid-cycle lives only in the conversation and dies with it. Plans for closed tasks accumulate in the live folder, so the folder stops indicating what is in flight.
+Without this skill, the context entries describe the repository the session opened with. A decision a plan settled mid-cycle lives only in the conversation and dies with it, and an entry naming a module the diff rewrote keeps stating what the module used to do.
 
-A handoff file has the same shape of gap as an unmarked outcome. A page a learning workspace produced and an operator already picked a destination for sits in gitignored scratch until something lands it, and the session that produced it is gone by the time a branch exists to carry the write. Left unfolded it reads as promoted while the destination holds nothing.
-
-The receipt half of that sweep was missing entirely. A review receipt was deleted per shipped branch while another kind of receipt was skipped, because the exclusion protecting the checklist and audit prefixes caught a third by accident. Nothing but an operator asking collected it, and a collection that waits on someone remembering to ask is one a folder outgrows, so the skipped population grew per shipped branch and never shrank until it was most of the folder.
-
-The trigger side carries a gap of its own. "Sync the docs" names either corpus to the person saying it, so a description leaving its corpus to the opening clause alone competes with its public-facing sibling on nothing the routing field states, and the planning surface the request was about goes untouched.
+The trigger side carries a gap of its own. "Sync the docs" names either corpus to the person saying it, so a description leaving its corpus to the opening clause alone competes with its public-facing sibling on nothing the routing field states, and the context folder the request was about goes untouched.
 
 The opposite gap opened from the same write. A fold allowed to touch the requirements record on every ship rewrote it one reasonable edit at a time, and nothing read it for whether it still stated the project's identity. Each ship looked correct and the sum drifted.
 
-This skill writes canonical docs at the end of a long build and never reviews what it wrote. An appended figure or a branch-narrated re-measurement lands unchecked the same way a session's own edits do, so what the fold produces carries the exact defect the standards it cites already ban.
+A fold that did everything at ship time hid its own job. It marked board outcomes, swept receipts, wrote the design record, and landed promoted pages, so a session invoking it to refresh the context entries ran ten steps and could not tell which one it had asked for.
+
+This skill writes canonical docs at the end of a long build. An appended figure, a branch-narrated re-measurement, or an entry pushed past its length lands unchecked the same way a session's own edits do, so what the fold produces carries the exact defect the standards it cites already ban.
 
 ## Must
 
-- Name the context entries and the task board in a trigger phrase rather than in the opening clause alone, so a bare request to sync the docs separates this skill from `docs-sync` on something both descriptions state
-- Take completion from the diff and everything else from the session, since completion is a fact about the repository rather than about the conversation
-- Match an outcome on the behavior it names, never on a filename or a commit subject
-- Leave an outcome unchecked when the diff is ambiguous. An unmarked shipped outcome costs one manual edit and a wrongly marked one hides work that never happened.
-- Write tracked docs at the current worktree root and the task board at the main root, since only the first commits with the branch
-- Count every other citation before archiving a plan, comparing resolved targets rather than raw strings or bare filenames
-- Retarget a closed task at the archived plan, so the reasoning behind finished work stays reachable
+- Name the context entries in a trigger phrase rather than in the opening clause alone, so a bare request to sync the docs separates this skill from `docs-sync` on something both descriptions state
+- Take decisions from the session and the refresh scope from the diff
+- Write tracked docs at the current worktree root, since only that copy commits with the branch
 - Write a decision to the domain context entry it constrains, whatever other domains its reasoning touches, so a decision has one home that loads on demand
 - Report a requirements or direction change in one line naming `document-health`, rather than writing it, so the identity record changes only when the operator reviews it
-- Leave the current branch's review receipt alone, since its branch is still live
-- Land each block of a promotion handoff at the destination its heading names, then delete the file so a later run does not fold it twice
-- Take a promotion destination as already decided, since the operator confirmed it where the page was produced
+- Close on an audit of what the fold touched, running `canon context audit` and reporting the findings on files this run wrote or the diff carries
 - Classify the fold's whole diff baseline through `canon context classify diff`, calling the verb rather than reimplementing its pattern or its prompt in the skill body, since an earlier commit on the branch carries a doc edit the fold is equally responsible for
 - Apply a `REPLACE` or `HISTORY` finding against the quote it names, report a `MOVE` finding naming the surface it belongs on rather than cutting it, or keep a finding with a one-line reason, rather than leaving a finding unanswered
-- Rewrite a restated or superseded statement in place rather than appending the replacement beside it, on every canonical doc type this skill writes
-- Report a refusal or a missing `context classify` subcommand as one line and continue the fold either way, since a check that cannot run is not a reason to leave the fold's own output unshipped
+- Rewrite a restated or superseded statement in place rather than appending the replacement beside it
+- Report a refusal or a missing `context audit` or `context classify` subcommand as one line and continue the fold either way, since a check that cannot run is not a reason to leave the fold's own output unshipped
 
 ## Must not
 
-- Infer a new task from the diff. Only outcomes already on the board get marked.
-- Touch task files the session did not change
-- Widen what a writing step reads when the baseline is unusable. Widening a read is safe and widening a write stubs a surface for every file in the repository.
+- Write the task board, the design record, `CLAUDE.md`, or a page from a promotion handoff. Each has its own owner, and a fold that writes them hides its job behind theirs.
+- Widen what the refresh reads when the baseline is unusable. Widening a read is safe and widening a write stubs a surface for every file in the repository.
 - Write the requirements record. It states identity, and a fold reads one session where a review reads the whole project.
-- Edit `CLAUDE.md` inline. Every change there goes through a diff-and-approve gate, so this skill only flags.
-- Create a context entry, or move or delete a plan. A plan is settled by the merge, and `canon tasks archive` carries it.
-- Overwrite a file a promotion block routes to. A destination that already holds a page is a merge for a person, and folding over it discards work this skill never read.
+- Create a context entry for a domain the catalog does not list
+- Report an audit finding on an entry this run never touched, which belongs to whoever next edits it
+- Add a path flag to the audit verb from this skill. It takes a project root, so the skill filters the record.
 - Pick or configure a classifier backend. The project setting decides it, and this skill reports the resolved `modelLayer` as returned.
-- Stop the fold on a classify finding, a refusal, or a missing subcommand. All three report and continue.
+- Stop the fold on an audit or classify finding, a refusal, or a missing subcommand. All of them report and continue.
 - Apply a finding against a quote found more than once or not found at all. Report that it could not be located instead of guessing.
 - Re-run the classifier after applying a finding, which loops it over its own edit
 - Cut a `MOVE` finding. The verdict means correct content sitting on the wrong surface rather than a deletion candidate, so cutting one can discard content that belongs elsewhere rather than removing detail that never belonged at all.
-- Scope Step 8 to the files Steps 3 and 5 wrote this run. An earlier commit on the branch carries a doc edit the fold is equally responsible for, and the verb's own extraction already answers whether anything in range qualifies.
+- Scope the classifier to the files Step 3 wrote this run. An earlier commit on the branch carries a doc edit the fold is equally responsible for, and the verb's own extraction already answers whether anything in range qualifies.
 
 ## Guards
 
 - Neither a `canon/` nor a `.claude/` directory: stop and name the command that sets one up
-- No session divergence and no queued outcome the diff shipped: stop with a pass, since both conditions have to hold
+- No session divergence and no diff a context entry could describe: stop with a pass, since both conditions have to hold
 
 ## Out of scope
 
-- Creating a task file or moving one off the board, which `task-board` owns
-- Public-facing docs, which `docs-sync` owns, apart from landing a page a promotion handoff already carries a confirmed destination for. This skill reconciles the context entries, the planning records, and the task board, and both descriptions name their corpus in the trigger so a request saying only "sync the docs" lands on one of the pair rather than on either.
-- Deciding where a promoted page belongs, which is settled with the operator by the surface that produced the page
-- Regenerating the task index, owned by a hook
+- Marking a shipped task's outcomes, sweeping review receipts, and archiving a task, which `task-complete` owns
+- Landing a page a teach promotion handoff carries, which `teach-workspace` owns in its fold mode
+- Creating or declining a task file, which `task-board` owns
+- Public-facing docs, which `docs-sync` owns. Both descriptions name their corpus in the trigger so a request saying only "sync the docs" lands on one of the pair rather than on either.
+- Regenerating the context catalog, which a commit hook runs

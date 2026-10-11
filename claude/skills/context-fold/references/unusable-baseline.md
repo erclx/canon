@@ -1,6 +1,6 @@
 ---
 title: An unusable diff baseline
-description: When context-fold's diff baseline is unusable, what Step 2 reads to recover the committed half, and why Step 5 keeps the scoped set rather than the whole tree
+description: When context-fold's diff baseline is unusable, why Step 3 keeps the scoped set rather than the whole tree
 ---
 
 # An unusable diff baseline
@@ -14,10 +14,8 @@ The baseline is unusable in two cases:
 
 An unusable baseline costs only the committed half. `git diff <base> HEAD` is empty by definition once the base equals HEAD, while `git diff HEAD` and `git ls-files --others --exclude-standard` still report uncommitted and untracked work at correct scope.
 
-**Step 2 recovers the committed half.** Read `git log -p -1`, widening to `git log -p -<n>` when the session spans several commits, and read the candidate task files against the working tree. That yields names and content both, which is what lets Step 2 decide on behavior rather than on filenames. A fresh `git init` on `main` with no remote is the ordinary shape of a scaffolded project, so this path carries the evidence rather than covering an edge case.
+**Step 3 keeps the scoped set.** Run it on the working tree and untracked files alone, and skip only when that set comes out empty, reporting the warning its own reference names.
 
-**Step 5 keeps the scoped set.** Run it on the working tree and untracked files alone, and skip only when that set comes out empty, reporting the warning its own step names.
-
-Never substitute the whole tree for a missing baseline, and do not reuse Step 2's commit read in Step 5 for consistency. On a fresh `git init` project the last commit is the scaffold commit, so `git log -p -1` is the whole tree by another route. Step 2 tolerates that because it only reads, and it matches conservatively against outcomes already on the board. Step 5 writes, so the same set rewrites every context entry that tree touches.
+Never substitute the whole tree for a missing baseline, and do not widen to `git log -p -1` for coverage. On a fresh `git init` project the last commit is the scaffold commit, so that read is the whole tree by another route, and Step 3 writes, so the same set rewrites every context entry that tree touches. `task-complete` takes the widened read for its marking step, which only reads and matches conservatively against outcomes already on the board.
 
 Widening what a step reads is safe. Widening what a step writes is not.
