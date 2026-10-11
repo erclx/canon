@@ -47,9 +47,9 @@ The Tests stage holds a lock file under the machine state folder while its suite
 
 A gate that starts queuing says so on stderr at once, naming the holder's pid and worktree, since a stage prints only after it returns and a silent wait reads as a hung suite. Once the suite has run, the stage repeats the wait in its own output with the seconds it took. The stage's `ms` stays wall time and includes the wait, and `queuedMs` in the `--json` record carries the queued part.
 
-### Why a lock rather than a worker cap
+### Why a lock and a worker cap together
 
-vitest defaults to every core but one, which is 31 workers on the 32-core box the measurement ran on, and a wave of worktrees each starting that many starves the tests that spawn `bun src/cli.ts`, `cspell`, or a browser past their timeouts. A lone default run passed every case.
+vitest defaults to every core but one, which is 31 workers on the 32-core box the measurement ran on, and a wave of worktrees each starting that many starves the tests that spawn `bun src/cli.ts`, `cspell`, or a browser past their timeouts. A lone default run on a quiet box passed every case.
 
 | Concurrent full suites | Workers each | Wall | Failed tests per run       |
 | ---------------------- | ------------ | ---- | -------------------------- |
@@ -57,7 +57,27 @@ vitest defaults to every core but one, which is 31 workers on the 32-core box th
 | 4                      | 8            | 48s  | 0 to 1, all the fixed port |
 | 7, fixed port excluded | 8            | 102s | 9 to 14                    |
 
-A cap thins each run's load and leaves the sum growing with the wave, so seven capped suites still failed. Only bounding how many suites run at once removes the failure, and it costs a queued worktree about the 17 seconds one lone run takes. The lock never gives up on a live holder, since a deadline turns a long queue back into the intermittent failure the lock removes.
+A cap thins each run's load and leaves the sum growing with the wave, so seven capped suites still failed. Only bounding how many suites run at once removes that failure, and it costs a queued worktree about the 17 seconds one lone run takes. The lock never gives up on a live holder, since a deadline turns a long queue back into the intermittent failure the lock removes.
+
+### What the lock left open
+
+The lock did not settle the whole outcome. It serializes suites and cannot see the rest of the box, which during a wave carries other gates' non-test stages, hand-run test files, sandbox runs, browsers, and the sessions themselves. One suite at the default worker count holds about 62 runnable processes on 32 cores, since each worker spawns a child, so any outside load starves its spawn tests. A second measurement loaded the box with `yes` loops under a lone suite of 6309 tests.
+
+| Load                      | Workers | Runs | Runs failing | Failed tests per run |
+| ------------------------- | ------- | ---- | ------------ | -------------------- |
+| quiet                     | default | 3    | 0            | 0                    |
+| 32 busy threads           | default | 2    | 1            | 4                    |
+| 64 busy threads           | default | 5    | 3            | 1 to 7               |
+| 64 busy threads           | 50%     | 3    | 0            | 0                    |
+| 64 busy threads, 15s test | default | 3    | 0            | 0                    |
+| 96 busy threads           | default | 3    | 3            | 1 to 3               |
+| 96 busy threads           | 50%     | 3    | 1            | 1                    |
+
+### Why the cap and not a timeout
+
+The cap and a longer timeout both cleared 64 threads. The cap removes load where the timeout tolerates a starved run, so `vitest.config.ts` sets `maxWorkers` to `'50%'` outside CI and no timeout or retry moves. A quiet box pays nothing for it, at 16 to 17 seconds against 18 to 19 at the default. The cap answers ambient load and the lock answers concurrent suites, so neither replaces the other.
+
+A failed Tests stage outside CI also prints the load average and core count it ran under, taken from the kernel's 1-minute average. A report that says a spawn test timed out can then be sorted into starvation or a real failure.
 
 ### How a dead holder is taken over
 
@@ -67,7 +87,9 @@ A takeover renames the stale file aside rather than deleting it, because two acq
 
 ### What the lock does not cover
 
-CI skips the lock, since each runner runs one suite. A suite run by hand through `bun run test` or `bun --bun vitest run` takes no lock either, so running the whole suite directly during a wave still oversubscribes the box. Run a single file that way and leave the full suite to `bun run check`.
+CI skips the lock, since each runner runs one suite, and it keeps vitest's default workers for the same reason. The cap bounds one suite and does nothing about load from outside it. At three times the core count a capped run still failed once, in the canvas walk `src/canvas/shell.e2e.test.ts`, whose cases share one page so one starved case takes the rest.
+
+A suite run by hand through `bun run test` or `bun --bun vitest run` takes no lock either, so running the whole suite directly during a wave still oversubscribes the box. Run a single file that way and leave the full suite to `bun run check`.
 
 The file records the gate's pid, while the suite runs in a child vitest tree. Killing the gate alone with `kill -9` leaves that tree running as orphans, so the next acquirer takes over at once while the orphaned suite still holds every core, and two suites overlap until it finishes. Closing it would mean recording and probing the holder's process group.
 
