@@ -33,7 +33,7 @@ It resolves the repository through `git worktree list` the way the poll's baseli
 
 ### Where the poll lives
 
-`orchestrator-poll.md` is a runbook and sits with the others, while the scripts it invokes take `scripts/` per `standards/skill.md`, which splits detail from deterministic operations. Placing both on an internal surface was the alternative, and it strands a target, which would install an orchestrator carrying its runbooks and no review trigger while the skill body names neither the poll nor the script.
+`orchestrator-poll.md` is a runbook and sits with the others, while the scripts it invokes take `scripts/` per `claude/skills/create-skill/references/skill.md`, which splits detail from deterministic operations. Placing both on an internal surface was the alternative, and it strands a target, which would install an orchestrator carrying its runbooks and no review trigger while the skill body names neither the poll nor the script.
 
 Nothing catches a misplacement. The Skill paths measure in `src/gate/boundaries.ts` bans a single pattern, `wiki/`, so a skill citing a toolkit-only path passes it clean, and the placement rule holds only while a session applies the reasoning. The start and stop condition is unenforced the same way, and both halves belong to whoever holds the loop, since a session holding a recurring-prompt scheduler starts and cancels one without the operator.
 

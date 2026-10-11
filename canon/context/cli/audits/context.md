@@ -37,7 +37,7 @@ A root folder is measured and stays out of the citation scope, since the pattern
 
 Which measures reach a folder is decided by the tier stating the rule behind them, not by whether a standard claims the folder. Length and the catalog-table scan are judgments about how far a reader travels, depth and bullet weight are stated in `claude/skills/markdown-craft/references/markdown.md` over every markdown file, and all four report wherever the audit is pointed, `docs/` included.
 
-Required sections and provenance narrow to the folder `standards/context.md` claims through `governsContent`, and citation resolution keys on the `.claude/` prefix. No standard claims `docs/` and none needs to, since a folder opting into measurement reads the output without a rule to cite.
+Required sections and provenance narrow to the folder `claude/skills/context-fold/references/context.md` claims through `governsContent`, and citation resolution keys on the `.claude/` prefix. No standard claims `docs/` and none needs to, since a folder opting into measurement reads the output without a rule to cite.
 
 The reference-form check narrows inside the governed folder rather than at it, reaching the folders a domain split into and stopping at the flat one above them. A split folder's entries are named for sub-areas of one domain, so a bare name matching one points at it, while the flat folder's entries are named for whole domains and a domain name is a common noun a seed spells the same way. Both measured false positives sat there. The sibling set narrows a second time inside a split folder, so a reference to an entry in a different folder is governed by the rule and never reported, which is the measure reaching less than the rule rather than the rule stopping at a sibling.
 
@@ -55,7 +55,7 @@ A heading at any level satisfies a required section, since those split domains c
 
 That sanctioned omission is what the `stub: true` frontmatter field answers under `--gate`. A file declaring it is dropped before the check and reported nowhere, and both seed install paths strip the field so no target receives it. The exemption is scoped to this one measure, since a skeleton is exempt from owing sections rather than from being well formed.
 
-Bullet weight and depth left this command for `canon markdown audit`. Both are stated in `claude/skills/markdown-craft/references/markdown.md` over every markdown file, and a check reaching every markdown file has no reason to require a folder that resolves. `standards/context.md` keeps the incident half of the bullet remedy, which needs a decision to keep, so the specialized advice stays here while the measure moved.
+Bullet weight and depth left this command for `canon markdown audit`. Both are stated in `claude/skills/markdown-craft/references/markdown.md` over every markdown file, and a check reaching every markdown file has no reason to require a folder that resolves. `claude/skills/context-fold/references/context.md` keeps the incident half of the bullet remedy, which needs a decision to keep, so the specialized advice stays here while the measure moved.
 
 ## Gotchas
 

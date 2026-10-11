@@ -29,7 +29,7 @@ A scenario enumerates from its script under `sandbox/<category>/`, not from the 
 
 ### What a percentage does not weigh
 
-Neither number weighs an arm by what it asserts. An arm can carry a single assertion over its own provisioning, such as `standards/skill.md` being absent, which is a claim about the fixture rather than about the skill under test. The count reads as scenarios reached rather than behavior covered, so a reader taking either percentage as skill coverage reads past what the declarations say.
+Neither number weighs an arm by what it asserts. An arm can carry a single assertion over its own provisioning, such as `claude/skills/create-skill/references/skill.md` being absent, which is a claim about the fixture rather than about the skill under test. The count reads as scenarios reached rather than behavior covered, so a reader taking either percentage as skill coverage reads past what the declarations say.
 
 The count measures declarations present, never declarations that work. `canon/context/sandbox/assertions.md` covers the ways a declaration counts as armed while asserting nothing.
 

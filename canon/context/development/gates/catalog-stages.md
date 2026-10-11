@@ -41,7 +41,7 @@ It reads the record directly because the Context citations stage runs `--citatio
 
 ## Design prose
 
-The Design stage regenerates `canon/DESIGN.md` and asserts it for drift, and then runs the `designProse` measure over that record and `examples/design/DESIGN.md`. The measure counts each against the limits in `src/design/budget.ts`, which `standards/design.md` states: a one-paragraph Personality, at most three rules a section, a word cap on each rule, and a short lead. A drift assert cannot see this, since a regenerated paragraph agrees with its source however long it grows.
+The Design stage regenerates `canon/DESIGN.md` and asserts it for drift, and then runs the `designProse` measure over that record and `examples/design/DESIGN.md`. The measure counts each against the limits in `src/design/budget.ts`, which `claude/skills/canvas-board/references/design.md` states: a one-paragraph Personality, at most three rules a section, a word cap on each rule, and a short lead. A drift assert cannot see this, since a regenerated paragraph agrees with its source however long it grows.
 
 A record that is absent is skipped, a tree holding neither passes and says so, and a path it cannot read reports unmeasured rather than passing.
 

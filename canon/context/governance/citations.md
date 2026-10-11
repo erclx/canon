@@ -64,35 +64,30 @@ A standard name resolves against `standards/` alone, matching `standardRoots` in
 
 ### Rules that point rather than restate
 
-Each rule below cites its standard through `canon standards <name>` alone, keeping its `Authority` pointer plus any content the standard does not cover. `standards/rule.md` settles the shape: a rule points at the standard that owns a convention and never restates it.
+Each rule below cites its standard through `canon standards <name>` alone, keeping its `Authority` pointer plus any content the standard does not cover. `claude/skills/create-rule/references/rule.md` settles the shape: a rule points at the standard that owns a convention and never restates it.
 
-- `governance/rules/standards/design.md` → `canon standards design`, without restating the token-as-intent, no-CSS, table-format, or omission rules.
-- `governance/rules/standards/skill.md` → `canon standards skill` and `canon standards skill-requirement`, without restating the `REQUIREMENT.md` gap-line rule, and keeps the `create-skill` question bullet and the after-editing bullets.
-- `governance/rules/standards/readme.md` → `canon standards readme`, without restating the audience-and-voice rules.
-- `governance/rules/standards/rule.md` → `canon standards rule`, without restating the numbering or body rules.
 - `governance/rules/standards/standard.md` → `canon standards standard`, without restating the scope-statement rules.
-- `governance/rules/standards/context.md` → `canon standards context`, without restating the supersede-in-place rule. Also moot.
 
-`governance/rules/canon/tasks.md` and `governance/rules/canon/plan.md` are hand-written and cite no standard by name, since their standards moved into `task-board` and `plan-feature`. They load the owner skill instead. The groundwork, intake, and session rules retired with their standards.
+`governance/rules/canon/tasks.md`, `governance/rules/canon/plan.md`, and `governance/rules/canon/context.md` are hand-written and cite no standard by name, since their standards moved into `task-board`, `plan-feature`, and `context-fold`. They load the owner skill instead. The groundwork, intake, session, design, readme, and rule rules retired with their standards, each routing a path to a reference its owner skill already reads. The skill rule stays as `governance/rules/claude/skill.md`, hand-written, because its creation-time and re-read bullets fire on a hand edit between skill runs.
 
 ### Skill citations carrying the prefix and fallback
 
 Each rule and standard below cites its skill with the `canon:` prefix plus a report-if-missing line.
 
 - `claude/skills/teach-workspace/references/teach.md` cites `canon:teach-workspace`, the standard's fallback reading "say so and stop".
-- `governance/rules/standards/skill.md` cites `canon:create-skill` twice.
+- `governance/rules/claude/skill.md` cites `canon:create-skill` twice.
 - `claude/skills/markdown-craft/references/markdown.md` cites `canon:write-human` in ordinary prose stating where a markdown edit routes, which reads as a directive rather than as a scope boundary.
 
 ### Moot: the target cannot reach the governed surface
 
 A rule scoped to a folder only a plugin skill creates is inert rather than broken for a target holding governance alone. The folder never exists there, so the glob never matches and the citation never fires. No repair applies, and the row keeps a later pass from misreading inertness as a defect.
 
-- `governance/rules/standards/context.md`, scoped to `canon/context/**`. Only `context-fold` writes an entry there.
+- `governance/rules/canon/context.md`, scoped to `canon/context/**`. Only `context-fold` writes an entry there.
 
 ### Clean pointer, no other note
 
 - `governance/rules/writing/markdown.md` → the `markdown-craft` and `write-human` skills, each named with the fallback line.
-- `standards/skill.md` → several sibling standards by path, all within the flat `standards/` corpus every delivery route carries whole.
+- `claude/skills/create-skill/references/skill.md` → several sibling standards by path, all within the flat `standards/` corpus every delivery route carries whole.
 - `claude/skills/task-board/references/tasks.md` → `standards/versioning.md` and `claude/skills/plan-feature/references/plan.md`, for the same reason.
 
 ### Standards corpus, examined and excluded

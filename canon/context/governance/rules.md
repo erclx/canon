@@ -38,7 +38,7 @@ The leading digit restates the folder, so what the number uniquely supplies is r
 ### Three sources numbering into one tree
 
 - `governance/rules/` ships to targets and takes the gaps between the tens, such as `canon/606-git.md`.
-- `internal/rules/` governs this repository alone and takes the top of a band, a division stated in `standards/rule.md`. The shipped `000` band was full at every ten when the split was set, which is what forced it rather than leaving it to convention. `internal/rules/core/095` to `097` sit under a `core/` folder the shipped tree does not carry, numbered inside the `code` band.
+- `internal/rules/` governs this repository alone and takes the top of a band, a division stated in `claude/skills/create-rule/references/rule.md`. The shipped `000` band was full at every ten when the split was set, which is what forced it rather than leaving it to convention. `internal/rules/core/095` to `097` sit under a `core/` folder the shipped tree does not carry, numbered inside the `code` band.
 - A target's own rules take `900-999`, since the two bands the toolkit crowds most, `claude/` and `canon/`, have little top-of-band room left for a target to claim.
 
 Each source also installs into its own folder: `.claude/rules/canon/`, `.claude/rules/internal/`, and `.claude/rules/project/`. The folder stops a colliding `<n>-<slug>` between two sources from overwriting one file with the other, and the number still resolves a citation against either corpus for a reader who has only the citation in hand. `internal/` exists only in this repository. Nothing checks any of the three divisions.

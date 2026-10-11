@@ -9,7 +9,7 @@ description: What the design domain owns, the generated record against a target'
 
 `canon/DESIGN.md` holds visual intent as token tables, a one-paragraph Personality, and a few one-line rules per section. The toolkit treats it as the tool-agnostic source of truth for any project's design system. A Claude Code skill drafts the file from existing project signals, and a CLI command renders a token preview for human inspection.
 
-This repository's own record is generated rather than authored. `src/design/tokens.ts` holds the values, and `canon design regen` renders the record from it and `src/design/base.css` from the achromatic set in `src/design/neutral.ts`, both of which the `design` gate stage asserts for drift. The same stage counts this record and `examples/design/DESIGN.md` against the prose budget `standards/design.md` sets, through `src/design/budget.ts`. A target keeps the hand-authored shape, so the markdown parser serves that reader and this repository reads the module instead.
+This repository's own record is generated rather than authored. `src/design/tokens.ts` holds the values, and `canon design regen` renders the record from it and `src/design/base.css` from the achromatic set in `src/design/neutral.ts`, both of which the `design` gate stage asserts for drift. The same stage counts this record and `examples/design/DESIGN.md` against the prose budget `claude/skills/canvas-board/references/design.md` sets, through `src/design/budget.ts`. A target keeps the hand-authored shape, so the markdown parser serves that reader and this repository reads the module instead.
 
 ## Layout
 

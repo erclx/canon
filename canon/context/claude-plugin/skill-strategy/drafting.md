@@ -64,7 +64,7 @@ The measure is TF-IDF over descriptions rather than Claude Code's own router, an
 
 ### Why the readme templates sit in the skill
 
-The readme kind carries one whole template per project type under `references/readme/`, in the skill and not in `standards/readme.md`. `docs-sync` reads the standard to rewrite a section and never needs a whole page, so a template there would load for every README edit to serve only the drafting one. The templates hold slots and structure and no rule of their own, which leaves the standard the one owner of per-type content.
+The readme kind carries one whole template per project type under `references/readme/`, in the skill and not in `claude/skills/docs-sync/references/readme.md`. `docs-sync` reads the standard to rewrite a section and never needs a whole page, so a template there would load for every README edit to serve only the drafting one. The templates hold slots and structure and no rule of their own, which leaves the standard the one owner of per-type content.
 
 The template types are the standard's five: library, CLI, application, agent-facing, and plugin. The intake that prompted them listed an internal service type. The standard carries none and the skill has no signal that detects one, so it waits for the first target that needs it, as a standard change. A project matching several types combines their templates under one header block and one description, and a project matching none falls back to the standard's generic template.
 

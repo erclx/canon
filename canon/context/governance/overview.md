@@ -22,7 +22,7 @@ The rules are content rather than code, so the domain is a catalog plus a comman
 
 ### Why the entry is a folder
 
-The entry is a folder on the sub-area condition rather than on length. `standards/context.md` splits a domain at three or more sub-areas that do not fit cleanly in one file, and the rule tier with its numbering and frontmatter contract, the stacks that group rules, and the install and sync path with its CLI are three that do not. Length is what raised the question and answers nothing by itself.
+The entry is a folder on the sub-area condition rather than on length. `claude/skills/context-fold/references/context.md` splits a domain at three or more sub-areas that do not fit cleanly in one file, and the rule tier with its numbering and frontmatter contract, the stacks that group rules, and the install and sync path with its CLI are three that do not. Length is what raised the question and answers nothing by itself.
 
 ### Editing `.claude/rules/` here changes nothing
 
