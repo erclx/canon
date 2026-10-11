@@ -19,6 +19,7 @@ import {
   govStackExists,
   listGovStacks,
   mergeExtraRules,
+  resolveExtraRules,
   resolveRules,
 } from '@/gov/stacks'
 import {
@@ -153,6 +154,11 @@ export function register(program: Command): void {
         '  canon gov install react',
         '  canon gov install node ../my-app',
         '  canon gov install astro --add 200-react,260-shadcn ../my-app',
+        '  canon gov install --add tasks,plan ../my-app',
+        '',
+        'With --add and no stack, the named rules install alone. A first',
+        'positional naming a stack is read as the stack, so pass . or a path',
+        'carrying a slash to force a target that shares a stack name.',
         '',
       ].join('\n'),
     )
@@ -1171,6 +1177,11 @@ async function runInstall(
 ): Promise<number> {
   intro('canon gov install')
 
+  const add = opts.add ?? ''
+  if (add !== '' && isStacklessAdd(stack, target)) {
+    return installExtras(add, stack ?? target)
+  }
+
   const resolved = resolveTarget(target, PROJECT_ROOT)
   if (typeof resolved === 'number') return resolved
 
@@ -1194,7 +1205,6 @@ async function runInstall(
     return 1
   }
 
-  const add = opts.add ?? ''
   const rules =
     add === '' ? resolution.rules : mergeExtraRules(resolution.rules, add)
 
@@ -1240,6 +1250,66 @@ async function runInstall(
     [selected],
     now,
   )
+
+  const { GREEN, NC } = palette(process.stderr)
+  outro()
+  process.stderr.write(`${GREEN}✓ Rules installed${NC}\n`)
+  return 0
+}
+
+/**
+ * Whether `--add` runs with no stack under it. Commander fills the first
+ * positional before the second, so `--add a,b ../my-app` arrives with the
+ * target in `stack` and the default `.` in `target`. A first positional that
+ * names a stack keeps today's meaning, so a folder named `node` reads as the
+ * stack, and `.` or a path carrying a slash is how a caller forces the target.
+ */
+function isStacklessAdd(stack: string | undefined, target: string): boolean {
+  if (stack === undefined) return true
+  if (target !== '.') return false
+  return !govStackExists(PROJECT_ROOT, stack)
+}
+
+/**
+ * Installs `--add` names alone. The chain stamp is left as it was, since the
+ * extras are not a stack, and overwriting the chain would cost a target the
+ * missing-rule report its stack install recorded.
+ */
+async function installExtras(add: string, target: string): Promise<number> {
+  const resolved = resolveTarget(target, PROJECT_ROOT)
+  if (typeof resolved === 'number') return resolved
+
+  logStep('Resolving extras with no stack')
+
+  const { found, missing } = lookupRules(PROJECT_ROOT, resolveExtraRules(add))
+  for (const rule of missing) logWarn(`${rule} (source not found, skipping)`)
+  for (const source of found) logInfo(source.rule)
+
+  if (found.length === 0) {
+    logError('No named rule resolved, so nothing was installed.')
+    outro()
+    return 1
+  }
+
+  const shouldInstall = await select({
+    message: `Install ${found.length} rules to ${displayPath(target, CANON_RULES_REL)}?`,
+    options: [
+      { value: true, label: 'Yes' },
+      { value: false, label: 'No' },
+    ],
+    nonInteractiveDefault: true,
+  })
+
+  if (!shouldInstall) {
+    logWarn('Cancelled')
+    outro()
+    return 0
+  }
+
+  logStep('Installing rules')
+  for (const rel of await installRules(found, resolved)) logAdd(rel)
+
+  await recordStamp(createGovAdapter(PROJECT_ROOT), resolved, new Date())
 
   const { GREEN, NC } = palette(process.stderr)
   outro()

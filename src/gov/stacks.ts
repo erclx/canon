@@ -207,3 +207,12 @@ export function mergeExtraRules(
 
   return merged
 }
+
+/**
+ * Resolves `--add` names with no stack under them. It runs the same merge as
+ * the stack path against an empty list, so a stackless add and a layered one
+ * split and dedupe their names identically.
+ */
+export function resolveExtraRules(add: string): string[] {
+  return mergeExtraRules([], add)
+}

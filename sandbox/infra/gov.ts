@@ -67,6 +67,8 @@ export default scenario({
   prepare: (ctx) => {
     ctx.mkdir('install')
     ctx.write('install/.gitkeep', '')
+    ctx.mkdir('add')
+    ctx.write('add/.gitkeep', '')
 
     const rulesDir = join(ctx.root, 'governance', 'rules')
     const rules = findMarkdown(ctx, rulesDir)
@@ -125,6 +127,7 @@ export default scenario({
 
     ctx.log.step('Governance sandbox')
     ctx.log.info('install/ : clean target, no rules present')
+    ctx.log.info('add/     : clean target, takes named rules with no stack')
     ctx.log.info(
       'sync/    : stale .claude/rules/canon/ present, canon/core/999-retired.md deleted, project/core/900-local.md kept',
     )
@@ -143,6 +146,10 @@ export default scenario({
     install: (ctx) => {
       ctx.log.step('Running: canon gov install astro --add 200-react install/')
       verb(ctx, 'gov', 'install', 'astro', '--add', '200-react', 'install/')
+    },
+    add: (ctx) => {
+      ctx.log.step('Running: canon gov install --add tasks,plan add/')
+      verb(ctx, 'gov', 'install', '--add', 'tasks,plan', 'add/')
     },
     sync: (ctx) => {
       ctx.log.step('Running: canon gov sync')
