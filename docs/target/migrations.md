@@ -124,6 +124,10 @@ The walk checks both `.claude/snippets` and a root `snippets/`, since a toolkit 
 
 The walk reads the toolkit's own history, so it needs a cloned toolkit. Installed from the registry it reports `historyUnavailable` and names nothing, so check for `.claude/snippets/` and a root `snippets/` by hand there, and treat what you find as `unattributed`.
 
+## Stop calling the standards verb, once
+
+`canon standards` is gone. Load the skill owning each standard instead.
+
 ## Keep or delete the wireframes folder, your call
 
 The toolkit retired the wireframes record. Its standard, its generated rule, its seeded folder, and the `@canon/wireframes/index.md` import in the seed `CLAUDE.md` no longer ship, and no skill reads or writes `canon/wireframes/` any more. The canvas holds visual direction instead.
