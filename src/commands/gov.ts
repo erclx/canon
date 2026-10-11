@@ -52,6 +52,7 @@ import {
   type TestOrderReport,
 } from '@/gov/test-order'
 import { recordStamp, runDomainSync } from '@/sync/engine'
+import { detectRules } from '@/gov/detect'
 import { writeChainStamp } from '@/sync/stamp'
 import { resolveTarget } from '@/targets/validate'
 import {
@@ -225,6 +226,31 @@ export function register(program: Command): void {
     .option('--json', 'Emit machine-readable JSON')
     .action((opts: ListOptions) => {
       process.exitCode = runList(opts)
+    })
+
+  gov
+    .command('detect')
+    .description('Propose opt-in rules from the evidence a target holds')
+    .argument('[target]', 'Target directory', '.')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--stack <stack>', 'Leave out every rule this stack resolves')
+    .option('--json', 'Emit machine-readable JSON')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Reads governance/detect.toml and matches each rule against the',
+        "target's manifests and git-listed paths to depth two. Pass the",
+        'proposals to canon gov install --add once confirmed.',
+        '',
+        'Examples:',
+        '  canon gov detect --json',
+        '  canon gov detect ../my-app --stack node --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (target: string, opts: DetectOptions) => {
+      process.exitCode = await runDetect(target, opts)
     })
 
   gov
@@ -1099,6 +1125,51 @@ function runList(opts: ListOptions): number {
     for (const rule of catalog.unreferenced) logInfo(rule)
   }
 
+  outro()
+  return 0
+}
+
+interface DetectOptions {
+  readonly stack?: string
+  readonly json?: boolean
+}
+
+async function runDetect(target: string, opts: DetectOptions): Promise<number> {
+  const resolved = resolve(target)
+  if (!existsSync(resolved)) {
+    logError(`Target not found: ${target}`)
+    return 1
+  }
+
+  const result = await detectRules(PROJECT_ROOT, resolved, opts.stack)
+  if (!result.ok) {
+    logError(`Stack not found: ${result.missingStack}`)
+    return 1
+  }
+
+  if (opts.json) {
+    process.stdout.write(
+      `${JSON.stringify({
+        target: resolved,
+        stack: opts.stack ?? null,
+        proposals: result.proposals,
+      })}\n`,
+    )
+    return 0
+  }
+
+  intro('canon gov detect')
+  if (result.proposals.length === 0) {
+    logInfo('No opt-in rule matched this target')
+  } else {
+    logStep('Proposed rules')
+    for (const proposal of result.proposals) {
+      const reasons = proposal.evidence
+        .map((evidence) => `${evidence.match} in ${evidence.path}`)
+        .join(', ')
+      logInfo(`${proposal.rule}: ${reasons}`)
+    }
+  }
   outro()
   return 0
 }
