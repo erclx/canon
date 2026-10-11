@@ -51,7 +51,7 @@ claude --plugin-dir <toolkit>/claude
 Two steps, in order:
 
 1. Run the framework's own scaffold if the project needs one, such as `bun init`, `npm create vite`, or `npm create astro`. The toolkit does not wrap framework scaffolding.
-2. Invoke `canon:target-setup` in Claude Code. The skill detects the stack, resolves flags, previews the full chain, and runs it end-to-end.
+2. Invoke `canon:target-setup` in Claude Code. The skill detects the stack, asks `canon gov detect` which opt-in rules the project's evidence proposes, previews the full chain with those proposals for you to confirm, and runs it end-to-end.
 
 The chain is:
 
@@ -113,7 +113,7 @@ The plugin corpus carries runtime behavior rather than reference prose alone, be
 
 When a new need appears after scaffold, install the one domain without re-running `canon init`.
 
-- Governance rule for a newly adopted library: invoke `canon:target-setup gov`, or run `canon gov install <stack> --add <rule> <path>`
+- Governance rule for a newly adopted library: run `canon gov detect <path> --json` to see what the project's evidence proposes, then `canon gov install --add <rule> <path>`, which installs the rule with no stack
 - Project-specific rule the toolkit does not ship: invoke `canon:create-rule`. It scaffolds a rule into `.claude/rules/project/` with a non-colliding number, and `canon gov sync` leaves it untouched. A rule placed under `.claude/rules/canon/` instead is deleted on the next sync, since that folder belongs to the toolkit.
 - Index.md system for a markdown-heavy folder that emerged: invoke `canon:target-setup indexes`
 
