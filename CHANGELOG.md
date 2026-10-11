@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.33.0](https://github.com/erclx/canon/compare/v5.32.0...v5.33.0) (2026-10-11)
+
+
+### Features
+
+* **hooks:** deny a review post whose body fails the label scan ([#2318](https://github.com/erclx/canon/issues/2318)) ([df9d61f](https://github.com/erclx/canon/commit/df9d61fcebc4de094be7ca3b5851af9d58686898))
+* **hooks:** turn harness auto memory off and guard its folder ([#2317](https://github.com/erclx/canon/issues/2317)) ([8d4b1bb](https://github.com/erclx/canon/commit/8d4b1bbddc3048ae7cd98dee4c356a7ddf93e124))
+* **labels:** add the apply verb for an open pull request ([#2319](https://github.com/erclx/canon/issues/2319)) ([762ce08](https://github.com/erclx/canon/commit/762ce08c010eb9aae55f01083f687deb8073e828))
+* **labels:** fail the scan on a stray heading or a banned character ([#2314](https://github.com/erclx/canon/issues/2314)) ([94f0953](https://github.com/erclx/canon/commit/94f09538c844439f3869a91997376566cbd95fad))
+* **orchestrator:** add talk session launch for planners and workers ([#2309](https://github.com/erclx/canon/issues/2309)) ([81f8046](https://github.com/erclx/canon/commit/81f8046ab40d6738a2723e811af80041c81385f2))
+* **skills:** route canon-cli from a job to its verb ([#2308](https://github.com/erclx/canon/issues/2308)) ([bcb014d](https://github.com/erclx/canon/commit/bcb014d18bfb049e85d17e81be9990bdf94f050e))
+
+
+### Performance Improvements
+
+* **test:** cap suite workers and report load on a failed stage ([#2316](https://github.com/erclx/canon/issues/2316)) ([6db7888](https://github.com/erclx/canon/commit/6db788835a0d52bb7050ff7f2ce8f908ef59e254))
+
 ## [5.32.0](https://github.com/erclx/canon/compare/v5.31.0...v5.32.0) (2026-10-10)
 
 
