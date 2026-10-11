@@ -96,17 +96,13 @@ export const fold = {
       detail: '.claude/rules/canon/, from the stack you name',
     },
   },
-  // README.md: canon-allow-readme-paraphrase: "some are never copied at all" "read by name with"
+  // README.md: canon-allow-readme-paraphrase: "some are never copied at all"
   never: {
-    title: 'and two it never copies',
+    title: 'and one it never copies',
     skills: {
       name: 'agent skills',
       detail:
         'loaded live from the plugin, so a fix reaches every project at once',
-    },
-    standards: {
-      name: 'standards',
-      detail: 'read by name with canon standards, never a file to drift',
     },
   },
 }
@@ -443,7 +439,6 @@ export const field = {
   }),
   usedCommands: [
     'gov',
-    'standards',
     'tooling',
     'claude',
     'tasks',
@@ -468,7 +463,7 @@ export const field = {
 export const close = {
   head: 'None of that was configured for that session',
   // README.md: canon-allow-readme-paraphrase: "copied into your project and become yours to edit" "some are never copied at all"
-  lead: 'The rules and the tooling are copied into your project and become yours to edit. The skills and the standards are never copied at all, so a fix reaches every project at once and neither can drift.',
+  lead: 'The rules and the tooling are copied into your project and become yours to edit. The skills are never copied at all, so a fix reaches every project at once and cannot drift.',
   primary: { label: 'Install canon', href: `${REPO}#install` },
   secondary: { label: 'Read the source', href: REPO },
 }
@@ -482,7 +477,6 @@ export const footer = {
       links: [
         { label: 'Docs', href: `${REPO}/tree/main/docs` },
         { label: 'Agent commands', href: `${REPO}/tree/main/docs/agents` },
-        { label: 'Standards', href: `${REPO}/tree/main/standards` },
         { label: 'Wiki', href: `${REPO}/tree/main/wiki` },
       ],
     },

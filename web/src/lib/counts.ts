@@ -3,7 +3,6 @@ import { readCanonJson } from './canon-cli'
 interface CatalogCounts {
   skills: number
   rules: number
-  standards: number
   commands: number
   audits: number
 }

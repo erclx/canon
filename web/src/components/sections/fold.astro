@@ -15,10 +15,7 @@ const steps = [
   { ...fold.after.seeds, count: session.seedFiles },
   { ...fold.after.rules, count: session.baseRules },
 ]
-const never = [
-  { ...fold.never.skills, count: session.skills.length },
-  { ...fold.never.standards, count: session.standards },
-]
+const never = [{ ...fold.never.skills, count: session.skills.length }]
 ---
 
 <section class="fold" id="top">
@@ -255,7 +252,7 @@ const never = [
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: var(--space-lg);
   }
 
@@ -279,8 +276,7 @@ const never = [
   }
 
   @media (max-width: 860px) {
-    .diff,
-    .never ul {
+    .diff {
       grid-template-columns: 1fr;
     }
   }

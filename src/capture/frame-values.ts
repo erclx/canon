@@ -31,15 +31,9 @@ const GLOB_WIDTH = 44
 /** A refusal the script prints as `regen-hero: <message>` and exits 1 on. */
 export class FrameError extends Error {}
 
-export interface StandardRow {
-  readonly name: string
-  readonly appliesTo?: readonly string[]
-}
-
 export interface FrameCatalogs {
   readonly skills: readonly string[]
   readonly gov: GovCatalog
-  readonly standards: readonly StandardRow[]
   readonly toolingStacks: readonly StackSummary[]
   readonly commandCount: number
   readonly tokenCss: string
@@ -63,7 +57,7 @@ const escape = (value: string): string =>
 /**
  * Even spacing across the sorted catalog rather than its first N, so a column
  * whose names share a prefix does not read as a narrower catalog than the one
- * that ships. Rules and standards sample. Skills do not, because the even step
+ * that ships. Rules sample. Skills do not, because the even step
  * lands on the entries closest to commodity and on none of the workflow the
  * toolkit exists to carry.
  */
@@ -186,7 +180,7 @@ function faviconUri(markSvg: string, tokenCss: string): string {
  * rather than shipping a frame claiming the domain has nothing in it.
  */
 export function buildFrameValues(catalogs: FrameCatalogs): FrameValues {
-  const { gov, toolingStacks, standards, skills } = catalogs
+  const { gov, toolingStacks, skills } = catalogs
   const markSvg = catalogs.markSvg.trim()
   if (!markSvg) {
     throw new FrameError(
@@ -207,12 +201,10 @@ export function buildFrameValues(catalogs: FrameCatalogs): FrameValues {
   const stacked = new Set(gov.stacks.flatMap((stack) => stack.rules))
   const deliveredEntries = gov.rules.filter((entry) => stacked.has(entry.name))
   const deliveredRules = deliveredEntries.map((entry) => slug(entry.name))
-  const standardNames = standards.map((entry) => entry.name)
 
   for (const [label, list] of [
     ['skills', skills],
     ['rules', rules],
-    ['standards', standardNames],
     ['tooling stacks', toolingStacks],
     ['gov stacks', gov.stacks],
     ['stack-delivered rules', deliveredRules],
@@ -251,23 +243,6 @@ export function buildFrameValues(catalogs: FrameCatalogs): FrameValues {
     })
     .join('\n')
 
-  // A standard either governs an artifact by path or is opened by name when a
-  // session decides it needs it. Naming the second is the contrast, since
-  // nothing else tells a reader the corpus installs into no project.
-  const standardRows = sample(standards)
-    .map((entry) => {
-      const applies = entry.appliesTo ?? []
-      const governs =
-        applies.length > 0
-          ? clip(applies.join(' '), GLOB_WIDTH)
-          : 'read by name'
-      return frameRow(
-        `<span class="name">${escape(pad(entry.name, 18))}</span>` +
-          `<span class="muted">${escape(governs)}</span>`,
-      )
-    })
-    .join('\n')
-
   // A tooling stack is counted rather than listed, because what it lays down is
   // dev dependencies, run scripts, and ignore groups rather than named entries.
   // The inheritance is the part worth showing, since it is why a stack carrying
@@ -286,7 +261,6 @@ export function buildFrameValues(catalogs: FrameCatalogs): FrameValues {
   for (const [label, rows] of [
     ['governance stack rows', govStackRows],
     ['governance rule rows', govRuleRows],
-    ['standard rows', standardRows],
     ['tooling stack rows', toolingStackRows],
   ] as const) {
     if (rows === '') {
@@ -300,11 +274,9 @@ export function buildFrameValues(catalogs: FrameCatalogs): FrameValues {
     TOKENS: tokenCss,
     GOV_STACK_ROWS: govStackRows,
     GOV_RULE_ROWS: govRuleRows,
-    STANDARD_ROWS: standardRows,
     TOOLING_STACK_ROWS: toolingStackRows,
     SKILL_COUNT: String(skills.length),
     RULE_COUNT: String(rules.length),
-    STANDARD_COUNT: String(standardNames.length),
     GOV_STACK_COUNT: String(gov.stacks.length),
     TOOLING_STACK_COUNT: String(toolingStacks.length),
     COMMAND_COUNT: String(catalogs.commandCount),
@@ -312,10 +284,8 @@ export function buildFrameValues(catalogs: FrameCatalogs): FrameValues {
     FAVICON: faviconUri(markSvg, tokenCss),
     SKILL_ENTRIES: markup(featured(skills, FEATURED_SKILLS)),
     RULE_ENTRIES: markup(sample(deliveredRules)),
-    STANDARD_ENTRIES: markup(sample(standardNames)),
     SKILL_MORE: remaining(skills),
     RULE_MORE: remaining(rules),
-    STANDARD_MORE: remaining(standardNames),
   }
 
   const light = lightTokens(tokenCss)

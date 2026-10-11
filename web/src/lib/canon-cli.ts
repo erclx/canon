@@ -25,9 +25,8 @@ export function readCanonText(args: readonly string[]): string {
   const result = spawnSync('bun', [join(root, 'src', 'cli.ts'), ...args], {
     encoding: 'utf8',
     cwd: root,
-    // The standards catalog carries every standard's full body, which runs
-    // past the default buffer and would otherwise truncate into a parse
-    // error.
+    // Catalog output can run past the default buffer and would otherwise
+    // truncate into a parse error.
     maxBuffer: 64 * 1024 * 1024,
     env: { ...process.env, NO_COLOR: '1' },
   })
