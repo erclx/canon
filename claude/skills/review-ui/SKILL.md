@@ -94,11 +94,13 @@ Read `${CLAUDE_SKILL_DIR}/references/driving.md` on reaching this step for how a
 
 Give every box exactly one verdict, in checklist order. A box the pass could not place on a route or a width is still driven, from the opened address at 1440 wide, and the verdict names the guess. Skipping a box silently reads the same as passing it.
 
-Never judge a box ending in `(taste)`. Drive to the state, capture the frame, and mark it needs eyes. Drive a ticked box the same as an unchecked one, since a tick is a claim this pass exists to check. A tick stamped at the current head still gets driven.
+Never judge a box ending in `(taste)`. Drive to the state, capture both themes, and mark it needs eyes. Drive a ticked box the same as an unchecked one, since a tick is a claim this pass exists to check. A tick stamped at the current head still gets driven.
 
-A frame the verdict rests on is published only when the worker's evidence lacks it. Compare the box's route, width, and theme against the `states` Step 2 kept, and when a state and stem show the same thing, cite that stem and push nothing. The match is this pass's judgment over the box's wording, so the verb never makes it. Otherwise push the frame and keep the `link` the record returns:
+A frame the verdict rests on is published only when the worker's evidence lacks it, matched per theme against the `states` Step 2 kept, as `references/driving.md` states. The match is this pass's judgment over the box's wording, never the verb's. Otherwise push the frame and keep the `link` the record returns:
 
 ```bash
+# one shot of a taste box's pair, then a pass or fail frame with no theme
+canon pr frames <number> --add frames/<box-number>-<theme>.png --box <box-number> --theme <dark|light> --head <head> --pass <pass> --json
 canon pr frames <number> --add frames/<box-number>.png --box <box-number> --head <head> --pass <pass> --json
 ```
 
@@ -118,7 +120,7 @@ Close the browser with `${CLAUDE_SKILL_DIR}/scripts/pw.sh -s=<project>-<number> 
 
 ## Step 7: post
 
-Read `${CLAUDE_SKILL_DIR}/references/post.md` for the heading rule, the body shape, the marker every body ends on, and the post command. Each Evidence cell holds words and names the evidence stem it matched, and the `link` its Step 5 push returned goes as given into the Frames block below the table.
+Read `${CLAUDE_SKILL_DIR}/references/post.md` for the heading rule, the body shape, the marker every body ends on, and the post command. Each box lands in the section its verdict names, and the `link` its Step 5 push returned goes as given into that box's own entry.
 
 ## Step 8: tick the passed boxes
 
@@ -139,10 +141,10 @@ gh run list --workflow phase-label-gate.yml --event pull_request_review --limit 
 Read `<heading>` off the first line of the file Step 7 posted, never composed here, so the line reports what the review carries.
 
 ```plaintext
-P passed, F failed, E need eyes, N not driven. Posted to PR #<number> under <heading>.
+F failed · E need your eyes · P passed · N not driven. Posted to PR #<number> under <heading>.
 ```
 
-Add `Review-event checks: <passing|failing|unread>.` and `Ticks: <ticked N|reason>.` after it, the second naming the count Step 8 ticked or the verb's refusal `reason`. Add `S sweep finding(s).` when the sweep raised any. Report no merge recommendation, since this pass saw the app and not the change.
+Add `Review-event checks: <passing|failing|unread>.` and `Ticks: <ticked N|reason>.` after it, the second naming the count ticked or the refusal `reason`. Add `S sweep finding(s).` when the sweep raised any. Report no merge recommendation, since this pass saw the app and not the change.
 
 ## Rules
 

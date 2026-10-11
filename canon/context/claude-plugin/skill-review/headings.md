@@ -27,6 +27,8 @@ Which headings exist, which family each belongs to, and who posts each is stated
 
 A comment posted under a heading outside the six the comment filters know is reported as unmatched rather than passed over, a UI heading posted as a comment included. Silence and a match read alike otherwise, so the poll surfaces an invented heading as a state a person reads rather than absorbing it silently.
 
+The UI body is sectioned by what the operator owes, in the order Failed, Needs your eyes, Not driven, then folded Passed and Sweep blocks, behind a count line reading `F failed · E need your eyes · P passed · N not driven`. The earlier shape was one table in checklist order, which put a failure and two taste calls among eight passes and gave a taste box no image to decide from. A taste box now carries its dark and light shots side by side, so `canon pr frames` takes a `--theme` and the path grows a theme segment rather than overloading `--box`, which `canon pr tick` reads as a checklist number. The heading, the last-line marker, and the label scan stay as they were, so the poll reads the body unchanged. The count line moved off the wording the sandbox pattern read, and the poll never read it. A box takes one section by its verdict, so a failed taste box sits under Failed alone.
+
 `review-ui` reads the checklist and its address off `canon pr evidence --json`, which carries `checklist`, `preview`, and `local` only on the `ok` and `no-evidence` reasons. Every other reason refuses before the comment is read, so the pass reports it rather than reading the missing fields as an absent checklist.
 
 ### The closing comment folds into the reply

@@ -1691,6 +1691,25 @@ describe('canon pr frames', () => {
     expect(outcome.record.reason).toBe('bad-pass')
   })
 
+  it('should refuse as bad-theme when --theme is neither dark nor light', async () => {
+    const outcome = await runFrames([
+      ...addArgs('box-1.png'),
+      '--theme',
+      'sepia',
+    ])
+
+    expect(outcome.record.reason).toBe('bad-theme')
+  })
+
+  it('should refuse as bad-theme without calling gh when --theme comes without --add', async () => {
+    const outcome = await runFrames(['7', '--drop', '--theme', 'dark'])
+
+    expect({ reason: outcome.record.reason, calls: calls() }).toEqual({
+      reason: 'bad-theme',
+      calls: [],
+    })
+  })
+
   it('should refuse as bad-days when --prune is not a positive number', async () => {
     const outcome = await runFrames(['--prune', '0'])
 
