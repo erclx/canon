@@ -6,10 +6,9 @@ import { SURFACE_ROOTS } from '@/roots/surface'
 /**
  * The authoring roots this repository owns and no install channel delivers.
  *
- * Every entry is a folder a target never holds under that spelling. Standards
- * install nowhere and are reached through the plugin corpus,
- * rules install under `.claude/rules/`, and the rest are this repository's
- * own source, docs, and catalogs.
+ * Every entry is a folder a target never holds under that spelling. Rules
+ * install under `.claude/rules/`, and the rest are this repository's own
+ * source, docs, and catalogs.
  *
  * `src/`, `scripts/`, and bare `docs/` are deliberately absent. A body naming
  * one of those is describing the reader's own tree, so listing them would
@@ -28,7 +27,6 @@ const AUTHORING_ROOTS = [
   'docs/agents/',
   'governance/',
   'internal/',
-  'standards/',
   'tooling/',
   'wiki/',
 ] as const
@@ -51,7 +49,7 @@ const TOKEN = /`([^`\s]+)`/g
  *
  * Requires an extension and a separator, and admits no `<`, `$`, or `*`. A
  * body writes `canon/context/<domain>.md` to name a shape rather than a
- * file, and `${CLAUDE_SKILL_DIR}/../../standards/<name>.md` to resolve
+ * file, and `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md` to resolve
  * against the plugin root, which is self-contained by construction.
  */
 const CONCRETE = /^[.A-Za-z0-9_][A-Za-z0-9._/-]*\.[a-z]{1,4}$/
