@@ -47,16 +47,16 @@ Does not govern:
 ## Sections
 
 - `## Summary`: 1-2 sentences following `<Action Verb> <Direct Object> to <Result>`, expand for clarity if needed
-- `## Key Changes`: name actual files, functions, or modules (e.g., `AuthService.verify()` not "auth handler"). Always use bullet points, never prose.
-- `## Technical Context` (optional): 1-2 lines of architectural reasoning explaining why, not what
-- Omit Technical Context for docs, config, or trivial changes
+- `## Key changes`: name actual files, functions, or modules (e.g., `AuthService.verify()` not "auth handler"). Always use bullet points, never prose.
+- `## Technical context` (optional): 1-2 lines of architectural reasoning explaining why, not what
+- Omit Technical context for docs, config, or trivial changes
 - Use bullet points for multiple reasons, one sentence for a single reason
 - `## Testing` (optional): specify exact commands or test cases run
 - Omit Testing for docs, config, or trivial sync changes
 - Use checkboxes, never prose. See Testing discipline for which box gets ticked.
 - `## For the reviewer` (optional): what the reviewing session should confirm, one bullet per request
 - Visuals: include only when they clarify architecture, UI, or complex logic flows
-- The list is closed. A body carries the sections above and nothing after the last of them, which covers a trailer a harness appends once the body is composed. `publish.md` states the rule, and `canon labels scan` fails on the one such trailer measured so far.
+- The list is closed. A body carries the sections above and nothing after the last of them, which covers a trailer a harness appends once the body is composed. `canon labels scan` holds the list: it fails a level-two heading outside the five above, and a body missing `## Summary` or `## Key changes`. A review body and a release-please body are exempt.
 
 ## Testing discipline
 
@@ -84,12 +84,12 @@ Does not govern:
 
 <Action Verb> <Direct Object> to <Result>.
 
-## Key Changes
+## Key changes
 
 - <Verb> <specific component/file/function> (<reason if non-obvious>)
 - <Verb> <specific component/file/function>
 
-## Technical Context
+## Technical context
 
 - <Architectural reasoning explaining why, not what>
 
@@ -111,12 +111,12 @@ Does not govern:
 
 Update auth middleware to enforce jwt expiration checks. # imperative + direct object + result
 
-## Key Changes
+## Key changes
 
 - Add `verifyExpiration()` to `src/auth/validators.ts`. # specific function + file path
 - Refactor `AuthService.authenticate()` to handle 401 codes. # named component + clear change
 
-## Technical Context
+## Technical context
 
 - Migration to stateless session management for horizontal scalability. # why, not what
 
@@ -138,7 +138,7 @@ Update auth middleware to enforce jwt expiration checks. # imperative + direct o
 
 This PR updates the authentication system to be more robust. # "This PR" opener + buzzword
 
-## Key Changes
+## Key changes
 
 - Updated auth middleware files # vague, no specific component, no period
 - The old system used to check tokens differently # describes historical behavior

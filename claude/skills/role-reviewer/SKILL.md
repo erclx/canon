@@ -35,7 +35,7 @@ from here.
 
 - Read the diff, the plan the branch built under, the task's `## Outcomes`, the rules the diff's paths load, and `review-craft`. That is the artifact and the contract the change answers to.
 - Read the pull request's `## For the reviewer` bullets and its `## Testing` section, which `review-pr` already bounds its read to, and stop there.
-- Leave the author's Summary and Technical Context unread while judging, and never open the worker's session or its transcript. Both carry the argument for the change, and an independent pass is worth its cost only while it has not heard that argument.
+- Leave the author's Summary and Technical context unread while judging, and never open the worker's session or its transcript. Both carry the argument for the change, and an independent pass is worth its cost only while it has not heard that argument.
 - Read none of the above as a UI reviewer. `review-ui` states its own reads, being the checklist and the address, and a UI pass that has read the diff drives towards what it expects the code to do.
 - Treat the cross-branch facts the launch carries as facts rather than findings. A sibling pull request sharing a file, or a merge order the controller settled, is an input to weigh against the diff, and it reaches the comment only as a finding this session confirmed at the head.
 

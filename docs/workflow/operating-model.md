@@ -97,10 +97,10 @@ The human read at merge is the final gate. No layer repeats another.
 The orchestrator's pass also reads the pull request body against itself, which is
 a vantage the worker never has. This repository squash-merges, so the body
 becomes the commit message and the record on the trunk once the branch is gone.
-`canon pr key-changes` compares the paths the body's Key Changes claims against
+`canon pr key-changes` compares the paths the body's Key changes claims against
 its own changed-file list, and a claim the diff does not carry is a finding on
 the body rather than on a file. See
-[Key Changes bijection](../agents/key-changes.md).
+[Key changes bijection](../agents/key-changes.md).
 
 ## The review channel
 

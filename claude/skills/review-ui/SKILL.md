@@ -46,7 +46,7 @@ gh api --paginate 'repos/{owner}/{repo}/issues/<number>/comments?per_page=100' -
 
 The first read prints the verdict's body and when it was posted as one JSON line, and the second prints when the newest reply was. `--paginate` runs the filter once per page, so `tail` outside it keeps the newest row in the thread rather than the newest on each page. The verdict goes out as JSON because its body spans many lines, and `tail` over the raw body would keep only its last one. An empty first read is a pull request carrying no verdict yet. Take the sha off the body's last-line `<!-- review-ui: head=<sha> -->` marker. A body carrying none covers no head this pass can trust, so drive.
 
-Read nothing else about the change. The diff, the plan, the task, and the description's Summary and Technical Context all carry the author's argument for it, and a pass that has heard it drives towards what it expects.
+Read nothing else about the change. The diff, the plan, the task, and the description's Summary and Technical context all carry the author's argument for it, and a pass that has heard it drives towards what it expects.
 
 ## Step 2: read the evidence record
 

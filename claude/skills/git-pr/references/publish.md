@@ -28,6 +28,8 @@ Scope every check below by destination. Text published to a remote takes all of 
 
 `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md` holds the character bans. Read it at scan time rather than working the sets from memory, then scan the drafted text and rewrite each occurrence.
 
+`canon labels scan` fails on these characters in a title or body, outside a code span or a link, so the scan is the check and the read above is the reason. It holds a pull request and a posted review alike.
+
 Restructure the sentence rather than substituting the character. A semicolon swapped for a period leaves both clauses in the order the semicolon chose, which is the shape the ban exists to remove.
 
 ## Phase labels
