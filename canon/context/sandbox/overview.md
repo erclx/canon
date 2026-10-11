@@ -22,7 +22,7 @@ Run `canon sandbox` with no args for the live catalog. Categories and scenarios 
 
 ### Two scenario forms
 
-A scenario is written in TypeScript from 2026-10-04, and the bash form takes no new scenarios after that date. The git, dev, and docs categories are ported, and the rest stay bash until their slice. `canon/context/sandbox/authoring.md` carries how to write one and why the two coexist.
+A scenario is written in TypeScript from 2026-10-04, and the bash form takes no new scenarios after that date. The git, dev, docs, infra, and tooling categories are ported, along with the 23 craft and drafting scenarios under `sandbox/claude/`. The 20 workflow scenarios there stay bash until their slice. `canon/context/sandbox/authoring.md` carries how to write one and why the two coexist.
 
 ## Decisions
 
