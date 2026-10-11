@@ -36,7 +36,7 @@ Review receipts pile up the same way. A branch report is read once by the sessio
 
 ## Guards
 
-- No task board at the main root: stop and name the command that sets one up
+- No task board at the main root: Mark reports one skip line and returns, since the ship chain runs it on every project, and Archive stops naming the command that sets one up
 - Work not yet on the default branch when archiving: stop, because the board has no history to restore from
 
 ## Out of scope

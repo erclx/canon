@@ -12,7 +12,7 @@ Owns the two operations that settle a task once its work exists: marking the out
 ## Guards
 
 - Resolve the board at the main worktree root, not `pwd`. Run `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd` outside a git repo. The board is gitignored scratch shared across worktrees, so a linked worktree reading its own `pwd` finds no board at all.
-- If `.canon/tasks/` does not exist at that root, stop: `❌ No .canon/tasks/ board. Run canon claude init to set it up.`
+- If `.canon/tasks/` does not exist at that root, Mark has nothing to mark: report `⏭️ No .canon/tasks/ board, so no outcomes to mark.` and return, still running Step 4's receipt sweep, since `git-ship` invokes Mark on every ship and a project with no board is not a failed one. Archive stops instead: `❌ No .canon/tasks/ board. Run canon claude init to set it up.`
 - Route on the request rather than on a flag. A request naming a shipped task to archive, or a task file the `post-merge` hook left in place, takes Archive. Every other request takes Mark, which is what the ship chain invokes.
 - Never hand-edit `.canon/tasks/index.md`. A hook regenerates it.
 
