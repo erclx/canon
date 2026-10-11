@@ -241,7 +241,7 @@ describe('runPostMerge archive lines', () => {
     await h.go()
 
     expect(h.output()).toBe(
-      '\n📋 Task not archived for #7: waits on "feat/x" still\nRun /task-complete to resolve it by hand.\n\n',
+      '\n📋 Task not archived for #7: waits on "feat/x" still\nRun /task-complete archive #7 to resolve it by hand.\n\n',
     )
   })
 })
