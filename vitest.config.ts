@@ -12,6 +12,7 @@ export default defineConfig({
     // The lock stops two suites running at once and cannot see ambient load,
     // and vitest's default fills a 32-core box on its own once each worker
     // spawns a child. CI runs one suite per runner, so it keeps the default.
-    maxWorkers: process.env.CI === undefined ? '50%' : undefined,
+    // CI is read as the gate reads it, so the cap and the lock agree.
+    maxWorkers: process.env.CI === 'true' ? undefined : '50%',
   },
 })
