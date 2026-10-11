@@ -1250,7 +1250,7 @@ async function runInstall(
   intro('canon gov install')
 
   const add = opts.add ?? ''
-  if (add !== '' && isStacklessAdd(stack, target)) {
+  if (add !== '' && isAddWithoutStack(stack, target)) {
     return installExtras(add, stack ?? target)
   }
 
@@ -1336,7 +1336,7 @@ async function runInstall(
  * names a stack keeps today's meaning, so a folder named `node` reads as the
  * stack, and `.` or a path carrying a slash is how a caller forces the target.
  */
-function isStacklessAdd(stack: string | undefined, target: string): boolean {
+function isAddWithoutStack(stack: string | undefined, target: string): boolean {
   if (stack === undefined) return true
   if (target !== '.') return false
   return !govStackExists(PROJECT_ROOT, stack)
