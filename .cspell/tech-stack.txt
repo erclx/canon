@@ -4,6 +4,7 @@ applestyleguide
 argjson
 asciinema
 asyncio
+asyncpg
 autocompact
 axios
 backgrounded
@@ -37,6 +38,7 @@ domcontentloaded
 dotglob
 dunder
 elif
+elysia
 enotdir
 entr
 errexit
@@ -50,6 +52,7 @@ execdir
 execve
 fangsong
 fastapi
+fastify
 faststart
 fatalf
 firecrawl
@@ -65,10 +68,14 @@ gitattributes
 gitdir
 gitlink
 glama
+gofiber
 golangci
+gonic
+gorm
 gsap
 gsub
 hlinksldjump
+hono
 hyperframes
 heredoc
 hljs
@@ -78,9 +85,14 @@ ibeam
 ihdr
 inplace
 issuecomment
+jackc
 jsxs
+knex
 kwargs
+kysely
 labelledby
+labstack
+laravel
 lavfi
 libvpx
 libx
@@ -127,6 +139,7 @@ pathlib
 pathspec
 pathspecs
 pdftoppm
+pestphp
 pgid
 phpstan
 phpunit
@@ -135,8 +148,10 @@ pnpm
 ppaction
 pptx
 pptxgenjs
+preact
 precompact
 prst
+psycopg
 pycache
 pydantic
 pyproject
@@ -161,6 +176,7 @@ rtrimstr
 segoe
 scrollend
 semgrep
+sequelize
 setattr
 setsid
 sfnt
@@ -172,7 +188,9 @@ slidenum
 soffice
 spid
 spids
+sqlalchemy
 stackr
+starlette
 startswith
 statusline
 streamable
@@ -180,6 +198,7 @@ stylesheet
 subgraph
 subshell
 superproject
+symfony
 syscall
 tabindex
 tanstack
@@ -197,6 +216,7 @@ toupper
 tsconfig
 tsgolint
 turbopack
+typeorm
 unitless
 unpushed
 unstub

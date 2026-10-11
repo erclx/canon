@@ -328,10 +328,9 @@ export const STAGES: readonly Stage[] = [
     success: 'Capability seeding clean',
   },
   {
-    // A stack entry naming a rule folder takes every rule in it, which is what
-    // stops a new rule from needing a second edit to reach a target. The
-    // failure it leaves open is a rule authored into a folder no stack names,
-    // which `canon gov install` never reaches on its own.
+    // A rule no stack names reaches a target only when `canon gov detect`
+    // proposes it, so every such rule needs a governance/detect.toml entry,
+    // and every key there has to name a live rule.
     id: 'unreferenced-rules',
     label: 'Unreferenced rules',
     checks: [{ kind: 'measure', measure: unreferencedRules }],

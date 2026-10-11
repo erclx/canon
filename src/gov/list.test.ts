@@ -23,6 +23,11 @@ function seedRule(folder: string, name: string, body: string): void {
   writeFileSync(join(dir, `${name}.md`), body)
 }
 
+function seedDetect(body: string): void {
+  mkdirSync(join(root, 'governance'), { recursive: true })
+  writeFileSync(join(root, 'governance', 'detect.toml'), body)
+}
+
 beforeEach(() => {
   root = mkdtempSync(join(tmpdir(), 'canon-gov-list-'))
 })
@@ -75,8 +80,19 @@ describe('buildRuleEntries', () => {
         domain: 'lang',
         description: 'Enforce type hints',
         paths: ['**/*.py'],
+        detect: null,
       },
     ])
+  })
+
+  it('should carry the evidence detect.toml records for the rule', () => {
+    seedRule('framework', '200-react', '# React\n')
+    seedDetect('["200-react"]\ndeps = ["react"]\nfiles = []\n')
+
+    expect(buildRuleEntries(root)[0].detect).toEqual({
+      deps: ['react'],
+      files: [],
+    })
   })
 
   it('should report null paths for an always-on rule', () => {
@@ -139,6 +155,15 @@ describe('buildGovCatalog', () => {
     expect(buildGovCatalog(root).rules.map((entry) => entry.name)).toContain(
       '505-at-references',
     )
+  })
+})
+
+describe('buildGovCatalog staleDetect', () => {
+  it('should name a detect.toml key that no rule carries', () => {
+    seedRule('core', '000-a', '# a\n')
+    seedDetect('["999-retired"]\ndeps = []\nfiles = []\n')
+
+    expect(buildGovCatalog(root).staleDetect).toEqual(['999-retired'])
   })
 })
 

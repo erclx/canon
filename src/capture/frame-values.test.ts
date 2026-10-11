@@ -30,9 +30,16 @@ const makeCatalogs = (
   gov: {
     stacks: [{ name: 'base', extends: null, rules: ['100-code'] }],
     rules: [
-      { name: '100-code', domain: 'lang', description: '', paths: ['**/*.ts'] },
+      {
+        name: '100-code',
+        domain: 'lang',
+        description: '',
+        paths: ['**/*.ts'],
+        detect: null,
+      },
     ],
     unreferenced: [],
+    staleDetect: [],
   },
   toolingStacks: [
     { name: 'ts', extends: null, devDeps: 1, scripts: 2, gitignoreGroups: 0 },
