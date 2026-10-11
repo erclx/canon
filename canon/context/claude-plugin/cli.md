@@ -24,7 +24,7 @@ The Claude seeds carry nothing under `canon/context/`. `tooling/base/seeds/` ins
 
 ### PostToolUse hooks
 
-The seed `settings.json` ships eight hook scripts across five blocks on three events. `pr-create-log.sh` is covered in `canon/context/development/hooks/guards.md`, `silent-turn.sh` in `canon/context/development/hooks/compaction.md`, and the rest below. All eight open with the bounded stdin read covered in `canon/context/development/hooks/guards.md`, so a hook run by hand refuses instead of blocking, and seven stay byte-identical to their counterparts under `.claude/hooks/`.
+The seed `settings.json` ships nine hook scripts across seven blocks on three events. `pr-create-log.sh` is covered in `canon/context/development/hooks/guards.md`, `silent-turn.sh` in `canon/context/development/hooks/compaction.md`, and the rest below. All nine open with the bounded stdin read covered in `canon/context/development/hooks/guards.md`, so a hook run by hand refuses instead of blocking, and eight stay byte-identical to their counterparts under `.claude/hooks/`.
 
 A PostToolUse hook pairs with `.claude/hooks/standards-audit.sh`, which calls `canon markdown audit` against the edited file, reads the hits out of the `--json` record, and emits `additionalContext` so the agent self-corrects on the next turn. A checkout's own `src/cli.ts` wins over an installed binary, so the hook and the push stage read one build. Scratch dirs `.canon/tmp/`, `.canon/review/`, and `.canon/plans/` are skipped.
 
@@ -47,6 +47,8 @@ A PreToolUse hook on `WebSearch` pairs with `.claude/hooks/search-reminder.sh`, 
 A PreToolUse hook on `Write` and `Edit` pairs with `.claude/hooks/scratch-guard.sh`, which fires when a temp-path write lands outside `.canon/tmp/` and reminds the agent to write scratch there, once per session. It exempts anything under `CLAUDE_PROJECT_DIR` before matching the temp patterns, because the bare `*/tmp/*` match has no notion of a project root and would fire on every source write in a project whose own path carries a `tmp` segment.
 
 That trade gives up warning on a write to `<project>/tmp/`, which is a real violation, in exchange for silencing a false positive that fired constantly. It enforces the scratch rule deterministically instead of relying on CLAUDE.md prose the harness scratchpad instruction competes with.
+
+A PreToolUse hook on `Bash` pairs with `.claude/hooks/review-post-scan.sh`, which runs `canon labels scan --body-file` against the body file of a `gh api` review or comment post and denies the call on a finding. It blocks rather than reminds, and it calls `canon` from `PATH`, so a target on a CLI older than the flag has its review posts refused until it upgrades. The decision and its rejected alternative are in `canon/context/development/hooks/guards.md`.
 
 ### User-level settings
 

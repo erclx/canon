@@ -139,6 +139,20 @@ const run = (
 const payloadFor = (fields: Record<string, unknown>): string =>
   JSON.stringify(fields)
 
+const REVIEWS = "'repos/{owner}/{repo}/pulls/7/reviews'"
+
+// The hook resolves a relative body path against the payload's own cwd, so the
+// fixture project is named there rather than left to the spawned process.
+const postPayload = (command: string, cwd?: string): string =>
+  payloadFor({
+    cwd: cwd ?? join(fixture, 'project'),
+    tool_input: { command },
+    tool_name: 'Bash',
+  })
+
+const reviewPost = (args: string, endpoint = REVIEWS, method = '-X POST') =>
+  postPayload(`gh api ${method} ${endpoint} -f event=COMMENT ${args}`)
+
 beforeAll(() => {
   fixture = mkdtempSync(join(tmpdir(), 'hooks-guard-'))
   hookPath = pathWithoutCanon()
@@ -156,6 +170,8 @@ beforeAll(() => {
     join(fixture, 'bin-empty-set'),
     join(fixture, 'bin-no-record'),
     join(fixture, 'bin-due'),
+    join(fixture, 'bin-scan-fail'),
+    join(fixture, 'bin-scan-pass'),
     join(fixture, 'no-source'),
     join(fixture, 'read-only'),
     join(fixture, 'elsewhere/tmp'),
@@ -244,11 +260,27 @@ beforeAll(() => {
   )
   chmodSync(due, 0o755)
 
+  // The review post hook gates on the scan's exit code and reads no record
+  // field, so a stub exiting 2 with a warning line stands in for a finding, and
+  // one exiting 0 for a clean body. The real scan is the one the verb's own
+  // tests cover.
+  const scanFail = join(fixture, 'bin-scan-fail/canon')
+  writeFileSync(
+    scanFail,
+    `#!/usr/bin/env bash\nprintf '%s\\n' '│ ! 1 board identifier in the title or body.' >&2\nexit 2\n`,
+  )
+  chmodSync(scanFail, 0o755)
+
+  const scanPass = join(fixture, 'bin-scan-pass/canon')
+  writeFileSync(scanPass, '#!/usr/bin/env bash\nexit 0\n')
+  chmodSync(scanPass, 0o755)
+
   // An empty file is enough, since the hook tests for the path and the stub
   // runner never reads it. Without it the project root takes the fallback and
   // the branch the hook prefers is exercised by nothing.
   writeFileSync(join(project, 'src/cli.ts'), '')
 
+  writeFileSync(join(project, 'review-body.md'), '## Review\n')
   writeFileSync(
     join(project, 'doc.md'),
     '# Doc\n\nA line with an em dash — in it.\n',
@@ -334,6 +366,13 @@ beforeAll(() => {
           tool_input: { file_path: join(project, '.claude/tasks/sample.md') },
           tool_name: 'Write',
         }),
+    },
+    'review-post-scan.sh': {
+      code: 2,
+      expect: 'board identifier',
+      path: [join(fixture, 'bin-scan-fail'), hookPath].join(delimiter),
+      payload: () => reviewPost(`-F body=@${join(project, 'review-body.md')}`),
+      stream: 'stderr',
     },
     'scratch-guard.sh': {
       expect: 'Temporary file write outside',
@@ -1048,6 +1087,215 @@ describe('seeds standards-audit.sh runner', () => {
       expect(result.code).toBe(0)
     },
   )
+})
+
+// The acting case proves a finding blocks. These pin what the hook promises
+// around it: a clean body, a read, and a post it cannot scan each take their
+// own verdict, and none of them reaches the session by stdout on the block path.
+describe('review-post-scan.sh verdicts', () => {
+  const scanPassPath = (): string =>
+    [join(fixture, 'bin-scan-pass'), hookPath].join(delimiter)
+
+  for (const tree of TREES) {
+    const hook = join(tree.dir, 'review-post-scan.sh')
+    const body = (): string =>
+      `-F body=@${join(fixture, 'project/review-body.md')}`
+
+    it.concurrent(
+      `should leave ${tree.label} silent on a clean body`,
+      async ({ expect }) => {
+        const result = await run(hook, reviewPost(body()), scanPassPath())
+
+        expect(result.stdout).toBe('')
+        expect(result.stderr).toBe('')
+        expect(result.code).toBe(0)
+      },
+    )
+
+    it.concurrent(
+      `should leave ${tree.label} silent on a read of the same endpoint`,
+      async ({ expect }) => {
+        const result = await run(
+          hook,
+          postPayload(`gh api ${REVIEWS}`),
+          join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+        )
+
+        expect(result.stdout).toBe('')
+        expect(result.stderr).toBe('')
+        expect(result.code).toBe(0)
+      },
+    )
+
+    it.concurrent(
+      `should block ${tree.label} on a post that names no method but carries fields`,
+      async ({ expect }) => {
+        const result = await run(
+          hook,
+          postPayload(`gh api ${REVIEWS} -f event=COMMENT ${body()}`),
+          join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+        )
+
+        expect(result.stderr).toContain('board identifier')
+        expect(result.code).toBe(2)
+      },
+    )
+
+    it.concurrent(
+      `should match a method placed after the endpoint on ${tree.label}`,
+      async ({ expect }) => {
+        const result = await run(
+          hook,
+          postPayload(`gh api ${REVIEWS} ${body()} -X PATCH`),
+          join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+        )
+
+        expect(result.code).toBe(2)
+      },
+    )
+
+    it.concurrent(
+      `should cover a pull request comment on ${tree.label}`,
+      async ({ expect }) => {
+        const result = await run(
+          hook,
+          reviewPost(body(), 'repos/{owner}/{repo}/issues/7/comments'),
+          join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+        )
+
+        expect(result.code).toBe(2)
+      },
+    )
+
+    it.concurrent(
+      `should leave ${tree.label} silent on a pull request create`,
+      async ({ expect }) => {
+        const result = await run(
+          hook,
+          reviewPost(body(), "'repos/{owner}/{repo}/pulls'"),
+          join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+        )
+
+        expect(result.stderr).toBe('')
+        expect(result.code).toBe(0)
+      },
+    )
+
+    it.concurrent(
+      `should refuse an inline body on ${tree.label}`,
+      async ({ expect }) => {
+        const result = await run(
+          hook,
+          reviewPost("-f body='looks fine'"),
+          scanPassPath(),
+        )
+
+        expect(result.stderr).toContain('-F body=@<file>')
+        expect(result.stdout).toBe('')
+        expect(result.code).toBe(2)
+      },
+    )
+
+    it.concurrent(
+      `should block ${tree.label} on a body file the call has not written yet`,
+      async ({ expect }) => {
+        const result = await run(
+          hook,
+          reviewPost('-F body=@.canon/tmp/not-written.md'),
+          scanPassPath(),
+        )
+
+        expect(result.stderr).toContain('earlier call')
+        expect(result.code).toBe(2)
+      },
+    )
+
+    it.concurrent(
+      `should resolve a relative body path against the payload cwd on ${tree.label}`,
+      async ({ expect }) => {
+        const result = await run(
+          hook,
+          postPayload(
+            `gh api -X POST ${REVIEWS} -F body=@review-body.md`,
+            join(fixture, 'project'),
+          ),
+          scanPassPath(),
+          join(fixture, 'elsewhere'),
+        )
+
+        expect(result.stderr).toBe('')
+        expect(result.code).toBe(0)
+      },
+    )
+
+    // A command that only mentions a post is not one. The scan stub fails, so
+    // a hook that read the whole string would deny each of these.
+    const mention = "gh api -X POST repos/o/r/issues/1/comments -f body='x'"
+    const quoting: Record<string, string> = {
+      'a heredoc quoting the command': `cat > .canon/tmp/notes.md <<'EOF'\n- ${mention}\nEOF`,
+      'a search pattern holding the command': `git grep -n '${mention}'`,
+      'a quoted string with a separator before the command': `echo 'done; ${mention}'`,
+      'an echo of the command': `echo "${mention}"`,
+    }
+
+    for (const [label, command] of Object.entries(quoting)) {
+      it.concurrent(
+        `should leave ${tree.label} silent on ${label}`,
+        async ({ expect }) => {
+          const result = await run(
+            hook,
+            postPayload(command),
+            join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+          )
+
+          expect(result.stderr).toBe('')
+          expect(result.stdout).toBe('')
+          expect(result.code).toBe(0)
+        },
+      )
+    }
+
+    it.concurrent(
+      `should block ${tree.label} on a post chained after another command`,
+      async ({ expect }) => {
+        const result = await run(
+          hook,
+          postPayload(`echo ready && gh api -X POST ${REVIEWS} ${body()}`),
+          join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+        )
+
+        expect(result.stderr).toContain('board identifier')
+        expect(result.code).toBe(2)
+      },
+    )
+
+    it.concurrent(
+      `should block ${tree.label} on a heredoc and a post in one call`,
+      async ({ expect }) => {
+        const result = await run(
+          hook,
+          postPayload(
+            `cat > .canon/tmp/not-written.md <<'EOF'\nbody\nEOF\ngh api -X POST ${REVIEWS} -F body=@.canon/tmp/not-written.md`,
+          ),
+          scanPassPath(),
+        )
+
+        expect(result.stderr).toContain('earlier call')
+        expect(result.code).toBe(2)
+      },
+    )
+
+    it.concurrent(
+      `should hand back additionalContext on ${tree.label} when canon is absent`,
+      async ({ expect }) => {
+        const result = await run(hook, reviewPost(body()), hookPath)
+
+        expect(result.stdout).toContain('additionalContext')
+        expect(result.stdout).toContain('did not run')
+        expect(result.code).toBe(0)
+      },
+    )
+  }
 })
 
 // Held local rather than seeded, per the canon-no-seed marker on the file
