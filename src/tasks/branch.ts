@@ -14,10 +14,10 @@ const MARKDOWN = '.md'
  */
 export const PLAN_BRANCH_TYPE = 'feat'
 
-/** The description cap in `standards/branch.md`, in kebab-separated words. */
+/** The description cap in `claude/skills/git-branch/references/branch.md`, in kebab-separated words. */
 export const DESCRIPTION_WORD_CAP = 4
 
-/** The branch length cap in `standards/branch.md`, in characters. */
+/** The branch length cap in `claude/skills/git-branch/references/branch.md`, in characters. */
 export const BRANCH_LENGTH_CAP = 50
 
 export interface PlanBranch {
@@ -48,7 +48,7 @@ function slugOf(path: string): string {
  * of them name. It is the one derivation, so the collision check and the
  * worktree entry it gates cannot hold two answers for one plan.
  *
- * Conformance covers both caps `standards/branch.md` states, being the word
+ * Conformance covers both caps `claude/skills/git-branch/references/branch.md` states, being the word
  * count of the description and the length of the whole branch. A slug is a
  * plan's own filename rather than a name anyone chose for a branch, so a plan
  * can name a branch this refuses to grade as conforming, and reporting that is

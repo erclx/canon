@@ -1,5 +1,5 @@
 /**
- * Which rule in `standards/pr.md`'s `## Title` section a title breaks.
+ * Which rule in `claude/skills/git-pr/references/pr.md`'s `## Title` section a title breaks.
  *
  * `structure` stands alone rather than beside the other three, because a
  * title failing the shape match has no parsed `<type>`, `<scope>`, or
@@ -28,9 +28,9 @@ const LEADING_LETTERS = /^[A-Za-z]+/
 
 /**
  * Grades a pull request title, or a commit subject sharing the same form,
- * against `standards/pr.md`'s structure, casing, and length rules.
+ * against `claude/skills/git-pr/references/pr.md`'s structure, casing, and length rules.
  *
- * Does not check `<type>` against `standards/commit.md`'s fixed enum.
+ * Does not check `<type>` against `claude/skills/git-commit/references/commit.md`'s fixed enum.
  * `pr.md`'s own `## Title` section states format, casing, and length only,
  * and names no type list of its own to check against.
  */

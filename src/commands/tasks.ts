@@ -347,7 +347,7 @@ export function register(program: Command): void {
       [
         '',
         'Exit codes:',
-        '  0  the branch is derived and conforms to standards/branch.md',
+        '  0  the branch is derived and conforms to claude/skills/git-branch/references/branch.md',
         '  1  refused as no-plan, archived, or bad-input',
         '  2  derived, and conforms is false because the slug breaks a cap',
         '',
@@ -566,7 +566,7 @@ export function register(program: Command): void {
         'same second can take the same answer. --claim reserves the label',
         'under .canon/ordinal-locks/ and counts every reservation in the',
         'scan, so two claims return different labels. A dead claim leaves a',
-        'gap, which standards/versioning.md permits.',
+        'gap, which claude/skills/git-commit/references/versioning.md permits.',
         '',
         'Examples:',
         '  canon tasks next-label',
@@ -1245,7 +1245,7 @@ function reportBranch(
     `derived from ${outcome.plan}, ${outcome.words} words and ${outcome.branch.length} characters.`,
   )
   logError(
-    'The slug breaks a cap in standards/branch.md, so hand the row to a person rather than renaming it.',
+    'The slug breaks a cap in claude/skills/git-branch/references/branch.md, so hand the row to a person rather than renaming it.',
   )
   outro()
 
