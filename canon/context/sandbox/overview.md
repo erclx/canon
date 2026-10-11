@@ -36,7 +36,7 @@ A scenario is written in TypeScript from 2026-10-04, and the bash form takes no 
 ### Scenario defaults and the reset contract
 
 - Sandboxes are minimal by default: no seeds, no gov rules, and auto-commit on. A scenario declares only the flags it needs, so the fixture states exactly what it depends on.
-- `claude/` scenarios default to `SANDBOX_INJECT_SEEDS="true"` so each models a real post-`canon init` project. Two documented exceptions: `target-setup.sh` tests `canon init` itself, and `auto-ship.sh` wipes the anchor after injection.
+- `claude/` scenarios default to `SANDBOX_INJECT_SEEDS="true"` so each models a real post-`canon init` project. Two documented exceptions: `target-setup.ts` tests `canon init` itself, and `auto-ship.ts` wipes the anchor after injection.
 - The reset contract belongs to the scenario, not the framework. A scenario that touches a real remote closes its own PRs and force-pushes a fresh main, because only the scenario knows what it created.
 
 ### What a sandbox is provisioned with
