@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { availableParallelism } from 'node:os'
 import { join } from 'node:path'
 import { execa } from 'execa'
 import type {
@@ -44,6 +46,28 @@ export interface StageResult {
   readonly queuedMs?: number
 }
 
+export interface LoadReading {
+  /** The 1-minute load average. */
+  readonly loadAverage: number
+  readonly cores: number
+}
+
+/**
+ * Reads the 1-minute load average from `/proc/loadavg`. A platform without
+ * it, as macOS, has no reading to give, so this answers `undefined` rather
+ * than throwing into a stage that has already failed.
+ */
+export function readProcLoad(): LoadReading | undefined {
+  try {
+    const first = readFileSync('/proc/loadavg', 'utf8').split(' ')[0]
+    const loadAverage = Number.parseFloat(first)
+    if (!Number.isFinite(loadAverage)) return undefined
+    return { loadAverage, cores: availableParallelism() }
+  } catch {
+    return undefined
+  }
+}
+
 export interface GateContext extends MeasureContext {
   /** Whether the format stage writes or checks. */
   readonly write: boolean
@@ -58,6 +82,11 @@ export interface GateContext extends MeasureContext {
    * wait and reads as a hung suite.
    */
   readonly onQueue?: (label: string, holder: LockHolder) => void
+  /**
+   * Reads the machine load a failed locked stage ran under. Defaults to
+   * `/proc/loadavg`, and answers `undefined` where there is none.
+   */
+  readonly readLoad?: () => LoadReading | undefined
 }
 
 export interface ChangedSet {
@@ -195,12 +224,38 @@ async function executeStage(
         ]
 
   try {
-    const outcome = await runChecks(stage, ctx, queued)
+    const outcome = withLoadLine(
+      await runChecks(stage, ctx, queued),
+      stage,
+      ctx,
+    )
     return held.waitedOn === undefined
       ? outcome
       : { ...outcome, queuedMs: held.waitedMs }
   } finally {
     held.release()
+  }
+}
+
+/**
+ * The lock serializes suites and does nothing about the rest of the box, so a
+ * starved spawn test and a real failure read alike. The load beside the
+ * failure is what lets a report tell them apart.
+ */
+function withLoadLine(
+  outcome: StageOutcome,
+  stage: Stage,
+  ctx: GateContext,
+): StageOutcome {
+  if (outcome.status !== 'failed') return outcome
+
+  const reading = (ctx.readLoad ?? readProcLoad)()
+  if (reading === undefined) return outcome
+
+  const text = `Load average ${reading.loadAverage} on ${reading.cores} cores when the ${stage.label} stage failed`
+  return {
+    ...outcome,
+    emissions: [...outcome.emissions, { kind: 'info', text }],
   }
 }
 
