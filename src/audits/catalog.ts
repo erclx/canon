@@ -468,7 +468,6 @@ const RECORD_KINDS: readonly (readonly [string, Corpus])[] = [
   ['plans', 'per-machine'],
   ['groundwork', 'per-machine'],
   ['intake', 'per-machine'],
-  ['memory', 'per-machine'],
   ['standards', 'tracked'],
   ['teach', 'per-machine'],
 ]

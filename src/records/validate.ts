@@ -22,7 +22,6 @@ export const RECORD_KINDS = [
   'plans',
   'groundwork',
   'intake',
-  'memory',
   'standards',
   'teach',
 ] as const
@@ -60,7 +59,6 @@ export type ValidateRefusal = (typeof VALIDATE_REFUSALS)[number]
 export const FINDING_KINDS = [
   'name-malformed',
   'title-missing',
-  'title-is-slug',
   'section-missing',
   'scope-unanchored',
   'entry-unreasoned',
@@ -72,7 +70,6 @@ export const FINDING_KINDS = [
   'state-missing',
   'closing-partial',
   'item-incomplete',
-  'category-mismatch',
   'operator-call-phrasing',
   'batch-unsplit',
   'source-unquoted',
@@ -923,153 +920,6 @@ async function checkWorkspace(dir: string, slug: string): Promise<Finding[]> {
   ]
 }
 
-const MEMORY_INDEX = 'index.md'
-const MEMORY_FIELDS = ['title', 'description', 'category'] as const
-
-/**
- * The filename prefix and the `category` field are one fact in two spellings,
- * so the map is the whole type list and the comparison against it is what
- * catches a prefix outside the set, a field disagreeing with the prefix, and a
- * casing drift that would open a second group in the catalog.
- */
-export const CATEGORY_BY_TYPE = {
-  feedback: 'Feedback',
-  project: 'Project',
-  user: 'User',
-  reference: 'Reference',
-} as const
-
-export type MemoryType = keyof typeof CATEGORY_BY_TYPE
-
-const MEMORY_TYPES = Object.keys(CATEGORY_BY_TYPE) as readonly MemoryType[]
-
-export const MEMORY_NAME = /^([a-z]+)-[a-z0-9]+(?:-[a-z0-9]+)*\.md$/
-
-/** The two markers a rule-bearing body carries, on top of the rule line itself. */
-const MEMORY_MARKERS = ['**Why:**', '**How to apply:**'] as const
-
-export function memoryType(value: string): MemoryType | undefined {
-  return MEMORY_TYPES.find((type) => type === value)
-}
-
-export function checkMemory(name: string, text: string): Finding[] {
-  const findings: Finding[] = []
-  const match = MEMORY_NAME.exec(name)
-  const named = match ? memoryType(match[1]) : undefined
-
-  if (!named) {
-    findings.push(
-      finding(
-        'name-malformed',
-        name,
-        name,
-        `is not named <type>-<slug>.md with a type of ${MEMORY_TYPES.join(', ')}.`,
-      ),
-    )
-  }
-
-  const frontmatter = parseFrontmatter(text)
-  const missing = MEMORY_FIELDS.filter(
-    (field) => !readField(frontmatter, field),
-  )
-
-  if (missing.length > 0) {
-    findings.push(
-      finding(
-        'frontmatter-incomplete',
-        name,
-        name,
-        `carries no ${missing.join(' and no ')}.`,
-      ),
-    )
-  }
-
-  // Its own kind rather than `title-missing`, which means an absent heading on a
-  // plan. One kind covering both leaves a caller filtering the JSON unable to
-  // tell a record with no title from one whose title is its own slug.
-  if (readField(frontmatter, 'title') === name.replace(/\.md$/, '')) {
-    findings.push(
-      finding(
-        'title-is-slug',
-        name,
-        name,
-        'is titled with its own filename, so the catalog renders a slug where the rule belongs.',
-      ),
-    )
-  }
-
-  const category = readField(frontmatter, 'category')
-
-  // Reported against the prefix alone. A name the prefix rule already failed
-  // has no type to compare against, and reporting it twice names one defect as
-  // two.
-  if (named && category && category !== CATEGORY_BY_TYPE[named]) {
-    findings.push(
-      finding(
-        'category-mismatch',
-        name,
-        category,
-        `is not ${CATEGORY_BY_TYPE[named]}, which the filename prefix declares.`,
-      ),
-    )
-  }
-
-  return [
-    ...findings,
-    ...checkMemoryBody(
-      name,
-      text.slice(frontmatter?.raw.length ?? 0),
-      named ?? category,
-    ),
-  ]
-}
-
-/**
- * A `user` or `reference` entry is a single sentence by design, so the markers
- * are checked only where a rule is being stated. The type is read off the
- * prefix, falling back to the category so a misnamed file is still checked
- * against the shape it claims.
- */
-function checkMemoryBody(
-  name: string,
-  text: string,
-  claimed: string | undefined,
-): Finding[] {
-  const type = claimed && memoryType(claimed.toLowerCase())
-  if (type !== 'feedback' && type !== 'project') return []
-
-  const body = linesOutsideFences(text).filter((line) => line.trim().length > 0)
-
-  const findings: Finding[] = []
-  const opening = body[0]
-
-  if (!opening || MEMORY_MARKERS.some((marker) => opening.startsWith(marker))) {
-    findings.push(
-      finding(
-        'section-missing',
-        name,
-        'the rule line',
-        'is absent, so the entry carries a rationale with no rule to apply.',
-      ),
-    )
-  }
-
-  for (const marker of MEMORY_MARKERS) {
-    if (!body.some((line) => line.startsWith(marker))) {
-      findings.push(
-        finding(
-          'section-missing',
-          name,
-          marker,
-          `is required on a ${type} entry and the body carries no such line.`,
-        ),
-      )
-    }
-  }
-
-  return findings
-}
-
 const STANDARD_INDEX = 'index.md'
 const STANDARD_FIELDS = ['title', 'description'] as const
 
@@ -1198,7 +1048,7 @@ export function checkStandard(name: string, text: string): Finding[] {
  */
 const FOLDER_CHECK: Readonly<
   Record<
-    Exclude<RecordKind, 'plans' | 'memory' | 'standards'>,
+    Exclude<RecordKind, 'plans' | 'standards'>,
     (dir: string, slug: string) => Promise<Finding[]>
   >
 > = {
@@ -1251,15 +1101,6 @@ export async function validateRecords(
   }
 
   if (kind === 'plans') return validateFiles(dir, kind, checkPlan)
-
-  if (kind === 'memory') {
-    return validateFiles(
-      dir,
-      kind,
-      checkMemory,
-      (file) => file === MEMORY_INDEX,
-    )
-  }
 
   // The walk stays flat, matching install and the catalog.
   if (kind === 'standards') {
