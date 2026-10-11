@@ -51,9 +51,9 @@ Grouping along the repository's three roots, `tooling/`, `claude/`, and `canon/`
 
 An always-loaded rule still reaches a target through `canon gov sync` rather than through a seeded root file nothing refreshes, since every group `base` names is taken whole. A `CLAUDE.md` bullet carries the same session-start priority, so the group is the only thing a move from a seed changes. The no-choice code rules retired rather than moving, and `code/000-code.md` keeps only the bullets a model does not follow by default.
 
-### The generator retired once its last standard did
+### The generator retired when no standard carried `paths:`
 
-`canon gov regen` once wrote a pointer rule under `governance/rules/standards/` for each standard carrying `paths:`, and it went when the last such standard moved into its owner skill, since keeping a generator with nothing to generate left a gate stage watching an empty path and a band any restored `paths:` field would regrow.
+`canon gov regen` once wrote a pointer rule under `governance/rules/standards/` for each standard carrying `paths:`. It went once `standards/standard.md`, the last standard carrying the field, dropped it, since keeping a generator with nothing to write left a gate stage watching an empty path and a band any restored `paths:` field would regrow. That standard stays in `standards/` and answers through `canon standards standard` until the verb retires.
 
 A rule pointing at a skill rather than a standard stays authored, as do the `writing/markdown` rule, `460-design-taste`, and `internal/rules/claude/595-tooling-reference.md`, whose standard never ships.
 
