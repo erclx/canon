@@ -69,7 +69,7 @@ describe('resolveStandard', () => {
     })
   })
 
-  it('should answer a fourth-slice standard from the owner skill reference that took it', () => {
+  it('should answer a moved standard from its owner skill reference', () => {
     expect(resolveStandard(ROOT, 'publish')).toEqual({
       path: join(PROJECT_ROOT, 'claude/skills/git-pr/references/publish.md'),
       source: join('<canon>', 'claude/skills/git-pr/references/publish.md'),
