@@ -585,3 +585,30 @@ describe('exportHtmlDeck on an empty folder', () => {
     })
   })
 })
+
+describe.skipIf(!hasBrowser)(
+  'exportHtmlDeck in a project with no design install',
+  () => {
+    it('should still write a deck that opens', async () => {
+      const root = mkdtempSync(join(tmpdir(), 'canon-slides-none-'))
+      const source = join(root, 'deck')
+      mkdirSync(source)
+      writeFileSync(
+        join(source, '01-only.html'),
+        `<!doctype html><html><head><meta charset="utf-8"><style>${STYLE}</style></head><body><h1>No install</h1></body></html>`,
+      )
+
+      const result = await exportHtmlDeck(source, join(root, 'out'), { root })
+
+      try {
+        expect(result.status).toBe('written')
+        if (result.status !== 'written') return
+        const zip = await JSZip.loadAsync(readFileSync(result.pptxPath))
+        const slide = await zip.file('ppt/slides/slide1.xml')?.async('string')
+        expect(slide).toContain('No install')
+      } finally {
+        rmSync(root, { recursive: true, force: true })
+      }
+    }, 60_000)
+  },
+)

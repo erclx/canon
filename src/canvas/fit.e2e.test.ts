@@ -37,6 +37,28 @@ const TALL = `<!doctype html>
 </html>
 `
 
+const VIEWPORT_SIZED = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>viewport-sized</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Geist Variable';
+      }
+      section {
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <section>One</section>
+    <section>Two</section>
+  </body>
+</html>
+`
+
 async function browserAvailable(): Promise<boolean> {
   const { chromium } = await import('playwright-core')
   try {
@@ -62,17 +84,26 @@ describe.skipIf(!hasBrowser)('fitCanvas', () => {
     })
     if (!added.ok) throw new Error(added.detail)
     writeFileSync(join(root, '.canon', 'canvas', PAGE, added.file), TALL)
+    const sized = addFrame(root, PAGE, 'sized', {
+      width: WIDTH,
+      height: BOX_HEIGHT,
+    })
+    if (!sized.ok) throw new Error(sized.detail)
+    writeFileSync(
+      join(root, '.canon', 'canvas', PAGE, sized.file),
+      VIEWPORT_SIZED,
+    )
   })
 
   afterAll(() => {
     rmSync(root, { recursive: true, force: true })
   })
 
-  function layoutHeight(): number {
+  function layoutHeight(frame = 'tall'): number {
     const layout = JSON.parse(
       readFileSync(join(root, '.canon', 'canvas', PAGE, 'layout.json'), 'utf8'),
     ) as { frames: Record<string, { height: number }> }
-    return layout.frames.tall?.height ?? 0
+    return layout.frames[frame]?.height ?? 0
   }
 
   it('should report an overflowing frame under a check and fit it on write', async () => {
@@ -81,7 +112,13 @@ describe.skipIf(!hasBrowser)('fitCanvas', () => {
     expect(checked).toMatchObject({
       ok: true,
       written: false,
-      rows: [{ frame: 'tall', height: BOX_HEIGHT, fitted: CONTENT_HEIGHT }],
+      rows: expect.arrayContaining([
+        expect.objectContaining({
+          frame: 'tall',
+          height: BOX_HEIGHT,
+          fitted: CONTENT_HEIGHT,
+        }),
+      ]),
     })
     expect(layoutHeight()).toBe(BOX_HEIGHT)
 
@@ -89,5 +126,15 @@ describe.skipIf(!hasBrowser)('fitCanvas', () => {
 
     expect(fitted).toMatchObject({ ok: true, written: true })
     expect(layoutHeight()).toBe(CONTENT_HEIGHT)
+  }, 60_000)
+
+  it('should leave a frame sized in viewport units alone and report it', async () => {
+    const outcome = await fitCanvas(root, `${PAGE}/sized`, true)
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      rows: [{ frame: 'sized', viewport: true, height: BOX_HEIGHT }],
+    })
+    expect(layoutHeight('sized')).toBe(BOX_HEIGHT)
   }, 60_000)
 })

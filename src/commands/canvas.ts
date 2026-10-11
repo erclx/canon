@@ -822,6 +822,11 @@ async function runFit(target: string, opts: FitOptions): Promise<number> {
     else if (outcome.written) logAdd(`${name} ${row.height} to ${row.fitted}`)
     else logStep(`${name} owes ${row.height} to ${row.fitted}`)
     if (row.wide) logWarn(`${name} is wider than its box, so widen the box`)
+    if (row.viewport) {
+      logWarn(
+        `${name} sets a height in viewport units, so its height was not written and a fixed height fits it`,
+      )
+    }
     if (row.font) {
       logWarn(
         `${name} sets ${row.family}, which the canvas does not serve, so its height may not hold in another browser`,

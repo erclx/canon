@@ -123,6 +123,21 @@ export function tokenGroups(css: string): TokenGroup[] {
   })
 }
 
+/**
+ * The families a served sheet declares a face for, so a caller reads what the
+ * frames carry from the same sheet the server builds rather than from a list
+ * of its own.
+ */
+export function servedFamilies(css: string): Set<string> {
+  const families = new Set<string>()
+  for (const [, family] of css.matchAll(
+    /@font-face\s*{[^}]*?font-family:\s*["']?([^"';}]+)/g,
+  )) {
+    if (family) families.add(family.trim())
+  }
+  return families
+}
+
 /** The installed files in cascade order: the base first, then each override. */
 function installedFiles(root: string): string[] {
   const base = join(DESIGN_INSTALL_DIR, BASE_FILE)
