@@ -1,6 +1,6 @@
 ---
 title: Guards
-description: The bounded stdin read every payload hook opens with, the path form hook, the bare flag repair, the pull-request creation log, and the unattended agent guard
+description: The bounded stdin read every payload hook opens with, the path form hook, the bare flag repair, the pull-request creation log, the unattended agent guard, and the memory guard
 ---
 
 # Guards
@@ -62,3 +62,17 @@ The guard answers one question, an unattended fork colliding with its parent, an
 The seed stays held. The hold lifts once an interactive terminal session reads `CLAUDE_CODE_SESSION_ATTENDED` as anything but `0`, since a seeded hook in a target where that reading is `0` would block every attended terminal session. One `! echo "$CLAUDE_CODE_SESSION_ATTENDED"` typed into such a session takes the reading. Seeding then also needs a seed settings registration and a second tree for the test to walk.
 
 `src/hooks/guard.test.ts` covers the denial with `CLAUDE_CODE_SESSION_ATTENDED=0` and the tool matcher on both `Agent` and `Task`, and covers the classification boundary with the variable unset and with a non-zero value, each expected to pass through silent. Because the hook reads an environment variable rather than payload alone, the shared `run` helper takes an `env` override that deletes or sets a key on the spawned process rather than inheriting whatever the test runner happens to carry. The hook exists only in `.claude/hooks/`, so the directory walk has no seed copy to reach, and the classification-boundary block runs once directly against that path rather than looping over both trees.
+
+## The memory guard
+
+`memory-guard.sh` is the check behind `autoMemoryEnabled: false`, which `canon/context/development/hooks/settings.md` records. The setting removes the harness's memory instruction, and the hook refuses a write that reaches the folder anyway, so the switch has a check behind it rather than standing alone. It registers on `PreToolUse` for `Write|Edit|MultiEdit`, widening the matcher `scratch-guard.sh` shares, and for `Bash` beside `dev-command-reminder.sh`. It denies the way `unattended-agent-guard.sh` does, a reason on stderr and exit 2, so the two blocking guards read alike.
+
+The match is the folder's shape, `.claude/projects/<one segment>/memory`, also under the directory `CLAUDE_CONFIG_DIR` names. A bare `memory` segment stays writable, since the CLI keeps a `memory` record kind for `canon records push` and any repository path may hold one.
+
+The `Bash` arm denies any command naming the folder rather than one carrying a write operator. A list of write verbs (`>`, `tee`, `cp`, `mv`, `sed -i`, `rm`, `touch`) is never complete, and a model reading the folder through `Bash` has no use for it once the feature is off. The `Read` tool stays open for a look, and the operator cleans the folder with a `!` command, which runs no hook. A file tool's `file_path` arrives absolute while a `Bash` command arrives unexpanded, so the match accepts `~`, `$HOME`, `${HOME}`, and an absolute spelling alike.
+
+The hot path stays cheap. `Bash` is the highest-frequency tool, so a shell `case` over the raw payload tests for a `projects/` and `memory` pair before `jq` starts, the way `bare-flag-repair.sh` puts its one-process check first. The field read is one `jq -r` and the match a `[[ =~ ]]` over its output, which keeps a multi-line command matched without the `@tsv` trap `canon/context/development/hooks/overview.md` records for the dev command reminder.
+
+Two gaps are accepted. A write built from a variable (`d=~/.claude/projects; echo x > "$d/.../memory/a.md"`) gets past a string test, and `autoMemoryDirectory` can move the folder anywhere, which the hook does not read settings to follow. The setting is the primary control and the guard the backstop, so neither is chased with a shell parser or a settings read.
+
+The hook carries a `canon-no-seed:` marker and ships through no seed, for the reason the setting does not. `src/hooks/guard.test.ts` covers it with an acting case in the per-hook table and one `describe` for the boundaries, run against `.claude/hooks/` alone as the unattended guard's block is.
