@@ -26,10 +26,81 @@ esac
 
 # A file tool carries an absolute file_path and Bash carries the command
 # unexpanded, so each arm reads its own field and every other tool reads none.
+# The first character says which arm answered, since only a command is cut.
 target=$(printf '%s' "$input" | jq -r '
-  if (.tool_name | IN("Write", "Edit", "MultiEdit")) then .tool_input.file_path
-  elif .tool_name == "Bash" then .tool_input.command
+  if (.tool_name | IN("Write", "Edit", "MultiEdit")) then "F" + .tool_input.file_path
+  elif .tool_name == "Bash" then "B" + .tool_input.command
   else empty end // empty')
+[ -n "$target" ] || exit 0
+kind=${target:0:1}
+target=${target:1}
+
+# A command that only mentions the folder is not a write to it: a heredoc whose
+# body quotes the shape, a comment, or prose inside quotes. The command is cut
+# with a small awk pass that drops heredoc bodies, comments, and quoted spans
+# holding whitespace, and the shape is matched on what is left. A write target
+# is a path and carries no whitespace, so no verb list is needed, and a bare or
+# whitespace-free quoted token naming the folder still denies. This is a
+# scanner and not a shell parser, so a substitution inside double quotes is
+# read as quoted text. The cut is copied from review-post-scan.sh, which is
+# seeded and so cannot be sourced from this unseeded hook.
+if [ "$kind" = B ]; then
+  IFS= read -r -d '' cutter <<'AWK'
+{ s = s (NR > 1 ? "\n" : "") $0 }
+function keep(quote, text) {
+  if (text ~ /[ \t\n]/) return " "
+  return quote text quote
+}
+END {
+  n = length(s); q = ""; quoted = ""; out = ""; nt = 0; i = 1
+  while (i <= n) {
+    c = substr(s, i, 1)
+    if (q == "'") {
+      if (c == "'") { out = out keep(q, quoted); q = ""; quoted = "" } else quoted = quoted c
+      i++; continue
+    }
+    if (q == "\"") {
+      if (c == "\\") { quoted = quoted c substr(s, i + 1, 1); i += 2; continue }
+      if (c == "\"") { out = out keep(q, quoted); q = ""; quoted = ""; i++; continue }
+      quoted = quoted c; i++; continue
+    }
+    if (c == "\\") { out = out c substr(s, i + 1, 1); i += 2; continue }
+    if (c == "'" || c == "\"") { q = c; quoted = ""; i++; continue }
+    if (c == "#" && (out == "" || substr(out, length(out), 1) ~ /[ \t\n]/)) {
+      while (i <= n && substr(s, i, 1) != "\n") i++
+      continue
+    }
+    if (c == "<" && substr(s, i, 2) == "<<" && substr(s, i, 3) != "<<<") {
+      j = i + 2; dash = 0
+      if (substr(s, j, 1) == "-") { dash = 1; j++ }
+      while (substr(s, j, 1) ~ /[ \t]/) j++
+      oq = substr(s, j, 1)
+      if (oq == "'" || oq == "\"") j++
+      tag = ""
+      while (substr(s, j, 1) ~ /[A-Za-z0-9_]/) { tag = tag substr(s, j, 1); j++ }
+      if (oq == "'" || oq == "\"") j++
+      if (tag != "") { nt++; tags[nt] = tag; dashes[nt] = dash; i = j; continue }
+    }
+    if (c == "\n") {
+      out = out c; i++
+      for (t = 1; t <= nt; t++) {
+        while (i <= n) {
+          e = index(substr(s, i), "\n")
+          if (e == 0) { line = substr(s, i); i = n + 1 } else { line = substr(s, i, e - 1); i += e }
+          if (dashes[t]) sub(/^\t+/, "", line)
+          if (line == tags[t]) break
+        }
+      }
+      nt = 0; continue
+    }
+    out = out c; i++
+  }
+  if (q != "") out = out keep(q, quoted)
+  print out
+}
+AWK
+  target=$(printf '%s' "$target" | awk "$cutter")
+fi
 [ -n "$target" ] || exit 0
 
 # The shape is <root>/projects/<one segment>/memory, so a bare memory segment

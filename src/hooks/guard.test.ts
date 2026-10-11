@@ -1446,6 +1446,28 @@ describe('memory-guard.sh boundaries', () => {
       'a CLAUDE_CONFIG_DIR path in Bash',
       shell('echo x > "$CLAUDE_CONFIG_DIR/projects/-a/memory/n.md"'),
     ],
+    ['a quoted target without whitespace', shell(`cp a "${home}/memory/n.md"`)],
+    ['a tee target', shell(`echo x | tee ${home}/memory/n.md`)],
+    [
+      'a write after a heredoc terminator',
+      shell(`cat > a.md <<'EOF'\nnote\nEOF\ncp a.md ${home}/memory/n.md`),
+    ],
+    [
+      'a write by the command that opened a heredoc',
+      shell(`cat > ${home}/memory/n.md <<'EOF'\nnote\nEOF`),
+    ],
+    [
+      'a write after a separator outside quotes',
+      shell(`echo 'a; b'; cp x ${home}/memory/n.md`),
+    ],
+    [
+      'a redirect after a heredoc body naming CLAUDE_CONFIG_DIR',
+      shell(
+        `cat <<EOF\n$CLAUDE_CONFIG_DIR/projects/-a/memory/n.md\nEOF\necho x > $CLAUDE_CONFIG_DIR/projects/-a/memory/n.md`,
+      ),
+    ],
+    ['a here-string naming the folder', shell(`cat <<< ${home}/memory/n.md`)],
+    ['a read of the folder through grep', shell(`grep -rn x ${home}/memory`)],
   ]
 
   const silent: ReadonlyArray<readonly [string, string]> = [
@@ -1462,6 +1484,44 @@ describe('memory-guard.sh boundaries', () => {
     ['a read of the folder', fileTool('Read', `${home}/memory/note.md`)],
     ['a command mentioning memory alone', shell('grep -rn memory src/')],
     ['a command naming projects alone', shell('ls ~/.claude/projects')],
+    [
+      'a heredoc body quoting the folder',
+      shell(
+        `cat > .canon/tmp/t.md <<'EOF'\nThe guard denies ${home}/memory/n.md\nEOF`,
+      ),
+    ],
+    [
+      'a heredoc with a dash and an unquoted terminator',
+      shell(`cat > a.md <<-EOF\n\t${home}/memory/n.md\n\tEOF`),
+    ],
+    [
+      'two heredocs on one line',
+      shell(
+        `cat <<A <<B > a.md\n${home}/memory/n.md\nA\n${home}/memory/m.md\nB`,
+      ),
+    ],
+    [
+      'a quoted prose mention',
+      shell(`grep -rn "see ${home}/memory/ for notes" docs`),
+    ],
+    ['a trailing comment', shell(`ls src # not ${home}/memory`)],
+    [
+      'a commit message naming the folder',
+      shell(`git commit -m "guard ${home}/memory writes"`),
+    ],
+    [
+      'a gh api body field naming the folder',
+      shell(`gh api x -f body='denied: ${home}/memory/n.md'`),
+    ],
+    ['a separator inside quotes', shell(`echo 'a; cp x ${home}/memory/n.md'`)],
+    [
+      'a CLAUDE_CONFIG_DIR path in a heredoc body',
+      shell(`cat <<EOF\n$CLAUDE_CONFIG_DIR/projects/-a/memory/n.md\nEOF`),
+    ],
+    [
+      'a multi-line command with the folder only in a heredoc',
+      shell(`ls\ncat > a.md <<'EOF'\n${home}/memory/n.md\nEOF\necho done`),
+    ],
   ]
 
   for (const [label, payload] of denied) {
