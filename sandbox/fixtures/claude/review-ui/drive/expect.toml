@@ -38,10 +38,10 @@ manual = [
 path = ".canon/tmp/pr/review-ui/body-*.md"
 pattern = '^## UI review[ \t]*$'
 
-# One verdict per box, counted on the summary line.
+# One verdict per box, counted on the count line.
 [[content]]
 path = ".canon/tmp/pr/review-ui/body-*.md"
-pattern = '1 passed, 1 failed, 1 needs? eyes, 0 not driven'
+pattern = '1 failed · 1 needs? your eyes · 1 passed · 0 not driven'
 
 # The planted fail carries the value read rather than an impression.
 [[content]]
@@ -50,9 +50,14 @@ pattern = '436'
 
 [[content]]
 path = ".canon/tmp/pr/review-ui/body-*.md"
-pattern = '(needs|Needs) eyes'
+pattern = '^### Needs your eyes[ \t]*$'
 
-# The renderer the browser reported, named on the summary line.
+# The failed box sits under its own section, ahead of the one owed a call.
+[[content]]
+path = ".canon/tmp/pr/review-ui/body-*.md"
+pattern = '^### Failed[ \t]*$'
+
+# The renderer the browser reported, named on the line under the counts.
 [[content]]
 path = ".canon/tmp/pr/review-ui/body-*.md"
 pattern = 'rendered by '

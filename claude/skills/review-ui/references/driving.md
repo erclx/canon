@@ -32,20 +32,20 @@ A box written before that format may carry no route, no width, and a verb such a
 - Text, presence, and attributes: `pw --raw eval "<expression>"`, quoting the value back.
 - Computed style: `getComputedStyle(<element>).<property>`.
 - Geometry and overflow: `getBoundingClientRect()`, and `scrollWidth` against `clientWidth` on `document.documentElement`.
-- A frame: `pw screenshot --filename=frames/<box-number>.png`, then open it with the file-reading tool before saying what it shows.
+- A frame: `pw screenshot --filename=frames/<box-number>.png`, then open it with the file-reading tool before saying what it shows. A taste box takes the shot twice, once per theme, naming the theme in the file as `frames/<box-number>-<theme>.png`.
 
 ## The four verdicts
 
 Each box takes exactly one.
 
-| Verdict             | When                                                    | Evidence it carries                                                                                                                                   |
-| ------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| pass or fail, read  | The result is a fact the page reports                   | The value read, quoted, such as `scrollWidth 436 against clientWidth 320`                                                                             |
-| pass or fail, frame | The result has a stated criterion only an image settles | The matching evidence stem or the pushed frame's link going to the Frames block, and what the frame shows, in words                                   |
-| needs eyes          | The box ends in `(taste)`                               | The matching evidence stem or the pushed frame's link going to the Frames block, and what the frame showed, with nothing about whether it looks right |
-| not driven          | The state could not be reached                          | The reason, such as an unreachable address, a `(local only)` box on a hosted preview, or a target the snapshot does not hold                          |
+| Verdict             | When                                                    | Evidence it carries                                                                                                                                                    |
+| ------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| pass or fail, read  | The result is a fact the page reports                   | The value read, quoted, such as `scrollWidth 436 against clientWidth 320`                                                                                              |
+| pass or fail, frame | The result has a stated criterion only an image settles | The matching evidence stem or the pushed frame's link, inline under the failed box's heading, and what the frame shows, in words                                       |
+| needs eyes          | The box ends in `(taste)`                               | The dark and the light shot as a pair, each the matching evidence stem or a pushed frame's link, and what the frames showed, with nothing about whether it looks right |
+| not driven          | The state could not be reached                          | The reason, such as an unreachable address, a `(local only)` box on a hosted preview, or a target the snapshot does not hold                                           |
 
-A frame verdict carries one image at most, and never one the worker's evidence already shows. When a state and stem in the evidence record match the box's route, width, and theme, the evidence names that stem and nothing is pushed. Otherwise the frame goes up through `canon pr frames` and the `link` the record returned, which names the frame's path on the frames branch, goes under the Frames block and never inside the table row. Either way the words stay, describing the value or region judged, such as the element, its position, and the colors or text read, so a reader whose image fails to load can still check it.
+A pass or fail resting on a frame carries one image at most, and never one the worker's evidence already shows. A needs-eyes box carries the pair, dark and light, since a taste call is made by comparing them. Match each theme separately: when a state and stem in the evidence record match the box's route, width, and that theme, the evidence names that stem and nothing is pushed for it, so a view with the dark shot in evidence pushes the light one alone. Otherwise the frame goes up through `canon pr frames` with `--theme`, and the `link` the record returned, which names the frame's path on the frames branch, goes in the box's own section of the body and never inside a folded block. Either way the words stay, describing the value or region judged, such as the element, its position, and the colors or text read, so a reader whose image fails to load can still check it.
 
 A push that refuses leaves the words alone, with the reason named. Never cite the local frame path. A path under `.canon/` is a board identifier the label scan rejects, and it resolves only on this machine.
 
