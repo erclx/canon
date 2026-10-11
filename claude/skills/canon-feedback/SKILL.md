@@ -26,60 +26,16 @@ From the conversation so far, identify:
 - Expected behavior, or `unclear`
 - Repro details already in context (commands run, files touched), or `none`
 - Proposed fix, or `open` when the session settled on no direction
-  **Fields the report omits when the session has none:**
+
+**Fields the report omits when the session has none:**
 
 - Suggested shape, when the session worked out what the change should look like, such as a template, a command's output, or a field list
 - Why, when the session has reasons for the fix beyond the observed failure
 - Links, when the session cites an issue, a pull request, or a document
 
-Format as a single fenced markdown block, one `###` heading per field:
+Format as a single fenced markdown block, one `###` heading per field. Read `${CLAUDE_SKILL_DIR}/references/template.md` on reaching this point for the block and each field's fallback.
 
-```markdown
-## Toolkit feedback
-
-### From project
-
-<name or kind>
-
-### Surface
-
-<type>, <file path or name>
-
-### Observed
-
-<one or two lines>
-
-### Expected
-
-<one or two lines, or "unclear">
-
-### Repro
-
-<commands or steps, or "none">
-
-### Proposed fix
-
-<the direction in as many lines as it takes, or "open">
-
-### Suggested shape
-
-<details>
-<summary>Shape</summary>
-
-<the template, output, or field list, in a fence one backtick longer than any fence it holds>
-
-</details>
-
-### Why
-
-- <one reason per bullet>
-
-### Links
-
-<one link per line>
-```
-
-`canon feedback` refuses a report missing `### Surface`, `### Observed`, or `### Proposed fix`, naming the one it did not find. `### From project`, `### Expected`, and `### Repro` are optional, so write the literal fallback shown above rather than dropping the heading, which is what keeps a field the session cannot fill reading as absent instead of unreported.
+`canon feedback` refuses a report missing `### Surface`, `### Observed`, or `### Proposed fix`, naming the one it did not find. `### From project`, `### Expected`, and `### Repro` are optional, so write the literal fallback the template shows rather than dropping the heading, which is what keeps a field the session cannot fill reading as absent instead of unreported.
 
 `### Suggested shape`, `### Why`, and `### Links` are optional the other way. Omit the heading when the session has nothing for it and write no fallback, since a report filed without them is complete and a placeholder would read as a reporter who had nothing to say.
 
