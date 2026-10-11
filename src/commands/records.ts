@@ -29,7 +29,6 @@ import {
 import {
   type Finding,
   isRecordKind,
-  isSharedScratch,
   RECORD_KINDS,
   type RecordKind,
   type ValidateOutcome,
@@ -94,7 +93,7 @@ export function register(program: Command): void {
     .option('--json', 'Add a machine-readable record on stdout')
     .option(
       '--root <path>',
-      'Project root, defaulting to the main worktree except on standards',
+      'Project root, defaulting to the main worktree',
     )
     .addHelpText(
       'after',
@@ -104,8 +103,6 @@ export function register(program: Command): void {
         '  plans       filename, required sections, and the suggested-and-answer contract',
         '  groundwork  README and current-state files, numbering, dating, and a half-closed track',
         '  intake      overview file, numbering, dating, and the four bullets every item carries',
-        '  standards   frontmatter, the scope section and its handoff list, and a filename',
-        '              derived from the governed path',
         '',
         'Exit codes:',
         '  0  every check passed',
@@ -113,12 +110,11 @@ export function register(program: Command): void {
         '  2  at least one record carries a finding',
         '',
         'It reports and never writes, so a session fixes what the report names. A',
-        'session record has no history to undo a wrong repair from, and a standard',
-        'is installed and cited everywhere, so a rename is larger than a file move.',
+        'session record has no history to undo a wrong repair from.',
         '',
         'Examples:',
         '  canon records validate plans',
-        '  canon records validate standards',
+        '  canon records validate teach',
         '  canon records validate intake --json',
         '',
       ].join('\n'),
@@ -718,15 +714,6 @@ function reportRefusal(
   return 1
 }
 
-/**
- * A shared-scratch kind reads the main worktree root, so a linked worktree
- * validates the records every other session reads. A tracked corpus reads the
- * checkout the caller stands in, which is the copy that session has edited.
- */
-function defaultRoot(kind: RecordKind): Promise<string> {
-  return isSharedScratch(kind) ? mainWorktreeRoot() : currentWorktreeRoot()
-}
-
 async function runValidate(
   kind: string,
   opts: ValidateCommandOptions,
@@ -745,7 +732,7 @@ async function runValidate(
     )
   }
 
-  const root = opts.root ?? (await defaultRoot(kind))
+  const root = opts.root ?? (await mainWorktreeRoot())
 
   return report(await validateWithStacks(root, kind), emitJson, root)
 }

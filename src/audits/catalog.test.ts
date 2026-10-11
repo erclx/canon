@@ -73,7 +73,6 @@ describe('the audit catalog', () => {
 
   it('should treat a gitignored record folder as a per-machine corpus', () => {
     expect(isTracked(specFor('records-plans'))).toBe(false)
-    expect(isTracked(specFor('records-standards'))).toBe(true)
     expect(isTracked(specFor('tasks'))).toBe(false)
     expect(isTracked(specFor('markdown'))).toBe(true)
   })
@@ -597,23 +596,6 @@ describe('classifying an audit run by its exit code', () => {
     )
 
     expect(result.status).toBe('finding')
-  })
-
-  /**
-   * `standards` is the exception among the tracked specs, on the same test the
-   * secret scan and the reach check already take: the install channel that
-   * would have written `standards/` into a target closed, so a project other
-   * than this toolkit's own checkout carries neither root by design rather
-   * than by defect.
-   */
-  it('should read an absent standards corpus as absent', () => {
-    const result = classify(
-      specFor('records-standards'),
-      1,
-      '{"ok":false,"reason":"no-folder","message":"No standards folder"}',
-    )
-
-    expect(result.status).toBe('absent')
   })
 
   /**

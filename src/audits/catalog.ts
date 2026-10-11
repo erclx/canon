@@ -468,7 +468,6 @@ const RECORD_KINDS: readonly (readonly [string, Corpus])[] = [
   ['plans', 'per-machine'],
   ['groundwork', 'per-machine'],
   ['intake', 'per-machine'],
-  ['standards', 'tracked'],
   ['teach', 'per-machine'],
 ]
 
@@ -588,14 +587,6 @@ export const AUDITS: readonly AuditSpec[] = [
     argv: ['records', 'validate', kind, '--json'],
     gatingExits: [],
     corpus,
-    // `standards` is the one tracked kind here, so it takes none of the
-    // per-machine default the other five inherit from their corpus. A target
-    // reads standards through `canon standards` rather than a copy in its own
-    // tree, so carrying no standards folder at all is the
-    // ordinary state of every project but this repository.
-    ...(kind === 'standards' && {
-      absentReasons: ['no-folder'] satisfies RecordRefusal[],
-    }),
     counts: findingsOnly,
   })),
   {
