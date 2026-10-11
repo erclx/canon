@@ -31,8 +31,8 @@ Every observable behavior becomes a dependency once there are enough callers, wh
 
 ## Keep one error shape per surface
 
-- Give every failure on one surface the same shape, carrying a stable code a caller can branch on and a message for the person reading it. Branching on message text breaks the first time the message is reworded.
-- Follow the project's own rule on structured errors and hidden internals where it states one, rather than inventing a second error convention beside it.
+- Give every failure on one surface the same shape, carrying a stable code a caller can branch on and a message for the person reading it. Branching on message text breaks the first time the message is reworded. Keep internal implementation details out of the message, since a caller reads it and cannot act on a stack frame.
+- Reuse the error type the project already throws or returns where one exists, rather than inventing a second error convention beside it.
 
 ## Validate at the boundary
 
@@ -98,7 +98,6 @@ Check each line against the surface the change produced. A line answering no is 
 ## What this delegates
 
 - Where the file holding a surface sits on disk: `codebase-layout`
-- The structured error rule and hidden internals floor every code stack loads: `000-code`
 - Listing the consumers a finished change breaks, and the docs it made false, during review: `review-craft`
 - A visual interface, its layout, and its look: `design-taste`
 - Interface depth and the internals behind a boundary: `code-craft`
