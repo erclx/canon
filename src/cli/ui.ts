@@ -154,9 +154,8 @@ export function isNonInteractive(): boolean {
 }
 
 /**
- * `nonInteractiveDefault` opts a prompt into the `select_option` behavior from
- * `scripts/lib/ui.sh`, where `CANON_NON_INTERACTIVE=1` resolves to the first
- * option instead of failing. Callers that would rather fail loudly than pick
+ * `nonInteractiveDefault` opts a prompt into resolving to its first option
+ * under `CANON_NON_INTERACTIVE=1` instead of failing. Callers that would rather fail loudly than pick
  * for the user leave it off.
  */
 export async function select<Value>(opts: {

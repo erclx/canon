@@ -8,7 +8,6 @@ import {
   writeFileSync,
 } from 'node:fs'
 import { basename, dirname, join, relative } from 'node:path'
-import { probeScenario, stageScenario } from '@/sandbox/hooks'
 import {
   FIXTURE_SUFFIX,
   FIXTURES_DIR,
@@ -34,9 +33,8 @@ import {
 
 /**
  * Provisions one scenario into the sandbox tree, and resets or cleans that tree.
- * A bash scenario's hooks run through `sandbox-hook.sh` and a TypeScript one's
- * arm runs in process through `scenario.ts`, and everything between them runs
- * here, in the order the retired bash dispatcher held.
+ * A scenario's arm runs in process through `scenario.ts`, and everything
+ * around it runs here, in the order the retired bash dispatcher held.
  *
  * Narration is part of the contract. `canon sandbox equivalence` compares the
  * log line for line against the bash harness, so every message, its frame
@@ -403,35 +401,21 @@ interface Scenario {
 
 /**
  * Reads what a scenario declares ahead of provisioning: its config exports and
- * whether it stages from the anchor. A bash scenario answers through the probe,
- * and a TypeScript one from its module, which is also what its stage runs.
+ * whether it stages from the anchor, from its module, which is also what its
+ * stage runs.
  */
 function declareScenario(
   root: string,
   scenario: Scenario,
   env: NodeJS.ProcessEnv,
-):
-  | { kind: 'sh'; file: string; isAnchor: boolean }
-  | { kind: 'ts'; definition: ScenarioDefinition; isAnchor: boolean } {
+): { definition: ScenarioDefinition; isAnchor: boolean } {
   const name = `${scenario.category}/${scenario.command}`
   const resolved = resolveScenarioFile(
     join(root, 'sandbox'),
     scenario.category,
     scenario.command,
   )
-  if (!resolved.ok && resolved.reason === 'ambiguous')
-    fail(
-      `Sandbox script ${name} exists as both .sh and .ts. Delete the one the port replaced.`,
-    )
   if (!resolved.ok) fail(`Sandbox script not found: ${name}`)
-
-  if (resolved.kind === 'sh') {
-    const probe = probeScenario(resolved.file, env)
-    if (!probe.ok) throw new Halt(probe.status)
-    Object.assign(env, probe.exports)
-
-    return { kind: 'sh', file: resolved.file, isAnchor: probe.isAnchor }
-  }
 
   let definition: ScenarioDefinition
   try {
@@ -443,7 +427,7 @@ function declareScenario(
   }
   Object.assign(env, scenarioExports(definition, root, env))
 
-  return { kind: 'ts', definition, isAnchor: definition.anchor === true }
+  return { definition, isAnchor: definition.anchor === true }
 }
 
 async function provisionScenario(
@@ -481,21 +465,14 @@ async function provisionScenario(
   // A scenario that execs a verb as its last step hands the run to that verb,
   // whose own frame is the last one written, so nothing follows it here. An
   // in-process arm writes its exports straight into `env`.
-  const staged =
-    declared.kind === 'sh'
-      ? stageScenario(declared.file, env)
-      : {
-          ...(await stageScenarioInProcess(declared.definition, {
-            root,
-            dir: sandbox,
-            env,
-            arm: scenario.arm,
-          })),
-          exports: {},
-        }
+  const staged = await stageScenarioInProcess(declared.definition, {
+    root,
+    dir: sandbox,
+    env,
+    arm: scenario.arm,
+  })
   if (staged.ending === 'replaced') throw new Halt(staged.status, false)
   if (staged.ending === 'exited') throw new Halt(staged.status)
-  Object.assign(env, staged.exports)
 
   const isSkipAutoCommit = (env.SANDBOX_SKIP_AUTO_COMMIT ?? '') !== ''
   const isSkipInject = (env.SANDBOX_SKIP_SKILL_INJECT ?? '') !== ''
@@ -602,7 +579,7 @@ function parseTarget(target: string): { category: string; command: string } {
 }
 
 export interface SandboxRequest {
-  /** False where a caller already opened the frame, as `run.sh` and the picker do. */
+  /** False where a caller already opened the frame, as `canon sandbox run` and the picker do. */
   readonly isHeader: boolean
   /** `<category>:<command>`, `reset`, or `clean`. */
   readonly target: string

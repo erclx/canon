@@ -10,7 +10,7 @@
 # Every top-level key sits above the first `[[content]]` block. A bare key below
 # one belongs to that table in TOML.
 
-# The default cap, which is what `sandbox/run.sh` runs under.
+# The default cap, which is what `canon sandbox run` runs under.
 max_turns = 30
 
 # The control. Provisioning commits all three, so the assertions below are about

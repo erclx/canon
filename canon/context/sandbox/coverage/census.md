@@ -27,10 +27,10 @@ Pairing tries two spellings, `<category>-<command>` first and bare `<command>` s
 
 ### The ship-time audit
 
-`internal-sandbox-check` resolves a skill here first, taking the `scenarios` entry as the pairing and the verdict as the report, rather than falling back to its own `<category>/<rest>.sh` split whenever that split finds no file. A per-run label answered in the audit reaches nothing and asks the same question again on the next branch.
+`internal-sandbox-check` resolves a skill here first, taking the `scenarios` entry as the pairing and the verdict as the report, rather than falling back to its own `<category>/<rest>.ts` split whenever that split finds no file. A per-run label answered in the audit reaches nothing and asks the same question again on the next branch.
 
 - The census reaches skills alone, so the audit's script mapping keeps a prompt of its own. `scripts/core/` meets it on every branch, and the standing answer is `none`: those scripts are the check runner and its guards, exercised by every `bun run check` rather than by a provisioned target, and no `infra/core.sh` exists or should.
-- A skill the census carries with no scenario can still have a file at `infra/<rest>.sh`. The audit offers that path and records neither answer on its own, because the file proves a scenario exists rather than that it exercises the skill. A scenario staging trees a CLI walks can exercise nothing the offered skill decides, so the correct pairing is the scenario exercising the skill's decision.
+- A skill the census carries with no scenario can still have a file at `infra/<rest>.ts`. The audit offers that path and records neither answer on its own, because the file proves a scenario exists rather than that it exercises the skill. A scenario staging trees a CLI walks can exercise nothing the offered skill decides, so the correct pairing is the scenario exercising the skill's decision.
 - An internal skill draws no prompt at all, being absent from the denominator by construction.
 
 ### Exemptions
@@ -43,7 +43,7 @@ An exemption lives in `sandbox/exempt.toml`, keyed by skill with a `reason`. It 
 
 ## Gotchas
 
-- `internal-sandbox-check` Step 2a splits a skill name on its first `-`, so `internal-claude` resolves to `sandbox/internal/claude.sh`, and no `internal/` category exists. Internal skills carry the reserved `internal-` prefix and the missing file is correct by design, so answer `none` and do not invent the category.
+- `internal-sandbox-check` Step 2a splits a skill name on its first `-`, so `internal-claude` resolves to `sandbox/internal/claude.ts`, and no `internal/` category exists. Internal skills carry the reserved `internal-` prefix and the missing file is correct by design, so answer `none` and do not invent the category.
 - The `create-*` skills report `no scenario` and `exempt.toml` carries none of them, so they read `should-be-asserted`. Answer `none` when the ship is not the place to write a scenario, and record the gap rather than reading `NONE` as settled coverage.
-- A skill rename that leaves its scenario file's name behind breaks pairing silently. A scenario such as `docs/draft.sh` beside skills named `draft-<kind>` would pair `docs-draft`, and `--skills --json` would report each skill with an empty `scenarios` array while a real scenario exists. Renaming the scenario file and fixture folder is a separate step from renaming the skill, and a merge takes one scenario named for the merged skill.
-- A citation sweep after a scenario rename greps for two more shapes than `claude/<name>(\.sh|/)` and `claude:<name>`. A `stage_fixtures claude <name> <arm> <stage>` call is a space-separated positional argument, and it breaks fixture staging at run time when the folder moves. Prose naming a scenario bare leaves a reader-facing sentence that no longer resolves. Re-read the narrative around any hit.
+- A skill rename that leaves its scenario file's name behind breaks pairing silently. A scenario such as `docs/draft.ts` beside skills named `draft-<kind>` would pair `docs-draft`, and `--skills --json` would report each skill with an empty `scenarios` array while a real scenario exists. Renaming the scenario file and fixture folder is a separate step from renaming the skill, and a merge takes one scenario named for the merged skill.
+- A citation sweep after a scenario rename greps for two more shapes than `claude/<name>(\.ts|/)` and `claude:<name>`. A `ctx.fixtures('claude', '<name>', '<arm>', '<stage>')` call carries the name as a positional argument, and it breaks fixture staging at run time when the folder moves. Prose naming a scenario bare leaves a reader-facing sentence that no longer resolves. Re-read the narrative around any hit.

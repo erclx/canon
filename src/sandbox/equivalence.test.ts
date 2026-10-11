@@ -19,7 +19,6 @@ import {
   diffManifests,
   enumerateArms,
   MASKS,
-  parseArmNames,
   runEquivalence,
   type Mask,
 } from '@/sandbox/equivalence'
@@ -32,8 +31,17 @@ function write(path: string, body: string): void {
   writeFileSync(full, body)
 }
 
-function scenario(category: string, command: string, body: string): void {
-  write(`sandbox/${category}/${command}.sh`, body)
+function scenario(
+  category: string,
+  command: string,
+  arms: readonly string[],
+  anchor = false,
+): void {
+  const entries = arms.map((name) => `${JSON.stringify(name)}: () => {}`)
+  write(
+    `sandbox/${category}/${command}.ts`,
+    `export default { ${anchor ? 'anchor: true, ' : ''}arms: { ${entries.join(', ')} } }\n`,
+  )
 }
 
 function initRepo(dir: string, subject: string): void {
@@ -79,27 +87,9 @@ afterEach(() => {
   rmSync(root, { recursive: true, force: true })
 })
 
-describe('parseArmNames', () => {
-  it('should read the arms after the prompt', () => {
-    const source = '  select_or_route_scenario "Which?" "full" "small"\n'
-
-    expect(parseArmNames(source)).toEqual(['full', 'small'])
-  })
-
-  it('should join a call continued across lines', () => {
-    const source = 'select_or_route_scenario "Which?" "one" \\\n  "two"\n'
-
-    expect(parseArmNames(source)).toEqual(['one', 'two'])
-  })
-
-  it('should find no arms in a scenario that routes none', () => {
-    expect(parseArmNames('stage_setup() { :; }\n')).toEqual([])
-  })
-})
-
 describe('enumerateArms', () => {
-  it('should treat a scenario with no routing call as one arm-less provision', () => {
-    scenario('claude', 'plain', 'stage_setup() { :; }\n')
+  it('should treat a scenario with only a default arm as one arm-less provision', () => {
+    scenario('claude', 'plain', ['default'])
 
     const { arms } = enumerateArms(root, [])
 
@@ -108,12 +98,8 @@ describe('enumerateArms', () => {
     ])
   })
 
-  it('should tag a scenario defining use_anchor as anchor', () => {
-    scenario(
-      'git',
-      'ship',
-      'use_anchor() {\n  :\n}\nselect_or_route_scenario "Q" "a"\n',
-    )
+  it('should tag a scenario declaring anchor as anchor', () => {
+    scenario('git', 'ship', ['a'], true)
 
     const { arms } = enumerateArms(root, ['git'])
 
@@ -121,8 +107,8 @@ describe('enumerateArms', () => {
   })
 
   it('should keep an arm named with a hyphen apart from the arm-less provision', () => {
-    scenario('claude', 'odd', 'select_or_route_scenario "Q" "-" "two words"\n')
-    scenario('claude', 'plain', 'stage_setup() { :; }\n')
+    scenario('claude', 'odd', ['-', 'two words'])
+    scenario('claude', 'plain', ['default'])
 
     const { arms } = enumerateArms(root, [])
 
@@ -143,20 +129,17 @@ describe('enumerateArms', () => {
     ])
   })
 
-  it('should report a stem present in both forms', () => {
-    scenario('git', 'pr', 'stage_setup() { :; }\n')
-    write(
-      'sandbox/git/pr.ts',
-      'export default { arms: { default: () => {} } }\n',
-    )
+  it('should ignore a stray bash file beside the scenarios', () => {
+    scenario('git', 'pr', ['default'])
+    write('sandbox/git/leftover.sh', 'stage_setup() { :; }\n')
 
     const { arms, errors } = enumerateArms(root, [])
 
-    expect([arms, errors]).toEqual([[], ['git:pr exists as both .sh and .ts']])
+    expect([arms.map((a) => a.command), errors]).toEqual([['pr'], []])
   })
 
   it('should narrow to one arm when the target names it', () => {
-    scenario('claude', 'docs', 'select_or_route_scenario "Q" "a" "b"\n')
+    scenario('claude', 'docs', ['a', 'b'])
 
     const { arms } = enumerateArms(root, ['claude:docs/b'])
 
@@ -164,7 +147,7 @@ describe('enumerateArms', () => {
   })
 
   it('should report a declared arm the enumeration lacks', () => {
-    scenario('claude', 'docs', 'select_or_route_scenario "Q" "a"\n')
+    scenario('claude', 'docs', ['a'])
     write('sandbox/fixtures/claude/docs/ghost/expect.toml', "paths = ['x']\n")
 
     const { errors } = enumerateArms(root, [])

@@ -118,7 +118,7 @@ export default scenario({
         'The without arm is a hand run against a scratch plugin dir lacking',
       )
       ctx.log.info(
-        'skills/test-craft, since run.sh hardcodes --plugin-dir claude, and it',
+        'skills/test-craft, since canon sandbox run hardcodes --plugin-dir claude, and it',
       )
       ctx.log.info(
         'is scored by reading the files it wrote, not by this check.',

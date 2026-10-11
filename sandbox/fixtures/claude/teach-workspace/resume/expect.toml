@@ -15,7 +15,7 @@
 # prompt this arm now carries. 40 is that count with room for a reply that runs
 # longer without the skill having changed.
 #
-# Run this arm with `CANON_SKILL_TEST_MAX_TURNS=60`. `sandbox/run.sh`
+# Run this arm with `CANON_SKILL_TEST_MAX_TURNS=60`. `canon sandbox run`
 # states the rule at its own `MAX_TURNS` default: this key is a ceiling asserted
 # after the run rather than a cap enforced during it, so a declaration cannot
 # raise what the arm runs under, and an arm needing more than the cap fails the

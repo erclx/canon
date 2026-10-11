@@ -12,17 +12,12 @@ Owns the scenarios that provision isolated project states for testing scripts, c
 ## Layout
 
 - `sandbox/` owns the scenario scripts, one folder per category
-- `sandbox/<category>/` owns one file per command, `.ts` or `.sh`, each holding one or more named scenarios
+- `sandbox/<category>/` owns one `.ts` file per command, each holding one or more named scenarios
 - `sandbox/fixtures/` owns file content staged into the sandbox and each arm's `expect.toml`
-- `src/sandbox/` owns the provisioning order, the scenario contract and its loader in `scenario.ts`, the hook contract, the expectation checker, the coverage report, and the skill census
-- `scripts/sandbox-hook.sh` owns the bash entry a `.sh` scenario's hooks run through, kept until the last bash scenario is ported
+- `src/sandbox/` owns the provisioning order, the scenario contract and its loader in `scenario.ts`, the expectation checker, the coverage report, and the skill census
 - `$XDG_STATE_HOME/canon/sandbox-<run-id>` owns the provisioned project state, outside the repository and unique to the run that provisioned it
 
-Run `canon sandbox` with no args for the live catalog. Categories and scenarios enumerate dynamically, so nothing here changes when one is added. `fixtures/` sits beside the categories but holds no scenarios, and every listing filters it out through `listCategories` in `src/sandbox/scenario.ts`. Any other subdirectory added there reads as a category, so a helper the harness needs on disk goes to `scripts/lib/` or `src/sandbox/`.
-
-### Two scenario forms
-
-A scenario is written in TypeScript from 2026-10-04, and the bash form takes no new scenarios after that date. The git, dev, docs, infra, and tooling categories are ported, along with every scenario under `sandbox/claude/`, the craft and drafting ones and the workflow ones. `canon/context/sandbox/authoring.md` carries how to write one and why the two coexist.
+Run `canon sandbox` with no args for the live catalog. Categories and scenarios enumerate dynamically, so nothing here changes when one is added. `fixtures/` sits beside the categories but holds no scenarios, and every listing filters it out through `listCategories` in `src/sandbox/scenario.ts`. Any other subdirectory added there reads as a category, so a helper the harness needs on disk goes to `src/sandbox/`.
 
 ## Decisions
 
@@ -30,8 +25,8 @@ A scenario is written in TypeScript from 2026-10-04, and the bash form takes no 
 
 - The scenario tree sits at `sandbox/` rather than under `scripts/`, the folder for a project's chores. The harness carries its own authoring contract, census, and expectation scoring, and it held seven eighths of the shell under `scripts/` before it moved, so the chores folder was mostly one domain that was not a chore.
 - Staying under `scripts/` was the alternative, and it ties the folder to the language. The scenarios are meant to be rebuilt in TypeScript in this same folder, which a role name survives and a language-shaped home does not.
-- The provisioning order lives in `src/sandbox/provision.ts`, and the bash dispatcher it replaced is gone. The headless runner moved to `src/sandbox/headless/` with its dispatch bound, and `sandbox/run.sh` stays as a wrapper over `canon sandbox run` until the retire slice retargets its citations. `scripts/lib/sandbox-path.sh` keeps the three functions `scripts/sandbox-hook.sh` and `scripts/lib/ui.sh` still call.
-- Four gates walked `scripts/` by name, being `check:shell`, the `shfmt` roots in `format` and `check:format`, and `scripts/core/check-color-source.sh`. Each names `sandbox` as a root of its own now, and the color check fails when either root is missing rather than reporting a tree it never walked.
+- The provisioning order lives in `src/sandbox/provision.ts`, and the bash dispatcher it replaced is gone. The headless runner lives in `src/sandbox/headless/` with its dispatch bound, and `canon sandbox run` is the only spelling that drives it.
+- Four gates walked `scripts/` by name, being `check:shell`, the `shfmt` roots in `format` and `check:format`, and `scripts/core/check-color-source.sh`. Each named `sandbox` as a root of its own until the harness retired its last shell file, which dropped it from `check:shell` and the `shfmt` roots. The color check still walks both roots and fails when either is missing rather than reporting a tree it never walked.
 
 ### Scenario defaults and the reset contract
 

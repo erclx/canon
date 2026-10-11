@@ -9,7 +9,7 @@ description: Where a sandbox tree lives and the guard on it, the per-run id, and
 
 ### The sandbox path
 
-The sandbox tree lives at `$XDG_STATE_HOME/canon/sandbox-<run-id>`, defaulting to `~/.local/state/canon/sandbox-<run-id>`, and `CANON_SANDBOX_DIR` overrides the whole path. Two definitions hold it, `resolve_sandbox_dir` in `scripts/lib/sandbox-path.sh` and `sandboxTree` in `src/sandbox/tree.ts`, and the exec boundary is why there are two rather than one.
+The sandbox tree lives at `$XDG_STATE_HOME/canon/sandbox-<run-id>`, defaulting to `~/.local/state/canon/sandbox-<run-id>`, and `CANON_SANDBOX_DIR` overrides the whole path. `sandboxTree` in `src/sandbox/tree.ts` holds it.
 
 The tree sits outside the repository because a tree inside the worktree puts the toolkit's own `CLAUDE.md` on the ancestor chain of the session `canon sandbox run` spawns, beside the seeded copy the scenario installed. Both carry the rule sending shared session scratch to the main worktree root, with nothing to decide which root wins. With the toolkit off that chain, a skill writing shared session scratch lands inside the sandbox, where the arm's `write_scope` asserts over it.
 

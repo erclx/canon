@@ -1,7 +1,7 @@
 # What a correct `/canon:target-setup indexes` run leaves behind against a bare folder of
 # five raw markdown files with no frontmatter and no index.md. Read by
 # `canon sandbox check`, which only asserts against what a run left behind
-# and drives nothing itself. `sandbox/run.sh infra:indexes
+# and drives nothing itself. `canon sandbox run infra:indexes
 # "/canon:target-setup indexes" bootstrap` drives this arm headlessly the same way
 # it drives any `claude:target-setup` arm, category is not what gates it.
 #

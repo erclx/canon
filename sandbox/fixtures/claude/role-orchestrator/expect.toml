@@ -12,7 +12,7 @@
 # that table in TOML, so an array written at the bottom parses clean and asserts
 # nothing.
 
-# The default cap, which is what `sandbox/run.sh` runs under. A passing
+# The default cap, which is what `canon sandbox run` runs under. A passing
 # run cost 4 turns, which is a floor on what a correct run costs rather than a
 # bound on it, since a proposal-only skill pays for however it reads the tree and
 # one sample of a varying cost lowers nothing. The routing arms beside this one

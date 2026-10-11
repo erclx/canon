@@ -8,7 +8,7 @@ subtitle: Scenarios that provision isolated project states, the run and coverage
 Scenarios that provision isolated project states, the run and coverage surfaces, and the authoring contract. Start with overview.
 
 - [Assertions](assertions.md): The expect.toml declaration keys, the checker and its verdicts, and how to write an assertion a wrong run can fail
-- [Authoring](authoring.md): Scenario file shape, the three hooks, the provisioning order, and the disposable GitHub remote
+- [Authoring](authoring.md): Scenario file shape, the provisioning order, and the disposable GitHub remote
 - [Coverage](coverage/index.md): The coverage report, the blast-radius rule for which skills earn an arm, what each arm proves, and the per-skill census. Start with overview.
 - [Fixtures](fixtures.md): Fixture tree layout, the helpers that stage it, the record root a tree spells, and the traps in keeping a staged tree honest
 - [Headless](headless.md): Driving a skill through canon sandbox run, composing the prompt, the run envelope and record, and the turn and cost budget

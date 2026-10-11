@@ -66,9 +66,8 @@ export function installedRuleNames(
 }
 
 /**
- * Mirrors `rule_subdir` in `scripts/lib/gov.sh`, which stays in bash for the
- * sandbox loops. A rule sitting directly under `governance/rules/` has no
- * subdirectory and installs flat.
+ * A rule sitting directly under `governance/rules/` has no subdirectory and
+ * installs flat.
  */
 export function ruleSubdir(src: string, rulesRoot: string): string {
   const subdir = dirname(relative(rulesRoot, src))

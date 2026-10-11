@@ -38,7 +38,7 @@ write_scope = [".claude/**", ".canon/tmp/**"]
 #
 # The ceiling sits at twice the measured run rather than at it, because one sample
 # cannot separate the skill's cost from this prompt's. It is also well under the
-# harness budget in `sandbox/run.sh`, which is the real cap: a declaration
+# harness budget in `canon sandbox run`, which is the real cap: a declaration
 # here is asserted after the run and cannot raise what the run executes under, so
 # a ceiling at that budget asserts nothing a truncated run would fail.
 max_turns = 12

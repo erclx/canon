@@ -22,7 +22,6 @@ import {
   listCategories,
   listScenarioFiles,
   loadScenario,
-  type ScenarioKind,
 } from '@/sandbox/scenario'
 import { createStubRemote, readStubManifest } from '@/sandbox/stub-remote'
 
@@ -153,28 +152,6 @@ export function armKey(arm: Arm): string {
   return arm.arm === undefined ? scenario : `${scenario}/${arm.arm}`
 }
 
-/**
- * Reads the quoted arguments of `select_or_route_scenario`, joining a call that
- * continues across backslash-newline pairs. The first argument is the prompt and
- * the rest are arm names. A call this cannot see returns no arms, which the
- * coverage cross-check in `enumerateArms` turns into an error rather than a
- * smaller list.
- */
-export function parseArmNames(source: string): string[] {
-  const start = source.search(/select_or_route_scenario\b/)
-  if (start === -1) return []
-
-  const call = source
-    .slice(start)
-    .replace(/\\\n/g, ' ')
-    .split('\n')[0]
-    ?.replace(/^select_or_route_scenario/, '')
-
-  return [...(call ?? '').matchAll(/"([^"]*)"/g)]
-    .map((match) => match[1] ?? '')
-    .slice(1)
-}
-
 function matchesTarget(
   category: string,
   command: string,
@@ -199,25 +176,14 @@ function matchesArm(arm: Arm, targets: readonly string[]): boolean {
 }
 
 /**
- * Reads a scenario's arm names and anchor flag: off a bash file's source, and
- * off a TypeScript module's own keys, which is what its stage routes on.
+ * Reads a scenario's arm names and anchor flag off its module's own keys, which
+ * is what its stage routes on.
  */
 function readArms(
   file: string,
-  kind: ScenarioKind,
 ):
   | { ok: true; anchor: boolean; names: string[] }
   | { ok: false; error: string } {
-  if (kind === 'sh') {
-    const source = readFileSync(file, 'utf8')
-
-    return {
-      ok: true,
-      anchor: /^use_anchor\s*\(\)/m.test(source),
-      names: parseArmNames(source),
-    }
-  }
-
   try {
     const definition = loadScenario(file)
 
@@ -250,17 +216,12 @@ export function enumerateArms(
   const coverage = collectCoverage(root)
 
   for (const category of listCategories(sandboxDir)) {
-    const { scenarios, ambiguous } = listScenarioFiles(
-      join(sandboxDir, category),
-    )
-    for (const command of ambiguous)
-      if (matchesTarget(category, command, targets))
-        errors.push(`${category}:${command} exists as both .sh and .ts`)
+    const { scenarios } = listScenarioFiles(join(sandboxDir, category))
 
-    for (const { command, file, kind } of scenarios) {
+    for (const { command, file } of scenarios) {
       if (!matchesTarget(category, command, targets)) continue
 
-      const declared = readArms(file, kind)
+      const declared = readArms(file)
       if (!declared.ok) {
         errors.push(`${category}:${command} did not load: ${declared.error}`)
         continue

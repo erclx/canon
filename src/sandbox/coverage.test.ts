@@ -17,7 +17,10 @@ function write(path: string, body: string): void {
 }
 
 function scenario(category: string, command: string): void {
-  write(`sandbox/${category}/${command}.sh`, 'stage_setup() { :; }\n')
+  write(
+    `sandbox/${category}/${command}.ts`,
+    'export default { arms: { default: () => {} } }\n',
+  )
 }
 
 function declaration(category: string, command: string, arm: string): void {
