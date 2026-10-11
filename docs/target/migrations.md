@@ -87,6 +87,12 @@ Run the second line once per stack the project holds, since the two hooks above 
 
 The order carries the reason. A sync replaces each toolkit-owned copy with one already carrying the new names, and the sweep afterwards reaches the prose the project wrote itself. Sweeping first rewrites those installed files in place, which moves them off the hash the install recorded, so the next sync reads them as edited by the project and leaves them alone.
 
+## Rename the pull request template headings, once
+
+The pull request section headings moved to sentence case, so the template seeds `## Key changes` and `## Technical context`. `canon labels scan` now fails a body whose level-two heading is outside the closed list, and it compares case exactly, so a body written under the old `## Key Changes` heading fails the pull request gate.
+
+A project scaffolded earlier holds the old template at `.github/pull_request_template.md`, and a sync writes only a seed a target lacks. Rename the two headings in that file by hand, or delete it and run `canon tooling sync base . --write` to take the new seed. Do it ahead of the first pull request after `canon upgrade`. `canon pr key-changes` reads either casing, so a body already open keeps parsing, and only the scan needs the rename on its next edit.
+
 ## Move the surfaces off `.claude/`, once
 
 Tracked surfaces moved out of `.claude/` and into a root of their own. `context/`, `wireframes/`, the three loose documents (`ARCHITECTURE.md`, `REQUIREMENTS.md`, `DESIGN.md`), and the install stamp folder, respelled `canon/config/`, now live under `canon/`, and `rules/`, `skills/`, `hooks/`, and `settings.json` stay put since Claude Code reads those by path.

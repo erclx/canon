@@ -34,7 +34,7 @@ A verdict also goes stale without saying so. A push after the pass changes what 
 
 ## Must not
 
-- Read the diff, the plan, the task, or the description's Summary and Technical Context. A pass that has heard the author's argument drives towards what it expects.
+- Read the diff, the plan, the task, or the description's Summary and Technical context. A pass that has heard the author's argument drives towards what it expects.
 - Judge a box marked as taste
 - Check out, build, or serve the head, or download a browser mid-pass
 - Tick a taste box, a failed box, or a box at a head it did not drive, or tick any box other than through `canon pr tick`

@@ -5,7 +5,7 @@ description: The review lenses that read the pull request body rather than the d
 
 # Lenses
 
-`review-pr` Step 3 reads the diff through the ordinary lenses and reads three sections of the pull request body through lenses of their own. Each lens draws its bound at one section and reads neither the sections around it nor the rest of the body, since the Summary and Technical Context carry the author's argument for the change, and a reviewing pass reading that argument while judging the change is most of what an independent vantage exists to avoid.
+`review-pr` Step 3 reads the diff through the ordinary lenses and reads three sections of the pull request body through lenses of their own. Each lens draws its bound at one section and reads neither the sections around it nor the rest of the body, since the Summary and Technical context carry the author's argument for the change, and a reviewing pass reading that argument while judging the change is most of what an independent vantage exists to avoid.
 
 ## The Testing question
 
@@ -39,9 +39,9 @@ A pass whose bullets are all answered takes the closed heading with the block st
 
 ## The key-changes claim check
 
-Step 3 also checks `## Key Changes`, through `references/key-changes.md`: `canon pr key-changes` compares the paths that section claims against the pull request's own changed-file list, and the step files a claim the diff does not carry under the same `**PR body**` block the stale ticked box takes, since what both corrupt is the merge record rather than a file in the diff.
+Step 3 also checks `## Key changes`, through `references/key-changes.md`: `canon pr key-changes` compares the paths that section claims against the pull request's own changed-file list, and the step files a claim the diff does not carry under the same `**PR body**` block the stale ticked box takes, since what both corrupt is the merge record rather than a file in the diff.
 
-The section is read alone, since `## Technical Context` names files a branch never touched by design. A bullet's claim region ends at its first comma, since a clause past the comma is usually naming context rather than the edit itself, and reading the whole bullet as a claim pulls those context mentions in as false claimed-but-untouched paths.
+The section is read alone, since `## Technical context` names files a branch never touched by design. A bullet's claim region ends at its first comma, since a clause past the comma is usually naming context rather than the edit itself, and reading the whole bullet as a claim pulls those context mentions in as false claimed-but-untouched paths.
 
 Only the claimed-but-untouched direction is graded. A changed file no bullet names is reported without a severity, since that class covers a real omission and equally a generated asset or a regenerated index, and grading it would fire on nearly every branch. A path written partially, or one past its bullet's first comma, can credit a changed file and never accuse one, since nothing separates a path written short from a path written wrong or a second claim from a file cited for context.
 

@@ -3,12 +3,12 @@ import { findBacktickSpans } from '@/markdown/backticks'
 /**
  * The heading whose bullets state what a branch changed.
  *
- * Read alone, and never widened to a sibling section. `## Technical Context`
+ * Read alone, and never widened to a sibling section. `## Technical context`
  * legitimately names files a branch never touched, such as an install stamp
  * inside a target, so a reader that took the whole body would manufacture a
  * finding out of every argument the author made for the change.
  */
-export const KEY_CHANGES = 'Key Changes'
+export const KEY_CHANGES = 'Key changes'
 
 /** What one bullet claimed, kept with its bullet so a finding can quote it. */
 export interface PathClaim {
@@ -86,7 +86,7 @@ const BARE_LINE = /^:\d+(?:-\d+)?$/
  * `canon markdown audit .claude/rules --json` carries a slash and names no file.
  * Angle brackets answer a second, since `.canon/plans/feature-<slug>.md`
  * describes a shape rather than naming a file. A glob and a caret describe a
- * shape too, `^src/` being a grep pattern one body spelled in Key Changes, and
+ * shape too, `^src/` being a grep pattern one body spelled in Key changes, and
  * a leading anchor names something outside this repository.
  *
  * Deliberately not shared with `classifySpan` in `@/gov/citations`, which asks
@@ -307,7 +307,7 @@ function resolveSpan(span: string): ResolvedSpan | undefined {
 }
 
 /**
- * Every path the `## Key Changes` section claims a change to.
+ * Every path the `## Key changes` section claims a change to.
  *
  * `roots` names the entries the tree holds at its top level, which is what
  * separates a whole path from one written partially. It is passed in rather

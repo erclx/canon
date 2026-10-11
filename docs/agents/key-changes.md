@@ -1,11 +1,11 @@
 ---
-title: Key Changes bijection
-description: Comparing the files a pull request body's Key Changes names against its own diff, the two directions and the split inside each that decides what is worth raising, the span rules the extractor was measured into, and the three refusals that separate a clean pass from a read that produced nothing
+title: Key changes bijection
+description: Comparing the files a pull request body's Key changes names against its own diff, the two directions and the split inside each that decides what is worth raising, the span rules the extractor was measured into, and the three refusals that separate a clean pass from a read that produced nothing
 ---
 
-# Key Changes bijection
+# Key changes bijection
 
-`canon pr key-changes` reads the `## Key Changes` section of a pull request body, lifts the paths its bullets claim, and compares that set against the files the pull request actually changed. This repository squash-merges, so the body becomes the commit message and the record on the trunk once the branch is gone.
+`canon pr key-changes` reads the `## Key changes` section of a pull request body, lifts the paths its bullets claim, and compares that set against the files the pull request actually changed. This repository squash-merges, so the body becomes the commit message and the record on the trunk once the branch is gone.
 
 ```bash
 canon pr key-changes
@@ -45,7 +45,7 @@ A generated asset and a regenerated index belong in the incidental class and are
 
 ## What counts as a claim
 
-Only `## Key Changes` is read. `## Technical Context` legitimately names files a branch never touched, such as an install stamp inside a target, so widening the read manufactures a finding out of every argument an author made for the change.
+Only `## Key changes` is read. `## Technical context` legitimately names files a branch never touched, such as an install stamp inside a target, so widening the read manufactures a finding out of every argument an author made for the change.
 
 Inside the section, every backticked span in a bullet is read, and the bullet's first comma outside a span divides the ones that can accuse from the ones that can only credit. That one lever was chosen by measurement. Over the 23 merged pull requests in this repository carrying the section, reading whole bullets reported 16 paths as claimed-but-untouched and every one was a file the body named for context. Cutting at the comma left 110 claims of the original 149 and took the false reports to 2. A list of sixteen clause-opening words tried beside it removed nothing the comma had not already removed, because this corpus punctuates every one of them.
 

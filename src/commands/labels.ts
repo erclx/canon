@@ -4,8 +4,11 @@ import { type LabelAuditRefusal, auditLabels } from '@/labels/audit'
 import { resolveScanInput } from '@/labels/event'
 import { checkTitleFormat, type TitleFormatIssue } from '@/labels/format'
 import { MAP_REL } from '@/labels/map'
-import { scanPhaseLabels } from '@/labels/phase'
+import { isReleasePullRequest, scanPhaseLabels } from '@/labels/phase'
+import { checkSections } from '@/labels/sections'
 import { scanTitleSpelling } from '@/labels/spelling'
+import { BAN_SETS } from '@/markdown/bans'
+import { bodyLines, scanBans } from '@/markdown/scan'
 import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
 
 interface AuditOptions {
@@ -159,11 +162,19 @@ export function register(program: Command): void {
         'or from a bare --body or --body-file invocation, skips this check',
         'rather than grading an empty string.',
         '',
+        'It grades the body of an ordinary pull request against the closed',
+        'section list: a level-two heading outside it, or a missing',
+        '## Summary or ## Key changes, fails. A review, a release-please body,',
+        'and a scan carrying no title skip this check. It also fails a banned',
+        'character, an em dash or a semicolon, in the title or body of a pull',
+        'request or a review, outside a code span or a link.',
+        '',
         'Exit codes:',
-        '  0  none of the five found',
+        '  0  none of the seven found',
         '  1  refused, with the reason on stderr or in the JSON record',
         '  2  the title or body carries a phase label, a board identifier, a',
-        '     session link, a title word no dictionary holds, or a title',
+        '     session link, a banned character, a heading outside the closed',
+        '     list or a required one missing, a title word no dictionary holds, or a title',
         "     breaking claude/skills/git-pr/references/pr.md's format, casing, or length",
         '',
         'Examples:',
@@ -363,6 +374,74 @@ async function runScan(opts: ScanOptions): Promise<number> {
 
   const titleFormatIssues = titleFormat?.issues ?? []
 
+  // A review carries its own headings, a release-please body opens on a
+  // version link, and a scan with no title is a reply or a review body rather
+  // than a pull request description, so none of the three has the closed list
+  // to grade against.
+  const sectionsChecked =
+    resolved.source === 'pull-request' &&
+    resolved.title !== '' &&
+    !isReleasePullRequest(resolved)
+  const sections = sectionsChecked
+    ? checkSections(resolved.body)
+    : { outside: [], missing: [] }
+
+  logStep(
+    !sectionsChecked
+      ? 'Sections not checked'
+      : sections.outside.length === 0 && sections.missing.length === 0
+        ? 'Clean'
+        : 'Section issue found',
+  )
+  if (!sectionsChecked) {
+    logInfo(
+      'only an ordinary pull request body is graded against the closed section list',
+    )
+  } else if (sections.outside.length === 0 && sections.missing.length === 0) {
+    logInfo(
+      'every heading is in the closed list and the required pair is there',
+    )
+  } else {
+    if (sections.outside.length > 0) {
+      logWarn(
+        `${plural(sections.outside.length, 'heading')} outside the closed list in the pull request standard. Rename or drop each.`,
+      )
+      for (const heading of sections.outside) logWarn(heading)
+    }
+    if (sections.missing.length > 0) {
+      logWarn(
+        `${plural(sections.missing.length, 'required heading')} missing from the body.`,
+      )
+      for (const heading of sections.missing) logWarn(heading)
+    }
+  }
+
+  const banFindings = [
+    ...scanBans(
+      [{ number: 1, text: resolved.title, fenced: false }],
+      BAN_SETS,
+    ).map((finding) => ({ ...finding, where: 'title' })),
+    ...scanBans(bodyLines(resolved.body), BAN_SETS).map((finding) => ({
+      ...finding,
+      where: 'body',
+    })),
+  ]
+  const bannedCharacters = [
+    ...new Set(banFindings.map((finding) => finding.term)),
+  ]
+
+  logStep(banFindings.length === 0 ? 'Clean' : 'Banned character found')
+  if (banFindings.length === 0) {
+    logInfo('no banned character outside a code span or a link')
+  } else {
+    logWarn(
+      `${plural(banFindings.length, 'banned character')} in the title or body. Rewrite the sentence rather than swapping the character.`,
+    )
+    for (const finding of banFindings) {
+      logWarn(`${finding.where} line ${finding.line}: ${finding.term}`)
+    }
+  }
+
   logStep(
     titleFormat === undefined
       ? 'Title format not checked'
@@ -396,6 +475,8 @@ async function runScan(opts: ScanOptions): Promise<number> {
         unspelledWords,
         spellingChecked,
         titleFormatIssues,
+        sections: { checked: sectionsChecked, ...sections },
+        bannedCharacters,
       })}\n`,
     )
   }
@@ -404,7 +485,10 @@ async function runScan(opts: ScanOptions): Promise<number> {
     result.boardReferences.length === 0 &&
     result.sessionLinks.length === 0 &&
     unspelledWords.length === 0 &&
-    titleFormatIssues.length === 0
+    titleFormatIssues.length === 0 &&
+    sections.outside.length === 0 &&
+    sections.missing.length === 0 &&
+    banFindings.length === 0
     ? 0
     : 2
 }

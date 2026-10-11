@@ -29,7 +29,7 @@ Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and n
 - `.lintstagedrc`: the glob map below.
 - `.prettierignore`: created empty. Projects add their own entries.
 - `.github/workflows/verify.yml`: runs on pull requests targeting `main` and on `workflow_dispatch`. A project with more than one language root adds its own jobs here.
-- `.github/pull_request_template.md`: `## Summary`, `## Key Changes`, `## Technical Context`, `## Testing`. A project adds the checklist lines its own review needs.
+- `.github/pull_request_template.md`: `## Summary`, `## Key changes`, `## Technical context`, `## Testing`. A project adds the checklist lines its own review needs.
 - `canon/context/`: extend the `ci` and `development` entries with project-specific commands, workflows, or deploy steps. Canonical rationale stays in this reference.
 
 ## Tool pairing

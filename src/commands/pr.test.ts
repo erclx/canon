@@ -53,7 +53,7 @@ describe('canon pr key-changes --body resolution', () => {
   })
 
   it('should resolve --body against the working directory, not --root', async () => {
-    await writeFile(join(cwdDir, 'body.md'), '## Key Changes\n')
+    await writeFile(join(cwdDir, 'body.md'), '## Key changes\n')
 
     const { reason } = await runKeyChanges(cwdDir, [
       '--body',
@@ -66,7 +66,7 @@ describe('canon pr key-changes --body resolution', () => {
   })
 
   it('should not resolve --body against --root', async () => {
-    await writeFile(join(rootDir, 'body.md'), '## Key Changes\n')
+    await writeFile(join(rootDir, 'body.md'), '## Key changes\n')
 
     const { reason } = await runKeyChanges(cwdDir, [
       '--body',
@@ -304,7 +304,7 @@ describe('canon pr key-changes credits a rename source and a .gitignore addition
     writeFileSync(
       join(repoRoot, 'body.md'),
       [
-        '## Key Changes',
+        '## Key changes',
         '',
         '- Move `README.md` to `GUIDE.md`.',
         '- Ignore `web/screenshots/` and `web/evidence/`.',
@@ -1816,7 +1816,7 @@ describe('canon pr reads through REST alone', () => {
   function pullRow(overrides: Record<string, unknown> = {}) {
     return {
       number: 7,
-      body: '## Key Changes\n\n- Add `src/a.ts`.\n',
+      body: '## Key changes\n\n- Add `src/a.ts`.\n',
       head: { ref: 'feat/x', sha: tip },
       base: { ref: 'main' },
       mergeable_state: 'clean',

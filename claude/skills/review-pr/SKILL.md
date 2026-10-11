@@ -83,11 +83,11 @@ Test every unchecked box against the testing discipline in `${CLAUDE_SKILL_DIR}/
 
 Test every ticked box too, bounded to one naming a file or a command. Confirm what it names still exists at `<headRefOid>`, `git show <headRefOid>:<path>` for a file or `git grep <command> <headRefOid>` for a command, rather than re-running what it claims. A box naming neither stays untested, since nothing here can confirm a claim carrying no artifact. A box ticked before a later commit removed or replaced what it names is a `should-fix` finding on the body itself, filed under a `**PR body**` block ahead of the file blocks, since what it corrupts is the merge record rather than a file in the diff.
 
-Then test what `## Key Changes` claims against the diff it describes. Read `${CLAUDE_SKILL_DIR}/references/key-changes.md` for the verb that compares them, which field of its record becomes a finding, and which ones raise nothing.
+Then test what `## Key changes` claims against the diff it describes. Read `${CLAUDE_SKILL_DIR}/references/key-changes.md` for the verb that compares them, which field of its record becomes a finding, and which ones raise nothing.
 
 Ask rather than grade. Whether a human is genuinely required is a reading the branch author may hold a reason this session cannot see, so the question carries no severity and enters no count. What it does carry is the heading and the dispatch, on the rule the opening states, because a question the author never receives corrects nothing and the author is the only party who can answer it. Answering it closes it, and the answer may be that the requirement holds.
 
-Read `## For the reviewer` the same way, bounded to the bullets under that heading rather than the Summary or the Technical Context around it. Those two carry the author's argument for the change, and reading them while judging it is most of what an independent pass exists to avoid, so the read stops at the section itself.
+Read `## For the reviewer` the same way, bounded to the bullets under that heading rather than the Summary or the Technical context around it. Those two carry the author's argument for the change, and reading them while judging it is most of what an independent pass exists to avoid, so the read stops at the section itself.
 
 Answer each bullet in the body, on the same terms as a Testing question: no severity, no count. A request nobody can answer stays owed under the heading and dispatch the opening states, keeping the thread open exactly as an unanswered Testing box does. One the pass does answer carries no further weight, since the answer is discharged in the same comment that carries it.
 

@@ -2,12 +2,12 @@
 
 <Action Verb> <Direct Object> to <Result>.
 
-## Key Changes
+## Key changes
 
 - <Verb> <specific component/file/function> (<reason if non-obvious>)
 - <Verb> <specific component/file/function>
 
-<!-- ## Technical Context (optional, omit for docs/config/trivial changes) -->
+<!-- ## Technical context (optional, omit for docs/config/trivial changes) -->
 <!-- - <Why this approach was taken, not what changed> -->
 
 ## Testing

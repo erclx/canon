@@ -24,7 +24,7 @@ An unanswered bullet is owed the same way an unanswered Testing box is, so a pas
 ```markdown
 **For the reviewer**
 
-- Confirm the 401 and 403 split reads correctly for the public API. Confirmed — `AuthService.authenticate()` returns 401 for an expired token and 403 for a missing scope, and both paths are covered under `## Testing`.
+- Confirm the 401 and 403 split reads correctly for the public API. Confirmed: `AuthService.authenticate()` returns 401 for an expired token and 403 for a missing scope, and both paths are covered under `## Testing`.
 ```
 
 A pass carrying nothing at all takes `## Review closed` and a short body, with the footer line included either way. On a first pass, post `✅ No findings. Reviewed against project docs and the board.` On a later pass, post `✅ Prior findings addressed. Re-reviewed <short-sha>, N commits since the prior pass.`

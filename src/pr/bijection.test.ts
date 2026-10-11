@@ -22,11 +22,11 @@ function read(body: string, changed: readonly string[]) {
 }
 
 function keyChanges(...bullets: string[]): string {
-  return ['## Key Changes', '', ...bullets].join('\n')
+  return ['## Key changes', '', ...bullets].join('\n')
 }
 
 describe('compareKeyChanges', () => {
-  it('should refuse a body carrying no Key Changes section', () => {
+  it('should refuse a body carrying no Key changes section', () => {
     expect(read('## Summary\n\nProse.\n', ['src/pr/paths.ts'])).toEqual({
       kind: 'refused',
       reason: 'no-section',

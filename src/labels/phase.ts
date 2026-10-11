@@ -186,7 +186,7 @@ const RELEASE_TITLE_PREFIX = 'chore(main): release '
  * phase label past this check. Together they name release-please's own act of
  * opening the pull request, which nothing else on the remote can perform.
  */
-function isReleasePullRequest(input: PhaseScanInput): boolean {
+export function isReleasePullRequest(input: PhaseScanInput): boolean {
   return (
     input.headRefName.startsWith(RELEASE_HEAD_PREFIX) &&
     input.title.startsWith(RELEASE_TITLE_PREFIX)
