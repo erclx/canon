@@ -49,7 +49,7 @@ A rule's folder names who the rule serves: `code/` for a project writing code, `
 
 Grouping along the repository's three roots, `tooling/`, `claude/`, and `canon/`, was the alternative, and it left two groups with no honest home: the generic code rules are not tooling, and the prose rules are not about Claude.
 
-An always-loaded rule still reaches a target through `canon gov sync` rather than through a seeded root file nothing refreshes, since every group `base` names is taken whole. A `CLAUDE.md` bullet carries the same session-start priority, so the group is the only thing a move from a seed changes. The no-choice code rules retired rather than moving, and `code/000-code.md` keeps only the bullets a model does not follow by default.
+An always-loaded rule still reaches a target through `canon gov sync` rather than through a seeded root file nothing refreshes, since every group `base` names is taken whole. A `CLAUDE.md` bullet carries the same session-start priority, so the group is the only thing a move from a seed changes. The no-choice code rules retired rather than moving, and `code/000-code.md` and `code/010-testing.md` keep only the pointers to the skills that carry the depth, so the floors load on demand rather than every session.
 
 ### The generator retired when no standard carried `paths:`
 
@@ -85,7 +85,7 @@ paths:
 
 Always-on rules emit no `paths:` key. The Cursor schema of `globs`, `alwaysApply`, and `priority` is not consumed and must not appear in source.
 
-Claude Code discovers `.claude/rules/*.md` recursively at session start. A rule without `paths:` always applies, with the same priority as `CLAUDE.md`, and a rule with `paths:` applies when Claude reads a matching file. The source page linked from `wiki/claude/memory.md` carries the loading-time details. Recursive discovery is also why a target still holding the flat `.claude/rules/<subdir>/` layout loads two copies of a rule, which `canon/context/governance/install.md` covers.
+Claude Code discovers `.claude/rules/*.md` recursively at session start. A rule without `paths:` always applies, with the same priority as `CLAUDE.md`, and a rule with `paths:` applies when Claude reads or writes a matching file, in a linked worktree as in the main one, and a session creating the first matching file gets it only after that write lands. The create-rule reference carries the conclusion and the recipe to re-measure it. The source page linked from `wiki/claude/memory.md` carries the loading-time details. Recursive discovery is also why a target still holding the flat `.claude/rules/<subdir>/` layout loads two copies of a rule, which `canon/context/governance/install.md` covers.
 
 ## Adding a rule
 

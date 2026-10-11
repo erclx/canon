@@ -15,7 +15,7 @@ The failure is measured on a real target. A single-page portfolio site carried 2
 
 A stated rule is also one a session can talk itself out of. Each test in that suite sat where it did for a reason that sounded fine at the time, such as the end to end spec already being open or a pause quieting a run that flaked under load, and nothing in front of the session answered the reason.
 
-Moving the guidance into a path-scoped rule does not reach the session that needs it. A path-scoped rule loads when a session reads a matching file and not when it creates one, measured in three headless runs, so a rule scoped to test files is silent on the first test of every feature.
+Moving the guidance into a path-scoped rule does not reach the session that needs it. A path-scoped rule loads when a session reads or writes a matching file, and it is absent from the write that creates the first one, measured in three headless runs, so a rule scoped to test files is silent on the first test of every feature.
 
 ## Must
 
@@ -23,6 +23,7 @@ Moving the guidance into a path-scoped rule does not reach the session that need
 - Open every test with the question of which production change makes it fail and whether that change is a bug or a decision, since a test with no answer proves nothing
 - State the end to end budget in words: journeys and what only a real browser renders, never a state a component test reaches
 - Carry a final filter the session runs over its own tests, each item a shape it can check: mirror assertion, change detector, assertion on a mock, framework behavior, fixed pause, and the mutation check
+- Own the structure floors every test carries, being arrange, act, assert, one behavior per test, no branching or loops in a body, no testing of private functions or internal state, no coverage targets, nesting at most two levels deep, independent tests that clean up, factories for test data, every async call awaited, and no snapshot verification. The testing rule only points here, so a later trim keeps them.
 - Hold in the body what every test decision pays for, and defer each layer's specifics to a reference loaded only when a test at that layer is being written
 - Promise a middle layer for behavior a simulated DOM cannot render, naming the real-browser component runners, so a static site is not left choosing between a simulated DOM that computes no layout and a whole-site run
 - Repeat in the end to end reference the two floors a session writing its first spec never loads through the path-scoped rule, being the `scrollend` settle and motion reduced by default
@@ -34,7 +35,6 @@ Moving the guidance into a path-scoped rule does not reach the session that need
 
 - Name a framework or runner in the body. Runner specifics live in the references and in the language testing rules, so the body holds across stacks.
 - Carry a numeric mix across layers. A codebase-wide ratio is a target a session writing one test cannot act on.
-- Restate the structure floors the testing rule already carries, such as arrange, act, assert, one behavior per test, isolation, and no snapshots
 - Restate the settle, guard, and run-scope rules the end to end rules carry, beyond the two floors named above
 - Run the red, green, refactor procedure or decide its order, which `test-first` owns
 - Import an external skill's tone, such as a law stated as absolute, or an excuse row rebutting an objection no session has raised
@@ -49,7 +49,6 @@ Moving the guidance into a path-scoped rule does not reach the session that need
 
 - The red, green, refactor loop and the order it runs in: `test-first`, which loads this skill at its first step
 - Reproducing a failure with no known cause: `systematic-debugging`
-- Structure floors for every test: the core testing rule
 - Runner choice, file suffix, placement, and query conventions: the TypeScript and Python testing rules
 - Settle, guard, and run-scope rules inside an end to end file: the end to end reliability and test scope rules
 - Writing a UI change's visual checklist, and naming the behaviors it ships untested for this skill to place: `ui-checklist`

@@ -70,4 +70,4 @@ Title casing is sentence case, with proper nouns keeping their own casing (`# Ty
 
 ## After writing
 
-Emit the full path on its own line: `.claude/rules/project/<subdir>/<n>-<slug>.md`. Remind the user that Claude Code loads path-scoped rules when it reads a matching file, and always-on rules every session.
+Emit the full path on its own line: `.claude/rules/project/<subdir>/<n>-<slug>.md`. Remind the user that Claude Code loads path-scoped rules when it reads or writes a matching file, and always-on rules every session.

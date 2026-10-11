@@ -21,7 +21,9 @@ description: Rule frontmatter, body shape, and voice for .claude/rules files
 
 Rules give Claude Code coding constraints scoped to file paths. Claude Code discovers `.claude/rules/**/*.md` at session start.
 
-A rule with no `paths:` field always applies, at the same priority as `CLAUDE.md`. A rule with `paths:` applies when Claude reads a file matching the glob. Author one rule per topic so the scope stays precise.
+A rule with no `paths:` field always applies, at the same priority as `CLAUDE.md`. A rule with `paths:` applies when Claude reads or writes a file matching the glob. Author one rule per topic so the scope stays precise.
+
+A rule with `paths:` loads on a read or a write of a matching file, inside a linked worktree as in the main one. A session creating the first matching file gets the rule only after that write lands, so a rule meant to shape new files also belongs in the skill or the always-on rule a session reads before it writes. Revisit when Claude Code loads a path-scoped rule before a write to a matching path. Re-measure with two headless `claude -p` runs in a linked worktree, one reading a matching file and one reading a file that does not match, each asking whether the rule's content is in context.
 
 ## Scope
 

@@ -19,7 +19,7 @@ The one skill nearest the subject leaves the pointer open. `codebase-layout` exc
 
 - State Hyrum's Law as design rules a session can act on: decide what is observable, and expose no storage type, internal identifier, ordering, or timing by accident
 - Tell the session to write the contract, being the signature, flags, output shape, or schema, before the body
-- State one error shape per surface with a stable code a caller can branch on, pointing at the core code rule for structured errors and hidden internals rather than restating it
+- State one error shape per surface with a stable code a caller can branch on, and own the hidden-internals clause in the body, since no project rule carries it for every code stack
 - State validation at the boundary, once, with the value trusted inside
 - State additive change as the default: new fields and flags optional, nothing renamed or removed in place, no change of meaning under an existing name, and the One-Version Rule for a caller that cannot pin
 - State the four idempotency rules: store and honor a caller's key, claim it in one atomic step under a unique constraint, fail loudly on a reused key with a different body, and keep a key past the longest retry window
@@ -30,7 +30,6 @@ The one skill nearest the subject leaves the pointer open. `codebase-layout` exc
 ## Must not
 
 - Name a framework, a protocol style, or a language in the body. Status codes, verbs, pagination, and schema languages stay out, so the body holds for a function, a command, a file format, and an endpoint alike.
-- Restate the two error bullets of the core code rule
 - Restate the consumer-listing axis `review-craft` carries for a finished change
 - Cover interface depth or the internals behind a boundary, which govern what sits behind a surface rather than what crosses it
 - Import an external skill's tone, such as a law stated as absolute, or an excuse row rebutting an objection no session has raised

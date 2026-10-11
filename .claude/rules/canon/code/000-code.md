@@ -1,5 +1,5 @@
 ---
-description: Code placement, shape, dependency, error, and naming choices a model does not make by default
+description: Routes code placement and shape decisions to the skills that carry them
 ---
 
 # Code standards
@@ -7,19 +7,7 @@ description: Code placement, shape, dependency, error, and naming choices a mode
 ## Placement
 
 - Load the `canon:codebase-layout` skill before placing a new file, and report it rather than proceeding silently when it does not resolve.
-- Prioritize native platform capabilities over third-party libraries.
-- Ensure data and configuration reside in designated Single Source of Truth locations.
 
 ## Shape
 
 - Load the `canon:code-craft` skill before deciding the shape of a new function, class, or module, and report it rather than proceeding silently when it does not resolve.
-
-## Errors
-
-- Return structured error types for recoverable failures.
-- Never expose internal implementation details in error messages.
-
-## Naming
-
-- Prefix booleans with `is`, `has`, `should`, or `can`: `isLoading`, `hasAccess`.
-- Prefix event handlers with `handle`: `handleClick`, `handleSubmit`.
