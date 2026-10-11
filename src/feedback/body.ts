@@ -18,13 +18,18 @@ export const REQUIRED_FIELDS = ['Surface', 'Observed', 'Proposed fix'] as const
  * retire, and the validator would then enforce nothing.
  */
 const FIELD_HEADING = /^###\s+(.+?)\s*$/
-const FENCE = /^\s*(```|~~~)/
+const FENCE = /^\s*(`{3,}|~{3,})(.*)$/
+
+interface OpenFence {
+  readonly marker: string
+  readonly length: number
+}
 
 export function parseSections(body: string): Map<string, string> {
   const sections = new Map<string, string>()
   let heading: string | undefined
   let lines: string[] = []
-  let fenced = false
+  let fence: OpenFence | undefined
 
   const flush = (): void => {
     if (heading === undefined) return
@@ -34,9 +39,25 @@ export function parseSections(body: string): Map<string, string> {
   for (const line of body.split('\n')) {
     // A Repro field routinely carries a fenced block, and a `###` comment
     // inside one is shell rather than the next field. Reading it as a heading
-    // splits the section and drops everything under it.
-    if (FENCE.test(line)) fenced = !fenced
-    const match = fenced ? null : line.match(FIELD_HEADING)
+    // splits the section and drops everything under it. A Suggested shape
+    // wraps a template that holds its own fence in a longer one, so a fence
+    // closes only on the same marker at least as long, per CommonMark.
+    const fenceMatch = line.match(FENCE)
+    const run = fenceMatch?.[1]
+    if (run !== undefined) {
+      const marker = run.charAt(0)
+      const isBare = (fenceMatch?.[2] ?? '').trim() === ''
+      if (fence === undefined) {
+        fence = { marker, length: run.length }
+      } else if (
+        isBare &&
+        marker === fence.marker &&
+        run.length >= fence.length
+      ) {
+        fence = undefined
+      }
+    }
+    const match = fence ? null : line.match(FIELD_HEADING)
     if (match?.[1] === undefined) {
       lines.push(line)
       continue
