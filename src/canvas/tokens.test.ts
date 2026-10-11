@@ -125,15 +125,17 @@ describe('resolveFrameTokens', () => {
 
     const { css } = resolveFrameTokens(ROOT, { isOwnCheckout: false })
 
-    expect(faceFamilies(css)).toEqual(['Geist Variable', 'Virgil'])
+    expect(faceFamilies(css)).toEqual(
+      expect.arrayContaining(['Geist Variable', 'Virgil']),
+    )
   })
 
-  it('should embed no toolkit face an installed sheet does not name', () => {
+  it('should embed the toolkit faces an installed sheet does not name', () => {
     seedDesign('base.css', ':root { --type-body-family: Geist, sans-serif; }')
 
     const { css } = resolveFrameTokens(ROOT, { isOwnCheckout: false })
 
-    expect(css).not.toContain('@font-face')
+    expect(faceFamilies(css)).toContain('Geist Variable')
   })
 
   it('should let a project face replace the toolkit face of the same family', () => {
@@ -149,7 +151,9 @@ describe('resolveFrameTokens', () => {
 
     const { css } = resolveFrameTokens(ROOT, { isOwnCheckout: false })
 
-    expect(faceFamilies(css)).toEqual(['Geist Variable'])
+    expect(
+      faceFamilies(css).filter((family) => family === 'Geist Variable'),
+    ).toHaveLength(1)
     expect(css).toContain(Buffer.from('wOF2project').toString('base64'))
   })
 
@@ -213,8 +217,15 @@ describe('resolveFrameTokens', () => {
 
     expect(tokens).toMatchObject({
       source: 'none',
-      css: '',
       notice: expect.stringContaining('.claude/design/base.css'),
     })
+  })
+
+  it('should serve the toolkit faces when nothing is installed', () => {
+    const { css } = resolveFrameTokens(ROOT, { isOwnCheckout: false })
+
+    expect(faceFamilies(css)).toEqual(
+      expect.arrayContaining(['Geist Variable', 'Noto Sans Mono', 'Excalifont']),
+    )
   })
 })

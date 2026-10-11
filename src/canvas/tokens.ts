@@ -10,7 +10,6 @@ import {
 import {
   type DroppedFace,
   inlineProjectFaces,
-  namedFamilies,
   projectSheets,
 } from '@/design/project-fonts'
 import { isOwnCheckout } from '@/roots/project'
@@ -31,7 +30,7 @@ export type FrameTokens =
       /** Project faces left out of the sheet, present only when one was. */
       readonly dropped?: readonly DroppedFace[]
     }
-  | { readonly source: 'none'; readonly css: ''; readonly notice: string }
+  | { readonly source: 'none'; readonly css: string; readonly notice: string }
 
 export interface TokenOptions {
   /** Overrides the checkout test, which reads this package's own name. */
@@ -134,14 +133,14 @@ function installedFiles(root: string): string[] {
 }
 
 /**
- * The vendored faces the installed sheets name and no project rule already
- * declares, so a target renders the base's families on a machine that never
- * installed them, and a project face of the same family wins outright.
+ * The vendored faces no project rule already declares, so a frame naming
+ * `Geist Variable` renders the same face in the capture and in any browser
+ * whether or not a sheet names it, and a project face of the same family wins
+ * outright.
  */
-function toolkitFaces(css: string, declared: ReadonlySet<string>): FontFace[] {
-  const named = namedFamilies(css)
+function toolkitFaces(declared: ReadonlySet<string>): FontFace[] {
   return [...FONT_FACES, ...HAND_DRAWN_FONT_FACES].filter(
-    (face) => named.has(face.family) && !declared.has(face.family),
+    (face) => !declared.has(face.family),
   )
 }
 
@@ -190,7 +189,7 @@ export function resolveFrameTokens(
   const files = installedFiles(root)
   if (files.length > 0) {
     const { css, dropped, declared } = installedSheets(root, files)
-    const faces = toolkitFaces(css, declared)
+    const faces = toolkitFaces(declared)
     return {
       source: 'installed',
       css: faces.length > 0 ? `${fontFaceBlock(faces)}\n${css}` : css,
@@ -199,5 +198,9 @@ export function resolveFrameTokens(
     }
   }
 
-  return { source: 'none', css: '', notice: NONE_NOTICE }
+  return {
+    source: 'none',
+    css: fontFaceBlock(toolkitFaces(new Set())),
+    notice: NONE_NOTICE,
+  }
 }
