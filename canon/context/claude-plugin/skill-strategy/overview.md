@@ -87,7 +87,9 @@ Its record is an ordinary intake folder, with the verdict riding in `Suggested:`
 
 ## What a skill carries
 
-`canon-cli` is the instance of the rule against restating a catalog. Its body keeps what no verb answers: the overwrite table, the sync rules, and the copy-once note on `CLAUDE.md`. A generated listing of every golden config path is what it declines, since that listing ran 70 of 122 lines and `canon tooling diff` resolves the same paths against a real target, or `canon tooling sync --check` on a binary older than that verb. The skill survives because `canon --help` names top-level commands with partial hints and enumerates no subcommands, so nothing in help says whether a sync overwrites.
+`canon-cli` routes a job to a verb, and it carries a guarded per-verb listing on purpose. The body names each target-usable top-level verb by its job, never its subcommands or flags, and keeps one line per verb that can lose the project's edits, each pointing at `canon docs install-and-sync` for the detail. A pointer-only body was the alternative, taken against and rejected: a session needs the job-to-verb route without paying a `--help` read every time, and `canon --help` carries only partial hints that say nothing about what a sync overwrites. The drift a pointer-only body avoided is settled by a failing test instead. `src/cli/canon-cli-skill.test.ts` reads the help registry and fails naming any top-level verb the body neither carries as `canon <verb>` nor exempts as toolkit-only, and fails again when an exemption names a verb that no longer exists.
+
+The generated listing of every golden config path stays declined, since that listing ran 70 of 122 lines and `canon tooling diff` resolves the same paths against a real target, or `canon tooling sync --check` on a binary older than that verb.
 
 ### A citation travels on the skill's own channel
 

@@ -25,14 +25,14 @@ These two groups hold the skills no single moment in a project's life calls for,
 
 ## Answer a question at any point
 
-| Skill                       | When to use                                                                                                                                                            |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `canon:canon-cli`           | Before running an unfamiliar verb, a sync, or an install, to learn which command to run, which reference doc covers it, or what it overwrites, merges, or leaves alone |
-| `canon:youtube-transcripts` | When a video transcript is wanted in the repo as context                                                                                                               |
-| `canon:read-frames`         | To read a recorded demo back frame by frame and report what each one shows, with no verdict on whether the recording looks right                                       |
-| `canon:teach-workspace`     | To learn a subject across sessions, in a workspace that holds the progress                                                                                             |
-| `canon:markdown-craft`      | Before a substantial markdown edit, for the format and structure rules and the audit that follows                                                                      |
-| `canon:write-human`         | Before drafting or revising prose, for voice, rhythm, and density                                                                                                      |
+| Skill                       | When to use                                                                                                                      |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `canon:canon-cli`           | To pick the `canon` verb that does a job, or before a sync or migrate, to learn which verbs can lose the project's edits         |
+| `canon:youtube-transcripts` | When a video transcript is wanted in the repo as context                                                                         |
+| `canon:read-frames`         | To read a recorded demo back frame by frame and report what each one shows, with no verdict on whether the recording looks right |
+| `canon:teach-workspace`     | To learn a subject across sessions, in a workspace that holds the progress                                                       |
+| `canon:markdown-craft`      | Before a substantial markdown edit, for the format and structure rules and the audit that follows                                |
+| `canon:write-human`         | Before drafting or revising prose, for voice, rhythm, and density                                                                |
 
 Every row answers a question rather than marking a point in a project's life, so filing one under a phase on the [skill map](skill-map.md) would send a reader to the wrong group.
 

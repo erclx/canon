@@ -41,6 +41,10 @@ export const SETUP_CASES: readonly SkillCase[] = [
     expect: 'canon-cli',
   },
   {
+    prompt: 'Which canon command tells me if my markdown breaks the rules?',
+    expect: 'canon-cli',
+  },
+  {
     prompt:
       'Something about the toolkit itself is broken, write it up and send it back to the maintainers.',
     expect: 'canon-feedback',
