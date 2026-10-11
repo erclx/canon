@@ -9,12 +9,15 @@ import {
   DEFAULT_FRAME,
   listPages,
   moveFrame,
+  pruneLayout,
   readPage,
   readSelection,
   renamePage,
   resizeFrame,
 } from '@/canvas/content'
+import { planArrange } from '@/canvas/arrange'
 import { captureCanvas, captureComposite } from '@/canvas/capture'
+import { fitCanvas, isOwed } from '@/canvas/fit'
 import {
   type EditRefused,
   editFrameAtIndex,
@@ -148,7 +151,7 @@ export function register(program: Command): void {
     .command('canvas')
     .helpOption('-h, --help', 'Show this help message')
     .description(
-      'Local canvas of pages and HTML frames (serve, list, page, frame, selection, edit, editing, capture)',
+      'Local canvas of pages and HTML frames (serve, list, page, frame, selection, edit, editing, capture, fit, arrange)',
     )
     .addHelpText(
       'after',
@@ -167,6 +170,8 @@ export function register(program: Command): void {
         "  canon canvas edit drafts/hero --element 4 --set 'color=var(--color-accent)'",
         '  canon canvas editing drafts/hero',
         '  canon canvas capture drafts/hero',
+        '  canon canvas fit drafts/hero --json',
+        '  canon canvas arrange drafts --check',
         '  canon canvas list --json',
         '',
       ].join('\n'),
@@ -728,6 +733,174 @@ export function register(program: Command): void {
       outro()
       if (failed) process.exitCode = 1
     })
+
+  withRoot(
+    canvas
+      .command('fit')
+      .description("Set each frame's height to its content")
+      .argument('<target>', '<page>/<frame> for one frame, <page> for all')
+      .option('--check', 'Report what is owed and write nothing'),
+  )
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Measures each frame in the capture browser at its box width, through',
+        'the served address, so the faces the canvas serves are the ones read.',
+        'The height is the content height rounded up, with no margin. A',
+        'content wider than the box is reported and the box is never widened.',
+        'A frame whose body text names a family the canvas does not serve is',
+        'reported as font, since its height may not hold in another browser.',
+        '',
+        'Run canvas arrange after a fit that grew a frame, since rows below',
+        'do not move on their own.',
+        '',
+        'Exit codes:',
+        '  0  written, or nothing owed under --check',
+        '  1  refused or the browser failed',
+        '  2  --check found a height off, a wide frame, or a font',
+        '',
+      ].join('\n'),
+    )
+    .action(async (target: string, opts: FitOptions) => {
+      process.exitCode = await runFit(target, opts)
+    })
+
+  withRoot(
+    canvas
+      .command('arrange')
+      .description('Re-lay a page in rows on the frame gap')
+      .argument('<page>', 'Page to arrange')
+      .option('--check', 'Report what is owed and write nothing'),
+  )
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Keeps the rows the frames already sit in, orders each left to right on',
+        'the frame gap, stacks the rows on their tallest frame, and drops',
+        'layout entries whose frame file is gone.',
+        '',
+        'Exit codes:',
+        '  0  written, or nothing owed under --check',
+        '  1  refused',
+        '  2  --check found frames to move or entries to drop',
+        '',
+      ].join('\n'),
+    )
+    .action(async (pageName: string, opts: FitOptions) => {
+      process.exitCode = await runArrange(pageName, opts)
+    })
+}
+
+interface FitOptions extends RootOptions {
+  readonly check?: boolean
+}
+
+async function runFit(target: string, opts: FitOptions): Promise<number> {
+  const emitJson = opts.json ?? false
+  const resolved = await resolveRoot(opts)
+  if (!resolved.ok) return refuse(resolved, emitJson)
+
+  const check = opts.check ?? false
+  let outcome: Awaited<ReturnType<typeof fitCanvas>>
+  try {
+    outcome = await fitCanvas(resolved.root, target, !check)
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error)
+    return refuse({ ok: false, reason: 'capture-failed', detail }, emitJson)
+  }
+  if (!outcome.ok) return refuse(outcome, emitJson)
+
+  const frames = outcome.rows.map((row) => ({ ...row, owed: isOwed(row) }))
+  const owed = frames.some((row) => row.owed)
+  if (emitJson) writeJson({ ok: true, written: outcome.written, frames })
+  intro(BANNER)
+  for (const row of frames) {
+    const name = `${row.page}/${row.frame}`
+    if (row.fitted === row.height) logInfo(`${name} fits at ${row.height}`)
+    else if (outcome.written) logAdd(`${name} ${row.height} to ${row.fitted}`)
+    else logStep(`${name} owes ${row.height} to ${row.fitted}`)
+    if (row.wide) logWarn(`${name} is wider than its box, so widen the box`)
+    if (row.font) {
+      logWarn(
+        `${name} sets ${row.family}, which the canvas does not serve, so its height may not hold in another browser`,
+      )
+    }
+  }
+  outro()
+  return check && owed ? 2 : 0
+}
+
+async function runArrange(pageName: string, opts: FitOptions): Promise<number> {
+  const emitJson = opts.json ?? false
+  const resolved = await resolveRoot(opts)
+  if (!resolved.ok) return refuse(resolved, emitJson)
+  const { root } = resolved
+
+  const page = readPage(root, pageName)
+  if (!page) {
+    return refuse(
+      {
+        ok: false,
+        reason: 'no-page',
+        detail: `page ${pageName} does not exist`,
+      },
+      emitJson,
+    )
+  }
+  if (page.layoutIssue) {
+    return refuse(
+      {
+        ok: false,
+        reason: 'malformed-layout',
+        detail: `${pageName}/layout.json does not parse`,
+      },
+      emitJson,
+    )
+  }
+
+  const check = opts.check ?? false
+  const pruned = pruneLayout(root, pageName, !check)
+  if (!pruned.ok) return refuse(pruned, emitJson)
+
+  const moves = planArrange(page.frames)
+  if (!check) {
+    for (const move of moves) {
+      const outcome = resizeFrame(root, pageName, move.name, move.to)
+      if (!outcome.ok) return refuse(outcome, emitJson)
+    }
+  }
+
+  if (emitJson) {
+    writeJson({
+      ok: true,
+      page: pageName,
+      written: !check,
+      moved: moves.map((move) => ({
+        frame: move.name,
+        from: { x: move.from.x, y: move.from.y },
+        to: { x: move.to.x, y: move.to.y },
+      })),
+      dropped: pruned.dropped,
+    })
+  }
+  intro(BANNER)
+  for (const move of moves) {
+    const text = `${pageName}/${move.name} ${move.from.x}, ${move.from.y} to ${move.to.x}, ${move.to.y}`
+    if (check) logStep(`${text} is owed`)
+    else logAdd(text)
+  }
+  for (const name of pruned.dropped) {
+    logWarn(
+      `${pageName}/${name} has no frame file, so its entry is ${check ? 'owed a drop' : 'dropped'}`,
+    )
+  }
+  if (moves.length === 0 && pruned.dropped.length === 0) {
+    logInfo(`${pageName} is already laid out`)
+  }
+  outro()
+  return check && (moves.length > 0 || pruned.dropped.length > 0) ? 2 : 0
 }
 
 interface CaptureOptions extends RootOptions {

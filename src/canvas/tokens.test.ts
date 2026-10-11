@@ -225,7 +225,11 @@ describe('resolveFrameTokens', () => {
     const { css } = resolveFrameTokens(ROOT, { isOwnCheckout: false })
 
     expect(faceFamilies(css)).toEqual(
-      expect.arrayContaining(['Geist Variable', 'Noto Sans Mono', 'Excalifont']),
+      expect.arrayContaining([
+        'Geist Variable',
+        'Noto Sans Mono',
+        'Excalifont',
+      ]),
     )
   })
 })

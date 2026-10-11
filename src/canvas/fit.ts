@@ -75,9 +75,7 @@ export type FitOutcome =
 
 export interface FitDeps extends Pick<CaptureDeps, 'start'> {
   /** What a test stands in for, which the command never passes. */
-  readonly measure?: (
-    targets: readonly MeasureTarget[],
-  ) => Promise<Measured[]>
+  readonly measure?: (targets: readonly MeasureTarget[]) => Promise<Measured[]>
 }
 
 export interface MeasureTarget {

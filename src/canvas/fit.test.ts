@@ -112,7 +112,10 @@ describe('fitCanvas with the server and browser stood in', () => {
 
   function layoutHeight(): number {
     const layout = JSON.parse(
-      readFileSync(join(ROOT, '.canon', 'canvas', 'drafts', 'layout.json'), 'utf8'),
+      readFileSync(
+        join(ROOT, '.canon', 'canvas', 'drafts', 'layout.json'),
+        'utf8',
+      ),
     ) as { frames: Record<string, { height: number }> }
     return layout.frames.hero?.height ?? 0
   }
