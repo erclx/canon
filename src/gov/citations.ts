@@ -6,7 +6,6 @@ import { isMarked } from '@/sweep/exempt-marker'
 import { gitEnv } from '@/git/env'
 import { listRuleFiles } from '@/gov/payload'
 import { parseFrontmatter } from '@/indexes/frontmatter'
-import { movedStandardPath } from '@/standards/read'
 import { findBacktickSpans } from '@/markdown/backticks'
 
 /**
@@ -42,14 +41,14 @@ export const RULE_DIRS: readonly string[] = [
 export const GLOB_CORPUS = join('internal', 'rules')
 
 /**
- * How the citation was written, kept on the finding because the three resolve
+ * How the citation was written, kept on the finding because the two resolve
  * against different roots and a reader repairing one needs to know which.
  *
- * `standard` is the live form, carried by 20 rules. `path` is a backticked
- * repository path. `sibling` is a rule naming another rule by filename alone,
- * which resolves inside the folder the citing rule sits in.
+ * `path` is a backticked repository path. `sibling` is a rule naming another
+ * rule by filename alone, which resolves inside the folder the citing rule
+ * sits in.
  */
-export type CitationForm = 'path' | 'standard' | 'sibling'
+export type CitationForm = 'path' | 'sibling'
 
 /**
  * What the sweep decided about one citation.
@@ -116,13 +115,6 @@ const FENCE = /^\s*(?:```|~~~)/
 
 const FRONTMATTER_DELIMITER = /^---\s*$/
 
-/**
- * The verb form, with the name captured. A leading letter or digit is required,
- * which is what leaves `canon standards <name>` unmatched: that line teaches the
- * form rather than citing a standard, and it is the only one in either corpus.
- */
-const STANDARD_CALL = /canon standards ([A-Za-z0-9][A-Za-z0-9._-]*)/g
-
 /** A rule filename, which is how a rule names a sibling with no folder around it. */
 const SIBLING_RULE = /^\d{3}-[a-z0-9-]+\.md$/
 
@@ -146,8 +138,8 @@ function isNotRepositoryPath(span: string): boolean {
  * This is what separates a citation from the folder and module conventions the
  * corpus is full of. `next/font`, `try/except`, `react-hooks/set-state-in-effect`,
  * and `oven-sh/setup-bun@v2` all carry a slash and name no file, and a trailing
- * slash is a folder rather than a document. The cost is that `claude/standards`
- * is a real path this declines to check, which is the bound the report states.
+ * slash is a folder rather than a document. The cost is that a real folder path
+ * goes unchecked, which is the bound the report states.
  */
 function namesAFile(span: string): boolean {
   if (span.endsWith('/')) return false
@@ -160,10 +152,10 @@ function namesAFile(span: string): boolean {
  * sweep can resolve.
  *
  * The whole span is classified rather than a trailing pattern inside it.
- * Extracting `standards/tooling-reference.md` out of
- * `internal/standards/tooling-reference.md` and resolving that against the
- * standards root manufactures a dead citation out of a file that exists, which
- * a session measuring this corpus did before the check was written.
+ * Extracting a trailing `<folder>/<name>.md` out of a longer path and resolving
+ * that against another root manufactures a dead citation out of a file that
+ * exists, which a session measuring this corpus did before the check was
+ * written.
  */
 export function classifySpan(span: string): CitationForm | undefined {
   if (isNotRepositoryPath(span)) return undefined
@@ -176,15 +168,6 @@ export function classifySpan(span: string): CitationForm | undefined {
  * Where a citation could answer, which is wherever the reader's own tools look
  * and nowhere else.
  *
- * A standard name takes the authoring root alone, matching `standardRoots` in
- * `@/standards/read`, which reads `standards/` at the working root and then the
- * package corpus, plus the skill reference a retired name moved to. This verb
- * refuses a tree holding no rule corpus, so it runs only where those two roots
- * are one directory. `internal/standards/` is
- * deliberately absent: `canon standards <name>` never reaches it, so admitting it
- * here would pass a citation that refuses for the session opening it, which is a
- * gate failing open.
- *
  * A sibling resolves inside the folder the citing rule sits in, since that is
  * the only place a bare rule filename means anything.
  */
@@ -193,11 +176,6 @@ function candidatesFor(
   cited: string,
   ruleFile: string,
 ): string[] {
-  if (form === 'standard') {
-    const moved = movedStandardPath(cited)
-
-    return [join('standards', `${cited}.md`), ...(moved ? [moved] : [])]
-  }
   if (form === 'sibling') return [join(dirname(ruleFile), cited)]
   return [cited]
 }
@@ -243,16 +221,6 @@ export function collectCitations(text: string): RawCitation[] {
         ? `${trimmed.slice(0, PREVIEW_LIMIT)}…`
         : trimmed
     const marked = isMarked(lines, index, CITATION_MARKER)
-
-    for (const match of line.matchAll(STANDARD_CALL)) {
-      found.push({
-        line: index + 1,
-        form: 'standard',
-        cited: match[1] ?? '',
-        preview,
-        marked,
-      })
-    }
 
     // A backticked span is the only carrier a rule writes a citation in. No
     // rule in either corpus uses a markdown link, and matching running prose

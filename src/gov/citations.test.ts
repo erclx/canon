@@ -131,8 +131,7 @@ describe('classifySpan', () => {
     for (const span of [
       'canon/context/<domain>.md',
       '.claude/diagrams/<kind>.md',
-      'standards/<name>.md',
-      '${CLAUDE_SKILL_DIR}/../../standards/<name>.md',
+      '${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md',
     ]) {
       expect(classifySpan(span)).toBeUndefined()
     }
@@ -217,8 +216,8 @@ describe('readCitations', () => {
 
   it('should anchor on the whole span rather than a trailing standards pattern', async () => {
     // Cutting `standards/tooling-reference.md` out of this span and resolving
-    // it against the standards root reports a file that exists as missing,
-    // which is what a session measuring this corpus by hand actually did.
+    // it against another root reports a file that exists as missing, which is
+    // what a session measuring this corpus by hand actually did.
     write('internal/standards/tooling-reference.md', '# Tooling reference')
     writeRule(
       'claude/598-authoring-layout.md',
@@ -229,72 +228,6 @@ describe('readCitations', () => {
     const report = await readCitations(ROOT)
 
     expect(withStatus(report, 'dead')).toEqual([])
-  })
-
-  it('should resolve a standard the verb names against the authoring root', async () => {
-    write('standards/teach.md', '# Teach')
-    writeRule(
-      'claude/561-teach.md',
-      '- Read it with `canon standards teach`. It is the single source.',
-    )
-    git('add', '--all')
-
-    const report = await readCitations(ROOT)
-
-    expect(withStatus(report, 'resolved')).toEqual(['teach'])
-  })
-
-  it('should name a standard only the internal corpus carries, which the verb cannot reach', async () => {
-    // `canon standards <name>` reads standards/ and then the package corpus, and
-    // never internal/standards/, so a citation resolving only there refuses for
-    // the session that opens it. Admitting that root here would pass it.
-    write('internal/standards/tooling-reference.md', '# Tooling reference')
-    writeRule(
-      'claude/598-authoring-layout.md',
-      '- Read it with `canon standards tooling-reference`.',
-    )
-    git('add', '--all')
-
-    const report = await readCitations(ROOT)
-
-    expect(withStatus(report, 'dead')).toEqual(['tooling-reference'])
-  })
-
-  it('should resolve a standard the verb answers from the skill that took it', async () => {
-    write('claude/skills/create-skill/references/skill-paths.md', '# Paths')
-    writeRule(
-      'claude/561-skill.md',
-      '- Read it with `canon standards skill-paths`.',
-    )
-    git('add', '--all')
-
-    const report = await readCitations(ROOT)
-
-    expect(withStatus(report, 'resolved')).toEqual(['skill-paths'])
-  })
-
-  it('should name a standard the verb cites that neither root carries', async () => {
-    writeRule(
-      'claude/561-teach.md',
-      '- Read it with `canon standards glossary`.',
-    )
-    git('add', '--all')
-
-    const report = await readCitations(ROOT)
-
-    expect(withStatus(report, 'dead')).toEqual(['glossary'])
-  })
-
-  it('should decline the line teaching the verb form rather than calling it', async () => {
-    writeRule(
-      'claude/598-authoring-layout.md',
-      '- Call `canon standards <name>` from a rule or a seed.',
-    )
-    git('add', '--all')
-
-    const report = measured(await readCitations(ROOT))
-
-    expect(report.citations).toEqual([])
   })
 
   it('should resolve a sibling rule named by filename alone', async () => {
