@@ -101,6 +101,12 @@ describe('resolveStandard', () => {
     )
   })
 
+  it('should answer a fifth-slice standard from the skill that owns it', () => {
+    expect(resolveStandard(ROOT, 'skill')?.source).toBe(
+      join('<canon>', 'claude/skills/create-skill/references/skill.md'),
+    )
+  })
+
   it('should keep an authored standard ahead of the moved map', () => {
     writeStandard('standards/markdown.md', '# Authored\n')
 
@@ -156,6 +162,12 @@ describe('listStandards', () => {
     const names = listStandards(ROOT)
 
     expect(names.filter((name) => name === 'session')).toEqual(['session'])
+  })
+
+  it('should name a fifth-slice standard once', () => {
+    const names = listStandards(ROOT)
+
+    expect(names.filter((name) => name === 'skill')).toEqual(['skill'])
   })
 
   it('should name a project standard the package does not carry', () => {

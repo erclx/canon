@@ -22,7 +22,7 @@ Read these in parallel, skipping any that do not exist:
 - `canon/REQUIREMENTS.md`: the `## Personality` paragraph, when `canon/DESIGN.md` carries none
 - `CLAUDE.md`: the project's stated voice, when neither file above carries a personality signal
 
-No signal from any of the three is not a stop. Draft against a neutral default and tag the color and type choices `? verify` per `${CLAUDE_SKILL_DIR}/../../standards/design.md`'s uncertainty tag.
+No signal from any of the three is not a stop. Draft against a neutral default and tag the color and type choices `? verify` per `${CLAUDE_SKILL_DIR}/../canvas-board/references/design.md`'s uncertainty tag.
 
 ## Step 2: detect the icon size sequence
 

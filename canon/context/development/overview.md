@@ -36,7 +36,7 @@ Owns the local development loop: toolchain setup, the run commands, and the git 
 
 ### What reads the table
 
-`standards/context.md` scopes the `## Scripts` heading to this domain by name, and this file is where it lands. Two surfaces read the table, so a command added anywhere else is a command they cannot see: every stack reference extends it, and `docs/target/projects.md` tells a target to keep its own copy current.
+`claude/skills/context-fold/references/context.md` scopes the `## Scripts` heading to this domain by name, and this file is where it lands. Two surfaces read the table, so a command added anywhere else is a command they cannot see: every stack reference extends it, and `docs/target/projects.md` tells a target to keep its own copy current.
 
 The table stays a table against the catalog rule beside it, which sends a surface that grows a row per shipped thing to a bullet list. That rule answers reflow conflicts between sibling branches, and the same standard names this section a table in the sentence that scopes it here. `canon context audit` reports the row count under Tables on every run, so the finding is expected rather than outstanding.
 
@@ -44,7 +44,7 @@ The table stays a table against the catalog rule beside it, which sends a surfac
 
 ### Why the entry is a folder
 
-The entry is a folder on the sub-area condition rather than on length. `standards/context.md` splits a domain at three or more sub-areas that do not fit cleanly in one file, and setup with the run commands, the scoping of `bun run check`, test scoping, the stages that regenerate, the stages that gate, the hook families, session scratch, and the record folders do not. The stages that gate and the hook families each span enough sub-areas to be folders of their own, `canon/context/development/gates/` and `canon/context/development/hooks/`.
+The entry is a folder on the sub-area condition rather than on length. `claude/skills/context-fold/references/context.md` splits a domain at three or more sub-areas that do not fit cleanly in one file, and setup with the run commands, the scoping of `bun run check`, test scoping, the stages that regenerate, the stages that gate, the hook families, session scratch, and the record folders do not. The stages that gate and the hook families each span enough sub-areas to be folders of their own, `canon/context/development/gates/` and `canon/context/development/hooks/`.
 
 ### Why most citations kept the flat path
 

@@ -45,7 +45,7 @@ A project-authored rule numbers in `900-999`, the band reserved for one. `000-89
 
 ## Step 4: write the rule
 
-Read `${CLAUDE_SKILL_DIR}/../../standards/rule.md` for frontmatter, body shape, and voice before writing the body. Do not work the shape from memory.
+Read `${CLAUDE_SKILL_DIR}/references/rule.md` for frontmatter, body shape, and voice before writing the body. Do not work the shape from memory.
 
 Write `.claude/rules/project/<subdir>/<n>-<slug>.md` where `<slug>` is a 1-to-3-word kebab topic. Preview the resolved path, subdir, number, and frontmatter, then write immediately. The tool permission dialog is the confirmation gate.
 
@@ -66,7 +66,7 @@ paths:
 - <imperative rule>
 ```
 
-Title casing is sentence case, with proper nouns keeping their own casing (`# TypeScript standards`). `${CLAUDE_SKILL_DIR}/../../standards/rule.md` owns the rest of the body shape.
+Title casing is sentence case, with proper nouns keeping their own casing (`# TypeScript standards`). `${CLAUDE_SKILL_DIR}/references/rule.md` owns the rest of the body shape.
 
 ## After writing
 

@@ -7,6 +7,17 @@ description: Reader and jurisdiction, frontmatter, page structure, what a page l
 
 Applies to each authored reference page under `docs/`. Skip for `index.md` at any depth, which is generated rather than authored.
 
+## Contents
+
+- [Scope](#scope)
+- [What a working docs page looks like](#what-a-working-docs-page-looks-like)
+- [Frontmatter](#frontmatter)
+- [Structure](#structure)
+- [Content](#content)
+- [Diagrams](#diagrams)
+- [Splitting the folder](#splitting-the-folder)
+- [Template](#template)
+
 ## Scope
 
 Governs each authored reference page under `docs/`, whose reader is an operator running what the project ships rather than developing it, and an agent reading the page cold from a project that consumes it: the frontmatter a page carries, its structure, what it links out to rather than restating, whether it holds a diagram, and when a category earns a subfolder of its own.

@@ -10,7 +10,7 @@ import { SURFACE_ROOTS } from '@/roots/surface'
  * A named list rather than the index-plus-entry contract read off disk, so a
  * generated tree satisfying that contract is never measured against a rule
  * written for per-domain narrative. This list names the folders
- * `standards/context.md` governs, and `--folder` admits another without an edit
+ * `claude/skills/context-fold/references/context.md` governs, and `--folder` admits another without an edit
  * here.
  *
  * It doubles as the citation check's scope, since `citationPattern` spells only

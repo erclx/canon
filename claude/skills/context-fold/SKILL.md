@@ -57,7 +57,7 @@ Write a session decision into the entry for the domain it constrains, under that
 
 - Never write `canon/REQUIREMENTS.md`. Report a requirements change in After completion.
 - Update only the sections affected by session decisions or the diff, and leave unrelated sections alone.
-- Rewrite a restated or superseded statement in place rather than appending the replacement beside it. State the fact that stands and keep the earlier reasoning only where it is the alternative that lost, per `${CLAUDE_SKILL_DIR}/../../standards/context.md`.
+- Rewrite a restated or superseded statement in place rather than appending the replacement beside it. State the fact that stands and keep the earlier reasoning only where it is the alternative that lost, per `${CLAUDE_SKILL_DIR}/references/context.md`.
 - Follow `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md` and the `write-human` skill for all edits.
 
 Write each updated file immediately. Claude Code's tool permission dialog is the confirmation gate. Do not wait for user input.

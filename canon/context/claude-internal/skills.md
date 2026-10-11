@@ -26,7 +26,7 @@ Every internal skill carries a `REQUIREMENT.md`. Coverage is universal rather th
 
 A working requirement lets a reader recover from the body alone both the failures the skill prevents and the nearest thing it deliberately does not do. Length does not decide which skills need one.
 
-The rule gating a skill edit globs `.claude/skills/**/REQUIREMENT.md`, firing on every internal skill edit. The plugin corpus under `claude/skills/` carries the same coverage, and `standards/skill.md` calls the file required for both corpora. A skill whose scope an in-flight branch is changing takes its requirement from that branch.
+The rule gating a skill edit globs `.claude/skills/**/REQUIREMENT.md`, firing on every internal skill edit. The plugin corpus under `claude/skills/` carries the same coverage, and `claude/skills/create-skill/references/skill.md` calls the file required for both corpora. A skill whose scope an in-flight branch is changing takes its requirement from that branch.
 
 ## Sandbox check verification route
 

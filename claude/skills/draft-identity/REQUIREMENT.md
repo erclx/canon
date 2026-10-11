@@ -23,7 +23,7 @@ A session building this without a shared loop restates `draft-and-pick`'s render
 ## Must not
 
 - Restate `draft-and-pick`'s render, hand-off, pick, or loop mechanics
-- Add a `## Logo` section to `standards/design.md`'s fixed section set. `src/design/parse.ts` reads a fixed key set, and no outcome behind this skill asks for a schema change.
+- Add a `## Logo` section to `claude/skills/canvas-board/references/design.md`'s fixed section set. `src/design/parse.ts` reads a fixed key set, and no outcome behind this skill asks for a schema change.
 - Modify `draft-and-pick`, `canon capture`, or `canon design render`. This skill composes all three and extending any of them is a separate change.
 - Assume this skill's own invocation frequency needs no check. Whether anything reaches for it beyond an operator typing its name has no answer at creation time, so a review pass some months in should read that back rather than take it on faith.
 
@@ -35,6 +35,6 @@ A session building this without a shared loop restates `draft-and-pick`'s render
 ## Out of scope
 
 - Wiring the produced files into a project's own HTML head or manifest, which is a separate edit this skill leaves for the operator to make against their own markup
-- Recording the mark's construction rules in `standards/design.md`, which the task's own constraint keeps out of the fixed section set
+- Recording the mark's construction rules in `claude/skills/canvas-board/references/design.md`, which the task's own constraint keeps out of the fixed section set
 - Mutating an existing logo file directly, which is a direct edit rather than a skill
 - Auditing an implemented UI against its tokens, which `ux-audit` owns

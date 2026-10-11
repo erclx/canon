@@ -5,7 +5,7 @@ description: The two-part test separating a rule from a skill, the standards eac
 
 # Rule routing
 
-A rule fires on a path match with no decision from the session, and a skill fires on invocation or a description match, so the rule is the floor and the skill is the depth. `standards/rule.md` and `standards/skill.md` each carry the checkpoint pointing at the other, and both ship to targets. Nothing checks either one, which is accepted, since the checkpoint is a judgment prompt rather than an invariant.
+A rule fires on a path match with no decision from the session, and a skill fires on invocation or a description match, so the rule is the floor and the skill is the depth. `claude/skills/create-rule/references/rule.md` and `claude/skills/create-skill/references/skill.md` each carry the checkpoint pointing at the other, and both ship to targets. Nothing checks either one, which is accepted, since the checkpoint is a judgment prompt rather than an invariant.
 
 ## Decisions
 
@@ -19,14 +19,14 @@ Record a rejection by which half failed rather than by judgment:
 - The husky re-drop on a monorepo subtree fails the first half too, firing when a command runs rather than when a path is edited.
 - The stale-copy failure on a widened source rule fails the second half, since that gate is closed and loud.
 
-One candidate passes both halves and stays deferred. A child folder carrying no `index.md` drops out of every catalog silently, and closing it means widening `governance/rules/standards/context.md`, which ships to every `base` consumer and would carry an invariant about a system a target may not run. It needs a shipped rule and a stack decision first.
+One candidate passes both halves and stays deferred. A child folder carrying no `index.md` drops out of every catalog silently, and closing it means widening `governance/rules/canon/context.md`, which ships to every `base` consumer and would carry an invariant about a system a target may not run. It needs a shipped rule and a stack decision first.
 
 ### Every file-path standard has a routing rule
 
 A standard governing a file path carries a rule routing to it, so an edit loads the standard without the matching skill being invoked. The route makes a standard reachable from the action rather than from a session that thought to look.
 
 - `595-tooling-reference` is authored under `internal/rules/claude/`, because `internal/standards/tooling-reference.md` governs a surface a target never authors, and shipping the route would point at a path no install creates. It globs `manifest.toml` beside `reference.md`, since a rule protecting a symmetry has to fire from either side and the manifest moves first.
-- `governance/rules/standards/context.md` carries a write-time policy beside its read-time one, so editing a domain leaves its context entry conforming. It ships to every `base` consumer, so each write-time bullet states an outcome of the edit rather than a backlog to drain, which also reads correctly in a project with no entries yet.
+- `governance/rules/canon/context.md` carries a write-time policy beside its read-time one, so editing a domain leaves its context entry conforming. It is hand-written and unnumbered like the two record rules, since its standard moved into `context-fold`. It ships to every `base` consumer, so each write-time bullet states an outcome of the edit rather than a backlog to drain, which also reads correctly in a project with no entries yet.
 - `governance/rules/canon/tasks.md` and `governance/rules/canon/plan.md` route the two record folders and ship in `base` with the `canon` band. Both are hand-written and unnumbered, as `writing/markdown.md` is, since their standards moved into `task-board` and `plan-feature` and the generator reads only `standards/`. The groundwork, intake, and session rules retired with their standards, since each only routed to a reference its owner skill already reads.
 - Each of those two carries the directives that ship silently when violated, such as the blank answer slot and the board's generated index, and loads its owner skill for the rest. The write scope stays in the skill body, since a misrouted write lands on a path the glob never matches.
 - `governance/rules/canon/tasks.md` globs `.canon/tasks/**` whole, so it also loads on a session handoff, and a carve-out bullet sends that file to `canon:session-map` because the board and the handoff are two shapes.

@@ -60,6 +60,13 @@ export function standardRoots(root: string): StandardRoot[] {
  */
 const MOVED_STANDARDS: Readonly<Record<string, string>> = {
   board: 'claude/skills/task-board/references/board.md',
+  context: 'claude/skills/context-fold/references/context.md',
+  design: 'claude/skills/canvas-board/references/design.md',
+  docs: 'claude/skills/docs-sync/references/docs.md',
+  figures: 'claude/skills/draft-figure/references/figures.md',
+  readme: 'claude/skills/docs-sync/references/readme.md',
+  rule: 'claude/skills/create-rule/references/rule.md',
+  skill: 'claude/skills/create-skill/references/skill.md',
   branch: 'claude/skills/git-branch/references/branch.md',
   commit: 'claude/skills/git-commit/references/commit.md',
   pr: 'claude/skills/git-pr/references/pr.md',

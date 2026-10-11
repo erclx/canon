@@ -5,7 +5,7 @@ description: The REQUIREMENT.md sibling, what loads it, and the admission test u
 
 # Skill requirements
 
-Every skill folder carries `REQUIREMENT.md` beside `SKILL.md`, stating the gaps that skill exists to close so a proposed change has something to be argued against. It is authoring context for whoever maintains the skill. Claude Code loads `SKILL.md` as the entry and never reads the sibling, and `src/sync/check.ts` leaves `claude/skills/` out of the synced sources because skills load live from the plugin directory rather than being copied, so the file reaches no target session and costs no tokens there. `governance/rules/standards/skill.md` fires on both filenames and carries the consult-first bullet.
+Every skill folder carries `REQUIREMENT.md` beside `SKILL.md`, stating the gaps that skill exists to close so a proposed change has something to be argued against. It is authoring context for whoever maintains the skill. Claude Code loads `SKILL.md` as the entry and never reads the sibling, and `src/sync/check.ts` leaves `claude/skills/` out of the synced sources because skills load live from the plugin directory rather than being copied, so the file reaches no target session and costs no tokens there. `governance/rules/claude/skill.md` fires on both filenames and carries the consult-first bullet.
 
 The consult-first bullet reaches one direction. A change to `SKILL.md` tests against the requirement, and no rule states the reverse, so a branch editing a `## Must` line can leave the body carrying a reason its requirement no longer states. The emitted-path sweep found that shape in `youtube-transcripts`, where a plan listed the requirement line and the body line implementing it as two independent sites. A `## Must` line and the body line implementing it move in one change.
 
@@ -27,6 +27,6 @@ The two resolve their root differently, and the difference decides which one ans
 
 Coverage is universal across both corpora: every skill carries a `REQUIREMENT.md`, or its absence is a gap in the authoring rather than a verdict that the body is already its own specification. `canon/context/claude-internal/skills.md` carries the same rule for the internal half.
 
-`standards/skill.md` admits every skill rather than testing each one's scope, since compressed orientation is useful over a body that is procedural by design whatever that body's own clarity. The standard sets no length threshold: the file's job is orientation rather than a filter, so a skill's body length has no bearing on whether it carries one.
+`claude/skills/create-skill/references/skill.md` admits every skill rather than testing each one's scope, since compressed orientation is useful over a body that is procedural by design whatever that body's own clarity. The standard sets no length threshold: the file's job is orientation rather than a filter, so a skill's body length has no bearing on whether it carries one.
 
 A skill still without one is a gap rather than an exemption, which is why no roster of them is written here. Where a branch in flight is changing what a skill is for, its requirement ships with that branch rather than ahead of it, since one authored earlier would describe the shape the skill is leaving. Coverage closes as those branches land, and the command above is what reports where it stands.

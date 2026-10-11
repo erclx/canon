@@ -20,7 +20,7 @@ Claude Code reads it and writes the implementation. Works for CLI tools, interna
 
 ### Seed shape
 
-The toolkit seed in `tooling/claude/seeds/canon/DESIGN.md` ships a token-table template with a starting set of roles, and `standards/design.md` carries the same tables under `## Template` with placeholder rows. The column headers are what the renderer parses, so they stay verbatim in either, while the rows and values are the project's own.
+The toolkit seed in `tooling/claude/seeds/canon/DESIGN.md` ships a token-table template with a starting set of roles, and `claude/skills/canvas-board/references/design.md` carries the same tables under `## Template` with placeholder rows. The column headers are what the renderer parses, so they stay verbatim in either, while the rows and values are the project's own.
 
 `canon design render` writes an HTML plus CSS preview to `.canon/tmp/render/design/` for eyeballing the current system without leaving Claude Code. See `canon/context/design/index.md`.
 

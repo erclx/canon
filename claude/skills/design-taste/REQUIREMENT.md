@@ -15,7 +15,7 @@ The instruction against that already existed. `draft-and-pick` Step 1 says to na
 
 The second half is the output itself. A model with no stated direction draws the population average of its training data, which produces interfaces that satisfy every craft rule and still read templated.
 
-Prose is already governed in two halves and design is governed in neither. The character bans ship as data a command reads, and the shapes no closed word set can match needed a skill of their own, because each is a pattern rather than a token. `standards/design.md` governs the shape of a project's design document and is silent on whether its values are any good.
+Prose is already governed in two halves and design is governed in neither. The character bans ship as data a command reads, and the shapes no closed word set can match needed a skill of their own, because each is a pattern rather than a token. `claude/skills/canvas-board/references/design.md` governs the shape of a project's design document and is silent on whether its values are any good.
 
 Importing an external catalog wholesale fails on what those catalogs turn out to carry. The largest is 1,206 lines in one file, pinned to one framework, one styling library and one animation package, and it scopes itself out of dashboards, data tables and multi-step product UI. A second bans default fonts by name and prescribes a component library.
 
@@ -56,7 +56,7 @@ A rule failing any of the four is recorded as considered and declined rather tha
 - Express intensity as a numeric scale. A session picks a middle value and reports compliance, which satisfies the rule and decides nothing.
 - Claim the reported failure is closed. Nothing measures whether a round follows these rules, so this skill states them and the measurement is owed separately.
 - Duplicate a rule a surface already states for itself, such as slide layout or terminal color, where pointing at that surface is the whole of the correct answer
-- Be reached only by an author typing its name. `standards/skill.md` makes this a review criterion rather than a check, since nothing answers it before the skill has run. The intended non-author caller is the declared read in `draft-and-pick`'s output. A round producing no read, with this skill never loaded, is the evidence that the description's triggers are too weak.
+- Be reached only by an author typing its name. `claude/skills/create-skill/references/skill.md` makes this a review criterion rather than a check, since nothing answers it before the skill has run. The intended non-author caller is the declared read in `draft-and-pick`'s output. A round producing no read, with this skill never loaded, is the evidence that the description's triggers are too weak.
 
 ## Guards
 
@@ -71,6 +71,6 @@ A rule failing any of the four is recorded as considered and declined rather tha
 - Validation timing, error placement and save blocking, which `420-forms` owns
 - Rendered copy casing, button labels and error wording, which `400-ui` owns
 - The candidate loop, the arm set, the render and the pick, which `draft-and-pick` owns and which this skill is loaded alongside rather than inside
-- The shape of the project's design document, its sections and its token tables, which `standards/design.md` governs
+- The shape of the project's design document, its sections and its token tables, which `claude/skills/canvas-board/references/design.md` governs
 - Prose on the surface being designed, which `write-human` and `markdown.md` govern between them
 - Measuring whether finished output followed these rules, which needs a check this skill does not carry and which no command reaches while a render is an image rather than a parse

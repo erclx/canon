@@ -38,6 +38,6 @@ Revisit when skills failing on a verb the installed binary lacks outnumber the d
 
 A domain this size stays contended as one file: the skill catalog, the shell-out pattern, and the per-skill reasoning for a corpus this large all sit behind one file that almost any skill change writes. Splitting by sub-area gives each one a file that no unrelated change is also writing, and it is what keeps a reader from meeting a claim the entry already states elsewhere against the same subject.
 
-The catalog is a bullet list rather than a table, per `standards/context.md`. A table pads its columns to a shared width, so a description outgrowing its column reflows every row and turns a one-row edit into a whole-file rewrite. A bullet list carries no shared column to reflow.
+The catalog is a bullet list rather than a table, per `claude/skills/context-fold/references/context.md`. A table pads its columns to a shared width, so a description outgrowing its column reflows every row and turns a one-row edit into a whole-file rewrite. A bullet list carries no shared column to reflow.
 
 The sub-areas below are the units a session actually arrives looking for.

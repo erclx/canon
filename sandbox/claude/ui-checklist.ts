@@ -3,7 +3,7 @@ import { scenario } from '@/sandbox/scenario'
 /**
  * No project copy of the corpus, for the same reason `claude/review-craft.ts`
  * carries none. The absent project copy forces `ui-checklist` onto the
- * `${CLAUDE_SKILL_DIR}/../../standards/skill.md` fallback, and the branch name
+ * slug standard fallback through the plugin, and the branch name
  * below turns that citation into a checklist filename `expect.toml` asserts by
  * exact path. It sat in `manual` while the skill could correctly write no
  * checklist at all, which is the escape the shrink closed: the checklist is the
@@ -58,7 +58,7 @@ export default scenario({
         '  .claude/standards/ is absent, so the skill must reach the plugin copy',
       )
       ctx.log.info(
-        '  the slug transform lives only in standards/skill.md, never in the skill body',
+        '  the slug transform lives only in the slug standard, never in the skill body',
       )
       ctx.log.info(
         '  so .canon/tmp/handoff/ui-checklist/task-filter.md is evidence it resolved',

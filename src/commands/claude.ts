@@ -386,7 +386,7 @@ export function register(program: Command): void {
   skills
     .command('audit')
     .description(
-      'Report both skill corpora against the mechanical rules in standards/skill.md',
+      'Report both skill corpora against the mechanical rules in claude/skills/create-skill/references/skill.md',
     )
     .argument('[path]', 'Project root, defaulting to the current directory')
     .helpOption('-h, --help', 'Show this help message')

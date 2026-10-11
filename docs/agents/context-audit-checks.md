@@ -9,7 +9,7 @@ What each finding from `canon context audit` means. The command surface, its fla
 
 ## Required sections
 
-The required-section check reports what does not declare the sections its folder's standard requires. A context entry owes `## Overview` and `## Layout`, the two sections `standards/context.md` marks required. The lists are held in code beside the numeric checkpoints rather than parsed out of the standard, so it fails on a defect rather than on a rewrite of the wording around it. A heading at any level counts, because a domain that split into a folder carries its overview in a sibling named `overview.md` where the section is the `#` title and an `##` beneath it would repeat the filename. Matching exactly is what keeps `## Layout catalog` from satisfying `Layout`.
+The required-section check reports what does not declare the sections its folder's standard requires. A context entry owes `## Overview` and `## Layout`, the two sections `claude/skills/context-fold/references/context.md` marks required. The lists are held in code beside the numeric checkpoints rather than parsed out of the standard, so it fails on a defect rather than on a rewrite of the wording around it. A heading at any level counts, because a domain that split into a folder carries its overview in a sibling named `overview.md` where the section is the `#` title and an `##` beneath it would repeat the filename. Matching exactly is what keeps `## Layout catalog` from satisfying `Layout`.
 
 Which unit answers depends on the folder. Entries of the folder named under `.claude/` are one domain each, so each answers for itself and a finding names the entry. Entries of a folder a domain split into describe that one domain between them, so any sibling answers and a finding names the folder. Holding a split folder to the rule per file would report every child beside its `overview.md`, and rolling the named folder up would let one conforming entry stand in for every other domain sitting next to it.
 
@@ -19,7 +19,7 @@ It reports rather than gates by default, the closer call because a missing secti
 
 ## Reference form
 
-The reference-form check reports an entry naming a sibling entry by bare filename where `standards/context.md` asks for the path it sits at. A bare name resolves against whichever folder its reader is already in, so a domain that splits into subfolders strands every inbound reference and the break surfaces nowhere. A path is checkable, which is what makes the form rule worth measuring at all: once a reference spells its path, the citation gate resolves it and a split that moves the file fails the push.
+The reference-form check reports an entry naming a sibling entry by bare filename where `claude/skills/context-fold/references/context.md` asks for the path it sits at. A bare name resolves against whichever folder its reader is already in, so a domain that splits into subfolders strands every inbound reference and the break surfaces nowhere. A path is checkable, which is what makes the form rule worth measuring at all: once a reference spells its path, the citation gate resolves it and a split that moves the file fails the push.
 
 A finding is a backticked filename carrying no folder, matched against the entries beside the one that wrote it. The backticks are required, since a filename in running prose is not a reference a reader follows.
 
@@ -33,7 +33,7 @@ It reports and never gates, which is the split the citation check already draws.
 
 ## Length
 
-Length quotes its checkpoint from `standards/context.md`: roughly 150 rendered lines for an entry, applied to each of the 60 entries the audit measures, 51 of them under `canon/context/` and 9 diagram files beside them. It counts rendered lines rather than source lines, wrapping each line at 80 columns and summing the heights.
+Length quotes its checkpoint from `claude/skills/context-fold/references/context.md`: roughly 150 rendered lines for an entry, applied to each of the 60 entries the audit measures, 51 of them under `canon/context/` and 9 diagram files beside them. It counts rendered lines rather than source lines, wrapping each line at 80 columns and summing the heights.
 
 A line is wrapped at the width it renders at, so a link counts as its anchor text and a backticked path counts whole, which parts the rendered count from a source count wherever an entry cites a path in backticks rather than as a link. Entries here are authored one line per bullet, so a block of fifteen paragraph-bullets occupies fifteen source lines and renders past sixty, which source counting cannot see.
 
@@ -71,7 +71,7 @@ The audit reads `canon/REQUIREMENTS.md` under its own step rather than as a fold
 
 The provenance check covers `canon/context/` alone, the reference-form check covers the split folders inside it, the required-section check covers `canon/context/` alone, and length and the table finding reach every audited folder.
 
-What narrows the provenance check is stated in `standards/context.md`, which opens its scope by handing figures to the `draft-figure` skill, and the sibling standards do not restate it. A marker reported in a diagram entry would cite a rule that entry's own standard routes elsewhere. The split is between kinds of rule rather than kinds of folder, and what decides it is which tier states the rule rather than what the check measures.
+What narrows the provenance check is stated in `claude/skills/context-fold/references/context.md`, which opens its scope by handing figures to the `draft-figure` skill, and the sibling standards do not restate it. A marker reported in a diagram entry would cite a rule that entry's own standard routes elsewhere. The split is between kinds of rule rather than kinds of folder, and what decides it is which tier states the rule rather than what the check measures.
 
 Length and the table finding generalize as judgments about how far a reader travels, so both reach wherever the audit is pointed. Required sections narrow for a plainer reason: each list is one standard's own, so it reaches the folder that standard governs. The context standard states a set, and an older install's diagrams folder has no standard to state one.
 

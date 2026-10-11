@@ -96,7 +96,7 @@ target project on the fly.
 
 On the `gov` phase, stop and present four options rather than picking:
 
-1. Author a new rule in the toolkit at `governance/rules/<domain>/<num>-<name>.md` following `${CLAUDE_SKILL_DIR}/../../standards/rule.md`, commit, then re-run install. Take this route when the toolkit should ship the rule to every project.
+1. Author a new rule in the toolkit at `governance/rules/<domain>/<num>-<name>.md` following `${CLAUDE_SKILL_DIR}/../create-rule/references/rule.md`, commit, then re-run install. Take this route when the toolkit should ship the rule to every project.
 2. Invoke `create-rule`, which scaffolds the file into the target project at a non-colliding number. Take this route when the rule is specific to this project and no sync should ever overwrite it.
 3. Install the matching non-`<tech>` rules and skip the tech-specific layer.
 4. Abort.

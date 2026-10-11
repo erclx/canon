@@ -1,21 +1,24 @@
 ---
 title: Claude skill reference
 description: Skill structure and authoring rules for Claude Code
-paths:
-  - '.claude/skills/**/SKILL.md'
-  - 'claude/skills/**/SKILL.md'
-  - '.claude/skills/**/REQUIREMENT.md'
-  - 'claude/skills/**/REQUIREMENT.md'
-rule:
-  - "Confirm `canon:create-skill`'s two creation-time questions are answered before a new `SKILL.md` lands, whether drafted by hand, by another skill, or by `canon:create-skill` itself. Carry the third question into the sibling `REQUIREMENT.md`'s `Must not` section as a review criterion rather than a gate."
-  - 'Report it rather than proceeding silently when `canon:create-skill` does not resolve. It ships with the plugin and this rule ships with the CLI, so a project that installed governance alone does not have it.'
-  - 'Re-read a skill body this session edited before invoking that skill again in the same session'
-  - 'Do not read a resolved file path in a held body as evidence the body is current'
-  - 'Follow the skill requirement standard for the shape a `REQUIREMENT.md` states. Read it with `canon standards skill-requirement`.'
-  - 'Follow the skill path standard for which root a path in a body resolves against and how a body cites a standard. Read it with `canon standards skill-paths`.'
 ---
 
 # Claude skill reference
+
+## Contents
+
+- [Overview](#overview)
+- [Scope](#scope)
+- [Changing a skill](#changing-a-skill)
+- [Whether a rule belongs beside the skill](#whether-a-rule-belongs-beside-the-skill)
+- [Skill types](#skill-types)
+- [Structure](#structure)
+- [Frontmatter](#frontmatter)
+- [Description](#description)
+- [Body](#body)
+- [Scripts](#scripts)
+- [Invocation](#invocation)
+- [Examples](#examples)
 
 ## Overview
 
@@ -34,7 +37,7 @@ Does not govern:
 - Voice, rhythm, and sentence construction in a skill body: the `write-human` skill
 - Punctuation, formatting, and word choice in a skill body: `markdown.md`
 - The transform from a branch name to a slug a skill carries in a filename: `slug.md`
-- Whether a new skill earns its place: the three-question test in the `create-skill` skill and the creation-time bullet in this standard's own `rule` frontmatter
+- Whether a new skill earns its place: the three-question test in the `create-skill` skill and the creation-time bullet in the `skill` governance rule
 
 ## Changing a skill
 
@@ -133,7 +136,7 @@ allowed-tools: <tools required>
 - Name every file under `references/` in the body at the point a session reads it, since an unnamed reference is never loaded.
 - Open a file under `references/` running over 100 lines with a `## Contents` H2 of anchor links after its H1 and intro, so a session that reads only the top of the file still sees everything it holds.
 - Keep the trigger, the skip condition, and the guard in the body. A run that never reaches the block has to decide that without opening the reference.
-- Never point one skill at a sibling skill's folder for a reference both read. Each skill carries its own copy under `references/`, generated rather than hand-copied by the rule in `## Path resolution`.
+- Point one skill at a sibling skill's reference by the form `skill-paths.md` states, `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md`, and name the owner rather than copying the file.
 
 ### Reading and running commands
 

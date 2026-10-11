@@ -7,7 +7,7 @@ description: How a skill is invoked, the split between the three task-board writ
 
 ## Invocation
 
-Invoke with `/skill-name` or let Claude auto-trigger by matching against the skill description. Skills marked with `disable-model-invocation: true` require explicit invocation and will not auto-trigger. Git skills (`git-commit`, `git-pr`, `git-branch`, `git-stage`) override built-in commit and PR behavior. See `standards/skill.md` for authoring conventions.
+Invoke with `/skill-name` or let Claude auto-trigger by matching against the skill description. Skills marked with `disable-model-invocation: true` require explicit invocation and will not auto-trigger. Git skills (`git-commit`, `git-pr`, `git-branch`, `git-stage`) override built-in commit and PR behavior. See `claude/skills/create-skill/references/skill.md` for authoring conventions.
 
 That flag blocks the `Skill` tool rather than only suppressing an auto-trigger, which decides who can delegate to a flagged body. A slash command inside a `claude --bg` launch prompt reaches a flagged body as an expanded invocation, which is what every dispatch here relies on: `auto-ship` carries the flag and is launched as `/canon:auto-ship`. A session acting on an inbound message does not reach it this way, because a message reaches a skill through the `Skill` tool and through no other route, so a chain step invoking a flagged sibling through the tool meets the flag rather than the body. The answer through that route has been measured inconsistent rather than a deterministic refusal, which is why the fallback below matters: a caller cannot rely on the call succeeding even when the flag is the only thing in its way.
 
@@ -23,7 +23,7 @@ A harness hook is a third route to a skill, and `session-compact` is the only on
 
 A session loads a skill body once and keeps it, so an edit made this session is not picked up, and a compaction carries the held copy forward. A held body naming a file the branch deleted fails loudly, while one naming a file that still exists and says something different reads current, so the session applies the superseded rule and reports success. That is the ordinary ship shape here, since a branch touching `context-fold`, `git-stage`, or `git-pr` runs those skills later in the chain that edited them.
 
-`canon claude skills drift <ref>` names which shipped bodies moved between a ref and `HEAD`, and `claude/skills/session-map/references/session.md` runs it while a session map is written. Comparing the bytes a session holds cannot be built, since a session cannot read its own loaded body back, so the substitute reports a file moving rather than a held copy differing. `governance/rules/standards/skill.md` carries the instruction on the body being edited, since telling a session to re-invoke the skill fixes nothing and a re-read step in the ship chain was declined on cost. Measured at `34ce48e6` on 2026-08-20.
+`canon claude skills drift <ref>` names which shipped bodies moved between a ref and `HEAD`, and `claude/skills/session-map/references/session.md` runs it while a session map is written. Comparing the bytes a session holds cannot be built, since a session cannot read its own loaded body back, so the substitute reports a file moving rather than a held copy differing. `governance/rules/claude/skill.md` carries the instruction on the body being edited, since telling a session to re-invoke the skill fixes nothing and a re-read step in the ship chain was declined on cost. Measured at `34ce48e6` on 2026-08-20.
 
 ## Diagrams as figures
 

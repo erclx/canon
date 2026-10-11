@@ -7,7 +7,7 @@ description: The skill audit with its dated-provenance, practice shape, referenc
 
 ## The skill audit
 
-`canon claude skills audit` measures both skill corpora against `standards/skill.md` and `claude/skills/create-skill/references/skill-practice.md`, gating on one check and reporting ten, which is the split the context audit set. Requirement presence is the fact and the rest are judgments. The gate exists because the standard required `REQUIREMENT.md` with nothing reading the rule, the shape three open issues already record.
+`canon claude skills audit` measures both skill corpora against `claude/skills/create-skill/references/skill.md` and `claude/skills/create-skill/references/skill-practice.md`, gating on one check and reporting ten, which is the split the context audit set. Requirement presence is the fact and the rest are judgments. The gate exists because the standard required `REQUIREMENT.md` with nothing reading the rule, the shape three open issues already record.
 
 Every measure traces to a stated line, so the report carries no rule of its own. Tracing each `Must` to a stated gap is the rule in that standard worth the most, and it needs a verdict per skill, so it is named as unmeasured rather than approximated by a count. The report names its blind spots on every run, since a list of what passed reads as a verdict on the whole standard.
 

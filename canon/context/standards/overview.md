@@ -18,7 +18,7 @@ Nothing installs the corpus into a project and nothing mirrors it under `.claude
 
 ### Why the entry is a folder
 
-The entry is a folder on the sub-area condition rather than on length. `standards/context.md` splits a domain at three or more sub-areas that do not fit cleanly in one file, and the scope model, authoring, destinations, resolution, and the per-standard decisions are five that do not, with the overview and the command surface a sixth.
+The entry is a folder on the sub-area condition rather than on length. `claude/skills/context-fold/references/context.md` splits a domain at three or more sub-areas that do not fit cleanly in one file, and the scope model, authoring, destinations, resolution, and the per-standard decisions are five that do not, with the overview and the command surface a sixth.
 
 The per-standard decisions are a nested folder under `canon/context/standards/per-standard/` because they group by standard family, and each family is a sub-area of its own. No file in the domain sits past 300 rendered lines, and that ceiling is the thing to defend. Read `canon context audit` for the live per-file numbers rather than recording them here, since a figure written into prose goes stale on the next edit and the audit does not.
 

@@ -1,4 +1,4 @@
-# What `canon standards skill` leaves behind when it runs from a target holding
+# What `canon standards standard` leaves behind when it runs from a target holding
 # no standards folder of its own. Read by `canon sandbox check`. Patterns use TOML
 # literal strings so a regex needs no backslash escaping.
 #
@@ -35,10 +35,10 @@ manual = [
 # standard without the prefix passes whichever root answered.
 [[content]]
 path = "install/read-frame.log"
-pattern = '<canon>/standards/skill\.md'
+pattern = '<canon>/standards/standard\.md'
 
 # The read returned the document rather than the miss path, which prints a
 # warning and the catalog to stderr and writes nothing to stdout.
 [[content]]
 path = "install/read-body.md"
-pattern = '^# Claude skill reference$'
+pattern = '^# Standard reference$'

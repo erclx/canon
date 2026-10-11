@@ -21,7 +21,7 @@ The consolidated dark set is the palette the hero already draws, so no capture n
 
 ### The component layer lives in code
 
-The component layer lives in `src/design/components.ts` rather than in the record, because `standards/design.md` keeps CSS class names out of that document. `TEACH_COMPONENTS`, the six-entry teach chrome of masthead, article, quiz, glossary, outline, and references, sits beside the generic default rather than inside it, and a caller opts in by passing an explicit list to `buildDesignCss`'s `components` option, which keeps a masthead and a quiz out of a project that never asked for teach.
+The component layer lives in `src/design/components.ts` rather than in the record, because `claude/skills/canvas-board/references/design.md` keeps CSS class names out of that document. `TEACH_COMPONENTS`, the six-entry teach chrome of masthead, article, quiz, glossary, outline, and references, sits beside the generic default rather than inside it, and a caller opts in by passing an explicit list to `buildDesignCss`'s `components` option, which keeps a masthead and a quiz out of a project that never asked for teach.
 
 `COMPONENTS` holds three: a status marker, a scrollbar, and `HAND_DRAWN_FIGURE`, which draws one hand-drawn figure without teach's quiz or schedule machinery. It declares its own `--figure-hand` and `--figure-wide` defaults rather than reading `TEACH_CHROME`'s `--teach-hand` and `--teach-wide`, which keeps it independent of teach.
 

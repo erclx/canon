@@ -10,7 +10,7 @@ import { isStubSeed } from '@/tooling/seed-marker'
  * Checkpoint quoted from the standard stating it. It is not a cap.
  *
  * Entry length rests on one entry per domain, which is a domain fact, so
- * `standards/context.md` keeps it. Depth and bullet weight read the same over
+ * `claude/skills/context-fold/references/context.md` keeps it. Depth and bullet weight read the same over
  * any markdown file, so they are stated at the attribute tier and measured by
  * `canon markdown audit` rather than here.
  */
@@ -111,7 +111,7 @@ const PROVENANCE: readonly { kind: ProvenanceKind; pattern: RegExp }[] = [
 /**
  * Verbs that read the date behind them as stamping a measurement.
  *
- * `standards/context.md` cuts a date attached to a change and permits one
+ * `claude/skills/context-fold/references/context.md` cuts a date attached to a change and permits one
  * stamping a measurement, so a pattern matching every ISO date reports against
  * a rule that admits half of what it finds. Separating the two needs the clause
  * rather than the token, since `measured on 2026-08-19` and `overturned on
@@ -154,7 +154,7 @@ const SENTENCE_END = /[.!?:;]\s(?=[^.!?:;]*$)/
  * JSON record publishes as `checkpoints.provenanceFolder` breaks every consumer
  * reading that field for a gain of one word.
  *
- * `standards/context.md` opens its scope by handing figures to the
+ * `claude/skills/context-fold/references/context.md` opens its scope by handing figures to the
  * `draft-figure` skill, so a marker reported in a diagrams entry would cite a
  * rule that entry's own standard routes elsewhere. The length and table
  * checkpoints are quoted from the same standard and keep reaching every audited
@@ -164,7 +164,7 @@ const SENTENCE_END = /[.!?:;]\s(?=[^.!?:;]*$)/
  * What gates here is a rule only this standard states. Bullet weight does not,
  * since `claude/skills/markdown-craft/references/markdown.md` owns that checkpoint across document types and
  * its remedy sends the overflow to prose, which any entry type can act on.
- * `standards/context.md` specializes that remedy for an entry carrying
+ * `claude/skills/context-fold/references/context.md` specializes that remedy for an entry carrying
  * decisions, and specializing a rule narrows the advice rather than the measure.
  *
  * Restating the exclusion in the sibling standards was the alternative for what
@@ -241,7 +241,7 @@ export interface EntryReport {
 }
 
 /**
- * The three questions `standards/context.md` asks of an entry past the
+ * The three questions `claude/skills/context-fold/references/context.md` asks of an entry past the
  * checkpoint, in the order it states them.
  *
  * The standard calls no entry over the checkpoint wrong. It asks whether the

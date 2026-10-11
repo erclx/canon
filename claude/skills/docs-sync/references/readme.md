@@ -1,8 +1,6 @@
 ---
 title: Readme reference
 description: Readme voice, structure, and content conventions
-paths:
-  - '**/README.md'
 ---
 
 # Readme reference
@@ -10,6 +8,15 @@ paths:
 Applies to every `README.md`. The `## Voice` section states the voice for a repository's root README, so the `write-human` skill yields to it there. The yield covers voice alone. The rhythm and density rules that skill carries stay in force, as does the word-choice guidance that travels with them, and so do the punctuation and formatting in `markdown.md`, so the warmer register ships with the same hygiene: no em dashes, no semicolons, no marketing words.
 
 The reader is what changes. Reference prose serves someone who already committed to the project and is scanning for a fact. A root README meets someone deciding whether to commit at all, and it is often the only file they read.
+
+## Contents
+
+- [Scope](#scope)
+- [Voice](#voice)
+- [Structure](#structure)
+- [Sections](#sections)
+- [Content](#content)
+- [Examples](#examples)
 
 ## Scope
 

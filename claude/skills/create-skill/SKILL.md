@@ -9,7 +9,7 @@ metadata:
 
 Read these files in parallel:
 
-- `${CLAUDE_SKILL_DIR}/../../standards/skill.md`: skill structure, skill types, frontmatter fields, invocation rules
+- `${CLAUDE_SKILL_DIR}/references/skill.md`: skill structure, skill types, frontmatter fields, invocation rules
 - `${CLAUDE_SKILL_DIR}/references/skill-requirement.md`: what `REQUIREMENT.md` must answer, its sections, and its template
 - `${CLAUDE_SKILL_DIR}/references/skill-paths.md`: which root a path in the body resolves against, and how the body cites a standard
 - `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md`: punctuation and formatting for skill body text
@@ -18,7 +18,7 @@ Read these files in parallel:
 
 ## Guards
 
-- If `${CLAUDE_SKILL_DIR}/../../standards/skill.md` is not present, stop: `❌ skill.md standard not found. Reinstall the canon plugin.`
+- If `${CLAUDE_SKILL_DIR}/references/skill.md` is not present, stop: `❌ skill.md standard not found. Reinstall the canon plugin.`
 
 ## Steps
 

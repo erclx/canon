@@ -23,7 +23,7 @@ The template outranks the prose where they disagree. An author copies the block,
 
 `design.md` is the sharpest case for the rule: the token tables carry fixed headers the renderer reads, and a standard that names the shape without spelling those headers verbatim sends an author into `src/design/parse.ts` and `src/design/render.ts` to recover them. The shape rule asks any standard for the headers and labels a tool parses, verbatim, which is the general form of what `design.md` would otherwise leave missing.
 
-A template and a seed hold different things for the same document, which is what keeps them from drifting. `standards/design.md` carries headers and placeholder rows, and `tooling/claude/seeds/canon/DESIGN.md` carries the starting roles a scaffolded project receives. Only the headers are load-bearing, since `src/design/render.ts` reads those by exact key and slugs every row name into the variable it emits, so a project is free to rename, add, or drop a role.
+A template and a seed hold different things for the same document, which is what keeps them from drifting. `claude/skills/canvas-board/references/design.md` carries headers and placeholder rows, and `tooling/claude/seeds/canon/DESIGN.md` carries the starting roles a scaffolded project receives. Only the headers are load-bearing, since `src/design/render.ts` reads those by exact key and slugs every row name into the variable it emits, so a project is free to rename, add, or drop a role.
 
 ## The meta-standard in the flat root
 
@@ -35,7 +35,7 @@ The rule's glob is recursive, so it governs a standard at any depth the same way
 
 `standards/standard.md` carries two rules about a standard's own lifecycle, distinct from the shape rules governing what it contains.
 
-A standard states a success criterion, near the top and above the shape rules. Specifying structure exhaustively and success nowhere leaves nothing to argue a proposed change against, so the standard gets edited on whichever input arrived most recently. `standards/context.md` states its own as `## What a working entry looks like`, and `claude/skills/create-skill/references/skill-requirement.md` states one as `## What a working requirement looks like`, scoped to the requirement file rather than the skill.
+A standard states a success criterion, near the top and above the shape rules. Specifying structure exhaustively and success nowhere leaves nothing to argue a proposed change against, so the standard gets edited on whichever input arrived most recently. `claude/skills/context-fold/references/context.md` states its own as `## What a working entry looks like`, and `claude/skills/create-skill/references/skill-requirement.md` states one as `## What a working requirement looks like`, scoped to the requirement file rather than the skill.
 
 A standard then changes on a failure rather than on a finding. A finding is that the vendor docs say X or a paper suggests Y, and it goes to the task board as a hypothesis. A failure is an artifact that satisfied every shape rule and still missed the criterion, and it edits the standard. The change cites the failing artifact.
 

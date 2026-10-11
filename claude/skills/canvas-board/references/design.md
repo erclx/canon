@@ -1,13 +1,22 @@
 ---
 title: Design reference
 description: Shape and content rules for canon/DESIGN.md
-paths:
-  - 'canon/DESIGN.md'
 ---
 
 # Design reference
 
 Applies to `canon/DESIGN.md`. Captures visual intent and the decisions behind how things look, not a style guide, component spec, or framework reference. Update when a visual decision is made or a rule changes.
+
+## Contents
+
+- [Scope](#scope)
+- [What goes in](#what-goes-in)
+- [What does not go in](#what-does-not-go-in)
+- [Format](#format)
+- [Prose budget](#prose-budget)
+- [The uncertainty tag](#the-uncertainty-tag)
+- [Sections](#sections)
+- [Template](#template)
 
 ## Scope
 

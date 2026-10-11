@@ -74,9 +74,9 @@ export default scenario({
       // warning and the whole catalog to the log file, so an abort here would kill
       // the scenario with the one diagnostic the command produced sitting unread.
       ctx.log.step(
-        'Running: canon standards skill (from install/, which holds none)',
+        'Running: canon standards standard (from install/, which holds none)',
       )
-      const result = ctx.capture('bun', cli(ctx, 'standards', 'skill'), {
+      const result = ctx.capture('bun', cli(ctx, 'standards', 'standard'), {
         cwd: 'install',
       })
       ctx.write('install/read-body.md', result.stdout)
