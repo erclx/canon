@@ -24,8 +24,9 @@ IFS= read -r -d '' -t 2 input
 # its edit path prints a URL as well and is not an opening.
 command=$(printf '%s' "$input" | jq -r '.tool_input.command // empty')
 stdout=$(printf '%s' "$input" | jq -r '.tool_response.stdout // empty')
+is_hand_opened=false
 case "$command" in
-*"gh pr create"*) ;;
+*"gh pr create"*) is_hand_opened=true ;;
 *)
   printf '%s\n' "$stdout" | grep -qx 'opened=true' || exit 0
   ;;
@@ -57,4 +58,11 @@ session=$(printf '%s' "$input" | jq -r '.session_id // "unknown"')
 printf -- '- %s session=%s pr=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$session" "$url" >>"$log_dir/log.md"
 
 msg="Pull request $url just opened. If this session holds a worker's channel obligation, announce it to the controller now, per role-worker."
+# A pull request opened by hand skipped git-pr, so nothing has labelled it.
+# The verb is named only where the installed canon carries it, since a skill
+# can reach a target ahead of the release that ships the verb.
+if [ "$is_hand_opened" = true ] && canon labels apply --help >/dev/null 2>&1; then
+  msg="$msg Run canon labels apply ${url##*/} to label it."
+fi
+
 jq -nc --arg msg "$msg" '{hookSpecificOutput:{hookEventName:"PostToolUse",additionalContext:$msg}}'

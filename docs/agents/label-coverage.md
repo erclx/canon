@@ -70,6 +70,17 @@ It reports and never gates. Whether an uncovered surface deserves a label is a j
 
 A project declaring no map refuses with `no-map`, which is an answer rather than a fault. Such a project is labelled silently by design, and treating the absence as a break would make the map mandatory for every target. `canon audits run` reads that one reason as an expected absence and every other refusal as a measure that did not run.
 
+## Applying the set
+
+`canon labels apply <number>` reads the same earned set and adds each label the open pull request lacks, so a pull request opened outside `git-pr` takes one command to label.
+
+```bash
+canon labels apply 123 --json
+canon labels apply 123 --check
+```
+
+It binds to the pull request before anything is read or written, and refuses with `head-mismatch` unless the head is the current branch and the state is open, under `--check` as well. It adds and never removes, so a label a person applied stays. A label the remote does not carry lands in `missingOnRemote` and is never created. `--check` writes nothing and exits 2 when labels are owed. A project declaring no map adds nothing and exits 0.
+
 ## What it does not measure
 
 A prefix reaching no path is invisible here. A row left behind by a deleted folder stays in the map forever, and this verb has nothing to say about it. That is the map going stale from the other side and a second measure rather than this one.
