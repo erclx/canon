@@ -1,11 +1,11 @@
 ---
 title: Archive a shipped task
-description: How task-board confirms a task's work reached main, runs canon tasks archive, routes each refusal, and clears prose naming the archived task
+description: How task-complete confirms a task's work reached main, runs canon tasks archive, routes each refusal, and clears prose naming the archived task
 ---
 
 # Archive a shipped task
 
-The Archive mode of `task-board`. The session reads this file when the request names a task file already shipped.
+The Archive mode of `task-complete`. The session reads this file when the request names a task file already shipped.
 
 The `post-merge` git hook archives the task a merge closed, so a request arriving here is usually one the hook could not resolve on its own. Run the steps below against whatever the hook left in place.
 
@@ -13,7 +13,7 @@ Do not move the file, edit `priority.md`, or regenerate the index by hand. `cano
 
 ## Step 1: confirm the work reached main
 
-`context-fold` marks outcomes on the branch as step 1 of the ship chain, so an all-`[x]` task routinely describes a pull request that is still open. The command gates on the outcomes and cannot tell those two apart, which is what puts this check here:
+`task-complete` marks outcomes on the branch as step 2 of the ship chain, so an all-`[x]` task routinely describes a pull request that is still open. The command gates on the outcomes and cannot tell those two apart, which is what puts this check here:
 
 ```bash
 git fetch origin main --quiet && git log origin/main --oneline -20
@@ -39,7 +39,7 @@ On success the record carries `from`, `to`, `priorityRowRemoved`, and `indexRege
 
 Each reason has one resolution and none of them is to archive around it:
 
-- `open-outcomes`: the named outcomes are unmarked or genuinely open. Run `context-fold` when the work shipped and nothing marked it. Leave the task on the board when the outcome is real. When the work is being abandoned, cut it by striking the body, `- ~~<outcome>~~ <why>`, whatever the checkbox holds, so the board records what was dropped rather than meeting this refusal a second time.
+- `open-outcomes`: the named outcomes are unmarked or genuinely open. Run `task-complete` when the work shipped and nothing marked it. Leave the task on the board when the outcome is real. When the work is being abandoned, cut it by striking the body, `- ~~<outcome>~~ <why>`, whatever the checkbox holds, so the board records what was dropped rather than meeting this refusal a second time.
 - `ambiguous`: two tasks name one pull request, which is the misfile `${CLAUDE_SKILL_DIR}/references/tasks.md` rules out. Resolve the citation by hand, since no sweep repairs it.
 - `earlier-slice`: the number is listed on the task but is not the last, so a later slice is still to merge. Leave the task on the board. Its last slice's merge archives it.
 - `pending-branch`: a branch named in `detail` ticked an outcome before its own pull request number was recorded. Leave the task live, since that branch's merge archives it once `git-pr` records the number. When the operator decides a named branch was abandoned, archive by stem, which is the one case for it.

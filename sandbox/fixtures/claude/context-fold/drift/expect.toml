@@ -8,10 +8,10 @@
 # firing on every run, which would be a vacuous assertion pointing the other way.
 max_turns = 30
 
-# Both plans stay live. Marking an outcome settles nothing about a plan, which
-# the merge settles through `canon tasks archive`, so a run that moved the
-# closing task's plan has swept on a tick this same run wrote three steps
-# earlier. The second path is the control that was never cited by any task.
+# Both plans stay live. The fold reads the plan for the decisions it carries and
+# writes neither plans nor the board, which `task-complete` and the merge's
+# `canon tasks archive` own, so a run that moved a plan reached past its own
+# surface. The second path is the control that was never cited by any task.
 paths = [
   ".canon/plans/feature-postgres-migration.md",
   ".canon/plans/feature-some-old-plan.md",
@@ -27,9 +27,11 @@ absent = [
 
 # The arm runs under `bypassPermissions`, because no permission mode both allows
 # writes under `.claude/` and scopes them. This is what replaces the denial count
-# the envelope can no longer supply. The record root is named beside it, since a
-# run that moved a plan would write there and nowhere under `.claude/`.
-write_scope = [".claude/**", ".canon/**"]
+# the envelope can no longer supply. `canon/context/**` is the one tracked folder
+# the fold writes, and the storage rewrite the manual list expects lands there.
+# The record root is named beside it, since a run that moved a plan would write
+# there and nowhere under `.claude/`.
+write_scope = [".claude/**", "canon/context/**", ".canon/**"]
 
 # Prose the checker cannot assert, each with the reason it stays here. Kept beside
 # the mechanical assertions rather than left in the scenario's log lines, which is
@@ -45,14 +47,3 @@ manual = [
 [[content]]
 path = "canon/REQUIREMENTS.md"
 pattern = '^- No multi-user support$'
-
-[[content]]
-path = ".canon/tasks/v01.0-postgres-migration.md"
-pattern = '^- \[x\] Outcome: tasks persist in Postgres'
-
-# The pointer stays where the fixture wrote it. A run that retargeted the line
-# without moving the plan leaves the only pointer to it aimed at a path holding
-# no file, and `.canon/plans/` is gitignored so nothing recovers it.
-[[content]]
-path = ".canon/tasks/v01.0-postgres-migration.md"
-pattern = '^Plan: \[feature-postgres-migration\]\(\.\./plans/feature-postgres-migration\.md\)'

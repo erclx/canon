@@ -27,7 +27,7 @@ Each section states what an arm's declaration proves and what it leaves open, so
 
 ## Task board
 
-`claude/task-board.sh` carries separate `create` and `archive` arms, because the two paths have disjoint preconditions and one arm running both would assert the second against a tree the first mutated. Both stage the board rather than inheriting one, since `SANDBOX_INJECT_SEEDS` leaves `.canon/tasks/` holding only the seeded `index.md`.
+`claude/task-board.sh` carries the `create` arm and `claude/task-complete.sh` the `archive` arm, because the two paths have disjoint preconditions and one arm running both would assert the second against a tree the first mutated. Both stage the board rather than inheriting one, since `SANDBOX_INJECT_SEEDS` leaves `.canon/tasks/` holding only the seeded `index.md`.
 
 - `canon tasks archive` is a typed verb whose refusals `src/tasks/archive.test.ts` covers, so the archive arm stages a board that satisfies every gate and asserts the successful move. The create path has no CLI verb, so the skill writes the file from `claude/skills/task-board/references/tasks.md` and that arm covers prose with nothing underneath it.
 - The create board runs three consecutive versions with no gaps, which forces the next one, and a `.canon/tasks/` reply fragment pins the proposed label.

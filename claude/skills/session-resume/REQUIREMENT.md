@@ -42,6 +42,6 @@ A resume is a read, and a session that treats it as a cleanup pass offers to arc
 
 - Writing a handoff, which happens at the close of a session rather than at its start. This skill names the standard that governs one and follows it no further.
 - The sections a role adds over the core handoff, which belong to that role's own surface
-- Archiving a shipped task out of the folder: `task-board`
-- Archiving a plan and marking an outcome, which `context-fold` does when the work ships
+- Archiving a shipped task out of the folder: `task-complete`
+- Marking an outcome, which `task-complete` does when the work ships, and archiving a plan, which the merge does
 - Implementing the item it recommends, which is the next request rather than part of this one

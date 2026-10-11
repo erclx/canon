@@ -60,7 +60,7 @@ canon tasks pull-request 673 --plan worktree-scratch-routing --json
 
 A plan is matched on the token both spellings share, so `worktree-scratch-routing`, `feature-worktree-scratch-routing`, and `.canon/plans/feature-worktree-scratch-routing.md` all select the same task. The `action` field reports `added`, `appended`, `corrected`, or `unchanged`, which makes a rerun against the same number safe.
 
-Run from a branch other than `main` or `master`, the verb also drops that branch from the task's `Pending branch:` line, along with every name its reflog says it was renamed from, and removes the line once it is empty. The renamed names matter because `git-ship` renames a nonconforming branch after `context-fold` wrote the marker. It does so on an `unchanged` run too, so a rerun repairs a marker left behind. The `pending` field lists the branches still on the line after the write.
+Run from a branch other than `main` or `master`, the verb also drops that branch from the task's `Pending branch:` line, along with every name its reflog says it was renamed from, and removes the line once it is empty. The renamed names matter because `git-ship` renames a nonconforming branch after `task-complete` wrote the marker. It does so on an `unchanged` run too, so a rerun repairs a marker left behind. The `pending` field lists the branches still on the line after the write.
 
 Exit codes: `0` recorded, `1` refused. The `reason` field carries `no-board`, `no-match`, or `ambiguous`. `git-pr` skips silently on those three, because each is a case where a guessed write would archive the wrong task once the branch merges.
 

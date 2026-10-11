@@ -21,6 +21,8 @@ The lesson then reaches nobody. It is a page carrying a stylesheet and a script,
 
 The durable half then has nowhere to go. A reference page and a glossary carry no learner and are ordinary reference prose, so they belong wherever the project already keeps prose on that subject, and a workspace holding them is a gitignored folder one person reads. A session moving them by hand picks a destination from the reader's activity rather than from who owns the subject, drops a page into a corpus without the source line that corpus requires, and has nothing stopping it from carrying a lesson across.
 
+A confirmed page then waits in gitignored scratch until something lands it, and the session that produced it is gone by the time a branch exists to carry the write. Left unfolded it reads as promoted while the destination holds nothing.
+
 Two failures land specifically on where the folder sits. A workspace resolved against the current directory forks into a copy per linked worktree, so the learning records split and no session sees the whole history. A body naming only the destination path reports success and loses the write, because the file-editing tools refuse a main-root path from a linked worktree and offer a worktree copy instead.
 
 ## Must
@@ -38,12 +40,14 @@ Two failures land specifically on where the folder sits. A workspace resolved ag
 - Hand the learner a link that opens the workspace in a real browser on every run, reading it back from the verb that served it rather than composing one, since the port a preview lands on is not the port it asked for
 - Propose a destination for each durable page by who owns its subject, and wait for the operator rather than routing on the session's own reading
 - Hand each confirmed page off through a named file of its own, so one skill owns the durable writes and no other producer's unread work is discarded with it
+- Land each block of that handoff from a branch, at the destination its heading names, taking the destination as already decided, then delete the file so a later run does not fold it twice
 - Name what the destination expects that the page does not carry yet, since the workspace runs none of the gates the destination does
 
 ## Must not
 
 - Teach from recall without saying which claims rest on it
-- Write to a destination surface directly, since the skill owning that file makes the edit and two skills writing one file at one step is what the handoff exists against
+- Write to a destination surface outside the fold mode, since the proposal and the landing are two steps a branch boundary separates and two writers at one step is what the handoff exists against
+- Overwrite a file a promotion block routes to. A destination that already holds a page is a merge for a person, and folding over it discards work this skill never read.
 - Open a second workspace on a subject an existing one already covers
 - Renumber a workspace folder, a lesson, or a learning record, since the number is cited by files already written
 - Promote a lesson, at any age and on any request, since it is generated markup carrying a quiz and a learner into a corpus every other page passed a gate to enter
@@ -55,7 +59,7 @@ Two failures land specifically on where the folder sits. A workspace resolved ag
 
 ## Out of scope
 
-- Landing a promoted page at its destination, which belongs to the skill that owns durable writes there, and creating a wiki folder a project never chose
+- Creating a wiki folder a project never chose
 - What the verbs do internally, which is the CLI domain's own contract rather than this skill's, and the records backup that carries the folder off one disk
 - What a lesson renders as and how a quiz behaves once rendered, which the lesson-craft reference shapes and a rendering layer executes
 - Deciding when to fire. The skill is user-invoked through `disable-model-invocation`, so opening a workspace is the learner's call rather than a description match.
