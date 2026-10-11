@@ -3,7 +3,7 @@
 # needs no backslash escaping.
 
 # `canon tasks next-label` allocates the label, and the skill writes the file
-# itself from `canon standards tasks`. Nothing writes the task for it, so the
+# itself from its own tasks reference. Nothing writes the task for it, so the
 # file's frontmatter, body, and links are prose behavior with no unit test
 # underneath them, which is the opposite of the archive arm beside it.
 

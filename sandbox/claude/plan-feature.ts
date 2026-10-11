@@ -181,7 +181,7 @@ export default scenario({
         'Context: flat src/components/ mixing 7 primitives with 5 cart pieces, flat e2e/ mixing 2 specs with 2 helpers, one wishlist task',
       )
       ctx.log.info(
-        'Before:  rm -rf .claude/skills/codebase-layout .claude/skills/plan-feature, since the injected copies carry no references/ or standards/ and shadow the plugin',
+        'Before:  rm -rf .claude/skills/codebase-layout .claude/skills/plan-feature, since the injected copies carry no references/ and shadow the plugin',
       )
       ctx.log.info(
         'Action:  /canon:plan-feature plan the wishlist task in .canon/tasks/v01.0-wishlist.md',

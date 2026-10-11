@@ -52,10 +52,10 @@ export default scenario({
       )
       ctx.log.info('')
       ctx.log.info(
-        'This arm also checks the standards citation, not the skill alone.',
+        'This arm also checks the slug reference citation, not the skill alone.',
       )
       ctx.log.info(
-        '  .claude/standards/ is absent, so the skill must reach the plugin copy',
+        '  the target holds no copy, so the skill must reach the plugin copy',
       )
       ctx.log.info(
         '  the slug transform lives only in the slug standard, never in the skill body',
