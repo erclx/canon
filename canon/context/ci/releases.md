@@ -7,7 +7,7 @@ description: The release pull request, the publish job and its credential prefli
 
 ## The release pull request
 
-`release-please.yml` runs on every push to `main` and keeps a release pull request open, rewriting it as commits land. Merging that pull request is what cuts a tag and writes `CHANGELOG.md`, so a release is a merge rather than a hand-run command. `standards/versioning.md` specifies both surfaces.
+`release-please.yml` runs on every push to `main` and keeps a release pull request open, rewriting it as commits land. Merging that pull request is what cuts a tag and writes `CHANGELOG.md`, so a release is a merge rather than a hand-run command. `claude/skills/git-commit/references/versioning.md` specifies both surfaces.
 
 The `release-please` job carries its own `concurrency` group, scoped to that job rather than to the workflow, and a newer push queues behind a started instance rather than cancelling it. The group cancelled in-progress instances until run 36246158157, whose job created the v5.0.0 GitHub release and was then cancelled by the run a capture-refresh auto-merge started nine seconds after it. The action sets `release_created` and `tag_name` only after its label and comment calls, so the cancel landed in the second between the release existing and the outputs being written, publish skipped, and 5.0.0 never reached the registry. Six of the 223 release merges since the cancel was added had the job cancelled, and 5.0.0 was the one where it landed inside that gap.
 

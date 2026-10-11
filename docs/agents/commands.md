@@ -129,7 +129,7 @@ Subcommands no other page describes:
 - `slides render [deck]` takes a deck name or a folder, defaulting to the only deck, and lays out each `.html` file in filename order in Chromium at 1280 by 720 and rebuilds it as editable shapes. Each element drawn as a picture prints one `✗` line on stderr naming the slide, the selector, and the properties that forced it. A link left out, being a `#slide-N` past the deck's end or any target that is neither that nor an absolute URL, prints one too, and the exit stays 0.
 - A deck folder's `deck.json` and the faces it embeds, its per-slide `<body>` attributes, transitions and entrances, speaker notes, and charts are described in `slides.md`.
 - `canvas`, with its verbs, content format, and write routes, is described in `canvas.md`.
-- `labels scan` fails a pull request or a posted review whose title, body, or review comment carries a phase label, a label a code span quotes, a gitignored record path, a session link, a title word no dictionary holds, or a title breaking `standards/pr.md`'s format, casing, or length rule (`--event`, `--body-file`, `--json`).
+- `labels scan` fails a pull request or a posted review whose title, body, or review comment carries a phase label, a label a code span quotes, a gitignored record path, a session link, a title word no dictionary holds, or a title breaking `claude/skills/git-pr/references/pr.md`'s format, casing, or length rule (`--event`, `--body-file`, `--json`).
 
 ## Version skew
 

@@ -29,11 +29,11 @@ It is a literal shell test rather than a `canon` verb, since directory presence 
 
 `session-worktree` renames the entered branch to `<type>/<name>` rather than to the bare `<name>`. Two consumers pull in opposite directions on that string. Slug derivation wants the plan's own slug, since `auto-ship` keys its worktree, review receipt, and pull request on the branch, and `git-pr` guards on `<type>/<description>` and refuses anything without a type.
 
-A bare name satisfies the first and fails the second mid-chain, with the work already done and uncommitted. `standards/slug.md` drops a leading type segment before it replaces slashes, so one branch answers both and no consumer has to learn a second spelling.
+A bare name satisfies the first and fails the second mid-chain, with the work already done and uncommitted. `claude/skills/git-branch/references/slug.md` drops a leading type segment before it replaces slashes, so one branch answers both and no consumer has to learn a second spelling.
 
 Entering from a branch that is already conventional stops on the collision. The name derives back onto the branch the session came from, git refuses a second branch under it, and the type default cannot invent a distinct one.
 
-Both collision tests sit in Step 2, ahead of the entry call, because the typed name turns a rare stop into a common one and a stop after entry leaves a worktree built with the session inside it. Neither read needs a worktree. The directory test earns its place beside the branch test rather than duplicating it: two branches differing only in type are distinct refs that collapse onto one slug, so `feat/foo` and `fix/foo` reach one `.claude/worktrees/foo/` and only the directory read sees it. That is the collision `standards/slug.md` records as the cost of dropping the type.
+Both collision tests sit in Step 2, ahead of the entry call, because the typed name turns a rare stop into a common one and a stop after entry leaves a worktree built with the session inside it. Neither read needs a worktree. The directory test earns its place beside the branch test rather than duplicating it: two branches differing only in type are distinct refs that collapse onto one slug, so `feat/foo` and `fix/foo` reach one `.claude/worktrees/foo/` and only the directory read sees it. That is the collision `claude/skills/git-branch/references/slug.md` records as the cost of dropping the type.
 
 The branch test reads both ref spaces through `git for-each-ref`, matching `checkClaim` in `src/sessions/claim.ts`, so a name this skill clears and a branch a dispatcher cleared answer the same question. `git show-ref --verify` sees no remote-tracking ref, so a branch pushed from elsewhere would pass that narrower test and collide at its first push.
 

@@ -7,7 +7,7 @@ description: The cross-reference form split by destination, the destination test
 
 ## Cross-reference form
 
-`standards/publish.md` states the form a pull request or issue number takes, under `## Cross-reference form`. The rule is one test rather than a list of surfaces: bare where the destination auto-links it, backticked where it does not. A list goes stale when a new surface appears, and the test covers the cross-repository spelling without a clause of its own.
+`claude/skills/git-pr/references/publish.md` states the form a pull request or issue number takes, under `## Cross-reference form`. The rule is one test rather than a list of surfaces: bare where the destination auto-links it, backticked where it does not. A list goes stale when a new surface appears, and the test covers the cross-repository spelling without a clause of its own.
 
 The split runs through the remote. A pull request body, an issue body, a comment on either, and a commit message all auto-link, and a markdown file browsed from the repository tree links neither spelling, so each form is correct in one place and a reference moved between them is rewritten.
 
@@ -29,7 +29,7 @@ The paragraph scoping a check by destination sits under `## When it runs` rather
 
 It is reported on a release pull request too, where the board identifier is exempted. That exemption reasons from every commit in release-please's generated history having already passed this gate, and a category the gate did not yet scan for would reach a release body underneath the premise.
 
-`standards/pr.md` names the rule from the reader's side, one line in its `Does not govern:` list routing at `publish.md`, so the person writing a body meets the rule rather than only a red check.
+`claude/skills/git-pr/references/pr.md` names the rule from the reader's side, one line in its `Does not govern:` list routing at `publish.md`, so the person writing a body meets the rule rather than only a red check.
 
 ## Record roots
 
@@ -54,12 +54,12 @@ Adding the worktrees entry to `RECORD_ENTRIES` lost, since it changes what the r
 
 ## Title format
 
-The title-format check grades a pull request title against `standards/pr.md`'s `## Title` section, format, casing, and length, so it enforces a rule already written rather than a fact this entry alone states.
+The title-format check grades a pull request title against `claude/skills/git-pr/references/pr.md`'s `## Title` section, format, casing, and length, so it enforces a rule already written rather than a fact this entry alone states.
 
 The rules are checked independently, `structure`, the two casing pairs, and `length`, rather than failing the title on the first mismatch. A title breaking two rules and reporting only the first leaves an author fixing one and meeting the second on the next run. `format.test.ts` breaks one rule at a time and asserts each fails alone. `structure` still stands apart, because a title failing the shape match parses no `<type>`, `<scope>`, or `<subject>` to grade casing against.
 
-It does not check `<type>` against `standards/commit.md`'s type enum. `pr.md`'s `## Title` states format, casing, and length only, and cites `commit.md` for the structure it shares rather than for a type list, so checking the enum would enforce a rule from the wrong document.
+It does not check `<type>` against `claude/skills/git-commit/references/commit.md`'s type enum. `pr.md`'s `## Title` states format, casing, and length only, and cites `commit.md` for the structure it shares rather than for a type list, so checking the enum would enforce a rule from the wrong document.
 
-The commit side mirrors it. The built-in `subject-case` rule tests the whole subject's casing, which rejects a legitimate capitalized proper noun anywhere in it rather than the first word alone `standards/commit.md` governs, so `commitlint.config.js` leaves it at `[0]`. A local rule function checks the subject's leading letter run alone, matching the title check's subject-casing rule.
+The commit side mirrors it. The built-in `subject-case` rule tests the whole subject's casing, which rejects a legitimate capitalized proper noun anywhere in it rather than the first word alone `claude/skills/git-commit/references/commit.md` governs, so `commitlint.config.js` leaves it at `[0]`. A local rule function checks the subject's leading letter run alone, matching the title check's subject-casing rule.
 
 A second local rule, `no-claude-co-author`, refuses a `Co-authored-by` trailer naming Claude or Anthropic. It reads `raw` line by line rather than `footer`, since `@commitlint/parse` files a lone trailer under `body` and leaves `footer` null, so a footer check passes the exact message it exists to stop. It matches `claude` or `anthropic` as a whole word in the name or the address rather than refusing co-author trailers outright, because capture-refresh squashes carry a `github-actions[bot]` trailer and history holds a human one, and both are legitimate. A line opening with `#` never matches, so git's own comment lines in the file `--edit` reads pass.
