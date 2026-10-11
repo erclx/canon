@@ -44,13 +44,9 @@ function listScenarios(sandboxDir: string): ScenarioCoverage[] {
   const scenarios: ScenarioCoverage[] = []
 
   for (const category of listCategories(sandboxDir)) {
-    // A stem in both forms counts once, and provisioning refuses it by name.
-    const { scenarios: files, ambiguous } = listScenarioFiles(
-      join(sandboxDir, category),
-    )
-    const commands = [...files.map((f) => f.command), ...ambiguous].sort()
+    const { scenarios: files } = listScenarioFiles(join(sandboxDir, category))
 
-    for (const command of commands) {
+    for (const { command } of files) {
       scenarios.push({ category, command, armed: [] })
     }
   }

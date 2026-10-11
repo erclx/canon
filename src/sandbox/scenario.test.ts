@@ -101,37 +101,24 @@ describe('loadScenario', () => {
 })
 
 describe('listScenarioFiles', () => {
-  it('should list each stem once with its form', () => {
+  it('should list each TypeScript stem and ignore any other file', () => {
     write('sandbox/cat/alpha.sh', '')
     write('sandbox/cat/beta.ts', '')
     write('sandbox/cat/notes.md', '')
 
     const { scenarios } = listScenarioFiles(join(root, 'sandbox', 'cat'))
 
-    expect(scenarios.map((s) => [s.command, s.kind])).toEqual([
-      ['alpha', 'sh'],
-      ['beta', 'ts'],
-    ])
-  })
-
-  it('should report a stem present in both forms rather than list it', () => {
-    write('sandbox/cat/both.sh', '')
-    write('sandbox/cat/both.ts', '')
-
-    const listing = listScenarioFiles(join(root, 'sandbox', 'cat'))
-
-    expect(listing).toEqual({ scenarios: [], ambiguous: ['both'] })
+    expect(scenarios.map((s) => s.command)).toEqual(['beta'])
   })
 })
 
 describe('resolveScenarioFile', () => {
-  it('should refuse a stem present in both forms', () => {
-    write('sandbox/cat/both.sh', '')
-    write('sandbox/cat/both.ts', '')
+  it('should report a stem with only a bash file as missing', () => {
+    write('sandbox/cat/legacy.sh', '')
 
-    const resolved = resolveScenarioFile(join(root, 'sandbox'), 'cat', 'both')
+    const resolved = resolveScenarioFile(join(root, 'sandbox'), 'cat', 'legacy')
 
-    expect(resolved).toEqual({ ok: false, reason: 'ambiguous' })
+    expect(resolved).toEqual({ ok: false, reason: 'missing' })
   })
 })
 

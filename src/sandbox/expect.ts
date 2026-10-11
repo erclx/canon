@@ -354,7 +354,7 @@ function checkWriteScope(
   // none, and without this the declaration vanishes from the verdict entirely:
   // no result, no skipped entry, and no contribution to the unchecked count that
   // exists to surface exactly this. The `undefined` branch above cannot stand in,
-  // since `run.sh` always passes `--writes` and `readPathList` returns `[]` for an
+  // since `canon sandbox run` always passes `--writes` and `readPathList` returns `[]` for an
   // empty file. An arm whose output escaped the snapshot reads as a clean run,
   // which is the vacuous pass the harness exists to remove.
   if (writes.length === 0) {
@@ -377,7 +377,7 @@ function checkWriteScope(
 }
 
 /**
- * `run.sh` watches two toolkit roots for a write to shared session scratch
+ * `canon sandbox run` watches two toolkit roots for a write to shared session scratch
  * during a run, and reports every one it finds as an unattributed escape with
  * no arm able to fail on it. An arm whose skill legitimately reaches outside
  * the sandbox tree declares the destinations here, and the harness asserts
@@ -388,8 +388,8 @@ function checkWriteScope(
  * nothing skips rather than passing on a fabricated zero. An escape-scope
  * declaration exists to bound a side effect nothing requires, so zero escapes
  * is the outcome a correct run produces and reports as a pass outright,
- * provided a watched root held something to watch. `run.sh`'s `snapshot_root`
- * returns an empty manifest both when a watch ran clean and when none of the
+ * provided a watched root held something to watch. `snapshotRoot` in
+ * `src/sandbox/headless/watch.ts` returns an empty manifest both when a watch ran clean and when none of the
  * four watched directories existed under a root, and the two produce the same
  * empty `escapes` list. `watched` is what tells them apart: a run that had
  * nothing to watch reports unmeasured rather than passing on a diff it never

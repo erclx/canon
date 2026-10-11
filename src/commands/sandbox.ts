@@ -126,13 +126,10 @@ function getCategories(): string[] {
   return listCategories(SANDBOX_DIR)
 }
 
-/** Lists a stem in both forms too, so picking it reaches the refusal that names it. */
 function getCommands(category: string): string[] {
-  const { scenarios, ambiguous } = listScenarioFiles(
-    join(SANDBOX_DIR, category),
-  )
+  const { scenarios } = listScenarioFiles(join(SANDBOX_DIR, category))
 
-  return [...scenarios.map((s) => s.command), ...ambiguous].sort()
+  return scenarios.map((s) => s.command)
 }
 
 async function interactivePicker(): Promise<string> {
@@ -188,7 +185,7 @@ function readEnvelope(path: string | undefined): RunEnvelope | undefined {
 
 /**
  * Shared by `--writes` and `--escapes`, which are both a newline-delimited
- * path list written by `run.sh`. Undefined when no file was given, which is
+ * path list written by `canon sandbox run`. Undefined when no file was given, which is
  * not the same as a run that produced no paths. Write scope and escape scope
  * both need that distinction: an empty list is a finding, an absent list is a
  * gap in what the caller supplied.

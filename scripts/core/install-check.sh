@@ -55,10 +55,10 @@ open_timeline "Install verification"
 # nothing, so the excluded tree has to exist here before its absence below can
 # mean the publish left it out.
 log_step "Assert excluded path exists in source"
-if [ ! -f "$PROJECT_ROOT/sandbox/run.sh" ]; then
-  log_error "sandbox/run.sh is missing from the source tree, so the absence check below would pass on nothing"
+if [ ! -f "$PROJECT_ROOT/sandbox/exempt.toml" ]; then
+  log_error "sandbox/exempt.toml is missing from the source tree, so the absence check below would pass on nothing"
 fi
-log_info "Present: sandbox/run.sh"
+log_info "Present: sandbox/exempt.toml"
 
 log_step "Pack"
 TARBALL_PATH="$(cd "$PROJECT_ROOT" && bun pm pack --quiet --ignore-scripts --destination "$PACK_DIR" | tail -n 1)"

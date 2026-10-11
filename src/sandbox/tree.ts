@@ -8,11 +8,9 @@ import { join } from 'node:path'
  * in `CANON_SANDBOX_RUN_ID` for the rest of this process, so a script that
  * spawns a child inheriting `process.env` — `canon sandbox run` calling
  * `canon sandbox` to provision and then `canon sandbox check` — resolves the same tree in every one
- * of them, as do the hook and installer children provisioning spawns. A process
+ * of them, as do the installer children provisioning spawns. A process
  * that already carries the variable, inherited from such a parent, reuses it
  * rather than minting a new one.
- *
- * Twin of `mint_sandbox_run_id` in `scripts/lib/sandbox-path.sh`.
  */
 export function mintSandboxRunId(): string {
   const existing = process.env.CANON_SANDBOX_RUN_ID
@@ -28,9 +26,7 @@ export function mintSandboxRunId(): string {
  * per-run default is unit-testable on its own rather than only through the
  * command's registration.
  *
- * Twin of `resolve_sandbox_dir` in `scripts/lib/sandbox-path.sh`. The exec
- * boundary rules out a shared constant, so a change to the default lands on
- * both sides. The fall-through used to be one path per machine, so two
+ * The fall-through used to be one path per machine, so two
  * sessions each resolving the default at once provisioned over each other
  * with neither told; `mintSandboxRunId` gives the path a per-run component
  * instead, which is what makes two such sessions land on two different trees.

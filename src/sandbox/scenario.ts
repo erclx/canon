@@ -42,15 +42,13 @@ export const FIXTURE_SUFFIX = '.fixture'
 /** A scenario whose only arm carries this name routes none, as a bash file with no picker did. */
 export const DEFAULT_ARM_NAME = 'default'
 
-/** What a bash scenario passed to `select_or_route_scenario` unless it named another. */
+/** The picker's message unless a scenario names another. */
 const ROUTE_PROMPT = 'Which scenario?'
 
 /** Every scenario that sets the anchor pushes to this one throwaway repository. */
 export const SANDBOX_ANCHOR_REPO = 'canon-sandbox'
 
-const EXTENSIONS = ['.ts', '.sh'] as const
-
-export type ScenarioKind = 'ts' | 'sh'
+const EXTENSION = '.ts'
 
 export type ArmSetup = (ctx: StageContext) => void | Promise<void>
 
@@ -60,12 +58,12 @@ export interface ScenarioDefinition {
   /** Stages the tree from the anchor fixture and names the throwaway remote. */
   readonly anchor?: boolean
   /**
-   * Stages and narrates what the bash form did ahead of `select_or_route_scenario`,
-   * so the picker's echo lands after it on the frame. Runs before the arm is
+   * Stages and narrates ahead of the picker, so the picker's echo lands after
+   * it on the frame. Runs before the arm is
    * routed, which leaves `ctx.arm` undefined.
    */
   readonly prepare?: ArmSetup
-  /** The picker's message, for a bash scenario that passed something other than the default. */
+  /** The picker's message, for a scenario that asks something other than the default. */
   readonly prompt?: string
   /** In routing order, so the first arm is the one a headless caller gets. */
   readonly arms: Readonly<Record<string, ArmSetup>>
@@ -78,43 +76,27 @@ export function scenario(definition: ScenarioDefinition): ScenarioDefinition {
 export interface ScenarioFile {
   readonly command: string
   readonly file: string
-  readonly kind: ScenarioKind
 }
 
 /**
- * Lists the scenarios in one category folder, one per stem. A stem present in
- * both forms is reported apart rather than listed twice, since picking one
- * without saying so is the failure the refusal exists to prevent.
+ * Lists the scenarios in one category folder, one per `.ts` stem. A file in any
+ * other form is ignored rather than refused, so a hand-written leftover does not
+ * break the listing.
  */
 export function listScenarioFiles(categoryDir: string): {
   scenarios: ScenarioFile[]
-  ambiguous: string[]
 } {
-  const byStem = new Map<string, ScenarioFile[]>()
-  for (const entry of readdirSync(categoryDir, { withFileTypes: true })) {
-    if (!entry.isFile()) continue
-    const kind = EXTENSIONS.find((ext) => entry.name.endsWith(ext))
-    if (kind === undefined) continue
-    const command = entry.name.slice(0, -kind.length)
-    const found = byStem.get(command) ?? []
-    found.push({
-      command,
-      file: join(categoryDir, entry.name),
-      kind: kind === '.ts' ? 'ts' : 'sh',
-    })
-    byStem.set(command, found)
-  }
-
   const scenarios: ScenarioFile[] = []
-  const ambiguous: string[] = []
-  for (const [command, found] of [...byStem].sort(([a], [b]) =>
-    a.localeCompare(b),
-  )) {
-    if (found.length > 1) ambiguous.push(command)
-    else if (found[0] !== undefined) scenarios.push(found[0])
+  for (const entry of readdirSync(categoryDir, { withFileTypes: true })) {
+    if (!entry.isFile() || !entry.name.endsWith(EXTENSION)) continue
+    scenarios.push({
+      command: entry.name.slice(0, -EXTENSION.length),
+      file: join(categoryDir, entry.name),
+    })
   }
+  scenarios.sort((a, b) => a.command.localeCompare(b.command))
 
-  return { scenarios, ambiguous }
+  return { scenarios }
 }
 
 /** Every category folder under `sandbox/`, fixtures excluded. */
@@ -129,21 +111,18 @@ export function listCategories(sandboxDir: string): string[] {
 
 export type ResolvedScenario =
   | ({ readonly ok: true } & ScenarioFile)
-  | { readonly ok: false; readonly reason: 'missing' | 'ambiguous' }
+  | { readonly ok: false; readonly reason: 'missing' }
 
 export function resolveScenarioFile(
   sandboxDir: string,
   category: string,
   command: string,
 ): ResolvedScenario {
-  const found = EXTENSIONS.map((ext) =>
-    join(sandboxDir, category, `${command}${ext}`),
-  ).filter((path) => existsSync(path) && statSync(path).isFile())
-  if (found.length > 1) return { ok: false, reason: 'ambiguous' }
-  const file = found[0]
-  if (file === undefined) return { ok: false, reason: 'missing' }
+  const file = join(sandboxDir, category, `${command}${EXTENSION}`)
+  if (!existsSync(file) || !statSync(file).isFile())
+    return { ok: false, reason: 'missing' }
 
-  return { ok: true, command, file, kind: file.endsWith('.ts') ? 'ts' : 'sh' }
+  return { ok: true, command, file }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -190,7 +169,7 @@ export function armNames(definition: ScenarioDefinition): string[] {
   return names.length === 1 && names[0] === DEFAULT_ARM_NAME ? [] : names
 }
 
-/** Twin of `scripts/config.sh`, which derives the organization from the toolkit's own remote. */
+/** Derives the organization from the toolkit's own remote unless `GITHUB_ORG` names one. */
 function deriveGithubOrg(root: string, env: NodeJS.ProcessEnv): string {
   if ((env.GITHUB_ORG ?? '') !== '') return env.GITHUB_ORG ?? ''
 
@@ -209,8 +188,8 @@ function deriveGithubOrg(root: string, env: NodeJS.ProcessEnv): string {
 }
 
 /**
- * What the bash probe reported for a scenario: its config, the organization
- * `config.sh` derives, and the anchor's repository name. These land in the one
+ * What provisioning reads off a scenario: its config, the derived organization,
+ * and the anchor's repository name. These land in the one
  * environment provisioning passes to every child, the seed and gov installs
  * included.
  */
@@ -447,8 +426,7 @@ export function createStageContext(options: ContextOptions): StageContext {
 
   /**
    * `gh` answers an absent repository and an unreachable host with one status,
-   * so the 404 alone separates them. Creating is the opt-in, for the reason
-   * `ensure_sandbox_anchor_repo` in `scripts/lib/sandbox-git.sh` records.
+   * so the 404 alone separates them. Creating is the opt-in.
    */
   const ensureAnchorRepo = (org: string, repo: string): void => {
     const probe = spawn(
@@ -503,7 +481,7 @@ export function createStageContext(options: ContextOptions): StageContext {
     git('remote', 'add', 'origin', `https://github.com/${org}/${repo}.git`)
   }
 
-  /** Twin of `stage_fixtures` in `scripts/lib/sandbox-fixtures.sh`. */
+  /** Copies a fixture folder into the tree. */
   const fixtures = (
     category: string,
     command: string,
@@ -602,7 +580,7 @@ export function createStageContext(options: ContextOptions): StageContext {
 }
 
 /**
- * Picks the arm the way `select_or_route_scenario` did: a routed name first,
+ * Picks the arm: a routed name first,
  * echoed on the frame, then the first arm for a headless caller, then a prompt.
  */
 async function routeArm(
