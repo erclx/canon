@@ -3,7 +3,6 @@ import { basename, join } from 'node:path'
 
 import { merge } from '../content/copy'
 import { readCanonJson, readCanonText, repoRoot } from './canon-cli'
-import { readCatalogCounts } from './counts'
 import {
   commandNamesFromHelp,
   firstSentence,
@@ -53,7 +52,6 @@ interface Skill {
 export interface SessionReads {
   readonly skills: readonly Skill[]
   readonly skillGroups: readonly SkillGroup[]
-  readonly standards: number
   readonly commands: readonly string[]
   readonly toolingFiles: number
   readonly seedFiles: number
@@ -104,7 +102,6 @@ export function readSession(): SessionReads {
   if (cached) return cached
   const root = repoRoot()
 
-  const counts = readCatalogCounts()
   const gov = readCanonJson<GovList>(['gov', 'list'])
   const { skills, families } = readCanonJson<{
     skills: Skill[]
@@ -125,7 +122,6 @@ export function readSession(): SessionReads {
       skills,
       families,
     ),
-    standards: counts.standards,
     commands: commandNamesFromHelp(readCanonText(['--help'])),
     toolingFiles: census.files,
     seedFiles: seeds.length,

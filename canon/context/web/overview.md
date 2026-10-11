@@ -33,7 +33,7 @@ The page is the toolkit's one outward-facing route, and a reader arrives cold, s
 
 - Skip link: first in the tab order, jumping to the start of the session
 - Nav bar: sticky at the top, carrying the mark, the version with a dot lit when it matches the published one, one link per named beat, the theme toggle, and the install action
-- Fold: the headline, a one-line lede, two actions, and a before-and-after pair on one command, ending in a strip naming the two surfaces the command never copies
+- Fold: the headline, a one-line lede, two actions, and a before-and-after pair on one command, ending in a strip naming the one surface the command never copies
 - Proof band: one claim on its own line at full width, below the fold
 - Beats: the eleven sections in reading order. Their sequence and what each figure derives from are under Composition below
 - Field: every command name and skill name in two fields, the ones the session used lit. Skills sit under the skill map's groups, and each name reveals its when-to-use text on hover, focus, and tap

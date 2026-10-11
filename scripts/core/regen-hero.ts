@@ -50,7 +50,6 @@ import { listSkills } from '../../src/claude/skills-list'
 import { countCommands } from '../../src/counts/catalogs'
 import { buildDesignCss } from '../../src/design/css'
 import { buildGovCatalog } from '../../src/gov/list'
-import { listStandardEntries } from '../../src/standards/list'
 import { buildStackSummaries } from '../../src/tooling/list'
 
 const root = new URL('../..', import.meta.url).pathname
@@ -87,11 +86,6 @@ function run(): void {
   const { values, frames } = buildFrameValues({
     skills: listSkills(root).map((entry) => entry.name),
     gov: buildGovCatalog(root),
-    // The toolkit root only: a project-local standard would put a row in the
-    // hero the toolkit does not ship.
-    standards: listStandardEntries(root).filter((entry) =>
-      entry.source.startsWith('standards/'),
-    ),
     toolingStacks: buildStackSummaries(root),
     commandCount: countCommands(root) ?? 0,
     tokenCss,

@@ -41,7 +41,6 @@ const makeCatalogs = (
     unreferenced: [],
     staleDetect: [],
   },
-  standards: [{ name: 'plan', appliesTo: ['.canon/plans/*.md'] }],
   toolingStacks: [
     { name: 'ts', extends: null, devDeps: 1, scripts: 2, gitignoreGroups: 0 },
   ],
@@ -91,8 +90,8 @@ describe('clip', () => {
 
 describe('buildFrameValues', () => {
   it('should refuse an empty catalog', () => {
-    expect(() => buildFrameValues(makeCatalogs({ standards: [] }))).toThrow(
-      'the standards catalog is empty',
+    expect(() => buildFrameValues(makeCatalogs({ skills: [] }))).toThrow(
+      'the skills catalog is empty',
     )
   })
 
@@ -100,15 +99,6 @@ describe('buildFrameValues', () => {
     expect(() => buildFrameValues(makeCatalogs({ commandCount: 0 }))).toThrow(
       FrameError,
     )
-  })
-
-  it('should fall back to read by name when a standard has no scope', () => {
-    const { values } = buildFrameValues(
-      makeCatalogs({ standards: [{ name: 'plan' }] }),
-    )
-
-    expect(values.STANDARD_ROWS).toContain('read by name')
-    expect(values.STANDARD_ROWS).not.toContain('undefined')
   })
 
   it('should point the light frame at the light roles', () => {
