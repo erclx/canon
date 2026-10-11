@@ -15,7 +15,7 @@ Its first subject is the focus ring, which `governance/rules/ui/410-a11y.md` sta
 
 - `src/inventory/` owns the config reader, the subject readers, the browser walk, and the grouping
 - `src/browser/` owns what every browser-driving command needs before it can report a failure, shared with `src/demo/`
-- A project declares its routes and the `focus` subject's query in `inventory.toml` at its root. This repository carries none, so the verb refuses with `no-config` here, since every route it once held named a page under the untracked, per-operator `.canon/teach/` tree and measured nothing on any other clone
+- A project declares its routes and the `focus` subject's query in `inventory.toml` at its root. This repository carries none, so the verb refuses with `no-config` here
 
 ## Decisions
 
