@@ -28,8 +28,10 @@ import {
   skillFamily,
   skillPracticeShape,
   skillProvenance,
+  unreferencedRules,
   visualPathGlobs,
 } from '@/gate/measures'
+import { buildGovCatalog } from '@/gov/list'
 import { REFERENCE_MARKER } from '@/shipped/references'
 import { README_PARAPHRASE_MARKER } from '@/web/readme-citations'
 
@@ -1612,5 +1614,73 @@ describe('rawFieldFileReference', () => {
     expect(report.failure).toBeUndefined()
     expect(report.emissions).toEqual([])
     expect(report.unmeasured).toContain('no shipped file was read')
+  })
+})
+
+describe('unreferencedRules', () => {
+  let toolkit: string
+
+  const seed = (rel: string, body: string): void => {
+    const path = join(toolkit, rel)
+    mkdirSync(join(path, '..'), { recursive: true })
+    writeFileSync(path, body)
+  }
+
+  const DETECT_REACT = '["200-react"]\ndeps = ["react"]\nfiles = []\n'
+
+  /** Answers `gov list --json` from a fixture toolkit rather than this one. */
+  const measureFixture = () =>
+    unreferencedRules({
+      root: toolkit,
+      ci: false,
+      run: async () => {
+        throw new Error('unreferencedRules reads the CLI and nothing else')
+      },
+      cli: async () => ({
+        exitCode: 0,
+        stdout: `${JSON.stringify(buildGovCatalog(toolkit))}\n`,
+        stderr: '',
+        all: '',
+      }),
+    })
+
+  beforeEach(() => {
+    toolkit = mkdtempSync(join(tmpdir(), 'canon-gate-unreferenced-'))
+    seed('governance/rules/core/000-a.md', '# a\n')
+    seed('governance/rules/framework/200-react.md', '# react\n')
+    seed('governance/stacks/base.toml', 'rules = ["core"]\n')
+  })
+
+  afterEach(() => {
+    rmSync(toolkit, { recursive: true, force: true })
+  })
+
+  it('should pass when every rule no stack reaches carries evidence', async () => {
+    seed('governance/detect.toml', DETECT_REACT)
+
+    const report = await measureFixture()
+
+    expect(report.failure).toBeUndefined()
+  })
+
+  it('should fail when an opt-in rule has no detect.toml table', async () => {
+    seed('governance/detect.toml', '')
+
+    const report = await measureFixture()
+
+    expect(report.failure).toBe('An opt-in rule has no route to a project')
+    expect(report.emissions[0]?.text).toContain('200-react')
+  })
+
+  it('should fail when a detect.toml key names a retired rule', async () => {
+    seed(
+      'governance/detect.toml',
+      `${DETECT_REACT}["999-retired"]\ndeps = []\nfiles = []\n`,
+    )
+
+    const report = await measureFixture()
+
+    expect(report.failure).toBe('An opt-in rule has no route to a project')
+    expect(report.emissions[0]?.text).toContain('999-retired')
   })
 })

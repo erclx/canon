@@ -105,28 +105,6 @@ const warn = (text: string): Emission => ({ kind: 'warn', text })
 const output = (text: string): Emission => ({ kind: 'output', text })
 
 /**
- * Rules no stack reaches, sorted the way `canon gov list` emits them.
- * `260-shadcn` and `320-tanstack-query` are opt-in libraries a project may not
- * want.
- *
- * `130-go`, `140-php`, `335-testing-go`, and `336-testing-php` are opt-in by
- * `--add` until a Go or PHP stack ships, which `target-setup` reaches by
- * matching a detected language against each rule's description.
- *
- * All are recorded here rather than in a config file: the list is what a
- * reader compares a new arrival against, and a config file would absorb the
- * arrival silently.
- */
-export const GOV_EXPECTED_UNREFERENCED = [
-  '130-go',
-  '140-php',
-  '260-shadcn',
-  '320-tanstack-query',
-  '335-testing-go',
-  '336-testing-php',
-]
-
-/**
  * Scenarios declaring no expectation, taken from `canon sandbox coverage`
  * against a clean tree. Raising it is a deliberate edit that says which
  * scenario shipped unarmed and why.
@@ -181,6 +159,16 @@ function parseJson(payload: string): unknown {
  * reached. A sentinel string carried success past that. Parsing in process
  * leaves the two states distinguishable with nothing to carry.
  */
+/**
+ * A rule no stack reaches arrives at a project only through `canon gov
+ * detect`, so each one needs a `governance/detect.toml` entry or nothing ever
+ * proposes it. A key naming a retired rule fails too, since it would hide from
+ * the rename sweep that keys the file by basename.
+ *
+ * The check replaced a fixed list of expected unreferenced rules. Once the
+ * stacks are thin, that list is most of the catalog and would be rewritten on
+ * every new rule, which is a list nobody reads.
+ */
 export const unreferencedRules: Measure = async (ctx) => {
   const { exitCode, stdout } = await ctx.cli(['gov', 'list', '--json'])
   if (exitCode !== 0 || stdout.trim() === '') {
@@ -190,34 +178,67 @@ export const unreferencedRules: Measure = async (ctx) => {
     }
   }
 
-  const record = parseJson(stdout) as { unreferenced?: unknown } | undefined
-  if (!Array.isArray(record?.unreferenced)) {
+  const record = parseJson(stdout) as
+    | { unreferenced?: unknown; rules?: unknown; staleDetect?: unknown }
+    | undefined
+  if (
+    !Array.isArray(record?.unreferenced) ||
+    !Array.isArray(record?.rules) ||
+    !Array.isArray(record?.staleDetect)
+  ) {
     return {
       emissions: [],
       unmeasured:
-        'The governance catalog carried no readable unreferenced list.',
+        'The governance catalog carried no readable unreferenced, rules, or staleDetect list.',
     }
   }
 
+  const detected = new Set(
+    record.rules
+      .filter(
+        (rule): rule is { name: string; detect: unknown } =>
+          typeof rule === 'object' &&
+          rule !== null &&
+          typeof (rule as { name?: unknown }).name === 'string',
+      )
+      .filter((rule) => rule.detect !== null && rule.detect !== undefined)
+      .map((rule) => rule.name),
+  )
   const unreferenced = record.unreferenced.map(String)
-  if (unreferenced.length === 0) {
-    return { emissions: [info('Every rule is reached by a stack')] }
+  const undetected = unreferenced.filter((rule) => !detected.has(rule))
+  const stale = record.staleDetect.map(String)
+
+  const emissions: Emission[] = []
+  if (undetected.length > 0) {
+    emissions.push(
+      warn(
+        `Reached by no stack and proposed by nothing: ${undetected.join(' ')}`,
+      ),
+      warn(
+        'Name each in a stack, or add a table to governance/detect.toml with the deps or files that mark a project as wanting it.',
+      ),
+    )
+  }
+  if (stale.length > 0) {
+    emissions.push(
+      warn(`governance/detect.toml names no live rule: ${stale.join(' ')}`),
+      warn('Rename the key to the rule it became, or delete the table.'),
+    )
   }
 
-  const listed = unreferenced.join(' ')
-  if (listed === GOV_EXPECTED_UNREFERENCED.join(' ')) {
+  if (emissions.length > 0) {
     return {
-      emissions: [
-        info(`Reached by no stack: ${listed} (each recorded above with why)`),
-      ],
+      emissions,
+      failure: 'An opt-in rule has no route to a project',
     }
   }
 
   return {
     emissions: [
-      warn(`Reached by no stack: ${listed}`),
-      warn(
-        `Expected: ${GOV_EXPECTED_UNREFERENCED.join(' ')}. Name the new rule in a stack, or update GOV_EXPECTED_UNREFERENCED in src/gate/measures.ts and say why it reaches no stack.`,
+      info(
+        unreferenced.length === 0
+          ? 'Every rule is reached by a stack'
+          : `${plural(unreferenced.length, 'rule')} reached by no stack, each proposed by governance/detect.toml`,
       ),
     ],
   }

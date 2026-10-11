@@ -1102,6 +1102,7 @@ function runList(opts: ListOptions): number {
         ...(sections.stacks ? { stacks: catalog.stacks } : {}),
         ...(sections.rules ? { rules: catalog.rules } : {}),
         unreferenced: catalog.unreferenced,
+        staleDetect: catalog.staleDetect,
       })}\n`,
     )
     return 0

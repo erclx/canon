@@ -30,9 +30,16 @@ const makeCatalogs = (
   gov: {
     stacks: [{ name: 'base', extends: null, rules: ['100-code'] }],
     rules: [
-      { name: '100-code', domain: 'lang', description: '', paths: ['**/*.ts'] },
+      {
+        name: '100-code',
+        domain: 'lang',
+        description: '',
+        paths: ['**/*.ts'],
+        detect: null,
+      },
     ],
     unreferenced: [],
+    staleDetect: [],
   },
   standards: [{ name: 'plan', appliesTo: ['.canon/plans/*.md'] }],
   toolingStacks: [
