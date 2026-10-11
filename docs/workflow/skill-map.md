@@ -29,7 +29,7 @@ Each row sits under the group its skill's `metadata.family` names. The landing p
 | `canon:plan-groundwork`    | When the state is unmeasured and more than one approach is live                   |
 | `canon:decision-escalate`  | When open decisions turn on your preference and want batching into one set        |
 | `canon:draft-and-pick`     | When the call is taste and wants several candidates rendered side by side         |
-| `canon:canvas`             | When a direction should be drawn as frames the operator can see, select, and edit |
+| `canon:canvas-board`       | When a direction should be drawn as frames the operator can see, select, and edit |
 | `canon:task-board`         | When a decided item needs a file on the board, or a shipped one needs archiving   |
 | `canon:plan-feature`       | When the approach is settled and the next step is a plan                          |
 | `canon:codebase-layout`    | When a plan or change adds a file and you need to decide which folder holds it    |

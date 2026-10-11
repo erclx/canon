@@ -78,7 +78,7 @@ One skill covers both outputs rather than two. The mark and the card are one ide
 
 ## The canvas surface
 
-`canvas` drives `canon canvas`, a local page of HTML frames the operator drags, selects, and edits in the browser while a session writes the files behind them. It covers a direction worked out by looking and touching over several turns, where the operator's own selection and restyle are input the session reads back.
+`canvas-board` drives `canon canvas`, a local page of HTML frames the operator drags, selects, and edits in the browser while a session writes the files behind them. It covers a direction worked out by looking and touching over several turns, where the operator's own selection and restyle are input the session reads back.
 
 What outlives the pick separates it from `draft-and-pick`. Both skills now draft on the canvas, and `draft-identity` reaches it through `draft-and-pick`'s loop. `draft-and-pick` takes one pick through the question surface, archives every arm, and deletes the pages it added, while a frame the operator drew here stays in its gitignored folder until somebody removes it. Either way the pick reaches the project through its design document, a plan, or the applied surface rather than through the canvas itself.
 

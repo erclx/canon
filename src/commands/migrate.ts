@@ -25,7 +25,11 @@ import {
   type RuleLayoutPlan,
   walkFlatRules,
 } from '@/migrate/rule-layout'
-import { SKILL_NAME_MAP, SKILL_NAME_RULES } from '@/migrate/skill-names'
+import {
+  SKILL_CITATION_MAP,
+  SKILL_NAME_MAP,
+  SKILL_NAME_RULES,
+} from '@/migrate/skill-names'
 import {
   planSurfaceRootsMove,
   type SurfaceRootsPlan,
@@ -1250,6 +1254,7 @@ export function register(program: Command): void {
       [
         '',
         `Rewrites ${Object.keys(SKILL_NAME_MAP).length} skill names and moves the folders that carry them.`,
+        `It also carries ${Object.keys(SKILL_CITATION_MAP).length} namespaced-only rows for a skill renamed from a single word.`,
         'It takes no scope. The skill folders it moves are authored in the',
         'toolkit and no target holds a copy of that catalog, so in a target it',
         'rewrites citations of a renamed skill and moves nothing.',

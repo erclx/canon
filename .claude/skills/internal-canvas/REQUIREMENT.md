@@ -27,7 +27,7 @@ Without this skill, a session editing canvas code:
 ## Must not
 
 - Restate the entry's layout, format, or capture decisions. The ownership table in `CLAUDE.md` puts that narrative in the entry.
-- Carry the procedure a session follows to draw on the canvas. `claude/skills/canvas/` owns it.
+- Carry the procedure a session follows to draw on the canvas. `claude/skills/canvas-board/` owns it.
 - Restate a verb's records or refusals, which `docs/agents/canvas.md` owns.
 
 ## Guards
@@ -37,7 +37,7 @@ No refusal strings. This is a domain skill loaded before editing rather than a p
 ## Out of scope
 
 - `internal-scripts` covers `src/` generally. This covers what the canvas means, which that skill does not carry.
-- `canvas` is the shipped skill an operator or session runs to draft. This is for editing the machinery underneath it.
+- `canvas-board` is the shipped skill an operator or session runs to draft. This is for editing the machinery underneath it.
 
 ### The open question this cannot answer
 

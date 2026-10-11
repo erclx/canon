@@ -8,7 +8,7 @@ use_config() {
 }
 
 stage_setup() {
-  log_step "Canvas sandbox"
+  log_step "Canvas board sandbox"
   log_info "open: a project with the design stylesheet installed and no canvas yet"
   log_info ""
   log_info "Invoke the prefixed form. The dev-skill injection copies SKILL.md alone,"
@@ -19,7 +19,7 @@ stage_setup() {
 
   case "$SELECTED_OPTION" in
   "open")
-    stage_fixtures claude canvas open 01-project
+    stage_fixtures claude canvas-board open 01-project
 
     # Installed rather than staged, so the frames resolve the same token sheet
     # a target receives and the arm reads no copy that drifts from the source.
@@ -27,15 +27,15 @@ stage_setup() {
 
     git add . && git commit -m "feat(plans): list the pricing tiers" --no-verify -q
 
-    log_step "Scenario ready: canvas draws a first frame from nothing"
+    log_step "Scenario ready: canvas-board draws a first frame from nothing"
     log_info "Context: no canvas server is running and .canon/canvas/ does not exist"
     log_info "  The project carries .claude/design/base.css, so a frame has tokens"
     log_info "  to draw with, and src/index.ts names three pricing tiers to draw"
     log_info ""
-    log_info "Action:  /canon:canvas draw the pricing tiers from src/index.ts as one"
+    log_info "Action:  /canon:canvas-board draw the pricing tiers from src/index.ts as one"
     log_info "         frame named pricing on a page named drafts, then capture it"
-    log_info "Expect:  declared in fixtures/claude/canvas/open/expect.toml"
-    log_info "         Check it with: canon sandbox check claude:canvas open"
+    log_info "Expect:  declared in fixtures/claude/canvas-board/open/expect.toml"
+    log_info "         Check it with: canon sandbox check claude:canvas-board open"
     log_info "         The session starts the server before writing the frame and"
     log_info "         checks the shell at the address it printed. A frame at"
     log_info "         .canon/canvas/drafts/pricing.html drawn with var(--...)"

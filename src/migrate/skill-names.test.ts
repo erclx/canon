@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { isExcludedPath, renamePath, renameText } from '@/migrate/rename'
-import { SKILL_NAME_MAP, SKILL_NAME_RULES } from '@/migrate/skill-names'
+import {
+  SKILL_CITATION_MAP,
+  SKILL_NAME_MAP,
+  SKILL_NAME_RULES,
+} from '@/migrate/skill-names'
 
 describe('SKILL_NAME_MAP', () => {
   it('should carry one row for every renamed skill', () => {
@@ -59,6 +63,50 @@ describe('SKILL_NAME_MAP', () => {
     )
 
     expect(single).toEqual([])
+  })
+})
+
+describe('SKILL_CITATION_MAP', () => {
+  it('should qualify every key, since a bare single-word key would rewrite ordinary prose', () => {
+    const bare = Object.keys(SKILL_CITATION_MAP).filter(
+      (key) => !key.startsWith('canon:') && !key.startsWith('skills/'),
+    )
+
+    expect(bare).toEqual([])
+  })
+
+  it('should never map a key onto a form the sweep would rewrite again', () => {
+    const chained = Object.values(SKILL_CITATION_MAP).filter(
+      (value) => value in SKILL_CITATION_MAP,
+    )
+
+    expect(chained).toEqual([])
+  })
+})
+
+describe('renameText under the canvas citation rows', () => {
+  it('should rewrite the namespaced invocation', () => {
+    expect(renameText('run canon:canvas now', SKILL_NAME_RULES)).toBe(
+      'run canon:canvas-board now',
+    )
+  })
+
+  it('should rewrite the skill folder path', () => {
+    expect(renameText('claude/skills/canvas/SKILL.md', SKILL_NAME_RULES)).toBe(
+      'claude/skills/canvas-board/SKILL.md',
+    )
+  })
+
+  it.each([
+    'canon canvas serve',
+    'src/canvas/server.ts',
+    '.canon/canvas/drafts/x.html',
+    '.claude/skills/internal-canvas/SKILL.md',
+    'assets/evidence/canvas/shell/',
+    'canon:canvas-board',
+    'claude/skills/canvas-board/SKILL.md',
+  ])('should leave %s unchanged', (text) => {
+    expect(renameText(text, SKILL_NAME_RULES)).toBe(text)
   })
 })
 

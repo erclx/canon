@@ -9,7 +9,7 @@ metadata:
 
 Some decisions are settled by looking rather than by reasoning, and no draft is wrong until one is picked. Every step here puts several candidates in front of the operator and keeps the real surface untouched until they have chosen.
 
-The candidates live on the local design canvas, the surface `canon:canvas` drives. Every verb below is `canon canvas`, and `canon standards canvas` fixes the content format a frame takes. Read that standard before writing the first frame.
+The candidates live on the local design canvas, the surface `canon:canvas-board` drives. Every verb below is `canon canvas`, and `canon standards canvas` fixes the content format a frame takes. Read that standard before writing the first frame.
 
 ## Guards
 
@@ -30,10 +30,10 @@ The candidates live on the local design canvas, the surface `canon:canvas` drive
 
 Every arm of a round sits as one frame on one canvas page, side by side. The comparison the operator judges is that page, never a set of separate images handed over to compare from memory.
 
-1. Start the canvas the way `canon:canvas` Step 1 states, unless this run already has: read `canon canvas list --json`, start `canon canvas serve --json` in the background unless the operator named an address that already answers, and fetch the `url` the record carries to check the shell's body holds a `<script` tag. Note whether this run started the server, since Step 6 stops only a server this run started. A refused serve or a blank shell stops the run, reported with its `reason`. A run with no canvas cannot draft, and no file stands in for one.
+1. Start the canvas the way `canon:canvas-board` Step 1 states, unless this run already has: read `canon canvas list --json`, start `canon canvas serve --json` in the background unless the operator named an address that already answers, and fetch the `url` the record carries to check the shell's body holds a `<script` tag. Note whether this run started the server, since Step 6 stops only a server this run started. A refused serve or a blank shell stops the run, reported with its `reason`. A run with no canvas cannot draft, and no file stands in for one.
 2. Add the round's page with `canon canvas page add <page> --json` and record its name on the run's own list of pages it added. A name `canvas list` already shows belongs to somebody else, so take the next free suffix rather than writing into it.
 3. Add each arm as a frame with `canon canvas frame add <page> arm-<id> --width <px> --height <px> --json`. Name every frame `arm-<id>`, since Step 6's archive keeps those names and its readers key on them. Set the width the arm is judged at. A frame renders at its own layout width on the canvas and in a capture alike, so a decision about layout reads off the frame itself and needs no device toolbar.
-4. Write each arm's whole document to the `path` the add verb reported. From a linked worktree, take the heredoc route `canon:canvas` Step 3 gives for a main-root write.
+4. Write each arm's whole document to the `path` the add verb reported. From a linked worktree, take the heredoc route `canon:canvas-board` Step 3 gives for a main-root write.
 5. Lay the frames out in one row, in arm order, with `canon canvas frame move <page> arm-<id> --x <px> --y <px> --json`.
 
 ### What every frame carries
@@ -62,7 +62,7 @@ canon canvas capture <page> --composite --json
 - Point `--out` at `evidence/<slug>/renders/<page>.png` inside a live track, and leave it at its session-scratch default everywhere else. A pick taken from an image the track does not hold is a judgment nobody but this session can check, and the archive in Step 6 covers the picked round alone.
 - Read the PNG's `path` off the record. The composite shows every frame in its default theme, so look at the other theme on the live canvas where the arms carry two.
 - `canon canvas capture` needs a browser binary the toolkit does not install. When it refuses for that reason, report the refusal and name `bunx playwright install chromium` as the repair, stop the canvas server if this run started it, then stop rather than describing an arm nobody has seen.
-- A capture refusing on a font names the family it read off the frame's text. Take the repair `canon:canvas` Step 6 gives and capture again.
+- A capture refusing on a font names the family it read off the frame's text. Take the repair `canon:canvas-board` Step 6 gives and capture again.
 - Hand over the address rather than a description. Emit the canvas link first on its own line, naming the page, then the PNG path on its own line. A still answers how a thing looks and answers none of a hover response, a scroll-linked position, or a pace, which the live frame does.
 - Never report a visual result you have not looked at. A claim about appearance with no render behind it is a guess.
 - Look to judge rather than to confirm. Reading the image back to check it rendered satisfies the rule above and still hands over weak work, so name the weakest thing on the page in a sentence. Where that sentence would embarrass the work, fix it and hand over the second version. Say the remaining weakness out loud either way, so the operator is not hunting for what you already know.
@@ -120,4 +120,4 @@ Cite these rather than restating them. A step reimplemented here rots against th
 - `write-human` carries the voice for any copy an arm puts in front of a reader
 - `git-stage`, `git-pr`, and `git-followup` carry the commits and the pull request
 - `review-pr` and `review-address` run the review pass
-- `canon:canvas` carries the canvas start-and-check sequence, the main-root write route for a frame, and the selection and capture refusals
+- `canon:canvas-board` carries the canvas start-and-check sequence, the main-root write route for a frame, and the selection and capture refusals

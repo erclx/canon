@@ -160,6 +160,6 @@ Card source: <the route, captured through the card server|a scratch page, since 
 Cite these rather than restating them.
 
 - `draft-and-pick` owns Steps 1 through 5 of the render-and-pick loop, cited above
-- `canon:canvas` carries a picked direction into `canon/DESIGN.md`. This skill only reads it.
+- `canon:canvas-board` carries a picked direction into `canon/DESIGN.md`. This skill only reads it.
 - `canon capture` owns the render mechanics, its font refusal, its fixed 2x scale factor, and its reported dimensions. It already reads an `http(s)://` source, where `--out` names the destination PNG rather than a directory, so the route capture needs nothing added to it.
 - The `astro` tooling stack owns the card route's scaffold, its second config, and the exclusion check, read with `canon tooling reference astro`. This skill writes into the route and never reshapes it.

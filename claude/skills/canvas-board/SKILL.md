@@ -1,11 +1,11 @@
 ---
-name: canvas
+name: canvas-board
 description: Drives the local design canvas, where pages hold HTML frames the operator sees, drags, selects, and edits in the browser. Starts the canvas when it is not running, confirms the live shell loads, makes pages and frames, edits a frame through its file, reads what the operator selected or restyled, captures finished frames, and carries a picked direction into the project's design document. Use when asked to "open the canvas", "put this on the canvas", "draw a frame for X", "change the one I selected", "what did I pick", "capture this frame", or "move that frame on the canvas". Do NOT use to draft candidates for a taste decision, which is `draft-and-pick`.
 metadata:
   family: decide
 ---
 
-# Canvas
+# Canvas board
 
 Drive the canvas the operator is looking at. A page is a folder of HTML frames and a frame is one file, so a session draws by writing files and the operator sees each write land in the browser. The content format is fixed by `${CLAUDE_SKILL_DIR}/references/canvas.md`. Read it before writing a frame.
 
