@@ -32,7 +32,8 @@ Does not govern:
 
 - What a `REQUIREMENT.md` must answer, its sections, and its template: `skill-requirement.md`
 - A practice skill's closing sections and ledger: `skill-practice.md`
-- Which root a path in a body resolves against, and how a body cites a standard: `skill-paths.md`
+- Which root a path in a body resolves against, and how a body cites another skill's reference: `skill-paths.md`
+- The jurisdiction, success criterion, and rule phrasing of a reference setting one artifact's shape: `skill-reference.md`
 - Path-scoped coding rules, which load on a file match rather than on a request match: `rule.md`
 - Voice, rhythm, and sentence construction in a skill body: the `write-human` skill
 - Punctuation, formatting, and word choice in a skill body: `markdown.md`
