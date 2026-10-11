@@ -152,6 +152,7 @@ beforeAll(() => {
     join(project, 'src'),
     join(fixture, 'bin'),
     join(fixture, 'bin-no-runner'),
+    join(fixture, 'bin-jq-trap'),
     join(fixture, 'bin-empty-set'),
     join(fixture, 'bin-no-record'),
     join(fixture, 'bin-due'),
@@ -180,6 +181,18 @@ beforeAll(() => {
     const found = findOnPath(name)
     if (found) symlinkSync(found, join(fixture, 'bin-no-runner', name))
   }
+
+  // A `jq` that fails loudly, so a hook that reached it on a payload it should
+  // have dismissed by shell test alone says so on stderr. `bash` is linked in
+  // because the hook still needs a shell to run under.
+  const bash = findOnPath('bash')
+  if (bash) symlinkSync(bash, join(fixture, 'bin-jq-trap', 'bash'))
+  const trap = join(fixture, 'bin-jq-trap/jq')
+  writeFileSync(
+    trap,
+    "#!/usr/bin/env bash\nprintf 'jq spawned\\n' >&2\nexit 99\n",
+  )
+  chmodSync(trap, 0o755)
 
   // The toolkit's standards-audit reads its findings out of a `markdown audit
   // --json` record, so the acting branch is unreachable with the real binary
@@ -1068,10 +1081,23 @@ describe('memory-guard.sh boundaries', () => {
   const hook = join(ROOT, '.claude/hooks/memory-guard.sh')
   const home = '/home/x/.claude/projects/-home-x-repo'
 
+  // Every real payload carries the session transcript, which sits under the
+  // same projects folder the guard watches, so a case built without it never
+  // exercises the payload the hook receives.
+  const transcript_path = `${home}/0f2c.jsonl`
+
   const fileTool = (tool: string, file: string): string =>
-    payloadFor({ tool_input: { file_path: file }, tool_name: tool })
+    payloadFor({
+      tool_input: { file_path: file },
+      tool_name: tool,
+      transcript_path,
+    })
   const shell = (command: string): string =>
-    payloadFor({ tool_input: { command }, tool_name: 'Bash' })
+    payloadFor({
+      tool_input: { command },
+      tool_name: 'Bash',
+      transcript_path,
+    })
 
   const denied: ReadonlyArray<readonly [string, string]> = [
     ['a Write to a memory note', fileTool('Write', `${home}/memory/note.md`)],
@@ -1135,6 +1161,30 @@ describe('memory-guard.sh boundaries', () => {
       expect(result.code).toBe(0)
     })
   }
+
+  it.concurrent(
+    'should dismiss a command mentioning memory without spawning jq',
+    async ({ expect }) => {
+      const result = await run(
+        hook,
+        shell('grep -rn memory src/'),
+        join(fixture, 'bin-jq-trap'),
+      )
+
+      expect(result.stderr).toBe('')
+      expect(result.code).toBe(0)
+    },
+  )
+
+  it.concurrent(
+    'should still reach a verdict when the transcript path precedes the command',
+    async ({ expect }) => {
+      const result = await run(hook, shell(`cp a ${home}/memory/n.md`))
+
+      expect(result.stderr).toContain('Auto memory is off')
+      expect(result.code).toBe(2)
+    },
+  )
 
   it.concurrent(
     'should deny a write under the directory CLAUDE_CONFIG_DIR names',

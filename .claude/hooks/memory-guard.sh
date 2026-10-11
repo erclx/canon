@@ -12,9 +12,14 @@ IFS= read -r -d '' -t 2 input
   exit 1
 }
 
-# Bash is the highest-frequency tool, so the raw payload is tested with a shell
-# pattern for the pair the folder's path always carries before jq starts.
-case "$input" in
+# Bash is the highest-frequency tool, so the one field a write names is lifted
+# out of the raw payload and tested with a shell pattern before jq starts. The
+# whole payload cannot be tested, since every real one carries transcript_path
+# under ~/.claude/projects/ and so matches the pair on its own. A tool that
+# carries neither key reads no field and leaves quietly.
+field_re='"(command|file_path)":"(([^"\\]|\\.)*)"'
+[[ $input =~ $field_re ]] || exit 0
+case "${BASH_REMATCH[2]}" in
 *projects/*memory*) ;;
 *) exit 0 ;;
 esac
