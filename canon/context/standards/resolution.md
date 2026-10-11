@@ -21,7 +21,7 @@ No single citation form answers everywhere, since nothing mirrors the corpus und
 
 A reader has to know which surface they are on, and nothing checks that they got it right. `DEFAULT_FOLDERS` in `src/context/folders.ts` covers `context` and `diagrams`, so the citation gate never resolves a `standards/` path either way and reports nothing on a wrong form.
 
-The `paths:` glob on `governance/rules/standards/standard.md` matches `standards/` alone, so a target holding a stale installed copy elsewhere never matches that rule, which governs authoring rather than an installed artifact.
+The rule that routed `standards/` edits to the meta-standard retired with its generator, and while it stood its glob matched `standards/` alone, so a target holding a stale installed copy elsewhere never matched it.
 
 ## No install verb
 

@@ -12,7 +12,6 @@ import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
 import { creationRel, SCRATCH } from '@/roots/record'
 import { createGovAdapter } from '@/gov/adapter'
 import { regenConsumedRules } from '@/gov/consumed'
-import { regenStandardRules } from '@/gov/standard-rules'
 import { installRules, lookupRules } from '@/gov/install'
 import { buildGovCatalog, describeRule, describeStack } from '@/gov/list'
 import { buildRulesPayload, listRuleFiles } from '@/gov/payload'
@@ -191,18 +190,14 @@ export function register(program: Command): void {
 
   gov
     .command('regen')
-    .description(
-      "Rebuild the standard-pointer rules and a repository's own .claude/rules/",
-    )
+    .description("Rebuild a repository's own .claude/rules/")
     .helpOption('-h, --help', 'Show this help message')
     .option('--root <path>', 'Repository root to regenerate', PROJECT_ROOT)
     .addHelpText(
       'after',
       [
         '',
-        'First writes governance/rules/standards/ from the paths: and rule:',
-        'fields in each standard under standards/. Then reads',
-        'internal/governance.toml and installs the stack it names, plus any',
+        'Reads internal/governance.toml and installs the stack it names, plus any',
         'rules under internal/rules/. Unlike install and sync, this runs',
         'against the toolkit root, whose .claude/rules/ is produced output.',
         '',
@@ -1120,14 +1115,6 @@ async function runRegen(
   }
 
   const root = resolve(opts.root ?? PROJECT_ROOT)
-
-  // The consumed copy installs from `governance/rules/`, so the band this
-  // writes has to be fresh before that copy is built from it.
-  const generated = await regenStandardRules(root)
-  if (!generated.ok) {
-    process.stderr.write(`Standard-rules regen failed: ${generated.reason}\n`)
-    return 1
-  }
 
   const result = await regenConsumedRules(root)
 

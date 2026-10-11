@@ -38,7 +38,7 @@ One attribute standard lands on the CLI: `markdown.md`, whose character bans and
 
 ## Gotchas
 
-- The meta-standard's subject is the corpus this census is dissolving. `standard.md` routes to `governance/rules/standards/standard.md` while standards remain a document type someone authors, and it is the one entry whose destination expires if the corpus does. Nothing detects that, because a rule globbing an empty folder reports the same as one globbing a full folder.
+- The meta-standard's subject is the corpus this census is dissolving. `standard.md` was routed by a generated rule that retired once no standard carried `paths:`, and the file itself expires with the corpus.
 - A destination recorded against a carrier nobody has built reads identically to one recorded against a live carrier, and only the marker below separates them. Nothing reads `to write`: every destination below is either `arrived` or moved to `## Withdrawn`, so a reversal does not read as an arrival.
 - `internal/standards/tooling-reference.md` is outside this census. It never installs into a target, so it has no corpus to leave, and `595-tooling-reference.md` already carries it.
 - A destination is not an install channel. The corpus has no install channel, so recording a home for a standard is the only route its guidance reaches a project through.
@@ -80,7 +80,7 @@ A standard no rule globs carries no row. `mermaid.md` reaches a session through 
 - `skill-requirement.md` fixes the `REQUIREMENT.md` beside a skill, its success questions, and its template. `governance/rules/claude/skill.md`, which already globs the requirement file beside the body.
 - `skill-practice.md` fixes how a practice skill closes and the source ledger it carries. Reached through the Practice type in `skill.md`, which `governance/rules/claude/skill.md` loads `create-skill` for, since the rule names no pointer to it directly. It was split from `skill.md` because that standard sat at 300 of the 300 rendered line ceiling, so any line `skill.md` gains needs a matching cut or a further split.
 - `skill-paths.md` fixes which root a path in a skill body resolves against and how a body cites a standard. `governance/rules/claude/skill.md`, through its `create-skill` load bullet. It is that further split, taken when the generated rule's frontmatter pushed `skill.md` past the ceiling.
-- `standard.md` fixes a standard's frontmatter, scope statement, and success criterion. `governance/rules/standards/standard.md`.
+- `standard.md` fixes a standard's frontmatter, scope statement, and success criterion.
 - `tasks.md` fixes the task file, its filename, its origin lines, and its archiving. `governance/rules/canon/tasks.md`.
 - `tasks-decline.md` fixes the declined folder, the `Declined:` line, and what declining does to a plan and a board row. `governance/rules/canon/tasks.md`, through a pointer bullet. Split from `tasks.md` for the same ceiling.
 - `teach.md` fixes the learning workspace layout, its ordinal naming, and its mission and record formats. The pedagogy stays in `teach-workspace`.

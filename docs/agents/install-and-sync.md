@@ -146,12 +146,7 @@ runs the verb again for that name.
 
 `canon gov regen` is the one governance verb that runs against the toolkit root,
 because the `.claude/rules/` it writes there is produced output rather than an
-operator's working copy. It first writes `governance/rules/standards/`, one rule
-per standard under `standards/` whose frontmatter carries `paths:`, clearing the
-folder so a standard that drops the field loses its rule. A standard named like
-a band folder or an authored rule, or a `paths:` or `rule:` that is not a list
-of strings, refuses the whole run before anything is written. It then reads the
-stack recorded in `internal/governance.toml`
+operator's working copy. It reads the stack recorded in `internal/governance.toml`
 into `.claude/rules/canon/`, installs anything under `internal/rules/` into a
 separate `.claude/rules/internal/`, and clears both destinations first so a
 rule the record stopped naming disappears. `internal/` is what this repository

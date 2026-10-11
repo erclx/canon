@@ -26,7 +26,7 @@ A rule stating a general fact has nowhere to point for the local decision, since
 
 `canon gov citations` resolves every path a rule body cites across `governance/rules/` and `internal/rules/`, plus every frontmatter `paths:` glob under `internal/rules/`, and `bun run check` gates on it as the `Rule citations` stage. The verdicts below stay a manual read: the stage answers whether a citation resolves, and nothing answers whether a resolving citation points at the right file or restates what it points at.
 
-A `canon standards <name>` citation resolves against `standards/` and then against the skill reference the `MOVED_STANDARDS` map in `src/standards/read.ts` names for a retired standard, so a generated rule keeps citing a moved standard by name with no rewrite. A rule retired alongside its standard also leaves `governance/renames.toml`, since `src/gov/renames.test.ts` fails on a chain ending on a rule nothing ships.
+A `canon standards <name>` citation resolves against `standards/` and then against the skill reference the `MOVED_STANDARDS` map in `src/standards/read.ts` names for a retired standard, so a rule keeps citing a moved standard by name with no rewrite. A rule retired alongside its standard also leaves `governance/renames.toml`, since `src/gov/renames.test.ts` fails on a chain ending on a rule nothing ships.
 
 At `2e912110` the corpus held 36 body citations across 77 rules. Twenty were `canon standards <name>`, fifteen were backticked paths, and one named a sibling rule by filename. All 36 resolved or were excused, and every internal glob matched, so the gate shipped as a floor rather than as a repair.
 
@@ -64,9 +64,7 @@ A standard name resolves against `standards/` alone, matching `standardRoots` in
 
 ### Rules that point rather than restate
 
-Each rule below cites its standard through `canon standards <name>` alone, keeping its `Authority` pointer plus any content the standard does not cover. `claude/skills/create-rule/references/rule.md` settles the shape: a rule points at the standard that owns a convention and never restates it.
-
-- `governance/rules/standards/standard.md` → `canon standards standard`, without restating the scope-statement rules.
+`claude/skills/create-rule/references/rule.md` settles the shape: a rule points at the standard that owns a convention and never restates it, citing it through `canon standards <name>` alone.
 
 `governance/rules/canon/tasks.md`, `governance/rules/canon/plan.md`, and `governance/rules/canon/context.md` are hand-written and cite no standard by name, since their standards moved into `task-board`, `plan-feature`, and `context-fold`. They load the owner skill instead. The groundwork, intake, session, design, readme, and rule rules retired with their standards, each routing a path to a reference its owner skill already reads. The skill rule stays as `governance/rules/claude/skill.md`, hand-written, because its creation-time and re-read bullets fire on a hand edit between skill runs.
 
