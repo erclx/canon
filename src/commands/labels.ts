@@ -385,6 +385,25 @@ async function runApply(number: string, opts: ApplyOptions): Promise<number> {
 
   if (!/^[1-9][0-9]*$/.test(number)) return refuse('bad-number')
 
+  const branch = await $`git -C ${root} symbolic-ref --short -q HEAD`
+    .env(gitEnv())
+    .quiet()
+    .nothrow()
+  const head = branch.exitCode === 0 ? branch.text().trim() : ''
+  if (head === '') return refuse('no-branch')
+
+  // Binding runs ahead of the audit, every label read, and every write, under
+  // --check and a project with no map as well, so a number this branch does
+  // not own costs the run and nothing else.
+  const target = await gh(root, [
+    'api',
+    `repos/{owner}/{repo}/pulls/${number}`,
+    '--jq',
+    '"\\(.head.ref) \\(.state)"',
+  ])
+  if (target === null) return refuse('gh-failed')
+  if (target.trim() !== `${head} open`) return refuse('head-mismatch')
+
   const report = await auditLabels(root, { base: opts.base })
 
   // A project declaring no map earns nothing and is labelled silently, which
@@ -410,24 +429,6 @@ async function runApply(number: string, opts: ApplyOptions): Promise<number> {
     return 0
   }
   if (report.kind === 'refused') return refuse(report.reason)
-
-  const branch = await $`git -C ${root} symbolic-ref --short -q HEAD`
-    .env(gitEnv())
-    .quiet()
-    .nothrow()
-  const head = branch.exitCode === 0 ? branch.text().trim() : ''
-  if (head === '') return refuse('no-branch')
-
-  // Binding runs ahead of every label read and every write, under --check as
-  // well, so a number this branch does not own costs the run and nothing else.
-  const target = await gh(root, [
-    'api',
-    `repos/{owner}/{repo}/pulls/${number}`,
-    '--jq',
-    '"\\(.head.ref) \\(.state)"',
-  ])
-  if (target === null) return refuse('gh-failed')
-  if (target.trim() !== `${head} open`) return refuse('head-mismatch')
 
   const presentRaw = await gh(root, [
     'api',

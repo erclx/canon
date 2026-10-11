@@ -105,7 +105,7 @@ A detached HEAD gives `git branch --show-current` an empty result, which would r
 
 ### Labels
 
-Read `${CLAUDE_SKILL_DIR}/references/labels.md` on reaching this step, starting at its `## Labels at run time` section, for the verb to ask, the record to branch on, the fallback, and when `pr_labels` stays empty. The final command below takes the set it resolves as `pr_labels`.
+Read `${CLAUDE_SKILL_DIR}/references/labels.md` on reaching this step, starting at its `## Labels at run time` section, for the verb to ask, the record to branch on, the fallback, and when `pr_labels` stays empty. The final command below takes the set it resolves as `pr_labels` and the record's `uncovered` paths as `pr_uncovered`, which only its fallback path reads.
 
 ### Final command
 
@@ -129,9 +129,9 @@ Add a line for each path in the `uncovered=` value the final command printed, na
 
 `⚠️ No label covers <path>. Add a row to canon/config/pr-labels.toml or a [declined] entry.`
 
-Add a further line only when `owed=` or `missingOnRemote=` printed a value, naming each label that is still owed and saying which are absent from the remote:
+Add a further line only when `owed=` or `missingOnRemote=` printed a value, naming each owed label, `owed=` less the names in `missingOnRemote=`, and separately the names in `missingOnRemote=`, since `owed=` already holds every absent label. Drop either half that is empty:
 
-`⚠️ Labels not applied: <owed labels>. Not on the remote: <missingOnRemote labels>.`
+`⚠️ Labels not applied: <owed labels not in missingOnRemote>. Not on the remote: <missingOnRemote labels>.`
 
 Add a line when a checklist was posted, naming the pull request it landed on and which comment carries it:
 

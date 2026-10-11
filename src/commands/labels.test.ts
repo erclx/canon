@@ -382,6 +382,17 @@ describe('canon labels apply', { timeout: RUN_TIMEOUT_MS }, () => {
     expect(record.reason).toBe('no-map')
     expect(record.earned).toEqual([])
     expect(record.exitCode).toBe(0)
-    expect(record.calls).toEqual([])
+    expect(record.calls.some((call) => call.includes('-X POST'))).toBe(false)
+  })
+
+  it('should refuse a foreign head before the no-map answer', async () => {
+    await seedRepo(false)
+
+    const record = await runApply(['7', '--check'], {
+      target: 'feat/other open',
+    })
+
+    expect(record.reason).toBe('head-mismatch')
+    expect(record.exitCode).toBe(1)
   })
 })

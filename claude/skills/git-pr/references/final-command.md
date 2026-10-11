@@ -19,6 +19,7 @@ That scan reads the body this session composed, and a harness can append a sessi
 
 ```bash
 pr_labels="<comma-separated labels, empty when the map resolves to nothing>"
+pr_uncovered="<comma-separated uncovered paths from the audit record, empty when none>"
 head_branch=$(git branch --show-current)
 git push -u origin HEAD || exit 1
 repo=$(gh api 'repos/{owner}/{repo}' --jq '"\(.default_branch) \(.owner.login)"') || exit 1
@@ -61,18 +62,27 @@ if printf '%s' "$record" | jq -e 'has("earned")' >/dev/null 2>&1; then
 else
   # No record: an installed canon that predates the verb, or a refusal it
   # could not read a map through. The loop below is the old-binary fallback.
+  # It fills the same three lists the verb's record would, so the report
+  # reads one shape on both paths. The loop reads from a here-document, since
+  # a pipe would run it in a subshell and drop what it appends.
   owed=
   missing=
-  uncovered=
-  printf '%s\n' "$pr_labels" | tr ',' '\n' | while IFS= read -r label; do
+  uncovered=$pr_uncovered
+  while IFS= read -r label; do
     [ -n "$label" ] || continue
     if gh api "repos/{owner}/{repo}/labels/$(jq -rn --arg l "$label" '$l|@uri')" --silent 2>/dev/null; then
-      gh api -X POST "repos/{owner}/{repo}/issues/$pr_number/labels" -f "labels[]=$label" --silent ||
+      gh api -X POST "repos/{owner}/{repo}/issues/$pr_number/labels" -f "labels[]=$label" --silent || {
         printf 'Label apply failed: %s\n' "$label" >&2
+        owed=${owed:+$owed,}$label
+      }
     else
       printf 'Label apply failed: %s is not on the remote. Create it with: gh label create %s\n' "$label" "$label" >&2
+      owed=${owed:+$owed,}$label
+      missing=${missing:+$missing,}$label
     fi
-  done
+  done <<EOF
+$(printf '%s\n' "$pr_labels" | tr ',' '\n')
+EOF
 fi
 rm -rf .canon/tmp/pr/body .canon/tmp/pr/live.md .canon/tmp/pr/clean.md
 printf 'number=%s\nurl=%s\nhead=%s\nopened=%s\nowed=%s\nmissingOnRemote=%s\nuncovered=%s\n' "$pr_number" "$pr_url" "$head_branch" "$opened" "$owed" "$missing" "$uncovered"
