@@ -31,7 +31,7 @@ The boundary is structural against user-extensible. Linters and formatters with 
 
 A confirm prompt carrying `nonInteractiveDefault` reads silence as consent, which made `CANON_NON_INTERACTIVE=1` mean apply-all and cost a real target its deploy job and a 120-line screenshot harness. An opt-in `--dry-run` was the alternative and it is declined, because a flag you have to remember is one nobody passes the first time, and the first time is when the target still holds the work. Anything relying on `CANON_NON_INTERACTIVE=1` to mean yes broke, which is the accepted cost. Measured at `0c953078` on 2026-08-20, across a golden-config category holding 41 files across 6 stacks.
 
-`claude/skills/canon-cli/SKILL.md` flags the tooling sync as a verb that can lose edits and sends a reader to `canon docs install-and-sync`, which names the category and points at `canon tooling diff <stack> <target>` for the paths, or `canon tooling sync --check` on a binary older than that verb. A generated path list in the body was the alternative and it loses, since a copy ships on a different cadence than the stacks it names.
+`claude/skills/canon-cli/SKILL.md` flags the tooling sync as a verb that can lose edits and sends a reader to `canon docs sync`, which says it overwrites golden configs and merges seeds, then to `canon tooling diff <stack> <target>` for the paths, or `canon tooling sync --check` on a binary older than that verb. A generated path list in the body was the alternative and it loses, since a copy ships on a different cadence than the stacks it names.
 
 Sync carries no prompt that opens each diff in an editor. Shelling out to `code --diff` is what breaks a headless caller, so compare with git after syncing instead.
 

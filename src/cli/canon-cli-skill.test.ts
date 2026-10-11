@@ -8,10 +8,11 @@ const SKILL_PATH = join(
   '../../claude/skills/canon-cli/SKILL.md',
 )
 
-// Verbs that read or write only this repository's own tree. A target session
-// reaches none of them, so the router leaves them out. Each name is confirmed
-// against its docs/agents page, and the second test fails when one stops
-// being a verb.
+// Verbs a target session has no job for, because their docs tie them to this
+// repository's own tree or to a hook it never calls by hand. `hooks` is the
+// edge: the base stack ships its post-merge call, which a target runs without
+// routing to it. Each name is confirmed against its docs/agents page, and the
+// second test fails when one stops being a verb.
 export const TOOLKIT_ONLY = new Set([
   'sandbox',
   'gate',
@@ -26,11 +27,13 @@ function registeredVerbs(): string[] {
   )
 }
 
-// Only the backticked `canon <verb>` form counts, so a verb named in prose
-// ("the gov command") is not a route.
+// Only a backticked `canon <verb>` on a table row counts. A verb named in
+// prose, in the frontmatter, or in the destructive list is not a route, so
+// deleting its row fails the test.
 function carriedVerbs(body: string): Set<string> {
-  const verbs = [...body.matchAll(/`canon ([a-z][a-z-]*)[^`]*`/g)].map(
-    (match) => match[1],
+  const rows = body.split('\n').filter((line) => line.startsWith('|'))
+  const verbs = rows.flatMap((row) =>
+    [...row.matchAll(/`canon ([a-z][a-z-]*)[^`]*`/g)].map((match) => match[1]),
   )
   return new Set(verbs)
 }

@@ -52,7 +52,7 @@ Each verb here has a skill that owns the job. Load the skill rather than driving
 | Walk a page through interactions and measure | `canon drive`       | `canon:ux-measure`          |
 | Fetch a YouTube transcript                   | `canon transcripts` | `canon:youtube-transcripts` |
 | Open a learning workspace                    | `canon teach`       | `canon:teach-workspace`     |
-| Work on the local canvas                     | `canon canvas`      | `canon:canvas`              |
+| Work on the local canvas                     | `canon canvas`      | `canon:canvas-board`        |
 
 ## Session and ship
 
@@ -80,17 +80,17 @@ Each verb here has a skill that owns the job. Load the skill rather than driving
 
 ## Verbs that can lose your edits
 
-Read `canon docs install-and-sync` before running one of these. Run its `--check` or `--dry-run` form first where the verb has one.
+Read the doc each line names before running one of these. `canon docs install-and-sync` covers the governance and design verbs, `canon docs sync` covers tooling, `canon docs indexes` covers regeneration, and `canon docs migrate` covers the migrate verbs. Run the `--check` or `--dry-run` form first where the verb has one.
 
 - `canon sync` runs every installed domain's sync, so it carries each risk below.
 - `canon gov sync` replaces a rule you edited and deletes a rule the toolkit retired, edited or not.
-- `canon tooling sync --write` replaces every golden config a stack ships. Seeds are copy-once and dictionaries merge. Nothing writes without the flag.
+- `canon tooling sync --write` replaces every golden config a stack ships. Seeds are copy-once and dictionaries merge. Nothing writes without the flag. See `canon docs sync`.
 - `canon design sync` replaces the shipped design files and leaves `.claude/design/project/` alone.
-- `canon migrate --write` rewrites files that cite a retired name or layout. It reports and writes nothing without the flag.
-- `canon indexes regen` rewrites each generated `index.md` from the folder's current state, so a hand edit there is lost.
+- `canon migrate --write` rewrites files that cite a retired name or layout. It reports and writes nothing without the flag. See `canon docs migrate`.
+- `canon indexes regen` rewrites each generated `index.md` from the folder's current state, so a hand edit there is lost. See `canon docs indexes`.
 
 No command writes a standard into a project, so `canon standards` is safe to run. `CLAUDE.md` and the other seed docs are copy-once, and no sync updates them. Merge those by hand against the toolkit copy.
 
 ## Source of truth
 
-- `canon docs install-and-sync` states what each install and sync verb writes, refuses, or leaves alone. When it and this skill disagree, the doc wins.
+- `canon docs install-and-sync` states what each install and sync verb writes, refuses, or leaves alone. `canon docs indexes` and `canon docs migrate` state the same for their verbs. When a doc and this skill disagree, the doc wins.
