@@ -1,5 +1,9 @@
 import { resolve } from 'node:path'
+import { $ } from 'bun'
 import type { Command } from 'commander'
+import { execa } from 'execa'
+import { gitEnv } from '@/git/env'
+import { diffLabels } from '@/labels/apply'
 import { type LabelAuditRefusal, auditLabels } from '@/labels/audit'
 import { resolveScanInput } from '@/labels/event'
 import { checkTitleFormat, type TitleFormatIssue } from '@/labels/format'
@@ -16,6 +20,14 @@ interface AuditOptions {
   readonly root?: string
   readonly json?: boolean
 }
+
+interface ApplyOptions extends AuditOptions {
+  readonly check?: boolean
+}
+
+type ApplyRefusal = 'bad-number' | 'no-branch' | 'gh-failed' | 'head-mismatch'
+
+const GH_TIMEOUT_MS = 30_000
 
 interface ScanOptions {
   readonly event?: string
@@ -48,6 +60,16 @@ const REFUSALS: Record<LabelAuditRefusal, string> = {
     'The ref passed to --base resolves to no commit here. Pass one this tree carries.',
   'unreadable-changes':
     'git could not list what this branch changed, so the set is unknown.',
+}
+
+const APPLY_REFUSALS: Record<ApplyRefusal, string> = {
+  'bad-number': 'The pull request number must be a positive whole number.',
+  'no-branch':
+    'This checkout is on no branch, so there is no head to bind the pull request to.',
+  'gh-failed':
+    'gh could not read the pull request or the labels, so nothing was written.',
+  'head-mismatch':
+    'That pull request is not open on the current branch. Nothing was written to it.',
 }
 
 export function register(program: Command): void {
@@ -100,6 +122,48 @@ export function register(program: Command): void {
     )
     .action(async (paths: string[], opts: AuditOptions) => {
       process.exitCode = await runAudit(paths, opts)
+    })
+
+  labels
+    .command('apply')
+    .description(
+      'Add the labels this branch earns to its open pull request, adding what is missing and never removing',
+    )
+    .argument('<number>', "This branch's open pull request")
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--base <ref>', 'Far side of the range, defaulting to the trunk')
+    .option('--root <path>', 'Repository to read, defaulting to the cwd')
+    .option('--check', 'Report the labels owed and write nothing')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Resolves the earned set the way `canon labels audit` does, binds to the',
+        'pull request only when its head is the current branch and it is open,',
+        'and adds each earned label the pull request lacks over REST.',
+        '',
+        'It adds and never removes, so a label a person applied by hand stays.',
+        'A label the remote does not carry is reported under missingOnRemote and',
+        'skipped, never created. A project declaring no map earns nothing and',
+        'exits 0.',
+        '',
+        'Record: number, earned, present, added, owed, missingOnRemote, uncovered',
+        '',
+        'Exit codes:',
+        '  0  nothing is owed after the run',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '  2  labels are still owed, being any under --check, or a label the',
+        '     remote lacks or a failed add otherwise',
+        '',
+        'Examples:',
+        '  canon labels apply 123 --json',
+        '  canon labels apply 123 --check',
+        '',
+      ].join('\n'),
+    )
+    .action(async (number: string, opts: ApplyOptions) => {
+      process.exitCode = await runApply(number, opts)
     })
 
   labels
@@ -274,6 +338,176 @@ async function runAudit(paths: string[], opts: AuditOptions): Promise<number> {
   }
 
   return coverage.uncovered.length === 0 ? 0 : 2
+}
+
+/** Runs one `gh` call under the stripped environment, null when it failed. */
+async function gh(
+  cwd: string,
+  args: readonly string[],
+): Promise<string | null> {
+  try {
+    const result = await execa('gh', [...args], {
+      cwd,
+      timeout: GH_TIMEOUT_MS,
+      env: gitEnv(),
+      extendEnv: false,
+    })
+    return result.stdout
+  } catch {
+    return null
+  }
+}
+
+function nonEmptyLines(text: string): string[] {
+  return text.split('\n').filter((line) => line !== '')
+}
+
+async function runApply(number: string, opts: ApplyOptions): Promise<number> {
+  const root = resolve(opts.root ?? process.cwd())
+  const emitJson = opts.json ?? false
+  const isCheck = opts.check ?? false
+
+  intro('canon labels apply')
+
+  const refuse = (reason: ApplyRefusal | LabelAuditRefusal): number => {
+    const message =
+      reason in APPLY_REFUSALS
+        ? APPLY_REFUSALS[reason as ApplyRefusal]
+        : REFUSALS[reason as LabelAuditRefusal]
+    logStep('Refused')
+    logWarn(message)
+    outro()
+    if (emitJson) {
+      process.stdout.write(`${JSON.stringify({ root, reason, message })}\n`)
+    }
+    return 1
+  }
+
+  if (!/^[1-9][0-9]*$/.test(number)) return refuse('bad-number')
+
+  const report = await auditLabels(root, { base: opts.base })
+
+  // A project declaring no map earns nothing and is labelled silently, which
+  // is an answer and exits clean rather than reading as a break.
+  if (report.kind === 'refused' && report.reason === 'no-map') {
+    logStep('Labels')
+    logInfo(REFUSALS['no-map'])
+    outro()
+    if (emitJson) {
+      process.stdout.write(
+        `${JSON.stringify({
+          number: Number(number),
+          reason: 'no-map',
+          earned: [],
+          present: [],
+          added: [],
+          owed: [],
+          missingOnRemote: [],
+          uncovered: [],
+        })}\n`,
+      )
+    }
+    return 0
+  }
+  if (report.kind === 'refused') return refuse(report.reason)
+
+  const branch = await $`git -C ${root} symbolic-ref --short -q HEAD`
+    .env(gitEnv())
+    .quiet()
+    .nothrow()
+  const head = branch.exitCode === 0 ? branch.text().trim() : ''
+  if (head === '') return refuse('no-branch')
+
+  // Binding runs ahead of every label read and every write, under --check as
+  // well, so a number this branch does not own costs the run and nothing else.
+  const target = await gh(root, [
+    'api',
+    `repos/{owner}/{repo}/pulls/${number}`,
+    '--jq',
+    '"\\(.head.ref) \\(.state)"',
+  ])
+  if (target === null) return refuse('gh-failed')
+  if (target.trim() !== `${head} open`) return refuse('head-mismatch')
+
+  const presentRaw = await gh(root, [
+    'api',
+    '--paginate',
+    `repos/{owner}/{repo}/issues/${number}/labels`,
+    '--jq',
+    '.[].name',
+  ])
+  const remoteRaw = await gh(root, [
+    'api',
+    '--paginate',
+    'repos/{owner}/{repo}/labels',
+    '--jq',
+    '.[].name',
+  ])
+  if (presentRaw === null || remoteRaw === null) return refuse('gh-failed')
+
+  const earned = report.coverage.labels
+  const present = nonEmptyLines(presentRaw)
+  const diff = diffLabels(earned, present, nonEmptyLines(remoteRaw))
+
+  let added: string[] = []
+  let failed: string[] = []
+
+  if (!isCheck && diff.toAdd.length > 0) {
+    const wrote = await gh(root, [
+      'api',
+      '-X',
+      'POST',
+      `repos/{owner}/{repo}/issues/${number}/labels`,
+      ...diff.toAdd.flatMap((label) => ['-f', `labels[]=${label}`]),
+      '--silent',
+    ])
+    if (wrote === null) failed = [...diff.toAdd]
+    else added = [...diff.toAdd]
+  }
+
+  logStep('Labels')
+  logInfo(earned.length === 0 ? 'this set earns no label' : earned.join(', '))
+
+  if (isCheck) {
+    logStep(diff.owed.length === 0 ? 'Nothing owed' : 'Owed')
+    for (const label of diff.owed) logWarn(label)
+  } else {
+    logStep('Added')
+    logInfo(added.length === 0 ? 'no label was added' : added.join(', '))
+  }
+
+  for (const label of diff.missingOnRemote) {
+    logWarn(
+      `${label} is not on the remote. Create it with: gh label create ${label}`,
+    )
+  }
+  for (const label of failed) logWarn(`Label apply failed: ${label}`)
+
+  if (report.coverage.uncovered.length > 0) {
+    logWarn(
+      `${plural(report.coverage.uncovered.length, 'path')} reached by no row of ${MAP_REL}.`,
+    )
+  }
+
+  outro()
+
+  const owed = diff.owed.filter((label) => !added.includes(label))
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({
+        number: Number(number),
+        earned,
+        present,
+        added,
+        owed,
+        missingOnRemote: diff.missingOnRemote,
+        uncovered: report.coverage.uncovered,
+      })}\n`,
+    )
+  }
+
+  return owed.length === 0 ? 0 : 2
 }
 
 async function runScan(opts: ScanOptions): Promise<number> {

@@ -1,7 +1,8 @@
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { existsSync, readFileSync } from 'node:fs'
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { execa } from 'execa'
+import { execa, execaSync } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 const REPO_ROOT = join(import.meta.dirname, '..', '..')
@@ -190,5 +191,197 @@ describe('canon labels scan text checks', { timeout: RUN_TIMEOUT_MS }, () => {
     const record = await runScan(['--title', TITLE, '--body-file', body])
 
     expect(record.bannedCharacters).toEqual([])
+  })
+})
+
+describe('canon labels apply', { timeout: RUN_TIMEOUT_MS }, () => {
+  interface ApplyRecord {
+    readonly reason?: string
+    readonly earned?: string[]
+    readonly added?: string[]
+    readonly owed?: string[]
+    readonly missingOnRemote?: string[]
+    readonly exitCode: number
+    readonly calls: string[]
+  }
+
+  interface Fake {
+    readonly target?: string
+    readonly present?: string[]
+    readonly remote?: string[]
+  }
+
+  let root: string
+  let logFile: string
+
+  function git(...args: string[]): void {
+    execaSync('git', ['-C', root, ...args], {
+      extendEnv: false,
+      env: {
+        GIT_AUTHOR_NAME: 'Test',
+        GIT_AUTHOR_EMAIL: 'test@example.com',
+        GIT_COMMITTER_NAME: 'Test',
+        GIT_COMMITTER_EMAIL: 'test@example.com',
+      },
+    })
+  }
+
+  async function seedRepo(hasMap: boolean): Promise<void> {
+    git('init', '-q', '--initial-branch=main')
+    await writeFile(join(root, 'README.md'), '# r\n')
+    if (hasMap) {
+      await mkdir(join(root, 'canon', 'config'), { recursive: true })
+      await writeFile(
+        join(root, 'canon', 'config', 'pr-labels.toml'),
+        '[domains]\ncli = ["src/"]\ndocs = ["docs/"]\n',
+      )
+    }
+    git('add', '.')
+    git('commit', '-q', '-m', 'init')
+    git('checkout', '-q', '-b', 'feat/x')
+    await mkdir(join(root, 'src'), { recursive: true })
+    await mkdir(join(root, 'docs'), { recursive: true })
+    await writeFile(join(root, 'src', 'a.ts'), 'export {}\n')
+    await writeFile(join(root, 'docs', 'a.md'), '# a\n')
+    git('add', '.')
+    git('commit', '-q', '-m', 'change')
+  }
+
+  async function writeFakeGh(): Promise<string> {
+    const bin = join(root, 'bin')
+    await mkdir(bin, { recursive: true })
+    await writeFile(
+      join(bin, 'gh'),
+      [
+        '#!/bin/sh',
+        'echo "$*" >> "$FAKE_LOG"',
+        'case "$*" in',
+        '  *"-X POST"*) exit 0 ;;',
+        '  *pulls/7*) printf \'%s\\n\' "$FAKE_TARGET" ;;',
+        '  *issues/7/labels*) printf \'%s\' "$FAKE_PRESENT" ;;',
+        '  *repos/{owner}/{repo}/labels*) printf \'%s\' "$FAKE_REMOTE" ;;',
+        '  *) exit 1 ;;',
+        'esac',
+        '',
+      ].join('\n'),
+      { mode: 0o755 },
+    )
+    return bin
+  }
+
+  async function runApply(args: string[], fake: Fake): Promise<ApplyRecord> {
+    const bin = await writeFakeGh()
+    const result = await execa(
+      process.execPath,
+      [CLI, 'labels', 'apply', '--json', '--base', 'main', ...args],
+      {
+        cwd: root,
+        reject: false,
+        timeout: RUN_TIMEOUT_MS,
+        extendEnv: false,
+        env: {
+          PATH: `${bin}:${process.env.PATH ?? ''}`,
+          HOME: process.env.HOME ?? root,
+          FAKE_LOG: logFile,
+          FAKE_TARGET: fake.target ?? 'feat/x open',
+          FAKE_PRESENT: (fake.present ?? []).join('\n'),
+          FAKE_REMOTE: (fake.remote ?? ['cli', 'docs']).join('\n'),
+        },
+      },
+    )
+    const record = JSON.parse(result.stdout) as Omit<
+      ApplyRecord,
+      'exitCode' | 'calls'
+    >
+    const calls = existsSync(logFile)
+      ? readFileSync(logFile, 'utf8').split('\n').filter(Boolean)
+      : []
+    return { ...record, exitCode: result.exitCode ?? -1, calls }
+  }
+
+  beforeEach(async () => {
+    root = await mkdtemp(join(tmpdir(), 'canon-labels-apply-'))
+    logFile = join(root, 'gh.log')
+  })
+
+  afterEach(async () => {
+    await rm(root, { recursive: true, force: true })
+  })
+
+  it('should add the earned labels the pull request lacks', async () => {
+    await seedRepo(true)
+
+    const record = await runApply(['7'], {})
+
+    expect(record.added).toEqual(['cli', 'docs'])
+    expect(record.exitCode).toBe(0)
+    expect(record.calls.some((call) => call.includes('-X POST'))).toBe(true)
+  })
+
+  it('should refuse a pull request whose head is another branch before any write', async () => {
+    await seedRepo(true)
+
+    const record = await runApply(['7'], { target: 'feat/other open' })
+
+    expect(record.reason).toBe('head-mismatch')
+    expect(record.exitCode).toBe(1)
+    expect(record.calls.some((call) => call.includes('-X POST'))).toBe(false)
+  })
+
+  it('should refuse a pull request that is not open', async () => {
+    await seedRepo(true)
+
+    const record = await runApply(['7'], { target: 'feat/x closed' })
+
+    expect(record.reason).toBe('head-mismatch')
+  })
+
+  it('should refuse a foreign head under --check as well', async () => {
+    await seedRepo(true)
+
+    const record = await runApply(['7', '--check'], {
+      target: 'feat/other open',
+    })
+
+    expect(record.reason).toBe('head-mismatch')
+  })
+
+  it('should exit 2 under --check with owed labels and write nothing', async () => {
+    await seedRepo(true)
+
+    const record = await runApply(['7', '--check'], {})
+
+    expect(record.owed).toEqual(['cli', 'docs'])
+    expect(record.exitCode).toBe(2)
+    expect(record.calls.some((call) => call.includes('-X POST'))).toBe(false)
+  })
+
+  it('should not re-add a label already on the pull request', async () => {
+    await seedRepo(true)
+
+    const record = await runApply(['7'], { present: ['cli', 'by-hand'] })
+
+    expect(record.added).toEqual(['docs'])
+  })
+
+  it('should report a label the remote lacks and not add it', async () => {
+    await seedRepo(true)
+
+    const record = await runApply(['7'], { remote: ['cli'] })
+
+    expect(record.added).toEqual(['cli'])
+    expect(record.missingOnRemote).toEqual(['docs'])
+    expect(record.exitCode).toBe(2)
+  })
+
+  it('should add nothing and exit 0 for a project with no map', async () => {
+    await seedRepo(false)
+
+    const record = await runApply(['7'], {})
+
+    expect(record.reason).toBe('no-map')
+    expect(record.earned).toEqual([])
+    expect(record.exitCode).toBe(0)
+    expect(record.calls).toEqual([])
   })
 })

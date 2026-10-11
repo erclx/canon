@@ -108,7 +108,7 @@ Each domain exposes a consistent shape where applicable: `list`, `install`, `syn
 - `gate`, in `gate.md`: `run`
 - `secrets`, in `state-scoped-risk.md`: `scan`
 - `deps`, in `state-scoped-risk.md`: `audit`
-- `labels`, in `label-coverage.md`: `audit`, `scan`
+- `labels`, in `label-coverage.md`: `audit`, `apply`, `scan`
 - `comments`, in `comments.md`: `scan`
 - `context`, in `context-audit.md`: `audit`, `classify diff`, `classify sweep`, `classifier show`, `classifier set`
 - `markdown`, in `markdown-audit.md`: `audit`
@@ -129,6 +129,7 @@ Subcommands no other page describes:
 - `slides render [deck]` takes a deck name or a folder, defaulting to the only deck, and lays out each `.html` file in filename order in Chromium at 1280 by 720 and rebuilds it as editable shapes. Each element drawn as a picture prints one `✗` line on stderr naming the slide, the selector, and the properties that forced it. A link left out, being a `#slide-N` past the deck's end or any target that is neither that nor an absolute URL, prints one too, and the exit stays 0.
 - A deck folder's `deck.json` and the faces it embeds, its per-slide `<body>` attributes, transitions and entrances, speaker notes, and charts are described in `slides.md`.
 - `canvas`, with its verbs, content format, and write routes, is described in `canvas.md`.
+- `labels apply <number>` adds the labels this branch earns to its open pull request, refusing a pull request whose head is not the current branch or that is not open, and never creating a label the remote lacks or removing one a person added (`--check` writes nothing and exits 2 when labels are owed, `--base`, `--json`).
 - `labels scan` fails a pull request or a posted review whose title, body, or review comment carries a phase label, a label a code span quotes, a gitignored record path, a session link, a banned character, a body heading outside the closed section list or a missing `## Summary` or `## Key changes`, a title word no dictionary holds, or a title breaking `claude/skills/git-pr/references/pr.md`'s format, casing, or length rule (`--event`, `--body-file`, `--json`).
 
 ## Version skew
