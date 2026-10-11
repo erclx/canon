@@ -303,6 +303,55 @@ describe('a stage holding a machine lock', () => {
     expect(outcome.queuedMs).toBeUndefined()
   })
 
+  it('should report the load a failed locked stage ran under', async () => {
+    const ctx = contextWith({
+      run: runnerFor({ 'true suite': result({ exitCode: 1 }) }),
+      readLoad: () => ({ loadAverage: 41.3, cores: 32 }),
+    })
+
+    const outcome = await runStage(stage('suite', { lock: 'suite' }), ctx)
+
+    expect(outcome.emissions.at(-1)).toEqual({
+      kind: 'info',
+      text: 'Load average 41.3 on 32 cores when the suite stage failed',
+    })
+  })
+
+  it('should not report load on a locked stage that passed', async () => {
+    const ctx = contextWith({
+      readLoad: () => ({ loadAverage: 41.3, cores: 32 }),
+    })
+
+    const outcome = await runStage(stage('suite', { lock: 'suite' }), ctx)
+
+    expect(outcome.emissions).toEqual([
+      { kind: 'output', text: '' },
+      { kind: 'info', text: 'suite clean' },
+    ])
+  })
+
+  it('should add nothing to a failed stage where load cannot be read', async () => {
+    const ctx = contextWith({
+      run: runnerFor({ 'true suite': result({ exitCode: 1 }) }),
+      readLoad: () => undefined,
+    })
+
+    const outcome = await runStage(stage('suite', { lock: 'suite' }), ctx)
+
+    expect(outcome.emissions).toEqual([{ kind: 'output', text: '' }])
+  })
+
+  it('should not report load on a failed stage holding no lock', async () => {
+    const ctx = contextWith({
+      run: runnerFor({ 'true suite': result({ exitCode: 1 }) }),
+      readLoad: () => ({ loadAverage: 41.3, cores: 32 }),
+    })
+
+    const outcome = await runStage(stage('suite'), ctx)
+
+    expect(outcome.emissions).toEqual([{ kind: 'output', text: '' }])
+  })
+
   it('should name the worktree it queued behind', async () => {
     placeLiveHolder('/worktrees/other')
     setTimeout(() => unlinkSync(lockPath()), 50)
