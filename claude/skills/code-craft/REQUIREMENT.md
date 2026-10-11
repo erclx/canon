@@ -30,7 +30,7 @@ Before this skill, two shipped pointers left interface depth unowned. `api-desig
 - State a tension as one side only, such as "never duplicate"
 - Name a language, a framework, or a type system feature in the body
 - Restate the red, green, refactor loop `test-first` runs, or the design review procedure `review-craft` carries for a finished diff
-- Restate the error and naming bullets of the core code rule
+- Restate error or naming bullets. The core code rule retired them on purpose, and the error shape lives in `api-design`.
 
 ## Guards
 

@@ -106,4 +106,3 @@ Check each line against the code the change produced. A line answering no is fix
 - Which layer a test belongs at: `test-craft`
 - The contract a caller depends on, being its exports, flags, output, and errors: `api-design`
 - Judging a finished diff, including a design review of it: `review-craft`
-- The error and naming floors every code stack loads: `000-code`
