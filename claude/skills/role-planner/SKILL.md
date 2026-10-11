@@ -94,6 +94,17 @@ controller. Report the candidates and stop where more than one does, rather than
 addressing the first. Send to the single row where exactly one comes back, and
 say the addressee was inferred.
 
+## Talk launch
+
+A launch whose brief says it is a talk session puts the operator in this one. Everything above holds, and the clause below changes how questions are answered and when the role ends. A launch carrying no such sentence takes none of this.
+
+- Put each open question to the operator through the structured question surface before writing the record, and record a settled pick in place per the plan standard's answer-in-place rule. Never fill an `- Answer:` slot the operator did not answer.
+- Keep answering under `plan-feature`'s discussion rounds after the record lands, since the operator launched this session to keep talking.
+- Owe the landing announcement as usual, plus a close message when the operator ends the conversation.
+- Skip the before-prompt block message for a question put to the operator who is in the session. Keep it for a block the operator cannot answer, since a controller learns of a stall only from a message.
+
+The operator being present is an assumption the launch carries. A talk planner whose operator has walked away waits silently on its first question, so say what the session is waiting on in the turn it stops.
+
 ## Refusing is part of the job
 
 - Refuse an instruction the tree contradicts, and carry the evidence with it. Name the commands read and what complying would produce, rather than reporting reluctance.
@@ -102,6 +113,6 @@ say the addressee was inferred.
 
 ## Lifetime
 
-- The role runs from the launch to the record landing, and one record closes it. A session handed a second row works it under the same role and reads the tree again for that row.
+- The role runs from the launch to the record landing. The record closes the role, and the operator closes a talk session. A session handed a second row works it under the same role and reads the tree again for that row.
 - A reused session pays the context load once and stales differently. Its picture of the tree ages while it works, which is why the in-flight read runs per row, and it accumulates toward a compaction that drops the reasoning behind its earlier records with nothing reporting it. Cap a reused session rather than letting it run the board.
 - Treat this body as possibly older than the branch under it. A plugin skill loads from the marketplace cache rather than from the working tree.
