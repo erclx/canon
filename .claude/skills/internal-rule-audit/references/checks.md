@@ -19,7 +19,7 @@ Each check names the source that answers it, so the audit reads rather than re-d
 - **Source:** the `stacks` array in `gov list --json`. Each stack lists its own rules and names the stack it `extends`, so a rule a stack selects reaches that stack and every stack extending it. The `unreferenced` array names every governance rule no stack selects.
 - **Test:** every project the selecting stacks reach has the rule's subject. A rule about code selected by a stack that docs-only projects consume fails.
 - **Fails toward:** move to the stack whose projects have the subject.
-- **Unreferenced:** a governance rule in `unreferenced` reaches no stack. Check it against `GOV_EXPECTED_UNREFERENCED` in `src/gate/measures.ts` before judging it. A rule on that list is opt-in by `--add`, so report its audience as `opt-in` and judge it on the other checks. A rule on neither list reaches nothing, so report its audience as `none` and its verdict as retire, or move when a stack it belongs in exists.
+- **Unreferenced:** a governance rule in `unreferenced` reaches no stack. Read its `detect` field in the same `gov list --json` record before judging it. A non-null `detect` means `canon gov detect` proposes it from a project's evidence, so report its audience as `opt-in` and judge it on the other checks. A null `detect` means nothing reaches it, so report its audience as `none` and its verdict as retire, or move when a stack it belongs in exists.
 - **Internal:** a rule under `internal/rules/` reaches this repository alone and needs no stack. `internal/governance.toml` records which stack this repository consumes and does not widen any rule's audience.
 
 ## 3. Restated elsewhere
