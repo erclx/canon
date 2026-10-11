@@ -67,11 +67,73 @@ describe('parseSections', () => {
 
     expect(readField(body, 'Proposed fix')).toBe('open')
   })
+
+  it('should read each optional suggested-shape field as its own section', () => {
+    const body = report({
+      'Suggested shape': 'a template',
+      Why: '- one reason',
+      Links: 'https://example.com',
+    })
+
+    const sections = parseSections(body)
+
+    expect(sections.get('suggested shape')).toBe('a template')
+    expect(sections.get('why')).toBe('- one reason')
+    expect(sections.get('links')).toBe('https://example.com')
+  })
+
+  it('should keep a three-backtick block holding ### lines inside a four-backtick fence', () => {
+    const shape = [
+      '````markdown',
+      '### Outer',
+      '```bash',
+      '### inner heading',
+      '```',
+      '### still body',
+      '````',
+    ].join('\n')
+    const body = report({ 'Suggested shape': shape, Why: 'because' })
+
+    const sections = parseSections(body)
+
+    expect(sections.get('suggested shape')).toBe(shape)
+    expect(sections.has('outer')).toBe(false)
+    expect(sections.has('inner heading')).toBe(false)
+    expect(sections.has('still body')).toBe(false)
+    expect(sections.get('why')).toBe('because')
+  })
+
+  it('should not close a backtick fence on a tilde line', () => {
+    const fenced = ['```', '~~~', '### body', '```'].join('\n')
+    const body = report({ Repro: fenced })
+
+    expect(readField(body, 'Repro')).toBe(fenced)
+    expect(parseSections(body).has('body')).toBe(false)
+  })
+
+  it('should read an indented fence as a fence', () => {
+    const fenced = ['  ```', '### body', '  ```'].join('\n')
+    const body = report({ Repro: fenced })
+
+    expect(parseSections(body).has('body')).toBe(false)
+  })
 })
 
 describe('missingField', () => {
   it('should find nothing missing in a report carrying every required field', () => {
     expect(missingField(report())).toBeUndefined()
+  })
+
+  it('should find nothing missing in a report without the optional suggested-shape fields', () => {
+    const body = report({ 'Suggested shape': '', Why: '', Links: '' })
+
+    expect(missingField(body)).toBeUndefined()
+  })
+
+  it('should find nothing missing in a report carrying the optional fields', () => {
+    const body = report({ 'Suggested shape': 'x', Why: 'y', Links: 'z' })
+
+    expect(missingField(body)).toBeUndefined()
   })
 
   it.each(REQUIRED_FIELDS)(

@@ -27,41 +27,23 @@ From the conversation so far, identify:
 - Repro details already in context (commands run, files touched), or `none`
 - Proposed fix, or `open` when the session settled on no direction
 
-Format as a single fenced markdown block, one `###` heading per field:
+**Fields the report omits when the session has none:**
 
-```markdown
-## Toolkit feedback
+- Suggested shape, when the session worked out what the change should look like, such as a template, a command's output, or a field list
+- Why, when the session has reasons for the fix beyond the observed failure
+- Links, when the session cites an issue, a pull request, or a document
 
-### From project
+Format as a single fenced markdown block, one `###` heading per field. Read `${CLAUDE_SKILL_DIR}/references/template.md` on reaching this point for the block and each field's fallback.
 
-<name or kind>
+`canon feedback` refuses a report missing `### Surface`, `### Observed`, or `### Proposed fix`, naming the one it did not find. `### From project`, `### Expected`, and `### Repro` are optional, so write the literal fallback the template shows rather than dropping the heading, which is what keeps a field the session cannot fill reading as absent instead of unreported.
 
-### Surface
-
-<type>, <file path or name>
-
-### Observed
-
-<one or two lines>
-
-### Expected
-
-<one or two lines, or "unclear">
-
-### Repro
-
-<commands or steps, or "none">
-
-### Proposed fix
-
-<one line, or "open">
-```
-
-`canon feedback` refuses a report missing `### Surface`, `### Observed`, or `### Proposed fix`, naming the one it did not find. The other three are optional, so write the literal fallback shown above rather than dropping the heading, which is what keeps a field the session cannot fill reading as absent instead of unreported.
+`### Suggested shape`, `### Why`, and `### Links` are optional the other way. Omit the heading when the session has nothing for it and write no fallback, since a report filed without them is complete and a placeholder would read as a reporter who had nothing to say.
 
 Headings rather than bold labels, because a GitHub issue form renders a submitted field as `### <label>`. One shape reaches the toolkit whichever route a report takes, and the CLI parses both with one parser. The retired `**Surface:**` form is refused rather than accepted, so a block carrying it has to be rewritten.
 
-Keep each field to one or two lines.
+Keep Observed and Expected to one or two lines each, so the report scans. Length belongs in Proposed fix, Suggested shape, and Why.
+
+The issue body is the request. Put everything the toolkit needs to act on it there, since a comment is easy to miss and a body and a comment that differ leave triage choosing. A comment carries only what happens after filing.
 
 ## Step 2: ship to the toolkit
 

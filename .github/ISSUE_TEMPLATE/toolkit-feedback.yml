@@ -47,6 +47,27 @@ body:
     id: fix
     attributes:
       label: Proposed fix
-      description: One line if you have one, or "open"
+      description: The direction you would take, or "open"
     validations:
       required: true
+  - type: textarea
+    id: suggested-shape
+    attributes:
+      label: Suggested shape
+      description: A template, output, or field list showing what the change should look like. Leave empty if you have none.
+    validations:
+      required: false
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: The reasons for the fix, one per line. Leave empty if the observed failure says it all.
+    validations:
+      required: false
+  - type: textarea
+    id: links
+    attributes:
+      label: Links
+      description: Issues, pull requests, or documents the report cites, one per line
+    validations:
+      required: false

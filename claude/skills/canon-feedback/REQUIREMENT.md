@@ -20,6 +20,7 @@ The last failure is the session's own effort. Asked to report, a session starts 
 - Write the stated fallback for a field the session cannot fill, so an empty field reads as absent rather than as unreported
 - Open a GitHub issue on the toolkit repo through the CLI so the report lands where triage reads it, and print the returned URL on its own line
 - Surface the block and the reason when the issue call fails, since a failure that prints nothing leaves the report where nothing reads it
+- Carry the whole request in the issue body alone, since a comment is easy to miss and a body and a comment that differ leave triage choosing
 - Hold a report the operator marks sensitive, since the issue is public
 - Fall back to printing the block when the CLI is absent, so the report still exists
 

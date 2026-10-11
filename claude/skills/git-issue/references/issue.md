@@ -59,7 +59,10 @@ Does not govern:
 - `### Expected` (optional): the expected behavior, or `unclear`.
 - `### Repro` (optional): repro details, or `none`.
 - `### Proposed fix` (required): a proposed fix, or `open` when the session settled on no direction.
-- A required field is refused when present but empty. Write the fallback literal for an optional field rather than leaving it blank.
+- `### Suggested shape` (optional): the template, output, or field list the change should take, inside a `<details>` block. Omit the heading when there is none.
+- `### Why` (optional): the reasons for the fix, one bullet each. Omit the heading when there are none.
+- `### Links` (optional): the issues, pull requests, or documents the report cites, one per line. Omit the heading when there are none.
+- A required field is refused when present but empty. Write the fallback literal for From project, Expected, and Repro rather than leaving one blank.
 
 ## Formatting
 
