@@ -1154,6 +1154,63 @@ describe('review-post-scan.sh verdicts', () => {
       },
     )
 
+    // A command that only mentions a post is not one. The scan stub fails, so
+    // a hook that read the whole string would deny each of these.
+    const mention = "gh api -X POST repos/o/r/issues/1/comments -f body='x'"
+    const quoting: Record<string, string> = {
+      'a heredoc quoting the command': `cat > .canon/tmp/notes.md <<'EOF'\n- ${mention}\nEOF`,
+      'a search pattern holding the command': `git grep -n '${mention}'`,
+      'a quoted string with a separator before the command': `echo 'done; ${mention}'`,
+      'an echo of the command': `echo "${mention}"`,
+    }
+
+    for (const [label, command] of Object.entries(quoting)) {
+      it.concurrent(
+        `should leave ${tree.label} silent on ${label}`,
+        async ({ expect }) => {
+          const result = await run(
+            hook,
+            postPayload(command),
+            join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+          )
+
+          expect(result.stderr).toBe('')
+          expect(result.stdout).toBe('')
+          expect(result.code).toBe(0)
+        },
+      )
+    }
+
+    it.concurrent(
+      `should block ${tree.label} on a post chained after another command`,
+      async ({ expect }) => {
+        const result = await run(
+          hook,
+          postPayload(`echo ready && gh api -X POST ${REVIEWS} ${body()}`),
+          join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+        )
+
+        expect(result.stderr).toContain('board identifier')
+        expect(result.code).toBe(2)
+      },
+    )
+
+    it.concurrent(
+      `should block ${tree.label} on a heredoc and a post in one call`,
+      async ({ expect }) => {
+        const result = await run(
+          hook,
+          postPayload(
+            `cat > .canon/tmp/not-written.md <<'EOF'\nbody\nEOF\ngh api -X POST ${REVIEWS} -F body=@.canon/tmp/not-written.md`,
+          ),
+          scanPassPath(),
+        )
+
+        expect(result.stderr).toContain('earlier call')
+        expect(result.code).toBe(2)
+      },
+    )
+
     it.concurrent(
       `should hand back additionalContext on ${tree.label} when canon is absent`,
       async ({ expect }) => {
