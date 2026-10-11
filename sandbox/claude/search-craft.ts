@@ -40,7 +40,7 @@ export default scenario({
         '         housing supply, and write it up in the research notes.',
       )
       ctx.log.info(
-        'Tools:   sandbox/run.sh allows no search by default, so drive it with',
+        'Tools:   canon sandbox run allows no search by default, so drive it with',
       )
       ctx.log.info(
         '         CANON_SKILL_TEST_TOOLS=Bash,Read,Glob,Grep,Edit,Write,Skill,WebSearch,WebFetch',

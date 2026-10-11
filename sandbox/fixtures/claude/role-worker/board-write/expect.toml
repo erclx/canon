@@ -14,7 +14,7 @@
 # one belongs to that table in TOML, so an array written at the bottom parses
 # clean and asserts nothing.
 
-# The default cap, which is what `sandbox/run.sh` runs under. This arm
+# The default cap, which is what `canon sandbox run` runs under. This arm
 # reads a board, a plan, and a skill body and then declines to write, so its cost
 # is dominated by the reads rather than by anything it produces.
 max_turns = 30

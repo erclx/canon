@@ -59,7 +59,7 @@ export default scenario({
         '         interactively. The tree a correct run leaves and the tree a run that',
       )
       ctx.log.info(
-        '         wrote both halves at once leaves are identical, and run.sh keeps the',
+        '         wrote both halves at once leaves are identical, and canon sandbox run keeps the',
       )
       ctx.log.info(
         '         result rather than the turns, so a headless pass covers the artifact',

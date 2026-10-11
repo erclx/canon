@@ -17,7 +17,7 @@
 # one belongs to that table in TOML, so an array written at the bottom parses
 # clean and asserts nothing.
 
-# The default cap, which is what `sandbox/run.sh` runs under. A correct
+# The default cap, which is what `canon sandbox run` runs under. A correct
 # run reads the plan, recognizes the stop, and reports, so it costs less than the
 # cap allows and a run approaching it has probably started building.
 max_turns = 30

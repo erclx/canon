@@ -47,7 +47,7 @@ Exit 0 means `pass` or `unchecked`. Exit 1 means `fail`, or a caller error: a ma
 
 ## Headless runs
 
-`canon sandbox run` provisions a scenario, drives one `claude -p` session over it, and scores the result with `canon sandbox check`. `sandbox/run.sh` is a wrapper that passes its arguments to the verb, so either spelling runs the same code.
+`canon sandbox run` provisions a scenario, drives one `claude -p` session over it, and scores the result with `canon sandbox check`.
 
 ```bash
 canon sandbox run <category>:<command> "<prompt>" [arm]

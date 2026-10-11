@@ -22,7 +22,7 @@ The registration failure is the one that passes every gate. A rule sitting in `g
 
 - Hand-edit `.claude/rules/`. It is produced output, regenerated from the record on the next check.
 - Ship a rule routing to a path no target install creates. A toolkit-only route is authored under `internal/rules/`, where location keeps it out of everything the plugin carries.
-- Duplicate `rule_subdir` or frontmatter stripping. Each has one owner and the callers that justify its position.
+- Duplicate `ruleSubdir` or frontmatter stripping. Each has one owner and the callers that justify its position.
 
 ## Guards
 

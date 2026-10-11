@@ -1,35 +1,20 @@
 ---
 title: lib
-description: The three shared bash libraries, the functions each exports, and where the TypeScript equivalents sit
+description: The shared bash frame library, the functions it exports, and the gotchas bash scripts carry
 ---
 
 # lib
 
-`scripts/lib/` holds the functions domain scripts source and never execute. Each file owns one concern, and the surfaces below are what a session reads before adding a helper that already exists.
+`scripts/lib/` holds the functions domain scripts source and never execute. It holds `ui.sh` alone, and the surfaces below are what a session reads before adding a helper that already exists.
 
 ## `ui.sh`
 
-Source this in any script that needs terminal output. When `CANON_NON_INTERACTIVE=1` is set, `select_option` auto-selects the first option and `ask` returns the default without blocking. `select_or_route_scenario` reads `SANDBOX_SCENARIO` and skips the picker when set, letting agents target a specific scenario via `canon sandbox <cat>:<cmd> <scenario>`. It also provides the color palette.
+Source this in any script that needs terminal output. It provides the framed log lines and the color palette, and holds no picker or prompt, which live in `src/cli/ui.ts`.
 
 - `open_timeline` and `close_timeline`: open `┌` with an optional banner and close `└` on stderr. Pair with `trap … EXIT`
 - `log_info`, `log_warn`, `log_error`, `log_step`, `log_add`, and `log_rem`: framed log lines on stderr. `log_error` exits 1
-- `select_option`: interactive picker. Sets `SELECTED_OPTION` and errors with a framed message on non-TTY stdin
-- `ask`: prompt for a value with a default. Exports the result to a named variable
-- `select_or_route_scenario`: sandbox-aware picker. Skips when `SANDBOX_SCENARIO` is set
 - `guard_root`: rejects the toolkit root as a target
-- `require_project_root`: errors when run outside the repo or inside a sandbox
-
-## `gov.sh`
-
-Narrowed to one function. The payload builder lives in `src/gov/payload.ts`, and `strip_frontmatter` lives in `src/markdown/frontmatter.ts`.
-
-- `rule_subdir`: emit a source rule's subdirectory relative to the rules root, or empty when the rule sits at the root. Stays bash permanently
-
-`rule_subdir` has three remaining call sites across two sandbox scenarios, which stay bash by decision. The sandbox harness does not source `gov.sh`, since gov injection runs through the real installer. `ruleSubdir` in `src/gov/install.ts` is the TypeScript copy the migrated installer uses. The two must agree, since a rule installed to the wrong subdirectory is one the sandbox scenarios then fail to find.
-
-The bash reading of frontmatter treats the first `---` on any line as the start of a frontmatter block, so a document whose body carries two horizontal rules loses everything between them. `stripFrontmatter` in `src/markdown/frontmatter.ts` anchors to the first line instead and leaves such a body intact, which is the reading `canon docs <topic>` emits.
-
-The divergence is latent on the current corpus. All 22 documents under `docs/` and `canon/context/` strip byte-identically under both, so the difference guards documents not yet written rather than repairing today's output. Three other inputs diverge and each favors the TypeScript reading: a file with no trailing newline, a block opening on line 2, and an unterminated block. The last two are the ones worth knowing, since the bash reading emits nothing at all for an unterminated block and swallows a mid-document block that was never frontmatter.
+- `pipe_output`: indents borrowed output inside the frame
 
 ## Gotchas
 
@@ -40,14 +25,6 @@ Before deleting a bash script or lib, grep for the file path in `source`, `exec`
 ### A guard inside a substitution cannot stop the run
 
 A fatal precondition placed inside a helper that callers invoke as `$(helper)` cannot stop the run, because `exit 1` there kills the subshell and leaves the caller holding an empty string. A `GITHUB_ORG` check placed inside `sandbox_anchor_url` would print its error with the variable empty, then the caller would run `git remote add origin ""`, which succeeds, and the script would exit 0. Split validation into a `require_*` function invoked from the main shell before the first call, and prove it end to end, since `set -e` does not fire on a substitution whose empty output the next command accepts.
-
-### A library must not declare a hook the dispatcher probes for
-
-When a dispatcher branches on whether a hook is defined, export a named helper for the hook to call rather than declaring the hook in shared code. `scripts/sandbox-hook.sh` reports the choice between staging an anchor and starting empty off `type -t use_anchor`, and nine scenarios collapsed their identical `use_anchor` stubs into `lib/sandbox-git.sh`. Declaring the hook there would have handed an anchor to `git/commit.sh`, `git/stage.sh`, and `infra/indexes.sh`, which source the file only for the identity helpers. Grep for the dispatcher's presence test and list every file that sources the library before moving a hook body.
-
-### Exercise a `gh` failure path without reaching the branch that creates
-
-A lib function whose refusal path shells out to `gh` is testable without provisioning anything. `ensure_sandbox_anchor_repo` separates an absent repository from an unreachable host on the 404 alone, so pointing `GH_HOST` at an invalid host forces the unreachable branch and proves it refuses rather than creates. A repository that already exists exercises the success path read-only. Putting the provisioning branch behind an opt-in is what makes the absent-repository branch testable too, since the default path can then run against a name that is genuinely missing without claiming it.
 
 ### Read a helper's body before porting its call
 

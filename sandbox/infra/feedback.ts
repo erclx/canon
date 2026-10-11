@@ -21,7 +21,7 @@ export default scenario({
     refusal: (ctx) => {
       // The one arm this command can assert. A report that passes validation
       // files a real issue, which sits outside the tree the snapshot covers,
-      // and `run.sh` reports that as an escape. A refusal writes nowhere at
+      // and `canon sandbox run` reports that as an escape. A refusal writes nowhere at
       // all, so the whole behavior lands inside the sandbox.
       //
       // Both streams go to disk because `canon sandbox check` reads the tree and

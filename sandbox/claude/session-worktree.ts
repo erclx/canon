@@ -209,7 +209,7 @@ export default scenario({
         '         no scripts/worktree-port.sh here, so the port line names the stack default',
       )
       ctx.log.info(
-        'Headless: sandbox/run.sh claude:session-worktree "/canon:session-worktree" dual-root',
+        'Headless: canon sandbox run claude:session-worktree "/canon:session-worktree" dual-root',
       )
       logCleanup(ctx)
     },
@@ -265,7 +265,7 @@ export default scenario({
         '         no worktree is created and no .claude/ is written under vendor',
       )
       ctx.log.info(
-        'Headless: sandbox/run.sh claude:session-worktree "cd vendor, then /canon:session-worktree" submodule',
+        'Headless: canon sandbox run claude:session-worktree "cd vendor, then /canon:session-worktree" submodule',
       )
       logCleanup(ctx)
     },
@@ -287,7 +287,7 @@ export default scenario({
         '         entry derives grault from the plan and creates the worktree',
       )
       ctx.log.info(
-        'Headless: sandbox/run.sh claude:session-worktree "/canon:session-worktree" submodule-root',
+        'Headless: canon sandbox run claude:session-worktree "/canon:session-worktree" submodule-root',
       )
       logCleanup(ctx)
     },

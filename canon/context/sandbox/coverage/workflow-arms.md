@@ -60,7 +60,7 @@ A `PUT` rewrite moves a review's body and leaves its `commit_id` pinned, so the 
 
 - A baseline session already places each of `layers`' three behaviors at its right layer, so a with-and-without comparison over it cannot move.
 - `pull` stages a page with an existing end to end spec and asks for a loading state, the prompt meant to pull a session toward extending the spec. A baseline session also places it in a component test, so the arm does not discriminate either. Its `expect.toml` asserts the with arm: a component test carrying the loading state, and `Loading` absent from every `e2e/*.spec.ts`.
-- The without arm cannot run through `run.sh`, which hardcodes `--plugin-dir claude`. It is a hand run of `claude -p` against the provisioned tree with a scratch copy of `claude/` lacking `skills/test-craft`, scored by reading the files it wrote.
+- The without arm cannot run through `canon sandbox run`, which hardcodes `--plugin-dir claude`. It is a hand run of `claude -p` against the provisioned tree with a scratch copy of `claude/` lacking `skills/test-craft`, scored by reading the files it wrote.
 
 ## Code craft
 
