@@ -66,12 +66,18 @@ describe('collectSuperseded', () => {
 
   it('should report every retired artifact the target still holds', () => {
     writeFixture(join('.claude', 'TASKS.md'))
-    writeFixture(join('.claude', 'MEMORY.md'))
+    writeFixture(join('.claude', 'CONTEXT.md'))
 
     expect(collectSuperseded(TARGET).map((entry) => entry.rel)).toEqual([
-      join('.claude', 'MEMORY.md'),
+      join('.claude', 'CONTEXT.md'),
       join('.claude', 'TASKS.md'),
     ])
+  })
+
+  it('should not report a legacy memory file, since no seeded folder replaces it', () => {
+    writeFixture(join('.claude', 'MEMORY.md'))
+
+    expect(collectSuperseded(TARGET)).toEqual([])
   })
 
   it('should not report a flat wireframes file, since no seeded folder replaces it', () => {

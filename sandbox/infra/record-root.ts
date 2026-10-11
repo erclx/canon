@@ -131,11 +131,11 @@ export default scenario({
     },
     refusal: (ctx) => {
       seedRecords(ctx, '.canon', 'tmp')
-      ctx.run('rm', ['-rf', '.canon/memory'])
-      ctx.log.step('Running: canon records validate memory --root .')
-      runCli(ctx, 'records', 'validate', 'memory', '--root', '.', '--json')
+      ctx.run('rm', ['-rf', '.canon/plans'])
+      ctx.log.step('Running: canon records validate plans --root .')
+      runCli(ctx, 'records', 'validate', 'plans', '--root', '.', '--json')
       ctx.log.info(
-        'Expect: no-folder naming .canon/memory or .claude/memory', // canon-keep-record-root
+        'Expect: no-folder naming .canon/plans or .claude/plans', // canon-keep-record-root
       )
       ctx.log.info(
         'Expect: the creation default named second, which is where a write lands',
