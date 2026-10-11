@@ -46,7 +46,7 @@ Size a test by what it touches rather than by what it covers. Pick the first row
 ## Keep test code readable over clever
 
 - Prefer a descriptive, repeated arrange over a shared helper a reader has to open. A test is read when it fails, by someone who did not write it. Build test data through a factory or builder rather than an inline object literal repeated across tests.
-- Assert through the public surface a caller uses. A test reaching into internals breaks on every refactor and catches nothing a caller sees.
+- Assert through the public surface a caller uses, never on a private function or internal state directly. A test reaching into internals breaks on every refactor and catches nothing a caller sees.
 - Prefer a real collaborator, then a fake, then a stub, and a mock last. A mock asserts how the code is built rather than what it does.
 
 ## Hold the structure floors
@@ -56,7 +56,6 @@ Every test carries these, at any layer and in any runner:
 - Structure each test as arrange, act, assert.
 - Verify one behavior per test.
 - Keep conditional logic and loops out of a test body. A table of cases is one test per row, never a branch inside one.
-- Test through the public surface. Never assert on a private function or internal state directly.
 - Set no coverage percentage as a target. Cover the behaviors and their edges.
 - Group related tests with the framework's nesting mechanism, and keep it to two levels deep.
 - Keep tests independent with no shared side effects. Clean up and restore state after each one.

@@ -21,7 +21,7 @@ From `addyosmani/agent-skills@2686b620`, [`skills/api-and-interface-design/SKILL
 
 **Contract first.** Write the interface before the body. Adopted as its own group, widened from an endpoint to a signature, a flag set, an output shape, and a schema.
 
-**One error shape.** Every failure on one surface carries the same structure. Adopted with a stable code added for the caller to branch on, and pointed at the core code rule for the structured-error floor rather than restating it.
+**One error shape.** Every failure on one surface carries the same structure. Adopted with a stable code added for the caller to branch on, and a clause keeping internal implementation details out of the message, since no project rule carries either for every code stack.
 
 **Validation at the boundary.** Check input where it enters and trust it inside. Adopted, with a value read back from a file or another service counted as input.
 
