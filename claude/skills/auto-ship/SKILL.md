@@ -12,7 +12,7 @@ Chain the post-plan pipeline in a single run. Every step but the UI checklist ha
 ## Guards
 
 - All `.canon/plans/` reads resolve at the main worktree root, not the current worktree. Resolve that root the way `session-worktree` does.
-- Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. This skill takes the stop rather than the `latest` fallback, since it commits and opens a pull request. If empty, stop: `❌ Detached HEAD. Checkout the feature branch first.` This slug is provisional. It is superseded once `session-worktree` runs, whether at Step 0 or before this chain began. Every later step keys its output on the slug that run resolves, being the worktree and the branch, regardless of which plan Step 1 reads.
+- Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`. This skill takes the stop rather than the `latest` fallback, since it commits and opens a pull request. If empty, stop: `❌ Detached HEAD. Checkout the feature branch first.` This slug is provisional. It is superseded once `session-worktree` runs, whether at Step 0 or before this chain began. Every later step keys its output on the slug that run resolves, being the worktree and the branch, regardless of which plan Step 1 reads.
 - Resolve `<plan>` in Step 1, ahead of any other read.
 - If the working tree has uncommitted changes unrelated to the plan, stop: `❌ Uncommitted changes outside the plan. Commit or stash before autoshipping.`
 

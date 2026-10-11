@@ -11,12 +11,12 @@ metadata:
 
 Read these files in parallel:
 
-- `${CLAUDE_SKILL_DIR}/../../standards/branch.md`: branch format, valid types, and constraints
-- `${CLAUDE_SKILL_DIR}/../../standards/pr.md`: structure, rules, and banned phrases
+- `${CLAUDE_SKILL_DIR}/../git-branch/references/branch.md`: branch format, valid types, and constraints
+- `${CLAUDE_SKILL_DIR}/references/pr.md`: structure, rules, and banned phrases
 - `${CLAUDE_SKILL_DIR}/references/labels.md`: label map format, matching, and the missing-label warning. Skip when the project has no `canon/config/pr-labels.toml` and no `.claude/canon/pr-labels.toml`.
 - `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md`: punctuation and formatting for all generated text
 - The `write-human` skill: voice, rhythm, and sentence construction for all generated text
-- `${CLAUDE_SKILL_DIR}/../../standards/versioning.md`: phase label vs semver discipline
+- `${CLAUDE_SKILL_DIR}/../git-commit/references/versioning.md`: phase label vs semver discipline
 
 Resolve the base ref first, because the log range and the diff below both consume it:
 
@@ -45,7 +45,7 @@ Either case leaves both reads empty, which the no-commits guard below catches. S
 
 ## Guards
 
-- If branch name does not match `<type>/<description>` format (valid types are defined in `${CLAUDE_SKILL_DIR}/../../standards/branch.md`), stop and output:
+- If branch name does not match `<type>/<description>` format (valid types are defined in `${CLAUDE_SKILL_DIR}/../git-branch/references/branch.md`), stop and output:
   `❌ Branch name does not follow conventions. Run /git-branch to rename first.`
 - If no commits ahead of main, stop and output:
   `❌ No commits ahead of main. Nothing to PR.`
@@ -62,13 +62,13 @@ After outputting the preview, execute the final command immediately. Claude Code
 
 ### Testing checkboxes
 
-Follow Testing discipline in `${CLAUDE_SKILL_DIR}/../../standards/pr.md`. Run each check before writing its line, then tick the box and state the result the run reported. Never pre-check based on intent or past sessions.
+Follow Testing discipline in `${CLAUDE_SKILL_DIR}/references/pr.md`. Run each check before writing its line, then tick the box and state the result the run reported. Never pre-check based on intent or past sessions.
 
 Leave a box unchecked only for the human-only cases the reference defines, and name which human and why on the same line. A request for the reviewer is not a test result, so it belongs under `## For the reviewer` rather than in the Testing list.
 
 ### Pre-publish scan
 
-Before running the final command, run the scan in `${CLAUDE_SKILL_DIR}/../../standards/publish.md` against the PR title and body. The title and body go straight to the remote with nothing checking them on the way, so run the scan regardless of what backs it downstream. It covers the phase-label check as well as the characters, since both go to a reader who has no task board. It applies on top of the banned phrases in `${CLAUDE_SKILL_DIR}/../../standards/pr.md`.
+Before running the final command, run the scan in `${CLAUDE_SKILL_DIR}/references/publish.md` against the PR title and body. The title and body go straight to the remote with nothing checking them on the way, so run the scan regardless of what backs it downstream. It covers the phase-label check as well as the characters, since both go to a reader who has no task board. It applies on top of the banned phrases in `${CLAUDE_SKILL_DIR}/references/pr.md`.
 
 Write the body here, ahead of the final command, since the scan below needs a file to read it from:
 
@@ -87,7 +87,7 @@ canon labels scan --title "<title>" --body-file .canon/tmp/pr/body.md --json
 
 Branch on the JSON record rather than the exit code. An operator's shell can wrap `canon` in a function whose status comes from a trailing command, flattening a non-zero exit to 0, the same reason the labels step below branches on its own record rather than the exit.
 
-Stop and fix the title or body on a non-empty `phaseLabels`, `boardReferences`, `sessionLinks`, `unspelledWords`, or `titleFormatIssues`. Do not proceed to `### Final command` until a re-run comes back clean on all five. `titleFormatIssues` names which `## Title` rule in `${CLAUDE_SKILL_DIR}/../../standards/pr.md` the title breaks, structure, casing, or length, so fix the named rule rather than guessing. Leave `cutsRelease` and `semverTags` alone, since a release-please pull request legitimately carries version references its own fixed shape explains.
+Stop and fix the title or body on a non-empty `phaseLabels`, `boardReferences`, `sessionLinks`, `unspelledWords`, or `titleFormatIssues`. Do not proceed to `### Final command` until a re-run comes back clean on all five. `titleFormatIssues` names which `## Title` rule in `${CLAUDE_SKILL_DIR}/references/pr.md` the title breaks, structure, casing, or length, so fix the named rule rather than guessing. Leave `cutsRelease` and `semverTags` alone, since a release-please pull request legitimately carries version references its own fixed shape explains.
 
 The scan stays required even where a `pull_request` workflow job runs the same verb, since a project holding an older `canon` carries no such job and no `titleFormatIssues` key.
 

@@ -39,7 +39,7 @@ The guard sits ahead of Step 2 because `--claim` reserves a label on disk, so a 
 
 Run `canon tasks next-label --claim --json` and take its `label` field. The verb reads the live board and its `archive/` sibling together, so the label it returns accounts for what the board alone no longer shows, and `--claim` reserves it under `.canon/ordinal-locks/` so a second session filing at the same moment gets the next one. Branch on the record's `reason` rather than the exit: `label-contended` means re-run the claim, and a usage error from an unknown `--claim` means the installed binary predates the flag, so report the verb as unavailable rather than falling back to a bare read, which reopens the race.
 
-Do not derive the label from a version file. `${CLAUDE_SKILL_DIR}/../../standards/versioning.md` permits free renumbering, so the verb's two folders are the only surface that knows what a label currently means.
+Do not derive the label from a version file. `${CLAUDE_SKILL_DIR}/../git-commit/references/versioning.md` permits free renumbering, so the verb's two folders are the only surface that knows what a label currently means.
 
 ### Step 3: write the file
 

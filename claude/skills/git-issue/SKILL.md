@@ -41,7 +41,7 @@ After outputting the preview, execute the final command immediately. Claude Code
 
 ### Pre-publish scan
 
-Before running the final command, run the scan in `${CLAUDE_SKILL_DIR}/../../standards/publish.md` against the title and body. The title and body go straight to the remote with nothing checking them on the way, so this scan is the only gate. It covers the phase-label check as well as the characters, since both go to a reader who has no task board. It applies on top of the banned phrases in `${CLAUDE_SKILL_DIR}/references/issue.md`.
+Before running the final command, run the scan in `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md` against the title and body. The title and body go straight to the remote with nothing checking them on the way, so this scan is the only gate. It covers the phase-label check as well as the characters, since both go to a reader who has no task board. It applies on top of the banned phrases in `${CLAUDE_SKILL_DIR}/references/issue.md`.
 
 The `pull_request` check the git-pr surface carries reads a pull request's own title and body alone, so an issue reaches no check behind this scan either.
 

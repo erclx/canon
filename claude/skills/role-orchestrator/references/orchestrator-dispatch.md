@@ -23,7 +23,7 @@ Run this at loop step 4, for a `## Run now` row whose plan is verified, in place
 Run `canon tasks plan-branch <plan> --json` against the row's plan file and read `branch`, `type`, `slug`, and `conforms` off the record.
 
 - `conforms: true`: take `branch` as the candidate, and take `type` and `slug` from the same record for the check below.
-- `conforms: false`: the plan's own filename breaks a cap in `${CLAUDE_SKILL_DIR}/../../standards/branch.md`. Report which, and hand the row to the human-launch line below rather than shortening the slug here. A rename parts the branch from the plan filename that `session-worktree` tier 1 and `git-pr`'s plan lookup both read back.
+- `conforms: false`: the plan's own filename breaks a cap in `${CLAUDE_SKILL_DIR}/../git-branch/references/branch.md`. Report which, and hand the row to the human-launch line below rather than shortening the slug here. A rename parts the branch from the plan filename that `session-worktree` tier 1 and `git-pr`'s plan lookup both read back.
 - `reason: archived`, `no-plan`, or `bad-input`: the row does not cite a live plan. Repoint the row or fix the citation rather than dispatching, since `auto-ship` Step 1 refuses the same file and the worker would meet that refusal after the launch spent.
 - Anything else, including a record carrying no `branch` key and an installed binary carrying no `plan-branch` subcommand: treat the candidate as unverified rather than clear, name which reading could not be taken, and fall back to the human-launch line below. Re-deriving by prose here rebuilds the defect the verb closes, and does it quietly.
 

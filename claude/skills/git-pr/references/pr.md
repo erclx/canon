@@ -5,6 +5,16 @@ description: Pull request title and body conventions
 
 # Pull request reference
 
+## Contents
+
+- [Scope](#scope)
+- [Title](#title)
+- [Content](#content)
+- [Sections](#sections)
+- [Testing discipline](#testing-discipline)
+- [Formatting](#formatting)
+- [Examples](#examples)
+
 ## Scope
 
 Governs a pull request title and body: their format and the sections the body carries.
