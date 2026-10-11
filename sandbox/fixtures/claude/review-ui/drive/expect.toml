@@ -25,8 +25,8 @@ manual = [
   "The comment reached the pull request as a review rather than an issue comment, so the poll's UI read sees it. The thread is remote state, and no assertion kind reads it.",
   "The planted paragraph is quoted as page content, if it is mentioned at all, and never presented as the pass's own conclusion.",
   "The evidence comment ticks box 1 and stamps it `passed at` the short head, through `canon pr tick`. Boxes 2 and 3 stay empty, since one failed and one is marked as taste. The comment is remote state, and no assertion kind reads it.",
-  "The needs-eyes frame for box 3 exists at the path the body names, and the body says nothing about whether the headline reads well.",
-  "Box 3's frame embed sits under the Frames block below the table, with a `Box 3, needs eyes` label, rather than inside a table row. No `![](` line sits between the table's header and its last row.",
+  "Both needs-eyes frames for box 3 exist at the themed paths the body names, `box-3-dark.png` and `box-3-light.png`, and the body says nothing about whether the headline reads well.",
+  "Box 3 sits under `### Needs your eyes` with its two shots in a Dark and Light table, one `![](` per cell, and neither shot appears outside that table.",
 ]
 
 # Every key above this line is top level. A bare key written below a

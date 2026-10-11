@@ -96,10 +96,12 @@ Give every box exactly one verdict, in checklist order. A box the pass could not
 
 Never judge a box ending in `(taste)`. Drive to the state, capture both themes, and mark it needs eyes. Drive a ticked box the same as an unchecked one, since a tick is a claim this pass exists to check. A tick stamped at the current head still gets driven.
 
-A frame the verdict rests on is published only when the worker's evidence lacks it, matched per theme against the `states` Step 2 kept, as `references/driving.md` states. The match is this pass's judgment over the box's wording, so the verb never makes it. Otherwise push the frame and keep the `link` the record returns:
+A frame the verdict rests on is published only when the worker's evidence lacks it, matched per theme against the `states` Step 2 kept, as `references/driving.md` states. The match is this pass's judgment over the box's wording, never the verb's. Otherwise push the frame and keep the `link` the record returns:
 
 ```bash
+# one shot of a taste box's pair, then a pass or fail frame with no theme
 canon pr frames <number> --add frames/<box-number>-<theme>.png --box <box-number> --theme <dark|light> --head <head> --pass <pass> --json
+canon pr frames <number> --add frames/<box-number>.png --box <box-number> --head <head> --pass <pass> --json
 ```
 
 Push only a frame of the address this pass drove, since the branch is as public as the repository. Branch on `reason` rather than on the exit code. Every reason but `ok` is a refusal, `read-only` among them on a fork's token, so describe that frame in words and name the reason in its evidence rather than failing the pass.

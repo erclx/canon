@@ -32,7 +32,7 @@ A box written before that format may carry no route, no width, and a verb such a
 - Text, presence, and attributes: `pw --raw eval "<expression>"`, quoting the value back.
 - Computed style: `getComputedStyle(<element>).<property>`.
 - Geometry and overflow: `getBoundingClientRect()`, and `scrollWidth` against `clientWidth` on `document.documentElement`.
-- A frame: `pw screenshot --filename=frames/<box-number>.png`, then open it with the file-reading tool before saying what it shows. A taste box takes the shot twice, once per theme, naming the theme in the file as `frames/<box-number>-<theme>.png`.
+- A frame: `pw screenshot --filename=frames/<box-number>.png`, then open it with the file-reading tool before saying what it shows. A taste box takes the shot twice, once per theme, naming the theme in the file as `frames/<box-number>-<theme>.png`. Reach each theme through the page's own control when the box names one, and through `pw set-color-scheme <dark|light>` otherwise, then read the page's background before the shot to confirm it changed. A page that paints the same under both has no second theme to show, so the box is not driven, with the reason naming that. `pw clear-color-scheme` restores the default.
 
 ## The four verdicts
 
