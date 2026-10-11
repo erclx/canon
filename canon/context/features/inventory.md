@@ -15,7 +15,7 @@ Its first subject is the focus ring, which `governance/rules/ui/410-a11y.md` sta
 
 - `src/inventory/` owns the config reader, the subject readers, the browser walk, and the grouping
 - `src/browser/` owns what every browser-driving command needs before it can report a failure, shared with `src/demo/`
-- `inventory.toml` at the project root declares this repository's own routes and the `focus` subject's query, pointed at the generated teach pages under `.canon/teach/`. Every route names a workspace under that untracked, per-operator tree, so a clone without it meets a `server-unreachable` refusal rather than a report. A lesson's filename moves whenever the generator rewrites it, which is a second way the same route goes stale.
+- A project declares its routes and the `focus` subject's query in `inventory.toml` at its root. This repository carries none, so the verb refuses with `no-config` here
 
 ## Decisions
 
