@@ -33,7 +33,7 @@ Nothing on the frame comes from `package.json`, since a pull request builds agai
 
 `bun install --global @erclx/canon` is the install path a plugin user follows. Nothing builds. `bin` points at `src/cli.ts`, whose `#!/usr/bin/env bun` shebang runs the source directly, which is why `src/` ships as TypeScript with `tsconfig.json` beside it so the `@/*` alias resolves.
 
-`PROJECT_ROOT` resolves from the CLI's own install root, so the package carries the catalogs rather than only `src/`. The `files` list covers `src/`, `scripts/`, `standards/`, `governance/`, `tooling/`, `claude/`, and `docs/`. Dropping any one produces a CLI that installs nothing for that domain, and dropping `docs/` breaks `canon docs <topic>`, which two shipped skills call in a command position. `internal/` stays out under the same rule that keeps it out of the plugin, and `wiki/` stays out because `src/wiki/` scaffolds into a target and never reads the toolkit's own copy.
+`PROJECT_ROOT` resolves from the CLI's own install root, so the package carries the catalogs rather than only `src/`. The `files` list covers `src/`, `scripts/`, `governance/`, `tooling/`, `claude/`, and `docs/`. Dropping any one produces a CLI that installs nothing for that domain, and dropping `docs/` breaks `canon docs <topic>`, which two shipped skills call in a command position. `internal/` stays out under the same rule that keeps it out of the plugin, and `wiki/` stays out because `src/wiki/` scaffolds into a target and never reads the toolkit's own copy.
 
 `scripts/eval` is excluded by negation rather than by leaving `scripts/` out, since the domain scripts beside it are what `execScript` dispatches to. It holds the frozen records of a retired toolkit-development harness and never ships. The scenario tree sits at `sandbox/` in the project root, outside every `files` entry, so it needs no negation: shipping it would carry a quarter of the file count for a command that can only fail in a target.
 
@@ -42,8 +42,6 @@ Nothing on the frame comes from `package.json`, since a pull request builds agai
 ### What `.claude/` costs by being absent
 
 `.claude/` never ships, which has three consequences worth knowing before touching any of these surfaces. The second root `canon docs <topic>` resolves against is absent in an installed package, so `listDocs` in `src/docs/list.ts` reports no context section when no context root exists rather than listing an empty one.
-
-The `claude/standards` symlink is dropped by the pack, which costs nothing, since the CLI reads the root copies and the plugin ships from the repository rather than from the registry.
 
 Version stays owned by release-please, which already writes `claude/.claude-plugin/plugin.json` through `extra-files`, so the package version and the plugin version cannot disagree. The publish job on the release workflow checks out the release tag rather than `main`, so the tarball matches the tag. What gates that job, why it publishes with `--ignore-scripts`, and why the runner's npm version decides whether that flag does anything all live in `canon/context/ci/releases.md`, which owns the release path.
 

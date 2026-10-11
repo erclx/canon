@@ -80,9 +80,3 @@ It reports unmeasured when `claude/skills/` is absent rather than when both corp
 The Skill family stage calls `auditSkills` in-process and fails on every `family` finding, naming each skill under `claude/skills/` whose `metadata.family` is missing or names no key in `src/claude/skills-families.ts`. The verb reports the same finding and keeps its exit on a missing requirement alone, the split the practice shape stage takes.
 
 The field needs a stage of its own because no stage reads the skill map. Its only reader is the web build, which CI runs when a skill or the map changes and `bun run check` never runs, so a skill with no family would otherwise reach the push and fail there. Internal skills take no family and the stage never asks them for one. A tree without `claude/skills/` reports unmeasured.
-
-## Standard success criteria
-
-The Standard success criteria stage runs `bun src/cli.ts standards audit --arrivals-only`, which fails a push when a standard new to the branch carries no `## Success criterion` section. It is scoped to arrival rather than to the corpus, since `standards/standard.md` forbids writing the section into an existing standard outside the change that exercises it, and a gate over the corpus would fail every push until someone closed every known gap at once, which is the sweep that rule exists to prevent.
-
-`--arrivals-only` prints nothing when every arriving standard carries the section, matching the Skill requirements stage's own silent-pass shape. The bare `canon standards audit` a session runs by hand reports the whole corpus instead, so the same verb serves the gate and the reader without a second command to keep in sync.

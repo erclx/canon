@@ -11,7 +11,7 @@ description: The pull request label map a project declares rather than the skill
 
 The map keys on changed paths rather than on the conventional-commit scope, since the top level of the tree already is the domain set and a scope-based table would need a second vocabulary held in step with the first. `.github/` is the rejected home for the map, since a skill reads the file and GitHub does not. `actions/labeler` would earn that folder but relabels on every push, needs a second glob syntax the skill cannot read, and derives labels from something other than the diff the body is written from.
 
-Matching is prefix-anchored, so a row written for an authoring root reaches nothing under the consumed copy: `standards/` never matches `.claude/standards/`, and `claude/skills/` never matches `.claude/skills/`. Every surface living only under a dotted folder needs its own prefix on the row that owns its subject.
+Matching is prefix-anchored, so a row written for an authoring root reaches nothing under the consumed copy: `internal/standards/` never matches `.claude/internal/standards/`, and `claude/skills/` never matches `.claude/skills/`. Every surface living only under a dotted folder needs its own prefix on the row that owns its subject.
 
 ### The audit verb and its fallback
 

@@ -53,7 +53,7 @@ An always-loaded rule still reaches a target through `canon gov sync` rather tha
 
 ### The generator retired when no standard carried `paths:`
 
-`canon gov regen` once wrote a pointer rule under `governance/rules/standards/` for each standard carrying `paths:`. It went once `standards/standard.md`, the last standard carrying the field, dropped it, since keeping a generator with nothing to write left a gate stage watching an empty path and a band any restored `paths:` field would regrow. That standard stays in `standards/` and answers through `canon standards standard` until the verb retires.
+`canon gov regen` once wrote a pointer rule under `governance/rules/standards/` for each standard carrying `paths:`. It went once `standards/standard.md`, the last standard carrying the field, dropped it, since keeping a generator with nothing to write left a gate stage watching an empty path and a band any restored `paths:` field would regrow. Its rules now live in `create-skill`'s `skill-reference.md`, since the verb and the folder retired.
 
 A rule pointing at a skill rather than a standard stays authored, as do the `writing/markdown` rule, `460-design-taste`, and `internal/rules/claude/595-tooling-reference.md`, whose standard never ships.
 

@@ -17,7 +17,7 @@ The aggregate and its baseline, the context and markdown audits, the skill and r
 - [Markdown triage](markdown-triage.md): The three shapes a triage records rather than rewrites, what each remedy costs in punctuation, cohesion, and lost clauses, and the floor a triage leaves
 - [Markdown weights](markdown-weights.md): The bullet, paragraph, and depth checkpoints, where each number sits and why, and the section markers that break a depth run
 - [Overview](overview.md): What the audit commands own, how their engines split, the aggregate that runs the set, what it gates on, and why the pipeline runs it without gating
-- [Record validator](records.md): The canon records validate kinds, why the board keeps its own verb, root resolution per kind, and the standards filename check
+- [Record validator](records.md): The canon records validate kinds, why the board keeps its own verb, and root resolution per kind
 - [Reports](reports.md): The comment census, the test-order report, the label coverage report, and the key-changes bijection
 - [Restated-instruction sweep](restated.md): The canon gov restated sweep, its asymmetric surfaces, recall-first matching, polarity, and rules read as both subject and candidate
 - [Routing measures](routing.md): The skill routing rank over the case corpus, its tokenizer and unmeasurable cases, and the CLAUDE.md routing report

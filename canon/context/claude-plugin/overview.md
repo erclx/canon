@@ -14,7 +14,6 @@ Owns everything the toolkit ships outward under the Claude domain: the plugin sk
 - `claude/skills/<skill>/REQUIREMENT.md`: required sibling of `SKILL.md` holding the skill's gap statement, inert at load time
 - `claude/.claude-plugin/` owns `plugin.json`, the plugin manifest. Its `name` field is `canon`, which is what namespaces every invocation as `/canon:<skill>`, and its `version` is written by the release automation rather than by hand
 - `.claude-plugin/` at the repository root owns `marketplace.json`, the catalog an installer adds
-- `claude/standards` is a symlink to the root authoring source, present so the files ship with an install
 
 ## Decisions
 
@@ -30,7 +29,7 @@ Revisit when a plugin install can write files a project then owns, or a copied s
 
 A plugin skill reads a catalog through `canon <domain> list --json` and acts through the CLI under `CANON_NON_INTERACTIVE=1`. Every domain owes a `list --json` verb, and no skill hardcodes a rule or stack name, which keeps one behavior in one place.
 
-Restating catalogs in skill bodies was the alternative, and it drifts on its own cadence. The rule covers catalogs, not documents: a skill reads a standard by path off the `claude/standards` symlink, and a rule names `canon standards <name>`, since a rule loads with no skill context.
+Restating catalogs in skill bodies was the alternative, and it drifts on its own cadence. The rule covers catalogs, not documents: a skill reads a shared reference by its sibling path under the owner skill's `references/`, and a rule loads the owner skill by name, since a rule loads with no skill context.
 
 Revisit when skills failing on a verb the installed binary lacks outnumber the drift restated catalogs would cause.
 

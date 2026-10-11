@@ -25,7 +25,7 @@ A cloud worker cannot message the orchestrator without Remote Control, so the pu
 
 ## Staging the VM
 
-A cloud session loads no plugin. `.claude/hooks/cloud-setup.sh` runs on `SessionStart`, exits at once unless `CLAUDE_CODE_REMOTE=true`, and on the VM copies `claude/skills/*` into `.claude/skills/`, links `.claude/standards` to `../standards` so the skills' `../../standards/` citations resolve, and runs `bun install && bun link` so `canon` is the checkout's own CLI.
+A cloud session loads no plugin. `.claude/hooks/cloud-setup.sh` runs on `SessionStart`, exits at once unless `CLAUDE_CODE_REMOTE=true`, and on the VM copies `claude/skills/*` into `.claude/skills/` and runs `bun install && bun link` so `canon` is the checkout's own CLI.
 
 Every path the hook writes goes into `.git/info/exclude` rather than `.gitignore`, which would itself be a diff, so no commit carries them. Copying from the checkout rather than installing the published package is deliberate here: this repository's rows build against `main`'s skills, and the published package trails `main` until a release cuts. A target needs the other answer, and `feature-cloud-target-setup` owns it.
 

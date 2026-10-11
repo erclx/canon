@@ -8,6 +8,6 @@ subtitle: Procedures that run inside more than one plugin skill, the label map, 
 Procedures that run inside more than one plugin skill, the label map, worktree entry, and the hazards a ship chain meets. Start with overview.
 
 - [Labels](labels.md): The pull request label map a project declares rather than the skill ships, why labelling runs at open and nowhere else, and what the map fails to cover
-- [Overview](overview.md): The CLI shell-out pattern every skill follows, reading a report rather than rediscovering, the procedures defined once in standards, the main-root write route, and the two gates a new skill trips
+- [Overview](overview.md): The CLI shell-out pattern every skill follows, reading a report rather than rediscovering, the procedures defined once in an owner skill's references, the main-root write route, and the two gates a new skill trips
 - [Ship chain](ship-chain.md): The hazards a ship chain meets, from a citation count that reads one surface to a pull request write landing on the wrong target and a failed commit leaking into the next group
 - [Worktree entry](worktree-entry.md): The core.bare repair carried at two points, the dependency check's literal presence test, the branch worktree entry hands the ship chain, which document the chain resolved, and how a run starting on main names its worktree
