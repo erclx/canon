@@ -478,16 +478,16 @@ describe('pluginBoundary', () => {
     expect(failure).toContain('Plugin ships toolkit-internal content:')
   })
 
-  it('should report a file symlink under claude/standards resolving into internal/', async () => {
+  it('should report a file symlink in a plain folder under claude/ resolving into internal/', async () => {
     write('claude/skills/a/SKILL.md', 'body\n')
-    mkdirSync(join(root, 'claude/standards'), { recursive: true })
+    mkdirSync(join(root, 'claude/assets'), { recursive: true })
     symlinkSync(
       join(root, 'internal/secret.md'),
-      join(root, 'claude/standards/secret.md'),
+      join(root, 'claude/assets/secret.md'),
     )
 
     expect((await measure(pluginBoundary)).failure).toContain(
-      'claude/standards/secret.md -> internal/secret.md',
+      'claude/assets/secret.md -> internal/secret.md',
     )
   })
 
