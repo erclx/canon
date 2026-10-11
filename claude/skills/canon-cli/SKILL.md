@@ -1,53 +1,96 @@
 ---
 name: canon-cli
-description: Reference for what a canon verb does before you run it. Run `canon docs agents` for the full command catalog, `canon docs` for any other reference doc, and read this skill's own table for what a sync or install command overwrites, merges, or leaves untouched in a target project. Use when asked "which canon command do I run", "is there a doc for X", "will this overwrite my changes", or before running `canon tooling`, `canon standards`, `canon claude sync`, or `canon init`. Do NOT use to execute a sync, an install, or a docs lookup, only to know which command answers the question.
+description: Routes a job to the `canon` verb that does it, and warns which verbs can lose a project's edits before one runs. Use when asked "which canon command does X", "is there a verb for X", "which command tells me if X", "will this overwrite my changes", or before running `canon sync`, `canon gov sync`, `canon tooling sync`, `canon design sync`, `canon migrate`, or `canon indexes regen`. Do NOT use to execute a verb, only to pick one and know what it costs.
 metadata:
   family: answer
 ---
 
-# Toolkit CLI contract
+# Toolkit CLI router
 
-Consult before running an unfamiliar `canon` verb, before a sync or install, or when asked "will this overwrite my changes". This skill is reference only. It never runs a sync or an install.
+Consult to pick the `canon` verb for a job, and before running a verb that writes. This skill is reference only. It never runs a verb.
 
-## Verb catalog and reference docs
+## Find the verb
 
-- Run `canon docs agents` for the full command catalog and invocation contract, rather than guessing at a verb from its name.
-- Run `canon docs list` for every other reference doc, then `canon docs <topic>` by name.
-- State neither list here. Both read live off the CLI, and a copy in this body ships on a different cadence than the commands it names.
+- Each row below names a verb by its job. Subcommands and flags are not listed here, so read them where they are kept.
+- Run `canon <verb> --help` for a verb's subcommands and flags.
+- Run `canon docs agents` for the invocation contract behind every verb, and `canon docs list` for every other reference doc, then `canon docs <topic>` by name.
 
-## Overwrite contract
+## Project setup
 
-| Surface                                                                                       | Command              | Effect on existing files                                                    |
-| --------------------------------------------------------------------------------------------- | -------------------- | --------------------------------------------------------------------------- |
-| Golden configs                                                                                | `canon tooling sync` | Overwritten once `--write` is passed. Local edits are lost.                 |
-| Dictionary seeds (`.cspell/*.txt`)                                                            | `canon tooling sync` | Merged and sorted. Existing terms preserved.                                |
-| Other seeds (`cspell.json`, `.lintstagedrc`, base's `verify.yml` and PR template, state docs) | `canon tooling sync` | Copy-once. Dropped on first install, untouched after.                       |
-| Standards                                                                                     | none                 | Nothing installs. `canon standards <name>` reads and never writes.          |
-| Seed docs and `CLAUDE.md`                                                                     | `canon claude init`  | Skipped when present. Never overwritten.                                    |
-| Seed docs                                                                                     | `canon claude sync`  | Never touched. Only `.gitignore` is written.                                |
-| Stack references                                                                              | none                 | Nothing installs. `canon tooling reference <stack>` reads and never writes. |
-| `.gitignore`, deps, scripts                                                                   | any sync             | Additive. Existing entries preserved. Deps re-pin on major skew.            |
-| Generated `index.md`                                                                          | any sync or regen    | Rewritten from target state. Hand edits are lost.                           |
+| Job                                          | Verb            |
+| -------------------------------------------- | --------------- |
+| Bootstrap a project with toolkit domains     | `canon init`    |
+| Bring every installed domain current         | `canon sync`    |
+| Reinstall the CLI itself                     | `canon upgrade` |
+| Move a project off a retired name or layout  | `canon migrate` |
+| List the projects the toolkit installed into | `canon targets` |
 
-## What a tooling sync can overwrite
+## Domains
 
-A golden config is any file a stack ships under `configs/`, and the category is wider than its name suggests. It carries the phase-label gate workflow, the web stack's CI workflow, the git hooks, the end-to-end harness, the shell scripts under `scripts/`, and the editor settings, alongside the linters and compilers a reader expects. A stack inherits its parent's configs, so syncing `astro` also writes everything `web` and `base` hold.
+| Job                                                             | Verb              |
+| --------------------------------------------------------------- | ----------------- |
+| Install or sync governance rules                                | `canon gov`       |
+| Read an authoring standard by name                              | `canon standards` |
+| Sync a tooling stack's configs and seeds, or read its reference | `canon tooling`   |
+| Set up or sync the Claude workflow                              | `canon claude`    |
+| Scaffold a wiki                                                 | `canon wiki`      |
+| Regenerate the `index.md` files                                 | `canon indexes`   |
+| Read a toolkit reference doc                                    | `canon docs`      |
 
-No list of those paths ships in this body, since a copy would go stale on a different cadence than the stacks. Run `canon tooling diff <stack> <target>` for the list resolved against a real target. It reports every path, writes nothing, and exits 1 when any differs. A binary older than that verb answers the same question through `canon tooling sync <stack> <target> --check`, which names each file it would replace.
+## Author and render
 
-## Rules
+Each verb here has a skill that owns the job. Load the skill rather than driving the verb by hand.
 
-- `canon tooling sync` writes nothing until `--write` is passed. A headless run without it reports and exits 1, so a script that forgets the flag fails rather than silently skipping the sync.
-- Run `--check` first when the project carries local edits to a config the stack ships. The report names each file it would replace, which is the warning the user needs before the write.
-- An interactive run still prompts. `--write` skips the prompt, and `--check` refuses to write even with a TTY.
-- Seeds are user-owned. Dictionary `.txt` files merge and sort. Other seeds are copy-once, so re-seeding a structured file means deleting it and syncing again.
-- No command writes a standard into a project. A `.claude/standards/` folder from an older toolkit is inert, and deleting it costs nothing.
-- For section-level customizations of a seed doc, merge by hand against the toolkit copy, not through `canon ... sync`.
+| Job                                          | Verb                | Skill                       |
+| -------------------------------------------- | ------------------- | --------------------------- |
+| Render the design system                     | `canon design`      | `canon:draft-figure`        |
+| Render a slide deck                          | `canon slides`      | `canon:draft-slides`        |
+| Render an HTML source to a PNG               | `canon capture`     | `canon:draft-identity`      |
+| Serve a directory and print the link         | `canon serve`       | none                        |
+| Record a running app                         | `canon demo`        | `canon:draft-screencast`    |
+| Report one computed property across routes   | `canon inventory`   | `canon:target-check`        |
+| Walk a page through interactions and measure | `canon drive`       | `canon:ux-measure`          |
+| Fetch a YouTube transcript                   | `canon transcripts` | `canon:youtube-transcripts` |
+| Open a learning workspace                    | `canon teach`       | `canon:teach-workspace`     |
+| Work on the local canvas                     | `canon canvas`      | `canon:canvas-board`        |
 
-## CLAUDE.md
+## Session and ship
 
-- `CLAUDE.md` is a copy-once seed. No `canon` sync command ever updates it. Merge it by hand against the toolkit copy, keeping the project's customizations.
+| Job                                            | Verb              |
+| ---------------------------------------------- | ----------------- |
+| Read and close tasks on the board              | `canon tasks`     |
+| Read and answer intake folders                 | `canon intake`    |
+| Validate, size, and move session records       | `canon records`   |
+| Resolve live sessions to a worktree and branch | `canon sessions`  |
+| Reclaim worktrees whose branches merged        | `canon worktrees` |
+| Read a pull request                            | `canon pr`        |
+| File toolkit feedback as an issue              | `canon feedback`  |
+
+## Reports
+
+| Job                                       | Verb             |
+| ----------------------------------------- | ---------------- |
+| Scan the tree for credentials             | `canon secrets`  |
+| Read the dependency set for advisories    | `canon deps`     |
+| Check a changed set against the label map | `canon labels`   |
+| Measure comment density                   | `canon comments` |
+| Report context folder health              | `canon context`  |
+| Check markdown against the standards      | `canon markdown` |
+| Count files, extensions, and lines        | `canon census`   |
+
+## Verbs that can lose your edits
+
+Read the doc each line names before running one of these. `canon docs install-and-sync` covers the governance and design verbs, `canon docs sync` covers tooling, `canon docs indexes` covers regeneration, and `canon docs migrate` covers the migrate verbs. Run the `--check` or `--dry-run` form first where the verb has one.
+
+- `canon sync` runs every installed domain's sync, so it carries each risk below.
+- `canon gov sync` replaces a rule you edited and deletes a rule the toolkit retired, edited or not.
+- `canon tooling sync --write` replaces every golden config a stack ships. Seeds are copy-once and dictionaries merge. Nothing writes without the flag. See `canon docs sync`.
+- `canon design sync` replaces the shipped design files and leaves `.claude/design/project/` alone.
+- `canon migrate --write` rewrites files that cite a retired name or layout. It reports and writes nothing without the flag. See `canon docs migrate`.
+- `canon indexes regen` rewrites each generated `index.md` from the folder's current state, so a hand edit there is lost. See `canon docs indexes`.
+
+No command writes a standard into a project, so `canon standards` is safe to run. `CLAUDE.md` and the other seed docs are copy-once, and no sync updates them. Merge those by hand against the toolkit copy.
 
 ## Source of truth
 
-- Full semantics live in the toolkit's own context entries. This skill is the target-session summary. When they disagree, the context docs win.
+- `canon docs install-and-sync` states what each install and sync verb writes, refuses, or leaves alone. `canon docs indexes` and `canon docs migrate` state the same for their verbs. When a doc and this skill disagree, the doc wins.

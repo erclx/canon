@@ -5,7 +5,7 @@ description: Flags, exit codes, and JSON shape for canon indexes regen and canon
 
 # Indexes
 
-`canon indexes regen` rewrites `index.md` files from sibling frontmatter. With no positional paths, it walks the current directory. With paths, each resolves by walking up to the nearest indexed ancestor, bounded by `--root`.
+`canon indexes regen` rewrites `index.md` files from sibling frontmatter, so a hand edit to a generated index is lost on the next run. With no positional paths, it walks the current directory. With paths, each resolves by walking up to the nearest indexed ancestor, bounded by `--root`.
 
 Duplicates dedupe. The whole-repo walk prunes `.git`, `node_modules`, and anything `.gitignore` covers via `git check-ignore`.
 

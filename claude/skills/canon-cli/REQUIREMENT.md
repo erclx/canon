@@ -1,39 +1,42 @@
 ---
 name: canon-cli
-description: Why a session is pointed at the verb catalog, the reference docs, and the overwrite contract from one place, and why the skill reads rather than writes
+description: Why a session is routed from a job to its canon verb from one place, why the verbs that can lose its edits are flagged before they run, and why the skill reads rather than writes
 ---
 
 # Canon cli requirement
 
 ## Gap
 
-Without this skill, a session runs a `canon` sync and finds out afterward what it did. The command names give nothing away. `install` and `sync` differ per domain, some surfaces overwrite unconditionally, some merge, some are written once and never touched again, and none of that is visible from the command line the user typed.
+Without this skill, a session guesses at a verb from its name and runs a `canon` sync to find out afterward what it did. The command names give nothing away. `install` and `sync` differ per domain, some surfaces overwrite unconditionally, some merge, some are written once and never touched again, and none of that is visible from the command line the user typed.
 
-The damage lands on the files a project owns. A golden config carrying local edits is replaced without a warning anyone saw, and a standards install overwrites every standard in a project that only needed the two it had drifted on. The user learns which category a file was in by losing the edit.
+The damage lands on the files a project owns. A golden config carrying local edits is replaced without a warning anyone saw, and a governance sync takes back a rule the project had edited. The user learns which category a file was in by losing the edit.
 
 The inverse failure is quieter. A session that assumes a sync will pick up a change edits a seed and waits for an update that never comes, because the seed is copy-once and no sync command writes it again. Both failures are one missing fact available before the command runs.
 
-Being reachable is a separate problem from being right. This is a pure reference whose moment happens inside another skill's run, so nothing brings it up unless a body names it. Three sibling requirement files named it and routed nothing, because Claude Code loads `SKILL.md` as the entry and never opens the sibling. A route lives in a body or it does not exist, and a fourth requirement mention would repeat the same defect.
+A third gap is the route itself. `canon --help` lists every top-level verb with a partial hint, and a session with a job in hand pays a `--help` read per candidate to find the one that does it, or picks by name and lands on the wrong one. The job-to-verb mapping is the fact the session needs and no verb answers.
 
-A third gap sits beside the first two, aimed at a different question. `canon --help` lists every top-level verb and `canon docs` emits the toolkit's own reference corpus, but no reference skill pointed a session at either. No skill does now. A session guessing at a verb's name, or restating what a doc already answers, is the same missing-fact failure the overwrite gap names.
+Being reachable is a separate problem from being right. This is a pure reference whose moment happens inside another skill's run, so nothing brings it up unless a body names it. A route lives in a body or it does not exist, and a mention in a sibling's requirement file is not one.
 
 ## Must
 
-- State per surface and per command whether an existing file is overwritten, merged, written once, or left alone
-- Warn about a destructive run before it happens, naming the surface that will be lost
-- Name the section-preserving path for a standard or seed the project has customized
-- Defer to the toolkit's own context docs when they and this summary disagree, since the summary is a copy and they are the source
-- Point to `canon docs agents` for the verb catalog and to `canon docs` for the reference corpus, rather than restating either
+- Name each target-usable top-level verb by its job, never its subcommands or flags
+- Route an author-and-render verb to the skill that owns it rather than describing it
+- Warn about a verb that can lose the project's edits before it runs, naming what it replaces
+- Point each destructive verb at `canon docs install-and-sync`, which owns the overwrite detail
+- Point to `canon <verb> --help` and `canon docs agents` for subcommands, flags, and the invocation contract
+- Defer to `canon docs install-and-sync` when it and this summary disagree, since the summary is a copy and the doc is the source
 
 ## Must not
 
 - Run, or send the session to run, a `canon` command that writes or installs. The skill is read before acting on a sync.
-- Restate the verb catalog or a reference doc's content. Point to `canon docs agents` or `canon docs <topic>` instead. The overwrite table is this skill's one authored exception, and it too is a target-session summary, with the detail living with its owner.
-- Take a mention in a sibling's requirement file as an inbound route. The three bodies named in the gap above carry the pointer, and adding a fourth means editing that body rather than its requirement.
+- List a subcommand, a flag, or a JSON shape. That restates the docs and is the drift the one-name-per-verb rule removes.
+- List a verb that only works inside the toolkit repository. A named exemption set in the coverage test holds that boundary.
+- Take a mention in a sibling's requirement file as an inbound route. The pointer lives in the body that needs it.
 
 ## Guards
 
-- A surface or command the contract does not cover routes to the context docs rather than to an inference from a similar row
+- A test fails naming each top-level verb in `COMMAND_GROUPS` that the body neither carries as `canon <verb>` nor exempts, and fails again when an exemption names something that is no longer a verb
+- A verb or surface the skill does not cover routes to `canon docs` rather than to an inference from a similar row
 
 ## Out of scope
 
