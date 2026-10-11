@@ -152,6 +152,7 @@ beforeAll(() => {
     join(project, 'src'),
     join(fixture, 'bin'),
     join(fixture, 'bin-no-runner'),
+    join(fixture, 'bin-jq-trap'),
     join(fixture, 'bin-empty-set'),
     join(fixture, 'bin-no-record'),
     join(fixture, 'bin-due'),
@@ -180,6 +181,18 @@ beforeAll(() => {
     const found = findOnPath(name)
     if (found) symlinkSync(found, join(fixture, 'bin-no-runner', name))
   }
+
+  // A `jq` that fails loudly, so a hook that reached it on a payload it should
+  // have dismissed by shell test alone says so on stderr. `bash` is linked in
+  // because the hook still needs a shell to run under.
+  const bash = findOnPath('bash')
+  if (bash) symlinkSync(bash, join(fixture, 'bin-jq-trap', 'bash'))
+  const trap = join(fixture, 'bin-jq-trap/jq')
+  writeFileSync(
+    trap,
+    "#!/usr/bin/env bash\nprintf 'jq spawned\\n' >&2\nexit 99\n",
+  )
+  chmodSync(trap, 0o755)
 
   // The toolkit's standards-audit reads its findings out of a `markdown audit
   // --json` record, so the acting branch is unreachable with the real binary
@@ -270,6 +283,18 @@ beforeAll(() => {
           tool_input: { path: join(project, 'indexed') },
           tool_name: 'Grep',
         }),
+    },
+    'memory-guard.sh': {
+      code: 2,
+      expect: 'Auto memory is off in this repository',
+      payload: () =>
+        payloadFor({
+          tool_input: {
+            file_path: join(fixture, '.claude/projects/x/memory/note.md'),
+          },
+          tool_name: 'Write',
+        }),
+      stream: 'stderr',
     },
     'path-form.sh': {
       expect: 'This write is from a linked worktree',
@@ -1042,6 +1067,137 @@ describe('unattended-agent-guard.sh classification boundary', () => {
       )
 
       expect(result.stderr).toContain('may not call the Agent tool')
+      expect(result.code).toBe(2)
+    },
+  )
+})
+
+// The acting case proves a write into the folder is denied. These are the
+// boundaries around it: the folder's shape is what separates a memory write
+// from any other path holding a `memory` segment, and the `Bash` arm reads a
+// command unexpanded where the file tools carry an absolute path. The hook
+// exists only in `.claude/hooks/`, so this runs against that path alone.
+describe('memory-guard.sh boundaries', () => {
+  const hook = join(ROOT, '.claude/hooks/memory-guard.sh')
+  const home = '/home/x/.claude/projects/-home-x-repo'
+
+  // Every real payload carries the session transcript, which sits under the
+  // same projects folder the guard watches, so a case built without it never
+  // exercises the payload the hook receives.
+  const transcript_path = `${home}/0f2c.jsonl`
+
+  const fileTool = (tool: string, file: string): string =>
+    payloadFor({
+      tool_input: { file_path: file },
+      tool_name: tool,
+      transcript_path,
+    })
+  const shell = (command: string): string =>
+    payloadFor({
+      tool_input: { command },
+      tool_name: 'Bash',
+      transcript_path,
+    })
+
+  const denied: ReadonlyArray<readonly [string, string]> = [
+    ['a Write to a memory note', fileTool('Write', `${home}/memory/note.md`)],
+    [
+      'a Write to the memory index',
+      fileTool('Write', `${home}/memory/MEMORY.md`),
+    ],
+    ['an Edit', fileTool('Edit', `${home}/memory/note.md`)],
+    ['a MultiEdit', fileTool('MultiEdit', `${home}/memory/note.md`)],
+    [
+      'a tilde path in Bash',
+      shell('echo x > ~/.claude/projects/-a/memory/n.md'),
+    ],
+    [
+      'a $HOME path in Bash',
+      shell('echo x > $HOME/.claude/projects/-a/memory/n.md'),
+    ],
+    ['an absolute path in Bash', shell(`echo x > ${home}/memory/n.md`)],
+    [
+      'a multi-line Bash command',
+      shell(`ls\ncp a ${home}/memory/n.md\necho done`),
+    ],
+    [
+      'a CLAUDE_CONFIG_DIR path in Bash',
+      shell('echo x > "$CLAUDE_CONFIG_DIR/projects/-a/memory/n.md"'),
+    ],
+  ]
+
+  const silent: ReadonlyArray<readonly [string, string]> = [
+    ['a session transcript', fileTool('Write', `${home}/session.jsonl`)],
+    ['a source folder named memory', fileTool('Write', '/r/src/memory/x.ts')],
+    [
+      'a canon records folder named memory',
+      fileTool('Write', '/r/.canon/memory/a.md'),
+    ],
+    [
+      'a folder only prefixed memory',
+      fileTool('Write', `${home}/memory-old/a.md`),
+    ],
+    ['a read of the folder', fileTool('Read', `${home}/memory/note.md`)],
+    ['a command mentioning memory alone', shell('grep -rn memory src/')],
+    ['a command naming projects alone', shell('ls ~/.claude/projects')],
+  ]
+
+  for (const [label, payload] of denied) {
+    it.concurrent(`should deny ${label}`, async ({ expect }) => {
+      const result = await run(hook, payload)
+
+      expect(result.stderr).toContain('Auto memory is off')
+      expect(result.stdout).toBe('')
+      expect(result.code).toBe(2)
+    })
+  }
+
+  for (const [label, payload] of silent) {
+    it.concurrent(`should stay silent on ${label}`, async ({ expect }) => {
+      const result = await run(hook, payload)
+
+      expect(result.stderr).toBe('')
+      expect(result.stdout).toBe('')
+      expect(result.code).toBe(0)
+    })
+  }
+
+  it.concurrent(
+    'should dismiss a command mentioning memory without spawning jq',
+    async ({ expect }) => {
+      const result = await run(
+        hook,
+        shell('grep -rn memory src/'),
+        join(fixture, 'bin-jq-trap'),
+      )
+
+      expect(result.stderr).toBe('')
+      expect(result.code).toBe(0)
+    },
+  )
+
+  it.concurrent(
+    'should still reach a verdict when the transcript path precedes the command',
+    async ({ expect }) => {
+      const result = await run(hook, shell(`cp a ${home}/memory/n.md`))
+
+      expect(result.stderr).toContain('Auto memory is off')
+      expect(result.code).toBe(2)
+    },
+  )
+
+  it.concurrent(
+    'should deny a write under the directory CLAUDE_CONFIG_DIR names',
+    async ({ expect }) => {
+      const result = await run(
+        hook,
+        fileTool('Write', '/opt/cfg/projects/-a/memory/n.md'),
+        undefined,
+        undefined,
+        { CLAUDE_CONFIG_DIR: '/opt/cfg' },
+      )
+
+      expect(result.stderr).toContain('Auto memory is off')
       expect(result.code).toBe(2)
     },
   )
