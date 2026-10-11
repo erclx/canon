@@ -31,6 +31,7 @@ Review receipts pile up the same way. A branch report is read once by the sessio
 - Archive from the ship chain. The pull request has not merged there, and the `post-merge` hook archives through the same command once it does.
 - Hand-edit the index or the ordering file, or move a task file or a plan directly
 - Archive around a refusal
+- Split the legacy single-file archive into per-task files nobody wrote
 - Widen what the marking step reads into a write when the baseline is unusable
 
 ## Guards

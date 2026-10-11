@@ -897,7 +897,7 @@ async function resolveStem(
 
 /**
  * Archives one task as a single unit: the move, the ordering-row removal, and
- * the index regen. The hook and `task-board` both call this, so every gate
+ * the index regen. The hook and `task-complete` both call this, so every gate
  * refuses rather than reports. A caller with nobody watching cannot act on a
  * warning, and two callers gating differently is the drift this exists to stop.
  */

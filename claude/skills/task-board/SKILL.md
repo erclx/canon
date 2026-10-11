@@ -1,22 +1,22 @@
 ---
 name: task-board
-description: Creates a task file in `.canon/tasks/` with the filename, phase label, and frontmatter the standard requires, and archives a shipped one out of the folder. Use when asked to "add a task", "create a task", "queue this", "put this on the board", "archive that task", or "close out a shipped task". Do NOT use to mark an outcome `[x]`. That is `context-fold`.
+description: Creates a task file in `.canon/tasks/` with the filename, phase label, and frontmatter the standard requires, and declines one decided against. Use when asked to "add a task", "create a task", "queue this", "put this on the board", or "decline that task". Do NOT use to mark an outcome `[x]` or to archive a shipped task. That is `task-complete`.
 metadata:
   family: decide
 ---
 
 # Task board
 
-Owns the two operations that bring a task file into existence and take it out of the folder. `context-fold` edits the contents of a task that already exists, marking outcomes `[x]`. Do not mark outcomes here, and do not move a plan by hand: the archive carries it.
+Owns the two operations that decide a task: bringing its file into existence, and declining one decided against. `task-complete` settles a task once its work exists, marking outcomes `[x]` and archiving a shipped one. Do not mark outcomes or archive here, and do not move a plan by hand.
 
 Read `${CLAUDE_SKILL_DIR}/references/tasks.md` before writing any file. It holds the filename convention, the frontmatter contract, and the file format. Do not work them from memory.
 
 ## Guards
 
 - Resolve the board at the main worktree root, not `pwd`. Run `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd` outside a git repo. Every read and write below resolves against that root. The board is gitignored scratch shared across worktrees, so a linked worktree writing to its own `pwd` creates a second board nothing else reads.
-- A new task file is a main-root write, so it goes out as a heredoc. Archiving already runs through `canon tasks archive`, which resolves the root in-process. Marking an outcome shipped is `context-fold` and runs through `canon tasks outcome`. Resolve that root and route the write the way `session-worktree` states.
+- A new task file is a main-root write, so it goes out as a heredoc. Declining already runs through `canon tasks decline`, which resolves the root in-process. Resolve that root and route the write the way `session-worktree` states.
 - If `.canon/tasks/` does not exist at that root, stop: `❌ No .canon/tasks/ board. Run canon claude init to set it up.`
-- Route on the request rather than on a flag. Creating names work that does not exist yet, archiving names a task file already shipped, and declining names one decided against. If the request fits none of the three, stop: `❌ Ambiguous. Say whether to create a task, archive one, or decline one.`
+- Route on the request rather than on a flag. Creating names work that does not exist yet, and declining names a task file decided against. A request to archive a shipped task or mark its outcomes belongs to `task-complete`, so name it and stop. If the request fits neither, stop: `❌ Ambiguous. Say whether to create a task or decline one.`
 - Never hand-edit `.canon/tasks/index.md`. A hook regenerates it from sibling frontmatter after a write. Do not run the regen command directly, except after a shell write from a linked worktree: the hook matches `Write|Edit|MultiEdit` and nothing fires on `Bash`, so that one case regenerates explicitly with `canon indexes regen --no-stage --root <main-root> <main-root>/.canon/tasks/index.md`.
 
 ## Create
@@ -90,10 +90,6 @@ Report rather than prompt. A track can be opened long after its task would have 
 
 Say the origins were read even when nothing comes back, which is the ordinary result. A step going silent on a clean pass is indistinguishable from one that never ran.
 
-## Archive
-
-Read `${CLAUDE_SKILL_DIR}/../task-complete/references/archive.md` when the request names a shipped task to archive. It carries the check that the work reached `main`, the `canon tasks archive` call, the route for each refusal, and the prose to clear afterwards. Never move the file, edit `priority.md`, or regenerate the index by hand, since the command owns all three.
-
 ## Decline
 
 Read `${CLAUDE_SKILL_DIR}/references/decline.md` when the request names a task decided against. It carries gathering the reason, the `canon tasks decline` call, the route for each refusal, and the prose to clear afterwards. Never move the file, edit `priority.md` or `backlog.md`, or regenerate the index by hand, since the command owns all three.
@@ -123,13 +119,5 @@ Create:
 ```
 
 Drop either block when it carries no rows. When both are empty, which is the ordinary result, replace them with one line naming what was read: `Read <n> tracks, <n> dumps, and <n> open issues. Nothing unlinked.`
-
-Archive, reporting the paths the command returned:
-
-```plaintext
-📦 Archived: .canon/tasks/archive/vXX.Y-<slug>.md
-
-<ordering and index disposition in one line>
-```
 
 A refusal reports the reason and the resolution the mode's reference routes it to under its Step 3, on one line each.
