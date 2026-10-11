@@ -5,6 +5,15 @@ description: The launch every dispatch kind shares, being the build, cloud build
 
 Run this once `orchestrator-dispatch.md` has cleared a row, or from its planning or review-address shape below when that runbook's checks do not bind. The model each template names comes from `## Pick the model` in that runbook.
 
+## Contents
+
+- [Dispatch](#dispatch)
+- [Dispatch to a cloud worker](#dispatch-to-a-cloud-worker)
+- [Dispatch to address a review](#dispatch-to-address-a-review)
+- [Dispatch to plan a row](#dispatch-to-plan-a-row)
+- [Dispatch a talk session](#dispatch-a-talk-session)
+- [Dispatch a reviewer](#dispatch-a-reviewer)
+
 ## Dispatch
 
 ```bash
