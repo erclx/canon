@@ -7,7 +7,7 @@ import { bodyLines, maskDisplayed } from '@/markdown/scan'
 /** Returned when a skill folder carries no `REQUIREMENT.md`, the gating check. */
 export const EXIT_MISSING_REQUIREMENT = 2
 
-/** The description ceiling stated in the frontmatter rules of `standards/skill.md`. */
+/** The description ceiling stated in the frontmatter rules of `claude/skills/create-skill/references/skill.md`. */
 export const DESCRIPTION_LIMIT = 1024
 
 /** The two headings the requirement template declares, matched at any level. */
@@ -160,7 +160,7 @@ interface SkillText {
 }
 
 /**
- * Measures both skill corpora against the rules `standards/skill.md` states
+ * Measures both skill corpora against the rules `claude/skills/create-skill/references/skill.md` states
  * mechanically. A corpus the project does not carry is skipped rather than
  * reported, so a target holding only `.claude/skills/` reads as in scope.
  *

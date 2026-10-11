@@ -50,7 +50,7 @@ Every element competes with the material for attention.
 Decide the figure once per lesson, before writing the body.
 
 1. Name the one relationship, boundary, path, or before-and-after the lesson is about. A lesson about none ends here, with `Figure: none, <why it names no structure>` on the reply.
-2. Hold it against the bar in `${CLAUDE_SKILL_DIR}/../../standards/figures.md`, which also carries the drawing rules.
+2. Hold it against the bar in `${CLAUDE_SKILL_DIR}/../draft-figure/references/figures.md`, which also carries the drawing rules.
 3. Draw it hand-written through `canon:draft-figure` into a `raw` block before the quiz, never inside it or after its feedback, which breaks the stepper's gating. Report it, never draw it yourself, if the skill does not resolve.
 4. Or write one line on why prose carries it better, such as a structure an earlier lesson gave.
 

@@ -145,6 +145,6 @@ Run `${CLAUDE_SKILL_DIR}/references/preflight.md` against the output. It is the 
 - States, empty and loading coverage, destructive confirmation, truncation: the same rules
 - Rendered copy casing, button labels, error message shape: the same rules
 - The candidate loop, the arm set, the render, and the pick: `draft-and-pick`
-- The shape of the project's design document and its token tables: `${CLAUDE_SKILL_DIR}/../../standards/design.md`
+- The shape of the project's design document and its token tables: `${CLAUDE_SKILL_DIR}/../canvas-board/references/design.md`
 - Reading source for roughness: `ux-audit`. Measuring what a running interface costs to paint: `ux-measure`
 - Prose on the surface being designed: the `write-human` skill

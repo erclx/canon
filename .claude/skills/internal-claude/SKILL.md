@@ -11,8 +11,8 @@ Read `canon/context/claude-plugin/` for the shipped plugin, starting at its `ind
 
 - When updating an internal skill, write to `{base-dir}/SKILL.md` where `{base-dir}` is the path shown in the skill header at load time.
 - Read `canon/context/claude-plugin/skill-strategy/overview.md` before adding a plugin skill and `canon/context/claude-internal/skills.md` before adding an internal one. Run `canon claude skills list` for the plugin roster, which no entry restates.
-- Follow `standards/skill.md` for skill structure and frontmatter conventions.
-- Audit skill bodies against `standards/skill.md`, `claude/skills/create-skill/references/skill-paths.md`, `claude/skills/markdown-craft/references/markdown.md`, and the `write-human` skill. The first covers structure and frontmatter. The second covers which root a path resolves against and how a body cites a standard. The third covers the body's word choice, punctuation, and formatting. The fourth covers its voice and rhythm.
+- Follow `claude/skills/create-skill/references/skill.md` for skill structure and frontmatter conventions.
+- Audit skill bodies against `claude/skills/create-skill/references/skill.md`, `claude/skills/create-skill/references/skill-paths.md`, `claude/skills/markdown-craft/references/markdown.md`, and the `write-human` skill. The first covers structure and frontmatter. The second covers which root a path resolves against and how a body cites a standard. The third covers the body's word choice, punctuation, and formatting. The fourth covers its voice and rhythm.
 
 ## Authoring conventions
 
@@ -73,4 +73,4 @@ When modifying either CLAUDE.md:
 - `canon/context/context-model/overview.md`: three-tier context model and how entries get populated
 - `canon/context/context-model/indexes.md`: index.md system rationale and contracts
 - `tooling/claude/reference.md`: seed layout and design notes
-- `standards/skill.md`: skill structure, frontmatter, and authoring rules
+- `claude/skills/create-skill/references/skill.md`: skill structure, frontmatter, and authoring rules

@@ -79,7 +79,7 @@ export function loadGovStack(
  * shape rather than two the caller has to tell apart.
  *
  * The directory wins over a rule file of the same name. They cannot collide
- * while `standards/rule.md` requires a numeric prefix on a rule slug, since a
+ * while `claude/skills/create-rule/references/rule.md` requires a numeric prefix on a rule slug, since a
  * band folder carries none.
  */
 export function expandStackEntry(root: string, entry: string): string[] {

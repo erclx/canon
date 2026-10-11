@@ -37,7 +37,7 @@ Rendering to verify layout. The first run downloads the Mermaid CLI and takes ab
 
 ## Rewrite the colors
 
-Rewrite every stroke, fill, and text color the renderer wrote as a literal hex value into the custom property the host stylesheet defines, per the color rule in `${CLAUDE_SKILL_DIR}/../../standards/figures.md`. Mermaid's own theme has no notion of a custom property, so this is a source edit made to the rendered SVG, not a config option.
+Rewrite every stroke, fill, and text color the renderer wrote as a literal hex value into the custom property the host stylesheet defines, per the color rule in `${CLAUDE_SKILL_DIR}/references/figures.md`. Mermaid's own theme has no notion of a custom property, so this is a source edit made to the rendered SVG, not a config option.
 
 ## Clipped titles
 

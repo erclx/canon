@@ -87,7 +87,7 @@ Read `ok` and `reason` out of that record rather than the exit. An operator's sh
 - Never write `canon/REQUIREMENTS.md`. Report a requirements change in After completion.
 - Update only the sections affected by session decisions.
 - Do not rewrite sections unrelated to what changed.
-- Rewrite a restated or superseded statement in place rather than appending the replacement beside it. State the fact that stands and keep the earlier reasoning only where it is the alternative that lost, per `${CLAUDE_SKILL_DIR}/../../standards/context.md`.
+- Rewrite a restated or superseded statement in place rather than appending the replacement beside it. State the fact that stands and keep the earlier reasoning only where it is the alternative that lost, per `${CLAUDE_SKILL_DIR}/references/context.md`.
 - Follow `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md` and the `write-human` skill for all edits.
 - Write a session decision into the `canon/context/` entry for the domain it constrains, under that entry's `## Decisions`, whatever other domains its reasoning touches.
 
