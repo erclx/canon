@@ -148,18 +148,6 @@ function parseJson(payload: string): unknown {
 }
 
 /**
- * A rule no stack names is a report rather than a gate. All three standing
- * findings ship that way on purpose, so failing would fail every push over the
- * deliberate case and teach a reader to route around the stage.
- *
- * The catalog is parsed here rather than piped through `bun --eval`, which the
- * script this replaces had to do and had to guard: that interpreter exits 0
- * when its script throws while stdin is a pipe, so a payload that is not JSON
- * printed nothing and exited clean, and empty already means every rule is
- * reached. A sentinel string carried success past that. Parsing in process
- * leaves the two states distinguishable with nothing to carry.
- */
-/**
  * A rule no stack reaches arrives at a project only through `canon gov
  * detect`, so each one needs a `governance/detect.toml` entry or nothing ever
  * proposes it. A key naming a retired rule fails too, since it would hide from
@@ -168,6 +156,11 @@ function parseJson(payload: string): unknown {
  * The check replaced a fixed list of expected unreferenced rules. Once the
  * stacks are thin, that list is most of the catalog and would be rewritten on
  * every new rule, which is a list nobody reads.
+ *
+ * The catalog is parsed here rather than piped through `bun --eval`, whose
+ * interpreter exits 0 when its script throws while stdin is a pipe, so a
+ * payload that is not JSON would print nothing and read as every rule
+ * reached. Parsing in process keeps the two states distinguishable.
  */
 export const unreferencedRules: Measure = async (ctx) => {
   const { exitCode, stdout } = await ctx.cli(['gov', 'list', '--json'])
