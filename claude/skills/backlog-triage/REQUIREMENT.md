@@ -7,7 +7,7 @@ description: Why the backlog gets a measured verdict per row with a lean toward 
 
 ## Gap
 
-Without this skill, the backlog only grows. `task-board` declines or archives one named task, and nothing reads the backlog as a whole, so a row stays until somebody happens to remember it and decides by hand. The orchestrator's backlog re-test only clears a row upward onto the board, so no sweep ever takes one off. A backlog past fifty rows had no surface that could say which of them still mattered.
+Without this skill, the backlog only grows. `task-board` declines one named task and `task-complete` archives one, and nothing reads the backlog as a whole, so a row stays until somebody happens to remember it and decides by hand. The orchestrator's backlog re-test only clears a row upward onto the board, so no sweep ever takes one off. A backlog past fifty rows had no surface that could say which of them still mattered.
 
 Four failure modes cost more than the rest. A pass that judges a row by what its task file says rather than by the tree keeps every row, since a task file reads as live the day it was written and every day after. A pass that applies its own verdicts decides rows on silence, which ships a decline nobody approved on a board with no history to restore it from. A keep that carries no measurement is the default nobody argues with, so a triage without a lean toward decline ends with the same backlog it started with. And a keep that measures only that the defect still exists keeps nearly everything, since a row filed against the tree almost always still reproduces. One pass suggested keeping 24 of 27 rows that way, where the operator kept 6 and promoted 1.
 
@@ -42,6 +42,6 @@ Four failure modes cost more than the rest. A pass that judges a row by what its
 
 - Filing a brain dump, which `plan-intake` owns
 - Answering the filed items, which `plan-intake-answer` owns
-- Creating a task, or archiving and declining one named task outside a triage, which `task-board` owns
+- Creating or declining one named task outside a triage, which `task-board` owns, and archiving one, which `task-complete` owns
 - Ordering the rows a promote lands under `## Needs a plan`, which the orchestrator's refill sweep owns
 - Skipping rows kept at a recent triage, which waits on a second triage measuring the re-read cost
