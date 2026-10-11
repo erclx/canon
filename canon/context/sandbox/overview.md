@@ -22,7 +22,7 @@ Run `canon sandbox` with no args for the live catalog. Categories and scenarios 
 
 ### Two scenario forms
 
-A scenario is written in TypeScript from 2026-10-04, and the bash form takes no new scenarios after that date. The git, dev, docs, infra, and tooling categories are ported, along with the 23 craft and drafting scenarios under `sandbox/claude/`. The 20 workflow scenarios there stay bash until their slice. `canon/context/sandbox/authoring.md` carries how to write one and why the two coexist.
+A scenario is written in TypeScript from 2026-10-04, and the bash form takes no new scenarios after that date. The git, dev, docs, infra, and tooling categories are ported, along with every scenario under `sandbox/claude/`, the craft and drafting ones and the workflow ones. `canon/context/sandbox/authoring.md` carries how to write one and why the two coexist.
 
 ## Decisions
 
@@ -47,7 +47,7 @@ A scenario is written in TypeScript from 2026-10-04, and the bash form takes no 
 
 ### Naming and staging a scenario
 
-- A scenario file is named for the skill it drives, not for the domain the skill sits in. `sandbox/claude/context-fold.sh` drives `/canon:context-fold`, and a name that diverged would leave the `<category>/<rest>.sh` mapping finding nothing and the audit reporting the skill unpaired. A renamed skill takes its scenario file with it.
+- A scenario file is named for the skill it drives, not for the domain the skill sits in. `sandbox/claude/context-fold.ts` drives `/canon:context-fold`, and a name that diverged would leave the `<category>/<rest>` mapping finding nothing and the audit reporting the skill unpaired. A renamed skill takes its scenario file with it.
 - A scenario whose expectation reads a slug checks out its branch explicitly. `git init` inherits the machine's `init.defaultBranch`, so an arm resting on the initial branch name passes or fails by local git config.
 - Git history initializes fresh each run, and a `refs/sandbox/baseline` ref marks the post-setup state so `canon sandbox reset` restores without provisioning again.
 
