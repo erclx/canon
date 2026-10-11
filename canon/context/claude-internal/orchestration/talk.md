@@ -19,7 +19,7 @@ Retirement happens in one runbook, `orchestrator-handoff.md`, and no runbook ret
 
 One message a cold session does not, a close when the operator ends the conversation. That carries the operator's word onto the controller's channel without making them repeat it in the controller's own session, which stays a valid route for a talk session that crashed or was abandoned.
 
-Reviewers get no talk shape, since a review pass holds no operator dialogue.
+Reviewers get no talk shape, since a reviewer holds no operator dialogue.
 
 ## Gotchas
 
