@@ -28,7 +28,7 @@ before the check runs are read.
 | `review`   | The newest `## Review` pass is closed, and its marker names the head.                         |
 | `ui`       | The newest `## UI review` verdict is closed at the head. Binds only where a checklist exists. |
 | `evidence` | `canon pr evidence --check` reads `settled`, meaning no post-pull-request step is owed.       |
-| `standing` | The head merges into the base cleanly, and the base moved no path the branch writes.          |
+| `standing` | The head merges into the freshly fetched base, and the base moved no path the branch writes.  |
 | `ci`       | Every check run on the branch tip concluded and none failed.                                  |
 
 The head is the branch tip read from the remote, not the pull request object's
@@ -66,7 +66,9 @@ instead of holding a turn through a CI run.
 A push during the wait moves the head off the commit every earlier gate
 cleared. After the wait, and immediately before the write, the verb reads the
 pull request, the branch tip, and the reviews again. A tip that moved refuses
-`head-moved`, and a review that opened refuses with its own reason. A pull
+`head-moved`, and a review that opened refuses with its own reason. The
+standing is read again as well, so a sibling merging during the wait refuses
+`standing-stale` instead of lifting a branch that read fresh before it. A pull
 request already out of draft by then reports `already-ready`.
 
 Two reviewers closing within seconds of each other can each read the other's

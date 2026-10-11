@@ -201,6 +201,20 @@ describe('lift', () => {
 
       expect(record.reason).toBe('ui-behind')
     })
+
+    it('should refuse ui-unmarked on a verdict stamped at the head with no marker', async () => {
+      const { api } = makeApi({
+        evidence: withChecklist,
+        reviews: [
+          CODE_CLOSED,
+          { body: '## UI review closed\n\nall boxes', commit: { oid: HEAD } },
+        ],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('ui-unmarked')
+    })
   })
 
   describe('evidence and standing gates', () => {
@@ -304,6 +318,23 @@ describe('lift', () => {
       expect(harness.calls.marks).toEqual([])
     })
 
+    it('should re-read the standing and refuse one that went stale during the wait', async () => {
+      const harness = makeApi({ checks: [PENDING, PASSING] })
+      let reads = 0
+      const api: LiftApi = {
+        ...harness.api,
+        readStanding: async () => {
+          reads += 1
+          return reads === 1 ? 'fresh' : 'stale'
+        },
+      }
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 600 })
+
+      expect(record.reason).toBe('standing-stale')
+      expect(harness.calls.marks).toEqual([])
+    })
+
     it('should re-read the reviews and refuse one that opened during the wait', async () => {
       const harness = makeApi({ checks: [PENDING, PASSING] })
       let reads = 0
@@ -394,6 +425,18 @@ describe('readBaseStanding', () => {
     })
 
     expect(await readBaseStanding(git, 1, HEAD, 'origin/main')).toBe('fresh')
+  })
+
+  it('should fetch the base before it measures against it', async () => {
+    const calls: string[][] = []
+    const git: GitRunner = async (args) => {
+      calls.push([...args])
+      return args.includes('merge-base') ? 'fork\n' : ''
+    }
+
+    await readBaseStanding(git, 1, HEAD, 'origin/main')
+
+    expect(calls).toContainEqual(['fetch', '-q', 'origin', 'main'])
   })
 
   it('should read conflict when merge-tree fails on resolvable refs', async () => {

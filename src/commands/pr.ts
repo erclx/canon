@@ -3123,11 +3123,6 @@ async function runFrames(
   )
 }
 
-/**
- * Frames a refusal on stderr in both modes and puts the record on stdout alone,
- * so an operator reading the terminal sees the reason rather than a command
- * that appeared to do nothing.
- */
 const LIFT_REFUSALS: Record<LiftRefusal | 'bad-wait' | 'gh-missing', string> = {
   'bad-wait': '--wait takes a whole number of seconds, zero or more.',
   'gh-missing': PULL_REFUSALS['gh-missing'],
@@ -3409,6 +3404,11 @@ async function runLift(
   return record.isOk ? 0 : 1
 }
 
+/**
+ * Frames a refusal on stderr in both modes and puts the record on stdout alone,
+ * so an operator reading the terminal sees the reason rather than a command
+ * that appeared to do nothing.
+ */
 function refuse(reason: Refusal, emitJson: boolean, root: string): number {
   return refuseWith(reason, REFUSALS[reason], emitJson, root)
 }

@@ -328,6 +328,13 @@ export async function lift(
     return refused(reread.reason, cleared, nowTip, ci.waited)
   }
 
+  // Standing is read again too, since a sibling merging during the wait can
+  // leave a branch that read fresh before it stale.
+  const laterStanding = standingGate(await api.readStanding(nowTip))
+  if (laterStanding.reason !== undefined) {
+    return refused(laterStanding.reason, cleared, nowTip, ci.waited)
+  }
+
   const isMarked = await api.markReady(pull.nodeId)
   if (!isMarked) return refused('gh-failed', cleared, nowTip, ci.waited)
 
@@ -364,6 +371,12 @@ export async function readBaseStanding(
   head: string,
   ref: string,
 ): Promise<Standing> {
+  // The base is fetched as well as the head. A tracking ref is only as current
+  // as the last fetch, so a sibling merging since then would read as fresh.
+  const baseBranch = ref.startsWith('origin/')
+    ? ref.slice('origin/'.length)
+    : ref
+  await git(['fetch', '-q', 'origin', baseBranch])
   await git(['fetch', '-q', 'origin', `pull/${number}/head`])
 
   const hasHead =
