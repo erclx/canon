@@ -158,7 +158,8 @@ describe('citationsIn', () => {
   })
 
   it('should skip a path resolved through the plugin root', () => {
-    const text = 'Read `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md`.'
+    const text =
+      'Read `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md`.'
 
     expect(citationsIn('claude/skills/x/SKILL.md', text, new Set())).toEqual([])
   })
