@@ -81,22 +81,12 @@ export const FINDING_KINDS = [
 
 export type FindingKind = (typeof FINDING_KINDS)[number]
 
-/**
- * The transforms `migrate.ts` carries. Most finding kinds have none, since a
- * transform is only safe where the old shape is recoverable from the file
- * itself, so this stays optional on `Finding` rather than required.
- */
-export const FINDING_REMEDIES = ['category-from-name'] as const
-
-export type FindingRemedy = (typeof FINDING_REMEDIES)[number]
-
 export interface Finding {
   readonly kind: FindingKind
   /** The record the finding sits in, relative to the validated folder. */
   readonly record: string
   readonly subject: string
   readonly message: string
-  readonly remedy?: FindingRemedy
 }
 
 export interface ValidateReport {
@@ -214,9 +204,8 @@ function finding(
   record: string,
   subject: string,
   message: string,
-  remedy?: FindingRemedy,
 ): Finding {
-  return { kind, record, subject, message, remedy }
+  return { kind, record, subject, message }
 }
 
 async function listMarkdown(dir: string): Promise<string[]> {
@@ -963,21 +952,6 @@ export function memoryType(value: string): MemoryType | undefined {
   return MEMORY_TYPES.find((type) => type === value)
 }
 
-/**
- * The one missing-field shape `migrate.ts` can repair: `category` alone,
- * recoverable from the same filename prefix `checkMemory` already read it
- * from. `title` and `description` are prose nobody wrote down, so a finding
- * naming either carries no remedy.
- */
-function memoryRemedy(
-  missing: readonly string[],
-  named: MemoryType | undefined,
-): FindingRemedy | undefined {
-  return named && missing.length === 1 && missing[0] === 'category'
-    ? 'category-from-name'
-    : undefined
-}
-
 export function checkMemory(name: string, text: string): Finding[] {
   const findings: Finding[] = []
   const match = MEMORY_NAME.exec(name)
@@ -1006,7 +980,6 @@ export function checkMemory(name: string, text: string): Finding[] {
         name,
         name,
         `carries no ${missing.join(' and no ')}.`,
-        memoryRemedy(missing, named),
       ),
     )
   }

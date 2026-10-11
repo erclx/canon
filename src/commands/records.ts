@@ -1,8 +1,5 @@
-import { readFile, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
 import type { Command } from 'commander'
 import { pullRecords, pushRecords } from '@/records/backup'
-import { migrateRecord } from '@/records/migrate'
 import {
   type ClaimOutcome,
   claimOrdinal,
@@ -25,24 +22,16 @@ import {
   sizeRecords,
 } from '@/records/size'
 import {
-  DEFAULT_REVIEW_DAYS,
-  type StaleEntry,
-  type StaleReport,
-  staleMemory,
-} from '@/records/stale'
-import {
   type CanonicalDoc,
   type CanonicalReport,
   staleCanonical,
 } from '@/records/stale-canonical'
 import {
   type Finding,
-  type FindingRemedy,
   isRecordKind,
   isSharedScratch,
   RECORD_KINDS,
   type RecordKind,
-  recordsDir,
   type ValidateOutcome,
   validateRecords,
 } from '@/records/validate'
@@ -62,9 +51,6 @@ import { readLivePlans, stackFindings } from '@/tasks/stack'
 /** Returned when a record carries a finding, which is the gating result. */
 const EXIT_FINDINGS = 2
 
-/** Returned when a record carries a known transform and `--write` was not passed. */
-const EXIT_MIGRATABLE = 2
-
 /** Returned when `--claim` loses every retry to a collision. */
 const EXIT_CONTENDED = 2
 
@@ -78,24 +64,15 @@ interface ValidateCommandOptions {
 
 type BackupCommandOptions = ValidateCommandOptions
 
-interface MigrateCommandOptions extends ValidateCommandOptions {
-  readonly write?: boolean
-}
-
 interface PruneCommandOptions extends ValidateCommandOptions {
   readonly write?: boolean
   readonly olderThan?: string
 }
 
-interface StaleCommandOptions extends ValidateCommandOptions {
-  readonly days?: string
-}
+type StaleCommandOptions = ValidateCommandOptions
 
-/**
- * The kinds `stale` reads. A memory entry ages by days in the shared pen, and
- * a canonical doc ages by the releases shipped since its review.
- */
-const STALE_KINDS = ['memory', 'canonical'] as const
+/** The kinds `stale` reads. A canonical doc ages by the releases shipped since its review. */
+const STALE_KINDS = ['canonical'] as const
 
 interface OrdinalCommandOptions extends ValidateCommandOptions {
   readonly claim?: boolean
@@ -150,44 +127,6 @@ export function register(program: Command): void {
     )
     .action(async (kind: string, opts: ValidateCommandOptions) => {
       process.exitCode = await runValidate(kind, opts)
-    })
-
-  records
-    .command('migrate')
-    .description('Rewrite the records a validate finding names a transform for')
-    .argument('<kind>', `Record folder: ${RECORD_KINDS.join(', ')}`)
-    .helpOption('-h, --help', 'Show this help message')
-    .option('--json', 'Add a machine-readable record on stdout')
-    .option('--write', 'Rewrite every record a transform can repair')
-    .option(
-      '--root <path>',
-      'Project root, defaulting to the main worktree except on standards',
-    )
-    .addHelpText(
-      'after',
-      [
-        '',
-        'Exit codes:',
-        '  0  nothing carries a known transform, or --write repaired every one',
-        '  1  refused, with the reason on stderr or in the JSON record, every',
-        '     candidate it found failed to repair, or --write repaired only',
-        '     some of them',
-        '  2  a record carries a known transform and --write was not passed',
-        '',
-        'It reports and never writes without --write, matching canon records',
-        'validate: a session record has no history to undo a wrong repair from.',
-        'A transform is only offered where the old value is recoverable from the',
-        'file itself, so a finding with no transform is left for a session to fix.',
-        '',
-        'Examples:',
-        '  canon records migrate memory',
-        '  canon records migrate memory --write',
-        '  canon records migrate memory --json',
-        '',
-      ].join('\n'),
-    )
-    .action(async (kind: string, opts: MigrateCommandOptions) => {
-      process.exitCode = await runMigrate(kind, opts)
     })
 
   records
@@ -278,10 +217,6 @@ export function register(program: Command): void {
     .helpOption('-h, --help', 'Show this help message')
     .option('--json', 'Add a machine-readable record on stdout')
     .option(
-      '--days <n>',
-      `Days after a review before a memory entry is due again (default ${DEFAULT_REVIEW_DAYS})`,
-    )
-    .option(
       '--root <path>',
       'Project root, defaulting to the main worktree except on canonical',
     )
@@ -289,34 +224,20 @@ export function register(program: Command): void {
       'after',
       [
         '',
-        'memory: reads the top-level entries of the memory folder, never review/, archive/,',
-        'or index.md. An entry is due when it carries no reviewed date, a reviewed',
-        'value that is not a date, or one older than --days. A path is a backticked',
-        'token holding a / and a file extension, resolved against the project root',
-        'after any :line or #heading anchor is stripped. Tokens under .canon/,',
-        'scratch, or worktrees, and any holding a placeholder, glob, variable, or',
-        'elided ... segment, are never reported.',
-        '',
-        'Entries are ordered due first, then those citing a missing path, then the',
-        'longest unreviewed, then by name, so a review takes the first N as a batch.',
-        '',
         'canonical: reads REQUIREMENTS.md at whichever surface root carries it,',
         'in the current worktree since it is tracked. It reports its reviewed date',
         'and the release tags merged into HEAD after that day, or never when it',
-        'carries no date. --days does not apply.',
+        'carries no date.',
         '',
         'Exit codes:',
         '  0  the reading completed, whatever it found',
         '  1  refused, with the reason on stderr or in the JSON record',
         '',
-        'It gates nothing and writes nothing. A due entry is a queue position rather',
-        'than a failure, and a missing path or a release count is a prompt for the',
-        'review to judge.',
+        'It gates nothing and writes nothing. A release count is a prompt for the',
+        'review to judge rather than a failure.',
         '',
         'Examples:',
-        '  canon records stale memory',
-        '  canon records stale memory --json',
-        '  canon records stale memory --days 60 --json',
+        '  canon records stale canonical',
         '  canon records stale canonical --json',
         '',
       ].join('\n'),
@@ -357,8 +278,8 @@ export function register(program: Command): void {
         '     delete failed',
         '  2  candidates exist and --write was not passed',
         '',
-        'It writes nothing until --write is passed, matching canon records',
-        'migrate: a session record has no history to undo a wrong delete from.',
+        'It writes nothing until --write is passed, since a session record has',
+        'no history to undo a wrong delete from.',
         'It reads mtime like canon records size, so a machine restored by canon',
         'records pull reads everything as new, which fails safe by offering',
         'nothing.',
@@ -579,34 +500,7 @@ async function runStale(
     )
   }
 
-  if (kind === 'canonical') return runStaleCanonical(opts, emitJson)
-
-  const days = Number(opts.days ?? DEFAULT_REVIEW_DAYS)
-
-  if (!Number.isInteger(days) || days <= 0) {
-    return reportRefusal(
-      'canon records stale',
-      {
-        reason: 'bad-days',
-        message: `--days must be a positive whole number of days, got ${opts.days}.`,
-      },
-      emitJson,
-    )
-  }
-
-  const root = opts.root ?? (await mainWorktreeRoot())
-  const outcome = await staleMemory(root, days)
-
-  if (!outcome.ok)
-    return reportRefusal('canon records stale', outcome, emitJson)
-
-  if (emitJson) {
-    process.stdout.write(`${JSON.stringify(outcome)}\n`)
-    return 0
-  }
-
-  reportStale(outcome)
-  return 0
+  return runStaleCanonical(opts, emitJson)
 }
 
 /**
@@ -618,18 +512,6 @@ async function runStaleCanonical(
   opts: StaleCommandOptions,
   emitJson: boolean,
 ): Promise<number> {
-  if (opts.days !== undefined) {
-    return reportRefusal(
-      'canon records stale',
-      {
-        reason: 'bad-days',
-        message:
-          '--days does not apply to canonical, which counts releases rather than days.',
-      },
-      emitJson,
-    )
-  }
-
   const root = opts.root ?? (await currentWorktreeRoot())
   const outcome = await staleCanonical(root)
 
@@ -669,48 +551,6 @@ function describeCanonical(
     ? `${plural(doc.releasesSince ?? 0, 'release')} since`
     : 'no releases to count'
   return `${doc.path}: reviewed ${doc.reviewed}, ${since}`
-}
-
-function staleRow(entry: StaleEntry): string[] {
-  return [
-    entry.name,
-    entry.reviewed ?? (entry.invalidReviewed ? 'invalid' : 'never'),
-    entry.unresolved.join(', '),
-  ]
-}
-
-function reportStale(outcome: StaleReport): void {
-  const due = outcome.entries.filter((entry) => entry.due)
-  const moved = outcome.entries.filter((entry) => entry.unresolved.length > 0)
-
-  intro('canon records stale')
-  logStep('Due')
-
-  if (due.length === 0) {
-    logInfo(`none, every entry reviewed within ${plural(outcome.days, 'day')}`)
-  } else {
-    const headers = ['entry', 'reviewed', 'unresolved']
-    const rows = due.map(staleRow)
-    const widths = headers.map((header, column) =>
-      columnWidth(
-        header,
-        rows.map((row) => row[column]),
-      ),
-    )
-    const render = (cells: readonly string[]): string =>
-      cells
-        .map((cell, column) => cell.padEnd(widths[column]))
-        .join('  ')
-        .trimEnd()
-
-    pipeOutput([render(headers), ...rows.map(render)].join('\n'))
-  }
-
-  logStep('Total')
-  logInfo(
-    `${outcome.due} of ${outcome.total} due, ${moved.length} citing a missing path, in ${outcome.folder}`,
-  )
-  outro()
 }
 
 function pruneRow(entry: PruneUnit): string[] {
@@ -917,8 +757,7 @@ async function runValidate(
 
 /**
  * Appends the one plans finding that reads across files. It sits in the command
- * layer because `src/records/` sits below `src/tasks/`, and `migrate` iterates
- * `validateRecords` alone, so it never meets a finding with no safe repair.
+ * layer because `src/records/` sits below `src/tasks/`.
  */
 async function validateWithStacks(
   root: string,
@@ -990,226 +829,6 @@ function report(
 function describe(found: Finding): string {
   const scope = found.record === found.subject ? '' : `${found.record}: `
   return `${scope}${found.subject} ${found.message}`
-}
-
-export interface Repair {
-  readonly record: string
-  readonly remedy: FindingRemedy
-  readonly path: string
-  readonly text: string
-}
-
-export interface Refusal {
-  readonly record: string
-  readonly message: string
-}
-
-/** The message a rejected promise leaves, for a record whose read or write failed. */
-function describeFailure(reason: unknown): string {
-  return reason instanceof Error ? reason.message : String(reason)
-}
-
-/**
- * Runs every finding's transform, without writing anything back.
- *
- * `Promise.allSettled` rather than `Promise.all`, so a record whose read
- * fails, such as one deleted between `validate`'s listing and this read,
- * becomes a refusal for that one record rather than an unhandled rejection
- * that `program.parse()` has no top-level catch for.
- */
-async function attemptMigrations(
-  dir: string,
-  findings: readonly Finding[],
-): Promise<{ repaired: Repair[]; refused: Refusal[] }> {
-  const candidates = findings.filter(
-    (found): found is Finding & { readonly remedy: FindingRemedy } =>
-      found.remedy !== undefined,
-  )
-
-  const settled = await Promise.allSettled(
-    candidates.map(async (found) => {
-      const path = join(dir, found.record)
-      const outcome = migrateRecord(
-        found.remedy,
-        found.record,
-        await readFile(path, 'utf8'),
-      )
-      return { record: found.record, remedy: found.remedy, path, outcome }
-    }),
-  )
-
-  const repaired: Repair[] = []
-  const refused: Refusal[] = []
-
-  settled.forEach((result, index) => {
-    if (result.status === 'rejected') {
-      refused.push({
-        record: candidates[index].record,
-        message: `could not be read: ${describeFailure(result.reason)}`,
-      })
-      return
-    }
-
-    const { record, remedy, path, outcome } = result.value
-
-    if (outcome.ok) {
-      repaired.push({ record, remedy, path, text: outcome.text })
-    } else {
-      refused.push({ record, message: outcome.message })
-    }
-  })
-
-  return { repaired, refused }
-}
-
-/**
- * Writes every repair, independently. `Promise.allSettled` so one record's
- * write failing does not abort the writes that would otherwise have
- * succeeded, per the concurrency standard's rule on batched partial failure.
- */
-async function writeRepairs(
-  repaired: readonly Repair[],
-): Promise<{ written: Repair[]; failed: Refusal[] }> {
-  const settled = await Promise.allSettled(
-    repaired.map((entry) => writeFile(entry.path, entry.text, 'utf8')),
-  )
-
-  const written: Repair[] = []
-  const failed: Refusal[] = []
-
-  settled.forEach((result, index) => {
-    const entry = repaired[index]
-
-    if (result.status === 'fulfilled') {
-      written.push(entry)
-    } else {
-      failed.push({
-        record: entry.record,
-        message: `could not be written: ${describeFailure(result.reason)}`,
-      })
-    }
-  })
-
-  return { written, failed }
-}
-
-async function runMigrate(
-  kind: string,
-  opts: MigrateCommandOptions,
-): Promise<number> {
-  const emitJson = opts.json ?? false
-
-  if (!isRecordKind(kind)) {
-    return reportRefusal(
-      'canon records migrate',
-      {
-        reason: 'unknown-kind',
-        message: `Not a record kind: ${kind}. Expected one of: ${RECORD_KINDS.join(', ')}.`,
-      },
-      emitJson,
-    )
-  }
-
-  const root = opts.root ?? (await defaultRoot(kind))
-  const outcome = await validateRecords(root, kind)
-
-  if (!outcome.ok) {
-    return reportRefusal('canon records migrate', outcome, emitJson)
-  }
-
-  const write = opts.write ?? false
-  const { repaired, refused } = await attemptMigrations(
-    recordsDir(root, kind),
-    outcome.findings,
-  )
-
-  if (!write) {
-    return reportMigrate(root, outcome.kind, repaired, refused, write, emitJson)
-  }
-
-  const { written, failed } = await writeRepairs(repaired)
-
-  return reportMigrate(
-    root,
-    outcome.kind,
-    written,
-    [...refused, ...failed],
-    write,
-    emitJson,
-  )
-}
-
-function reportMigrate(
-  root: string,
-  kind: RecordKind,
-  repaired: readonly Repair[],
-  refused: readonly Refusal[],
-  write: boolean,
-  emitJson: boolean,
-): number {
-  const total = repaired.length + refused.length
-
-  if (emitJson) {
-    process.stdout.write(
-      `${JSON.stringify({
-        ok: true,
-        root,
-        kind,
-        written: write,
-        migrated: repaired.map((entry) => entry.record),
-        refused,
-      })}\n`,
-    )
-  } else {
-    intro('canon records migrate')
-
-    if (total === 0) {
-      logStep('Clean')
-      logInfo('no finding carries a known transform')
-    } else {
-      logStep(write ? 'Rewritten' : 'Would rewrite')
-      if (repaired.length === 0) {
-        logInfo('none, every candidate refused, see below')
-      } else {
-        for (const entry of repaired)
-          logInfo(`${entry.record}: ${entry.remedy}`)
-      }
-
-      if (refused.length > 0) {
-        logStep('Refused')
-        for (const entry of refused)
-          logWarn(`${entry.record}: ${entry.message}`)
-      }
-
-      if (!write && repaired.length > 0) {
-        logInfo('Re-run with --write to apply.')
-      }
-    }
-
-    outro()
-  }
-
-  return migrateExitCode(repaired, refused, write)
-}
-
-/**
- * `repaired` carries only records a transform actually fixed, whether this
- * is a dry run or the set `--write` wrote, so exit 2 (a write is available)
- * never fires when every candidate refused. A dry run reaching that state
- * previously returned the same code as a genuine offer to write, telling a
- * caller `--write` would repair something when it would repair nothing.
- */
-export function migrateExitCode(
-  repaired: readonly Repair[],
-  refused: readonly Refusal[],
-  write: boolean,
-): number {
-  const total = repaired.length + refused.length
-
-  if (total === 0) return 0
-  if (repaired.length === 0) return 1
-  if (!write) return EXIT_MIGRATABLE
-  return refused.length > 0 ? 1 : 0
 }
 
 async function runOrdinal(

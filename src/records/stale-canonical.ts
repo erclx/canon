@@ -3,7 +3,6 @@ import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { relative } from 'node:path'
 import { gitEnv } from '@/git/env'
-import { readReviewed } from '@/records/stale'
 import { surfaceDir } from '@/roots/surface'
 
 /** The record whose drift is identity rather than a stale path. */
@@ -20,6 +19,37 @@ export interface CanonicalDoc {
   readonly releasesSince: number | null
   /** The newest release tag merged into HEAD, or null when there is none. */
   readonly latestRelease: string | null
+}
+
+const REVIEWED_FIELD = /^reviewed:[ \t]*(.*?)[ \t]*$/m
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
+const RAW_FRONTMATTER = /^---\n([\s\S]*?)\n---/
+
+/**
+ * Reads `reviewed` off the raw block rather than the parsed fields, for the
+ * reason `hasOpeningDate` in the validator gives: a YAML parser resolves a
+ * bare `YYYY-MM-DD` to a date on one schema and a string on another.
+ *
+ * A value that is not a calendar date reads as never reviewed and is carried
+ * back so the review can see it, rather than throwing over one hand edit.
+ */
+function readReviewed(
+  text: string,
+): Pick<CanonicalDoc, 'reviewed' | 'invalidReviewed'> {
+  const block = RAW_FRONTMATTER.exec(text)?.[1]
+  const match = block ? REVIEWED_FIELD.exec(block) : null
+  if (!match) return { reviewed: null }
+
+  const value = match[1].replace(/^(['"])(.*)\1$/, '$2')
+  const parsed = Date.parse(`${value}T00:00:00Z`)
+  const isDate =
+    ISO_DATE.test(value) &&
+    Number.isFinite(parsed) &&
+    new Date(parsed).toISOString().slice(0, 10) === value
+
+  return isDate
+    ? { reviewed: value }
+    : { reviewed: null, invalidReviewed: value }
 }
 
 export interface CanonicalReport {
