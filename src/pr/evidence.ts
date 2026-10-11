@@ -350,12 +350,17 @@ function renderState(
 ): string[] {
   const views = new Map<string, ViewCase[]>()
   const flat: EvidenceItem[] = []
+  const taken = new Set<string>()
   for (const item of entry.items) {
     const name = readCaseName(item.stem)
-    if (name === undefined) {
+    // Two files can share a stem across extensions, and a view cell holds one.
+    const cell =
+      name === undefined ? '' : `${name.view}|${name.theme}|${name.width}`
+    if (name === undefined || taken.has(cell)) {
       flat.push(item)
       continue
     }
+    taken.add(cell)
     const cases = views.get(name.view)
     const viewCase = { item, theme: name.theme, width: name.width }
     if (cases === undefined) views.set(name.view, [viewCase])

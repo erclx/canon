@@ -665,6 +665,25 @@ describe('renderEvidenceBody', () => {
       expect(countEvidenceCases(body)).toBe(3)
     })
 
+    it('should send a second file sharing a view cell to the flat block so both still show', () => {
+      const body = render([
+        {
+          path: 'evidence/grid-dark-320.png',
+          stem: 'grid-dark-320',
+          added: true,
+        },
+        {
+          path: 'evidence/grid-dark-320.webp',
+          stem: 'grid-dark-320',
+          added: true,
+        },
+      ])
+
+      expect(body).toContain('<summary>grid (1)</summary>')
+      expect(body).toContain('<summary>evidence (1)</summary>')
+      expect(countEvidenceCases(body)).toBe(2)
+    })
+
     it('should open every block together while the whole comment is within the image limit', () => {
       const body = render(viewItems('grid', true).slice(0, 6))
 
