@@ -11,7 +11,7 @@ describe('checkSections', () => {
   })
 
   it('should accept every heading in the closed list', () => {
-    const body = `${WELL_FORMED}\n## Technical context\n\n## Commits\n\n## Testing\n`
+    const body = `${WELL_FORMED}\n## Technical context\n\n## Testing\n\n## For the reviewer\n`
 
     const result = checkSections(body)
 
@@ -24,6 +24,14 @@ describe('checkSections', () => {
     const result = checkSections(body)
 
     expect(result.outside).toEqual(['## Whatever'])
+  })
+
+  it('should name a heading the list never held', () => {
+    const body = `${WELL_FORMED}\n## Commits\n`
+
+    const result = checkSections(body)
+
+    expect(result.outside).toEqual(['## Commits'])
   })
 
   it('should name a required heading that is missing', () => {

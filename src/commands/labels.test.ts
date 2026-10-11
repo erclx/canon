@@ -100,7 +100,7 @@ describe('canon labels scan text checks', () => {
     const record = await runScan(['--title', TITLE, '--body-file', body])
 
     expect(record.exitCode).toBe(2)
-    expect(record.sections?.outside).toEqual(['## Whatever'])
+    expect(record.sections?.outside).toEqual(['## Commits', '## Whatever'])
     expect(record.sections?.missing).toEqual(['## Key changes'])
   })
 
