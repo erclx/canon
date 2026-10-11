@@ -188,23 +188,213 @@ function evidenceImage(url: string, alt: string, width?: number): string {
 
 const EVIDENCE_IMAGE = String.raw`(?:!\[\]\([^)]*\)|<img [^>]*>)`
 
-/** A case row in any shape a render has posted: a Base cell before the head image, or the head image alone. */
-const EVIDENCE_ROW_PATTERN = new RegExp(
+/** A case row in a shape before the head image carried an alt: a Base cell before the head image, or the head image alone. */
+const LEGACY_ROW_PATTERN = new RegExp(
   String.raw`^\| .+ \| (?:(?:\*\(new\)\*|${EVIDENCE_IMAGE}) \| )?${EVIDENCE_IMAGE} \|$`,
-  'gm',
 )
+
+/** A head image, which every render since the alt text was added names with a trailing `head`. A row carries one per case it holds. */
+const HEAD_IMAGE_PATTERN = /<img [^>]*alt="[^"]* head">/g
+
+/** The form a case name takes when it names a view, a theme, and a width. Anchored on the right, since a view may carry hyphens. */
+const CASE_NAME = /^(.+)-(dark|light)-(\d+)$/
+
+const THEMES = ['dark', 'light'] as const
+
+type Theme = (typeof THEMES)[number]
+
+interface ViewCase {
+  readonly item: EvidenceItem
+  readonly theme: Theme
+  readonly width: string
+}
+
+function isTheme(value: string): value is Theme {
+  return value === 'dark' || value === 'light'
+}
+
+function readCaseName(stem: string):
+  | {
+      readonly view: string
+      readonly theme: Theme
+      readonly width: string
+    }
+  | undefined {
+  const match = CASE_NAME.exec(stem)
+  const view = match?.[1]
+  const theme = match?.[2]
+  const width = match?.[3]
+  if (view === undefined || theme === undefined || width === undefined) {
+    return undefined
+  }
+  return isTheme(theme) ? { view, theme, width } : undefined
+}
+
+function compareWidths(a: string, b: string): number {
+  return Number(a) - Number(b) || a.localeCompare(b)
+}
+
+function commitLink(repo: string, sha: string): string {
+  return `[\`${sha.slice(0, SHORT_SHA_LENGTH)}\`](https://github.com/${repo}/commit/${sha})`
+}
+
+function baseImage(item: EvidenceItem, repo: string, base: string): string {
+  return item.added
+    ? '*(new)*'
+    : evidenceImage(
+        rawUrl(repo, base, item.path),
+        `${escapeCell(item.stem)} base`,
+        item.baseWidth,
+      )
+}
+
+function headImage(item: EvidenceItem, repo: string, head: string): string {
+  return evidenceImage(
+    rawUrl(repo, head, item.path),
+    `${escapeCell(item.stem)} head`,
+    item.width,
+  )
+}
+
+function block(
+  opener: string,
+  summary: string,
+  header: readonly string[],
+  rows: readonly string[],
+): string {
+  return [
+    opener,
+    `<summary>${summary}</summary>`,
+    '',
+    `| ${header.join(' | ')} |`,
+    `| ${header.map(() => '---').join(' | ')} |`,
+    ...rows,
+    '',
+    '</details>',
+  ].join('\n')
+}
+
+/** One block for the cases of a state that did not name a view, one case per row. */
+function renderFlat(
+  label: string,
+  items: readonly EvidenceItem[],
+  repo: string,
+  base: string,
+  head: string,
+  opener: string,
+): string {
+  const hasBase = items.some((item) => !item.added)
+  const rows = items.map((item) => {
+    const stem = escapeCell(item.stem)
+    const after = headImage(item, repo, head)
+    return hasBase
+      ? `| ${stem} | ${baseImage(item, repo, base)} | ${after} |`
+      : `| ${stem} | ${after} |`
+  })
+  return block(
+    opener,
+    `${label} (${items.length})`,
+    hasBase ? ['Case', 'Base', 'Head'] : ['Case', 'Head'],
+    rows,
+  )
+}
+
+/** One block for a view, a width per row and a theme per column, each theme taking a base column when the view already exists at the base. */
+function renderView(
+  label: string,
+  cases: readonly ViewCase[],
+  repo: string,
+  base: string,
+  head: string,
+  opener: string,
+): string {
+  const themes = THEMES.filter((theme) =>
+    cases.some((entry) => entry.theme === theme),
+  )
+  const hasBase = cases.some((entry) => !entry.item.added)
+  const widths = [...new Set(cases.map((entry) => entry.width))].sort(
+    compareWidths,
+  )
+  const header = [
+    'Width',
+    ...themes.flatMap((theme) => {
+      const name = theme === 'dark' ? 'Dark' : 'Light'
+      return hasBase ? [`${name} base`, `${name} head`] : [name]
+    }),
+  ]
+  const rows = widths.map((width) => {
+    const cells = themes.flatMap((theme) => {
+      const found = cases.find(
+        (entry) => entry.theme === theme && entry.width === width,
+      )
+      if (found === undefined) return hasBase ? ['', ''] : ['']
+      const after = headImage(found.item, repo, head)
+      return hasBase ? [baseImage(found.item, repo, base), after] : [after]
+    })
+    return `| ${[width, ...cells].join(' | ')} |`
+  })
+  return block(opener, `${label} (${cases.length})`, header, rows)
+}
+
+/**
+ * Renders the blocks of one state: a block per view the case names split
+ * into, then one flat block for the names that did not. Nothing is dropped,
+ * so a state of unparsed names reads as the flat table it always was.
+ */
+function renderState(
+  entry: EvidenceState,
+  repo: string,
+  base: string,
+  head: string,
+  opener: string,
+): string[] {
+  const views = new Map<string, ViewCase[]>()
+  const flat: EvidenceItem[] = []
+  for (const item of entry.items) {
+    const name = readCaseName(item.stem)
+    if (name === undefined) {
+      flat.push(item)
+      continue
+    }
+    const cases = views.get(name.view)
+    const viewCase = { item, theme: name.theme, width: name.width }
+    if (cases === undefined) views.set(name.view, [viewCase])
+    else cases.push(viewCase)
+  }
+
+  const prefix = entry.state === '' ? '' : `${escapeCell(entry.state)} / `
+  const blocks = [...views.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([view, cases]) =>
+      renderView(
+        `${prefix}${escapeCell(view)}`,
+        cases,
+        repo,
+        base,
+        head,
+        opener,
+      ),
+    )
+  if (flat.length > 0) {
+    const label = entry.state === '' ? 'evidence' : escapeCell(entry.state)
+    blocks.push(renderFlat(label, flat, repo, base, head, opener))
+  }
+  return blocks
+}
 
 export function evidenceMarker(head: string): string {
   return `${MARKER_PREFIX} head=${head} -->`
 }
 
 /**
- * Renders the whole comment body: one `<details>` block per state, a Base/Head
- * row per case, and the trailing marker naming the head this body describes.
+ * Renders the whole comment body: one `<details>` block per view within each
+ * state, a width per row with a column per theme, a flat Base/Head table for
+ * the case names that do not split into a view, and the trailing marker naming
+ * the head this body describes.
  * Every state opens while the comment carries at most `EVIDENCE_OPEN_LIMIT`
  * images, one per row for the head plus one per row not added, and every state
  * closes past it, so a comment is never half open. A visible line under
- * `## Evidence` names the base and head as short shas. Every image URL is
+ * `## Evidence` names the base and head as short shas, each linking its commit. Every image URL is
  * pinned to a commit sha rather than a branch, so the comment keeps showing
  * what it claimed even after the branch moves.
  *
@@ -252,42 +442,13 @@ export function renderEvidenceBody(
   const opener =
     imageCount <= EVIDENCE_OPEN_LIMIT ? '<details open>' : '<details>'
 
-  const sections = states.map((entry) => {
-    const hasBase = entry.items.some((item) => !item.added)
-    const rows = entry.items.map((item) => {
-      const stem = escapeCell(item.stem)
-      const before = item.added
-        ? '*(new)*'
-        : evidenceImage(
-            rawUrl(repo, base, item.path),
-            `${stem} base`,
-            item.baseWidth,
-          )
-      const after = evidenceImage(
-        rawUrl(repo, head, item.path),
-        `${stem} head`,
-        item.width,
-      )
-      return hasBase
-        ? `| ${stem} | ${before} | ${after} |`
-        : `| ${stem} | ${after} |`
-    })
-
-    return [
-      opener,
-      `<summary>${entry.state === '' ? 'evidence' : entry.state} (${entry.items.length})</summary>`,
-      '',
-      hasBase ? '| Case | Base | Head |' : '| Case | Head |',
-      hasBase ? '| --- | --- | --- |' : '| --- | --- |',
-      ...rows,
-      '',
-      '</details>',
-    ].join('\n')
-  })
+  const sections = states.flatMap((entry) =>
+    renderState(entry, repo, base, head, opener),
+  )
 
   return [
     ...opening,
-    `${BASE_PREFIX} \`${base.slice(0, SHORT_SHA_LENGTH)}\` · **Head:** \`${head.slice(0, SHORT_SHA_LENGTH)}\``,
+    `${BASE_PREFIX} ${commitLink(repo, base)} · **Head:** ${commitLink(repo, head)}`,
     '',
     ...sections,
     '',
@@ -297,14 +458,21 @@ export function renderEvidenceBody(
 }
 
 /**
- * How many case rows a rendered body carries, read off the row shapes
- * `renderEvidenceBody` writes. A row always ends in a head image, which a
- * checklist line or a preview address never does. The pattern also reads the
- * `![](url)` three-column shape an earlier render posted, so a comment posted
- * before the change still counts its cases and the `would-empty` guard holds.
+ * How many cases a rendered body carries. Every case has exactly one head
+ * image, so a row counts the head images it holds, which is one in the flat
+ * table and up to two in a view's row. A row from before the alt text named
+ * its head image counts as one case when it matches the old row shape, so a
+ * comment posted before the change still counts its cases and the
+ * `would-empty` guard holds.
  */
 export function countEvidenceCases(body: string): number {
-  return body.match(EVIDENCE_ROW_PATTERN)?.length ?? 0
+  let total = 0
+  for (const line of body.split('\n')) {
+    if (!line.startsWith('| ')) continue
+    const heads = line.match(HEAD_IMAGE_PATTERN)?.length ?? 0
+    total += heads > 0 ? heads : LEGACY_ROW_PATTERN.test(line) ? 1 : 0
+  }
+  return total
 }
 
 export interface EvidenceComment {
