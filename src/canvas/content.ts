@@ -578,6 +578,45 @@ export function restoreBox(
   })
 }
 
+export type PruneOutcome =
+  | { readonly ok: true; readonly dropped: readonly string[] }
+  | ContentRefused
+
+/**
+ * Lists the layout entries whose frame file is gone, and removes them under
+ * the layout lock unless `write` is false. `readPage` never reports them, so
+ * this is the one place an entry outliving its frame is seen.
+ */
+export function pruneLayout(
+  root: string,
+  page: string,
+  write: boolean,
+): PruneOutcome {
+  if (!isValidName(page)) {
+    return refuse('invalid-name', `${page} is not a valid page name`)
+  }
+  const dir = pagePath(root, page)
+  if (!isDirectory(dir)) return refuse('no-page', `page ${page} does not exist`)
+
+  const prune = (): PruneOutcome => {
+    const { boxes, malformed } = readLayout(dir)
+    if (malformed) {
+      return refuse('malformed-layout', `${page}/${LAYOUT_FILE} does not parse`)
+    }
+    const present = new Set(frameNames(dir))
+    const dropped = [...boxes.keys()].filter((name) => !present.has(name))
+    if (write && dropped.length > 0) {
+      writeLayout(
+        dir,
+        new Map([...boxes].filter(([name]) => present.has(name))),
+      )
+    }
+    return { ok: true, dropped }
+  }
+
+  return write ? withFileLock(join(dir, LAYOUT_FILE), prune) : prune()
+}
+
 export interface Selection {
   readonly page: string
   readonly frame: string

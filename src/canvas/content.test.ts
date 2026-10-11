@@ -19,6 +19,7 @@ import {
   FRAME_GAP,
   listPages,
   moveFrame,
+  pruneLayout,
   readPage,
   readSelection,
   renamePage,
@@ -590,6 +591,41 @@ describe('restoreBox', () => {
 
     expect(outcome).toMatchObject({ ok: false, reason: 'changed' })
     expect(readPage(ROOT, 'drafts')?.frames[0]).toMatchObject({ x: 90, y: 90 })
+  })
+})
+
+describe('pruneLayout', () => {
+  const GONE =
+    '{"frames":{"a":{"x":0,"y":0,"width":10,"height":10},"gone":{"x":5,"y":5,"width":10,"height":10}}}'
+
+  it('should list an entry with no frame file without writing it', () => {
+    seedPage('main', ['a'], GONE)
+
+    const outcome = pruneLayout(ROOT, 'main', false)
+
+    expect(outcome).toEqual({ ok: true, dropped: ['gone'] })
+    expect(readFileSync(join(pageDir('main'), 'layout.json'), 'utf8')).toBe(
+      GONE,
+    )
+  })
+
+  it('should drop an entry with no frame file and keep the rest', () => {
+    seedPage('main', ['a'], GONE)
+
+    const outcome = pruneLayout(ROOT, 'main', true)
+
+    expect(outcome).toEqual({ ok: true, dropped: ['gone'] })
+    const written = JSON.parse(
+      readFileSync(join(pageDir('main'), 'layout.json'), 'utf8'),
+    ) as { frames: Record<string, unknown> }
+    expect(Object.keys(written.frames)).toEqual(['a'])
+  })
+
+  it('should refuse a page that does not exist', () => {
+    expect(pruneLayout(ROOT, 'missing', true)).toMatchObject({
+      ok: false,
+      reason: 'no-page',
+    })
   })
 })
 
