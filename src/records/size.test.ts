@@ -104,7 +104,7 @@ describe('sizeRecords', () => {
 
   it('should read a project holding the new root alone', async () => {
     const migrated = join(ROOT, 'migrated')
-    const path = join(migrated, '.canon', 'memory', 'project-one.md')
+    const path = join(migrated, '.canon', 'tasks', 'project-one.md')
     mkdirSync(join(path, '..'), { recursive: true })
     writeFileSync(path, '12345')
 
@@ -112,7 +112,7 @@ describe('sizeRecords', () => {
 
     expect(outcome.ok).toBe(true)
     if (!outcome.ok) return
-    expect(folder(outcome, 'memory')).toMatchObject({ present: true, files: 1 })
+    expect(folder(outcome, 'tasks')).toMatchObject({ present: true, files: 1 })
   })
 
   it('should read the scratch folder at the name the new root gives it', async () => {
@@ -129,11 +129,11 @@ describe('sizeRecords', () => {
   })
 
   it('should skip a file that leaves between the listing and the read', async () => {
-    writeRecord('memory/project-one.md', '12345', 1)
-    writeRecord('memory/project-gone.md', '123', 1)
-    VANISHED.add(join(ROOT, '.claude', 'memory', 'project-gone.md'))
+    writeRecord('tasks/project-one.md', '12345', 1)
+    writeRecord('tasks/project-gone.md', '123', 1)
+    VANISHED.add(join(ROOT, '.claude', 'tasks', 'project-gone.md'))
 
-    const entry = folder(await read(), 'memory')
+    const entry = folder(await read(), 'tasks')
 
     expect(entry.files).toBe(1)
     expect(entry.bytes).toBe(5)
@@ -151,13 +151,13 @@ describe('sizeRecords', () => {
   it('should report an absent folder as absent rather than as empty', async () => {
     const report = await read()
 
-    expect(folder(report, 'memory').present).toBe(false)
-    expect(folder(report, 'memory').files).toBe(0)
+    expect(folder(report, 'tasks').present).toBe(false)
+    expect(folder(report, 'tasks').files).toBe(0)
   })
 
   it('should not list an absent folder at all at a .canon root', async () => {
     const canonRoot = join(ROOT, 'canon-root')
-    const path = join(canonRoot, '.canon', 'memory', 'project-one.md')
+    const path = join(canonRoot, '.canon', 'tasks', 'project-one.md')
     mkdirSync(join(path, '..'), { recursive: true })
     writeFileSync(path, '12345')
 
@@ -166,7 +166,7 @@ describe('sizeRecords', () => {
     expect(outcome.ok).toBe(true)
     if (!outcome.ok) return
     expect(outcome.folders.map((entry) => entry.folder)).toEqual([
-      'memory',
+      'tasks',
       SCRATCH,
     ])
     expect(outcome.folders.some((entry) => entry.folder === 'groundwork')).toBe(
@@ -175,13 +175,13 @@ describe('sizeRecords', () => {
   })
 
   it('should count the files a folder holds and the bytes they occupy', async () => {
-    writeRecord('memory/project-one.md', '12345', 1)
-    writeRecord('memory/project-two.md', '123', 1)
+    writeRecord('tasks/project-one.md', '12345', 1)
+    writeRecord('tasks/project-two.md', '123', 1)
 
     const report = await read()
 
-    expect(folder(report, 'memory').files).toBe(2)
-    expect(folder(report, 'memory').bytes).toBe(8)
+    expect(folder(report, 'tasks').files).toBe(2)
+    expect(folder(report, 'tasks').bytes).toBe(8)
   })
 
   it('should count a file nested below the folder root', async () => {
@@ -191,7 +191,7 @@ describe('sizeRecords', () => {
   })
 
   it('should total the files and bytes across every folder', async () => {
-    writeRecord('memory/project-one.md', '12345', 1)
+    writeRecord('tasks/project-one.md', '12345', 1)
     writeRecord('review/review-one.md', '123', 1)
 
     const report = await read()
@@ -201,29 +201,29 @@ describe('sizeRecords', () => {
   })
 
   it('should count a file inside a growth window and leave out one past it', async () => {
-    writeRecord('memory/project-recent.md', 'body', 2)
-    writeRecord('memory/project-older.md', 'body', 20)
-    writeRecord('memory/project-ancient.md', 'body', 200)
+    writeRecord('tasks/project-recent.md', 'body', 2)
+    writeRecord('tasks/project-older.md', 'body', 20)
+    writeRecord('tasks/project-ancient.md', 'body', 200)
 
-    const entry = folder(await read(), 'memory')
+    const entry = folder(await read(), 'tasks')
 
     expect(touchedWithin(entry, 7)).toBe(1)
     expect(touchedWithin(entry, 30)).toBe(2)
   })
 
   it('should report a window for each published window length', async () => {
-    writeRecord('memory/project-one.md', 'body', 1)
+    writeRecord('tasks/project-one.md', 'body', 1)
 
     expect(
-      folder(await read(), 'memory').touched.map((window) => window.days),
+      folder(await read(), 'tasks').touched.map((window) => window.days),
     ).toEqual([...GROWTH_WINDOWS])
   })
 
   it('should date the least and most recently written file in the folder', async () => {
-    writeRecord('memory/project-recent.md', 'body', 1)
-    writeRecord('memory/project-older.md', 'body', 40)
+    writeRecord('tasks/project-recent.md', 'body', 1)
+    writeRecord('tasks/project-older.md', 'body', 40)
 
-    const entry = folder(await read(), 'memory')
+    const entry = folder(await read(), 'tasks')
 
     expect(entry.oldest).toBe('2026-07-11')
     expect(entry.newest).toBe('2026-08-19')
@@ -238,26 +238,26 @@ describe('sizeRecords', () => {
 
   it('should date a late-evening file by the local day its writer saw', async () => {
     writeRecordAt(
-      'memory/project-late.md',
+      'tasks/project-late.md',
       'body',
       new Date(2026, 7, 18, 23, 30),
     )
 
-    expect(folder(await read(), 'memory').newest).toBe('2026-08-18')
+    expect(folder(await read(), 'tasks').newest).toBe('2026-08-18')
   })
 
   it('should date an early-morning file by the local day its writer saw', async () => {
     writeRecordAt(
-      'memory/project-early.md',
+      'tasks/project-early.md',
       'body',
       new Date(2026, 7, 18, 0, 30),
     )
 
-    expect(folder(await read(), 'memory').newest).toBe('2026-08-18')
+    expect(folder(await read(), 'tasks').newest).toBe('2026-08-18')
   })
 
   it('should leave an absent folder undated', async () => {
-    const entry = folder(await read(), 'memory')
+    const entry = folder(await read(), 'tasks')
 
     expect(entry.oldest).toBeUndefined()
     expect(entry.newest).toBeUndefined()
