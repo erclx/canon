@@ -1,21 +1,21 @@
-# What a correct `/context-fold` run leaves behind on the board-sweep arm.
+# What a correct `/task-complete` run leaves behind on the mark arm.
 # Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
 # needs no backslash escaping.
 
-# The arm asserts that outcome state alone moves no plan. `context-fold` marks
-# outcomes and nothing else, and a plan is settled by the merge through
-# `canon tasks archive`, so a run here leaves all three plans exactly where it
-# found them however many tasks it closes.
+# The arm asserts that outcome state alone moves no plan. `task-complete` marks
+# outcomes from the ship chain and never archives there, and a plan is settled
+# by the merge through `canon tasks archive`, so a run here leaves all three
+# plans exactly where it found them however many tasks it closes.
 #
 # It reads board-wide for the same reason it always did. The rate-limit task
 # closed in an earlier session and nothing in the prompt mentions it, so a run
 # that reached past its own diff to sweep is what this arm has to see and refuse.
 
 # The arm runs under the default cap. A clean run on 2026-07-31 cost 28 turns,
-# just under `drift`'s 29, so the ceiling matches the default 30 the way `drift`
-# already does. That reading predates the plans sweep coming out, and the cap
-# stays where it is: the work this arm dropped was two moves against a board it
-# reads and reasons about once, which is where the turns actually go.
+# when the arm still ran the whole context fold, so the ceiling sits at the
+# default 30. That reading predates the plans sweep and the fold's own steps
+# coming out, and the cap stays where it is until a run under this skill alone
+# measures lower: the turns go to reading and reasoning about the board once.
 #
 # Correcting from that 28 lands on the cap anyway. A ceiling has to sit above the
 # observation to catch a blowup rather than fire on ordinary variance, and the

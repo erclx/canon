@@ -23,5 +23,5 @@ reply = ["Autoshipped (draft)"]
 
 manual = [
   "The pull request itself opened, and opened as a draft. Unwired: the sandbox tree and the reply text are what expect.toml can read, and confirming the PR object needs a gh call this declaration has no channel for.",
-  "docs-sync and context-fold left the tree exactly where a run with no public docs and no owning task would leave it. Semantic: both skills sync against what a session finds, and a project this small may give either nothing to change, so an assertion pinned to a specific edit would fail a correct run that found none to make.",
+  "docs-sync, context-fold, and task-complete left the tree exactly where a run with no public docs and no owning task would leave it. Semantic: all three skills sync against what a session finds, and a project this small may give any of them nothing to change, so an assertion pinned to a specific edit would fail a correct run that found none to make.",
 ]
