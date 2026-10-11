@@ -91,10 +91,7 @@ export function register(program: Command): void {
     .argument('<kind>', `Record folder: ${RECORD_KINDS.join(', ')}`)
     .helpOption('-h, --help', 'Show this help message')
     .option('--json', 'Add a machine-readable record on stdout')
-    .option(
-      '--root <path>',
-      'Project root, defaulting to the main worktree',
-    )
+    .option('--root <path>', 'Project root, defaulting to the main worktree')
     .addHelpText(
       'after',
       [

@@ -17,12 +17,7 @@ import {
   WORKSPACE_NAME,
 } from '@/teach/workspace'
 
-export const RECORD_KINDS = [
-  'plans',
-  'groundwork',
-  'intake',
-  'teach',
-] as const
+export const RECORD_KINDS = ['plans', 'groundwork', 'intake', 'teach'] as const
 
 export type RecordKind = (typeof RECORD_KINDS)[number]
 
