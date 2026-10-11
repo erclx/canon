@@ -41,8 +41,9 @@ The record groups every evidence path by state, the remainder of its
 directory under the `evidence/` segment, and within a state by filename stem,
 so a `before/hero.png` and an `after/hero.png` naming the same case group as
 one entry, not two files. Each entry carries whether it existed at the base
-commit, so the comment shows a base image or marks it new. All-new states drop
-the Base column and each `<img>` takes its PNG width, at most 1000.
+commit, so the comment shows a base image or marks it new. Each `<img>` takes
+its PNG width, at most 1000. `canon docs pr-evidence-layout` covers how the body
+groups those entries by view.
 
 `reason` on the record is what a caller branches on, not the exit code:
 
@@ -152,7 +153,7 @@ whichever previews apply, joined by a middle dot:
 
 **Preview:** <url> · **Local preview:** <url>
 
-**Base:** `<base>` · **Head:** `<head>`
+**Base:** [`<base>`](<base-commit-url>) · **Head:** [`<head>`](<head-commit-url>)
 ```
 
 The Base and Head line follows only when the comment carries screenshots.
@@ -258,12 +259,10 @@ the caller, and lifts only on `settled`, so a refusal holds it the same as
 
 ## When the comment opens
 
-The comment opens every state while it carries six images or fewer, counting one
-per row for the head plus one per row that is not new, and closes every state
-past that, so the whole comment is open or closed together. A line under
-`## Evidence` names the compared base and head as short shas, which tells a
-reader whether the images match the latest push. The base is the merge base the
-compare endpoint returns, not trunk's tip.
+The comment opens every block while it carries six images or fewer and closes
+every block past that. A line under `## Evidence` names the compared base and
+head as linked short shas, which tells a reader whether the images match the
+latest push. `canon docs pr-evidence-layout` covers the count and the blocks.
 
 ## What the comment still leaves to GitHub
 
