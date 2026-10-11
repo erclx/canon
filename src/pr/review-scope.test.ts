@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { type ReviewRow, resolveReviewScope } from '@/pr/review-scope'
+import {
+  coversHead,
+  type ReviewRow,
+  resolveReviewScope,
+  resolveUiScope,
+} from '@/pr/review-scope'
 
 const READ = 'a0cf1a39aa1d0d510e16360e98a18129a8fddc78'
 const STAMPED = '5653721cbb1d0d510e16360e98a18129a8fddc78'
@@ -213,5 +218,92 @@ ${marker(READ)}
       submittedAt: SUBMITTED_AT,
       source: 'fallback',
     })
+  })
+})
+
+const UI_HEAD = '9b1f2c3d4e5f60718293a4b5c6d7e8f901234567'
+
+function uiMarker(head: string): string {
+  return `<!-- review-ui: head=${head} -->`
+}
+
+const UI_OPEN = '## UI review\n\nBox 2 failed.'
+const UI_CLOSED = '## UI review closed\n\nEvery box passed.'
+
+describe('resolveUiScope', () => {
+  it('should report none when the thread carries no UI verdict', () => {
+    const scope = resolveUiScope({ reviews: [review(CLOSED)] })
+
+    expect(scope).toEqual({ state: 'none', source: 'none' })
+  })
+
+  it('should read the head off the marker on the last line', () => {
+    const scope = resolveUiScope({
+      reviews: [review(`${UI_CLOSED}\n${uiMarker(UI_HEAD)}`)],
+    })
+
+    expect(scope).toEqual({
+      heading: '## UI review closed',
+      state: 'closed',
+      commit: UI_HEAD,
+      source: 'marker',
+    })
+  })
+
+  it('should take the newest UI verdict over an older one', () => {
+    const scope = resolveUiScope({
+      reviews: [
+        review(`${UI_OPEN}\n${uiMarker(READ)}`),
+        review(`${UI_CLOSED}\n${uiMarker(UI_HEAD)}`),
+      ],
+    })
+
+    expect(scope.state).toBe('closed')
+    expect(scope.commit).toBe(UI_HEAD)
+  })
+
+  it('should read a code review heading as no UI verdict', () => {
+    const scope = resolveUiScope({
+      reviews: [review(`${OPEN}\n${marker(READ)}`)],
+    })
+
+    expect(scope.state).toBe('none')
+  })
+
+  it('should fall back to the stamp when a verdict carries no marker', () => {
+    const scope = resolveUiScope({ reviews: [review(UI_CLOSED, STAMPED)] })
+
+    expect(scope).toEqual({
+      heading: '## UI review closed',
+      state: 'closed',
+      commit: STAMPED,
+      source: 'fallback',
+    })
+  })
+
+  it('should ignore a marker that is not the last line', () => {
+    const scope = resolveUiScope({
+      reviews: [review(`${UI_CLOSED}\n${uiMarker(UI_HEAD)}\ntrailing prose`)],
+    })
+
+    expect(scope.source).toBe('fallback')
+  })
+})
+
+describe('coversHead', () => {
+  it('should cover a head the commit names in full', () => {
+    expect(coversHead(UI_HEAD, UI_HEAD)).toBe(true)
+  })
+
+  it('should cover a head a short sha prefixes', () => {
+    expect(coversHead(UI_HEAD.slice(0, 7), UI_HEAD)).toBe(true)
+  })
+
+  it('should read a close behind the head as not covering it', () => {
+    expect(coversHead(READ, UI_HEAD)).toBe(false)
+  })
+
+  it('should not cover an empty head', () => {
+    expect(coversHead(UI_HEAD, '')).toBe(false)
   })
 })
