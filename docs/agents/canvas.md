@@ -1,6 +1,6 @@
 ---
 title: Canvas
-description: The canvas server, its content format, and the verbs that list, arrange, select, edit, mark, and capture frames
+description: The canvas server, its content format, and the verbs that list, arrange, fit, select, edit, mark, and capture frames
 ---
 
 # Canvas
@@ -28,6 +28,10 @@ The write routes the shell posts to also refuse a request carrying an `Origin` o
 `frame move <page> <name> --x <px> --y <px>` rewrites one frame's position in `layout.json` and keeps its size. An omitted axis stays where the frame is. It refuses a frame or page that does not exist and a layout that does not parse.
 
 `frame resize <page> <name> --width <px> --height <px>` rewrites one frame's whole box in one write, and `--x` and `--y` move it at the same time. An omitted flag keeps the frame's current value. It refuses a width or height that is not a positive number as `invalid-size`, a position that is not a number as `invalid-position`, and a missing frame, a missing page, or a layout that does not parse as `frame move` does.
+
+`canvas arrange <page>` re-lays a page's frames. It keeps the rows they already sit in, where boxes whose vertical spans overlap share a row, orders each row left to right by `x`, places the boxes on the 80px frame gap from the page's leftmost edge, and stacks the rows on their tallest box plus the gap from the page's top edge. It also drops every layout entry whose frame file is gone. `--check` writes nothing. `--json` emits `{ ok, page, written, moved, dropped }`, where `moved` lists each frame with its `from` and `to` position and `dropped` lists the entries with no file. Sizes never change. Under `--check` it exits 2 when a frame would move or an entry would drop, and it refuses a missing page as `no-page` and a layout that does not parse as `malformed-layout`.
+
+`canvas fit <page>/<frame>` and `canvas fit <page>` set each frame's height to its content. The content is measured in the capture browser at the frame's box width, through the served address, after fonts and the load event settle, and the height is that measure rounded up with no margin. The write goes through the same writer as `frame resize`. `--check` writes nothing. `--json` emits `{ ok, written, frames }`, one row per frame carrying `height`, `fitted`, `wide`, `font`, `family`, and `owed`. `wide` is true when the content is wider than the box, which fit reports and never widens, since the width is the frame's declared render width. `font` is true when the first family of the body text is not one the canvas serves into every frame, being `Geist Variable`, `Noto Sans Mono`, and the hand-drawn pair, because a height fitted against a machine family may not hold in another browser. Under `--check` it exits 2 when any row is owed, and it refuses as `no-page`, `no-frame`, `no-server`, or `capture-failed` the way `canvas capture` does. Rows below a frame that grew do not move, so run `canvas arrange` after a fit.
 
 The shell writes through the same writer when the operator drags a frame or one of its corner handles. Both take a lock file beside the layout, read it, merge their change, and replace it, so a drag released while a verb writes loses neither position. A writer that cannot get the lock within two seconds refuses with reason `busy`.
 
