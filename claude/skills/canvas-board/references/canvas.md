@@ -15,6 +15,7 @@ The folder is gitignored, so nothing in a repository checks its shape and nothin
 - [What a working canvas looks like](#what-a-working-canvas-looks-like)
 - [Pages](#pages)
 - [Frames](#frames)
+- [House style](#house-style)
 - [Layout](#layout)
 - [Tokens](#tokens)
 - [What a frame must not assume](#what-a-frame-must-not-assume)
@@ -24,9 +25,11 @@ The folder is gitignored, so nothing in a repository checks its shape and nothin
 
 Governs the canvas content under `.canon/canvas/`: page folder names, frame files, the `layout.json` shape, how tokens reach a frame, and what a frame must not assume about where it renders.
 
+Also governs the house style of an explanation frame, being a diagram, a board of notes, or a comparison. A mockup of the project's own interface is not an explanation frame, and it follows the project's design document for type, color, and layout.
+
 Does not govern:
 
-- The design decisions a frame is drafting, such as type, color, and layout taste: the project's own design document
+- The design decisions a mockup frame is drafting, such as type, color, and layout taste: the project's own design document
 - The project's design document and the token module it renders from, which a picked direction is carried into: `design.md`
 - The procedure that starts the canvas, reads the operator's selection, and carries a pick back, which belongs to the surface driving the canvas
 - Voice, rhythm, and sentence construction in any text a frame shows: the `write-human` skill
@@ -58,6 +61,18 @@ A canvas failing these is non-conforming even when it satisfies every shape rule
 - Keep a frame self-contained. Inline its own styles and scripts, or link a file inside the same page folder, since a frame is served from its page and nothing outside the canvas resolves.
 - Use the project's custom properties, `var(--<name>)`, for every value the token stylesheet defines. A literal copied from it shows the right color today and the wrong one after the next token change.
 - Edit a frame by rewriting its file. The file is the frame, and nothing else holds a copy of its markup.
+
+## House style
+
+Applies to an explanation frame only. A mockup of the project's interface renders at the app's own sizes and follows the project's design document instead.
+
+- Write text in sentence case. Use no all-caps text and no `text-transform: uppercase`.
+- Keep lines short, one fact a line.
+- Set body text at 20px or larger and headings at 44px or larger. Set nothing under 16px.
+- Render an explanation frame about 1100px wide.
+- Take colors from the project's custom properties. A frame that defines colors of its own sets the dark values on `:root` and the light ones under `[data-theme="light"]`, since the shell sets `data-theme` on each frame's root.
+- Make each box tall enough to show all its content, with no scrollbar and no clipped line.
+- Read frames left to right in reading order. Add a frame with no `--x` so the verb places it after the last with the standard gap.
 
 ## Layout
 
@@ -112,6 +127,13 @@ A new frame starts from this skeleton. The names in it are placeholders.
         padding: var(--space-lg);
         color: var(--color-text);
         background: var(--color-background);
+      }
+      /* only a color the frame defines itself: dark on :root, light here */
+      :root {
+        --frame-accent: #7aa2ff;
+      }
+      [data-theme='light'] {
+        --frame-accent: #1f4fd8;
       }
     </style>
   </head>
