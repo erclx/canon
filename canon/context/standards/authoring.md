@@ -23,7 +23,7 @@ The template outranks the prose where they disagree. An author copies the block,
 
 `design.md` is the sharpest case for the rule: the token tables carry fixed headers the renderer reads, and a standard that names the shape without spelling those headers verbatim sends an author into `src/design/parse.ts` and `src/design/render.ts` to recover them. The shape rule asks any standard for the headers and labels a tool parses, verbatim, which is the general form of what `design.md` would otherwise leave missing.
 
-A template and a seed hold different things for the same document, which is what keeps them from drifting. `standards/design.md` carries headers and placeholder rows, and `tooling/claude/seeds/canon/DESIGN.md` carries the starting roles a scaffolded project receives. Only the headers are load-bearing, since `src/design/render.ts` reads those by exact key and slugs every row name into the variable it emits, so a project is free to rename, add, or drop a role.
+A template and a seed hold different things for the same document, which is what keeps them from drifting. `claude/skills/canvas-board/references/design.md` carries headers and placeholder rows, and `tooling/claude/seeds/canon/DESIGN.md` carries the starting roles a scaffolded project receives. Only the headers are load-bearing, since `src/design/render.ts` reads those by exact key and slugs every row name into the variable it emits, so a project is free to rename, add, or drop a role.
 
 ## The meta-standard in the flat root
 

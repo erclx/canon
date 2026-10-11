@@ -157,6 +157,12 @@ describe('listStandards', () => {
     expect(names.filter((name) => name === 'session')).toEqual(['session'])
   })
 
+  it('should name a fifth-slice standard once', () => {
+    const names = listStandards(ROOT)
+
+    expect(names.filter((name) => name === 'skill')).toEqual(['skill'])
+  })
+
   it('should name a project standard the package does not carry', () => {
     writeStandard('standards/house-style.md', '# House style\n')
 

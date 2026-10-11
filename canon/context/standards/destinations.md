@@ -64,22 +64,22 @@ A standard no rule globs carries no row. `mermaid.md` reaches a session through 
 ### To an existing governance rule
 
 - `board.md` fixes `priority.md`, `backlog.md`, and the generated index beside the tasks. `governance/rules/canon/tasks.md`, which already globs the whole folder.
-- `context.md` fixes the per-domain narrative entry. `governance/rules/standards/context.md`.
-- `design.md` fixes visual intent and the token tables. `governance/rules/standards/design.md`.
+- `context.md` fixes the per-domain narrative entry. `governance/rules/canon/context.md`, hand-written since the standard moved into `context-fold`.
+- `design.md` fixes visual intent and the token tables. Its generated rule retired when it moved into `canvas-board`.
 - `groundwork.md` fixes the measurement track a topic gets before anyone plans it. Its generated rule retired when it moved into `plan-groundwork`.
 - `groundwork-spikes.md` fixes a track's `08-spikes.md`, the sample rule, and the folders holding what a spike produced. Split from `groundwork.md` when the generated rule's frontmatter pushed that standard past the 300 rendered line ceiling, a rule that has since retired.
 - `intake.md` fixes the folder a raw dump is filed into. Its generated rule retired when it moved into `plan-intake`.
 - `plan.md` fixes the plan file and the suggested-and-answer contract a worker executes. `governance/rules/canon/plan.md`.
 - `plan-lifecycle.md` fixes when a plan is written, how it is amended, and its move to the archive. `governance/rules/canon/plan.md`, through a pointer bullet. Split from `plan.md` for the same ceiling, which `plan.md` still sits one line under.
-- `readme.md` fixes the voice and structure of the page a project leads with. `governance/rules/standards/readme.md`.
+- `readme.md` fixes the voice and structure of the page a project leads with. Its generated rule retired when it moved into `docs-sync`.
 - `ready.md` fixes the finished-file handoff folder, its overview frontmatter, and the thin-plan contract that ships it.
 - `requirements.md` fixes the problem, goals, and non-goals record.
-- `rule.md` fixes a path-scoped governance rule. `governance/rules/standards/rule.md`.
+- `rule.md` fixes a path-scoped governance rule. Its generated rule retired when it moved into `create-rule`.
 - `session.md` fixes the pre-compaction handoff. `governance/rules/canon/tasks.md`, which globs the board around it and carries a carve-out sending a `session-` file to `session-map`. Its own generated rule retired when it moved.
-- `skill.md` fixes the skill folder, its frontmatter, and its invocation contract. `governance/rules/standards/skill.md`.
-- `skill-requirement.md` fixes the `REQUIREMENT.md` beside a skill, its success questions, and its template. `governance/rules/standards/skill.md`, which already globs the requirement file beside the body.
-- `skill-practice.md` fixes how a practice skill closes and the source ledger it carries. Reached through the Practice type in `skill.md`, which `governance/rules/standards/skill.md` points at, since the rule names no pointer to it directly. It was split from `skill.md` because that standard sat at 300 of the 300 rendered line ceiling, so any line `skill.md` gains needs a matching cut or a further split.
-- `skill-paths.md` fixes which root a path in a skill body resolves against and how a body cites a standard. `governance/rules/standards/skill.md`, through a pointer bullet. It is that further split, taken when the generated rule's frontmatter pushed `skill.md` past the ceiling.
+- `skill.md` fixes the skill folder, its frontmatter, and its invocation contract. `governance/rules/claude/skill.md`, hand-written since the standard moved into `create-skill`.
+- `skill-requirement.md` fixes the `REQUIREMENT.md` beside a skill, its success questions, and its template. `governance/rules/claude/skill.md`, which already globs the requirement file beside the body.
+- `skill-practice.md` fixes how a practice skill closes and the source ledger it carries. Reached through the Practice type in `skill.md`, which `governance/rules/claude/skill.md` loads `create-skill` for, since the rule names no pointer to it directly. It was split from `skill.md` because that standard sat at 300 of the 300 rendered line ceiling, so any line `skill.md` gains needs a matching cut or a further split.
+- `skill-paths.md` fixes which root a path in a skill body resolves against and how a body cites a standard. `governance/rules/claude/skill.md`, through its `create-skill` load bullet. It is that further split, taken when the generated rule's frontmatter pushed `skill.md` past the ceiling.
 - `standard.md` fixes a standard's frontmatter, scope statement, and success criterion. `governance/rules/standards/standard.md`.
 - `tasks.md` fixes the task file, its filename, its origin lines, and its archiving. `governance/rules/canon/tasks.md`.
 - `tasks-decline.md` fixes the declined folder, the `Declined:` line, and what declining does to a plan and a board row. `governance/rules/canon/tasks.md`, through a pointer bullet. Split from `tasks.md` for the same ceiling.
