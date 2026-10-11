@@ -644,10 +644,7 @@ describe('pullRecords', () => {
   it('should refuse rather than discard a local record that never reached the remote', async () => {
     await makeRecordsRepo(ROOT, ORIGIN)
     await pushRecords(ROOT)
-    writeFileSync(
-      join(ROOT, '.claude', 'tasks', 'unpushed.md'),
-      'local only\n',
-    )
+    writeFileSync(join(ROOT, '.claude', 'tasks', 'unpushed.md'), 'local only\n')
 
     const outcome = await pullRecords(ROOT)
 

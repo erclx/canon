@@ -105,5 +105,4 @@ describe('canon records stale canonical', () => {
     expect(result.stdout).toBe('')
     expect(result.stderr).toContain('canon/REQUIREMENTS.md')
   })
-
 })
