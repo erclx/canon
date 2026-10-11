@@ -1799,11 +1799,13 @@ fx="$FAKE_DIR"
 echo "$*" >> "$fx/gh.log"
 f=.; p=; for a in "$@"; do [ "$p" = --jq ] && f=$a; p=$a; done
 case "$*" in
+  *markPullRequestReadyForReview*) [ -f "$fx/mutation-fail" ] && { echo "gh: blocked by proxy (HTTP 403)" >&2; exit 1; }; echo '{"data":{"markPullRequestReadyForReview":{"pullRequest":{"isDraft":false}}}}' ;;
   *graphql*|"pr "*|"repo view"*) echo "gh: blocked by proxy (HTTP 403)" >&2; exit 1 ;;
   *"/pulls?head="*) jq -r "$f" "$fx/listing.json" ;;
+  *"/issues/7/comments"*) [ -f "$fx/comments.json" ] && jq -r "$f" "$fx/comments.json" || echo "[]" | jq -r "$f" ;;
   *"/pulls/7/reviews"*) [ -f "$fx/reviews-fail" ] && { echo "gh: (HTTP 403)" >&2; exit 1; }; jq -r "$f" "$fx/reviews.json" ;;
   *"/pulls/7/files"*) echo '[{"filename":"src/a.ts","status":"added"}]' | jq -r "$f" ;;
-  *"/check-runs"*) echo '{"total_count":0,"check_runs":[]}' ;;
+  *"/check-runs"*) [ -f "$fx/checks.json" ] && cat "$fx/checks.json" || echo '{"total_count":0,"check_runs":[]}' ;;
   *"/pulls/7") jq -r "$f" "$fx/pull.json" ;;
   *) exit 1 ;;
 esac
@@ -1966,5 +1968,115 @@ describe('canon pr reads through REST alone', () => {
     const record = await runVerb('key-changes', ['7'])
 
     expect(record).toMatchObject({ unmet: [] })
+  })
+
+  describe('lift', () => {
+    function stageClearPull(): void {
+      git('push', '-q', 'origin', 'feat/x:main')
+      git('fetch', '-q', 'origin')
+      writeFixture(
+        'pull.json',
+        pullRow({ draft: true, state: 'open', node_id: 'PR_7' }),
+      )
+      writeFixture('reviews.json', [
+        {
+          body: `## Review closed\n\nclean\n\n<!-- review-pr: commit=${tip} read-at=2026-10-12T10:00:00Z -->`,
+          commit_id: tip,
+          submitted_at: '2026-10-12T10:01:00Z',
+        },
+      ])
+      writeFixture('checks.json', {
+        total_count: 1,
+        check_runs: [
+          {
+            head_sha: tip,
+            status: 'completed',
+            conclusion: 'success',
+            name: 'check',
+            id: 1,
+          },
+        ],
+      })
+    }
+
+    async function runLift(
+      args: string[],
+    ): Promise<{ record: Record<string, unknown>; exit: number }> {
+      const result = await execa(
+        process.execPath,
+        [CLI, 'pr', 'lift', ...args, '--json', '--root', repoRoot],
+        {
+          cwd: repoRoot,
+          reject: false,
+          timeout: RUN_TIMEOUT_MS,
+          env: {
+            PATH: `${join(tempDir, 'bin')}:${process.env.PATH}`,
+            FAKE_DIR: tempDir,
+          },
+        },
+      )
+      return { record: JSON.parse(result.stdout), exit: result.exitCode ?? -1 }
+    }
+
+    function mutationCalls(): number {
+      return readFileSync(join(tempDir, 'gh.log'), 'utf8')
+        .split('\n')
+        .filter((line) => line.includes('markPullRequestReadyForReview')).length
+    }
+
+    it('should lift the mark when every gate reads clear, over REST and one mutation', async () => {
+      stageClearPull()
+
+      const { record, exit } = await runLift(['7'])
+
+      expect(record).toMatchObject({ reason: 'lifted', isLifted: true })
+      expect(exit).toBe(0)
+      expect(mutationCalls()).toBe(1)
+    })
+
+    it('should report every gate under --check and call no mutation', async () => {
+      stageClearPull()
+
+      const { record, exit } = await runLift(['7', '--check'])
+
+      expect(record).toMatchObject({ reason: 'clear', isLifted: false })
+      expect(exit).toBe(0)
+      expect(mutationCalls()).toBe(0)
+    })
+
+    it('should refuse gh-failed on a blocked mutation rather than reporting a lift', async () => {
+      stageClearPull()
+      writeFixture('mutation-fail', '')
+
+      const { record, exit } = await runLift(['7'])
+
+      expect(record).toMatchObject({ reason: 'gh-failed', isLifted: false })
+      expect(exit).toBe(1)
+    })
+
+    it('should refuse an open review and call no mutation', async () => {
+      stageClearPull()
+      writeFixture('reviews.json', [
+        {
+          body: `## Review\n\n1 finding\n\n<!-- review-pr: commit=${tip} read-at=2026-10-12T10:00:00Z -->`,
+          commit_id: tip,
+          submitted_at: '2026-10-12T10:01:00Z',
+        },
+      ])
+
+      const { record, exit } = await runLift(['7'])
+
+      expect(record).toMatchObject({ reason: 'review-open' })
+      expect(exit).toBe(1)
+      expect(mutationCalls()).toBe(0)
+    })
+
+    it('should refuse a --wait that is not a whole number', async () => {
+      stageClearPull()
+
+      const { record } = await runLift(['7', '--wait', 'soon'])
+
+      expect(record.reason).toBe('bad-wait')
+    })
   })
 })

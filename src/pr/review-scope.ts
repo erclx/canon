@@ -131,6 +131,82 @@ function markerOf(
   return { commit, readAt }
 }
 
+/** The two headings `review-ui` posts a verdict under. */
+export const UI_HEADINGS = ['## UI review', '## UI review closed'] as const
+
+export type UiHeading = (typeof UI_HEADINGS)[number]
+
+export interface UiScope {
+  readonly heading?: UiHeading
+  readonly state: ReviewState
+  /** The head the verdict covered, a full or abbreviated sha. */
+  readonly commit?: string
+  /** `marker` is the verdict's own record, `fallback` is GitHub's stamp. */
+  readonly source: ScopeSource
+}
+
+/**
+ * The marker `review-ui` writes as the last line of every verdict. It names the
+ * head the pass drove, since the submission stamp moves onto a commit pushed
+ * while the pass was driving.
+ */
+const UI_MARKER = /^<!--\s*review-ui:\s*head=([0-9a-f]{7,40})\s*-->$/
+
+function lastLine(body: string): string | undefined {
+  const lines = body.split('\n')
+
+  let index = lines.length - 1
+  while (index >= 0 && (lines[index] ?? '').trim() === '') index -= 1
+  if (index < 0) return undefined
+
+  return (lines[index] ?? '').trim()
+}
+
+/**
+ * Resolves the newest UI verdict and the head it covered.
+ *
+ * Read off `reviews` like the code review family, since `review-ui` posts each
+ * verdict as a pull request review. The first line is matched for equality so
+ * `## UI review closed` is never taken for the open heading by prefix.
+ */
+export function resolveUiScope(listing: ReviewListing): UiScope {
+  let newest: { heading: UiHeading; row: ReviewRow } | undefined
+
+  for (const row of listing.reviews ?? []) {
+    const first = ((row.body ?? '').split('\n')[0] ?? '').replace(/\r$/, '')
+    const heading = UI_HEADINGS.find((candidate) => candidate === first)
+    if (heading !== undefined) newest = { heading, row }
+  }
+
+  if (newest === undefined) return { state: 'none', source: 'none' }
+
+  const { heading, row } = newest
+  const state: ReviewState = heading === '## UI review' ? 'open' : 'closed'
+  const line = lastLine(row.body ?? '')
+  const match = line === undefined ? null : UI_MARKER.exec(line)
+  const marked = match?.[1]
+
+  if (marked !== undefined) {
+    return { heading, state, commit: marked, source: 'marker' }
+  }
+
+  const oid = row.commit?.oid
+  return {
+    heading,
+    state,
+    ...(oid === undefined || oid === '' ? {} : { commit: oid }),
+    source: 'fallback',
+  }
+}
+
+/**
+ * Whether a covered commit names the head. A marker may carry a short sha, so
+ * coverage is a prefix match on the head.
+ */
+export function coversHead(commit: string, head: string): boolean {
+  return commit !== '' && head !== '' && head.startsWith(commit)
+}
+
 /**
  * Resolves what the newest review pass covered.
  *

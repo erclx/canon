@@ -1,0 +1,12 @@
+---
+title: The pull request draft lift
+description: The decision canon pr lift reverses about who lifts a draft mark, why the gate order and the re-read sit where they do, the poll's port of the base-standing read, and why the cloud reviewer still cannot lift
+---
+
+# The pull request draft lift
+
+`canon pr lift` reverses a decision the orchestration rules had settled the other way, that only the controlling session lifts a pull request's draft mark. The reason was that a reviewer or a worker cannot tell a real request to lift from a message that only claims to come from the controller, so the sender had to be the one that acts. A verb that reads the gate itself removes the sender from the question. Review state at the head, UI state where a checklist exists, the evidence check, the standing against the base, and CI are all facts on the pull request, so the session that closes a review can run it and the claim of who asked stops mattering. The controller stays the fallback lifter, since two reviewers closing seconds apart can each read the other as open and both refuse, and the final re-read narrows that window without closing it.
+
+`src/pr/lift.ts` reads review state, UI state, evidence, and standing ahead of the CI wait, so a reviewer whose partner is still driving refuses at once, and reads the head and the reviews again before the write, since a push during the wait moves the head off the commit every gate cleared. A review pass carrying no read-time marker refuses `review-unmarked` rather than lifting, because its covered commit is the submission stamp the marker replaced. The base-standing read is ported from the orchestrator poll's `readMerges`, `readWritten`, and `readStale` into `src/pr/lift.ts`, so it has two copies on two release cadences, the drift `pr.md` already warns of for the review marker. Delegating the poll to `canon pr lift --check` is the way to one authority, and it lands with the routing change that edits the poll.
+
+The evidence gate shells this checkout's own `canon pr evidence --check --json` rather than restating the check, and the UI gate branches on that record's `checklist` field. The write is the one GraphQL call under `pr`, `markPullRequestReadyForReview`, since the REST pull request update carries no draft field, and it reads `isDraft` back from the answer. A cloud reviewer's proxy refuses GraphQL, so it cannot lift and hands the pull request to the controller.
