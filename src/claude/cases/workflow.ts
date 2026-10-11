@@ -128,6 +128,11 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     expect: 'task-board',
   },
   {
+    prompt:
+      'This branch finished the pagination work, so tick off whichever board outcomes it actually delivered.',
+    expect: 'task-complete',
+  },
+  {
     prompt: 'Open a learning workspace so I can study this topic properly.',
     expect: 'teach-workspace',
   },

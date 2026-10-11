@@ -92,7 +92,7 @@ Say the origins were read even when nothing comes back, which is the ordinary re
 
 ## Archive
 
-Read `${CLAUDE_SKILL_DIR}/references/archive.md` when the request names a shipped task to archive. It carries the check that the work reached `main`, the `canon tasks archive` call, the route for each refusal, and the prose to clear afterwards. Never move the file, edit `priority.md`, or regenerate the index by hand, since the command owns all three.
+Read `${CLAUDE_SKILL_DIR}/../task-complete/references/archive.md` when the request names a shipped task to archive. It carries the check that the work reached `main`, the `canon tasks archive` call, the route for each refusal, and the prose to clear afterwards. Never move the file, edit `priority.md`, or regenerate the index by hand, since the command owns all three.
 
 ## Decline
 

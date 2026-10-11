@@ -113,7 +113,7 @@ Skip this step silently when no teach promotion handoff exists at `.canon/tmp/ha
 
 ## Step 7: sweep consumed receipts
 
-Read `${CLAUDE_SKILL_DIR}/references/receipt-sweep.md` for which review receipts this session sweeps, which it keeps, and the output lines. Skip this step silently when nothing qualifies.
+Read `${CLAUDE_SKILL_DIR}/../task-complete/references/receipt-sweep.md` for which review receipts this session sweeps, which it keeps, and the output lines. Skip this step silently when nothing qualifies.
 
 ## Step 8: classify the fold's diff baseline
 
