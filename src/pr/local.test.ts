@@ -213,7 +213,7 @@ describe('dropAddressLine', () => {
       '',
       '**Local preview:** http://localhost:5173',
       '',
-      '**Base:** `aaaa000` · **Head:** `bbbb111`',
+      '**Base:** [`aaaa000`](https://github.com/o/r/commit/aaaa000) · **Head:** [`bbbb111`](https://github.com/o/r/commit/bbbb111)',
       '',
       MARKER,
     ].join('\n')
@@ -224,7 +224,7 @@ describe('dropAddressLine', () => {
       [
         '## Evidence',
         '',
-        '**Base:** `aaaa000` · **Head:** `bbbb111`',
+        '**Base:** [`aaaa000`](https://github.com/o/r/commit/aaaa000) · **Head:** [`bbbb111`](https://github.com/o/r/commit/bbbb111)',
         '',
         MARKER,
       ].join('\n'),
