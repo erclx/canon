@@ -100,6 +100,25 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
 }
 
 /**
+ * The skills that took a two-word name from a single word, which the map above
+ * may not carry as a bare key.
+ *
+ * `canvas` became `canvas-board`, and a bare `canvas` key would rewrite every
+ * unrelated use of the word: `canon canvas serve`, `src/canvas/`,
+ * `.canon/canvas/`, and the `internal-canvas` skill. So each row keys on a form
+ * only the skill spells, a plugin invocation or a skill folder path. The tail
+ * guard rejects a following `-`, so a rewritten `canon:canvas-board` is not
+ * matched again.
+ *
+ * What this leaves behind is a prose mention of the skill by its bare name,
+ * which has no token for a sweep to find and is fixed by hand.
+ */
+export const SKILL_CITATION_MAP: Readonly<Record<string, string>> = {
+  'canon:canvas': 'canon:canvas-board',
+  'skills/canvas': 'skills/canvas-board',
+}
+
+/**
  * The skill rename.
  *
  * It protects nothing. The `aitk` sweep had to guard a sibling repository
@@ -132,7 +151,7 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
  * listing every sweep reads never reaches them.
  */
 export const SKILL_NAME_RULES: RenameRules = defineRenameRules({
-  replacements: SKILL_NAME_MAP,
+  replacements: { ...SKILL_NAME_MAP, ...SKILL_CITATION_MAP },
   keepMarker: 'canon-keep-retired',
   wholeToken: true,
   excludedPrefixes: ['scripts/eval/result-'],
