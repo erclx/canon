@@ -3,7 +3,6 @@ import { join } from 'node:path'
 import { AUDITS } from '@/audits/catalog'
 import { listSkills } from '@/claude/skills-list'
 import { buildGovCatalog } from '@/gov/list'
-import { listStandards } from '@/standards/read'
 
 export interface Catalog {
   readonly id: string
@@ -58,11 +57,6 @@ export const CATALOGS: readonly Catalog[] = [
     id: 'rules',
     nouns: ['rule', 'rules'],
     count: (root) => buildGovCatalog(root).rules.length,
-  },
-  {
-    id: 'standards',
-    nouns: ['standard', 'standards'],
-    count: (root) => listStandards(root).length,
   },
   {
     id: 'commands',
