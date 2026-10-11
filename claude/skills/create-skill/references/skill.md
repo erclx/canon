@@ -50,7 +50,7 @@ Answer all four before editing, and carry the answers into wherever the change i
 
 ## Whether a rule belongs beside the skill
 
-A skill fires when a session invokes it or its description matches the request. A path-scoped rule fires when a session reads a file matching its glob, with no decision from the session at all. The rule is the floor and the skill is the depth.
+A skill fires when a session invokes it or its description matches the request. A path-scoped rule fires when a session reads or writes a file matching its glob, with no decision from the session at all. The rule is the floor and the skill is the depth.
 
 Run the two-part test over what the body states before calling the skill finished. Does the invariant fire when a specific path is edited, and does violating it ship silently? An invariant passing both halves belongs in a rule as well, since a session that never invoked the skill still edits that path. An invariant failing either half stays here, which is most of a body.
 

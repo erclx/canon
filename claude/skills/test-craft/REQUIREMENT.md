@@ -15,7 +15,7 @@ The failure is measured on a real target. A single-page portfolio site carried 2
 
 A stated rule is also one a session can talk itself out of. Each test in that suite sat where it did for a reason that sounded fine at the time, such as the end to end spec already being open or a pause quieting a run that flaked under load, and nothing in front of the session answered the reason.
 
-Moving the guidance into a path-scoped rule does not reach the session that needs it. A path-scoped rule loads when a session reads a matching file and not when it creates one, measured in three headless runs, so a rule scoped to test files is silent on the first test of every feature.
+Moving the guidance into a path-scoped rule does not reach the session that needs it. A path-scoped rule loads when a session reads or writes a matching file, and it is absent from the write that creates the first one, measured in three headless runs, so a rule scoped to test files is silent on the first test of every feature.
 
 ## Must
 
