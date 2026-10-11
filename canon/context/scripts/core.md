@@ -16,7 +16,6 @@ What sequences those guards is not here. `bun run check` resolves to `canon gate
   - The name says hero while the loop covers every template in the folder, since every citation across `docs/`, `canon/context/`, and `src/` spells that name. A template naming a placeholder nothing fills fails the run rather than shipping the literal braces.
   - Each catalog is read in-process through the module its verb calls, and the command count through `countCommands` in `src/counts/catalogs.ts`, so no child process runs and no catalog crosses an environment or file channel. The pure half, every row builder and refusal, sits in `src/capture/frame-values.ts` with a test beside it, since `tsc` and vitest reach `src/` only.
   - The verb layer is skipped, so the checkout-mismatch warning that `gov list`, `claude skills list`, and `tooling list` print does not reach the script. It guards a globally linked binary resolving to the main checkout, which a script run by path never does.
-  - The standards column reads `listStandardEntries` filtered to the toolkit's own `standards/` root, since the entry list spans every root a resolve reaches and a project-local standard would put a row in the hero the toolkit does not ship.
 - `check-color-source.sh`: walks `scripts/` and `sandbox/` and fails when any `.sh` other than `scripts/lib/ui.sh` spells an SGR escape, so one answer sits behind every bash writer
 
 The five boundary checks that used to sit here as scripts are measures in `src/gate/boundaries.ts`, described under the plugin boundary stage below.
