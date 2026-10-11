@@ -103,7 +103,7 @@ Each domain exposes a consistent shape where applicable: `list`, `install`, `syn
 - `sessions`, in `sessions.md`: `list`, `export`, `import`
 - `worktrees`, in `worktrees.md`: `list`, `reclaim`
 - `hooks`, in `hooks.md`: `post-merge`
-- `pr`, in `pr-reads.md`: `key-changes`, `head`, `checks`, `review-state`, `evidence`, `preview`, `local`, `frames`
+- `pr`, in `pr-reads.md`: `key-changes`, `head`, `checks`, `review-state`, `evidence`, `preview`, `local`, `frames`, `lift` (in `pr-lift.md`)
 - `audits`, in `audits.md`: `run`, `list`
 - `gate`, in `gate.md`: `run`
 - `secrets`, in `state-scoped-risk.md`: `scan`
