@@ -71,7 +71,8 @@ Applies to an explanation frame only. A mockup of the project's interface render
 - Set body text at 20px or larger and headings at 44px or larger. Set nothing under 16px.
 - Render an explanation frame about 1100px wide.
 - Take colors from the project's custom properties. A frame that defines colors of its own sets the dark values on `:root` and the light ones under `[data-theme="light"]`, since the shell sets `data-theme` on each frame's root.
-- Make each box tall enough to show all its content, with no scrollbar and no clipped line.
+- Name only the faces the canvas serves into every frame: `Geist Variable` for text, `Noto Sans Mono` for code, and `Excalifont` for a hand-drawn look. They render the same in a capture and in any browser, so a height fitted against them holds.
+- Make each box tall enough to show all its content, with no scrollbar and no clipped line. Run `canon canvas fit <page>/<frame>` rather than estimating, since it measures the content in the capture browser and sets the height.
 - Read frames left to right in reading order. Let `frame add` place each frame after the last with the standard gap, and move one only when the operator asks for a position.
 
 ## Layout
@@ -104,8 +105,8 @@ The keys below are the ones a reader parses. The frame names are placeholders.
 
 - Do not assume a viewport. A frame renders at its layout width on the canvas and in a capture alike, so size it with media queries against that width rather than against the operator's window.
 - Do not assume the theme. The canvas theme toggle is the operator's own state, and a capture shows each frame in its default theme.
-- Do not assume a network. Name only fonts the machine has, or ship the font beside the frame, since a capture refuses a frame naming a font it cannot find.
-- Do not assume a default font. Set `font-family` with an installed family first on an element the frame's text inherits from, since a capture checks the first family of the text it renders and the browser's default serif is absent from many machines.
+- Do not assume a network. Name a served face, or ship the font beside the frame, since a capture refuses a frame naming a font it cannot find.
+- Do not assume a default font. Set `font-family` with a served face first on an element the frame's text inherits from, since a capture checks the first family of the text it renders and the browser's default serif is absent from many machines. A frame naming a machine family such as `DejaVu Sans` renders at another height in another browser, which `canon canvas fit` reports.
 - Do not assume the frame is the source. A picked direction is carried into the project's design document or a plan, and the operator clears the frame once it has been carried.
 - Do not assume the canvas survives the checkout. The folder is gitignored, so a lost checkout loses every page in it.
 

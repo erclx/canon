@@ -51,6 +51,7 @@ Hand the operator the address as a markdown link carrying the URL as its text an
 - Add each frame through the verb, which writes the starting file and its box in one locked step: `canon canvas frame add <page> <frame> --width <px> --height <px> --json`. Give the width the frame should render at, since a capture and the canvas both render at it. The verb places the frame after the last one, and a position the operator asks for goes through `frame move`.
 - Lay frames out with `canon canvas frame move <page> <frame> --x <px> --y <px> --json` rather than writing `layout.json` by hand, since the operator's drags write the same file under a lock.
 - Name pages and frames for what they hold, such as `pricing` and `pricing-dense`, so the operator can say which one by name.
+- After an insert or a resize, re-lay the page with `canon canvas arrange <page> --json`. It keeps the rows the operator dragged, places each on the standard gap, and drops layout entries whose frame file is gone. `--check` reports without writing.
 
 ## Step 3: edit a frame through its file
 
@@ -58,6 +59,7 @@ Write the frame's whole document to the `path` the add verb reported. The open c
 
 - From a linked worktree, `Edit` and `Write` refuse a main-root path. Write the whole file through one plain `Bash` heredoc instead, the route `session-worktree` states for a main-root write, and never take the redirect to a worktree copy.
 - Change one property of one element with `canon canvas edit <page>/<frame> --element <index> --set <property>=<value> --json` when the set it accepts covers the change, since it leaves every other byte as it was.
+- Fit the box to the content once the write lands: `canon canvas fit <page>/<frame> --json`. Read each row's `wide` and `font`. A `wide` frame needs its box widened, which fit never does, and a `font` frame names a family the canvas does not serve, so set its text to a served face and fit again. A fit that grew a frame leaves the rows below overlapped until `canvas arrange` runs.
 - Use the project's custom properties for every value the token stylesheet defines. The record from `serve` names the token source under `tokens`, and a `none` source means frames render unstyled, so say so rather than inventing values to cover it.
 
 Mark the frame before the first write, so the operator sees which frame is being worked on before anything lands, and clear the mark once the edits to it are done:
