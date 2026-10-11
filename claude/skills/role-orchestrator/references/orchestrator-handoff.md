@@ -1,6 +1,6 @@
 ---
 title: Orchestrator handoff runbook
-description: Retirement act the wind-down owes the fleet it dispatched, the two sections an orchestrating session adds over the shared session map, where a lesson goes from a session that never commits, and the resume invocation the file carries out
+description: Retirement act the wind-down owes the fleet it dispatched, the talk sessions it exempts, the three sections an orchestrating session adds over the shared session map, where a lesson goes from a session that never commits, and the resume invocation the file carries out
 ---
 
 ## Retire what the wave delivered
@@ -15,7 +15,9 @@ Name the planner as the case always in this set, and scope the act no narrower. 
 
 ### Which sessions this session may retire unasked
 
-Retire what this session dispatched. Report a hand-launched session and leave the act to the operator, since the knowledge making the act safe is a delivery this session received and it received nothing from a session it never launched. The `worker-` and `planner-` name prefixes separate the two populations, per `orchestrator-dispatch.md`.
+Retire what this session dispatched. Report a hand-launched session and leave the act to the operator, since the knowledge making the act safe is a delivery this session received and it received nothing from a session it never launched. The `worker-` and `planner-` name prefixes separate the two populations, per `orchestrator-launch.md`.
+
+A talk session is the exception inside the dispatched population. Retire it only on the operator's word, given here or carried in the session's own close message, and never on its delivery, at wind-down or at any other point. Its plan landing or its pull request opening tells this session nothing about whether the conversation is over. Until the word arrives, report it as held open next to the hand-launched read. A talk session is found by the `sessionId` the map records, since the client can rename it and drop the `-talk` suffix `orchestrator-launch.md` gives it.
 
 A capability gap sits beside the knowledge gap, and it holds even where delivery is somehow known. A hand-launched session is as often interactive as background, and `claude rm <id>` has no id to take for an interactive one at all, so the command cannot reach it whatever this session learned about its delivery.
 
@@ -39,10 +41,11 @@ Report the retired sessions as a list, the hand-launched ones under it as a read
 
 Write the pre-compaction handoff as orchestrator. Invoke `canon:session-map` for the generic half, which is the filename, the three core sections, the write procedure, the drift step and the ref it reads, and the citation rule. Everything in this section is the extension this role adds over that core, and none of it belongs to a session holding no delegated authority.
 
-Settle both steps below before the door writes, so one write carries the core and the extension together. The door reports the map as written and knows nothing of this role, so its success line ends the generic half rather than this runbook, and a session that stops there ships a map missing both of the things this section adds to it.
+Settle all three steps below before the door writes, so one write carries the core and the extension together. The door reports the map as written and knows nothing of this role, so its success line ends the generic half rather than this runbook, and a session that stops there ships a map missing everything this section adds to it.
 
 1. Add `## Decisions taken under delegated authority` directly after `## State`, holding each decision and why it went that way, so nobody re-proposes it. It sits there rather than after the core because a decision is read against the state it was taken in.
-2. Close the file with the block below, resolving `${CLAUDE_SKILL_DIR}/references/orchestrator-resume.md` and `${CLAUDE_SKILL_DIR}/references/orchestrator-poll.md` to absolute paths as you write it and pasting each in place of `<RESUME_RUNBOOK>` and `<POLL_RUNBOOK>`:
+2. Add `## Talk sessions held open` directly after that section, with one line per open talk session giving its name, its `sessionId`, and its row, or `None.` when there are none. The next session reads it to know which sessions it must not retire on a delivery.
+3. Close the file with the block below, resolving `${CLAUDE_SKILL_DIR}/references/orchestrator-resume.md` and `${CLAUDE_SKILL_DIR}/references/orchestrator-poll.md` to absolute paths as you write it and pasting each in place of `<RESUME_RUNBOOK>` and `<POLL_RUNBOOK>`:
 
 ```markdown
 Resume by loading the orchestrator skill and asking it to resume after a compaction. This repository spells that `/canon:role-orchestrator` followed by the request. Following <RESUME_RUNBOOK> reaches the same place with no skill loaded at all.
@@ -52,7 +55,7 @@ That resume reads the board and stops. It restarts nothing, so the review poll i
 
 The delegated-authority section is the orchestrator's alone because a worker holds no delegation to have exercised, and a section a session cannot fill teaches its reader to skip the file. The closing block is the orchestrator's for the same reason from the other direction: it restarts a review poll no other role runs.
 
-The substitution belongs in step 2 because that step ends the write. A reader who treats the list as finished elsewhere ships the literal placeholders, and the variable expands while this runbook renders rather than in the turn that reads the handoff back, so a path left unresolved reaches a session holding no skill as a string matching nothing. `orchestrator-poll.md` resolves its script at the same point and for the same reason.
+The substitution belongs in step 3 because that step ends the write. A reader who treats the list as finished elsewhere ships the literal placeholders, and the variable expands while this runbook renders rather than in the turn that reads the handoff back, so a path left unresolved reaches a session holding no skill as a string matching nothing. `orchestrator-poll.md` resolves its script at the same point and for the same reason.
 
 That block sits in this runbook and again in the file this runbook writes, which is the fix rather than a copy for a later pass to collapse. A session has to already be holding this runbook to read it, and a compaction that took the skill body took the routing to it too, so the session that most needs the resume is the one that can no longer find it. The map survives that, so it carries the invocation itself. Each of the two reaches a reader the other cannot.
 

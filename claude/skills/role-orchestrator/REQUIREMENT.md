@@ -80,6 +80,8 @@ Dispatch parts from what it checked in three ways. The gate and the worker each 
 - Carry the dispatcher's `sessionId` in the launch prompt, since a worker owed two messages has no property on the roster that resolves a controller and a name goes stale inside the window it builds in
 - Report each self-dispatch and the row it fired against loudly enough to follow, since a person no longer watches the launch step happen
 - Stop dispatching once `## Run now` is empty or every row in it reads claimed, rather than waking again to fire on a board nobody is clearing
+- Launch a planner or worker the operator will talk with from the talk shape, with the `-talk` suffix and the brief sentence that tells it so, since a cold launch retires the session the moment its delivery lands while the operator still wants the conversation
+- Retire a talk session only on the operator's word and report it as held open until then, since its delivery says nothing about whether the conversation is over
 - Dispatch a pull request's review, first pass included, to `role-reviewer` on load or on executable content, a skill body included, and keep one cross-branch pass per wave here, since a warm pass holding a wave skims what a cold one reads
 
 ## Must not
@@ -105,6 +107,7 @@ Dispatch parts from what it checked in three ways. The gate and the worker each 
 - Blocker only an operator can clear: record the row as untestable this pass and name the action owed, rather than re-measuring what no session can move
 - Branch check refuses, with no session registry or no repository resolved: treat the candidate as unverified and fall back to the human-launch line, rather than reading a check that could not run as a clear one
 - Candidate holds under the conflict check: leave the row ready and name the hold, rather than dispatching onto a contract still moving
+- Talk session the client renamed after launch: find it by the `sessionId` recorded in the map, since the `-talk` suffix is display only and a rename can drop it
 - Operator states a cap for the session: honor it for that session alone, rather than treating it as a standing rule or writing the number into a file
 
 ## Out of scope

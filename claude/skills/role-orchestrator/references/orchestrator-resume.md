@@ -17,7 +17,10 @@ Read: <task files>, <groundwork folders>
 Shipped since: <commits or PRs>
 Stale in the groundwork: <lean or number the shipped work overturned>
 Next: <the one or two tasks ready to hand a worker>
+Held open: <talk sessions from the map's `## Talk sessions held open`, or none>
 ```
+
+Read `Held open:` off the newest session map's `## Talk sessions held open`, so a resumed session does not mistake a conversation for a finished delivery. `orchestrator-handoff.md` states what ends one.
 
 Treat a groundwork folder as three kinds of content with different shelf lives. Trust the reasoning and the method, which stay correct. Re-measure every count, size, and cost, because they were true when written. Check every `Leaning:` against what has shipped, because work spawned by a track routinely overturns the lean that spawned it and nothing writes back.
 
