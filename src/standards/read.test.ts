@@ -61,11 +61,11 @@ describe('resolveStandard', () => {
   })
 
   it('should fall back to the package copy when the project installed none', () => {
-    const resolved = resolveStandard(ROOT, 'branch.md')
+    const resolved = resolveStandard(ROOT, 'standard.md')
 
     expect(resolved).toEqual({
-      path: join(PROJECT_ROOT, 'standards', 'branch.md'),
-      source: join('<canon>', 'standards', 'branch.md'),
+      path: join(PROJECT_ROOT, 'standards', 'standard.md'),
+      source: join('<canon>', 'standards', 'standard.md'),
     })
   })
 
@@ -91,6 +91,12 @@ describe('resolveStandard', () => {
   it('should answer a third-slice standard from the skill that owns it', () => {
     expect(resolveStandard(ROOT, 'plan')?.source).toBe(
       join('<canon>', 'claude/skills/plan-feature/references/plan.md'),
+    )
+  })
+
+  it('should answer a fifth-slice standard from the skill that owns it', () => {
+    expect(resolveStandard(ROOT, 'skill')?.source).toBe(
+      join('<canon>', 'claude/skills/create-skill/references/skill.md'),
     )
   })
 

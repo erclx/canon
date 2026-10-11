@@ -1,13 +1,21 @@
 ---
 title: Governance rule reference
 description: Rule frontmatter, body shape, and voice for .claude/rules files
-paths:
-  - '.claude/rules/**/*.md'
-rule:
-  - 'Read it before writing or editing a rule. Do not work the shape from memory.'
 ---
 
 # Governance rule reference
+
+## Contents
+
+- [Overview](#overview)
+- [Scope](#scope)
+- [Whether a skill belongs behind the rule](#whether-a-skill-belongs-behind-the-rule)
+- [Location](#location)
+- [Reserved numbers](#reserved-numbers)
+- [Two sources numbering into one folder](#two-sources-numbering-into-one-folder)
+- [Frontmatter](#frontmatter)
+- [Body](#body)
+- [Examples](#examples)
 
 ## Overview
 

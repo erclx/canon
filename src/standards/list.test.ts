@@ -57,10 +57,10 @@ describe('listStandardEntries', () => {
 
   it('should list a package standard from a project with no standards folder', () => {
     const entry = listStandardEntries(ROOT).find(
-      (each) => each.name === 'branch',
+      (each) => each.name === 'standard',
     )
 
-    expect(entry?.source).toBe(join('<canon>', 'standards', 'branch.md'))
+    expect(entry?.source).toBe(join('<canon>', 'standards', 'standard.md'))
   })
 
   it('should list each name once and spell the toolkit root without a label when both roots are one folder', () => {
@@ -68,8 +68,8 @@ describe('listStandardEntries', () => {
     const names = entries.map((each) => each.name)
 
     expect(new Set(names).size).toBe(names.length)
-    expect(entries.find((each) => each.name === 'branch')?.source).toBe(
-      join('standards', 'branch.md'),
+    expect(entries.find((each) => each.name === 'standard')?.source).toBe(
+      join('standards', 'standard.md'),
     )
   })
 })
