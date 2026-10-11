@@ -385,18 +385,50 @@ describe('runEquivalence', () => {
   }, 240_000)
 
   it('should never find the toolkit different from itself on one real arm', async () => {
-    const record = await runEquivalence({
-      root: process.cwd(),
-      targets: ['claude:plan-feature/full'],
-      base: 'HEAD',
-      includeAnchor: false,
-      useMasks: true,
-    })
+    // The head side reads `root`, and the live checkout carries edits the base
+    // does not, so both sides build from one detached copy of the same commit.
+    const snapshot = join(root, 'head')
+    const modules = join(process.cwd(), 'node_modules')
 
-    // A machine without the tools the arm needs reads it red on both sides, which
-    // is still no difference, so the claim holds wherever the test runs.
-    expect(record.arms.map((a) => [a.arm, a.differs])).toEqual([
-      ['claude:plan-feature/full', []],
-    ])
+    try {
+      execFileSync('git', ['worktree', 'add', '--detach', snapshot, 'HEAD'], {
+        cwd: process.cwd(),
+        stdio: 'ignore',
+      })
+      if (existsSync(modules)) {
+        symlinkSync(modules, join(snapshot, 'node_modules'))
+      }
+
+      const record = await runEquivalence({
+        root: snapshot,
+        targets: ['claude:plan-feature/full'],
+        base: 'HEAD',
+        includeAnchor: false,
+        useMasks: true,
+      })
+
+      // A machine without the tools the arm needs reads it red on both sides,
+      // which is still no difference, so the claim holds wherever the test runs.
+      expect(record.arms.map((a) => [a.arm, a.differs])).toEqual([
+        ['claude:plan-feature/full', []],
+      ])
+    } finally {
+      try {
+        execFileSync('git', ['worktree', 'remove', '--force', snapshot], {
+          cwd: process.cwd(),
+          stdio: 'ignore',
+        })
+      } catch {
+        rmSync(snapshot, { recursive: true, force: true })
+      }
+      try {
+        execFileSync('git', ['worktree', 'prune'], {
+          cwd: process.cwd(),
+          stdio: 'ignore',
+        })
+      } catch {
+        // The entry is already gone, or the repository is.
+      }
+    }
   }, 240_000)
 })
