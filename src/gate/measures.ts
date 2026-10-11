@@ -113,6 +113,10 @@ const output = (text: string): Emission => ({ kind: 'output', text })
  * `--add` until a Go or PHP stack ships, which `target-setup` reaches by
  * matching a detected language against each rule's description.
  *
+ * `480-canvas` is opt-in by `--add`, since only a project drawing on the
+ * canvas wants it and a path-scoped rule on `.canon/canvas/**` is dead weight
+ * elsewhere.
+ *
  * All are recorded here rather than in a config file: the list is what a
  * reader compares a new arrival against, and a config file would absorb the
  * arrival silently.
@@ -124,6 +128,7 @@ export const GOV_EXPECTED_UNREFERENCED = [
   '320-tanstack-query',
   '335-testing-go',
   '336-testing-php',
+  '480-canvas',
 ]
 
 /**
