@@ -188,7 +188,7 @@ export function register(program: Command): void {
       'after',
       [
         '',
-        'Reads canon standards versioning for the two namespaces and sorts every',
+        'Reads the git-commit versioning reference for the two namespaces and sorts every',
         'version-shaped token this pull request carries into the one the pull',
         'request is allowed to hold. A release-please pull request, read off its',
         'own fixed head branch and title, may carry semver references. Every',

@@ -1124,7 +1124,7 @@ export function register(program: Command): void {
         'repoints every citation that names one, live or archived.',
         '',
         'A promoted folder is one a durable record cites and no source file',
-        'under claude/, scripts/, src/, governance/, or standards/ names by',
+        'under claude/, scripts/, src/, or governance/ names by',
         'path. A folder a script still writes into stays in scratch, since',
         'moving it needs a code change first.',
         '',

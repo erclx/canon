@@ -3,8 +3,8 @@
 # canon-no-seed: stages this checkout's own claude/skills and src/cli.ts, which a target does not carry. The target route is feature-cloud-target-setup's.
 
 # A Claude Code cloud session loads no plugin, so on the VM this copies the
-# plugin skills to where a project session lists them, links the standards
-# their bodies cite as ../../standards, and makes `canon` the checkout's CLI.
+# plugin skills to where a project session lists them and makes `canon` the
+# checkout's CLI.
 # Locally it exits before touching anything, since every session start here
 # runs it too.
 
@@ -37,9 +37,6 @@ for src in claude/skills/*/; do
   cp -R "$src" "$dest"
   exclude_once "/$dest/"
 done
-
-[ -e .claude/standards ] || ln -s ../standards .claude/standards
-exclude_once '/.claude/standards'
 
 # A SessionStart hook's stdout reaches the session as context, which is the
 # only place a failed install surfaces before a skill calls a verb that is not

@@ -6,7 +6,7 @@
  * durable record naming a folder under it as its evidence is a citation into
  * something the backup never covers. The nine promoted here are every folder
  * under scratch that a live or archived record cites and no source file under
- * `claude/`, `scripts/`, `src/`, `governance/`, or `standards/` names by path,
+ * `claude/`, `scripts/`, `src/`, or `governance/` names by path,
  * which is what separates them from a folder a script still writes into on its
  * own schedule.
  *
@@ -42,7 +42,7 @@ import { recordDir, SCRATCH } from '@/roots/record'
  * Derived by the two-clause test `canon migrate scratch-evidence` exists to
  * apply mechanically: a durable record under a `BACKED_FOLDERS` entry, live
  * or archived, names the folder as its evidence, and no file under `claude/`,
- * `scripts/`, `src/`, `governance/`, or `standards/` names that path. Measured
+ * `scripts/`, `src/`, or `governance/` names that path. Measured
  * 2026-09-06 against nine folders holding thirteen files.
  *
  * `verify-astro` and `verify-vite-react` pass the same test and are excluded

@@ -28,9 +28,8 @@ function toolingSourceDir(root: string): string {
 }
 
 /**
- * The roots a stack reference resolves against, mirroring `standardRoots` in
- * `src/standards/read.ts`. No stack reference installs into a project any
- * more, so the package corpus is the only root that answers there. The
+ * The roots a stack reference resolves against. No stack reference installs
+ * into a project any more, so the package corpus is the only root that answers there. The
  * authoring root stays ahead of it for the toolkit's own repository, which
  * authors the corpus this reads, and for a project authoring stacks of its
  * own under the same layout.
