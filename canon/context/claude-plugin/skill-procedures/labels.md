@@ -31,7 +31,11 @@ Labelling runs after the pull request resolves rather than as a field on the cre
 
 The step stays in `git-pr` alone, which makes the label set a description of the branch at the moment the pull request opened. `review-address` delegates its push to `git-followup`, which stages, commits, pushes, and refreshes the body without invoking `git-pr`, so no follow-up push reaches the labelling step whatever the branch touched.
 
-A branch that pushes again after opening can merge under-labelled if the new commits cross into a domain the open-time diff never touched. Moving the step into `git-followup` is the alternative and it loses on the price rather than on the rate, since one behavior in two skills on two cadences buys back a rare miss. A check comparing the label set against the diff after the fact is the other answer and it loses too, since nothing can do that without re-deriving the map on every push, which is the same step in a third place.
+The step is one verb, `canon labels apply <number>`, which `git-pr`'s final command calls and which any other path to an open pull request runs by hand. The seeded `pr-create-log.sh` hook names it after a `gh pr create`, since that path skipped `git-pr` and nothing else labels the result. Issue #2266 came from two workers in one target doing exactly that.
+
+A branch that pushes again after opening can merge under-labelled if the new commits cross into a domain the open-time diff never touched. Moving the step into `git-followup` is the alternative and it loses on the price rather than on the rate, since one behavior in two skills on two cadences buys back a rare miss. A check comparing the label set against the diff after the fact first lost because it would re-derive the map in a third place. The verb is one place every caller shares, so it replaced that rejection rather than reopening it: `--check` is the after-the-fact reading, and it reads the same earned set the add does. The follow-up-push miss stays a gotcha, since no caller runs the verb on a push.
+
+The verb only adds, and refuses before any write, `--check` included, a pull request whose head is not the current branch or whose state is not open. A project declaring no map exits 0 with nothing added. Whether `review-pr` should raise owed labels, and whether CI should run the verb on `pull_request` opened, were both declined for now: the hook and the verb close the reported gap, and CI would fix this repository alone while the issue came from a target.
 
 ## What the map fails to cover
 

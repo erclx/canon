@@ -109,7 +109,7 @@ Read `${CLAUDE_SKILL_DIR}/references/labels.md` on reaching this step, starting 
 
 ### Final command
 
-Read `${CLAUDE_SKILL_DIR}/references/final-command.md` on reaching this step for the one command that pushes, finds or creates the pull request over REST, re-scans its live body for a session link, applies the labels, and prints `number=`, `url=`, and `head=`, and for the check binding every write to this branch's pull request.
+Read `${CLAUDE_SKILL_DIR}/references/final-command.md` on reaching this step for the one command that pushes, finds or creates the pull request over REST, re-scans its live body for a session link, applies the labels through `canon labels apply`, and prints `number=`, `url=`, `head=`, `owed=`, `missingOnRemote=`, and `uncovered=`, and for the check binding every write to this branch's pull request.
 
 ### Post the rendered-surface evidence
 
@@ -125,13 +125,13 @@ Respond with one line, using the `url` the final command printed:
 
 `✅ PR: <url>`
 
-Add a line for each `uncovered` path the labels step reported, naming the path and the map it belongs in:
+Add a line for each path in the `uncovered=` value the final command printed, naming the path and the map it belongs in:
 
 `⚠️ No label covers <path>. Add a row to canon/config/pr-labels.toml or a [declined] entry.`
 
-Add a further line only when the labelling command printed its warning, quoting the label `gh` refused:
+Add a further line only when `owed=` or `missingOnRemote=` printed a value, naming each label that is still owed and saying which are absent from the remote:
 
-`⚠️ Labels not applied: <what gh reported>`
+`⚠️ Labels not applied: <owed labels>. Not on the remote: <missingOnRemote labels>.`
 
 Add a line when a checklist was posted, naming the pull request it landed on and which comment carries it:
 

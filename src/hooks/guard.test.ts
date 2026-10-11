@@ -698,6 +698,80 @@ describe('pr-create-log.sh REST create', () => {
   }
 })
 
+// A pull request opened with `gh pr create` skipped git-pr, so nothing has
+// labelled it and the hook names the verb that does. The line stays off the
+// REST path, which already ran the verb, and off a canon that predates it.
+describe('pr-create-log.sh label line', () => {
+  const byHand = (nonce: string): string =>
+    payloadFor({
+      session_id: nonce,
+      tool_input: { command: 'gh pr create --title x --body y' },
+      tool_response: { stdout: 'https://github.com/example/repo/pull/12\n' },
+    })
+
+  for (const tree of TREES) {
+    const treeHook = join(tree.dir, 'pr-create-log.sh')
+
+    it.concurrent(
+      `should name the apply verb on ${tree.label} after gh pr create`,
+      async ({ expect }) => {
+        const stubs = mkdtempSync(join(tmpdir(), 'hooks-guard-canon-'))
+        writeFileSync(join(stubs, 'canon'), '#!/bin/sh\nexit 0\n')
+        chmodSync(join(stubs, 'canon'), 0o755)
+
+        const result = await run(
+          treeHook,
+          byHand(`${tree.label}-label-by-hand`),
+          [stubs, hookPath].join(delimiter),
+        )
+
+        expect(result.stdout).toContain(
+          'Run canon labels apply 12 to label it.',
+        )
+        rmSync(stubs, { recursive: true, force: true })
+      },
+    )
+
+    it.concurrent(
+      `should stay off the apply verb on ${tree.label} after git-pr's own open`,
+      async ({ expect }) => {
+        const stubs = mkdtempSync(join(tmpdir(), 'hooks-guard-canon-'))
+        writeFileSync(join(stubs, 'canon'), '#!/bin/sh\nexit 0\n')
+        chmodSync(join(stubs, 'canon'), 0o755)
+
+        const result = await run(
+          treeHook,
+          payloadFor({
+            session_id: `${tree.label}-label-rest`,
+            tool_input: {
+              command: "gh api -X POST 'repos/{owner}/{repo}/pulls' -f title=x",
+            },
+            tool_response: {
+              stdout:
+                'number=7\nurl=https://github.com/example/repo/pull/7\nhead=feat/x\nopened=true\n',
+            },
+          }),
+          [stubs, hookPath].join(delimiter),
+        )
+
+        expect(result.stdout).toContain('just opened')
+        expect(result.stdout).not.toContain('canon labels apply')
+        rmSync(stubs, { recursive: true, force: true })
+      },
+    )
+
+    it.concurrent(
+      `should stay off the apply verb on ${tree.label} when the installed canon lacks it`,
+      async ({ expect }) => {
+        const result = await run(treeHook, byHand(`${tree.label}-label-absent`))
+
+        expect(result.stdout).toContain('just opened')
+        expect(result.stdout).not.toContain('canon labels apply')
+      },
+    )
+  }
+})
+
 // A bare basename match reads as covering both when two written paths share
 // one, since a single mention of the shared name would otherwise clear the
 // pair. The acting case above never exercises this, since its fixture writes
