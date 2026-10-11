@@ -163,7 +163,7 @@ function archiveLines(
   }
   return (
     `\n📋 Task not archived for #${number}: ${text(fields, 'message') ?? reason}\n` +
-    'Run /task-board to resolve it by hand.\n\n'
+    `Run /task-complete archive #${number} to resolve it by hand.\n\n`
   )
 }
 

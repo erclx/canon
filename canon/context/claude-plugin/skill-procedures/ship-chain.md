@@ -13,6 +13,10 @@ Sweeping every task on the board rather than the session's own can archive a pla
 
 `archiveTask` decides whether a plan is still cited by scanning `Plan:` lines alone, so a table row in `.canon/tasks/priority.md` carrying a plan its task file never states leaves the count at zero and the row pointing at a moved file. `canon tasks validate` reports that pair as `plan-uncited` rather than the archive reading the row, which keeps the count on one surface and puts the disagreement in front of a person.
 
+### Marking rides the chain and archiving rides the merge
+
+`task-complete` runs as `git-ship` step 2 and marks outcomes only. Archiving at ship time was the alternative, and it lost: the pull request has not merged there, `canon tasks archive` cannot tell an open pull request from a merged one on outcomes alone, and the board is gitignored, so a task archived for work later abandoned has nothing to restore it from. The `post-merge` hook archives the task and moves its plans once the merge lands, and `task-complete`'s archive mode is the manual fallback for a task the hook could not resolve.
+
 ### A cross-cutting entry never refreshes from the diff
 
 An entry describing a cross-cutting rule never refreshes from the diff. `context-fold` picks entries whose prose references files the diff touched, so an entry referencing no path at all is skipped by construction. Sort entries into the kind a diff refreshes and the kind the enforcing change is what invalidates, and edit the second by hand.
@@ -23,7 +27,7 @@ An entry describing a cross-cutting rule never refreshes from the diff. `context
 
 ### A format change strands the predicates routing on it
 
-When a format a skill parses changes shape, every predicate routing on the old shape has to move with it. The task `Plan:` line is the worked case: it carries a markdown link, so `context-fold` and `task-board` both read the target out of the parentheses, and a routing bullet still naming the bare-path form matches nothing for a link-form task, which falls to the final warn-and-skip and archives nothing.
+When a format a skill parses changes shape, every predicate routing on the old shape has to move with it. The task `Plan:` line is the worked case: it carries a markdown link, so `task-complete` and `canon tasks archive` both read the target out of the parentheses, and a routing bullet still naming the bare-path form matches nothing for a link-form task, which falls to the final warn-and-skip and archives nothing.
 
 ### A ported condition keeps the test its source could afford
 
@@ -31,13 +35,13 @@ Lifting a conditional from another skill copies the clause rather than what it t
 
 ### A deterministic check backstops the session judgment writing the doc
 
-`context-fold` Step 3 and Step 5 rewrite canonical docs on session judgment, which can leave an appended figure or a re-measurement sitting beside the statement it restates rather than replacing it. Step 8 closes that gap by running `canon context classify diff` over the fold's whole diff baseline, after Step 3 and Step 5 have already run, and answering every non-`KEEP` finding rather than only the files those two steps wrote this run, since an earlier commit on the branch can carry a doc edit the fold is equally responsible for.
+`context-fold` Step 3 rewrites context entries on session judgment, which can leave an appended figure or a re-measurement sitting beside the statement it restates rather than replacing it. Step 4 closes that gap. It runs `canon context audit` and reports the findings on files the fold wrote or the diff carries, filtering the verb's whole-project record by file since the verb takes a root rather than a file list. Then it runs `canon context classify diff` over the fold's whole diff baseline and answers every non-`KEEP` finding rather than only the files Step 3 wrote this run, since an earlier commit on the branch can carry a doc edit the fold is equally responsible for.
 
 The verb's own extraction scopes to canonical doc types and reports nothing when the range carries none, and it reuses the Diff baseline section's own base rather than resolving a second one.
 
 A `REPLACE` or `HISTORY` finding is applied in place with a one-line reason to keep instead when it should not be. A `MOVE` finding is reported rather than cut, since the verdict means correct content on the wrong surface, such as a rule written into a context entry that belongs in a path-scoped rule, and only the model layer returns it.
 
-The verb's regex layer always runs regardless of whether a project configures a model, so every fold gets a deterministic check rather than one gated on a backend being reachable. A refusal or a missing `context classify` subcommand on an older installed binary reports one line and the fold continues either way, since the classify step is a check on what the fold wrote and not a precondition for shipping it.
+The verb's regex layer always runs regardless of whether a project configures a model, so every fold gets a deterministic check rather than one gated on a backend being reachable. A refusal or a missing `context audit` or `context classify` subcommand on an older installed binary reports one line and the fold continues either way, since the classify step is a check on what the fold wrote and not a precondition for shipping it.
 
 ## Pull request writes
 
@@ -73,4 +77,4 @@ When a sequence of grouped commits runs unattended and one is rejected by a hook
 
 ### A branch built in slices reaches the stage step with nothing staged
 
-`build-in-slices` commits each slice as it lands, so a branch whose sync steps write nothing arrives at `git-ship` step 5 with an empty index. `git-stage` stops on an empty index by design, so the step runs it only when a staged path exists and otherwise continues to the branch rename. The guard sits in `git-ship` rather than in `git-stage`, since a direct `git-stage` call on an empty index is still a mistake worth stopping on.
+`build-in-slices` commits each slice as it lands, so a branch whose sync steps write nothing arrives at `git-ship` step 6 with an empty index. `git-stage` stops on an empty index by design, so the step runs it only when a staged path exists and otherwise continues to the branch rename. The guard sits in `git-ship` rather than in `git-stage`, since a direct `git-stage` call on an empty index is still a mistake worth stopping on.

@@ -1,4 +1,4 @@
-# What a correct `/task-board` run leaves behind on the archive arm.
+# What a correct `/task-complete` run leaves behind on the archive arm.
 # Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
 # needs no backslash escaping.
 

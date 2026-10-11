@@ -8,9 +8,9 @@ description: Fixture tree layout, the helpers that stage it, the record root a t
 A scenario's file content lives under `sandbox/fixtures/<category>/<scenario>/<arm>/<stage>/`, and `stage_fixtures` from `scripts/lib/sandbox-fixtures.sh` copies one stage into the sandbox. The scenario keeps its own git operations between the calls, so the script holds logic and the tree holds content.
 
 ```bash
-stage_fixtures claude task-board archive 01-initial
+stage_fixtures claude task-complete archive 01-initial
 git add . && git commit -m "feat(api): serve the task list" --no-verify -q
-stage_fixtures claude task-board archive 02-rate-limit
+stage_fixtures claude task-complete archive 02-rate-limit
 ```
 
 ## Decisions

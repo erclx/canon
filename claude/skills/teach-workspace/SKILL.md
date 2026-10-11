@@ -1,8 +1,8 @@
 ---
 name: teach-workspace
-description: Opens and runs a learning workspace on one subject, holding a mission, resources, numbered lessons, reference pages, a glossary, and learning records that survive across sessions, and proposes where a durable page from one belongs once it outgrows the workspace. Use when asked to "teach me X", "open a learning workspace", "I want to learn X", "quiz me on this", "continue the lesson", "resume my workspace on X", or "promote this reference page". Do NOT use to write project documentation, which belongs to the surface owning that document, and do NOT use to answer one question, which is an ordinary reply.
+description: Opens and runs a learning workspace on one subject, holding a mission, resources, numbered lessons, reference pages, a glossary, and learning records that survive across sessions, proposes where a durable page from one belongs once it outgrows the workspace, and lands the confirmed pages from a branch. Use when asked to "teach me X", "open a learning workspace", "I want to learn X", "quiz me on this", "continue the lesson", "resume my workspace on X", "promote this reference page", or "fold the promoted pages in". Do NOT use to write project documentation, which belongs to the surface owning that document, and do NOT use to answer one question, which is an ordinary reply.
 disable-model-invocation: true
-argument-hint: <subject to learn, or the topic of a workspace to resume or promote>
+argument-hint: <subject to learn, the topic of a workspace to resume or promote, or fold>
 metadata:
   family: answer
 ---
@@ -17,7 +17,7 @@ The shape of the workspace is fixed by `${CLAUDE_SKILL_DIR}/references/teach.md`
 
 - If the invocation names no subject and no existing workspace matches, stop: `❌ No subject. Invoke with the subject to learn, or the topic of a workspace to resume.`
 - Never trust recall for what the subject says. Research first, cite what was read, and say what was not.
-- Write nothing outside the workspace folder, apart from the one handoff file Step 6 names. A durable page stays in `reference/` and is copied out by the skill that owns the destination, never by this one.
+- Write nothing outside the workspace folder, apart from the one handoff file Step 6 names and the destinations the fold mode lands from that file. A durable page stays in `reference/` until the operator confirms a destination, and only the fold mode copies it out, from a branch.
 - Do not open a second workspace on a subject one already covers. Resume that one.
 - Never promote a lesson. It is generated markup carrying a quiz and a learner, and no request makes it promotable.
 - Never write a favicon link by hand. `canon teach nav` puts the toolkit's icon on every page it generates and inside a lesson's `style` region, so a hand-written one in a lesson's `<head>` gives the page two.
@@ -41,7 +41,7 @@ Every path under the main root is a main-root write, routed the way `session-wor
 
 ## Step 1: open or resume
 
-A topic the listing already carries is a resume, and anything else is a new workspace. An invocation asking to promote is neither: read the named workspace through the listing and go to Step 6, which teaches nothing and writes no lesson.
+A topic the listing already carries is a resume, and anything else is a new workspace. An invocation asking to promote is neither: read the named workspace through the listing and go to Step 6, which teaches nothing and writes no lesson. An invocation asking to fold confirmed promotions in is neither as well: go to `## Fold mode`.
 
 On a resume, run `canon teach list <topic> --json` for the files behind each count, then read the highest-numbered learning record and `GLOSSARY.md`. Those carry where the learner stopped and what they got wrong. The listing record carries `success`, the mission's success lines, which are the exit criteria this workspace is finished against. Report them with what is already met before teaching anything.
 
@@ -140,6 +140,10 @@ Then restate the mission's success lines with what is now met, reading them from
 Run this when the invocation asks for it, or offer it in one line when a mission finishes, since that is when the workspace stops growing and its reference pages stop changing. Never run it unasked mid-course.
 
 Read `${CLAUDE_SKILL_DIR}/references/promotion.md` first. It carries what may be promoted, the routing test, both spellings of the wiki folder, the refusal when a project has none, what each destination expects a page to carry, and under `## Proposing and handing off` the proposal block, the handoff file this step writes in place of any destination, and how the operator is told to fold it. Propose and wait, and write nothing to a destination here.
+
+## Fold mode
+
+Run this only when the invocation asks to fold, and only from a branch in a linked worktree, since every destination is a tracked file that commits with the branch while the handoff sits in gitignored scratch at the main root. Read `${CLAUDE_SKILL_DIR}/references/promotion-fold.md` for how each block lands, the overwrite refusal, the handoff delete, and the output lines, which replace the Output block below.
 
 ## Output
 

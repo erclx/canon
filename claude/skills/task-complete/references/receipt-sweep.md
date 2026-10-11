@@ -1,17 +1,17 @@
 ---
 title: Sweep consumed receipts
-description: How context-fold Step 7 sweeps branch review reports whose branch is gone, and what it keeps and reports
+description: How task-complete's marking step sweeps branch review reports whose branch is gone, and what it keeps and reports
 ---
 
 # Sweep consumed receipts
 
-Step 7 of `context-fold`, reached in order on every run.
+Step 4 of `task-complete`'s Mark mode, reached in order on every marking run.
 
-Sweep the review receipts this session consumed. Resolve all paths at the main worktree root, not the current worktree, the way `session-worktree` does.
+Sweep the review receipts a shipped branch left behind. Resolve all paths at the main worktree root, not the current worktree, the way `session-worktree` does.
 
 Every delete below is a plain `rm`, one per call, routed the way `session-worktree` states.
 
-Plans are not swept here. A plan is settled by the merge rather than by an outcome this run marked, and `canon tasks archive` moves it with the task the `post-merge` hook archives. Sweeping it from this step read a closure Step 3 had written moments earlier and moved a plan the branch was still building from.
+Plans are not swept here. A plan is settled by the merge rather than by an outcome this run marked, and `canon tasks archive` moves it with the task the `post-merge` hook archives. Sweeping it from this step would read a closure Step 3 wrote moments earlier and move a plan the branch is still building from.
 
 ## Reviews
 

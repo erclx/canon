@@ -1,6 +1,6 @@
 ---
 title: Skill lifecycle
-description: How a skill is invoked, the split between the two task-board writers, where a session fact is routed, the plan archive that rides on the task archive, and the sandbox arm that covers it
+description: How a skill is invoked, the split between the three task-board writers, where a session fact is routed, the plan archive that rides on the task archive, and the sandbox arm that covers it
 ---
 
 # Skill lifecycle
@@ -31,7 +31,9 @@ The architecture views are one reference inside `draft-figure` rather than a ski
 
 ## The task board split
 
-Two skills write to the task board and the split is by operation rather than by file. `task-board` brings a task file into existence and moves a shipped one to `.canon/tasks/archive/`. `context-fold` edits the contents of a file that already exists, marking outcomes `[x]` from the diff and sweeping the plans those tasks cite. Neither crosses into the other, because two skills relocating the same file drift into relocating it differently.
+Three writers touch the task board and the split is by operation rather than by file. `task-board` brings a task file into existence and declines one. `task-complete` edits the contents of a file that already exists, marking outcomes `[x]` from the diff, and archives a shipped one by hand. The `post-merge` hook archives the task a merge closed through the same `canon tasks archive` call. None crosses into another, because two skills relocating the same file drift into relocating it differently.
+
+Marking left `context-fold` for a skill of its own. The fold ran ten steps on every ship, so a session asking for the context entries got the board, the receipts, and the design record with them, and could not tell which step it had asked for. The chain now calls one more skill. Archiving at ship time was the rejected alternative for the new skill's chain step, since the pull request has not merged there and a task archived early is lost if it is abandoned, so the chain marks and the hook archives.
 
 Creation is the only moment the task-origin invariant is enforceable, so that is where `task-board` enforces it. A task names a plan, a groundwork folder, an intake folder, or an issue, and the skill refuses to write one that names none. The reverse direction is a report rather than a prompt, since a groundwork track can be opened long after its task would have been written, and an offer to create a task for each open track would be noise on most runs.
 
@@ -45,7 +47,7 @@ The two halves close in one act, so neither can run before the other and no call
 
 A fact a session learns reaches the context entry that owns it through `context-fold`, which reads the diff, rather than through a capture step of its own. The toolkit once ran `memory-capture` on every ship, routing each fact to an entry or to a gitignored memory folder, and retired it. Nothing loaded that folder into a later session, the entries it held are archived unread, and Claude Code already keeps a memory of its own. The cost the operator accepted is that a lesson no context entry owns has no home outside a task's Findings or the platform memory.
 
-A producer that hands a fact to the fold does so through a file of its own. `teach-workspace` writes each confirmed promotion to `.canon/tmp/handoff/teach-promotion/<slug>.md`, which `context-fold` folds and deletes. The fold reaching the public docs corpus is the cost, since `docs-sync` owns that tree, and the carve-out is landing a page whose destination an operator already confirmed. Splitting the fold across two skills by destination was declined, since it puts one handoff file under two readers. Measured at `f0f8bd62` on 2026-08-19.
+A producer that hands a page on does so through a file of its own. `teach-workspace` writes each confirmed promotion to `.canon/tmp/handoff/teach-promotion/<slug>.md`, and its own fold mode lands each page from a branch and deletes the file. The handoff's consumer sits with its producer, since the file is that skill's output. Leaving the landing in `context-fold` was the alternative, and it lost when the fold was cut to the context entries alone, which would otherwise have stranded every confirmed promotion in scratch.
 
 `role-orchestrator` sends a lesson about how to work to the owning task's Findings from its handoff runbook, because the session commits nothing and a domain fact belongs to the task that owns the surface.
 
@@ -67,9 +69,9 @@ The count compares the resolved target rather than the raw string, because a boa
 
 A step's scope belongs in the sentence carrying the instruction rather than in a correction stated below it, since a scope stated as a correction loses to the instruction above it. A step opening with one scope and asserting a wider one several lines later reads as the narrower scope regardless of what the correction says.
 
-## The board-sweep sandbox arm
+## The mark sandbox arm
 
-The sandbox arm for this is `board-sweep`, kept separate from `drift`. Both assert that a run marking outcomes moves no plan, `drift` for the task its prompt names and `board-sweep` for one the prompt never mentions, so a failure stays unambiguous between the two readings a session could take.
+The sandbox arm for this is `task-complete`'s `mark`, kept separate from the fold's `drift`. `mark` asserts that a run marking outcomes moves no plan, for a task the prompt never mentions, and `drift` asserts the fold leaves both plans and the board alone.
 
 The arm carries a third task whose outcomes stay open and whose plan must survive the run. It is what separates a run that moved nothing from one that moved everything, since a fixture where every plan stays live reads the same under both until a task the run had no reason to touch is standing beside them. Its assertions cover each plan's location and each task's untouched `Plan:` line, since a run that retargeted a pointer without moving the file would leave the task aimed at an archive path holding nothing.
 

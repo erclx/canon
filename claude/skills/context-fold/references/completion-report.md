@@ -1,6 +1,6 @@
 ---
 title: Completion report
-description: The lines context-fold prints once every step has run, being one per file updated, the direction-change note, Step 8's own lines, and the closing line with when it is suppressed
+description: The lines context-fold prints once every step has run, being one per file updated, the direction-change note, Step 4's audit and classify lines, and the closing line with when it is suppressed
 ---
 
 # Completion report
@@ -13,10 +13,10 @@ Output one line per file updated:
 
 When Step 2 noted a requirements change: `↪ Direction changed this session: run document-health on canon/REQUIREMENTS.md`
 
-Step 8 adds its own lines when it applied or reported a finding, in the exact shape `${CLAUDE_SKILL_DIR}/references/classify.md` gives them under its own Report section. Do not shorten or paraphrase those lines here or in the reply, since the quote and the reason are what a reader checks the finding against.
+Step 4 adds one `⚠ Audit:` line per audit finding it reported, in the shape the body gives. Its classify half adds its own lines when it applied or reported a finding, in the exact shape `${CLAUDE_SKILL_DIR}/references/classify.md` gives them under its own Report section. Do not shorten or paraphrase those lines here or in the reply, since the quote and the reason are what a reader checks the finding against.
 
-If no files were updated and nothing was swept, output:
+If no files were updated and Step 4 reported nothing, output:
 
 `✅ No changes needed.`
 
-Suppress that line when Step 2 already reported no doc updates. It closes the run on its own, and emitting both leaves a quiet session reporting success twice for one outcome.
+Suppress that line when Step 2 already reported no context updates. It closes the run on its own, and emitting both leaves a quiet session reporting success twice for one outcome.

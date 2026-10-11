@@ -54,7 +54,7 @@ One file per task is what keeps the board safe under parallel sessions. Two sess
 
 Siblings sit in the folder without being tasks, and each earns its place by being governed somewhere. `index.md`, `priority.md`, and `backlog.md` are governed by `board.md`. Every `session-` file is a pre-compaction handoff governed by `session.md`, and each is optional: a project whose sessions never approach a compaction carries none. Anything filtering the folder to tasks skips all of them, so a name outside the set is a task whatever it holds.
 
-The `task-board` skill creates and archives task files, and the archive carries the task's plan with it. `context-fold` marks outcomes `[x]` in an existing file. Neither does the other's job.
+The `task-board` skill creates and declines task files. The `task-complete` skill marks outcomes `[x]` in an existing file and archives a shipped one, and the archive carries the task's plan with it. Neither does the other's job.
 
 ## Filenames
 

@@ -2,15 +2,15 @@
 # Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
 # needs no backslash escaping.
 
-# One uncommitted edit stages the shape Step 9's classify call exists to
-# catch, after Step 3 and Step 6 have already run:
+# One uncommitted edit stages the shape Step 4's classify call exists to
+# catch, after Step 3 has already run:
 #
 # `canon/context/retrieval.md` appends a branch-narrated re-measurement below
-# the count it restates, instead of rewriting the count in place. Step 6's own
+# the count it restates, instead of rewriting the count in place. Step 3's own
 # session judgment reliably folds this on its own, measured across two clean
-# runs, since the diff sits inside the entry Step 6 already maps to and reads.
+# runs, since the diff sits inside the entry Step 3 already maps to and reads.
 # This arm is therefore an end-to-end content check on the final doc, not
-# evidence Step 9 ran, since Step 6 alone is sufficient to produce it. The
+# evidence Step 4 ran, since Step 3 alone is sufficient to produce it. The
 # classify step is covered by `src/context/classify` unit tests.
 
 write_scope = ["canon/**"]

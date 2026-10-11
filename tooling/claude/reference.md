@@ -21,7 +21,7 @@ canon/
 
 .canon/
 ├── tasks/             ← seeded. One file per task plus a generated index.md, local scratch only. `archive/` holds the tasks that shipped.
-├── plans/             ← execution detail for multi-step tasks. `feature-*.md` entries swept by context-fold into `archive/`.
+├── plans/             ← execution detail for multi-step tasks. `feature-*.md` entries moved into `archive/` by `canon tasks archive` when the `post-merge` hook archives their task.
 ├── review/            ← one subfolder per producer. `branch/` no longer written, `design/` for canon design render.
 └── tmp/               ← ephemeral scratch space, safe to delete without loss
 ```

@@ -31,7 +31,7 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      'Fold what we decided this session into the context entries and mark off what shipped on the task board.',
+      'Fold what we decided this session into the context entries before this branch goes out.',
     expect: 'context-fold',
   },
   {
@@ -126,6 +126,11 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   {
     prompt: 'Open a new entry on the task board for this piece of work.',
     expect: 'task-board',
+  },
+  {
+    prompt:
+      'This branch finished the pagination work, so tick off whichever board outcomes it actually delivered.',
+    expect: 'task-complete',
   },
   {
     prompt: 'Open a learning workspace so I can study this topic properly.',

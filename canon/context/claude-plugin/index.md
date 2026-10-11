@@ -16,7 +16,7 @@ Plugin skills shipped to target projects, the canon claude CLI, and overlap with
 - [Skill archiving on merge](skill-archiving.md): The post-merge hook that closes a shipped task, how a pull request number reaches the board, and where the archive gates live
 - [Skill diff baseline](skill-baseline.md): The merge-base block three skills share, and the read against write asymmetry when it fails to resolve
 - [Skill body size](skill-body-size.md): The line checkpoint that replaced a word cap nothing reached, the move rule deciding what leaves a body, and the dereference test each move has to pass
-- [Skill lifecycle](skill-lifecycle.md): How a skill is invoked, the split between the two task-board writers, where a session fact is routed, the plan archive that rides on the task archive, and the sandbox arm that covers it
+- [Skill lifecycle](skill-lifecycle.md): How a skill is invoked, the split between the three task-board writers, where a session fact is routed, the plan archive that rides on the task archive, and the sandbox arm that covers it
 - [Shared skill procedures](skill-procedures/index.md): Procedures that run inside more than one plugin skill, the label map, worktree entry, and the hazards a ship chain meets. Start with overview.
 - [Skill requirements](skill-requirements.md): The REQUIREMENT.md sibling, what loads it, and the admission test universal coverage retired
 - [Skill review paths](skill-review/index.md): How a pull request review posts and re-posts, the headings a poll routes on, the lenses that read the body, and the worker's half of the channel. Start with overview.

@@ -461,6 +461,7 @@ export const field = {
     'git-pr',
     'git-followup',
     'context-fold',
+    'task-complete',
   ],
 }
 

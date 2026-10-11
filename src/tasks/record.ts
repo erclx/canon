@@ -420,7 +420,7 @@ async function openTask(
  * resolve the board root in-process.
  *
  * `branches` names the recording branch and every name it carried before a
- * rename, since `git-ship` renames a branch after `context-fold` has already
+ * rename, since `git-ship` renames a branch after `task-complete` has already
  * written the marker under the old name. Each comes off the `Pending branch:`
  * line even when the number was already listed, so a rerun repairs a stale
  * marker.
@@ -504,7 +504,7 @@ export async function recordPlan(
 }
 
 /**
- * Marks the named outcomes `[x]` in place. `context-fold` runs this against a
+ * Marks the named outcomes `[x]` in place. `task-complete` runs this against a
  * board it can read and cannot edit from a linked worktree, and the positions
  * come from the read it already made.
  *
