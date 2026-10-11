@@ -14,6 +14,7 @@ import { homedir, tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
+  addDetachedWorktree,
   buildManifest,
   classifyArm,
   diffManifests,
@@ -388,17 +389,9 @@ describe('runEquivalence', () => {
     // The head side reads `root`, and the live checkout carries edits the base
     // does not, so both sides build from one detached copy of the same commit.
     const snapshot = join(root, 'head')
-    const modules = join(process.cwd(), 'node_modules')
+    const removeSnapshot = addDetachedWorktree(process.cwd(), snapshot, 'HEAD')
 
     try {
-      execFileSync('git', ['worktree', 'add', '--detach', snapshot, 'HEAD'], {
-        cwd: process.cwd(),
-        stdio: 'ignore',
-      })
-      if (existsSync(modules)) {
-        symlinkSync(modules, join(snapshot, 'node_modules'))
-      }
-
       const record = await runEquivalence({
         root: snapshot,
         targets: ['claude:plan-feature/full'],
@@ -413,22 +406,7 @@ describe('runEquivalence', () => {
         ['claude:plan-feature/full', []],
       ])
     } finally {
-      try {
-        execFileSync('git', ['worktree', 'remove', '--force', snapshot], {
-          cwd: process.cwd(),
-          stdio: 'ignore',
-        })
-      } catch {
-        rmSync(snapshot, { recursive: true, force: true })
-      }
-      try {
-        execFileSync('git', ['worktree', 'prune'], {
-          cwd: process.cwd(),
-          stdio: 'ignore',
-        })
-      } catch {
-        // The entry is already gone, or the repository is.
-      }
+      removeSnapshot()
     }
   }, 240_000)
 })
