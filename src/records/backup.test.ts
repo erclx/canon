@@ -183,7 +183,6 @@ describe('BACKED_FOLDERS', () => {
       'diagrams',
       'groundwork',
       'intake',
-      'memory',
       'plans',
       'proposals',
       'review',
@@ -409,7 +408,7 @@ describe('pushRecords', () => {
   // and named as first seen, while the two excluded folder names are not.
   it('should carry a new .canon folder as first seen, excluding tmp and ordinal-locks', async () => {
     const canonRoot = await makeCanonProject({
-      'memory/entry.md': '# memory\n',
+      'tasks/entry.md': '# tasks\n',
       'tmp/scratch.md': 'scratch\n',
     })
     mkdirSync(join(canonRoot, '.canon', 'ordinal-locks', '01'), {
@@ -420,10 +419,10 @@ describe('pushRecords', () => {
 
     expect(outcome.ok).toBe(true)
     if (!outcome.ok) return
-    expect(outcome.firstSeen).toEqual(['memory'])
+    expect(outcome.firstSeen).toEqual(['tasks'])
 
     const tracked = await trackedOnOrigin(canonRoot)
-    expect(tracked).toContain('memory/entry.md')
+    expect(tracked).toContain('tasks/entry.md')
     expect(tracked).not.toContain('tmp/')
     expect(tracked).not.toContain('ordinal-locks/')
   })
@@ -434,10 +433,10 @@ describe('pushRecords', () => {
   // then stays out.
   it('should drop an excluded name the records index still tracks, once', async () => {
     const canonRoot = await makeCanonProject({
-      'memory/entry.md': '# memory\n',
+      'tasks/entry.md': '# tasks\n',
       'tmp/old/notes.md': 'old scratch\n',
     })
-    await canonRecordsGit(canonRoot, ['add', '-f', '--', 'memory', 'tmp'])
+    await canonRecordsGit(canonRoot, ['add', '-f', '--', 'tasks', 'tmp'])
     await canonRecordsGit(canonRoot, [
       '-c',
       'user.name=t',
@@ -467,16 +466,16 @@ describe('pushRecords', () => {
 
   it('should name a new file under a tracked folder as added, not first seen', async () => {
     const canonRoot = await makeCanonProject({
-      'memory/entry.md': '# memory\n',
+      'tasks/entry.md': '# tasks\n',
     })
     await pushRecords(canonRoot)
-    writeCanonRecord(canonRoot, 'memory/second.md', '# second\n')
+    writeCanonRecord(canonRoot, 'tasks/second.md', '# second\n')
 
     const outcome = await pushRecords(canonRoot)
 
     expect(outcome.ok).toBe(true)
     if (!outcome.ok) return
-    expect(outcome.added).toEqual(['memory/second.md'])
+    expect(outcome.added).toEqual(['tasks/second.md'])
     expect(outcome.firstSeen).toEqual([])
   })
 
@@ -487,7 +486,7 @@ describe('pushRecords', () => {
     const big = join(ROOT, '.claude', 'groundwork', 'backup.tar')
     writeFileSync(big, '')
     truncateSync(big, MAX_RECORD_BYTES + 1)
-    writeFileSync(join(ROOT, '.claude', 'memory', 'fine.md'), '# fine\n')
+    writeFileSync(join(ROOT, '.claude', 'tasks', 'fine.md'), '# fine\n')
 
     const outcome = await pushRecords(ROOT)
 
@@ -551,7 +550,7 @@ describe('pushRecords', () => {
     await makeRecordsRepo(ROOT, ORIGIN)
     await pushRecords(ROOT)
     const priorHead = await recordsGit(ROOT, ['rev-parse', 'HEAD'])
-    writeFileSync(join(ROOT, '.claude', 'memory', 'later.md'), '# later\n')
+    writeFileSync(join(ROOT, '.claude', 'tasks', 'later.md'), '# later\n')
     await recordsGit(ROOT, [
       'remote',
       'set-url',
@@ -570,7 +569,7 @@ describe('pushRecords', () => {
     expect(retried.ok).toBe(true)
     if (!retried.ok) return
     expect(retried.changed).toBe(1)
-    expect(await trackedOnOrigin(ROOT)).toContain('memory/later.md')
+    expect(await trackedOnOrigin(ROOT)).toContain('tasks/later.md')
   })
 
   it('should commit nothing on a second push that changed no record', async () => {
@@ -591,7 +590,7 @@ describe('pushRecords', () => {
   it('should carry a record deleted since the last push', async () => {
     await makeRecordsRepo(ROOT, ORIGIN)
     await pushRecords(ROOT)
-    rmSync(join(ROOT, '.claude', 'memory', 'entry.md'))
+    rmSync(join(ROOT, '.claude', 'tasks', 'entry.md'))
 
     const outcome = await pushRecords(ROOT)
 
@@ -600,7 +599,7 @@ describe('pushRecords', () => {
     expect(outcome.changed).toBe(1)
 
     const tracked = await trackedOnOrigin(ROOT)
-    expect(tracked).not.toContain('memory/entry.md')
+    expect(tracked).not.toContain('tasks/entry.md')
   })
 
   // Every worker runs from inside the work tree, so the folder set staged there
@@ -645,10 +644,7 @@ describe('pullRecords', () => {
   it('should refuse rather than discard a local record that never reached the remote', async () => {
     await makeRecordsRepo(ROOT, ORIGIN)
     await pushRecords(ROOT)
-    writeFileSync(
-      join(ROOT, '.claude', 'memory', 'unpushed.md'),
-      'local only\n',
-    )
+    writeFileSync(join(ROOT, '.claude', 'tasks', 'unpushed.md'), 'local only\n')
 
     const outcome = await pullRecords(ROOT)
 
@@ -656,7 +652,7 @@ describe('pullRecords', () => {
     if (outcome.ok) return
     expect(outcome.reason).toBe('local-changes')
     expect(
-      readFileSync(join(ROOT, '.claude', 'memory', 'unpushed.md'), 'utf8'),
+      readFileSync(join(ROOT, '.claude', 'tasks', 'unpushed.md'), 'utf8'),
     ).toBe('local only\n')
   })
 
@@ -708,7 +704,7 @@ describe('pullRecords', () => {
   it('should refuse when a record was deleted locally without being pushed', async () => {
     await makeRecordsRepo(ROOT, ORIGIN)
     await pushRecords(ROOT)
-    rmSync(join(ROOT, '.claude', 'memory', 'entry.md'))
+    rmSync(join(ROOT, '.claude', 'tasks', 'entry.md'))
 
     const outcome = await pullRecords(ROOT)
 
@@ -725,7 +721,7 @@ describe('pullRecords', () => {
   it('should still refuse an unpushed record when run from inside the work tree', async () => {
     await makeRecordsRepo(ROOT, ORIGIN)
     await pushRecords(ROOT)
-    const unpushed = join(ROOT, '.claude', 'memory', 'unpushed.md')
+    const unpushed = join(ROOT, '.claude', 'tasks', 'unpushed.md')
     writeFileSync(unpushed, 'local only\n')
 
     const outcome = await fromInsideWorkTree(ROOT, () => pullRecords(ROOT))
@@ -771,8 +767,8 @@ describe('pullRecords', () => {
     if (!outcome.ok) return
     expect(outcome.files).toBe(BACKED_FOLDERS.length)
     expect(
-      readFileSync(join(fresh, '.claude', 'memory', 'entry.md'), 'utf8'),
-    ).toBe('# memory\n')
+      readFileSync(join(fresh, '.claude', 'tasks', 'entry.md'), 'utf8'),
+    ).toBe('# tasks\n')
 
     rmSync(fresh, { recursive: true, force: true })
   })
@@ -798,7 +794,21 @@ describe('a tree whose records sit under both roots', () => {
 
   it('should refuse a push rather than stage the stranded folder as deleted', async () => {
     await makeRecordsRepo(ROOT, ORIGIN)
-    halfMigrate(ROOT, 'memory')
+    halfMigrate(ROOT, 'tasks')
+
+    const outcome = await pushRecords(ROOT)
+
+    expect(outcome.ok).toBe(false)
+    if (outcome.ok) return
+    expect(outcome.reason).toBe('split-roots')
+    expect(outcome.message).toContain(join('.claude', 'tasks'))
+  })
+
+  it('should refuse a push over a stranded memory folder the index may still track', async () => {
+    await makeRecordsRepo(ROOT, ORIGIN)
+    halfMigrate(ROOT, '')
+    mkdirSync(join(ROOT, '.claude', 'memory'), { recursive: true })
+    writeFileSync(join(ROOT, '.claude', 'memory', 'entry.md'), '# memory\n')
 
     const outcome = await pushRecords(ROOT)
 

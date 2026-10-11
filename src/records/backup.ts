@@ -30,7 +30,7 @@ import { type BlockedPath, guardPayload } from '@/records/push-guard'
  * rather than named here. That is what keeps this list at one line per surface
  * as archives spread, which a sibling-per-archive layout could not.
  *
- * `RECORD_KINDS` in `validate.ts` overlaps this on five names and carries one
+ * `RECORD_KINDS` in `validate.ts` overlaps this on four names and carries one
  * more that no backup reaches. The two lists differ on purpose: one is what a
  * standard governs, this is what a disk loss would take, and `standards` is
  * tracked so a backup would carry a second copy of committed files.
@@ -39,7 +39,6 @@ export const BACKED_FOLDERS = [
   'diagrams',
   'groundwork',
   'intake',
-  'memory',
   'plans',
   'proposals',
   'review',
@@ -50,6 +49,15 @@ export const BACKED_FOLDERS = [
   'upstream',
   'walkthroughs',
 ] as const
+
+/**
+ * Folders a retired kind left at a legacy `.claude` root that the allowlist
+ * must still read, so a half-finished move that strands one still trips
+ * `split-roots`. Absent from `BACKED_FOLDERS` because nothing writes them, and
+ * absent from `RETIRED_FOLDERS` because that list stages a deletion and this
+ * folder is an archive to keep.
+ */
+const LEGACY_RECORD_FOLDERS = ['memory'] as const
 
 /**
  * Names that have left `BACKED_FOLDERS` and whose removal still has to reach a
@@ -124,7 +132,9 @@ function isExcluded(name: string): boolean {
  */
 function foldersAt(dir: string): string[] {
   if (basename(dir) === '.claude') {
-    return BACKED_FOLDERS.filter((folder) => existsSync(join(dir, folder)))
+    return [...BACKED_FOLDERS, ...LEGACY_RECORD_FOLDERS].filter((folder) =>
+      existsSync(join(dir, folder)),
+    )
   }
 
   const entries = existsSync(dir)
@@ -378,7 +388,7 @@ async function enclosingRemotes(
  * Clears the four gates both verbs share and returns the records remote URL.
  *
  * The last two are the ones the payload depends on. This repository is public,
- * so a records branch on any of its remotes serves the memory pen and the
+ * so a records branch on any of its remotes serves the plans and the
  * groundwork trails to anyone who fetches all refs. Comparing the configured
  * URL against every remote of the enclosing repository is what keeps a
  * misconfigured `origin` from publishing them, and refusing when that list
@@ -416,7 +426,7 @@ async function resolveRemote(
   if (!enclosing) {
     return refuse(
       'remote-unreadable',
-      `Cannot read the remotes of the project at ${root}, so the records origin cannot be checked against them. Records carry the memory pen and the groundwork trails, and an unchecked origin risks publishing them.`,
+      `Cannot read the remotes of the project at ${root}, so the records origin cannot be checked against them. Records carry the plans and the groundwork trails, and an unchecked origin risks publishing them.`,
     )
   }
 
@@ -424,7 +434,7 @@ async function resolveRemote(
   if (enclosing.identities.includes(url)) {
     return refuse(
       'remote-shared',
-      `The records origin ${remote.text} is a remote of this project. Records carry the memory pen and the groundwork trails, so they need a repository of their own.`,
+      `The records origin ${remote.text} is a remote of this project. Records carry the plans and the groundwork trails, so they need a repository of their own.`,
     )
   }
 

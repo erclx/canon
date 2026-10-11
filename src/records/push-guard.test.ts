@@ -38,7 +38,7 @@ afterEach(() => {
 
 describe('guardPayload', () => {
   it('should pass a plain text record', async () => {
-    const path = writeRecord('memory/entry.md', '# memory\n')
+    const path = writeRecord('tasks/entry.md', '# tasks\n')
 
     expect(await guardPayload(TREE, [path])).toEqual([])
   })

@@ -113,6 +113,29 @@ describe('staleCanonical on a tagged history', () => {
     })
   })
 
+  it('should read a quoted stamp the same as a bare one', async () => {
+    writeDoc('canon/REQUIREMENTS.md', "'2026-03-01'")
+    release('v1.0.0', '2026-02-01')
+
+    const doc = await readDoc('canon/REQUIREMENTS.md')
+
+    expect(doc).toMatchObject({ reviewed: '2026-03-01', releasesSince: 0 })
+  })
+
+  it('should read the stamp from a doc with CRLF line endings', async () => {
+    const full = join(ROOT, 'canon', 'REQUIREMENTS.md')
+    mkdirSync(dirname(full), { recursive: true })
+    writeFileSync(
+      full,
+      ['---', 'reviewed: 2026-03-01', '---', '', '# Doc', ''].join('\r\n'),
+    )
+    release('v1.0.0', '2026-02-01')
+
+    const doc = await readDoc('canon/REQUIREMENTS.md')
+
+    expect(doc).toMatchObject({ reviewed: '2026-03-01', releasesSince: 0 })
+  })
+
   it('should leave out a tag the current head has not merged', async () => {
     writeDoc('canon/REQUIREMENTS.md', '2026-03-01')
     release('v1.0.0', '2026-04-01')

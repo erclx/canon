@@ -31,7 +31,7 @@ printf '.canon/\n' >> .gitignore
 
 The ignore line is repeated here rather than left to the install, because the person running these commands is the one who creates the directory and the rule is worth reading beside the command that needs it. The claude manifest ships `.canon/` too, so a project that ran `canon tooling sync` already carries it and this line is a no-op there. One root entry covers the history and every record beside it, which is what makes the rule worth stating once rather than per folder.
 
-Point it at a private repository, and at one that is not a remote of the project. Records carry the memory pen, the review reports, and the groundwork trails, so a public project publishes all of it to anyone who fetches all refs. `push` compares the configured origin against every remote of the project and refuses on a match. A read of that list which fails refuses as well, since an empty list clears the comparison for every origin and a gate that passes on its own failure is no gate.
+Point it at a private repository, and at one that is not a remote of the project. Records carry the plans, the review reports, and the groundwork trails, so a public project publishes all of it to anyone who fetches all refs. `push` compares the configured origin against every remote of the project and refuses on a match. A read of that list which fails refuses as well, since an empty list clears the comparison for every origin and a gate that passes on its own failure is no gate.
 
 ## Refusals
 
@@ -58,4 +58,4 @@ The two `pull` refusals exist because the directions are not symmetric. A push o
 
 ## When it runs
 
-`canon hooks post-merge`, which `.husky/post-merge` calls, runs `push` after the task archiving, on every merge rather than only on one that archived a task. A review report and a memory entry both land on runs that close nothing. The verb exits zero whatever the push answers, so an unreachable remote neither aborts the hook nor delays the archiving before it, and a checkout that never ran the setup reports nothing. `hooks.md` covers the verb. Anything the hook misses is covered by running the verb by hand.
+`canon hooks post-merge`, which `.husky/post-merge` calls, runs `push` after the task archiving, on every merge rather than only on one that archived a task. A review report and a plan edit both land on runs that close nothing. The verb exits zero whatever the push answers, so an unreachable remote neither aborts the hook nor delays the archiving before it, and a checkout that never ran the setup reports nothing. `hooks.md` covers the verb. Anything the hook misses is covered by running the verb by hand.

@@ -1,6 +1,6 @@
 ---
 title: Records
-description: The two roots a record folder resolves at, migrating a record a frontmatter change orphaned, claiming the ordinal intake and groundwork share, reading each folder's size and growth, pruning stale scratch, and where validation, the memory review queue, and the private-remote backup are described
+description: The two roots a record folder resolves at, claiming the ordinal intake and groundwork share, reading each folder's size and growth, pruning stale scratch, and where validation, the canonical review count, and the private-remote backup are described
 ---
 
 # Records
@@ -18,28 +18,6 @@ A refusal names every root it looked at, so a message reading `no-folder` says w
 ## Validate
 
 `canon records validate <kind>` reports where a record folder or the standards corpus disagrees with the standard governing it. Its flags, the per-kind checks, and the refusals are in `records-validate.md`.
-
-## Migrate
-
-`canon records migrate <kind>` rewrites the records a `validate` finding names a transform for. A standard that redefines its own required frontmatter breaks every record already written to the old shape, and this is the repair `validate` could only report until now.
-
-```bash
-canon records migrate memory
-canon records migrate memory --write
-canon records migrate memory --json
-```
-
-| Option          | Behavior                                                            |
-| --------------- | ------------------------------------------------------------------- |
-| `--json`        | Add a machine-readable record on stdout                             |
-| `--write`       | Rewrite every record a transform can repair                         |
-| `--root <path>` | Project root, defaulting to the main worktree except on `standards` |
-
-It writes nothing until `--write` is passed, matching the write-flag contract `canon tooling sync` carries: a session record has no history to undo a wrong repair from, so naming a kind is not consent to rewrite every record inside it. A dry run reports which records it would touch and exits non-zero either way, headless or not, since there is nothing to prompt for.
-
-A transform runs only where the missing value is recoverable from the file itself. The one shipped today repairs a memory record missing `category` alone, deriving it from the same filename prefix `checkMemory` already reads it from. `title` and `description` are prose nobody wrote down, so a finding naming either carries no transform and stays for a session to fix by hand, and `validate` keeps reporting it. The transform re-reads the file rather than trusting a value captured at validate time, so a check and its repair cannot disagree about the same record.
-
-Exit codes: `0` nothing carried a known transform, or `--write` repaired everything it found. `1` refused for a reason `validate` shares, every candidate it found failed to repair, or `--write` repaired only some of them. `2` a record carries a known transform and `--write` was not passed.
 
 ## Ordinal
 
@@ -81,9 +59,9 @@ Ordering by weight is what makes the reading worth taking. A folder listed alpha
 
 The reading carries two windows rather than one, at 7 and 30 days. A single window cannot separate a folder growing steadily from one that took a single batch: a folder whose 7-day count is most of its 30-day count moved in one pass, and one where the two are proportional is growing at a rate.
 
-Nothing fails on a number here. A record folder has no correct size, so the reading is a number to notice rather than a threshold to gate, and the point of the verb is that the next reading is taken by a command instead of by someone remembering to count the folder. The memory pen went from 44 entries to 236 between two readings taken by hand two weeks apart, which is the measurement this replaces.
+Nothing fails on a number here. A record folder has no correct size, so the reading is a number to notice rather than a threshold to gate, and the point of the verb is that the next reading is taken by a command instead of by someone remembering to count the folder. A pen went from 44 entries to 236 between two readings taken by hand two weeks apart, which is the measurement this replaces.
 
-The scratch folder is read here and skipped by a backup, because deletable without loss is not the same as empty. The routing handoffs and the memory archive both sit there and both accumulate. `.canon/.records.git` stays out because it is the backup history rather than a record, and `.claude/worktrees/` stays out because each entry is a checkout of the project with its own removal verb, and one of them outweighs every record folder combined.
+The scratch folder is read here and skipped by a backup, because deletable without loss is not the same as empty. The routing handoffs and a retired entry archive both sit there and both accumulate. `.canon/.records.git` stays out because it is the backup history rather than a record, and `.claude/worktrees/` stays out because each entry is a checkout of the project with its own removal verb, and one of them outweighs every record folder combined.
 
 The window counts read `mtime`, so what they report is a file written inside the window rather than one created there. An entry edited long after it landed reads as recent, which overstates growth and never understates it, and these folders are append-mostly so the two readings agree on nearly every file. The one reading that is wrong rather than early is a machine restored by `canon records pull`, which resets the work tree hard and re-dates every file it writes, so a window taken there counts the restore. Nothing on the filesystem separates the two, since a restored file is new by every stamp it carries.
 
@@ -112,13 +90,13 @@ A candidate is a unit whose newest file is older than the threshold: a `tmp/<slu
 
 A scratch-root name `canon migrate record-layout` or `canon migrate scratch-evidence` moves out of scratch for good, such as `memory-archive`, is skipped the same way on a project that has not yet run that migration, naming the verb to run. The retired-entry archive `memory-archive` holds is never deleted, per the memory standard, so it stays skipped rather than aging into an offer.
 
-It writes nothing until `--write` is passed, matching `canon records migrate`: a session record has no history to undo a wrong delete from. It reads `mtime` the way `canon records size` does, so a machine restored by `canon records pull` reads its whole tree as new and fails safe by offering nothing.
+It writes nothing until `--write` is passed, since a session record has no history to undo a wrong delete from. It reads `mtime` the way `canon records size` does, so a machine restored by `canon records pull` reads its whole tree as new and fails safe by offering nothing.
 
 Exit codes: `0` nothing to prune, or `--write` deleted every candidate. `1` refused, sharing `no-folder` with `size`, or a delete failed. `2` candidates exist and `--write` was not passed.
 
 ## Stale
 
-`canon records stale memory` reports which memory entries are due for review and which cite a path the tree no longer holds, ordered so a review takes the first N as a batch. `canon records stale canonical` reports when the requirements record was last reviewed and how many releases have shipped since. What makes an entry due, how a cited path resolves, how the release count is taken, and the refusals are in `records-stale.md`.
+`canon records stale canonical` reports when the requirements record was last reviewed and how many releases have shipped since. How the release count is taken and the refusals are in `records-stale.md`.
 
 ## Push and pull
 
