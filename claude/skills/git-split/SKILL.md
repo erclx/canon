@@ -9,8 +9,8 @@ metadata:
 
 Before proposing a split, read in parallel:
 
-- `${CLAUDE_SKILL_DIR}/../../standards/branch.md`: format, types, length limit, and constraints
-- `${CLAUDE_SKILL_DIR}/../../standards/pr.md`: PR title format, body sections, and content rules
+- `${CLAUDE_SKILL_DIR}/../git-branch/references/branch.md`: format, types, length limit, and constraints
+- `${CLAUDE_SKILL_DIR}/../git-pr/references/pr.md`: PR title format, body sections, and content rules
 
 Follow both exactly.
 
@@ -71,7 +71,7 @@ If Mode is Independent, append this line to the preview:
 
 After outputting the preview, execute the final commands immediately. Claude Code's tool permission dialog is the confirmation gate. Do not wait for user input.
 
-Before running them, run the scan in `${CLAUDE_SKILL_DIR}/../../standards/publish.md` against every title and body. Each body stages under `.canon/tmp/` and leaves through `gh`, so the hook sees neither and this scan is the only gate. Each resulting branch reaches the `pull_request` check the git-pr surface carries once its own pull request opens, but not before, so this scan is what catches a leak ahead of that.
+Before running them, run the scan in `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md` against every title and body. Each body stages under `.canon/tmp/` and leaves through `gh`, so the hook sees neither and this scan is the only gate. Each resulting branch reaches the `pull_request` check the git-pr surface carries once its own pull request opens, but not before, so this scan is what catches a leak ahead of that.
 
 ### Final commands
 

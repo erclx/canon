@@ -51,9 +51,9 @@ Test the target for a guard before writing `Load` into a rule. `write-human` is 
 
 ### Surfaces reached by something other than a glob
 
-`standards/versioning.md` is deliberately unrouted. It governs commit subjects, pull request titles and bodies, review comments, issues, and git tags, none of which are files, so a path-scoped rule would never fire.
+`claude/skills/git-commit/references/versioning.md` is deliberately unrouted. It governs commit subjects, pull request titles and bodies, review comments, issues, and git tags, none of which are files, so a path-scoped rule would never fire.
 
-`git-commit` and `git-pr` reach that surface by instruction, and a leak there is caught by `publish.md`, which reads the label rule from `versioning.md` beside it. Routing it into those two skills would take the file out of the flat root that `publish.md` and `tasks.md` depend on in-body. `canon/context/standards/destinations.md` carries the reader count behind that.
+`git-commit` and `git-pr` reach that surface by instruction, and a leak there is caught by `publish.md`, which reads the label rule from `versioning.md` beside it. `canon/context/standards/destinations.md` carries the reader count behind that.
 
 #### A missing file
 

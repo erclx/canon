@@ -61,7 +61,7 @@ Omit the heading when every automatable change is covered.
 
 ## Persist the checklist
 
-Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. Fall back to `latest` on an empty result.
+Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`. Fall back to `latest` on an empty result.
 
 When a checklist is produced, write it directly to `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root, not the current worktree. Resolve that root the way `session-worktree` does. Create the directory if it does not exist. Always overwrite. This is a handoff file rather than a deliverable: `git-pr` renders it into the evidence comment once a pull request opens, then removes it, and nothing here talks to `gh` directly.
 

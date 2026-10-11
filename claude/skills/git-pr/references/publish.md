@@ -26,13 +26,13 @@ Scope every check below by destination. Text published to a remote takes all of 
 
 ## Banned characters
 
-`markdown.md` holds the character bans. Read it at scan time rather than working the sets from memory, then scan the drafted text and rewrite each occurrence.
+`${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md` holds the character bans. Read it at scan time rather than working the sets from memory, then scan the drafted text and rewrite each occurrence.
 
 Restructure the sentence rather than substituting the character. A semicolon swapped for a period leaves both clauses in the order the semicolon chose, which is the shape the ban exists to remove.
 
 ## Phase labels
 
-`versioning.md` holds the label rule and the table of surfaces. Read it at scan time rather than working the format from memory.
+`${CLAUDE_SKILL_DIR}/../git-commit/references/versioning.md` holds the label rule and the table of surfaces. Read it at scan time rather than working the format from memory.
 
 This check is one of the two the destination rule above scopes. The reader inside the repository has the task board and the reader on a remote does not.
 

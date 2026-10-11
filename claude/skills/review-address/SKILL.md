@@ -156,7 +156,7 @@ the regen rebuilt, and close the same way. The heading stays outside the
 `## Review` family so the close-out's equality test on the first line never
 matches it.
 
-Before posting, follow `${CLAUDE_SKILL_DIR}/../../standards/publish.md`
+Before posting, follow `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md`
 and run its scan against the reply:
 
 ```bash

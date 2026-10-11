@@ -93,7 +93,7 @@ A rule scoped to a folder only a plugin skill creates is inert rather than broke
 
 - `governance/rules/writing/markdown.md` → the `markdown-craft` and `write-human` skills, each named with the fallback line.
 - `standards/skill.md` → several sibling standards by path, all within the flat `standards/` corpus every delivery route carries whole.
-- `claude/skills/task-board/references/tasks.md` → `standards/versioning.md` and `claude/skills/plan-feature/references/plan.md`, for the same reason.
+- `claude/skills/task-board/references/tasks.md` → `claude/skills/git-commit/references/versioning.md` and `claude/skills/plan-feature/references/plan.md`, for the same reason.
 
 ### Standards corpus, examined and excluded
 

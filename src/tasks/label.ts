@@ -185,7 +185,7 @@ async function reserveLabel(root: string, label: string): Promise<boolean> {
  * the task file after this returns, so a reservation with no file behind it is
  * the ordinary state for a few seconds, and a scan blind to it would offer the
  * same label to every retry. Reservations are never expired: a claim that died
- * leaves a gap, and `standards/versioning.md` permits gaps.
+ * leaves a gap, and `claude/skills/git-commit/references/versioning.md` permits gaps.
  */
 export async function claimLabel(
   root: string,

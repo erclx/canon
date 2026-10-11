@@ -3,7 +3,7 @@ import { RECORD_ENTRIES, RECORD_ROOTS } from '@/roots/record'
 import type { RecordRoot } from '@/roots/record'
 
 /**
- * The two version namespaces `standards/versioning.md` keeps apart, and why a
+ * The two version namespaces `claude/skills/git-commit/references/versioning.md` keeps apart, and why a
  * pull request cannot be sorted between them by pattern alone.
  *
  * A phase label (`v68.5`) and a semver reference (`v3.44`) both match
@@ -265,7 +265,7 @@ function sessionLinks(text: string): string[] {
  * The split runs on the pull request rather than on each token. A release
  * pull request's tokens are read as the semver references its generated body
  * legitimately carries, and every other pull request's tokens are read as
- * leaked phase labels, which is what `standards/versioning.md` names the
+ * leaked phase labels, which is what `claude/skills/git-commit/references/versioning.md` names the
  * defect this exists to catch.
  *
  * A release pull request reports no board reference either, and the ground is

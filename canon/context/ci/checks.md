@@ -71,7 +71,7 @@ The code-span exclusion exists because a test fixture can carry its own version-
 
 The board-identifier check (`VERSION_SPAN` in `src/labels/phase.ts`) reads a span whose whole content is a version token as a hit. A token folded into longer content clears it, which is the fixture-name shape the exclusion above protects. A phase label quoted alone in its own span still needs that check to catch it, since the phase-label check alone would clear it.
 
-The carve-out stays, leaving authors responsible for a label quoted alone in its own span, rather than narrowing it to fenced blocks alone or dropping it and giving up every leak written with no backticks, the common case the check was built for. `standards/versioning.md` states the same three-way split.
+The carve-out stays, leaving authors responsible for a label quoted alone in its own span, rather than narrowing it to fenced blocks alone or dropping it and giving up every leak written with no backticks, the common case the check was built for. `claude/skills/git-commit/references/versioning.md` states the same three-way split.
 
 The scan also spell-checks the title alone, since release-please copies a title straight into `CHANGELOG.md` with nothing having spell-checked it first: cspell reads tracked files, and a title is not one until the release that copies it there.
 

@@ -73,7 +73,7 @@ command -v canon >/dev/null 2>&1
 
 The destination is a public GitHub issue on the toolkit repo, so the report leaves the machine. Hold it and ask when the operator has marked it sensitive, and never send it on a guess.
 
-Before the pipe below, run the scan in `${CLAUDE_SKILL_DIR}/../../standards/publish.md` against the composed block, phase-label half included. Nothing else checks what reaches the remote, so this scan is the only gate.
+Before the pipe below, run the scan in `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md` against the composed block, phase-label half included. Nothing else checks what reaches the remote, so this scan is the only gate.
 
 ```bash
 cat <<'EOF' | canon feedback

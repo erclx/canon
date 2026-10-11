@@ -61,11 +61,18 @@ describe('resolveStandard', () => {
   })
 
   it('should fall back to the package copy when the project installed none', () => {
-    const resolved = resolveStandard(ROOT, 'branch.md')
+    const resolved = resolveStandard(ROOT, 'standard.md')
 
     expect(resolved).toEqual({
-      path: join(PROJECT_ROOT, 'standards', 'branch.md'),
-      source: join('<canon>', 'standards', 'branch.md'),
+      path: join(PROJECT_ROOT, 'standards', 'standard.md'),
+      source: join('<canon>', 'standards', 'standard.md'),
+    })
+  })
+
+  it('should answer a moved standard from its owner skill reference', () => {
+    expect(resolveStandard(ROOT, 'publish')).toEqual({
+      path: join(PROJECT_ROOT, 'claude/skills/git-pr/references/publish.md'),
+      source: join('<canon>', 'claude/skills/git-pr/references/publish.md'),
     })
   })
 

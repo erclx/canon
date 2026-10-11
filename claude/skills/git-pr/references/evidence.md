@@ -17,9 +17,9 @@ The rendered-surface step of `git-pr`, reached after the final command printed t
 
 ## Find the UI checklist
 
-`ui-checklist` writes a visual checklist to `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root when a change needs visual verification, with `<slug>` derived per `${CLAUDE_SKILL_DIR}/../../standards/slug.md`. This skill is the file's sole consumer. Resolve the main root the way `session-worktree` does (`git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd`) and check for the file there. A missing file means no checklist was produced, and the two steps below each skip their checklist half.
+`ui-checklist` writes a visual checklist to `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root when a change needs visual verification, with `<slug>` derived per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`. This skill is the file's sole consumer. Resolve the main root the way `session-worktree` does (`git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd`) and check for the file there. A missing file means no checklist was produced, and the two steps below each skip their checklist half.
 
-When it exists, scan it against `${CLAUDE_SKILL_DIR}/../../standards/publish.md` before either step posts it, the same as the pull request body in the skill's pre-publish scan.
+When it exists, scan it against `${CLAUDE_SKILL_DIR}/references/publish.md` before either step posts it, the same as the pull request body in the skill's pre-publish scan.
 
 Where it lands is decided by the evidence step below rather than here, since a checklist reads next to the screenshots it annotates and posting it on its own is the fallback for a refused render.
 

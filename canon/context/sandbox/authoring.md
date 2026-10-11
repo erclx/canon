@@ -81,7 +81,7 @@ Refusing is the default because every anchor scenario force-pushes to `main`, so
 
 ## stage_setup
 
-`stage_setup` sets up scenario-specific state. It runs inside the sandbox tree after provisioning and asset injection. Commit messages inside it follow `standards/commit.md`.
+`stage_setup` sets up scenario-specific state. It runs inside the sandbox tree after provisioning and asset injection. Commit messages inside it follow `claude/skills/git-commit/references/commit.md`.
 
 ```bash
 stage_setup() {
