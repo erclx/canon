@@ -14,6 +14,7 @@ import { homedir, tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
+  addDetachedWorktree,
   buildManifest,
   classifyArm,
   diffManifests,
@@ -385,18 +386,27 @@ describe('runEquivalence', () => {
   }, 240_000)
 
   it('should never find the toolkit different from itself on one real arm', async () => {
-    const record = await runEquivalence({
-      root: process.cwd(),
-      targets: ['claude:plan-feature/full'],
-      base: 'HEAD',
-      includeAnchor: false,
-      useMasks: true,
-    })
+    // The head side reads `root`, and the live checkout carries edits the base
+    // does not, so both sides build from one detached copy of the same commit.
+    const snapshot = join(root, 'head')
+    const removeSnapshot = addDetachedWorktree(process.cwd(), snapshot, 'HEAD')
 
-    // A machine without the tools the arm needs reads it red on both sides, which
-    // is still no difference, so the claim holds wherever the test runs.
-    expect(record.arms.map((a) => [a.arm, a.differs])).toEqual([
-      ['claude:plan-feature/full', []],
-    ])
+    try {
+      const record = await runEquivalence({
+        root: snapshot,
+        targets: ['claude:plan-feature/full'],
+        base: 'HEAD',
+        includeAnchor: false,
+        useMasks: true,
+      })
+
+      // A machine without the tools the arm needs reads it red on both sides,
+      // which is still no difference, so the claim holds wherever the test runs.
+      expect(record.arms.map((a) => [a.arm, a.differs])).toEqual([
+        ['claude:plan-feature/full', []],
+      ])
+    } finally {
+      removeSnapshot()
+    }
   }, 240_000)
 })

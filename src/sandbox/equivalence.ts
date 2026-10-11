@@ -701,13 +701,16 @@ function canonVersion(): string {
 }
 
 /**
- * Adds the baseline as a detached worktree of the base ref, so it carries full
- * history for the scenarios that read it, and returns a remover that is safe to
- * call twice. `node_modules` is linked from the working checkout, since the
- * baseline runs the same CLI and carries no install of its own.
+ * Adds a detached worktree of `ref` at `path`, so it carries full history for
+ * the scenarios that read it, and returns a remover that is safe to call twice.
+ * `node_modules` is linked from the working checkout, since the copy runs the
+ * same CLI and carries no install of its own.
  */
-function addBaseline(root: string, workDir: string, ref: string): () => void {
-  const path = join(workDir, 'base')
+export function addDetachedWorktree(
+  root: string,
+  path: string,
+  ref: string,
+): () => void {
   execFileSync('git', ['worktree', 'add', '--detach', path, ref], {
     cwd: root,
     stdio: ['ignore', 'ignore', 'pipe'],
@@ -761,7 +764,11 @@ export async function runEquivalence(
 
   let removeBaseline: () => void
   try {
-    removeBaseline = addBaseline(options.root, workDir, options.base)
+    removeBaseline = addDetachedWorktree(
+      options.root,
+      join(workDir, 'base'),
+      options.base,
+    )
   } catch (error) {
     // An unknown ref must not leave an empty scratch folder behind.
     if (options.out === undefined)
