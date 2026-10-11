@@ -62,7 +62,7 @@ A rule authored in a folder no stack names reaches no target. The five folders `
 
 ### The unreferenced stage stays advisory
 
-The `Unreferenced rules` stage reports rules no stack reaches and never fails. It compares the catalog against `GOV_EXPECTED_UNREFERENCED` in `src/gate/measures.ts`, which records each deliberate case: `260-shadcn` and `320-tanstack-query` are opt-in libraries, and `130-go`, `140-php`, `335-testing-go`, and `336-testing-php` are opt-in until a Go or PHP stack ships, reached through `--add` when `target-setup` detects the language.
+The `Unreferenced rules` stage reports rules no stack reaches and never fails. It compares the catalog against `GOV_EXPECTED_UNREFERENCED` in `src/gate/measures.ts`, which records each deliberate case: `260-shadcn` and `320-tanstack-query` are opt-in libraries, and `130-go`, `140-php`, `335-testing-go`, and `336-testing-php` are opt-in until a Go or PHP stack ships, reached through `--add` when `target-setup` detects the language. `480-canvas` is opt-in for a project that draws on the canvas.
 
 A rule outside that list reads as new and the stage warns. A failing gate would fail every push over the deliberate cases, so reconsider failing only if the set keeps growing by accident rather than by design.
 
