@@ -180,6 +180,13 @@ A browser computes a unitless line height to pixels, so the field shows a pixel 
 - The mark gates no write. The frame hash check already refuses an inspector edit made against a file the session rewrote, so a lock would refuse the same collision twice.
 - The shell shows a mark on the frame's board label and outline, not in the pages panel, since a frame being edited is something the operator watches on the board. A reread drops a cleared mark, and a client timer set for the earliest `until` drops a lapsed one, because an expiry writes no file and raises no change event.
 
+### House style
+
+- The house style lives in `canvas-board`'s reference, which a session loads before it drafts, and the opt-in rule `480-canvas` on `.canon/canvas/**` only points there. A path-scoped rule loads after a new frame's first write lands, so a style carried by the rule alone would arrive after the frame it was meant to shape.
+- It governs explanation frames, being diagrams, boards of notes, and comparisons. A mockup of the project's interface follows the project's design document, so the style's sizes never override an app's own.
+- The rule is listed in no stack and a project takes it with `--add 480-canvas`. A project that never adds it gets the style from the skill alone, which is the cost of keeping a canvas-only rule out of every base install.
+- The rule states case and box height again in one line each, since a session editing a frame without the skill still sees them. It repeats no size or selector, so the reference stays the one owner.
+
 ### The static board retired
 
 `canon design board` generated a static page set indexing six design surfaces, with a components panel framing a second Astro build of every site component. The canvas replaced it rather than joining it. That board only looked back at what the project already held, while the canvas is where an idea gets drawn before one is written into the design record. Keeping both meant one more generator to hold in step with every surface it indexed, for a page nobody drafted on.
