@@ -19,7 +19,7 @@ canon gov detect ../my-app --stack node --json
 
 ## Evidence
 
-Each opt-in rule keeps a table in the toolkit's `governance/detect.toml`, keyed by rule basename. Its `deps` are package names, read from `package.json` (`dependencies` and `devDependencies`), `pyproject.toml`, `go.mod`, and `composer.json`. Its `files` are globs matched against the target's git-listed paths and against each folder on those paths, so `.github/workflows` matches a folder holding a workflow.
+Each opt-in rule keeps a table in the toolkit's `governance/detect.toml`, keyed by rule basename. Its `deps` are package names, read from `package.json` (`dependencies` and `devDependencies`), `pyproject.toml`, `go.mod`, and `composer.json`. Its `files` are globs matched against the target's git-listed paths and against each folder on those paths, so `.github/workflows` matches a folder holding a workflow. A glob with no wildcard is also tested on disk, which is how `.canon/canvas` matches in a target that gitignores `.canon/`.
 
 Both reads stop at depth two, which reaches a service folder and a workspace package under `packages/<name>/`. Outside git the verb walks the directory to the same depth and skips `.git`, `node_modules`, `vendor`, and `.venv`. A manifest that does not parse contributes nothing.
 
