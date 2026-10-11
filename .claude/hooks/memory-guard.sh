@@ -42,7 +42,8 @@ target=${target:1}
 # is a path and carries no whitespace, so no verb list is needed, and a bare or
 # whitespace-free quoted token naming the folder still denies. A span or a
 # heredoc body handed to an interpreter is code rather than a target, so it
-# is kept when the command word is a shell, python, node, perl, ruby, or eval.
+# is kept when the command word is a shell, python, node, perl, ruby, or eval,
+# after any leading assignment or wrapper such as sudo, env, timeout, or xargs.
 # This is a
 # scanner and not a shell parser, so a substitution inside double quotes is
 # read as quoted text. The cut is copied from review-post-scan.sh, which is
@@ -59,7 +60,7 @@ function runsCode(word) {
   return word ~ /^(sh|bash|zsh|dash|eval|python[0-9.]*|node|perl|ruby)$/
 }
 END {
-  n = length(s); q = ""; quoted = ""; out = ""; nt = 0; i = 1; leading = 1; cw = ""
+  n = length(s); q = ""; quoted = ""; out = ""; nt = 0; i = 1; leading = 1; cw = ""; wrapped = 0
   while (i <= n) {
     c = substr(s, i, 1)
     if (q == "'") {
@@ -71,9 +72,16 @@ END {
       if (c == "\"") { out = out keep(q, quoted, spanIsCode); q = ""; quoted = ""; i++; continue }
       quoted = quoted c; i++; continue
     }
-    if (c ~ /[;|&(`\n]/) { leading = 1; cw = "" }
+    if (c ~ /[;|&(`\n]/) { leading = 1; cw = ""; wrapped = 0 }
     else if (leading) {
-      if (c ~ /[ \t]/) { if (cw != "") leading = 0 }
+      if (c ~ /[ \t]/) {
+        if (cw != "") {
+          w = cw; sub(/.*\//, "", w)
+          if (w ~ /^(sudo|env|command|exec|time|timeout|nice|stdbuf|xargs)$/) { wrapped = 1; cw = "" }
+          else if (w ~ /^[A-Za-z_][A-Za-z0-9_]*=/ || (wrapped && (w ~ /^-/ || w ~ /^[0-9.]+(s|m|h|d)?$/))) cw = ""
+          else leading = 0
+        }
+      }
       else if (c == "'" || c == "\"") leading = 0
       else cw = cw c
     }

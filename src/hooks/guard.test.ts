@@ -1478,6 +1478,24 @@ describe('memory-guard.sh boundaries', () => {
     ],
     ['a write inside bash -c', shell(`bash -c 'cp a ${home}/memory/n.md'`)],
     [
+      'a write inside sudo bash -c',
+      shell(`sudo bash -c 'cp a ${home}/memory/n.md'`),
+    ],
+    [
+      'a write inside timeout sh -c',
+      shell(`timeout 5 sh -c 'cp a ${home}/memory/n.md'`),
+    ],
+    [
+      'a write inside xargs sh -c',
+      shell(`ls | xargs -n1 sh -c 'cp a ${home}/memory/n.md'`),
+    ],
+    [
+      'a write in a python heredoc behind an assignment',
+      shell(
+        `X=1 python3 - <<'EOF'\nopen('${home}/memory/n.md', 'w').write('x')\nEOF`,
+      ),
+    ],
+    [
       'a write in the body of a bash heredoc',
       shell(`bash <<EOF\ncp a ${home}/memory/n.md\nEOF`),
     ],
@@ -1533,6 +1551,10 @@ describe('memory-guard.sh boundaries', () => {
       shell(`gh api x -f body='denied: ${home}/memory/n.md'`),
     ],
     ['a separator inside quotes', shell(`echo 'a; cp x ${home}/memory/n.md'`)],
+    [
+      'a commit message behind an assignment and a wrapper',
+      shell(`env X=1 git commit -m "see ${home}/memory notes"`),
+    ],
     [
       'prose after an interpreter command has ended',
       shell(`bash -c 'ls'; git commit -m "see ${home}/memory notes"`),
