@@ -96,12 +96,3 @@ close_timeline() {
   set_palette 2
   echo -e "${GREY}└${NC}" >&2
 }
-
-guard_root() {
-  local target="$1"
-  local target_abs
-  target_abs=$(cd "$target" && pwd)
-  if [ "$target_abs" = "$PROJECT_ROOT" ]; then
-    log_error "Cannot run against toolkit root. Files here are the source of truth."
-  fi
-}
