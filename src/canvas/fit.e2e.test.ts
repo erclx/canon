@@ -59,6 +59,49 @@ const VIEWPORT_SIZED = `<!doctype html>
 </html>
 `
 
+const SINGLE_SECTION = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>single-section</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Geist Variable';
+      }
+      section {
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <section>Only one</section>
+  </body>
+</html>
+`
+
+const MIN_HEIGHT_BODY = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>min-height-body</title>
+    <style>
+      body {
+        min-height: 100vh;
+        margin: 0;
+        font-family: 'Geist Variable';
+      }
+      main {
+        height: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>Content</main>
+  </body>
+</html>
+`
+
 async function browserAvailable(): Promise<boolean> {
   const { chromium } = await import('playwright-core')
   try {
@@ -93,6 +136,17 @@ describe.skipIf(!hasBrowser)('fitCanvas', () => {
       join(root, '.canon', 'canvas', PAGE, sized.file),
       VIEWPORT_SIZED,
     )
+    for (const [name, html] of [
+      ['single', SINGLE_SECTION],
+      ['min-body', MIN_HEIGHT_BODY],
+    ] as const) {
+      const extra = addFrame(root, PAGE, name, {
+        width: WIDTH,
+        height: BOX_HEIGHT,
+      })
+      if (!extra.ok) throw new Error(extra.detail)
+      writeFileSync(join(root, '.canon', 'canvas', PAGE, extra.file), html)
+    }
   })
 
   afterAll(() => {
@@ -136,5 +190,24 @@ describe.skipIf(!hasBrowser)('fitCanvas', () => {
       rows: [{ frame: 'sized', viewport: true, height: BOX_HEIGHT }],
     })
     expect(layoutHeight('sized')).toBe(BOX_HEIGHT)
+  }, 60_000)
+
+  it('should flag a single section sized in viewport units', async () => {
+    const outcome = await fitCanvas(root, `${PAGE}/single`, true)
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      rows: [{ frame: 'single', viewport: true }],
+    })
+    expect(layoutHeight('single')).toBe(BOX_HEIGHT)
+  }, 60_000)
+
+  it('should fit a body with a min-height over real content', async () => {
+    const outcome = await fitCanvas(root, `${PAGE}/min-body`, false)
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      rows: [{ frame: 'min-body', viewport: false }],
+    })
   }, 60_000)
 })

@@ -24,7 +24,7 @@ function measured(overrides: Partial<Measured> = {}): Measured {
     box: { x: 0, y: 0, width: 480, height: 300 },
     contentHeight: 300,
     contentWidth: 480,
-    renderedHeight: 300,
+    viewportBound: false,
     family: 'Geist Variable',
     ...overrides,
   }
@@ -32,9 +32,9 @@ function measured(overrides: Partial<Measured> = {}): Measured {
 
 const SERVED = new Set(['Geist Variable', 'Noto Sans Mono', 'Excalifont'])
 
-/** A read a viewer would draw, which floors at the box height. */
-function drawn(contentHeight: number, boxHeight = 300): Partial<Measured> {
-  return { contentHeight, renderedHeight: Math.max(contentHeight, boxHeight) }
+/** A read of content that does not move with the viewport. */
+function drawn(contentHeight: number): Partial<Measured> {
+  return { contentHeight, viewportBound: false }
 }
 
 describe('planFit', () => {
@@ -87,7 +87,7 @@ describe('planFit', () => {
 
   it('should keep the height of a frame whose height is set in viewport units', () => {
     const [row] = planFit(
-      [measured({ contentHeight: 19, renderedHeight: 600 })],
+      [measured({ contentHeight: 10, viewportBound: true })],
       SERVED,
     )
 
@@ -114,7 +114,7 @@ describe('isOwed', () => {
         measured(drawn(301)),
         measured({ contentWidth: 481 }),
         measured({ family: 'DejaVu Sans' }),
-        measured({ contentHeight: 19, renderedHeight: 600 }),
+        measured({ contentHeight: 10, viewportBound: true }),
       ],
       SERVED,
     )

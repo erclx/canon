@@ -19,8 +19,12 @@ export interface Measured {
   readonly box: Box
   readonly contentHeight: number
   readonly contentWidth: number
-  /** The document height with the viewport at the box height, as a viewer draws it. */
-  readonly renderedHeight: number
+  /**
+   * The lowest edge of any element in the body moved when the viewport
+   * height changed, so a viewport unit is sizing something and the content
+   * measure is not the height a viewer draws.
+   */
+  readonly viewportBound: boolean
   /** The first family of the body text, unquoted. */
   readonly family: string
 }
@@ -49,10 +53,10 @@ export interface FitRow {
  * width, so an overflow in it is a finding and never a resize. `served` is the
  * set of families the served sheet carries a face for.
  *
- * A document that does not depend on the viewport reads the larger of its
- * content and the viewport when drawn at the box height. A read that differs
- * from that means a unit such as `vh` is sizing it, so the row keeps its
- * height and reports `viewport`.
+ * A frame whose elements moved with the viewport height is sized by a unit
+ * such as `vh`, so the row keeps its height and reports `viewport`. Scroll
+ * height cannot show it alone, since a single `100vh` section reads as short
+ * content drawn in a taller viewport.
  */
 export function planFit(
   measured: readonly Measured[],
@@ -60,8 +64,7 @@ export function planFit(
 ): FitRow[] {
   return measured.map((item) => {
     const content = Math.max(1, Math.ceil(item.contentHeight))
-    const viewport =
-      Math.ceil(item.renderedHeight) !== Math.max(content, item.box.height)
+    const viewport = item.viewportBound
     return {
       page: item.page,
       frame: item.frame,
@@ -107,9 +110,9 @@ export interface MeasureTarget {
  * injects the tokens and the faces, and reads the document once fonts and the
  * load event have settled, the moment a capture waits for. The content is read
  * at a one pixel tall viewport, since a document shorter than the viewport
- * reports the viewport and a frame could then never shrink. The viewport then
- * takes the box height and the document is read again, which is what a viewer
- * draws and what shows a height set in viewport units.
+ * reports the viewport and a frame could then never shrink. The lowest element
+ * edge is then read at the box height and at twice it, and an edge that moved
+ * is a height set in viewport units.
  */
 async function measureInBrowser(
   targets: readonly MeasureTarget[],
@@ -134,20 +137,30 @@ async function measureInBrowser(
             family,
           }
         })
-        await page.setViewportSize({
-          width: target.box.width,
-          height: target.box.height,
-        })
-        const renderedHeight = await page.evaluate(
-          () => document.documentElement.scrollHeight,
-        )
+        const lowestEdge = () =>
+          page.evaluate(() => {
+            let bottom = 0
+            for (const element of document.body.querySelectorAll('*')) {
+              bottom = Math.max(
+                bottom,
+                element.getBoundingClientRect().bottom + window.scrollY,
+              )
+            }
+            return Math.ceil(bottom)
+          })
+        const heights = [target.box.height, target.box.height * 2]
+        const edges: number[] = []
+        for (const height of heights) {
+          await page.setViewportSize({ width: target.box.width, height })
+          edges.push(await lowestEdge())
+        }
         measured.push({
           page: target.page,
           frame: target.frame,
           box: target.box,
           contentHeight: read.contentHeight,
           contentWidth: read.contentWidth,
-          renderedHeight,
+          viewportBound: edges[0] !== edges[1],
           family: firstFamily(read.family),
         })
       } finally {
