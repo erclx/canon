@@ -1,6 +1,6 @@
 ---
 name: internal-tooling
-description: Scope boundary for stacks, golden configs, seeds, and manifests, and the manifest syntax whose errors parse to nothing
+description: Scope boundary for stacks, golden configs, seeds, and manifests, and the manifest failures that stay silent
 ---
 
 # Internal tooling requirement
@@ -9,7 +9,7 @@ description: Scope boundary for stacks, golden configs, seeds, and manifests, an
 
 Without this skill, a session writes a manifest key the parser skips without reporting it, duplicates a parent layer's config into a child where the copy drifts, changes a `base` config and leaves the repository root running the old one, and calls the change verified from a read of the diff.
 
-The manifest failures are silent by construction. An unquoted script key and a multi-line gitignore array both parse to nothing, so sync completes, the target receives less than the manifest names, and the only symptom arrives later in a project nobody is watching. Reading the file back confirms the text is there, which is why the syntax has to be known before the edit rather than checked after it.
+The manifest failures are silent by construction. A sync into a target with no `package.json` completes, the target receives less than the manifest names, and the only symptom arrives later in a project nobody is watching. Reading the file back confirms the text is there, which is why what the reader skips has to be known before the edit rather than checked after it.
 
 ## Must
 
@@ -19,7 +19,6 @@ The manifest failures are silent by construction. An unquoted script key and a m
 
 ## Must not
 
-- Write an unquoted key in a scripts block or a multi-line array in a gitignore block. Both parse to nothing and report success.
 - Declare dev dependencies in a manifest whose runtime is not `bun`. Injection runs a `bun add`, so document the manual install step in that stack's reference instead.
 - Route Claude work through the tooling CLI. That folder is storage rather than a stack, and its exclusion is read from one place that any change has to update.
 - Seed agent-facing content under a stack's `docs/`, which is reserved for prose written for a human reader

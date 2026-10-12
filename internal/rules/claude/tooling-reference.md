@@ -11,8 +11,7 @@ paths:
 
 - Edit `manifest.toml` and the stack's `reference.md` in the same change. Nothing compares them.
 - Restate every `[gitignore]` group verbatim in `reference.md`. A group edited in the manifest alone leaves the reference listing the old set.
-- Quote both key and value in `[scripts]`. Unquoted keys are skipped without an error.
-- Write each `[gitignore]` group as a single-line array. A multi-line array parses as empty.
+- Write a `[gitignore]` group as an array on one line or wrapped across lines, since the manifest reader takes either whole. Leave the wrapping to the formatter.
 - Leave `[dependencies.dev]` empty when `runtime` is not `bun`, and document the manual install step in `reference.md`.
 
 ## Authority
