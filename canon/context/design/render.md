@@ -11,7 +11,7 @@ description: The canon design render preview, how the parser carries the verify 
 
 The output sits under `.canon/tmp/render/`, gitignored scratch the command regenerates and `canon records push` never carries. Do not stage the preview.
 
-`examples/design/DESIGN.md` is the committed intent record for an invented project, and it carries no capture. A record with no values previews as its Overview paragraph and a column of unset swatches, which misleads more than it shows, so the earlier capture was deleted rather than refreshed. The `design` gate stage reads the example against the prose budget.
+`examples/design/DESIGN.md` is the committed intent record for an invented project, and it carries no capture. A record with no values previews as its Overview paragraph and a column of unset swatches, which misleads more than it shows, so none is committed. The `design` gate stage reads the example against the prose budget.
 
 No dev baseline of the preview exists either, and one would sit at `assets/evidence/design/`. `canon/context/development/evidence.md` owns the boundary.
 

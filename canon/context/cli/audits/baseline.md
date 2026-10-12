@@ -5,7 +5,9 @@ description: The retained baseline in canon/config/baseline.json, what it record
 
 # Baseline and census
 
-## The retained baseline
+## Decisions
+
+### The retained baseline
 
 `canon/config/baseline.json` holds the counts from the last run recorded with `--record`, with the day and the commit behind them. It is committed, because the question the record answers is whether a number grew since anyone last looked and a fresh checkout has to inherit that answer. A per-machine record makes every contributor's first run a first run, which answers nobody.
 
@@ -23,7 +25,7 @@ Re-recording is not the way to clear that. A feature branch running `--record` w
 
 `--root` is what makes that attribution mechanical rather than a reading of the diff. It defaults to the current working directory rather than to the installation the CLI was linked from, which is the exception to the rule that a catalog command reads the install tree and is therefore untestable from a worktree. Run the verb twice with `--json`, once at the main root and once at the branch worktree, and diff the per-measure counts: the difference is the branch's own, and whatever remains against the recorded baseline belongs to the trunk. The framed output states only the delta against the baseline, which mixes the two, so the two-run diff is the read that separates them.
 
-## The codebase census
+### The codebase census
 
 `canon census` is the nineteenth verb, and the one that answers what the tree is made of rather than what is wrong with it. It reads `listRepositoryFiles`, the corpus the citation check, the markdown corpus, and the secret scan already share, and reports a file count, a breakdown by extension, and a line total. Registering it here with an empty `gatingExits` is what lets `canon/config/baseline.json` retain its three headline counts, since the growth series this measure exists to answer, at 481 files on one date and 965 five weeks later, otherwise depends on someone counting by hand.
 

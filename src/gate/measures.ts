@@ -18,9 +18,18 @@ import {
 import { familyKeys } from '@/claude/skills-families'
 import { measureDesignProse } from '@/design/budget'
 import { DESIGN_DOCUMENT } from '@/design/regen'
-import { listRepositoryFiles } from '@/git/files'
+import {
+  listChangedFiles,
+  listFilesAtRef,
+  listRepositoryFiles,
+  readFileAtRef,
+  resolveBaseRef,
+} from '@/git/files'
 import { ceilingFindings } from '@/markdown/ceiling'
 import { resolveMarkdown } from '@/markdown/files'
+import { grownBlocks, normalizeProse } from '@/markdown/growth'
+import { bodyLines } from '@/markdown/scan'
+import { bulletStacks as findBulletStacks } from '@/markdown/stacks'
 import { CHECKPOINTS } from '@/markdown/structure'
 import {
   isShippedCorpus,
@@ -498,6 +507,182 @@ export const documentCeiling: Measure = async (ctx) => {
   return {
     emissions: [],
     failure: `${plural(over.length, 'document')} past the ${ceiling}-line ceiling: ${where}. Split each at a seam, or for a verbatim record add a \`<!-- canon-length-exempt: <reason> -->\` line naming why.`,
+  }
+}
+
+/**
+ * The tracked documents a bullet run is held against: the context entries, the
+ * docs pages, and the skill bodies and references of both skill trees.
+ *
+ * Rules and the requirement records stay out, since a rule is one imperative
+ * per bullet and a requirement is a record of its own. Named here and nowhere
+ * else, so the stage and its tests read one scope.
+ */
+const STACK_SCOPE = [
+  /^canon\/context\/.+\.md$/,
+  /^docs\/.+\.md$/,
+  /^(?:claude|\.claude)\/skills\/[^/]+\/SKILL\.md$/,
+  /^(?:claude|\.claude)\/skills\/[^/]+\/references\/.+\.md$/,
+]
+
+/** Whether a path is one the bullet cap holds. */
+export function inStackScope(rel: string): boolean {
+  return STACK_SCOPE.some((pattern) => pattern.test(rel))
+}
+
+/** The context entries alone, where length drifts because `context-fold` appends after every merge. */
+const GROWTH_SCOPE = /^canon\/context\/.+\.md$/
+
+/** Whether a path is one the growth check reads. */
+export function inGrowthScope(rel: string): boolean {
+  return GROWTH_SCOPE.test(rel)
+}
+
+/**
+ * Every in-scope document against the five-bullet cap.
+ *
+ * The failure names each file with its longest run and where it opens. Read
+ * in-process rather than through `canon markdown audit`, whose exit code stays
+ * bans and dead links only, for the reason `documentCeiling` gives: the plan
+ * and groundwork skills run that audit on gitignored records, where a long
+ * list is not a defect.
+ */
+export const bulletStacks: Measure = async (ctx) => {
+  const files = await listRepositoryFiles(ctx.root)
+  if (files === undefined) {
+    return {
+      emissions: [],
+      unmeasured: 'git could not list the tree, so no bullet run was measured.',
+    }
+  }
+
+  const scoped = files.filter(inStackScope)
+  const failing: { rel: string; count: number; line: number }[] = []
+
+  for (const rel of scoped) {
+    let source: string
+    try {
+      source = readFileSync(join(ctx.root, rel), 'utf8')
+    } catch {
+      continue
+    }
+    const runs = findBulletStacks(bodyLines(source))
+    if (runs.length === 0) continue
+    const longest = runs.reduce((a, b) => (b.count > a.count ? b : a))
+    failing.push({ rel, count: longest.count, line: longest.line })
+  }
+
+  if (failing.length === 0) {
+    return {
+      emissions: [
+        info(
+          `No run of more than 5 plain bullets across ${plural(scoped.length, 'document')}`,
+        ),
+      ],
+    }
+  }
+
+  const where = failing
+    .sort((a, b) => b.count - a.count)
+    .map((f) => `${f.rel}:${f.line} ${f.count} bullets`)
+    .join(', ')
+  return {
+    emissions: [],
+    failure: `${plural(failing.length, 'document')} carrying a run of more than 5 plain bullets: ${where}. Split each run under H3 headings with a few bullets or prose beneath, or open every item with a bold label or a link.`,
+  }
+}
+
+/**
+ * A context entry's paragraph or top-level bullet past its checkpoint that
+ * this branch added or changed.
+ *
+ * A block fails when its text is absent from every context entry the merge
+ * base held, so an unchanged long block passes wherever it now sits and an
+ * edited or new one fails. Reading the whole base folder rather than the same
+ * path is what lets a block move into a sibling entry. No resolvable base
+ * reports unmeasured rather than a pass, since a missing base would otherwise
+ * read every block as new or none as new.
+ *
+ * Only context entries are held to it. Length drifts there because
+ * `context-fold` appends after every merge, and in docs and skills it stays the
+ * audit's advisory warning.
+ */
+export const paragraphGrowth: Measure = async (ctx) => {
+  const base = await resolveBaseRef(ctx.root)
+  if (base === undefined) {
+    return {
+      emissions: [],
+      unmeasured:
+        'no merge base resolved, so no paragraph or bullet was compared against it.',
+    }
+  }
+
+  const changed = await listChangedFiles(ctx.root, base)
+  if (changed === undefined) {
+    return {
+      emissions: [],
+      unmeasured:
+        'git could not list the branch range, so no block was compared.',
+    }
+  }
+
+  const grown: {
+    rel: string
+    kind: string
+    line: number
+    characters: number
+  }[] = []
+  let corpus: string | undefined
+
+  for (const rel of changed.filter(inGrowthScope)) {
+    let source: string
+    try {
+      source = readFileSync(join(ctx.root, rel), 'utf8')
+    } catch {
+      continue
+    }
+
+    const own = normalizeProse((await readFileAtRef(ctx.root, base, rel)) ?? '')
+    const first = grownBlocks(source, own)
+    if (first.length === 0) continue
+
+    if (corpus === undefined) {
+      const paths =
+        (await listFilesAtRef(ctx.root, base, 'canon/context')) ?? []
+      const texts = await Promise.all(
+        paths
+          .filter(inGrowthScope)
+          .map((path) => readFileAtRef(ctx.root, base, path)),
+      )
+      corpus = normalizeProse(texts.filter((t) => t !== undefined).join('\n'))
+    }
+
+    for (const block of grownBlocks(source, corpus)) {
+      grown.push({
+        rel,
+        kind: block.kind,
+        line: block.line,
+        characters: block.characters,
+      })
+    }
+  }
+
+  if (grown.length === 0) {
+    return {
+      emissions: [
+        info(
+          `No paragraph past ${CHECKPOINTS.paragraph} characters and no bullet past ${CHECKPOINTS.bullet} grew in a context entry`,
+        ),
+      ],
+    }
+  }
+
+  const where = grown
+    .map((g) => `${g.rel}:${g.line} ${g.kind} ${g.characters} characters`)
+    .join(', ')
+  return {
+    emissions: [],
+    failure: `${plural(grown.length, 'block')} past the checkpoint added or changed on this branch: ${where}. Split each at a seam, or cut it under ${CHECKPOINTS.paragraph} characters for a paragraph and ${CHECKPOINTS.bullet} for a bullet.`,
   }
 }
 

@@ -35,6 +35,9 @@ Before shipping any change under `web/`:
 - `canon/context/web/index.md`: structure, the Astro build, decisions, and the CI and layout gaps
 - `internal/rules/claude/landing-page.md`: the page's conventions, each failing silently
 - `references/citation-anchors.md`: how a string in `copy.ts` anchors to `README.md` and what the gate reads
+
+### Neighboring entries
+
 - `canon/context/design/tokens.md`: the token values this surface reads and does not own
 - `canon/context/development/regeneration.md`: the Hero section, before touching `assets/captures/` or `assets/frames/`
 - `canon/context/web/assets.md`: why `assets/` and `examples/` are separate folders, decided on who each addresses

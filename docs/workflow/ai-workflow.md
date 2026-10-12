@@ -52,6 +52,9 @@ Work in Claude Code directly. It reads `CLAUDE.md` automatically and has full fi
 - When the input is a pile of findings rather than one feature, invoke `canon:plan-intake` first. It files the dump into `.canon/intake/<nn>-<slug>/`, one item per finding carrying a problem measured against the tree, a proposed fix, and a verdict, then names which items are plan-ready, which need measuring, and which are already settled.
 - When the backlog has grown past what anyone rereads, invoke `canon:backlog-triage`. It files one item per backlog row into an intake folder, suggesting decline, archive, keep, or promote and leaning toward decline, and once `canon:plan-intake-answer` has taken your answers, a second run applies the approved verdicts through the task verbs.
 - When the current state is unmeasured and more than one approach is live, invoke `canon:plan-groundwork` first. It opens a track folder under `.canon/groundwork/<nn>-<slug>/` and ends in a decision, which may be to do nothing. Skip it when the approach is already settled.
+
+Then plan and build:
+
 - Invoke `canon:plan-feature` to scan for code-level conflicts and ambiguities, confirm approach before proceeding
 - Implement the feature, then Claude Code runs the commands defined in `CLAUDE.md`, fixes failures, and iterates until all pass
 - For UI changes, invoke `canon:ui-checklist` to write what a reviewer has to look at and name any behavior shipping without a test

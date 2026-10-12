@@ -33,7 +33,7 @@ Restating catalogs in skill bodies was the alternative, and it drifts on its own
 
 Revisit when skills failing on a verb the installed binary lacks outnumber the drift restated catalogs would cause.
 
-## Why this domain is a folder
+### Why this domain is a folder
 
 A domain this size stays contended as one file: the skill catalog, the shell-out pattern, and the per-skill reasoning for a corpus this large all sit behind one file that almost any skill change writes. Splitting by sub-area gives each one a file that no unrelated change is also writing, and it is what keeps a reader from meeting a claim the entry already states elsewhere against the same subject.
 

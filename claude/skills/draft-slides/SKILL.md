@@ -41,6 +41,9 @@ The render injects the project's token stylesheet ahead of each slide's own styl
 - Use the project's custom properties, such as `var(--color-accent)`, for every color, face, and spacing value the stylesheet defines. Read the names from `.claude/design/base.css` and any overrides under `.claude/design/project/`. When neither exists, say the deck renders unstyled rather than inventing values to cover it.
 - Leave the `--color-*` roles to the stylesheet rather than redefining them in a slide. The master reads its colors off the first slide's `<html>`, and a slide body computing its own `--color-text` is reported, since the bands keep the master's colors.
 - Vary the composition across slides. Never repeat a title over bullets on every slide. Reach for columns, a row of large numbers, a grid of cards, a chart, a pull quote, and section dividers.
+
+### Fit and shapes
+
 - Keep titles short and lines tight, so text fits its box at the size the design sets rather than overflowing the frame.
 - Never write centered body text.
 - Prefer CSS the converter maps to native shapes. An element computing a property it cannot map is drawn as a picture of itself and reported on stderr, so a slide full of gradients and filters stops being editable.

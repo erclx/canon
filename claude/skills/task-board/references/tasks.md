@@ -29,12 +29,12 @@ Governs the task files under `.canon/tasks/`: folder layout, filenames, frontmat
 
 Does not govern:
 
-- The declined folder, the `Declined:` line, and what declining does to a plan and a board row: `tasks-decline.md`
-- Execution order, readiness groups, the backlog, and the generated index beside the tasks: `board.md`
-- The plan file a task cites, its sections, and its answer contract: `plan.md`
-- Phase-label format and which surfaces a label may appear on: `versioning.md`
-- The pre-compaction handoff sitting in the folder, its filename and its sections: `session.md`
-- When a project opens a task at all, which is project policy rather than a shape rule
+- **`tasks-decline.md`**: the declined folder, the `Declined:` line, and what declining does to a plan and a board row
+- **`board.md`**: execution order, readiness groups, the backlog, and the generated index beside the tasks
+- **`plan.md`**: the plan file a task cites, its sections, and its answer contract
+- **`versioning.md`**: phase-label format and which surfaces a label may appear on
+- **`session.md`**: the pre-compaction handoff sitting in the folder, its filename and its sections
+- **project policy**: when a project opens a task at all, which is a policy rather than a shape rule
 
 ## Layout
 
@@ -160,6 +160,9 @@ The line is what lets a merge close its own task. `canon tasks archive --pull-re
 - Class names, file paths, function names, or prop names in any entry or title
 - Code-level steps or implementation detail. Behavioral specifics are fine.
 - Architectural reasoning that outlives the task. A finding explains why this task is shaped as it is. A decision the system keeps after the task closes belongs in the context entry of the domain it constrains.
+
+### Narrative and sequencing
+
 - Narrative of the session that produced the task. A finding states what constrains the task, so what was probed, what it cost, and who decided belongs in the groundwork folder the `Groundwork:` line names. A task with no groundwork folder cuts the narrative rather than relocating it, since the board is not the fallback destination for it.
 - "In progress" or "Blocked" headings. Note status inline on the outcome instead.
 - Sequencing rationale or which version is active. Why this task is planned before its neighbors goes on its row in `priority.md`, in the cell that already carries what it is waiting on. Rationale wider than one row has no home at all, so cut it rather than filing it here.

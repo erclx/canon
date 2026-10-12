@@ -12,10 +12,19 @@ Read these files in parallel:
 - `${CLAUDE_SKILL_DIR}/references/skill.md`: skill structure, skill types, frontmatter fields, invocation rules
 - `${CLAUDE_SKILL_DIR}/references/skill-requirement.md`: what `REQUIREMENT.md` must answer, its sections, and its template
 - `${CLAUDE_SKILL_DIR}/references/skill-paths.md`: which root a path in the body resolves against, and how the body cites another skill's reference
-- `${CLAUDE_SKILL_DIR}/references/skill-reference.md`, when the skill carries a reference setting the shape of one artifact: its scope, success criterion, frontmatter, and rule phrasing
+- `${CLAUDE_SKILL_DIR}/references/skill-disclosure.md`: the rules that bind a skill of any size, being where each reference is named, the contents block, the trigger and guard that stay in the body, and what moves to `references/`
+
+### Writing standards
+
+Read these in the same pass:
+
 - `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md`: punctuation and formatting for skill body text
-- `${CLAUDE_SKILL_DIR}/references/skill-practice.md`, when the skill carries engineering practice: the closing sections a practice skill owes and the anatomy behind them
 - The `write-human` skill: voice, rhythm, and sentence construction for skill body text
+
+## Further references
+
+- `${CLAUDE_SKILL_DIR}/references/skill-reference.md`, when the skill carries a reference setting the shape of one artifact: its scope, success criterion, frontmatter, and rule phrasing
+- `${CLAUDE_SKILL_DIR}/references/skill-practice.md`, when the skill carries engineering practice: the closing sections a practice skill owes and the anatomy behind them
 
 ## Guards
 

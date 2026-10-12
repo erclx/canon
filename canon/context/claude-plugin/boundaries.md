@@ -7,7 +7,9 @@ description: Where built-in Claude Code features overlap toolkit skills and how 
 
 Claude Code includes built-in features that overlap with some toolkit skills. They serve different purposes and are complementary.
 
-## Code review
+## Decisions
+
+### Code review
 
 Claude Code Review is a managed service that reviews pull requests on GitHub. It runs on a push to the pull request or on `@claude review`, reads the full repo on Anthropic infrastructure, and posts inline comments with severity tags. Two more surfaces meet on the pull request itself.
 
@@ -19,7 +21,7 @@ Use `review-pr` where a reviewer and a worker trade passes on one pull request, 
 
 `review-craft` carries a security reference, and the built-in `security-review` audits too. The reference is a checklist of classes read against one diff during an ordinary review, loaded only when the diff reaches a sink, and it grades nothing. `security-review` is a deliberate audit a session runs on purpose over the pending changes. The reference stops at the diff in hand and names the built-in for anything wider.
 
-## Planning
+### Planning
 
 | Aspect     | Plan mode                                        | Ultraplan                                               | `plan-feature` skill                                                                                  |
 | ---------- | ------------------------------------------------ | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
@@ -36,13 +38,13 @@ Both skills close their questions with a lean, and the two leans differ in stren
 
 Collapsing the two would turn a groundwork track into premature planning, the failure the container exists to prevent. A measurement question carries no lean at all, since a guess at a number is worse than an admission.
 
-### Groundwork experiments
+#### Groundwork experiments
 
 A track may run its own experiments. Reading and computing were always in scope, so the permission that mattered is the fixture write, and it lands under `.canon/tmp/runs/groundwork-fixtures/<slug>/` rather than inside the track folder so mode detection never matches a fixture as a track. A billed headless run is bounded by a count of three rather than by a dollar figure, because a headless run reports its total cost only after it finishes, which makes a budget reportable and not enforceable while a count is checkable before spawning. The record lands in `08-spikes.md`, the one reserved number sitting after the closing files, because it holds evidence rather than a topic.
 
 The fixture path splits by who reads it. A fixture this session provisions and reads itself is fine in-repo, and a fixture a headless run is pointed at has to sit outside the repository under `mktemp -d`. A session started anywhere beneath the project root inherits that project's `CLAUDE.md`, `.claude/rules/`, and `canon/context/` through the ancestor chain, so an in-repo arm measures the repository rather than the thing under test. The retired eval runner extracted its fixture to `mktemp -d` for this reason, which is the isolation a track should copy along with the assertions.
 
-## Background session isolation
+### Background session isolation
 
 Claude Code isolates a `claude --bg` session into its own `.claude/worktrees/` entry automatically, but only lazily: the move happens right before the session's first file edit rather than at dispatch. `auto-ship` Step 0 calls `EnterWorktree` through `session-worktree` ahead of any edit tool, so a worker dispatched through the ship chain never observes the built-in trigger firing at all. Its own explicit move always lands first.
 

@@ -7,6 +7,43 @@ description: Where rules land in a target, why install and sync and build stay s
 
 Rules install per-file at `.claude/rules/canon/<subdir>/<rule>.md` with each domain subdirectory preserved. Source rules already carry the Claude shape, so the copy is a passthrough rather than a transform.
 
+## Layout
+
+### CLI
+
+- `canon gov install` bootstraps a stack or installs named rules alone, `sync` refreshes what is installed and clears a stale `.claude/GOV.md`, `build` writes the paste payload, `regen` rebuilds this repository's own copy, `list` emits the catalog, and `detect` proposes opt-in rules for a target.
+- Flags, arguments, and JSON shapes live in `docs/agents/install-and-sync.md` and `canon gov --help`.
+- `CANON_NON_INTERACTIVE=1` resolves each confirm prompt to its first option. The stack picker refuses headlessly instead, since defaulting there would choose a whole stack for the caller.
+
+#### Why `list` is TypeScript
+
+Bash cannot express the folder-entry match. The regex bash would apply to a rules array matches nothing for a folder entry, so `base` would report zero rules to the `target-setup` skill, which dedupes `--add` extras against that list. Expanding the match in bash beside the resolver would also put one rule-matching logic in two languages.
+
+`gov list --json` carries `unreferenced` and `staleDetect` beside `stacks` and `rules` on every invocation rather than behind a flag, and each rule carries its `detect` evidence or null. The gate stage and a session asking what a stack leaves out read one call, and the key is additive, so a consumer reading either of the other two is untouched.
+
+### Workflow
+
+Set up a new project:
+
+```bash
+canon gov install node ../my-app
+# resolves node → base, copies each rule to .claude/rules/canon/<subdir>/<rule>.md
+```
+
+Layer extra rules on a stack without defining a new one:
+
+```bash
+canon gov install node --add astro,react,shadcn ../my-app
+# installs node stack rules plus the three extras, deduped
+```
+
+Add rules to a target with no stack, after asking what its evidence proposes:
+
+```bash
+canon gov detect ../my-app --stack node --json
+canon gov install --add react,zod ../my-app
+```
+
 ## Decisions
 
 ### Three verbs rather than flags on one
@@ -52,38 +89,3 @@ The rejected alternative was the skill matching a detected technology against ea
 - The payload builder behind `build` is `src/gov/payload.ts`, and frontmatter stripping is `src/markdown/frontmatter.ts`, which `docs` shares. Do not duplicate either inside `src/gov/`.
 - A project holding `.cursor/rules/` from an earlier toolkit version keeps those files, since sync does not touch them. Remove the folder by hand in a project that does not use Cursor.
 - A target on the flat `.claude/rules/<subdir>/` layout is invisible to both bootstrap verbs. Sync walks only `.claude/rules/canon/` and exits 0, and install writes there without clearing the flat tree. Claude Code then loads both copies of an edited rule, one of them frozen. Run `canon migrate rule-layout` before either verb.
-
-## CLI
-
-- `canon gov install` bootstraps a stack or installs named rules alone, `sync` refreshes what is installed and clears a stale `.claude/GOV.md`, `build` writes the paste payload, `regen` rebuilds this repository's own copy, `list` emits the catalog, and `detect` proposes opt-in rules for a target.
-- Flags, arguments, and JSON shapes live in `docs/agents/install-and-sync.md` and `canon gov --help`.
-- `CANON_NON_INTERACTIVE=1` resolves each confirm prompt to its first option. The stack picker refuses headlessly instead, since defaulting there would choose a whole stack for the caller.
-
-### Why `list` is TypeScript
-
-Bash cannot express the folder-entry match. The regex bash would apply to a rules array matches nothing for a folder entry, so `base` would report zero rules to the `target-setup` skill, which dedupes `--add` extras against that list. Expanding the match in bash beside the resolver would also put one rule-matching logic in two languages.
-
-`gov list --json` carries `unreferenced` and `staleDetect` beside `stacks` and `rules` on every invocation rather than behind a flag, and each rule carries its `detect` evidence or null. The gate stage and a session asking what a stack leaves out read one call, and the key is additive, so a consumer reading either of the other two is untouched.
-
-## Workflow
-
-Set up a new project:
-
-```bash
-canon gov install node ../my-app
-# resolves node → base, copies each rule to .claude/rules/canon/<subdir>/<rule>.md
-```
-
-Layer extra rules on a stack without defining a new one:
-
-```bash
-canon gov install node --add astro,react,shadcn ../my-app
-# installs node stack rules plus the three extras, deduped
-```
-
-Add rules to a target with no stack, after asking what its evidence proposes:
-
-```bash
-canon gov detect ../my-app --stack node --json
-canon gov install --add react,zod ../my-app
-```

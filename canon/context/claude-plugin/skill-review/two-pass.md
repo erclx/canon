@@ -5,19 +5,21 @@ description: The first pass and the close-out a pull request review posts, the n
 
 # Two-pass model
 
-## The body file name
+## Decisions
+
+### The body file name
 
 `review-pr` posts twice over a pull request's life, a first pass and a close-out. The body path carries the head commit, `body-<number>-<short-sha>.md`, since keying on the pull request number alone would let two sessions reviewing different pull requests collide, and says nothing about one session posting twice.
 
 A name the caller has to choose is a name the caller gets wrong in practice, so the second segment is derived rather than picked.
 
-### When the head repeats
+#### When the head repeats
 
 Deriving from the head leaves a later pass with no legal name whenever the head stops moving, which is an ordinary state rather than an error. A fix landing in gitignored records produces no commit, since the return leg delegates its push to `git-followup` and that skill stops on an unchanged tree, and a finding the worker accepts as recorded produces no change at all. The close-out is still owed on both routes, because the newest heading is what an operator reads to decide whether the branch is blocked.
 
 So a repeated head takes a third segment off the `## Review response` comment the pass answers: the thread's id, a real object rather than a suffix someone picked, with the head still leading the name so the second body sorts beside the first. A pass index was the other candidate and it loses, because nothing in the thread carries one, so a session would have to count prior comments to pick the next, which is the hand-chosen suffix the rule forbids.
 
-### Resolving the response comment
+#### Resolving the response comment
 
 The number is the REST `id` off the paginated issue-comments listing, the same number each comment's anchor shows in the thread. The read runs on REST because a cloud session's GitHub proxy refuses the GraphQL that `gh pr view` runs on, and the filter emits one id per match with `tail` keeping the newest, since `--paginate` runs the filter once per page.
 
@@ -25,7 +27,7 @@ Selecting the response is scoped by the prior pass's `submittedAt` rather than b
 
 An empty derivation is a head repeating with no response behind it, so the pass has nothing to add and stops rather than writing a second body over one commit. Where a response or a rebase report sits there, it is the entire read: the equality that triggers the naming case makes Step 2's range empty, so the comment rather than the delta is what says whether a prior finding landed. A late finding is the one exception, since the read also opens the file the comment names.
 
-## Where the unchanged-head stop sits
+### Where the unchanged-head stop sits
 
 A check placed only inside the filename derivation reaches only the path that composes a body, so a pass reading the head as unchanged and taking no other action skips it entirely. Step 2 instead runs the same response query the moment the ancestor test reports an unchanged head, ahead of the diff read and ahead of Step 3's review, and stops there when it comes back empty. That is the earliest point every path through the skill crosses, so a pass with nothing to add cannot reach the review post.
 
@@ -37,7 +39,7 @@ The equality test matches `## Review response`, `## Post-review findings`, and `
 
 Step 2 splits on the heading: a response or a rebase report skips straight to composing the body, and a late finding gets the file it names read at `<headRefOid>` first, the same confirmation Step 3 runs against a stale ticked box.
 
-## A close-out repeating the standing one
+### A close-out repeating the standing one
 
 The unchanged-head stop tests an empty range, so a pass whose head moved passes it whatever the thread already says. A pass telling the author a change is their own call, followed by the author making it, leaves the next pass's delta with nothing left to say by construction, so a correct pass over real commits can still arrive carrying nothing and post a close-out that repeats the standing one.
 
@@ -53,7 +55,7 @@ The read-time marker covered next closes the rest: `PUT` replaces the body and t
 
 The guard fires on `## Review closed` alone. Two open passes carry different findings and both are worth reading, so a repeated `## Review` stays an ordinary post.
 
-## The commit a pass records
+### The commit a pass records
 
 GitHub stamps a review with `commit.oid` and `submittedAt` when it is submitted, and neither describes what the reviewing session read. A push landing in the compose window moves both onto a commit the pass never opened, so the next reader scopes its delta past that work and reports it covered, which is a genuine fix silently skipped rather than a false alarm.
 
@@ -67,11 +69,11 @@ The stamps stay live for the question each is right about. The poll's age and it
 
 What it costs is a release of silence and a round trip. A target whose CLI predates the verb meets a missing subcommand, and both the skill body and `poll.ts` carry a written fallback that reads the stamps and reproduces the defect rather than failing, so the fix reaches a project only once a release does. The poll also spends a third `gh` read per open pull request per tick, on top of the payload and `canon pr head`.
 
-## A submitted review cannot be deleted
+### A submitted review cannot be deleted
 
 A submitted pull request review is editable and never deletable. `DELETE /repos/{owner}/{repo}/pulls/{n}/reviews/{id}` returns 422 with `Can not delete a non-pending pull request review`, and dismissal covers approvals and change requests rather than comments, so a mistimed or malformed comment is repaired with `PUT` to the same path, which replaces the body and keeps its timestamp and position in the thread. When the repair leaves a comment that should no longer anchor the review state, strip its heading, since `review-pr` scopes a later narrow pass by matching a comment's first line against `## Review` and `## Review closed` and would otherwise point the next pass at the wrong commit.
 
-## A finding links to its line
+### A finding links to its line
 
 A finding sits under a bare backticked file block with no line in it, so a reader opens the diff and hunts for the spot. Each file-bound finding now carries a permalink to its line, `<repo-url>/blob/<headRefOid>/<path>#L12` or `#L12-L14` for a span, stated once in `post.md` and shown in every template.
 

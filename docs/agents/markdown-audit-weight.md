@@ -1,13 +1,13 @@
 ---
 title: Markdown audit weight
-description: The structural half of the markdown audit, being bullet and paragraph weight, run depth, the two cadence numbers, and the length ceiling, with the samples behind each checkpoint and why none of them gates
+description: The structural half of the markdown audit, being bullet and paragraph weight, bullet stacks, run depth, the two cadence numbers, and the length ceiling, with the samples behind each checkpoint and why none of them gates
 ---
 
 # Markdown audit weight
 
 ## Bullets, paragraphs, and depth
 
-Bullet weight and depth are the checks that moved off `canon context audit`, carrying what they measured at the time. A top-level bullet reports past roughly 400 characters with continuation lines folded in and nested items left out. A run reports past roughly 40 rendered lines, measured at 80 columns, where a heading breaks one and so does a bold section marker taking the whole line at column zero, either ending in a colon, or holding one whole code span at any width, or running to 20 characters or fewer, skipping fenced blocks and exempting a flat peer list averaging under 130 characters a bullet and a run that is entirely table rows. Each file reports its longest run alone, so a second run past the checkpoint in the same file is never named.
+Bullet weight and depth are the checks that moved off `canon context audit`, carrying what they measured at the time. A top-level bullet reports past roughly 250 characters with continuation lines folded in and nested items left out. A run reports past roughly 40 rendered lines, measured at 80 columns, where a heading breaks one and so does a bold section marker taking the whole line at column zero, either ending in a colon, or holding one whole code span at any width, or running to 20 characters or fewer, skipping fenced blocks and exempting a flat peer list averaging under 130 characters a bullet and a run that is entirely table rows. Each file reports its longest run alone, so a second run past the checkpoint in the same file is never named.
 
 Every weight and depth measure counts the text a reader is shown. A link reduces to its anchor text and an autolink drops whole, since no reader is shown either destination. A backticked path stays counted, which is where these measures part from the ban scan `markdown-audit.md` describes: that one blanks a code span so a standard quoting its own banned character does not report itself, and discounting the same span here would under-report a paragraph carrying several. One file holds both span sets and each answers its own question.
 
@@ -17,7 +17,7 @@ The paragraph check measures both halves of one rule. `markdown.md` caps a parag
 
 A sentence boundary closes on terminal punctuation ahead of a capital or a code span. The capital is what keeps a version pin and a decimal from each reading as two sentences, and the code span is admitted beside it because a command name opening a sentence carries no capital to find.
 
-The paragraph weight sits at 700 and the bullet weight at 400. Both shipped at 400, because the paragraph number was borrowed from the bullet rule when the two checks landed together, and each has since been read against a sample of its own. They are separate checkpoints in the standard and separate patterns in the parser, so a read that moves one leaves the other where it is.
+The paragraph weight sits at 700 and the bullet weight at 250. Both shipped at 400, and the bullet number moved to 250 so the audit's warning and the `paragraph-growth` gate stage, which fails a bullet a branch adds or grows past it in a context entry, read one number. The paragraph number was borrowed from the bullet rule when the two checks landed together, and each has since been read against a sample of its own. They are separate checkpoints in the standard and separate patterns in the parser, so a read that moves one leaves the other where it is.
 
 ### The sample behind the paragraph number
 
@@ -45,6 +45,14 @@ The sample is thirty-six paragraphs against a reported population in the hundred
 That re-sample ran once the scan stopped counting link syntax as prose. Findings at 604, 633, and 677 characters each read as an ordinary four-sentence paragraph on one topic, density arrived around 760 and was plain by 860, and the move cut the weight half of the report roughly in half while leaving the sentence cap untouched.
 
 A bullet, a heading, a table row, a blockquote, a blank line, and a fence each end a paragraph, so a heavy bullet is reported by the bullet check alone and never counted twice.
+
+## Bullet stacks
+
+A run of consecutive top-level bullets reports past 5. A blank line, an indented continuation, and a nested item do not break the run, and a paragraph, a heading, or any other column-zero line does. A fenced line is skipped without breaking it. The count is of items rather than weight, so it catches a catalog of short bullets the 250-character checkpoint above passes.
+
+Two shapes are exempt. A run whose every item opens with a bold label or a link names its own subject per item and reads as a table of entries, and a numbered list states an order, so numbered items never count. `CHANGELOG.md` is exempt by name. Governance rules and `REQUIREMENT.md` sit outside the gate stage's scope rather than being exempted here, since a rule is one imperative per bullet.
+
+The audit reports a stack and never fails on one. The `bullet-stacks` stage in `canon gate run` fails the push, for the reason the length ceiling does: the audit also runs on plans and groundwork records kept out of version control.
 
 ## Cadence
 

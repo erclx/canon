@@ -5,19 +5,21 @@ description: Whether a skill earns its place, how to read a usage census, the ev
 
 # Catalog health
 
-## Whether a skill earns its place
+## Decisions
+
+### Whether a skill earns its place
 
 The redundancy audit in `canon/context/claude-plugin/skill-strategy/redundancy-audit.md` runs outward, against community counterparts. Inward, against the catalog's own two zero-cost tells, a folder wrapping something already reachable and a folder nobody calls, `create-skill` asks the first two before a folder exists, and `governance/rules/claude/skill.md` carries the same check for whatever creates a `SKILL.md` some other way.
 
 The third question, whether anything invokes the skill beyond the author typing its name, has no answer at creation time. It ships in the skill's own `REQUIREMENT.md` as a review criterion, read against a usage census rather than gated on up front.
 
-### What a verdict requires
+#### What a verdict requires
 
 A skill carries a verdict when these entries reach a disposition on it: a passage stating the reason it stays, or a redundancy audit line stating keep or borrow against a counterpart. Naming a skill inside another skill's disposition is a mention and settles nothing on its own.
 
 A skill with no plausible community counterpart, which covers most of the catalog since it wraps this toolkit's own catalogs and formats, skips a redundancy comparison outright. Where a plausible counterpart exists, the comparison and its outcome are recorded in the redundancy audit rather than restated per skill here.
 
-### Reading a usage census
+#### Reading a usage census
 
 A typed-prompt history and a tool-level transcript record are both per-machine readings rather than repository facts, and reading either one straight risks several traps:
 
@@ -25,6 +27,9 @@ A typed-prompt history and a tool-level transcript record are both per-machine r
 - The tool-level record's window is shorter than the typed history's, so recent adoption reads lower there until the window catches up.
 - A skill body read by path, rather than invoked through the tool, writes no record in either corpus.
 - A one-shot skill can only ever score in the typed record, since every target it acts on was scaffolded before any transcript window opened.
+
+##### What a count cannot show
+
 - The census spans whatever machine and project folders it was run against, so it does not reproduce on a second machine or a second pass.
 - A skill carrying `disable-model-invocation: true` cannot be reached by a description match at all, so its tool-level number counts explicit hand-offs rather than routing, and its floor is structural rather than earned.
 - A skill a sibling body chains carries a tool-level number that counts how often the chain ran rather than how often anyone wanted it specifically. Read it against the typed count of its chain head instead.
@@ -32,7 +37,7 @@ A typed-prompt history and a tool-level transcript record are both per-machine r
 
 A zero or near-zero reading is not the same as nobody reaching the skill. A skill cited by sibling bodies, exercised only by a sandbox arm, or named by a governance rule or docs page can carry real reach with no typed or routed call behind it. Read a census as one input to a conversation about a skill's place, never as a removal list on its own.
 
-### Every skill currently ships
+#### Every skill currently ships
 
 Every folder under `claude/skills/` currently ships. Each read against `create-skill`'s three questions either has no simpler surface already reaching its moment, or carries a nontrivial procedure worth a body of its own, or both, with one open exception: `youtube-transcripts` answers question 1 with a plain yes, since `canon transcripts <url>` already owns the fetch, the cleanup, and the frontmatter its body wraps. It is the strongest removal candidate the audit has found, and it stays a skill until the operator answers whether to drop it. A skill landing after a given census pass carries no verdict yet by construction, and a later pass closes that gap.
 
@@ -41,11 +46,14 @@ A few load-bearing patterns come out of running the three questions across the w
 - Four skills, `git-commit`, `git-branch`, `git-pr`, and `git-stage`, each partly overlap a Claude Code built-in, decided by `governance/rules/canon/git.md`. A project without governance has no such rule, and no seed fallback, since one scaffolded without the plugin carries no `canon:git-*` skills at all.
 - `auto-ship`'s ship step invokes `git-ship` directly and states the sequence once, in the body a reader also meets on its own, rather than restating it. The one thing the wrapping chain adds is marking the pull request as a draft, placed ahead of the CI watch rather than after it.
 - A skill reached almost entirely through a chain, such as most of the `git-ship` sequence, is not adopted by an operator typing its name. The chain is the denominator its call count measures, not demand, so read such a skill's reach against the typed count of whichever skill heads the chain.
+
+##### Reach and merging
+
 - The most-called skill in the catalog can carry no sandbox arm at all when its reach is already proven by how many chain steps route to it, and a skill with a real sandbox arm and a real citation can still score zero on every usage record. Neither instrument substitutes for the other.
 - A skill whose own body forbids merging into a neighbor, on a stated contradiction the merge would create, stays split even when its usage looks nominal next to that neighbor's.
 - `role-worker` and `role-planner` each answer question 1, whether a rule, a verb, or an existing skill already reaches this moment, with no: each asserts a role or a channel obligation nothing else in the catalog covers.
 
-## The eval wrapper not built
+### The eval wrapper not built
 
 `canon-skill-eval` is a proposed thin wrapper composing `claude plugin eval`, which is the one runner that scores whether a skill changes behavior rather than whether it conforms. It is not built, and this is where the reason sits, since a session proposing it again reads this entry before it finds a groundwork folder.
 
@@ -57,7 +65,7 @@ What ships instead is the half nothing blocks. `canon claude skills rank` and `r
 
 Neither measure has a recorded floor in `canon/config/baseline.json`, so `bun run check` never gates on the rank score or the collision count. That matters most when a change edits a skill's `description`, since the field is what the corpus scores and a widened one silently takes cases off its neighbors, including neighbors neither the plan nor the diff names. A standing collision and a fresh regression read identically in one run, so the only way to tell them apart is to measure both sides. The verb takes a project root as its argument, which makes the comparison cheap: extract the trunk with `git archive origin/main` into a scratch tree, rank that tree, and read the branch against it.
 
-## Reading the catalog for overlap rather than for size
+### Reading the catalog for overlap rather than for size
 
 A catalog-size trim is answered by the marketplace subset lever instead of a cut: `canon/context/claude-plugin/distribution.md` carries the result, where a curated marketplace root holding one symlink per kept skill loads a handful of skills at a fraction of the always-on token cost of the full plugin. A trim measured by catalog size reaches that lever at a cost already paid, which is what an overlap read answers instead.
 

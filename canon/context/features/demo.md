@@ -73,11 +73,11 @@ The command's purpose is running in someone else's project, so `src/demo/` ships
 - **Multiple launches in one test run risk an unexplained wedge.** A `drive` call has timed out here after other launches in the same run finished clean, with no cause found. Recent local runs with five launches have each finished clean in eleven to twelve seconds, which narrows this shape of the wedge without ruling it out.
 - **`extractFrames` clears its own naming pattern before ffmpeg runs, not after.** ffmpeg's `-y` only overwrites the indices a run produces, so a shorter re-extraction against the same video's stable output path, the demo loop's ordinary record-watch-fix-record cycle, would otherwise leave the previous run's tail in place and read it back as if it were still current, with `read-frames` unable to tell where the real frames stopped.
 
-## Hidden contracts
+### Hidden contracts
 
-- `src/demo/beats.ts` reads the human-facing draft `draft-screencast` writes, and `compile.ts` holds the plan type, the beats-to-plan transform, and validation of a plan read back off disk
-- `src/demo/pointer.ts` decodes cursor resources, scales hotspots, and builds the script injected into the page, `cursors.ts` holds the bundled artwork for the three pointer states, and `theme.ts` reads a cursor theme folder for `--cursor`
-- `src/demo/drive.ts` holds every browser reference the feature adds, and `src/commands/demo.ts` is wiring only, with the driver behind a dynamic import
-- `src/demo/timeline.ts` holds the timeline entry shape, the sidecar's name derived from the video path, and its writer, and `drive.ts` is its one caller
-- `src/demo/container.ts` converts the webm the driver wrote into mp4, into a gif behind `--gif`, and into numbered PNG frames on demand, as post-steps the compiler and the driver never see
-- `src/browser/engine.ts` holds the install command, the two ways the engine can be absent, the unreachable-server test, and the keyboard-modality press
+- **`src/demo/beats.ts`** reads the human-facing draft `draft-screencast` writes, and `compile.ts` holds the plan type, the beats-to-plan transform, and validation of a plan read back off disk
+- **`src/demo/pointer.ts`** decodes cursor resources, scales hotspots, and builds the script injected into the page, `cursors.ts` holds the bundled artwork for the three pointer states, and `theme.ts` reads a cursor theme folder for `--cursor`
+- **`src/demo/drive.ts`** holds every browser reference the feature adds, and `src/commands/demo.ts` is wiring only, with the driver behind a dynamic import
+- **`src/demo/timeline.ts`** holds the timeline entry shape, the sidecar's name derived from the video path, and its writer, and `drive.ts` is its one caller
+- **`src/demo/container.ts`** converts the webm the driver wrote into mp4, into a gif behind `--gif`, and into numbered PNG frames on demand, as post-steps the compiler and the driver never see
+- **`src/browser/engine.ts`** holds the install command, the two ways the engine can be absent, the unreachable-server test, and the keyboard-modality press

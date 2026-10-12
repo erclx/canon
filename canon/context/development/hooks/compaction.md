@@ -5,7 +5,9 @@ description: The PreCompact handoff hook and its manual and automatic channels, 
 
 # Compaction and turn hooks
 
-## The compaction handoff
+## Decisions
+
+### The compaction handoff
 
 `precompact-handoff.sh` is toolkit-only and sits on an event carrying no tool. It registers on `PreCompact` under both matchers, refuses the first `/compact` of a session with exit 2, and names the `session-compact` skill in the stderr text that exit 2 turns into the blocking reason. One sentence sends a session holding `canon:role-orchestrator` to its own handoff runbook, since the hook cannot tell that role from a plain session. On an automatic compaction it exits 0 and writes to stdout instead, so it blocks on `manual` and instructs on `auto`.
 
@@ -15,7 +17,7 @@ The once-per-session marker stays on `manual` alone, since a precompute pass dra
 
 The matcher separates a manual compaction from an automatic one. The vendor reference documents no event-specific payload field for `PreCompact`, so the script reads `trigger` and routes on it rather than trusting the matcher alone, since a registration widened to `*` would otherwise send an automatic compaction down the blocking path. An absent value takes the manual path, the conservative reading of a payload naming no trigger. The `hook_event_name` test ahead of it is what keeps the hook silent under `src/hooks/guard.test.ts`'s inert payload, which names a tool and no event.
 
-### The once-per-session marker
+#### The once-per-session marker
 
 Dedupe writes a marker under `.canon/tmp/hooks/precompact-handoff/` keyed on `session_id`, the way three other hooks here do, and on the manual path it is load-bearing rather than a courtesy. A hook that never stops blocking refuses every `/compact` the session will ever take. The first asks and the second proceeds, so a session that ignores the message is not asked twice. The hook asks and does not enforce, since nothing it can read tells it whether a map was written or was worth writing.
 
@@ -25,7 +27,7 @@ The marker write fails open. Both the `mkdir` and the truncation exit 0 rather t
 
 `ActingCase` carries an optional `stream` and `code`, so a hook reaching the session by blocking is asserted on stderr with exit 2 rather than the default stdout-with-exit-0 shape the guard test otherwise assumes. Five further cases sit outside the directory walk: an automatic compaction instructing rather than blocking, the same instruction arriving on a second automatic firing, a payload naming no trigger taking the manual path, a manual compaction blocking once and clearing, and stdout staying empty under a block.
 
-### What the client does with a blocked automatic compaction
+#### What the client does with a blocked automatic compaction
 
 This reading comes from the shipped binary, which is bun-compiled and carries its own source, so `grep -a` over it reads the code rather than a symbol table. What it shows diverges from the vendor page's documented account of the event. Measured at client version `2.1.251` on 2026-08-31.
 
@@ -35,7 +37,7 @@ What the client does not do is tell the session. The newer path writes `blockedB
 
 Exit-0 stdout is the channel that stays open on both triggers. The runner collects the output of every hook that succeeded without blocking into `newCustomInstructions`, and each path merges that into the instructions the summarizer is given. It is per invocation rather than accumulated, since the runner builds the list from the results of that single call and nothing outside it keeps them.
 
-### Why a count cannot bound the automatic trigger
+#### Why a count cannot bound the automatic trigger
 
 A precompute pass runs the same hook ahead of the real compaction with a payload identical to it, and every field is common to both, so nothing in it separates the two. When that pass is refused it removes its own record rather than marking it failed, which frees the slot and lets it arm again on the next turn with no backoff. Anything counted per session is therefore drained by firings the session never sees.
 
@@ -47,7 +49,7 @@ The immediate retry, alongside the precompute drain, is the second way a per-ses
 
 The operator's own `autoCompactWindow`, covered in `canon/context/development/hooks/settings.md`, is a lever this hook is not and does not reach. It decides whether a compaction happens at all, where the hook decides only what the summarizer is told when one does.
 
-## The silent turn hook
+### The silent turn hook
 
 `silent-turn.sh` registers on `Stop` with no `matcher` field at all, since the event carries no `tool_name` to filter on. It ships through the seed rather than staying toolkit-only, on the capability-seeding criterion in `canon/context/tooling/seeds.md`: the defect it reports is exactly as real in a scaffolded target as it is here, and nothing in its detection logic reads a toolkit-specific path.
 
@@ -55,7 +57,7 @@ The operator's own `autoCompactWindow`, covered in `canon/context/development/ho
 
 Bounding the read to one turn needs no heuristic. The payload's `prompt_id` matches, byte for byte, the `promptId` field the transcript stamps on that turn's initiating entry and on the tool-result echoes belonging to it, so the hook takes every line from the first such match to end of file. `Read` carries `input.file_path` the same way `Write` and `Edit` do, which is why the filter tests the tool's `name` rather than the field's presence.
 
-### Blocking once
+#### Blocking once
 
 The block-once guarantee rests on `stop_hook_active` alone, read fresh on every firing rather than backed by a session-keyed marker file. A forced continuation's `Stop` event carries `stop_hook_active: true` and passes clean. The blocking reason reaches the model as text it reasons about and acts on, unlike the suppressed notice `precompact-handoff.sh` meets on its own `auto` trigger.
 

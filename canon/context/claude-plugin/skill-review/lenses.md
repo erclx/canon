@@ -7,7 +7,9 @@ description: The review lenses that read the pull request body rather than the d
 
 `review-pr` Step 3 reads the diff through the ordinary lenses and reads three sections of the pull request body through lenses of their own. Each lens draws its bound at one section and reads neither the sections around it nor the rest of the body, since the Summary and Technical context carry the author's argument for the change, and a reviewing pass reading that argument while judging the change is most of what an independent vantage exists to avoid.
 
-## The Testing question
+## Decisions
+
+### The Testing question
 
 A lens reads the `## Testing` section against what the repository can drive. It reads the claim the author made about verifying the change, which is the one part of a description a reviewing session can falsify: the branch author cannot see what a sibling branch drove the same day.
 
@@ -17,7 +19,7 @@ A question riding on a close-out would land on a thread reporting nothing owed, 
 
 What it tests against is `claude/skills/git-pr/references/pr.md`, which says what makes a human required: a capability the agent lacks, never the cost of the run. A refusal the author actually met counts and names itself, and a refusal predicted and never met does not. `review-pr` reads that file through the sibling path `${CLAUDE_SKILL_DIR}/../git-pr/references/pr.md`, the same route every skill citing it from outside `git-pr` takes.
 
-## The stale ticked box
+### The stale ticked box
 
 A second check reads the opposite half of the same section: a ticked box rather than an unchecked one. A box stays true only as long as what it names does, and a fix commit landing after review is what breaks that, so a box naming a test a later commit replaced can reach the merge record with nothing positioned to catch it.
 
@@ -27,7 +29,7 @@ Confirming a file's existence keys off `<headRefOid>` rather than local `HEAD`. 
 
 That resolution comes off `canon pr head --json`, taking the record's `tip`, rather than off a pull request object's own field, which can trail the branch ref by up to a minute after a push with nothing on it saying so. Step 1 still reads `number`, `headRefName`, `title`, and `body` in one `gh` call and takes the head from the verb instead, which costs one extra remote round trip. The `<short-sha>` naming the Step 4 body file is drawn from the same tip, so a body file and the ancestor test beside it name one commit rather than two.
 
-## The reviewer request section
+### The reviewer request section
 
 `claude/skills/git-pr/references/pr.md` defines `## For the reviewer` as what the reviewer should confirm, one bullet per request, and names that reader as the reviewing session rather than leaving it ambiguous between a person and a session. A lens reads that section and stops there.
 
@@ -37,7 +39,7 @@ Owed narrows to a bullet the pass could not answer, rather than every bullet a p
 
 A pass whose bullets are all answered takes the closed heading with the block standing in for the canned line, the same shape a withdrawn finding already takes.
 
-## The key-changes claim check
+### The key-changes claim check
 
 Step 3 also checks `## Key changes`, through `references/key-changes.md`: `canon pr key-changes` compares the paths that section claims against the pull request's own changed-file list, and the step files a claim the diff does not carry under the same `**PR body**` block the stale ticked box takes, since what both corrupt is the merge record rather than a file in the diff.
 

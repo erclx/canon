@@ -45,6 +45,9 @@ Promoting, demoting, and archiving a row all write `.canon/tasks/priority.md`, a
 - Edit the file with the file-editing tool. A shell stream editor and an inline string replace both exit clean on a non-match, so a promotion that matched nothing leaves the board wrong with nothing reporting it, and the file-editing tool errors instead.
 - Write both halves of a move before reporting it. A row removed from one surface and not written to the other leaves a task file nothing names, and the folder is gitignored with no history to recover the row from. `canon tasks validate` reports that state, so run it after any move.
 - Put the reason a row sits where it does in its Waiting on cell. Position is the ordering and the cell is where the ordering's rationale lives, so a row promoted with the cell left alone carries an order the next sweep cannot check.
+
+### Columns and read-back
+
 - Put a pointer in the Plan column, never prose. `## Run now` claims a written plan covers every open outcome, and `auto-ship` refuses at its guard when it follows the column and finds no plan, which spends a worker dispatch to learn what the row should have said.
 - Name the file set in the Touches column. It feeds the merge order and the shared paths a dispatch names, and the hold call in step 6 is only checkable later when the sets are written down rather than reasoned once and discarded.
 - Re-resolve every Plan pointer after anything archives a plan

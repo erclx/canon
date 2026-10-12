@@ -5,7 +5,9 @@ description: The release pull request, the publish job and its credential prefli
 
 # Releases
 
-## The release pull request
+## Decisions
+
+### The release pull request
 
 `release-please.yml` runs on every push to `main` and keeps a release pull request open, rewriting it as commits land. Merging that pull request is what cuts a tag and writes `CHANGELOG.md`, so a release is a merge rather than a hand-run command. `claude/skills/git-commit/references/versioning.md` specifies both surfaces.
 
@@ -23,7 +25,7 @@ The tool writes four files, and prettier disagrees with its serialization of two
 
 `.release-please-manifest.json` and `package.json` need no entry, since `prettier --check` already accepts what the tool writes for both, and an ignore over a file the formatter already agrees with would hide real drift later. Treat the four files as one unit, since covering only one at a time misses that the others need the same fix.
 
-## The publish job
+### The publish job
 
 A `publish` job on the same workflow ships the package to the registry as `@erclx/canon`. It is gated on the `release_created` output rather than on the push, so it fires once per release rather than on every commit that lands on `main`, and it checks out `tag_name` so the tarball matches the tag rather than whatever `main` moved to afterward. It publishes with `--ignore-scripts`, because `npm publish` runs `prepare` before packing and `prepare` is `husky`, which a job that installs nothing cannot resolve. The registry credential is an `NPM_TOKEN` repository secret, the one piece of the release path that is not in version control.
 
@@ -35,7 +37,7 @@ The env form `NPM_CONFIG_IGNORE_SCRIPTS=true` fails the same way, and so does `n
 
 A preflight step gates the release job on that credential before release-please runs, so a tag is never cut that cannot be published. It calls the registry's `whoami` endpoint with the token rather than testing the variable is non-empty, which is what catches an expired or revoked token as well as a missing one. The cost is that every push to `main` fails while the secret is absent or stale, including pushes that would cut no release. That is the intended trade, since the alternative reports the same fault after the tag and the GitHub release already exist, where the only repair is publishing the tag by hand.
 
-## Authentication and manual dispatch
+### Authentication and manual dispatch
 
 The release step authenticates with a `RELEASE_PLEASE_TOKEN` repository secret rather than the default `GITHUB_TOKEN`. Under the default token the release pull request is authored by `app/github-actions`, which GitHub counts as a first-time contributor, so `verify.yml` queued in `action_required` and reported no checks until a maintainer approved the run on every release. A pull request authored by the token owner runs its checks unattended.
 
@@ -53,7 +55,7 @@ The `publish-check` job is what reports the disagreement. It runs on every push,
 
 It reads only the newest release, so a lost release followed by a successful one goes unreported, which is where 5.0.0 sits. That version stays a GitHub-only release by the operator's decision, since nobody could have installed it and 5.1.0 carries its change.
 
-## The capture-frame refresh
+### The capture-frame refresh
 
 `refresh-capture-frames.yml` installs `fonts-noto-mono` before the capture step, because the frames declare Noto Sans Mono and the capture guard refuses any render that falls back to another face. Nothing in the gate sees the absence, since the workflow runs only after a merge, so a `Check Frame Font` step fails by family name ahead of the capture. On Ubuntu 24.04 that package ships Noto Sans Mono and `fonts-noto-core` ships none of it.
 

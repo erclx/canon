@@ -13,7 +13,9 @@ The `post-merge` git hook chains the archive. Every other step fires from `auto-
 
 The hook archives rather than announcing. Announcing alone was the alternative, and both of its reasons fail. `index.md` regenerating only from a `PostToolUse` hook a shell-side `mv` never fires does not hold, since `canon indexes regen` is a CLI verb and the command regenerates the index as part of the move. A gitignored board leaving no diff to review with nobody watching holds only for a blind sweep of every all-`[x]` task, and stops holding once the hook can name which task a merge closed.
 
-## Naming the pull request a merge closed
+## Decisions
+
+### Naming the pull request a merge closed
 
 A branch name cannot carry the link, because every merge on `main` is a squash with a single parent and the branch commits never land, so an ancestry test fails on every shipped task. The number in the subject is the only offline signal.
 
@@ -23,7 +25,7 @@ That number has to name an open pull request. `gh pr view` resolves by head bran
 
 `git-followup` needs nothing, since its guard stops unless the state is `OPEN`. The cause sits in `git-branch`, which has no collision check against a name that already carried a pull request, and that stays on the board because scoping the lookup makes a reused name survivable.
 
-## Where the gates live
+### Where the gates live
 
 The gates all live in `canon tasks archive` rather than in the shell. A hook that pre-filtered would duplicate them in a language where the outcome test already needed an errexit comment, and the skill calling the same command is what stops the attended and unattended paths archiving differently.
 

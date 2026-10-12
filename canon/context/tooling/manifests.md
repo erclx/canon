@@ -9,6 +9,38 @@ description: Manifest blocks and what each injects, which layer wins a duplicate
 
 Each stack's `manifest.toml` controls what sync injects, and the extends chain decides which layer's file a target receives. `internal/rules/claude/tooling-reference.md` carries the syntax invariants and the manifest-to-reference symmetry, globbing `tooling/*/manifest.toml` beside `tooling/*/reference.md` so an edit to either side loads both, since the manifest is the side that moves first. `internal/standards/tooling-reference.md` carries the symmetry in prose.
 
+## Layout
+
+### Manifest blocks
+
+`[stack]` is the only required block.
+
+```toml
+[stack]
+name = "stack-name"     # must match the folder name under tooling/
+extends = "parent"      # parent stack to inherit from, empty string if none
+runtime = "runtime-name"      # reserved, read by nothing
+scaffold = "scaffold-command"  # bootstrap command, read by sandbox/tooling/upstream.ts
+```
+
+```toml
+[dependencies.dev]
+packages = []
+
+[scripts]
+"script-key" = "command --flag"
+
+[gitignore]
+"# group-label" = ["pattern/", ".file"]
+
+[verify]
+prepare = "command to run after scaffold, before sync"
+```
+
+`[dependencies.dev]` injects into `devDependencies`, adding only missing packages. `[scripts]` injects into the `scripts` block, adding only missing keys. `[gitignore]` appends each group as a comment header plus one line per path, with single-word labels such as `# VSCode` so headers stay stable across renames. `[verify] prepare` declares a post-scaffold, pre-sync setup command for `canon tooling verify`, for an integration that cannot ship as a golden config, such as astro's `bunx astro add react --yes`.
+
+`mergeSections` in `src/tooling/gitignore.ts` writes a group's header only when the whole group is missing from the target. A group the target already carries takes its new entries bare at the end of the file, so an entry added to a shipped group reaches an already-scaffolded project detached from its header. Presence is re-tested against the growing file and ignores a trailing slash, so `.canon/tmp` and `.canon/tmp/` count as one entry.
+
 ## Decisions
 
 ### Which layer wins
@@ -44,36 +76,9 @@ No exception mechanism exists. The bare `.canon/` spelling admits no carve-out, 
 - Syncing a monorepo subtree without `--skip base` re-drops husky per subtree. Git honors only one `core.hooksPath`, so the extra hook dirs silently break.
 - `--skip base` relies on the layer boundary holding: repo-root-once configs live in `base`, and per-root configs live in `web` and the adapters. Moving a per-root config into `base` breaks the split unless base names it under `[sync] per_root`.
 - `[sync] per_root` is that one named exception, and base lists its verify runner and phase list there. `resolveChain` keeps a skipped stack carrying the key as a restricted manifest, holding those configs and no seeds, scripts, dependencies, or gitignore entries, so `scan`, `injectConfigs`, and `tooling diff` agree through `configFiles` and `seedFiles`. The chain stamp leaves the restricted stack out, and `buildToolingReport` restores it by re-resolving the recorded leaf with the first unrecorded ancestor as the skip, so `canon sync --check` measures the per-root files in a skipped subfolder without flagging every config the skip withheld.
+
+#### Subfolder detection
+
 - A target below its git toplevel syncs as a subfolder, read in `src/tooling/subfolder.ts` by comparing `git rev-parse --show-toplevel` against the target's realpath. Every `.github/` config or seed moves into the scan's `withheld` field and stays out of `totalChanges`, since GitHub reads workflows only at the root. `scan`, `injectConfigs`, and `injectSeeds` all call `isWithheldInSubfolder`, so the diff and the write cannot disagree. A target outside any repository reads as a root.
 - Base's `scripts/verify.ts` runs a phase the nearest `scripts/verify.json` requires and fails when its script is undeclared. A base-owned phase, being `format` or `check:format`, that the list leaves out runs only when the folder's `package.json` declares its script, and `check:shell`, which the `shell` add-on declares, runs on the same terms after probing for `shfmt` and `shellcheck`, so web, python, go, and php pass in a `--skip base` subfolder while base alone still fails on a missing one. The run stops naming `bun init` when no `package.json` exists, and names `canon tooling sync` when no `verify.json` does rather than falling back to base's list.
 - A sync into a folder with no `package.json` installs the gitignore alone and warns with every dev dependency and script it skipped, rather than seeding a `package.json` that would pick a package manager and a name for the target.
-
-## Manifest blocks
-
-`[stack]` is the only required block.
-
-```toml
-[stack]
-name = "stack-name"     # must match the folder name under tooling/
-extends = "parent"      # parent stack to inherit from, empty string if none
-runtime = "runtime-name"      # reserved, read by nothing
-scaffold = "scaffold-command"  # bootstrap command, read by sandbox/tooling/upstream.ts
-```
-
-```toml
-[dependencies.dev]
-packages = []
-
-[scripts]
-"script-key" = "command --flag"
-
-[gitignore]
-"# group-label" = ["pattern/", ".file"]
-
-[verify]
-prepare = "command to run after scaffold, before sync"
-```
-
-`[dependencies.dev]` injects into `devDependencies`, adding only missing packages. `[scripts]` injects into the `scripts` block, adding only missing keys. `[gitignore]` appends each group as a comment header plus one line per path, with single-word labels such as `# VSCode` so headers stay stable across renames. `[verify] prepare` declares a post-scaffold, pre-sync setup command for `canon tooling verify`, for an integration that cannot ship as a golden config, such as astro's `bunx astro add react --yes`.
-
-`mergeSections` in `src/tooling/gitignore.ts` writes a group's header only when the whole group is missing from the target. A group the target already carries takes its new entries bare at the end of the file, so an entry added to a shipped group reaches an already-scaffolded project detached from its header. Presence is re-tested against the growing file and ignores a trailing slash, so `.canon/tmp` and `.canon/tmp/` count as one entry.

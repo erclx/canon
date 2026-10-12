@@ -15,7 +15,11 @@ import {
   captureStamps,
   clientCommandCitations,
   designProse,
+  bulletStacks,
   documentCeiling,
+  inGrowthScope,
+  inStackScope,
+  paragraphGrowth,
   folderEchoedNames,
   isFolderEchoedName,
   readmeCitations,
@@ -1682,5 +1686,200 @@ describe('unreferencedRules', () => {
 
     expect(report.failure).toBe('An opt-in rule has no route to a project')
     expect(report.emissions[0]?.text).toContain('999-retired')
+  })
+})
+
+describe('the bullet and growth scopes', () => {
+  it('should hold the cap over context, docs, and both skill trees', () => {
+    expect(inStackScope('canon/context/cli/overview.md')).toBe(true)
+    expect(inStackScope('docs/agents/commands.md')).toBe(true)
+    expect(inStackScope('claude/skills/git-pr/SKILL.md')).toBe(true)
+    expect(inStackScope('claude/skills/git-pr/references/pr.md')).toBe(true)
+    expect(inStackScope('.claude/skills/internal-docs/SKILL.md')).toBe(true)
+  })
+
+  it('should leave rules and requirement records outside the cap', () => {
+    expect(inStackScope('governance/rules/canon/git.md')).toBe(false)
+    expect(inStackScope('claude/skills/git-pr/REQUIREMENT.md')).toBe(false)
+    expect(inStackScope('canon/REQUIREMENTS.md')).toBe(false)
+  })
+
+  it('should hold growth over context entries alone', () => {
+    expect(inGrowthScope('canon/context/cli/overview.md')).toBe(true)
+    expect(inGrowthScope('docs/agents/commands.md')).toBe(false)
+    expect(inGrowthScope('claude/skills/git-pr/SKILL.md')).toBe(false)
+  })
+})
+
+describe('bulletStacks and paragraphGrowth', () => {
+  let root: string
+
+  const refuse = () => {
+    throw new Error('these measures read the tree and run nothing')
+  }
+
+  const context = (): MeasureContext => ({
+    root,
+    ci: false,
+    run: refuse,
+    cli: refuse,
+  })
+
+  const git = (...args: string[]): string =>
+    execaSync('git', ['-C', root, ...args], {
+      env: gitEnv(),
+      extendEnv: false,
+    }).stdout
+
+  const write = (path: string, body: string): void => {
+    const full = join(root, path)
+    mkdirSync(join(full, '..'), { recursive: true })
+    writeFileSync(full, body)
+  }
+
+  const items = (count: number): string =>
+    Array.from({ length: count }, (_, i) => `- item ${i}`).join('\n')
+
+  const sentence = (n: number): string => `${'word '.repeat(n)}end.`
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-length-stages-'))
+    git('init', '--initial-branch=main')
+    git('config', 'user.email', 'a@b.c')
+    git('config', 'user.name', 'a')
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  const commitBase = (): void => {
+    git('add', '-A')
+    git('commit', '-m', 'base')
+    git('checkout', '-b', 'topic')
+  }
+
+  describe('bulletStacks', () => {
+    it('fails a stack in scope, naming the file and its longest run', async () => {
+      write('canon/context/a.md', `# A\n\n${items(6)}\n`)
+
+      const report = await bulletStacks(context())
+
+      expect(report.failure).toContain('canon/context/a.md:3 6 bullets')
+    })
+
+    it('passes the same stack in governance rules', async () => {
+      write('governance/rules/a.md', `# A\n\n${items(9)}\n`)
+
+      const report = await bulletStacks(context())
+
+      expect(report.failure).toBeUndefined()
+    })
+
+    it('passes a run whose every item opens with a bold label', async () => {
+      const labelled = Array.from(
+        { length: 8 },
+        (_, i) => `- **Item ${i}.** text`,
+      ).join('\n')
+      write('docs/a.md', `# A\n\n${labelled}\n`)
+
+      const report = await bulletStacks(context())
+
+      expect(report.failure).toBeUndefined()
+    })
+  })
+
+  describe('paragraphGrowth', () => {
+    it('passes an unchanged long paragraph', async () => {
+      write('canon/context/a.md', `# A\n\n${sentence(150)}\n`)
+      commitBase()
+      write('canon/context/b.md', '# B\n\nShort.\n')
+
+      const report = await paragraphGrowth(context())
+
+      expect(report.failure).toBeUndefined()
+    })
+
+    it('fails a paragraph one word longer than its base', async () => {
+      write('canon/context/a.md', `# A\n\n${sentence(150)}\n`)
+      commitBase()
+      write('canon/context/a.md', `# A\n\n${sentence(151)}\n`)
+
+      const report = await paragraphGrowth(context())
+
+      expect(report.failure).toContain('canon/context/a.md:3 paragraph')
+    })
+
+    it('passes a long paragraph moved under a new heading unchanged', async () => {
+      write('canon/context/a.md', `# A\n\n${sentence(150)}\n`)
+      commitBase()
+      write('canon/context/a.md', `# A\n\n## Decisions\n\n${sentence(150)}\n`)
+
+      const report = await paragraphGrowth(context())
+
+      expect(report.failure).toBeUndefined()
+    })
+
+    it('passes a long paragraph moved into a sibling entry', async () => {
+      write('canon/context/a.md', `# A\n\n${sentence(150)}\n`)
+      commitBase()
+      write('canon/context/b.md', `# B\n\n${sentence(150)}\n`)
+
+      const report = await paragraphGrowth(context())
+
+      expect(report.failure).toBeUndefined()
+    })
+
+    it('passes an unchanged 300-character bullet and fails a grown one', async () => {
+      const bullet = (n: number) => `- ${sentence(n)}`
+      write('canon/context/a.md', `# A\n\n${bullet(60)}\n`)
+      commitBase()
+      write('canon/context/a.md', `# A\n\n${bullet(60)}\n${bullet(61)}\n`)
+
+      const report = await paragraphGrowth(context())
+
+      expect(report.failure).toContain('bullet')
+      expect(report.failure).toContain('canon/context/a.md:4')
+      expect(report.failure).not.toContain('canon/context/a.md:3')
+    })
+
+    it('does not count a nested bullet into its parent', async () => {
+      const nested = `- short\n${Array.from({ length: 4 }, () => `  - ${sentence(20)}`).join('\n')}`
+      write('canon/context/a.md', '# A\n\nBase.\n')
+      commitBase()
+      write('canon/context/a.md', `# A\n\n${nested}\n`)
+
+      const report = await paragraphGrowth(context())
+
+      expect(report.failure).toBeUndefined()
+    })
+
+    it('passes a grown paragraph in docs, which only the audit warns on', async () => {
+      write('docs/a.md', `# A\n\n${sentence(150)}\n`)
+      commitBase()
+      write('docs/a.md', `# A\n\n${sentence(160)}\n`)
+
+      const report = await paragraphGrowth(context())
+
+      expect(report.failure).toBeUndefined()
+    })
+
+    it('passes a grown paragraph in a skill, which only the audit warns on', async () => {
+      write('claude/skills/x/SKILL.md', `# X\n\n${sentence(150)}\n`)
+      commitBase()
+      write('claude/skills/x/SKILL.md', `# X\n\n${sentence(160)}\n`)
+
+      const report = await paragraphGrowth(context())
+
+      expect(report.failure).toBeUndefined()
+    })
+
+    it('reports unmeasured where no merge base resolves', async () => {
+      write('canon/context/a.md', `# A\n\n${sentence(150)}\n`)
+
+      const report = await paragraphGrowth(context())
+
+      expect(report.unmeasured).toBeDefined()
+    })
   })
 })

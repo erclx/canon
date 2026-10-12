@@ -26,10 +26,15 @@ Skip nothing on the ground that it is obviously fine. A rule is on this list bec
 
 ## Composition
 
+### Section rhythm
+
 - [ ] No layout family used twice. Eight sections carry at least four families
 - [ ] No three consecutive sections sharing the image-and-text split
 - [ ] Small uppercase labels above headings number no more than one per three sections, per `interface-casing`
 - [ ] At most one horizontal marquee
+
+### Content and first screen
+
 - [ ] Grid cells equal content items, with no blank tile filling a gap
 - [ ] Lists over five items use something other than a longer list
 - [ ] The first screen carries the point and the primary action without scrolling
@@ -39,9 +44,14 @@ Skip nothing on the ground that it is obviously fine. A rule is on this list bec
 
 Skip this group where the surface draws on a system already settled.
 
+### Space and type
+
 - [ ] Every gap comes from one scale, and the distinct spacing values number under about eight
 - [ ] Space between groups exceeds space within them
 - [ ] The type scale carries five to seven steps, each visibly different from its neighbors
+
+### Color
+
 - [ ] The accent is rare enough to read as an accent
 - [ ] Neutrals sit in one family at one temperature
 - [ ] Adjacent surfaces separate by a little and content separates from ground by a lot
@@ -51,6 +61,9 @@ Skip this group where the surface draws on a system already settled.
 
 - [ ] Shared elements align across every item in a row, and actions form one line
 - [ ] Nothing centered by arithmetic that reads off-center
+
+### Type detail
+
 - [ ] No orphaned word closing a heading
 - [ ] Body text measure is capped
 - [ ] Changing numbers set in tabular figures
@@ -61,6 +74,9 @@ Skip this group where the surface draws on a system already settled.
 - [ ] Every visible string re-read in one pass, with anything broken, unclear or performatively clever rewritten
 - [ ] Every number either real, labeled as sample, or removed
 - [ ] No placeholder that reads as placeholder: generic names, generic company names, reused portraits, identical dates
+
+### Wording
+
 - [ ] No filler verbs
 - [ ] Sentence case throughout, with exceptions per `interface-casing`
 - [ ] Every claim about what the product does is a thing it does

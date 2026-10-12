@@ -43,6 +43,9 @@ A reference shared across skills lives in the `references/` of the skill that ow
 - Cite another skill's reference as `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md`. The plugin ships the skills side by side, so the sibling path resolves in every install. Name the owner skill rather than copying the file.
 - State the path once per body, at the site that reads the reference. A later mention of a reference the body already read stays bare, since repeating the path at every mention is noise rather than instruction.
 - A guard on a reference's presence names the file rather than the folder holding it, since a folder test answers for a sibling that happens to be there.
+
+### Form and ownership
+
 - Use `${CLAUDE_SKILL_DIR}`, never a bare `../../` and never `${CLAUDE_PLUGIN_ROOT}`, since only the first expands before the body reaches the model.
 - Cite a shared procedure, never restate it. A procedure two or more skills execute gets one definition in its owner's reference and a citation in each body.
 - Keep the trigger in the body and the procedure in the reference. The citing skill states when the procedure runs and what it runs against, since that varies per skill and the reference cannot know it.

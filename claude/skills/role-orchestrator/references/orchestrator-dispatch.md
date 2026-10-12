@@ -38,8 +38,11 @@ The type the verb reports is fixed at `feat`, which is safe because a branch typ
 Run `canon tasks plan-answers <plan> --json` and read `launchable` off the record.
 
 - `launchable: true`: the plan answers itself, so proceed to the branch check.
-- `launchable: false`: the row is not dispatchable. Report every entry in `open`, each carrying the question label and the reason its suggestion gave for needing a person, and hand the row to the human-launch line below. Never fill the slot on the operator's behalf, which is the one move the plan standard forbids outright.
+- `launchable: false`: the row is not dispatchable. Report every entry in `open`, each carrying the question label and the reason its suggestion gave for needing a person, and hand the row to the human-launch line below. Never fill the slot on the operator's behalf, the one move the plan standard forbids outright.
 - `reason: archived`: the row's plan sits in `.canon/plans/archive/` and describes work that already shipped. Repoint the row at a live plan rather than dispatching, since `auto-ship` Step 1 refuses the same file and the worker would meet that refusal after the launch spent.
+
+### Refusals and staging
+
 - The command refuses for any other reason, or the record carries no `launchable` key: treat the row as unverified rather than clear, name what could not be read, and fall back to the human. A gate that reads nothing and proceeds is the gate not running.
 - The same read also refuses a plan still staging its batches in one file with `**Batch N**` sub-headings. That reports as an entry in `open` labeled `Batch staging`, so a staged plan reads as `launchable: false` the same way an unanswered operator call does, and the row waits on a split rather than on the operator.
 - An entry labeled `Stacked sibling` means the plan stacks on a live sibling it mostly shares files with, so the row waits on a fold into that sibling or on a `Judged apart from` constraint line, and not on the operator.
@@ -62,7 +65,7 @@ Run `canon sessions list --branch <type>/<slug> --json` and read `claimed` off t
 
 Reading `claimed` off the record is what keeps this a check rather than a rule a session can talk itself out of. The field is already the composed answer across the worktree listing, the live session roster, and the refs that name the branch, so nothing here re-derives the OR.
 
-`refs` is the reading that catches a shipped row. A branch behind a merged pull request has no worktree and no session, so the check answered clear on one until a worker refused the instruction and named the consequences: a second pull request against a head GitHub already shows merged, a row whose pull-request line points at two numbers, and the `ambiguous` refusal `canon tasks archive` documents.
+`refs` is the reading that catches a shipped row. A branch behind a merged pull request has no worktree and no session, so the check answered clear on one until a worker refused the instruction and named the consequences: a second pull request against a head GitHub shows merged, a row whose pull-request line points at two numbers, and the `ambiguous` refusal `canon tasks archive` documents.
 
 What the ref read cannot see is a branch pushed from another machine since the last fetch. A `git ls-remote` per dispatch costs 0.438s against 0.001s, so the gap is recorded rather than closed.
 
@@ -103,7 +106,7 @@ A `claude --bg` session inherits the launching session's model, so an orchestrat
 - Planner: `opus` for a row that changes a contract others consume, spans modules, or needs slicing. `sonnet` for a narrow row, even one inside a hook or governance folder.
 - Worker, and the review-address pass against the findings in hand: `opus` where the plan leaves a cross-module call tests will not settle. `sonnet` where it pins the fix, however long.
 - Code reviewer: `opus` where a miss would ship unseen, a change to behavior no test or gate exercises that other surfaces read. `sonnet` otherwise, a one-line hook edit included.
-- UI reviewer: always `sonnet`. A cheaper tier was measured on the same checklist and passed real defects as clean while judging the taste boxes it was told to leave.
+- UI reviewer: always `sonnet`. A cheaper tier was measured on that checklist and passed real defects as clean while judging taste boxes it was told to leave.
 
 ## Pick local or cloud
 
@@ -117,7 +120,7 @@ Read `${CLAUDE_SKILL_DIR}/references/orchestrator-launch.md` once every check ab
 
 ## Fall back to the human
 
-Hand the row to the human-launch line in step 4 instead of dispatching when any of these hold, and name which one: the plan still waits on the operator, the plan-answer read could not be taken, the collision check refused, or the row holds behind a track already out under the conflict check, on a dependency, a contract, a relocation, a sweep, or a stated reason. A shared file alone is not on that list.
+Hand the row to the human-launch line in step 4 instead of dispatching when any of these hold, and name which one: the plan still waits on the operator, the plan-answer read could not be taken, the collision check refused, or the row holds behind a track already out under the conflict check, on a dependency, a contract, a relocation, a sweep, or a stated reason. A shared file alone is not listed.
 
 The first of those four is the one that reaches a person rather than the board. A row held on its branch or under the conflict check waits on the wave clearing, where a row held on its plan waits on an answer only the operator can give, so hand that one over with the question label and its stated reason attached rather than as a name and a refusal.
 

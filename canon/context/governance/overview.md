@@ -14,6 +14,9 @@ The rules are content rather than code, so the domain is a catalog plus a comman
 - `governance/rules/` owns the source rules, organized into one subfolder per domain
 - `governance/stacks/` owns stack definitions as toml, each declaring an optional extends chain and a rules list whose entries name either a rule or a whole rule folder
 - `internal/rules/` owns rules that govern toolkit authoring alone, installed into this repository's copy and shipped to no target
+
+### Consumption and code
+
 - `internal/governance.toml` records which stack and extras this repository consumes, and `src/gov/consumed.ts` produces the copy from it
 - `src/gov/` owns the gov half of every verb: the stack reader, the rule lookup, the catalog behind `list`, the install copy, the sync adapter, and the payload builder behind `build`
 - `src/sync/engine.ts` owns the shared sync engine every domain runs on

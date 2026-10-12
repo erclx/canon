@@ -9,7 +9,9 @@ description: Repo maintenance scripts, the guard stages check fires, and the bar
 
 What sequences those guards is not here. `bun run check` resolves to `canon gate run`, and the stage table, the changed-file scoping, and every threshold comparison sit in `src/gate/`, described in `canon/context/development/gates/overview.md`. Each check here stayed the script it already was, so this folder is what the gate runs rather than what decides when to run it.
 
-## The catalog
+## Layout
+
+### The catalog
 
 - `bootstrap.sh`, run as `bun run bootstrap`: installs deps, links the CLI globally, and appends the Claude Code aliases to `~/.zshrc`. Idempotent and re-runnable, which cuts both ways on the alias block: `install_aliases` returns at the marker check, so growing the canonical block reaches nobody who already ran it until they delete the marked block and re-run
 - `regen-hero.ts`: fills every `assets/captures/*.html.tmpl` and writes the `.html` beside it. The catalogs supply the counts so no figure on the README frame is hand-maintained, and `buildDesignCss` without its component half supplies the palette so neither frame carries its own copy of a hex. Clone-only, and it writes the HTML while `canon capture` renders each image and stamps both sides with a digest.
@@ -18,9 +20,11 @@ What sequences those guards is not here. `bun run check` resolves to `canon gate
   - The verb layer is skipped, so the checkout-mismatch warning that `gov list`, `claude skills list`, and `tooling list` print does not reach the script. It guards a globally linked binary resolving to the main checkout, which a script run by path never does.
 - `check-color-source.sh`: walks `scripts/` and `sandbox/` and fails when any `.sh` other than `scripts/lib/ui.sh` spells an SGR escape, so one answer sits behind every bash writer
 
-The five boundary checks that used to sit here as scripts are measures in `src/gate/boundaries.ts`, described under the plugin boundary stage below.
+The five boundary checks are measures in `src/gate/boundaries.ts`, described under the plugin boundary stage below.
 
-## What the hero frame chooses and what it samples
+## Decisions
+
+### What the hero frame chooses and what it samples
 
 `src/capture/frame-values.ts` carries a `FEATURED_SKILLS` list of ten chosen names for the skills column rather than sampling it, because an even sample lands on the entries closest to commodity and on none of the workflow the toolkit exists to carry. The run fails when a chosen name is absent from the catalog or when the list is not exactly `LISTED` long, so renaming or retiring a shipped skill breaks the Hero stage until the list is updated. The length assert is not decoration: `SKILL_MORE` counts down from `LISTED` rather than from the number of names rendered, so a list of any other length prints a remainder wrong by the difference.
 
@@ -28,7 +32,7 @@ The rules column still samples, but only over rules a stack names. A rule no sta
 
 The command count in the stats row reads `grep -c '^import { register as ' src/cli.ts`, since the commands have no `--json` catalog and `--help` is hand-authored ASCII that drifts from what is registered. A command added without that import shape leaves the frame's count low and nothing reports it.
 
-## Reading a JSON payload from bash
+### Reading a JSON payload from bash
 
 `bun --eval` exits 0 when its script throws while stdin is a pipe, and exits 1 on the same throw with no pipe attached. A script piping a catalog into it and branching on `$?` therefore reads a parse failure as a success. A throw also prints nothing, so the empty output then reads as whichever clean result an empty string means, which is how a broken catalog reports as a clean sweep.
 
@@ -36,18 +40,18 @@ Print a sentinel from inside the eval and branch on that instead, covering a pay
 
 No stage carries either shape. Every reading that needs a payload runs through `src/gate/measures.ts`, where a `try` around `JSON.parse` separates the two states with nothing to carry between processes, and the guidance above stays here for the next script that reaches for the interpreter.
 
-## Verification
+### Verification
 
 CI runs every stage through `bun run check:ci`, which passes `--all`. The local run scopes shell, types, and tests to the changed-file set, so it is the weaker of the two. See `canon/context/ci/overview.md`.
 
 The `core.bare` repair that runs ahead of every stage is TypeScript now, in `src/worktrees/bare-flag.ts`. `canon/context/claude-plugin/skill-procedures/worktree-entry.md` carries its narrative.
 
-### Stage gotchas
+#### Stage gotchas
 
 - Nine stages call this checkout's CLI, and each reaches it through `cliRunner` in `src/gate/sequencer.ts` rather than through a globally installed `canon`, which resolves to the main checkout no matter which worktree is running and would have the gate measure the wrong tree.
 - Every stage pays its own process, the CLI ones a bun startup apiece, which is what the shell script paid too. The stages calling the CLI sit together in `STAGES` for the ordering that buys a reader, not for any saved startup.
 
-### The seed-standards stage
+#### The seed-standards stage
 
 - The seed-standards stage discovers its roots rather than listing them, through `seedRoots` in `src/tooling/seeds.ts`, which the Seed independence measure imports as well, so a new stack is covered without an edit to either caller and the two cannot disagree about which roots exist.
 - It reports the entries it measured per root and warns on a root that measured none, rather than printing one verdict for the set. A root can resolve an audited folder and hold no entry in it, which `tooling/claude/seeds` does today, and a single pass line over that reads as coverage of a tree nothing opened.
@@ -55,26 +59,34 @@ The `core.bare` repair that runs ahead of every stage is TypeScript now, in `src
 - It branches on the audit's exit code rather than on pass against fail, because 1 and 2 mean opposite things there. 2 is a seed breaking the standard it seeds and fails the push. 1 is the audit refusing, which a seed root carrying a `.claude/` but no audited folder produces, and it warns instead, rather than red-failing a stack that seeds nothing a standard governs.
 - The measure reads the exit code as a value, so nothing here discards a non-zero exit with `|| true` the way a `set -e` shell script would otherwise need to.
 
-### The plugin boundary stage
+#### The plugin boundary stage
 
 - `src/gate/boundaries.ts` holds five measures, each guarding what crosses from this repository into a target: ignore parity, capability seeding, plugin boundary, seed independence, and skill paths. They read the tree in-process and report `unmeasured` wherever the walk covered nothing, which every guard paragraph in the scripts they replaced existed to do by hand. A producer that fails and a tree that is clean both arrive as zero rows, so a missing `claude/`, a plugin root holding no file, a missing `.gitignore`, or an array the parse missed each report unmeasured instead of a pass. Anything added to a walk there needs the same treatment.
-- The plugin boundary walk follows symlinks the way `find -L` did and tracks the real directories on its current descent, so a loop under `claude/` ends. A leak reports as `<path> -> <resolved>`, relative to the root. The `realpath` and `jq` guards went with the bash, since neither tool is read any longer.
+
+The plugin boundary walk follows symlinks the way `find -L` did and tracks the real directories on its current descent, so a loop under `claude/` ends. A leak reports as `<path> -> <resolved>`, relative to the root. No `realpath` or `jq` guard exists, since neither tool is read.
+
 - Seed independence matches `canon` not followed by `/`, so "canonical" trips it exactly as `canon` alone would. Seed prose describing something as a "canonical doc" reads as a citation of the CLI binary, so write around the word rather than adding it to a seed file. The walk is scoped to `tooling/*/seeds/` alone, so a citation landing in `governance/rules/` passes CI unflagged even when the rule carries content moved out of the seed and ships to every target the same way, and a moved bullet's independence has to be checked by hand against the same standard.
+
+##### Walk and failure reporting
+
 - Capability seeding lists a source folder the way a shell `*` did, skipping dotfiles and directories, so `.husky/_` is never read as an unseeded capability. Hook wiring compares whole path segments across every `command` at any depth of the seeded `settings.json`. A `settings.json` that does not parse is a failure rather than unmeasured, since it is a broken file in the tree and not a missing input.
 - A failing measure keeps its `failure` to the stage's one line and returns the header, the offender lines, and the remediation sentence as an `output` emission, so the frame indents every line and the `--json` record's `failure` stays one line.
-- A missing `.gitignore`, a missing claude manifest, and a seed root with no markdown exited 1 as "unverifiable" in the bash, and a missing `claude/skills/` or no seed root exited 0. All now report unmeasured, which warns on a contributor's machine and refuses under CI, and it makes Seed independence agree with Seed standards on the no-root case.
 
-The ignore parity check was recorded as staying a standalone script rather than folding into the gate's own TypeScript, on the reading that it is the check itself rather than the sequencing around it. That call is reversed. Every check in the set had become a reading with a verdict, which is what a measure already is, and the standalone shape cost a second parser for the manifest (an awk over TOML where `Bun.TOML` was available) and a bash-exec test file per script. `ignoreParity` reads the same `# Claude` array through `Bun.TOML` and takes the empty-read refusal on both sides of its comparison, since an unreadable `.gitignore` and an array the parse missed each arrive as an empty list that satisfies parity vacuously. Its test points the measure at a fixture tree with a `MeasureContext` whose `run` and `cli` throw, the shape `documentCeiling`'s tests use.
+A missing `.gitignore`, a missing claude manifest, a seed root with no markdown, a missing `claude/skills/`, and no seed root all report unmeasured, which warns on a contributor's machine and refuses under CI, and it makes Seed independence agree with Seed standards on the no-root case.
+
+The ignore parity check is a measure rather than a standalone script, since every check in the set is a reading with a verdict, which is what a measure already is, and the standalone shape cost a second parser for the manifest (an awk over TOML where `Bun.TOML` was available) and a bash-exec test file per script. `ignoreParity` reads the same `# Claude` array through `Bun.TOML` and takes the empty-read refusal on both sides of its comparison, since an unreadable `.gitignore` and an array the parse missed each arrive as an empty list that satisfies parity vacuously.
+
+Its test points the measure at a fixture tree with a `MeasureContext` whose `run` and `cli` throw, the shape `documentCeiling`'s tests use.
 
 `check-color-source.sh` takes that treatment too, exiting 1 when `scripts/lib/ui.sh` or either walked root is absent rather than reporting a tree it never measured. Its walk stops at `scripts/` and `sandbox/` on purpose, since the seed scripts under `tooling/*/configs/scripts/` have to keep escapes of their own: a target that installs them has no shared library to source. It matches SGR alone, which leaves the cursor and erase sequences an interactive prompt writes legal.
 
 A walk built on `find -L claude/ -type f` inside a process substitution whose status nothing reads can pass silently on a missing root: a missing `claude/` makes `find` fail, the loop runs zero times, and the guard exits 0 without walking anything, which reads as verified once a planted violation turns it red. Proving a gate goes red on a planted violation does not prove it goes red when its input never arrives, so the right probe for a collect-and-pass walk is removing the input root, not only seeding a violation inside it. The same shape reaches a consumer reading structured output: both standards-audit hooks read findings out of a `canon markdown audit --json` record, and the verb writes no record at all outside a git repository, so a hook can report a file clean that it never checked. Assert the whole payload arrived before reading any field out of it.
 
-### Quoting a pathspec changes what it matches
+#### Quoting a pathspec changes what it matches
 
 Quoting a glob passed to `git diff --` changes what it matches. `'claude/skills/*/references'` quoted returns nothing, because git pattern-matches the whole path and a file one level deeper never matches, while unquoted the shell expands to real directory paths and a literal directory pathspec does cover its contents. A hand-run scope check with the quoted form returns an empty set against a file that was modified, which reads as proof the file sits outside scope. The gate does not carry the hazard: a `drift` check in `src/gate/stages.ts` spells its pathspec as one argument and no shell ever sees it, so what git receives is what the table says. Append `/*` or name the directory literally when a hand-run scope check is what is wanted.
 
-### The poll compares snapshots rather than reading the remote
+#### The poll compares snapshots rather than reading the remote
 
 `role-orchestrator/scripts/poll.ts` compares the open list against a baseline at `.canon/tmp/pr/poll/baseline.txt`, so `No movement.` is a claim about two snapshots rather than about the remote. A merge is reported on the run after it lands, and a pull request that opens and closes inside one interval never enters the baseline and is never reported. Cancelling and restarting the loop leaves the old baseline in place, so the first run afterwards replays every state change since the cancel. The same snapshot reading makes a `RESPONSE` line say nothing about whether a response is still open, since the comparison never runs against the review it would be triggering, so a worker reply a later review already superseded routes to a re-review whose delta is empty. Read `main` and the REST open list (`gh api --paginate 'repos/{owner}/{repo}/pulls?state=open'`) directly before any sweep or handoff.
 

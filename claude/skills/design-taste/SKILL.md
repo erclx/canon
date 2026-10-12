@@ -22,6 +22,9 @@ This is what the population average looks like. Each one is what gets drawn when
 - A violet-to-blue gradient used as the accent.
 - Numbered labels above sections: `001 / Capabilities`, `Phase 02`, `Step 1`.
 - A scroll cue at the bottom of the first screen.
+
+### Details and copy
+
 - A colored dot before every navigation item, row or badge.
 - A glow standing in for elevation, on a pure black or pure white ground.
 - A product screenshot built out of styled rectangles.
@@ -144,6 +147,9 @@ Run `${CLAUDE_SKILL_DIR}/references/preflight.md` against the output. It is the 
 - Focus, keyboard, ARIA, alt text, and every accessibility floor: the `ui` governance rules, which fire on the same paths this skill does and are the single source
 - States, empty and loading coverage, destructive confirmation, truncation: the same rules
 - Rendered copy casing, button labels, error message shape: the same rules
+
+### Other skills
+
 - The candidate loop, the arm set, the render, and the pick: `draft-and-pick`
 - The shape of the project's design document and where its values live: `${CLAUDE_SKILL_DIR}/../canvas-board/references/design.md`
 - Reading source for roughness: `ux-audit`. Measuring what a running interface costs to paint: `ux-measure`

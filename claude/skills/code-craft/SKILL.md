@@ -83,6 +83,9 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 - A new class has one method, or a new function's body is one call with the same arguments.
 - The change you are making opens a third file to adjust one rule.
 - You are writing an interface, a factory, or a registry with one implementation behind it.
+
+### Defaults and fixes
+
 - You wrote a default value, a threshold, or a fallback the task never named.
 - A fix is adding a special case, a catch, or a disabled check rather than changing the code that misbehaved.
 - The code reads the current time, an environment variable, or a global from inside a rule.
@@ -95,6 +98,9 @@ Check each line against the code the change produced. A line answering no is fix
 - Every new function or class hides more than its interface asks a caller to learn, with no pass-through left.
 - No rule the change wrote exists in a second place, and nothing was merged that changes for a different reason.
 - Every pattern in the diff solves a problem present now, with more than one case behind it.
+
+### Inputs, scope, and fixes
+
 - Clock, environment, and global reads are passed in rather than taken inside a rule.
 - The diff holds no feature, option, or default the task did not ask for or state.
 - Every fix changes the code that misbehaved rather than silencing it.

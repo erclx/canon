@@ -11,11 +11,14 @@ import {
   LENGTH_CHECKPOINT,
   matchesSiblings,
   measureFolders,
+  extraSections,
   missingSections,
   PROVENANCE_FOLDER,
+  ALLOWED_SECTIONS_BY_FOLDER,
   REQUIRED_SECTIONS,
   REQUIRED_SECTIONS_BY_FOLDER,
   requiredSections,
+  type ExtraSectionFinding,
   type SectionFinding,
 } from '@/context/audit'
 import { auditCitations, type CitationReport } from '@/context/citations'
@@ -640,6 +643,7 @@ async function runAudit(
   const entries = gateOnly ? [] : await measureFolders(root, folders)
   const drift = gateOnly ? [] : await auditIndexes(folders)
   const sections = gateOnly ? [] : missingSections(root, folders, entries)
+  const extras = gateOnly ? [] : extraSections(entries)
   const length = gateOnly ? undefined : lengthFindings(entries)
   // Absent under `--citations-only` and null when the project carries no
   // record. A run that never looked and a project with nothing to look at are
@@ -653,7 +657,7 @@ async function runAudit(
     reportScope(folders, unresolved)
     reportCitations(citations, cited)
     reportReferenceForm(entries, folders)
-    reportSections(sections, folders)
+    reportSections(sections, extras, folders)
     reportLength(length ?? [])
     reportTables(entries)
     reportProvenance(entries, folders)
@@ -691,6 +695,7 @@ async function runAudit(
         // never opened an entry.
         length,
         missingSections: sections,
+        extraSections: extras,
         indexDrift: drift,
         // Null says the run opened the project and found no record, which a
         // target that never wrote one is entitled to. Absent says the run
@@ -705,6 +710,7 @@ async function runAudit(
           // caller that read it first, since removing it would break that
           // caller without an error.
           requiredSectionsByFolder: REQUIRED_SECTIONS_BY_FOLDER,
+          allowedSectionsByFolder: ALLOWED_SECTIONS_BY_FOLDER,
         },
       })}\n`,
     )
@@ -715,6 +721,7 @@ async function runAudit(
     requirementsOverWords:
       requirements !== undefined && isOverWordCap(requirements),
     sections,
+    extraSections: extras,
     drift,
     widened,
   })
@@ -905,6 +912,7 @@ function reportReferenceForm(
  */
 function reportSections(
   missing: readonly SectionFinding[],
+  extras: readonly ExtraSectionFinding[],
   folders: readonly AuditedFolder[],
 ): void {
   logStep('Sections')
@@ -938,13 +946,30 @@ function reportSections(
 
   if (missing.length === 0) {
     logInfo('Every entry declares each required section.')
+  } else {
+    logWarn(`${plural(missing.length, 'path')} short a required section`)
+    pipeOutput(
+      missing
+        .map((found) => `${found.rel}  missing: ${found.missing.join(', ')}`)
+        .join('\n'),
+    )
+  }
+
+  logInfo(
+    `The set is closed: ${Object.entries(ALLOWED_SECTIONS_BY_FOLDER)
+      .map(([name, set]) => `canon/${name}/ allows ${set.join(', ')}`)
+      .join('. ')} as H2. Any other topic is an H3 under one of them.`,
+  )
+
+  if (extras.length === 0) {
+    logInfo('No entry carries an H2 outside the set.')
     return
   }
 
-  logWarn(`${plural(missing.length, 'path')} short a required section`)
+  logWarn(`${plural(extras.length, 'path')} carrying an H2 outside the set`)
   pipeOutput(
-    missing
-      .map((found) => `${found.rel}  missing: ${found.missing.join(', ')}`)
+    extras
+      .map((found) => `${found.rel}  extra: ${found.headings.join(', ')}`)
       .join('\n'),
   )
 }

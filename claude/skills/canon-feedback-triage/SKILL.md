@@ -19,6 +19,9 @@ Run from the toolkit repo root. This skill reads GitHub issues and writes only i
 - If `gh` is not on PATH, stop: `❌ gh CLI not found. Install it to read feedback issues.`
 - If `gh auth status` fails, stop: `❌ gh is not authenticated. Run gh auth login.`
 - If no open `feedback` issues exist, stop: `✅ No open feedback issues.`
+
+### Slots and records
+
 - Never fill a `You:` slot, and never read an empty one as agreement. Answering runs through `plan-intake-answer` or the operator's own edit.
 - Branch on each `canon` record's `ok` and `reason` rather than on the exit code, which a shell function wrapping `canon` can flatten to zero.
 

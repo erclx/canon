@@ -31,6 +31,9 @@ Run these commands in parallel to gather git context:
 - Group files by shared concern. A group is a single commit.
 - Files belong together when they implement or modify the same logical unit.
 - A file that clearly stands alone is its own group.
+
+### Order and commands
+
 - Order commits by dependency: commit dependencies before the files that import them.
 - Prefix the full command sequence with `git restore --staged .` to unstage everything, then stage and commit each group in order.
 - For `D` status files, use `git rm <file>`. For `A` or `M` files, use `git add <file>`.

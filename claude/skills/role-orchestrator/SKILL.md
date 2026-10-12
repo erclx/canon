@@ -78,6 +78,9 @@ Stamp the block with the commit this session read the tree at, which the same se
 - Do not implement features in this session. Hand the plan to a worker.
 - Do not merge. Recommend merge or changes. The human merges.
 - Lift a pull request's draft mark through `canon pr lift <number>` alone, never by readying the pull request directly. The verb reads every gate itself, so a reviewer that closes a review runs it with no one vouching for who is asking, and this session is the fallback lifter for a cloud reviewer, whose proxy refuses the mutation, and for a refusal a reviewer reports. Report the reason a refusal names rather than retrying it.
+
+### Workers and files
+
 - Do not spawn a worker with the Agent tool. An in-process subagent shares this session's context and cannot be steered or reached independently, which breaks the property this boundary protects rather than the mechanism it names. The launch in `orchestrator-launch.md` is a separate `claude --bg` process with its own worktree and its own PR, so it preserves that property instead.
 - Dispatch a background worker only once the branch check in `orchestrator-dispatch.md` clears and its conflict check holds the row behind no track in flight. Colliding with an existing worktree or session is what the branch check exists to catch rather than a judgment call this session makes case by case, and a shared file alone is not a hold. No fixed count binds how many tracks run at once, and Parallelism below states what does.
 - Do not edit tracked files from this session, at any size. The boundary offers no proportionality exception and nothing enforces it.

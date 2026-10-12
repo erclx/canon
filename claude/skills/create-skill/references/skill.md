@@ -30,15 +30,15 @@ Governs a skill folder under `skills/` as one artifact: `SKILL.md`, its siblings
 
 Does not govern:
 
-- What a `REQUIREMENT.md` must answer, its sections, and its template: `skill-requirement.md`
-- A practice skill's closing sections and ledger: `skill-practice.md`
-- Which root a path in a body resolves against, and how a body cites another skill's reference: `skill-paths.md`
-- The jurisdiction, success criterion, and rule phrasing of a reference setting one artifact's shape: `skill-reference.md`
-- Path-scoped coding rules, which load on a file match rather than on a request match: `rule.md`
-- Voice, rhythm, and sentence construction in a skill body: the `write-human` skill
-- Punctuation, formatting, and word choice in a skill body: `markdown.md`
-- The transform from a branch name to a slug a skill carries in a filename: `slug.md`
-- Whether a new skill earns its place: the three-question test in the `create-skill` skill and the creation-time bullet in the `skill` governance rule
+- **`skill-requirement.md`**: what a `REQUIREMENT.md` must answer, its sections, and its template
+- **`skill-practice.md`**: a practice skill's closing sections and ledger
+- **`skill-paths.md`**: which root a path in a body resolves against, and how a body cites another skill's reference
+- **`skill-reference.md`**: the jurisdiction, success criterion, and rule phrasing of a reference setting one artifact's shape
+- **`rule.md`**: path-scoped coding rules, which load on a file match rather than on a request match
+- **the `write-human` skill**: voice, rhythm, and sentence construction in a skill body
+- **`markdown.md`**: punctuation, formatting, and word choice in a skill body
+- **`slug.md`**: the transform from a branch name to a slug a skill carries in a filename
+- **the `create-skill` skill and the creation-time bullet in the `skill` governance rule**: whether a new skill earns its place, by the three-question test
 
 ## Changing a skill
 
@@ -93,18 +93,21 @@ allowed-tools: <tools required>
 - Create a new skill with its `REQUIREMENT.md` beside it, even where nobody contests its scope. A requirement present for some skills and absent for others cannot be scanned, since an absence reads as a gap rather than as a verdict
 - Name a file sitting directly in the skill folder in capitals and a bundled folder in lowercase, so the parts a reader opens are distinct from the ones a skill loads
 - `EVAL.md` holds prompts and a judging rubric a person runs by hand, since the automated `claude plugin eval` runner is gated in early access
+
+### Folder and file rules
+
 - `SKILL.md` must start with YAML frontmatter between `---` delimiters
 - No `README.md` inside the skill folder
 - No spaces, capitals, or underscores in folder or skill name
 
 ## Frontmatter
 
-- `name` (required): kebab-case, matches folder name, no spaces or capitals
-- `description` (required): what it does + when to use it, under 1024 chars, no XML tags
-- `disable-model-invocation: true`: user-invoked only, Claude will not auto-trigger. Set it on a skill that starts a process the operator owns, never on one reachable by a matched trigger.
-- `allowed-tools`: restrict tool access when the skill is active
-- `metadata`: optional key-value pairs (`author`, `version`, `mcp-server`)
-- `metadata.family` (required on a skill under `claude/skills/`): the skill map group the skill's row sits under, as one key from `families` in `canon claude skills list --json`. A skill under `.claude/skills/` takes none.
+- **`name`** (required): kebab-case, matches folder name, no spaces or capitals
+- **`description`** (required): what it does + when to use it, under 1024 chars, no XML tags
+- **`disable-model-invocation: true`**: user-invoked only, Claude will not auto-trigger. Set it on a skill that starts a process the operator owns, never on one reachable by a matched trigger.
+- **`allowed-tools`**: restrict tool access when the skill is active
+- **`metadata`**: optional key-value pairs (`author`, `version`, `mcp-server`)
+- **`metadata.family`** (required on a skill under `claude/skills/`): the skill map group the skill's row sits under, as one key from `families` in `canon claude skills list --json`. A skill under `.claude/skills/` takes none.
 
 ## Description
 
@@ -120,24 +123,22 @@ allowed-tools: <tools required>
 - Front-load critical instructions
 - Contain only behavioral rules (what to do, what not to do) and pointers to reference docs. Narrative descriptions of what files are or how the system works belong in `docs/`, not in the skill body.
 - State rules, not inventories. Reference docs for lists that change, and phrase a rule as a ban on the forbidden shape rather than an enumeration of allowed options, so it stays stable as categories change.
+
+#### Current rule and grouping
+
 - Cut any rule that resists crisp one-line phrasing. Vague guidance is worse than none.
 - State the current rule only, in the body and in every file under `references/`. The incident and the date that earned a rule go in `REQUIREMENT.md` under `Gap`, or stay in git. A date inside a fence or a code span is example data and stays.
 - Group bullets under H2 headings by domain concern. Keep dos and don'ts together under the topic they belong to rather than splitting them into flat rules and constraints sections.
 - One actionable constraint per bullet. Prefer the `X over Y` form for preferences.
+
+#### Examples and density
+
 - Do not include code examples unless a one to three line inline snippet captures a pattern the model cannot infer.
 - Keep a statement only when removing it would change what the agent does, naming a principle as a few-word handle rather than explaining it. Revisit when a run shows the model ignoring a principle named only as a handle.
 
 ### Progressive disclosure
 
-- Keep `SKILL.md` and each file under `references/` at or under the 300 rendered line ceiling `markdown.md` sets for a whole document. The ceiling binds procedure as much as reference material.
-- Look at a body once it passes 150 lines. That number prompts a look and gates nothing.
-- Move a catalog, a table of cases, or a format spec running past roughly 15 lines to `references/` at any body length.
-- Below the ceiling, name the branch that skips a block before moving it. A block every run dereferences costs a read and saves nothing.
-- Past the ceiling, move a whole step to a reference, preferring a step a named branch skips. Keep the step heading in the body with one line naming the file to read on reaching it, so the body still shows every step in order.
-- Name every file under `references/` in the body at the point a session reads it, since an unnamed reference is never loaded.
-- Open a file under `references/` running over 100 lines with a `## Contents` H2 of anchor links after its H1 and intro, so a session that reads only the top of the file still sees everything it holds.
-- Keep the trigger, the skip condition, and the guard in the body. A run that never reaches the block has to decide that without opening the reference.
-- Point one skill at a sibling skill's reference by the form `skill-paths.md` states, `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md`, and name the owner rather than copying the file.
+Keeping a body and its references under the ceiling, what moves to `references/` and what stays, and how a body names a reference are in `skill-disclosure.md`.
 
 ### Reading and running commands
 

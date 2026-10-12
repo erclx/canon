@@ -82,64 +82,64 @@ query = "button, a[href], input, select, textarea, [tabindex]"
 
 Each domain exposes a consistent shape where applicable: `list`, `install`, `sync`, `create`. The page named beside a domain carries its flags, records, and refusals, and `canon <domain> --help --all` prints every subcommand's flags.
 
-- `migrate`, in `migrate.md`: `rename`, `skill-names`, `records`, `surface-roots`, `record-tree`, `rule-layout`, `scratch-evidence`, `record-layout`
-- `targets`, in `targets.md`: `list`, `pulls`
-- `gov`, in `install-and-sync.md`: `list`, `install`, `sync`, `build`, `regen`, `detect` (in `gov-detect.md`), `test-order`, `counts`, `superseded`, `citations`, `restated`
-- `tooling`, in `install-and-sync.md`: `list`, `sync`, `diff`, `reference`, `verify`, `inject`, `prune-gitignore`
-- `claude`, in `skills-audit.md`: `init`, `sync`, `setup`, `routing`, `plugin-update`, `seeds list`, `skills list`, `skills audit`, `skills drift`, `skills reach`, `skills rank`
-- `wiki`, in `scripting.md`: `init`
-- `indexes`, in `indexes.md`: `regen`, `list`
-- `docs`, in `docs.md`: `list`, `<topic>`
-- `design`, in `install-and-sync.md` for `install`, `sync`, and `fonts`, and below for the rest: `render`, `regen`, `css`, `install`, `sync`, `fonts`
-- `slides`, described below: `render`, `list`
-- `demo`, in `demo.md`: `compile`, `run`, `frames`
-- `inventory`, described above: `run`
-- `teach`, in `teach.md`: `list`, `up`, `open`, `resource`, `glossary`, `lesson`, `stylesheet`, `nav`, `render`
-- `canvas`, described below: `serve`, `list`, `page add`, `page rename`, `frame add`, `frame move`, `frame resize`, `fit`, `arrange`, `selection`, `edit`, `editing`, `capture`
-- `sandbox`, in `sandbox.md`: `run`, `equivalence`, `reset`, `clean`, `check`, `coverage`
-- `tasks`, in `tasks.md`: `next-label`, `archive`, `decline`, `plan-citations`, `plan-answers`, `plan-branch`, `plan-reach`, `plan-link`, `pull-request`, `outcome`, `list`, `validate`
-- `intake`, in `intake.md`: `list`, `answer`
-- `records`, in `records.md`: `validate`, `ordinal`, `size`, `stale`, `prune-tmp`, `push`, `pull`
-- `sessions`, in `sessions.md`: `list`, `export`, `import`
-- `worktrees`, in `worktrees.md`: `list`, `reclaim`, `repair-bare-flag` (hidden)
-- `hooks`, in `hooks.md`: `post-merge`
-- `pr`, in `pr-reads.md`: `key-changes`, `head`, `checks`, `review-state`, `evidence`, `preview`, `local`, `frames`, `lift` (in `pr-lift.md`), `tick` (in `pr-tick.md`)
-- `upstream`, in `upstream.md`: `fetch`, `catalog`, `due`, `advance`
-- `audits`, in `audits.md`: `run`, `list`
-- `gate`, in `gate.md`: `run`
-- `secrets`, in `state-scoped-risk.md`: `scan`
-- `deps`, in `state-scoped-risk.md`: `audit`
-- `labels`, in `label-coverage.md`: `audit`, `apply`, `scan`
-- `comments`, in `comments.md`: `scan`
-- `context`, in `context-audit.md`: `audit`, `classify diff`, `classify sweep`, `classifier show`, `classifier set`
-- `markdown`, in `markdown-audit.md`: `audit`
+- **`migrate`**, in `migrate.md`: `rename`, `skill-names`, `records`, `surface-roots`, `record-tree`, `rule-layout`, `scratch-evidence`, `record-layout`
+- **`targets`**, in `targets.md`: `list`, `pulls`
+- **`gov`**, in `install-and-sync.md`: `list`, `install`, `sync`, `build`, `regen`, `detect` (in `gov-detect.md`), `test-order`, `counts`, `superseded`, `citations`, `restated`
+- **`tooling`**, in `install-and-sync.md`: `list`, `sync`, `diff`, `reference`, `verify`, `inject`, `prune-gitignore`
+- **`claude`**, in `skills-audit.md`: `init`, `sync`, `setup`, `routing`, `plugin-update`, `seeds list`, `skills list`, `skills audit`, `skills drift`, `skills reach`, `skills rank`
+- **`wiki`**, in `scripting.md`: `init`
+- **`indexes`**, in `indexes.md`: `regen`, `list`
+- **`docs`**, in `docs.md`: `list`, `<topic>`
+- **`design`**, in `install-and-sync.md` for `install`, `sync`, and `fonts`, and below for the rest: `render`, `regen`, `css`, `install`, `sync`, `fonts`
+- **`slides`**, described below: `render`, `list`
+- **`demo`**, in `demo.md`: `compile`, `run`, `frames`
+- **`inventory`**, described above: `run`
+- **`teach`**, in `teach.md`: `list`, `up`, `open`, `resource`, `glossary`, `lesson`, `stylesheet`, `nav`, `render`
+- **`canvas`**, described below: `serve`, `list`, `page add`, `page rename`, `frame add`, `frame move`, `frame resize`, `fit`, `arrange`, `selection`, `edit`, `editing`, `capture`
+- **`sandbox`**, in `sandbox.md`: `run`, `equivalence`, `reset`, `clean`, `check`, `coverage`
+- **`tasks`**, in `tasks.md`: `next-label`, `archive`, `decline`, `plan-citations`, `plan-answers`, `plan-branch`, `plan-reach`, `plan-link`, `pull-request`, `outcome`, `list`, `validate`
+- **`intake`**, in `intake.md`: `list`, `answer`
+- **`records`**, in `records.md`: `validate`, `ordinal`, `size`, `stale`, `prune-tmp`, `push`, `pull`
+- **`sessions`**, in `sessions.md`: `list`, `export`, `import`
+- **`worktrees`**, in `worktrees.md`: `list`, `reclaim`, `repair-bare-flag` (hidden)
+- **`hooks`**, in `hooks.md`: `post-merge`
+- **`pr`**, in `pr-reads.md`: `key-changes`, `head`, `checks`, `review-state`, `evidence`, `preview`, `local`, `frames`, `lift` (in `pr-lift.md`), `tick` (in `pr-tick.md`)
+- **`upstream`**, in `upstream.md`: `fetch`, `catalog`, `due`, `advance`
+- **`audits`**, in `audits.md`: `run`, `list`
+- **`gate`**, in `gate.md`: `run`
+- **`secrets`**, in `state-scoped-risk.md`: `scan`
+- **`deps`**, in `state-scoped-risk.md`: `audit`
+- **`labels`**, in `label-coverage.md`: `audit`, `apply`, `scan`
+- **`comments`**, in `comments.md`: `scan`
+- **`context`**, in `context-audit.md`: `audit`, `classify diff`, `classify sweep`, `classifier show`, `classifier set`
+- **`markdown`**, in `markdown-audit.md`: `audit`
 
 Common patterns:
 
-- `list --json` → machine-readable catalog on stdout.
-- `install <name> <path>` → install a specific entry into a target project.
-- `sync <path>` → reapply all installed entries in a target project.
-- `create [name]` → scaffold a new authoring entry in this repo.
+- **`list --json`** → machine-readable catalog on stdout.
+- **`install <name> <path>`** → install a specific entry into a target project.
+- **`sync <path>`** → reapply all installed entries in a target project.
+- **`create [name]`** → scaffold a new authoring entry in this repo.
 
 Subcommands no other page describes:
 
-- `claude plugin-update` matches the installed marketplace plugin against `claude/.claude-plugin/plugin.json`'s own name and runs `claude plugin update` on it, reading the version back off `claude plugin list --json`, since the update call reports none of its own (`--json`).
-- `claude skills rank` scores either skill corpus's descriptions against a case corpus by TF-IDF cosine similarity, reporting rank-one and top-three (`--cases <path>`).
-- `design regen` rewrites this repository's `canon/DESIGN.md` from `src/design/tokens.ts` and `src/design/base.css` from `src/design/neutral.ts`. `design css` emits the tokens and components as CSS on stdout, with `--no-components` for properties alone, and `design render` declares each vendored face the typography table names under `--embed-fonts`.
-- `slides list --json` emits one row per deck under `.canon/slides/`, carrying `name`, `title`, `slides`, and `path`.
-- `slides render [deck]` takes a deck name or a folder, defaulting to the only deck, and lays out each `.html` file in filename order in Chromium at 1280 by 720 and rebuilds it as editable shapes. Each element drawn as a picture prints one `✗` line on stderr naming the slide, the selector, and the properties that forced it. A link left out, being a `#slide-N` past the deck's end or any target that is neither that nor an absolute URL, prints one too, and the exit stays 0.
-- A deck folder's `deck.json` and the faces it embeds, its per-slide `<body>` attributes, transitions and entrances, speaker notes, and charts are described in `slides.md`.
-- `canvas`, with its verbs, content format, and write routes, is described in `canvas.md`.
-- `labels apply <number>` adds the labels this branch earns to its open pull request, refusing a pull request whose head is not the current branch or that is not open, and never creating a label the remote lacks or removing one a person added (`--check` writes nothing and exits 2 when labels are owed, `--base`, `--json`).
-- `labels scan` fails a pull request or a posted review whose title, body, or review comment carries a phase label, a label a code span quotes, a gitignored record path, a session link, a banned character, a body heading outside the closed section list or a missing `## Summary` or `## Key changes`, or a title breaking `claude/skills/git-pr/references/pr.md`'s format, casing, or length rule (`--event`, `--body-file`, `--json`).
+- **`claude plugin-update`** matches the installed marketplace plugin against `claude/.claude-plugin/plugin.json`'s own name and runs `claude plugin update` on it, reading the version back off `claude plugin list --json`, since the update call reports none of its own (`--json`).
+- **`claude skills rank`** scores either skill corpus's descriptions against a case corpus by TF-IDF cosine similarity, reporting rank-one and top-three (`--cases <path>`).
+- **`design regen`** rewrites this repository's `canon/DESIGN.md` from `src/design/tokens.ts` and `src/design/base.css` from `src/design/neutral.ts`. `design css` emits the tokens and components as CSS on stdout, with `--no-components` for properties alone, and `design render` declares each vendored face the typography table names under `--embed-fonts`.
+- **`slides list --json`** emits one row per deck under `.canon/slides/`, carrying `name`, `title`, `slides`, and `path`.
+- **`slides render [deck]`** takes a deck name or a folder, defaulting to the only deck, and lays out each `.html` file in filename order in Chromium at 1280 by 720 and rebuilds it as editable shapes. Each element drawn as a picture prints one `✗` line on stderr naming the slide, the selector, and the properties that forced it. A link left out, being a `#slide-N` past the deck's end or any target that is neither that nor an absolute URL, prints one too, and the exit stays 0.
+- **`slides.md`** describes a deck folder's `deck.json` and the faces it embeds, its per-slide `<body>` attributes, transitions and entrances, speaker notes, and charts.
+- **`canvas`**, with its verbs, content format, and write routes, is described in `canvas.md`.
+- **`labels apply <number>`** adds the labels this branch earns to its open pull request, refusing a pull request whose head is not the current branch or that is not open, and never creating a label the remote lacks or removing one a person added (`--check` writes nothing and exits 2 when labels are owed, `--base`, `--json`).
+- **`labels scan`** fails a pull request or a posted review whose title, body, or review comment carries a phase label, a label a code span quotes, a gitignored record path, a session link, a banned character, a body heading outside the closed section list or a missing `## Summary` or `## Key changes`, or a title breaking `claude/skills/git-pr/references/pr.md`'s format, casing, or length rule (`--event`, `--body-file`, `--json`).
 
 ## Version skew
 
-`canon sync --check` and `canon claude skills drift` are the two moments a target
-already stops to reconcile with the toolkit, so each reports the installed
-version against the newest published one. No other command performs the lookup,
-which keeps a registry round trip out of the catalog reads an agent runs in a
-loop.
+`canon sync --check` and `canon claude skills drift` are the two moments a
+target already stops to reconcile with the toolkit, so each reports the
+installed version against the newest published one. No other command performs
+the lookup, which keeps a registry round trip out of the catalog reads an agent
+runs in a loop.
 
 The report carries three states and never changes an exit code. `behind` names
 `canon upgrade` as the remedy, `current` says so, and `unknown` carries the
@@ -147,8 +147,8 @@ reason the registry could not be reached. Branch on the `skew.state` field in
 the JSON record rather than on the exit, since an offline machine has to read as
 unmeasured rather than as a failing check.
 
-`canon upgrade --json` carries one further state, `pending`, that the skew report
-does not: the working directory's checkout holds a release npm does not serve
-yet, so there is nothing to install. The record names it in `checkout` beside
-`latest`, exits 0, and its `message` starts `CLI stays at`. Outside a canon
-checkout it never reads `pending`.
+`canon upgrade --json` carries one further state, `pending`, that the skew
+report does not: the working directory's checkout holds a release npm does not
+serve yet, so there is nothing to install. The record names it in `checkout`
+beside `latest`, exits 0, and its `message` starts `CLI stays at`. Outside a
+canon checkout it never reads `pending`.

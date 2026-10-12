@@ -5,7 +5,9 @@ description: The teaching surface and why it sorts by what the reader is doing, 
 
 # Teaching and writing
 
-## The teaching surface
+## Decisions
+
+### The teaching surface
 
 `teach-workspace` runs a learning workspace on one subject across sessions. It sits beside the wiki rather than against it, because the two sort on independent axes: a workspace sorts by what the reader is doing, learning rather than looking up, and the wiki test sorts by who owns the subject. A workspace on how a system measures pronunciation accuracy and a workspace on how a feature is implemented here are the same surface with different subjects, which is why the wiki test needs no amendment.
 
@@ -13,13 +15,13 @@ The name follows the same pattern every skill owning a record folder takes, nami
 
 The output splits by lifetime and the format follows the split. A lesson is worked through once, carries a quiz with immediate feedback, and is never committed, so it is markup. A reference page is looked up later and is the half a promotion pass would move into a gated corpus, so it is markdown and passes those gates the day it is written rather than at the moment someone tries to promote it. Authoring both as markup was the source's own choice and it puts the promotable half in a format no stage reads.
 
-### Promotion
+#### Promotion
 
 The durable half leaves through a promote step in the same skill, sorted by who owns the subject rather than by what the reader was doing. That is the wiki test unamended, so an Anthropic-owned subject goes to the wiki, an internal one to the matching context entry, and everything else, including a subject owned by another vendor, goes to the public docs. The step proposes and waits, and it writes nothing to a destination: a confirmed page lands in `.canon/tmp/handoff/teach-promotion/<slug>.md` and the skill's own fold mode lands it from a branch, deleting the handoff once it has read it.
 
 Two things carry a cost worth naming. The step is the first caller of the wiki scaffolding verb, and it refuses rather than scaffolds when a project has no wiki, so the verb stays the operator's call. The fold reaches the public docs corpus, which `docs-sync` otherwise owns, and the carve-out is narrow: `context-fold` lands a page whose destination is already confirmed and reconciles nothing there against a diff.
 
-### The rendered layer
+#### The rendered layer
 
 The rendered layer is the half a session works through rather than consults, and three of its rules live in code rather than in the body. Quiz option order is drawn by `canon teach lesson` rather than instructed, because the source this design departs from reports answers defaulting to the first option while its stated mitigation addresses a formatting leak instead, so porting the instruction ports the defect. The same verb reports the numbered path the lesson takes, the shared stylesheet with whether it is on disk yet, and the mission's success lines, which is what turns those lines into exit criteria a session reports progress against rather than a list nothing reads.
 
@@ -29,7 +31,7 @@ The third is the chrome itself. `canon teach nav` splices the header, breadcrumb
 
 What the split cannot close is that the body is still free to reorder what the verb reports. The sandbox arm for this layer asserts the ordinal, the link, and the stylesheet, and the ordering is a property over many runs that one arm cannot see, so it is recorded as manual rather than claimed.
 
-### Retrieval and spacing
+#### Retrieval and spacing
 
 The pedagogy reference prefers three things the lesson carries, and each costs a different thing:
 
@@ -39,7 +41,7 @@ The pedagogy reference prefers three things the lesson carries, and each costs a
 
 The teach-back miss lands under what the learner got wrong rather than under a heading of its own, since a produced answer and a selected one are both retrieval failures the next session places from, and two headings split one placement input.
 
-## The writing surface
+### The writing surface
 
 `write-human` carries voice, word choice, rhythm, sentence construction, and information density. The character bans and the frontmatter wording live in `markdown.md`, and a command reads the bans. This skill carries the half no check settles, and it is a skill because nothing reads a standard nobody opens.
 

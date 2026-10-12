@@ -13,12 +13,12 @@ Owns the GitHub Actions workflow that gates a merge: which events start a run, a
 
 - `.github/workflows/` owns the workflow definitions a trigger below starts
 
-## Triggers
+### Triggers
 
 - Pull requests targeting `main`
 - `workflow_dispatch` (manual run from the Actions tab)
 
-## Checks
+### Checks
 
 Defined in `.github/workflows/verify.yml`. All jobs must pass before merge.
 
@@ -26,6 +26,6 @@ Defined in `.github/workflows/verify.yml`. All jobs must pass before merge.
 | ------ | ---------------------- | ----------------- |
 | Format | `bun run check:format` | prettier is clean |
 
-## Running CI locally
+### Running CI locally
 
 `bun run check` runs the same assert plus auto-formats first. If CI fails on format, run `bun run check` locally and commit the diff.

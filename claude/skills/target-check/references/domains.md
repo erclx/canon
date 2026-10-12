@@ -26,9 +26,14 @@ Read four fields off the same report, then two verbs:
 - `unmigrated`: a domain still at the root layout with nothing under `.claude/`. The most urgent finding, because such a domain reports no drift of its own while being entirely behind.
 - `superseded`: a file a newer seed folder replaced. No command moves it, since the content is the project's own.
 - `unmovedSurfaces`: a surface held only at its `.claude/` spelling, each entry carrying `rel` and `movesTo`. Every other field reads clean for such a target, and the report's drift status ignores it by design, so read the array itself rather than an exit status.
+
+### Reverse and the verbs
+
 - `reverse`: `unclaimed` names folders at roots the toolkit stopped shipping, each with an `attribution` of `dropped`, `unattributed`, or `project`.
 - `canon context audit --json`: required sections, entry length, citations, and index drift across the context folder.
 - `canon records validate <kind> --json`, once per record folder the target carries.
+
+### Verdicts
 
 - Current: `unmigrated`, `superseded`, and `unmovedSurfaces` all empty, `reverse.unclaimed` carrying nothing outside `project` attribution, and both verbs finding nothing.
 - Behind: any of those carrying an entry. Name the entry and its attribution, and for `unmovedSurfaces` each `rel` with its `movesTo`.

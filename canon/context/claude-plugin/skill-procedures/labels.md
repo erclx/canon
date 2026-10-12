@@ -5,7 +5,9 @@ description: The pull request label map a project declares rather than the skill
 
 # Labels
 
-## Configuration a project declares
+## Decisions
+
+### Configuration a project declares
 
 `git-pr` labels a pull request from a `[domains]` table at `canon/config/pr-labels.toml`, keying a label name to the path prefixes that earn it. No domain name of this repository reaches the skill or its references, because a shipped label set is a guess about someone else's surfaces and a wrong default costs more than no label at all. A project declaring no map is labelled silently and never warned, which reads the absent-key discipline in `canon/context/claude-plugin/skill-procedures/overview.md` the other way: an absent file here is an answer rather than a state to repair.
 
@@ -13,7 +15,7 @@ The map keys on changed paths rather than on the conventional-commit scope, sinc
 
 Matching is prefix-anchored, so a row written for an authoring root reaches nothing under the consumed copy: `internal/standards/` never matches `.claude/internal/standards/`, and `claude/skills/` never matches `.claude/skills/`. Every surface living only under a dotted folder needs its own prefix on the row that owns its subject.
 
-### The audit verb and its fallback
+#### The audit verb and its fallback
 
 `canon labels audit`, living in `src/labels/` rather than in the skill body, names an uncovered branch before it merges. A second table, `[declined]`, separates a surface nobody covered from one somebody decided against, since prose can carry that distinction only to a reader rather than to a command. `canon/context/cli/audits/reports.md` carries the reasoning behind the verb.
 
@@ -25,19 +27,19 @@ The fallback carries every refusal except `no-map`, rather than the absent recor
 
 What is left uncovered is recorded in the file itself rather than covered: paths a release moves and paths a command rewrites, since a domain row over either gives a mechanical edit a subject it does not have, plus `assets/captures/hero.html`, which rides in the commit that regenerates the image beside it, so a row over `assets/` would label every such commit with a surface none of them is about.
 
-## Labelling runs at open and nowhere else
+### Labelling runs at open and nowhere else
 
 Labelling runs after the pull request resolves rather than as a field on the create, so one step covers both the create and the edit branch. It runs over REST, since a cloud session's GitHub access blocks GraphQL. The REST endpoint creates any label it is handed that the remote lacks, so the step reads each name off the remote first and degrades a missing one to a warning naming `gh label create`, earning a second output line since a refusal reaching nobody is the failure the fallback exists to prevent.
 
 The step stays in `git-pr` alone, which makes the label set a description of the branch at the moment the pull request opened. `review-address` delegates its push to `git-followup`, which stages, commits, pushes, and refreshes the body without invoking `git-pr`, so no follow-up push reaches the labelling step whatever the branch touched.
 
-The step is one verb, `canon labels apply <number>`, which `git-pr`'s final command calls and which any other path to an open pull request runs by hand. The seeded `pr-create-log.sh` hook names it after a `gh pr create`, since that path skipped `git-pr` and nothing else labels the result. Issue #2266 came from two workers in one target doing exactly that.
+The step is one verb, `canon labels apply <number>`, which `git-pr`'s final command calls and which any other path to an open pull request runs by hand. The seeded `pr-create-log.sh` hook names it after a `gh pr create`, since that path skipped `git-pr` and nothing else labels the result.
 
 A branch that pushes again after opening can merge under-labelled if the new commits cross into a domain the open-time diff never touched. Moving the step into `git-followup` is the alternative and it loses on the price rather than on the rate, since one behavior in two skills on two cadences buys back a rare miss. A check comparing the label set against the diff after the fact first lost because it would re-derive the map in a third place. The verb is one place every caller shares, so it replaced that rejection rather than reopening it: `--check` is the after-the-fact reading, and it reads the same earned set the add does. The follow-up-push miss stays a gotcha, since no caller runs the verb on a push.
 
 The verb only adds, and refuses before any write, `--check` included, a pull request whose head is not the current branch or whose state is not open. A project declaring no map exits 0 with nothing added. Whether `review-pr` should raise owed labels, and whether CI should run the verb on `pull_request` opened, were both declined for now: the hook and the verb close the reported gap, and CI would fix this repository alone while the issue came from a target.
 
-## What the map fails to cover
+### What the map fails to cover
 
 The map has a second consumer and it is a person. Nothing detects a top-level directory the table fails to cover, so a surface added later labels nothing until someone adds a row, which is the manifest-to-reference symmetry this repository already records as a gotcha, arriving in a new folder.
 

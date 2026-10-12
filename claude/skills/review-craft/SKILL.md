@@ -88,6 +88,9 @@ Three scope checks follow the walk:
 - You are about to call the change clean having read only the lines it changed.
 - A threshold, an exclude list, or a skip marker changed and you have not found the sentence explaining it.
 - You are approving a refactor because it has more, smaller pieces.
+
+### Claims and axes
+
 - You are calling code dead without having read the commit that added it.
 - A performance claim rests on a number you cannot trace to a repeated measurement.
 - An axis condition held and you moved past it without reading the reference it names.

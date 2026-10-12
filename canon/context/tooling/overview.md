@@ -19,6 +19,42 @@ Owns the golden configs a project inherits, layered across a `base` to `web` to 
 
 `canon tooling list` returns every stack with its extends chain and a dependency summary, so this entry carries no stack table. `canon/context/tooling/stacks.md` covers what individual stacks decide, `canon/context/tooling/capture.md` the served port and the capture seed, `canon/context/tooling/manifests.md` the manifest and how layers resolve, `canon/context/tooling/seeds.md` seed ownership and the seed gate, and `canon/context/tooling/testing.md` the end-to-end verify.
 
+### CLI
+
+- **`canon init`** bootstraps a project with base tooling and toolkit domains
+- **`canon tooling sync`** runs the full sync of configs, seeds, deps, and gitignore entries
+- **`canon tooling diff`** reports how a target differs from a stack and never writes
+- **`canon tooling reference`** prints a stack's reference doc and never writes
+- **`canon tooling list`** emits the catalog of stacks
+- **`canon tooling verify`** scaffolds into a temp dir, syncs, then runs the full project check
+
+Flags and arguments live in `docs/agents/index.md`.
+
+### Workflow
+
+Bootstrap a new project with `canon init`, which installs base configs, the Claude workflow, and governance in one command, and scaffolds an empty `.claude/wiki/`. Governance installs the `base` stack when `--stack` is absent, and `--skip governance` declines it. The `target-setup` skill resolves the flags from project detection and runs the chain in one shot.
+
+Set up a multi-language monorepo by letting the repository root own the `base` layer and giving each language its own subfolder:
+
+```bash
+canon init                                              # base at the root
+canon tooling sync vite-react ./frontend --skip base --write
+canon tooling sync python ./backend --skip base --write
+```
+
+`--skip <stack>` removes the named layer and its parents across configs, seeds, deps, scripts, and gitignore, except for any config a skipped stack names under `[sync] per_root`, which `canon/context/tooling/manifests.md` covers. Each subtree still gets its own language configs.
+
+#### Adding a stack
+
+1. Copy the closest existing stack under `tooling/`, found through `canon tooling list`
+2. Fill in `manifest.toml` with `extends`, deps, scripts, and optionally `[gitignore]` or `[verify]`
+3. Fill in `reference.md` with prose documentation
+4. Add golden configs to `configs/` for anything that ships as source of truth
+5. Add seed files to `seeds/` for user-owned files that accumulate over time
+6. Run `canon tooling verify <name>` to validate end to end
+
+Sync auto-discovers the new stack.
+
 ## Decisions
 
 ### Configs overwrite and seeds are preserved
@@ -72,39 +108,3 @@ Stacks do not compose horizontally, meaning two `extends` chains resolving at on
 - Commit golden config changes with `--no-verify`. Lint-staged runs against the template files themselves, not project source.
 - A bare `canon` on PATH resolves `PROJECT_ROOT` to the installed package rather than the checkout a caller stands in. `findCheckoutMismatch` in `src/roots/project.ts` walks upward from `process.cwd()` for the nearest ancestor `package.json` sharing this package's name, and `checkoutMismatchWarning` beside it formats the line naming both roots. `create`, `inject`, `list`, and `prune-gitignore` warn rather than refuse when the two differ. `canon/context/cli/overview.md` carries the warning's reach across every other verb.
 - `canon tooling reference` is exempt. `referenceRoots` puts the caller's own working root ahead of the package corpus, so a caller standing in the checkout already reads it. A cwd one level short of the `tooling/` folder falls through to the package corpus with nothing said, and that precedence is deliberate.
-
-## CLI
-
-- `canon init` bootstraps a project with base tooling and toolkit domains
-- `canon tooling sync` runs the full sync of configs, seeds, deps, and gitignore entries
-- `canon tooling diff` reports how a target differs from a stack and never writes
-- `canon tooling reference` prints a stack's reference doc and never writes
-- `canon tooling list` emits the catalog of stacks
-- `canon tooling verify` scaffolds into a temp dir, syncs, then runs the full project check
-
-Flags and arguments live in `docs/agents/index.md`.
-
-## Workflow
-
-Bootstrap a new project with `canon init`, which installs base configs, the Claude workflow, and governance in one command, and scaffolds an empty `.claude/wiki/`. Governance installs the `base` stack when `--stack` is absent, and `--skip governance` declines it. The `target-setup` skill resolves the flags from project detection and runs the chain in one shot.
-
-Set up a multi-language monorepo by letting the repository root own the `base` layer and giving each language its own subfolder:
-
-```bash
-canon init                                              # base at the root
-canon tooling sync vite-react ./frontend --skip base --write
-canon tooling sync python ./backend --skip base --write
-```
-
-`--skip <stack>` removes the named layer and its parents across configs, seeds, deps, scripts, and gitignore, except for any config a skipped stack names under `[sync] per_root`, which `canon/context/tooling/manifests.md` covers. Each subtree still gets its own language configs.
-
-### Adding a stack
-
-1. Copy the closest existing stack under `tooling/`, found through `canon tooling list`
-2. Fill in `manifest.toml` with `extends`, deps, scripts, and optionally `[gitignore]` or `[verify]`
-3. Fill in `reference.md` with prose documentation
-4. Add golden configs to `configs/` for anything that ships as source of truth
-5. Add seed files to `seeds/` for user-owned files that accumulate over time
-6. Run `canon tooling verify <name>` to validate end to end
-
-Sync auto-discovers the new stack.

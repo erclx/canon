@@ -18,6 +18,9 @@ The shape of the workspace is fixed by `${CLAUDE_SKILL_DIR}/references/teach.md`
 - If the invocation names no subject and no existing workspace matches, stop: `❌ No subject. Invoke with the subject to learn, or the topic of a workspace to resume.`
 - Never trust recall for what the subject says. Research first, cite what was read, and say what was not.
 - Write nothing outside the workspace folder, apart from the one handoff file Step 6 names and the destinations the fold mode lands from that file. A durable page stays in `reference/` until the operator confirms a destination, and only the fold mode copies it out, from a branch.
+
+### Workspaces and promotion
+
 - Do not open a second workspace on a subject one already covers. Resume that one.
 - Never promote a lesson. It is generated markup carrying a quiz and a learner, and no request makes it promotable.
 - Never write a favicon link by hand. `canon teach nav` puts the toolkit's icon on every page it generates and inside a lesson's `style` region, so a hand-written one in a lesson's `<head>` gives the page two.

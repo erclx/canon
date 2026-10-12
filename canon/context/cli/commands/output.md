@@ -5,33 +5,43 @@ description: Stdout against stderr, writing into a target, record-root resolutio
 
 # Writing files and output
 
-## Streams and records
+## Decisions
+
+### Streams and records
 
 - A command whose stdout is the product writes the document with `process.stdout.write` and everything else with the `log_*` helpers, which are stderr-only. `canon docs <topic>` is the one command a caller captures with `$(...)`, so a single frame character on stdout would corrupt the document silently rather than failing.
 - Anything that writes a file into a target routes through `copyPreservingMode` in `src/sync/copy.ts`. `copyFile` imposes the source's mode on an existing destination, so a target file deliberately at 600, or one an earlier layer made executable, comes back at the source's mode. The bash `cp` it replaces left an existing mode alone.
 - A verb that writes outside a target takes its destination as an argument. `canon claude setup` defaults to `$HOME/.claude` but accepts a path, which is the only way to cover the settings merge without pointing a test at the operator's real config. The sandbox scenario passes a sandbox-local path for the same reason.
+
+#### Preview and records
+
 - A preview and the apply it precedes run the same function. `planGitignore` dry-runs `mergeSections`, so the two cannot disagree. Parsing the source a second time for the preview is what lost, since the two reads drift. `govArgs` in `src/init/steps.ts` is the same shape, building both the `gov install` argv and the command a `--skip governance` notice tells the caller to paste.
 - Machine-readable output goes through `JSON.stringify` rather than a `printf` template. Interpolating a name straight into a JSON string literal emits output a consuming skill cannot parse as soon as the name carries a quote.
 - The reporter shapes the emitted record rather than the result interface behind it, and the two differ in field names. `ArchiveSuccess` in `src/tasks/archive.ts` carries `stem`, and `recordFor` in `src/commands/tasks.ts` emits that same value as `task`, so a body or a reference documenting the record off the interface names a field no caller receives.
 
-## Record roots
+### Record roots
 
 - A record folder resolves at two roots rather than one, through `recordDir` in `src/roots/record.ts`. `.canon/<folder>` is read first and `.claude/<folder>` second, and a folder neither root carries resolves to the creation default, which is `.canon/`. The read order and the default agree.
 - No call site spells a record root. A path composed by hand resolves against one root and reports nothing when it is wrong, which is the quiet failure the ordering exists to prevent, so a read goes through `recordDir`, a containment test through `recordDirs`, which names both roots whatever is on disk, and a write through `creationDir` or `creationRel`. The scratch folder is the one name that differs by root, spelled `.canon/tmp` and `.canon/tmp`, and the resolver owns that spelling so no caller carries a variant of its own.
 - `canon claude sync`'s `SEEDED_DIRS` presence check (`seededDirPath` in `src/commands/claude.ts`) routes a tracked surface entry through `surfaceDir` rather than `recordDir`, since it resolves under `SURFACE_ROOTS` (`canon`/`.claude`) rather than `RECORD_ROOTS` (`.canon`/`.claude`). Routing it through `recordDir` would report a migrated target's surface folder as missing, since that resolver never checks `canon/`.
+
+#### Backups and verbs
+
 - The backup is the one caller resolving the root rather than a folder under it. `workTree` and `recordsGitDir` in `src/records/backup.ts` both read `recordRoot`, since a history opened at one root beside a work tree at the other stages the deletion of every folder a move relocated and pushes it.
 - A verb editing shared session scratch under a record root resolves that root through `mainWorktreeRoot` rather than the working directory. The task record verbs, `canon intake answer`, and every `canon teach` verb share the reason: every worker runs in a linked worktree where the file-editing tools refuse a main-root path and the stream editors this repository bans are what a shell route reaches for, so the write has to resolve the root in-process.
-- A verb reading a tracked tree resolves `currentWorktreeRoot` instead, so it answers about the checkout the caller edited. `canon records validate` split both ways on `isSharedScratch` while one of its kinds read the tracked standards corpus, and every kind reads the main root now that kind has retired. A default keyed on a property every member shared is the thing to re-test when a member arrives without it.
 
-## Editing a file in place
+A verb reading a tracked tree resolves `currentWorktreeRoot` instead, so it answers about the checkout the caller edited. `canon records validate` split both ways on `isSharedScratch` while one of its kinds read the tracked standards corpus, and every kind reads the main root, there being no kind over a tracked corpus. A default keyed on a property every member shared is the thing to re-test when a member arrives without it.
+
+### Editing a file in place
 
 - A verb landing several edits in one file takes the whole batch in one invocation rather than one call per edit. `canon intake answer` scopes a call to a single cluster for that reason, and `canon teach glossary` writes one workspace's terms the same way, since concurrent calls read the same file and the last write keeps only its own change. A repeatable flag carrying `<key>=<value>` is the shape, splitting on the first separator so a value carrying its own survives, which is what lets `canon teach resource` take a URL holding a query string.
 - A verb editing a markdown list in place groups each bullet with the indented lines wrapped under it rather than keeping the lines that open with a bullet marker. Filtering by line drops every line of a wrapped entry but the first, and the loss is silent rather than a failure, which is how `canon teach glossary` reached a sandbox fixture carrying a wrapped entry before anything caught it. `bulletRange` in `src/teach/workspace.ts` ends the span it rewrites at the last bullet or indented continuation, so an unindented paragraph written under a list stays outside and is neither sorted nor moved.
 - The shape a validator walks is declared once by the module that writes it. `src/records/validate.ts` imports the workspace filenames, the subfolder names, the folder pattern, and the mission heading whose list is read as exit criteria from `src/teach/workspace.ts` rather than restating them, so the writer and the check cannot disagree on a filename and a layout change lands in one module. The heading is tested by equality against that constant, since a validator matching a spelling the reader cannot find would pass a mission whose criteria read as empty.
 
-## Validators and their repairs
+### Validators and their repairs
 
-- `canon records` carries no repair verb. `canon records migrate` held one transform, for a memory entry's missing `category`, and left with the kind, so `Finding` carries no `remedy` and a validator only reports. The next standard that redefines its required frontmatter brings a verb back with its first transform, which is cheaper than keeping one nothing exercised.
+`canon records` carries no repair verb, so `Finding` carries no `remedy` and a validator only reports. The next standard that redefines its required frontmatter brings a verb back with its first transform, which is cheaper than keeping one nothing exercised.
+
 - A reader over a prose corpus counts what it cannot answer apart from what it can. `canon intake list` reports an item carrying no answer slot separately from unread and answered, because folding it into either one hides a malformed file behind a number that reads as work remaining or work done.
 - A folder identity gaining a prefix does not break the argument callers already type. `matchSlug` in `src/intake/folder.ts` tries an exact match against the bare argument first, then the one entry whose name is an ordinal ahead of it, so `canon intake list toolkit-overview` keeps resolving once the folder becomes `21-toolkit-overview`. Every outcome reports `basename(opened)` rather than the caller's own argument, so `list`, `list <slug>`, and `answer <slug>` name the folder the same way in `--json`.
 - A suffix match that finds more than one folder is a collision, not an absence. `matchSlug` returns a discriminated `SlugMatch` rather than `string | undefined`, so `openFolder` refuses `ambiguous-slug` naming every match, distinct from `no-folder`, which is what lets a caller tell a typo from two dumps sharing a topic.

@@ -53,6 +53,9 @@ Reaching for size is the first instinct and the weakest tool.
 - A link or action that goes nowhere.
 - Navigation with no indication of where the reader currently is.
 - The same portrait used for several different people.
+
+### Content and copy
+
 - Every item dated identically, which no real collection ever is.
 - An exclamation mark in a success message. Confidence is quieter than that.
 - An error opening on an apology rather than on what to do next.

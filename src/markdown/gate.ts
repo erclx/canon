@@ -2,6 +2,7 @@ import type { ColonFinding } from '@/markdown/colons'
 import type { HeadingCaseFinding } from '@/markdown/heading-case'
 import type { LinkFinding } from '@/markdown/links'
 import type { BanFinding } from '@/markdown/scan'
+import type { StackFinding } from '@/markdown/stacks'
 import type { StructureReport } from '@/markdown/structure'
 
 export interface GateInput {
@@ -31,6 +32,15 @@ export interface GateInput {
    * case, and gating it would need a names list and an escape marker.
    */
   readonly headingCase: readonly HeadingCaseFinding[]
+  /**
+   * Every run of plain bullets past the cap, read by nothing here.
+   *
+   * The stage that gates it is `bullet-stacks` in `src/gate/stages.ts`, which
+   * reads a scope of tracked files. This audit also runs on plans and
+   * groundwork records kept out of version control, where a long list is not
+   * a defect, which is the reason `documentCeiling` gates apart from it too.
+   */
+  readonly bulletStacks: readonly StackFinding[]
 }
 
 /**

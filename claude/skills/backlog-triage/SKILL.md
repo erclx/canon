@@ -77,13 +77,13 @@ Age is evidence in neither direction. A row untouched for months is not more dec
 
 Write one item per row in the intake item format, one cluster file per domain the task touches, numbered in read order. Head each item `### N. <task stem>` so apply can find the task from the heading alone.
 
-- `Problem:` states what this pass measured, with the count, path, or commit behind it
-- `Fix:` states what applying the verdict does to the board
-- `Worth it:` names the cost or the reach the verdict rests on in one clause, or says the row names neither. A `yes` or a `later` carries no verdict on its own, so a decline can follow either word
-- `Open:` reads `decline, archive, keep, or promote?` on every item
-- `Suggested:` opens with exactly one of the four verdict tokens, then the reason. An archive suggestion lists every outcome position it closes, as `archive 1, 3: shipped in #NNN`
-- `Overlaps:` names a live board task that already carries the work, where one does
-- `You:` ships empty
+- **`Problem:`** states what this pass measured, with the count, path, or commit behind it
+- **`Fix:`** states what applying the verdict does to the board
+- **`Worth it:`** names the cost or the reach the verdict rests on in one clause, or says the row names neither. A `yes` or a `later` carries no verdict on its own, so a decline can follow either word
+- **`Open:`** reads `decline, archive, keep, or promote?` on every item
+- **`Suggested:`** opens with exactly one of the four verdict tokens, then the reason. An archive suggestion lists every outcome position it closes, as `archive 1, 3: shipped in #NNN`
+- **`Overlaps:`** names a live board task that already carries the work, where one does
+- **`You:`** ships empty
 
 Write `00-overview.md` last, per the intake standard, with the verdict counts by token and an open-questions list linking each item. Where the pass runs out of context before the index, write `99-next-session.md` naming the last row filed, since a compaction drops the rest.
 

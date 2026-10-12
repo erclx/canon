@@ -22,6 +22,9 @@ Does not govern:
 - Length: 50 characters maximum
 - Casing: kebab-case only, no underscores or camelCase
 - Description: 2 words maximum, up to 4 only when genuinely needed for specificity
+
+### Description content
+
 - Capture the core change, not the commit message verbatim
 - For branches with multiple commits, use the unifying concern as the description.
 - Do not duplicate type in description (e.g., `feat/feature-login`)
@@ -30,17 +33,19 @@ The upper bound reads 4 rather than 3 for every branch, whoever named it. It was
 
 ## Types
 
-- `feat`: new feature or capability
-- `fix`: bug fix
-- `refactor`: structural changes (not a fix or feature)
-- `docs`: documentation only (README)
-- `chore`: maintenance tasks (deps, tooling, configs)
-- `perf`: performance improvements
-- `test`: add or modify tests
-- `style`: code formatting (whitespace, semicolons)
-- `build`: build system changes (webpack, npm scripts)
-- `ci`: CI/CD pipeline changes (GitHub Actions)
-- `revert`: revert a previous commit
+| Type       | Use                                         |
+| ---------- | ------------------------------------------- |
+| `feat`     | new feature or capability                   |
+| `fix`      | bug fix                                     |
+| `refactor` | structural changes (not a fix or feature)   |
+| `docs`     | documentation only (README)                 |
+| `chore`    | maintenance tasks (deps, tooling, configs)  |
+| `perf`     | performance improvements                    |
+| `test`     | add or modify tests                         |
+| `style`    | code formatting (whitespace, semicolons)    |
+| `build`    | build system changes (webpack, npm scripts) |
+| `ci`       | CI/CD pipeline changes (GitHub Actions)     |
+| `revert`   | revert a previous commit                    |
 
 ## Examples
 

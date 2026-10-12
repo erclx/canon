@@ -48,6 +48,9 @@ A page failing these is non-conforming even when it satisfies every shape rule b
 - `title` (required): sentence case, naming the surface the page covers rather than the action a reader takes on it
 - `description` (required): one line naming what the page covers, which is what the folder's catalog shows beside the link
 - `category` (conditional): the shelf the page sits on in that catalog
+
+### Declaring category
+
 - Declare `category` on every page in a folder where any page declares one. A grouped catalog writes the declared shelves and nothing else, so a page omitting the field beside a sibling that carries one is absent from the catalog with nothing reporting it.
 - Omit it on every page or on none. A folder where no page declares one lists flat, which is the right shape for a folder whose pages need no shelves.
 - Spell one shelf's value identically on every page sitting there. The grouping reads the literal string, so a second spelling opens a second shelf holding one page.
@@ -65,6 +68,9 @@ A page failing these is non-conforming even when it satisfies every shape rule b
 - Write for a reader with no access to the source. A sentence that resolves only by opening a file belongs in internal narrative instead.
 - Name the failures a surface produces alongside the path that works. A page documenting success alone sends its reader to the source at the first refusal.
 - Link to the adjacent page rather than restating it. One page owns each surface, and a second copy drifts with nothing comparing the two.
+
+### What to leave out
+
 - Do not restate output a command already prints, such as a full flag table. Name the command that prints it.
 - Do not carry the history of how a surface reached its shape. A page describes the surface as it stands, and the change that moved it is recorded wherever the project tracks work.
 - Do not carry contributor setup or the argument for adopting the project. Both are addressed to a reader who has not installed anything yet.

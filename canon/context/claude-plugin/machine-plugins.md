@@ -20,7 +20,9 @@ The catalog has no other home, since it is content rather than procedure and no
 command reads it. Nothing loads this entry at install time, and a person setting
 up a new machine is its only reader.
 
-## What was picked
+## Decisions
+
+### What was picked
 
 | Plugin              | Category  | Marketplace source       | Why                                                                  |
 | ------------------- | --------- | ------------------------ | -------------------------------------------------------------------- |
@@ -38,7 +40,9 @@ installing through `npx impeccable skills install` into `.claude/` per project
 rather than per machine, since its skill invokes scripts by project-relative
 path. That is the one row whose install is not the two commands above.
 
-## What the list does not settle
+## Gotchas
+
+### What the list does not settle
 
 `code-review` was picked on the reading that it runs on a pull request,
 where a local review skill that stood beside it ran on a local diff. Claude Code now ships a `/code-review` command of its own, which

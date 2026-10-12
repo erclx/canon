@@ -32,13 +32,13 @@ Governs a groundwork track under `.canon/groundwork/<nn>-<slug>/`: folder layout
 
 Does not govern:
 
-- `08-spikes.md`, what each spike records, and the folders holding what a spike produced: `groundwork-spikes.md`
-- A dump of many findings filed by domain, each carrying its own verdict: `intake.md`
-- The feature plan a closed track feeds, and the contract its answer slots keep: `plan.md`
-- The task file a closing track writes, and the origin line pointing back at the folder: `tasks.md`
-- Voice, rhythm, and sentence construction: the `write-human` skill
-- Headings, punctuation, word choice, and file references: `markdown.md`
-- When a project opens a track at all, and the procedure that runs one, which belong to the surface driving it
+- **`groundwork-spikes.md`**: `08-spikes.md`, what each spike records, and the folders holding what a spike produced
+- **`intake.md`**: A dump of many findings filed by domain, each carrying its own verdict
+- **`plan.md`**: the feature plan a closed track feeds, and the contract its answer slots keep
+- **`tasks.md`**: the task file a closing track writes, and the origin line pointing back at the folder
+- **the `write-human` skill**: voice, rhythm, and sentence construction
+- **`markdown.md`**: headings, punctuation, word choice, and file references
+- **the surface driving it**: when a project opens a track at all, and the procedure that runs one
 
 ## Folder name
 
@@ -92,6 +92,9 @@ Orients. Holds no findings.
 - A `## Why` section stating why the track is running now
 - A file-map table of filename and what it holds, kept current as files are added or retired
 - A `## Method` section splitting internal sources from external ones, naming which were used and which were not yet done, and listing under a leads heading any external source found but not opened
+
+### Closing sections and phase
+
 - A `## Prior art` section
 - A `## Source citation` section stating the rule below, so a returning session picks it up from the folder
 - The phase stated out loud in the first three lines, in the form `Groundwork phase. Nothing here is a feature plan.`

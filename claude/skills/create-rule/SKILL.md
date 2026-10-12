@@ -25,15 +25,17 @@ Resolve both from the request, and ask only for what is missing. Attach a propos
 
 Pick the subdir from the topic. It sits under `.claude/rules/project/` and names the rule's domain:
 
-- `code/`: code placement, errors, naming, testing.
-- `lang/`: one programming language.
-- `framework/`: one framework.
-- `lib/`: one library or tool.
-- `ui/`: UI copy, accessibility, forms.
-- `claude/`: session conduct and `.claude/` authoring surfaces.
-- `canon/`: the toolkit workflow and its record folders.
-- `tooling/`: dev setup, such as CI workflows, dependencies, and config.
-- `writing/`: prose and document shape.
+| Subdir        | Holds                                                      |
+| ------------- | ---------------------------------------------------------- |
+| `code/`:      | code placement, errors, naming, testing.                   |
+| `lang/`:      | one programming language.                                  |
+| `framework/`: | one framework.                                             |
+| `lib/`:       | one library or tool.                                       |
+| `ui/`:        | UI copy, accessibility, forms.                             |
+| `claude/`:    | session conduct and `.claude/` authoring surfaces.         |
+| `canon/`:     | the toolkit workflow and its record folders.               |
+| `tooling/`:   | dev setup, such as CI workflows, dependencies, and config. |
+| `writing/`:   | prose and document shape.                                  |
 
 ## Step 3: pick a free slug
 

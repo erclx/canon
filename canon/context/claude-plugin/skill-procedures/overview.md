@@ -21,11 +21,13 @@ Each file covers one procedure family:
 - `canon/context/claude-plugin/skill-procedures/worktree-entry.md`: the `core.bare` repair, the dependency check, the branch entry hands the ship chain, and which document the chain resolved
 - `canon/context/claude-plugin/skill-procedures/ship-chain.md`: the hazards a ship chain meets, from a citation count reading one surface to a write landing on the wrong pull request
 
-## The CLI shell-out pattern
+## Decisions
+
+### The CLI shell-out pattern
 
 Plugin skills that shell out to the CLI follow a consistent pattern: read the toolkit catalog via `canon <domain> list --json`, match against project context, then execute the CLI with `CANON_NON_INTERACTIVE=1` so it skips prompts. Claude Code's tool permission dialog is the single confirmation gate. Skills never reimplement CLI logic or hardcode rule or stack names. `target-setup` is the reference.
 
-### The non-interactive variable answers a prompt rather than refusing it
+#### The non-interactive variable answers a prompt rather than refusing it
 
 `CANON_NON_INTERACTIVE=1` skips a prompt by resolving it, not by declining to proceed. `select` in `src/cli/ui.ts` returns the first option under that variable, so a verb whose argument a prompt would have asked for takes whatever sorts first in its catalog. A body that both mandates the variable and calls such a verb bare therefore runs against a value nothing about the target produced, and it reports the difference as a finding.
 
@@ -33,7 +35,7 @@ Plugin skills that shell out to the CLI follow a consistent pattern: read the to
 
 The general rule is that a skill mandating the variable owes every verb it calls each argument a prompt would have asked for. A default reached this way is silent in both directions: the command exits zero and the report reads as measured, so nothing downstream can tell the answer apart from one the target earned.
 
-### Reading a report rather than rediscovering
+#### Reading a report rather than rediscovering
 
 A skill reading `canon sync --check --json` rather than walking the tree itself treats an absent report key as unread rather than as an empty answer. An absent key and an empty array are separate states: reading an absent key as empty exits zero, takes the nothing-to-report branch, and reports a clean target the CLI never actually measured, while a current CLI reporting an empty array has looked and found nothing.
 
@@ -41,21 +43,21 @@ That skew is the general shape rather than one skill's problem. A skill reaches 
 
 The fallback does not key on `historyUnavailable`, since that field reports failed attribution on a domain or on `seeds`, while `unmigrated` is a filesystem read carrying no attribution at all. Keying on it would drop a correct detection whenever an unrelated half of the report could not be dated.
 
-### Where the fallback stops being the safe answer
+#### Where the fallback stops being the safe answer
 
 A fallback is worth having when its failure is an imprecision and worth refusing when its failure is a proposal nobody can undo. `unmigrated` pairs against domain folders whose worst listing error is an unfiltered count, so a skill reading it degrades to a listing when the key is absent. A `superseded` pairing fails differently: a listing of `.claude/*.md` also reaches `ARCHITECTURE.md`, `REQUIREMENTS.md`, and `DESIGN.md`, each a single file the layout intends to stay one, so a fallback there would shred three documents. No shipped skill reads that key, and the principle stands for whichever skill reads such a key next.
 
-### A skill whose subject is a banned path
+#### A skill whose subject is a banned path
 
 The Skill paths stage fails the build on a shipped body naming a `wiki/` path, since a shipped skill runs where no such path resolves. The ban constrains a citation, and it constrains the shape of a whole body when the folder is the skill's subject rather than an aside in it. The wiki reference of `draft-doc` is that case and it names no path at all. It cites its standard through `${CLAUDE_SKILL_DIR}/references/wiki.md`, resolves the folder and its vendor subfolder from what that standard's own placement section states, and carries both as placeholders through every later step. The standard is therefore the single owner of the path, which is the outcome the citation rule wants anyway and which the ban forces here rather than leaving to judgment.
 
 The script anchors its pattern on a non-path character, so a nested spelling such as `.claude/wiki/` stays legal and only the bare one fails. A body reaching for that nested form to satisfy the pattern would pass the gate and still be wrong, since it names a layout the target does not necessarily have. Resolving from the standard is what separates passing the check from being portable.
 
-### Bundled references
+#### Bundled references
 
 `target-setup` bundles `references/detect.md`, `references/indexes.md`, and `references/verify.md`, each holding the per-phase procedure its body routes to. A `references/` file is read by a session running in a target project, where no `canon/context/` path resolves, so nothing in one cites the reasoning behind it. That reasoning is recorded here instead, on a surface that never ships, for the maintainer editing a reference. `canon/context/claude-plugin/machine-plugins.md` keeps the plugin catalog a retired setup skill bundled the same way.
 
-## Procedures defined once and cited
+### Procedures defined once and cited
 
 Two procedures run inside more than one skill and are defined once in an owner skill's `references/`, cited from each body rather than restated in it. Each has a reference of its own, `publish.md` for the scan and `slug.md` for the transform. Neither sits inside a document-type standard, since `markdown.md` does not govern a scan and `skill.md` does not govern a slug transform.
 
@@ -69,13 +71,13 @@ The split between the two surfaces is what keeps the citation honest. The standa
 
 Nothing detects a body that restates a procedure instead of citing it. `assert_no_drift` covers generated copies and a hand-written restatement is not generated, so the guarantee is only that a single definition exists to correct.
 
-## Main-root writes
+### Main-root writes
 
-### The routing handoff drains per session
+#### The routing handoff drains per session
 
 A handoff queue under `.canon/tmp/handoff/` drains per session rather than accumulating unread, so a file sitting in it is evidence about one session rather than about the mechanism. A handoff outlives its producer only when that producer never reached its own ship chain, so an aged file reads as a session that stopped early rather than as a queue with no consumer. Check the modification time against the live worktree list before concluding the mechanism itself is unread.
 
-### A main-root write names its route or the guard silently takes it
+#### A main-root write names its route or the guard silently takes it
 
 Several bodies write shared session scratch at the main worktree root, and Claude Code refuses any such write from a linked worktree, redirecting to the worktree copy instead. The redirected write still succeeds, so a body stating only the destination reports success and loses the file, with no stage reporting the miss.
 
@@ -85,6 +87,6 @@ Two structured edits have verbs, `canon tasks pull-request` and `canon tasks out
 
 A read site needs no route, since `Read` resolves against the main root normally.
 
-## Adding a shipped skill trips two gates
+### Adding a shipped skill trips two gates
 
 A new folder under `claude/skills/` fails `bun run check` twice before anything about the skill itself is wrong. `src/claude/cases/all.test.ts` asserts every shipped skill carries at least one routing case, so the suite fails until the new name gets an entry in one of the `src/claude/cases/*.ts` files, and the failure names the skill rather than the checklist step that was missed. The Hero gate stage then fails, because the captured frame prints the shipped skill count and the count moved, which wants `assets/captures/hero.html` regenerated and re-rendered through `canon capture` with all three of the markup, the image, and the stamp committed. The `internal-claude` sync checklist names the folder, the catalog decision, the sandbox scenario, and both of these, pointing back here for the reasoning behind each rather than restating it.

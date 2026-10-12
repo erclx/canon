@@ -32,14 +32,14 @@ Governs a learning workspace under `.canon/teach/<nn>-<topic>/`: folder layout, 
 
 Does not govern:
 
-- The frontmatter, entry shape, and ordering of the glossary the workspace holds: the `teach-workspace` skill, which carries that reference
-- What a lesson teaches, how it sequences difficulty, and what makes one worth returning to, which belong to the surface driving the workspace
-- Where a durable page goes once it leaves the workspace, which belongs to the routing test the destination surface states
-- One question measured in depth before anyone can plan against it: `groundwork.md`
-- A dump of many findings filed by domain, each carrying its own verdict: `intake.md`
-- Voice, rhythm, and sentence construction: the `write-human` skill
-- Headings, punctuation, word choice, and file references: `markdown.md`
-- When a workspace opens at all, and the procedure that runs one, which belong to the surface driving it
+- **the `teach-workspace` skill**: the frontmatter, entry shape, and ordering of the glossary the workspace holds, which that skill's reference carries
+- **the surface driving the workspace**: what a lesson teaches, how it sequences difficulty, and what makes one worth returning to
+- **the routing test the destination surface states**: where a durable page goes once it leaves the workspace
+- **`groundwork.md`**: one question measured in depth before anyone can plan against it
+- **`intake.md`**: A dump of many findings filed by domain, each carrying its own verdict
+- **the `write-human` skill**: voice, rhythm, and sentence construction
+- **`markdown.md`**: headings, punctuation, word choice, and file references
+- **the surface driving it**: when a workspace opens at all, and the procedure that runs one
 
 ## What a working workspace looks like
 

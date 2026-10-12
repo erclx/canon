@@ -7,7 +7,9 @@ description: The regenerate-then-assert stages, covering the consumed copies of 
 
 Three stages regenerate a tracked artifact and then assert it did not move. Regenerating and then asserting is what turns an edit to a source surface into a failure that names the stale copy, rather than a copy nothing reads as wrong. The Indexes and Skill references stages share the shape, and their gotchas sit in `canon/context/development/verification.md`.
 
-## Consumed copies
+## Decisions
+
+### Consumed copies
 
 The Consumed copies stage runs `canon gov regen` and then asserts no drift across `.claude/rules`. It is the only mirror this stage regenerates: standards ship with no mirror, since nothing installs their corpus into a project, and `internal/` carries no mirror either, since nothing installs it and both readers of the one standard under it sit at the root beside the source.
 
@@ -21,11 +23,11 @@ The failure message asks for a commit while staging is what clears the stage, wh
 
 The producer clears `.claude/rules/` before installing, so a rule dropped from the record disappears rather than lingering as an unsourced file. That is also why `internal/rules/` exists: a rule governing toolkit authoring alone needs a source somewhere outside `governance/rules/`, which ships to every target. Those rules land at the one path they are authored at, since nothing under `internal/` mirrors anywhere.
 
-## Sample content on disk
+### Sample content on disk
 
 Sample content committed at its real filename gets rewritten by every repo-wide write pass that claims that filename. An `index.md` or `package.json` fixture on disk collides with `canon indexes regen`, which rebuilds any `index.md` from sibling frontmatter, and with prettier, which reformats JSON and can strip a leading blank line an append fixture depends on. Store such content under a `.fixture` suffix stripped on copy, which beats ignore-file entries and beats pruning a shared walker because it changes nothing for that walker's consumers.
 
-## Hero
+### Hero
 
 `assets/` is the self-portrait half of the boundary decision between it and `examples/` in `canon/context/web/assets.md`, which is why every render here gates on drift rather than carrying a disclaimer.
 
@@ -35,7 +37,7 @@ One shared value map reaches every template, so a frame resolving only the place
 
 What the script can read bounds what a frame can show. It reads committed catalogs through the modules their verbs call, so a frame sourced from a gitignored folder such as `.canon/tasks/` regenerates here and fails in CI, where that folder does not exist. A frame wanting that content carries its text the way `install.html.tmpl` does, recorded from a real run in the template with its elisions named.
 
-### The source folder is read flat three times
+#### The source folder is read flat three times
 
 `regen-hero.ts` collects templates through `readdirSync`, `resolveCaptureSources` expands a directory to the `.html` files directly inside it, and `captureBases` finds a capture set the same way. All three read `assets/captures/` and none of them descends.
 
@@ -43,25 +45,25 @@ So a template placed a further folder down is skipped by regeneration, by captur
 
 Only the markup half reads that way. `captureBases` lists `assets/captures/`, then `readCaptureSet` builds the `.png` and the `.stamp` against `assets/frames/`, which is where `--out assets/frames` puts them, so a set is one base name resolved in two folders rather than three files in one. The frames carry no `showcase-` prefix, since separating markup from image needs no prefix once the two live in separate folders rather than a single flat listing.
 
-### What the assert covers
+#### What the assert covers
 
 The assert covers the HTML and not the PNG beside it. A capture is a chromium render whose bytes move with the browser version, so asserting the image would fail on a machine whose browser differs rather than on a stale count. A second assert closes the gap that leaves without rendering anything: `canon capture` writes a digest of the markup it read and one of the image it wrote into a `.stamp` beside each PNG, and the stage hashes both committed files of each set and compares them.
 
 The stage takes its set of frames off the `.html` files in `assets/captures/`, which is the same thing `canon capture assets/captures` reads to decide what to render, so a frame added later is covered without a second edit and an image in `assets/` that no markup renders is left alone.
 
-### Run a branch-reading verb from source
+#### Run a branch-reading verb from source
 
 An installed `canon capture` renders rather than refusing, which makes the wrong route quiet rather than safe. A session clearing this stage in this repository runs it through the source entry point, as `bun src/cli.ts capture assets/captures/hero.html --selector .window --out assets/frames`, since the global binary is whatever release last published and this stage compares against the branch. `--selector` carries no default, so a run that omits it refuses before rendering anything.
 
 The rule generalizes past this stage to every verb reading data the branch authors. `canon claude skills rank` is the second instance: it ranks prompts against the case list of whatever release last published, so a branch editing `src/claude/cases/` reads its own change as absent and reports the old prompt beside the old expected skill, which reads as a case that never routed at all. Run such a verb through `bun src/cli.ts` whenever the branch touches what it reads. A verb reading the checkout instead, such as `canon gov test-order`, answers correctly from the global binary, since what it reads moves with the tree rather than with the release.
 
-### Committing a capture
+#### Committing a capture
 
 Reading the commit that last touched each file measures timing rather than agreement, so a pair moved by one commit passes whatever the image holds. `canon/context/development/gates/content-stages.md` carries what the digest proves and the merge case that needs it. The cost is unchanged: a capture cannot ship as a follow-up commit, so regenerate, capture, and commit all three files in one step.
 
 The assert compares against the index, the way the Consumed copies stage above does, so running `canon capture` is not what clears the stage. All three files have to be staged before the next `bun run check`, and until they are the stage repeats the same message it printed before the capture ran. Reading that repeat as the capture having failed is the trap, since the render succeeded and only the staging is outstanding.
 
-### One writer per frame
+#### One writer per frame
 
 The frame carries no version number. `package.json` is bumped on `main` by the release tooling, and a pull request builds against the merge commit, so an embedded version drifts on every open branch the moment a release lands and the stage then fails for work that touched nothing. Counts have the same shape and are kept, because a catalog change is what the stage exists to catch and the branch that changes a catalog is the one that goes red.
 
@@ -69,6 +71,6 @@ Every `assets/captures/*.html` is in `.prettierignore`, because the stage and th
 
 That entry is a folder glob rather than a list of frames. The script writes whatever templates the folder holds, so a frame added under a named-file entry arrives with two writers and shows no sign of it until their output first disagrees. Templates keep their format gate, which the glob leaves alone because a template ends in `.tmpl`.
 
-### An exit 2 with no message
+#### An exit 2 with no message
 
 The bash version of `regen-hero` intermittently exited 2 with nothing on stderr. The TypeScript script spawns nothing and discards no stderr, and thirty consecutive `--check` runs passed clean on WSL2. `canon/context/development/gates/content-stages.md` holds the record under `## Hero provenance`.

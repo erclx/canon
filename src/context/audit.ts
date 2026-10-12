@@ -64,6 +64,22 @@ export const REQUIRED_SECTIONS_BY_FOLDER: Readonly<
 }
 
 /**
+ * The closed set of H2 sections per audited folder name, which a required
+ * section belongs to. An entry carrying another H2 is a finding under
+ * `--gate`, since the set is what makes a context entry cheap to find a fact
+ * in: a domain's own topic names go one level down as H3 items under
+ * `Decisions` and `Gotchas`.
+ *
+ * Held beside the required lists for the same reason they are held here, and
+ * keyed on the folder whose standard states it.
+ */
+export const ALLOWED_SECTIONS_BY_FOLDER: Readonly<
+  Record<string, readonly string[]>
+> = {
+  context: ['Overview', 'Layout', 'Decisions', 'Gotchas'],
+}
+
+/**
  * The context standard's list, kept as its own export because the audit record
  * has published it flat under `checkpoints.requiredSections` since before any
  * other folder required a section.
@@ -226,6 +242,12 @@ export interface EntryReport {
    */
   readonly sections: readonly string[]
   /**
+   * H2 headings outside the folder's closed set, in document order, and empty
+   * outside a folder whose standard states one. What the folder carries in
+   * all is `extraSections`.
+   */
+  readonly otherSections: readonly string[]
+  /**
    * Whether the file declares itself a skeleton, which excludes it from the
    * section check alone. Every other measure still reads it, since a stub is
    * exempt from owing sections rather than from being well formed.
@@ -279,6 +301,13 @@ export interface LengthFinding {
   readonly lines: number
   /** One entry per question in `LengthQuestion` order, never empty. */
   readonly causes: readonly LengthCause[]
+}
+
+export interface ExtraSectionFinding {
+  /** Repo-relative path of the entry carrying the headings. */
+  readonly rel: string
+  /** H2 headings outside the closed set, never empty. */
+  readonly headings: readonly string[]
 }
 
 export interface SectionFinding {
@@ -442,6 +471,33 @@ function declaredSections(
   return required.filter((section) => found.has(section))
 }
 
+const H2_TEXT = /^##\s+(.+?)\s*$/
+
+/**
+ * Finds the H2 headings outside the allowed set.
+ *
+ * H2 only, since the set closes the sections of an entry and says nothing of
+ * where its H3 items sit. Fenced blocks are skipped, so a template quoted
+ * inside an example declares nothing about the entry quoting it.
+ */
+function otherSections(
+  lines: readonly BodyLine[],
+  allowed: readonly string[],
+): string[] {
+  if (allowed.length === 0) return []
+
+  const found: string[] = []
+
+  for (const line of lines) {
+    if (line.fenced) continue
+
+    const match = line.text.match(H2_TEXT)
+    if (match && !allowed.includes(match[1])) found.push(match[1])
+  }
+
+  return found
+}
+
 /**
  * Finds the references naming a sibling entry by bare filename.
  *
@@ -500,6 +556,7 @@ export function measureEntry(
   governsContent = true,
   siblings: readonly string[] = [],
   required: readonly string[] = governsContent ? REQUIRED_SECTIONS : [],
+  allowed: readonly string[] = [],
 ): EntryReport {
   const lines = bodyLines(source)
 
@@ -510,6 +567,7 @@ export function measureEntry(
     provenance: governsContent ? provenance(lines) : [],
     bareReferences: bareReferences(lines, siblings),
     sections: declaredSections(lines, required),
+    otherSections: otherSections(lines, allowed),
     stub: isStubSeed(source),
     governed: governsContent,
   }
@@ -589,6 +647,7 @@ export async function measureFolders(
           governsContent(folder),
           names.filter((name) => name !== self),
           requiredSections(folder),
+          allowedSections(folder),
         ),
       )
     }
@@ -606,6 +665,13 @@ export function governsContent(folder: AuditedFolder): boolean {
 export function requiredSections(folder: AuditedFolder): readonly string[] {
   return Object.hasOwn(REQUIRED_SECTIONS_BY_FOLDER, folder.name)
     ? REQUIRED_SECTIONS_BY_FOLDER[folder.name]
+    : []
+}
+
+/** Names the H2 sections the folder's standard allows, empty where it states no set. */
+export function allowedSections(folder: AuditedFolder): readonly string[] {
+  return Object.hasOwn(ALLOWED_SECTIONS_BY_FOLDER, folder.name)
+    ? ALLOWED_SECTIONS_BY_FOLDER[folder.name]
     : []
 }
 
@@ -687,4 +753,21 @@ export function missingSections(
   }
 
   return findings
+}
+
+/**
+ * Names each entry carrying an H2 outside its folder's closed set.
+ *
+ * Per entry rather than per folder, unlike `missingSections`: a split folder's
+ * entries each answer for their own headings, since an extra section is a fact
+ * about the file it sits in. A stub seed is dropped for the reason
+ * `missingSections` drops one, a skeleton being exempt from the shape rather
+ * than from being well formed.
+ */
+export function extraSections(
+  entries: readonly EntryReport[],
+): ExtraSectionFinding[] {
+  return entries
+    .filter((entry) => !entry.stub && entry.otherSections.length > 0)
+    .map((entry) => ({ rel: entry.rel, headings: entry.otherSections }))
 }

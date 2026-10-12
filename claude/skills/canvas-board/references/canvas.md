@@ -58,6 +58,9 @@ A canvas failing these is non-conforming even when it satisfies every shape rule
 - Write a frame as a whole document or as a fragment. The server writes in the `html`, `head`, and `body` a fragment leaves out, marked so a pick still matches the file.
 - State a `body` whenever the frame states a `head`. The browser builds one the file leaves out, and an address the operator picks inside the frame can no longer be matched to the file.
 - Write every table with its `tbody` stated, for the same reason. A browser adds one the file leaves out.
+
+### Content and edits
+
 - Keep a frame self-contained. Inline its own styles and scripts, or link a file inside the same page folder, since a frame is served from its page and nothing outside the canvas resolves.
 - Use the project's custom properties, `var(--<name>)`, for every value the token stylesheet defines. A literal copied from it shows the right color today and the wrong one after the next token change.
 - Edit a frame by rewriting its file. The file is the frame, and nothing else holds a copy of its markup.
@@ -70,6 +73,9 @@ Applies to an explanation frame only. A mockup of the project's interface render
 - Keep lines short, one fact a line.
 - Set body text at 20px or larger and headings at 44px or larger. Set nothing under 16px.
 - Render an explanation frame about 1100px wide.
+
+### Colors, faces, and fit
+
 - Take colors from the project's custom properties. A frame that defines colors of its own sets the dark values on `:root` and the light ones under `[data-theme="light"]`, since the shell sets `data-theme` on each frame's root.
 - Name only the faces the canvas serves into every frame: `Geist Variable` for text, `Noto Sans Mono` for code, and `Excalifont` for a hand-drawn look. They render the same in a capture and in any browser, so a height fitted against them holds.
 - Make each box tall enough to show all its content, with no scrollbar and no clipped line. Run `canon canvas fit <page>/<frame>` rather than estimating, since it measures the content in the capture browser and sets the height.
@@ -80,6 +86,9 @@ Applies to an explanation frame only. A mockup of the project's interface render
 - Keep one `layout.json` per page, beside its frames. It holds each frame's box and nothing else, so moving a frame never rewrites its markup.
 - Key each box by the frame's name, under one top-level `frames` object.
 - Give every box four finite numbers in pixels: `x` and `y` for its top-left corner on the page, `width` for the width the frame renders at, and `height` for the height it shows on the canvas.
+
+### Missing boxes and writes
+
 - Leave a frame out of the layout only when its position does not matter yet. A reader places an unnamed frame in a row after the others, at the default size of 1440 by 900.
 - Never write the file while a writer holds its lock, which is the same name with `.lock` appended. Two writers each replacing the whole file lose one of the two edits.
 - Treat a layout that does not parse as a defect to repair, never as an empty one to overwrite. Writing over it erases every box it held.
@@ -106,6 +115,9 @@ The keys below are the ones a reader parses. The frame names are placeholders.
 - Do not assume a viewport. A frame renders at its layout width on the canvas and in a capture alike, so size it with media queries against that width rather than against the operator's window.
 - Do not assume the theme. The canvas theme toggle is the operator's own state, and a capture shows each frame in its default theme.
 - Do not assume a network. Name a served face, or ship the font beside the frame, since a capture refuses a frame naming a font it cannot find.
+
+### Font, source, and checkout
+
 - Do not assume a default font. Set `font-family` with a served face first on an element the frame's text inherits from, since a capture checks the first family of the text it renders and the browser's default serif is absent from many machines. A frame naming a machine family such as `DejaVu Sans` renders at another height in another browser, which `canon canvas fit` reports.
 - Do not assume the frame is the source. A picked direction is carried into the project's design document or a plan, and the operator clears the frame once it has been carried.
 - Do not assume the canvas survives the checkout. The folder is gitignored, so a lost checkout loses every page in it.

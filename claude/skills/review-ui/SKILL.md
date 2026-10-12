@@ -22,6 +22,9 @@ rather than inside it, so the two passes finish on their own clocks.
 - The evidence record carries no `checklist`: stop and post nothing, `No checklist on PR #<number>, so there is nothing to drive.`
 - No address resolves under Step 3: stop and post nothing, `❌ No address to drive. PR #<number> carries no preview and no local preview, and the launch named none.`
 - The wrapper refuses to open the browser because its revision is absent: stop and post nothing, passing its install command to whoever launched the pass. Never install mid-pass.
+
+### Head and posting
+
 - The newest UI verdict is `## UI review closed` at the current head: stop, `The UI review already covers <short-sha>.` An open verdict at the head stops the same way only when nothing has arrived since it: drive again when a `## Review response` or `## Post-review findings` comment is newer than the verdict, or the launch names an address.
 - The hosted preview was not built from the head: stop and post nothing, naming `built`, `tip`, and `canon pr preview <number> --json` for the dispatcher. A verdict posted against an older build carries a marker naming a head nobody drove.
 - Post, then run `canon pr lift <number>` on a close. Never merge or ready the PR by hand, and edit the evidence comment only through `canon pr tick`.
@@ -66,7 +69,7 @@ Take the first rung that answers, testing each with `curl -s -o /dev/null -w '%{
 2. The `local` address off the record.
 3. An address the launch names.
 
-When the hosted rung answers, check that it was built from the head before driving it:
+When the hosted rung answers, check it was built from the head before driving:
 
 ```bash
 canon pr preview <number> --check --json
@@ -80,7 +83,7 @@ An address that exists and does not answer is a different outcome from no addres
 
 ## Step 4: open the browser
 
-Drive from `.canon/tmp/pr/review-ui/<number>/` at the main worktree root, resolved the way `session-worktree` does, since the CLI writes its snapshots under the folder it runs in. Name the browser session `<project>-<number>`, with `<project>` the main root's basename, so two passes on one machine never share a browser.
+Drive from `.canon/tmp/pr/review-ui/<number>/` at the main worktree root, resolved the way `session-worktree` does, since the CLI writes its snapshots under the folder it runs in. Name the browser session `<project>-<number>`, with `<project>` the main root's basename, so two passes on a machine never share a browser.
 
 ```bash
 ${CLAUDE_SKILL_DIR}/scripts/pw.sh -s=<project>-<number> open <url>
@@ -104,7 +107,7 @@ canon pr frames <number> --add frames/<box-number>-<theme>.png --box <box-number
 canon pr frames <number> --add frames/<box-number>.png --box <box-number> --head <head> --pass <pass> --json
 ```
 
-Push only a frame of the address this pass drove, since the branch is as public as the repository. Branch on `reason` rather than on the exit code. Every reason but `ok` is a refusal, `read-only` among them on a fork's token, so describe that frame in words and name the reason in its evidence rather than failing the pass.
+Push only a frame of the address this pass drove, since the branch is as public as the repository. Branch on `reason` rather than on the exit code. Every reason but `ok` is a refusal, `read-only` among them on a fork's token, so describe that frame in words and name the reason in its evidence not failing the pass.
 
 ## Step 6: sweep
 

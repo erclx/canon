@@ -26,8 +26,11 @@ One candidate passes both halves and stays deferred. A child folder carrying no 
 A standard governing a file path carries a rule routing to it, so an edit loads the standard without the matching skill being invoked. The route makes a standard reachable from the action rather than from a session that thought to look.
 
 - `tooling-reference` is authored under `internal/rules/claude/`, because `internal/standards/tooling-reference.md` governs a surface a target never authors, and shipping the route would point at a path no install creates. It globs `manifest.toml` beside `reference.md`, since a rule protecting a symmetry has to fire from either side and the manifest moves first.
-- `governance/rules/canon/context.md` carries a write-time policy beside its read-time one, so editing a domain leaves its context entry conforming. It is hand-written like the two record rules, since its standard moved into `context-fold`. It ships to every `base` consumer, so each write-time bullet states an outcome of the edit rather than a backlog to drain, which also reads correctly in a project with no entries yet.
-- `governance/rules/canon/tasks.md` and `governance/rules/canon/plan.md` route the two record folders and ship in `base` with the `canon` folder. Both are hand-written, as `writing/markdown.md` is, since their standards moved into `task-board` and `plan-feature` and the generator reads only `standards/`. The groundwork, intake, and session rules retired with their standards, since each only routed to a reference its owner skill already reads.
+
+`governance/rules/canon/context.md` carries a write-time policy beside its read-time one, so editing a domain leaves its context entry conforming. It is hand-written like the two record rules, since its standard lives in `context-fold`. It ships to every `base` consumer, so each write-time bullet states an outcome of the edit rather than a backlog to drain, which also reads correctly in a project with no entries yet.
+
+`governance/rules/canon/tasks.md` and `governance/rules/canon/plan.md` route the two record folders and ship in `base` with the `canon` folder. Both are hand-written, as `writing/markdown.md` is, since their standards live in `task-board` and `plan-feature` and the generator reads only `standards/`.
+
 - Each of those two carries the directives that ship silently when violated, such as the blank answer slot and the board's generated index, and loads its owner skill for the rest. The write scope stays in the skill body, since a misrouted write lands on a path the glob never matches.
 - `governance/rules/canon/tasks.md` globs `.canon/tasks/**` whole, so it also loads on a session handoff, and a carve-out bullet sends that file to `canon:session-map` because the board and the handoff are two shapes.
 
@@ -41,7 +44,7 @@ No rule carries a directive for the root file and no standard governs it, so the
 
 ### A rule loads the skill owning a reference
 
-A rule pointing at a shared reference loads the skill that owns it by its `canon:` name. A rule loads on a glob match with no skill context, so `${CLAUDE_SKILL_DIR}` expands to nothing and the sibling path a skill body spells is unavailable. `canon standards <name>` was the other route until the verb retired with the standards corpus.
+A rule pointing at a shared reference loads the skill that owns it by its `canon:` name. A rule loads on a glob match with no skill context, so `${CLAUDE_SKILL_DIR}` expands to nothing and the sibling path a skill body spells is unavailable.
 
 The skill ships on the plugin channel and the rule on the CLI channel, so the two can arrive apart, which is why the rule names the gap itself with a report-if-missing bullet.
 
@@ -77,9 +80,9 @@ The retirement is a stated exception to the cut test under "What an always-loade
 
 ### The question surface has no shipped rule
 
-A call the operator's preference decides went through the structured question surface, stated in an always-loaded rule a target reached through `canon gov sync`. The operator cut that rule on 2026-10-10 on the ground that the guidance cost every session its words. What holds now is the skills that state the surface in their own bodies, so no shipped surface tells a target session to ask on a preference call. A skill body such as `decision-escalate` fires only when typed, which is the cost the operator accepted.
+A call the operator's preference decides went through the structured question surface, stated in an always-loaded rule a target reached through `canon gov sync`. That rule was rejected because the guidance cost every session its words. The skills state the surface in their own bodies, so no shipped surface tells a target session to ask on a preference call. A skill body such as `decision-escalate` fires only when typed, which is the cost the operator accepted.
 
-The cut rule had forbidden reopening a question a written artifact already answered rather than forbidding the surface, since that was the real defect behind the rejections of it. The plan answer contract in `governance/rules/canon/plan.md` still carries the answer for a plan.
+The rejected rule forbade reopening a question a written artifact already answered rather than forbidding the surface, which was the real defect behind the rejections of it. The plan answer contract in `governance/rules/canon/plan.md` still carries the answer for a plan.
 
 ### What an always-loaded bullet has to carry alone
 

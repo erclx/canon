@@ -7,7 +7,9 @@ description: Each toolkit skill with a plausible community counterpart compared 
 
 Toolkit skills with a plausible community counterpart are compared below. Every one is kept, some have taken a borrowed section from the counterpart, and each taken borrow names the body it landed in. Most borrows found have been taken: the `session-worktree` submodule guard, the `ux-measure` CLS attribution, the `git-ship` verify gate, and the `git-worktree` path-prefix test. The `review-address` push-back borrow is the one still standing, a repair that edits a skill body no verdict pass has opened.
 
-## Debugging, review, and planning counterparts
+## Decisions
+
+### Debugging, review, and planning counterparts
 
 - `canon:systematic-debugging` vs `obra/superpowers/systematic-debugging`. Same methodology. Ours is 98 lines to their 283 at `8ca22db`, capturing the four phases, circuit breaker, and red flags in a prose-tight form that matches toolkit conventions. No borrow from superpowers.
   - Bisect, the reduce step, the non-reproducible branches, and error output as data were borrowed from `addyosmani/agent-skills`'s `debugging-and-error-recovery` instead, and the skill's `references/adopted.md` records each.
@@ -18,7 +20,7 @@ Toolkit skills with a plausible community counterpart are compared below. Every 
 - `canon:plan-groundwork` vs `obra/superpowers/brainstorming`. Closest external analogue, different output. `brainstorming` is an upfront clarification conversation feeding straight into a plan, so its product is a better-specified plan.
   - Groundwork produces a durable numbered folder of measurements and rejected options that can legitimately conclude in doing nothing, and it runs before a plan is warranted rather than while one is being written. No borrow.
 
-## Worktree and measurement counterparts
+### Worktree and measurement counterparts
 
 - `canon:session-worktree` vs `obra/superpowers/using-git-worktrees`. Different premises. Theirs is portable, so most of its 202 lines carry a fallback path for a harness with no native tool, down to an ignore check, a dependency install by ecosystem sniff, and a baseline test run. Ours assumes `EnterWorktree` and spends its 133 lines on what that tool leaves undone.
   - Taken into `session-worktree`'s Guards, on the opposite branch from the one theirs describes. Their Step 0 adds `git rev-parse --show-superproject-working-tree` for a submodule where the git-dir reads differ, but an absorbed submodule returns one identical path from both reads, so that failure cannot occur here. What the same command closes is a submodule passing the first guard and building `.claude/worktrees/` inside a tree the superproject tracks as a commit. The skill body carries the measurement.
@@ -28,7 +30,7 @@ Toolkit skills with a plausible community counterpart are compared below. Every 
   - Their threshold handling is the one place ours is the narrower design on purpose. `web-perf` retrieves boundaries from `web.dev` at run time and carries seven metrics to our three. Ours pins the published numbers in a table and forbids moving one to fit a reading, so adopting retrieval would contradict that rule rather than extend it. No borrow.
   - Taken into `ux-measure` Step 3 and its report format. Their `CLSCulprits` insight names which elements shifted, where a bare CLS number carries no attribution. It sits inside our report-and-stop contract because it says where the score came from rather than what to do about it, and the body says so where it lands. The attribution comes off the run that produced the median rather than merging all three, since merged shares are proportions of a total no run measured.
 
-## Shipping counterparts
+### Shipping counterparts
 
 - `canon:auto-ship` vs `obra/superpowers/executing-plans` and the `finishing-a-development-branch` it requires. Different products. Theirs walks plan tasks against a todo list and closes by handing the operator a merge, PR, or cleanup menu. Ours closes on a draft pull request with CI polled and offers no menu.
   - No borrow. `executing-plans` opens by critiquing the plan, and this toolkit takes that at the `plan-feature` approval gate ahead of autoship.
@@ -42,7 +44,7 @@ Toolkit skills with a plausible community counterpart are compared below. Every 
   - Theirs cleans the one worktree the session sits in, at the end of one branch, and only for two of its four options. Ours enumerates every worktree in the repository at any time, resolves each branch's merge state through `gh` with a local-ancestry fallback, and removes the merged set in one batch.
   - Taken as a fourth enumeration test. Theirs tests the worktree path against a known prefix before removing anything and leaves a workspace the harness owns in place. Without it, `git worktree list` reporting every worktree could put a merged clean tree an operator added by hand elsewhere on disk inside the remove set, its branch following under `branch -D`. A non-main row whose path sits outside `<MAIN_ROOT>/.claude/worktrees/` reads as `foreign` and joins the skip set with that reason, in `list` and `cleanup` both.
 
-## Orchestration and review counterparts
+### Orchestration and review counterparts
 
 - `canon:role-orchestrator` vs `obra/superpowers/dispatching-parallel-agents` and the `subagent-driven-development` beside it. Same subject, opposite mechanism. Both of theirs delegate to in-process subagents and spend most of their length on constructing the context each one gets, since a subagent inherits nothing and is reached only through its final report.
   - Ours dispatches a separate `claude --bg` process holding its own worktree and its own pull request, and forbids the Agent tool outright. `canon/context/claude-internal/orchestration/dispatch.md` records why under the dispatch boundary: independence, being steerable, and a worker's own pull request are the properties, and a subagent carries none of them.

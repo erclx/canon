@@ -39,13 +39,13 @@ A fact goes to `.claude/rules/` when it fires on a specific path being edited an
 
 Firing is one axis of three. The second is conditional presence, which a rule buys and a line in `CLAUDE.md` or a seed cannot, since an eager line loads into every session. The third is updatability, which is what makes the six rules `base` installs with no `paths:` glob correct as rules, five under `canon/` and one under `claude/`: a rule installed through governance sync carries a later fix to every project that installed it, where a seed line stays fixed at the scaffold it was written into. Measured at `b6835a56` on 2026-09-26.
 
-The test no longer ships as a rule, so it reaches a session through this entry alone. A target holds it only where this context folder exists, and the seed does not state it.
+The test ships as no rule, so it reaches a session through this entry alone. A target holds it only where this context folder exists, and the seed does not state it.
 
 ### What bounds the eager tier
 
 `canon/REQUIREMENTS.md` states a word cap the Canonical records stage gates. `CLAUDE.md` states none, and trims hold it instead, each moving a bullet into the skill or entry that reads it. Reach never bounds either file, since nearly every fact touches two domains. Bounding by reach is how an eager architecture record once grew to forty entries and about 15k tokens loaded into every session, and a numeric ceiling on its length was tried first and dropped, since nothing enforced it and every merge drifted past it.
 
-That record is retired here, and `CLAUDE.md` states where a decision several domains read now lands. A session pays for such a decision on demand rather than at every start. The pointer each other domain keeps carries no check, since nothing compares an entry against the one it defers to.
+That record is retired, and `CLAUDE.md` states where a decision several domains read lands. A session pays for such a decision on demand rather than at every start. The pointer each other domain keeps carries no check, since nothing compares an entry against the one it defers to.
 
 ### What each root holds
 
@@ -84,6 +84,20 @@ The bare `.canon/` ignore spelling is what keeps a carve-out out of reach: writt
 New entries are not created automatically, since auto-creation pads the catalog with low-signal entries refreshed every pull request. Create one by hand following `claude/skills/context-fold/references/context.md`, and `context-fold` keeps it current after. The rule does not reach the tooling stacks, which ship `development.md` and `ci.md` as user-owned seeds under `tooling/base/seeds/canon/context/`, arriving filled rather than generated, a decision `tooling/base/reference.md` owns. Check both seed sources before concluding an entry is absent from a scaffolded project.
 
 Mapping changed files to entries misses two shapes, both produced by a change that removes a capability, and the `context-fold` body holds the sweep that catches them. The first is the half-rewritten entry, refreshed at the top and left alone below, where the current opening lends authority to the stale remainder. The second is a sentence a change inverted from a distance: a claim comparing two surfaces stays true only while both hold, and its file often sits outside the diff. Rewriting only what the diff touched stays the default, overridden only inside an entry the run already edited.
+
+### The sweep prompt reads rationale as current
+
+The local classifier's sweep prompt reads a reason naming why an alternative was left out, what an earlier approach got wrong, or what a measurement caught as KEEP, even in the past tense. REWRITE needs a superseded figure beside its replacement, "now" or "no longer" marking a change, branch or PR narration, or rounds of candidates.
+
+Three web sections drew the tune, `README images`, `The capture job reports and never commits`, and `Composition`, each a rule with its evidence written in the past tense. On the groundwork's labelled set the tuned prompt catches 7 of 8 with 0 of 6 false flags, against 7 of 8 and 1 of 6 for the first prompt. The one miss is a wireframe the ported prompt no longer names.
+
+### A context entry's H2 set is closed
+
+A context entry carries `Overview`, `Layout`, `Decisions`, and `Gotchas` as H2 and nothing else, and `canon context audit --gate` fails any other H2. A topic of the domain's own is an H3 under one of them.
+
+The cause was open-ended naming. Measured over the commits since 2026-10-01, `Decisions` and `Gotchas` took 29% of the lines an entry grew by, and H2 sections an entry named for itself took 64%. The drift was the section set rather than the two named sections, so closing the set puts the growth in places a reader already scans.
+
+A `Sources` section for entries that are not about code was rejected. Such an entry omits `Layout`, which the standard already sanctions, and a project needing more overrides with its own rule, as compass does through `.claude/rules/project/context.md`. The set ships to targets advisory, since no target runs `--gate`.
 
 ## Gotchas
 

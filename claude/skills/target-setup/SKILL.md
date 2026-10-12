@@ -163,6 +163,11 @@ After the chain, report:
 - Tooling stack synced, or skipped. Name the layers pulled via the extends chain.
 - Any post-sync fixups applied (ESLint pin, filename renames)
 - `verify` outcome, naming the depth it ran at
+
+### Outcomes and gaps
+
+After the chain, report as well:
+
 - `indexes` outcome (folders bootstrapped, or none found)
 - Any domains or scripts that failed
 - Any detection gaps surfaced during resolve

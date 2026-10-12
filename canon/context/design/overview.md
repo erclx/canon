@@ -23,11 +23,24 @@ The parser reads `## Personality`, `## Color`, and `## Borders` as `## Overview`
 
 `canon/context/design/tokens.md` covers the token module and the surfaces reading it, and `canon/context/design/render.md` the preview. The canvas a direction is drafted on before it reaches this record is `canon/context/features/canvas.md`.
 
+### Workflow
+
+1. Draft `canon/DESIGN.md` from the seed template and name the project's stylesheet in its lead, or work the direction out on the canvas and carry the pick in.
+2. Write each value into that stylesheet, and the rule or intent behind it into the record.
+3. For a record carrying values, review the `? verify` cells through `canon design render`, which marks and counts each one at `.canon/tmp/render/design/index.html`.
+
+A direction nobody has settled yet is drafted on the canvas first, through the `canvas-board` skill, and only the pick leaves it, its values for the stylesheet and its intent for `DESIGN.md`.
+
+### Related
+
+- `docs/agents/commands.md`: CLI flags and invocation contract for `canon design`
+- `docs/workflow/visual-design-workflow.md`: tier framework for prose-only, visual companion, and graphical source of truth
+
 ## Decisions
 
 ### The record stays at the canon root
 
-`canon/DESIGN.md` sits at the `canon/` root beside `REQUIREMENTS.md`, and no `canon/design/` folder holds it. The operator decided this on 2026-10-02. Moving it would change a path every target shares, read by the surface root, the migrations, and the renderer, for a tidier root alone.
+`canon/DESIGN.md` sits at the `canon/` root beside `REQUIREMENTS.md`, and no `canon/design/` folder holds it. Moving it would change a path every target shares, read by the surface root, the migrations, and the renderer, for a tidier root alone.
 
 ### Output is one-way
 
@@ -48,16 +61,3 @@ A target writes rules, omissions, and each role's intent by hand, and takes ever
 ## Gotchas
 
 - `canon design regen` resolves its outputs from `PROJECT_ROOT`, which is the installed package directory in a target. It refuses where `.claude/DESIGN.md` is absent at that root, which is what an installed package looks like, rather than writing two files into `node_modules` and reporting success.
-
-## Workflow
-
-1. Draft `canon/DESIGN.md` from the seed template and name the project's stylesheet in its lead, or work the direction out on the canvas and carry the pick in.
-2. Write each value into that stylesheet, and the rule or intent behind it into the record.
-3. For a record carrying values, review the `? verify` cells through `canon design render`, which marks and counts each one at `.canon/tmp/render/design/index.html`.
-
-A direction nobody has settled yet is drafted on the canvas first, through the `canvas-board` skill, and only the pick leaves it, its values for the stylesheet and its intent for `DESIGN.md`.
-
-## Related
-
-- `docs/agents/commands.md`: CLI flags and invocation contract for `canon design`
-- `docs/workflow/visual-design-workflow.md`: tier framework for prose-only, visual companion, and graphical source of truth

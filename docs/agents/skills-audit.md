@@ -28,14 +28,22 @@ The audit reads the directory it is pointed at, defaulting to the cwd. `canon cl
 
 Each check traces to a line in the standard.
 
-- `REQUIREMENT.md` present in every skill folder
+### Folder and frontmatter
+
 - Frontmatter `name` matching the folder name
 - Frontmatter `description` present
 - `description` under 1024 characters
 - No `README.md` inside a skill folder
 - Folder name in kebab-case
+
+### Requirement and content
+
+- `REQUIREMENT.md` present in every skill folder
 - Each `REQUIREMENT.md` declaring `Gap` and `Must`, matched at any heading level
 - No ISO date in `SKILL.md` or any file under `references/`, reported as `datedProvenance` in the JSON record's `findings`
+
+### Practice, references, and family
+
 - Each listed practice skill closing with `## Excuses and rebuttals`, `## Red flags`, and `## Before handing over`, and each skill on the wider ledger list carrying `references/adopted.md`, reported together as `practiceShape`
 - Each file under `references/` running over 100 lines opening with a `## Contents` H2, reported as `referenceContents`
 - Each skill under `claude/skills/` declaring a `metadata.family` that names a key in `checkpoints.families`, reported as `family`
