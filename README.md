@@ -61,17 +61,17 @@ bun install --global @erclx/canon
 
 Each domain has a canonical source in this repo and a thin install or sync CLI on your side. The domains split on one line: some are copied into your project and become yours to edit, and some are never copied at all.
 
-| Domain         | What it is                                                                                                               | How it reaches you                                              |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
-| Plugin skills  | Skills that plan a feature, review a diff, sync the planning docs, and run the ship chain                                | Loaded live from the plugin, never copied                       |
-| Governance     | Coding and authoring rules that load into a Claude session when a matching path is edited                                | Installed per project by `canon gov install`, refreshed by sync |
-| Tooling stacks | Golden configs, seeds, and a reference per framework                                                                     | Laid down by `canon init`, reconciled by `canon tooling sync`   |
-| Design system  | Ships a `DESIGN.md` token format, a skill that drafts one from an existing project or from scratch, and a render command | `canon design render`                                           |
-| Slides         | A folder of HTML slides per deck, drawn in the project's tokens and rebuilt as editable shapes                           | `canon slides render` writes PowerPoint                         |
-| Teach          | Lessons, sources, and a glossary in one workspace, rendered to a small site                                              | `canon teach`                                                   |
-| Canvas         | Pages of HTML frames on a local pan and zoom surface, each frame drawn with the project's tokens                         | `canon canvas serve`                                            |
-| Transcripts    | A YouTube transcript with metadata frontmatter                                                                           | `canon transcripts <url>` writes it into any repo               |
-| Sandbox        | Scenario scaffolds that provision an isolated project state for verifying each domain flow                               | `canon sandbox`                                                 |
+| Domain         | What it is                                                                                                                                                                   | How it reaches you                                              |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Plugin skills  | Skills that plan a feature, review a diff, sync the planning docs, and run the ship chain                                                                                    | Loaded live from the plugin, never copied                       |
+| Governance     | Coding and authoring rules that load into a Claude session when a matching path is edited                                                                                    | Installed per project by `canon gov install`, refreshed by sync |
+| Tooling stacks | Golden configs, seeds, and a reference per framework                                                                                                                         | Laid down by `canon init`, reconciled by `canon tooling sync`   |
+| Design system  | Ships a `DESIGN.md` intent format that points at the project's stylesheet for values, a skill that drafts one from an existing project or from scratch, and a render command | `canon design render`                                           |
+| Slides         | A folder of HTML slides per deck, drawn in the project's tokens and rebuilt as editable shapes                                                                               | `canon slides render` writes PowerPoint                         |
+| Teach          | Lessons, sources, and a glossary in one workspace, rendered to a small site                                                                                                  | `canon teach`                                                   |
+| Canvas         | Pages of HTML frames on a local pan and zoom surface, each frame drawn with the project's tokens                                                                             | `canon canvas serve`                                            |
+| Transcripts    | A YouTube transcript with metadata frontmatter                                                                                                                               | `canon transcripts <url>` writes it into any repo               |
+| Sandbox        | Scenario scaffolds that provision an isolated project state for verifying each domain flow                                                                                   | `canon sandbox`                                                 |
 
 Those domains reach you in three shapes. A tooling stack lands as real files under version control, because a config is something your build reads and your project owns. A plugin skill and the references it carries are never copied, so there is no copy in your repo to drift from this one.
 

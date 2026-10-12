@@ -17,7 +17,7 @@ Project docs split across three roots at the project root. What the project auth
 ```plaintext
 canon/
 ├── REQUIREMENTS.md  ← problem, goals, non-goals
-├── DESIGN.md        ← visual intent and token decisions (UI projects)
+├── DESIGN.md        ← visual intent, pointing at the stylesheet (UI projects)
 └── context/         ← per-domain narrative loaded on demand via index.md
 
 .claude/
