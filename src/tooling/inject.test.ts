@@ -56,6 +56,29 @@ describe('injectManifest', () => {
     expect(stderr()).toContain('test:run')
   })
 
+  it('should name an override script it could not install without a package.json', async () => {
+    const stderr = captureStderr()
+
+    await injectManifest(resolveChain(PROJECT_ROOT, 'web'), target)
+
+    const listed = stderr()
+      .match(/Scripts not added: (.*)/)?.[1]
+      .split(', ')
+    expect(listed).toContain('check:format')
+    expect(listed).toContain('lint')
+  })
+
+  it('should list a script declared as both plain and override once', async () => {
+    const stderr = captureStderr()
+
+    await injectManifest(resolveChain(PROJECT_ROOT, 'vite-react'), target)
+
+    const listed = stderr()
+      .match(/Scripts not added: (.*)/)?.[1]
+      .split(', ')
+    expect(listed?.filter((key) => key === 'build')).toEqual(['build'])
+  })
+
   it('should name a declared dev dependency it could not install without a package.json', async () => {
     const stderr = captureStderr()
 
