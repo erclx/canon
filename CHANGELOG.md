@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.37.0](https://github.com/erclx/canon/compare/v5.36.0...v5.37.0) (2026-10-12)
+
+
+### Features
+
+* **markdown:** cap bullet runs and close the context section set ([#2365](https://github.com/erclx/canon/issues/2365)) ([5a7b49b](https://github.com/erclx/canon/commit/5a7b49bd9ad2a7f58691dd47b236f989365232fc))
+* **pr:** namespace the frames branch under canon/ ([#2361](https://github.com/erclx/canon/issues/2361)) ([fd9ee3a](https://github.com/erclx/canon/commit/fd9ee3a3bc6c9453387f993565caa9ce068178e0))
+
+
+### Bug Fixes
+
+* **capture:** name the code font on the install frame pre ([#2362](https://github.com/erclx/canon/issues/2362)) ([471a4f0](https://github.com/erclx/canon/commit/471a4f05fd0d7851c73a4bfc92306289129cbd50))
+* **hooks:** exempt the background job folder from the scratch guard ([#2367](https://github.com/erclx/canon/issues/2367)) ([ff11149](https://github.com/erclx/canon/commit/ff11149f0dd8cac229ed683cd46f24514521f3cc))
+* **tooling:** make the base check read-only ([#2368](https://github.com/erclx/canon/issues/2368)) ([9dad825](https://github.com/erclx/canon/commit/9dad8253b249632f39df7af83bfdcf7abf41509f))
+* **tooling:** run the web goldens clean on Vite 8 ([#2366](https://github.com/erclx/canon/issues/2366)) ([7c057a7](https://github.com/erclx/canon/commit/7c057a7f67360c5f420bc7c8123197f5a4c0df72))
+
 ## [5.36.0](https://github.com/erclx/canon/compare/v5.35.0...v5.36.0) (2026-10-12)
 
 
