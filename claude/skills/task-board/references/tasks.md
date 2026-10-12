@@ -82,6 +82,8 @@ Two headings, `## Outcomes` and `## Findings`. Outcomes are future and checkable
 
 Add no third heading. Status stays inline on an outcome rather than becoming an "In progress" section.
 
+Open each finding with a bold label naming its source and date, as in `- **v144.0 planner, 2026-10-11:** <finding>`, and keep it to a few sentences. Anything longer moves into the plan or the groundwork folder. Outcomes stay a checklist, since the board tools read them by their `- [ ]` line.
+
 Size the outcomes so one pull request closes all of them, and split the task before handing it off rather than after. A task closes whole or not at all, so outcomes spanning two pull requests leave the board showing in-progress work no branch carries.
 
 A sliced task is the one allowed exception: a task the operator decided to ship across several pull requests on purpose, one slice each. Its `Pull request:` line lists every slice, so the board records which merged work covered which outcomes, and it closes whole when the last slice's merge finds every outcome ticked and no slice left pending.
@@ -115,7 +117,7 @@ Why this task exists and what it depends on.
 
 ## Findings
 
-- What constrains the task, dated where it matters.
+- **<source>, <YYYY-MM-DD>:** What constrains the task.
 
 > Test strategy: <unit | component | e2e | visual | manual>, what is being verified
 ```
