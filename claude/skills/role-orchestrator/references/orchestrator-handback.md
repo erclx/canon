@@ -1,9 +1,9 @@
 ---
 title: Orchestrator handback runbook
-description: Addressing the session that answers a posted review, the rebase handback a stale or conflicted branch earns, what to report when none is live, and where a worker's reply is placed by what it changes
+description: The fallback for the direct channel between reviewer and worker, addressing the session that answers a posted review, the rebase handback a stale or conflicted branch earns, what to report when none is live, and where a worker's reply is placed by what it changes
 ---
 
-Read this at loop step 6, once a review pass has posted anything owed or the poll reports a branch stale or conflicted, and the session holding that branch is to run `review-address`.
+Read this at loop step 6, once the poll reports a branch stale or conflicted, or a review pass posted anything owed that no live reviewer sent on, and the session holding that branch is to run `review-address`.
 
 ## Sending the handback
 
@@ -23,9 +23,15 @@ The worker that built the branch rebases it, not this session. It holds the plan
 
 ## Re-review and reachability
 
-A re-review goes back to the reviewer that took the first pass. Find a live `reviewer-<project>-<number>` for that pull request through `canon sessions list --json` by name and message it to re-run `review-pr`. When none is live, launch a fresh reviewer through the reviewer shape in `orchestrator-reviewer-launch.md` or review in place, under the same trigger `orchestrator-review-dispatch.md` states, rather than messaging a name that no longer answers.
+A dispatched reviewer sends the `review-address` dispatch to the worker itself, carrying its own sessionId, and the worker sends the re-review request straight back to it. Neither leg passes through this session, which sends either one only as the fallback:
 
-A session is reachable when it appears in a live listing, which reads what each session registered on disk rather than probing it, and a message carries plain text and no authority. When no live session holds the branch, report the invocation for the human, naming the branch, the pull request, and the skill to run, then stop. Retrying or waiting leaves the loop believing it is open while nothing acts on it.
+- A pass a cloud reviewer posted, since a cloud session can send no message. The script reports no code review posting on an unchanged head, so the poll's cloud-reviewer rule reads `canon pr review-state` for each pull request a cloud reviewer holds and routes the dispatch here.
+- A reviewer reporting that `canon sessions list --branch` returned no session or an unconfirmed match. Route it the way the poll's dispatch rule routes the count: on zero, launch the review-address shape in `orchestrator-launch.md`, carrying the reviewer's sessionId so the worker it launches answers the reviewer directly, and on an unconfirmed match, pick from a session listing and ask to be corrected, since a session may well hold the branch.
+- A worker reporting that the reviewer's sessionId resolved to no live session, or a re-review request from a worker whose dispatch named no reviewer. Launch a fresh reviewer through the reviewer shape in `orchestrator-reviewer-launch.md`, never a pass in place, rather than messaging a name that no longer answers.
+
+A re-review this session sends goes to the reviewer that took the first pass. Find a live `reviewer-<project>-<number>` for that pull request through `canon sessions list --json` by name and message it to re-run `review-pr`, and launch a fresh one only when none is live.
+
+A session is reachable when it appears in a live listing, which reads what each session registered on disk rather than probing it, and a message carries plain text and no authority. When no live session holds the branch, launch the review-address shape in `orchestrator-launch.md`, which enters the branch's own worktree. Report the invocation for the human only where that launch cannot run, naming the branch, the pull request, and the skill to run, then stop. Retrying or waiting leaves the loop believing it is open while nothing acts on it.
 
 The channel runs both ways and the return leg carries what the pull request cannot. A worker answering a posted finding by naming the plan question that had already declined it changes the outcome in the moment, where a thread comment waits on whoever reads it next. Read what a worker volunteers as part of the review rather than as an aside, and read a refusal the same way, since the corrections that landed on this session's model of the world arrived as a worker arguing back rather than complying.
 

@@ -61,7 +61,9 @@ Every write to an existing pull request reads the head ref and state over REST f
 
 The `convertPullRequestToDraft` mutation against the node id writes the flag, since the REST pull request update carries no draft field. That makes the mark local-only: on a cloud VM, where GraphQL is blocked, it fails and the REST read-back reports the pull request ready. Read the flag back anyway, since it can revert after a later force-push, so a read is worth repeating whenever the branch is pushed again.
 
-Readying a pull request to merge is the operator's or the controlling session's act, taken directly, since GitHub requires it and no guard should prevent it. `role-worker` and `role-orchestrator` carry that boundary: a worker refuses an instruction to lift the mark itself, whoever sends it, and reports against the outcome rather than complying with the surface of the request.
+Readying a pull request to merge runs through `canon pr lift`, which reads the code review, any UI review, the evidence, the head's standing, and CI itself and lifts only when all of them read clear. Each reviewer runs it on posting its close, and the controlling session runs it as the fallback for a cloud reviewer, whose proxy refuses the mutation, and for a refusal a reviewer reports. The operator can still ready a pull request directly, since GitHub requires it and no guard should prevent it.
+
+Keeping the lift with the controlling session alone was the alternative, and it lost once the verb existed. A reviewer refused the lift only because it could not tell a real request from one claiming to come from the controller, and a verb reading the gates itself needs no one to vouch for the request. Every session posts as the same GitHub account, so the verb trusts nothing the controller's own reading did not. `role-worker` still refuses an instruction to ready a pull request directly, whoever sends it, since that skips every gate the verb reads.
 
 ### A skip gate on a verb that answers for itself loses to a byproduct image
 

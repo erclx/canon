@@ -24,7 +24,7 @@ rather than inside it, so the two passes finish on their own clocks.
 - The wrapper refuses to open the browser because its revision is absent: stop and post nothing, passing its install command to whoever launched the pass. Never install mid-pass.
 - The newest UI verdict is `## UI review closed` at the current head: stop, `The UI review already covers <short-sha>.` An open verdict at the head stops the same way only when nothing has arrived since it: drive again when a `## Review response` or `## Post-review findings` comment is newer than the verdict, or the launch names an address.
 - The hosted preview was not built from the head: stop and post nothing, naming `built`, `tip`, and `canon pr preview <number> --json` for the dispatcher. A verdict posted against an older build carries a marker naming a head nobody drove.
-- Post and stop. Never merge, never lift the draft mark, and never edit the evidence comment except through `canon pr tick`.
+- Post, then run `canon pr lift <number>` on a close. Never merge or ready the PR by hand, and edit the evidence comment only through `canon pr tick`.
 
 ## Step 1: resolve the pull request
 

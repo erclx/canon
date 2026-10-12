@@ -222,6 +222,7 @@ beforeEach(() => {
     [
       '#!/usr/bin/env bash',
       `if [ "$1 $2" = "pr review-state" ]; then cat "${join(root, 'fixtures')}/scope-$3.json"; exit 0; fi`,
+      `if [ "$1 $2" = "pr lift" ] && [ -f "${join(root, 'fixtures')}/lift-$3.json" ]; then cat "${join(root, 'fixtures')}/lift-$3.json"; exit 1; fi`,
       'exit 1',
       '',
     ].join('\n'),
@@ -758,6 +759,47 @@ describe('poll', () => {
 
         expect(run.stdout).toMatch(/^STALE {5}#7 standing at /)
         expect(readFileSync(baselinePath(), 'utf8')).toBe(written)
+      })
+
+      // The lift verb exits 1 on every refusal and still prints its record, so
+      // the stub does too.
+      const liftRecord = (number: string, gates: object[]): void => {
+        writeFileSync(
+          join(root, 'fixtures', `lift-${number}.json`),
+          JSON.stringify({
+            gates,
+            head: HEAD,
+            isLifted: false,
+            isOk: false,
+            reason: 'review-open',
+            waitedSeconds: 0,
+          }),
+        )
+      }
+
+      it('should take the standing the lift verb reads over its own', () => {
+        const main2 = commit(base, 'main2', { 'a.txt': fileWith(4, 'theirs') })
+        pushMain(main2)
+        openPull(
+          '7',
+          commit(main2, 'rebased', { 'a.txt': fileWith(0, 'mine') }),
+        )
+        liftRecord('7', [
+          { gate: 'review', isOk: false, reason: 'review-open' },
+          { gate: 'standing', isOk: false, reason: 'standing-conflict' },
+        ])
+
+        expect(check('7').stdout).toBe(
+          `CONFLICT  #7 standing at ${HEAD.slice(0, 7)}`,
+        )
+      })
+
+      it('should read its own standing when the lift record carries none', () => {
+        openPull('7', commit(base, 'pr7', { 'a.txt': fileWith(0, 'mine') }))
+        pushMain(commit(base, 'main2', { 'a.txt': fileWith(4, 'theirs') }))
+        liftRecord('7', [])
+
+        expect(check('7').stdout).toMatch(/^STALE {5}#7 standing at /)
       })
 
       it('should refuse a pull request whose head it cannot read', () => {
