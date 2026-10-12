@@ -12,7 +12,7 @@ The nextjs stack covers Next.js + TypeScript projects using the App Router. It s
 2. Install web tooling: `canon tooling sync web . --write`
 3. Install nextjs configs: `canon tooling sync nextjs . --write`
 4. Extend the `ci` and `development` context entries under `canon/context/` per the web reference's extend sections plus the nextjs rows below.
-5. Run `bun run lint:fix` then `bun run check`.
+5. Run `bun run lint:fix`, then `bun run format`, then `bun run check`.
 
 ## What ships as golden configs
 

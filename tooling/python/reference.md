@@ -16,7 +16,7 @@ Configs ship as sidecar files (`ruff.toml`, `mypy.ini`, `pytest.ini`, `.coverage
 4. Install python tooling: `canon tooling sync python . --write`
 5. Install Python tooling deps: `uv add --dev ruff mypy pytest pytest-cov`. v1 of this stack does not declare these in `[dependencies.dev]` because manifest injection hardcodes `bun add -D`, which can not install Python packages. Until the injector branches on `runtime`, this step is manual.
 6. Sync the lockfile and create the venv: `uv sync`.
-7. Run `bun run lint:fix` then `bun run check`.
+7. Run `bun run lint:fix`, then `bun run format`, then `bun run check`.
 
 The python stack also ships `tests/test_smoke.py` as a copy-once seed. `pytest` collects at least one test on first run, so `bun run test:run` exits 0 instead of the empty-collection exit code 5. Delete or replace the smoke test with real tests.
 
@@ -39,7 +39,7 @@ The manifest declares no `[dependencies.dev]`. Manifest injection currently call
 
 ## Verify command
 
-`canon tooling verify python` runs the manifest's `[verify] prepare` before Sync, which is checklist steps 2, 5, and 6: `bun init -y`, `uv add --dev ruff mypy pytest pytest-cov`, and `uv sync`. `uv init` writes no `package.json`, and a verify that reaches its end with none fails, so the prepare is what lets `bun run lint:fix` and `bun run check` run at all. Python's `verify.json` requires the `lint`, `typecheck`, and `test:run` scripts that delegate to `uv run`, so the run needs `uv` on the machine and a network for the installs. The end-to-end test and screenshot phases are gated on `package.json` script keys that python does not declare, so they skip.
+`canon tooling verify python` runs the manifest's `[verify] prepare` before Sync, which is checklist steps 2, 5, and 6: `bun init -y`, `uv add --dev ruff mypy pytest pytest-cov`, and `uv sync`. `uv init` writes no `package.json`, and a verify that reaches its end with none fails, so the prepare is what lets `bun run lint:fix`, `bun run format`, and `bun run check` run at all. Python's `verify.json` requires the `lint`, `typecheck`, and `test:run` scripts that delegate to `uv run`, so the run needs `uv` on the machine and a network for the installs. The end-to-end test and screenshot phases are gated on `package.json` script keys that python does not declare, so they skip.
 
 ## Anti-patterns
 

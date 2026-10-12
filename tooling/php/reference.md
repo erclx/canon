@@ -13,7 +13,7 @@ The php stack covers Composer projects on PHP 8.3 or later, formatted by PHP CS 
 3. Install base tooling: `canon tooling sync base . --write`
 4. Install php tooling: `canon tooling sync php . --write`
 5. Install the dev tools: `composer require --dev friendsofphp/php-cs-fixer phpstan/phpstan phpunit/phpunit`. The manifest declares no `[dependencies.dev]`, because manifest injection runs `bun add -D`, which cannot install a Composer package. This step stays manual.
-6. Run `bun run lint:fix` then `bun run check`.
+6. Run `bun run lint:fix`, then `bun run format`, then `bun run check`.
 
 Use PHP 8.3 or later, since PHPUnit 12 requires it.
 

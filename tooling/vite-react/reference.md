@@ -12,7 +12,7 @@ The vite-react stack covers Vite + React + TypeScript projects: web apps and Chr
 2. Install base and web tooling: `canon tooling sync web . --write`
 3. Install vite-react deps and configs: `canon tooling sync vite-react . --write`
 4. Extend the `ci` and `development` context entries under `canon/context/` per the web reference's extend sections plus the vite-react rows below.
-5. Run `bun run lint:fix` then `bun run check`.
+5. Run `bun run lint:fix`, then `bun run format`, then `bun run check`.
 
 ## What ships as golden configs
 

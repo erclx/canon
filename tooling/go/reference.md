@@ -14,7 +14,7 @@ The go stack covers Go modules linted and formatted by `golangci-lint` v2, type-
 4. Install base tooling: `canon tooling sync base . --write`
 5. Install go tooling: `canon tooling sync go . --write`
 6. Install the linter: `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest`. The manifest declares no `[dependencies.dev]`, because manifest injection runs `bun add -D`, which cannot install a Go tool. This step stays manual.
-7. Run `bun run lint:fix` then `bun run check`.
+7. Run `bun run lint:fix`, then `bun run format`, then `bun run check`.
 
 The go stack also ships `smoke_test.go` at the module root as a copy-once seed. A module with no `.go` file fails `golangci-lint run`, `go vet`, and `go test` on an empty package list, so the seed is what lets `bun run check` pass on a fresh scaffold. It declares `package main`, so delete or rename it once the root package takes another name, or the build reports two packages in one folder.
 

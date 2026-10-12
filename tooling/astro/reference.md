@@ -13,7 +13,7 @@ The astro stack covers Astro + TypeScript projects: content sites, marketing sit
 3. Install web tooling: `canon tooling sync web . --write`
 4. Install astro adapter: `canon tooling sync astro . --write`
 5. Extend the `ci` and `development` context entries under `canon/context/` per the web reference's extend sections plus the astro rows below.
-6. Run `bun run lint:fix` then `bun run check`.
+6. Run `bun run lint:fix`, then `bun run format`, then `bun run check`.
 
 ## What ships as golden configs
 
