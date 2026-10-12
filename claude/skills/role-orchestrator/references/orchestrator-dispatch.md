@@ -1,6 +1,6 @@
 ---
 title: Orchestrator dispatch runbook
-description: The plan-answer gate, the collision check before a self-dispatch, the conflict check against the tracks in flight and the evidence it rests on, the branch and model the launch names, the fallback to a human launch, and the loop's stopping condition
+description: The plan-answer gate, the collision check before a self-dispatch, the conflict check against the tracks in flight and the evidence it rests on, the branch the launch names, the one model test applied to each role, the fallback to a human launch, and the loop's stopping condition
 ---
 
 Run this at loop step 4, for a `## Run now` row whose plan is verified, in place of handing the worktree to a human. The conflict check below is where that row is tested against every track in flight, and it is the one statement of what holds a row there.
@@ -31,7 +31,7 @@ Branch on the record rather than on the exit code, which a shell function wrappi
 
 The worker calls the same verb on the same plan at `auto-ship` Step 0, so the branch this gate checks and the branch that session takes are one string by construction rather than two readings of one paragraph. Two readings of one plan part on the slug and on the type alike, and a check against a branch nobody uses verifies nothing.
 
-The type the verb reports is fixed at `feat` whatever the row does, which is the half of the derivation that disagreed most. What makes that safe is that a branch type is cosmetic: `git-stage` reads a commit's type off the staged diff and `git-pr` reads a title off the diff, so nothing a release reads passes through the branch name. What it costs is a worktree listing where every dispatched branch reads `feat/`, which a person scanning one loses. Nothing renames it later, since `git-branch`'s conventions guard fires on a conforming `feat/` before reaching any type judgment.
+The type the verb reports is fixed at `feat`, which is safe because a branch type is cosmetic: `git-stage` and `git-pr` read their types off the diff, and nothing a release reads passes through the branch name. The cost is a worktree listing where every dispatched branch reads `feat/`.
 
 ## Check the plan waits on nobody
 
@@ -46,9 +46,7 @@ Run `canon tasks plan-answers <plan> --json` and read `launchable` off the recor
 
 Branch on `launchable` rather than on the exit code, which a shell function wrapping `canon` can flatten to zero and so read a held row as a clear one.
 
-This gate runs ahead of the two collision checks because it is the cheapest reading of the three, needing no roster and no ref, and because it is the only one asking about the row itself rather than about what else is in flight. A row nobody can launch does not need testing against the tracks already out.
-
-It also reads the plan rather than a cell describing one, which is the input the gate below it does not have. The conflict check reads the sets a dispatcher wrote into the constraints and the Touches column, so a cell omitting a renamed or relocated path clears a check the tree would fail, and what catches it then is a worker's message rather than any check.
+This gate runs first because it is the cheapest reading, needing no roster and no ref, and the only one asking about the row itself. It reads the plan rather than a cell describing one, since the conflict check reads sets a dispatcher wrote, and a cell omitting a renamed path clears a check the tree would fail.
 
 A blank `- Answer:` is not an unanswered question. `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md` fixes an empty slot as accepting the `- Suggested:` line above it, which is what makes a plan decision-ready in one pass. The narrow case this reads is `- Suggested: needs your call, <why>` and its two demonstrated paraphrases, `needs operator's call` and `needs the operator's call`, over an empty slot, the form that same standard writes where the answer turns on preference rather than on a technical default. A gate reading every blank slot as open would refuse every plan in the folder.
 
@@ -66,7 +64,7 @@ Reading `claimed` off the record is what keeps this a check rather than a rule a
 
 `refs` is the reading that catches a shipped row. A branch behind a merged pull request has no worktree and no session, so the check answered clear on one until a worker refused the instruction and named the consequences: a second pull request against a head GitHub already shows merged, a row whose pull-request line points at two numbers, and the `ambiguous` refusal `canon tasks archive` documents.
 
-What the ref read cannot see is a branch pushed from another machine since the last fetch, because it reads the remote-tracking ref rather than the remote. Nobody has hit that, and a `git ls-remote` per dispatch costs 0.438s against 0.001s, so the gap is recorded rather than closed.
+What the ref read cannot see is a branch pushed from another machine since the last fetch. A `git ls-remote` per dispatch costs 0.438s against 0.001s, so the gap is recorded rather than closed.
 
 ### A cloud worker's claim
 
@@ -98,9 +96,14 @@ A declared set predicts what a branch writes rather than bounding it, since `can
 
 ## Pick the model
 
-A `claude --bg` session inherits the model of whatever launched it rather than reading the machine's configured default. An orchestrator on the larger model therefore spends it on every worker it launches, and the operator who set the default never sees the override.
+This section binds every launch shape that names `<model>`, the planner and both reviewers as well as the step 4 build, none of which pass through that step.
 
-Name `<model>` on the launch, and pick it against the task rather than copying whatever this session happens to run. Sizing the model to the row is the dispatcher's call, the same call it already makes on the branch. A mechanical row moving files under a written plan is not the row that needs the largest model, and one whose plan carries an open judgment is.
+A `claude --bg` session inherits the launching session's model, so an orchestrator on the larger model spends it on every session it launches. Name `<model>` on each launch with one test: `opus` where a wrong result is costly and nothing automatic would catch it, `sonnet` otherwise, never `haiku`. Read the role's worst failure and whether a test, gate, or later review stops it, and never the folder or the plan's length.
+
+- Planner: `opus` for a row that changes a contract others consume, spans modules, or needs slicing. `sonnet` for a narrow row, even one inside a hook or governance folder.
+- Worker, and the review-address pass against the findings in hand: `opus` where the plan leaves a cross-module call tests will not settle. `sonnet` where it pins the fix, however long.
+- Code reviewer: `opus` where a miss would ship unseen, a change to behavior no test or gate exercises that other surfaces read. `sonnet` otherwise, a one-line hook edit included.
+- UI reviewer: always `sonnet`. A cheaper tier was measured on the same checklist and passed real defects as clean while judging the taste boxes it was told to leave.
 
 ## Pick local or cloud
 
