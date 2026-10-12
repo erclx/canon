@@ -28,4 +28,4 @@ Defined in `.github/workflows/verify.yml`. All jobs must pass before merge.
 
 ### Running CI locally
 
-`bun run check` runs the same assert plus auto-formats first. If CI fails on format, run `bun run check` locally and commit the diff.
+`bun run check` runs the same assert and writes nothing. If CI fails on format, run `bun run format` locally and commit the diff.

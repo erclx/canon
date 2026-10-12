@@ -32,7 +32,7 @@ A local `canon gate run --all` runs in about 41 seconds, so each extra job still
 
 The job name stays `🛡️ Static Checks` even though the job runs the test suite. Required status checks resolve against the job name, so renaming it would break branch protection until the rule updates to match.
 
-The gate asserts formatting in every mode and writes none of it, and CI names the `check:ci` script rather than setting anything inline. The rejected alternative was a local write mode behind `--no-write`, which formatted in place and then could not fail on formatting, so a push rewrote files and left a `style(<scope>):` follow-up commit. Base targets dropped the same writing pass in v149.4, and `bun run format` is the one writer.
+The gate asserts formatting in every mode and writes none of it, and CI names the `check:ci` script rather than setting anything inline. The rejected alternative was a local write mode chosen by a flag, which formatted in place and then could not fail on formatting, so a push rewrote files and left a follow-up style commit. Base targets dropped the same writing pass in v149.4, and `bun run format` is the one writer.
 
 Scope selection goes through an `--all` argument, since it describes what to run rather than which mode to run in. An unknown argument exits 1, and `--help` prints the flags, the exit codes, and what an unmeasured stage means, so the surface stays discoverable without reading the table.
 
