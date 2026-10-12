@@ -57,7 +57,7 @@ The launch window is the one defect closed by a rule rather than by a reading. A
 
 ## The launch
 
-The launch names the model, because a `claude --bg` session inherits the launching session's model and an orchestrator on a larger one silently spends it on every worker. The operator settled one test on 2026-10-12, the larger model where a wrong result is costly and nothing automatic would catch it, applied to planner, worker, and both reviewers. Sizing by folder sent one-line hook edits to Opus reviewers in #2328 and #2329, and sizing by plan length sent a Sonnet worker to a plan that went three review rounds in #2339. Both read a proxy for the cost of a miss.
+The launch names the model, because a `claude --bg` session inherits the launching session's model and an orchestrator on a larger one silently spends it on every worker. The operator settled one test on 2026-10-12, the larger model where a wrong result is costly and nothing automatic would catch it, applied to planner, worker, and both reviewers. Sizing by folder sent a one-line rule edit and a tested hook guard over a folder nothing reads to Opus reviewers in #2328 and #2329, and sizing by plan length sent a Sonnet worker to a plan that went three review rounds in #2339. Both read a proxy for the cost of a miss.
 
 A self-dispatched worker's name carries the prefix `worker-` rather than naming the launcher. A launcher prefix breaks any rule that reaches a controller by scanning the roster for it: the scan returns a sibling or the sender itself, and no controlling session carries the prefix. The comment in `scripts/watch.ts` keeps the `orchestrator-` spelling deliberately, since it describes that matching mistake.
 
