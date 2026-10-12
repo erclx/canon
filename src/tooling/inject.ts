@@ -66,30 +66,13 @@ async function writeSeed(src: string, dest: string): Promise<void> {
 }
 
 /**
- * Copies a seed when the target lacks it. When the target already has one and
- * the seed is a `.txt` word list, missing lines are appended and the file is
- * re-sorted. Every other existing file is left untouched.
+ * Copies a seed when the target lacks it and leaves an existing file untouched.
  */
-async function mergeSeedFile(src: string, dest: string): Promise<void> {
+async function copySeedIfMissing(src: string, dest: string): Promise<void> {
   await mkdir(dirname(dest), { recursive: true })
+  if (existsSync(dest)) return
 
-  if (!existsSync(dest)) {
-    await writeSeed(src, dest)
-    return
-  }
-
-  if (!src.endsWith('.txt')) return
-
-  const existing = (await readFile(dest, 'utf8')).split('\n')
-  const incoming = (await readFile(src, 'utf8')).split('\n')
-  const missing = incoming.filter(
-    (word) => word !== '' && !existing.includes(word),
-  )
-
-  if (missing.length === 0) return
-
-  const merged = [...existing.filter((line) => line !== ''), ...missing].sort()
-  await writeFile(dest, `${merged.join('\n')}\n`)
+  await writeSeed(src, dest)
 }
 
 export async function injectSeeds(
@@ -110,7 +93,7 @@ export async function injectSeeds(
     logStep(`Applying ${manifest.name} seeds`)
     for (const rel of files) {
       const dest = resolveSurfacePath(target, rel)
-      await mergeSeedFile(join(manifest.seedsDir, rel), dest)
+      await copySeedIfMissing(join(manifest.seedsDir, rel), dest)
       logAdd(relative(target, dest))
       applied.push(rel)
     }
