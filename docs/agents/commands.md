@@ -7,7 +7,7 @@ description: Every top-level command with its purpose, each domain's subcommands
 
 Bare `canon --help` lists every top-level command under five headings, Project, Domains, Author and render, Session and ship, and Repo reports, with descriptions cut at 80 columns. A pipe gets the same text without the frame glyphs. Behavior notes for the install and sync verbs live in `install-and-sync.md`.
 
-`canon <command> --help` lists a command's subcommands, and `canon <command> <subcommand> --help` one leaf's flags, exit codes, and examples. `canon <command> --help --all` prints both in one call. An unknown subcommand refuses with exit 1.
+`canon <command> --help` lists subcommands, and `canon <command> <subcommand> --help` a leaf's flags, exit codes, and examples. `canon <command> --help --all` prints both. An unknown subcommand exits 1 under a group taking no operand.
 
 ## Project-level
 
