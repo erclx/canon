@@ -4,7 +4,7 @@
 
 ## Overview
 
-The astro stack covers Astro + TypeScript projects: content sites, marketing sites, blogs, and docs. Interactive islands use React only. Output is static. It ships golden configs for `astro.config.mjs`, `vitest.config.ts` (using `getViteConfig` from `astro/config`), `playwright.config.ts` (preview-server backed), a `tsconfig.json` that extends `astro/tsconfigs/strict`, and an `eslint.config.js` that overrides the web layer's config to include `eslint-plugin-astro` and exclude React-refresh rules.
+The astro stack covers Astro + TypeScript projects: content sites, marketing sites, blogs, and docs. Interactive islands use React only. Output is static. It ships golden configs for `astro.config.mjs`, `vitest.config.ts` (using `getViteConfig` from `astro/config`), `playwright.config.ts` (preview-server backed), a `tsconfig.json` that extends `astro/tsconfigs/strict`, an `eslint.config.js` that overrides the web layer's config to include `eslint-plugin-astro` and exclude React-refresh rules, and a `.prettierrc` that formats `.astro` files alone.
 
 ## Scaffold checklist
 
@@ -34,9 +34,13 @@ Unit-test React island components (`.tsx`) only. Do not test `.astro` files. Pag
 
 Vitest is pinned to `^5` in the web manifest, which supports the Vite 8 that Astro 7 bundles. The earlier `^3` pin avoided `^4` bundling rolldown-vite, which ignored the esbuild JSX config in `@vitejs/plugin-react`. Astro now bundles Vite 8 itself, so that conflict no longer applies.
 
-## Prettier (extend)
+## Formatting (extend)
 
-Add `prettier-plugin-astro` first in plugins, then `prettier-plugin-tailwindcss` last (per its docs). Add a parser override for `.astro` files.
+- Format `.astro` files with Prettier and every other file with oxfmt. oxfmt loads no Prettier plugin, so it cannot parse `.astro`.
+- Load `prettier-plugin-astro` first in `.prettierrc`'s plugins, then `prettier-plugin-tailwindcss` last (per its docs), with a parser override for `.astro` files.
+- Ignore `**/*.astro` in this stack's `.oxfmtrc.json`, so the two formatters never touch one file.
+- Copy every other option from base's `.oxfmtrc.json` into this one by hand. Scan takes the child config over the parent's whole file, so a change to base's options is lost here until it is copied.
+- Override `check:format` and `format` to run oxfmt, then Prettier over `**/*.astro`.
 
 ## Development docs (extend)
 
