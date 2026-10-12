@@ -1757,6 +1757,41 @@ describe('canon pr frames', () => {
     )
   })
 
+  it('should read only canon/frames and the legacy ref on --drop and report ok', async () => {
+    const outcome = await runFrames(['7', '--drop'])
+
+    const refCalls = calls().filter((call) => call.includes('/git/ref'))
+    expect({ outcome, refCalls: refCalls.length }).toEqual({
+      outcome: {
+        record: expect.objectContaining({ reason: 'ok', removed: [] }),
+        exit: 0,
+      },
+      refCalls: 2,
+    })
+    expect(
+      refCalls.every(
+        (call) =>
+          call.includes('heads/canon/frames') ||
+          call.includes('heads/canon-frames'),
+      ),
+    ).toBe(true)
+  })
+
+  it('should drain the legacy ref on --prune without a new refusal when it is missing', async () => {
+    const outcome = await runFrames(['--prune', '30'])
+
+    expect(outcome).toEqual({
+      record: expect.objectContaining({ reason: 'ok', removed: [] }),
+      exit: 0,
+    })
+  })
+
+  it('should never read the legacy ref on --add', async () => {
+    await runFrames(addArgs('box-1.png'))
+
+    expect(calls().filter((call) => call.includes('canon-frames'))).toEqual([])
+  })
+
   it('should list every refusal reason in the help text', async () => {
     const result = await execa(
       process.execPath,
