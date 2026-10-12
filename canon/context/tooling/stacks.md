@@ -25,6 +25,8 @@ Scripts are never overwritten except through `[scripts.override]`, which exists 
 
 `lint` and `lint:fix` live at the `web` level because their value is shared, while `dev` and `preview` differ by framework and live per child. `vite-react`'s raw scaffold ships `"lint": "oxlint"` and a bare `.oxlintrc.json`, and that `lint` exits 0 on warnings. The override forces `--max-warnings 0` over it, and the golden `.oxlintrc.json` at the same path overwrites the scaffold's bare one rather than leaving a second config to override away. `astro` overrides both keys back to `eslint`, since oxlint parses no `.astro` file. `check:format` and `format` sit under base's override for the same reason, so a target synced while the stack ran Prettier switches to oxfmt on its next sync.
 
+The drift scan compares each override key against the value sync would write, so a stale override reads `drifted` and counts toward the pending total beside the plain scripts.
+
 ### The Oxc tools replace Prettier and ESLint outside astro
 
 Base formats with oxfmt, and `web`, `vite-react`, and `nextjs` lint with oxlint, running `eslint-plugin-check-file` and `eslint-plugin-simple-import-sort` as JS plugins. Prettier cost this repository about 22 s on every check against under 3 s for oxfmt, and the Prettier plugins `web` installed never loaded in a target, since base's `.prettierrc` named none. Keeping Prettier and ESLint everywhere was the alternative, and it lost on that cost.
