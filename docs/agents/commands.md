@@ -130,7 +130,7 @@ Subcommands no other page describes:
 - A deck folder's `deck.json` and the faces it embeds, its per-slide `<body>` attributes, transitions and entrances, speaker notes, and charts are described in `slides.md`.
 - `canvas`, with its verbs, content format, and write routes, is described in `canvas.md`.
 - `labels apply <number>` adds the labels this branch earns to its open pull request, refusing a pull request whose head is not the current branch or that is not open, and never creating a label the remote lacks or removing one a person added (`--check` writes nothing and exits 2 when labels are owed, `--base`, `--json`).
-- `labels scan` fails a pull request or a posted review whose title, body, or review comment carries a phase label, a label a code span quotes, a gitignored record path, a session link, a banned character, a body heading outside the closed section list or a missing `## Summary` or `## Key changes`, a title word no dictionary holds, or a title breaking `claude/skills/git-pr/references/pr.md`'s format, casing, or length rule (`--event`, `--body-file`, `--json`).
+- `labels scan` fails a pull request or a posted review whose title, body, or review comment carries a phase label, a label a code span quotes, a gitignored record path, a session link, a banned character, a body heading outside the closed section list or a missing `## Summary` or `## Key changes`, or a title breaking `claude/skills/git-pr/references/pr.md`'s format, casing, or length rule (`--event`, `--body-file`, `--json`).
 
 ## Version skew
 
