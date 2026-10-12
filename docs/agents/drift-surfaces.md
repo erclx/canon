@@ -123,14 +123,14 @@ that is not a full clone as unmeasured rather than clean. This gap does not
 reach the chain-based read above, since it consults no anchor at all.
 
 In the fallback, entitlement is filtered, because a stack does not receive
-every rule. The base stack takes four folders whole, the code stacks add `code`, and
-every other stack extends them with individually named rules, so an unfiltered
-list would tell a base consumer about rules it can never receive and train the
-reader to skip the section.
+every rule. The base stack names ten rules, the language stacks add `code` and
+their own language and testing rules, and every other rule is opt-in, so an
+unfiltered list would tell a base consumer about rules it can never receive and
+train the reader to skip the section.
 
-The filter accepts a band on either of two grounds. A folder the base stack takes
-whole is entitled to every target, read from the stack file so a folder added to
-base later needs no code change. Every other band is read off the folders the
+The filter accepts a band on either of two grounds. A folder holding a rule the
+base stack resolves to is entitled to every target, read through the stack file so
+a rule added to base later needs no code change. Every other band is read off the folders the
 target already carries, which is the fallback's only evidence of what a target
 was entitled to before it recorded a chain. One band can be reached by more than
 one stack, so the test over-reports inside a folder the target holds, which

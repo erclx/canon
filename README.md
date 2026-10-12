@@ -152,9 +152,9 @@ git init
 canon init
 ```
 
-`canon init` installs base tooling configs, Claude seeds, and governance rules in one pass, and scaffolds a `.claude/wiki/` stub for your project's own reference pages. Governance defaults to the `base` stack, so a bare init lands the coding and doc-authoring rules in `.claude/rules/`. Each rule names the standard it answers to and reads it with `canon standards <name>`, so no corpus is copied into your project.
+`canon init` installs base tooling configs, Claude seeds, and governance rules in one pass, and scaffolds a `.claude/wiki/` stub for your project's own reference pages. Governance defaults to the `base` stack, so a bare init lands the workflow and doc-authoring rules in `.claude/rules/`. Each rule names the standard it answers to and reads it with `canon standards <name>`, so no corpus is copied into your project.
 
-Pass `--stack <name>` for a framework stack, or `--skip governance` to leave rules out. Run `canon tooling list --json` to see the catalog.
+Pass `--stack <name>` for a language stack such as `node` or `python`, or `--skip governance` to leave rules out. Run `canon tooling list --json` to see the catalog.
 
 For the full journey from scaffold through adding a domain later to syncing upstream drift, see [target projects](docs/target/projects.md).
 

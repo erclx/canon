@@ -94,7 +94,7 @@ CANON_NON_INTERACTIVE=1 canon tooling diff astro /path/to/project
 CANON_NON_INTERACTIVE=1 canon tooling sync astro /path/to/project --write
 
 # Install a governance stack (the stack argument is required headlessly)
-CANON_NON_INTERACTIVE=1 canon gov install astro --add 260-shadcn /path/to/project
+CANON_NON_INTERACTIVE=1 canon gov install node --add 210-astro,260-shadcn /path/to/project
 
 # Update installed governance rules, dropping a retired .claude/GOV.md
 CANON_NON_INTERACTIVE=1 canon gov sync /path/to/project
@@ -120,7 +120,7 @@ canon tooling prune-gitignore base /path/to/project
 CANON_NON_INTERACTIVE=1 canon standards slug >slug.md
 
 # Bootstrap a project. Any flag suppresses the confirmation prompt
-CANON_NON_INTERACTIVE=1 canon init --stack astro --skip wiki /path/to/project
+CANON_NON_INTERACTIVE=1 canon init --stack node --skip wiki /path/to/project
 
 # Run every domain sync. The git workflow is refused headlessly, so nothing is pushed
 CANON_NON_INTERACTIVE=1 canon sync /path/to/project
