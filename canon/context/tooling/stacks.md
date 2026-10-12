@@ -31,6 +31,12 @@ Scripts are never overwritten except through `[scripts.override]`, which exists 
 
 It ships from `tooling/astro/configs/` rather than `tooling/web/`, because `vite-react` shares the `web` parent and cannot parse `.astro` syntax. `vite-react` gets no equivalent until a React version is written against a real decision. Measured at `927f2571` on 2026-09-06.
 
+### The web layer pins Vitest 5
+
+`tooling/web/manifest.toml` pins `vitest`, `@vitest/coverage-v8`, and `@vitest/ui` to `^5`, since Vitest 3's `vite` peer range stops at 7 and a Vite 8 target warned on its first run. `^4` also covers Vite 8 and was the alternative. It lost because it leaves the removed jest bridge untested in the golden and defers the same move to the next sync.
+
+The three goldens that named `@testing-library/jest-dom` take the `/vitest` entry in `setup.ts` and both `tsconfig.json` files, so the runtime import and the types agree. Vitest 5 needs Node 22.12 or later. Measured against `5a7b49bd9` on 2026-10-12.
+
 ### Filename and folder conventions
 
 `astro`, `web`, and `nextjs` all gate component filenames `KEBAB_CASE` rather than carving out Astro's PascalCase convention, since a component's name in markup comes from the import binding rather than the filename. `tooling/astro/configs/eslint.config.js` scopes `files` to `**/*.{ts,tsx,js,jsx,astro}` and the rule's own pattern to `**/*.{ts,tsx,astro}`, leaving `.js` and `.jsx` outside it to match `web` and `nextjs`.
