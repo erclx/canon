@@ -15,7 +15,7 @@ The `/code-review` slash command takes a pull request number, a branch, or a pat
 
 What separates them is the re-review contract rather than the review. `review-pr` scopes a first pass to the whole change and every later pass to the commits added since, reads the task board for cross-feature context, and refuses a close-out that repeats one already standing. `/code-review` reviews the target it is handed each time and keeps no state between passes.
 
-Use `review-pr` where an orchestrator and a worker trade passes on one pull request, since the heading state is what tells the next pass which half to read. Use `/code-review` for a one-shot read on a pull request nobody is iterating on.
+Use `review-pr` where a reviewer and a worker trade passes on one pull request, since the heading state is what tells the next pass which half to read. Use `/code-review` for a one-shot read on a pull request nobody is iterating on.
 
 `review-craft` carries a security reference, and the built-in `security-review` audits too. The reference is a checklist of classes read against one diff during an ordinary review, loaded only when the diff reaches a sink, and it grades nothing. `security-review` is a deliberate audit a session runs on purpose over the pending changes. The reference stops at the diff in hand and names the built-in for anything wider.
 
