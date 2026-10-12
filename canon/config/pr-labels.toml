@@ -138,4 +138,4 @@ rides-with-generated = [
 ]
 # Formatting configuration nobody reviews for behavior, and no row above owns
 # its subject.
-formatting = [".prettierignore"]
+formatting = [".oxfmtrc.jsonc"]
