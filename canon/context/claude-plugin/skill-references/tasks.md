@@ -1,11 +1,22 @@
 ---
 title: Tasks
-description: The tasks readiness test widened to admit a row waiting on an external condition, the board standard split from tasks, and the origin and archiving rationale
+description: The tasks readiness test widened to admit a row waiting on an external condition, the board reference split from tasks, and the origin and archiving rationale
 ---
 
 # Tasks
 
-## Tasks readiness test
+## Overview
+
+The tasks and board references carry a readiness test that has to admit a row no fact on disk can confirm, and a board split that keeps each reference under the length ceiling. This entry also records why a merge can close a task and why the archive moves without asking.
+
+## Layout
+
+- `claude/skills/task-board/references/` owns the task and board references these decisions explain
+- `src/tasks/` owns the board validator and the archive verbs that read both references back
+
+## Decisions
+
+### Tasks readiness test
 
 `claude/skills/task-board/references/board.md` admits a row to `## Up next` on a written plan plus a stated reason the task cannot start, and that group's `Waiting on` cell carries a collision, a sibling task, or an external condition. The three forms are stated under the group they govern rather than under the header they share. A test naming only the first two leaves a planned task waiting on a condition outside the board passing neither it nor the `## Needs a plan` test below it.
 
@@ -21,11 +32,11 @@ The `## Needs a plan` cell takes the same treatment. It states why the row sits 
 
 `canon tasks validate` resolves the `Task`, `Plan`, and `Touches` columns by header text and never reads the `Waiting on` cell, so the widened test holds on reading alone and the standard says so. A non-empty check lost, since every row already passes it. Every finding the validator reports compares a written claim against the tree, and an external condition puts no fact there to disagree with.
 
-## Board split from tasks
+### Board split from tasks
 
 `claude/skills/task-board/references/board.md` carries `priority.md`, `backlog.md`, and the generated index, and `claude/skills/task-board/references/tasks.md` keeps the task file. The two govern different documents with their own templates, and cutting the ordering and backlog rules down inside one file would have cut live rules to fit the length ceiling. `governance/rules/canon/tasks.md` globs the whole folder, so it routes to both.
 
-## Tasks origin and archiving
+### Tasks origin and archiving
 
 An intake folder is read for abandonment at folder scope, since one dump dispositions many items and most close without becoming a task. The check counts the archive and the declined folder beside the board, because a check reading the board alone calls every finished folder abandoned.
 
@@ -41,6 +52,6 @@ The task archive nests inside `.canon/tasks/` under one fixed destination, which
 
 The citation count before a plan archives guards against the one-plan-per-task misfile stranding a pointer. It is not support for a plan shared by design.
 
-## The tasks rule keeps the plan-writing act
+### The tasks rule keeps the plan-writing act
 
 `governance/rules/canon/602-tasks.md` keeps the act of writing a plan in the same session as its task and linking it, because the standard fixes the `Plan:` link for a plan that exists and never tells a session to create one. The seed eval in `scripts/eval/result-seed.md` measured the gap: sessions holding the bullet wrote plans and sessions without it wrote none.

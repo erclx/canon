@@ -7,7 +7,7 @@ description: Verdict for every rule and standard citing a skill or a sibling doc
 
 ## Overview
 
-Owns whether a citation inside `governance/rules/` or `standards/` resolves for the target holding it, and whether the citing body restates the content it points at rather than pointing at it cleanly. Excludes a `## Scope` "Does not govern:" entry, which names an owner rather than asking a reader to load anything, and excludes a rule restating a sibling rule, which `canon gov restated` covers mechanically.
+Owns whether a citation inside `governance/rules/` resolves for the target holding it, and whether the citing body restates the content it points at rather than pointing at it cleanly. Excludes a `## Scope` "Does not govern:" entry, which names an owner rather than asking a reader to load anything, and excludes a rule restating a sibling rule, which `canon gov restated` covers mechanically.
 
 ## Decisions
 
@@ -51,7 +51,7 @@ The ignored class makes the counts tree-dependent. From the main worktree that p
 
 ## Gotchas
 
-- A "Does not govern:" line naming a skill or a sibling standard is a scope exclusion, not a citation. `standards/standard.md` requires that shape for every excluded concern, so the many `write-human` mentions across the standards corpus carry no verdict here.
+- A "Does not govern:" line naming a skill or a sibling reference is a scope exclusion, not a citation. `claude/skills/create-skill/references/skill-reference.md` requires that shape for every excluded concern, so the many `write-human` mentions across the references carry no verdict here.
 - `canon gov restated` catches a rule restating a sibling rule or `CLAUDE.md`. It does not catch a rule restating the standard it cites, which is this entry's subject and stays a manual read.
 - `canon gov citations` and `canon gov superseded` read one corpus and answer different questions. The first asks whether a cited path resolves, the second whether a citation still names a value a changed convention no longer produces. A citation can pass either and fail the other.
 - The Consumed copies stage passes an authored rule and its copy that are wrong together, which is how the teach rule, then numbered, shipped a `references/glossary.md` that did not exist. Two files agreeing is not either one being right about the tree.
@@ -85,6 +85,6 @@ A rule scoped to a folder only a plugin skill creates is inert rather than broke
 - `claude/skills/create-skill/references/skill.md` → sibling references by the `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md` form `skill-paths.md` states, which resolves in every install since the plugin ships the skills side by side.
 - `claude/skills/task-board/references/tasks.md` → `claude/skills/git-commit/references/versioning.md` and `claude/skills/plan-feature/references/plan.md`, for the same reason.
 
-### Standards corpus, examined and excluded
+### Other references, examined and excluded
 
-Every other standard names `write-human` or `markdown.md` only inside a "Does not govern:" bullet and carries no citation this entry verdicts.
+Every other shape reference names `write-human` or `markdown.md` only inside a "Does not govern:" bullet and carries no citation this entry verdicts.

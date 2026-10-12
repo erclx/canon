@@ -29,7 +29,7 @@ Without this skill, a session editing the teach implementation:
 
 - Restate what `claude/skills/teach-workspace/references/teach.md` or `glossary.md` fixes. Each is the single source for the artifact it governs and a second copy here drifts on its own cadence.
 - Restate `canon/context/features/teach/overview.md`'s or `canon/context/features/teach/chrome.md`'s structure or gotchas. The ownership table in `CLAUDE.md` puts per-domain narrative in the context entry, and a skill paraphrasing its own entry is the duplication that table exists to prevent.
-- Carry the pedagogy that decides what to teach next. `claude/skills/teach-workspace/references/` owns it, and `canon/context/standards/per-standard/surfaces.md` records the split.
+- Carry the pedagogy that decides what to teach next. `claude/skills/teach-workspace/references/` owns it, and `canon/context/claude-plugin/skill-references/surfaces.md` records the split.
 - Fire on a `.canon/teach/**` edit. `teach-workspace` owns that path and ships to targets, where this skill is toolkit-internal and does not.
 
 ## Guards
@@ -40,7 +40,7 @@ No refusal strings. This is a domain skill loaded before editing rather than a p
 
 - `internal-web` covers the outward-facing surface and its committed images.
 - `internal-scripts` covers `src/` generally. This covers what `src/teach/` means, which that skill does not carry.
-- `internal-standards` covers authoring a standard. This routes a shape change there and stops.
+- `canon:create-skill` covers the shape of a skill reference, which the teach and glossary references are. This routes a shape change there and stops.
 - `teach-workspace` is the shipped skill an operator runs to teach. This is for editing the machinery underneath it.
 
 ### The open question this cannot answer

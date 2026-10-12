@@ -5,13 +5,24 @@ description: The cross-reference form split by destination, the destination test
 
 # Publish
 
-## Cross-reference form
+## Overview
+
+The publish reference splits one rule by destination, so the same reference takes opposite spellings on either side of the remote. Every check scoped by destination inherits one test, and the two title checks beside them grade a field that release-please copies into the changelog unread.
+
+## Layout
+
+- `claude/skills/git-pr/references/` owns the publish and pull request references these decisions explain
+- `src/labels/` owns `canon labels scan`, the verb behind the destination-scoped and title checks
+
+## Decisions
+
+### Cross-reference form
 
 `claude/skills/git-pr/references/publish.md` states the form a pull request or issue number takes, under `## Cross-reference form`. The rule is one test rather than a list of surfaces: bare where the destination auto-links it, backticked where it does not. A list goes stale when a new surface appears, and the test covers the cross-repository spelling without a clause of its own.
 
 The split runs through the remote. A pull request body, an issue body, a comment on either, and a commit message all auto-link, and a markdown file browsed from the repository tree links neither spelling, so each form is correct in one place and a reference moved between them is rewritten.
 
-`publish.md` holds the rule over `markdown.md` because it turns on where the text is going rather than on what the text is. `markdown.md` governs a file reference identically in every file, and this one is wrong in one destination and right in the other, which is the split `publish.md` already draws for phase labels. `markdown.md` carries the `Does not govern:` entry and `publish.md` names the rule in its own scope line, so the boundary is declared from both sides. `canon/context/standards/scope.md` holds the general case.
+`publish.md` holds the rule over `markdown.md` because it turns on where the text is going rather than on what the text is. `markdown.md` governs a file reference identically in every file, and this one is wrong in one destination and right in the other, which is the split `publish.md` already draws for phase labels. `markdown.md` carries the `Does not govern:` entry and `publish.md` names the rule in its own scope line, so the boundary is declared from both sides. `canon/context/claude-plugin/skill-references/authoring.md` holds the general case.
 
 Every skill writing GitHub conversational text already cites the standard, so a single section reaches all of them and no skill body carries the rule. Restating it per skill would put one rule in several places on several cadences.
 
@@ -19,7 +30,7 @@ Quoted text is exempt, and the rule says so rather than leaving it to judgment. 
 
 Nothing enforces it and nothing can. `canon markdown audit` runs over repository files, where the backticked form is the correct one, so a check there would flag the compliant references and reach none of the published text that goes wrong. The rule joins the character and phase-label bans as something an author applies at publish time.
 
-## Destination test
+### Destination test
 
 The paragraph scoping a check by destination sits under `## When it runs` rather than inside one check's section, so a check added later inherits it instead of restating it: a reader inside the repository holds the task board and a reader on a remote holds neither that nor any gitignored record folder. `## Phase labels` and `## Board identifiers` both fall under it, the second covering a label a code span quotes and a path under a record root, and each says under its own heading that the shared paragraph scopes it.
 
@@ -31,7 +42,7 @@ It is reported on a release pull request too, where the board identifier is exem
 
 `claude/skills/git-pr/references/pr.md` names the rule from the reader's side, one line in its `Does not govern:` list routing at `publish.md`, so the person writing a body meets the rule rather than only a red check.
 
-## Record roots
+### Record roots
 
 Which paths the verb reads as absent from a clone splits by root:
 
@@ -40,7 +51,7 @@ Which paths the verb reads as absent from a clone splits by root:
 
 Adding the worktrees entry to `RECORD_ENTRIES` lost, since it changes what the record move carries to fix what a scan reports.
 
-## Title spelling
+### Title spelling
 
 `canon labels scan`'s unspelled-word check on a pull request title carries no `publish.md` section. The destination-scoped checks name text a reader outside this checkout cannot resolve, and a misspelled word carries no such dependency, so it fits neither that paragraph nor the namespace split `versioning.md` states for phase labels against semver tags. It is a fact about one field feeding one sink: release-please copies a pull request title straight into `CHANGELOG.md` with nothing having spell-checked it first. This entry and `docs/agents/commands.md` state it about the verb.
 
@@ -52,7 +63,7 @@ Adding the worktrees entry to `RECORD_ENTRIES` lost, since it changes what the r
 
 `scanTitleSpelling` reads the `cspell` exit code and reports `check-failed` on any value outside its two defined ones, rather than reading an unreadable exit as a clean title. The `--json` record carries `spellingChecked` beside `unspelledWords`, so a caller can tell a clean title from one nothing checked.
 
-## Title format
+### Title format
 
 The title-format check grades a pull request title against `claude/skills/git-pr/references/pr.md`'s `## Title` section, format, casing, and length, so it enforces a rule already written rather than a fact this entry alone states.
 

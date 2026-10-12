@@ -47,13 +47,13 @@ The skill ships on the plugin channel and the rule on the CLI channel, so the tw
 
 Test the target for a guard before writing `Load` into a rule. `write-human` is advisory, with no guard and nothing it starts, so the `writing/markdown` rule can say load. `teach-workspace` runs a workspace, stops on a missing subject, and resumes a matching one, so a rule telling a session to load it for a glossary shape gets a refusal or a workspace.
 
-`teach-workspace` reads its own `references/glossary.md`. `canon/context/standards/scope.md` carries what this narrows on the standards side.
+`teach-workspace` reads its own `references/glossary.md`. `canon/context/claude-plugin/skill-references/surfaces.md` carries why the glossary shape lives there.
 
 ### Surfaces reached by something other than a glob
 
 `claude/skills/git-commit/references/versioning.md` is deliberately unrouted. It governs commit subjects, pull request titles and bodies, review comments, issues, and git tags, none of which are files, so a path-scoped rule would never fire.
 
-`git-commit` and `git-pr` reach that surface by instruction, and a leak there is caught by `publish.md`, which reads the label rule from `versioning.md` beside it. `canon/context/standards/destinations.md` carries the reader count behind that.
+`git-commit` and `git-pr` reach that surface by instruction, and a leak there is caught by `publish.md`, which reads the label rule from `versioning.md` beside it.
 
 #### A missing file
 
