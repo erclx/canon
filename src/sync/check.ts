@@ -3,9 +3,10 @@ import { basename, join, sep } from 'node:path'
 import { execa } from 'execa'
 import { gitEnv } from '@/git/env'
 import { createDesignAdapter, DESIGN_INSTALL_DIR } from '@/design/adapter'
-import { createGovAdapter, rulesSourceDir } from '@/gov/adapter'
+import { createGovAdapter } from '@/gov/adapter'
 import { successorResolver } from '@/gov/renames'
-import { loadGovStack, resolveMissingRules, resolveRules } from '@/gov/stacks'
+import { lookupRules } from '@/gov/install'
+import { resolveMissingRules, resolveRules } from '@/gov/stacks'
 import { planSync, type ScanEntry, type SyncAdapter } from '@/sync/engine'
 import {
   collectSuperseded,
@@ -615,27 +616,29 @@ export function selectNewRules(
 }
 
 /**
- * Band folders the base stack takes whole. Every governance stack extends base,
- * so a rule authored under one of these is entitled to every target.
+ * Band folders holding a rule the base stack resolves to. Every governance
+ * stack extends base, so a new rule authored beside one of base's rules is
+ * reported to every target the fallback below reads.
  *
  * This is what covers a band no target can carry yet. Entitlement is otherwise
- * read off folders the target already holds, and a folder added to base later
+ * read off folders the target already holds, and a band base reaches later
  * exists in no installed tree, so without this the rules inside it would reach
- * nobody. Read from the stack file rather than fixed, so that addition needs no
- * code change here.
+ * nobody. Read through `resolveRules` rather than off the stack's entries,
+ * since base names its rules one by one and an entry is a slug rather than a
+ * folder.
  *
- * A folder only a leaf stack names is deliberately absent. It is entitled to
+ * A folder only a leaf stack reaches is deliberately absent. It is entitled to
  * some targets and not others, which is the distinction the band test makes and
  * the installed tree is the only evidence of.
  */
 export function baseBands(root: string): Set<string> {
-  const stack = loadGovStack(root, 'base')
-  if (stack === undefined) return new Set()
+  const resolution = resolveRules(root, 'base')
+  if (!resolution.ok) return new Set()
 
   return new Set(
-    stack.rules.filter((entry) =>
-      isDirectory(join(rulesSourceDir(root), entry)),
-    ),
+    lookupRules(root, resolution.rules)
+      .found.map((source) => source.subdir.split(sep)[0] ?? '')
+      .filter((band) => band !== ''),
   )
 }
 
