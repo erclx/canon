@@ -47,15 +47,9 @@ const PHASES: readonly Phase[] = [
     passed: 'Lint passed',
   },
   {
-    script: 'format',
-    title: 'Formatting',
-    failed: 'Format failed',
-    passed: 'Format applied',
-  },
-  {
     script: 'check:format',
     title: 'Format check',
-    failed: 'Format check failed',
+    failed: "Format check failed. Run 'bun run format' to fix it",
     passed: 'Format check passed',
   },
   {
@@ -85,7 +79,7 @@ const PHASES: readonly Phase[] = [
 // A subfolder synced with --skip base declares none of these, since the
 // repository root owns them, so a list that does not require one runs it only
 // where the folder declares it.
-const BASE_PHASES = new Set(['format', 'check:format'])
+const BASE_PHASES = new Set(['check:format'])
 
 // An add-on stack declares these, keyed to the stack that ships each, so a
 // folder that never synced the add-on skips the phase rather than failing it.

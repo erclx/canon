@@ -21,10 +21,10 @@ Owns how the project runs on a developer machine: installing the toolchain, the 
 
 ### Scripts
 
-| Command          | Purpose                                                                        |
-| ---------------- | ------------------------------------------------------------------------------ |
-| `bun run check`  | Repairs locally. Auto-formats, then asserts what the formatters could not fix. |
-| `bun run format` | Auto-fix prettier formatting.                                                  |
+| Command          | Purpose                                                                                  |
+| ---------------- | ---------------------------------------------------------------------------------------- |
+| `bun run check`  | Gates locally and writes nothing. Fails on formatting drift until `bun run format` runs. |
+| `bun run format` | Auto-fix prettier formatting.                                                            |
 
 ### Shell scripts
 
@@ -34,4 +34,4 @@ All `.sh` files live under `scripts/`. Do not place shell scripts outside `scrip
 
 - `pre-commit` runs `lint-staged` (prettier on staged files).
 - `commit-msg` runs `commitlint` against the conventional commit format.
-- `pre-push` runs `bun run check`. When a markdown-bans audit tool is on PATH, it also gates on banned characters across every tracked markdown file except `CHANGELOG.md`. After pushing, run `git status`. If files changed, commit the diff as `style(<scope>):` and push again.
+- `pre-push` runs `bun run check`. When a markdown-bans audit tool is on PATH, it also gates on banned characters across every tracked markdown file except `CHANGELOG.md`. A push fails on formatting drift until `bun run format` runs, since the hook writes nothing.
