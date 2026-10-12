@@ -39,7 +39,7 @@ A run where no requested name resolves refuses, whichever list it read. Naming t
 
 Exit codes are `0` for a clean run, `1` for a refusal, and `2` for a gating finding. An unresolved citation gates under every mode. A requirements record stating a word cap gates past it, on any run that measures it, which is every mode except `--citations-only`. A record stating none is reported and never gated.
 
-`bun run check` in the toolkit repository reads every one of these rules through its own Canonical records stage rather than through this verb, since the verb's only gating stage there runs `--citations-only` and never opens either record.
+`bun run check` in the toolkit repository reads every one of these rules through its own Canonical records stage as well as through this verb, whose gating stage there runs `--gate`.
 
 Entry length, reference form, table, provenance, the record's claim classification, and every word figure no record caps print and return `0` under every mode, because each is a judgment or a weight read alongside one, and failing a push on either would make the check something to route around.
 
