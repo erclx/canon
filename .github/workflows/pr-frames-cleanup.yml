@@ -6,8 +6,9 @@ on:
     - cron: '17 4 * * *'
   workflow_dispatch:
 
-# Writes refs/heads/canon-frames alone, through the git data API, and reads
-# pull requests to learn when each closed. No other ref is touched.
+# Writes refs/heads/canon/frames and the legacy refs/heads/canon-frames alone,
+# through the git data API, and reads pull requests to learn when each closed.
+# No other ref is touched.
 permissions:
   contents: write
   pull-requests: read
