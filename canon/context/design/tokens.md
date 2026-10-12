@@ -53,7 +53,8 @@ The light theme remaps the roles the record declares a `light-` counterpart for,
 
 - A project's own faces sit in `.claude/design/project/fonts/` with plain `@font-face` rules in `project/fonts.css`, which `src/design/project-fonts.ts` reads and `canon design fonts add` writes. A project rule for a vendored family replaces the vendored face. Reading descriptors from the font's own tables was the alternative and cannot open WOFF2 without a Brotli parser.
 - The vendored Geist subset has no box-drawing, arrow, check, or diamond glyphs, which teach and terminal copy print. The stack names `DejaVu Sans` second, which carries all four ranges, and a larger subset would grow the base64 every embedding stylesheet ships. Revisit if a surface shows the fallback mismatching Geist in weight.
-- `src/design/base.css` has two writers that disagree past 80 columns. `canon design regen` writes each declaration flat and prettier wraps anything longer, so the `design` stage fails on the drift between them. Any value added to the module has to render inside that width, which is why the proportional stack for `page-display` stops at two names and a generic.
+- `src/design/base.css` has two writers that disagree past 80 columns. `canon design regen` writes each declaration flat and oxfmt wraps anything longer, so the `design` stage fails on the drift between them.
+- Any value added to the module has to render inside that width, which is why the proportional stack for `page-display` stops at two names and a generic.
 
 ### Color derivation
 

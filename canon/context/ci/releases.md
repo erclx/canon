@@ -21,9 +21,9 @@ The plugin manifest version is written through `extra-files` rather than by hand
 
 `bootstrap-sha` pins the starting commit to the head this work branched from, and the manifest anchors at `0.1.0` to match what `package.json` claims. Without both, a first run computes a version from every untagged commit and picks one nobody chose.
 
-The tool writes four files, and prettier disagrees with its serialization of two. `.prettierignore` carries `**/.claude-plugin/*.json` and `/CHANGELOG.md`, which leaves the generator as their only formatter. Both prefixes are deliberate: a pattern with an interior slash anchors to the ignore file's directory and one with none matches at any depth, so the manifest entry needs widening and the changelog entry needs pinning to the root.
+The tool writes four files, and oxfmt disagrees with its serialization of two. The `ignorePatterns` in `.oxfmtrc.jsonc` carry `**/.claude-plugin/*.json` and `/CHANGELOG.md`, which leaves the generator as their only formatter. Both prefixes are deliberate: a pattern with an interior slash anchors to the config file's directory and one with none matches at any depth, so the manifest entry needs widening and the changelog entry needs pinning to the root.
 
-`.release-please-manifest.json` and `package.json` need no entry, since `prettier --check` already accepts what the tool writes for both, and an ignore over a file the formatter already agrees with would hide real drift later. Treat the four files as one unit, since covering only one at a time misses that the others need the same fix.
+`.release-please-manifest.json` and `package.json` need no entry, since `oxfmt --check` already accepts what the tool writes for both, and an ignore over a file the formatter already agrees with would hide real drift later. Treat the four files as one unit, since covering only one at a time misses that the others need the same fix.
 
 ### The publish job
 
