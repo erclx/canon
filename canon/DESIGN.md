@@ -2,11 +2,11 @@
 
 Authoring guidance: `claude/skills/canvas-board/references/design.md`. Rendered from `src/design/tokens.ts` by `canon design regen`, so edit the module and never this file. Why each value was chosen lives in `canon/context/design/tokens.md`.
 
-## Personality
+## Overview
 
 Warm neutrals under one rust accent, set in Geist. The page reads as prose, and monospace appears only where a surface shows what a shell printed. One accent carries every count, link, and primary action.
 
-## Color
+## Colors
 
 - One accent. Never promote a second color into a structural role.
 - Every text role clears WCAG AA at 4.5:1 against each ground it is drawn on.
@@ -66,7 +66,12 @@ Warm neutrals under one rust accent, set in Geist. The page reads as prose, and 
 | 2xl  | 16         | 4rem     |
 | 3xl  | 24         | 6rem     |
 
-## Borders
+## Layout
+
+- Capture widths: 320, 768, 1280, 1536. 320 is the reflow floor.
+- Every width query in the generated stylesheets opens a range one of these widths reaches.
+
+## Shapes
 
 - Every border is one pixel solid in `border`. Radius and width are independent.
 
@@ -78,11 +83,6 @@ Warm neutrals under one rust accent, set in Geist. The page reads as prose, and 
 | rule   | none           | 1px           | horizontal dividers between bands |
 | pill   | 999px ? verify | none ? verify | tags and status chips, none built |
 | marker | 999px          | none          | the status dot, sized at 6px      |
-
-## Layout
-
-- Capture widths: 320, 768, 1280, 1536. 320 is the reflow floor.
-- Every width query in the generated stylesheets opens a range one of these widths reaches.
 
 ## Motion
 

@@ -346,7 +346,7 @@ export const merge = {
     'canon worktrees reclaim': 'the worktree the merged branch was built in',
   } as Record<string, string>,
   foot: 'A tick is a claim a session makes. A merge is a fact the trunk shows, and only the second fires this.',
-  // README.md: "a `DESIGN.md` token format" "and a render command"
+  // README.md: "a `DESIGN.md` intent format" "and a render command"
   tokens: {
     title: 'The tokens that merge landed, as this page renders them',
     note: 'Rendered from canon/DESIGN.md by canon design render at build time, and embedded live rather than captured.',

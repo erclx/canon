@@ -7,9 +7,11 @@ description: What the design domain owns, the generated record against a target'
 
 ## Overview
 
-`canon/DESIGN.md` holds visual intent as token tables, a one-paragraph Personality, and a few one-line rules per section. The toolkit treats it as the tool-agnostic source of truth for any project's design system. A Claude Code skill drafts the file from existing project signals, and a CLI command renders a token preview for human inspection.
+`canon/DESIGN.md` holds visual intent, being a one-paragraph Overview, a few one-line rules per section, and a table naming what each color and shape role is for. A target's record carries no value and its lead names the stylesheet the values live in. The toolkit treats it as the tool-agnostic source of intent for any project's design system, and a CLI command renders a token preview of a record that carries values.
 
-This repository's own record is generated rather than authored. `src/design/tokens.ts` holds the values, and `canon design regen` renders the record from it and `src/design/base.css` from the achromatic set in `src/design/neutral.ts`, both of which the `design` gate stage asserts for drift. The same stage counts this record and `examples/design/DESIGN.md` against the prose budget `claude/skills/canvas-board/references/design.md` sets, through `src/design/budget.ts`. A target keeps the hand-authored shape, so the markdown parser serves that reader and this repository reads the module instead.
+This repository's own record is generated rather than authored. `src/design/tokens.ts` holds the values, and `canon design regen` renders the record from it and `src/design/base.css` from the achromatic set in `src/design/neutral.ts`, both of which the `design` gate stage asserts for drift. The same stage counts this record and `examples/design/DESIGN.md` against the prose budget `claude/skills/canvas-board/references/design.md` sets, through `src/design/budget.ts`. A target keeps the hand-authored intent shape, so the markdown parser serves that reader and this repository reads the module instead.
+
+The parser reads `## Personality`, `## Color`, and `## Borders` as `## Overview`, `## Colors`, and `## Shapes` for good, since a target's record written before the rename will not rename itself.
 
 ## Layout
 
@@ -35,6 +37,10 @@ This repository's own record is generated rather than authored. `src/design/toke
 
 The toolkit's own record is rendered from `src/design/tokens.ts` rather than authored. Leaving the document as the source was the alternative, and it costs more: a table a person edits is one a parser has to be taught to read back, where a module is checked by the compiler. The cost is two artifacts from one source, and the `design` gate stage is the only thing that catches them disagreeing. The module's prose slots are rule lists rather than strings, so a bullet is the unit the renderer emits and the budget counts, and a paragraph of why goes to `canon/context/design/tokens.md`.
 
+### A target's record holds intent and points at the stylesheet
+
+A target writes rules, omissions, and each role's intent by hand, and takes every value from its own stylesheet, which the record's lead names. Hand-typed hex tables were the alternative, and they are a second copy of the CSS that drifts from it with nothing to catch the drift. Each role row names its custom property, such as `--color-accent`, so a role can still be matched against the stylesheet. The three renamed headings follow Google's DESIGN.md where it maps, and `## Layout` keeps its name because the surface-capture rule reads breakpoints from it by that name. The worked example points at a stylesheet of its invented project and ships none, so its render capture went with its values.
+
 ### A target inherits a neutral base
 
 `canon design install` ships greys at chroma 0 and a monochrome accent, keeping only the two success greens, since a state color is a meaning rather than a palette. Rewording the seed and the extract skill's examples alone was the alternative, and it leaves every installed target rendering this repository's red. The cost is a second color list the `design` gate stage cannot compare against `TOKENS`, which the role parity test in `src/design/neutral.test.ts` stands in for.
@@ -45,13 +51,11 @@ The toolkit's own record is rendered from `src/design/tokens.ts` rather than aut
 
 ## Workflow
 
-1. Draft `canon/DESIGN.md` from the seed template, or work the direction out on the canvas and carry the pick in.
-2. Review the `? verify` cells and edit the file directly. The preview marks each one and counts them, so the preview is where they are found rather than the source file.
-3. Run `canon design render` to regenerate the preview
-4. Open `.canon/tmp/render/design/index.html` in a browser
-5. Iterate on `DESIGN.md` until the preview matches intent
+1. Draft `canon/DESIGN.md` from the seed template and name the project's stylesheet in its lead, or work the direction out on the canvas and carry the pick in.
+2. Write each value into that stylesheet, and the rule or intent behind it into the record.
+3. For a record carrying values, review the `? verify` cells through `canon design render`, which marks and counts each one at `.canon/tmp/render/design/index.html`.
 
-A direction nobody has settled yet is drafted on the canvas first, through the `canvas-board` skill, and only the pick is carried into `DESIGN.md`.
+A direction nobody has settled yet is drafted on the canvas first, through the `canvas-board` skill, and only the pick leaves it, its values for the stylesheet and its intent for `DESIGN.md`.
 
 ## Related
 

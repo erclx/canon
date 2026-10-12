@@ -16,7 +16,7 @@ const colorDoc = (rows: string[]): string =>
   [
     '# Design',
     '',
-    '## Color',
+    '## Colors',
     '',
     '| Role | Intent | Value |',
     '| ---- | ------ | ----- |',
@@ -95,7 +95,7 @@ describe('parseDesignDoc', () => {
       [
         '# Design',
         '',
-        '## Color',
+        '## Colors',
         '',
         '| Role | Intent | Value ? verify |',
         '| ---- | ------ | -------------- |',
@@ -141,5 +141,85 @@ describe('parseDesignDoc', () => {
     const doc = parseDesignDoc(path)
 
     expect(doc.motion).toBe('Motion is not used.')
+  })
+
+  it('should keep the prose of a record carrying no table', () => {
+    const path = write(
+      [
+        '# Design',
+        '',
+        '## Overview',
+        '',
+        'Calm and exact.',
+        '',
+        '## Colors',
+        '',
+        '- One accent, used for the primary action alone.',
+        '',
+        '## Typography',
+        '',
+        '- Two sizes on any one screen.',
+        '',
+      ].join('\n'),
+    )
+
+    const doc = parseDesignDoc(path)
+
+    expect(doc.personality).toBe('Calm and exact.')
+    expect(doc.color).toEqual([])
+    expect(doc.typography).toEqual([])
+    expect(doc.spacing).toEqual([])
+    expect(doc.borders).toEqual([])
+  })
+
+  it('should read an intent table that carries no value column', () => {
+    const path = write(
+      [
+        '# Design',
+        '',
+        '## Colors',
+        '',
+        '| Role | Intent |',
+        '| ---- | ------ |',
+        '| accent | primary action |',
+        '',
+      ].join('\n'),
+    )
+
+    const doc = parseDesignDoc(path)
+
+    expect(doc.color[0]['Intent'].value).toBe('primary action')
+    expect(doc.color[0]['Value']).toBeUndefined()
+  })
+
+  it('should resolve the legacy headings to the sections they were renamed to', () => {
+    const path = write(
+      [
+        '# Design',
+        '',
+        '## Personality',
+        '',
+        'Calm and exact.',
+        '',
+        '## Color',
+        '',
+        '| Role | Intent | Value |',
+        '| ---- | ------ | ----- |',
+        '| accent | primary action | #e0724b |',
+        '',
+        '## Borders',
+        '',
+        '| Role | When used |',
+        '| ---- | --------- |',
+        '| panel | cards |',
+        '',
+      ].join('\n'),
+    )
+
+    const doc = parseDesignDoc(path)
+
+    expect(doc.personality).toBe('Calm and exact.')
+    expect(doc.color[0]['Value'].value).toBe('#e0724b')
+    expect(doc.borders[0]['When used'].value).toBe('cards')
   })
 })

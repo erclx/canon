@@ -10,104 +10,121 @@ Applies to `canon/DESIGN.md`. Captures visual intent and the decisions behind ho
 ## Contents
 
 - [Scope](#scope)
+- [Two shapes](#two-shapes)
 - [What goes in](#what-goes-in)
 - [What does not go in](#what-does-not-go-in)
 - [Format](#format)
 - [Prose budget](#prose-budget)
-- [The uncertainty tag](#the-uncertainty-tag)
 - [Sections](#sections)
+- [The uncertainty tag](#the-uncertainty-tag)
 - [Template](#template)
 
 ## Scope
 
-Governs the visual-intent document at `canon/DESIGN.md`: tokens described as intent, layout constraints, and the omissions that keep visual scope closed.
+Governs the visual-intent document at `canon/DESIGN.md`, being the rules and omissions that keep visual scope closed, the intent behind each role, and the pointer to where the values live.
 
 Does not govern:
 
 - Per-domain implementation narrative: `context.md`
+- The token values themselves, which live in the project's stylesheet
+
+## Two shapes
+
+- **An intent record** is the shape a project writes by hand. It carries rules, omissions, and each role's intent, and its lead names the stylesheet the values live in. It carries no value, since a hand-typed copy of the stylesheet drifts from it.
+- **A values record** is generated from a token source and carries the value tables beside the rules. It is never edited by hand, and its lead names the module it is rendered from. The toolkit's own record is one.
+
+Everything below applies to both shapes unless it names one.
 
 ## What goes in
 
-- A token's exact value, anchored to the surface it was read from and tagged per `## The uncertainty tag` when unconfirmed. Fall back to intent language ("mid gray, muted text") only where no source exists yet to anchor from.
-- Layout constraints and sizing rules not obvious from the tokens and the code
+- In the lead, the stylesheet a reader takes values from, such as `src/styles/tokens.css` or a Tailwind `@theme` block
+- What each color role and each shape role is for, with the custom property that carries it
+- Layout constraints and sizing rules not obvious from the stylesheet and the code
 - Visual rules a developer could get wrong without guidance
 - Non-obvious omissions ("no motion", "no custom icons") that prevent scope creep
 
 ## What does not go in
 
+- A token's value in an intent record, whether a hex, a font stack, a size, a step, or a radius. The stylesheet the lead names carries it.
 - CSS classes and prop names. Those live in code.
 - Anything that needs updating every time the code is refactored
-- The history of how a value or a mark was chosen: the candidates, the rounds, the date of a pick. State the rule and the current value, and cut the trail. Git keeps it.
+- The history of how a value or a mark was chosen, being the candidates, the rounds, and the date of a pick. State the rule and cut the trail, since version control keeps it.
 
 ## Format
 
-- Use tables for token systems, one row per token. Write every other rule as a short bullet, one decision per line, within `## Prose budget`.
-- Plain English over technical notation. If a section could be removed and the developer would still build correctly from the tokens and code alone, remove it.
-- Keep table headers and role names intact so the render tooling can parse the token tables.
+- Write every rule as a short bullet, one decision per line, within `## Prose budget`.
+- Plain English over technical notation. If a section could be removed and the developer would still build correctly from the stylesheet and code alone, remove it.
+- Keep table headers and role names intact so the parser can read the tables.
 
 ## Prose budget
 
-The record is a lookup, so its prose stays short enough to scan beside the tables. Why a value was chosen belongs in the project's context entry for design, never here.
+The record is a lookup, so its prose stays short enough to scan. Why a rule was chosen belongs in the project's context entry for design, never here.
 
-- Personality: one paragraph of at most 60 words
+- Overview: one paragraph of at most 60 words
 - Any other section: at most 3 rules beside its table, each at most 25 words. A bullet is one rule, and so is a paragraph.
 - The lead before the first section: at most 40 words
 
 Headings and table rows are never counted, and a section holding a table and no rules is within budget. A bullet wrapping over several lines counts as one rule, and a nested bullet counts as its own.
 
-## The uncertainty tag
-
-A cell no source anchors ends in ` ? verify`, written inside the cell rather than as a trailing column, since a trailing marker breaks the table parse. A cell wrapping itself in a code span carries the tag inside the span, as in `` `#ffffff ? verify` ``. Both spellings parse.
-
-The renderer splits the tag off the value, so a swatch and a font sample are built from the value alone and the marker shows beside it. The preview also reports how many cells are anchored against how many are tagged, which is the reading a reviewer takes the record's overall confidence from.
-
-Which columns that ratio reads is fixed by the table rather than by the record. The first column of each table names its row, and `Multiplier` and `When used` restate what the row already carries, so none of them is something a source could anchor and none is counted. That leaves `Intent` and `Value` in Color, `Family`, `Weight`, `Size`, and `Line height` in Typography, `Value` in Spacing, and `Radius` and `Width` in Borders. A cell tagged outside that set counts anyway, so a marker the preview draws is never missing from the ratio beside it.
-
-A prose section takes its uncertainty inline instead, in a sentence saying what is proposed and what has yet to confirm it. A tag appended to a paragraph renders verbatim.
-
 ## Sections
 
-Use `## Personality`, `## Color`, `## Typography`, `## Spacing`, `## Borders`, `## Motion`, and `## Iconography`. The token tables carry fixed headers the renderer reads.
+Use `## Overview`, `## Colors`, `## Typography`, `## Spacing`, `## Shapes`, `## Motion`, and `## Iconography`, in that order, which follows Google's DESIGN.md for the sections the two share. An optional `## Layout` sits between Spacing and Shapes. The parser still reads a record written under the earlier names, `## Personality`, `## Color`, and `## Borders`, as the sections they became.
+
+In an intent record, `## Colors` carries a `Role | Property | Intent` table and `## Shapes` a `Role | Property | When used` table. Each row names the custom property the stylesheet declares for that role, such as `--color-accent`. Typography and Spacing carry rules alone.
 
 Add either optional section when the project has content for it:
 
 - `## Layout`: page width, breakpoints, and grid rules, as current constraints. The surface-capture rule reads the breakpoints from here, so a project with none declared here is captured at the 320 reflow floor alone.
 - `## Mark`: the logo's construction rules and the files that carry it
 
+## The uncertainty tag
+
+Applies to a values record alone. An intent record carries no value to tag, and a guessed value is marked where it is written, in the stylesheet.
+
+A cell no source anchors ends in ` ? verify`, written inside the cell rather than as a trailing column, since a trailing marker breaks the table parse. A cell wrapping itself in a code span carries the tag inside the span, as in `` `#ffffff ? verify` ``. Both spellings parse.
+
+The renderer splits the tag off the value, so a swatch and a font sample are built from the value alone and the marker shows beside it. The preview also reports how many cells are anchored against how many are tagged, which is the reading a reviewer takes the record's overall confidence from.
+
+Which columns that ratio reads is fixed by the table rather than by the record. The first column of each table names its row, and `Multiplier` and `When used` restate what the row already carries, so none of them is something a source could anchor and none is counted. That leaves `Intent` and `Value` in Colors, `Family`, `Weight`, `Size`, and `Line height` in Typography, `Value` in Spacing, and `Radius` and `Width` in Shapes. A cell tagged outside that set counts anyway, so a marker the preview draws is never missing from the ratio beside it.
+
+A prose section takes its uncertainty inline instead, in a sentence saying what is proposed and what has yet to confirm it. A tag appended to a paragraph renders verbatim.
+
 ## Template
 
-The column headers are the strings the renderer parses, read by exact key, so they stay verbatim. Row names are not. Each is slugged into the variable name it emits, which leaves a project free to rename a row, add one, or drop one it has no use for.
+The template is the intent record. The column headers are read by exact key, so they stay verbatim. Row names are not, which leaves a project free to rename a role, add one, or drop one it has no use for.
 
 ```markdown
 # Design
 
-## Personality
+Values live in `<path to the stylesheet>`. This record holds the intent behind them.
+
+## Overview
 
 <one paragraph on voice, tone, and the feeling a user should have>
 
-## Color
+## Colors
 
-| Role   | Intent           | Value   |
-| ------ | ---------------- | ------- |
-| <role> | <what it is for> | <value> |
+- <a rule a developer could get wrong>
+
+| Role   | Property         | Intent           |
+| ------ | ---------------- | ---------------- |
+| <role> | `--color-<role>` | <what it is for> |
 
 ## Typography
 
-| Role   | Family   | Weight   | Size   | Line height |
-| ------ | -------- | -------- | ------ | ----------- |
-| <role> | <family> | <weight> | <size> | <height>    |
+- <how the roles divide between families, and any role that breaks the pattern>
 
 ## Spacing
 
-| Step   | Multiplier   | Value   |
-| ------ | ------------ | ------- |
-| <step> | <multiplier> | <value> |
+- <the base unit and how the scale steps>
 
-## Borders
+## Shapes
 
-| Role   | Radius   | Width   | When used   |
-| ------ | -------- | ------- | ----------- |
-| <role> | <radius> | <width> | <when used> |
+- <a rule about radius or border a developer could get wrong>
+
+| Role   | Property          | When used   |
+| ------ | ----------------- | ----------- |
+| <role> | `--radius-<role>` | <when used> |
 
 ## Motion
 

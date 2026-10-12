@@ -25,6 +25,23 @@ export interface DesignDoc {
   iconography: string
 }
 
+/**
+ * The three headings the standard renamed toward Google's DESIGN.md, each read
+ * as the section it became. Records the seed and `canvas-board` wrote before
+ * the rename sit in targets and will not rename themselves, and an unmatched
+ * heading parses to nothing without saying so. The field names on `DesignDoc`
+ * keep the old words, since the preview reading them is retired separately.
+ */
+export const LEGACY_HEADINGS: Readonly<Record<string, string>> = {
+  Personality: 'Overview',
+  Color: 'Colors',
+  Borders: 'Shapes',
+}
+
+export function canonicalHeading(heading: string): string {
+  return LEGACY_HEADINGS[heading] ?? heading
+}
+
 const VERIFY_TAG = /\s*\?\s*verify\s*$/
 
 /** A cell whose whole content is one balanced code span and nothing else. */
@@ -34,11 +51,11 @@ export function parseDesignDoc(path: string): DesignDoc {
   const raw = readFileSync(path, 'utf8')
   const sections = splitSections(raw)
   return {
-    personality: prose(sections['Personality']),
-    color: table(sections['Color']),
+    personality: prose(sections['Overview']),
+    color: table(sections['Colors']),
     typography: table(sections['Typography']),
     spacing: table(sections['Spacing']),
-    borders: table(sections['Borders']),
+    borders: table(sections['Shapes']),
     motion: prose(sections['Motion']),
     iconography: prose(sections['Iconography']),
   }
@@ -53,7 +70,7 @@ function splitSections(raw: string): Record<string, string> {
     const match = line.match(/^##\s+(.+?)\s*$/)
     if (match) {
       if (current) out[current] = buffer.join('\n')
-      current = match[1]
+      current = canonicalHeading(match[1])
       buffer = []
     } else if (current) {
       buffer.push(line)

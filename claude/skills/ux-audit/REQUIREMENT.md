@@ -37,4 +37,4 @@ The pass slides into fixing what it finds, and then the audit and the change lan
 - Feature planning, which `plan-feature` owns
 - Verifying one specific change, which `ui-checklist` owns
 - Defining the intent it audits against, which the design document owns
-- Measuring what a running interface costs to paint, block, or shift, which `ux-measure` owns. Contrast stays here rather than going with it, being computable from two color values this skill already reads off the token table.
+- Measuring what a running interface costs to paint, block, or shift, which `ux-measure` owns. Contrast stays here rather than going with it, being computable from two color values this skill already reads off the stylesheet's custom properties.

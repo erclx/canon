@@ -26,7 +26,7 @@ const doc = (sections: string[]): string =>
   ['# Design', '', ...sections, ''].join('\n')
 
 const colorTable = (rows: string[]): string[] => [
-  '## Color',
+  '## Colors',
   '',
   '| Role | Intent | Value |',
   '| ---- | ------ | ----- |',
@@ -35,7 +35,7 @@ const colorTable = (rows: string[]): string[] => [
 ]
 
 const bordersTable = (rows: string[]): string[] => [
-  '## Borders',
+  '## Shapes',
   '',
   '| Role | Radius | Width | When used |',
   '| ---- | ------ | ----- | --------- |',
@@ -214,6 +214,41 @@ describe('renderDesignDoc', () => {
     const { html } = render(doc(['## Motion', '', 'Motion is not used.']))
 
     expect(html).toContain('<h2>Motion</h2>\n<p>Motion is not used.</p>')
+  })
+
+  it('should render a record carrying no table without an empty table', () => {
+    const { css, html } = render(
+      doc([
+        '## Overview',
+        '',
+        'Calm and exact.',
+        '',
+        '## Colors',
+        '',
+        '- One accent, for the primary action alone.',
+      ]),
+    )
+
+    expect(html).toContain('<h2>Overview</h2>\n<p>Calm and exact.</p>')
+    expect(html).not.toContain('<table>')
+    expect(css).toBe(':root {\n}\n')
+  })
+
+  it('should show an intent row with no value column as unset', () => {
+    const { css, html } = render(
+      doc([
+        '## Colors',
+        '',
+        '| Role | Property | Intent |',
+        '| ---- | -------- | ------ |',
+        '| accent | `--color-accent` | primary action |',
+        '',
+      ]),
+    )
+
+    expect(html).toContain('<h2>Colors</h2>')
+    expect(html).toContain('<span class="empty">unset</span>')
+    expect(css).not.toContain('--color-accent')
   })
 
   it('should add nothing to a record where no cell carries a tag', () => {

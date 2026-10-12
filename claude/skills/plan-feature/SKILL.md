@@ -24,7 +24,7 @@ Read these in parallel from the project root, skipping any that do not exist:
 
 Also read these when the feature touches code or UI. Skip them for prose, docs, catalog, or config-only changes:
 
-- `canon/DESIGN.md`: tokens, typography, spacing, and component rules
+- `canon/DESIGN.md`: visual intent and component rules, with values read from the stylesheet its lead names
 
 Coding standards live in `.claude/rules/`. Claude Code loads them automatically. Path-scoped rules apply to the files they match.
 

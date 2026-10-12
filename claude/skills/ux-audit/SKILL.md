@@ -10,14 +10,14 @@ metadata:
 ## Guards
 
 - If no UI files exist in the project (no JSX, TSX, Vue, Svelte, or HTML under `src/`), stop: `❌ No UI surfaces found to audit.`
-- If the request asks what the interface costs to paint, block, or shift at runtime, run nothing and name `ux-measure`. This skill reads source and reaches no number a browser produces. Contrast is the exception and stays here, since it is computable from the two color values already in the token table.
+- If the request asks what the interface costs to paint, block, or shift at runtime, run nothing and name `ux-measure`. This skill reads source and reaches no number a browser produces. Contrast is the exception and stays here, since it is computable from two color values in the stylesheet's custom properties, which the design document's lead names.
 
 ## Step 1: read context
 
 Read these in parallel from the project root, skipping any that do not exist:
 
 - `CLAUDE.md`: project type and conventions
-- `canon/DESIGN.md`: visual intent, tokens, typography, spacing rules
+- `canon/DESIGN.md`: visual intent, typography, and spacing rules, plus the stylesheet its lead names for the values
 - `canon/REQUIREMENTS.md`: feature scope and non-goals
 - A committed capture beside the surface's own source, when the project has one. A rendered surface reads differently composed than it reads written, and a capture is the only artifact here that shows the composed result rather than the markup. Absent one, note that this audit reads source only, and keep going. This is a stated fallback, not a stop: a project with no capture yet, or a capture mid-rebuild, still gets a source-only audit rather than losing the skill entirely.
 

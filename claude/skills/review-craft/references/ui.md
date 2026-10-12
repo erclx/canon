@@ -59,7 +59,7 @@ A second theme earns a read only when the diff touches a color token. Name the s
 
 ## Comparing
 
-Check each opened image against the layout its checklist box claims, and check `canon/DESIGN.md` for the tokens the image makes visible: color, type scale, spacing, and component rules.
+Check each opened image against the layout its checklist box claims, and check the tokens the image makes visible, being color, type scale, and spacing, against the stylesheet `canon/DESIGN.md`'s lead names, and its component rules against the record itself.
 
 Read the width and theme from whatever the image path carries, and fix no width list, since which widths matter belongs to the project. Skip the design file comparison silently when the project has none.
 

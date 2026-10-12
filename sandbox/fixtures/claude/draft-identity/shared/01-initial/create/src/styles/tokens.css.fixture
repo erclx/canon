@@ -1,0 +1,15 @@
+:root {
+  --color-ground: #faf6f0;
+  --color-ink: #2b241c;
+  --color-accent: #b5502e;
+
+  --font-body: system-ui, sans-serif;
+  --font-body-weight: 400;
+  --font-body-size: 16px;
+  --font-heavy-weight: 700;
+  --font-heavy-size: 28px;
+
+  --space-unit: 8px;
+
+  --radius-default: 4px;
+}

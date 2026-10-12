@@ -1,44 +1,45 @@
 ---
 title: Design
-description: Tokens for the focus timer
+description: Visual intent for the focus timer
 ---
 
 # Design
 
-## Personality
+Values live in `src/styles/tokens.css`. This record holds the intent behind them.
+
+## Overview
 
 Quiet and disciplined. Warm paper tones, a single confident accent for the
 active state. No decoration, no motion.
 
-## Color
+## Colors
 
-| Role   | Intent               | Value     |
-| ------ | --------------------- | --------- |
-| Ground | warm paper page       | `#faf6f0` |
-| Ink    | primary text          | `#2b241c` |
-| Accent | the active timer state | `#b5502e` |
+- The accent marks the active timer state and nothing else.
+
+| Role   | Property         | Intent                 |
+| ------ | ---------------- | ---------------------- |
+| ground | `--color-ground` | warm paper page        |
+| ink    | `--color-ink`    | primary text           |
+| accent | `--color-accent` | the active timer state |
 
 ## Typography
 
-| Role  | Family                    | Weight | Size | Line height |
-| ----- | ------------------------- | ------ | ---- | ----------- |
-| Body  | system-ui, sans-serif     | 400    | 16px | 1.5         |
-| Heavy | system-ui, sans-serif     | 700    | 28px | 1.2         |
+- One system sans for every role, with the countdown set heavy.
 
 ## Spacing
 
-- Base unit: `8px`
+- An 8px base unit.
 
-## Borders
+## Shapes
 
-| Role    | Radius | Width |
-| ------- | ------ | ----- |
-| Default | 4px    | 1px   |
+| Role    | Property           | When used     |
+| ------- | ------------------ | ------------- |
+| default | `--radius-default` | cards, inputs |
 
 ## Motion
 
-No animation.
+- No animation.
 
 ## Iconography
 
-No custom icons.
+- No custom icons.

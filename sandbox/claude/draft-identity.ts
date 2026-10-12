@@ -11,20 +11,22 @@ export default scenario({
 
       ctx.mkdir('.claude')
       ctx.git('add', '.')
-      ctx.commit('feat(project): seed a focus timer with DESIGN.md tokens')
+      ctx.commit(
+        'feat(project): seed a focus timer with DESIGN.md and its stylesheet',
+      )
 
       ctx.log.step(
-        'Scenario ready: a project with DESIGN.md tokens and no logo, favicon, or manifest yet',
+        'Scenario ready: a project with DESIGN.md, a token stylesheet, and no logo, favicon, or manifest yet',
       )
       ctx.log.info(
-        'Context: CLAUDE.md names a focus timer, canon/DESIGN.md carries Personality, Color, and Typography',
+        'Context: CLAUDE.md names a focus timer, canon/DESIGN.md carries Overview, Colors, and Typography intent, and its lead names src/styles/tokens.css for the values',
       )
       ctx.log.info('Signals the skill should pick up:')
       ctx.log.info(
-        '  Personality: quiet, disciplined, warm paper tones, single accent, no motion',
+        '  Overview: quiet, disciplined, warm paper tones, single accent, no motion',
       )
       ctx.log.info(
-        '  Color: warm paper ground, dark ink, a rust accent for the active state',
+        "  Colors: warm paper ground, dark ink, a rust accent for the active state, read from the stylesheet's custom properties",
       )
       ctx.log.info(
         '  No public/, static/, src/app/, index.html, or manifest.json anywhere in the tree',

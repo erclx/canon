@@ -113,7 +113,7 @@ Never change these without saying so and getting agreement, because each one bre
 
 Read `${CLAUDE_SKILL_DIR}/references/systems.md` when establishing or revising what a surface draws from, being the space scale, the type scale, and the relationships a palette holds. Every other reference here is read against a draft. That one is read before there is one, so a project reaches for it at the start and on a system revision rather than on an ordinary round.
 
-It states no values. A value belongs to the project's own design document.
+It states no values. A value belongs to the project's own stylesheet, and its intent to the design document.
 
 ## The rest of the catalog
 
@@ -145,6 +145,6 @@ Run `${CLAUDE_SKILL_DIR}/references/preflight.md` against the output. It is the 
 - States, empty and loading coverage, destructive confirmation, truncation: the same rules
 - Rendered copy casing, button labels, error message shape: the same rules
 - The candidate loop, the arm set, the render, and the pick: `draft-and-pick`
-- The shape of the project's design document and its token tables: `${CLAUDE_SKILL_DIR}/../canvas-board/references/design.md`
+- The shape of the project's design document and where its values live: `${CLAUDE_SKILL_DIR}/../canvas-board/references/design.md`
 - Reading source for roughness: `ux-audit`. Measuring what a running interface costs to paint: `ux-measure`
 - Prose on the surface being designed: the `write-human` skill
