@@ -128,7 +128,12 @@ describe('isGating', () => {
   it('should leave a mid-sentence colon and a heading case finding advisory', () => {
     const input = makeInput({
       colons: [
-        { line: 3, column: 14, text: 'Prose sentence: another clause.' },
+        {
+          line: 3,
+          column: 14,
+          text: 'Prose sentence: another clause.',
+          lead: 'sentence',
+        },
       ],
       headingCase: [{ line: 1, text: 'Key Changes', words: ['Changes'] }],
     })

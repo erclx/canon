@@ -250,7 +250,7 @@ beforeAll(() => {
   const advisory = join(fixture, 'bin-advisory/canon')
   writeFileSync(
     advisory,
-    `#!/usr/bin/env bash\nprintf '%s\\n' '{"entries":[{"path":"doc.md","bans":[],"colons":[{"line":3,"column":14,"text":"Prose sentence: another clause."}],"headingCase":[{"line":1,"text":"Key Changes","words":["Changes"]}]}],"bans":{"emptySets":[]}}'\n`,
+    `#!/usr/bin/env bash\nprintf '%s\\n' '{"entries":[{"path":"doc.md","bans":[],"colons":[{"line":3,"column":14,"text":"Prose sentence: another clause.","lead":"sentence"},{"line":5,"column":14,"text":"Ship it 🚀 now: it works.","lead":"now"}],"headingCase":[{"line":1,"text":"Key Changes","words":["Changes"]}]}],"bans":{"emptySets":[]}}'\n`,
   )
   chmodSync(advisory, 0o755)
 
@@ -1124,6 +1124,29 @@ describe('seeds standards-audit.sh runner', () => {
       const result = await run(hook, edit, path)
 
       expect(result.stdout).toContain('Prose sentence: another clause.')
+      expect(result.code).toBe(0)
+    },
+  )
+
+  it.concurrent(
+    'should not warn on an unrelated colon in an edit when a line carries an emoji',
+    async ({ expect }) => {
+      // The record names the word before each colon, so a line with an emoji
+      // is matched by that word rather than by slicing its text at a UTF-16
+      // column, which lands one character off and yields an empty word.
+      const path = [join(fixture, 'bin-advisory'), hookPath].join(delimiter)
+      const edit = JSON.stringify({
+        tool_input: {
+          file_path: join(fixture, 'project/doc.md'),
+          old_string: 'one',
+          new_string: 'a note: unrelated',
+        },
+        tool_name: 'Edit',
+      })
+
+      const result = await run(hook, edit, path)
+
+      expect(result.stdout).not.toContain('Ship it')
       expect(result.code).toBe(0)
     },
   )

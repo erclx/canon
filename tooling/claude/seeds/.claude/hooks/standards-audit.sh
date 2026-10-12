@@ -66,14 +66,16 @@ hits=$(printf '%s' "$record" |
 # case is read for the whole file, since it is cheap to fix where it stands. A
 # colon is kept only where the word before it and the colon appear in the text
 # this write carried, since an edit often rewrites part of a line and a
-# whole-line match would drop exactly that case. A file holds colons nobody is
+# whole-line match would drop exactly that case. The verb names that word as
+# `lead`, since slicing `text` at `column` miscounts after an emoji, and a
+# binary predating the field falls back to the slice. A file holds colons nobody is
 # asking this edit to answer for.
 new=$(printf '%s' "$input" |
   jq -r '[.tool_input.new_string?, .tool_input.content?, (.tool_input.edits[]?.new_string?)] | map(select(. != null)) | join("\n")' 2>/dev/null)
 headings=$(printf '%s' "$record" |
   jq -r '.entries[]?.headingCase[]? | ":\(.line)  \(.text)"' 2>/dev/null)
 colons=$(printf '%s' "$record" |
-  jq -r --arg new "$new" '.entries[]?.colons[]? | (.text[:.column] | sub("^.*\\s"; "")) as $lead | select($new | contains($lead + ":")) | ":\(.line):\(.column + 1)  \(.text)"' 2>/dev/null)
+  jq -r --arg new "$new" '.entries[]?.colons[]? | (.lead // (.text[:.column] | sub("^.*\\s"; ""))) as $lead | select($new | contains($lead + ":")) | ":\(.line):\(.column + 1)  \(.text)"' 2>/dev/null)
 
 # A set the verb shipped empty measures nothing and would report a clean file.
 # Reading the findings alone turns that narrowed check into a pass, so the field

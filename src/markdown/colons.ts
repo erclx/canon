@@ -6,6 +6,12 @@ export interface ColonFinding {
   readonly column: number
   /** The whole source line, so a reader can match it against new text. */
   readonly text: string
+  /**
+   * The run of non-space characters ending at the colon. A hook matches it
+   * against new text, since `column` is a UTF-16 offset that a reader counting
+   * code points would misplace after an emoji.
+   */
+  readonly lead: string
 }
 
 const HEADING = /^#{1,6}\s/
@@ -67,7 +73,12 @@ export function findColons(lines: readonly BodyLine[]): ColonFinding[] {
         if (isLabel(masked.slice(start, match.index), marker !== '')) continue
       }
 
-      found.push({ line: line.number, column: match.index, text: line.text })
+      found.push({
+        line: line.number,
+        column: match.index,
+        text: line.text,
+        lead: line.text.slice(0, match.index).replace(/^.*\s/, ''),
+      })
     }
   }
 

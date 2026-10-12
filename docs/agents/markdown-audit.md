@@ -59,7 +59,7 @@ The placeholder exemption is the one live case the corpus needs. Every current i
 
 Two advisory measures report beside the bans and never fail a run.
 
-The colon measure reports a colon followed by more text in a prose line, outside the label position. A list item's first colon, a bold or code span label, a line-final colon, a time, a URL, and anything inside a code span or a link are left alone. A heading, a table row, and a fenced line are skipped. Each finding carries the line, the column, and the line's text under `colons` in the `--json` entry.
+The colon measure reports a colon followed by more text in a prose line, outside the label position. A list item's first colon, a bold or code span label, a line-final colon, a time, a URL, and anything inside a code span or a link are left alone. A heading, a table row, and a fenced line are skipped. Each finding carries the line, the column, the line's text, and the word before the colon as `lead` under `colons` in the `--json` entry.
 
 The heading-case measure reports a heading or a frontmatter `title` with a capitalized word after its first, outside code spans and all-caps tokens, under `headingCase`. A proper noun reports as well and is left as it is.
 

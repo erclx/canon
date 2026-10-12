@@ -11,8 +11,21 @@ describe('findColons', () => {
     const found = colonsIn('Prose sentence: another clause.')
 
     expect(found).toEqual([
-      { line: 1, column: 14, text: 'Prose sentence: another clause.' },
+      {
+        line: 1,
+        column: 14,
+        text: 'Prose sentence: another clause.',
+        lead: 'sentence',
+      },
     ])
+  })
+
+  it('should name the word before the colon after an emoji', () => {
+    // The column is a UTF-16 offset, so the lead is carried rather than left
+    // for a reader counting code points to slice out of the text.
+    const found = colonsIn('Ship it 🚀 now: it works.')
+
+    expect(found.map((hit) => hit.lead)).toEqual(['now'])
   })
 
   it('should report a colon after the label position in a list item', () => {
