@@ -34,16 +34,17 @@
 # authoring root: `internal/standards/` never matches
 # `.claude/internal/standards/`. Every surface living only under a dotted folder
 # carries its own prefix on the row that owns its subject. `internal/` splits across two rows for the same reason, holding
-# rules and standards rather than a subject of its own, and only the
-# `standards` row carries its consumed copy under `.claude/internal/`.
+# rules and the tooling reference convention rather than a subject of its own,
+# and only the `tooling` row carries its consumed copy under `.claude/internal/`.
 
 [domains]
 # The plugin surface: shipped skills, toolkit-internal skills, and the
 # marketplace entry a consumer adds.
 skills = ["claude/skills/", ".claude/skills/", ".claude-plugin/"]
 governance = ["governance/", ".claude/rules/", "internal/rules/", "internal/governance.toml"]
-standards = ["internal/standards/", ".claude/internal/standards/"]
-tooling = ["tooling/"]
+# `internal/standards/` holds the one convention governing
+# `tooling/<stack>/reference.md`, so tooling is its subject.
+tooling = ["tooling/", "internal/standards/", ".claude/internal/standards/"]
 # Both halves of the migration boundary. `scripts/core/` and `sandbox/` are
 # left to the rows below, so a new `scripts/` folder goes bare until the
 # uncovered-surface check names it.
