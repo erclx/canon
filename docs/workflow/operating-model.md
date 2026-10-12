@@ -18,12 +18,12 @@ This page covers the roles and the loop. For merge order and fan-out rules, see
 
 The split is by vantage, not by capability. All four are Claude Code sessions.
 
-| Role         | Session                               | Owns                                                    | Does not                          |
-| ------------ | ------------------------------------- | ------------------------------------------------------- | --------------------------------- |
-| Orchestrator | One warm, long-lived session          | The cross-feature call, deep PR review, merge order     | Edit tracked files, merge PRs     |
-| Reviewer     | One cold session per pull request     | The per-pull-request read, posted through `review-pr`   | Fix findings, lift a draft, merge |
-| Planner      | One session per row, warm or cold     | Measure the row against the tree, write one plan        | Enter a worktree, write the board |
-| Worker       | One cold worktree session per feature | Implement, self-check, open PR, answer the orchestrator | Write the shared board, merge     |
+| Role         | Session                               | Owns                                                 | Does not                           |
+| ------------ | ------------------------------------- | ---------------------------------------------------- | ---------------------------------- |
+| Orchestrator | One warm, long-lived session          | The cross-feature call, review dispatch, merge order | Review in place, edit, merge PRs   |
+| Reviewer     | One cold session per pull request     | One PR's read through `review-pr`, the lift on close | Fix findings, ready by hand, merge |
+| Planner      | One session per row, warm or cold     | Measure the row against the tree, write one plan     | Enter a worktree, write the board  |
+| Worker       | One cold worktree session per feature | Implement, self-check, open PR, answer the reviewer  | Write the shared board, merge      |
 
 Each role is asserted explicitly rather than inferred. The orchestrator loads
 `role-orchestrator` at the start of its session, a worker loads `role-worker`,
@@ -72,9 +72,9 @@ One feature travels this path end to end.
 
 1. The next feature is planned with `plan-feature`, writing a plan to `.canon/plans/`. The orchestrator runs it warm when the row turns on a contract other features consume or a dependency on another row, and dispatches a planner under `role-planner` otherwise. A cold planner measures the row against the tree rather than trusting what the row claims, and it reads what is in flight by composing the live session roster with open pull requests. A bare branch or worktree is not evidence on its own, since this repository leaves both behind after a squash merge.
 2. Orchestrator checks the plan waits on nobody, checks the branch is unclaimed, and checks no conflict holds the plan behind a track in flight, then dispatches a background worker with `claude --bg` against the plan, naming the branch and the model on the launch rather than leaving the worker to derive either. No count caps how many run at once. The branch travels as the argument to the worker's own worktree call, which is the one place the name is read rather than inferred. It falls back to naming the invocation for a human to run through `session-worktree` and `auto-ship` when the plan still waits on an answer only the operator can give, the branch check refuses, or a conflict holds the plan behind a track already in flight. Either way, the worker enters its own worktree, builds, self-checks, opens a PR, and stops at the PR boundary.
-3. A reviewer under `role-reviewer`, or the orchestrator, posts `review-pr` findings, and `review-ui` drives any visual checklist beside it.
-4. Orchestrator tells the session holding that branch to run `review-address` once the pass posted a finding at any severity, resolving the target then with `canon sessions list --branch` and reporting the invocation for the human when no live session holds it. The worker addresses the findings, rebases onto `origin/main` when a sibling landed first on a file it writes, then pushes a follow-up. A pass carrying only minor findings dispatches too, since the grade runs low often enough that a floor at should-fix loses fixes a worker would have made. `review-pr` states that threshold and the heading follows it, so an open heading is itself the signal to send.
-5. Orchestrator closes the review out with `review-pr` again. The second pass reads only the commits the follow-up added, or the worker's response alone when the follow-up added none, and posts under `## Review` when it finds anything and under `## Review closed` when it finds nothing, so a reader learns from the heading whether work is still owed and takes the merge decision from the counts on the line under it. A pass finding nothing where a close-out already stands rewrites that comment to cover what it read rather than posting a second one, so the thread carries one live verdict. Repeat from step 4 until a pass closes the review.
+3. Orchestrator dispatches a reviewer under `role-reviewer` for every pull request but a release one, which posts `review-pr` findings, and `review-ui` drives any visual checklist beside it.
+4. The reviewer tells the session holding that branch to run `review-address` once the pass posted a finding at any severity, resolving it with `canon sessions list --branch` and falling back to the orchestrator when none is live. The worker addresses the findings, rebases onto `origin/main` when a sibling landed first on a file it writes, then pushes a follow-up. A pass carrying only minor findings dispatches too, since the grade runs low often enough that a floor at should-fix loses fixes a worker would have made. `review-pr` states that threshold and the heading follows it, so an open heading is itself the signal to send.
+5. The worker asks that reviewer for the re-review directly, and the reviewer closes the review out with `review-pr` again. The second pass reads only the commits the follow-up added, or the worker's response alone when the follow-up added none, and posts under `## Review` when it finds anything and under `## Review closed` when it finds nothing, so a reader learns from the heading whether work is still owed and takes the merge decision from the counts on the line under it. A pass finding nothing where a close-out already stands rewrites that comment to cover what it read rather than posting a second one, so the thread carries one live verdict. Repeat from step 4 until a pass closes the review. Each reviewer then runs `canon pr lift`, which lifts the draft mark once every gate it reads is clear.
 6. The human reads the result and merges. After each merge, the orchestrator tells any trailing worker whose files the merged diff touches to run `review-address`, which rebases whether or not the review left anything open.
 
 There is no loop construct here. Each worker is a single build that halts at the
@@ -86,11 +86,11 @@ from merging promptly so the next PR does not rot against a moving main.
 
 The worker's chain carries no review step. The session that wrote the code is
 structurally blind to its own misreadings, because the same misreading wrote
-both the code and any review of it, so the first review a change gets is the
-orchestrator's.
+both the code and any review of it, so the first review a change gets is a
+dispatched reviewer's.
 
 - Worker gate, inside `auto-ship`: the session that wrote the code. Its job is "did I build the plan and does it pass?" The verify commands and the test order read decide whether the PR opens, and the draft mark holds the merge.
-- Orchestrator review, via `review-pr`: a fresh session with cross-feature context (the board, a sibling PR in flight, a downstream contract). Its job is "is this right and does it fit?" It can question the plan itself. This is the merge gate.
+- Reviewer pass, via `review-pr`: a fresh session holding one pull request, briefed with the cross-feature facts the orchestrator's wave pass found (a sibling PR in flight, a shared file, the merge order). Its job is "is this right and does it fit?" It can question the plan itself. This is the merge gate.
 
 The human read at merge is the final gate. No layer repeats another.
 
@@ -202,11 +202,9 @@ before another is carried nowhere at all.
 
 Review attention binds, and no number caps worker tracks, so stop adding once you cannot review every output. A row waits only on a conflict a merge cannot settle, which the `role-orchestrator` dispatch runbook states once. A shared file is not one: both rows build, and the branch merging second resolves any conflict in its own session after the first lands, since no practice source serializes on a file. [Fowler](https://martinfowler.com/articles/branching-patterns.html) has whoever integrates second check health "even if it's a clean merge", and [DORA](https://dora.dev/capabilities/trunk-based-development/) keeps branches to hours with no integration phase.
 
-Review splits by vantage. A reviewer under `role-reviewer` takes a pull
-request's read, first pass included, when three await one (a number set by
-hand), when a diff is too large to hold, or when it changes code or a skill or
-rule body. Prose stays with the orchestrator, which keeps one cross-branch pass
-per wave over file sets, the board, and merge order.
+Review splits by vantage. A reviewer under `role-reviewer` takes every pull
+request's read but a release one's and trades each round with the worker. The
+orchestrator keeps one cross-branch pass per wave over file sets and merge order.
 
 Inbound turns cost the controlling session as well, so weigh the spend before
 widening. A message from one of your other sessions arrives as a new turn
