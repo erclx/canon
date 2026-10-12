@@ -126,7 +126,7 @@ The walk reads the toolkit's own history, so it needs a cloned toolkit. Installe
 
 ## Stop calling the standards verb, once
 
-`canon standards` is gone. Replace each call with `references/<name>.md` in the owning skill, listed in [target standards moved](standards-moved.md).
+`canon standards` is gone. Replace each call with a skill reference from [target standards moved](standards-moved.md). <!-- canon-allow-reference: verb retired -->
 
 ## Keep or delete the wireframes folder, your call
 

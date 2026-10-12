@@ -14,7 +14,6 @@ Use these to discover what's available instead of hardcoding names.
 | Command                           | Returns                                                          |
 | --------------------------------- | ---------------------------------------------------------------- |
 | `canon tooling list --json`       | Stacks, extends chain, dep and script counts                     |
-| `canon standards list --json`     | Standards docs and the paths each governs                        |
 | `canon gov list --json`           | Governance stacks, rule sets, evidence, and unreferenced rules   |
 | `canon gov detect --json`         | Opt-in rules a target's dependencies and paths propose           |
 | `canon claude seeds list --json`  | Seed doc sources with content                                    |
@@ -27,20 +26,6 @@ Use these to discover what's available instead of hardcoding names.
 Every catalog serializes through `JSON.stringify`, so a name carrying a quote
 emits valid JSON. `canon tooling list` previously built
 its output with `printf` and no escaping.
-
-`canon standards list` carries `appliesTo` per standard, the paths that standard's
-`## Scope` statement declares. It holds the backticked paths from the first
-sentence of the statement, the single entry `*` for a standard governing an
-attribute rather than a document type, and an empty array when the statement
-declares nothing a parser can read. A consumer mapping a file to its governing
-standards reads this rather than holding a table of its own, and reports an empty
-array rather than skipping the standard behind it.
-
-Each standard also carries `source`, the labeled path of the copy `canon standards
-<name>` would read: `standards/<name>.md` for the working root and
-`<canon>/standards/<name>.md` for the package corpus. A project's own standard
-lists beside the package's, and one sharing a package name lists once, as the
-project's copy.
 
 `canon claude seeds list` reads the same plan `canon claude init` applies, so the
 listing and the install cannot disagree. It now reports
@@ -115,9 +100,6 @@ canon tooling inject base /path/to/project --configs --seeds
 # Drop managed gitignore entries a manifest no longer declares
 # Prints the number removed on stdout, diagnostics on stderr
 canon tooling prune-gitignore base /path/to/project
-
-# Print one standard. Nothing installs the corpus, so this is how a target reads one
-CANON_NON_INTERACTIVE=1 canon standards slug >slug.md
 
 # Bootstrap a project. Any flag suppresses the confirmation prompt
 CANON_NON_INTERACTIVE=1 canon init --stack node --skip wiki /path/to/project

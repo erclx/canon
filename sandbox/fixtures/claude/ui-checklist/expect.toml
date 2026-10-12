@@ -15,9 +15,9 @@
 # to the slug transform. An arm that staged a copy of its own would resolve the
 # project path and void the premise here, so the absence is asserted where that
 # edit lands.
-absent = [".claude/standards/skill.md", "standards/skill.md"]
+absent = [".claude/skills/git-branch/references/slug.md"]
 
-# The filename is the slug transform in the slug standard applied to branch
+# The filename is the slug transform in the slug reference applied to branch
 # `feat/task-filter`, with the leading type segment dropped. The transform
 # appears in no skill body, so asserting this exact path asserts the citation
 # resolved through the plugin fallback rather than through a project copy.

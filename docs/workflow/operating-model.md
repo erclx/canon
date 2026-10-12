@@ -190,7 +190,7 @@ coordination costs more than the change it was too small.
 
 Two tiers hold work at different altitudes.
 
-- Tasks (`.canon/tasks/`): the active few pulled into the current turn, one file each. Gitignored, high churn. Shape governed by `canon standards tasks`. `priority.md` beside them carries execution order, and `backlog.md` carries what nobody is scheduling, both shaped by `canon standards board`.
+- Tasks (`.canon/tasks/`): the active few pulled into the current turn, one file each. Gitignored, high churn. Shape governed by the `task-board` skill. `priority.md` beside them carries execution order, and `backlog.md` carries what nobody is scheduling, both shaped by the same skill.
 - Edits: a few lines, done immediately with no ceremony.
 
 Nothing above these sequences work into versions. Scope is stated in

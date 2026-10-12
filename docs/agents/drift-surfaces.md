@@ -50,23 +50,19 @@ seed tree rather than from a fixed set of filenames, so a folder added later is
 covered without a code change. Only an exact stem matches, which leaves a
 suffixed variant such as `TASKS-ARCHIVE.md` unreported.
 
-No skill splits the file. The standard governing `replacedBy` is the one the
-`appliesTo` the standards catalog declares, and `canon standards <name>` reads
-its destination shape, so the split is the project's own to make.
+No skill splits the file. The destination's shape lives in the skill that owns
+it, so the split is the project's own to make.
 
 `unmigrated` names a domain sitting at the root layout an older toolkit installed
 to, with nothing at the path the current one reads. It carries `rootPath`,
-`installPath`, and a file count. Without it a project holding `standards/` at its
+`installPath`, and a file count. Without it a project holding an older layout at its
 root reports zero entries for that domain and reads as clean, which is the most
 misleading state the report can produce.
 
-The field currently names no domain. Standards and snippets are the two the
-toolkit ever installed at a project root. Standards closed its install channel
-and snippets retired outright, so a project still holding a root `standards/`
-folder is carrying its own authoring surface rather than an unfinished install.
-Nothing proposes moving it, and no command relocates the content. Move it
-yourself. A leftover `snippets/` folder reports under the reverse walk instead,
-where `docs/target/sync.md` says what to do with it.
+The field currently names no domain. Snippets was the one the toolkit ever
+installed at a project root, and it retired outright. A leftover `snippets/`
+folder reports under the reverse walk instead, where `docs/target/sync.md` says
+what to do with it.
 
 `unmovedSurfaces` names a tracked surface the target still holds at its `.claude/`
 spelling with nothing at the `canon/` one, such as `.claude/REQUIREMENTS.md` or

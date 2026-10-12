@@ -27,15 +27,15 @@ carried, and the sync says so. The sync lists each change by path before it
 applies, and the target's git diff is the record afterwards. `canon sync
 --check` lists the same file as `retired` or `renamed` before any sync runs.
 
-A rule that only routed a path to a standard ships under that standard's name,
-but the tasks, plan, context, and skill rules are hand-written at `canon/` and
-`claude/skill.md`. A held copy of each syncs in place, and the groundwork,
-intake, session, design, readme, and rule copies are deleted as retired. The
-markdown rule is hand-written at `writing/markdown.md`, and a target holding
-`standards/markdown.md` keeps it there as `800-prose` retires.
+A rule that only routed a path to a standard now names the skill that owns
+the guidance. The tasks, plan, context, and skill rules are hand-written at
+`canon/` and `claude/skill.md`. A held copy of each syncs in place, and the
+groundwork, intake, session, design, readme, and rule copies are deleted as
+retired. The markdown rule is hand-written at `writing/markdown.md` and names
+the `markdown-craft` skill, and `800-prose` retires.
 
 A project's own rules belong under `.claude/rules/project/`, where
-`canon standards rule` reserves `900-999` for them, and a rule placed under
+the `create-rule` skill's reference reserves `900-999` for them, and a rule placed under
 `canon/` instead is lost on the next sync.
 
 A sync never deletes a rule that a newer canon release installed. The stamp
@@ -86,12 +86,6 @@ from an anchor a later sync could advance past the rule's own commit. A
 target whose install predates the recorded chain falls back to the same
 band-inference `newRules` uses in `canon sync --check`.
 
-There is no `canon standards sync` and no `canon standards install`. The corpus
-installs into no project, so the domain has nothing in a target to reconcile.
-`canon standards <name>` prints one, resolving `standards/` at the working root
-and then the corpus inside the package, and `canon standards list --json` carries
-the catalog, each entry labeled by the root it was read from.
-
 ## Tooling diff and sync
 
 `canon tooling diff <stack> [target]` is the read-only comparison, and a session asking what differs reaches for it by default. It writes nothing and exits 1 when anything differs and 0 when nothing does, so it gates CI. `--json` adds the scan record on stdout with `ok: true`, and the frame goes to stderr. A refusal such as an unknown stack, an excluded stack, or a toolkit-root target still exits 1 and answers `{ ok: false, reason, message }`, so a caller branches on the record and reads a typo'd stack name as a refusal rather than as drift.
@@ -128,23 +122,6 @@ rather than reading or clearing it, so the target ends up holding both, and
 Claude Code loads both copies of an edited rule at session start. Run `canon
 migrate rule-layout` first to move a target off the flat layout, which reports
 what it would move and applies it under `--write`.
-
-## Standards resolution
-
-`canon standards <name>` writes the document to stdout and the root it answered
-from to stderr, so a caller capturing with `$(...)` receives the document alone.
-A name resolves with or without its `.md` extension, and one that matches no
-standard exits 1 after listing the catalog on stderr.
-
-Two roots answer, in order: `standards/` at the working directory, then the
-corpus inside the package. A project that authors standards of its own uses the
-first, and this repository's own authoring root is the same path. `.claude/standards/`
-is not among them, and no repository writes one any more. A copy an older
-toolkit installed into a target resolves nothing.
-
-There is no citation closure to compute, since nothing is copied. A standard
-that hands a concern to a sibling names it in `Does not govern:` and a reader
-runs the verb again for that name.
 
 ## Governance regen
 
@@ -258,7 +235,6 @@ still prompts. `--skip` takes `wiki`, `governance`, and `records`, and warns
 without aborting on any other value. Records has nothing to run non-interactively,
 since the private backup repository does not exist yet at scaffold time, so its
 step only prints the one-time setup reminder and `--skip records` silences it.
-There is no `--standards`, since no run writes that corpus into the target.
 
 ## Unguarded tooling primitives
 

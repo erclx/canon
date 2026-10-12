@@ -368,14 +368,38 @@ describe('referencesIn', () => {
       ).toEqual([])
     })
 
-    it('should pass a call inside the docs/ corpus', () => {
+    it('should report a call inside the docs/ corpus', () => {
       expect(
         referencesIn(
           'docs/agents/alpha.md',
           'Run `canon standards markdown`.',
           noDocsRoot,
         ),
-      ).toEqual([])
+      ).toEqual([
+        {
+          file: 'docs/agents/alpha.md',
+          line: 1,
+          kind: 'retired-verb',
+          text: 'canon standards',
+        },
+      ])
+    })
+
+    it('should mute a marked call in docs/ without muting a second one beside it', () => {
+      expect(
+        referencesIn(
+          'docs/target/alpha.md',
+          `\`canon standards\` is gone. <!-- ${REFERENCE_MARKER}: says the verb is gone -->\n\nRun \`canon standards markdown\`.`,
+          noDocsRoot,
+        ),
+      ).toEqual([
+        {
+          file: 'docs/target/alpha.md',
+          line: 3,
+          kind: 'retired-verb',
+          text: 'canon standards',
+        },
+      ])
     })
 
     it('should mute a call marked as deliberate', () => {

@@ -22,11 +22,10 @@ Under `--json` the record holds stdout alone and the frame still renders on stde
 
 ## The catalogs it reads
 
-A closed set of five, each with a filesystem reader behind it rather than every list command this CLI ships:
+A closed set of four, each with a filesystem reader behind it rather than every list command this CLI ships:
 
 - `skills`: shipped plugin skills, a folder per `claude/skills/*/SKILL.md`
 - `rules`: authored governance rules, a file per `governance/rules/**/*.md`
-- `standards`: the authoring corpus at `standards/`
 - `commands`: top-level `canon` commands, read off `src/cli.ts`'s registration imports
 - `audits`: the registered set in `src/audits/catalog.ts`, this entry included
 
@@ -36,7 +35,7 @@ The set is closed rather than derived, so widening it is a deliberate change to 
 
 A sentence has to carry an assertion verb (`loads`, `ships`, `carries`, `holds`, `counts`, `totals`, `documents`, `declares`, `installs`, `lists`, `contains`, `comprises`, `authors`), the quantifier `all`, or an article (`the`, `a`, `an`) immediately ahead of the number, which is immediately ahead of the catalog noun, with one optional qualifying word between the number and the noun (`sixty-one shipped skills`). The number reads either as digits or as a spelled-out cardinal through ninety-nine, since this corpus states a catalog size in words as often as in digits.
 
-Nothing stands between the trigger and the number, which is the rule an author writing a new count has to know. It separates `the toolkit authors 60 rules` and `took all 60 rules`, both read, from `a domain of 55 skills` and `denominator of sixty-one shipped skills`, neither of them read. A figure meant as a past state takes a date in the same sentence instead, which reads the sentence past whatever its shape.
+Nothing stands between the trigger and the number, which is the rule an author writing a new count has to know. It separates `the toolkit authors 49 rules` and `took all 49 rules`, both read, from `a domain of 55 skills` and `denominator of sixty-one shipped skills`, neither of them read. A figure meant as a past state takes a date in the same sentence instead, which reads the sentence past whatever its shape.
 
 ## How the trigger set grew
 
@@ -44,7 +43,7 @@ The verb gate is not the first design tried. A bare number next to a catalog nou
 
 The article half was added after a first review of the shipped design found a live miss: the development domain's gating-stages entry stated a stale audit total while the tree held 20, and the verb gate never reached it, since that sentence puts its verb after the noun rather than ahead of the number. Widening the trigger set to admit an article ahead of the number closed that gap.
 
-The quantifier `all` and the verb `authors` joined on the same evidence, two more live misses failing only the trigger test. Allowing words to stand between the trigger and the number was the other candidate, measured and declined: at widths of one, two, and three it reached 77, 104, and 132 sentences against a baseline of 65, missed `took all 60 rules` at every width, and reached `the toolkit authors 60 rules` only at a width admitting the indirect-noun shape below. The two words reach both at 75 sentences and no false positive.
+The quantifier `all` and the verb `authors` joined on the same evidence, two more live misses failing only the trigger test. Allowing words to stand between the trigger and the number was the other candidate, measured and declined: at widths of one, two, and three it reached 77, 104, and 132 sentences against a baseline of 65, missed `took all 49 rules` at every width, and reached `the toolkit authors 49 rules` only at a width admitting the indirect-noun shape below. The two words reach both at 75 sentences and no false positive.
 
 ## The plausibility filter
 
@@ -52,13 +51,13 @@ The verb gate alone still left four false positives standing: `carries two rules
 
 A stated figure is read only when it sits within a factor of two of the true count, in either direction. That bound is tuned against the run this sweep was written against rather than reasoned to from first principles, the way `restated.ts` tunes its own document-frequency ceiling, and it is a property of the scale every catalog here sits at (the tens) rather than a universal rule.
 
-The article gate is looser than the verb list and carries a real cost. Re-running against the tree once it widened caught the live miss above and also misread a passage in the standards destinations entry, since retired, naming a real subset, a standard outside the retired `standards/bundled/` fan-out, as a claim about the whole standards catalog. The qualifying adjective there fills the same optional-word slot `sixty-one shipped skills` needs to match at all, and no syntactic rule tells a qualifier that narrows a catalog from one that only restates it. The finding could not be closed by correcting a figure, since the sentence was true when the corpus held it, only unmarked as a past state, which is the class the date exclusion already reads past. Naming the moment, the same way a context entry dates its own figures, closed it with no change to the matcher.
+The article gate is looser than the verb list and carries a real cost. Re-running against the tree once it widened caught the live miss above and also misread a passage in the standards destinations entry, since retired, naming a real subset, a standard outside the retired bundled fan-out, as a claim about the whole standards catalog. The qualifying adjective there fills the same optional-word slot `sixty-one shipped skills` needs to match at all, and no syntactic rule tells a qualifier that narrows a catalog from one that only restates it. The finding could not be closed by correcting a figure, since the sentence was true when the corpus held it, only unmarked as a past state, which is the class the date exclusion already reads past. Naming the moment, the same way a context entry dates its own figures, closed it with no change to the matcher.
 
 ## What it does not measure
 
 A delta phrased as a transition (`from fourteen to fifteen`), a fraction (`thirteen of sixteen`), and a total reached through an indirect noun (`denominator of sixty-one shipped skills`) are all catalog-size claims this corpus carries, and none matches the trigger shape this reads. Each stays a known gap. The false-positive rate that gated closing them has a measurement behind it now, and what it showed is that the widening these three need is the one that costs a false positive rather than the one that does not.
 
-A second figure in a sentence whose first figure already matched is a fourth gap and a structural one, since one match is taken per catalog per sentence. `authors 60 rules under governance/rules/ and consumes 39 into .claude/rules/` is read for its 60 alone, which is correct here because the two figures name different populations, and a sentence stating one catalog twice would go unread the same way.
+A second figure in a sentence whose first figure already matched is a fourth gap and a structural one, since one match is taken per catalog per sentence. `authors 49 rules under governance/rules/ and consumes 31 into .claude/rules/` is read for its 49 alone, which is correct here because the two figures name different populations, and a sentence stating one catalog twice would go unread the same way.
 
 A calendar date (`2026-08-21`) or a backticked commit reference in the same sentence reads the whole sentence past, since that is how this corpus already marks a figure as a historical record rather than a live claim. The context entries carry a figure this way deliberately, and every one of them stays correct forever.
 
