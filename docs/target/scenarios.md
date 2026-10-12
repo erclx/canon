@@ -46,7 +46,7 @@ canon tooling sync vite-react ./frontend --skip base --write
 canon tooling sync python ./backend --skip base --write
 ```
 
-`--skip base` drops the `base` layer from each subtree sync, so husky, prettier, commitlint, and CI stay single at the repo root. The one exception is base's verify runner, `scripts/verify.ts` and `scripts/verify.json`, which every subtree still receives so it can verify on its own. Without it, every subtree re-drops husky, and since git honors only one `core.hooksPath` the extra hook dirs silently break. Each subtree still gets its own framework configs (eslint, vitest, tsconfig, vite), and its own stack reference reads through `canon tooling reference <stack>`.
+`--skip base` drops the `base` layer from each subtree sync, so husky, oxfmt, commitlint, and CI stay single at the repo root. The one exception is base's verify runner, `scripts/verify.ts` and `scripts/verify.json`, which every subtree still receives so it can verify on its own. Without it, every subtree re-drops husky, and since git honors only one `core.hooksPath` the extra hook dirs silently break. Each subtree still gets its own framework configs (oxlint, vitest, tsconfig, vite), and its own stack reference reads through `canon tooling reference <stack>`.
 
 A sync whose target sits below the git root knows it is writing into a subfolder:
 

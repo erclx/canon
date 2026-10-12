@@ -7,7 +7,12 @@ max_turns = 20
 
 # One marker per stage in the fixed order the skill runs: dev, preview,
 # test:e2e, screenshot. All four exist only when every stage ran.
-paths = [".smoke/dev-started", ".smoke/preview-started", ".smoke/e2e-ran", ".smoke/screenshot-ran"]
+paths = [
+  ".smoke/dev-started",
+  ".smoke/preview-started",
+  ".smoke/e2e-ran",
+  ".smoke/screenshot-ran",
+]
 
 manual = [
   "The dev and preview stages report pass. Semantic: pass/fail for a long-running server has no manifest-exposed port to probe, so the judgment reads backgrounded output for a fatal string rather than a fixed exit code, and no content pattern can assert on a heuristic read of a process this checker does not itself run",

@@ -109,6 +109,7 @@ describe('verifyStack phases', () => {
     expect(outcome.results.map((result) => result.name)).toEqual([
       'Sync',
       'lint:fix',
+      'format',
       'check',
       'test:e2e',
       'screenshot',
@@ -125,6 +126,7 @@ describe('verifyStack phases', () => {
     expect(outcome.results.map((result) => result.name)).toEqual([
       'Sync',
       'lint:fix',
+      'format',
       'check',
     ])
   })
@@ -150,6 +152,7 @@ describe('verifyStack phases', () => {
     expect(outcome.results).toEqual([
       { name: 'Sync', passed: true },
       { name: 'lint:fix', passed: true },
+      { name: 'format', passed: true },
       { name: 'check', passed: false },
       { name: 'test:e2e', passed: true },
     ])

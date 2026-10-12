@@ -21,18 +21,13 @@ paths = ["vendor/lib.js"]
 # that found no populated `vendor` had no submodule to be guarded against, so
 # every assertion below would pass for the wrong reason.
 
-absent = [
-  ".claude/worktrees/grault",
-  "vendor/.claude",
-]
+absent = [".claude/worktrees/grault", "vendor/.claude"]
 
 # The guard stops before entry, so neither path is written. `vendor/.claude` is
 # the sharper of the two: it is where the run lands if the guard is removed and
 # every derivation after it takes the submodule for the project.
 
-reply = [
-  "Inside a submodule",
-]
+reply = ["Inside a submodule"]
 
 manual = [
   "The stop names the superproject by absolute path, which is the sandbox root and moves per machine, so the reply assertion matches the fixed half of the message alone. Semantic: a run that named the wrong root would pass this.",

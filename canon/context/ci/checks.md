@@ -13,7 +13,7 @@ Defined in `.github/workflows/verify.yml`, which runs one step, `bun run check:c
 
 | Stage                   | Command                                                                  | What it asserts                                                                                          |
 | ----------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| Format check            | `bun run check:format`                                                   | prettier and shfmt are clean                                                                             |
+| Format check            | `bun run check:format`                                                   | oxfmt, Prettier over `.astro`, and shfmt are clean                                                       |
 | Indexes                 | `canon indexes regen`                                                    | no `index.md` was committed stale or left untracked                                                      |
 | Consumed copies         | `canon gov regen`                                                        | `.claude/rules` matches source                                                                           |
 | Hero                    | `bun scripts/core/regen-hero.ts --check`                                 | the regen runs clean into a temp folder, and each stamp matches its pair                                 |

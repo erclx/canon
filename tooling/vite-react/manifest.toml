@@ -5,10 +5,7 @@ runtime = "bun"
 scaffold = "bun create vite@latest {{name}} --template react-ts"
 
 [dependencies.dev]
-packages = [
-  "vite",
-  "@vitejs/plugin-react",
-]
+packages = ["vite", "@vitejs/plugin-react"]
 
 [scripts]
 "dev" = "WORKTREE_PORT_OFFSET=$(bash scripts/worktree-port.sh) && export WORKTREE_PORT_OFFSET && vite"

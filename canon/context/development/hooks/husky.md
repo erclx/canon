@@ -9,7 +9,7 @@ description: What each git hook runs, the five post-merge steps and their order,
 
 ### The hooks
 
-- `pre-commit` runs `lint-staged`: prettier on staged `.json`, `.md`, and `.mdc` files, and shfmt and shellcheck on staged `.sh` files.
+- `pre-commit` runs `lint-staged`: oxfmt on staged `.json` and `.md` files, and shfmt and shellcheck on staged `.sh` files.
 - `commit-msg` runs `commitlint` against the conventional commit format
 - `pre-push` runs `bun run check`. A push fails on format drift until `bun run format` runs and the result is committed.
 - `post-merge` runs five steps in order through `canon hooks post-merge`, covered below

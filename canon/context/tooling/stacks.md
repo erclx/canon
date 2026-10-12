@@ -23,7 +23,13 @@ Web's `verify.yml` carries the web chain's own static check, unit test, build, a
 
 Scripts are never overwritten except through `[scripts.override]`, which exists for three cases: scaffolds that ship an anti-pattern by default, toolkit-owned wrappers whose body must stay in lockstep with the shipped shell scripts, and a key whose value the stack owns where the scaffold writes its own. `dev`, `preview`, and `lint` are the third case, since every scaffold that defines one keeps it through an ordinary `[scripts]` entry.
 
-`lint` lives at the `web` level because its value is shared, while `dev` and `preview` differ by framework and live per child. `vite-react`'s raw scaffold ships `"lint": "oxlint"` and a bare `.oxlintrc.json`, and the oxlint it resolves runs under its own default rule set with exit 0, never reaching the stack's ESLint config or its `--max-warnings 0` gate. The override is what forces `lint` back to the stack's eslint invocation.
+`lint` and `lint:fix` live at the `web` level because their value is shared, while `dev` and `preview` differ by framework and live per child. `vite-react`'s raw scaffold ships `"lint": "oxlint"` and a bare `.oxlintrc.json`, and that `lint` exits 0 on warnings. The override forces `--max-warnings 0` over it, and the golden `.oxlintrc.json` at the same path overwrites the scaffold's bare one rather than leaving a second config to override away. `astro` overrides both keys back to `eslint`, since oxlint parses no `.astro` file. `check:format` and `format` sit under base's override for the same reason, so a target synced while the stack ran Prettier switches to oxfmt on its next sync.
+
+### The Oxc tools replace Prettier and ESLint outside astro
+
+Base formats with oxfmt, and `web`, `vite-react`, and `nextjs` lint with oxlint, running `eslint-plugin-check-file` and `eslint-plugin-simple-import-sort` as JS plugins. Prettier cost this repository about 22 s on every check against under 3 s for oxfmt, and the Prettier plugins `web` installed never loaded in a target, since base's `.prettierrc` named none. Keeping Prettier and ESLint everywhere was the alternative, and it lost on that cost.
+
+`astro` keeps both, scoped: oxfmt loads no Prettier plugin and oxlint parses no custom file format, so `.astro` files take Prettier with `prettier-plugin-astro` and ESLint with `eslint-plugin-astro`, and every other file takes oxfmt. `astro`'s `.oxfmtrc.json` repeats base's options, because scan takes a child config over the parent's whole file. Both tools are pinned to exact versions, since oxlint's JS plugin host is alpha. Measured against `e545d8823` on 2026-10-12.
 
 ### The astro scenario switcher
 
@@ -50,9 +56,14 @@ The three goldens that named `@testing-library/jest-dom` take the `/vitest` entr
 - `astro` needs `tooling/web/manifest.toml`'s `typescript` dependency pinned to `^6`. Its scaffold lists no `typescript` of its own, and an unpinned install resolves past `typescript-eslint`'s peer range, throwing before `scripts/verify.ts` reaches `Spelling`.
 - `astro preview` backgrounds itself by default in the release the scaffold resolves, so Playwright's `webServer` meets `Process from config.webServer exited early`. `tooling/astro/configs/playwright.config.ts` sets `env: { ASTRO_PREVIEW_BACKGROUND: '0' }` on its `webServer` block, which keeps Playwright's own process foregrounded without touching the `preview` script a person runs by hand. `vite-react` needs no equivalent, since its `webServer` runs plain `vite` through `bun run dev`.
 
+### The nextjs scaffold
+
+- `nextjs`'s non-interactive scaffold flags are `--skip-install` and `--disable-git`, with no `--turbopack` flag since Turbopack is the default.
+- `--no-agents-md` suppresses the scaffold's `AGENTS.md` and `CLAUDE.md`, which collide with a root `CLAUDE.md`. `--no-linter` suppresses its `eslint.config.mjs` and `lint` script. `--help` lists neither, and both are accepted.
+- `nextjs`'s `typecheck` runs `next typegen && tsc --noEmit`, since the App Router's route-level types generate into a gitignored `.next/types/` absent from a fresh checkout.
+- `nextjs` carries a `[gitignore]` group naming `.next/`, matching `astro`'s, for a target whose `.gitignore` never carried that scaffold default.
+
 ### Other scaffolds and eslint
 
-- `nextjs`'s non-interactive scaffold flags are `--skip-install` and `--disable-git`, with no `--turbopack` flag since Turbopack is the default. `--no-agents-md` suppresses the scaffold-time `AGENTS.md` and `CLAUDE.md` write that would collide with a root `CLAUDE.md`. Its `typecheck` runs `next typegen && tsc --noEmit`, since the App Router's route-level types generate into a gitignored `.next/types/` absent from a fresh checkout.
-- `nextjs` carries a `[gitignore]` group naming `.next/`, matching `astro`'s, for a target whose `.gitignore` never carried that scaffold default.
 - `python`, `go`, and `php` scaffolds write no `package.json`, so each manifest's `[verify] prepare` runs `bun init -y` and installs the dev tools its reference lists before Sync. Without that step the verify would stop after Sync, and a run that reaches the end with no `package.json` fails rather than reporting green. The python and php prepares install over the network on every run, while go's installs `golangci-lint` only when the binary is absent from PATH. A machine missing `uv`, `go`, or `composer` fails at Prepare, where the runner's own probe names what is missing.
-- Verifying against these eslint configs needs `eslint@9` pinned in a scratch install. ESLint 10 dropped the `LegacyESLint` shim that `typescript-eslint@8.69.0`'s bundled `@typescript-eslint/utils` still imports, so it crashes on load.
+- Verifying against astro's eslint config needs `eslint@9` pinned in a scratch install. ESLint 10 dropped the `LegacyESLint` shim that `typescript-eslint@8.69.0`'s bundled `@typescript-eslint/utils` still imports, so it crashes on load.

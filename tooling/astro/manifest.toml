@@ -9,9 +9,18 @@ packages = [
   "astro",
   "@astrojs/react",
   "@astrojs/check",
+  "eslint@^9",
+  "@eslint/js",
+  "typescript-eslint",
+  "eslint-config-prettier",
+  "eslint-plugin-react-hooks",
+  "eslint-plugin-vitest",
+  "globals",
   "eslint-plugin-astro",
   "astro-eslint-parser",
+  "prettier",
   "prettier-plugin-astro",
+  "prettier-plugin-tailwindcss",
 ]
 
 [scripts]
@@ -24,6 +33,10 @@ packages = [
 "card:check" = "bash scripts/check-card-exclusion.sh"
 
 [scripts.override]
+"lint" = "eslint . --max-warnings 0"
+"lint:fix" = "eslint . --fix --max-warnings 0"
+"check:format" = "oxfmt --check . && prettier --check --log-level warn '**/*.astro'"
+"format" = "oxfmt . && prettier --write --log-level warn '**/*.astro'"
 "screenshot" = "PREVIEW_PORT=$(bash scripts/worktree-port.sh 4321) && export PREVIEW_PORT && bash scripts/screenshot.sh"
 "readme-screenshot" = "PREVIEW_PORT=$(bash scripts/worktree-port.sh 4321) && export PREVIEW_PORT && bash scripts/readme-screenshot.sh"
 "dev" = "WORKTREE_PORT_OFFSET=$(bash scripts/worktree-port.sh) && export WORKTREE_PORT_OFFSET && astro dev"

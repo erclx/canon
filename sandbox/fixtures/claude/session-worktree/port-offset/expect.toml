@@ -34,10 +34,7 @@ paths = [
 # The dependency line above it lands on the last of Step 6's four bullets, since
 # the arm seeds no manifest inside the worktree. No other arm reaches that
 # bullet, which is the one that keeps the step honest on a stack it cannot read.
-reply = [
-  "Port offset 27",
-  "No package manifest",
-]
+reply = ["Port offset 27", "No package manifest"]
 
 manual = [
   "The refusal branch of the port line is unreachable from this skill. Unwired: Step 4 registers whatever it creates, so a fresh entry always lands on a worktree the helper answers for, and no arm can stage the entry onto the stale sibling.",

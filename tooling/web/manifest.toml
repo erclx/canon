@@ -6,16 +6,9 @@ scaffold = ""
 
 [dependencies.dev]
 packages = [
-  "eslint@^9",
-  "eslint-config-prettier",
+  "oxlint@1.87.0",
   "eslint-plugin-check-file",
-  "eslint-plugin-react-hooks",
-  "eslint-plugin-react-refresh",
   "eslint-plugin-simple-import-sort",
-  "eslint-plugin-vitest",
-  "globals",
-  "typescript-eslint",
-  "@eslint/js",
   "typescript@^6",
   "react",
   "react-dom",
@@ -32,12 +25,9 @@ packages = [
   "@playwright/test",
   "tailwindcss",
   "@tailwindcss/vite",
-  "prettier-plugin-tailwindcss",
 ]
 
 [scripts]
-"lint" = "eslint . --max-warnings 0"
-"lint:fix" = "eslint . --fix --max-warnings 0"
 "test" = "vitest"
 "test:run" = "vitest run --reporter=verbose"
 "test:ui" = "vitest --ui"
@@ -50,12 +40,18 @@ packages = [
 "smoke:prod" = "bun e2e/screenshot.ts --check-console-clean --require-base-url"
 
 [scripts.override]
-"lint" = "eslint . --max-warnings 0"
+"lint" = "oxlint --max-warnings 0"
+"lint:fix" = "oxlint --fix --max-warnings 0"
 "screenshot" = "PREVIEW_PORT=$(bash scripts/worktree-port.sh 4173) && export PREVIEW_PORT && bash scripts/screenshot.sh"
 "readme-screenshot" = "PREVIEW_PORT=$(bash scripts/worktree-port.sh 4173) && export PREVIEW_PORT && bash scripts/readme-screenshot.sh"
 
 [gitignore]
 "# Build" = ["dist/"]
 "# Coverage" = ["coverage/"]
-"# Playwright" = ["test-results/", "playwright-report/", "blob-report/", "playwright/.cache/"]
+"# Playwright" = [
+  "test-results/",
+  "playwright-report/",
+  "blob-report/",
+  "playwright/.cache/",
+]
 "# Screenshots" = ["screenshots/"]

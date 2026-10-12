@@ -13,7 +13,7 @@ description: The end-to-end tooling verify, which stack to verify a parent-layer
 
 ### What the verify run does
 
-The verb scaffolds fresh into `.canon/tmp/runs/verify-<stack>/`, runs the optional `[verify] prepare` hook, invokes `canon tooling sync <stack> . --write`, then runs `bun run lint:fix`, `bun run check`, `bun run test:e2e`, and `bun run screenshot`, asserts screenshot artifacts, and reports a pass and fail matrix. A failed phase is recorded and the run carries on, so the matrix lists every phase. A scaffold that still has no `package.json` after Sync fails the run, since no phase past Sync could reach it. The tmp dir removes itself on success. Pass `--keep` to inspect a green run, and a failing run is preserved on its own.
+The verb scaffolds fresh into `.canon/tmp/runs/verify-<stack>/`, runs the optional `[verify] prepare` hook, invokes `canon tooling sync <stack> . --write`, then runs `bun run lint:fix`, `bun run format`, `bun run check`, `bun run test:e2e`, and `bun run screenshot`, asserts screenshot artifacts, and reports a pass and fail matrix. A failed phase is recorded and the run carries on, so the matrix lists every phase. A scaffold that still has no `package.json` after Sync fails the run, since no phase past Sync could reach it. The tmp dir removes itself on success. Pass `--keep` to inspect a green run, and a failing run is preserved on its own.
 
 Run it after any change to `tooling/<stack>/configs/`, a manifest, or the sync logic in `src/tooling/`. `src/tooling/verify-stack.ts` sets `CI` on every phase, so the `isCI` branches in the two shipped `playwright.config.ts` files run the way a target's CI job runs them.
 

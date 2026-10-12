@@ -10,19 +10,19 @@ per_root = ["scripts/verify.ts", "scripts/verify.json"]
 
 [dependencies.dev]
 packages = [
-    "prettier",
-    "husky",
-    "@commitlint/cli",
-    "@commitlint/config-conventional",
+  "oxfmt@0.72.0",
+  "husky",
+  "@commitlint/cli",
+  "@commitlint/config-conventional",
 ]
 
 [scripts]
-"check:format" = "prettier --check --log-level warn --ignore-path .gitignore --ignore-path .prettierignore ."
-"format" = "prettier --write --log-level warn --ignore-path .gitignore --ignore-path .prettierignore ."
 "prepare" = "husky"
 
 [scripts.override]
 "check" = "bun scripts/verify.ts"
+"check:format" = "oxfmt --check ."
+"format" = "oxfmt ."
 
 [gitignore]
 "# System" = [".DS_Store"]

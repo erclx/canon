@@ -10,10 +10,7 @@
 # component test instead. This asserts the with arm only. The without arm is
 # scored by reading the files it wrote, since it fails this check by design.
 
-paths = [
-  "src/pages/Orders.*.tsx",
-  "e2e/orders.spec.ts",
-]
+paths = ["src/pages/Orders.*.tsx", "e2e/orders.spec.ts"]
 
 write_scope = [
   "src/**",

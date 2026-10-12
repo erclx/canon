@@ -25,11 +25,11 @@ Owns the local development loop: toolchain setup, the run commands, and the git 
 | ----------------------- | ------------------------------------------------------------------------------------------------ |
 | `bun run check`         | Verification scoped to changed files. Fails on format drift, regenerates indexes, asserts clean. |
 | `bun run check:ci`      | Every stage via `--all`, the run CI does. Still regenerates.                                     |
-| `bun run check:format`  | Read-only prettier and shfmt format check.                                                       |
+| `bun run check:format`  | Read-only oxfmt, Prettier for `.astro`, and shfmt format check.                                  |
 | `bun run check:shell`   | Read-only shellcheck against `scripts/`, `tooling/`, and `.claude/hooks/`.                       |
 | `bun run check:types`   | Read-only `tsc --noEmit` against `src/`.                                                         |
 | `bun run check:install` | Clones the repo to tmp and asserts `canon init` lands a fresh scaffold.                          |
-| `bun run format`        | Auto-fix prettier and shfmt formatting.                                                          |
+| `bun run format`        | Auto-fix oxfmt, Prettier for `.astro`, and shfmt formatting.                                     |
 | `bun run clean`         | Wipe `node_modules/`, clear bun cache, reinstall.                                                |
 | `bun run update`        | Interactive `bun update` followed by verification.                                               |
 

@@ -4,7 +4,7 @@
 
 ## Overview
 
-The astro stack covers Astro + TypeScript projects: content sites, marketing sites, blogs, and docs. Interactive islands use React only. Output is static. It ships golden configs for `astro.config.mjs`, `vitest.config.ts` (using `getViteConfig` from `astro/config`), `playwright.config.ts` (preview-server backed), a `tsconfig.json` that extends `astro/tsconfigs/strict`, and an `eslint.config.js` that overrides the web layer's config to include `eslint-plugin-astro` and exclude React-refresh rules.
+The astro stack covers Astro + TypeScript projects: content sites, marketing sites, blogs, and docs. Interactive islands use React only. Output is static. It ships golden configs for `astro.config.mjs`, `vitest.config.ts` (using `getViteConfig` from `astro/config`), `playwright.config.ts` (preview-server backed), a `tsconfig.json` that extends `astro/tsconfigs/strict`, an `eslint.config.js` that keeps ESLint for this stack alone, and a `.prettierrc` that formats `.astro` files alone.
 
 ## Scaffold checklist
 
@@ -13,7 +13,7 @@ The astro stack covers Astro + TypeScript projects: content sites, marketing sit
 3. Install web tooling: `canon tooling sync web . --write`
 4. Install astro adapter: `canon tooling sync astro . --write`
 5. Extend the `ci` and `development` context entries under `canon/context/` per the web reference's extend sections plus the astro rows below.
-6. Run `bun run lint:fix` then `bun run check`.
+6. Run `bun run lint:fix`, then `bun run format`, then `bun run check`.
 
 ## What ships as golden configs
 
@@ -22,7 +22,7 @@ The astro stack covers Astro + TypeScript projects: content sites, marketing sit
 - `playwright.config.ts`: all browsers, `webServer` runs `bun run build && bun run preview` on port `4321` plus `WORKTREE_PORT_OFFSET`, `reuseExistingServer: false`. Astro's dev/prod gap is wide (MDX, island hydration, asset optimization), so E2E always tests the built `dist/`. `DIST_PREBUILT` set in the environment drops the `build` half, running `bun run preview` alone against a `dist/` a prior CI job already produced.
 - `tsconfig.json`: extends `astro/tsconfigs/strict`, adds `skipLibCheck`, `vitest/globals` and `@testing-library/jest-dom/vitest` in types, `@/` paths.
 - `card.config.mjs`, `card-src/pages/og-card.astro`, and `scripts/check-card-exclusion.sh`: the social card route, its structural build exclusion, and the check enforcing it. See `## Social card route` below.
-- `eslint.config.js`: overrides the web layer. Adds `eslint-plugin-astro` (`.astro` parser via `astro-eslint-parser`). React-hooks scoped to `.jsx`/`.tsx` only (`.astro` is not React). The shared block's `files` selector includes `.astro`, so `check-file/filename-naming-convention` reaches `.ts`, `.tsx`, and `.astro` under `KEBAB_CASE`, overriding Astro's own PascalCase component convention deliberately, on the ground that a component's name in markup comes from the import binding rather than the filename. `.js` and `.jsx` stay out of the rule's own pattern, matching `web` and `nextjs`. `check-file/folder-naming-convention` reaches every `src/**` folder except `__tests__` and the whole `pages/` subtree, which carries its own off-block for the bracket-named dynamic routes and nested slug folders Astro's file-based routing produces. See `canon/context/tooling/stacks.md` for the measurement.
+- `eslint.config.js`: this stack's own flat config, since the web layer lints with oxlint, which parses no `.astro` file. Adds `eslint-plugin-astro` (`.astro` parser via `astro-eslint-parser`). React-hooks scoped to `.jsx`/`.tsx` only (`.astro` is not React). The shared block's `files` selector includes `.astro`, so `check-file/filename-naming-convention` reaches `.ts`, `.tsx`, and `.astro` under `KEBAB_CASE`, overriding Astro's own PascalCase component convention deliberately, on the ground that a component's name in markup comes from the import binding rather than the filename. `.js` and `.jsx` stay out of the rule's own pattern, matching `web` and `nextjs`. `check-file/folder-naming-convention` reaches every `src/**` folder except `__tests__` and the whole `pages/` subtree, which carries its own off-block for the bracket-named dynamic routes and nested slug folders Astro's file-based routing produces. See `canon/context/tooling/stacks.md` for the measurement.
 
 ## Typecheck
 
@@ -34,9 +34,19 @@ Unit-test React island components (`.tsx`) only. Do not test `.astro` files. Pag
 
 Vitest is pinned to `^5` in the web manifest, which supports the Vite 8 that Astro 7 bundles. The earlier `^3` pin avoided `^4` bundling rolldown-vite, which ignored the esbuild JSX config in `@vitejs/plugin-react`. Astro now bundles Vite 8 itself, so that conflict no longer applies.
 
-## Prettier (extend)
+## Formatting (extend)
 
-Add `prettier-plugin-astro` first in plugins, then `prettier-plugin-tailwindcss` last (per its docs). Add a parser override for `.astro` files.
+- Format `.astro` files with Prettier and every other file with oxfmt. oxfmt loads no Prettier plugin, so it cannot parse `.astro`.
+- Load `prettier-plugin-astro` first in `.prettierrc`'s plugins, then `prettier-plugin-tailwindcss` last (per its docs), with a parser override for `.astro` files.
+- Ignore `**/*.astro` in this stack's `.oxfmtrc.json`, so the two formatters never touch one file.
+- Copy every other option from base's `.oxfmtrc.json` into this one by hand. Scan takes the child config over the parent's whole file, so a change to base's options is lost here until it is copied.
+- Override `check:format` and `format` to run oxfmt, then Prettier over `**/*.astro`.
+
+## ESLint
+
+- Override `lint` and `lint:fix` back to `eslint . --max-warnings 0`, since the web layer sets them to oxlint.
+- Install the ESLint packages here (`eslint@^9`, `@eslint/js`, `typescript-eslint`, `eslint-config-prettier`, `eslint-plugin-react-hooks`, `eslint-plugin-vitest`, `globals`), since the web layer no longer ships them. Pin `eslint@^9`: ESLint 10 dropped the `LegacyESLint` shim `typescript-eslint@8` still imports.
+- Expect the web layer's `.oxlintrc.json` in the target. Nothing runs it here.
 
 ## Development docs (extend)
 

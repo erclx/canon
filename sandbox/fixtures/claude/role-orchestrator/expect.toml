@@ -35,10 +35,7 @@ max_turns = 30
 # session, derived from the branch, and the scenario's branch follows whatever
 # the machine's `git init` inherits. A single spelling would pass vacuously on
 # every machine deriving another.
-absent = [
-  ".canon/plans/feature-streak-view.md",
-  ".canon/tasks/session-*.md",
-]
+absent = [".canon/plans/feature-streak-view.md", ".canon/tasks/session-*.md"]
 
 # Two of the scenario's five expectations reach a load-bearing token. Each pin is
 # a positive, since a negative substring passes on every reply that phrases the
@@ -71,11 +68,7 @@ absent = [
 # `Next:` is the output contract's last slot. It asserts the slot rather than the
 # singleness the scenario expects or the route it names, both of which the manual
 # entries below carry.
-reply = [
-  ".canon/plans/feature-log-entry.md",
-  "auto-ship",
-  "Next:",
-]
+reply = [".canon/plans/feature-log-entry.md", "auto-ship", "Next:"]
 
 manual = [
   "The reply names no active version at all, since the fixture stages no file stating one. Semantic: a negative, and a substring cannot reach a version string the run invented from the task filenames.",

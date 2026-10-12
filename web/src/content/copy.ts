@@ -83,7 +83,7 @@ export const fold = {
     tooling: {
       title: 'Base tooling',
       unit: 'files',
-      detail: 'editorconfig, prettier, commitlint, husky hooks, CI',
+      detail: 'editorconfig, oxfmt, commitlint, husky hooks, CI',
     },
     seeds: {
       title: 'Claude workflow',

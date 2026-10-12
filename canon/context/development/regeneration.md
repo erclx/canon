@@ -25,7 +25,7 @@ The producer clears `.claude/rules/` before installing, so a rule dropped from t
 
 ### Sample content on disk
 
-Sample content committed at its real filename gets rewritten by every repo-wide write pass that claims that filename. An `index.md` or `package.json` fixture on disk collides with `canon indexes regen`, which rebuilds any `index.md` from sibling frontmatter, and with prettier, which reformats JSON and can strip a leading blank line an append fixture depends on. Store such content under a `.fixture` suffix stripped on copy, which beats ignore-file entries and beats pruning a shared walker because it changes nothing for that walker's consumers.
+Sample content committed at its real filename gets rewritten by every repo-wide write pass that claims that filename. An `index.md` or `package.json` fixture on disk collides with `canon indexes regen`, which rebuilds any `index.md` from sibling frontmatter, and with oxfmt, which reformats JSON and can strip a leading blank line an append fixture depends on. Store such content under a `.fixture` suffix stripped on copy, which beats ignore-file entries and beats pruning a shared walker because it changes nothing for that walker's consumers.
 
 ### Hero
 
@@ -67,7 +67,7 @@ The assert compares against the index, the way the Consumed copies stage above d
 
 The frame carries no version number. `package.json` is bumped on `main` by the release tooling, and a pull request builds against the merge commit, so an embedded version drifts on every open branch the moment a release lands and the stage then fails for work that touched nothing. Counts have the same shape and are kept, because a catalog change is what the stage exists to catch and the branch that changes a catalog is the one that goes red.
 
-Every `assets/captures/*.html` is in `.prettierignore`, because the stage and the formatter would otherwise both own each one and serialize it differently. `bun run format` is the second writer and rewrites the file, the Hero stage rewrites it back, and the drift assert then reports against whichever version was committed last. A committed formatter version is exactly what would deadlock the stage. One writer per generated file is the rule the entry beside it already applies to the release tooling.
+Every `assets/captures/*.html` is in the `ignorePatterns` of `.oxfmtrc.jsonc`, because the stage and the formatter would otherwise both own each one and serialize it differently. `bun run format` is the second writer and rewrites the file, the Hero stage rewrites it back, and the drift assert then reports against whichever version was committed last. A committed formatter version is exactly what would deadlock the stage. One writer per generated file is the rule the entry beside it already applies to the release tooling.
 
 That entry is a folder glob rather than a list of frames. The script writes whatever templates the folder holds, so a frame added under a named-file entry arrives with two writers and shows no sign of it until their output first disagrees. Templates keep their format gate, which the glob leaves alone because a template ends in `.tmpl`.
 

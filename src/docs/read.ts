@@ -149,29 +149,23 @@ export function walkEntries(root: string, dir: string): WalkedEntry[] {
   const cwd = join(root, dir)
   if (!existsSync(cwd)) return []
 
-  const files = markdownNames(cwd).map(
-    (name): WalkedEntry => ({
-      name,
-      kind: 'file',
-      rel: join(dir, `${name}.md`),
-    }),
-  )
+  const files = markdownNames(cwd).map((name): WalkedEntry => ({
+    name,
+    kind: 'file',
+    rel: join(dir, `${name}.md`),
+  }))
   const folders = catalogedFolders(cwd)
-  const split = folders.map(
-    (folder): WalkedEntry => ({
-      name: folder,
-      kind: 'folder',
-      rel: join(dir, folder, `${INDEX_TOPIC}.md`),
-    }),
-  )
+  const split = folders.map((folder): WalkedEntry => ({
+    name: folder,
+    kind: 'folder',
+    rel: join(dir, folder, `${INDEX_TOPIC}.md`),
+  }))
   const leaves = folders.flatMap((folder) =>
-    markdownNames(join(cwd, folder)).map(
-      (name): WalkedEntry => ({
-        name,
-        kind: 'leaf',
-        rel: join(dir, folder, `${name}.md`),
-      }),
-    ),
+    markdownNames(join(cwd, folder)).map((name): WalkedEntry => ({
+      name,
+      kind: 'leaf',
+      rel: join(dir, folder, `${name}.md`),
+    })),
   )
 
   return [...files, ...split, ...leaves]

@@ -58,10 +58,11 @@ exit code is the whole verdict.
 | Order | Script      | Skip if                     |
 | ----- | ----------- | --------------------------- |
 | 1     | `lint:fix`  | absent                      |
-| 2     | `typecheck` | absent                      |
-| 3     | `check`     | absent                      |
-| 4     | `test:run`  | absent, fall back to `test` |
-| 5     | `build`     | absent                      |
+| 2     | `format`    | absent                      |
+| 3     | `typecheck` | absent                      |
+| 4     | `check`     | absent                      |
+| 5     | `test:run`  | absent, fall back to `test` |
+| 6     | `build`     | absent                      |
 
 Do not run composite scripts like `check:full`. Do not run `dev`, `preview`,
 `test:e2e`, `test:ui`, or `screenshot` at this depth. They belong to `deep`
@@ -80,7 +81,7 @@ server, and whether the screenshot harness produces output.
 | 3     | `test:e2e`   | absent  | leaf script: exit code  |
 | 4     | `screenshot` | absent  | leaf script: exit code  |
 
-`deep` runs the four above and not the five leaf scripts, which the default
+`deep` runs the four above and not the six leaf scripts, which the default
 depth already covers. The two sets are disjoint, so running both depths runs
 every declared script exactly once.
 

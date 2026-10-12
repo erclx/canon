@@ -53,7 +53,7 @@ describe('injectManifest', () => {
 
     await injectManifest(resolveChain(PROJECT_ROOT, 'web'), target)
 
-    expect(stderr()).toContain('lint:fix')
+    expect(stderr()).toContain('test:run')
   })
 
   it('should name a declared dev dependency it could not install without a package.json', async () => {
@@ -77,11 +77,11 @@ describe('injectSeeds over an existing destination', () => {
   it('should leave the file byte for byte', async () => {
     captureStderr()
     const mine = 'mine-only\n'
-    writeFileSync(join(target, '.prettierignore'), mine)
+    writeFileSync(join(target, '.lintstagedrc'), mine)
 
     await injectSeeds(resolveChain(PROJECT_ROOT, 'base'), target)
 
-    expect(readFileSync(join(target, '.prettierignore'), 'utf8')).toBe(mine)
+    expect(readFileSync(join(target, '.lintstagedrc'), 'utf8')).toBe(mine)
   })
 
   it('should write the seed when the destination is missing', async () => {
@@ -89,9 +89,9 @@ describe('injectSeeds over an existing destination', () => {
 
     await injectSeeds(resolveChain(PROJECT_ROOT, 'base'), target)
 
-    expect(readFileSync(join(target, '.prettierignore'), 'utf8')).toBe(
+    expect(readFileSync(join(target, '.lintstagedrc'), 'utf8')).toBe(
       readFileSync(
-        join(PROJECT_ROOT, 'tooling/base/seeds/.prettierignore'),
+        join(PROJECT_ROOT, 'tooling/base/seeds/.lintstagedrc'),
         'utf8',
       ),
     )

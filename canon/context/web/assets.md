@@ -42,7 +42,9 @@ The two captures under `web/public/evidence/pr-1699/` are fixed renders of one p
 
 ### Build-time previews
 
-`bun run web:build` runs `web:previews`, which is `scripts/core/regen-web-previews.ts`, between `web:favicon` and `astro build`. It writes `web/public/previews/<name>/{index.html,design.css}`, committed rather than gitignored, and the merge beat embeds the design-token render live through an `<iframe>` as the change that session merged. The `teach-workspace` render is written and embedded nowhere, since the page carries the session and nothing else. The folder is in `.prettierignore` and carries no format gate, so the script is its only writer. Prettier over the same files rewrote the raw render and left `web:build` and `bun run check` each producing a file the other disagreed with.
+`bun run web:build` runs `web:previews`, which is `scripts/core/regen-web-previews.ts`, between `web:favicon` and `astro build`. It writes `web/public/previews/<name>/{index.html,design.css}`, committed rather than gitignored, and the merge beat embeds the design-token render live through an `<iframe>` as the change that session merged. The `teach-workspace` render is written and embedded nowhere, since the page carries the session and nothing else.
+
+The folder is in the `ignorePatterns` of `.oxfmtrc.jsonc` and carries no format gate, so the script is its only writer. A formatter over the same files rewrote the raw render and left `web:build` and `bun run check` each producing a file the other disagreed with.
 
 The `teach-workspace` preview copies only rendered HTML and CSS, never a workspace's own `MISSION.md`, `RESOURCES.md`, or `GLOSSARY.md`, whose links are relative to `.canon/teach/` and resolve to nothing once copied under `web/public/`. It skips the whole regeneration when `.canon/teach/<slug>` is absent, since that folder is gitignored session scratch and no CI machine has it.
 

@@ -13,10 +13,7 @@
 # The short-sha segment is derived from the PR's head commit, so only the
 # prefix is fixed. The evidence path is what proves the pass wrote an image out
 # through `git show` rather than reading the markup and guessing.
-paths = [
-  ".canon/tmp/pr/review/body-*.md",
-  ".canon/tmp/pr/review/evidence/*/**",
-]
+paths = [".canon/tmp/pr/review/body-*.md", ".canon/tmp/pr/review/evidence/*/**"]
 
 write_scope = [".canon/tmp/pr/review/**"]
 

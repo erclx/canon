@@ -22,9 +22,9 @@ Owns the GitHub Actions workflow that gates a merge: which events start a run, a
 
 Defined in `.github/workflows/verify.yml`. All jobs must pass before merge.
 
-| Check  | Command                | What it asserts   |
-| ------ | ---------------------- | ----------------- |
-| Format | `bun run check:format` | prettier is clean |
+| Check  | Command                | What it asserts |
+| ------ | ---------------------- | --------------- |
+| Format | `bun run check:format` | oxfmt is clean  |
 
 ### Running CI locally
 

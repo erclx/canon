@@ -41,7 +41,12 @@
 # The plugin surface: shipped skills, toolkit-internal skills, and the
 # marketplace entry a consumer adds.
 skills = ["claude/skills/", ".claude/skills/", ".claude-plugin/"]
-governance = ["governance/", ".claude/rules/", "internal/rules/", "internal/governance.toml"]
+governance = [
+  "governance/",
+  ".claude/rules/",
+  "internal/rules/",
+  "internal/governance.toml",
+]
 # `internal/standards/` holds the one convention governing
 # `tooling/<stack>/reference.md`, so tooling is its subject.
 tooling = ["tooling/", "internal/standards/", ".claude/internal/standards/"]
@@ -60,7 +65,13 @@ web = ["web/"]
 # `scripts/core/` reaches the whole folder, maintenance scripts included, and
 # the two hook families enforce what the verify gate cannot. `.claude/settings.json`
 # registers those hooks, so it rides the same row.
-ci = [".github/", "scripts/core/", ".husky/", ".claude/hooks/", ".claude/settings.json"]
+ci = [
+  ".github/",
+  "scripts/core/",
+  ".husky/",
+  ".claude/hooks/",
+  ".claude/settings.json",
+]
 # Internal narrative and the always-loaded record, which `docs` does not reach.
 # `assets/brand/` rides here rather than under `generated` or `rides-with-generated`,
 # since a mark under it is hand-authored source `canon/DESIGN.md`'s own
@@ -138,4 +149,9 @@ rides-with-generated = [
 ]
 # Formatting configuration nobody reviews for behavior, and no row above owns
 # its subject.
-formatting = [".prettierignore"]
+formatting = [
+  ".oxfmtrc.jsonc",
+  ".prettierrc",
+  ".prettierignore",
+  ".lintstagedrc",
+]

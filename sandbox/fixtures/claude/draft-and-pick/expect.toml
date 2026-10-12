@@ -53,7 +53,13 @@ paths = ["index.html", "canon/DESIGN.md"]
 # the picked round's arms lands there as the durable revert record, before the
 # round pages are deleted from `.canon/canvas/`. The composite render taken at
 # step 3 lands in session scratch, which `.canon/tmp/**` admits.
-write_scope = [".canon/canvas/**", ".canon/tmp/**", ".canon/picks/**", "index.html", "canon/DESIGN.md"]
+write_scope = [
+  ".canon/canvas/**",
+  ".canon/tmp/**",
+  ".canon/picks/**",
+  "index.html",
+  "canon/DESIGN.md",
+]
 
 # Declared at the runner default rather than at the observation. One run bounds
 # nothing here, since the cost follows how many arms the run drafts and how much

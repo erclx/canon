@@ -827,14 +827,12 @@ export async function runEquivalence(
     const records: ArmRecord[] = [
       ...offline,
       ...anchored,
-      ...skipped.map(
-        (arm): ArmRecord => ({
-          arm: armKey(arm),
-          state: 'skipped-anchor',
-          differs: [],
-          masked: [],
-        }),
-      ),
+      ...skipped.map((arm): ArmRecord => ({
+        arm: armKey(arm),
+        state: 'skipped-anchor',
+        differs: [],
+        masked: [],
+      })),
     ].sort((x, y) => x.arm.localeCompare(y.arm))
 
     const counts: Record<ArmState, number> = {

@@ -13,7 +13,12 @@ scaffold = "uv init --package {{name}}"
 "test:cov" = "uv run pytest --cov --cov-report=term-missing --cov-report=html"
 
 [gitignore]
-"# Python" = [".pytest_cache/", ".mypy_cache/", ".ruff_cache/", ".coverage_cache/"]
+"# Python" = [
+  ".pytest_cache/",
+  ".mypy_cache/",
+  ".ruff_cache/",
+  ".coverage_cache/",
+]
 
 [verify]
 prepare = "bun init -y && uv add --dev ruff mypy pytest pytest-cov && uv sync"

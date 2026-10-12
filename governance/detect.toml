@@ -27,7 +27,12 @@ files = [".github/workflows"]
 
 ["dependencies"]
 deps = []
-files = ["**/package.json", "**/pyproject.toml", "**/go.mod", "**/composer.json"]
+files = [
+  "**/package.json",
+  "**/pyproject.toml",
+  "**/go.mod",
+  "**/composer.json",
+]
 
 ["config-comments"]
 deps = []
