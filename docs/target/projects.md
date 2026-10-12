@@ -38,7 +38,7 @@ The `canon` CLI is separate. Twenty skills invoke it in a command position, and 
 bun install --global @erclx/canon
 ```
 
-The package ships the catalogs the CLI reads, not only `src/`, so `canon init` resolves governance, tooling, and the seeds from wherever the package landed, and `canon standards <name>` reads the corpus from there too.
+The package ships the catalogs the CLI reads, not only `src/`, so `canon init` resolves governance, tooling, and the seeds from wherever the package landed.
 
 Pointing Claude Code at a checkout stays the development path, where a local skill edit overrides the installed copy for that session.
 
@@ -100,7 +100,7 @@ Run `canon tooling list --json` and `canon gov list --json` to see the current c
 
 `canon init` installs base tooling, Claude workflow, and governance, and scaffolds `.claude/wiki/`. Governance defaults to the `base` stack, so a bare init carries the rules that route a project. Pass `--stack <name>` to install a language stack instead.
 
-No standard is written into the project. Each governance rule's authority line names `canon standards <name>`, which answers from the corpus inside the CLI's own package, and every toolkit skill names the copy in its own plugin root. `canon markdown audit` needs no standard at all, its ban set and checkpoints shipping with the package as data.
+No reference corpus is written into the project. Each governance rule carries its operative lines inline and names the plugin skill that owns the rest, and every toolkit skill reads the references in its own plugin root. A target that installs governance without the plugin gets the inline lines alone, since no verb answers for a skill's reference there. `canon markdown audit` needs no reference at all, its ban set and checkpoints shipping with the package as data.
 
 `governance` and `wiki` are skippable:
 
@@ -117,7 +117,7 @@ When a new need appears after scaffold, install the one domain without re-runnin
 - Project-specific rule the toolkit does not ship: invoke `canon:create-rule`. It scaffolds a rule into `.claude/rules/project/` with a non-colliding number, and `canon gov sync` leaves it untouched. A rule placed under `.claude/rules/canon/` instead is deleted on the next sync, since that folder belongs to the toolkit.
 - Index.md system for a markdown-heavy folder that emerged: invoke `canon:target-setup indexes`
 
-Standards are not on that list, and there is nothing to add for them. They install into no project, by default or by flag, so a session reads one with `canon standards <name>`, resolving against the toolkit rather than a project copy. A project holding a `.claude/standards/` folder from an older toolkit is carrying a stale artifact nothing reads, and deleting it is safe. The toolkit retired snippets entirely, and [target migrations](migrations.md) covers the `.claude/snippets/` folder an older one left behind.
+Skill references are not on that list, and there is nothing to add for them. They install into no project, by default or by flag, and a session reads one from the plugin that loaded the skill rather than from a project copy. A project holding a `standards` folder under `.claude/` from an older toolkit is carrying a stale artifact nothing reads, and deleting it is safe. The toolkit retired snippets entirely, and [target migrations](migrations.md) covers the `.claude/snippets/` folder an older one left behind.
 
 Per-domain mechanics live in the corresponding `docs/<domain>.md`. The skill body in `claude/skills/<skill>/SKILL.md` covers detection and preview.
 

@@ -130,4 +130,4 @@ Skills branch on the findings rather than on the exit code:
 canon tasks validate --json | jq -r '.findings[] | "\(.kind): \(.subject)"'
 ```
 
-For the board format, see `claude/skills/task-board/references/board.md`. For the `Pull request:` line and the archive rules, see `claude/skills/task-board/references/tasks.md`.
+The `task-board` skill's `board.md` and `tasks.md` references carry the board format, the `Pull request:` line, and the archive rules.

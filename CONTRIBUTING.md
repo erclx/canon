@@ -22,7 +22,7 @@ The [development notes](canon/context/development/index.md) carry the full scrip
 
 ## Where to author
 
-Standards author at `standards/` in the repository root. They do not install into a target project. A session reads a standard with `canon standards <name>`.
+Author a skill's reference under `claude/skills/*/references/`, where it ships inside the plugin, and toolkit-only content under `internal/`. Neither installs into a target project as a copy.
 
 Neither carries a consumed copy under `.claude/`, so the file at its authoring root is the only one to edit and the only one to cite from a file staying in this repository.
 
