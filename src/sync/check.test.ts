@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gitEnv } from '@/git/env'
 import {
-  baseBands,
+  baseFolders,
   buildToolingReport,
   type CheckReport,
   countStates,
@@ -509,65 +509,65 @@ describe('readInstalledRules', () => {
     ])
   })
 
-  it('should name the band folder each rule sits in', () => {
+  it('should name the rule folder each rule sits in', () => {
     install(join('core', '000-constitution.md'))
     install(join('lang', 'typescript.md'))
 
-    expect([...readInstalledRules(TARGET).bands].sort()).toEqual([
+    expect([...readInstalledRules(TARGET).folders].sort()).toEqual([
       'core',
       'lang',
     ])
   })
 
-  it('should record no band for a rule installed flat', () => {
+  it('should record no folder for a rule installed flat', () => {
     install('900-local.md')
 
-    const { held, bands } = readInstalledRules(TARGET)
+    const { held, folders } = readInstalledRules(TARGET)
 
     expect(held.has('900-local')).toBe(true)
-    expect([...bands]).toEqual([])
+    expect([...folders]).toEqual([])
   })
 
   it('should read nothing from a target with no rules directory', () => {
-    const { held, bands } = readInstalledRules(TARGET)
+    const { held, folders } = readInstalledRules(TARGET)
 
     expect([...held]).toEqual([])
-    expect([...bands]).toEqual([])
+    expect([...folders]).toEqual([])
   })
 })
 
 describe('selectNewRules', () => {
   const held = new Set(['000-constitution'])
-  const bands = new Set(['core', 'claude'])
+  const folders = new Set(['core', 'claude'])
 
-  it('should name a rule added under a band the target carries', () => {
+  it('should name a rule added under a folder the target carries', () => {
     const paths = 'governance/rules/core/080-observability.md'
 
-    expect(selectNewRules(paths, held, bands)).toEqual(['080-observability'])
+    expect(selectNewRules(paths, held, folders)).toEqual(['080-observability'])
   })
 
-  it('should drop a rule added under a band the target never installed', () => {
+  it('should drop a rule added under a folder the target never installed', () => {
     const paths = 'governance/rules/ui/450-motion.md'
 
-    expect(selectNewRules(paths, held, bands)).toEqual([])
+    expect(selectNewRules(paths, held, folders)).toEqual([])
   })
 
   it('should name a rule added flat at the source root', () => {
     expect(
-      selectNewRules('governance/rules/900-loose.md', held, bands),
+      selectNewRules('governance/rules/900-loose.md', held, folders),
     ).toEqual(['900-loose'])
   })
 
-  it('should drop a rule the target already holds under another band', () => {
+  it('should drop a rule the target already holds under another folder', () => {
     const paths = 'governance/rules/claude/000-constitution.md'
 
-    expect(selectNewRules(paths, held, bands)).toEqual([])
+    expect(selectNewRules(paths, held, folders)).toEqual([])
   })
 
   it('should ignore an added path outside the rules source', () => {
     const paths = 'governance/stacks/react.toml'
 
-    expect(selectNewRules(paths, held, bands)).toEqual([])
+    expect(selectNewRules(paths, held, folders)).toEqual([])
   })
 
   it('should sort and deduplicate rule names', () => {
@@ -577,14 +577,14 @@ describe('selectNewRules', () => {
       'governance/rules/core/090-zebra.md',
     ].join('\n')
 
-    expect(selectNewRules(paths, held, bands)).toEqual([
+    expect(selectNewRules(paths, held, folders)).toEqual([
       '010-alpha',
       '090-zebra',
     ])
   })
 
   it('should return nothing when no rules were added', () => {
-    expect(selectNewRules('', held, bands)).toEqual([])
+    expect(selectNewRules('', held, folders)).toEqual([])
   })
 })
 
@@ -610,7 +610,7 @@ describe('readNewRules', () => {
     return git('rev-parse', '--short', 'HEAD').trim()
   }
 
-  /** A stamp naming only the anchor, so the diff-and-bands fallback runs. */
+  /** A stamp naming only the anchor, so the diff-and-folder fallback runs. */
   function commitStamp(commit: string): Stamp {
     return {
       covers: ['governance'],
@@ -653,11 +653,11 @@ describe('readNewRules', () => {
   }
 
   /** The stack every other stack extends, naming the folders it takes whole. */
-  function writeBaseStack(...bands: string[]): void {
+  function writeBaseStack(...folders: string[]): void {
     const path = join('governance', 'stacks', 'base.toml')
     const full = join(TOOLKIT, path)
     mkdirSync(dirname(full), { recursive: true })
-    writeFileSync(full, `extends = ""\nrules = ${JSON.stringify(bands)}\n`)
+    writeFileSync(full, `extends = ""\nrules = ${JSON.stringify(folders)}\n`)
     git('add', '--', path)
     git('commit', '-m', 'record base stack')
   }
@@ -693,7 +693,7 @@ describe('readNewRules', () => {
     ).resolves.toEqual([])
   })
 
-  it('should ignore a rule outside the bands the target carries', async () => {
+  it('should ignore a rule outside the folders the target carries', async () => {
     const anchor = authorRule(join('core', '000-constitution.md'), 'base')
     authorRule(join('ui', 'copy.md'), 'add ui')
     install(join('core', '000-constitution.md'))
@@ -736,10 +736,10 @@ describe('readNewRules', () => {
   })
 
   /**
-   * The band exists in no installed tree, so the target's own folders are no
+   * The folder exists in no installed tree, so the target's own folders are no
    * evidence at all and the base stack file is the only thing that entitles it.
    */
-  it('should name a rule under a new band the base stack takes whole', async () => {
+  it('should name a rule under a new folder the base stack takes whole', async () => {
     const anchor = authorRule(join('core', '000-constitution.md'), 'base rule')
     authorRule(join('security', '600-secrets.md'), 'add secrets')
     writeBaseStack('core', 'claude', 'security')
@@ -750,7 +750,7 @@ describe('readNewRules', () => {
     ).resolves.toEqual(['600-secrets'])
   })
 
-  it('should ignore a new band no stack file takes whole', async () => {
+  it('should ignore a new folder no stack file takes whole', async () => {
     const anchor = authorRule(join('core', '000-constitution.md'), 'base rule')
     authorRule(join('security', '600-secrets.md'), 'add secrets')
     writeBaseStack('core', 'claude')
@@ -763,7 +763,7 @@ describe('readNewRules', () => {
 
   /**
    * The reproduction this row exists for: a rule shipped and joined a stack
-   * before the target's recorded anchor, which the diff-and-bands fallback
+   * before the target's recorded anchor, which the diff-and-folder fallback
    * above can never see since its window only opens after the anchor.
    */
   it('should name a rule the recorded chain lists that predates the anchor', async () => {
@@ -823,7 +823,7 @@ describe('readNewRules', () => {
   })
 })
 
-describe('baseBands', () => {
+describe('baseFolders', () => {
   let TOOLKIT: string
 
   function writeStack(body: string): void {
@@ -839,7 +839,7 @@ describe('baseBands', () => {
   }
 
   beforeEach(() => {
-    TOOLKIT = mkdtempSync(join(tmpdir(), 'canon-check-bands-'))
+    TOOLKIT = mkdtempSync(join(tmpdir(), 'canon-check-folders-'))
   })
 
   afterEach(() => {
@@ -851,7 +851,7 @@ describe('baseBands', () => {
     writeRule(join('claude', '500-prose.md'))
     writeStack('extends = ""\nrules = ["core", "claude"]\n')
 
-    expect([...baseBands(TOOLKIT)].sort()).toEqual(['claude', 'core'])
+    expect([...baseFolders(TOOLKIT)].sort()).toEqual(['claude', 'core'])
   })
 
   it('should name the folder of each rule a slug-only base names', () => {
@@ -861,18 +861,18 @@ describe('baseBands', () => {
     writeRule(join('claude', '520-skills.md'))
     writeStack('extends = ""\nrules = ["task-scope", "scratch", "output"]\n')
 
-    expect([...baseBands(TOOLKIT)].sort()).toEqual(['canon', 'claude'])
+    expect([...baseFolders(TOOLKIT)].sort()).toEqual(['canon', 'claude'])
   })
 
-  it('should name no band for a rule sitting at the rules root', () => {
+  it('should name no folder for a rule sitting at the rules root', () => {
     writeRule('000-loose.md')
     writeStack('extends = ""\nrules = ["000-loose"]\n')
 
-    expect([...baseBands(TOOLKIT)]).toEqual([])
+    expect([...baseFolders(TOOLKIT)]).toEqual([])
   })
 
   it('should read nothing from a toolkit with no base stack', () => {
-    expect([...baseBands(TOOLKIT)]).toEqual([])
+    expect([...baseFolders(TOOLKIT)]).toEqual([])
   })
 })
 

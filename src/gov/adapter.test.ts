@@ -341,7 +341,7 @@ describe('createGovAdapter', () => {
       expect(createGovAdapter(TOOLKIT).collectMissing?.(TARGET)).toEqual([])
     })
 
-    it('should leave a new name the target already holds in another band', () => {
+    it('should leave a new name the target already holds in another folder', () => {
       writeFixture(OLD_PATH(), '# 505-old\n')
       const held = join(TARGET, '.claude/rules/canon/core/510-new.md')
       writeFixture(held, '# 510-new\n')

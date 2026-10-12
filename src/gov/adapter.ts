@@ -98,8 +98,8 @@ export function createGovAdapter(root: string): SyncAdapter {
 }
 
 /**
- * Where the target already holds a rule, in whichever band folder. A
- * successor held outside the source's band stays where it is, the same way
+ * Where the target already holds a rule, in whichever rule folder. A
+ * successor held outside the source's folder stays where it is, the same way
  * `locateSource` syncs a moved rule in place, rather than gaining a second copy.
  *
  * Holding the predecessor is the whole entitlement test, so no stamped chain

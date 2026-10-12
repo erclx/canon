@@ -34,12 +34,12 @@ export const RENUMBERED_RULES: Readonly<Record<string, string>> = {
 }
 
 /**
- * Band folders the walk skips by name rather than by content, so the
- * exclusion holds even for a band the toolkit has not shipped yet.
+ * Rule folders the walk skips by name rather than by content, so the
+ * exclusion holds even for a folder the toolkit has not shipped yet.
  * `canon/` and `internal/` are already-migrated destinations, and
  * `project/` is a target's own rules, which this verb never touches.
  */
-const EXCLUDED_BANDS: readonly string[] = ['project', 'canon', 'internal']
+const EXCLUDED_FOLDERS: readonly string[] = ['project', 'canon', 'internal']
 
 /** One flat rule file, before classification. */
 export interface FlatRuleFile {
@@ -57,9 +57,9 @@ export function flatRulesRoot(target: string): string {
 }
 
 /**
- * Every rule file sitting directly under a flat band folder. One level for
- * the band and one glob below it for `*.md`, since `governance/rules/` never
- * nests a rule deeper than its band, and the flat layout this verb migrates
+ * Every rule file sitting directly under a flat rule folder. One level for
+ * the folder and one glob below it for `*.md`, since `governance/rules/` never
+ * nests a rule deeper than its folder, and the flat layout this verb migrates
  * off of mirrors that depth.
  */
 export async function walkFlatRules(target: string): Promise<FlatRuleFile[]> {
@@ -69,20 +69,20 @@ export async function walkFlatRules(target: string): Promise<FlatRuleFile[]> {
   )
   if (entries === undefined) return []
 
-  const bands = entries.filter(
-    (entry) => entry.isDirectory() && !EXCLUDED_BANDS.includes(entry.name),
+  const folders = entries.filter(
+    (entry) => entry.isDirectory() && !EXCLUDED_FOLDERS.includes(entry.name),
   )
 
   const files: FlatRuleFile[] = []
-  for (const band of bands) {
+  for (const folder of folders) {
     const glob = new Bun.Glob('*.md')
     for (const name of glob.scanSync({
-      cwd: join(root, band.name),
+      cwd: join(root, folder.name),
       onlyFiles: true,
     })) {
       files.push({
-        rel: relPath('.claude', 'rules', band.name, name),
-        subdir: band.name,
+        rel: relPath('.claude', 'rules', folder.name, name),
+        subdir: folder.name,
         name: name.slice(0, -'.md'.length),
       })
     }
