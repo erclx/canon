@@ -11,7 +11,6 @@ Owns the GitHub Actions verification that gates pull requests into `main`, and t
 
 Three things differ from the local gate:
 
-- Formatting: the local run writes and CI asserts
 - Scope: the local run gates shell, types, and tests on the changed-file set, while CI passes `--all` and runs them unconditionally
 - The plugin manifest stage, skipping on a machine without the CLI and failing on a runner that should have installed it
 
@@ -29,11 +28,11 @@ The workflow calls one entry point instead of naming each stage as its own step.
 
 One job runs all of it, which is the carve-out `ci-workflow` states rather than an exemption this repository took. `auditSet` in `src/gate/measures.ts` scopes `canon audits run` to the tracked and per-machine corpora, and `src/deps/audit.ts` bounds the dependency-advisory lookup at a 120-second timeout for the caller that still wants it.
 
-A local `canon gate run --all --no-write` runs in about 41 seconds, so each extra job still repays checkout, `bun install --frozen-lockfile`, and an apt install before reaching a stage, and a split buys three or four minutes of setup for no earlier signal. The skill conditions the carve-out on a gate under roughly two minutes, so this workflow splits once its own run log crosses that.
+A local `canon gate run --all` runs in about 41 seconds, so each extra job still repays checkout, `bun install --frozen-lockfile`, and an apt install before reaching a stage, and a split buys three or four minutes of setup for no earlier signal. The skill conditions the carve-out on a gate under roughly two minutes, so this workflow splits once its own run log crosses that.
 
 The job name stays `🛡️ Static Checks` even though the job runs the test suite. Required status checks resolve against the job name, so renaming it would break branch protection until the rule updates to match.
 
-Mode selection goes through `--no-write`, and CI names the `check:ci` script rather than setting anything inline. The two questions a caller answers, what to run and whether to write, both resolve through flags, since splitting one across a flag and the other across an environment variable would leave the surface half discoverable. Each mode runs exactly one format stage: the local run formats in place, and CI asserts.
+The gate asserts formatting in every mode and writes none of it, and CI names the `check:ci` script rather than setting anything inline. The rejected alternative was a local write mode behind `--no-write`, which formatted in place and then could not fail on formatting, so a push rewrote files and left a `style(<scope>):` follow-up commit. Base targets dropped the same writing pass in v149.4, and `bun run format` is the one writer.
 
 Scope selection goes through an `--all` argument, since it describes what to run rather than which mode to run in. An unknown argument exits 1, and `--help` prints the flags, the exit codes, and what an unmeasured stage means, so the surface stays discoverable without reading the table.
 
@@ -65,7 +64,7 @@ The types stage runs in CI rather than only in the pre-push hook because a missi
 
 ### Running CI locally
 
-`bun run check` formats in place where CI asserts formatting. It also scopes shell, types, and tests to the changed-file set, so a local pass is weaker than a CI pass and the two do not mean the same thing. Run `bun run check:ci` to reproduce what CI does, or `bun run check --all` to keep the local write-mode format stage while running every check. If CI fails on format, run `bun run check` locally and commit the diff.
+`bun run check` scopes shell, types, and tests to the changed-file set, so a local pass is weaker than a CI pass and the two do not mean the same thing. Run `bun run check:ci` or `bun run check --all` to reproduce what CI does. If CI fails on format, run `bun run format` locally and commit the diff.
 
 ## Gotchas
 

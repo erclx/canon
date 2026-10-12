@@ -9,16 +9,15 @@ description: Running the gate this repository verifies a branch with, what the s
 
 ```bash
 canon gate run
-canon gate run --all --no-write
+canon gate run --all
 canon gate run --json
 ```
 
-| Option       | Behavior                                                                      |
-| ------------ | ----------------------------------------------------------------------------- |
-| `--all`      | Run every stage instead of scoping shell, types, and tests to the changed set |
-| `--no-write` | Check formatting instead of applying it, which is what a merge gate wants     |
-| `--nested`   | Suppress the outer frame when a calling script has already opened one         |
-| `--json`     | Add a machine-readable record on stdout                                       |
+| Option     | Behavior                                                                      |
+| ---------- | ----------------------------------------------------------------------------- |
+| `--all`    | Run every stage instead of scoping shell, types, and tests to the changed set |
+| `--nested` | Suppress the outer frame when a calling script has already opened one         |
+| `--json`   | Add a machine-readable record on stdout                                       |
 
 ## What the command owns and what it runs
 
