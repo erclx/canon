@@ -5,17 +5,19 @@ description: Why shared scratch lives at the main worktree root, what worktree i
 
 # Session scratch
 
-## Where shared scratch lives
+## Decisions
+
+### Where shared scratch lives
 
 `.canon/plans/`, `.canon/review/`, and `.canon/tasks/` are gitignored and live at the main worktree root. A linked worktree resolves them there rather than writing its own copy. How each folder archives, and how the set is backed off the disk, sits in `canon/context/development/records.md`.
 
 `.claude/.tmp/` carries its own `.gitignore` entry and manifest array member, so a project still on the old root keeps its scratch out of git wherever it is written, worktree or main root alike. The scratch rule states only `.canon/tmp/`, since a rule names the current layout alone. It stays an ignore entry rather than a second scratch root, since only whether git sees the folder changed. `canon/context/context-model/overview.md` carries the entry as a temporary carve-out, retired once `canon migrate records` has moved every project off the fallback it covers. <!-- canon-keep-record-root -->
 
-## What worktree isolation refuses
+### What worktree isolation refuses
 
 A linked worktree reads the shared folders through one tool and writes them through another. `Edit` and `Write` refuse every main-root path with a message naming session isolation and directing the session to the worktree copy, while `Read` resolves normally and `Bash` writes without complaint, so the boundary is tool-scoped rather than filesystem-scoped. That holds across all four folders and a live task file.
 
-### The four `Bash` triggers
+#### The four `Bash` triggers
 
 The same isolation refuses a `Bash` command it cannot statically verify stays inside the worktree, on four triggers. None depends on where the target sits, so a session reading the main-root case as the cause earns the refusal a second time.
 
@@ -28,7 +30,7 @@ A single-line `printf '%s\n' "line one" "line two" > file` carrying a refused he
 
 The same token reaches a script handed to an interpreter inline, so a Python heredoc naming a skill with `git` in its name is refused, as is a `canon` call fed a command substitution. Writing the script to a file under the worktree's `.canon/tmp/<slug>/` and running it by path passes, since the guard then reads the interpreter call alone. Measured 2026-09-25.
 
-## The two write routes
+### The two write routes
 
 `session-worktree` states these routes to a session, in its `references/main-root-writes.md`, and `worktrees` points there. This section keeps the reasons behind them.
 
@@ -42,7 +44,7 @@ A setting would lift the refusal outright rather than route around it. `worktree
 
 Resolution runs `CLAUDE_BG_ISOLATION` first, then a value stamped into the job record at spawn, then `.claude/settings.json`, and the spawn value comes out `none` when the spawning context is an interactive REPL, which is why a session working in place never meets the refusal a session it dispatches does. The routes decline the key anyway, since it carries no path carve-out: `none` frees every concurrent background session to write the shared checkout rather than only the write this section covers.
 
-### What a shell write bypasses
+#### What a shell write bypasses
 
 A shell write costs the index hook, which matters wherever a folder's `index.md` is generated. The `PostToolUse` triggers match `Write|Edit|MultiEdit`, so nothing fires on `Bash`, and `task-board` regenerates positionally after a shell write rather than leaving the index a row short.
 
@@ -50,7 +52,7 @@ The bypass reaches four hooks: `PostToolUse` on `Edit|Write|MultiEdit` runs `sta
 
 A plan write is a no-op for every one of the four: `standards-audit.sh` exits on `*.canon/plans/*` by an explicit skip, `records-index.sh` matches the tasks folder alone, `path-form.sh` answers only a path carrying a worktree segment, and `scratch-guard.sh` fires only on a `tmp`, `Temp`, or `var/folders` segment. `.canon/review/` clears the same four for the same reasons, so the cost lands on `.canon/tasks/` alone, where the index hook is a real writer.
 
-## Which `.canon/tmp/` writers state a root
+### Which `.canon/tmp/` writers state a root
 
 `scratch.md` states the mixed default alone and names no writer, since a shipped rule citing a path under this repository's own `canon/context/` resolves nowhere in a target, per `authoring-layout.md`. The census lives here instead. Read the current writer set with `git grep -l '.canon/tmp/' claude/skills .claude/skills` before trusting the split below.
 
@@ -62,6 +64,6 @@ Four write material a later run or a different worktree reads back, and each sta
 
 `review-pr`'s `.canon/tmp/pr/review/body-<number>-<short-sha>.md` is the exception on the other side: material a later pass reads back through the Step 2 oid comparison, with no root stated anywhere in the body. A dispatched re-review runs in its own worktree, so the second pass writes a folder the first pass never touched, which the filename scheme cannot stop without the root fixed. Its Step 4 takes the same main-root heredoc route the six use.
 
-### A handoff shared across worktrees
+#### A handoff shared across worktrees
 
 A `.canon/tmp/<topic>/<slug>.md` handoff shared across worktrees, the pattern `teach-workspace` uses, carries no producer subfolder of its own. Its consumer removes the consumed `<slug>.md` alone, then `rmdir`s the topic folder guarded with `2>/dev/null || true`, which is a no-op wherever a sibling branch's own pending file still sits in it. A plain `rm -rf` on the topic folder would delete that sibling's in-flight handoff, since the folder is shared across every worktree writing to the same main root.

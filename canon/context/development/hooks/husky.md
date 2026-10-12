@@ -5,7 +5,9 @@ description: What each git hook runs, the five post-merge steps and their order,
 
 # Husky hooks
 
-## The hooks
+## Layout
+
+### The hooks
 
 - `pre-commit` runs `lint-staged`: prettier on staged `.json`, `.md`, and `.mdc` files, and shfmt and shellcheck on staged `.sh` files.
 - `commit-msg` runs `commitlint` against the conventional commit format
@@ -13,7 +15,9 @@ description: What each git hook runs, the five post-merge steps and their order,
 - `post-merge` runs five steps in order through `canon hooks post-merge`, covered below
 - `post-rewrite` delegates to `post-merge` on the `rebase` argument, so a `pull.rebase=true` machine gets the same steps. It exits on `amend`, which rewrites nothing on the board.
 
-## The post-merge steps
+## Decisions
+
+### The post-merge steps
 
 `.husky/post-merge` resolves the main root, returns on a checkout with no board at `.canon/tasks`, returns when `canon` is not on PATH, and hands the rest to `canon hooks post-merge --root "$root"`. The verb in `src/hooks/post-merge.ts` owns the order and every line it prints, so the hook carries no step logic. The board guard stops all five steps rather than the archive alone, which keeps the behavior the shell hook had.
 
@@ -23,17 +27,17 @@ The hook carries one bootstrap. A global binary older than the verb fails a prob
 
 Ordering is the one coupling between the steps, and the call order in `runPostMerge` is what holds it. Each step that can be switched off names its `CANON_SKIP_` variable in the hook's own header, since the header is what a person reads looking for the switch, and the verb's help lists them too.
 
-### Archiving the merged task
+#### Archiving the merged task
 
 The first step archives the task each merged pull request closed and stays silent otherwise, printing its one line when the task still waits on a pending branch. It is the only trigger that fires after a merge, covered in `canon/context/claude-plugin/skill-archiving.md`. It reads `ORIG_HEAD..HEAD` rather than the tip, since one pull routinely fast-forwards over several merges and reading `git log -1` would strand every task but the last.
 
-### Pushing the records
+#### Pushing the records
 
 The second step runs `canon records push`, which backs the gitignored record folders to a private remote. The call sits after the archive so an unreachable remote delays no archiving, and it fires on every merge rather than on one that closed a task, since a review report lands on runs that close nothing.
 
 A refusal prints its reason with a retry hint, except `unsafe-payload`, which points at running the push by hand to see the blocked paths, since waiting on the remote fixes nothing there. A checkout that never ran the one-time setup answers `no-repository` and reports nothing.
 
-### Reclaiming merged worktrees
+#### Reclaiming merged worktrees
 
 The third step runs `canon worktrees reclaim --json`, which removes the worktree and the branch behind a merged pull request so a shipped directory goes without a person remembering. The verb clears only what passes all three of its conditions, being a merged pull request, a clean working tree, and no live session on the directory, so an idle worker keeps its own worktree until someone retires the session. `CANON_SKIP_RECLAIM=1` turns the step off.
 
@@ -45,7 +49,7 @@ An unreadable reading refuses every verdict rather than some of them, so the ste
 
 `src/hooks/post-merge.test.ts` drives every step against an injected runner, covering the order, the cwd and root each child gets, the skip switches, and each record shape's line. `src/hooks/post-merge-hook.test.ts` runs the hook itself under `sh -e` against stub `canon` and `bun` binaries, covering which one gets the verb and the quiet skip when neither carries it.
 
-### Reinstalling the binary
+#### Reinstalling the binary
 
 The fourth step runs `canon upgrade --json` under `CANON_NON_INTERACTIVE=1`, since the hook has no TTY, so a global binary behind what is published reinstalls on the next merge instead of staying stale until someone runs `canon sync --check` by hand. The reclaim sits before it, since the upgrade reinstalls the binary the hook is running under and every step after it runs against a package that moved. `CANON_SKIP_UPGRADE=1` turns the step off.
 
@@ -53,7 +57,7 @@ The printed line comes from the JSON record's `message` field, which `src/comman
 
 `pending` prints like any other non-`current` state, as `CLI stays at ...`, so the hook needs no branch for it. `current` stays quiet, matching the archive block's silence on `no-match` and `no-board` and the records push printing only when something changed. A line on every merge that says nothing moved is the shape both siblings avoid. A reinstall that fails partway names both versions it was moving between, in that same `message` field, which is the one route back to a broken global binary the next session meets.
 
-### Updating the plugin cache
+#### Updating the plugin cache
 
 The fifth step runs `canon claude plugin-update --json`, mirroring the binary reinstall for the marketplace plugin cache, which the binary reinstall never touches. The plugin follows the marketplace head rather than the binary, so it can lead the binary by a whole publish: a pull lands the release commit before the publish job finishes, the plugin moves, and `canon upgrade` reads `current` against an npm that does not serve the release yet. That is why each line names its subject (`CLI ...`, `Plugin ...`) and why the upgrade verb reports `pending`. Without it a dispatched session keeps resolving a retired skill body until an operator runs `claude plugin update` by hand. It sits last for the reason the reinstall sits after the records push: a slow or unreachable marketplace delays nothing else in the file. `CANON_SKIP_PLUGIN_UPDATE=1` turns the step off.
 
@@ -63,7 +67,7 @@ The verb resolves the plugin's own id by reading `claude/.claude-plugin/plugin.j
 
 An older global binary carrying no `upgrade` or `plugin-update` subcommand produces no parseable record, and the verb stays quiet on that the way every such gap here does until a release lands.
 
-### The base stack's copy
+#### The base stack's copy
 
 `tooling/base/configs/.husky/post-merge` carries the same guard, bootstrap, and verb call, and differs in two ways. It has no source-CLI fallback, since a target holds no `src/cli.ts` of the toolkit's, so a target on a binary the registry has not caught up with runs nothing until a release publishes the verb, quietly. And a target's global binary may predate the verb for longer than this checkout's does, because the hook ships on sync and the binary on publish, which the `canon upgrade` probe covers unless `CANON_SKIP_UPGRADE` is set.
 

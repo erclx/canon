@@ -11,7 +11,9 @@ No rule routes a session editing `.claude/settings.json` here, since JSON carrie
 
 Every value below was read from `https://code.claude.com/docs/en/settings-reference`, `https://code.claude.com/docs/en/model-config`, `https://code.claude.com/docs/en/cross-session-messaging`, and `https://code.claude.com/docs/en/costs`. Re-read those pages before trusting a value here against a newer client.
 
-## autoCompactWindow
+## Decisions
+
+### autoCompactWindow
 
 The setting fixes how full the context window gets before Claude Code compacts. It takes an absolute token count from 100K to 1M rather than a percentage, accepting a plain integer, a `k` or `M` suffix, or a bare number from 100 to 1000 read as thousands. Its documented scope is any settings file. Left unset, a session compacts at its model's context limit, and `/autocompact <value>` writes a value to the user file rather than to the project one.
 
@@ -19,7 +21,7 @@ The operator's user file sets it to 750000. Claude Code caps the window at the m
 
 The value stays in the user file rather than moving here or into the seed. A threshold that suits an orchestrator open all day is wrong for a session that opens for ten minutes, which makes it a per-operator preference rather than a project fact, and committing one machine's answer here would impose it on everyone who opens the repository.
 
-## autoContinueAtUsageLimit
+### autoContinueAtUsageLimit
 
 The setting makes a session wait in place and continue its task after a claude.ai usage limit resets, instead of losing where it was. It is set to `true` in the operator's user file.
 
@@ -27,7 +29,7 @@ The project file cannot assert it. Its documented scope is user or managed, and 
 
 The rolling five-hour usage-limit window is not readable locally. There is no `claude usage` subcommand, `/usage` is interactive, `stats-cache.json` holds daily counts rather than a rolling window, and nothing under `~/.claude/` names usage, limit, or quota. Do not rebuild that search.
 
-## crossSessionInbound
+### crossSessionInbound
 
 The setting decides what a session does with a message from one of your other sessions, on an `accept`, `hold`, `refuse` ladder. Claude Code delivers an inbound message as a new turn whenever the receiving session sits idle, and that turn carries the whole context, which is what makes the key a cost lever for a dispatch loop. The vendor's own cost page names `hold` as the way to stop paying it.
 
@@ -35,12 +37,12 @@ This repository leaves it unset. `hold` and `refuse` are the two values that bou
 
 Precedence is the reason to leave the seed alone as well. A project or local value wins over managed, `--settings`, and user values when it is stricter and is ignored when it is not, so a `hold` seeded into a scaffolded target would override that operator's own `accept` rather than yield to it.
 
-## autoMemoryEnabled
+### autoMemoryEnabled
 
-Claude Code tells every session it may keep notes under `~/.claude/projects/<project>/memory/`. Canon retired its own memory system in #2300, so a kept fact lands in the owning task's Findings or the context entry that owns it, and the harness's instruction pulls the other way. `.claude/settings.json` sets `autoMemoryEnabled: false`, which removes the instruction from every session's system prompt here and stops the harness reading or writing the folder.
+Claude Code tells every session it may keep notes under `~/.claude/projects/<project>/memory/`. Canon keeps no memory system of its own, so a kept fact lands in the owning task's Findings or the context entry that owns it, and the harness's instruction pulls the other way. `.claude/settings.json` sets `autoMemoryEnabled: false`, which removes the instruction from every session's system prompt here and stops the harness reading or writing the folder.
 
 The key's documented scope is any settings file, so the project file sets it. Project scope outranks the operator's user file, which reads `true` today, so the repository's value wins for a session opened here and the user file keeps governing every other project. `CLAUDE_CODE_DISABLE_AUTO_MEMORY` still takes precedence over the key for one session, in either direction, so an operator who exports it overrides this file.
 
-The setting is the primary control and `memory-guard.sh` is the backstop behind it, covered in `canon/context/development/hooks/command-scanners.md`. Neither is seeded. Turning off a harness feature in a target is that operator's preference rather than a fact canon owns, and #2300 left a target's memory folder inert. Revisit when a target asks.
+The setting is the primary control and `memory-guard.sh` is the backstop behind it, covered in `canon/context/development/hooks/command-scanners.md`. Neither is seeded. Turning off a harness feature in a target is that operator's preference rather than a fact canon owns, and a target's memory folder stays inert. Revisit when a target asks.
 
 Verify it by opening a fresh `claude` session at the repository root: `/memory` shows auto memory off and the system prompt carries no memory section. No test reaches the harness's own prompt, so this check stays manual.

@@ -5,7 +5,9 @@ description: How bun run check scopes stages to the changed-file set, why the ba
 
 # Verification
 
-## Scoped verification
+## Decisions
+
+### Scoped verification
 
 `bun run check` gates three stages on the changed-file set. Shell runs on any `.sh` change, types on any `src/` change, and tests on `src/` or on any corpus a `src/` test asserts over, which `canon/context/development/tests.md` censuses. Format and the regeneration stages always run, because their inputs are diffuse. Skipping tests, types, and shell on a markdown-only edit drops roughly 16 of the 31 CPU-seconds measured across the gate, and the test suite alone accounts for most of that.
 
@@ -17,7 +19,7 @@ When `origin/main` does not resolve, which happens transiently during a concurre
 
 Pass `--all` to force the full suite, and `--help` to print the argument list. `bun run check:ci` passes `--all`, so CI stays the backstop for a wrong local scoping decision on the pull request path.
 
-## The process tier
+### The process tier
 
 `src/process/harness.ts` spawns `src/cli.ts` as a real process against a temporary directory rather than calling a command's action function in-process. A case can then assert what an in-process call cannot: whether a verb is registered at all, whether the process exits the way its own contract states, and whether a `--json` record parses off stdout alone once stderr framing is set aside. `src/process/harness.test.ts` covers the harness itself, and `src/process/verbs.test.ts` covers the verbs.
 
@@ -27,11 +29,11 @@ The cases assert only that the verb the two package scripts name is registered. 
 
 `src/commands/checkout-mismatch.test.ts` carries the one case that spawns `canon gate run` anyway, asserting the wrong-checkout warning reaches the verb, and it survives the recursion by never waiting on the child. `runGate` logs the warning ahead of `runStages` on both the bare and the `--json` form, so the case kills the child the instant that line reaches stderr, before the first stage starts. Logging the warning ahead of the stages is load-bearing: deferring it until every stage had run left a killed child's subprocess tree still spawning, orphaning `cli.ts gate run --json` processes that never exited.
 
-### Adding a case
+#### Adding a case
 
 Write a fixture under a per-test `mkdtempSync` directory, being a golden config, a rule stack, or a task board, whatever the verb reads, and assert the resulting file tree, the exit code, and the parsed record together rather than any one alone. An exit code says nothing about a `canon` call here, since a shell profile may wrap the binary, which is why every task verb tells a caller to branch on the record's `reason`. An exit code alone can therefore misreport, and a written file alone says nothing about whether the process reported the write correctly. Assert a written tree with named paths plus a count derived from the catalog the verb reads, such as the stack's own rule list off `gov list --json --stacks`, rather than a hardcoded figure, which fails on every unrelated addition.
 
-### Containment
+#### Containment
 
 `runCli` asserts its own containment on every call rather than trusting a case to. `gov install` and `gov sync` both record their target into `stateDir()/targets.json` through `src/targets/registry.ts`, and `canon sandbox` resolves its tree through `sandboxTree()` under the same `stateDir()` parent, so a case inheriting the real `HOME` writes into the machine that ran the suite. `runCli` points both overrides at folders under the case's own `cwd`, and snapshots the whole `stateDir()` tree before and after every spawn regardless, throwing `ContainmentViolation` the moment the two disagree.
 

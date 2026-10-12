@@ -7,7 +7,9 @@ description: The shared cut the memory guard and review post scan make over a Ba
 
 `memory-guard.sh` and `review-post-scan.sh` each read a `Bash` command string and need to know which text is a command and which is only mentioned. Both answer it with one `awk` pass that cuts the command, so the shape and its gaps are stated once here and the two hook sections below carry only what differs.
 
-## The opener test
+## Decisions
+
+### The opener test
 
 A heredoc body is dropped from the cut, and the pass finds one by testing for `<<` followed by a tag. Three other spellings carry the same two characters and open nothing, so the test reads them first.
 
@@ -19,15 +21,7 @@ A digit before `<<` is not a shift. `cat 0<<EOF` is a file descriptor before a r
 
 The two passes carry the edit separately. They share the opener test and the tag skip and differ in output shape, since the review scan emits one command per line and the memory guard emits the text with quoted spans folded. `src/hooks/guard.test.ts` covers each shape against both hook trees and against the memory guard.
 
-## Accepted gaps
-
-The cut now keeps a nested subshell written `((cmd); cmd2)` whole, which bash itself tries as arithmetic first, so a `gh api` inside it is not read as the start of a command. The case is rare and the ambiguity is bash's own.
-
-The array and substring forms `$[1<<2]`, `a[1<<2]=x`, and `${s:1<<2}` still open a false heredoc. Each needs its own bracket tracking for input nobody has measured, so none is chased.
-
-The opposite error stays and is fail-safe. `cat <<\EOF` yields an empty tag, so its body is read as commands and a quoted post inside it is denied rather than passed. A substitution inside double quotes is read as quoted text, which both hook sections below state again for their own verdict.
-
-## The memory guard
+### The memory guard
 
 `memory-guard.sh` is the check behind `autoMemoryEnabled: false`, which `canon/context/development/hooks/settings.md` records. The setting removes the harness's memory instruction, and the hook refuses a write that reaches the folder anyway. It registers on `PreToolUse` for `Write|Edit|MultiEdit`, widening the matcher `scratch-guard.sh` shares, and for `Bash` beside `dev-command-reminder.sh`. It denies with a reason on stderr and exit 2, as `unattended-agent-guard.sh` does.
 
@@ -41,7 +35,7 @@ Three gaps are accepted. A write built from a variable (`d=~/.claude/projects; e
 
 The hook carries a `canon-no-seed:` marker and ships through no seed. `src/hooks/guard.test.ts` covers it with an acting case and one `describe` for the boundaries.
 
-## The review post scan
+### The review post scan
 
 `review-post-scan.sh` registers on `PreToolUse` for `Bash` and denies a `gh api` post or edit of a review or a pull request comment whose body file fails `canon labels scan --body-file`. It is seeded, since a leaked record path is a target's problem as much as this repository's, and it calls the `canon` on `PATH`. It filters on the command string rather than the matcher, the shape `dev-command-reminder.sh` takes, so a `Bash` call that is not a `gh api` post leaves on a single `case` match.
 
@@ -60,3 +54,13 @@ A scan exit of 2 blocks with the scan's warning lines on stderr. Any other non-z
 The alternative was a `canon pr review-post` verb that scans and posts, which keeps the parse in TypeScript. A session can still call `gh api` directly, which is the slip three review passes made with the manual scan step, while the hook fires on the tool call whatever the session remembered. The cost is parsing a command string, so the hook reads the one shape every shipped skill uses.
 
 `src/hooks/guard.test.ts` carries the acting case per tree with a stub `canon` exiting 2, and a verdicts block covering a clean body, a read of the same endpoint, a post naming no method, a method placed after the endpoint, a comment post, a pull request create, an inline body, a body not yet written, a relative path, `canon` absent, a post chained after another command, a heredoc and a post in one call, and four commands that only mention a post.
+
+## Gotchas
+
+### Accepted gaps
+
+The cut now keeps a nested subshell written `((cmd); cmd2)` whole, which bash itself tries as arithmetic first, so a `gh api` inside it is not read as the start of a command. The case is rare and the ambiguity is bash's own.
+
+The array and substring forms `$[1<<2]`, `a[1<<2]=x`, and `${s:1<<2}` still open a false heredoc. Each needs its own bracket tracking for input nobody has measured, so none is chased.
+
+The opposite error stays and is fail-safe. `cat <<\EOF` yields an empty tag, so its body is read as commands and a quoted post inside it is denied rather than passed. A substitution inside double quotes is read as quoted text, which both hook sections below state again for their own verdict.

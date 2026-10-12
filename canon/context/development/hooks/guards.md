@@ -5,7 +5,9 @@ description: The bounded stdin read every payload hook opens with, the path form
 
 # Guards
 
-## The stdin guard
+## Decisions
+
+### The stdin guard
 
 Every hook that reads a payload opens with `IFS= read -r -d '' -t 2 input` and exits non-zero with a usage line on an empty payload. Under Claude Code the payload arrives and stdin closes, so the read returns at once and the bound is never paid. An unbounded `cat` instead blocks forever when a caller runs the hook by hand or from a tool call whose stdin is an open socket, which holds the background task open and with it the session. Only `bare-flag-repair.sh` and `cloud-setup.sh` are exempt, and both are exempt because they read no payload.
 
@@ -19,17 +21,17 @@ The index hook runs with `canon` dropped from `PATH`, which pins it to the branc
 
 `cloud-setup.sh` run with `CLAUDE_CODE_REMOTE=true` anywhere but a cloud VM runs a real `bun link`, which repoints the machine's global `@erclx/canon` at that checkout. Exercise it with a stub `bun` on `PATH`, as `src/hooks/guard.test.ts` does, and restore a relinked machine with `bun add -g @erclx/canon@<version>`.
 
-## The path form hook
+### The path form hook
 
 `path-form.sh` shares the `Edit|Write|MultiEdit` matcher and hands back the absolute form of a path written from a linked worktree, so a session prefers that form over computing it. `governance/rules/claude/output.md` keeps the instruction as a self-sufficient fallback rather than a branch the hook replaced. The hook reaches a project only through `tooling/claude/seeds/` at scaffold time while the rule reaches one through `canon gov sync`, and a target that synced governance without ever scaffolding through the seed would otherwise read a line naming a source it does not have.
 
 It reads the worktree branch off `file_path` itself, a `*/.claude/worktrees/*` segment, rather than shelling out to `git rev-parse`, since that call would answer for whatever directory the hook's own process happens to run in rather than the worktree the write came from. `records-index.sh` derives its main root the same way, off a path suffix rather than the session. It exits quietly on a path with no such segment and resolves `realpath` on one that has it.
 
-The output rule once branched on `CLAUDE_CODE_ENTRYPOINT` to pick a bare path or a `file://` link. That branch retired onto the harness's own link instruction, which Claude Code gives per surface, so neither the rule nor this hook decides the link form.
+The output rule does not branch on `CLAUDE_CODE_ENTRYPOINT` to pick a bare path or a `file://` link. The harness's own link instruction, which Claude Code gives per surface, decides, so neither the rule nor this hook decides the link form.
 
 The companion outcome, reporting a turn that wrote files and named none of them, is `silent-turn.sh`, covered in `canon/context/development/hooks/compaction.md`.
 
-## The bare flag repair
+### The bare flag repair
 
 `bare-flag-repair.sh` shares the `Bash` matcher and clears `core.bare` when worktree entry has left it set. Git refuses every operation while the flag is on, which puts `post-checkout` and the rest of the husky hooks out of reach, so a tool call is the only event that still fires ahead of the command that would fail. `canon gate run` keeps its own in-process call to the same repair, but a planning or review session reads git constantly and runs the suite never, so the suite alone leaves such a session broken for its whole length.
 
@@ -37,7 +39,7 @@ The hook writes to the shared git config as a side effect of an unrelated `Bash`
 
 The flag read comes first and costs one process, ahead of the payload parse, because every invocation but a handful stops there. That measured at roughly 2ms against 3.6ms for `dev-command-reminder.sh` on the same matcher, so the two stay separate hooks.
 
-## The pull-request creation log
+### The pull-request creation log
 
 `pr-create-log.sh` registers on `PostToolUse` for the `Bash` matcher, where `dev-command-reminder.sh` and `bare-flag-repair.sh` sit on `PreToolUse` instead. It filters for a command containing `gh pr create`, or for an `opened=true` line in the output, rather than narrowing at the matcher, the same shape those two take for testing the command string over the tool name.
 
@@ -47,7 +49,7 @@ The hook cannot know whether a session sent the announcement, only that a pull r
 
 The log resolves off `CLAUDE_PROJECT_DIR`, and that value is the session's own worktree rather than the main root, so a naive read would write a wave's denominator into a folder that dies the moment the worktree it was built in gets reclaimed. The hook strips a trailing `.claude/worktrees/*` segment before writing, the way `records-index.sh` derives its main root off a path suffix.
 
-## The unattended agent guard
+### The unattended agent guard
 
 `unattended-agent-guard.sh` is toolkit-only and carries a `canon-no-seed:` marker rather than shipping through `tooling/claude/seeds/.claude/hooks/`, holding the seeded copy back until the local hook is proven. It registers on `PreToolUse` for `Agent|Task`, the second name covering an installed build that still emits the tool's pre-rename name, and reads `tool_name` off the payload the way every guarded hook here does.
 
@@ -57,12 +59,12 @@ The deny condition is `CLAUDE_CODE_SESSION_ATTENDED` read as exactly `0`, the on
 
 A session where the variable holds anything other than `0`, unset or unmeasured included, is one the hook cannot classify, and it lets the call through silently rather than blocking a session the reading never covered or reporting a pass it has no basis for. A terminal interactive session reading `0` would collide with that silence, since nothing else distinguishes it from a background session, and closing that gap needs the unmeasured reading rather than a guess.
 
-The guard answers one question, an unattended fork colliding with its parent, and an operator's standing "no subagents in this project" is a different one. That is a permission rule, and it grows no attended switch here. A `permissions.deny` entry of `"Agent"` in `.claude/settings.json` or `.claude/settings.local.json` already binds every session and wins over any hook, which `wiki/claude/permissions.md` states under its subagent section. The rejected alternative was an environment variable or settings key the hook reads to deny attended sessions as well. It would duplicate coverage the native rule has, need its own test, and fail open whenever the key is unset. Feedback #1980 asked for it and received the documented route instead.
+The guard answers one question, an unattended fork colliding with its parent, and an operator's standing "no subagents in this project" is a different one. That is a permission rule, and it grows no attended switch here. A `permissions.deny` entry of `"Agent"` in `.claude/settings.json` or `.claude/settings.local.json` already binds every session and wins over any hook, which `wiki/claude/permissions.md` states under its subagent section. The rejected alternative was an environment variable or settings key the hook reads to deny attended sessions as well. It would duplicate coverage the native rule has, need its own test, and fail open whenever the key is unset.
 
 The seed stays held. The hold lifts once an interactive terminal session reads `CLAUDE_CODE_SESSION_ATTENDED` as anything but `0`, since a seeded hook in a target where that reading is `0` would block every attended terminal session. One `! echo "$CLAUDE_CODE_SESSION_ATTENDED"` typed into such a session takes the reading. Seeding then also needs a seed settings registration and a second tree for the test to walk.
 
 `src/hooks/guard.test.ts` covers the denial with `CLAUDE_CODE_SESSION_ATTENDED=0` and the tool matcher on both `Agent` and `Task`, and covers the classification boundary with the variable unset and with a non-zero value, each expected to pass through silent. Because the hook reads an environment variable rather than payload alone, the shared `run` helper takes an `env` override that deletes or sets a key on the spawned process rather than inheriting whatever the test runner happens to carry. The hook exists only in `.claude/hooks/`, so the directory walk has no seed copy to reach, and the classification-boundary block runs once directly against that path rather than looping over both trees.
 
-## Command scanners
+### Command scanners
 
 `memory-guard.sh` and `review-post-scan.sh` cut a `Bash` command with the same `awk` shape and share one opener test and its accepted gaps. Both are covered in `canon/context/development/hooks/command-scanners.md`.

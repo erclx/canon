@@ -13,13 +13,13 @@ Owns the local development loop: toolchain setup, the run commands, and the git 
 - `.claude/hooks/` owns the Claude Code hooks
 - `.husky/` owns the git hooks
 
-## Setup
+### Setup
 
 - Install [Bun](https://bun.sh): `curl -fsSL https://bun.sh/install | bash`
 - Install bash 4+ on macOS: `brew install bash`.
 - Install dependencies: `bun install`.
 
-## Scripts
+### Scripts
 
 | Command                 | Purpose                                                                                  |
 | ----------------------- | ---------------------------------------------------------------------------------------- |
@@ -33,7 +33,7 @@ Owns the local development loop: toolchain setup, the run commands, and the git 
 | `bun run clean`         | Wipe `node_modules/`, clear bun cache, reinstall.                                        |
 | `bun run update`        | Interactive `bun update` followed by verification.                                       |
 
-### What reads the table
+#### What reads the table
 
 `claude/skills/context-fold/references/context.md` scopes the `## Scripts` heading to this domain by name, and this file is where it lands. Two surfaces read the table, so a command added anywhere else is a command they cannot see: every stack reference extends it, and `docs/target/projects.md` tells a target to keep its own copy current.
 
