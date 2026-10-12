@@ -48,7 +48,7 @@ A PreToolUse hook on `WebSearch` pairs with `.claude/hooks/search-reminder.sh`, 
 
 A PreToolUse hook on `Write` and `Edit` pairs with `.claude/hooks/scratch-guard.sh`, which fires when a temp-path write lands outside `.canon/tmp/` and reminds the agent to write scratch there, once per session. It strips `CLAUDE_PROJECT_DIR` before matching the temp patterns, since the bare `*/tmp/*` match would fire on every source write in a project whose own path carries a `tmp` segment, and `<project>/tmp/` still warns. It exempts the harness's `.claude/jobs/<id>/tmp/` by shape.
 
-That trade gives up warning on a write to `<project>/tmp/`, which is a real violation, in exchange for silencing a false positive that fired constantly. It enforces the scratch rule deterministically instead of relying on CLAUDE.md prose the harness scratchpad instruction competes with.
+Stripping the root rather than exiting on it keeps a write to `<project>/tmp/`, which is a real violation, warning while silencing a false positive that fired constantly. It enforces the scratch rule deterministically instead of relying on CLAUDE.md prose the harness scratchpad instruction competes with.
 
 A PreToolUse hook on `Bash` pairs with `.claude/hooks/review-post-scan.sh`, which runs `canon labels scan --body-file` against the body file of a `gh api` review or comment post and denies the call on a finding. It blocks rather than reminds, and it calls `canon` from `PATH`, so a target on a CLI older than the flag has its review posts refused until it upgrades. The decision and its rejected alternative are in `canon/context/development/hooks/command-scanners.md`.
 
