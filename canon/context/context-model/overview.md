@@ -85,6 +85,12 @@ New entries are not created automatically, since auto-creation pads the catalog 
 
 Mapping changed files to entries misses two shapes, both produced by a change that removes a capability, and the `context-fold` body holds the sweep that catches them. The first is the half-rewritten entry, refreshed at the top and left alone below, where the current opening lends authority to the stale remainder. The second is a sentence a change inverted from a distance: a claim comparing two surfaces stays true only while both hold, and its file often sits outside the diff. Rewriting only what the diff touched stays the default, overridden only inside an entry the run already edited.
 
+### The sweep prompt reads rationale as current
+
+The local classifier's sweep prompt reads a reason naming why an alternative was left out, what an earlier approach got wrong, or what a measurement caught as KEEP, even in the past tense. REWRITE needs a superseded figure beside its replacement, "now" or "no longer" marking a change, branch or PR narration, or rounds of candidates.
+
+Three web sections drew the tune, `README images`, `The capture job reports and never commits`, and `Composition`, each a rule with its evidence written in the past tense. On the groundwork's labelled set the tuned prompt catches 7 of 8 with 0 of 6 false flags, against 7 of 8 and 1 of 6 for the first prompt. The one miss is a wireframe the ported prompt no longer names.
+
 ## Gotchas
 
 ### A folder split is a ceiling rather than a fix

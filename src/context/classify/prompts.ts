@@ -2,7 +2,10 @@
  * System prompts and user-message builders for the model layer, ported
  * verbatim as data from the groundwork spike at
  * `.canon/groundwork/93-canonical-doc-drift/scripts/prompts/v3.md` (diff
- * mode) and `sweep-v1.md` (sweep mode). Neither prompt text is invented here.
+ * mode) and `sweep-v1.md` (sweep mode). The diff prompt is verbatim. The sweep
+ * prompt was tuned past `sweep-v1.md` with one decision check, measured
+ * against the groundwork's labelled set in
+ * `canon/context/context-model/overview.md`.
  *
  * Each prompt already states its own rules per canonical doc type inside one
  * string, which is the shape the spike measured, so there is one prompt per
@@ -45,6 +48,8 @@ Decision checks, in order:
 1. Judge what the text says, not how long it is. A long section that states current design once is KEEP.
 2. A trailing "Measured at <sha> on <date>" does not make a paragraph current if another paragraph in the section states an older value on the same subject.
 3. Short rationale for a current rule ("the form checks length itself because...") is KEEP. A story of the rounds that produced the rule is REWRITE.
+4. Rationale is KEEP even when it is told in the past tense. A reason naming why an alternative was left out, what an earlier approach got wrong, what a measurement caught, or what a past run cost is the evidence for the current rule, so a sentence such as "the first form timed out" or "two runs took 1281s and 1924s" or "reading figures from real data caught three wrong claims" supports a rule that stands and stays KEEP. Past tense alone is never the test.
+5. REWRITE needs the section to restate its own subject as a sequence: a superseded figure kept beside its replacement, "now" or "no longer" marking a change, branch or PR narration, or rounds of candidates. A maintenance step or an operator decision stated as a rule is current, not history.
 
 Return only JSON: {"verdict": "...", "quotes": ["<up to three short phrases copied from the section that decided it>"], "reason": "<one sentence>"}
 `

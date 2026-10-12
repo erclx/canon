@@ -31,6 +31,8 @@ The regex layer always runs. It is free, needs nothing installed, and catches na
 
 The local Ollama layer runs only when configured, through `canon context classifier`. When it runs, its call is one chunk or section per request, never batched: the groundwork measurement behind this verb found that batching 16 hunks into one call returned KEEP for every one of them. Thinking is always off, since it was measured to catch nothing thinking-off missed while running roughly five times slower and, in sweep mode, losing three real flags by reasoning past them.
 
+Sweep mode reads decision rationale as current. A reason naming why an alternative was left out, what an earlier approach got wrong, what a measurement caught, or what a past run cost is KEEP even told in the past tense. Only a superseded figure kept beside its replacement, a "now" or "no longer" marking a change, branch or PR narration, or rounds of candidates is REWRITE.
+
 A finding carries both layers' readings when the model ran. The `verdict` field takes the model's reading when it ran and parsed, and falls back to the regex reading otherwise, since the model catches shapes the regex layer cannot reach structurally. `decidedBy` names which one won.
 
 A configured-but-unreachable backend warns on stderr and falls back to the regex layer alone. The run still exits clean: the record's `modelLayer` field names why the model layer did not run (`off`, `skipped-no-model`, `skipped-unreachable`, or `ran`), so a clean regex-only report never reads as a clean model pass.
