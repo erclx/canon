@@ -4,19 +4,11 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gitEnv } from '@/git/env'
-import { PROJECT_ROOT } from '@/roots/project'
-import { resolveChain } from '@/tooling/manifest'
 import {
   isSubfolderTarget,
   isWithheldInSubfolder,
   subfolderPath,
-  subfolderSpellConfig,
 } from '@/tooling/subfolder'
-
-interface SpellConfig {
-  readonly dictionaryDefinitions: readonly { name: string; path: string }[]
-  readonly dictionaries: readonly string[]
-}
 
 let fixture: string
 
@@ -31,9 +23,6 @@ afterEach(() => {
 const initRepo = (dir: string): void => {
   spawnSync('git', ['init', '-q', dir], { env: gitEnv() })
 }
-
-const parseSpell = (body: string | undefined): SpellConfig =>
-  JSON.parse(body ?? '') as SpellConfig
 
 describe('isSubfolderTarget', () => {
   it('should read a folder below the git toplevel as a subfolder', () => {
@@ -93,45 +82,5 @@ describe('isWithheldInSubfolder', () => {
 
   it('should keep a folder whose name only starts with .github', () => {
     expect(isWithheldInSubfolder('.github-pages/index.html')).toBe(false)
-  })
-})
-
-describe('subfolderSpellConfig', () => {
-  it('should register the one python dictionary under a local name', () => {
-    const chain = resolveChain(PROJECT_ROOT, 'python', { skipStack: 'base' })
-
-    expect(parseSpell(subfolderSpellConfig(chain)).dictionaries).toEqual([
-      'local-tech-stack',
-    ])
-  })
-
-  it('should register both vite-react dictionaries under local names', () => {
-    const chain = resolveChain(PROJECT_ROOT, 'vite-react', {
-      skipStack: 'base',
-    })
-
-    expect(parseSpell(subfolderSpellConfig(chain)).dictionaries).toEqual([
-      'local-project-terms',
-      'local-tech-stack',
-    ])
-  })
-
-  it('should point each definition at the seeded word list', () => {
-    const chain = resolveChain(PROJECT_ROOT, 'python', { skipStack: 'base' })
-
-    expect(
-      parseSpell(subfolderSpellConfig(chain)).dictionaryDefinitions,
-    ).toContainEqual(
-      expect.objectContaining({
-        name: 'local-tech-stack',
-        path: '.cspell/tech-stack.txt',
-      }),
-    )
-  })
-
-  it('should return nothing for a chain that carries base', () => {
-    const chain = resolveChain(PROJECT_ROOT, 'python')
-
-    expect(subfolderSpellConfig(chain)).toBeUndefined()
   })
 })

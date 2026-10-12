@@ -11,14 +11,12 @@ per_root = ["scripts/verify.sh", "scripts/verify.ts", "scripts/verify.json"]
 [dependencies.dev]
 packages = [
     "prettier",
-    "cspell",
     "husky",
     "@commitlint/cli",
     "@commitlint/config-conventional",
 ]
 
 [scripts]
-"check:spell" = "cspell '**' '.*/**' '.*' --no-progress --color --show-context"
 "check:format" = "prettier --check --log-level warn --ignore-path .gitignore --ignore-path .prettierignore . && find scripts -name '*.sh' -exec shfmt --diff --indent 2 {} +"
 "check:shell" = "find scripts -name '*.sh' -exec shellcheck --severity=warning {} +"
 "format" = "prettier --write --log-level warn --ignore-path .gitignore --ignore-path .prettierignore . && find scripts -name '*.sh' -exec shfmt --write --indent 2 {} +"
@@ -29,3 +27,4 @@ packages = [
 "# System" = [".DS_Store"]
 "# Dependencies" = ["node_modules/"]
 "# Secrets" = [".env", ".env.*", "*.local", "!.env.example"]
+"# VSCode" = [".vscode/"]

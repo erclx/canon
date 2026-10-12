@@ -2,7 +2,7 @@
 
 ## Overview
 
-The base layer covers every project the toolkit scaffolds, whatever language sits on top. It ships formatting, spelling, shell linting, conventional commits, git hooks, CI, and one maintenance script. Every other stack extends it, so a decision made here is one every stack inherits.
+The base layer covers every project the toolkit scaffolds, whatever language sits on top. It ships formatting, shell linting, conventional commits, git hooks, CI, and one maintenance script. Every other stack extends it, so a decision made here is one every stack inherits.
 
 A repository with several language roots layers this stack once at the root and skips it per subtree, since git honors only one `core.hooksPath` and a re-dropped husky silently breaks. `canon docs scenarios` carries the recipe.
 
@@ -15,17 +15,14 @@ Golden config files live in `tooling/base/configs/` and are copied into the targ
 - `.editorconfig`: `root = true`, with an `[*.sh]` block setting `indent_style = space` and `indent_size = 2`.
 - `commitlint.config.js`: ESM default export extending `@commitlint/config-conventional`. Rules are `header-max-length: 72`, `scope-case: lower-case`, `subject-full-stop: never`, `subject-case` disabled, and a local `no-claude-co-author` rule refusing a `Co-authored-by` trailer that names Claude or Anthropic.
 - `.husky/`: `pre-commit`, `commit-msg`, `pre-push`, `post-merge`, `post-rewrite`.
-- `.vscode/extensions.json` and `.vscode/settings.json`: editor wiring for Prettier, cspell, shfmt, and shellcheck.
 - `scripts/verify.sh`: the maintenance entry point behind `check`, a wrapper that hands off to `scripts/verify.ts`.
-- `scripts/verify.ts`: the one verify runner every stack shares. It runs typecheck, lint, format, format check, spelling, shell, unit tests, build, markdown bans, then card exclusion, always in that order, and skips any phase the folder's `scripts/verify.json` leaves out. Node modules only, since a target's own lint and typecheck read it.
-- `scripts/verify.json`: the phases a stack requires, plus any tools and preconditions it probes first. The nearest stack's copy wins. A required phase whose script `package.json` lacks fails the run. A base phase the list leaves out runs only where the folder declares its script. Base requires its four phases, so a base-only target still fails on a missing one. These three files are base's `[sync] per_root` set, which a `--skip base` subfolder still receives.
+- `scripts/verify.ts`: the one verify runner every stack shares. It runs typecheck, lint, format, format check, shell, unit tests, build, markdown bans, then card exclusion, always in that order, and skips any phase the folder's `scripts/verify.json` leaves out. Node modules only, since a target's own lint and typecheck read it.
+- `scripts/verify.json`: the phases a stack requires, plus any tools and preconditions it probes first. The nearest stack's copy wins. A required phase whose script `package.json` lacks fails the run. A base phase the list leaves out runs only where the folder declares its script. Base requires its three phases, so a base-only target still fails on a missing one. These three files are base's `[sync] per_root` set, which a `--skip base` subfolder still receives.
 
 ## What ships as user-owned seeds
 
 Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and never overwrites it, so a project extends them freely.
 
-- `cspell.json`: `version: "0.2"`, `language: "en"`, `useGitignore: true`, `gitignoreRoot: ["."]`, dictionary definitions for `project-terms` and `tech-stack` with `addWords: true` on both, and `ignorePaths: [".cspell/**", ".git/**"]` to skip dictionary self-checks and git object files.
-- `.cspell/project-terms.txt` and `.cspell/tech-stack.txt`: one word per line, sorted alphabetically.
 - `.lintstagedrc`: the glob map below.
 - `.prettierignore`: created empty. Projects add their own entries.
 - `.github/workflows/verify.yml`: runs on pull requests targeting `main` and on `workflow_dispatch`. A project with more than one language root adds its own jobs here.
@@ -36,15 +33,14 @@ Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and n
 
 - Runtime: `bun` as package manager and script runner, `bunx` over `npx` for a one-off executable.
 - Formatting: Prettier for what it parses, shfmt for shell. Two formatters because Prettier has no shell parser.
-- Spelling: cspell over the whole tree, with project vocabulary split into a project-terms dictionary and a tech-stack one.
 - Shell: shfmt formats and shellcheck lints at warning severity. Both take their files from `find scripts -name '*.sh'`, since `scripts/` can mix shell with TypeScript and shellcheck has no directory mode. A shell script with a shebang and no `.sh` extension is covered by neither, so give it the extension.
 - Commits: commitlint against conventional commits, wired through the husky `commit-msg` hook. Format is `<type>(<scope>): <subject>` in imperative mood with no trailing period.
-- Dev dependencies: `prettier`, `cspell`, `husky`, `@commitlint/cli`, `@commitlint/config-conventional`. Install via `bun add -D`.
+- Dev dependencies: `prettier`, `husky`, `@commitlint/cli`, `@commitlint/config-conventional`. Install via `bun add -D`.
 
 ## File layout
 
 - All shell scripts live in `scripts/`. Do not place a `.sh` file outside it.
-- Dictionaries live in `.cspell/`, hooks in `.husky/`, seeded context docs in `canon/context/`.
+- Hooks live in `.husky/`, seeded context docs in `canon/context/`.
 - The `canon/context/` location matches the three-tier context model: project-wide invariants in `CLAUDE.md` and `canon/REQUIREMENTS.md`, path-scoped rules in `.claude/rules/`, and on-demand domain narrative in `canon/context/`. Indexes stay opt-in.
 
 ## Hooks
@@ -59,13 +55,13 @@ Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and n
 
 Seeded baseline globs:
 
-- `**/*.{json,md,mdc}` runs `prettier --write --ignore-path .gitignore --ignore-path .prettierignore` then `cspell --no-must-find-files`
+- `**/*.{json,md,mdc}` runs `prettier --write --ignore-path .gitignore --ignore-path .prettierignore`
 - `**/*.md` runs `canon indexes regen`
 - `**/*.sh` runs `shfmt --write --indent 2` then `shellcheck --severity=warning`
 
 ## CI
 
-- Steps: checkout, setup Bun at latest, `bun install --frozen-lockfile`, install `shfmt` and `shellcheck` via apt, then `check:format`, `check:spell`, and `check:shell`.
+- Steps: checkout, setup Bun at latest, `bun install --frozen-lockfile`, install `shfmt` and `shellcheck` via apt, then `check:format` and `check:shell`.
 - CI asserts and never writes. Format must be clean before push.
 
 ## Gitignore
@@ -73,13 +69,12 @@ Seeded baseline globs:
 - `# System`: `.DS_Store`
 - `# Dependencies`: `node_modules/`
 - `# Secrets`: `.env`, `.env.*`, `*.local`, `!.env.example`
+- `# VSCode`: `.vscode/`
 
 ## Anti-patterns
 
 Sticky negative knowledge. Do not relearn.
 
-- Do NOT drop `gitignoreRoot: ["."]` from `cspell.json`. Without it, cspell run from inside a linked worktree under `.claude/worktrees/` walks up into the parent repo's `.gitignore`, resolves every worktree file as living under the ignored worktree path, and checks zero files. New words then pass locally and fail in CI.
-- Do NOT rely on the default `**` glob for spelling. It skips dot-prefixed folders, leaving `.claude/`, `.github/`, and `.husky/` unchecked. Pass `'**' '.*/**' '.*'` explicitly.
 - Do NOT invoke prettier without both `--ignore-path .gitignore --ignore-path .prettierignore`. Passing one drops the other, since the flag replaces the default rather than adding to it.
 - Do NOT omit `--log-level warn` from a prettier invocation. The default prints a line per unchanged file.
 - Do NOT put logic in a husky hook and expect its shebang to hold. Husky runs hooks as `sh -e`, so a hook carrying logic is POSIX sh under errexit whatever the first line says.
@@ -92,11 +87,10 @@ Sticky negative knowledge. Do not relearn.
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `bun run check`        | Repairs a checkout via `scripts/verify.ts`. Honors `VERIFY_NESTED=true` to suppress timeline boundaries when another script calls it. |
 | `bun run check:format` | Asserts prettier and shfmt formatting without writing                                                                                 |
-| `bun run check:spell`  | Runs cspell across every file, with context on failures                                                                               |
 | `bun run check:shell`  | Runs shellcheck at warning severity                                                                                                   |
 | `bun run format`       | Writes prettier and shfmt formatting in place                                                                                         |
 | `bun run prepare`      | Initializes husky hooks, run automatically on `bun install`                                                                           |
 
-`bun run check` repairs a checkout rather than gating one. It runs `format` first to auto-fix drifted code, then asserts only what the formatters could not fix. The pull request workflow calls `check:format`, `check:spell`, and `check:shell` directly, and those three are the gate.
+`bun run check` repairs a checkout rather than gating one. It runs `format` first to auto-fix drifted code, then asserts only what the formatters could not fix. The pull request workflow calls `check:format` and `check:shell` directly, and those two are the gate.
 
-`scripts/verify.ts`'s `Markdown bans` stage is the exception: it gates rather than repairs. It runs `canon markdown audit` over every tracked markdown file except `CHANGELOG.md`, since a generated changelog carries commit subjects nobody wrote against the ban set, and exits `2` on a finding or `3` on a shipped-empty ban set, failing `bun run check` and the `pre-push` hook that calls it. A refusal to measure exits `1` and is logged as a skip rather than a failure, as does a corpus with no file left to check once `CHANGELOG.md` is set aside. The stage needs `canon` on PATH. `canon docs projects` names the install command. Without it, the stage is skipped and logged, and coverage falls back to the three checks above.
+`scripts/verify.ts`'s `Markdown bans` stage is the exception: it gates rather than repairs. It runs `canon markdown audit` over every tracked markdown file except `CHANGELOG.md`, since a generated changelog carries commit subjects nobody wrote against the ban set, and exits `2` on a finding or `3` on a shipped-empty ban set, failing `bun run check` and the `pre-push` hook that calls it. A refusal to measure exits `1` and is logged as a skip rather than a failure, as does a corpus with no file left to check once `CHANGELOG.md` is set aside. The stage needs `canon` on PATH. `canon docs projects` names the install command. Without it, the stage is skipped and logged, and coverage falls back to the two checks above.

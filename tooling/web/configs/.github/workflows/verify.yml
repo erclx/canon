@@ -42,9 +42,6 @@ jobs:
       - name: Check Formatting
         run: bun run check:format
 
-      - name: Check Spelling
-        run: bun run check:spell
-
       - name: Check Shell
         run: bun run check:shell
 

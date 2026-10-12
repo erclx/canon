@@ -1,17 +1,8 @@
-import { existsSync, readdirSync, realpathSync } from 'node:fs'
-import { basename, join, relative } from 'node:path'
+import { realpathSync } from 'node:fs'
+import { relative } from 'node:path'
 import { gitEnv } from '@/git/env'
-import { isWholeStack, type Manifest, seedFiles } from '@/tooling/manifest'
-
-/**
- * The path the generated subfolder spell config is written to. Written
- * copy-once, since a project that already configured cspell here owns it.
- */
-export const SUBFOLDER_SPELL_CONFIG = 'cspell.json'
 
 const WITHHELD_PREFIX = '.github/'
-
-const SPELL_CONFIG_NAMES = ['cspell.json', '.cspell.json']
 
 /**
  * Whether the target sits below the root of the git repository holding it. A
@@ -56,59 +47,4 @@ export function subfolderPath(target: string): string | undefined {
  */
 export function isWithheldInSubfolder(rel: string): boolean {
   return rel.startsWith(WITHHELD_PREFIX)
-}
-
-/**
- * Whether the target already carries a cspell config of its own, in any of
- * the file names cspell searches for.
- */
-export function hasSpellConfig(target: string): boolean {
-  if (SPELL_CONFIG_NAMES.some((name) => existsSync(join(target, name)))) {
-    return true
-  }
-  if (!existsSync(target)) return false
-  return readdirSync(target).some((name) => name.startsWith('cspell.config.'))
-}
-
-/**
- * Builds the nested cspell config that registers a subfolder's seeded word
- * lists. A root `cspell '**'` merges it with the root config for files under
- * the subfolder. Each dictionary takes a `local-` name, since reusing a root
- * dictionary's name shadows it inside the subfolder and a root word then fails
- * there.
- *
- * Returns nothing when the chain carries `base`, whose own seed already writes
- * a config, or when no stack seeds a word list.
- */
-export function subfolderSpellConfig(
-  chain: readonly Manifest[],
-): string | undefined {
-  if (
-    chain.some((manifest) => manifest.name === 'base' && isWholeStack(manifest))
-  ) {
-    return undefined
-  }
-
-  const lists = new Set<string>()
-  for (const manifest of chain) {
-    for (const rel of seedFiles(manifest)) {
-      if (rel.startsWith('.cspell/') && rel.endsWith('.txt')) lists.add(rel)
-    }
-  }
-  if (lists.size === 0) return undefined
-
-  const definitions = [...lists].sort().map((path) => ({
-    name: `local-${basename(path, '.txt')}`,
-    path,
-    addWords: true,
-  }))
-
-  const config = {
-    version: '0.2',
-    dictionaryDefinitions: definitions,
-    dictionaries: definitions.map((definition) => definition.name),
-    ignorePaths: ['.cspell/**'],
-  }
-
-  return `${JSON.stringify(config, null, 2)}\n`
 }

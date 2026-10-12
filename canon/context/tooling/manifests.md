@@ -1,6 +1,6 @@
 ---
 title: Manifests and layering
-description: Manifest blocks and what each injects, which layer wins a duplicate, gitignore and dictionary merging, the ignore-parity check, and subfolder and monorepo sync
+description: Manifest blocks and what each injects, which layer wins a duplicate, gitignore merging, the ignore-parity check, and subfolder and monorepo sync
 ---
 
 # Manifests and layering
@@ -19,7 +19,7 @@ Which stack wins a duplicate differs by category, and the split is inherited rat
 
 ### Merges that add and never rewrite
 
-Gitignore merging is additive only and existing entries are never touched, so a project can reorder or annotate its own ignores without sync fighting it. Dictionary seeds merge rather than copy once: `.cspell/*.txt` accumulates project terms, so sync appends new entries and sorts. Every other seed copies once and is then left alone.
+Gitignore merging is additive only and existing entries are never touched, so a project can reorder or annotate its own ignores without sync fighting it. A seed copies once and is then left alone.
 
 ## Gotchas
 
@@ -45,8 +45,7 @@ No exception mechanism exists. The bare `.canon/` spelling admits no carve-out, 
 - `--skip base` relies on the layer boundary holding: repo-root-once configs live in `base`, and per-root configs live in `web` and the adapters. Moving a per-root config into `base` breaks the split unless base names it under `[sync] per_root`.
 - `[sync] per_root` is that one named exception, and base lists its verify runner, wrapper, and phase list there. `resolveChain` keeps a skipped stack carrying the key as a restricted manifest, holding those configs and no seeds, scripts, dependencies, or gitignore entries, so `scan`, `injectConfigs`, and `tooling diff` agree through `configFiles` and `seedFiles`. The chain stamp leaves the restricted stack out, and `buildToolingReport` restores it by re-resolving the recorded leaf with the first unrecorded ancestor as the skip, so `canon sync --check` measures the per-root files in a skipped subfolder without flagging every config the skip withheld.
 - A target below its git toplevel syncs as a subfolder, read in `src/tooling/subfolder.ts` by comparing `git rev-parse --show-toplevel` against the target's realpath. Every `.github/` config or seed moves into the scan's `withheld` field and stays out of `totalChanges`, since GitHub reads workflows only at the root. `scan`, `injectConfigs`, and `injectSeeds` all call `isWithheldInSubfolder`, so the diff and the write cannot disagree. A target outside any repository reads as a root.
-- A subfolder sync on a chain without `base` writes a nested `cspell.json` copy-once, registering each seeded `.cspell/*.txt` as `local-<basename>`. A root `cspell '**'` merges it for files under the subfolder. Reusing the root's `tech-stack` name shadows the root list there, so the prefix is required. Measured on cspell 8 only, and `cspell` is unpinned in the base manifest.
-- Base's `scripts/verify.ts` runs a phase the nearest `scripts/verify.json` requires and fails when its script is undeclared. A base-owned phase, being `format`, `check:format`, `check:spell`, or `check:shell`, that the list leaves out runs only when the folder's `package.json` declares its script, so web, python, go, and php pass in a `--skip base` subfolder while base alone still fails on a missing one. The run stops naming `bun init` when no `package.json` exists, and names `canon tooling sync` when no `verify.json` does rather than falling back to base's list.
+- Base's `scripts/verify.ts` runs a phase the nearest `scripts/verify.json` requires and fails when its script is undeclared. A base-owned phase, being `format`, `check:format`, or `check:shell`, that the list leaves out runs only when the folder's `package.json` declares its script, so web, python, go, and php pass in a `--skip base` subfolder while base alone still fails on a missing one. The run stops naming `bun init` when no `package.json` exists, and names `canon tooling sync` when no `verify.json` does rather than falling back to base's list.
 - A sync into a folder with no `package.json` installs the gitignore alone and warns with every dev dependency and script it skipped, rather than seeding a `package.json` that would pick a package manager and a name for the target.
 
 ## Manifest blocks

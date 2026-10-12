@@ -64,12 +64,12 @@ describe('loadManifest', () => {
   it('should read the dev packages array', () => {
     seedStack(
       'base',
-      '[stack]\nname = "base"\n\n[dependencies.dev]\npackages = ["prettier", "cspell"]\n',
+      '[stack]\nname = "base"\n\n[dependencies.dev]\npackages = ["prettier", "husky"]\n',
     )
 
     expect(loadManifest(root, 'base')?.devPackages).toEqual([
       'prettier',
-      'cspell',
+      'husky',
     ])
   })
 

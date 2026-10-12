@@ -11,7 +11,7 @@ Configs ship as sidecar files (`ruff.toml`, `mypy.ini`, `pytest.ini`, `.coverage
 ## Scaffold checklist
 
 1. Scaffold with `uv init --package <name>`. This creates `pyproject.toml` with a `uv_build` backend, `.python-version` pinned to 3.14, and `src/<name with underscores>/__init__.py` holding an annotated `def main() -> None:`, so source lands under `src/` where `mypy.ini`, `pytest.ini`, and `.coveragerc` look for it. `uv init` defaults `requires-python` to `>=3.14`, which matches the `.python-version` pin this stack ships.
-2. Seed `package.json` so the base layer's bun-side tools (husky, prettier, cspell, commitlint) have a target to install into: `bun init -y`. Without this the sync drops base configs but skips the dep install, since `resolve_missing_deps` short-circuits when `package.json` is absent.
+2. Seed `package.json` so the base layer's bun-side tools (husky, prettier, commitlint) have a target to install into: `bun init -y`. Without this the sync drops base configs but skips the dep install, since `resolve_missing_deps` short-circuits when `package.json` is absent.
 3. Install base tooling: `canon tooling sync base . --write`
 4. Install python tooling: `canon tooling sync python . --write`
 5. Install Python tooling deps: `uv add --dev ruff mypy pytest pytest-cov`. v1 of this stack does not declare these in `[dependencies.dev]` because manifest injection hardcodes `bun add -D`, which can not install Python packages. Until the injector branches on `runtime`, this step is manual.
@@ -31,7 +31,7 @@ The python stack also ships `tests/test_smoke.py` as a copy-once seed. `pytest` 
 
 ## Hybrid project shape
 
-A python project synced with this stack ends up with both `package.json` from base and `pyproject.toml` from `uv init`. The base layer brings prettier, cspell, commitlint, and husky for non-Python files. Both `node_modules/` and `.venv/` coexist at the project root. The hybrid shape gives Python projects access to the toolkit's cross-cutting tools without forking the base stack.
+A python project synced with this stack ends up with both `package.json` from base and `pyproject.toml` from `uv init`. The base layer brings prettier, commitlint, and husky for non-Python files. Both `node_modules/` and `.venv/` coexist at the project root. The hybrid shape gives Python projects access to the toolkit's cross-cutting tools without forking the base stack.
 
 ## Dependencies
 

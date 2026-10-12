@@ -1,3 +1,0 @@
-{
-  "shellcheck.customArgs": ["--severity=warning"]
-}

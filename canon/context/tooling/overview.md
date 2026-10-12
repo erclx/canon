@@ -23,7 +23,7 @@ Owns the golden configs a project inherits, layered across a `base` to `web` to 
 
 ### Configs overwrite and seeds are preserved
 
-The boundary is structural against user-extensible. Linters and formatters with no project-specific surface ship as configs, while files projects routinely extend, such as `cspell.json`, `.lintstagedrc`, and base's `.github/workflows/verify.yml` and `.github/pull_request_template.md`, ship as seeds. The config is the source, and a stack's reference carries only what a config cannot express, such as anti-patterns and opinions.
+The boundary is structural against user-extensible. Linters and formatters with no project-specific surface ship as configs, while files projects routinely extend, such as `.lintstagedrc` and base's `.github/workflows/verify.yml` and `.github/pull_request_template.md`, ship as seeds. The config is the source, and a stack's reference carries only what a config cannot express, such as anti-patterns and opinions.
 
 ### An overwrite needs authority a caller states
 

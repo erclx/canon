@@ -16,13 +16,7 @@ import {
   readPackage,
   type ScriptState,
 } from '@/tooling/package'
-import {
-  hasSpellConfig,
-  isSubfolderTarget,
-  isWithheldInSubfolder,
-  SUBFOLDER_SPELL_CONFIG,
-  subfolderSpellConfig,
-} from '@/tooling/subfolder'
+import { isSubfolderTarget, isWithheldInSubfolder } from '@/tooling/subfolder'
 
 export interface ConfigState {
   readonly rel: string
@@ -73,9 +67,9 @@ function isIdentical(a: string, b: string): boolean {
  * so the path is reported once.
  *
  * A target below its git toplevel is scanned as a subfolder: a config or seed
- * GitHub reads only at the root moves to `withheld` and counts as no change,
- * and the nested spell config joins the seeds. The scope is read here so every
- * caller of `scan` agrees without passing a flag.
+ * GitHub reads only at the root moves to `withheld` and counts as no change.
+ * The scope is read here so every caller of `scan` agrees without passing a
+ * flag.
  */
 export function scan(chain: readonly Manifest[], target: string): ScanResult {
   const isSubfolder = isSubfolderTarget(target)
@@ -130,13 +124,6 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
           : 'missing',
       })
     }
-  }
-
-  if (isSubfolder && subfolderSpellConfig(chain) !== undefined) {
-    seeds.push({
-      rel: SUBFOLDER_SPELL_CONFIG,
-      state: hasSpellConfig(target) ? 'present' : 'missing',
-    })
   }
 
   const packagePath = join(target, 'package.json')

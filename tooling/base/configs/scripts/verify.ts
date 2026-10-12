@@ -55,12 +55,6 @@ const PHASES: readonly Phase[] = [
     passed: 'Format check passed',
   },
   {
-    script: 'check:spell',
-    title: 'Spelling',
-    failed: 'Spell check failed',
-    passed: 'Spell check passed',
-  },
-  {
     script: 'check:shell',
     title: 'Shell',
     failed: 'Shell check failed',
@@ -83,12 +77,7 @@ const PHASES: readonly Phase[] = [
 // A subfolder synced with --skip base declares none of these, since the
 // repository root owns them, so a list that does not require one runs it only
 // where the folder declares it.
-const BASE_PHASES = new Set([
-  'format',
-  'check:format',
-  'check:spell',
-  'check:shell',
-])
+const BASE_PHASES = new Set(['format', 'check:format', 'check:shell'])
 
 const PHASE_LIST = 'scripts/verify.json'
 const CARD_EXCLUSION = 'scripts/check-card-exclusion.sh'

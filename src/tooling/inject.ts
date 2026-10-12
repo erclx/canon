@@ -20,13 +20,7 @@ import {
   readPackage,
   serializePackage,
 } from '@/tooling/package'
-import {
-  hasSpellConfig,
-  isSubfolderTarget,
-  isWithheldInSubfolder,
-  SUBFOLDER_SPELL_CONFIG,
-  subfolderSpellConfig,
-} from '@/tooling/subfolder'
+import { isSubfolderTarget, isWithheldInSubfolder } from '@/tooling/subfolder'
 import { logAdd, logRemove, logStep, logWarn } from '@/cli/ui'
 
 export async function injectConfigs(
@@ -120,14 +114,6 @@ export async function injectSeeds(
       logAdd(relative(target, dest))
       applied.push(rel)
     }
-  }
-
-  const spellConfig = isSubfolder ? subfolderSpellConfig(chain) : undefined
-  if (spellConfig !== undefined && !hasSpellConfig(target)) {
-    logStep('Applying subfolder spell config')
-    await writeFile(join(target, SUBFOLDER_SPELL_CONFIG), spellConfig)
-    logAdd(SUBFOLDER_SPELL_CONFIG)
-    applied.push(SUBFOLDER_SPELL_CONFIG)
   }
 
   return applied

@@ -25,7 +25,6 @@ Defined in `.github/workflows/verify.yml`. All jobs must pass before merge.
 | Check  | Command                | What it asserts                    |
 | ------ | ---------------------- | ---------------------------------- |
 | Format | `bun run check:format` | prettier and shfmt are clean       |
-| Spell  | `bun run check:spell`  | cspell passes against dictionaries |
 | Shell  | `bun run check:shell`  | shellcheck passes at warning level |
 
 ## Running CI locally

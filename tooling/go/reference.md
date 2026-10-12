@@ -10,7 +10,7 @@ The go stack covers Go modules linted and formatted by `golangci-lint` v2, type-
 
 1. Scaffold with `go mod init <module-path>`. The module path is the project's own identity, so this stack never ships a `go.mod`.
 2. Keep `./...` out of `node_modules`: `go mod edit -ignore=./node_modules`. At a root sync the base layer installs `node_modules/` inside the module, and a package there can ship a `.go` file that `go vet`, `go test`, and `golangci-lint` would otherwise walk. The directive needs Go 1.25 or later.
-3. Seed `package.json` so the base layer's bun-side tools (husky, prettier, cspell, commitlint) have a target to install into: `bun init -y`.
+3. Seed `package.json` so the base layer's bun-side tools (husky, prettier, commitlint) have a target to install into: `bun init -y`.
 4. Install base tooling: `canon tooling sync base . --write`
 5. Install go tooling: `canon tooling sync go . --write`
 6. Install the linter: `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest`. The manifest declares no `[dependencies.dev]`, because manifest injection runs `bun add -D`, which cannot install a Go tool. This step stays manual.

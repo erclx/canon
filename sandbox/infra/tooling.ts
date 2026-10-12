@@ -125,7 +125,7 @@ export default scenario({
       )
       ctx.log.info('Expected: only the root .husky exists, no frontend/.husky.')
       ctx.log.info(
-        "Expected: .github/ is withheld and named with 'working-directory: frontend', and frontend/cspell.json lands.",
+        "Expected: .github/ is withheld and named with 'working-directory: frontend', and no frontend/cspell.json lands.",
       )
       ctx.exec(
         'bun',
