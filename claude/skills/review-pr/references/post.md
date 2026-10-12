@@ -80,7 +80,7 @@ Keying either half of the opening's threshold on the grade was measured wrong: a
 
 The cost is that the merge decision no longer reads off the heading alone, since an open heading covers a minor as well as a critical. Take it from the counts on the summary line, which is where they already sit. No summary line reports the merge as unblocked under either heading, since a thread reading open cannot also report that nothing blocks it.
 
-A minor the dispatched worker declines is what needs a surface that survives the merge, rather than every minor, since one that gets fixed on the branch needs no durable record. Write a declined minor into the `## Findings` section of the task the branch closes, which is where the queue-refill sweep already routes a finding that changes another task. A declined finding left on the thread alone is lost the moment the pull request merges.
+A minor the dispatched worker declines is what needs a surface that survives the merge, rather than every minor, since one that gets fixed on the branch needs no durable record. Write a declined minor into the `## Findings` section of the task the branch closes, as a line opening with the bold source-and-date label from `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`, which is where the queue-refill sweep already routes a finding that changes another task. A declined finding left on the thread alone is lost the moment the pull request merges.
 
 Read the state off the most recent review comment rather than off the presence of a closed one. A close-out does not close the pull request, so a commit pushed after it gets its own pass, and that pass reopens the review under `## Review` when it raises a finding of any grade.
 

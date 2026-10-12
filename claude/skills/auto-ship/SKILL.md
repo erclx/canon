@@ -50,7 +50,7 @@ Check for a `**Files to touch:**` or `## Files to touch` marker per `${CLAUDE_SK
 
 Read `<plan>` at the main worktree root. This file is the scope for this run.
 
-Its sections and its answer contract are fixed by `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`. A blank `- Answer:` accepts the `- Suggested:` line above it, so an unanswered question is a decision this run executes rather than a reason to stop. When this run decides against that suggestion, rewrite the `- Suggested:` line as `overridden at execution to <pick>,` plus the measurement, leaving the `- Answer:` slot blank, and put the same deviation in one line under the open task's `## Findings`, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
+Its sections and its answer contract are fixed by `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`. A blank `- Answer:` accepts the `- Suggested:` line above it, so an unanswered question is a decision this run executes rather than a reason to stop. When this run decides against that suggestion, rewrite the `- Suggested:` line as `overridden at execution to <pick>,` plus the measurement, leaving the `- Answer:` slot blank, and put the same deviation in one line under the open task's `## Findings`, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`, opening with the bold source-and-date label that `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
 
 ## Step 2: implement
 

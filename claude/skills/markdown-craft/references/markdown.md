@@ -42,6 +42,7 @@ Does not govern:
 - H1 for document title, H2 for main sections, H3 for subsections
 - Use sentence case for all headings (H1, H2, H3). The audit reports a heading or a frontmatter `title` with a capitalized word after the first, and a proper noun it reports stays as it is.
 - Proper nouns and product names retain their casing in headings
+- Shape a record as H2 per section and H3 per item a reader looks up by name, with a few bullets or prose under each H3. Use a table only for a fixed-shape set.
 
 ### Seams
 
@@ -67,11 +68,11 @@ Does not govern:
 
 - Use prose by default. Reserve bullets for discrete, unrelated items.
 - Keep paragraphs to four sentences or fewer. Split longer blocks at the next logical boundary.
-- Past roughly 700 characters in one paragraph, folding in the lines that wrap it, split at the next logical boundary as well. A paragraph written as two long sentences satisfies the sentence cap above and still asks the reader to hold too much at once. This number sits well above the bullet checkpoint because a paragraph is read straight through and a bullet is scanned. A paragraph a branch adds or grows past it fails the push in a context entry through the `paragraph-growth` gate stage, and an unchanged long paragraph passes. Elsewhere it is the audit's warning and no more.
+- Past roughly 700 characters in one paragraph, folding in the lines that wrap it, split at the next logical boundary as well. Two long sentences satisfy the sentence cap and still overload the reader. This number sits well above the bullet checkpoint because a paragraph is read straight through and a bullet is scanned. A paragraph a branch adds or grows past it fails the push in a context entry through the `paragraph-growth` gate stage, and an unchanged long paragraph passes. Elsewhere it is the audit's warning and no more.
 
 ### Bullets
 
-- Keep bullets tight. Past roughly 250 characters in one top-level bullet, counting the lines that continue it and excluding any bullet nested under it, the overflow belongs in prose. A bullet a branch adds or grows past it fails the push in a context entry through the `paragraph-growth` gate stage, and an unchanged one passes until edited. Elsewhere it is the audit's warning and no more. The number is a checkpoint rather than a cap, and a bullet reading well past it means the number is wrong rather than the rule.
+- Keep bullets tight. Past roughly 250 characters in one top-level bullet, counting the lines that continue it and excluding any bullet nested under it, the overflow belongs in prose. A bullet a branch adds or grows past it fails the push in a context entry through the `paragraph-growth` gate stage, and an unchanged one passes until edited. Elsewhere it is the audit's warning and no more. The number is a checkpoint rather than a cap.
 - Keep a run of consecutive top-level bullets to 5 or fewer under one heading, and fold a longer one into prose, an H3 per item, or a split at the seam. A blank line, a continuation, and a nested item do not break the run, and a paragraph or heading does. The audit reports a longer run and the `bullet-stacks` gate stage fails it.
 - Leave a run whose every item opens with a bold label or a link as it is, since each item names its own subject. A task box (`[ ]`) is not a link, so a checklist counts as plain bullets. Numbered items do not count toward the cap. Governance rules and `REQUIREMENT.md` sit outside it, since a rule is one imperative per bullet.
 - Collapse a stack of bullets narrating one subsystem into a single `###` subsection carrying one narrative. Splitting a heavy bullet into three light ones satisfies the checkpoint above and leaves the reader no better off, and subdividing a block does not lighten the bullets inside it, so the two rules answer different defects.

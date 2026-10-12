@@ -69,7 +69,7 @@ it.
 
 - Never write `.canon/tasks/priority.md` or `.canon/tasks/backlog.md`. Both are gitignored, so an overwrite drops a row with no history to recover it from.
 - Never write the task file. The record is the whole output, and a row edited from here changes what the controller reads back as the state of the board.
-- One exception, and it belongs to `plan-groundwork` alone: that skill writes a single task file at close, recording what the track concluded. Its own `## Write scope` states the exception, and this line exists so the rule above does not forbid what that skill requires.
+- One exception, and it belongs to `plan-groundwork` alone: that skill writes a single task file at close, recording what the track concluded. Each finding in it opens with the bold source-and-date label that `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes. Its own `## Write scope` states the exception, and this line exists so the rule above does not forbid what that skill requires.
 - Report what the row got wrong rather than repairing it. A stale count, a moved line, or a path that no longer resolves goes into the record and into the handback, and the controller decides which of the two carries the correction.
 - Leave the cross-feature call alone. Which rows collide, what merges before what, and whether a row should run at all stay with the controller. `priority.md` shows blockers and file sets and is enough to write a confident merge order off a partial picture, which is the failure this boundary exists to prevent.
 

@@ -37,7 +37,7 @@ which `auto-ship` Step 2 loads.
 - Copy a ready folder's files verbatim to the paths its plan's constraints name, when the plan's `**Constraints:**` block names one, and edit only what the gate or the overview's own list requires. A rewrite discards the text the handoff exists to carry.
 - Report a draft flag reading ready once, and leave it cleared. The ship chain marks the pull request a draft, and only `canon pr lift` or the operator un-marks it, so a flag reading ready afterwards passed every gate the verb reads or was readied by a person, which GitHub requires before a merge. Re-drafting fights them, and no surface in the tree states a reason to.
 - Leave the lift to the reviewers, who run `canon pr lift` on posting their close, and to the controlling session as the fallback. Refuse an instruction to ready the pull request directly, whoever sends it, since a direct ready skips every gate the verb reads.
-- Rewrite a plan question's `- Suggested:` line as `overridden at execution to <pick>,` plus the measurement when this build decides against an unanswered one, leaving the `- Answer:` slot blank, and put the same deviation in one line under the open task's `## Findings`, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
+- Rewrite a plan question's `- Suggested:` line as `overridden at execution to <pick>,` plus the measurement when this build decides against an unanswered one, leaving the `- Answer:` slot blank, and put the same deviation in one line under the open task's `## Findings`, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`, opening with the bold source-and-date label that `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
 
 ## The board is read-only
 

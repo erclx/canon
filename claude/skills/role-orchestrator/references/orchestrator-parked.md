@@ -31,7 +31,7 @@ The blocker cell states what the row waits on, and each kind is tested different
 
 Every measurement this pass takes is a blocker re-test on a row already filed, and it decides whether that row can start rather than how big it is. Sizing a row is the filing boundary `role-orchestrator` states under `## Boundaries`, which leaves the extent and the cause to whoever plans the row.
 
-Write the result into the row. A re-test reported in chat is lost at the next compaction and the next pass measures the same thing again. Rewrite a blocker cell whose test no longer holds, move the row to the group its new state puts it in, and record the measurement in that task's `## Findings` with the date it was taken. `### Writing the board` in `role-orchestrator` owns the method, and `canon tasks validate` runs once the board is rewritten and before the report.
+Write the result into the row. A re-test reported in chat is lost at the next compaction and the next pass measures the same thing again. Rewrite a blocker cell whose test no longer holds, move the row to the group its new state puts it in, and record the measurement in that task's `## Findings` as a line labeled with this session and the date it was taken, per `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`. `### Writing the board` in `role-orchestrator` owns the method, and `canon tasks validate` runs once the board is rewritten and before the report.
 
 ## Re-testing a backlog row
 
