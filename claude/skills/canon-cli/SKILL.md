@@ -12,7 +12,8 @@ Consult to pick the `canon` verb for a job, and before running a verb that write
 ## Find the verb
 
 - Each row below names a verb by its job. Subcommands and flags are not listed here, so read them where they are kept.
-- Run `canon <verb> --help` for a verb's subcommands and flags.
+- Run `canon <verb> --help --all` for a verb's subcommands and every flag in one read, where `canon <verb> --help` alone stops at the subcommand list.
+- Read `canon <verb> --help --all` before running a verb no skill body spells out. A verb a skill gives in full runs as that skill wrote it.
 - Run `canon docs agents` for the invocation contract behind every verb, and `canon docs list` for every other reference doc, then `canon docs <topic>` by name.
 
 ## Project setup

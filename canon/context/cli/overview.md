@@ -11,7 +11,7 @@ The layer boundary: TypeScript owns argument parsing plus every migrated domain,
 
 ## Layout
 
-- `src/` root holds the entry point (`cli.ts`) alone, since `bin`, scripts, workflows, and hooks name it. `src/cli/` holds the terminal and process layer: `ui.ts` matching `lib/ui.sh`, `help.ts`, `run.ts`, and the bash helper `exec.ts`
+- `src/` root holds the entry point (`cli.ts`) alone, since `bin`, scripts, workflows, and hooks name it. `src/cli/` holds the terminal and process layer: `ui.ts` matching `lib/ui.sh`, `help.ts` and the `--help --all` router `help-all.ts`, `run.ts`, and the bash helper `exec.ts`
 - `src/roots/` groups the four resolvers answering where something lives, `PROJECT_ROOT` among them
 - `src/commands/` owns one file per `canon` subcommand, each one not yet migrated a thin pass-through to a `manage-*.sh` script
 - `src/design/`, `src/slides/`, `src/transcripts/` own the domains built TS-first, documented as feature entries in `canon/context/design/index.md`, `canon/context/features/slides.md`, and `canon/context/features/transcripts.md`

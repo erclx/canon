@@ -13,7 +13,7 @@ The damage lands on the files a project owns. A golden config carrying local edi
 
 The inverse failure is quieter. A session that assumes a sync will pick up a change edits a seed and waits for an update that never comes, because the seed is copy-once and no sync command writes it again. Both failures are one missing fact available before the command runs.
 
-A third gap is the route itself. `canon --help` lists every top-level verb with a partial hint, and a session with a job in hand pays a `--help` read per candidate to find the one that does it, or picks by name and lands on the wrong one. The job-to-verb mapping is the fact the session needs and no verb answers.
+A third gap is the route itself. `canon --help` lists every top-level verb by a one-line description, and a session with a job in hand pays a `--help` read per candidate to find the one that does it, or picks by name and lands on the wrong one. The job-to-verb mapping is the fact the session needs and no verb answers.
 
 Being reachable is a separate problem from being right. This is a pure reference whose moment happens inside another skill's run, so nothing brings it up unless a body names it. A route lives in a body or it does not exist, and a mention in a sibling's requirement file is not one.
 
@@ -23,7 +23,7 @@ Being reachable is a separate problem from being right. This is a pure reference
 - Route an author-and-render verb to the skill that owns it rather than describing it
 - Warn about a verb that can lose the project's edits before it runs, naming what it replaces
 - Point each destructive verb at `canon docs install-and-sync`, which owns the overwrite detail
-- Point to `canon <verb> --help` and `canon docs agents` for subcommands, flags, and the invocation contract
+- Point to `canon <verb> --help --all` and `canon docs agents` for subcommands, flags, and the invocation contract, and have the session read that help before running a verb no skill body spells out, a verb a skill pins in full being exempt
 - Defer to `canon docs install-and-sync` when it and this summary disagree, since the summary is a copy and the doc is the source
 
 ## Must not

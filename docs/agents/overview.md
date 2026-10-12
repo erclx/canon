@@ -11,7 +11,7 @@ This folder is an index of what an agent can run and how to run it cleanly from 
 
 ## Invocation rules
 
-See `CLAUDE.md` design principles. They apply to every command in this folder.
+`output-shape.md` holds the stream and exit contract. It applies to every command in this folder.
 
 ## Where to start
 
@@ -21,6 +21,6 @@ See `CLAUDE.md` design principles. They apply to every command in this folder.
 
 ## Related
 
-- `CLAUDE.md`: project behaviors and design principles
+- `CLAUDE.md`: project behaviors
 - `.claude/skills/internal-*`: domain-scoped guidance for editing work, in the toolkit checkout only
 - `docs/index.md`: full docs directory

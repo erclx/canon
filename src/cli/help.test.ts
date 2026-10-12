@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { renderHelp } from '@/cli/help'
+import { COMMAND_GROUPS, renderHelp } from '@/cli/help'
 
 const FRAME_GLYPHS = /[┌├│└]/
 
@@ -47,6 +47,16 @@ describe('renderHelp', () => {
     const [first] = renderHelp(makeStream(false)).split('\n')
 
     expect(first).toBe('Usage: canon [command]')
+  })
+
+  it('should name no subcommands in a row description', () => {
+    const rows = COMMAND_GROUPS.flatMap((group) => group.rows)
+
+    const hinted = rows.filter(([, description]) =>
+      /\([^)]*,[^)]*\)/.test(description),
+    )
+
+    expect(hinted).toEqual([])
   })
 
   it('should cut descriptions at the same text in both forms', () => {

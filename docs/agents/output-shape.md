@@ -40,7 +40,7 @@ Rules:
 └
 ```
 
-Help skips the banner. The `Usage:` line sits directly on `├`. Help writes to stdout because `--help` is documentation, not runtime UI.
+Help skips the banner. The `Usage:` line sits directly on `├`. Help writes to stdout because `--help` is documentation, not runtime UI. `--help --all` on a command prints each block unframed, one after another, and a help request naming an unknown subcommand, under a group that takes no operand of its own, writes its refusal to stderr and exits 1.
 
 ## JSON and `--names` modes
 

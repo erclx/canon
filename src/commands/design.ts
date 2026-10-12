@@ -161,7 +161,13 @@ export function register(program: Command): void {
         `overrides a value by writing ${join(DESIGN_INSTALL_DIR, DESIGN_PROJECT_SUBDIR)}/`,
         'itself, which sync never touches. Nothing arrives on a project that',
         'has not run this, so a design value reaches a target on an install',
-        'rather than on the next sync.',
+        'rather than on the next sync. A base stylesheet already installed is',
+        'replaced.',
+        '',
+        'Exit codes:',
+        '  0  the stylesheet was installed',
+        '  1  the target is missing or is the toolkit root, or the toolkit',
+        '     source is absent',
         '',
       ].join('\n'),
     )
@@ -176,6 +182,21 @@ export function register(program: Command): void {
     )
     .argument('[target]', 'Target directory', '.')
     .helpOption('-h, --help', 'Show this help message')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Replaces the shipped design files under .claude/design/ with the',
+        'toolkit copy, edited or not, and leaves',
+        `${join(DESIGN_INSTALL_DIR, DESIGN_PROJECT_SUBDIR)}/ alone. It deletes nothing it finds no`,
+        'source for.',
+        '',
+        'Exit codes:',
+        '  0  synced, already up to date, or the prompt was cancelled',
+        '  1  the target is missing or is the toolkit root',
+        '',
+      ].join('\n'),
+    )
     .action(async (target: string) => {
       process.exitCode = await runDomainSync(
         createDesignAdapter(PROJECT_ROOT),

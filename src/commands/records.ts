@@ -81,7 +81,7 @@ export function register(program: Command): void {
   const records = program
     .command('records')
     .description(
-      'Check a governed corpus against its standard, and back up the session records under .claude/',
+      'Check a governed corpus against its standard, and back up the session records under .canon/',
     )
     .helpOption('-h, --help', 'Show this help message')
 
