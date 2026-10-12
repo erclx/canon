@@ -1,4 +1,4 @@
-# Screencast: Four sessions, four branches
+# Screencast: four sessions, four branches
 
 ## 1. Header
 
@@ -15,7 +15,7 @@
 
 ## 3. Beat sheet
 
-### Beat 1: The page opens
+### Beat 1: the page opens
 
 - On screen: the top of canon's landing page
 - Action: navigate
@@ -23,7 +23,7 @@
 - Emphasis: none
 - Caption: canon's landing page
 
-### Beat 2: One session dispatches the rest
+### Beat 2: one session dispatches the rest
 
 - On screen: the dispatch section
 - Action: scroll
@@ -31,7 +31,7 @@
 - Emphasis: none
 - Caption: One session dispatches workers and planners
 
-### Beat 3: Four branches on disjoint files
+### Beat 3: four branches on disjoint files
 
 - On screen: the branch graph with each worker's pull request
 - Action: scroll

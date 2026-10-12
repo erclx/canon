@@ -1,3 +1,5 @@
+import type { ColonFinding } from '@/markdown/colons'
+import type { HeadingCaseFinding } from '@/markdown/heading-case'
 import type { LinkFinding } from '@/markdown/links'
 import type { BanFinding } from '@/markdown/scan'
 import type { StructureReport } from '@/markdown/structure'
@@ -16,6 +18,19 @@ export interface GateInput {
    * alone states the same rule and leaves no place to assert it.
    */
   readonly structure: readonly StructureReport[]
+  /**
+   * Every mid-sentence colon the run measured, read by nothing here.
+   *
+   * A colon is sometimes right and the corpus carries over a thousand
+   * candidates, so the measure warns and a push never fails on it.
+   */
+  readonly colons: readonly ColonFinding[]
+  /**
+   * Every heading or title with a capital after its first word, read by
+   * nothing here. A proper noun is the one case it cannot tell from title
+   * case, and gating it would need a names list and an escape marker.
+   */
+  readonly headingCase: readonly HeadingCaseFinding[]
 }
 
 /**

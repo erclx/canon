@@ -55,6 +55,16 @@ A relative link's destination resolves against the filesystem, over the same cor
 
 The placeholder exemption is the one live case the corpus needs. Every current instance is a genuine illustration rather than a literal path, and a marker-based override is available for the day a real one needs an exception instead.
 
+### Colons and heading case
+
+Two advisory measures report beside the bans and never fail a run.
+
+The colon measure reports a colon followed by more text in a prose line, outside the label position. A list item's first colon, a bold or code span label, a line-final colon, a time, a URL, and anything inside a code span or a link are left alone. A heading, a table row, and a fenced line are skipped. Each finding carries the line, the column, the line's text, and the word before the colon as `lead` under `colons` in the `--json` entry.
+
+The heading-case measure reports a heading or a frontmatter `title` with a capitalized word after its first, outside code spans and all-caps tokens, under `headingCase`. A proper noun reports as well and is left as it is.
+
+`CHANGELOG.md` is exempt from both, since the release tool writes its headings.
+
 ### Weight, cadence, and length
 
 Bullet and paragraph weight, run depth, the two cadence numbers, and the document length ceiling are each a judgment a reader settles rather than a fact a scan settles. What each measures, the samples behind its checkpoint, and why none of them gates are in `markdown-audit-weight.md`.
@@ -94,6 +104,8 @@ The target push stage reads the same exit codes `canon gate run`'s own stage rea
 The target push stage excludes `CHANGELOG.md`, unlike every other surface here. A changelog a generator builds from commit subjects carries prose nobody wrote against the ban set, where this repository's own passes only because `release-please` builds it from subjects sessions already wrote to the rule. The stage passes an explicit file list rather than the bare invocation the other surfaces use, so a corpus with no file left once the changelog is set aside reads as a pass rather than falling back to the whole tree.
 
 The hook prefers a checkout's own `src/cli.ts` over a globally installed binary, so it and the push stage read one build. A published binary lags a branch by whatever has not been released, which would put a ban kind added on the branch into the push and not into the edit. It reads its findings out of the `--json` record rather than off the exit code, so an older binary still reports where the fallback applies. It reads `bans.emptySets` out of the same record, so a set the verb shipped empty reaches the author as a check narrowed to what it could measure rather than as a clean pass.
+
+It also relays the two advisory measures from the same record. A heading finding reports for the whole file, and a colon finding reports only where the word before the colon and the colon appear in the text the write carried, so an edit is never asked to answer for a colon it left untouched.
 
 That field replaced `bans.missingStandards`, which answered a standard resolving under none of three roots. The set ships with the package now, so the state it named cannot occur and the narrowed check has one cause left, a defect in the build. The hook keeps reading a field either way, since a reader cannot tell a narrowed check from a clean one without it.
 

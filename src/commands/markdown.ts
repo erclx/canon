@@ -3,9 +3,14 @@ import { readFile } from 'node:fs/promises'
 import { dirname, relative, resolve } from 'node:path'
 import type { Command } from 'commander'
 import { BAN_SETS, emptyBanSets } from '@/markdown/bans'
-import { lengthExemption } from '@/markdown/ceiling'
+import { isChangelog, lengthExemption } from '@/markdown/ceiling'
+import { type ColonFinding, findColons } from '@/markdown/colons'
 import { type MarkdownAuditRefusal, resolveMarkdown } from '@/markdown/files'
 import { isGating } from '@/markdown/gate'
+import {
+  findHeadingCase,
+  type HeadingCaseFinding,
+} from '@/markdown/heading-case'
 import { decodePath, findBrokenLinks, type LinkFinding } from '@/markdown/links'
 import {
   type BanFinding,
@@ -52,6 +57,8 @@ interface FileReport {
   readonly rel: string
   readonly bans: readonly BanFinding[]
   readonly links: readonly LinkFinding[]
+  readonly colons: readonly ColonFinding[]
+  readonly headingCase: readonly HeadingCaseFinding[]
   readonly structure: StructureReport
   readonly renderedLines: number
   /** The stated reason, or null where the document is not exempt. */
@@ -90,6 +97,10 @@ export function register(program: Command): void {
         'Bullet, paragraph, and depth weight are judgments a reader settles,',
         'so all three report and none of them fails a run.',
         '',
+        'A mid-sentence colon and a heading with a capital after its first word',
+        'report the same way. A proper noun is the one case the second cannot',
+        'tell from title case, and the first is sometimes right.',
+        '',
         'Length reports a whole document past the ceiling and never exits 2.',
         'The Document ceiling gate stage owns that verdict, since this audit also',
         'runs on a record kept out of version control, where a long plan is not',
@@ -100,7 +111,7 @@ export function register(program: Command): void {
         'it correctly and a flat paragraph there is not a defect.',
         '',
         'Rewrite the sentence carrying a hit rather than swapping the token for',
-        'a near-synonym. A code span clears the report and is the answer only',
+        'a near-synonym or a colon or a comma. A code span clears the report and is the answer only',
         'where the token is genuinely an identifier under discussion, which is',
         'what markdown.md reserves the span for.',
         '',
@@ -160,9 +171,13 @@ async function runAudit(
       const abs = resolve(root, rel)
       const source = await readFile(abs, 'utf8')
       const lines = bodyLines(source)
+      // The release tool writes a changelog, so neither advisory reads it.
+      const advisory = !isChangelog(rel)
       return {
         rel,
         bans: scanBans(lines, bans),
+        colons: advisory ? findColons(lines) : [],
+        headingCase: advisory ? findHeadingCase(source) : [],
         links: findBrokenLinks(lines, (path) =>
           existsSync(resolve(dirname(abs), path)),
         ),
@@ -177,6 +192,8 @@ async function runAudit(
   reportScope(scope.files, scope.unmatched)
   reportBans(reports, bans, empty)
   reportLinks(reports, root)
+  reportColons(reports)
+  reportHeadingCase(reports)
   reportBullets(reports, checkpoints)
   reportParagraphs(reports, checkpoints)
   reportCadence(reports, checkpoints)
@@ -210,6 +227,8 @@ async function runAudit(
           path: report.rel,
           bans: report.bans,
           links: report.links,
+          colons: report.colons,
+          headingCase: report.headingCase,
           longestRun: report.structure.longestRun,
           longestRunLine: report.structure.longestRunLine,
           heavyBullets: report.structure.heavyBullets,
@@ -230,6 +249,8 @@ async function runAudit(
     bans: reports.flatMap((report) => report.bans),
     links: reports.flatMap((report) => report.links),
     structure: reports.map((report) => report.structure),
+    colons: reports.flatMap((report) => report.colons),
+    headingCase: reports.flatMap((report) => report.headingCase),
   })
 
   return gating ? EXIT_GATE : 0
@@ -310,7 +331,7 @@ function reportBans(
   logWarn(`${plural(total, 'hit')} across ${plural(carrying.length, 'file')}`)
   logWarn('This fails the run. Every other check below reports.')
   logInfo(
-    'Rewrite the sentence rather than swapping the token for a near-synonym.',
+    "Rewrite the sentence rather than swapping the token for a near-synonym, or a colon or a comma in the dash's place. That is the same sentence.",
   )
   logInfo(
     'A code span clears the report and is the answer only where the token is genuinely an identifier under discussion, which is what markdown.md reserves the span for.',
@@ -377,6 +398,78 @@ function reportLinks(reports: readonly FileReport[], root: string): void {
               (found) =>
                 `  :${found.line}:${found.column + 1}  ${found.destination}  -> ${resolvedLinkPath(root, report.rel, found.destination)}`,
             )
+            .join('\n')}`,
+      )
+      .join('\n'),
+  )
+}
+
+function reportColons(reports: readonly FileReport[]): void {
+  logStep('Colons')
+  logInfo(
+    'A colon followed by more text in a prose line, outside a label, a code span, and a link.',
+  )
+  logInfo(
+    'A heading, a table row, a fenced block, and a line-final colon are excluded. This never fails a run.',
+  )
+
+  const carrying = reports
+    .filter((report) => report.colons.length > 0)
+    .sort((a, b) => b.colons.length - a.colons.length)
+
+  if (carrying.length === 0) {
+    logInfo('No colon joining two clauses.')
+    return
+  }
+
+  const total = carrying.reduce((sum, report) => sum + report.colons.length, 0)
+  logWarn(`${plural(total, 'colon')} across ${plural(carrying.length, 'file')}`)
+  logInfo(
+    'Split the sentence or rewrite it. A colon belongs after a label or at the end of a line introducing a list.',
+  )
+  pipeOutput(
+    carrying
+      .map(
+        (report) =>
+          `${report.rel}  ${plural(report.colons.length, 'colon')}\n${report.colons
+            .map((found) => `  :${found.line}:${found.column + 1}`)
+            .join('\n')}`,
+      )
+      .join('\n'),
+  )
+}
+
+function reportHeadingCase(reports: readonly FileReport[]): void {
+  logStep('Heading case')
+  logInfo(
+    'A heading or frontmatter title with a capitalized word after its first, outside code spans and all-caps tokens.',
+  )
+  logInfo(
+    'A proper noun reports too and is left as it is. This never fails a run.',
+  )
+
+  const carrying = reports
+    .filter((report) => report.headingCase.length > 0)
+    .sort((a, b) => b.headingCase.length - a.headingCase.length)
+
+  if (carrying.length === 0) {
+    logInfo('No heading carrying a capital after its first word.')
+    return
+  }
+
+  const total = carrying.reduce(
+    (sum, report) => sum + report.headingCase.length,
+    0,
+  )
+  logWarn(
+    `${plural(total, 'heading')} across ${plural(carrying.length, 'file')}`,
+  )
+  pipeOutput(
+    carrying
+      .map(
+        (report) =>
+          `${report.rel}  ${plural(report.headingCase.length, 'heading')}\n${report.headingCase
+            .map((found) => `  :${found.line}  ${found.text}`)
             .join('\n')}`,
       )
       .join('\n'),

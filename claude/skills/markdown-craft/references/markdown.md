@@ -42,7 +42,7 @@ Does not govern:
 ## Headings
 
 - H1 for document title, H2 for main sections, H3 for subsections
-- Use sentence case for all headings (H1, H2, H3)
+- Use sentence case for all headings (H1, H2, H3). The audit reports a heading or a frontmatter `title` with a capitalized word after the first, and a proper noun it reports stays as it is.
 - Proper nouns and product names retain their casing in headings
 - Past roughly 40 rendered lines with no heading of any level breaking them, add a subheading at the seam. Measure the longest such run rather than everything under one `##`, and exclude fenced code blocks. The number is a checkpoint, not a cap.
 - Count rendered lines rather than source lines, wrapping each source line at 80 columns and summing the heights. Source lines undercount a file authored one line per bullet, where a block of fifteen paragraph-bullets occupies fifteen lines and renders past sixty. A checkpoint another standard states counts the same unit, so a file measured one way never sits beside a run measured another.
@@ -80,7 +80,8 @@ Does not govern:
 
 ## Punctuation
 
-- Do not use em dashes (`—`) or semicolons (`;`). Rewrite or restructure the sentence to avoid them.
+- Do not use em dashes (`—`) or semicolons (`;`). Rewrite or restructure the sentence to avoid them. A colon or a comma standing where the dash was is the same sentence, so split it or rewrite it.
+- Do not use a colon to join two clauses in the middle of a sentence. A colon belongs after a label or at the end of a line introducing a list.
 - Do not use parenthetical asides in prose (`the config (which is optional) controls...`). Split into its own sentence or drop it. Parentheses in rule definitions for grouping examples are fine.
 
 ## Language
