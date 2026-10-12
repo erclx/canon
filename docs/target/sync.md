@@ -30,7 +30,7 @@ A project that has never synced under a toolkit new enough to write a stamp fall
 
 Further causes sit outside the per-domain scan, each naming something that walk cannot see. A seed the project edited is reported under `seeds` and merged by hand, since no sync command touches a seed. A file a newer seed folder replaced is reported under `superseded`, such as `.claude/TASKS.md` against the `.canon/tasks/` that now ships, and nothing moves it because the content is the project's own. A domain sitting at the root layout with nothing under `.claude/` is reported under `unmigrated`, and no command moves it either. The project moves the content itself. A surface still at its `.claude/` spelling with nothing under `canon/`, such as `.claude/REQUIREMENTS.md`, is reported under `unmovedSurfaces`, since rules glob the `canon/` spelling alone, and `canon migrate surface-roots` moves it. <!-- canon-keep-surface-root -->
 
-`unmigrated` currently names no domain, since standards and snippets are the two the toolkit ever installed at the project root, standards closed its install channel, and snippets retired outright. A target still holding a root `standards/` folder from an older toolkit is carrying its own authoring surface now, not an unfinished install, and nothing proposes moving it. A leftover `.claude/snippets/` reports under `reverse` below instead.
+`unmigrated` currently names no domain, since snippets is the one the toolkit ever installed at the project root, and it retired outright. A leftover `.claude/snippets/` reports under `reverse` below instead.
 
 ### Rules you never received
 
@@ -73,8 +73,6 @@ Reconcile the configs with `canon tooling diff <stack> <path>` to read which fil
 `canon sync <path>` runs every installed domain's sync in sequence. Safe to run on a cadence.
 
 It never touches user-owned seed files. Governance rules in `.claude/rules/` and tooling configs refresh in place. Stale `.claude/GOV.md` from earlier installs is removed.
-
-Standards take no part in that run. Nothing installed them, so there is no copy to reconcile and no `canon standards sync` to reach for.
 
 ## Targeted
 

@@ -5,14 +5,14 @@ description: Running the audit over any markdown path, where its bans and checkp
 
 # Markdown audit
 
-`canon markdown audit [path...]` reports any markdown file against the attribute standard `markdown.md`. An attribute standard governs a file rather than a folder, so this resolves no folder and requires no `index.md`, which is what puts `.claude/rules/` and `governance/` in reach. Folder-shaped findings stay in `canon context audit`, described in `context-audit.md`.
+`canon markdown audit [path...]` reports any markdown file against the `markdown-craft` skill's `markdown.md` reference. That reference governs a file rather than a folder, so this resolves no folder and requires no `index.md`, which is what puts `.claude/rules/` and `governance/` in reach. Folder-shaped findings stay in `canon context audit`, described in `context-audit.md`.
 
 ```bash
 canon markdown audit
 canon markdown audit --json
 canon markdown audit .claude/rules governance
 canon markdown audit docs/agents/commands.md
-canon markdown audit 'standards/**/*.md'
+canon markdown audit 'docs/**/*.md'
 ```
 
 | Option   | Behavior                                                   |
@@ -27,11 +27,11 @@ A bare run measures every markdown file git lists, tracked plus untracked-and-no
 
 ## Where the rules come from
 
-The ban set and all ten checkpoints ship with the `canon` package as data, in `src/markdown/bans.ts` and `src/markdown/structure.ts`. Every project is measured against the same set whether or not it installed any standards, and no file has to resolve for a run to mean something.
+The ban set and all ten checkpoints ship with the `canon` package as data, in `src/markdown/bans.ts` and `src/markdown/structure.ts`. Every project is measured against the same set whether or not it installed the plugin, and no file has to resolve for a run to mean something.
 
 Seven of the ten are stated in `markdown.md` and the three cadence numbers are stated in the `write-human` skill. That split is the content boundary rather than an accident: `markdown.md` carries the enforced rules a scan can decide, and the skill carries the rhythm rules a ban list cannot express. A cadence number moved in the skill and left in the code drifts the same way, so move both.
 
-Reading them out of the standards per run was the original design. It put a parser contract on a document authored for people, and the standard had to carry a paragraph of its own warning an author that a one-word backticked example in a `- Do not use ` bullet would be lifted into a literal ban set and ban that word everywhere. A rule existing to protect a parser from the prose it parses is the argument for separating them.
+Reading them out of the reference per run was the original design. It put a parser contract on a document authored for people, and the reference had to carry a paragraph of its own warning an author that a one-word backticked example in a `- Do not use ` bullet would be lifted into a literal ban set and ban that word everywhere. A rule existing to protect a parser from the prose it parses is the argument for separating them.
 
 `markdown.md` still states every ban and every checkpoint, and a reader follows it rather than the code. Nothing compares the two, so a number moved in one place and left in the other drifts silently. Move both in the same change.
 
@@ -39,17 +39,15 @@ The set is closed rather than extensible, so a project cannot add a term by edit
 
 A set shipped empty is reported rather than passed. It finds nothing and would exit clean, which reports a corpus nobody checked as a corpus carrying no violation, so the run names the empty set and exits `3`. The set ships with the package, so a defect in the build is the only cause left.
 
-`canon standards <name>` still resolves a standard at the authoring root, then the package corpus, and prints it, so the human catalog reads without a project copy on disk.
-
 ## What each check reports
 
 ### Bans
 
 One closed set reports a hit: the characters `markdown.md` bans under `## Punctuation`.
 
-Frontmatter, fenced blocks, inline code spans, and link destinations are excluded. Without the code-span exclusion each standard would report its own backticked examples, and without the link exclusion a semicolon in a query string would report as prose no rewrite can fix.
+Frontmatter, fenced blocks, inline code spans, and link destinations are excluded. Without the code-span exclusion each reference would report its own backticked examples, and without the link exclusion a semicolon in a query string would report as prose no rewrite can fix.
 
-Word choice stays unmeasured and the report says so on every run. Single words travel in the `write-human` skill as guidance a reader applies. A multi-word ban escapes the harvest by width, whether it carries a placeholder standing in for the rest of the sentence or spells the phrase out in full, and every rule under `## Voice` is a judgment. The bans `## Language` states over what a sentence may claim are patterns of the multi-word kind by construction, since a literal match over a pattern reports the compliant text and reaches none of the violations. A report listing hits without naming those would read as a verdict on the whole standard.
+Word choice stays unmeasured and the report says so on every run. Single words travel in the `write-human` skill as guidance a reader applies. A multi-word ban escapes the harvest by width, whether it carries a placeholder standing in for the rest of the sentence or spells the phrase out in full, and every rule under `## Voice` is a judgment. The bans `## Language` states over what a sentence may claim are patterns of the multi-word kind by construction, since a literal match over a pattern reports the compliant text and reaches none of the violations. A report listing hits without naming those would read as a verdict on the whole reference.
 
 ### Links
 
@@ -103,14 +101,14 @@ Both hooks answer an absent record as well. A completed run always writes the re
 
 A machine with neither runner still blocks no edit, and it says so rather than exiting clean. The push stage holds either way. An edit nobody checked and an edit carrying no violation are one silence to a reader, so the enforcement a machine lacks is reported rather than inferred.
 
-The stage measures the whole corpus rather than the changed files. A `Do not use` bullet added to a standard bans a token retroactively, and no file in the push that adds the bullet was edited.
+The stage measures the whole corpus rather than the changed files. A `Do not use` bullet added to a reference bans a token retroactively, and no file in the push that adds the bullet was edited.
 
 ## What it does not cover
 
-The verb reads the two attribute standards and nothing else. The five standards declaring `appliesTo: ["*"]` also include `publish.md`, `slug.md`, and `versioning.md`, none of which this implements.
+The verb reads the `markdown-craft` skill's reference and the `write-human` cadence numbers and nothing else. The references the `git-pr`, `git-branch`, and `git-commit` skills own, `publish.md`, `slug.md`, and `versioning.md`, govern an attribute of other artifacts, and none of them is implemented here.
 
 `publish.md` describes a scan applying the same punctuation bans to finished text on its way out. No code implemented that scan before this command, so nothing is duplicated, and a later surface should call this verb rather than build a second one.
 
-That standard's cross-reference rule is out of reach rather than merely unimplemented. It resolves by destination, bare where the destination auto-links a pull request or issue number and backticked where it does not, so this verb sees only the half where the backticked form is correct. A check here would report every compliant reference in the tree and reach none of the published text that goes wrong, which is why the rule holds on reading alone.
+That reference's cross-reference rule is out of reach rather than merely unimplemented. It resolves by destination, bare where the destination auto-links a pull request or issue number and backticked where it does not, so this verb sees only the half where the backticked form is correct. A check here would report every compliant reference in the tree and reach none of the published text that goes wrong, which is why the rule holds on reading alone.
 
 The list-density rule at `claude/skills/markdown-craft/references/markdown.md` is out of scope on purpose, since it carries no number and what a density figure should measure is still open.

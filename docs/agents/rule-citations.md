@@ -1,6 +1,6 @@
 ---
 title: Rule citations
-description: Resolving every path a governance rule cites and every frontmatter glob the internal corpus declares, the three forms a citation is written in, the shapes that look like citations and are not, the two classes where an absent path is correct, why the glob half reads one corpus, and why this one gates
+description: Resolving every path a governance rule cites and every frontmatter glob the internal corpus declares, the two forms a citation is written in, the shapes that look like citations and are not, the two classes where an absent path is correct, why the glob half reads one corpus, and why this one gates
 ---
 
 # Rule citations
@@ -28,32 +28,29 @@ Under `--json` the record holds stdout alone and the frame still renders on stde
 
 Two files agreeing is what a drift check measures. Whether either one is right about the tree is a different question, and this is the stage that asks it.
 
-## The three forms
+## The two forms
 
-A citation reaches a reader in one of three shapes, and each resolves against a different root.
+A citation reaches a reader in one of two shapes, and each resolves against a different root.
 
-| Form       | Shape                    | Resolves against                   |
-| ---------- | ------------------------ | ---------------------------------- |
-| `standard` | `canon standards <name>` | `standards/<name>.md`              |
-| `path`     | a backticked path        | the root                           |
-| `sibling`  | a bare `<nnn>-<slug>.md` | the folder the citing rule sits in |
+| Form      | Shape                    | Resolves against                   |
+| --------- | ------------------------ | ---------------------------------- |
+| `path`    | a backticked path        | the root                           |
+| `sibling` | a bare `<nnn>-<slug>.md` | the folder the citing rule sits in |
 
-`standard` is the live form and carries most of the corpus, which is what makes scoping this check to the two path shapes a check over almost nothing.
+A call to the retired standards verb is no form here. A rule holding one fails the shipped-references stage of `canon gate run`, which reads every shipped file for it.
 
-A standard name resolves against the authoring root and nowhere else, matching `standardRoots` in `src/standards/read.ts`, which reads `standards/` at the working root and then the package corpus. The stage refuses a tree holding no rule corpus, so it runs only where those two roots are one directory. `internal/standards/` is deliberately not tried: `canon standards <name>` never reaches it, so admitting it would pass a citation that refuses for the session opening it, which is a gate failing open.
-
-A `path` is anchored on the whole backticked span rather than on a trailing pattern inside it. Cutting `standards/tooling-reference.md` out of `internal/standards/tooling-reference.md` and resolving that against the standards root reports a file that exists as missing, which is a mistake made by hand while measuring this corpus before the stage was written.
+A `path` is anchored on the whole backticked span rather than on a trailing pattern inside it. Cutting `tooling-reference.md` out of `internal/standards/tooling-reference.md` and resolving that against the root alone reports a file that exists as missing, which is a mistake made by hand while measuring this corpus before the stage was written.
 
 ## What is not a citation
 
 A rule body is full of backticked spans carrying a slash, and almost none of them names a file in this tree. The stage declines four shapes outright.
 
-- A placeholder or glob segment describes a shape rather than naming a file: `canon/context/<domain>.md`, `standards/<name>.md`, `app/**/route.ts`, `${CLAUDE_SKILL_DIR}/../../standards/<name>.md`.
+- A placeholder or glob segment describes a shape rather than naming a file: `canon/context/<domain>.md`, `app/**/route.ts`, `${CLAUDE_SKILL_DIR}/../references/<name>.md`.
 - A bare filename names a convention: `route.ts`, `manifest.toml`, `components.json`, `playwright.config.ts`. A bare name is read as a citation only when it matches a rule filename, which is how one authored rule would point at a sibling such as `605-worktrees.md`.
 - A span carrying no file extension is a folder or a module specifier: `src/pages/`, `next/font`, `try/except`, `react-hooks/set-state-in-effect`, `oven-sh/setup-bun@v2`, `@/lib/utils`.
 - A fenced block displays a path rather than pointing at one.
 
-The extension test is what carries most of the separation, and it costs one real path: `claude/standards` is a symlink this stage declines to check because nothing in the span says it is a file. Declining is the right direction for a gate, where a guess that goes wrong fails a push over prose.
+The extension test is what carries most of the separation, and it costs the real paths that name a folder or a symlink, which this stage declines to check because nothing in the span says it is a file. Declining is the right direction for a gate, where a guess that goes wrong fails a push over prose.
 
 ## Where an absent path is correct
 

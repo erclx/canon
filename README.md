@@ -65,7 +65,6 @@ Each domain has a canonical source in this repo and a thin install or sync CLI o
 | -------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
 | Plugin skills  | Skills that plan a feature, review a diff, sync the planning docs, and run the ship chain                                | Loaded live from the plugin, never copied                       |
 | Governance     | Coding and authoring rules that load into a Claude session when a matching path is edited                                | Installed per project by `canon gov install`, refreshed by sync |
-| Standards      | Authoring conventions for commits, branches, plans, tasks, and markdown                                                  | Opened by name, read by name with `canon standards <name>`      |
 | Tooling stacks | Golden configs, seeds, and a reference per framework                                                                     | Laid down by `canon init`, reconciled by `canon tooling sync`   |
 | Design system  | Ships a `DESIGN.md` token format, a skill that drafts one from an existing project or from scratch, and a render command | `canon design render`                                           |
 | Slides         | A folder of HTML slides per deck, drawn in the project's tokens and rebuilt as editable shapes                           | `canon slides render` writes PowerPoint                         |
@@ -74,7 +73,7 @@ Each domain has a canonical source in this repo and a thin install or sync CLI o
 | Transcripts    | A YouTube transcript with metadata frontmatter                                                                           | `canon transcripts <url>` writes it into any repo               |
 | Sandbox        | Scenario scaffolds that provision an isolated project state for verifying each domain flow                               | `canon sandbox`                                                 |
 
-Those domains reach you in three shapes. A tooling stack lands as real files under version control, because a config is something your build reads and your project owns. A standard stays here and is opened by name, so there is no copy in your repo to drift from this one.
+Those domains reach you in three shapes. A tooling stack lands as real files under version control, because a config is something your build reads and your project owns. A plugin skill and the references it carries are never copied, so there is no copy in your repo to drift from this one.
 
 Governance is the third shape. A rule with a path glob loads only when a matching path is edited, and a rule with none loads every session. Run `canon gov list` to see the glob beside each rule.
 
@@ -152,7 +151,7 @@ git init
 canon init
 ```
 
-`canon init` installs base tooling configs, Claude seeds, and governance rules in one pass, and scaffolds a `.claude/wiki/` stub for your project's own reference pages. Governance defaults to the `base` stack, so a bare init lands the workflow and doc-authoring rules in `.claude/rules/`. Each rule names the standard it answers to and reads it with `canon standards <name>`, so no corpus is copied into your project.
+`canon init` installs base tooling configs, Claude seeds, and governance rules in one pass, and scaffolds a `.claude/wiki/` stub for your project's own reference pages. Governance defaults to the `base` stack, so a bare init lands the workflow and doc-authoring rules in `.claude/rules/`. Each rule names the skill it loads, so no corpus is copied into your project.
 
 Pass `--stack <name>` for a language stack such as `node` or `python`, or `--skip governance` to leave rules out. Run `canon tooling list --json` to see the catalog.
 
@@ -164,7 +163,6 @@ Each domain carries an entry written for someone maintaining the toolkit rather 
 
 - [Claude Code plugin](canon/context/claude-plugin/index.md)
 - [Governance rules](canon/context/governance/index.md)
-- [Skill references](canon/context/claude-plugin/skill-references/index.md)
 - [Tooling stacks](canon/context/tooling/index.md)
 - [Design system](canon/context/design/index.md)
 - [Slides](canon/context/features/slides.md)
