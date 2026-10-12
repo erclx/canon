@@ -17,7 +17,6 @@ import {
   type FolderSize,
   formatBytes,
   GROWTH_WINDOWS,
-  sizedFolders,
   type SizeOutcome,
   sizeRecords,
 } from '@/records/size'

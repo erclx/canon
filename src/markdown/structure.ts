@@ -86,7 +86,7 @@ const BLOCKQUOTE = /^\s*>/
  * follows, and the price is that a span opening a fragment mid-paragraph reads
  * as a sentence start.
  */
-const SENTENCE_END = /[.!?]["'’”)\]]*(?=\s+(?:["'“(\[]*[A-Z]|`)|\s*$)/g
+const SENTENCE_END = /[.!?]["'’”)\]]*(?=\s+(?:["'“([]*[A-Z]|`)|\s*$)/g
 
 /**
  * Checkpoints the structural measures run against.

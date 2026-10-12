@@ -16,6 +16,7 @@ import {
 const ROOT = join(import.meta.dirname, '../..')
 
 /** Any SGR sequence. The cursor and key sequences end in a letter instead. */
+// oxlint-disable-next-line no-control-regex
 const SGR = /\x1b\[[\d;]*m/
 
 /** The same sequence as a source literal, in either spelling. */

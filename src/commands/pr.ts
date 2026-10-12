@@ -1891,7 +1891,7 @@ async function mapPool<T, R>(
   limit: number,
   task: (input: T) => Promise<R>,
 ): Promise<R[]> {
-  const results: R[] = new Array(inputs.length)
+  const results: R[] = Array.from({ length: inputs.length })
   let next = 0
   const lane = async (): Promise<void> => {
     while (next < inputs.length) {

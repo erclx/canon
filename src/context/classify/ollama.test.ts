@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { chat, parseVerdictText, probeOllama } from '@/context/classify/ollama'
 
 let server: ReturnType<typeof Bun.serve> | undefined

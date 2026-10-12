@@ -62,6 +62,7 @@ export function firstSentence(text: string): string {
   return text.split(/(?<=\.)\s/)[0]?.trim() ?? text
 }
 
+// oxlint-disable-next-line no-control-regex
 const ANSI = /\u001b\[[0-9;]*m/g
 
 // A blank frame line or a colon-less group heading sits between two groups of
