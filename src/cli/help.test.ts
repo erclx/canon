@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { COMMAND_GROUPS, renderHelp } from '@/cli/help'
 
 const FRAME_GLYPHS = /[┌├│└]/
+// oxlint-disable-next-line no-control-regex
+const ANSI = /\u001b\[[0-9;]*m/g
 
 function makeStream(isTTY: boolean): NodeJS.WriteStream {
   return { isTTY } as NodeJS.WriteStream
@@ -9,7 +11,7 @@ function makeStream(isTTY: boolean): NodeJS.WriteStream {
 
 function stripFrame(block: string): string[] {
   return block
-    .replace(/\u001b\[[0-9;]*m/g, '')
+    .replace(ANSI, '')
     .split('\n')
     .map((line) => line.replace(/^[┌├│└]\s?/, '').trimEnd())
     .filter((line) => line.trim() !== '')

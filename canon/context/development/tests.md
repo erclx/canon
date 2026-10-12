@@ -133,6 +133,6 @@ A shell script under `claude/skills/*/scripts/` gates only the Shell stage unles
 
 `bunx vitest run <path>` runs vitest on Node, so a test reaching `Bun.Glob` or another Bun global fails with `ReferenceError: Bun is not defined` before asserting anything. `bun run test` passes `--bun`, so run a single file through `bun --bun vitest run <path>` or `bun test <path>` instead.
 
-### No stage reports an unused import
+### The Lint stage, not Types, reports an unused import
 
-`check:types` is `tsc --noEmit` and `tsconfig.json` sets `strict` without `noUnusedLocals` or `noUnusedParameters`, and no JavaScript or TypeScript linter runs anywhere in the sequence, since `check:format` is oxfmt and `check:shell` is shellcheck. A dead import therefore passes a green check and reaches history, caught only by reading the file. The same stage does catch a duplicate function implementation, as TS2393, so two helpers colliding on one name inside a large file fails the gate rather than shadowing at runtime.
+`tsconfig.json` sets `strict` without `noUnusedLocals` or `noUnusedParameters`, so `check:types` passes a dead import and the Lint stage catches it instead. Every default rule `check:lint` runs is a warning, which oxlint exits 0 on, so `--max-warnings 0` is what makes one fail the stage. Types still catches a duplicate function implementation, as TS2393, so two helpers colliding on one name fails the gate rather than shadowing at runtime.

@@ -34,7 +34,7 @@ export function sidebar(breakpoint: number): void {
     root.classList.add('sb-shut')
     try {
       localStorage.setItem('teach-sb', 'shut')
-    } catch (e) {}
+    } catch {}
     if (inside && fold) fold.focus()
   }
 
@@ -46,7 +46,7 @@ export function sidebar(breakpoint: number): void {
           'teach-sb',
           root.classList.contains('sb-shut') ? 'shut' : 'open',
         )
-      } catch (e) {}
+      } catch {}
       /* An overlay takes focus with it. Without this a keyboard reader opens the
        panel and goes on tabbing through the lesson behind the scrim. */
       if (!narrow.matches || root.classList.contains('sb-shut')) return
@@ -112,7 +112,7 @@ export function sidebar(breakpoint: number): void {
     if (save) {
       try {
         localStorage.setItem('teach-sb-w', String(w))
-      } catch (e) {}
+      } catch {}
     }
   }
 

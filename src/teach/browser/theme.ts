@@ -3,7 +3,7 @@ export function theme(): void {
   try {
     var s = localStorage.getItem('course-theme')
     if (s) r.dataset.theme = s
-  } catch (e) {}
+  } catch {}
   document.addEventListener('click', function (e) {
     var b = (e.target as Element).closest('.theme')
     if (!b) return
@@ -13,6 +13,6 @@ export function theme(): void {
     r.dataset.theme = d ? 'light' : 'dark'
     try {
       localStorage.setItem('course-theme', r.dataset.theme)
-    } catch (e) {}
+    } catch {}
   })
 }

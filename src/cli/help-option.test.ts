@@ -58,6 +58,7 @@ describe('registered commands', () => {
 })
 
 const LISTING_WIDTH = 80
+// oxlint-disable-next-line no-control-regex
 const ANSI = /\u001b\[[0-9;]*m/g
 
 function readListing(): string[] {

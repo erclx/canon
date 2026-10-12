@@ -19,12 +19,12 @@ export function head(page: 'index' | 'lesson', breakpoint: number): void {
   }
   try {
     s = localStorage.getItem('teach-sb')
-  } catch (e) {}
+  } catch {}
   var idx = r.dataset.page === 'index'
   if (s === 'shut' || (s === null && idx)) r.classList.add('sb-shut')
   var w: string | null = null
   try {
     w = localStorage.getItem('teach-sb-w')
-  } catch (e) {}
+  } catch {}
   if (w) r.style.setProperty('--sb-w', w + 'px')
 }

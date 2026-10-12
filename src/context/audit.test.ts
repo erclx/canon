@@ -16,24 +16,13 @@ import { resolveFolders } from '@/context/folders'
 
 const FRONTMATTER = '---\ntitle: CI\ndescription: A domain\n---\n\n'
 
-/** Bullet counts the exempt catalog and the reported wall both hit. */
-const PEER_COUNT = 55
-
-/** Characters a bullet averages in each of the two shapes the corpus holds. */
-const CATALOG_BULLET = 94
+/** Characters a paragraph-shaped bullet averages in the corpus. */
 const PARAGRAPH_BULLET = 394
 
 function prose(count: number): string {
   return Array.from({ length: count }, (_, index) => `Line ${index + 1}.`).join(
     '\n',
   )
-}
-
-function bullets(count: number, indent = ''): string {
-  return Array.from(
-    { length: count },
-    (_, index) => `${indent}- Item ${index + 1}`,
-  ).join('\n')
 }
 
 function weightedBullets(count: number, width: number): string {
@@ -51,11 +40,6 @@ function catalogRows(count: number): string[] {
     { length: count },
     (_, index) => `| \`canon cmd-${index}\` | Does a thing |`,
   )
-}
-
-/** A bullet of an exact character count, so a boundary case lands on it. */
-function bullet(characters: number): string {
-  return `- ${'w'.repeat(characters - 2)}`
 }
 
 describe('measureEntry', () => {

@@ -70,7 +70,6 @@ import {
   writeSettings,
 } from '@/claude/settings'
 import { copyPreservingMode } from '@/sync/copy'
-import { execScript } from '@/cli/exec'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
 import { recordDir } from '@/roots/record'
 import { SURFACE_ENTRIES, surfaceDir } from '@/roots/surface'

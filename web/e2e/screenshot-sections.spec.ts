@@ -103,7 +103,7 @@ async function readPixel(
       const context = canvas.getContext('2d')
       if (context === null) throw new Error('no 2d context to decode into')
       context.drawImage(image, 0, 0)
-      return [...context.getImageData(x, y, 1, 1).data.slice(0, 3)]
+      return Array.from(context.getImageData(x, y, 1, 1).data.slice(0, 3))
     },
     { source, x, y },
   )

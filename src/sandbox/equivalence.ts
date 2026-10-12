@@ -674,7 +674,7 @@ async function pool<T, R>(
   size: number,
   work: (item: T, index: number) => Promise<R>,
 ): Promise<R[]> {
-  const results: R[] = new Array(items.length)
+  const results: R[] = Array.from({ length: items.length })
   let next = 0
 
   async function lane(): Promise<void> {
