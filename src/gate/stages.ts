@@ -11,10 +11,12 @@ import {
   captureStamps,
   clientCommandCitations,
   designProse,
+  bulletStacks,
   documentCeiling,
   folderEchoedNames,
   markdownBans,
   type Measure,
+  paragraphGrowth,
   pluginManifests,
   readmeCitations,
   recordIdempotence,
@@ -335,19 +337,23 @@ export const STAGES: readonly Stage[] = [
     checks: [{ kind: 'measure', measure: unreferencedRules }],
   },
   {
-    // Only the citation half of the audit gates. Its length, depth, table, and
-    // index findings are judgment thresholds, and failing a push on one would
-    // make the stage something to route around. The one length reading that
-    // gates is the whole-document ceiling, which the Document ceiling stage
-    // below owns rather than this audit.
+    // The facts the audit can answer from the files gate: a cited path that
+    // does not resolve, a required section an entry does not declare, an H2
+    // outside the closed set of four, and an index disagreeing with its folder.
+    // Its length, depth, bullet, table, and provenance findings are judgment
+    // thresholds, and failing a push on one would make the stage something to
+    // route around. The length readings that gate sit in their own stages
+    // below, apart from the audit's exit code: the whole-document ceiling, the
+    // bullet cap, and the growth of a paragraph or a bullet past its
+    // checkpoint.
     id: 'context-citations',
     label: 'Context citations',
     checks: [
       {
         kind: 'cli',
-        argv: ['context', 'audit', '--citations-only'],
+        argv: ['context', 'audit', '--gate'],
         failure:
-          'A cited context path does not resolve. Run bun src/cli.ts context audit.',
+          'A cited context path does not resolve, an entry lacks a required section or carries an H2 outside Overview, Layout, Decisions, and Gotchas, or an index disagrees with its folder. Run bun src/cli.ts context audit --gate.',
       },
     ],
     success: 'Context citations resolve',
@@ -365,6 +371,23 @@ export const STAGES: readonly Stage[] = [
     id: 'document-ceiling',
     label: 'Document ceiling',
     checks: [{ kind: 'measure', measure: documentCeiling }],
+  },
+  {
+    // Unscoped, since any branch can add a bullet to any entry. A run of more
+    // than 5 plain bullets fails the push in the context entries, the docs
+    // pages, and the skill bodies and references. Apart from the audit's exit
+    // code for the reason the Document ceiling stage above states.
+    id: 'bullet-stacks',
+    label: 'Bullet stacks',
+    checks: [{ kind: 'measure', measure: bulletStacks }],
+  },
+  {
+    // Context entries only, where length drifts. A paragraph past 700
+    // characters or a top-level bullet past 250 fails when this branch added or
+    // changed it, and an unchanged one passes until it is edited.
+    id: 'paragraph-growth',
+    label: 'Paragraph growth',
+    checks: [{ kind: 'measure', measure: paragraphGrowth }],
   },
   {
     // Unscoped, since any branch can add a file anywhere and one git ls-files

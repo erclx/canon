@@ -165,3 +165,33 @@ export async function listRepositoryFiles(
 
   return [...new Set([...tracked, ...untracked])].sort()
 }
+
+/**
+ * A file as `ref` holds it, or undefined where the ref holds no such path or
+ * git cannot answer. A path absent at the ref and a failed read are the same
+ * answer for a caller asking what the copy before this branch said.
+ */
+export async function readFileAtRef(
+  root: string,
+  ref: string,
+  rel: string,
+): Promise<string | undefined> {
+  return git(root, ['show', `${ref}:${rel}`])
+}
+
+/** Every path under `prefix` that `ref` holds, or undefined where git cannot answer. */
+export async function listFilesAtRef(
+  root: string,
+  ref: string,
+  prefix: string,
+): Promise<string[] | undefined> {
+  const listed = await git(root, [
+    'ls-tree',
+    '-r',
+    '--name-only',
+    ref,
+    '--',
+    prefix,
+  ])
+  return listed === undefined ? undefined : listed.split('\n').filter(Boolean)
+}
