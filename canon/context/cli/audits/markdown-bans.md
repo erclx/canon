@@ -40,6 +40,14 @@ description: The markdown ban scan and its gate, the relative-link check, why on
 
 Tiering fits a structural measure because a checkpoint is a judgment, and a seed leaving the repository is where a judgment is worth failing a push over. A closed set has no such gradient. A banned character is as wrong in a context entry as in a seed a target installs, so a per-path tier would rank the tree its own authors read most as the tree where a violation counts least. Adding that tiering is the change this record exists to decline.
 
+## Why the colon and heading-case measures are advisory
+
+Both report and neither gates, which `isGating` in `src/markdown/gate.ts` keeps by reading the ban and link lists alone and carrying both findings as inputs it ignores.
+
+The colon measure counted 1,393 candidate lines across 464 of 716 tracked files at `2203cc0a8`. A gate would be a sweep nobody asked for, and a colon is sometimes right. It exists because an agent told to drop an em dash often writes a colon in its place and leaves the sentence as it was, which nothing else notices. The hook scopes its warning to lines the write introduced, so an old colon never asks the current edit to answer for it.
+
+Heading case is advisory because a proper noun is the one case it cannot tell from title case. Gating it would need a names list and an escape marker, and the operator chose warnings on 2026-10-11 to avoid both. The hook reads the whole file's headings, since fixing one is a single edit where it stands. The scoping of the colon findings lives in the hook and not in the verb, because only the hook holds the edit's new text and the verb stays a pure measure of a file.
+
 ## The edit-time hook
 
 - `.claude/hooks/standards-audit.sh` calls the verb per edited file, so one copy of the ban set serves the surface an author meets at edit time and the stage that fails the push. A second copy of the set inside the hook is a divergence nothing would compare.

@@ -55,6 +55,16 @@ A relative link's destination resolves against the filesystem, over the same cor
 
 The placeholder exemption is the one live case the corpus needs. Every current instance is a genuine illustration rather than a literal path, and a marker-based override is available for the day a real one needs an exception instead.
 
+### Colons and heading case
+
+Two advisory measures report beside the bans and never fail a run.
+
+The colon measure reports a colon followed by more text in a prose line, outside the label position. A list item's first colon, a bold or code span label, a line-final colon, a time, a URL, and anything inside a code span or a link are left alone. A heading, a table row, and a fenced line are skipped. Each finding carries the line, the column, and the line's text under `colons` in the `--json` entry.
+
+The heading-case measure reports a heading or a frontmatter `title` with a capitalized word after its first, outside code spans and all-caps tokens, under `headingCase`. A proper noun reports as well and is left as it is.
+
+`CHANGELOG.md` is exempt from both, since the release tool writes its headings.
+
 ### Weight, cadence, and length
 
 Bullet and paragraph weight, run depth, the two cadence numbers, and the document length ceiling are each a judgment a reader settles rather than a fact a scan settles. What each measures, the samples behind its checkpoint, and why none of them gates are in `markdown-audit-weight.md`.
