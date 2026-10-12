@@ -23,6 +23,7 @@ import {
   exitCodeFor,
   type GateContext,
   hasChanged,
+  parsePressure,
   runStage,
   runStages,
   summarize,
@@ -314,6 +315,24 @@ describe('a stage holding a machine lock', () => {
     expect(outcome.emissions.at(-1)).toEqual({
       kind: 'info',
       text: 'Load average 41.3 on 32 cores when the suite stage failed',
+    })
+  })
+
+  it('should append the pressure clause to the load line', async () => {
+    const ctx = contextWith({
+      run: runnerFor({ 'true suite': result({ exitCode: 1 }) }),
+      readLoad: () => ({
+        loadAverage: 41.3,
+        cores: 32,
+        pressure: { cpu: 7.5, memory: 0, io: 0.2 },
+      }),
+    })
+
+    const outcome = await runStage(stage('suite', { lock: 'suite' }), ctx)
+
+    expect(outcome.emissions.at(-1)).toEqual({
+      kind: 'info',
+      text: 'Load average 41.3 on 32 cores, pressure cpu 7.5% memory 0.0% io 0.2% over 10s, when the suite stage failed',
     })
   })
 
@@ -610,5 +629,19 @@ describe('assertStampField', () => {
     expect(assertStampField(root, stamp, 'source-sha256', source)).toEqual([
       'hero.stamp carries no source-sha256 line, so it predates the capture that writes one.',
     ])
+  })
+})
+
+describe('parsePressure', () => {
+  it('should read the some avg10 share', () => {
+    const text =
+      'some avg10=7.50 avg60=3.00 avg300=1.00 total=12345\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n'
+
+    expect(parsePressure(text)).toBe(7.5)
+  })
+
+  it('should answer undefined for a malformed file', () => {
+    expect(parsePressure('some avg10=abc total=1\n')).toBeUndefined()
+    expect(parsePressure('')).toBeUndefined()
   })
 })
