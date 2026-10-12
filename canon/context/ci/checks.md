@@ -40,6 +40,7 @@ Defined in `.github/workflows/verify.yml`, which runs one step, `bun run check:c
 | Audit set               | `bun src/cli.ts audits run --corpus tracked --corpus per-machine --json` | reports the judgment half of every tracked and per-machine audit and its growth, and fails on none of it |
 | Plugin manifests        | `claude plugin validate --strict`                                        | every plugin and marketplace manifest is well-formed                                                     |
 | Shell                   | `bun run check:shell`                                                    | shellcheck passes at warning level                                                                       |
+| Lint                    | `bun run check:lint`                                                     | oxlint at its default rules raises no warning across tracked JS, TS, and `.astro` files                  |
 | Types                   | `bun run check:types`                                                    | `tsc --noEmit` passes against `src/`                                                                     |
 | Tests                   | `bun run test`                                                           | the vitest suite passes                                                                                  |
 

@@ -27,6 +27,7 @@ Owns the local development loop: toolchain setup, the run commands, and the git 
 | `bun run check:ci`      | Every stage via `--all`, the run CI does. Still regenerates.                                     |
 | `bun run check:format`  | Read-only oxfmt, Prettier for `.astro`, and shfmt format check.                                  |
 | `bun run check:shell`   | Read-only shellcheck against `scripts/`, `tooling/`, and `.claude/hooks/`.                       |
+| `bun run check:lint`    | Read-only oxlint at its default rules, failing on any warning.                                   |
 | `bun run check:types`   | Read-only `tsc --noEmit` against `src/`.                                                         |
 | `bun run check:install` | Clones the repo to tmp and asserts `canon init` lands a fresh scaffold.                          |
 | `bun run format`        | Auto-fix oxfmt, Prettier for `.astro`, and shfmt formatting.                                     |
@@ -40,6 +41,10 @@ Owns the local development loop: toolchain setup, the run commands, and the git 
 The table stays a table against the catalog rule beside it, which sends a surface that grows a row per shipped thing to a bullet list. That rule answers reflow conflicts between sibling branches, and the same standard names this section a table in the sentence that scopes it here. `canon context audit` reports the row count under Tables on every run, so the finding is expected rather than outstanding.
 
 ## Gotchas
+
+### Why `check:lint` disables nested configs
+
+Without `--disable-nested-config`, oxlint loads the golden `.oxlintrc.json` under each `tooling/*/configs/` and fails on JS plugins this repository does not install. A root `ignorePatterns` entry does not stop that discovery at the pinned version. The root `.oxlintrc.json` still ignores those folders, which keeps their stand-in files out of the run, since `canon tooling verify` lints them under each stack's own config.
 
 ### Why the entry is a folder
 
