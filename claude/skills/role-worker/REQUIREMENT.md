@@ -19,7 +19,7 @@ Finishing is invisible from the other side. A worker that opens a pull request g
 
 Nothing tells the session that refusing is allowed either. Four occasions across two days had a worker halt correctly with the cost falling on the dispatcher, and the correction that mattered most reached the right place because a worker argued back with evidence rather than complying. A role written only as report-upward suppresses exactly that.
 
-The draft mark fails from both ends. On 2026-08-31 four sessions re-drafted a pull request someone had readied, acting on a belief no surface in the tree stated. On 2026-09-07 a controlling session told a worker to lift the mark rather than lifting it itself, and the worker complied and reported against the surface rather than the outcome. From 2026-10-12 `canon pr lift` reads the gates itself, so the reviewers run it on a close and the controlling session runs it as the fallback. A worker still runs it never, and readies a pull request directly for nobody, since a direct ready skips every gate the verb reads.
+The draft mark fails from both ends. On 2026-08-31 four sessions re-drafted a pull request someone had readied, acting on a belief no surface in the tree stated. On 2026-09-07 a controlling session told a worker to lift the mark rather than lifting it itself, and the worker complied and reported against the surface rather than the outcome. From 2026-10-12 `canon pr lift` reads the gates itself, so the reviewers run it on a close and the controlling session runs it as the fallback. A worker leaves the verb to them and readies a pull request directly for nobody, since a direct ready skips every gate the verb reads.
 
 ## Must
 
