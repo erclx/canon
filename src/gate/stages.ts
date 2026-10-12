@@ -83,11 +83,6 @@ export interface Stage {
   readonly scope?: RegExp
   /** What a scoped-out stage says, so a skip never reads as a pass. */
   readonly skipped?: string
-  /**
-   * Whether this stage belongs in the run at all, read off the write grant
-   * rather than the changed set. Absent means it always belongs.
-   */
-  readonly when?: (options: { readonly write: boolean }) => boolean
   readonly checks: readonly Check[]
   /**
    * The machine lock this stage holds while its checks run, so one box runs it
@@ -147,27 +142,14 @@ const script = (name: string, failure: string): Check => ({
  */
 export const STAGES: readonly Stage[] = [
   {
-    id: 'format',
-    label: 'Formatting',
-    when: ({ write }) => write,
-    checks: [
-      {
-        kind: 'command',
-        argv: ['bun', 'run', 'format'],
-        failure: 'Format failed',
-      },
-    ],
-    success: 'Format applied',
-  },
-  {
     id: 'format-check',
     label: 'Format check',
-    when: ({ write }) => !write,
     checks: [
       {
         kind: 'command',
         argv: ['bun', 'run', 'check:format'],
-        failure: 'Format check failed',
+        failure:
+          'Format check failed. Run bun run format and commit the result.',
       },
     ],
     success: 'Format check passed',

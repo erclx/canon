@@ -27,7 +27,6 @@ import { repairBareFlag } from '@/worktrees/bare-flag'
 
 interface RunCommandOptions {
   readonly all?: boolean
-  readonly write?: boolean
   readonly nested?: boolean
   readonly json?: boolean
 }
@@ -47,10 +46,6 @@ export function register(program: Command): void {
     .option(
       '--all',
       'Run every stage instead of scoping shell, types, and tests to changed files',
-    )
-    .option(
-      '--no-write',
-      'Check formatting instead of applying it, which is what a merge gate wants',
     )
     .option(
       '--nested',
@@ -77,7 +72,7 @@ export function register(program: Command): void {
         '',
         'Examples:',
         '  canon gate run',
-        '  canon gate run --all --no-write',
+        '  canon gate run --all',
         '  canon gate run --json',
         '',
       ].join('\n'),
@@ -92,7 +87,6 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
   const mismatch = checkoutMismatchWarning(process.cwd())
   const emitJson = opts.json ?? false
   const nested = opts.nested ?? false
-  const write = opts.write ?? true
   const run = commandRunner(root)
 
   if (!emitJson && !nested) intro('canon gate run')
@@ -111,7 +105,6 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
     ci: process.env.CI === 'true',
     run,
     cli: cliRunner(root),
-    write,
     changed: changed.scoped ? changed.files : undefined,
     onQueue: (label, holder) => {
       const text = `${label} is waiting for the suite pid ${holder.pid} runs at ${holder.root}`

@@ -48,7 +48,7 @@ A branch touching few files answers the same question without a second checkout.
 
 ### What sequences them
 
-`bun run check` resolves to `canon gate run` and `bun run check:ci` to `canon gate run --all --no-write`. Three things live in `src/gate/`: the stage table in `stages.ts`, the changed-file scoping and the run loop in `sequencer.ts`, and every threshold comparison in `measures.ts`.
+`bun run check` resolves to `canon gate run` and `bun run check:ci` to `canon gate run --all`. Three things live in `src/gate/`: the stage table in `stages.ts`, the changed-file scoping and the run loop in `sequencer.ts`, and every threshold comparison in `measures.ts`.
 
 Three properties are load-bearing and each has a case in `src/gate/sequencer.test.ts`. Stages run in table order. A stage that finds a fact halts the run, which is what makes a regenerate-then-assert run reveal one surface at a time. A scoped stage that the changed set carries nothing for says so rather than printing a clean line.
 

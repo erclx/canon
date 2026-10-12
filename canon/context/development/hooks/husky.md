@@ -11,7 +11,7 @@ description: What each git hook runs, the five post-merge steps and their order,
 
 - `pre-commit` runs `lint-staged`: prettier on staged `.json`, `.md`, and `.mdc` files, and shfmt and shellcheck on staged `.sh` files.
 - `commit-msg` runs `commitlint` against the conventional commit format
-- `pre-push` runs `bun run check`. After pushing, run `git status`. If files changed, commit the diff as `style(<scope>):` and push again.
+- `pre-push` runs `bun run check`. A push fails on format drift until `bun run format` runs and the result is committed.
 - `post-merge` runs five steps in order through `canon hooks post-merge`, covered below
 - `post-rewrite` delegates to `post-merge` on the `rebase` argument, so a `pull.rebase=true` machine gets the same steps. It exits on `amend`, which rewrites nothing on the board.
 

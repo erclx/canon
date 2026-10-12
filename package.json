@@ -32,7 +32,7 @@
     "test": "bun --bun vitest run",
     "prepare": "husky",
     "check": "bun src/cli.ts gate run",
-    "check:ci": "bun src/cli.ts gate run --all --no-write",
+    "check:ci": "bun src/cli.ts gate run --all",
     "update": "bun update --interactive && bun run check",
     "clean": "rm -rf node_modules && bun pm cache rm && bun install",
     "bootstrap": "./scripts/core/bootstrap.sh",

@@ -9,7 +9,7 @@ description: The gate stage table CI runs, the regeneration stages, the phase-la
 
 ### Stages
 
-Defined in `.github/workflows/verify.yml`, which runs one step, `bun run check:ci`. That resolves to `canon gate run --all --no-write`, so the stage list lives in `src/gate/stages.ts` rather than in the workflow and every stage runs regardless of what the branch touched. Two rows report rather than gate, and the table marks each.
+Defined in `.github/workflows/verify.yml`, which runs one step, `bun run check:ci`. That resolves to `canon gate run --all`, so the stage list lives in `src/gate/stages.ts` rather than in the workflow and every stage runs regardless of what the branch touched. Two rows report rather than gate, and the table marks each.
 
 | Stage                   | Command                                                                  | What it asserts                                                                                          |
 | ----------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
@@ -47,13 +47,13 @@ Unreferenced rules and Audit set report rather than gate because every finding t
 
 One more qualification is a stage that could not read its input at all, which is a state any row can reach. Under `check:ci` that fails the run, since an absent tool on a runner is a broken workflow step. On a contributor's machine it warns and the run stays green, and the closing line names how many stages measured nothing rather than printing an unqualified pass. Shell, types, and tests skip on the changed-file set locally and never in CI, which is what `--all` buys.
 
-Rebuild this table from `STAGES` in `src/gate/stages.ts` rather than editing rows by hand, since a hand edit can drift from the source it renders. Both format stages are entries in that table, so a rebuild reaches them the way it reaches every other row. This table names the check side, since `check:ci` passes `--no-write` and the write side heads its output `Formatting` instead. Nothing compares this table to the table it describes, so a stage added later can leave it wrong until the next rebuild.
+Rebuild this table from `STAGES` in `src/gate/stages.ts` rather than editing rows by hand, since a hand edit can drift from the source it renders. The one format stage is an entry in that table, so a rebuild reaches it the way it reaches every other row. Nothing compares this table to the table it describes, so a stage added later can leave it wrong until the next rebuild.
 
 #### The regeneration stages
 
 The two drift stages, Indexes and Consumed copies, regenerate and then assert twice through the `drift` check in `src/gate/sequencer.ts`, once with `git diff --exit-code` for modified tracked files and once with `git ls-files --others --exclude-standard` for new untracked ones. They catch content that was regenerated locally but committed stale, which is the failure a local-only gate lets through.
 
-Regeneration runs in both modes, so `check:ci` writes to the working tree even though it never formats. Only the format stage changes behavior between modes.
+Regeneration runs in every mode, so `check:ci` writes to the working tree even though it never formats.
 
 ### The plugin CLI on the runner
 

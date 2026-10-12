@@ -23,7 +23,7 @@ Pass `--all` to force the full suite, and `--help` to print the argument list. `
 
 `src/process/harness.ts` spawns `src/cli.ts` as a real process against a temporary directory rather than calling a command's action function in-process. A case can then assert what an in-process call cannot: whether a verb is registered at all, whether the process exits the way its own contract states, and whether a `--json` record parses off stdout alone once stderr framing is set aside. `src/process/harness.test.ts` covers the harness itself, and `src/process/verbs.test.ts` covers the verbs.
 
-`gate run` is the one verb there whose stages a case does not drive. The last stage runs `bun run test`, so a case spawning the gate spawns the suite that spawns the case, and the recursion has no floor. Every stage also reads this checkout by design, so a per-case temporary directory measures the wrong tree, and the first stage writes to whatever it read, so a case running the write side would reformat the repository under the suite.
+`gate run` is the one verb there whose stages a case does not drive. The last stage runs `bun run test`, so a case spawning the gate spawns the suite that spawns the case, and the recursion has no floor. Every stage also reads this checkout by design, so a per-case temporary directory measures the wrong tree, and the regenerating stages write to whatever they read, so a case running the gate would rewrite generated files in the repository under the suite.
 
 The cases assert only that the verb the two package scripts name is registered. The stages themselves run end to end on every branch, by `pre-push` and by `bun run check:ci`, and the sequencing around them is covered in `src/gate/sequencer.test.ts` with an injected runner.
 
