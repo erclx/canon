@@ -50,7 +50,7 @@ When adding deps or scripts to `manifest.toml`:
 
 ## Verify command
 
-`canon tooling verify <stack>` is the end-to-end validator. Scaffolds fresh, syncs, runs `lint:fix`, `check`, `test:e2e`, and `screenshot`, asserts screenshot artifacts, reports a results matrix. Use it after any change to `tooling/<stack>/` or `src/tooling/`.
+`canon tooling verify <stack>` is the end-to-end validator. Scaffolds fresh, syncs, runs `lint:fix`, `format`, `check`, `test:e2e`, and `screenshot`, asserts screenshot artifacts, reports a results matrix. Use it after any change to `tooling/<stack>/` or `src/tooling/`.
 
 - The `[verify] prepare` manifest field declares post-scaffold setup that runs before sync. Use for integrations that can not ship as golden configs (astro's `bunx astro add react`).
 - Tmp dir auto-removes on success. Keeps on failure. Use `--keep` to inspect after a green run.
