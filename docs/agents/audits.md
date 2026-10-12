@@ -85,7 +85,7 @@ It sits under the project root rather than beside the aggregator in `src/`. The 
 
 ### What is kept out of it
 
-A gitignored record folder holds one machine's session scratch. Its counts describe somebody else's disk, so committing them writes a floor no other clone can reproduce and every contributor reads a regression against a number that was never about their tree. The board and five of the six record kinds are therefore reported on every run and recorded in none. `records-standards` is the exception, because that corpus is tracked.
+A gitignored record folder holds one machine's session scratch. Its counts describe somebody else's disk, so committing them writes a floor no other clone can reproduce and every contributor reads a regression against a number that was never about their tree. The board and every record kind are therefore reported on every run and recorded in none.
 
 An audit that did not report is left out rather than written as zero. Zero there records a clean corpus nobody measured, and the next run reads its real numbers as a regression against a floor that was never taken.
 
