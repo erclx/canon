@@ -1,9 +1,16 @@
 extends = ""
-# Four audience groups whole. Every rule authored under them ships to a base
-# consumer, so adding one is a single edit rather than a file and a name here.
-# `canon` carries the toolkit workflow and canonical-doc rules, `claude` the
-# session conduct and `.claude/` authoring rules, `tooling` the dev setup and
-# CI workflow rules, and `writing` the prose and document-shape rules. The
-# `code` group is left to the stacks that write code, so a docs or writing
-# project loads no rule it can never apply.
-rules = ["canon", "claude", "tooling", "writing"]
+# Named rule by rule rather than by folder, so a rule authored later under
+# `canon` or `claude` reaches no project until it is added here or proposed by
+# `canon gov detect`. Every other rule is opt-in.
+rules = [
+  "566-output",
+  "602-tasks",
+  "604-scratch",
+  "605-worktrees",
+  "606-git",
+  "611-indexes",
+  "context",
+  "tasks",
+  "plan",
+  "markdown",
+]

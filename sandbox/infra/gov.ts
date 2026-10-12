@@ -144,8 +144,18 @@ export default scenario({
   },
   arms: {
     install: (ctx) => {
-      ctx.log.step('Running: canon gov install astro --add 200-react install/')
-      verb(ctx, 'gov', 'install', 'astro', '--add', '200-react', 'install/')
+      ctx.log.step(
+        'Running: canon gov install node --add 210-astro,200-react install/',
+      )
+      verb(
+        ctx,
+        'gov',
+        'install',
+        'node',
+        '--add',
+        '210-astro,200-react',
+        'install/',
+      )
     },
     add: (ctx) => {
       ctx.log.step('Running: canon gov install --add tasks,plan add/')

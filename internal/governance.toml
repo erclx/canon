@@ -19,13 +19,17 @@
 # `110-python` is added because sessions here write Python for groundwork
 # spikes and occasional skill scripts, and the `node` stack alone never loads it.
 
+# `skill`, the `tooling` rules, and `460-design-taste`, `465-interface-casing`,
+# and `470-motion` are added because base names its rules one by one and none
+# of them is among the ten, while this repository edits skills, workflows,
+# configs, and code, and renders the surfaces the newer `ui` rules govern.
+
 # `306-test-scope` is left out because it names `bun run test:e2e:changed`,
 # which no script in this repository's `package.json` carries.
 
 stack = "node"
 add = [
   "110-python",
-  "300-testing-ts",
   "305-e2e-reliability",
   "400-ui",
   "410-a11y",
@@ -33,5 +37,14 @@ add = [
   "430-ux-completeness",
   "440-surface-capture",
   "450-link-behavior",
+  "460-design-taste",
+  "465-interface-casing",
+  "470-motion",
   "480-canvas",
+  "700-ci-workflow",
+  "765-spelling",
+  "775-dependencies",
+  "780-config-comments",
+  "790-code-comments",
+  "skill",
 ]
