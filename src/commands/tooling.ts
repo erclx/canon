@@ -106,6 +106,14 @@ export function register(program: Command): void {
         'what `canon sync --check --exit-code` spells with a flag. Pass --check',
         'to report the same list and always exit 0.',
         '',
+        '--write replaces every golden config that differs from the stack.',
+        'Seeds are copy-once, so a seed the target already holds is left alone.',
+        '',
+        'Exit codes:',
+        '  0  synced, up to date, cancelled, or run with --check',
+        '  1  refused, or run headlessly with neither flag while a file would',
+        '     be replaced',
+        '',
       ].join('\n'),
     )
     .action(

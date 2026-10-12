@@ -212,6 +212,20 @@ export function register(program: Command): void {
     .description('Seed .claude/ workflow docs into a project')
     .argument('[target]', 'Target directory', '.')
     .helpOption('-h, --help', 'Show this help message')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Copies each workflow seed the target lacks, CLAUDE.md included, and',
+        'leaves one already present alone. Then adds the .gitignore entries',
+        'the claude manifest lists.',
+        '',
+        'Exit codes:',
+        '  0  initialized, already initialized, or the prompt was cancelled',
+        '  1  the target is missing or is the toolkit root',
+        '',
+      ].join('\n'),
+    )
     .action(async (target: string) => {
       process.exitCode = await runInit(target)
     })
@@ -221,6 +235,21 @@ export function register(program: Command): void {
     .description('Reconcile .gitignore against the claude manifest')
     .argument('[target]', 'Target directory', '.')
     .helpOption('-h, --help', 'Show this help message')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Writes .gitignore alone: adds the entries the claude manifest lists',
+        'and drops ones under its headers that the manifest no longer lists.',
+        'A seeded file is reported, never rewritten, and a missing one points',
+        'at `canon claude init`.',
+        '',
+        'Exit codes:',
+        '  0  synced, already up to date, or the prompt was cancelled',
+        '  1  the target is missing or is the toolkit root',
+        '',
+      ].join('\n'),
+    )
     .action(async (target: string) => {
       process.exitCode = await runSync(target)
     })

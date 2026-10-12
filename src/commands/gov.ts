@@ -161,6 +161,14 @@ export function register(program: Command): void {
         'positional naming a stack is read as the stack, so pass . or a path',
         'carrying a slash to force a target that shares a stack name.',
         '',
+        'Copies each rule into .claude/rules/canon/, replacing a copy already',
+        'there. Rules under .claude/rules/project/ are never read.',
+        '',
+        'Exit codes:',
+        '  0  installed, the stack held no rules, or the prompt was cancelled',
+        '  1  refused: no stack named headlessly, an unknown stack, no --add',
+        '     rule resolved, or a missing target or the toolkit root',
+        '',
       ].join('\n'),
     )
     .action(
@@ -178,6 +186,21 @@ export function register(program: Command): void {
     .description('Update rules already installed under .claude/rules/canon/')
     .argument('[target]', 'Target directory', '.')
     .helpOption('-h, --help', 'Show this help message')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Replaces an edited rule under .claude/rules/canon/ with the shipped',
+        'copy, deletes a rule the toolkit retired, and moves a renamed one.',
+        'It adds no new rule, which is `canon gov install`, and never touches',
+        '.claude/rules/project/.',
+        '',
+        'Exit codes:',
+        '  0  synced, already up to date, or the prompt was cancelled',
+        '  1  the target is missing or is the toolkit root',
+        '',
+      ].join('\n'),
+    )
     .action(async (target: string) => {
       process.exitCode = await runDomainSync(
         createGovAdapter(PROJECT_ROOT),
