@@ -13,7 +13,7 @@ Internal skills live in `.claude/skills/` and are toolkit-only. They are not ins
 - `internal-governance`: Load before editing governance rules or stack definitions
 - `internal-rule-audit`: Audit the governance rule set, returning one keep, move, retire, or merge verdict per rule with the check that decided it
 - `internal-scripts`: Load before editing scripts or sandbox scenarios
-- `internal-standards`: Load before editing standards or docs
+- `internal-docs`: Load before editing `docs/` or `canon/context/`
 - `internal-teach`: Load before editing the learning workspace, its committed fixture, or the teach standards
 - `internal-tooling`: Load before editing tooling stacks or golden configs
 - `internal-web`: Load before editing the landing page or this repository's own rendered images

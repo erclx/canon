@@ -17,7 +17,7 @@ Each rule or fact lives in one surface. Others point at it. `canon/context/conte
 | Identity, goals, non-goals, constraints                                          | `canon/REQUIREMENTS.md`                                             |
 | Behavior every session needs                                                     | `CLAUDE.md`                                                         |
 | Behavior that fires on a path being edited                                       | `governance/rules/`, or `internal/rules/` for this repository alone |
-| Shape of an artifact many sessions edit                                          | `standards/`                                                        |
+| Shape of an artifact many sessions edit                                          | the owning skill's `references/`                                    |
 | What a session needs when editing domain X                                       | `.claude/skills/internal-<X>/SKILL.md`                              |
 | Narrative, decisions with their rejected alternative, and gotchas for one domain | `canon/context/<X>/`                                                |
 | Consumer-facing reference                                                        | `docs/`, with the CLI contract in `docs/agents/`                    |
@@ -32,7 +32,7 @@ Load the skill before editing anything in its domain.
 | ---------------------------------------------------------------------------- | --------------------- |
 | `src/`, `scripts/`, `sandbox/`                                               | `internal-scripts`    |
 | `tooling/`, manifests, golden configs, seeds                                 | `internal-tooling`    |
-| `standards/`, `docs/`, `canon/context/`                                      | `internal-standards`  |
+| `docs/`, `canon/context/`                                                    | `internal-docs`       |
 | `governance/rules/`, `governance/stacks/`                                    | `internal-governance` |
 | `claude/skills/`, `claude/README.md`, `.claude/skills/`                      | `internal-claude`     |
 | `web/`, `assets/`, the landing page                                          | `internal-web`        |
@@ -45,8 +45,7 @@ Load the skill before editing anything in its domain.
 ## Key paths
 
 - `governance/rules/`: governance rules that ship to targets
-- `internal/`: toolkit-only rules and standards, outside every installable surface
-- `standards/`: authoring conventions, read through `canon standards <name>`
+- `internal/`: toolkit-only rules and the tooling reference convention, outside every installable surface
 - `tooling/`: golden configs, references, and manifests per stack
 - `claude/skills/`: plugin skills installable in target projects
 - `src/`: the TypeScript CLI, including the product verbs
