@@ -21,10 +21,10 @@ Owns how the project runs on a developer machine: installing the toolchain, the 
 
 ### Scripts
 
-| Command          | Purpose                                                                        |
-| ---------------- | ------------------------------------------------------------------------------ |
-| `bun run check`  | Repairs locally. Auto-formats, then asserts what the formatters could not fix. |
-| `bun run format` | Auto-fix prettier formatting.                                                  |
+| Command          | Purpose                                                                                  |
+| ---------------- | ---------------------------------------------------------------------------------------- |
+| `bun run check`  | Gates locally and writes nothing. Fails on formatting drift until `bun run format` runs. |
+| `bun run format` | Auto-fix prettier formatting.                                                            |
 
 ### Shell scripts
 
