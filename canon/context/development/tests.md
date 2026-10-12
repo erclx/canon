@@ -89,6 +89,19 @@ A takeover renames the stale file aside rather than deleting it, because two acq
 
 CI skips the lock, since each runner runs one suite, and it keeps vitest's default workers for the same reason. The cap bounds one suite and does nothing about load from outside it. At three times the core count a capped run still failed once, in the canvas walk `src/canvas/shell.e2e.test.ts`, whose cases share one page so one starved case takes the rest.
 
+Starving CPU alone does not reproduce it. Measured on 2026-10-12 with seven workers building and the load average between 14 and 25, runs pinned to the CPU counts below, in cell order:
+
+| Run                                | CPUs      | Runs    | Failing | Wall                             |
+| ---------------------------------- | --------- | ------- | ------- | -------------------------------- |
+| the walk alone                     | all, 2, 1 | 2, 3, 3 | 0       | 10 to 12 s, 8 to 10 s, 9 to 11 s |
+| all 11 browser test files together | 4, 2      | 2, 2    | 0       | 10 to 11 s, 25 to 30 s           |
+| full suite, 16 workers             | 8, 4      | 2, 2    | 0       | 48 to 55 s, 79 to 109 s          |
+
+The slowest typography case took 2.6 s, and the box has logged 173 s of full memory stall since the 2026-10-08 boot, which the load average folds into one number. A timeout CPU starvation cannot reproduce points at memory or I/O stalls, or at a race the jitter exposes. Two readings tell these apart:
+
+- The failed-stage load line carries the `some avg10` stall share per resource from `/proc/pressure/`, as `, pressure cpu 7.5% memory 0.0% io 0.2% over 10s,`. It drops where the files are absent or PSI is off.
+- The walk writes `failed-<case slug>.png` and the server's stderr as `server.log` under `.canon/tmp/canvas-walk/`. The first `failed-*` file by case order is the one that matters, since every later case fails on the shared page. A passing walk writes none.
+
 A suite run by hand through `bun run test` or `bun --bun vitest run` takes no lock either, so running the whole suite directly during a wave still oversubscribes the box. Run a single file that way and leave the full suite to `bun run check`.
 
 The file records the gate's pid, while the suite runs in a child vitest tree. Killing the gate alone with `kill -9` leaves that tree running as orphans, so the next acquirer takes over at once while the orphaned suite still holds every core, and two suites overlap until it finishes. Closing it would mean recording and probing the holder's process group.

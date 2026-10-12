@@ -50,6 +50,45 @@ export interface LoadReading {
   /** The 1-minute load average. */
   readonly loadAverage: number
   readonly cores: number
+  /**
+   * The `some avg10` stall share per resource from `/proc/pressure`, which the
+   * load average folds into one number. Absent where the kernel has no PSI.
+   */
+  readonly pressure?: PressureReading
+}
+
+export interface PressureReading {
+  readonly cpu: number
+  readonly memory: number
+  readonly io: number
+}
+
+/**
+ * Reads the `some avg10` percentage from one `/proc/pressure/<resource>` file.
+ * A file that does not parse answers `undefined`, which drops the clause.
+ */
+export function parsePressure(text: string): number | undefined {
+  const match = /^some\b.*\bavg10=(\d+(?:\.\d+)?)\b/m.exec(text)
+  if (match === null) return undefined
+  const value = Number.parseFloat(match[1])
+  return Number.isFinite(value) ? value : undefined
+}
+
+function readPressure(): PressureReading | undefined {
+  try {
+    const read = (name: string) =>
+      parsePressure(readFileSync(`/proc/pressure/${name}`, 'utf8'))
+    const cpu = read('cpu')
+    const memory = read('memory')
+    const io = read('io')
+    if (cpu === undefined || memory === undefined || io === undefined) {
+      return undefined
+    }
+    return { cpu, memory, io }
+  } catch {
+    // PSI off or absent: the files may exist and still fail with EOPNOTSUPP.
+    return undefined
+  }
 }
 
 /**
@@ -62,7 +101,12 @@ export function readProcLoad(): LoadReading | undefined {
     const first = readFileSync('/proc/loadavg', 'utf8').split(' ')[0]
     const loadAverage = Number.parseFloat(first)
     if (!Number.isFinite(loadAverage)) return undefined
-    return { loadAverage, cores: availableParallelism() }
+    const pressure = readPressure()
+    return {
+      loadAverage,
+      cores: availableParallelism(),
+      ...(pressure === undefined ? {} : { pressure }),
+    }
   } catch {
     return undefined
   }
@@ -252,7 +296,12 @@ function withLoadLine(
   const reading = (ctx.readLoad ?? readProcLoad)()
   if (reading === undefined) return outcome
 
-  const text = `Load average ${reading.loadAverage} on ${reading.cores} cores when the ${stage.label} stage failed`
+  const { pressure } = reading
+  const stalls =
+    pressure === undefined
+      ? ''
+      : `, pressure cpu ${pressure.cpu.toFixed(1)}% memory ${pressure.memory.toFixed(1)}% io ${pressure.io.toFixed(1)}% over 10s,`
+  const text = `Load average ${reading.loadAverage} on ${reading.cores} cores${stalls} when the ${stage.label} stage failed`
   return {
     ...outcome,
     emissions: [...outcome.emissions, { kind: 'info', text }],

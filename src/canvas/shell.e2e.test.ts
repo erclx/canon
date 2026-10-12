@@ -1,6 +1,7 @@
 import {
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
@@ -8,7 +9,15 @@ import {
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import type { Browser, Page } from 'playwright-core'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  onTestFailed,
+} from 'vitest'
 
 /**
  * Walks the canvas shell in a real browser: open, select a frame, pick an
@@ -163,6 +172,11 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
   beforeAll(async () => {
     root = mkdtempSync(join(tmpdir(), 'canvas-walk-'))
     mkdirSync(SHOTS, { recursive: true })
+    // A file from an earlier run reads the same as a fresh one, so each run
+    // starts with none and a failed-*.png always belongs to this run.
+    for (const name of readdirSync(SHOTS)) {
+      if (/^failed-.*\.png$/.test(name)) rmSync(join(SHOTS, name))
+    }
     provision(root)
 
     const spawned = Bun.spawn(
@@ -177,7 +191,7 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
         String(freePort()),
         '--json',
       ],
-      { stdout: 'pipe', stderr: 'ignore' },
+      { stdout: 'pipe', stderr: Bun.file(join(SHOTS, 'server.log')) },
     )
     server = spawned
     const url = await readServeUrl(spawned.stdout)
@@ -188,6 +202,25 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
     // The shell holds /api/events open, so networkidle never arrives.
     await page.goto(url, { waitUntil: 'load' })
   }, 120_000)
+
+  // The page is shared, so every case after the first failure fails too and
+  // writes its own file. The first by case order is the one that matters.
+  beforeEach(({ task }) => {
+    onTestFailed(async () => {
+      const slug = task.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+      try {
+        await page.screenshot({
+          path: join(SHOTS, `failed-${slug}.png`),
+          timeout: 5_000,
+        })
+      } catch {
+        // A hung page is the case being recorded, so its own error stands.
+      }
+    })
+  })
 
   afterAll(async () => {
     await browser?.close()
