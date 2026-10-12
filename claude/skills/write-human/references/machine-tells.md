@@ -21,6 +21,7 @@ Work top down. The first three account for most of what a reader calls machine-w
 - [Question as transition](#question-as-transition)
 - [Escalating parallel clauses](#escalating-parallel-clauses)
 - [Empty superlative frames](#empty-superlative-frames)
+- [A colon or comma where the dash was](#a-colon-or-comma-where-the-dash-was)
 
 ## Rule of three
 
@@ -118,3 +119,14 @@ Fix by writing the two claims as two sentences, or by cutting the one that repea
 `one of the most important`, `a critical piece of`, `at the heart of`. The frame ranks a thing against a set the sentence never names.
 
 Fix by stating what the thing does. A ranking survives only where the set is named and the position is measured.
+
+## A colon or comma where the dash was
+
+An agent told to remove an em dash swaps in a colon or a comma and leaves the sentence as it was. The join is the same and so is the pause the dash made, which is the habit the ban was written against.
+
+```markdown
+Bad: The hook fires on every edit: it reads the record the verb wrote.
+Good: The hook fires on every edit and reads the record the verb wrote.
+```
+
+Fix by splitting the sentence in two, or by cutting the clause that only restates the first. A colon after a label or before a list is not this tell.
