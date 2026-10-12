@@ -1269,6 +1269,80 @@ describe('review-post-scan.sh verdicts', () => {
       },
     )
 
+    // A here-string and an arithmetic shift both carry `<<` and neither opens
+    // a heredoc, so the post on the next line must still reach the scan.
+    const notHeredocs: Record<string, string> = {
+      'a here-string with a space': 'cat <<< word',
+      'a here-string with no space': 'cat <<<word',
+      'a shift in a command substitution': 'echo $((1<<2))',
+      'a shift between names': 'echo $((a<<n))',
+      'a shift in an arithmetic command': '(( x<<2 ))',
+      'a shift in a let command': 'let x=1<<2',
+      'a shift nested in parentheses': 'echo $(( (1<<2) + 3 ))',
+    }
+
+    for (const [label, opener] of Object.entries(notHeredocs)) {
+      it.concurrent(
+        `should block ${tree.label} on a post after ${label}`,
+        async ({ expect }) => {
+          const result = await run(
+            hook,
+            postPayload(`${opener}\ngh api -X POST ${REVIEWS} ${body()}`),
+            join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+          )
+
+          expect(result.stderr).toContain('board identifier')
+          expect(result.code).toBe(2)
+        },
+      )
+    }
+
+    it.concurrent(
+      `should block ${tree.label} on a post after a here-string on one line`,
+      async ({ expect }) => {
+        const result = await run(
+          hook,
+          postPayload(
+            `cat <<<word; gh api -X POST ${REVIEWS} ${body()}`,
+          ),
+          join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+        )
+
+        expect(result.stderr).toContain('board identifier')
+        expect(result.code).toBe(2)
+      },
+    )
+
+    it.concurrent(
+      `should still drop a quoted post inside a heredoc after a here-string on ${tree.label}`,
+      async ({ expect }) => {
+        const result = await run(
+          hook,
+          postPayload(
+            `cat <<< word\ncat > .canon/tmp/n.md <<'EOF'\n- ${mention}\nEOF`,
+          ),
+          join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+        )
+
+        expect(result.stderr).toBe('')
+        expect(result.code).toBe(0)
+      },
+    )
+
+    it.concurrent(
+      `should still open a heredoc after a digit file descriptor on ${tree.label}`,
+      async ({ expect }) => {
+        const result = await run(
+          hook,
+          postPayload(`cat 0<<EOF\n- ${mention}\nEOF`),
+          join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+        )
+
+        expect(result.stderr).toBe('')
+        expect(result.code).toBe(0)
+      },
+    )
+
     it.concurrent(
       `should block ${tree.label} on a heredoc and a post in one call`,
       async ({ expect }) => {
@@ -1475,6 +1549,14 @@ describe('memory-guard.sh boundaries', () => {
     [
       'a write after a here-string with no space',
       shell(`cat <<<x\ncp a ${home}/memory/n.md`),
+    ],
+    [
+      'a write after an arithmetic shift',
+      shell(`echo $((1<<2))\ncp a ${home}/memory/n.md`),
+    ],
+    [
+      'a write after a let shift',
+      shell(`let x=1<<2\ncp a ${home}/memory/n.md`),
     ],
     ['a write inside bash -c', shell(`bash -c 'cp a ${home}/memory/n.md'`)],
     [

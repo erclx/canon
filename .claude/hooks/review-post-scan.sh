@@ -50,7 +50,19 @@ END {
       while (i <= n && substr(s, i, 1) != "\n") i++
       continue
     }
-    if (c == "<" && substr(s, i, 2) == "<<" && substr(s, i, 3) != "<<<") {
+    if (c == "(" && substr(s, i, 2) == "((") {
+      d = 0
+      while (i <= n) {
+        a = substr(s, i, 1)
+        if (a == "(") d++
+        else if (a == ")") { d--; if (d == 0) { seg = seg a; i++; break } }
+        seg = seg a; i++
+      }
+      continue
+    }
+    if (c == "<" && substr(s, i, 3) == "<<<") { seg = seg "<<<"; i += 3; continue }
+    if (c == "<" && substr(s, i, 2) == "<<" && seg ~ /^[ \t]*let[ \t]/) { seg = seg "<<"; i += 2; continue }
+    if (c == "<" && substr(s, i, 2) == "<<") {
       j = i + 2; dash = 0
       if (substr(s, j, 1) == "-") { dash = 1; j++ }
       while (substr(s, j, 1) ~ /[ \t]/) j++
