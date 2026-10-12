@@ -19,7 +19,7 @@ removes a stale `.claude/GOV.md` from the retired build. Use
 
 Everything under `.claude/rules/canon/` belongs to the toolkit, so a rule
 there that the toolkit no longer ships is deleted on sync, edited or not. That
-is how a retired rule stops loading in a target. A renamed or renumbered rule
+is how a retired rule stops loading in a target. A renamed rule
 the toolkit declares in `governance/renames.toml` moves instead: the sync
 installs the rule under its new name and deletes the old file, whether or not
 the target's stamp records a stack. Local edits to the old file are not

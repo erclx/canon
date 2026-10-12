@@ -83,7 +83,7 @@ The retired-verb pattern reads every corpus but `docs/`, since a `canon standard
 
 ### The skill-body pattern
 
-The rule-path pattern is scoped to `claude/skills/`, less each `REQUIREMENT.md`, since a maintainer or an audit command reads that file rather than a session loading it. A bare match reports whether or not the named rule exists, since a same-repository citation under this corpus names no target project's own tree. A rule reaches a target only through a separate `canon gov sync`, a narrower and slower delivery path than the plugin merge that ships the citing skill. The pattern anchors on the trailing `\d{3}-[\w-]+\.md` rather than on the bare `.claude/rules/` prefix, which lets a folder mention carrying no number pass untouched.
+The rule-path pattern is scoped to `claude/skills/`, less each `REQUIREMENT.md`, since a maintainer or an audit command reads that file rather than a session loading it. A bare match reports whether or not the named rule exists, since a same-repository citation under this corpus names no target project's own tree. A rule reaches a target only through a separate `canon gov sync`, a narrower and slower delivery path than the plugin merge that ships the citing skill. The pattern anchors on a trailing `.md` file rather than on the bare `.claude/rules/` prefix, which lets a folder mention, ending in `/` or naming no file, pass untouched.
 
 ### The shape-only patterns
 
