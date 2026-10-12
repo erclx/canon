@@ -17,7 +17,7 @@ A refusal names every root it looked at, so a message reading `no-folder` says w
 
 ## Validate
 
-`canon records validate <kind>` reports where a record folder or the standards corpus disagrees with the standard governing it. Its flags, the per-kind checks, and the refusals are in `records-validate.md`.
+`canon records validate <kind>` reports where a record folder disagrees with the standard governing it. Its flags, the per-kind checks, and the refusals are in `records-validate.md`.
 
 ## Ordinal
 
