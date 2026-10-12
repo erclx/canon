@@ -36,6 +36,12 @@ Tidewell is a tide-table app for people on a shoreline who need one number fast,
 
 - Six steps. The first four double, and the last two add one rem each.
 
+## Layout
+
+- One column up to 40rem, then a day list beside the chart.
+- The chart never drops below 20rem wide.
+- At the 320 pixel reflow floor the day list scrolls, never the chart.
+
 ## Shapes
 
 - Every border is one pixel solid at the `border` role.
@@ -45,12 +51,6 @@ Tidewell is a tide-table app for people on a shoreline who need one number fast,
 | card  | `--radius-card`  | one day's tide table           |
 | input | `--radius-input` | the location search field      |
 | chip  | `--radius-chip`  | tags for a station, none built |
-
-## Layout
-
-- One column up to 40rem, then a day list beside the chart.
-- The chart never drops below 20rem wide.
-- At the 320 pixel reflow floor the day list scrolls, never the chart.
 
 ## Motion
 

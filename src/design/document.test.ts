@@ -54,6 +54,23 @@ describe('renderDesignDocument', () => {
     }
   })
 
+  it('orders the sections the way Google DESIGN.md orders those it shares', () => {
+    const headings = renderDesignDocument()
+      .split('\n')
+      .filter((line) => line.startsWith('## '))
+
+    expect(headings).toEqual([
+      '## Overview',
+      '## Colors',
+      '## Typography',
+      '## Spacing',
+      '## Layout',
+      '## Shapes',
+      '## Motion',
+      '## Iconography',
+    ])
+  })
+
   it('writes none of the headings the standard renamed', () => {
     const document = renderDesignDocument()
 

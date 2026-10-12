@@ -68,7 +68,7 @@ Headings and table rows are never counted, and a section holding a table and no 
 
 ## Sections
 
-Use `## Overview`, `## Colors`, `## Typography`, `## Spacing`, `## Shapes`, `## Motion`, and `## Iconography`, in that order. The parser still reads a record written under the earlier names, `## Personality`, `## Color`, and `## Borders`, as the sections they became.
+Use `## Overview`, `## Colors`, `## Typography`, `## Spacing`, `## Shapes`, `## Motion`, and `## Iconography`, in that order, which follows Google's DESIGN.md for the sections the two share. An optional `## Layout` sits between Spacing and Shapes. The parser still reads a record written under the earlier names, `## Personality`, `## Color`, and `## Borders`, as the sections they became.
 
 In an intent record, `## Colors` carries a `Role | Property | Intent` table and `## Shapes` a `Role | Property | When used` table. Each row names the custom property the stylesheet declares for that role, such as `--color-accent`. Typography and Spacing carry rules alone.
 

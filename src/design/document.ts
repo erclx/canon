@@ -137,6 +137,8 @@ export function renderDesignDocument(tokens: DesignTokens = TOKENS): string {
       formatTable(['Step', 'Multiplier', 'Value'], spaceRows(tokens.spacing)),
     ),
     '',
+    section('Layout', bullets(tokens.layout)),
+    '',
     section(
       'Shapes',
       bullets(tokens.bordersRules),
@@ -145,8 +147,6 @@ export function renderDesignDocument(tokens: DesignTokens = TOKENS): string {
         borderRows(tokens.borders),
       ),
     ),
-    '',
-    section('Layout', bullets(tokens.layout)),
     '',
     section('Motion', bullets(tokens.motion)),
     '',
