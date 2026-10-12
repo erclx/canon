@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
-import { dirname, join, resolve } from 'node:path'
+import { join, resolve } from 'node:path'
 import { $ } from 'bun'
 import { isMarked } from '@/sweep/exempt-marker'
 import { gitEnv } from '@/git/env'
@@ -41,14 +41,11 @@ export const RULE_DIRS: readonly string[] = [
 export const GLOB_CORPUS = join('internal', 'rules')
 
 /**
- * How the citation was written, kept on the finding because the two resolve
- * against different roots and a reader repairing one needs to know which.
- *
- * `path` is a backticked repository path. `sibling` is a rule naming another
- * rule by filename alone, which resolves inside the folder the citing rule
- * sits in.
+ * How the citation was written, being a backticked repository path. A bare
+ * filename is no form, since with no folder around it nothing tells a rule
+ * from a convention such as `index.md`.
  */
-export type CitationForm = 'path' | 'sibling'
+export type CitationForm = 'path'
 
 /**
  * What the sweep decided about one citation.
@@ -115,9 +112,6 @@ const FENCE = /^\s*(?:```|~~~)/
 
 const FRONTMATTER_DELIMITER = /^---\s*$/
 
-/** A rule filename, which is how a rule names a sibling with no folder around it. */
-const SIBLING_RULE = /^\d{3}-[a-z0-9-]+\.md$/
-
 /**
  * A character that puts the span outside this repository, or outside paths
  * altogether.
@@ -160,24 +154,7 @@ function namesAFile(span: string): boolean {
 export function classifySpan(span: string): CitationForm | undefined {
   if (isNotRepositoryPath(span)) return undefined
   if (!namesAFile(span)) return undefined
-  if (span.includes('/')) return 'path'
-  return SIBLING_RULE.test(span) ? 'sibling' : undefined
-}
-
-/**
- * Where a citation could answer, which is wherever the reader's own tools look
- * and nowhere else.
- *
- * A sibling resolves inside the folder the citing rule sits in, since that is
- * the only place a bare rule filename means anything.
- */
-function candidatesFor(
-  form: CitationForm,
-  cited: string,
-  ruleFile: string,
-): string[] {
-  if (form === 'sibling') return [join(dirname(ruleFile), cited)]
-  return [cited]
+  return span.includes('/') ? 'path' : undefined
 }
 
 interface RawCitation {
@@ -410,7 +387,7 @@ export async function readCitations(root: string): Promise<CitationReport> {
       }
 
       for (const raw of collectCitations(text)) {
-        const candidates = candidatesFor(raw.form, raw.cited, file)
+        const candidates = [raw.cited]
         const resolved = candidates.find((path) =>
           existsSync(resolve(root, path)),
         )
@@ -439,7 +416,7 @@ function classifyStatus(
 ): CitationStatus {
   if (resolved !== undefined) return 'resolved'
   if (raw.marked) return 'exempt'
-  if (raw.form === 'path' && isGoverned(raw.cited, declared)) return 'governed'
+  if (isGoverned(raw.cited, declared)) return 'governed'
   return 'dead'
 }
 
@@ -456,7 +433,7 @@ async function applyIgnored(
   measured: Extract<CitationReport, { kind: 'measured' }>,
 ): Promise<CitationReport> {
   const pending = measured.citations.filter(
-    (citation) => citation.status === 'dead' && citation.form === 'path',
+    (citation) => citation.status === 'dead',
   )
   if (pending.length === 0) return measured
 

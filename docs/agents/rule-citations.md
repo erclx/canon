@@ -1,6 +1,6 @@
 ---
 title: Rule citations
-description: Resolving every path a governance rule cites and every frontmatter glob the internal corpus declares, the two forms a citation is written in, the shapes that look like citations and are not, the two classes where an absent path is correct, why the glob half reads one corpus, and why this one gates
+description: Resolving every path a governance rule cites and every frontmatter glob the internal corpus declares, the one form a citation is written in, the shapes that look like citations and are not, the two classes where an absent path is correct, why the glob half reads one corpus, and why this one gates
 ---
 
 # Rule citations
@@ -28,14 +28,9 @@ Under `--json` the record holds stdout alone and the frame still renders on stde
 
 Two files agreeing is what a drift check measures. Whether either one is right about the tree is a different question, and this is the stage that asks it.
 
-## The two forms
+## The one form
 
-A citation reaches a reader in one of two shapes, and each resolves against a different root.
-
-| Form      | Shape                    | Resolves against                   |
-| --------- | ------------------------ | ---------------------------------- |
-| `path`    | a backticked path        | the root                           |
-| `sibling` | a bare `<nnn>-<slug>.md` | the folder the citing rule sits in |
+A citation reaches a reader as a backticked path, reported under the form `path`, and it resolves against the root. A bare filename is never a citation, since with no folder around it nothing tells a rule from a convention such as `index.md`. A rule pointing at another rule writes its repository path.
 
 A call to the retired standards verb is no form here. A rule holding one fails the shipped-references stage of `canon gate run`, which reads every shipped file for it.
 
@@ -46,7 +41,7 @@ A `path` is anchored on the whole backticked span rather than on a trailing patt
 A rule body is full of backticked spans carrying a slash, and almost none of them names a file in this tree. The stage declines four shapes outright.
 
 - A placeholder or glob segment describes a shape rather than naming a file: `canon/context/<domain>.md`, `app/**/route.ts`, `${CLAUDE_SKILL_DIR}/../references/<name>.md`.
-- A bare filename names a convention: `route.ts`, `manifest.toml`, `components.json`, `playwright.config.ts`. A bare name is read as a citation only when it matches a rule filename, which is how one authored rule would point at a sibling such as `605-worktrees.md`.
+- A bare filename names a convention: `route.ts`, `manifest.toml`, `components.json`, `playwright.config.ts`.
 - A span carrying no file extension is a folder or a module specifier: `src/pages/`, `next/font`, `try/except`, `react-hooks/set-state-in-effect`, `oven-sh/setup-bun@v2`, `@/lib/utils`.
 - A fenced block displays a path rather than pointing at one.
 

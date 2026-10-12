@@ -110,15 +110,12 @@ describe('classifySpan', () => {
     expect(classifySpan('tooling/claude/seeds/CLAUDE.md')).toBe('path')
   })
 
-  it('should read a bare rule filename as a sibling reference', () => {
-    expect(classifySpan('555-tasks.md')).toBe('sibling')
-  })
-
   it('should decline a bare filename naming a convention rather than a file', () => {
     for (const span of [
       'route.ts',
       'index.md',
       'reference.md',
+      'tasks.md',
       'manifest.toml',
       'components.json',
       'playwright.config.ts',
@@ -230,18 +227,17 @@ describe('readCitations', () => {
     expect(withStatus(report, 'dead')).toEqual([])
   })
 
-  it('should resolve a sibling rule named by filename alone', async () => {
-    writeRule('claude/555-tasks.md', '- Task rules live here.')
+  it('should report nothing for a rule naming a bare filename', async () => {
+    writeRule('claude/tasks.md', '- Task rules live here.')
     writeRule(
-      'claude/562-session.md',
-      '- Follow this rule rather than `555-tasks.md` for a `session-` file.',
+      'claude/session.md',
+      '- Follow `tasks.md` rather than the folder `index.md` for a `session-` file.',
     )
     git('add', '--all')
 
     const report = await readCitations(ROOT)
 
-    expect(withStatus(report, 'dead')).toEqual([])
-    expect(withStatus(report, 'resolved')).toContain('555-tasks.md')
+    expect(report.kind === 'measured' && report.citations).toEqual([])
   })
 
   it('should exempt a path the rule spells in its own frontmatter', async () => {
