@@ -168,6 +168,7 @@ beforeAll(() => {
     join(fixture, 'bin-no-runner'),
     join(fixture, 'bin-jq-trap'),
     join(fixture, 'bin-empty-set'),
+    join(fixture, 'bin-advisory'),
     join(fixture, 'bin-no-record'),
     join(fixture, 'bin-due'),
     join(fixture, 'bin-scan-fail'),
@@ -242,6 +243,16 @@ beforeAll(() => {
     `#!/usr/bin/env bash\nprintf '%s\\n' '{"entries":[],"bans":{"emptySets":["characters"]}}'\n`,
   )
   chmodSync(narrowed, 0o755)
+
+  // A record carrying no ban and two advisory findings, one colon on a line
+  // the edits below do or do not introduce and one heading, so the new-text
+  // filter and the unfiltered heading read are each observable.
+  const advisory = join(fixture, 'bin-advisory/canon')
+  writeFileSync(
+    advisory,
+    `#!/usr/bin/env bash\nprintf '%s\\n' '{"entries":[{"path":"doc.md","bans":[],"colons":[{"line":3,"column":14,"text":"Prose sentence: another clause."}],"headingCase":[{"line":1,"text":"Key Changes","words":["Changes"]}]}],"bans":{"emptySets":[]}}'\n`,
+  )
+  chmodSync(advisory, 0o755)
 
   // A verb that declined to measure writes no record at all, which is what it
   // does outside a git repository. Reading the findings alone reports that as a
@@ -1071,6 +1082,47 @@ describe('seeds standards-audit.sh runner', () => {
 
       expect(result.stdout).toContain('shipped ban set is empty')
       expect(result.stdout).toContain('characters')
+      expect(result.code).toBe(0)
+    },
+  )
+
+  it.concurrent(
+    'should warn on a colon the write introduced and a heading in the file',
+    async ({ expect }) => {
+      const path = [join(fixture, 'bin-advisory'), hookPath].join(delimiter)
+      const write = JSON.stringify({
+        tool_input: {
+          file_path: join(fixture, 'project/doc.md'),
+          content: '# Key Changes\n\nProse sentence: another clause.\n',
+        },
+        tool_name: 'Write',
+      })
+
+      const result = await run(hook, write, path)
+
+      expect(result.stdout).toContain('Prose sentence: another clause.')
+      expect(result.stdout).toContain('Key Changes')
+      expect(result.code).toBe(0)
+    },
+  )
+
+  it.concurrent(
+    'should stay quiet on a colon an edit left untouched',
+    async ({ expect }) => {
+      const path = [join(fixture, 'bin-advisory'), hookPath].join(delimiter)
+      const edit = JSON.stringify({
+        tool_input: {
+          file_path: join(fixture, 'project/doc.md'),
+          old_string: 'one',
+          new_string: 'two',
+        },
+        tool_name: 'Edit',
+      })
+
+      const result = await run(hook, edit, path)
+
+      expect(result.stdout).not.toContain('Prose sentence')
+      expect(result.stdout).toContain('Key Changes')
       expect(result.code).toBe(0)
     },
   )

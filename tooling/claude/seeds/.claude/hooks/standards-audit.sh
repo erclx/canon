@@ -62,13 +62,24 @@ fi
 hits=$(printf '%s' "$record" |
   jq -r '.entries[]?.bans[]? | ":\(.line):\(.column + 1)  \(.kind)  \(.term)"' 2>/dev/null)
 
+# Two advisory measures ride in the same record and never gate. A heading's
+# case is read for the whole file, since it is cheap to fix where it stands. A
+# colon is kept only where its line appears in the text this write carried,
+# because a file holds colons nobody is asking this edit to answer for.
+new=$(printf '%s' "$input" |
+  jq -r '[.tool_input.new_string?, .tool_input.content?, (.tool_input.edits[]?.new_string?)] | map(select(. != null)) | join("\n")' 2>/dev/null)
+headings=$(printf '%s' "$record" |
+  jq -r '.entries[]?.headingCase[]? | ":\(.line)  \(.text)"' 2>/dev/null)
+colons=$(printf '%s' "$record" |
+  jq -r --arg new "$new" '.entries[]?.colons[]? | select(.text as $t | $new | contains($t)) | ":\(.line):\(.column + 1)  \(.text)"' 2>/dev/null)
+
 # A set the verb shipped empty measures nothing and would report a clean file.
 # Reading the findings alone turns that narrowed check into a pass, so the field
 # is read beside them.
 empty=$(printf '%s' "$record" |
   jq -r '[.bans.emptySets[]?] | join(", ")' 2>/dev/null)
 
-[ -z "$hits" ] && [ -z "$unread" ] && [ -z "$empty" ] && exit 0
+[ -z "$hits" ] && [ -z "$headings" ] && [ -z "$colons" ] && [ -z "$unread" ] && [ -z "$empty" ] && exit 0
 
 nl=$'\n'
 msg=""
@@ -82,7 +93,17 @@ elif [ -n "$empty" ]; then
 fi
 
 if [ -n "$hits" ]; then
-  found=$(printf 'Standards-audit: markdown.md violations in %s. Rewrite the sentence (do not lazy-swap). A code span is the answer only where the token is genuinely an identifier under discussion.\n%s' "$file" "$hits")
+  found=$(printf 'Standards-audit: markdown.md violations in %s. Split the sentence or rewrite it. A colon or a comma standing where the em dash was is the same sentence. A code span is the answer only where the token is genuinely an identifier under discussion.\n%s' "$file" "$hits")
+  msg="${msg:+$msg$nl}$found"
+fi
+
+if [ -n "$headings" ]; then
+  found=$(printf 'Standards-audit: headings in %s are not sentence case. Lowercase every word after the first unless it is a proper noun, and leave a proper noun as it is.\n%s' "$file" "$headings")
+  msg="${msg:+$msg$nl}$found"
+fi
+
+if [ -n "$colons" ]; then
+  found=$(printf 'Standards-audit: this write added a colon in the middle of a sentence in %s. A colon belongs after a label or at the end of a line introducing a list. Split the sentence or rewrite it.\n%s' "$file" "$colons")
   msg="${msg:+$msg$nl}$found"
 fi
 
