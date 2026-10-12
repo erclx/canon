@@ -4,7 +4,7 @@
 # autoMemoryEnabled, and this hook is the check behind that switch. A target's
 # own memory folder is inert since #2300, and turning off a harness feature in
 # someone else's project is that operator's preference rather than a fact canon
-# owns. See the guards context entry.
+# owns. See the command scanners context entry.
 
 IFS= read -r -d '' -t 2 input
 [ -n "$input" ] || {

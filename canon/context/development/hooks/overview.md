@@ -15,7 +15,7 @@ Owns the Claude Code hooks this repository runs on itself and the husky git hook
 - `.husky/` owns the git hooks
 - `scripts/` owns every other shell script
 
-`canon/context/development/hooks/guards.md` covers the hooks that guard a tool call, `canon/context/development/hooks/compaction.md` the hooks on `PreCompact` and `Stop`, `canon/context/development/hooks/settings.md` the session budget settings, and `canon/context/development/hooks/husky.md` the git hooks.
+`canon/context/development/hooks/guards.md` covers the hooks that guard a tool call, `canon/context/development/hooks/command-scanners.md` the two that cut a `Bash` command, `canon/context/development/hooks/compaction.md` the hooks on `PreCompact` and `Stop`, `canon/context/development/hooks/settings.md` the session budget settings, and `canon/context/development/hooks/husky.md` the git hooks.
 
 ## Decisions
 
