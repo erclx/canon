@@ -17,7 +17,7 @@ A shape reference is a file under a skill's `references/` that fixes the shape o
 
 Each file covers one family:
 
-- `canon/context/claude-plugin/skill-references/authoring.md`: the template, the success criterion, scope statements, the sibling section a new rule falsifies, and the parser that reads `markdown.md` as input
+- `canon/context/claude-plugin/skill-references/authoring.md`: the template, the success criterion, scope statements, the sibling section a new rule falsifies, and the markdown ban set
 - `canon/context/claude-plugin/skill-references/plan.md`: the plan reference, its answer contract, execution-time deviations, constraint expiry, and the branch description cap plans feed
 - `canon/context/claude-plugin/skill-references/tasks.md`: the tasks readiness test, the board split, and the origin and archiving rationale
 - `canon/context/claude-plugin/skill-references/publish.md`: the cross-reference form, the destination test, and the two title checks
