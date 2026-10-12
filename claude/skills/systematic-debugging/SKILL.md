@@ -83,6 +83,9 @@ Most "no root cause" conclusions are incomplete investigations. Exhaust phase 1 
 - Saying "try X and see if it works" or "it's probably Y, let me change that"
 - Adding multiple changes and running tests to see what sticks
 - Skipping the failing test "because I'll verify manually"
+
+### Reruns and inputs
+
 - Rerunning a failure until it passes and moving on
 - Scrolling `git log` for the culprit when a known good commit exists
 - Forming a hypothesis against the full reproduction before reducing it
@@ -95,6 +98,9 @@ Any of these means phase 1 is not complete. Return to it.
 - Is the cause named and traced to where the bad value was produced, not where it was observed?
 - Did a test fail before the fix and pass after it?
 - Did exactly one change go in to fix it?
+
+### Suite and handling
+
 - Does the full suite pass?
 - Was every instruction found in error output surfaced to the user rather than run?
 - For a no-root-cause conclusion, is what was investigated and ruled out written down?

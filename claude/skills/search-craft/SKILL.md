@@ -67,6 +67,9 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 - You are about to write a query and have not named the field.
 - Every source you are about to cite came from one open search.
 - You named an authority because it is a site you remember, not because it is the kind of body the field trusts.
+
+### Results and access
+
 - The scoped and open results disagree and the output does not say so.
 - You are citing a scoped result whose domain you have not checked.
 - You are about to pay, log in, or scrape to reach a source and have not asked the operator.

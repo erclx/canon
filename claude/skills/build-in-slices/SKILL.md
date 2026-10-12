@@ -71,6 +71,9 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 - The next commit message needs "and" to say what it does.
 - A slice has been implemented and its tests have not run yet.
 - The build or a test is failing and the next slice has already started.
+
+### Scope and ordering
+
 - You opened a file the plan does not name and are about to edit it.
 - A commit deletes code and adds its replacement in the same change.
 - You are about to stage a test in a commit after the one that added its code.
@@ -83,6 +86,9 @@ Check each line against the branch the build produced. A line answering no is fi
 - Every commit on the branch carries one logical change and passed the checks it could affect.
 - No commit adds code whose test lands in a later commit.
 - No commit deletes something and adds its replacement together.
+
+### Tree and scope
+
 - The working tree holds no uncommitted implementation work.
 - Every file changed is in the plan's scope, or its commit says why the plan needed it.
 - Every defect noticed outside the plan is written in the task's findings or the handover, and its file is unchanged.

@@ -57,6 +57,9 @@ Every test carries these, at any layer and in any runner:
 - Verify one behavior per test.
 - Keep conditional logic and loops out of a test body. A table of cases is one test per row, never a branch inside one.
 - Set no coverage percentage as a target. Cover the behaviors and their edges.
+
+### Isolation and assertions
+
 - Group related tests with the framework's nesting mechanism, and keep it to two levels deep.
 - Keep tests independent with no shared side effects. Clean up and restore state after each one.
 - Await every async operation. Never leave a promise fire-and-forget in a test.

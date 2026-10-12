@@ -86,6 +86,9 @@ From the enumeration, include a worktree in the remove set when all hold:
 - Not the main row.
 - Not the current session's worktree.
 - Not occupied by a live session.
+
+### Tree state
+
 - Not a `foreign` tree.
 - State is `merged` or `merged (local)`.
 - Working tree is clean.

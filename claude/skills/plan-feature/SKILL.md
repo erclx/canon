@@ -52,10 +52,16 @@ What this skill adds on top of the standard:
 - Reframe a vague ask as success criteria before writing `**Files to touch:**`. Each criterion names something observable and a check that decides it, such as a measure and the threshold it must stay under, drawn from the ask or the project context. "Make it faster" names no criterion, while a stated budget for one path does. Each criterion becomes one `**Verification:**` bullet.
 - Confirm a concrete project or use case drives the feature before shaping it, and lift patterns from that project where precedent exists. A feature with no named user is a guess about what one will want.
 - Prefer one layout that serves both a new and a grown project over a dual-mode toggle or a migration shim. Two modes double what every later change has to hold.
+
+### Suggestions and sections
+
 - Apply senior judgment to every `- Suggested:` line. Pick the best option and state it in one line with its reason or main tradeoff. No padding, no alternatives unless they change the pick.
 - Suggest a real default when best practice, the codebase, or prior context points to one.
 - Load the `canon:codebase-layout` skill before writing the `**Files to touch:**` entries when any of them names a file or folder that does not exist yet, and give each new path its placement reason in its entry. Skip the load when every entry edits an existing file. Report it rather than proceeding silently when the skill does not resolve.
 - Write `**Verification:**` as one bullet per outcome naming the test or command that proves it, and `**Review focus:**` as the inputs or states that would break the change. You understood the risk before any diff existed, and these two sections carry it to the executing session and to the reviewer.
+
+### Sources and size
+
 - Cite the `**Sources:**` entry for every decision Step 2 sourced, each with its quoted passage or the word `unverified`.
 - Prefer `None identified.` over low-signal fillers. A small feature should produce a short plan, not a padded one.
 - When three or more questions remain, keep chat output to the file pointer plus a short summary. Inline chat is fine when two or fewer remain.
@@ -67,6 +73,9 @@ A plan sequencing its work into batches declares where one pull request ends, he
 - One batch is one pull request, and one pull request is one plan file, named for its own concern rather than a numeric suffix. `canon tasks plan-branch` derives one branch from one plan filename, so a `**Batch N**` sub-heading inside one file's `**Files to touch:**` shares that one branch across every batch, and the batch that merges first strands every batch behind it with nothing left to open a pull request against. Write a plan opening five batches as five files before the first line of any of them.
 - State a dependent batch's dependency on the ones before it in its own `**Constraints:**`, naming the earlier batch's slug and stacking rather than merging into it. A batch that builds after another and shares most of its files with it folds into that batch as contiguous commits on one branch, since each pull request pays a fixed cost a same-file slice cannot earn back, and the rebases between stacked slices land on the same files. Keep a batch apart only where a reviewer or the operator would judge it apart: a contract a later batch is built against, a taste call the operator judges in its own sitting, or a fold that would exceed one review. Write that reason as ``Judged apart from `feature-<parent>`: <reason>`` in the batch's `**Constraints:**`. `canon records validate plans` reports a stacked batch that should have folded, and its thresholds live there.
 - Mark each batch dependent or independent by comparing the file sets rather than the descriptions. A batch sharing no file with another is independent and earns its own branch even where both arrived in one request. One run measured at 68 files carried three such batches into a single review because nothing drew the boundary.
+
+### Slicing and sequence
+
 - Slice a batch by one user-visible path end to end rather than by layer, so each batch ships something a person can exercise. The slice decides what a batch contains, and the file-set comparison above still decides whether two batches depend on each other, so two slices sharing a file stay marked dependent. A path too thin to pay a pull request of its own folds forward into the next.
 - Sequence the riskiest batch first, so the batch most likely to change the plan is built while every later batch can still move. A sweep is the one exception and stays last even when it is the riskiest, per the next bullet.
 - Sequence a sweep last. A batch deliberately rewriting files earlier batches touched is coherent as the final one and forces every batch behind it into one review anywhere else.

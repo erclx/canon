@@ -60,6 +60,9 @@ The guidance covers landscape 16:9 video. Vertical 9:16 framing is not covered y
 - Every move in the composition shares one duration.
 - A caption is centered on screen and covers the element the step acts on.
 - A caption names a step the frame is not showing.
+
+### Timing and checks
+
 - The zoom's start time was added up by hand while a timeline file sits beside the take.
 - Two pointers appear on one frame.
 - A checker finding was dismissed and no frame was opened.
@@ -77,6 +80,9 @@ The guidance covers landscape 16:9 video. Vertical 9:16 framing is not covered y
 - Easing, speed variety, anchoring, click timing, and every other general motion rule: `hyperframes-animation` and `hyperframes-creative`
 - Title-safe margins and timeline layout: `hyperframes-studio`
 - The carve that sits music under a voice: `hyperframes-audio`
+
+### Media, capture, and reading
+
 - Fetching or generating music, effects, voice, and imagery: `media-use`
 - Recording the take and writing its timeline: `record-screencast` through `canon demo run`
 - Reading a render frame by frame: `read-frames`

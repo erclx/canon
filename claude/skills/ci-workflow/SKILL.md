@@ -61,6 +61,9 @@ Before responding, verify:
 - All actions pinned to major version tags, no `@latest` or `@main`.
 - A new pipeline folds static, unit, and build into one job, and a gate a run log put past two minutes gives them no `needs` so they run in parallel.
 - Every name in a `needs` matches a job declared in the same file. E2E names the artifact producer, release and deploy name E2E.
+
+### Artifacts, names, and deploys
+
 - Artifacts upload on `if: failure()` only with `retention-days: 7`.
 - Job names use emoji + title format.
 - Deploy, publish, and release jobs carry a placeholder step and a named handoff, never a guessed deploy command.

@@ -36,9 +36,15 @@ Run these commands in parallel to gather git context:
 - Group commits by concern using both commit messages and file paths.
 - Prefer fewer branches: combine related commits into one branch.
 - Only split into separate branches when concerns are clearly independent.
+
+### Primary concern
+
 - Identify the primary concern of the current branch. Rename it using `git branch -m` if the current name does not already match. Skip the rename if it already matches. Secondary concerns are extracted as new focused branches via cherry-pick.
 - If no single concern dominates (dumping-ground branch with no clear primary), split all commits into new focused branches and add `git branch -d <current>` to delete the original.
 - Propose one new branch per secondary concern following branch.md format.
+
+### Independent and stacked
+
 - Classify groups as independent or stacked before generating commands.
 - Independent groups: each group's commits apply to `main` without the others. Base every branch on `main`.
 - Stacked groups: groups are ordered and each depends on the commits before it. Base each branch on the previous group's branch. Cherry-pick only that group's commits onto it. The base branch already carries all prior commits.

@@ -79,6 +79,9 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 - A function returns the object it read from storage, or a type defined beside the storage code.
 - The same input check appears both at the entry point and inside a function it calls.
 - A caller matches on the text of an error message.
+
+### Changes, retries, and order
+
 - An existing field is changing type or meaning under the same name.
 - A write that a client could retry carries no key, or checks for one with a read before the insert.
 - Output order follows whatever the underlying data returned, and nothing states whether it is sorted.
@@ -91,6 +94,9 @@ Check each line against the surface the change produced. A line answering no is 
 - Every new field, flag, or parameter is optional and defaults to the old behavior.
 - No storage type, internal identifier, or bookkeeping field appears in what the surface returns.
 - Every failure on the surface carries the same shape with a stable code.
+
+### Input, writes, and contract
+
 - Input is checked once, at the boundary, and nowhere deeper.
 - Every write a caller could retry takes a key, claims it atomically, and refuses a reused key with a different body.
 - The contract states what the surface returns and what it refuses.

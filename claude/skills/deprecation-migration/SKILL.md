@@ -93,6 +93,9 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 - A deprecation notice names no replacement or no removal date.
 - The diff adds a replacement and deletes the original in the same change.
 - A fallback or compatibility path has no stated condition for its removal.
+
+### Behavior and callers
+
 - You are adding behavior to the surface being deprecated.
 - Your report says "no callers" without naming the caller kinds the search could not reach.
 - A caller outside the repository was found and the plan still deletes the original.
@@ -104,6 +107,9 @@ Check each line against what the change produced. A line answering no is fixed o
 - The surface is deprecated only if it has a stated cost, a shipped replacement, and a named owner.
 - Every compulsory deprecation states its removal date where a caller looks.
 - Every caller reachable in the repository was migrated, or is named with the reason it was not.
+
+### Checks and fallbacks
+
 - The zero-consumers check covered every caller kind, and the report names the kinds it could not reach.
 - No change both adds the replacement and removes the original.
 - Every fallback left in place states when it goes and who removes it.

@@ -41,6 +41,9 @@ Every arm of a round sits as one frame on one canvas page, side by side. The com
 - Label each arm inside its frame with its id and its cost. The composite capture draws no captions, so the label is how the render carries what the question will ask about.
 - Theme every arm off the `data-theme` attribute the canvas sets on each frame's root, so the canvas theme toggle sets the whole set at once. A set spanning both themes cannot be compared, since the operator has to hold one arm in memory while reading the next.
 - Give no arm a script that stores a theme and reapplies it on load. That script overwrites the toggle, shows one frame in the other theme, and passes a fresh browser profile because the stored value is not there yet.
+
+#### Default path and live app
+
 - Take the live-app branch instead when the surface under decision is a running app: lift the rendered markup and link a copy of the built stylesheet rather than inlining, per `${CLAUDE_SKILL_DIR}/references/live-arms.md`.
 - On the default path, inline every style, script, and asset the frame needs. A frame resolves nothing outside its own page folder, so one reaching for a build step or a network font renders without it and the arms differ by something nobody chose.
 - On the default path, name a real font first in the stack, one the machine has or the frame embeds, such as the project's own family from its design tokens. A generic keyword such as `system-ui` or `sans-serif` is refused, since it resolves to a different font on each machine. The capture refuses a frame that would rewrap against a substitute rather than shipping a false comparison, so a frame naming no font at all is refused on whatever the default resolves to.
@@ -63,6 +66,9 @@ canon canvas capture <page> --composite --json
 - Read the PNG's `path` off the record. The composite shows every frame in its default theme, so look at the other theme on the live canvas where the arms carry two.
 - `canon canvas capture` needs a browser binary the toolkit does not install. When it refuses for that reason, report the refusal and name `bunx playwright install chromium` as the repair, stop the canvas server if this run started it, then stop rather than describing an arm nobody has seen.
 - A capture refusing on a font names the family it read off the frame's text. Take the repair `canon:canvas-board` Step 6 gives and capture again.
+
+### Handing over
+
 - Hand over the address rather than a description. Emit the canvas link first on its own line, naming the page, then the PNG path on its own line. A still answers how a thing looks and answers none of a hover response, a scroll-linked position, or a pace, which the live frame does.
 - Never report a visual result you have not looked at. A claim about appearance with no render behind it is a guess.
 - Look to judge rather than to confirm. Reading the image back to check it rendered satisfies the rule above and still hands over weak work, so name the weakest thing on the page in a sentence. Where that sentence would embarrass the work, fix it and hand over the second version. Say the remaining weakness out loud either way, so the operator is not hunting for what you already know.
@@ -75,6 +81,9 @@ Put the choice to the operator through the structured question surface, since a 
 - One option per arm, labeled with the arm's id and carrying its cost as the description.
 - Rank the recommendation first and mark it `(Recommended)`.
 - Author the real arms only. The surface appends its own escapes for a free-text answer and for reopening the question, so writing either as an option ships a duplicate the tool rejects.
+
+### Taking the answer
+
 - Take no pick on the operator's behalf when two arms are both defensible and the difference is taste. That call is theirs, and a silent one is the failure this skill exists to prevent.
 - Read `canon canvas selection --json` when the answer points at the canvas rather than naming an arm, such as "the selected one". Resolve it against the record's `page` as well as its `frame`, since every round names its arms `arm-<id>` from the same ids. A selected frame on the current round's page is the pick. One on an earlier round's page picks that round's arm, which is a revert, so name the round back to the operator before acting on it. A fresh element inside a picked frame is a correction Step 5 carries by its `index`.
 - Treat `selection: null`, a frame on a page this run did not add, or an element carrying `stale: true` as no answer, and ask again rather than guessing.
@@ -118,6 +127,9 @@ Cite these rather than restating them. A step reimplemented here rots against th
 - `plan-feature` plans the work once the pick is made, and declares the pull request boundary that plan carries
 - `design-taste` carries the layer catalog, the ordering, grey-boxing, and the defaults an arm should reach past
 - `write-human` carries the voice for any copy an arm puts in front of a reader
+
+### Git and review
+
 - `git-stage`, `git-pr`, and `git-followup` carry the commits and the pull request
 - `review-pr` and `review-address` run the review pass
 - `canon:canvas-board` carries the canvas start-and-check sequence, the main-root write route for a frame, and the selection and capture refusals

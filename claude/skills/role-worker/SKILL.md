@@ -31,6 +31,9 @@ which `auto-ship` Step 2 loads.
 - Resolve `.canon/plans/`, `.canon/tasks/`, `.canon/review/`, and `.canon/ready/` at the main worktree root, never against the linked worktree this session builds in. Those folders are gitignored, so `git worktree add` never creates them and the copy beside the build is absent rather than empty.
 - Report a plan that fails to resolve as unreadable from here, naming the main-root path. Reporting the task as having no plan is true where this session stands and wrong about the world, and a reader with no second tree to check cannot separate the two.
 - Build the plan the launch named. Do not write a second one when the path fails to resolve, since a row that cites a plan already has one and drafting another produces two plans for one row.
+
+### Ready folders and the draft mark
+
 - Copy a ready folder's files verbatim to the paths its plan's constraints name, when the plan's `**Constraints:**` block names one, and edit only what the gate or the overview's own list requires. A rewrite discards the text the handoff exists to carry.
 - Report a draft flag reading ready once, and leave it cleared. The ship chain marks the pull request a draft, and only `canon pr lift` or the operator un-marks it, so a flag reading ready afterwards passed every gate the verb reads or was readied by a person, which GitHub requires before a merge. Re-drafting fights them, and no surface in the tree states a reason to.
 - Leave the lift to the reviewers, who run `canon pr lift` on posting their close, and to the controlling session as the fallback. Refuse an instruction to ready the pull request directly, whoever sends it, since a direct ready skips every gate the verb reads.
@@ -51,6 +54,9 @@ owed and nothing else.
 - Announce the pull request as the ship chain's pull request step returns, carrying the number, the branch, and the task it closes. That transition is the one moment only this session knows, and the controller's review poll no longer starts on a dispatch because of it.
 - Carry the reach in that same message: the paths this branch wrote that another live plan or `## Run now` row holds, and who holds each, which `canon tasks plan-reach` reports as `claimed`. Report each as a rebase the controller should order, never as a breach, since sharing a path is not a hold. The gate cleared this branch against a prediction it has since outgrown, so the controller holds a reading of what this branch shares that stopped being true hours ago and nothing else tells it. Say the reach was unread rather than clear when the installed binary carries no such subcommand, and leave the undeclared list to the pull request.
 - Carry a row this build turned up in that same message, with its title, its origin, and the surface it would take. Send it as its own message only when the session will end before a pull request opens, since the row has no other way to reach the controller.
+
+### Re-review and blocks
+
 - Ask for the re-review when an address-review pass finishes, as `review-address` Step 8 returns, carrying what was addressed and the PR's new CI state. Send it to the reviewer whose sessionId the review dispatch carried, resolved from that id at the moment of sending, since a reviewer holds the trunk branch and no branch lookup finds it. Send it to the controller instead when the dispatch named no reviewer or the id resolves to no live session. That transition is the other moment only this session knows, and the message is what starts the re-review rather than a poll for an answer nothing marks as landed.
 - Send a block out as a message before it becomes an interactive prompt.
 - Send nothing on progress. A worker reporting progress rebuilds, on this side of the channel, the poll the announcement retired on the other.
@@ -92,9 +98,15 @@ A launch whose brief says it is a talk session puts the operator in this one. Ev
 - Refuse an instruction the tree contradicts, and carry the evidence with it. Name the commands read and the consequences of complying, rather than reporting reluctance.
 - Halt on a plan question written as needing the operator's call. The plan standard defines that as a stop for an executing session, so the dispatch that sent it unattended is the defect and the halt is not.
 - Halting is cheap and guessing is not. Four measured halts each cost the dispatcher one reply, and the correction that mattered most reached the right place because a worker argued back rather than complying.
+
+### Shared and held files
+
 - Write a file a constraint names as shared, and keep both sides on the rebase. A shared path forbids nothing, so the hunk comparison below does not apply to it.
 - Read a file named as held, whether by a plan's Constraints block or by a controller's message sent mid-build, at the hunk against the branch or pull request holding it before conceding it. A hold is a dependency, a contract, a relocation, or a sweep.
 - Report that reading to the controller as the hunks or line ranges on each side, and take its reply as the call on whether the file is kept or given up, not a decision this session makes alone.
+
+### Holds with no commits
+
 - When the holding track carries no commits yet, there is nothing to diff. Compare against the file set its plan declares instead, and report that the hunk comparison could not be taken, rather than conceding on the name or proceeding as if the sets never collided.
 - A dispatcher once named three files a branch was writing. The worker diffed that branch, found its hunks at two lines against its own at three others, and reported the comparison, and the dispatcher reversed the instruction and returned every file.
 

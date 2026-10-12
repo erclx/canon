@@ -85,6 +85,9 @@ Read the doc each line names before running one of these. `canon docs install-an
 - `canon sync` runs every installed domain's sync, so it carries each risk below.
 - `canon gov sync` replaces a rule you edited and deletes a rule the toolkit retired, edited or not.
 - `canon tooling sync --write` replaces every golden config a stack ships. Seeds are copy-once. Nothing writes without the flag. See `canon docs sync`.
+
+### Design, migrate, and indexes
+
 - `canon design sync` replaces the shipped design files and leaves `.claude/design/project/` alone.
 - `canon migrate --write` rewrites files that cite a retired name or layout. It reports and writes nothing without the flag. See `canon docs migrate`.
 - `canon indexes regen` rewrites each generated `index.md` from the folder's current state, so a hand edit there is lost. See `canon docs indexes`.

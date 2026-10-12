@@ -24,9 +24,15 @@ The banned characters sit in `${CLAUDE_SKILL_DIR}/../markdown-craft/references/m
 - Write for a developer who is scanning rather than studying. Every sentence has to land on first read.
 - Use active voice, and present tense unless past or future is factually correct.
 - Name the actor in a sentence that has one. Passive voice with an unnamed actor hides who acts and reads as evasion.
+
+### Word choice
+
 - Prefer direct verbs and plain words. Write `use` over `utilize`, `help` over `facilitate`, `is` over `serves as`.
 - Drop marketing words: `seamless`, `robust`, `powerful`, `revolutionary`, `enhanced`, `allows`, and `leverage`. Each claims a quality without showing it, so state what the thing does and let the reader judge it.
 - Drop vague qualifiers: `simply`, `just`, `easily`, `quickly`, `very`, and `really`. Cut the word where the sentence stands without it, and give the measurement where the degree matters.
+
+### Stance and density
+
 - Be direct on an established fact. Hedge on a genuinely uncertain claim and say which it is.
 - Assume developer-level knowledge. Skip the explanation the reader already carries.
 - Front-load the key information in a paragraph, and give every sentence something the reader did not have.
@@ -38,6 +44,9 @@ Uniform cadence is the tell that survives the cleanest ban scan. Measure it rath
 - Read the paragraph as one block. Uniformity is audible and close to invisible line by line.
 - Compare the longest and shortest sentence in a paragraph. Within roughly five words of each other means the paragraph has one cadence and needs a short sentence or a long one added.
 - Count the opening word of each sentence. Two alike is coincidence and three is a pattern to break.
+
+### Variety
+
 - Vary the grammatical shape of the opening, not the word alone. Three sentences opening on three different subjects still share one shape.
 - Never buy variety with a fragment. A verbless clause standing as a sentence trades one uniformity for another and is the failure these rules exist against.
 - Use a substantive connective where the flow needs one, and never add a word for rhythm alone.
