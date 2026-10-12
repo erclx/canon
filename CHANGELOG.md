@@ -1,5 +1,25 @@
 # Changelog
 
+## [5.35.0](https://github.com/erclx/canon/compare/v5.34.0...v5.35.0) (2026-10-12)
+
+
+### Features
+
+* **cli:** remove the standards verb, folder, and plugin symlink ([c147ea1](https://github.com/erclx/canon/commit/c147ea128df55833f63d2d947e4b4e63f2725104))
+* **gate:** add pressure readings and walk failure evidence ([#2343](https://github.com/erclx/canon/issues/2343)) ([0e25cf1](https://github.com/erclx/canon/commit/0e25cf18bee9d9a26c11fcf7118aee09efece990))
+* **governance:** thin the governance stacks to one per language ([#2348](https://github.com/erclx/canon/issues/2348)) ([0a9d2cb](https://github.com/erclx/canon/commit/0a9d2cb3b190b825dbc48ba4b31ac3de2e2f4030))
+* **orchestrator:** name the dispatched reviewer in review skills ([#2353](https://github.com/erclx/canon/issues/2353)) ([2e8baa5](https://github.com/erclx/canon/commit/2e8baa57547fcc9d65d7217eea3e9b6cb10394ae))
+* **orchestrator:** route review rounds between reviewer and worker ([#2347](https://github.com/erclx/canon/issues/2347)) ([a05c972](https://github.com/erclx/canon/commit/a05c972ed03a8543240f8beaefe665e224314997))
+* **orchestrator:** state one model test per dispatch role ([#2345](https://github.com/erclx/canon/issues/2345)) ([8addf30](https://github.com/erclx/canon/commit/8addf30712d27e6dae188e0a545da57b2f622858))
+* **skills:** name TypeScript as the language for a skill script ([#2354](https://github.com/erclx/canon/issues/2354)) ([ea7c113](https://github.com/erclx/canon/commit/ea7c1137926ee6088d83aedd47543ec1f5bfab1c))
+* **tooling:** remove cspell and the .vscode folder from the toolkit ([#2350](https://github.com/erclx/canon/issues/2350)) ([8918610](https://github.com/erclx/canon/commit/8918610be9837d57bfafd1aa09bc50c35f03a87f))
+
+
+### Bug Fixes
+
+* **hooks:** read here-strings and shifts as text in command scans ([#2346](https://github.com/erclx/canon/issues/2346)) ([c20360f](https://github.com/erclx/canon/commit/c20360fccac02a689713a11fb82704063b3f7df7))
+* **web:** give the build previews one writer ([#2342](https://github.com/erclx/canon/issues/2342)) ([79779f6](https://github.com/erclx/canon/commit/79779f608852dec945f891dd8df014d1f0b0f971))
+
 ## [5.34.0](https://github.com/erclx/canon/compare/v5.33.0...v5.34.0) (2026-10-11)
 
 
