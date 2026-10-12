@@ -2,7 +2,7 @@
 name = "nextjs"
 extends = "web"
 runtime = "bun"
-scaffold = "bunx create-next-app@latest {{name}} --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-bun --skip-install --disable-git --no-agents-md --yes"
+scaffold = "bunx create-next-app@latest {{name}} --typescript --tailwind --no-linter --app --src-dir --import-alias \"@/*\" --use-bun --skip-install --disable-git --no-agents-md --yes"
 
 [dependencies.dev]
 packages = ["next", "@tailwindcss/postcss"]

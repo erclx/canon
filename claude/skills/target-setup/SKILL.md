@@ -99,7 +99,7 @@ Step 2: `canon tooling sync <tooling-stack> --write` installs stack deps, script
 CANON_NON_INTERACTIVE=1 canon tooling sync <tooling-stack> <target> --write
 ```
 
-Monorepo with multiple language roots: run `canon init` once at the repo root so `base` (husky, prettier, commitlint, CI) lands single, then sync each subtree with `--skip base` so the shared layer is not re-dropped. Take the subtree commands from the per-root rows the preview printed rather than picking folders by hand. Detection found each root and its stack, and the two commands below show the shape.
+Monorepo with multiple language roots: run `canon init` once at the repo root so `base` (husky, oxfmt, commitlint, CI) lands single, then sync each subtree with `--skip base` so the shared layer is not re-dropped. Take the subtree commands from the per-root rows the preview printed rather than picking folders by hand. Detection found each root and its stack, and the two commands below show the shape.
 
 ```bash
 CANON_NON_INTERACTIVE=1 canon tooling sync vite-react ./frontend --skip base --write
@@ -112,11 +112,10 @@ A subtree sync withholds `.github/`, since GitHub reads workflows only at the re
 
 Step 3: post-sync fixups. Golden configs arrive from sync, so no config generation is required. But a few items may need a one-time touch:
 
-- **ESLint version pin.** If `bun create vite` installed `eslint@^10` and the manifest pins `eslint@^9`, sync does not override a present dep. Run `bun add -d eslint@^9` if `bun run lint:fix` fails with `Class extends value undefined`.
 - **File naming.** `bun create vite`'s `App.tsx` violates the `KEBAB_CASE` rule. Rename to `app.tsx` and update the import in `main.tsx`.
 - **Docs.** Run `canon tooling reference <tooling-stack>` and `canon tooling reference web` for any stack-specific follow-ups (Chrome extension overrides, setup script details).
 
-Do not generate ESLint, Vitest, or Playwright configs. They ship as golden files. Generating from prose duplicates what sync already installed.
+Do not generate oxlint, ESLint, Vitest, or Playwright configs. They ship as golden files. Generating from prose duplicates what sync already installed.
 
 ## Phase: gov
 
@@ -161,7 +160,7 @@ After the chain, report:
 
 - Domains installed, with a check per domain
 - Tooling stack synced, or skipped. Name the layers pulled via the extends chain.
-- Any post-sync fixups applied (ESLint pin, filename renames)
+- Any post-sync fixups applied (filename renames)
 - `verify` outcome, naming the depth it ran at
 
 ### Outcomes and gaps

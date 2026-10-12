@@ -37,7 +37,7 @@ paths = [
 absent = [
   ".claude/rules/canon/framework/react.md",
   "vite.config.ts",
-  "eslint.config.js",
+  ".oxlintrc.json",
   ".claude/standards",
 ]
 

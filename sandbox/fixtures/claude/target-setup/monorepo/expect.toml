@@ -24,7 +24,7 @@ paths = [
   ".claude/rules/canon/lang/python.md",
   ".claude/rules/canon/lang/go.md",
   ".claude/rules/canon/framework/react.md",
-  "web/eslint.config.js",
+  "web/.oxlintrc.json",
   "api/ruff.toml",
 ]
 

@@ -4,11 +4,11 @@
 
 ## Overview
 
-The nextjs stack covers Next.js + TypeScript projects using the App Router. It ships golden configs for `next.config.ts`, `vitest.config.ts` (plain `defineConfig`, no bundler merge), `playwright.config.ts` (build-then-preview), and an `eslint.config.js` that extends the web layer's config with `.next` ignores and an App Router override. Shared web tooling (ESLint base, screenshot template, VS Code, CI, verify script) comes from the `web` layer.
+The nextjs stack covers Next.js + TypeScript projects using the App Router. It ships golden configs for `next.config.ts`, `vitest.config.ts` (plain `defineConfig`, no bundler merge), `playwright.config.ts` (build-then-preview), and an `.oxlintrc.json` that replaces the web layer's with `.next` ignores and an App Router override. Shared web tooling (oxlint base, screenshot template, VS Code, CI, verify script) comes from the `web` layer.
 
 ## Scaffold checklist
 
-1. Scaffold with `bunx create-next-app@latest <name> --typescript --tailwind --eslint --app --src-dir --import-alias "@/*" --use-bun --skip-install --disable-git --no-agents-md --yes`. `--no-agents-md` skips the scaffold-time `AGENTS.md`/`CLAUDE.md` write, which otherwise duplicates the root `CLAUDE.md`.
+1. Scaffold with `bunx create-next-app@latest <name> --typescript --tailwind --no-linter --app --src-dir --import-alias "@/*" --use-bun --skip-install --disable-git --no-agents-md --yes`. `--no-agents-md` skips the scaffold-time `AGENTS.md`/`CLAUDE.md` write, which otherwise duplicates the root `CLAUDE.md`. `--no-linter` skips the scaffold's `eslint.config.mjs` and `lint` script, and is accepted though `--help` lists only `--eslint` and `--biome`.
 2. Install web tooling: `canon tooling sync web . --write`
 3. Install nextjs configs: `canon tooling sync nextjs . --write`
 4. Extend the `ci` and `development` context entries under `canon/context/` per the web reference's extend sections plus the nextjs rows below.
@@ -19,7 +19,7 @@ The nextjs stack covers Next.js + TypeScript projects using the App Router. It s
 - `next.config.ts`: `agentRules: false` stops Next from regenerating `AGENTS.md`/`CLAUDE.md` on every run, which would otherwise compete with the root `CLAUDE.md`. `turbopack.root: import.meta.dirname` pins the workspace root, silencing Next's multi-lockfile inference warning in any checkout carrying more than one lockfile above the project, a worktree included.
 - `vitest.config.ts`: plain `defineConfig`, no `mergeConfig` or `getViteConfig` since Next has no Vite config to merge from. jsdom, globals, setup file, `passWithNoTests: true`, v8 coverage, `.next/**` in test excludes.
 - `playwright.config.ts`: all browsers, `webServer` runs `bun run build && bun run preview` on port `3000` plus `WORKTREE_PORT_OFFSET`, `reuseExistingServer: false`. `DIST_PREBUILT` drops the `build` half, matching the astro stack's flag.
-- `eslint.config.js`: overrides the web layer with `.next` and `next-env.d.ts` added to `globalIgnores`, keeping `react-hooks`/`react-refresh` since this stack still ships React components. `react-refresh/only-export-components` is `off` for `src/app/**`, since route and layout files export non-component values the rule would otherwise flag. `check-file/folder-naming-convention` is `off` for the same subtree, since App Router's bracket, paren, and at-sign folder syntax (dynamic segments, route groups, parallel slots) fails `KEBAB_CASE`.
+- `.oxlintrc.json`: replaces the web layer's whole file, since oxlint reads one config, with `.next` and `next-env.d.ts` added to `ignorePatterns`. `react/only-export-components` is `off` for `src/app/**`, since route and layout files export non-component values the rule would otherwise flag. `check-file/folder-naming-convention` is `off` for the same subtree, since App Router's bracket, paren, and at-sign folder syntax (dynamic segments, route groups, parallel slots) fails `KEBAB_CASE`.
 
 ## Port
 

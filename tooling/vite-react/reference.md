@@ -4,7 +4,7 @@
 
 ## Overview
 
-The vite-react stack covers Vite + React + TypeScript projects: web apps and Chrome extensions. It ships golden configs for `vite.config.ts`, `vitest.config.ts` (merging from vite config), `playwright.config.ts`, and a unified `tsconfig.json` with `@/` path alias. Shared web tooling (ESLint, screenshot template, VS Code, CI, verify script) comes from the `web` layer.
+The vite-react stack covers Vite + React + TypeScript projects: web apps and Chrome extensions. It ships golden configs for `vite.config.ts`, `vitest.config.ts` (merging from vite config), `playwright.config.ts`, and a unified `tsconfig.json` with `@/` path alias. Shared web tooling (oxlint, screenshot template, VS Code, CI, verify script) comes from the `web` layer.
 
 ## Scaffold checklist
 
@@ -28,7 +28,7 @@ When scaffolding a Chrome extension, override the installed golden configs:
 - `vite.config.ts`: use `crx({ manifest })` and `zip()` from `@crxjs/vite-plugin` instead of `react()` alone. Keep the derived `server.port` and `server.strictPort: true`, set `server.hmr.clientPort` to the same derived value, and add `chrome-extension://` to CORS origins. Drop `VITE_BASE_URL`.
 - `vitest.config.ts`: use a standalone `defineConfig` (no `mergeConfig`). crxjs plugin breaks Vitest. Declare `@vitejs/plugin-react` and `@tailwindcss/vite` directly. Add `**/release/**` to excludes and `manifest.config.ts`, `**/*.d.ts` to coverage excludes.
 - `playwright.config.ts`: chromium-only (Firefox and WebKit cannot run extensions). Bundled `chromium` channel. No `baseURL` or `webServer`. Tests load the built extension directly from `dist/`.
-- `e2e/fixtures.ts`: extend Playwright base `test` with `context` (persistent context loading the extension from `dist/`) and `extensionId` (extracted from service worker URL). Rename `use` to `apply` to avoid the React hooks ESLint rule. `waitForEvent('serviceworker')` blocks until the MV3 service worker registers.
+- `e2e/fixtures.ts`: extend Playwright base `test` with `context` (persistent context loading the extension from `dist/`) and `extensionId` (extracted from service worker URL). Rename `use` to `apply` to avoid oxlint's `react/rules-of-hooks`. `waitForEvent('serviceworker')` blocks until the MV3 service worker registers.
 - `manifest.config.ts`: use `defineManifest` from `@crxjs/vite-plugin`. Read `name` and `version` from `package.json`. Entry points `src/popup/index.html`, `src/sidepanel/index.html`, `src/background/index.ts`, `src/content/main.tsx`. Permissions `sidePanel`, `contentSettings`, `storage`. Icon `public/logo.png` at size 48.
 - `screenshot` script: `bun run build && bun e2e/screenshot.ts` (no preview server).
 - Additional gitignore entries: `*.crx`, `*.pem`, `release/`.
