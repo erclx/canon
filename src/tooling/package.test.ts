@@ -120,6 +120,74 @@ describe('collectScripts', () => {
       { key: 'build', state: 'matching' },
     ])
   })
+
+  it('should report an override-only script the target lacks as missing', () => {
+    const chain = [
+      makeManifest('base', { scriptOverrides: { format: 'oxfmt .' } }),
+    ]
+
+    expect(collectScripts(chain, {})).toEqual([
+      { key: 'format', state: 'missing' },
+    ])
+  })
+
+  it('should report a stale override-only script as drifted', () => {
+    const chain = [
+      makeManifest('base', { scriptOverrides: { format: 'oxfmt .' } }),
+    ]
+    const pkg = { scripts: { format: 'prettier --write .' } }
+
+    expect(collectScripts(chain, pkg)).toEqual([
+      { key: 'format', state: 'drifted' },
+    ])
+  })
+
+  it('should report a current override-only script as matching', () => {
+    const chain = [
+      makeManifest('base', { scriptOverrides: { format: 'oxfmt .' } }),
+    ]
+    const pkg = { scripts: { format: 'oxfmt .' } }
+
+    expect(collectScripts(chain, pkg)).toEqual([
+      { key: 'format', state: 'matching' },
+    ])
+  })
+
+  it('should compare a target against the override that shadows a parent plain value', () => {
+    const chain = [
+      makeManifest('web', { scriptOverrides: { dev: 'vite --port 0' } }),
+      makeManifest('base', { scripts: { dev: 'bun run start' } }),
+    ]
+    const pkg = { scripts: { dev: 'vite --port 0' } }
+
+    expect(collectScripts(chain, pkg)).toEqual([
+      { key: 'dev', state: 'matching' },
+    ])
+  })
+
+  it('should expect the nearest stack override when two stacks override a key', () => {
+    const chain = [
+      makeManifest('astro', { scriptOverrides: { 'check:format': 'astro' } }),
+      makeManifest('base', { scriptOverrides: { 'check:format': 'base' } }),
+    ]
+    const pkg = { scripts: { 'check:format': 'base' } }
+
+    expect(collectScripts(chain, pkg)).toEqual([
+      { key: 'check:format', state: 'drifted' },
+    ])
+  })
+
+  it('should list plain keys before override-only keys', () => {
+    const chain = [
+      makeManifest('web', { scriptOverrides: { format: 'oxfmt .' } }),
+      makeManifest('base', { scripts: { build: 'tsc' } }),
+    ]
+
+    expect(collectScripts(chain, {}).map((entry) => entry.key)).toEqual([
+      'build',
+      'format',
+    ])
+  })
 })
 
 describe('applyScripts', () => {
