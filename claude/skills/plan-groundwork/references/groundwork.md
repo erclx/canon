@@ -33,8 +33,8 @@ Governs a groundwork track under `.canon/groundwork/<nn>-<slug>/`: folder layout
 Does not govern:
 
 - **`groundwork-spikes.md`**: `08-spikes.md`, what each spike records, and the folders holding what a spike produced
-- **`intake.md`**: A dump of many findings filed by domain, each carrying its own verdict
-- **`plan.md`**: the feature plan a closed track feeds, and the contract its answer slots keep
+- **`intake.md`**: A dump of many findings filed by domain, each with a verdict
+- **`plan.md`**: the feature plan a closed track feeds, and its answer contract
 - **`tasks.md`**: the task file a closing track writes, and the origin line pointing back at the folder
 - **the `write-human` skill**: voice, rhythm, and sentence construction
 - **`markdown.md`**: headings, punctuation, word choice, and file references
@@ -42,9 +42,9 @@ Does not govern:
 
 ## Folder name
 
-- Name the folder `<nn>-<slug>`, a two-digit zero-padded ordinal followed by a kebab-case slug.
-- The ordinal marks a folder per track, opened once and worked over time, distinct from a file addressed by name, one already carrying its own sorting prefix, or one deliberately overwritten.
-- Claim the ordinal through `canon records ordinal groundwork <slug> --claim`, which reads the highest one across both `.canon/groundwork/` and `.canon/intake/` and creates the folder in one atomic act, so two sessions opening at once never share a number. The two kinds share one creation-order line.
+- Name the folder `<nn>-<slug>`, a two-digit ordinal and a kebab-case slug.
+- The ordinal marks a folder per track, opened once and worked over time, unlike a file addressed by name, one with its own sorting prefix, or one overwritten on purpose.
+- Claim the ordinal through `canon records ordinal groundwork <slug> --claim`, which reads the highest one across both `.canon/groundwork/` and `.canon/intake/` and creates the folder in one atomic act, so two sessions opening at once never share a number. The two kinds share one order.
 - With neither folder holding an entry, the first one opened takes `01`, whatever number a track's own files start at.
 - Never renumber an existing folder. The ordinal is the order it opened, and a later reader cites it by that name.
 
@@ -53,17 +53,17 @@ Does not govern:
 A track works when a session that has never seen it re-enters from the folder alone and can answer each of these:
 
 - Which single question is being measured, and why is it running now?
-- What is the current state, measured during this pass rather than carried in from an earlier one?
-- Which questions are still open, where does the evidence point, and what would overturn that?
+- What is the current state, measured this pass rather than carried in?
+- Which questions are open, where is the evidence, and what overturns it?
 - What was decided, and what was considered and dropped?
 
-A track failing these is non-conforming even when it satisfies every shape rule below.
+A track failing these is non-conforming even when it meets every shape rule.
 
 ## Frontmatter and dating
 
 - `title` (required): the track subject in sentence case
 - `description` (required): one line naming what the track measures
-- `date` (required, `README.md` only): the day the folder opened, as `YYYY-MM-DD`
+- `date` (required, `README.md` only): the day it opened, as `YYYY-MM-DD`
 
 Carry the opening date as a frontmatter field rather than a sentence in the body, since nothing that walks the folder reads prose. Date the folder once rather than every file, because a per-file date goes stale on the first edit. The checkable half is the commit each measurement was taken against, which the file holding that measurement names.
 
@@ -90,13 +90,13 @@ Orients. Holds no findings.
 
 - A one-line definition of the investigation
 - A `## Why` section stating why the track is running now
-- A file-map table of filename and what it holds, kept current as files are added or retired
+- A file-map table of filename and what it holds, kept current
 - A `## Method` section splitting internal sources from external ones, naming which were used and which were not yet done, and listing under a leads heading any external source found but not opened
 
 ### Closing sections and phase
 
 - A `## Prior art` section
-- A `## Source citation` section stating the rule below, so a returning session picks it up from the folder
+- A `## Source citation` section stating the rule below, so a returning session finds it in the folder
 - The phase stated out loud in the first three lines, in the form `Groundwork phase. Nothing here is a feature plan.`
 
 Every claim about a source outside the project carries a link to it, wherever the claim appears in the folder. Without one, a later reader cannot tell a fetched page from recall. A source found and not read is listed as a lead and is never cited, since a link to a page nobody opened is worse than no link. Listing it stops a later pass re-searching for it.
@@ -109,23 +109,19 @@ Facts before opinion. Verified measurement only, taken during this pass.
 
 - Never carry a figure from a previous session without re-measuring, since every number built on a stale one is quietly wrong.
 - Mark an inference as an inference where one is unavoidable.
-- Measure only what an open question needs. A number with no question attached is the mechanism by which the groundwork becomes the work.
+- Measure only what an open question needs. A number with no question attached is how the groundwork becomes the work.
 
 ## 00-scope.md
 
-Written when the subject is large enough to run away. Holds constraints, risks, the open question list, and the downstream surfaces a decision would touch. A small track skips it.
+Written when the subject is large enough to run away. Holds constraints, risks, the open questions, and what a decision would touch. A small track skips it.
 
 ## 06-decision.md
 
-Closes the folder. Everything above it is input.
+Closes the folder. Everything above it is input. Write it from the skeleton under `## Template`, with an H3 per dropped alternative.
 
-- The problem stated once
-- The goal
-- The items to do
-- What was considered and dropped
-- `## Revisit when`: the "Overturned by" line of each lean that became the decision, carried over as written. A lean the decision did not take carries nothing, and a track whose deciding leans carried no overturn line omits the section.
+`## Revisit when` carries the "Overturned by" line of each lean that became the decision, as written. A lean the decision did not take carries nothing, and a track whose deciding leans carried no overturn line omits the section.
 
-The dropped list is what stops a future session re-proposing something already rejected.
+The dropped list stops a future session re-proposing a rejected idea.
 
 ## 07-next-session.md
 
@@ -141,8 +137,8 @@ Every open question carries a lean, wherever it appears. A bare numbered list ha
    - Overturned by: <the finding that would change it>
 ```
 
-- Pair every lean with what would overturn it. A lean with no falsifier is an opinion.
-- On a measurement rather than a judgment, write `- Leaning: none, needs measuring` and drop the overturn line. A guess at a number is worse than an admission.
+- Pair every lean with what would overturn it. A lean with no falsifier is opinion.
+- On a measurement rather than a judgment, write `- Leaning: none, needs measuring` and drop the overturn line. A guess at a number is worse.
 - Mark each question open or answered, and repeat the open ones at the end of the file they belong to. That gives the decision file its agenda for free.
 
 A lean is weaker than a plan's suggestion: it records the current read on an open question, not a decision to accept at execution time.
@@ -155,12 +151,14 @@ A lean is weaker than a plan's suggestion: it records the current read on an ope
 
 ## Anti-patterns
 
-- **The groundwork becomes the work.** Gathering expands until the measuring costs more than the change it justifies. Cap it, and drop any thread with no question attached.
+- **The groundwork becomes the work.** Gathering expands until the measuring costs more than the change it justifies. Cap it, and drop any thread with no question.
 - **Deciding by omission.** Closing a track while an unresolved question quietly fails an outcome. Resolve it or record it as knowingly accepted.
 - **Recording a constraint discovered while defending a decision.** Check it against the alternative design first, or a fact about the current shape reads as inherent to the problem.
 - **A plan written before the groundwork.** Every track that has done this had to supersede the plan it wrote.
 
 ## Template
+
+### README.md
 
 ```markdown
 ---
@@ -195,10 +193,41 @@ Groundwork phase. Nothing here is a feature plan.
 
 ## Prior art
 
-<Earlier plans, folders, or decisions this track supersedes or builds on.>
+### <earlier plan or folder>
+
+<What it decided and how this track supersedes or builds on it. Say not to go looking for it again.>
 
 ## Source citation
 
 Every claim about a source outside the project carries a link. A source found
 and not read is listed as a lead and is never cited.
+```
+
+### 06-decision.md
+
+```markdown
+---
+title: <Track subject> decision
+description: <one line naming what the track decided>
+---
+
+# <Track subject> decision
+
+## Problem and goal
+
+<The problem stated once, then what done looks like.>
+
+## What to do
+
+1. <item>
+
+## Considered and dropped
+
+### <alternative>
+
+<Why it was dropped, and what would revive it.>
+
+## Revisit when
+
+- <an "Overturned by" line, as written>
 ```
