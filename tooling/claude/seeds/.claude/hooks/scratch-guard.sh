@@ -26,6 +26,14 @@ case "$file_path" in
 */.claude/.tmp/* | */.canon/tmp/*) exit 0 ;;
 esac
 
+# A background session's temp folder is the harness's own, told to the session
+# and located under the home folder, outside every project. Matching its shape
+# rather than reading CLAUDE_JOB_DIR holds whether or not this hook's
+# environment carries the variable.
+case "$file_path" in
+*/.claude/jobs/*/tmp/*) exit 0 ;;
+esac
+
 # A project whose own root sits under a path carrying a tmp segment is not
 # writing to system temp, and the bare pattern below would trip on every source
 # file it holds. The project root is stripped before the match rather than

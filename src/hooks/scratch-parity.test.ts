@@ -1,7 +1,8 @@
 import { spawnSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { afterAll, describe, expect, it } from 'vitest'
 
 const ROOT = join(import.meta.dirname, '../..')
 
@@ -16,6 +17,12 @@ const TREES = [
   },
 ]
 
+// The harness assigns a background session a temp folder under the home
+// folder, which no repository ignores. The probe below is about project
+// scratch roots, so an arm naming that folder is covered by the spawned-hook
+// test instead.
+const HARNESS_FOLDER = '/.claude/jobs/'
+
 // The hook accepts a scratch write it recognizes through case arms under
 // `case "$file_path" in`, each exiting 0 on more than the bare wildcard.
 // Collecting every such arm rather than returning on the first is what keeps
@@ -28,7 +35,12 @@ function deriveAcceptPatterns(source: string, hookPath: string): string[] {
   for (const line of source.split('\n')) {
     const match = line.trim().match(/^(.+)\)\s*exit 0\s*;;$/)
     if (!match || match[1] === '*') continue
-    patterns.push(...match[1].split('|').map((pattern) => pattern.trim()))
+    patterns.push(
+      ...match[1]
+        .split('|')
+        .map((pattern) => pattern.trim())
+        .filter((pattern) => !pattern.includes(HARNESS_FOLDER)),
+    )
   }
 
   if (patterns.length === 0) {
@@ -88,5 +100,65 @@ for (const tree of TREES) {
         expect(isIgnored(probePath(pattern))).toBe(true)
       },
     )
+  })
+}
+
+interface HookRun {
+  stdout: string
+  status: number | null
+}
+
+function runHook(hookPath: string, filePath: string, project: string): HookRun {
+  const payload = JSON.stringify({
+    tool_name: 'Write',
+    tool_input: { file_path: filePath },
+    session_id: `parity-${Math.random().toString(36).slice(2)}`,
+  })
+  const result = spawnSync('bash', [hookPath], {
+    input: payload,
+    encoding: 'utf8',
+    env: { ...process.env, CLAUDE_PROJECT_DIR: project },
+  })
+  return { stdout: result.stdout, status: result.status }
+}
+
+for (const tree of TREES) {
+  const hookPath = join(tree.dir, 'scratch-guard.sh')
+
+  describe(`scratch-guard job folder: ${tree.label}`, () => {
+    const project = mkdtempSync(join(tmpdir(), 'scratch-guard-'))
+    afterAll(() => rmSync(project, { recursive: true, force: true }))
+
+    it('stays silent on a write under the harness job folder', () => {
+      const run = runHook(
+        hookPath,
+        '/home/someone/.claude/jobs/efde12bc/tmp/notes.md',
+        project,
+      )
+
+      expect(run.status).toBe(0)
+      expect(run.stdout).toBe('')
+    })
+
+    it('leaves no marker behind for a job folder write', () => {
+      runHook(
+        hookPath,
+        '/home/someone/.claude/jobs/efde12bc/tmp/notes.md',
+        project,
+      )
+
+      expect(existsSync(join(project, '.canon'))).toBe(false)
+      expect(existsSync(join(project, '.claude'))).toBe(false)
+    })
+
+    it.each([
+      '/elsewhere/tmp/notes.md',
+      '/home/someone/.claude/jobs-old/tmp/notes.md',
+      '/home/someone/jobs/tmp/notes.md',
+    ])('still warns on %s', (path) => {
+      const run = runHook(hookPath, path, project)
+
+      expect(run.stdout).toContain('Temporary file write outside')
+    })
   })
 }
