@@ -119,27 +119,27 @@ describe('injectSeeds with a config at the same path', () => {
   })
 })
 
-describe('injectConfigs over a derived verify.sh', () => {
-  const WRAPPER = join(PROJECT_ROOT, 'tooling/base/configs/scripts/verify.sh')
-  const STALE = '#!/bin/bash\necho "derived web copy"\n'
+describe('injectConfigs over a derived verify.ts', () => {
+  const RUNNER = join(PROJECT_ROOT, 'tooling/base/configs/scripts/verify.ts')
+  const STALE = '// derived web copy\n'
 
   const seedStale = (dir: string): void => {
     mkdirSync(join(dir, 'scripts'), { recursive: true })
-    writeFileSync(join(dir, 'scripts/verify.sh'), STALE)
+    writeFileSync(join(dir, 'scripts/verify.ts'), STALE)
   }
 
-  it('should overwrite it with the base wrapper at a root', async () => {
+  it('should overwrite it with the base runner at a root', async () => {
     captureStderr()
     seedStale(target)
 
     await injectConfigs(resolveChain(PROJECT_ROOT, 'web'), target)
 
-    expect(readFileSync(join(target, 'scripts/verify.sh'), 'utf8')).toBe(
-      readFileSync(WRAPPER, 'utf8'),
+    expect(readFileSync(join(target, 'scripts/verify.ts'), 'utf8')).toBe(
+      readFileSync(RUNNER, 'utf8'),
     )
   })
 
-  it('should overwrite it with the base wrapper in a --skip base subfolder', async () => {
+  it('should overwrite it with the base runner in a --skip base subfolder', async () => {
     captureStderr()
     const sub = subfolder()
     seedStale(sub)
@@ -149,8 +149,8 @@ describe('injectConfigs over a derived verify.sh', () => {
       sub,
     )
 
-    expect(readFileSync(join(sub, 'scripts/verify.sh'), 'utf8')).toBe(
-      readFileSync(WRAPPER, 'utf8'),
+    expect(readFileSync(join(sub, 'scripts/verify.ts'), 'utf8')).toBe(
+      readFileSync(RUNNER, 'utf8'),
     )
   })
 

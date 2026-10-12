@@ -74,7 +74,7 @@ export default scenario({
       else ctx.log.warn('lint:fix had issues')
 
       ctx.log.step('Running verification')
-      if (ctx.run('bash', ['scripts/verify.sh'], { allowFailure: true }) === 0)
+      if (ctx.run('bun', ['scripts/verify.ts'], { allowFailure: true }) === 0)
         ctx.log.info('All checks passed')
       else ctx.log.warn('Verification failed, check configs')
 

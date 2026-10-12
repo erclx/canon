@@ -21,7 +21,9 @@ packages = [
 "check:shell" = "find scripts -name '*.sh' -exec shellcheck --severity=warning {} +"
 "format" = "prettier --write --log-level warn --ignore-path .gitignore --ignore-path .prettierignore . && find scripts -name '*.sh' -exec shfmt --write --indent 2 {} +"
 "prepare" = "husky"
-"check" = "./scripts/verify.sh"
+
+[scripts.override]
+"check" = "bun scripts/verify.ts"
 
 [gitignore]
 "# System" = [".DS_Store"]

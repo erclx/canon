@@ -46,7 +46,7 @@ packages = [
 "test:e2e:changed" = "WORKTREE_PORT_OFFSET=$(bash scripts/worktree-port.sh) && export WORKTREE_PORT_OFFSET && playwright test --only-changed"
 "test:e2e:ui" = "WORKTREE_PORT_OFFSET=$(bash scripts/worktree-port.sh) && export WORKTREE_PORT_OFFSET && playwright test --ui"
 "test:e2e:report" = "playwright show-report"
-"check:full" = "./scripts/verify.sh && bun run test:e2e"
+"check:full" = "bun scripts/verify.ts && bun run test:e2e"
 "smoke:prod" = "bun e2e/screenshot.ts --check-console-clean --require-base-url"
 
 [scripts.override]

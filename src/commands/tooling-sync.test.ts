@@ -13,7 +13,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { stampPath } from '@/sync/stamp'
 
 const CLI = join(import.meta.dirname, '../cli.ts')
-const GOLDEN = '.editorconfig'
+const GOLDEN = '.prettierrc'
 const LOCAL_EDIT = '# a project owns this line\n'
 
 interface Run {
