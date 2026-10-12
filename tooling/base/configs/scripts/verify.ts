@@ -1,6 +1,6 @@
 // Runs this folder's verify phases in a fixed order. The phases a stack
 // requires come from scripts/verify.json, which each stack ships and the
-// nearest one wins. Only node: modules, since a target's own eslint and
+// nearest one wins. Only node: modules, since a target's own linter and
 // tsc --noEmit read this file with no Bun types.
 import { spawnSync } from 'node:child_process'
 import { accessSync, constants, existsSync, readFileSync } from 'node:fs'
