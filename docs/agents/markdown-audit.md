@@ -105,7 +105,7 @@ The target push stage excludes `CHANGELOG.md`, unlike every other surface here. 
 
 The hook prefers a checkout's own `src/cli.ts` over a globally installed binary, so it and the push stage read one build. A published binary lags a branch by whatever has not been released, which would put a ban kind added on the branch into the push and not into the edit. It reads its findings out of the `--json` record rather than off the exit code, so an older binary still reports where the fallback applies. It reads `bans.emptySets` out of the same record, so a set the verb shipped empty reaches the author as a check narrowed to what it could measure rather than as a clean pass.
 
-It also relays the two advisory measures from the same record. A heading finding reports for the whole file, and a colon finding reports only where its line appears in the text the write carried, so an edit is never asked to answer for a colon it left untouched.
+It also relays the two advisory measures from the same record. A heading finding reports for the whole file, and a colon finding reports only where the word before the colon and the colon appear in the text the write carried, so an edit is never asked to answer for a colon it left untouched.
 
 That field replaced `bans.missingStandards`, which answered a standard resolving under none of three roots. The set ships with the package now, so the state it named cannot occur and the narrowed check has one cause left, a defect in the build. The hook keeps reading a field either way, since a reader cannot tell a narrowed check from a clean one without it.
 

@@ -1107,6 +1107,28 @@ describe('seeds standards-audit.sh runner', () => {
   )
 
   it.concurrent(
+    'should warn on a colon an edit introduced inside a longer line',
+    async ({ expect }) => {
+      // The record's text is the whole line, so a filter matching the line
+      // against the new text drops an edit that rewrote only a phrase of it.
+      const path = [join(fixture, 'bin-advisory'), hookPath].join(delimiter)
+      const edit = JSON.stringify({
+        tool_input: {
+          file_path: join(fixture, 'project/doc.md'),
+          old_string: 'sentence \u2014 another',
+          new_string: 'sentence: another',
+        },
+        tool_name: 'Edit',
+      })
+
+      const result = await run(hook, edit, path)
+
+      expect(result.stdout).toContain('Prose sentence: another clause.')
+      expect(result.code).toBe(0)
+    },
+  )
+
+  it.concurrent(
     'should stay quiet on a colon an edit left untouched',
     async ({ expect }) => {
       const path = [join(fixture, 'bin-advisory'), hookPath].join(delimiter)
