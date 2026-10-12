@@ -1,6 +1,6 @@
 ---
 title: Seeds
-description: Which files ship as seeds and which a config shadows, seed dictionaries, seed independence from the toolkit binary, capability seeding, install-order collisions, and the seed gate
+description: Which files ship as seeds and which a config shadows, seed independence from the toolkit binary, capability seeding, install-order collisions, and the seed gate
 ---
 
 # Seeds
@@ -18,14 +18,6 @@ Base's `verify.yml` and PR template ship as seeds, since a polyglot target adds 
 A seed at a path any stack in the chain ships as a config is shadowed. `configPaths` in `src/tooling/manifest.ts` returns that set, and `scan` and `injectSeeds` both read it, so a web chain reports `.github/workflows/verify.yml` once, as a config, and the seed never writes a copy the config then overwrites.
 
 Per-stack `ci.md` and `development.md` seeds are not shipped, because seeds are never overwritten. Stack references carry `## CI docs (extend)` sections telling the agent which rows to append instead.
-
-### Spelling dictionaries sit with the file that spells the word
-
-A word a new seeded config spells lands in that stack's own seeded dictionary, not this checkout's. The root `cspell.json` ignores `tooling/**`, so only a target that installs the stack and runs its own `check:spell` meets an unrecognized word there, and the sandbox scenario for that stack fails its spell check until the word is added.
-
-The reverse holds too. The root `cspell.json` checks `canon/context/`, so naming a stack-specific word in an entry's prose needs that word in the root `.cspell/tech-stack.txt` as well as in the stack's seed.
-
-`canon/context/tooling/testing.md` names the words each stack's seed carries for the verify run.
 
 ### Seed prose never names the toolkit binary
 

@@ -16,7 +16,7 @@ const RUNNER = join(TOOLING, 'base/configs/scripts/verify.ts')
 const WRAPPER = join(TOOLING, 'base/configs/scripts/verify.sh')
 
 const STACK_SCRIPTS = {
-  base: ['format', 'check:format', 'check:spell', 'check:shell'],
+  base: ['format', 'check:format', 'check:shell'],
   go: ['typecheck', 'lint', 'test:run'],
   php: ['typecheck', 'lint', 'test:run'],
   python: ['typecheck', 'lint', 'test:run'],
@@ -28,7 +28,6 @@ const ALL_PHASES = [
   'lint',
   'format',
   'check:format',
-  'check:spell',
   'check:shell',
   'test:run',
   'build',
@@ -155,11 +154,11 @@ describe('an undeclared base phase', () => {
     const result = runVerify()
 
     expect(result.status).toBe(0)
-    expect(result.stdout).toContain('Skipped: check:spell is not declared here')
+    expect(result.stdout).toContain('Skipped: check:shell is not declared here')
   })
 
   it('should fail under the base list', () => {
-    setUp('base', ['format', 'check:format', 'check:shell'])
+    setUp('base', ['format', 'check:format'])
 
     expect(runVerify().status).toBe(1)
   })
@@ -167,7 +166,7 @@ describe('an undeclared base phase', () => {
   it('should run when a derived folder declares it', () => {
     setUp('web', [...STACK_SCRIPTS.web, ...STACK_SCRIPTS.base])
 
-    expect(runVerify().stdout).toContain('Spell check passed')
+    expect(runVerify().stdout).toContain('Shell check passed')
   })
 })
 
@@ -353,6 +352,6 @@ describe('verify.sh', () => {
     const result = run(['bash', WRAPPER])
 
     expect(result.status).toBe(0)
-    expect(result.stdout).toContain('Skipped: check:spell is not declared here')
+    expect(result.stdout).toContain('Skipped: check:shell is not declared here')
   })
 })

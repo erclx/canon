@@ -151,6 +151,24 @@ describe('createGovAdapter', () => {
     expect(plan.changes).toEqual([{ kind: 'delete', dest: retired, rel }])
   })
 
+  it('should retire a target-held 765-spelling and queue its delete', () => {
+    writeFixture(
+      join(TOOLKIT, 'governance/rules/tooling/775-dependencies.md'),
+      'a',
+    )
+    writeFixture(
+      join(TARGET, '.claude/rules/canon/tooling/775-dependencies.md'),
+      'a',
+    )
+    const retired = join(TARGET, '.claude/rules/canon/tooling/765-spelling.md')
+    writeFixture(retired, 'shipped once\n')
+    const rel = join('.claude', 'rules', 'canon', 'tooling', '765-spelling.md')
+
+    const plan = planSync(createGovAdapter(TOOLKIT), TARGET)
+
+    expect(plan.changes).toEqual([{ kind: 'delete', dest: retired, rel }])
+  })
+
   it('should never walk a project rule under .claude/rules/project/', () => {
     writeFixture(join(TARGET, '.claude/rules/canon/core/000-const.md'), 'a')
     writeFixture(join(TOOLKIT, 'governance/rules/core/000-const.md'), 'a')

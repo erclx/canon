@@ -29,7 +29,7 @@ describe('buildStackSummaries', () => {
         'name = "base"',
         '',
         '[dependencies.dev]',
-        'packages = ["prettier", "cspell"]',
+        'packages = ["prettier", "husky"]',
         '',
         '[scripts]',
         '"dev" = "vite"',

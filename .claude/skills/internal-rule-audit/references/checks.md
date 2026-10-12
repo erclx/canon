@@ -42,7 +42,7 @@ Each check names the source that answers it, so the audit reads rather than re-d
 
 ## 6. Enforced elsewhere
 
-- **Source:** the hooks under `.claude/hooks/`, the stage ids in `src/gate/stages.ts` that `canon gate run` executes, and the linter, formatter, and spelling configs a target installs from `tooling/`.
+- **Source:** the hooks under `.claude/hooks/`, the stage ids in `src/gate/stages.ts` that `canon gate run` executes, and the linter and formatter configs a target installs from `tooling/`.
 - **Test:** a mechanism that fails loudly on the violation the bullet forbids.
 - **Fails toward:** retire the bullet. Keep it when the enforcement covers this repository alone and the rule ships to targets that have none.
 

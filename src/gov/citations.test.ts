@@ -105,7 +105,7 @@ describe('classifySpan', () => {
   // of each case is that the corpus already writes the shape.
 
   it('should read a backticked path carrying a directory segment as a citation', () => {
-    expect(classifySpan('.cspell/project-terms.txt')).toBe('path')
+    expect(classifySpan('.github/workflows/verify.yml')).toBe('path')
     expect(classifySpan('scripts/core/check-plugin-boundary.sh')).toBe('path')
     expect(classifySpan('tooling/claude/seeds/CLAUDE.md')).toBe('path')
   })

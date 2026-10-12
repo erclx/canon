@@ -324,10 +324,10 @@ describe('tooling sync into a subfolder', () => {
     )
   })
 
-  it('should write the nested spell config', () => {
+  it('should write no nested spell config', () => {
     runSubfolder('sync', ['--write'])
 
-    expect(existsSync(join(web, 'cspell.json'))).toBe(true)
+    expect(existsSync(join(web, 'cspell.json'))).toBe(false)
   })
 
   it('should still end on the success line with no package.json', () => {

@@ -151,7 +151,7 @@ describe('scan', () => {
       gitignore: [{ header: '# Build', entries: ['dist/'] }],
     })
     seedFile(join(manifest.configsDir, '.editorconfig'), 'root = true\n')
-    seedFile(join(manifest.seedsDir, 'cspell.json'), '{}\n')
+    seedFile(join(manifest.seedsDir, 'seed.json'), '{}\n')
 
     const result = scan([manifest], dir)
 
@@ -189,7 +189,7 @@ describe('scan with a restricted manifest', () => {
     })
     seedFile(join(manifest.configsDir, 'scripts/verify.sh'), 'exec bun\n')
     seedFile(join(manifest.configsDir, '.prettierrc'), '{}\n')
-    seedFile(join(manifest.seedsDir, '.cspell/tech-stack.txt'), 'bun\n')
+    seedFile(join(manifest.seedsDir, 'notes/tech-stack.txt'), 'bun\n')
     return manifest
   }
 
@@ -224,7 +224,7 @@ describe('scan in a subfolder', () => {
     const manifest = makeManifest('web')
     seedFile(join(manifest.configsDir, WORKFLOW), 'on: push\n')
     seedFile(join(manifest.configsDir, '.editorconfig'), 'root = true\n')
-    seedFile(join(manifest.seedsDir, '.cspell/tech-stack.txt'), 'vite\n')
+    seedFile(join(manifest.seedsDir, 'notes/tech-stack.txt'), 'vite\n')
     return manifest
   }
 
@@ -251,31 +251,10 @@ describe('scan in a subfolder', () => {
     expect(result.withheld[0]?.present).toBe(true)
   })
 
-  it('should report the spell config as a missing seed', () => {
-    const result = scan([webManifest()], repoWithSubfolder())
-
-    expect(result.seeds).toContainEqual({
-      rel: 'cspell.json',
-      state: 'missing',
-    })
-  })
-
-  it('should report the spell config as present when the subfolder has its own', () => {
-    const sub = repoWithSubfolder()
-    seedFile(join(sub, '.cspell.json'), '{}\n')
-
-    const result = scan([webManifest()], sub)
-
-    expect(result.seeds).toContainEqual({
-      rel: 'cspell.json',
-      state: 'present',
-    })
-  })
-
   it('should keep withheld paths out of the total', () => {
     const result = scan([webManifest()], repoWithSubfolder())
 
-    expect(result.totalChanges).toBe(3)
+    expect(result.totalChanges).toBe(2)
   })
 
   it('should report a .github seed as withheld rather than as a missing seed', () => {

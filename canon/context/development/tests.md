@@ -49,7 +49,7 @@ A gate that starts queuing says so on stderr at once, naming the holder's pid an
 
 ### Why a lock and a worker cap together
 
-vitest defaults to every core but one, which is 31 workers on the 32-core box the measurement ran on, and a wave of worktrees each starting that many starves the tests that spawn `bun src/cli.ts`, `cspell`, or a browser past their timeouts. A lone default run on a quiet box passed every case.
+vitest defaults to every core but one, which is 31 workers on the 32-core box the measurement ran on, and a wave of worktrees each starting that many starves the tests that spawn `bun src/cli.ts` or a browser past their timeouts. A lone default run on a quiet box passed every case.
 
 | Concurrent full suites | Workers each | Wall | Failed tests per run       |
 | ---------------------- | ------------ | ---- | -------------------------- |
@@ -133,4 +133,4 @@ A shell script under `claude/skills/*/scripts/` gates only the Shell stage unles
 
 ### No stage reports an unused import
 
-`check:types` is `tsc --noEmit` and `tsconfig.json` sets `strict` without `noUnusedLocals` or `noUnusedParameters`, and no JavaScript or TypeScript linter runs anywhere in the sequence, since `check:format` is prettier, `check:shell` is shellcheck, and `check:spell` is cspell. A dead import therefore passes a green check and reaches history, caught only by reading the file. The same stage does catch a duplicate function implementation, as TS2393, so two helpers colliding on one name inside a large file fails the gate rather than shadowing at runtime.
+`check:types` is `tsc --noEmit` and `tsconfig.json` sets `strict` without `noUnusedLocals` or `noUnusedParameters`, and no JavaScript or TypeScript linter runs anywhere in the sequence, since `check:format` is prettier and `check:shell` is shellcheck. A dead import therefore passes a green check and reaches history, caught only by reading the file. The same stage does catch a duplicate function implementation, as TS2393, so two helpers colliding on one name inside a large file fails the gate rather than shadowing at runtime.

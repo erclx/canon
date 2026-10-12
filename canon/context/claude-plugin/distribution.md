@@ -17,7 +17,7 @@ The `internal/` boundary does not keep internal files off a user's disk, since a
 
 The entry carries no version on purpose. `plugin.json` overrides the enclosing entry for both name and version, so a version on the entry would drift on every release with nothing reporting it, and the release config writes only the plugin manifest.
 
-The check pipeline does not follow symlinks. The index walker's glob, the spell checker, and the formatter were each tested against a symlinked directory in isolation, so a linked folder is not double-walked and produces no drift failures.
+The check pipeline does not follow symlinks. The index walker's glob and the formatter were each tested against a symlinked directory in isolation, so a linked folder is not double-walked and produces no drift failures.
 
 ## Decisions
 

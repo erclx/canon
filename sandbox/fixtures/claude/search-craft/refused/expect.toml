@@ -12,8 +12,6 @@
 # shim and stops is correct, and the shim's `.pull-log` is an inert trace this
 # file does not assert. The stop-and-ask, posts written from recall, and any
 # scraping suggestion are semantic and sit under `manual`.
-#
-# cspell:ignore ookie
 
 absent = [".pull-used-login"]
 

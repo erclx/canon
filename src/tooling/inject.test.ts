@@ -77,38 +77,13 @@ describe('injectSeeds in a subfolder', () => {
   const chain = () =>
     resolveChain(PROJECT_ROOT, 'vite-react', { skipStack: 'base' })
 
-  it('should write the nested spell config', async () => {
+  it('should write no nested spell config', async () => {
     captureStderr()
     const sub = subfolder()
 
     await injectSeeds(chain(), sub)
 
-    expect(readFileSync(join(sub, 'cspell.json'), 'utf8')).toContain(
-      'local-tech-stack',
-    )
-  })
-
-  it('should leave a spell config the subfolder already edited', async () => {
-    captureStderr()
-    const sub = subfolder()
-    await injectSeeds(chain(), sub)
-    writeFileSync(join(sub, 'cspell.json'), '{"edited":true}\n')
-
-    await injectSeeds(chain(), sub)
-
-    expect(readFileSync(join(sub, 'cspell.json'), 'utf8')).toBe(
-      '{"edited":true}\n',
-    )
-  })
-
-  it('should write no cspell.json beside an existing cspell.config file', async () => {
-    captureStderr()
-    const sub = subfolder()
-    writeFileSync(join(sub, 'cspell.config.yaml'), 'version: "0.2"\n')
-
-    await injectSeeds(chain(), sub)
-
-    expect(() => readFileSync(join(sub, 'cspell.json'))).toThrow()
+    expect(existsSync(join(sub, 'cspell.json'))).toBe(false)
   })
 })
 

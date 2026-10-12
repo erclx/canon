@@ -1,13 +1,13 @@
 ---
 title: Verification
-description: How bun run check scopes stages to the changed-file set, why the baseline is the remote ref, the process tier, the install gate, ranking a stage by processor seconds, and the index and spelling gotchas
+description: How bun run check scopes stages to the changed-file set, why the baseline is the remote ref, the process tier, the install gate, ranking a stage by processor seconds, and the index gotchas
 ---
 
 # Verification
 
 ## Scoped verification
 
-`bun run check` gates three stages on the changed-file set. Shell runs on any `.sh` change, types on any `src/` change, and tests on `src/` or on any corpus a `src/` test asserts over, which `canon/context/development/tests.md` censuses. Format, spelling, and the regeneration stages always run, because their inputs are diffuse. Skipping tests, types, and shell on a markdown-only edit drops roughly 16 of the 31 CPU-seconds measured across the gate, and the test suite alone accounts for most of that.
+`bun run check` gates three stages on the changed-file set. Shell runs on any `.sh` change, types on any `src/` change, and tests on `src/` or on any corpus a `src/` test asserts over, which `canon/context/development/tests.md` censuses. Format and the regeneration stages always run, because their inputs are diffuse. Skipping tests, types, and shell on a markdown-only edit drops roughly 16 of the 31 CPU-seconds measured across the gate, and the test suite alone accounts for most of that.
 
 The changed set unions the branch diff against the merge base with `origin/main`, the working tree, and untracked files, which matches what a pull request will contain. Every fallback widens rather than narrows. A missing merge base runs every stage.
 
@@ -62,12 +62,6 @@ Test-count growth is invisible in wall time and linear in CPU. State which measu
 The Indexes stage asserts drift against the working tree, so the first `bun run check` after a frontmatter edit reports its own regeneration as drift and exits red. Stage or commit the rewritten `index.md` and run again. This is the regenerate-then-assert shape `canon/context/development/regeneration.md` covers, except that the walk writes files the session never opened, so the failure names work nobody did by hand.
 
 The pathspec matches by name rather than by how a file changed, so an unstaged hand edit to any `*index.md`-matching file trips the same failure, `auto: false` or not. A file under `auto: false` frontmatter that `canon indexes regen` correctly skips still reports as drifted until it is staged. The same name match reaches a file that is no index at all: a new untracked file such as a fixture page called `element-index.md` fails the stage with "Indexes drifted", so name such a file so it does not end in `index.md`.
-
-### Spelling exemptions
-
-cspell has no way to recognize a base64 payload as non-prose, so a generated TypeScript module holding one as a string literal, such as `src/design/fonts.ts` embedding WOFF2 font data, floods `check:spell` with an unknown-word finding for nearly every substring. Add the file's path to `cspell.json`'s `ignorePaths` rather than growing `project-terms.txt` with meaningless fragments, the way `tooling/**` is exempted wholesale.
-
-A path-level entry exempts a whole file, which is too wide for a percent-encoded data URI sitting in one line of ordinary prose, such as an inline SVG favicon in a shipped skill body. Each percent-encoded angle bracket glued to the tag name after it reads as one unknown word. `cspell.json`'s `ignoreRegExpList` closes this at the substring instead: a pattern matching from `data:image/svg+xml,` to the next `"` skips the encoded segment without exempting the prose around it.
 
 ### Other stage gotchas
 

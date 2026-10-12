@@ -99,7 +99,7 @@ Step 2: `canon tooling sync <tooling-stack> --write` installs stack deps, script
 CANON_NON_INTERACTIVE=1 canon tooling sync <tooling-stack> <target> --write
 ```
 
-Monorepo with multiple language roots: run `canon init` once at the repo root so `base` (husky, prettier, cspell, commitlint, CI) lands single, then sync each subtree with `--skip base` so the shared layer is not re-dropped. Take the subtree commands from the per-root rows the preview printed rather than picking folders by hand. Detection found each root and its stack, and the two commands below show the shape.
+Monorepo with multiple language roots: run `canon init` once at the repo root so `base` (husky, prettier, commitlint, CI) lands single, then sync each subtree with `--skip base` so the shared layer is not re-dropped. Take the subtree commands from the per-root rows the preview printed rather than picking folders by hand. Detection found each root and its stack, and the two commands below show the shape.
 
 ```bash
 CANON_NON_INTERACTIVE=1 canon tooling sync vite-react ./frontend --skip base --write
@@ -108,7 +108,7 @@ CANON_NON_INTERACTIVE=1 canon tooling sync python ./backend --skip base --write
 
 Without `--skip base`, each subtree re-drops husky, and git honors only one `core.hooksPath`, so the extra hook dirs silently break. Each subtree keeps its own framework configs, and its own stack reference reads through `canon tooling reference <stack>`.
 
-A subtree sync withholds `.github/`, since GitHub reads workflows only at the repository root, and names each withheld file with the `working-directory` a root CI job needs. It also writes a nested `cspell.json` that registers the subtree's word lists. A subtree needs its own `bun init` before its scripts and dependencies land. The sync warns and skips them until then.
+A subtree sync withholds `.github/`, since GitHub reads workflows only at the repository root, and names each withheld file with the `working-directory` a root CI job needs. A subtree needs its own `bun init` before its scripts and dependencies land. The sync warns and skips them until then.
 
 Step 3: post-sync fixups. Golden configs arrive from sync, so no config generation is required. But a few items may need a one-time touch:
 

@@ -1,13 +1,13 @@
 ---
 title: Publish
-description: The cross-reference form split by destination, the destination test every scan under it inherits, the record-root reading, and the title-spelling and title-format checks beside them
+description: The cross-reference form split by destination, the destination test every scan under it inherits, the record-root reading, and the title-format check beside them
 ---
 
 # Publish
 
 ## Overview
 
-The publish reference splits one rule by destination, so the same reference takes opposite spellings on either side of the remote. Every check scoped by destination inherits one test, and the two title checks beside them grade a field that release-please copies into the changelog unread.
+The publish reference splits one rule by destination, so the same reference takes opposite spellings on either side of the remote. Every check scoped by destination inherits one test, and the title-format check beside them grades a field that release-please copies into the changelog unread.
 
 ## Layout
 
@@ -50,18 +50,6 @@ Which paths the verb reads as absent from a clone splits by root:
 - `.claude/` keeps the entry-list reading. `src/labels/phase.ts` composes it from `RECORD_ENTRIES` plus the worktrees folder, which is ignored at `.gitignore` and absent from that list on purpose, since the harness pins a worktree to `.claude/` and a migration told to relocate one would break it.
 
 Adding the worktrees entry to `RECORD_ENTRIES` lost, since it changes what the record move carries to fix what a scan reports.
-
-### Title spelling
-
-`canon labels scan`'s unspelled-word check on a pull request title carries no `publish.md` section. The destination-scoped checks name text a reader outside this checkout cannot resolve, and a misspelled word carries no such dependency, so it fits neither that paragraph nor the namespace split `versioning.md` states for phase labels against semver tags. It is a fact about one field feeding one sink: release-please copies a pull request title straight into `CHANGELOG.md` with nothing having spell-checked it first. This entry and `docs/agents/commands.md` state it about the verb.
-
-`cspell` is a devDependency of this repository alone, per `775-dependencies.md`'s ban on importing a transitive-only package, so `src/labels/spelling.ts` resolves `node_modules/.bin/cspell` by walking from the caller's working directory up to the filesystem root rather than spawning a bare `cspell`.
-
-- `bun src/cli.ts labels scan`, the invocation `phase-label-gate.yml` runs, sits outside `bun run` and carries no `node_modules/.bin` on `PATH`, so a bare spawn throws `ENOENT` even inside this repository.
-- The resolved path rules out a `bunx` fallback, which could reach the network from inside an otherwise offline, regex-based command.
-- A target project carrying no `cspell` gets no coverage from this check rather than a forced dependency or a network call.
-
-`scanTitleSpelling` reads the `cspell` exit code and reports `check-failed` on any value outside its two defined ones, rather than reading an unreadable exit as a clean title. The `--json` record carries `spellingChecked` beside `unspelledWords`, so a caller can tell a clean title from one nothing checked.
 
 ### Title format
 

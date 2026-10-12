@@ -24,9 +24,9 @@ describe('BAN_SETS', () => {
   })
 
   it('should report nothing for a word or spelling the audit used to ban', () => {
-    // The words moved to `write-human` as guidance and spelling went to cspell,
-    // so a line carrying both must come back clean rather than half-reported.
-    // cspell:disable-next-line
+    // The words moved to `write-human` as guidance and spelling went to no
+    // check, so a line carrying both must come back clean rather than
+    // half-reported.
     const lines = bodyLines('We leverage it and just check the behaviour.')
 
     expect(scanBans(lines, BAN_SETS)).toEqual([])

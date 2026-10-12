@@ -517,18 +517,6 @@ export const STAGES: readonly Stage[] = [
     checks: [{ kind: 'measure', measure: pluginManifests }],
   },
   {
-    id: 'spelling',
-    label: 'Spelling',
-    checks: [
-      {
-        kind: 'command',
-        argv: ['bun', 'run', 'check:spell'],
-        failure: 'Spell check failed',
-      },
-    ],
-    success: 'Spell check passed',
-  },
-  {
     id: 'shell',
     label: 'Shell',
     // `.husky/` is matched by prefix rather than by extension, since every hook

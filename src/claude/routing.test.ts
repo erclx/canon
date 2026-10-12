@@ -34,8 +34,8 @@ describe('namedPaths', () => {
   })
 
   it('should read a root file with an alphabetic extension', () => {
-    expect(namedPaths('- Add the term to `cspell.json`.')).toEqual([
-      'cspell.json',
+    expect(namedPaths('- Add the term to `tsconfig.json`.')).toEqual([
+      'tsconfig.json',
     ])
   })
 

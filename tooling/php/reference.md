@@ -9,7 +9,7 @@ The php stack covers Composer projects on PHP 8.3 or later, formatted by PHP CS 
 ## Scaffold checklist
 
 1. Scaffold with `composer init -n --name <vendor>/<name> --autoload src/`. The package name and namespace are the project's own identity, so this stack never ships a `composer.json`.
-2. Seed `package.json` so the base layer's bun-side tools (husky, prettier, cspell, commitlint) have a target to install into: `bun init -y`.
+2. Seed `package.json` so the base layer's bun-side tools (husky, prettier, commitlint) have a target to install into: `bun init -y`.
 3. Install base tooling: `canon tooling sync base . --write`
 4. Install php tooling: `canon tooling sync php . --write`
 5. Install the dev tools: `composer require --dev friendsofphp/php-cs-fixer phpstan/phpstan phpunit/phpunit`. The manifest declares no `[dependencies.dev]`, because manifest injection runs `bun add -D`, which cannot install a Composer package. This step stays manual.

@@ -35,7 +35,7 @@ Reading them out of the standards per run was the original design. It put a pars
 
 `markdown.md` still states every ban and every checkpoint, and a reader follows it rather than the code. Nothing compares the two, so a number moved in one place and left in the other drifts silently. Move both in the same change.
 
-The set is closed rather than extensible, so a project cannot add a term by editing a file. It holds the two characters alone, since a character is the one class a literal match settles. The set once carried 13 words and 6 British spellings as well. The words moved to the `write-human` skill as guidance, because a word ban catches the token and misses the habit, and `just`, `allows`, and `very` carry honest uses no literal match separates. Spelling went to a project's spell checker, which already reads every word.
+The set is closed rather than extensible, so a project cannot add a term by editing a file. It holds the two characters alone, since a character is the one class a literal match settles. The set once carried 13 words and 6 British spellings as well. The words moved to the `write-human` skill as guidance, because a word ban catches the token and misses the habit, and `just`, `allows`, and `very` carry honest uses no literal match separates. Spelling is left to the author, with American spelling carried as guidance in `markdown-craft`.
 
 A set shipped empty is reported rather than passed. It finds nothing and would exit clean, which reports a corpus nobody checked as a corpus carrying no violation, so the run names the empty set and exits `3`. The set ships with the package, so a defect in the build is the only cause left.
 

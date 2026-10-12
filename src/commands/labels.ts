@@ -10,7 +10,6 @@ import { checkTitleFormat, type TitleFormatIssue } from '@/labels/format'
 import { MAP_REL } from '@/labels/map'
 import { isReleasePullRequest, scanPhaseLabels } from '@/labels/phase'
 import { checkSections } from '@/labels/sections'
-import { scanTitleSpelling } from '@/labels/spelling'
 import { BAN_SETS } from '@/markdown/bans'
 import { bodyLines, scanBans } from '@/markdown/scan'
 import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
@@ -169,7 +168,7 @@ export function register(program: Command): void {
   labels
     .command('scan')
     .description(
-      'Fail a pull request or a posted review whose title, body, or review comment carries a phase label, a board identifier, a session link, or a title with an unspelled word',
+      'Fail a pull request or a posted review whose title, body, or review comment carries a phase label, a board identifier, or a session link',
     )
     .helpOption('-h, --help', 'Show this help message')
     .option(
@@ -212,13 +211,6 @@ export function register(program: Command): void {
         'session and for no other reader, which no clone repairs, so it is read',
         'on a release pull request too, where the board identifier is not.',
         '',
-        "It also spell-checks the title alone against this repository's own",
-        'cspell config, since release-please copies the title into',
-        'CHANGELOG.md and nothing else spell-checks it first. The check shells',
-        "this repository's own resolved cspell binary and reports nothing when",
-        'a target project carries none, rather than reaching the network or',
-        'forcing a new dependency.',
-        '',
         "It also grades the title alone against claude/skills/git-pr/references/pr.md's ## Title",
         'section: the `<type>(<scope>)[!]: <subject>` structure, lowercase casing',
         'for the type, the scope, and the first subject word, and a 72-',
@@ -234,11 +226,11 @@ export function register(program: Command): void {
         'request or a review, outside a code span or a link.',
         '',
         'Exit codes:',
-        '  0  none of the seven found',
+        '  0  none of the six found',
         '  1  refused, with the reason on stderr or in the JSON record',
         '  2  the title or body carries a phase label, a board identifier, a',
         '     session link, a banned character, a heading outside the closed',
-        '     list or a required one missing, a title word no dictionary holds, or a title',
+        '     list or a required one missing, or a title',
         "     breaking claude/skills/git-pr/references/pr.md's format, casing, or length",
         '',
         'Examples:',
@@ -532,7 +524,6 @@ async function runScan(opts: ScanOptions): Promise<number> {
   }
 
   const result = scanPhaseLabels(resolved)
-  const spelling = await scanTitleSpelling(resolved.title, process.cwd())
   // A scan given no title, whatever produced that absence, has nothing to
   // grade and would otherwise fail as `structure` for the wrong reason.
   const titleFormat =
@@ -577,34 +568,6 @@ async function runScan(opts: ScanOptions): Promise<number> {
       `${plural(result.sessionLinks.length, 'session link')} in the title or body. Delete every hit rather than rewriting it, since a session resolves for the one account that started it and for no other reader.`,
     )
     for (const link of result.sessionLinks) logWarn(link)
-  }
-
-  const spellingChecked = spelling.kind === 'checked'
-  const unspelledWords =
-    spelling.kind === 'checked' ? spelling.unknownWords : []
-
-  logStep(
-    spelling.kind === 'unavailable'
-      ? 'Spelling unavailable'
-      : unspelledWords.length === 0
-        ? 'Clean'
-        : 'Unspelled word found',
-  )
-  if (spelling.kind === 'unavailable' && spelling.reason === 'no-binary') {
-    logInfo(
-      `no node_modules/.bin/cspell resolved walking up from ${spelling.probedFrom}, so the title was not checked`,
-    )
-  } else if (spelling.kind === 'unavailable') {
-    logInfo(
-      `cspell did not exit clean or with issues found (${spelling.message}), so the title was not checked`,
-    )
-  } else if (unspelledWords.length === 0) {
-    logInfo('no word in the title is absent from every dictionary')
-  } else {
-    logWarn(
-      `${plural(unspelledWords.length, 'word')} in the title absent from every dictionary. Fix the spelling, or add jargon and project-specific terms to .cspell/project-terms.txt and dependency vocabulary to .cspell/tech-stack.txt.`,
-    )
-    for (const word of unspelledWords) logWarn(word)
   }
 
   const titleFormatIssues = titleFormat?.issues ?? []
@@ -707,8 +670,6 @@ async function runScan(opts: ScanOptions): Promise<number> {
         semverTags: result.semverTags,
         boardReferences: result.boardReferences,
         sessionLinks: result.sessionLinks,
-        unspelledWords,
-        spellingChecked,
         titleFormatIssues,
         sections: { checked: sectionsChecked, ...sections },
         bannedCharacters,
@@ -719,7 +680,6 @@ async function runScan(opts: ScanOptions): Promise<number> {
   return result.phaseLabels.length === 0 &&
     result.boardReferences.length === 0 &&
     result.sessionLinks.length === 0 &&
-    unspelledWords.length === 0 &&
     titleFormatIssues.length === 0 &&
     sections.outside.length === 0 &&
     sections.missing.length === 0 &&

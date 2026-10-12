@@ -1,4 +1,0 @@
-{
-  "shellcheck.customArgs": ["--severity=warning"],
-  "vitest.enable": false
-}

@@ -57,10 +57,6 @@ When adding deps or scripts to `manifest.toml`:
 - Agent-facing prose seeds under `tooling/*/seeds/` use lowercase filenames (`development.md`, `ci.md`). Reserve CAPS (`CLAUDE.md`, `REQUIREMENTS.md`) for state and planning files that agents read as known paths.
 - Base agent-context seeds land at `tooling/base/seeds/canon/context/` and install to target projects' `canon/context/`, or beside the entries an unmoved project still holds under `.claude/context/`. <!-- canon-keep-surface-root --> This matches the three-tier context model documented in the `internal-claude` seed. Do not seed agent-facing content under `tooling/*/seeds/docs/`. The `docs/` location is reserved for human-facing prose.
 
-## Cspell seeds
-
-Seed files merge across layers. Each stack contributes words to the target's `.cspell/tech-stack.txt` via the seed merge in `src/tooling/inject.ts`. Do not duplicate terms across layers. Place each word in the narrowest layer that needs it (toolkit-ecosystem → `base`, web-universal → `web`, framework-specific → the adapter).
-
 ## Reference
 
 - `canon/context/tooling/index.md`: system overview, configs vs seeds vs references, extends chain, manifest authoring

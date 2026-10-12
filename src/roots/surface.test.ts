@@ -47,8 +47,8 @@ describe('resolveSurfacePath', () => {
   })
 
   it('should join a path naming no surface entry as written', () => {
-    expect(resolveSurfacePath(root, '.cspell/tech-stack.txt')).toBe(
-      join(root, '.cspell', 'tech-stack.txt'),
+    expect(resolveSurfacePath(root, '.husky/pre-commit')).toBe(
+      join(root, '.husky', 'pre-commit'),
     )
     expect(resolveSurfacePath(root, 'canon/config/x.toml')).toBe(
       join(root, 'canon', 'config', 'x.toml'),

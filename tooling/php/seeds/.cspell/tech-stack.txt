@@ -1,5 +1,0 @@
-analyse
-friendsofphp
-phpstan
-phpunit
-testdox

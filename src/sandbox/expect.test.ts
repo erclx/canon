@@ -865,7 +865,6 @@ describe('parseExpectation', () => {
   })
 })
 
-// cspell:ignore ookie
 describe('the claude:search-craft refused declaration', () => {
   const declare = (): Expectation =>
     parseExpectation(

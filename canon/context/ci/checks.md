@@ -35,7 +35,6 @@ Defined in `.github/workflows/verify.yml`, which runs one step, `bun run check:c
 | Sandbox coverage        | `bun src/cli.ts sandbox coverage --json`                                 | undeclared scenarios stay at or under the ceiling `src/gate/measures.ts` pins                            |
 | Audit set               | `bun src/cli.ts audits run --corpus tracked --corpus per-machine --json` | reports the judgment half of every tracked and per-machine audit and its growth, and fails on none of it |
 | Plugin manifests        | `claude plugin validate --strict`                                        | every plugin and marketplace manifest is well-formed                                                     |
-| Spelling                | `bun run check:spell`                                                    | cspell passes against dictionaries                                                                       |
 | Shell                   | `bun run check:shell`                                                    | shellcheck passes at warning level                                                                       |
 | Types                   | `bun run check:types`                                                    | `tsc --noEmit` passes against `src/`                                                                     |
 | Tests                   | `bun run test`                                                           | the vitest suite passes                                                                                  |
@@ -72,11 +71,7 @@ The board-identifier check (`VERSION_SPAN` in `src/labels/phase.ts`) reads a spa
 
 The carve-out stays, leaving authors responsible for a label quoted alone in its own span, rather than narrowing it to fenced blocks alone or dropping it and giving up every leak written with no backticks, the common case the check was built for. `claude/skills/git-commit/references/versioning.md` states the same three-way split.
 
-The scan also spell-checks the title alone, since release-please copies a title straight into `CHANGELOG.md` with nothing having spell-checked it first: cspell reads tracked files, and a title is not one until the release that copies it there.
-
 The same gate also holds the section list and the character bans, since both are text no stage in `bun run check` sees. The headings check reads an ordinary pull request alone: a review body carries its own headings, a release-please body opens on a version link and takes the `isReleasePullRequest` test the phase scan already runs, and a scan carrying no title is a reply rather than a description. The bans reuse `BAN_SETS` and run on every source, so a posted review is held to the same two characters as a pull request.
-
-It shells this repository's own resolved `cspell` binary rather than a bare `execa('cspell', …)`, because `bun src/cli.ts labels scan`, the exact invocation `phase-label-gate.yml` runs, sits outside `bun run` and carries no `node_modules/.bin` on `PATH`. A target `phase-label-gate.yml` this repository does not control can carry no `cspell` at all, and that check reports `unavailable` there rather than reaching the network or forcing a new dependency, which is quiet by design rather than a defect in the workflow.
 
 ## The plugin CLI on the runner
 

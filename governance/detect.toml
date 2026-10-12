@@ -25,10 +25,6 @@ files = [".claude/skills", "claude/skills"]
 deps = []
 files = [".github/workflows"]
 
-["765-spelling"]
-deps = ["cspell"]
-files = [".cspell", "cspell.json", ".cspell.json", "cspell.config.*"]
-
 ["775-dependencies"]
 deps = []
 files = ["**/package.json", "**/pyproject.toml", "**/go.mod", "**/composer.json"]

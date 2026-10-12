@@ -16,7 +16,7 @@ const PATH_TOKEN = /^[.A-Za-z0-9_][A-Za-z0-9._/-]*$/
 /** A placeholder segment, which a shape carries and a real path does not. */
 const SHAPE = /<[^>]*>/
 
-/** An alphabetic extension, which separates `cspell.json` from `3.6.0`. */
+/** An alphabetic extension, which separates `tsconfig.json` from `3.6.0`. */
 const EXTENSION = /\.[a-z]{2,5}$/
 
 /** Extensions a folder is probed with, so a glob narrowed by type still hits. */

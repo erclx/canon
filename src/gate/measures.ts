@@ -782,7 +782,7 @@ export function seedEntryCount(payload: string): number {
  * nothing it would notice.
  *
  * `dot` is what reaches the seeds, which is half of what `tooling/` ships. Every
- * seeded `.claude/` tree, `.cspell/` list, and `.husky/` hook sits behind a
+ * seeded `.claude/` tree, `.github/` workflow, and `.husky/` hook sits behind a
  * dotted segment, so the default scan walks `tooling/` and returns none of the
  * files a scaffolded project actually receives.
  */

@@ -1,9 +1,0 @@
-{
-  "recommendations": [
-    "esbenp.prettier-vscode",
-    "streetsidesoftware.code-spell-checker",
-    "mkhl.shfmt",
-    "timonwong.shellcheck",
-    "mads-hartmann.bash-ide-vscode"
-  ]
-}
