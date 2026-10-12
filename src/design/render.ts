@@ -268,7 +268,7 @@ ${sections.join('\n')}
 
 function sectionPersonality(text: string): string {
   if (!text) return ''
-  return `<h2>Personality</h2>\n<p>${escape(text)}</p>`
+  return `<h2>Overview</h2>\n<p>${escape(text)}</p>`
 }
 
 function sectionColor(rows: Row[]): string {
@@ -283,7 +283,7 @@ function sectionColor(rows: Row[]): string {
       return `<tr><td>${swatch}${cellText(r, 'Role')}</td><td>${cellText(r, 'Intent')}</td><td><code>${shown}</code>${mark(r, 'Value')}</td></tr>`
     })
     .join('\n')
-  return `<h2>Color</h2>\n<table><thead><tr><th>Role</th><th>Intent</th><th>Value</th></tr></thead><tbody>${body}</tbody></table>`
+  return `<h2>Colors</h2>\n<table><thead><tr><th>Role</th><th>Intent</th><th>Value</th></tr></thead><tbody>${body}</tbody></table>`
 }
 
 function sectionTypography(rows: Row[]): string {
@@ -325,7 +325,7 @@ function sectionBorders(rows: Row[]): string {
       return `<tr><td>${cellText(r, 'Role')}</td><td><code>${escape(radius)}</code>${mark(r, 'Radius')}</td><td><code>${escape(width)}</code>${mark(r, 'Width')}</td><td>${cellText(r, 'When used')}</td><td>${sample}</td></tr>`
     })
     .join('\n')
-  return `<h2>Borders</h2>\n<table><thead><tr><th>Role</th><th>Radius</th><th>Width</th><th>When used</th><th>Sample</th></tr></thead><tbody>${body}</tbody></table>`
+  return `<h2>Shapes</h2>\n<table><thead><tr><th>Role</th><th>Radius</th><th>Width</th><th>When used</th><th>Sample</th></tr></thead><tbody>${body}</tbody></table>`
 }
 
 /** A section the record writes as one-line rules draws them as a list. */
