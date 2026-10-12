@@ -809,12 +809,61 @@ const countSince =
     return log.isOk ? log.stdout.split('\n').filter((l) => l !== '').length : 0
   }
 
+const LIFT_STANDING: Record<
+  string,
+  Pick<Baseline, 'merges' | 'stale'> | undefined
+> = {
+  'standing-conflict': { merges: 'conflict', stale: 'unknown' },
+  'standing-stale': { merges: 'clean', stale: 'stale' },
+  'standing-unknown': { merges: 'unknown', stale: 'unknown' },
+}
+
+/**
+ * The standing `canon pr lift --check` read, so the lift and this check answer
+ * from one authority. Null when the record names no head or no standing gate,
+ * which a pull request already ready, a closed one, and an older binary with no
+ * `pr lift` verb all leave.
+ */
+export const standingFromLift = (
+  record: unknown,
+): null | Pick<Baseline, 'head' | 'merges' | 'stale'> => {
+  if (typeof record !== 'object' || record === null) return null
+  const { gates, head } = record as Record<string, unknown>
+  if (typeof head !== 'string' || head === '' || !Array.isArray(gates)) {
+    return null
+  }
+  const gate: unknown = gates.find(
+    (g: unknown) =>
+      typeof g === 'object' &&
+      g !== null &&
+      (g as Record<string, unknown>).gate === 'standing',
+  )
+  if (gate === undefined) return null
+  const { isOk, reason } = gate as Record<string, unknown>
+  if (isOk === true) return { head, merges: 'clean', stale: 'fresh' }
+  const standing =
+    typeof reason === 'string' ? LIFT_STANDING[reason] : undefined
+
+  return standing === undefined ? null : { head, ...standing }
+}
+
 /**
  * `--check <number>` reads the base and the head at call time and writes
  * nothing. The baseline is as old as the last full run, and a sibling merging
- * after it would leave a stored reading claiming clear.
+ * after it would leave a stored reading claiming clear. The lift verb's reading
+ * comes first, and the read below stays as the fallback for an older binary.
  */
 const check = (number: string): number => {
+  // The verb exits 1 on any refused gate and still prints its record, so the
+  // exit says nothing about whether the standing was read.
+  const lifted = standingFromLift(
+    parseJson(run('canon', ['pr', 'lift', number, '--check', '--json']).stdout),
+  )
+  if (lifted !== null) {
+    console.log(standingLine({ ...lifted, number }))
+
+    return 0
+  }
   const ref = baseRef()
   run('git', ['fetch', '-q', 'origin', baseBranch(ref)])
   const head = readHead(number)
