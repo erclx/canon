@@ -354,3 +354,47 @@ describe('tooling sync into a subfolder', () => {
     expect(runSubfolder('diff', ['--json']).status).toBe(0)
   })
 })
+
+describe('tooling sync shell', () => {
+  const syncShell = (): void => {
+    spawnSync('bun', [CLI, 'tooling', 'sync', 'shell', target, '--write'], {
+      encoding: 'utf8',
+      env: buildEnv({ CANON_NON_INTERACTIVE: '1' }),
+    })
+  }
+
+  const scripts = (): Record<string, string> =>
+    (
+      JSON.parse(readFileSync(join(target, 'package.json'), 'utf8')) as {
+        scripts: Record<string, string>
+      }
+    ).scripts
+
+  beforeEach(() => {
+    writeFileSync(join(target, 'package.json'), JSON.stringify({ scripts: {} }))
+  })
+
+  it('should write the shellcheck config', () => {
+    syncShell()
+
+    expect(existsSync(join(target, '.shellcheckrc'))).toBe(true)
+  })
+
+  it('should write the shell workflow', () => {
+    syncShell()
+
+    expect(existsSync(join(target, '.github/workflows/shell.yml'))).toBe(true)
+  })
+
+  it('should declare check:shell in package.json', () => {
+    syncShell()
+
+    expect(scripts()).toHaveProperty('check:shell')
+  })
+
+  it('should write no base config', () => {
+    syncShell()
+
+    expect(existsSync(join(target, 'commitlint.config.js'))).toBe(false)
+  })
+})
