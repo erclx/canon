@@ -83,10 +83,6 @@ The `drift` check pairs the diff with `git ls-files --others --exclude-standard`
 
 `bun run check:install` packs and installs from the extracted tarball rather than cloning, so it reads the same working tree the other gates read. A change staged for one of the regenerated surfaces is visible to it with no separate commit required first.
 
-### A fence is exempt from the prose gate and not from the spell gate
-
-The prose-standards hook treats a fenced code block as exempt and `bun run check:spell` does not, so an invented short identifier inside a mermaid fence can pass every prose gate and still fail the check that blocks the commit. `claude/skills/draft-figure/references/mermaid.md` names the fence exemption for the prose hook while saying nothing about the spell stage, so the exemption reads wider than it is. Spell participant aliases and node ids as whole words, and check punctuation bans inside labels by hand. The `Markdown bans` and `Spelling` stages read different corpora, so no reordering closes the gap between them.
-
 ### A write grant has to agree with the formatter
 
 Any tool granted write access to a format-checked file has to agree with the formatter, and a release configuration's `extra-files` mechanism is that kind of grant. `release-please` bumps the version in `claude/.claude-plugin/plugin.json` and re-serializes the whole file, expanding `keywords` to one string per line, while prettier collapses any array fitting the print width, so an automated version bump can land a file that fails `bun run check` at every future release. Run the tool and the formatter over the same content and diff the two before wiring the grant. A real file with a fixed name takes a formatter ignore entry, unlike sample content, which takes a suffix.

@@ -23,7 +23,7 @@ The producer clears `.claude/rules/` before installing, so a rule dropped from t
 
 ## Sample content on disk
 
-Sample content committed at its real filename gets rewritten by every repo-wide write pass that claims that filename. An `index.md` or `package.json` fixture on disk collides with `canon indexes regen`, which rebuilds any `index.md` from sibling frontmatter, and with prettier, which reformats JSON and can strip a leading blank line an append fixture depends on. Store such content under a `.fixture` suffix stripped on copy, which beats ignore-file entries and beats pruning a shared walker because it changes nothing for that walker's consumers. cspell still reads suffixed files, so spell coverage survives the move.
+Sample content committed at its real filename gets rewritten by every repo-wide write pass that claims that filename. An `index.md` or `package.json` fixture on disk collides with `canon indexes regen`, which rebuilds any `index.md` from sibling frontmatter, and with prettier, which reformats JSON and can strip a leading blank line an append fixture depends on. Store such content under a `.fixture` suffix stripped on copy, which beats ignore-file entries and beats pruning a shared walker because it changes nothing for that walker's consumers.
 
 ## Hero
 

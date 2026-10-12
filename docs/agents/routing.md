@@ -32,7 +32,7 @@ Three things are read past. A nested bullet belongs to the one above it rather t
 
 A bullet is path-scoped here when it names a path. That is evidence for the tier judgment rather than the judgment itself, and the gap runs both ways: a bullet naming a folder can still apply every session, and one firing on a path it never spells is invisible to the count. Read a section's number as a place to look rather than as a verdict on it.
 
-A backticked token counts when it carries a separator or an alphabetic extension, which admits `src/cli.ts` and `cspell.json` while leaving a flag, a bare word, and a version string out.
+A backticked token counts when it carries a separator or an alphabetic extension, which admits `src/cli.ts` and `tsconfig.json` while leaving a flag, a bare word, and a version string out.
 
 A shape counts as the folder above its placeholder. `canon/context/<domain>.md` names `canon/context/` and nothing narrower, so dropping the token whole would report the section carrying it as naming no path at all. A placeholder opening the first segment has no openable prefix and is dropped.
 

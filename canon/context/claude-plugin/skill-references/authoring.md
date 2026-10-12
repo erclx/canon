@@ -49,7 +49,7 @@ Adding a section to a reference can make a claim in a sibling section of that sa
 
 The change checkpoint does not prompt for it. Its collision question asks which sibling reference, rule, or template the change contradicts, so a sibling section inside the file being edited falls outside what the four questions reach. Read the neighboring sections for words such as `alone` and `only` before adding a section beside them, and rewrite the one that now claims too much.
 
-The failure is invisible to every check the repository runs. Both sentences are well-formed prose citing nothing, so the drift stages, the markdown audit, and the spell check all pass over a file that now states two incompatible things.
+The failure is invisible to every check the repository runs. Both sentences are well-formed prose citing nothing, so the drift stages, and the markdown audit all pass over a file that now states two incompatible things.
 
 ### Scope statements
 

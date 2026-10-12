@@ -15,17 +15,17 @@ What earns a rule in the first place, and which standard each one routes to, is 
 
 A rule's number states its domain without opening it.
 
-| Range     | Domain                                                                   |
-| --------- | ------------------------------------------------------------------------ |
-| `000–099` | code (placement, errors, naming, testing), code stacks only              |
-| `100–199` | lang (one rule per language)                                             |
-| `200–299` | framework (one rule per framework)                                       |
-| `300–399` | lib (testing libraries, validation, security, persistence)               |
-| `400–499` | ui (copy, accessibility, forms, motion, capture)                         |
-| `500–599` | claude (session conduct and authoring rules for `.claude/`)              |
-| `600–699` | canon (toolkit workflow, canonical docs, and record folders)             |
-| `700–799` | tooling (CI workflows, spelling, dependencies, config and code comments) |
-| `800–899` | writing (prose, markdown, diagrams, READMEs, and standards)              |
+| Range     | Domain                                                         |
+| --------- | -------------------------------------------------------------- |
+| `000–099` | code (placement, errors, naming, testing), code stacks only    |
+| `100–199` | lang (one rule per language)                                   |
+| `200–299` | framework (one rule per framework)                             |
+| `300–399` | lib (testing libraries, validation, security, persistence)     |
+| `400–499` | ui (copy, accessibility, forms, motion, capture)               |
+| `500–599` | claude (session conduct and authoring rules for `.claude/`)    |
+| `600–699` | canon (toolkit workflow, canonical docs, and record folders)   |
+| `700–799` | tooling (CI workflows, dependencies, config and code comments) |
+| `800–899` | writing (prose, markdown, diagrams, READMEs, and standards)    |
 
 The table stays a table because it grows a row per band rather than per rule, and a band opens rarely. Each row names a category rather than listing its rules, which `canon gov list` reports.
 
@@ -69,7 +69,7 @@ A rule pointing at a skill rather than a standard stays authored, as do the `wri
 - A rule publishing a heading some command parses is program input. `src/comments/vocabulary.ts` reads its terms from whichever rule publishes `## Degradation vocabulary`, so adding that heading elsewhere changes what `canon comments scan` sweeps for. Grep for a reader of the heading or filename before writing the rule.
   - The program-input check in `internal-rule-audit` runs the same grep per rule, and attaches the reader to any retire or merge verdict.
 - A `description` holding a bare word, a colon, and a space breaks `Bun.YAML.parse`, which reads the shape as a nested key. `parseFrontmatter` treats the unparsable block as absent, so `canon gov list` and the citation check list the rule as unscoped rather than naming the colon. Rephrase the description rather than quoting it, since every other frontmatter example here is unquoted.
-- A glob can reach well past one named folder. `canon/611-indexes.md` globs `**/index.md` and reaches every folder in the tree, and `tooling/765-spelling.md` globs `.cspell/**`, a folder outside `.claude/` and outside a project's own source.
+- A glob can reach well past one named folder. `canon/611-indexes.md` globs `**/index.md` and reaches every folder in the tree.
 
 ## Frontmatter contract
 
