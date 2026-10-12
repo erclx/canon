@@ -37,7 +37,7 @@ The gitignored `.canon/` scratch folders live at the main worktree root, and the
 
 ## Tooling caveats
 
-Tools that honor `.gitignore` by walking parent directories treat every file in a linked worktree as ignored once `.claude/worktrees/` is in the main repo's `.gitignore`. `cspell` is the concrete case in this repo. Bound its search with `gitignoreRoot: ["."]` in `cspell.json` so it stops at the config's own directory.
+Tools that honor `.gitignore` by walking parent directories treat every file in a linked worktree as ignored once `.claude/worktrees/` is in the main repo's `.gitignore`. A spell checker was the concrete case in this repo before it was dropped. Bound such a tool's search with its own root setting so it stops at the config's own directory.
 
 ## Ports across sessions
 
