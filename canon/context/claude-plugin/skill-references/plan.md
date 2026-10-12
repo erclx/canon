@@ -1,13 +1,24 @@
 ---
 title: Plan
-description: What the plan standard fixes and why its section markers are mixed, the inverted answer contracts, where an execution-time deviation is recorded, how a constraint declares its expiry, and the branch description cap a plan filename feeds
+description: What the plan reference fixes and why its section markers are mixed, the inverted answer contracts, where an execution-time deviation is recorded, how a constraint declares its expiry, and the branch description cap a plan filename feeds
 ---
 
 # Plan
 
-## Sections
+## Overview
 
-`claude/skills/plan-feature/references/plan.md` fixes the section list and the suggested-and-answer contract, and `claude/skills/plan-feature/references/plan-lifecycle.md` fixes the lifecycle from `.canon/plans/` to `.canon/plans/archive/`. The lifecycle was split out when the generated rule's frontmatter pushed `plan.md` past the document ceiling. `plan-feature`, `auto-ship`, and `context-fold` each cite the half they read rather than restating it.
+The plan reference was drafted against a live folder holding two or three files, so it was measured against its archive before its shape rules held. It also carries two rules under separate headings that read as pointing opposite ways, and a constraint block measured against a tree that has moved by the time a worker reads it.
+
+## Layout
+
+- `claude/skills/plan-feature/references/` owns the plan and plan-lifecycle references these decisions explain
+- `src/tasks/` owns the plan answer reader and the branch derivation that read a plan back
+
+## Decisions
+
+### Sections
+
+`claude/skills/plan-feature/references/plan.md` fixes the section list and the suggested-and-answer contract, and `claude/skills/plan-feature/references/plan-lifecycle.md` fixes the lifecycle from `.canon/plans/` to `.canon/plans/archive/`. The lifecycle was split out when `plan.md` reached the document ceiling, at a time its frontmatter still carried the fields a rule generator read. `plan-feature`, `auto-ship`, and `context-fold` each cite the half they read rather than restating it.
 
 The section markers are mixed on purpose, `## Summary` as a heading and the other six as bold labels, because that is what the corpus writes. Across the plan archive, `Summary` is nearly always a heading and never a label, while `Files to touch` and the sections the archive already carried mostly take the bold-label form.
 
@@ -19,7 +30,7 @@ The check accepts either spelling for a section and names the table's form in th
 
 `governance/rules/canon/plan.md` routes `.canon/plans/**` and joins `base`, hand-written because its standard moved into `plan-feature`. That one glob covers the archive as well. It carries the three directives that ship silently when violated, a filled answer slot, a deleted plan, and a deviation from a suggestion recorded off the plan, and loads `canon:plan-feature` for the rest.
 
-## Answer contract
+### Answer contract
 
 The plan and intake answer contracts invert each other and both files state the inversion, which is the both-sides rule applied to a contract rather than to a scope entry.
 
@@ -29,7 +40,7 @@ The operator-call line's separator varies in the corpus and the standard fixes o
 
 Reading the phrase also means reading the `Questions` section rather than the file. A plan discussing the operator-call form in its own `Risks` can carry the exact phrase in backticks, so a whole-file match would read that plan as waiting on its own author. `splitPlanSections` holds the read to the section, which is the split `checkQuestionContract` already runs, leaving one definition of a question for both readers.
 
-## Execution-time deviations
+### Execution-time deviations
 
 `claude/skills/plan-feature/references/plan.md` bars filling the answer slot and requires amending the plan in place when a decision changes. `governance/rules/canon/plan.md` carries the pair as two separate bullets, so the prohibition could read as covering the whole question block. The contract states that it covers the answer line alone, and that amending the `- Suggested:` line is the route an executing session takes when it picks other than the suggestion.
 
@@ -39,7 +50,7 @@ The rewritten line opens with the fixed phrase `overridden at execution to <pick
 
 The deviation also takes one line in the open task's `## Findings`, because the plan is archived at ship and the task is what the board still points at. The plan carries why the pick moved and the task carries what shipped. `claude/skills/task-board/references/tasks.md` names the finding class from its own side, since a handoff written on one side of a boundary is never checked against the standard on the other.
 
-## Constraint expiry
+### Constraint expiry
 
 A constraint block names the file set of every track in flight, and a plan sits in the ready queue until a worker picks it up. A constraint written while a wave is still building is correct when written and stale once that wave merges, which can happen before a worker ever reads it.
 
@@ -57,7 +68,7 @@ An unstamped constraint reads as unverified rather than as live. Restamping the 
 
 The rule sits in `claude/skills/plan-feature/references/plan.md` with `role-orchestrator` naming the stamp alone, because a worker running the planning skill in its own branch writes constraints too. No check parses the block, so the rule holds by being read.
 
-## Sources
+### Sources
 
 Citations sit in an optional `**Sources:**` section rather than inline. A quote does not fit the one-line `- Suggested:` form, and an optional marker leaves a code-only plan untouched, since most plans rest on nothing outside the project.
 
@@ -65,7 +76,7 @@ Citations sit in an optional `**Sources:**` section rather than inline. A quote 
 
 An entry owns its nested bullets and wrapped lines, so a passage broken across lines still counts as quoted. The section closes at the next marker, which `splitPlanSections` already does for every section.
 
-## Branch description cap
+### Branch description cap
 
 The branch standard's cap reads 2 words as the target with 4 as the ceiling, wide enough that a branch derived from a plan filename is not renamed at ship. A rename there is a third derivation on top of the two `canon tasks plan-branch` exists to collapse, and it parts the branch slug from the plan slug that `session-worktree` tier 1 and `git-pr`'s fallback plan lookup both read back to find the plan.
 
@@ -73,7 +84,7 @@ Two alternatives lost. Tightening `claude/skills/plan-feature/references/plan.md
 
 Nothing can tell a plan-derived name from a hand-picked one, so the wider ceiling holds for every branch in every target that installed the standard. The standard says that plainly rather than scoping the sentence to a case no tool can detect.
 
-## Fold rule beside a size floor
+### Fold rule beside a size floor
 
 A stacked batch that shares most of its files with its parent folds into it, because each pull request pays a fixed cost a same-file slice cannot earn back. On 2026-10-04 the canvas inspector had shipped as five merged pull requests over 26 distinct files, carrying 25 reviews, 13 comments, and 64 commits between them, with 29 to 528 minutes from open to merge. The standard states a fold rule with a written exemption, ``Judged apart from `feature-<parent>`: <reason>``, rather than a minimum slice size, since a size floor cannot see a contract split or a taste call the operator judges in its own sitting.
 
@@ -81,7 +92,7 @@ The check reads declared file sets and the plan's own stack wording, so it measu
 
 The sources are DORA's small-batches capability, which names regrouping small batches as a pitfall and asks for independent batches, and Reinertsen's batch size economics, which frames the optimum as a U-curve with coupling raising the cost of a small batch.
 
-## Shared path beside hold
+### Shared path beside hold
 
 A constraint on work in flight takes one of two forms, a hold or a shared path, because the dispatch conflict check stopped treating a shared file as a hold. On 2026-10-04 it ran six ready canvas rows one at a time while what they shared was docs paragraphs and appended test cases. The standard still told a plan to name each track as forbidding an act, and `role-worker` still had a worker concede a file a constraint named as held, so a shared path read as a hold at both ends.
 

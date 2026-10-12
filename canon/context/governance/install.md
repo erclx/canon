@@ -41,7 +41,7 @@ The rejected alternative was the skill matching a detected technology against ea
 
 ### Only governance keeps a consumed copy
 
-`standards/` and `internal/` carry no mirror, since nothing installs either into a project. A `standards/` mirror would buy only a path this repository resolves, at the cost of a tracked copy regenerated on every check and a citation form that reads as portable and is not. `internal/rules/claude/598-authoring-layout.md` states the root each carrier resolves against instead, and the accepted cost is that a citation here reads differently from the same citation in a rule or a shipped body.
+`internal/` carries no mirror, since nothing installs it into a project. A mirror would buy only a path this repository resolves, at the cost of a tracked copy regenerated on every check and a citation form that reads as portable and is not. `internal/rules/claude/598-authoring-layout.md` states the root each carrier resolves against instead, and the accepted cost is that a citation here reads differently from the same citation in a rule or a shipped body.
 
 `internal/` has no install channel to mirror. The Consumed copies gate stage runs `canon gov regen` directly.
 

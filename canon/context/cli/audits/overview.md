@@ -53,8 +53,6 @@ Every audited verb now writes a parseable record on its refusal path, since a re
 
 `canon markdown audit`, `canon comments scan`, and `canon gov test-order` write a record on every refusal path too, and none claims the allowance. A corpus with no markdown file, a bad `--languages` argument, and a tree carrying no git history at all are each a broken invocation or a broken checkout, so they stay `unmeasured` on the corpus's own default.
 
-`records-standards` is the one tracked record kind that takes the allowance, against the rule that an unread tracked tree is a broken checkout. The exception rests on a fact this record already carries: the install channel that would have written `standards/` into a target's own tree closed, so a project other than this toolkit's own checkout carries no standards folder at all by design. Leaving the corpus label without the exception would have pinned every such project's aggregate at `incomplete` forever, the same signal the split above exists to retire.
-
 ### Why the pipeline runs it without gating on it
 
 `bun run check` runs the set after the three gating stages and never fails on it. Those stages keep their own remedies, which are specific in a way one aggregate line cannot be, so a fact still fails the push where a reader is told what to do about it.

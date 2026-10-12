@@ -5,7 +5,7 @@ description: The sync engine and its adapters, ownership by location and by name
 
 # Sync
 
-`src/sync/` holds one engine that gov installs and syncs through, plus the git workflow `canon sync` runs afterward. Gov is the only adapter left, since standards closed its install channel. The install stamp is what lets the engine tell a file the toolkit moved from a file the project edited, and `canon/context/cli/stamp.md` carries it. `canon/context/cli/sync-reporting.md` carries attribution from history and the freshness report, which reads the same plan a sync would apply.
+`src/sync/` holds one engine that gov installs and syncs through, plus the git workflow `canon sync` runs afterward. Gov is the only adapter left. The install stamp is what lets the engine tell a file the toolkit moved from a file the project edited, and `canon/context/cli/stamp.md` carries it. `canon/context/cli/sync-reporting.md` carries attribution from history and the freshness report, which reads the same plan a sync would apply.
 
 The folder splits by job: the git workflow across `target.ts`, `git.ts`, and `workflow.ts`, the stamp in `stamp.ts`, the drift report in `check.ts`, and the history fallback in `history.ts`.
 
@@ -15,7 +15,7 @@ The folder splits by job: the git workflow across `target.ts`, `git.ts`, and `wo
 
 A domain installs as a file when something other than the model resolves it by path, and ships as a command when only a session's own judgment would open it. The harness glob-loads a rule, and a target's build tooling reads a config or `.claude/design/base.css` off its path, so each installs. A skill reference is opened by the model on purpose, so it ships inside the plugin and carries no install and no sync.
 
-Deciding case by case lost to writing the criterion down. `canon/context/standards/resolution.md` carries the closed install channel.
+Deciding case by case lost to writing the criterion down. `canon/context/claude-plugin/skill-references/overview.md` carries why a reference has one home in its owner skill.
 
 Revisit when Claude Code loads a document on demand from a catalog of its own.
 
@@ -42,7 +42,7 @@ Revisit when Claude Code loads a document on demand from a catalog of its own.
 
 ## canon sync
 
-`canon sync [target]` runs every installed domain sync in sequence (governance, claude), then a git workflow step that detects which domains changed and previews the commit and pull request body before prompting. Standards sits outside that sequence, since it installs nothing into a target for a sync to reconcile. Committing creates `chore/canon-sync-YYYYMMDD-HHMM` when the run is on `main` or `master` and stays on the current branch otherwise. The pull request body lists up to three changed filenames per domain, then a count for the rest.
+`canon sync [target]` runs every installed domain sync in sequence (governance, claude), then a git workflow step that detects which domains changed and previews the commit and pull request body before prompting. Committing creates `chore/canon-sync-YYYYMMDD-HHMM` when the run is on `main` or `master` and stays on the current branch otherwise. The pull request body lists up to three changed filenames per domain, then a count for the rest.
 
 Claude sync runs under `CANON_NON_INTERACTIVE=1` so the embedded call does not prompt. The one other domain sync, governance, inherits stdin and prompts for its own changes, and the combined pull request preview is the confirmation gate for the workflow alone. `canon claude sync` writes only `.gitignore`, so the changed-file tracking watches that path and a gitignore-only change still reports under a `claude/` domain line. Seed audits stay a manual step, a hand merge against the toolkit copy, which `canon sync` reminds the reader of when `.claude/` is present.
 

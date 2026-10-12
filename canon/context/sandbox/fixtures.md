@@ -53,7 +53,6 @@ The claude anchor scenarios (`auto-ship`, `review-pr`, `review-address`, `review
 
 ### Content staged from the toolkit itself
 
-- `stage_toolkit_markdown` stages the toolkit's own `standards/` tree. An arm modelling a real install wants the files a target received, and a copy under `fixtures/` would drift from the source with nothing reporting it. The helper flattens, because both `detectUnmigrated` and the sync engine match a target file to its source by basename against the flat domain root, and a file staged out of a subfolder such as `internal/standards/` reads as project-authored.
 - `pick_dropped_root` and `restore_dropped_file` stage the toolkit's own deleted history. An arm covering the reverse walk needs a folder at a root this repository dropped, holding bytes it published, since attribution matches content against the blobs history holds for that path and a hand-authored file scores `unattributed`.
 
 ### Staging a history rather than a tree

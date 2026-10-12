@@ -310,7 +310,7 @@ describe('scanCounts', () => {
     // a restated whole. No syntactic rule tells the two apart, so the real
     // fix for a case like this is dating the clause as a past state, not
     // narrowing the matcher, which is what the equivalent instance in
-    // `canon/context/standards/destinations.md` was repaired with.
+    // the retired standards destinations entry was repaired with.
     seedSkills(27)
     write(
       'docs/history.md',

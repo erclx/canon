@@ -5,7 +5,7 @@ description: The numbering bands and their two sources, the frontmatter contract
 
 # Rules
 
-A rule is a `.md` file carrying the Claude shape directly, so install is a passthrough copy. Every authored rule is written by hand, and the `standards/` band alone is generated. Rules sit in subdirectories by domain and install preserves that layout, since a flat folder would leave the numbering bands as the only grouping signal.
+A rule is a `.md` file carrying the Claude shape directly, so install is a passthrough copy. Every rule is written by hand, and nothing generates one. Rules sit in subdirectories by domain and install preserves that layout, since a flat folder would leave the numbering bands as the only grouping signal.
 
 What earns a rule in the first place, and which standard each one routes to, is `canon/context/governance/routing.md`.
 
