@@ -102,6 +102,8 @@ The slowest typography case took 2.6 s, and the box has logged 173 s of full mem
 - The failed-stage load line carries the `some avg10` stall share per resource from `/proc/pressure/`, as `, pressure cpu 7.5% memory 0.0% io 0.2% over 10s,`. It drops where the files are absent or PSI is off.
 - The walk writes `failed-<case slug>.png` and the server's stderr as `server.log` under `.canon/tmp/canvas-walk/`. The first `failed-*` file by case order is the one that matters, since every later case fails on the shared page. A passing walk writes none.
 
+A suite run by hand through `bun run test` or `bun --bun vitest run` takes no lock either, so running the whole suite directly during a wave still oversubscribes the box. Run a single file that way and leave the full suite to `bun run check`.
+
 The file records the gate's pid, while the suite runs in a child vitest tree. Killing the gate alone with `kill -9` leaves that tree running as orphans, so the next acquirer takes over at once while the orphaned suite still holds every core, and two suites overlap until it finishes. Closing it would mean recording and probing the holder's process group.
 
 ## Gotchas
