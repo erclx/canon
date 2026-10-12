@@ -126,6 +126,6 @@ The sweep under `screenshots/` is ignored again, and only a flagged case's `evid
 
 ## Verify script
 
-The web layer's `scripts/verify.json` requires `typecheck`, `lint`, `test:run`, and `build`, and base's `scripts/verify.ts` runs them in its fixed order: typecheck, lint, format, shell, unit tests, build, markdown bans, then the card exclusion check where one is installed. astro, vite-react, and nextjs inherit the list, since the nearest stack's copy wins. An adapter whose phases differ ships its own `verify.json` rather than a script.
+The web layer's `scripts/verify.json` requires `typecheck`, `lint`, `test:run`, and `build`, and base's `scripts/verify.ts` runs them in its fixed order: typecheck, lint, format, shell where the `shell` stack declares it, unit tests, build, markdown bans, then the card exclusion check where one is installed. astro, vite-react, and nextjs inherit the list, since the nearest stack's copy wins. An adapter whose phases differ ships its own `verify.json` rather than a script.
 
 The card stage runs `scripts/check-card-exclusion.sh` whenever that file is installed, which keeps the social card route's build exclusion on the default path rather than behind a flag. It tests for the script rather than the stack, so a project with no card route runs one less stage with no override, and the stack shipping a card route owns what the check reads, being the build the stage before it produced. The astro reference carries the route itself.

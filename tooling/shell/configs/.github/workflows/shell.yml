@@ -1,0 +1,30 @@
+name: Shell
+# canon-no-seed: an add-on stack's workflow with no root counterpart by design, since the toolkit checks its own shell inside verify.yml.
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  shell-checks:
+    name: 🐚 Shell Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Shell Tools
+        run: sudo apt-get install -y shfmt shellcheck
+
+      - name: Check Shell
+        run: bun run check:shell

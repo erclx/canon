@@ -1,0 +1,12 @@
+[stack]
+name = "shell"
+extends = ""
+runtime = "bun"
+scaffold = ""
+
+[sync]
+source = "configs"
+
+[scripts]
+"check:shell" = "find scripts -name '*.sh' -exec shfmt --diff --indent 2 {} + && find scripts -name '*.sh' -exec shellcheck --severity=warning {} +"
+"format:shell" = "find scripts -name '*.sh' -exec shfmt --write --indent 2 {} +"

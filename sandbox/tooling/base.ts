@@ -1,15 +1,5 @@
-import { readdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { type StageContext, scenario } from '@/sandbox/scenario'
-
-/** `chmod +x scripts/*.sh`, passing the pattern through unexpanded when nothing matches, as the shell did. */
-function makeScriptsExecutable(ctx: StageContext): void {
-  const scripts = readdirSync(join(ctx.dir, 'scripts'))
-    .filter((name) => name.endsWith('.sh'))
-    .sort()
-    .map((name) => `scripts/${name}`)
-  ctx.run('chmod', ['+x', ...(scripts.length > 0 ? scripts : ['scripts/*.sh'])])
-}
+import { scenario } from '@/sandbox/scenario'
 
 export default scenario({
   arms: {
@@ -30,12 +20,8 @@ export default scenario({
       ctx.log.step('Initializing Husky')
       ctx.run('bunx', ['husky'])
 
-      ctx.log.step('Setting script permissions')
-      makeScriptsExecutable(ctx)
-      ctx.log.info('Scripts made executable')
-
       ctx.log.step('Running verification')
-      if (ctx.run('bash', ['scripts/verify.sh'], { allowFailure: true }) === 0)
+      if (ctx.run('bun', ['scripts/verify.ts'], { allowFailure: true }) === 0)
         ctx.log.info('All checks passed')
       else ctx.log.warn('Verification failed, check configs')
 

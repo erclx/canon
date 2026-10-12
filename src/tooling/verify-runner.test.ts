@@ -13,10 +13,9 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 const TOOLING = join(import.meta.dirname, '../../tooling')
 const RUNNER = join(TOOLING, 'base/configs/scripts/verify.ts')
-const WRAPPER = join(TOOLING, 'base/configs/scripts/verify.sh')
 
 const STACK_SCRIPTS = {
-  base: ['format', 'check:format', 'check:shell'],
+  base: ['format', 'check:format'],
   go: ['typecheck', 'lint', 'test:run'],
   php: ['typecheck', 'lint', 'test:run'],
   python: ['typecheck', 'lint', 'test:run'],
@@ -44,7 +43,15 @@ beforeEach(() => {
   mkdirSync(bin)
   // Each stack's toolchain is only probed for presence, so a stub that
   // succeeds keeps the run from stopping at the probe on a machine without it.
-  for (const tool of ['uv', 'go', 'golangci-lint', 'php', 'composer']) {
+  for (const tool of [
+    'uv',
+    'go',
+    'golangci-lint',
+    'php',
+    'composer',
+    'shfmt',
+    'shellcheck',
+  ]) {
     writeStub(tool, 0)
   }
   mkdirSync(join(fixture, 'vendor/bin'), { recursive: true })
@@ -154,11 +161,13 @@ describe('an undeclared base phase', () => {
     const result = runVerify()
 
     expect(result.status).toBe(0)
-    expect(result.stdout).toContain('Skipped: check:shell is not declared here')
+    expect(result.stdout).toContain(
+      'Skipped: format is not declared here, so the repository root runs it',
+    )
   })
 
   it('should fail under the base list', () => {
-    setUp('base', ['format', 'check:format'])
+    setUp('base', ['check:format'])
 
     expect(runVerify().status).toBe(1)
   })
@@ -166,7 +175,55 @@ describe('an undeclared base phase', () => {
   it('should run when a derived folder declares it', () => {
     setUp('web', [...STACK_SCRIPTS.web, ...STACK_SCRIPTS.base])
 
-    expect(runVerify().stdout).toContain('Shell check passed')
+    expect(runVerify().stdout).toContain('Format check passed')
+  })
+})
+
+describe('check:shell', () => {
+  it('should run where package.json declares it and no list requires it', () => {
+    setUp('base', [...STACK_SCRIPTS.base, 'check:shell'])
+
+    const result = runVerify()
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('Shell check passed')
+  })
+
+  it('should pass where package.json does not declare it', () => {
+    setUp('base', STACK_SCRIPTS.base)
+
+    expect(runVerify().status).toBe(0)
+  })
+
+  it('should name the shell stack rather than the root when skipped', () => {
+    setUp('base', STACK_SCRIPTS.base)
+
+    const result = runVerify()
+
+    expect(result.stdout).toContain('canon tooling sync shell . --write')
+    expect(result.stdout).not.toContain(
+      'check:shell is not declared here, so the repository root runs it',
+    )
+  })
+
+  it('should fail and name the install when shfmt is absent', () => {
+    setUp('base', [...STACK_SCRIPTS.base, 'check:shell'])
+    rmSync(join(bin, 'shfmt'))
+    linkTool('bun')
+
+    const result = run([process.execPath, RUNNER], { PATH: bin })
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('shfmt is not installed')
+    expect(result.stdout).toContain('apt-get install shfmt shellcheck')
+  })
+
+  it('should not probe for shfmt where check:shell is undeclared', () => {
+    setUp('base', STACK_SCRIPTS.base)
+    rmSync(join(bin, 'shfmt'))
+    linkTool('bun')
+
+    expect(run([process.execPath, RUNNER], { PATH: bin }).status).toBe(0)
   })
 })
 
@@ -342,16 +399,5 @@ describe('markdown bans', () => {
     )
 
     expect(runVerify().stdout).not.toContain('CHANGELOG')
-  })
-})
-
-describe('verify.sh', () => {
-  it('should delegate to the runner', () => {
-    setUp('web', STACK_SCRIPTS.web)
-
-    const result = run(['bash', WRAPPER])
-
-    expect(result.status).toBe(0)
-    expect(result.stdout).toContain('Skipped: check:shell is not declared here')
   })
 })

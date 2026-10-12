@@ -27,7 +27,11 @@ interface Phase {
   readonly title: string
   readonly failed: string
   readonly passed: string
+  readonly tools?: readonly Tool[]
 }
+
+const SHELL_TOOLS_HINT =
+  "Install it with 'sudo apt-get install shfmt shellcheck' or 'brew install shfmt shellcheck'"
 
 const PHASES: readonly Phase[] = [
   {
@@ -59,6 +63,10 @@ const PHASES: readonly Phase[] = [
     title: 'Shell',
     failed: 'Shell check failed',
     passed: 'Shell check passed',
+    tools: [
+      { name: 'shfmt', hint: SHELL_TOOLS_HINT },
+      { name: 'shellcheck', hint: SHELL_TOOLS_HINT },
+    ],
   },
   {
     script: 'test:run',
@@ -77,7 +85,11 @@ const PHASES: readonly Phase[] = [
 // A subfolder synced with --skip base declares none of these, since the
 // repository root owns them, so a list that does not require one runs it only
 // where the folder declares it.
-const BASE_PHASES = new Set(['format', 'check:format', 'check:shell'])
+const BASE_PHASES = new Set(['format', 'check:format'])
+
+// An add-on stack declares these, keyed to the stack that ships each, so a
+// folder that never synced the add-on skips the phase rather than failing it.
+const ADD_ON_PHASES = new Map([['check:shell', 'shell']])
 
 const PHASE_LIST = 'scripts/verify.json'
 const CARD_EXCLUSION = 'scripts/check-card-exclusion.sh'
@@ -226,8 +238,8 @@ function readDeclaredScripts(): Set<string> {
   )
 }
 
-function checkTools(list: PhaseList): void {
-  for (const tool of list.tools) {
+function checkTools(tools: readonly Tool[]): void {
+  for (const tool of tools) {
     if (onPath(tool.name)) continue
     fail(
       tool.hint === undefined
@@ -250,7 +262,8 @@ function runPhase(
   declared: Set<string>,
 ): void {
   const isBase = BASE_PHASES.has(phase.script)
-  if (!required && !isBase) return
+  const addOn = ADD_ON_PHASES.get(phase.script)
+  if (!required && !isBase && addOn === undefined) return
 
   logStep(phase.title)
   if (!declared.has(phase.script)) {
@@ -260,10 +273,13 @@ function runPhase(
       )
     }
     logSkip(
-      `Skipped: ${phase.script} is not declared here, so the repository root runs it`,
+      addOn === undefined
+        ? `Skipped: ${phase.script} is not declared here, so the repository root runs it`
+        : `Skipped: ${phase.script} is not declared here. Run 'canon tooling sync ${addOn} . --write' to add it`,
     )
     return
   }
+  checkTools(phase.tools ?? [])
   runCheck(`bun run ${phase.script}`, phase.failed)
   logInfo(phase.passed)
 }
@@ -332,7 +348,7 @@ function checkMarkdownBans(): void {
 function main(): void {
   const declared = readDeclaredScripts()
   const list = readPhaseList()
-  checkTools(list)
+  checkTools(list.tools)
   checkPreconditions(list)
 
   if (!isNested) print(`${GREY}┌${NC}`)

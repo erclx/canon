@@ -101,18 +101,13 @@ log_step "Assert scaffold"
 # skills rather than installing into a target. The two
 # rule paths stand for the `claude` and `canon` groups `base` takes whole.
 for path in "CLAUDE.md" ".claude/wiki/index.md" ".claude" "canon/context/index.md" \
-  ".prettierrc" ".editorconfig" ".lintstagedrc" ".husky/pre-commit" ".github/workflows/verify.yml" "scripts/verify.sh" \
+  ".prettierrc" ".lintstagedrc" ".husky/pre-commit" ".github/workflows/verify.yml" "scripts/verify.ts" \
   ".claude/rules/canon/claude/566-output.md" ".claude/rules/canon/canon/604-scratch.md"; do
   if [ ! -e "$TARGET_DIR/$path" ]; then
     log_error "Missing after canon init: $path"
   fi
   log_info "Found: $path"
 done
-
-if [ ! -x "$TARGET_DIR/scripts/verify.sh" ]; then
-  log_error "Not executable after canon init: scripts/verify.sh"
-fi
-log_info "Executable: scripts/verify.sh"
 
 log_step "Verification passed"
 log_info "Manual check still needed: bun link and global canon invocation"
