@@ -91,6 +91,14 @@ The local classifier's sweep prompt reads a reason naming why an alternative was
 
 Three web sections drew the tune, `README images`, `The capture job reports and never commits`, and `Composition`, each a rule with its evidence written in the past tense. On the groundwork's labelled set the tuned prompt catches 7 of 8 with 0 of 6 false flags, against 7 of 8 and 1 of 6 for the first prompt. The one miss is a wireframe the ported prompt no longer names.
 
+### A context entry's H2 set is closed
+
+A context entry carries `Overview`, `Layout`, `Decisions`, and `Gotchas` as H2 and nothing else, and `canon context audit --gate` fails any other H2. A topic of the domain's own is an H3 under one of them.
+
+The cause was open-ended naming. Measured over the commits since 2026-10-01, `Decisions` and `Gotchas` took 29% of the lines an entry grew by, and H2 sections an entry named for itself took 64%. The drift was the section set rather than the two named sections, so closing the set puts the growth in places a reader already scans.
+
+A `Sources` section for entries that are not about code was rejected. Such an entry omits `Layout`, which the standard already sanctions, and a project needing more overrides with its own rule, as compass does through `.claude/rules/project/context.md`. The set ships to targets advisory, since no target runs `--gate`.
+
 ## Gotchas
 
 ### A folder split is a ceiling rather than a fix

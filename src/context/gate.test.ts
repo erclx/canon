@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { SectionFinding } from '@/context/audit'
+import type { ExtraSectionFinding, SectionFinding } from '@/context/audit'
 import { type GateInput, hasDrift, isGating } from '@/context/gate'
 import type { FolderDrift } from '@/context/index-drift'
 
@@ -15,11 +15,18 @@ function makeSection(overrides: Partial<SectionFinding> = {}): SectionFinding {
   }
 }
 
+function makeExtra(
+  overrides: Partial<ExtraSectionFinding> = {},
+): ExtraSectionFinding {
+  return { rel: 'canon/context/ci.md', headings: ['Triggers'], ...overrides }
+}
+
 function makeInput(overrides: Partial<GateInput> = {}): GateInput {
   return {
     unresolvedCitations: 0,
     requirementsOverWords: false,
     sections: [],
+    extraSections: [],
     drift: [],
     widened: false,
     ...overrides,
@@ -75,6 +82,16 @@ describe('isGating', () => {
 
   it('should fail a missing required section under the widened gate', () => {
     const input = makeInput({ sections: [makeSection()], widened: true })
+
+    expect(isGating(input)).toBe(true)
+  })
+
+  it('should leave an off-set section advisory under the narrow gate', () => {
+    expect(isGating(makeInput({ extraSections: [makeExtra()] }))).toBe(false)
+  })
+
+  it('should fail an off-set section under the widened gate', () => {
+    const input = makeInput({ extraSections: [makeExtra()], widened: true })
 
     expect(isGating(input)).toBe(true)
   })

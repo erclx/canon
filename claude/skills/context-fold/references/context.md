@@ -13,10 +13,7 @@ Applies to per-domain narrative entries under `canon/context/`. Skip for `index.
 - [Organizing principle](#organizing-principle)
 - [What a working entry looks like](#what-a-working-entry-looks-like)
 - [Frontmatter](#frontmatter)
-- [Required sections](#required-sections)
-- [Expected sections](#expected-sections)
-- [Optional sections](#optional-sections)
-- [Ordering](#ordering)
+- [The closed set](#the-closed-set)
 - [The development entry](#the-development-entry)
 - [What goes in](#what-goes-in)
 - [What does not go in](#what-does-not-go-in)
@@ -59,40 +56,33 @@ An entry that fails these is non-conforming regardless of whether it satisfies e
 
 Both fields feed `canon/context/index.md` when regenerated.
 
-## Required sections
+## The closed set
 
-- `## Overview`: two to four lines. What the domain owns and where its boundary sits.
-- `## Layout`: one line per folder in owns-X form. Folders only, never files.
-  - Form: ``- `scripts/lib/` owns shared bash functions sourced by domain scripts``. Do not list every file under that folder with a description each.
-  - Implementation detail moves to `## Decisions`, `## Hidden contracts`, or `## Gotchas`.
-  - Omit the section when the domain owns no paths in the repo, as with a domain covering external tools. Inventing a line to satisfy the heading is the padding banned below.
+An entry carries four H2 sections and no other, in this order: `Overview`, `Layout`, `Decisions`, `Gotchas`. `canon context audit` reports any other H2 and `--gate` fails it. A topic of the domain's own, such as `Cache` or `Workflow`, is an H3 under one of the four, which is where a reader scanning the entry looks for it.
 
-## Expected sections
+- `## Overview`: two to four lines. What the domain owns and where its boundary sits. Required.
+- `## Layout`: one line per folder in owns-X form, folders only and never files. Required, and omitted where the domain owns no paths in the repo, as with a domain covering external tools. Inventing a line to satisfy the heading is the padding banned below.
+- `## Decisions`: non-obvious choices and the reasoning behind them, each as an H3 or a bullet. The highest-value section in the folder and the one most often missing. A decision resting on how an outside tool, an installer, or the model behaves may close with one `Revisit when <finding>.` sentence naming the harm the decision prevents, and a decision resting on the project's own code takes none.
+- `## Gotchas`: workarounds, things tried and rejected, and invariants the code does not self-document, such as shape constraints, skip rules, and header semantics. Use `## Decisions` when the reader needs the reasoning rather than the invariant itself.
 
-Include whenever the domain has content for them. Never pad an entry with an empty heading.
+Include `Decisions` and `Gotchas` whenever the domain has content for them, and never pad an entry with an empty heading.
 
-- `## Decisions`: non-obvious choices and the reasoning behind them. The highest-value section in the folder and the one most often missing. A decision resting on how an outside tool, an installer, or the model behaves may close with one `Revisit when <finding>.` sentence naming the harm the decision prevents, and a decision resting on the project's own code takes none.
-- `## Gotchas`: workarounds, things tried and rejected, scar tissue worth preserving.
+### Where an extra topic goes
 
-## Optional sections
+- A command surface goes under `## Layout` as an H3, only when the domain has one, and only as a list of what each verb does. Flags and JSON shapes stay in the CLI reference under `docs/`, linked rather than restated.
+- The procedure for the domain's most common task goes under `## Layout` as an H3 such as `### Adding a <thing>`, since most sessions arrive asking how to add one more of the thing the domain holds.
+- Implementation detail that the one-line owns-X form cannot carry moves to `## Decisions` or `## Gotchas`.
 
-Pick by what the domain is. Add domain-specific headings as needed.
+### Ordering and headings
 
-- `## CLI`: the command surface, only when the domain has one, and only as a list of what each verb does. Flags and JSON shapes stay in the CLI reference under `docs/`, linked rather than restated.
-- `## Workflow` or `## Adding a <thing>`: the procedure for the domain's most common task. Most sessions arrive asking how to add one more of the thing the domain holds.
-- `## Hidden contracts`: invariants the code does not self-document (shape constraints, skip rules, header semantics). Use `## Decisions` when the reader needs the reasoning rather than the invariant itself.
-
-## Ordering
-
-- Order sections `Overview`, `Layout`, `Decisions`, `Gotchas`, then everything else.
-- Name a heading for its subject as it stands (`## Cache`), never for the event that shaped it (`## The cache was the untested part, and the test moved it`). A heading is what a scan reads, so a narrating heading turns the table of contents into a changelog.
+- Name a heading for its subject as it stands (`### Cache`), never for the event that shaped it (`### The cache was the untested part, and the test moved it`). A heading is what a scan reads, so a narrating heading turns the table of contents into a changelog.
 - Entries get read top-down and often partially, so irreducible content sits above recoverable content.
 
 ## The development entry
 
-Only the `development` entry carries this section. It is not a general-purpose heading for other domains.
+Only the `development` entry carries this section, as an H3 under `## Layout`. It is not a general-purpose heading for other domains.
 
-- `## Scripts`: a table of run commands (command plus purpose). The single discoverable surface for how to run the project. Keep run commands here, not scattered across `CLAUDE.md`.
+- `### Scripts`: a table of run commands (command plus purpose). The single discoverable surface for how to run the project. Keep run commands here, not scattered across `CLAUDE.md`.
 
 ## What goes in
 
@@ -122,7 +112,7 @@ Only the `development` entry carries this section. It is not a general-purpose h
 
 - Aim for one entry per domain. Length is a symptom, not the defect, and the one hard cap is the whole-document ceiling `markdown.md` states.
 - Past roughly 150 rendered lines, check three things before adding more: whether the entry still covers a single domain, whether it has filled with content `ls` or `--help` reproduces, and whether it has accumulated the history of its own changes. Fix whichever is true rather than trimming to hit a number. The 150 is a diagnostic checkpoint and never gates. Rendered lines count as `markdown.md` defines them.
-- Never cut a `## Decisions` or `## Gotchas` entry to shorten a file. Cut a `## Layout` or `## CLI` section instead.
+- Never cut a `## Decisions` or `## Gotchas` entry to shorten a file. Cut a `## Layout` section or an H3 under it instead.
 - Retire a decision or gotcha once its subject is gone, rewriting the bullet to state the current design rather than leaving the narration of what it replaced beside it. A rejected alternative is not a retired one, so what was tried and why it lost stays whatever its age. The rule above protects content whose subject is live, and this one releases content whose subject is not.
 - Rewrite a decision a later one replaced rather than appending the replacement beside it. The subject is still live, so the rule above does not reach it, and two bullets on one subject leave a reader to work out which of them is current. State the design that stands and keep the superseded reasoning only where it is the alternative that lost.
 - Split into a folder (`canon/context/<domain>/<sub-area>.md`) when a domain has three or more sub-areas that do not fit cleanly in one file. That split is the natural ceiling.
@@ -157,16 +147,25 @@ never the reverse.
 
 ## Decisions
 
-- Validation happens at the route boundary using a schema library. Services trust their inputs.
-- Pagination uses opaque cursor tokens, never offset+limit. Cursor format stays opaque to clients.
+### Validation at the route boundary
+
+Validation happens at the route boundary using a schema library. Services trust their inputs.
+
+### Opaque pagination cursors
+
+Pagination uses opaque cursor tokens, never offset+limit. Cursor format stays opaque to clients, which is why any handler that issues a cursor uses the shared encoder.
 
 ## Gotchas
 
-- The `/health` endpoint skips auth middleware. Liveness probes from the orchestrator do not carry tokens.
-- Database connection pool caps at 50. Concurrent requests over that block until a connection frees.
+### The health endpoint skips auth
 
-## Hidden contracts
+The `/health` endpoint skips auth middleware. Liveness probes from the orchestrator do not carry tokens.
 
-- Route handlers return a plain object. The serializer wraps it in `{ data, meta }`. Handlers never wrap manually.
-- Cursor tokens are base64-encoded JSON of `{ id, sort }`. Any handler that issues a cursor must use the shared encoder.
+### The connection pool caps at 50
+
+Concurrent requests over that block until a connection frees.
+
+### Handlers never wrap their return
+
+Route handlers return a plain object, and the serializer wraps it in `{ data, meta }`.
 ```

@@ -17,6 +17,12 @@ It reports rather than gates by default, the closer call because a missing secti
 
 `--gate` promotes the finding to a failing exit code, which the seed stage runs and no other caller does. That mode needs an answer to the sanctioned omission above, so a file declaring `stub: true` in its frontmatter is dropped before the check and reported nowhere. Both are described in `context-audit.md`.
 
+### The closed set
+
+The same section also reports an H2 outside the folder's closed set. A context entry allows `Overview`, `Layout`, `Decisions`, and `Gotchas` and no other H2, so a topic of the domain's own sits one level down as an H3. The finding is per entry rather than per folder, since an extra heading is a fact about the file carrying it. Fenced blocks are skipped, a stub seed is skipped, and only H2 is read, so where an H3 sits is not audited. It gates under `--gate` alone, like a missing section.
+
+The record carries it as a top-level `extraSections` array of `{ rel, headings }`, and the set itself as `checkpoints.allowedSectionsByFolder`, keyed on the folder name the way `requiredSectionsByFolder` is. Both are additive.
+
 ## Reference form
 
 The reference-form check reports an entry naming a sibling entry by bare filename where `claude/skills/context-fold/references/context.md` asks for the path it sits at. A bare name resolves against whichever folder its reader is already in, so a domain that splits into subfolders strands every inbound reference and the break surfaces nowhere. A path is checkable, which is what makes the form rule worth measuring at all: once a reference spells its path, the citation gate resolves it and a split that moves the file fails the push.

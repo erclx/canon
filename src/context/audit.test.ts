@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   CATALOG_ROW_CHECKPOINT,
+  extraSections,
   LENGTH_CHECKPOINT,
   lengthFindings,
   measureEntry,
@@ -682,5 +683,49 @@ describe('missingSections', () => {
     })
 
     expect(await missingIn('.claude/diagrams/components.md')).toEqual([])
+  })
+})
+
+describe('extraSections', () => {
+  const ALLOWED = ['Overview', 'Layout', 'Decisions', 'Gotchas']
+
+  function extrasIn(source: string, stub = false) {
+    const body = stub
+      ? `---\nstub: true\n---\n\n${source}`
+      : `${FRONTMATTER}${source}`
+    return extraSections([
+      measureEntry('canon/context/ci.md', body, true, [], [], ALLOWED),
+    ])
+  }
+
+  it('should report an H2 outside the closed set', () => {
+    const found = extrasIn('# CI\n\n## Overview\n\nx\n\n## Triggers\n\ny\n')
+
+    expect(found).toEqual([
+      { rel: 'canon/context/ci.md', headings: ['Triggers'] },
+    ])
+  })
+
+  it('should leave the four names and any H3 unreported', () => {
+    const source =
+      '# CI\n\n## Overview\n\n## Layout\n\n## Decisions\n\n### Triggers\n\n## Gotchas\n'
+
+    expect(extrasIn(source)).toEqual([])
+  })
+
+  it('should skip a heading inside a fence', () => {
+    const source = '# CI\n\n## Overview\n\n```markdown\n## Triggers\n```\n'
+
+    expect(extrasIn(source)).toEqual([])
+  })
+
+  it('should skip a stub seed', () => {
+    expect(extrasIn('# CI\n\n## Triggers\n', true)).toEqual([])
+  })
+
+  it('should report nothing for a folder stating no set', () => {
+    const entry = measureEntry('x.md', `${FRONTMATTER}# X\n\n## Anything\n`)
+
+    expect(extraSections([entry])).toEqual([])
   })
 })

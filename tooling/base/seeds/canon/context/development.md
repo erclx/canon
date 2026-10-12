@@ -14,23 +14,23 @@ Owns how the project runs on a developer machine: installing the toolchain, the 
 - `scripts/` owns the shell scripts the package scripts below call
 - `.husky/` owns the git hooks
 
-## Setup
+### Setup
 
 - Install [Bun](https://bun.sh): `curl -fsSL https://bun.sh/install | bash`
 - Install dependencies: `bun install`
 
-## Scripts
+### Scripts
 
 | Command          | Purpose                                                                        |
 | ---------------- | ------------------------------------------------------------------------------ |
 | `bun run check`  | Repairs locally. Auto-formats, then asserts what the formatters could not fix. |
 | `bun run format` | Auto-fix prettier formatting.                                                  |
 
-## Shell scripts
+### Shell scripts
 
 All `.sh` files live under `scripts/`. Do not place shell scripts outside `scripts/`.
 
-## Husky hooks
+### Husky hooks
 
 - `pre-commit` runs `lint-staged` (prettier on staged files).
 - `commit-msg` runs `commitlint` against the conventional commit format.
