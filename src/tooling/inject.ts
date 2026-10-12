@@ -16,7 +16,6 @@ import {
 import {
   applyScripts,
   collectDeps,
-  collectScripts,
   readPackage,
   serializePackage,
 } from '@/tooling/package'
@@ -198,7 +197,8 @@ export async function injectManifest(
 
 function warnSkippedInstalls(chain: readonly Manifest[], target: string): void {
   const deps = collectDeps(chain, {}).map((dep) => dep.spec)
-  const scripts = collectScripts(chain, {}).map((script) => script.key)
+  const skipped = applyScripts({}, chain)
+  const scripts = [...new Set([...skipped.added, ...skipped.overridden])]
   if (deps.length === 0 && scripts.length === 0) return
 
   logStep('Skipped installs')
