@@ -110,4 +110,6 @@ Create the session with the wrapper under `## The create`, setting `dir` to that
 
 The pull request is the record to act on, and the transcript is read back only to check for a refused call. Run `claude --teleport <session>` under `script` from a throwaway clone of the target outside this repository, answer its trust prompt with the same piped keys, and set the terminal to 500 rows first, since only the screen tail is captured otherwise. Search the capture for `HTTP 403` and `graphql`. A hit names a call still on GraphQL, so report it as a finding rather than reading the posted review as clean.
 
-A cloud reviewer cannot be messaged after it posts. A re-review after a worker's address pass is a fresh dispatch, local or cloud by the same pick, rather than the message `orchestrator-handback.md` sends a live reviewer.
+A cloud reviewer cannot be messaged after it posts, and it cannot message the worker either. The poll's fallback rule sends the `review-address` dispatch for its pass from this session, and a re-review after the worker's address pass is a fresh dispatch, local or cloud by the same pick, rather than the message a worker sends a live local reviewer.
+
+A cloud reviewer cannot lift the draft mark, since `canon pr lift` makes its one write through the GraphQL mutation the proxy refuses. Leave the lift out of its prompt. The poll's fallback runs the verb from this session once the review reads closed, the same way it covers a local reviewer whose run did not lift.

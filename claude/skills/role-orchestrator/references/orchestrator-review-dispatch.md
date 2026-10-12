@@ -1,41 +1,38 @@
 ---
 title: Orchestrator review dispatch runbook
-description: When a pull request's review leaves this session for a reviewer dispatched under role-reviewer, when a UI reviewer goes beside it, what stays in place below both code triggers, and how the cross-branch pass per wave reaches each brief
+description: Which pull requests take a reviewer dispatched under role-reviewer, the model it runs on, when a UI reviewer goes beside it, and how the cross-branch pass per wave reaches each brief
 ---
 
 Run this on every first pass, from `### The review dispatch` in the skill body. Review splits by what each side can see rather than by pass number. A dispatched reviewer holds one pull request and reads it deeper than this session can while holding a wave, and this session holds the wave and reads what no single pull request shows.
 
-## The two code triggers
+## Every pull request takes a reviewer
 
-Either one dispatches the pull request's review to a reviewer under `role-reviewer`, first pass included.
+Dispatch every pull request's review to a reviewer under `role-reviewer`, first pass included, whatever its size or its paths. A release pull request is the one exception, since its sweep carries no findings and owes no pass.
 
-- Load. Three or more open pull requests awaiting a first pass, or one diff too large for this session to hold. Three is the operator's number, set by hand and marked as such so a measurement replaces it rather than argues with it. What counts toward it is a pull request awaiting a first pass rather than every open one, since a branch already closed out and waiting on a merge costs this session nothing. `orchestrator-poll.md` states where the count is legible.
-- Content. The change touches `src/`, `scripts/`, a workflow, a hook, a skill or rule body, or a security surface, meaning anything that writes files, runs commands, pushes records, or handles transcripts. A skill or rule body counts as executable whatever its extension, since a model runs it. A pull request carrying an `## Evidence` comment with screenshots counts as well, since a reviewer holding one pull request opens every capture and a long-lived context rarely pays for that.
+This session reviews nothing in place. A warm pass reads the whole diff into the one context the wave shares, so every pull request reviewed here thins the attention each later one gets, and a cold session pays for its own context instead.
 
-## The UI trigger
+Nothing checks that a first pass was dispatched rather than run here. This is prose this session applies to itself, on the same standing as the poll's own start condition, so a pull request reviewed in place is a rule that went unread rather than a check that failed.
 
-A third trigger sends a second reviewer rather than moving the first. A pull request whose evidence record carries a checklist takes a UI reviewer under `review-ui`, dispatched beside the code review whichever way the two triggers above decide it, so the two passes run at once. Read the record with `canon pr evidence <number> --json` and branch on its `checklist` field rather than on the exit code. A record carrying none dispatches no UI reviewer, since the pass would stop on arrival.
+Pick the reviewer's model by `## Pick the model` in `orchestrator-dispatch.md`, which states the test for every role this session launches. Stating the pick here as well would leave two sources for one call.
 
-The UI reviewer reads no diff and never hears the code reviewer's verdict, so neither brief carries the other's result. Each posts its own family, and the draft mark waits on both, per the draft-lift boundary in the skill body.
+## The UI reviewer
 
-Nothing counts any of the three triggers. This is prose this session applies to itself, on the same standing as the poll's own start condition, so a wave reviewed in place past both is a rule that went unread rather than a check that failed.
+A pull request whose evidence record carries a checklist takes a second reviewer, a UI reviewer under `review-ui`, dispatched beside the code reviewer so the two passes run at once. Read the record with `canon pr evidence <number> --json` and branch on its `checklist` field rather than on the exit code. A record carrying none dispatches no UI reviewer, since the pass would stop on arrival.
 
-## What stays in place
-
-Below both triggers this session runs `review-pr` itself: a change to `docs/` or a context entry, a wording sweep, a release or capture pull request, and anything this session can review in one read. A cold reviewer pays a full session context per pull request, which on a small prose change costs more than the warm pass it replaces.
+The UI reviewer reads no diff and never hears the code reviewer's verdict, so neither brief carries the other's result. Each posts its own family and runs `canon pr lift` on posting its close, and the verb lifts the draft mark only once both read closed at the head, per the draft-lift boundary in the skill body.
 
 ## The cross-branch pass
 
-This session keeps one pass per wave, whichever way each review went. It reads the file sets of every open pull request against each other, the board, and the merge order, and never the diffs themselves. What it looks for is what no single pull request shows: two branches regenerating one asset, several writing one context entry, a figure true only after another branch lands.
+This session keeps one pass per wave beside the dispatched reviews. It reads the file sets of every open pull request against each other, the board, and the merge order, and never the diffs themselves. What it looks for is what no single pull request shows: two branches regenerating one asset, several writing one context entry, a figure true only after another branch lands.
 
 Hand what it finds to each reviewer as facts in the brief, per `### What the brief may carry` in `orchestrator-launch.md`, rather than posting a comment of its own, so each pull request keeps one live verdict. A fact surfacing after a reviewer posted goes to that reviewer as a re-review request.
 
 ## Launching the reviewer
 
-Take the reviewer shape in `orchestrator-reviewer-launch.md`, or its UI reviewer shape for the UI trigger. Check `canon sessions list --json` for a live `reviewer-<project>-<number>`, or `reviewer-ui-<project>-<number>`, first and message it instead of launching a second, since two reviewers on one pull request post two verdicts. The re-review after a worker's address pass goes back the same way, per `orchestrator-handback.md`.
+Take the reviewer shape in `orchestrator-reviewer-launch.md`, or its UI reviewer shape for a pull request carrying a checklist. Check `canon sessions list --json` for a live `reviewer-<project>-<number>`, or `reviewer-ui-<project>-<number>`, first and message it instead of launching a second, since two reviewers on one pull request post two verdicts. The re-review after a worker's address pass reaches that reviewer from the worker directly, and this session sends it only as the fallback `orchestrator-handback.md` states.
 
 ## Local or cloud
 
-A code review goes to a cloud reviewer rather than `claude --bg` only on the operator's explicit pick for that dispatch, the same standing the build shape's pick holds in `orchestrator-dispatch.md`. The cloud session costs no local context and no machine slot, which matters when the load trigger fired. It also reads nothing this machine holds, so a review that needs the board, a local preview, or a sandbox stays local.
+A code review goes to a cloud reviewer rather than `claude --bg` only on the operator's explicit pick for that dispatch, the same standing the build shape's pick holds in `orchestrator-dispatch.md`. The cloud session costs no local context and no machine slot, which matters on a wide wave. It also reads nothing this machine holds, so a review that needs the board, a local preview, or a sandbox stays local.
 
 This session hears a cloud reviewer through `poll.ts` alone, which already lists every open pull request from this machine, so the posted review is the announcement and no message arrives. `orchestrator-cloud-launch.md` carries the shape under `## Dispatch a review to a cloud reviewer`. A UI review always stays local.
