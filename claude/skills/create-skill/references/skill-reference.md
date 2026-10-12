@@ -7,6 +7,19 @@ description: Shape and content rules for a reference that sets the shape of one 
 
 Applies to each file under a skill's `references/` that sets the shape of one document type, or of one attribute carried across every document. A session reads it at the point the skill body names it, and skills and developers consume it alike. This file governs itself, so every rule below applies to it.
 
+## Contents
+
+- [Scope](#scope)
+- [What a working reference looks like](#what-a-working-reference-looks-like)
+- [Scoping rules](#scoping-rules)
+- [Frontmatter](#frontmatter)
+- [Structure](#structure)
+- [Rules](#rules)
+- [Success criterion](#success-criterion)
+- [Changing a reference](#changing-a-reference)
+- [Examples](#examples)
+- [Template](#template)
+
 ## Scope
 
 Governs a shape reference at `skills/<name>/references/<file>.md`: its stated jurisdiction, success criterion, frontmatter, structure, and rule phrasing.

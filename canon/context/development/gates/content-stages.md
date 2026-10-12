@@ -25,7 +25,7 @@ Writing the stamp inside the render rather than in a wrapper is what makes it wo
 
 ### What moves a frame
 
-The counts rendered into the frame come from the standards and skills trees and from the CLI registration block, so a merge adding a standard, a skill, or a command group moves `assets/captures/hero.html` and the refresh pull request carries the change. `canon design css --no-components` fills a `{{TOKENS}}` placeholder in every template, so a merge moving a value in `src/design/tokens.ts` moves `hero.html` and `install.html` and both light sets together. The command count is the source a plan is least likely to predict, since the commands expose no `--json` catalog and the figure comes from `countCommands` in `src/counts/catalogs.ts`, which parses the registration list in `src/cli.ts` directly.
+The counts rendered into the frame come from the skills tree and from the CLI registration block, so a merge adding a skill or a command group moves `assets/captures/hero.html` and the refresh pull request carries the change. `canon design css --no-components` fills a `{{TOKENS}}` placeholder in every template, so a merge moving a value in `src/design/tokens.ts` moves `hero.html` and `install.html` and both light sets together. The command count is the source a plan is least likely to predict, since the commands expose no `--json` catalog and the figure comes from `countCommands` in `src/counts/catalogs.ts`, which parses the registration list in `src/cli.ts` directly.
 
 ### Gotchas
 

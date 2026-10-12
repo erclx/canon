@@ -1,6 +1,6 @@
 ---
 title: Catalog stages
-description: The gate stages reading a catalog or a count, covering sandbox coverage, plugin manifest validation, skill paths, the requirements record, the document ceiling, skill provenance, skill practice shape, skill family, and standard success criteria
+description: The gate stages reading a catalog or a count, covering sandbox coverage, plugin manifest validation, skill paths, the requirements record, the document ceiling, skill provenance, skill practice shape, and skill family
 ---
 
 # Catalog stages
@@ -61,7 +61,7 @@ The Folder-echoed filenames stage reads every path `git ls-files` lists and fail
 
 It is a gate stage rather than a `canon markdown audit` finding for two reasons. It reads paths rather than markdown, so it covers code and config files the audit never opens. The audit also runs inside every target through the tooling base stack, where a folder-named file may be a convention the target chose, and a finding there would fail a push on that choice. The rule itself sits in the `codebase-layout` skill and reaches targets as guidance, and this stage is this repository's only enforcement.
 
-Matching is exact rather than singular-aware, so `standards/standard.md` passes. A false positive on a gate stage teaches a contributor to route around it, and widening the match is cheap once a real plural echo slips through. The stage carries no exemption list, and one waits for the first hit someone argues for.
+Matching is exact rather than singular-aware, so `skills/skill.md` passes. A false positive on a gate stage teaches a contributor to route around it, and widening the match is cheap once a real plural echo slips through. The stage carries no exemption list, and one waits for the first hit someone argues for.
 
 ## Skill provenance
 
