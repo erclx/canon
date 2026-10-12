@@ -1302,9 +1302,7 @@ describe('review-post-scan.sh verdicts', () => {
       async ({ expect }) => {
         const result = await run(
           hook,
-          postPayload(
-            `cat <<<word; gh api -X POST ${REVIEWS} ${body()}`,
-          ),
+          postPayload(`cat <<<word; gh api -X POST ${REVIEWS} ${body()}`),
           join(fixture, 'bin-scan-fail') + delimiter + hookPath,
         )
 
