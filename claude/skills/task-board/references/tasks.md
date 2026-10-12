@@ -82,7 +82,7 @@ Two headings, `## Outcomes` and `## Findings`. Outcomes are future and checkable
 
 Add no third heading. Status stays inline on an outcome rather than becoming an "In progress" section.
 
-Open each finding with a bold label naming its source and date, as in `- **v144.0 planner, 2026-10-11:** <finding>`, and keep it to a few sentences. Anything longer moves into the plan or the groundwork folder. Outcomes stay a checklist, since the board tools read them by their `- [ ]` line.
+Open each finding with a bold label naming its source and date, as in `- **planner, 2026-10-11:** <finding>`, and keep it to a few sentences. Anything longer moves into the plan or the groundwork folder. Outcomes stay a checklist, since the board tools read them by their `- [ ]` line.
 
 Size the outcomes so one pull request closes all of them, and split the task before handing it off rather than after. A task closes whole or not at all, so outcomes spanning two pull requests leave the board showing in-progress work no branch carries.
 
