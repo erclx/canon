@@ -1,5 +1,25 @@
 # Changelog
 
+## [5.34.0](https://github.com/erclx/canon/compare/v5.33.0...v5.34.0) (2026-10-11)
+
+
+### Features
+
+* **canvas-board:** add a house style for explanation frames ([#2334](https://github.com/erclx/canon/issues/2334)) ([3132fd2](https://github.com/erclx/canon/commit/3132fd2e3ec6fcc1042eba9545127c26f62b6d17))
+* **canvas:** add fit and arrange verbs and serve embedded faces ([#2339](https://github.com/erclx/canon/issues/2339)) ([b9d765c](https://github.com/erclx/canon/commit/b9d765c4000ef6dd5e0cc6c5322ff0f13d7778dc))
+* **feedback:** add suggested shape, why, and links to the report ([#2327](https://github.com/erclx/canon/issues/2327)) ([1497e11](https://github.com/erclx/canon/commit/1497e1151a10bd109e353303f0af9ddd47d5f9de))
+* **governance:** ban semicolons in the UI rule and landing copy ([#2328](https://github.com/erclx/canon/issues/2328)) ([7612f57](https://github.com/erclx/canon/commit/7612f570de1e0e95e847295557662c26468bb80a))
+* **governance:** propose opt-in rules through gov detect ([#2338](https://github.com/erclx/canon/issues/2338)) ([9585229](https://github.com/erclx/canon/commit/958522979385ed7f505fca104fd4982fb233fbd3))
+* **pr:** add a verb that lifts the draft mark on its own gate ([#2337](https://github.com/erclx/canon/issues/2337)) ([19cc429](https://github.com/erclx/canon/commit/19cc4292f4cbfac1b2b824881d50804674b4b41a))
+* **pr:** group evidence screenshots by view ([#2333](https://github.com/erclx/canon/issues/2333)) ([69881d9](https://github.com/erclx/canon/commit/69881d946d11d38ecf5088cc2ebf4f673b4d5bb7))
+* **review-ui:** section the verdict by what the operator owes ([#2332](https://github.com/erclx/canon/issues/2332)) ([4f502aa](https://github.com/erclx/canon/commit/4f502aad1e8c0705b74e2d91274740daccd5d62a))
+* **web:** drop the standards catalog from the landing page ([#2336](https://github.com/erclx/canon/issues/2336)) ([71d03f7](https://github.com/erclx/canon/commit/71d03f7fcc61a1be4aa96aa66261cb468f535069))
+
+
+### Bug Fixes
+
+* **hooks:** pass a command that only names the memory folder ([#2329](https://github.com/erclx/canon/issues/2329)) ([cd9c465](https://github.com/erclx/canon/commit/cd9c465aa139fadcb3899a9a79e43bf67c46e493))
+
 ## [5.33.0](https://github.com/erclx/canon/compare/v5.32.0...v5.33.0) (2026-10-11)
 
 
