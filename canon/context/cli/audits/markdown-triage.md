@@ -5,7 +5,9 @@ description: The three shapes a triage records rather than rewrites, what each r
 
 # Markdown triage
 
-## What a triage exempts and why
+## Decisions
+
+### What a triage exempts and why
 
 Three shapes reach a checkpoint where no rewrite improves the prose, so a triage records them rather than editing.
 
@@ -35,7 +37,7 @@ A re-read does not substitute for it. The worker self-reviewed and the review pa
 
 The three checkpoints are not independent under their own remedies either. Splitting a heavy paragraph adds a blank line inside whatever run it sits in, and the depth measure counts blank lines, so clearing a paragraph finding lengthens the run reported for that section. A file can therefore come off two checkpoints and report worse on the third, which is worth stating wherever a depth reading is deferred to a later pass, since the number that pass starts from is not the one the deferring pass recorded.
 
-## The floor a triage leaves
+### The floor a triage leaves
 
 The generated mirror reaches zero the same way the tree does. A finding under `.claude/rules/` is fixed at its authoring root and cleared by `bun run check`, so the two never need counting apart once a slice has run, and one number over the whole corpus is what a later run reproduces.
 

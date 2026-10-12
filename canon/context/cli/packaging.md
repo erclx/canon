@@ -7,7 +7,9 @@ description: What the published package carries and excludes, how a browser comm
 
 The CLI ships to the registry as `@erclx/canon` with nothing built, so what the package carries is decided entirely by the `files` list. Two trees are excluded plus every test file, and the four browser commands are what set the pattern any command backed by a heavy import follows.
 
-## Keeping an engine off the startup path
+## Decisions
+
+### Keeping an engine off the startup path
 
 A command backed by a browser reaches its engine through a dynamic import inside the action. `src/cli.ts` imports every command's `register` at module scope, so a browser reference at a command's top level would put a browser resolution in front of every other command rather than in front of the one that needs it. `src/commands/capture.ts` therefore holds wiring only and `src/capture/render.ts` holds every browser reference, which `src/commands/demo.ts`, `src/commands/inventory.ts`, and `src/commands/driver.ts` each repeat against a module of their own. The two engine-absence predicates the four share sit in `src/browser/engine.ts` rather than being spelled once per command.
 
@@ -19,7 +21,7 @@ An argument check runs in the order that puts the message on what was actually w
 
 `canon sandbox` is the one surface left where availability is the question, and it detects a missing directory rather than a missing module, so the guard is an existence check on where `SANDBOX_DIR` resolves rather than a caught import. One check there serves the interactive picker and `coverage` both, and it makes `coverage` exit 1 without printing a percentage. A denominator nobody looked at is not a zero, and reporting one reads as a suite that examined everything and found it clean.
 
-## The capture sources
+### The capture sources
 
 A capture proves its declared font resolved and asserts nothing about its output size. The height of `assets/frames/install.png` is whatever the terminal block wrapped to at a fixed width, so pinning that number would harden an accident, while the font is the input that actually decides the wrap. The check compares text metrics against a family that cannot exist, because `document.fonts.check` reports every system family as present, invented ones included.
 
@@ -29,7 +31,7 @@ The gate never byte-checks the PNG, because it is a chromium render whose bytes 
 
 Nothing on the frame comes from `package.json`, since a pull request builds against the merge commit and an embedded version would drift every open branch on the next release. The generator samples entry names at even spacing across each sorted catalog rather than taking the first ten, since the skill names are domain-prefixed and an alphabetical head returns eight `claude-*` entries and reads as a narrower catalog than the one that ships.
 
-## The published package
+### The published package
 
 `bun install --global @erclx/canon` is the install path a plugin user follows. Nothing builds. `bin` points at `src/cli.ts`, whose `#!/usr/bin/env bun` shebang runs the source directly, which is why `src/` ships as TypeScript with `tsconfig.json` beside it so the `@/*` alias resolves.
 
@@ -39,7 +41,7 @@ Nothing on the frame comes from `package.json`, since a pull request builds agai
 
 `src/capture` ships rather than being excluded, and renders its own sources rather than this repository's: a target has no use for the `assets/` paths that live only here. `scripts/core/install-check.sh` verifies an exclusion by packing the tarball and installing from it, because every other check in the repository runs where the excluded files are present and passes either way.
 
-### What `.claude/` costs by being absent
+#### What `.claude/` costs by being absent
 
 `.claude/` never ships, which has three consequences worth knowing before touching any of these surfaces. The second root `canon docs <topic>` resolves against is absent in an installed package, so `listDocs` in `src/docs/list.ts` reports no context section when no context root exists rather than listing an empty one.
 

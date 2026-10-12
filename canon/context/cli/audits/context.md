@@ -5,7 +5,9 @@ description: What the context audit gates and reports, how its folder scope reso
 
 # Context audit
 
-## What gates and what reports
+## Decisions
+
+### What gates and what reports
 
 One check out of `canon context audit` gates `bun run check` and the rest report. Citation resolution has no false positives and a silent failure mode without it, so it earns a stage. Every other measure is a judgment a reader settles, and a push failing on one of those teaches contributors to route around the stage. Apply the split to any later check: gate on a fact, report a judgment.
 
@@ -21,7 +23,7 @@ The rule has a writer as well as a check. `context-fold` instructs the path form
 
 The gate invokes the CLI as this checkout's own `src/cli.ts`, never as `canon`. A globally installed `canon` resolves to the main checkout no matter which worktree is running, so the gate would measure the wrong tree and pass a branch whose own citations are broken. `cliRunner` in `src/gate/sequencer.ts` is what holds that, so the rule is one function rather than a habit each stage has to keep.
 
-## Folder scope and resolution
+### Folder scope and resolution
 
 The audit's folder scope is a named list rather than the index-plus-entry contract read off disk. `.claude/internal/standards/` satisfied the contract too while its mirror generated it, and auditing it would have measured a generated copy against a rule written for per-domain narrative. `--folder` admits another folder without an edit, which is the escape hatch the contract reading would have given for free.
 
@@ -45,7 +47,7 @@ A named folder's own `index.md` gates every split beneath it. `resolveFolders` l
 
 A run where no requested name resolves refuses, whichever list it read. Naming the absent ones is what narrows to a name passed by hand, since a project carrying one of the three default folders is ordinary and warning on the other two every run would train a reader past the scope line.
 
-## Which unit answers a measure
+### Which unit answers a measure
 
 Required sections are the first measure that cannot decide from one entry, so the judgment sits in `missingSections` beside `measureFolders` rather than widening `measureEntry`. Which unit answers is what `nested` on `AuditedFolder` decides.
 

@@ -5,7 +5,9 @@ description: The skill routing rank over the case corpus, its tokenizer and unme
 
 # Routing measures
 
-## The skill routing rank
+## Decisions
+
+### The skill routing rank
 
 `canon claude skills rank` scores the shipped catalog's frontmatter descriptions against a hand-authored case corpus at `src/claude/cases/`, one prompt per case naming the skill it should reach. TF-IDF cosine similarity over the tokenized description is the mechanism. It joins the aggregate with an empty `gatingExits`, since the corpus is a first run with no baseline to fail a push against and the score bounds a necessary condition rather than reporting real routing behavior.
 
@@ -19,7 +21,7 @@ The verb reads a target as well. `resolveSkillsCorpus` in `src/claude/skills-lis
 
 The resolver sits beside `listSkills` rather than inside it. `src/counts/catalogs.ts` counts the shipped catalog through that function, so widening the function itself would take the reported total from 62 to 70, falsify every sentence in the corpus stating what ships, and move `assets/captures/hero.html` with it. A measure that reaches a target resolves its own corpus and the counter keeps reading the tree that installs.
 
-## The routing report
+### The routing report
 
 `canon claude routing` reports per `CLAUDE.md` section how many top-level bullets name a path and how many of those a path-scoped rule already covers. It answers what the always-loaded file is paying for, which the tier test in `canon/context/context-model/overview.md` decides case by case.
 

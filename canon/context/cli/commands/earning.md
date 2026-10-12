@@ -5,7 +5,9 @@ description: Where a shared helper lifts to, the tests a new verb passes from a 
 
 # What earns a verb
 
-## Shared helpers
+## Decisions
+
+### Shared helpers
 
 - A helper lifts out of its first domain once a second domain needs it, into the folder of the domain that fits the contract, or to the `src/` root when none does. `stripFrontmatter` moved out of `src/gov/payload.ts` into `src/markdown/frontmatter.ts` when `docs` arrived, rather than having `docs` import from `gov` and carry a dependency it has no reason to. `copyPreservingMode`, `resolveTarget`, and `cliRun` were lifted to the root the same way.
 - `listIgnored` lifted from `src/indexes/walk.ts` to `src/git/ignore.ts` when the comment scan became its second caller, following the same rule.
@@ -13,25 +15,31 @@ description: Where a shared helper lifts to, the tests a new verb passes from a 
 - Behavior shared across domains lands in `src/sync/` rather than in the first domain that needs it. Gov is the first consumer of the sync engine, and burying it under `src/gov/` would force a move as soon as a second consumer arrives.
 - Feature entries stay separate from this domain. They document a user-facing artifact such as a deck folder's `deck.json` or the design token schema, which is worth reading without the CLI plumbing.
 
-## What earns a command
+### What earns a command
 
 - A domain earns a command when the operation is mechanical, not when the domain is important. Tasks gained `archive`, then `pull-request` and `outcome`, all three of which take a decision a skill already made and apply it to a file.
 - Creating a task proposes a phase label from the board and writes prose from a conversation, which is judgment, so it stays in `task-board` and no `create` verb exists to tempt a caller
 - A structured edit to shared scratch is the second thing that earns a verb, and worktree isolation is why. `Edit` and `Write` refuse a main-root path from a linked worktree, a shell stream editor is banned for an in-place edit, and a verb resolving the root in-process is what is left.
 - `pull-request` and `outcome` are the two the board takes. Creating a whole file earns nothing, since a heredoc through `Bash` writes it safely, which is why no verb exists for a plan or a review report.
 - Answering a question no skill can answer alone is the third thing that earns a verb. `sessions list` reads a registry outside the project to say which session holds which branch, where a runbook could only describe the lookup and every session would re-derive it. The test still holds, since the work is a mechanical read rather than a judgment, and the reasoning sits in `canon/context/cli/overview.md`.
+
+#### Reading and measuring verbs
+
 - `sessions list --self` narrows that same read to the caller's own row, which is what a dispatcher reads to learn the `sessionId` it carries into a launch. The join runs on `CLAUDE_CODE_SESSION_ID`, then `CLAUDE_PID`, then the pid the `CLAUDE_CODE_MESSAGING_SOCKET` basename spells, and never on `CLAUDE_CODE_HOST_SESSION_ID`, which holds a `local_`-prefixed value from the harness namespace matching no row. Refusals name which half failed, `no-self-identity` where the environment states none of the three and `no-self-row` where it states one and no live row carries it, on the same ground as `no-registry` rather than returning an empty roster.
 - Replacing a reading a person was taking by hand is the fourth. `canon records size` reports each record folder's file count, bytes, two mtime windows at 7 and 30 days, and the dates of its least and most recently written file, and it gates on none of them, since a record folder has no correct size and the number is one to notice rather than a threshold. What earned it is that the memory pen went from 44 entries to 236 between two readings taken by hand two weeks apart.
 - That growth half rests on `mtime`, which is a proxy that overstates and never understates. A machine restored by `canon records pull` reads its whole tree as new, because a hard reset re-dates every file it writes and nothing on the filesystem separates a restore from a write. The set read is `BACKED_FOLDERS` plus the scratch folder, since deletable without loss is not the same as empty, while `.records.git` is the backup history and `worktrees/` holds checkouts with their own removal verb.
 - `canon records prune-tmp` earns the same test size does: it replaces a manual scratch cleanup with a mechanical report, dry run by default and deleting only under `--write`. `newestMtime`, exported from `src/records/size.ts` for this second caller, walks with the same `walk`/`absorb` pair `sizeRecords` uses, so the two verbs agree on what counts as a file and which mtime a rewritten entry carries rather than each answering from a second walk of its own. `tmp/handoff/` and `tmp/pr/poll/` are skipped rather than offered, since a reader deletes a handoff itself and a poll baseline is live state, and the pre-split names those two folders replaced (`memory-routing/`, `teach-promotion/`, `ui-checklist/`, `pr-poll/`) are skipped the same way on a project the rename never reached.
 - The skip set for a scratch-root name reaches past its own two lists into two other migrations' tables rather than carrying a third hand-kept one. `RECORD_LAYOUT_MOVES` names `memory-archive`, the retired-entry archive of the memory records kind, which `records push` still backs, and `PROMOTED_FOLDERS` in `src/migrate/scratch-evidence.ts` names an evidence folder a durable record cites by name. A project that has not yet run either migration still carries both at the scratch root, where the age test alone would eventually offer them for deletion, so `migratedScratchNames()` derives the skip from each table's own rows and names the migration to run as the reason.
 
-## The skill catalog verbs
+### The skill catalog verbs
 
 - `canon claude skills list` reads `claude/skills/` alone. Internal skills under `.claude/skills/` are excluded, since a count spanning both reports work that never installs into a target. Each entry carries a `requirement` boolean for the sibling `REQUIREMENT.md`.
 - It reports presence and never a reason, and since coverage is universal a `false` is a gap to close rather than a recorded exemption. `canon claude skills audit` sits beside it and gates that rule across both corpora, so the boolean reads the shipped catalog while the audit answers whether a working tree conforms.
 - `canon claude skills drift <ref>` is the one verb under `skills` reading history rather than a tree, naming which shipped bodies were rewritten between that ref and `HEAD`. A session holds a skill body from the moment it loads one and re-invoking it does not re-read the file, so nothing else compares the two. The ref is required because `HEAD` is the only default available and would answer every run with nothing moved. Nothing records the commit a session started from, so a caller recovers it from elapsed run time through `git log -1 --format=%H --before='<duration> ago'` and rounds up, which is safe because the report over-reports in that direction rather than going quiet.
 - A second route to a stale body needs no age. A session editing a body and then invoking that skill later in one chain replays what it loaded before the edit, which is the ordinary ship shape here since a branch touching `context-fold`, `git-stage`, or `git-pr` runs those skills at the end.
+
+#### Drift and reach
+
 - The verb does not reach that route, since reading history is what closes it off and the edit is still uncommitted while the replay happens
 - Which shape the staleness takes decides whether anyone notices. A held body naming a file the branch deleted fails loudly by having nothing to read. One naming a file that still exists while saying something different resolves and reads current, so the session applies the stale rule and reports success.
 - The report fires only when a caller runs it, and reading it is not acting on it. One session ran the verb at session start, read a moved review body in the result, and applied the stale rule for the rest of the day.

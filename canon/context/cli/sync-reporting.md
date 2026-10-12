@@ -7,7 +7,9 @@ description: Attribution from git history, the freshness report, and the report 
 
 `canon sync --check` and the attribution fallback both read the plan `canon/context/cli/sync.md` describes rather than a second one. This file holds how an unstamped file is attributed, what the freshness report measures, and the sections it prints beside the domain scan.
 
-## Freshness
+## Decisions
+
+### Freshness
 
 `canon sync --check` reports drift and writes nothing. It reads the same `planSync` a sync would apply, so the report cannot disagree with the action it predicts. Drift between syncs is normal, so the check exits 0 by default and CI opts into failing with `--exit-code`.
 
@@ -17,7 +19,7 @@ Tooling renders its own section, and it prints whether it was measured before it
 
 The report closes by naming the scanned domains a target has left unstamped. Tooling is excluded there despite being a stamp domain, because its section renders on every managed target and a second mention states one fact under two remedies. A scanned domain nobody installed has no section at all, which is what the closing line is for.
 
-## Attribution from git history
+### Attribution from git history
 
 An unstamped file falls back to the toolkit's git history, matching installed content against every version that path ever held in `src/sync/history.ts`. The stamp records what was installed, and history holds the same fact for anyone who installed before the stamp existed, so a match recovers `stale` and names the commit.
 
@@ -27,7 +29,7 @@ The fallback reads history as one `git log --raw` call per domain rather than on
 
 History is absent exactly where the stamp is, since a registry install ships `src/` without `.git`. `historyUnavailable` separates a toolkit that could not attribute from one that attributed and found a local edit, because only the first is a capability the install lacks. It degrades the way `toolkitCommit` already does rather than failing the sync.
 
-## Surfaces reported without a change
+### Surfaces reported without a change
 
 Seven report sections sit outside the domain scan in `src/sync/check.ts`, being `seeds`, `superseded`, `unmigrated`, `unmovedSurfaces`, `newSkills`, `newRules`, and `reverse`, each covering something `planSync` structurally cannot. The headings below carry six of them, since `newSkills` is described under the section built from it. All seven are report-only, and the reason holds for the five built on installed files: the engine turns a difference into a `copy` and a retired surface into a `delete`, and those files hold content the project wrote. `newRules` and `newSkills` are report-only on the opposite ground, since both name files the target does not hold at all. Installing a rule changes what the project is governed by, and a skill loads live from the plugin directory with nothing to install.
 
@@ -35,27 +37,27 @@ All seven are gated on `isManagedTarget`, which reads a `.claude/` directory, a 
 
 An unmigrated domain counts as a marker because `detectUnmigrated` fires only on root files whose basename the toolkit ships, so it firing proves the toolkit installed there before the layout moved. An unmanaged target returns every section empty rather than only suppressing the render, so no consumer, one reading the JSON directly included, can act on a finding the render withheld.
 
-### Seeds
+#### Seeds
 
 Seeds get their own reader in `src/sync/seeds-report.ts` rather than a `SyncAdapter`. Three things blocked the adapter. `listInstalled` globs `**/*.md` under one root while seeds span the target root for `CLAUDE.md`, `.claude/` for the rest, and include a `.json` and four `.sh` files. And `planSync` queues a copy for every non-matching file, which would overwrite `CLAUDE.md` wholesale and defeat the hand merge a drifted seed needs.
 
 The reader reuses `readHistoryIndex` and `findInstalledOrigin` directly, because `recoverAttribution` is private to the engine and takes an adapter seeds have no way to supply. Seeds carry no stamp, so `customized` is unreachable and an unattributed difference stays `drifted`.
 
-### Superseded artifacts
+#### Superseded artifacts
 
 `collectSuperseded` in `src/sync/layout.ts` derives retired artifacts by pairing `SUBDIRS` from `src/claude/seeds.ts` against an uppercase-stem sibling. The existing `collectRetired` adapter hook was the wrong tool: it exists for `.claude/GOV.md`, a generated file, and the engine deletes whatever it returns. Deriving from the seed tree rather than a fixed filename list means a folder added later is covered without a code change, at the cost of missing a suffixed variant like `TASKS-ARCHIVE.md`.
 
-### Unmigrated domains
+#### Unmigrated domains
 
 `detectUnmigrated` covers a state the drift walk alone reads as clean: `installedStampDomains` lists only domains whose install marker exists, so a project holding `standards/` at its root would otherwise report zero entries for a real problem. It counts toward `--exit-code` because the relocation closes it, while superseded artifacts and seed drift are excluded for the reason `orphaned` already is. `ROOT_LAYOUTS` in `src/sync/layout.ts` is empty, since standards closed the install channel that put it at risk of sitting unmigrated at a project root, so the section currently names no domain. The section stays rather than being cut, since the next domain to retire an install channel this way reoccupies it.
 
-### Surfaces at the old root
+#### Surfaces at the old root
 
 `detectUnmovedSurfaces` in `src/sync/layout.ts` names each entry of `SURFACE_ENTRIES` that `surfaceDir` still resolves under `.claude/`, which happens only when the `.claude/` copy exists and the `canon/` one does not, and the render points at `canon migrate surface-roots`. A rule globs the `canon/` spelling alone, so a target on the old root stops loading the rules scoped to those files, and this section is what tells it. `unmigrated` could not carry it, since `ROOT_LAYOUTS` models a domain stranded at the project root under a stamp domain and a surface has neither. Without the section the only signal was the `seeds` line reporting `.claude/REQUIREMENTS.md (drifted)`, which reads as content to refresh rather than a layout to move. <!-- canon-keep-surface-root -->
 
 It stays out of `--exit-code`, the same as `superseded`. The verb closes it, but a target gating CI on the count would go red on a move nobody scheduled, and the line is a prompt rather than a gate.
 
-### Rules the target never received
+#### Rules the target never received
 
 `readNewRules` answers the question the drift walk cannot ask. That walk enumerates what the target holds, so a rule that never arrived sits in no section and the report reads clean. A sync can silently refresh a rule into a version that cites a sibling rule the target never received, such as `governance/rules/writing/markdown.md` citing a sibling rule, which needs a hand repair once discovered.
 
@@ -77,7 +79,7 @@ An unresolvable anchor is a gap the fallback still carries. `read` returns an em
 
 Nothing here reaches `hasDrift`. `unmigrated` counts because running the relocation closes it, and a command closes this too, so the exclusion rests on consent rather than on the absence of a remedy: gating CI on the count would pressure a target into adopting rules nobody picked.
 
-### The reverse walk
+#### The reverse walk
 
 `src/sync/reverse.ts` is the only section built by walking the target rather than the catalog. It reports beside `superseded`, `unmigrated`, and `newSkills` rather than absorbing them. Each of those answers a narrower version of the same question and none is wrong today, so folding them in would change what two shipped sections print in the same change that introduces a third. A later consolidation can read one interface instead of inventing it.
 
@@ -89,7 +91,7 @@ Three verdicts come out of that one pass. Content matching a published blob is `
 
 The walk reaches none of that on an unmanaged target. `isManagedTarget` gates it the way it gates its three siblings, and the early branch returns `emptyReverseReport()`, so a project holding a dropped root reports nothing unclaimed until it carries a `.claude/` directory, a `CLAUDE.md`, or an unmigrated domain. A consumer staging a folder to observe the walk stages the marker too, or it reads an empty section as a clean answer.
 
-### What reaches the exit code
+#### What reaches the exit code
 
 Nothing in the reverse section reaches `hasDrift`. Every entry is a judgment about a file the project may own, and one verdict is a labelled unknown by design. The sandbox `unclaimed` arm asserts the exit code stays 0 with a finding present.
 

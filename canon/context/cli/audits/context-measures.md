@@ -5,7 +5,9 @@ description: How the length, depth, provenance, and reference-form measures coun
 
 # Context audit measures
 
-## How the measures count
+## Decisions
+
+### How the measures count
 
 The length measure counts rendered lines at 80 columns, the unit the depth checkpoint uses in the sibling command. Entries are authored one line per bullet, so a block of fifteen paragraph-bullets occupies fifteen source lines and renders past sixty, which source counting cannot see. The two share `renderedHeight` across the domain boundary rather than each keeping a count of its own, since they sit in one section of the standard and a reader compares them.
 
@@ -47,7 +49,7 @@ The reference-form match is a second pass rather than a widened `citationPattern
 
 The provenance marker matches a version-like or date-like token anywhere outside a fence, so two shapes that narrate no change still report. One is a fixture literal an entry quotes because the fixture stages that exact label, and the other is a version string illustrating a pattern some other matcher must not misread. Naming the property rather than the literal clears both while keeping what the sentence taught, which is the remedy the reported-rather-than-gated framing leaves open. A date stamping a measurement clears the same way when the measured artifact's own version pins already sit in the surrounding prose, since those date the measurement more precisely than a calendar does.
 
-## The requirements record
+### The requirements record
 
 `canon/REQUIREMENTS.md` is measured beside the folders rather than by a command of its own. The record is a context surface and this verb already sits in the audit catalog, while a new top-level registration would touch `src/cli.ts` for no reason specific to this check. The accepted cost is a requirements check under a verb named for context folders, and moving it later renames a command surface.
 
