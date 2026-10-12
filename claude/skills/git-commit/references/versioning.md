@@ -16,6 +16,9 @@ Does not govern:
 - The format of a phase label, which is project-specific by the rule below
 - Task filenames and folder layout: `tasks.md`
 - Commit subject, branch name, and pull request title format: `commit.md`, `branch.md`, and `pr.md`
+
+### Neighboring concerns
+
 - Voice, rhythm, and sentence construction in any text carrying a label: the `write-human` skill
 - Punctuation, formatting, and word choice in any text carrying a label: `markdown.md`
 - How a quoted-alone version-shaped token or a record path is caught as a board reference, which sits outside the phase-label/semver split this file owns: `publish.md`
@@ -59,11 +62,17 @@ External release identity used in git tags and release notes. Independent of pha
 - Commit subjects do not embed phase labels.
 - Git tags use semver only. Phase labels never become tags.
 - A PR that cuts a release may reference its semver tag in the title or body. Phase labels still do not appear.
+
+### Bodies and code spans
+
 - PR bodies, review comments, and issue text name the change itself, never the internal stream that scheduled it. Describe the work rather than the label it was planned under.
 - A phase label written alone inside its own code span reads as shown rather than asserted. `canon labels scan` masks a code span before checking for a bare token, so a backticked label on its own does not count as an appearance for the phase-label check.
 - That masking clears one check and not the gate. A span whose whole content is the label still resolves as a board reference under `publish.md`'s own board-identifier check, run by the same scan, so a title or body quoting a label alone in a span still fails on that check and does not clear every surface the table above marks `no`.
 - The one shape neither check reaches is a version-shaped token folded into a longer quoted phrase, such as a fixture name or a file path. A backticked span quoting a test fixture's own version-shaped name is the corpus case that forced this carve-out, and a real phase label folded the same way inside a review comment is the counterexample where it read as clean on both checks.
 - The operator decided to keep the carve-out rather than narrow it to fenced blocks alone or drop it outright, leaving an author responsible for writing a live reference in plain text instead of folding it into a quoted phrase.
+
+### Phase labels in shipped files
+
 - A phase label in a context entry is permitted only when its substance is restated inline beside it. A bare label carrying nothing beside it is forbidden, since a reader without the board has nothing to resolve it against.
 - A phase label carries no exception for a surface this repository authors and ships to a target it does not control: a standard, a skill body, and a governance rule are all forbidden outright, substance restated or not. The line is ownership rather than reachability. A shipped file is read by a project that never edits it, so the label names a board that reader can never reach. A context entry stays permitted above because it is this project's own tracked surface, never shipped.
 - The shipped-surface rule governs a reference to a real row, never a token shown to illustrate the label's own format. A phase label naming no decision, written only to show the pattern's shape, is not a citation, which is what lets a standard defining the format still show what one looks like.

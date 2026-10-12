@@ -23,23 +23,28 @@ Does not govern:
 
 ## Types
 
-- `feat`: new feature or capability
-- `fix`: bug fix
-- `refactor`: structural changes (not a fix or feature)
-- `docs`: documentation only (README)
-- `chore`: maintenance tasks (deps, tooling, configs)
-- `perf`: performance improvements
-- `test`: add or modify tests
-- `style`: code formatting (whitespace, semicolons)
-- `build`: build system changes (webpack, npm scripts)
-- `ci`: CI/CD pipeline changes (GitHub Actions)
-- `revert`: revert a previous commit
+| Type       | Use                                         |
+| ---------- | ------------------------------------------- |
+| `feat`     | new feature or capability                   |
+| `fix`      | bug fix                                     |
+| `refactor` | structural changes (not a fix or feature)   |
+| `docs`     | documentation only (README)                 |
+| `chore`    | maintenance tasks (deps, tooling, configs)  |
+| `perf`     | performance improvements                    |
+| `test`     | add or modify tests                         |
+| `style`    | code formatting (whitespace, semicolons)    |
+| `build`    | build system changes (webpack, npm scripts) |
+| `ci`       | CI/CD pipeline changes (GitHub Actions)     |
+| `revert`   | revert a previous commit                    |
 
 ## Scope vocabulary
 
 - Single lowercase word representing a system component
 - Prefer single word
 - Use kebab-case only when two words are genuinely needed for specificity
+
+### What a scope may not be
+
 - Do not use specific filenames as scopes
 - Do not use a scope that duplicates the type
 - Write scopes for release readability. They surface in `changelogithub` release notes.
@@ -49,6 +54,9 @@ Does not govern:
 - Use imperative mood (`add` not `added`)
 - Describe the actual technical change, not that something changed
 - Do not use vague verbs (`improve`, `refine`, `enhance`)
+
+### Form and quoting
+
 - Do not repeat the scope in the subject line
 - Use single quotes if quoting
 - No backslash escaping or internal double quotes

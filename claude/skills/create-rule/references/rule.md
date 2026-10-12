@@ -81,9 +81,15 @@ paths:
 - Use imperative voice for every rule (`Prefix booleans with is`, not `Booleans should be prefixed`)
 - State one rule per bullet as a single directive line
 - State what to do and what not to do. Do not explain the reasoning behind a rule.
+
+### Phrasing
+
 - End the directive line of a ban asserting how the model or a tool behaves with one `Revisit when <finding>.` sentence, which states a condition rather than the reasoning. A style, safety, or consistency ban takes none.
 - Phrase a rule as a ban on the forbidden shape when it could otherwise enumerate allowed options, so it stays stable as categories grow
 - Cut any rule that resists crisp one-line phrasing. Vague guidance is worse than none.
+
+### Scope of a rule file
+
 - Keep the file to one topic. A second topic is a second rule file.
 - Do not restate a rule that a sibling rule or `CLAUDE.md` already owns. Point once, never duplicate.
 - Name the current layout only, in a glob and in the body alike. A layout change ships a migration verb, as `canon migrate surface-roots` and `canon migrate records` did, rather than a rule line or a glob that keeps the old spelling loading.

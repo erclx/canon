@@ -51,10 +51,16 @@ Scoped to the README at a repository root. A nested README documenting a folder,
 
 - Required: project description, installation/setup, usage examples, support/help resources
 - Optional: the header block below, features, contributing (link to `CONTRIBUTING.md`), license (link to `LICENSE`)
+
+### Leave out
+
 - Do not include full API documentation. Link to separate docs instead.
 - Do not include license text. Reference the `LICENSE` file.
 - Do not include detailed contribution guidelines. Reference `CONTRIBUTING.md`.
 - Do not include extensive troubleshooting guides. Use a wiki or separate documentation.
+
+### Routing and generator output
+
 - A README that points to the project's own context entries instead of restating them satisfies the required list by routing rather than carrying. A repository documented in `docs/` or `canon/context/` names the entry point and the listing command, then stops. The reader is one hop away, the same way `## Badges` treats zero as complete.
 - A README missing an H1, or whose headings restate the tool that scaffolded it rather than the project, is unedited generator output rather than a page anyone wrote. Draft over it. Nothing here asks a session to preserve a section a scaffold wrote and nobody replaced.
 
@@ -74,6 +80,9 @@ The description of 2-3 sentences follows the block and expands the claim rather 
 - A project with no page omits the link and the screenshot. A library or a CLI reads as a complete block with a title, badges, and a claim.
 - A project whose own page carries the screenshot omits it here and keeps the live link, which answers the slot rather than skipping it. Say so in the pull request that drops it.
 - The order is the block's rather than the page's. The screenshot sits last inside the block, which puts it in the first row of content a reader meets below the title, badges, and claim.
+
+#### Themes and wrappers
+
 - A themed light and dark pair counts as one element in the slot rather than two. The block does not require a pair and leaves the handling of themes to the project.
 - Centering the block in an HTML wrapper is optional. Plain markdown reaches every host a README renders on, and a wrapper is styling a project can add.
 - Never invent an element. A mark or a screenshot the project does not hold stays out of the page.
@@ -91,6 +100,9 @@ Stars, forks, download counts, language chips, and "made with" badges fail. The 
 - Cap the block at four. A fifth costs more scanning than any badge repays.
 - Give each badge alt text naming what it reports rather than the service that renders it. Write `npm version`, not `shields.io`.
 - Link each badge to the page a doubting reader would check next, which is the registry listing for a version badge and the run history for a status badge. A red badge with no route to the failing run reports a problem and withholds the only thing the reader wants.
+
+#### Pinning and verifying
+
 - Pin a status badge to the branch whose health it claims to report, and confirm the workflow actually runs on that branch. A workflow triggered by pull requests alone never runs on the default branch, so an unpinned badge reports whichever branch ran last and a pinned one reports nothing at all. Fix the trigger, or drop the badge under the rule below.
 - Verify a badge by the value it renders, not by its status code. A badge service answers 200 for a query it cannot satisfy, so a blank badge and a working one look identical to a status check.
 - Zero badges is a correct answer. A private project with no registry presence and no CI has nothing that passes the test, and an empty block beats a padded one.
@@ -100,6 +112,9 @@ Stars, forks, download counts, language chips, and "made with" badges fail. The 
 - Open public-facing READMEs with universal problems any reader recognizes, not repo-specific artifact names. Save artifact names for feature or "What is inside" sections.
 - Use relative paths for repository files. Use absolute URLs for external resources.
 - Include practical usage snippets for core functionality
+
+### Per project kind
+
 - For libraries/tools: include API quickstart
 - For applications/products: include usage instructions and configuration options
 - For CLI tools: include command examples with flags

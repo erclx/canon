@@ -84,6 +84,9 @@ The quiz shape is a contract rather than a convention. `canon teach nav` splices
 - Give every option in one question the same `name`, and a different `name` per question. Options sharing a name across two questions let one answer clear another.
 - Mark the correct option with `data-a="1"` and leave the others without the attribute
 - Carry `data-k` on the `label`, since the workspace stylesheet renders the key letter from it
+
+#### Structure and the legacy button
+
 - Keep `.fb` the last child of its `.q`. The stepper reveals it as a direct child, and a feedback block nested deeper stays hidden.
 - Put the option text in a `<span>` inside the label rather than bare beside the input, so the workspace can lay the two out
 - Never write a `<button class="opt">` in a new lesson. That is the shape written before the stepper, and it is kept working by an injected script the presence of a button is what still triggers.

@@ -21,6 +21,9 @@ External sources were read and filtered rather than imported. This file is the r
 - Vertical, risk-first, and contract-first slicing, stated as rules for choosing the next slice rather than as worked examples tied to one stack.
 - Rule 1, one thing at a time, as one logical change per commit.
 - Rule 2, keep it compilable, as a build left passing at every commit.
+
+#### Rollback and the notes
+
 - Rule 5, rollback-friendly, as the group on keeping each commit safe to revert and the rule against deleting and replacing in one commit.
 - The "noticed but not touching" list from its scope section, routed to the open task's findings or the handover rather than offered as new tasks, since a worker may not add a row to the board.
 - The note against re-running a command on unchanged code, scoped to a session's own repeats so it never reads as permission to skip a chain's verify step.

@@ -65,6 +65,9 @@ Between agent-facing and plugin alone, a repository with no plugin manifest take
 - Open the page with the standard's header block, filling each slot from what Detect found: mark, title, badges, a one-line claim from the manifest description, the live link, then the product screenshot.
 - Fill the screenshot slot only with an image the project already commits, referenced with alt text naming what it depicts. This kind cannot capture one. Omit the slot when no such image exists and say so in the preview. Never write a placeholder path or invent a mark.
 - Omit the link and the screenshot for a project with no page, and the mark for a project with none, without a note in the drafted page. A project with a page and no known URL gets the screenshot slot, and the Confirm step asks for the link.
+
+### Types and badges
+
 - Cover every applicable project type from the standard's `## Content` list rather than picking the closest one.
 - Candidate badges: check for a published package (a registry field in the manifest), a CI workflow, and a `LICENSE` file.
 - State each candidate's rendered value in the preview rather than trusting a fetch's status code, since a badge service answers 200 for a query it cannot satisfy.

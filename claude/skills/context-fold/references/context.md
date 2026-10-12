@@ -90,6 +90,9 @@ Only the `development` entry carries this section, as an H3 under `## Layout`. I
 - Decisions that constrain the domain, whether or not their reasoning touches another one. A decision lives in the entry of the domain it constrains.
 - Constraints, gotchas, things tried and rejected
 - Domain-specific conventions that do not fit a `paths:`-scoped rule
+
+### Figures and references
+
 - A measured figure, closed with a trailing `Measured at <short-sha> on <YYYY-MM-DD>.` naming a commit rather than a pull request number or a branch. Carry one anchor per figure and rewrite it in place when the number is re-read, whether or not it moved. An absent anchor reads as unchecked.
 - A reference to another entry, spelled as the path that entry sits at rather than as its bare filename. A bare name resolves against whichever folder the reader is already in, so a domain that splits into subfolders strands every inbound reference and the break surfaces nowhere. A reference to a seed, a standard, or a file the project owns elsewhere keeps the form its own surface uses.
 
@@ -99,10 +102,16 @@ Only the `development` entry carries this section, as an H3 under `## Layout`. I
 - Restated `--help` output, flag tables, or JSON shapes.
 - A catalog a `list` command already returns. Link the command instead, so the entry cannot drift from it.
 - Function-level documentation for implementation modules. Read the code. The exception is the public surface of a shared utility module, where the entry is how a session finds an existing helper instead of duplicating it.
+
+### Elsewhere
+
 - Rules. Those go in `.claude/rules/<scope>.md` with a `paths:` glob.
 - Tutorials or human onboarding. Those go in `docs/` if a public audience exists.
 - Generated content (API references). Generate, do not write by hand.
 - Anything already in `canon/REQUIREMENTS.md`.
+
+### History and results
+
 - The history of how the domain reached its current shape. An entry describes the repository as it stands, so a change number, release label, or date attached to a change goes wherever the project tracks work.
 - A rejected alternative's provenance, which is the same rule at the one place the section above admits history. Keep what was tried and why it lost. Cut who tried it and when.
 - The route to a decision: the rounds of candidates, the tuning steps a threshold passed through, the review pass that caught a miss. State the decision, what lost, and why, once and in the present tense. Cut the route. Git and the change that introduced it keep it.
@@ -113,8 +122,14 @@ Only the `development` entry carries this section, as an H3 under `## Layout`. I
 - Aim for one entry per domain. Length is a symptom, not the defect, and the one hard cap is the whole-document ceiling `markdown.md` states.
 - Past roughly 150 rendered lines, check three things before adding more: whether the entry still covers a single domain, whether it has filled with content `ls` or `--help` reproduces, and whether it has accumulated the history of its own changes. Fix whichever is true rather than trimming to hit a number. The 150 is a diagnostic checkpoint and never gates. Rendered lines count as `markdown.md` defines them.
 - Never cut a `## Decisions` or `## Gotchas` entry to shorten a file. Cut a `## Layout` section or an H3 under it instead.
+
+### Retiring and rewriting
+
 - Retire a decision or gotcha once its subject is gone, rewriting the bullet to state the current design rather than leaving the narration of what it replaced beside it. A rejected alternative is not a retired one, so what was tried and why it lost stays whatever its age. The rule above protects content whose subject is live, and this one releases content whose subject is not.
 - Rewrite a decision a later one replaced rather than appending the replacement beside it. The subject is still live, so the rule above does not reach it, and two bullets on one subject leave a reader to work out which of them is current. State the design that stands and keep the superseded reasoning only where it is the alternative that lost.
+
+### Splitting and naming
+
 - Split into a folder (`canon/context/<domain>/<sub-area>.md`) when a domain has three or more sub-areas that do not fit cleanly in one file. That split is the natural ceiling.
 - Group whole single-file entries of two or more small domains into one folder when they share a kind, such as small feature domains that each own a verb. Each entry still covers one domain, and the folder's generated `index.md` carries a `subtitle` naming the kind. It names an entry to start with only when that entry frames the others. A grouping folder is not a split, so no entry inside it is a sub-area of another.
 - Name an entry inside a split or grouping folder per the `codebase-layout` skill, which never repeats the folder's name as the entry's stem or prefix.

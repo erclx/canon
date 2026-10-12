@@ -39,6 +39,9 @@ A glossary failing these is non-conforming even when it satisfies every shape ru
 - Write one entry per term, as a single bullet.
 - Lead the bullet with the term as a bolded span, then the definition in one or two sentences.
 - Define the term without using it. A definition that spends the term explains nothing to the reader who arrived not knowing it.
+
+### Placement and order
+
 - Name where the term first appears, so a reader can reach one use of it in context.
 - Keep an entry to the meaning. Worked detail belongs on the page that teaches the term.
 - Sort entries alphabetically, so a reader who knows only the word finds it without reading the file.

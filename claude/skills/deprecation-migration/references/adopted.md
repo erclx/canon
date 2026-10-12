@@ -27,6 +27,9 @@ External sources were read and filtered rather than imported. This file is the r
 - The five-question deprecation decision, cut to four. Its unique-value and maintenance-cost questions merge into one question about what keeping the surface costs. Its per-consumer migration-cost question drops, since the Churn Rule puts that cost on the owner rather than weighing it per caller. The owner question from the book takes the freed place.
 - The rule never to deprecate without a replacement, as the third decision question.
 - The strangler and adapter patterns, stated as when each fits rather than as worked code tied to one stack.
+
+#### Migration, zombie code, and red flags
+
 - Expand, migrate, contract, lifted out of its schema section and stated for any surface as three separate changes.
 - Zombie code, narrowed to code that is unowned, uncalled, and still built, and settled by the same zero-consumers check rather than a list of staleness signals.
 - The rationalizations and red flags that carry across stacks, reworded for any surface rather than a service or a column. Two excuse rows come from here:

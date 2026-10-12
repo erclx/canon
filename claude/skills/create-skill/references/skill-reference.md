@@ -50,10 +50,16 @@ A reference failing these questions is non-conforming even when it satisfies eve
 - Govern one document type per reference, or one attribute across every document. Split unrelated conventions into separate files.
 - Open with a `## Scope` section stating what the reference governs and what it does not, placed above the shape rules. A reference that specifies shape exhaustively and jurisdiction nowhere cannot refuse a rule, so the rule with no obvious owner lands in whichever reference sits nearest.
 - Write it as one line naming the artifact or attribute and where it applies, then a `Does not govern:` list. Give each entry the excluded concern and the owner it goes to.
+
+#### The path and owners
+
 - Name an owner in the same `references/` folder by bare filename and one in another skill by its sibling path, `../<skill>/references/<name>.md`. Name the surface instead where the owner is one, such as a coding rule, a project policy, or the code.
 - Put the governed path in backticks inside the first sentence of that line, anchored deep enough to resolve from a project root. A bare folder name matches a same-named folder elsewhere in the tree, and a path held back until a later sentence sits beside every other path the statement mentions, including the ones it excludes.
 - Say in that same sentence when the reference governs an attribute rather than a document type. An attribute is written across every document and has no path to name, so the silence reads as an omission unless the sentence claims it.
 - Cut an entry that names no owner at all. It is either excluding something nothing was going to claim, or it is a content exclusion, which the rule below sends to the shape rules instead.
+
+#### Boundaries
+
 - Declare a boundary from both sides. A yield, an exemption, or a handoff stated in one reference alone is never checked against the reference on the other side of it, which is how two files come to claim the same rule or neither does.
 - Separate a jurisdiction exclusion from a content exclusion. The first names a concern another reference owns and belongs in `## Scope`. The second names what does not belong inside the document and stays with the shape rules. Merging them puts a boundary claim where no sibling will read it.
 - Stay silent on a section the reference holds today but should not own. Claiming it makes the scope statement false the moment it moves, and the mismatch is the evidence that moves it.
@@ -125,9 +131,15 @@ Answer all four before editing, and carry the answers into wherever the change i
 - Carry one fenced template of the document the reference governs, so an author copies a shape instead of reconstructing it from prose.
 - Bind this to a reference governing a document type. An attribute reference governs a scan, a string, or a label rather than a file, so it has no document to template and carries none. State that exemption in the sentence declaring it an attribute reference.
 - Place the template below the rules it satisfies, under a `## Template` heading or inside the section holding those rules.
+
+### What the template shows
+
 - Show the skeleton alone: every required section, one placeholder line for what each holds. A full worked document is a second document to maintain.
 - Write placeholders in angle brackets rather than copying a real document. A copied file goes stale, and its backticked filenames read as citations to anything parsing the reference.
 - Switch to a bare word where the fenced language reads `<` as syntax of its own, as Mermaid and HTML do, and say in the line above the fence that the names are placeholders.
+
+### Load-bearing text
+
 - Carry any header, key, or label a consuming tool parses verbatim. The template is the only place an author learns which strings are load-bearing.
 - Treat the template as authoritative where it and the prose disagree. An author copies the block, so a contradiction ships as the block.
 

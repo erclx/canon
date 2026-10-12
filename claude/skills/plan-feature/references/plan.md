@@ -26,14 +26,14 @@ Governs a feature plan under `.canon/plans/feature-<slug>.md`: the filename, the
 
 Does not govern:
 
-- When a plan is written, how it is amended, and its move to the archive: `plan-lifecycle.md`
-- One question measured in depth before anyone can plan against it: `groundwork.md`
-- A dump of many findings filed by domain, each carrying its own verdict: `intake.md`
-- The task file a plan is linked from, and the origin line pointing back at it: `tasks.md`
-- The transform from a branch name to a slug: `slug.md`
-- Voice, rhythm, and sentence construction: the `write-human` skill
-- Headings, punctuation, word choice, and file references: `markdown.md`
-- When a plan is written at all, and whether a short one goes to a file or to the conversation, which belong to the surface driving it
+- **`plan-lifecycle.md`**: when a plan is written, how it is amended, and its move to the archive
+- **`groundwork.md`**: one question measured in depth before anyone can plan against it
+- **`intake.md`**: A dump of many findings filed by domain, each carrying its own verdict
+- **`tasks.md`**: the task file a plan is linked from, and the origin line pointing back at it
+- **`slug.md`**: the transform from a branch name to a slug
+- **the `write-human` skill**: voice, rhythm, and sentence construction
+- **`markdown.md`**: headings, punctuation, word choice, and file references
+- **the surface driving it**: when a plan is written at all, and whether a short one goes to a file or to the conversation
 
 ## What a working plan looks like
 
@@ -76,9 +76,15 @@ The document opens with `# Feature: <short title>` and one paragraph stating wha
 - A section written in the other spelling is still that section, since `## Risks` and `**Risks:**` name one thing. Write the table's form in a new plan and leave an existing plan's spelling alone. Either spelling breaks a depth run.
 - Write `None identified.` under a required section with nothing to report rather than dropping the marker. A dropped section and an unconsidered one read identically.
 - Aim `## Summary` at a person scanning the plan, not at the session executing it. The other sections carry what execution needs.
+
+### Files to touch entries
+
 - Give every `**Files to touch:**` entry a backticked path and something said about it. A bare path states scope and not intent, and the reason is what an executing session checks its edit against. Lead with the path or lead with a label carrying the path, whichever reads better for the entry.
 - Separate the two halves with a colon, and keep every path the entry declares ahead of it. What sits before the colon reads as a target, so both sides of a rename belong there and a file merely cited by the reason does not.
 - Read the list as what the branch sets out to write rather than as a bound on it, since the doc syncs at ship write past it on nearly every branch. `canon tasks plan-reach <plan>` reads the branch back against this list and every other live plan.
+
+### Measured claims
+
 - State every count and every claim about the tree as measured during the pass that wrote the plan. A figure carried in from a summary or an earlier session is the most common way a plan ships the wrong scope.
 - Prefer a short plan over a padded one. A section filled to look thorough costs the reader the same attention as one that matters.
 
@@ -147,8 +153,14 @@ An execution that deviates rewrites the suggestion into the form below, leaving 
 - A blank `- Answer:` means accept the suggestion at execution time. That default is what makes the plan decision-ready in one pass, with no separate round to collect answers.
 - Never ship a question without a suggestion. A bare question defers the judgment the plan exists to supply, and it arrives at the executing session as a stop.
 - State the pick in one line with its reason or its main tradeoff. List an alternative only where it changes the pick.
+
+### Preference questions and answers
+
 - Write `- Suggested: needs your call, <why>` where the answer turns on preference rather than on a technical default. Fabricating a default there hides an open question behind an accepted answer.
 - Never fill an `- Answer:` slot on behalf of the person who owns it. Recording the pick as the suggestion is what the suggestion line is for.
+
+### Overrides and settled questions
+
 - Rewrite the `- Suggested:` line to the pick execution made when it deviates from an unanswered question, and leave the slot blank. The prohibition above reaches the answer line alone, so the suggestion line is where a deviation goes.
 - Open the rewritten text with `overridden at execution to <pick>,` and follow it with the measurement that moved the pick. The fixed phrase is what tells an override from an authored suggestion, which routinely carries a number too.
 - Take a deviation from an answered question back to whoever answered it rather than rewriting either line. A filled slot is a decision already made, and a suggestion rewritten under one leaves the plan holding two picks with no default resolving them.

@@ -47,9 +47,6 @@ Does not govern:
 
 - Past roughly 40 rendered lines with no heading of any level breaking them, add a subheading at the seam. Measure the longest such run rather than everything under one `##`, and exclude fenced code blocks. The number is a checkpoint, not a cap.
 - Count rendered lines rather than source lines, wrapping each source line at 80 columns and summing the heights. Source lines undercount a file authored one line per bullet, where a block of fifteen paragraph-bullets occupies fifteen lines and renders past sixty. A checkpoint another standard states counts the same unit, so a file measured one way never sits beside a run measured another.
-
-### Ceiling
-
 - Keep a whole document at or under 300 rendered lines, counted over the full source with frontmatter and fenced blocks included, since a session pays for every line it loads. This one is a ceiling rather than a checkpoint. `canon markdown audit` lists every document past it without failing the run, and a gate stage reads the same number, so whether a push fails on it is the project's gate to decide. Split the document at a seam rather than compressing it.
 - Exempt a file named `CHANGELOG.md`, which a release tool rewrites, and a document carrying `<!-- canon-length-exempt: <reason> -->` on a line of its own outside a fenced block. A marker naming no reason exempts nothing.
 
@@ -67,8 +64,6 @@ Does not govern:
 - Break a colon-less marker on either of two signals, since no one test separates every marker from a sentence set in bold. A label that is one whole code span breaks at any width, which is how a bold line holding only a backticked path reads as the file heading it is. Anything else breaks at 20 characters or fewer, which reaches `**Testing**` and leaves a bold sentence as prose.
 
 ## Paragraphs and lists
-
-### Paragraphs
 
 - Use prose by default. Reserve bullets for discrete, unrelated items.
 - Keep paragraphs to four sentences or fewer. Split longer blocks at the next logical boundary.
@@ -107,9 +102,6 @@ Does not govern:
 ## Language
 
 - Use American English spelling
-
-### Sentence shape
-
 - Open a sentence with its subject and action, not filler (`Note that`, `Basically`), a hollow connective (`That being said`, `It's worth noting`), or a gerund windup (`Leveraging the API...`). Substantive transitions that carry a real relationship are fine.
 - Do not use the negative parallelism pattern (`It's not X, it's Y`, `not because X, but because Y`)
 - Do not pad verb phrases or delay the action. Write the shortest form (`in order to` → `to`, `ensure that X is set` → `set X`, `By doing X, you can Y` → state Y directly).

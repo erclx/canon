@@ -34,8 +34,14 @@ A diagram failing these is non-conforming even when it satisfies every shape rul
 - Declare `flowchart TB` by default. Mermaid ignores a subgraph's direction whenever that subgraph links outward, and an architecture diagram links across its subgraphs as the normal case, so top-bottom is a declaration rather than a guarantee.
 - Restructure a diagram that renders diagonal or left-to-right. Repeating the direction keyword does not fix it.
 - Render a context, component, or pipeline diagram taller than wide. A `sequenceDiagram` is wide by construction and is exempt.
+
+### Rows and edges
+
 - Do not let independent nodes render in a row. A row of siblings reads as a sequential chain and asserts a pipeline the system does not have.
 - Do not converge many edges on one node from one side. A crossing bundle is unreadable whatever it encodes.
+
+### Labels and subgraphs
+
 - Keep node labels short. Three or four words max. Detail goes in the paragraph below the diagram.
 - Use `<br/>` for a second short line on a node when the label is two ideas, never for a sentence.
 - Subgraphs are for grouping unrelated lanes such as offline versus online or browser versus server. Do not subgraph a single linear flow.
