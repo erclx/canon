@@ -161,9 +161,14 @@ allowed-tools: <tools required>
 ## Scripts
 
 - Use `scripts/` for operations that must be deterministic or repetitive
+- Ask whether a CLI verb the project already has does the job before writing a script. A verb is already installed and tested, and a script beside it is a second copy that drifts
+- Write a script in TypeScript and run it as `bun ${CLAUDE_SKILL_DIR}/scripts/<name>.ts`. Keep bash for a few lines that start one command
+- Import no package. A plugin loads from a cache that carries no `node_modules`, so only `node:` built-ins and the CLIs the skill already requires resolve
 - Use XML tags in script output for reliable parsing: `<SECTION>content</SECTION>`
-- Use `#!/usr/bin/env bash` shebang
-- Always include `2>/dev/null || echo "FALLBACK"` guards on git and shell commands
+
+### Inline commands
+
+- Always include `2>/dev/null || echo "FALLBACK"` guards on git and shell commands a skill body runs inline. A TypeScript script handles failure with try and catch instead
 
 ## Invocation
 
