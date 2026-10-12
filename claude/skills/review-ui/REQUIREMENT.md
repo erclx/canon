@@ -54,7 +54,7 @@ A verdict also goes stale without saying so. A push after the pass changes what 
 
 - Reviewing the code and the stills, which `review-pr` owns. The two run as separate sessions so each finishes on its own clock and neither hears the other.
 - Writing the checklist and its drivable format, which `ui-checklist` owns
-- Dispatching the pass, polling its verdict, and lifting the draft mark, which `role-orchestrator` owns
+- Dispatching the pass and polling its verdict, which `role-orchestrator` owns, and the lift's gates, which `canon pr lift` reads whichever session runs it
 - A subagent inside the code reviewer, dropped because its cost stays invisible until it returns
 - Writing a tracked file or checking anything out to host a frame. The push goes through the GitHub API onto the frames branch alone, so the reviewer still enters no worktree and touches no branch a pull request holds.
 - Dropping a closed pull request's frames, which a scheduled workflow runs, and purging a dropped frame GitHub still serves by commit, which needs a platform request

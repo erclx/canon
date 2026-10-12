@@ -247,7 +247,7 @@ addressed, and leads with the rebase instead:
 Rebased PR #<number> onto origin/main. <N> files resolved by hand, <N> rebuilt by the check.
 ```
 
-Do not merge. Hand back to the orchestrator for re-review.
+Do not merge. Hand back to the reviewer for re-review, or to the orchestrator where no live reviewer answers.
 
 ## Post-review findings
 
