@@ -141,8 +141,8 @@ const DOCS_PATH = /(?<![\w./-])docs\/[^\s`)\]]*\.md\b/g
 /**
  * A call to `canon standards`, a verb no installed CLI carries any more. A
  * shipped body naming it sends a target reader to an unknown-command error,
- * so every corpus but `docs/` reports it. `docs/` sits outside the scan while
- * its pages still document the retired verb.
+ * so every corpus reports it, `docs/` included. A page saying the verb is gone
+ * carries the reference marker on that line.
  *
  * The trailing lookahead keeps a hyphenated token such as a `standards-audit`
  * page name from matching, since that names a file rather than a call.
@@ -327,15 +327,13 @@ export function referencesIn(
       })
     }
 
-    if (!file.startsWith('docs/')) {
-      for (const match of line.matchAll(STANDARDS_CALL)) {
-        references.push({
-          file,
-          line: index + 1,
-          kind: 'retired-verb',
-          text: match[0],
-        })
-      }
+    for (const match of line.matchAll(STANDARDS_CALL)) {
+      references.push({
+        file,
+        line: index + 1,
+        kind: 'retired-verb',
+        text: match[0],
+      })
     }
 
     for (const match of line.matchAll(PHASE_LABEL)) {
