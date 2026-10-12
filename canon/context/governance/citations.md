@@ -1,6 +1,6 @@
 ---
 title: Citations
-description: Verdict for every rule and standard citing a skill or a sibling document, the two forms that resolve for a target, the moot exception, and the stage that resolves a cited path and an internal frontmatter glob mechanically with the bounds each carries
+description: Verdict for every rule and standard citing a skill or a sibling document, the form that resolves for a target, the moot exception, and the stage that resolves a cited path and an internal frontmatter glob mechanically with the bounds each carries
 ---
 
 # Citations
@@ -11,12 +11,11 @@ Owns whether a citation inside `governance/rules/` or `standards/` resolves for 
 
 ## Decisions
 
-### Two forms resolve for a target
+### The form that resolves for a target
 
-- `canon standards <name>` resolves for any target. The verb reads `standards/` at the project root first, then the package corpus, so it needs no fallback behind it. Most citing rules and standards use this form.
 - A plugin skill named with the `canon:` prefix, paired with a line reporting rather than proceeding silently when the skill does not resolve, degrades honestly: it loads for a target holding the plugin and names the gap for one holding governance alone.
 
-A bare skill name carrying neither the prefix nor the fallback line resolves for a plugin-holding target and fails silently for every other one, which is the defect both forms exist to close.
+A bare skill name carrying neither the prefix nor the fallback line resolves for a plugin-holding target and fails silently for every other one, which is the defect the form exists to close. `canon standards <name>` was a second form until the verb retired with the standards corpus.
 
 ### A rule names no path into this repository
 
@@ -26,7 +25,7 @@ A rule stating a general fact has nowhere to point for the local decision, since
 
 `canon gov citations` resolves every path a rule body cites across `governance/rules/` and `internal/rules/`, plus every frontmatter `paths:` glob under `internal/rules/`, and `bun run check` gates on it as the `Rule citations` stage. The verdicts below stay a manual read: the stage answers whether a citation resolves, and nothing answers whether a resolving citation points at the right file or restates what it points at.
 
-A `canon standards <name>` citation resolves against `standards/` and then against the skill reference the `MOVED_STANDARDS` map in `src/standards/read.ts` names for a retired standard, so a rule keeps citing a moved standard by name with no rewrite. A rule retired alongside its standard also leaves `governance/renames.toml`, since `src/gov/renames.test.ts` fails on a chain ending on a rule nothing ships.
+A rule retired alongside its standard also leaves `governance/renames.toml`, since `src/gov/renames.test.ts` fails on a chain ending on a rule nothing ships.
 
 At `2e912110` the corpus held 36 body citations across 77 rules. Twenty were `canon standards <name>`, fifteen were backticked paths, and one named a sibling rule by filename. All 36 resolved or were excused, and every internal glob matched, so the gate shipped as a floor rather than as a repair.
 
@@ -36,8 +35,8 @@ The glob half reads one corpus. A rule under `governance/rules/` installs into a
 
 What it reads is bounded four ways, each a shape the corpus already writes:
 
-- A placeholder or glob segment is declined, since it describes a shape rather than naming a file. `standards/<name>.md` and `app/**/route.ts` are the two forms.
-- A span carrying no file extension is declined as a folder or a module specifier. This costs one real path, `claude/standards`, which the stage cannot tell from `next/font` by looking at it.
+- A placeholder or glob segment is declined, since it describes a shape rather than naming a file. `canon/context/<domain>.md` and `app/**/route.ts` are the two forms.
+- A span carrying no file extension is declined as a folder or a module specifier. This costs any real folder path, which the stage cannot tell from `next/font` by looking at it.
 - A path written without backticks is not read, since matching one would report every sentence that names a file.
 - A glob that matches real files and still misses the work it was scoped at is not read. `lib/305-e2e-reliability.md` globs `**/e2e/**/*.ts` rather than `e2e/**/*.ts` so it reaches a suite kept under an app folder such as `web/e2e/`. Resolution is mechanical and reach is a judgment about where the work happens.
 
@@ -49,8 +48,6 @@ Two classes resolve to nothing and are correct to, and both are reported by name
 - **Ignored.** A path git ignores is session scratch no clone holds. `governance/rules/canon/tasks.md` cites `.canon/tasks/index.md`, which is real at the main root and absent from a fresh clone and from every linked worktree. Without this the verdict would depend on which tree the stage ran in.
 
 The ignored class makes the counts tree-dependent. From the main worktree that path resolves and the ignored count is zero, and from a linked worktree it is one. The verdict is the same either way, so a count quoted from one tree names which tree it came from.
-
-A standard name resolves against `standards/` alone, matching `standardRoots` in `src/standards/read.ts`, which reads the working root and then the package corpus. `internal/standards/` is not a candidate, since `canon standards <name>` never reaches it and admitting it would pass a citation that refuses for the session opening it.
 
 ## Gotchas
 
@@ -64,7 +61,7 @@ A standard name resolves against `standards/` alone, matching `standardRoots` in
 
 ### Rules that point rather than restate
 
-`claude/skills/create-rule/references/rule.md` settles the shape: a rule points at the standard that owns a convention and never restates it, citing it through `canon standards <name>` alone.
+`claude/skills/create-rule/references/rule.md` settles the shape: a rule points at the standard that owns a convention and never restates it, loading the skill that owns it rather than naming a path.
 
 `governance/rules/canon/tasks.md`, `governance/rules/canon/plan.md`, and `governance/rules/canon/context.md` are hand-written and cite no standard by name, since their standards moved into `task-board`, `plan-feature`, and `context-fold`. They load the owner skill instead. The groundwork, intake, session, design, readme, and rule rules retired with their standards, each routing a path to a reference its owner skill already reads. The skill rule stays as `governance/rules/claude/skill.md`, hand-written, because its creation-time and re-read bullets fire on a hand edit between skill runs.
 

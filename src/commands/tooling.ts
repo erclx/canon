@@ -276,8 +276,7 @@ function runList(opts: ListOptions): number {
 
 /**
  * Writes the reference to stdout and every frame line to stderr, so a caller
- * capturing the output with `$(...)` receives the document alone. Mirrors
- * `print` in `src/commands/standards.ts`.
+ * capturing the output with `$(...)` receives the document alone.
  */
 function printReference(stack: string): number {
   intro('canon tooling reference')

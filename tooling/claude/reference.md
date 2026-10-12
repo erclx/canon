@@ -42,7 +42,7 @@ A project installed before the board became a folder still holds `.claude/TASKS.
 
 Convert by hand, once per project:
 
-1. Split each `###` block into `.canon/tasks/vXX.Y-<slug>.md`, adding the `title` and `description` frontmatter the tasks standard requires, which `canon standards tasks` prints. Compare each new file against the block it came from rather than checking that every block landed somewhere.
+1. Split each `###` block into `.canon/tasks/vXX.Y-<slug>.md`, adding the `title` and `description` frontmatter the tasks reference in the `task-board` skill requires. Compare each new file against the block it came from rather than checking that every block landed somewhere.
 2. Run `canon indexes regen --no-stage --root . .canon/tasks/<any-task>.md` to build the catalog.
 3. Delete `.claude/TASKS.md`, and swap its `.gitignore` entry for `.canon/tasks/`.
 

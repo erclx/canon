@@ -1,6 +1,6 @@
 ---
 title: Overview
-description: The CLI shell-out pattern every skill follows, reading a report rather than rediscovering, the procedures defined once in standards, the main-root write route, and the two gates a new skill trips
+description: The CLI shell-out pattern every skill follows, reading a report rather than rediscovering, the procedures defined once in an owner skill's references, the main-root write route, and the two gates a new skill trips
 ---
 
 # Overview
@@ -12,7 +12,7 @@ Procedures that run inside more than one plugin skill, and the reasoning each bo
 ## Layout
 
 - `claude/skills/` owns the bodies that carry these procedures
-- `standards/` owns the two procedures defined once and cited, `publish.md` and `slug.md`
+- `claude/skills/git-pr/references/publish.md` and `claude/skills/git-branch/references/slug.md` own the two procedures defined once and cited
 - `src/labels/` owns `canon labels audit`, which the label map procedure calls
 
 Each file covers one procedure family:
@@ -57,13 +57,13 @@ The script anchors its pattern on a non-path character, so a nested spelling suc
 
 ## Procedures defined once and cited
 
-Two procedures run inside more than one skill and are defined once in `standards/`, cited from each body rather than restated in it. Each has a standard of its own, `publish.md` for the scan and `slug.md` for the transform. Neither sits inside a document-type standard, since `markdown.md` does not govern a scan and `skill.md` does not govern a slug transform.
+Two procedures run inside more than one skill and are defined once in an owner skill's `references/`, cited from each body rather than restated in it. Each has a reference of its own, `publish.md` for the scan and `slug.md` for the transform. Neither sits inside a document-type standard, since `markdown.md` does not govern a scan and `skill.md` does not govern a slug transform.
 
 The scan carries two checks under one citation, characters and phase labels, with the rules themselves held by `markdown.md` and `versioning.md` beside it. A skill citing the scan gets both without naming either file, which is what keeps a new check from costing an edit in every consuming body. The label check scopes by destination, so a skill writing into the repository rather than onto a remote cites the same standard and takes the character half alone.
 
 Both are stated generally, and neither names what enforces it here. An installed standard belongs to the project that installed it, so a standard citing this repository's audit hook, scratch paths, or output filenames goes wrong in a target that has none of them, with nothing reporting it. In this repository the scan covers text the hook never reaches, meaning `.canon/tmp/`, anything leaving through `gh`, and anything inside a fence, and that belongs here rather than in the file that ships. Each citing skill names its own gap for the same reason, since the gap is a fact about the skill.
 
-A citation names one path, `${CLAUDE_SKILL_DIR}/../../standards/<name>.md`, the same as any standard a body reads. The plugin install dereferences the `claude/standards` symlink, so every plugin cache holds the whole corpus and that path resolves wherever the plugin does. `slug.md` and `publish.md` are reached by citation alone, since neither has a home outside the corpus.
+A citation names one path, `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md`, the same as any shared reference a body reads. The plugin ships its skills side by side, so that path resolves wherever the plugin does. `slug.md` and `publish.md` are reached by citation alone.
 
 The split between the two surfaces is what keeps the citation honest. The standard owns the procedure and the body owns the trigger, since both the moment a scan runs and the text it runs against vary per skill. The empty-branch case splits the same way, carrying three legitimate answers across the catalogue: fall back to `latest`, stop, or fall through to another source. A body that cites without stating its own case reads as if the default applied to it.
 

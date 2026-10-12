@@ -2,7 +2,6 @@
 description: Enforce where toolkit content is authored and which copy a rule, skill, or seed cites
 paths:
   - 'internal/**'
-  - 'standards/**'
   - 'claude/**'
   - 'governance/**'
   - 'docs/**'
@@ -15,18 +14,13 @@ paths:
 ## Where to author
 
 - Author toolkit-internal content under `internal/`, never inside an installable surface.
-- Author standards at `standards/`, at the project root.
 - Author a toolkit-only rule at `internal/rules/` and a rule that ships to targets at `governance/rules/`.
 - Before restructuring installable content under `claude/skills/`, `tooling/`, or `governance/rules/`, grep the matching install and list scripts for depth constraints such as `-maxdepth` and fixed globs. Bundle the script update with the restructure, or pick a depth the scripts already handle.
 
 ## Which copy to edit and cite
 
 - Edit the authoring root, never the consumed copy under `.claude/`. Regenerate that copy with `bun run check`.
-- Cite a standard in the form its carrier resolves. The corpus has no consumed copy, so no single spelling answers on every surface.
-- Cite `${CLAUDE_SKILL_DIR}/../../standards/<name>.md` from a body under `claude/`, which resolves off the `claude/standards` symlink in every plugin cache.
-- Call `canon standards <name>` from a rule or a seed. Both are read with no skill context, so `${CLAUDE_SKILL_DIR}` expands to nothing there.
-- Cite `standards/<name>.md` from a file that stays in this repository, which is the working root the resolver reads first.
-- Cite a standard by bare name with no path in a `SKILL.md` frontmatter `description` field. Frontmatter loads ahead of the body, so `${CLAUDE_SKILL_DIR}` has nothing to expand against there, and a raw `standards/<name>.md` path resolves nowhere in an installed target. Say "the `<name>` standard" instead.
+- Cite a reference another skill owns as `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md` from a body under `claude/`, naming the owner skill rather than copying the file. The plugin ships the skills side by side, so the sibling path resolves in every plugin cache.
 
 ## What a shipped body may assume about its checkout
 

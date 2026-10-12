@@ -49,7 +49,7 @@ describe('isQualified', () => {
 
 describe('isToolkitOwned', () => {
   it('should own a path under an authoring root no install channel delivers', () => {
-    expect(isToolkitOwned('standards/intake.md', new Set())).toBe(true)
+    expect(isToolkitOwned('governance/intake.md', new Set())).toBe(true)
   })
 
   it('should disown a path a seed installs into the target', () => {
@@ -94,14 +94,14 @@ describe('authoringRootsFor', () => {
 
     // canon-keep-surface-root
     expect(roots).not.toContain('.claude/context/')
-    expect(roots).toContain('standards/')
+    expect(roots).toContain('governance/')
   })
 
   it("should drop the reader's own surface root for a moved project corpus", () => {
     const roots = authoringRootsFor('canon/skills')
 
     expect(roots).not.toContain('canon/context/')
-    expect(roots).toContain('standards/')
+    expect(roots).toContain('governance/')
   })
 })
 
@@ -125,27 +125,27 @@ describe('citationsIn', () => {
     const text = [
       '# Body',
       '',
-      'See `standards/intake.md` for the shape.',
+      'See `governance/intake.md` for the shape.',
     ].join('\n')
 
     expect(citationsIn('claude/skills/x/SKILL.md', text, new Set())).toEqual([
       {
         file: 'claude/skills/x/SKILL.md',
         line: 3,
-        path: 'standards/intake.md',
+        path: 'governance/intake.md',
         qualified: false,
       },
     ])
   })
 
   it('should mark a citation the sentence qualifies', () => {
-    const text = "Read the toolkit's `standards/intake.md`."
+    const text = "Read the toolkit's `governance/intake.md`."
 
     expect(citationsIn('claude/skills/x/SKILL.md', text, new Set())).toEqual([
       {
         file: 'claude/skills/x/SKILL.md',
         line: 1,
-        path: 'standards/intake.md',
+        path: 'governance/intake.md',
         qualified: true,
       },
     ])
@@ -158,7 +158,8 @@ describe('citationsIn', () => {
   })
 
   it('should skip a path resolved through the plugin root', () => {
-    const text = 'Read `${CLAUDE_SKILL_DIR}/../../standards/markdown.md`.'
+    const text =
+      'Read `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md`.'
 
     expect(citationsIn('claude/skills/x/SKILL.md', text, new Set())).toEqual([])
   })
@@ -172,15 +173,15 @@ describe('citationsIn', () => {
 
 describe('scanReach', () => {
   it('should split the shipped corpus into qualified and unqualified citations', () => {
-    write('standards/intake.md', '# Intake\n')
+    write('governance/intake.md', '# Intake\n')
     write('tooling/base/seeds/canon/context/ci.md', '# CI\n')
     write(
       'claude/skills/alpha/SKILL.md',
-      'See `standards/intake.md` for the shape.\n',
+      'See `governance/intake.md` for the shape.\n',
     )
     write(
       'claude/skills/beta/SKILL.md',
-      "Read the toolkit's `standards/intake.md`.\n",
+      "Read the toolkit's `governance/intake.md`.\n",
     )
 
     const report = scanReach(root)
@@ -191,7 +192,7 @@ describe('scanReach', () => {
       {
         file: 'claude/skills/alpha/SKILL.md',
         line: 1,
-        path: 'standards/intake.md',
+        path: 'governance/intake.md',
         qualified: false,
       },
     ])
@@ -201,7 +202,7 @@ describe('scanReach', () => {
   it('should skip a citation of a path this repository does not hold', () => {
     write(
       'claude/skills/alpha/SKILL.md',
-      'See `standards/never-written.md` for the shape.\n',
+      'See `governance/never-written.md` for the shape.\n',
     )
 
     const report = scanReach(root)
@@ -211,10 +212,10 @@ describe('scanReach', () => {
   })
 
   it("should read a target's own corpus and name which one it read", () => {
-    write('standards/intake.md', '# Intake\n')
+    write('governance/intake.md', '# Intake\n')
     write(
       '.claude/skills/alpha/SKILL.md',
-      'See `standards/intake.md` for the shape.\n',
+      'See `governance/intake.md` for the shape.\n',
     )
 
     const report = scanReach(root)
@@ -225,7 +226,7 @@ describe('scanReach', () => {
       {
         file: '.claude/skills/alpha/SKILL.md',
         line: 1,
-        path: 'standards/intake.md',
+        path: 'governance/intake.md',
         qualified: false,
       },
     ])
@@ -246,9 +247,9 @@ describe('scanReach', () => {
   })
 
   it('should prefer the shipped corpus over the internal one', () => {
-    write('standards/intake.md', '# Intake\n')
-    write('claude/skills/shipped/SKILL.md', 'See `standards/intake.md`.\n')
-    write('.claude/skills/internal/SKILL.md', 'See `standards/intake.md`.\n')
+    write('governance/intake.md', '# Intake\n')
+    write('claude/skills/shipped/SKILL.md', 'See `governance/intake.md`.\n')
+    write('.claude/skills/internal/SKILL.md', 'See `governance/intake.md`.\n')
 
     const report = scanReach(root)
     if (report.kind !== 'measured') throw new Error('expected a measurement')

@@ -31,9 +31,9 @@
 # the other side and a second measure rather than this one.
 #
 # Matching is prefix-anchored, so a `.claude/` path earns no row written for an
-# authoring root: `standards/` never matches `.claude/standards/`. Every surface
-# living only under a dotted folder carries its own prefix on the row that owns
-# its subject. `internal/` splits across two rows for the same reason, holding
+# authoring root: `internal/standards/` never matches
+# `.claude/internal/standards/`. Every surface living only under a dotted folder
+# carries its own prefix on the row that owns its subject. `internal/` splits across two rows for the same reason, holding
 # rules and standards rather than a subject of its own, and only the
 # `standards` row carries its consumed copy under `.claude/internal/`.
 
@@ -42,7 +42,7 @@
 # marketplace entry a consumer adds.
 skills = ["claude/skills/", ".claude/skills/", ".claude-plugin/"]
 governance = ["governance/", ".claude/rules/", "internal/rules/", "internal/governance.toml"]
-standards = ["standards/", ".claude/standards/", "internal/standards/", ".claude/internal/standards/"]
+standards = ["internal/standards/", ".claude/internal/standards/"]
 tooling = ["tooling/"]
 # Both halves of the migration boundary. `scripts/core/` and `sandbox/` are
 # left to the rows below, so a new `scripts/` folder goes bare until the

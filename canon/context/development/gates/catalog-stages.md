@@ -1,6 +1,6 @@
 ---
 title: Catalog stages
-description: The gate stages reading a catalog or a count, covering sandbox coverage, plugin manifest validation, skill paths, the requirements record, the document ceiling, skill provenance, skill practice shape, skill family, and standard success criteria
+description: The gate stages reading a catalog or a count, covering sandbox coverage, plugin manifest validation, skill paths, the requirements record, the document ceiling, skill provenance, skill practice shape, and skill family
 ---
 
 # Catalog stages
@@ -61,7 +61,7 @@ The Folder-echoed filenames stage reads every path `git ls-files` lists and fail
 
 It is a gate stage rather than a `canon markdown audit` finding for two reasons. It reads paths rather than markdown, so it covers code and config files the audit never opens. The audit also runs inside every target through the tooling base stack, where a folder-named file may be a convention the target chose, and a finding there would fail a push on that choice. The rule itself sits in the `codebase-layout` skill and reaches targets as guidance, and this stage is this repository's only enforcement.
 
-Matching is exact rather than singular-aware, so `standards/standard.md` passes. A false positive on a gate stage teaches a contributor to route around it, and widening the match is cheap once a real plural echo slips through. The stage carries no exemption list, and one waits for the first hit someone argues for.
+Matching is exact rather than singular-aware, so `skills/skill.md` passes. A false positive on a gate stage teaches a contributor to route around it, and widening the match is cheap once a real plural echo slips through. The stage carries no exemption list, and one waits for the first hit someone argues for.
 
 ## Skill provenance
 
@@ -80,9 +80,3 @@ It reports unmeasured when `claude/skills/` is absent rather than when both corp
 The Skill family stage calls `auditSkills` in-process and fails on every `family` finding, naming each skill under `claude/skills/` whose `metadata.family` is missing or names no key in `src/claude/skills-families.ts`. The verb reports the same finding and keeps its exit on a missing requirement alone, the split the practice shape stage takes.
 
 The field needs a stage of its own because no stage reads the skill map. Its only reader is the web build, which CI runs when a skill or the map changes and `bun run check` never runs, so a skill with no family would otherwise reach the push and fail there. Internal skills take no family and the stage never asks them for one. A tree without `claude/skills/` reports unmeasured.
-
-## Standard success criteria
-
-The Standard success criteria stage runs `bun src/cli.ts standards audit --arrivals-only`, which fails a push when a standard new to the branch carries no `## Success criterion` section. It is scoped to arrival rather than to the corpus, since `standards/standard.md` forbids writing the section into an existing standard outside the change that exercises it, and a gate over the corpus would fail every push until someone closed every known gap at once, which is the sweep that rule exists to prevent.
-
-`--arrivals-only` prints nothing when every arriving standard carries the section, matching the Skill requirements stage's own silent-pass shape. The bare `canon standards audit` a session runs by hand reports the whole corpus instead, so the same verb serves the gate and the reader without a second command to keep in sync.

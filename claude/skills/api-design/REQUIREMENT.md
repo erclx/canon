@@ -9,7 +9,7 @@ description: Why a session changing what a caller can see needs stated rules on 
 
 Without this skill, a session changing a surface a caller depends on has nothing in front of it about what that caller can see or how a change lands without breaking it. It works for the one caller it opened, renames a field in place, returns whatever record it had in hand, and nothing in the toolkit answers before the change ships.
 
-The absence is measured across the shipped corpus. No folder under `claude/skills/` matches `api`, `interface`, or `contract`, and no file across `claude/`, `governance/`, and `standards/` carries `hyrum` or a form of `idempotent`. The only related lines are the two error bullets in the core code rule, which state that errors are structured and hide internals and say nothing about exposure, versioning, or retries.
+The absence is measured across the shipped corpus. No folder under `claude/skills/` matches `api`, `interface`, or `contract`, and no file across `claude/` and `governance/` carries `hyrum` or a form of `idempotent`. The only related lines are the two error bullets in the core code rule, which state that errors are structured and hide internals and say nothing about exposure, versioning, or retries.
 
 The one skill nearest the subject leaves the pointer open. `codebase-layout` excludes shaping "a module's interface and seams" in its description and names no skill to take it, so a session routed away from layout on that question lands nowhere.
 

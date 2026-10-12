@@ -13,11 +13,11 @@ The dependency install is the cost that still argues for the `./claude` source. 
 
 The `internal/` boundary does not keep internal files off a user's disk, since adding a git marketplace clones the whole repository with `internal/` in it. The leak that first argued for the boundary, internal snippets surfacing in a target's catalog as if the plugin offered them, went with the retired snippets domain.
 
-`claude/standards` is a symlink to the root authoring source. A symlink inside a plugin that resolves elsewhere within the marketplace is dereferenced at install and its content copied, so the files arrive as real directories in the cache. The measured install is 964K with 55 skills, against 760K for the same shape without the symlinks.
+`claude/` carries no symlink into the rest of the repository. A symlink inside a plugin that resolves elsewhere within the marketplace is dereferenced at install and its content copied, which is how the retired `claude/standards` link once shipped the standards corpus as real directories in the cache, at 964K with 55 skills against 760K without it. That corpus retired when each standard moved into the `references/` of the skill owning it.
 
 The entry carries no version on purpose. `plugin.json` overrides the enclosing entry for both name and version, so a version on the entry would drift on every release with nothing reporting it, and the release config writes only the plugin manifest.
 
-The check pipeline does not follow the two symlinks. The index walker's glob, the spell checker, and the formatter were each tested against a symlinked directory in isolation, so `standards/` is not double-walked and the links produce no drift failures.
+The check pipeline does not follow symlinks. The index walker's glob, the spell checker, and the formatter were each tested against a symlinked directory in isolation, so a linked folder is not double-walked and produces no drift failures.
 
 ## Decisions
 
@@ -40,13 +40,13 @@ Revisit when the installer lets a plugin skip that install, or an `internal/` fi
 
 Validation proves the manifest parses and nothing about whether it works. `claude plugin validate --strict` passes a manifest whose `source` points at a directory that does not exist, so it would have accepted the zero-skill root-sourced shape. An install is the only check that proves a shape, which is why `bun run check` covering this file does not retire the manual install.
 
-### Reaching a standard
+### Reaching a shared reference
 
-Delivering a standard and reaching it are separate problems. Each citing body names `${CLAUDE_SKILL_DIR}/../../standards/X.md`, which lands on the dereferenced symlink beside `skills/`. One path is enough, because no corpus installs into a project, so there is no project copy for a citation to fall back to. `git-commit` citing `versioning.md` is the concrete shape of the form.
+Delivering a shared reference and reaching it are separate problems. Each citing body names `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md`, which lands on the owner skill beside it under `skills/`. One path is enough, because no reference installs into a project, so there is no project copy for a citation to fall back to. `draft-and-pick` citing `canvas-board`'s `canvas.md` is the concrete shape of the form.
 
-Only `${CLAUDE_SKILL_DIR}` survives to the model as an already-expanded path. Measured across three probe skills in a project with no `.claude/`, the body arrived with that variable already expanded to an absolute path, while `${CLAUDE_PLUGIN_ROOT}` reached the model as a literal string and a bare `../../` arrived unresolved, working only because the model inferred a base, which is the inference `claude/skills/create-skill/references/skill.md` bans a bare relative path to avoid. All three probes reported the standard's sentinel, so the content read looked the same across them. Ask a probe for the path it resolved rather than the content it read, since content alone cannot separate expansion from a lucky guess.
+Only `${CLAUDE_SKILL_DIR}` survives to the model as an already-expanded path. Measured across three probe skills in a project with no `.claude/`, the body arrived with that variable already expanded to an absolute path, while `${CLAUDE_PLUGIN_ROOT}` reached the model as a literal string and a bare `../../` arrived unresolved, working only because the model inferred a base, which is the inference `claude/skills/create-skill/references/skill.md` bans a bare relative path to avoid. All three probes reported the reference's sentinel, so the content read looked the same across them. Ask a probe for the path it resolved rather than the content it read, since content alone cannot separate expansion from a lucky guess.
 
-A guard on a standard's presence names the file under the plugin root rather than a directory in the target. `create-skill` carries that guard.
+A guard on a reference's presence names the file under the plugin root rather than a directory in the target. `create-skill` carries that guard.
 
 ### The first executable in a skill
 
@@ -64,11 +64,11 @@ The verb also needs a fallback rather than only a guard, since these scripts shi
 
 ### What a symlink costs
 
-A symlink is an entry point that cannot filter. An installer dereferences `claude/standards` and copies whatever sits behind it into every plugin cache with no code in the path to stop it. A filterable subfolder such as `standards/canon/` still leaks through the symlink ahead of it.
+A symlink is an entry point that cannot filter. An installer dereferences any symlink under `claude/` and copies whatever sits behind it into every plugin cache with no code in the path to stop it, so a filterable subfolder behind the link still leaks through it.
 
 Internal content lives at `internal/` instead, which nothing under `claude/` reaches. The Plugin boundary measure in `src/gate/boundaries.ts` walks the plugin tree with symlinks followed and fails on any file resolving under `internal/`, measuring what an install actually copies rather than trusting a filter upstream of it.
 
-A native Windows checkout without symlink support materializes the link as a plain text file holding the path `../standards`. The plugin then ships a junk file and no standards, and no stage notices, because every catalog command reads the real directories at the repository root. `canon/context/sandbox/overview.md` treats Windows as a supported development environment, so this is a limitation to state rather than a case the pipeline can catch.
+A native Windows checkout without symlink support materializes a link as a plain text file holding its target path. A plugin carrying one then ships a junk file in place of the content, and no stage notices, because every catalog command reads the real directories at the repository root. `claude/` carries no link today, so this binds the next one rather than a live path. `canon/context/sandbox/overview.md` treats Windows as a supported development environment, so this is a limitation to state rather than a case the pipeline can catch.
 
 A marketplace name is one global slot per user. Adding a second marketplace under the same name replaces the first, and a local-path marketplace pointing at a worktree breaks when that worktree is removed.
 
@@ -78,9 +78,9 @@ A marketplace entry's `skills` array adds to the conventional `<plugin-root>/ski
 
 Removing `plugin.json` from the subdirectory changes none of it. The manifest governs name and version and leaves component discovery to the root's own layout, so whether that root carries `skills/` is what decides.
 
-The shape that narrows in this layout is a curated root holding one symlink per kept skill and no `skills/` directory, with the entry naming each path. Measured when the plugin shipped 64 skills, the full entry loaded all of them at roughly 8,300 always-on tokens, and a four-skill curated entry loads 4 at roughly 330. The 8,300 is the 8,100 read at 63 skills scaled by total frontmatter bytes rather than a fresh measurement. Install dereferences the symlinks the way it does `claude/standards`, so the cache holds real directories at 104K against 964K for the full plugin.
+The shape that narrows in this layout is a curated root holding one symlink per kept skill and no `skills/` directory, with the entry naming each path. Measured when the plugin shipped 64 skills, the full entry loaded all of them at roughly 8,300 always-on tokens, and a four-skill curated entry loads 4 at roughly 330. The 8,300 is the 8,100 read at 63 skills scaled by total frontmatter bytes rather than a fresh measurement. Install dereferences the symlinks into real directories, so the cache holds real directories at 104K against 964K for the full plugin.
 
-What that shape drops is the standards fallback. Install copies the named skill directories alone, so no `standards/` sibling arrives, and a skill sitting one level under the curated root rather than two under the plugin root resolves `${CLAUDE_SKILL_DIR}/../../standards/X.md` to nothing. That reached 40 of the 64 bodies shipping at that measurement, which all lose their fallback at once, and a curated entry has to answer it before one ships.
+What that shape drops is every sibling a kept body cites. Install copies the named skill directories alone, so a body citing `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md` resolves to nothing when the owner skill was not kept. At that measurement the shared standards path reached 40 of the 64 bodies, and a curated entry has to answer the sibling citations of every skill it keeps before one ships.
 
 ### The install ref reads as malformed
 

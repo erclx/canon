@@ -40,8 +40,8 @@ After changing what a workspace's files must contain:
 - `canon/context/features/teach/overview.md`: structure, the render pipeline, decisions and gotchas
 - `canon/context/features/teach/chrome.md`: the chrome, its styles, and the page scripts
 - `references/lesson-chrome.md`: the four markers, what `canon teach nav` rewrites, and the authored-versus-generated boundary
-- `canon standards teach`: folder layout, ordinal naming, frontmatter, mission and learning-record formats
-- `canon standards glossary`: the entry shape, ordering, and which terms a workspace carries
+- `claude/skills/teach-workspace/references/teach.md`: folder layout, ordinal naming, frontmatter, mission and learning-record formats
+- `claude/skills/teach-workspace/references/glossary.md`: the entry shape, ordering, and which terms a workspace carries
 - `claude/skills/teach-workspace/`: the pedagogy deciding what to teach next, which is the shipped skill's own concern rather than this one's
 - `canon/context/design/tokens.md`: the token values this surface reads and does not own
 - `canon/context/development/evidence.md`: which `evidence` folders are dev baselines and which are prod captures, before touching `examples/teach/evidence/`

@@ -1,8 +1,8 @@
 import { type StageContext, scenario } from '@/sandbox/scenario'
 
 /**
- * No mock standards folder. A target holds none, so `docs-sync` reaches the
- * standards it reads through `canon standards <name>` here as it would anywhere.
+ * No mock reference folder. `docs-sync` reaches the references it reads
+ * through the plugin's own skills here as it would anywhere.
  */
 function stageBase(ctx: StageContext): void {
   ctx.fixtures('docs', 'sync', 'shared', 'base')

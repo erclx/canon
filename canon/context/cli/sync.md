@@ -13,7 +13,7 @@ The folder splits by job: the git workflow across `target.ts`, `git.ts`, and `wo
 
 ### Something other than the model resolving a file by path decides whether it installs
 
-A domain installs as a file when something other than the model resolves it by path, and ships as a command when only a session's own judgment would open it. The harness glob-loads a rule, and a target's build tooling reads a config or `.claude/design/base.css` off its path, so each installs. A standard is opened by the model on purpose, so `canon standards` carries no install and no sync.
+A domain installs as a file when something other than the model resolves it by path, and ships as a command when only a session's own judgment would open it. The harness glob-loads a rule, and a target's build tooling reads a config or `.claude/design/base.css` off its path, so each installs. A skill reference is opened by the model on purpose, so it ships inside the plugin and carries no install and no sync.
 
 Deciding case by case lost to writing the criterion down. `canon/context/standards/resolution.md` carries the closed install channel.
 

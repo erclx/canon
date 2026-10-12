@@ -82,9 +82,9 @@ Six things a run cannot reach. Each is a property of the harness rather than a g
 
 A nested background dispatch is not on this list. A shim bounds it and `sessions` records it, and `canon/context/sandbox/isolation.md` states the three cases that bound still misses.
 
-### The standards fallback
+### The sibling reference route
 
-A shipped body cites `${CLAUDE_SKILL_DIR}/../../standards/<file>.md`, and `${CLAUDE_SKILL_DIR}` expands to wherever the harness found the skill. Resolved through `--plugin-dir`, that lands on `<root>/standards/`, a tree the sandbox does not carry, so an arm asserting the sandbox holds no standard still separates the two. Resolved through injection, the base is `<sandbox>/.claude/skills/<name>/`, so the citation lands on `<sandbox>/.claude/standards/`, a path inside the fixture that no assertion can tell from a project copy.
+A shipped body cites `${CLAUDE_SKILL_DIR}/../<skill>/references/<file>.md`, and `${CLAUDE_SKILL_DIR}` expands to wherever the harness found the skill. Resolved through `--plugin-dir`, that lands on the owner skill under `<root>/claude/skills/`, a tree the sandbox does not carry, so an arm asserting the sandbox holds no copy still separates the two. Resolved through injection, the base is `<sandbox>/.claude/skills/<name>/`, so the citation lands on `<sandbox>/.claude/skills/<skill>/references/`, a path inside the fixture that no assertion can tell from a project copy.
 
 `canon sandbox run` sets `SANDBOX_SKIP_SKILL_INJECT`, so `injectChangedSkills` in `src/sandbox/provision.ts` copies nothing for a headless run. Every skill there resolves through `--plugin-dir`, the changed ones included, and an assertion that the sandbox holds no standard separates the routes. The gap stays for an interactive sandbox, which injects exactly the skills the branch changed, so the skills most in need of the check are the ones injection disqualifies.
 

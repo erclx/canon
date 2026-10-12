@@ -337,8 +337,8 @@ export const capabilitySeeding: Measure = async (ctx) => {
  * Every file under `claude/` resolved through its symlinks and rejected when it
  * lands under `internal/`.
  *
- * The plugin reaches `standards/` through a symlink, which an installer
- * dereferences with no code in the path to filter. Walking with symlinks
+ * An installer dereferences any symlink under the plugin root with no code in
+ * the path to filter, so a link added there ships whatever it points at. Walking with symlinks
  * followed is what an install copies, so this is the only place the boundary
  * can be measured. The walk tracks the real directories on its current descent
  * and does not enter one a second time, the way `find -L` stops on a loop.

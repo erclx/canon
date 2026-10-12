@@ -10,8 +10,7 @@ import { isMarked } from '@/sweep/exempt-marker'
  * on purpose rather than by omission. What decides membership here is whether
  * anything serves the file to a reader who does not hold this repository: a
  * skill body loads into a session, a docs page is read through `canon docs`, a
- * standard through `canon standards`, a rule through a glob match, and a seed
- * through an install. A `src/` doc comment
+ * rule through a glob match, and a seed through an install. A `src/` doc comment
  * is read by someone working on the toolkit, in this checkout, where every
  * number resolves.
  *
@@ -19,18 +18,12 @@ import { isMarked } from '@/sweep/exempt-marker'
  * `src/design/base.css` and `src/design/tokens.ts` carry sixteen values shaped
  * `#191512`, which no width or boundary rule separates from a pull request
  * number, so telling them apart would need the line's syntactic position.
- *
- * `claude/standards` is a symlink into one of the roots below, and a walk that
- * followed it would read that corpus twice and report every finding in it
- * under two paths. Nothing is lost by not following, since it is a corpus here
- * in its own right.
  */
 export const SHIPPED_CORPORA = [
   'claude',
   'docs',
   'governance',
   'scripts',
-  'standards',
   'tooling',
 ] as const
 
@@ -146,37 +139,15 @@ const SAME_REPOSITORY =
 const DOCS_PATH = /(?<![\w./-])docs\/[^\s`)\]]*\.md\b/g
 
 /**
- * A bare `standards/<name>.md` citation from a body under `claude/skills/`,
- * which `598-authoring-layout.md` fixes as the broken form there:
- * `${CLAUDE_SKILL_DIR}` is what resolves off the `claude/standards` symlink
- * in every plugin cache, and a raw path has nothing to expand it.
+ * A call to `canon standards`, a verb no installed CLI carries any more. A
+ * shipped body naming it sends a target reader to an unknown-command error,
+ * so every corpus but `docs/` reports it. `docs/` sits outside the scan while
+ * its pages still document the retired verb.
  *
- * Scoped to that one corpus rather than every `isShippedCorpus` reads,
- * because `docs/agents/` and `docs/workflow/` carry the identical
- * `standards/<name>.md` shape correctly: a docs page resolves from this
- * checkout's own root rather than through a skill's `${CLAUDE_SKILL_DIR}`,
- * so the same string is the fix in one corpus and the defect in the other.
- * Widening the pattern to every corpus turns it into a mass false-positive
- * over the dozens of correct citations those two folders carry.
- *
- * The same leading-boundary discipline as `DOCS_PATH` excludes the already
- * correct form: a `/` sits ahead of `standards` in
- * `${CLAUDE_SKILL_DIR}/../../standards/<name>.md`, which the negative
- * lookbehind rejects, so a citation already rewritten to the resolving form
- * does not fail this check a second time.
- *
- * Reported unless `isStandardsPathReportable` reads the match as a
- * deliberate placeholder rather than a real citation. A body illustrating
- * the shape a project's own `standards/<name>.md` takes writes a bracketed
- * token this pattern also matches, such as `standards/<slug>.md`
- * in a skill that drafts one, which names no real file. A bare,
- * non-bracketed match now reports whether or not the file exists, unlike
- * `DOCS_PATH`, which still gates on existence: a same-repository citation
- * under this corpus names no target project's own tree the way a `docs/`
- * path can, so shape alone separates a placeholder from a broken citation
- * here with no false-positive class existence was catching.
+ * The trailing lookahead keeps a hyphenated token such as a `standards-audit`
+ * page name from matching, since that names a file rather than a call.
  */
-const STANDARDS_PATH = /(?<![\w./-])standards\/[^\s`)\]]*\.md\b/g
+const STANDARDS_CALL = /\bcanon standards(?![\w-])/g
 
 /**
  * A phase-label-shaped token: exactly two numeric groups, with a negative
@@ -223,7 +194,7 @@ export interface ShippedReference {
     | 'pull-request'
     | 'commit'
     | 'docs-path'
-    | 'standards-path'
+    | 'retired-verb'
     | 'phase-label'
     | 'rule-path'
   /** The reference as written, so a report names the token to qualify. */
@@ -272,35 +243,17 @@ function isDocsPathReportable(
 }
 
 /**
- * Whether `file` sits in the one corpus `STANDARDS_PATH` and `RULE_PATH`
- * both gate: a shipped skill body, minus its own `REQUIREMENT.md`.
+ * Whether `file` sits in the one corpus `RULE_PATH` gates: a shipped skill
+ * body, minus its own `REQUIREMENT.md`.
  *
- * Both patterns share this scope because both bans live in
- * `598-authoring-layout.md`, stated for the same reader: a session loading
- * the `SKILL.md` body a target actually receives. `REQUIREMENT.md` is
- * excluded for the reason that file states there, since a maintainer or an
- * audit command reads it rather than a session loading it, so neither
- * resolver rule this pair enforces ever applies to it. One predicate serves
- * both call sites rather than two copies drifting apart with nothing
- * comparing them.
+ * The ban lives in `598-authoring-layout.md`, stated for one reader: a
+ * session loading the `SKILL.md` body a target actually receives.
+ * `REQUIREMENT.md` is excluded for the reason that file states there, since a
+ * maintainer or an audit command reads it rather than a session loading it,
+ * so the resolver rule never applies to it.
  */
 function isSkillBodyScope(file: string): boolean {
   return file.startsWith('claude/skills/') && !file.endsWith('/REQUIREMENT.md')
-}
-
-/**
- * Whether a `STANDARDS_PATH` match should be reported: every match that is
- * not a placeholder, whether or not the named file exists.
- *
- * Existence used to gate this the same way `isDocsPathReportable` gates its
- * corpus, which conflated a deliberate placeholder with a genuinely broken,
- * real-looking citation: both fail existence and both passed muted. A bare
- * `standards/<name>.md` names no target-project tree the way a `docs/` path
- * can, so shape alone separates the two classes here with no false-positive
- * class existence was catching.
- */
-function isStandardsPathReportable(path: string): boolean {
-  return !isPlaceholderPath(path)
 }
 
 /**
@@ -309,13 +262,12 @@ function isStandardsPathReportable(path: string): boolean {
  * The corpus walk is deliberately absent, which lets most of the shape be
  * tested against a string rather than against a fixture. That is the seam
  * `headingCitationsIn` draws in `src/claude/skills-headings.ts` and `citationsIn`
- * draws in `skills-reach.ts`. `DOCS_PATH` and `STANDARDS_PATH` are the two
- * patterns that still need a filesystem, since resolving against this
- * checkout is the only thing that separates a real citation from an
- * illustration for either, so `referencesIn` takes `root` as the one
- * caller-supplied exception to that rule. `root` is required rather than
- * defaulted, since a caller that dropped it silently would report zero
- * findings for both rather than raising, which is the wrong failure
+ * draws in `skills-reach.ts`. `DOCS_PATH` is the one pattern that still
+ * needs a filesystem, since resolving against this checkout is the only thing
+ * that separates a real citation from an illustration, so `referencesIn`
+ * takes `root` as the one caller-supplied exception to that rule. `root` is
+ * required rather than defaulted, since a caller that dropped it silently
+ * would report zero findings rather than raising, which is the wrong failure
  * direction for a gate.
  *
  * The unit is the match rather than the line, unlike those two, because one
@@ -375,13 +327,12 @@ export function referencesIn(
       })
     }
 
-    if (isSkillBodyScope(file)) {
-      for (const match of line.matchAll(STANDARDS_PATH)) {
-        if (!isStandardsPathReportable(match[0])) continue
+    if (!file.startsWith('docs/')) {
+      for (const match of line.matchAll(STANDARDS_CALL)) {
         references.push({
           file,
           line: index + 1,
-          kind: 'standards-path',
+          kind: 'retired-verb',
           text: match[0],
         })
       }

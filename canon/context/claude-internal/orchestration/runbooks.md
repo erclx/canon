@@ -23,7 +23,7 @@ A fourth act settles ahead of those three and puts nothing in the map at all. Th
 
 Splitting on role rather than on file is what lets a feature session write a handoff at all. A worker holds no delegation to have exercised and runs no review poll, so lifting the whole runbook would hand it two sections it can only leave blank, and a blank section teaches its reader to skip the file. The drift step sits in the standard on the opposite test: the failure it detects follows session length rather than role, so a long worker session writing a handoff while following a body the repository has moved past is the case the step exists for.
 
-The reference sits in `session-map`, the one skill that writes the file. `role-orchestrator` and `session-resume` read it as siblings through `${CLAUDE_SKILL_DIR}/../session-map/references/session.md`, which resolves in the plugin cache as `../markdown-craft/` does, and a project holding no plugin runs `canon standards session`.
+The reference sits in `session-map`, the one skill that writes the file. `role-orchestrator` and `session-resume` read it as siblings through `${CLAUDE_SKILL_DIR}/../session-map/references/session.md`, which resolves in the plugin cache as `../markdown-craft/` does.
 
 ### One file per session
 

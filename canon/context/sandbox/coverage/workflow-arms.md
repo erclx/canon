@@ -24,16 +24,6 @@ The skill names its route again on the `Next:` line, so the `auto-ship` pin read
 
 The `open`, `resume`, and `decline` arms cover creating, continuing, and refusing a track. None runs a spike or produces an artifact, so the write-scope rule sending evidence to `evidence/` inside a track has no arm exercising it. The skill's first guard refuses a missing topic without creating a folder, so each arm names its intended prompt on its own `Action:` line and has to be driven with that topic.
 
-## Standards read
-
-`infra:standards read` covers a resolve order rather than a skill. `src/standards/read.ts` searches two roots, and the second is the package corpus, which is the only one a target has. `src/standards/read.test.ts` passes its own roots in, so the arm is what runs the command from a working directory outside the toolkit checkout, where `PROJECT_ROOT` comes off the module's location rather than off `pwd`.
-
-- The arm runs `canon standards skill` from `install/`, a clean target, and captures the frame to `install/read-frame.log` and the document to `install/read-body.md`, since `canon sandbox check` reads the tree alone and splitting the streams lets the resolve be asserted apart from the read. Running from `install/` rather than the sandbox root keeps `authored/standards/` out of the picture.
-- `<canon>` is what the arm scores, since `standardRoots` spells the other root as `standards` and the prefix is the one label no project path produces. The two `absent` entries carry the other half, because a resolve answered from a project copy returns the same document. `.claude/standards` stays in that list.
-- The arm carries no `max_turns`, since it runs the CLI with no agent and no envelope.
-
-It does not reach the published layout. The arm runs `bun "$PROJECT_ROOT/src/cli.ts"`, so the package root is this checkout's `standards/` rather than an installed package directory, and whether `package.json` ships the corpus is measured nowhere. It does not reach the catalog either: no shipped skill body invokes this verb, and plugin bodies read standards off the `claude/standards` symlink, a route that never reaches `src/standards/read.ts`.
-
 ## Session worktree
 
 ### Port offset
@@ -46,7 +36,7 @@ The arm cannot reach the refusal branch for a leftover folder, since Step 4 regi
 
 The runner takes the prompt as a free argument, and a session's `Bash` working directory persists across calls, so a prompt opening with `cd vendor` puts every git read the skill makes inside the submodule. `submodule` runs from inside the submodule and asserts the guard, and `submodule-root` runs from the superproject root over the same staged tree and asserts the guard stays silent.
 
-A scenario staging a subdirectory read inside its own script is the other mechanism, as `infra:standards read` does. The prompt route reaches the skill session's own directory, which no scenario body can set.
+A scenario staging a subdirectory read inside its own script is the other mechanism. The prompt route reaches the skill session's own directory, which no scenario body can set.
 
 ## Review close-out
 

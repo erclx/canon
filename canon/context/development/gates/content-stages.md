@@ -25,7 +25,7 @@ Writing the stamp inside the render rather than in a wrapper is what makes it wo
 
 ### What moves a frame
 
-The counts rendered into the frame come from the standards and skills trees and from the CLI registration block, so a merge adding a standard, a skill, or a command group moves `assets/captures/hero.html` and the refresh pull request carries the change. `canon design css --no-components` fills a `{{TOKENS}}` placeholder in every template, so a merge moving a value in `src/design/tokens.ts` moves `hero.html` and `install.html` and both light sets together. The command count is the source a plan is least likely to predict, since the commands expose no `--json` catalog and the figure comes from `countCommands` in `src/counts/catalogs.ts`, which parses the registration list in `src/cli.ts` directly.
+The counts rendered into the frame come from the skills tree and from the CLI registration block, so a merge adding a skill or a command group moves `assets/captures/hero.html` and the refresh pull request carries the change. `canon design css --no-components` fills a `{{TOKENS}}` placeholder in every template, so a merge moving a value in `src/design/tokens.ts` moves `hero.html` and `install.html` and both light sets together. The command count is the source a plan is least likely to predict, since the commands expose no `--json` catalog and the figure comes from `countCommands` in `src/counts/catalogs.ts`, which parses the registration list in `src/cli.ts` directly.
 
 ### Gotchas
 
@@ -59,7 +59,7 @@ The 150-line length checkpoint stays on the context side of that split and never
 
 ## Shipped references
 
-The Shipped references stage reads `referencesIn` from `src/shipped/references.ts` over the seven corpora a target reader reaches, which is the package's `files` field less `src` and less the two trees that field already negates. It fails a push on six forms, each for what a reader holding a plugin cache rather than this repository meets:
+The Shipped references stage reads `referencesIn` from `src/shipped/references.ts` over the five corpora a target reader reaches, which is the package's `files` field less `src` and less the two trees that field already negates. It fails a push on seven forms, each for what a reader holding a plugin cache rather than this repository meets:
 
 - A bare pull request number resolves against the reader's own tree and reaches something else
 - A bare commit sha resolves nowhere at all
@@ -67,6 +67,7 @@ The Shipped references stage reads `referencesIn` from `src/shipped/references.t
 - A `docs/`-relative path that resolves against this checkout names a file the reader does not hold
 - A phase-label-shaped token has no board to resolve against
 - A numbered rule path reaches its rule only through a separate `canon gov sync`, and only where governance was installed at all
+- A `canon standards` call sends the reader to a verb no installed CLI carries
 
 It gates rather than reports, since a report leaves a citation for a person to notice rather than for a push to catch. The stage emits every hit before returning its failure, since a stage halts the run on its first failing check and a branch carrying several would otherwise repair one.
 
@@ -76,11 +77,13 @@ The docs-path pattern gates on resolution rather than on shape, because shape al
 
 `canon/context/` takes no equivalent pattern, since resolution cannot separate `canon/context/index.md`, which every scaffolded project holds, from `canon/context/context-model/indexes.md`, this repository's own domain entry. Both resolve and only the second is a defect, which is a semantic read the rule and the review checklist carry instead.
 
-### The two skill-body patterns
+### The retired-verb pattern
 
-The standards-path pattern is scoped to `claude/skills/` rather than reaching the other six corpora. `598-authoring-layout.md` fixes `${CLAUDE_SKILL_DIR}/../../standards/<name>.md` as the form that resolves off the `claude/standards` symlink in every plugin cache, so a bare `standards/<name>.md` citation is the defect there and nowhere else: `docs/agents/` and `docs/workflow/` carry the identical bare shape correctly, since a docs page resolves from this checkout's own root. `REQUIREMENT.md` stays out of the scope even there, since a maintainer or an audit command reads that file rather than a session loading it.
+The retired-verb pattern reads every corpus but `docs/`, since a `canon standards` call fails for a reader wherever it sits. `docs/` stays outside the scan while its pages still document the verb. A trailing lookahead rejects a hyphen, so a `standards-audit` page name passes as the filename it is.
 
-The rule-path pattern shares that scope and reasoning, and a bare match reports whether or not the named rule exists, since a same-repository citation under this corpus names no target project's own tree. A rule reaches a target only through a separate `canon gov sync`, a narrower and slower delivery path than the plugin merge that ships the citing skill. The pattern anchors on the trailing `\d{3}-[\w-]+\.md` rather than on the bare `.claude/rules/` prefix, which lets a folder mention carrying no number pass untouched.
+### The skill-body pattern
+
+The rule-path pattern is scoped to `claude/skills/`, less each `REQUIREMENT.md`, since a maintainer or an audit command reads that file rather than a session loading it. A bare match reports whether or not the named rule exists, since a same-repository citation under this corpus names no target project's own tree. A rule reaches a target only through a separate `canon gov sync`, a narrower and slower delivery path than the plugin merge that ships the citing skill. The pattern anchors on the trailing `\d{3}-[\w-]+\.md` rather than on the bare `.claude/rules/` prefix, which lets a folder mention carrying no number pass untouched.
 
 ### The shape-only patterns
 
@@ -92,7 +95,7 @@ Both number patterns exclude the repair form by construction rather than by exem
 
 The corpus stops short of `src/` on the reader rather than on the shipping. A `src/` doc comment lands on a target's disk and nothing serves it to a target reader, so its every number resolves for the person reading it. That boundary is also what keeps the check a prose pattern instead of a parser, since `src/design/` writes values shaped `#191512` and no width or boundary rule separates an all-digit hex color from a pull request number.
 
-The walk passes `dot: true`, which is what reaches the seeds. `Bun.Glob` skips any path carrying a dotted segment by default, and every seeded `.claude/` tree, `.cspell/` list, and `.husky/` hook under `tooling/` sits behind one. It does not follow `claude/standards`, since that tree is a corpus here in its own right, and following the symlink would report every finding in it under two paths.
+The walk passes `dot: true`, which is what reaches the seeds. `Bun.Glob` skips any path carrying a dotted segment by default, and every seeded `.claude/` tree, `.cspell/` list, and `.husky/` hook under `tooling/` sits behind one.
 
 ### Gotchas
 

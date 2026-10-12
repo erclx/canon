@@ -97,9 +97,8 @@ log_step "Assert scaffold"
 # catches a failed domain, and the gate stays green while the target is
 # missing everything that domain provides.
 #
-# Standards name no path because that corpus never installs into a target. A
-# scaffold reads a standard through `canon standards <name>`, resolving against
-# the toolkit rather than a copy this gate could assert on. The two
+# Authoring references name no path because they ship inside the plugin's
+# skills rather than installing into a target. The two
 # rule paths stand for the `claude` and `canon` groups `base` takes whole.
 for path in "CLAUDE.md" ".claude/wiki/index.md" ".claude" "canon/context/index.md" \
   ".prettierrc" ".editorconfig" ".lintstagedrc" ".husky/pre-commit" ".github/workflows/verify.yml" "scripts/verify.sh" \

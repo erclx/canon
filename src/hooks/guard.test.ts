@@ -1764,7 +1764,6 @@ describe('.claude/hooks/cloud-setup.sh', () => {
     for (const [path, body] of [
       ['claude/skills/demo/SKILL.md', '# Demo\n'],
       ['claude/skills/demo/references/notes.md', 'notes\n'],
-      ['standards/plan.md', '# Plan\n'],
       ['.claude/skills/internal-demo/SKILL.md', '# Internal\n'],
     ] as const) {
       mkdirSync(join(dir, path, '..'), { recursive: true })
@@ -1814,7 +1813,7 @@ describe('.claude/hooks/cloud-setup.sh', () => {
   )
 
   it.concurrent(
-    'should stage the skills, the standards link, and the CLI on a cloud VM',
+    'should stage the skills and the CLI on a cloud VM',
     async ({ expect }) => {
       const dir = makeCheckout()
       const bun = makeBun(0)
@@ -1830,9 +1829,7 @@ describe('.claude/hooks/cloud-setup.sh', () => {
           'utf8',
         ),
       ).toBe('notes\n')
-      expect(readFileSync(join(dir, '.claude/standards/plan.md'), 'utf8')).toBe(
-        '# Plan\n',
-      )
+      expect(existsSync(join(dir, '.claude/standards'))).toBe(false)
       expect(readFileSync(bun.log, 'utf8')).toBe('install\nlink\n')
       expect(status(dir)).toBe('')
     },
@@ -1852,7 +1849,7 @@ describe('.claude/hooks/cloud-setup.sh', () => {
         .split('\n')
         .filter((line) => line.startsWith('/.claude/'))
       expect(second.code).toBe(0)
-      expect(exclude).toEqual(['/.claude/skills/demo/', '/.claude/standards'])
+      expect(exclude).toEqual(['/.claude/skills/demo/'])
       expect(status(dir)).toBe('')
     },
   )

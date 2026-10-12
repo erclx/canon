@@ -68,7 +68,7 @@ Recording a source's rung as a field was rejected too, since a `canon teach reso
 
 ## Related
 
-- `canon standards teach`: the workspace artifact
-- `canon standards glossary`: the glossary every workspace carries
+- `claude/skills/teach-workspace/references/teach.md`: the workspace artifact
+- `claude/skills/teach-workspace/references/glossary.md`: the glossary every workspace carries
 - `claude/skills/teach-workspace/`: the pedagogy and the promotion handoff
 - `canon/context/design/tokens.md`: the token values a workspace stylesheet is seeded from

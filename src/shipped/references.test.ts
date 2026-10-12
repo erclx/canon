@@ -330,100 +330,60 @@ describe('referencesIn', () => {
     })
   })
 
-  describe('STANDARDS_PATH', () => {
-    let root: string
-
-    beforeEach(() => {
-      root = mkdtempSync(join(tmpdir(), 'canon-references-standards-'))
-      const real = join(root, 'standards/tasks.md')
-      mkdirSync(dirname(real), { recursive: true })
-      writeFileSync(real, 'placeholder\n')
-    })
-
-    afterEach(() => {
-      rmSync(root, { recursive: true, force: true })
-    })
-
-    it('should report a bare standards/ path that resolves against the checkout', () => {
-      expect(
-        referencesIn(
-          'claude/skills/role-orchestrator/references/orchestrator-parked.md',
-          'since `standards/tasks.md` fixes that file as unordered',
-          root,
-        ),
-      ).toEqual([
-        {
-          file: 'claude/skills/role-orchestrator/references/orchestrator-parked.md',
-          line: 1,
-          kind: 'standards-path',
-          text: 'standards/tasks.md',
-        },
-      ])
-    })
-
-    it('should pass a standards/ path illustrating a placeholder shape, which resolves nowhere', () => {
-      expect(
-        referencesIn(
-          'claude/skills/create-rule/SKILL.md',
-          'Write the file to `standards/<slug>.md`, creating the folder when it is absent.',
-          root,
-        ),
-      ).toEqual([])
-    })
-
-    it('should report a bare standards/ path that resolves nowhere, since only shape mutes it now', () => {
+  describe('STANDARDS_CALL', () => {
+    it('should report a canon standards call in a shipped skill body', () => {
       expect(
         referencesIn(
           'claude/skills/alpha/SKILL.md',
-          'Read `standards/does-not-exist-xyz.md` for the shape.',
-          root,
+          'Run `canon standards markdown` before the first edit.',
+          noDocsRoot,
         ),
       ).toEqual([
         {
           file: 'claude/skills/alpha/SKILL.md',
           line: 1,
-          kind: 'standards-path',
-          text: 'standards/does-not-exist-xyz.md',
+          kind: 'retired-verb',
+          text: 'canon standards',
         },
       ])
     })
 
-    it('should pass the resolving ${CLAUDE_SKILL_DIR} form the layout standard requires', () => {
+    it('should report a canon standards call in a governance rule', () => {
       expect(
         referencesIn(
-          'claude/skills/role-orchestrator/references/orchestrator-parked.md',
-          'since `${CLAUDE_SKILL_DIR}/../../standards/tasks.md` fixes that file as unordered',
-          root,
+          'governance/rules/alpha/100-alpha.md',
+          '- Read `canon standards tasks` before writing a task.',
+          noDocsRoot,
         ),
-      ).toEqual([])
+      ).toHaveLength(1)
     })
 
-    it('should pass a bare standards/ path cited from the docs/ corpus, which resolves there without a skill context', () => {
-      expect(
-        referencesIn(
-          'docs/agents/tasks.md',
-          'Read `standards/tasks.md` for the frontmatter contract.',
-          root,
-        ),
-      ).toEqual([])
-    })
-
-    it("should pass a bare standards/ path cited from a skill's own REQUIREMENT.md, which a maintainer reads rather than a session", () => {
-      expect(
-        referencesIn(
-          'claude/skills/task-board/REQUIREMENT.md',
-          'Read `standards/tasks.md` before writing a case.',
-          root,
-        ),
-      ).toEqual([])
-    })
-
-    it('should mute a bare standards/ path marked as deliberate', () => {
+    it('should pass a page name sharing the prefix, which names a file rather than a call', () => {
       expect(
         referencesIn(
           'claude/skills/alpha/SKILL.md',
-          `Read \`standards/tasks.md\` for the shape. <!-- ${REFERENCE_MARKER}: illustrates the bare form the rule bans -->`,
-          root,
+          'See the canon standards-audit page history.',
+          noDocsRoot,
+        ),
+      ).toEqual([])
+    })
+
+    it('should pass a call inside the docs/ corpus', () => {
+      expect(
+        referencesIn(
+          'docs/agents/alpha.md',
+          'Run `canon standards markdown`.',
+          noDocsRoot,
+        ),
+      ).toEqual([])
+    })
+
+    it('should mute a call marked as deliberate', () => {
+      expect(
+        referencesIn(
+          'claude/skills/alpha/SKILL.md',
+          `Run \`canon standards markdown\`. <!-- ${REFERENCE_MARKER}: names the retired verb on purpose -->`,
+          noDocsRoot,
         ),
       ).toEqual([])
     })

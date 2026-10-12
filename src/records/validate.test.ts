@@ -7,13 +7,10 @@ import { linesOutsideFences } from '@/markdown/scan'
 import {
   checkItems,
   checkPlan,
-  checkStandard,
   type Finding,
   type FindingKind,
   hasStagedBatches,
   isRecordKind,
-  isSharedScratch,
-  pathWords,
   readQuestions,
   type RecordKind,
   recordDirs,
@@ -97,84 +94,19 @@ function frontmatter(fields: string): string {
   return ['---', fields, '---', '', '# Heading', ''].join('\n')
 }
 
-function conformingStandard(governs: string): string {
-  return [
-    '---',
-    'title: Plan reference',
-    'description: One line naming what this standard covers',
-    '---',
-    '',
-    '# Plan reference',
-    '',
-    '## Scope',
-    '',
-    `Governs a feature plan under \`${governs}\`: the filename and the sections.`,
-    '',
-    'Does not govern:',
-    '',
-    '- The voice it is written in: `prose.md`',
-    '',
-    '## Frontmatter',
-    '',
-    '- `title` (required): names the doc type',
-    '',
-  ].join('\n')
-}
-
-async function seedStandard(name: string, body: string): Promise<void> {
-  const dir = recordsDir(ROOT, 'standards')
-  mkdirSync(dir, { recursive: true })
-  await writeFile(join(dir, name), body)
-}
-
 describe('isRecordKind', () => {
   it('should accept every published kind and reject anything else', () => {
     expect(isRecordKind('plans')).toBe(true)
     expect(isRecordKind('groundwork')).toBe(true)
     expect(isRecordKind('intake')).toBe(true)
-    expect(isRecordKind('standards')).toBe(true)
     expect(isRecordKind('teach')).toBe(true)
+    expect(isRecordKind('standards')).toBe(false)
     expect(isRecordKind('review')).toBe(false)
     expect(isRecordKind('memory')).toBe(false)
   })
 })
 
-describe('isSharedScratch', () => {
-  it('should hold for every gitignored record folder', () => {
-    expect(isSharedScratch('plans')).toBe(true)
-    expect(isSharedScratch('groundwork')).toBe(true)
-    expect(isSharedScratch('intake')).toBe(true)
-    expect(isSharedScratch('teach')).toBe(true)
-  })
-
-  it('should not hold for the tracked corpus', () => {
-    expect(isSharedScratch('standards')).toBe(false)
-  })
-})
-
 describe('recordsDir', () => {
-  it('should prefer the authoring root over the installed copy for standards', () => {
-    mkdirSync(join(ROOT, '.claude', 'standards'), { recursive: true })
-    mkdirSync(join(ROOT, 'standards'), { recursive: true })
-
-    expect(recordsDir(ROOT, 'standards')).toBe(join(ROOT, 'standards'))
-  })
-
-  it('should fall through to the installed copy when no authoring root exists', () => {
-    mkdirSync(join(ROOT, '.claude', 'standards'), { recursive: true })
-
-    expect(recordsDir(ROOT, 'standards')).toBe(
-      join(ROOT, '.claude', 'standards'),
-    )
-  })
-
-  it('should name both candidate folders for standards', () => {
-    expect(recordDirs(ROOT, 'standards')).toEqual([
-      join(ROOT, 'standards'),
-      join(ROOT, '.claude', 'standards'),
-    ])
-  })
-
   it('should read a record kind at the new root when it carries the folder', () => {
     mkdirSync(join(ROOT, '.canon', 'plans'), { recursive: true })
 
@@ -196,151 +128,6 @@ describe('recordsDir', () => {
       join(ROOT, '.canon', 'plans'),
       join(ROOT, '.claude', 'plans'),
     ])
-  })
-})
-
-describe('pathWords', () => {
-  it('should offer the prefix of a placeholder filename', () => {
-    expect(pathWords('.claude/tasks/session-<slug>.md')).toEqual([
-      'tasks',
-      'session',
-    ])
-  })
-
-  it('should offer nothing from a dotted container segment', () => {
-    expect(pathWords('.claude/rules/')).toEqual(['rules'])
-  })
-})
-
-describe('checkStandard', () => {
-  it('should report nothing on a standard named for its governed path', () => {
-    expect(
-      checkStandard(
-        'plan.md',
-        conformingStandard('.claude/plans/feature-<slug>.md'),
-      ),
-    ).toEqual([])
-  })
-
-  it('should accept the singular of a plural path segment', () => {
-    expect(
-      checkStandard('standard.md', conformingStandard('standards/')),
-    ).toEqual([])
-  })
-
-  it('should report a filename naming no part of the governed path', () => {
-    const findings = checkStandard(
-      'session-map.md',
-      conformingStandard('.claude/tasks/session-<slug>.md'),
-    )
-
-    expect(kinds(findings)).toEqual(['name-malformed'])
-  })
-
-  it('should exempt an attribute standard from the filename derivation', () => {
-    const body = [
-      '---',
-      'title: Slug reference',
-      'description: One line naming what this standard covers',
-      '---',
-      '',
-      '## Scope',
-      '',
-      'Governs the transform from a branch name to a slug. It is an attribute standard rather than a document-type one.',
-      '',
-      'Does not govern:',
-      '',
-      '- The format of the branch name: `branch.md`',
-      '',
-    ].join('\n')
-
-    expect(checkStandard('slug.md', body)).toEqual([])
-  })
-
-  it('should report a statement backticking no path and claiming no attribute', () => {
-    const body = [
-      '---',
-      'title: Plan reference',
-      'description: One line naming what this standard covers',
-      '---',
-      '',
-      '## Scope',
-      '',
-      'Governs the feature plans a session writes.',
-      '',
-      'Does not govern:',
-      '',
-      '- The voice it is written in: `prose.md`',
-      '',
-    ].join('\n')
-
-    expect(kinds(checkStandard('plan.md', body))).toEqual(['scope-unanchored'])
-  })
-
-  it('should report an absent scope section without also reporting the name', () => {
-    const body = [
-      '---',
-      'title: Plan reference',
-      'description: One line naming what this standard covers',
-      '---',
-      '',
-      '## Frontmatter',
-      '',
-      '- `title` (required): names the doc type',
-      '',
-    ].join('\n')
-    const findings = checkStandard('anything.md', body)
-
-    expect(findings).toEqual([
-      {
-        kind: 'section-missing',
-        record: 'anything.md',
-        subject: '## Scope',
-        message:
-          'is absent, so the standard claims no jurisdiction and can refuse no rule.',
-      },
-    ])
-  })
-
-  it('should report a scope section carrying no handoff list', () => {
-    const body = conformingStandard('.claude/plans/feature-<slug>.md').replace(
-      'Does not govern:',
-      'Nothing else applies:',
-    )
-    const findings = checkStandard('plan.md', body)
-
-    expect(findings[0]).toMatchObject({
-      kind: 'section-missing',
-      subject: 'Does not govern:',
-    })
-  })
-
-  it('should report a standard missing both frontmatter fields', () => {
-    const body = conformingStandard('.claude/plans/feature-<slug>.md').replace(
-      'title: Plan reference\ndescription: One line naming what this standard covers',
-      'subtitle: Plan',
-    )
-
-    expect(checkStandard('plan.md', body)[0]).toMatchObject({
-      kind: 'frontmatter-incomplete',
-      message: 'carries no title and no description.',
-    })
-  })
-
-  it('should read the scope section outside a fenced template carrying one', () => {
-    const body = [
-      conformingStandard('.claude/plans/feature-<slug>.md'),
-      '## Template',
-      '',
-      '````markdown',
-      '## Scope',
-      '',
-      'Governs `<path/to/document>`: <the aspects this standard sets>.',
-      '````',
-      '',
-    ].join('\n')
-
-    expect(checkStandard('plan.md', body)).toEqual([])
   })
 })
 
@@ -967,42 +754,6 @@ describe('validateRecords', () => {
     expect(outcome.findings[0]).toMatchObject({
       kind: 'item-incomplete',
       record: 'overview',
-    })
-  })
-
-  it('should skip the generated catalog when counting standards', async () => {
-    await seedStandard('index.md', frontmatter('title: Standards'))
-    await seedStandard(
-      'plan.md',
-      conformingStandard('.claude/plans/feature-<slug>.md'),
-    )
-
-    expect(await validateRecords(ROOT, 'standards')).toMatchObject({
-      ok: true,
-      records: 1,
-      findings: [],
-    })
-  })
-
-  it('should read the installed copy when no authoring root exists', async () => {
-    const dir = join(ROOT, '.claude', 'standards')
-    mkdirSync(dir, { recursive: true })
-    await writeFile(
-      join(dir, 'wrong-name.md'),
-      conformingStandard('.claude/plans/feature-<slug>.md'),
-    )
-    const outcome = await validateRecords(ROOT, 'standards')
-
-    expect(outcome.ok).toBe(true)
-    if (!outcome.ok) return
-    expect(kinds(outcome.findings)).toEqual(['name-malformed'])
-  })
-
-  it('should name both candidate folders when neither standards folder exists', async () => {
-    expect(await validateRecords(ROOT, 'standards')).toMatchObject({
-      ok: false,
-      reason: 'no-folder',
-      message: `No standards folder at ${join(ROOT, 'standards')} or ${join(ROOT, '.claude', 'standards')}.`,
     })
   })
 

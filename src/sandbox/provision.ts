@@ -220,11 +220,6 @@ function install(
   fail(`Could not install ${label} into the sandbox.`)
 }
 
-/**
- * No standards install. The corpus installs into no target, so a scenario
- * driving a skill that reads one takes the `canon standards <name>` path a real
- * project takes.
- */
 function setupAssets(
   root: string,
   sandbox: string,

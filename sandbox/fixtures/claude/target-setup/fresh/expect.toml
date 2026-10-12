@@ -57,8 +57,8 @@ manual = [
 
 # Both stamped domains wrote their manifest. A run that installed governance and
 # stopped leaves a well-formed `config.json` carrying one entry, which every path
-# above still passes. Standards is not among them and `.claude/standards` is
-# asserted absent above, since the corpus installs into no target.
+# above still passes. `.claude/standards` is asserted absent above, since no
+# install channel writes it.
 [[content]]
 path = "canon/config/config.json"
 pattern = '"covers": \[\s*"governance",\s*"tooling"\s*\]'

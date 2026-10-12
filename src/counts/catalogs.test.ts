@@ -28,11 +28,10 @@ afterEach(() => {
 })
 
 describe('the closed catalog set', () => {
-  it('should register exactly the five catalogs the plan named', () => {
+  it('should register exactly the four closed catalogs', () => {
     expect(CATALOGS.map((catalog) => catalog.id)).toEqual([
       'skills',
       'rules',
-      'standards',
       'commands',
       'audits',
     ])

@@ -7,7 +7,6 @@ import {
   recordDir as resolveRecordDir,
   recordDirs as resolveRecordDirs,
 } from '@/roots/record'
-import { ATTRIBUTE_MARKER, governedPaths, readScope } from '@/standards/scope'
 import {
   TEACH_GLOSSARY,
   TEACH_MISSION,
@@ -18,33 +17,9 @@ import {
   WORKSPACE_NAME,
 } from '@/teach/workspace'
 
-export const RECORD_KINDS = [
-  'plans',
-  'groundwork',
-  'intake',
-  'standards',
-  'teach',
-] as const
+export const RECORD_KINDS = ['plans', 'groundwork', 'intake', 'teach'] as const
 
 export type RecordKind = (typeof RECORD_KINDS)[number]
-
-/**
- * The folders standards reads, in precedence order.
- *
- * It carries two because the corpus authors at the project root and installs
- * under `.claude/`. The authoring root wins where both exist, since the
- * installed tree is a generated copy here and a finding fixed there is
- * overwritten by the next regen. A project that consumed the corpus holds only
- * the second, so one order serves both.
- *
- * Every other kind is a session record and takes the record roots instead,
- * resolved by `@/roots/record`. Standards is the one kind that is tracked, so it
- * does not move and spells its own two candidates here.
- */
-const STANDARDS_FOLDERS: readonly string[] = [
-  'standards',
-  join('.claude', 'standards'),
-]
 
 /**
  * `unknown-kind` is raised at the argument boundary rather than by the walk, and
@@ -60,7 +35,6 @@ export const FINDING_KINDS = [
   'name-malformed',
   'title-missing',
   'section-missing',
-  'scope-unanchored',
   'entry-unreasoned',
   'suggestion-missing',
   'question-unanswerable',
@@ -103,10 +77,6 @@ export type ValidateOutcome = ValidateReport | ValidateRefused
 
 /** Every folder a kind would accept, whether or not it is on disk. */
 export function recordDirs(root: string, kind: RecordKind): string[] {
-  if (kind === 'standards') {
-    return STANDARDS_FOLDERS.map((folder) => join(root, folder))
-  }
-
   return resolveRecordDirs(root, kind)
 }
 
@@ -114,36 +84,13 @@ export function recordDirs(root: string, kind: RecordKind): string[] {
  * The folder a kind reads. The first candidate on disk wins, and the creation
  * default stands in when none exists, so a refusal and a test fixture both name
  * the location the kind would be written to.
- *
- * The default is where this parts company with `dirs[0]`, which the record
- * kinds can no longer take: their first candidate is the root the move lands at
- * and nothing creates there yet, so a fallback reading it would name a folder no
- * verb would ever write. Standards has no such split, since it is tracked and
- * its first candidate is where it is authored.
  */
 export function recordsDir(root: string, kind: RecordKind): string {
-  if (kind === 'standards') {
-    const dirs = recordDirs(root, kind)
-    return dirs.find((dir) => existsSync(dir)) ?? dirs[0]
-  }
-
   return resolveRecordDir(root, kind)
 }
 
 export function isRecordKind(value: string): value is RecordKind {
   return (RECORD_KINDS as readonly string[]).includes(value)
-}
-
-/**
- * Whether a kind's folder is shared session scratch at the main worktree root.
- *
- * The five record folders are, so every session validates the records every
- * other session reads. The corpus is tracked instead, so a linked worktree holds
- * its own edited copy, and defaulting that kind to the main root would report on
- * a tree the session never touched and say nothing about which one it read.
- */
-export function isSharedScratch(kind: RecordKind): boolean {
-  return kind !== 'standards'
 }
 
 const NONE_IDENTIFIED = 'None identified.'
@@ -920,127 +867,6 @@ async function checkWorkspace(dir: string, slug: string): Promise<Finding[]> {
   ]
 }
 
-const STANDARD_INDEX = 'index.md'
-const STANDARD_FIELDS = ['title', 'description'] as const
-
-const DOES_NOT_GOVERN = 'Does not govern:'
-
-/**
- * The words a governed path offers a filename. Each segment gives its own word
- * and, where it carries a prefix or a placeholder, the parts either side of a
- * hyphen, so `.canon/tasks/session-<slug>.md` offers `tasks` and `session`.
- *
- * A dotted segment gives nothing. It names the folder holding the artifact
- * rather than the artifact, and a standard named for it would pass this check
- * while naming the container every sibling shares.
- */
-export function pathWords(path: string): string[] {
-  const words: string[] = []
-
-  for (const segment of path.split('/')) {
-    if (segment.startsWith('.')) continue
-
-    const stem = segment.replace(/\.[a-z]+$/i, '').toLowerCase()
-    words.push(stem)
-    if (stem.includes('-')) words.push(...stem.split('-'))
-  }
-
-  return words.filter((word) => /^[a-z]+$/.test(word))
-}
-
-/**
- * Accepts the singular and the plural of one word. A standard over a single
- * document is named for the document and one over a folder of them is named for
- * either, and picking a side would report a conforming half of the corpus.
- */
-function namesWord(stem: string, word: string): boolean {
-  return stem === word || `${stem}s` === word || stem === `${word}s`
-}
-
-function checkStandardName(name: string, statement: string): Finding[] {
-  const paths = governedPaths(statement)
-
-  // The marker is read only where the first sentence backticks nothing, which
-  // is the catalog's own rule. A statement naming a path publishes that path
-  // however the rest of the statement describes itself.
-  if (paths.length === 0) {
-    if (statement.includes(ATTRIBUTE_MARKER)) return []
-
-    return [
-      finding(
-        'scope-unanchored',
-        name,
-        name,
-        'backticks no path in its first scope sentence and does not call itself an attribute standard, so it names no artifact to be named for.',
-      ),
-    ]
-  }
-
-  const stem = name.replace(/\.md$/, '')
-  const words = paths.flatMap(pathWords)
-
-  if (words.some((word) => namesWord(stem, word))) return []
-
-  return [
-    finding(
-      'name-malformed',
-      name,
-      name,
-      `names no part of ${paths.join(', ')}, which is what it governs. A rename reaches every target that installed the corpus and every surface citing it by bare filename.`,
-    ),
-  ]
-}
-
-export function checkStandard(name: string, text: string): Finding[] {
-  const findings: Finding[] = []
-  const frontmatter = parseFrontmatter(text)
-
-  const missing = STANDARD_FIELDS.filter(
-    (field) => !readField(frontmatter, field),
-  )
-
-  if (missing.length > 0) {
-    findings.push(
-      finding(
-        'frontmatter-incomplete',
-        name,
-        name,
-        `carries no ${missing.join(' and no ')}.`,
-      ),
-    )
-  }
-
-  const scope = readScope(text)
-
-  // The name derives from the scope statement, so an absent section leaves
-  // nothing to derive against. Reporting the name as well would name one defect
-  // twice and point the fix at the wrong file.
-  if (!scope) {
-    return [
-      ...findings,
-      finding(
-        'section-missing',
-        name,
-        '## Scope',
-        'is absent, so the standard claims no jurisdiction and can refuse no rule.',
-      ),
-    ]
-  }
-
-  if (!scope.lines.some((line) => line.trim().startsWith(DOES_NOT_GOVERN))) {
-    findings.push(
-      finding(
-        'section-missing',
-        name,
-        DOES_NOT_GOVERN,
-        'is absent from the scope section, so no boundary names the owner it hands off to.',
-      ),
-    )
-  }
-
-  return [...findings, ...checkStandardName(name, scope.statement)]
-}
-
 /**
  * The three kinds whose records are folders rather than files. Keyed by kind so
  * a seventh arrives as an entry here and the compiler names the walk it owes,
@@ -1048,7 +874,7 @@ export function checkStandard(name: string, text: string): Finding[] {
  */
 const FOLDER_CHECK: Readonly<
   Record<
-    Exclude<RecordKind, 'plans' | 'standards'>,
+    Exclude<RecordKind, 'plans'>,
     (dir: string, slug: string) => Promise<Finding[]>
   >
 > = {
@@ -1066,9 +892,8 @@ async function validateFiles(
   dir: string,
   kind: RecordKind,
   check: (name: string, text: string) => Finding[],
-  skip: (file: string) => boolean = () => false,
 ): Promise<ValidateReport> {
-  const files = (await listMarkdown(dir)).filter((file) => !skip(file))
+  const files = await listMarkdown(dir)
 
   const perFile = await Promise.all(
     files.map(async (file) =>
@@ -1080,12 +905,9 @@ async function validateFiles(
 }
 
 /**
- * Reports what every record in one folder claims against the shape its standard
- * fixes. It writes nothing whichever kind runs, and the reason differs by kind.
- * A session record is per-machine scratch with no history behind it, so a repair
- * that guessed wrong could not be undone. A standard installs into every target
- * and is cited by bare filename, so a rename costs more than the file move it
- * looks like.
+ * Reports what every record in one folder claims against the shape its reference
+ * fixes. It writes nothing, since a session record is per-machine scratch with
+ * no history behind it, so a repair that guessed wrong could not be undone.
  */
 export async function validateRecords(
   root: string,
@@ -1101,16 +923,6 @@ export async function validateRecords(
   }
 
   if (kind === 'plans') return validateFiles(dir, kind, checkPlan)
-
-  // The walk stays flat, matching install and the catalog.
-  if (kind === 'standards') {
-    return validateFiles(
-      dir,
-      kind,
-      checkStandard,
-      (file) => file === STANDARD_INDEX,
-    )
-  }
 
   const folders = await listFolders(dir)
   const check = FOLDER_CHECK[kind]
