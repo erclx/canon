@@ -69,7 +69,7 @@ That reply reaches the pull request rather than two transcripts that both end. T
 
 The other class stays off the thread by decision. A correction to what the reviewing session believes, such as which session holds which branch or that a worker's edits pass an approval gate, settles no finding on a pull request that closes, so it takes the route the skill already states for a change found while orchestrating and lands on the task owning that surface. Both halves are prose and no check tests a posted reply for either, so the split holds while a session applies it.
 
-One branch ships untested. Every dispatch in the trial found a live session, so the fallback that reports the invocation for a person rests on reasoning alone.
+One branch ships untested. Every dispatch in the trial found a live session, so the zero-session fallback, which launches the review-address shape and reports the invocation for a person only when that launch cannot run, rests on reasoning alone.
 
 The runbook holds the routing and the skill body points at it. Correcting a running loop is a cancel and a re-create rather than an edit, so the runbook states both directions of the divergence rather than only one.
 
