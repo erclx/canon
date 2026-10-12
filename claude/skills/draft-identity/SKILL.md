@@ -18,11 +18,12 @@ One identity rendered twice: the same mark sized down to an icon sequence and co
 
 Read these in parallel, skipping any that do not exist:
 
-- `canon/DESIGN.md`: the `## Personality`, `## Color`, and `## Typography` sections
+- `canon/DESIGN.md`: the `## Overview` paragraph and the role intents under `## Colors` and `## Typography`, read under their earlier names `## Personality` and `## Color` in an older record
+- The stylesheet `canon/DESIGN.md`'s lead names: the color and type values behind those roles
 - `canon/REQUIREMENTS.md`: the `## Personality` paragraph, when `canon/DESIGN.md` carries none
 - `CLAUDE.md`: the project's stated voice, when neither file above carries a personality signal
 
-No signal from any of the three is not a stop. Draft against a neutral default and tag the color and type choices `? verify` per `${CLAUDE_SKILL_DIR}/../canvas-board/references/design.md`'s uncertainty tag.
+No signal from any of these is not a stop. Draft against a neutral default, and mark each guessed color and type value with a `/* ? verify */` comment on its property in the stylesheet this run writes, since the design document carries no value to tag.
 
 ## Step 2: detect the icon size sequence
 

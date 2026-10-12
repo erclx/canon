@@ -14,19 +14,19 @@ The tier framework sits alongside [Claude Design](../../wiki/claude/design.md), 
 
 ## Tier 0: prose only
 
-The default. `canon/DESIGN.md` holds visual intent as token tables for color, typography, spacing, and borders, with one Personality paragraph and at most three one-line rules a section, motion and iconography included.
+The default. `canon/DESIGN.md` holds visual intent, being one Overview paragraph, at most three one-line rules a section, and a table naming what each color and shape role is for. Its lead names the stylesheet the values live in, since a hand-typed copy of them drifts from the CSS.
 
 Claude Code reads it and writes the implementation. Works for CLI tools, internal dashboards, admin panels, and backend-focused projects.
 
 ### Seed shape
 
-The toolkit seed in `tooling/claude/seeds/canon/DESIGN.md` ships a token-table template with a starting set of roles, and `claude/skills/canvas-board/references/design.md` carries the same tables under `## Template` with placeholder rows. The column headers are what the renderer parses, so they stay verbatim in either, while the rows and values are the project's own.
+The toolkit seed in `tooling/claude/seeds/canon/DESIGN.md` ships an intent template with a starting set of roles, each naming its custom property, and `claude/skills/canvas-board/references/design.md` carries the same tables under `## Template` with placeholder rows. The column headers are what the parser reads, so they stay verbatim in either, while the rows are the project's own. The seed's lead asks for the project's own stylesheet, such as `src/styles/tokens.css` or a Tailwind `@theme` block, and falls back to `.claude/design/project/` only when the project has none.
 
 `canon design render` writes an HTML plus CSS preview to `.canon/tmp/render/design/` for eyeballing the current system without leaving Claude Code. See `canon/context/design/index.md`.
 
 A project wanting a neutral starting point to override runs `canon design install`, which copies one stylesheet to `.claude/design/base.css` carrying an achromatic token set as custom properties and two components built on them. Greys run from near-black to near-white and the accent is monochrome, so the only palette the project renders is one it writes itself. That file is toolkit-owned and `canon design sync` refreshes it, so a project overrides a value in `.claude/design/project/` instead, which sync never touches. Nothing arrives without that install, and the two channels are independent: a record the project wrote is its own, and the installed stylesheet is the toolkit's.
 
-A cell no source anchors ends in `? verify`, and the preview shows that marker beside the value rather than folding it in, so a swatch and a font sample stay built from the value alone. A confidence line above the sections names how many cells are anchored against how many are tagged, which is what tells a reader whether they are looking at a record of the code or a proposal about it. It reads the columns a source could anchor and leaves out the row names, so the ratio is not diluted by cells no tag could ever reach. The proposal path tags nearly all of them, so that count reads low on day one by design.
+A record generated from a token source carries the values in tables instead, which is the shape this toolkit's own record takes. There a cell no source anchors ends in `? verify`, and the preview shows that marker beside the value rather than folding it in, so a swatch and a font sample stay built from the value alone. A confidence line above the sections names how many cells are anchored against how many are tagged, which is what tells a reader whether they are looking at a record of the code or a proposal about it. It reads the columns a source could anchor and leaves out the row names, so the ratio is not diluted by cells no tag could ever reach. The proposal path tags nearly all of them, so that count reads low on day one by design.
 
 ### Tools
 

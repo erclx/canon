@@ -105,7 +105,7 @@ The operator restyles elements from the inspector, and each edit lands as inline
 
 When the operator picks a frame, the decision leaves the canvas.
 
-- Carry visual values, being color, type, spacing, and radius, into the project's design document, editing its sections in place under the `design.md` standard. Leave structure and layout on the canvas, and name the frame in the plan that builds it.
+- Carry visual values, being color, type, spacing, and radius, into the stylesheet the design document's lead names, and the intent behind them into the document's sections under the `design.md` standard. A project with no stylesheet yet takes the values under `.claude/design/project/` after `canon design install`, and the lead names that path. Leave structure and layout on the canvas, and name the frame in the plan that builds it.
 - Name the frame the decision came from in the reply, and leave the frame on the canvas until the operator clears it.
 - Never cite a frame path from a tracked file. The folder is gitignored, so the citation resolves on this machine alone.
 
@@ -116,7 +116,7 @@ When the operator picks a frame, the decision leaves the canvas.
 Page:     <page>, <n> frames
 Selected: <page>/<frame>, element <index>, or none, or stale
 Capture:  <path of each capture written>
-Carried:  <the design document the pick went to, the plan that cites the frame, or not yet>
+Carried:  <the stylesheet and design document the pick went to, the plan that cites the frame, or not yet>
 ```
 
 Write the canvas line's URL as a markdown link. Omit the capture line when nothing was captured and the carried line when no direction was picked. Emit every path from the project root.

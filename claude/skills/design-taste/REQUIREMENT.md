@@ -71,6 +71,6 @@ A rule failing any of the four is recorded as considered and declined rather tha
 - Validation timing, error placement and save blocking, which `forms` owns
 - Rendered copy casing, button labels and error wording, which `copy` owns
 - The candidate loop, the arm set, the render and the pick, which `draft-and-pick` owns and which this skill is loaded alongside rather than inside
-- The shape of the project's design document, its sections and its token tables, which `claude/skills/canvas-board/references/design.md` governs
+- The shape of the project's design document, its sections and its role tables, which `claude/skills/canvas-board/references/design.md` governs
 - Prose on the surface being designed, which `write-human` and `markdown.md` govern between them
 - Measuring whether finished output followed these rules, which needs a check this skill does not carry and which no command reaches while a render is an image rather than a parse
