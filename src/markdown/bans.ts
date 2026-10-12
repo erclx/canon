@@ -16,7 +16,7 @@ const CHARACTERS = ['—', ';'] as const
  * Parsing the prose was the alternative and it put a parser contract on a
  * document authored for people. The set is closed rather than extensible,
  * since a character is the one class a literal match settles. A word is left
- * to `write-human` as guidance and a spelling to cspell, because a word ban
+ * to `write-human` as guidance and a spelling to no check at all, because a word ban
  * catches the token and misses the habit behind it.
  */
 export const BAN_SETS: BanSets = {
