@@ -1,7 +1,10 @@
 import { readFile } from 'node:fs/promises'
 
 /** The branch holding review frames. It never merges into a branch anyone checks out. */
-export const FRAMES_BRANCH = 'canon-frames'
+export const FRAMES_BRANCH = 'canon/frames'
+
+/** The branch frames lived on before the rename. A drop and a prune drain it and an add never writes it. */
+export const LEGACY_FRAMES_BRANCH = 'canon-frames'
 
 /** The eight bytes every PNG opens with. A frame that lacks them embeds as a broken image. */
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]

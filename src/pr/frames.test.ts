@@ -217,7 +217,7 @@ describe('frameLink', () => {
     const link = frameLink('o/r', 'pr-12/abcdef0/x/box-3.png')
 
     expect(link).toBe(
-      'https://github.com/o/r/blob/canon-frames/pr-12/abcdef0/x/box-3.png?raw=true',
+      'https://github.com/o/r/blob/canon/frames/pr-12/abcdef0/x/box-3.png?raw=true',
     )
   })
 })

@@ -1748,11 +1748,11 @@ describe('canon pr frames', () => {
     })
   })
 
-  it('should address no ref but the canon-frames branch', async () => {
+  it('should address no ref but the canon/frames branch', async () => {
     await runFrames(addArgs('box-1.png'))
 
     const refCalls = calls().filter((call) => call.includes('/git/ref'))
-    expect(refCalls.every((call) => call.includes('heads/canon-frames'))).toBe(
+    expect(refCalls.every((call) => call.includes('heads/canon/frames'))).toBe(
       true,
     )
   })
