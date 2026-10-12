@@ -1,6 +1,4 @@
 {
-  "**/*.{json,md,mdc}": [
-    "prettier --write --ignore-path .gitignore --ignore-path .prettierignore"
-  ],
+  "**/*.{json,md}": ["oxfmt --no-error-on-unmatched-pattern"],
   "**/*.md": ["canon indexes regen"]
 }

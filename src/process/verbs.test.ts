@@ -77,7 +77,7 @@ describe('gov sync', () => {
 
 describe('tooling sync', () => {
   it('should replace a local edit once --write is passed', () => {
-    const path = join(target, '.prettierrc')
+    const path = join(target, '.oxfmtrc.json')
     writeFileSync(path, '# a project owns this line\n')
 
     const run = runCli(['tooling', 'sync', 'base', target, '--write'], {
@@ -89,7 +89,7 @@ describe('tooling sync', () => {
   })
 
   it('should leave the local edit in place and exit 1 without --write', () => {
-    const path = join(target, '.prettierrc')
+    const path = join(target, '.oxfmtrc.json')
     writeFileSync(path, '# a project owns this line\n')
 
     const run = runCli(['tooling', 'sync', 'base', target], { cwd: target })

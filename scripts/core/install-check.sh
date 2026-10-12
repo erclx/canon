@@ -101,7 +101,7 @@ log_step "Assert scaffold"
 # skills rather than installing into a target. The two
 # rule paths stand for the `claude` and `canon` groups `base` takes whole.
 for path in "CLAUDE.md" ".claude/wiki/index.md" ".claude" "canon/context/index.md" \
-  ".prettierrc" ".lintstagedrc" ".husky/pre-commit" ".github/workflows/verify.yml" "scripts/verify.ts" \
+  ".oxfmtrc.json" ".lintstagedrc" ".husky/pre-commit" ".github/workflows/verify.yml" "scripts/verify.ts" \
   ".claude/rules/canon/claude/output.md" ".claude/rules/canon/canon/scratch.md"; do
   if [ ! -e "$TARGET_DIR/$path" ]; then
     log_error "Missing after canon init: $path"
