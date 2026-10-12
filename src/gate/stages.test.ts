@@ -12,6 +12,29 @@ function scopeOf(id: string): RegExp {
   return stage.scope
 }
 
+describe('the format stage', () => {
+  it('should leave no stage that runs the formatter in write mode', () => {
+    const writers = STAGES.filter((stage) =>
+      stage.checks.some(
+        (check) =>
+          check.kind === 'command' && check.argv.join(' ') === 'bun run format',
+      ),
+    )
+
+    expect(writers).toEqual([])
+  })
+
+  it('should tell a failed format check to run the formatter', () => {
+    const stage = STAGES.find((candidate) => candidate.id === 'format-check')
+
+    const check = stage?.checks[0]
+
+    expect(check?.kind === 'command' ? check.failure : '').toContain(
+      'bun run format',
+    )
+  })
+})
+
 describe('the shell stage scope', () => {
   it('should fire on a husky hook, which carries no extension to match', () => {
     const scope = scopeOf('shell')

@@ -130,7 +130,7 @@ const EXAMPLES = [
   'canon labels audit --json',
   'canon census --json',
   'canon audits run --json',
-  'canon gate run --all --no-write',
+  'canon gate run --all',
   'canon upgrade --json',
   'canon upstream fetch --since 2.1.256 --json',
 ]

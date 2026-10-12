@@ -57,7 +57,6 @@ function contextWith(overrides: Partial<GateContext> = {}): GateContext {
     ci: false,
     run: runnerFor(),
     cli: runnerFor(),
-    write: true,
     ...overrides,
   }
 }
@@ -104,20 +103,6 @@ describe('stage ordering', () => {
     const results = await runStages([stage('first')], ctx)
 
     expect(results[0].failure).toBe('first failed')
-  })
-
-  it('should keep the write grant deciding which format stage belongs in the run', async () => {
-    const ctx = contextWith({ write: false })
-
-    const results = await runStages(
-      [
-        stage('applies', { when: ({ write }) => write }),
-        stage('checks', { when: ({ write }) => !write }),
-      ],
-      ctx,
-    )
-
-    expect(results.map((entry) => entry.id)).toEqual(['checks'])
   })
 
   it('should carry a duration on every stage result', async () => {

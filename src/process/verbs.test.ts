@@ -173,12 +173,11 @@ describe('gate run', () => {
     expect(run.stdout).toContain('run')
   })
 
-  it('should carry both flags the package scripts pass it', () => {
+  it('should carry the flag the package scripts pass it', () => {
     const run = runCli(['gate', 'run', '--help'], { cwd: target })
 
     expect(run.status).toBe(0)
     expect(run.stdout).toContain('--all')
-    expect(run.stdout).toContain('--no-write')
   })
 
   it('should state what each exit code means', () => {

@@ -113,8 +113,6 @@ export function readProcLoad(): LoadReading | undefined {
 }
 
 export interface GateContext extends MeasureContext {
-  /** Whether the format stage writes or checks. */
-  readonly write: boolean
   /**
    * The changed set a scoped stage is read against, or `undefined` where
    * scoping is off and every stage runs.
@@ -444,8 +442,6 @@ export async function runStages(
   const results: StageResult[] = []
 
   for (const stage of stages) {
-    if (stage.when !== undefined && !stage.when({ write: ctx.write })) continue
-
     const result = await runStage(stage, ctx)
     results.push(result)
     onResult?.(result)
