@@ -52,7 +52,7 @@ Node with a build step was the alternative and costs a publish pipeline. The tra
 
 ### Wiring and output
 
-- Exit and stream discipline moved to `internal/rules/core/095-cli-output.md`, which globs `src/**/*.ts` so it loads on an edit here rather than waiting to be looked up. It holds the `process.exitCode` requirement and the stderr-in-every-mode rule.
+- Exit and stream discipline moved to `internal/rules/core/cli-output.md`, which globs `src/**/*.ts` so it loads on an edit here rather than waiting to be looked up. It holds the `process.exitCode` requirement and the stderr-in-every-mode rule.
 - Color goes through `palette(stream)` in `src/cli/ui.ts`, which reads `NO_COLOR` and the stream's `isTTY` at write time and hands back a blank set when either says no. Ask about the stream being written to rather than about the process, since `showHelp` in `src/cli.ts` frames on stdout while every other writer frames on stderr, and `process.stdin.isTTY` is a third question about prompting.
 - No file outside `src/cli/ui.ts` defines an escape constant. `src/cli/ui.test.ts` walks the tree and fails the build on one, because sixteen files each spelling their own grey is what made color impossible to turn off in the first place.
 - Exit-code coverage spawns the CLI from `src/commands/exit-code.test.ts`, because an action imported in process would set the code on the test runner.
@@ -79,7 +79,7 @@ Node with a build step was the alternative and costs a publish pipeline. The tra
 
 - `src/wiki/` scaffolds `.claude/wiki/` in a target and reports a root `wiki/` left by an older scaffold rather than migrating it. A move is a decision the operator owns, since the two roots can both hold pages.
 - Porting a guard means porting its side effects. The bash `guard_root` ran `cd "$target"`, which validated the target existed as a by-product of resolving it. A port that reproduces only the stated purpose drops that check, and `mkdir -p` downstream then scaffolds a typo'd path into a new tree.
-- Preserving a destination's mode and indent width lives in `internal/rules/core/096-operator-files.md`, which globs `src/**/*.ts`. `writeSettings` is the live implementation of the mode half, and `detectIndent` plus `serializeSettings` are the indent half.
+- Preserving a destination's mode and indent width lives in `internal/rules/core/operator-files.md`, which globs `src/**/*.ts`. `writeSettings` is the live implementation of the mode half, and `detectIndent` plus `serializeSettings` are the indent half.
 
 ### A catalog command reads the installation, not the branch
 

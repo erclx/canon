@@ -70,13 +70,13 @@ describe('buildRuleEntries', () => {
   it('should read the description and paths off the frontmatter', () => {
     seedRule(
       'lang',
-      '110-python',
+      'python',
       "---\ndescription: Enforce type hints\npaths:\n  - '**/*.py'\n---\n\n# Python\n",
     )
 
     expect(buildRuleEntries(root)).toEqual([
       {
-        name: '110-python',
+        name: 'python',
         domain: 'lang',
         description: 'Enforce type hints',
         paths: ['**/*.py'],
@@ -86,8 +86,8 @@ describe('buildRuleEntries', () => {
   })
 
   it('should carry the evidence detect.toml records for the rule', () => {
-    seedRule('framework', '200-react', '# React\n')
-    seedDetect('["200-react"]\ndeps = ["react"]\nfiles = []\n')
+    seedRule('framework', 'react', '# React\n')
+    seedDetect('["react"]\ndeps = ["react"]\nfiles = []\n')
 
     expect(buildRuleEntries(root)[0].detect).toEqual({
       deps: ['react'],
@@ -125,14 +125,14 @@ function rulesMatching(domain: string, file: string): string[] {
 describe('governance/rules/ui', () => {
   it('should match an Astro component from every extension-scoped rule', () => {
     expect(rulesMatching('ui', 'src/components/Card.astro')).toEqual([
-      '400-ui',
-      '410-a11y',
-      '420-forms',
-      '430-ux-completeness',
-      '440-surface-capture',
-      '450-link-behavior',
-      '465-interface-casing',
-      '470-motion',
+      'a11y',
+      'copy',
+      'forms',
+      'interface-casing',
+      'link-behavior',
+      'motion',
+      'surface-capture',
+      'ux-completeness',
     ])
   })
 })

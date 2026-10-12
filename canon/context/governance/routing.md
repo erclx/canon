@@ -25,7 +25,7 @@ One candidate passes both halves and stays deferred. A child folder carrying no 
 
 A standard governing a file path carries a rule routing to it, so an edit loads the standard without the matching skill being invoked. The route makes a standard reachable from the action rather than from a session that thought to look.
 
-- `595-tooling-reference` is authored under `internal/rules/claude/`, because `internal/standards/tooling-reference.md` governs a surface a target never authors, and shipping the route would point at a path no install creates. It globs `manifest.toml` beside `reference.md`, since a rule protecting a symmetry has to fire from either side and the manifest moves first.
+- `tooling-reference` is authored under `internal/rules/claude/`, because `internal/standards/tooling-reference.md` governs a surface a target never authors, and shipping the route would point at a path no install creates. It globs `manifest.toml` beside `reference.md`, since a rule protecting a symmetry has to fire from either side and the manifest moves first.
 - `governance/rules/canon/context.md` carries a write-time policy beside its read-time one, so editing a domain leaves its context entry conforming. It is hand-written and unnumbered like the two record rules, since its standard moved into `context-fold`. It ships to every `base` consumer, so each write-time bullet states an outcome of the edit rather than a backlog to drain, which also reads correctly in a project with no entries yet.
 - `governance/rules/canon/tasks.md` and `governance/rules/canon/plan.md` route the two record folders and ship in `base` with the `canon` band. Both are hand-written and unnumbered, as `writing/markdown.md` is, since their standards moved into `task-board` and `plan-feature` and the generator reads only `standards/`. The groundwork, intake, and session rules retired with their standards, since each only routed to a reference its owner skill already reads.
 - Each of those two carries the directives that ship silently when violated, such as the blank answer slot and the board's generated index, and loads its owner skill for the rest. The write scope stays in the skill body, since a misrouted write lands on a path the glob never matches.
@@ -65,7 +65,7 @@ A rule reached by its own glob needs no citation from `CLAUDE.md`, while a skill
 
 A filename is the wrong citation besides, since a project renumbers around a collision with a shared set.
 
-A rule with no `paths:` key arrives unconditionally, so the argument runs harder. `canon/606-git.md` carries no `canon:git-*` skill pointer, since the precedence it states already loads into every session.
+A rule with no `paths:` key arrives unconditionally, so the argument runs harder. `canon/git.md` carries no `canon:git-*` skill pointer, since the precedence it states already loads into every session.
 
 #### Rules that always load
 
@@ -73,7 +73,7 @@ No rule carries the channel between sessions. `session-relay` owns the send mech
 
 The retirement is a stated exception to the cut test under "What an always-loaded bullet has to carry alone" below. A project installing governance without the plugin receives no surface carrying block-before-prompt, so a roleless session there goes without it. The operator accepted that cost over a rule paying its bytes in every session of every governed target.
 
-`790-code-comments` owns the degradation term list rather than `src/comments/`, because `src/comments/vocabulary.ts` reads the terms out of whichever rule publishes `## Degradation vocabulary`. Editing the backticked terms there changes what `canon comments scan` sweeps for here and in every target on `base`. Discovery anchors on the heading rather than the filename, so a renumber cannot empty the list.
+`code-comments` owns the degradation term list rather than `src/comments/`, because `src/comments/vocabulary.ts` reads the terms out of whichever rule publishes `## Degradation vocabulary`. Editing the backticked terms there changes what `canon comments scan` sweeps for here and in every target on `base`. Discovery anchors on the heading rather than the filename, so a renumber cannot empty the list.
 
 ### The question surface has no shipped rule
 
@@ -83,12 +83,12 @@ The cut rule had forbidden reopening a question a written artifact already answe
 
 ### What an always-loaded bullet has to carry alone
 
-An always-loaded bullet is cut only where another surface a governed target actually receives carries the same instruction. A path-scoped rule, a skill body, a hook, or a standard counts. A surface that reaches a target only through a seed copied at scaffold time does not, since the rule arrives through `canon gov sync` and the seed never does, which is why `566-output.md` keeps a self-sufficient linked-worktree bullet and names the `PostToolUse` path hook only as the preferred source. Two cuts refuse this test, both taken by the operator's choice rather than by the test: the relay retirement recorded under "Rules that always load" above, and the question-surface cut recorded under "The question surface has no shipped rule", which also dropped the "answer from the artifact rather than re-asking" bullet that `governance/rules/canon/plan.md` does not cover for intake and groundwork `- Suggested:` lines.
+An always-loaded bullet is cut only where another surface a governed target actually receives carries the same instruction. A path-scoped rule, a skill body, a hook, or a standard counts. A surface that reaches a target only through a seed copied at scaffold time does not, since the rule arrives through `canon gov sync` and the seed never does, which is why `output.md` keeps a self-sufficient linked-worktree bullet and names the `PostToolUse` path hook only as the preferred source. Two cuts refuse this test, both taken by the operator's choice rather than by the test: the relay retirement recorded under "Rules that always load" above, and the question-surface cut recorded under "The question surface has no shipped rule", which also dropped the "answer from the artifact rather than re-asking" bullet that `governance/rules/canon/plan.md` does not cover for intake and groundwork `- Suggested:` lines.
 
 Two always-loaded bullets stand beside a surface that looks like it covers them, each because that surface does not carry the act:
 
-- `606-git.md` keeps the sentence saying the precedence bullets pick a surface and never authorize an operation. A session reading those bullets alone takes them as permission and commits unasked.
-- `602-tasks.md` keeps the act of writing the plan in the same session and linking it. `claude/skills/task-board/references/tasks.md` fixes the `Plan:` link for a plan that exists and never tells a session to create one, and the seed eval in `scripts/eval/result-seed.md` measured sessions without the bullet writing no plan.
+- `git.md` keeps the sentence saying the precedence bullets pick a surface and never authorize an operation. A session reading those bullets alone takes them as permission and commits unasked.
+- `task-scope.md` keeps the act of writing the plan in the same session and linking it. `claude/skills/task-board/references/tasks.md` fixes the `Plan:` link for a plan that exists and never tells a session to create one, and the seed eval in `scripts/eval/result-seed.md` measured sessions without the bullet writing no plan.
 
 ## Gotchas
 

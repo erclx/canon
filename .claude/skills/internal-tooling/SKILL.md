@@ -13,7 +13,7 @@ Stack-specific configs override extends-chain configs at the same relative path.
 
 ## Manifest rules
 
-Syntax invariants and the manifest-to-reference symmetry live in `internal/rules/claude/595-tooling-reference.md`, which fires on a `manifest.toml` edit without this skill being loaded. The rules below are what a rule bullet cannot carry.
+Syntax invariants and the manifest-to-reference symmetry live in `internal/rules/claude/tooling-reference.md`, which fires on a `manifest.toml` edit without this skill being loaded. The rules below are what a rule bullet cannot carry.
 
 - Version pins in `[dependencies.dev]` (e.g. `"eslint@^9"`) are enforced by major version. Sync compares the installed dep's major against the pin's major and re-installs on mismatch. Deps without pins are left alone when present.
 - `[scripts]` entries add only when the key is missing in `package.json`. Scaffolds win for keys both sides define. Use `[scripts.override]` to force-replace a key, for anti-patterns the scaffold ships by default.

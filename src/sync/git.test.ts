@@ -136,8 +136,8 @@ describe('pullRequestBody', () => {
       {
         domain: 'governance',
         verb: 'Add',
-        names: ['010-testing.md'],
-        paths: ['.claude/rules/core/010-testing.md'],
+        names: ['testing.md'],
+        paths: ['.claude/rules/core/testing.md'],
       },
     ]
 
@@ -150,7 +150,7 @@ describe('pullRequestBody', () => {
         '## Key changes',
         '',
         '- Update `claude/` .gitignore.',
-        '- Add `governance/` 010-testing.md.',
+        '- Add `governance/` testing.md.',
       ].join('\n'),
     )
   })

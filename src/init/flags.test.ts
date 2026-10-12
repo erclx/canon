@@ -55,6 +55,6 @@ describe('flagsProvided', () => {
   })
 
   it('should read an explicitly passed add list as operator-provided', () => {
-    expect(readFlagsProvided(['--add', '260-shadcn'])).toBe(true)
+    expect(readFlagsProvided(['--add', 'shadcn'])).toBe(true)
   })
 })

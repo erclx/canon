@@ -47,11 +47,11 @@ Server readiness stays in `scripts/screenshot.sh` rather than the seed. The wrap
 
 ### The README frame workflow
 
-The web stack ships `readme-screenshot.yml`, which commits a refreshed frame back to the pull request branch, and this repository does not run it. `pr-visual-checks.yml` reports the landing page capture and never commits, because that page reads catalog counts at build time and a merge touching no `web/` file moves its bytes. A target's README frame moves only when the branch's own files do, which is the test `governance/rules/tooling/700-ci-workflow.md` states for committing. The cost is a shipped template whose commit-back half the first adopting target verifies, not this repository.
+The web stack ships `readme-screenshot.yml`, which commits a refreshed frame back to the pull request branch, and this repository does not run it. `pr-visual-checks.yml` reports the landing page capture and never commits, because that page reads catalog counts at build time and a merge touching no `web/` file moves its bytes. A target's README frame moves only when the branch's own files do, which is the test `governance/rules/tooling/ci-workflow.md` states for committing. The cost is a shipped template whose commit-back half the first adopting target verifies, not this repository.
 
 ### The surface-capture rule reaches every component
 
-`governance/rules/ui/440-surface-capture.md` fires on every component file rather than on routes and pages alone, since a component with no capture can carry a real defect unseen. A component the production build strips out, such as a dev-only scaffold switcher, carries its exemption in the rule body rather than sitting outside a narrower glob. A provider or a layout wrapper that renders no surface of its own fires the rule too, which is the accepted cost. Measured at `64a4297b` on 2026-09-07.
+`governance/rules/ui/surface-capture.md` fires on every component file rather than on routes and pages alone, since a component with no capture can carry a real defect unseen. A component the production build strips out, such as a dev-only scaffold switcher, carries its exemption in the rule body rather than sitting outside a narrower glob. A provider or a layout wrapper that renders no surface of its own fires the rule too, which is the accepted cost. Measured at `64a4297b` on 2026-09-07.
 
 ## Gotchas
 

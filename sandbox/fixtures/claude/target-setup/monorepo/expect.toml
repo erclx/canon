@@ -21,9 +21,9 @@ max_turns = 30
 # `canon`, and a Go tooling config asserted here fails against any release
 # predating that stack while the detection under test ran correctly.
 paths = [
-  ".claude/rules/canon/lang/110-python.md",
-  ".claude/rules/canon/lang/130-go.md",
-  ".claude/rules/canon/framework/200-react.md",
+  ".claude/rules/canon/lang/python.md",
+  ".claude/rules/canon/lang/go.md",
+  ".claude/rules/canon/framework/react.md",
   "web/eslint.config.js",
   "api/ruff.toml",
 ]

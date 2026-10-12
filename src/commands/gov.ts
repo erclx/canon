@@ -154,7 +154,7 @@ export function register(program: Command): void {
         'Examples:',
         '  canon gov install node',
         '  canon gov install node ../my-app',
-        '  canon gov install node --add 210-astro,260-shadcn ../my-app',
+        '  canon gov install node --add astro,shadcn ../my-app',
         '  canon gov install --add tasks,plan ../my-app',
         '',
         'With --add and no stack, the named rules install alone. A first',

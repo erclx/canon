@@ -67,12 +67,12 @@ async function makeRepo(): Promise<string> {
 }
 
 const DRIFTED_GOVERNANCE = {
-  '.claude/rules/,.claude/GOV.md': ' M .claude/rules/core/010-testing.md\n',
+  '.claude/rules/,.claude/GOV.md': ' M .claude/rules/core/testing.md\n',
 }
 
 const DRIFTED_TWO_DOMAINS = {
   '.claude/rules/,.claude/GOV.md':
-    ' M .claude/rules/core/010-testing.md\n M .claude/rules/core/020-concurrency.md\n',
+    ' M .claude/rules/core/testing.md\n M .claude/rules/core/020-concurrency.md\n',
   '.gitignore': ' M .gitignore\n',
 }
 
@@ -90,8 +90,7 @@ describe('collectChanges', () => {
   it('should report one entry per domain with pending changes', async () => {
     const git = makeGit({
       status: {
-        '.claude/rules/,.claude/GOV.md':
-          ' M .claude/rules/core/010-testing.md\n',
+        '.claude/rules/,.claude/GOV.md': ' M .claude/rules/core/testing.md\n',
         '.gitignore': '?? .gitignore\n',
       },
     })
@@ -102,8 +101,8 @@ describe('collectChanges', () => {
       {
         domain: 'governance',
         verb: 'Update',
-        names: ['010-testing.md'],
-        paths: ['.claude/rules/core/010-testing.md'],
+        names: ['testing.md'],
+        paths: ['.claude/rules/core/testing.md'],
       },
       {
         domain: 'claude',
@@ -244,7 +243,7 @@ describe('runGitWorkflow staging', () => {
     })
 
     expect(git.calls).toContain(
-      'stage .claude/rules/core/010-testing.md .claude/rules/core/020-concurrency.md .gitignore',
+      'stage .claude/rules/core/testing.md .claude/rules/core/020-concurrency.md .gitignore',
     )
   })
 
@@ -260,7 +259,7 @@ describe('runGitWorkflow staging', () => {
       choose: choosing('commit'),
     })
 
-    expect(git.calls).toContain('stage .claude/rules/core/010-testing.md')
+    expect(git.calls).toContain('stage .claude/rules/core/testing.md')
     expect(git.calls).not.toContain('stage -A')
   })
 
@@ -298,7 +297,7 @@ describe('runGitWorkflow staging', () => {
 
     expect(git.calls).toEqual([
       'createBranch chore/canon-sync-20260729-1242',
-      'stage .claude/rules/core/010-testing.md',
+      'stage .claude/rules/core/testing.md',
       'commit chore(sync): update governance from toolkit',
     ])
   })
@@ -316,7 +315,7 @@ describe('runGitWorkflow staging', () => {
     })
 
     expect(git.calls).toEqual([
-      'stage .claude/rules/core/010-testing.md',
+      'stage .claude/rules/core/testing.md',
       'commit chore(sync): update governance from toolkit',
     ])
   })
@@ -354,7 +353,7 @@ describe('runGitWorkflow staging', () => {
     expect(code).toBe(0)
     expect(git.calls).toEqual([
       'createBranch chore/canon-sync-20260729-1242',
-      'stage .claude/rules/core/010-testing.md',
+      'stage .claude/rules/core/testing.md',
       'commit chore(sync): update governance from toolkit',
       'push chore/canon-sync-20260729-1242',
     ])

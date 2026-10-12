@@ -63,7 +63,7 @@ describe('buildSteps', () => {
     buildSteps(
       '../app',
       '/abs/app',
-      flags({ stack: 'astro', add: '260-shadcn' }),
+      flags({ stack: 'astro', add: 'shadcn' }),
       child,
     )
 
@@ -72,7 +72,7 @@ describe('buildSteps', () => {
       'install',
       'astro',
       '--add',
-      '260-shadcn',
+      'shadcn',
       '/abs/app',
     ])
   })
@@ -121,14 +121,14 @@ describe('buildSteps', () => {
   it('should carry the extra rules into the skip recovery command', () => {
     const governance = steps({
       stack: 'astro',
-      add: '260-shadcn',
+      add: 'shadcn',
       skip: parseSkip('governance'),
     }).find((step) => step.label === 'Governance')
 
     expect(governance).toMatchObject({
       kind: 'skip',
       notice:
-        "Skipped: --skip governance. Run 'canon gov install astro --add 260-shadcn ../app' to install rules.",
+        "Skipped: --skip governance. Run 'canon gov install astro --add shadcn ../app' to install rules.",
     })
   })
 

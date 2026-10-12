@@ -190,9 +190,9 @@ A browser computes a unitless line height to pixels, so the field shows a pixel 
 
 ### House style
 
-- The house style lives in `canvas-board`'s reference, which a session loads before it drafts, and the opt-in rule `480-canvas` on `.canon/canvas/**` only points there. A path-scoped rule loads after a new frame's first write lands, so a style carried by the rule alone would arrive after the frame it was meant to shape.
+- The house style lives in `canvas-board`'s reference, which a session loads before it drafts, and the opt-in rule `canvas` on `.canon/canvas/**` only points there. A path-scoped rule loads after a new frame's first write lands, so a style carried by the rule alone would arrive after the frame it was meant to shape.
 - It governs explanation frames, being diagrams, boards of notes, and comparisons. A mockup of the project's interface follows the project's design document, so the style's sizes never override an app's own.
-- The rule is listed in no stack and a project takes it with `--add 480-canvas`. A project that never adds it gets the style from the skill alone, which is the cost of keeping a canvas-only rule out of every base install.
+- The rule is listed in no stack and a project takes it with `--add canvas`. A project that never adds it gets the style from the skill alone, which is the cost of keeping a canvas-only rule out of every base install.
 - The rule states case and box height again in one line each, scoped to explanation frames the way the reference scopes them, since a session editing a frame without the skill still sees them and a mockup follows the design document. It repeats no size or selector, so the reference stays the one owner.
 
 ### The static board retired

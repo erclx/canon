@@ -55,9 +55,7 @@ describe('the shipped-references stage scope', () => {
 
     expect(scope.test('src/gate/measures.ts')).toBe(false)
     expect(scope.test('canon/context/development/gates.md')).toBe(false)
-    expect(scope.test('internal/rules/claude/598-authoring-layout.md')).toBe(
-      false,
-    )
+    expect(scope.test('internal/rules/claude/authoring-layout.md')).toBe(false)
     expect(scope.test('wiki/claude/worktrees.md')).toBe(false)
   })
 

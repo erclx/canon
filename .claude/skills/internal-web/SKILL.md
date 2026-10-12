@@ -7,7 +7,7 @@ description: The landing page and this repository's own rendered images. Use for
 
 Read `canon/context/web/index.md` for structure, the Astro build, and the gotchas before editing, then the file it names for the change at hand.
 
-`internal/rules/claude/593-landing-page.md` is scoped to `web/**` and holds the page's conventions, each of which fails silently when broken. It loads on the edit and this skill loads for the domain. Open the rule before drafting rather than after: a draft that never read it reproduces what it forbids, and a five-round drafting pass did exactly that.
+`internal/rules/claude/landing-page.md` is scoped to `web/**` and holds the page's conventions, each of which fails silently when broken. It loads on the edit and this skill loads for the domain. Open the rule before drafting rather than after: a draft that never read it reproduces what it forbids, and a five-round drafting pass did exactly that.
 
 ## Before drafting a page change
 
@@ -33,7 +33,7 @@ Before shipping any change under `web/`:
 ## Reference
 
 - `canon/context/web/index.md`: structure, the Astro build, decisions, and the CI and layout gaps
-- `internal/rules/claude/593-landing-page.md`: the page's conventions, each failing silently
+- `internal/rules/claude/landing-page.md`: the page's conventions, each failing silently
 - `references/citation-anchors.md`: how a string in `copy.ts` anchors to `README.md` and what the gate reads
 - `canon/context/design/tokens.md`: the token values this surface reads and does not own
 - `canon/context/development/regeneration.md`: the Hero section, before touching `assets/captures/` or `assets/frames/`

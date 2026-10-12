@@ -152,12 +152,9 @@ describe('createGovAdapter', () => {
   })
 
   it('should retire a target-held 765-spelling and queue its delete', () => {
+    writeFixture(join(TOOLKIT, 'governance/rules/tooling/dependencies.md'), 'a')
     writeFixture(
-      join(TOOLKIT, 'governance/rules/tooling/775-dependencies.md'),
-      'a',
-    )
-    writeFixture(
-      join(TARGET, '.claude/rules/canon/tooling/775-dependencies.md'),
+      join(TARGET, '.claude/rules/canon/tooling/dependencies.md'),
       'a',
     )
     const retired = join(TARGET, '.claude/rules/canon/tooling/765-spelling.md')
@@ -190,19 +187,16 @@ describe('createGovAdapter', () => {
 
   describe('collectMissing', () => {
     it('should name a rule the recorded chain lists that the target does not hold', async () => {
-      writeFixture(join(TOOLKIT, 'governance/rules/ui/400-ui.md'), '# 400-ui\n')
+      writeFixture(join(TOOLKIT, 'governance/rules/ui/copy.md'), '# copy\n')
       writeFixture(
         join(TOOLKIT, 'governance/rules/ui/440-capture.md'),
         '# 440-capture\n',
       )
       writeFixture(
         join(TOOLKIT, 'governance/stacks/astro.toml'),
-        'extends = ""\nrules = ["400-ui", "440-capture"]\n',
+        'extends = ""\nrules = ["copy", "440-capture"]\n',
       )
-      writeFixture(
-        join(TARGET, '.claude/rules/canon/ui/400-ui.md'),
-        '# 400-ui\n',
-      )
+      writeFixture(join(TARGET, '.claude/rules/canon/ui/copy.md'), '# copy\n')
       await writeChainStamp(
         TARGET,
         { domain: 'governance', toolkitRoot: TOOLKIT },
@@ -238,20 +232,20 @@ describe('createGovAdapter', () => {
   describe('a rule its recorded stack stopped listing', () => {
     beforeEach(async () => {
       writeFixture(
-        join(TOOLKIT, 'governance/rules/framework/200-react.md'),
-        '# 200-react\n',
+        join(TOOLKIT, 'governance/rules/framework/react.md'),
+        '# react\n',
       )
       writeFixture(
-        join(TOOLKIT, 'governance/rules/framework/230-nextjs.md'),
-        '# 230-nextjs\n',
+        join(TOOLKIT, 'governance/rules/framework/nextjs.md'),
+        '# nextjs\n',
       )
       writeFixture(
         join(TOOLKIT, 'governance/stacks/react.toml'),
-        'extends = ""\nrules = ["200-react"]\n',
+        'extends = ""\nrules = ["react"]\n',
       )
       writeFixture(
-        join(TARGET, '.claude/rules/canon/framework/200-react.md'),
-        '# 200-react\n',
+        join(TARGET, '.claude/rules/canon/framework/react.md'),
+        '# react\n',
       )
       await writeChainStamp(
         TARGET,
@@ -263,15 +257,15 @@ describe('createGovAdapter', () => {
 
     it('should read the installed rule as matching and queue no delete', () => {
       writeFixture(
-        join(TARGET, '.claude/rules/canon/framework/230-nextjs.md'),
-        '# 230-nextjs\n',
+        join(TARGET, '.claude/rules/canon/framework/nextjs.md'),
+        '# nextjs\n',
       )
 
       const plan = planSync(createGovAdapter(TOOLKIT), TARGET)
 
       expect(plan.entries).toContainEqual({
         state: 'matching',
-        rel: join('.claude', 'rules', 'canon', 'framework', '230-nextjs.md'),
+        rel: join('.claude', 'rules', 'canon', 'framework', 'nextjs.md'),
       })
       expect(plan.changes).toEqual([])
     })

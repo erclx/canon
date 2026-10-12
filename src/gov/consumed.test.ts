@@ -63,11 +63,11 @@ afterEach(() => {
 
 describe('readConsumedRecord', () => {
   it('should read the stack and extras the record names', () => {
-    seedRecord('stack = "node"\nadd = ["300-testing-ts"]\n')
+    seedRecord('stack = "node"\nadd = ["testing-ts"]\n')
 
     expect(readConsumedRecord(root)).toEqual({
       stack: 'node',
-      add: ['300-testing-ts'],
+      add: ['testing-ts'],
     })
   })
 
@@ -82,7 +82,7 @@ describe('readConsumedRecord', () => {
   })
 
   it('should return undefined when the record names no stack', () => {
-    seedRecord('add = ["300-testing-ts"]\n')
+    seedRecord('add = ["testing-ts"]\n')
 
     expect(readConsumedRecord(root)).toBeUndefined()
   })
@@ -109,11 +109,11 @@ describe('listInternalRules', () => {
 describe('regenConsumedRules', () => {
   beforeEach(() => {
     seedStack('base', 'extends = ""\nrules = ["000-constitution"]\n')
-    seedStack('node', 'extends = "base"\nrules = ["100-typescript"]\n')
+    seedStack('node', 'extends = "base"\nrules = ["typescript"]\n')
     seedRule(join('core', '000-constitution.md'), 'C')
-    seedRule(join('lang', '100-typescript.md'), 'TS')
-    seedRule(join('lib', '300-testing-ts.md'), 'TEST')
-    seedRecord('stack = "node"\nadd = ["300-testing-ts"]\n')
+    seedRule(join('lang', 'typescript.md'), 'TS')
+    seedRule(join('lib', 'testing-ts.md'), 'TEST')
+    seedRecord('stack = "node"\nadd = ["testing-ts"]\n')
   })
 
   it('should install the resolved stack into the authored subfolders', async () => {
@@ -123,8 +123,8 @@ describe('regenConsumedRules', () => {
       ok: true,
       installed: [
         join('.claude', 'rules', 'canon', 'core', '000-constitution.md'),
-        join('.claude', 'rules', 'canon', 'lang', '100-typescript.md'),
-        join('.claude', 'rules', 'canon', 'lib', '300-testing-ts.md'),
+        join('.claude', 'rules', 'canon', 'lang', 'typescript.md'),
+        join('.claude', 'rules', 'canon', 'lib', 'testing-ts.md'),
       ],
     })
   })
@@ -178,11 +178,11 @@ describe('regenConsumedRules', () => {
   })
 
   it('should refuse when an internal rule shadows a stack rule', async () => {
-    seedInternalRule(join('lang', '100-typescript.md'), 'SHADOW')
+    seedInternalRule(join('lang', 'typescript.md'), 'SHADOW')
 
     expect(await regenConsumedRules(root)).toEqual({
       ok: false,
-      reason: 'Internal rules shadow stack rules: 100-typescript',
+      reason: 'Internal rules shadow stack rules: typescript',
     })
   })
 

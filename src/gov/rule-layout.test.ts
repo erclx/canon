@@ -52,10 +52,9 @@ function retiredClaudePaths(rel: string, text: string): string[] {
     )
 }
 
-// Both trees install side by side and resolve a stack entry by basename, where a
-// folder name wins over a rule of the same name. The numeric prefix once kept
-// every basename distinct and off every folder name, and this check holds that
-// now the prefix is gone.
+// Both trees resolve a stack entry and a rename by basename alone. A folder
+// name wins over a rule of the same name, which leaves that rule unreachable,
+// and a repeated basename resolves to whichever file is read first.
 function nameCollisions(toolkit: string): string[] {
   const owners = new Map<string, string[]>()
   const folders = new Set<string>()
@@ -169,7 +168,7 @@ describe('rule layout', () => {
 
   it('should pass the current roots, including a home-relative one', () => {
     seedRule(
-      'claude/566-output.md',
+      'claude/output.md',
       '- Under `.claude/worktrees/<name>/`, not `~/.claude/projects/`, see `.claude/rules/canon/x.md`\n- Edit .claude/hooks, then .claude/settings.json.\n',
     )
 

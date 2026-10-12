@@ -121,9 +121,6 @@ const plural = (count: number, noun: string): string =>
 const frameRow = (cells: string): string =>
   `<span class="frame">│</span> <span class="ok">✓</span> ${cells}`
 
-/** Rule names carry a numeric prefix that orders the load, not the identity. */
-const slug = (name: string): string => name.replace(/^\d+-/, '')
-
 /** Indented to the depth a rule inside the `<style>` block sits at. */
 const indentTokens = (css: string): string =>
   css
@@ -194,13 +191,13 @@ export function buildFrameValues(catalogs: FrameCatalogs): FrameValues {
   }
 
   const tokenCss = indentTokens(catalogs.tokenCss)
-  const rules = gov.rules.map((entry) => slug(entry.name))
+  const rules = gov.rules.map((entry) => entry.name)
   // A rule no stack names is opt-in behind `--add`, so featuring one advertises
   // an entry no ordinary `canon gov install` delivers. The column samples the
   // stack-reached subset while its count and remainder describe the whole.
   const stacked = new Set(gov.stacks.flatMap((stack) => stack.rules))
   const deliveredEntries = gov.rules.filter((entry) => stacked.has(entry.name))
-  const deliveredRules = deliveredEntries.map((entry) => slug(entry.name))
+  const deliveredRules = deliveredEntries.map((entry) => entry.name)
 
   for (const [label, list] of [
     ['skills', skills],
@@ -236,7 +233,7 @@ export function buildFrameValues(catalogs: FrameCatalogs): FrameValues {
       const scope =
         globs.length > 0 ? clip(globs.join(' '), GLOB_WIDTH) : 'every session'
       return frameRow(
-        `<span class="name">${escape(pad(slug(entry.name), 24))}</span>` +
+        `<span class="name">${escape(pad(entry.name, 24))}</span>` +
           `<span class="domain">${escape(pad(`[${entry.domain}]`, 12))}</span>` +
           `<span class="muted">${escape(scope)}</span>`,
       )

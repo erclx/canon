@@ -3,12 +3,12 @@ extends = ""
 # `canon` or `claude` reaches no project until it is added here or proposed by
 # `canon gov detect`. Every other rule is opt-in.
 rules = [
-  "566-output",
-  "602-tasks",
-  "604-scratch",
-  "605-worktrees",
-  "606-git",
-  "611-indexes",
+  "output",
+  "task-scope",
+  "scratch",
+  "worktrees",
+  "git",
+  "indexes",
   "context",
   "tasks",
   "plan",

@@ -21,7 +21,7 @@ import {
  * Every value the session page reads at build time, gathered once. Each read
  * goes through this checkout's own CLI where a verb answers it, and through
  * the file the claim is about where none does, and every one refuses rather
- * than falling back. `internal/rules/claude/593-landing-page.md` states why a
+ * than falling back. `internal/rules/claude/landing-page.md` states why a
  * fallback is worse than a failed build.
  */
 

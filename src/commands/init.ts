@@ -49,7 +49,7 @@ export function register(program: Command): void {
         'Examples:',
         '  canon init',
         '  canon init ../my-app',
-        '  canon init --stack node --add 210-astro,260-shadcn ../my-app',
+        '  canon init --stack node --add astro,shadcn ../my-app',
         '  canon init --skip governance ../my-app',
         '',
       ].join('\n'),

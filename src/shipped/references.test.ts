@@ -147,7 +147,7 @@ describe('referencesIn', () => {
   it('should pass a Tailwind arbitrary hex color, which an unbounded pattern reads as #316', () => {
     expect(
       referencesIn(
-        'governance/rules/framework/250-tailwind.md',
+        'governance/rules/framework/tailwind.md',
         '- Use arbitrary values (`bg-[#316ff6]`) instead.',
         noDocsRoot,
       ),
@@ -568,9 +568,9 @@ describe('isShippedCorpus', () => {
 
   it('should exclude a corpus whose reader already holds this repository', () => {
     expect(isShippedCorpus('canon/context/development/gates.md')).toBe(false)
-    expect(
-      isShippedCorpus('internal/rules/claude/598-authoring-layout.md'),
-    ).toBe(false)
+    expect(isShippedCorpus('internal/rules/claude/authoring-layout.md')).toBe(
+      false,
+    )
     expect(isShippedCorpus('wiki/claude/worktrees.md')).toBe(false)
     expect(isShippedCorpus('src/design/base.css')).toBe(false)
   })

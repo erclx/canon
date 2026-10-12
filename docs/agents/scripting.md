@@ -79,7 +79,7 @@ CANON_NON_INTERACTIVE=1 canon tooling diff astro /path/to/project
 CANON_NON_INTERACTIVE=1 canon tooling sync astro /path/to/project --write
 
 # Install a governance stack (the stack argument is required headlessly)
-CANON_NON_INTERACTIVE=1 canon gov install node --add 210-astro,260-shadcn /path/to/project
+CANON_NON_INTERACTIVE=1 canon gov install node --add astro,shadcn /path/to/project
 
 # Update installed governance rules, dropping a retired .claude/GOV.md
 CANON_NON_INTERACTIVE=1 canon gov sync /path/to/project

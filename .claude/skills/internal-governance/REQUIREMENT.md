@@ -7,14 +7,14 @@ description: Scope boundary for the rule catalog and its stacks, and where a rul
 
 ## Gap
 
-Without this skill, a session writes a rule straight into `.claude/rules/` where the next check deletes it, adds a source rule no stack names so it installs into nothing, picks a number outside its band so the number stops stating the domain, widens a rule without committing the regenerated copy, and lands a gov-specific sync change in the engine three other domains inherit.
+Without this skill, a session writes a rule straight into `.claude/rules/` where the next check deletes it, adds a source rule no stack names so it installs into nothing, picks a slug another rule or a folder already holds so a stack entry resolves to the wrong file, widens a rule without committing the regenerated copy, and lands a gov-specific sync change in the engine three other domains inherit.
 
-The registration failure is the one that passes every gate. A rule sitting in `governance/rules/` under a correct number and a correct shape looks landed, and the drift assertion agrees, because the consumed copy still matches what the record resolves to. Nothing reports that the record names it nowhere, so the rule reaches no target and no session ever loads it.
+The registration failure is the one that passes every gate. A rule sitting in `governance/rules/` under a free slug and a correct shape looks landed, and the drift assertion agrees, because the consumed copy still matches what the record resolves to. Nothing reports that the record names it nowhere, so the rule reaches no target and no session ever loads it.
 
 ## Must
 
 - Register a new rule where the record resolves it, meaning a stack in `governance/stacks/`, the `add` list in `internal/governance.toml`, or `internal/rules/` when it governs toolkit authoring alone
-- Pick the number from its band, so the number states the rule's domain without the file being opened
+- Pick a slug no other rule and no folder holds, so a stack entry and a rename resolve to one file
 - Commit the regenerated `.claude/rules/` copy alongside the source change, since the drift assertion turns a stale copy into a failing check
 - Route a sync change by axis, sending source location and what counts as a change to the adapter, and the scan report, the prompt, and the apply loop to the engine every other domain inherits
 
@@ -32,6 +32,6 @@ The registration failure is the one that passes every gate. A rule sitting in `g
 ## Out of scope
 
 - The frontmatter, headings, and bullet conventions a rule file carries, which `claude/skills/create-rule/references/rule.md` states
-- Creating a project-local rule inside a target, which the shipped `create-rule` skill does against that project's own numbering
+- Creating a project-local rule inside a target, which the shipped `create-rule` skill does against that project's own subdirs
 - Authoring the reference a rule routes to, which lives in its owner skill's `references/` and which `internal-claude` covers under `claude/skills/`
 - The per-rule verdict on whether a rule earns its place, its load mode, and its reach: `internal-rule-audit`

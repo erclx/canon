@@ -15,7 +15,7 @@ Per-domain narrative loaded on demand
 - [Design](design/index.md): DESIGN.md and the token module it renders from, and the render preview. Start with overview.
 - [Development](development/index.md): Local dev loop and the run command table, how bun run check scopes its work and its tests, what each stage regenerates and gates on, the hook families, session scratch, and the record folders. Start with overview.
 - [Features](features/index.md): Small feature domains grouped by kind rather than split from one domain, one entry each for canvas, demo, inventory, slides, teach, and transcripts
-- [Governance](governance/index.md): Path-scoped Claude rules with their numbering and frontmatter contract, the stacks that group them, and the install and sync path with its CLI. Start with overview.
+- [Governance](governance/index.md): Path-scoped Claude rules with their naming and frontmatter contract, the stacks that group them, and the install and sync path with its CLI. Start with overview.
 - [Sandbox](sandbox/index.md): Scenarios that provision isolated project states, the run and coverage surfaces, and the authoring contract. Start with overview.
 - [Scripts](scripts/index.md): Bash entry points and the migration boundary, repo maintenance, UI framing across the exec boundary, the shared lib surface, and the frozen eval records. Start with overview.
 - [Tooling](tooling/index.md): Stacks and their layering, manifests, seeds and the seed gate, the served port and capture seed, and the end-to-end verify. Start with overview.

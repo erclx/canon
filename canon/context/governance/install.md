@@ -5,7 +5,7 @@ description: Where rules land in a target, why install and sync and build stay s
 
 # Install and sync
 
-Rules install per-file at `.claude/rules/canon/<subdir>/<rule>.md` with each band subdirectory preserved. Source rules already carry the Claude shape, so the copy is a passthrough rather than a transform.
+Rules install per-file at `.claude/rules/canon/<subdir>/<rule>.md` with each domain subdirectory preserved. Source rules already carry the Claude shape, so the copy is a passthrough rather than a transform.
 
 ## Decisions
 
@@ -19,7 +19,7 @@ Install overwrites existing rules on purpose. Delete the rules you do not want a
 
 The engine in `src/sync/engine.ts` owns target validation, the scan report, the prompt, and the apply loop. The gov adapter supplies two things only: where a destination file's source lives, and what counts as a change beyond a content diff.
 
-Sync matches an installed rule to its source by rule name rather than by relative path. A rule that moves between bands here still syncs into the subdirectory the target already uses, so a reorganization does not strand installed copies.
+Sync matches an installed rule to its source by rule name rather than by relative path. A rule that moves between folders here still syncs into the subdirectory the target already uses, so a reorganization does not strand installed copies.
 
 ### This repository's own rules are produced, not written
 
@@ -41,13 +41,13 @@ The rejected alternative was the skill matching a detected technology against ea
 
 ### Only governance keeps a consumed copy
 
-`internal/` carries no mirror, since nothing installs it into a project. A mirror would buy only a path this repository resolves, at the cost of a tracked copy regenerated on every check and a citation form that reads as portable and is not. `internal/rules/claude/598-authoring-layout.md` states the root each carrier resolves against instead, and the accepted cost is that a citation here reads differently from the same citation in a rule or a shipped body.
+`internal/` carries no mirror, since nothing installs it into a project. A mirror would buy only a path this repository resolves, at the cost of a tracked copy regenerated on every check and a citation form that reads as portable and is not. `internal/rules/claude/authoring-layout.md` states the root each carrier resolves against instead, and the accepted cost is that a citation here reads differently from the same citation in a rule or a shipped body.
 
 `internal/` has no install channel to mirror. The Consumed copies gate stage runs `canon gov regen` directly.
 
 ## Gotchas
 
-- `runInstall` in `src/commands/gov.ts` writes two stamp records after copying a stack: `recordStamp` for the file hashes a sync refreshes, and `writeChainStamp` for the stack name the operator gave. The chain stamp lets a later sync answer what the target's stack lists without re-deriving it from installed band folders. An add with no stack writes only the first.
+- `runInstall` in `src/commands/gov.ts` writes two stamp records after copying a stack: `recordStamp` for the file hashes a sync refreshes, and `writeChainStamp` for the stack name the operator gave. The chain stamp lets a later sync answer what the target's stack lists without re-deriving it from installed domain folders. An add with no stack writes only the first.
 - `canon gov install` and `canon gov sync` refuse to run against the toolkit root, because a target's rules are the operator's to edit. `canon gov regen` runs against it on purpose, since the destination there is produced output.
 - The payload builder behind `build` is `src/gov/payload.ts`, and frontmatter stripping is `src/markdown/frontmatter.ts`, which `docs` shares. Do not duplicate either inside `src/gov/`.
 - A project holding `.cursor/rules/` from an earlier toolkit version keeps those files, since sync does not touch them. Remove the folder by hand in a project that does not use Cursor.
@@ -77,7 +77,7 @@ canon gov install node ../my-app
 Layer extra rules on a stack without defining a new one:
 
 ```bash
-canon gov install node --add 210-astro,200-react,260-shadcn ../my-app
+canon gov install node --add astro,react,shadcn ../my-app
 # installs node stack rules plus the three extras, deduped
 ```
 
@@ -85,5 +85,5 @@ Add rules to a target with no stack, after asking what its evidence proposes:
 
 ```bash
 canon gov detect ../my-app --stack node --json
-canon gov install --add 200-react,310-zod ../my-app
+canon gov install --add react,zod ../my-app
 ```

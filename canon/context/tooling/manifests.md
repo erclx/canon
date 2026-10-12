@@ -7,7 +7,7 @@ description: Manifest blocks and what each injects, which layer wins a duplicate
 
 ## Overview
 
-Each stack's `manifest.toml` controls what sync injects, and the extends chain decides which layer's file a target receives. `internal/rules/claude/595-tooling-reference.md` carries the syntax invariants and the manifest-to-reference symmetry, globbing `tooling/*/manifest.toml` beside `tooling/*/reference.md` so an edit to either side loads both, since the manifest is the side that moves first. `internal/standards/tooling-reference.md` carries the symmetry in prose.
+Each stack's `manifest.toml` controls what sync injects, and the extends chain decides which layer's file a target receives. `internal/rules/claude/tooling-reference.md` carries the syntax invariants and the manifest-to-reference symmetry, globbing `tooling/*/manifest.toml` beside `tooling/*/reference.md` so an edit to either side loads both, since the manifest is the side that moves first. `internal/standards/tooling-reference.md` carries the symmetry in prose.
 
 ## Decisions
 
@@ -27,7 +27,7 @@ Gitignore merging is additive only and existing entries are never touched, so a 
 - Bun's script shell expands command substitution and a leading environment assignment, so a script value may carry `VAR=$(bash scripts/x.sh) command`. Verified 2026-08-13 against `bun run`.
 - `Bun.Glob` skips dotfiles unless `dot: true` is set. Tooling configs are almost entirely dotfiles, so omitting it matches 4 of 14 files in `base` and fails silently.
 - Seeds are copy-once. To re-seed a structured file, delete it and sync again.
-- `copyPreservingMode` in `src/sync/copy.ts` keeps a destination's mode, per `internal/rules/core/096-operator-files.md`. A target's husky hooks keep their executable bit across a sync whatever mode the source carries. It sits in `src/sync/` rather than `src/tooling/` because the sync engine owns it and the tooling inject reads it.
+- `copyPreservingMode` in `src/sync/copy.ts` keeps a destination's mode, per `internal/rules/core/operator-files.md`. A target's husky hooks keep their executable bit across a sync whatever mode the source carries. It sits in `src/sync/` rather than `src/tooling/` because the sync engine owns it and the tooling inject reads it.
 
 ### The ignore-parity check
 

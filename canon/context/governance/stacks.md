@@ -41,17 +41,17 @@ Sync never retracts a rule, so a target installed before the cut keeps every rul
 
 The rejected alternative kept the five as thin aliases naming one framework rule each. That gives a project two routes to one install, a stack name and a detect proposal, which is the dual mode the plan standard warns against, and the alias drifts from the detect entry the first time either changes.
 
-`target-setup` picks the stack from the repository root's language alone, and a framework's rules arrive as extras the operator confirms. `230-nextjs` globs every `.ts` and `.tsx` file, so a Vite app would match it if it reached one. Detect proposes it only from `next` in a manifest or a `next.config.*` file, so detection scopes it to Next.js apps where stack membership once did.
+`target-setup` picks the stack from the repository root's language alone, and a framework's rules arrive as extras the operator confirms. `nextjs` globs every `.ts` and `.tsx` file, so a Vite app would match it if it reached one. Detect proposes it only from `next` in a manifest or a `next.config.*` file, so detection scopes it to Next.js apps where stack membership once did.
 
 A target recorded on a retired stack still syncs. `readNewRules` in `src/sync/check.ts` reads a chain that no longer resolves as no chain and falls back to band folders, so the target keeps receiving updates to the rules it holds and is offered a new rule only in a band folder it already carries or one holding a base rule.
 
 ### Server rules glob every backend language
 
-`360-security-server` and `370-database` glob Python, TypeScript, JavaScript, Go, and PHP. No stack names them, so `canon gov detect` proposes them from a server framework or database client in the manifest, and any backend language matches once installed. `350-security-web` globs component and markup files alone and matches nothing on a request handler.
+`security-server` and `database` glob Python, TypeScript, JavaScript, Go, and PHP. No stack names them, so `canon gov detect` proposes them from a server framework or database client in the manifest, and any backend language matches once installed. `security-web` globs component and markup files alone and matches nothing on a request handler.
 
 ### The extras flag layers rather than defines
 
-`--add` takes rule names alone and does not expand a folder, since the flag layers onto a resolved stack rather than defining one. An unknown name warns rather than aborting, so `--add code` is loud rather than silent. A target reaching `335-testing-go` or `336-testing-php` through `--add` rather than the `go` or `php` stack gets no `code/` rule, which is why those two keep their `canon:test-craft` pointer where `300-testing-ts` and `330-testing-py` dropped it. Extras are deduped against the stack's resolved rules, so a rule already in the stack is a no-op.
+`--add` takes rule names alone and does not expand a folder, since the flag layers onto a resolved stack rather than defining one. An unknown name warns rather than aborting, so `--add code` is loud rather than silent. A target reaching `testing-go` or `testing-php` through `--add` rather than the `go` or `php` stack gets no `code/` rule, which is why those two keep their `canon:test-craft` pointer where `testing-ts` and `testing-py` dropped it. Extras are deduped against the stack's resolved rules, so a rule already in the stack is a no-op.
 
 With no stack named, `--add` installs its rules alone, which `canon/context/governance/install.md` covers.
 
@@ -71,7 +71,7 @@ Create a `.toml` file in `governance/stacks/`. Set `extends` to the parent stack
 
 ```toml
 extends = "base"
-rules = ["code", "130-go", "335-testing-go"]
+rules = ["code", "go", "testing-go"]
 ```
 
 Take a folder whole only when the stack wants every rule in it now and every rule added to it later. A stack selecting some of a folder stays enumerated, since the list records that the omission was a decision.

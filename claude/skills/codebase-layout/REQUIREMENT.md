@@ -34,7 +34,7 @@ A placement rule in front of the session is also one it can argue past. Each fla
 - Carry a hard file-count threshold. A command folder holding sixty files of one role reads fine flat, and a number would fail it.
 - Restate the layer rule, the layer table, or the final filter `test-craft` owns
 - Mandate one layout across projects, such as a `features/` tree, over the project's own strategy
-- Restate the pointer in `000-code`, which loads in code stacks only. The rule points here and this body carries the depth.
+- Restate the pointer in `routing`, which loads in code stacks only. The rule points here and this body carries the depth.
 
 ## Guards
 

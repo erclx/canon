@@ -54,7 +54,7 @@ export const REFERENCE_MARKER = 'canon-allow-reference'
  * already ships `anthropics/claude-code#58345` in exactly that form.
  *
  * The trailing boundary is what the first shape of this pattern lacked, and it
- * costs a live finding to omit. `governance/rules/framework/250-tailwind.md`
+ * costs a live finding to omit. `governance/rules/framework/tailwind.md`
  * writes `bg-[#316ff6]`, a Tailwind arbitrary hex color, which an unbounded
  * `#[0-9]+` reads as pull request 316. Requiring a non-word character after the
  * digits rejects it and rejects nothing real, since a citation is always
@@ -172,7 +172,7 @@ const PHASE_LABEL = /\bv\d+\.\d+(?!\.\d)\b/g
 
 /**
  * A `.claude/rules/<segments>/<slug>.md` citation from a body under
- * `claude/skills/`, the installed-path spelling `598-authoring-layout.md` bans a
+ * `claude/skills/`, the installed-path spelling `authoring-layout.md` bans a
  * shipped skill body from citing as authority for its own behavior.
  *
  * Anchored on a trailing `.md` file rather than on the bare `.claude/rules/`
@@ -246,7 +246,7 @@ function isDocsPathReportable(
  * Whether `file` sits in the one corpus `RULE_PATH` gates: a shipped skill
  * body, minus its own `REQUIREMENT.md`.
  *
- * The ban lives in `598-authoring-layout.md`, stated for one reader: a
+ * The ban lives in `authoring-layout.md`, stated for one reader: a
  * session loading the `SKILL.md` body a target actually receives.
  * `REQUIREMENT.md` is excluded for the reason that file states there, since a
  * maintainer or an audit command reads it rather than a session loading it,

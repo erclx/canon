@@ -245,7 +245,7 @@ function isGoverned(cited: string, declared: readonly string[]): boolean {
  *
  * Anchored on the entry shape rather than searched for as a substring. A bare
  * scan for the glob text finds it in the `description:` line first wherever a
- * rule names what it governs in prose, which is how `596-claude-md.md` reported
+ * rule names what it governs in prose, which is how `seed-mirror.md` reported
  * its `CLAUDE.md` glob against line 2 instead of line 4.
  */
 const LIST_ENTRY = /^\s*-\s*(?:'([^']*)'|"([^"]*)"|(\S.*?))\s*$/
