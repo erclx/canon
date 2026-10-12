@@ -35,35 +35,55 @@ Does not govern:
 - What sections a document has, or what belongs in each: the standard for that document type
 - Which frontmatter fields a document carries, which is that standard's own subject. This file governs the wording of a `title` and a `description` and nothing else about them.
 - The text inside a fenced block, which follows the conventions of its own language rather than these
-- Phase-label and semver discipline: `versioning.md`
-- The scan that applies these bans to finished text on its way out: `publish.md`
-- Whether a pull request or issue number is backticked, which turns on where the text is published rather than on the text: `publish.md`
+- Phase-label and semver discipline, which is `versioning.md`. The scan that applies these bans to finished text on its way out, and whether a pull request or issue number is backticked, which turns on where the text is published rather than on the text, are `publish.md`.
 
 ## Headings
 
 - H1 for document title, H2 for main sections, H3 for subsections
 - Use sentence case for all headings (H1, H2, H3). The audit reports a heading or a frontmatter `title` with a capitalized word after the first, and a proper noun it reports stays as it is.
 - Proper nouns and product names retain their casing in headings
+
+### Seams
+
 - Past roughly 40 rendered lines with no heading of any level breaking them, add a subheading at the seam. Measure the longest such run rather than everything under one `##`, and exclude fenced code blocks. The number is a checkpoint, not a cap.
 - Count rendered lines rather than source lines, wrapping each source line at 80 columns and summing the heights. Source lines undercount a file authored one line per bullet, where a block of fifteen paragraph-bullets occupies fifteen lines and renders past sixty. A checkpoint another standard states counts the same unit, so a file measured one way never sits beside a run measured another.
+
+### Ceiling
+
 - Keep a whole document at or under 300 rendered lines, counted over the full source with frontmatter and fenced blocks included, since a session pays for every line it loads. This one is a ceiling rather than a checkpoint. `canon markdown audit` lists every document past it without failing the run, and a gate stage reads the same number, so whether a push fails on it is the project's gate to decide. Split the document at a seam rather than compressing it.
 - Exempt a file named `CHANGELOG.md`, which a release tool rewrites, and a document carrying `<!-- canon-length-exempt: <reason> -->` on a line of its own outside a fenced block. A marker naming no reason exempts nothing.
-- Exempt a block whose lines are all list items at one level averaging under roughly 130 characters. A flat list of short peers is already navigable, and a subheading dropped into it splits a set that belongs together. Bullet count says nothing on its own, since a catalog of one-liners and a stack of paragraphs reach the same count and read nothing alike, so weight is what decides.
+
+### Exempt blocks
+
+- Exempt a block whose lines are all list items at one level averaging under roughly 130 characters. A flat list of short peers is already navigable, and a subheading dropped into it splits a set that belongs together. Bullet count says nothing on its own to this checkpoint, which measures depth. The cap on a run of bullets is a separate rule under Paragraphs and lists. A catalog of one-liners and a stack of paragraphs reach the same count and read nothing alike, so weight is what decides.
 - Mixing prose with that list, or nesting levels inside it, ends the exemption at any weight.
 - Exempt a block whose lines are all table rows, at any length. The peer list above is exempt because it is already navigable, and a table because the remedy does not exist: a subheading dropped inside one splits the table rather than the run, so no edit short of rewriting it as a list clears the checkpoint.
 - Prose either side of the table ends that exemption, since the block has a seam and a heading breaks it there.
+
+### Bold section markers
+
 - Break a run on a bold section marker holding its line alone, the way a heading breaks one. A document whose template separates sections with `**Risks:**` rather than `## Risks` has written the seam a reader lands on, and reading only the heading reported every such file at its full length whatever it carried.
 - Require the marker to start at column zero and to be the whole line. `**Risks:**` breaks a run, a bold phrase opening a sentence stays emphasis, and an indented one stays a label inside its list item.
 - Break a colon-less marker on either of two signals, since no one test separates every marker from a sentence set in bold. A label that is one whole code span breaks at any width, which is how a bold line holding only a backticked path reads as the file heading it is. Anything else breaks at 20 characters or fewer, which reaches `**Testing**` and leaves a bold sentence as prose.
 
 ## Paragraphs and lists
 
+### Paragraphs
+
 - Use prose by default. Reserve bullets for discrete, unrelated items.
 - Keep paragraphs to four sentences or fewer. Split longer blocks at the next logical boundary.
-- Past roughly 700 characters in one paragraph, folding in the lines that wrap it, split at the next logical boundary as well. A paragraph written as two long sentences satisfies the sentence cap above and still asks the reader to hold too much at once. This number sits well above the bullet checkpoint because a paragraph is read straight through and a bullet is scanned.
-- Keep bullets tight. Past roughly 400 characters in one top-level bullet, counting the lines that continue it and excluding any bullet nested under it, the overflow belongs in prose. The number is a checkpoint rather than a cap, and a bullet reading well past it means the number is wrong rather than the rule.
+- Past roughly 700 characters in one paragraph, folding in the lines that wrap it, split at the next logical boundary as well. A paragraph written as two long sentences satisfies the sentence cap above and still asks the reader to hold too much at once. This number sits well above the bullet checkpoint because a paragraph is read straight through and a bullet is scanned. A paragraph a branch adds or grows past it fails the push in a context entry through the `paragraph-growth` gate stage, and an unchanged long paragraph passes. Elsewhere it is the audit's warning and no more.
+
+### Bullets
+
+- Keep bullets tight. Past roughly 250 characters in one top-level bullet, counting the lines that continue it and excluding any bullet nested under it, the overflow belongs in prose. A bullet a branch adds or grows past it fails the push in a context entry through the `paragraph-growth` gate stage, and an unchanged one passes until edited. Elsewhere it is the audit's warning and no more. The number is a checkpoint rather than a cap, and a bullet reading well past it means the number is wrong rather than the rule.
+- Keep a run of consecutive top-level bullets to 5 or fewer under one heading, and fold a longer one into prose, an H3 per item, or a split at the seam. A blank line, a continuation, and a nested item do not break the run, and a paragraph or heading does. The audit reports a longer run and the `bullet-stacks` gate stage fails it.
+- Leave a run whose every item opens with a bold label or a link as it is, since each item names its own subject. Numbered items do not count toward the cap. Governance rules and `REQUIREMENT.md` sit outside it, since a rule is one imperative per bullet.
 - Collapse a stack of bullets narrating one subsystem into a single `###` subsection carrying one narrative. Splitting a heavy bullet into three light ones satisfies the checkpoint above and leaves the reader no better off, and subdividing a block does not lighten the bullets inside it, so the two rules answer different defects.
 - Use dashes (`-`) not asterisks (`*`) for bulleted lists
+
+### Bullet form
+
 - Do not end single-sentence or fragment bullets with a period. Use periods when a bullet has two or more sentences.
 - For key path lists, use colon format: `- \`src/\`: description`. Never use an em dash.
 - Do not introduce a list with a "Here are the X:" or "The following X:" lead-in
@@ -87,10 +107,16 @@ Does not govern:
 ## Language
 
 - Use American English spelling
+
+### Sentence shape
+
 - Open a sentence with its subject and action, not filler (`Note that`, `Basically`), a hollow connective (`That being said`, `It's worth noting`), or a gerund windup (`Leveraging the API...`). Substantive transitions that carry a real relationship are fine.
 - Do not use the negative parallelism pattern (`It's not X, it's Y`, `not because X, but because Y`)
 - Do not pad verb phrases or delay the action. Write the shortest form (`in order to` → `to`, `ensure that X is set` → `set X`, `By doing X, you can Y` → state Y directly).
 - Do not address the reader as a participant (`Let's`, `Here's`, `Here are`). State the content directly.
+
+### Claims
+
 - Commit to a position. Do not hedge in clusters (`It might be worth considering`) or use false balance (`While X is true, Y is also important`). Recommend, or state the tradeoff.
 - Do not inflate significance. State what a thing does rather than calling it `a major milestone` or `a turning point for the field`.
 - Do not name a person, company, or product to borrow its authority. Name a source only where the claim turns on who made it.

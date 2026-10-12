@@ -18,6 +18,7 @@ import {
   bodyLines,
   scanBans,
 } from '@/markdown/scan'
+import { bulletStacks, CAP, type StackFinding } from '@/markdown/stacks'
 import {
   BASELINE,
   CHECKPOINTS,
@@ -59,6 +60,7 @@ interface FileReport {
   readonly links: readonly LinkFinding[]
   readonly colons: readonly ColonFinding[]
   readonly headingCase: readonly HeadingCaseFinding[]
+  readonly bulletStacks: readonly StackFinding[]
   readonly structure: StructureReport
   readonly renderedLines: number
   /** The stated reason, or null where the document is not exempt. */
@@ -100,6 +102,10 @@ export function register(program: Command): void {
         'A mid-sentence colon and a heading with a capital after its first word',
         'report the same way. A proper noun is the one case the second cannot',
         'tell from title case, and the first is sometimes right.',
+        '',
+        'Bullet stacks report a run of more than 5 plain bullets under one',
+        'heading and never exit 2. The Bullet stacks gate stage owns that',
+        'verdict, for the reason the length line below states.',
         '',
         'Length reports a whole document past the ceiling and never exits 2.',
         'The Document ceiling gate stage owns that verdict, since this audit also',
@@ -178,6 +184,7 @@ async function runAudit(
         bans: scanBans(lines, bans),
         colons: advisory ? findColons(lines) : [],
         headingCase: advisory ? findHeadingCase(source) : [],
+        bulletStacks: advisory ? bulletStacks(lines) : [],
         links: findBrokenLinks(lines, (path) =>
           existsSync(resolve(dirname(abs), path)),
         ),
@@ -194,6 +201,7 @@ async function runAudit(
   reportLinks(reports, root)
   reportColons(reports)
   reportHeadingCase(reports)
+  reportStacks(reports)
   reportBullets(reports, checkpoints)
   reportParagraphs(reports, checkpoints)
   reportCadence(reports, checkpoints)
@@ -229,6 +237,7 @@ async function runAudit(
           links: report.links,
           colons: report.colons,
           headingCase: report.headingCase,
+          bulletStacks: report.bulletStacks,
           longestRun: report.structure.longestRun,
           longestRunLine: report.structure.longestRunLine,
           heavyBullets: report.structure.heavyBullets,
@@ -251,6 +260,7 @@ async function runAudit(
     structure: reports.map((report) => report.structure),
     colons: reports.flatMap((report) => report.colons),
     headingCase: reports.flatMap((report) => report.headingCase),
+    bulletStacks: reports.flatMap((report) => report.bulletStacks),
   })
 
   return gating ? EXIT_GATE : 0
@@ -402,6 +412,48 @@ function reportLinks(reports: readonly FileReport[], root: string): void {
       )
       .join('\n'),
   )
+}
+
+function reportStacks(reports: readonly FileReport[]): void {
+  logStep('Bullet stacks')
+  logInfo(
+    `A run of more than ${CAP} top-level bullets, with no paragraph or heading between them.`,
+  )
+  logInfo(
+    'A run whose every item opens with a bold label or a link is exempt. This never fails a run. The Bullet stacks gate stage owns that verdict.',
+  )
+
+  const carrying = reports
+    .filter((report) => report.bulletStacks.length > 0)
+    .sort((a, b) => longestStack(b) - longestStack(a))
+
+  if (carrying.length === 0) {
+    logInfo(`No run past ${CAP} bullets.`)
+    return
+  }
+
+  const total = carrying.reduce(
+    (sum, report) => sum + report.bulletStacks.length,
+    0,
+  )
+  logWarn(`${plural(total, 'stack')} across ${plural(carrying.length, 'file')}`)
+  logInfo(
+    'Fold the run into prose, give each item an H3, or split the list at its seam.',
+  )
+  pipeOutput(
+    carrying
+      .map(
+        (report) =>
+          `${report.rel}  ${plural(report.bulletStacks.length, 'stack')}\n${report.bulletStacks
+            .map((found) => `  :${found.line}  ${found.count} bullets`)
+            .join('\n')}`,
+      )
+      .join('\n'),
+  )
+}
+
+function longestStack(report: FileReport): number {
+  return Math.max(0, ...report.bulletStacks.map((found) => found.count))
 }
 
 function reportColons(reports: readonly FileReport[]): void {

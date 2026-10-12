@@ -8,10 +8,10 @@ description: The bullet, paragraph, and depth checkpoints, where each number sit
 ## The paragraph and bullet checkpoints
 
 - The paragraph check closed a gap in the standard rather than working around it. A sentence cap alone is satisfied by writing fewer and longer sentences, and 486 paragraphs across the corpus sit inside four sentences and past 400 characters, so the weight half was added to `claude/skills/markdown-craft/references/markdown.md` and parses as its own checkpoint.
-- Borrowing the bullet number was the first shape and it fails twice over: an author reading the sentence cap finds no weight rule to read, and retuning the bullet rule moves a paragraph rule nobody edited. The two numbers diverge, at 400 for a bullet and 700 for a paragraph, because each was read against its own corpus once the shapes were measured apart.
+- Borrowing the bullet number was the first shape and it fails twice over: an author reading the sentence cap finds no weight rule to read, and retuning the bullet rule moves a paragraph rule nobody edited. The two numbers diverge, at 250 for a bullet and 700 for a paragraph, because each was read against its own corpus once the shapes were measured apart.
 - The sentence cap counts a paragraph whose next sentence opens on a code span. `SENTENCE_END` requires a capital after the terminal punctuation, which a command name never carries, so the backtick sits in the lookahead as its own alternative. The price is a span opening a fragment mid-paragraph reading as a sentence start.
 
-The bullet number stays at 400. Findings sampled at 404, 420, and 458 characters read as three dense but scannable bullets, and the ones at 508 and 598 read as prose wearing a bullet, which is the rule working rather than the number sitting wrong. Moving the line to 500 would cut the open set from 104 findings to 51 and would exempt the band the sample judged worst.
+The bullet number moved from 400 to 250 so the audit's warning and the growth gate read one number. The 400 rested on findings sampled at 404, 420, and 458 characters, which read as three dense but scannable bullets, while the ones at 508 and 598 read as prose wearing a bullet. Moving the line to 500 would cut the open set from 104 findings to 51 and would exempt the band the sample judged worst.
 
 The paragraph weight number moves from 600 to 700. Samples at 604, 633, and 677 characters each read as an ordinary four-sentence paragraph on one topic, which is a finding reading well past its checkpoint and the signal that the number is low. Density arrives around 760 and is plain by 860, so 700 is where the reading stops being comfortable. The move takes the weight half from 146 findings to 78 and leaves the sentence cap untouched, since 96 of its hits sit at 700 characters or under and fire on sentence count alone.
 
@@ -27,3 +27,15 @@ Moving a number in a standard is two edits rather than one. `DEFAULT_CHECKPOINTS
 - `MARKER_WIDTH` is 20 and covers the rest. Of the remaining 51 markers in those review bodies 50 sit at or under it, and so do 48 of the 94 colon-less lines in the records tree, every one a label. The single miss is a 48-character heading written by hand, left as the cheap error rather than bought back by raising the ceiling. Terminal punctuation separates nothing, since 45 of those 48 end in one.
 - The ceiling sits under the 21 to 30 band rather than over it. Those 8 lines cannot be classified on sight, where `One change across four files.` reads as a sentence and `Rule plus a mechanical half` reads as a seam, and the asymmetry decides the tie: a missed break costs one unbroken run, and a false one shortens every run around it until the measure stops reporting.
 - Both signals govern the colon-less shape alone, since a colon is its own evidence of a label. Capping the colon form too would take the break back from the four markers between 31 and 50 characters that already have it, every one a genuine section marker.
+
+## Decisions
+
+### Bullet runs cap at 5, reported by the audit and gated in a stage of their own
+
+A run of more than 5 top-level bullets under one heading fails a push through the `bullet-stacks` stage, and `canon markdown audit` reports the same runs and never exits 2 on them. The measure lives in `src/markdown/stacks.ts` and both read it, so the report and the gate cannot disagree about what a run is.
+
+The audit stays report-only for the reason `documentCeiling` gives: it also runs on plans and groundwork records kept out of version control, where a long list is not a defect. The gate stage reads tracked files in a fixed scope instead.
+
+A cap of 8 was the rejected alternative. It left the worst of the corpus alone and still failed the common five-to-eight stack that reads as one list, and 5 is where a reader stops holding the items one at a time. A ratchet that failed only a branch adding to the stack count was rejected for needing a stored baseline per file and for letting the existing 36-bullet runs stand. Report-only was rejected because nothing then held the shape once the sweep reshaped it.
+
+Two shapes are exempt without a marker: a run whose every item opens with a bold label or a link, and numbered items. No escape marker exists, since a marker is how the ceiling's exemptions accumulated.

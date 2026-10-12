@@ -109,7 +109,7 @@ const SENTENCE_END = /[.!?]["'’”)\]]*(?=\s+(?:["'“(\[]*[A-Z]|`)|\s*$)/g
 export const CHECKPOINTS = {
   run: 40,
   peerBullet: 130,
-  bullet: 400,
+  bullet: 250,
   paragraph: 700,
   sentences: 4,
   renderWidth: 80,

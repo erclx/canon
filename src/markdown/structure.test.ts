@@ -104,7 +104,7 @@ describe('CHECKPOINTS', () => {
     expect(CHECKPOINTS).toEqual({
       run: 40,
       peerBullet: 130,
-      bullet: 400,
+      bullet: 250,
       paragraph: 700,
       sentences: 4,
       renderWidth: 80,

@@ -44,6 +44,7 @@ function makeInput(overrides: Partial<GateInput> = {}): GateInput {
     structure: [],
     colons: [],
     headingCase: [],
+    bulletStacks: [],
     ...overrides,
   }
 }
@@ -137,6 +138,12 @@ describe('isGating', () => {
       ],
       headingCase: [{ line: 1, text: 'Key Changes', words: ['Changes'] }],
     })
+
+    expect(isGating(input)).toBe(false)
+  })
+
+  it('should pass a bullet stack on its own', () => {
+    const input = makeInput({ bulletStacks: [{ line: 4, count: 36 }] })
 
     expect(isGating(input)).toBe(false)
   })

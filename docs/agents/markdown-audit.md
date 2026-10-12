@@ -67,11 +67,11 @@ The heading-case measure reports a heading or a frontmatter `title` with a capit
 
 ### Weight, cadence, and length
 
-Bullet and paragraph weight, run depth, the two cadence numbers, and the document length ceiling are each a judgment a reader settles rather than a fact a scan settles. What each measures, the samples behind its checkpoint, and why none of them gates are in `markdown-audit-weight.md`.
+Bullet and paragraph weight, bullet stacks, run depth, the two cadence numbers, and the document length ceiling are each a judgment a reader settles rather than a fact a scan settles. What each measures, the samples behind its checkpoint, and why none of them gates are in `markdown-audit-weight.md`.
 
 ## Exit codes
 
-Exit codes are `0` for a completed run with no gating finding, `1` for a refusal, `2` for a ban hit or a dead relative link, and `3` for a shipped ban set that arrived empty. A banned character and a relative link resolving to nothing on disk each fail the run, both facts a scan settles rather than a reader judging. Bullet, paragraph, and depth weight are judgments a reader settles, and cadence is a distribution whose healthy range moves with the surface, so all four report under every code. Length reports the same way, since the audit also runs on a plan kept out of version control, and the Document ceiling stage in `canon gate run` owns that verdict instead.
+Exit codes are `0` for a completed run with no gating finding, `1` for a refusal, `2` for a ban hit or a dead relative link, and `3` for a shipped ban set that arrived empty. A banned character and a relative link resolving to nothing on disk each fail the run, both facts a scan settles rather than a reader judging. Bullet, paragraph, and depth weight are judgments a reader settles, and cadence is a distribution whose healthy range moves with the surface, so all four report under every code. A bullet stack, a run of more than 5 plain bullets, reports the same way, and the `bullet-stacks` stage in `canon gate run` owns its verdict. Length reports the same way, since the audit also runs on a plan kept out of version control, and the Document ceiling stage in `canon gate run` owns that verdict instead.
 
 `3` is separate from `1` because the two want different responses from a caller. A refusal means no corpus was built, and the `Markdown bans` stage in `canon gate run` is right to report it as unmeasured rather than as a pass. An empty set means the corpus was walked and nothing was looked for, so that stage fails the push on `3` rather than skipping.
 
