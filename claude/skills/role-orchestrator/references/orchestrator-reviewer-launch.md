@@ -17,7 +17,7 @@ claude --bg --model <model> -n "reviewer-<project>-<number>" "Run /canon:role-re
 
 `<number>` is the pull request's number, and the brief pins no head, since `review-pr` resolves the head itself and stamps the range it covered in its marker. `<model>` comes from `## Pick the model` in `orchestrator-dispatch.md`, which states the test for a reviewer as for every other role. `<dispatcher-id>` and `<project>` resolve the same way they do in `orchestrator-launch.md`.
 
-The channel clauses restate what `role-reviewer` holds, so a reviewer whose plugin cache predates that body still sends the dispatch itself rather than leaving it to this session. The worker reads the reviewer's sessionId off that message and sends its re-review request back to it, since a reviewer holds the trunk branch and no branch lookup finds it. Append the cross-branch facts after the controller clause, per `### What the brief may carry` in that runbook.
+The channel clauses restate what `role-reviewer` holds, so a reviewer whose plugin cache predates that body still sends the dispatch itself rather than leaving it to this session. The worker reads the reviewer's sessionId off that message and sends its re-review request back to it, since a reviewer holds the trunk branch and no branch lookup finds it. Append the cross-branch facts after the controller clause, per `### What the brief may carry` in `orchestrator-launch.md`.
 
 Check `canon sessions list --json` for a live `reviewer-<project>-<number>` before launching, and message that session instead when one holds the pull request.
 
