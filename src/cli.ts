@@ -43,6 +43,7 @@ import { register as targets } from '@/commands/targets'
 import { register as upgrade } from '@/commands/upgrade'
 import { readInstalled, UNKNOWN_LABEL } from '@/version/installed'
 import { renderHelp } from '@/cli/help'
+import { renderAll, routeHelp } from '@/cli/help-all'
 
 function showHelp(): void {
   console.log(renderHelp(process.stdout))
@@ -102,4 +103,10 @@ audits(program)
 gate(program)
 upgrade(program)
 
-program.parse()
+const route = routeHelp(program, process.argv.slice(2))
+if (route.kind === 'top') showHelp()
+else if (route.kind === 'all') process.stdout.write(renderAll(route.command))
+else if (route.kind === 'unknown') {
+  console.error(`error: unknown command '${route.name}'`)
+  process.exitCode = 1
+} else program.parse()
