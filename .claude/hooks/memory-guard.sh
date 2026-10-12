@@ -4,7 +4,7 @@
 # autoMemoryEnabled, and this hook is the check behind that switch. A target's
 # own memory folder is inert since #2300, and turning off a harness feature in
 # someone else's project is that operator's preference rather than a fact canon
-# owns. See the guards context entry.
+# owns. See the command scanners context entry.
 
 IFS= read -r -d '' -t 2 input
 [ -n "$input" ] || {
@@ -91,7 +91,18 @@ END {
       while (i <= n && substr(s, i, 1) != "\n") i++
       continue
     }
+    if (c == "(" && substr(s, i, 2) == "((") {
+      d = 0
+      while (i <= n) {
+        a = substr(s, i, 1)
+        if (a == "(") d++
+        else if (a == ")") { d--; if (d == 0) { out = out a; i++; break } }
+        out = out a; i++
+      }
+      continue
+    }
     if (c == "<" && substr(s, i, 3) == "<<<") { out = out "<<<"; i += 3; continue }
+    if (c == "<" && substr(s, i, 2) == "<<" && !leading && cw == "let") { out = out "<<"; i += 2; continue }
     if (c == "<" && substr(s, i, 2) == "<<") {
       j = i + 2; dash = 0
       if (substr(s, j, 1) == "-") { dash = 1; j++ }

@@ -41,6 +41,6 @@ Claude Code tells every session it may keep notes under `~/.claude/projects/<pro
 
 The key's documented scope is any settings file, so the project file sets it. Project scope outranks the operator's user file, which reads `true` today, so the repository's value wins for a session opened here and the user file keeps governing every other project. `CLAUDE_CODE_DISABLE_AUTO_MEMORY` still takes precedence over the key for one session, in either direction, so an operator who exports it overrides this file.
 
-The setting is the primary control and `memory-guard.sh` is the backstop behind it, covered in `canon/context/development/hooks/guards.md`. Neither is seeded. Turning off a harness feature in a target is that operator's preference rather than a fact canon owns, and #2300 left a target's memory folder inert. Revisit when a target asks.
+The setting is the primary control and `memory-guard.sh` is the backstop behind it, covered in `canon/context/development/hooks/command-scanners.md`. Neither is seeded. Turning off a harness feature in a target is that operator's preference rather than a fact canon owns, and #2300 left a target's memory folder inert. Revisit when a target asks.
 
 Verify it by opening a fresh `claude` session at the repository root: `/memory` shows auto memory off and the system prompt carries no memory section. No test reaches the harness's own prompt, so this check stays manual.
