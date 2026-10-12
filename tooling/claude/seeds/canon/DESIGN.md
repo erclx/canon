@@ -1,57 +1,44 @@
 # Design
 
-Authoring guidance: the design standard.
+Authoring guidance: the design standard. Values live in `<your stylesheet>`, such as `src/styles/tokens.css` or a Tailwind `@theme` block. A project with none writes them under `.claude/design/project/` after `canon design install`.
 
-## Personality
+## Overview
 
 One paragraph. Voice, tone, and the feeling a user should have. The same content a design intake form asks for.
 
-## Color
+## Colors
 
-One row per role. Intent is a short phrase a human can picture. Value is a hex or a named system token.
+Up to three rules a developer could get wrong.
 
-| Role       | Intent                        | Value |
-| ---------- | ----------------------------- | ----- |
-| background | page canvas                   |       |
-| surface    | cards, panels, raised blocks  |       |
-| text       | primary body text             |       |
-| muted      | secondary text, captions      |       |
-| accent     | links, primary action         |       |
-| success    | confirmations, positive state |       |
-| warning    | cautions, pending state       |       |
-| error      | failures, destructive action  |       |
+One row per role, naming its custom property. Intent is a short phrase a human can picture.
+
+| Role       | Property             | Intent                        |
+| ---------- | -------------------- | ----------------------------- |
+| background | `--color-background` | page canvas                   |
+| surface    | `--color-surface`    | cards, panels, raised blocks  |
+| text       | `--color-text`       | primary body text             |
+| muted      | `--color-muted`      | secondary text, captions      |
+| accent     | `--color-accent`     | links, primary action         |
+| success    | `--color-success`    | confirmations, positive state |
+| warning    | `--color-warning`    | cautions, pending state       |
+| error      | `--color-error`      | failures, destructive action  |
 
 ## Typography
 
-One row per role. Size and line height in pixels or rem. Family names use their product casing.
-
-| Role    | Family | Weight | Size | Line height |
-| ------- | ------ | ------ | ---- | ----------- |
-| display |        |        |      |             |
-| heading |        |        |      |             |
-| body    |        |        |      |             |
-| label   |        |        |      |             |
-| code    |        |        |      |             |
+Up to three rules. How the roles divide between families, and any role that breaks the pattern.
 
 ## Spacing
 
-Base unit and scale. The renderer draws a swatch per step.
+One line. The base unit and how the scale steps.
 
-| Step | Multiplier | Value |
-| ---- | ---------- | ----- |
-| xs   | 0.5        |       |
-| sm   | 1          |       |
-| md   | 2          |       |
-| lg   | 3          |       |
-| xl   | 5          |       |
+## Shapes
 
-## Borders
+One row per role, naming its radius property.
 
-| Role    | Radius | Width | When used             |
-| ------- | ------ | ----- | --------------------- |
-| default |        |       | cards, inputs         |
-| pill    |        |       | tags, status chips    |
-| none    | 0      | 0     | edge-to-edge surfaces |
+| Role    | Property           | When used          |
+| ------- | ------------------ | ------------------ |
+| default | `--radius-default` | cards, inputs      |
+| pill    | `--radius-pill`    | tags, status chips |
 
 ## Motion
 
