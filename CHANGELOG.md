@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.36.0](https://github.com/erclx/canon/compare/v5.35.0...v5.36.0) (2026-10-12)
+
+
+### Features
+
+* **cli:** print a verb's whole help tree on --help --all ([#2358](https://github.com/erclx/canon/issues/2358)) ([fe1cc46](https://github.com/erclx/canon/commit/fe1cc46372dcdb376382d4f62c97a274cc3bd073))
+* **design:** hold intent in the design record, values in the stylesheet ([#2360](https://github.com/erclx/canon/issues/2360)) ([e3dcde7](https://github.com/erclx/canon/commit/e3dcde7114442c8c2f1f9539a450977f309ad58a))
+* **governance:** drop the number prefix from every rule ([#2359](https://github.com/erclx/canon/issues/2359)) ([e31622e](https://github.com/erclx/canon/commit/e31622ebc8a19180224ba48effe16ad4c2c55b59))
+* **markdown:** warn on mid-sentence colons and heading case ([#2355](https://github.com/erclx/canon/issues/2355)) ([4ece093](https://github.com/erclx/canon/commit/4ece093c6b40f1d2103138234130ec3946602421))
+* **tooling:** move shell checks out of base into an add-on stack ([#2356](https://github.com/erclx/canon/issues/2356)) ([86a534c](https://github.com/erclx/canon/commit/86a534c9313c0a68f229ba2ebce3191024d0223e))
+
 ## [5.35.0](https://github.com/erclx/canon/compare/v5.34.0...v5.35.0) (2026-10-12)
 
 
