@@ -161,6 +161,20 @@ describe('resolveRules on the shipped stacks', () => {
       ],
     })
   })
+
+  it('should give go the code rules and its language and testing rule alone', () => {
+    expect(resolveRules(PROJECT_ROOT, 'go')).toEqual({
+      ok: true,
+      rules: [...BASE, '000-code', '010-testing', '130-go', '335-testing-go'],
+    })
+  })
+
+  it('should give php the code rules and its language and testing rule alone', () => {
+    expect(resolveRules(PROJECT_ROOT, 'php')).toEqual({
+      ok: true,
+      rules: [...BASE, '000-code', '010-testing', '140-php', '336-testing-php'],
+    })
+  })
 })
 
 describe('expandStackEntry', () => {
