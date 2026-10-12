@@ -9,7 +9,7 @@ description: What the CI domain owns, the single gate entry point, the triggers 
 
 Owns the GitHub Actions verification that gates pull requests into `main`, and the release automation that runs after one merges. CI runs every gate stage through one entry point, `bun run check:ci`, plus one further step outside the gate, `bun run check:install`. Four workflows are described here, `verify.yml`, `phase-label-gate.yml`, `release-please.yml`, and `refresh-capture-frames.yml`.
 
-Three things differ from the local gate:
+Two things differ from the local gate:
 
 - Scope: the local run gates shell, types, and tests on the changed-file set, while CI passes `--all` and runs them unconditionally
 - The plugin manifest stage, skipping on a machine without the CLI and failing on a runner that should have installed it

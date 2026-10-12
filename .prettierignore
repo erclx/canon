@@ -20,8 +20,8 @@
 /assets/captures/*.html
 
 # regen-web-previews.ts writes these and serializes them its own way, the raw
-# render. The format stage of bun run check ran prettier over the same files and
-# rewrote them, so web:build and check each left a file the other disagreed with.
+# render. bun run format runs prettier over the same files and would rewrite
+# them, so web:build and format each leave a file the other disagrees with.
 # The folder has one writer, the script, and nothing edits a preview by hand.
 #
 # The glob covers the whole folder rather than design-tokens alone, since the
