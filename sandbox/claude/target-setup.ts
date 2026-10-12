@@ -93,7 +93,7 @@ export default scenario({
       )
       ctx.log.info('Action:  /canon:target-setup')
       ctx.log.info(
-        "Expect:  governance stack 'react', tooling stack 'vite-react', canon init lands .claude/rules/ with 200-react.md and no 230-nextjs.md under .claude/rules/canon/framework/, tooling sync drops golden configs from tooling/web and tooling/vite-react, the verify phase runs lint/typecheck/check/test/build, the indexes phase then runs over the scaffold's own docs, and the report names git-commit as outside the chain",
+        "Expect:  governance stack 'node' with 200-react proposed as an extra, tooling stack 'vite-react', canon init lands .claude/rules/ with 200-react.md and no 230-nextjs.md under .claude/rules/canon/framework/, tooling sync drops golden configs from tooling/web and tooling/vite-react, the verify phase runs lint/typecheck/check/test/build, the indexes phase then runs over the scaffold's own docs, and the report names git-commit as outside the chain",
       )
     },
     astro: (ctx) => {
@@ -121,7 +121,7 @@ export default scenario({
       )
       ctx.log.info('Action:  /canon:target-setup')
       ctx.log.info(
-        "Expect:  governance stack 'astro', tooling stack 'astro', canon init lands .claude/rules/, tooling sync drops golden configs from tooling/web and tooling/astro, the verify phase runs lint/typecheck/check/test/build, the indexes phase then runs over the scaffold's own docs, and the report names git-commit as outside the chain",
+        "Expect:  governance stack 'node' with 210-astro proposed as an extra, tooling stack 'astro', canon init lands .claude/rules/, tooling sync drops golden configs from tooling/web and tooling/astro, the verify phase runs lint/typecheck/check/test/build, the indexes phase then runs over the scaffold's own docs, and the report names git-commit as outside the chain",
       )
     },
     'verify-pass': (ctx) => {
