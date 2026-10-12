@@ -148,7 +148,8 @@ export const STAGES: readonly Stage[] = [
       {
         kind: 'command',
         argv: ['bun', 'run', 'check:format'],
-        failure: 'Format check failed. Run bun run format and commit the result.',
+        failure:
+          'Format check failed. Run bun run format and commit the result.',
       },
     ],
     success: 'Format check passed',
