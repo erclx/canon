@@ -31,7 +31,7 @@ Read `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md` when the oper
 claude --bg --model sonnet -n "reviewer-ui-<project>-<number>" "Run /canon:role-reviewer, then /canon:review-ui <number>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. Message it when the pass posts, carrying the heading and the count line, and message it again if you stop on a question."
 ```
 
-The model is fixed at Sonnet rather than taken from `## Pick the model` in `orchestrator-dispatch.md`. A cheaper tier was measured on the same checklist and passed real defects as clean while judging the taste boxes it was told to leave, at a higher cost per run.
+The model is `sonnet`, always, as the UI reviewer line in `## Pick the model` in `orchestrator-dispatch.md` states with its measured reason.
 
 Name an address in the brief only when the evidence record carries no `preview` and no `local` field, as `Drive <url>.` after the controller clause. An address the record already holds is the one the pass reads first, and a second in the brief is a second source for one fact. Name a CLI config path the same way when the operator keeps a GPU recipe for this machine, since the pass renders in software otherwise. Carry nothing else: the UI reviewer reads no diff and no code verdict, so the cross-branch facts the code brief carries stay out of this one.
 
