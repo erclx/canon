@@ -56,9 +56,14 @@ The three goldens that named `@testing-library/jest-dom` take the `/vitest` entr
 - `astro` needs `tooling/web/manifest.toml`'s `typescript` dependency pinned to `^6`. Its scaffold lists no `typescript` of its own, and an unpinned install resolves past `typescript-eslint`'s peer range, throwing before `scripts/verify.ts` reaches `Spelling`.
 - `astro preview` backgrounds itself by default in the release the scaffold resolves, so Playwright's `webServer` meets `Process from config.webServer exited early`. `tooling/astro/configs/playwright.config.ts` sets `env: { ASTRO_PREVIEW_BACKGROUND: '0' }` on its `webServer` block, which keeps Playwright's own process foregrounded without touching the `preview` script a person runs by hand. `vite-react` needs no equivalent, since its `webServer` runs plain `vite` through `bun run dev`.
 
+### The nextjs scaffold
+
+- `nextjs`'s non-interactive scaffold flags are `--skip-install` and `--disable-git`, with no `--turbopack` flag since Turbopack is the default.
+- `--no-agents-md` suppresses the scaffold's `AGENTS.md` and `CLAUDE.md`, which collide with a root `CLAUDE.md`. `--no-linter` suppresses its `eslint.config.mjs` and `lint` script. `--help` lists neither, and both are accepted.
+- `nextjs`'s `typecheck` runs `next typegen && tsc --noEmit`, since the App Router's route-level types generate into a gitignored `.next/types/` absent from a fresh checkout.
+- `nextjs` carries a `[gitignore]` group naming `.next/`, matching `astro`'s, for a target whose `.gitignore` never carried that scaffold default.
+
 ### Other scaffolds and eslint
 
-- `nextjs`'s non-interactive scaffold flags are `--skip-install` and `--disable-git`, with no `--turbopack` flag since Turbopack is the default. `--no-agents-md` suppresses the scaffold-time `AGENTS.md` and `CLAUDE.md` write that would collide with a root `CLAUDE.md`, and `--no-linter` suppresses the scaffold's `eslint.config.mjs` and `lint` script. Neither appears in `create-next-app --help`, which lists only `--eslint` and `--biome`, and both are accepted. Its `typecheck` runs `next typegen && tsc --noEmit`, since the App Router's route-level types generate into a gitignored `.next/types/` absent from a fresh checkout.
-- `nextjs` carries a `[gitignore]` group naming `.next/`, matching `astro`'s, for a target whose `.gitignore` never carried that scaffold default.
 - `python`, `go`, and `php` scaffolds write no `package.json`, so each manifest's `[verify] prepare` runs `bun init -y` and installs the dev tools its reference lists before Sync. Without that step the verify would stop after Sync, and a run that reaches the end with no `package.json` fails rather than reporting green. The python and php prepares install over the network on every run, while go's installs `golangci-lint` only when the binary is absent from PATH. A machine missing `uv`, `go`, or `composer` fails at Prepare, where the runner's own probe names what is missing.
 - Verifying against astro's eslint config needs `eslint@9` pinned in a scratch install. ESLint 10 dropped the `LegacyESLint` shim that `typescript-eslint@8.69.0`'s bundled `@typescript-eslint/utils` still imports, so it crashes on load.
