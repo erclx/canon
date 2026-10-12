@@ -114,10 +114,10 @@ export function renderDesignDocument(tokens: DesignTokens = TOKENS): string {
     '',
     LEAD,
     '',
-    section('Personality', tokens.personality),
+    section('Overview', tokens.personality),
     '',
     section(
-      'Color',
+      'Colors',
       bullets(tokens.colorRules),
       formatTable(['Role', 'Intent', 'Value'], colorRows(tokens.color)),
     ),
@@ -138,7 +138,7 @@ export function renderDesignDocument(tokens: DesignTokens = TOKENS): string {
     ),
     '',
     section(
-      'Borders',
+      'Shapes',
       bullets(tokens.bordersRules),
       formatTable(
         ['Role', 'Radius', 'Width', 'When used'],

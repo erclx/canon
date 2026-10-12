@@ -41,16 +41,24 @@ describe('renderDesignDocument', () => {
     const document = renderDesignDocument()
 
     for (const heading of [
-      '## Personality',
-      '## Color',
+      '## Overview',
+      '## Colors',
       '## Typography',
       '## Spacing',
-      '## Borders',
+      '## Shapes',
       '## Layout',
       '## Motion',
       '## Iconography',
     ]) {
       expect(document).toContain(heading)
+    }
+  })
+
+  it('writes none of the headings the standard renamed', () => {
+    const document = renderDesignDocument()
+
+    for (const heading of ['## Personality', '## Color\n', '## Borders']) {
+      expect(document).not.toContain(heading)
     }
   })
 
