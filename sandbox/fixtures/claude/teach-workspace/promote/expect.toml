@@ -32,10 +32,7 @@ paths = [
 # place the page could land. The lesson rule has no entry here on purpose: a
 # promoted lesson arrives as a second block inside the handoff file rather than
 # as a file of its own, so an extension glob would pass on the run it names.
-absent = [
-  ".claude/wiki/*/*.md",
-  "docs/**/*.md",
-]
+absent = [".claude/wiki/*/*.md", "docs/**/*.md"]
 
 # One skill owns the durable writes, so this pass reaches the handoff and
 # nothing else. A run that edited the wiki index to list its own page fails here

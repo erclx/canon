@@ -10,10 +10,10 @@ per_root = ["scripts/verify.ts", "scripts/verify.json"]
 
 [dependencies.dev]
 packages = [
-    "prettier",
-    "husky",
-    "@commitlint/cli",
-    "@commitlint/config-conventional",
+  "prettier",
+  "husky",
+  "@commitlint/cli",
+  "@commitlint/config-conventional",
 ]
 
 [scripts]

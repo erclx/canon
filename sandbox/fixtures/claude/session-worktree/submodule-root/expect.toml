@@ -24,10 +24,7 @@ paths = [
 # is the precondition: a tree with no populated `vendor` cannot show that the
 # guard stayed silent for the right reason.
 
-reply = [
-  "feat/grault",
-  "No package manifest",
-]
+reply = ["feat/grault", "No package manifest"]
 
 manual = [
   "That the guard stayed silent rather than never running is not separable here. Unwired: a skipped read and a read returning empty produce the same output, and only the sibling arm shows the command is wired at all.",

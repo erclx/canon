@@ -494,48 +494,45 @@ for (const tree of TREES) {
     for (const name of hooks) {
       const hook = join(tree.dir, name)
 
-      it.concurrent(
-        `should refuse ${name} with a usage line when no payload arrives`,
-        async ({ expect }) => {
-          const result = await run(hook)
+      it.concurrent(`should refuse ${name} with a usage line when no payload arrives`, async ({
+        expect,
+      }) => {
+        const result = await run(hook)
 
-          expect(result.code).not.toBe(0)
-          expect(result.stderr).toContain('cannot be run by hand')
-          expect(result.elapsed).toBeLessThan(3000)
-        },
-      )
+        expect(result.code).not.toBe(0)
+        expect(result.stderr).toContain('cannot be run by hand')
+        expect(result.elapsed).toBeLessThan(3000)
+      })
 
-      it.concurrent(
-        `should leave ${name} silent on a payload it ignores`,
-        async ({ expect }) => {
-          const result = await run(hook, INERT_PAYLOAD)
+      it.concurrent(`should leave ${name} silent on a payload it ignores`, async ({
+        expect,
+      }) => {
+        const result = await run(hook, INERT_PAYLOAD)
 
-          expect(result.stderr).toBe('')
-          expect(result.stdout).toBe('')
-          expect(result.code).toBe(0)
-        },
-      )
+        expect(result.stderr).toBe('')
+        expect(result.stdout).toBe('')
+        expect(result.code).toBe(0)
+      })
 
       // A hook added without an acting case fails here rather than passing on
       // the refusal test alone, which is what keeps the directory walk honest.
-      it.concurrent(
-        `should carry ${name} through to its verdict on an acting payload`,
-        async ({ expect }) => {
-          const expected = acting[name]
-          expect(expected, `no acting case defined for ${name}`).toBeDefined()
+      it.concurrent(`should carry ${name} through to its verdict on an acting payload`, async ({
+        expect,
+      }) => {
+        const expected = acting[name]
+        expect(expected, `no acting case defined for ${name}`).toBeDefined()
 
-          const result = await run(
-            hook,
-            expected.payload(`${tree.label}-${name}`),
-            expected.path,
-            undefined,
-            expected.env,
-          )
+        const result = await run(
+          hook,
+          expected.payload(`${tree.label}-${name}`),
+          expected.path,
+          undefined,
+          expected.env,
+        )
 
-          expect(result[expected.stream ?? 'stdout']).toContain(expected.expect)
-          expect(result.code).toBe(expected.code ?? 0)
-        },
-      )
+        expect(result[expected.stream ?? 'stdout']).toContain(expected.expect)
+        expect(result.code).toBe(expected.code ?? 0)
+      })
     }
   })
 }
@@ -554,26 +551,24 @@ describe('records-index.sh folders and roots', () => {
 
     for (const folder of ['tasks']) {
       for (const root of ['.canon', '.claude']) {
-        it.concurrent(
-          `should name ${root}/${folder}/index.md on ${tree.label}`,
-          async ({ expect }) => {
-            const result = await run(hook, writeOf(`${root}/${folder}/x.md`))
+        it.concurrent(`should name ${root}/${folder}/index.md on ${tree.label}`, async ({
+          expect,
+        }) => {
+          const result = await run(hook, writeOf(`${root}/${folder}/x.md`))
 
-            expect(result.stdout).toContain(`${root}/${folder}/index.md`)
-            expect(result.code).toBe(0)
-          },
-        )
+          expect(result.stdout).toContain(`${root}/${folder}/index.md`)
+          expect(result.code).toBe(0)
+        })
       }
     }
 
-    it.concurrent(
-      `should index a task under a review folder on ${tree.label}`,
-      async ({ expect }) => {
-        const result = await run(hook, writeOf('.canon/tasks/review/x.md'))
+    it.concurrent(`should index a task under a review folder on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const result = await run(hook, writeOf('.canon/tasks/review/x.md'))
 
-        expect(result.stdout).toContain('.canon/tasks/index.md')
-      },
-    )
+      expect(result.stdout).toContain('.canon/tasks/index.md')
+    })
   }
 })
 
@@ -597,16 +592,15 @@ describe('records-index.sh exclusions', () => {
 
     for (const [folder, rest] of excluded) {
       for (const root of ['.canon', '.claude']) {
-        it.concurrent(
-          `should leave ${tree.label} silent on ${root}/${folder}/${rest}`,
-          async ({ expect }) => {
-            const result = await run(hook, writeOf(`${root}/${folder}/${rest}`))
+        it.concurrent(`should leave ${tree.label} silent on ${root}/${folder}/${rest}`, async ({
+          expect,
+        }) => {
+          const result = await run(hook, writeOf(`${root}/${folder}/${rest}`))
 
-            expect(result.stdout).toBe('')
-            expect(result.stderr).toBe('')
-            expect(result.code).toBe(0)
-          },
-        )
+          expect(result.stdout).toBe('')
+          expect(result.stderr).toBe('')
+          expect(result.code).toBe(0)
+        })
       }
     }
   }
@@ -625,44 +619,41 @@ describe('search-reminder.sh firing conditions', () => {
         tool_name: 'WebSearch',
       })
 
-    it.concurrent(
-      `should leave ${tree.label} silent on a fetch`,
-      async ({ expect }) => {
-        const result = await run(
-          hook,
-          payloadFor({
-            session_id: `${tree.label}-fetch`,
-            tool_input: { url: 'https://example.com' },
-            tool_name: 'WebFetch',
-          }),
-        )
+    it.concurrent(`should leave ${tree.label} silent on a fetch`, async ({
+      expect,
+    }) => {
+      const result = await run(
+        hook,
+        payloadFor({
+          session_id: `${tree.label}-fetch`,
+          tool_input: { url: 'https://example.com' },
+          tool_name: 'WebFetch',
+        }),
+      )
 
-        expect(result.stdout).toBe('')
-        expect(result.code).toBe(0)
-      },
-    )
+      expect(result.stdout).toBe('')
+      expect(result.code).toBe(0)
+    })
 
-    it.concurrent(
-      `should fire once per session on ${tree.label}`,
-      async ({ expect }) => {
-        const session = `${tree.label}-repeat`
-        const first = await run(hook, search(session))
-        const second = await run(hook, search(session))
+    it.concurrent(`should fire once per session on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const session = `${tree.label}-repeat`
+      const first = await run(hook, search(session))
+      const second = await run(hook, search(session))
 
-        expect(first.stdout).toContain('canon:search-craft')
-        expect(second.stdout).toBe('')
-      },
-    )
+      expect(first.stdout).toContain('canon:search-craft')
+      expect(second.stdout).toBe('')
+    })
 
-    it.concurrent(
-      `should leave ${tree.label} silent on a search with no session id`,
-      async ({ expect }) => {
-        const result = await run(hook, search())
+    it.concurrent(`should leave ${tree.label} silent on a search with no session id`, async ({
+      expect,
+    }) => {
+      const result = await run(hook, search())
 
-        expect(result.stdout).toBe('')
-        expect(result.code).toBe(0)
-      },
-    )
+      expect(result.stdout).toBe('')
+      expect(result.code).toBe(0)
+    })
   }
 })
 
@@ -674,33 +665,32 @@ describe('search-reminder.sh firing conditions', () => {
 describe('pr-create-log.sh root resolution', () => {
   const hook = join(ROOT, '.claude/hooks/pr-create-log.sh')
 
-  it.concurrent(
-    'should log under the main root rather than a linked worktree',
-    async ({ expect }) => {
-      const project = join(fixture, 'project')
-      const worktreeRoot = join(project, '.claude/worktrees/demo')
-      const result = await run(
-        hook,
-        payloadFor({
-          session_id: 'pr-create-log-worktree-root',
-          tool_input: { command: 'gh pr create --title x --body y' },
-          tool_response: {
-            stdout: 'https://github.com/example/repo/pull/99\n',
-          },
-        }),
-        undefined,
-        worktreeRoot,
-      )
+  it.concurrent('should log under the main root rather than a linked worktree', async ({
+    expect,
+  }) => {
+    const project = join(fixture, 'project')
+    const worktreeRoot = join(project, '.claude/worktrees/demo')
+    const result = await run(
+      hook,
+      payloadFor({
+        session_id: 'pr-create-log-worktree-root',
+        tool_input: { command: 'gh pr create --title x --body y' },
+        tool_response: {
+          stdout: 'https://github.com/example/repo/pull/99\n',
+        },
+      }),
+      undefined,
+      worktreeRoot,
+    )
 
-      expect(result.code).toBe(0)
-      expect(existsSync(join(worktreeRoot, '.claude/.tmp/pr/log/log.md'))).toBe(
-        false,
-      )
-      expect(
-        readFileSync(join(project, '.claude/.tmp/pr/log/log.md'), 'utf8'),
-      ).toContain('pr=https://github.com/example/repo/pull/99')
-    },
-  )
+    expect(result.code).toBe(0)
+    expect(existsSync(join(worktreeRoot, '.claude/.tmp/pr/log/log.md'))).toBe(
+      false,
+    )
+    expect(
+      readFileSync(join(project, '.claude/.tmp/pr/log/log.md'), 'utf8'),
+    ).toContain('pr=https://github.com/example/repo/pull/99')
+  })
 })
 
 // git-pr opens a pull request over REST rather than through `gh pr create`, so
@@ -721,30 +711,25 @@ describe('pr-create-log.sh REST create', () => {
         },
       })
 
-    it.concurrent(
-      `should remind on ${tree.label} when the run opened a pull request`,
-      async ({ expect }) => {
-        const result = await run(hook, payload(`${tree.label}-rest-open`, true))
+    it.concurrent(`should remind on ${tree.label} when the run opened a pull request`, async ({
+      expect,
+    }) => {
+      const result = await run(hook, payload(`${tree.label}-rest-open`, true))
 
-        expect(result.stdout).toContain(
-          'Pull request https://github.com/example/repo/pull/7 just opened',
-        )
-        expect(result.code).toBe(0)
-      },
-    )
+      expect(result.stdout).toContain(
+        'Pull request https://github.com/example/repo/pull/7 just opened',
+      )
+      expect(result.code).toBe(0)
+    })
 
-    it.concurrent(
-      `should stay silent on ${tree.label} when the run edited one`,
-      async ({ expect }) => {
-        const result = await run(
-          hook,
-          payload(`${tree.label}-rest-edit`, false),
-        )
+    it.concurrent(`should stay silent on ${tree.label} when the run edited one`, async ({
+      expect,
+    }) => {
+      const result = await run(hook, payload(`${tree.label}-rest-edit`, false))
 
-        expect(result.stdout).toBe('')
-        expect(result.code).toBe(0)
-      },
-    )
+      expect(result.stdout).toBe('')
+      expect(result.code).toBe(0)
+    })
   }
 })
 
@@ -762,63 +747,58 @@ describe('pr-create-log.sh label line', () => {
   for (const tree of TREES) {
     const treeHook = join(tree.dir, 'pr-create-log.sh')
 
-    it.concurrent(
-      `should name the apply verb on ${tree.label} after gh pr create`,
-      async ({ expect }) => {
-        const stubs = mkdtempSync(join(tmpdir(), 'hooks-guard-canon-'))
-        writeFileSync(join(stubs, 'canon'), '#!/bin/sh\nexit 0\n')
-        chmodSync(join(stubs, 'canon'), 0o755)
+    it.concurrent(`should name the apply verb on ${tree.label} after gh pr create`, async ({
+      expect,
+    }) => {
+      const stubs = mkdtempSync(join(tmpdir(), 'hooks-guard-canon-'))
+      writeFileSync(join(stubs, 'canon'), '#!/bin/sh\nexit 0\n')
+      chmodSync(join(stubs, 'canon'), 0o755)
 
-        const result = await run(
-          treeHook,
-          byHand(`${tree.label}-label-by-hand`),
-          [stubs, hookPath].join(delimiter),
-        )
+      const result = await run(
+        treeHook,
+        byHand(`${tree.label}-label-by-hand`),
+        [stubs, hookPath].join(delimiter),
+      )
 
-        expect(result.stdout).toContain(
-          'Run canon labels apply 12 to label it.',
-        )
-        rmSync(stubs, { recursive: true, force: true })
-      },
-    )
+      expect(result.stdout).toContain('Run canon labels apply 12 to label it.')
+      rmSync(stubs, { recursive: true, force: true })
+    })
 
-    it.concurrent(
-      `should stay off the apply verb on ${tree.label} after git-pr's own open`,
-      async ({ expect }) => {
-        const stubs = mkdtempSync(join(tmpdir(), 'hooks-guard-canon-'))
-        writeFileSync(join(stubs, 'canon'), '#!/bin/sh\nexit 0\n')
-        chmodSync(join(stubs, 'canon'), 0o755)
+    it.concurrent(`should stay off the apply verb on ${tree.label} after git-pr's own open`, async ({
+      expect,
+    }) => {
+      const stubs = mkdtempSync(join(tmpdir(), 'hooks-guard-canon-'))
+      writeFileSync(join(stubs, 'canon'), '#!/bin/sh\nexit 0\n')
+      chmodSync(join(stubs, 'canon'), 0o755)
 
-        const result = await run(
-          treeHook,
-          payloadFor({
-            session_id: `${tree.label}-label-rest`,
-            tool_input: {
-              command: "gh api -X POST 'repos/{owner}/{repo}/pulls' -f title=x",
-            },
-            tool_response: {
-              stdout:
-                'number=7\nurl=https://github.com/example/repo/pull/7\nhead=feat/x\nopened=true\n',
-            },
-          }),
-          [stubs, hookPath].join(delimiter),
-        )
+      const result = await run(
+        treeHook,
+        payloadFor({
+          session_id: `${tree.label}-label-rest`,
+          tool_input: {
+            command: "gh api -X POST 'repos/{owner}/{repo}/pulls' -f title=x",
+          },
+          tool_response: {
+            stdout:
+              'number=7\nurl=https://github.com/example/repo/pull/7\nhead=feat/x\nopened=true\n',
+          },
+        }),
+        [stubs, hookPath].join(delimiter),
+      )
 
-        expect(result.stdout).toContain('just opened')
-        expect(result.stdout).not.toContain('canon labels apply')
-        rmSync(stubs, { recursive: true, force: true })
-      },
-    )
+      expect(result.stdout).toContain('just opened')
+      expect(result.stdout).not.toContain('canon labels apply')
+      rmSync(stubs, { recursive: true, force: true })
+    })
 
-    it.concurrent(
-      `should stay off the apply verb on ${tree.label} when the installed canon lacks it`,
-      async ({ expect }) => {
-        const result = await run(treeHook, byHand(`${tree.label}-label-absent`))
+    it.concurrent(`should stay off the apply verb on ${tree.label} when the installed canon lacks it`, async ({
+      expect,
+    }) => {
+      const result = await run(treeHook, byHand(`${tree.label}-label-absent`))
 
-        expect(result.stdout).toContain('just opened')
-        expect(result.stdout).not.toContain('canon labels apply')
-      },
-    )
+      expect(result.stdout).toContain('just opened')
+      expect(result.stdout).not.toContain('canon labels apply')
+    })
   }
 })
 
@@ -830,63 +810,62 @@ describe('silent-turn.sh basename collision', () => {
   for (const tree of TREES) {
     const hook = join(tree.dir, 'silent-turn.sh')
 
-    it.concurrent(
-      `should block on ${tree.label} when two written paths share a basename and neither full path is named`,
-      async ({ expect }) => {
-        const key = `collision-${tree.label.replace(/[^A-Za-z0-9_.-]/g, '_')}`
-        const transcriptPath = join(fixture, `transcript-${key}.jsonl`)
-        const promptId = `prompt-${key}`
-        const first = join(fixture, `docs/${key}/index.md`)
-        const second = join(fixture, `wiki/${key}/index.md`)
-        const lines = [
-          { promptId, type: 'user' },
-          {
-            message: {
-              content: [
-                {
-                  input: { content: 'a', file_path: first },
-                  name: 'Write',
-                  type: 'tool_use',
-                },
-              ],
-            },
-            type: 'assistant',
+    it.concurrent(`should block on ${tree.label} when two written paths share a basename and neither full path is named`, async ({
+      expect,
+    }) => {
+      const key = `collision-${tree.label.replace(/[^A-Za-z0-9_.-]/g, '_')}`
+      const transcriptPath = join(fixture, `transcript-${key}.jsonl`)
+      const promptId = `prompt-${key}`
+      const first = join(fixture, `docs/${key}/index.md`)
+      const second = join(fixture, `wiki/${key}/index.md`)
+      const lines = [
+        { promptId, type: 'user' },
+        {
+          message: {
+            content: [
+              {
+                input: { content: 'a', file_path: first },
+                name: 'Write',
+                type: 'tool_use',
+              },
+            ],
           },
-          {
-            message: {
-              content: [
-                {
-                  input: { content: 'b', file_path: second },
-                  name: 'Write',
-                  type: 'tool_use',
-                },
-              ],
-            },
-            type: 'assistant',
+          type: 'assistant',
+        },
+        {
+          message: {
+            content: [
+              {
+                input: { content: 'b', file_path: second },
+                name: 'Write',
+                type: 'tool_use',
+              },
+            ],
           },
-        ]
-        writeFileSync(
-          transcriptPath,
-          lines.map((line) => JSON.stringify(line)).join('\n') + '\n',
-        )
+          type: 'assistant',
+        },
+      ]
+      writeFileSync(
+        transcriptPath,
+        lines.map((line) => JSON.stringify(line)).join('\n') + '\n',
+      )
 
-        const result = await run(
-          hook,
-          payloadFor({
-            hook_event_name: 'Stop',
-            last_assistant_message: 'Wrote index.md with the new content.',
-            prompt_id: promptId,
-            stop_hook_active: false,
-            transcript_path: transcriptPath,
-          }),
-        )
+      const result = await run(
+        hook,
+        payloadFor({
+          hook_event_name: 'Stop',
+          last_assistant_message: 'Wrote index.md with the new content.',
+          prompt_id: promptId,
+          stop_hook_active: false,
+          transcript_path: transcriptPath,
+        }),
+      )
 
-        expect(result.stderr).toContain('did not name:')
-        expect(result.stderr).toContain(first)
-        expect(result.stderr).toContain(second)
-        expect(result.code).toBe(2)
-      },
-    )
+      expect(result.stderr).toContain('did not name:')
+      expect(result.stderr).toContain(first)
+      expect(result.stderr).toContain(second)
+      expect(result.code).toBe(2)
+    })
   }
 })
 
@@ -945,83 +924,68 @@ describe('.claude/hooks/standards-audit.sh runner', () => {
   const withStubs = (): string =>
     [join(fixture, 'bin'), hookPath].join(delimiter)
 
-  it.concurrent(
-    'should prefer the checkout CLI when the root carries src/cli.ts',
-    async ({ expect }) => {
-      const result = await run(hook, payload(), withStubs())
+  it.concurrent('should prefer the checkout CLI when the root carries src/cli.ts', async ({
+    expect,
+  }) => {
+    const result = await run(hook, payload(), withStubs())
 
-      expect(result.stdout).toContain('via-bun')
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).toContain('via-bun')
+    expect(result.code).toBe(0)
+  })
 
-  it.concurrent(
-    'should fall back to the installed binary when the root carries no src/cli.ts',
-    async ({ expect }) => {
-      const root = join(fixture, 'no-source')
+  it.concurrent('should fall back to the installed binary when the root carries no src/cli.ts', async ({
+    expect,
+  }) => {
+    const root = join(fixture, 'no-source')
 
-      const result = await run(hook, payload(), withStubs(), root)
+    const result = await run(hook, payload(), withStubs(), root)
 
-      expect(result.stdout).toContain('via-canon')
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).toContain('via-canon')
+    expect(result.code).toBe(0)
+  })
 
-  it.concurrent(
-    'should report that nothing ran when the machine carries neither runner',
-    async ({ expect }) => {
-      // The linked dependencies and nothing else, so neither runner resolves
-      // whatever the machine carries. A missing link would take the run
-      // somewhere silent for a reason this test is not about.
-      const path = join(fixture, 'bin-no-runner')
-      expect(existsSync(join(path, 'bash')), 'no bash found to link').toBe(true)
-      expect(existsSync(join(path, 'jq')), 'no jq found to link').toBe(true)
+  it.concurrent('should report that nothing ran when the machine carries neither runner', async ({
+    expect,
+  }) => {
+    // The linked dependencies and nothing else, so neither runner resolves
+    // whatever the machine carries. A missing link would take the run
+    // somewhere silent for a reason this test is not about.
+    const path = join(fixture, 'bin-no-runner')
+    expect(existsSync(join(path, 'bash')), 'no bash found to link').toBe(true)
+    expect(existsSync(join(path, 'jq')), 'no jq found to link').toBe(true)
 
-      const result = await run(hook, payload(), path)
+    const result = await run(hook, payload(), path)
 
-      expect(result.stdout).toContain('nothing checked')
-      expect(result.stdout).toContain(join(fixture, 'project/doc.md'))
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).toContain('nothing checked')
+    expect(result.stdout).toContain(join(fixture, 'project/doc.md'))
+    expect(result.code).toBe(0)
+  })
 
-  it.concurrent(
-    'should name a ban set the verb shipped empty',
-    async ({ expect }) => {
-      // `no-source` carries no `src/cli.ts`, which is what sends the hook past
-      // the checkout branch to the stubbed binary.
-      const path = [join(fixture, 'bin-empty-set'), hookPath].join(delimiter)
+  it.concurrent('should name a ban set the verb shipped empty', async ({
+    expect,
+  }) => {
+    // `no-source` carries no `src/cli.ts`, which is what sends the hook past
+    // the checkout branch to the stubbed binary.
+    const path = [join(fixture, 'bin-empty-set'), hookPath].join(delimiter)
 
-      const result = await run(
-        hook,
-        payload(),
-        path,
-        join(fixture, 'no-source'),
-      )
+    const result = await run(hook, payload(), path, join(fixture, 'no-source'))
 
-      expect(result.stdout).toContain('characters')
-      expect(result.stdout).toContain('narrowed set')
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).toContain('characters')
+    expect(result.stdout).toContain('narrowed set')
+    expect(result.code).toBe(0)
+  })
 
-  it.concurrent(
-    'should report a run that returned no record at all',
-    async ({ expect }) => {
-      const path = [join(fixture, 'bin-no-record'), hookPath].join(delimiter)
+  it.concurrent('should report a run that returned no record at all', async ({
+    expect,
+  }) => {
+    const path = [join(fixture, 'bin-no-record'), hookPath].join(delimiter)
 
-      const result = await run(
-        hook,
-        payload(),
-        path,
-        join(fixture, 'no-source'),
-      )
+    const result = await run(hook, payload(), path, join(fixture, 'no-source'))
 
-      expect(result.stdout).toContain('nothing checked')
-      expect(result.stdout).toContain('no record')
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).toContain('nothing checked')
+    expect(result.stdout).toContain('no record')
+    expect(result.code).toBe(0)
+  })
 })
 
 // The seed reaches one runner where the toolkit copy reaches two, so the branch
@@ -1040,150 +1004,142 @@ describe('seeds standards-audit.sh runner', () => {
       tool_name: 'Write',
     })
 
-  it.concurrent(
-    'should read its findings out of the installed binary',
-    async ({ expect }) => {
-      // The seed resolves no checkout source, so the `canon` stub is the only
-      // branch it can take and `via-canon` is what proves it took one rather
-      // than reaching a verdict some other way.
-      const path = [join(fixture, 'bin'), hookPath].join(delimiter)
+  it.concurrent('should read its findings out of the installed binary', async ({
+    expect,
+  }) => {
+    // The seed resolves no checkout source, so the `canon` stub is the only
+    // branch it can take and `via-canon` is what proves it took one rather
+    // than reaching a verdict some other way.
+    const path = [join(fixture, 'bin'), hookPath].join(delimiter)
 
-      const result = await run(hook, payload(), path)
+    const result = await run(hook, payload(), path)
 
-      expect(result.stdout).toContain('via-canon')
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).toContain('via-canon')
+    expect(result.code).toBe(0)
+  })
 
-  it.concurrent(
-    'should report that nothing ran when the machine carries no binary',
-    async ({ expect }) => {
-      // The linked dependencies and nothing else, so no runner resolves
-      // whatever the machine carries. A missing link would take the run
-      // somewhere silent for a reason this test is not about.
-      const path = join(fixture, 'bin-no-runner')
-      expect(existsSync(join(path, 'bash')), 'no bash found to link').toBe(true)
-      expect(existsSync(join(path, 'jq')), 'no jq found to link').toBe(true)
+  it.concurrent('should report that nothing ran when the machine carries no binary', async ({
+    expect,
+  }) => {
+    // The linked dependencies and nothing else, so no runner resolves
+    // whatever the machine carries. A missing link would take the run
+    // somewhere silent for a reason this test is not about.
+    const path = join(fixture, 'bin-no-runner')
+    expect(existsSync(join(path, 'bash')), 'no bash found to link').toBe(true)
+    expect(existsSync(join(path, 'jq')), 'no jq found to link').toBe(true)
 
-      const result = await run(hook, payload(), path)
+    const result = await run(hook, payload(), path)
 
-      expect(result.stdout).toContain('nothing checked')
-      expect(result.stdout).toContain(join(fixture, 'project/doc.md'))
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).toContain('nothing checked')
+    expect(result.stdout).toContain(join(fixture, 'project/doc.md'))
+    expect(result.code).toBe(0)
+  })
 
-  it.concurrent(
-    'should name a ban set the verb shipped empty',
-    async ({ expect }) => {
-      const path = [join(fixture, 'bin-empty-set'), hookPath].join(delimiter)
+  it.concurrent('should name a ban set the verb shipped empty', async ({
+    expect,
+  }) => {
+    const path = [join(fixture, 'bin-empty-set'), hookPath].join(delimiter)
 
-      const result = await run(hook, payload(), path)
+    const result = await run(hook, payload(), path)
 
-      expect(result.stdout).toContain('shipped ban set is empty')
-      expect(result.stdout).toContain('characters')
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).toContain('shipped ban set is empty')
+    expect(result.stdout).toContain('characters')
+    expect(result.code).toBe(0)
+  })
 
-  it.concurrent(
-    'should warn on a colon the write introduced and a heading in the file',
-    async ({ expect }) => {
-      const path = [join(fixture, 'bin-advisory'), hookPath].join(delimiter)
-      const write = JSON.stringify({
-        tool_input: {
-          file_path: join(fixture, 'project/doc.md'),
-          content: '# Key Changes\n\nProse sentence: another clause.\n',
-        },
-        tool_name: 'Write',
-      })
+  it.concurrent('should warn on a colon the write introduced and a heading in the file', async ({
+    expect,
+  }) => {
+    const path = [join(fixture, 'bin-advisory'), hookPath].join(delimiter)
+    const write = JSON.stringify({
+      tool_input: {
+        file_path: join(fixture, 'project/doc.md'),
+        content: '# Key Changes\n\nProse sentence: another clause.\n',
+      },
+      tool_name: 'Write',
+    })
 
-      const result = await run(hook, write, path)
+    const result = await run(hook, write, path)
 
-      expect(result.stdout).toContain('Prose sentence: another clause.')
-      expect(result.stdout).toContain('Key Changes')
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).toContain('Prose sentence: another clause.')
+    expect(result.stdout).toContain('Key Changes')
+    expect(result.code).toBe(0)
+  })
 
-  it.concurrent(
-    'should warn on a colon an edit introduced inside a longer line',
-    async ({ expect }) => {
-      // The record's text is the whole line, so a filter matching the line
-      // against the new text drops an edit that rewrote only a phrase of it.
-      const path = [join(fixture, 'bin-advisory'), hookPath].join(delimiter)
-      const edit = JSON.stringify({
-        tool_input: {
-          file_path: join(fixture, 'project/doc.md'),
-          old_string: 'sentence \u2014 another',
-          new_string: 'sentence: another',
-        },
-        tool_name: 'Edit',
-      })
+  it.concurrent('should warn on a colon an edit introduced inside a longer line', async ({
+    expect,
+  }) => {
+    // The record's text is the whole line, so a filter matching the line
+    // against the new text drops an edit that rewrote only a phrase of it.
+    const path = [join(fixture, 'bin-advisory'), hookPath].join(delimiter)
+    const edit = JSON.stringify({
+      tool_input: {
+        file_path: join(fixture, 'project/doc.md'),
+        old_string: 'sentence \u2014 another',
+        new_string: 'sentence: another',
+      },
+      tool_name: 'Edit',
+    })
 
-      const result = await run(hook, edit, path)
+    const result = await run(hook, edit, path)
 
-      expect(result.stdout).toContain('Prose sentence: another clause.')
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).toContain('Prose sentence: another clause.')
+    expect(result.code).toBe(0)
+  })
 
-  it.concurrent(
-    'should warn on a colon an edit introduced after an emoji in its line',
-    async ({ expect }) => {
-      // The record names the word before each colon, so a line with an emoji
-      // is matched by that word. Slicing its text at a UTF-16 column lands one
-      // character off in jq and keys the match on `now::`, which drops it.
-      const path = [join(fixture, 'bin-advisory'), hookPath].join(delimiter)
-      const edit = JSON.stringify({
-        tool_input: {
-          file_path: join(fixture, 'project/doc.md'),
-          old_string: 'now, it works',
-          new_string: 'now: it works',
-        },
-        tool_name: 'Edit',
-      })
+  it.concurrent('should warn on a colon an edit introduced after an emoji in its line', async ({
+    expect,
+  }) => {
+    // The record names the word before each colon, so a line with an emoji
+    // is matched by that word. Slicing its text at a UTF-16 column lands one
+    // character off in jq and keys the match on `now::`, which drops it.
+    const path = [join(fixture, 'bin-advisory'), hookPath].join(delimiter)
+    const edit = JSON.stringify({
+      tool_input: {
+        file_path: join(fixture, 'project/doc.md'),
+        old_string: 'now, it works',
+        new_string: 'now: it works',
+      },
+      tool_name: 'Edit',
+    })
 
-      const result = await run(hook, edit, path)
+    const result = await run(hook, edit, path)
 
-      expect(result.stdout).toContain('Ship it')
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).toContain('Ship it')
+    expect(result.code).toBe(0)
+  })
 
-  it.concurrent(
-    'should stay quiet on a colon an edit left untouched',
-    async ({ expect }) => {
-      const path = [join(fixture, 'bin-advisory'), hookPath].join(delimiter)
-      const edit = JSON.stringify({
-        tool_input: {
-          file_path: join(fixture, 'project/doc.md'),
-          old_string: 'one',
-          new_string: 'two',
-        },
-        tool_name: 'Edit',
-      })
+  it.concurrent('should stay quiet on a colon an edit left untouched', async ({
+    expect,
+  }) => {
+    const path = [join(fixture, 'bin-advisory'), hookPath].join(delimiter)
+    const edit = JSON.stringify({
+      tool_input: {
+        file_path: join(fixture, 'project/doc.md'),
+        old_string: 'one',
+        new_string: 'two',
+      },
+      tool_name: 'Edit',
+    })
 
-      const result = await run(hook, edit, path)
+    const result = await run(hook, edit, path)
 
-      expect(result.stdout).not.toContain('Prose sentence')
-      expect(result.stdout).toContain('Key Changes')
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).not.toContain('Prose sentence')
+    expect(result.stdout).toContain('Key Changes')
+    expect(result.code).toBe(0)
+  })
 
-  it.concurrent(
-    'should report a run that returned no record at all',
-    async ({ expect }) => {
-      const path = [join(fixture, 'bin-no-record'), hookPath].join(delimiter)
+  it.concurrent('should report a run that returned no record at all', async ({
+    expect,
+  }) => {
+    const path = [join(fixture, 'bin-no-record'), hookPath].join(delimiter)
 
-      const result = await run(hook, payload(), path)
+    const result = await run(hook, payload(), path)
 
-      expect(result.stdout).toContain('nothing checked')
-      expect(result.stdout).toContain('no record')
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).toContain('nothing checked')
+    expect(result.stdout).toContain('no record')
+    expect(result.code).toBe(0)
+  })
 })
 
 // The acting case proves a finding blocks. These pin what the hook promises
@@ -1198,132 +1154,123 @@ describe('review-post-scan.sh verdicts', () => {
     const body = (): string =>
       `-F body=@${join(fixture, 'project/review-body.md')}`
 
-    it.concurrent(
-      `should leave ${tree.label} silent on a clean body`,
-      async ({ expect }) => {
-        const result = await run(hook, reviewPost(body()), scanPassPath())
+    it.concurrent(`should leave ${tree.label} silent on a clean body`, async ({
+      expect,
+    }) => {
+      const result = await run(hook, reviewPost(body()), scanPassPath())
 
-        expect(result.stdout).toBe('')
-        expect(result.stderr).toBe('')
-        expect(result.code).toBe(0)
-      },
-    )
+      expect(result.stdout).toBe('')
+      expect(result.stderr).toBe('')
+      expect(result.code).toBe(0)
+    })
 
-    it.concurrent(
-      `should leave ${tree.label} silent on a read of the same endpoint`,
-      async ({ expect }) => {
-        const result = await run(
-          hook,
-          postPayload(`gh api ${REVIEWS}`),
-          join(fixture, 'bin-scan-fail') + delimiter + hookPath,
-        )
+    it.concurrent(`should leave ${tree.label} silent on a read of the same endpoint`, async ({
+      expect,
+    }) => {
+      const result = await run(
+        hook,
+        postPayload(`gh api ${REVIEWS}`),
+        join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+      )
 
-        expect(result.stdout).toBe('')
-        expect(result.stderr).toBe('')
-        expect(result.code).toBe(0)
-      },
-    )
+      expect(result.stdout).toBe('')
+      expect(result.stderr).toBe('')
+      expect(result.code).toBe(0)
+    })
 
-    it.concurrent(
-      `should block ${tree.label} on a post that names no method but carries fields`,
-      async ({ expect }) => {
-        const result = await run(
-          hook,
-          postPayload(`gh api ${REVIEWS} -f event=COMMENT ${body()}`),
-          join(fixture, 'bin-scan-fail') + delimiter + hookPath,
-        )
+    it.concurrent(`should block ${tree.label} on a post that names no method but carries fields`, async ({
+      expect,
+    }) => {
+      const result = await run(
+        hook,
+        postPayload(`gh api ${REVIEWS} -f event=COMMENT ${body()}`),
+        join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+      )
 
-        expect(result.stderr).toContain('board identifier')
-        expect(result.code).toBe(2)
-      },
-    )
+      expect(result.stderr).toContain('board identifier')
+      expect(result.code).toBe(2)
+    })
 
-    it.concurrent(
-      `should match a method placed after the endpoint on ${tree.label}`,
-      async ({ expect }) => {
-        const result = await run(
-          hook,
-          postPayload(`gh api ${REVIEWS} ${body()} -X PATCH`),
-          join(fixture, 'bin-scan-fail') + delimiter + hookPath,
-        )
+    it.concurrent(`should match a method placed after the endpoint on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const result = await run(
+        hook,
+        postPayload(`gh api ${REVIEWS} ${body()} -X PATCH`),
+        join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+      )
 
-        expect(result.code).toBe(2)
-      },
-    )
+      expect(result.code).toBe(2)
+    })
 
-    it.concurrent(
-      `should cover a pull request comment on ${tree.label}`,
-      async ({ expect }) => {
-        const result = await run(
-          hook,
-          reviewPost(body(), 'repos/{owner}/{repo}/issues/7/comments'),
-          join(fixture, 'bin-scan-fail') + delimiter + hookPath,
-        )
+    it.concurrent(`should cover a pull request comment on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const result = await run(
+        hook,
+        reviewPost(body(), 'repos/{owner}/{repo}/issues/7/comments'),
+        join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+      )
 
-        expect(result.code).toBe(2)
-      },
-    )
+      expect(result.code).toBe(2)
+    })
 
-    it.concurrent(
-      `should leave ${tree.label} silent on a pull request create`,
-      async ({ expect }) => {
-        const result = await run(
-          hook,
-          reviewPost(body(), "'repos/{owner}/{repo}/pulls'"),
-          join(fixture, 'bin-scan-fail') + delimiter + hookPath,
-        )
+    it.concurrent(`should leave ${tree.label} silent on a pull request create`, async ({
+      expect,
+    }) => {
+      const result = await run(
+        hook,
+        reviewPost(body(), "'repos/{owner}/{repo}/pulls'"),
+        join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+      )
 
-        expect(result.stderr).toBe('')
-        expect(result.code).toBe(0)
-      },
-    )
+      expect(result.stderr).toBe('')
+      expect(result.code).toBe(0)
+    })
 
-    it.concurrent(
-      `should refuse an inline body on ${tree.label}`,
-      async ({ expect }) => {
-        const result = await run(
-          hook,
-          reviewPost("-f body='looks fine'"),
-          scanPassPath(),
-        )
+    it.concurrent(`should refuse an inline body on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const result = await run(
+        hook,
+        reviewPost("-f body='looks fine'"),
+        scanPassPath(),
+      )
 
-        expect(result.stderr).toContain('-F body=@<file>')
-        expect(result.stdout).toBe('')
-        expect(result.code).toBe(2)
-      },
-    )
+      expect(result.stderr).toContain('-F body=@<file>')
+      expect(result.stdout).toBe('')
+      expect(result.code).toBe(2)
+    })
 
-    it.concurrent(
-      `should block ${tree.label} on a body file the call has not written yet`,
-      async ({ expect }) => {
-        const result = await run(
-          hook,
-          reviewPost('-F body=@.canon/tmp/not-written.md'),
-          scanPassPath(),
-        )
+    it.concurrent(`should block ${tree.label} on a body file the call has not written yet`, async ({
+      expect,
+    }) => {
+      const result = await run(
+        hook,
+        reviewPost('-F body=@.canon/tmp/not-written.md'),
+        scanPassPath(),
+      )
 
-        expect(result.stderr).toContain('earlier call')
-        expect(result.code).toBe(2)
-      },
-    )
+      expect(result.stderr).toContain('earlier call')
+      expect(result.code).toBe(2)
+    })
 
-    it.concurrent(
-      `should resolve a relative body path against the payload cwd on ${tree.label}`,
-      async ({ expect }) => {
-        const result = await run(
-          hook,
-          postPayload(
-            `gh api -X POST ${REVIEWS} -F body=@review-body.md`,
-            join(fixture, 'project'),
-          ),
-          scanPassPath(),
-          join(fixture, 'elsewhere'),
-        )
+    it.concurrent(`should resolve a relative body path against the payload cwd on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const result = await run(
+        hook,
+        postPayload(
+          `gh api -X POST ${REVIEWS} -F body=@review-body.md`,
+          join(fixture, 'project'),
+        ),
+        scanPassPath(),
+        join(fixture, 'elsewhere'),
+      )
 
-        expect(result.stderr).toBe('')
-        expect(result.code).toBe(0)
-      },
-    )
+      expect(result.stderr).toBe('')
+      expect(result.code).toBe(0)
+    })
 
     // A command that only mentions a post is not one. The scan stub fails, so
     // a hook that read the whole string would deny each of these.
@@ -1336,35 +1283,33 @@ describe('review-post-scan.sh verdicts', () => {
     }
 
     for (const [label, command] of Object.entries(quoting)) {
-      it.concurrent(
-        `should leave ${tree.label} silent on ${label}`,
-        async ({ expect }) => {
-          const result = await run(
-            hook,
-            postPayload(command),
-            join(fixture, 'bin-scan-fail') + delimiter + hookPath,
-          )
-
-          expect(result.stderr).toBe('')
-          expect(result.stdout).toBe('')
-          expect(result.code).toBe(0)
-        },
-      )
-    }
-
-    it.concurrent(
-      `should block ${tree.label} on a post chained after another command`,
-      async ({ expect }) => {
+      it.concurrent(`should leave ${tree.label} silent on ${label}`, async ({
+        expect,
+      }) => {
         const result = await run(
           hook,
-          postPayload(`echo ready && gh api -X POST ${REVIEWS} ${body()}`),
+          postPayload(command),
           join(fixture, 'bin-scan-fail') + delimiter + hookPath,
         )
 
-        expect(result.stderr).toContain('board identifier')
-        expect(result.code).toBe(2)
-      },
-    )
+        expect(result.stderr).toBe('')
+        expect(result.stdout).toBe('')
+        expect(result.code).toBe(0)
+      })
+    }
+
+    it.concurrent(`should block ${tree.label} on a post chained after another command`, async ({
+      expect,
+    }) => {
+      const result = await run(
+        hook,
+        postPayload(`echo ready && gh api -X POST ${REVIEWS} ${body()}`),
+        join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+      )
+
+      expect(result.stderr).toContain('board identifier')
+      expect(result.code).toBe(2)
+    })
 
     // A here-string and an arithmetic shift both carry `<<` and neither opens
     // a heredoc, so the post on the next line must still reach the scan.
@@ -1379,91 +1324,85 @@ describe('review-post-scan.sh verdicts', () => {
     }
 
     for (const [label, opener] of Object.entries(notHeredocs)) {
-      it.concurrent(
-        `should block ${tree.label} on a post after ${label}`,
-        async ({ expect }) => {
-          const result = await run(
-            hook,
-            postPayload(`${opener}\ngh api -X POST ${REVIEWS} ${body()}`),
-            join(fixture, 'bin-scan-fail') + delimiter + hookPath,
-          )
-
-          expect(result.stderr).toContain('board identifier')
-          expect(result.code).toBe(2)
-        },
-      )
-    }
-
-    it.concurrent(
-      `should block ${tree.label} on a post after a here-string on one line`,
-      async ({ expect }) => {
+      it.concurrent(`should block ${tree.label} on a post after ${label}`, async ({
+        expect,
+      }) => {
         const result = await run(
           hook,
-          postPayload(`cat <<<word; gh api -X POST ${REVIEWS} ${body()}`),
+          postPayload(`${opener}\ngh api -X POST ${REVIEWS} ${body()}`),
           join(fixture, 'bin-scan-fail') + delimiter + hookPath,
         )
 
         expect(result.stderr).toContain('board identifier')
         expect(result.code).toBe(2)
-      },
-    )
+      })
+    }
 
-    it.concurrent(
-      `should still drop a quoted post inside a heredoc after a here-string on ${tree.label}`,
-      async ({ expect }) => {
-        const result = await run(
-          hook,
-          postPayload(
-            `cat <<< word\ncat > .canon/tmp/n.md <<'EOF'\n- ${mention}\nEOF`,
-          ),
-          join(fixture, 'bin-scan-fail') + delimiter + hookPath,
-        )
+    it.concurrent(`should block ${tree.label} on a post after a here-string on one line`, async ({
+      expect,
+    }) => {
+      const result = await run(
+        hook,
+        postPayload(`cat <<<word; gh api -X POST ${REVIEWS} ${body()}`),
+        join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+      )
 
-        expect(result.stderr).toBe('')
-        expect(result.code).toBe(0)
-      },
-    )
+      expect(result.stderr).toContain('board identifier')
+      expect(result.code).toBe(2)
+    })
 
-    it.concurrent(
-      `should still open a heredoc after a digit file descriptor on ${tree.label}`,
-      async ({ expect }) => {
-        const result = await run(
-          hook,
-          postPayload(`cat 0<<EOF\n- ${mention}\nEOF`),
-          join(fixture, 'bin-scan-fail') + delimiter + hookPath,
-        )
+    it.concurrent(`should still drop a quoted post inside a heredoc after a here-string on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const result = await run(
+        hook,
+        postPayload(
+          `cat <<< word\ncat > .canon/tmp/n.md <<'EOF'\n- ${mention}\nEOF`,
+        ),
+        join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+      )
 
-        expect(result.stderr).toBe('')
-        expect(result.code).toBe(0)
-      },
-    )
+      expect(result.stderr).toBe('')
+      expect(result.code).toBe(0)
+    })
 
-    it.concurrent(
-      `should block ${tree.label} on a heredoc and a post in one call`,
-      async ({ expect }) => {
-        const result = await run(
-          hook,
-          postPayload(
-            `cat > .canon/tmp/not-written.md <<'EOF'\nbody\nEOF\ngh api -X POST ${REVIEWS} -F body=@.canon/tmp/not-written.md`,
-          ),
-          scanPassPath(),
-        )
+    it.concurrent(`should still open a heredoc after a digit file descriptor on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const result = await run(
+        hook,
+        postPayload(`cat 0<<EOF\n- ${mention}\nEOF`),
+        join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+      )
 
-        expect(result.stderr).toContain('earlier call')
-        expect(result.code).toBe(2)
-      },
-    )
+      expect(result.stderr).toBe('')
+      expect(result.code).toBe(0)
+    })
 
-    it.concurrent(
-      `should hand back additionalContext on ${tree.label} when canon is absent`,
-      async ({ expect }) => {
-        const result = await run(hook, reviewPost(body()), hookPath)
+    it.concurrent(`should block ${tree.label} on a heredoc and a post in one call`, async ({
+      expect,
+    }) => {
+      const result = await run(
+        hook,
+        postPayload(
+          `cat > .canon/tmp/not-written.md <<'EOF'\nbody\nEOF\ngh api -X POST ${REVIEWS} -F body=@.canon/tmp/not-written.md`,
+        ),
+        scanPassPath(),
+      )
 
-        expect(result.stdout).toContain('additionalContext')
-        expect(result.stdout).toContain('did not run')
-        expect(result.code).toBe(0)
-      },
-    )
+      expect(result.stderr).toContain('earlier call')
+      expect(result.code).toBe(2)
+    })
+
+    it.concurrent(`should hand back additionalContext on ${tree.label} when canon is absent`, async ({
+      expect,
+    }) => {
+      const result = await run(hook, reviewPost(body()), hookPath)
+
+      expect(result.stdout).toContain('additionalContext')
+      expect(result.stdout).toContain('did not run')
+      expect(result.code).toBe(0)
+    })
   }
 })
 
@@ -1479,21 +1418,20 @@ describe('upstream-due.sh silences', () => {
   const dueBin = (): string =>
     [join(fixture, 'bin-due'), hookPath].join(delimiter)
 
-  it.concurrent(
-    'should stay silent in a background session',
-    async ({ expect }) => {
-      const result = await run(
-        hook,
-        payloadFor({ source: 'startup' }),
-        dueBin(),
-        undefined,
-        { CLAUDE_CODE_SESSION_ATTENDED: '0' },
-      )
+  it.concurrent('should stay silent in a background session', async ({
+    expect,
+  }) => {
+    const result = await run(
+      hook,
+      payloadFor({ source: 'startup' }),
+      dueBin(),
+      undefined,
+      { CLAUDE_CODE_SESSION_ATTENDED: '0' },
+    )
 
-      expect(result.stdout).toBe('')
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).toBe('')
+    expect(result.code).toBe(0)
+  })
 
   it.concurrent('should stay silent on a resume', async ({ expect }) => {
     const result = await run(
@@ -1520,47 +1458,44 @@ describe('unattended-agent-guard.sh classification boundary', () => {
   const payload = (): string =>
     payloadFor({ tool_input: {}, tool_name: 'Agent' })
 
-  it.concurrent(
-    'should let an Agent call through when CLAUDE_CODE_SESSION_ATTENDED is unset',
-    async ({ expect }) => {
-      const result = await run(hook, payload(), undefined, undefined, {
-        CLAUDE_CODE_SESSION_ATTENDED: undefined,
-      })
+  it.concurrent('should let an Agent call through when CLAUDE_CODE_SESSION_ATTENDED is unset', async ({
+    expect,
+  }) => {
+    const result = await run(hook, payload(), undefined, undefined, {
+      CLAUDE_CODE_SESSION_ATTENDED: undefined,
+    })
 
-      expect(result.stdout).toBe('')
-      expect(result.stderr).toBe('')
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).toBe('')
+    expect(result.stderr).toBe('')
+    expect(result.code).toBe(0)
+  })
 
-  it.concurrent(
-    'should let an Agent call through when CLAUDE_CODE_SESSION_ATTENDED holds a value other than 0',
-    async ({ expect }) => {
-      const result = await run(hook, payload(), undefined, undefined, {
-        CLAUDE_CODE_SESSION_ATTENDED: '1',
-      })
+  it.concurrent('should let an Agent call through when CLAUDE_CODE_SESSION_ATTENDED holds a value other than 0', async ({
+    expect,
+  }) => {
+    const result = await run(hook, payload(), undefined, undefined, {
+      CLAUDE_CODE_SESSION_ATTENDED: '1',
+    })
 
-      expect(result.stdout).toBe('')
-      expect(result.stderr).toBe('')
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).toBe('')
+    expect(result.stderr).toBe('')
+    expect(result.code).toBe(0)
+  })
 
-  it.concurrent(
-    'should deny a Task call the same as an Agent call when unattended',
-    async ({ expect }) => {
-      const result = await run(
-        hook,
-        payloadFor({ tool_input: {}, tool_name: 'Task' }),
-        undefined,
-        undefined,
-        { CLAUDE_CODE_SESSION_ATTENDED: '0' },
-      )
+  it.concurrent('should deny a Task call the same as an Agent call when unattended', async ({
+    expect,
+  }) => {
+    const result = await run(
+      hook,
+      payloadFor({ tool_input: {}, tool_name: 'Task' }),
+      undefined,
+      undefined,
+      { CLAUDE_CODE_SESSION_ATTENDED: '0' },
+    )
 
-      expect(result.stderr).toContain('may not call the Agent tool')
-      expect(result.code).toBe(2)
-    },
-  )
+    expect(result.stderr).toContain('may not call the Agent tool')
+    expect(result.code).toBe(2)
+  })
 })
 
 // The acting case proves a write into the folder is denied. These are the
@@ -1766,45 +1701,42 @@ describe('memory-guard.sh boundaries', () => {
     })
   }
 
-  it.concurrent(
-    'should dismiss a command mentioning memory without spawning jq',
-    async ({ expect }) => {
-      const result = await run(
-        hook,
-        shell('grep -rn memory src/'),
-        join(fixture, 'bin-jq-trap'),
-      )
+  it.concurrent('should dismiss a command mentioning memory without spawning jq', async ({
+    expect,
+  }) => {
+    const result = await run(
+      hook,
+      shell('grep -rn memory src/'),
+      join(fixture, 'bin-jq-trap'),
+    )
 
-      expect(result.stderr).toBe('')
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stderr).toBe('')
+    expect(result.code).toBe(0)
+  })
 
-  it.concurrent(
-    'should still reach a verdict when the transcript path precedes the command',
-    async ({ expect }) => {
-      const result = await run(hook, shell(`cp a ${home}/memory/n.md`))
+  it.concurrent('should still reach a verdict when the transcript path precedes the command', async ({
+    expect,
+  }) => {
+    const result = await run(hook, shell(`cp a ${home}/memory/n.md`))
 
-      expect(result.stderr).toContain('Auto memory is off')
-      expect(result.code).toBe(2)
-    },
-  )
+    expect(result.stderr).toContain('Auto memory is off')
+    expect(result.code).toBe(2)
+  })
 
-  it.concurrent(
-    'should deny a write under the directory CLAUDE_CONFIG_DIR names',
-    async ({ expect }) => {
-      const result = await run(
-        hook,
-        fileTool('Write', '/opt/cfg/projects/-a/memory/n.md'),
-        undefined,
-        undefined,
-        { CLAUDE_CONFIG_DIR: '/opt/cfg' },
-      )
+  it.concurrent('should deny a write under the directory CLAUDE_CONFIG_DIR names', async ({
+    expect,
+  }) => {
+    const result = await run(
+      hook,
+      fileTool('Write', '/opt/cfg/projects/-a/memory/n.md'),
+      undefined,
+      undefined,
+      { CLAUDE_CONFIG_DIR: '/opt/cfg' },
+    )
 
-      expect(result.stderr).toContain('Auto memory is off')
-      expect(result.code).toBe(2)
-    },
-  )
+    expect(result.stderr).toContain('Auto memory is off')
+    expect(result.code).toBe(2)
+  })
 })
 
 // Each trigger reaches the session by a different channel, so the cases
@@ -1820,102 +1752,96 @@ describe('.claude/hooks/precompact-handoff.sh', () => {
   const payload = (fields: Record<string, unknown>): string =>
     JSON.stringify({ hook_event_name: 'PreCompact', ...fields })
 
-  it.concurrent(
-    'should instruct the summarizer rather than block an automatic compaction',
-    async ({ expect }) => {
-      const result = await run(
-        hook,
-        payload({ session_id: 'precompact-auto', trigger: 'auto' }),
-      )
+  it.concurrent('should instruct the summarizer rather than block an automatic compaction', async ({
+    expect,
+  }) => {
+    const result = await run(
+      hook,
+      payload({ session_id: 'precompact-auto', trigger: 'auto' }),
+    )
 
-      expect(result.stdout).toContain('Preserve the reasoning')
-      expect(result.stderr).toBe('')
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).toContain('Preserve the reasoning')
+    expect(result.stderr).toBe('')
+    expect(result.code).toBe(0)
+  })
 
-  it.concurrent(
-    'should instruct on every automatic compaction rather than once',
-    async ({ expect }) => {
-      // A precompute pass fires this hook with a payload identical to the real
-      // compaction's and drops its own record when refused, so it re-arms and
-      // fires again. Anything counted per session is drained by firings the
-      // session never sees, which is why the automatic path counts nothing.
-      const once = payload({ session_id: 'precompact-arms', trigger: 'auto' })
+  it.concurrent('should instruct on every automatic compaction rather than once', async ({
+    expect,
+  }) => {
+    // A precompute pass fires this hook with a payload identical to the real
+    // compaction's and drops its own record when refused, so it re-arms and
+    // fires again. Anything counted per session is drained by firings the
+    // session never sees, which is why the automatic path counts nothing.
+    const once = payload({ session_id: 'precompact-arms', trigger: 'auto' })
 
-      const first = await run(hook, once)
-      const second = await run(hook, once)
+    const first = await run(hook, once)
+    const second = await run(hook, once)
 
-      expect(second.stdout).toBe(first.stdout)
-      expect(second.code).toBe(0)
-    },
-  )
+    expect(second.stdout).toBe(first.stdout)
+    expect(second.code).toBe(0)
+  })
 
-  it.concurrent(
-    'should block a compaction whose payload names no trigger',
-    async ({ expect }) => {
-      // An absent trigger is the payload the hook cannot answer with silence,
-      // so it takes the manual path and asks.
-      const result = await run(hook, payload({ session_id: 'precompact-bare' }))
+  it.concurrent('should block a compaction whose payload names no trigger', async ({
+    expect,
+  }) => {
+    // An absent trigger is the payload the hook cannot answer with silence,
+    // so it takes the manual path and asks.
+    const result = await run(hook, payload({ session_id: 'precompact-bare' }))
 
-      expect(result.stderr).toContain('Run the canon:session-compact skill')
-      expect(result.code).toBe(2)
-    },
-  )
+    expect(result.stderr).toContain('Run the canon:session-compact skill')
+    expect(result.code).toBe(2)
+  })
 
-  it.concurrent(
-    'should block a manual compaction once and let the next one through',
-    async ({ expect }) => {
-      const once = payload({
-        session_id: 'precompact-repeat',
-        trigger: 'manual',
-      })
+  it.concurrent('should block a manual compaction once and let the next one through', async ({
+    expect,
+  }) => {
+    const once = payload({
+      session_id: 'precompact-repeat',
+      trigger: 'manual',
+    })
 
-      const first = await run(hook, once)
-      const second = await run(hook, once)
+    const first = await run(hook, once)
+    const second = await run(hook, once)
 
-      expect(first.stderr).toContain('Run the canon:session-compact skill')
-      expect(first.code).toBe(2)
-      expect(second.stderr).toBe('')
-      expect(second.code).toBe(0)
-    },
-  )
+    expect(first.stderr).toContain('Run the canon:session-compact skill')
+    expect(first.code).toBe(2)
+    expect(second.stderr).toBe('')
+    expect(second.code).toBe(0)
+  })
 
-  it.concurrent(
-    'should keep the blocking reason off stdout',
-    async ({ expect }) => {
-      // Exit 2 makes stderr the blocking reason, and stdout on this event is
-      // merged into the summarizer's instructions. Writing there would address
-      // the summary of a compaction that is not going to happen, while the
-      // block itself stayed unexplained.
-      const result = await run(
-        hook,
-        payload({ session_id: 'precompact-out', trigger: 'manual' }),
-      )
+  it.concurrent('should keep the blocking reason off stdout', async ({
+    expect,
+  }) => {
+    // Exit 2 makes stderr the blocking reason, and stdout on this event is
+    // merged into the summarizer's instructions. Writing there would address
+    // the summary of a compaction that is not going to happen, while the
+    // block itself stayed unexplained.
+    const result = await run(
+      hook,
+      payload({ session_id: 'precompact-out', trigger: 'manual' }),
+    )
 
-      expect(result.stdout).toBe('')
-      expect(result.code).toBe(2)
-    },
-  )
+    expect(result.stdout).toBe('')
+    expect(result.code).toBe(2)
+  })
 
-  it.concurrent(
-    'should carry on rather than block when the marker cannot be written',
-    async ({ expect }) => {
-      // The marker is what ends the block, so blocking without recording it
-      // would refuse every compaction the session takes. A project root the
-      // hook cannot write to is the case that reaches that, and it has to fail
-      // open: one unasked handoff costs less than a session that cannot compact.
-      const result = await run(
-        hook,
-        payload({ session_id: 'precompact-readonly' }),
-        undefined,
-        readOnlyRoot,
-      )
+  it.concurrent('should carry on rather than block when the marker cannot be written', async ({
+    expect,
+  }) => {
+    // The marker is what ends the block, so blocking without recording it
+    // would refuse every compaction the session takes. A project root the
+    // hook cannot write to is the case that reaches that, and it has to fail
+    // open: one unasked handoff costs less than a session that cannot compact.
+    const result = await run(
+      hook,
+      payload({ session_id: 'precompact-readonly' }),
+      undefined,
+      readOnlyRoot,
+    )
 
-      expect(result.stdout).toBe('')
-      expect(result.code).toBe(0)
-    },
-  )
+    expect(result.stdout).toBe('')
+    expect(result.code).toBe(0)
+  })
 })
 
 // The cloud VM loads no plugin, so the hook stages the checkout's own skills
@@ -1971,96 +1897,91 @@ describe('.claude/hooks/cloud-setup.sh', () => {
 
   const status = (dir: string): string => git(dir, 'status', '--porcelain')
 
-  it.concurrent(
-    'should write nothing outside a cloud VM',
-    async ({ expect }) => {
-      const dir = makeCheckout()
-      const bun = makeBun(0)
+  it.concurrent('should write nothing outside a cloud VM', async ({
+    expect,
+  }) => {
+    const dir = makeCheckout()
+    const bun = makeBun(0)
 
-      const result = await run(hook, '{}', bun.path, dir, {
-        CLAUDE_CODE_REMOTE: undefined,
-      })
+    const result = await run(hook, '{}', bun.path, dir, {
+      CLAUDE_CODE_REMOTE: undefined,
+    })
 
-      expect(result.code).toBe(0)
-      expect(result.stdout).toBe('')
-      expect(existsSync(join(dir, '.claude/skills/demo'))).toBe(false)
-      expect(existsSync(bun.log)).toBe(false)
-      expect(status(dir)).toBe('')
-    },
-  )
+    expect(result.code).toBe(0)
+    expect(result.stdout).toBe('')
+    expect(existsSync(join(dir, '.claude/skills/demo'))).toBe(false)
+    expect(existsSync(bun.log)).toBe(false)
+    expect(status(dir)).toBe('')
+  })
 
-  it.concurrent(
-    'should stage the skills and the CLI on a cloud VM',
-    async ({ expect }) => {
-      const dir = makeCheckout()
-      const bun = makeBun(0)
+  it.concurrent('should stage the skills and the CLI on a cloud VM', async ({
+    expect,
+  }) => {
+    const dir = makeCheckout()
+    const bun = makeBun(0)
 
-      const result = await run(hook, '{}', bun.path, dir, {
-        CLAUDE_CODE_REMOTE: 'true',
-      })
+    const result = await run(hook, '{}', bun.path, dir, {
+      CLAUDE_CODE_REMOTE: 'true',
+    })
 
-      expect(result.code).toBe(0)
-      expect(
-        readFileSync(
-          join(dir, '.claude/skills/demo/references/notes.md'),
-          'utf8',
-        ),
-      ).toBe('notes\n')
-      expect(existsSync(join(dir, '.claude/standards'))).toBe(false)
-      expect(readFileSync(bun.log, 'utf8')).toBe('install\nlink\n')
-      expect(status(dir)).toBe('')
-    },
-  )
+    expect(result.code).toBe(0)
+    expect(
+      readFileSync(
+        join(dir, '.claude/skills/demo/references/notes.md'),
+        'utf8',
+      ),
+    ).toBe('notes\n')
+    expect(existsSync(join(dir, '.claude/standards'))).toBe(false)
+    expect(readFileSync(bun.log, 'utf8')).toBe('install\nlink\n')
+    expect(status(dir)).toBe('')
+  })
 
-  it.concurrent(
-    'should add each exclude line once when run twice',
-    async ({ expect }) => {
-      const dir = makeCheckout()
-      const bun = makeBun(0)
-      const env = { CLAUDE_CODE_REMOTE: 'true' }
+  it.concurrent('should add each exclude line once when run twice', async ({
+    expect,
+  }) => {
+    const dir = makeCheckout()
+    const bun = makeBun(0)
+    const env = { CLAUDE_CODE_REMOTE: 'true' }
 
-      await run(hook, '{}', bun.path, dir, env)
-      const second = await run(hook, '{}', bun.path, dir, env)
+    await run(hook, '{}', bun.path, dir, env)
+    const second = await run(hook, '{}', bun.path, dir, env)
 
-      const exclude = readFileSync(join(dir, '.git/info/exclude'), 'utf8')
-        .split('\n')
-        .filter((line) => line.startsWith('/.claude/'))
-      expect(second.code).toBe(0)
-      expect(exclude).toEqual(['/.claude/skills/demo/'])
-      expect(status(dir)).toBe('')
-    },
-  )
+    const exclude = readFileSync(join(dir, '.git/info/exclude'), 'utf8')
+      .split('\n')
+      .filter((line) => line.startsWith('/.claude/'))
+    expect(second.code).toBe(0)
+    expect(exclude).toEqual(['/.claude/skills/demo/'])
+    expect(status(dir)).toBe('')
+  })
 
-  it.concurrent(
-    'should say the CLI is missing when the install fails',
-    async ({ expect }) => {
-      const dir = makeCheckout()
-      const bun = makeBun(1)
+  it.concurrent('should say the CLI is missing when the install fails', async ({
+    expect,
+  }) => {
+    const dir = makeCheckout()
+    const bun = makeBun(1)
 
-      const result = await run(hook, '{}', bun.path, dir, {
-        CLAUDE_CODE_REMOTE: 'true',
-      })
+    const result = await run(hook, '{}', bun.path, dir, {
+      CLAUDE_CODE_REMOTE: 'true',
+    })
 
-      expect(result.code).toBe(0)
-      expect(result.stdout).toContain('canon is not installed')
-      expect(existsSync(join(dir, '.claude/skills/demo/SKILL.md'))).toBe(true)
-    },
-  )
+    expect(result.code).toBe(0)
+    expect(result.stdout).toContain('canon is not installed')
+    expect(existsSync(join(dir, '.claude/skills/demo/SKILL.md'))).toBe(true)
+  })
 
   // A link can succeed into a bin folder the session's PATH never reads, which
   // leaves every skill calling a verb that is not there and nothing saying so.
-  it.concurrent(
-    'should say canon is off the PATH when the link succeeds but nothing resolves it',
-    async ({ expect }) => {
-      const dir = makeCheckout()
-      const bun = makeBun(0, hookPath)
+  it.concurrent('should say canon is off the PATH when the link succeeds but nothing resolves it', async ({
+    expect,
+  }) => {
+    const dir = makeCheckout()
+    const bun = makeBun(0, hookPath)
 
-      const result = await run(hook, '{}', bun.path, dir, {
-        CLAUDE_CODE_REMOTE: 'true',
-      })
+    const result = await run(hook, '{}', bun.path, dir, {
+      CLAUDE_CODE_REMOTE: 'true',
+    })
 
-      expect(result.code).toBe(0)
-      expect(result.stdout).toContain('canon is not on PATH')
-    },
-  )
+    expect(result.code).toBe(0)
+    expect(result.stdout).toContain('canon is not on PATH')
+  })
 })

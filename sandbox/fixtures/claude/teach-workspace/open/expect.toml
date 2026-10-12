@@ -31,11 +31,7 @@ paths = [
 # Three wrong turns, none of them present in the seeded tree. The first two
 # catch a workspace opened with no ordinal or with the ordinal counting from
 # zero, and the third catches a run that answered the request by planning it.
-absent = [
-  ".canon/teach/regex",
-  ".canon/teach/00-regex",
-  ".canon/plans",
-]
+absent = [".canon/teach/regex", ".canon/teach/00-regex", ".canon/plans"]
 
 # The floor the skill's own guard states. A run that wrote a lesson into the
 # project source or dropped a page beside the code fails here rather than in a

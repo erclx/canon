@@ -22,10 +22,7 @@ paths = [
 # the arm branched, so the tree the entry forks from already carries both. A
 # run that dropped either during entry loses the precondition this arm tests.
 
-reply = [
-  "bun install",
-  "virtual environment",
-]
+reply = ["bun install", "virtual environment"]
 
 # Neither manifest's folder exists, so neither ecosystem reads as installed.
 # Pinning `bun install` rather than the full sentence is what separates a run
