@@ -31,7 +31,7 @@ Both reads stop at depth two, which reaches a service folder and a workspace pac
   "stack": "node",
   "proposals": [
     {
-      "rule": "200-react",
+      "rule": "react",
       "evidence": [{ "kind": "dep", "match": "react", "path": "package.json" }]
     }
   ]

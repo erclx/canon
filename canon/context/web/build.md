@@ -22,7 +22,7 @@ The page reads its figures at build time and deploys through `.github/workflows/
 - The branch graph, the review exchange, the provenance roster, and the lit names in the field are authored against the depicted session, since nothing on a build machine records which files four sessions held. The footer says so, which is the labelling repair for an authored figure. The lit names are still checked against their catalog, so a renamed skill fails the build rather than lighting nothing
 - The version dot lights only when the npm registry's latest matches the version the build carries. It reports state rather than a count, so an unreachable registry reads as unconfirmed and the build continues
 
-Every string in `copy.ts` carries an inline citation to `README.md` or a paraphrase marker, gated by `readmeCitations` in `src/gate/measures.ts`. The citation discipline itself is stated in `internal/rules/claude/593-landing-page.md`.
+Every string in `copy.ts` carries an inline citation to `README.md` or a paraphrase marker, gated by `readmeCitations` in `src/gate/measures.ts`. The citation discipline itself is stated in `internal/rules/claude/landing-page.md`.
 
 ### The build reads this checkout's CLI
 

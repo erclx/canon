@@ -110,15 +110,12 @@ describe('classifySpan', () => {
     expect(classifySpan('tooling/claude/seeds/CLAUDE.md')).toBe('path')
   })
 
-  it('should read a bare rule filename as a sibling reference', () => {
-    expect(classifySpan('555-tasks.md')).toBe('sibling')
-  })
-
   it('should decline a bare filename naming a convention rather than a file', () => {
     for (const span of [
       'route.ts',
       'index.md',
       'reference.md',
+      'tasks.md',
       'manifest.toml',
       'components.json',
       'playwright.config.ts',
@@ -185,7 +182,7 @@ describe('readCitations', () => {
   it('should resolve a cited path that exists', async () => {
     write('docs/agents/output-shape.md', '# Output shape')
     writeRule(
-      'core/095-cli-output.md',
+      'core/cli-output.md',
       '- Follow `docs/agents/output-shape.md` for the framed shapes.',
     )
     git('add', '--all')
@@ -201,7 +198,7 @@ describe('readCitations', () => {
   it('should resolve a citation past a doubled-backtick span earlier on the line', async () => {
     write('docs/agents/output-shape.md', '# Output shape')
     writeRule(
-      'core/095-cli-output.md',
+      'core/cli-output.md',
       '- Reading ``canon markdown audit``, then follow `docs/agents/output-shape.md`.',
     )
     git('add', '--all')
@@ -220,7 +217,7 @@ describe('readCitations', () => {
     // what a session measuring this corpus by hand actually did.
     write('internal/standards/tooling-reference.md', '# Tooling reference')
     writeRule(
-      'claude/598-authoring-layout.md',
+      'claude/authoring-layout.md',
       '- A stack reference follows `internal/standards/tooling-reference.md`.',
     )
     git('add', '--all')
@@ -230,18 +227,17 @@ describe('readCitations', () => {
     expect(withStatus(report, 'dead')).toEqual([])
   })
 
-  it('should resolve a sibling rule named by filename alone', async () => {
-    writeRule('claude/555-tasks.md', '- Task rules live here.')
+  it('should report nothing for a rule naming a bare filename', async () => {
+    writeRule('claude/tasks.md', '- Task rules live here.')
     writeRule(
-      'claude/562-session.md',
-      '- Follow this rule rather than `555-tasks.md` for a `session-` file.',
+      'claude/session.md',
+      '- Follow `tasks.md` rather than the folder `index.md` for a `session-` file.',
     )
     git('add', '--all')
 
     const report = await readCitations(ROOT)
 
-    expect(withStatus(report, 'dead')).toEqual([])
-    expect(withStatus(report, 'resolved')).toContain('555-tasks.md')
+    expect(report.kind === 'measured' && report.citations).toEqual([])
   })
 
   it('should exempt a path the rule spells in its own frontmatter', async () => {
@@ -265,7 +261,7 @@ describe('readCitations', () => {
     // A glob declares a shape rather than an artifact, so a stale path under
     // one is the defect this check exists for.
     writeRule(
-      'core/095-cli-output.md',
+      'core/cli-output.md',
       '- Follow `docs/agents/renamed.md` for the framed shapes.',
       'docs/**',
     )
@@ -341,7 +337,7 @@ describe('readCitations', () => {
 
   it('should read the internal corpus alongside the shipped one', async () => {
     write(
-      join('internal', 'rules', 'claude', '598-authoring-layout.md'),
+      join('internal', 'rules', 'claude', 'authoring-layout.md'),
       [
         '---',
         'description: Fixture',
@@ -387,10 +383,10 @@ describe('readCitations', () => {
   })
 
   it('should anchor a glob past a description line that names the same path', async () => {
-    // `596-claude-md.md` names CLAUDE.md in its description and again as a
+    // `seed-mirror.md` names CLAUDE.md in its description and again as a
     // glob, and a substring scan finds the description first.
     write(
-      join('internal', 'rules', 'claude', '596-claude-md.md'),
+      join('internal', 'rules', 'claude', 'seed-mirror.md'),
       [
         '---',
         'description: Enforce the shape of CLAUDE.md and its seed',

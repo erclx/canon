@@ -49,7 +49,7 @@ Discovery runs through `seedRoots` in `src/tooling/seeds.ts`, shared with the Se
 
 Three outcomes separate a clean walk from one that measured nothing, and all three report unmeasured, which warns on a contributor's machine and refuses under CI. A missing `tooling/` covers nothing. Roots that resolve and carry no markdown between them are unmeasured for the same reason, because a pass there says the seeds cite no CLI on the strength of having read no prose. No seed root carrying `.claude/` or `canon/` is unmeasured as well, which agrees with the Seed standards stage on the one condition. The bash this replaced exited 0 on that last case, and the agreement is what moved it.
 
-`internal/rules/claude/596-claude-md.md` carries the matching authoring rule, so a session editing the seed meets it at the edit rather than at the push. Its glob stays on the two `CLAUDE.md` paths rather than widening to every seed markdown, since the bullets beside it govern the root-and-seed pair and mean nothing over `canon/REQUIREMENTS.md`. The stage covers the rest of the seed tree.
+`internal/rules/claude/seed-mirror.md` carries the matching authoring rule, so a session editing the seed meets it at the edit rather than at the push. Its glob stays on the two `CLAUDE.md` paths rather than widening to every seed markdown, since the bullets beside it govern the root-and-seed pair and mean nothing over `canon/REQUIREMENTS.md`. The stage covers the rest of the seed tree.
 
 ### A seed gates harder than a context entry
 
@@ -66,7 +66,7 @@ The Shipped references stage reads `referencesIn` from `src/shipped/references.t
 - Either form qualified against this repository's own name resolves exactly as badly as the bare form it qualifies
 - A `docs/`-relative path that resolves against this checkout names a file the reader does not hold
 - A phase-label-shaped token has no board to resolve against
-- A numbered rule path reaches its rule only through a separate `canon gov sync`, and only where governance was installed at all
+- An installed rule path reaches its rule only through a separate `canon gov sync`, and only where governance was installed at all
 - A `canon standards` call sends the reader to a verb no installed CLI carries
 
 It gates rather than reports, since a report leaves a citation for a person to notice rather than for a push to catch. The stage emits every hit before returning its failure, since a stage halts the run on its first failing check and a branch carrying several would otherwise repair one.
@@ -83,7 +83,7 @@ The retired-verb pattern reads every corpus but `docs/`, since a `canon standard
 
 ### The skill-body pattern
 
-The rule-path pattern is scoped to `claude/skills/`, less each `REQUIREMENT.md`, since a maintainer or an audit command reads that file rather than a session loading it. A bare match reports whether or not the named rule exists, since a same-repository citation under this corpus names no target project's own tree. A rule reaches a target only through a separate `canon gov sync`, a narrower and slower delivery path than the plugin merge that ships the citing skill. The pattern anchors on the trailing `\d{3}-[\w-]+\.md` rather than on the bare `.claude/rules/` prefix, which lets a folder mention carrying no number pass untouched.
+The rule-path pattern is scoped to `claude/skills/`, less each `REQUIREMENT.md`, since a maintainer or an audit command reads that file rather than a session loading it. A bare match reports whether or not the named rule exists, since a same-repository citation under this corpus names no target project's own tree. A rule reaches a target only through a separate `canon gov sync`, a narrower and slower delivery path than the plugin merge that ships the citing skill. The pattern anchors on a trailing `.md` file rather than on the bare `.claude/rules/` prefix, which lets a folder mention, ending in `/` or naming no file, pass untouched.
 
 ### The shape-only patterns
 

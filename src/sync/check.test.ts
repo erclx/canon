@@ -501,17 +501,17 @@ describe('readInstalledRules', () => {
 
   it('should name every rule the target holds', () => {
     install(join('core', '000-constitution.md'))
-    install(join('ui', '400-ui.md'))
+    install(join('ui', 'copy.md'))
 
     expect([...readInstalledRules(TARGET).held].sort()).toEqual([
       '000-constitution',
-      '400-ui',
+      'copy',
     ])
   })
 
   it('should name the band folder each rule sits in', () => {
     install(join('core', '000-constitution.md'))
-    install(join('lang', '100-typescript.md'))
+    install(join('lang', 'typescript.md'))
 
     expect([...readInstalledRules(TARGET).bands].sort()).toEqual([
       'core',
@@ -685,7 +685,7 @@ describe('readNewRules', () => {
 
   it('should ignore a rule authored before the anchor', async () => {
     authorRule(join('core', '000-constitution.md'), 'base')
-    const anchor = authorRule(join('core', '010-testing.md'), 'add testing')
+    const anchor = authorRule(join('core', 'testing.md'), 'add testing')
     install(join('core', '000-constitution.md'))
 
     await expect(
@@ -695,7 +695,7 @@ describe('readNewRules', () => {
 
   it('should ignore a rule outside the bands the target carries', async () => {
     const anchor = authorRule(join('core', '000-constitution.md'), 'base')
-    authorRule(join('ui', '400-ui.md'), 'add ui')
+    authorRule(join('ui', 'copy.md'), 'add ui')
     install(join('core', '000-constitution.md'))
 
     await expect(
@@ -767,10 +767,10 @@ describe('readNewRules', () => {
    * above can never see since its window only opens after the anchor.
    */
   it('should name a rule the recorded chain lists that predates the anchor', async () => {
-    writeStack('astro', 'extends = ""\nrules = ["400-ui", "440-capture"]\n')
-    authorRule(join('ui', '400-ui.md'), 'add ui')
+    writeStack('astro', 'extends = ""\nrules = ["copy", "440-capture"]\n')
+    authorRule(join('ui', 'copy.md'), 'add ui')
     const anchor = authorRule(join('ui', '440-capture.md'), 'add capture')
-    install(join('ui', '400-ui.md'))
+    install(join('ui', 'copy.md'))
 
     await expect(
       readNewRules(TOOLKIT, TARGET, chainStamp(['astro'])),
@@ -784,9 +784,9 @@ describe('readNewRules', () => {
   })
 
   it('should name nothing when the target already holds everything the chain lists', async () => {
-    writeStack('astro', 'extends = ""\nrules = ["400-ui"]\n')
-    authorRule(join('ui', '400-ui.md'), 'add ui')
-    install(join('ui', '400-ui.md'))
+    writeStack('astro', 'extends = ""\nrules = ["copy"]\n')
+    authorRule(join('ui', 'copy.md'), 'add ui')
+    install(join('ui', 'copy.md'))
 
     await expect(
       readNewRules(TOOLKIT, TARGET, chainStamp(['astro'])),
@@ -794,7 +794,7 @@ describe('readNewRules', () => {
   })
 
   it('should read nothing for a recorded chain naming a stack the toolkit no longer ships, and no anchor to fall back on', async () => {
-    authorRule(join('ui', '400-ui.md'), 'add ui')
+    authorRule(join('ui', 'copy.md'), 'add ui')
 
     await expect(
       readNewRules(TOOLKIT, TARGET, chainStamp(['retired-stack'])),
@@ -855,13 +855,11 @@ describe('baseBands', () => {
   })
 
   it('should name the folder of each rule a slug-only base names', () => {
-    writeRule(join('canon', '602-tasks.md'))
-    writeRule(join('canon', '604-scratch.md'))
-    writeRule(join('claude', '566-output.md'))
+    writeRule(join('canon', 'task-scope.md'))
+    writeRule(join('canon', 'scratch.md'))
+    writeRule(join('claude', 'output.md'))
     writeRule(join('claude', '520-skills.md'))
-    writeStack(
-      'extends = ""\nrules = ["602-tasks", "604-scratch", "566-output"]\n',
-    )
+    writeStack('extends = ""\nrules = ["task-scope", "scratch", "output"]\n')
 
     expect([...baseBands(TOOLKIT)].sort()).toEqual(['canon', 'claude'])
   })

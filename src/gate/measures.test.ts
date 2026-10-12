@@ -1463,7 +1463,7 @@ describe('isFolderEchoedName', () => {
   })
 
   it('should read the immediate parent only', () => {
-    expect(isFolderEchoedName('rules/canon/canon/605-worktrees.md')).toBe(false)
+    expect(isFolderEchoedName('rules/canon/canon/worktrees.md')).toBe(false)
   })
 })
 
@@ -1626,7 +1626,7 @@ describe('unreferencedRules', () => {
     writeFileSync(path, body)
   }
 
-  const DETECT_REACT = '["200-react"]\ndeps = ["react"]\nfiles = []\n'
+  const DETECT_REACT = '["react"]\ndeps = ["react"]\nfiles = []\n'
 
   /** Answers `gov list --json` from a fixture toolkit rather than this one. */
   const measureFixture = () =>
@@ -1647,7 +1647,7 @@ describe('unreferencedRules', () => {
   beforeEach(() => {
     toolkit = mkdtempSync(join(tmpdir(), 'canon-gate-unreferenced-'))
     seed('governance/rules/core/000-a.md', '# a\n')
-    seed('governance/rules/framework/200-react.md', '# react\n')
+    seed('governance/rules/framework/react.md', '# react\n')
     seed('governance/stacks/base.toml', 'rules = ["core"]\n')
   })
 
@@ -1669,7 +1669,7 @@ describe('unreferencedRules', () => {
     const report = await measureFixture()
 
     expect(report.failure).toBe('An opt-in rule has no route to a project')
-    expect(report.emissions[0]?.text).toContain('200-react')
+    expect(report.emissions[0]?.text).toContain('react')
   })
 
   it('should fail when a detect.toml key names a retired rule', async () => {

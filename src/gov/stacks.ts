@@ -78,9 +78,9 @@ export function loadGovStack(
  * entry resolves to itself, so a folder and a slug reach the caller as one
  * shape rather than two the caller has to tell apart.
  *
- * The directory wins over a rule file of the same name. They cannot collide
- * while `claude/skills/create-rule/references/rule.md` requires a numeric prefix on a rule slug, since a
- * band folder carries none.
+ * The directory wins over a rule file of the same name, which would leave
+ * that rule unreachable from a stack entry. `src/gov/rule-layout.test.ts`
+ * fails on any rule basename equal to a folder name, so the two never meet.
  */
 export function expandStackEntry(root: string, entry: string): string[] {
   const dir = join(rulesSourceDir(root), entry)

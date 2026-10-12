@@ -9,7 +9,7 @@ description: The route walk behind canon inventory, why it reports a listing rat
 
 `canon inventory` walks every route a project declares and reports one computed property per element, grouped by the answer rather than by the component. The command surface and its refusal reasons live in `docs/agents/commands.md`. This entry holds why it is shaped the way it is.
 
-Its first subject is the focus ring, which `governance/rules/ui/410-a11y.md` states three rules against with no existing measurement. The command is an instrument that answers across every route, distinct from a capture that shows one.
+Its first subject is the focus ring, which `governance/rules/ui/a11y.md` states three rules against with no existing measurement. The command is an instrument that answers across every route, distinct from a capture that shows one.
 
 ## Layout
 
@@ -27,7 +27,7 @@ The focus reader reports the difference between rest and focus rather than the f
 
 Nothing gates on the listing. The value is seeing how many different answers a site gives, and a gate collapses that to one bit. What it costs is a measure that can rot with nobody noticing, recorded here rather than closed: a later row can compare the group count against a recorded baseline the way `canon/config/baseline.json` already does for other measures, and building both at once decides the baseline question with no data to decide it from.
 
-Only two of the three focus rules in `410-a11y.md` are measurable this way. The project-focus-ring rule and the `outline-none` rule are both readable off computed style across routes, while the 3:1 contrast rule needs the two colors and a source for what the background is, which is the same runtime-versus-token-table split `canon/context/claude-plugin/skill-strategy/axes.md` records for the contrast check.
+Only two of the three focus rules in `a11y.md` are measurable this way. The project-focus-ring rule and the `outline-none` rule are both readable off computed style across routes, while the 3:1 contrast rule needs the two colors and a source for what the background is, which is the same runtime-versus-token-table split `canon/context/claude-plugin/skill-strategy/axes.md` records for the contrast check.
 
 ## Gotchas
 

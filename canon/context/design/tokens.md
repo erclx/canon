@@ -31,7 +31,7 @@ The light theme remaps the roles the record declares a `light-` counterpart for,
 
 ### Breakpoints live in the record's layout section
 
-`## Layout` in the record is read as text by the `440-surface-capture` rule to find a project's breakpoints, and the renderer and parser ignore it, so nothing visual confirms it landed. The `capture widths` block in `src/design/css.test.ts` checks the widths instead: it reads them from `tooling/web/configs/e2e/screenshot.ts` and fails when a width query in the generated base or teach stylesheet opens a range none of them reaches, or when the record stops naming the same widths. The `web/` queries follow no shared scale and sit outside that check. This repository's record carries the section through `layout` in `src/design/tokens.ts`, since a hand edit to the generated document fails the `design` gate stage.
+`## Layout` in the record is read as text by the `surface-capture` rule to find a project's breakpoints, and the renderer and parser ignore it, so nothing visual confirms it landed. The `capture widths` block in `src/design/css.test.ts` checks the widths instead: it reads them from `tooling/web/configs/e2e/screenshot.ts` and fails when a width query in the generated base or teach stylesheet opens a range none of them reaches, or when the record stops naming the same widths. The `web/` queries follow no shared scale and sit outside that check. This repository's record carries the section through `layout` in `src/design/tokens.ts`, since a hand edit to the generated document fails the `design` gate stage.
 
 ## Gotchas
 

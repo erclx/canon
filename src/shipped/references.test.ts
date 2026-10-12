@@ -147,7 +147,7 @@ describe('referencesIn', () => {
   it('should pass a Tailwind arbitrary hex color, which an unbounded pattern reads as #316', () => {
     expect(
       referencesIn(
-        'governance/rules/framework/250-tailwind.md',
+        'governance/rules/framework/tailwind.md',
         '- Use arbitrary values (`bg-[#316ff6]`) instead.',
         noDocsRoot,
       ),
@@ -428,7 +428,7 @@ describe('referencesIn', () => {
       expect(
         referencesIn(
           'claude/skills/draft-and-pick/SKILL.md',
-          "Write scratch to `.claude/rules/canon/core/055-scratch.md`'s location.",
+          "Write scratch to `.claude/rules/canon/canon/scratch.md`'s location.",
           root,
         ),
       ).toEqual([
@@ -436,16 +436,26 @@ describe('referencesIn', () => {
           file: 'claude/skills/draft-and-pick/SKILL.md',
           line: 1,
           kind: 'rule-path',
-          text: '.claude/rules/canon/core/055-scratch.md',
+          text: '.claude/rules/canon/canon/scratch.md',
         },
       ])
+    })
+
+    it('should pass a folder mention that names no rule file', () => {
+      expect(
+        referencesIn(
+          'claude/skills/create-rule/SKILL.md',
+          'Project rules live under `.claude/rules/project/`, beside index.md.',
+          root,
+        ),
+      ).toEqual([])
     })
 
     it('should pass a rule path illustrating a placeholder shape', () => {
       expect(
         referencesIn(
           'claude/skills/create-rule/SKILL.md',
-          'Repoint the citation at `.claude/rules/canon/core/<n>-<slug>.md`.',
+          'Repoint the citation at `.claude/rules/project/<subdir>/<slug>.md`.',
           root,
         ),
       ).toEqual([])
@@ -455,7 +465,7 @@ describe('referencesIn', () => {
       expect(
         referencesIn(
           'claude/skills/task-board/REQUIREMENT.md',
-          'See `.claude/rules/canon/core/035-tasks.md` for the file shape.',
+          'See `.claude/rules/canon/canon/tasks.md` for the file shape.',
           root,
         ),
       ).toEqual([])
@@ -465,7 +475,7 @@ describe('referencesIn', () => {
       expect(
         referencesIn(
           'claude/skills/alpha/SKILL.md',
-          `See \`.claude/rules/canon/core/055-scratch.md\` for the shape. <!-- ${REFERENCE_MARKER}: illustrates the bare form the rule bans -->`,
+          `See \`.claude/rules/canon/canon/scratch.md\` for the shape. <!-- ${REFERENCE_MARKER}: illustrates the bare form the rule bans -->`,
           root,
         ),
       ).toEqual([])
@@ -558,9 +568,9 @@ describe('isShippedCorpus', () => {
 
   it('should exclude a corpus whose reader already holds this repository', () => {
     expect(isShippedCorpus('canon/context/development/gates.md')).toBe(false)
-    expect(
-      isShippedCorpus('internal/rules/claude/598-authoring-layout.md'),
-    ).toBe(false)
+    expect(isShippedCorpus('internal/rules/claude/authoring-layout.md')).toBe(
+      false,
+    )
     expect(isShippedCorpus('wiki/claude/worktrees.md')).toBe(false)
     expect(isShippedCorpus('src/design/base.css')).toBe(false)
   })

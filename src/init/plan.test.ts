@@ -116,21 +116,19 @@ describe('planInit', () => {
 
   it('should report extra rules the governance skip drops', () => {
     const plan = planInit(
-      flags({ add: '260-shadcn', skip: parseSkip('governance') }),
+      flags({ add: 'shadcn', skip: parseSkip('governance') }),
     )
 
     expect(plan.preview).toContainEqual({
       level: 'warn',
-      text: 'governance (skipped, --add 260-shadcn not installed)',
+      text: 'governance (skipped, --add shadcn not installed)',
     })
   })
 
   it('should name the extra rules alongside the stack', () => {
-    const plan = planInit(flags({ stack: 'astro', add: '260-shadcn' }))
+    const plan = planInit(flags({ stack: 'astro', add: 'shadcn' }))
 
-    expect(texts(plan)).toContain(
-      'governance (stack: astro, extras: 260-shadcn)',
-    )
+    expect(texts(plan)).toContain('governance (stack: astro, extras: shadcn)')
   })
 
   it('should drop a skipped domain from the preview and the count', () => {

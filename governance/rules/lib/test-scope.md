@@ -20,5 +20,5 @@ paths:
 
 - Answer a question about the running page with a script against the dev server rather than with the suite.
 - Do not enable `fullyParallel` in `playwright.config.ts`.
-- Follow `.claude/rules/canon/ui/440-surface-capture.md` for capture scope.
-- Follow `.claude/rules/canon/lib/305-e2e-reliability.md` for waits and guards.
+- Follow `.claude/rules/canon/ui/surface-capture.md` for capture scope.
+- Follow `.claude/rules/canon/lib/e2e-reliability.md` for waits and guards.

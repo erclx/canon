@@ -21,67 +21,67 @@
 deps = []
 files = [".claude/skills", "claude/skills"]
 
-["700-ci-workflow"]
+["ci-workflow"]
 deps = []
 files = [".github/workflows"]
 
-["775-dependencies"]
+["dependencies"]
 deps = []
 files = ["**/package.json", "**/pyproject.toml", "**/go.mod", "**/composer.json"]
 
-["780-config-comments"]
+["config-comments"]
 deps = []
 files = [".editorconfig", "**/Dockerfile*", "**/*.config.*", "**/.env.example"]
 
-["790-code-comments"]
+["code-comments"]
 deps = []
 files = ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "**/*.sh", "**/*.py"]
 
-["130-go"]
+["go"]
 deps = []
 files = ["**/go.mod"]
 
-["140-php"]
+["php"]
 deps = []
 files = ["**/composer.json"]
 
-["200-react"]
+["react"]
 deps = ["react"]
 files = []
 
-["210-astro"]
+["astro"]
 deps = ["astro"]
 files = ["**/astro.config.*"]
 
-["220-fastapi"]
+["fastapi"]
 deps = ["fastapi"]
 files = []
 
-["230-nextjs"]
+["nextjs"]
 deps = ["next"]
 files = ["**/next.config.*"]
 
-["250-tailwind"]
+["tailwind"]
 deps = ["tailwindcss", "@tailwindcss/vite", "@tailwindcss/postcss"]
 files = ["**/tailwind.config.*"]
 
-["260-shadcn"]
+["shadcn"]
 deps = []
 files = ["**/components.json"]
 
-["305-e2e-reliability"]
+["e2e-reliability"]
 deps = ["@playwright/test", "playwright", "cypress"]
 files = ["**/e2e"]
 
-["306-test-scope"]
+["test-scope"]
 deps = ["@playwright/test", "playwright", "cypress"]
 files = ["**/e2e"]
 
-["310-zod"]
+["zod"]
 deps = ["zod"]
 files = []
 
-["320-tanstack-query"]
+["tanstack-query"]
 deps = [
   "@tanstack/react-query",
   "@tanstack/vue-query",
@@ -91,23 +91,23 @@ deps = [
 ]
 files = []
 
-["335-testing-go"]
+["testing-go"]
 deps = []
 files = ["**/go.mod"]
 
-["336-testing-php"]
+["testing-php"]
 deps = ["phpunit/phpunit", "pestphp/pest"]
 files = ["**/phpunit.xml", "**/phpunit.xml.dist"]
 
-["340-pydantic"]
+["pydantic"]
 deps = ["pydantic"]
 files = []
 
-["350-security-web"]
+["security-web"]
 deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
 files = ["index.html", "*/index.html"]
 
-["360-security-server"]
+["security-server"]
 deps = [
   "express",
   "fastify",
@@ -129,7 +129,7 @@ deps = [
 ]
 files = []
 
-["370-database"]
+["database"]
 deps = [
   "prisma",
   "@prisma/client",
@@ -156,42 +156,42 @@ deps = [
 ]
 files = ["**/migrations", "**/schema.prisma", "**/*.sql"]
 
-["400-ui"]
+["copy"]
 deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
 files = ["index.html", "*/index.html"]
 
-["410-a11y"]
+["a11y"]
 deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
 files = ["index.html", "*/index.html"]
 
-["420-forms"]
+["forms"]
 deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
 files = ["index.html", "*/index.html"]
 
-["430-ux-completeness"]
+["ux-completeness"]
 deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
 files = ["index.html", "*/index.html"]
 
-["440-surface-capture"]
+["surface-capture"]
 deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
 files = ["index.html", "*/index.html"]
 
-["450-link-behavior"]
+["link-behavior"]
 deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
 files = ["index.html", "*/index.html"]
 
-["460-design-taste"]
+["design-taste"]
 deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
 files = ["canon/DESIGN.md", "index.html", "*/index.html"]
 
-["465-interface-casing"]
+["interface-casing"]
 deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
 files = ["index.html", "*/index.html"]
 
-["470-motion"]
+["motion"]
 deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
 files = ["index.html", "*/index.html"]
 
-["480-canvas"]
+["canvas"]
 deps = []
 files = [".canon/canvas"]

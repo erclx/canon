@@ -15,7 +15,7 @@ This repository's own record is generated rather than authored. `src/design/toke
 
 - `src/design/` owns the token module, the component layer, the record and stylesheet renderers, the markdown parser and preview renderer, the sync adapter, and the contrast reading
 - `claude/skills/canvas-board/` owns the step that carries a picked direction into the file
-- `claude/skills/design-taste/` owns the layer model, the coherence locks, and grey-boxing, and `governance/rules/ui/460-design-taste.md` routes stylesheet and `canon/DESIGN.md` edits to it. Building an already-decided surface stays outside the glob, so a project styling entirely in utility classes is not reached
+- `claude/skills/design-taste/` owns the layer model, the coherence locks, and grey-boxing, and `governance/rules/ui/design-taste.md` routes stylesheet and `canon/DESIGN.md` edits to it. Building an already-decided surface stays outside the glob, so a project styling entirely in utility classes is not reached
 - `.canon/tmp/render/design/` owns the rendered preview, gitignored
 - `.claude/design/` owns what an install lands in a target, `base.css` at its root and the target's own values under `project/`
 

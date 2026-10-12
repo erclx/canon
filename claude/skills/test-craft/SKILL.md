@@ -105,5 +105,5 @@ Run the final filter over every test written this session, checking each line. A
 
 - The red, green, refactor procedure and its order: `test-first`, which loads this skill at its first step
 - Reproducing a failure with no known cause: `systematic-debugging`
-- Runner, file suffix, placement, and query conventions per language: `300-testing-ts`, `330-testing-py`, `335-testing-go`, and `336-testing-php`
-- Settle, guard, and run-scope rules inside an end to end file: `305-e2e-reliability` and `306-test-scope`
+- Runner, file suffix, placement, and query conventions per language: `testing-ts`, `testing-py`, `testing-go`, and `testing-php`
+- Settle, guard, and run-scope rules inside an end to end file: `e2e-reliability` and `test-scope`

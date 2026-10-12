@@ -6,7 +6,7 @@ import {
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { listRuleSourcePaths, rulesSourceDir } from '@/gov/install'
 import { buildRuleEntries } from '@/gov/list'
@@ -52,6 +52,37 @@ function retiredClaudePaths(rel: string, text: string): string[] {
     )
 }
 
+// Both trees resolve a stack entry and a rename by basename alone. A folder
+// name wins over a rule of the same name, which leaves that rule unreachable,
+// and a repeated basename resolves to whichever file is read first.
+function nameCollisions(toolkit: string): string[] {
+  const owners = new Map<string, string[]>()
+  const folders = new Set<string>()
+
+  for (const tree of [
+    rulesSourceDir(toolkit),
+    join(toolkit, 'internal', 'rules'),
+  ]) {
+    for (const rel of new Bun.Glob('**/*.md').scanSync({
+      cwd: tree,
+      onlyFiles: true,
+    })) {
+      const name = basename(rel, '.md')
+      owners.set(name, [...(owners.get(name) ?? []), rel])
+      for (let dir = dirname(rel); dir !== '.'; dir = dirname(dir)) {
+        folders.add(basename(dir))
+      }
+    }
+  }
+
+  return [...owners]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .flatMap(([name, rels]) => [
+      ...(rels.length > 1 ? [`${name}: repeats at ${rels.join(', ')}`] : []),
+      ...(folders.has(name) ? [`${name}: equals a rules folder name`] : []),
+    ])
+}
+
 function layoutFindings(toolkit: string): string[] {
   const rulesRoot = rulesSourceDir(toolkit)
   const bodies = listRuleSourcePaths(toolkit).flatMap((rel) =>
@@ -81,6 +112,29 @@ describe('rule layout', () => {
     const findings = layoutFindings(REPO_ROOT)
 
     expect(findings).toEqual([])
+  })
+
+  it('should keep every rule basename unique and off every folder name', () => {
+    const findings = nameCollisions(REPO_ROOT)
+
+    expect(findings).toEqual([])
+  })
+
+  it('should flag a rule named for a folder and a repeated basename', () => {
+    seedRule('ui/ui.md', '# UI\n')
+    seedRule('ui/forms.md', '# Forms\n')
+    mkdirSync(join(root, 'internal', 'rules', 'core'), { recursive: true })
+    writeFileSync(
+      join(root, 'internal', 'rules', 'core', 'forms.md'),
+      '# Forms\n',
+    )
+
+    const findings = nameCollisions(root)
+
+    expect(findings).toEqual([
+      'forms: repeats at ui/forms.md, core/forms.md',
+      'ui: equals a rules folder name',
+    ])
   })
 
   it('should flag a retired root in a glob and in a body line', () => {
@@ -114,7 +168,7 @@ describe('rule layout', () => {
 
   it('should pass the current roots, including a home-relative one', () => {
     seedRule(
-      'claude/566-output.md',
+      'claude/output.md',
       '- Under `.claude/worktrees/<name>/`, not `~/.claude/projects/`, see `.claude/rules/canon/x.md`\n- Edit .claude/hooks, then .claude/settings.json.\n',
     )
 

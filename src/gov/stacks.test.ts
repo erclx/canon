@@ -117,12 +117,12 @@ describe('resolveRules', () => {
 
 describe('resolveRules on the shipped stacks', () => {
   const BASE = [
-    '566-output',
-    '602-tasks',
-    '604-scratch',
-    '605-worktrees',
-    '606-git',
-    '611-indexes',
+    'output',
+    'task-scope',
+    'scratch',
+    'worktrees',
+    'git',
+    'indexes',
     'context',
     'tasks',
     'plan',
@@ -139,40 +139,28 @@ describe('resolveRules on the shipped stacks', () => {
   it('should give node the code rules and its language and testing rule alone', () => {
     expect(resolveRules(PROJECT_ROOT, 'node')).toEqual({
       ok: true,
-      rules: [
-        ...BASE,
-        '000-code',
-        '010-testing',
-        '100-typescript',
-        '300-testing-ts',
-      ],
+      rules: [...BASE, 'routing', 'testing', 'typescript', 'testing-ts'],
     })
   })
 
   it('should give python the code rules and its language and testing rule alone', () => {
     expect(resolveRules(PROJECT_ROOT, 'python')).toEqual({
       ok: true,
-      rules: [
-        ...BASE,
-        '000-code',
-        '010-testing',
-        '110-python',
-        '330-testing-py',
-      ],
+      rules: [...BASE, 'routing', 'testing', 'python', 'testing-py'],
     })
   })
 
   it('should give go the code rules and its language and testing rule alone', () => {
     expect(resolveRules(PROJECT_ROOT, 'go')).toEqual({
       ok: true,
-      rules: [...BASE, '000-code', '010-testing', '130-go', '335-testing-go'],
+      rules: [...BASE, 'routing', 'testing', 'go', 'testing-go'],
     })
   })
 
   it('should give php the code rules and its language and testing rule alone', () => {
     expect(resolveRules(PROJECT_ROOT, 'php')).toEqual({
       ok: true,
-      rules: [...BASE, '000-code', '010-testing', '140-php', '336-testing-php'],
+      rules: [...BASE, 'routing', 'testing', 'php', 'testing-php'],
     })
   })
 })
@@ -242,10 +230,10 @@ describe('resolveRules with folder entries', () => {
 
 describe('resolveMissingRules', () => {
   it('should name a rule the leaf chain entry lists that the target lacks', () => {
-    seedRule('ui', '400-ui')
+    seedRule('ui', 'copy')
     seedRule('ui', '440-capture')
-    seedStack('astro', 'extends = ""\nrules = ["400-ui", "440-capture"]\n')
-    installRule('ui', '400-ui')
+    seedStack('astro', 'extends = ""\nrules = ["copy", "440-capture"]\n')
+    installRule('ui', 'copy')
 
     const missing = resolveMissingRules(root, target, ['astro'])
 
@@ -254,19 +242,19 @@ describe('resolveMissingRules', () => {
 
   it('should resolve the chain leaf through its extends ancestors', () => {
     seedRule('core', '000-a')
-    seedRule('ui', '400-ui')
+    seedRule('ui', 'copy')
     seedStack('base', 'extends = ""\nrules = ["core"]\n')
-    seedStack('astro', 'extends = "base"\nrules = ["400-ui"]\n')
+    seedStack('astro', 'extends = "base"\nrules = ["copy"]\n')
 
     const missing = resolveMissingRules(root, target, ['astro'])
 
-    expect(missing.map((source) => source.rule)).toEqual(['000-a', '400-ui'])
+    expect(missing.map((source) => source.rule)).toEqual(['000-a', 'copy'])
   })
 
   it('should return nothing when the target already holds every entitled rule', () => {
-    seedRule('ui', '400-ui')
-    seedStack('astro', 'extends = ""\nrules = ["400-ui"]\n')
-    installRule('ui', '400-ui')
+    seedRule('ui', 'copy')
+    seedStack('astro', 'extends = ""\nrules = ["copy"]\n')
+    installRule('ui', 'copy')
 
     expect(resolveMissingRules(root, target, ['astro'])).toEqual([])
   })
@@ -280,13 +268,13 @@ describe('resolveMissingRules', () => {
   })
 
   it('should ignore a rule an extra the target added installs that no stack lists', () => {
-    seedRule('ui', '400-ui')
-    seedStack('astro', 'extends = ""\nrules = ["400-ui"]\n')
+    seedRule('ui', 'copy')
+    seedStack('astro', 'extends = ""\nrules = ["copy"]\n')
     installRule('lib', '300-extra')
 
     const missing = resolveMissingRules(root, target, ['astro'])
 
-    expect(missing.map((source) => source.rule)).toEqual(['400-ui'])
+    expect(missing.map((source) => source.rule)).toEqual(['copy'])
   })
 })
 
@@ -318,29 +306,26 @@ describe('unreferencedRules', () => {
 
 describe('mergeExtraRules', () => {
   it('should append comma-separated extras after the stack rules', () => {
-    expect(mergeExtraRules(['000-a'], '200-react,260-shadcn')).toEqual([
+    expect(mergeExtraRules(['000-a'], 'react,shadcn')).toEqual([
       '000-a',
-      '200-react',
-      '260-shadcn',
+      'react',
+      'shadcn',
     ])
   })
 
   it('should trim surrounding whitespace from each extra', () => {
-    expect(mergeExtraRules([], ' 200-react , 260-shadcn ')).toEqual([
-      '200-react',
-      '260-shadcn',
-    ])
+    expect(mergeExtraRules([], ' react , shadcn ')).toEqual(['react', 'shadcn'])
   })
 
   it('should skip an extra the stack already resolved', () => {
-    expect(mergeExtraRules(['200-react'], '200-react,260-shadcn')).toEqual([
-      '200-react',
-      '260-shadcn',
+    expect(mergeExtraRules(['react'], 'react,shadcn')).toEqual([
+      'react',
+      'shadcn',
     ])
   })
 
   it('should ignore empty entries from a trailing comma', () => {
-    expect(mergeExtraRules([], '200-react,,')).toEqual(['200-react'])
+    expect(mergeExtraRules([], 'react,,')).toEqual(['react'])
   })
 })
 

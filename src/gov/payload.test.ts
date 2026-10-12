@@ -25,14 +25,14 @@ afterEach(() => {
 })
 
 describe('listRuleFiles', () => {
-  it('should sort rules by path so numeric prefixes stay ordered', () => {
-    writeRule('core/010-testing.md', 'a')
+  it('should sort rules by path', () => {
+    writeRule('core/testing.md', 'a')
     writeRule('core/000-const.md', 'b')
     writeRule('lang/100-ts.md', 'c')
 
     expect(listRuleFiles(RULES)).toEqual([
       join(RULES, 'core/000-const.md'),
-      join(RULES, 'core/010-testing.md'),
+      join(RULES, 'core/testing.md'),
       join(RULES, 'lang/100-ts.md'),
     ])
   })

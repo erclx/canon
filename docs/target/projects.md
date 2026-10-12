@@ -88,7 +88,7 @@ Escalate for a project writing code. The `target-setup` skill reads `package.jso
 
 In a monorepo the skill reads each folder holding a `package.json`, `pyproject.toml`, `go.mod`, `composer.json`, or `Cargo.toml` to depth two, skipping what git ignores. Each of those folders gets its own tooling stack and a `canon tooling sync <stack> <folder> --skip base` in the preview. Governance still installs once at the root, since a rule's `paths:` globs reach every subfolder, so a subfolder's language rules join the root install through `--add`.
 
-The server-side security and persistence rules belong to no stack. `canon gov detect` proposes both from a server framework or database client in the manifest, which you confirm in the preview, or add them by hand with `--add 360-security-server,370-database`.
+The server-side security and persistence rules belong to no stack. `canon gov detect` proposes both from a server framework or database client in the manifest, which you confirm in the preview, or add them by hand with `--add security-server,database`.
 
 Markdown-heavy projects, CLI tools, docs sites, research notebooks, and scripting repos stay on `base`. Escalation is a ceiling move, not a default.
 

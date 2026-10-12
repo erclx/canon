@@ -54,4 +54,4 @@ The citation count before a plan archives guards against the one-plan-per-task m
 
 ### The tasks rule keeps the plan-writing act
 
-`governance/rules/canon/602-tasks.md` keeps the act of writing a plan in the same session as its task and linking it, because the standard fixes the `Plan:` link for a plan that exists and never tells a session to create one. The seed eval in `scripts/eval/result-seed.md` measured the gap: sessions holding the bullet wrote plans and sessions without it wrote none.
+`governance/rules/canon/task-scope.md` keeps the act of writing a plan in the same session as its task and linking it, because the standard fixes the `Plan:` link for a plan that exists and never tells a session to create one. The seed eval in `scripts/eval/result-seed.md` measured the gap: sessions holding the bullet wrote plans and sessions without it wrote none.

@@ -26,7 +26,7 @@ bun create vite my-app && cd my-app
 claude
 ```
 
-Invoke `canon:target-setup`. The skill reads `package.json` and the Vite config, resolves tooling to `vite-react` and governance to `node`, proposes `200-react` and the other rules its manifest matches as extras, and runs `canon init` with the resolved flags.
+Invoke `canon:target-setup`. The skill reads `package.json` and the Vite config, resolves tooling to `vite-react` and governance to `node`, proposes `react` and the other rules its manifest matches as extras, and runs `canon init` with the resolved flags.
 
 Ongoing maintenance:
 
@@ -34,14 +34,14 @@ Ongoing maintenance:
 - Seed drift: merge by hand against the toolkit copy
 - Catch-all sync: `canon sync .`
 - Governance rule refresh only: `canon gov sync .`
-- Layer a new rule on top, for example `260-shadcn` after adopting shadcn: `canon gov install node --add 260-shadcn .`
+- Layer a new rule on top, for example `shadcn` after adopting shadcn: `canon gov install node --add shadcn .`
 
 ## Monorepo with multiple language roots
 
 The repo root owns the shared `base` layer, and each language lives in its own subfolder.
 
 ```bash
-canon init --stack node --add 200-react .
+canon init --stack node --add react .
 canon tooling sync vite-react ./frontend --skip base --write
 canon tooling sync python ./backend --skip base --write
 ```

@@ -18,7 +18,7 @@ Internal skills live in `.claude/skills/` and are toolkit-only. They are not ins
 - `internal-tooling`: Load before editing tooling stacks or golden configs
 - `internal-web`: Load before editing the landing page or this repository's own rendered images
 - `internal-sandbox-check`: Audit changed skills and scripts for missing sandbox scenario edits, user-invoked via `/internal-sandbox-check`
-- `internal-shipped-reference`: Review a shipped-corpus edit for a self-only reference no pattern scan catches, routed by `598-authoring-layout.md`
+- `internal-shipped-reference`: Review a shipped-corpus edit for a self-only reference no pattern scan catches, routed by `authoring-layout.md`
 
 ## Requirement coverage
 

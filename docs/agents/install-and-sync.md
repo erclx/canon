@@ -19,7 +19,7 @@ removes a stale `.claude/GOV.md` from the retired build. Use
 
 Everything under `.claude/rules/canon/` belongs to the toolkit, so a rule
 there that the toolkit no longer ships is deleted on sync, edited or not. That
-is how a retired rule stops loading in a target. A renamed or renumbered rule
+is how a retired rule stops loading in a target. A renamed rule
 the toolkit declares in `governance/renames.toml` moves instead: the sync
 installs the rule under its new name and deletes the old file, whether or not
 the target's stamp records a stack. Local edits to the old file are not
@@ -34,9 +34,9 @@ groundwork, intake, session, design, readme, and rule copies are deleted as
 retired. The markdown rule is hand-written at `writing/markdown.md` and names
 the `markdown-craft` skill, and `800-prose` retires.
 
-A project's own rules belong under `.claude/rules/project/`, where
-the `create-rule` skill's reference reserves `900-999` for them, and a rule placed under
-`canon/` instead is lost on the next sync.
+A project's own rules belong under `.claude/rules/project/`, where a slug
+the toolkit also ships collides with nothing, and a rule placed under `canon/`
+instead is lost on the next sync.
 
 A sync never deletes a rule that a newer canon release installed. The stamp
 records the newest release that synced governance, and an older binary holds

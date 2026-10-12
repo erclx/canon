@@ -52,7 +52,7 @@ describe('gov install', () => {
 
     expect(
       readFileSync(
-        join(target, '.claude/rules/canon/claude/566-output.md'),
+        join(target, '.claude/rules/canon/claude/output.md'),
         'utf8',
       ),
     ).toContain('# Output standards')
@@ -65,7 +65,7 @@ describe('gov sync', () => {
   })
 
   it('should replace a local edit to an installed rule', () => {
-    const path = join(target, '.claude/rules/canon/claude/566-output.md')
+    const path = join(target, '.claude/rules/canon/claude/output.md')
     writeFileSync(path, `${readFileSync(path, 'utf8')}\n<!-- local edit -->\n`)
 
     const run = runCli(['gov', 'sync', target], { cwd: target })

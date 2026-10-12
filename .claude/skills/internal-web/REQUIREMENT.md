@@ -9,7 +9,7 @@ description: Why the outward-facing surface needs a domain skill beside the path
 
 Without this skill, a session editing the landing page or this repository's images:
 
-- Drafts a page change without opening `internal/rules/claude/593-landing-page.md`, which is scoped to `web/**` and holds conventions that fail silently. A five-round drafting pass did this and reproduced three of the failures the rule names.
+- Drafts a page change without opening `internal/rules/claude/landing-page.md`, which is scoped to `web/**` and holds conventions that fail silently. A five-round drafting pass did this and reproduced three of the failures the rule names.
 - Paraphrases a convention into a plan rather than citing the rule, so a worker enforces a requirement the rule does not carry. One plan restated an image convention as a rule about where an `img` tag sits, where the actual convention is about what wrote the file.
 - Types a count into the page. Every count is read from the CLI at build time, and a typed one ships looking correct.
 - Hand-edits a generated frame under `assets/`, which the next regeneration overwrites and which the drift gate reports only once the digests disagree.
@@ -25,7 +25,7 @@ Without this skill, a session editing the landing page or this repository's imag
 
 ## Must not
 
-- Restate the five conventions. `593-landing-page.md` is the single source, `v101.0` is rewriting two of them, and a copy here would be stale the day that lands.
+- Restate the five conventions. `landing-page.md` is the single source, `v101.0` is rewriting two of them, and a copy here would be stale the day that lands.
 - Restate the gotchas under `canon/context/web/`. The ownership table in `CLAUDE.md` puts per-domain narrative in the context entry.
 - Own the design tokens. `canon/context/design/tokens.md` owns them and four surfaces read them, which makes them canonical rather than per-domain.
 - Absorb `examples/`. `canon/context/web/assets.md` separates it from `assets/` on who each folder addresses, and a skill covering both would erase the line that decision draws.

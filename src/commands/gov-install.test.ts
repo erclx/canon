@@ -76,7 +76,7 @@ describe('gov install --add with no stack', () => {
   it('should keep the chain an earlier stack install recorded', () => {
     install(['node', target])
 
-    install(['--add', '200-react', target])
+    install(['--add', 'react', target])
 
     expect(stampedChain(readStamp(target), 'governance')).toEqual(['node'])
   })

@@ -9,30 +9,30 @@ function matchesRule(name: string, path: string): boolean {
 }
 
 describe('rule paths', () => {
-  describe('336-testing-php', () => {
+  describe('testing-php', () => {
     it.each([
       'tests/A.php',
       'invoicing/tests/Database/L.php',
       'src/FooTest.php',
     ])('loads for %s', (path) => {
-      expect(matchesRule('336-testing-php', path)).toBe(true)
+      expect(matchesRule('testing-php', path)).toBe(true)
     })
 
     it('does not load for a PHP file outside a tests folder', () => {
-      expect(matchesRule('336-testing-php', 'src/A.php')).toBe(false)
+      expect(matchesRule('testing-php', 'src/A.php')).toBe(false)
     })
   })
 
-  describe('330-testing-py', () => {
+  describe('testing-py', () => {
     it.each(['tests/conftest.py', 'billing/tests/factories/user.py'])(
       'loads for %s',
       (path) => {
-        expect(matchesRule('330-testing-py', path)).toBe(true)
+        expect(matchesRule('testing-py', path)).toBe(true)
       },
     )
 
     it('does not load for a Python file outside a tests folder', () => {
-      expect(matchesRule('330-testing-py', 'src/app.py')).toBe(false)
+      expect(matchesRule('testing-py', 'src/app.py')).toBe(false)
     })
   })
 })

@@ -10,19 +10,19 @@ let root: string
 let target: string
 
 const DETECT = [
-  '["200-react"]',
+  '["react"]',
   'deps = ["react"]',
   'files = []',
   '',
-  '["700-ci-workflow"]',
+  '["ci-workflow"]',
   'deps = []',
   'files = [".github/workflows"]',
   '',
-  '["340-pydantic"]',
+  '["pydantic"]',
   'deps = ["pydantic"]',
   'files = []',
   '',
-  '["100-typescript"]',
+  '["typescript"]',
   'deps = ["typescript"]',
   'files = []',
   '',
@@ -36,14 +36,14 @@ function write(base: string, rel: string, body: string): void {
 
 function seedToolkit(detect: string = DETECT): void {
   for (const rule of [
-    'framework/200-react',
-    'tooling/700-ci-workflow',
-    'lib/340-pydantic',
-    'lang/100-typescript',
+    'framework/react',
+    'tooling/ci-workflow',
+    'lib/pydantic',
+    'lang/typescript',
   ]) {
     write(root, `governance/rules/${rule}.md`, `# ${rule}\n`)
   }
-  write(root, 'governance/stacks/node.toml', 'rules = ["100-typescript"]\n')
+  write(root, 'governance/stacks/node.toml', 'rules = ["typescript"]\n')
   write(root, 'governance/detect.toml', detect)
 }
 
@@ -76,7 +76,7 @@ describe('detectRules', () => {
       ok: true,
       proposals: [
         {
-          rule: '200-react',
+          rule: 'react',
           evidence: [{ kind: 'dep', match: 'react', path: 'package.json' }],
         },
       ],
@@ -87,7 +87,7 @@ describe('detectRules', () => {
     seedToolkit()
     write(target, '.github/workflows/ci.yml', 'on: push\n')
 
-    expect(await proposedRules()).toEqual(['700-ci-workflow'])
+    expect(await proposedRules()).toEqual(['ci-workflow'])
   })
 
   it('should propose a rule from a pyproject.toml dependency', async () => {
@@ -98,19 +98,17 @@ describe('detectRules', () => {
       '[project]\nname = "svc"\ndependencies = ["Pydantic>=2.0"]\n',
     )
 
-    expect(await proposedRules()).toEqual(['340-pydantic'])
+    expect(await proposedRules()).toEqual(['pydantic'])
   })
 
   it('should match a literal evidence path git would ignore', async () => {
-    seedToolkit(
-      `${DETECT}["480-canvas"]\ndeps = []\nfiles = [".canon/canvas"]\n`,
-    )
-    write(root, 'governance/rules/ui/480-canvas.md', '# canvas\n')
+    seedToolkit(`${DETECT}["canvas"]\ndeps = []\nfiles = [".canon/canvas"]\n`)
+    write(root, 'governance/rules/ui/canvas.md', '# canvas\n')
     write(target, '.gitignore', '.canon/\n')
     write(target, '.canon/canvas/board.json', '{}\n')
     execFileSync('git', ['init', '-q', target], { env: gitEnv() })
 
-    expect(await proposedRules()).toEqual(['480-canvas'])
+    expect(await proposedRules()).toEqual(['canvas'])
   })
 
   it('should read a manifest in a workspace package at depth two', async () => {
@@ -133,7 +131,7 @@ describe('detectRules', () => {
       packageJson({ react: '^19', typescript: '^5' }),
     )
 
-    expect(await proposedRules('node')).toEqual(['200-react'])
+    expect(await proposedRules('node')).toEqual(['react'])
   })
 
   it('should refuse a stack the toolkit does not ship', async () => {
@@ -156,7 +154,7 @@ describe('detectRules', () => {
     seedToolkit(`${DETECT}["999-retired"]\ndeps = ["react"]\nfiles = []\n`)
     write(target, 'package.json', packageJson({ react: '^19' }))
 
-    expect(await proposedRules()).toEqual(['200-react'])
+    expect(await proposedRules()).toEqual(['react'])
   })
 })
 

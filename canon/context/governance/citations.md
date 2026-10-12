@@ -38,7 +38,7 @@ What it reads is bounded four ways, each a shape the corpus already writes:
 - A placeholder or glob segment is declined, since it describes a shape rather than naming a file. `canon/context/<domain>.md` and `app/**/route.ts` are the two forms.
 - A span carrying no file extension is declined as a folder or a module specifier. This costs any real folder path, which the stage cannot tell from `next/font` by looking at it.
 - A path written without backticks is not read, since matching one would report every sentence that names a file.
-- A glob that matches real files and still misses the work it was scoped at is not read. `lib/305-e2e-reliability.md` globs `**/e2e/**/*.ts` rather than `e2e/**/*.ts` so it reaches a suite kept under an app folder such as `web/e2e/`. Resolution is mechanical and reach is a judgment about where the work happens.
+- A glob that matches real files and still misses the work it was scoped at is not read. `lib/e2e-reliability.md` globs `**/e2e/**/*.ts` rather than `e2e/**/*.ts` so it reaches a suite kept under an app folder such as `web/e2e/`. Resolution is mechanical and reach is a judgment about where the work happens.
 
 #### Excused classes
 

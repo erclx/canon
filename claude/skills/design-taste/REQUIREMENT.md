@@ -27,7 +27,7 @@ A session handed either one unfiltered adopts a stack the project does not use, 
 - Enumerate the layers in settle order, so an instruction to name one has a catalog behind it
 - State that a round varies one layer, and that a complaint is worked at the lowest layer it reaches rather than the cheapest one to change
 - Carry grey-boxing as the operational form of the ordering rule, since removing the higher layers from view is what makes a lower one judgeable
-- Cite the correctness floor rather than restating it. `400-ui`, `410-a11y`, `420-forms` and `430-ux-completeness` already carry accessibility, keyboard, forms, states and rendered copy on the rendered paths, and a second copy here drifts with nothing comparing the two.
+- Cite the correctness floor rather than restating it. `copy`, `a11y`, `forms` and `ux-completeness` already carry accessibility, keyboard, forms, states and rendered copy on the rendered paths, and a second copy here drifts with nothing comparing the two.
 - Hold in the body what every design moment pays for, being the read, the layers, the ordering, grey-boxing and the locks, and defer everything a single moment needs.
 - State what has to stay constant across a whole surface, since coherence is a property of the whole and each of those is broken one section at a time.
 - Detect the mode before reading anything when a surface already exists, and name what cannot change silently, since a slug, a field name or an analytics event breaks something outside the surface.
@@ -66,10 +66,10 @@ A rule failing any of the four is recorded as considered and declined rather tha
 
 ## Out of scope
 
-- Accessibility, keyboard interaction, ARIA and alt text, which `410-a11y` owns on every rendered path
-- State coverage, empty and loading treatment, destructive confirmation and truncation, which `430-ux-completeness` owns
-- Validation timing, error placement and save blocking, which `420-forms` owns
-- Rendered copy casing, button labels and error wording, which `400-ui` owns
+- Accessibility, keyboard interaction, ARIA and alt text, which `a11y` owns on every rendered path
+- State coverage, empty and loading treatment, destructive confirmation and truncation, which `ux-completeness` owns
+- Validation timing, error placement and save blocking, which `forms` owns
+- Rendered copy casing, button labels and error wording, which `copy` owns
 - The candidate loop, the arm set, the render and the pick, which `draft-and-pick` owns and which this skill is loaded alongside rather than inside
 - The shape of the project's design document, its sections and its token tables, which `claude/skills/canvas-board/references/design.md` governs
 - Prose on the surface being designed, which `write-human` and `markdown.md` govern between them

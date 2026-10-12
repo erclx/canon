@@ -63,7 +63,7 @@ When modifying a skill:
 
 When modifying either CLAUDE.md:
 
-- The root file and its seed are paired by `internal/rules/claude/596-claude-md.md`, which globs both and fires on an edit to either without this skill being loaded. It holds the mirroring split alone. The routing criterion is the tier test in `canon/context/context-model/overview.md`, which no shipped rule carries to a target.
+- The root file and its seed are paired by `internal/rules/claude/seed-mirror.md`, which globs both and fires on an edit to either without this skill being loaded. It holds the mirroring split alone. The routing criterion is the tier test in `canon/context/context-model/overview.md`, which no shipped rule carries to a target.
 - The seed's "Context" section defines the three-tier context model (always-loaded / path-scoped lazy / on-demand lookup at `canon/context/`). Keep the section coherent with the same model in `canon/context/context-model/overview.md`.
 
 ## Reference

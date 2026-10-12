@@ -111,10 +111,10 @@ export default scenario({
     )
     ctx.mkdir('regen/.claude/rules/canon/claude')
     ctx.run('cp', [
-      join(rulesDir, 'claude', '566-output.md'),
-      'regen/.claude/rules/canon/claude/566-output.md',
+      join(rulesDir, 'claude', 'output.md'),
+      'regen/.claude/rules/canon/claude/output.md',
     ])
-    ctx.append('regen/.claude/rules/canon/claude/566-output.md', '# stale\n')
+    ctx.append('regen/.claude/rules/canon/claude/output.md', '# stale\n')
 
     ctx.git('add', '.')
     ctx.commit('chore(sandbox): scaffold gov test directories')
@@ -144,18 +144,8 @@ export default scenario({
   },
   arms: {
     install: (ctx) => {
-      ctx.log.step(
-        'Running: canon gov install node --add 210-astro,200-react install/',
-      )
-      verb(
-        ctx,
-        'gov',
-        'install',
-        'node',
-        '--add',
-        '210-astro,200-react',
-        'install/',
-      )
+      ctx.log.step('Running: canon gov install node --add astro,react install/')
+      verb(ctx, 'gov', 'install', 'node', '--add', 'astro,react', 'install/')
     },
     add: (ctx) => {
       ctx.log.step('Running: canon gov install --add tasks,plan add/')
@@ -198,7 +188,7 @@ export default scenario({
           .join(''),
       )
       ctx.log.info(
-        '599-sandbox-local.md present, 999-orphan.md gone, 566-output.md restored',
+        '599-sandbox-local.md present, 999-orphan.md gone, output.md restored',
       )
     },
     'test-order': (ctx) => {

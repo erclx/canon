@@ -2,7 +2,7 @@
 
 Every string in `web/src/content/copy.ts` traces to `README.md`, so the page and the readme cannot drift into saying different things. `readmeCitations` in `src/gate/measures.ts` enforces it, which makes this the one page convention that fails the build rather than failing silently.
 
-`internal/rules/claude/593-landing-page.md` states the convention. This covers working with it.
+`internal/rules/claude/landing-page.md` states the convention. This covers working with it.
 
 ## The two forms
 

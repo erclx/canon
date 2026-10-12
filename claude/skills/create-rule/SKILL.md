@@ -1,6 +1,6 @@
 ---
 name: create-rule
-description: Scaffolds a project-specific governance rule into `.claude/rules/project/<subdir>/<n>-<slug>.md` with correct frontmatter and a non-colliding number. Use when asked to "add a rule", "create a governance rule", "write a project rule", or when a project needs a coding rule the toolkit does not ship. Do NOT use to edit toolkit source rules under `governance/rules/`.
+description: Scaffolds a project-specific governance rule into `.claude/rules/project/<subdir>/<slug>.md` with correct frontmatter and a slug no other rule in that subdir takes. Use when asked to "add a rule", "create a governance rule", "write a project rule", or when a project needs a coding rule the toolkit does not ship. Do NOT use to edit toolkit source rules under `governance/rules/`.
 metadata:
   family: generate
 ---
@@ -35,19 +35,19 @@ Pick the subdir from the topic. It sits under `.claude/rules/project/` and names
 - `tooling/`: dev setup, such as CI workflows, dependencies, and config.
 - `writing/`: prose and document shape.
 
-## Step 3: pick a free number
+## Step 3: pick a free slug
 
-A project-authored rule numbers in `900-999`, the band reserved for one. `000-899` belongs to the toolkit, so a number free in the target today is one a later release can ship into.
+A rule's filename is its slug alone, a one-to-three-word kebab topic with no number in front. A slug the toolkit ships is no collision, since `canon/` and `project/` install side by side and a sync never reads the second.
 
-- Scan every `.claude/rules/project/<subdir>/` in the target for used prefixes, not only the subdir this rule lands in. The band runs as one sequence across all of them.
-- Take the lowest unused number at or above `900`.
-- Stop and say so if the band is full, rather than reaching below `900`.
+- Take a slug no file in the chosen `.claude/rules/project/<subdir>/` already uses.
+- Never take a slug equal to a subdir name from Step 2, since a stack entry naming that word reads it as the folder.
+- Stop and say so when the topic's natural slug is taken, and propose a narrower one rather than overwriting the file.
 
 ## Step 4: write the rule
 
 Read `${CLAUDE_SKILL_DIR}/references/rule.md` for frontmatter, body shape, and voice before writing the body. Do not work the shape from memory.
 
-Write `.claude/rules/project/<subdir>/<n>-<slug>.md` where `<slug>` is a 1-to-3-word kebab topic. Preview the resolved path, subdir, number, and frontmatter, then write immediately. The tool permission dialog is the confirmation gate.
+Write `.claude/rules/project/<subdir>/<slug>.md`. Preview the resolved path, subdir, slug, and frontmatter, then write immediately. The tool permission dialog is the confirmation gate.
 
 Frontmatter carries the Claude shape. Path-scoped rules emit one `paths:` entry per glob. Always-on rules omit `paths:` entirely.
 
@@ -70,4 +70,4 @@ Title casing is sentence case, with proper nouns keeping their own casing (`# Ty
 
 ## After writing
 
-Emit the full path on its own line: `.claude/rules/project/<subdir>/<n>-<slug>.md`. Remind the user that Claude Code loads path-scoped rules when it reads or writes a matching file, and always-on rules every session.
+Emit the full path on its own line: `.claude/rules/project/<subdir>/<slug>.md`. Remind the user that Claude Code loads path-scoped rules when it reads or writes a matching file, and always-on rules every session.

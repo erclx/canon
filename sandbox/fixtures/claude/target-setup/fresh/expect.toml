@@ -23,8 +23,8 @@ max_turns = 30
 # expectation the declaration exists to catch.
 paths = [
   "CLAUDE.md",
-  ".claude/rules/canon/claude/566-output.md",
-  ".claude/rules/canon/canon/604-scratch.md",
+  ".claude/rules/canon/claude/output.md",
+  ".claude/rules/canon/canon/scratch.md",
   ".claude/wiki/index.md",
   "commitlint.config.js",
 ]
@@ -35,7 +35,7 @@ paths = [
 # lands the other two. These are claims about what the resolve step decided, not
 # assertions inverted over output the snapshot cannot reach.
 absent = [
-  ".claude/rules/canon/framework/200-react.md",
+  ".claude/rules/canon/framework/react.md",
   "vite.config.ts",
   "eslint.config.js",
   ".claude/standards",

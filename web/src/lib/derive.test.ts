@@ -16,23 +16,21 @@ function rule(name: string, paths?: string[]) {
 describe('matchRules', () => {
   it('should split rules into matched, unmatched and always-loaded', () => {
     const rules = [
-      rule('100-typescript', ['**/*.ts']),
-      rule('210-astro', ['**/*.astro']),
+      rule('typescript', ['**/*.ts']),
+      rule('astro', ['**/*.astro']),
       rule('000-constitution'),
     ]
 
     const result = matchRules(rules, 'src/design/tokens.ts')
 
-    expect(result.matched.map((match) => match.name)).toEqual([
-      '100-typescript',
-    ])
+    expect(result.matched.map((match) => match.name)).toEqual(['typescript'])
     expect(result.unmatched).toBe(1)
     expect(result.always).toBe(1)
     expect(result.total).toBe(3)
   })
 
   it('should name the glob that matched rather than the first one listed', () => {
-    const rules = [rule('300-testing-ts', ['**/*.test.ts', 'src/**/*.ts'])]
+    const rules = [rule('testing-ts', ['**/*.test.ts', 'src/**/*.ts'])]
 
     const [match] = matchRules(rules, 'src/design/tokens.ts').matched
 

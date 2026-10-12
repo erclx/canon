@@ -33,7 +33,7 @@ The `EnterWorktree` and `ExitWorktree` tool descriptions require an instruction 
 
 ## Shared scratch sits outside the worktree
 
-The gitignored `.canon/` scratch folders live at the main worktree root, and the isolation checks refuse an editing-tool write there while reads resolve normally. An agent that accepts the redirect the refusal offers reports success and leaves the file where no later session looks. The rule that carries the fix is `governance/rules/canon/605-worktrees.md`, which a target reads back at `.claude/rules/canon/canon/605-worktrees.md` once it has run `canon gov sync`.
+The gitignored `.canon/` scratch folders live at the main worktree root, and the isolation checks refuse an editing-tool write there while reads resolve normally. An agent that accepts the redirect the refusal offers reports success and leaves the file where no later session looks. The rule that carries the fix is `governance/rules/canon/worktrees.md`, which a target reads back at `.claude/rules/canon/canon/worktrees.md` once it has run `canon gov sync`.
 
 ## Tooling caveats
 
