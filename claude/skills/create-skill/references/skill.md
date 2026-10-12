@@ -162,7 +162,7 @@ allowed-tools: <tools required>
 
 - Use `scripts/` for operations that must be deterministic or repetitive
 - Ask whether a CLI verb the project already has does the job before writing a script. A verb is already installed and tested, and a script beside it is a second copy that drifts
-- Write a script in TypeScript and run it as `bun ${CLAUDE_SKILL_DIR}/scripts/<name>.ts`. Keep bash for a few lines that start one command
+- Write a script in TypeScript and run it as `bun ${CLAUDE_SKILL_DIR}/scripts/<name>.ts`. Keep bash for a few lines that start one command. The rule governs a new script, so bash kept by decision is no breach and is not ported unasked, such as `review-ui`'s `scripts/pw.sh` as glue and the shell scripts the web tooling stacks ship, whose port was deferred
 - Import no package. A plugin loads from a cache that carries no `node_modules`, so only `node:` built-ins and the CLIs the skill already requires resolve
 - Use XML tags in script output for reliable parsing: `<SECTION>content</SECTION>`
 
