@@ -535,12 +535,7 @@ describe('pruneFramesWithLegacy', () => {
     current.seed(['pr-1/a/box-1.png', 'pr-2/a/box-1.png'])
     legacy.seed(['pr-1/b/box-1.png'])
 
-    const result = await pruneFramesWithLegacy(
-      current.api,
-      legacy.api,
-      30,
-      NOW,
-    )
+    const result = await pruneFramesWithLegacy(current.api, legacy.api, 30, NOW)
 
     expect({
       result,
@@ -564,12 +559,7 @@ describe('pruneFramesWithLegacy', () => {
     current.seed(['pr-1/a/box-1.png'])
     legacy.seed(['pr-1/b/box-1.png', 'pr-9/b/box-1.png'])
 
-    const result = await pruneFramesWithLegacy(
-      current.api,
-      legacy.api,
-      30,
-      NOW,
-    )
+    const result = await pruneFramesWithLegacy(current.api, legacy.api, 30, NOW)
 
     expect(result).toEqual(
       expect.objectContaining({ removed: [1], kept: [9], unread: [9] }),
@@ -581,12 +571,7 @@ describe('pruneFramesWithLegacy', () => {
     const legacy = fakeApi()
     current.seed(['pr-2/a/box-1.png'])
 
-    const result = await pruneFramesWithLegacy(
-      current.api,
-      legacy.api,
-      30,
-      NOW,
-    )
+    const result = await pruneFramesWithLegacy(current.api, legacy.api, 30, NOW)
 
     expect(result).toEqual({
       kind: 'dropped',
