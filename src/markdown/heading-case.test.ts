@@ -5,13 +5,17 @@ describe('findHeadingCase', () => {
   it('should report a heading with a capitalized word after the first', () => {
     const found = findHeadingCase('## Key Changes\n')
 
-    expect(found).toEqual([{ line: 1, text: 'Key Changes', words: ['Changes'] }])
+    expect(found).toEqual([
+      { line: 1, text: 'Key Changes', words: ['Changes'] },
+    ])
   })
 
   it('should report a frontmatter title the same way', () => {
     const found = findHeadingCase('---\ntitle: Key Changes\n---\n\nBody.\n')
 
-    expect(found).toEqual([{ line: 2, text: 'Key Changes', words: ['Changes'] }])
+    expect(found).toEqual([
+      { line: 2, text: 'Key Changes', words: ['Changes'] },
+    ])
   })
 
   it('should not report a sentence case heading', () => {

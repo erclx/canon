@@ -331,7 +331,7 @@ function reportBans(
   logWarn(`${plural(total, 'hit')} across ${plural(carrying.length, 'file')}`)
   logWarn('This fails the run. Every other check below reports.')
   logInfo(
-    'Rewrite the sentence rather than swapping the token for a near-synonym, or a colon or a comma in the dash\'s place. That is the same sentence.',
+    "Rewrite the sentence rather than swapping the token for a near-synonym, or a colon or a comma in the dash's place. That is the same sentence.",
   )
   logInfo(
     'A code span clears the report and is the answer only where the token is genuinely an identifier under discussion, which is what markdown.md reserves the span for.',
@@ -423,9 +423,7 @@ function reportColons(reports: readonly FileReport[]): void {
   }
 
   const total = carrying.reduce((sum, report) => sum + report.colons.length, 0)
-  logWarn(
-    `${plural(total, 'colon')} across ${plural(carrying.length, 'file')}`,
-  )
+  logWarn(`${plural(total, 'colon')} across ${plural(carrying.length, 'file')}`)
   logInfo(
     'Split the sentence or rewrite it. A colon belongs after a label or at the end of a line introducing a list.',
   )

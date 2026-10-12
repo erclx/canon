@@ -12,7 +12,7 @@ const HEADING = /^#{1,6}\s+(.*?)(?:\s+#+)?\s*$/
 const FRONTMATTER = /^---\n([\s\S]*?)\n---\n?/
 const TITLE = /^title:\s*(["']?)(.*?)\1\s*$/
 const CODE_SPAN = /(`+)(?:(?!\1).)*\1/g
-const CAPITALIZED =/^[A-Z][a-z]/
+const CAPITALIZED = /^[A-Z][a-z]/
 
 /**
  * The words of `text` that break sentence case.
