@@ -31,7 +31,7 @@ The template outranks the prose where they disagree. An author copies the block,
 
 A generated catalog is out of scope despite reading as a document with no template. `canon indexes regen` rewrites it, so a template added there is deleted by the next `bun run check`.
 
-`claude/skills/canvas-board/references/design.md` is the sharpest case for the rule: the token tables carry fixed headers the renderer reads, and a reference that names the shape without spelling those headers verbatim sends an author into `src/design/parse.ts` and `src/design/render.ts` to recover them. The template rule asks any reference for the headers and labels a tool parses, verbatim, which is the general form of what `design.md` would otherwise leave missing.
+`claude/skills/canvas-board/references/design.md` is the sharpest case for the rule: a values record's tables and an intent record's role tables carry fixed headers the parser reads, and a reference that names the shape without spelling those headers verbatim sends an author into `src/design/parse.ts` and `src/design/render.ts` to recover them. The template rule asks any reference for the headers and labels a tool parses, verbatim, which is the general form of what `design.md` would otherwise leave missing.
 
 A template and a seed hold different things for the same document, which is what keeps them from drifting. `design.md` carries headers and placeholder rows, and `tooling/claude/seeds/canon/DESIGN.md` carries the starting roles a scaffolded project receives. Only the headers are load-bearing, since `src/design/render.ts` reads those by exact key and slugs every row name into the variable it emits, so a project is free to rename, add, or drop a role.
 

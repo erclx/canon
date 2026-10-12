@@ -23,7 +23,7 @@ Read these in parallel, skipping any that do not exist:
 - `canon/REQUIREMENTS.md`: the `## Personality` paragraph, when `canon/DESIGN.md` carries none
 - `CLAUDE.md`: the project's stated voice, when neither file above carries a personality signal
 
-No signal from any of these is not a stop. Draft against a neutral default, and mark each guessed color and type value with a `/* ? verify */` comment on its property in the stylesheet this run writes, since the design document carries no value to tag.
+No signal from any of these is not a stop. Draft against a neutral default, and mark each guessed color and type value with a `/* ? verify */` comment beside its declaration in the `.mark` and `.card` markup this run writes, since the design document carries no value to tag.
 
 ## Step 2: detect the icon size sequence
 

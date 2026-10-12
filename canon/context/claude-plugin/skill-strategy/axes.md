@@ -19,7 +19,7 @@ The rule and the skill overlap in subject and differ in reach, which is what kee
 
 Folding the measurement into the audit was the obvious alternative and its own guard rules it out. That skill stops when it finds no interface source to read, which is a condition a running interface does not satisfy, so the host would refuse the request before reaching it. Each body therefore declines the other by name, since a boundary stated on one side alone is never checked against the skill on the other.
 
-Contrast stays with the static reader against the pull of the runtime one. Two color values compute it and the audit already reads the token table holding them, so moving it buys a browser start for an answer arithmetic gives. What that costs is a contrast failure from a color computed at runtime, which is invisible to a token-table reader and is accepted rather than overlooked.
+Contrast stays with the static reader against the pull of the runtime one. Two color values compute it and the audit already reads the stylesheet's custom properties holding them, so moving it buys a browser start for an answer arithmetic gives. What that costs is a contrast failure from a color computed at runtime, which is invisible to a reader of the declared properties and is accepted rather than overlooked.
 
 The runner is detected rather than prescribed, since the harness differs per project. The surface owns the metrics and the thresholds, which are portable, and reads the project's choice of runner, which is not. Detecting nothing therefore reports what the measurement needs and stops, the same absent-key rule a `canon sync --check` reader follows, since a stop there says the project has not chosen a runner rather than saying the skill is broken.
 
