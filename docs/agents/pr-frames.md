@@ -101,8 +101,9 @@ state could not be read, listing that last kind under `unread`.
 
 Frames lived on `canon-frames` before the rename to `canon/frames`. An add
 never writes it. `--drop` and `--prune` also run against it after the
-current branch, remove only, and delete it once empty, so a target holding
-it drains it with one `--prune`. The record carries `legacy: true` when that
+current branch, remove only, and delete it once empty. `--prune` drains it
+as its pull requests expire, and `--drop` clears one pull request at once.
+The record carries `legacy: true` when that
 pass changed the ref, and its `removed` list folds both branches in, naming
 a pull request once. A missing or unreadable legacy ref never fails a run
 the current branch finished.
