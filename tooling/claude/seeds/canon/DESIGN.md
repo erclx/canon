@@ -1,6 +1,6 @@
 # Design
 
-Authoring guidance: the design standard. Values live in `<your stylesheet>`, such as `src/styles/tokens.css` or a Tailwind `@theme` block. A project with none writes them under `.claude/design/project/` after `canon design install`.
+Authoring guidance: the design standard. Values live in `<your stylesheet>`, such as `src/styles/tokens.css` or a Tailwind `@theme` block. A project with none writes them under `.claude/design/project/`, beside the installed base stylesheet.
 
 ## Overview
 
