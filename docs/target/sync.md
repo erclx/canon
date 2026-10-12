@@ -40,7 +40,9 @@ Take a clean section as reporting rather than as delivering. Nothing here instal
 
 Since `canon gov install` records the stack you gave it, the list is read by comparing that stack's current rules against what you hold right now, with no date involved at all. That is what lets it name a rule the toolkit shipped before you last synced: nothing here depends on when you installed. A target stamped before this recording shipped falls back to the older read below.
 
-The fallback filters to what your stack can receive, read off the rule folders you already carry plus the folders the base stack takes whole. A rule under `lang/` or `ui/` belongs to some stacks and not others, so an unfiltered list would name rules you can never install. A target with neither a recorded stack nor a governance anchor reports nothing at all, since there is no date to measure against either.
+The fallback filters to what your stack can receive, read off the rule folders you already carry plus the folders holding a base rule. A rule under `lang/` or `ui/` belongs to some stacks and not others, so an unfiltered list would name rules you can never install. A target with neither a recorded stack nor a governance anchor reports nothing at all, since there is no date to measure against either.
+
+A target recorded on a stack the toolkit retired, such as `react` or `astro`, reads as having no recorded stack and takes this fallback, so it keeps receiving updates to the rules it holds and is offered new rules only in the rule folders it already carries. Run `canon gov detect . --stack node --json` to see which rules its manifests propose beyond those.
 
 In the fallback, an empty section is not proof either way when the toolkit running the check is not a full git clone. The read needs history to reach your anchor, and an install from the registry ships none, so the section goes quiet rather than saying it could not measure. Run the check from a clone before reading a clean result as a complete one. The stack-based read above is untouched by this, since it consults no history.
 

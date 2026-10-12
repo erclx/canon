@@ -90,7 +90,7 @@ const SANDBOX_ROWS: CommandRow[] = [
 const EXAMPLES = [
   'canon sync ../my-app',
   'canon sandbox git:commit',
-  'canon gov install react',
+  'canon gov install node',
   'canon gov sync ../my-app',
   'canon gov restated --json',
   'canon markdown audit docs/',

@@ -854,12 +854,23 @@ describe('baseBands', () => {
     expect([...baseBands(TOOLKIT)].sort()).toEqual(['claude', 'core'])
   })
 
-  it('should drop an entry naming a rule rather than a folder', () => {
-    writeRule(join('core', '000-constitution.md'))
-    writeRule(join('lang', '100-typescript.md'))
-    writeStack('extends = ""\nrules = ["core", "100-typescript"]\n')
+  it('should name the folder of each rule a slug-only base names', () => {
+    writeRule(join('canon', '602-tasks.md'))
+    writeRule(join('canon', '604-scratch.md'))
+    writeRule(join('claude', '566-output.md'))
+    writeRule(join('claude', '520-skills.md'))
+    writeStack(
+      'extends = ""\nrules = ["602-tasks", "604-scratch", "566-output"]\n',
+    )
 
-    expect([...baseBands(TOOLKIT)]).toEqual(['core'])
+    expect([...baseBands(TOOLKIT)].sort()).toEqual(['canon', 'claude'])
+  })
+
+  it('should name no band for a rule sitting at the rules root', () => {
+    writeRule('000-loose.md')
+    writeStack('extends = ""\nrules = ["000-loose"]\n')
+
+    expect([...baseBands(TOOLKIT)]).toEqual([])
   })
 
   it('should read nothing from a toolkit with no base stack', () => {

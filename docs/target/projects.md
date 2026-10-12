@@ -82,23 +82,23 @@ Nothing watches a figure once it is drawn. Run `canon:draft-figure` again when t
 
 ### Stack decision
 
-The default path is `base`. `canon init` on `base` installs base tooling configs, Claude seeds, and the `canon`, `claude`, `tooling`, and `writing` governance rule groups, and scaffolds an empty `.claude/wiki/`. Most projects need nothing more.
+The default path is `base`. `canon init` on `base` installs base tooling configs, Claude seeds, and the ten `base` governance rules, and scaffolds an empty `.claude/wiki/`. Most projects need nothing more.
 
-Escalate only for real web apps. The `target-setup` skill reads `package.json` and the framework configs, then picks the matching tooling stack (`canon tooling list --json` names the current set) and the matching governance stack (`react`, `nextjs`, `astro`, `node`). A Next.js app lands on `nextjs`, which extends `react` with the App Router rule a Vite React app does not get.
+Escalate for a project writing code. The `target-setup` skill reads `package.json` and the framework configs, then picks the matching tooling stack (`canon tooling list --json` names the current set) and the governance stack for the root's language (`node`, `python`, `go`, `php`). Framework rules arrive as extras `canon gov detect` proposes from the manifest, so a Next.js app lands on `node` with the App Router rule proposed, and a Vite React app gets no such proposal.
 
 In a monorepo the skill reads each folder holding a `package.json`, `pyproject.toml`, `go.mod`, `composer.json`, or `Cargo.toml` to depth two, skipping what git ignores. Each of those folders gets its own tooling stack and a `canon tooling sync <stack> <folder> --skip base` in the preview. Governance still installs once at the root, since a rule's `paths:` globs reach every subfolder, so a subfolder's language rules join the root install through `--add`.
 
-`node-server` is named rather than detected. It carries the server-side security and persistence rules for a project writing request handlers or a persistence layer in TypeScript, and the detect step matches a runtime or a framework against stack names, so the stack never resolves on its own. `canon gov detect` proposes its two rules from a server framework or database client in the manifest, which you confirm in the preview. Pass the stack deliberately with `canon init --stack node-server` or `canon gov install node-server <target>`.
+The server-side security and persistence rules belong to no stack. `canon gov detect` proposes both from a server framework or database client in the manifest, which you confirm in the preview, or add them by hand with `--add 360-security-server,370-database`.
 
 Markdown-heavy projects, CLI tools, docs sites, research notebooks, and scripting repos stay on `base`. Escalation is a ceiling move, not a default.
 
-A project the toolkit ships no stack for lands on `base` the same way, and the skill marks that resolution as a fallback in its preview rather than reporting it as a match. Configs, seeds, and gitignore entries land either way, and the JavaScript development dependencies, scripts, and hook activation land only where a `package.json` exists to carry them. A project outside that ecosystem declines at the preview and takes `canon:target-setup gov` for the governance layer alone, which is language-neutral. Go and PHP ship tooling stacks but no governance stack, so a project in either takes the `go` or `php` tooling stack, lands on `base` for governance, and picks up its language and testing rules through `--add`, for example `canon gov install base --add 130-go,335-testing-go .`
+A project the toolkit ships no stack for lands on `base` the same way, and the skill marks that resolution as a fallback in its preview rather than reporting it as a match. Configs, seeds, and gitignore entries land either way, and the JavaScript development dependencies, scripts, and hook activation land only where a `package.json` exists to carry them. A project outside that ecosystem declines at the preview and takes `canon:target-setup gov` for the governance layer alone, which is language-neutral. Go and PHP ship a governance stack beside their tooling stack, so a project in either takes `go` or `php` for both.
 
 Run `canon tooling list --json` and `canon gov list --json` to see the current catalogs. Never hardcode stack names.
 
 ### Core domains and skips
 
-`canon init` installs base tooling, Claude workflow, and governance, and scaffolds `.claude/wiki/`. Governance defaults to the `base` stack, so a bare init carries the rules that route a project. Pass `--stack <name>` to install a framework stack instead.
+`canon init` installs base tooling, Claude workflow, and governance, and scaffolds `.claude/wiki/`. Governance defaults to the `base` stack, so a bare init carries the rules that route a project. Pass `--stack <name>` to install a language stack instead.
 
 No standard is written into the project. Each governance rule's authority line names `canon standards <name>`, which answers from the corpus inside the CLI's own package, and every toolkit skill names the copy in its own plugin root. `canon markdown audit` needs no standard at all, its ban set and checkpoints shipping with the package as data.
 

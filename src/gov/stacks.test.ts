@@ -116,17 +116,63 @@ describe('resolveRules', () => {
 })
 
 describe('resolveRules on the shipped stacks', () => {
-  it('should leave the Next.js rule out of react', () => {
-    expect(resolveRules(PROJECT_ROOT, 'react')).toEqual({
+  const BASE = [
+    '566-output',
+    '602-tasks',
+    '604-scratch',
+    '605-worktrees',
+    '606-git',
+    '611-indexes',
+    'context',
+    'tasks',
+    'plan',
+    'markdown',
+  ]
+
+  it('should give base its ten rules and no band whole', () => {
+    expect(resolveRules(PROJECT_ROOT, 'base')).toEqual({
       ok: true,
-      rules: expect.not.arrayContaining(['230-nextjs']),
+      rules: BASE,
     })
   })
 
-  it('should give nextjs the Next.js rule on top of the react rules', () => {
-    expect(resolveRules(PROJECT_ROOT, 'nextjs')).toEqual({
+  it('should give node the code rules and its language and testing rule alone', () => {
+    expect(resolveRules(PROJECT_ROOT, 'node')).toEqual({
       ok: true,
-      rules: expect.arrayContaining(['200-react', '230-nextjs']),
+      rules: [
+        ...BASE,
+        '000-code',
+        '010-testing',
+        '100-typescript',
+        '300-testing-ts',
+      ],
+    })
+  })
+
+  it('should give python the code rules and its language and testing rule alone', () => {
+    expect(resolveRules(PROJECT_ROOT, 'python')).toEqual({
+      ok: true,
+      rules: [
+        ...BASE,
+        '000-code',
+        '010-testing',
+        '110-python',
+        '330-testing-py',
+      ],
+    })
+  })
+
+  it('should give go the code rules and its language and testing rule alone', () => {
+    expect(resolveRules(PROJECT_ROOT, 'go')).toEqual({
+      ok: true,
+      rules: [...BASE, '000-code', '010-testing', '130-go', '335-testing-go'],
+    })
+  })
+
+  it('should give php the code rules and its language and testing rule alone', () => {
+    expect(resolveRules(PROJECT_ROOT, 'php')).toEqual({
+      ok: true,
+      rules: [...BASE, '000-code', '010-testing', '140-php', '336-testing-php'],
     })
   })
 })

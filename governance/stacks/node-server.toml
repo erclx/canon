@@ -1,2 +1,0 @@
-extends = "node"
-rules = ["360-security-server", "370-database"]

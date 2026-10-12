@@ -1,0 +1,2 @@
+extends = "base"
+rules = ["code", "140-php", "336-testing-php"]

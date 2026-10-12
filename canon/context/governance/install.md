@@ -70,15 +70,15 @@ Bash cannot express the folder-entry match. The regex bash would apply to a rule
 Set up a new project:
 
 ```bash
-canon gov install react ../my-app
-# resolves react → node → base, copies each rule to .claude/rules/canon/<subdir>/<rule>.md
+canon gov install node ../my-app
+# resolves node → base, copies each rule to .claude/rules/canon/<subdir>/<rule>.md
 ```
 
 Layer extra rules on a stack without defining a new one:
 
 ```bash
-canon gov install astro --add 200-react,260-shadcn,300-testing-ts ../my-app
-# installs astro stack rules plus the three extras, deduped
+canon gov install node --add 210-astro,200-react,260-shadcn ../my-app
+# installs node stack rules plus the three extras, deduped
 ```
 
 Add rules to a target with no stack, after asking what its evidence proposes:
