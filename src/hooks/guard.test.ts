@@ -1129,24 +1129,24 @@ describe('seeds standards-audit.sh runner', () => {
   )
 
   it.concurrent(
-    'should not warn on an unrelated colon in an edit when a line carries an emoji',
+    'should warn on a colon an edit introduced after an emoji in its line',
     async ({ expect }) => {
       // The record names the word before each colon, so a line with an emoji
-      // is matched by that word rather than by slicing its text at a UTF-16
-      // column, which lands one character off and yields an empty word.
+      // is matched by that word. Slicing its text at a UTF-16 column lands one
+      // character off in jq and keys the match on `now::`, which drops it.
       const path = [join(fixture, 'bin-advisory'), hookPath].join(delimiter)
       const edit = JSON.stringify({
         tool_input: {
           file_path: join(fixture, 'project/doc.md'),
-          old_string: 'one',
-          new_string: 'a note: unrelated',
+          old_string: 'now, it works',
+          new_string: 'now: it works',
         },
         tool_name: 'Edit',
       })
 
       const result = await run(hook, edit, path)
 
-      expect(result.stdout).not.toContain('Ship it')
+      expect(result.stdout).toContain('Ship it')
       expect(result.code).toBe(0)
     },
   )
