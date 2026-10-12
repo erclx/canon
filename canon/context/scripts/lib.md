@@ -7,7 +7,9 @@ description: The shared bash frame library, the functions it exports, and the go
 
 `scripts/lib/` holds the functions domain scripts source and never execute. It holds `ui.sh` alone, and the surfaces below are what a session reads before adding a helper that already exists.
 
-## `ui.sh`
+## Layout
+
+### `ui.sh`
 
 Source this in any script that needs terminal output. It provides the framed log lines and the color palette, and holds no picker or prompt, which live in `src/cli/ui.ts`.
 

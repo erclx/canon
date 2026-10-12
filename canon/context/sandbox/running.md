@@ -5,18 +5,9 @@ description: Prerequisites, the command surface, and the toolkit-only refusal an
 
 # Running
 
-## Decisions
+## Layout
 
-- Every sandbox verb is toolkit-only and refuses under an installed `canon`, reporting `sandbox is toolkit-only and is absent from an installed canon`. Run this checkout's own entry point instead, as `bun src/cli.ts sandbox <verb>`. A linked worktree meets the refusal on every sandbox read, since the `canon` on the path resolves to the published binary rather than to the branch under it.
-- When a scenario argument is passed, `canon sandbox` sets `SANDBOX_SCENARIO` and `CANON_NON_INTERACTIVE=1` which routes a multi-arm scenario to the named arm and skips the picker.
-- The `internal-sandbox-check` skill maps changed plugin skills and changed `scripts/` files on a feature branch to their matching scenarios, so an e2e gap on a script edit surfaces the way one on a skill edit does.
-
-## Gotchas
-
-- A session that reads the toolkit-only refusal at face value concludes the verb no longer exists rather than reaching for the local CLI. The refusal names its cause so it does not read as a broken tree.
-- Org membership is a real requirement for the anchor scenarios. HTTPS fixes transport rather than authorization, so a contributor outside the org cannot run them.
-
-## Prerequisites
+### Prerequisites
 
 The anchor scenarios push to a real GitHub remote. They need an authenticated `gh` and membership in the org that owns `canon-sandbox`, which is private. Everything else runs offline against an empty sandbox.
 
@@ -28,7 +19,7 @@ Provisioning is offline, since the starting tree comes from a fixture, so the fi
 
 A scenario that reads git history also needs a checkout `canon` first on `PATH`. The reverse walk reads git history and the published install carries none, so provisioning stops naming the missing history. A shim that execs `bun <checkout>/src/cli.ts` serves, and the headless run calls the same `canon`, so a shim that satisfies only the provisioning guard would fail the run.
 
-## Commands
+### Commands
 
 ```bash
 canon sandbox                        # interactive category + command picker
@@ -41,3 +32,14 @@ canon sandbox equivalence [target]   # diff every arm's provisioned tree against
 ```
 
 `docs/agents/sandbox.md` carries the flags and JSON shapes. `canon/context/sandbox/headless.md` covers driving a skill through `canon sandbox run`.
+
+## Decisions
+
+- Every sandbox verb is toolkit-only and refuses under an installed `canon`, reporting `sandbox is toolkit-only and is absent from an installed canon`. Run this checkout's own entry point instead, as `bun src/cli.ts sandbox <verb>`. A linked worktree meets the refusal on every sandbox read, since the `canon` on the path resolves to the published binary rather than to the branch under it.
+- When a scenario argument is passed, `canon sandbox` sets `SANDBOX_SCENARIO` and `CANON_NON_INTERACTIVE=1` which routes a multi-arm scenario to the named arm and skips the picker.
+- The `internal-sandbox-check` skill maps changed plugin skills and changed `scripts/` files on a feature branch to their matching scenarios, so an e2e gap on a script edit surfaces the way one on a skill edit does.
+
+## Gotchas
+
+- A session that reads the toolkit-only refusal at face value concludes the verb no longer exists rather than reaching for the local CLI. The refusal names its cause so it does not read as a broken tree.
+- Org membership is a real requirement for the anchor scenarios. HTTPS fixes transport rather than authorization, so a contributor outside the org cannot run them.

@@ -17,7 +17,7 @@ The module's prose slots are lists of one-line rules, so the record carries valu
 
 The token preview's own chrome and a teach workspace stylesheet take custom properties through `@/design/css`. The hero and the terminal framing carry their own copies, so the record is the source for two surfaces and a description of two. A slide deck reads the project's own tokens through the canvas resolution rather than this module, so a deck takes the project's design rather than Canon's.
 
-The consolidated dark set is the palette the hero already draws, so no capture needed to move. It clears one of the two contrast failures too: the hero's rust reads 5.77 and 5.36 against the two dark grounds, where the slide theme's reads 4.36 and 3.99.
+The consolidated dark set is the palette the hero draws. The hero's rust reads 5.77 and 5.36 against the two dark grounds, where the slide theme's reads 4.36 and 3.99.
 
 ### The component layer lives in code
 
@@ -48,6 +48,9 @@ The light theme remaps the roles the record declares a `light-` counterpart for,
 - The record claims two families. Every role but `code` is Geist, embedded through `FONT_FACES`, and `code` plus any terminal frame is monospace, stated as a role. The landing page retires the `code` role and sets its code in Geist, which `canon/context/web/overview.md` records. `TEACH_CHROME` points `--teach-sans` and `--teach-mono` at `--type-body-family` and `--type-code-family` and keeps only the hand-drawn pair as its own.
 - `src/design/fonts.ts` exports `HAND_DRAWN_FONT_FACES`, Virgil then Excalifont, beside `FONT_FACES`, which holds the two Noto Sans Mono statics and the `Geist Variable` face declaring `font-weight: 100 900`, so `FontFace.weight` carries a range as well as a single weight. `TEACH_FONT_FACES` spreads the hand-drawn set in rather than holding its own Virgil copy.
 - The synced `base.css` carries no `@font-face`. A consumer reading an installed sheet embeds the vendored faces it names at injection, which the canvas does, so the base stays one copy of the tokens and the faces stay one copy in `fonts.ts`.
+
+#### Project faces and glyphs
+
 - A project's own faces sit in `.claude/design/project/fonts/` with plain `@font-face` rules in `project/fonts.css`, which `src/design/project-fonts.ts` reads and `canon design fonts add` writes. A project rule for a vendored family replaces the vendored face. Reading descriptors from the font's own tables was the alternative and cannot open WOFF2 without a Brotli parser.
 - The vendored Geist subset has no box-drawing, arrow, check, or diamond glyphs, which teach and terminal copy print. The stack names `DejaVu Sans` second, which carries all four ranges, and a larger subset would grow the base64 every embedding stylesheet ships. Revisit if a surface shows the fallback mismatching Geist in weight.
 - `src/design/base.css` has two writers that disagree past 80 columns. `canon design regen` writes each declaration flat and prettier wraps anything longer, so the `design` stage fails on the drift between them. Any value added to the module has to render inside that width, which is why the proportional stack for `page-display` stops at two names and a generic.
@@ -75,11 +78,11 @@ The light theme remaps the roles the record declares a `light-` counterpart for,
 
 The toolkit's one authored icon, `assets/brand/mark.svg`, is not a design token. `regen-hero.ts` reads it directly and fills a `{{MARK_SVG}}` placeholder beside `{{TOKENS}}`, landing in the hero's topbar `.mark` slot as inline markup. The `iconography` field in `src/design/tokens.ts` names it.
 
-The mark ships in five independently maintained copies rather than through one shared verb. `regen-hero.ts` derives its copy from the live SVG and accent on every run, and `scripts/core/regen-web-favicon.ts` regenerates `web/public/favicon.svg` from the live SVG. Teach pages and the canvas shell read the live SVG through `brandFavicon()` in `src/design/brand-favicon.ts`, teach at `canon teach nav` time and the canvas from its `/api/icon.svg` route, which is why `package.json` ships `assets/brand/mark.svg`. The reader sits apart from `src/design/favicon.ts`, which imports nothing so the card build can load it. `src/design/render.ts`'s hardcoded path data and the README pair `mark-accent.svg` and `mark-accent-light.svg` are static text nothing checks, so a change to the mark's shape leaves them behind. The canvas was the second surface asking for a shared icon, which lifted the helper.
+The mark ships in five independently maintained copies rather than through one shared verb. `regen-hero.ts` derives its copy from the live SVG and accent on every run, and `scripts/core/regen-web-favicon.ts` regenerates `web/public/favicon.svg` from the live SVG. Teach pages and the canvas shell read the live SVG through `brandFavicon()` in `src/design/brand-favicon.ts`, teach at `canon teach nav` time and the canvas from its `/api/icon.svg` route, which is why `package.json` ships `assets/brand/mark.svg`. The reader sits apart from `src/design/favicon.ts`, which imports nothing so the card build can load it. `src/design/render.ts`'s hardcoded path data and the README pair `mark-accent.svg` and `mark-accent-light.svg` are static text nothing checks, so a change to the mark's shape leaves them behind.
 
 The five copies carry different colors on purpose. `regen-hero.ts` uses the dark `accent` role, `#c76b5f`, matching the dark capture chrome. `src/design/render.ts` uses `light-accent`, `#ad4a4b`, since the preview renders on light chrome and a data URI has no CSS context. The README pair carries each on the page background GitHub renders it on. The favicon and teach pages take `#c42938` light and `#e54e40` dark from `FAVICON_COLORS`, a chroma raised for legibility at tab size, reading no page token. Unifying the five onto one color breaks the fit each was chosen for.
 
-## Hidden contracts
+### Hidden contracts
 
 - `src/design/tokens.ts` owns the values, and `components.ts` beside it owns the component layer built on them
 - `src/design/document.ts` renders the record, `css.ts` renders the stylesheet, and `regen.ts` writes both through `canon design regen`

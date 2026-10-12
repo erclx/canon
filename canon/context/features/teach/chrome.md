@@ -9,11 +9,13 @@ description: The teach page chrome, its regions and breadcrumb, sidebar, type sc
 
 The chrome is the masthead, breadcrumb, sidebar, footer nav, and reading bar `canon teach nav` splices into every teach page. `overview.md` carries the workspace, the splice, and the verbs. This entry carries the browser side: how the chrome is built and styled, and the scripts it runs.
 
-## Surface
+## Layout
+
+### Surface
 
 Every page shares one header and one course sidebar, built by `renderHeader` and `renderSidebar` in `src/teach/nav.ts` and styled by the chrome rules in `examples/teach/course.css`. The bar is `--teach-mast-h`, 3.5rem tall, and its row spans the window rather than the reading measure, so the collapse and theme controls sit at the same inset on every page. The foot nav shares the article's measure, and an anchor jump lands below the bar rather than behind it.
 
-### Regions
+#### Regions
 
 - Sidebar (`.sb`): the left column, holding the workspace switcher at its top, a meta line, the page list, and a foot line. Above 1100px it sits beside the pane and at 1100px and below it overlays the page
 - Masthead (`.mast`): sticky across the top of the pane, holding the collapse control and the breadcrumb on the left and the theme toggle on the right
@@ -21,7 +23,7 @@ Every page shares one header and one course sidebar, built by `renderHeader` and
 - Jump menu: a panel under whichever crumb caret opened it, overlapping the page content below it rather than pushing it down
 - Pane (`.pane`): right of the sidebar and under the masthead, holding the page's own `<main>`
 
-### Breadcrumb
+#### Breadcrumb
 
 The crumb grows with depth. The root has one segment, `Workspaces`. A contents page has two, with the workspace after it, and a lesson has three, ending in `Lesson N of M`. A reference page puts the page's title in the third place. Only that trailing segment drops its jump menu, and every other one, current page or not, still opens one.
 
@@ -29,21 +31,30 @@ A crumb and its caret form one chip. The label goes to the page, the caret opens
 
 The `☰` control left of the crumb collapses the sidebar. It is the panel's only trigger at any window width, and below 1100px it opens the panel over the lesson rather than beside it.
 
-### States and behavior
+#### States and behavior
 
 - sidebar-open: a lesson or reference page loads, and the sidebar sits beside the pane
 - sidebar-shut: the root or a contents page loads, and the pane takes the full width under the masthead
 - jump-menu-open: the visitor hovers or clicks a crumb caret, and the menu panel opens under its trigger. A row pairs a two-digit ordinal with the item's name, marked as the current page where it is, with a lesson count trailing in the workspace menu and nothing in the lesson menu
+
+##### Menus, theme, and headings
+
 - Opening one jump menu closes any other already open, the sidebar's workspace switcher included. A click outside every menu closes it, and Escape does too and returns focus to the trigger
 - A breadcrumb menu opens on hover as well as click, and a click on a panel hover already opened keeps it open. The sidebar's switcher stays click-only, since its panel opens over the lesson list the pointer is headed toward
 - The theme toggle flips light and dark and remembers the pick in the visitor's own browser, falling back to the system preference
 - The sidebar's workspace heading stops at two lines with an ellipsis and carries the whole title in its `title` attribute, so a long title stays inside the top band
 
-### Not on this surface
+#### Not on this surface
 
 - No search across workspaces or lessons, since the sidebar filter narrows one workspace's lesson list only
 - No account, sign-in, or sync control, since every page is a local file
 - No progress saved per visitor beyond the theme and the sidebar's width and open state
+
+### Related
+
+- `canon/context/features/teach/overview.md`: the workspace, the chrome splice, and the verbs
+- `canon/context/features/teach/pages.md`: what each page kind shows and does under this chrome
+- `canon/context/design/tokens.md`: the token values a workspace stylesheet is seeded from
 
 ## Decisions
 
@@ -62,6 +73,9 @@ The `☰` control left of the crumb collapses the sidebar. It is the panel's onl
 - The jump menu is one component in both mounts. The prototype drew the breadcrumb menu as a grid at `0.38rem` row padding and the sidebar switcher as a flex row at `0.34rem` with a 12px numeral. Both now take the breadcrumb recipe, so the switcher opens 4px taller than drawn and its numeral is a pixel smaller.
 - The current row's numeral takes the accent in both menus. The prototype muted it in the breadcrumb menu and kept the accent in the switcher, so one of its mounts had to give way, and the accent is what marks where you are.
 - A breadcrumb menu row fills with `--color-chrome` on hover. The prototype left that mount on `--color-surface` while moving every other hover in the chrome to the chrome ground, and the row rule is shared with the switcher, which it moved.
+
+### Spacing and markup
+
 - `.bar` keeps its own side padding, `1.5rem` wide and `1rem` on a phone, under the `0.9rem` the full-width `.mast` adds. The prototype's `.bar` computes that same padding, so the controls sit 38px in from the window edge on both.
 - `.track` and `.outline` are gone from the markup. The prototype kept both elements and hid them with `display: none`.
 - The trailing count column keeps `text-align: right`, where the prototype's flex switcher row read `start`. The column is sized to its content, so the value moves nothing.
@@ -73,9 +87,3 @@ The `☰` control left of the crumb collapses the sidebar. It is the panel's onl
 Each step carries one leading across reading text: 1.1 on `--t1`, 1.3 on `--t2`, 1.55 on `--t3` and `--t4`, and 1.6 on `--t5`. `h3` takes 1.55 where the prototype drew 1.4, so a step holds one value. Controls keep their own tuning, such as the option rows at 1.45 and the jump menu rows, since a one-line control is not reading text.
 
 Two literals stay on purpose. `code` sets `0.85em` and `pre code` sets `1em`, because inline code must scale with the text around it rather than sit at a fixed step. The chrome's `0.75rem` sizes and the figure caption's `1rem` are outside this mapping and remain literals. Spacing is untouched: `var(--space-*)` is still unused, and moving it changes what groups with what.
-
-## Related
-
-- `canon/context/features/teach/overview.md`: the workspace, the chrome splice, and the verbs
-- `canon/context/features/teach/pages.md`: what each page kind shows and does under this chrome
-- `canon/context/design/tokens.md`: the token values a workspace stylesheet is seeded from

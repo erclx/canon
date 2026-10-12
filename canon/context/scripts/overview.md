@@ -11,7 +11,10 @@ Owns every bash script in the repo: the domain entry points behind each `canon` 
 
 - No domain keeps a bash dispatcher under `scripts/`
 - `scripts/core/` owns repo maintenance: bootstrap, verify, regen
-- No domain keeps a verb folder under `scripts/`. `tooling` was the last to empty its own, once `canon tooling verify` moved to `src/tooling/verify-stack.ts`
+- No domain keeps a verb folder under `scripts/`. `canon tooling verify` lives in `src/tooling/verify-stack.ts`
+
+### Retained folders
+
 - `scripts/eval/` holds the frozen records of a retired authoring test, being a ledger, a pre-registration, and three results. It carries no runner and nothing dispatches to it
 - `scripts/lib/` owns shared functions, sourced and never executed directly. No bash function is under test
 - The scenario tree that `canon sandbox` provisions from sits at `sandbox/` in the project root, outside this folder, covered in `canon/context/sandbox/index.md`
@@ -21,6 +24,9 @@ Owns every bash script in the repo: the domain entry points behind each `canon` 
 - A migrated domain loses its dispatcher entirely, and `src/commands/<domain>.ts` routes every verb it owns.
 - A dispatcher holding domain logic migrates in one pull request per file rather than verb by verb, since splitting the migration of dispatchers that share the same tracking documents would collide there for no review benefit.
 - A dispatcher that grew domain logic migrates that logic out to `src/<domain>/` rather than into the command file. Seed collection, gitignore scanning, and a settings merge are the shape that forces it, since a command file would otherwise drag the spawn and prompt layer into every unit test.
+
+### Verdicts and ownership
+
 - The language end state is the stack decision in `canon/context/cli/overview.md`. The stays-bash verdicts below record why each file has not moved yet rather than that it never will, and an inventory pass sorts each one into delete, rebuild, or wrap.
 - The frontmatter-loop cost is not on its own enough to keep a verb in bash. `gov/list.sh` reads frontmatter in a loop yet is migrated, because a stack entry naming a rule folder has to expand somewhere, and expanding it in bash beside the TypeScript resolver would put one rule in two languages. A parse the CLI already owns outweighs a process per read.
 - A recorded verdict is only as wide as its own reasoning. The frontmatter-loop cost above did not apply to every list verb: `claude/seeds-list.sh` reads with a plain `read -r` loop and `tooling/list.sh` uses `awk`, and both are migrated regardless. Check a stated reason against each file before counting one as settled.

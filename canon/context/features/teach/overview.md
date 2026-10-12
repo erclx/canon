@@ -19,6 +19,13 @@ Two standards fix the artifact and one skill drives the pedagogy. `claude/skills
 - `chrome.md` beside this entry owns the chrome's build and style decisions and the page scripts
 - `pages.md` beside this entry owns what the root, contents, lesson, and reference pages show and do
 
+### Related
+
+- `claude/skills/teach-workspace/references/teach.md`: the workspace artifact
+- `claude/skills/teach-workspace/references/glossary.md`: the glossary every workspace carries
+- `claude/skills/teach-workspace/`: the pedagogy and the promotion handoff
+- `canon/context/design/tokens.md`: the token values a workspace stylesheet is seeded from
+
 ## Decisions
 
 **A workspace is named `<nn>-<topic>` rather than by a bare slug**, so a listing sorts by when each opened. It is the first record folder to take that shape, which was free because the surface was greenfield. `canon/context/claude-plugin/skill-references/surfaces.md` carries the decision and the groundwork and intake folders' shared sequence beside it.
@@ -54,21 +61,25 @@ Recording a source's rung as a field was rejected too, since a `canon teach reso
 - `canon teach nav` rewrites `assets/base.css` only where the workspace already holds one or holds no `course.css`. A legacy workspace carrying a hand-authored `course.css` and no `base.css` keeps rendering from its own sheet, so a change to `TEACH_CHROME` never reaches it until `canon teach stylesheet <topic>` seeds the base half.
 - No browser harness in this repository reaches a generated teach page. `web/playwright.config.ts` is the only browser config that is not a seed for a target, and nothing under `web/e2e/` names teach, so what a rendered lesson does has nowhere to be asserted above the unit layer. A change carrying collapse, resize, filter, focus, or overlay work therefore ships it named as untested rather than covered, and what is missing is the harness rather than a person to look.
 - Regenerating the fixture takes `bun src/cli.ts teach ...` rather than an installed `canon`. The installed binary carries the components it was published with, so a branch that changes `src/design/components.ts` regenerates the older stylesheet and reverts whatever landed since, with nothing failing.
-- On 2026-10-10 a `canon teach nav --root examples/teach` run rewrote the committed fixture pages across about 1,800 lines, since they predate the current browser-script emitter, and `01-sparse` and `02-unopened` sat about 70 lines short of the syntax tokens in their base sheets. A change that needs only the chrome stylesheet regenerates the sheets and keeps the page diff out, since the page rewrite is a change of its own.
+
+### Fixture and test traps
+
+A `canon teach nav --root examples/teach` run rewrites the committed fixture pages across about 1,800 lines, since they predate the current browser-script emitter, and `01-sparse` and `02-unopened` sit about 70 lines short of the syntax tokens in their base sheets. A change that needs only the chrome stylesheet regenerates the sheets and keeps the page diff out, since the page rewrite is a change of its own.
+
 - The committed fixture is prettier-formatted after a `nav` run, and prettier closes a void tag as `/>`. Anything `nav` later matches in a page it generated, such as the reference page's generator meta tag that the orphan sweep keys on, has to accept both `>` and `/>`. Prettier also wraps a closing tag across a line as `</a\n>`, so the lesson-link pass matches a nav-owned link's close as `</a\s*>`, or a formatted lesson never re-points after a slug rename.
 - `Bun.markdown` is writable but not configurable, so a test stubbing its absence sets it with `Reflect.set` and restores it after. `Object.defineProperty` throws there.
 - `canon teach stylesheet <topic>` rewrites the generated half, `assets/base.css`, unconditionally, and `nav` now rewrites it too wherever it exists. Only the workspace's own `course.css` rules are embedded in a lesson, so an edit there takes a `nav` run before a lesson shows it.
 - `workspace.ts` resolves a root whose basename is already `teach` as that root rather than nesting a second `teach` below it, so a path ending in `teach` behaves differently from one that does not.
+
+### Roots and captures
+
 - A bare `canon teach list` reads the operator's live workspaces. Reaching the committed fixture takes `--root examples/teach`, and a claim about the fixture made without the flag describes a different tree.
 - No rule scopes `.canon/teach/**`, since `teach-workspace` owns workspace content and ships its standards as references. An implementation or fixture edit under `src/teach/` or `examples/teach/` is routed by the `internal-teach` skill, and a target has no `src/teach/`.
 - The captures under `examples/teach/evidence/` are taken with `canon capture <url> -o <png> --selector body` against `canon serve examples/teach --port 8766`, since a URL source refuses without `--selector`. The capture rewrites the `.stamp` beside each image, and two runs with no change between them come back byte-identical.
-- The shipped `claude/skills/teach-workspace/SKILL.md` sat at 300 rendered lines on 2026-09-30, exactly the Document ceiling stage's limit, which fails a push past it. An addition there has to displace text or fold into a line with wrap slack, and a rule needing more room goes to the standard or a reference the body points at.
+
+### Evidence and ceiling
+
+The shipped `claude/skills/teach-workspace/SKILL.md` sits at 300 rendered lines, exactly the Document ceiling stage's limit, which fails a push past it. An addition there has to displace text or fold into a line with wrap slack, and a rule needing more room goes to the standard or a reference the body points at.
+
 - The frames under `examples/teach/evidence/` are prod evidence, shown to a reader of the examples. No dev baseline exists, and one would sit at `assets/evidence/teach/`. Two defects are measured against the captures, being no phone or tablet frames (v113.0) and a URL capture stamp that hashes the address rather than the page (v116.1). `canon/context/development/evidence.md` owns the boundary.
 - Renders committed under `examples/` are disclaimed rather than gated, because nothing outside `examples/` depends on them staying current. `canon/context/web/assets.md` draws that line between `assets/` and `examples/` on who each folder addresses.
-
-## Related
-
-- `claude/skills/teach-workspace/references/teach.md`: the workspace artifact
-- `claude/skills/teach-workspace/references/glossary.md`: the glossary every workspace carries
-- `claude/skills/teach-workspace/`: the pedagogy and the promotion handoff
-- `canon/context/design/tokens.md`: the token values a workspace stylesheet is seeded from

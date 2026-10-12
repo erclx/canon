@@ -7,7 +7,9 @@ description: Which domains still shell out, who opens the timeline frame once a 
 
 Every `canon` command prints inside one timeline frame, and the frame has to survive a call crossing from TypeScript into bash and back. This file holds where that boundary sits today and which side owns the frame at each crossing. The output shape itself is in `docs/agents/output-shape.md`, and the frame described below is the one a new domain script prints inside.
 
-## The exec boundary
+## Decisions
+
+### The exec boundary
 
 No domain has a dispatcher.
 
@@ -20,7 +22,7 @@ A migrated list verb has to open that frame itself, and the gap is easy to miss 
 
 `claude seeds list` is a real Commander subcommand rather than hand-rolled routing, since its script sits at `scripts/claude/seeds-list.sh` outside the `scripts/<domain>/<verb>.sh` shape a pass-through verb assumes. The parent `seeds` command keeps an action handler so an unknown or missing subcommand still reports the two errors a bash `case` would emit, since Commander falls through to the parent when no subcommand name matches.
 
-## Frame ownership
+### Frame ownership
 
 The responsibility for opening the frame sits with the TypeScript command layer above a pass-through, since a bash verb script closes a frame it never opened. `src/commands/gov.ts` calls `intro('canon gov')` before it execs a pass-through, taking over that job. It skips the call when the args carry `-h` or `--help`, since a help screen prints its own frame.
 
@@ -28,16 +30,21 @@ A TypeScript command that both bash and users invoke owns its frame and takes `-
 
 Once both sides of a call are TypeScript the flag is not needed at all: `canon claude` calls `injectGitignore` directly inside the already-open frame rather than shelling into `canon tooling inject --gitignore --nested`, which drops a process per invocation.
 
-## Hidden contracts
+### The first option is what a headless run takes
+
+`select({nonInteractiveDefault})` returns the first option under `CANON_NON_INTERACTIVE=1`, so an option list ordered for a human at a terminal decides what an agent does. An option list whose first entry reaches outside the machine, such as `Commit and open PR` whenever `gh` is installed, would make a headless run push a branch and open a pull request on the target's repository with no confirmation, reproducible against a throwaway repo with a bare remote. Ask what the first option does rather than whether the list reads well. Reordering is enough for a local write, and an action reaching outside the machine refuses headlessly and reports what it would have done instead, which is what `runGitWorkflow` and the standards sync refusal both do.
+
+## Gotchas
+
+### Hidden contracts
 
 - The timeline frame opens in the dispatcher rather than in each subcommand. Prompts and `log_*` assume a frame is already open, so opening it at the top prevents dangling output on error paths.
 - `log_*` writes to stderr and data goes to stdout, so JSON and lists pipe clean through any wrapper. This is why `--help` is the one exception that prints to stdout.
 - `exec` replaces the process and drops the parent trap, so every subcommand re-arms `trap close_timeline EXIT` itself before any early exit, including `--json` paths.
 - Subcommand scripts never emit their own `┌`. The dispatcher already did, and a second one produces two frames per invocation.
+
+#### Color and palette
+
 - The color opt-out crosses this boundary by having each side answer for itself. `src/cli/exec.ts` runs a delegated script under `stdio: 'inherit'`, so no parent can filter a child's stream and the child reads `NO_COLOR` and its own `[ -t <fd> ]` instead.
 - `set_palette <fd>` in `scripts/lib/ui.sh` is the only place a bash escape is spelled, and it asks per stream rather than once per process. Every writer in that file declares all six palette names `local` and calls it for fd 2 at write time, so a redirect applied after the file was sourced still gets the right answer. A single source-time call answers for stdout, which is the stream 112 of the 125 palette reads across 13 consumer scripts reach with a bare `echo` in their own frames. The blank palette keeps every frame character and drops only the escapes.
 - A consumer framing to stderr with a bare `echo` asks for itself. Declare the six names `local` and call `set_palette 2` at the top of the function. Without that they read the stdout answer, and a run piping only its data emits a frame that is colored where a `log_*` writer drew it and plain where the script drew it. Place the declaration after any branch calling a help function, since dynamic scoping hands a callee whatever the caller declared. `tooling/ref.sh` held one of the six functions before it retired, so this count is already stale and wants a fresh reading now, not only on the next script naming `set_palette`.
-
-## The first option is what a headless run takes
-
-`select({nonInteractiveDefault})` returns the first option under `CANON_NON_INTERACTIVE=1`, so an option list ordered for a human at a terminal decides what an agent does. An option list whose first entry reaches outside the machine, such as `Commit and open PR` whenever `gh` is installed, would make a headless run push a branch and open a pull request on the target's repository with no confirmation, reproducible against a throwaway repo with a bare remote. Ask what the first option does rather than whether the list reads well. Reordering is enough for a local write, and an action reaching outside the machine refuses headlessly and reports what it would have done instead, which is what `runGitWorkflow` and the standards sync refusal both do.

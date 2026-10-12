@@ -16,30 +16,39 @@ Owns `web/`, the Astro app behind the `canon.erclx.dev` landing page: one route,
 - `web/src/components/sections/` owns the sections around the beats: the fold, the proof band, the beat group, the provenance ledger, the install steps, the field, and the close
 - `web/src/components/` owns the site chrome, being the nav and the footer, and the panel primitives `panel`, `panel-group`, and `panel-row`, which no page imports since the component gallery that rendered them retired
 - `web/src/content/` owns page copy, each string tied to a `README.md` citation or a paraphrase marker
+
+### Support folders
+
 - `web/src/lib/` owns the build-time reads, split into the pure derivations and the CLI and file reads that feed them
 - `web/src/layouts/` owns the shared page shell
 - `web/src/styles/` owns the page stylesheet and the generated design tokens
 - `web/e2e/` owns the Playwright suite
+
+### Public and card
+
 - `web/public/` owns the social card symlink, the evidence beat's fixed captures, and the build-time previews
 - `web/card-src/` owns the social card route, a third Astro config
 
 `canon/context/web/build.md` covers the build-time reads, the build, and deploy, `canon/context/web/assets.md` the social card, favicon, previews, and README images, and `canon/context/web/capture.md` the visual checks and the capture of this page.
 
-## Surface
+### Surface
 
 The page is the toolkit's one outward-facing route, and a reader arrives cold, scrolls once, and reads one real session from the ask to the merge. Every count in a section head is read from the repository at build time. The long-form copy lives in `web/src/content/copy.ts`, each string tied to a `README.md` citation, so it is not restated here.
 
-### Regions
+#### Regions
 
 - Skip link: first in the tab order, jumping to the start of the session
 - Nav bar: sticky at the top, carrying the mark, the version with a dot lit when it matches the published one, one link per named beat, the theme toggle, and the install action
 - Fold: the headline, a one-line lede, two actions, and a before-and-after pair on one command, ending in a strip naming the one surface the command never copies
 - Proof band: one claim on its own line at full width, below the fold
 - Beats: the eleven sections in reading order. Their sequence and what each figure derives from are under Composition below
+
+##### Field and footer
+
 - Field: every command name and skill name in two fields, the ones the session used lit. Skills sit under the skill map's groups, and each name reveals its when-to-use text on hover, focus, and tap
 - Footer: the brand line, three link columns, and a note on what is read and what is authored
 
-### States
+#### States
 
 - light: the reader's system prefers light, or they pick it, and the page sits on the warm light ground. Captured at `assets/evidence/home/1280--light.png`
 - dark: the system prefers dark or the reader picks it, and the page sits on its own derived dark ground, not an inversion. Captured at `assets/evidence/home/1280--dark.png`
@@ -47,14 +56,14 @@ The page is the toolkit's one outward-facing route, and a reader arrives cold, s
 
 Every committed frame is also a still, since the capture creates its context with reduced motion and scrolls each section into view before it shoots. The whole-page frames sit beside a folder per section, so a change to one part reaches review as a diff on that part. `capture.md` carries the section list.
 
-### Behavior
+#### Behavior
 
 - The nav bar lights the beat the reader is on and jumps to any beat on selection. Below 900 pixels the beat links drop and the mark, the toggle, and the action stay
 - The theme follows the system preference before first paint, and the toggle overrides it and keeps the choice across a reload
 - The evidence pair and the token preview load lazily as their beat nears the viewport
 - The page reads without horizontal overflow from a 320 pixel viewport up, in both themes
 
-### Not on this surface
+#### Not on this surface
 
 - No placeholder figure. Every figure derives from a real file or is a real capture, except the branch graph, the review exchange, and the provenance roster, which the footer names as drawn from the session
 - No full-bleed expansion cap, since a figure's height is a result of its content

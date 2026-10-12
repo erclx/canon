@@ -33,7 +33,7 @@ Neither number weighs an arm by what it asserts. An arm can carry a single asser
 
 The count measures declarations present, never declarations that work. `canon/context/sandbox/assertions.md` covers the ways a declaration counts as armed while asserting nothing.
 
-## What earns a declaration
+### What earns a declaration
 
 Arm a skill when a wrong run is silent and the damage lands in a target project rather than in the sandbox. Blast radius decides rather than a coverage percentage. A percentage names no particular skill and counts an arm asserting one provisioning fact the same as one asserting eleven things about a run, so it rewards whichever arm is cheapest to write next.
 

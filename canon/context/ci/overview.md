@@ -63,6 +63,10 @@ The push trigger exists to give the README's CI badge a default-branch run to re
 
 The types stage runs in CI rather than only in the pre-push hook because a missing or wrong import is the failure mode the bash migration produces most, and no other stage catches it. The test suite only catches one where a test happens to cover the caller. In the stage table it sits before the tests for the same reason, since it reports in about a second and the suite does not.
 
+### Running CI locally
+
+`bun run check` formats in place where CI asserts formatting. It also scopes shell, types, and tests to the changed-file set, so a local pass is weaker than a CI pass and the two do not mean the same thing. Run `bun run check:ci` to reproduce what CI does, or `bun run check --all` to keep the local write-mode format stage while running every check. If CI fails on format, run `bun run check` locally and commit the diff.
+
 ## Gotchas
 
 Read `no checks reported on the '<branch>' branch` as a possible merge conflict rather than as CI lag. A `pull_request` workflow runs against a merge ref GitHub computes from the head and the base, and a conflicting branch has no such ref, so the run is never queued and nothing reports why. Check `gh pr view --json mergeable,mergeStateStatus`: `CONFLICTING` and `DIRTY` mean the branch needs a rebase, and force-pushing queues the run within a minute. Autoship's CI watch runs in the background and exits on `conflicted: true`, and a 60-minute timeout bounds it otherwise, so a branch with no run at all reports CI unsettled rather than shipped.
@@ -72,7 +76,3 @@ A shields.io badge URL returns HTTP 200 whether or not the query resolves, so ve
 An exit-code flag counts only states some documented action can drive to zero, since a permanent condition makes the gate unpassable rather than informative. `canon sync --check --exit-code` excludes `orphaned` from the count, since a single local rule in `.claude/rules/` would otherwise return 1 on every run with no remedy. For each state a gate counts, name the action that clears it, and where there is none, exclude it and report it separately.
 
 The runner installs no browser binary, so a test needing one skips rather than fails, and a green pipeline is not evidence that test ran. Each `*.e2e.test.ts` under `src/` guards itself with a launch probe and reports the skip in its own header, among them the demo and driver drives, the inventory walk, the slides export, and the canvas shell walk. Adding the install would slow every run, so the gap stays open and a change under any of them is verified locally. The plugin CLI install in `canon/context/ci/checks.md` is the precedent for closing it as the count of such tests grows.
-
-## Running CI locally
-
-`bun run check` formats in place where CI asserts formatting. It also scopes shell, types, and tests to the changed-file set, so a local pass is weaker than a CI pass and the two do not mean the same thing. Run `bun run check:ci` to reproduce what CI does, or `bun run check --all` to keep the local write-mode format stage while running every check. If CI fails on format, run `bun run check` locally and commit the diff.

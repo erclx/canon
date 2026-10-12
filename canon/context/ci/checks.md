@@ -5,7 +5,9 @@ description: The gate stage table CI runs, the regeneration stages, the phase-la
 
 # Checks
 
-## Stages
+## Layout
+
+### Stages
 
 Defined in `.github/workflows/verify.yml`, which runs one step, `bun run check:ci`. That resolves to `canon gate run --all --no-write`, so the stage list lives in `src/gate/stages.ts` rather than in the workflow and every stage runs regardless of what the branch touched. Two rows report rather than gate, and the table marks each.
 
@@ -45,13 +47,27 @@ One more qualification is a stage that could not read its input at all, which is
 
 Rebuild this table from `STAGES` in `src/gate/stages.ts` rather than editing rows by hand, since a hand edit can drift from the source it renders. Both format stages are entries in that table, so a rebuild reaches them the way it reaches every other row. This table names the check side, since `check:ci` passes `--no-write` and the write side heads its output `Formatting` instead. Nothing compares this table to the table it describes, so a stage added later can leave it wrong until the next rebuild.
 
-### The regeneration stages
+#### The regeneration stages
 
 The two drift stages, Indexes and Consumed copies, regenerate and then assert twice through the `drift` check in `src/gate/sequencer.ts`, once with `git diff --exit-code` for modified tracked files and once with `git ls-files --others --exclude-standard` for new untracked ones. They catch content that was regenerated locally but committed stale, which is the failure a local-only gate lets through.
 
 Regeneration runs in both modes, so `check:ci` writes to the working tree even though it never formats. Only the format stage changes behavior between modes.
 
-## The phase-label gate
+### The plugin CLI on the runner
+
+The runner installs the plugin CLI so the manifest stage gates on a real binary rather than skipping for want of one. The plugin is the toolkit's second delivery path, so a manifest validated only on the author's machine could still reach a marketplace install unchecked.
+
+`bun install -g @anthropic-ai/claude-code@2.1.236` lands the binary in the directory `setup-bun` already put on `PATH`. The version is pinned exactly rather than to a major, because `2.1.237` installs one package with no platform-native dependency and leaves a wrapper on `PATH` that cannot run. Whether a later release repairs the install on its own is unmeasured, so raising the pin is a move someone makes and reads the run for, rather than one the registry makes overnight.
+
+The release itself is not the defect: `2.1.237` answers `claude --version` and passes `claude plugin validate --strict` on both manifests locally, so the failure is a condition of `bun install -g` against that release on a fresh runner. Raising the pin has to be tested on a runner and cannot be cleared by running the new version locally.
+
+The published tarball explains why the health guard checks behavior rather than presence alone. `bin/claude.exe` as shipped is a shell stub that prints a native-binary error and exits 1 on any invocation, and the postinstall step replaces that stub with the real binary. A global install landing the wrapper alone leaves a name that resolves and a command that fails, which is exactly what `claude --version` tests.
+
+Validation needs no credential, so this is an install step rather than a secret. The stage skips on a machine where the CLI is absent or cannot run, and fails instead when `CI` is set, because a silent skip on the runner would report the pass the stage exists to withhold.
+
+## Decisions
+
+### The phase-label gate
 
 `phase-label-gate.yml` runs `canon labels scan` against `$GITHUB_EVENT_PATH`, since a pull request body and a posted review comment are the two things no stage in `bun run check` can see. It sits outside `verify.yml` rather than as a second job there, and the split turns on `types:` rather than on cost: this check exists to catch a title or body edited with no new commit, which needs `edited` on the trigger, and adding that to the shared trigger would re-run the whole Static Checks job on every such edit.
 
@@ -73,19 +89,7 @@ The carve-out stays, leaving authors responsible for a label quoted alone in its
 
 The same gate also holds the section list and the character bans, since both are text no stage in `bun run check` sees. The headings check reads an ordinary pull request alone: a review body carries its own headings, a release-please body opens on a version link and takes the `isReleasePullRequest` test the phase scan already runs, and a scan carrying no title is a reply rather than a description. The bans reuse `BAN_SETS` and run on every source, so a posted review is held to the same two characters as a pull request.
 
-## The plugin CLI on the runner
-
-The runner installs the plugin CLI so the manifest stage gates on a real binary rather than skipping for want of one. The plugin is the toolkit's second delivery path, so a manifest validated only on the author's machine could still reach a marketplace install unchecked.
-
-`bun install -g @anthropic-ai/claude-code@2.1.236` lands the binary in the directory `setup-bun` already put on `PATH`. The version is pinned exactly rather than to a major, because `2.1.237` installs one package with no platform-native dependency and leaves a wrapper on `PATH` that cannot run. Whether a later release repairs the install on its own is unmeasured, so raising the pin is a move someone makes and reads the run for, rather than one the registry makes overnight.
-
-The release itself is not the defect: `2.1.237` answers `claude --version` and passes `claude plugin validate --strict` on both manifests locally, so the failure is a condition of `bun install -g` against that release on a fresh runner. Raising the pin has to be tested on a runner and cannot be cleared by running the new version locally.
-
-The published tarball explains why the health guard checks behavior rather than presence alone. `bin/claude.exe` as shipped is a shell stub that prints a native-binary error and exits 1 on any invocation, and the postinstall step replaces that stub with the real binary. A global install landing the wrapper alone leaves a name that resolves and a command that fails, which is exactly what `claude --version` tests.
-
-Validation needs no credential, so this is an install step rather than a secret. The stage skips on a machine where the CLI is absent or cannot run, and fails instead when `CI` is set, because a silent skip on the runner would report the pass the stage exists to withhold.
-
-## The install check
+### The install check
 
 `check:install` runs in CI as its own step, after `check:ci`. `Verify install` costs about 3 seconds against `Verify`'s 70, since the runner's `bun install --frozen-lockfile` step has already primed the same package cache moments earlier in the same job. The local gate and the pre-push hook exclude it anyway, because a contributor's first run gets no such head start, and what a cold pack-and-install costs there is unmeasured.
 

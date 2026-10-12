@@ -17,6 +17,11 @@ Owns the `index.md` catalog system. Folders that an agent browses to pick a docu
 - `src/commands/indexes.ts` owns the command surface
 - `claude/skills/target-setup/references/indexes.md` owns the bootstrap procedure, reached as the `target-setup` skill's `indexes` phase
 
+### Related
+
+- `docs/agents/indexes.md`: CLI flags, exit codes, and JSON output
+- `canon/context/cli/commands/overview.md`: the TypeScript layer and the migration boundary
+
 ## Decisions
 
 - The system is opt-in per folder. A project that does not need browseable catalogs gets no value from adopting it, so nothing is indexed by default.
@@ -24,11 +29,40 @@ Owns the `index.md` catalog system. Folders that an agent browses to pick a docu
 - The bootstrap skill is the only supported migration path. The CLI does not own it because authoring readable `description` text is judgment work, not a deterministic transformation.
 - Regen auto-stages rewritten `index.md` files when positional paths are passed inside a git repository. Without it, a commit that stages a sibling frontmatter change would land with a drifted `index.md`, because `lint-staged` re-stages only files in the original staged set.
 - Both integration points are opt-in per project and the toolkit ships no default. Git-driven projects want `lint-staged`, agent-driven ones want the hook, and picking one for them would be wrong half the time.
+
+### Engine and catalog modes
+
 - The engine reads frontmatter with `Bun.YAML` and emits JSON with `JSON.stringify`, so neither the parser nor the escaping is hand-rolled.
 - Frontmatter is re-emitted verbatim rather than re-serialized from the parsed object. Key order, comments, and the `auto: false` marker all survive a regeneration that way.
 - Flat mode sorts sub-catalogs among the sibling files instead of appending them. A folder and a file are both one domain to a reader scanning the catalog, and a trailing entry reads as absent from the alphabetical run it belongs in.
 - Grouped mode keeps the append under a trailing `## Sub-catalogs` heading, since a category is the organizing key there and that heading is what makes the child catalogs visible in a catalog `CLAUDE.md` loads every session.
 - `list` is the catalog a session reads for a cross-folder answer, matching a topic against every entry's `title`, `description`, and `path` rather than searching file contents. A folder sitting outside `list`'s walk stays one the caller checks by hand.
+
+### When to adopt
+
+Adopt for folders an agent browses to pick a document: markdown-heavy reference folders, folders with three or more sibling markdown files that have distinct purposes, and catalogs a skill or script discovers at runtime instead of hardcoding names.
+
+Skip code folders, since agents traverse code by import graph rather than description. Skip generated docs such as API references and changelogs, where the frontmatter cost outweighs the navigation gain, and a small folder where `ls` is cheaper. Skip folders whose files resolve by path convention. Add `auto: false` to keep an adopted folder's index hand-edited when it needs prose the walker cannot produce.
+
+Add the system to a project that does not have it through the `target-setup` skill's `indexes` phase, which drafts each sibling's frontmatter from its first heading and paragraph and validates with a dry run before writing.
+
+### Keeping indexes current
+
+`lint-staged` is the recommended option for git-driven projects:
+
+```json
+{
+  "**/*.md": "canon indexes regen"
+}
+```
+
+`lint-staged` appends changed paths as trailing arguments. The CLI walks up from each path to the nearest indexed ancestor and regenerates only affected folders. Pass `--no-stage` to opt out of auto-staging, for example when partial-staging with `git add -p` and deliberately excluding an index change.
+
+A Claude Code `PostToolUse` hook on `Edit` and `Write` matching `**/*.md` covers projects that prefer agent-driven regeneration, running the same command with the same auto-stage behavior.
+
+### Enforcement
+
+The system pays off only when sessions consult the catalogs instead of searching past them. The Claude seed ships a `PreToolUse` hook on `Grep` and `Glob` that walks up from the search path to the nearest `index.md` and reminds the agent to read it first, naming `canon indexes list --json` alongside the local path as the cross-folder answer. It fires once per folder per session and only where an index exists, so it scales to a project's index density. `canon/context/claude-plugin/cli.md` carries the seed settings block.
 
 ## Gotchas
 
@@ -59,39 +93,8 @@ A child folder's own `index.md` `category` reaches nothing in the parent. `readC
 
 Quote a `description` opening with a backtick or a colon, or carrying a colon followed by a space anywhere in it. YAML reserves the first two at the start of a scalar and reads the third as a mapping key, so `Bun.YAML.parse` rejects the block and the folder fails. `parseFrontmatter` reads a block that will not parse as absent, so the error names the file as missing its `title` and `description` even though it carries both. A hand-maintained catalog never exercises the parser, so a folder converting to generation surfaces these on its first regen rather than as it grew.
 
-## Hidden contracts
+### Hidden contracts
 
 - Every `index.md` carries `title` and `subtitle` in its own frontmatter, and every sibling `*.md` carries `title` and `description`. The walker fails the folder when any sibling lacks either field.
 - The H1 mirrors the `title` and the lead paragraph mirrors the `subtitle`. Each sibling renders as `- [<title>](<filename>): <description>`, and each immediate subfolder carrying an `index.md` renders as `- [<child title>](<child>/index.md): <child subtitle>`. Linking is recursive because each folder regenerates independently.
 - `category` on a sibling groups it under an H2 of that value, emitted verbatim, so it is written in sentence case
-
-## When to adopt
-
-Adopt for folders an agent browses to pick a document: markdown-heavy reference folders, folders with three or more sibling markdown files that have distinct purposes, and catalogs a skill or script discovers at runtime instead of hardcoding names.
-
-Skip code folders, since agents traverse code by import graph rather than description. Skip generated docs such as API references and changelogs, where the frontmatter cost outweighs the navigation gain, and a small folder where `ls` is cheaper. Skip folders whose files resolve by path convention. Add `auto: false` to keep an adopted folder's index hand-edited when it needs prose the walker cannot produce.
-
-Add the system to a project that does not have it through the `target-setup` skill's `indexes` phase, which drafts each sibling's frontmatter from its first heading and paragraph and validates with a dry run before writing.
-
-## Keeping indexes current
-
-`lint-staged` is the recommended option for git-driven projects:
-
-```json
-{
-  "**/*.md": "canon indexes regen"
-}
-```
-
-`lint-staged` appends changed paths as trailing arguments. The CLI walks up from each path to the nearest indexed ancestor and regenerates only affected folders. Pass `--no-stage` to opt out of auto-staging, for example when partial-staging with `git add -p` and deliberately excluding an index change.
-
-A Claude Code `PostToolUse` hook on `Edit` and `Write` matching `**/*.md` covers projects that prefer agent-driven regeneration, running the same command with the same auto-stage behavior.
-
-## Enforcement
-
-The system pays off only when sessions consult the catalogs instead of searching past them. The Claude seed ships a `PreToolUse` hook on `Grep` and `Glob` that walks up from the search path to the nearest `index.md` and reminds the agent to read it first, naming `canon indexes list --json` alongside the local path as the cross-folder answer. It fires once per folder per session and only where an index exists, so it scales to a project's index density. `canon/context/claude-plugin/cli.md` carries the seed settings block.
-
-## Related
-
-- `docs/agents/indexes.md`: CLI flags, exit codes, and JSON output
-- `canon/context/cli/commands/overview.md`: the TypeScript layer and the migration boundary

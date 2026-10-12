@@ -39,13 +39,13 @@ A fact goes to `.claude/rules/` when it fires on a specific path being edited an
 
 Firing is one axis of three. The second is conditional presence, which a rule buys and a line in `CLAUDE.md` or a seed cannot, since an eager line loads into every session. The third is updatability, which is what makes the six rules `base` installs with no `paths:` glob correct as rules, five under `canon/` and one under `claude/`: a rule installed through governance sync carries a later fix to every project that installed it, where a seed line stays fixed at the scaffold it was written into. Measured at `b6835a56` on 2026-09-26.
 
-The test no longer ships as a rule, so it reaches a session through this entry alone. A target holds it only where this context folder exists, and the seed does not state it.
+The test ships as no rule, so it reaches a session through this entry alone. A target holds it only where this context folder exists, and the seed does not state it.
 
 ### What bounds the eager tier
 
 `canon/REQUIREMENTS.md` states a word cap the Canonical records stage gates. `CLAUDE.md` states none, and trims hold it instead, each moving a bullet into the skill or entry that reads it. Reach never bounds either file, since nearly every fact touches two domains. Bounding by reach is how an eager architecture record once grew to forty entries and about 15k tokens loaded into every session, and a numeric ceiling on its length was tried first and dropped, since nothing enforced it and every merge drifted past it.
 
-That record is retired here, and `CLAUDE.md` states where a decision several domains read now lands. A session pays for such a decision on demand rather than at every start. The pointer each other domain keeps carries no check, since nothing compares an entry against the one it defers to.
+That record is retired, and `CLAUDE.md` states where a decision several domains read lands. A session pays for such a decision on demand rather than at every start. The pointer each other domain keeps carries no check, since nothing compares an entry against the one it defers to.
 
 ### What each root holds
 

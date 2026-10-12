@@ -27,23 +27,23 @@ The language stacks take `code` whole, since every stack that writes code wants 
 
 ### Base names its rules one by one
 
-Base installs ten rules, being the session output rule, the board, plan, scratch, worktree, and git rules, the index rule, and markdown. It took the `canon`, `claude`, `tooling`, and `writing` folders whole until the operator chose a minimal base on intake `143`, measured at 16 rules on 2026-10-11.
+Base installs ten rules, being the session output rule, the board, plan, scratch, worktree, and git rules, the index rule, and markdown. Naming them one by one, rather than taking the `canon`, `claude`, `tooling`, and `writing` folders whole, keeps the base minimal, where the whole folders measured 16 rules on 2026-10-11.
 
-Base takes one of the two `claude` rules and none of `tooling`, so a folder entry cannot express its set. A folder entry for `canon` alone would also put the next rule authored there into every project, which is the default the operator reversed. A rule base drops reaches a project through `canon gov detect`, whose evidence table the unreferenced stage requires.
+Base takes one of the two `claude` rules and none of `tooling`, so a folder entry cannot express its set. A folder entry for `canon` alone would also put the next rule authored there into every project, which is the default this avoids. A rule base drops reaches a project through `canon gov detect`, whose evidence table the unreferenced stage requires.
 
 `baseBands` in `src/sync/check.ts` reads the folders of the rules base resolves to rather than its folder entries, so the fallback for a target with no recorded chain still reports a new rule authored beside one of base's.
 
-Sync never retracts a rule, so a target installed before the cut keeps every rule it holds. The cut changes new installs only.
+Sync never retracts a rule, so a target installed before the minimal base keeps every rule it holds. The minimal base changes new installs only.
 
-### Governance stacks are per language, and framework stacks retired
+### Governance stacks are per language
 
-`react`, `astro`, `nextjs`, `node-server`, and `python-fastapi` retired, leaving one stack per language. With every framework, UI, security, and database rule opt-in, each framework stack would equal its parent plus the one rule `canon gov detect` already proposes from the same dependency.
+One stack exists per language and none per framework. With every framework, UI, security, and database rule opt-in, each framework stack would equal its parent plus the one rule `canon gov detect` already proposes from the same dependency.
 
 The rejected alternative kept the five as thin aliases naming one framework rule each. That gives a project two routes to one install, a stack name and a detect proposal, which is the dual mode the plan standard warns against, and the alias drifts from the detect entry the first time either changes.
 
-`target-setup` picks the stack from the repository root's language alone, and a framework's rules arrive as extras the operator confirms. `nextjs` globs every `.ts` and `.tsx` file, so a Vite app would match it if it reached one. Detect proposes it only from `next` in a manifest or a `next.config.*` file, so detection scopes it to Next.js apps where stack membership once did.
+`target-setup` picks the stack from the repository root's language alone, and a framework's rules arrive as extras the operator confirms. `nextjs` globs every `.ts` and `.tsx` file, so a Vite app would match it if it reached one. Detect proposes it only from `next` in a manifest or a `next.config.*` file, so detection scopes it to Next.js apps.
 
-A target recorded on a retired stack still syncs. `readNewRules` in `src/sync/check.ts` reads a chain that no longer resolves as no chain and falls back to band folders, so the target keeps receiving updates to the rules it holds and is offered a new rule only in a band folder it already carries or one holding a base rule.
+A target recorded on a retired stack still syncs. `readNewRules` in `src/sync/check.ts` reads a chain that does not resolve as no chain and falls back to band folders, so the target keeps receiving updates to the rules it holds and is offered a new rule only in a band folder it already carries or one holding a base rule.
 
 ### Server rules glob every backend language
 
@@ -55,17 +55,7 @@ A target recorded on a retired stack still syncs. `readNewRules` in `src/sync/ch
 
 With no stack named, `--add` installs its rules alone, which `canon/context/governance/install.md` covers.
 
-## Gotchas
-
-### A rule in an unnamed folder installs for nobody
-
-A rule authored in a folder no stack names reaches no target. `code` is the only folder a stack takes whole, so a rule anywhere else needs its name in a stack file or an entry in `governance/detect.toml`.
-
-### The unreferenced stage fails on a rule nothing proposes
-
-A rule no stack names reaches a target only through `canon gov detect`, so the `Unreferenced rules` stage fails when such a rule has no table in `governance/detect.toml`, and when a table there names no live rule. The stage replaced a fixed `GOV_EXPECTED_UNREFERENCED` list in `src/gate/measures.ts` that warned and never failed. Once the stacks are thin, the unreferenced set is most of the catalog, and a list rewritten on every new rule is one nobody compares against.
-
-## Adding a stack
+### Adding a stack
 
 Create a `.toml` file in `governance/stacks/`. Set `extends` to the parent stack name or leave it empty. List rule names without `.md` in the `rules` array, or a folder name under `governance/rules/` to take that folder whole. Nothing compiles the stack, so the file is live to `canon gov install` as soon as it is written.
 
@@ -76,6 +66,16 @@ rules = ["code", "go", "testing-go"]
 
 Take a folder whole only when the stack wants every rule in it now and every rule added to it later. A stack selecting some of a folder stays enumerated, since the list records that the omission was a decision.
 
-A stack is a language. A framework or library gets a `governance/detect.toml` entry rather than a stack, per the retirement above.
+A stack is a language. A framework or library gets a `governance/detect.toml` entry rather than a stack, per the per-language rule above.
 
 The branch adding a stack owes no hero render. The Hero stage runs `regen-hero.ts --check`, which discards what it fills, so a changed stack count does not fail it. `refresh-capture-frames.yml` lists `governance/stacks/**` in its path filter and regenerates the frames in its own pull request after the merge.
+
+## Gotchas
+
+### A rule in an unnamed folder installs for nobody
+
+A rule authored in a folder no stack names reaches no target. `code` is the only folder a stack takes whole, so a rule anywhere else needs its name in a stack file or an entry in `governance/detect.toml`.
+
+### The unreferenced stage fails on a rule nothing proposes
+
+A rule no stack names reaches a target only through `canon gov detect`, so the `Unreferenced rules` stage fails when such a rule has no table in `governance/detect.toml`, and when a table there names no live rule. A fixed expected-unreferenced list that warned and never failed was the rejected alternative. With thin stacks the unreferenced set is most of the catalog, and a list rewritten on every new rule is one nobody compares against.
