@@ -67,12 +67,14 @@ The transcript and side folder land under `projects/<encoding>/`, where the enco
 
 Exit codes: `0` the session was placed, `1` refused. The refusal carries one of these reasons:
 
-- `not-a-bundle`: the file is no gzip tarball, carries no manifest at format `1`, or names a path outside its own session, such as one climbing out with `..` or an absolute one
-- `other-repository`: the local `origin` differs from the one the bundle recorded
-- `exists`: the target transcript or side folder is already there, or any other project folder already holds a transcript for the id, which `--resume <id>` could reach first
-- `live-here`: the id is live in the local roster, so a second copy would fork it
-- `write-failed`: a write failed partway for a reason other than a copy appearing, such as a bundle carrying a file where it also needs a folder
-- `no-archive`: the running Bun predates `Bun.Archive`
+| Reason             | Meaning                                                                                                                                                           |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `not-a-bundle`     | the file is no gzip tarball, carries no manifest at format `1`, or names a path outside its own session, such as one climbing out with `..` or an absolute one    |
+| `other-repository` | the local `origin` differs from the one the bundle recorded                                                                                                       |
+| `exists`           | the target transcript or side folder is already there, or any other project folder already holds a transcript for the id, which `--resume <id>` could reach first |
+| `live-here`        | the id is live in the local roster, so a second copy would fork it                                                                                                |
+| `write-failed`     | a write failed partway for a reason other than a copy appearing, such as a bundle carrying a file where it also needs a folder                                    |
+| `no-archive`       | the running Bun predates `Bun.Archive`                                                                                                                            |
 
 A write that fails partway removes every file this run placed and every folder it created before refusing, so a retry of the same bundle does not refuse on its own leftovers. Any path it could not remove is named in the message. A copy that appears between the existence check and the write refuses as `exists` on the same terms.
 
