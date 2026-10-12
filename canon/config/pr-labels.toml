@@ -77,9 +77,6 @@ context = [
 # so a second file landing beside it is labelled without another census.
 repo = [
   ".gitignore",
-  ".vscode/",
-  "cspell.json",
-  ".cspell/",
   "canon/config/",
   "vitest.config.ts",
   "vitest.setup.ts",

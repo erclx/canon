@@ -66,3 +66,6 @@ demos/*.png
 # canon migrate records has targets left to migrate off it.
 # canon-keep-record-root
 .claude/.tmp/
+
+# Editor
+.vscode/
