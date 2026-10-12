@@ -15,9 +15,9 @@ What earns a rule in the first place, and which standard each one routes to, is 
 
 A rule lives at `<folder>/<slug>.md` with no number in front. The folder states the domain, and the slug states the topic.
 
-A three-digit prefix from a band per folder, `000` for `code/` through `800` for `writing/`, is not used. The leading digit restated the folder, and nothing precedence-orders rules at load, so what the number supplied was read order in a folder listing.
+A three-digit prefix from a number range per folder, `000` for `code/` through `800` for `writing/`, is not used. The leading digit restated the folder, and nothing precedence-orders rules at load, so what the number supplied was read order in a folder listing.
 
-Keeping the prefix for that read order was the rejected alternative. It cost a band table, a range from `900` reserved for target-authored rules, and a division of each band between shipped and internal rules, and none of the three was checked. A `governance/renames.toml` entry per shipped rule carries a target across through `canon gov sync`.
+Keeping the prefix for that read order was the rejected alternative. It cost a range table, a range from `900` reserved for target-authored rules, and a division of each range between shipped and internal rules, and none of the three was checked. A `governance/renames.toml` entry per shipped rule carries a target across through `canon gov sync`.
 
 Every basename stays distinct and off every folder name, which `expandStackEntry` in `src/gov/stacks.ts` leans on, since a stack entry naming a folder expands to the whole folder. `src/gov/rule-layout.test.ts` asserts both across `governance/rules/` and `internal/rules/`. Four names collided and took a different slug, three of them because the Folder-echoed filenames stage of `bun run check` refuses a filename equal to its folder or opening on the folder's name:
 
@@ -44,7 +44,7 @@ An always-loaded rule still reaches a target through `canon gov sync` rather tha
 
 ### Pointer rules are authored by hand
 
-A generator writing a pointer rule under `governance/rules/standards/` for each standard carrying `paths:` has nothing to write, since no standard carries the field. Keeping one would leave a gate stage watching an empty path and a band any restored `paths:` field would regrow. The rules for the shape of a reference live in `create-skill`'s `skill-reference.md`.
+A generator writing a pointer rule under `governance/rules/standards/` for each standard carrying `paths:` has nothing to write, since no standard carries the field. Keeping one would leave a gate stage watching an empty path and a folder any restored `paths:` field would regrow. The rules for the shape of a reference live in `create-skill`'s `skill-reference.md`.
 
 A rule pointing at a skill rather than a standard stays authored, as do the `writing/markdown` rule, `design-taste`, and `internal/rules/claude/tooling-reference.md`, whose standard never ships.
 

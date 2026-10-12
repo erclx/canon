@@ -84,7 +84,7 @@ postdates a rule joining its stack still see that rule: the report reads the
 target's current entitlement against its current tree rather than diffing
 from an anchor a later sync could advance past the rule's own commit. A
 target whose install predates the recorded chain falls back to the same
-band-inference `newRules` uses in `canon sync --check`.
+rule-folder-inference `newRules` uses in `canon sync --check`.
 
 ## Tooling diff and sync
 
@@ -137,7 +137,7 @@ since a target has no rule source of its own that ships nowhere.
 It takes `--root <path>` and defaults to the toolkit root, prints nothing on success, and
 reports the reason on stderr with exit 1 when the record names a stack or rule
 that does not resolve. The Consumed copies stage of `bun run check` calls it and
-asserts both the generated band and the consumed copy are committed.
+asserts both the generated rule folders and the consumed copy are committed.
 
 ## Whole-project sync
 

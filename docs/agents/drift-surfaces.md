@@ -101,7 +101,7 @@ rule on the far side of a window a later sync moved past it. The per-file
 rule the chain lists reaches both surfaces the same way.
 
 A target stamped before governance recorded a chain falls back to the older
-band-inference read below. The measurement there anchors on governance's own
+rule-folder-inference read below. The measurement there anchors on governance's own
 stamp rather than on the oldest anchor across domains, since rules are
 domain-scoped and a shared anchor would let another domain's sync move the
 revision rules are measured from. A target carrying no chain and no governance anchor
@@ -124,16 +124,16 @@ their own language and testing rules, and every other rule is opt-in, so an
 unfiltered list would tell a base consumer about rules it can never receive and
 train the reader to skip the section.
 
-The filter accepts a band on either of two grounds. A folder holding a rule the
+The filter accepts a rule folder on either of two grounds. A folder holding a rule the
 base stack resolves to is entitled to every target, read through the stack file so
-a rule added to base later needs no code change. Every other band is read off the folders the
+a rule added to base later needs no code change. Every other rule folder is read off the folders the
 target already carries, which is the fallback's only evidence of what a target
-was entitled to before it recorded a chain. One band can be reached by more than
+was entitled to before it recorded a chain. One rule folder can be reached by more than
 one stack, so the test over-reports inside a folder the target holds, which
 costs a line where under-reporting would cost the section its point.
 
 A rule the target already holds is dropped by name. That is what keeps a rule the
-toolkit moved between band folders out of the list, since a rename reaches this
+toolkit moved between rule folders out of the list, since a rename reaches this
 read as an addition and only the name tells the two apart.
 
 This closes the dangling-citation case as a side effect rather than checking for
