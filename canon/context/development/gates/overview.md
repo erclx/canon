@@ -85,7 +85,7 @@ The `drift` check pairs the diff with `git ls-files --others --exclude-standard`
 
 ### A write grant has to agree with the formatter
 
-Any tool granted write access to a format-checked file has to agree with the formatter, and a release configuration's `extra-files` mechanism is that kind of grant. `release-please` bumps the version in `claude/.claude-plugin/plugin.json` and re-serializes the whole file, expanding `keywords` to one string per line, while prettier collapses any array fitting the print width, so an automated version bump can land a file that fails `bun run check` at every future release. Run the tool and the formatter over the same content and diff the two before wiring the grant. A real file with a fixed name takes a formatter ignore entry, unlike sample content, which takes a suffix.
+Any tool granted write access to a format-checked file has to agree with the formatter, and a release configuration's `extra-files` mechanism is that kind of grant. `release-please` bumps the version in `claude/.claude-plugin/plugin.json` and re-serializes the whole file, expanding `keywords` to one string per line, while oxfmt collapses any array fitting the print width, so an automated version bump can land a file that fails `bun run check` at every future release. Run the tool and the formatter over the same content and diff the two before wiring the grant. A real file with a fixed name takes a formatter ignore entry, unlike sample content, which takes a suffix.
 
 ### A marker built on `isMarked` reaches only its own line and the one above
 

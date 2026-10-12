@@ -23,7 +23,13 @@ Web's `verify.yml` carries the web chain's own static check, unit test, build, a
 
 Scripts are never overwritten except through `[scripts.override]`, which exists for three cases: scaffolds that ship an anti-pattern by default, toolkit-owned wrappers whose body must stay in lockstep with the shipped shell scripts, and a key whose value the stack owns where the scaffold writes its own. `dev`, `preview`, and `lint` are the third case, since every scaffold that defines one keeps it through an ordinary `[scripts]` entry.
 
-`lint` lives at the `web` level because its value is shared, while `dev` and `preview` differ by framework and live per child. `vite-react`'s raw scaffold ships `"lint": "oxlint"` and a bare `.oxlintrc.json`, and the oxlint it resolves runs under its own default rule set with exit 0, never reaching the stack's ESLint config or its `--max-warnings 0` gate. The override is what forces `lint` back to the stack's eslint invocation.
+`lint` and `lint:fix` live at the `web` level because their value is shared, while `dev` and `preview` differ by framework and live per child. `vite-react`'s raw scaffold ships `"lint": "oxlint"` and a bare `.oxlintrc.json`, and that `lint` exits 0 on warnings. The override forces `--max-warnings 0` over it, and the golden `.oxlintrc.json` at the same path overwrites the scaffold's bare one rather than leaving a second config to override away. `astro` overrides both keys back to `eslint`, since oxlint parses no `.astro` file. `check:format` and `format` sit under base's override for the same reason, so a target synced while the stack ran Prettier switches to oxfmt on its next sync.
+
+### The Oxc tools replace Prettier and ESLint outside astro
+
+Base formats with oxfmt, and `web`, `vite-react`, and `nextjs` lint with oxlint, running `eslint-plugin-check-file` and `eslint-plugin-simple-import-sort` as JS plugins. Prettier cost this repository about 22 s on every check against under 3 s for oxfmt, and the Prettier plugins `web` installed never loaded in a target, since base's `.prettierrc` named none. Keeping Prettier and ESLint everywhere was the alternative, and it lost on that cost.
+
+`astro` keeps both, scoped: oxfmt loads no Prettier plugin and oxlint parses no custom file format, so `.astro` files take Prettier with `prettier-plugin-astro` and ESLint with `eslint-plugin-astro`, and every other file takes oxfmt. `astro`'s `.oxfmtrc.json` repeats base's options, because scan takes a child config over the parent's whole file. Both tools are pinned to exact versions, since oxlint's JS plugin host is alpha. Measured against `e545d8823` on 2026-10-12.
 
 ### The astro scenario switcher
 
