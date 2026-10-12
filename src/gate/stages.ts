@@ -545,6 +545,20 @@ export const STAGES: readonly Stage[] = [
     success: 'Shell check passed',
   },
   {
+    id: 'lint',
+    label: 'Lint',
+    // Unscoped, since a full run costs less than spawning the process and a
+    // scope is one more pattern to fall behind the extensions oxlint reads.
+    checks: [
+      {
+        kind: 'command',
+        argv: ['bun', 'run', 'check:lint'],
+        failure: 'Lint failed',
+      },
+    ],
+    success: 'Lint passed',
+  },
+  {
     id: 'types',
     label: 'Types',
     scope: /^src\/|^tsconfig\.json$|^package\.json$/,

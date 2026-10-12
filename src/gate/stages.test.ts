@@ -35,6 +35,27 @@ describe('the format stage', () => {
   })
 })
 
+describe('the lint stage', () => {
+  it('should run the read-only lint script', () => {
+    const stage = STAGES.find((candidate) => candidate.id === 'lint')
+
+    const check = stage?.checks[0]
+
+    expect(check?.kind === 'command' ? check.argv : []).toEqual([
+      'bun',
+      'run',
+      'check:lint',
+    ])
+  })
+
+  it('should carry no scope, so no changed-file set can skip it', () => {
+    const stage = STAGES.find((candidate) => candidate.id === 'lint')
+
+    expect(stage).toBeDefined()
+    expect(stage?.scope).toBeUndefined()
+  })
+})
+
 describe('the shell stage scope', () => {
   it('should fire on a husky hook, which carries no extension to match', () => {
     const scope = scopeOf('shell')
