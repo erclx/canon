@@ -25,6 +25,8 @@ From the conversation so far, identify:
 
 ### Behavior and fix
 
+From the same conversation, identify:
+
 - Observed behavior
 - Expected behavior, or `unclear`
 - Repro details already in context (commands run, files touched), or `none`

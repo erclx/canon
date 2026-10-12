@@ -166,6 +166,8 @@ After the chain, report:
 
 ### Outcomes and gaps
 
+After the chain, report as well:
+
 - `indexes` outcome (folders bootstrapped, or none found)
 - Any domains or scripts that failed
 - Any detection gaps surfaced during resolve

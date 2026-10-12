@@ -63,6 +63,15 @@ describe('bulletStacks', () => {
     expect(stacksIn(source)).toEqual([])
   })
 
+  it('should report a checklist run, since a task box is not a link', () => {
+    const source = Array.from(
+      { length: 7 },
+      (_, i) => `- [${i % 2 ? 'x' : ' '}] Check ${i}`,
+    ).join('\n')
+
+    expect(stacksIn(source)).toEqual([{ line: 1, count: 7 }])
+  })
+
   it('should report a run where one item opens with neither', () => {
     const source = `${items(6, '**Label.** text')}\n- plain item`
 

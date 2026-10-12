@@ -10,8 +10,12 @@ export const CAP = 5
 /** A top-level bullet marker followed by its content, at column zero only. */
 const BULLET = /^[-*+][ \t]+(.*)$/
 
-/** An item opening with a bold label or a link names its own subject. */
-const LABELED = /^(?:\*\*|__|\[)/
+/**
+ * An item opening with a bold label or a link names its own subject. A task
+ * box (`[ ]`, `[x]`) opens with a bracket too and is not a link, so a checklist
+ * counts as a plain run.
+ */
+const LABELED = /^(?:\*\*|__|\[(?![ xX]\]))/
 
 export interface StackFinding {
   /** The line of the run's first item, as an editor numbers it. */

@@ -17,7 +17,7 @@ The paragraph check measures both halves of one rule. `markdown.md` caps a parag
 
 A sentence boundary closes on terminal punctuation ahead of a capital or a code span. The capital is what keeps a version pin and a decimal from each reading as two sentences, and the code span is admitted beside it because a command name opening a sentence carries no capital to find.
 
-The paragraph weight sits at 700 and the bullet weight at 250. Both shipped at 400, and the bullet number moved to 250 so the audit's warning and the `paragraph-growth` gate stage, which fails a bullet a branch adds or grows past it in a context entry, read one number. The paragraph number was borrowed because the paragraph number was borrowed from the bullet rule when the two checks landed together, and each has since been read against a sample of its own. They are separate checkpoints in the standard and separate patterns in the parser, so a read that moves one leaves the other where it is.
+The paragraph weight sits at 700 and the bullet weight at 250. Both shipped at 400, and the bullet number moved to 250 so the audit's warning and the `paragraph-growth` gate stage, which fails a bullet a branch adds or grows past it in a context entry, read one number. The paragraph number was borrowed from the bullet rule when the two checks landed together, and each has since been read against a sample of its own. They are separate checkpoints in the standard and separate patterns in the parser, so a read that moves one leaves the other where it is.
 
 ### The sample behind the paragraph number
 
@@ -48,7 +48,7 @@ A bullet, a heading, a table row, a blockquote, a blank line, and a fence each e
 
 ## Bullet stacks
 
-A run of consecutive top-level bullets reports past 5. A blank line, an indented continuation, and a nested item do not break the run, and a paragraph, a heading, or any other column-zero line does. A fenced line is skipped without breaking it. The count is of items rather than weight, so it catches a catalog of short bullets the 400-character checkpoint above passes.
+A run of consecutive top-level bullets reports past 5. A blank line, an indented continuation, and a nested item do not break the run, and a paragraph, a heading, or any other column-zero line does. A fenced line is skipped without breaking it. The count is of items rather than weight, so it catches a catalog of short bullets the 250-character checkpoint above passes.
 
 Two shapes are exempt. A run whose every item opens with a bold label or a link names its own subject per item and reads as a table of entries, and a numbered list states an order, so numbered items never count. `CHANGELOG.md` is exempt by name. Governance rules and `REQUIREMENT.md` sit outside the gate stage's scope rather than being exempted here, since a rule is one imperative per bullet.
 

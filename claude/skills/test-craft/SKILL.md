@@ -60,6 +60,8 @@ Every test carries these, at any layer and in any runner:
 
 ### Isolation and assertions
 
+Every test carries these too:
+
 - Group related tests with the framework's nesting mechanism, and keep it to two levels deep.
 - Keep tests independent with no shared side effects. Clean up and restore state after each one.
 - Await every async operation. Never leave a promise fire-and-forget in a test.

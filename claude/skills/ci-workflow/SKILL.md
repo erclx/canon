@@ -64,6 +64,8 @@ Before responding, verify:
 
 ### Artifacts, names, and deploys
 
+Before responding, also verify:
+
 - Artifacts upload on `if: failure()` only with `retention-days: 7`.
 - Job names use emoji + title format.
 - Deploy, publish, and release jobs carry a placeholder step and a named handoff, never a guessed deploy command.

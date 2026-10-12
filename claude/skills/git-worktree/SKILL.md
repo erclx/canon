@@ -83,15 +83,12 @@ If Enumeration marked the roster unreadable, stop: `❌ Session roster unreadabl
 
 From the enumeration, include a worktree in the remove set when all hold:
 
-- Not the main row.
-- Not the current session's worktree.
-- Not occupied by a live session.
-
-### Tree state
-
-- Not a `foreign` tree.
-- State is `merged` or `merged (local)`.
-- Working tree is clean.
+1. Not the main row.
+2. Not the current session's worktree.
+3. Not occupied by a live session.
+4. Not a `foreign` tree.
+5. State is `merged` or `merged (local)`.
+6. Working tree is clean.
 
 Every other non-main row goes to the skip set with a one-word reason, the first that applies in this order: `current`, `occupied`, `foreign`, `dirty`, `open`, `closed`, `unmerged`. A `foreign` tree that is also dirty reports `foreign`, since `dirty` is a state the operator can clear and `foreign` is not. Leading with the transient reason invites a commit or stash that changes nothing, after which the row reports `foreign` and holds back anyway.
 

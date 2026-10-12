@@ -17,6 +17,8 @@ Read these files in parallel:
 
 ### Writing standards
 
+Read these in the same pass:
+
 - `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md`: punctuation and formatting for all generated text
 - The `write-human` skill: voice, rhythm, and sentence construction for all generated text
 - `${CLAUDE_SKILL_DIR}/../git-commit/references/versioning.md`: phase label vs semver discipline
