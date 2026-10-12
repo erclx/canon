@@ -53,7 +53,7 @@ describe('injectManifest', () => {
 
     await injectManifest(resolveChain(PROJECT_ROOT, 'web'), target)
 
-    expect(stderr()).toContain('lint:fix')
+    expect(stderr()).toContain('test:run')
   })
 
   it('should name a declared dev dependency it could not install without a package.json', async () => {
