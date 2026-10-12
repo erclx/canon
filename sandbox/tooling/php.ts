@@ -1,17 +1,7 @@
-import { readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { type StageContext, scenario } from '@/sandbox/scenario'
 
 const QUIET = { stdout: 'ignore', stderr: 'ignore' } as const
-
-/** `chmod +x scripts/*.sh`, passing the pattern through unexpanded when nothing matches, as the shell did. */
-function makeScriptsExecutable(ctx: StageContext): void {
-  const scripts = readdirSync(join(ctx.dir, 'scripts'))
-    .filter((name) => name.endsWith('.sh'))
-    .sort()
-    .map((name) => `scripts/${name}`)
-  ctx.run('chmod', ['+x', ...(scripts.length > 0 ? scripts : ['scripts/*.sh'])])
-}
 
 function hasCommand(ctx: StageContext, name: string): boolean {
   return Bun.which(name, { PATH: ctx.env.PATH }) !== null
@@ -51,10 +41,6 @@ export default scenario({
 
       ctx.log.step('Initializing Husky')
       ctx.run('bunx', ['husky'])
-
-      ctx.log.step('Setting script permissions')
-      makeScriptsExecutable(ctx)
-      ctx.log.info('Scripts made executable')
 
       ctx.log.step('Installing php tooling deps')
       ctx.log.info(
