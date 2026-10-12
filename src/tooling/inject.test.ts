@@ -73,17 +73,28 @@ describe('injectManifest', () => {
   })
 })
 
-describe('injectSeeds in a subfolder', () => {
-  const chain = () =>
-    resolveChain(PROJECT_ROOT, 'vite-react', { skipStack: 'base' })
-
-  it('should write no nested spell config', async () => {
+describe('injectSeeds over an existing destination', () => {
+  it('should leave the file byte for byte', async () => {
     captureStderr()
-    const sub = subfolder()
+    const mine = 'mine-only\n'
+    writeFileSync(join(target, '.prettierignore'), mine)
 
-    await injectSeeds(chain(), sub)
+    await injectSeeds(resolveChain(PROJECT_ROOT, 'base'), target)
 
-    expect(existsSync(join(sub, 'cspell.json'))).toBe(false)
+    expect(readFileSync(join(target, '.prettierignore'), 'utf8')).toBe(mine)
+  })
+
+  it('should write the seed when the destination is missing', async () => {
+    captureStderr()
+
+    await injectSeeds(resolveChain(PROJECT_ROOT, 'base'), target)
+
+    expect(readFileSync(join(target, '.prettierignore'), 'utf8')).toBe(
+      readFileSync(
+        join(PROJECT_ROOT, 'tooling/base/seeds/.prettierignore'),
+        'utf8',
+      ),
+    )
   })
 })
 
