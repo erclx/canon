@@ -61,6 +61,23 @@ describe('loadManifest', () => {
     ])
   })
 
+  it('should read a gitignore array wrapped across lines in full', () => {
+    seedStack(
+      'base',
+      '[stack]\nname = "base"\n\n[gitignore]\n"# Deps" = [\n  "node_modules/",\n  ".env",\n]\n',
+    )
+
+    expect(loadManifest(root, 'base')?.gitignore).toEqual([
+      { header: '# Deps', entries: ['node_modules/', '.env'] },
+    ])
+  })
+
+  it('should read a script whose key is bare', () => {
+    seedStack('web', '[stack]\nname = "web"\n\n[scripts]\nlint = "oxlint"\n')
+
+    expect(loadManifest(root, 'web')?.scripts).toEqual({ lint: 'oxlint' })
+  })
+
   it('should read the dev packages array', () => {
     seedStack(
       'base',
