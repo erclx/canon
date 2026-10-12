@@ -121,30 +121,51 @@ describe('measureDesignProse', () => {
     ])
   })
 
-  it('passes a Personality paragraph at the word cap', () => {
+  it('passes an Overview paragraph at the word cap', () => {
     const source = record({
-      Personality: words(DESIGN_BUDGET.personalityWords),
+      Overview: words(DESIGN_BUDGET.overviewWords),
     })
 
     expect(measureDesignProse(source)).toEqual([])
   })
 
-  it('fails a Personality paragraph one word past the cap', () => {
+  it('fails an Overview paragraph one word past the cap', () => {
     const source = record({
-      Personality: words(DESIGN_BUDGET.personalityWords + 1),
+      Overview: words(DESIGN_BUDGET.overviewWords + 1),
     })
 
     expect(measureDesignProse(source)).toEqual([
-      `Personality holds ${DESIGN_BUDGET.personalityWords + 1} words against a cap of ${DESIGN_BUDGET.personalityWords}`,
+      `Overview holds ${DESIGN_BUDGET.overviewWords + 1} words against a cap of ${DESIGN_BUDGET.overviewWords}`,
     ])
   })
 
-  it('fails a Personality of two paragraphs', () => {
-    const source = record({ Personality: `${words(5)}\n\n${words(5)}` })
+  it('fails an Overview of two paragraphs', () => {
+    const source = record({ Overview: `${words(5)}\n\n${words(5)}` })
 
     expect(measureDesignProse(source)).toEqual([
-      'Personality holds 2 paragraphs against a cap of 1',
+      'Overview holds 2 paragraphs against a cap of 1',
     ])
+  })
+
+  it('caps a legacy Personality the way it caps Overview, under its own name', () => {
+    const source = record({
+      Personality: words(DESIGN_BUDGET.overviewWords + 1),
+    })
+
+    expect(measureDesignProse(source)).toEqual([
+      `Personality holds ${DESIGN_BUDGET.overviewWords + 1} words against a cap of ${DESIGN_BUDGET.overviewWords}`,
+    ])
+  })
+
+  it('passes a record carrying rules and no table within the caps', () => {
+    const source = record({
+      Overview: words(DESIGN_BUDGET.overviewWords),
+      Colors: rules(DESIGN_BUDGET.rules, DESIGN_BUDGET.ruleWords),
+      Typography: rules(DESIGN_BUDGET.rules),
+      Spacing: rules(1),
+    })
+
+    expect(measureDesignProse(source)).toEqual([])
   })
 
   it('passes a lead at the word cap', () => {
@@ -165,7 +186,7 @@ describe('measureDesignProse', () => {
     expect(measureDesignProse('')).toEqual([])
   })
 
-  it('reads a record with no Personality as nothing to count there', () => {
+  it('reads a record with no Overview as nothing to count there', () => {
     expect(measureDesignProse(record({ Color: TABLE }))).toEqual([])
   })
 })

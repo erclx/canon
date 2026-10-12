@@ -1,3 +1,5 @@
+import { canonicalHeading } from '@/design/parse'
+
 /**
  * The prose budget `claude/skills/canvas-board/references/design.md` sets for a design record, and the
  * counter the `design` gate stage reads it through.
@@ -11,21 +13,23 @@
  * `<` is dropped the way `prose()` drops it, and so is a fenced block or an
  * HTML comment spanning several lines, which `prose()` would read in part. A
  * `###` subsection counts toward the `##` section holding it, since the
- * standard fixes the sections and a subheading is no way past the cap.
+ * standard fixes the sections and a subheading is no way past the cap. A
+ * legacy `## Personality` takes the Overview cap through the parser's alias,
+ * and a finding names the heading as the record wrote it.
  */
 export const DESIGN_BUDGET = {
   /** Words before the first `##` section, the title excluded. */
   leadWords: 40,
-  /** Words in `## Personality`, held to one paragraph. */
-  personalityWords: 60,
-  personalityParagraphs: 1,
+  /** Words in `## Overview`, held to one paragraph. */
+  overviewWords: 60,
+  overviewParagraphs: 1,
   /** Bullets or paragraphs in any other section, beside its table. */
   rules: 3,
   /** Words in one of those rules, the proxy for one line. */
   ruleWords: 25,
 } as const
 
-const PERSONALITY = 'Personality'
+const OVERVIEW = 'Overview'
 
 /** A list item at any depth, which starts a rule of its own. */
 const BULLET = /^\s*(?:[-*+]|\d+[.)])\s+/
@@ -52,15 +56,15 @@ export function measureDesignProse(source: string): string[] {
           `The lead holds ${total} words against a cap of ${DESIGN_BUDGET.leadWords}`,
         )
       }
-    } else if (section.heading === PERSONALITY) {
-      if (rules.length > DESIGN_BUDGET.personalityParagraphs) {
+    } else if (canonicalHeading(section.heading) === OVERVIEW) {
+      if (rules.length > DESIGN_BUDGET.overviewParagraphs) {
         findings.push(
-          `${PERSONALITY} holds ${rules.length} paragraphs against a cap of ${DESIGN_BUDGET.personalityParagraphs}`,
+          `${section.heading} holds ${rules.length} paragraphs against a cap of ${DESIGN_BUDGET.overviewParagraphs}`,
         )
       }
-      if (total > DESIGN_BUDGET.personalityWords) {
+      if (total > DESIGN_BUDGET.overviewWords) {
         findings.push(
-          `${PERSONALITY} holds ${total} words against a cap of ${DESIGN_BUDGET.personalityWords}`,
+          `${section.heading} holds ${total} words against a cap of ${DESIGN_BUDGET.overviewWords}`,
         )
       }
     } else {
