@@ -16,4 +16,4 @@
 ## Key paths
 
 - `src/`: [description]
-- `canon/DESIGN.md`: design tokens and the visual system
+- `canon/DESIGN.md`: visual intent, pointing at the stylesheet that holds the values
