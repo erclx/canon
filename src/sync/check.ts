@@ -577,7 +577,8 @@ export function readInstalledRules(
  * not already hold.
  *
  * The band test is the entitlement filter, and `bands` carries two sources: the
- * folders the target already holds, and the folders the base stack takes whole.
+ * folders the target already holds, and the folders holding a rule the base
+ * stack resolves to.
  * A rule authored under `lang/` or `ui/` is named by an individual stack, so it
  * belongs to some targets and not others, and listing every added file would
  * tell a base consumer about rules it was never entitled to. The test

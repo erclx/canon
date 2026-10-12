@@ -43,7 +43,7 @@ The rejected alternative kept the five as thin aliases naming one framework rule
 
 `target-setup` picks the stack from the repository root's language alone, and a framework's rules arrive as extras the operator confirms. `230-nextjs` globs every `.ts` and `.tsx` file, so a Vite app would match it if it reached one. Detect proposes it only from `next` in a manifest or a `next.config.*` file, so detection scopes it to Next.js apps where stack membership once did.
 
-A target recorded on a retired stack still syncs. `readNewRules` in `src/sync/check.ts` reads a chain that no longer resolves as no chain and falls back to band folders, so the target keeps receiving updates to the rules it holds and stops being offered new framework rules.
+A target recorded on a retired stack still syncs. `readNewRules` in `src/sync/check.ts` reads a chain that no longer resolves as no chain and falls back to band folders, so the target keeps receiving updates to the rules it holds and is offered a new rule only in a band folder it already carries or one holding a base rule.
 
 ### Server rules glob every backend language
 
