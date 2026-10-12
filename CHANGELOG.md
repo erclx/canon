@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.38.0](https://github.com/erclx/canon/compare/v5.37.0...v5.38.0) (2026-10-12)
+
+
+### Features
+
+* **gate:** lint the repository with oxlint ahead of types ([#2377](https://github.com/erclx/canon/issues/2377)) ([8ff4c9f](https://github.com/erclx/canon/commit/8ff4c9f94089bae8cfd19d59e2b7bf53a922f1ce))
+* **tooling:** format with oxfmt and lint the web stacks with oxlint ([#2373](https://github.com/erclx/canon/issues/2373)) ([cbf312a](https://github.com/erclx/canon/commit/cbf312a70d58b743a2d6ad8e29c8e0c45ee28204))
+
+
+### Bug Fixes
+
+* **tooling:** compare override scripts in the drift scan ([#2378](https://github.com/erclx/canon/issues/2378)) ([9632920](https://github.com/erclx/canon/commit/963292008df22cf26d1c6610969a53c00bb41345))
+* **tooling:** name override scripts in the skipped-install warning ([#2376](https://github.com/erclx/canon/issues/2376)) ([aa6af6b](https://github.com/erclx/canon/commit/aa6af6b34d7bc20dd371f1ed61bf2487d3ca46c9))
+
 ## [5.37.0](https://github.com/erclx/canon/compare/v5.36.0...v5.37.0) (2026-10-12)
 
 
