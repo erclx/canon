@@ -5,7 +5,9 @@ description: Every top-level command with its purpose, each domain's subcommands
 
 # Command catalog
 
-Full help: `canon <command> --help`. Bare `canon --help` lists every top-level command under five headings, Project, Domains, Author and render, Session and ship, and Repo reports, with descriptions cut at 80 columns. Piped into another command, the block prints without its frame glyphs and carries the same text. Behavior notes for the install and sync verbs live in `install-and-sync.md`.
+Bare `canon --help` lists every top-level command under five headings, Project, Domains, Author and render, Session and ship, and Repo reports, with descriptions cut at 80 columns. A pipe gets the same text without the frame glyphs. Behavior notes for the install and sync verbs live in `install-and-sync.md`.
+
+`canon <command> --help` lists a command's subcommands, and `canon <command> <subcommand> --help` one leaf's flags, exit codes, and examples. `canon <command> --help --all` prints both in one call. An unknown subcommand refuses with exit 1.
 
 ## Project-level
 
@@ -78,11 +80,11 @@ query = "button, a[href], input, select, textarea, [tabindex]"
 
 ## Domain commands
 
-Each domain exposes a consistent shape where applicable: `list`, `install`, `sync`, `create`. The page named beside a domain carries its flags, records, and refusals, and `canon <domain> --help` lists the flags of any subcommand.
+Each domain exposes a consistent shape where applicable: `list`, `install`, `sync`, `create`. The page named beside a domain carries its flags, records, and refusals, and `canon <domain> --help --all` prints every subcommand's flags.
 
 - `migrate`, in `migrate.md`: `rename`, `skill-names`, `records`, `surface-roots`, `record-tree`, `rule-layout`, `scratch-evidence`, `record-layout`
 - `targets`, in `targets.md`: `list`, `pulls`
-- `gov`, in `install-and-sync.md`: `list`, `install`, `sync`, `build`, `regen`, `test-order`, `counts`, `superseded`, `citations`, `restated`
+- `gov`, in `install-and-sync.md`: `list`, `install`, `sync`, `build`, `regen`, `detect` (in `gov-detect.md`), `test-order`, `counts`, `superseded`, `citations`, `restated`
 - `tooling`, in `install-and-sync.md`: `list`, `sync`, `diff`, `reference`, `verify`, `inject`, `prune-gitignore`
 - `claude`, in `skills-audit.md`: `init`, `sync`, `setup`, `routing`, `plugin-update`, `seeds list`, `skills list`, `skills audit`, `skills drift`, `skills reach`, `skills rank`
 - `wiki`, in `scripting.md`: `init`
@@ -92,16 +94,17 @@ Each domain exposes a consistent shape where applicable: `list`, `install`, `syn
 - `slides`, described below: `render`, `list`
 - `demo`, in `demo.md`: `compile`, `run`, `frames`
 - `inventory`, described above: `run`
-- `teach`, in `teach.md`: `list`, `open`, `resource`, `glossary`, `lesson`, `stylesheet`, `nav`, `render`
-- `canvas`, described below: `serve`, `list`, `page add`, `page rename`, `frame add`, `frame move`, `frame resize`, `selection`, `edit`, `editing`, `capture`
-- `sandbox`, in `sandbox.md`: `reset`, `clean`, `check`, `coverage`
+- `teach`, in `teach.md`: `list`, `up`, `open`, `resource`, `glossary`, `lesson`, `stylesheet`, `nav`, `render`
+- `canvas`, described below: `serve`, `list`, `page add`, `page rename`, `frame add`, `frame move`, `frame resize`, `fit`, `arrange`, `selection`, `edit`, `editing`, `capture`
+- `sandbox`, in `sandbox.md`: `run`, `equivalence`, `reset`, `clean`, `check`, `coverage`
 - `tasks`, in `tasks.md`: `next-label`, `archive`, `decline`, `plan-citations`, `plan-answers`, `plan-branch`, `plan-reach`, `plan-link`, `pull-request`, `outcome`, `list`, `validate`
 - `intake`, in `intake.md`: `list`, `answer`
-- `records`, in `records.md`: `validate`, `migrate`, `ordinal`, `size`, `stale`, `prune-tmp`, `push`, `pull`
+- `records`, in `records.md`: `validate`, `ordinal`, `size`, `stale`, `prune-tmp`, `push`, `pull`
 - `sessions`, in `sessions.md`: `list`, `export`, `import`
-- `worktrees`, in `worktrees.md`: `list`, `reclaim`
+- `worktrees`, in `worktrees.md`: `list`, `reclaim`, `repair-bare-flag` (hidden)
 - `hooks`, in `hooks.md`: `post-merge`
-- `pr`, in `pr-reads.md`: `key-changes`, `head`, `checks`, `review-state`, `evidence`, `preview`, `local`, `frames`, `lift` (in `pr-lift.md`)
+- `pr`, in `pr-reads.md`: `key-changes`, `head`, `checks`, `review-state`, `evidence`, `preview`, `local`, `frames`, `lift` (in `pr-lift.md`), `tick` (in `pr-tick.md`)
+- `upstream`, in `upstream.md`: `fetch`, `catalog`, `due`, `advance`
 - `audits`, in `audits.md`: `run`, `list`
 - `gate`, in `gate.md`: `run`
 - `secrets`, in `state-scoped-risk.md`: `scan`
