@@ -34,14 +34,6 @@ Unit-test React island components (`.tsx`) only. Do not test `.astro` files. Pag
 
 Vitest is pinned to `^3` in the web manifest. Vitest `^4` bundles rolldown-vite (vite@8), which ignores the esbuild JSX config in `@vitejs/plugin-react` and breaks `.tsx` tests, plus emits deprecation warnings. Unpin once `@astrojs/react` ships a rolldown-aware plugin (or astro's bundled vite reaches 8).
 
-## Setup script
-
-- File: `scripts/setup.sh`. Destructive: deletes `.git` and self-removes after running. Run once immediately after scaffolding.
-- Prompt for project name, normalize to kebab-case, derive title-cased display name.
-- Update `package.json` name and version, inject verify/clean/update scripts, remove setup.
-- Update `astro.config.mjs`: set `site` if provided.
-- Update `<title>` and `<meta name="description">` in the default layout.
-
 ## Prettier (extend)
 
 Add `prettier-plugin-astro` first in plugins, then `prettier-plugin-tailwindcss` last (per its docs). Add a parser override for `.astro` files.

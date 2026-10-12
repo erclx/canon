@@ -33,14 +33,6 @@ When scaffolding a Chrome extension, override the installed golden configs:
 - `screenshot` script: `bun run build && bun e2e/screenshot.ts` (no preview server).
 - Additional gitignore entries: `*.crx`, `*.pem`, `release/`.
 
-## Setup script
-
-- File: `scripts/setup.sh`. Destructive: deletes `.git` and self-removes after running. Run once immediately after scaffolding.
-- Prompt for project name, normalize to kebab-case, derive title-cased display name.
-- Update `package.json` name and version, inject verify/clean/update scripts, remove setup.
-- Update `<title>` tags in HTML files.
-- Wipe `.git`, re-init, make scripts executable, commit as `chore(root): initialize <name>`.
-
 ## Development docs (extend)
 
 Append to the `## Scripts` table:

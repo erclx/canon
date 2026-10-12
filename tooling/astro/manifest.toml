@@ -20,7 +20,6 @@ packages = [
 "preview" = "WORKTREE_PORT_OFFSET=$(bash scripts/worktree-port.sh) && export WORKTREE_PORT_OFFSET && astro preview"
 "astro" = "astro"
 "typecheck" = "astro check"
-"setup" = "./scripts/setup.sh"
 "card:dev" = "WORKTREE_PORT_OFFSET=$(bash scripts/worktree-port.sh) && export WORKTREE_PORT_OFFSET && astro dev --config card.config.mjs"
 "card:check" = "bash scripts/check-card-exclusion.sh"
 

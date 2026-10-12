@@ -15,7 +15,6 @@ packages = [
 "build" = "tsc --noEmit && vite build"
 "preview" = "WORKTREE_PORT_OFFSET=$(bash scripts/worktree-port.sh) && export WORKTREE_PORT_OFFSET && vite preview"
 "typecheck" = "tsc --noEmit"
-"setup" = "./scripts/setup.sh"
 
 [scripts.override]
 "build" = "tsc --noEmit && vite build"
