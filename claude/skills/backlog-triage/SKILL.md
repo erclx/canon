@@ -112,7 +112,7 @@ Take the task stem from the item heading. Every verdict leaves the folder slug o
 - **keep**: append the `## Findings` line naming what reproduced. The backlog line stays.
 - **promote**: move the backlog line to the bottom of `## Needs a plan` in `.canon/tasks/priority.md`, with a `Waiting on` cell stating what cleared and ending in `last`, then append the `## Findings` line.
 
-Write the `## Findings` line as `- <YYYY-MM-DD>, backlog triage <slug>: <verdict>, <evidence>`. It is the last write on every verdict with a task file behind it, since Step 1 reads it as applied and a line written ahead of a refused move would mark a row done that never moved.
+Write the `## Findings` line as `- **<YYYY-MM-DD>, backlog triage <slug>:** <verdict>, <evidence>`, the bold label form `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes. It is the last write on every verdict with a task file behind it, since Step 1 reads it as applied and a line written ahead of a refused move would mark a row done that never moved.
 
 Before any promote, check the roster the way `task-board` step 4 does: a live session in this repository whose name starts with `orchestrator-` and whose `sessionId` is not this one. When one is found, write the `## Findings` line but not `priority.md` or `backlog.md`, and message that session with the row and its cell so it places the row itself.
 

@@ -49,11 +49,11 @@ pattern = '^- \[x\] Outcome: the download is served at'
 # Keep and the override both leave the folder slug on their task.
 [[content]]
 path = ".canon/tasks/v03.0-rate-limit.md"
-pattern = 'backlog triage 01-backlog-triage: keep'
+pattern = 'backlog triage 01-backlog-triage:\*\* keep'
 
 [[content]]
 path = ".canon/tasks/v05.0-dark-theme.md"
-pattern = 'backlog triage 01-backlog-triage: keep'
+pattern = 'backlog triage 01-backlog-triage:\*\* keep'
 
 # The promoted row lands under the control row with a cell ending in `last`.
 [[content]]
