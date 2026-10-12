@@ -17,9 +17,9 @@ The vite-react stack covers Vite + React + TypeScript projects: web apps and Chr
 ## What ships as golden configs
 
 - `vite.config.ts`: `@vitejs/plugin-react`, `@tailwindcss/vite`, `@` path alias to `./src`, `VITE_BASE_URL` env for base path. Dev port `5173` and preview port `4173`, each plus `WORKTREE_PORT_OFFSET`, both with `strictPort`.
-- `vitest.config.ts`: merges from `vite.config.ts`, jsdom, globals, setup file, `passWithNoTests: true`, v8 coverage.
+- `vitest.config.ts`: merges from `vite.config.ts` (imported with its `.ts` extension, which Vite 8 requires), jsdom, globals, setup file, `passWithNoTests: true`, v8 coverage.
 - `playwright.config.ts`: all browsers, `webServer` on `bun run dev` at port `5173` plus `WORKTREE_PORT_OFFSET`, `reuseExistingServer: false`, trace under `use`.
-- `tsconfig.json`: unified, `noEmit: true`, `skipLibCheck: true`, `@/` paths, `vitest/globals` and `@testing-library/jest-dom` in types.
+- `tsconfig.json`: unified, `noEmit: true`, `skipLibCheck: true`, `@/` paths, `vitest/globals` and `@testing-library/jest-dom/vitest` in types.
 
 ## Chrome extension variant
 

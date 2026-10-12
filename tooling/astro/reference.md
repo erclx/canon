@@ -20,7 +20,7 @@ The astro stack covers Astro + TypeScript projects: content sites, marketing sit
 - `astro.config.mjs`: `@astrojs/react` integration, `@tailwindcss/vite` in `vite.plugins`, `@/` path alias via `vite.resolve.alias`, `ASTRO_SITE` env for the `site` field. Port `4321` plus `WORKTREE_PORT_OFFSET` at `server.port`, with `strictPort` under `vite.server` and `vite.preview`. Astro merges the user's `vite` block into the config backing both its dev and its static preview server, and feeds `server.port` through as the preview port, so the port sits at the top level while the bind guarantee sits under `vite`.
 - `vitest.config.ts`: uses `getViteConfig` from `astro/config` (not `mergeConfig`). jsdom, globals, setup file, `passWithNoTests: true`, v8 coverage, `**/*.astro` in coverage excludes.
 - `playwright.config.ts`: all browsers, `webServer` runs `bun run build && bun run preview` on port `4321` plus `WORKTREE_PORT_OFFSET`, `reuseExistingServer: false`. Astro's dev/prod gap is wide (MDX, island hydration, asset optimization), so E2E always tests the built `dist/`. `DIST_PREBUILT` set in the environment drops the `build` half, running `bun run preview` alone against a `dist/` a prior CI job already produced.
-- `tsconfig.json`: extends `astro/tsconfigs/strict`, adds `skipLibCheck`, `vitest/globals` and `@testing-library/jest-dom` in types, `@/` paths.
+- `tsconfig.json`: extends `astro/tsconfigs/strict`, adds `skipLibCheck`, `vitest/globals` and `@testing-library/jest-dom/vitest` in types, `@/` paths.
 - `card.config.mjs`, `card-src/pages/og-card.astro`, and `scripts/check-card-exclusion.sh`: the social card route, its structural build exclusion, and the check enforcing it. See `## Social card route` below.
 - `eslint.config.js`: overrides the web layer. Adds `eslint-plugin-astro` (`.astro` parser via `astro-eslint-parser`). React-hooks scoped to `.jsx`/`.tsx` only (`.astro` is not React). The shared block's `files` selector includes `.astro`, so `check-file/filename-naming-convention` reaches `.ts`, `.tsx`, and `.astro` under `KEBAB_CASE`, overriding Astro's own PascalCase component convention deliberately, on the ground that a component's name in markup comes from the import binding rather than the filename. `.js` and `.jsx` stay out of the rule's own pattern, matching `web` and `nextjs`. `check-file/folder-naming-convention` reaches every `src/**` folder except `__tests__` and the whole `pages/` subtree, which carries its own off-block for the bracket-named dynamic routes and nested slug folders Astro's file-based routing produces. See `canon/context/tooling/stacks.md` for the measurement.
 
@@ -32,7 +32,7 @@ The astro stack covers Astro + TypeScript projects: content sites, marketing sit
 
 Unit-test React island components (`.tsx`) only. Do not test `.astro` files. Page-level behavior is verified by Playwright against rendered output.
 
-Vitest is pinned to `^3` in the web manifest. Vitest `^4` bundles rolldown-vite (vite@8), which ignores the esbuild JSX config in `@vitejs/plugin-react` and breaks `.tsx` tests, plus emits deprecation warnings. Unpin once `@astrojs/react` ships a rolldown-aware plugin (or astro's bundled vite reaches 8).
+Vitest is pinned to `^5` in the web manifest, which supports the Vite 8 that Astro 7 bundles. The earlier `^3` pin avoided `^4` bundling rolldown-vite, which ignored the esbuild JSX config in `@vitejs/plugin-react`. Astro now bundles Vite 8 itself, so that conflict no longer applies.
 
 ## Prettier (extend)
 
