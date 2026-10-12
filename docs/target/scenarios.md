@@ -52,4 +52,4 @@ A sync whose target sits below the git root knows it is writing into a subfolder
 
 - It withholds `.github/`, since GitHub reads workflows only at the repository root, and names each withheld file. Run the subtree from a job in the root workflow instead, with `working-directory` set to the subtree path the sync prints, such as `working-directory: frontend`.
 - It installs no dependencies and adds no scripts to a subtree without a `package.json`. It names what it skipped and ends on `run 'bun init' in <path>, then sync again`.
-- The subtree carries no `check` script, since that lives in the root's base layer, so run `bun scripts/verify.ts` there. It skips the format phases a subtree does not declare, since the root runs them, and still fails on a missing lint, typecheck, or test script, the phases its stack's `scripts/verify.json` requires.
+- The subtree carries no `check` script, since that lives in the root's base layer, so run `bun scripts/verify.ts` there. It skips the format phase a subtree does not declare, since the root runs them, and still fails on a missing lint, typecheck, or test script, the phases its stack's `scripts/verify.json` requires.
