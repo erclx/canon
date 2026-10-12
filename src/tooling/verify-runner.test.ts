@@ -1,6 +1,7 @@
 import { type SpawnSyncReturns, spawnSync } from 'node:child_process'
 import {
   copyFileSync,
+  existsSync,
   mkdirSync,
   mkdtempSync,
   rmSync,
@@ -15,7 +16,7 @@ const TOOLING = join(import.meta.dirname, '../../tooling')
 const RUNNER = join(TOOLING, 'base/configs/scripts/verify.ts')
 
 const STACK_SCRIPTS = {
-  base: ['format', 'check:format'],
+  base: ['check:format'],
   go: ['typecheck', 'lint', 'test:run'],
   php: ['typecheck', 'lint', 'test:run'],
   python: ['typecheck', 'lint', 'test:run'],
@@ -25,7 +26,6 @@ const STACK_SCRIPTS = {
 const ALL_PHASES = [
   'typecheck',
   'lint',
-  'format',
   'check:format',
   'check:shell',
   'test:run',
@@ -162,12 +162,12 @@ describe('an undeclared base phase', () => {
 
     expect(result.status).toBe(0)
     expect(result.stdout).toContain(
-      'Skipped: format is not declared here, so the repository root runs it',
+      'Skipped: check:format is not declared here, so the repository root runs it',
     )
   })
 
   it('should fail under the base list', () => {
-    setUp('base', ['check:format'])
+    setUp('base', [])
 
     expect(runVerify().status).toBe(1)
   })
@@ -176,6 +176,42 @@ describe('an undeclared base phase', () => {
     setUp('web', [...STACK_SCRIPTS.web, ...STACK_SCRIPTS.base])
 
     expect(runVerify().stdout).toContain('Format check passed')
+  })
+})
+
+describe('a read-only check', () => {
+  it('should fail and name bun run format when check:format exits 1', () => {
+    writeList('base')
+    writePackage({ 'check:format': 'exit 1' })
+
+    const result = runVerify()
+
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain('bun run format')
+  })
+
+  it('should never run a declared format script', () => {
+    writeList('base')
+    writePackage({
+      'check:format': 'true',
+      format: `touch ${join(fixture, 'wrote')}`,
+    })
+
+    const result = runVerify()
+
+    expect(result.status).toBe(0)
+    expect(existsSync(join(fixture, 'wrote'))).toBe(false)
+  })
+
+  it('should ignore a format entry a stale verify.json still lists', () => {
+    mkdirSync(join(fixture, 'scripts'), { recursive: true })
+    writeFileSync(
+      join(fixture, 'scripts/verify.json'),
+      JSON.stringify({ require: ['format', 'check:format'] }),
+    )
+    writePackage(declare(['check:format']))
+
+    expect(runVerify().status).toBe(0)
   })
 })
 
