@@ -55,3 +55,7 @@ The citation count before a plan archives guards against the one-plan-per-task m
 ### The tasks rule keeps the plan-writing act
 
 `governance/rules/canon/task-scope.md` keeps the act of writing a plan in the same session as its task and linking it, because the standard fixes the `Plan:` link for a plan that exists and never tells a session to create one. The seed eval in `scripts/eval/result-seed.md` measured the gap: sessions holding the bullet wrote plans and sessions without it wrote none.
+
+### Findings keep a bold source label
+
+A task's `## Findings` stays a flat bullet list, each bullet opening with a bold label naming its source and date and held to a few sentences. Across 973 tasks with findings the median carried 6 and over half carried more than 5, so a plain list reads as a wall. An H3 per finding was rejected, since it puts about 48 headings on the longest task and makes each of the seven writing skills invent a title. The bold label makes the list scannable by source and falls under the labeled-run exemption to the bullet cap, at one line per writing skill. Outcomes stay a checklist because the archive verb reads them by their `- [ ]` line.
