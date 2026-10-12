@@ -171,20 +171,20 @@ const STANDARDS_CALL = /\bcanon standards(?![\w-])/g
 const PHASE_LABEL = /\bv\d+\.\d+(?!\.\d)\b/g
 
 /**
- * A `.claude/rules/<segments>/<nnn>-<slug>.md` citation from a body under
- * `claude/skills/`, the installed-path spelling `598-authoring-layout.md`
- * bans a shipped skill body from citing as authority for its own behavior.
+ * A `.claude/rules/<segments>/<slug>.md` citation from a body under
+ * `claude/skills/`, the installed-path spelling `598-authoring-layout.md` bans a
+ * shipped skill body from citing as authority for its own behavior.
  *
- * Anchored on the trailing `\d{3}-[\w-]+\.md` rather than on the bare
- * `.claude/rules/` prefix, which is what keeps a folder mention carrying no
- * number, such as `create-rule`, `target-check`, and `target-setup` already
- * write correctly, from matching. The segment group between `rules/` and the
- * numbered file admits both a governance-namespace path
- * (`canon/canon/604-scratch.md`) and a project-namespace one
- * (`project/<subdir>/<n>-<slug>.md`) without distinguishing them, since
- * either shape is the same broken citation.
+ * Anchored on a trailing `.md` file rather than on the bare `.claude/rules/`
+ * prefix, which is what keeps a folder mention, such as `create-rule`,
+ * `target-check`, and `target-setup` write, from matching: it ends in `/` or
+ * names no `.md`. The segments between `rules/` and the file admit both a
+ * governance-namespace path (`canon/canon/scratch.md`) and a
+ * project-namespace one (`project/<subdir>/<slug>.md`) without distinguishing
+ * them, since either shape is the same broken citation, and the placeholder
+ * check spares the bracketed illustration.
  */
-const RULE_PATH = /(?<![\w./-])\.claude\/rules\/[^\s`)\]]*\/\d{3}-[\w-]+\.md\b/g
+const RULE_PATH = /(?<![\w./-])\.claude\/rules\/[^\s`)\]]*?[\w-]+\.md\b/g
 
 export interface ShippedReference {
   readonly file: string
