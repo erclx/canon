@@ -6,7 +6,7 @@ scaffold = ""
 
 [sync]
 source = "configs"
-per_root = ["scripts/verify.sh", "scripts/verify.ts", "scripts/verify.json"]
+per_root = ["scripts/verify.ts", "scripts/verify.json"]
 
 [dependencies.dev]
 packages = [
@@ -17,9 +17,8 @@ packages = [
 ]
 
 [scripts]
-"check:format" = "prettier --check --log-level warn --ignore-path .gitignore --ignore-path .prettierignore . && find scripts -name '*.sh' -exec shfmt --diff --indent 2 {} +"
-"check:shell" = "find scripts -name '*.sh' -exec shellcheck --severity=warning {} +"
-"format" = "prettier --write --log-level warn --ignore-path .gitignore --ignore-path .prettierignore . && find scripts -name '*.sh' -exec shfmt --write --indent 2 {} +"
+"check:format" = "prettier --check --log-level warn --ignore-path .gitignore --ignore-path .prettierignore ."
+"format" = "prettier --write --log-level warn --ignore-path .gitignore --ignore-path .prettierignore ."
 "prepare" = "husky"
 
 [scripts.override]

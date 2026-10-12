@@ -22,11 +22,10 @@ Owns the GitHub Actions workflow that gates a merge: which events start a run, a
 
 Defined in `.github/workflows/verify.yml`. All jobs must pass before merge.
 
-| Check  | Command                | What it asserts                    |
-| ------ | ---------------------- | ---------------------------------- |
-| Format | `bun run check:format` | prettier and shfmt are clean       |
-| Shell  | `bun run check:shell`  | shellcheck passes at warning level |
+| Check  | Command                | What it asserts   |
+| ------ | ---------------------- | ----------------- |
+| Format | `bun run check:format` | prettier is clean |
 
 ## Running CI locally
 
-`bun run check` runs the same three asserts plus auto-formats first. If CI fails on format, run `bun run check` locally and commit the diff.
+`bun run check` runs the same assert plus auto-formats first. If CI fails on format, run `bun run check` locally and commit the diff.

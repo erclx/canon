@@ -2,6 +2,5 @@
   "**/*.{json,md,mdc}": [
     "prettier --write --ignore-path .gitignore --ignore-path .prettierignore"
   ],
-  "**/*.md": ["canon indexes regen"],
-  "**/*.sh": ["shfmt --write --indent 2", "shellcheck --severity=warning"]
+  "**/*.md": ["canon indexes regen"]
 }

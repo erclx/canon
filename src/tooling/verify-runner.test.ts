@@ -13,7 +13,6 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 const TOOLING = join(import.meta.dirname, '../../tooling')
 const RUNNER = join(TOOLING, 'base/configs/scripts/verify.ts')
-const WRAPPER = join(TOOLING, 'base/configs/scripts/verify.sh')
 
 const STACK_SCRIPTS = {
   base: ['format', 'check:format'],
@@ -400,16 +399,5 @@ describe('markdown bans', () => {
     )
 
     expect(runVerify().stdout).not.toContain('CHANGELOG')
-  })
-})
-
-describe('verify.sh', () => {
-  it('should delegate to the runner', () => {
-    setUp('web', STACK_SCRIPTS.web)
-
-    const result = run(['bash', WRAPPER])
-
-    expect(result.status).toBe(0)
-    expect(result.stdout).toContain('Skipped: format is not declared here')
   })
 })

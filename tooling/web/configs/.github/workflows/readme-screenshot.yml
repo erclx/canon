@@ -95,11 +95,9 @@ jobs:
         # and stops here without pushing a second time.
         if: steps.diff.outputs.changed == 'true'
         # The hooks are off because this commit carries nothing they can read.
-        # `pre-push` runs the full verify, whose format step shells out to
-        # `shfmt`, which the runner does not install, so a push through them
-        # exits 127. The jobs in verify.yml already run those checks against
-        # the source, and what this step pushes is PNG bytes a capture
-        # produced.
+        # `pre-push` runs the full verify, which reruns every check the jobs
+        # in verify.yml already ran against the source, and what this step
+        # pushes is PNG bytes a capture produced.
         env:
           HUSKY: 0
         run: |
