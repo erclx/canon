@@ -38,7 +38,14 @@ function makeStructure(
 }
 
 function makeInput(overrides: Partial<GateInput> = {}): GateInput {
-  return { bans: [], links: [], structure: [], ...overrides }
+  return {
+    bans: [],
+    links: [],
+    structure: [],
+    colons: [],
+    headingCase: [],
+    ...overrides,
+  }
 }
 
 describe('isGating', () => {
@@ -113,6 +120,15 @@ describe('isGating', () => {
   it('should leave a run past the depth checkpoint advisory', () => {
     const input = makeInput({
       structure: [makeStructure({ longestRun: 61, longestRunLine: 44 })],
+    })
+
+    expect(isGating(input)).toBe(false)
+  })
+
+  it('should leave a mid-sentence colon and a heading case finding advisory', () => {
+    const input = makeInput({
+      colons: [{ line: 3, column: 14, text: 'Prose sentence: another clause.' }],
+      headingCase: [{ line: 1, text: 'Key Changes', words: ['Changes'] }],
     })
 
     expect(isGating(input)).toBe(false)

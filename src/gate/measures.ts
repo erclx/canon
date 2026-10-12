@@ -659,7 +659,7 @@ export const markdownBans: Measure = async (ctx) => {
     return {
       emissions: [output(frame.all)],
       failure:
-        'Markdown prose carries a banned character, or a relative link resolves to nothing on disk. Rewrite the sentence or fix the link, and reach for a code span only where the token is genuinely an identifier under discussion.',
+        'Markdown prose carries a banned character, or a relative link resolves to nothing on disk. Rewrite the sentence, since a colon or a comma standing where the em dash was is the same sentence, or fix the link, and reach for a code span only where the token is genuinely an identifier under discussion.',
     }
   }
 

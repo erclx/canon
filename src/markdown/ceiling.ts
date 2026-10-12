@@ -34,9 +34,14 @@ export interface CeilingFinding {
   readonly exempt: string | null
 }
 
+/** Whether the release tool writes this document, which no measure reads. */
+export function isChangelog(rel: string): boolean {
+  return basename(rel) === CHANGELOG
+}
+
 /** The reason a document is exempt from the ceiling, or null where it is not. */
 export function lengthExemption(rel: string, source: string): string | null {
-  if (basename(rel) === CHANGELOG) return CHANGELOG_REASON
+  if (isChangelog(rel)) return CHANGELOG_REASON
 
   for (const line of bodyLines(source)) {
     if (line.fenced) continue
