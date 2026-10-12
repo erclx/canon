@@ -5,25 +5,27 @@ description: The rebase stage the worker's return leg carries, the worker role h
 
 # Worker
 
-## The rebase stage
+## Decisions
+
+### The rebase stage
 
 `review-address` runs a rebase stage between the doc refresh and the push, since a branch that answers every finding can still fail to merge once a sibling lands first. The orchestrator's poll reports `CONFLICT` on that transition, which is what lets the stage skip building its own detection.
 
 The stage sits after the fixes rather than before them, so one force-push carries both and the reviewer reads a single delta. It tests with `git fetch origin main` followed by `git merge-tree --write-tree`, chosen over `gh pr view --json mergeable`, since that field returns `UNKNOWN` exactly when a poll asks.
 
-### The no-findings path
+#### The no-findings path
 
 The test runs ahead of the no-findings guard rather than inside the fix path. A guard gated on the finding count alone stops before the stage on a pull request carrying no comments, which is exactly the shape a stale branch produces when `main` moves rather than the review saying anything, so the guard decides on the rebase test instead and a run carrying no findings skips straight to it.
 
 The reply, the terminal confirmation, and the output line each need a rebase-only form on that path, since all three otherwise assume at least one finding. The reply takes a `## Rebase` heading rather than `## Review response`, since the second claims a review the run never read and would sit under a `## Review` that does not exist. The heading also stays outside that family so the close-out's first-line equality test cannot match it.
 
-### Two runs of the test
+#### Two runs of the test
 
 It also runs twice. `git merge-tree` reads committed history and the fixes are uncommitted when the stage first runs, so a branch that merges clean as committed, whose fixes touch lines `main` moved, passes the first test and reaches the remote unmergeable. The second run sits after `git-followup` commits, and it costs an extra force-push only in that narrow case.
 
 The fixes are uncommitted by then, so the stage stashes before the rebase and pops after, and the resolution rules cover hunks from both. Both halves are conditional on a dirty tree, since a run answering every finding as a conscious-accept leaves nothing to stash and an unconditional pop would restore an unrelated entry from an earlier session. That same run has no commit for `git-followup` to carry either, which is why the push leg names a direct force-push for it.
 
-### Conflict resolution
+#### Conflict resolution
 
 The rules are stated where the stage runs, which is what makes it safe. A wholesale `--ours` or `--theirs` drops one side silently and passes every check, since both sides are valid content, and a generated file merged by hand produces a diff the next regen discards. A generated file needs its own rule for that reason, and an authored file needing a count or an index updated needs judgment an orchestrator does not have, which is why the worker owns this stage rather than the orchestrator.
 
@@ -31,7 +33,7 @@ No comment channel exists for a conflict. Both sides of every hunk sit in the co
 
 `git-followup` absorbs the consequence at its push, forcing under a lease when the tracking branch no longer reaches the head, since a plain `git push` is rejected on a rewritten branch. The close-out's ancestry test already covers the re-read this produces, falling back to a full pass on exactly this branch shape.
 
-## The return leg runs on REST
+### The return leg runs on REST
 
 A cloud worker answering a review runs `review-address`, which calls `git-followup`, and the cloud's GitHub proxy refuses GraphQL. Every `gh pr` subcommand runs on GraphQL, so both bodies resolve the pull request through `canon pr head --json` and read, post, and edit through `gh api` alone. An early cloud run posted its reply only because the worker reached for REST unprompted, and the contract turns that improvisation into the path.
 
@@ -39,7 +41,7 @@ The writes moved with the reads on this leg, since a reply posted through `gh pr
 
 `review-ui` posts its verdict and `git-split` opens and retargets its pull requests through REST as well, since a cloud session runs both and a write fails there as surely as a read. `src/claude/skills-rest.test.ts` fails on any `gh pr` subcommand in all five paths it covers. The leg also reaches `git-pr/references/evidence.md`, since `git-followup` mints a preview through it, so that one file sits in the list while the rest of `git-pr` does not.
 
-## The worker's own half
+### The worker's own half
 
 `role-worker` exists because without it the return leg the rebase stage depends on is documented only on the side that does not perform it. Worker behavior spreads across `session-worktree`, `auto-ship`, and `review-address`, each owning a step, and none of the three names the role or the channel on its own.
 
@@ -47,7 +49,7 @@ The writes moved with the reads on this leg, since a reply posted through `gh pr
 
 The body stays thin by construction, since it has three readers who need different things from it. A dispatched worker reads it as its whole operating contract with nobody watching, a hand-launched one reads it beside a person who can correct it, and the orchestrator reads it to know what it may assume. A rule written for the first can be wrong for the second, so the body carries the role, the boundaries, the three obligations, the refusal right, and the lifetime, and points at the three step-owning skills for everything else.
 
-### The channel splits by who sends
+#### The channel splits by who sends
 
 Each half is stated where its sender reads it. The worker's obligations sit in `role-worker` and the orchestrator's handback stays in `orchestrator-poll.md`. One shared section would put a worker's duties in a file no worker loads, which is the defect the split avoids. The orchestrator's step 6 points at the worker skill rather than holding its own copy.
 
@@ -59,7 +61,7 @@ A launch naming `review-address` alone reaches no `role-worker` and takes no rol
 
 Refusing stays a first-class move rather than a failure mode: a worker arguing back with evidence rather than complying has reached corrections a report-upward-only body would suppress.
 
-## The relay
+### The relay
 
 `role-worker` and `role-planner` each state a channel, and each assumes a message-sending tool carries what they compose. A standalone skill for the session holding neither role never fires, because nothing routes a session to a skill matching no request and reaching for no artifact of its own.
 
@@ -67,7 +69,7 @@ Moving the protocol inline into each role body was the other alternative, and it
 
 `session-relay` is the shape that keeps both. The firing condition survives because the pointer sits inside `## The channel`, a section both role bodies already read at session start rather than one reached by request match alone, and what remains duplicated across the two bodies is two sentences naming one skill rather than the protocol itself. A pointer drifting from its target fails loudly, since the skill it names either resolves or does not, where two copies of one protocol drift from each other in silence.
 
-### A session holding neither role
+#### A session holding neither role
 
 A session holding neither role has no `## The channel` section to carry the pointer, so a relay scoped to the two roles would read neither ladder and never learn the skill existed. A worker dispatched into another project is the concrete instance, structurally barred from `role-worker` since that body resolves session scratch against a main worktree root a target does not carry, and it meets the gap by naming the relay directly.
 
@@ -77,7 +79,7 @@ No rule carries block-before-prompt. `session-relay` owns the send mechanics and
 
 The relay's description names a session stuck on a question that owes its dispatcher a message before it stops to ask, since that is the one trigger a roleless session carries nowhere else. The routing eval is the only check that the widened description still fires, since nothing else tests what a roleless session reaches.
 
-## What the announcement buys
+### What the announcement buys
 
 The poll's condition is an open pull request alone rather than an open pull request or a dispatched worker, since the script reads pull requests and a building worker has none. The announcement covers exactly the gap that leaves open, because the transition from building to reviewable is the one moment only the worker knows.
 

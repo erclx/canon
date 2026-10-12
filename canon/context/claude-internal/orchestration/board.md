@@ -5,7 +5,9 @@ description: Why the board is one orchestrator's gitignored scratch, the split b
 
 # Board
 
-## Board constraints
+## Decisions
+
+### Board constraints
 
 Gitignored also means undated. `git log --diff-filter=A` over `.canon/groundwork/`, `.canon/intake/`, `.canon/plans/`, or `.canon/tasks/` returns nothing at all, since no commit ever touched those paths, so a pass reconstructing when a folder opened has only what the file wrote down itself. Filesystem mtime is the wrong substitute, because it records the last edit and reads later than the truth on anything still being worked. A surface that wants a recoverable opening date carries it as a frontmatter field, which is why `claude/skills/plan-groundwork/references/groundwork.md` and `intake.md` both require one.
 
@@ -15,7 +17,7 @@ A worker takes neither path and files no task file either. `task-board` Create s
 
 Being gitignored also puts the citations these artifacts carry outside every check. A task file names its origin as a `Groundwork:` or `Plan:` link, `priority.md` carries a plan link per row, and a review report names the files it read. None of those appear in a diff, the citation half of `canon context audit` covers `canon/context/` alone, and no drift stage reads the folder, so a path rename anywhere under `.claude/` has to sweep the board and the plans by hand or it ships with every pointer broken and each check still green.
 
-## Board and backlog
+### Board and backlog
 
 The three readiness groups answer whether a task can start, which is mechanical and checkable. Nothing in them answers which task is worth starting, and once unplanned rows number in the dozens that judgment stops fitting in one reading, so the board cannot say what to do next.
 
@@ -31,7 +33,7 @@ Sequencing rationale has no dedicated home. It rides in the `Waiting on` cell th
 
 The three groups have no slot at the other end either, for work too small to plan that is executing in the session filing it. `## Run now` requires a written plan covering every open outcome, so a change agreed as a diff in conversation cannot enter it, and the backlog asserts that nobody has scheduled the task, which is false of work already running. Such a row takes `## Needs a plan` with the mismatch stated in its own `Waiting on` cell, on the reading that a row contradicting its heading for the minutes before a merge clears it costs less than a fourth group the standard bars.
 
-## Validating a row
+### Validating a row
 
 `canon tasks validate` checks what a row claims once the sweep has rewritten it. It is a verb rather than a hook because the board is gitignored per-machine scratch, so a `PostToolUse` hook would fire on intermediate states mid-restructure and run nowhere but an interactive session. It reads and never writes, since a row is the orchestrator's claim about readiness and a validator repairing one would assert the claim it exists to test.
 
@@ -39,7 +41,7 @@ The check it earns its place on is file-set overlap between `## Run now` rows. T
 
 The validator lists those pairs in a `shared` array that moves no exit code. A collision finding exiting 2 was the retired alternative, which held only while the gate serialized on a shared file. Once the gate held on a dependency, a contract, a relocation, a sweep, or a stated reason alone, that finding failed every sweep on a canvas doc two independent rows both wrote, and a `Touches` cell cannot say which hold a pair carries.
 
-### Blockers
+#### Blockers
 
 The blocker check reaches the opposite groups on the same argument. A blocker cell is a measurement taken the day a row was parked, and two of the five kinds it carries put a fact on disk: a cited task is settled by being archived, by being declined, or by reaching the trunk, and a cited file is settled by nothing under `## Run now` still holding it. Both are inputs the validator already reads for the other four checks.
 
@@ -47,7 +49,7 @@ Reaching the trunk is the check the closed checkbox cannot answer. `task-complet
 
 The reader never fetches. `canon tasks validate` runs several times a sweep, so a clone behind its remote under-reports a settled row rather than claiming work landed. The trade is that a session that has not pulled sees parked rows it could have released.
 
-### The cell stays prose
+#### The cell stays prose
 
 The cell stays prose and the check reads citations out of it, which is the constraint the board standard sets by fixing three forms for the cell and leaving it unstructured. A cited task is a bare sibling link, so a pointer into another folder is a plan and settles nothing. Parsing the cell into fields was the alternative and it writes a grammar for a corpus of a handful of rows nobody phrases the same way twice.
 
@@ -57,11 +59,11 @@ A citation resolving in none of the three is `blocker-unresolved` rather than a 
 
 The three kinds resting on judgment go to a second array rather than to the findings, because a check reporting only what it can settle is trusted past its reach. A clean findings list on a board whose parked rows were never testable reads as a clean board, so the untested array keeps the reach visible without moving an exit code.
 
-### Mapping
+#### Mapping
 
 The mapping check counts a task file against both the board and the backlog. Counting against the board alone reports a row and a task file that do not map one to one, which is exactly the state a backlogged task is in, so every run would fail with each finding correct. Reading a marker inside the task file was the alternative and it puts the same fact in two places, where the backlog line already says it. One check across both surfaces also lets a task move between them without the move looking like a dropped file, and a task named by both is reported for the reason a task in two groups is.
 
-## The filing boundary
+### The filing boundary
 
 Filing a row states the defect and the surface it was seen on and stops, leaving the extent and the cause to whoever plans the row. A row carrying a count reads as measured, so a planner inherits a scope nobody outside the orchestrating seat could check. The cause half is the more expensive one: a filed row can assert a mechanism nobody opened the module to check, and a wrong count fails loudly at the first re-measurement where a wrong mechanism sends real work in the wrong direction.
 

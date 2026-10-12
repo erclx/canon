@@ -14,6 +14,9 @@ description: The task, plan, and ready-folder artifacts coordinating multi-sessi
 - `.canon/tasks/` owns one gitignored file per task, the board surfaces `priority.md` and `backlog.md`, and the session maps
 - `.canon/plans/` owns one gitignored plan per task, archived beside the task on ship
 - `.canon/ready/` owns the finished-text folders a plan names as its verbatim source
+
+### Skill and source folders
+
 - `claude/skills/role-orchestrator/references/` owns the orchestrator runbooks
 - `claude/skills/role-orchestrator/scripts/` owns `poll.ts` and `watch.ts`, the review trigger's two loops, and the `repo.ts` they share
 - `src/tasks/` owns the `canon tasks` verbs that validate, archive, and derive from the board
@@ -24,12 +27,15 @@ Each file covers one stage of a row's life:
 - `canon/context/claude-internal/orchestration/board.md`: the board's constraints, the backlog split, row validation, and the filing boundary
 - `canon/context/claude-internal/orchestration/planning.md`: the planning dispatch and the gotchas of reading a plan
 - `canon/context/claude-internal/orchestration/dispatch.md`: the self-dispatch, its three gates, and what binds concurrency
+
+### Review, runbooks, and reclaim
+
 - `canon/context/claude-internal/orchestration/review.md`: the review trigger, its poll and watch loops, and the handback dispatch
 - `canon/context/claude-internal/orchestration/poll.md`: how the poll classifies a pull request, its base-movement readings, and its test harness
 - `canon/context/claude-internal/orchestration/runbooks.md`: the orchestrator runbooks, the session map, and the parked-row pass
 - `canon/context/claude-internal/orchestration/reclaim.md`: the reading that decides which worktree is safe to remove, and the removal routes
 
-## The artifacts
+### The artifacts
 
 - `.canon/tasks/vXX.Y-<slug>.md`: written by the orchestrator. One task with its outcomes and a test strategy, and the only place a phase label lives. Gitignored, shared across worktrees, archived on ship.
 - `.canon/plans/feature-<slug>.md`: written by the orchestrator or a worker. Files to touch with reasons, optional constraints, risks, and answered questions for one task. Gitignored, shared across worktrees, archived on ship.
@@ -37,7 +43,9 @@ Each file covers one stage of a row's life:
 
 A ready folder covers the one case where a session has already written the finished text, such as a skill or a rule, rather than a description of it. It rides the existing plan and task contract: the plan's `**Constraints:**` name the ready folder as the verbatim source for the paths its `**Files to touch:**` lists, so `plan-branch`, `plan-reach`, `archive`, and dispatch all keep resolving the plan itself, unchanged. `canon tasks archive` moves the task, the plan, and the ready folder the task's `Ready:` line names. `role-worker` copies the folder's files verbatim into its worktree and edits only what the gate or the overview requires, rather than re-authoring from the plan's description. `claude/skills/draft-ready/references/ready.md` fixes the folder's shape, and the `draft-ready` skill writes the folder, its overview, the thin plan, and the task in one invocation.
 
-## The drafting flow
+## Decisions
+
+### The drafting flow
 
 The orchestrator writes a task file through `task-board`, runs `plan-feature` to produce a plan carrying the reading list and any constraints, then hands the worker a plan slug. The worker enters a linked worktree, reads the plan, and implements.
 
@@ -51,7 +59,7 @@ The move sits inside `archiveTask` rather than in a second call the hook makes a
 
 An operator's shell profile may wrap `canon` in a function that runs the binary and then a second command ending in something like `cd .`, so the function returns 0 whatever the binary did. It masks an ordinary refusal exactly as it masks an absent verb: `canon tasks archive` against no such stem exits 1 called directly and 0 called through such a wrapper. Every task verb tells a caller to branch on `reason` rather than on the exit, which is the rule that survives it.
 
-### Origins
+#### Origins
 
 The origin invariant is owned by `claude/skills/task-board/references/tasks.md`. Orchestration adds that a handoff needs more than an origin, because scope lives in the plan rather than in the task file, so a task can sit on the board plan-less and gains one when it is handed out. See Boundaries in `role-orchestrator` for the handoff rule and for the boundary that keeps tracked edits out of the main worktree.
 
@@ -59,7 +67,7 @@ The reverse direction of that invariant reads three origins. `task-board` lists 
 
 Counting `.canon/tasks/archive/` and `.canon/tasks/declined/` beside the board separates the two, and the answer slots are read through `canon intake list --json` rather than by grepping headings, since the verb owns the parse `claude/skills/plan-intake/references/intake.md` fixes and skips the index and every fenced sample a grep would count. The verb reports four counts per folder and the check reads three of them. `malformed` earns its own wording rather than an exclusion, because an item carrying no answer slot is neither unread nor answered, so a test reading `unread` alone folds a broken file onto the answered side and reports it as decided work nobody promoted. The step names what it read on a clean pass rather than printing nothing.
 
-## Phase label containment
+### Phase label containment
 
 Phase labels stay inside the task board, in both the filename and the title. They never appear in PR titles or bodies, review comments, issues, commit messages, or git tags. The scan in `claude/skills/git-pr/references/publish.md` catches a leak on the way out, reading the label rule from `claude/skills/git-commit/references/versioning.md` beside it. See that file for the rules and the reasons.
 

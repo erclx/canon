@@ -5,7 +5,9 @@ description: The self-dispatch that launches a background worker for a Run now r
 
 # Dispatch
 
-## The self-dispatch
+## Decisions
+
+### The self-dispatch
 
 Step 4 of the loop can launch a background `claude --bg` worker itself for a `## Run now` row, rather than only naming the invocation for a human to run. `orchestrator-dispatch.md` holds the procedure: derive the candidate branch with `canon tasks plan-branch <plan> --json`, check the row's plan against `canon tasks plan-answers <plan> --json`, check the branch against `canon sessions list --branch <branch> --json`, run the conflict check against every track in flight, then dispatch from the template in `orchestrator-launch.md`.
 
@@ -13,7 +15,7 @@ Spawning a worker with the Agent tool stays forbidden, since an in-process subag
 
 A cloud session can take the build instead of a local worker, and `canon/context/claude-internal/orchestration/cloud-dispatch.md` carries that shape.
 
-## The plan-answer gate
+### The plan-answer gate
 
 The plan-answer gate runs ahead of the other two, and it is the only one of the three reading the row rather than the tree. `canon tasks plan-answers` reports `launchable`, and where that is false it names every question still open with the label identifying it and the reason its suggestion gave for needing a person. It closes from the other end the failure `canon/context/claude-internal/orchestration/planning.md` records under a blank answer: a guard testing only for the plan file admits a plan whose open question needed a person.
 
@@ -23,7 +25,7 @@ An exact-prefix match can miss a paraphrase, so a plan whose suggestion reads `n
 
 A write-time `operator-call-phrasing` finding in `checkQuestionContract` catches a paraphrase in the same session that wrote it, so `canon records validate plans` reports it before it reaches this dispatch gate. The normalization set stays two spellings of `operator` rather than a general list, so a fifth variant can still slip both reads.
 
-### Resolving the plan reference
+#### Resolving the plan reference
 
 The reference a dispatcher hands it resolves against the project root first and the board directory second. Root order leaves the documented spellings untouched and the second base catches the one nobody documented, since a board row writes its link relative to `.canon/tasks/` and a dispatcher copying that reference out of the row it is dispatching has `../plans/feature-<slug>.md` to hand. Resolving that against the root alone lands a directory above the repository and refuses a plan that exists, which a refusal naming one base reports as a missing file rather than as a base that could not answer.
 
@@ -33,7 +35,7 @@ The liveness half is stated separately rather than folded into the resolution. `
 
 A question carrying no suggestion is a stop at execution too, and it stays the validator's finding rather than becoming this one's. `checkQuestionContract` already reports it as `suggestion-missing`, and the runbook dispatches a row whose plan is verified, so the gate testing it again would put one rule on two surfaces that ship on different cadences. The verb reads the `Questions` section rather than the file, which keeps a plan discussing the phrase in its own `Risks` from refusing itself.
 
-## The branch gate
+### The branch gate
 
 The branch check reads `claimed` off its own record rather than composing the readings itself. The field already answers across all three, and reading a pre-composed field keeps the check a verb rather than a rule the model can talk itself out of. `src/sessions/claim.ts` is the composition, joining the session roster against `listWorktrees()` and `branchRefs()` in `src/git/worktree.ts`.
 
@@ -43,7 +45,7 @@ Three readings rather than two. A worktree can outlive the session that made it 
 
 Each reading that can fail carries its own flag, so `refsReadable` sits beside `sessionsReadable` rather than folding into either `claimed` or the other flag. Without its own flag, an absent registry leaves `claimed` covering the worktree half alone with nothing distinguishing that from a genuinely clear branch, and a dispatcher reading one boolean cannot tell the two apart. Merging the two flags rebuilds that defect one reading over, since a dispatcher told the roster failed goes and looks at the roster.
 
-### One derivation for the branch
+#### One derivation for the branch
 
 Both sides derive the branch from the plan through one verb rather than either naming it for the other. Each side deriving its own candidate from the same prose disagrees in practice, on the slug and on the type alike, so two dispatches for one plan produce different strings.
 
@@ -55,9 +57,9 @@ The verb does not close the fallback. A target whose installed binary carries no
 
 The launch window is the one defect closed by a rule rather than by a reading. A worker registers on `main` in the main worktree until autoship Step 0 moves it, so for those seconds no reading names the candidate. The dispatcher holds the branches it launched this pass and treats a match as claimed, which closes the window for that session alone. A second dispatcher elsewhere sees git and the roster and nothing of that record, so the runbook states which case it covers rather than implying it covers both.
 
-## The launch
+### The launch
 
-The launch names the model, because a `claude --bg` session inherits the launching session's model and an orchestrator on a larger one silently spends it on every worker. The operator settled one test on 2026-10-12, the larger model where a wrong result is costly and nothing automatic would catch it, applied to planner, worker, and both reviewers. Sizing by folder sent a one-line rule edit and a tested hook guard over a folder nothing reads to Opus reviewers in #2328 and #2329, and sizing by plan length sent a Sonnet worker to a plan that went three review rounds in #2339. Both read a proxy for the cost of a miss.
+The launch names the model, because a `claude --bg` session inherits the launching session's model and an orchestrator on a larger one silently spends it on every worker. One test sizes the model, the larger one where a wrong result is costly and nothing automatic would catch it, applied to planner, worker, and both reviewers. Sizing by folder sends a one-line rule edit and a tested hook guard over a folder nothing reads to Opus reviewers, and sizing by plan length sends a Sonnet worker to a plan that goes three review rounds. Both read a proxy for the cost of a miss.
 
 A self-dispatched worker's name carries the prefix `worker-` rather than naming the launcher. A launcher prefix breaks any rule that reaches a controller by scanning the roster for it: the scan returns a sibling or the sender itself, and no controlling session carries the prefix. The comment in `scripts/watch.ts` keeps the `orchestrator-` spelling deliberately, since it describes that matching mistake.
 
@@ -67,17 +69,17 @@ The last hop reads a third surface, because a name is not unique. Two live sessi
 
 Asking sits above inferring on the worker's ladder. A session with an operator present puts the candidate rows through the structured question surface and halts, which costs less than sending to the wrong session and reporting success. Where nobody is there to ask, the inference rung takes the sessions holding no feature branch, since a controlling session holds none, and never a name prefix.
 
-## What binds concurrency
+### What binds concurrency
 
 A row holds behind a track in flight only on a conflict a merge cannot settle, being a dependency, a contract one changes and the other consumes, a relocation, a sweep, or a stated reason, which `orchestrator-dispatch.md` states once with its sources. What binds past that is review attention. A shared file is not a hold: both build, and the branch merging second resolves any conflict in its own session after the first lands, which is how Fowler, DORA, and GitHub's merge queue run parallel work, testing at integration rather than serializing on a file.
 
-A file-set disjointness gate was the rejected alternative. It replaced a fixed cap of three workers at `83fc7fb5` on 2026-08-27, and on 2026-10-04 it ran six ready canvas rows one at a time while what they shared was docs paragraphs and appended test cases. A trial merge cannot replace it at dispatch, since a candidate has no commits, so `git merge-tree` stays at integration. The cost is more rebases and a contract hold that rests on the dispatcher reading a plan's Risks by hand.
+A file-set disjointness gate was the rejected alternative. It ran six ready canvas rows one at a time while what they shared was docs paragraphs and appended test cases, where a fixed cap of three workers had not. A trial merge cannot replace it at dispatch, since a candidate has no commits, so `git merge-tree` stays at integration. The cost is more rebases and a contract hold that rests on the dispatcher reading a plan's Risks by hand.
 
 What binds and what costs are separate readings. `## Parallelism` carries what binds, and its `references/orchestrator-inbound.md` carries what costs. A cross-session message arrives as a new turn carrying the orchestrator's whole accumulated context, and a recurring poll bills that window again on its own interval, so a wave's spend tracks the controlling session's context rather than the work coming back. `crossSessionInbound` is the only control over it and stays unset, since `hold` and `refuse` both break the worker handback and `accept` bounds nothing. The section states the conclusion beside the cost, because a lever named without it reads as available to pull.
 
 Granularity is where the verb reads wrong rather than fails. `sharesPath` in `src/tasks/validate.ts` collides a row naming a directory with a row naming a file inside it on purpose, since an intersection over the written strings would miss exactly that overlap. A row whose `Touches` cell claims a bare folder such as `src` therefore collides with every row writing a file under it, and the imprecise half is the cell rather than the verb. The finding names the claiming row, and a `Touches` cell naming a bare folder reports as a `claims` entry beside the findings, moving no exit code. A row rewriting a whole directory has no other way to say so, and a measure that fails on a legitimate cell teaches a reader to skip it.
 
-The `worker-` prefix separates a dispatched worker from an operator's own launch in a session listing, since only a self-dispatch writes it. It carries no count.
+The `worker-` prefix separates a dispatched worker from an operator's launch in a session listing, since only a self-dispatch writes it. It carries no count.
 
 A grep on the policy phrase undercounts the surfaces stating it. The shared-file rule was spelled in the orchestrator body, its requirement, five runbooks, two workflow docs, and this entry, and also as `wiring seam`, `serialize`, and `shared file`, which a grep on `disjoint` misses. Re-grep all four after any change to the policy.
 

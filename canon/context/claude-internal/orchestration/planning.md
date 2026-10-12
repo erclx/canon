@@ -5,7 +5,9 @@ description: The planning dispatch that launches a planner session, what it owes
 
 # Planning
 
-## The planning dispatch
+## Decisions
+
+### The planning dispatch
 
 `orchestrator-launch.md` carries a second launch shape beside the build one, for the same reason as the first: dispatching a planner with `claude --bg` needs its boundaries stated once rather than retyped into each launch. Six rules go into the brief: no worktree, no branch, no tracked file, no board write, report the path alone, and re-measure rather than trusting the task file. `role-planner` holds all but the fifth, report the path alone, which is a trial condition keeping a blind comparison intact rather than an obligation.
 
@@ -15,7 +17,7 @@ None of the three checks the build shape runs binds this one. No candidate branc
 
 A planning dispatch owes the reverse reading. The plan it produces names a constraint per track in flight, so a row planned during a wave is planned against a tree that wave is changing, and the role takes that read per task rather than per batch because a reused session ages its picture of the tree while it works.
 
-### The warm half
+#### The warm half
 
 The cross-feature call stays in the controlling session. Loop step 1 in `role-orchestrator` keeps which rows conflict, what merges before what, and whether a row should run at all where the board is readable in full, and lets the per-row measurement go cold to a planner. Keeping every plan warm was the alternative, on the ground that a warm plan front-loads reasoning a cold worker would otherwise re-derive. The planner trials measured finding quality rather than that claim, ten task-file errors across four plans with two controller corrections, so they neither confirm nor retire it, and the narrowed step claims no more than they measured.
 

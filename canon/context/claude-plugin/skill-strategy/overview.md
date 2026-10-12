@@ -27,7 +27,7 @@ Each file covers one question:
 - `canon/context/claude-plugin/skill-strategy/catalog-health.md`: whether a skill earns its place, reading a usage census, the skill not built, and reading the catalog for overlap
 - `canon/context/claude-plugin/skill-strategy/redundancy-audit.md`: each skill compared against its community counterpart, and the borrows taken
 
-## The catalog
+### The catalog
 
 `canon claude skills list` is the catalog. It reports every folder under `claude/skills/`, `--names` emits those names one per line for a shell caller, and `canon claude skills list --json` returns the set as objects carrying `name`, `description`, and `requirement`. A session looking for which skills exist runs the first, and one looking for what a skill claims to do runs the third.
 
@@ -35,7 +35,9 @@ These entries hold the reasons instead: why a skill exists, where its boundary a
 
 The `migration-*` prefix names a skill performing a one-time structural move of a project into a newer toolkit layout, and the family is empty. Its members retired once `target-check` shipped, since each encoded one historical transition by hand and went obsolete the moment that transition finished, where a check reading current documentation stays true for whatever a target falls behind on next. A relocation a target still needs reaches it as a `target-check` finding. A skill name carries no alias, so a target or operator naming a retired skill gets nothing.
 
-## The consumer map
+## Decisions
+
+### The consumer map
 
 `docs/workflow/skill-map.md` carries the when-to-use map, and its tables are what a coverage claim is measured against. Groups run in the order a project meets them, from setup through building, checking, and shipping to the pull request and the toolkit-sync relationship. The last two hold what serves no single moment, one for artifacts generated on request and one for skills answering a question at any point, and they live on the sibling `docs/workflow/skill-map-on-request.md`. The coverage block spans both pages, with the journey page counting as earlier.
 
@@ -45,7 +47,7 @@ The groups derive from the scenarios in `docs/workflow/ai-workflow.md` reconcile
 
 Nothing checks that the table still covers the corpus. `canon claude skills list --names` reports the set and the comparison is a person's to run, so a skill added later opens a gap with nothing reporting it. That check belongs beside the other catalog commands rather than inside a doc rewrite.
 
-## Workflow skills and domain-knowledge skills
+### Workflow skills and domain-knowledge skills
 
 Skills split into two categories by function. The toolkit owns the first and installs the second, and mixing them is the most common source of skill bloat and maintenance drag.
 
@@ -65,7 +67,7 @@ Forking has not been necessary in practice, and when one looks tempting a thin t
 
 The rules this argument produces fire when a skill is being written, so they live in `.claude/skills/internal-claude/SKILL.md` rather than here.
 
-## Three entry points, split by what a question costs
+### Three entry points, split by what a question costs
 
 `plan-intake`, `plan-groundwork`, and `plan-feature` are the front doors, and one question routes between them. Can the item be answered by reading the repository today? Yes goes to intake at the cost of a session grepping, no goes to groundwork at the cost of runs and days, and already-decided goes to the planning skill. The test runs per item, since a dump of forty findings typically holds one that needs measuring and routing the whole dump on its worst item buys a folder nobody can close.
 
@@ -79,19 +81,19 @@ A pass that splits a finding after the fact labels the halves `3a` and `3b` rath
 
 An empty operator slot in an intake folder means unread, where a plan file's blank answer means accept. A plan is read in one sitting and an intake folder is read over weeks, so silence there is far more likely to mean nobody reached the item than that they accepted it.
 
-## Triaging the backlog reuses the intake record
+### Triaging the backlog reuses the intake record
 
 `backlog-triage` judges the backlog as a whole and is a skill rather than a launch shape for a dispatched planner. A launch shape exists only where an orchestrator composes the dispatch, while the operator calls a triage on their own schedule, and a planner launch can still name the skill.
 
 Its record is an ordinary intake folder, with the verdict riding in `Suggested:` and the task stem in the item heading. `canon intake list`, `canon intake answer`, and `plan-intake-answer` read and write it with no change, so the approval between filing and applying is the intake answer contract rather than a second one. Filing writes only inside that folder and applying writes the board, which is why the two are phases detected from folder state rather than one pass.
 
-## What a skill carries
+### What a skill carries
 
 `canon-cli` routes a job to a verb, and it carries a guarded per-verb listing on purpose. The body names each target-usable top-level verb by its job, never its subcommands or flags, and keeps one line per verb that can lose the project's edits, each pointing at `canon docs install-and-sync` for the detail. A pointer-only body was the alternative, taken against and rejected: a session needs the job-to-verb route without paying a `--help` read every time, and `canon --help` carries only partial hints that say nothing about what a sync overwrites. The drift a pointer-only body avoided is settled by a failing test instead. `src/cli/canon-cli-skill.test.ts` reads the help registry and fails naming any top-level verb the body neither carries as `canon <verb>` nor exempts as toolkit-only, and fails again when an exemption names a verb that no longer exists.
 
 The generated listing of every golden config path stays declined, since that listing ran 70 of 122 lines and `canon tooling diff` resolves the same paths against a real target, or `canon tooling sync --check` on a binary older than that verb.
 
-### A citation travels on the skill's own channel
+#### A citation travels on the skill's own channel
 
 A file a skill body cites has to arrive by the channel the skill itself travels on. Skills load live from the plugin root while governance rules are copied by a `canon` command, so a body naming an installed path is a dependency crossing that boundary and resolves only for a project that ran the matching install. Nothing reports the break, because an unresolved path produces no error until a session opens it.
 
@@ -101,13 +103,13 @@ The test cuts both ways. `plan-groundwork` and `plan-intake` are each edited by 
 
 The sharpest failure of the same test is a citation naming no toolkit file at all. A body sending a reader to a named section of the consuming project's own `CLAUDE.md` resolves to nothing in every known target while reading as an ordinary pointer, so bodies name `session-worktree` instead, which ships in the same plugin and pins no heading a retitling can break. `src/claude/skills-headings.test.ts` walks `claude/skills/` and fails on the shape, which is a prose pattern rather than a resolution because no check can read a target's own root file. It bans this instance and not the class: a body citing any part of the consuming project's file is the wider defect and nothing measures it.
 
-### The typed entry point
+#### The typed entry point
 
 The cost is the typed entry point, which is the part worth knowing before moving anything else. A person fires a prompt file by typing its path and cannot type a reference, so a runbook whose moment the loop cannot detect has to be reachable some other way. An invocation word looks like the answer and is banned by `claude/skills/create-skill/references/skill.md`, which turns down a flag that selects an alternate flow because the model misreads it and runs the vanilla path, and a handoff that silently does not happen is lost at the next compaction.
 
 What replaces it is a body that routes a plain request to the runbook serving it, leaving one flow with no flag in it. `role-orchestrator` does this for both compaction sides, while the sweep needs nothing because the loop already reaches it.
 
-### Which surface holds an invariant
+#### Which surface holds an invariant
 
 Which surface holds an invariant follows the same test, run against the failure rather than against the topic. A path-scoped rule loads when a session opens a file matching its glob, so it reaches what goes wrong inside a folder and never reaches a write that escapes one.
 

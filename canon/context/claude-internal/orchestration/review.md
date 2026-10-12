@@ -5,21 +5,25 @@ description: The review trigger and its poll and watch loops, where the poll liv
 
 # Review
 
-## The review trigger
+## Decisions
 
-`role-orchestrator/scripts/poll.ts` reports pull request movement so the orchestrator learns a branch moved without checking by hand, and the runbook's routing block decides what each report earns. A first pass, a re-review, and the handback dispatch all run from that block, so the operator triggers none of them. Where a pass runs is decided by `orchestrator-review-dispatch.md` rather than by the poll. A reviewer dispatched under `role-reviewer` takes every pull request's read but a release one's, first pass included, and the warm session reviews none in place, keeping only one cross-branch pass per wave over file sets. That reverses `.canon/groundwork/23-review-automation/06-decision.md`, which kept every first pass warm for the two cross-pull-request findings its sample produced. Groundwork 115 found a cold pass holding one pull request read the docs a warm pass holding eight had skimmed, and the file-set pass is what keeps the cross-branch half.
+### The review trigger
+
+`role-orchestrator/scripts/poll.ts` reports pull request movement so the orchestrator learns a branch moved without checking by hand, and the runbook's routing block decides what each report earns. A first pass, a re-review, and the handback dispatch all run from that block, so the operator triggers none of them. Where a pass runs is decided by `orchestrator-review-dispatch.md` rather than by the poll. A reviewer dispatched under `role-reviewer` takes every pull request's read but a release one's, first pass included, and the warm session reviews none in place, keeping only one cross-branch pass per wave over file sets.
+
+Groundwork 115 found a cold pass holding one pull request read the docs a warm pass holding eight had skimmed, and the file-set pass is what keeps the cross-branch half.
 
 Reviewing small prose changes in place was the alternative, and it lost because every in-place pass reads a whole diff into the one context the wave shares, so the cheap review on one pull request thins the attention every later one gets. The reviewer's model is picked by `## Pick the model` in `orchestrator-dispatch.md` rather than by the folder a change touches, since a folder reading sent a one-bullet rule to the larger model.
 
 `review-pr` posts its findings as a comment on the pull request rather than returning them to the session that asked, since a finding posted there survives either session ending, and neither the orchestrator nor the worker is sure to outlive the review.
 
-### The cloud reviewer
+#### The cloud reviewer
 
-On the operator's pick, a dispatched code review runs on a cloud session through the cloud build's create. The posted review is its announcement, since the session cannot message the orchestrator, and `poll.ts` already lists every open pull request locally. Spike 5 posted a review in about 64 s only because the reviewer fell back to REST when the proxy refused GraphQL, so every `canon pr` read and `review-pr` lookup now runs on REST. A UI review stays local, and a re-review is a fresh dispatch, since a cloud session is absent from `canon sessions list`. A cloud reviewer cannot run `canon pr lift` either, since the verb's one write is the GraphQL mutation, so the controller lifts for it.
+On the operator's pick, a dispatched code review runs on a cloud session through the cloud build's create. The posted review is its announcement, since the session cannot message the orchestrator, and `poll.ts` already lists every open pull request locally. A cloud reviewer posts only through REST, since the proxy refuses GraphQL, so every `canon pr` read and `review-pr` lookup runs on REST. A UI review stays local, and a re-review is a fresh dispatch, since a cloud session is absent from `canon sessions list`. A cloud reviewer cannot run `canon pr lift` either, since the verb's one write is the GraphQL mutation, so the controller lifts for it.
 
 Only an open pull request starts it, since the script reads pull requests while a building worker has none, so a dispatch alone would cost a run every interval between launch and push and return nothing. The worker announces its own pull request instead, per `role-worker`, which is the one transition only that session can observe. The dispatch survives as a fallback the orchestrator applies to a worker still out after thirty minutes with no announcement, since nothing reports a silent failure of the announcement.
 
-### The watch loop
+#### The watch loop
 
 `scripts/watch.ts` covers the same window on a loop of its own rather than on a scheduled prompt, reading the open pull request list and the session roster together every sixty seconds. The roster read is the half `poll.ts` cannot make and the reason both exist: a worker that finishes goes idle and one that crashes vanishes, so a trigger matching pull requests alone stays silent through the second. It classifies no pull request, leaving the routing block to decide what each report earns.
 
@@ -33,7 +37,7 @@ The row goes out of `canon sessions list --json` tab-separated and back in read 
 
 It resolves the repository through `git worktree list` the way the poll's baseline does, rather than a hardcoded path. And it counts every session on a branch other than the base one as a worker, rather than matching a name prefix, which would read a dispatched worker and miss every hand-launched one.
 
-### Where the poll lives
+#### Where the poll lives
 
 `orchestrator-poll.md` is a runbook and sits with the others, while the scripts it invokes take `scripts/` per `claude/skills/create-skill/references/skill.md`, which splits detail from deterministic operations. Placing both on an internal surface was the alternative, and it strands a target, which would install an orchestrator carrying its runbooks and no review trigger while the skill body names neither the poll nor the script.
 
@@ -47,7 +51,7 @@ The script is tracked and its baseline is not. State lives at `.canon/tmp/pr/pol
 
 How the script classifies a pull request, its base-movement readings, and its test harness sit in `poll.md`.
 
-## The handback dispatch
+### The handback dispatch
 
 A posted finding reaches the worker as a message from the reviewer that posted it, which is the one session that already knows what the worker should do next. The worker sends its re-review request straight back to that reviewer, addressed by the sessionId the dispatch carried, since a reviewer holds the trunk branch and `canon sessions list --branch` finds no reviewer. `ListAgents` and `SendMessage` carry both and the source page linked from `wiki/claude/sessions.md` holds the transport, with the relay through a person as the alternative that lost.
 
@@ -61,7 +65,7 @@ Reading the target off a bare listing was the alternative and it lost on measure
 
 Severity alone is a poor gate in both directions: a mis-called minor dispatches nobody and lands as a defect the operator has to notice, while a should-fix raised over a decision the plan already declined sends a worker to act on nothing. A live minors-only pass would sit until the operator ran the address skill by hand. A dispatch on any finding still sends a worker to a should-fix the plan settled, and the return leg answers that rather than a grade nobody calls consistently.
 
-### The return leg
+#### The return leg
 
 The return leg is the strongest argument for the channel. A worker answering a posted finding by naming the plan question that already declined it changes the outcome in the moment, where a thread comment waits on whoever reads it next.
 

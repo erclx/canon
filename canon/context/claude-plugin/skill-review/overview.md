@@ -25,13 +25,15 @@ Each file covers one part of the review loop:
 - `canon/context/claude-plugin/skill-review/lenses.md`: the lenses that read the pull request body rather than the diff
 - `canon/context/claude-plugin/skill-review/worker.md`: the rebase stage, the worker role, the channel split, and the relay
 
-## No version-sequencing surface
+## Decisions
+
+### No version-sequencing surface
 
 No version-sequencing surface exists. `role-orchestrator` and `review-pr` each read `.canon/tasks/priority.md`'s `Waiting on` cell for why a row sits where it does, one line per row, rather than a roadmap version file, so reasoning spanning several rows has no dedicated home and reaches a later session only through whoever remembers it.
 
 `claude/skills/draft-doc/references/requirements.md`'s Lifecycle section states that later scope arrives as a new section and that nothing sequences either list into versions.
 
-## Asserting a routing decision
+### Asserting a routing decision
 
 A router is reviewable only through what it says. A route ending in a handoff or a report rather than a file leaves a review reading a body that claims a route and unable to tell on its own whether the route fires.
 

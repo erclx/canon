@@ -23,7 +23,9 @@ Which skills carry the file is a fact two commands report. `canon claude skills 
 
 The two resolve their root differently, and the difference decides which one answers a question. The listing reads the shipped corpus rather than the cwd, so a dev-linked `canon` reports `main` no matter which worktree runs it, which is what makes it useless for verifying a branch. The audit reads the directory it is pointed at, defaulting to the cwd, so it measures the tree in hand. The merge gate runs it under `--requirements-only` on every push, which is the enforcement the rule went without while the standard required the file.
 
-## Universal coverage
+## Decisions
+
+### Universal coverage
 
 Coverage is universal across both corpora: every skill carries a `REQUIREMENT.md`, or its absence is a gap in the authoring rather than a verdict that the body is already its own specification. `canon/context/claude-internal/skills.md` carries the same rule for the internal half.
 

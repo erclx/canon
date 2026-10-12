@@ -7,7 +7,9 @@ description: How the orchestrator poll classifies a pull request, the STALE and 
 
 The trigger that runs `role-orchestrator/scripts/poll.ts`, where its baseline lives, and the handback its reports feed sit in `review.md`.
 
-## How the poll classifies
+## Decisions
+
+### How the poll classifies
 
 `RESPONSE` is two tests rather than one count. The count asks whether a reply is new to the script, the stamp asks whether it is newer than the last pass, and a reply failing the second is one that pass already answered. A worker answers a finding and the reviewing session closes out seconds later, which is the ordinary handback rather than a race, so the count alone would report the answered thread on the next run and route a re-review that stops at the guard `review-pr` states.
 
@@ -21,7 +23,7 @@ A line read from an older baseline may lack a field, so the comparison reads a m
 
 The UI family is one token, `none` or `<open|closed>-<head|behind>-<short-sha>`, read off `.reviews` by `uiState` and compared against the head as a prefix, since the `review-ui` marker may carry a short sha. It sits ahead of the unmatched heading on the snapshot line, because that heading carries spaces and has to stay last, and it rides in the baseline as the eighth field so the next run can report a transition. Carrying the covered sha in the token is what makes a second UI pass at a new head read as a change even when its heading repeats. A carried pull request never reaches that read, since `main` writes its baseline line back unchanged beyond the heading, so no `UI-` state fires on it and the baseline keeps the previous token.
 
-### Base movement
+#### Base movement
 
 `STALE` and `OVERLAP` read the base rather than the thread. A pull request's written set comes from its own diff against `git merge-base` with the base, with `--no-renames` so both sides of a rename count. `STALE` fires when the net diff from that fork point to the base touches the set, and an unreadable set reads `unknown`, never current.
 
@@ -29,7 +31,7 @@ It fires again on a push that leaves the branch behind, and `CONFLICT` does the 
 
 `OVERLAP` merges two heads with `git merge-tree --name-only` and names the conflicted files, tried only on pairs sharing a written path, since the pairwise cost grows with the square of open pull requests. Each pair reports once, carried as a comma list of partners in the tenth field and read off the lower-numbered side, and a partner the run could not read keeps its place. Both readings stay local, a `git` call over refs the poll already fetched through `pull/<n>/head`. The baseline formatter trims trailing empty fields, so a line an older version wrote round-trips unchanged.
 
-## The poll's tests
+### The poll's tests
 
 `src/claude/orchestrate-poll.test.ts` covers the classifier, which puts a shipped skill script under test. The harness builds a throwaway repository under `mktemp` and puts a stub `gh` first on `PATH`, answering the REST list, reviews, issue-comments, pull, and repository reads out of fixture files a case rewrites between runs. The stub refuses `pr`, `repo view`, and `graphql`. Either of the reviews and comments reads failing carries the pull request forward.
 

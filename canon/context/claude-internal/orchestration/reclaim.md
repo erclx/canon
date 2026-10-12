@@ -5,7 +5,9 @@ description: The reading canon worktrees list takes to decide which worktree is 
 
 # Reclaim
 
-## The reclaim reading
+## Decisions
+
+### The reclaim reading
 
 `canon worktrees list` reports which worktrees can be removed once their work ships, which the sweep after a merge does not read on its own. It is composed in `src/worktrees/reclaim.ts` out of the worktree listing, the merged pull requests, a status read per directory, and the session roster.
 
@@ -13,13 +15,13 @@ Git ancestry is the reading anyone reaches for, and it is wrong in both directio
 
 Reclaimable takes all three of a merged pull request, a clean working tree, and no live session holding the directory, and `refusals` names every failing condition rather than the first. Each alone has a case where removal loses something, and removal is the unrecoverable direction, since a worktree is gitignored scratch with no history behind it. Untracked files count as uncommitted for that reason.
 
-### Reading the merges
+#### Reading the merges
 
 The pull request read is one `gh pr list --state merged` for the repository rather than one call per worktree, which would put a network round trip inside a loop. It covers the most recent 200 merges, so an older worktree reads as having none and is refused, which fails in the keeping direction.
 
 That read strips the git resolution variables through `gitEnv()` the way every git read in the file does, because `gh` resolves its repository through git and those variables take precedence over the working directory it is handed. With `GIT_DIR` naming a remote-less repository, the stripped call reads this repository's merges while a bare `gh repo view` beside it answers `no git remotes found`. A run from inside a hook would otherwise match a branch name against another repository's merges, and branch names recur, so the wrong answer arrives in the direction that removes a live worktree. `src/feedback/github.ts` carries the only other `gh` call in the tree and does not strip the same variables.
 
-### Refusing the whole reading
+#### Refusing the whole reading
 
 An unreadable input refuses the whole reading rather than producing verdicts around it, on the argument `refsReadable` makes in `canon/context/claude-internal/orchestration/dispatch.md`. An absent merge state and a branch with no merged pull request produce the same empty answer, as do an absent roster and a worktree nobody holds, and reporting the second when it was the first is a false clean that ends in a removal rather than in a duplicate dispatch. Two flags beside the verdicts was the alternative and it puts the same false clean behind a boolean a caller has to remember to read.
 
@@ -27,7 +29,7 @@ What the reading cannot decide is the session a wind-down is about to retire. A 
 
 The refusal list settles the order between the two acts. `held-by-session` refuses a directory a live session holds, so a reclaim taken ahead of the retirement refuses the directories that retirement is about to free, and the handoff runs the retirement first for that reason.
 
-## Reclaiming without removing
+### Reclaiming without removing
 
 `route` reports which removal shape applies rather than choosing one. `claude rm <id>` is meant to remove a background session and its worktree together while a session exists, though its own report is not reliable, so `canon worktrees list` is the reading to trust afterward, and a worktree whose session has ended needs `git worktree remove` and a branch delete instead. The argument is the id `claude agents --json` carries rather than the name, so a caller holding the `sessions` field matches a name to an id there before the call. Deleting a directory underneath a live session is the case that has to refuse, so a held worktree is refused and its route is reported for whoever decides to act on it.
 

@@ -9,13 +9,15 @@ description: The line checkpoint that replaced a word cap nothing reached, the m
 
 Keeping a procedure-only body whole at any length was the alternative, and it lost to the Document ceiling stage, which fails a push on a body past 300, so a procedure body with nothing else to move has to move a step. Past the ceiling a whole step now moves to a reference, the body keeping the step heading and one line naming the file to read on reaching it. The cost is a second read at that step, which the load line carries, and a session that skips the line skips the step.
 
-## Why the cap counts lines rather than words
+## Decisions
+
+### Why the cap counts lines rather than words
 
 A word cap of 5,000 never forces a single reference, since no skill body approaches it. A cap that never fires is indistinguishable from no rule, and lowering the word number would keep the wrong unit: a body is read as lines on a screen and edited as lines in a diff, and every neighboring checkpoint in this repository counts lines.
 
 Words and lines also disagree about what a body is heavy with. A signal table or a stub template is few words and many lines, and those are exactly the blocks worth moving, so the word unit was blind to the content the rule exists to catch.
 
-## What the move rule names
+### What the move rule names
 
 A catalog, a table of cases, or a format spec running past roughly fifteen lines goes to `references/` at any body length. Below the ceiling procedure prose stays, since a session sent to a reference for its own steps pays two reads for one job.
 
@@ -23,7 +25,7 @@ Below the ceiling, each move owes a named branch that skips it. Body lines are p
 
 That test is what bounds the rule. The rebase machinery in `review-address` sits in a reference because a branch that still merges never reaches it, while the reply format that same skill writes on every run stays in the body, having failed the test.
 
-## Applying it is maintenance, not a sweep
+### Applying it is maintenance, not a sweep
 
 A body sitting at the ceiling takes no new line at all, since the Document ceiling gate stage fails a push past 300 rendered lines whatever the line adds. `role-orchestrator/SKILL.md` sits at exactly 300, so new orchestrator procedure lands in a reference and reaches the body through one it already points at, such as `orchestrator-dispatch.md`, rather than through a pointer line of its own.
 

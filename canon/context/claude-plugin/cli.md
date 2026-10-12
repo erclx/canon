@@ -10,19 +10,21 @@ description: The canon claude command surface and what each verb writes into a t
 - `canon claude sync` reconciles `.gitignore` against the claude manifest
 - `canon claude setup` installs user-level Claude config, `~/.claude/` by default
 
-## init
+## Layout
 
-### What lands
+### init
+
+#### What lands
 
 `canon claude seeds list` names every file `init` writes and where it comes from, so this entry does not restate the set. `init` also merges `.gitignore` entries, skips a file already present, and runs once per project.
 
 Coding and doc-authoring standards arrive separately via `canon gov install`, which `canon init` runs on every scaffold since `--stack` defaults to `base`. The seed `CLAUDE.md` carries no `## Markdown` section: `governance/rules/writing/markdown.md` and `governance/rules/canon/context.md` deliver that routing path-scoped instead. `--skip governance` reopens the gap by design, and the run warns that standards land without the rules that route to them.
 
-### Seeded folders
+#### Seeded folders
 
 The Claude seeds carry nothing under `canon/context/`. `tooling/base/seeds/` installs the folder's `index.md`, `development.md`, and `ci.md` as user-owned files, and `canon init` runs base tooling before the Claude domain, so those land first and the Claude seed pass skips what is already present. Do not add a context entry to the Claude seeds without checking `tooling/base/seeds/canon/context/` for the same path, since two seed sources writing one destination resolve by whichever domain runs first.
 
-### PostToolUse hooks
+#### PostToolUse hooks
 
 The seed `settings.json` ships nine hook scripts across seven blocks on three events. `pr-create-log.sh` is covered in `canon/context/development/hooks/guards.md`, `silent-turn.sh` in `canon/context/development/hooks/compaction.md`, and the rest below. All nine open with the bounded stdin read covered in `canon/context/development/hooks/guards.md`, so a hook run by hand refuses instead of blocking, and eight stay byte-identical to their counterparts under `.claude/hooks/`.
 
@@ -38,7 +40,7 @@ The script reads the folder and the root off the matched path, so an archived or
 
 `.claude/hooks/path-form.sh` closes the same block, handing back the absolute form of a path written from a linked worktree, covered in full in `canon/context/development/hooks/guards.md`. It reads a `*/.claude/worktrees/*` segment off the write's own path rather than shelling out to git, the same derive-from-the-path precedent as the index hook above it.
 
-### PreToolUse hooks
+#### PreToolUse hooks
 
 A PreToolUse hook on `Grep` and `Glob` pairs with `.claude/hooks/index-reminder.sh`, which walks up from the search path to the nearest `index.md` and reminds the agent to read it first, once per folder per session. It fires only where an index exists, so it self-scales to a project's index density.
 
@@ -50,17 +52,17 @@ That trade gives up warning on a write to `<project>/tmp/`, which is a real viol
 
 A PreToolUse hook on `Bash` pairs with `.claude/hooks/review-post-scan.sh`, which runs `canon labels scan --body-file` against the body file of a `gh api` review or comment post and denies the call on a finding. It blocks rather than reminds, and it calls `canon` from `PATH`, so a target on a CLI older than the flag has its review posts refused until it upgrades. The decision and its rejected alternative are in `canon/context/development/hooks/command-scanners.md`.
 
-### User-level settings
+#### User-level settings
 
 User-level pieces (attribution, permission `allow` entries, and `.env` denies) live at `~/.claude/settings.json` and install once per machine via `canon claude setup`. Project settings layer on top of user settings, so per-project files only need to carry what is genuinely project-specific.
 
-## seeds
+### seeds
 
 `canon claude seeds list [--json|--names]` enumerates the seed docs that `canon claude init` would copy into a project. Skills consume `--json` to compare a target project's installed copies against the toolkit's current seed source and propose targeted edits. The CLI only emits content. Reconciliation is a hand merge against that source.
 
 The listing reads `planSeeds`, the same function `init` applies, so the two cannot disagree about what a seed install contains.
 
-## sync
+### sync
 
 Reports whether each seeded project doc is present, then reconciles `.gitignore` against the `[gitignore]` section of `tooling/claude/manifest.toml`: appends any missing entries and prunes entries inside the `# Claude` section that the manifest no longer declares. Removed entries are logged as `-` lines. Never touches seeded project docs, so `.gitignore` is the only file it writes.
 
@@ -68,7 +70,7 @@ Reports whether each seeded project doc is present, then reconciles `.gitignore`
 
 Seed audits are not automated. Merge a drifted seed by hand against the toolkit copy, one `##` section at a time. `canon sync` prints a tip reminder at the tail.
 
-## setup
+### setup
 
 Installs user-level Claude Code config from `tooling/claude/user/` into `~/.claude/`. Run once per machine after cloning the toolkit. Idempotent. Re-runs skip blocks that already match.
 

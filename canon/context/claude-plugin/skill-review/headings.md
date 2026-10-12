@@ -5,7 +5,9 @@ description: The heading contract a pull request review posts under, the full se
 
 # Headings
 
-## The heading contract
+## Decisions
+
+### The heading contract
 
 The heading is the half a reader sees without opening anything, so it reports state rather than pass number. `## Review` covers a pass carrying a finding at any severity and `## Review closed` covers a pass carrying none, so the state comes off the most recent comment rather than off a label on a kind of pass. A close-out does not close the pull request, which is why the rule reads the latest heading rather than promising the closed one is last.
 
@@ -15,7 +17,7 @@ Sharing a prefix across that family is why the detection matches the first line 
 
 A finding withdrawn on a reply's argument leaves that count too, so a pass withdrawing every finding it carried reads as a close-out while still owing a body the short close-out line cannot carry, since that line credits a fix nobody made. `canon/context/claude-internal/orchestration/review.md` holds why a reply reaches the thread at all and which class of reply stays off it.
 
-## The full set, stated once
+### The full set, stated once
 
 Five headings route through `poll.ts`: `## Review`, `## Review closed`, `## Review response`, `## Rebase`, and `## Post-review findings`. `## Post-review findings` gets the same routing `## Review response` does, since a worker with something to report after a close-out needs a heading of its own: `poll.ts` reports it as a reply and sends a fresh pass.
 
@@ -31,13 +33,13 @@ The UI body is sectioned by what the operator owes, in the order Failed, Needs y
 
 `review-ui` reads the checklist and its address off `canon pr evidence --json`, which carries `checklist`, `preview`, and `local` only on the `ok` and `no-evidence` reasons. Every other reason refuses before the comment is read, so the pass reports it rather than reading the missing fields as an absent checklist.
 
-### The closing comment folds into the reply
+#### The closing comment folds into the reply
 
 `review-address` Step 7 appends its CI confirmation to the `## Review response` reply and edits it in place, rather than posting a second comment carrying no heading. A heading-free comment passes over the poll the way ordinary chatter does: `unmatchedState` in `poll.ts` opens with a `.startsWith('## ')` test, so only a comment whose first line already carries a heading prefix reaches the known-set test at all.
 
 The confirmation states nothing the reply posted moments earlier does not already carry, so a second comment would reach no reader on either side of the channel.
 
-## One threshold under the heading and the dispatch
+### One threshold under the heading and the dispatch
 
 One threshold governs both the heading and the dispatch: a pass carrying anything, at any severity, posts the open heading and sends the session holding the branch, and the closed heading is reserved for a pass carrying nothing at all.
 
@@ -51,7 +53,7 @@ A minor the dispatched worker declines goes to the `## Findings` section of the 
 
 Whether a finding is new in the diff or pre-existing and out of it is a real difference behind the two handlings, and it stays off the thread. It is a second axis on a ladder already graded imprecisely, and the single threshold closes the gap without needing it.
 
-### The stalled state
+#### The stalled state
 
 `poll.ts` carries the detection, because a rule firing only when a session reads it produces the inconsistency a split threshold has. A filter takes the last family review's first line rather than its commit, and a `STALLED` state names a pull request whose open pass covers the head with nothing following it.
 

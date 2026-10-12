@@ -5,7 +5,9 @@ description: The candidate and document draft surfaces, the identity surface, an
 
 # Drafting
 
-## The candidate surface
+## Decisions
+
+### The candidate surface
 
 `draft-and-pick` covers work where several drafts are produced, looked at, and iterated until one is good enough. The four nearest surfaces all miss it by assuming the answer is known: `plan-feature` plans one answer, `ux-audit` reports roughness from source in one pass, `ux-measure` reads numbers off a running interface, and `ui-checklist` writes what to look at on a change already made. Each takes one pass at one answer, so a decision settled by looking lands on whichever of them matches the word "UI".
 
@@ -13,7 +15,7 @@ The name carries no ownership prefix, on the ownership axis in `canon/context/cl
 
 Each round is one canvas page and each arm one frame on it, named `arm-<id>`. The canvas page list reaches every round from one address, its theme toggle sets every frame at once, and each frame renders at its own layout width, so the skill ships no picker or theme control of its own. The run records the pages it adds and deletes only those at close, since the canvas folder also holds the operator's own pages.
 
-### The canvas page is the comparison
+#### The canvas page is the comparison
 
 The contact sheet the source skill relied on is the canvas page itself, captured once with `canon canvas capture <page> --composite`. One image per arm was the alternative and hands the operator several images to hold against each other in memory, which is the comparison the page makes visible instead. The close captures each frame on its own into `.canon/picks/<slug>/`, so the archive keeps one `arm-<id>` image per arm while the pick is taken from the composite.
 
@@ -23,7 +25,7 @@ What travels and what does not is stated in the skill's own `REQUIREMENT.md` rat
 
 The pull request boundary rule lives in `plan-feature` and not in `claude/skills/plan-feature/references/plan.md`. It is the whole of the source skill's phase 1, and a session decides scope while writing the plan, so it lands in the skill that writes one rather than in the document standard that plan follows. A rule stated in both is two sources for one rule.
 
-### What the arm reaches
+#### What the arm reaches
 
 The sandbox arm resolves the canvas capture through `playwright-core` and the installed `canon` binary rather than `@playwright/test`, since the latter resolves out of a `node_modules` no target installs. It also starts `canon canvas serve`, which refuses with `missing-client-deps` where the installed CLI lacks the shell's client packages, and a headless run there stops before drafting rather than closing. A headless run has no operator to confirm a pick is right, so waiting would spend turns up to the cap with nobody to answer. Closing on a pre-supplied pick is the only terminal behavior available to it.
 
@@ -33,13 +35,13 @@ The canvas capture refuses a frame that would rewrap against a substituted font,
 
 A close records the decision wherever it was stated as open, in the same step that writes the design note, a path the write scope admits. The losing arms are deleted by the next step, so a pick that records nothing about why leaves the next reader re-deriving it from a diff.
 
-## The document draft surface
+### The document draft surface
 
 `draft-doc` covers a document that does not exist yet, in any of four kinds: a `docs/` page, a `canon/context/` entry, a wiki reference page, and a `README.md`. Each kind sits beside a surface that rewrites or refreshes an existing document and was never built to originate one.
 
 `docs-sync` classifies and rewrites existing sections against a diff since main, and `context-fold` refreshes context entries. A document with no prior version has no diff to classify, so reaching for either on a brand-new subject reports it as unrelated to any change, which reads as a clean pass over a request nobody served.
 
-### One skill rather than five
+#### One skill rather than five
 
 The five kinds ran one procedure: read the owning standard, check for a name or topic collision, place the file, draft against the template, confirm, write. They shipped as five skills sharing that shape by convention, and that was the alternative this one beat. Each restated the shared steps, so a fix to one drifted from the other four, and five descriptions competed for the one trigger of writing a new document.
 
@@ -51,24 +53,24 @@ The gain was a topic-search skill since retired, which the retired docs drafter 
 
 The measure is TF-IDF over descriptions rather than Claude Code's own router, and one case per kind is a thin sample, so a real routing loss would show only as a session that never loads the skill.
 
-### The confirm step
+#### The confirm step
 
 `draft-doc` takes its confirm step from the standard-authoring skill's pattern rather than from `docs-sync`. `docs-sync` writes at once after its preview, since the tool permission dialog is confirmation enough over a rewrite bounded by a diff. A new document carries no such bound, because its kind, its placement, and every detection a kind runs are judgment calls weighed against the catalog rather than a change the branch already made. The skill waits for the user to confirm the path and the full content, the way that skill confirmed a slug and a body against no diff of its own.
 
-### What each kind settles
+#### What each kind settles
 
 - Docs placement reads the catalog rather than assuming a folder. A `category` a sibling page carries is reused verbatim, and a topic matching no shelf lands at the `docs/` root.
 - The docs `canon docs <slug>` guard is a heuristic, since the slug is guessed from the topic phrase, so the title and description check behind it catches the wider case.
 - A context entry defaults to a flat file, since a fresh domain never holds the three or more sub-areas the context standard requires before it earns a folder.
 - The wiki kind's ownership refusal offers the docs or context kind of the same skill, so a subject this project owns is redirected without leaving the skill.
 
-### Why the readme templates sit in the skill
+#### Why the readme templates sit in the skill
 
 The readme kind carries one whole template per project type under `references/readme/`, in the skill and not in `claude/skills/docs-sync/references/readme.md`. `docs-sync` reads the standard to rewrite a section and never needs a whole page, so a template there would load for every README edit to serve only the drafting one. The templates hold slots and structure and no rule of their own, which leaves the standard the one owner of per-type content.
 
 The template types are the standard's five: library, CLI, application, agent-facing, and plugin. The intake that prompted them listed an internal service type. The standard carries none and the skill has no signal that detects one, so it waits for the first target that needs it, as a standard change. A project matching several types combines their templates under one header block and one description, and a project matching none falls back to the standard's generic template.
 
-## The identity surface
+### The identity surface
 
 `draft-identity` covers a project's logo mark and the social card composed from it, reached through `draft-and-pick`'s own render-and-pick loop rather than a second implementation of one. Without it, a project reaching for either output redoes the work by hand each time. `canon/context/claude-plugin/social-card-route.md` covers the card route it writes.
 
@@ -76,7 +78,7 @@ The name passed over two candidates. `logo` names one of the two outputs and lea
 
 One skill covers both outputs rather than two. The mark and the card are one identity rendered twice, and two skills each reading the other's pick can settle on shapes that do not compose. Drafting every arm already inside the card frame is what makes that real rather than aspirational, since the pick settling the mark's shape settles its composition in the same choice.
 
-## The canvas surface
+### The canvas surface
 
 `canvas-board` drives `canon canvas`, a local page of HTML frames the operator drags, selects, and edits in the browser while a session writes the files behind them. It covers a direction worked out by looking and touching over several turns, where the operator's own selection and restyle are input the session reads back.
 

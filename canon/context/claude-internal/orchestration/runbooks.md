@@ -5,13 +5,17 @@ description: The orchestrator runbooks under role-orchestrator, the session map 
 
 # Runbooks
 
-## The runbook set
+## Layout
+
+### The runbook set
 
 Runbooks under `claude/skills/role-orchestrator/references/` cover the moments the model cannot detect on its own, beside the refill, handback, review dispatch, and output shapes the body moved out to stay under the length ceiling. `orchestrator-sweep.md` triggers the queue refill after a batch of merges, and `orchestrator-parked.md` re-tests a row already parked, on the opposite trigger. `orchestrator-poll.md` holds the review trigger and `orchestrator-watch.md` the roster watch and its stall alarm, both covered in `canon/context/claude-internal/orchestration/review.md`. `orchestrator-dispatch.md` holds the self-dispatch checks, `orchestrator-launch.md` the launch templates, and `orchestrator-reviewer-launch.md` the reviewer shapes, all covered in `canon/context/claude-internal/orchestration/dispatch.md`, which also covers `orchestrator-inbound.md` and the cost a wide wave puts on this session. `orchestrator-handoff.md` and `orchestrator-resume.md` are the two sides of a compaction.
 
 The runbooks ship inside the skill because a runbook the skill cites has to resolve for a project holding the plugin and running no install, and the human fires the two compaction sides by asking for them once the skill is loaded. The routing lives in the body and the skill is user-invoked, so a long session that has dropped the body routes nothing, which is why the body names re-invocation and the two runbook paths as one recovery.
 
-## The session map
+## Decisions
+
+### The session map
 
 `orchestrator-handoff.md` covers the write side of a compaction and `orchestrator-resume.md` the read side, both over the session map `claude/skills/session-map/references/session.md` governs. The standard holds what any session can fill: the three core sections, the per-session filename, the capture and drift steps that open the write, and the citation rule. The `session-map` skill is the invocable route onto it, which the runbook calls rather than restating.
 
@@ -19,13 +23,13 @@ A plain session about to compact takes `session-compact` instead, which writes a
 
 A fourth act settles ahead of those three and puts nothing in the map at all. The runbook retires the sessions this wave delivered, per `canon/context/claude-internal/orchestration/reclaim.md`, and it runs first because a session retired after the write is one the map already listed as running.
 
-### Split by role
+#### Split by role
 
 Splitting on role rather than on file is what lets a feature session write a handoff at all. A worker holds no delegation to have exercised and runs no review poll, so lifting the whole runbook would hand it two sections it can only leave blank, and a blank section teaches its reader to skip the file. The drift step sits in the standard on the opposite test: the failure it detects follows session length rather than role, so a long worker session writing a handoff while following a body the repository has moved past is the case the step exists for.
 
 The reference sits in `session-map`, the one skill that writes the file. `role-orchestrator` and `session-resume` read it as siblings through `${CLAUDE_SKILL_DIR}/../session-map/references/session.md`, which resolves in the plugin cache as `../markdown-craft/` does.
 
-### One file per session
+#### One file per session
 
 One file per session keeps two writers off one path. `session-<slug>.md` takes the branch-derived slug, so two sessions closing near each other write different files and the reader takes the newest by modification time. A declared section ownership over one file was the alternative and it asks two sessions to cooperate on a write neither can watch the other make. The cost is a folder to scan rather than a known path, which the newest-wins read absorbs on the common path. `RESERVED_STEMS` in `src/tasks/archive.ts` carries the prefix so neither task verb counts a handoff as a task carrying no row.
 
@@ -33,7 +37,7 @@ The one file per session lands on the board catalog, which filters nothing and g
 
 Every sibling added to the folder has to reach that reader, which is the cost of putting the filter there. `backlog.md` shows the cost: the catalog lists it like any other file, so a reader filtering only three names counts the second board surface as a task.
 
-### The recoveries
+#### The recoveries
 
 The handoff carries the second recovery, since the body is what a compaction takes and the map is what survives it. Its closing block names the resume invocation and the review poll that resume does not restart, and the runbook states the duplication as deliberate so a later pass does not read it as a copy to collapse. Both runbook paths are resolved to absolute form as the file is written, for the reason `canon/context/claude-internal/orchestration/review.md` records about the poll prompt.
 
@@ -41,7 +45,7 @@ The handoff carries the second recovery, since the body is what a compaction tak
 
 Capture sits in the handoff rather than in the sweep because a pass per batch of merges bills the operator a wait while nothing is being built. The sweep reports the debt in its output block and the handoff pays it, which keeps the signal without the wait.
 
-## The parked-row pass
+### The parked-row pass
 
 The parked-row pass stays a separate runbook and the sweep ends by firing it. The two ask opposite questions, since all three refill triggers ask what to promote next and take the blocker cell as read, while the pass asks whether the cell is still true. A merge changes the tree under every parked row at once rather than under the rows naming it, which is what forces the merge trigger, and an idle trigger alone never fires the pass through a busy day of sweeps.
 

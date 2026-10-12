@@ -5,7 +5,9 @@ description: How a plugin skill is named and sorted, from the judgment-call rule
 
 # Axes
 
-## The judgment-call rule and `decision-escalate`, split by reach
+## Decisions
+
+### The judgment-call rule and `decision-escalate`, split by reach
 
 The judgment-call rule in `CLAUDE.md` states two branches. A call the session can weigh takes a pick carrying its tradeoff in one sentence. A call whose answer turns on the operator's preference goes through the structured question surface, which the rule states generally and which reaches every session rather than only an invoked one, and `decision-escalate` layers batching over that statement so several open decisions arrive in one turn rather than one question each.
 
@@ -13,7 +15,7 @@ The rule and the skill overlap in subject and differ in reach, which is what kee
 
 `decision-escalate` carries `disable-model-invocation: true`, so nothing routes to it on a description match and the operator is what fires it. The body tests the surface rather than naming a vendor's tool or reading the project's instruction file, which keeps one body running where the structured tool exists and where it does not. Gating on the instruction file instead would reach no installed target, since the rule ships in the seed and a seed reaches only a project scaffolded after it.
 
-## The interface pair splits on the act
+### The interface pair splits on the act
 
 `ux-audit` and `ux-measure` share a subject and differ on what they do to it. The first reads source and reports judgments against stated intent, the second starts the thing and reports numbers against published thresholds. Without the second, the question lands on whichever skill matches the word "UI", since no other surface in the catalog covers a running interface.
 
@@ -25,7 +27,7 @@ The runner is detected rather than prescribed, since the harness differs per pro
 
 The front door reaches it through the audit offers. Four rows are `canon` verbs and this one is a skill handoff, so the execute contract governing a CLI run does not reach it. Its second condition is a browser harness, which the front door does not test, because the skill detects that already and a second reader of the same fact answers stale.
 
-## Prefix families
+### Prefix families
 
 Two prefixes answer ownership and each one answers it the same way. `internal-` is a skill only this repository runs, and `canon-` is a skill whose subject is the toolkit or which wraps a `canon` verb. Beside them sit the act families, `git-` and `create-`, which name what the session is doing rather than what it is doing it to. A family picking a further ownership answer beside these two is what recording the axis is meant to prevent.
 
@@ -35,7 +37,7 @@ A `claude-` prefix is the rejected third ownership answer. The plugin namespace 
 
 Ownership is what the trade gives up. A shipped skill outside `internal-` and `canon-` says nothing about whose surface it maintains, since the phase and act prefixes answer when in a session the skill is reached instead, and the two readings do not compose into one name. Nothing reports a skill landing under a phase prefix while owning a surface the phase says nothing about, which an ownership axis would catch by reading.
 
-### Two words, and the collision that forces the axis
+#### Two words, and the collision that forces the axis
 
 A plugin skill takes two words and only rarely one. A bare single word such as `autoship`, `diagram`, `docs`, `feature`, `groundwork`, `intake`, `orchestrate`, `planner`, `review`, `tasks`, `teach`, `worker`, or `worktree` is an ordinary English word a reader meets in running prose, so a catalog holding it leaves no token to grep for. The rule costs the catalog its shortest available names and keeps every name in it a token a search can find.
 
@@ -45,13 +47,13 @@ Where a skill writes does not decide the ownership answer. A thin wrapper over a
 
 The feedback pair is the one place the axis alone is not enough. `canon-feedback` and `canon-feedback-triage` share a subject and split on the act, which is the rule `## The interface pair splits on the act` above states, so the prefix places the family and the trailing word separates the consumer from the producer. Naming both for the subject alone would ship `canon-feedback` and `canon-triage`, which read as unrelated in a listing.
 
-## The direction axis
+### The direction axis
 
 Direction is a second sorting axis beside the phase-of-use one the prefixes carry, and it earns no prefix of its own. A family naming it would hold one member and would contradict the ownership answer the prefix already gives, which is the further answer `## Prefix families` above exists to prevent. What recording it here costs is an axis with no naming convention behind it, so a second outbound skill can land under a prefix that hides the fact and nothing reports it.
 
 The distinction is worth an entry because the risk moves with it. A wrong run inside this repository damages a checkout under version control with a test suite over it. A wrong run outbound enters a worktree in somebody else's project and pushes a branch there, and the sandbox arm can reach a fixture rather than a real target, so no test in this repository covers the case the axis names.
 
-### One skill rather than a family
+#### One skill rather than a family
 
 The skill carries an orchestrator role and a worker role in one body, where `role-orchestrator` and `role-worker` split the same pair across two. Splitting was the alternative and it puts the target census in one body and the dispatch that reads it in another, when the three phases are one loop over one target list. The tradeoff accepted instead is a body longer than either half alone.
 

@@ -5,7 +5,9 @@ description: How a skill is invoked, the split between the three task-board writ
 
 # Skill lifecycle
 
-## Invocation
+## Decisions
+
+### Invocation
 
 Invoke with `/skill-name` or let Claude auto-trigger by matching against the skill description. Skills marked with `disable-model-invocation: true` require explicit invocation and will not auto-trigger. Git skills (`git-commit`, `git-pr`, `git-branch`, `git-stage`) override built-in commit and PR behavior. See `claude/skills/create-skill/references/skill.md` for authoring conventions.
 
@@ -19,17 +21,17 @@ Prefer pointing a chain step at an unflagged body that already performs the step
 
 A harness hook is a third route to a skill, and `session-compact` is the only one reached this way: a `PreCompact` hook names it in the reason it blocks a manual compaction with, covered in `canon/context/development/hooks/compaction.md`. A skill named by a hook is named in a string nothing validates, so a rename here leaves the hook pointing at a skill that no longer answers, with no stage comparing the two.
 
-## A held body is checked against history
+### A held body is checked against history
 
 A session loads a skill body once and keeps it, so an edit made this session is not picked up, and a compaction carries the held copy forward. A held body naming a file the branch deleted fails loudly, while one naming a file that still exists and says something different reads current, so the session applies the superseded rule and reports success. That is the ordinary ship shape here, since a branch touching `context-fold`, `git-stage`, or `git-pr` runs those skills later in the chain that edited them.
 
 `canon claude skills drift <ref>` names which shipped bodies moved between a ref and `HEAD`, and `claude/skills/session-map/references/session.md` runs it while a session map is written. Comparing the bytes a session holds cannot be built, since a session cannot read its own loaded body back, so the substitute reports a file moving rather than a held copy differing. `governance/rules/claude/skill.md` carries the instruction on the body being edited, since telling a session to re-invoke the skill fixes nothing and a re-read step in the ship chain was declined on cost. Measured at `34ce48e6` on 2026-08-20.
 
-## Diagrams as figures
+### Diagrams as figures
 
 The architecture views are one reference inside `draft-figure` rather than a skill writing a `.canon/diagrams/` folder of per-kind entries. The folder skill had no recorded use, and its per-kind filenames, `verified` marker, and regenerated catalog served only the folder. A view now lands in a document the user names and goes through the same Mermaid render and read-back as every other figure. The cost is the staleness signal: nothing records the commit a view was checked against. The record-root lists still back up and audit a `.canon/diagrams/` an older install left, so a target's existing entries are not orphaned.
 
-## The task board split
+### The task board split
 
 Three writers touch the task board and the split is by operation rather than by file. `task-board` brings a task file into existence and declines one. `task-complete` edits the contents of a file that already exists, marking outcomes `[x]` from the diff, and archives a shipped one by hand. The `post-merge` hook archives the task a merge closed through the same `canon tasks archive` call. None crosses into another, because two skills relocating the same file drift into relocating it differently.
 
@@ -43,7 +45,7 @@ Archiving a task archives its plan with it, inside `archiveTask` rather than in 
 
 The two halves close in one act, so neither can run before the other and no caller is sent elsewhere first.
 
-## Where a session fact lands
+### Where a session fact lands
 
 A fact a session learns reaches the context entry that owns it through `context-fold`, which reads the diff, rather than through a capture step of its own. The toolkit once ran `memory-capture` on every ship, routing each fact to an entry or to a gitignored memory folder, and retired it. Nothing loaded that folder into a later session, the entries it held are archived unread, and Claude Code already keeps a memory of its own. The cost the operator accepted is that a lesson no context entry owns has no home outside a task's Findings or the platform memory.
 
@@ -51,13 +53,13 @@ A producer that hands a page on does so through a file of its own. `teach-worksp
 
 `role-orchestrator` sends a lesson about how to work to the owning task's Findings from its handoff runbook, because the session commits nothing and a domain fact belongs to the task that owns the surface.
 
-## The plan archive
+### The plan archive
 
 Every stop the verb emits has to name a next step that actually moves. The archive is gated on the citing task's outcomes being all `[x]`, and a stop that routes past that gate returns the caller to the same guard unchanged. The citation count is not a gate at all: it decides whether the plan travels, and the task archives either way.
 
 A plan that ships is archived rather than removed. `archiveTask` moves it from `.canon/plans/` to `.canon/plans/archive/`, then writes the task file's `Plan:` line at the new location as it lands in `.canon/tasks/archive/`, a folder deeper than the live pair. Retargeting is what makes the archive worth having, since an archive nothing points at is barely better than a deletion. A task already pointing into the archive moves on its own with nothing to carry, which keeps a second pass idempotent instead of acting on work it did itself.
 
-### Reading the plan citation
+#### Reading the plan citation
 
 The `Plan:` line carries a markdown link relative to `.canon/tasks/`, so both parsers read the target out of the parentheses and both resolve it against that folder before routing on it. Resolving is what lets `../plans/x.md` and the older bare `.canon/plans/x.md` land on the same file, and skipping it would drop every link-form task through to the sweep's final warn-and-skip branch, archiving nothing. The retarget writes a link back for the same reason it reads one: that branch is the only writer producing a `Plan:` line nobody authored, so emitting a bare path would convert the board to the old form one closing task at a time.
 
@@ -65,17 +67,17 @@ The plan travels only when the closing task is its last live citation. One plan 
 
 The count compares the resolved target rather than the raw string, because a board holding one task written `../plans/x.md` and another written `.canon/plans/x.md` cites one plan and a raw comparison reads two, counts zero, and archives the file out from under a live task. Comparing basenames instead trades that for the mirror error, since a live plan and an archived one share a filename whenever a closed task still points into `.canon/plans/archive/`, so the count invents a citation and the plan is never archived.
 
-### Scope placement in an instruction step
+#### Scope placement in an instruction step
 
 A step's scope belongs in the sentence carrying the instruction rather than in a correction stated below it, since a scope stated as a correction loses to the instruction above it. A step opening with one scope and asserting a wider one several lines later reads as the narrower scope regardless of what the correction says.
 
-## The mark sandbox arm
+### The mark sandbox arm
 
 The sandbox arm for this is `task-complete`'s `mark`, kept separate from the fold's `drift`. `mark` asserts that a run marking outcomes moves no plan, for a task the prompt never mentions, and `drift` asserts the fold leaves both plans and the board alone.
 
 The arm carries a third task whose outcomes stay open and whose plan must survive the run. It is what separates a run that moved nothing from one that moved everything, since a fixture where every plan stays live reads the same under both until a task the run had no reason to touch is standing beside them. Its assertions cover each plan's location and each task's untouched `Plan:` line, since a run that retargeted a pointer without moving the file would leave the task aimed at an archive path holding nothing.
 
-## Merging one skill into another absorbs the body
+### Merging one skill into another absorbs the body
 
 Merging one skill into another moves the body, not only the description. The survivor gains the absorbed behavior as a state-selected branch and the pointer left at the old name carries `disable-model-invocation: true` so it stops competing for routing. The design extraction skill was the worked case before its retirement: it absorbed a sibling proposing token values for a project with no code, while its own path sourced them from code and left a cell blank when nothing anchored it, so absorbing the triggers alone would have routed every greenfield caller to a body returning blanks. Where two bodies disagree rather than duplicate, the survivor branches on project state and never on a flag. Check also whether the absorbed skill's sandbox scenario can rename to the survivor, since the survivor's filename may already be taken.
 

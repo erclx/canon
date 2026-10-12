@@ -29,18 +29,58 @@ Sourcing from the root was the alternative, and the dependency install measured 
 
 Revisit when the installer lets a plugin skip that install, or an `internal/` file surfaces in a target as something the plugin offers.
 
-## Distribution gotchas
+### The per-install subset lever
 
-### Skills and the CLI ship at two speeds
+A marketplace entry's `skills` array adds to the conventional `<plugin-root>/skills/` scan rather than narrowing it. An entry sourced at `./claude` naming four skill directories exposed all 59, and the same entry naming one skill directory outside `skills/` exposed 60. The documented restricting behavior is an artifact of the plugin root rather than a property of the field. Where the resolved root carries no `skills/` directory, the conventional scan contributes nothing and the array becomes the only source, which is what both published examples of the field have in common.
+
+Removing `plugin.json` from the subdirectory changes none of it. The manifest governs name and version and leaves component discovery to the root's own layout, so whether that root carries `skills/` is what decides.
+
+The shape that narrows in this layout is a curated root holding one symlink per kept skill and no `skills/` directory, with the entry naming each path. Measured when the plugin shipped 64 skills, the full entry loaded all of them at roughly 8,300 always-on tokens, and a four-skill curated entry loads 4 at roughly 330. The 8,300 is the 8,100 read at 63 skills scaled by total frontmatter bytes rather than a fresh measurement. Install dereferences the symlinks into real directories, so the cache holds real directories at 104K against 964K for the full plugin.
+
+What that shape drops is every sibling a kept body cites. Install copies the named skill directories alone, so a body citing `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md` resolves to nothing when the owner skill was not kept. At that measurement the shared standards path reached 40 of the 64 bodies, and a curated entry has to answer the sibling citations of every skill it keeps before one ships.
+
+#### The install ref reads as malformed
+
+`claude plugin install canon@canon` is `<plugin>@<marketplace>` with both names set to `canon`, and the GitHub owner never enters the ref. It reads as malformed against the npm `@erclx/canon` form, where `@` marks an owner scope, and the two identifier systems collide on one symbol. Renaming the marketplace to `erclx` would yield `canon@erclx` and was rejected, since it breaks the install string in every README, doc, and installed `settings.json`.
+
+#### What a shape change does to an installed cache
+
+An installed plugin follows its marketplace where auto-update is on, which it is for the `canon` marketplace on the authoring machine, so a version lag is not the usual failure. What remains is a shape change.
+
+A change to an entry's `skills` array reaches the reported inventory as soon as the marketplace refreshes and never reaches the cache: `claude plugin details` answers from the entry rather than from what an install materialized, so its reported count can outrun the cache directory's own contents. `claude plugin update` declines the work and reports the plugin already current whenever the version key has not moved. Uninstall followed by install reconciles both.
+
+Publishing a shape change therefore strands anyone who has already installed, unless the release moves the version the cache is keyed on. An entry resolving a `plugin.json` takes its key from that file's version, which `release-please` bumps, so a shape change riding a release materializes and one shipped without a bump does not. An entry resolving no manifest is keyed on the source commit instead.
+
+`claude plugin marketplace remove` leaves the cache directory behind. Removing a marketplace reclaims nothing until the directory under `plugins/cache/` goes as well.
+
+### Release
+
+`plugin.json` carries `author`, `homepage`, `repository`, `license`, and `keywords` beside its name, version, and description. None of the five change how the plugin loads. They exist because `claude plugin validate --strict` treats missing attribution as a failure, and because a manifest reaching an installer is the first thing a stranger reads about the project.
+
+Its `version` is written by `release-please` through the `extra-files` wiring in `release-please-config.json`, never by hand. The manifest overrides the enclosing marketplace entry for both name and version, so a shape declared at one version installs at another when the two disagree, and `claude plugin tag` refuses to tag in that state. Parity that depends on someone remembering breaks on the first release nobody is watching, which is why the tool owns the field rather than a convention. The mechanics of the release itself live in `canon/context/ci/releases.md`.
+
+Owning the field means owning the file's serialization. `release-please` rewrites the whole manifest on each bump and expands `keywords` to one string per line, while prettier collapses any array that fits the print width, so the two disagree at every release rather than once. `.prettierignore` excludes `**/.claude-plugin/*.json` to settle it, which leaves the release tool as the only formatter of the manifests it writes.
+
+The `**/` prefix is load-bearing, since a pattern carrying an interior slash anchors to the ignore file's directory and `.claude-plugin/*.json` would match nothing under `claude/`. `claude plugin validate --strict` still gates the schema, though that stage is author-side only, so CI checks neither the format nor the schema of these files.
+
+The class pattern overreaches by one file, so a `!.claude-plugin/marketplace.json` negation follows it. The exclusion earns its place for a file a release tool rewrites, and the marketplace entry is hand-authored, carries no version, and is written by nothing. Without the negation it would sit outside the formatter and outside CI at once, since the validation stage runs author-side only. The negation has to come after the pattern it undoes, because the last matching line wins.
+
+Version parity is a two-file problem. `package.json` and `plugin.json` are wired through `release-please`, and the marketplace entry carries no version to disagree with them. The validation stage in `bun run check` discovers manifests rather than naming them, so it reads `marketplace.json` with no entry of its own.
+
+## Gotchas
+
+### Distribution gotchas
+
+#### Skills and the CLI ship at two speeds
 
 - A skill merged to `main` reaches a `--plugin-dir` session at once, while the CLI reaches users only on release. A skill calling an unpublished verb fails in a target, and `canon sync --check` reports the version gap but not the missing verb.
 - A marketplace install is a cached copy, the same skew in the other direction, and nothing detects either.
 
-### What validation proves
+#### What validation proves
 
 Validation proves the manifest parses and nothing about whether it works. `claude plugin validate --strict` passes a manifest whose `source` points at a directory that does not exist, so it would have accepted the zero-skill root-sourced shape. An install is the only check that proves a shape, which is why `bun run check` covering this file does not retire the manual install.
 
-### Reaching a shared reference
+#### Reaching a shared reference
 
 Delivering a shared reference and reaching it are separate problems. Each citing body names `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md`, which lands on the owner skill beside it under `skills/`. One path is enough, because no reference installs into a project, so there is no project copy for a citation to fall back to. `draft-and-pick` citing `canvas-board`'s `canvas.md` is the concrete shape of the form.
 
@@ -48,7 +88,7 @@ Only `${CLAUDE_SKILL_DIR}` survives to the model as an already-expanded path. Me
 
 A guard on a reference's presence names the file under the plugin root rather than a directory in the target. `create-skill` carries that guard.
 
-### The first executable in a skill
+#### The first executable in a skill
 
 `role-orchestrator/scripts/` holds the poll and the watch as TypeScript, `poll.ts` and `watch.ts`, with the `repo.ts` they share, so the plugin carries code a target runs as well as prose. It sits in `scripts/` rather than beside the runbook that invokes it, because `claude/skills/create-skill/references/skill.md` splits a skill folder by role and assigns `references/` to detail and `scripts/` to deterministic operations. One other tracked non-markdown file, `review-ui/scripts/pw.sh`, sits beside them.
 
@@ -62,7 +102,7 @@ A shipped script calling a `canon` verb has to treat a refusal as a value. A ref
 
 The verb also needs a fallback rather than only a guard, since these scripts ship with the plugin and the verbs ship with the CLI. `poll.ts` reads the pull request object's own `headRefOid` when `canon pr head` returns nothing, which is the behavior the poll already had and the answer a target on an older binary gets.
 
-### What a symlink costs
+#### What a symlink costs
 
 A symlink is an entry point that cannot filter. An installer dereferences any symlink under `claude/` and copies whatever sits behind it into every plugin cache with no code in the path to stop it, so a filterable subfolder behind the link still leaks through it.
 
@@ -71,41 +111,3 @@ Internal content lives at `internal/` instead, which nothing under `claude/` rea
 A native Windows checkout without symlink support materializes a link as a plain text file holding its target path. A plugin carrying one then ships a junk file in place of the content, and no stage notices, because every catalog command reads the real directories at the repository root. `claude/` carries no link today, so this binds the next one rather than a live path. `canon/context/sandbox/overview.md` treats Windows as a supported development environment, so this is a limitation to state rather than a case the pipeline can catch.
 
 A marketplace name is one global slot per user. Adding a second marketplace under the same name replaces the first, and a local-path marketplace pointing at a worktree breaks when that worktree is removed.
-
-## The per-install subset lever
-
-A marketplace entry's `skills` array adds to the conventional `<plugin-root>/skills/` scan rather than narrowing it. An entry sourced at `./claude` naming four skill directories exposed all 59, and the same entry naming one skill directory outside `skills/` exposed 60. The documented restricting behavior is an artifact of the plugin root rather than a property of the field. Where the resolved root carries no `skills/` directory, the conventional scan contributes nothing and the array becomes the only source, which is what both published examples of the field have in common.
-
-Removing `plugin.json` from the subdirectory changes none of it. The manifest governs name and version and leaves component discovery to the root's own layout, so whether that root carries `skills/` is what decides.
-
-The shape that narrows in this layout is a curated root holding one symlink per kept skill and no `skills/` directory, with the entry naming each path. Measured when the plugin shipped 64 skills, the full entry loaded all of them at roughly 8,300 always-on tokens, and a four-skill curated entry loads 4 at roughly 330. The 8,300 is the 8,100 read at 63 skills scaled by total frontmatter bytes rather than a fresh measurement. Install dereferences the symlinks into real directories, so the cache holds real directories at 104K against 964K for the full plugin.
-
-What that shape drops is every sibling a kept body cites. Install copies the named skill directories alone, so a body citing `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md` resolves to nothing when the owner skill was not kept. At that measurement the shared standards path reached 40 of the 64 bodies, and a curated entry has to answer the sibling citations of every skill it keeps before one ships.
-
-### The install ref reads as malformed
-
-`claude plugin install canon@canon` is `<plugin>@<marketplace>` with both names set to `canon`, and the GitHub owner never enters the ref. It reads as malformed against the npm `@erclx/canon` form, where `@` marks an owner scope, and the two identifier systems collide on one symbol. Renaming the marketplace to `erclx` would yield `canon@erclx` and was rejected, since it breaks the install string in every README, doc, and installed `settings.json`.
-
-### What a shape change does to an installed cache
-
-An installed plugin follows its marketplace where auto-update is on, which it is for the `canon` marketplace on the authoring machine, so a version lag is not the usual failure. What remains is a shape change.
-
-A change to an entry's `skills` array reaches the reported inventory as soon as the marketplace refreshes and never reaches the cache: `claude plugin details` answers from the entry rather than from what an install materialized, so its reported count can outrun the cache directory's own contents. `claude plugin update` declines the work and reports the plugin already current whenever the version key has not moved. Uninstall followed by install reconciles both.
-
-Publishing a shape change therefore strands anyone who has already installed, unless the release moves the version the cache is keyed on. An entry resolving a `plugin.json` takes its key from that file's version, which `release-please` bumps, so a shape change riding a release materializes and one shipped without a bump does not. An entry resolving no manifest is keyed on the source commit instead.
-
-`claude plugin marketplace remove` leaves the cache directory behind. Removing a marketplace reclaims nothing until the directory under `plugins/cache/` goes as well.
-
-## Release
-
-`plugin.json` carries `author`, `homepage`, `repository`, `license`, and `keywords` beside its name, version, and description. None of the five change how the plugin loads. They exist because `claude plugin validate --strict` treats missing attribution as a failure, and because a manifest reaching an installer is the first thing a stranger reads about the project.
-
-Its `version` is written by `release-please` through the `extra-files` wiring in `release-please-config.json`, never by hand. The manifest overrides the enclosing marketplace entry for both name and version, so a shape declared at one version installs at another when the two disagree, and `claude plugin tag` refuses to tag in that state. Parity that depends on someone remembering breaks on the first release nobody is watching, which is why the tool owns the field rather than a convention. The mechanics of the release itself live in `canon/context/ci/releases.md`.
-
-Owning the field means owning the file's serialization. `release-please` rewrites the whole manifest on each bump and expands `keywords` to one string per line, while prettier collapses any array that fits the print width, so the two disagree at every release rather than once. `.prettierignore` excludes `**/.claude-plugin/*.json` to settle it, which leaves the release tool as the only formatter of the manifests it writes.
-
-The `**/` prefix is load-bearing, since a pattern carrying an interior slash anchors to the ignore file's directory and `.claude-plugin/*.json` would match nothing under `claude/`. `claude plugin validate --strict` still gates the schema, though that stage is author-side only, so CI checks neither the format nor the schema of these files.
-
-The class pattern overreaches by one file, so a `!.claude-plugin/marketplace.json` negation follows it. The exclusion earns its place for a file a release tool rewrites, and the marketplace entry is hand-authored, carries no version, and is written by nothing. Without the negation it would sit outside the formatter and outside CI at once, since the validation stage runs author-side only. The negation has to come after the pattern it undoes, because the last matching line wins.
-
-Version parity is a two-file problem. `package.json` and `plugin.json` are wired through `release-please`, and the marketplace entry carries no version to disagree with them. The validation stage in `bun run check` discovers manifests rather than naming them, so it reads `marketplace.json` with no entry of its own.

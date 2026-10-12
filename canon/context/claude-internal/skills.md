@@ -7,20 +7,22 @@ description: The internal canon skills loaded before editing a toolkit domain, t
 
 Internal skills live in `.claude/skills/` and are toolkit-only. They are not installed into target projects.
 
-- `internal-ask`: Answer a repository-knowledge question from the indexes before opening any file, user-invoked via `/internal-ask`
-- `internal-canvas`: Load before editing the canvas server, its browser shell, or the `canon canvas` verbs
-- `internal-claude`: Load before editing plugin skills, the CLAUDE.md seed, or the Claude context entries
-- `internal-governance`: Load before editing governance rules or stack definitions
-- `internal-rule-audit`: Audit the governance rule set, returning one keep, move, retire, or merge verdict per rule with the check that decided it
-- `internal-scripts`: Load before editing scripts or sandbox scenarios
-- `internal-docs`: Load before editing `docs/` or `canon/context/`
-- `internal-teach`: Load before editing the learning workspace, its committed fixture, or the teach standards
-- `internal-tooling`: Load before editing tooling stacks or golden configs
-- `internal-web`: Load before editing the landing page or this repository's own rendered images
-- `internal-sandbox-check`: Audit changed skills and scripts for missing sandbox scenario edits, user-invoked via `/internal-sandbox-check`
-- `internal-shipped-reference`: Review a shipped-corpus edit for a self-only reference no pattern scan catches, routed by `authoring-layout.md`
+- **`internal-ask`**: Answer a repository-knowledge question from the indexes before opening any file, user-invoked via `/internal-ask`
+- **`internal-canvas`**: Load before editing the canvas server, its browser shell, or the `canon canvas` verbs
+- **`internal-claude`**: Load before editing plugin skills, the CLAUDE.md seed, or the Claude context entries
+- **`internal-governance`**: Load before editing governance rules or stack definitions
+- **`internal-rule-audit`**: Audit the governance rule set, returning one keep, move, retire, or merge verdict per rule with the check that decided it
+- **`internal-scripts`**: Load before editing scripts or sandbox scenarios
+- **`internal-docs`**: Load before editing `docs/` or `canon/context/`
+- **`internal-teach`**: Load before editing the learning workspace, its committed fixture, or the teach standards
+- **`internal-tooling`**: Load before editing tooling stacks or golden configs
+- **`internal-web`**: Load before editing the landing page or this repository's own rendered images
+- **`internal-sandbox-check`**: Audit changed skills and scripts for missing sandbox scenario edits, user-invoked via `/internal-sandbox-check`
+- **`internal-shipped-reference`**: Review a shipped-corpus edit for a self-only reference no pattern scan catches, routed by `authoring-layout.md`
 
-## Requirement coverage
+## Decisions
+
+### Requirement coverage
 
 Every internal skill carries a `REQUIREMENT.md`. Coverage is universal rather than selective, because the operator reads the corpus to decide whether a skill should exist at all, and a file present for some skills and absent for others cannot be scanned for that. An absence reads as a gap in the authoring rather than as a verdict that the body is already its own specification.
 
@@ -28,7 +30,7 @@ A working requirement lets a reader recover from the body alone both the failure
 
 The rule gating a skill edit globs `.claude/skills/**/REQUIREMENT.md`, firing on every internal skill edit. The plugin corpus under `claude/skills/` carries the same coverage, and `claude/skills/create-skill/references/skill.md` calls the file required for both corpora. A skill whose scope an in-flight branch is changing takes its requirement from that branch.
 
-## Sandbox check verification route
+### Sandbox check verification route
 
 `internal-sandbox-check` maps changed items to scenarios and then verifies one of them. It drives `canon sandbox run` against the `Provisioning:` scenario, deriving the target from the scenario path and the prompt as `/canon:<skill-name>`, and reports the verdict `canon sandbox run` returns rather than asserting its own.
 
@@ -44,6 +46,6 @@ The collection commands the skill spells out do not run as written from where it
 
 An item that ships unverified names one of three gates, `no-mechanism`, `credentials`, or `cost`. The vocabulary exists because the three have different fixes and a single sentence about verification being undone hides which one applied. `credentials` covers the `anchor: true` scenarios off an authenticated machine, `no-mechanism` covers a script mapping with no skill invocation to run, and `cost` is reserved for a sweep rather than a single arm.
 
-## A detection root excludes the artifacts a skill writes
+### A detection root excludes the artifacts a skill writes
 
 When a skill derives its mode from listing a directory, any new artifact it writes belongs outside that directory, since the listing cannot tell a fixture from the state it is scanning for. `plan-groundwork` Step 1 lists `.canon/groundwork/` and routes on whether a matching folder exists, so the experiment fixture the spike permission needed went to `.canon/tmp/runs/groundwork-fixtures/<slug>/`. One level inside the scanned root it would have matched as a live track and resumed. Before adding a write path to a skill, check whether any step lists that path's parent to decide something.
