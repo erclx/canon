@@ -97,6 +97,7 @@ export type DropResult =
       readonly removed: readonly number[]
       readonly commit?: string
       readonly deleted?: boolean
+      readonly legacy?: true
     }
   | { readonly kind: 'refused'; readonly reason: FramesRefusal }
 
@@ -108,6 +109,7 @@ export type PruneResult =
       readonly unread: readonly number[]
       readonly commit?: string
       readonly deleted?: boolean
+      readonly legacy?: true
     }
   | { readonly kind: 'refused'; readonly reason: FramesRefusal }
 
@@ -342,5 +344,65 @@ export async function pruneFrames(
     ...result,
     kept: kept.sort((a, b) => a - b),
     unread: unread.sort((a, b) => a - b),
+  }
+}
+
+function mergeNumbers(
+  first: readonly number[],
+  second: readonly number[],
+): number[] {
+  return [...new Set([...first, ...second])].sort((a, b) => a - b)
+}
+
+/** Whether a drain pass changed the legacy ref, by removing a pull request or deleting it. */
+function touchedLegacy(result: DropResult): boolean {
+  return (
+    result.kind === 'dropped' &&
+    (result.removed.length > 0 || result.deleted === true)
+  )
+}
+
+/**
+ * Drops on the current branch, then on the legacy one. The legacy pass only
+ * removes, and a refusal there never fails a drop the current branch already
+ * finished, since a target that never held the legacy ref reads it as missing
+ * and a token may be unable to read it at all.
+ */
+export async function dropFramesWithLegacy(
+  api: FramesApi,
+  legacy: FramesApi,
+  numbers: readonly number[],
+): Promise<DropResult> {
+  const current = await dropFrames(api, numbers)
+  if (current.kind === 'refused') return current
+  const drained = await dropFrames(legacy, numbers)
+  if (drained.kind === 'refused' || !touchedLegacy(drained)) return current
+  return {
+    ...current,
+    removed: mergeNumbers(current.removed, drained.removed),
+    legacy: true,
+  }
+}
+
+/** The prune counterpart of `dropFramesWithLegacy`, with the same legacy semantics. */
+export async function pruneFramesWithLegacy(
+  api: FramesApi,
+  legacy: FramesApi,
+  days: number,
+  now: Date,
+): Promise<PruneResult> {
+  const current = await pruneFrames(api, days, now)
+  if (current.kind === 'refused') return current
+  const drained = await pruneFrames(legacy, days, now)
+  if (drained.kind === 'refused') return current
+  const touched = drained.removed.length > 0 || drained.deleted === true
+  const kept = mergeNumbers(current.kept, drained.kept)
+  const unread = mergeNumbers(current.unread, drained.unread)
+  return {
+    ...current,
+    removed: mergeNumbers(current.removed, drained.removed),
+    kept,
+    unread,
+    ...(touched && { legacy: true as const }),
   }
 }
