@@ -85,7 +85,7 @@ The prohibition above runs one direction only. A path-scoped rule may carry the 
 
 ### The markdown ban set
 
-`canon markdown audit` measures one closed set, the characters `markdown.md` bans under `## Punctuation`, and the set ships as data in `src/markdown/bans.ts` rather than being harvested from the reference's prose. Parsing the reference was the alternative, and it lost because it put a parser contract on a document authored for people: an example chosen to illustrate a pattern became a literal ban on that example, and renaming a heading emptied a set with nothing reporting it. A character is the one class a literal match settles, so a word is left to `write-human` as guidance and a spelling to cspell.
+`canon markdown audit` measures one closed set, the characters `markdown.md` bans under `## Punctuation`, and the set ships as data in `src/markdown/bans.ts` rather than being harvested from the reference's prose. Parsing the reference was the alternative, and it lost because it put a parser contract on a document authored for people: an example chosen to illustrate a pattern became a literal ban on that example, and renaming a heading emptied a set with nothing reporting it. A character is the one class a literal match settles, so a word is left to `write-human` as guidance and spelling to no check.
 
 The cost is two copies of one list, the prose and the data. The writing rule names the two characters beside its pointer, so a ban added to `bans.ts` is a one-line edit to the rule rather than a silent gap.
 
