@@ -6,7 +6,7 @@ category: Agent surface
 
 # Target standards moved
 
-`canon standards <name>` is gone, and with it the name map that sent an old call to a new home. A rule, skill, or `CLAUDE.md` of your own that still runs it now gets commander's too-many-arguments error and no content, so search the project for the call and replace it. The surrounding step is in [target migrations](migrations.md).
+`canon standards <name>` is gone, and with it the name map that sent an old call to a new home. A rule, skill, or `CLAUDE.md` of your own that still runs it now gets commander's too-many-arguments error and no content, so search the project for the call and replace it. The surrounding step is in [target migrations](migrations.md). <!-- canon-allow-reference: says the verb is gone -->
 
 Each standard now lives at `references/<name>.md` in the skill that owns it. Load that skill and read the reference it names:
 
