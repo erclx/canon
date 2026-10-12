@@ -42,7 +42,6 @@ add = [
   "470-motion",
   "480-canvas",
   "700-ci-workflow",
-  "765-spelling",
   "775-dependencies",
   "780-config-comments",
   "790-code-comments",
