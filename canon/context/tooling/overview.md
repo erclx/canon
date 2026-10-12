@@ -84,7 +84,7 @@ Flags and arguments live in `docs/agents/index.md`.
 
 ## Workflow
 
-Bootstrap a new project with `canon init`, which installs base configs, the Claude workflow, and governance in one command, and scaffolds an empty `.claude/wiki/`. Governance installs the `base` stack when `--stack` is absent, and `--skip governance` declines it. Standards installs nothing into a project, so it carries no flag. The `target-setup` skill resolves the flags from project detection and runs the chain in one shot.
+Bootstrap a new project with `canon init`, which installs base configs, the Claude workflow, and governance in one command, and scaffolds an empty `.claude/wiki/`. Governance installs the `base` stack when `--stack` is absent, and `--skip governance` declines it. The `target-setup` skill resolves the flags from project detection and runs the chain in one shot.
 
 Set up a multi-language monorepo by letting the repository root own the `base` layer and giving each language its own subfolder:
 

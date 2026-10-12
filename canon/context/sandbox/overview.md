@@ -37,7 +37,7 @@ Run `canon sandbox` with no args for the live catalog. Categories and scenarios 
 ### What a sandbox is provisioned with
 
 - Gov rules and seeds provision through the real installer rather than a hand-built copy, `canon gov install` for the first and `canon claude init` for the second. A copy reimplementing an installer's selection rules drifts from what the installer does and from the stamp it writes, and a sandbox carrying what a target carries is what makes a rule change observable to a run.
-- No standards folder provisions at all, since nothing installs the corpus into a project. A skill reading a standard exercises the resolve a real target takes.
+- No skill reference provisions into the sandbox tree, since every reference ships inside its owner skill. A skill reading one exercises the sibling path a real target resolves.
 - Seeds install rather than copy. Copying `tooling/claude/seeds/` as it sits left every seeded arm holding records at retired paths and missing the folders `planSeeds` re-roots, so each arm started from a tree no target holds. The install also merges `.canon/` into the sandbox `.gitignore`, so a record a scenario stages under `.canon/` stays untracked, as it does in a target, and a scenario does not commit it. Hooks ship inside the seed tree, so a hook change reaches any scenario declaring `SANDBOX_INJECT_SEEDS`.
 
 ### Naming and staging a scenario
@@ -76,7 +76,7 @@ Six things a run cannot reach. Each is a property of the harness rather than a g
 - Marketplace install behavior. `canon sandbox run` points `--plugin-dir` at a worktree instead of installing the plugin, so anything depending on a real install stays outside the harness.
 - A mid-session rule change. Rules are discovered at session start and the harness spawns a fresh session per run, so this binds the session doing the editing rather than the run.
 - Host-conditional behavior such as linked-worktree locks or remote-state failures. A standalone sandbox repo cannot reproduce the trigger.
-- The standards fallback of a skill the branch changed, in an interactive sandbox. Both resolution routes can land on one file there, and no assertion tells them apart.
+- The sibling reference route of a skill the branch changed, in an interactive sandbox. Both resolution routes can land on one file there, and no assertion tells them apart.
 - A write landing outside both the sandbox tree and the four watched scratch directories. `canon/context/sandbox/isolation.md` states what the watch reaches.
 - Git state. `snapshotTree` excludes `.git`, and the declaration keys read paths, file content, the write list, the reply, and the turn count, so no key reaches a commit, a branch, or a rewritten history.
 
@@ -86,7 +86,7 @@ A nested background dispatch is not on this list. A shim bounds it and `sessions
 
 A shipped body cites `${CLAUDE_SKILL_DIR}/../<skill>/references/<file>.md`, and `${CLAUDE_SKILL_DIR}` expands to wherever the harness found the skill. Resolved through `--plugin-dir`, that lands on the owner skill under `<root>/claude/skills/`, a tree the sandbox does not carry, so an arm asserting the sandbox holds no copy still separates the two. Resolved through injection, the base is `<sandbox>/.claude/skills/<name>/`, so the citation lands on `<sandbox>/.claude/skills/<skill>/references/`, a path inside the fixture that no assertion can tell from a project copy.
 
-`canon sandbox run` sets `SANDBOX_SKIP_SKILL_INJECT`, so `injectChangedSkills` in `src/sandbox/provision.ts` copies nothing for a headless run. Every skill there resolves through `--plugin-dir`, the changed ones included, and an assertion that the sandbox holds no standard separates the routes. The gap stays for an interactive sandbox, which injects exactly the skills the branch changed, so the skills most in need of the check are the ones injection disqualifies.
+`canon sandbox run` sets `SANDBOX_SKIP_SKILL_INJECT`, so `injectChangedSkills` in `src/sandbox/provision.ts` copies nothing for a headless run. Every skill there resolves through `--plugin-dir`, the changed ones included, and an assertion that the sandbox holds no copy of the reference separates the routes. The gap stays for an interactive sandbox, which injects exactly the skills the branch changed, so the skills most in need of the check are the ones injection disqualifies.
 
 ### Git state
 
