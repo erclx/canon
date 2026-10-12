@@ -143,7 +143,7 @@ export function register(program: Command): void {
   gov
     .command('install')
     .description('Install a governance stack into .claude/rules/canon/')
-    .argument('[stack]', 'Stack name (e.g. base, node, react)')
+    .argument('[stack]', 'Stack name (e.g. base, node, python)')
     .argument('[target]', 'Target directory', '.')
     .helpOption('-h, --help', 'Show this help message')
     .option('--add <rules>', 'Comma-separated rules to layer on the stack')
@@ -152,9 +152,9 @@ export function register(program: Command): void {
       [
         '',
         'Examples:',
-        '  canon gov install react',
+        '  canon gov install node',
         '  canon gov install node ../my-app',
-        '  canon gov install astro --add 200-react,260-shadcn ../my-app',
+        '  canon gov install node --add 210-astro,260-shadcn ../my-app',
         '  canon gov install --add tasks,plan ../my-app',
         '',
         'With --add and no stack, the named rules install alone. A first',
