@@ -57,11 +57,13 @@ Every stack-name lookup in `src/commands/tooling.ts`, being `prepare`, `promptFo
 
 The non-goal against shipping application code turns on the word application, and its carve-out in `canon/REQUIREMENTS.md` already reads configs, seeds, and rules. It turns on proof rather than on a project boundary: code ships when it is proven to leave the production build, either stripped by a build-time flag such as `import.meta.env.DEV` and confirmed absent from the built output, or never reached from any production entry point.
 
-Test files, an e2e spec, the screenshot template, and six shell scripts land executable source in a target under that proof, such as `tooling/web/configs/e2e/home.spec.ts` and `tooling/python/seeds/tests/test_smoke.py`, and `injectManifest` in `src/tooling/inject.ts` runs `bun add -D` against it. `canon/context/tooling/stacks.md` records the astro scenario switcher, which ships under the same proof.
+Test files, an e2e spec, the screenshot template, the five shell scripts under `tooling/*/configs/scripts/`, and the nine Claude hooks the `claude` storage seeds land executable source in a target under that proof, such as `tooling/web/configs/e2e/home.spec.ts` and `tooling/python/seeds/tests/test_smoke.py`, and `injectManifest` in `src/tooling/inject.ts` runs `bun add -D` against it.
+
+The five scripts stay bash by decision rather than by oversight. Their port to TypeScript was deferred on 2026-10-12, and `canon/context/tooling/capture.md` records lifting the screenshot wrapper's server readiness into TypeScript as rejected. The rule that a script is TypeScript on Bun governs new scripts, so a session does not port these unasked. `canon/context/tooling/stacks.md` records the astro scenario switcher, which ships under the same proof.
 
 ### Composition and storage
 
-Stacks do not compose horizontally, meaning two `extends` chains resolving at one root in a single `sync` call. A monorepo uses the subfolder pattern instead. A second, orthogonal stack synced onto the same root is a different case and works: `cloudflare` sets `extends = ""` and ships one config with no dependency or gitignore entries, so `canon tooling sync cloudflare . --write` at a root already carrying `astro` collides with nothing.
+Stacks do not compose horizontally, meaning two `extends` chains resolving at one root in a single `sync` call. A monorepo uses the subfolder pattern instead. A second, orthogonal stack synced onto the same root is a different case and works: `cloudflare` sets `extends = ""` and ships one config with no dependency or gitignore entries, so `canon tooling sync cloudflare . --write` at a root already carrying `astro` collides with nothing. `shell` is the second such add-on, shipping `.shellcheckrc`, `.editorconfig`, a `shell.yml` workflow, and the `check:shell` and `format:shell` scripts to a project that writes shell, so base carries no shell tool.
 
 `tooling/claude/` is storage, not a stack. It holds seeds, user-level config, and a minimal manifest consumed only by the `canon claude` CLI, so `EXCLUDED_STACKS` in `src/tooling/manifest.ts` keeps it out of discovery.
 
