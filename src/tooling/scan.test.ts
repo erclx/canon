@@ -158,6 +158,22 @@ describe('scan', () => {
     expect(result.totalChanges).toBe(5)
   })
 
+  it('should count a stale override script toward the total', () => {
+    const dir = target()
+    writeFileSync(
+      join(dir, 'package.json'),
+      '{"scripts":{"format":"prettier --write ."}}\n',
+    )
+    const manifest = makeManifest('base', {
+      scriptOverrides: { format: 'oxfmt .' },
+    })
+
+    const result = scan([manifest], dir)
+
+    expect(result.scripts).toEqual([{ key: 'format', state: 'drifted' }])
+    expect(result.totalChanges).toBe(1)
+  })
+
   it('should report a path shipped as a config and a seed once, as a config', () => {
     const child = makeManifest('web')
     const parent = makeManifest('base')

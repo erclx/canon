@@ -101,34 +101,31 @@ export function collectDeps(
 }
 
 /**
- * Compares manifest scripts against package.json, nearest stack first, so a
- * child definition shadows the parent it extends.
+ * Compares manifest scripts and `[scripts.override]` keys against
+ * package.json. The expected value of each key comes from `applyScripts`, so
+ * the scan and the write path agree on which stack wins. Plain keys come
+ * first, nearest stack first, then override-only keys.
  */
 export function collectScripts(
   chain: readonly Manifest[],
   pkg: PackageJson,
 ): ScriptState[] {
   const scripts = pkg.scripts ?? {}
-  const seen = new Set<string>()
-  const states: ScriptState[] = []
+  const expected = applyScripts({}, chain).pkg.scripts ?? {}
+  const keys = new Set<string>()
 
   for (const manifest of chain) {
-    for (const [key, value] of Object.entries(manifest.scripts)) {
-      if (seen.has(key)) continue
-      seen.add(key)
-
-      const current = scripts[key]
-      if (current === undefined) {
-        states.push({ key, state: 'missing' })
-      } else if (current !== value) {
-        states.push({ key, state: 'drifted' })
-      } else {
-        states.push({ key, state: 'matching' })
-      }
-    }
+    for (const key of Object.keys(manifest.scripts)) keys.add(key)
+  }
+  for (const manifest of chain) {
+    for (const key of Object.keys(manifest.scriptOverrides)) keys.add(key)
   }
 
-  return states
+  return [...keys].map((key): ScriptState => {
+    const current = scripts[key]
+    if (current === undefined) return { key, state: 'missing' }
+    return { key, state: current === expected[key] ? 'matching' : 'drifted' }
+  })
 }
 
 /**
