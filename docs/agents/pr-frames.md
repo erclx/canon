@@ -8,7 +8,7 @@ description: How canon pr frames pushes a UI review frame to a never-merged bran
 `canon pr frames` gives a review comment an image it can embed. `review-ui`
 drives a pull request's checklist and captures a frame per box, and a frame
 on the reviewer's disk resolves for nobody else. The verb pushes one frame to
-the `canon-frames` branch and returns a link to its path there.
+the `canon/frames` branch and returns a link to its path there.
 
 ```bash
 canon pr frames 1341 --add frames/3.png --box 3 --head <sha> --pass 20261002T154450Z --json
@@ -19,7 +19,7 @@ canon pr frames --prune 30 --json
 
 ## What it writes
 
-The verb writes `refs/heads/canon-frames` and no other ref. Every call goes
+An add writes `refs/heads/canon/frames` and no other ref. Every call goes
 through the GitHub git data API, being blobs, trees, commits, and that one ref,
 so nothing is checked out, no worktree is entered, and neither `main` nor any
 branch a pull request holds is touched. The branch never merges.
@@ -36,7 +36,7 @@ box therefore writes a new file rather than replacing the image an earlier
 comment shows, which matters when a preview is minted again at one head.
 
 `link` uses the same `blob/<ref>/<path>?raw=true` form as the evidence comment,
-naming the `canon-frames` branch rather than a commit. Every drop rewrites the
+naming the `canon/frames` branch rather than a commit. Every drop rewrites the
 branch, and a link pinned to a commit would stop resolving for every other pull
 request's frames once GitHub collects the commit it names. A path link lives
 exactly as long as its file, so it survives every rewrite that drops another
@@ -96,6 +96,20 @@ request's state, and drops every one reading closed with a close date more
 than that many days ago, in a single rewrite. It keeps one still open, one
 reopened after closing, one closed exactly the given days ago, and one whose
 state could not be read, listing that last kind under `unread`.
+
+## The legacy branch
+
+Frames lived on `canon-frames` before the rename to `canon/frames`. An add
+never writes it. `--drop` and `--prune` also run against it after the
+current branch, remove only, and delete it once empty. `--prune` drains it
+as its pull requests expire, and `--drop` clears one pull request at once.
+The record carries `legacy: true` when that
+pass changed the ref, and its `removed` list folds both branches in, naming
+a pull request once. A missing or unreadable legacy ref never fails a run
+the current branch finished.
+
+A link minted before the rename points at `blob/canon-frames/...` and keeps
+resolving until its pull request has been closed 30 days or `--drop` runs.
 
 This repository runs `--prune 30` daily from
 `.github/workflows/pr-frames-cleanup.yml`. A frame's file stays on the branch

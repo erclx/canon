@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   dropFrames,
+  dropFramesWithLegacy,
   type FrameInput,
   type FramesApi,
   frameLink,
@@ -13,6 +14,7 @@ import {
   isFrameTheme,
   type PullClosure,
   pruneFrames,
+  pruneFramesWithLegacy,
   pushFrame,
   readFrame,
   type TreeEntry,
@@ -217,7 +219,7 @@ describe('frameLink', () => {
     const link = frameLink('o/r', 'pr-12/abcdef0/x/box-3.png')
 
     expect(link).toBe(
-      'https://github.com/o/r/blob/canon-frames/pr-12/abcdef0/x/box-3.png?raw=true',
+      'https://github.com/o/r/blob/canon/frames/pr-12/abcdef0/x/box-3.png?raw=true',
     )
   })
 })
@@ -446,6 +448,137 @@ describe('pruneFrames', () => {
     await pruneFrames(fake.api, 30, NOW)
 
     expect(fake.filesAtTip()).toEqual(['README.md'])
+  })
+})
+
+describe('dropFramesWithLegacy', () => {
+  it('should remove a pull request from both refs and list it once', async () => {
+    const current = fakeApi()
+    const legacy = fakeApi()
+    current.seed(['pr-12/a/box-1.png', 'pr-3/a/box-1.png'])
+    legacy.seed(['pr-12/b/box-1.png', 'pr-4/a/box-1.png'])
+
+    const result = await dropFramesWithLegacy(current.api, legacy.api, [12])
+
+    expect({
+      result,
+      current: current.filesAtTip(),
+      legacy: legacy.filesAtTip(),
+    }).toEqual({
+      result: expect.objectContaining({
+        kind: 'dropped',
+        removed: [12],
+        legacy: true,
+      }),
+      current: ['pr-3/a/box-1.png'],
+      legacy: ['pr-4/a/box-1.png'],
+    })
+  })
+
+  it('should delete the legacy ref when the drop empties it', async () => {
+    const current = fakeApi()
+    const legacy = fakeApi()
+    legacy.seed(['pr-12/b/box-1.png'])
+
+    const result = await dropFramesWithLegacy(current.api, legacy.api, [12])
+
+    expect({ result, legacyRef: legacy.state.ref }).toEqual({
+      result: { kind: 'dropped', removed: [12], legacy: true },
+      legacyRef: undefined,
+    })
+  })
+
+  it('should report ok with no legacy flag when the legacy ref is missing', async () => {
+    const current = fakeApi()
+    const legacy = fakeApi()
+    current.seed(['pr-12/a/box-1.png', 'pr-3/a/box-1.png'])
+
+    const result = await dropFramesWithLegacy(current.api, legacy.api, [12])
+
+    expect(result).toEqual(
+      expect.objectContaining({ kind: 'dropped', removed: [12] }),
+    )
+    expect(result).not.toHaveProperty('legacy')
+  })
+
+  it('should keep the current result when the legacy ref is unreadable', async () => {
+    const current = fakeApi()
+    const legacy = fakeApi({ unreadableTip: true })
+    current.seed(['pr-12/a/box-1.png', 'pr-3/a/box-1.png'])
+
+    const result = await dropFramesWithLegacy(current.api, legacy.api, [12])
+
+    expect(result).toEqual(
+      expect.objectContaining({ kind: 'dropped', removed: [12] }),
+    )
+  })
+
+  it('should leave the legacy ref alone when the current ref is unreadable', async () => {
+    const current = fakeApi({ unreadableTip: true })
+    const legacy = fakeApi()
+    legacy.seed(['pr-12/b/box-1.png'])
+
+    const result = await dropFramesWithLegacy(current.api, legacy.api, [12])
+
+    expect({ result, legacy: legacy.filesAtTip() }).toEqual({
+      result: { kind: 'refused', reason: 'unreadable-tip' },
+      legacy: ['pr-12/b/box-1.png'],
+    })
+  })
+})
+
+describe('pruneFramesWithLegacy', () => {
+  it('should drop closed pull requests on both refs, keep open ones, and delete an emptied legacy ref', async () => {
+    const pulls = { 1: closedDaysAgo(31), 2: { state: 'open' as const } }
+    const current = fakeApi({ pulls })
+    const legacy = fakeApi({ pulls })
+    current.seed(['pr-1/a/box-1.png', 'pr-2/a/box-1.png'])
+    legacy.seed(['pr-1/b/box-1.png'])
+
+    const result = await pruneFramesWithLegacy(current.api, legacy.api, 30, NOW)
+
+    expect({
+      result,
+      current: current.filesAtTip(),
+      legacyRef: legacy.state.ref,
+    }).toEqual({
+      result: expect.objectContaining({
+        kind: 'dropped',
+        removed: [1],
+        kept: [2],
+        legacy: true,
+      }),
+      current: ['pr-2/a/box-1.png'],
+      legacyRef: undefined,
+    })
+  })
+
+  it('should keep and list unread a legacy pull request whose state could not be read', async () => {
+    const current = fakeApi({ pulls: { 1: closedDaysAgo(31) } })
+    const legacy = fakeApi({ pulls: { 1: closedDaysAgo(31) } })
+    current.seed(['pr-1/a/box-1.png'])
+    legacy.seed(['pr-1/b/box-1.png', 'pr-9/b/box-1.png'])
+
+    const result = await pruneFramesWithLegacy(current.api, legacy.api, 30, NOW)
+
+    expect(result).toEqual(
+      expect.objectContaining({ removed: [1], kept: [9], unread: [9] }),
+    )
+  })
+
+  it('should report ok with no legacy flag when the legacy ref is missing', async () => {
+    const current = fakeApi({ pulls: { 2: { state: 'open' } } })
+    const legacy = fakeApi()
+    current.seed(['pr-2/a/box-1.png'])
+
+    const result = await pruneFramesWithLegacy(current.api, legacy.api, 30, NOW)
+
+    expect(result).toEqual({
+      kind: 'dropped',
+      removed: [],
+      kept: [2],
+      unread: [],
+    })
   })
 })
 

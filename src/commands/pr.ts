@@ -44,7 +44,7 @@ import {
   settleChecklist,
 } from '@/pr/evidence'
 import {
-  dropFrames,
+  dropFramesWithLegacy,
   FRAMES_BRANCH,
   type FramesApi,
   type FramesRefusal,
@@ -53,7 +53,8 @@ import {
   isFrameHead,
   isFramePass,
   isFrameTheme,
-  pruneFrames,
+  LEGACY_FRAMES_BRANCH,
+  pruneFramesWithLegacy,
   pushFrame,
   readFrame,
   type TreeEntry,
@@ -933,7 +934,7 @@ export function register(program: Command): void {
       'after',
       [
         '',
-        `Writes only refs/heads/${FRAMES_BRANCH}, through the GitHub git data API,`,
+        `An add writes only refs/heads/${FRAMES_BRANCH}, through the GitHub git data API,`,
         'so nothing is checked out and no other branch is touched. A frame lands',
         'at pr-<number>/<short-head>/<pass>/box-<n>.png, or box-<n>-<theme>.png',
         'with --theme, and `link` names that',
@@ -947,6 +948,11 @@ export function register(program: Command): void {
         'A rewrite that empties the branch deletes it. --prune keeps a pull',
         'request still open, reopened, closed exactly the given days ago, or one',
         'whose state could not be read, listing that last kind under `unread`.',
+        '',
+        `Both also drain the ${LEGACY_FRAMES_BRANCH} branch a rename left behind,`,
+        'removing only, and carry `legacy: true` when it changed. --prune empties',
+        'it as its pull requests expire, and --drop clears one pull request at',
+        'once. An add never writes it.',
         '',
         'Read `reason` on the JSON record:',
         '  ok                an add pushed, or a drop or prune finished',
@@ -2876,13 +2882,13 @@ function isTreeEntry(value: unknown): value is TreeEntry {
  * that already exists or no longer does, which is another writer's doing and
  * worth a re-read rather than a failure.
  */
-function ghFramesApi(call: ApiCaller): FramesApi {
-  const ref = `git/refs/heads/${FRAMES_BRANCH}`
+function ghFramesApi(call: ApiCaller, branch: string): FramesApi {
+  const ref = `git/refs/heads/${branch}`
   const refWrite = (result: ApiCall) =>
     result.ok ? 'ok' : result.status === 422 ? 'conflict' : 'failed'
   return {
     async readTip() {
-      const head = await call('GET', `git/ref/heads/${FRAMES_BRANCH}`)
+      const head = await call('GET', `git/ref/heads/${branch}`)
       if (!head.ok) {
         return head.status === 404
           ? { kind: 'missing' }
@@ -2937,7 +2943,7 @@ function ghFramesApi(call: ApiCaller): FramesApi {
     async createRef(commit) {
       return refWrite(
         await call('POST', 'git/refs', {
-          ref: `refs/heads/${FRAMES_BRANCH}`,
+          ref: `refs/heads/${branch}`,
           sha: commit,
         }),
       )
@@ -3034,7 +3040,8 @@ async function runFrames(
 
   if (Bun.which('gh') === null) return refuseFrames('gh-missing')
   const runner = ghApiRunner(root)
-  const api = ghFramesApi(runner.call)
+  const api = ghFramesApi(runner.call, FRAMES_BRANCH)
+  const legacyApi = ghFramesApi(runner.call, LEGACY_FRAMES_BRANCH)
   const refuseWrite = (reason: FramesRefusal) =>
     refuseFrames(
       reason === 'push-failed' && runner.refusedWrites.length > 0
@@ -3059,7 +3066,7 @@ async function runFrames(
 
   if (opts.prune !== undefined) {
     const days = Number(opts.prune)
-    const result = await pruneFrames(api, days, new Date())
+    const result = await pruneFramesWithLegacy(api, legacyApi, days, new Date())
     if (result.kind === 'refused') return refuseWrite(result.reason)
     const { kind: _kind, ...rest } = result
     return finish({ days, ...rest }, [
@@ -3072,7 +3079,7 @@ async function runFrames(
 
   const pull = Number(number)
   if (opts.drop === true) {
-    const result = await dropFrames(api, [pull])
+    const result = await dropFramesWithLegacy(api, legacyApi, [pull])
     if (result.kind === 'refused') return refuseWrite(result.reason)
     const { kind: _kind, ...rest } = result
     return finish({ number: pull, ...rest }, [
