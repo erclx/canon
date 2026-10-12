@@ -1,6 +1,7 @@
 import {
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
@@ -171,6 +172,11 @@ describe.skipIf(!hasBrowser)('canvas shell in a browser', () => {
   beforeAll(async () => {
     root = mkdtempSync(join(tmpdir(), 'canvas-walk-'))
     mkdirSync(SHOTS, { recursive: true })
+    // A file from an earlier run reads the same as a fresh one, so each run
+    // starts with none and a failed-*.png always belongs to this run.
+    for (const name of readdirSync(SHOTS)) {
+      if (/^failed-.*\.png$/.test(name)) rmSync(join(SHOTS, name))
+    }
     provision(root)
 
     const spawned = Bun.spawn(
