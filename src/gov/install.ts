@@ -28,7 +28,7 @@ export function canonRulesDir(target: string): string {
 
 /**
  * This repository's own toolkit-only rules, installed beside `canon/` rather
- * than interleaved into its bands. No target ever holds this folder.
+ * than interleaved into its folders. No target ever holds this folder.
  */
 export function installedInternalRulesDir(target: string): string {
   return join(installedRulesDir(target), 'internal')
@@ -134,7 +134,7 @@ export function lookupRules(
 
 /**
  * Copies each rule into the subdirectory it was authored in, so the installed
- * tree keeps the band structure `governance/rules/` carries. Returns the
+ * tree keeps the rule folder structure `governance/rules/` carries. Returns the
  * target-relative paths the timeline prints.
  *
  * `destSubdir` picks which wrapper the rule lands under: `canon` for every

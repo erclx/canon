@@ -22,7 +22,7 @@ The bullet checklist does not close this. It judges whether a freshly written bu
 ## Must not
 
 - Write a rule, a stack, or a task file. The skill reports verdicts, and a plan acts on them.
-- Name a governance folder, a band, or a rule number in the body or its reference. A regroup renames most of the set, and each hardcoded name is one stale line per rename.
+- Name a governance folder or a rule number in the body or its reference. A regroup renames most of the set, and each hardcoded name is one stale line per rename.
 - Work around the restatement matcher here. A gap it leaves is fixed in `canon gov restated` rather than read by hand in this skill.
 
 ## Guards

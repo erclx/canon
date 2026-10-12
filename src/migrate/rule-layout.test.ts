@@ -93,7 +93,7 @@ describe('RENUMBERED_RULES', () => {
 })
 
 describe('walkFlatRules', () => {
-  it('should find a file sitting directly under a flat band folder', async () => {
+  it('should find a file sitting directly under a flat rule folder', async () => {
     const files = await walkFlatRules(root)
     expect(files.map((f) => f.rel)).toContain(
       '.claude/rules/core/005-behavior.md',
@@ -109,7 +109,7 @@ describe('walkFlatRules', () => {
 })
 
 describe('destinationRel', () => {
-  it('should insert canon/ ahead of an ordinary rule’s band', () => {
+  it('should insert canon/ ahead of an ordinary rule’s folder', () => {
     expect(
       destinationRel({ rel: '', subdir: 'core', name: '005-behavior' }),
     ).toBe('.claude/rules/canon/core/005-behavior.md')

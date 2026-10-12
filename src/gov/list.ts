@@ -74,7 +74,7 @@ export function buildStackEntries(root: string): StackEntry[] {
 
 /**
  * Reads the catalog straight off the source tree. A rule's domain is the
- * subdirectory it sits in, which is the band grouping install preserves, and
+ * subdirectory it sits in, which is the rule folder grouping install preserves, and
  * its `detect` entry is the evidence that proposes it, null for a rule
  * `detect.toml` does not name.
  */

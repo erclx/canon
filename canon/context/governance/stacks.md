@@ -31,7 +31,7 @@ Base installs ten rules, being the session output rule, the board, plan, scratch
 
 Base takes one of the two `claude` rules and none of `tooling`, so a folder entry cannot express its set. A folder entry for `canon` alone would also put the next rule authored there into every project, which is the default this avoids. A rule base drops reaches a project through `canon gov detect`, whose evidence table the unreferenced stage requires.
 
-`baseBands` in `src/sync/check.ts` reads the folders of the rules base resolves to rather than its folder entries, so the fallback for a target with no recorded chain still reports a new rule authored beside one of base's.
+`baseFolders` in `src/sync/check.ts` reads the folders of the rules base resolves to rather than its folder entries, so the fallback for a target with no recorded chain still reports a new rule authored beside one of base's.
 
 Sync never retracts a rule, so a target installed before the minimal base keeps every rule it holds. The minimal base changes new installs only.
 
@@ -43,7 +43,7 @@ The rejected alternative kept the five as thin aliases naming one framework rule
 
 `target-setup` picks the stack from the repository root's language alone, and a framework's rules arrive as extras the operator confirms. `nextjs` globs every `.ts` and `.tsx` file, so a Vite app would match it if it reached one. Detect proposes it only from `next` in a manifest or a `next.config.*` file, so detection scopes it to Next.js apps.
 
-A target recorded on a retired stack still syncs. `readNewRules` in `src/sync/check.ts` reads a chain that does not resolve as no chain and falls back to band folders, so the target keeps receiving updates to the rules it holds and is offered a new rule only in a band folder it already carries or one holding a base rule.
+A target recorded on a retired stack still syncs. `readNewRules` in `src/sync/check.ts` reads a chain that does not resolve as no chain and falls back to rule folders, so the target keeps receiving updates to the rules it holds and is offered a new rule only in a rule folder it already carries or one holding a base rule.
 
 ### Server rules glob every backend language
 

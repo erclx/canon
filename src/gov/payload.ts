@@ -5,7 +5,7 @@ import { stripFrontmatter } from '@/markdown/frontmatter'
 /**
  * Lists installed rules in the order the payload concatenates them. Sorting by
  * path keeps the numeric filename prefixes ordered inside each subdirectory,
- * which is how the rule bands are meant to read.
+ * which is how the rule folders are meant to read.
  */
 export function listRuleFiles(rulesDir: string): string[] {
   return [

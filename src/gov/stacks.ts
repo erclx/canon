@@ -163,7 +163,7 @@ export function unreferencedRules(root: string): string[] {
  * does not hold. `resolveRules` already walks a stack's `extends` ancestors,
  * so reading its leaf entry is enough; no second walk resolves the chain
  * itself. A stack the toolkit no longer ships resolves to nothing rather than
- * throwing, the same way `readNewRules`'s band fallback already treats it.
+ * throwing, the same way `readNewRules`'s folder fallback already treats it.
  *
  * A held rule's declared successor counts as held, since the sync that
  * renames the old file installs it.

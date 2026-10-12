@@ -531,12 +531,12 @@ export function parseNewSkills(paths: string): string[] {
 
 /**
  * What the target's `.claude/rules/` proves about its entitlement. `held` is
- * every rule name it carries and `bands` every band folder those names sit in.
+ * every rule name it carries and `folders` every rule folder those names sit in.
  *
  * Read off the installed tree rather than off a stack name, because
  * `gov install` records file hashes and never the stack it resolved, so the
  * chain a target consumed survives nowhere else. `installRules` copies each
- * rule into the subdirectory it was authored in, which is what makes the band
+ * rule into the subdirectory it was authored in, which is what makes the folder
  * folders legible as evidence.
  *
  * `successorOf` adds the name a held rule was renamed to, which the next sync
@@ -547,12 +547,12 @@ export function readInstalledRules(
   successorOf?: (name: string) => string | undefined,
 ): {
   held: Set<string>
-  bands: Set<string>
+  folders: Set<string>
 } {
   const dir = join(target, ...INSTALL_MARKERS.governance)
   const held = new Set<string>()
-  const bands = new Set<string>()
-  if (!isDirectory(dir)) return { held, bands }
+  const folders = new Set<string>()
+  if (!isDirectory(dir)) return { held, folders }
 
   for (const rel of new Bun.Glob('**/*.md').scanSync({
     cwd: dir,
@@ -566,34 +566,34 @@ export function readInstalledRules(
     held.add(name)
     const successor = successorOf?.(name)
     if (successor !== undefined) held.add(successor)
-    if (boundary > 0) bands.add(posix.slice(0, boundary))
+    if (boundary > 0) folders.add(posix.slice(0, boundary))
   }
 
-  return { held, bands }
+  return { held, folders }
 }
 
 /**
  * Narrows rules added upstream to the ones this target could receive and does
  * not already hold.
  *
- * The band test is the entitlement filter, and `bands` carries two sources: the
+ * The folder test is the entitlement filter, and `folders` carries two sources: the
  * folders the target already holds, and the folders holding a rule the base
  * stack resolves to.
  * A rule authored under `lang/` or `ui/` is named by an individual stack, so it
  * belongs to some targets and not others, and listing every added file would
  * tell a base consumer about rules it was never entitled to. The test
- * over-reports inside a band a target already carries, since one folder can be
+ * over-reports inside a folder a target already carries, since one folder can be
  * reached by more than one stack, and that costs a line where under-reporting
  * would cost the whole point of the section.
  *
- * The `held` test is what keeps a rule that moved bands upstream out. A rename
+ * The `held` test is what keeps a rule that moved folders upstream out. A rename
  * reaches this diff as an addition, and the target already has the file under
  * its old folder, so matching by name is what tells the two apart.
  */
 export function selectNewRules(
   paths: string,
   held: ReadonlySet<string>,
-  bands: ReadonlySet<string>,
+  folders: ReadonlySet<string>,
 ): string[] {
   const prefix = 'governance/rules/'
   const names = new Set<string>()
@@ -604,11 +604,11 @@ export function selectNewRules(
 
     const rel = trimmed.slice(prefix.length)
     const boundary = rel.indexOf('/')
-    const band = boundary === -1 ? '' : rel.slice(0, boundary)
+    const folder = boundary === -1 ? '' : rel.slice(0, boundary)
     const name = basename(rel, '.md')
 
     if (held.has(name)) continue
-    if (band !== '' && !bands.has(band)) continue
+    if (folder !== '' && !folders.has(folder)) continue
 
     names.add(name)
   }
@@ -617,29 +617,29 @@ export function selectNewRules(
 }
 
 /**
- * Band folders holding a rule the base stack resolves to. Every governance
+ * Rule folders holding a rule the base stack resolves to. Every governance
  * stack extends base, so a new rule authored beside one of base's rules is
  * reported to every target the fallback below reads.
  *
- * This is what covers a band no target can carry yet. Entitlement is otherwise
- * read off folders the target already holds, and a band base reaches later
+ * This is what covers a folder no target can carry yet. Entitlement is otherwise
+ * read off folders the target already holds, and a folder base reaches later
  * exists in no installed tree, so without this the rules inside it would reach
  * nobody. Read through `resolveRules` rather than off the stack's entries,
  * since base names its rules one by one and an entry is a slug rather than a
  * folder.
  *
  * A folder only a leaf stack reaches is deliberately absent. It is entitled to
- * some targets and not others, which is the distinction the band test makes and
+ * some targets and not others, which is the distinction the folder test makes and
  * the installed tree is the only evidence of.
  */
-export function baseBands(root: string): Set<string> {
+export function baseFolders(root: string): Set<string> {
   const resolution = resolveRules(root, 'base')
   if (!resolution.ok) return new Set()
 
   return new Set(
     lookupRules(root, resolution.rules)
       .found.map((source) => source.subdir.split(sep)[0] ?? '')
-      .filter((band) => band !== ''),
+      .filter((folder) => folder !== ''),
   )
 }
 
@@ -651,7 +651,7 @@ export function baseBands(root: string): Set<string> {
  * `collectMissing` reports per file through the domain scan, so a rule the
  * chain names and the target lacks reaches both surfaces the same way.
  *
- * The diff-and-bands path stays as the fallback for a target stamped before
+ * The diff-and-folder path stays as the fallback for a target stamped before
  * governance recorded a chain. Rules are domain-scoped there too, so it
  * measures from governance's own anchor rather than from the oldest anchor
  * across domains the way `readNewSkills` does. A shared anchor would let
@@ -670,7 +670,7 @@ export function baseBands(root: string): Set<string> {
  * unmeasured result from a clean one.
  *
  * A recorded chain naming a stack the toolkit no longer ships falls through to
- * the band-based path below rather than reporting the empty list an
+ * the folder-based path below rather than reporting the empty list an
  * unresolved chain would otherwise produce. That empty list reads exactly
  * like a target holding everything, which is the same failure this function
  * exists to close, so a retired stack name is read the same as no chain at
@@ -702,8 +702,8 @@ export async function readNewRules(
     'governance/rules/',
   ])
 
-  const { held, bands } = readInstalledRules(target, successorResolver(root))
-  return selectNewRules(paths, held, bands.union(baseBands(root)))
+  const { held, folders } = readInstalledRules(target, successorResolver(root))
+  return selectNewRules(paths, held, folders.union(baseFolders(root)))
 }
 
 async function readUpstream(
