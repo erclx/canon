@@ -90,7 +90,7 @@ Each row sits under the group its skill's `metadata.family` names. The landing p
 
 | Skill                     | When to use                                                                                                 |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `canon:role-orchestrator` | To assert the control session that owns the queue and reviews each worker's PR                              |
+| `canon:role-orchestrator` | To assert the control session that owns the queue and dispatches a reviewer for each worker's PR            |
 | `canon:role-planner`      | To assert the thinking role for a cold session writing a plan, a groundwork track, or an intake pass        |
 | `canon:role-reviewer`     | To assert the reviewing role for a cold session dispatched to review one pull request                       |
 | `canon:role-worker`       | To assert the worker role for a cold session building one branch under one plan                             |
