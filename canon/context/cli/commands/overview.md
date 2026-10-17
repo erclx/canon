@@ -39,7 +39,7 @@ The root program sets `helpOption(false)` for its hand-rolled help, and subcomma
 
 ### The sandbox command
 
-`sandbox.ts` carries the scenario picker and hands provisioning, `reset`, and `clean` to `src/sandbox/provision.ts`. It also holds the sandbox reads that are not provisioning, with the report logic in `src/sandbox/` so the command file keeps only the framing. `canon/context/sandbox/index.md` reasons about each read.
+`sandbox.ts` carries the scenario picker and hands provisioning, `reset`, and `clean` to `src/sandbox/provision.ts`. It also holds the sandbox reads that are not provisioning, with the report logic in `src/sandbox/` so the command file keeps only the framing. `canon/context/sandbox.md` covers each read.
 
 ### A `check` subcommand registers after its parent
 

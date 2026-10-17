@@ -14,7 +14,7 @@ No domain keeps a bash dispatcher or a verb folder under `scripts/`. `canon tool
 - `scripts/core/` owns repo maintenance: bootstrap, verify, regen
 - `scripts/eval/` holds the frozen records of a retired authoring test, being a ledger, a pre-registration, and three results, with no runner
 - `scripts/lib/` owns shared functions, sourced and never executed, and no bash function is under test
-- `sandbox/` at the project root holds the scenario tree `canon sandbox` provisions from, covered in `canon/context/sandbox/index.md`
+- `sandbox/` at the project root holds the scenario tree `canon sandbox` provisions from, covered in `canon/context/sandbox.md`
 
 ## Decisions
 

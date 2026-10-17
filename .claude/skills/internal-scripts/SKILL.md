@@ -19,7 +19,7 @@ Read `canon/context/scripts/index.md` for structure, file inventory, and lib res
 
 ## Sandbox pattern
 
-Write a scenario as `sandbox/<cat>/<cmd>.ts` per `canon/context/sandbox/authoring.md`, which holds the TypeScript form, the config flags, and the one-file-per-skill rule. The seeds default for `claude/` scenarios is in `canon/context/sandbox/overview.md`.
+Write a scenario as `sandbox/<cat>/<cmd>.ts` per `canon/context/sandbox.md`, which holds the TypeScript form, the config flags, and the one-file-per-skill rule. The seeds default for `claude/` scenarios is in `canon/context/sandbox.md`.
 
 - Mirror realistic use of the skill with a happy-path shape that succeeds end to end
 - Put adversarial cases in a separate named arm, such as `conflict`, `degraded`, or `empty`, so pass or fail reads as a property of the skill rather than the fixture
@@ -27,7 +27,7 @@ Write a scenario as `sandbox/<cat>/<cmd>.ts` per `canon/context/sandbox/authorin
 
 ### Testing a skill headlessly
 
-`canon sandbox run <cat:cmd> "/canon:<skill>" [scenario]` provisions the scenario, drives the skill through `claude -p`, and returns a JSON envelope carrying `is_error`, `result`, `num_turns`, and `total_cost_usd`. Judge the run from the envelope rather than opening an interactive session, per `canon/context/sandbox/headless.md`.
+`canon sandbox run <cat:cmd> "/canon:<skill>" [scenario]` provisions the scenario, drives the skill through `claude -p`, and returns a JSON envelope carrying `is_error`, `result`, `num_turns`, and `total_cost_usd`. Judge the run from the envelope rather than opening an interactive session, per `canon/context/sandbox.md`.
 
 - From a linked worktree, invoke `bun src/cli.ts sandbox <cat>:<cmd>`, since global `canon` resolves to main's source and cannot see worktree changes
 - After refactoring a scenario, a green run alone is no proof. Diff `.sandbox/` contents, the file list, and `git log` against the prior behavior, and report the comparison.
@@ -69,5 +69,5 @@ A new domain script is written in TypeScript on Bun. An existing domain script s
 
 - `canon/context/scripts/index.md`: structure, file inventory, core scripts, lib responsibilities
 - `docs/agents/output-shape.md`: output shape and stream contract for every CLI command
-- `canon/context/sandbox/index.md`: sandbox system, hook pattern, provisioning flow, scenario catalog
+- `canon/context/sandbox.md`: sandbox system, hook pattern, provisioning flow, scenario catalog
 - `canon/context/scripts/framing.md`: the timeline frame a domain script prints inside

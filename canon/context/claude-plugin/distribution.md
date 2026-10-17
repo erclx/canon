@@ -42,7 +42,7 @@ An installer dereferences any symlink under `claude/` and copies whatever sits b
 - The check pipeline does not follow symlinks. The index glob and the formatter were each tested against a linked directory, so none is double-walked and none produces drift failures.
 - A native Windows checkout without symlink support materializes a link as a plain text file holding its target path, so a plugin carrying one ships a junk file and no stage notices
 
-`claude/` carries no link today, so the Windows case binds the next one. `canon/context/sandbox/overview.md` treats Windows as a supported development environment, so this is a limitation to state rather than a case the pipeline can catch.
+`claude/` carries no link today, so the Windows case binds the next one. Windows is a supported development environment, so this is a limitation to state rather than a case the pipeline can catch.
 
 ## Decisions
 
