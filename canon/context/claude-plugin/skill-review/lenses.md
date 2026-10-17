@@ -58,7 +58,7 @@ A pass whose bullets are all answered takes the closed heading, with the block s
 
 Step 3 also checks `## Key changes` through `references/key-changes.md`. `canon pr key-changes` compares the paths that section claims against the pull request's changed-file list. A claim the diff does not carry is filed under the `**PR body**` block the stale ticked box takes, since both corrupt the merge record rather than a file in the diff.
 
-The check composes on the body read Step 4 already does. A second read of one text at one head is a second place for the head to be wrong. `docs/agents/key-changes.md` carries the span rules and the residual rate.
+The check composes on the body read Step 4 already does. A second read of one text at one head is a second place for the head to be wrong. `canon pr key-changes --help` carries the span rules and the residual rate.
 
 ### How a claim is read
 

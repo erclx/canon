@@ -171,7 +171,7 @@ The line is what lets a merge close its own task. `canon tasks archive --pull-re
 
 ## Archiving
 
-Never delete a task file. A shipped task moves to `.canon/tasks/archive/` under its own name, and the live index regenerates without it. `canon tasks archive` owns that move, and what it does and what it refuses on are at `canon docs tasks-archive`.
+Never delete a task file. A shipped task moves to `.canon/tasks/archive/` under its own name, and the live index regenerates without it. `canon tasks archive` owns that move, and what it does and what it refuses on are at `canon tasks archive --help`.
 
 The archive nests inside `.canon/tasks/` rather than sitting beside it as a flat `.claude/task-archive/`, which is what a binary predating this convention still writes. Meeting the flat sibling names an older checkout rather than a second archive to reconcile.
 
