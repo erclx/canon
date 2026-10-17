@@ -24,10 +24,10 @@ description: The canon claude command surface and what each verb writes into a t
 
 ### PostToolUse hooks
 
-The seed `settings.json` ships ten hook scripts across seven blocks on three events. All ten open with the bounded stdin read covered in `canon/context/development/hooks/guards.md`, so a hook run by hand refuses instead of blocking. Eight stay byte-identical to their counterparts under `.claude/hooks/`.
+The seed `settings.json` ships ten hook scripts across seven blocks on three events. All ten open with the bounded stdin read covered in `canon/context/development.md`, so a hook run by hand refuses instead of blocking. Eight stay byte-identical to their counterparts under `.claude/hooks/`.
 
-- `pr-create-log.sh` is covered in `canon/context/development/hooks/guards.md`
-- `silent-turn.sh` and `reply-links.sh` are covered in `canon/context/development/hooks/compaction.md`
+- `pr-create-log.sh` is covered in `canon/context/development.md`
+- `silent-turn.sh` and `reply-links.sh` are covered in `canon/context/development.md`
 - The rest are below
 
 ### The standards audit hook
@@ -53,7 +53,7 @@ A target installed before the merge keeps the two older scripts and their settin
 
 ### The path form hook
 
-`.claude/hooks/path-form.sh` closes the same block, handing back the absolute form of a path written from a linked worktree, covered in `canon/context/development/hooks/guards.md`. It reads a `*/.claude/worktrees/*` segment off the write's own path rather than shelling out to git, the same derive-from-the-path precedent as the index hook.
+`.claude/hooks/path-form.sh` closes the same block, handing back the absolute form of a path written from a linked worktree, covered in `canon/context/development.md`. It reads a `*/.claude/worktrees/*` segment off the write's own path rather than shelling out to git, the same derive-from-the-path precedent as the index hook.
 
 ### PreToolUse hooks
 
@@ -62,7 +62,7 @@ Four PreToolUse hooks remind or deny before a tool runs, each paired with a scri
 - On `Grep` and `Glob`, `index-reminder.sh` walks up from the search path to the nearest `index.md` and reminds the agent to read it, once per folder per session. It fires only where an index exists.
 - On `Bash`, `review-post-scan.sh` runs `canon labels scan --body-file` against the body file of a `gh api` review or comment post and denies the call on a finding
 - It blocks rather than reminds and calls `canon` from `PATH`, so a target on a CLI older than the flag has review posts refused until it upgrades
-- The decision and its rejected alternative are in `canon/context/development/hooks/command-scanners.md`
+- The decision and its rejected alternative are in `canon/context/development.md`
 
 ### User-level settings
 

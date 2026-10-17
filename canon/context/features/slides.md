@@ -50,7 +50,7 @@ A deck is a draft made with Claude, so it lives under the record root rather tha
 
 ### What is not shipped
 
-No slides capture is committed, so none is prod evidence today. A dev baseline would sit at `assets/evidence/slides/` and does not exist. `canon/context/development/evidence.md` owns the boundary.
+No slides capture is committed, so none is prod evidence today. A dev baseline would sit at `assets/evidence/slides/` and does not exist. `canon/context/development.md` owns the boundary.
 
 There is no markdown deck source and no set of layouts. A markdown source painted every project's deck in Canon's palette and could carry no image, chart, table, notes, or motion, so nothing migrates one.
 

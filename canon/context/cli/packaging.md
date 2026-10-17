@@ -45,7 +45,7 @@ The check compares text metrics against a family that cannot exist, because `doc
 
 ### The hero stage checks only that the regen runs
 
-The `Hero` stage in the merge gate runs `regen-hero.ts --check`, which fills into a temp folder, so a stale frame passes and the refresh workflow regenerates the committed files after a merge, per `canon/context/development/gates/content-stages.md`.
+The `Hero` stage in the merge gate runs `regen-hero.ts --check`, which fills into a temp folder, so a stale frame passes and the refresh workflow regenerates the committed files after a merge, per `canon/context/development.md`.
 
 ### The install frame
 

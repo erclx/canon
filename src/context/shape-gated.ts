@@ -16,6 +16,7 @@
 export const SHAPE_GATED_FOLDERS: readonly string[] = [
   'canon/context/context-model.md',
   'canon/context/design.md',
+  'canon/context/development.md',
   'canon/context/web.md',
 ]
 

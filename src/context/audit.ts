@@ -104,6 +104,18 @@ export const LAYOUT_PARAGRAPH_CAP = 1
 /** The one Layout H3 not titled with a path, holding the trivial folders. */
 export const OTHER_FOLDERS = 'Other folders'
 
+/** The run-command table H3 only the development entry carries under `Layout`. */
+export const SCRIPTS_HEADING = 'Scripts'
+
+/**
+ * Whether an entry path is the development entry, being the flat entry or the
+ * overview of a split one a target may still carry. The standard exempts the
+ * `Scripts` H3 for that entry alone, so the path is what tells.
+ */
+function isDevelopmentEntry(rel: string): boolean {
+  return /(?:^|\/)development(?:\/overview)?\.md$/.test(rel)
+}
+
 /**
  * The context standard's list, kept as its own export because the audit record
  * has published it flat under `checkpoints.requiredSections` since before any
@@ -584,13 +596,18 @@ interface FolderHeading {
  * A cap reports once per section or folder heading however far past it the
  * count runs, since the fix is one cut either way. `Other folders` is exempt
  * from both folder caps, its one-line bullets being held by the bullet run
- * limit `canon markdown audit` already gates.
+ * limit `canon markdown audit` already gates. The development entry's `Scripts`
+ * H3 is exempt from the heading rule and both caps the same way, its table
+ * being a run-command surface rather than a folder.
  */
 function shapeIssues(
+  rel: string,
   lines: readonly BodyLine[],
   retired: readonly string[],
 ): ShapeIssue[] {
   const issues: ShapeIssue[] = []
+  const exempt = new Set([OTHER_FOLDERS])
+  if (isDevelopmentEntry(rel)) exempt.add(SCRIPTS_HEADING)
   let section: string | undefined
   let gotchas: { line: number; bullets: number } | undefined
   let folder: FolderHeading | undefined
@@ -599,7 +616,7 @@ function shapeIssues(
   let afterBlank = false
 
   const closeFolder = (): void => {
-    if (folder && folder.text !== OTHER_FOLDERS) {
+    if (folder && !exempt.has(folder.text)) {
       if (folder.paragraphs > LAYOUT_PARAGRAPH_CAP) {
         issues.push({
           line: folder.line,
@@ -659,7 +676,7 @@ function shapeIssues(
       } else if (section === 'Layout' && level === 3) {
         closeFolder()
         folder = { line: line.number, text, bullets: 0, paragraphs: 0 }
-        if (!FOLDER_TITLE.test(text) && text !== OTHER_FOLDERS) {
+        if (!FOLDER_TITLE.test(text) && !exempt.has(text)) {
           issues.push({ line: line.number, kind: 'layout-heading', text })
         }
       } else if (section === 'Layout') {
@@ -780,7 +797,7 @@ export function measureEntry(
     bareReferences: bareReferences(lines, siblings),
     sections: declaredSections(lines, required),
     otherSections: otherSections(lines, allowed, retired),
-    shape: governsContent ? shapeIssues(lines, retired) : [],
+    shape: governsContent ? shapeIssues(rel, lines, retired) : [],
     stub: isStubSeed(source),
     governed: governsContent,
   }

@@ -52,7 +52,7 @@ The sweep under `screenshots/` is gitignored and per worktree, so it partitions 
 - `--require-base-url` skips a flagged case, since a production smoke run should not overwrite the committed baseline with what a live deployment renders
 - It exits 1 when the skip leaves zero cases, and the golden template leaves one case unflagged so a fresh scaffold's `smoke:prod` always has a route to check
 - A first commit to `evidence/` runs the capture twice with no code change and confirms byte-identical output, which catches a flaky render before it reaches the pull request
-- This repository sorts its own `evidence/` folders into dev and prod by location, which `canon/context/development/evidence.md` writes down
+- This repository sorts its own `evidence/` folders into dev and prod by location, which `canon/context/development.md` writes down
 
 ### Where server readiness lives
 

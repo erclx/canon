@@ -71,7 +71,7 @@ A caller spawning `gov install` or `gov sync` as a real process inherits the rea
 
 `sandboxTree` in `src/commands/sandbox.ts` resolves the same three ways under `CANON_SANDBOX_DIR` and lands one folder below `stateDir`'s own result, so a caller redirecting one without the other still reaches the real machine through `canon sandbox`.
 
-`canon/context/development/verification.md` covers the process tier's handling of both.
+`canon/context/development.md` covers the process tier's handling of both.
 
 ### A stamped folder can hold others
 

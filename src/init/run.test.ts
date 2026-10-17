@@ -12,6 +12,9 @@ function passing(label: string, order: string[]): DomainStep {
   }
 }
 
+// Exercises the failing-domain branch on purpose, and vitest passes its stderr
+// through, so a passing `bun run check` prints `Failed, run manually` lines.
+// Read the closing verification line rather than grepping for failure strings.
 function failing(label: string, order: string[]): DomainStep {
   return {
     kind: 'run',

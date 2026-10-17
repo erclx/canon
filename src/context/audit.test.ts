@@ -814,6 +814,24 @@ describe('shape', () => {
     ])
   })
 
+  it.each([
+    'canon/context/development.md',
+    'canon/context/development/overview.md',
+    'development.md',
+  ])('should accept a Scripts table in the development entry at %s', (rel) => {
+    const source = `${FRONTMATTER}## Layout\n\n### Scripts\n\n| Command | Purpose |\n| --- | --- |\n| \`bun run check\` | Verify |\n`
+
+    expect(measureEntry(rel, source).shape).toEqual([])
+  })
+
+  it('should report a Scripts H3 in an entry other than the development entry', () => {
+    const source = `${FRONTMATTER}## Layout\n\n### Scripts\n\n- One\n`
+
+    expect(measureEntry('canon/context/ci.md', source).shape).toEqual([
+      { line: 8, kind: 'layout-heading', text: 'Scripts' },
+    ])
+  })
+
   it('should report a folder H3 with a two-paragraph lead', () => {
     const source = '## Layout\n\n### `src/`\n\nFirst.\n\nSecond.\n\n- One\n'
 

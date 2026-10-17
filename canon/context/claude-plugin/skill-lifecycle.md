@@ -16,7 +16,7 @@ How a skill is invoked, the three task-board writers, where a session fact is ro
 Invoke a skill with `/skill-name` or let Claude auto-trigger it by matching the description. A skill marked `disable-model-invocation: true` requires explicit invocation. Git skills (`git-commit`, `git-pr`, `git-branch`, `git-stage`) override built-in commit and PR behavior. Conventions are in `claude/skills/create-skill/references/skill.md`.
 
 - A slash command in a `claude --bg` launch prompt reaches a flagged body as an expanded invocation, which every dispatch relies on. `auto-ship` carries the flag and launches as `/canon:auto-ship`.
-- A harness hook is a third route, and only `session-compact` is reached so. A `PreCompact` hook names it when blocking a manual compaction, per `canon/context/development/hooks/compaction.md`.
+- A harness hook is a third route, and only `session-compact` is reached so. A `PreCompact` hook names it when blocking a manual compaction, per `canon/context/development.md`.
 - A skill named by a hook is named in a string nothing validates, so a rename leaves the hook pointing at a skill that no longer answers, and no stage compares the two
 
 ### The mark sandbox arm

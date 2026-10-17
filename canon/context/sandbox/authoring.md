@@ -62,7 +62,7 @@ Refusing is the default because every anchor scenario force-pushes to `main`, so
 
 - `SANDBOX_ANCHOR_CREATE=true` opts into creating it as private, and the probe says when it did
 - That flag takes `true` or `1` and refuses every other value, including `false`, where the `config` flags are presence tests, since a presence test here would have `false` provisioning a repository
-- `canon tooling sync --write` takes the same shape, and `canon records push` refuses outright for the reason `canon/context/development/records.md` records
+- `canon tooling sync --write` takes the same shape, and `canon records push` refuses outright for the reason `canon/context/development.md` records
 - `gh` reports an absent repository and an unreachable host with the same exit status, so the probe separates them on the 404 alone
 
 ### Writing a TypeScript scenario

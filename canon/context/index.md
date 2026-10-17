@@ -13,7 +13,7 @@ Per-domain narrative loaded on demand
 - [CLI](cli/index.md): TypeScript entry point and the layer boundary to bash, command registration and migration, the sync engine and its install stamp, the audit commands, and packaging. Start with overview.
 - [Context model](context-model.md): How project context splits across loading tiers and roots, the test that sorts a fact between them, and the folder index.md catalog system
 - [Design](design.md): DESIGN.md as a generated record, the token module and component layer it renders from, the render preview, and the neutral base a target inherits
-- [Development](development/index.md): Local dev loop and run commands, how bun run check scopes its stages and tests, the hooks, session scratch, and record folders. Start with overview.
+- [Development](development.md): The local dev loop, the run command table, how bun run check sequences and scopes its stages, the hooks, session scratch, record folders, and the evidence and hero folders
 - [Features](features/index.md): Small feature domains grouped by kind rather than split from one domain, one entry each for canvas, demo, inventory, slides, teach, and transcripts
 - [Governance](governance/index.md): Path-scoped Claude rules with their naming and frontmatter contract, the stacks that group them, and the install and sync path with its CLI. Start with overview.
 - [Sandbox](sandbox/index.md): Scenarios that provision isolated project states, the run and coverage surfaces, and the authoring contract. Start with overview.
