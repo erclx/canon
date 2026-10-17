@@ -7,12 +7,22 @@ import { isChangelog, lengthExemption } from '@/markdown/ceiling'
 import { type ColonFinding, findColons } from '@/markdown/colons'
 import { type MarkdownAuditRefusal, resolveMarkdown } from '@/markdown/files'
 import { densityFindings, type DensityKind } from '@/markdown/density'
-import { type GatedDensityFinding, isGating } from '@/markdown/gate'
+import {
+  type GatedDensityFinding,
+  type GatedReferenceShapeFinding,
+  isGating,
+  referenceShapeGates,
+} from '@/markdown/gate'
 import {
   findHeadingCase,
   type HeadingCaseFinding,
 } from '@/markdown/heading-case'
 import { decodePath, findBrokenLinks, type LinkFinding } from '@/markdown/links'
+import {
+  REFERENCE_SECTIONS,
+  type ReferenceShapeKind,
+  referenceShapeFindings,
+} from '@/markdown/reference-shape'
 import {
   type BanFinding,
   type BanSets,
@@ -64,6 +74,8 @@ interface FileReport {
   readonly headingCase: readonly HeadingCaseFinding[]
   /** Empty on a path outside the density scope, so a plan never carries one. */
   readonly density: readonly GatedDensityFinding[]
+  /** Empty on a page whose frontmatter does not carry `kind: reference`. */
+  readonly referenceShape: readonly GatedReferenceShapeFinding[]
   readonly structure: StructureReport
   readonly renderedLines: number
   /** The stated reason, or null where the document is not exempt. */
@@ -95,7 +107,8 @@ export function register(program: Command): void {
         '  0  the audit completed with no gating finding',
         '  1  refused, with the reason on stderr',
         '  2  a banned character is present, a relative link resolves to',
-        '     nothing on disk, or a density finding sits on a gated path',
+        '     nothing on disk, or a density or reference shape finding sits',
+        '     on a gated path',
         '  3  a shipped ban set is empty, so the run measured nothing',
         '',
         'A ban hit and a dead link are each a fact and gate unconditionally.',
@@ -109,6 +122,11 @@ export function register(program: Command): void {
         'finding. One gates under a prefix in GATED_PATHS in src/markdown/scope.ts,',
         'and a bullet run gates in context, docs, and skills from the start.',
         'Outside a canon checkout every density finding reports and none gates.',
+        '',
+        'A page whose frontmatter carries kind: reference takes the reference',
+        'shape: no H2 beyond Output, Refusals, and See also, no H3, and no',
+        'table whose first header cell names flags or options. It gates under',
+        'the same prefixes density does, and an unmarked page is never measured.',
         '',
         'A mid-sentence colon and a heading with a capital after its first word',
         'report the same way. A proper noun is the one case the second cannot',
@@ -200,6 +218,10 @@ async function runAudit(
               gating: gates && densityGates(rel, finding.kind),
             }))
           : [],
+        referenceShape: referenceShapeFindings(source).map((finding) => ({
+          ...finding,
+          gating: gates && referenceShapeGates(rel),
+        })),
         links: findBrokenLinks(lines, (path) =>
           existsSync(resolve(dirname(abs), path)),
         ),
@@ -217,6 +239,7 @@ async function runAudit(
   reportColons(reports)
   reportHeadingCase(reports)
   reportDensity(reports, gates)
+  reportReferenceShape(reports, gates)
   reportBullets(reports, checkpoints)
   reportParagraphs(reports, checkpoints)
   reportCadence(reports, checkpoints)
@@ -253,6 +276,7 @@ async function runAudit(
           colons: report.colons,
           headingCase: report.headingCase,
           density: report.density,
+          referenceShape: report.referenceShape,
           longestRun: report.structure.longestRun,
           longestRunLine: report.structure.longestRunLine,
           heavyBullets: report.structure.heavyBullets,
@@ -276,6 +300,7 @@ async function runAudit(
     colons: reports.flatMap((report) => report.colons),
     headingCase: reports.flatMap((report) => report.headingCase),
     density: reports.flatMap((report) => report.density),
+    referenceShape: reports.flatMap((report) => report.referenceShape),
   })
 
   return gating ? EXIT_GATE : 0
@@ -496,6 +521,70 @@ function reportDensity(reports: readonly FileReport[], gates: boolean): void {
         (report) =>
           `${report.rel}  ${plural(report.density.length, 'finding')}\n${report.density
             .map(describeDensity)
+            .join('\n')}`,
+      )
+      .join('\n'),
+  )
+}
+
+const REFERENCE_SHAPE_LABELS: Record<ReferenceShapeKind, string> = {
+  'extra-section': 'section outside the shape',
+  subsection: 'H3',
+  'flag-table': 'flag table',
+}
+
+function describeReferenceShape(finding: GatedReferenceShapeFinding): string {
+  const gate = finding.gating ? '  gating' : ''
+  return `  :${finding.line}  ${REFERENCE_SHAPE_LABELS[finding.kind]}  ${finding.text}${gate}`
+}
+
+/**
+ * Lists every reference shape finding with whether it gates, under the same
+ * prefixes the density step names.
+ */
+function reportReferenceShape(
+  reports: readonly FileReport[],
+  gates: boolean,
+): void {
+  logStep('Reference shape')
+  logInfo(
+    `A page whose frontmatter carries kind: reference holds its opening, then ${REFERENCE_SECTIONS.join(', ')}, with no H3 and no table of flags. An unmarked page is never measured.`,
+  )
+  logInfo(
+    gates
+      ? 'A finding gates under the prefixes the density step names. Every other finding reports.'
+      : 'This tree is not a canon checkout, so every reference shape finding reports and none gates.',
+  )
+
+  const carrying = reports.filter((report) => report.referenceShape.length > 0)
+
+  if (carrying.length === 0) {
+    logInfo('No reference shape finding.')
+    return
+  }
+
+  const total = carrying.reduce(
+    (sum, report) => sum + report.referenceShape.length,
+    0,
+  )
+  const gating = carrying.reduce(
+    (sum, report) =>
+      sum + report.referenceShape.filter((finding) => finding.gating).length,
+    0,
+  )
+  logWarn(
+    `${plural(total, 'finding')} across ${plural(carrying.length, 'file')}, ${gating} gating`,
+  )
+  if (gating > 0) logWarn('A gating finding fails the run.')
+  logInfo(
+    'Fold an H3 into its section, move a section the shape lacks into the opening or a linked page, and point at canon <verb> --help for flags.',
+  )
+  pipeOutput(
+    carrying
+      .map(
+        (report) =>
+          `${report.rel}  ${plural(report.referenceShape.length, 'finding')}\n${report.referenceShape
+            .map(describeReferenceShape)
             .join('\n')}`,
       )
       .join('\n'),

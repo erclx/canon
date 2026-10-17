@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   type GateInput,
   type GatedDensityFinding,
+  type GatedReferenceShapeFinding,
   isGating,
+  referenceShapeGates,
 } from '@/markdown/gate'
 import type { LinkFinding } from '@/markdown/links'
 import type { BanFinding } from '@/markdown/scan'
@@ -54,6 +56,18 @@ function makeDensity(
   }
 }
 
+function makeReferenceShape(
+  overrides: Partial<GatedReferenceShapeFinding> = {},
+): GatedReferenceShapeFinding {
+  return {
+    kind: 'subsection',
+    line: 9,
+    text: 'Flags',
+    gating: false,
+    ...overrides,
+  }
+}
+
 function makeInput(overrides: Partial<GateInput> = {}): GateInput {
   return {
     bans: [],
@@ -62,6 +76,7 @@ function makeInput(overrides: Partial<GateInput> = {}): GateInput {
     colons: [],
     headingCase: [],
     density: [],
+    referenceShape: [],
     ...overrides,
   }
 }
@@ -171,6 +186,22 @@ describe('isGating', () => {
     expect(isGating(input)).toBe(false)
   })
 
+  it('should fail a reference shape finding marked gating', () => {
+    const input = makeInput({
+      referenceShape: [makeReferenceShape({ gating: true })],
+    })
+
+    expect(isGating(input)).toBe(true)
+  })
+
+  it('should pass a reference shape finding marked not gating', () => {
+    const input = makeInput({
+      referenceShape: [makeReferenceShape({ gating: false })],
+    })
+
+    expect(isGating(input)).toBe(false)
+  })
+
   it('should fail a ban hit sitting beside a structural finding', () => {
     const input = makeInput({
       bans: [makeBan()],
@@ -192,5 +223,19 @@ describe('isGating', () => {
     const input = makeInput({ bans: [makeBan()], links: [makeLink()] })
 
     expect(isGating(input)).toBe(true)
+  })
+})
+
+describe('referenceShapeGates', () => {
+  it('should gate a page under a gated prefix', () => {
+    expect(referenceShapeGates('docs/agents/tick.md', ['docs/agents/'])).toBe(
+      true,
+    )
+  })
+
+  it('should leave a page under no gated prefix reporting', () => {
+    expect(referenceShapeGates('docs/workflow/ship.md', ['docs/agents/'])).toBe(
+      false,
+    )
   })
 })
