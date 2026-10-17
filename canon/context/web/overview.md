@@ -29,13 +29,13 @@ The remaining folders hold the build-time reads, the shell, the styles, and the 
 - `web/public/` owns the social card symlink, the evidence beat's fixed captures, and the build-time previews
 - `web/card-src/` owns the social card route, a third Astro config
 
-`canon/context/web/build.md` covers the build-time reads, the build, and deploy. `assets.md` covers the card, favicon, previews, and README images, and `capture.md` the visual checks.
+`canon/context/web/build.md` covers the build-time reads, the build, and deploy. `canon/context/web/assets.md` covers the card, favicon, previews, and README images, and `canon/context/web/capture.md` the visual checks.
 
-## Surface
+### What a reader sees
 
 A reader arrives cold, scrolls once, and reads one real session from the ask to the merge. Every count in a section head is read from the repository at build time. The long-form copy lives in `web/src/content/copy.ts`, so it is not restated here.
 
-### Regions
+### Page regions
 
 The page runs top to bottom through six regions.
 
@@ -47,7 +47,7 @@ The page runs top to bottom through six regions.
 
 A field of every command and skill name follows, with the used ones lit. Skills sit under the skill map's groups, and each name reveals its when-to-use text on hover, focus, and tap. The footer carries the brand line, three link columns, and a note on what is read and what is authored.
 
-### States
+### Page states
 
 Three states, each captured or reachable on its own.
 
@@ -55,9 +55,9 @@ Three states, each captured or reachable on its own.
 - Dark: the system prefers dark or the reader picks it, on its own derived dark ground rather than an inversion. Captured at `assets/evidence/home/1280--dark.png`.
 - Still: the reader asks for reduced motion or opens `?still`, and every figure shows its end state with no build and no control motion
 
-Every committed frame is also a still, since the capture creates its context with reduced motion and scrolls each section into view first. Whole-page frames sit beside a folder per section, so a change to one part reaches review as a diff on that part. `capture.md` carries the section list.
+Every committed frame is also a still, since the capture creates its context with reduced motion and scrolls each section into view first. Whole-page frames sit beside a folder per section, so a change to one part reaches review as a diff on that part. `canon/context/web/capture.md` carries the section list.
 
-### Behavior
+### Page behavior
 
 The page behaves the same in every state.
 

@@ -20,7 +20,8 @@ canon sandbox coverage --strict   # exits 1 while any scenario declares nothing
 - `src/sandbox/` owns the coverage report and the skill census
 - `sandbox/fixtures/` owns each arm's `expect.toml`, which the report counts
 - `sandbox/` owns the scenario scripts the report enumerates, and `exempt.toml` beside them
-- `arms.md` and `workflow-arms.md` in this folder record what individual arms prove, and `census.md` covers the per-skill census, pairing, and exemptions
+- `canon/context/sandbox/coverage/arms.md` and `canon/context/sandbox/coverage/workflow-arms.md` record what individual arms prove
+- `canon/context/sandbox/coverage/census.md` covers the per-skill census, pairing, and exemptions
 
 ## Decisions
 
