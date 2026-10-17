@@ -79,7 +79,7 @@ The pre-filter is a shell test for `](` on the raw payload, ahead of any `jq` sp
 
 #### Failing to measure
 
-The hook reports a check it could not run and never passes it as clean, but it exits 1 for that rather than 2. Exit 2 forces a continuation, and a hook that cannot read `stop_hook_active` would then block every continuation after it. Exit 1 puts the text in front of the operator and leaves the session alone. A missing `jq`, an unreadable payload, a `cwd` that no longer exists, no resolvable runner, and a verb answering no record each take this path.
+The hook reports a check it could not run and never passes it as clean, but it exits 1 for that rather than 2. Exit 2 forces a continuation, and a hook that cannot read `stop_hook_active` would then block every continuation after it. Exit 1 puts the text in front of the operator and leaves the session alone. A missing `jq`, an unreadable payload, a `cwd` missing from disk, no resolvable runner, and a verb answering no record each take this path.
 
 Two limits come with the event. Only the closing message is checked, because the payload carries `last_assistant_message` and nothing earlier, so a bad link in a mid-turn message passes. And the bad reply is already on screen when the hook fires, so the fix arrives as a follow-up and not a replacement. Reference-style links and backticked path-like tokens are not read. Widening to backticked tokens is deferred until a week of blocks shows how often an illustrative path would false-positive.
 
