@@ -83,7 +83,7 @@ Five traps catch a first-time author.
 Four constraints shape what an arm can reach.
 
 - Skills whose body forbids probing project surfaces, such as `canon-feedback`, stay out of scope, though `infra:feedback` asserts `canon feedback` refusing an incomplete report
-- A driven session calls the `canon` on PATH, the published release. A catalog the branch extends, such as a new governance rule, is absent until a release ships it. `canon/context/sandbox/headless.md` carries the repair.
+- A driven session calls the `canon` on PATH, the published release. A catalog the branch extends is absent until a release ships it. `canon/context/sandbox/headless.md` carries the repair.
 - Anchor scenarios take their starting tree from a fixture, so provisioning does not depend on the previous arm. The force-pushes remain, so an assertion reading `origin/main` is order-sensitive.
 - After provisioning, the terminal cwd may need a refresh, which a wrapper in `.zshrc` or `.bashrc` supplies
 

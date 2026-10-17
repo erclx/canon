@@ -127,7 +127,7 @@ A caller resolving the tree apart from the provisioning that populated it misses
 
 Two readings come before a finding.
 
-- An escape list covering the whole tree, or a failure count far past what the arm declares, reads as a tree collision, from a stale `canon` sharing one tree or two commands pinned to one `CANON_SANDBOX_DIR`
+- An escape list covering the whole tree, or a failure count far past what the arm declares, reads as a tree collision, from a stale `canon` or two commands sharing one `CANON_SANDBOX_DIR`
 - Escape detection assumes the toolkit's shared scratch is quiet while a run is in flight, so a launching session editing the four directories mid-run draws an escape naming its own file
 
 ### A scenario faking a live session writes to the real registry
