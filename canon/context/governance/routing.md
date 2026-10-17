@@ -27,7 +27,7 @@ One candidate passes both halves and stays deferred. A child folder carrying no 
 
 A standard governing a file path carries a rule routing to it, so an edit loads the standard without the matching skill being invoked. The route makes a standard reachable from the action rather than from a session that thought to look.
 
-`tooling-reference` is authored under `internal/rules/claude/`, because `internal/standards/tooling-reference.md` governs a surface a target never authors, and shipping the route would point at a path no install creates.
+`tooling-reference` is authored under `internal/rules/claude/`, because `.claude/skills/internal-tooling/references/tooling-reference.md` governs a surface a target never authors, and shipping the route would point at a path no install creates.
 
 - It globs `manifest.toml` beside `reference.md`, since a rule protecting a symmetry has to fire from either side and the manifest moves first
 

@@ -16,5 +16,5 @@ paths:
 
 ## Authority
 
-- Follow `internal/standards/tooling-reference.md` for stack reference content, structure, the extends chain, and what the manifest owes the reference. It is the single source.
+- Follow `.claude/skills/internal-tooling/references/tooling-reference.md` for stack reference content, structure, the extends chain, and what the manifest owes the reference. It is the single source.
 - Read it before editing a stack reference or its manifest. Do not work the shape from memory.

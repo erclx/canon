@@ -11,14 +11,24 @@ The canvas exists for Claude to draw frames the operator reviews. Do not add new
 
 ## Working against the canvas
 
-- Pass `--root <provisioned dir>` to every verb and never point at `.canon/canvas/`. Selecting an element writes a real selection, so a test run against the live root changes what the operator has open.
-- Expect `canvas serve` to refuse with `missing-client-deps` in a fresh worktree, and run the `bun install` its detail names. Check the live shell as well as the captures, since a shell that builds wrong still passes every capture.
-- Drive the shell through `src/canvas/shell.e2e.test.ts` and wait on `load`, never `networkidle`. The page holds a connection open, so `networkidle` never settles. The suite skips where no browser binary exists, so run it locally before a shell change ships.
-- Post evidence for every change to the shell. Commit the walk's states for the change to `assets/evidence/canvas/<area>/`, the area folder (`arrange`, `inspector`, `layers`, or `shell`) its walk exercises, post them with `canon pr evidence` and a short checklist of what to look at, then serve the branch's canvas from a scratch root on a free port, never the operator's 8790, and hand that address to the UI reviewer. Re-serve after every push until the UI pass names the head.
+Pass `--root <provisioned dir>` to every verb and never point at `.canon/canvas/`. Selecting an element writes a real selection, so a test run against the live root changes what the operator has open.
+
+- Expect `canvas serve` to refuse with `missing-client-deps` in a fresh worktree, and run the `bun install` its detail names
+- Check the live shell as well as the captures, since a shell that builds wrong still passes every capture
+- Drive the shell through `src/canvas/shell.e2e.test.ts` and wait on `load`, since the page holds a connection open and `networkidle` never settles
+- Run that suite locally before a shell change ships, since it skips where no browser binary exists
+
+### Evidence for a shell change
+
+Every change to the shell posts evidence and hands the UI reviewer a live address.
+
+- Commit the walk's states to `assets/evidence/canvas/<area>/`, where the area (`arrange`, `inspector`, `layers`, or `shell`) is the one the walk exercises
+- Post them with `canon pr evidence` and a short checklist of what to look at
+- Serve the branch's canvas from a scratch root on a free port, never the operator's 8790, and re-serve after every push until the UI pass names the head
 
 ## Editing
 
-- Send every property edit through the one writer behind `canvas edit`, which the inspector shares. It carries the frame hash check that refuses a stale address. A second write path skips that check and lands on a shifted element.
+- Send every property edit through the one writer behind `canvas edit`, which the inspector shares. Its frame hash check refuses a stale address, which a second write path would skip.
 - Land a verb before the key binding or control that calls it, so the keyboard and the CLI never disagree about what an action does.
 - Bind single-letter keys to act only while the canvas holds focus. A letter typed into a field must reach the field.
 

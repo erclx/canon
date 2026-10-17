@@ -1,6 +1,6 @@
 # Lesson chrome
 
-`canon teach nav` rewrites lessons in place, so an authored file and a generated one share a path. This is the single largest trap in the domain and it fails silently: a hand-edit to spliced chrome is overwritten by the next run with nothing reporting the loss.
+`canon teach nav` rewrites lessons in place, so an authored file and a generated one share a path. This is the single largest trap in the domain, and it fails silently, since a hand-edit to spliced chrome is overwritten by the next run with nothing reporting the loss.
 
 ## The four markers
 
@@ -17,7 +17,10 @@ A lesson carries four empty marker pairs and `canon teach nav` fills each from w
 
 ## What is authored and what is generated
 
-The authored heading, lede, body and quiz sit between the header and footnav markers. The splice leaves that region untouched apart from two rewrites: it wraps the region in `<main>` when it holds none, and it links each "lesson NNNN" mention to the lesson file carrying that number. Nav owns only a link carrying `data-lesson-ref`, re-pointing or unwrapping it on every run, and never touches an author's own `<a>`. It rewrites everything inside the four pairs.
+The authored heading, lede, body and quiz sit between the header and footnav markers. `nav` rewrites everything inside the four pairs and leaves that region untouched apart from two rewrites.
+
+- It wraps the region in `<main>` when it holds none
+- It links each "lesson NNNN" mention to the lesson file carrying that number, owning only a link carrying `data-lesson-ref` and never an author's own `<a>`
 
 So the boundary is positional rather than per-file. Edit between the markers freely. Never edit inside them, and never edit the root or contents pages at all, since `nav` regenerates those whole.
 
@@ -29,6 +32,6 @@ Read the diff anyway. A pipeline change moves every committed fixture lesson at 
 
 ## Why the splice exists rather than a template
 
-A lesson is a standalone HTML file a learner opens directly, with no build step between the file and the browser. Chrome that a template inserted would need that build step, and chrome that an author copied would drift per lesson. The splice keeps both properties: the file stays directly openable, and the chrome stays uniform because one verb owns it.
+A lesson is a standalone HTML file a learner opens directly, with no build step between the file and the browser. Chrome a template inserted would need that build step, and chrome an author copied would drift per lesson. The splice keeps the file openable and the chrome uniform, because one verb owns it.
 
 The cost is the shared path, and the mitigation is this document rather than a mechanism. Nothing prevents a hand-edit inside a marker pair.

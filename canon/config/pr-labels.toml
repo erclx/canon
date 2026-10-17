@@ -31,11 +31,10 @@
 # the other side and a second measure rather than this one.
 #
 # Matching is prefix-anchored, so a `.claude/` path earns no row written for an
-# authoring root: `internal/standards/` never matches
-# `.claude/internal/standards/`. Every surface living only under a dotted folder
-# carries its own prefix on the row that owns its subject. `internal/` splits across two rows for the same reason, holding
-# rules and the tooling reference convention rather than a subject of its own,
-# and only the `tooling` row carries its consumed copy under `.claude/internal/`.
+# authoring root: `internal/rules/` never matches `.claude/rules/internal/`.
+# Every surface living only under a dotted folder carries its own prefix on the
+# row that owns its subject. `internal/` holds rules rather than a subject of its
+# own, so the `governance` row names its paths one by one.
 
 [domains]
 # The plugin surface: shipped skills, toolkit-internal skills, and the
@@ -47,9 +46,7 @@ governance = [
   "internal/rules/",
   "internal/governance.toml",
 ]
-# `internal/standards/` holds the one convention governing
-# `tooling/<stack>/reference.md`, so tooling is its subject.
-tooling = ["tooling/", "internal/standards/", ".claude/internal/standards/"]
+tooling = ["tooling/"]
 # Both halves of the migration boundary. `scripts/core/` and `sandbox/` are
 # left to the rows below, so a new `scripts/` folder goes bare until the
 # uncovered-surface check names it.

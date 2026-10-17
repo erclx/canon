@@ -19,20 +19,25 @@ Read `canon/context/scripts/index.md` for structure, file inventory, and lib res
 
 ## Sandbox pattern
 
-- Write a scenario as `sandbox/<cat>/<cmd>.ts` per `canon/context/sandbox/authoring.md`, which holds the TypeScript form, the config flags and their defaults, and the one-file-per-skill rule. The seeds default for `claude/` scenarios is in `canon/context/sandbox/overview.md`.
-- Sandbox scenarios mirror realistic use of the skill. Pick a happy-path shape that succeeds end-to-end. Put adversarial cases in a separate named scenario arm (e.g. `conflict`, `degraded`, `empty`) so pass/fail reads as a property of the skill, not the fixture.
-- When testing a skill that has a sandbox scenario, run `canon sandbox <cat>:<cmd>` yourself before handing off. Tell the user the exact skill invocation and what to expect.
+Write a scenario as `sandbox/<cat>/<cmd>.ts` per `canon/context/sandbox/authoring.md`, which holds the TypeScript form, the config flags, and the one-file-per-skill rule. The seeds default for `claude/` scenarios is in `canon/context/sandbox/overview.md`.
+
+- Mirror realistic use of the skill with a happy-path shape that succeeds end to end
+- Put adversarial cases in a separate named arm, such as `conflict`, `degraded`, or `empty`, so pass or fail reads as a property of the skill rather than the fixture
+- Run `canon sandbox <cat>:<cmd>` yourself before handing off a skill that has a scenario, and tell the user the exact invocation and what to expect
 
 ### Testing a skill headlessly
 
-- To test a skill non-interactively, run `canon sandbox run <cat:cmd> "/canon:<skill>" [scenario]`. It provisions the scenario, drives the skill through `claude -p`, and returns a JSON envelope (`is_error`, `result`, `num_turns`, `total_cost_usd`). Judge the run from the envelope instead of opening an interactive session. See `canon/context/sandbox/headless.md`.
-- When testing uncommitted script edits from a linked worktree, invoke the CLI through its worktree-local path like `bun src/cli.ts sandbox <cat>:<cmd>`. Global `canon` resolves to the main repo's source and cannot see worktree changes until they land on main.
-- After refactoring a sandbox scenario, do not claim verified from a green run alone. Diff `.sandbox/` contents, file list, and `git log` against the pre-refactor behavior or spec, and report the comparison in the done message.
+`canon sandbox run <cat:cmd> "/canon:<skill>" [scenario]` provisions the scenario, drives the skill through `claude -p`, and returns a JSON envelope carrying `is_error`, `result`, `num_turns`, and `total_cost_usd`. Judge the run from the envelope rather than opening an interactive session, per `canon/context/sandbox/headless.md`.
+
+- From a linked worktree, invoke `bun src/cli.ts sandbox <cat>:<cmd>`, since global `canon` resolves to main's source and cannot see worktree changes
+- After refactoring a scenario, a green run alone is no proof. Diff `.sandbox/` contents, the file list, and `git log` against the prior behavior, and report the comparison.
 
 ### Scenario limits and the playground
 
-- A sandbox scenario validates a skill change only when its environment reproduces the bug's trigger. Standalone-repo scenarios cannot exercise host-conditional behavior like linked-worktree locks or remote-state failures. Mark the scenario extension as a follow-up rather than treating a green run as proof.
-- `github.com/erclx/canon-sandbox` is a pre-authorized destructive-ops playground. Sandbox scenarios that force-push to its `main` or delete `chore/canon-sync*` remote branches run without confirmation. Treat any other `erclx/*` repo as production where destructive ops still need explicit approval.
+A scenario validates a skill change only when its environment reproduces the bug's trigger. A standalone-repo scenario cannot exercise host-conditional behavior such as linked-worktree locks or remote-state failures, so mark that extension as a follow-up rather than reading a green run as proof.
+
+- `github.com/erclx/canon-sandbox` is a pre-authorized destructive playground, where force-pushing its `main` or deleting `chore/canon-sync*` branches runs without confirmation
+- Treat any other `erclx/*` repo as production, where destructive operations still need explicit approval
 
 ## Sync checklist
 
@@ -52,15 +57,17 @@ After editing install or sync code (`manage-*.sh`, `src/tooling/`):
 
 ## Captures
 
-- Read `canon/context/development/evidence.md` before editing `src/capture/` or `src/pr/`. It states which `evidence` folders are dev baselines and which are prod captures, and that `canon pr evidence` compares both.
+- Read `canon/context/development/evidence.md` before editing `src/capture/` or `src/pr/`. It sorts the `evidence` folders into dev baselines and prod captures, which `canon pr evidence` compares.
 
 ## Hooks and husky
 
-- Read `canon/context/development/hooks/index.md` before touching `.claude/hooks/` or `.husky/`, then the file it names for the hook at hand. The folder covers the Claude Code hook stdin guard, the husky POSIX `sh` constraint, and the `canon-no-seed:` capability-seeding marker rule from `canon/context/tooling/seeds.md`.
+Read `canon/context/development/hooks/index.md` before touching `.claude/hooks/` or `.husky/`, then the file it names for the hook at hand. The folder covers the hook stdin guard, the husky POSIX `sh` constraint, and the `canon-no-seed:` marker rule from `canon/context/tooling/seeds.md`.
 
 ## Reference
+
+A new domain script is written in TypeScript on Bun. An existing domain script stays bash on `scripts/lib/ui.sh`, frame included, until it moves, and a shell file over 100 lines is edited in place without growing and flagged for a rewrite.
 
 - `canon/context/scripts/index.md`: structure, file inventory, core scripts, lib responsibilities
 - `docs/agents/output-shape.md`: output shape and stream contract for every CLI command
 - `canon/context/sandbox/index.md`: sandbox system, hook pattern, provisioning flow, scenario catalog
-- `canon/context/scripts/framing.md`: the timeline frame a domain script prints inside. A new domain script is written in TypeScript on Bun, and an existing shell file over 100 lines is edited in place without growing it and flagged for a rewrite. Existing domain scripts stay bash on `scripts/lib/ui.sh`, frame included, until they move
+- `canon/context/scripts/framing.md`: the timeline frame a domain script prints inside

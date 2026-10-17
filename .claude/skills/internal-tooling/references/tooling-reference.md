@@ -7,7 +7,9 @@ description: Shape and content rules for tooling stack reference docs, and the m
 
 ## Overview
 
-A stack reference records the explicit decisions a tooling stack makes, so a reader knows what the stack chose without opening every config. It lives at `tooling/<stack>/reference.md` and reads through `canon tooling reference <stack>`, resolving the working root first and the packaged corpus after. Nothing installs it into a target and nothing generates it, so it is written by hand and kept current by hand.
+A stack reference records the explicit decisions a tooling stack makes, so a reader knows what the stack chose without opening every config. It lives at `tooling/<stack>/reference.md` and reads through `canon tooling reference <stack>`, resolving the working root first and the packaged corpus after.
+
+Nothing installs it into a target and nothing generates it, so it is written and kept current by hand.
 
 ## The manifest pair
 

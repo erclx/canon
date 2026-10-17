@@ -29,7 +29,7 @@ const DENSITY_SCOPE = [
 
 /**
  * The path prefixes whose density findings fail a run, each added by the
- * rewrite batch that brought it to zero.
+ * rewrite batch that brought its folders to zero.
  *
  * It describes this repository's rewrite progress and nothing about a target's
  * corpus, which is why the audit reads it only inside a canon checkout.
@@ -133,6 +133,7 @@ export const GATED_PATHS: readonly string[] = [
   'canon/context/development/',
   'canon/context/ci/',
   'canon/context/scripts/',
+  '.claude/skills/internal-',
 ]
 
 /**

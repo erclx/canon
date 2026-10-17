@@ -7,7 +7,7 @@ description: The landing page and this repository's own rendered images. Use for
 
 Read `canon/context/web/index.md` for structure, the Astro build, and the gotchas before editing, then the file it names for the change at hand.
 
-`internal/rules/claude/landing-page.md` is scoped to `web/**` and holds the page's conventions, each of which fails silently when broken. It loads on the edit and this skill loads for the domain. Open the rule before drafting rather than after: a draft that never read it reproduces what it forbids, and a five-round drafting pass did exactly that.
+`internal/rules/claude/landing-page.md` is scoped to `web/**` and holds the page's conventions, each of which fails silently when broken. It loads on the edit and this skill loads for the domain. Open the rule before drafting rather than after, since a draft that never read it reproduces what it forbids.
 
 ## Before drafting a page change
 
@@ -17,9 +17,11 @@ Read `canon/context/web/index.md` for structure, the Astro build, and the gotcha
 
 ## Images are generated
 
-- Point an image at a file some script writes. `canon capture` writes a `.stamp` beside each PNG carrying a digest over the markup it read and the image it wrote, and `bun run check` fails when either moves.
+Point an image at a file some script writes. `canon capture` writes a `.stamp` beside each PNG carrying a digest over the markup it read and the image it wrote, and `bun run check` fails when either moves.
+
 - Never hand-edit a generated frame. The next regeneration overwrites it and the gate reports nothing until the digests disagree.
-- A design-token change can move the capture markup and the stamps while leaving the PNGs byte-identical. `canon/context/web/assets.md` records why, and the Hero stage failing until regenerated frames are committed is that stage working rather than a defect.
+- A design-token change can move the capture markup and stamps while the PNGs stay byte-identical, per `canon/context/web/assets.md`
+- The Hero stage failing until the regenerated frames are committed is that stage working rather than a defect
 
 ## Sync checklist
 
@@ -37,6 +39,8 @@ Before shipping any change under `web/`:
 - `references/citation-anchors.md`: how a string in `copy.ts` anchors to `README.md` and what the gate reads
 
 ### Neighboring entries
+
+Four entries outside `canon/context/web/` bear on this surface.
 
 - `canon/context/design/tokens.md`: the token values this surface reads and does not own
 - `canon/context/development/regeneration.md`: the Hero section, before touching `assets/captures/` or `assets/frames/`

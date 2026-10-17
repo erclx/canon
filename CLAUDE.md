@@ -45,7 +45,7 @@ Load the skill before editing anything in its domain.
 ## Key paths
 
 - `governance/rules/`: governance rules that ship to targets
-- `internal/`: toolkit-only rules and the tooling reference convention, outside every installable surface
+- `internal/`: toolkit-only rules, outside every installable surface
 - `tooling/`: golden configs, references, and manifests per stack
 - `claude/skills/`: plugin skills installable in target projects
 - `src/`: the TypeScript CLI, including the product verbs

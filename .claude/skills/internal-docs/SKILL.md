@@ -13,7 +13,7 @@ Read `claude/skills/markdown-craft/references/markdown.md` and load the `write-h
 
 - Put consumer-facing reference in `docs/`, read by someone operating the toolkit without the source open. The CLI contract sits in `docs/agents/`.
 - Put internal narrative, decisions with their rejected alternative, and gotchas in `canon/context/<domain>/`, read by someone maintaining the toolkit.
-- Decide the reader before writing. A misplaced document reads correctly where it sits, and the cost arrives when a target reads prose written for this repository or a session searches the tier that does not hold the answer.
+- Decide the reader before writing. A misplaced document reads fine where it sits, and costs later when a target reads prose meant for this repository or a session searches the wrong tier.
 
 ## Generated indexes
 

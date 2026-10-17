@@ -34,7 +34,7 @@ A citation reaches a reader as a backticked path, reported under the form `path`
 
 A call to the retired standards verb is no form here. A rule holding one fails the shipped-references stage of `canon gate run`, which reads every shipped file for it.
 
-A `path` is anchored on the whole backticked span rather than on a trailing pattern inside it. Cutting `tooling-reference.md` out of `internal/standards/tooling-reference.md` and resolving that against the root alone reports a file that exists as missing, which is a mistake made by hand while measuring this corpus before the stage was written.
+A `path` is anchored on the whole backticked span rather than on a trailing pattern inside it. Cutting `tooling-reference.md` out of `.claude/skills/internal-tooling/references/tooling-reference.md` and resolving that against the root alone reports a file that exists as missing, which is a mistake made by hand while measuring this corpus before the stage was written.
 
 ## What is not a citation
 
