@@ -33,7 +33,7 @@ Four of the ten, `index-reminder.sh`, `records-index.sh`, `scratch-guard.sh`, an
 
 Both copies of `standards-audit.sh` depend on something outside themselves, and each reports the dependency it failed to resolve rather than exiting clean. A pass on a file nobody checked reads the same as a pass on a file carrying no violation, and the report is what separates them.
 
-Neither copy parses a standard directly. Both read a `markdown audit --json` record, so both reach the defect by the same two routes: resolving no runner reports that nothing ran, and a record naming an empty shipped ban set reports a check narrowed to what the verb could measure. The verb returns that field either way, and reading the findings beside it alone is what would let a narrowed check report a pass.
+Neither copy parses a standard directly. Both read a `markdown audit --json` record, so both reach the defect by the same two routes: resolving no runner reports that nothing ran, and a record naming an empty shipped ban set reports a check narrowed to what the verb could measure. The verb returns that field either way, and reading the findings beside it alone is what would let a narrowed check report a pass. Both copies also hand back every density finding in the record, gating or not, since the verb returns one only for a path in its scope.
 
 The seed differs from the toolkit copy in what it can resolve rather than in what it reads. It reaches an installed binary alone, since a scaffolded project has no checkout to run the CLI out of, and it names `bun add -g @erclx/canon` when the machine carries none. A non-zero exit is the blunter alternative and carries more than a PostToolUse event warrants.
 

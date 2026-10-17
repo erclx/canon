@@ -1,6 +1,6 @@
 ---
 title: Markdown audit
-description: Running the audit over any markdown path, where its bans and checkpoints are read from, what each check reports, and why the ban half gates while the structural half reports
+description: Running the audit over any markdown path, where its bans and checkpoints are read from, what each check reports, and why bans, dead links, and density on a gated path fail while the rest reports
 ---
 
 # Markdown audit
@@ -65,15 +65,19 @@ The heading-case measure reports a heading or a frontmatter `title` with a capit
 
 `CHANGELOG.md` is exempt from both, since the release tool writes its headings.
 
+### Density
+
+The six layout limits, their scope, and their gate are in `markdown-audit-density.md`.
+
 ### Weight, cadence, and length
 
-Bullet and paragraph weight, bullet stacks, run depth, the two cadence numbers, and the document length ceiling are each a judgment a reader settles rather than a fact a scan settles. What each measures, the samples behind its checkpoint, and why none of them gates are in `markdown-audit-weight.md`.
+Bullet and paragraph weight, run depth, the two cadence numbers, and the document length ceiling are each a judgment a reader settles rather than a fact a scan settles. What each measures, the samples behind its checkpoint, and why none of them gates are in `markdown-audit-weight.md`.
 
 ## Exit codes
 
-Exit codes are `0` for a completed run with no gating finding, `1` for a refusal, `2` for a ban hit or a dead relative link, and `3` for a shipped ban set that arrived empty. A banned character and a relative link resolving to nothing on disk each fail the run, both facts a scan settles rather than a reader judging. Bullet, paragraph, and depth weight are judgments a reader settles, and cadence is a distribution whose healthy range moves with the surface, so all four report under every code. A bullet stack, a run of more than 5 plain bullets, reports the same way, and the `bullet-stacks` stage in `canon gate run` owns its verdict. Length reports the same way, since the audit also runs on a plan kept out of version control, and the Document ceiling stage in `canon gate run` owns that verdict instead.
+Exit codes are `0` for a completed run with no gating finding, `1` for a refusal, `2` for a ban hit, a dead relative link, or a density finding marked `gating`, and `3` for a shipped ban set that arrived empty. All three are facts a scan settles rather than a reader judging. Depth weight is a judgment a reader settles, and cadence is a distribution whose healthy range moves with the surface, so both report under every code, as do the advisory Bullets and Paragraphs sections. Length reports the same way, since the audit also runs on a plan kept out of version control, and the Document ceiling stage in `canon gate run` owns that verdict instead.
 
-`3` is separate from `1` because the two want different responses from a caller. A refusal means no corpus was built, and the `Markdown bans` stage in `canon gate run` is right to report it as unmeasured rather than as a pass. An empty set means the corpus was walked and nothing was looked for, so that stage fails the push on `3` rather than skipping.
+`3` is separate from `1` because the two want different responses from a caller. A refusal means no corpus was built, and the `Markdown` stage in `canon gate run` is right to report it as unmeasured rather than as a pass. An empty set means the corpus was walked and nothing was looked for, so that stage fails the push on `3` rather than skipping.
 
 `2` rather than `1` for the gate keeps a measurement that succeeded and found something distinct from the audit declining to measure at all. A caller reading one as the other sends a reader hunting a defect that does not exist, which is the distinction `canon context audit` and the gate's own seed stage already draw between the same two codes.
 
@@ -95,7 +99,7 @@ A hit the closed set could not separate from correct prose was the case with no 
 
 ### Where the rules are enforced
 
-Four surfaces apply the ban set and all four go through this verb. `.claude/hooks/standards-audit.sh` runs it against a single file after each markdown edit, the seed copy a project installs does the same, the `Markdown bans` stage in `canon gate run` runs it across the whole corpus before this repository's own push, and the same-named stage in the one verify runner every stack shares, `scripts/verify.ts`, runs it across a scaffolded project's tracked markdown before its own push. Each hook parsed its own copy of the word bans in awk before that, which left a British spelling passing at edit time and failing the push with nothing in between explaining the difference.
+Four surfaces apply the ban set and all four go through this verb. `.claude/hooks/standards-audit.sh` runs it against a single file after each markdown edit, the seed copy a project installs does the same, the `Markdown` stage in `canon gate run` runs it across the whole corpus before this repository's own push, and the same-named stage in the one verify runner every stack shares, `scripts/verify.ts`, runs it across a scaffolded project's tracked markdown before its own push. Each hook parsed its own copy of the word bans in awk before that, which left a British spelling passing at edit time and failing the push with nothing in between explaining the difference.
 
 The seed copy moved onto the verb when the sets became data, since its awk had nothing left to parse. It resolves one runner where the toolkit copy resolves two, looking for no checkout source, and a machine carrying no `canon` gets a report naming the binary to install rather than a silent pass. The Seed independence stage of `bun run check` scopes its walk to markdown and leaves the seed hooks outside it, which its own comment records as deliberate.
 
@@ -105,7 +109,7 @@ The target push stage excludes `CHANGELOG.md`, unlike every other surface here. 
 
 The hook prefers a checkout's own `src/cli.ts` over a globally installed binary, so it and the push stage read one build. A published binary lags a branch by whatever has not been released, which would put a ban kind added on the branch into the push and not into the edit. It reads its findings out of the `--json` record rather than off the exit code, so an older binary still reports where the fallback applies. It reads `bans.emptySets` out of the same record, so a set the verb shipped empty reaches the author as a check narrowed to what it could measure rather than as a clean pass.
 
-It also relays the two advisory measures from the same record. A heading finding reports for the whole file, and a colon finding reports only where the word before the colon and the colon appear in the text the write carried, so an edit is never asked to answer for a colon it left untouched.
+It relays every density finding from the same record, gating or not, and the two advisory measures. A heading finding reports for the whole file, and a colon finding reports only where the word before the colon and the colon appear in the text the write carried, so an edit is never asked to answer for a colon it left untouched.
 
 That field replaced `bans.missingStandards`, which answered a standard resolving under none of three roots. The set ships with the package now, so the state it named cannot occur and the narrowed check has one cause left, a defect in the build. The hook keeps reading a field either way, since a reader cannot tell a narrowed check from a clean one without it.
 

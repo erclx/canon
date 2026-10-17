@@ -1,17 +1,23 @@
 ---
 title: Markdown weights
-description: The bullet, paragraph, and depth checkpoints, where each number sits and why, and the section markers that break a depth run
+description: The density limits and the gate on a fact that overturned report-only weight, the bullet, paragraph, and depth checkpoints, where each number sits and why, and the section markers that break a depth run
 ---
 
 # Markdown weights
 
 ## Decisions
 
-### Bullet runs cap at 5, reported by the audit and gated in a stage of their own
+### Density gates on a fact, in the audit's own exit
 
-A run of more than 5 top-level bullets under one heading fails a push through the `bullet-stacks` stage, and `canon markdown audit` reports the same runs and never exits 2 on them. The measure lives in `src/markdown/stacks.ts` and both read it, so the report and the gate cannot disagree about what a run is.
+Six layout limits gate through `canon markdown audit`, being a 350-character paragraph, 2 paragraphs in a row, a 200-character bullet, 5 plain bullets in a row, no H4, and a paragraph or table opening every H3. Each is a count against a fixed number, so a finding is a fact. Groundwork `154` overturned the report-only verdict, since the soft findings are why the corpus drifted.
 
-The audit stays report-only for the reason `documentCeiling` gives: it also runs on plans and groundwork records kept out of version control, where a long list is not a defect. The gate stage reads tracked files in a fixed scope instead.
+The scope list in `src/markdown/scope.ts` answers the objection that kept weight out of the exit before. A plan or a groundwork record takes no density finding at all, so the audit can gate without failing a record kept out of version control. `GATED_PATHS` turns each folder on as its rewrite batch reaches zero, and outside a canon checkout nothing gates, since the list describes this repository alone.
+
+A ratchet failing only touched lines was the rejected alternative. It leaves the existing failing files as the example the next session copies. The `bullet-stacks` and `paragraph-growth` stages retired into the `markdown` stage, which reads the one exit.
+
+### Bullet runs cap at 5, and gate in context, docs, and skills already
+
+The bullet-run limit gates on those three surfaces before `GATED_PATHS` lists them, since the retired `bullet-stacks` stage already failed the push there and waiting would reopen that hole. The seeds, the stack references, the wiki, and the root guides wait for their batch, because seven runs in the stack references would fail the push on landing. The measure still lives in `src/markdown/stacks.ts`.
 
 A cap of 8 was the rejected alternative. It left the worst of the corpus alone and still failed the common five-to-eight stack that reads as one list, and 5 is where a reader stops holding the items one at a time. A ratchet that failed only a branch adding to the stack count was rejected for needing a stored baseline per file and for letting the existing 36-bullet runs stand. Report-only was rejected because nothing then held the shape once the sweep reshaped it.
 
@@ -21,7 +27,7 @@ Two shapes are exempt without a marker: a run whose every item opens with a bold
 
 - The paragraph check closed a gap in the standard rather than working around it. A sentence cap alone is satisfied by writing fewer and longer sentences, and 486 paragraphs across the corpus sit inside four sentences and past 400 characters, so the weight half was added to `claude/skills/markdown-craft/references/markdown.md` and parses as its own checkpoint.
 - Borrowing the bullet number was the first shape and it fails twice over: an author reading the sentence cap finds no weight rule to read, and retuning the bullet rule moves a paragraph rule nobody edited.
-- The two numbers diverge, at 250 for a bullet and 700 for a paragraph, because each was read against its own corpus once the shapes were measured apart.
+- The two numbers diverge, at 200 for a bullet and 350 for a paragraph, because each was read against its own sample. Groundwork `154` moved both down from 250 and 700 after the operator read rewrites at each length.
 - The sentence cap counts a paragraph whose next sentence opens on a code span. `SENTENCE_END` requires a capital after the terminal punctuation, which a command name never carries, so the backtick sits in the lookahead as its own alternative. The price is a span opening a fragment mid-paragraph reading as a sentence start.
 
 The bullet number moved from 400 to 250 so the audit's warning and the growth gate read one number. The 400 rested on findings sampled at 404, 420, and 458 characters, which read as three dense but scannable bullets, while the ones at 508 and 598 read as prose wearing a bullet. Moving the line to 500 would cut the open set from 104 findings to 51 and would exempt the band the sample judged worst.
