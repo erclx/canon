@@ -1,26 +1,31 @@
 ---
 title: Overview
-description: What this folder covers, the invocation rules every command inherits, and where domain behavior is documented instead
+description: What this folder covers, the invocation rules every command inherits, and how canon docs resolves a topic name
 ---
 
 # Overview
 
-CLI catalog and invocation rules for an agent driving the `canon` CLI, in this repository or in any project that installed it.
+Reference for an agent driving the `canon` CLI, in this repository or in any project that installed it. It covers invocation and output contracts, not domain behavior. Read the project's own `CLAUDE.md` for that.
 
-This folder is an index of what an agent can run and how to run it cleanly from a script. It does not cover domain behavior. Read the project's own `CLAUDE.md` for that. The `.claude/skills/internal-*` skills carry the per-domain editing guidance and live in the toolkit checkout alone, so a reader who installed the package resolves none of them.
+`canon --help` is the command catalog. `canon <command> --help` lists subcommands, and `canon <command> <subcommand> --help` prints a leaf's flags, exit codes, and examples. `--help --all` prints both. A pipe gets the same text without the frame glyphs.
 
 ## Invocation rules
 
-`output-shape.md` holds the stream and exit contract. It applies to every command in this folder.
+`output-shape.md` holds the stream and exit contract every command follows. Every command has a non-interactive path, and data on stdout pipes clean.
 
-## Where to start
+## Reading a page by name
 
-- `output-shape.md`: the stream contract every command renders into and the exit discipline behind it, which is what a caller parsing stdout depends on
-- `commands.md`: the full command catalog, project-level and per-domain
-- `scripting.md`: the runtime catalogs that replace hardcoded names, plus headless invocation examples
+`canon docs list [--json]` lists the consumer docs, plus the per-domain context entries when the install carries `canon/context/`. A registry install carries `docs/` alone. A clone or a linked worktree carries both.
 
-## Related
+`canon docs <topic>` prints one doc to stdout, and an unknown topic names the available ones on stderr and exits 1. Three spellings are tried in order, each across both roots before the next, with `docs/` ahead of `canon/context/`.
 
-- `CLAUDE.md`: project behaviors
-- `.claude/skills/internal-*`: domain-scoped guidance for editing work, in the toolkit checkout only
-- `docs/index.md`: full docs directory
+- A sibling file, such as `docs/agents/indexes.md` for `indexes`
+- A folder of that name, which prints its generated `index.md`
+- A sub-area file one level down, such as `operating-model` reaching `docs/workflow/operating-model.md`
+
+A bare name carried by two folders of one root resolves to neither and exits 1. Toolkit-internal topics resolve by name and stay off the list.
+
+## See also
+
+- `output-shape.md`: the frame, `--json`, color, and exit discipline
+- `docs/index.md`: the full docs directory

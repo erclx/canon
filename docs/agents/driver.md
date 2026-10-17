@@ -100,4 +100,4 @@ An unreachable page refuses rather than returning an empty report, since nothing
 
 The browser binary installs separately from the package, once, with `bunx playwright install chromium`. The command ships to targets like `demo`, `inventory`, and `capture`, because its whole purpose is measuring a page inside someone else's project. It reaches nothing under `src/capture/`, so the two surfaces move independently.
 
-See `commands.md` for where this sits among the browser commands, and `capture.md` for the single-state render it adds an axis to.
+See `canon --help` for where this sits among the browser commands, and `capture.md` for the single-state render it adds an axis to.
