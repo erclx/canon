@@ -16,33 +16,37 @@ description: Fetch YouTube transcripts with metadata frontmatter into any repo
 
 ### Related
 
-- `docs/agents/commands.md`: CLI flags and invocation contract for `canon transcripts`
+`docs/agents/commands.md` holds the CLI flags and invocation contract for `canon transcripts`.
 
 ## Decisions
 
-- The command is toolkit-native. It runs against the current working directory, so any repo with `canon` and `yt-dlp` on PATH can pull transcripts without installing anything.
-- When a video has no captions, the command still writes the frontmatter with `has_transcript: false` and a one-line note in place of the body, so a missing transcript is a recorded fact rather than a silent gap.
+### Toolkit-native and missing captions
+
+The command is toolkit-native. It runs against the current working directory, so any repo with `canon` and `yt-dlp` on PATH can pull transcripts without installing anything.
+
+When a video has no captions, the command still writes the frontmatter with `has_transcript: false` and a one-line note in place of the body. A missing transcript is a recorded fact rather than a silent gap.
 
 ### External dependency
 
-The command shells out to the `yt-dlp` binary, the same way the git skills shell out to `git` and `gh`. It is not bundled. Install it from the [yt-dlp project](https://github.com/yt-dlp/yt-dlp) before running. The command checks for it on PATH and fails with an install pointer when it is missing.
+The command shells out to the `yt-dlp` binary, as the git skills shell out to `git` and `gh`. It is not bundled. Install it from the [yt-dlp project](https://github.com/yt-dlp/yt-dlp) first. The command checks for it on PATH and fails with an install pointer when it is missing.
 
 ### Fetch command
 
-`canon transcripts <url>` writes one file per video to the output directory. The filename is `<fetch-date>--<title-slug>--<video-id>.md`, date-prefixed so re-fetching the same video on a later date writes a new file rather than overwriting the earlier one. The default output directory is a backed record folder, so `canon records push` and `canon records pull` carry it along with the rest. The command also writes a minimal `index.md` stub into the output directory the first time it runs there, left alone on every later run.
+`canon transcripts <url>` writes one file per video to the output directory, named `<fetch-date>--<title-slug>--<video-id>.md`. The date prefix means re-fetching a video on a later date writes a new file rather than overwriting the earlier one.
 
 | Option              | Default                         | Behavior                                             |
 | ------------------- | ------------------------------- | ---------------------------------------------------- |
 | `--out <path>`      | the backed `transcripts` folder | Output directory, resolved against the main worktree |
 | `--keep-timestamps` | off                             | Prefix each line with `[mm:ss]` instead of prose     |
 
-A caller-supplied `--out` still resolves against the CWD rather than the main worktree, since naming a path explicitly is opting out of the backed default.
-
-The written file path prints to stdout so it pipes clean into a wrapper. The framed run UI goes to stderr.
+- The default output directory is a backed record folder, so `canon records push` and `canon records pull` carry it with the rest
+- The first run in a directory writes a minimal `index.md` stub, left alone on every later run
+- A caller-supplied `--out` resolves against the CWD, since naming a path is opting out of the backed default
+- The written file path prints to stdout so it pipes clean into a wrapper, and the framed run UI goes to stderr
 
 ### Output shape
 
-Each file opens with frontmatter, then an `# <title>` heading, then the transcript body:
+Each file opens with frontmatter, then an `# <title>` heading, then the transcript body.
 
 ```markdown
 ---
