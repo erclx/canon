@@ -34,11 +34,19 @@ The run commands, which stack references and `docs/target/projects.md` send a se
 
 Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`, and every threshold comparison in `measures.ts`.
 
-- Stages run in table order and the first to find a fact halts the run, so a regenerate-then-assert chain reveals one surface at a time
-- A stage that cannot read its input is `unmeasured`, which warns and exits 0 locally and refuses under CI. The sequencer decides that, and a measure only returns the reason.
+- Stages run in table order and the first to find a fact halts the run. A stage that cannot read its input is `unmeasured`, which warns locally and refuses under CI.
 - The changed set unions the diff against `origin/main`, the working tree, and untracked files. Fallbacks widen, and `--all` forces every stage. On `main` the local ref is HEAD, so the base is remote.
 - Tests runs on `^src/` and on any corpus in `TEST_CORPORA_PATTERNS`, which a `src/` test reads from outside `src/`. A test reading a new corpus joins the array in the same change.
 - A regenerating stage reports its own regeneration as drift on the first run after an edit. Stage the rewritten file and run again, since re-running alone regenerates the same diff.
+- A root-level test pair or a script under `claude/skills/*/scripts/` needs its own pattern in `TESTS_SCOPE`, asserted in `stages.test.ts`, or a branch touching only it skips the Tests stage
+
+### `src/init/`
+
+Installs each domain `canon init` runs, as the steps `runDomains` walks in `run.ts`.
+
+- `runDomains` catches a failed domain and lets init report the ones that worked, so the `check:install` assert loop is the only guard against a silently truncated install
+- Every domain init installs needs at least one asserted path in `scripts/core/install-check.sh`, and a conditional domain needs its condition met in the gate's `canon init --stack base` call
+- `check:install` clones the last commit, so an uncommitted fix is invisible to it
 
 ### `src/audits/`
 
@@ -117,8 +125,8 @@ Smaller folders the loop touches.
 
 ## Gotchas
 
-- `check:lint` passes `--disable-nested-config`, since oxlint otherwise loads each golden `.oxlintrc.json` under `tooling/*/configs/` and fails on JS plugins this repository does not install
-- `check:install` clones the last commit, so an uncommitted fix is invisible to it
+- `check:lint` passes `--disable-nested-config` to skip the golden configs under `tooling/*/configs/`, and `check:types` needs `typescript` in `devDependencies`, not hoisted from an astro peer
 - `canon gov regen` defaults `--root` to wherever the binary is installed, so from a worktree pass `--root <literal-path>`
 - A prose edit can break a test no stage in the push runs, as with the markdown checkpoints, literals in `src/markdown/` that `structure.test.ts` asserts against themselves
-- The Document ceiling counts a table at its padded width and counts frontmatter, so a bullet list is the cheapest cut near 300 lines
+- A file whose name ends in `index.md`, staged or untracked, trips the Indexes stage even under `auto: false`
+- A line number cited into a file the entry does not own goes stale with nothing comparing it, so cite a named identifier
