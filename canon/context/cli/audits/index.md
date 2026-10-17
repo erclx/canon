@@ -1,11 +1,11 @@
 ---
 title: Audits
-subtitle: The aggregate and its baseline, the context and markdown audits, the skill and routing measures, the board and record validators, the gov sweeps, the reports, and the state-scoped checks. Start with overview.
+subtitle: The aggregate and its baseline, the context, markdown, skill, and routing audits, the board and record validators, the gov sweeps, and reports. Start with overview.
 ---
 
 # Audits
 
-The aggregate and its baseline, the context and markdown audits, the skill and routing measures, the board and record validators, the gov sweeps, the reports, and the state-scoped checks. Start with overview.
+The aggregate and its baseline, the context, markdown, skill, and routing audits, the board and record validators, the gov sweeps, and reports. Start with overview.
 
 - [Baseline and census](baseline.md): The retained baseline in canon/config/baseline.json, why growth needs attributing before it reads as a regression, and the codebase census that feeds it
 - [Board validator](board.md): What canon tasks validate checks on the board, from shape and ordering to blockers, shared files, and folder claims

@@ -7,11 +7,12 @@ subtitle: TypeScript entry point and the layer boundary to bash, command registr
 
 TypeScript entry point and the layer boundary to bash, command registration and migration, the sync engine and its install stamp, the audit commands, and packaging. Start with overview.
 
-- [Audits](audits/index.md): The aggregate and its baseline, the context and markdown audits, the skill and routing measures, the board and record validators, the gov sweeps, the reports, and the state-scoped checks. Start with overview.
+- [Audits](audits/index.md): The aggregate and its baseline, the context, markdown, skill, and routing audits, the board and record validators, the gov sweeps, and reports. Start with overview.
 - [Commands](commands/index.md): Command registration and migration off bash, what earns a verb, writing files and output, prompts and unattended callers, and the shapes particular verbs take. Start with overview.
 - [Overview](overview.md): What the CLI domain owns, the folder layout, and the gotchas that cross every command
 - [Packaging](packaging.md): What the published package carries and excludes, how a browser command keeps its engine off the startup path, and the two capture sources
 - [Roots and foreign trees](roots.md): Reading and writing a tree another tool owns, which root a catalog command reads, and where the checkout-mismatch warning sits
 - [Install stamp](stamp.md): The install stamp at canon/config/config.json, the machine-level target index it feeds, and which domains and paths the stamp covers
-- [Sync reporting](sync-reporting.md): Attribution from git history, the freshness report, and the report sections covering what the drift walk cannot see, from seeds to the reverse walk
+- [Sync reporting for rules and the reverse walk](sync-reporting-rules.md): The newRules section, its chain and fallback reads, and the reverse walk that finds files the toolkit dropped
+- [Sync reporting](sync-reporting.md): Attribution from git history, the freshness report, and the report sections covering what the drift walk cannot see
 - [Sync](sync.md): The sync engine and its adapters, ownership by location and by name, retired and renamed rules, and the canon sync git workflow

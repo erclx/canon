@@ -42,7 +42,7 @@ The gate invokes `src/cli.ts` of its own checkout, never `canon`. A globally ins
 
 ### Folder scope is a named list
 
-The audit's folder scope is a named list, not the index-plus-entry contract read off disk. `.claude/internal/standards/` satisfied the contract while its mirror generated it, and auditing it would measure a generated copy against a rule for per-domain narrative.
+The audit's folder scope is a named list, not the index-plus-entry contract read off disk. A folder can satisfy that contract while holding a generated mirror, and auditing it would measure a generated copy against a rule for per-domain narrative.
 
 `--folder` admits another folder without an edit, the escape hatch the contract reading would have given.
 

@@ -13,8 +13,10 @@ Command registration and migration off bash, what earns a verb, writing files an
 - [Writing files and output](output.md): Stdout against stderr, writing into a target, record-root resolution, batching edits into one invocation, and validators with their repairs
 - [Overview](overview.md): What a command owes, commander registration, migrating a domain off bash verb by verb, and the gotchas in wiring a command and testing one
 - [Pull request evidence comparison](pr-evidence.md): What canon pr evidence reads, how its comment is found, how cases group by view and size, and what counts as evidence
+- [Pull request frames](pr-frames.md): How canon pr frames stores review images on one ref, why links name the path, and the ref name and its drain
 - [The pull request draft lift](pr-lift.md): The decision canon pr lift reverses about who lifts a draft mark, its gate order and re-read, and why the cloud reviewer cannot lift
-- [Pull request verbs](pr.md): The pr verbs that key on a commit, the review marker, evidence and preview comments, the local server read, and false-green check runs
+- [Pull request preview and local server](pr-preview.md): How canon pr preview mints and checks a deploy, refuses unserved changes, and how canon pr local finds the branch's dev server
+- [Pull request verbs](pr.md): The pr verbs that key on a commit, the review marker, the tick and owed checks, and false-green check runs
 - [Prompts and unattended callers](prompts.md): Declined prompts, headless refusals, decision seams, record-driven branching behind a shell wrapper, and driving a prompt through a PTY
 - [Upgrade and skew](upgrade.md): The upgrade verb, the version skew read and its two callers, and the record shapes that keep a behind report honest
 - [Verb shape](verb-shape.md): Walking a gitignored tree, holding two roots apart, guards an added argument widens, measuring an external tool, and ordering a record for a shell
