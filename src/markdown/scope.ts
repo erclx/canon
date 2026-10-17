@@ -76,6 +76,7 @@ export const GATED_PATHS: readonly string[] = [
   'claude/skills/draft-screencast/SKILL.md',
   'claude/skills/draft-screencast/references/beats-template.md',
   'claude/skills/draft-slides/SKILL.md',
+  'claude/skills/draft-slides/references/deck.md',
   'claude/skills/git-branch/SKILL.md',
   'claude/skills/git-commit/SKILL.md',
   'claude/skills/git-followup/SKILL.md',

@@ -4,7 +4,7 @@ import type { Command } from 'commander'
 import { INSTALL_BROWSER, isEngineMissing } from '@/browser/engine'
 import type { DriverRefusal } from '@/driver/drive'
 import { describeViewport } from '@/driver/probes/viewport'
-import { PROBE_NAMES, readDriverPlan } from '@/driver/steps'
+import { PROBE_NAMES, readDriverPlan, type ProbeName } from '@/driver/steps'
 import type { PlanRefusal } from '@/driver/steps'
 import {
   intro,
@@ -55,6 +55,15 @@ const DRIVE_REFUSALS: Record<DriverRefusal, string> = {
   'drive-failed': 'The drive failed against a reachable page.',
 }
 
+const PROBE_NOTES: Record<ProbeName, string> = {
+  focus: 'keyboard focus that changes nothing visible, read after a Tab press',
+  details:
+    'a details panel off the viewport or a row under the tap minimum, read open',
+  'diagram-geometry':
+    'an SVG label outside its frame, covered by a fill, or on another label',
+  'diagram-strokes': 'an SVG label a stroke crosses, in either paint order',
+}
+
 export function register(program: Command): void {
   program
     .command('drive')
@@ -103,7 +112,24 @@ export function register(program: Command): void {
         `  ${INSTALL_BROWSER}`,
         '',
         'Probes:',
-        ...PROBE_NAMES.map((name) => `  ${name}`),
+        ...PROBE_NAMES.map(
+          (name) => `  ${name.padEnd(18)}${PROBE_NOTES[name]}`,
+        ),
+        '',
+        'Reasons:',
+        '  no-run-file         nothing readable at the run path',
+        '  unreadable-plan     the run file is not valid JSON',
+        '  no-steps            the run names no step',
+        '  no-probes           the run names an empty probe list',
+        '  unknown-probe       the run names a probe this build does not ship',
+        '  bad-step            a step is missing what the driver needs to perform it',
+        '  no-viewport         the run declares no viewport',
+        '  no-width            the viewport has no width to wrap at',
+        '  no-heights          the viewport names no height, which is never defaulted',
+        '  engine-missing      the browser engine is not installed in this project',
+        '  browser-missing     the engine is installed and its browser binary is not',
+        '  server-unreachable  nothing answered at the URL, so no state was reached',
+        '  drive-failed        the drive failed against a reachable page',
         '',
         'Step kinds:',
         '  click <target>   press the first element the selector matches',

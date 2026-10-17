@@ -5,7 +5,7 @@ description: Why the Claude Code release triage runs by hand in the operator's s
 
 # Upstream digest
 
-`internal-upstream-digest` turns the Claude Code releases published since the last run into findings filed as one intake pass. The verb contract is in `docs/agents/upstream.md`. This entry holds the reasoning behind the shape.
+`internal-upstream-digest` turns the Claude Code releases published since the last run into findings filed as one intake pass. The verb contract is in `canon upstream --help`. This entry holds the reasoning behind the shape.
 
 ## Decisions
 

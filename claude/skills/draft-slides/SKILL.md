@@ -11,16 +11,15 @@ Draw each slide as an HTML file in a deck folder, then shell out to `canon slide
 
 ## Read the decks and the format
 
-Run both first. Never hardcode a deck name, an attribute, or a chart type. The CLI is the source of truth for each.
+Run the list first, then read the format. Never hardcode a deck name, an attribute, or a chart type.
 
 ```bash
 canon slides list --json 2>/dev/null
-canon docs slides
 ```
 
 The list returns one row per deck, carrying its `name`, `title`, slide count, and `path`. When the request names a deck the list holds, edit that folder. Otherwise pick a new kebab-case name no row carries.
 
-The docs page states what `deck.json` holds, what each slide declares on its `<body>`, the motion attributes, speaker notes, charts, and what each refusal reports.
+Read `${CLAUDE_SKILL_DIR}/references/deck.md`. It states what `deck.json` holds, what each slide declares on its `<body>`, the motion attributes, speaker notes, and charts. Each refusal prints as a `✗` line from the render.
 
 ## Draw the deck
 

@@ -173,6 +173,6 @@ pptxgenjs 4 reads a text margin as left, right, bottom, top in points, while a t
 
 ### Draft skill
 
-`canon:draft-slides` reads the decks through `canon slides list --json` and the slide format through `canon docs slides`, draws one `.html` file per slide with the project's custom properties, and shells out to the render command. It owns the deck content and markup and never reimplements the conversion, master, or packaging.
+`canon:draft-slides` reads the decks through `canon slides list --json` and the slide format through its `references/deck.md`, draws one `.html` file per slide with the project's custom properties, and shells out to the render command. It owns the deck content and markup and never reimplements the conversion, master, or packaging.
 
 After the first render it reads every `✗` line and runs a one-pass quality check. It converts the deck to images with `soffice` and `pdftoppm`, inspects every slide for overlap, overflow, and contrast, fixes once, and stops. The image pass is skipped with a note when those tools are absent.
