@@ -1,13 +1,13 @@
 ---
 title: Publish
-description: The cross-reference form split by destination, the destination test every scan under it inherits, the record-root reading, and the title-format check beside them
+description: The cross-reference form split by destination, the destination test every scan inherits, the record-root reading, and the title-format check
 ---
 
 # Publish
 
 ## Overview
 
-The publish reference splits one rule by destination, so the same reference takes opposite spellings on either side of the remote. Every check scoped by destination inherits one test, and the title-format check beside them grades a field that release-please copies into the changelog unread.
+The publish reference splits one rule by destination, so the same reference takes opposite spellings on either side of the remote. Every check scoped by destination inherits one test, and the title-format check grades a field that release-please copies into the changelog unread.
 
 ## Layout
 
@@ -18,47 +18,75 @@ The publish reference splits one rule by destination, so the same reference take
 
 ### Cross-reference form
 
-`claude/skills/git-pr/references/publish.md` states the form a pull request or issue number takes, under `## Cross-reference form`. The rule is one test rather than a list of surfaces: bare where the destination auto-links it, backticked where it does not. A list goes stale when a new surface appears, and the test covers the cross-repository spelling without a clause of its own.
+`claude/skills/git-pr/references/publish.md` states the form a pull request or issue number takes, under `## Cross-reference form`. The rule is one test. Write the number bare where the destination auto-links it and backticked where it does not.
 
-The split runs through the remote. A pull request body, an issue body, a comment on either, and a commit message all auto-link, and a markdown file browsed from the repository tree links neither spelling, so each form is correct in one place and a reference moved between them is rewritten.
+- A list goes stale when a new surface appears, and the test covers the cross-repository spelling without a clause of its own
+- A pull request body, an issue body, a comment on either, and a commit message all auto-link
+- A markdown file browsed from the repository tree links neither spelling, so a reference moved between the two is rewritten
 
-`publish.md` holds the rule over `markdown.md` because it turns on where the text is going rather than on what the text is. `markdown.md` governs a file reference identically in every file, and this one is wrong in one destination and right in the other, which is the split `publish.md` already draws for phase labels. `markdown.md` carries the `Does not govern:` entry and `publish.md` names the rule in its own scope line, so the boundary is declared from both sides. `canon/context/claude-plugin/skill-references/authoring.md` holds the general case.
+### Why publish.md holds it
 
-Every skill writing GitHub conversational text already cites the standard, so a single section reaches all of them and no skill body carries the rule. Restating it per skill would put one rule in several places on several cadences.
+`publish.md` holds the rule over `markdown.md` because it turns on where the text is going rather than on what the text is. `markdown.md` governs a file reference identically in every file, while this one is wrong in one destination and right in the other.
 
-Quoted text is exempt, and the rule says so rather than leaving it to judgment. Two consumers quote repository prose into a GitHub comment, so an instruction to rewrite a reference would reach inside a quotation and report the source as having said something it never said.
+`markdown.md` carries the `Does not govern:` entry and `publish.md` names the rule in its own scope line, so the boundary is declared from both sides. `canon/context/claude-plugin/skill-references/authoring.md` holds the general case.
 
-Nothing enforces it and nothing can. `canon markdown audit` runs over repository files, where the backticked form is the correct one, so a check there would flag the compliant references and reach none of the published text that goes wrong. The rule joins the character and phase-label bans as something an author applies at publish time.
+### Reach and enforcement
+
+Every skill writing GitHub conversational text already cites the standard, so one section reaches all of them and no skill body carries the rule. Restating it per skill would put one rule in several places on several cadences.
+
+- Quoted text is exempt, because two consumers quote repository prose into a GitHub comment and a rewrite would report the source as saying something it never said
+- Nothing enforces the rule and nothing can, since `canon markdown audit` reads repository files, where the backticked form is correct, and reaches none of the published text
+- The rule joins the character and phase-label bans as something an author applies at publish time
 
 ### Destination test
 
-The paragraph scoping a check by destination sits under `## When it runs` rather than inside one check's section, so a check added later inherits it instead of restating it: a reader inside the repository holds the task board and a reader on a remote holds neither that nor any gitignored record folder. `## Phase labels` and `## Board identifiers` both fall under it, the second covering a label a code span quotes and a path under a record root, and each says under its own heading that the shared paragraph scopes it.
+The paragraph scoping a check by destination sits under `## When it runs` rather than inside one check's section, so a check added later inherits it. A reader inside the repository holds the task board, and a reader on a remote holds neither it nor any gitignored record folder.
 
-`canon labels scan` is the verb behind the checks, and it is destination-scoped by construction rather than by a parameter, since the workflow wires it to `pull_request` and `pull_request_review`, both readers holding the checkout the check scopes against. The negative half is asserted: a unit case runs the markdown ban sets, the repository-bound corpus, through the scan and expects nothing. A `destination` argument lost, since it moves a split the invocation site already draws into a function every caller then has to answer for.
+`## Phase labels` and `## Board identifiers` both fall under it, the second covering a label a code span quotes and a path under a record root. Each says under its own heading that the shared paragraph scopes it.
 
-`## Session links` is the third check the paragraph governs, with a narrower dependency. The other two turn on the reader holding this checkout. A session link resolves for the one account that started it, which no checkout reaches, so the section states that dependency under its own heading.
+### Scan scoping
 
-It is reported on a release pull request too, where the board identifier is exempted. That exemption reasons from every commit in release-please's generated history having already passed this gate, and a category the gate did not yet scan for would reach a release body underneath the premise.
+`canon labels scan` is destination-scoped by construction rather than by a parameter, since the workflow wires it to `pull_request` and `pull_request_review`, both readers holding the checkout the check scopes against.
 
-`claude/skills/git-pr/references/pr.md` names the rule from the reader's side, one line in its `Does not govern:` list routing at `publish.md`, so the person writing a body meets the rule rather than only a red check.
+- The negative half is asserted, because a unit case runs the markdown ban sets, the repository-bound corpus, through the scan and expects nothing
+- A `destination` argument lost, since it moves a split the invocation site already draws into a function every caller then has to answer for
+
+### Session links
+
+`## Session links` is the third check the paragraph governs, with a narrower dependency. The other two turn on the reader holding this checkout, while a session link resolves for the one account that started it, which no checkout reaches. The section states that dependency under its own heading.
+
+- It is reported on a release pull request too, where the board identifier is exempted
+- That exemption assumes every commit in release-please's history already passed this gate, and a category the gate did not yet scan for would slip underneath it
+- `claude/skills/git-pr/references/pr.md` names the rule in one `Does not govern:` line routing at `publish.md`, so a body's author meets it before a red check
 
 ### Record roots
 
-Which paths the verb reads as absent from a clone splits by root:
+The verb reads paths as absent from a clone, and the reading splits by root.
 
-- `.canon/` matches on the root alone, since one `.gitignore` line covers everything beneath it. That reading also catches a path under a `.canon/` folder no entry list names, such as a worker's own scratch note.
-- `.claude/` keeps the entry-list reading. `src/labels/phase.ts` composes it from `RECORD_ENTRIES` plus the worktrees folder, which is ignored at `.gitignore` and absent from that list on purpose, since the harness pins a worktree to `.claude/` and a migration told to relocate one would break it.
+- `.canon/` matches on the root alone, since one `.gitignore` line covers everything beneath it, including a folder no entry list names such as a worker's scratch note
+- `.claude/` keeps the entry-list reading, which `src/labels/phase.ts` composes from `RECORD_ENTRIES` plus the worktrees folder
 
-Adding the worktrees entry to `RECORD_ENTRIES` lost, since it changes what the record move carries to fix what a scan reports.
+The worktrees folder is ignored at `.gitignore` and absent from `RECORD_ENTRIES` on purpose, since the harness pins a worktree to `.claude/` and a migration told to relocate one would break it. Adding it to `RECORD_ENTRIES` lost, since it changes what the record move carries to fix what a scan reports.
 
 ### Title format
 
-The title-format check grades a pull request title against `claude/skills/git-pr/references/pr.md`'s `## Title` section, format, casing, and length, so it enforces a rule already written rather than a fact this entry alone states.
+The title-format check grades a pull request title against the `## Title` section of `claude/skills/git-pr/references/pr.md`, covering format, casing, and length. It enforces a rule already written.
 
-The rules are checked independently, `structure`, the two casing pairs, and `length`, rather than failing the title on the first mismatch. A title breaking two rules and reporting only the first leaves an author fixing one and meeting the second on the next run. `format.test.ts` breaks one rule at a time and asserts each fails alone. `structure` still stands apart, because a title failing the shape match parses no `<type>`, `<scope>`, or `<subject>` to grade casing against.
+The rules are checked independently, being `structure`, the two casing pairs, and `length`. A title breaking two rules and reporting only the first leaves an author meeting the second on the next run.
 
-It does not check `<type>` against `claude/skills/git-commit/references/commit.md`'s type enum. `pr.md`'s `## Title` states format, casing, and length only, and cites `commit.md` for the structure it shares rather than for a type list, so checking the enum would enforce a rule from the wrong document.
+- `format.test.ts` breaks one rule at a time and asserts each fails alone
+- `structure` stands apart, because a title failing the shape match parses no `<type>`, `<scope>`, or `<subject>` to grade casing against
+- The check skips the `<type>` enum in `claude/skills/git-commit/references/commit.md`, since `pr.md` cites `commit.md` for shared structure and not a type list
 
-The commit side mirrors it. The built-in `subject-case` rule tests the whole subject's casing, which rejects a legitimate capitalized proper noun anywhere in it rather than the first word alone `claude/skills/git-commit/references/commit.md` governs, so `commitlint.config.js` leaves it at `[0]`. A local rule function checks the subject's leading letter run alone, matching the title check's subject-casing rule.
+### Commit side
 
-A second local rule, `no-claude-co-author`, refuses a `Co-authored-by` trailer naming Claude or Anthropic. It reads `raw` line by line rather than `footer`, since `@commitlint/parse` files a lone trailer under `body` and leaves `footer` null, so a footer check passes the exact message it exists to stop. It matches `claude` or `anthropic` as a whole word in the name or the address rather than refusing co-author trailers outright, because capture-refresh squashes carry a `github-actions[bot]` trailer and history holds a human one, and both are legitimate. A line opening with `#` never matches, so git's own comment lines in the file `--edit` reads pass.
+The built-in `subject-case` rule tests the whole subject's casing, which rejects a legitimate capitalized proper noun anywhere in it. `claude/skills/git-commit/references/commit.md` governs the first word alone.
+
+- `commitlint.config.js` leaves `subject-case` at `[0]`
+- A local rule function checks the subject's leading letter run alone, matching the title check
+
+A second local rule, `no-claude-co-author`, refuses a `Co-authored-by` trailer naming Claude or Anthropic.
+
+- It reads `raw` line by line, since `@commitlint/parse` files a lone trailer under `body` and leaves `footer` null, so a footer check passes the message it exists to stop
+- It matches `claude` or `anthropic` as a whole word in the name or address, because capture-refresh squashes carry a `github-actions[bot]` trailer and history holds a human one
+- A line opening with `#` never matches, so git's own comment lines in the file `--edit` reads pass

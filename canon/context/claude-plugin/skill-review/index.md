@@ -7,9 +7,9 @@ subtitle: How a pull request review posts and re-posts, the headings a poll rout
 
 How a pull request review posts and re-posts, the headings a poll routes on, the lenses that read the body, and the worker's half of the channel. Start with overview.
 
-- [Criteria](criteria.md): Why what a review looks for lives in review-craft rather than in either review procedure, why security and rendered output are references rather than skills, why the filter and severity stayed behind, and why the rendered-output read uses the posted comment
-- [Headings](headings.md): The heading contract a pull request review posts under, the full set the poll routes on, the closing comment that folds into the reply, and the one threshold governing both the heading and the dispatch
-- [Lenses](lenses.md): The review lenses that read the pull request body rather than the diff, from the Testing question and the stale ticked box to the reviewer request section and the key-changes claim check
+- [Criteria](criteria.md): Why review criteria live in review-craft, why security and rendered output are references, and why the rendered read uses the posted comment
+- [Headings](headings.md): The heading contract a review posts under, the set the poll routes on, the closing comment, and the one threshold for heading and dispatch
+- [Lenses](lenses.md): The review lenses that read the pull request body rather than the diff, from the testing question to the key-changes claim check
 - [Overview](overview.md): What the review paths cover, why no version-sequencing surface exists, how a routing decision is asserted
-- [Two-pass model](two-pass.md): The first pass and the close-out a pull request review posts, the name a body file takes when the head repeats, where the unchanged-head stop sits, the guard against a repeated close-out, and the commit a pass records
-- [Worker](worker.md): The rebase stage the worker's return leg carries, the worker role holding its own half of the channel, the relay serving a session holding neither role, what the pull request announcement buys, and why the return leg runs on REST
+- [Two-pass model](two-pass.md): The first pass and close-out a review posts, the body file name, the unchanged-head stop, and the repeated close-out guard
+- [Worker](worker.md): The worker's rebase stage and half of the channel, the relay for a roleless session, what the announcement buys, and why the return leg runs on REST
