@@ -43,7 +43,7 @@ Each cell form states a reason a check can read, so none admits every row.
 
 `canon tasks validate` resolves the `Task`, `Plan`, and `Touches` columns by header text and never reads the `Waiting on` cell, so the widened test holds on reading alone. A non-empty check lost, since every row already passes it.
 
-Every validator finding compares a written claim against the tree, and an external condition puts no fact there to disagree with. The mechanism sits in `canon/context/cli/audits/board.md`.
+Every validator finding compares a written claim against the tree, and an external condition puts no fact there to disagree with. `canon/context/cli.md` covers the audit set the validator belongs to.
 
 ### Board split from tasks
 

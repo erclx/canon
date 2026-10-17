@@ -111,7 +111,7 @@ The headings check reads an ordinary pull request alone. A review body carries i
 
 `check:install` runs in CI as its own step after `check:ci`. It costs about 3 seconds against `Verify`'s 70, since the runner's `bun install --frozen-lockfile` has already primed the package cache. The local gate and the pre-push hook exclude it, because a contributor's first run gets no such head start and a cold pack-and-install is unmeasured.
 
-Packing and installing from the extracted tarball answers what the `files` field ships, which nothing else in this workflow tests. A clone only proves a checkout installs. `canon/context/cli/packaging.md` covers what the check proves and what it cannot see.
+Packing and installing from the extracted tarball answers what the `files` field ships, which nothing else in this workflow tests. A clone only proves a checkout installs. `canon/context/cli.md` covers what the package carries and how the check asserts it.
 
 ### TypeScript pin
 

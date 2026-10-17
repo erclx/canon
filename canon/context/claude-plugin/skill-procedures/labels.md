@@ -52,7 +52,7 @@ The map keys on changed paths rather than the conventional-commit scope, since t
 
 ### What the verb reports
 
-`canon labels audit`, living in `src/labels/` rather than the skill body, names an uncovered branch before it merges. A second table, `[declined]`, separates a surface nobody covered from one somebody decided against, which prose carries only to a reader. `canon/context/cli/audits/reports.md` carries the reasoning behind the verb.
+`canon labels audit`, living in `src/labels/` rather than the skill body, names an uncovered branch before it merges. A second table, `[declined]`, separates a surface nobody covered from one somebody decided against, which prose carries only to a reader. `canon/context/cli.md` places the verb among the audit engines.
 
 ### The fallback
 
