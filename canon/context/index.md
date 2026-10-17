@@ -10,7 +10,7 @@ Per-domain narrative loaded on demand
 - [CI](ci/index.md): GitHub Actions workflow triggers, the gate stages CI runs, and the release and capture-refresh workflows. Start with overview.
 - [Claude internal](claude-internal/index.md): Toolkit-only internal skills, the task and plan artifacts that coordinate sessions, and plugin discovery for local sessions. Start with overview.
 - [Claude plugin](claude-plugin/index.md): Plugin skills shipped to target projects, the canon claude CLI, and overlap with built-in Claude Code features. Start with overview.
-- [CLI](cli/index.md): TypeScript entry point and the layer boundary to bash, command registration and migration, the sync engine and its install stamp, the audit commands, and packaging. Start with overview.
+- [CLI](cli.md): TypeScript entry point and the layer boundary to bash, command registration and migration, the sync engine and its install stamp, the audit commands, and packaging
 - [Context model](context-model.md): How project context splits across loading tiers and roots, the test that sorts a fact between them, and the folder index.md catalog system
 - [Design](design.md): DESIGN.md as a generated record, the token module and component layer it renders from, the render preview, and the neutral base a target inherits
 - [Development](development/index.md): Local dev loop and run commands, how bun run check scopes its stages and tests, the hooks, session scratch, and record folders. Start with overview.

@@ -1,0 +1,145 @@
+---
+title: CLI
+description: TypeScript entry point and the layer boundary to bash, command registration and migration, the sync engine and its install stamp, the audit commands, and packaging
+---
+
+# CLI
+
+## Overview
+
+`src/cli.ts` is the entry point of `canon`, the one `bin` the package ships. It builds a commander program, calls the `register` of each file in `src/commands/`, and routes help ahead of parsing. The source runs as it stands under Bun, so nothing compiles and no `dist/` exists to drift. Use `@/` imports, mapped to `src/` in `tsconfig.json`.
+
+This entry owns the layers every command stands on, from the process layer and root resolvers to the sync engine, the audit set, `canon pr`, and the package. The engine behind a feature verb sits in its own `src/<domain>/` folder and belongs to that domain's entry. Flags and exit codes are in `docs/agents/`.
+
+## Layout
+
+### `src/cli/`
+
+Holds the terminal and process layer every command shares.
+
+- `ui.ts` draws the timeline frame and alone may define an escape constant. `palette(stream)` reads `NO_COLOR` and that stream's `isTTY` at write time, so ask about the stream written to
+- `help.ts` renders the top block from `COMMAND_GROUPS`, framed only on a TTY, and `help-option.test.ts` fails on a command with no row
+- The web command field parses that block through `commandNamesFromHelp`, so a row-shape change has to keep every row readable
+- `help-all.ts` routes `--help --all` before `program.parse()`. A bare `canon --help --all` prints the top block, and a group with no operand refuses an unknown word with exit 1
+- `run.ts` spawns a subcommand by path so a worktree runs its own code, and `exec.ts` holds `execScript`, which no command calls now
+
+### `src/commands/`
+
+Holds one file per subcommand, each exporting a `register(program)` that `src/cli.ts` calls.
+
+- Add a command by writing its `register`, calling it from `src/cli.ts`, and adding its row to `COMMAND_GROUPS`
+- Define real options in commander and re-enable `helpOption` at each level, since the root disables it. Put a default on the flag, and read `getOptionValueSource` to tell it from an explicit pass
+- A parent with subcommands and an action prints help through `outputHelp({ error: true })`, or the block lands in the data stream
+- A command file cannot be imported by a test. Move testable logic to a pure module in the domain folder and pass the impure factories in
+- A browser-backed command imports its engine inside the action, since `src/cli.ts` loads every `register` at module scope. `src/browser/engine.ts` holds the shared absence predicates
+
+### `src/roots/`
+
+Groups the resolvers that answer where something lives.
+
+- `project.ts` derives `PROJECT_ROOT` from `import.meta.url` and holds `checkoutMismatchWarning`, which a verb answering from `PROJECT_ROOT` emits when the caller stands in another checkout
+- `record.ts` resolves a record folder through `.canon/` before `.claude/`, and `surface.ts` a surface folder through `canon/` before `.claude/`, each with a creation default
+- `legacy.ts` holds `resolveExisting`, the first-existing-path read the stamp, baseline, and label map share
+- A verb whose answer depends on the caller's root takes it as a parameter, which keeps root resolution in the command layer
+
+### `src/git/`
+
+Holds every module that reads repository state, named for what it reads.
+
+- `env.ts` holds `gitEnv()`, which strips the variables a hook exports, and `gh-invocations.test.ts` fails on a `gh` call in `src/` that skips it
+- `worktree.ts` holds `mainWorktreeRoot()` for shared scratch, `currentWorktreeRoot()` for a tracked tree, `listWorktrees()`, and `branchRefs()`
+- `base.ts` holds `baseCandidates()`, the trunk order the base-ref resolver and `src/gov/test-order.ts` each run their own call over
+- `files.ts` holds `listRepositoryFiles()`, the file set the citation check, markdown corpus, and secret scan read
+- `listChangedFiles()` in that file diffs the working tree rather than `HEAD`, so a surface added before the commit is in scope
+
+### `src/sync/`
+
+Holds the one engine `gov` and `design` install and sync through, the workflow `canon sync` runs afterward, and the install stamp.
+
+- An adapter supplies `installedRoot`, `locateSource`, and optional hooks. Widen `SyncAdapter` rather than branching on a domain name in `engine.ts`
+- `planSync` marks each walked file with a state such as `stale`, `orphaned`, `retired`, or `renamed`. Location decides ownership before a name lookup, through `projectSubdir` and `ownsInstalledRoot`
+- Declare a rename in `governance/renames.toml`, or the old rule lands as `retired` and is deleted. `src/gov/renames.test.ts` fails on a live key, a dead chain, or a cycle
+- `stamp.ts` writes `canon/config/config.json` after the copies land and reads three older spellings. Adding a domain means choosing `STAMP_DOMAINS` or `SCANNED_DOMAINS`, and retiring one edits both
+- `check.ts` builds `canon sync --check`, `history.ts` recovers `stale` when unstamped, and `reverse.ts` finds dropped files. `hasDrift` skips `orphaned`, tooling, and the new and reverse sections
+
+### `src/targets/`
+
+Owns the machine-level index of target projects, kept under `stateDir()`.
+
+- `registry.ts` records a target as `putDomain` stamps it. A failed write is dropped, since the stamp is the authoritative record
+- `sweep.ts` finds installs that predate the index. It descends into a stamped folder, which can hold others, and skips `.claude` so a worktree's stamp copy counts nothing
+- `resolve.ts` groups by origin so a target in two clones counts once, and `pulls.ts` reads each target's open pull requests
+- `validate.ts` holds `resolveTarget`, the install-directory check under every verb that takes a target
+
+### `src/audits/`
+
+Holds the aggregate behind `canon audits run`, the only audit anything schedules.
+
+- `catalog.ts` holds `AUDITS`, one `AuditSpec` per verb. Its `gatingExits` say which exits are facts, since a reporting verb sets 2 on findings it does not gate
+- Add an audit by adding its spec, with a `counts` extractor that returns `undefined` when the record lacks its keys, since zero would read as clean
+- `run.ts` runs the specs together and reports one verdict. `--corpus` scopes a run, and an exit 3 from a verb is a defect in the run
+- `baseline.ts` compares each count to the recorded baseline. Growth reports and never gates, and it is attributed rather than re-recorded to clear it
+
+### `src/context/`
+
+Holds the context-folder audit behind `canon context audit`.
+
+- `audit.ts` reports section, shape, length, provenance, and reference-form findings per entry, and `gate.ts` decides which fail under `--gate`
+- `shape-gated.ts` lists the entry paths held to the Overview, Layout, and Gotchas shape. `canon/context/index.md` is regenerated by `canon indexes regen`, never edited
+- `citations.ts` resolves every cited path and gates on a miss. It lifts a `canon/context/<name>.md` suffix out of a longer path, so a seed path fails when the entry it mirrors moves
+- `requirements.ts` reads the word cap from `canon/REQUIREMENTS.md`, and `index-drift.ts` compares an index to its siblings
+
+### `src/markdown/`
+
+Holds the attribute-standard audit behind `canon markdown audit` and the fence walker every markdown reader shares.
+
+- `bans.ts` and `links.ts` gate. The ban set ships as data, an empty set reports rather than passes, and exit 3 stays apart from the refusal at 1
+- `density.ts` measures bullet runs and sentence weight. `scope.ts` names the measured documents in `DENSITY_SCOPE` and the prefixes that fail a run in `GATED_PATHS`
+- A rewrite batch replaces its folder prefix with the entry path in `GATED_PATHS`, never adding beside it
+- `colons.ts` and `heading-case.ts` only report, and the edit hook scopes them to the lines being edited
+
+### `src/pr/`
+
+Holds the readers and writers behind `canon pr`, all over REST since a cloud session's proxy refuses GraphQL.
+
+- `rest.ts` is the one boundary where REST payloads take the field names the rest of the folder reads, and list endpoints go through `gh api --paginate`
+- `head.ts` and `checks.ts` key on the remote tip, not the local branch, and `checks.ts` tells a conflicted branch from runs that have not started
+- `evidence.ts`, `tick.ts`, and `bijection.ts` own the marked comment, the checklist ticks, and the key-changes comparison. `frames.ts` stores review images on the `canon/frames` branch
+- `preview.ts` and `local.ts` write and remove the address line. The first reads what a branch serves from the deploy workflow's push trigger, the second finds a server by its cwd
+- `lift.ts` reads every gate in order and readies a pull request only when each passes, so no caller readies one directly
+
+### `src/sessions/`
+
+Holds the live-session roster, split by what a stub has to replace.
+
+- `registry.ts` reads one JSON file per session under `claudeConfigDir()`. No published contract describes it, so an absent registry refuses rather than reporting an empty roster
+- `live.ts` matches a record to the start time it stamped through the process filesystem, and marks the roster unverified where it can only probe a signal
+- `resolve.ts` joins a session to its branch, and `claim.ts` asks whether a session or worktree holds one. `--branch` scopes to the shared directory, since names collide across projects
+- `transfer/` moves a session between machines and treats a transcript as opaque bytes
+
+### `package.json`
+
+Decides what the published package `@erclx/canon` carries.
+
+- `files` lists `src`, `scripts`, `governance`, `tooling`, `claude`, and `docs`, minus `scripts/eval` and every test file. `internal/`, `wiki/`, `sandbox/`, and `.claude/` stay out
+- `publishConfig.access` is `public`, since a scoped package defaults to restricted and a restricted publish only fails for everyone outside the scope
+- Release-please owns the version and writes the plugin manifest through `extra-files`
+- `scripts/core/install-check.sh` packs with `--ignore-scripts`, installs the tarball without development dependencies, and asserts an excluded path is absent from it
+
+### Other folders
+
+Each of these owns one slice the folders above lean on.
+
+- `src/capture/` owns the capture render, the one place a browser is imported for `canon capture`
+- `src/records/`, `src/tasks/`, and `src/migrate/` own the record-folder verbs, the task-board verbs, and the one-shot migrations, each planning before it applies
+- `src/worktrees/` owns the engine of `canon worktrees`, and `src/gate/` and `src/shipped/` own the gate stages and the shipped-references check
+- `src/comments/`, `src/secrets/`, `src/deps/`, `src/labels/`, `src/counts/`, and `src/census/` own the remaining audit engines
+- `src/sweep/` owns the skip and mute contract line sweeps read, and `src/version/` and `src/upstream/` own the skew read behind `canon upgrade` and the release digest
+
+## Gotchas
+
+- `PROJECT_ROOT` is the installation the CLI runs from, so a catalog verb in a linked worktree reports that tree. Run `bun src/cli.ts` to answer from the worktree
+- A verb reading a tracked tree uses `currentWorktreeRoot()`, since the main root reports on files the session never edited
+- A test that spawns `gov install` or `gov sync` as a process sets `CANON_STATE_DIR`, or it writes a row for its fixture into the real target index
+- A subcommand registered after its parent keeps `passThroughOptions`, so `canon sandbox` words such as `reset` reach its action as words
+- A `canon docs` topic resolves `<topic>.md` before `<topic>/index.md`, and each lister pins its own depth, so a split domain needs both passes

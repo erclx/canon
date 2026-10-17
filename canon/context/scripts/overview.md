@@ -5,7 +5,7 @@ description: What the scripts domain owns, the folder layout, and the decisions 
 
 # Overview
 
-Owns every bash script in the repo, being the domain entry points behind each `canon` command, repo maintenance, and the shared library functions the rest source. The TypeScript side that parses arguments and dispatches here lives in `canon/context/cli/index.md`.
+Owns every bash script in the repo, being the domain entry points behind each `canon` command, repo maintenance, and the shared library functions the rest source. The TypeScript side that parses arguments and dispatches here lives in `canon/context/cli.md`.
 
 ## Layout
 
@@ -28,7 +28,7 @@ A migrated domain loses its dispatcher entirely, and `src/commands/<domain>.ts` 
 
 ### Verdicts and ownership
 
-The language end state is the stack decision in `canon/context/cli/overview.md`. The stays-bash verdicts record why a file has not moved yet, and an inventory pass sorts each into delete, rebuild, or wrap.
+The language end state is TypeScript on Bun, and `canon/context/cli.md` covers the CLI side. The stays-bash verdicts record why a file has not moved yet, and an inventory pass sorts each into delete, rebuild, or wrap.
 
 - The frontmatter-loop cost alone does not keep a verb in bash, since a parse the CLI already owns outweighs a process per read
 - `gov/list.sh` migrated anyway, since expanding a rule folder in bash beside the TypeScript resolver puts one rule in two languages
