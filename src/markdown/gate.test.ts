@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { type GateInput, isGating } from '@/markdown/gate'
+import {
+  type GateInput,
+  type GatedDensityFinding,
+  isGating,
+} from '@/markdown/gate'
 import type { LinkFinding } from '@/markdown/links'
 import type { BanFinding } from '@/markdown/scan'
 import type { StructureReport } from '@/markdown/structure'
@@ -37,6 +41,19 @@ function makeStructure(
   }
 }
 
+function makeDensity(
+  overrides: Partial<GatedDensityFinding> = {},
+): GatedDensityFinding {
+  return {
+    kind: 'paragraph-length',
+    line: 3,
+    value: 400,
+    limit: 350,
+    gating: false,
+    ...overrides,
+  }
+}
+
 function makeInput(overrides: Partial<GateInput> = {}): GateInput {
   return {
     bans: [],
@@ -44,7 +61,7 @@ function makeInput(overrides: Partial<GateInput> = {}): GateInput {
     structure: [],
     colons: [],
     headingCase: [],
-    bulletStacks: [],
+    density: [],
     ...overrides,
   }
 }
@@ -142,8 +159,14 @@ describe('isGating', () => {
     expect(isGating(input)).toBe(false)
   })
 
-  it('should pass a bullet stack on its own', () => {
-    const input = makeInput({ bulletStacks: [{ line: 4, count: 36 }] })
+  it('should fail a density finding marked gating', () => {
+    const input = makeInput({ density: [makeDensity({ gating: true })] })
+
+    expect(isGating(input)).toBe(true)
+  })
+
+  it('should pass a density finding marked not gating', () => {
+    const input = makeInput({ density: [makeDensity({ gating: false })] })
 
     expect(isGating(input)).toBe(false)
   })

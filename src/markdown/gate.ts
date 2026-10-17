@@ -1,9 +1,13 @@
 import type { ColonFinding } from '@/markdown/colons'
+import type { DensityFinding } from '@/markdown/density'
 import type { HeadingCaseFinding } from '@/markdown/heading-case'
 import type { LinkFinding } from '@/markdown/links'
 import type { BanFinding } from '@/markdown/scan'
-import type { StackFinding } from '@/markdown/stacks'
 import type { StructureReport } from '@/markdown/structure'
+
+export interface GatedDensityFinding extends DensityFinding {
+  readonly gating: boolean
+}
 
 export interface GateInput {
   /** Every ban hit across every file measured, flattened. */
@@ -13,10 +17,11 @@ export interface GateInput {
   /**
    * Every structural measure the run made, read by nothing here.
    *
-   * Naming it is what makes the split checkable: bullet, paragraph, and depth
-   * weight are judgments a reader settles, and a push failing on one teaches a
-   * contributor to route around the stage. A signature taking the ban list
-   * alone states the same rule and leaves no place to assert it.
+   * Naming it is what makes the split checkable: depth weight, cadence, and the
+   * sentence count are judgments a reader settles, and a push failing on one
+   * teaches a contributor to route around the stage. The bullet and paragraph
+   * weight a reader settles here are the advisory half, and the same numbers
+   * gate through `density` below, which knows the path each one sits on.
    */
   readonly structure: readonly StructureReport[]
   /**
@@ -33,25 +38,30 @@ export interface GateInput {
    */
   readonly headingCase: readonly HeadingCaseFinding[]
   /**
-   * Every run of plain bullets past the cap, read by nothing here.
+   * Every density finding, each marked with whether its path gates.
    *
-   * The stage that gates it is `bullet-stacks` in `src/gate/stages.ts`, which
-   * reads a scope of tracked files. This audit also runs on plans and
-   * groundwork records kept out of version control, where a long list is not
-   * a defect, which is the reason `documentCeiling` gates apart from it too.
+   * The mark is decided by the caller from `src/markdown/scope.ts`, since only
+   * the caller knows the path and whether the tree is a canon checkout. A plan,
+   * a groundwork record, and a rule carry no density finding at all, and an
+   * in-scope path under no gated prefix carries one marked `gating: false`.
    */
-  readonly bulletStacks: readonly StackFinding[]
+  readonly density: readonly GatedDensityFinding[]
 }
 
 /**
  * Whether the audit found something that should fail the caller.
  *
- * A banned character and a relative link resolving to
- * nothing on disk are both facts rather than a threshold, so either gates
- * unconditionally and there is no widened mode to reach for. The standards
- * decide what counts as banned, which keeps this answering how many rather
- * than which.
+ * A banned character and a relative link resolving to nothing on disk are both
+ * facts rather than a threshold, so either gates unconditionally and there is
+ * no widened mode to reach for. A density finding is a fact too, a count
+ * against a fixed number, and it gates wherever the caller marked its path as
+ * gated. The standards decide what counts as banned, which keeps this
+ * answering how many rather than which.
  */
-export function isGating({ bans, links }: GateInput): boolean {
-  return bans.length > 0 || links.length > 0
+export function isGating({ bans, links, density }: GateInput): boolean {
+  return (
+    bans.length > 0 ||
+    links.length > 0 ||
+    density.some((finding) => finding.gating)
+  )
 }

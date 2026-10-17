@@ -6,7 +6,8 @@ import { BAN_SETS, emptyBanSets } from '@/markdown/bans'
 import { isChangelog, lengthExemption } from '@/markdown/ceiling'
 import { type ColonFinding, findColons } from '@/markdown/colons'
 import { type MarkdownAuditRefusal, resolveMarkdown } from '@/markdown/files'
-import { isGating } from '@/markdown/gate'
+import { densityFindings, type DensityKind } from '@/markdown/density'
+import { type GatedDensityFinding, isGating } from '@/markdown/gate'
 import {
   findHeadingCase,
   type HeadingCaseFinding,
@@ -18,7 +19,7 @@ import {
   bodyLines,
   scanBans,
 } from '@/markdown/scan'
-import { bulletStacks, CAP, type StackFinding } from '@/markdown/stacks'
+import { densityGates, GATED_PATHS, inDensityScope } from '@/markdown/scope'
 import {
   BASELINE,
   CHECKPOINTS,
@@ -36,6 +37,7 @@ import {
   pipeOutput,
   plural,
 } from '@/cli/ui'
+import { isOwnCheckout } from '@/roots/project'
 
 const EXIT_REFUSED = 1
 const EXIT_GATE = 2
@@ -60,7 +62,8 @@ interface FileReport {
   readonly links: readonly LinkFinding[]
   readonly colons: readonly ColonFinding[]
   readonly headingCase: readonly HeadingCaseFinding[]
-  readonly bulletStacks: readonly StackFinding[]
+  /** Empty on a path outside the density scope, so a plan never carries one. */
+  readonly density: readonly GatedDensityFinding[]
   readonly structure: StructureReport
   readonly renderedLines: number
   /** The stated reason, or null where the document is not exempt. */
@@ -76,7 +79,7 @@ export function register(program: Command): void {
   markdown
     .command('audit')
     .description(
-      'Fail on a banned character, and report bullet, paragraph, cadence, depth, and length',
+      'Fail on a banned character, a dead link, or a gated density finding, and report weight, cadence, depth, and length',
     )
     .argument(
       '[path...]',
@@ -91,21 +94,25 @@ export function register(program: Command): void {
         'Exit codes:',
         '  0  the audit completed with no gating finding',
         '  1  refused, with the reason on stderr',
-        '  2  a banned character is present, or a relative link resolves',
-        '     to nothing on disk',
+        '  2  a banned character is present, a relative link resolves to',
+        '     nothing on disk, or a density finding sits on a gated path',
         '  3  a shipped ban set is empty, so the run measured nothing',
         '',
         'A ban hit and a dead link are each a fact and gate unconditionally.',
-        'Bullet, paragraph, and depth weight are judgments a reader settles,',
-        'so all three report and none of them fails a run.',
+        'Depth weight is a judgment a reader settles, so it reports and never',
+        'fails a run.',
+        '',
+        'Density holds six limits: a 350-character paragraph, 2 paragraphs in',
+        'a row, a 200-character bullet, 5 plain bullets in a row, no H4, and a',
+        'paragraph or table opening every H3. Only context, docs, skills, tooling',
+        'seeds and references, the wiki, README.md, and CONTRIBUTING.md take a',
+        'finding. One gates under a prefix in GATED_PATHS in src/markdown/scope.ts,',
+        'and a bullet run gates in context, docs, and skills from the start.',
+        'Outside a canon checkout every density finding reports and none gates.',
         '',
         'A mid-sentence colon and a heading with a capital after its first word',
         'report the same way. A proper noun is the one case the second cannot',
         'tell from title case, and the first is sometimes right.',
-        '',
-        'Bullet stacks report a run of more than 5 plain bullets under one',
-        'heading and never exit 2. The Bullet stacks gate stage owns that',
-        'verdict, for the reason the length line below states.',
         '',
         'Length reports a whole document past the ceiling and never exits 2.',
         'The Document ceiling gate stage owns that verdict, since this audit also',
@@ -171,6 +178,9 @@ async function runAudit(
   const bans = BAN_SETS
   const empty = emptyBanSets(bans)
   const checkpoints = CHECKPOINTS
+  // `GATED_PATHS` describes this repository's rewrite progress, so a target
+  // reads every density finding as a report until its own corpus is gated.
+  const gates = isOwnCheckout(root)
 
   const reports: FileReport[] = await Promise.all(
     scope.files.map(async (rel) => {
@@ -184,7 +194,12 @@ async function runAudit(
         bans: scanBans(lines, bans),
         colons: advisory ? findColons(lines) : [],
         headingCase: advisory ? findHeadingCase(source) : [],
-        bulletStacks: advisory ? bulletStacks(lines) : [],
+        density: inDensityScope(rel)
+          ? densityFindings(lines).map((finding) => ({
+              ...finding,
+              gating: gates && densityGates(rel, finding.kind),
+            }))
+          : [],
         links: findBrokenLinks(lines, (path) =>
           existsSync(resolve(dirname(abs), path)),
         ),
@@ -201,7 +216,7 @@ async function runAudit(
   reportLinks(reports, root)
   reportColons(reports)
   reportHeadingCase(reports)
-  reportStacks(reports)
+  reportDensity(reports, gates)
   reportBullets(reports, checkpoints)
   reportParagraphs(reports, checkpoints)
   reportCadence(reports, checkpoints)
@@ -237,7 +252,7 @@ async function runAudit(
           links: report.links,
           colons: report.colons,
           headingCase: report.headingCase,
-          bulletStacks: report.bulletStacks,
+          density: report.density,
           longestRun: report.structure.longestRun,
           longestRunLine: report.structure.longestRunLine,
           heavyBullets: report.structure.heavyBullets,
@@ -260,7 +275,7 @@ async function runAudit(
     structure: reports.map((report) => report.structure),
     colons: reports.flatMap((report) => report.colons),
     headingCase: reports.flatMap((report) => report.headingCase),
-    bulletStacks: reports.flatMap((report) => report.bulletStacks),
+    density: reports.flatMap((report) => report.density),
   })
 
   return gating ? EXIT_GATE : 0
@@ -414,46 +429,77 @@ function reportLinks(reports: readonly FileReport[], root: string): void {
   )
 }
 
-function reportStacks(reports: readonly FileReport[]): void {
-  logStep('Bullet stacks')
+const DENSITY_LABELS: Record<DensityKind, string> = {
+  'paragraph-length': 'paragraph length',
+  'paragraph-run': 'paragraphs in a row',
+  'bullet-length': 'bullet length',
+  'bullet-run': 'bullets in a row',
+  'heading-depth': 'heading depth',
+  'h3-opening': 'H3 opening',
+}
+
+function describeDensity(finding: GatedDensityFinding): string {
+  const measured =
+    finding.kind === 'h3-opening'
+      ? 'opens with neither a paragraph nor a table'
+      : finding.kind === 'heading-depth'
+        ? `H${finding.value} past H${finding.limit}`
+        : `${finding.value} past ${finding.limit}`
+  const gate = finding.gating ? '  gating' : ''
+  return `  :${finding.line}  ${DENSITY_LABELS[finding.kind]}  ${measured}${gate}`
+}
+
+/**
+ * Lists every density finding with whether it gates, since an in-scope path
+ * under no gated prefix reports the same finding a gated one fails on and a
+ * reader has to tell the two apart in one frame.
+ */
+function reportDensity(reports: readonly FileReport[], gates: boolean): void {
+  logStep('Density')
   logInfo(
-    `A run of more than ${CAP} top-level bullets, with no paragraph or heading between them.`,
+    `Paragraphs past ${CHECKPOINTS.paragraph} characters, more than 2 paragraphs in a row, bullets past ${CHECKPOINTS.bullet} characters, more than 5 plain bullets in a row, a heading past H3, and an H3 opening with neither a paragraph nor a table.`,
   )
   logInfo(
-    'A run whose every item opens with a bold label or a link is exempt. This never fails a run. The Bullet stacks gate stage owns that verdict.',
+    'Measured on context entries, docs, skill bodies and references, tooling seeds and stack references, the wiki, README.md, and CONTRIBUTING.md. Every other path takes no density finding.',
+  )
+  logInfo(
+    gates
+      ? `A finding gates under a gated prefix (${GATED_PATHS.length === 0 ? 'none yet' : GATED_PATHS.join(', ')}), and a bullet run gates in context, docs, and skills already. Every other finding reports.`
+      : 'This tree is not a canon checkout, so every density finding reports and none gates.',
   )
 
   const carrying = reports
-    .filter((report) => report.bulletStacks.length > 0)
-    .sort((a, b) => longestStack(b) - longestStack(a))
+    .filter((report) => report.density.length > 0)
+    .sort((a, b) => b.density.length - a.density.length)
 
   if (carrying.length === 0) {
-    logInfo(`No run past ${CAP} bullets.`)
+    logInfo('No density finding.')
     return
   }
 
-  const total = carrying.reduce(
-    (sum, report) => sum + report.bulletStacks.length,
+  const total = carrying.reduce((sum, report) => sum + report.density.length, 0)
+  const gating = carrying.reduce(
+    (sum, report) =>
+      sum + report.density.filter((finding) => finding.gating).length,
     0,
   )
-  logWarn(`${plural(total, 'stack')} across ${plural(carrying.length, 'file')}`)
+  logWarn(
+    `${plural(total, 'finding')} across ${plural(carrying.length, 'file')}, ${gating} gating`,
+  )
+  if (gating > 0) logWarn('A gating finding fails the run.')
   logInfo(
-    'Fold the run into prose, give each item an H3, or split the list at its seam.',
+    'Split a long block at its seam, put a heading or a table between paragraphs, give a long list H3s, and open each H3 with a sentence or a table.',
   )
   pipeOutput(
     carrying
       .map(
         (report) =>
-          `${report.rel}  ${plural(report.bulletStacks.length, 'stack')}\n${report.bulletStacks
-            .map((found) => `  :${found.line}  ${found.count} bullets`)
+          `${report.rel}  ${plural(report.density.length, 'finding')}\n${report.density
+            .map(describeDensity)
             .join('\n')}`,
       )
       .join('\n'),
   )
-}
-
-function longestStack(report: FileReport): number {
-  return Math.max(0, ...report.bulletStacks.map((found) => found.count))
 }
 
 function reportColons(reports: readonly FileReport[]): void {
