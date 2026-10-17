@@ -7,18 +7,16 @@ metadata:
 
 # API design
 
-A session changing a surface sees the one caller it is working for and none of the others, so it renames a field in place, returns whatever record it had in hand, and ships. Every caller it did not open breaks on the next release. This skill carries the judgment at the moment the surface is drawn: what a caller can observe, what the contract says before the body exists, and how a change lands without breaking anyone.
+A session changing a surface sees the one caller it is working for, so it renames a field in place, returns whatever record it had in hand, and ships. Every caller it did not open breaks on the next release. This skill carries the judgment at the moment the surface is drawn.
 
-Load it before changing anything a caller outside the module reads, whether code, a script parsing output, or a stored file. A surface is cheap to shape before its first caller and expensive after.
-
-Skip it when the change stays behind an existing boundary and alters nothing a caller can observe.
+Load it before changing anything a caller outside the module reads, whether code, a script parsing output, or a stored file, since a surface is cheap to shape before its first caller and expensive after. Skip it when the change alters nothing a caller can observe.
 
 ## Decide what a caller can observe
 
 Every observable behavior becomes a dependency once there are enough callers, whatever the contract promises, which is Hyrum's Law. Decide what is observable, and expose nothing by accident.
 
 - Return a shape built for the caller over the internal record you had in hand. A storage type, an internal identifier, or a field kept for bookkeeping becomes a contract the moment it ships.
-- Treat ordering, timing, default values, and the exact text of an error or a log line as observable. Sort output on purpose or say it is unordered, rather than leaving it in whatever order the data arrived.
+- Treat ordering, timing, default values, and the exact text of an error or a log line as observable. Sort output on purpose or say it is unordered, never in whatever order the data arrived.
 - Keep the surface as small as the first caller needs. A field or flag added later is free, and one removed later breaks someone.
 - Keep one name for one concept across every surface the project exposes. A caller learning `id` in one output and `key` in the next has to guess which is which.
 
@@ -31,7 +29,8 @@ Every observable behavior becomes a dependency once there are enough callers, wh
 
 ## Keep one error shape per surface
 
-- Give every failure on one surface the same shape, carrying a stable code a caller can branch on and a message for the person reading it. Branching on message text breaks the first time the message is reworded. Keep internal implementation details out of the message, since a caller reads it and cannot act on a stack frame.
+- Give every failure on one surface the same shape, a stable code a caller can branch on and a message for the person, since branching on message text breaks at the first rewording
+- Keep internal implementation details out of the message, since a caller reads it and cannot act on a stack frame
 - Reuse the error type the project already throws or returns where one exists, rather than inventing a second error convention beside it.
 
 ## Validate at the boundary
@@ -44,10 +43,10 @@ Every observable behavior becomes a dependency once there are enough callers, wh
 ## Change additively
 
 - Add a field, a flag, or a parameter as optional, with a default that keeps the old behavior.
-- Never rename or remove anything in place. Add the new name beside the old one, keep both working, and remove the old one only once no caller reads it, proving that and moving the callers through `deprecation-migration`.
+- Never rename or remove anything in place. Add the new name beside the old, keep both working, and remove the old only once no caller reads it, proven through `deprecation-migration`.
 - Never change what an existing field means or what type it carries. A new meaning takes a new name.
-- When a caller cannot pin a version, such as a module everything in one repository imports, keep one version of the surface live and migrate every caller in the change that alters it, the One-Version Rule. Two versions live side by side split the callers between them.
-- Record each deprecation where a caller looks, naming the replacement and what happens next, rather than in a commit message nobody reads again. Whether to deprecate, and when a deprecation turns compulsory, is `deprecation-migration`.
+- When a caller cannot pin a version, such as a module one repository imports, keep one version live and migrate every caller in the change, the One-Version Rule. Two live versions split the callers.
+- Record each deprecation where a caller looks, naming the replacement and what happens next, never only in a commit message. Whether and when to deprecate is `deprecation-migration`.
 
 ## Make a retried write safe
 
@@ -82,6 +81,8 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 
 ### Changes, retries, and order
 
+Changes to an existing surface carry their own signs.
+
 - An existing field is changing type or meaning under the same name.
 - A write that a client could retry carries no key, or checks for one with a read before the insert.
 - Output order follows whatever the underlying data returned, and nothing states whether it is sorted.
@@ -96,6 +97,8 @@ Check each line against the surface the change produced. A line answering no is 
 - Every failure on the surface carries the same shape with a stable code.
 
 ### Input, writes, and contract
+
+Check the input and the contract the same way.
 
 - Input is checked once, at the boundary, and nowhere deeper.
 - Every write a caller could retry takes a key, claims it atomically, and refuses a reused key with a different body.

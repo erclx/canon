@@ -7,9 +7,9 @@ metadata:
 
 # Build in slices
 
-A session handed a plan tends to build all of it in one pass and test at the end. The diff grows past what anyone can read, a failure late in the run could have come from any of the changes, and nothing in history marks a point that worked. A defect it notices on the way gets fixed in the same diff, so the review reads two changes as one. This skill carries the discipline that keeps each step small enough to verify and revert on its own.
+A session handed a plan tends to build all of it in one pass and test at the end. The diff grows past what anyone can read, a late failure could have come from any change, and nothing in history marks a point that worked.
 
-Load it before implementing a plan with more than one behavior or more than one file to change. Skip it for a change that is already one behavior in one place.
+A defect it notices on the way gets fixed in the same diff, so the review reads two changes as one. This skill keeps each step small enough to verify and revert on its own. Load it before implementing a plan with more than one behavior or file, and skip it for one behavior in one place.
 
 ## Run the cycle per slice
 
@@ -26,7 +26,7 @@ Leave the build passing at every commit. A slice that cannot pass on its own is 
 
 - Prefer one path through every layer it needs, end to end, over one whole layer at a time. A finished path proves the layers fit, and a finished layer proves nothing until the next one meets it.
 - Take the riskiest or least certain piece first. When it fails, the slices that would have rested on it are not built yet.
-- Build the contract first when two sides are written against it, such as a command and the skill that calls it, or a format and its reader. Commit the contract as its own slice, then each side against it.
+- Build the contract first when two sides are written against it, such as a command and the skill calling it, or a format and its reader. Commit it as its own slice, then each side.
 - Read the plan's file list as the scope of the whole branch, not as the order. Cut the order from the three rules above.
 
 ## Keep each commit safe to revert on its own
@@ -40,7 +40,7 @@ Leave the build passing at every commit. A slice that cannot pass on its own is 
 
 A defect outside the plan that turns up mid-build is a finding, not a slice. Fixing it on this branch widens a diff the plan scoped and hides the fix inside an unrelated review.
 
-- Write it in one line under the open task's `## Findings`, naming the file and what is wrong, when the build is closing a task. Open the line with the bold source-and-date label from `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`.
+- Write it as one line under the task's `## Findings`, naming the file and the fault when the build closes a task, opening with the label `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes
 - Carry it in the handover message instead when no task exists, and never create a file to hold it.
 - Leave the file as it is, even when the fix is one line.
 - Fix it here only when the plan's own change cannot pass without it, and then say so in the commit that does.
@@ -74,6 +74,8 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 
 ### Scope and ordering
 
+Scope and order carry their own signs.
+
 - You opened a file the plan does not name and are about to edit it.
 - A commit deletes code and adds its replacement in the same change.
 - You are about to stage a test in a commit after the one that added its code.
@@ -88,6 +90,8 @@ Check each line against the branch the build produced. A line answering no is fi
 - No commit deletes something and adds its replacement together.
 
 ### Tree and scope
+
+Check the tree and the scope the same way.
 
 - The working tree holds no uncommitted implementation work.
 - Every file changed is in the plan's scope, or its commit says why the plan needed it.
