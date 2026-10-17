@@ -27,7 +27,8 @@ canon transcripts <url>
 ```
 
 - Pass `--keep-timestamps` when the user wants `[mm:ss]` markers per line instead of prose.
-- Pass `--out <dir>` to override the output directory, resolved against the current directory. The default is the backed `.canon/transcripts/` folder at the main worktree root, under a filename shaped `<fetch-date>--<title-slug>--<video-id>.md`.
+- Pass `--out <dir>` to override the output directory, resolved against the current directory
+- Without it, the file lands in the backed `.canon/transcripts/` folder at the main worktree root, named `<fetch-date>--<title-slug>--<video-id>.md`
 - The written file path prints to stdout. Surface it back to the user as a full relative path, in the form the project's instruction file sets under `## Output`.
 
 ## After the fetch
