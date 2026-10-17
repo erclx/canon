@@ -11,7 +11,7 @@ description: The density limits and the gate on a fact that overturned report-on
 
 Six layout limits gate through `canon markdown audit`, being a 350-character paragraph, 2 paragraphs in a row, a 200-character bullet, 5 plain bullets in a row, no H4, and a paragraph or table opening every H3. Each is a count against a fixed number, so a finding is a fact. Groundwork `154` overturned the report-only verdict, since the soft findings are why the corpus drifted.
 
-The scope list in `src/markdown/scope.ts` answers the objection that kept weight out of the exit before. A plan or a groundwork record takes no density finding at all, so the audit can gate without failing a record kept out of version control. `GATED_PATHS` turns each folder on as its rewrite batch reaches zero, and outside a canon checkout nothing gates, since the list describes this repository alone.
+The scope list in `src/markdown/scope.ts` answers the objection that kept weight out of the exit before. A plan or a groundwork record takes no density finding at all, so the audit can gate without failing a record kept out of version control. `GATED_PATHS` turns each path on as its rewrite batch reaches zero, a folder or one file per entry where a batch covers part of a folder, and outside a canon checkout nothing gates, since the list describes this repository alone.
 
 A ratchet failing only touched lines was the rejected alternative. It leaves the existing failing files as the example the next session copies. The `bullet-stacks` and `paragraph-growth` stages retired into the `markdown` stage, which reads the one exit.
 
