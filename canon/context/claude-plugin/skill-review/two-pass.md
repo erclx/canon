@@ -1,6 +1,6 @@
 ---
 title: Two-pass model
-description: The first pass and the close-out a pull request review posts, the name a body file takes when the head repeats, where the unchanged-head stop sits, the guard against a repeated close-out, and the commit a pass records
+description: The first pass and close-out a review posts, the body file name, the unchanged-head stop, and the repeated close-out guard
 ---
 
 # Two-pass model
@@ -9,74 +9,104 @@ description: The first pass and the close-out a pull request review posts, the n
 
 ### The body file name
 
-`review-pr` posts twice over a pull request's life, a first pass and a close-out. The body path carries the head commit, `body-<number>-<short-sha>.md`, since keying on the pull request number alone would let two sessions reviewing different pull requests collide, and says nothing about one session posting twice.
+`review-pr` posts twice over a pull request's life, a first pass and a close-out. The body path is `body-<number>-<short-sha>.md`, since keying on the number alone would let two sessions reviewing different pull requests collide. A name the caller must choose gets chosen wrong, so the second segment is derived.
 
-A name the caller has to choose is a name the caller gets wrong in practice, so the second segment is derived rather than picked.
+### When the head repeats
 
-#### When the head repeats
+A head that stops moving leaves a later pass with no legal name. A fix in gitignored records makes no commit, because `git-followup` stops on an unchanged tree, and a finding accepted as recorded changes nothing. The close-out is still owed, since the newest heading tells an operator whether the branch is blocked.
 
-Deriving from the head leaves a later pass with no legal name whenever the head stops moving, which is an ordinary state rather than an error. A fix landing in gitignored records produces no commit, since the return leg delegates its push to `git-followup` and that skill stops on an unchanged tree, and a finding the worker accepts as recorded produces no change at all. The close-out is still owed on both routes, because the newest heading is what an operator reads to decide whether the branch is blocked.
+A repeated head takes a third segment, the id of the `## Review response` comment the pass answers, with the head still leading so the second body sorts beside the first. A pass index loses because nothing in the thread carries one, so a session would count comments, which is the hand-chosen suffix the rule forbids.
 
-So a repeated head takes a third segment off the `## Review response` comment the pass answers: the thread's id, a real object rather than a suffix someone picked, with the head still leading the name so the second body sorts beside the first. A pass index was the other candidate and it loses, because nothing in the thread carries one, so a session would have to count prior comments to pick the next, which is the hand-chosen suffix the rule forbids.
+### Resolving the response comment
 
-#### Resolving the response comment
+The number is the REST `id` off the paginated issue-comments listing, because a cloud session's GitHub proxy refuses the GraphQL `gh pr view` runs on. The filter emits one id per match and `tail` keeps the newest, since `--paginate` runs the filter once per page.
 
-The number is the REST `id` off the paginated issue-comments listing, the same number each comment's anchor shows in the thread. The read runs on REST because a cloud session's GitHub proxy refuses the GraphQL that `gh pr view` runs on, and the filter emits one id per match with `tail` keeping the newest, since `--paginate` runs the filter once per page.
+- Scope the selection by the prior pass's `submittedAt`, since a heading match alone takes the newest response whatever its age, which on a re-run rebuilds the collision
+- Testing whether the derived name exists on disk is weaker, because the scratch folder is gitignored and a second machine passes the test exactly where its record is missing
 
-Selecting the response is scoped by the prior pass's `submittedAt` rather than by the heading alone, since a heading match alone takes the newest response in the thread whatever its age, which resolves the id a close-out already used on a re-run and rebuilds the collision the third segment exists to prevent. Testing whether the derived name is already on disk was the other candidate, and it is weaker: the scratch folder is gitignored, so a second machine holds none of it and the test passes exactly where the record it consults is missing.
+### Reading a repeated head
 
-An empty derivation is a head repeating with no response behind it, so the pass has nothing to add and stops rather than writing a second body over one commit. Where a response or a rebase report sits there, it is the entire read: the equality that triggers the naming case makes Step 2's range empty, so the comment rather than the delta is what says whether a prior finding landed. A late finding is the one exception, since the read also opens the file the comment names.
+An empty derivation is a head repeating with no response behind it, so the pass stops rather than writing a second body over one commit. Where a response or rebase report sits there, it is the entire read. The equality that triggers the naming case empties Step 2's range, so the comment says whether a prior finding landed.
+
+A late finding is the one exception, since the read also opens the file the comment names.
 
 ### Where the unchanged-head stop sits
 
-A check placed only inside the filename derivation reaches only the path that composes a body, so a pass reading the head as unchanged and taking no other action skips it entirely. Step 2 instead runs the same response query the moment the ancestor test reports an unchanged head, ahead of the diff read and ahead of Step 3's review, and stops there when it comes back empty. That is the earliest point every path through the skill crosses, so a pass with nothing to add cannot reach the review post.
+A check inside the filename derivation reaches only a pass that composes a body, so a pass that reads the head as unchanged and does nothing else would skip it. Step 2 instead runs the response query the moment the ancestor test reports an unchanged head, ahead of the diff read and Step 3, and stops when it comes back empty.
 
-Step 4 still derives the third filename segment for a pass that does proceed, off the comment id Step 2 already resolved, since collision avoidance in the name is still owed once posting is decided.
+That is the earliest point every path crosses. Step 4 still derives the third segment for a pass that proceeds, off the comment id Step 2 resolved.
 
-Deriving it also decides what a close-out reads. The last comment the skill posted names the commit the prior pass covered, so the close-out reads that range to the head rather than the whole change. That same field settles the rebase case without a second mechanism: after a force-push the prior commit no longer reaches the head, `git merge-base --is-ancestor` exits non-zero, and the skill pays for a full pass and states that in the body. Scoping by the prior review's timestamp instead would need its own rebase test, since a commit's author date can predate the push that put it on the branch.
+### What a close-out reads
 
-The equality test matches `## Review response`, `## Post-review findings`, and `## Rebase` as one family rather than `## Review response` alone. `## Post-review findings` is a reply carrying no commit behind it, which is exactly the shape the stop is meant to let through, so testing it separately would refuse a late finding the way it refuses an ordinary rerun. `## Rebase` needs no separate handling, since a rebase moves the head and the pass takes the non-ancestor path before this test ever runs. The filename segment Step 4 derives reads off the same resolution.
+The last comment the skill posted names the commit the prior pass covered, so the close-out reads that range to the head rather than the whole change.
 
-Step 2 splits on the heading: a response or a rebase report skips straight to composing the body, and a late finding gets the file it names read at `<headRefOid>` first, the same confirmation Step 3 runs against a stale ticked box.
+- The same field settles the rebase case. After a force-push the prior commit no longer reaches the head, `git merge-base --is-ancestor` exits non-zero, and the skill pays for a full pass and says so.
+
+Scoping by the prior review's timestamp would need its own rebase test, since a commit's author date can predate the push that put it on the branch.
+
+### One family for the stop
+
+The equality test matches `## Review response`, `## Post-review findings`, and `## Rebase` as one family. `## Post-review findings` carries no commit behind it, exactly the shape the stop should let through, so testing it separately would refuse a late finding as it refuses an ordinary rerun.
+
+- `## Rebase` needs no handling of its own, because a rebase moves the head and the pass takes the non-ancestor path first
+- Step 2 splits on the heading. A response or rebase report skips to composing the body, and a late finding gets the file it names read at `<headRefOid>` first, as Step 3 does for a stale ticked box.
 
 ### A close-out repeating the standing one
 
-The unchanged-head stop tests an empty range, so a pass whose head moved passes it whatever the thread already says. A pass telling the author a change is their own call, followed by the author making it, leaves the next pass's delta with nothing left to say by construction, so a correct pass over real commits can still arrive carrying nothing and post a close-out that repeats the standing one.
+The unchanged-head stop tests an empty range, so a pass whose head moved passes it whatever the thread says. The author may act on a change the pass called their own call, leaving the next delta empty by construction. A correct pass over real commits can then post a close-out repeating the standing one.
 
-The guard therefore turns on the standing verdict rather than on the range. Step 2 widens its existing query to return the last family review's first line beside its commit, one read answering both, and Step 4 rewrites the standing close-out through `gh api -X PUT` instead of posting beside it. `PUT` keeps the timestamp and the position in the thread, so the verdict stays where a reader last found it.
+The guard turns on the standing verdict instead. Step 2 widens its query to return the last family review's first line beside its commit, one read answering both. Step 4 rewrites the standing close-out through `gh api -X PUT` rather than posting beside it, and `PUT` keeps the timestamp and thread position.
 
-Suppressing the pass was one alternative and it fails twice: a reader scanning the thread would see a close-out naming an older commit with no way to tell whether the newer one was covered or skipped, and a test broad enough to suppress early would swallow a pass that raised a real finding.
+- The guard fires on `## Review closed` alone, since two open passes carry different findings and a repeated `## Review` stays an ordinary post
 
-A further heading was the other alternative, and the closed set `poll.ts` matches against closes it outright: the script matches a fixed set and reports anything else as `UNMATCHED`, so a new heading invented here without a matching change to that set would break the classification it was meant to clarify. `## Evidence` is in the known set on that same condition, having shipped with `canon pr evidence` and the `poll.ts` exclusion together rather than one ahead of the other.
+### Why not suppress or add a heading
 
-`poll.ts`'s `SEEN` branch fires when `prior` equals the head. Since `FINAL` writes the head the run observed back to the baseline every tick and the report gates on `old_head`, `head != old_head` fires once per head move regardless of what `prior` says, rather than repeatedly on every later tick that finds the same unmoved head.
+Suppressing the pass fails twice. A reader would see a close-out naming an older commit with no way to tell whether the newer one was covered or skipped, and a test broad enough to suppress early would swallow a pass that raised a real finding.
 
-The read-time marker covered next closes the rest: `PUT` replaces the body and the marker rides in it, but `PUT` cannot move `submittedAt`, so a rewritten close-out still ages from when it first landed, which is the reading the poll's age test wants.
+A new heading fails because `poll.ts` matches a fixed set and reports anything else as `UNMATCHED`. `## Evidence` is in the set only because it shipped with `canon pr evidence` and the `poll.ts` exclusion together.
 
-The guard fires on `## Review closed` alone. Two open passes carry different findings and both are worth reading, so a repeated `## Review` stays an ordinary post.
+### The SEEN branch and the marker
+
+`poll.ts`'s `SEEN` branch fires when `prior` equals the head. `FINAL` writes the observed head back to the baseline every tick and the report gates on `old_head`, so `head != old_head` fires once per head move regardless of `prior`.
+
+`PUT` replaces the body and the marker rides in it, but `PUT` cannot move `submittedAt`. A rewritten close-out still ages from when it first landed, the reading the poll's age test wants.
 
 ### The commit a pass records
 
-GitHub stamps a review with `commit.oid` and `submittedAt` when it is submitted, and neither describes what the reviewing session read. A push landing in the compose window moves both onto a commit the pass never opened, so the next reader scopes its delta past that work and reports it covered, which is a genuine fix silently skipped rather than a false alarm.
+GitHub stamps a review with `commit.oid` and `submittedAt` at submission, and neither describes what the session read. A push landing in the compose window moves both onto a commit the pass never opened, so the next reader scopes its delta past that work and silently skips a genuine fix.
 
-The pass writes its own record instead. Step 1 captures the instant ahead of every read it makes, and Step 4 ends every body with `<!-- review-pr: commit=<sha> read-at=<iso8601> -->`, an HTML comment a reader of the thread never meets. Both halves of the marker come from the top of the pass rather than from the post, so the window belongs to the next reader rather than being claimed by this one.
+The pass writes its own record. Step 1 captures the instant before every read, and Step 4 ends every body with `<!-- review-pr: commit=<sha> read-at=<iso8601> -->`, an HTML comment a thread reader never meets. Both halves come from the top of the pass, so the compose window belongs to the next reader.
 
-The reader takes the last non-empty line and searches nowhere else. Searching for the last match anywhere would read a marker a body was displaying rather than claiming, since a fenced block showing the format on its own line trims to exactly the pattern, and whole-line anchoring alone does not separate the two, since it only defeats the inline form where backticks leave the trimmed line unmatchable. Position costs nothing, since Step 4 already writes the marker last in every body.
+### Reading the marker
 
-`canon pr review-state`, and `src/pr/review-scope.ts` behind it, is the only parser of that marker. Two readers would put one format in a shipped skill body and a shipped script that ship on different cadences, which is the drift `poll.ts`'s own header already warns about for the posted headings. The record carries `source`, reading `marker` for a pass that wrote one, `fallback` for one posted without a marker, and `none` for a thread with no pass, so a caller can tell a read-time answer from a stamped one rather than trusting every commit alike.
+The reader takes the last non-empty line and searches nowhere else. A search for the last match anywhere would read a marker a body was displaying rather than claiming, since a fenced block showing the format trims to exactly the pattern. Position costs nothing because Step 4 already writes the marker last.
 
-The stamps stay live for the question each is right about. The poll's age and its `STALLED` branch read `submittedAt`, since how long a comment has waited on a human is a fact about the submission, and the pass instant that scopes a reply query reads `readAt // submittedAt`, since what a pass had read is a fact about the read.
+`canon pr review-state` and `src/pr/review-scope.ts` behind it are the only parser. Two readers would put one format in a skill body and a script that ship on different cadences, the drift `poll.ts`'s header already warns about.
 
-What it costs is a release of silence and a round trip. A target whose CLI predates the verb meets a missing subcommand, and both the skill body and `poll.ts` carry a written fallback that reads the stamps and reproduces the defect rather than failing, so the fix reaches a project only once a release does. The poll also spends a third `gh` read per open pull request per tick, on top of the payload and `canon pr head`.
+- The record's `source` reads `marker`, `fallback` for a pass posted without one, or `none` for a thread with no pass
+- The poll's age and `STALLED` branch read `submittedAt`, because how long a comment has waited on a human is a fact about the submission
+- The pass instant scoping a reply query reads `readAt // submittedAt`, because what a pass had read is a fact about the read
+
+### What the marker costs
+
+A target whose CLI predates the verb meets a missing subcommand. The skill body and `poll.ts` both carry a written fallback that reads the stamps and reproduces the defect rather than failing, so the fix reaches a project only once a release does. The poll also spends a third `gh` read per open pull request per tick.
 
 ### A submitted review cannot be deleted
 
-A submitted pull request review is editable and never deletable. `DELETE /repos/{owner}/{repo}/pulls/{n}/reviews/{id}` returns 422 with `Can not delete a non-pending pull request review`, and dismissal covers approvals and change requests rather than comments, so a mistimed or malformed comment is repaired with `PUT` to the same path, which replaces the body and keeps its timestamp and position in the thread. When the repair leaves a comment that should no longer anchor the review state, strip its heading, since `review-pr` scopes a later narrow pass by matching a comment's first line against `## Review` and `## Review closed` and would otherwise point the next pass at the wrong commit.
+A submitted review is editable and never deletable. `DELETE /repos/{owner}/{repo}/pulls/{n}/reviews/{id}` returns 422 with `Can not delete a non-pending pull request review`, and dismissal covers approvals and change requests rather than comments.
+
+Repair a mistimed or malformed comment with `PUT` to the same path, which keeps its timestamp and position. When the repair leaves a comment that should no longer anchor the review state, strip its heading.
+
+- `review-pr` scopes a later pass by matching a first line against `## Review` and `## Review closed`, so a kept heading would point the next pass at the wrong commit.
 
 ### A finding links to its line
 
-A finding sits under a bare backticked file block with no line in it, so a reader opens the diff and hunts for the spot. Each file-bound finding now carries a permalink to its line, `<repo-url>/blob/<headRefOid>/<path>#L12` or `#L12-L14` for a span, stated once in `post.md` and shown in every template.
+Each file-bound finding carries a permalink to its line, `<repo-url>/blob/<headRefOid>/<path>#L12` or `#L12-L14` for a span, stated once in `post.md` and shown in every template. Before, a bare backticked file block sent the reader hunting through the diff.
 
-Inline review threads were the alternative, and they lost because a thread changes how `review-address`, the poll, the re-review scope, and the close-out each read a review, while a link changes only how one bullet is written. The URL pins the full oid from Step 1 rather than the branch, so it keeps opening on the reviewed line after a push, and the pass reads the line from the file at `<headRefOid>` rather than from a checkout at another commit. A later pass restating an open finding links at its own head, since the earlier link points at code the delta may have changed.
+Inline review threads lost, because a thread changes how `review-address`, the poll, the re-review scope, and the close-out each read a review, while a link changes one bullet.
 
-A `**PR body**` entry, a finding on a file the head deleted, a finding on a line the diff removed from a surviving file, and a whole-file finding keep the plain bullet. A fork pull request's link is built on the base repository, which GitHub resolves through the same network, and the sandbox arm did not drive a fork.
+- The URL pins the full oid from Step 1 rather than the branch, so it keeps opening on the reviewed line after a push
+- The pass reads the line from the file at `<headRefOid>`, not from a checkout at another commit
+- A later pass restating an open finding links at its own head, since the delta may have changed the earlier code
+
+A `**PR body**` entry, a finding on a deleted file, a finding on a line the diff removed, and a whole-file finding keep the plain bullet. A fork pull request's link is built on the base repository, which GitHub resolves through the same network, and the sandbox arm did not drive a fork.

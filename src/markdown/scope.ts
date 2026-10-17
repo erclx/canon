@@ -34,7 +34,7 @@ const DENSITY_SCOPE = [
  * It describes this repository's rewrite progress and nothing about a target's
  * corpus, which is why the audit reads it only inside a canon checkout.
  */
-export const GATED_PATHS: readonly string[] = []
+export const GATED_PATHS: readonly string[] = ['canon/context/claude-plugin/']
 
 /**
  * The limit that gates before any folder is listed, and the surfaces it gates
