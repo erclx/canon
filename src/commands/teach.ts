@@ -130,6 +130,8 @@ export function register(program: Command): void {
         '  listed        a URL is already read, or a lead is offered as listed',
         '  defined       a term already carries a glossary entry',
         '  bad-input     the command line is malformed',
+        '  no-port       up found every port in reach taken',
+        '  bind-failed   up could not bind, such as a privileged port',
         '',
       ].join('\n'),
     )

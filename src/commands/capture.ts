@@ -58,6 +58,20 @@ export function register(program: Command): void {
       '--width <px>',
       'Viewport width in pixels, so a media query resolves at that width',
     )
+    .addHelpText(
+      'after',
+      [
+        '',
+        'The selector has no default, since the element to crop to belongs to the',
+        'page. Each element holding text inside it must resolve its first font',
+        'family, and a generic keyword such as monospace or system-ui fails,',
+        'since it resolves differently on each machine. The user agent sets',
+        'monospace on pre, code, kbd, and samp, so each needs its own',
+        'font-family. --width takes one whole number and sets the viewport, so',
+        'run it once per breakpoint with its own --out.',
+        '',
+      ].join('\n'),
+    )
     .action(
       async (
         source: string,

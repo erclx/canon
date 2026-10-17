@@ -169,4 +169,15 @@ A `<figure data-chart="...">` holding a `<table>` becomes a native, editable cha
 - `data-labels` shows each value, and a `<figcaption>` becomes the chart title.
 - Series take the accent first, then every other declared `--color-*` role in sheet order except the background and surface, repeating past the last.
 
-A refused chart, effect, or face is left out and the rest of the deck is written. Each reports a `✗` line from the render.
+A refused chart, effect, or face is left out and the rest of the deck is written. Each prints a `✗` line, and the exit depends on the case:
+
+| Case                                                                    | Exit |
+| ----------------------------------------------------------------------- | ---- |
+| malformed or unknown `deck.json` field                                  | 1    |
+| `mark` path missing                                                     | 1    |
+| `fonts` path missing or outside the folder                              | 1    |
+| face that cannot embed                                                  | 0    |
+| unknown transition or entrance name                                     | 0    |
+| entrance on an element that draws nothing                               | 0    |
+| chart cell that is not a number, or `data-chart` off-list               | 0    |
+| token role not declared, or a slide body setting its own `--color-text` | 0    |
