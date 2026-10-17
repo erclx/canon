@@ -5,7 +5,10 @@ description: Readme voice, structure, and content conventions
 
 # Readme reference
 
-Applies to every `README.md`. The `## Voice` section states the voice for a repository's root README, so the `write-human` skill yields to it there. The yield covers voice alone. The rhythm and density rules that skill carries stay in force, as does the word-choice guidance that travels with them, and so do the punctuation and formatting in `markdown.md`, so the warmer register ships with the same hygiene: no em dashes, no semicolons, no marketing words.
+Applies to every `README.md`. The `## Voice` section states the voice for a repository's root README, so the `write-human` skill yields to it there, for voice alone.
+
+- The rhythm, density, and word-choice rules that skill carries stay in force
+- The punctuation, formatting, and density limits in `markdown.md` stay in force too, so the warmer register ships with no em dashes, no semicolons, and no marketing words
 
 The reader is what changes. Reference prose serves someone who already committed to the project and is scanning for a fact. A root README meets someone deciding whether to commit at all, and it is often the only file they read.
 
@@ -54,6 +57,8 @@ Scoped to the README at a repository root. A nested README documenting a folder,
 
 ### Leave out
 
+A README links to the surface that owns long-form material rather than carrying it.
+
 - Do not include full API documentation. Link to separate docs instead.
 - Do not include license text. Reference the `LICENSE` file.
 - Do not include detailed contribution guidelines. Reference `CONTRIBUTING.md`.
@@ -61,8 +66,12 @@ Scoped to the README at a repository root. A nested README documenting a folder,
 
 ### Routing and generator output
 
-- A README that points to the project's own context entries instead of restating them satisfies the required list by routing rather than carrying. A repository documented in `docs/` or `canon/context/` names the entry point and the listing command, then stops. The reader is one hop away, the same way `## Badges` treats zero as complete.
-- A README missing an H1, or whose headings restate the tool that scaffolded it rather than the project, is unedited generator output rather than a page anyone wrote. Draft over it. Nothing here asks a session to preserve a section a scaffold wrote and nobody replaced.
+A README can satisfy the required list by routing to the project's own context entries rather than restating them.
+
+- A repository documented in `docs/` or `canon/context/` names the entry point and the listing command, then stops, since the reader is one hop away
+- That counts as complete the same way `## Badges` treats zero as complete
+- A README missing an H1, or whose headings restate the tool that scaffolded it rather than the project, is unedited generator output. Draft over it.
+- Nothing here asks a session to preserve a section a scaffold wrote and nobody replaced
 
 ### Header block
 
@@ -73,7 +82,7 @@ The opening of a root README is a block of up to six elements in a fixed order. 
 3. Badges: the block `### Badges` below governs, placed directly under the title.
 4. Claim: one line saying what the project does, taken from the manifest description or the repository description.
 5. Live link: the URL of the running surface, from a `homepage` field or a deploy config. Omit it when the project has no page or no known URL.
-6. Product screenshot: an image the project already commits and references, shown with alt text naming what it depicts. Present only when the project has a page. Omit it when no such image exists rather than writing a placeholder path.
+6. Product screenshot: an image the project already commits, with alt text naming what it depicts. Present only when the project has a page, and omitted rather than given a placeholder path.
 
 The description of 2-3 sentences follows the block and expands the claim rather than repeating it.
 
@@ -81,7 +90,9 @@ The description of 2-3 sentences follows the block and expands the claim rather 
 - A project whose own page carries the screenshot omits it here and keeps the live link, which answers the slot rather than skipping it. Say so in the pull request that drops it.
 - The order is the block's rather than the page's. The screenshot sits last inside the block, which puts it in the first row of content a reader meets below the title, badges, and claim.
 
-#### Themes and wrappers
+### Themes and wrappers
+
+The block takes a project's styling as it is and adds nothing of its own.
 
 - A themed light and dark pair counts as one element in the slot rather than two. The block does not require a pair and leaves the handling of themes to the project.
 - Centering the block in an HTML wrapper is optional. Plain markdown reaches every host a README renders on, and a wrapper is styling a project can add.
@@ -99,11 +110,16 @@ Stars, forks, download counts, language chips, and "made with" badges fail. The 
 
 - Cap the block at four. A fifth costs more scanning than any badge repays.
 - Give each badge alt text naming what it reports rather than the service that renders it. Write `npm version`, not `shields.io`.
-- Link each badge to the page a doubting reader would check next, which is the registry listing for a version badge and the run history for a status badge. A red badge with no route to the failing run reports a problem and withholds the only thing the reader wants.
+- Link each badge to the page a doubting reader would check next, which is the registry listing for a version badge and the run history for a status badge
+- A red badge with no route to the failing run reports a problem and withholds the only thing the reader wants
 
-#### Pinning and verifying
+### Pinning and verifying
 
-- Pin a status badge to the branch whose health it claims to report, and confirm the workflow actually runs on that branch. A workflow triggered by pull requests alone never runs on the default branch, so an unpinned badge reports whichever branch ran last and a pinned one reports nothing at all. Fix the trigger, or drop the badge under the rule below.
+A badge reports a fact only when its source runs where the badge says and the value it renders is checked.
+
+- Pin a status badge to the branch whose health it claims to report, and confirm the workflow actually runs on that branch
+- A workflow triggered by pull requests alone never runs on the default branch, so an unpinned badge reports whichever branch ran last and a pinned one reports nothing at all
+- Fix the trigger, or drop the badge under the zero-badge rule below
 - Verify a badge by the value it renders, not by its status code. A badge service answers 200 for a query it cannot satisfy, so a blank badge and a working one look identical to a status check.
 - Zero badges is a correct answer. A private project with no registry presence and no CI has nothing that passes the test, and an empty block beats a padded one.
 
@@ -114,6 +130,8 @@ Stars, forks, download counts, language chips, and "made with" badges fail. The 
 - Include practical usage snippets for core functionality
 
 ### Per project kind
+
+Each kind of project owes its reader a different first snippet.
 
 - For libraries/tools: include API quickstart
 - For applications/products: include usage instructions and configuration options
@@ -126,6 +144,8 @@ A project is often several of these at once. Cover every type that applies rathe
 ## Examples
 
 ### Template
+
+A README a scaffold would start from, with the required sections and the optional ones most projects carry.
 
 ````markdown
 # Project Name
@@ -171,6 +191,8 @@ See the [contributing guidelines](CONTRIBUTING.md).
 
 ### Correct
 
+Each line names what it is and links what it cites.
+
 ```plaintext
 Lightweight authentication library for Node.js with OAuth2 and JWT support.  # one line naming what it is
 ## Quick start                                                               # sentence case, a runnable snippet follows
@@ -178,6 +200,8 @@ Lightweight authentication library for Node.js with OAuth2 and JWT support.  # o
 ```
 
 ### Incorrect
+
+Each line pitches, pads, or inlines what belongs elsewhere.
 
 ```plaintext
 ## Why Use This?                                 # title case, and a pitch rather than a feature list

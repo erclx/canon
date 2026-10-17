@@ -29,7 +29,9 @@ The baseline is unusable in two cases:
 - No merge base resolves against either ref.
 - The base equals HEAD, whichever ref resolved it. Nothing is committed ahead of the base to compare against. This is the ordinary shape on `main`, and on a feature branch before its first commit.
 
-An unusable baseline costs only the committed half. `git diff --cached <base>` degrades to the staged set and `git status --short` still reports the working tree, so both reads stay at this skill's own scope. Say so in the preview with `⚠ Baseline unusable. Synced against the uncommitted set only.` The base ref is the only thing this change touches, and the `--cached` scope stays.
+An unusable baseline costs only the committed half. `git diff --cached <base>` degrades to the staged set and `git status --short` still reports the working tree, so both reads stay at this skill's own scope.
+
+Say so in the preview with `⚠ Baseline unusable. Synced against the uncommitted set only.` The base ref is the only thing this change touches, and the `--cached` scope stays.
 
 ## Context
 
@@ -41,7 +43,8 @@ Run these commands in parallel:
 
 ## Guards
 
-- If `git diff --cached <base>` output is empty and `git status --short` output is empty, stop: `❌ No changes since main. Nothing to sync.` Resolve the base ref first. A guard reading bare local `main` stops the skill on `main` before it reaches the corrected read.
+- If `git diff --cached <base>` output is empty and `git status --short` output is empty, stop: `❌ No changes since main. Nothing to sync.`
+- Resolve the base ref first, since a guard reading bare local `main` stops the skill on `main` before it reaches the corrected read
 
 ## Discovery
 
@@ -68,9 +71,16 @@ Classify at the section level, not the file level. A doc edited earlier in the s
 
 Rewrite only the stale sections. Do not touch sections unrelated to the diff.
 
-Write the updated file immediately after the preview. Claude Code's tool permission dialog is the confirmation gate. Do not wait for user input.
+- Write the updated file immediately after the preview. Claude Code's tool permission dialog is the confirmation gate, so do not wait for user input.
+- Never rewrite a `departed` section. Leave it as written and report it as a finding, since the repair belongs in the code rather than in the prose.
 
-Never rewrite a `departed` section. Leave it as written and report it as a finding, since the repair belongs in the code rather than in the prose.
+## Audit
+
+Run `canon markdown audit <path>` over every page this run rewrote, and fix each ban and density finding it reports per the markdown standard read above.
+
+- Fix a finding inside a section this run rewrote, then re-run the audit on that page until it reports none there
+- Report a finding in a section the diff does not reach as an audit line in the summary, since the rule above leaves that section as it is
+- Report a refusal or a missing subcommand as an audit line and continue
 
 ## Response format
 
@@ -95,4 +105,5 @@ One line per file, using the same relative path format as the preview table (e.g
 ✅ Updated: <relative-path>
 ⏭️  Skipped: <relative-path>
 ⚠️ Departed: <relative-path> records <the contract>, and the diff <what it did>. Left unwritten.
+⚠️ Audit: <relative-path>, <finding>
 ```

@@ -7,6 +7,8 @@ description: Reader and jurisdiction, frontmatter, page structure, what a page l
 
 Applies to each authored reference page under `docs/`. Skip for `index.md` at any depth, which is generated rather than authored.
 
+Its reader is an operator running what the project ships rather than developing it, or an agent reading the page cold from a project that consumes it. Neither has the source open, which separates a page from internal narrative, whose reader does, and from the front-door page, whose reader has not installed anything yet.
+
 ## Contents
 
 - [Scope](#scope)
@@ -20,9 +22,7 @@ Applies to each authored reference page under `docs/`. Skip for `index.md` at an
 
 ## Scope
 
-Governs each authored reference page under `docs/`, whose reader is an operator running what the project ships rather than developing it, and an agent reading the page cold from a project that consumes it: the frontmatter a page carries, its structure, what it links out to rather than restating, whether it holds a diagram, and when a category earns a subfolder of its own.
-
-Neither reader has the source open. That is the whole of the distinction from internal narrative, whose reader does, and from the page a project puts at its front door, whose reader has not decided to install anything yet.
+Governs each authored reference page under `docs/`, being the frontmatter a page carries, its structure, what it links out to rather than restating, whether it holds a diagram, and when a category earns a subfolder of its own.
 
 Does not govern:
 
@@ -51,7 +51,9 @@ A page failing these is non-conforming even when it satisfies every shape rule b
 
 ### Declaring category
 
-- Declare `category` on every page in a folder where any page declares one. A grouped catalog writes the declared shelves and nothing else, so a page omitting the field beside a sibling that carries one is absent from the catalog with nothing reporting it.
+A grouped catalog writes the declared shelves and nothing else, so `category` is all or nothing within a folder.
+
+- Declare `category` on every page in a folder where any page declares one, since a page omitting it beside a sibling that carries one is absent from the catalog with nothing reporting it
 - Omit it on every page or on none. A folder where no page declares one lists flat, which is the right shape for a folder whose pages need no shelves.
 - Spell one shelf's value identically on every page sitting there. The grouping reads the literal string, so a second spelling opens a second shelf holding one page.
 
@@ -71,6 +73,8 @@ A page failing these is non-conforming even when it satisfies every shape rule b
 
 ### What to leave out
 
+A page leaves out what its reader can get elsewhere or does not need yet.
+
 - Do not restate output a command already prints, such as a full flag table. Name the command that prints it.
 - Do not carry the history of how a surface reached its shape. A page describes the surface as it stands, and the change that moved it is recorded wherever the project tracks work.
 - Do not carry contributor setup or the argument for adopting the project. Both are addressed to a reader who has not installed anything yet.
@@ -80,14 +84,15 @@ A page failing these is non-conforming even when it satisfies every shape rule b
 - Carry a diagram where the page describes a structure or a path the reader has to hold in their head at once. One per page at most, and none is a correct answer for most pages.
 - Draw it as a Mermaid fence or as a committed image the page references. Neither form is preferred, and the pick belongs to whoever knows which one the page's reader reads it in.
 - Follow `mermaid.md` for the drawing inside a fence. It reaches the drawing and stops at the fence markers, so everything around it stays this file's subject.
-- Do not write the drawing as raw inline markup. A rendering host strips markup outside its own allowlist, so an inline drawing survives a local preview and vanishes on the surface the page is read from.
+- Do not write the drawing as raw inline markup. A rendering host strips markup outside its allowlist, so an inline drawing survives a local preview and vanishes where the page is read.
 - Say beneath the diagram, in prose, what it shows. A reader who cannot see the image gets the same answer from the sentence.
 
 ## Splitting the folder
 
-- Move a `category` into a subfolder once its pages stop reading as a list in the catalog and start reading as a section of one. The shelf is the signal, not a file count, and a count invites an argument about the count instead.
+Move a `category` into a subfolder once its pages stop reading as a list in the catalog and start reading as a section of one. The shelf is the signal, not a file count, since a count invites an argument about the count instead.
+
 - Move every page carrying that value. A shelf split across two depths is harder to scan than either arrangement taken whole.
-- Give the subfolder a catalog page of its own, so the parent lists one entry where it listed several. The parent lists a subfolder as a folder rather than as a member of the shelf it replaced, so nothing on that page restores the grouping.
+- Give the subfolder a catalog page of its own, so the parent lists one entry where it listed several, as a folder rather than as a member of the shelf it replaced
 - Retarget every link into a moved page in the same change. A link resolving nowhere is what the move costs, and nothing else reports it.
 - Name a moved page per the `codebase-layout` skill, which drops the prefix the subfolder now states.
 
