@@ -88,7 +88,7 @@ The sibling set narrows again inside a split folder, so a reference to an entry 
 
 ### A folder's index gates its splits
 
-`resolveFolders` locates a name by testing for `<base>/<name>/index.md` and walks for nested folders only after that. A tree carrying `canon/context/governance/` and no `canon/context/index.md` contributes nothing.
+`resolveFolders` locates a name by testing for `<base>/<name>/index.md` and walks for nested folders only after that. A tree carrying `canon/context/ci/` and no `canon/context/index.md` contributes nothing.
 
 The run refuses only when no other name resolved, so a project holding a `.canon/diagrams/` folder an older install left prints a scope line that leaves the context subtree out without saying so.
 

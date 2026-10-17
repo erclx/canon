@@ -104,7 +104,7 @@ The reference names the general condition and lets the consuming surface name it
 
 The prohibition above runs one direction only. A path-scoped rule may carry the operative directives of the reference its owner skill holds, since the rule arrives attached to the edit while a pointer reaches a session only if that session opens the file.
 
-The reference keeps the full specification and the rule keeps what a session must have on arrival. A drift is then a rule falling behind rather than two files disagreeing, and nothing checks it. `canon/context/governance/routing.md` carries the cap on directives beside the pointer.
+The reference keeps the full specification and the rule keeps what a session must have on arrival. A drift is then a rule falling behind rather than two files disagreeing, and nothing checks it. `canon/context/governance.md` carries the cap on directives beside the pointer.
 
 ### The markdown ban set
 

@@ -1,0 +1,78 @@
+---
+title: Governance
+description: Path-scoped Claude rules with their naming, frontmatter, and routing contract, the stacks that group them, and the install and sync path with its CLI
+---
+
+# Governance
+
+## Overview
+
+Owns the rules that steer AI agents working in a project. Source rules are `.md` files under `governance/rules/` already carrying the Claude shape, and install copies them unchanged to `.claude/rules/canon/<folder>/<slug>.md` in a target. Stacks group rules so one install provisions a toolchain. The domain is a catalog plus a command surface.
+
+## Layout
+
+### `governance/rules/`
+
+Holds the source rules, one subfolder per audience, each at `<folder>/<slug>.md` with no number and a basename that is unique and never a folder name.
+
+- `code/`, `claude/`, `canon/`, `tooling/`, and `writing/` serve a project's code, session conduct, workflow, dev setup, and prose, and `lang/`, `framework/`, `lib/`, and `ui/` are opt-in
+- A rule with `paths:` loads when Claude reads or writes a matching file, one without always applies like `CLAUDE.md`, and the Cursor keys `globs`, `alwaysApply`, and `priority` must not appear
+- A `description` with a bare word, a colon, and a space breaks `Bun.YAML.parse` and lists the rule as unscoped, so rephrase it rather than quote it
+- Adding a rule means creating the file, committing the regenerated `.claude/rules/` copy, and running `canon gov counts` until clean, and a rename also adds a `governance/renames.toml` entry
+- A rule in `code/` reaches every language stack, and one elsewhere reaches nobody until a stack or detect names it, so its glob should cover every ecosystem it governs
+
+### `governance/stacks/`
+
+Holds one `.toml` per stack with an optional `extends` and a `rules` list, where an entry names a rule or a whole rule folder.
+
+- `expandStackEntry` in `src/gov/stacks.ts` turns a folder name into every rule inside it, and dedupe runs on the expanded names
+- `base` names ten rules one by one, so a rule authored later under `canon/` or `claude/` reaches no project until it is added there or proposed by detect
+- `node`, `python`, `go`, and `php` extend `base` and take `code` whole plus their language and testing rules, and there is no stack per framework
+- Adding a stack means creating the `.toml`, setting `extends`, and listing rule names without `.md`, taking a folder whole only when it wants every rule there now and later
+- `--add` takes rule names alone, warns on an unknown name, and with no stack named skips `writeChainStamp`, so the target keeps its recorded chain
+
+### `governance/detect.toml`
+
+Holds one table per opt-in rule, keyed by rule basename, listing the dependencies and file globs that mark a project as wanting it.
+
+- `canon gov detect` reads the target's manifests and git-listed paths to depth two, skips what the caller's stack resolves, and returns each match with its evidence
+- The `Unreferenced rules` stage fails on a rule no stack names and no table proposes, and on a table naming no live rule
+- `nextjs` is proposed from `next` in a manifest or a `next.config.*` file, since it globs every `.ts` and `.tsx` file
+- `security-server` and `database` glob Python, TypeScript, JavaScript, Go, and PHP, and `security-web` globs component and markup files alone
+
+### `src/gov/`
+
+Owns the gov half of every verb, being the stack reader, the rule lookup, the catalog behind `list`, the install copy, the sync adapter, the citation and restated checks, and the payload builder behind `build`.
+
+- `install` bootstraps a stack and overwrites, `sync` refreshes only what is installed and never adds, and `build` writes the paste payload
+- `gov list --json` carries `unreferenced` and `staleDetect` beside `stacks` and `rules`
+- `src/sync/engine.ts` runs the scan, prompt, and apply loop, and matches an installed rule to its source by name so a moved rule syncs into the subfolder the target uses
+- `canon gov citations` resolves every path a rule body cites plus the `paths:` globs under `internal/rules/`, and the `Rule citations` stage gates on it
+- `canon gov install` and `sync` refuse the toolkit root, `regen` runs there on purpose, and `CANON_NON_INTERACTIVE=1` takes each confirm's first option but not the stack picker
+
+### `internal/`
+
+Holds `governance.toml`, which names the one stack and extras this repository consumes, and `rules/` for toolkit authoring alone.
+
+- `canon gov regen` resolves the record through the install machinery into `.claude/rules/canon/`, and `internal/rules/` installs beside it into `.claude/rules/internal/`
+- A new rule must be named in a stack, the record's `add` list, or `internal/rules/`, since the drift assertion passes on a rule nothing names
+- Nothing mirrors `internal/` into a path this repository resolves, and `internal/rules/claude/authoring-layout.md` states the root each carrier resolves against
+- A target's own rules go to `.claude/rules/project/<subdir>/` through `create-rule`, and `canon gov sync` never reads them
+- A file under `.claude/rules/canon/` that no source names is `orphaned` with no destination offered
+
+### Other folders
+
+Four more surfaces shape what a rule says and where it lands.
+
+- `.claude/rules/` is produced output, so a hand edit is deleted on the next `bun run check` and the change belongs in the source or the record
+- `governance/renames.toml` carries one entry per renamed shipped rule so `canon gov sync` moves a target across
+- `claude/skills/create-rule/references/rule.md` settles what a rule states, and a rule loads the skill owning a reference by its `canon:` name with a report-if-missing line
+- A rule earns its place when a path edit can ship a violation silently and no gate catches it, so `claude/skills/git-commit/references/versioning.md` is reached by skill instruction
+
+## Gotchas
+
+- A widened source rule fails `bun run check` until its consumed copy is committed, and no stage reports a glob that matches nothing after the files it governs move
+- Sync never retracts a rule a stack stopped naming, and `locateSource` matches a held basename in any folder, so a moved rule reaches new installs only
+- A target on the flat `.claude/rules/<subdir>/` layout loads two copies of an edited rule until `canon migrate rule-layout` runs, and neither bootstrap verb sees it
+- `src/comments/vocabulary.ts` reads whichever rule publishes `## Degradation vocabulary`, so adding that heading elsewhere changes what `canon comments scan` sweeps for
+- A shipped rule naming a plugin skill or a `canon` verb can point at something a governance-only target lacks, so it carries a report-if-missing line

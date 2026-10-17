@@ -5,11 +5,11 @@ description: Governance rules and stack definitions. Source `.md` files install 
 
 # Governance
 
-Read `canon/context/governance/overview.md` for the system overview and `canon/context/governance/stacks.md` for stack structure before editing.
+Read `canon/context/governance.md` for the system overview, rule naming, stack structure, and install and sync before editing.
 
 ## Rules
 
-- Read `canon/context/governance/rules.md` for how a rule is named before picking a slug for a new one.
+- Read `canon/context/governance.md` for how a rule is named before picking a slug for a new one.
 - Follow `claude/skills/create-rule/references/rule.md` for frontmatter, heading style, and bullet conventions when writing a new rule file.
 - `ruleSubdir` lives in `src/gov/install.ts` and frontmatter stripping in `src/markdown/frontmatter.ts`. Do not duplicate either.
 
@@ -25,7 +25,7 @@ Every verb is TypeScript. What counts as a change, or where a rule's source live
 | Stack resolver | `src/gov/stacks.ts`  |
 | `list` catalog | `src/gov/list.ts`    |
 
-`internal/rules/` follows the naming and frontmatter convention of `governance/rules/`, per `canon/context/governance/rules.md`, and mirrors to `.claude/rules/internal/`.
+`internal/rules/` follows the naming and frontmatter convention of `governance/rules/`, per `canon/context/governance.md`, and mirrors to `.claude/rules/internal/`.
 
 ## Install path
 
@@ -56,5 +56,5 @@ After writing or revising a rule, or on "audit this rule" or "review the governa
 
 ## Reference
 
-- `canon/context/governance/index.md`: the domain catalog, with the overview, rules and their names, stacks, and install and sync as sub-areas
+- `canon/context/governance.md`: the domain entry, covering rules and their names, stacks, and install and sync
 - `claude/skills/create-rule/references/rule.md`: conventions for writing rule files

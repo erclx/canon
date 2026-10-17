@@ -68,7 +68,7 @@ The operator's `autoCompactWindow`, covered in `canon/context/development/hooks/
 
 ### The silent turn hook
 
-`silent-turn.sh` registers on `Stop` with no `matcher` field, since the event carries no `tool_name`. It ships through the seed on the capability-seeding criterion in `canon/context/tooling/seeds.md`, because the defect it reports is as real in a target as here and its detection reads no toolkit-specific path.
+`silent-turn.sh` registers on `Stop` with no `matcher` field, since the event carries no `tool_name`. It ships through the seed on the capability-seeding criterion in `canon/context/tooling.md`, because the defect it reports is as real in a target as here and its detection reads no toolkit-specific path.
 
 - `last_assistant_message` sits on the `Stop` payload, a field neither vendor page names, and carries the closing text with no lag, so the hook reads it there rather than from `transcript_path`
 - `transcript_path` lags in both directions for roughly two seconds after `Stop`, but every `Write` and `Edit` call is already in the file, so the hook reads paths from there with no retry
