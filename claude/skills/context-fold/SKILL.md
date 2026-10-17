@@ -29,7 +29,10 @@ Take the union of `git diff --name-only <base> HEAD`, `git diff --name-only HEAD
 
 ## Step 1: read the context catalog
 
-Read `canon/context/index.md` from the current worktree root (`pwd`), not the main worktree root, to see which domain entries exist. Entries are tracked files and edits must commit with the branch. A project the surface move has not reached holds the folder under `.claude/` rather than `canon/`, so read and write it at whichever root already carries it.
+Read `canon/context/index.md` from the current worktree root (`pwd`), not the main worktree root, to see which domain entries exist.
+
+- Entries are tracked files, so edits must commit with the branch
+- A project the surface move has not reached holds the folder under `.claude/` rather than `canon/`, so read and write it at whichever root already carries it
 
 Read `canon/REQUIREMENTS.md` beside it when it exists, for the direction a session decision is measured against. This skill never writes it.
 

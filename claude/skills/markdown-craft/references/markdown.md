@@ -42,7 +42,7 @@ Does not govern:
 
 - H1 for document title, H2 for main sections, H3 for subsections, and no H4
 - Use sentence case for every heading. The audit reports a heading or a frontmatter `title` with a capitalized word after the first.
-- Proper nouns and product names retain their casing, so leave one the audit reports as it is
+- Proper nouns and product names keep their casing, whatever the audit reports
 - Shape a record as H2 per section and H3 per item a reader looks up by name. Use a table only for a fixed-shape set.
 
 ### Seams
@@ -62,7 +62,7 @@ Two kinds of block are exempt from the 40-line checkpoint, since a subheading dr
 
 - A block whose lines are all list items at one level averaging under roughly 130 characters, since a flat list of short peers is already navigable
 - Weight decides rather than count, since a catalog of one-liners and a stack of paragraphs reach one count and read nothing alike. The cap on a bullet run is a separate rule.
-- Mixing prose with that list, or nesting levels inside it, ends the exemption at any weight
+- Mixing prose into that list, or nesting levels in it, ends the exemption at any weight
 - A block whose lines are all table rows, at any length, since a subheading inside one splits the table rather than the run
 - Prose either side of the table ends that exemption, since the block has a seam and a heading breaks it there
 
@@ -88,12 +88,14 @@ Six limits keep a file scannable on sight, each a fact `canon markdown audit` me
 | Heading depth       | H3 at most, no H4                                 |
 | H3 opening          | First block under an H3 is a paragraph or a table |
 
+Rules, `CLAUDE.md`, a requirements or design record, a changelog, examples, and `.canon/` records take no density finding, since a rule is one imperative per bullet and each record keeps its own shape.
+
 ### How each limit counts
 
 A paragraph is read straight through and a bullet is scanned, so the paragraph limit sits above the bullet one. Four sentences to a paragraph stays advice rather than a limit.
 
 - A paragraph's length folds in the lines that wrap it. A paragraph inside a list item counts toward its bullet, never as a paragraph or toward a run.
-- A bullet's length counts the lines that continue it and excludes any bullet nested under it
+- A bullet's length counts its continuation lines and excludes any bullet nested under it
 - A heading, list, table, fence, or bold section marker ends a run of paragraphs
 - A blank line, a continuation, and a nested item do not break a run of bullets, and a paragraph or a heading does
 - A run whose every item opens with a bold label or a link is exempt from the run limit, since each item names its own subject. A task box is not a link, so a checklist counts as plain.
@@ -105,13 +107,13 @@ Numbered items do not count toward a bullet run. Fix a finding by its shape, spl
 A file can pass every limit and still say too much.
 
 - State one fact per bullet, with its reason in the same sentence, as "X, so Y"
-- State what holds now. History and rejected options belong in a decision record.
+- State what holds now. History and rejected options go in a decision record.
 - Do not write a sentence that restates its heading or the line above it
 - Collapse a stack of bullets narrating one subsystem into one H3 with one narrative, since splitting a heavy bullet into light ones reads no better
 
 ### Bullet form
 
-A bullet's punctuation follows its sentence count, and a list opens without announcing itself.
+A bullet's punctuation follows its sentence count, and a list opens unannounced.
 
 - Use dashes (`-`) not asterisks (`*`) for bulleted lists
 - Do not end single-sentence or fragment bullets with a period. Use periods when a bullet has two or more sentences.

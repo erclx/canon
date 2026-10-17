@@ -23,7 +23,8 @@ Each kind has one standard and one reference. Load the reference for the resolve
 - Read the kind off the destination the request names: a path, a folder, or the document's own name, such as "a context entry" or "a wiki page".
 - Ask which kind when the request names no destination, offering the candidates the subject fits with the likeliest first
 - Never default to `docs/` without saying so, since a subject documented in the wrong surface is invisible to the session that looks for it in the right one
-- If no subject is given for any kind but readme, stop: `❌ No subject given. Name what this document should cover.` A README covers the project or the folder it sits in, so its subject is the target path.
+- If no subject is given for any kind but readme, stop: `❌ No subject given. Name what this document should cover.`
+- A README covers the project or the folder it sits in, so its subject is the target path
 
 ## Read
 
