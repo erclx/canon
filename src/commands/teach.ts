@@ -120,6 +120,17 @@ export function register(program: Command): void {
         'rewriting anything, canon teach list <topic> prints the canon serve',
         'line, with the teach folder written from where you stand.',
         '',
+        'Reasons, on stderr or in the JSON record:',
+        '  no-teach      the root carries no .canon/teach/ folder',
+        '  no-workspace  no workspace matches the topic',
+        '  ambiguous     two workspaces claim one topic',
+        '  exists        a workspace already covers the topic an open names',
+        '  no-file       the workspace carries no file the verb writes into',
+        '  no-section    RESOURCES.md carries no heading the entries belong under',
+        '  listed        a URL is already read, or a lead is offered as listed',
+        '  defined       a term already carries a glossary entry',
+        '  bad-input     the command line is malformed',
+        '',
       ].join('\n'),
     )
 
