@@ -434,6 +434,9 @@ function grepLines(
  * seed itself installs, so every other spelling reports. No seed root, or roots
  * carrying no markdown, is unmeasured rather than a pass, which agrees with
  * `seedStandards` on the no-root case.
+ *
+ * The token matches as a substring, so `canonical` reports as `canon` does. The
+ * walk covers the seed roots alone, so a shipped rule citing the CLI passes.
  */
 export const seedIndependence: Measure = async (ctx) => {
   if (!isDirectory(join(ctx.root, 'tooling'))) {
