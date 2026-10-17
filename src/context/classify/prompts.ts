@@ -5,7 +5,7 @@
  * mode) and `sweep-v1.md` (sweep mode). The diff prompt is verbatim. The sweep
  * prompt was tuned past `sweep-v1.md` with one decision check, measured
  * against the groundwork's labelled set in
- * `canon/context/context-model/overview.md`.
+ * `canon/context/context-model.md`.
  *
  * Each prompt already states its own rules per canonical doc type inside one
  * string, which is the shape the spike measured, so there is one prompt per

@@ -95,7 +95,7 @@ function borderRows(tokens: readonly BorderToken[]): string[][] {
  */
 const LEAD = [
   'Authoring guidance: `claude/skills/canvas-board/references/design.md`. Rendered from `src/design/tokens.ts` by `canon design regen`, so edit the module and never this file.',
-  'Why each value was chosen lives in `canon/context/design/tokens.md`.',
+  'Why each value was chosen lives in `canon/context/design.md`.',
 ].join(' ')
 
 function bullets(rules: readonly string[]): string {

@@ -25,7 +25,7 @@ Under `assets/evidence/` is dev, and anywhere else a tracked folder is named `ev
 | Prod, the examples | `examples/teach/evidence/`       | `canon capture`, which writes a `.stamp` beside each image | none, an example is disclaimed rather than gated      | yes      |
 | Prod, the site     | `web/public/evidence/`           | hand-placed, two fixed captures of one pull request        | none                                                  | yes      |
 
-The marketing images, being the hero, the social card, and the arrival and install frames, sit in `assets/frames/` and are not evidence of either kind. `canon pr evidence` never compares them, and the capture-stamp stage gates them. `canon/context/web/assets.md` owns the social card and the beat captures.
+The marketing images, being the hero, the social card, and the arrival and install frames, sit in `assets/frames/` and are not evidence of either kind. `canon pr evidence` never compares them, and the capture-stamp stage gates them. `canon/context/web.md` owns the social card and the beat captures.
 
 ### The canvas baseline
 

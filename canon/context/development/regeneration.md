@@ -39,7 +39,7 @@ Store such content under a `.fixture` suffix stripped on copy. That beats ignore
 
 ### Hero
 
-`assets/` is the self-portrait half of the boundary decision between it and `examples/` in `canon/context/web/assets.md`, which is why every render here gates on drift rather than carrying a disclaimer.
+`assets/` is the self-portrait half of the boundary decision between it and `examples/` in `canon/context/web.md`, which is why every render here gates on drift rather than carrying a disclaimer.
 
 The Hero stage runs `bun scripts/core/regen-hero.ts`, which fills every `assets/captures/*.html.tmpl`, writes the `.html` beside it, and asserts no drift over `assets/captures/*.html`. The script is a thin entry, and the value builder with every guard sits in `src/capture/frame-values.ts`, where tsc and vitest reach it.
 

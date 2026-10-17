@@ -59,7 +59,7 @@ export interface BorderToken {
 /**
  * Every prose slot is a list of one-line rules rather than a string, so a
  * bullet is the unit the renderer emits and the prose budget counts, and a
- * value needing a paragraph of why goes to `canon/context/design/tokens.md`.
+ * value needing a paragraph of why goes to `canon/context/design.md`.
  */
 export interface DesignTokens {
   readonly personality: string

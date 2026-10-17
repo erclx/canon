@@ -78,7 +78,7 @@ Three entries sit beside this one.
 
 - `canon/context/features/teach/overview.md` covers the workspace, the chrome splice, and the verbs
 - `canon/context/features/teach/pages.md` covers what each page kind shows and does under this chrome
-- `canon/context/design/tokens.md` holds the token values a workspace stylesheet is seeded from
+- `canon/context/design.md` holds the token values a workspace stylesheet is seeded from
 
 ## Decisions
 

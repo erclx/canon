@@ -15,9 +15,9 @@ TypeScript owns argument parsing and every migrated domain, and bash owns what h
 - **`src/cli/`** holds the terminal and process layer, being `ui.ts` matching `lib/ui.sh`, `help.ts`, the `--help --all` router `help-all.ts`, `run.ts`, and the bash helper `exec.ts`
 - **`src/roots/`** groups the four resolvers answering where something lives, `PROJECT_ROOT` among them
 - **`src/commands/`** owns one file per `canon` subcommand, each one not yet migrated a thin pass-through to a `manage-*.sh` script
-- **`src/design/`** owns the TS-first design domain, documented in `canon/context/design/index.md`
+- **`src/design/`** owns the TS-first design domain, documented in `canon/context/design.md`
 - **`src/slides/`** and **`src/transcripts/`** are documented in `canon/context/features/slides.md` and `canon/context/features/transcripts.md`
-- **`src/indexes/`** owns the index engine, documented in `canon/context/context-model/indexes.md`
+- **`src/indexes/`** owns the index engine, documented in `canon/context/context-model.md`
 - **`src/tooling/`** owns the tooling inject and scan engine, documented in `canon/context/tooling/index.md`
 - **`src/tooling/seed-marker.ts`** is the seed stub contract `canon/context/tooling/` owns, read by `tooling/`, `claude/`, `sync/`, and `context/`
 - **`src/sweep/`** owns the contract every line sweep reads, being which files it skips (`binary.ts`) and which lines it mutes (`exempt-marker.ts`). Six domains share it.

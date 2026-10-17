@@ -21,7 +21,7 @@ Two standards fix the artifact and one skill drives the pedagogy. `claude/skills
 
 ### Related
 
-The artifact is `claude/skills/teach-workspace/references/teach.md`, with `glossary.md` beside it. `claude/skills/teach-workspace/` holds the pedagogy and promotion handoff, and `canon/context/design/tokens.md` the token values a workspace stylesheet is seeded from.
+The artifact is `claude/skills/teach-workspace/references/teach.md`, with `glossary.md` beside it. `claude/skills/teach-workspace/` holds the pedagogy and promotion handoff, and `canon/context/design.md` the token values a workspace stylesheet is seeded from.
 
 ## Decisions
 
@@ -168,4 +168,4 @@ The shipped `claude/skills/teach-workspace/SKILL.md` sits at 300 rendered lines,
 - Two defects are measured against the captures, being no phone or tablet frames (v113.0) and a URL capture stamp that hashes the address rather than the page (v116.1)
 - `canon/context/development/evidence.md` owns the boundary
 - Renders committed under `examples/` are disclaimed rather than gated, because nothing outside `examples/` depends on them staying current
-- `canon/context/web/assets.md` draws that line on who each folder addresses
+- `canon/context/web.md` draws that line on who each folder addresses

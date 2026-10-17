@@ -164,7 +164,7 @@ Each domain carries an entry written for someone maintaining the toolkit rather 
 - [Claude Code plugin](canon/context/claude-plugin/index.md)
 - [Governance rules](canon/context/governance/index.md)
 - [Tooling stacks](canon/context/tooling/index.md)
-- [Design system](canon/context/design/index.md)
+- [Design system](canon/context/design.md)
 - [Slides](canon/context/features/slides.md)
 - [Transcripts](canon/context/features/transcripts.md)
 - [Sandbox](canon/context/sandbox/index.md)
