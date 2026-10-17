@@ -67,8 +67,7 @@ export const REQUIRED_SECTIONS_BY_FOLDER: Readonly<
  * The closed set of H2 sections per audited folder name, which a required
  * section belongs to. An entry carrying another H2 is a finding under
  * `--gate`, since the set is what makes a context entry cheap to find a fact
- * in: a domain's own topic names go one level down as H3 items under
- * `Decisions` and `Gotchas`.
+ * in: a domain's folders go one level down as H3 items under `Layout`.
  *
  * Held beside the required lists for the same reason they are held here, and
  * keyed on the folder whose standard states it.
@@ -76,8 +75,34 @@ export const REQUIRED_SECTIONS_BY_FOLDER: Readonly<
 export const ALLOWED_SECTIONS_BY_FOLDER: Readonly<
   Record<string, readonly string[]>
 > = {
-  context: ['Overview', 'Layout', 'Decisions', 'Gotchas'],
+  context: ['Overview', 'Layout', 'Gotchas'],
 }
+
+/**
+ * H2 sections the standard once allowed and now forbids, per audited folder.
+ *
+ * Kept apart from the extra sections because every unrebuilt entry still
+ * carries one, and an extra section gates under `--gate` everywhere. A retired
+ * section is a shape finding instead, which gates only where the folder was
+ * rebuilt, per `SHAPE_GATED_FOLDERS`.
+ */
+export const RETIRED_SECTIONS_BY_FOLDER: Readonly<
+  Record<string, readonly string[]>
+> = {
+  context: ['Decisions'],
+}
+
+/** Bullets a `Gotchas` section may hold, counted at any indent. */
+export const GOTCHA_CAP = 5
+
+/** Bullets a folder H3 under `Layout` may hold, counted at any indent. */
+export const LAYOUT_BULLET_CAP = 5
+
+/** Paragraphs a folder H3 under `Layout` may hold, being its one lead. */
+export const LAYOUT_PARAGRAPH_CAP = 1
+
+/** The one Layout H3 not titled with a path, holding the trivial folders. */
+export const OTHER_FOLDERS = 'Other folders'
 
 /**
  * The context standard's list, kept as its own export because the audit record
@@ -210,6 +235,34 @@ export interface BareReferenceFinding {
   readonly name: string
 }
 
+/**
+ * Each way an entry breaks the section shape the context standard states.
+ *
+ * `retired-section` is a `Decisions` H2. The three `gotcha-*` kinds are a
+ * `Gotchas` section past its bullet cap, holding a heading, or holding a
+ * paragraph. The three `layout-*` kinds are a Layout H3 titled neither a path
+ * nor `Other folders`, a folder H3 past its bullet or paragraph cap, and a
+ * heading below H3 under `Layout`.
+ */
+export type ShapeKind =
+  | 'retired-section'
+  | 'gotcha-count'
+  | 'gotcha-heading'
+  | 'gotcha-paragraph'
+  | 'layout-heading'
+  | 'layout-bullets'
+  | 'layout-paragraphs'
+  | 'layout-depth'
+
+export interface ShapeIssue {
+  readonly line: number
+  readonly kind: ShapeKind
+  /** The heading or line as written, so a report names where to look. */
+  readonly text: string
+  /** Bullets or paragraphs counted, on the two cap kinds alone. */
+  readonly count?: number
+}
+
 export interface EntryReport {
   readonly rel: string
   /**
@@ -247,6 +300,12 @@ export interface EntryReport {
    * all is `extraSections`.
    */
   readonly otherSections: readonly string[]
+  /**
+   * Breaks of the section shape, in document order, and empty outside the
+   * governed folder. Whether one gates depends on where the entry sits, which
+   * `shapeFindings` decides rather than the measure.
+   */
+  readonly shape: readonly ShapeIssue[]
   /**
    * Whether the file declares itself a skeleton, which excludes it from the
    * section check alone. Every other measure still reads it, since a stub is
@@ -483,6 +542,7 @@ const H2_TEXT = /^##\s+(.+?)\s*$/
 function otherSections(
   lines: readonly BodyLine[],
   allowed: readonly string[],
+  retired: readonly string[],
 ): string[] {
   if (allowed.length === 0) return []
 
@@ -492,10 +552,159 @@ function otherSections(
     if (line.fenced) continue
 
     const match = line.text.match(H2_TEXT)
-    if (match && !allowed.includes(match[1])) found.push(match[1])
+    if (match && !allowed.includes(match[1]) && !retired.includes(match[1])) {
+      found.push(match[1])
+    }
   }
 
   return found
+}
+
+const HEADING_LEVEL = /^(#{1,6})\s+(.+?)\s*$/
+const LIST_ITEM = /^\s*(?:[-*+]|\d+[.)])\s+/
+const INDENTED = /^\s+\S/
+const FOLDER_TITLE = /^`[^`]+`$/
+
+interface FolderHeading {
+  readonly line: number
+  readonly text: string
+  bullets: number
+  paragraphs: number
+}
+
+/**
+ * Finds where the entry breaks the section shape.
+ *
+ * Bullets are counted at any indent and across any paragraph, so a list split
+ * by a bold label or nested one level down still counts against the cap it
+ * would otherwise slip under. A line continuing a list item, lazily or
+ * indented after a blank, belongs to the item rather than opening a paragraph,
+ * which is what keeps a wrapped bullet from reading as prose.
+ *
+ * A cap reports once per section or folder heading however far past it the
+ * count runs, since the fix is one cut either way. `Other folders` is exempt
+ * from both folder caps, its one-line bullets being held by the bullet run
+ * limit `canon markdown audit` already gates.
+ */
+function shapeIssues(
+  lines: readonly BodyLine[],
+  retired: readonly string[],
+): ShapeIssue[] {
+  const issues: ShapeIssue[] = []
+  let section: string | undefined
+  let gotchas: { line: number; bullets: number } | undefined
+  let folder: FolderHeading | undefined
+  let inItem = false
+  let inParagraph = false
+  let afterBlank = false
+
+  const closeFolder = (): void => {
+    if (folder && folder.text !== OTHER_FOLDERS) {
+      if (folder.paragraphs > LAYOUT_PARAGRAPH_CAP) {
+        issues.push({
+          line: folder.line,
+          kind: 'layout-paragraphs',
+          text: folder.text,
+          count: folder.paragraphs,
+        })
+      }
+      if (folder.bullets > LAYOUT_BULLET_CAP) {
+        issues.push({
+          line: folder.line,
+          kind: 'layout-bullets',
+          text: folder.text,
+          count: folder.bullets,
+        })
+      }
+    }
+    folder = undefined
+  }
+
+  const closeGotchas = (): void => {
+    if (gotchas && gotchas.bullets > GOTCHA_CAP) {
+      issues.push({
+        line: gotchas.line,
+        kind: 'gotcha-count',
+        text: 'Gotchas',
+        count: gotchas.bullets,
+      })
+    }
+    gotchas = undefined
+  }
+
+  for (const line of lines) {
+    if (line.fenced) continue
+
+    const heading = line.text.match(HEADING_LEVEL)
+    if (heading) {
+      const level = heading[1].length
+      const text = heading[2]
+      inItem = false
+      inParagraph = false
+      afterBlank = false
+
+      if (level <= 2) {
+        closeFolder()
+        closeGotchas()
+        section = level === 2 ? text : undefined
+        if (level === 2 && retired.includes(text)) {
+          issues.push({ line: line.number, kind: 'retired-section', text })
+        }
+        if (section === 'Gotchas') gotchas = { line: line.number, bullets: 0 }
+        continue
+      }
+
+      if (section === 'Gotchas') {
+        issues.push({ line: line.number, kind: 'gotcha-heading', text })
+      } else if (section === 'Layout' && level === 3) {
+        closeFolder()
+        folder = { line: line.number, text, bullets: 0, paragraphs: 0 }
+        if (!FOLDER_TITLE.test(text) && text !== OTHER_FOLDERS) {
+          issues.push({ line: line.number, kind: 'layout-heading', text })
+        }
+      } else if (section === 'Layout') {
+        issues.push({ line: line.number, kind: 'layout-depth', text })
+      }
+      continue
+    }
+
+    if (line.text.trim() === '') {
+      inParagraph = false
+      afterBlank = true
+      continue
+    }
+
+    if (LIST_ITEM.test(line.text)) {
+      inItem = true
+      inParagraph = false
+      afterBlank = false
+      if (gotchas) gotchas.bullets++
+      if (folder) folder.bullets++
+      continue
+    }
+
+    const continues = inItem && (!afterBlank || INDENTED.test(line.text))
+    afterBlank = false
+    if (continues) continue
+
+    inItem = false
+    if (inParagraph) continue
+    inParagraph = true
+
+    if (gotchas) {
+      issues.push({
+        line: line.number,
+        kind: 'gotcha-paragraph',
+        text: line.text.trim(),
+      })
+    }
+    if (folder) folder.paragraphs++
+  }
+
+  closeFolder()
+  closeGotchas()
+
+  return issues.sort((a, b) => a.line - b.line)
 }
 
 /**
@@ -557,6 +766,9 @@ export function measureEntry(
   siblings: readonly string[] = [],
   required: readonly string[] = governsContent ? REQUIRED_SECTIONS : [],
   allowed: readonly string[] = [],
+  retired: readonly string[] = governsContent
+    ? RETIRED_SECTIONS_BY_FOLDER.context
+    : [],
 ): EntryReport {
   const lines = bodyLines(source)
 
@@ -567,7 +779,8 @@ export function measureEntry(
     provenance: governsContent ? provenance(lines) : [],
     bareReferences: bareReferences(lines, siblings),
     sections: declaredSections(lines, required),
-    otherSections: otherSections(lines, allowed),
+    otherSections: otherSections(lines, allowed, retired),
+    shape: governsContent ? shapeIssues(lines, retired) : [],
     stub: isStubSeed(source),
     governed: governsContent,
   }
@@ -648,6 +861,7 @@ export async function measureFolders(
           names.filter((name) => name !== self),
           requiredSections(folder),
           allowedSections(folder),
+          retiredSections(folder),
         ),
       )
     }
@@ -672,6 +886,13 @@ export function requiredSections(folder: AuditedFolder): readonly string[] {
 export function allowedSections(folder: AuditedFolder): readonly string[] {
   return Object.hasOwn(ALLOWED_SECTIONS_BY_FOLDER, folder.name)
     ? ALLOWED_SECTIONS_BY_FOLDER[folder.name]
+    : []
+}
+
+/** Names the H2 sections the folder's standard retired, empty where it retired none. */
+export function retiredSections(folder: AuditedFolder): readonly string[] {
+  return Object.hasOwn(RETIRED_SECTIONS_BY_FOLDER, folder.name)
+    ? RETIRED_SECTIONS_BY_FOLDER[folder.name]
     : []
 }
 
@@ -770,4 +991,34 @@ export function extraSections(
   return entries
     .filter((entry) => !entry.stub && entry.otherSections.length > 0)
     .map((entry) => ({ rel: entry.rel, headings: entry.otherSections }))
+}
+
+export interface ShapeFinding {
+  /** Repo-relative path of the entry breaking the shape. */
+  readonly rel: string
+  /** Whether the entry sits where the shape gates under `--gate`. */
+  readonly gated: boolean
+  /** Every break in the entry, never empty. */
+  readonly issues: readonly ShapeIssue[]
+}
+
+/**
+ * Names each entry breaking the section shape, and whether it gates.
+ *
+ * Where it gates is the caller's predicate rather than a list read here, since
+ * the folders rebuilt to the shape are named by path from the repository root
+ * and `measureFolders` holds only paths from the audit root. A stub seed is
+ * dropped for the reason `extraSections` drops one.
+ */
+export function shapeFindings(
+  entries: readonly EntryReport[],
+  isGated: (rel: string) => boolean,
+): ShapeFinding[] {
+  return entries
+    .filter((entry) => !entry.stub && entry.shape.length > 0)
+    .map((entry) => ({
+      rel: entry.rel,
+      gated: isGated(entry.rel),
+      issues: entry.shape,
+    }))
 }

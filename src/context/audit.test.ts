@@ -10,6 +10,7 @@ import {
   measureEntry,
   measureFolders,
   missingSections,
+  shapeFindings,
 } from '@/context/audit'
 import { IGNORE_MARKER } from '@/context/citations'
 import { resolveFolders } from '@/context/folders'
@@ -711,5 +712,175 @@ describe('extraSections', () => {
     const entry = measureEntry('x.md', `${FRONTMATTER}# X\n\n## Anything\n`)
 
     expect(extraSections([entry])).toEqual([])
+  })
+})
+
+describe('shape', () => {
+  function shapeOf(source: string) {
+    return measureEntry('canon/context/ci.md', `${FRONTMATTER}${source}`).shape
+  }
+
+  function kinds(source: string) {
+    return shapeOf(source).map((issue) => issue.kind)
+  }
+
+  const CONFORMING_SHAPE = [
+    '# CI',
+    '',
+    '## Overview',
+    '',
+    'Owns the workflow.',
+    '',
+    '## Layout',
+    '',
+    '### `.github/workflows/`',
+    '',
+    'Holds the workflow definitions.',
+    '',
+    '- One',
+    '- Two',
+    '  wrapped onto a second line',
+    '- Three',
+    '',
+    '### Other folders',
+    '',
+    '- `a/`: one',
+    '- `b/`: two',
+    '- `c/`: three',
+    '- `d/`: four',
+    '- `e/`: five',
+    '- `f/`: six',
+    '',
+    '## Gotchas',
+    '',
+    '- One trap',
+    '- Two traps',
+  ].join('\n')
+
+  it('should report nothing for an entry in the three-section shape', () => {
+    expect(shapeOf(CONFORMING_SHAPE)).toEqual([])
+  })
+
+  it('should report a Decisions H2 as a retired section', () => {
+    const source = '# CI\n\n## Overview\n\nx\n\n## Decisions\n\n### Why\n\ny\n'
+
+    expect(shapeOf(source)).toEqual([
+      { line: 12, kind: 'retired-section', text: 'Decisions' },
+    ])
+  })
+
+  it('should leave a retired section out of the extra sections', () => {
+    const entry = measureEntry(
+      'canon/context/ci.md',
+      `${FRONTMATTER}# CI\n\n## Decisions\n`,
+      true,
+      [],
+      [],
+      ['Overview', 'Layout', 'Gotchas'],
+    )
+
+    expect(extraSections([entry])).toEqual([])
+  })
+
+  it('should count six gotchas split by a bold label as six', () => {
+    const source =
+      '## Gotchas\n\n- One\n- Two\n- Three\n\n**Later:**\n\n- Four\n  - Five\n- Six\n'
+
+    expect(shapeOf(source)).toEqual([
+      { line: 6, kind: 'gotcha-count', text: 'Gotchas', count: 6 },
+      { line: 12, kind: 'gotcha-paragraph', text: '**Later:**' },
+    ])
+  })
+
+  it('should report a gotcha H3 once whatever it holds', () => {
+    expect(kinds('## Gotchas\n\n### Sync\n\n- One\n- Two\n')).toEqual([
+      'gotcha-heading',
+    ])
+  })
+
+  it('should report a paragraph inside Gotchas', () => {
+    expect(kinds('## Gotchas\n\n- One\n\nA paragraph of history.\n')).toEqual(
+      ['gotcha-paragraph'],
+    )
+  })
+
+  it('should read a wrapped gotcha as one bullet rather than a paragraph', () => {
+    expect(kinds('## Gotchas\n\n- One trap\nwrapped lazily\n')).toEqual([])
+  })
+
+  it('should report a Layout H3 titled with prose', () => {
+    expect(shapeOf('## Layout\n\n### Triggers\n\n- One\n')).toEqual([
+      { line: 8, kind: 'layout-heading', text: 'Triggers' },
+    ])
+  })
+
+  it('should report a folder H3 with a two-paragraph lead', () => {
+    const source = '## Layout\n\n### `src/`\n\nFirst.\n\nSecond.\n\n- One\n'
+
+    expect(shapeOf(source)).toEqual([
+      { line: 8, kind: 'layout-paragraphs', text: '`src/`', count: 2 },
+    ])
+  })
+
+  it('should report six folder bullets split by a paragraph once for the bullets', () => {
+    const source =
+      '## Layout\n\n### `src/`\n\n- One\n- Two\n- Three\n\nA lead.\n\n- Four\n- Five\n- Six\n'
+
+    expect(shapeOf(source)).toEqual([
+      { line: 8, kind: 'layout-bullets', text: '`src/`', count: 6 },
+    ])
+  })
+
+  it('should report an H4 under Layout', () => {
+    expect(kinds('## Layout\n\n### `src/`\n\n#### Files\n')).toEqual([
+      'layout-depth',
+    ])
+  })
+
+  it('should leave a heading inside a fence unread', () => {
+    expect(kinds('## Gotchas\n\n```markdown\n### Sync\n```\n')).toEqual([])
+  })
+
+  it('should measure nothing outside the governed folder', () => {
+    const entry = measureEntry('x.md', `${FRONTMATTER}## Decisions\n`, false)
+
+    expect(entry.shape).toEqual([])
+  })
+})
+
+describe('shapeFindings', () => {
+  const DECISIONS = `${FRONTMATTER}# CI\n\n## Decisions\n`
+
+  it('should report an entry under no gated prefix as ungated', () => {
+    const entry = measureEntry('canon/context/ci.md', DECISIONS)
+
+    expect(shapeFindings([entry], () => false)).toEqual([
+      {
+        rel: 'canon/context/ci.md',
+        gated: false,
+        issues: [{ line: 8, kind: 'retired-section', text: 'Decisions' }],
+      },
+    ])
+  })
+
+  it('should mark an entry the predicate gates as gated', () => {
+    const entry = measureEntry('canon/context/ci.md', DECISIONS)
+
+    expect(shapeFindings([entry], () => true)[0].gated).toBe(true)
+  })
+
+  it('should leave out an entry with no shape issue', () => {
+    const entry = measureEntry('canon/context/ci.md', `${FRONTMATTER}# CI\n`)
+
+    expect(shapeFindings([entry], () => true)).toEqual([])
+  })
+
+  it('should skip a stub seed', () => {
+    const entry = measureEntry(
+      'canon/context/ci.md',
+      '---\nstub: true\n---\n\n## Decisions\n',
+    )
+
+    expect(shapeFindings([entry], () => true)).toEqual([])
   })
 })
