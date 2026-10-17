@@ -19,7 +19,7 @@ A project declaring no map is labelled silently and never warned. That reads the
 
 ### Prefix anchoring
 
-Matching is prefix-anchored, so a row written for an authoring root reaches nothing under the consumed copy. `internal/standards/` never matches `.claude/internal/standards/`, and `claude/skills/` never matches `.claude/skills/`.
+Matching is prefix-anchored, so a row written for an authoring root reaches nothing under the consumed copy. `governance/rules/` never matches `.claude/rules/`, and `claude/skills/` never matches `.claude/skills/`.
 
 Every surface living only under a dotted folder needs its own prefix on the row that owns its subject.
 
