@@ -32,10 +32,11 @@ The map file records two surfaces it leaves uncovered rather than covering them.
 
 ### `.claude/` carries no row of its own
 
-The tree spans context entries, two sets of generated mirrors, and internal skills rather than one domain, and a single row would label unrelated work alike. Each subtree instead carries its prefix on the row owning its subject.
+The tree spans generated rule mirrors, internal skills, and hooks rather than one domain, and a single row would label unrelated work alike. Each subtree instead carries its prefix on the row owning its subject.
 
 - `.claude/rules/` joins `governance`
-- `.claude/internal/standards/` joins `tooling`
+- `.claude/skills/` joins `skills`, which covers the internal skills and their references
+- `.claude/hooks/` and `.claude/settings.json` join `ci`
 
 ## Decisions
 
