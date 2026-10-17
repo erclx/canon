@@ -1,15 +1,13 @@
 ---
 title: Output shape
-description: Two framed shapes every command renders into, how JSON and --names modes keep stdout clean, and the exit discipline that lets piped output drain
+description: The framed output shape every command renders into, the JSON and color modes, the exit discipline, the runtime catalogs, and a headless invocation per domain
 ---
 
 # Output shape
 
-Every CLI command renders into one of two framed shapes. Data goes to stdout. UI and logs go to stderr.
+Data goes to stdout. UI and logs go to stderr. Help is the exception and prints to stdout so it can be piped.
 
-Help output is the exception. It prints to stdout so it can be piped and grepped.
-
-## Data shape (lists, runs, errors)
+## Frame
 
 ```plaintext
 ┌
@@ -17,54 +15,71 @@ Help output is the exception. It prints to stdout so it can be piped and grepped
 │
 ├ Section
 │ ✓ item
-│ ✓ item
 └
 ```
 
-Rules:
+- `┌` opens the frame, `│ canon <domain>` is the banner, and `├ Section` groups items
+- `└` closes the frame on stderr
+- An error renders as `│ ✗ message` inside the frame, never as a lone line
+- Help skips the banner and puts `Usage:` directly on `├`
 
-- `┌` opens the frame on stderr
-- `│ canon <domain>` is the command banner, one per invocation
-- `├ Section` headers introduce groups of items. `log_step` produces the blank `│` spacer before each.
-- `└` closes the frame on stderr, wired via `trap close_timeline EXIT`
-- Errors render as `│ ✗ message` inside the same frame. Never emit a lone error line without a frame.
+A help request naming an unknown subcommand, under a group taking no operand, writes its refusal to stderr and exits 1.
 
-## Help shape
+## JSON and names modes
 
-```plaintext
-┌
-├ Usage: canon <domain> [command]
-│
-│  Commands:
-│    ...
-└
-```
+`--json` and `--names` keep stdout pure data. The frame still renders on stderr, and diagnostics reach stderr in every mode. A JSON refusal carries an action and a reason, so branch on the record rather than on stderr.
 
-Help skips the banner. The `Usage:` line sits directly on `├`. Help writes to stdout because `--help` is documentation, not runtime UI. `--help --all` on a command prints each block unframed, one after another, and a help request naming an unknown subcommand, under a group that takes no operand of its own, writes its refusal to stderr and exits 1.
-
-## JSON and `--names` modes
-
-`--json` and `--names` keep stdout clean and machine-readable. The frame still renders on stderr (open, banner, close) so the stream discipline is consistent across modes. Consumers that only read stdout see pure data.
+A shell profile may wrap `canon` in a function that takes its status from a later command. Where a verb documents a record field, read the field rather than the exit.
 
 ## Color
 
-Escape sequences reach a destination that renders them and nowhere else. The question is asked per stream rather than once for the process, so a run piping its data while keeping a terminal on stderr still gets color on the frame.
+Escape sequences reach a destination that renders them and nowhere else, decided per stream. `NO_COLOR` set to any non-empty value turns color off, and so does a destination that is not a terminal. The frame glyphs and the `✓ ! + - ✗` marks survive both.
 
-Either condition alone turns color off:
+## Exit discipline
 
-- `NO_COLOR` is set to any non-empty value, whatever that value says
-- The destination is not a terminal, which covers a pipe, a file, and a captured session
+A command action sets `process.exitCode` and returns. Calling `process.exit()` in an action truncates piped output at the 64K buffer. A file redirect hides the truncation, so test through a pipe.
 
-The frame survives both. `┌`, `│`, `├`, `└`, and the `✓ ! + - ✗` marks are structure rather than color, and they are what lets a captured run still read as one block. A caller wanting neither the frame nor the color reads `--json` instead.
+## Runtime catalogs
 
-Terminal control is a separate question this section does not cover. The cursor and key sequences an interactive prompt writes run only where a terminal already exists.
+Discover names at runtime rather than hardcoding them.
 
-## Process exit
+| Command                           | Returns                                                          |
+| --------------------------------- | ---------------------------------------------------------------- |
+| `canon tooling list --json`       | Stacks, extends chain, dep and script counts                     |
+| `canon gov list --json`           | Governance stacks, rule sets, evidence, and unreferenced rules   |
+| `canon gov detect --json`         | Opt-in rules a target's dependencies and paths propose           |
+| `canon claude seeds list --json`  | Seed doc sources with content                                    |
+| `canon claude skills list --json` | Plugin skills, descriptions, requirement flag, family vocabulary |
+| `canon docs list --json`          | Consumer docs plus per-domain context                            |
+| `canon audits list --json`        | Audits the set runs, the corpus each reads, and whether it gates |
 
-A command action sets `process.exitCode` and returns. Calling `process.exit()` there ends the process before a stdout write drains, which truncates piped output at the 64K pipe buffer while still reporting the right exit code. Redirecting to a file hides the truncation, so it surfaces only through a pipe, which is what a check has to use to catch it.
+- `gov list` expands each stack to its rules and carries `unreferenced`, the rules no stack reaches, which install only through `--add`
+- `claude skills list` reports shipped skills only. Each carries `family` (or `null`) and `requirement`, and a `false` requirement is a gap to close. `--names` and `--by-family` change the render.
+- A skill with unparseable frontmatter returns an empty description rather than failing the listing
 
-The rule reaches an error path that writes to stderr alone, where the truncation has nothing to cut. Scoping it to the stdout writers was the alternative and it makes the floor depend on a detail that moves, since an action grows a stdout write long after its error branches are written. An action always has a return path, so the requirement costs it a line.
+## Headless invocation
 
-The exit belongs to a helper that has no caller to unwind through. A prompt inside a promise executor and a wrapper propagating a child process status both qualify, and neither can hand a value back to a caller expecting one. A validation helper called from an action does not: it throws from a `never` return, which keeps its caller exhaustive to the compiler while the action catches and owns the code.
+Set `CANON_NON_INTERACTIVE=1` to refuse every prompt.
 
-Diagnostics reach stderr in every mode, including `--json`. Name the file and the field that failed, because a JSON record carries an action and a reason and an operator reading stderr alone sees neither.
+```bash
+CANON_NON_INTERACTIVE=1 canon init --stack node --skip wiki /path/to/project
+CANON_NON_INTERACTIVE=1 canon sync /path/to/project
+CANON_NON_INTERACTIVE=1 canon gov install node --add astro,shadcn /path/to/project
+CANON_NON_INTERACTIVE=1 canon gov sync /path/to/project
+CANON_NON_INTERACTIVE=1 canon gov build /path/to/project
+CANON_NON_INTERACTIVE=1 canon tooling diff astro /path/to/project
+CANON_NON_INTERACTIVE=1 canon tooling sync astro /path/to/project --write
+CANON_NON_INTERACTIVE=1 canon wiki init /path/to/project
+canon tooling inject base /path/to/project --configs --seeds
+canon tooling prune-gitignore base /path/to/project
+canon tooling verify vite-react
+canon audits run --json
+canon secrets scan --json
+canon deps audit --json
+```
+
+- `canon tooling sync` needs `--check` or `--write` headlessly. With neither it reports and exits 1.
+- `--skip base` syncs a monorepo subtree without the layer the root owns
+- `canon audits run` exits 2 on a fact and 3 for an audit that did not report
+- `secrets scan` and `deps audit` exit 2 on findings. Only a credential fails `audits run`, and an advisory reports without moving the verdict.
+- Both refuse with a `reason` when they have no corpus, `no-manifest` for the scan and `no-lockfile` for the audit
