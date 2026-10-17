@@ -42,6 +42,15 @@ Holds `marketplace.json`, the catalog an installer adds. Its one entry names the
 - `**/.claude-plugin/*.json` is excluded from oxfmt because `release-please` serializes the manifest its own way, and the marketplace file is re-included because nothing else writes it
 - `claude plugin validate --strict` accepts a manifest whose `source` points at nothing, so an install is the only proof of a shape
 
+### `src/migrate/`
+
+Owns `canon migrate skill-names`, which moves a renamed or merged skill's body and every citation of it. The rename logic is in `rename.ts` and the map is in `skill-names.ts`.
+
+- A rename or merge adds a map row and leaves a pointer at the old name, with `disable-model-invocation: true` on a merged one
+- The pointer counts as a shipped skill, so it needs a routing case, `metadata.family`, and a skill-map row
+- Each old spelling in the pointer takes a `canon-keep-retired` marker so a later sweep does not move it onto the survivor
+- The pointer's paths join the map's `excludedPaths` only after the sweep runs, since excluding first leaves the real body unmoved while every citation names the new one
+
 ### `src/claude/`
 
 Owns the logic behind `canon claude`, with its verbs registered in `src/commands/claude.ts`.
@@ -66,9 +75,9 @@ Holds what `canon claude init` lands, and `claude` is excluded from `canon tooli
 
 The skills and rules around the plugin each own one slice.
 
+- `web/card-src/` owns the social card route, Astro only since `srcDir` excludes it from a build, and it reads only properties `canon design css` emits, as an undefined one silently falls back
 - `docs/workflow/` owns the skill map a coverage claim is measured against, one row per skill
 - `.claude/skills/` owns the toolkit-internal `internal-*` skills, covered in `canon/context/claude-internal/index.md`
-- `.claude/hooks/` owns the hook scripts this repository runs, and the seeded copies stay byte-identical for eight of them
 - `sandbox/claude/` owns the per-skill scenarios that provision a seeded project for a headless run
 - `src/labels/` owns `canon labels`, which `git-pr` calls to label a pull request from `canon/config/pr-labels.toml`
 
@@ -78,4 +87,4 @@ The skills and rules around the plugin each own one slice.
 - Only `${CLAUDE_SKILL_DIR}` reaches the model already expanded, while `${CLAUDE_PLUGIN_ROOT}` arrives as a literal string and a bare `../../` resolves only on the model's inferred base
 - A skill reading `canon sync --check --json` treats an absent key as unread rather than empty, since an older binary omits it and an empty read reports a clean target nothing measured
 - A skill carrying `disable-model-invocation` is refused by the `Skill` tool too, so a chain step cannot delegate to it and must point at an unflagged body
-- A slash command expands only at position zero of a prompt, and one chained after another reaches the session as prose
+- Nothing checks that `target-check`'s body, `references/domains.md`, and its requirement keep the same six domains, and `document-health` is absent from them by design
