@@ -9,17 +9,19 @@ description: Prerequisites, the command surface, and the toolkit-only refusal an
 
 ### Prerequisites
 
-The anchor scenarios push to a real GitHub remote. They need an authenticated `gh` and membership in the org that owns `canon-sandbox`, which is private. Everything else runs offline against an empty sandbox.
+The anchor scenarios push to a real GitHub remote. They need an authenticated `gh` and membership in the org owning the private `canon-sandbox`. Everything else runs offline.
 
 ```bash
 gh auth login   # required for any scenario declaring `anchor: true`
 ```
 
-Provisioning is offline, since the starting tree comes from a fixture, so the first network call is the probe `configure_sandbox_anchor_remote` runs before adding the remote. The probe turns a missing credential or an unreachable host into a named error at the top of the run, and `GIT_TERMINAL_PROMPT=0` keeps a credential failure immediate. `canon/context/sandbox/authoring.md` covers why an absent repository refuses by default.
+Provisioning is offline, since the starting tree comes from a fixture. The first network call is the probe `configure_sandbox_anchor_remote` runs before adding the remote, which turns a missing credential or unreachable host into a named error. `canon/context/sandbox/authoring.md` covers why an absent repository refuses.
 
-A scenario that reads git history also needs a checkout `canon` first on `PATH`. The reverse walk reads git history and the published install carries none, so provisioning stops naming the missing history. A shim that execs `bun <checkout>/src/cli.ts` serves, and the headless run calls the same `canon`, so a shim that satisfies only the provisioning guard would fail the run.
+A scenario that reads git history also needs a checkout `canon` first on `PATH`, since the published install carries no history and provisioning stops naming it. A shim that execs `bun <checkout>/src/cli.ts` serves. The headless run calls the same `canon`, so a shim satisfying only the provisioning guard would fail the run.
 
 ### Commands
+
+Seven verbs cover the run surface.
 
 ```bash
 canon sandbox                        # interactive category + command picker
@@ -35,11 +37,20 @@ canon sandbox equivalence [target]   # diff every arm's provisioned tree against
 
 ## Decisions
 
-- Every sandbox verb is toolkit-only and refuses under an installed `canon`, reporting `sandbox is toolkit-only and is absent from an installed canon`. Run this checkout's own entry point instead, as `bun src/cli.ts sandbox <verb>`. A linked worktree meets the refusal on every sandbox read, since the `canon` on the path resolves to the published binary rather than to the branch under it.
-- When a scenario argument is passed, `canon sandbox` sets `SANDBOX_SCENARIO` and `CANON_NON_INTERACTIVE=1` which routes a multi-arm scenario to the named arm and skips the picker.
-- The `internal-sandbox-check` skill maps changed plugin skills and changed `scripts/` files on a feature branch to their matching scenarios, so an e2e gap on a script edit surfaces the way one on a skill edit does.
+### Every sandbox verb is toolkit-only
+
+Every verb refuses under an installed `canon`, reporting `sandbox is toolkit-only and is absent from an installed canon`. Run this checkout's own entry point instead, as `bun src/cli.ts sandbox <verb>`. A linked worktree meets it on every read, since the `canon` on the path is the published binary.
+
+### Passing a scenario skips the picker
+
+A scenario argument makes `canon sandbox` set `SANDBOX_SCENARIO` and `CANON_NON_INTERACTIVE=1`, which routes a multi-arm scenario to the named arm. The `internal-sandbox-check` skill maps changed plugin skills and `scripts/` files on a branch to their scenarios, so an e2e gap on a script edit surfaces like one on a skill edit.
 
 ## Gotchas
 
-- A session that reads the toolkit-only refusal at face value concludes the verb no longer exists rather than reaching for the local CLI. The refusal names its cause so it does not read as a broken tree.
-- Org membership is a real requirement for the anchor scenarios. HTTPS fixes transport rather than authorization, so a contributor outside the org cannot run them.
+### Reading the refusal
+
+A session that reads the toolkit-only refusal at face value concludes the verb no longer exists rather than reaching for the local CLI. The refusal names its cause so it does not read as a broken tree.
+
+### Org membership
+
+Org membership is a real requirement for the anchor scenarios. HTTPS fixes transport rather than authorization, so a contributor outside the org cannot run them.
