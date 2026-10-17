@@ -25,6 +25,25 @@ Reference for an agent driving the `canon` CLI, in this repository or in any pro
 
 A bare name carried by two folders of one root resolves to neither and exits 1. Toolkit-internal topics resolve by name and stay off the list.
 
+## Commands with no page
+
+`canon serve [dir]` binds loopback and prints the link that opens the directory.
+
+- Read `url` off `--json`, since a busy port walks forward to the next free one
+- `--entry` escaping the root refuses as `no-entry` before a port is taken
+- Any other bind failure refuses as `bind-failed` carrying the error code
+- `entryExists` reads true with no `--entry` and no root `index.html`
+
+`canon inventory [subject]` reads `inventory.toml` at the project root and never gates. A missing server and an unmatched query refuse rather than list nothing.
+
+```toml
+base-url = "http://localhost:4173"
+routes = ["/", "/pricing"]
+
+[subjects.focus]
+query = "button, a[href], input"
+```
+
 ## See also
 
 - `output-shape.md`: the frame, `--json`, color, and exit discipline

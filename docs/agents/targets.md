@@ -6,18 +6,17 @@ kind: reference
 
 # Targets
 
-`canon targets list` reports the projects this toolkit installed into, and `canon targets pulls [paths…]` reports each target's open pull requests, (all targets when none is named). Both take `--json`.
+`canon targets list` reports the projects this toolkit installed into. `canon targets pulls [paths…]` reports each target's open pull requests, or every target's when none is named. Both take `--json`. Read the record's fields, since a wrapping shell function can flatten the exit.
 
-- `list` takes `--sweep <path…>`, `--depth <n>` (default 4), and `--record`, which seeds the index from each swept stamp and needs `--sweep`
-- Each stamping sync records its target in `$XDG_STATE_HOME/canon/targets.json`
-- A sweep finds installs the index never held, and nothing removes a row
+- `list` takes `--sweep <path…>`, `--depth <n>` (default 4), and `--record`, which seeds the index from swept stamps and needs `--sweep`
+- Each stamping sync records its target in `$XDG_STATE_HOME/canon/targets.json`, and no row is removed
+- A sweep finds installs the index never held
 
 ## Output
 
-- `bound` on a sweep names the roots walked, the depth, and what it skipped. Read it before treating a count as the population.
-- Clones sharing an `origin` collapse to one row
-- `legacyPaths` is the subset of `paths` still on the retired stamp path
-- `pulls` reads one clone per project
+- `bound` on a sweep names the roots walked, the depth, and what it skipped. Read it before trusting a count.
+- Clones sharing an `origin` share a row, and `pulls` reads one
+- `legacyPaths` is the `paths` on the retired stamp path
 
 | Field            | Holds                                                    |
 | ---------------- | -------------------------------------------------------- |
@@ -27,18 +26,14 @@ kind: reference
 
 ## Refusals
 
-Both exit 1 when refused. An absent index reports as unknown, not as no targets.
+`list` exits 1 when refused. `pulls` exits 0 when one target was read and 1 when all refused. An absent index reads as unknown.
 
-| Reason                 | Means                                        |
-| ---------------------- | -------------------------------------------- |
-| `bad-depth`            | `--depth` is not a whole number              |
-| `record-without-sweep` | `--record` was given with no `--sweep`       |
-| `not-a-directory`      | A named path is not a directory              |
-| `gh-unavailable`       | `gh` is not on the path                      |
-| `list-failed`          | The open pull request list could not be read |
+| Reason                 | Means                                   |
+| ---------------------- | --------------------------------------- |
+| `bad-depth`            | `--depth` is not a whole number         |
+| `record-without-sweep` | `--record` with no `--sweep`            |
+| `not-a-directory`      | A named path is no directory            |
+| `gh-unavailable`       | `gh` is not on the path                 |
+| `list-failed`          | The pull request list could not be read |
 
-The last three sit on a target's row.
-
-## See also
-
-- `install-and-sync.md`: the sync that stamps
+The last three fail only that target's row.
