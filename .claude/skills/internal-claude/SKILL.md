@@ -79,7 +79,7 @@ Adding a skill touches the catalog, the skill map, the family key, a scenario, a
 Draft a `sandbox/<category>/<skill>.ts` scenario beside `SKILL.md`, even for judgment-driven output, since the seeded input is the point. Skip it, and list no follow-up, only for a skill whose body forbids probing, listing, grepping, or reading project surfaces.
 
 - `canon sandbox run <cat:cmd> "<prompt>"` drives the arm through `claude -p`, so the sandbox can drive Claude
-- The operator authorizes the spend and the session performs it, per `canon/context/scripts/eval.md`
+- The operator authorizes the spend and the session performs it, per `canon/context/scripts.md`
 - `src/claude/cases/all.test.ts` fails `bun run check` until a routing case for the new skill lands in one of `src/claude/cases/*.ts`
 - A changed skill count fails the Hero gate stage until `bun scripts/core/regen-hero.ts` runs and `canon capture assets/captures --selector .window --out assets/frames` re-renders the frame
 - Commit the hero markup, the image, and the stamp together

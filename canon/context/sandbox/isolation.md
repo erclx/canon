@@ -45,7 +45,7 @@ They run under `--permission-mode bypassPermissions`, because `acceptEdits` deni
 - `write_scope` supplies the scoping a permission layer would, asserted after the run rather than enforced during it
 - It is a report, not a block: a skill that writes somewhere it should not still wrote there
 
-The manifest diff covers creates, modifications, and deletions, which makes it comparable to the permission check. `canon/context/scripts/eval.md` holds the blind spot both harnesses share, a write outside the diffed tree.
+The manifest diff covers creates, modifications, and deletions, which makes it comparable to the permission check. `canon/context/scripts.md` holds the blind spot both harnesses share, a write outside the diffed tree.
 
 A per-arm permission set is worth building for its own reasons, since every arm gets the widest permission any arm needs. It would not bound a nested dispatch, because the arm that exposed that failure runs its whole path through `Bash`, and a tool set narrow enough to stop the dispatch denies the one tool the arm needs.
 

@@ -100,7 +100,7 @@ It renders its own sources rather than this repository's, since a target has no 
 
 Version stays owned by release-please, which writes `claude/.claude-plugin/plugin.json` through `extra-files`, so the package and plugin versions cannot disagree. The publish job checks out the release tag rather than `main`, so the tarball matches the tag.
 
-`canon/context/ci/releases.md` owns what gates that job, why it publishes with `--ignore-scripts`, and why the runner's npm version decides whether that flag does anything.
+The comments in `.github/workflows/release-please.yml` state what gates that job, why it publishes with `--ignore-scripts`, and why the runner's npm version decides whether that flag does anything.
 
 ## Gotchas
 

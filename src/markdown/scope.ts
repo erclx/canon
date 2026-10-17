@@ -137,8 +137,8 @@ export const GATED_PATHS: readonly string[] = [
   'docs/agents/overview.md',
   'docs/agents/targets.md',
   'canon/context/development/',
-  'canon/context/ci/',
-  'canon/context/scripts/',
+  'canon/context/ci.md',
+  'canon/context/scripts.md',
   '.claude/skills/internal-',
 ]
 

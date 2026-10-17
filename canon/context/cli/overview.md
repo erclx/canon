@@ -7,7 +7,7 @@ description: What the CLI domain owns, the folder layout, and the gotchas that c
 
 `src/` is the TypeScript CLI entry point. It uses commander to register subcommands and execa to dispatch most of them to the matching `manage-*.sh` script in `scripts/`. Domains migrate off bash one at a time. Use `@/` absolute imports, mapped to `src/` in `tsconfig.json`.
 
-TypeScript owns argument parsing and every migrated domain, and bash owns what has not moved. `canon/context/scripts/index.md` covers the bash side.
+TypeScript owns argument parsing and every migrated domain, and bash owns what has not moved. `canon/context/scripts.md` covers the bash side.
 
 ## Layout
 

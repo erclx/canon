@@ -83,7 +83,7 @@ Publishing a shape change therefore strands anyone who has installed, unless the
 
 - `release-please` writes `version` through `extra-files` in `release-please-config.json`, never by hand
 - The manifest overrides the marketplace entry, so a shape declared at one version installs at another when they disagree, and `claude plugin tag` refuses to tag then
-- Parity that depends on memory breaks on the first unwatched release. Release mechanics live in `canon/context/ci/releases.md`.
+- Parity that depends on memory breaks on the first unwatched release. Release mechanics live in `canon/context/ci.md`.
 
 ### Formatter exclusion for the manifests
 
