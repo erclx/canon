@@ -19,7 +19,7 @@ Owns the token module, the component layer, the renderers, the markdown parser, 
 - `components.ts` holds the component layer, since the record keeps CSS class names out. `buildDesignCss` takes `TEACH_COMPONENTS` only through its `components` option.
 - `neutral.ts` holds the achromatic set `canon design install` hands a target, and `neutral.test.ts` holds its roles to the same list as `TOKENS`
 - `document.ts` renders the record, `css.ts` the stylesheet, `regen.ts` writes both, and `budget.ts` counts the record against the prose budget
-- `parse.ts` and `render.ts` produce the preview at `.canon/tmp/render/design/`, which is gitignored and never staged or captured
+- `parse.ts` and `render.ts` write the gitignored preview at `.canon/tmp/render/design/`, and `prose()` reads only Overview, Motion, and Iconography, so no other rule reaches it
 
 ### `.claude/design/`
 
@@ -35,6 +35,7 @@ The skills and docs around the module each own one slice.
 
 - `claude/skills/canvas-board/` owns the step that carries a picked direction from the canvas into the record
 - `claude/skills/design-taste/` owns the layer model, the coherence locks, and grey-boxing, and `governance/rules/ui/design-taste.md` routes stylesheet and `canon/DESIGN.md` edits to it
+- `assets/brand/mark.svg` is the one authored icon, and the path data in `src/design/render.ts` and the README `mark-accent` pair are static copies nothing compares
 - `examples/design/` owns an intent record for an invented project, with no committed capture
 - `docs/agents/commands.md` owns the `canon design` flags, and `docs/workflow/visual-design-workflow.md` the tier framework
 

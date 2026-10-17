@@ -106,6 +106,5 @@ The context entries and seeds this skill draws on, beyond the ones named above.
 
 - `canon/context/claude-plugin/`: skill strategy, requirements, lifecycle, review paths, shared procedures, distribution, the CLI, and built-in overlap
 - `canon/context/claude-internal/`: internal skills, orchestration, plugin discovery
-- `canon/context/context-model.md`: three-tier context model and how entries get populated
-- `canon/context/context-model.md`: index.md system rationale and contracts
+- `canon/context/context-model.md`: three-tier context model, how entries get populated, and the index.md system
 - `tooling/claude/reference.md`: seed layout and design notes

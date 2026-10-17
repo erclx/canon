@@ -18,7 +18,7 @@ Holds the page, built from components that read their figures through `lib/`.
 - `pages/` assembles the one route, and `components/beats/` holds the eleven beats, one component each, so two builds on different beats touch different files
 - `components/sections/` holds the fold, proof band, beat group, provenance ledger, install steps, field, and close
 - `content/copy.ts` holds the page copy, each string cited to `README.md` or marked as a paraphrase, which `readmeCitations` in `src/gate/measures.ts` gates
-- `lib/derive.ts` holds every rule about what a read means as a pure function, and `session.ts` spawns the CLI and reads files for it
+- `lib/derive.ts` holds every read rule as a pure function, refusing a skill with no skill-map row and a row naming none, and `session.ts` spawns the CLI and reads files for it
 - `styles/global.css` maps role names onto the generated `tokens.css` inside `@layer base`, and `base.astro` embeds Geist
 
 ### `web/`
@@ -27,6 +27,7 @@ Beside `src/`, holds the tests, the social card route, and the files served as t
 
 - `e2e/` owns the Playwright suite, which runs on all three browsers
 - `card-src/` owns the social card route, served by `card.config.mjs` as `bun run web:card` on 4421 plus `WORKTREE_PORT_OFFSET`
+- `web:card:check` fails a build carrying `og-card-marker` or any `*og-card*` file, which is why the published card is `social-card.png`
 - `public/assets/social-card.png` is a symlink into `assets/frames/`, and `public/evidence/` holds two fixed captures of one merged pull request
 - `public/previews/` holds committed renders written only by `scripts/core/regen-web-previews.ts`, and `.oxfmtrc.jsonc` ignores the folder
 
@@ -36,6 +37,7 @@ This repository's self-portrait for a visitor who never opens the source, where 
 
 - `evidence/home/` is the committed baseline of the page, one folder per section holding a frame per theme at 320 and 1280 pixels
 - `frames/` and `captures/` hold the card and hero images, and a render gates only where `captureStamps` makes something committed depend on it
+- `merge/` and the whole-page frames come from a `workflow_dispatch` artifact on `main`, since a local capture falls back to another font
 - Every README image ships as a `<name>` and `<name>-light` pair behind a `<picture>`
 
 ### `.github/workflows/`
@@ -50,6 +52,7 @@ Holds the two workflows that build and check the page.
 Two folders outside `web/` shape what the page renders and captures.
 
 - `src/design/` owns the tokens `web/` reads, and `canon/context/design.md` covers it
+- `scripts/core/regen-web-favicon.ts` writes `web/public/favicon.svg` from the mark, and does not symlink it since a favicon loads with no CSS context and `currentColor` paints black
 - `tooling/web/configs/e2e/` owns the screenshot harness, which creates its context with reduced motion and scrolls each section into view before it shoots
 
 ## Gotchas
