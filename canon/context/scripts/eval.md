@@ -55,6 +55,6 @@ The Output pair looked like discrimination until the other pairs were read. With
 
 ### The snapshot blind spot
 
-A harness that reports writes by diffing one directory cannot see a write outside it, and both harnesses here have that shape. A cut half of the memory ablation could write into the fixture's folder under `~/.claude/projects/<fixture>/` while the run reported no files changed, which is true of the fixture and false of the machine.
+A harness that reports writes by diffing one directory cannot see a write outside it, and both harnesses here have that shape. A cut half of the memory ablation could write into the fixture's folder under `~/.claude/projects/<fixture>/memory/` while the run reported no files changed, which is true of the fixture and false of the machine.
 
 The sandbox harness reports `write_scope` from a manifest diff over its tree and shares the blind spot, recorded in `canon/context/sandbox/isolation.md`. Read the transcript beside the file list in either, and clear the stray path afterward.

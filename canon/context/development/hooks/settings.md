@@ -10,7 +10,8 @@ Three Claude Code settings bound what a long session costs, and a fourth turns o
 This repository and `tooling/claude/seeds/.claude/settings.json` set none of the three. Two are live in the operator's own `~/.claude/settings.json` and the third is deliberately unset, so a session reading the settings file alone would conclude all three are unconfigured and set them again.
 
 - The fourth, `autoMemoryEnabled`, is the one setting this repository sets
-- No rule routes a session editing `.claude/settings.json` here, since the file is rarely edited and this index reaches the `autoContinueAtUsageLimit` inversion and the `autoCompactWindow` cap
+- No rule routes a session editing `.claude/settings.json` here, since JSON carries no pointer of its own, the file is rarely edited, and the guard already sits in every seeded hook
+- A session editing the file finds the `autoContinueAtUsageLimit` inversion and the `autoCompactWindow` cap through this folder's index
 - Every value was read from `https://code.claude.com/docs/en/settings-reference`, `model-config`, `cross-session-messaging`, and `costs`, so re-read them against a newer client
 
 ## Decisions

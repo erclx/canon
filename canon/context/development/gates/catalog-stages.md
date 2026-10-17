@@ -29,7 +29,10 @@ The Plugin manifests stage runs `claude plugin validate --strict` over every plu
 - Both listings honor `.gitignore`, which keeps linked worktrees and dependency copies out
 - `--strict` promotes warnings to failures, so a Claude Code release adding a warning fails `bun run check` for everyone until the manifest answers it
 
-The guard tests that `claude` resolves on `PATH` and that `claude --version` succeeds, since a global install can land the wrapper without the native package. A contributor's machine skips on either failure. CI refuses on both, and the refusal for a binary that cannot run names the pinned version.
+The guard tests that `claude` resolves on `PATH` and that `claude --version` succeeds, since a global install can land the wrapper without the native package.
+
+- A contributor's machine skips on either failure, since an absent or half-installed CLI there is someone mid-setup
+- CI refuses on both, and the refusal for a binary that cannot run names the pinned version
 
 ### Skill paths
 

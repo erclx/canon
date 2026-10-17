@@ -9,7 +9,10 @@ description: How each gitignored record folder is indexed, named, archived, and 
 
 ### Indexing the board and the pen
 
-The task board is a folder of one file per task, which keeps concurrent sessions from overwriting each other on a board with no history. A `PostToolUse` hook regenerates its `index.md` rather than `bun run check`, because the whole-repo index walk filters through `git check-ignore` and never sees a gitignored folder. Positional regen reaches it.
+The task board is a folder of one file per task, which keeps concurrent sessions from overwriting each other on a board with no history.
+
+- A `PostToolUse` hook regenerates its `index.md` rather than `bun run check`, because the whole-repo index walk filters through `git check-ignore` and never sees a gitignored folder
+- Positional regen reaches it, since the walk-up never consults git
 
 `.canon/review/` carries a subfolder per producer.
 

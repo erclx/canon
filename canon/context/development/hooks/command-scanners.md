@@ -79,12 +79,13 @@ The hook gates on the scan's exit code and reads no record field, so a check add
 The body must be a file named by `-F body=@<file>`, resolved against the payload's `cwd`, since a session in a linked worktree writes the body relative to itself. Three shapes the hook cannot read are refused rather than let through.
 
 - An inline `-f body=` or `-F body=` value and a `@-` stdin body have no file to scan
-- A file that does not exist yet, which a heredoc and a post in one call produces, is blocked with a reason telling the session to write the body in an earlier call
+- A file that does not exist yet, which a heredoc and a post in one call produces, is blocked with a reason to write the body in an earlier call
+- It is blocked because the file is absent when the hook runs and passing it would post a body no scan read
 - A body supplied through `--input` is outside what the hook reads and passes
 
 A scan exit of 2 blocks with the scan's warning lines on stderr, and any other non-zero exit blocks too, so a refusal is never read as a pass. A blocking `PreToolUse` hook reaches the session through stderr alone.
 
-With `canon` absent from `PATH` the call goes through and `additionalContext` says the scan did not run, since blocking would take a target's posting away over a missing binary.
+With `canon` absent from `PATH` the call goes through and `additionalContext` says the scan did not run, since every surface the hook guards already requires the CLI and blocking would take a target's posting away over a missing binary.
 
 ### Why a hook and not a verb
 

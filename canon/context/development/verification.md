@@ -80,7 +80,10 @@ A passing `bun run check` prints three `Failed, run manually` lines. Vitest pass
 
 Rank verification stages by CPU seconds rather than elapsed time, because a stage fanning across cores finishes fast and costs the most. By wall clock the tests look cheapest, around 931ms.
 
-`/usr/bin/time -f 'user %U sys %S wall %e cpu %P'` shows them the most expensive stage at 11.76 CPU seconds and 1169 percent peak CPU, 38 percent of a roughly 31 CPU second total, delivered in one wall second. Test-count growth is invisible in wall time and linear in CPU, so state which measure a cost claim rests on.
+`/usr/bin/time -f 'user %U sys %S wall %e cpu %P'` shows them the most expensive stage at 11.76 CPU seconds and 1169 percent peak CPU, 38 percent of a roughly 31 CPU second total, delivered in one wall second.
+
+- Test-count growth is invisible in wall time and linear in CPU
+- State which measure a cost claim rests on, since wall clock still answers how long a human waits
 
 ### The Indexes stage reports its own regeneration
 

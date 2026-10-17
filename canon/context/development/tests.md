@@ -41,7 +41,7 @@ The census reads every file under `src/**/*.test.ts` that resolves a path outsid
 - `src/comments/trend.test.ts` is outside the set, since it replays fixed git revisions and skips itself when they are unreachable
 - `src/commands/exit-code.test.ts` copies `src/` and `tsconfig.json` into a temp root, and is outside the set
 - `src/git/gh-invocations.test.ts` and `src/cli/ui.test.ts` resolve the root and then walk `src/` alone, and are outside it too
-- A temp root is not the repository root, which excludes `src/commands/records-migrate.test.ts`, `tooling-sync.test.ts`, and `src/records/backup.test.ts`, each using `mkdtempSync`
+- A temp root is not the repository root, which excludes `src/commands/records-migrate.test.ts`, `src/commands/tooling-sync.test.ts`, and `src/records/backup.test.ts`, each using `mkdtempSync`
 - A sweep for the resolution form alone counts too many, for that reason
 
 A file can reach the root two ways and a sweep for one undercounts. Every file in the census names a root constant, being `PROJECT_ROOT`, `import.meta.dirname`, or `process.cwd()`. None passes a bare relative path to a file read, which would resolve against the runner's working directory and name no constant at all.
@@ -82,7 +82,9 @@ A cap thins each run's load and leaves the sum growing with the wave, so seven c
 
 ### What the lock left open
 
-The lock serializes suites and cannot see the rest of the box, which in a wave carries other stages, hand-run tests, browsers, and sessions. One suite at the default count holds about 62 runnable processes on 32 cores, since each worker spawns a child, so outside load starves its spawn tests. A second run used `yes` loops under a 6309-test suite.
+The lock serializes suites and cannot see the rest of the box, which in a wave carries other stages, hand-run tests, sandbox runs, browsers, and sessions.
+
+One suite at the default count holds about 62 runnable processes on 32 cores, since each worker spawns a child, so outside load starves its spawn tests. A second run used `yes` loops under a lone 6309-test suite.
 
 | Load                      | Workers | Runs | Runs failing | Failed tests per run |
 | ------------------------- | ------- | ---- | ------------ | -------------------- |

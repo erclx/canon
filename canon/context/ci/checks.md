@@ -97,6 +97,7 @@ The scan reads a title and body with every fenced block dropped and every inline
 
 - A link destination stays unmasked, unlike the ban scan, since a release-please body's real semver reference sits inside its generated compare link
 - `VERSION_SPAN` in `src/labels/phase.ts` reads a span whose whole content is a version token as a hit, and a token folded into longer content clears it
+- A phase label quoted alone in its own span still needs that check to catch it, since the phase-label check alone would clear it
 - Authors stay responsible for a label quoted alone in its own span, since narrowing the exclusion to fenced blocks or dropping it would give up every unbackticked leak, the common case
 - `claude/skills/git-commit/references/versioning.md` states the same three-way split
 

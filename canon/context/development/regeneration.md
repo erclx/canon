@@ -76,7 +76,7 @@ The rule covers every verb reading data the branch authors.
 
 - `canon claude skills rank` ranks prompts against the last release's case list, so a branch editing `src/claude/cases/` reads its own change as absent
 - Run such a verb through `bun src/cli.ts`
-- A verb reading the checkout, such as `canon gov test-order`, answers correctly from the global binary
+- A verb reading the checkout, such as `canon gov test-order`, answers correctly from the global binary, since what it reads moves with the tree rather than with the release
 
 ### Committing a capture
 

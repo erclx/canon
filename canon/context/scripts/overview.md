@@ -30,7 +30,8 @@ A migrated domain loses its dispatcher entirely, and `src/commands/<domain>.ts` 
 
 The language end state is the stack decision in `canon/context/cli/overview.md`. The stays-bash verdicts record why a file has not moved yet, and an inventory pass sorts each into delete, rebuild, or wrap.
 
-- The frontmatter-loop cost alone does not keep a verb in bash. `gov/list.sh` migrated anyway, since expanding a rule folder in bash beside the TypeScript resolver puts one rule in two languages.
+- The frontmatter-loop cost alone does not keep a verb in bash, since a parse the CLI already owns outweighs a process per read
+- `gov/list.sh` migrated anyway, since expanding a rule folder in bash beside the TypeScript resolver puts one rule in two languages
 - A verdict is only as wide as its reasoning. `claude/seeds-list.sh` and `tooling/list.sh` read with `read -r` and `awk` and migrated regardless, so check a stated reason against each file.
 - Configs always overwrite and seeds preserve user edits, since a config is toolkit-owned and a seed grows with the project
 

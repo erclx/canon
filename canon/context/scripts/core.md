@@ -135,7 +135,8 @@ A hand-run scope check with the quoted form returns an empty set against a modif
 
 - A merge is reported on the run after it lands, and a pull request that opens and closes inside one interval never enters the baseline
 - Cancelling and restarting leaves the old baseline, so the first run afterwards replays every state change since the cancel
-- A `RESPONSE` line says nothing about whether a response is still open, so a worker reply a later review already superseded routes to a re-review whose delta is empty
+- A `RESPONSE` line says nothing about whether a response is still open, since the comparison never runs against the review it would be triggering
+- A worker reply a later review already superseded therefore routes to a re-review whose delta is empty
 - Read `main` and the REST open list (`gh api --paginate 'repos/{owner}/{repo}/pulls?state=open'`) directly before any sweep or handoff
 
 See `canon/context/scripts/framing.md` for how UI framing crosses the exec boundary these stages sit on.

@@ -58,7 +58,7 @@ Banning a token is blunt, and the alternative is a judgment no stage can make. T
 
 The walk is scoped by extension rather than by path.
 
-- Two seed hooks, `records-index.sh` and `standards-audit.sh`, call the CLI deliberately, so the extension scope leaves them out with no exemption list
+- Two seed hooks, `records-index.sh` and `standards-audit.sh`, call the CLI deliberately and report by name when the binary is absent, so the extension scope leaves them out with no exemption list
 - Discovery runs through `seedRoots` in `src/tooling/seeds.ts`, shared with the Seed standards stage, so a stack seeding `.claude/` later is covered with no edit to either caller
 
 Three outcomes report unmeasured, which warns on a contributor's machine and refuses under CI.
