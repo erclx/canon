@@ -41,7 +41,11 @@ canon tasks next-label --claim --json
 
 The claim reserves the label under `.canon/ordinal-locks/`, so a second session allocating at the same moment gets the next one. A bare read reserves nothing and can return a label a live claim already holds.
 
-Branch on the record's `reason` rather than on the exit code, taking `label` from a record that carries one. `label-contended` means re-run the claim. Report the verb as unavailable and stop when the installed binary carries no `next-label` subcommand, or when an unknown `--claim` prints no record, since that binary predates the flag. Never fall back to a bare read or a label picked by hand, which reopens the collision the claim exists to prevent.
+Branch on the record's `reason` rather than on the exit code, taking `label` from a record that carries one.
+
+- `label-contended` means re-run the claim
+- Report the verb as unavailable and stop when the binary carries no `next-label` subcommand, or prints no record for an unknown `--claim`, since it predates the flag
+- Never fall back to a bare read or a label picked by hand, which reopens the collision the claim exists to prevent
 
 ## Step 3: write the overview
 
@@ -71,7 +75,9 @@ Run the match check in `${CLAUDE_SKILL_DIR}/references/assembly.md` before going
 
 ## Step 6: write the task
 
-Write `<main-root>/.canon/tasks/<label>-<slug>.md` by heredoc, from the label Step 2 claimed, without calling the verb again, since a second call would claim a different label. Its frontmatter, H1, and `## Outcomes` follow `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`. Write a `Ready:` line beside the `Plan:` line pointing at the folder, then point the task at the plan through the verb:
+Write `<main-root>/.canon/tasks/<label>-<slug>.md` by heredoc from the label Step 2 claimed, never calling the verb again, which would claim another. Its frontmatter, H1, and `## Outcomes` follow `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`.
+
+Write a `Ready:` line beside the `Plan:` line pointing at the folder, then point the task at the plan through the verb:
 
 ```bash
 canon tasks plan-link <task-stem> .canon/plans/feature-<slug>.md --json
@@ -79,13 +85,19 @@ canon tasks plan-link <task-stem> .canon/plans/feature-<slug>.md --json
 
 Branch on the record rather than on the exit. The `Ready:` line orients a worker reading the task, and `canon tasks archive` reads it to move the folder on ship.
 
-A task file with no row is a dropped task, so place the row in the same pass. The plan exists, so the row takes `## Run now`, per the tests in `${CLAUDE_SKILL_DIR}/../task-board/references/board.md`. A path `canon tasks plan-reach` reports as claimed is a shared file rather than a hold. Name each one and its holder wherever the row is reported below, so whoever controls the board decides whether a contract, a relocation, or a sweep moves the row to `## Up next`.
+### Place the row
 
-Check the roster the way `canon:task-board` Step 4 does, reading `canon sessions list --self --json` for this session and `canon sessions list --json` for a row from the same repository, under another `sessionId`, whose `name` starts with `orchestrator-`. Treat a refused read as a roster read that failed.
+A task file with no row is a dropped task, so place the row in the same pass. The plan exists, so the row takes `## Run now`, per the tests in `${CLAUDE_SKILL_DIR}/../task-board/references/board.md`.
 
-- **Orchestrator found.** Write neither file. Message that session with the row's title, the plan link, and the group with its reason, so it places the row itself rather than two sessions writing the board at once.
-- **Not found, and this session's name starts with `worker-` or `planner-`.** Write neither file, since both role bodies ban a board write with no exception. Report the row and its group in Step 8.
-- **Not found otherwise, or the roster read fails.** Write the row into `priority.md` through the same `Bash` route the task file took. A failed read looks like a solo project, and stopping would strand the task on the one path with nobody to place it.
+A path `canon tasks plan-reach` reports as claimed is a shared file rather than a hold. Name each one and its holder wherever the row is reported, so whoever controls the board decides whether a contract, a relocation, or a sweep moves the row to `## Up next`.
+
+### Check the roster
+
+Check the roster the way `canon:task-board` Step 4 does, reading `canon sessions list --self --json` for this session and `canon sessions list --json` for a same-repository row under another `sessionId` whose `name` starts with `orchestrator-`. A refused read counts as failed.
+
+- **Orchestrator found.** Write neither file. Message that session with the row's title, the plan link, and the group with its reason, so two sessions never write the board at once.
+- **Not found, and this session's name starts with `worker-` or `planner-`.** Write neither file, since both role bodies ban a board write. Report the row and its group in Step 8.
+- **Not found otherwise, or the roster read fails.** Write the row into `priority.md` through the task file's `Bash` route, since a failed read looks like a solo project and stopping strands the task.
 
 Say which branch fired in Step 8.
 
