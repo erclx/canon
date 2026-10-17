@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import type { ExtraSectionFinding, SectionFinding } from '@/context/audit'
+import type {
+  ExtraSectionFinding,
+  SectionFinding,
+  ShapeFinding,
+} from '@/context/audit'
 import { type GateInput, hasDrift, isGating } from '@/context/gate'
 import type { FolderDrift } from '@/context/index-drift'
 
@@ -21,12 +25,22 @@ function makeExtra(
   return { rel: 'canon/context/ci.md', headings: ['Triggers'], ...overrides }
 }
 
+function makeShape(overrides: Partial<ShapeFinding> = {}): ShapeFinding {
+  return {
+    rel: 'canon/context/ci.md',
+    gated: false,
+    issues: [{ line: 8, kind: 'retired-section', text: 'Decisions' }],
+    ...overrides,
+  }
+}
+
 function makeInput(overrides: Partial<GateInput> = {}): GateInput {
   return {
     unresolvedCitations: 0,
     requirementsOverWords: false,
     sections: [],
     extraSections: [],
+    shape: [],
     drift: [],
     widened: false,
     ...overrides,
@@ -113,6 +127,27 @@ describe('isGating', () => {
 
   it('should pass a widened gate reading a record per clean folder', () => {
     const input = makeInput({ drift: [makeDrift()], widened: true })
+
+    expect(isGating(input)).toBe(false)
+  })
+
+  it('should pass an ungated shape finding under the widened gate', () => {
+    const input = makeInput({ shape: [makeShape()], widened: true })
+
+    expect(isGating(input)).toBe(false)
+  })
+
+  it('should fail a gated shape finding under the widened gate', () => {
+    const input = makeInput({
+      shape: [makeShape({ gated: true })],
+      widened: true,
+    })
+
+    expect(isGating(input)).toBe(true)
+  })
+
+  it('should pass a gated shape finding outside the widened gate', () => {
+    const input = makeInput({ shape: [makeShape({ gated: true })] })
 
     expect(isGating(input)).toBe(false)
   })

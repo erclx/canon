@@ -1,4 +1,4 @@
-import { resolve } from 'node:path'
+import { join, relative, resolve } from 'node:path'
 import type { Command } from 'commander'
 import {
   type ContextAuditRefusal,
@@ -12,14 +12,22 @@ import {
   matchesSiblings,
   measureFolders,
   extraSections,
+  GOTCHA_CAP,
+  LAYOUT_BULLET_CAP,
+  LAYOUT_PARAGRAPH_CAP,
   missingSections,
+  OTHER_FOLDERS,
   PROVENANCE_FOLDER,
   ALLOWED_SECTIONS_BY_FOLDER,
   REQUIRED_SECTIONS,
   REQUIRED_SECTIONS_BY_FOLDER,
   requiredSections,
+  RETIRED_SECTIONS_BY_FOLDER,
+  shapeFindings,
   type ExtraSectionFinding,
   type SectionFinding,
+  type ShapeFinding,
+  type ShapeIssue,
 } from '@/context/audit'
 import { auditCitations, type CitationReport } from '@/context/citations'
 import {
@@ -49,6 +57,8 @@ import {
   resolveFolders,
 } from '@/context/folders'
 import { isGating } from '@/context/gate'
+import { isShapeGated, SHAPE_GATED_FOLDERS } from '@/context/shape-gated'
+import { currentWorktreeRoot } from '@/git/worktree'
 import {
   isOverWordCap,
   measureRequirements,
@@ -103,7 +113,7 @@ export function register(program: Command): void {
     .option('--citations-only', 'Run the gating citation check alone')
     .option(
       '--gate',
-      'Also fail on a missing required section or index drift, the findings that are facts',
+      'Also fail on a missing required section, an H2 outside the set, a shape break in a gated folder, or index drift, the findings that are facts',
     )
     .addHelpText(
       'after',
@@ -118,10 +128,13 @@ export function register(program: Command): void {
         'stating a word cap gates past it, on any run except',
         '--citations-only, which never measures it. A record stating no',
         'cap is reported and never gated. --gate widens the gate to the',
-        'other two findings that are facts rather than judgments: a',
-        'missing required section and index drift. A context entry',
-        'requires Overview and Layout. Entry length, reference form,',
-        'table, and provenance are judgments under both.',
+        'findings that are facts rather than judgments: a missing',
+        'required section, an H2 outside the closed set, and index drift.',
+        'A context entry requires Overview and Layout and allows Gotchas.',
+        'A shape break, such as a Decisions section or a sixth gotcha, is',
+        'reported everywhere and gated only under a shape-gated folder.',
+        'Entry length, reference form, table, and provenance are',
+        'judgments under both.',
         '',
         'Depth and bullet weight are stated over every markdown file rather',
         'than over a context entry, so `canon markdown audit` measures them.',
@@ -644,6 +657,15 @@ async function runAudit(
   const drift = gateOnly ? [] : await auditIndexes(folders)
   const sections = gateOnly ? [] : missingSections(root, folders, entries)
   const extras = gateOnly ? [] : extraSections(entries)
+  // The gated prefixes name paths from the repository root, while an entry's
+  // path runs from the audit root, which is a seed tree's own root when one is
+  // passed. Resolving here keeps a seed tree listed under its toolkit path.
+  const top = gateOnly ? root : await currentWorktreeRoot(root)
+  const shape = gateOnly
+    ? []
+    : shapeFindings(entries, (rel) =>
+        isShapeGated(relative(top, join(root, rel))),
+      )
   const length = gateOnly ? undefined : lengthFindings(entries)
   // Absent under `--citations-only` and null when the project carries no
   // record. A run that never looked and a project with nothing to look at are
@@ -658,6 +680,7 @@ async function runAudit(
     reportCitations(citations, cited)
     reportReferenceForm(entries, folders)
     reportSections(sections, extras, folders)
+    reportShape(shape)
     reportLength(length ?? [])
     reportTables(entries)
     reportProvenance(entries, folders)
@@ -696,6 +719,7 @@ async function runAudit(
         length,
         missingSections: sections,
         extraSections: extras,
+        shapeFindings: shape,
         indexDrift: drift,
         // Null says the run opened the project and found no record, which a
         // target that never wrote one is entitled to. Absent says the run
@@ -711,6 +735,11 @@ async function runAudit(
           // caller without an error.
           requiredSectionsByFolder: REQUIRED_SECTIONS_BY_FOLDER,
           allowedSectionsByFolder: ALLOWED_SECTIONS_BY_FOLDER,
+          retiredSectionsByFolder: RETIRED_SECTIONS_BY_FOLDER,
+          gotchaCap: GOTCHA_CAP,
+          layoutBulletCap: LAYOUT_BULLET_CAP,
+          layoutParagraphCap: LAYOUT_PARAGRAPH_CAP,
+          shapeGatedFolders: SHAPE_GATED_FOLDERS,
         },
       })}\n`,
     )
@@ -722,6 +751,7 @@ async function runAudit(
       requirements !== undefined && isOverWordCap(requirements),
     sections,
     extraSections: extras,
+    shape,
     drift,
     widened,
   })
@@ -958,7 +988,7 @@ function reportSections(
   logInfo(
     `The set is closed: ${Object.entries(ALLOWED_SECTIONS_BY_FOLDER)
       .map(([name, set]) => `canon/${name}/ allows ${set.join(', ')}`)
-      .join('. ')} as H2. Any other topic is an H3 under one of them.`,
+      .join('. ')} as H2. A folder is an H3 under Layout.`,
   )
 
   if (extras.length === 0) {
@@ -970,6 +1000,75 @@ function reportSections(
   pipeOutput(
     extras
       .map((found) => `${found.rel}  extra: ${found.headings.join(', ')}`)
+      .join('\n'),
+  )
+}
+
+/** Characters of a paragraph the report quotes, enough to find it by. */
+const QUOTE_WIDTH = 60
+
+function clip(text: string): string {
+  return text.length > QUOTE_WIDTH ? `${text.slice(0, QUOTE_WIDTH)}...` : text
+}
+
+/** How each shape break reads in the report. */
+function readIssue(issue: ShapeIssue): string {
+  switch (issue.kind) {
+    case 'retired-section':
+      return `retired section: ${issue.text}`
+    case 'gotcha-count':
+      return `${issue.count ?? 0} gotchas, past ${GOTCHA_CAP}`
+    case 'gotcha-heading':
+      return `heading inside Gotchas: ${issue.text}`
+    case 'gotcha-paragraph':
+      return `paragraph inside Gotchas: ${clip(issue.text)}`
+    case 'layout-heading':
+      return `Layout H3 titled neither a path nor ${OTHER_FOLDERS}: ${issue.text}`
+    case 'layout-bullets':
+      return `${issue.count ?? 0} bullets under ${issue.text}, past ${LAYOUT_BULLET_CAP}`
+    case 'layout-paragraphs':
+      return `${issue.count ?? 0} paragraphs under ${issue.text}, past ${LAYOUT_PARAGRAPH_CAP}`
+    case 'layout-depth':
+      return `heading below H3 under Layout: ${issue.text}`
+  }
+}
+
+/**
+ * Names each entry breaking the section shape, gated ones first, and states
+ * which prefixes gate on every run, since an empty gated list and a corpus that
+ * conforms would otherwise print the same report.
+ */
+function reportShape(shape: readonly ShapeFinding[]): void {
+  logStep('Shape')
+
+  logInfo(
+    SHAPE_GATED_FOLDERS.length === 0
+      ? 'No folder is shape-gated yet, so every shape break reports and none gates.'
+      : `Gated under --gate: ${SHAPE_GATED_FOLDERS.join(', ')}. A break elsewhere reports and never gates.`,
+  )
+
+  if (shape.length === 0) {
+    logInfo('Every entry holds the section shape.')
+    return
+  }
+
+  const gated = shape.filter((finding) => finding.gated)
+  if (gated.length > 0) {
+    logWarn(
+      `${gated.length} gated ${gated.length === 1 ? 'entry' : 'entries'} breaking the shape`,
+    )
+  }
+  logInfo(
+    `${shape.length} ${shape.length === 1 ? 'entry' : 'entries'} breaking the shape in all`,
+  )
+  pipeOutput(
+    [...gated, ...shape.filter((finding) => !finding.gated)]
+      .map(
+        (finding) =>
+          `${finding.rel}${finding.gated ? '  gated' : ''}\n${finding.issues
+            .map((issue) => `  :${issue.line}  ${readIssue(issue)}`)
+            .join('\n')}`,
+      )
       .join('\n'),
   )
 }

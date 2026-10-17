@@ -799,9 +799,9 @@ describe('shape', () => {
   })
 
   it('should report a paragraph inside Gotchas', () => {
-    expect(kinds('## Gotchas\n\n- One\n\nA paragraph of history.\n')).toEqual(
-      ['gotcha-paragraph'],
-    )
+    expect(kinds('## Gotchas\n\n- One\n\nA paragraph of history.\n')).toEqual([
+      'gotcha-paragraph',
+    ])
   })
 
   it('should read a wrapped gotcha as one bullet rather than a paragraph', () => {
