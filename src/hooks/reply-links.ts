@@ -11,7 +11,9 @@ export interface MissingLink {
   readonly suggestion?: string
 }
 
-const SCHEME = /^[a-z][a-z0-9+.-]*:/i
+// A bare filename followed by a line tail reads as a scheme, so a colon that
+// opens nothing but a position (`README.md:12`) is not one.
+const SCHEME = /^[a-z][a-z0-9+.-]*:(?!\d+(?:-\d+)?(?::\d+)?$)/i
 const POSITION_TAIL = /(?::\d+){1,2}(?:-\d+)?$/
 const WORKTREE_RECORDS = /\/\.claude\/worktrees\/[^/]+\/(\.canon\/.*)$/
 

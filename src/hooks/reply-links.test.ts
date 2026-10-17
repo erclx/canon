@@ -80,6 +80,24 @@ describe('findMissingReplyLinks', () => {
     })
   })
 
+  describe('root-level files with a position tail', () => {
+    it.each([
+      ['README.md:12', '/main/README.md'],
+      ['package.json:5', '/main/package.json'],
+      ['Makefile:3-9', '/main/Makefile'],
+    ])('should return a missing %s', (destination) => {
+      expect(destinations(`[x](${destination})`)).toEqual([destination])
+    })
+
+    it('should pass a root-level file that exists', () => {
+      expect(destinations('[x](README.md:12)', '/main/README.md')).toEqual([])
+    })
+
+    it('should still skip a url carrying a port', () => {
+      expect(destinations('[x](http://localhost:3000)')).toEqual([])
+    })
+  })
+
   it('should decode a percent escape and keep parentheses and spaces', () => {
     const reply = '[x](notes/a%20b.md) [y](notes/c_(1).md)'
 
