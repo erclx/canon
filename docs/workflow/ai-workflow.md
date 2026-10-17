@@ -58,7 +58,7 @@ Then plan and build:
 - Invoke `canon:plan-feature` to scan for code-level conflicts and ambiguities, confirm approach before proceeding
 - Implement the feature, then Claude Code runs the commands defined in `CLAUDE.md`, fixes failures, and iterates until all pass
 - For UI changes, invoke `canon:ui-checklist` to write what a reviewer has to look at and name any behavior shipping without a test
-  End the session once the feature works and tests pass. Invoke `canon:context-fold` to capture any decisions made during implementation before closing.
+  End the session once the feature works and tests pass. Invoke `canon:context-fold` before closing to refresh any context entry the diff left untrue.
 
 The routing test is whether the repository can answer an item today. A session grepping handles the yes, and a groundwork track handles the no.
 

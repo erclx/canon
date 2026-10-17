@@ -1,4 +1,8 @@
-import type { ExtraSectionFinding, SectionFinding } from '@/context/audit'
+import type {
+  ExtraSectionFinding,
+  SectionFinding,
+  ShapeFinding,
+} from '@/context/audit'
 import type { FolderDrift } from '@/context/index-drift'
 
 export interface GateInput {
@@ -15,6 +19,11 @@ export interface GateInput {
   readonly sections: readonly SectionFinding[]
   /** H2 headings outside a folder's closed set, gating under `--gate` alone. */
   readonly extraSections: readonly ExtraSectionFinding[]
+  /**
+   * Section shape breaks, gating under `--gate` only where the finding is
+   * marked gated, so an unrebuilt entry reports and never fails a push.
+   */
+  readonly shape: readonly ShapeFinding[]
   readonly drift: readonly FolderDrift[]
   /**
    * Whether the caller asked for the widened gate. False leaves a missing
@@ -36,17 +45,19 @@ export function hasDrift(drift: readonly FolderDrift[]): boolean {
  *
  * An unresolved citation is a broken pointer and gates unconditionally, and so
  * does a requirements record past its own word cap: the record states its rule
- * for itself, which makes it a fact rather than a threshold a reader weighs. The findings `--gate` adds are
- * the ones answerable from the file itself: a required section it does not
- * declare, an H2 outside the closed set, and an index disagreeing with its folder. Entry length, depth, bullet,
- * table, provenance, and the record's claim coverage are judgments, so they
- * stay out under both modes.
+ * for itself, which makes it a fact rather than a threshold a reader weighs.
+ * The findings `--gate` adds are the ones answerable from the file itself: a
+ * required section it does not declare, an H2 outside the closed set, a shape
+ * break in a folder rebuilt to the shape, and an index disagreeing with its
+ * folder. Entry length, depth, bullet, table, provenance, and the record's
+ * claim coverage are judgments, so they stay out under both modes.
  */
 export function isGating({
   unresolvedCitations,
   requirementsOverWords,
   sections,
   extraSections,
+  shape,
   drift,
   widened,
 }: GateInput): boolean {
@@ -54,5 +65,10 @@ export function isGating({
   if (requirementsOverWords) return true
   if (!widened) return false
 
-  return sections.length > 0 || extraSections.length > 0 || hasDrift(drift)
+  return (
+    sections.length > 0 ||
+    extraSections.length > 0 ||
+    shape.some((finding) => finding.gated) ||
+    hasDrift(drift)
+  )
 }

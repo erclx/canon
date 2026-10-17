@@ -22,7 +22,7 @@ Applies to per-domain narrative entries under `canon/context/`. Skip for `index.
 
 ## Scope
 
-Governs per-domain narrative entries under `canon/context/`: their structure, the decisions and gotchas they carry, and what they leave to the code.
+Governs the structure of per-domain narrative entries under `canon/context/`, the folders and traps they carry, and what they leave to the code.
 
 Does not govern:
 
@@ -33,19 +33,20 @@ Does not govern:
 
 ## Organizing principle
 
-Weight the entry toward what cannot be re-derived from the repo. That single rule sorts every section below.
+Weight the entry toward what a session cannot cheaply re-derive from the repo, and keep it true of the repository today. That single rule sorts every section below.
 
-- Folder structure is re-derivable with `ls`, cheap to regenerate and expensive to maintain by hand, so cap it hard
+- A folder list is re-derivable with `ls`, so Layout spends its words on what each working folder does rather than on naming it
 - Command surfaces are re-derivable with `--help` and already live in the CLI reference under `docs/`, so a copied flag list is a second source of truth that drifts
-- Decisions and gotchas cannot be re-derived at any price, so they are the reason the folder exists
+- How the domain reached its shape is in git and the pull request that changed it, so the entry carries no decisions and no history
+- A trap the code does not self-document costs a session a failed run to find, so it earns a line
 
 ## What a working entry looks like
 
 An entry works when a session can read it and answer three questions without opening source:
 
-- Where do things live in this domain?
-- Why are they that way?
-- How do I add one more of what this domain holds?
+- What does this domain own, and where does its boundary sit?
+- What does each folder in it do now?
+- Which trap would I hit working here?
 
 An entry that fails these is non-conforming regardless of whether it satisfies every section and ordering rule below. Shape is the means. These three questions are the test.
 
@@ -58,30 +59,31 @@ Both fields feed `canon/context/index.md` when regenerated.
 
 ## The closed set
 
-An entry carries four H2 sections and no other, in this order: `Overview`, `Layout`, `Decisions`, `Gotchas`. `canon context audit` reports any other H2 and `--gate` fails it. A topic of the domain's own, such as `Cache` or `Workflow`, is an H3 under one of the four, which is where a reader scanning the entry looks for it.
+An entry carries three H2 sections and no other, being `Overview`, `Layout`, and `Gotchas` in that order. `canon context audit` reports any other H2 and `--gate` fails it.
 
 - `## Overview`: two to four lines on what the domain owns and where its boundary sits. Required.
-- `## Layout`: one line per folder in owns-X form, folders only and never files. Required unless the domain owns no paths, as with one covering external tools, since an invented line is padding.
-- `## Decisions`: non-obvious choices and their reasoning, each as an H3 or a bullet. The highest-value section in the folder and the one most often missing.
-- `## Gotchas`: workarounds, things tried and rejected, and invariants the code does not self-document, such as shape constraints, skip rules, and header semantics
+- `## Layout`: the folders the domain owns, described below. Required unless the domain owns no paths, as with one covering external tools, since an invented line is padding.
+- `## Gotchas`: at most five one-line bullets, each a trap true today. No H3, no paragraph, and no history. Omit the section when the domain has no trap.
 
-A Decisions H3 opens with a one- or two-sentence lead, then two or three bullets. A decision resting on how an outside tool, an installer, or the model behaves may close with one `Revisit when <finding>.` sentence naming the harm it prevents, and one resting on the project's own code takes none.
+`## Decisions` is retired. The audit reports one everywhere and gates it under a folder rebuilt to this shape, alongside the Gotchas and Layout caps below.
 
-Use `## Decisions` over `## Gotchas` when the reader needs the reasoning rather than the invariant. Include both whenever the domain has content for them, and never pad an entry with an empty heading.
+### Layout
 
-### Where an extra topic goes
+Layout gives each folder doing real work its own H3, titled with the folder path in a code span, such as ``### `src/design/` ``.
 
-An extra topic is an H3 under the section a reader scanning for it would open.
+- Open the H3 with a lead of one short paragraph stating what the folder does
+- Follow it with at most five bullets on what the folder does now
+- Put every trivial folder under `### Other folders` as a one-line bullet in owns-X form
+- Name folders only, never files, and write no decisions and no history under any H3
+- Write no heading below H3 under `## Layout`
 
-- A command surface goes under `## Layout` as an H3 listing what each verb does, only when the domain has one. Flags and JSON shapes stay in the CLI reference under `docs/`.
-- The procedure for the domain's most common task goes under `## Layout` as an H3 such as `### Adding a <thing>`, since most sessions arrive asking how to add one more
-- Implementation detail the owns-X form cannot carry moves to `## Decisions` or `## Gotchas`
+The audit reports a Layout H3 titled neither a path nor `Other folders`, a folder H3 holding a second paragraph or a sixth bullet, and any H4 under Layout. Bullets count at any indent and across any paragraph, so a list split by a bold label still counts as one list.
 
 ### Ordering and headings
 
-Entries get read top-down and often partially, so irreducible content sits above recoverable content.
+Entries get read top-down and often partially, so the boundary sits above the folders and the folders above the traps.
 
-- Name a heading for its subject as it stands (`### Cache`), never for the event that shaped it, since a heading is what a scan reads
+- Name a heading for its subject as it stands, never for the event that shaped it, since a heading is what a scan reads
 - A narrating heading such as `### The cache was the untested part, and the test moved it` turns the table of contents into a changelog
 
 ## The development entry
@@ -92,10 +94,9 @@ Only the `development` entry carries this section, as an H3 under `## Layout`. I
 
 ## What goes in
 
-- Per-domain narrative on how the code is structured and why
-- Decisions that constrain the domain, whether or not their reasoning touches another one. A decision lives in the entry of the domain it constrains.
-- Constraints, gotchas, things tried and rejected
-- Domain-specific conventions that do not fit a `paths:`-scoped rule
+- What the domain owns and where its boundary sits
+- What each working folder does now
+- Traps a session would hit, being shape constraints, skip rules, header semantics, and invariants the code does not self-document
 
 ### Figures and references
 
@@ -109,7 +110,7 @@ A measured figure and a reference to another entry each take a form that keeps t
 
 ## What does not go in
 
-- Exhaustive file trees with a description per file. Name folders and their responsibility under `## Layout` instead.
+- Exhaustive file trees with a description per file. Describe the folder under its Layout H3 instead.
 - Restated `--help` output, flag tables, or JSON shapes.
 - A catalog a `list` command already returns. Link the command instead, so the entry cannot drift from it.
 - Function-level documentation for implementation modules. The exception is a shared utility module's public surface, where the entry is how a session finds a helper rather than duplicating it.
@@ -123,32 +124,28 @@ Some content belongs to another surface entirely.
 - Generated content (API references). Generate, do not write by hand.
 - Anything already in `canon/REQUIREMENTS.md`.
 
-### History and results
+### History and decisions
 
 An entry describes the repository as it stands, so the route that reached it lives in git and the change that introduced it.
 
+- A decision and its rejected alternative, which the pull request carrying the change records
 - The history of how the domain reached its current shape. A change number, release label, or date attached to a change goes wherever the project tracks work.
-- A rejected alternative's provenance. Keep what was tried and why it lost, and cut who tried it and when.
-- The route to a decision, being the rounds of candidates, the tuning steps a threshold passed through, and the review pass that caught a miss
+- The route to a choice, being the rounds of candidates, the tuning steps a threshold passed through, and the review pass that caught a miss
 - Measured results a generated file already carries. Point at the file instead, so a re-run cannot leave the entry behind.
-
-State a decision, what lost, and why, once and in the present tense.
 
 ## Length
 
-- Aim for one entry per domain. Length is a symptom, not the defect, and the one hard cap is the whole-document ceiling `markdown.md` states.
+- Aim for one entry per domain. The section shape and the density limits `markdown.md` states bound the size, and the one hard cap is the whole-document ceiling it states.
 - Past roughly 150 rendered lines, check whether the entry still covers one domain, has filled with content `ls` or `--help` reproduces, or has accumulated its own history
 - Fix whichever is true rather than trimming. The 150 is a diagnostic checkpoint that never gates, counted in rendered lines as `markdown.md` defines them.
-- Never cut a `## Decisions` or `## Gotchas` entry to shorten a file. Cut a `## Layout` section or an H3 under it instead.
 
 ### Retiring and rewriting
 
-An entry states the design that stands. The rule above protects content whose subject is live, and these release or replace it.
+An entry states the repository that stands, so a bullet changes when its subject does.
 
-- Retire a decision or gotcha once its subject is gone, rewriting the bullet to state the current design rather than narrating what it replaced
-- A rejected alternative is not a retired one, so what was tried and why it lost stays whatever its age
-- Rewrite a decision a later one replaced, whose subject is still live, rather than appending the replacement beside it, since two bullets on one subject leave a reader to work out which is current
-- Keep the superseded reasoning only where it is the alternative that lost
+- Edit a bullet that went untrue in place, and never append the correction beside it, since two bullets on one subject leave a reader to work out which is current
+- Retire a gotcha once its trap is gone, rather than narrating what fixed it
+- Drop a folder's H3 when the folder is removed, and move it when the folder moves
 
 ### Splitting and naming
 
@@ -166,7 +163,7 @@ Author a catalog that grows a row per shipped thing as a bullet list, never a ma
 
 ### Template
 
-Each Decisions H3 opens with a lead sentence, then two or three bullets carrying the reason.
+Each working folder takes an H3 with a one-paragraph lead and at most five bullets, and the rest sit under `### Other folders`.
 
 ```markdown
 ---
@@ -184,37 +181,21 @@ never the reverse.
 
 ## Layout
 
-- `src/routes/` owns the HTTP layer and request parsing
+### `src/routes/`
+
+Parses each request, validates it against its schema, and calls one service.
+
+- Validation runs at the route boundary, so a service trusts its inputs
+- Every handler issuing a cursor uses the shared encoder
+- A handler returns a plain object, and the serializer wraps it in `{ data, meta }`
+
+### Other folders
+
 - `src/services/` owns business logic with no HTTP concerns
 - `src/db/` owns persistence and schema migrations
 
-## Decisions
-
-### Validation at the route boundary
-
-Validation happens at the route boundary using a schema library.
-
-- Services trust their inputs, so a schema change lands in one place
-- A caller reaching a service without a route runs the same schema first
-
-### Opaque pagination cursors
-
-Pagination uses opaque cursor tokens, never offset and limit.
-
-- The cursor format stays opaque to clients, so the server can change it freely
-- Any handler that issues a cursor uses the shared encoder, so every cursor decodes one way
-
 ## Gotchas
 
-### The health endpoint skips auth
-
-The `/health` endpoint skips auth middleware. Liveness probes from the orchestrator do not carry tokens.
-
-### The connection pool caps at 50
-
-Concurrent requests over that block until a connection frees.
-
-### Handlers never wrap their return
-
-Route handlers return a plain object, and the serializer wraps it in `{ data, meta }`.
+- The `/health` endpoint skips auth, since liveness probes carry no token
+- The connection pool caps at 50, and a request past it blocks until one frees
 ```

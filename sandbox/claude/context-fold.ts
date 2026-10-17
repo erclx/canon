@@ -42,7 +42,7 @@ export default scenario({
       )
       ctx.log.info('')
       ctx.log.info(
-        'The folded plan names the storage move as a decision of the storage domain, so canon/context/storage.md is rewritten.',
+        'The diff makes the SQLite bullet in canon/context/storage.md untrue, so that entry is rewritten in place.',
       )
       ctx.log.info(
         'REQUIREMENTS.md stays unwritten. The fold reports the direction change and names document-health.',

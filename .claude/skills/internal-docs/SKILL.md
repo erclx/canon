@@ -12,7 +12,7 @@ Read `claude/skills/markdown-craft/references/markdown.md` and load the `write-h
 ## Routing a document by its reader
 
 - Put consumer-facing reference in `docs/`, read by someone operating the toolkit without the source open. The CLI contract sits in `docs/agents/`.
-- Put internal narrative, decisions with their rejected alternative, and gotchas in `canon/context/<domain>/`, read by someone maintaining the toolkit.
+- Put what a domain does, where it lives, and the traps a session would hit in it in `canon/context/<domain>/`, read by someone maintaining the toolkit, per the content ownership row in `CLAUDE.md`.
 - Decide the reader before writing. A misplaced document reads fine where it sits, and costs later when a target reads prose meant for this repository or a session searches the wrong tier.
 
 ## Generated indexes
@@ -23,7 +23,7 @@ Read `claude/skills/markdown-craft/references/markdown.md` and load the `write-h
 ## Owners
 
 - `canon:docs-sync` rewrites stale `README.md` and `docs/` sections from a branch's changes.
-- `canon:context-fold` folds a session's decisions into `canon/context/` and carries the entry shape in `claude/skills/context-fold/references/context.md`.
+- `canon:context-fold` folds a branch's diff into `canon/context/` and carries the entry shape in `claude/skills/context-fold/references/context.md`.
 
 ## Reference
 

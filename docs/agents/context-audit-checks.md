@@ -19,9 +19,27 @@ It reports rather than gates by default, the closer call because a missing secti
 
 ### The closed set
 
-The same section also reports an H2 outside the folder's closed set. A context entry allows `Overview`, `Layout`, `Decisions`, and `Gotchas` and no other H2, so a topic of the domain's own sits one level down as an H3. The finding is per entry rather than per folder, since an extra heading is a fact about the file carrying it. Fenced blocks are skipped, a stub seed is skipped, and only H2 is read, so where an H3 sits is not audited. It gates under `--gate` alone, like a missing section.
+The section also reports an H2 outside the closed set. A context entry allows `Overview`, `Layout`, and `Gotchas` and no other H2. The finding is per entry, since an extra heading is a fact about the file carrying it, and it gates under `--gate` alone. Fenced blocks and stub seeds are skipped, and a retired `Decisions` H2 goes to the shape check.
 
 The record carries it as a top-level `extraSections` array of `{ rel, headings }`, and the set itself as `checkpoints.allowedSectionsByFolder`, keyed on the folder name the way `requiredSectionsByFolder` is. Both are additive.
+
+### The section shape
+
+The Shape section reports where a context entry breaks the shape inside its sections. Each finding carries a line and one of eight kinds.
+
+- `retired-section`: a `## Decisions` H2
+- `gotcha-count`, `gotcha-heading`, `gotcha-paragraph`: a `Gotchas` section past five bullets, holding a heading, or holding a paragraph
+- `layout-heading`: a Layout H3 titled neither a code-spanned path nor `Other folders`
+- `layout-bullets`, `layout-paragraphs`: a folder H3 past five bullets or past its one-paragraph lead
+- `layout-depth`: any heading below H3 under `Layout`
+
+Bullets count at any indent and across any paragraph, so a list split by a bold label counts as one. A line continuing a list item belongs to the item. `Other folders` is exempt from both folder caps.
+
+### Where the shape gates
+
+A shape finding gates under `--gate` only for an entry under a prefix that `SHAPE_GATED_FOLDERS` in `src/context/shape-gated.ts` lists, read from the repository root. Every other entry reports and never fails a push. A seed tree is matched by its toolkit path, such as `tooling/base/seeds/`.
+
+The record carries a top-level `shapeFindings` array of `{ rel, gated, issues }`, and each entry carries its own `shape` list. The caps sit under `checkpoints` as `gotchaCap`, `layoutBulletCap`, and `layoutParagraphCap`, beside `retiredSectionsByFolder` and `shapeGatedFolders`. All are additive.
 
 ## Reference form
 
