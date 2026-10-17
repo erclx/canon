@@ -11,7 +11,7 @@ description: Running the audit over any markdown path, where its bans and checkp
 canon markdown audit
 canon markdown audit --json
 canon markdown audit .claude/rules governance
-canon markdown audit docs/agents/commands.md
+canon markdown audit docs/agents/install-and-sync.md
 canon markdown audit 'docs/**/*.md'
 ```
 
