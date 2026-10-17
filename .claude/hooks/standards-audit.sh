@@ -92,6 +92,11 @@ colons=$(printf '%s' "$record" |
 density=$(printf '%s' "$record" |
   jq -r '.entries[]?.density[]? | ":\(.line)  \(.kind)  " + (if .limit == null then "opens with neither a paragraph nor a table" else "\(.value) past \(.limit)" end) + (if .gating then "  gating" else "" end)' 2>/dev/null)
 
+# A page marked `kind: reference` carries reference shape findings, handed back
+# whole the same way, since a gated one fails the push like a density finding.
+shape=$(printf '%s' "$record" |
+  jq -r '.entries[]?.referenceShape[]? | ":\(.line)  \(.kind)  \(.text)" + (if .gating then "  gating" else "" end)' 2>/dev/null)
+
 # A set the verb shipped empty measures nothing and would report a clean file.
 # Reading the findings alone turned that narrowed check into a pass once, back
 # when a standard could go missing, and the sets shipping with the package moves
@@ -99,7 +104,7 @@ density=$(printf '%s' "$record" |
 empty=$(printf '%s' "$record" |
   jq -r '[.bans.emptySets[]?] | join(", ")' 2>/dev/null)
 
-[ -z "$hits" ] && [ -z "$headings" ] && [ -z "$colons" ] && [ -z "$density" ] && [ -z "$unread" ] && [ -z "$empty" ] && exit 0
+[ -z "$hits" ] && [ -z "$headings" ] && [ -z "$colons" ] && [ -z "$density" ] && [ -z "$shape" ] && [ -z "$unread" ] && [ -z "$empty" ] && exit 0
 
 nl=$'\n'
 msg=""
@@ -129,6 +134,11 @@ fi
 
 if [ -n "$density" ]; then
   found=$(printf 'Standards-audit: %s breaks the markdown density limits, being a 350-character paragraph, 2 paragraphs in a row, a 200-character bullet, 5 plain bullets in a row, no H4, and a paragraph or table opening every H3. Split each block at its seam rather than trimming words to pass. A finding marked gating fails the push.\n%s' "$file" "$density")
+  msg="${msg:+$msg$nl}$found"
+fi
+
+if [ -n "$shape" ]; then
+  found=$(printf 'Standards-audit: %s is marked kind: reference and breaks its shape, being an opening, then Output, Refusals, and See also, each at most once and in that order, no H3, and no flag table. Point at the command'"'"'s own --help for flags. A finding marked gating fails the push.\n%s' "$file" "$shape")
   msg="${msg:+$msg$nl}$found"
 fi
 

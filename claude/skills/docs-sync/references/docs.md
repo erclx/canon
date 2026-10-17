@@ -1,6 +1,6 @@
 ---
 title: Docs reference
-description: Reader and jurisdiction, frontmatter, page structure, what a page links out to, the diagram permission, and when a category earns a subfolder
+description: Reader and jurisdiction, frontmatter, page structure, the command reference shape, what a page links out to, the diagram permission, and when a category earns a subfolder
 ---
 
 # Docs reference
@@ -15,6 +15,7 @@ Its reader is an operator running what the project ships rather than developing 
 - [What a working docs page looks like](#what-a-working-docs-page-looks-like)
 - [Frontmatter](#frontmatter)
 - [Structure](#structure)
+- [Reference pages](#reference-pages)
 - [Content](#content)
 - [Diagrams](#diagrams)
 - [Splitting the folder](#splitting-the-folder)
@@ -26,7 +27,7 @@ Governs each authored reference page under `docs/`, being the frontmatter a page
 
 Does not govern:
 
-- The page a project puts at its front door, whose reader is deciding whether to commit at all: `readme.md`
+- `README.md`, the page a project puts at its front door, whose reader is deciding whether to commit at all. It keeps its own voice and takes the density limits but not the no-why rule: `readme.md`
 - Per-domain internal narrative written for a reader with the source open: `context.md`
 - The drawing inside a Mermaid fence: `mermaid.md`
 - Voice, rhythm, and sentence construction: the `write-human` skill
@@ -48,6 +49,7 @@ A page failing these is non-conforming even when it satisfies every shape rule b
 - `title` (required): sentence case, naming the surface the page covers rather than the action a reader takes on it
 - `description` (required): one line naming what the page covers, which is what the folder's catalog shows beside the link
 - `category` (conditional): the shelf the page sits on in that catalog
+- `kind` (optional): `reference` on a page documenting one command, which opts it into the shape under [Reference pages](#reference-pages)
 
 ### Declaring category
 
@@ -62,11 +64,24 @@ A grouped catalog writes the declared shelves and nothing else, so `category` is
 - Open with an H1 matching `title`, then one or two lines saying what the surface is, before any heading
 - Use `##` for major sections and `###` for subsections. Do not nest deeper.
 - Use sentence case for every heading, proper nouns aside
-- Lead with the invocation a reader came for. Background, rationale, and edge cases sit below it.
+- Lead with the invocation a reader came for, with the edge cases below it
 - Write a command, a flag, or a field as something copyable, in a code span or a fence, never paraphrased into prose
+
+## Reference pages
+
+A page marked `kind: reference` documents one command and holds a fixed set of parts. `canon markdown audit` checks the headings and tables on every marked page, and an unmarked page is never measured.
+
+- Open with the H1, one or two lines on what the command does, and the command in a fence
+- Follow with `## Output`, `## Refusals`, and `## See also`, each at most once and in that order, and no other H2. A page may leave one out.
+- Use no H3. A part long enough to need one belongs on a page of its own.
+- Point at `<command> --help` for flags rather than tabling them. A table whose first header cell is `Flag` or `Option` is a finding.
+- Table the refusals by their `reason` where the command emits one
+
+A guide walking a reader through several commands carries no marker and keeps free sections, held by the density limits and the no-why rule under [Content](#content).
 
 ## Content
 
+- State how to use the surface and never why it was built that way. The why lives in the code and the pull request that changed it.
 - Write for a reader with no access to the source. A sentence that resolves only by opening a file belongs in internal narrative instead.
 - Name the failures a surface produces alongside the path that works. A page documenting success alone sends its reader to the source at the first refusal.
 - Link to the adjacent page rather than restating it. One page owns each surface, and a second copy drifts with nothing comparing the two.
@@ -75,7 +90,7 @@ A grouped catalog writes the declared shelves and nothing else, so `category` is
 
 A page leaves out what its reader can get elsewhere or does not need yet.
 
-- Do not restate output a command already prints, such as a full flag table. Name the command that prints it.
+- Do not restate what `<command> --help` prints, such as a flag table. Name the command and point at its help.
 - Do not carry the history of how a surface reached its shape. A page describes the surface as it stands, and the change that moved it is recorded wherever the project tracks work.
 - Do not carry contributor setup or the argument for adopting the project. Both are addressed to a reader who has not installed anything yet.
 
@@ -98,28 +113,39 @@ Move a `category` into a subfolder once its pages stop reading as a list in the 
 
 ## Template
 
-```markdown
+A command reference page, in the four-part shape:
+
+````markdown
 ---
 title: <Surface>
 description: <one line naming what this page covers>
 category: <the shelf this page sits on, carried by every sibling or by none>
+kind: reference
 ---
 
 # <Surface>
 
-<One or two lines on what the surface is and when a reader reaches for it.>
+<One or two lines on what the command does and who calls it.>
 
-## <The invocation>
-
-`<the command or field, spelled to copy>`
-
-<What it does and what it produces.>
-
-## <Refusals>
-
-- `<the condition>`: <what the reader sees, and what to do about it>
-
-## <Adjacent surface>
-
-<Where the reader goes for the thing this page stops at.>
+```bash
+<the command, spelled to copy>
 ```
+
+Run `<command> --help` for every flag.
+
+## Output
+
+<What the command prints or writes, with one example where the shape is not obvious.>
+
+## Refusals
+
+Branch on `reason` in the record, not the exit code.
+
+| Reason     | Meaning                                |
+| ---------- | -------------------------------------- |
+| `<reason>` | <what the reader sees, and what to do> |
+
+## See also
+
+- `<adjacent command or page>`: <what it covers that this page stops at>
+````

@@ -21,6 +21,7 @@ description: The guard, placement, draft additions, and regen folder for a brand
 ## Draft
 
 - Draft `title`, `description`, and `category` where one applies, then the page body.
+- Draft a page documenting one command in the docs standard's reference shape, with `kind: reference` in its frontmatter, so `canon markdown audit` checks its sections.
 - Test the page against the standard's four questions: what the surface is, what to run or write, what it refuses, and where to go for the adjacent surface.
 - Take a diagram only through the Mermaid fence the docs standard permits. Never build a hand-drawn diagram-and-capture loop here.
 

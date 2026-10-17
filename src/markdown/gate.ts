@@ -2,10 +2,16 @@ import type { ColonFinding } from '@/markdown/colons'
 import type { DensityFinding } from '@/markdown/density'
 import type { HeadingCaseFinding } from '@/markdown/heading-case'
 import type { LinkFinding } from '@/markdown/links'
+import type { ReferenceShapeFinding } from '@/markdown/reference-shape'
 import type { BanFinding } from '@/markdown/scan'
+import { GATED_PATHS } from '@/markdown/scope'
 import type { StructureReport } from '@/markdown/structure'
 
 export interface GatedDensityFinding extends DensityFinding {
+  readonly gating: boolean
+}
+
+export interface GatedReferenceShapeFinding extends ReferenceShapeFinding {
   readonly gating: boolean
 }
 
@@ -46,6 +52,11 @@ export interface GateInput {
    * in-scope path under no gated prefix carries one marked `gating: false`.
    */
   readonly density: readonly GatedDensityFinding[]
+  /**
+   * Every reference shape finding, each marked with whether its path gates.
+   * Only a page whose frontmatter carries `kind: reference` has any.
+   */
+  readonly referenceShape: readonly GatedReferenceShapeFinding[]
 }
 
 /**
@@ -55,13 +66,31 @@ export interface GateInput {
  * facts rather than a threshold, so either gates unconditionally and there is
  * no widened mode to reach for. A density finding is a fact too, a count
  * against a fixed number, and it gates wherever the caller marked its path as
- * gated. The standards decide what counts as banned, which keeps this
- * answering how many rather than which.
+ * gated, and so does a reference shape finding. The standards decide what
+ * counts as banned, which keeps this answering how many rather than which.
  */
-export function isGating({ bans, links, density }: GateInput): boolean {
+export function isGating({
+  bans,
+  links,
+  density,
+  referenceShape,
+}: GateInput): boolean {
   return (
     bans.length > 0 ||
     links.length > 0 ||
-    density.some((finding) => finding.gating)
+    density.some((finding) => finding.gating) ||
+    referenceShape.some((finding) => finding.gating)
   )
+}
+
+/**
+ * Whether a reference shape finding on this path fails the run, under the
+ * prefixes density gates on. A page is opted in by its own marker, so the
+ * density scope and the always-gated bullet run have nothing to add here.
+ */
+export function referenceShapeGates(
+  rel: string,
+  gated: readonly string[] = GATED_PATHS,
+): boolean {
+  return gated.some((prefix) => rel.startsWith(prefix))
 }
