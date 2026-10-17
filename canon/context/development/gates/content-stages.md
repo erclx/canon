@@ -22,6 +22,7 @@ The Hero stage asks two questions of a branch, and neither is whether the frames
 - Two digests are needed because either file can move alone. The markup side catches an edit with no capture, and the image side catches a PNG replaced or truncated under unchanged markup.
 - Each digest covers a whole file, so the stage stays ignorant of what the markup renders and correct as the frame grows fields
 - The stamp is written inside the render, so a caller cannot skip it, and a PNG without a current one is uncaptured or hand-placed
+- The stage names which of a frame's three files is missing rather than reporting a mismatch it cannot compute
 
 `captureStamps` takes the `.html` files under `assets/captures/` as bases and resolves each `.png` and `.stamp` against `assets/`, so a later frame is covered with no second edit and an image no markup renders is left alone. A tree with no markup under `assets/` has no set to read and passes.
 
@@ -55,13 +56,16 @@ Banning a token is blunt, and the alternative is a judgment no stage can make. T
 
 ### What the seed walk covers
 
-The walk is scoped by extension rather than by path. Two seed hooks, `records-index.sh` and `standards-audit.sh`, call the CLI deliberately and report by name when the binary is absent, so the extension scope leaves them out with no exemption list. Discovery runs through `seedRoots` in `src/tooling/seeds.ts`, shared with the Seed standards stage.
+The walk is scoped by extension rather than by path.
+
+- Two seed hooks, `records-index.sh` and `standards-audit.sh`, call the CLI deliberately, so the extension scope leaves them out with no exemption list
+- Discovery runs through `seedRoots` in `src/tooling/seeds.ts`, shared with the Seed standards stage, so a stack seeding `.claude/` later is covered with no edit to either caller
 
 Three outcomes report unmeasured, which warns on a contributor's machine and refuses under CI.
 
 - A missing `tooling/` covers nothing
 - Roots that resolve and carry no markdown between them, since a pass would say the seeds cite no CLI on the strength of having read no prose
-- No seed root carrying `.claude/` or `canon/`, which agrees with the Seed standards stage, where the bash this replaced exited 0
+- No seed root carrying `.claude/` or `canon/`, which agrees with the Seed standards stage, while the bash this stage replaced exited 0
 
 `internal/rules/claude/seed-mirror.md` carries the matching authoring rule, so a session editing the seed meets it at the edit rather than the push. Its glob stays on the two `CLAUDE.md` paths, since its bullets govern the root-and-seed pair and mean nothing over `canon/REQUIREMENTS.md`.
 
@@ -75,7 +79,10 @@ The same finding fails a push against `tooling/*/seeds/` and only reports agains
 
 ### Shipped references
 
-The Shipped references stage reads `referencesIn` from `src/shipped/references.ts` over the five corpora a target reader reaches, being the package's `files` field less `src` and the two trees it negates. It gates rather than reports, and emits every hit before failing so a branch carrying several repairs them all.
+The Shipped references stage reads `referencesIn` from `src/shipped/references.ts` over the five corpora a target reader reaches, being the package's `files` field less `src` and the two trees it negates.
+
+- It gates rather than reports, since a report leaves a citation for a person to notice rather than a push to catch
+- It emits every hit before failing, since a stage halts the run on its first failing check and a branch carrying several would otherwise repair one
 
 Seven forms fail a push, each for what a reader holding a plugin cache rather than this repository meets.
 
@@ -99,10 +106,11 @@ The docs-path pattern gates on resolution rather than shape, because shape canno
 
 ### The retired-verb and rule-path patterns
 
-The retired-verb pattern reads every corpus but `docs/`, whose pages still document the verb. A trailing lookahead rejects a hyphen so a `standards-audit` page name passes.
+The retired-verb pattern reads every corpus but `docs/`, since a `canon standards` call fails for a reader wherever it sits and `docs/` pages still document the verb. A trailing lookahead rejects a hyphen so a `standards-audit` page name passes.
 
 - The rule-path pattern is scoped to `claude/skills/`, less each `REQUIREMENT.md`, which a maintainer or audit reads rather than a session
-- A match reports whether or not the named rule exists, since a rule reaches a target only through a separate `canon gov sync`
+- A match reports whether or not the named rule exists, since a same-repository citation names no target project's own tree
+- A rule reaches a target only through a separate `canon gov sync`, a narrower path than the plugin merge that ships the citing skill
 - It anchors on a trailing `.md` file rather than the bare `.claude/rules/` prefix, so a folder mention naming no file passes
 
 ### The shape-only patterns

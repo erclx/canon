@@ -49,12 +49,12 @@ Both pairs falsified that, since the cut halves create no plan at all. The stand
 
 When every arm in a batch emits the same observable, the arms testing something else are a free control for how often the rule is followed anyway.
 
-The Output pair looked like clean discrimination until the other pairs were read. With the section present the canonical grouping appeared 8 times in 10, so a 2-in-10 miss rate already existed and two cut observations could not carry a verdict. Report that base rate beside the difference.
+The Output pair looked like discrimination until the other pairs were read. With the section present the grouping appeared 8 times in 10, so a 2-in-10 miss rate already existed and two cut observations could not carry a verdict. Count the same observable across every arm that left the rule intact and report that base rate beside the difference.
 
 ## Gotchas
 
 ### The snapshot blind spot
 
-A harness that reports writes by diffing one directory cannot see a write outside it, and both harnesses here have that shape. A cut half of the memory ablation could write into the fixture's folder under `~/.claude/projects/` while the run reported no files changed, which is true of the fixture and false of the machine.
+A harness that reports writes by diffing one directory cannot see a write outside it, and both harnesses here have that shape. A cut half of the memory ablation could write into the fixture's folder under `~/.claude/projects/<fixture>/` while the run reported no files changed, which is true of the fixture and false of the machine.
 
 The sandbox harness reports `write_scope` from a manifest diff over its tree and shares the blind spot, recorded in `canon/context/sandbox/isolation.md`. Read the transcript beside the file list in either, and clear the stray path afterward.

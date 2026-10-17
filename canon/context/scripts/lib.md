@@ -24,14 +24,15 @@ Source this in any script that needs terminal output. It provides the framed log
 Grep for the file path in `source`, `exec`, and `bash <path>` form before deleting a bash script or lib, since a function-name audit undercounts real callers.
 
 - Deleting `lib/inject.sh` and `tooling/sync.sh`, a function-name audit found 2 callers where 17 existed: twelve sandbox scripts with a dead `source` line and five call sites shelling the script
-- One site was `manage-init.sh`, which stopped installing base tooling while `bun run check:install` still passed, because `run_domain` swallows a failed domain
-- Confirm the gate you cite asserts on the deleted code's output, since it checked only files the tooling stack does not provide
+- One site was `manage-init.sh`, which silently stopped installing base tooling while `bun run check:install` still passed
+- That gate passed because `run_domain` swallows a failed domain and the gate asserts only on files the tooling stack does not provide
+- Confirm the gate you cite asserts on the deleted code's output rather than trusting its exit code
 
 ### A guard inside a substitution cannot stop the run
 
 A fatal precondition inside a helper called as `$(helper)` cannot stop the run, because `exit 1` kills the subshell and leaves the caller holding an empty string.
 
-- A `GITHUB_ORG` check inside `sandbox_anchor_url` printed its error, then the caller ran `git remote add origin ""`, which succeeds, and the script exited 0
+- A `GITHUB_ORG` check inside `sandbox_anchor_url` would print its error with the variable empty, then the caller would run `git remote add origin ""`, which succeeds, and the script would exit 0
 - Split validation into a `require_*` function invoked from the main shell before the first call
 - Prove it end to end, since `set -e` does not fire on a substitution whose empty output the next command accepts
 

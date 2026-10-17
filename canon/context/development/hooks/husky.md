@@ -89,7 +89,7 @@ The printed line comes from the JSON record's `message` field, which `src/comman
 
 - `emit` runs `message` through `singleLine`, collapsing it to one line and swapping a double quote for an apostrophe, since a registry error can carry either and older hooks read it with a pattern
 - `pending` prints like any non-`current` state, as `CLI stays at ...`, so the hook needs no branch for it
-- `current` stays quiet, as the archive does on `no-match` and `no-board` and the records push does when nothing changed
+- `current` stays quiet, as the archive does on `no-match` and `no-board` and the records push when nothing changed, since a line on every merge saying nothing moved is the shape both avoid
 - A reinstall that fails partway names both versions in the same field, the one route back to a broken global binary
 
 ### Updating the plugin cache

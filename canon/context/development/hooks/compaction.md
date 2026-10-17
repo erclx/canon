@@ -20,14 +20,16 @@ description: The PreCompact handoff hook, what the client does with a blocked co
 
 Each trigger gets the channel that reaches the session. The vendor's `additionalContext` is not offered for this event, so on `manual` the exit-2 stderr text is the channel. On `auto` a block tells nobody, so exit-0 stdout is the channel, merged into the summarizer's instructions as `newCustomInstructions`. Measured at `70b64982` on 2026-08-31.
 
-The vendor reference documents no `PreCompact` payload field, so the script reads `trigger` and routes on it rather than trusting the matcher, since a registration widened to `*` would send an automatic compaction down the blocking path.
+The vendor reference documents no event-specific `PreCompact` payload field, so the script reads `trigger` and routes on it rather than trusting the matcher, since a registration widened to `*` would send an automatic compaction down the blocking path.
 
 - An absent value takes the manual path, the conservative reading
 - The `hook_event_name` test ahead of it keeps the hook silent under `src/hooks/guard.test.ts`'s inert payload, which names a tool and no event
 
 ### The once-per-session marker
 
-Dedupe writes a marker under `.canon/tmp/hooks/precompact-handoff/` keyed on `session_id`, as three other hooks do, and on the manual path it is load-bearing. The first `/compact` asks and the second proceeds, since a hook that never stops blocking refuses every one. The hook cannot tell whether a map was written or worth writing.
+Dedupe writes a marker under `.canon/tmp/hooks/precompact-handoff/` keyed on `session_id`, as three other hooks do, and on the manual path it is load-bearing. The first `/compact` asks and the second proceeds, since a hook that never stops blocking refuses every one.
+
+The hook asks and does not enforce, since nothing it can read tells it whether a map was written or worth writing.
 
 - The automatic path reads and writes no marker, and the `trigger` branch sits ahead of the marker logic so an unrequested compaction never spends the refusal a typed `/compact` is owed
 - The marker write fails open, with `mkdir` and the truncation exiting 0 when the root refuses them, because a hook blocking without recording the block strands the session
@@ -47,10 +49,11 @@ Dedupe writes a marker under `.canon/tmp/hooks/precompact-handoff/` keyed on `se
 
 This reading comes from the shipped binary, which is bun-compiled and carries its own source, so `grep -a` reads the code. It diverges from the vendor page. Measured at client version `2.1.251` on 2026-08-31.
 
-- A block does hold on `auto`. The runner passes the trigger as the matcher's match query and returns `blockedBy` whenever a hook exits 2, so the turn carries on with its context.
+- A block does hold on `auto`. The runner passes the trigger as the matcher's match query and returns `blockedBy` whenever a hook exits 2, and both compaction paths honor it.
+- The newer path returns `hookBlocked` and the older throws an error converted to a `hook_blocked` outcome. Neither errors out, so the turn carries on with its context.
 - The client does not tell the session. The newer path logs `blockedBy` to debug, and the older path's notifier suppresses the warning for this trigger, then throws an error the caller drops.
-- Exit-2 stderr reaching the model is a property of the manual path alone
-- Exit-0 stdout stays open on both triggers, collected per invocation into `newCustomInstructions` and merged into the summarizer's instructions
+- Exit-2 stderr reaching the model is a property of the manual path alone, where the throw reaches the command that renders it
+- Exit-0 stdout stays open on both triggers, collected per invocation into `newCustomInstructions` and merged into the summarizer's instructions, since the runner builds the list from that single call
 
 ### Why a count cannot bound the automatic trigger
 
@@ -78,7 +81,7 @@ The block-once guarantee rests on `stop_hook_active` alone, read fresh on every 
 
 - It blocks rather than advising, as other seeded hooks do, because exit-0 stdout never reaches the session on `Stop`, and a probe line was never quoted back. Measured at `f47f8f02` on 2026-09-03.
 - A missing input exits quiet on every guard from `transcript_path` down, so a transient miss never reports as the defect this hook catches
-- A payload missing `transcript_path`, `prompt_id`, or a `promptId` match is malformed rather than stale
+- A payload missing `transcript_path`, `prompt_id`, or a `promptId` match is malformed rather than stale, since reading `last_assistant_message` off the payload removes the lag
 
 ### Shared basenames
 
@@ -90,7 +93,7 @@ The count pipes basenames through `sort | uniq -d` rather than an associative ar
 
 `reply-links.sh` registers on `Stop` beside `silent-turn.sh` and blocks a closing reply whose markdown links name a file not on disk. The desktop app opens such a link as "Couldn't read this file", and the output rule already asks for full paths, so a failing check replaces a second reminder. It ships through the seed on the same criterion.
 
-- The work sits in `canon hooks reply-links`, which reads the reply on stdin and exits 1 on findings
+- The work sits in `canon hooks reply-links`, which reads the reply on stdin and exits 1 on findings, since a verb run by hand reports failure as 1 and the hook exit table reserves 2 for a block
 - The wrapper maps that to the exit 2 a block needs and reads the `--json` record, not the exit code, since a binary predating the verb exits 1 on an unknown command, as a finding does
 
 ### What the reply link hook resolves
