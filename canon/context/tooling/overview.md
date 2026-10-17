@@ -143,6 +143,6 @@ Commit golden config changes with `--no-verify`. Lint-staged runs against the te
 A bare `canon` on PATH resolves `PROJECT_ROOT` to the installed package rather than the checkout a caller stands in. `findCheckoutMismatch` in `src/roots/project.ts` walks upward from `process.cwd()` for the nearest ancestor `package.json` sharing this package's name, and `checkoutMismatchWarning` formats the line naming both roots.
 
 - `create`, `inject`, `list`, and `prune-gitignore` warn rather than refuse when the two differ
-- `canon/context/cli.md` carries the checkout-mismatch warning's reach across every other verb
+- `canon/context/cli.md` says where the checkout-mismatch warning lives and which verbs emit it
 - `canon tooling reference` is exempt, since `referenceRoots` puts the caller's own working root ahead of the package corpus
 - A cwd one level short of the `tooling/` folder falls through to the package corpus with nothing said, and that precedence is deliberate

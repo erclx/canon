@@ -60,7 +60,7 @@ Holds the one engine `gov` and `design` install and sync through, the workflow `
 - `planSync` marks each walked file with a state such as `stale`, `orphaned`, `retired`, or `renamed`. Location decides ownership before a name lookup, through `projectSubdir` and `ownsInstalledRoot`
 - Declare a rename in `governance/renames.toml`, or the old rule lands as `retired` and is deleted. `src/gov/renames.test.ts` fails on a live key, a dead chain, or a cycle
 - `stamp.ts` writes `canon/config/config.json` after the copies land and reads three older spellings. Adding a domain means choosing `STAMP_DOMAINS` or `SCANNED_DOMAINS`, and retiring one edits both
-- `check.ts` builds `canon sync --check`, `history.ts` recovers `stale` for an unstamped file, and `reverse.ts` finds dropped files. Only `retired` and `renamed` count toward `hasDrift`
+- `check.ts` builds `canon sync --check`, `history.ts` recovers `stale` when unstamped, and `reverse.ts` finds dropped files. `hasDrift` skips `orphaned`, tooling, and the new and reverse sections
 
 ### `src/targets/`
 
