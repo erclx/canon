@@ -1,6 +1,6 @@
 ---
 title: Markdown audit
-description: Running the audit over any markdown path, where its bans and checkpoints are read from, what each check reports, and why bans, dead links, and density on a gated path fail while the rest reports
+description: Running the audit over any markdown path, where its bans and checkpoints are read from, what each check reports, how a reference page opts into its shape check, and why bans, dead links, and density or reference shape on a gated path fail while the rest reports
 ---
 
 # Markdown audit
@@ -15,9 +15,7 @@ canon markdown audit docs/agents/commands.md
 canon markdown audit 'docs/**/*.md'
 ```
 
-| Option   | Behavior                                                   |
-| -------- | ---------------------------------------------------------- |
-| `--json` | Add a machine-readable record on stdout, keeping the frame |
+Run `canon markdown audit --help` for every flag.
 
 ## Scope
 
@@ -69,13 +67,19 @@ The heading-case measure reports a heading or a frontmatter `title` with a capit
 
 The six layout limits, their scope, and their gate are in `markdown-audit-density.md`.
 
+### Reference shape
+
+A page opts in with `kind: reference` in its frontmatter, and an unmarked page is never measured. On a marked page, outside fenced blocks, an H2 other than `Output`, `Refusals`, or `See also` reports, as does any H3 and a table whose first header cell is `Flag` or `Option`.
+
+Each finding sits under `referenceShape` in the `--json` entry with `kind`, `line`, `text`, and `gating`. It gates under the prefixes density gates on.
+
 ### Weight, cadence, and length
 
 The Bullets, Paragraphs, Cadence, Depth, and Length sections report and never set the exit. The bullet and paragraph numbers gate through the density lengths instead, and depth and cadence stay a judgment a reader settles. What each section measures and the samples behind its checkpoint are in `markdown-audit-weight.md`.
 
 ## Exit codes
 
-Exit codes are `0` for a completed run with no gating finding, `1` for a refusal, `2` for a ban hit, a dead relative link, or a density finding marked `gating`, and `3` for a shipped ban set that arrived empty. All three are facts a scan settles rather than a reader judging. Depth weight is a judgment a reader settles, and cadence is a distribution whose healthy range moves with the surface, so both report under every code, as do the advisory Bullets and Paragraphs sections. Length reports the same way, since the audit also runs on a plan kept out of version control, and the Document ceiling stage in `canon gate run` owns that verdict instead.
+Exit codes are `0` for a completed run with no gating finding, `1` for a refusal, `2` for a ban hit, a dead relative link, or a density or reference shape finding marked `gating`, and `3` for a shipped ban set that arrived empty. All three are facts a scan settles rather than a reader judging. Depth weight is a judgment a reader settles, and cadence is a distribution whose healthy range moves with the surface, so both report under every code, as do the advisory Bullets and Paragraphs sections. Length reports the same way, since the audit also runs on a plan kept out of version control, and the Document ceiling stage in `canon gate run` owns that verdict instead.
 
 `3` is separate from `1` because the two want different responses from a caller. A refusal means no corpus was built, and the `Markdown` stage in `canon gate run` is right to report it as unmeasured rather than as a pass. An empty set means the corpus was walked and nothing was looked for, so that stage fails the push on `3` rather than skipping.
 
@@ -86,8 +90,6 @@ A banned character is a fact rather than a judgment, which is the test that admi
 Of the five measures a first full reading took, the ban count is the only one a gate should ever read.
 
 The ban half reached zero, which was the precondition the gate waited on, and it was re-measured against the same corpus at the moment the gate landed. Three sweep slices then took the structural half, and the corpus reports 1 heavy bullet and 22 heavy paragraphs across 6 files on 2026-08-06, every one on a ground the triage record holds as exempt.
-
-Depth is the one measure no slice triaged, so its figure moved with the sweep rather than with the corpus. The break rule widened to bold section markers on 2026-08-28 and again to the colon-less ones the same day, and each drop came with no edit to any file, so the 41 above reads against a rule the command no longer runs. Read all four structural counts from a run rather than from this paragraph.
 
 ### What a hit asks of an author
 
