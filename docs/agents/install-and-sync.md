@@ -1,246 +1,135 @@
 ---
 title: Install and sync
-description: What each install and sync verb writes, refuses, or leaves alone, and how drift is attributed in a target project
+description: What each install and sync verb writes, refuses, or leaves alone, the drift report and its seven side sections, the rule detection record, and version skew states
 ---
 
 # Install and sync
 
-The behavior notes behind the verbs listed in `commands.md`. Each one records what the verb writes, what it refuses, and what it deliberately leaves alone.
-
-## Domain sync
-
-`canon gov sync` updates only rules already present under
-`.claude/rules/canon/` and never adds new ones. That wrapper marks the
-toolkit-owned half of the tree, and it is the whole of what the walk reaches:
-`.claude/rules/project/` sits outside it by location and is never read,
-matched, or reported on, which is how project-authored rules survive. It also
-removes a stale `.claude/GOV.md` from the retired build. Use
-`canon gov install` to add rules.
-
-Everything under `.claude/rules/canon/` belongs to the toolkit, so a rule
-there that the toolkit no longer ships is deleted on sync, edited or not. That
-is how a retired rule stops loading in a target. A renamed rule
-the toolkit declares in `governance/renames.toml` moves instead: the sync
-installs the rule under its new name and deletes the old file, whether or not
-the target's stamp records a stack. Local edits to the old file are not
-carried, and the sync says so. The sync lists each change by path before it
-applies, and the target's git diff is the record afterwards. `canon sync
---check` lists the same file as `retired` or `renamed` before any sync runs.
-
-A rule that only routed a path to a standard now names the skill that owns
-the guidance. The tasks, plan, context, and skill rules are hand-written at
-`canon/` and `claude/skill.md`. A held copy of each syncs in place, and the
-groundwork, intake, session, design, readme, and rule copies are deleted as
-retired. The markdown rule is hand-written at `writing/markdown.md` and names
-the `markdown-craft` skill, and `800-prose` retires.
-
-A project's own rules belong under `.claude/rules/project/`, where a slug
-the toolkit also ships collides with nothing, and a rule placed under `canon/`
-instead is lost on the next sync.
-
-A sync never deletes a rule that a newer canon release installed. The stamp
-records the newest release that synced governance, and an older binary holds
-every rule it finds no source for, naming both releases and asking for an
-upgrade, rather than deleting what it cannot recognize.
-
-A renamed rule loses its old file and gains nothing under the new name unless
-the target's stamp records the stack it installed, in which case the new name
-shows as `missing` and `canon gov install <stack>` adds it.
-
-Design's own orphans are the target's overrides and are meant to stay where
-they are, so `canon design sync` deletes nothing it finds no source for.
-
-`canon design install` copies one toolkit-owned file to
-`.claude/design/base.css` and creates no override. A project overrides a value
-by writing `.claude/design/project/` itself, which `canon design sync` never
-touches, because that subfolder is project-authored by location the way
-`.claude/rules/project/` is. An override named exactly like the shipped file is
-still the project's.
-
-A project's faces sit in that subfolder too, under `fonts/` with plain
-`@font-face` rules in `fonts.css`. `canon design fonts add <file> --family <name>`
-copies a `woff2`, `woff`, `ttf`, or `otf` face in and appends its rule
-(`--weight`, `--style`, `--json`), refusing bytes that disagree with the
-extension as `invalid-font`. `fonts list --json` emits one row per rule, with a
-`problem` where the file is missing or lies outside the subfolder.
-
-The override ships absent rather than empty. An empty file is one the project
-did not ask for and did not write, the reconciliation already handles a missing
-side, and an empty override invites a target to fill it before it has an
-opinion.
-
-Nothing arrives on a project that has not run `canon design install`. The
-domain is detected by that folder existing, so `canon sync` skips it entirely on
-a target that never installed it, and the unstamped line at the end of
-`canon sync --check` stays quiet about it for the same reason. Governance is
-named there when it is absent and design is not, because a managed project
-without governance has yet to install what every project carries, while one
-without design chose that.
-
-When the target's install recorded a stack, `canon gov sync` also reports a
-rule that stack lists and `.claude/rules/canon/` does not hold, as a `missing`
-entry carrying no change. This is what makes a target whose recorded sync point
-postdates a rule joining its stack still see that rule: the report reads the
-target's current entitlement against its current tree rather than diffing
-from an anchor a later sync could advance past the rule's own commit. A
-target whose install predates the recorded chain falls back to the same
-rule-folder-inference `newRules` uses in `canon sync --check`.
-
-## Tooling diff and sync
-
-`canon tooling diff <stack> [target]` is the read-only comparison, and a session asking what differs reaches for it by default. It writes nothing and exits 1 when anything differs and 0 when nothing does, so it gates CI. `--json` adds the scan record on stdout with `ok: true`, and the frame goes to stderr. A refusal such as an unknown stack, an excluded stack, or a toolkit-root target still exits 1 and answers `{ ok: false, reason, message }`, so a caller branches on the record and reads a typo'd stack name as a refusal rather than as drift.
-
-The record carries a `withheld` array beside `configs`, each entry `{ rel, stack, present }`. It fills only when the target sits below its git root: every `.github/` config or seed moves there rather than into `configs` or `seeds`, and none of them counts toward the exit, since GitHub never reads a workflow outside the root. `present` marks a copy an earlier sync already left in the subfolder, which the sync reports and never deletes. At a root, and for a target outside any repository, `withheld` is empty.
-
-`canon tooling sync <stack> [target] --check` reports the same list and always exits 0. It stays for scripts that already call it. `sync` itself writes only under `--write`, and a headless run with neither flag reports and exits 1.
-
-## Install guards
-
-`canon gov install` requires its first argument under
-`CANON_NON_INTERACTIVE=1`. It used to fall back to an interactive picker that
-resolved to its first option headlessly, so a call with no stack installed
-whichever stack sorted first. It now reports the valid names on stderr and
-exits 1.
-
-Every documented agent path already passes the argument, including
-`canon init`. The confirm-then-apply prompt after it still resolves to `Yes`
-headlessly, so a call that names its stack is unchanged.
-
-`--add` with no stack installs the named rules into the one positional, or the
-current directory, and keeps the recorded chain. Pass `./node` to force a target
-named like a stack. [Rule detection](gov-detect.md) proposes the names.
-
-`canon gov install` also refuses the toolkit root as a target. It resolves the
-target before anything else, so a path that does not exist fails rather than
-being scaffolded.
-
-A target still on the flat installed-rule layout from an older release reports
-"No governance surfaces found in target" from `canon gov sync` and exits 0,
-since sync reads only the current wrapped destination. `canon gov install`
-against that same target writes a second, wrapped copy beside the flat one
-rather than reading or clearing it, so the target ends up holding both, and
-Claude Code loads both copies of an edited rule at session start. Run `canon
-migrate rule-layout` first to move a target off the flat layout, which reports
-what it would move and applies it under `--write`.
-
-## Governance regen
-
-`canon gov regen` is the one governance verb that runs against the toolkit root,
-because the `.claude/rules/` it writes there is produced output rather than an
-operator's working copy. It reads the stack recorded in `internal/governance.toml`
-into `.claude/rules/canon/`, installs anything under `internal/rules/` into a
-separate `.claude/rules/internal/`, and clears both destinations first so a
-rule the record stopped naming disappears. `internal/` is what this repository
-alone carries: no `canon gov install` or `canon gov sync` target ever writes it,
-since a target has no rule source of its own that ships nowhere.
-
-It takes `--root <path>` and defaults to the toolkit root, prints nothing on success, and
-reports the reason on stderr with exit 1 when the record names a stack or rule
-that does not resolve. The Consumed copies stage of `bun run check` calls it and
-asserts both the generated rule folders and the consumed copy are committed.
-
-## Whole-project sync
-
-`canon sync` runs every installed domain sync, then offers to commit the result
-and open a pull request. Under `CANON_NON_INTERACTIVE=1` it applies the domain
-syncs and then refuses the git workflow, reporting the branch and commit it
-would have created and exiting 0. Nothing is staged, committed, or pushed
-headlessly.
-
-Run it interactively to reach the commit and pull request options.
-It also refuses a target whose working tree is dirty, so commit or stash first.
-
-## Drift reporting
-
-`canon sync --check` reports drift and writes nothing, so it needs no clean tree
-and is safe to run at any time. Each file is classified as `stale` when it still
-matches what the toolkit installed, `customized` when the project edited it,
-`stranded` when it sits at a path the toolkit no longer installs to, `orphaned`
-when the project authored it, or `drifted` when no stamp covers it. Governance
-also reports `missing`, for a rule the target's recorded stack lists that its
-tree does not hold at all, `retired`, for a rule under
-`.claude/rules/canon/` the toolkit no longer ships, which the next sync
-deletes, and `renamed`, for one the toolkit ships under a new name, which the
-next sync moves. A `retired` or `renamed` file counts toward `--exit-code`,
-since one sync clears it.
-
-Use `--json` for the machine-readable report and `--exit-code` to fail a CI job. Orphaned
-and missing files are both excluded from that exit code: a project-authored
-rule never converges, and a sync that added a missing one silently changes
-what the project is governed by, which stays a separate command an operator
-chooses to run. Attribution reads `canon/config/config.json` first, which every
-install and sync now writes, and falls back to `.claude/canon/config.json` for
-a target that has not moved.
-
-A target installed before stamping shipped has no such file, and neither does
-that fallback do anything to migrate it. A target stamped before the file
-moved into `.claude/canon/` still carries it at the retired
-`.claude/canon.json`, and `canon sync --check` reads that path when the current
-one is absent, reporting it rather than moving it. Only a target carrying
-neither path falls back to the toolkit's own git history.
-Installed content matching any
-version that history ever published proves the file is untouched, so it reports
-`stale` naming the commit it came from, and content matching no published
-version stays `drifted`. A toolkit reached outside a git clone, which is what a
-registry install is, cannot run that fallback and reports
-`historyUnavailable` alongside the unattributed files.
-
-Each domain carries its own toolkit anchor in that file, so syncing one domain
-never advances the revision another measures from, and each reports the upstream
-commits touching its own source path. The `covers` field names the domains a
-target has actually stamped, so a domain that was never stamped is legible
-rather than reading as a clean one.
-
-### Tooling
-
-Tooling records the stack chain an install resolved rather than per-file hashes,
-since `src/tooling/` runs its own inject machinery and has no walk to attribute.
-The chain is ordered nearest stack first, which is what a `--skip` run needs:
-recording the leaf alone would send the next report measuring against a layer the
-target deliberately does not carry. The report loads exactly those stacks, scans
-them the way `canon tooling diff` would, and counts what differs per category
-under `tooling.counts`.
-
-`measured` is the field the section exists for. A target carrying no chain
-reports `measured: false`, which separates tooling nobody has ever looked at from
-tooling that is current. Both produce zero changes otherwise. Every target
-installed before the record shipped starts unmeasured and leaves on its next
-`canon tooling sync`, since backfilling would mean inferring the chain from
-installed files, which is the guess the record replaces.
-
-A workspace root records nothing, because each package resolves its own chain and
-one written at the root would be that same guess. Run the check against a package
-to measure it. Tooling never counts toward `--exit-code`, on the grounds seeds
-are already excluded on, since it reports golden configs a project is expected to
-edit and a job counting those stays red with no remedy.
-
-### Surfaces reported beside the domains
-
-Seven sections sit outside the per-domain scan, because each names something
-that walk cannot see: `seeds`, `superseded`, `unmigrated`, `unmovedSurfaces`,
-`newSkills`, `newRules`, and `reverse`. None of them produces a change, and no sync command
-applies any of them. What each reports, the managed-target gate they share, and
-which count toward `--exit-code` are in `drift-surfaces.md`.
+What each verb writes, refuses, and leaves alone. `canon --help` lists flags.
 
 ## Bootstrap
 
-`canon init` installs up to five core domains and reports each one independently. A
-domain that fails does not abort the run, so the command finishes the rest and
-exits 1 naming the failures. Passing any flag skips the confirmation prompt,
-which is what makes it scriptable.
+`canon init [path]` installs up to five core domains and reports each independently. A failed domain does not abort the run, which finishes the rest and exits 1 naming the failures.
 
-`--stack` defaults to `base`, and the default
-does not read as a passed flag, so a bare `canon init` installs governance and
-still prompts. `--skip` takes `wiki`, `governance`, and `records`, and warns
-without aborting on any other value. Records has nothing to run non-interactively,
-since the private backup repository does not exist yet at scaffold time, so its
-step only prints the one-time setup reminder and `--skip records` silences it.
+Any flag skips the confirmation prompt, but the `base` default of `--stack` does not count, so a bare `canon init` still prompts. `--skip` takes `wiki`, `governance`, and `records`, and warns on any other value.
 
-## Unguarded tooling primitives
+## Governance install
 
-`canon tooling inject` and `canon tooling prune-gitignore` are the unguarded
-primitives beneath `sync`. They apply one stack with no scan and no prompt, and
-they deliberately skip the check that rejects `claude`, which is how `canon
-claude` drives its own stack through them. Use `sync` unless you are scripting
-provisioning. Both frame their own output, so pass `--nested` when calling from
-inside an already-open frame.
+- `canon gov install <stack> [target]` needs the stack under `CANON_NON_INTERACTIVE=1`, else lists the valid names on stderr and exits 1
+- It refuses the toolkit root and a missing path
+- `--add <rules>` with no stack installs into the one positional, or the current directory, keeping the recorded chain. Pass `./node` for a target named like a stack.
+
+A flat installed-rule layout makes `gov sync` report "No governance surfaces found in target" and exit 0, and `gov install` write a second, wrapped copy. Run `canon migrate rule-layout` first.
+
+## Governance sync
+
+`canon gov sync [target]` updates what `.claude/rules/canon/` holds and adds nothing. `.claude/rules/project/` is never read, so put project rules there.
+
+- A rule the toolkit no longer ships is deleted, edited or not
+- A rule renamed in `governance/renames.toml` moves, and its local edits are dropped
+- A rule the recorded stack lists and the tree lacks reports as `missing` with no change
+- A retired `.claude/GOV.md` is removed
+- A binary older than the stamp holds every rule it has no source for and asks for an upgrade
+
+After a rename the new name shows as `missing` when the stamp records a stack, and `gov install <stack>` adds it.
+
+`canon gov regen [--root <path>]` runs against the toolkit root alone. It rewrites `.claude/rules/canon/` and `.claude/rules/internal/` from `internal/`, and exits 1 when the record names something that does not resolve.
+
+## Rule detection
+
+`canon gov detect [target] [--stack <stack>] [--json]` proposes opt-in rules and writes nothing, from `governance/detect.toml` evidence keyed by rule basename.
+
+- `deps` match package names in `package.json`, `pyproject.toml`, `go.mod`, and `composer.json`
+- `files` are globs matched against git-listed paths and their folders, to depth two. Install what the operator keeps with `canon gov install --add <rules> <target>`.
+
+```json
+{
+  "target": "",
+  "stack": "node",
+  "proposals": [
+    {
+      "rule": "react",
+      "evidence": [{ "kind": "dep", "match": "react", "path": "package.json" }]
+    }
+  ]
+}
+```
+
+- `kind` is `dep` or `file`, and `stack` is null without `--stack`, which drops rules that stack resolves
+- A glob without a wildcard is also tested on disk, an unparseable manifest contributes nothing, and outside git the walk skips `.git`, `node_modules`, `vendor`, and `.venv`
+- It exits 0 on any readable target and 1 for a missing target or an unresolved stack
+
+## Tooling
+
+- `canon tooling diff <stack> [target]` is the read-only comparison, exiting 1 on any difference
+- A `--json` refusal answers `{ ok: false, reason, message }`, so branch on the record
+- `withheld` entries are `{ rel, stack, present }`, hold every `.github/` file below the git root, and count toward no exit
+- `present` marks a copy an earlier sync left, which is reported and never deleted
+- `canon tooling sync <stack> [target]` writes only under `--write`. `--check` reports and exits 0, and a headless run with neither flag exits 1.
+
+`canon tooling inject` and `prune-gitignore` apply one stack with no scan or prompt, and the latter prints the number removed on stdout. Use `sync` unless scripting provisioning, and pass `--nested` inside an open frame.
+
+## Design
+
+- `canon design install` copies `base.css` to `.claude/design/` and creates no override
+- Project overrides live in `.claude/design/project/`, which `design sync` never touches
+- `canon design fonts add <file> --family <name>` copies a `woff2`, `woff`, `ttf`, or `otf` face into `project/fonts/` with its `fonts.css` rule, and refuses mismatched bytes as `invalid-font`
+- `fonts list --json` flags a missing or out-of-folder file as a `problem`
+- `canon sync` skips the domain where `design install` never ran
+
+## Whole-project sync
+
+`canon sync [path]` runs every installed domain sync, then offers a commit and pull request. Headlessly it applies the syncs, refuses the git workflow, reports what it would have made, and exits 0. It refuses a dirty working tree.
+
+## Drift report
+
+`canon sync --check` writes nothing and needs no clean tree. `--json` emits the record, `--exit-code` fails CI.
+
+| State        | Meaning                                                            |
+| ------------ | ------------------------------------------------------------------ |
+| `stale`      | Still matches what the toolkit installed                           |
+| `customized` | The project edited it                                              |
+| `stranded`   | Sits at a path the toolkit no longer installs to                   |
+| `orphaned`   | The project authored it                                            |
+| `drifted`    | No stamp covers it                                                 |
+| `missing`    | Governance only. The recorded stack lists it and the tree lacks it |
+| `retired`    | Governance only. The toolkit no longer ships it                    |
+| `renamed`    | Governance only. The toolkit ships it under a new name             |
+
+`retired` and `renamed` count toward `--exit-code`. `orphaned` and `missing` do not.
+
+- Attribution reads `canon/config/config.json`, then `.claude/canon/config.json`, then the retired `.claude/canon.json`, and moves none
+- With none it matches the toolkit's git history, where a published version is `stale` and anything else `drifted`. A registry install has none and reports `historyUnavailable`.
+- `covers` names the domains the target stamped, and each domain keeps its own anchor
+- Tooling records its stack chain, nearest first, and never counts toward `--exit-code`
+- `tooling.measured: false` means none was recorded. It clears on the next `canon tooling sync`. A workspace root records nothing, so run the check against a package.
+
+## Side sections
+
+Seven sections sit outside the per-domain scan, and no sync applies them. Each returns empty when `managed` is false. A managed target holds `.claude/`, a `CLAUDE.md`, or a root-layout domain, and an unmanaged one is routed to `canon init`.
+
+| Section           | Reports                                                                                 | Exit |
+| ----------------- | --------------------------------------------------------------------------------------- | ---- |
+| `seeds`           | Each seed as `matching`, `stale`, `drifted`, or `missing`. Merge an edited one by hand. | No   |
+| `superseded`      | A file a newer seed folder replaced, as `replacedBy`. Never deleted.                    | No   |
+| `unmigrated`      | A domain at its old root, with `rootPath`, `installPath`, and a count                   | Yes  |
+| `unmovedSurfaces` | A surface at its `.claude/` spelling, as `rel` and `movesTo`                            | No   |
+| `newRules`        | A rule the recorded stack lists and the tree lacks                                      | No   |
+| `newSkills`       | A plugin skill the target has not seen. Needs no command.                               | No   |
+| `reverse`         | `unclaimed` folders the toolkit once shipped                                            | No   |
+
+The Exit column marks what counts toward `--exit-code`. `canon migrate surface-roots` closes `unmovedSurfaces`, and `canon gov install` closes `newRules`. A `reverse` entry is attributed `dropped`, `project`, or `unattributed`.
+
+`newRules` and `newSkills` come back empty on a shallow clone or registry install, which is unmeasured rather than clean.
+
+## Version skew
+
+`canon sync --check` and `canon claude skills drift` report the installed version against the newest published one in `skew.state`. The report never changes an exit code, so branch on the field.
+
+| State     | Meaning                                              |
+| --------- | ---------------------------------------------------- |
+| `behind`  | Names `canon upgrade` as the remedy                  |
+| `current` | Installed matches published                          |
+| `unknown` | Carries the reason the registry could not be reached |
+
+`canon upgrade --json` adds `pending`, where the checkout holds a release npm does not serve yet. `checkout` names it, `message` starts `CLI stays at`, and the exit is 0.

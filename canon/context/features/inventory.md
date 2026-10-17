@@ -7,7 +7,7 @@ description: The route walk behind canon inventory, why it reports a listing rat
 
 ## Overview
 
-`canon inventory` walks every route a project declares and reports one computed property per element, grouped by the answer rather than by the component. The command surface and its refusal reasons live in `docs/agents/commands.md`. This entry holds why it is shaped the way it is.
+`canon inventory` walks every route a project declares and reports one computed property per element, grouped by the answer rather than by the component. The command surface and its refusal reasons live in `canon docs overview`. This entry holds why it is shaped the way it is.
 
 Its first subject is the focus ring, which `governance/rules/ui/a11y.md` states three rules against with no existing measurement. The command is an instrument that answers across every route, distinct from a capture that shows one.
 
