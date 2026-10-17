@@ -1,15 +1,15 @@
 ---
 title: Skill references
-subtitle: The shape references a plugin skill owns, why each lives with the skill writing its artifact, and the decisions behind the plan, tasks, publish, teach, and authoring families. Start with overview.
+subtitle: The shape references a plugin skill owns, why each lives with its skill, and the decisions behind each family. Start with overview.
 ---
 
 # Skill references
 
-The shape references a plugin skill owns, why each lives with the skill writing its artifact, and the decisions behind the plan, tasks, publish, teach, and authoring families. Start with overview.
+The shape references a plugin skill owns, why each lives with its skill, and the decisions behind each family. Start with overview.
 
-- [Authoring](authoring.md): The canonical template and where it stops, the success criterion and changing on a failure, the sibling section a new rule falsifies, scope statements and the three places jurisdiction is written, rules beside references, the markdown ban set, and the markdown-craft against write-human split
-- [Overview](overview.md): Where a shape reference lives, why each sits with the skill writing its artifact rather than in a shared corpus, how a rule reaches one at path time, and which file records the decisions behind each family
-- [Plan](plan.md): What the plan reference fixes and why its section markers are mixed, the inverted answer contracts, where an execution-time deviation is recorded, how a constraint declares its expiry, and the branch description cap a plan filename feeds
-- [Publish](publish.md): The cross-reference form split by destination, the destination test every scan under it inherits, the record-root reading, and the title-format check beside them
-- [Surfaces](surfaces.md): The teach and glossary split, the workspace ordinal naming, the Mermaid aspect rule, and when a reference earns a drafting skill
-- [Tasks](tasks.md): The tasks readiness test widened to admit a row waiting on an external condition, the board reference split from tasks, and the origin and archiving rationale
+- [Authoring](authoring.md): The canonical template, the success criterion, scope statements, the sibling-section trap, the markdown ban set, and the craft split
+- [Overview](overview.md): Where a shape reference lives, why it sits with its skill, how a rule reaches one at path time, and where each family's decisions are recorded
+- [Plan](plan.md): What the plan reference fixes, the inverted answer contracts, where a deviation is recorded, and how a constraint expires
+- [Publish](publish.md): The cross-reference form split by destination, the destination test every scan inherits, the record-root reading, and the title-format check
+- [Surfaces](surfaces.md): The teach and glossary split, workspace ordinal naming, the Mermaid aspect rule, and when a reference earns a drafting skill
+- [Tasks](tasks.md): The readiness test widened for external conditions, the board split from tasks, and why a merge closes a task and the archive moves unasked
