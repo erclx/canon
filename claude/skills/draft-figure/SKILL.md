@@ -30,7 +30,7 @@ Apply the standard's bar: a relationship, a boundary, a path, or a before-and-af
 
 Take the first that matches, and state which path was picked and why in one sentence:
 
-1. **A teach lesson**, meaning the destination is a lesson page in a learning workspace's `lessons/` folder: the hand-drawn path, whatever the subject's shape, an architecture view included. The lesson letters its figures in a hand font the renderer cannot load, so a Mermaid render measures its labels in a narrower face and the lesson clips them.
+1. **A teach lesson**, a page in a learning workspace's `lessons/` folder: the hand-drawn path, any shape. The renderer cannot load the lesson's hand font, so Mermaid labels measure narrow and clip.
 2. **An architecture view**, meaning the request names system context, components, request flow, data pipeline, or deployment: the architecture set, then the Mermaid path.
 3. **Graph-shaped**, meaning the relationship, boundary, or path is already what a flowchart or sequence diagram expresses: the Mermaid path.
 4. **Anything else**, a spatial or physical arrangement no flowchart reduces to: the hand-drawn path.
@@ -41,7 +41,7 @@ The standard states this as a render-first policy rather than a ban on any tool-
 
 Read the reference for the path Step 3 picked and follow it:
 
-- Architecture set: read `${CLAUDE_SKILL_DIR}/references/architecture-set.md` to shape the view, then `${CLAUDE_SKILL_DIR}/references/mermaid-path.md` to draw and render it. The architecture branch always renders and reads back. An unrendered fence is not a figure.
+- Architecture set: shape the view per `${CLAUDE_SKILL_DIR}/references/architecture-set.md`, then draw, render, and read back per `${CLAUDE_SKILL_DIR}/references/mermaid-path.md`
 - Mermaid path: read `${CLAUDE_SKILL_DIR}/references/mermaid-path.md`.
 - Hand-drawn path: read `${CLAUDE_SKILL_DIR}/references/hand-drawn.md`.
 
@@ -50,17 +50,17 @@ Read the reference for the path Step 3 picked and follow it:
 - Wrap the drawing in a `<figure>` element with a `<figcaption>` naming what to take from the figure, never what it shows. Let it run wider than the surrounding prose column.
 - On the Mermaid path, run the read-back `mermaid-path.md` states before confirming.
 - On every path, confirm the figure still reads once every color and font it depends on is stripped to its fallback, per the standard's own working-figure bar.
-- When the destination is a rendered page, an HTML file a browser loads, the check that counts is the figure inside that page, which Step 6 captures once the figure is written, on either path. A markdown destination has no page to load, so the checks above are the whole check there.
+- On a rendered page, an HTML file a browser loads, the check that counts is the figure in the page, which Step 6 captures on either path. A markdown destination's whole check is the checks above.
 
 ## Step 6: confirm and write
 
-Show the destination path, the decided path, and the full `<figure>` markup before writing. Confirm with the user, since the path decision and the render verdict are judgment calls with no diff to preview either against.
-
-Write the figure into the destination document at the location the user named.
+Show the destination path, the decided path, and the full `<figure>` markup before writing. Confirm with the user, since the path decision and the render verdict are judgment calls with no diff to preview, then write the figure where the user named.
 
 When the destination is a rendered page, read the `## Capture in the page` section of `${CLAUDE_SKILL_DIR}/references/hand-drawn.md` and run it, on the Mermaid path as well as the hand-drawn one, within the same two correction passes the read-back allows.
 
-Renders and captures under `.canon/tmp/figures/` are verification artifacts, and the scratch PNGs, the stamps the capture writes beside them, and the JSON config are deleted once the checks confirm, since only the SVG ships. Keep the `.mmd` source, which is what a later refresh redraws from.
+### Cleaning up
+
+Renders and captures under `.canon/tmp/figures/` are verification artifacts. Delete the scratch PNGs, the stamps beside them, and the JSON config once the checks confirm, since only the SVG ships, and keep the `.mmd` source a later refresh redraws from.
 
 ## Output
 
@@ -74,6 +74,8 @@ Renders and captures under `.canon/tmp/figures/` are verification artifacts, and
 ```
 
 ### After confirmation
+
+Report the write in this shape.
 
 ```plaintext
 ✅ Drafted figure in <path>

@@ -11,7 +11,8 @@ Generate GitHub Actions workflow files for CI pipelines. Enforce parallel job ex
 
 ## Guards
 
-- A request for what runs inside a deploy, publish, or release job stops at the gate. Credentials, environments, and deploy targets are invisible to this skill, so emit the job with its `needs` wiring and a placeholder step, then name what the caller fills in. Never guess a deploy command.
+- A request for what runs inside a deploy, publish, or release job stops at the gate, since credentials, environments, and targets are invisible here. Never guess a deploy command.
+- Emit such a job with its `needs` wiring and a placeholder step, then name what the caller fills in
 - The build, test, and deploy commands belong to the project. Read them from its scripts rather than asserting a second copy in the workflow.
 
 ## Workflow setup
@@ -26,9 +27,9 @@ Generate GitHub Actions workflow files for CI pipelines. Enforce parallel job ex
 
 ## Job granularity
 
-- Start a new pipeline with the checks that share setup in one job: static analysis, unit tests, and build. A project with no run history has nothing to measure, and one job is the shape that costs least to reverse.
-- Keep them in one job while the gate runs under roughly two minutes end to end. Each extra job repays checkout, dependency install, and toolchain setup before it reaches a stage, so a split at that duration costs more than the parallelism returns.
-- Split once a run log puts the gate past that, then apply the dependency rules below. The run log is the revision trigger rather than the entry condition, since repository size and stage count answer nothing.
+- Start a new pipeline with static analysis, unit tests, and build in one job, since they share setup. A project with no run history has nothing to measure, and one job costs least to reverse.
+- Keep them in one job while the gate runs under roughly two minutes. Each extra job repays checkout, dependency install, and toolchain setup, so a split at that duration costs more than it returns.
+- Split once a run log puts the gate past that, then apply the dependency rules below. The run log is the trigger, since repository size and stage count answer nothing.
 - Give E2E, release, and deploy their own jobs from the start. Each carries a data dependency or a gate, so this rule never folds them into the check job.
 
 ## Job dependencies
