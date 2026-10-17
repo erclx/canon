@@ -71,7 +71,7 @@ The `foreign` prefix is the folder `session-worktree` creates under, a conventio
 
 Run `canon sessions list --json` once for the whole enumeration, never once per row. A row is `occupied` when a live session's `worktree` equals its `path`.
 
-- Resolve both sides with `realpath` before comparing, since a session registered from a second clone reports a path under that clone
+- Resolve both sides with `realpath` before comparing, since a session from a second clone reports a path under that clone and a raw compare would hold nothing back
 - A resolved session `worktree` outside `MAIN_ROOT` names a different checkout, so it marks no row occupied
 
 The roster is unreadable when the command exits non-zero, when its JSON carries a `reason` instead of a populated `sessions` array, or when `sessions` is non-empty and no entry carries a `worktree` key. An older binary prints that last shape, which cannot be told apart from nothing occupied.
