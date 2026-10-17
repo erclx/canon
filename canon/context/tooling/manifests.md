@@ -7,7 +7,7 @@ description: Manifest blocks and what each injects, which layer wins a duplicate
 
 ## Overview
 
-Each stack's `manifest.toml` controls what sync injects, and the extends chain decides which layer's file a target receives. `internal/rules/claude/tooling-reference.md` carries the syntax invariants and the manifest-to-reference symmetry, globbing `tooling/*/manifest.toml` beside `tooling/*/reference.md` so an edit to either side loads both, since the manifest is the side that moves first. `internal/standards/tooling-reference.md` carries the symmetry in prose.
+Each stack's `manifest.toml` controls what sync injects, and the extends chain decides which layer's file a target receives. `internal/rules/claude/tooling-reference.md` carries the syntax invariants and the manifest-to-reference symmetry, globbing `tooling/*/manifest.toml` beside `tooling/*/reference.md` so an edit to either side loads both, since the manifest is the side that moves first. `.claude/skills/internal-tooling/references/tooling-reference.md` carries the symmetry in prose.
 
 ## Layout
 

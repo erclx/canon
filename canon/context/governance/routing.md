@@ -25,7 +25,7 @@ One candidate passes both halves and stays deferred. A child folder carrying no 
 
 A standard governing a file path carries a rule routing to it, so an edit loads the standard without the matching skill being invoked. The route makes a standard reachable from the action rather than from a session that thought to look.
 
-- `tooling-reference` is authored under `internal/rules/claude/`, because `internal/standards/tooling-reference.md` governs a surface a target never authors, and shipping the route would point at a path no install creates. It globs `manifest.toml` beside `reference.md`, since a rule protecting a symmetry has to fire from either side and the manifest moves first.
+- `tooling-reference` is authored under `internal/rules/claude/`, because `.claude/skills/internal-tooling/references/tooling-reference.md` governs a surface a target never authors, and shipping the route would point at a path no install creates. It globs `manifest.toml` beside `reference.md`, since a rule protecting a symmetry has to fire from either side and the manifest moves first.
 
 `governance/rules/canon/context.md` carries a write-time policy beside its read-time one, so editing a domain leaves its context entry conforming. It is hand-written like the two record rules, since its standard lives in `context-fold`. It ships to every `base` consumer, so each write-time bullet states an outcome of the edit rather than a backlog to drain, which also reads correctly in a project with no entries yet.
 

@@ -42,7 +42,7 @@ When modifying files in `tooling/base/configs/`:
 
 When modifying `tooling/<stack>/configs/` or `tooling/<stack>/seeds/`:
 
-- Update `tooling/<stack>/reference.md` if the intent or rationale changed. Typo fixes and dictionary term additions do not count.
+- Update `tooling/<stack>/reference.md` per `references/tooling-reference.md` if the intent or rationale changed. Typo fixes and dictionary terms do not count.
 - Validate headless through `canon tooling verify <stack>`, which reports pass or fail per phase
 
 When adding deps or scripts to `manifest.toml`:
@@ -68,4 +68,4 @@ Agent-facing prose seeds under `tooling/*/seeds/` use lowercase filenames, such 
 ## Reference
 
 - `canon/context/tooling/index.md`: system overview, configs vs seeds vs references, extends chain, manifest authoring
-- `internal/standards/tooling-reference.md`: conventions for writing reference.md docs
+- `references/tooling-reference.md`: conventions for writing reference.md docs
