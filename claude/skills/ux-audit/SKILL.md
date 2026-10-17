@@ -10,7 +10,8 @@ metadata:
 ## Guards
 
 - If no UI files exist in the project (no JSX, TSX, Vue, Svelte, or HTML under `src/`), stop: `❌ No UI surfaces found to audit.`
-- If the request asks what the interface costs to paint, block, or shift at runtime, run nothing and name `ux-measure`. This skill reads source and reaches no number a browser produces. Contrast is the exception and stays here, since it is computable from two color values in the stylesheet's custom properties, which the design document's lead names.
+- If the request asks what the interface costs to paint, block, or shift at runtime, run nothing and name `ux-measure`, since this skill reads source and reaches no number a browser produces
+- Contrast is the exception and stays here, since two color values in the stylesheet's custom properties compute it, and the design document's lead names that stylesheet
 
 ## Step 1: read context
 
@@ -19,7 +20,8 @@ Read these in parallel from the project root, skipping any that do not exist:
 - `CLAUDE.md`: project type and conventions
 - `canon/DESIGN.md`: visual intent, typography, and spacing rules, plus the stylesheet its lead names for the values
 - `canon/REQUIREMENTS.md`: feature scope and non-goals
-- A committed capture beside the surface's own source, when the project has one. A rendered surface reads differently composed than it reads written, and a capture is the only artifact here that shows the composed result rather than the markup. Absent one, note that this audit reads source only, and keep going. This is a stated fallback, not a stop: a project with no capture yet, or a capture mid-rebuild, still gets a source-only audit rather than losing the skill entirely.
+- A committed capture beside the surface's own source, when the project has one, since only a capture shows the composed result rather than the markup
+- Absent one, note that this audit reads source only and keep going. A project with no capture yet still gets a source-only audit rather than a stop.
 
 ## Step 2: identify surfaces
 
@@ -36,7 +38,7 @@ For each surface, look for:
 
 Use `canon/DESIGN.md` as ground truth for intent where it exists. Observations only, no implementation suggestions or fixes.
 
-Where Step 1 found a committed capture for this surface, judge composed output (spacing, overlap, contrast, wrapping) against it rather than inferring layout from markup alone, which reports what the surface renders rather than what its source implies. Where none exists, judge from source alone and say so in that surface's findings, since a source-only read cannot see what only a render would show.
+Where Step 1 found a committed capture for this surface, judge composed output (spacing, overlap, contrast, wrapping) against it rather than inferring layout from markup. Where none exists, judge from source and say so in that surface's findings, since a source read cannot see what only a render shows.
 
 ## Step 4: report and persist
 
@@ -63,13 +65,10 @@ If nothing is wrong, use: `✅ No observations.`
 
 Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`. Fall back to `latest` on an empty result.
 
-Write the full report directly to `.canon/review/ux-audit-<slug>.md` at the main worktree root, not the current worktree. Resolve that root the way `session-worktree` does. Create the directory if it does not exist. Always overwrite.
-
-The report is a main-root write, so it goes out as a heredoc, routed the way `session-worktree` states.
-
-If there are no observations, write `✅ No observations.` to the file with a timestamp.
-
-The `.canon/review/` directory is gitignored. Do not stage or commit the file.
+- Write the full report to `.canon/review/ux-audit-<slug>.md` at the main worktree root, resolved the way `session-worktree` does, creating the directory if needed and always overwriting
+- The report is a main-root write, so it goes out as a heredoc, routed the way `session-worktree` states
+- With no observations, write `✅ No observations.` to the file with a timestamp
+- `.canon/review/` is gitignored, so do not stage or commit the file
 
 ### Chat output
 

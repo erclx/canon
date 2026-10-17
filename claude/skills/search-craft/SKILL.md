@@ -7,9 +7,9 @@ metadata:
 
 # Search craft
 
-A session reaching outside the project tends to run one generic search and take whatever ranks highest. Ranking rewards pages written to rank, so a field's thin "complete guide" pages and its advocates crowd out its reference material, and one search gives nothing to check a wrong fact against. This skill carries the step before the search: work out where the field's authoritative material lives, search there, and search openly beside it.
+A session reaching outside the project tends to run one generic search and take whatever ranks highest. Ranking rewards pages written to rank, so thin guides crowd out a field's reference material, and one search gives nothing to check a wrong fact against.
 
-The procedure that loaded this skill owns what the result is for and where it is written. Nothing here formats a citation or decides what a finding means.
+This skill carries the step before the search. Work out where the field's authoritative material lives, search there, and search openly beside it. The procedure that loaded it owns what the result is for, where it is written, and what a finding means.
 
 ## Name the field
 
@@ -26,8 +26,8 @@ The procedure that loaded this skill owns what the result is for and where it is
   - the official statistics office or regulator that publishes the numbers
   - the project's own repository, changelog, or issue tracker, for a piece of software
 - Derive the names. Never reach for a remembered list of sites per category, since a list rots with nobody noticing and the field's own kind of authority is what the derivation tests.
-- Search for the authorities first when unsure who they are, such as asking where the field's practitioners publish or what its practitioners cite, and scope the real search only after that answer is read.
-- As an illustration of deriving, not a list to reuse: a question on a browser feature's support sits in web platform engineering, whose authorities are the specification, the reference docs practitioners cite, and the compatibility tables built from browser releases. Each new question derives its own.
+- Search for the authorities first when unsure who they are, asking where the field's practitioners publish or what they cite, and scope the real search only after reading that answer
+- Each new question derives its own names. A browser feature's support, for one, sits in web platform engineering, whose authorities are the spec, cited docs, and compatibility tables.
 
 ## Search twice
 
@@ -39,7 +39,7 @@ The procedure that loaded this skill owns what the result is for and where it is
 
 ## Prefer a structured source
 
-- Prefer a source's public API over a fetched and summarized HTML page where one exists. An API returns the dates, authors, and identifiers a citation needs, and a summary of the page can drop or blur them.
+- Prefer a source's public API over a fetched and summarized HTML page where one exists. An API returns the dates, authors, and identifiers a citation needs, which a summary can drop.
 - Reach the API with a plain request when it needs no key, rather than writing a wrapper for one search.
 
 ## Access note
@@ -69,6 +69,8 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 - You named an authority because it is a site you remember, not because it is the kind of body the field trusts.
 
 ### Results and access
+
+These flags fire after the search has run.
 
 - The scoped and open results disagree and the output does not say so.
 - You are citing a scoped result whose domain you have not checked.
