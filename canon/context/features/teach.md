@@ -19,9 +19,9 @@ Reads a workspace, resolves lessons, renders the lesson body, and splices the ch
 
 - A workspace is `<nn>-<topic>`, so a listing sorts by when each opened, and one with no `MISSION.md` lists as a disabled `Stub` row
 - `teach lesson` writes nothing. It reports the numbered path, the stylesheet, the mission's success lines, and one drawn quiz order per question, so the author never picks it.
-- `teach nav` rewrites each lesson between four marker pairs, `style`, `header`, `footnav`, and `scripts`, and refuses a lesson missing one
-- `nav` leaves the heading, lede, body, and quiz alone apart from a `<main>` wrap and a link on each "lesson NNNN" mention, which it re-points after a rename and unwraps when the number stops resolving
-- `nav` also regenerates the root listing, the contents pages, and each `reference/<slug>.md` as an escaped, highlighted `.html` sibling, writing only what changed
+- `teach nav` rewrites each lesson between four marker pairs, `style`, `header`, `footnav`, and `scripts`, refuses one missing a pair, and regenerates the root, contents, and reference pages
+- `nav` leaves the heading, lede, body, and quiz alone beyond a `<main>` wrap and links on "lesson NNNN", which it re-points after a rename and unwraps when the number stops resolving
+- `teach render` takes no topic or `--root`, reads a JSON array of blocks on stdin, ends with the quiz `raw` block then `refs`, and refuses a bad cite or second `refs` by block index
 
 ### `src/teach/browser/`
 
