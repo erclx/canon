@@ -8,7 +8,7 @@ subtitle: Per-domain narrative loaded on demand
 Per-domain narrative loaded on demand
 
 - [CI](ci/index.md): GitHub Actions workflow triggers, the gate stages CI runs, and the release and capture-refresh workflows. Start with overview.
-- [Claude internal](claude-internal/index.md): Toolkit-only internal skills, the task and plan artifacts that coordinate sessions, and plugin discovery for local sessions. Start with overview.
+- [Claude internal](claude-internal.md): Toolkit-only internal skills, the upstream release digest behind them, local plugin discovery, and the worktree traps a session here hits
 - [Claude plugin](claude-plugin.md): The plugin skills shipped to target projects, the manifest and marketplace entry that deliver them, the canon claude CLI, and the seeds it lands in a target
 - [CLI](cli/index.md): TypeScript entry point and the layer boundary to bash, command registration and migration, the sync engine and its install stamp, the audit commands, and packaging. Start with overview.
 - [Context model](context-model.md): How project context splits across loading tiers and roots, the test that sorts a fact between them, and the folder index.md catalog system
@@ -16,6 +16,7 @@ Per-domain narrative loaded on demand
 - [Development](development/index.md): Local dev loop and run commands, how bun run check scopes its stages and tests, the hooks, session scratch, and record folders. Start with overview.
 - [Features](features/index.md): Small feature domains grouped by kind rather than split from one domain, one entry each for canvas, demo, inventory, slides, teach, and transcripts
 - [Governance](governance.md): Path-scoped Claude rules with their naming, frontmatter, and routing contract, the stacks that group them, and the install and sync path with its CLI
+- [Orchestration](orchestration.md): The task, plan, and ready artifacts coordinating multi-session work, the board, and the dispatch, review, and reclaim steps that move a row to merged
 - [Sandbox](sandbox/index.md): Scenarios that provision isolated project states, the run and coverage surfaces, and the authoring contract. Start with overview.
 - [Scripts](scripts/index.md): Bash entry points and the migration boundary, repo maintenance, UI framing across the exec boundary, the shared lib surface, and the frozen eval records. Start with overview.
 - [Tooling](tooling.md): The golden configs and seeds a project inherits, the stack layering and manifests that decide what sync injects, the seed gates, the web capture harness, and the end-to-end verify

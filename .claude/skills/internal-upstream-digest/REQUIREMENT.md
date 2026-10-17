@@ -29,7 +29,7 @@ Without this skill, a session asked what changed upstream:
 
 - Edit a file outside the intake folder. A finding names what to change and a plan carries the change.
 - Run headless or in a cloud session. The triage needs the repository and `.canon/`, which neither reads.
-- Restate the verb contract or the reasoning. `canon upstream --help` and `canon/context/claude-internal/upstream-digest.md` own them.
+- Restate the verb contract or the reasoning. `canon upstream --help` and `canon/context/claude-internal.md` own them.
 
 ## Guards
 
