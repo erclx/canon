@@ -91,7 +91,10 @@ The cost is two copies of one list, the prose and the data. The writing rule nam
 
 ### The markdown-craft against write-human split
 
-A reference splits when one half is machine-checkable and the other is a read a session either performs or does not. `markdown.md` carries the format rules and the bans a command measures. Voice, rhythm, and information density go to the `write-human` skill, which a markdown edit routes to.
+A reference splits when one half is machine-checkable and the other is a read a session either performs or does not. `markdown.md` carries the format rules, the bans, and the six density limits a command measures. Voice, rhythm, and word choice go to the `write-human` skill, which a markdown edit routes to.
+
+- The density limits replaced "use prose by default", which measured as the main cause of prose-heavy files
+- Every writing skill that ends on a file runs `canon markdown audit` over it and fixes what it reports, so no skill restates a number
 
 Scoping the audit tighter inside one file is the alternative, and it leaves the enforceable rules reading as advice. A single reference holding both halves grades a session on the words it avoided and never on how the prose reads. Folding the bans into `write-human` lost too, since it would put the enforced list behind a skill a session might not load. The split costs a reference citing a skill, and nothing measures whether output follows the rhythm rules.
 
