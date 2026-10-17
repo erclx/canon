@@ -71,7 +71,7 @@ The six layout limits, their scope, and their gate are in `markdown-audit-densit
 
 ### Weight, cadence, and length
 
-Bullet and paragraph weight, run depth, the two cadence numbers, and the document length ceiling are each a judgment a reader settles rather than a fact a scan settles. What each measures, the samples behind its checkpoint, and why none of them gates are in `markdown-audit-weight.md`.
+The Bullets, Paragraphs, Cadence, Depth, and Length sections report and never set the exit. The bullet and paragraph numbers gate through the density lengths instead, and depth and cadence stay a judgment a reader settles. What each section measures and the samples behind its checkpoint are in `markdown-audit-weight.md`.
 
 ## Exit codes
 
@@ -126,5 +126,3 @@ The verb reads the `markdown-craft` skill's reference and the `write-human` cade
 `publish.md` describes a scan applying the same punctuation bans to finished text on its way out. No code implemented that scan before this command, so nothing is duplicated, and a later surface should call this verb rather than build a second one.
 
 That reference's cross-reference rule is out of reach rather than merely unimplemented. It resolves by destination, bare where the destination auto-links a pull request or issue number and backticked where it does not, so this verb sees only the half where the backticked form is correct. A check here would report every compliant reference in the tree and reach none of the published text that goes wrong, which is why the rule holds on reading alone.
-
-The list-density rule at `claude/skills/markdown-craft/references/markdown.md` is out of scope on purpose, since it carries no number and what a density figure should measure is still open.

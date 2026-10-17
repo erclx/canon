@@ -1,6 +1,6 @@
 ---
 title: Markdown audit weight
-description: The advisory structural half of the markdown audit, being bullet and paragraph weight, run depth, the two cadence numbers, and the length ceiling, with the samples behind each checkpoint and why none of them gates
+description: The advisory sections of the markdown audit, being bullet and paragraph weight, run depth, the two cadence numbers, and the length ceiling, with the samples behind each checkpoint and which of those numbers gate through density
 ---
 
 # Markdown audit weight
