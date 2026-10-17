@@ -16,7 +16,7 @@ Per-domain narrative loaded on demand
 - [Development](development/index.md): Local dev loop and run commands, how bun run check scopes its stages and tests, the hooks, session scratch, and record folders. Start with overview.
 - [Features](features/index.md): Small feature domains grouped by kind rather than split from one domain, one entry each for canvas, demo, inventory, slides, teach, and transcripts
 - [Governance](governance.md): Path-scoped Claude rules with their naming, frontmatter, and routing contract, the stacks that group them, and the install and sync path with its CLI
-- [Sandbox](sandbox/index.md): Scenarios that provision isolated project states, the run and coverage surfaces, and the authoring contract. Start with overview.
+- [Sandbox](sandbox.md): The scenarios that provision isolated project states, the fixture trees and expect.toml declarations they stage, the headless runner, and the coverage report and skill census
 - [Scripts](scripts/index.md): Bash entry points and the migration boundary, repo maintenance, UI framing across the exec boundary, the shared lib surface, and the frozen eval records. Start with overview.
 - [Tooling](tooling.md): The golden configs and seeds a project inherits, the stack layering and manifests that decide what sync injects, the seed gates, the web capture harness, and the end-to-end verify
 - [Web](web.md): The canon.erclx.dev landing page, its composition and build-time reads, the deploy and social card, and the pull request visual checks and baseline
