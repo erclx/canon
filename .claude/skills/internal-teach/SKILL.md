@@ -12,15 +12,16 @@ The `teach-workspace` skill owns the workspace shape and the glossary, and its r
 ## Authoring a lesson
 
 - The chrome is spliced, never authored. Read `references/lesson-chrome.md` before writing or editing any lesson file.
-- Take the quiz option order `canon teach lesson` reports rather than choosing one. The verb draws it because an author told to vary a position varies it by judgment, and nothing downstream compares the two.
+- Take the quiz option order `canon teach lesson` reports rather than choosing one, since an author told to vary a position varies it by judgment and nothing downstream compares the two
 - Run `canon teach nav` after the body lands, and read the result rather than assuming the splice fired.
 
 ## Working against the fixture
 
-- Develop against `examples/teach/00-fixture/`. Real workspaces hold real learning and sit outside this repository.
-- Pass `--root examples/teach` to reach the fixture. A bare `canon teach list` reads the operator's live workspaces instead, so a claim about "the workspace" made without the flag is a claim about the wrong tree.
-- `workspace.ts` resolves a root whose basename is already `teach` as that root rather than nesting a second `teach` below it. A path ending in `teach` therefore behaves differently from one that does not.
-- Renders committed under `examples/` are disclaimed rather than gated, because nothing outside `examples/` depends on them staying current. Do not add a staleness gate there without deciding it first, which is the split `canon/context/web/assets.md` draws between `assets/` and `examples/`.
+Develop against `examples/teach/00-fixture/`, since real workspaces hold real learning and sit outside this repository. Pass `--root examples/teach` to reach it, because a bare `canon teach list` reads the operator's live workspaces instead.
+
+- `workspace.ts` resolves a root whose basename is already `teach` as that root rather than nesting a second `teach`, so a path ending in `teach` behaves differently
+- Renders committed under `examples/` are disclaimed rather than gated, since nothing outside `examples/` depends on them staying current
+- Decide a staleness gate there before adding one, per the split `canon/context/web/assets.md` draws between `assets/` and `examples/`
 
 ## Sync checklist
 
@@ -43,11 +44,15 @@ After changing what a workspace's files must contain:
 
 ### Shipped skill references
 
+The `teach-workspace` skill ships these to targets and owns the artifact shape.
+
 - `claude/skills/teach-workspace/references/teach.md`: folder layout, ordinal naming, frontmatter, mission and learning-record formats
 - `claude/skills/teach-workspace/references/glossary.md`: the entry shape, ordering, and which terms a workspace carries
 - `claude/skills/teach-workspace/`: the pedagogy deciding what to teach next, which is the shipped skill's own concern rather than this one's
 
 ### Neighboring entries
+
+Two entries outside the teach domain bear on this surface.
 
 - `canon/context/design/tokens.md`: the token values this surface reads and does not own
 - `canon/context/development/evidence.md`: which `evidence` folders are dev baselines and which are prod captures, before touching `examples/teach/evidence/`

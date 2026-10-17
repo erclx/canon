@@ -9,58 +9,82 @@ Each check names the source that answers it, so the audit reads rather than re-d
 
 ## 1. Load mode
 
-- **Source:** the rule's `paths` in `gov list --json`, where `null` means always-on. For a file under `internal/rules/`, which that verb does not list, read the `paths:` key in the file's own frontmatter.
-- **Test:** an always-on rule must pass "would removing this cause a mistake in every session this rule reaches". A path-scoped rule must pass the two-part test in `canon/context/governance/routing.md`: the invariant fires when a matching path is edited, and violating it ships silently.
-- **Fails toward:** move, when the subject has a glob and the rule loads always, or when the subject has no glob and the rule is path-scoped and never fires. Retire instead when removing the rule causes no mistake even in a session that has its subject, since a rule stating only what a current model does unprompted, such as a textbook principle, earns no load anywhere and moving it carries the cost to a narrower audience unchanged.
+An always-on rule must pass "would removing this cause a mistake in every session this rule reaches". A path-scoped rule must pass the two-part test in `canon/context/governance/routing.md`, that the invariant fires when a matching path is edited and violating it ships silently.
+
+- **Source:** the rule's `paths` in `gov list --json`, where `null` means always-on. A file under `internal/rules/` is unlisted, so read its own `paths:` frontmatter.
+- **Fails toward:** move, when a subject with a glob loads always, or a subject with no glob is path-scoped and never fires
+- **Retire:** when removing the rule causes no mistake even where its subject exists. A rule stating what a current model does unprompted earns no load anywhere, and a move only narrows who pays.
 - **Silent:** a frontmatter block that fails to parse reads as unscoped in `gov list`. Open the file and report the parse failure rather than the load mode.
 
 ## 2. Reach against audience
 
-- **Source:** the `stacks` array in `gov list --json`. Each stack lists its own rules and names the stack it `extends`, so a rule a stack selects reaches that stack and every stack extending it. The `unreferenced` array names every governance rule no stack selects.
-- **Test:** every project the selecting stacks reach has the rule's subject. A rule about code selected by a stack that docs-only projects consume fails.
+Every project the selecting stacks reach must have the rule's subject. A rule about code selected by a stack that docs-only projects consume fails.
+
+- **Source:** the `stacks` array in `gov list --json`. A rule a stack selects reaches that stack and every stack that `extends` it.
 - **Fails toward:** move to the stack whose projects have the subject.
-- **Unreferenced:** a governance rule in `unreferenced` reaches no stack. Read its `detect` field in the same `gov list --json` record before judging it. A non-null `detect` means `canon gov detect` proposes it from a project's evidence, so report its audience as `opt-in` and judge it on the other checks. A null `detect` means nothing reaches it, so report its audience as `none` and its verdict as retire, or move when a stack it belongs in exists.
-- **Internal:** a rule under `internal/rules/` reaches this repository alone and needs no stack. `internal/governance.toml` records which stack this repository consumes and does not widen any rule's audience.
+- **Internal:** a rule under `internal/rules/` reaches this repository alone and needs no stack. `internal/governance.toml` names the stack this repository consumes and widens no audience.
+
+### Unreferenced rules
+
+The `unreferenced` array in the same record names every governance rule no stack selects. Read the rule's `detect` field before judging it.
+
+- A non-null `detect` means `canon gov detect` proposes it from a project's evidence, so report its audience as `opt-in` and judge it on the other checks
+- A null `detect` means nothing reaches it, so report its audience as `none` and its verdict as retire, or move when a stack it belongs in exists
 
 ## 3. Restated elsewhere
 
-- **Source:** `gov restated --json`. Keep each entry in `restatements` whose `subject.file` ends in the rule's filename, and read its `surfaces`, where `kind` is `rule`, `skill`, or `seed`.
-- **Test:** two surfaces a target receives stating one instruction means one goes. A surface reaching a target only through a seed copied at scaffold time does not count, per `canon/context/governance/routing.md`. A surface under `.claude/skills/` does not count against a `governance/rules/` subject either, since no target receives this repository's own skills, and does count against an `internal/rules/` subject, whose audience is this repository alone.
+Two surfaces a target receives stating one instruction means one goes. A surface reaching a target only through a seed copied at scaffold time does not count, per `canon/context/governance/routing.md`.
+
+- **Source:** `gov restated --json`. Keep each `restatements` entry whose `subject.file` ends in the rule's filename, and read its `surfaces`, each of kind `rule`, `skill`, or `seed`.
+- **Own skills:** a surface under `.claude/skills/` counts against an `internal/rules/` subject alone, since no target receives this repository's own skills
 - **Fails toward:** retire when every bullet is restated, merge when the other surface is a rule for the same audience, keep with bullets to cut otherwise.
 
 ## 4. Owned by a standard
 
+A directive beside the pointer states what must not go wrong rather than restating the standard's structure. `canon/context/governance/routing.md` caps directives beside a pointer at five.
+
 - **Source:** the standard the rule points at, read with `bun src/cli.ts standards <name>`.
-- **Test:** a directive beside the pointer states what must not go wrong rather than restating the standard's structure. `canon/context/governance/routing.md` caps directives beside a pointer at five.
 - **Fails toward:** keep with the restated directives to cut. A rule whose every directive restates its standard retires to the pointer alone, which reads as keep when the pointer still earns the load.
 
 ## 5. Pointer at a self-triggering skill
 
+A rule that loads on a path edit and points at a skill whose own description fires on the same edit is a second trigger for one thing.
+
 - **Source:** the `description` of each skill the rule names, in `claude/skills/<name>/SKILL.md` or `.claude/skills/<name>/SKILL.md`.
-- **Test:** whether the skill's own description already fires on the moment the rule fires on. A rule that loads on a path edit and points at a skill whose description fires on the same edit is a second trigger for one thing.
-- **Fails toward:** retire the pointer bullet. The rule stays when it also carries the floor the skill deepens, since the rule arrives with the edit and the skill arrives only when invoked.
+- **Fails toward:** retire the pointer bullet. The rule stays when it also carries the floor the skill deepens, since the rule arrives with the edit and the skill only when invoked.
 
 ## 6. Enforced elsewhere
 
+A mechanism that fails loudly on the violation the bullet forbids makes the bullet redundant.
+
 - **Source:** the hooks under `.claude/hooks/`, the stage ids in `src/gate/stages.ts` that `canon gate run` executes, and the linter and formatter configs a target installs from `tooling/`.
-- **Test:** a mechanism that fails loudly on the violation the bullet forbids.
 - **Fails toward:** retire the bullet. Keep it when the enforcement covers this repository alone and the rule ships to targets that have none.
 
 ## 7. Harness default
 
+A bullet restating what the harness already instructs every session, such as committing only when asked, adds nothing.
+
 - **Source:** the Claude Code pages under `wiki/claude/`, reached from `wiki/index.md`. No verb answers this.
-- **Test:** whether the bullet restates what the harness already instructs every session, such as committing only when asked.
 - **Fails toward:** retire the bullet.
 - **Silent:** when no page states the default, report the check as unread. A remembered default is not evidence.
 
 ## 8. Program input
 
-- **Source:** grep the TypeScript under `src/`, test files excluded, for each H2 as a literal line including its `## ` prefix, and for the rule's filename stem. Bare heading text matches common words across unrelated readers.
-- **Test:** whether a verb reads the rule by heading or by name, as the comment-vocabulary reader in `src/comments/` reads its terms from whichever rule publishes the heading it looks for. Open each hit, since most name the rule in a comment or a help example and read nothing. A hit counts when code compares against the heading or holds the name in a list, such as the opt-in allowlist in `src/gate/measures.ts`. A heading hit counts only when the reader names this rule's heading rather than a same-named section in another document.
-- **Fails toward:** nothing on its own. It attaches the parsing file to a retire or merge verdict as a code change the acting plan owes, and to a move when the heading would change hands.
+A verb may read the rule by heading or by name, as the comment-vocabulary reader in `src/comments/` reads its terms from whichever rule publishes the heading it looks for. This check fails toward nothing on its own.
+
+- **Source:** grep `src/` TypeScript, tests excluded, for the rule's filename stem and each H2 as a literal line with its `## ` prefix, since bare heading text matches common words
+- **Fails toward:** attaching the parsing file to a retire or merge verdict as a code change the acting plan owes, and to a move when the heading would change hands
+
+### Which hits count
+
+Open each hit, since most name the rule in a comment or a help example and read nothing.
+
+- A hit counts when code compares against the heading or holds the name in a list, such as the opt-in allowlist in `src/gate/measures.ts`
+- A heading hit counts only when the reader names this rule's heading rather than a same-named section in another document
 
 ## 9. In flight
 
-- **Source:** the in-flight read in `claude/skills/role-planner/SKILL.md` under `## Read what is in flight rather than inferring it`, then `git diff --name-only origin/main...<branch>` per branch after a fetch for the rule's source path.
-- **Test:** whether an open branch edits the rule.
-- **Fails toward:** holds the row. The verdict stands and is marked held, naming the branch, since moving a file another branch is editing strands that branch's hunk.
+An open branch editing the rule holds its row. The verdict stands and is marked held, naming the branch, since moving a file another branch is editing strands that branch's hunk.
+
+- **Source:** the in-flight read under `## Read what is in flight rather than inferring it` in `claude/skills/role-planner/SKILL.md`
+- **Per branch:** after a fetch, `git diff --name-only origin/main...<branch>` for the rule's source path

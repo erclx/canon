@@ -34,10 +34,19 @@ Read `references/checks.md` for the nine checks, the source each one reads, and 
 
 The verdict set is closed at four:
 
-- **keep.** The rule loads where its subject lives, reaches only projects that have that subject, and states something no other surface a target receives carries. A rule that stays but carries cuttable bullets is a keep, and the row names the bullets to cut.
-- **move.** The rule is worth its text and loads in the wrong place: always-on where a path scope would do, path-scoped where its subject has no glob, or selected by a stack whose projects lack its subject. Report a path-scope change as a move of the load mode. A change of folder that leaves the selecting stacks and the load mode as they were is a regroup rather than a move, and reads as keep here.
-- **retire.** Every bullet is restated on a surface a target receives, enforced by a hook or a gate stage, owned by a standard the rule already points at, or a harness default. Two whole-rule routes retire as well: an always-on rule whose removal causes no mistake even where its subject exists, and a governance rule no stack selects and no opt-in list names, unless a stack it belongs in exists, which makes it a move.
+- **keep.** The rule loads where its subject lives, reaches only projects with that subject, and states what no other target surface carries. A keep with cuttable bullets names them in the row.
+- **move.** The rule is worth its text and loads in the wrong place, or a stack whose projects lack its subject selects it. A path-scope change reports as a move of the load mode.
+- **retire.** Every bullet is restated on a target surface, enforced by a hook or a gate stage, owned by a standard the rule points at, or a harness default.
 - **merge.** Another rule states the same instruction for the same audience, so one file absorbs the other.
+
+### Edge routes
+
+A wrong place means always-on where a path scope would do, or path-scoped where the subject has no glob. A change of folder leaving the selecting stacks and the load mode as they were is a regroup, and reads as keep.
+
+- An always-on rule whose removal causes no mistake even where its subject exists retires whole
+- A governance rule no stack selects and no opt-in list names retires whole, unless a stack it belongs in exists, which makes it a move
+
+### Overrides
 
 Hold two overrides above the verdict:
 
@@ -58,4 +67,6 @@ Emit one row per rule in the corpus, with no rule skipped. A rule no stack selec
 - **Deciding check:** the name of the check from `references/checks.md` that settled the verdict
 - **Note:** the bullets to cut on a keep, the target on a move, the surviving file on a merge, the parsing file on a parsed heading, or the branch on a held row
 
-Write the table to `.canon/tmp/rule-audit/report.md` at the current worktree's root and print it in the reply. Close with the verdict counts and the row count. On a full-corpus run, check the row count against the rules `gov list` reports plus the files under `internal/rules/`. A mismatch means a rule was skipped, so name it rather than reporting the table as complete.
+Write the table to `.canon/tmp/rule-audit/report.md` at the current worktree's root and print it in the reply. Close with the verdict counts and the row count.
+
+On a full-corpus run, check the row count against the rules `gov list` reports plus the files under `internal/rules/`. A mismatch means a rule was skipped, so name it rather than reporting the table as complete.

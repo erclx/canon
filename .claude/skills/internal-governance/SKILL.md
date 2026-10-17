@@ -15,13 +15,21 @@ Read `canon/context/governance/overview.md` for the system overview and `canon/c
 
 ### Engine and adapter
 
-- Every verb is TypeScript and `scripts/gov/` is gone. The sync engine is `src/sync/engine.ts`, the gov adapter is `src/gov/adapter.ts`, the payload builder is `src/gov/payload.ts`, the stack resolver is `src/gov/stacks.ts`, and the catalog behind `list` is `src/gov/list.ts`.
-- Changing what counts as a change, or where a rule's source lives, belongs in the adapter. Changing the scan report, the prompt, or the apply loop belongs in the engine, where any future adapter will inherit it.
-- `internal/rules/` follows the same naming and frontmatter convention as `governance/rules/`, per `canon/context/governance/rules.md`, and mirrors to `.claude/rules/internal/`.
+Every verb is TypeScript. What counts as a change, or where a rule's source lives, belongs in the adapter, and the scan report, the prompt, and the apply loop belong in the engine, where any future adapter inherits them.
+
+| Part           | File                 |
+| -------------- | -------------------- |
+| Sync engine    | `src/sync/engine.ts` |
+| Gov adapter    | `src/gov/adapter.ts` |
+| Payload        | `src/gov/payload.ts` |
+| Stack resolver | `src/gov/stacks.ts`  |
+| `list` catalog | `src/gov/list.ts`    |
+
+`internal/rules/` follows the naming and frontmatter convention of `governance/rules/`, per `canon/context/governance/rules.md`, and mirrors to `.claude/rules/internal/`.
 
 ## Install path
 
-- `canon gov install <stack> <target>` writes `.claude/rules/<subdir>/<rule>.md` as a passthrough copy. Source files carry the Claude shape directly, so the install copies the `.md` file as-is and preserves subdirectories.
+- `canon gov install <stack> <target>` copies each source `.md` as-is to `.claude/rules/<subdir>/<rule>.md`, preserving subdirectories, since sources carry the Claude shape directly.
 - `canon gov sync` diffs `.claude/rules/` against source. It also removes any stale `.claude/GOV.md` left over from the retired build.
 - `canon gov build` produces a single concatenated paste-payload at `.canon/tmp/gov/rules.md` from `.claude/rules/`.
 
@@ -41,7 +49,7 @@ When adding a stack:
 
 ## Rule audit
 
-After writing or revising a rule, audit each bullet against the checklist. Trigger phrases: "audit this rule", "review the governance rule".
+After writing or revising a rule, or on "audit this rule" or "review the governance rule", audit each bullet against the checklist.
 
 - Read `.claude/skills/internal-governance/references/rule-audit.md` for the criteria and output shape.
 - A verdict on whether a whole rule earns its place, where it loads, and whom it reaches is `internal-rule-audit`.
