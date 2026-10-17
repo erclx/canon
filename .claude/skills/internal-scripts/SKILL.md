@@ -5,7 +5,7 @@ description: CLI entry point, bash scripts, sandbox scenarios, and lib functions
 
 # Scripts
 
-Read `canon/context/scripts/index.md` for structure, file inventory, and lib responsibilities before editing.
+Read `canon/context/scripts.md` for structure and lib responsibilities before editing.
 
 ## CLI design
 
@@ -14,7 +14,7 @@ Read `canon/context/scripts/index.md` for structure, file inventory, and lib res
 
 ## Lib rules
 
-- Each lib file owns one concern. Read `canon/context/scripts/lib.md` for responsibilities before adding or modifying.
+- Each lib file owns one concern. Read `canon/context/scripts.md` for responsibilities before adding or modifying.
 - Never duplicate logic that already exists in `lib/`. When adding a function, check if any existing script duplicates the logic and consolidate.
 
 ## Sandbox pattern
@@ -67,7 +67,6 @@ Read `canon/context/development/hooks/index.md` before touching `.claude/hooks/`
 
 A new domain script is written in TypeScript on Bun. An existing domain script stays bash on `scripts/lib/ui.sh`, frame included, until it moves, and a shell file over 100 lines is edited in place without growing and flagged for a rewrite.
 
-- `canon/context/scripts/index.md`: structure, file inventory, core scripts, lib responsibilities
+- `canon/context/scripts.md`: structure, core scripts, lib responsibilities, and the timeline frame a bash script prints inside
 - `docs/agents/output-shape.md`: output shape and stream contract for every CLI command
 - `canon/context/sandbox/index.md`: sandbox system, hook pattern, provisioning flow, scenario catalog
-- `canon/context/scripts/framing.md`: the timeline frame a domain script prints inside

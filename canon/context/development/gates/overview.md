@@ -33,7 +33,7 @@ The Tests stage alone holds a machine lock while it runs, so a gate in one workt
 
 ### The four check kinds
 
-A stage is a list of checks, and every check is an argument vector rather than a shell string, so no stage runs through `eval` and no check is a quoting question. `canon/context/scripts/core.md` covers the pathspec case under "Quoting a pathspec changes what it matches".
+A stage is a list of checks, and every check is an argument vector rather than a shell string, so no stage runs through `eval` and no check is a quoting question. `canon/context/scripts.md` covers the pathspec case in its gotchas.
 
 - `command` runs any binary
 - `cli` runs this checkout's own `src/cli.ts`, since a globally installed `canon` resolves to the main checkout whatever worktree is running

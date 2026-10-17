@@ -9,7 +9,7 @@ description: What the sandbox domain owns, the scenario categories, provisioning
 
 Owns the scenarios that provision isolated project states for testing scripts, configs, and skills. Each scenario defines a known starting state plus instructions for what to run and what to expect.
 
-The scripts live under `sandbox/` rather than `scripts/`, since the authoring contract is its own domain, which is also why it sits apart from `canon/context/scripts/index.md`.
+The scripts live under `sandbox/` rather than `scripts/`, since the authoring contract is its own domain, which is also why it sits apart from `canon/context/scripts.md`.
 
 ## Layout
 
