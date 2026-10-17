@@ -26,7 +26,7 @@ The Claude seeds carry nothing under `canon/context/`. `tooling/base/seeds/` ins
 
 #### PostToolUse hooks
 
-The seed `settings.json` ships nine hook scripts across seven blocks on three events. `pr-create-log.sh` is covered in `canon/context/development/hooks/guards.md`, `silent-turn.sh` in `canon/context/development/hooks/compaction.md`, and the rest below. All nine open with the bounded stdin read covered in `canon/context/development/hooks/guards.md`, so a hook run by hand refuses instead of blocking, and eight stay byte-identical to their counterparts under `.claude/hooks/`.
+The seed `settings.json` ships ten hook scripts across seven blocks on three events. `pr-create-log.sh` is covered in `canon/context/development/hooks/guards.md`, `silent-turn.sh` and `reply-links.sh` in `canon/context/development/hooks/compaction.md`, and the rest below. All ten open with the bounded stdin read covered in `canon/context/development/hooks/guards.md`, so a hook run by hand refuses instead of blocking, and eight stay byte-identical to their counterparts under `.claude/hooks/`.
 
 A PostToolUse hook pairs with `.claude/hooks/standards-audit.sh`, which calls `canon markdown audit` against the edited file, reads the hits out of the `--json` record, and emits `additionalContext` so the agent self-corrects on the next turn. A checkout's own `src/cli.ts` wins over an installed binary, so the hook and the push stage read one build. Scratch dirs `.canon/tmp/`, `.canon/review/`, and `.canon/plans/` are skipped.
 

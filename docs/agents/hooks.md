@@ -1,6 +1,6 @@
 ---
 title: Hooks
-description: Running the post-merge steps through one verb, the order and the child call behind each, the root and working directory each step reads, the skip switches, and the line each record maps to
+description: Running the post-merge steps through one verb, the order and the child call behind each, the root and working directory each step reads, the skip switches, the line each record maps to, and the reply link check
 ---
 
 # Hooks
@@ -37,6 +37,26 @@ The archive runs once per pull request number, read as the trailing `(#NNN)` on 
 The reclaim takes no `--root`. It refuses the worktree its own working directory names, so a root would let a pull inside a linked worktree remove the worktree it stands in. The archive and the push take the root because the board and the records live at the main worktree root.
 
 Each step is a separate process rather than an in-process call, so the plugin update runs the binary the upgrade just installed. Every child, and every `git` read, runs with the repository variables a hook exports stripped, since `GIT_DIR` beats `-C`.
+
+## Reply links
+
+`canon hooks reply-links` checks that every markdown link in a reply names a file on disk. The `Stop` hook `reply-links.sh` runs it on the closing message of a turn, so a dead link is corrected in the same turn.
+
+```bash
+printf '%s' "$reply" | canon hooks reply-links
+canon hooks reply-links --json < reply.md
+```
+
+| Option          | Behavior                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------- |
+| `--root <path>` | Root a relative link resolves against, the main worktree root from `git worktree list` if omitted |
+| `--json`        | Write `{ ok, missing, message }` to stdout. `message` is present only when `ok` is false          |
+
+The reply comes on stdin, and a terminal on stdin is refused. A relative link resolves against the root, an absolute one is checked as written. The check skips placeholders such as `<path>`, globs, URLs, anchors, and any link inside a code span or fence. A `:42`, `:42-50`, or `#L42` tail is stripped before the check.
+
+Each entry in `missing` carries the `destination` as written and the `path` that was checked. A link into `.claude/worktrees/<name>/.canon/` also carries a `suggestion` with the main-root path when that file exists there.
+
+Exit codes: `0` when every link resolves or the reply holds none, `1` when at least one does not. The missing list goes to stderr. The hook turns a finding into exit 2 so the session continues, and exits 1 without blocking when it could not run the check, such as with no `jq` or no `canon` on `PATH`.
 
 ## Skip switches
 
