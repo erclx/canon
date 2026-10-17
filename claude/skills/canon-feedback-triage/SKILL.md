@@ -11,16 +11,19 @@ Consume the feedback queue that `canon feedback` fills. Each open `feedback` iss
 
 The record is an ordinary intake folder at `.canon/intake/<nn>-feedback-triage/`. Read `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md` before writing any file in it, since it holds the item format, the frontmatter, the index shape, and the answer contract this skill is bound by.
 
-Run from the toolkit repo root. This skill reads GitHub issues and writes only inside its claimed folder. It posts no comment, close, or label to GitHub.
+- Run from the toolkit repo root
+- Read GitHub issues and write only inside the claimed folder, posting no comment, close, or label to GitHub
 
 ## Guards
 
-- Resolve `.canon/tasks/` and `.canon/intake/` at the main worktree root, not `pwd`. Run `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd` outside a git repo.
+- Resolve `.canon/tasks/` and `.canon/intake/` at the main worktree root, from `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd` outside git
 - If `gh` is not on PATH, stop: `❌ gh CLI not found. Install it to read feedback issues.`
 - If `gh auth status` fails, stop: `❌ gh is not authenticated. Run gh auth login.`
 - If no open `feedback` issues exist, stop: `✅ No open feedback issues.`
 
 ### Slots and records
+
+Two more guards hold through every step.
 
 - Never fill a `You:` slot, and never read an empty one as agreement. Answering runs through `plan-intake-answer` or the operator's own edit.
 - Branch on each `canon` record's `ok` and `reason` rather than on the exit code, which a shell function wrapping `canon` can flatten to zero.
@@ -45,7 +48,11 @@ Run `canon records ordinal intake feedback-triage --claim --json` and take its `
 
 ## Step 4: measure each issue
 
-For each remaining issue, measure its claim against the tree during this pass. Grep for the construct its defect names and count the sites, check whether the behavior it asks for exists, and search the log for a commit or pull request that shipped it under another task. Never carry a figure from the issue forward as current, since it states what was true when it was filed.
+For each remaining issue, measure its claim against the tree during this pass, never carrying a figure from the issue forward, since it states what was true when filed.
+
+- Grep for the construct its defect names and count the sites
+- Check whether the behavior it asks for exists
+- Search the log for a commit or pull request that shipped it under another task
 
 Classify each against the toolkit's own surfaces:
 
