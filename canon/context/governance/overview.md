@@ -17,6 +17,8 @@ The rules are content rather than code, so the domain is a catalog plus a comman
 
 ### Consumption and code
 
+Three pieces produce and run the consumed copy.
+
 - `internal/governance.toml` records which stack and extras this repository consumes, and `src/gov/consumed.ts` produces the copy from it
 - `src/gov/` owns the gov half of every verb: the stack reader, the rule lookup, the catalog behind `list`, the install copy, the sync adapter, and the payload builder behind `build`
 - `src/sync/engine.ts` owns the shared sync engine every domain runs on
@@ -25,7 +27,7 @@ The rules are content rather than code, so the domain is a catalog plus a comman
 
 ### Why the entry is a folder
 
-The entry is a folder on the sub-area condition rather than on length. `claude/skills/context-fold/references/context.md` splits a domain at three or more sub-areas that do not fit cleanly in one file, and the rule tier with its naming and frontmatter contract, the stacks that group rules, and the install and sync path with its CLI are three that do not. Length is what raised the question and answers nothing by itself.
+The entry is a folder on the sub-area condition rather than on length. `claude/skills/context-fold/references/context.md` splits a domain at three or more sub-areas that do not fit in one file. The rule tier, the stacks, and the install and sync path are three that do not.
 
 ### Editing `.claude/rules/` here changes nothing
 

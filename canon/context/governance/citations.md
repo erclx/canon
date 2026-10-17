@@ -1,90 +1,92 @@
 ---
 title: Citations
-description: Verdict for every rule and standard citing a skill or a sibling document, the form that resolves for a target, the moot exception, and the stage that resolves a cited path and an internal frontmatter glob mechanically with the bounds each carries
+description: Verdicts for every rule and standard citing a skill or sibling document, the form that resolves for a target, the moot exception, and what the citation stage resolves and cannot
 ---
 
 # Citations
 
 ## Overview
 
-Owns whether a citation inside `governance/rules/` resolves for the target holding it, and whether the citing body restates the content it points at rather than pointing at it cleanly. Excludes a `## Scope` "Does not govern:" entry, which names an owner rather than asking a reader to load anything, and excludes a rule restating a sibling rule, which `canon gov restated` covers mechanically.
+Owns whether a citation inside `governance/rules/` resolves for the target holding it, and whether the citing body points at its owner rather than restating it. It excludes a "Does not govern:" entry, which names an owner, and a rule restating a sibling rule, which `canon gov restated` covers.
 
 ## Decisions
 
 ### The form that resolves for a target
 
-- A plugin skill named with the `canon:` prefix, paired with a line reporting rather than proceeding silently when the skill does not resolve, degrades honestly: it loads for a target holding the plugin and names the gap for one holding governance alone.
+A plugin skill named with the `canon:` prefix, paired with a line reporting rather than proceeding silently when the skill does not resolve, degrades honestly. It loads for a target holding the plugin and names the gap for one holding governance alone.
 
-A bare skill name carrying neither the prefix nor the fallback line resolves for a plugin-holding target and fails silently for every other one, which is the defect the form exists to close.
+A bare skill name carrying neither the prefix nor the fallback line resolves for a plugin-holding target and fails silently for every other one. That is the defect the form exists to close.
 
 ### A rule names no path into this repository
 
-A rule stating a general fact has nowhere to point for the local decision, since it ships through `canon gov sync` and no path on a target's machine resolves to this repository's context entries. A rule states its facts and names no path, and the local answer is reached from the entry rather than from the rule.
+A rule ships through `canon gov sync`, and no path on a target's machine resolves to this repository's context entries. A rule states its facts and names no path, and the local answer is reached from the entry rather than from the rule.
 
-### What the stage resolves and what it cannot
+### What the stage resolves
 
-`canon gov citations` resolves every path a rule body cites across `governance/rules/` and `internal/rules/`, plus every frontmatter `paths:` glob under `internal/rules/`, and `bun run check` gates on it as the `Rule citations` stage. The verdicts below stay a manual read: the stage answers whether a citation resolves, and nothing answers whether a resolving citation points at the right file or restates what it points at.
+`canon gov citations` resolves every path a rule body cites across `governance/rules/` and `internal/rules/`, plus every frontmatter `paths:` glob under `internal/rules/`. `bun run check` gates on it as the `Rule citations` stage.
 
-A rule retired alongside its standard also leaves `governance/renames.toml`, since `src/gov/renames.test.ts` fails on a chain ending on a rule nothing ships.
+The stage answers whether a citation resolves. Whether a resolving citation points at the right file, or restates what it points at, stays a manual read.
 
-Measured at `2e912110`, the corpus held 36 body citations across 77 rules. Twenty were `canon standards <name>`, fifteen were backticked paths, and one named a sibling rule by filename. All 36 resolved or were excused, and every internal glob matched, so the gate is a floor rather than a repair.
+- A rule retired alongside its standard also leaves `governance/renames.toml`, since `src/gov/renames.test.ts` fails on a chain ending on a rule nothing ships
+- Measured at `2e912110`, the corpus held 36 body citations across 77 rules, being twenty `canon standards <name>`, fifteen backticked paths, and one sibling rule by filename
+- All 36 resolved or were excused and every internal glob matched, so the gate is a floor rather than a repair
 
-#### Bounds
+### What the stage cannot read
 
-The glob half reads one corpus. A rule under `governance/rules/` installs into a target and its globs name that project's shape, so many match nothing in this tree and every one is correct, `src/pages/**` in the Astro rule being indistinguishable by pattern from a path here. Gating them would ship an exemption list the length of the corpus. `internal/rules/` ships nowhere, so the tree it governs is the tree present.
+The glob half reads one corpus. A rule under `governance/rules/` installs into a target and its globs name that project's shape, so many match nothing in this tree and every one is correct. Gating them would ship an exemption list the length of the corpus. `internal/rules/` ships nowhere, so the tree it governs is the tree present.
 
-What it reads is bounded four ways, each a shape the corpus already writes:
+Four bounds follow from shapes the corpus already writes.
 
-- A placeholder or glob segment is declined, since it describes a shape rather than naming a file. `canon/context/<domain>.md` and `app/**/route.ts` are the two forms.
-- A span carrying no file extension is declined as a folder or a module specifier. This costs any real folder path, which the stage cannot tell from `next/font` by looking at it.
-- A path written without backticks is not read, since matching one would report every sentence that names a file.
-- A glob that matches real files and still misses the work it was scoped at is not read. `lib/e2e-reliability.md` globs `**/e2e/**/*.ts` rather than `e2e/**/*.ts` so it reaches a suite kept under an app folder such as `web/e2e/`. Resolution is mechanical and reach is a judgment about where the work happens.
+- A placeholder or glob segment is declined, since it describes a shape rather than naming a file
+- A span with no file extension is declined as a folder or module specifier, which costs any real folder path
+- A path written without backticks is not read, since matching one would report every sentence that names a file
+- A glob that matches real files and still misses its work is not read, since reach is a judgment about where the work happens. `lib/e2e-reliability.md` globs `**/e2e/**/*.ts` to reach `web/e2e/`.
 
-#### Excused classes
+### Excused classes
 
-Two classes resolve to nothing and are correct to, and both are reported by name rather than dropped:
+Two classes resolve to nothing and are correct to, and the stage reports both by name rather than dropping them.
 
-- **Governed.** A path the citing rule spells exactly in its own frontmatter `paths:` names an artifact a target holds rather than a file here. No shipped rule declares one, so `src/gov/citations.test.ts` carries the only instance. The class stays for the next rule declaring a target-held path, which would otherwise draw the false finding it exists to prevent. Only an exact declaration excuses, never a glob match, so a typo under a globbed folder is still a finding.
-- **Ignored.** A path git ignores is session scratch no clone holds. `governance/rules/canon/tasks.md` cites `.canon/tasks/index.md`, which is real at the main root and absent from a fresh clone and from every linked worktree. Without this the verdict would depend on which tree the stage ran in.
+- **Governed.** A path the rule spells exactly in its own `paths:` names an artifact a target holds. Only an exact declaration excuses, so a typo under a globbed folder is still a finding.
+- **Ignored.** A path git ignores is session scratch no clone holds. `governance/rules/canon/tasks.md` cites `.canon/tasks/index.md`, absent from a fresh clone and every linked worktree.
 
-The ignored class makes the counts tree-dependent. From the main worktree that path resolves and the ignored count is zero, and from a linked worktree it is one. The verdict is the same either way, so a count quoted from one tree names which tree it came from.
+The ignored class makes the counts tree-dependent. From the main worktree that path resolves and the ignored count is zero, and from a linked worktree it is one. The verdict is the same, so a quoted count names which tree it came from.
 
-### Verdicts
+### Rules point rather than restate
 
-#### Rules that point rather than restate
+`claude/skills/create-rule/references/rule.md` settles the shape. A rule points at the standard that owns a convention, loading the skill that owns it rather than naming a path.
 
-`claude/skills/create-rule/references/rule.md` settles the shape: a rule points at the standard that owns a convention and never restates it, loading the skill that owns it rather than naming a path.
+`governance/rules/canon/tasks.md`, `plan.md`, and `context.md` are hand-written and cite no standard by name, since their standards live in `task-board`, `plan-feature`, and `context-fold`. They load the owner skill instead. `governance/rules/claude/skill.md` is hand-written because its bullets fire on a hand edit between skill runs.
 
-`governance/rules/canon/tasks.md`, `governance/rules/canon/plan.md`, and `governance/rules/canon/context.md` are hand-written and cite no standard by name, since their standards live in `task-board`, `plan-feature`, and `context-fold`. They load the owner skill instead. The skill rule is `governance/rules/claude/skill.md`, hand-written, because its creation-time and re-read bullets fire on a hand edit between skill runs.
+### Verdicts: skill citations with prefix and fallback
 
-#### Skill citations carrying the prefix and fallback
+Each of these cites its skill with the `canon:` prefix plus a report-if-missing line.
 
-Each rule and standard below cites its skill with the `canon:` prefix plus a report-if-missing line.
+- `claude/skills/teach-workspace/references/teach.md` cites `canon:teach-workspace`, with the fallback "say so and stop"
+- `governance/rules/claude/skill.md` cites `canon:create-skill` twice
+- `claude/skills/markdown-craft/references/markdown.md` cites `canon:write-human` in prose stating where a markdown edit routes, which reads as a directive rather than a scope boundary
 
-- `claude/skills/teach-workspace/references/teach.md` cites `canon:teach-workspace`, the standard's fallback reading "say so and stop".
-- `governance/rules/claude/skill.md` cites `canon:create-skill` twice.
-- `claude/skills/markdown-craft/references/markdown.md` cites `canon:write-human` in ordinary prose stating where a markdown edit routes, which reads as a directive rather than as a scope boundary.
+### Verdicts: moot, clean, and excluded
 
-#### Moot: the target cannot reach the governed surface
+A rule scoped to a folder only a plugin skill creates is inert rather than broken for a target holding governance alone. The folder never exists there, so the glob never matches. No repair applies, and the row keeps a later pass from misreading inertness as a defect.
 
-A rule scoped to a folder only a plugin skill creates is inert rather than broken for a target holding governance alone. The folder never exists there, so the glob never matches and the citation never fires. No repair applies, and the row keeps a later pass from misreading inertness as a defect.
-
-- `governance/rules/canon/context.md`, scoped to `canon/context/**`. Only `context-fold` writes an entry there.
-
-#### Clean pointer, no other note
-
-- `governance/rules/writing/markdown.md` → the `markdown-craft` and `write-human` skills, each named with the fallback line.
-- `claude/skills/create-skill/references/skill.md` → sibling references by the `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md` form `skill-paths.md` states, which resolves in every install since the plugin ships the skills side by side.
-- `claude/skills/task-board/references/tasks.md` → `claude/skills/git-commit/references/versioning.md` and `claude/skills/plan-feature/references/plan.md`, for the same reason.
-
-#### Other references, examined and excluded
-
-Every other shape reference names `write-human` or `markdown.md` only inside a "Does not govern:" bullet and carries no citation this entry verdicts.
+- Moot: `governance/rules/canon/context.md`, scoped to `canon/context/**`, where only `context-fold` writes an entry
+- Clean: `governance/rules/writing/markdown.md` points at the `markdown-craft` and `write-human` skills, each with the fallback line
+- Clean: `claude/skills/create-skill/references/skill.md` points at sibling references by the `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md` form, which resolves in every install
+- Clean: `claude/skills/task-board/references/tasks.md` points at `git-commit`'s `versioning.md` and `plan-feature`'s `plan.md` the same way
+- Excluded: every other shape reference names `write-human` or `markdown.md` only inside a "Does not govern:" bullet
 
 ## Gotchas
 
-- A "Does not govern:" line naming a skill or a sibling reference is a scope exclusion, not a citation. `claude/skills/create-skill/references/skill-reference.md` requires that shape for every excluded concern, so the many `write-human` mentions across the references carry no verdict here.
-- `canon gov restated` catches a rule restating a sibling rule or `CLAUDE.md`. It does not catch a rule restating the standard it cites, which is this entry's subject and stays a manual read.
-- `canon gov citations` and `canon gov superseded` read one corpus and answer different questions. The first asks whether a cited path resolves, the second whether a citation still names a value a changed convention no longer produces. A citation can pass either and fail the other.
-- The Consumed copies stage passes an authored rule and its copy that are wrong together, which is how the teach rule, then numbered, shipped a `references/glossary.md` that did not exist. Two files agreeing is not either one being right about the tree.
-- A rule can carry both the restated and the moot verdict. Moot says the citation never fires for a target holding governance alone, and restated says the rule duplicated its standard regardless. Neither excuses the other.
+### Scope lines are not citations
+
+A "Does not govern:" line naming a skill or a sibling reference is a scope exclusion. `claude/skills/create-skill/references/skill-reference.md` requires that shape for every excluded concern, so the many `write-human` mentions across the references carry no verdict here.
+
+### What each check misses
+
+Three checks cover different questions, and a citation can pass one and fail another.
+
+- `canon gov restated` catches a rule restating a sibling rule or `CLAUDE.md`, and misses one restating the standard it cites, which stays a manual read
+- `canon gov citations` asks whether a cited path resolves, and `canon gov superseded` whether a citation still names a value a changed convention no longer produces
+- The Consumed copies stage passes an authored rule and its copy that are wrong together, which is how the teach rule shipped a `references/glossary.md` that did not exist
+
+A rule can carry both the restated and the moot verdict. Moot says the citation never fires for a target holding governance alone, and restated says the rule duplicated its standard regardless. Neither excuses the other.
