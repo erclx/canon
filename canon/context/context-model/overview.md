@@ -76,21 +76,13 @@ Revisit when Claude Code reads its files from a root a project can configure.
 
 ### Surfaces under each root
 
-Five surfaces under `.claude/` are Claude Code's own, and the toolkit invented none of them.
-
-- `.claude/settings.json` registers the hooks, and `settings.local.json` is per machine and untracked
-- `.claude/hooks/` runs on the events `settings.json` names
-- `.claude/skills/` holds the internal skills a session in this repository can load
-- `.claude/rules/` is glob-matched against the path being edited
-- `.claude/worktrees/` is where `EnterWorktree` creates a worktree and requires its target to sit
+Five surfaces under `.claude/` are Claude Code's own: `settings.json` (with a per-machine `settings.local.json`), `hooks/`, `skills/` for the internal skills, `rules/` glob-matched against the path being edited, and `worktrees/`, where `EnterWorktree` requires its target.
 
 The toolkit's committed surfaces sit under `canon/`.
 
 - `canon/context/` is read on demand through its catalog
-- `canon/config/` holds `baseline.json` for `canon audits`, `pr-labels.toml` for the label map, and the install stamp, since Claude Code loads none of them by path
+- `canon/config/` holds `baseline.json`, `pr-labels.toml`, and the install stamp, since Claude Code loads none of them by path
 - `canon/REQUIREMENTS.md` is eager, and `canon/DESIGN.md` is read by `canon design render` and the design skills
-
-`.tmp/`, when it exists, is the old gitignored scratch spelling, carried for a project the record move has not reached and retired once `canon migrate records` has moved the last one off it.
 
 ### Migrating a project onto the roots
 
@@ -122,8 +114,6 @@ Rewriting only what the diff touched stays the default, overridden only inside a
 ### The sweep prompt reads rationale as current
 
 The local classifier's sweep prompt reads a reason naming why an alternative was left out, what an earlier approach got wrong, or what a measurement caught as KEEP, even in the past tense. REWRITE needs a superseded figure beside its replacement, "now" or "no longer" marking a change, branch or PR narration, or rounds of candidates.
-
-Three web sections drew the tune, `README images`, `The capture job reports and never commits`, and `Composition`. On the groundwork's labelled set the tuned prompt catches 7 of 8 with 0 of 6 false flags, against 7 of 8 and 1 of 6 for the first. The one miss is a wireframe the ported prompt no longer names.
 
 ### A context entry's H2 set is closed
 
@@ -178,7 +168,7 @@ A document is always-loaded only when an `@` line in `CLAUDE.md` names it. Nothi
 
 An `@` line carries a catalog or a short document every session needs, such as a folder `index.md`. A lookup file such as `canon/DESIGN.md` stays a one-line key path.
 
-- A line stays in either `CLAUDE.md` only when no core rule, path-scoped rule firing at the moment it matters, eager import, or catalog already carries it
+- A line stays in either `CLAUDE.md` only when no core rule, path-scoped rule, eager import, or catalog already carries it
 - A path-scoped rule fires on edit rather than during planning, so a design principle a command is planned against stays in the root even where a rule on `src/` restates it
 - The seed keeps a line a core rule duplicates when a target installing it without governance would lose the instruction, which is why it keeps its Context bullet
 - The root file keeps its own folder map, since the cap on re-derivable structure governs a second copy inside a per-domain entry, where the reader has already arrived
