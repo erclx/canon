@@ -28,7 +28,8 @@ A page failing either is non-conforming even when it satisfies every shape rule 
 ## Placement
 
 - Write a page here only when its subject is owned outside this repository. Route anything about how this repository works to `docs/`, `canon/context/`, or a skill body instead.
-- File the page in the `claude` subfolder of the `wiki` folder. A subject Anthropic does not own, whether a third-party tool or a vendor-neutral concept, is out of scope for this folder split. Route it to `docs/` or a skill body instead of adding a second wiki folder for it.
+- File the page in the `claude` subfolder of the `wiki` folder
+- Route a subject Anthropic does not own, whether a third-party tool or a vendor-neutral concept, to `docs/` or a skill body rather than adding a second wiki folder for it
 
 ## Frontmatter
 
@@ -50,7 +51,7 @@ A page failing either is non-conforming even when it satisfies every shape rule 
 ## Shape
 
 - Keep a page thin: the `Source:` sentence, an orientation paragraph, and lesson sections. The source owns the reference detail and a paraphrase of it falls behind within days.
-- Apply the lesson test per section: keep a fact about the subject only when the source page does not state it. Such a fact is a gotcha this project hit, a constraint it relies on, or how it uses the feature.
+- Apply the lesson test per section, keeping a fact only when the source page does not state it. Such a fact is a gotcha this project hit, a constraint it relies on, or how it uses the feature.
 - Read the current source before keeping or cutting a section. A fact kept from memory is the drift this shape exists to prevent.
 - Send a session that wants reference detail to the source and fetch it live. The page answers orientation and lessons only.
 - Leave a page with no lessons as the source link and the orientation paragraph. A catalog routes a reader by page, so the stub stays.
