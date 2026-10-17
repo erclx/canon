@@ -215,15 +215,12 @@ describe('canon hooks reply-links', () => {
   it('should write the findings as a record under --json', async () => {
     const result = await verb('[it](src/gone.ts)', '--json')
 
-    expect(JSON.parse(result.stdout)).toEqual({
-      missing: [
-        {
-          destination: 'src/gone.ts',
-          path: join(main, 'src/gone.ts'),
-        },
-      ],
-      ok: false,
-    })
+    const record = JSON.parse(result.stdout)
+    expect(record.ok).toBe(false)
+    expect(record.missing).toEqual([
+      { destination: 'src/gone.ts', path: join(main, 'src/gone.ts') },
+    ])
+    expect(record.message).toContain('- src/gone.ts')
   })
 
   it('should take --root over the main worktree root', async () => {

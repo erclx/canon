@@ -117,7 +117,11 @@ export function register(program: Command): void {
       )
       if (opts.json) {
         process.stdout.write(
-          `${JSON.stringify({ missing: found, ok: found.length === 0 })}\n`,
+          `${JSON.stringify({
+            message: found.length > 0 ? formatMissing(found) : undefined,
+            missing: found,
+            ok: found.length === 0,
+          })}\n`,
         )
       }
       if (found.length > 0) process.stderr.write(`${formatMissing(found)}\n`)
