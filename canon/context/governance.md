@@ -18,7 +18,7 @@ Holds the source rules, one subfolder per audience, each at `<folder>/<slug>.md`
 - `code/`, `claude/`, `canon/`, `tooling/`, and `writing/` serve a project's code, session conduct, workflow, dev setup, and prose, and `lang/`, `framework/`, `lib/`, and `ui/` are opt-in
 - A rule with `paths:` loads when Claude reads or writes a matching file, one without always applies like `CLAUDE.md`, and the Cursor keys `globs`, `alwaysApply`, and `priority` must not appear
 - A `description` with a bare word, a colon, and a space breaks `Bun.YAML.parse` and lists the rule as unscoped, so rephrase it rather than quote it
-- Adding a rule means creating the file, committing the regenerated `.claude/rules/` copy, and running `canon gov counts` until clean, and a rename also adds a `governance/renames.toml` entry
+- Adding a rule means creating the file, committing the regenerated `.claude/rules/` copy, and running `canon gov counts` until clean, as authored, consumed, and `base` counts move apart
 - A rule in `code/` reaches every language stack, and one elsewhere reaches nobody until a stack or detect names it, so its glob should cover every ecosystem it governs
 
 ### `governance/stacks/`
@@ -42,13 +42,23 @@ Holds one table per opt-in rule, keyed by rule basename, listing the dependencie
 
 ### `src/gov/`
 
-Owns the gov half of every verb, being the stack reader, the rule lookup, the catalog behind `list`, the install copy, the sync adapter, the citation and restated checks, and the payload builder behind `build`.
+Owns the gov half of every verb, being the stack reader, the rule lookup, the catalog behind `list`, the install copy, the sync adapter, the citation and restated checks, and the payload builder behind `build`. Frontmatter stripping lives in `src/markdown/frontmatter.ts`, which `docs` shares, and is never duplicated here.
 
 - `install` bootstraps a stack and overwrites, `sync` refreshes only what is installed and never adds, and `build` writes the paste payload
-- `gov list --json` carries `unreferenced` and `staleDetect` beside `stacks` and `rules`
+- `gov list --json` carries `unreferenced` and `staleDetect` beside `stacks` and `rules`, and `recordStamp` holds the file hashes while `writeChainStamp` holds the stack name
 - `src/sync/engine.ts` runs the scan, prompt, and apply loop, and matches an installed rule to its source by name so a moved rule syncs into the subfolder the target uses
 - `canon gov citations` resolves every path a rule body cites plus the `paths:` globs under `internal/rules/`, and the `Rule citations` stage gates on it
 - `canon gov install` and `sync` refuse the toolkit root, `regen` runs there on purpose, and `CANON_NON_INTERACTIVE=1` takes each confirm's first option but not the stack picker
+
+### `claude/skills/create-rule/`
+
+Holds the standard for what a rule states, which these tests apply before a rule is written.
+
+- A rule passes when its invariant fires on a path edit and violating it ships silently, and a rejected candidate is recorded by which half failed
+- A claude rule carries at most five directives beside its pointer, since past that it reproduces the standard's structure rather than what must not go wrong
+- A rule loads with no skill context, so `${CLAUDE_SKILL_DIR}` expands to nothing and the rule names the owning skill by its `canon:` name
+- Test the target skill for a guard before writing `Load`, since `teach-workspace` refuses or starts a workspace where `write-human` only advises
+- A standard a target never authors is routed by an `internal/rules/` rule, and `tasks.md` globs the whole task folder and sends the session handoff to `canon:session-map`
 
 ### `internal/`
 
@@ -62,12 +72,12 @@ Holds `governance.toml`, which names the one stack and extras this repository co
 
 ### Other folders
 
-Four more surfaces shape what a rule says and where it lands.
+A few more surfaces shape where a rule lands.
 
 - `.claude/rules/` is produced output, so a hand edit is deleted on the next `bun run check` and the change belongs in the source or the record
 - `governance/renames.toml` carries one entry per renamed shipped rule so `canon gov sync` moves a target across
-- `claude/skills/create-rule/references/rule.md` settles what a rule states, and a rule loads the skill owning a reference by its `canon:` name with a report-if-missing line
-- A rule earns its place when a path edit can ship a violation silently and no gate catches it, so `claude/skills/git-commit/references/versioning.md` is reached by skill instruction
+- `claude/skills/git-commit/references/versioning.md` governs no file, so skill instruction reaches it rather than a rule
+- A project holding `.cursor/rules/` from an older toolkit keeps those files, since sync never touches them
 
 ## Gotchas
 
