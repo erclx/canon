@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.39.0](https://github.com/erclx/canon/compare/v5.38.0...v5.39.0) (2026-10-17)
+
+
+### Features
+
+* **context:** retire decisions and cap gotchas in the entry shape ([#2418](https://github.com/erclx/canon/issues/2418)) ([bf85e94](https://github.com/erclx/canon/commit/bf85e94ed056e094ac7770cfa6097cade1605c45))
+* **hooks:** block a reply whose links name missing files ([#2404](https://github.com/erclx/canon/issues/2404)) ([44696b0](https://github.com/erclx/canon/commit/44696b09ca759d340c0db5836c8dc7ba273d7859))
+* **markdown:** check the command reference page shape ([#2417](https://github.com/erclx/canon/issues/2417)) ([8197a68](https://github.com/erclx/canon/commit/8197a685d42da580754bfc4f2db957a370617c0d))
+* **markdown:** gate density on the remaining context entries ([#2415](https://github.com/erclx/canon/issues/2415)) ([2172b55](https://github.com/erclx/canon/commit/2172b552e31ae01d1118e581d98a766b5bcd15be))
+* **markdown:** gate six density limits through the markdown audit ([#2405](https://github.com/erclx/canon/issues/2405)) ([d9fa7c2](https://github.com/erclx/canon/commit/d9fa7c2b87b0a76e9379194c249cb23bdc58dbb6))
+* **markdown:** state density limits and audit writing skill output ([#2406](https://github.com/erclx/canon/issues/2406)) ([0f64067](https://github.com/erclx/canon/commit/0f640676c1e618f71c070e9e5a778fc092a2ec0d))
+* **skills:** gate density on api-design to plan-groundwork bodies ([#2416](https://github.com/erclx/canon/issues/2416)) ([1b1b07a](https://github.com/erclx/canon/commit/1b1b07a40823cc904c3473d00e7b88a3574f577a))
+
 ## [5.38.0](https://github.com/erclx/canon/compare/v5.37.0...v5.38.0) (2026-10-12)
 
 
