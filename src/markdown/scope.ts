@@ -36,7 +36,8 @@ const DENSITY_SCOPE = [
  */
 export const GATED_PATHS: readonly string[] = [
   'canon/context/claude-plugin.md',
-  'canon/context/claude-internal/',
+  'canon/context/claude-internal.md',
+  'canon/context/orchestration.md',
   'canon/context/features/',
   'canon/context/cli/',
   'canon/context/sandbox/',

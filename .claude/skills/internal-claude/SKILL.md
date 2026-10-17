@@ -5,12 +5,12 @@ description: Claude Code plugin and tooling. Use for adding or modifying plugin 
 
 # Claude
 
-Read `canon/context/claude-plugin.md` for the shipped plugin, its marketplace and release wiring, and `canon claude`, and `canon/context/claude-internal/index.md` for internal skills and plugin setup before editing.
+Read `canon/context/claude-plugin.md` for the shipped plugin, its marketplace and release wiring, and `canon claude`, and `canon/context/claude-internal.md` for internal skills and plugin setup before editing.
 
 ## Editing rules
 
 - When updating an internal skill, write to `{base-dir}/SKILL.md`, where `{base-dir}` is the path the skill header shows at load time
-- Read `canon/context/claude-plugin.md` before adding a plugin skill and `canon/context/claude-internal/skills.md` before adding an internal one
+- Read `canon/context/claude-plugin.md` before adding a plugin skill and `canon/context/claude-internal.md` before adding an internal one
 - Run `canon claude skills list` for the plugin roster, which no entry restates
 - Follow `claude/skills/create-skill/references/skill.md` for skill structure and frontmatter
 
@@ -64,7 +64,7 @@ When editing any file under `.claude/` here, check `tooling/claude/seeds/` for a
 Adding a skill touches the catalog, the skill map, the family key, a scenario, a routing case, and the hero.
 
 - Create the skill folder and `SKILL.md` in `claude/skills/`
-- List an internal skill in `canon/context/claude-internal/skills.md`. A plugin skill needs no catalog edit, and takes a `skill-*` entry only for reasoning no existing child covers.
+- An internal skill needs no catalog edit, since `canon/context/claude-internal.md` describes the folder. A plugin skill takes a `skill-*` entry only for reasoning no existing child covers.
 - Add a row to the skill's group in `docs/workflow/skill-map.md`, or in `skill-map-on-request.md` beside it for the artifact and question groups. Every listed name takes exactly one row across the two.
 - Set `metadata.family` to the group's key from `canon claude skills list --json`. The Skill family gate stage fails a skill without one, and the web build refuses a row under another group.
 
@@ -84,7 +84,6 @@ Draft a `sandbox/<category>/<skill>.ts` scenario beside `SKILL.md`, even for jud
 
 Read the skill's sibling `REQUIREMENT.md` first when one exists. A change closing no gap it states changes the requirement first or is dropped.
 
-- Update the matching bullet in `canon/context/claude-internal/skills.md` when an internal skill's description changes. A plugin skill's description is read from its own frontmatter.
 - Update the paired scenario in `sandbox/` when the skill's behavior changed
 - Run `/internal-sandbox-check` before shipping to audit which skills changed without a paired scenario edit
 
@@ -99,6 +98,6 @@ The seed's "Context" section defines the three-tier context model, so keep it co
 The context entries and seeds this skill draws on, beyond the ones named above.
 
 - `canon/context/claude-plugin.md`: the plugin root, skills, marketplace entry, `canon claude`, and seeds
-- `canon/context/claude-internal/`: internal skills, orchestration, plugin discovery
+- `canon/context/claude-internal.md` and `canon/context/orchestration.md`: internal skills, plugin discovery, and multi-session coordination
 - `canon/context/context-model.md`: three-tier context model, how entries get populated, and the index.md system
 - `tooling/claude/reference.md`: seed layout and design notes

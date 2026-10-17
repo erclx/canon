@@ -51,7 +51,7 @@ A `main` baseline answers a branch tested against a stale `main`, but not two br
 - A pull request's run checks out `refs/pull/<n>/merge`, the merge with `main` as of its last push (run 37203889787, Checkout step)
 - Nothing re-runs it when `main` moves, so once a sibling merges the green describes a merge nobody will make
 
-The orchestrator poll covers that gap by hand, as `canon/context/claude-internal/orchestration/poll.md` describes.
+The orchestrator poll covers that gap by hand, as `canon/context/orchestration.md` describes.
 
 - `STALE` names an open pull request whose files `main` changed since it branched, so its worker rebases and re-runs the gate while the draft mark stays on
 - `OVERLAP` names two open pull requests that conflict with each other, so the merge order is settled before either lands

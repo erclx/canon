@@ -77,7 +77,7 @@ The skills and rules around the plugin each own one slice.
 
 - `web/card-src/` owns the social card route, Astro only since `srcDir` excludes it from a build, and it reads only properties `canon design css` emits, as an undefined one silently falls back
 - `docs/workflow/` owns the skill map a coverage claim is measured against, one row per skill
-- `.claude/skills/` owns the toolkit-internal `internal-*` skills, covered in `canon/context/claude-internal/index.md`
+- `.claude/skills/` owns the toolkit-internal `internal-*` skills, covered in `canon/context/claude-internal.md`
 - `sandbox/claude/` owns the per-skill scenarios that provision a seeded project for a headless run
 - `src/labels/` owns `canon labels`, which `git-pr` calls to label a pull request from `canon/config/pr-labels.toml`
 
