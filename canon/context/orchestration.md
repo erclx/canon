@@ -30,6 +30,15 @@ Holds one plan per task, archived beside the task on ship.
 - `planLineIndex` finds the first `Plan:` line outside a fenced sample, and a line linking several plans is a sliced task
 - `next-label --claim` reserves a label under `.canon/ordinal-locks/`, since a bare read lets two callers land on one answer
 
+### `claude/skills/plan-feature/`
+
+Owns the plan shape that a planner writes and a worker or controller reads.
+
+- A question answered by narrowing scope leaves the dropped board outcome `[ ]`, so the task stays live and the merge archives no plan
+- The numbered questions are coupled, so re-read every answer as one set for a later answer whose mechanism an earlier one chose not to supply
+- Where a `- Suggested:` line conflicts with a Files-to-touch line for the same file, the suggestion wins and the reconciliation is reported
+- A plan's file list is a measurement from the day it was written, so re-run its count before treating it as the scope
+
 ### `src/tasks/`
 
 Owns the `canon tasks` verbs that validate, archive, and derive from the board.
@@ -76,6 +85,13 @@ Owns the handoff the orchestrator adds three sections to.
 - One file per session keeps two writers off one path, and `RESERVED_STEMS` in `src/tasks/archive.ts` stops the task verbs counting it
 - `session-resume` filters `index`, `priority`, `backlog`, and `session-` rows before it counts tasks, so a new sibling in the folder must reach that reader
 
+### `claude/skills/role-orchestrator/`
+
+Owns the orchestrator body and requirement, which state the dispatch policy.
+
+- After any change to the shared-file policy, search every spelling in the body, its requirement, five runbooks, and two workflow docs, including `wiring seam`, `serialize`, and `shared file`
+- Check a peer's claim about what a merge did against its commits, since an add followed by a remove reads as an untouched file in the net diff
+
 ### `claude/skills/role-orchestrator/scripts/`
 
 Holds `poll.ts`, `watch.ts`, and the `repo.ts` they share. Tests sit in `src/claude/orchestrate-poll.test.ts` and `orchestrate-watch.test.ts`.
@@ -100,6 +116,7 @@ The remaining surfaces each own one slice.
 
 - `.canon/ready/` owns finished-text folders a plan names as its verbatim source, which `role-worker` copies unedited
 - A posted finding reaches the worker as a message from the reviewer, who receives the re-review request directly, so the controller hears only a close, a refusal, or a block
+- The controller falls back as sender for a cloud reviewer or an unreachable side, as `orchestrator-handback.md` states, and the poll's after-finding rule skips a pass a live reviewer sent on
 - A cloud worker has no GraphQL, so its draft mark reads ready and `git-pr` deletes the session link the harness appends
 - `crossSessionInbound` stays unset, since `hold` and `refuse` break the worker handback and `accept` bounds nothing
 
@@ -107,6 +124,6 @@ The remaining surfaces each own one slice.
 
 - A plan carried as an intro link rather than a `Plan:` line is skipped silently by the `git-pr` number write, so the merge archives no plan
 - `canon tasks archive` retargets only the closing task's `Plan:` line, so a sibling row in `priority.md` keeps a dead link that `validate` reports
-- A shell function wrapping `canon` can return 0 on a refusal, so branch on a verb's `reason` rather than its exit
 - A review's `commit.oid` is the head at submission, so a `SEEN` with `source` reading `fallback` may cover a commit the pass never read
-- A board finding or a plan's file list is a measurement from the day it was written, so re-run its count before treating it as the scope
+- `src/gate/boundaries.ts` bans only `wiki/` in the Skill paths measure, so a skill citing a toolkit-only path passes clean
+- `OPERATOR_CALL_PHRASES` in `src/records/validate.ts` covers two paraphrases of the operator-call phrase, so a third reads `launchable: true`

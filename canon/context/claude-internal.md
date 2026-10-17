@@ -35,6 +35,7 @@ Holds the linked worktrees sessions build in, entered through `session-worktree`
 
 - Move a batch of files at the main worktree root with `xargs -a <list> mv -t <destination>`, the list built into a scratchpad file by an earlier command
 - Exclude `*/.claude/worktrees/*` by name from any `find`, `grep -r`, or checksum sweep over a project root, since a worktree's `.git` is a file and `-not -path '*/.git/*'` misses it
+- A plan slug with a hyphen-bounded `git` segment blocks the branch rename, so rename the plan file, re-derive the branch with `canon tasks plan-branch`, then create it off the target commit
 - List merged branches with `git branch --merged --format='%(refname:short)'`, which drops the `*` and `+` decoration a literal-indent grep trips on
 
 ### Other folders
