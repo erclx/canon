@@ -19,7 +19,7 @@ Without this skill, a session editing canvas code:
 
 ## Must
 
-- Point at `canon/context/features/canvas.md` and `docs/agents/canvas.md` rather than restating them.
+- Point at `canon/context/features/canvas.md` and `canon canvas --help` rather than restating them.
 - State that a verb runs against a provisioned `--root`, and why.
 - Name the one writer for property edits and the order a verb and its key binding land in.
 - State how the shell is driven in a browser and what to wait on.
@@ -28,7 +28,7 @@ Without this skill, a session editing canvas code:
 
 - Restate the entry's layout, format, or capture decisions. The ownership table in `CLAUDE.md` puts that narrative in the entry.
 - Carry the procedure a session follows to draw on the canvas. `claude/skills/canvas-board/` owns it.
-- Restate a verb's records or refusals, which `docs/agents/canvas.md` owns.
+- Restate a verb's records or refusals, which `canon canvas --help` owns.
 
 ## Guards
 

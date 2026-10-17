@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Run by hand, inside this repository, in the operator's own session. Each run turns every Claude Code release since the stored cursor into ranked findings with evidence and files them as one intake pass. It is a first pass: recall is incomplete, so say so in the overview and do not present the result as exhaustive.
 
-The reasoning for running locally and for advancing the cursor last is in `canon/context/claude-internal/upstream-digest.md`. The verb contract is in `docs/agents/upstream.md`.
+The reasoning for running locally and for advancing the cursor last is in `canon/context/claude-internal/upstream-digest.md`. The verb contract is in `canon upstream --help`.
 
 ## Guards
 

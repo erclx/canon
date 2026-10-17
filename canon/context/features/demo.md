@@ -7,7 +7,7 @@ description: Beats compiler and browser driver behind canon demo, why the plan i
 
 ## Overview
 
-`canon demo` drives a project's running application and writes a recording and a still. The command surface, its flags, and its refusal reasons live in `docs/agents/demo.md`. This entry holds why it is shaped the way it is.
+`canon demo` drives a project's running application and writes a recording and a still. The command surface, its flags, and its refusal reasons live in `canon demo --help`. This entry holds why it is shaped the way it is.
 
 The browser engine already in this repository can produce a video from a driven page with no editor and no desktop recorder, which is the premise the whole feature rests on. See `.canon/groundwork/38-demo-recorder/06-decision.md` before changing anything structural.
 

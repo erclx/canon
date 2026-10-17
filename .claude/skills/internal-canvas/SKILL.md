@@ -5,7 +5,7 @@ description: The canvas server, its browser shell, and the verbs behind them. Us
 
 # Canvas
 
-Read `canon/context/features/canvas.md` for the layout, the content format, token resolution, and the decisions behind the surface before editing. `docs/agents/canvas.md` is the verb reference.
+Read `canon/context/features/canvas.md` for the layout, the content format, token resolution, and the decisions behind the surface before editing. `canon canvas --help` is the verb reference.
 
 The canvas exists for Claude to draw frames the operator reviews. Do not add new design-tool features unless the operator asks.
 
@@ -40,7 +40,7 @@ Every change to the shell posts evidence and hands the UI reviewer a live addres
 ## Reference
 
 - `canon/context/features/canvas.md`: structure, content format, capture, gotchas
-- `docs/agents/canvas.md`: every verb, record, and refusal
+- `canon canvas --help`: every verb, record, and refusal
 - `claude/skills/canvas-board/`: the procedure a session follows to drive the canvas, which is the shipped skill's concern rather than this one's
 - `claude/skills/canvas-board/references/canvas.md`: the frame content format both writers share
 - `canon/context/development/evidence.md`: which `evidence` folders are dev baselines and which are prod captures, before committing a walk's states
