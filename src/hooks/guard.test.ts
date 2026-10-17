@@ -139,6 +139,14 @@ const run = (
 const payloadFor = (fields: Record<string, unknown>): string =>
   JSON.stringify(fields)
 
+const stopPayload = (reply: string, active = false): string =>
+  payloadFor({
+    cwd: join(fixture, 'project'),
+    hook_event_name: 'Stop',
+    last_assistant_message: reply,
+    stop_hook_active: active,
+  })
+
 const REVIEWS = "'repos/{owner}/{repo}/pulls/7/reviews'"
 
 // The hook resolves a relative body path against the payload's own cwd, so the
@@ -166,6 +174,7 @@ beforeAll(() => {
     join(project, 'src'),
     join(fixture, 'bin'),
     join(fixture, 'bin-no-runner'),
+    join(fixture, 'bin-reply-links'),
     join(fixture, 'bin-jq-trap'),
     join(fixture, 'bin-empty-set'),
     join(fixture, 'bin-advisory'),
@@ -286,6 +295,26 @@ beforeAll(() => {
   writeFileSync(scanPass, '#!/usr/bin/env bash\nexit 0\n')
   chmodSync(scanPass, 0o755)
 
+  // The reply-links hook decides on the record the verb writes, so a stub
+  // answering a missing path stands in for the verb, and logs each call so a
+  // test reads whether the hook spawned it at all. The real check is covered
+  // by the verb's own tests. It stubs `canon` alone, and the toolkit copy falls
+  // to it because the fixture project holds an empty `src/cli.ts` and no `bun`
+  // on this PATH.
+  for (const name of ['canon', 'bun']) {
+    const stub = join(fixture, 'bin-reply-links', name)
+    writeFileSync(
+      stub,
+      [
+        '#!/usr/bin/env bash',
+        'echo called >> "${REPLY_LINKS_CALLS:-/dev/null}"',
+        `printf '%s\\n' '{"ok":false,"missing":[{"destination":"src/gone.ts","path":"/x/src/gone.ts"}],"message":"The final reply links to paths that do not exist on disk:\\n- src/gone.ts"}'`,
+        '',
+      ].join('\n'),
+    )
+    chmodSync(stub, 0o755)
+  }
+
   // An empty file is enough, since the hook tests for the path and the stub
   // runner never reads it. Without it the project root takes the fallback and
   // the branch the hook prefers is exercised by nothing.
@@ -368,6 +397,13 @@ beforeAll(() => {
           hook_event_name: 'PreCompact',
           session_id: nonce,
         }),
+      stream: 'stderr',
+    },
+    'reply-links.sh': {
+      code: 2,
+      expect: 'src/gone.ts',
+      path: [join(fixture, 'bin-reply-links'), hookPath].join(delimiter),
+      payload: () => stopPayload('See [it](src/gone.ts).'),
       stream: 'stderr',
     },
     'records-index.sh': {
@@ -536,6 +572,101 @@ for (const tree of TREES) {
     }
   })
 }
+
+// The block fires once, and a reply with no link never starts the CLI. The
+// acting case above proves the stub still answers, which is what makes the
+// silences here mean something.
+describe('reply-links.sh firing conditions', () => {
+  for (const tree of TREES) {
+    const hook = join(tree.dir, 'reply-links.sh')
+    const path = (): string =>
+      [join(fixture, 'bin-reply-links'), hookPath].join(delimiter)
+    const calls = (name: string): string => join(fixture, `${name}.calls`)
+    const callCount = (name: string): number =>
+      existsSync(calls(name))
+        ? readFileSync(calls(name), 'utf8').split('\n').filter(Boolean).length
+        : 0
+    const runWith = (reply: string, name: string, active = false) =>
+      run(hook, stopPayload(reply, active), path(), undefined, {
+        REPLY_LINKS_CALLS: calls(name),
+      })
+
+    it.concurrent(`should pass the continuation on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const name = `${tree.label.replace(/\W/g, '_')}-active`
+      const result = await runWith('See [it](src/gone.ts).', name, true)
+
+      expect(result.code).toBe(0)
+      expect(result.stderr).toBe('')
+      expect(callCount(name)).toBe(0)
+    })
+
+    it.concurrent(`should never spawn the CLI for a reply with no link on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const name = `${tree.label.replace(/\W/g, '_')}-nolink`
+      const result = await runWith('Done. Nothing to link here (really).', name)
+
+      expect(result.code).toBe(0)
+      expect(result.stderr).toBe('')
+      expect(callCount(name)).toBe(0)
+    })
+
+    it.concurrent(`should leave ${tree.label} silent on a clean record`, async ({
+      expect,
+    }) => {
+      const clean = join(
+        fixture,
+        `bin-reply-links-clean-${tree.label.replace(/\W/g, '_')}`,
+      )
+      mkdirSync(clean, { recursive: true })
+      for (const name of ['canon', 'bun']) {
+        writeFileSync(
+          join(clean, name),
+          `#!/usr/bin/env bash\nprintf '%s\\n' '{"ok":true,"missing":[]}'\n`,
+        )
+        chmodSync(join(clean, name), 0o755)
+      }
+      const result = await run(
+        hook,
+        stopPayload('See [it](src/real.ts).'),
+        [clean, hookPath].join(delimiter),
+      )
+
+      expect(result.code).toBe(0)
+      expect(result.stderr).toBe('')
+    })
+
+    it.concurrent(`should report rather than pass when no record comes back on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const result = await run(
+        hook,
+        stopPayload('See [it](src/gone.ts).'),
+        [join(fixture, 'bin-no-record'), hookPath].join(delimiter),
+      )
+
+      expect(result.code).toBe(1)
+      expect(result.stderr).toContain('was not checked')
+    })
+
+    it.concurrent(`should report rather than pass when jq is missing on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const bare = join(fixture, 'bin-no-jq-only-bash')
+      mkdirSync(bare, { recursive: true })
+      const bash = findOnPath('bash')
+      if (bash && !existsSync(join(bare, 'bash'))) {
+        symlinkSync(bash, join(bare, 'bash'))
+      }
+      const result = await run(hook, stopPayload('[it](src/gone.ts)'), bare)
+
+      expect(result.code).toBe(1)
+      expect(result.stderr).toContain('was not checked')
+    })
+  }
+})
 
 const writeOf = (relative: string): string =>
   payloadFor({

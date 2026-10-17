@@ -24,7 +24,7 @@ CLI catalog and invocation rules for agents, split by command domain. Start with
 - [Driver](driver.md): Walking a page through named interactions, the probe catalog and the false finding each one carries, why viewport heights are never defaulted, and what each refusal reports
 - [Merge gate](gate.md): Running the gate this repository verifies a branch with, what the stage table holds and what stays a script, how the changed set scopes three stages, and why a stage that cannot read its input reports rather than passing
 - [Rule detection](gov-detect.md): Proposing opt-in governance rules from a target's dependencies and paths, the evidence file the verb reads, the record it emits, and its exit codes
-- [Hooks](hooks.md): Running the post-merge steps through one verb, the order and the child call behind each, the root and working directory each step reads, the skip switches, and the line each record maps to
+- [Hooks](hooks.md): Running the post-merge steps through one verb, the order and the child call behind each, the root and working directory each step reads, the skip switches, the line each record maps to, and the reply link check
 - [Indexes](indexes.md): Flags, exit codes, and JSON shape for canon indexes regen and canon indexes list, plus when regen auto-stages what it rewrote
 - [Install and sync](install-and-sync.md): What each install and sync verb writes, refuses, or leaves alone, and how drift is attributed in a target project
 - [Intake](intake.md): Reading intake folder counts and items, the three read states an item can be in, landing a batch of selections in one cluster, the refusal reasons, and why a call is scoped to one file

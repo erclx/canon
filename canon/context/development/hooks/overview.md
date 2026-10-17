@@ -1,6 +1,6 @@
 ---
 title: Overview
-description: Where shell scripts and hooks live, the nine hooks shared with the seed, the audit hook's unresolved dependencies, the dev command reminder, and linting both hook trees
+description: Where shell scripts and hooks live, the ten hooks shared with the seed, the audit hook's unresolved dependencies, the dev command reminder, and linting both hook trees
 ---
 
 # Overview
@@ -23,11 +23,11 @@ Owns the Claude Code hooks this repository runs on itself and the husky git hook
 
 All `.sh` files live under `scripts/`, except Claude Code hooks, which live in `.claude/hooks/`. Do not place shell scripts anywhere else.
 
-### Nine hooks share a name with the seed
+### Ten hooks share a name with the seed
 
-Nine hooks carry the same names as the hooks `canon claude init` seeds from `tooling/claude/seeds/.claude/hooks/`: `index-reminder.sh`, `path-form.sh`, `pr-create-log.sh`, `records-index.sh`, `review-post-scan.sh`, `scratch-guard.sh`, `search-reminder.sh`, `silent-turn.sh`, and `standards-audit.sh`. Eight stay byte-identical to their seeded copies, checked by a hand diff rather than assumed. `standards-audit.sh` is the one pair that diverges on purpose, covered under the audit hook below.
+Ten hooks carry the same names as the hooks `canon claude init` seeds from `tooling/claude/seeds/.claude/hooks/`: `index-reminder.sh`, `path-form.sh`, `pr-create-log.sh`, `records-index.sh`, `reply-links.sh`, `review-post-scan.sh`, `scratch-guard.sh`, `search-reminder.sh`, `silent-turn.sh`, and `standards-audit.sh`. Eight stay byte-identical to their seeded copies, checked by a hand diff rather than assumed. `standards-audit.sh` and `reply-links.sh` diverge on purpose. The seeded copy reaches an installed binary alone, and the toolkit copy prefers the checkout's own source. The first pair is covered under the audit hook below and the second in `canon/context/development/hooks/compaction.md`.
 
-Four of the nine, `index-reminder.sh`, `records-index.sh`, `scratch-guard.sh`, and `standards-audit.sh`, match on the edited file's own path rather than resolving a root. Each matches both the current `.canon/` root and the retired `.claude/` root, spelling the scratch folder `tmp` under the first and `.tmp` under the second. The scratch guard holds a third exemption outside both roots, the harness's own `.claude/jobs/<id>/tmp/`. A hook fixed at one spelling alone stops matching the moment a target sits on the other, and the index goes stale with nothing said.
+Four of the ten, `index-reminder.sh`, `records-index.sh`, `scratch-guard.sh`, and `standards-audit.sh`, match on the edited file's own path rather than resolving a root. Each matches both the current `.canon/` root and the retired `.claude/` root, spelling the scratch folder `tmp` under the first and `.tmp` under the second. The scratch guard holds a third exemption outside both roots, the harness's own `.claude/jobs/<id>/tmp/`. A hook fixed at one spelling alone stops matching the moment a target sits on the other, and the index goes stale with nothing said.
 
 ### What the audit hook could not read
 

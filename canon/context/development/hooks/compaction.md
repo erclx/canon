@@ -1,6 +1,6 @@
 ---
 title: Compaction and turn hooks
-description: The PreCompact handoff hook and its manual and automatic channels, what the client does with a blocked automatic compaction, the silent turn hook on Stop, and driving a compaction spike
+description: The PreCompact handoff hook and its manual and automatic channels, what the client does with a blocked automatic compaction, the silent turn and reply link hooks on Stop, and driving a compaction spike
 ---
 
 # Compaction and turn hooks
@@ -66,6 +66,28 @@ It blocks rather than advising the way every other seeded hook does, because exi
 A missing input exits quiet rather than blocking, on every guard from `transcript_path` down to the boundary match, so a transient miss never reports as though it were the defect this hook exists to catch. A payload missing `transcript_path`, `prompt_id`, or a `promptId` match is malformed rather than stale, since reading `last_assistant_message` off the payload removes the lag this design would otherwise carry.
 
 Two written paths sharing a basename would otherwise let one mention clear both, since the ordinary check tests only the basename. The hook counts basenames across the turn's written paths first, and a basename shared by more than one falls back to matching the full path instead. The count pipes the basenames through `sort | uniq -d` rather than keeping an associative array, since macOS ships bash 3.2 and `declare -A` fails there on every turn. A scan in `src/hooks/guard.test.ts` fails on any bash-4-only construct in either hook tree.
+
+### The reply link hook
+
+`reply-links.sh` registers on `Stop` beside `silent-turn.sh` and blocks a closing reply whose markdown links name a file that is not on disk. The desktop app renders such a link as clickable and opens "Couldn't read this file", and the output rule already asks for full paths, so a check that fails replaces a second reminder. It ships through the seed on the same capability-seeding criterion as the silent turn hook, since a dead link is as real in a target as here.
+
+The work sits in `canon hooks reply-links`, which reads the reply on stdin and exits 1 on findings, leaving the wrapper to map that to the exit 2 a hook block needs. A verb run by hand reports ordinary failure as 1, and the hook exit table reserves 2 for a block. The wrapper reads the verb's `--json` record rather than its exit code, because a binary predating the verb exits 1 on an unknown command, the same code a finding leaves.
+
+A link resolves against the main worktree root, since the output rule says the editor is rooted there. A relative link to a file that exists only inside a linked worktree therefore reads as missing, which is the report the rule asks for. An absolute link into `.claude/worktrees/<name>/.canon/` is reported with the main-root path when that file exists, because the records folders are gitignored and a worktree never holds them. Placeholders, globs, URLs, anchors, and anything inside a code span or fence are skipped. A `:42`, `:42-50`, or `#L42` tail is stripped first, and a malformed percent escape is skipped rather than thrown on.
+
+The pre-filter is a shell test for `](` on the raw payload, ahead of any `jq` spawn, so an ordinary reply costs a bounded read and nothing else. Measured at 2 ms for a link-free reply on 2026-10-17. The CLI starts only for a reply carrying a link.
+
+#### Failing to measure
+
+The hook reports a check it could not run and never passes it as clean, but it exits 1 for that rather than 2. Exit 2 forces a continuation, and a hook that cannot read `stop_hook_active` would then block every continuation after it. Exit 1 puts the text in front of the operator and leaves the session alone. A missing `jq`, an unreadable payload, a `cwd` missing from disk, no resolvable runner, and a verb answering no record each take this path.
+
+Two limits come with the event. Only the closing message is checked, because the payload carries `last_assistant_message` and nothing earlier, so a bad link in a mid-turn message passes. And the bad reply is already on screen when the hook fires, so the fix arrives as a follow-up and not a replacement. Reference-style links and backticked path-like tokens are not read. Widening to backticked tokens is deferred until a week of blocks shows how often an illustrative path would false-positive.
+
+#### Copies and registration
+
+The seeded copy resolves an installed `canon` alone, and names `bun add -g @erclx/canon` when none is on `PATH`. The toolkit copy runs the checkout's `src/cli.ts` first, the order `standards-audit.sh` documents, so the hook and the build under test read one verb. That makes a second intentional pair beside the audit hook, and the hand diff in `canon/context/development/hooks/overview.md` skips both. A target installed before this hook shipped keeps its `hooks` block, which sync never rewrites, so the seeded script lands there unregistered.
+
+`src/hooks/guard.test.ts` stubs `canon` and `bun` to answer a record, and checks the continuation passing, a link-free reply never starting the stub, a clean record, and the two reporting paths. The throwaway-repository cases in `src/hooks/reply-links.test.ts` spawn the real verb from a linked worktree. Whether the desktop app resolves a relative link against the main root or the session's directory is taken from the output rule and is not yet confirmed in a driven session.
 
 ## Gotchas
 
