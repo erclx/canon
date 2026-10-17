@@ -78,7 +78,10 @@ The three kinds resting on judgment go to a second array, because a check report
 
 The board standard fixes three forms for a blocker cell and leaves it unstructured, and the check reads citations out of it. A cited task is a bare sibling link, so a pointer into another folder is a plan and settles nothing. A grammar for a handful of rows nobody phrases the same way twice was the rejected alternative.
 
-Both halves gate on the cell rather than a column beside it. Gating collision on the row's `Touches` column fires on any parked row whose declared files nothing running holds, whatever parked it. That row then counts as re-tested, so the condition still holding it goes unmentioned and the report reads as a clean board.
+Both halves gate on the cell rather than a column beside it. The standard gives a collision cell the file held by the running task, so the citation is already there to gate on.
+
+- Gating collision on the row's `Touches` column fires on any parked row whose declared files nothing running holds, whatever parked it
+- That row then counts as re-tested, so the condition still holding it goes unmentioned and the report reads as a clean board
 
 ### Mapping
 

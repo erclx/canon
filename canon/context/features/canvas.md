@@ -17,7 +17,7 @@ The canvas exists for Claude to draw frames the operator reviews. No further des
 
 - `src/canvas/` owns the server, the content reader and writers, element addressing, the inline-style editor, token resolution, capture, fit, and arrange
 - `src/canvas/client/` owns the browser shell, built by Bun's HTML bundler when the server starts
-- `src/canvas/client/inspector/` owns the inspector's fields, sections, alignment grid, color field and picker, value formatting, and stylesheet, composed by `inspector.tsx`
+- `src/canvas/client/inspector/` owns the inspector's fields, sections, size field, alignment grid, color field and picker, value formatting, color parsing, and stylesheet, composed by `inspector.tsx`
 - `claude/skills/canvas-board/` owns the procedure a session follows
 - `.canon/canvas/` at the main worktree root owns the content, gitignored
 
@@ -92,7 +92,7 @@ The `assets/evidence/canvas/arrange/`, `layers/`, and `shell/` folders hold the 
 | edit-refused       | The server refuses an edit, as when the file changed. The frame reloads, the typed value is dropped, and an alert says so         | none       |
 | undo-dropped       | An undo or redo finds its target changed. Nothing is written, the entry is gone, and the history notice says so                   | `shell/`   |
 | panels-hidden      | The panel toggle or its key. Both panels go and the surface takes the full width with the frames held still                       | `shell/`   |
-| panels-resized     | A panel handle drag or arrow key. That panel takes the new width with the frames held still                                       | none       |
+| panels-resized     | A panel handle drag or arrow key. That panel takes the new width with the frames held still                                       | `shell/`   |
 | theme, theme-empty | The Theme tab is picked. Token groups replace the lists, or one line says no tokens resolve, then the server's notice             | none       |
 
 ### Behavior
@@ -247,8 +247,9 @@ The key layer is one pure map in `client/keys.ts`, called by the surface `<main>
 A Space pan lives in its own `spacePan` signal beside `activeTool`, so releasing Space restores the picked tool, and the strip lights the computed `shownTool`.
 
 - While panning, every `.frame` and its descendants take `pointer-events: none`, since a selection handle sets its own and a Space drag starting on one resized the element
-- A pan press prevents the viewport's mouse press default, since a press read as a second click selected a word or a whole frame and painted it blue
-- The pan also blocks that start event and clears the selection in the shell and every frame document, because neither blocking the start event nor a clear at pointer down alone reached it
+- A pan press prevents the viewport's mouse press default, since a press read as a second click selected a word or frame and painted it blue
+- Neither blocking a selection's start event nor a clear at pointer down alone stopped that
+- The pan also blocks that start event and clears the selection in the shell and every frame document
 
 ### Pan focus
 
@@ -415,9 +416,9 @@ A saved edit reloads the frame twice, once on the edit's answer and once when th
 Three traps sit in the menu, the writer, and the class namespace.
 
 - The W and H mode menu is a transparent native `select` over a chevron, so its list opens above the panel's scroll clipping and answers the keyboard as the platform does
-- The focus ring draws on the lane holding it
+- The focus ring draws on the lane holding it, since the select itself is invisible
 - The writer reads a style attribute through `HTMLRewriter`, whose `getAttribute` returns entities still encoded and whose `setAttribute` escapes only `"`, as `&quot;`
-- The declaration splitter in `src/canvas/edit.ts` skips a character reference whole rather than splitting at its semicolon
+- A quoted font family comes back carrying `&quot;`, so the declaration splitter in `src/canvas/edit.ts` skips a character reference whole rather than splitting at its semicolon
 - The inspector's stylesheet and `shell.css` share one class namespace, and the Theme tab owns `.token`. A new inspector class takes its own prefix, as `.token-option` does.
 
 ### The walk and rewriting

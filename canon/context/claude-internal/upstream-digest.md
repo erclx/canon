@@ -35,7 +35,7 @@ The walk stops at the first release not newer than the cursor, not at an exact t
 The run is by hand, so something has to say when it is due. A `SessionStart` hook calls `upstream due` and prints one line, and three choices keep it cheap.
 
 - **It goes to the operator, not the model.** The line leaves through `systemMessage`, since hook stdout would spend a transcript line per session and invite an unrequested digest.
-- **It skips background sessions.** A dispatch wave starts about twenty, and unauthenticated GitHub requests cap at 60 an hour. The filter reads `CLAUDE_CODE_SESSION_ATTENDED` as `0`.
+- **It skips background sessions.** A wave starts about twenty and unauthenticated requests cap at 60 an hour. The filter reads `CLAUDE_CODE_SESSION_ATTENDED` as `0`, like `unattended-agent-guard.sh`.
 - **It reads the feed once a day.** The reading is cached under the scratch folder, since a records push backs the upstream folder and a daily rewrite would add a commit. A failed read is cached too.
 
 The `0` value is undocumented. If an interactive terminal also read `0` the reminder would go silent, which fails safe.
