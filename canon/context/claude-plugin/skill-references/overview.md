@@ -43,7 +43,7 @@ A skill reaches its references when it runs, and a session editing an artifact b
 - `governance/rules/canon/context.md`
 - `governance/rules/claude/skill.md`
 
-Each loads its owner skill by its `canon:` name and carries the few directives that ship silently when violated. `canon/context/governance/routing.md` carries why a rule loads the skill rather than citing the file, and the cap on directives beside the pointer.
+Each loads its owner skill by its `canon:` name and carries the few directives that ship silently when violated. `canon/context/governance.md` carries why a rule loads the skill rather than citing the file, and the cap on directives beside the pointer.
 
 ## Gotchas
 

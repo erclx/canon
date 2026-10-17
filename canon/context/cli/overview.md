@@ -18,8 +18,8 @@ TypeScript owns argument parsing and every migrated domain, and bash owns what h
 - **`src/design/`** owns the TS-first design domain, documented in `canon/context/design.md`
 - **`src/slides/`** and **`src/transcripts/`** are documented in `canon/context/features/slides.md` and `canon/context/features/transcripts.md`
 - **`src/indexes/`** owns the index engine, documented in `canon/context/context-model.md`
-- **`src/tooling/`** owns the tooling inject and scan engine, documented in `canon/context/tooling/index.md`
-- **`src/tooling/seed-marker.ts`** is the seed stub contract `canon/context/tooling/` owns, read by `tooling/`, `claude/`, `sync/`, and `context/`
+- **`src/tooling/`** owns the tooling inject and scan engine, documented in `canon/context/tooling.md`
+- **`src/tooling/seed-marker.ts`** is the seed stub contract `canon/context/tooling.md` owns, read by `tooling/`, `claude/`, `sync/`, and `context/`
 - **`src/sweep/`** owns the contract every line sweep reads, being which files it skips (`binary.ts`) and which lines it mutes (`exempt-marker.ts`). Six domains share it.
 - **`src/feedback/`** owns the `canon feedback` engine, being required sections (`body.ts`), the GitHub issue call (`github.ts`), and argument and failure formatting (`github-format.ts`)
 - **`src/sync/`** owns the sync engine, the git workflow, the install stamp, the drift report, and `copy.ts`, the mode-preserving install copy the three adapters read

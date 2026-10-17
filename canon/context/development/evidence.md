@@ -47,7 +47,7 @@ Three gitignored spellings hold no baseline and no shown capture.
 
 The web stack seeds `scripts/readme-screenshot.sh`, which copies a target's README frame into `assets/evidence/readme/`. That is a prod frame under the dev folder, so the boundary is this repository's own and a target is never assumed to hold dev evidence alone.
 
-Conforming the seed is a follow-up. The harness it ships is covered in `canon/context/tooling/capture.md`.
+Conforming the seed is a follow-up. The harness it ships is covered in `canon/context/tooling.md`.
 
 ## Gotchas
 

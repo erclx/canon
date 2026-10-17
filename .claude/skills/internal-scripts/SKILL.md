@@ -61,7 +61,7 @@ After editing install or sync code (`manage-*.sh`, `src/tooling/`):
 
 ## Hooks and husky
 
-Read `canon/context/development/hooks/index.md` before touching `.claude/hooks/` or `.husky/`, then the file it names for the hook at hand. The folder covers the hook stdin guard, the husky POSIX `sh` constraint, and the `canon-no-seed:` marker rule from `canon/context/tooling/seeds.md`.
+Read `canon/context/development/hooks/index.md` before touching `.claude/hooks/` or `.husky/`, then the file it names for the hook at hand. The folder covers the hook stdin guard, the husky POSIX `sh` constraint, and the `canon-no-seed:` marker rule from `canon/context/tooling.md`.
 
 ## Reference
 

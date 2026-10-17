@@ -111,7 +111,7 @@ The relay serves that session. It refuses neither a caller holding no role nor o
 
 No rule carries block-before-prompt. `session-relay` owns the send mechanics and the reason for the order, and `role-worker` and `role-planner` each state only that the message is owed first. Each keeps the operator ask and its own inference rung.
 
-- A project installing governance without the plugin gets no surface carrying the timing, a cost the operator accepted and `canon/context/governance/routing.md` records as an exception to its cut test
+- A project installing governance without the plugin gets no surface carrying the timing, a cost the operator accepted and `canon/context/governance.md` records as an exception to its cut test
 - The relay's description names a session stuck on a question that owes its dispatcher a message, the one trigger a roleless session carries nowhere else
 - The routing eval is the only check that the widened description still fires
 
