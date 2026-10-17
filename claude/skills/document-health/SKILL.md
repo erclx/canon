@@ -16,7 +16,7 @@ Three axes carry the report. Two answer from a verb and the third answers from a
 - `canon` absent from the path: stop. `❌ canon is not on PATH, so neither measured axis can be read.`
 - `git ls-files '*.md'` listing nothing: stop. `❌ No tracked markdown here, so there is no corpus to read.`
 - Run every command under `CANON_NON_INTERACTIVE=1` and prompt at no point. A caller reaching this from a rollout wave has nobody present to answer.
-- Branch on each record's own fields rather than on an exit status. An operator's shell profile may wrap `canon` in a function whose status comes from a trailing command, which reports every refusal as success.
+- Branch on each record's own fields rather than on an exit status, since a shell profile may wrap `canon` in a function whose trailing command reports every refusal as success
 - Repair nothing, write no file in the project, and open no pull request. Whoever read the report decides what to fix.
 
 ## Step 1: scope the corpus
@@ -51,9 +51,8 @@ Take the checkpoints from the record each verb returns rather than from a number
 
 A refusal, an absent key, and a subcommand the project's binary does not carry each leave an axis unread. Report it as unread against the documents it would have covered, name the read that could not be taken, and name the cause.
 
-`canon context audit` refuses with `reason: "no-folders"` in a project whose folders resolve to nothing, which is the ordinary shape where the layout differs from the one the verb looks for. That refusal is the honest answer rather than a failure, and reading it as an empty finding set reports a healthy corpus for documents nothing looked at.
-
-A narrower read is not an unread one. The sweep running on its regex layer alone still answered, so it is reported with the layer named rather than as an axis nothing reached.
+- `canon context audit` refuses with `reason: "no-folders"` where the layout is not the expected one. Reading that honest refusal as an empty finding set reports a healthy corpus nothing looked at.
+- A narrower read is not an unread one. The sweep running on its regex layer alone still answered, so report it with the layer named.
 
 ## Step 3: read the staleness axis
 

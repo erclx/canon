@@ -14,7 +14,7 @@ Runs the one-time setup a deploy needs before the host can publish on push, stop
 - Never accept an API token as input, in a prompt, an argument, or a file. Verify a secret's presence with `gh secret list` rather than asking for or reading its content.
 - Read every account, org, or project ID from the host CLI's own session or files, never from the operator, and pipe it into `gh secret set` rather than reporting it first.
 - Never reimplement a host CLI call or `gh secret set` as a hand-built HTTP call. Call the tools directly.
-- If the project name is not supplied, derive it from the repository's own name (`basename` of `git remote get-url origin`, stripped of a trailing `.git`) and confirm it in the preview rather than asking first.
+- If the project name is not supplied, derive it as the `basename` of `git remote get-url origin` without a trailing `.git`, and confirm it in the preview rather than asking first
 
 ## Step 1: pick the host
 
