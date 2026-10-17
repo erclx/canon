@@ -23,9 +23,9 @@ git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD main 2>/dev/n
 
 Take the union of `git diff --name-only <base> HEAD`, `git diff --name-only HEAD`, and `git ls-files --others --exclude-standard`. Read content with `git diff <base> HEAD` and `git diff HEAD`.
 
-Prefer `origin/main` over local `main`. On `main` itself the local ref resolves to HEAD, so every committed change drops out of the set and the skill goes blind to the work it is meant to read.
-
-The baseline is unusable when no merge base resolves against either ref, or when the base came from local `main` and equals HEAD. On an unusable baseline, read `${CLAUDE_SKILL_DIR}/references/unusable-baseline.md` before Step 3 for the set that step takes instead.
+- Prefer `origin/main` over local `main`. On `main` itself the local ref resolves to HEAD, so every committed change drops out of the set and the skill goes blind to its work.
+- The baseline is unusable when no merge base resolves against either ref, or when the base came from local `main` and equals HEAD
+- On an unusable baseline, read `${CLAUDE_SKILL_DIR}/references/unusable-baseline.md` before Step 3 for the set that step takes instead
 
 ## Step 1: read the context catalog
 
@@ -43,38 +43,58 @@ Review the session for decisions that diverged from the original plan:
 - Technical decisions made or revised
 - Design or UX decisions that differ from what the context entries state
 
-Then resolve the diff baseline and keep the changed paths for Step 3.
+Then resolve the diff baseline and keep the changed paths for Step 3. Stop when the session shows no divergence **and** the diff carries no path a context entry could describe, being a change confined to the task board, scratch, or files outside source and docs.
 
-Stop when the session shows no divergence **and** the diff carries no path a context entry could describe, being a change confined to the task board, scratch, or files outside the repository's source and docs. Report `✅ No context updates needed. Session matched the original plan.` Both conditions have to hold, since a session-only skip would drop the diff-driven refresh for a mechanical change nobody narrated.
+Report `✅ No context updates needed. Session matched the original plan.` Both conditions have to hold, since a session-only skip would drop the diff-driven refresh for a mechanical change nobody narrated.
 
 ## Step 3: refresh context entries
 
-Skip this step silently when `canon/context/` does not exist or its catalog lists no entries.
-
-Otherwise read `${CLAUDE_SKILL_DIR}/references/context-refresh.md` for the diff it reads, the widening a removed capability takes, when a new entry is created, and the output lines.
+Skip this step silently when `canon/context/` does not exist or its catalog lists no entries. Otherwise read `${CLAUDE_SKILL_DIR}/references/context-refresh.md` for the diff it reads, the widening a removed capability takes, when a new entry is created, and the output lines.
 
 Write a session decision into the entry for the domain it constrains, under that entry's `## Decisions`, whatever other domains its reasoning touches. Every write follows these rules:
 
 - Never write `canon/REQUIREMENTS.md`. Report a requirements change in After completion.
 - Update only the sections affected by session decisions or the diff, and leave unrelated sections alone.
-- Rewrite a restated or superseded statement in place rather than appending the replacement beside it. State the fact that stands and keep the earlier reasoning only where it is the alternative that lost, per `${CLAUDE_SKILL_DIR}/references/context.md`.
+- Rewrite a restated or superseded statement in place rather than appending the replacement beside it, per `${CLAUDE_SKILL_DIR}/references/context.md`
+- State the fact that stands, and keep the earlier reasoning only where it is the alternative that lost
 - Follow `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md` and the `write-human` skill for all edits.
 
 Write each updated file immediately. Claude Code's tool permission dialog is the confirmation gate. Do not wait for user input.
 
 ## Step 4: audit what the fold touched
 
-Run the structural audit, then the content classifier, and answer both before the report.
+Run the structural audit, the markdown audit, and the content classifier, and answer each before the report. Findings never stop the fold.
+
+### Structural audit
+
+`canon context audit --json` takes a project root rather than a file list, so it reports the whole folder.
 
 ```bash
 canon context audit --json
 ```
 
-The verb takes a project root rather than a file list, so it reports the whole folder. Report only the findings whose `rel` names a file Step 3 wrote this run or a file the diff carries, one line each as `⚠ Audit: <rel>, <finding>`, and leave the rest unreported, since a finding in an entry this run never touched belongs to whoever next edits it. Repair a finding in a file Step 3 wrote this run when the fix is inside what it already rewrote, such as a bare reference or a missing section it dropped. Report a missing subcommand or a refusal as `⚠ Audit: <message>` and continue.
+- Report only the findings whose `rel` names a file Step 3 wrote this run or a file the diff carries, one line each as `⚠ Audit: <rel>, <finding>`
+- Leave the rest unreported, since a finding in an entry this run never touched belongs to whoever next edits it
+- Repair a finding in a file Step 3 wrote this run when the fix is inside what it already rewrote, such as a bare reference or a missing section it dropped
+- Report a missing subcommand or a refusal as `⚠ Audit: <message>` and continue
 
-Then classify. Skip the classifier only when the Diff baseline section could not resolve a base ref at all, reporting `⚠ No diff to scope against. Skipped the classify check.` The verb needs a resolvable ref to run against, which is the one condition it cannot answer for itself.
+### Markdown audit
 
-Otherwise read `${CLAUDE_SKILL_DIR}/references/classify.md` for the invocation, its scope, the record fields, applying a finding, the one-line keep reason, the unreachable and missing-subcommand lines, and the report shape. `${CLAUDE_SKILL_DIR}` names this skill's own directory, resolved once when the skill loaded. Read the reference by that resolved path rather than guessing a `.claude/skills/context-fold/references/classify.md` path from the toolkit's install-time layout, which is a different root than the one this skill's own files live under. The invocation is `canon context classify diff --base <base> --json`, and it runs whether or not that reference resolves. Findings never stop the fold.
+Run `canon markdown audit <path>` over every entry Step 3 wrote this run, and fix each ban and density finding it reports per the markdown standard Step 3 follows.
+
+- Fix a finding inside a section Step 3 rewrote, then re-run the audit on that entry until it reports none there
+- Report a finding in a section Step 3 left alone as `⚠ Audit: <rel>, <finding>`, since the rule above keeps unrelated sections as they are
+- Report a refusal as `⚠ Audit: <message>` and continue
+
+### Classify
+
+Skip the classifier only when the Diff baseline section could not resolve a base ref at all, reporting `⚠ No diff to scope against. Skipped the classify check.` The verb needs a resolvable ref, which is the one condition it cannot answer for itself.
+
+Otherwise read `${CLAUDE_SKILL_DIR}/references/classify.md` for the invocation, its scope, the record fields, applying a finding, the one-line keep reason, the unreachable and missing-subcommand lines, and the report shape.
+
+- `${CLAUDE_SKILL_DIR}` names this skill's own directory, resolved once when the skill loaded, so read the reference by that resolved path
+- Never guess a `.claude/skills/context-fold/references/classify.md` path from the install-time layout, which is a different root than this skill's own files
+- The invocation is `canon context classify diff --base <base> --json`, and it runs whether or not that reference resolves
 
 ## After completion
 

@@ -35,9 +35,9 @@ Does not govern:
 
 Weight the entry toward what cannot be re-derived from the repo. That single rule sorts every section below.
 
-- Folder structure is re-derivable with `ls`. Cheap to regenerate, expensive to maintain by hand. Cap it hard.
-- Command surfaces are re-derivable with `--help` and already live in the CLI reference under `docs/`. Duplicating flag lists creates a second source of truth that drifts.
-- Decisions and gotchas cannot be re-derived at any price. They are the reason the folder exists.
+- Folder structure is re-derivable with `ls`, cheap to regenerate and expensive to maintain by hand, so cap it hard
+- Command surfaces are re-derivable with `--help` and already live in the CLI reference under `docs/`, so a copied flag list is a second source of truth that drifts
+- Decisions and gotchas cannot be re-derived at any price, so they are the reason the folder exists
 
 ## What a working entry looks like
 
@@ -60,23 +60,29 @@ Both fields feed `canon/context/index.md` when regenerated.
 
 An entry carries four H2 sections and no other, in this order: `Overview`, `Layout`, `Decisions`, `Gotchas`. `canon context audit` reports any other H2 and `--gate` fails it. A topic of the domain's own, such as `Cache` or `Workflow`, is an H3 under one of the four, which is where a reader scanning the entry looks for it.
 
-- `## Overview`: two to four lines. What the domain owns and where its boundary sits. Required.
-- `## Layout`: one line per folder in owns-X form, folders only and never files. Required, and omitted where the domain owns no paths in the repo, as with a domain covering external tools. Inventing a line to satisfy the heading is the padding banned below.
-- `## Decisions`: non-obvious choices and the reasoning behind them, each as an H3 or a bullet. The highest-value section in the folder and the one most often missing. A decision resting on how an outside tool, an installer, or the model behaves may close with one `Revisit when <finding>.` sentence naming the harm the decision prevents, and a decision resting on the project's own code takes none.
-- `## Gotchas`: workarounds, things tried and rejected, and invariants the code does not self-document, such as shape constraints, skip rules, and header semantics. Use `## Decisions` when the reader needs the reasoning rather than the invariant itself.
+- `## Overview`: two to four lines on what the domain owns and where its boundary sits. Required.
+- `## Layout`: one line per folder in owns-X form, folders only and never files. Required unless the domain owns no paths, as with one covering external tools, since an invented line is padding.
+- `## Decisions`: non-obvious choices and their reasoning, each as an H3 or a bullet. The highest-value section in the folder and the one most often missing.
+- `## Gotchas`: workarounds, things tried and rejected, and invariants the code does not self-document, such as shape constraints, skip rules, and header semantics
 
-Include `Decisions` and `Gotchas` whenever the domain has content for them, and never pad an entry with an empty heading.
+A Decisions H3 opens with a one- or two-sentence lead, then two or three bullets. A decision resting on how an outside tool, an installer, or the model behaves may close with one `Revisit when <finding>.` sentence naming the harm it prevents, and one resting on the project's own code takes none.
+
+Use `## Decisions` over `## Gotchas` when the reader needs the reasoning rather than the invariant. Include both whenever the domain has content for them, and never pad an entry with an empty heading.
 
 ### Where an extra topic goes
 
-- A command surface goes under `## Layout` as an H3, only when the domain has one, and only as a list of what each verb does. Flags and JSON shapes stay in the CLI reference under `docs/`, linked rather than restated.
-- The procedure for the domain's most common task goes under `## Layout` as an H3 such as `### Adding a <thing>`, since most sessions arrive asking how to add one more of the thing the domain holds.
-- Implementation detail that the one-line owns-X form cannot carry moves to `## Decisions` or `## Gotchas`.
+An extra topic is an H3 under the section a reader scanning for it would open.
+
+- A command surface goes under `## Layout` as an H3 listing what each verb does, only when the domain has one. Flags and JSON shapes stay in the CLI reference under `docs/`.
+- The procedure for the domain's most common task goes under `## Layout` as an H3 such as `### Adding a <thing>`, since most sessions arrive asking how to add one more
+- Implementation detail the owns-X form cannot carry moves to `## Decisions` or `## Gotchas`
 
 ### Ordering and headings
 
-- Name a heading for its subject as it stands (`### Cache`), never for the event that shaped it (`### The cache was the untested part, and the test moved it`). A heading is what a scan reads, so a narrating heading turns the table of contents into a changelog.
-- Entries get read top-down and often partially, so irreducible content sits above recoverable content.
+Entries get read top-down and often partially, so irreducible content sits above recoverable content.
+
+- Name a heading for its subject as it stands (`### Cache`), never for the event that shaped it, since a heading is what a scan reads
+- A narrating heading such as `### The cache was the untested part, and the test moved it` turns the table of contents into a changelog
 
 ## The development entry
 
@@ -93,52 +99,74 @@ Only the `development` entry carries this section, as an H3 under `## Layout`. I
 
 ### Figures and references
 
-- A measured figure, closed with a trailing `Measured at <short-sha> on <YYYY-MM-DD>.` naming a commit rather than a pull request number or a branch. Carry one anchor per figure and rewrite it in place when the number is re-read, whether or not it moved. An absent anchor reads as unchecked.
-- A reference to another entry, spelled as the path that entry sits at rather than as its bare filename. A bare name resolves against whichever folder the reader is already in, so a domain that splits into subfolders strands every inbound reference and the break surfaces nowhere. A reference to a seed, a standard, or a file the project owns elsewhere keeps the form its own surface uses.
+A measured figure and a reference to another entry each take a form that keeps them checkable.
+
+- Close a measured figure with `Measured at <short-sha> on <YYYY-MM-DD>.`, naming a commit rather than a pull request number or a branch
+- Carry one anchor per figure and rewrite it in place whenever the number is re-read, whether or not it moved, since an absent anchor reads as unchecked
+- Spell a reference to another entry as the path that entry sits at, never as its bare filename
+- A bare name resolves against whichever folder the reader is in, so a domain splitting into subfolders strands every inbound reference silently
+- A reference to a seed, a standard, or a file the project owns elsewhere keeps the form its own surface uses
 
 ## What does not go in
 
 - Exhaustive file trees with a description per file. Name folders and their responsibility under `## Layout` instead.
 - Restated `--help` output, flag tables, or JSON shapes.
 - A catalog a `list` command already returns. Link the command instead, so the entry cannot drift from it.
-- Function-level documentation for implementation modules. Read the code. The exception is the public surface of a shared utility module, where the entry is how a session finds an existing helper instead of duplicating it.
+- Function-level documentation for implementation modules. The exception is a shared utility module's public surface, where the entry is how a session finds a helper rather than duplicating it.
 
 ### Elsewhere
 
+Some content belongs to another surface entirely.
+
 - Rules. Those go in `.claude/rules/<scope>.md` with a `paths:` glob.
-- Tutorials or human onboarding. Those go in `docs/` if a public audience exists.
+- Tutorials or human onboarding, which go in `docs/` if a public audience exists
 - Generated content (API references). Generate, do not write by hand.
 - Anything already in `canon/REQUIREMENTS.md`.
 
 ### History and results
 
-- The history of how the domain reached its current shape. An entry describes the repository as it stands, so a change number, release label, or date attached to a change goes wherever the project tracks work.
-- A rejected alternative's provenance, which is the same rule at the one place the section above admits history. Keep what was tried and why it lost. Cut who tried it and when.
-- The route to a decision: the rounds of candidates, the tuning steps a threshold passed through, the review pass that caught a miss. State the decision, what lost, and why, once and in the present tense. Cut the route. Git and the change that introduced it keep it.
-- Measured results a generated file already carries. Point at the file instead of copying the figure, so a re-run cannot leave the entry behind.
+An entry describes the repository as it stands, so the route that reached it lives in git and the change that introduced it.
+
+- The history of how the domain reached its current shape. A change number, release label, or date attached to a change goes wherever the project tracks work.
+- A rejected alternative's provenance. Keep what was tried and why it lost, and cut who tried it and when.
+- The route to a decision, being the rounds of candidates, the tuning steps a threshold passed through, and the review pass that caught a miss
+- Measured results a generated file already carries. Point at the file instead, so a re-run cannot leave the entry behind.
+
+State a decision, what lost, and why, once and in the present tense.
 
 ## Length
 
 - Aim for one entry per domain. Length is a symptom, not the defect, and the one hard cap is the whole-document ceiling `markdown.md` states.
-- Past roughly 150 rendered lines, check three things before adding more: whether the entry still covers a single domain, whether it has filled with content `ls` or `--help` reproduces, and whether it has accumulated the history of its own changes. Fix whichever is true rather than trimming to hit a number. The 150 is a diagnostic checkpoint and never gates. Rendered lines count as `markdown.md` defines them.
+- Past roughly 150 rendered lines, check whether the entry still covers one domain, has filled with content `ls` or `--help` reproduces, or has accumulated its own history
+- Fix whichever is true rather than trimming. The 150 is a diagnostic checkpoint that never gates, counted in rendered lines as `markdown.md` defines them.
 - Never cut a `## Decisions` or `## Gotchas` entry to shorten a file. Cut a `## Layout` section or an H3 under it instead.
 
 ### Retiring and rewriting
 
-- Retire a decision or gotcha once its subject is gone, rewriting the bullet to state the current design rather than leaving the narration of what it replaced beside it. A rejected alternative is not a retired one, so what was tried and why it lost stays whatever its age. The rule above protects content whose subject is live, and this one releases content whose subject is not.
-- Rewrite a decision a later one replaced rather than appending the replacement beside it. The subject is still live, so the rule above does not reach it, and two bullets on one subject leave a reader to work out which of them is current. State the design that stands and keep the superseded reasoning only where it is the alternative that lost.
+An entry states the design that stands. The rule above protects content whose subject is live, and these release or replace it.
+
+- Retire a decision or gotcha once its subject is gone, rewriting the bullet to state the current design rather than narrating what it replaced
+- A rejected alternative is not a retired one, so what was tried and why it lost stays whatever its age
+- Rewrite a decision a later one replaced, whose subject is still live, rather than appending the replacement beside it, since two bullets on one subject leave a reader to work out which is current
+- Keep the superseded reasoning only where it is the alternative that lost
 
 ### Splitting and naming
 
+A domain outgrowing one file splits into a folder, and small domains of one kind group into one.
+
 - Split into a folder (`canon/context/<domain>/<sub-area>.md`) when a domain has three or more sub-areas that do not fit cleanly in one file. That split is the natural ceiling.
-- Group whole single-file entries of two or more small domains into one folder when they share a kind, such as small feature domains that each own a verb. Each entry still covers one domain, and the folder's generated `index.md` carries a `subtitle` naming the kind. It names an entry to start with only when that entry frames the others. A grouping folder is not a split, so no entry inside it is a sub-area of another.
-- Name an entry inside a split or grouping folder per the `codebase-layout` skill, which never repeats the folder's name as the entry's stem or prefix.
-- Keep a split domain's `index.md` generated. The catalog body is rewritten on every regen, so the domain's own overview and layout belong in a sibling file rather than in it, and the `subtitle` is what names the file to start with.
-- Author a catalog that grows a row per shipped thing as a bullet list, never a markdown table. A table pads its columns to a shared width, so one row outgrowing its column reflows every row and turns a one-line edit into a whole-file rewrite that conflicts with any sibling branch. This is what forced the split above.
+- Group the single-file entries of two or more small domains into one folder when they share a kind, such as small feature domains that each own a verb
+- A grouping folder is not a split, so each entry in it covers one domain. Its generated `index.md` carries a `subtitle` naming the kind, and an entry to start with only when one frames the others.
+- Name an entry inside either folder per the `codebase-layout` skill, which never repeats the folder's name as the entry's stem or prefix
+- Keep a split domain's `index.md` generated, since regen rewrites its body. The domain's own overview and layout go in a sibling file, which the `subtitle` names.
+
+Author a catalog that grows a row per shipped thing as a bullet list, never a markdown table. A table pads its columns to a shared width, so one row outgrowing its column reflows every row and conflicts with any sibling branch.
 
 ## Examples
 
 ### Template
+
+Each Decisions H3 opens with a lead sentence, then two or three bullets carrying the reason.
 
 ```markdown
 ---
@@ -164,11 +192,17 @@ never the reverse.
 
 ### Validation at the route boundary
 
-Validation happens at the route boundary using a schema library. Services trust their inputs.
+Validation happens at the route boundary using a schema library.
+
+- Services trust their inputs, so a schema change lands in one place
+- A caller reaching a service without a route runs the same schema first
 
 ### Opaque pagination cursors
 
-Pagination uses opaque cursor tokens, never offset+limit. Cursor format stays opaque to clients, which is why any handler that issues a cursor uses the shared encoder.
+Pagination uses opaque cursor tokens, never offset and limit.
+
+- The cursor format stays opaque to clients, so the server can change it freely
+- Any handler that issues a cursor uses the shared encoder, so every cursor decodes one way
 
 ## Gotchas
 
