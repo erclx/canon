@@ -13,9 +13,10 @@ When the baseline is unusable, scope this step to the working tree and untracked
 
 Reuse the diff from the baseline above, names and content both. For each domain listed in `canon/context/index.md`, read its own entry: a flat `canon/context/<domain>.md`, or, for a domain split into a folder, its `canon/context/<domain>/index.md` and every sibling file that index links. Follow the index rather than globbing the folder, since a folder can hold a file the index does not list yet.
 
-- Map the entry's section headings, whether they sit in one flat file or spread across a nested domain's sibling files, to the changed files. An entry is relevant when its prose references files, modules, or decisions touched by the diff.
-- For each relevant entry, rewrite only the sections affected by the diff. Same pattern as `docs-sync`. Do not touch unrelated sections. Never rewrite a split domain's own `index.md` directly, since a regen overwrites it the same way it overwrites the top-level catalog. Rewrite the sibling file the affected section actually lives in instead.
-- Rewrite a restated or superseded statement in place rather than appending beside it, the same rule the body states for a session decision.
+- Treat an entry as relevant only when the diff adds, moves, or removes a folder its Layout lists, makes a folder's bullet untrue, or changes a trap it names
+- For each relevant entry, rewrite only the H3 or the gotcha the trigger names, and leave unrelated sections alone
+- Never rewrite a split domain's own `index.md`, which a regen overwrites, and rewrite the sibling file the section lives in instead
+- Edit the bullet that went untrue in place and never append one beside it, the same rule the body states.
 - Write a reference to another entry as the path that entry sits at, rather than as its bare filename. `${CLAUDE_SKILL_DIR}/references/context.md` states the form, and a bare name strands the reference once a domain splits into subfolders.
 
 ## When the diff removes a capability

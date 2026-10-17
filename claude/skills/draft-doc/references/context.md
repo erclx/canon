@@ -22,9 +22,9 @@ A project the surface move has not reached keeps its context folder under `.clau
 
 ## Draft
 
-- Read the domain's own folders and files well enough to answer the standard's three questions: where things live, why they are that way, and how to add one more of what the domain holds.
-- Draft `title` and `description` frontmatter, then `## Overview`, `## Layout` (folder ownership lines only, never a file-by-file list), and `## Decisions` or `## Gotchas` wherever the domain's history supplies a non-obvious choice or a workaround worth preserving.
-- Keep the standard's closed set and order: `Overview`, `Layout`, `Decisions`, `Gotchas`. A topic of the domain's own is an H3 under one of them, per `context.md` in the `context-fold` skill's references.
+- Read the domain's own folders and files well enough to answer the standard's three questions, being what the domain owns, what each folder does now, and which trap a session would hit.
+- Draft `title` and `description` frontmatter, then `## Overview`, `## Layout` with one H3 per working folder and `### Other folders` for the rest, and `## Gotchas` only for a trap true today.
+- Keep the standard's closed set and order of `Overview`, `Layout`, and `Gotchas`, per `context.md` in the `context-fold` skill's references. Write no decision and no history.
 
 ## Write
 

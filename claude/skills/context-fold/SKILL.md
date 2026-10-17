@@ -54,12 +54,11 @@ Report `✅ No context updates needed. Session matched the original plan.` Both 
 
 Skip this step silently when `canon/context/` does not exist or its catalog lists no entries. Otherwise read `${CLAUDE_SKILL_DIR}/references/context-refresh.md` for the diff it reads, the widening a removed capability takes, when a new entry is created, and the output lines.
 
-Write a session decision into the entry for the domain it constrains, under that entry's `## Decisions`, whatever other domains its reasoning touches. Every write follows these rules:
+Write an entry only when the diff adds, moves, or removes a folder, makes a folder's existing bullet untrue, or adds, fixes, or removes a trap, and skip the step otherwise. Never write a decision, which the pull request records. Every write follows these rules:
 
 - Never write `canon/REQUIREMENTS.md`. Report a requirements change in After completion.
-- Update only the sections affected by session decisions or the diff, and leave unrelated sections alone.
-- Rewrite a restated or superseded statement in place rather than appending the replacement beside it, per `${CLAUDE_SKILL_DIR}/references/context.md`
-- State the fact that stands, and keep the earlier reasoning only where it is the alternative that lost
+- Update only the Layout H3 or the gotcha the trigger names, and leave unrelated sections alone.
+- Edit the bullet that went untrue in place, and never append a correction beside it, per `${CLAUDE_SKILL_DIR}/references/context.md`
 - Follow `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md` and the `write-human` skill for all edits.
 
 Write each updated file immediately. Claude Code's tool permission dialog is the confirmation gate. Do not wait for user input.
