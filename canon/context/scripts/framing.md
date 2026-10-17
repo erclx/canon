@@ -17,9 +17,15 @@ No domain has a dispatcher. Each command file handles its verbs in TypeScript an
 - `src/commands/gov.ts` handles `install`, `sync`, and `build`, and shells out for `list` alone
 - `src/commands/standards.ts`, `src/commands/docs.ts`, and `src/commands/claude.ts` are TypeScript end to end
 
-A migrated list verb has to open the frame itself. The bash verb never emits `┌`, so a baseline captured by running the script directly matches a frameless port exactly, while the migrated verb loses the header a pass-through dispatch would print. Capture equivalence baselines at the boundary the user invokes.
+A migrated list verb has to open the frame itself, and the gap is easy to miss because it only shows through the CLI.
 
-`claude seeds list` is a real Commander subcommand, since its script sits at `scripts/claude/seeds-list.sh` outside the `scripts/<domain>/<verb>.sh` shape a pass-through assumes. The parent `seeds` command keeps an action handler so an unknown or missing subcommand still reports the two errors a bash `case` would emit.
+- The bash verb never emits `┌`, so a baseline captured by running the script directly matches a frameless port exactly
+- The migrated verb loses the header a pass-through dispatch would print
+- Capture equivalence baselines at the boundary the user invokes
+
+`claude seeds list` is a real Commander subcommand, since its script sits at `scripts/claude/seeds-list.sh` outside the `scripts/<domain>/<verb>.sh` shape a pass-through assumes.
+
+The parent `seeds` command keeps an action handler so an unknown or missing subcommand still reports the two errors a bash `case` would emit, since Commander falls through to the parent when no subcommand name matches.
 
 ### Frame ownership
 
