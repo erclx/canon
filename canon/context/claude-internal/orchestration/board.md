@@ -1,6 +1,6 @@
 ---
 title: Board
-description: Why the board is one orchestrator's gitignored scratch, the split between the board and the backlog, what canon tasks validate checks on a row, and where filing a row stops
+description: Why the board is one orchestrator's gitignored scratch, the board and backlog split, what canon tasks validate checks on a row, and where filing stops
 ---
 
 # Board
@@ -9,72 +9,104 @@ description: Why the board is one orchestrator's gitignored scratch, the split b
 
 ### Board constraints
 
-Gitignored also means undated. `git log --diff-filter=A` over `.canon/groundwork/`, `.canon/intake/`, `.canon/plans/`, or `.canon/tasks/` returns nothing at all, since no commit ever touched those paths, so a pass reconstructing when a folder opened has only what the file wrote down itself. Filesystem mtime is the wrong substitute, because it records the last edit and reads later than the truth on anything still being worked. A surface that wants a recoverable opening date carries it as a frontmatter field, which is why `claude/skills/plan-groundwork/references/groundwork.md` and `intake.md` both require one.
+The board, the task files, and the plans are gitignored, which leaves them undated, limits the board to one orchestrator, and puts their citations outside every check.
 
-Both artifacts are gitignored, which limits the board to one orchestrator at a time. A second session reads neither the other's task files nor its archives, so the two write colliding labels and archive each other's plans. `role-orchestrator` states the constraint, holds the queue-refill sweep that keeps planned, non-conflicting tasks ahead of a free worker, and states the method for writing `priority.md` under Writing the board, since the sweep promotes and demotes rows. `canon tasks archive` removes a row on merge, and `task-board` and `plan-groundwork` each write one directly in the roster-checked fallback, when no live orchestrator is there to hand the row to.
+- **Undated.** History over `.canon/` folders returns nothing, and mtime reads later than the truth. A recoverable opening date is a frontmatter field, which `plan-groundwork` requires.
+- **One orchestrator.** A second session reads neither the other's task files nor its archives, so the two write colliding labels and archive each other's plans.
+- **Unchecked citations.** Task, plan, and review links appear in no diff, and `canon context audit` covers `canon/context/` alone. A rename under `.claude/` sweeps them by hand.
 
-A worker takes neither path and files no task file either. `task-board` Create stops a session holding the worker role before `canon tasks next-label --claim` runs, since a task file with no row is a dropped task and placing the row is the controller's call, and a stop after the claim leaves an orphaned reservation. The guard names the worker alone, because a planner closing a groundwork track files its task file through the same Create path and reaches Step 4's roster check. Placing the stop in Step 4 was the alternative, and it would have blocked that planner path along with the worker.
+`role-orchestrator` holds the queue-refill sweep and the method for writing `priority.md`. `canon tasks archive` removes a row on merge, and `task-board` and `plan-groundwork` each write one directly in the roster-checked fallback, when no live orchestrator can take the row.
 
-Being gitignored also puts the citations these artifacts carry outside every check. A task file names its origin as a `Groundwork:` or `Plan:` link, `priority.md` carries a plan link per row, and a review report names the files it read. None of those appear in a diff, the citation half of `canon context audit` covers `canon/context/` alone, and no drift stage reads the folder, so a path rename anywhere under `.claude/` has to sweep the board and the plans by hand or it ships with every pointer broken and each check still green.
+### A worker files no task
+
+A worker takes neither path and files no task file. `task-board` Create stops a session holding the worker role before `canon tasks next-label --claim` runs, since a task file with no row is a dropped task and placing the row is the controller's call.
+
+The guard names the worker alone, because a planner closing a groundwork track files through the same Create path and reaches Step 4's roster check. A stop in Step 4 would have blocked that planner too.
 
 ### Board and backlog
 
-The three readiness groups answer whether a task can start, which is mechanical and checkable. Nothing in them answers which task is worth starting, and once unplanned rows number in the dozens that judgment stops fitting in one reading, so the board cannot say what to do next.
+The three readiness groups say whether a task can start, which is mechanical. Nothing in them says which task is worth starting, and past a few dozen unplanned rows that judgment stops fitting in one reading.
 
-Row position under `## Needs a plan` carries that judgment, and `backlog.md` holds what is not near-term. A fourth readiness group is the obvious shape and the standard bars it directly, since the three names are a contract anything counting rows under a heading reads by. The bar holds on its own terms here: a backlog states that nobody has scheduled the task, which is a fact about attention rather than about whether the work can start, so it is not a readiness group whatever it is called.
+Row position under `## Needs a plan` carries it, and `backlog.md` holds what is not near-term. The backlog is not a fourth readiness group, which the standard bars because the three names are a contract anything counting rows reads by. It states that nobody has scheduled the task, a fact about attention rather than about whether the work can start.
 
-Sorting the whole group and leaving it on the board is the alternative the cut declines. State shifts under a row sitting ten deep, so planning it now is wasted, and carrying it as a board row claims a commitment nobody made. A backlog line costs a pointer where a board row costs a position, a rationale, and a slot in every count. The intake folder was the third candidate and it holds findings before anyone decides they are work, while these are decisions already taken that nobody has scheduled.
+- **Why a backlog.** State shifts under a row ten deep, so planning it now is wasted. A board row claims a commitment nobody made, where a backlog line costs a pointer.
+- **Why not the intake folder.** Intake holds findings before anyone decides they are work. The backlog holds decisions already taken that nobody has scheduled.
+- **The cost.** A judgment restated on every sweep. A mechanical test over age or origin would predict nothing about what gets picked, so the cost is taken, and the `role-orchestrator` sweep pays it.
 
-The split costs a judgment restated on every sweep rather than a rule applied once. A mechanical test over age or origin would need no restating and predicts nothing about what gets picked, which is the whole thing the ordering exists to carry, so the cost is taken deliberately and the sweep in `role-orchestrator` is where it is paid.
+### Leaving the backlog
 
-That sweep only lifts a row onto the board. Taking one off the backlog is `backlog-triage`, which files a verdict per row into an intake folder and applies the ones the operator approved. The two task verbs clear the backlog unevenly: `canon tasks decline` drops a task's line from `priority.md` and `backlog.md` alike, while `canon tasks archive` drops only the `priority.md` row, so a caller archiving a task straight off the backlog removes the line itself once the archive succeeds.
+The sweep only lifts a row onto the board. `backlog-triage` takes one off, filing a verdict per row into an intake folder and applying the ones the operator approved.
 
-Sequencing rationale has no dedicated home. It rides in the `Waiting on` cell the row already carries, one line per row. A separate document would be that surface under another name. The cell holds one row's reasoning and nothing wider: why one group of work runs before another is carried by no surface at all, which the tasks standard states, so a session wanting it asks whoever ordered the board.
+`canon tasks decline` drops a task's line from `priority.md` and `backlog.md` alike. `canon tasks archive` drops only the `priority.md` row, so a caller archiving straight off the backlog removes the line itself once the archive succeeds.
 
-The three groups have no slot at the other end either, for work too small to plan that is executing in the session filing it. `## Run now` requires a written plan covering every open outcome, so a change agreed as a diff in conversation cannot enter it, and the backlog asserts that nobody has scheduled the task, which is false of work already running. Such a row takes `## Needs a plan` with the mismatch stated in its own `Waiting on` cell, on the reading that a row contradicting its heading for the minutes before a merge clears it costs less than a fourth group the standard bars.
+### Sequencing and in-session work
+
+Sequencing rationale rides in the `Waiting on` cell, one line per row. Why one group runs before another is carried by no surface, so a session wanting it asks whoever ordered the board.
+
+- Work too small to plan that is executing in the filing session fits no group. `## Run now` requires a plan, and the backlog says nobody scheduled the task.
+- The row takes `## Needs a plan` with the mismatch stated in its `Waiting on` cell, which costs less than a fourth group the standard bars
 
 ### Validating a row
 
-`canon tasks validate` checks what a row claims once the sweep has rewritten it. It is a verb rather than a hook because the board is gitignored per-machine scratch, so a `PostToolUse` hook would fire on intermediate states mid-restructure and run nowhere but an interactive session. It reads and never writes, since a row is the orchestrator's claim about readiness and a validator repairing one would assert the claim it exists to test.
+`canon tasks validate` checks what a row claims once the sweep has rewritten it. It is a verb rather than a hook because the board is per-machine scratch, so a `PostToolUse` hook would fire on intermediate states mid-restructure and run only in an interactive session.
 
-The check it earns its place on is file-set overlap between `## Run now` rows. That group's test has a plan half and a half asking whether the task carries a reason it cannot start, and the paths a row shares with something already running are the candidates the dispatch conflict check tests for one, which is the part a person cannot run by eye.
+It reads and never writes. A row is the orchestrator's claim about readiness, and a validator repairing one would assert the claim it exists to test.
 
-The validator lists those pairs in a `shared` array that moves no exit code. A collision finding exiting 2 was the retired alternative, which held only while the gate serialized on a shared file. Once the gate held on a dependency, a contract, a relocation, a sweep, or a stated reason alone, that finding failed every sweep on a canvas doc two independent rows both wrote, and a `Touches` cell cannot say which hold a pair carries.
+### File-set overlap
 
-#### Blockers
+The check earning its place is overlap between `## Run now` rows, the part of the dispatch conflict test a person cannot run by eye. The validator lists those pairs in a `shared` array that moves no exit code.
 
-The blocker check reaches the opposite groups on the same argument. A blocker cell is a measurement taken the day a row was parked, and two of the five kinds it carries put a fact on disk: a cited task is settled by being archived, by being declined, or by reaching the trunk, and a cited file is settled by nothing under `## Run now` still holding it. Both are inputs the validator already reads for the other four checks.
+A collision finding exiting 2 was retired. Once the gate held on a dependency, a contract, a relocation, a sweep, or a stated reason alone, it failed every sweep on a canvas doc two independent rows both wrote, and a `Touches` cell cannot say which hold a pair carries.
 
-Reaching the trunk is the check the closed checkbox cannot answer. `task-complete` marks outcomes as step two of the ship chain and `git-pr` opens the pull request several steps later, so a checkbox alone can read a row as settled while its branch still sits in review. The check reads the task's `Pull request:` line instead, and `src/tasks/trunk.ts` asks whether a commit naming that number sits on `origin/main`, falling back to local `main`. A task that closed every outcome and names no pull request goes to the untested array, as does one whose number no trunk ref could answer for. Degrading either back to the box is forbidden, since it reproduces the false settle under a name claiming to have fixed it.
+### Blockers
 
-The reader never fetches. `canon tasks validate` runs several times a sweep, so a clone behind its remote under-reports a settled row rather than claiming work landed. The trade is that a session that has not pulled sees parked rows it could have released.
+A blocker cell is a measurement taken the day a row was parked. Two of its five kinds put a fact on disk, and both are inputs the validator already reads.
 
-#### The cell stays prose
+- A cited task is settled by being archived, declined, or reaching the trunk
+- A cited file is settled by nothing under `## Run now` still holding it
+- A citation resolving in none of the three is `blocker-unresolved`, since an absent file read as archived states a fact about a file nobody wrote, as a renamed task or a typo produces
 
-The cell stays prose and the check reads citations out of it, which is the constraint the board standard sets by fixing three forms for the cell and leaving it unstructured. A cited task is a bare sibling link, so a pointer into another folder is a plan and settles nothing. Parsing the cell into fields was the alternative and it writes a grammar for a corpus of a handful of rows nobody phrases the same way twice.
+Reaching the trunk is what a closed checkbox cannot answer, since `task-complete` ticks outcomes several steps before `git-pr` opens the pull request. The check reads the task's `Pull request:` line, and `src/tasks/trunk.ts` asks whether a commit naming that number sits on `origin/main`, falling back to local `main`.
 
-Both halves gate on the cell rather than on a column beside it. Gating the collision half on the row's own `Touches` column is the alternative, and it fires on any parked row whose declared files nothing running holds, whatever parked the row. The false finding is the cheaper half of that error: the row also counts as re-tested and drops out of the untested list, so the condition still holding it goes unmentioned and the report reads as a clean board. The standard gives a collision cell the file held by the running task, so the citation is already there to gate on.
+- A task that closed every outcome and names no pull request goes to the untested array, as does one no trunk ref could answer for
+- Degrading either back to the box reproduces the false settle under a name claiming to have fixed it
+- The reader never fetches, since the verb runs several times a sweep. A clone behind its remote under-reports a settled row, so a session that has not pulled sees parked rows it could have released.
 
-A citation resolving in none of the three is `blocker-unresolved` rather than a settled row. Reading an absent file as archived or declined states a specific fact about a file nobody wrote, which is what a renamed task or a typo produces, and only a task that genuinely closed or was genuinely decided against releases the row.
+The three kinds resting on judgment go to a second array, because a check reporting only what it can settle is trusted past its reach. The untested array keeps the reach visible without moving an exit code.
 
-The three kinds resting on judgment go to a second array rather than to the findings, because a check reporting only what it can settle is trusted past its reach. A clean findings list on a board whose parked rows were never testable reads as a clean board, so the untested array keeps the reach visible without moving an exit code.
+### The cell stays prose
 
-#### Mapping
+The board standard fixes three forms for a blocker cell and leaves it unstructured, and the check reads citations out of it. A cited task is a bare sibling link, so a pointer into another folder is a plan and settles nothing. A grammar for a handful of rows nobody phrases the same way twice was the rejected alternative.
 
-The mapping check counts a task file against both the board and the backlog. Counting against the board alone reports a row and a task file that do not map one to one, which is exactly the state a backlogged task is in, so every run would fail with each finding correct. Reading a marker inside the task file was the alternative and it puts the same fact in two places, where the backlog line already says it. One check across both surfaces also lets a task move between them without the move looking like a dropped file, and a task named by both is reported for the reason a task in two groups is.
+Both halves gate on the cell rather than a column beside it. Gating collision on the row's `Touches` column fires on any parked row whose declared files nothing running holds, whatever parked it. That row then counts as re-tested, so the condition still holding it goes unmentioned and the report reads as a clean board.
+
+### Mapping
+
+The mapping check counts a task file against both the board and the backlog. Counting against the board alone fails every run on a backlogged task, with each finding correct.
+
+A marker inside the task file would put the fact in two places, where the backlog line already says it. One check across both surfaces lets a task move between them without looking like a dropped file, and a task named by both is reported as a task in two groups is.
 
 ### The filing boundary
 
-Filing a row states the defect and the surface it was seen on and stops, leaving the extent and the cause to whoever plans the row. A row carrying a count reads as measured, so a planner inherits a scope nobody outside the orchestrating seat could check. The cause half is the more expensive one: a filed row can assert a mechanism nobody opened the module to check, and a wrong count fails loudly at the first re-measurement where a wrong mechanism sends real work in the wrong direction.
+Filing a row states the defect and the surface it was seen on and stops, leaving the extent and the cause to whoever plans it. A row carrying a count reads as measured, so a planner inherits a scope nobody outside the orchestrating seat could check.
 
-A flat ban on measuring was the alternative and it contradicts three live rules at once, since `orchestrator-parked.md` orders a tree condition re-measured, refill step 6 orders a candidate's file set listed against every track in flight, and `### Writing the board` orders that set written into the `Touches` column. What separates the two kinds is what the measurement decides rather than whether one was taken. A blocker re-test, a collision check, and a file set decide whether a row can start, and a count of a defect's extent decides how big it is, so only the second commits a plan to a scope this seat has no vantage to size.
+The cause half costs more. A wrong count fails at the first re-measurement, and a wrong mechanism nobody opened the module to check sends real work the wrong way.
 
-A position claim in a `## Needs a plan` cell falls inside the boundary rather than beside it. It may name the row it outranks and the class it belongs to, both of which are judgments about order, and it may not cite a count of the defect's extent to justify the rank. Leaving the two surfaces to settle it separately was the alternative, and it hands whichever lands second a cell whose ranking vocabulary reaches for the number the other one bans.
+- A flat ban on measuring contradicts `orchestrator-parked.md`, refill step 6, and `### Writing the board`
+- What separates the kinds is what the measurement decides. A blocker re-test, a collision check, and a file set decide whether a row can start.
+- A count of extent sizes the row, which this seat has no vantage to do
+- A position claim in a `## Needs a plan` cell may name the row it outranks and its class, and may not cite a count of extent to justify the rank
 
-The statement lives once in `claude/skills/role-orchestrator/SKILL.md` under `## Boundaries`, with the sibling `REQUIREMENT.md` carrying it as a `Must not` and `orchestrator-parked.md` pointing at it, since that runbook's re-test would otherwise read as an instruction to size a row from this seat. The task standard carries no matching convention, because the rule is seat-scoped and a standard governing every task file would bind a groundwork or intake pass that measured properly before filing. Nothing enforces any of it, since no gate stage reads a skill body for the rule, and whether it holds is read off the next row filed.
+The statement lives once in `claude/skills/role-orchestrator/SKILL.md` under `## Boundaries`. The sibling `REQUIREMENT.md` carries it as a `Must not`, and `orchestrator-parked.md` points at it.
+
+The task standard carries no matching convention, since it would bind a groundwork or intake pass that measured properly before filing. No gate stage enforces the rule, so the next row filed shows whether it holds.
 
 ## Gotchas
 
 ### Board findings decay
 
-Board findings decay silently, because the board is gitignored and nothing in git records when a finding stopped being true, and a count can decay upward as well as dead: a re-measurement can find far more instances than a task file states, or far fewer. Re-measure before executing rather than trusting the file. Where a plan converts a stale count into a scope constraint, the constraint caps the work below the outcome it serves and the outcome wins. A finding about live external state needs the same check by query rather than by grep, since a query against live state can answer differently from what a task file recorded, especially where routine cleanup has already swept the state away.
+Nothing in git records when a board finding stopped being true, and a count can decay upward as well as dead. A re-measurement can find far more instances than a task file states, or far fewer.
+
+- Re-measure before executing rather than trusting the file
+- Where a plan converts a stale count into a scope constraint, the constraint caps the work below the outcome it serves, and the outcome wins
+- A finding about live external state needs a query rather than a grep, since routine cleanup may already have swept the state away
