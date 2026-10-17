@@ -13,13 +13,17 @@ This entry covers `session-worktree` and the chain it feeds. It holds the `core.
 
 ### What the check reads
 
-`session-worktree` Step 6 carries the test itself. Node and python each read against a literal `[ -f ... ]` or `[ -d ... ]` pair, and the closing "no manifest" line takes its own direct test, run ahead of both rather than reached by falling through them unmatched.
+`session-worktree` Step 6 carries the dependency check itself. Node and python each read against a literal `[ -f ... ]` or `[ -d ... ]` pair, and the closing "no manifest" line takes its own direct test, run ahead of both rather than reached by falling through them unmatched.
 
 `<install>` resolves off a fixed four-row lockfile table in `references/install-command.md`. The order is `bun.lock` or `bun.lockb`, `pnpm-lock.yaml`, `yarn.lock`, then `package-lock.json`, falling back to `bun install` when none match.
 
+### Why the dependency check is not a verb
+
+The dependency check is a literal shell test rather than a `canon` verb, since directory presence is not a judgment call and the body ships to a target that may hold no `canon` binary on PATH at all.
+
 ### The shape test
 
-Everything else meets the shape test, which checks the resolved file for the `**Files to touch:**` marker that `claude/skills/plan-feature/references/plan.md` requires, or the `## Files to touch` heading form the same standard admits. A task never carries either.
+A file resolving under any tier can still be the wrong document, so the shape test checks the resolved file for the `**Files to touch:**` marker that `claude/skills/plan-feature/references/plan.md` requires, or the `## Files to touch` heading form the same standard admits. A task never carries either.
 
 The test runs after all three tiers rather than guarding the supplied one alone.
 
@@ -36,7 +40,7 @@ The test runs after all three tiers rather than guarding the supplied one alone.
 
 ### What the pointer resolves against
 
-The base decides whether that refusal reaches anything. An archived task sits a folder deeper and the standard points its line at `../../plans/archive/feature-<slug>.md`.
+A task's `Plan:` pointer resolves against a base, and the base decides whether the archive refusal reaches anything. An archived task sits a folder deeper and the standard points its line at `../../plans/archive/feature-<slug>.md`.
 
 A base fixed at `.canon/tasks/` lands on a repository-root `plans/archive/` that never exists, so the run answers a correct citation with the stale-citation message.
 
@@ -66,10 +70,6 @@ Every later command in the main worktree then fails for want of a work tree whil
 Both call sites confirm the repository's common dir is named `.git` before writing. That separates the defect from a genuinely bare repository that keeps its objects at the root and would be broken by the repair.
 
 The skill states the upstream issue inline rather than pointing at `wiki/claude/worktrees.md`, since a shipped skill runs where no `wiki/` path resolves and the Skill paths stage fails the build on one.
-
-### Why it is not a verb
-
-It is a literal shell test rather than a `canon` verb, since directory presence is not a judgment call and the body ships to a target that may hold no `canon` binary on PATH at all.
 
 ### A typed name serves both consumers
 

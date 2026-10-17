@@ -21,18 +21,10 @@ Invoke a skill with `/skill-name` or let Claude auto-trigger it by matching the 
 
 ### The mark sandbox arm
 
-The sandbox arm for this is `task-complete`'s `mark`, kept separate from the fold's `drift`. `mark` asserts that a run marking outcomes moves no plan for a task the prompt never mentions, and `drift` asserts the fold leaves plans and the board alone.
+The sandbox arm covering the plan archive is `task-complete`'s `mark`, kept separate from the fold's `drift`. `mark` asserts that a run marking outcomes moves no plan for a task the prompt never mentions, and `drift` asserts the fold leaves plans and the board alone.
 
 - The arm carries a third task with open outcomes whose plan must survive the run. It separates a run that moved nothing from one that moved everything, which a fixture with every plan live cannot.
 - Its assertions cover each plan's location and each task's untouched `Plan:` line, since a retargeted pointer with an unmoved file leaves the task aimed at an empty archive path
-
-### A pointer is still a shipped skill
-
-A pointer counts as a shipped skill for both coverage checks, since `canon claude skills list --names` reports every folder whether or not its body carries `disable-model-invocation: true`.
-
-- It needs a routing case in `src/claude/cases/` and a `metadata.family` naming its row's group
-- It needs a row in the skills table of `docs/workflow/skill-map.md`, or of `docs/workflow/skill-map-on-request.md` for a skill serving a request
-- Each spelling of the old name there takes a `canon-keep-retired` marker, so a later sweep does not move it onto the survivor
 
 ## Decisions
 
@@ -112,6 +104,14 @@ A plain rename leaves the same pointer, since a typed invocation of the old name
 
 - The pointer's two paths join the map's `excludedPaths` only after the sweep has run
 - Excluding them first leaves the real body unmoved at the old path while every citation names the new one, and leaving them out afterwards lets a later run move the pointer onto the survivor
+
+### A pointer is still a shipped skill
+
+A pointer, the stub a merge or rename leaves at the old name, counts as a shipped skill for both coverage checks, since `canon claude skills list --names` reports every folder whether or not its body carries `disable-model-invocation: true`.
+
+- It needs a routing case in `src/claude/cases/` and a `metadata.family` naming its row's group
+- It needs a row in the skills table of `docs/workflow/skill-map.md`, or of `docs/workflow/skill-map-on-request.md` for a skill serving a request
+- Each spelling of the old name there takes a `canon-keep-retired` marker, so a later sweep does not move it onto the survivor
 
 ## Gotchas
 

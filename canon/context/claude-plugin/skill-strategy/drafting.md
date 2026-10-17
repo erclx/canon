@@ -29,7 +29,7 @@ The contact sheet the source skill relied on is the canvas page itself, captured
 - The close captures each frame on its own into `.canon/picks/<slug>/`
 - The archive therefore keeps one `arm-<id>` image per arm, while the pick is taken from the composite
 
-The measurement rules are cited rather than restated. `canon drive` ships the probes carrying most of the source skill's nine, and the body keeps the three no probe reaches.
+The measurement rules are cited rather than restated. `canon drive` ships the probes carrying most of the source skill's nine, and the body keeps the three no probe reaches. They stay inline because they sit well under the fifteen-line move checkpoint.
 
 - Composite alpha before reading a color
 - Sample inside the shape rather than at a bounding-box corner
