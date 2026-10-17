@@ -22,6 +22,7 @@ The quiet one is the baseline. A diff resolved against a bare local ref equals H
 - Say so in the output when the baseline degrades, rather than reporting a clean pass off a set it could not build
 - Discover the doc set by glob at run time
 - Classify and rewrite at section level, so a partly stale file is partly rewritten
+- Mark a section stale only when the diff changes what a caller sees, since a page rewritten on every internal change starts carrying the reasons behind it
 - Write immediately after the preview, since the tool permission dialog is the confirmation gate
 
 ## Must not

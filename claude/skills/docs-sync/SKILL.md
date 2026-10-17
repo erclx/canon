@@ -59,9 +59,9 @@ Read each discovered file in parallel.
 
 For each discovered doc, classify as one of:
 
-- `stale`: the diff touches something the doc describes
+- `stale`: the diff changes something a caller sees in what the doc describes, being a flag, the output, a refusal, or how commands chain
 - `departed`: the doc records a deliberate contract and the diff broke it
-- `unrelated`: no overlap between diff and doc content
+- `unrelated`: no overlap between diff and doc content, or the diff changes only internals a caller never sees
 
 The split between `stale` and `departed` is whether the doc was describing or promising. A doc that trailed the code is `stale`. A doc stating a contract the code was meant to keep is `departed`, and rewriting it to match the diff would record the regression as the contract.
 
