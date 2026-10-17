@@ -7,7 +7,7 @@ description: What the context-entry fold is for, the gaps it closes, and why it 
 
 ## Gap
 
-Without this skill, the context entries describe the repository the session opened with. A decision a plan settled mid-cycle lives only in the conversation and dies with it, and an entry naming a module the diff rewrote keeps stating what the module used to do.
+Without this skill, the context entries describe the repository the session opened with. An entry keeps listing a folder the diff moved and a trap the diff fixed, so it states what the repository used to be.
 
 The trigger side carries a gap of its own. "Sync the docs" names either corpus to the person saying it, so a description leaving its corpus to the opening clause alone competes with its public-facing sibling on nothing the routing field states, and the context folder the request was about goes untouched.
 
@@ -20,9 +20,9 @@ This skill writes canonical docs at the end of a long build. An appended figure,
 ## Must
 
 - Name the context entries in a trigger phrase rather than in the opening clause alone, so a bare request to sync the docs separates this skill from `docs-sync` on something both descriptions state
-- Take decisions from the session and the refresh scope from the diff
+- Take the refresh scope from the diff, and from the session only the requirements or direction change the report names
 - Write tracked docs at the current worktree root, since only that copy commits with the branch
-- Write a decision to the domain context entry it constrains, whatever other domains its reasoning touches, so a decision has one home that loads on demand
+- Write an entry only when the diff adds, moves, or removes a folder, makes a folder's bullet untrue, or changes a trap, and never write a decision, which the pull request records
 - Report a requirements or direction change in one line naming `document-health`, rather than writing it, so the identity record changes only when the operator reviews it
 - Close on an audit of what the fold touched, running `canon context audit` and reporting the findings on files this run wrote or the diff carries
 - Classify the fold's whole diff baseline through `canon context classify diff`, calling the verb rather than reimplementing its pattern or its prompt in the skill body, since an earlier commit on the branch carries a doc edit the fold is equally responsible for
@@ -48,7 +48,7 @@ This skill writes canonical docs at the end of a long build. An appended figure,
 ## Guards
 
 - Neither a `canon/` nor a `.claude/` directory: stop and name the command that sets one up
-- No session divergence and no diff a context entry could describe: stop with a pass, since both conditions have to hold
+- No direction change in the session and no diff a context entry could describe: stop with a pass, since both conditions have to hold
 
 ## Out of scope
 

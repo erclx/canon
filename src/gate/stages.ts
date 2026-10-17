@@ -319,7 +319,8 @@ export const STAGES: readonly Stage[] = [
   {
     // The facts the audit can answer from the files gate: a cited path that
     // does not resolve, a required section an entry does not declare, an H2
-    // outside the closed set of four, and an index disagreeing with its folder.
+    // outside the closed set of three, a shape break in an entry under a
+    // shape-gated folder, and an index disagreeing with its folder.
     // Its length, depth, bullet, table, and provenance findings are judgment
     // thresholds, and failing a push on one would make the stage something to
     // route around. The length readings that gate sit in their own stages
