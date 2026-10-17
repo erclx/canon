@@ -166,6 +166,6 @@ The shipped `claude/skills/teach-workspace/SKILL.md` sits at 300 rendered lines,
 
 - The frames under `examples/teach/evidence/` are prod evidence, shown to a reader of the examples. No dev baseline exists, and one would sit at `assets/evidence/teach/`.
 - Two defects are measured against the captures, being no phone or tablet frames (v113.0) and a URL capture stamp that hashes the address rather than the page (v116.1)
-- `canon/context/development/evidence.md` owns the boundary
+- `canon/context/development.md` owns the boundary
 - Renders committed under `examples/` are disclaimed rather than gated, because nothing outside `examples/` depends on them staying current
 - `canon/context/web.md` draws that line on who each folder addresses

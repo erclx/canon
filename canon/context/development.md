@@ -1,0 +1,124 @@
+---
+title: Development
+description: The local dev loop, the run command table, how bun run check sequences and scopes its stages, the hooks, session scratch, record folders, and the evidence and hero folders
+---
+
+# Development
+
+## Overview
+
+Owns the local development loop, being the run commands, the gate behind `bun run check`, and the Claude Code and git hooks around it. CI runs the same stages through `bun run check:ci`, covered in `canon/context/ci/overview.md`.
+
+`CONTRIBUTING.md` states the contributor-facing subset, and what each script does is in the entry for its domain.
+
+## Layout
+
+### Scripts
+
+The run commands, which stack references and `docs/target/projects.md` send a session to, so a command added elsewhere is invisible to them.
+
+| Command                 | Purpose                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------ |
+| `bun run check`         | Verification scoped to changed files. Fails on format drift, regenerates indexes, asserts clean. |
+| `bun run check:ci`      | Every stage via `--all`, the run CI does. Still regenerates.                                     |
+| `bun run check:format`  | Read-only oxfmt, Prettier for `.astro`, and shfmt format check.                                  |
+| `bun run check:shell`   | Read-only shellcheck against `scripts/`, `tooling/`, and `.claude/hooks/`.                       |
+| `bun run check:lint`    | Read-only oxlint at its default rules, failing on any warning.                                   |
+| `bun run check:types`   | Read-only `tsc --noEmit` against `src/`.                                                         |
+| `bun run check:install` | Clones the repo to tmp and asserts `canon init` lands a fresh scaffold.                          |
+| `bun run format`        | Auto-fix oxfmt, Prettier for `.astro`, and shfmt formatting.                                     |
+| `bun run clean`         | Wipe `node_modules/`, clear bun cache, reinstall.                                                |
+| `bun run update`        | Interactive `bun update` followed by verification.                                               |
+
+### `src/gate/`
+
+Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`, and every threshold comparison in `measures.ts`.
+
+- Stages run in table order and the first to find a fact halts the run, so a regenerate-then-assert chain reveals one surface at a time
+- A stage that cannot read its input is `unmeasured`, which warns and exits 0 locally and refuses under CI. The sequencer decides that, and a measure only returns the reason.
+- The changed set unions the diff against `origin/main`, the working tree, and untracked files. Fallbacks widen, and `--all` forces every stage. On `main` the local ref is HEAD, so the base is remote.
+- Tests runs on `^src/` and on any corpus in `TEST_CORPORA_PATTERNS`, which a `src/` test reads from outside `src/`. A test reading a new corpus joins the array in the same change.
+- A regenerating stage reports its own regeneration as drift on the first run after an edit. Stage the rewritten file and run again, since re-running alone regenerates the same diff.
+
+### `src/audits/`
+
+Owns the audit catalog behind the report-only Audit set stage, which reads the whole tracked and per-machine set and fails nothing.
+
+- The stage reports growth against `canon/config/baseline.json` rather than gating it, since a push failing on a judgment teaches a reader to route around it
+- `deps` carries `corpus: 'upstream'` and runs weekly in `.github/workflows/verify.yml`, and `auditDependencies` times out at 120 seconds as `no-record`
+- A per-machine corpus missing its gitignored folder reports as absent, but a tracked tree that cannot be found is a broken checkout and still warns
+- To separate a branch's growth from main's, run `bun src/cli.ts audits run` in the main worktree and diff the reports, or restore the branch's paths from the base, rerun, and compare
+
+### `src/process/`
+
+Spawns `src/cli.ts` as a real process against a temporary directory, so a case asserts what an in-process call cannot, being whether a verb is registered, how it exits, and whether `--json` parses off stdout alone.
+
+- No case drives `gate run`, since its last stage runs the suite that spawns the case. `checkout-mismatch.test.ts` is the one exception and kills the child once the warning reaches stderr.
+- To add a case, write the fixture under a per-test `mkdtempSync`, then assert the file tree, exit code, and parsed record together. Take a count from the verb's catalog.
+- `runCli` points `HOME` and the state folder under the case's `cwd` and throws `ContainmentViolation` when a spawn writes into the real `stateDir()`
+- Run one test file as `bun --bun vitest run <path>`. Without `--bun` a module importing `bun` fails at collection, and bare `bun test` runs Bun's own runner, which lacks vitest's `expect` context.
+- The Tests stage holds a machine lock in `suite-lock.ts` so one box runs one suite, and `vitest.config.ts` caps `maxWorkers` at `'50%'` outside CI. A suite run by hand takes no lock.
+
+### `.claude/hooks/`
+
+Holds this repository's Claude Code hooks, wired through `.claude/settings.json`. Each seeded hook has a twin in `tooling/claude/seeds/.claude/hooks/` maintained by hand with nothing comparing the trees, and eight of the ten shared names stay byte-identical.
+
+- `standards-audit.sh` and `reply-links.sh` differ on purpose, since the seeded copy resolves an installed `canon` alone and this copy prefers the checkout's `src/cli.ts`
+- Every hook reading a payload opens with `IFS= read -r -d '' -t 2 input`, never `cat`, and `src/hooks/guard.test.ts` walks both trees to hold each to a bounded refusal and an acting payload
+- `memory-guard.sh` and `review-post-scan.sh` cut a `Bash` command with one `awk` pass that drops heredoc bodies, and an arithmetic or `let` shift is text rather than an opener
+- `precompact-handoff.sh` blocks the first manual `/compact` once and instructs on `auto`, where a block reaches nobody. `silent-turn.sh` and `reply-links.sh` block once on `Stop`.
+- `autoCompactWindow`, `autoContinueAtUsageLimit`, and `crossSessionInbound` stay unset here as per-operator values, and `autoMemoryEnabled: false` is the one setting this repository sets
+
+### `.husky/`
+
+Holds the git hooks, which run as POSIX sh under `sh -e`, so each `grep` that may match nothing sits in an `if` or behind `||`.
+
+- `pre-commit` runs `lint-staged`, `commit-msg` runs `commitlint`, and `pre-push` runs `bun run check`. `post-rewrite` delegates to `post-merge` on `rebase`.
+- `post-merge` returns when `.canon/tasks` or `canon` is absent, then hands off to `canon hooks post-merge`, whose verb in `src/hooks/post-merge.ts` owns the five steps and their order
+- The steps run as child verbs, being the task archive, `records push`, `worktrees reclaim`, `upgrade`, and `claude plugin-update`. A `CANON_SKIP_*` switch in the hook header turns one off.
+- The reclaim child carries no `--root`, so `reclaimReport` reads `process.cwd()` and refuses the worktree the pull ran in. Every other step passes the main root.
+- `tooling/base/configs/.husky/post-merge` is the target's copy without the source-CLI fallback, and `post-merge-hook.test.ts` runs its shared cases against both
+
+### `.canon/`
+
+Holds the gitignored record folders, where `canon/context/context-model.md` fixes the rule that every gitignored record lives here and nothing tracked does.
+
+- A linked worktree resolves `plans/`, `review/`, and `tasks/` at the main root. `Edit` and `Write` refuse a main-root path, so write through the routes `session-worktree` states.
+- `records-index.sh` regenerates the task board index, since the index walk skips gitignored folders. A shell write fires no `PostToolUse` hook, so `task-board` regenerates positionally.
+- `canon tasks archive` moves a shipped task and its plan into `archive/` inside their own folders, and the `Pull request:` line is what lets a merge close the task
+- `canon records push` backs every folder except `tmp`, `ordinal-locks`, and `.records.git` to a private remote, through a second git directory at `.canon/.records.git`
+
+### `assets/evidence/`
+
+Holds the dev regression baselines, one subfolder per area. Dev evidence is what a developer compares across a change, and prod evidence is a capture shown to a reader.
+
+- The location tells the kind. Under `assets/evidence/` is dev, and any other tracked `evidence` folder is prod. `canon pr evidence` compares both.
+- `assets/evidence/home/` is the site baseline, and `assets/evidence/canvas/<area>/` holds `arrange`, `inspector`, `layers`, and `shell`
+- `examples/teach/evidence/` is prod with a `.stamp` per image from `canon capture`, and `web/public/evidence/` is prod and hand-placed
+- `.canon/evidence/` and a groundwork track's `evidence/` are gitignored proof a record cites, and `canon migrate scratch-evidence` moves a cited folder out of `tmp/`
+- Teach, slides, and design commit no dev baseline yet, and the marketing images in `assets/frames/` are neither kind
+
+### `assets/captures/`
+
+Holds the `*.html.tmpl` frame templates that `scripts/core/regen-hero.ts` fills and the Hero stage gates.
+
+- The script fills the templates from committed catalogs and the design CSS, writes the `.html` beside each, and asserts no drift. It reads this folder flat, so a nested template is skipped silently.
+- The assert covers the HTML and not the PNG, so `canon capture` writes a `.stamp` of markup and image digests that `captureStamps` compares
+- Regenerate, capture, and stage all three files in one step, since the assert reads the index and repeats its message until they are staged
+- A branch commits no frame of its own, and `.github/workflows/refresh-capture-frames.yml` refreshes them from `main`
+- Run a verb reading data the branch authors through `bun src/cli.ts`, since the global binary is the last release, as with `canon capture --selector`
+
+### Other folders
+
+Smaller folders the loop touches.
+
+- `scripts/` owns every shell script except the Claude Code hooks, grouped by domain
+- `scripts/core/` owns the checks that stay scripts, such as the skill-path and seed-independence walks
+
+## Gotchas
+
+- `check:lint` passes `--disable-nested-config`, since oxlint otherwise loads each golden `.oxlintrc.json` under `tooling/*/configs/` and fails on JS plugins this repository does not install
+- `check:install` clones the last commit, so an uncommitted fix is invisible to it
+- `canon gov regen` defaults `--root` to wherever the binary is installed, so from a worktree pass `--root <literal-path>`
+- A prose edit can break a test no stage in the push runs, as with the markdown checkpoints, literals in `src/markdown/` that `structure.test.ts` asserts against themselves
+- The Document ceiling counts a table at its padded width and counts frontmatter, so a bullet list is the cheapest cut near 300 lines

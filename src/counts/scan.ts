@@ -80,7 +80,7 @@ function sentencesOf(line: string): string[] {
  * the 290 showed removing all of them while keeping that one.
  *
  * `authors` joined the list on a corpus measurement rather than on the shape
- * argument above. `canon/context/development/regeneration.md` states `the
+ * argument above. A context entry asserting `the
  * toolkit authors 69 rules under governance/rules/`, which is the assertion
  * shape this list was built for with a verb the list did not carry, and the
  * word costs one further sentence across the whole corpus and no finding.

@@ -49,7 +49,7 @@ It runs the opposite way, since either field is absent when the manifest did not
 
 It is rendered once per outcome rather than left for a caller to rebuild from `before`, `after`, and `latest`. The `current` branch reuses `describeSkew` verbatim.
 
-`.husky/post-merge` is the first caller reading `message` off `--json` rather than parsing the raw fields, covered in `canon/context/development/hooks/husky.md`.
+`.husky/post-merge` is the first caller reading `message` off `--json` rather than parsing the raw fields, covered in `canon/context/development.md`.
 
 ### `message` is the one free-text field
 

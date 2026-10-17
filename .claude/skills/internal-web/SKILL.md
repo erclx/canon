@@ -43,6 +43,6 @@ Before shipping any change under `web/`:
 Four entries outside `canon/context/web.md` bear on this surface.
 
 - `canon/context/design.md`: the token values this surface reads and does not own
-- `canon/context/development/regeneration.md`: the Hero section, before touching `assets/captures/` or `assets/frames/`
+- `canon/context/development.md`: the Hero section, before touching `assets/captures/` or `assets/frames/`
 - `canon/context/web.md`: why `assets/` and `examples/` are separate folders, decided on who each addresses
-- `canon/context/development/evidence.md`: which `evidence` folders are dev baselines and which are prod captures, before adding or moving an image under one
+- `canon/context/development.md`: which `evidence` folders are dev baselines and which are prod captures, before adding or moving an image under one

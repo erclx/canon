@@ -130,7 +130,7 @@ export const GATED_PATHS: readonly string[] = [
   'claude/skills/video-craft/SKILL.md',
   'claude/skills/write-human/SKILL.md',
   'claude/skills/youtube-transcripts/SKILL.md',
-  'canon/context/development/',
+  'canon/context/development.md',
   'canon/context/ci/',
   'canon/context/scripts/',
   '.claude/skills/internal-',

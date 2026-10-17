@@ -55,4 +55,4 @@ The `teach-workspace` skill ships these to targets and owns the artifact shape.
 Two entries outside the teach domain bear on this surface.
 
 - `canon/context/design.md`: the token values this surface reads and does not own
-- `canon/context/development/evidence.md`: which `evidence` folders are dev baselines and which are prod captures, before touching `examples/teach/evidence/`
+- `canon/context/development.md`: which `evidence` folders are dev baselines and which are prod captures, before touching `examples/teach/evidence/`
