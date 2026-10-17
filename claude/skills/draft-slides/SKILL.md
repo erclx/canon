@@ -38,15 +38,18 @@ Each slide is a full HTML document laid out at 1280 by 720 CSS pixels. Position 
 
 The render injects the project's token stylesheet ahead of each slide's own styles, so the deck takes the project's design rather than the toolkit's.
 
-- Use the project's custom properties, such as `var(--color-accent)`, for every color, face, and spacing value the stylesheet defines. Read the names from `.claude/design/base.css` and any overrides under `.claude/design/project/`. When neither exists, say the deck renders unstyled rather than inventing values to cover it.
-- Leave the `--color-*` roles to the stylesheet rather than redefining them in a slide. The master reads its colors off the first slide's `<html>`, and a slide body computing its own `--color-text` is reported, since the bands keep the master's colors.
+- Use the project's custom properties, such as `var(--color-accent)`, for every color, face, and spacing value, read from `.claude/design/base.css` and overrides under `.claude/design/project/`
+- When neither exists, say the deck renders unstyled rather than inventing values to cover it
+- Leave the `--color-*` roles to the stylesheet. The master reads its colors off the first slide's `<html>`, so a slide computing its own `--color-text` is reported, since the bands keep the master's.
 - Vary the composition across slides. Never repeat a title over bullets on every slide. Reach for columns, a row of large numbers, a grid of cards, a chart, a pull quote, and section dividers.
 
 ### Fit and shapes
 
+Text and shapes have to survive the conversion.
+
 - Keep titles short and lines tight, so text fits its box at the size the design sets rather than overflowing the frame.
 - Never write centered body text.
-- Prefer CSS the converter maps to native shapes. An element computing a property it cannot map is drawn as a picture of itself and reported on stderr, so a slide full of gradients and filters stops being editable.
+- Prefer CSS the converter maps to native shapes. An unmappable property is drawn as a picture and reported on stderr, so a slide full of gradients and filters stops being editable.
 
 ## Render
 
@@ -64,7 +67,7 @@ Read every `✗` line the render prints. A picture fallback, a refused link, cha
 
 Run this once after the first render, then stop.
 
-1. Convert the deck to images: `soffice --headless --convert-to pdf <deck>.pptx` then `pdftoppm -r 90 -png <deck>.pdf slide`. If `soffice` or `pdftoppm` is missing, skip the image pass and say so. Do not fail the render.
+1. Convert the deck with `soffice --headless --convert-to pdf <deck>.pptx`, then `pdftoppm -r 90 -png <deck>.pdf slide`. If either is missing, skip the image pass and say so rather than fail the render.
 2. Open and inspect every rendered image in this session, checking each slide for overlap, overflow, low contrast, and empty regions.
 3. Fix the reported issues and the `✗` lines in the slide files once, re-render, and stop. Do not loop indefinitely on aesthetics.
 

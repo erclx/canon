@@ -26,7 +26,7 @@ Groundwork `154` overturned the report-only verdict, since the soft findings are
 
 A plan or a groundwork record takes no density finding at all, so the audit can gate without failing a record kept out of version control. The list lives in `src/markdown/scope.ts`.
 
-`GATED_PATHS` turns each folder on as its rewrite batch reaches zero. Outside a canon checkout nothing gates, since the list describes this repository alone.
+`GATED_PATHS` turns each path on as its rewrite batch reaches zero, a folder or one file per entry where a batch covers part of a folder. Outside a canon checkout nothing gates, since the list describes this repository alone.
 
 ### A ratchet was rejected
 

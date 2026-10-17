@@ -30,6 +30,8 @@ Run these commands in parallel to gather git context:
 
 ### Preview
 
+Output the preview first.
+
 - **Files:** <if ≤3 list all, if >3 show first 3 + "+N more">
 - **Message:** `<type>(<scope>): <subject>`
 - **Length:** <count>/72
@@ -38,14 +40,14 @@ After outputting the preview, execute the final command immediately. Claude Code
 
 ### Final command
 
+Run it as soon as the preview is out.
+
 ```bash
 git commit -m "<type>(<scope>): <subject>"
 ```
 
 ## After execution
 
-Respond with exactly one line:
+Respond with exactly one line and add no other text:
 
 `✅ Committed: <type>(<scope>): <subject>`
-
-Do not add any other text.

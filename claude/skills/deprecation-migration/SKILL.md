@@ -7,7 +7,11 @@ metadata:
 
 # Deprecation and migration
 
-A session asked to remove something tends to grep for its name, find nothing it recognizes, and delete it. What it misses calls the thing by a string, a config key, or a copy shipped somewhere the search never looked, and the first anyone hears of it is a break in a place the diff never touched. The reverse failure is as common: a replacement ships, the old path gets a deprecation note, and nobody ever moves the callers, so both live on with no owner. This skill carries the discipline that ends with the old surface gone and every caller working.
+A session asked to remove something tends to grep for its name, find nothing it recognizes, and delete it. What it misses calls the thing by a string, a config key, or a copy the search never reached, and breaks somewhere the diff never touched.
+
+The reverse failure is as common. A replacement ships, the old path gets a deprecation note, and nobody moves the callers, so both live on with no owner. This skill ends with the old surface gone and every caller working.
+
+## When to load
 
 Load it before deleting or replacing anything a caller outside the current change could reach. Skip it for code introduced on the same branch that nothing has shipped against yet.
 
@@ -32,7 +36,7 @@ Answer four questions before writing a deprecation notice, and keep the surface 
 The owner of a surface moves its callers, the Churn Rule. Announcing a deprecation and waiting for callers to migrate pushes the work onto everyone downstream, and most of them never do it.
 
 - Migrate every caller you can reach in the repository you own, as part of the deprecation work rather than after it.
-- For a caller you cannot edit, such as another team's code or a published consumer, ship a backward-compatible path or migration notes they can apply, and track them as a caller still on the old surface.
+- For a caller you cannot edit, such as another team's code or a published consumer, ship a compatible path or migration notes, and track it as a caller still on the old surface
 - Never add a feature to the deprecated surface. New behavior goes on the replacement, which gives callers a reason to move.
 
 ## Prove zero consumers before removal
@@ -43,13 +47,13 @@ A clean search for one spelling of the name proves only that this spelling is ab
 - **String references**, such as a handler looked up by name, a command dispatched from a table, a reflection call, or a test fixture naming it.
 - **Configuration**, including build files, CI workflows, environment defaults, and data files that name the surface.
 - **Documentation and examples**, which callers copy from long after the code moves.
-- **Copies outside the repository**, such as a published package, an installed copy in another project, a shipped binary, a script someone runs from their own machine, or a saved request in an API client.
+- **Copies outside the repository**, such as a published package, an installed copy in another project, a shipped binary, a script run from someone's machine, or a saved API client request.
 
 Say which kinds your search could not reach and why, rather than reporting zero. "No callers in this repository, but a published release still exports it" is a finding a reader can act on, since it names where the remaining risk sits. A bare "no callers" is a guess.
 
 ## Bridge with an adapter or a strangler
 
-- **Adapter.** Keep the old interface as a thin layer over the new implementation, so callers keep working while the implementation moves underneath them. The adapter holds no logic of its own and goes once its last caller moves.
+- **Adapter.** Keep the old interface as a thin layer over the new implementation, so callers keep working while it moves underneath. It holds no logic of its own and goes once its last caller moves.
 - **Strangler.** Route callers to the new path a group at a time, leaving the old path serving the rest. The old path is done when it serves nothing, and only then is it removed.
 - Prefer the adapter when the interface stays and the implementation changes. Prefer the strangler when callers have to change how they call.
 
@@ -96,6 +100,8 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 
 ### Behavior and callers
 
+Behavior and callers carry their own signs.
+
 - You are adding behavior to the surface being deprecated.
 - Your report says "no callers" without naming the caller kinds the search could not reach.
 - A caller outside the repository was found and the plan still deletes the original.
@@ -109,6 +115,8 @@ Check each line against what the change produced. A line answering no is fixed o
 - Every caller reachable in the repository was migrated, or is named with the reason it was not.
 
 ### Checks and fallbacks
+
+Hold the checks and the fallbacks to the same test.
 
 - The zero-consumers check covered every caller kind, and the report names the kinds it could not reach.
 - No change both adds the replacement and removes the original.

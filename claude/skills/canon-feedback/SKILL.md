@@ -19,8 +19,8 @@ Format a `## Toolkit feedback` block from the current session, then open it as a
 
 From the conversation so far, identify:
 
-- Target project name or kind, never its full path. The path names a folder on one machine and says nothing a triage session can route on, where the project's own name does. Name a private project by its kind instead, such as `a Next.js app`, since the report leaves the machine.
-- Toolkit surface and its type (plugin skill, tooling config, governance rule, seed, or CLI). The type leads the `### Surface` field, ahead of the first comma, because the CLI picks the issue's domain labels from that text alone.
+- Target project name or kind, never its path, which names one machine's folder and nothing triage routes on. Name a private project by kind, such as `a Next.js app`, since reports leave the machine.
+- Toolkit surface and its type (plugin skill, tooling config, governance rule, seed, or CLI). The type leads `### Surface`, ahead of the first comma, since the CLI labels from it alone.
 - Specific toolkit file or name when the session cites one
 
 ### Behavior and fix
@@ -40,13 +40,21 @@ From the same conversation, identify:
 
 Format as a single fenced markdown block, one `###` heading per field. Read `${CLAUDE_SKILL_DIR}/references/template.md` on reaching this point for the block and each field's fallback.
 
-`canon feedback` refuses a report missing `### Surface`, `### Observed`, or `### Proposed fix`, naming the one it did not find. `### From project`, `### Expected`, and `### Repro` are optional, so write the literal fallback the template shows rather than dropping the heading, which is what keeps a field the session cannot fill reading as absent instead of unreported.
+### Required and optional fields
 
-`### Suggested shape`, `### Why`, and `### Links` are optional the other way. Omit the heading when the session has nothing for it and write no fallback, since a report filed without them is complete and a placeholder would read as a reporter who had nothing to say.
+The fields fall into three groups, and each treats a missing value differently.
 
-Headings rather than bold labels, because a GitHub issue form renders a submitted field as `### <label>`. One shape reaches the toolkit whichever route a report takes, and the CLI parses both with one parser. The retired `**Surface:**` form is refused rather than accepted, so a block carrying it has to be rewritten.
+| Fields                                            | When the session has nothing                                                        |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `### Surface`, `### Observed`, `### Proposed fix` | Required, and `canon feedback` refuses a report missing one, naming it              |
+| `### From project`, `### Expected`, `### Repro`   | Write the template's literal fallback, so the field reads as absent, not unreported |
+| `### Suggested shape`, `### Why`, `### Links`     | Omit the heading with no fallback, since a placeholder reads as nothing to say      |
 
 Keep Observed and Expected to one or two lines each, so the report scans. Length belongs in Proposed fix, Suggested shape, and Why.
+
+### Headings, not bold labels
+
+A GitHub issue form renders a submitted field as `### <label>`, so one shape reaches the toolkit whichever route a report takes, and the CLI parses both with one parser. The retired `**Surface:**` form is refused, so a block carrying it has to be rewritten.
 
 The issue body is the request. Put everything the toolkit needs to act on it there, since a comment is easy to miss and a body and a comment that differ leave triage choosing. A comment carries only what happens after filing.
 
@@ -70,12 +78,14 @@ cat <<'EOF' | canon feedback
 EOF
 ```
 
-The CLI opens a GitHub issue on the toolkit repo, labeled `feedback` and each domain label the surface type names, such as `skills` for a plugin skill, and prints the issue URL, which this skill reports back on its own line. It needs `gh` authenticated. `git-issue` is not the route, since it files on the current repository and this report belongs on the toolkit's.
+The CLI opens a GitHub issue on the toolkit repo, labeled `feedback` and each domain label the surface type names, such as `skills` for a plugin skill, and prints the issue URL for this skill to report on its own line. It needs `gh` authenticated, and `git-issue` is not the route, since it files on the current repository.
+
+### Reading the outcome
 
 Read the outcome off stdout, never off the exit code, since a shell wrapper can flatten it. Stdout takes one of three shapes:
 
 - A line opening with `https://` is the filed issue. Report the URL.
-- A block opening with `## Toolkit feedback` is a failed call. The reason is on stderr, so show the block in chat with it and `📋 Paste this into an issue at https://github.com/erclx/canon/issues/new`.
+- A block opening with `## Toolkit feedback` is a failed call. Show it in chat with the stderr reason and `📋 Paste this into an issue at https://github.com/erclx/canon/issues/new`.
 - Empty stdout is a refusal. Step 3 says how to repair it from stderr.
 
 If `canon` is not on PATH, fall back: print the block in chat and tell the user `📋 Copy the block above into a toolkit-repo session.`
@@ -85,4 +95,4 @@ If `canon` is not on PATH, fall back: print the block in chat and tell the user 
 A report that was not filed reads one of two ways on stdout, and stderr carries the reason in both:
 
 - Empty stdout, with a named missing field on stderr. Add that heading with a real value or its stated fallback, then re-run. Do not report the defect as filed.
-- The block on stdout, with `gh` absent or its call failed on stderr. The stderr names which, since installing `gh` and fixing an authenticated call are different repairs. Show the block in chat with the reason and the paste line from Step 2.
+- The block on stdout, with `gh` absent or its call failed on stderr, which names which, since the two repairs differ. Show the block in chat with the reason and the paste line from Step 2.

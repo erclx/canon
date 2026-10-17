@@ -7,7 +7,9 @@ metadata:
 
 # Create rule
 
-Author a project-local governance rule. The rule lives in the target project, not the toolkit, so `canon gov sync` never overwrites it: the sync engine orphans anything under `.claude/rules/project/` by location, before it ever checks the rule's name against the toolkit catalog. A rule written anywhere else under `.claude/rules/` survives the sync too, and the report offers it the path under the project subfolder it would take.
+Author a project-local governance rule. The rule lives in the target project, not the toolkit, so `canon gov sync` never overwrites it.
+
+The sync engine orphans anything under `.claude/rules/project/` by location, before checking its name against the toolkit catalog. A rule elsewhere under `.claude/rules/` survives too, and the report offers it the path under the project subfolder.
 
 ## Guards
 
@@ -49,9 +51,11 @@ A rule's filename is its slug alone, a one-to-three-word kebab topic with no num
 
 Read `${CLAUDE_SKILL_DIR}/references/rule.md` for frontmatter, body shape, and voice before writing the body. Do not work the shape from memory.
 
-Write `.claude/rules/project/<subdir>/<slug>.md`. Preview the resolved path, subdir, slug, and frontmatter, then write immediately. The tool permission dialog is the confirmation gate.
+Write `.claude/rules/project/<subdir>/<slug>.md`. Preview the resolved path, subdir, slug, and frontmatter, then write immediately, since the tool permission dialog is the confirmation gate.
 
-Frontmatter carries the Claude shape. Path-scoped rules emit one `paths:` entry per glob. Always-on rules omit `paths:` entirely.
+- Frontmatter carries the Claude shape
+- Path-scoped rules emit one `paths:` entry per glob
+- Always-on rules omit `paths:` entirely
 
 ```markdown
 ---

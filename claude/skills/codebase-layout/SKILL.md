@@ -7,11 +7,9 @@ metadata:
 
 # Codebase layout
 
-A session placing a new file copies the folder next to it, so a flat folder stays flat until a refactor pays to split it. In one target, two source folders grew to 46 and 36 flat files under installed rules against it, and the split cost a pull request touching 98 files. This skill carries the placement call to the moment the path is written, which is the one moment it is cheap.
+A session placing a new file copies the folder next to it, so a flat folder stays flat until a refactor pays to split it. In one target, two folders grew to 46 and 36 flat files under rules against it, and the split touched 98 files. This skill carries the placement call to the moment the path is written, the one moment it is cheap.
 
-Load it before writing a new path into a plan, not after. A worker copies the path the plan gives it, so the placement is settled once the plan is.
-
-Skip it when every path the work names already exists.
+Load it before writing a new path into a plan, not after, since a worker copies the path the plan gives it. Skip it when every path the work names already exists.
 
 ## Read the project's strategy first
 
@@ -33,7 +31,7 @@ Skip it when every path the work names already exists.
 
 ## Split before the file lands
 
-- Split a folder when the new file brings a second role into it, before the file lands rather than in a later refactor. The split that touched 98 files would have touched a handful when the folder held eleven.
+- Split a folder when the new file brings a second role into it, before the file lands rather than in a later refactor. The 98-file split would have touched a handful when the folder held eleven.
 - Treat roughly ten files as a prompt to look, not a gate. A folder holding one role can stay flat at any size, and a folder mixing two roles is worth splitting at six.
 - Give a new role a named folder in the plan, rather than dropping its first file beside the nearest neighbor.
 

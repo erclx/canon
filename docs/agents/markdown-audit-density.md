@@ -30,7 +30,7 @@ Only context entries, docs pages, skill bodies and references, tooling seeds and
 
 ## When a finding gates
 
-A finding gates when its path sits under a prefix in `GATED_PATHS` in `src/markdown/scope.ts`, and each rewrite batch adds its own folders there once they reach zero. A run of more than 5 plain bullets gates in context, docs, and skills from the start, since it failed the push there before this measure existed.
+A finding gates when its path sits under a prefix in `GATED_PATHS` in `src/markdown/scope.ts`, and each rewrite batch adds its own folders or files there once they reach zero. A run of more than 5 plain bullets gates in context, docs, and skills from the start, since it failed the push there before this measure existed.
 
 Outside a canon checkout every density finding reports and none gates, since the list describes this repository's own rewrite.
 

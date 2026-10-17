@@ -9,25 +9,37 @@ metadata:
 
 A backlog only grows while nothing can decline a row. This pass reads every row against the current tree, files one verdict per row for the operator, and later applies what they approved.
 
-The record is an ordinary intake folder at `.canon/intake/<nn>-backlog-triage/`. Read `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md` before writing any file in it, since it holds the item format, the frontmatter, the index shape, and the answer contract this skill is bound by. Read `${CLAUDE_SKILL_DIR}/../task-board/references/board.md` and `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` before applying, since the first holds the backlog and the ordering file and the second holds the `Declined:` line.
+The record is an ordinary intake folder at `.canon/intake/<nn>-backlog-triage/`, so three sibling references bind it.
+
+- `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md`, read before writing any file in the folder, holds the item format, the frontmatter, the index shape, and the answer contract
+- `${CLAUDE_SKILL_DIR}/../task-board/references/board.md`, read before applying, holds the backlog and the ordering file
+- `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`, read before applying, holds the `Declined:` line
 
 ## Guards
 
-- Resolve `.canon/tasks/` and `.canon/intake/` at the main worktree root, not `pwd`. Run `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd` outside a git repo.
+- Resolve `.canon/tasks/` and `.canon/intake/` at the main worktree root, from `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd` outside git
 - If `.canon/tasks/backlog.md` does not exist at that root, stop: `❌ No backlog at .canon/tasks/backlog.md. Nothing to triage.`
-- Never fill a `You:` slot, and never read an empty one as agreement. Answering runs through `plan-intake-answer` or the operator's own edit, which is what keeps silence from deciding a row.
+- Never fill a `You:` slot, and never read an empty one as agreement, so silence never decides a row. Answering runs through `plan-intake-answer` or the operator's own edit.
 - Branch on each `canon` record's `ok` and `reason` rather than on the exit code, which a shell function wrapping `canon` can flatten to zero.
 
 ## Step 1: detect the phase
 
-Run `canon intake list --json` and take the folders whose slug ends in `-backlog-triage`. Read the newest by ordinal. Where the installed binary carries no such subcommand, stop and report it, since opening a folder beside one awaiting apply leaves the first stranded and applying needs the same verb.
+Run `canon intake list --json` and read the newest folder by ordinal whose slug ends in `-backlog-triage`. Where the binary carries no such subcommand, stop and report it, since a second folder would strand the first and apply needs the same verb.
 
-- **No folder, or the newest is fully applied.** Run the file phase.
-- **Unread above zero.** Stop: `❌ <n> items in <slug> are unread. Run /canon:plan-intake-answer, then re-run this skill to apply.`
-- **Malformed above zero.** Stop: `❌ <n> items in <slug> carry no answer slot. Repair them in the cluster files before applying.`
-- **Every item answered, some not yet applied.** Run the apply phase.
+| State of the newest folder                | Route                                                                                                      |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| None, or fully applied                    | Run the file phase                                                                                         |
+| Unread above zero                         | Stop: `❌ <n> items in <slug> are unread. Run /canon:plan-intake-answer, then re-run this skill to apply.` |
+| Malformed above zero                      | Stop: `❌ <n> items in <slug> carry no answer slot. Repair them in the cluster files before applying.`     |
+| Every item answered, some not yet applied | Run the apply phase                                                                                        |
 
-An item is applied once its task has moved under `.canon/tasks/declined/` or `.canon/tasks/archive/`, or once its live task file carries a `## Findings` line naming the folder slug. A task whose file sits in none of the three folders counts as applied only once `backlog.md` no longer names it, since its dangling line is the one thing apply has left to remove. Test that per item rather than trusting a count, since a run can stop partway. An item apply skipped for an unreadable answer stays unapplied, so the folder stays in the apply phase until the operator rewrites that answer.
+### When an item counts as applied
+
+Test each item rather than trusting a count, since a run can stop partway. An item apply skipped for an unreadable answer stays unapplied until the operator rewrites it.
+
+- Its task has moved under `.canon/tasks/declined/` or `.canon/tasks/archive/`
+- Its live task file carries a `## Findings` line naming the folder slug
+- Its task file sits in none of the three folders and `backlog.md` no longer names it, since the dangling line is all apply has left to remove
 
 ## File phase
 
@@ -35,7 +47,7 @@ Writes only inside `.canon/intake/<nn>-backlog-triage/`, so it runs under any ro
 
 ### Step 2: claim the folder
 
-Run `canon records ordinal intake backlog-triage --claim --json` and take its `name`. The verb creates the folder in the same act, so two sessions opening at once never share one. Where the installed binary carries no such subcommand, report it and stop rather than picking an ordinal by hand.
+Run `canon records ordinal intake backlog-triage --claim --json` and take its `name`. The verb creates the folder in the same act, so two sessions opening at once never share one. Where the binary carries no such subcommand, report it and stop rather than picking an ordinal by hand.
 
 ### Step 3: read every row
 
@@ -45,33 +57,51 @@ A row whose link resolves to no file gets an item anyway, carrying `decline` and
 
 ### Step 4: measure each row
 
-Measure every claim the task makes against the tree and `git log` during this pass. Grep for the construct its defect names and count the sites, check whether each open outcome's behavior exists, and search the log for a commit or pull request that shipped it under another task. Never carry a figure from the task file forward as current, since the task states what was true when it was filed.
+Measure every claim the task makes against the tree and `git log` during this pass, never carrying a figure from the task file forward, since it states what was true when filed. Name the commit the pass measured against in the overview body.
 
-Then gather the evidence Step 5 reads for each row that reproduces. Check whether its origin line or `## Findings` names an issue, a run, or a person it bit. Search the log for a commit or pull request that worked around it rather than fixing it. For a defect in something the project ships, whether a route or a page its users call or a rule, a seed, a scaffold, or a verb other repositories copy or run, name the shipped path it sits on. Record each one that is absent as absent rather than inferring it.
+- Grep for the construct its defect names and count the sites
+- Check whether each open outcome's behavior exists
+- Search the log for a commit or pull request that shipped it under another task
 
-Name the commit the pass measured against in the overview body.
+For each row that reproduces, gather the evidence Step 5 reads, and record each piece that is absent as absent rather than inferring it.
+
+- An issue, a run, or a person it bit, named in its origin line or `## Findings`
+- A commit or pull request that worked around it rather than fixing it
+- The shipped path a defect sits on, being a route or page users call, or a rule, seed, scaffold, or verb other repositories copy or run
 
 ### Step 5: pick the verdict
 
-Keep and promote carry the burden of proof, and a defect that still exists does not meet it. A row filed against the tree nearly always still reproduces, so a test of reproduction alone keeps almost every row.
+Keep and promote carry the burden of proof, and a defect that still exists does not meet it. A row filed against the tree nearly always reproduces, so a reproduction test alone keeps almost every row. A row earns keep or promote only by naming a cost or a reach from Step 4's evidence.
 
-A row earns keep or promote only by naming one of two things from the evidence Step 4 gathered:
+| Ground | What it takes                                                                                                                                                |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Cost   | A wrong result this pass observed by running the verb or reading committed output, or an issue, run, person, or workaround commit it hit, not measured fixed |
+| Reach  | The defect sits on a shipped path, so everyone reaching it receives a wrong instruction, a broken or unbounded behavior, or a wrong output, hit or not       |
 
-- **A cost**: the defect gives a wrong result that this pass observed, by running the verb that carries it or reading the committed output that shows it, or that the row's evidence shows an issue, a run, or a person hit, a workaround commit included. A hit counts only while the pass does not measure it as fixed or as no longer recurring.
-- **A reach**: the defect sits on a path the project ships, and everyone who reaches that path, whether a user calling it or a target copying or running it, receives the defect as a wrong instruction, a broken, failing, or unbounded behavior, or a wrong output. Reach needs no hit, since the path's users meet the defect whether or not anyone reported it.
+A plausible cost names nothing. A row arguing what could go wrong off a shipped path, with no observed output and no hit, is declined however likely it sounds.
 
-A plausible cost names nothing. A row arguing what could go wrong off a shipped path, with no observed output and no hit, is declined however likely the argument sounds. Three things are not a reach: a missing feature on a shipped surface, a defect that changes nothing a user or a target receives, such as dead code on a shipped path, and a defect that shows only in this repository's own config, workflows, scripts, or fixtures.
+### What is not a reach
 
-A missing protection is a defect, not a missing feature. Read a row as a missing protection when the shipped path lacks a bound, a check, or a guard on what it does at run time, such as a limit, a timeout, or input validation, so that the path can fail, run unbounded, or return a wrong output for every user who reaches it. That is a reach. A missing feature leaves the path working as it does today and adds a capability, a document kind, or a sentence of guidance, and it is not a reach.
+Three things are not a reach, and a row resting on one needs a cost instead.
 
-A missing feature can still earn keep or promote through the cost arm. A user asking for it in an issue or a report, or working around its absence on their side, is a case someone hit, so that row is never declined for being a feature. A feature nobody asked for is declined. A passing mention is not a request, and neither is one the project's own planning records filed with no user behind it.
+- A missing feature on a shipped surface, which leaves the path working and adds a capability, a document kind, or guidance
+- A defect that changes nothing a user or a target receives, such as dead code on a shipped path
+- A defect that shows only in this repository's own config, workflows, scripts, or fixtures
 
-- **keep**: the defect reproduces this pass, stated with a count or a path, and the row names a cost or a reach, stated with the observation, the hit, or the shipped path.
-- **promote**: it qualifies for keep, and the thing it was waiting on has cleared, naming what cleared it.
-- **archive**: every open outcome is measured shipped, naming the commit or pull request per outcome position.
-- **decline**: anything else, including a defect that reproduces but names no cost and no reach, a defect the tree no longer holds, work superseded by another task, and a row whose argument rests only on its original filing.
+A missing protection is a defect, not a missing feature, and is a reach. Read a row that way when the shipped path lacks a run-time bound, check, or guard, such as a limit, a timeout, or input validation, so it can fail, run unbounded, or return a wrong output.
 
-Age is evidence in neither direction. A row untouched for months is not more declinable than one filed yesterday, and a row filed yesterday is not more worth keeping. An old hit is read the same way as a new one, by whether the pass measures it as still able to recur.
+A missing feature earns keep through the cost arm when a user asked for it in an issue or a report, or worked around its absence. A feature nobody asked for is declined, and neither a passing mention nor a request the project's own planning filed with no user behind it counts.
+
+### The four verdicts
+
+Age is evidence in neither direction. An old hit reads the same as a new one, by whether the pass measures it as still able to recur.
+
+| Verdict | When                                                                                                                                     |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| keep    | The defect reproduces this pass, with a count or a path, and the row names a cost or a reach with its observation, hit, or shipped path  |
+| promote | It qualifies for keep, and what it was waiting on has cleared, naming what cleared it                                                    |
+| archive | Every open outcome is measured shipped, naming the commit or pull request per outcome position                                           |
+| decline | Anything else, including a reproduction naming no cost or reach, a defect the tree no longer holds, superseded work, or the filing alone |
 
 ### Step 6: write the items
 
@@ -79,9 +109,9 @@ Write one item per row in the intake item format, one cluster file per domain th
 
 - **`Problem:`** states what this pass measured, with the count, path, or commit behind it
 - **`Fix:`** states what applying the verdict does to the board
-- **`Worth it:`** names the cost or the reach the verdict rests on in one clause, or says the row names neither. A `yes` or a `later` carries no verdict on its own, so a decline can follow either word
+- **`Worth it:`** names the cost or reach the verdict rests on in one clause, or says the row names neither. A `yes` or `later` alone carries no verdict.
 - **`Open:`** reads `decline, archive, keep, or promote?` on every item
-- **`Suggested:`** opens with exactly one of the four verdict tokens, then the reason. An archive suggestion lists every outcome position it closes, as `archive 1, 3: shipped in #NNN`
+- **`Suggested:`** opens with exactly one verdict token, then the reason. An archive lists every outcome position it closes, as `archive 1, 3: shipped in #NNN`.
 - **`Overlaps:`** names a live board task that already carries the work, where one does
 - **`You:`** ships empty
 
@@ -89,42 +119,21 @@ Write `00-overview.md` last, per the intake standard, with the verdict counts by
 
 ## Apply phase
 
-Writes the board and task files. Refuses when this session's name starts with `planner-` or `worker-`: read it from `canon sessions list --self --json` before writing anything, and stop: `❌ Apply writes the board, which the <role> role bans. Run it from an operator or orchestrator session.` A refused or failed read proceeds, since it is indistinguishable from a solo project running no named sessions.
+Writes the board and task files, so it refuses when this session's name starts with `planner-` or `worker-`. Read the name from `canon sessions list --self --json` before writing anything, and stop: `❌ Apply writes the board, which the <role> role bans. Run it from an operator or orchestrator session.`
 
-Every write here is a main-root write. Route a change inside an existing file the way `session-worktree` states, and report it rather than proceeding silently when that skill does not resolve.
+A refused or failed read proceeds, since it is indistinguishable from a solo project running no named sessions. Every write here is a main-root write, so route a change inside an existing file the way `session-worktree` states, and report it rather than proceeding silently when that skill does not resolve.
 
 ### Step 7: read the answers
 
-Run `canon intake list <slug> --json` and read each item's `answer` and `suggested`.
-
-- An answer of `ok` takes the suggested verdict. A `suggested` that opens with no verdict token is malformed: report the item and skip it, never treating it as keep.
-- An answer opening with a verdict token overrides the suggestion. An override to archive names its own outcome positions, and one that names none is reported and skipped.
-- Any other answer, such as a free-text note, is reported and skipped. Never guess a verdict from prose.
-- An item already applied, by the test in Step 1, is skipped silently, which is what makes a re-run write nothing twice.
+Read `${CLAUDE_SKILL_DIR}/references/apply.md` on reaching this step, for how each answer reads, what each verdict runs, and how a refusal routes. The file phase skips it.
 
 ### Step 8: run each verdict
 
-Take the task stem from the item heading. Every verdict leaves the folder slug on its task, which is how Step 1 and `task-board`'s unlinked-origin scan both see the folder as acted on.
-
-- **decline**: `canon tasks decline <stem> --reason "<reason>, backlog triage <slug> item <cluster>#<n>" --json`. The verb clears the backlog line.
-- **decline on a missing file**: when the stem resolves to no file in `.canon/tasks/`, `declined/`, or `archive/`, the verb would refuse as `no-match`, so skip it. Drop the dangling line from `backlog.md` directly and report it as removed with no task behind it. Any other verdict on such an item is reported and skipped, since there is no file to keep, archive, or promote.
-- **archive**: `canon tasks outcome <stem> --close <p> ... --json` for the named positions, then `canon tasks archive <stem> --json`. Outcomes already closed report as closed rather than refusing, so archive still runs. Archive leaves `backlog.md` alone, so drop the task's backlog line once it succeeds, then append the `## Findings` line naming the evidence to the archived file.
-- **keep**: append the `## Findings` line naming what reproduced. The backlog line stays.
-- **promote**: move the backlog line to the bottom of `## Needs a plan` in `.canon/tasks/priority.md`, with a `Waiting on` cell stating what cleared and ending in `last`, then append the `## Findings` line.
-
-Write the `## Findings` line as `- **<YYYY-MM-DD>, backlog triage <slug>:** <verdict>, <evidence>`, the bold label form `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes. It is the last write on every verdict with a task file behind it, since Step 1 reads it as applied and a line written ahead of a refused move would mark a row done that never moved.
-
-Before any promote, check the roster the way `task-board` step 4 does: a live session in this repository whose name starts with `orchestrator-` and whose `sessionId` is not this one. When one is found, write the `## Findings` line but not `priority.md` or `backlog.md`, and message that session with the row and its cell so it places the row itself.
+Run each verdict through the task verbs the reference names, writing the `## Findings` line last on every verdict with a task file behind it.
 
 ### Step 9: route on a refusal
 
-Report every refusal on its item and continue with the rest, since one row's refusal says nothing about another's.
-
-- `decline` refusing with `no-match`: the task already moved elsewhere. Report and skip. A missing-file item never reaches the verb, per Step 8.
-- `outcome` refusing, or `archive` refusing with `open-outcomes`: the verdict named too few positions. Report the positions still open and leave the row on the backlog. Never retry with guessed positions.
-- A promote whose row already sits in `priority.md`: report it, skip the move, and still write the `## Findings` line.
-
-Close with `canon tasks validate --json` and report every finding it raises against a row this run touched. After a shell write under `.canon/tasks/`, regenerate the index with `canon indexes regen --no-stage --root <main-root> <main-root>/.canon/tasks/index.md`, since no hook fires on `Bash`.
+Report every refusal on its item and continue, then close with `canon tasks validate --json`, per the reference.
 
 ## Output
 

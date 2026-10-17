@@ -1,0 +1,46 @@
+---
+title: Card route path
+description: How draft-identity writes the picked card composition into a project's existing Astro card route and captures it through the card server
+---
+
+# Card route path
+
+Applies to Step 7 of `draft-identity` when the project already holds the card route scaffold. A project without it takes the page path in the skill body instead.
+
+## The scaffold
+
+The scaffold is a second framework config pointing `srcDir` at a folder beside `src/`, a route inside that folder, and a shell check. Read the shape with `canon tooling reference astro`.
+
+- The route imports the project's global stylesheet and carries a fixed `<meta>` marker
+- The shell check fails a build that carries the marker
+- Of the route's three consumers, the published build is the only one a check reaches
+
+### When the scaffold is missing
+
+Check for a `card.config.mjs` with a `card-src/pages/og-card.astro` beside it. Where either is missing, take the page path and leave the install to the operator, saying:
+
+```plaintext
+No card route installed, so the card shipped as a PNG this run.
+`canon tooling sync astro . --write` installs the route, and it replaces every other
+golden config in the astro stack, so run it when you mean to sync the stack.
+```
+
+Never run that sync to obtain the route, since it copies the whole stack over the project's own framework, lint, typescript, and test configs. Never hand-write the scaffold either, since a copy written here drifts from the one the stack maintains.
+
+## Writing and capturing the route
+
+1. Write the picked arm's `.card` markup into the route's `.card` element, leaving the marker, the stylesheet import, and the surrounding document alone.
+2. Keep the element at 600x315, half the 1200x630 target, since the capture's 2x scale factor is fixed and a 1200x630 element captures at 2400x1260.
+3. Start the card server in the background with `bun run card:dev` and read the port off its own output.
+4. Capture the route, naming the destination PNG rather than a directory, which is what a URL source takes for `--out`.
+5. Stop the server. Report the dimensions `canon capture` printed, confirming 1200x630.
+
+```bash
+canon capture http://localhost:<port>/og-card --selector .card --out <write-folder>/og-image.png
+```
+
+### Port and font refusals
+
+The card server runs under a strict port, so it refuses rather than walking to the next free one. Where something already holds that port, set `WORKTREE_PORT_OFFSET` by hand and start it again.
+
+A capture refusing on a font is the mechanism working rather than a failure to route around. The route asked for a family the machine cannot resolve, which is the rewrap a published card would have shipped silently.
