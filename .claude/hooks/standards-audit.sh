@@ -86,6 +86,12 @@ headings=$(printf '%s' "$record" |
 colons=$(printf '%s' "$record" |
   jq -r --arg new "$new" '.entries[]?.colons[]? | (.lead // (.text[:.column] | sub("^.*\\s"; ""))) as $lead | select($new | contains($lead + ":")) | ":\(.line):\(.column + 1)  \(.text)"' 2>/dev/null)
 
+# Density findings are handed back whole, gating or not, since the verb only
+# returns them for a path in its scope and a finding the push does not fail on
+# yet is the one a rewrite has to clear before its folder is gated.
+density=$(printf '%s' "$record" |
+  jq -r '.entries[]?.density[]? | ":\(.line)  \(.kind)  " + (if .limit == null then "opens with neither a paragraph nor a table" else "\(.value) past \(.limit)" end) + (if .gating then "  gating" else "" end)' 2>/dev/null)
+
 # A set the verb shipped empty measures nothing and would report a clean file.
 # Reading the findings alone turned that narrowed check into a pass once, back
 # when a standard could go missing, and the sets shipping with the package moves
@@ -93,7 +99,7 @@ colons=$(printf '%s' "$record" |
 empty=$(printf '%s' "$record" |
   jq -r '[.bans.emptySets[]?] | join(", ")' 2>/dev/null)
 
-[ -z "$hits" ] && [ -z "$headings" ] && [ -z "$colons" ] && [ -z "$unread" ] && [ -z "$empty" ] && exit 0
+[ -z "$hits" ] && [ -z "$headings" ] && [ -z "$colons" ] && [ -z "$density" ] && [ -z "$unread" ] && [ -z "$empty" ] && exit 0
 
 nl=$'\n'
 msg=""
@@ -118,6 +124,11 @@ fi
 
 if [ -n "$colons" ]; then
   found=$(printf 'Standards-audit: this write added a colon in the middle of a sentence in %s. A colon belongs after a label or at the end of a line introducing a list. Split the sentence or rewrite it.\n%s' "$file" "$colons")
+  msg="${msg:+$msg$nl}$found"
+fi
+
+if [ -n "$density" ]; then
+  found=$(printf 'Standards-audit: %s breaks the markdown density limits, being a 350-character paragraph, 2 paragraphs in a row, a 200-character bullet, 5 plain bullets in a row, no H4, and a paragraph or table opening every H3. Split each block at its seam rather than trimming words to pass. A finding marked gating fails the push.\n%s' "$file" "$density")
   msg="${msg:+$msg$nl}$found"
 fi
 
