@@ -1,11 +1,11 @@
 ---
 title: Development
-subtitle: Local dev loop and the run command table, how bun run check scopes its work and its tests, what each stage regenerates and gates on, the hook families, session scratch, and the record folders. Start with overview.
+subtitle: Local dev loop and run commands, how bun run check scopes its stages and tests, the hooks, session scratch, and record folders. Start with overview.
 ---
 
 # Development
 
-Local dev loop and the run command table, how bun run check scopes its work and its tests, what each stage regenerates and gates on, the hook families, session scratch, and the record folders. Start with overview.
+Local dev loop and run commands, how bun run check scopes its stages and tests, the hooks, session scratch, and record folders. Start with overview.
 
 - [Evidence modes](evidence.md): The dev and prod meanings of evidence, the one boundary that sorts a folder between them, a row per kind with its writer and gate and whether canon pr evidence compares it, the folders carrying the segment and neither kind, and the products with no dev baseline yet
 - [Gating stages](gates/index.md): The stages that gate a push on a measure, what sequences them, the report-only Audit set stage, the content stages, and the catalog stages. Start with overview.

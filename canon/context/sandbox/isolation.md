@@ -11,95 +11,135 @@ description: Where a sandbox tree lives and the guard on it, the per-run id, and
 
 The sandbox tree lives at `$XDG_STATE_HOME/canon/sandbox-<run-id>`, defaulting to `~/.local/state/canon/sandbox-<run-id>`, and `CANON_SANDBOX_DIR` overrides the whole path. `sandboxTree` in `src/sandbox/tree.ts` holds it.
 
-The tree sits outside the repository because a tree inside the worktree puts the toolkit's own `CLAUDE.md` on the ancestor chain of the session `canon sandbox run` spawns, beside the seeded copy the scenario installed. Both carry the rule sending shared session scratch to the main worktree root, with nothing to decide which root wins. With the toolkit off that chain, a skill writing shared session scratch lands inside the sandbox, where the arm's `write_scope` asserts over it.
+The tree sits outside the repository because a tree inside the worktree puts the toolkit's own `CLAUDE.md` on the ancestor chain of the session `canon sandbox run` spawns, beside the seeded copy. Both carry the rule sending shared session scratch to the main worktree root, with nothing to decide which root wins.
+
+- With the toolkit off that chain, a skill writing shared session scratch lands inside the sandbox, where the arm's `write_scope` asserts over it
 
 `.gitignore` keeps a `.sandbox/` entry regardless. Nothing provisions there, so the entry costs a line and covers a stray tree from an older checkout or a hand-set override.
 
 ### The per-run id
 
-`<run-id>` comes from `mint_sandbox_run_id` and `mintSandboxRunId`, one in each of the two definitions. Each mints a short random suffix the first time a process asks for the default and holds it in `CANON_SANDBOX_RUN_ID` for the rest of that process, so a child inheriting the environment resolves the same tree its parent did. Two sessions provisioning at once land on two trees and cannot provision over each other.
+`<run-id>` comes from `mint_sandbox_run_id` and `mintSandboxRunId`, one in each of the two definitions.
 
-`canon sandbox run` mints once into its own environment, before it provisions, which is what lets its provisioning child and the `sandbox check` child it runs afterward agree.
+Each mints a short random suffix the first time a process asks for the default and holds it in `CANON_SANDBOX_RUN_ID` for the rest of that process, so a child inheriting the environment resolves the same tree its parent did. Two sessions provisioning at once land on two trees.
+
+- `canon sandbox run` mints once into its own environment, before it provisions, which lets its provisioning child and the `sandbox check` child it runs afterward agree
 
 ### The guard
 
-`assertSandboxDirSafe` in `src/sandbox/tree.ts` is the live guard, and no bash copy remains now that no runner sources one. Provisioning runs `rm -rf` on the resolved path at three sites, so the guard tests an allowlist rather than a list of paths to refuse. The path normalizes first, collapsing repeated separators, folding `.` and `..` segments, and stripping trailing ones, then has to be a strict descendant of the home directory or the temp root.
+`assertSandboxDirSafe` in `src/sandbox/tree.ts` is the live guard, and no bash copy remains. Provisioning runs `rm -rf` on the resolved path at three sites, so the guard tests an allowlist. The path normalizes first, folding `.` and `..` and repeated or trailing separators, then has to be a strict descendant of the home directory or the temp root.
 
-A blocklist is right once and wrong as soon as a system directory goes unnamed. The allowlist admits the default and every reasonable override, and refuses `/`, `/usr`, `/etc`, `//`, `$HOME/../..`, and `$HOME` itself without naming any of them. The repository test is separate and runs both ways, since a path under the worktree restores the ancestor chain and a path above it is one `rm -rf` from deleting the repository.
+A blocklist is right once and wrong as soon as a system directory goes unnamed. The allowlist admits the default and every reasonable override, and refuses `/`, `/usr`, `/etc`, `//`, `$HOME/../..`, and `$HOME` itself without naming any of them.
 
-The fold is lexical and follows no symlink. The guard runs before provisioning creates the tree, which rules out `cd` with `pwd -P` and every other resolution needing the path to exist, so a `..` below a symlink resolves against the link's own path rather than its target. A `..` climbing past the root clamps to `/`, which the allowlist refuses. Folding dot-dot is what the guard turns on: a string test against the path as written admits `$HOME/../../usr`, `$HOME/..`, `/tmp/../etc`, and a spelling resolving to the main worktree root.
+- The repository test is separate and runs both ways, since a path under the worktree restores the ancestor chain and a path above it is one `rm -rf` from deleting the repository
+- The fold is lexical and follows no symlink, because the guard runs before provisioning creates the tree, which rules out `cd` with `pwd -P`
+- A `..` below a symlink therefore resolves against the link's own path, and a `..` climbing past the root clamps to `/`, which the allowlist refuses
+- Folding dot-dot is what the guard turns on, since a string test against the path as written admits `$HOME/../../usr`, `/tmp/../etc`, and a spelling resolving to the main worktree root
 
 ### Headless permissions and the write scope
 
-Headless runs pin `--model sonnet` for cost control and assert on structural properties rather than exact wording, since model output varies between runs. They run under `--permission-mode bypassPermissions`. `acceptEdits` denies writes under `.claude/`, and neither an `--allowedTools` glob nor a `permissions.allow` rule in `settings.json` lifts it, so an arm that writes planning docs cannot run under it at all.
+Headless runs pin `--model sonnet` for cost control and assert on structural properties rather than exact wording, since model output varies.
 
-The scoping a permission layer would supply comes from `write_scope`, asserted after the run rather than enforced during it. `write_scope` is a report, not a block: a skill that writes somewhere it should not still wrote there. The manifest diff covers creates, modifications, and deletions, which makes it comparable to the permission check rather than a subset of it. `canon/context/scripts/eval.md` holds the blind spot both harnesses share, a write outside the diffed tree.
+They run under `--permission-mode bypassPermissions`, because `acceptEdits` denies writes under `.claude/` and neither an `--allowedTools` glob nor a `permissions.allow` rule lifts it, so an arm that writes planning docs cannot run under it.
 
-A per-arm permission set is worth building for its own reasons, since every arm gets the widest permission any arm needs. It would not bound a nested dispatch, though, because the arm that exposed that failure runs its whole tested path through `Bash`, and a tool set narrow enough to stop the dispatch denies the one tool the arm needs.
+- `write_scope` supplies the scoping a permission layer would, asserted after the run rather than enforced during it
+- It is a report, not a block: a skill that writes somewhere it should not still wrote there
 
-### The escape watch and `escape_scope`
+The manifest diff covers creates, modifications, and deletions, which makes it comparable to the permission check. `canon/context/scripts/eval.md` holds the blind spot both harnesses share, a write outside the diffed tree.
+
+A per-arm permission set is worth building for its own reasons, since every arm gets the widest permission any arm needs. It would not bound a nested dispatch, because the arm that exposed that failure runs its whole path through `Bash`, and a tool set narrow enough to stop the dispatch denies the one tool the arm needs.
+
+### The escape watch and escape_scope
 
 The runner watches `.canon/plans/`, `.canon/review/`, `.canon/memory/`, and `.canon/tasks/` under the toolkit roots, and reports what changed there as `escapes` rather than folding them into the write scope, since a file the session put outside the tree is not in it to be asserted over. Without a declaration, an escape is an unattributed warning.
 
-`escape_scope` in an arm's `expect.toml` turns that warning into a result, using the mechanism `write_scope` already models: globs matched against what `escapeRoots` and `ESCAPE_SCRATCH_DIRS` in `src/sandbox/headless/watch.ts` found, checked by the harness that finds them. Declaring the key, even as `escape_scope = []`, makes a write matching a declared glob pass and everything else fail the arm. Accepting the exposure and stating it in prose was the alternative, and it lost because the accidental bound it leaned on had already weakened once, when a machine-level target registry appeared as a side effect of an unrelated test.
+`escape_scope` in an arm's `expect.toml` turns that warning into a result, using the mechanism `write_scope` models. Globs match against what `escapeRoots` and `ESCAPE_SCRATCH_DIRS` in `src/sandbox/headless/watch.ts` found. Declaring the key, even as `escape_scope = []`, makes a write matching a declared glob pass and everything else fail the arm.
 
-No arm declares it at present. An arm that narrates a run dispatching no worker declares `escape_scope = []`, since a correct run touches none of the eight watched destinations, and an arm that drives the dispatch widens the scope from what that run measures rather than from a guess at what a worker touches.
+- Stating the exposure in prose lost, because the accidental bound it leaned on had already weakened once, when a machine-level target registry appeared as a side effect of an unrelated test
+- No arm declares it at present
+- An arm narrating a run that dispatches no worker declares `escape_scope = []`, since a correct run touches none of the eight watched destinations
+- An arm driving the dispatch widens it from what that run measures
+- A scoped pass says nothing about a write past the watch's reach, such as a home directory, a sibling worktree, or the machine-level target registry, nor whether a seen write belongs to this run
 
-A scoped pass says nothing about a write past the watch's reach, being a home directory, a sibling worktree, or the machine-level target registry a live dispatch touches. It says nothing about whether a write it saw belongs to this run rather than a sibling's, since the harness cannot attribute one.
-
-`snapshotRoot` returns an empty manifest both when a watch ran clean and when none of the four directories existed under a root. The runner therefore sets a flag whenever any root held one of them at snapshot time and passes it as `--escapes-watched`, and `checkEscapeScope` reports unmeasured rather than passing when no root did.
+`snapshotRoot` returns an empty manifest both when a watch ran clean and when none of the four directories existed under a root. The runner therefore sets a flag whenever any root held one at snapshot time and passes it as `--escapes-watched`, and `checkEscapeScope` reports unmeasured rather than passing when no root did.
 
 ### A concurrent session is a witness, never a pass
 
 `sessionsConcurrent` names a session the client's registry carried on both sides of the run. It appears beside the escape in the runner's stderr warning and inside the `unbounded escape:` message an `escape_scope` declaration produces, so the operator's own launching session shows up attached to the finding.
 
-`checkEscapeScope`'s pass, fail, and skip outcomes take no branch on it, so `escape_scope = []` keeps failing on any unbounded write whether or not a witness sits beside it. A witness-based skip was the alternative, and it lost because it reopens a declaration that reads as covered while the run underneath can no longer fail. A witness proves someone else was busy, never that a given file is theirs. The registry has no contract either, so a session that writes no record, or a write from something other than a live `claude` process, still leaves the escape to read by hand.
+`checkEscapeScope`'s outcomes take no branch on it, so `escape_scope = []` keeps failing on any unbounded write whether or not a witness sits beside it. A witness-based skip would reopen a declaration that reads as covered while the run can no longer fail.
+
+- A witness proves someone else was busy, never that a given file is theirs
+- The registry has no contract, so a session that writes no record, or a write from something other than a live `claude` process, still leaves the escape to read by hand
 
 ### A nested background dispatch is bounded rather than watched
 
-An arm invoked without the narration its fixture states can dispatch a real `claude --bg` session against the machine's process table. Every watch reports clean and is right to, since a dispatched session writes into neither the tree `snapshotTree` reads nor the four directories `snapshotRoot` reads. An unbound dispatch keeps spending until a person finds and kills it, and `SIGTERM` alone does not end it. Three mechanisms bound it, and all sit in `src/sandbox/headless/dispatch.ts` rather than in `run.ts`, their only caller, so the test beside it reaches each without launching a session.
+An arm invoked without the narration its fixture states can dispatch a real `claude --bg` session against the machine's process table. Every watch reports clean and is right to, since a dispatched session writes into neither the tree `snapshotTree` reads nor the four directories `snapshotRoot` reads.
 
-#### The shim
+An unbound dispatch keeps spending until a person kills it, and `SIGTERM` alone does not end it.
 
-A `claude` shim sits first on the PATH of the session the runner spawns. It stays a bash file, since it stands in for a binary any shell in the session may exec. It refuses `--bg` and `--background` by name and delegates everything else. The harness calls the real binary by resolved path, since the arm's prompt is an argument to that call and a prompt naming the flag would otherwise refuse the run. That path is written into the shim rather than passed through the environment, because a variable carrying it sits in the spawned session's environment and hands any arm the string that walks around the bound.
+- Three mechanisms bound it. All sit in `src/sandbox/headless/dispatch.ts` rather than `run.ts`, their only caller, so the test beside it reaches each without launching a session.
 
-#### The session recording
+### The shim
 
-The runner snapshots `${CLAUDE_CONFIG_DIR:-$HOME/.claude}/sessions` either side of the run, comparing record names rather than content, since a live session rewrites its own record on every status change. The result reports on `sessions` in the merged JSON rather than through `escape_scope`, because folding a process fact into a key defined against a file-write watch would make the key mean two things and silently widen an arm's empty declaration.
+A `claude` shim sits first on the PATH of the session the runner spawns. It stays a bash file, since it stands in for a binary any shell in the session may exec. It refuses `--bg` and `--background` by name and delegates everything else.
 
-A new record reads as a dispatch because the harness's own session leaves none. A headless `claude -p` writes no registry entry, so a sandbox path appearing there names either a scenario staging one by hand, such as `git-worktree`, or a nested dispatch. A client that started registering print-mode runs would have every sandbox run report itself.
+The harness calls the real binary by resolved path, since the arm's prompt is an argument to that call and a prompt naming the flag would otherwise refuse the run. That path is written into the shim rather than passed through the environment, because a variable carrying it hands any arm the string that walks around the bound.
 
-#### The reap
+### The session recording
 
-The runner starts its session as a detached spawn through `node:child_process`, so the session calls `setsid` and leads a process group of its own, and the runner signals that group after the verdict is taken, escalating to `SIGKILL`. `Bun.spawn` takes no detached option, which is why this one spawn leaves it. The group has to be one the run created, since signalling the inherited group would reap the operator's terminal, so the run compares the session's group against its own and `reapProcessGroup` refuses a group matching the calling process.
+The runner snapshots `${CLAUDE_CONFIG_DIR:-$HOME/.claude}/sessions` either side of the run, comparing record names rather than content, since a live session rewrites its own record on every status change.
 
-The session's stdout goes to a file rather than a pipe. A child the session leaves behind inherits the descriptor, and a pipe would stay open until that child exits, stalling the read the verdict waits on.
+The result reports on `sessions` in the merged JSON rather than through `escape_scope`, because folding a process fact into a key defined against a file-write watch would make the key mean two things.
 
-The liveness read skips zombies. A leader the runner spawned and has not yet collected stays in the process table after the signal lands, and the synchronous wait blocks the event loop that would collect it, so a read counting zombies reports a dead group as a survivor.
+- A new record reads as a dispatch because the harness's own session leaves none
+- A headless `claude -p` writes no registry entry, so a sandbox path appearing there names either a scenario staging one by hand, such as `git-worktree`, or a nested dispatch
+- A client that started registering print-mode runs would have every sandbox run report itself
 
-The reap runs on every path out of the runner, being a provision failure, a dead session, a thrown error, and `SIGINT` or `SIGTERM`, as well as the ordinary path. The session leads its own group, so a terminal interrupt never reaches it, and a runner that exited without reaping would leave it running. A session that dispatches a child and exits non-zero leaves the run with no verdict to take, which is the failure the backstop exists for. The ordinary path reaps first, because the outcome has to reach the merged record, and the exit path then skips a second signal.
+### The reap
 
-#### What the bound misses
+The runner starts its session as a detached spawn through `node:child_process`, so the session leads a process group of its own, and the runner signals that group after the verdict is taken, escalating to `SIGKILL`. `Bun.spawn` takes no detached option, which is why this one spawn leaves it.
 
-- A dispatch calling the binary by an absolute path never resolves through PATH, which is the half the reap covers.
-- A dispatch calling `setsid` leaves the group before the reap reads it, which is the half the shim covers.
-- The registry is a client-owned surface carrying no contract, so a client that stops writing a record per session breaks the detection with nothing reporting the break.
+- The group has to be one the run created, since signalling the inherited group would reap the operator's terminal, so `reapProcessGroup` refuses a group matching the calling process
+- The session's stdout goes to a file rather than a pipe, since a child the session leaves behind inherits the descriptor and a pipe would stall the read the verdict waits on
+- The liveness read skips zombies, since the synchronous wait blocks the event loop that would collect a leader, and counting it would report a dead group as a survivor
 
-Those three are why the recording reports and never fails a run.
+The reap runs on every path out of the runner, being a provision failure, a dead session, a thrown error, and `SIGINT` or `SIGTERM`, as well as the ordinary path. The session leads its own group, so a terminal interrupt never reaches it, and a runner that exited without reaping would leave it running.
+
+The ordinary path reaps first, because the outcome has to reach the merged record, and the exit path then skips a second signal.
+
+### What the bound misses
+
+Three cases slip past, which is why the recording reports and never fails a run.
+
+- A dispatch calling the binary by an absolute path never resolves through PATH, which is the half the reap covers
+- A dispatch calling `setsid` leaves the group before the reap reads it, which is the half the shim covers
+- The registry is a client-owned surface carrying no contract, so a client that stops writing a record per session breaks the detection with nothing reporting the break
 
 ## Gotchas
 
-- Never point `CANON_SANDBOX_DIR` under `~/.claude/`, such as a background job's own scratch folder. Provisioning succeeds there, and the driven session then has every `Write` refused as a sensitive path, so it plans its files in the reply and writes none. The guard does not refuse the path.
-- A caller resolving the tree apart from the provisioning that populated it misses it. `canon sandbox check <target>` run after a separate `canon sandbox <target>`, and `canon sandbox reset` or `canon sandbox clean` run alone, each mint a fresh id. Pin one with `CANON_SANDBOX_DIR` across the whole sequence to iterate against a single tree.
-- An escape list covering the whole tree, or a failure count far past what the arm declares, reads as a tree collision before a finding: a stale `canon` still sharing one default tree, or two commands pinned to the same hand-set `CANON_SANDBOX_DIR`.
-- Escape detection assumes the toolkit's shared scratch is quiet while a run is in flight. The watch attributes any change in the four directories to the spawned session, so a launching session that edits them mid-run draws an escape naming its own file. Run the harness from a session that leaves them alone, or read a reported escape against what else was happening.
+### Tree location and run ids
+
+Never point `CANON_SANDBOX_DIR` under `~/.claude/`, such as a background job's own scratch folder. Provisioning succeeds there, and the driven session then has every `Write` refused as a sensitive path, so it plans its files in the reply and writes none. The guard does not refuse the path.
+
+A caller resolving the tree apart from the provisioning that populated it misses it. `canon sandbox check <target>` after a separate `canon sandbox <target>`, and `canon sandbox reset` or `clean` run alone, each mint a fresh id. Pin one with `CANON_SANDBOX_DIR` across the whole sequence to iterate against a single tree.
+
+### Reading an escape
+
+Two readings come before a finding.
+
+- An escape list covering the whole tree, or a failure count far past what the arm declares, reads as a tree collision, from a stale `canon` or two commands sharing one `CANON_SANDBOX_DIR`
+- Escape detection assumes the toolkit's shared scratch is quiet while a run is in flight, so a launching session editing the four directories mid-run draws an escape naming its own file
+- Run the harness from a session that leaves them alone, or read a reported escape against what else was happening
 
 ### A scenario faking a live session writes to the real registry
 
-A scenario needing a live session record for a roster read, such as testing occupancy against `canon sessions list`, has no sandbox-local registry to point at. Provisioning and the spawned `claude -p` run are separate script invocations with no shared environment, so a variable set during provisioning cannot repoint `CLAUDE_CONFIG_DIR` for the spawned session, and the scenario writes to the host's real `${CLAUDE_CONFIG_DIR:-$HOME/.claude}/sessions/`.
+A scenario needing a live session record for a roster read, such as testing occupancy against `canon sessions list`, has no sandbox-local registry to point at.
 
-Bound the staged process well under a day, so the record drops out of the live roster on its own rather than sitting there for every consumer. Key the record's filename on the process's pid, so a second drive gets its own record instead of orphaning the first run's process.
+Provisioning and the spawned `claude -p` run are separate invocations with no shared environment, so a variable set during provisioning cannot repoint `CLAUDE_CONFIG_DIR`, and the scenario writes to the host's real `${CLAUDE_CONFIG_DIR:-$HOME/.claude}/sessions/`.
 
-A TypeScript scenario spawns the staged process without `detached: true` and drops its handle from the event loop, so it stays in the provisioning process group. `canon sandbox equivalence` reaps a provisioned arm by killing that group, and a detached occupant would escape it and leak a six-hour `sleep` on every run while the manifest still read identical. `canon sandbox clean` does not reap it. The process bounds itself, as the bash form did.
+- Bound the staged process well under a day, so the record drops out of the live roster on its own, and key its filename on the pid so a second drive does not orphan the first run's process
+- A TypeScript scenario spawns the staged process without `detached: true` and drops its handle from the event loop, so it stays in the provisioning process group
+- `canon sandbox equivalence` reaps an arm by killing that group, so a detached occupant leaks a six-hour `sleep` while the manifest reads identical. `canon sandbox clean` does not reap it.
 
-Such a record does not read as a nested dispatch, because the runner snapshots the registry after provisioning and the staged record is already on the before side. Stage it in the scenario script rather than from inside the driven session, where it would be reported.
+Such a record does not read as a nested dispatch, because the runner snapshots the registry after provisioning. Stage it in the scenario script rather than from inside the driven session, where it would be reported.
