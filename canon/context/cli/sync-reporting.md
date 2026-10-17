@@ -85,11 +85,10 @@ An unmanaged target returns every section empty rather than only suppressing the
 
 ### Seeds
 
-Seeds get their own reader in `src/sync/seeds-report.ts` rather than a `SyncAdapter`. Three things blocked the adapter.
+Seeds get their own reader in `src/sync/seeds-report.ts` rather than a `SyncAdapter`. Two things blocked the adapter.
 
 - `listInstalled` globs `**/*.md` under one root, while seeds span the target root for `CLAUDE.md` and `.claude/` for the rest, and include a `.json` and four `.sh` files
-- `planSync` queues a copy for every non-matching file, which would overwrite `CLAUDE.md` wholesale
-- That defeats the hand merge a drifted seed needs
+- `planSync` queues a copy for every non-matching file, which would overwrite `CLAUDE.md` wholesale and defeat the hand merge a drifted seed needs
 
 ### The seeds reader reuses history
 
@@ -121,6 +120,6 @@ A rule globs the `canon/` spelling alone, so a target on the old root stops load
 
 ### Why not `unmigrated`
 
-`unmigrated` could not carry it, since `ROOT_LAYOUTS` models a domain stranded at the project root under a stamp domain and a surface has neither. Without the section the only signal was the `seeds` line reporting `.claude/REQUIREMENTS.md (drifted)`, which reads as content to refresh rather than a layout to move.
+`unmigrated` could not carry it, since `ROOT_LAYOUTS` models a domain stranded at the project root under a stamp domain and a surface has neither. Without the section the only signal was the `seeds` line reporting `.claude/REQUIREMENTS.md (drifted)`, which reads as content to refresh rather than a layout to move. <!-- canon-keep-surface-root -->
 
 It stays out of `--exit-code` like `superseded`. A target gating CI on the count would go red on a move nobody scheduled, and the line is a prompt rather than a gate.

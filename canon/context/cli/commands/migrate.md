@@ -31,7 +31,7 @@ A second run over a renamed tree rewriting zero tokens proves the set complete, 
 
 ### A tested verb, not a scripted pass
 
-A shell stream editor invites a one-time pass, and a non-match exits clean. Code separates four overlapping forms a single expression flattens. `@erclx/aitk` had to move, `erclx/aitk-sandbox` had to stay, and the second contains the first.
+A shell stream editor invites a one-time pass, and a non-match exits clean. Code separates four overlapping forms a single expression flattens. `@erclx/aitk` had to move, `erclx/aitk-sandbox` had to stay, and the second contains the first. <!-- canon-keep-retired -->
 
 ### Strings that name something the world holds
 
@@ -45,7 +45,7 @@ The verb cannot decide which strings name something already held elsewhere, such
 
 The engine takes its map, its protected forms, and its exclusion set as a rules object rather than module constants, so `src/migrate/` compiles two presets and `canon migrate skill-names` runs the second.
 
-`aitk` is a word stem that legitimately carries a suffix, as in `aitk-allow-superseded`. A skill name is a whole name, so only the second asks the scanner to stop where the word ends.
+`aitk` is a word stem that legitimately carries a suffix, as in `aitk-allow-superseded`. A skill name is a whole name, so only the second asks the scanner to stop where the word ends. <!-- canon-keep-retired -->
 
 ### The word boundary mattered
 

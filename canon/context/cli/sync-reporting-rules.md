@@ -32,7 +32,7 @@ The cost is that a target can read the section and act on none of it, the contra
 A target stamped before governance recorded a chain gets the fallback. `readNewSkills` was its model, since both diff the toolkit's own tree from an anchor and list what appeared. Two things diverge.
 
 - Skills are not domain-scoped, so that read takes the oldest anchor across domains, where this one takes governance's own `stampedCommit`
-- A shared anchor would let another domain's sync advance the revision rules are measured from
+  - A shared anchor would let another domain's sync advance the revision rules are measured from
 - Skills need no filter, where an unfiltered rule list reports what a base consumer can never receive
 
 ### The entitlement filter reads two sources

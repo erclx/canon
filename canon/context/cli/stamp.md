@@ -116,7 +116,8 @@ Adding one means deciding which of the two lists it joins. Retiring one means ed
 Each domain stores the chain its reader needs.
 
 - Tooling stores the full ordered chain, nearest first, since a `--skip` run installs fewer layers than the leaf's chain reproduces
-- Governance stores only the leaf `canon gov install` was given, since `resolveRules` walks that stack's own `extends` ancestors internally
+  - The report therefore loads the recorded stacks directly rather than re-resolving
+- Governance stores only the leaf `canon gov install` was given, since `resolveRules` walks that stack's own `extends` ancestors internally and a reader asking it again needs nothing more
 
 ### `chain` is optional
 

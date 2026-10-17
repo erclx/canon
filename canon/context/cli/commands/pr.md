@@ -59,7 +59,7 @@ A refused page refuses the verb as `gh-failed` rather than reading as no reviews
 
 Their decisions kept this entry past the line ceiling.
 
-- `canon pr evidence` renders at `canon/context/cli/commands/pr-evidence.md`
+- The comparison `canon pr evidence` renders is in `canon/context/cli/commands/pr-evidence.md`
 - `canon pr preview` and `canon pr local` are in `canon/context/cli/commands/pr-preview.md`
 - `canon pr frames` is in `canon/context/cli/commands/pr-frames.md`
 
@@ -83,7 +83,7 @@ The tick and the re-render both `PATCH` one comment, and a render rereads the th
 
 It reports which post-pull-request steps of the ship chain never landed, as `owed` drawn from `evidence` and `preview`, through `readOwed` over the same API changed set and thread the render reads.
 
-It reads the pull request rather than a session's account of what it ran, since a session that stops after opening the pull request is the one whose account is missing.
+It reads the pull request rather than a session's account of what it ran, since a session that stops after opening the pull request is the one whose account is missing, and a branch it leaves reads the same as one that needed neither step.
 
 ### Four surfaces read `owed`
 

@@ -48,7 +48,7 @@ The branch was `canon-frames` until 2026-10-12, when the operator settled `canon
 
 ### Three alternatives lost
 
-Each alternative failed on a measured cost.
+Each alternative lost on a stated cost.
 
 - Keeping the name left that listing as it was
 - A bare data name such as `frames` claims a word a project may already hold
