@@ -1,6 +1,6 @@
 import { type BodyLine, visibleText } from '@/markdown/scan'
 
-const HEADING = /^#{1,6}\s/
+export const HEADING = /^#{1,6}\s/
 
 /**
  * A section marker holding its line alone, which is the signpost a document
@@ -65,10 +65,10 @@ const BOLD_LINE = /^\*\*([^*]+)\*\*\s*$/
 const SPAN_LABEL = /^`[^`]+`$/
 const MARKER_WIDTH = 20
 
-const LIST_ITEM = /^(\s*)([-*+]|\d+\.)\s+/
-const TABLE_ROW = /^\s*\|/
+export const LIST_ITEM = /^(\s*)([-*+]|\d+\.)\s+/
+export const TABLE_ROW = /^\s*\|/
 const TABLE_SEPARATOR = /^\s*\|[\s:|-]+\|\s*$/
-const BLOCKQUOTE = /^\s*>/
+export const BLOCKQUOTE = /^\s*>/
 
 /**
  * A sentence ends on terminal punctuation followed by the start of another
@@ -109,8 +109,8 @@ const SENTENCE_END = /[.!?]["'’”)\]]*(?=\s+(?:["'“([]*[A-Z]|`)|\s*$)/g
 export const CHECKPOINTS = {
   run: 40,
   peerBullet: 130,
-  bullet: 250,
-  paragraph: 700,
+  bullet: 200,
+  paragraph: 350,
   sentences: 4,
   renderWidth: 80,
   cadence: 3,
@@ -336,7 +336,7 @@ function isTableRun(run: readonly BodyLine[]): boolean {
  * what lets a linked path reach the span test at all, since the markup around
  * it would fail the pattern the destination is still attached.
  */
-function isSectionMarker(text: string): boolean {
+export function isSectionMarker(text: string): boolean {
   const marker = text.match(BOLD_LINE)
   if (!marker) return false
 
@@ -579,10 +579,7 @@ function paragraphText(block: readonly BodyLine[]): string {
  * paragraph rule whenever the bullet rule was changed, and an author reading
  * the sentence cap would find no weight rule to read at all.
  *
- * The two numbers coincide today because paragraph and bullet weight measure
- * one population, sharing a median near 170 characters with no gap behind
- * either candidate. They are separate checkpoints regardless, so either moves
- * without dragging the other.
+ * They are separate checkpoints, so either moves without dragging the other.
  */
 export function heavyParagraphs(
   lines: readonly BodyLine[],
