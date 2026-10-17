@@ -19,6 +19,7 @@ export const SHAPE_GATED_FOLDERS: readonly string[] = [
   'canon/context/governance.md',
   'canon/context/tooling.md',
   'canon/context/web.md',
+  'canon/context/claude-plugin.md',
 ]
 
 /** Whether a repository-relative entry path sits under a gated prefix. */

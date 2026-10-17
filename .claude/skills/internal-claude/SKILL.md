@@ -5,16 +5,12 @@ description: Claude Code plugin and tooling. Use for adding or modifying plugin 
 
 # Claude
 
-Read `canon/context/claude-plugin/index.md` for the shipped plugin and `canon/context/claude-internal/index.md` for internal skills and plugin setup before editing. Everything about the skills themselves sits in the `skill-*` children the plugin index lists, one per sub-area.
-
-- `canon/context/claude-plugin/distribution.md`: marketplace and release wiring
-- `canon/context/claude-plugin/cli.md`: `canon claude`
-- `canon/context/claude-plugin/boundaries.md`: overlap with built-in features
+Read `canon/context/claude-plugin.md` for the shipped plugin, its marketplace and release wiring, and `canon claude`, and `canon/context/claude-internal/index.md` for internal skills and plugin setup before editing.
 
 ## Editing rules
 
 - When updating an internal skill, write to `{base-dir}/SKILL.md`, where `{base-dir}` is the path the skill header shows at load time
-- Read `canon/context/claude-plugin/skill-strategy/overview.md` before adding a plugin skill and `canon/context/claude-internal/skills.md` before adding an internal one
+- Read `canon/context/claude-plugin.md` before adding a plugin skill and `canon/context/claude-internal/skills.md` before adding an internal one
 - Run `canon claude skills list` for the plugin roster, which no entry restates
 - Follow `claude/skills/create-skill/references/skill.md` for skill structure and frontmatter
 
@@ -34,8 +30,6 @@ Write a new skill only when it encodes workflow specific to this toolkit or a co
 - Install a community skill for domain expertise the toolkit does not maintain, such as frontend design or security audits, and reference it in per-tier install recommendations rather than absorbing it
 - When a fix could live in a skill body or a seed, default to the skill, and lift it into shared infrastructure on the second concrete case
 - Never fork a community skill. Propose a thin wrapper composing the upstream one, and fork only when upstream diverges hard from a stated need and the maintenance cost is accepted explicitly.
-
-`canon/context/claude-plugin/skill-strategy/overview.md` carries the reasoning, and `canon/context/claude-plugin/skill-strategy/redundancy-audit.md` the redundancy audit.
 
 ### Skill bodies and references
 
@@ -84,7 +78,7 @@ Draft a `sandbox/<category>/<skill>.ts` scenario beside `SKILL.md`, even for jud
 - A changed skill count fails the Hero gate stage until `bun scripts/core/regen-hero.ts` runs and `canon capture assets/captures --selector .window --out assets/frames` re-renders the frame
 - Commit the hero markup, the image, and the stamp together
 
-`canon/context/claude-plugin/skill-procedures/overview.md` records why for the last two.
+`canon/context/claude-plugin.md` lists both gates under its `claude/skills/` layout.
 
 ### Modifying a skill
 
@@ -104,7 +98,7 @@ The seed's "Context" section defines the three-tier context model, so keep it co
 
 The context entries and seeds this skill draws on, beyond the ones named above.
 
-- `canon/context/claude-plugin/`: skill strategy, requirements, lifecycle, review paths, shared procedures, distribution, the CLI, and built-in overlap
+- `canon/context/claude-plugin.md`: the plugin root, skills, marketplace entry, `canon claude`, and seeds
 - `canon/context/claude-internal/`: internal skills, orchestration, plugin discovery
 - `canon/context/context-model.md`: three-tier context model, how entries get populated, and the index.md system
 - `tooling/claude/reference.md`: seed layout and design notes

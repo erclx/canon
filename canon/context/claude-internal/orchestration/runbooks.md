@@ -112,4 +112,4 @@ The two directions of that call stay split. The runbook performs promotion as a 
 
 ### The expansion trial's citations
 
-The expansion-route rules `orchestrator-launch.md` states without a number are grounded in a trial rather than reasoning alone. The dispatch-to-address-a-review case is narrated in full under the channel section of `canon/context/claude-plugin/skill-review/worker.md`.
+The expansion-route rules `orchestrator-launch.md` states without a number are grounded in a trial rather than reasoning alone.

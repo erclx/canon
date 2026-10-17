@@ -45,7 +45,7 @@ The verb holds the only step that would update the binary, so the hook runs `can
 
 ### Archiving the merged task
 
-The first step archives the task each merged pull request closed and stays silent otherwise, printing one line when the task still waits on a pending branch. It is the only trigger that fires after a merge, covered in `canon/context/claude-plugin/skill-archiving.md`.
+The first step archives the task each merged pull request closed and stays silent otherwise, printing one line when the task still waits on a pending branch. It is the only trigger that fires after a merge.
 
 It reads `ORIG_HEAD..HEAD` rather than the tip, since one pull routinely fast-forwards over several merges and `git log -1` would strand every task but the last.
 

@@ -47,7 +47,7 @@ A later row can compare the group count against a recorded baseline the way `can
 
 Only two of the three focus rules in `a11y.md` are measurable this way. The project-focus-ring rule and the `outline-none` rule are both readable off computed style across routes.
 
-The 3:1 contrast rule needs the two colors and a source for the background, the same runtime-versus-token-table split `canon/context/claude-plugin/skill-strategy/axes.md` records for the contrast check.
+The 3:1 contrast rule needs the two colors and a source for the background.
 
 ## Gotchas
 

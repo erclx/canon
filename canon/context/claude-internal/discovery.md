@@ -25,7 +25,7 @@ alias clps='clp --model sonnet'
 
 The full alias set, covering resume, continue, worktree, and model shortcuts, is in `docs/workflow/zshrc-aliases.md`.
 
-Machine provisioning is a separate concern reachable by the same word. `canon claude setup` installs user-level Claude config at `~/.claude/`, covered in `canon/context/claude-plugin/cli.md`.
+Machine provisioning is a separate concern reachable by the same word. `canon claude setup` installs user-level Claude config at `~/.claude/`, covered in `canon/context/claude-plugin.md`.
 
 ## Gotchas
 

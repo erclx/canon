@@ -56,7 +56,7 @@ export interface AuditedFolder {
    * The requested folder name this was resolved under, which is what says
    * which standard governs the entries. A nested split folder carries the name
    * of the folder it sits beneath rather than its own, so
-   * `canon/context/claude-plugin` is governed as `context`.
+   * `canon/context/<domain>` is governed as `context`.
    */
   readonly name: string
   /**

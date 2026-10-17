@@ -53,7 +53,6 @@ The runner takes the prompt as a free argument, and a session's `Bash` working d
 Whether a second close-out was posted is the shape of a remote thread, which no assertion kind reads, so four entries sit in `manual`.
 
 - A `PUT` rewrite moves a review's body and leaves its `commit_id` pinned, so the field `review-pr` and `poll.ts` read a prior commit from goes stale when the guard fires
-- `canon/context/claude-plugin/skill-review/two-pass.md` holds why that cost stands
 
 ### Test craft
 

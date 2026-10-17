@@ -7,7 +7,7 @@ description: Where shell scripts and hooks live, the ten hooks shared with the s
 
 ## Overview
 
-Owns the Claude Code hooks this repository runs on itself and the husky git hooks that gate commits, pushes, and merges. The seeded copies a target receives are the tooling domain's, and `canon/context/claude-plugin/cli.md` covers what `canon claude init` installs.
+Owns the Claude Code hooks this repository runs on itself and the husky git hooks that gate commits, pushes, and merges. The seeded copies a target receives are the tooling domain's, and `canon/context/claude-plugin.md` covers what `canon claude init` installs.
 
 ## Layout
 
