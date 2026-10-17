@@ -1,5 +1,18 @@
-import { describe, expect, it } from 'vitest'
-import { findMissingReplyLinks } from '@/hooks/reply-links'
+import { execa } from 'execa'
+import {
+  mkdirSync,
+  mkdtempSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { gitEnv } from '@/git/env'
+import { findMissingReplyLinks, formatMissing } from '@/hooks/reply-links'
+
+const CLI = join(import.meta.dirname, '../cli.ts')
 
 const ROOT = '/main'
 
@@ -123,5 +136,103 @@ describe('findMissingReplyLinks', () => {
 
   it('should return nothing for a reply with no link', () => {
     expect(destinations('Plain text with `code` and (parens).')).toEqual([])
+  })
+})
+
+describe('formatMissing', () => {
+  it('should name each destination and point a relocated one at its file', () => {
+    const text = formatMissing([
+      { destination: 'src/gone.ts', path: '/main/src/gone.ts' },
+      {
+        destination: '/main/.claude/worktrees/w/.canon/a.md',
+        path: '/main/.claude/worktrees/w/.canon/a.md',
+        suggestion: '/main/.canon/a.md',
+      },
+    ])
+
+    expect(text).toContain('- src/gone.ts\n')
+    expect(text).toContain('(the file is at /main/.canon/a.md)')
+    expect(text).toContain('absolute path for a file inside a linked worktree')
+  })
+})
+
+describe('canon hooks reply-links', () => {
+  let base: string
+  let main: string
+  let linked: string
+
+  const git = (cwd: string, ...args: string[]) =>
+    execa('git', ['-C', cwd, ...args], { env: gitEnv(), extendEnv: false })
+
+  const verb = (reply: string, ...args: string[]) =>
+    execa('bun', [CLI, 'hooks', 'reply-links', ...args], {
+      cwd: linked,
+      input: reply,
+      reject: false,
+    })
+
+  beforeAll(async () => {
+    base = realpathSync(mkdtempSync(join(tmpdir(), 'reply-links-')))
+    main = join(base, 'main')
+    linked = join(base, 'linked')
+    mkdirSync(main)
+    await git(main, 'init', '-q', '-b', 'main')
+    await git(
+      main,
+      '-c',
+      'user.name=t',
+      '-c',
+      'user.email=t@t',
+      'commit',
+      '-q',
+      '--allow-empty',
+      '-m',
+      'init',
+    )
+    await git(main, 'worktree', 'add', '-q', '-b', 'feat/x', linked)
+    mkdirSync(join(main, '.canon/plans'), { recursive: true })
+    writeFileSync(join(main, '.canon/plans/feature-x.md'), '# Plan\n')
+  })
+
+  afterAll(() => {
+    rmSync(base, { force: true, recursive: true })
+  })
+
+  it('should resolve a records link against the main root from a linked worktree', async () => {
+    const result = await verb('[plan](.canon/plans/feature-x.md)')
+
+    expect(result.exitCode).toBe(0)
+    expect(result.stderr).toBe('')
+  })
+
+  it('should exit 1 and name a missing path on stderr', async () => {
+    const result = await verb('[it](src/gone.ts)')
+
+    expect(result.exitCode).toBe(1)
+    expect(result.stderr).toContain('- src/gone.ts')
+  })
+
+  it('should write the findings as a record under --json', async () => {
+    const result = await verb('[it](src/gone.ts)', '--json')
+
+    expect(JSON.parse(result.stdout)).toEqual({
+      missing: [
+        {
+          destination: 'src/gone.ts',
+          path: join(main, 'src/gone.ts'),
+        },
+      ],
+      ok: false,
+    })
+  })
+
+  it('should take --root over the main worktree root', async () => {
+    const result = await verb(
+      '[plan](.canon/plans/feature-x.md)',
+      '--root',
+      linked,
+    )
+
+    expect(result.exitCode).toBe(1)
   })
 })

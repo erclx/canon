@@ -75,6 +75,25 @@ export function findMissingReplyLinks(
   return [...checked.values()].filter((entry) => entry !== undefined)
 }
 
+/**
+ * The block reason the wrapper hands back to the session. The closing line
+ * covers the one miss that is not a typo: a relative link to a file living only
+ * inside a linked worktree, which the editor, rooted at the main checkout,
+ * cannot open.
+ */
+export function formatMissing(found: readonly MissingLink[]): string {
+  return [
+    'The final reply links to paths that do not exist on disk:',
+    ...found.map((entry) =>
+      entry.suggestion === undefined
+        ? `- ${entry.destination}`
+        : `- ${entry.destination} (the file is at ${entry.suggestion})`,
+    ),
+    '',
+    'Post the corrected links in a short follow-up. Use the full path from the project root, and the absolute path for a file inside a linked worktree.',
+  ].join('\n')
+}
+
 function missing(
   destination: string,
   path: string,
