@@ -29,7 +29,7 @@ The Shape section reports where a context entry breaks the shape inside its sect
 
 - `retired-section`: a `## Decisions` H2
 - `gotcha-count`, `gotcha-heading`, `gotcha-paragraph`: a `Gotchas` section past five bullets, holding a heading, or holding a paragraph
-- `layout-heading`: a Layout H3 titled neither a code-spanned path nor `Other folders`
+- `layout-heading`: a Layout H3 titled neither a code-spanned path nor `Other folders`, with one exception: the development entry (`canon/context/development.md`, or the `overview.md` of a split one) may carry a `Scripts` H3, which is also exempt from both folder caps
 - `layout-bullets`, `layout-paragraphs`: a folder H3 past five bullets or past its one-paragraph lead
 - `layout-depth`: any heading below H3 under `Layout`
 
