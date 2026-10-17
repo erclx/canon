@@ -13,13 +13,13 @@ Owns the workflows in `.github/workflows/` that verify a pull request, scan its 
 
 ### `.github/workflows/`
 
-`verify.yml` calls the gate once rather than naming each stage, so a stage added to `src/gate/stages.ts` is enforced with no workflow edit. The release and refresh workflows run on their own events, and the web previews belong to `canon/context/web.md`.
+`verify.yml` calls the gate once rather than naming each stage, so a stage added to `src/gate/stages.ts` is enforced with no workflow edit. Each workflow states its reasons in comments beside the line. The web previews belong to `canon/context/web.md`.
 
 - `verify.yml` runs on pull requests into `main`, pushes to `main`, `merge_group`, dispatch, and a weekly cron that runs `dependency-advisories` alone
 - The Install Plugin CLI step pins `@anthropic-ai/claude-code` exactly. Test a raised pin with `bun install -g` on a fresh runner, since `2.1.237` left a wrapper that cannot run.
 - `release-please.yml` keeps a release pull request open, and merging it tags, rewrites `CHANGELOG.md`, and runs `publish` to npm. A lost publish is repaired by dispatching the workflow with `tag`.
+- `publish-check` reads only the newest release, so a lost release followed by a good one goes unreported, as 5.0.0 did and stays GitHub-only
 - `refresh-capture-frames.yml` runs on `main` only and queues `gh pr merge --auto --squash`. Its push step rebuilds the branch on a fresh `main` and carries only the files it wrote or dropped.
-- Each workflow states its own reasons in comments beside the line, such as the queued `concurrency` group, the `npm@11` install, and the credential preflight
 
 ### `src/gate/`
 
@@ -43,15 +43,17 @@ CI differs from a local run in scope and in what an unmeasured stage means. The 
 
 ### Other folders
 
-The release configuration and the install check sit beside the workflows.
+The release configuration, the manifests, and the install check sit beside the workflows.
 
+- The root owns `release-please-config.json`, whose `bootstrap-sha` stops a first run versioning every untagged commit and whose `include-component-in-tag: false` keeps tags `v<semver>`
 - `.claude-plugin/` and `claude/.claude-plugin/` hold the manifests release-please versions, and `.oxfmtrc.jsonc` ignores the files the tool writes
-- `scripts/core/` owns `install-check.sh`, which packs, extracts, and installs the tarball in CI after `check:ci`, covered in `canon/context/cli/packaging.md`
+- `scripts/core/` owns `install-check.sh`, run in CI after `check:ci` and kept out of the local gate because a cold pack-and-install is unmeasured
+- `package.json` pins `typescript` to the v5 line `@astrojs/check` expects, so `bun add -D typescript` selecting v7 is a compiler upgrade
 
 ## Gotchas
 
 - `no checks reported on the '<branch>' branch` usually means a merge conflict, since such a branch has no merge ref to run on. Read `gh pr view --json mergeable,mergeStateStatus` and rebase.
-- A green `🛡️ Static Checks` tested `refs/pull/<n>/merge` as of the last push. A personal repository holds no merge queue, so a sibling merge leaves it stale until the poll reads `STALE`.
+- A green `🛡️ Static Checks` tested `refs/pull/<n>/merge` as of the last push. No merge queue exists, so a sibling merge leaves it stale until the poll reads `STALE`.
 - The job name `🛡️ Static Checks` is what the ruleset requires, so renaming it strands branch protection
 - The runner installs no browser, so each `*.e2e.test.ts` skips itself and a green run does not show it ran. Verify those locally.
-- The `merge_group` trigger is inert until a `merge_queue` rule exists, and a workflow with no job listening for the event never completes a queue entry
+- The `merge_group` trigger is inert, since a `merge_queue` rule returns `422` on a user-owned repository until a move to an organization
