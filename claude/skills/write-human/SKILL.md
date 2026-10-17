@@ -11,6 +11,8 @@ Write prose that reads as though a person wrote it. A ban list subtracts words a
 
 Load this before drafting a passage rather than after. A revision pass recovers the words and never recovers the structure the draft already settled.
 
+## The bans stay in force
+
 The banned characters sit in `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md`. They stay in force here. This skill adds to them and never restates them, since `canon markdown audit` reads them from the package and a second copy would drift. The word guidance under `## Voice` is the one copy of that list, and no command reads it.
 
 ## What yields and what does not
@@ -27,11 +29,15 @@ The banned characters sit in `${CLAUDE_SKILL_DIR}/../markdown-craft/references/m
 
 ### Word choice
 
+Plain words carry the claim, and decorated ones only assert it.
+
 - Prefer direct verbs and plain words. Write `use` over `utilize`, `help` over `facilitate`, `is` over `serves as`.
-- Drop marketing words: `seamless`, `robust`, `powerful`, `revolutionary`, `enhanced`, `allows`, and `leverage`. Each claims a quality without showing it, so state what the thing does and let the reader judge it.
+- Drop marketing words: `seamless`, `robust`, `powerful`, `revolutionary`, `enhanced`, `allows`, and `leverage`. Each claims a quality without showing it, so state what the thing does.
 - Drop vague qualifiers: `simply`, `just`, `easily`, `quickly`, `very`, and `really`. Cut the word where the sentence stands without it, and give the measurement where the degree matters.
 
 ### Stance and density
+
+Say how sure a claim is, and say only what the reader lacks.
 
 - Be direct on an established fact. Hedge on a genuinely uncertain claim and say which it is.
 - Assume developer-level knowledge. Skip the explanation the reader already carries.
@@ -46,6 +52,8 @@ Uniform cadence is the tell that survives the cleanest ban scan. Measure it rath
 - Count the opening word of each sentence. Two alike is coincidence and three is a pattern to break.
 
 ### Variety
+
+A different first word is not a different shape.
 
 - Vary the grammatical shape of the opening, not the word alone. Three sentences opening on three different subjects still share one shape.
 - Never buy variety with a fragment. A verbless clause standing as a sentence trades one uniformity for another and is the failure these rules exist against.

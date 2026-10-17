@@ -9,7 +9,7 @@ metadata:
 
 Wrap the `EnterWorktree` entry path with name derivation so the user does not pick a name by hand.
 
-The Guards and Steps gate entry alone. A session loading this skill for a main-root write reads `## Main-root writes`, enters nothing, and runs no guard, which is what keeps a session already inside a linked worktree off the first guard's stop.
+The Guards and Steps gate entry alone. A session loading this skill for a main-root write reads `## Main-root writes`, enters nothing, and runs no guard, which keeps a session already inside a linked worktree off the first guard's stop.
 
 ## Guards
 
@@ -17,7 +17,11 @@ The Guards and Steps gate entry alone. A session loading this skill for a main-r
 - If neither command resolves, the session is not in a git repo and no `WorktreeCreate` hook is configured. Stop: `❌ Not a git repository. EnterWorktree needs git or a WorktreeCreate hook.`
 - If the two match and `git rev-parse --show-superproject-working-tree` prints a path, the session is inside a submodule checkout. Stop: `❌ Inside a submodule of <path>. Run this from there instead.`
 
-The submodule guard sits on the matching branch rather than ahead of the first one, and a measurement decided that. Inside a submodule at git 2.43.0 both reads return the same absorbed path under the superproject's `.git/modules/`, so the first guard does not fire and the session proceeds. Every derivation below then reads the submodule as the project: Step 1 resolves the main root to the submodule, the plan lookup reads a `.canon/plans/` the project never wrote, and entry builds `.claude/worktrees/` inside a tree the superproject tracks as a commit. The superproject read is empty in a linked worktree of a submodule and in one of the superproject alike, which is why it separates the two states rather than qualifying the first guard.
+### Why the submodule guard sits on the matching branch
+
+Inside a submodule both reads return the same absorbed path under the superproject's `.git/modules/`, so the first guard does not fire. Every later step would then read the submodule as the project and build `.claude/worktrees/` inside a tree the superproject tracks as a commit.
+
+The superproject read is empty in a linked worktree of a submodule and of the superproject alike, so it separates the two states rather than qualifying the first guard.
 
 ## Step 1: resolve the main worktree root
 
@@ -29,50 +33,67 @@ Run in parallel:
 
 Plans always live at the main root, never inside a linked worktree.
 
-`EnterWorktree` writes `core.bare = true` into the shared config, and nothing restores it, so the repository can already be broken before this session arrives. Repair it before entering when the value is `true` and `<main-root>/.git` is a directory:
+### Repair a stranded bare flag
+
+`EnterWorktree` writes `core.bare = true` into the shared config and nothing restores it, so the repository can already be broken. Repair it before entering when the value is `true` and `<main-root>/.git` is a directory:
 
 ```bash
 git config core.bare false
 ```
 
-The directory test separates the defect from a genuinely bare repository, which keeps its objects at the root and has no `.git` directory. Announce the repair in one line naming the flag. Leave the file alone when the value is already `false`.
+The directory test separates the defect from a genuinely bare repository, which keeps its objects at the root with no `.git` directory. Announce the repair in one line naming the flag, and leave the file alone when the value is already `false`.
 
 ## Step 2: derive the worktree name
 
 Try each source in order. Stop at the first match.
 
-0. **Caller-supplied.** The invocation carried an argument. Take it as the name and infer nothing further. Accept `<name>` or `<type>/<name>`, where a leading segment matching a type in `${CLAUDE_SKILL_DIR}/../git-branch/references/branch.md` sets `<type>` and the rest is `<name>`. A bare `<name>` falls to the default type below.
-1. **Plan matched to current branch.** Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`. An empty result falls through to the next source here rather than becoming `latest`, since the slug is one candidate among several. If `<main-root>/.canon/plans/feature-<slug>.md` exists, use `<slug>`.
+0. **Caller-supplied.** The invocation carried an argument. Take it as the name and infer nothing further.
+   - Accept `<name>` or `<type>/<name>`, where a leading segment matching a type in `${CLAUDE_SKILL_DIR}/../git-branch/references/branch.md` sets `<type>`
+   - A bare `<name>` falls to the default type below
+1. **Plan matched to current branch.** Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`, and use it if `<main-root>/.canon/plans/feature-<slug>.md` exists.
+   - An empty result falls through to the next source rather than becoming `latest`, since the slug is one candidate among several
 2. **Single plan file.** List `<main-root>/.canon/plans/feature-*.md`. If exactly one match, derive `<slug>` from the filename.
 3. **Multiple plan files, no branch match.** Ask the user which plan. Show the candidate slugs as a numbered list. Do not pick.
 4. **Current branch.** When no plan exists, use the `<slug>` from step 1 if it is not `main` or `master`.
-   4b. **Session context.** When on `main` or `master` with no matching plan, read the current conversation to infer a kebab slug from the topic being discussed. Propose it: `Infer: <slug>. Confirm or rename?` Do not enter the worktree until the user confirms or provides a corrected name.
+   - **4b. Session context.** On `main` or `master` with no matching plan, infer a kebab slug from the conversation's topic and propose it: `Infer: <slug>. Confirm or rename?`
+   - At 4b, do not enter the worktree until the user confirms or provides a corrected name
 5. **Ask.** None of the above applies. Ask the user for a name. Do not invent one.
 
-Tier 0 sits ahead of the inference because every tier below it answers from state the caller cannot set. A dispatched worker starts on `main` beside several plans, so without it the run lands on tier 3 and asks somebody who is not there.
+Tier 0 sits ahead of the inference because every tier below answers from state the caller cannot set. A dispatched worker starts on `main` beside several plans, so without it the run lands on tier 3 and asks somebody who is not there.
 
-Validate the result: letters, digits, dots, underscores, dashes only, max 64 chars (`/` separators are also allowed). If the derived name violates the rule, sanitize by replacing invalid chars with `-` and truncating. Show the sanitized name in the preview before invoking.
+Validate the result: letters, digits, dots, underscores, dashes only, max 64 chars (`/` separators are also allowed). Sanitize a violating name by replacing invalid chars with `-` and truncating, and show the sanitized name in the preview.
 
-Resolve `<type>` here as well, since Step 3 previews it and Step 5 renames onto it, drawing the value from the type vocabulary in `${CLAUDE_SKILL_DIR}/../git-branch/references/branch.md`. A type the caller spelled in tier 0 wins outright and no reading overrides it. A name that came from a plan, through tier 1 or tier 2, takes its type from `canon tasks plan-branch <plan> --json`, read off the record's `type` field. Every other case takes `feat`, which covers a name from a branch, a bare name from the user, and a plan the verb could not answer for.
+### Resolve the type
 
-The verb is the reading rather than this body, because a type read off a plan's sections is a judgment that two sessions reading one plan can grade differently, and the verb answers the same for both. The caller's type still wins over the verb's, because tier 0 is the one source that knows something no file states.
+Resolve `<type>` here too, since Step 3 previews it and Step 5 renames onto it, drawing from the vocabulary in `${CLAUDE_SKILL_DIR}/../git-branch/references/branch.md`.
 
-Branch on the record rather than on the exit code, which a shell function wrapping `canon` can flatten to zero. Take `feat` and say the verb did not answer where it refuses, where the record carries no `type` key, or where the installed binary carries no `plan-branch` subcommand.
+| Name came from                               | `<type>`                                                    |
+| -------------------------------------------- | ----------------------------------------------------------- |
+| Tier 0 with a type spelled                   | That type, which no reading overrides                       |
+| A plan, through tier 1 or tier 2             | The `type` field of `canon tasks plan-branch <plan> --json` |
+| A branch, a bare user name, or anything else | `feat`                                                      |
 
-A wrong type is cosmetic, since `git-stage` and `git-pr` read their types off the diff rather than the branch name. Nothing corrects it later either: `git-branch` stops on any name that already conforms, and `feat/` over a fix conforms.
+- The verb is the reading because a type read off a plan's sections is a judgment two sessions can grade differently, and the verb answers the same for both
+- Branch on the record rather than on the exit code, which a shell function wrapping `canon` can flatten to zero
+- Take `feat` and say the verb did not answer where it refuses, the record has no `type`, or the binary has no `plan-branch`
+- A wrong type is cosmetic, since `git-stage` and `git-pr` read types off the diff. Nothing corrects it later, since `git-branch` stops on a conforming name.
 
-Then test both names the entry is about to claim. Neither read needs a worktree, and a stop after Step 4 leaves one built with the session sitting inside it, so both belong here rather than beside the rename:
+### Test both names before entry
 
-- Branch. `git for-each-ref --format='%(refname)' refs/heads/<type>/<name> refs/remotes/origin/<type>/<name>` printing any ref means the name is taken. Stop: `❌ Branch <type>/<name> already exists. Resolve manually before continuing.` A non-zero exit is a read that failed rather than a free name, so stop on that too and say the read failed.
-- Directory. `<main-root>/.claude/worktrees/<name>/` existing means an earlier entry claimed the name. Stop: `❌ Worktree .claude/worktrees/<name>/ already exists. Resolve manually before continuing.`
+Neither read needs a worktree, and a stop after Step 4 leaves one built with the session inside it, so both run here. Leave a collision in place, since resolving either automatically risks the wrong one.
 
-Leave both in place. Resolving either automatically risks the wrong one.
+- Branch. `git for-each-ref --format='%(refname)' refs/heads/<type>/<name> refs/remotes/origin/<type>/<name>` printing any ref means the name is taken
+- On a taken branch, stop: `❌ Branch <type>/<name> already exists. Resolve manually before continuing.`
+- A non-zero exit from that read is a failed read rather than a free name, so stop on it too and say the read failed
+- Directory. `<main-root>/.claude/worktrees/<name>/` existing means an earlier entry claimed it. Stop: `❌ Worktree .claude/worktrees/<name>/ already exists. Resolve manually before continuing.`
 
-The two tests catch different collisions. The branch test misses the one `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md` records, where two branches differing only in type collapse onto one name: `feat/foo` and `fix/foo` are distinct refs and reach one directory. The directory test is the only read that sees it.
+The tests catch different collisions. Two branches differing only in type, such as `feat/foo` and `fix/foo`, are distinct refs reaching one directory, which only the directory test sees, per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`.
 
-The branch test fires on the tier 1 and tier 4 sources whenever the branch the session started on is already conventional, since a name derived from that branch resolves back onto it. Stopping is the answer there. The concern already has a branch, git refuses a second under the same name, and the bare-name rename this replaces only carried the collision forward to the `git-branch` step. It fires on tier 0 as well, where a caller handed a name something already holds.
+### When the branch test fires
 
-It reads both ref spaces rather than the local head alone, the way `checkClaim` does, so a name this skill clears and a branch a dispatcher cleared are one answer, and a branch pushed from elsewhere is caught before the first push rather than at it.
+It fires on tiers 1 and 4 whenever the starting branch is already conventional, since the derived name resolves back onto it. Stopping is right, since the concern already has a branch and git refuses a second. It fires on tier 0 when a caller handed a name something holds.
+
+It reads both ref spaces rather than the local head, the way `checkClaim` does, so this skill and a dispatcher clear names alike, and a branch pushed from elsewhere is caught before the first push.
 
 ## Step 3: preview
 
@@ -92,19 +113,19 @@ Call `EnterWorktree` with `name: "<name>"`. Claude Code's tool permission dialog
 
 ## Step 5: align the branch name and repair the shared config
 
-`EnterWorktree` creates a branch named `worktree-<name>`, which diverges from `<name>` and breaks downstream slug derivation in `auto-ship` and any skill that reads `git branch --show-current`. A bare `<name>` fixes that and fails the branch-format guard in `git-pr`, which requires `<type>/<description>`. Rename to the conventional form, which satisfies both:
+`EnterWorktree` creates a branch named `worktree-<name>`, which breaks downstream slug derivation in `auto-ship` and any skill reading `git branch --show-current`. A bare `<name>` fails the `<type>/<description>` guard in `git-pr`, so rename to the conventional form:
 
 ```bash
 git branch -m worktree-<name> <type>/<name>
 ```
 
-The slug transform drops a leading type segment, so `<name>` is what every downstream derivation reads back out of the typed branch. See `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`.
+- The slug transform drops a leading type segment, so every downstream derivation reads `<name>` back out, per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`
+- Step 2 cleared the target, so the rename runs unguarded. A ref created between the two points is a racing session, which a re-read narrows rather than closes.
+- Skip the rename if the worktree was entered via `path` rather than `name`, since the branch already exists under its own identity
 
-Step 2 already cleared the target name, so the rename runs unguarded here. Do not repeat the test. A ref created between the two points is a second session racing this one, which a re-read narrows rather than closes.
+### Repair the bare flag again
 
-Skip the rename if the worktree was entered via `path` rather than `name`, since the branch already exists under its own identity.
-
-Entry also sets `core.bare = true` in the shared config, which strands the main worktree. Every later command run there fails with `fatal: this operation must be run in a work tree` while the files sit untouched on disk. The linked worktree keeps working, so nothing surfaces until the operator returns to the main checkout. Repeat the Step 1 repair, which writes the parent's config even from inside the linked worktree:
+Entry also sets `core.bare = true` in the shared config, which strands the main worktree. Every later command there fails with `fatal: this operation must be run in a work tree`, and nothing surfaces until the operator returns to it. Repeat the Step 1 repair, which writes the parent's config from inside the linked worktree:
 
 ```bash
 git config core.bare false
@@ -114,37 +135,44 @@ The flag is not set on every entry, so read before writing and announce only whe
 
 ## Step 6: report whether the tree can run
 
-A linked worktree is a second working directory over one repository, and every ecosystem installs its dependencies into a folder git ignores. Nothing copies that folder across, so a fresh worktree arrives without it and the session learns as much from whichever command needs it first, which reports a missing module rather than an empty working directory.
+Every ecosystem installs dependencies into a folder git ignores, and nothing copies it into a fresh worktree. The session learns that from whichever command needs it first, as a missing module rather than an empty directory.
 
-Report the state on one line. Do not install. Entering a worktree to read is as common as entering one to run, and an install is slow, needs a network, and picks an ecosystem on the session's behalf.
+Report the state on one line, and do not install. Entering to read is as common as entering to run, and an install is slow, needs a network, and picks an ecosystem for the session.
 
-Read the worktree root and evaluate node and python independently against a literal presence test, each emitting its own line regardless of the other's state:
+### Dependency lines
 
-- Node. `[ -f package.json ] && [ ! -d node_modules ]`: `Dependencies are not installed. Run <install> before any build, test, or server command.` `[ -f package.json ] && [ -d node_modules ]`: `Node dependencies are installed.`
-- Python. `{ [ -f pyproject.toml ] || [ -f requirements.txt ]; } && [ ! -d .venv ]`: `No virtual environment. Create and populate one before running anything.` `{ [ -f pyproject.toml ] || [ -f requirements.txt ]; } && [ -d .venv ]`: `Python dependencies are installed.`
+Run the no-manifest test first, then evaluate node and python independently, each emitting its own line regardless of the other:
 
-`[ -d node_modules ]` reads a symlinked `node_modules` as present, which is the correct read rather than a regression.
+- No manifest: `[ ! -f package.json ] && [ ! -f pyproject.toml ] && [ ! -f requirements.txt ]` emits `No package manifest, so there is nothing to install.`
+- Node missing: `[ -f package.json ] && [ ! -d node_modules ]` emits `Dependencies are not installed. Run <install> before any build, test, or server command.`
+- Node present: `[ -f package.json ] && [ -d node_modules ]` emits `Node dependencies are installed.`
+- Python missing: `{ [ -f pyproject.toml ] || [ -f requirements.txt ]; } && [ ! -d .venv ]` emits `No virtual environment. Create and populate one before running anything.`
+- Python present: the same manifest test with `[ -d .venv ]` emits `Python dependencies are installed.`
 
-Name the ecosystem in both installed lines rather than leaving `Dependencies are installed.` unqualified. Both checks can fire on one project, so an unqualified line reported the same sentence twice for a dual-root project with both folders present, and a reader could not tell which half each line answered.
+### Reading the lines
 
-Take `<install>` from the lockfile beside the manifest. Read `${CLAUDE_SKILL_DIR}/references/install-command.md` when the Node line reports dependencies not installed, for the order the lockfiles are checked in and the command each one names.
+The checks follow a few rules that keep a dual-root project and an unread stack honest.
 
-Emit the closing line only on its own direct test, run ahead of the two checks above rather than reached by falling through them unmatched: `[ ! -f package.json ] && [ ! -f pyproject.toml ] && [ ! -f requirements.txt ]`: `No package manifest, so there is nothing to install.` A dual-root project matches both checks above, and a fallthrough test would route it here by accident.
+- Take `<install>` from the lockfile beside the manifest. Read `${CLAUDE_SKILL_DIR}/references/install-command.md` when the Node line reports dependencies not installed.
+- Name the ecosystem in both installed lines, since a dual-root project fires both checks and an unqualified line reads the same twice
+- The no-manifest test runs on its own, never as a fallthrough, which would route a dual-root project there by accident
+- `[ -d node_modules ]` reads a symlinked `node_modules` as present, which is the correct read
+- The no-manifest line keeps the step honest on a stack this skill cannot read, since silence looks like a check that passed
 
-The closing line is what keeps the step honest on a stack this skill cannot read. Entry is not stack-aware, and silence is indistinguishable from a check that passed.
+### Port line
 
-Then report the port this worktree derives, on a second line:
+Then report the port this worktree derives, on a second line. Branch on the helper's exit rather than its output, since it prints nothing when it refuses and that would read as offset zero, the main checkout's.
 
-- `scripts/worktree-port.sh` present and exiting zero: run `bash scripts/worktree-port.sh` and emit `Port offset <n>. Every served port adds it to the stack default.`
+- Present and exiting zero: run `bash scripts/worktree-port.sh` and emit `Port offset <n>. Every served port adds it to the stack default.`
 - Present and exiting non-zero: emit `The port helper refuses this directory, so no server here has a port. <its stderr>`
 - Absent: `No port derivation installed, so every served port is the stack default.`
 
-Branch on the exit rather than on the output, since the helper prints nothing to stdout when it refuses and reading that as a number reports an offset of zero, which is the main checkout's.
-
-The offset is what `role-orchestrator` sends a reader here to read rather than assign, and what an operator overrides through `WORKTREE_PORT_OFFSET` when two worktrees derive the same value. Deriving it correctly and printing it nowhere leaves both instructions naming a number no surface emits.
+The offset is what `role-orchestrator` sends a reader here to read, and what an operator overrides through `WORKTREE_PORT_OFFSET` when two worktrees derive the same value.
 
 Do not invoke `ExitWorktree` from this skill. Exit is the user's call.
 
 ## Main-root writes
 
-Route a main-root write by what it does to the file: a whole-file create goes out as a heredoc, a change inside an existing file goes through a `canon` verb, and a delete or a move runs as a plain `rm` or `mv`. Read `${CLAUDE_SKILL_DIR}/references/main-root-writes.md` for which tools the refusal covers, the mechanics of each route, and the index cost a shell write carries.
+Route a main-root write by what it does to the file. A whole-file create goes out as a heredoc, a change inside an existing file goes through a `canon` verb, and a delete or a move runs as a plain `rm` or `mv`.
+
+Read `${CLAUDE_SKILL_DIR}/references/main-root-writes.md` for which tools the refusal covers, the mechanics of each route, and the index cost a shell write carries.

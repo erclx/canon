@@ -45,7 +45,8 @@ Size a test by what it touches rather than by what it covers. Pick the first row
 
 ## Keep test code readable over clever
 
-- Prefer a descriptive, repeated arrange over a shared helper a reader has to open. A test is read when it fails, by someone who did not write it. Build test data through a factory or builder rather than an inline object literal repeated across tests.
+- Prefer a descriptive, repeated arrange over a shared helper a reader has to open. A test is read when it fails, by someone who did not write it.
+- Build test data through a factory or builder rather than an inline object literal repeated across tests
 - Assert through the public surface a caller uses, never on a private function or internal state directly. A test reaching into internals breaks on every refactor and catches nothing a caller sees.
 - Prefer a real collaborator, then a fake, then a stub, and a mock last. A mock asserts how the code is built rather than what it does.
 

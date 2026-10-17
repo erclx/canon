@@ -7,7 +7,7 @@ metadata:
 
 # Plan intake
 
-Intake dispositions many findings in breadth. A dump goes in, an inventory comes out, and every item carries a problem measured against the tree, one proposed fix, and a verdict. The item that turns out to be already settled is the highest-value output, and it is the one thing neither a plan nor a groundwork track has anywhere to put.
+Intake dispositions many findings in breadth. A dump goes in, an inventory comes out, and every item carries a problem measured against the tree, one proposed fix, and a verdict. An item found already settled is the highest-value output, and nothing else has a place for it.
 
 Read `${CLAUDE_SKILL_DIR}/references/intake.md` before writing any file in the folder. It holds the numbering, the file map, the frontmatter and dating rules, the item format, and the answer contract. Do not work them from memory.
 
@@ -21,7 +21,7 @@ The test is one question. Can the item be answered by reading the repository tod
 
 Apply the test per item rather than per dump. A dump of forty items typically yields one groundwork candidate, so routing the whole dump on its worst item buys a folder nobody can close.
 
-Using the wrong one fails in two shapes. Intake on a question that needs measuring yields a confident verdict with nothing behind it. Groundwork on a brain dump is refused by its own qualifying guard, and forcing past that refusal gives one folder holding dozens of unrelated threads and a decision file that can close one of them.
+The wrong surface fails either way. Intake on a question that needs measuring yields a confident verdict with nothing behind it, and groundwork refuses a brain dump through its own qualifying guard. Forced past that guard, it holds dozens of unrelated threads under a decision file that can close one.
 
 ## Guards
 
@@ -31,20 +31,27 @@ Using the wrong one fails in two shapes. Intake on a question that needs measuri
 
 ## Write scope
 
-- Write only inside `.canon/intake/<nn>-<slug>/`. A plan file, a task file, a source change, a standard, and a rule all live outside that folder, so this one rule forbids every one of them.
-- There is no exception. Promoting an item onto the board runs through `task-board` after the operator has answered, which is a separate invocation.
+- Write only inside `.canon/intake/<nn>-<slug>/`. Plans, tasks, source, standards, and rules all live outside it, so this one rule forbids every one of them.
+- There is no exception. Promoting an item onto the board runs through `task-board` after the operator has answered, as a separate invocation.
 - Reading is unrestricted inside the project. Measuring is the work.
-- Treat the folder as gitignored, and backed only where a records remote is configured: `canon records push` and `canon records pull` protect it against the machine being lost there and refuse with `no-remote` otherwise, and neither protects against a compaction dropping a session's reasoning before anyone has pushed. No check reaches its contents, so every rule stated here holds only while a session reads it.
+- Treat the folder as gitignored. `canon records push` and `pull` back it up only where a records remote exists, and refuse with `no-remote` otherwise.
+- A push protects against losing the machine, never against a compaction dropping reasoning before anyone pushed. No check reaches the folder, so these rules hold only while a session reads them.
 
-Nothing outside this body carries the write-scope floor, and no path-scoped rule can. A misrouted write lands on a path the folder's glob never matches, so the rule that ships beside the intake standard carries the item format and the answer contract instead, for a session editing the folder with this skill unloaded.
+Nothing outside this body carries the write-scope floor, and no path-scoped rule can, since a misrouted write lands on a path the folder's glob never matches. The rule shipping beside the intake standard carries the item format and answer contract instead.
 
 ## Step 1: detect open or resume
 
-List `.canon/intake/` from the project root and match the topic against the slug half of each `<nn>-<slug>` folder already there before deriving a slug. A second pass over the same subject rarely phrases the topic the way the folder was named, so a fresh slug would open a duplicate beside a live folder.
+List `.canon/intake/` and match the topic against the slug half of each `<nn>-<slug>` folder before deriving a slug. A second pass rarely phrases the topic the way the folder was named, so a fresh slug opens a duplicate.
 
-Never match against `.claude/` itself. That directory holds every other workflow surface, so a topic matched there lands on a folder that was never an intake.
+Never match against `.claude/` itself. It holds every other workflow surface, so a topic matched there lands on a folder that was never an intake.
 
-With no match, derive a kebab-case slug named for the subject rather than the activity. Prefer `toolkit-overview` over `august-triage`. Claim the ordinal and create the folder in one act with `canon records ordinal intake <slug> --claim`, per `${CLAUDE_SKILL_DIR}/references/intake.md`. Where the installed binary carries no such subcommand, fall back to listing both `.canon/intake/` and `.canon/groundwork/` and taking the highest ordinal present across the two, incremented. An absent folder opens, and a present one resumes by appending items and revising verdicts the tree has moved under.
+### With no match
+
+Derive a kebab-case slug named for the subject rather than the activity, preferring `toolkit-overview` over `august-triage`.
+
+- Claim the ordinal and create the folder in one act with `canon records ordinal intake <slug> --claim`, per `${CLAUDE_SKILL_DIR}/references/intake.md`
+- Where the installed binary carries no such subcommand, take the highest ordinal across `.canon/intake/` and `.canon/groundwork/`, incremented
+- An absent folder opens. A present one resumes by appending items and revising verdicts the tree has moved under.
 
 ## Step 2: orient
 
@@ -54,21 +61,21 @@ Read these in parallel from the project root, skipping any that do not exist:
 - `canon/REQUIREMENTS.md`: scope and non-goals
 - `.canon/tasks/index.md`: what is already tracked. Open a task file whose entry looks related to an item.
 
-Then read only what a live item needs. Do not read entire directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at.
+Then read only what a live item needs, never whole directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at.
 
 ## Step 3: measure against the tree
 
 Grep for each construct an item names and count the sites. Every problem line carries a number or a file path taken during this pass.
 
-Never carry a figure from an earlier session, a summary, or another document. The dump states the complaint and the tree states the size of it, and that measurement is the whole difference between an inventory and a list of opinions. Confirm that any work an item sequences behind is still open, so no item leads with something that already shipped.
-
-Name the commit the pass measured against in the overview body. It is the half a later reader can check.
+- Never carry a figure from an earlier session, a summary, or another document. The tree states the size of a complaint, and that is what separates an inventory from opinions.
+- Confirm any work an item sequences behind is still open, so no item leads with something already shipped
+- Name the commit the pass measured against in the overview body, since that is the half a later reader can check
 
 ## Step 4: cluster
 
-Split items by domain, one file per cluster, and let the file count follow the number of separable domains rather than the size of the dump. An item belongs to the domain its fix touches, not the domain the complaint arrived from.
+Split items by domain, one file per cluster, and let the file count follow the separable domains rather than the size of the dump. An item belongs to the domain its fix touches, not the one the complaint arrived from.
 
-Two heading levels is the right depth. A third means the cluster should have been split into its own file.
+Two heading levels is the right depth. A third means the cluster should have been its own file.
 
 ## Step 5: disposition each item
 
@@ -80,15 +87,15 @@ Where an item's call is the operator's, pair it with a suggestion rather than a 
 
 Write `00-overview.md` last, once the clusters are filed and the counts are real. It carries the cluster table, the verdict counts, the ready list, and the open questions.
 
-Each open question in the index is a labeled markdown link to its owning item's heading anchor. The index points and the item owns, so no answer slot appears in the index. One question in two answerable places has no rule for which wins, and retrieval walks item headings, so an answer typed into the index is found by nothing and lost silently.
-
-Add `99-next-session.md` only where the pass ends holding context no cluster file carries, such as a dump half filed or a measurement that has to be redone. Write it self-contained, since a compaction drops the conversation behind it regardless of whether the folder is backed.
+- Link each open question to its owning item's heading anchor, and put no answer slot in the index. Retrieval walks item headings, so an answer typed into the index is lost silently.
+- Add `99-next-session.md` only where the pass ends holding context no cluster file carries, such as a dump half filed or a measurement to redo
+- Write that file self-contained, since a compaction drops the conversation behind it whether or not the folder is backed
 
 ## Output
 
-Emit the full relative path from the project root for every file written, and name the heading and the act beside it. A path alone cannot distinguish three new items from one reworded sentence in a file that holds a dozen items and lives for weeks, so a bare path sends the reader to diff it against memory. This overrides the paths-only reporting the project states generally, which stays right wherever the reader is about to see a diff.
+Emit the full relative path of every file written, with the heading and the act beside it. A bare path cannot tell three new items from one reworded sentence in a long-lived file, so the reader would diff against memory.
 
-A file the pass only read gets no line, which is what keeps the block short.
+This overrides the paths-only reporting the project states generally, which stays right wherever the reader is about to see a diff. A file the pass only read gets no line.
 
 ```plaintext
 📂 Opened .canon/intake/<nn>-<slug>/
@@ -110,6 +117,6 @@ Use `📂 Resumed` in place of `📂 Opened` on a resume pass.
 
 ## Answering what this pass wrote
 
-The slots this pass leaves empty are answered by editing each cluster file, or from chat through `plan-intake-answer`, which walks the unread items in batches and writes each selection back onto the item it answers. Name that route in the closing line so the operator finds it where they look for it.
+The operator answers the empty slots by editing each cluster file, or from chat through `plan-intake-answer`, which writes each selection back onto its item. Name that route in the closing line so the operator finds it.
 
 Do not invoke it from here. It is operator-triggered, and a pass that files a dump and answers it in the same run decides items on silence.

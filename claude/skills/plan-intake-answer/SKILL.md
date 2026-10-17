@@ -10,7 +10,9 @@ metadata:
 
 Put an intake folder's unread items as batched questions, then land each selection in the slot it answers.
 
-A folder is answered by opening each cluster file and typing under the item, which on a dump spanning six clusters means navigating to each in turn. This walks the same items in chat and writes the answers back, so the file rather than the conversation stays the record.
+This walks the items in chat rather than file by file, and writes the answers back so the file rather than the conversation stays the record.
+
+## Contract
 
 Read `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md` before writing anything. It holds the item format and the answer contract this skill is bound by.
 
@@ -38,13 +40,13 @@ Work one cluster at a time, in the order the folder numbers them. A dump of six 
 
 Cap each batch at four items, which is what a structured question tool takes. A cluster carrying more than four unread items takes several batches in file order.
 
-Every item with an empty slot is offered, not only the ones carrying an open question. An item with a verdict and no question is still asking whether the verdict stands, and the standard's one-token accept exists for exactly that case.
+Offer every item with an empty slot, not only the ones carrying an open question. An item with a verdict and no question still asks whether the verdict stands, which is what the standard's one-token accept is for.
 
-Shape each question from what the item carries:
-
-- The item's label and title name the question, so the operator knows which item is being asked about
-- An item carrying `Open:` puts that question with its `Suggested:` line ranked first and marked as the suggestion
-- An item carrying no `Open:` puts its verdict, with accepting it ranked first as `ok` and the alternatives drawn from what the verdict could otherwise be
+| Item carries | Question shape                                                                  |
+| ------------ | ------------------------------------------------------------------------------- |
+| Label, title | Name the question, so the operator knows which item is being asked about        |
+| `Open:`      | That question, with its `Suggested:` line ranked first and marked as suggestion |
+| No `Open:`   | Its verdict, with `ok` ranked first and alternatives from what it could be      |
 
 Give every option what it means and what it costs. An option with no stated cost is not an option, since the operator picks it without knowing what the other one buys.
 
@@ -58,13 +60,12 @@ Land every answered item in the cluster with one call:
 canon intake answer <slug> --cluster <file> --set <label>=<answer> --set <label>=<answer>
 ```
 
-One call per cluster, never one per item. Items are labeled per cluster file, so the label alone does not identify an item and the cluster travels with it. Four separate calls against one file also race on the read and drop every answer but the last.
+- Make one call per cluster, never one per item. Labels are per cluster file, so the cluster travels with the label, and separate calls against one file race and drop every answer but the last.
+- Pass the label exactly as the heading spells it, including a letter suffix such as `3a`
+- Write the operator's selection as the answer, using `ok` for a verdict accepted as it stands
+- Omit an unanswered item from the call. An empty value writes a slot that reads as answered.
 
-Pass the label exactly as the heading spells it, including a letter suffix such as `3a`. Write the operator's selection as the answer, using `ok` for a verdict accepted as it stands.
-
-The verb refuses an item that already carries an answer rather than overwriting it, and refuses the whole batch when any item in it is filled. A filled slot is a decision already made. On that refusal, drop the named item from the batch and send the rest.
-
-An item the operator left unanswered is omitted from the call entirely. Do not pass it with an empty value, which writes a slot that reads as answered.
+The verb refuses the whole batch when any item in it already carries an answer, since a filled slot is a decision already made. On that refusal, drop the named item and send the rest.
 
 ## Step 5: continue or stop
 

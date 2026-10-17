@@ -7,35 +7,54 @@ metadata:
 
 # Session map
 
-Write the pre-compaction handoff for the current session. `${CLAUDE_SKILL_DIR}/references/session.md` fixes the filename, the frontmatter, the three core sections, the numbered write procedure, and the citation rule. Follow that document rather than this body, which states when the procedure runs and what it runs against and leaves the shape where it already lives.
+Write the pre-compaction handoff for the current session. `${CLAUDE_SKILL_DIR}/references/session.md` fixes the filename, the frontmatter, the three core sections, the numbered write procedure, and the citation rule, so follow it rather than this body.
 
 Any session writes one. Do not assert a role on invocation, and do not add a role's sections to a map written by a session holding no such role.
 
-Run every step rather than judging in advance that one has nothing to act on. The drift verb answers for itself, refusal included, and a refusal recorded is a result where a prediction of one is not. A project carrying none of the scaffolding the step reads is the case this fires on, and it is the case where skipping looks most defensible.
+## Run every step
+
+Run every step rather than judging in advance that one has nothing to act on. The drift verb answers for itself, refusal included, and a refusal recorded is a result where a prediction of one is not.
+
+A project carrying none of the scaffolding the step reads is where skipping looks most defensible, and it is the case this rule fires on.
 
 ## What fires this
 
-Being asked is the route for a plain session that wants a board-side map, and the orchestrator's handoff runbook is the route for that role. A plain session about to compact belongs to `session-compact`, which is what the `PreCompact` hook on the `manual` matcher names. That hook's message carries one sentence sending a session holding `canon:role-orchestrator` here.
+| Caller                                                    | Route                                                                        |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| A plain session asking for a board map                    | Being asked                                                                  |
+| The orchestrator                                          | Its handoff runbook                                                          |
+| A plain session about to compact                          | `session-compact`, which the `PreCompact` hook on the `manual` matcher names |
+| A session holding `canon:role-orchestrator` at compaction | Here, through one sentence in that hook's message                            |
 
-Decline where the session holds no reasoning a reader could not get faster from git. Say so in one line and write nothing. The standard already names a `## State` filled from the tree as non-conforming, and the file that carries three such sections is worse than an absent one, because a reader who finds a map trusts it. Declining is a result the caller can act on, where a padded map is a result that misleads.
+### Declining
+
+Decline where the session holds no reasoning a reader could not get faster from git. Say so in one line and write nothing.
+
+A `## State` filled from the tree is non-conforming per the standard, and a map of three such sections is worse than none, because a reader who finds a map trusts it. A decline is a result the caller can act on.
 
 ## Guards
 
 - If `git rev-parse --git-dir` does not resolve, stop: `❌ Not a git repository. A session map takes its filename from the branch.`
-- Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`. An empty result falls back to `latest` rather than stopping, since a handoff is scratch and a stop loses the reasoning the file exists to save.
-- Resolve the containing folder at the main worktree root with `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`. The guard above already stopped where that read has no repository to answer from, so it takes no fallback.
+- Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`. An empty result falls back to `latest`, since a stop loses the reasoning the file exists to save.
+- Resolve the containing folder at the main worktree root with `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`
+  - It takes no fallback, since the guard above already stopped where no repository answers
 
 ## Step 1: recover the commit the drift step reads
 
-Item 1 of `## Writing one` runs `canon claude skills drift <ref>` against the commit this session started from, and nothing on the machine records that commit. Estimate how long the session has run, round the duration up, and read the ref item 2 recovers:
+Item 1 of `## Writing one` runs `canon claude skills drift <ref>` against the commit this session started from, which nothing on the machine records. Estimate how long the session has run, round up, and read the ref item 2 recovers:
 
 ```bash
 git log -1 --format=%H --before='<duration> ago'
 ```
 
-Round up rather than down. A ref older than the oldest load over-reports, and confirming a name it raises costs one read of that body, so the generous end is the safe one.
+Round up rather than down. An older ref over-reports, and confirming a name it raises costs one read of that body, so the generous end is the safe one.
 
-Record what the verb names under `## Standing cautions`. A refusal is the boundary of what the verb can read rather than a fault, since it answers where the working directory carries `claude/skills/` with history behind it and refuses in a project consuming the plugin from a cache. Record the boundary the verb reported and keep writing, rather than the one it looked likely to report.
+### Record what the verb names
+
+Record what the verb names under `## Standing cautions`, and keep writing.
+
+- A refusal marks the boundary of what the verb reads, not a fault. It answers where the working directory carries `claude/skills/` with history, and refuses where the plugin comes from a cache.
+- Record the boundary the verb reported, not the one it looked likely to report
 
 ## Step 2: write the map
 
@@ -45,7 +64,9 @@ The file sits at the main worktree root and is written whole every time, so send
 
 ## Step 3: extend it only where a role is held
 
-`## Extending it` governs a section added over the core three. Add one only when this session holds the role and the surface owning that role states the section, since a section the writer cannot fill teaches its reader to skip the file. A session holding no role writes the core three and stops.
+`## Extending it` governs a section added over the core three. Add one only when this session holds the role and the surface owning that role states the section, since a section the writer cannot fill teaches its reader to skip the file.
+
+A session holding no role writes the core three and stops.
 
 ## Output
 
