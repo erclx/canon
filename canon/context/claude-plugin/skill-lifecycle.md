@@ -5,7 +5,11 @@ description: How a skill is invoked, the three task-board writers, where a sessi
 
 # Skill lifecycle
 
-## Invocation
+## Overview
+
+How a skill is invoked, the three task-board writers, where a session fact is routed, and the plan archive on the task archive.
+
+## Layout
 
 ### Routes to a skill
 
@@ -15,20 +19,20 @@ Invoke a skill with `/skill-name` or let Claude auto-trigger it by matching the 
 - A harness hook is a third route, and only `session-compact` is reached so. A `PreCompact` hook names it when blocking a manual compaction, per `canon/context/development/hooks/compaction.md`.
 - A skill named by a hook is named in a string nothing validates, so a rename leaves the hook pointing at a skill that no longer answers, and no stage compares the two
 
-### The flag blocks the `Skill` tool
+### The mark sandbox arm
 
-The flag blocks the `Skill` tool rather than only suppressing an auto-trigger, which decides who can delegate to a flagged body. A message reaches a skill through the `Skill` tool and no other route, so a chain step invoking a flagged sibling through the tool meets the flag rather than the body.
+The sandbox arm for this is `task-complete`'s `mark`, kept separate from the fold's `drift`. `mark` asserts that a run marking outcomes moves no plan for a task the prompt never mentions, and `drift` asserts the fold leaves plans and the board alone.
 
-- The answer through that route has been measured inconsistent rather than a deterministic refusal, so a caller cannot rely on the call succeeding
-- A refusal names the flag in its own message and repeats identically on a retry in the same session, so a refused caller has no route left and stops rather than degrading
-- Prefer pointing a chain step at an unflagged body that already performs the step. Dropping the flag from the callee reopens a body to description matching that its author closed on purpose.
+- The arm carries a third task with open outcomes whose plan must survive the run. It separates a run that moved nothing from one that moved everything, which a fixture with every plan live cannot.
+- Its assertions cover each plan's location and each task's untouched `Plan:` line, since a retargeted pointer with an unmoved file leaves the task aimed at an empty archive path
 
-### Position zero
+### A pointer is still a shipped skill
 
-A slash command expands as a user invocation only at position zero of a prompt. A command chained after a first one reaches the session as prose, with the `Skill` tool as its only remaining route, which the flag then refuses.
+A pointer counts as a shipped skill for both coverage checks, since `canon claude skills list --names` reports every folder whether or not its body carries `disable-model-invocation: true`.
 
-- Position zero is necessary and not sufficient, since a command glued to a comma rather than followed by a space has been observed not to expand even there
-- `claude/skills/role-orchestrator/references/orchestrator-launch.md` carries the launch-prompt form a dispatcher writes, one leading slash command per launch with the rest handed to the tool
+- It needs a routing case in `src/claude/cases/` and a `metadata.family` naming its row's group
+- It needs a row in the skills table of `docs/workflow/skill-map.md`, or of `docs/workflow/skill-map-on-request.md` for a skill serving a request
+- Each spelling of the old name there takes a `canon-keep-retired` marker, so a later sweep does not move it onto the survivor
 
 ## Decisions
 
@@ -82,8 +86,6 @@ The cost the operator accepted is that a lesson no context entry owns has no hom
 - Leaving the landing in `context-fold` lost when the fold was cut to context entries alone, which would have stranded every confirmed promotion in scratch
 - `role-orchestrator` sends a lesson about how to work to the owning task's Findings from its handoff runbook, because the session commits nothing and a domain fact belongs to the task owning it
 
-## Plan archive
-
 ### Archiving rides on the task
 
 A plan that ships is archived rather than removed, inside `archiveTask` rather than in a call beside it. The `post-merge` hook reaches the archive with nobody watching, so a second call is a second failure point that leaves the task archived and the plan live. Merge-driven archiving is covered in `canon/context/claude-plugin/skill-archiving.md`.
@@ -94,29 +96,6 @@ A plan that ships is archived rather than removed, inside `archiveTask` rather t
 - The two halves close in one act, so neither runs before the other and no caller is sent elsewhere first
 
 Every stop the verb emits has to name a next step that moves. The archive is gated on the citing task's outcomes all being `[x]`, and a stop routing past that gate returns the caller to the same guard. The citation count is no gate. It decides whether the plan travels, and the task archives either way.
-
-### Reading the plan citation
-
-The `Plan:` line carries a markdown link relative to `.canon/tasks/`, so both parsers read the target out of the parentheses and resolve it against that folder before routing on it. Resolving lets `../plans/x.md` and the older bare `.canon/plans/x.md` land on the same file.
-
-- Skipping the resolve would drop every link-form task through to the sweep's final warn-and-skip branch, archiving nothing
-- The retarget writes a link back too. That branch is the only writer of a `Plan:` line nobody authored, and a bare path would convert the board to the old form one task at a time.
-
-### The last live citation
-
-The plan travels only when the closing task is its last live citation. One plan can serve several tasks, and moving it on the first to close strands every other pointer. `.canon/plans/` is gitignored, so no history recovers the retarget.
-
-- The count compares the resolved target. Tasks written `../plans/x.md` and `.canon/plans/x.md` cite one plan, and a raw string comparison counts zero and archives the file from under a live task.
-- Comparing basenames trades that for the mirror error. A live plan and an archived one share a filename when a closed task points into `.canon/plans/archive/`, so the count invents a citation.
-
-### The mark sandbox arm
-
-The sandbox arm for this is `task-complete`'s `mark`, kept separate from the fold's `drift`. `mark` asserts that a run marking outcomes moves no plan for a task the prompt never mentions, and `drift` asserts the fold leaves plans and the board alone.
-
-- The arm carries a third task with open outcomes whose plan must survive the run. It separates a run that moved nothing from one that moved everything, which a fixture with every plan live cannot.
-- Its assertions cover each plan's location and each task's untouched `Plan:` line, since a retargeted pointer with an unmoved file leaves the task aimed at an empty archive path
-
-## Merging and renaming skills
 
 ### Merging one skill into another absorbs the body
 
@@ -134,13 +113,36 @@ A plain rename leaves the same pointer, since a typed invocation of the old name
 - The pointer's two paths join the map's `excludedPaths` only after the sweep has run
 - Excluding them first leaves the real body unmoved at the old path while every citation names the new one, and leaving them out afterwards lets a later run move the pointer onto the survivor
 
-### A pointer is still a shipped skill
+## Gotchas
 
-A pointer counts as a shipped skill for both coverage checks, since `canon claude skills list --names` reports every folder whether or not its body carries `disable-model-invocation: true`.
+### The flag blocks the `Skill` tool
 
-- It needs a routing case in `src/claude/cases/` and a `metadata.family` naming its row's group
-- It needs a row in the skills table of `docs/workflow/skill-map.md`, or of `docs/workflow/skill-map-on-request.md` for a skill serving a request
-- Each spelling of the old name there takes a `canon-keep-retired` marker, so a later sweep does not move it onto the survivor
+The flag blocks the `Skill` tool rather than only suppressing an auto-trigger, which decides who can delegate to a flagged body. A message reaches a skill through the `Skill` tool and no other route, so a chain step invoking a flagged sibling through the tool meets the flag rather than the body.
+
+- The answer through that route has been measured inconsistent rather than a deterministic refusal, so a caller cannot rely on the call succeeding
+- A refusal names the flag in its own message and repeats identically on a retry in the same session, so a refused caller has no route left and stops rather than degrading
+- Prefer pointing a chain step at an unflagged body that already performs the step. Dropping the flag from the callee reopens a body to description matching that its author closed on purpose.
+
+### Position zero
+
+A slash command expands as a user invocation only at position zero of a prompt. A command chained after a first one reaches the session as prose, with the `Skill` tool as its only remaining route, which the flag then refuses.
+
+- Position zero is necessary and not sufficient, since a command glued to a comma rather than followed by a space has been observed not to expand even there
+- `claude/skills/role-orchestrator/references/orchestrator-launch.md` carries the launch-prompt form a dispatcher writes, one leading slash command per launch with the rest handed to the tool
+
+### Reading the plan citation
+
+The `Plan:` line carries a markdown link relative to `.canon/tasks/`, so both parsers read the target out of the parentheses and resolve it against that folder before routing on it. Resolving lets `../plans/x.md` and the older bare `.canon/plans/x.md` land on the same file.
+
+- Skipping the resolve would drop every link-form task through to the sweep's final warn-and-skip branch, archiving nothing
+- The retarget writes a link back too. That branch is the only writer of a `Plan:` line nobody authored, and a bare path would convert the board to the old form one task at a time.
+
+### The last live citation
+
+The plan travels only when the closing task is its last live citation. One plan can serve several tasks, and moving it on the first to close strands every other pointer. `.canon/plans/` is gitignored, so no history recovers the retarget.
+
+- The count compares the resolved target. Tasks written `../plans/x.md` and `.canon/plans/x.md` cite one plan, and a raw string comparison counts zero and archives the file from under a live task.
+- Comparing basenames trades that for the mirror error. A live plan and an archived one share a filename when a closed task points into `.canon/plans/archive/`, so the count invents a citation.
 
 ### Scope placement in an instruction step
 

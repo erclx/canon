@@ -5,11 +5,13 @@ description: The marketplace entry, the install-shape traps it avoids, and the r
 
 # Distribution
 
+## Overview
+
 `.claude-plugin/marketplace.json` at the repository root holds one entry whose `source` is `./claude`. The marketplace root is the directory holding `.claude-plugin/`, and a source resolves against that root rather than the manifest file.
 
 Adding the marketplace and installing the one plugin is the whole install path. The `--plugin-dir` alias survives as the development path, where a local edit overrides the installed copy for that session.
 
-## Install shape
+## Layout
 
 ### Why the source is `./claude`
 

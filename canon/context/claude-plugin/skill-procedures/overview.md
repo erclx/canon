@@ -75,8 +75,6 @@ The script anchors its pattern on a non-path character, so a nested spelling suc
 
 `canon/context/claude-plugin/machine-plugins.md` keeps the plugin catalog a retired setup skill bundled the same way.
 
-## Procedures defined once and cited
-
 ### Owner references
 
 Two procedures run inside more than one skill. Each is defined once in an owner skill's `references/` and cited from each body rather than restated, `publish.md` for the scan and `slug.md` for the transform. Neither sits inside a document-type standard, since `markdown.md` does not govern a scan and `skill.md` does not govern a slug transform.
@@ -100,7 +98,13 @@ A citation names one path, `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md`
 - The empty-branch case splits the same way, with three answers across the catalogue (fall back to `latest`, stop, or fall through), so a body citing without its own reads as if the default applied
 - Nothing detects a body that restates a procedure instead of citing it, since `assert_no_drift` covers generated copies only, so the guarantee is that a single definition exists to correct
 
-## Main-root writes
+### Structured edits and reads
+
+Two structured edits have verbs, `canon tasks pull-request` and `canon tasks outcome`. They were chosen over a body instruction because the board write has a measured cost and a verb is the only part a test can reach.
+
+A structured edit no verb covers, such as `context-fold` retargeting a `Plan:` line, reads the file and writes it back whole. It stays a body instruction until a second caller wants the same edit. A read site needs no route, since `Read` resolves against the main root normally.
+
+## Gotchas
 
 ### The routing handoff drains per session
 
@@ -117,14 +121,6 @@ Each body names the route beside the destination.
 - Creating a whole file goes out as one plain `Bash` heredoc command, with `mkdir -p` sent separately, since the isolation refuses a compound command it cannot statically verify
 - Changing a line inside an existing file goes through a `canon` verb, since the shell route for that case is the stream editor `CLAUDE.md` bans
 - `session-worktree` states the split once in its `references/main-root-writes.md`, and each guard names only its destination, its route, and a pointer to that skill
-
-### Structured edits and reads
-
-Two structured edits have verbs, `canon tasks pull-request` and `canon tasks outcome`. They were chosen over a body instruction because the board write has a measured cost and a verb is the only part a test can reach.
-
-A structured edit no verb covers, such as `context-fold` retargeting a `Plan:` line, reads the file and writes it back whole. It stays a body instruction until a second caller wants the same edit. A read site needs no route, since `Read` resolves against the main root normally.
-
-## Adding a shipped skill
 
 ### Two gates trip before the skill is wrong
 

@@ -5,7 +5,45 @@ description: The core.bare repair, the dependency check's presence test, the bra
 
 # Worktree entry
 
-## Repairing `core.bare`
+## Overview
+
+This entry covers `session-worktree` and the chain it feeds. It holds the `core.bare` repair, the dependency check, the branch entry hands the ship chain, and how a run on `main` names its worktree.
+
+## Layout
+
+### What the check reads
+
+`session-worktree` Step 6 carries the test itself. Node and python each read against a literal `[ -f ... ]` or `[ -d ... ]` pair, and the closing "no manifest" line takes its own direct test, run ahead of both rather than reached by falling through them unmatched.
+
+`<install>` resolves off a fixed four-row lockfile table in `references/install-command.md`. The order is `bun.lock` or `bun.lockb`, `pnpm-lock.yaml`, `yarn.lock`, then `package-lock.json`, falling back to `bun install` when none match.
+
+### The shape test
+
+Everything else meets the shape test, which checks the resolved file for the `**Files to touch:**` marker that `claude/skills/plan-feature/references/plan.md` requires, or the `## Files to touch` heading form the same standard admits. A task never carries either.
+
+The test runs after all three tiers rather than guarding the supplied one alone.
+
+- A branch slug matching an unrelated plan is the same wrong-file risk under the derived tier
+- A task's own pointer can name a non-plan under the first
+
+### The caller-supplied tier
+
+`auto-ship` Step 0 enters the worktree ahead of Step 1, so it holds the raw invocation argument rather than a resolved plan. When that argument is a plan path or a bare slug, it runs `canon tasks plan-branch` on it and hands the returned `<type>/<slug>` to `session-worktree` as its tier 0 argument.
+
+- `orchestrator-dispatch.md` runs the same verb on the same plan to pick the branch its collision check clears, so the checked branch and the taken branch are one string
+- A plan named outside `feature-<slug>.md`, such as a phased row backing several branches from one file, still needs its own file per branch, since one plan cannot answer for more than one
+- A type spelled by the caller wins over the one the verb returns
+
+### What the pointer resolves against
+
+The base decides whether that refusal reaches anything. An archived task sits a folder deeper and the standard points its line at `../../plans/archive/feature-<slug>.md`.
+
+A base fixed at `.canon/tasks/` lands on a repository-root `plans/archive/` that never exists, so the run answers a correct citation with the stale-citation message.
+
+- Resolving against the directory holding the task file closes that
+- Taking a bare path beside a link target reaches the older tasks writing the target as a plain project-root path
+
+## Decisions
 
 ### Two repair points in the skill
 
@@ -29,29 +67,9 @@ Both call sites confirm the repository's common dir is named `.git` before writi
 
 The skill states the upstream issue inline rather than pointing at `wiki/claude/worktrees.md`, since a shipped skill runs where no `wiki/` path resolves and the Skill paths stage fails the build on one.
 
-### How the repair is tested
-
-The rule was a bash function in a shared library until it was ported, kept there so a test could source it. A hook could not import it from TypeScript, so a script and a library sat between the gate and one predicate. The test builds six repository shapes, and the `basename` guard is what it pins.
-
-- Deleting the guard line leaves the other cases passing and fails only the genuinely-bare one, the case where an unguarded repair does damage
-- Every git call goes through `gitEnv()` with `extendEnv: false`, and the test strips every inherited `GIT_*` variable before building fixtures
-- Git hooks export `GIT_DIR`, so without the scrub the suite passes standalone and fails under `pre-push`, since `git -C real-bare.git` resolves against the toolkit's own repository
-
-Any future test that shells out to git needs the same scrub, and the failure is invisible to a normal `bun run test`. See `wiki/claude/worktrees.md` for the upstream issue.
-
-## The dependency check is a literal test
-
-### What the check reads
-
-`session-worktree` Step 6 carries the test itself. Node and python each read against a literal `[ -f ... ]` or `[ -d ... ]` pair, and the closing "no manifest" line takes its own direct test, run ahead of both rather than reached by falling through them unmatched.
-
-`<install>` resolves off a fixed four-row lockfile table in `references/install-command.md`. The order is `bun.lock` or `bun.lockb`, `pnpm-lock.yaml`, `yarn.lock`, then `package-lock.json`, falling back to `bun install` when none match.
-
 ### Why it is not a verb
 
 It is a literal shell test rather than a `canon` verb, since directory presence is not a judgment call and the body ships to a target that may hold no `canon` binary on PATH at all.
-
-## The branch entry hands the ship chain
 
 ### A typed name serves both consumers
 
@@ -76,16 +94,6 @@ The branch test reads both ref spaces through `git for-each-ref`, matching `chec
 
 - `git show-ref --verify` sees no remote-tracking ref, so a branch pushed from elsewhere would pass that narrower test and collide at its first push
 
-## A run starting on `main`
-
-### The caller-supplied tier
-
-`auto-ship` Step 0 enters the worktree ahead of Step 1, so it holds the raw invocation argument rather than a resolved plan. When that argument is a plan path or a bare slug, it runs `canon tasks plan-branch` on it and hands the returned `<type>/<slug>` to `session-worktree` as its tier 0 argument.
-
-- `orchestrator-dispatch.md` runs the same verb on the same plan to pick the branch its collision check clears, so the checked branch and the taken branch are one string
-- A plan named outside `feature-<slug>.md`, such as a phased row backing several branches from one file, still needs its own file per branch, since one plan cannot answer for more than one
-- A type spelled by the caller wins over the one the verb returns
-
 ### Why the tier exists
 
 Every other `session-worktree` tier answers from state the caller cannot set. Naming the branch in the launch prompt closes none of that, since no tier reads the prompt.
@@ -104,20 +112,9 @@ A caller supplying a task path, or nothing at all, has no plan to hand the verb,
 
 Refusing a branch with no pull request stays, since that is the split from `git-ship` rather than an accident of where the branch came from.
 
-## Which document the chain resolved
-
 ### A path is not a document kind
 
 A path resolving to a file says nothing about which document it names, and a task file resolves exactly as a plan does. A path under `.canon/tasks/` reaches a tier of its own, which reads the task's first `Plan:` line and takes what it names, so a caller holding the board's own pointer does not meet a refusal.
-
-### The shape test
-
-Everything else meets the shape test, which checks the resolved file for the `**Files to touch:**` marker that `claude/skills/plan-feature/references/plan.md` requires, or the `## Files to touch` heading form the same standard admits. A task never carries either.
-
-The test runs after all three tiers rather than guarding the supplied one alone.
-
-- A branch slug matching an unrelated plan is the same wrong-file risk under the derived tier
-- A task's own pointer can name a non-plan under the first
 
 ### Three refusals, three repairs
 
@@ -135,11 +132,14 @@ The archive refusal tests the resolved path rather than the task's outcomes, sin
 
 An archived plan carries `**Files to touch:**` unchanged, so without the refusal the tier would re-implement merged work. It covers the two older archive spellings an unmigrated project still holds beside `.canon/plans/archive/`.
 
-### What the pointer resolves against
+## Gotchas
 
-The base decides whether that refusal reaches anything. An archived task sits a folder deeper and the standard points its line at `../../plans/archive/feature-<slug>.md`.
+### How the repair is tested
 
-A base fixed at `.canon/tasks/` lands on a repository-root `plans/archive/` that never exists, so the run answers a correct citation with the stale-citation message.
+The rule was a bash function in a shared library until it was ported, kept there so a test could source it. A hook could not import it from TypeScript, so a script and a library sat between the gate and one predicate. The test builds six repository shapes, and the `basename` guard is what it pins.
 
-- Resolving against the directory holding the task file closes that
-- Taking a bare path beside a link target reaches the older tasks writing the target as a plain project-root path
+- Deleting the guard line leaves the other cases passing and fails only the genuinely-bare one, the case where an unguarded repair does damage
+- Every git call goes through `gitEnv()` with `extendEnv: false`, and the test strips every inherited `GIT_*` variable before building fixtures
+- Git hooks export `GIT_DIR`, so without the scrub the suite passes standalone and fails under `pre-push`, since `git -C real-bare.git` resolves against the toolkit's own repository
+
+Any future test that shells out to git needs the same scrub, and the failure is invisible to a normal `bun run test`. See `wiki/claude/worktrees.md` for the upstream issue.

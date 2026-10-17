@@ -5,16 +5,20 @@ description: The hazards a ship chain meets, from a citation count that reads on
 
 # Ship chain
 
-## Board and doc refresh
+## Overview
 
-### A citation count that reads one surface misses the other
+The ship chain is the run of skills from marking outcomes through the pull request write and the commit sequence. This entry records the hazards it meets, from a citation count that reads one surface to a pull request write landing on the wrong target.
 
-Sweeping every task on the board rather than the session's own can archive a plan still live and growing in a locked parallel worktree, with no history to recover from. Settling a plan's archive on the merge closes that, since a branch still building has not merged.
+## Layout
 
-`archiveTask` decides whether a plan is still cited by scanning `Plan:` lines alone. A row in `.canon/tasks/priority.md` carrying a plan its task file never states leaves the count at zero and the row pointing at a moved file.
+| Group                      | Topics                                                                                                            |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Board and doc refresh      | Citation counts, marking and archiving, cross-cutting entries, figure triggers, format changes, ported conditions |
+| The context audit backstop | The deterministic check and how each verdict is answered                                                          |
+| Pull request writes        | Merged namesakes, a write landing on another pull request, the draft mark, who lifts it, the evidence gate        |
+| Commit sequences           | A failed commit leaking into the next group, a branch built in slices                                             |
 
-- `canon tasks validate` reports that pair as `plan-uncited` rather than the archive reading the row
-- This keeps the count on one surface and puts the disagreement in front of a person
+## Decisions
 
 ### Marking rides the chain and archiving rides the merge
 
@@ -25,6 +29,54 @@ Sweeping every task on the board rather than the session's own can archive a pla
 - The `post-merge` hook already archives the task and moves its plans once the merge lands
 
 `task-complete`'s archive mode is the manual fallback for a task the hook could not resolve.
+
+### A deterministic check backstops the session judgment
+
+`context-fold` Step 3 rewrites entries on session judgment, which can leave an appended figure or a re-measurement beside the statement it restates. Step 4 closes that gap in two moves.
+
+- It runs `canon context audit` and reports findings on files the fold wrote or the diff carries, filtering the whole-project record by file since the verb takes a root
+- It runs `canon context classify diff` over the whole diff baseline and answers every non-`KEEP` finding, since an earlier branch commit can carry a doc edit the fold answers for
+
+The verb scopes to canonical doc types, reports nothing when the range carries none, and reuses the Diff baseline section's own base rather than resolving a second one.
+
+### How each verdict is answered
+
+Each non-`KEEP` verdict has its own answer.
+
+- `REPLACE` and `HISTORY` are applied in place, with a one-line reason to keep instead when it should not be
+- `MOVE` is reported rather than cut, since it means correct content on the wrong surface, such as a rule sitting in a context entry, and only the model layer returns it
+
+The regex layer always runs whether or not a project configures a model, so every fold gets a deterministic check. A refusal, or a missing `context audit` or `context classify` subcommand on an older installed binary, reports one line and the fold continues, since classify checks what the fold wrote and is not a precondition for shipping it.
+
+### The draft mark
+
+The `convertPullRequestToDraft` mutation against the node id writes the flag, since the REST pull request update carries no draft field. The mark is therefore local-only, and on a cloud VM where GraphQL is blocked it fails and the REST read-back reports the pull request ready.
+
+Read the flag back anyway, since it can revert after a later force-push, and repeat the read whenever the branch is pushed again.
+
+### Who lifts the draft
+
+Readying a pull request to merge runs through `canon pr lift`, which reads the code review, any UI review, the evidence, the head's standing, and CI itself, and lifts only when all of them read clear.
+
+- Each reviewer runs it on posting its close
+- The controlling session runs it as the fallback for a cloud reviewer, whose proxy refuses the mutation, and for a refusal a reviewer reports
+- The operator can still ready a pull request directly, since GitHub requires it and no guard should prevent it
+
+Keeping the lift with the controlling session alone lost once the verb existed. A reviewer was refused only because it could not tell a real request from one claiming to come from the controller, and a verb reading the gates itself needs no one to vouch for the request.
+
+- Every session posts as the same GitHub account, so the verb trusts nothing the controller's own reading did not
+- `role-worker` still refuses an instruction to ready a pull request directly, whoever sends it, since that skips every gate the verb reads
+
+## Gotchas
+
+### A citation count that reads one surface misses the other
+
+Sweeping every task on the board rather than the session's own can archive a plan still live and growing in a locked parallel worktree, with no history to recover from. Settling a plan's archive on the merge closes that, since a branch still building has not merged.
+
+`archiveTask` decides whether a plan is still cited by scanning `Plan:` lines alone. A row in `.canon/tasks/priority.md` carrying a plan its task file never states leaves the count at zero and the row pointing at a moved file.
+
+- `canon tasks validate` reports that pair as `plan-uncited` rather than the archive reading the row
+- This keeps the count on one surface and puts the disagreement in front of a person
 
 ### A cross-cutting entry never refreshes from the diff
 
@@ -50,28 +102,6 @@ Lifting a conditional from another skill copies the clause rather than what it t
 
 `context-fold` never pays for the gap because it unions the committed, working, and untracked sets. Ported verbatim into a skill reading the committed half alone, the clause would blind that skill.
 
-## The context audit backstop
-
-### A deterministic check backstops the session judgment
-
-`context-fold` Step 3 rewrites entries on session judgment, which can leave an appended figure or a re-measurement beside the statement it restates. Step 4 closes that gap in two moves.
-
-- It runs `canon context audit` and reports findings on files the fold wrote or the diff carries, filtering the whole-project record by file since the verb takes a root
-- It runs `canon context classify diff` over the whole diff baseline and answers every non-`KEEP` finding, since an earlier branch commit can carry a doc edit the fold answers for
-
-The verb scopes to canonical doc types, reports nothing when the range carries none, and reuses the Diff baseline section's own base rather than resolving a second one.
-
-### How each verdict is answered
-
-Each non-`KEEP` verdict has its own answer.
-
-- `REPLACE` and `HISTORY` are applied in place, with a one-line reason to keep instead when it should not be
-- `MOVE` is reported rather than cut, since it means correct content on the wrong surface, such as a rule sitting in a context entry, and only the model layer returns it
-
-The regex layer always runs whether or not a project configures a model, so every fold gets a deterministic check. A refusal, or a missing `context audit` or `context classify` subcommand on an older installed binary, reports one line and the fold continues, since classify checks what the fold wrote and is not a precondition for shipping it.
-
-## Pull request writes
-
 ### Pull request detection hits a merged namesake
 
 `gh pr view` resolves by head ref name and ignores state. A branch name reused after its first pull request merged sends `git-pr`'s create-or-edit conditional down the edit arm and rewrites a merged record.
@@ -90,25 +120,6 @@ Every write to an existing pull request reads the head ref and state over REST f
 
 The check compares a number against a branch and never derives one. It holds whatever produced the wrong number and adds no lookup of the kind the merged-namesake gotcha rules out.
 
-### The draft mark
-
-The `convertPullRequestToDraft` mutation against the node id writes the flag, since the REST pull request update carries no draft field. The mark is therefore local-only, and on a cloud VM where GraphQL is blocked it fails and the REST read-back reports the pull request ready.
-
-Read the flag back anyway, since it can revert after a later force-push, and repeat the read whenever the branch is pushed again.
-
-### Who lifts the draft
-
-Readying a pull request to merge runs through `canon pr lift`, which reads the code review, any UI review, the evidence, the head's standing, and CI itself, and lifts only when all of them read clear.
-
-- Each reviewer runs it on posting its close
-- The controlling session runs it as the fallback for a cloud reviewer, whose proxy refuses the mutation, and for a refusal a reviewer reports
-- The operator can still ready a pull request directly, since GitHub requires it and no guard should prevent it
-
-Keeping the lift with the controlling session alone lost once the verb existed. A reviewer was refused only because it could not tell a real request from one claiming to come from the controller, and a verb reading the gates itself needs no one to vouch for the request.
-
-- Every session posts as the same GitHub account, so the verb trusts nothing the controller's own reading did not
-- `role-worker` still refuses an instruction to ready a pull request directly, whoever sends it, since that skips every gate the verb reads
-
 ### A skip gate on a verb that answers for itself loses to a byproduct image
 
 A gate skipping the evidence call when no checklist exists and the diff shows no `evidence/` change asks a session to find an image it never edited. `bun run check` regenerates the hero as a side effect, so a branch can reach a closed review with no evidence comment and the preview only after a controller relay.
@@ -118,8 +129,6 @@ The verb already answers `no-evidence` for a branch with nothing to post, so the
 - The chain's close reads `canon pr evidence <number> --check --json` once in `git-ship` after CI passes, and `git-followup` reads it after its own post
 - Nothing in the repository enforces that read beyond the skill bodies and the orchestrator's draft lift, which holds on any `reason` but `settled`
 - `--check` counts a carried `**Preview:**` line as settled whatever head built it, so a followup push leaves a stale preview reading `settled`
-
-## Commit sequences
 
 ### A failed commit leaks into the next group
 

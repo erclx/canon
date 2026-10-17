@@ -5,12 +5,14 @@ description: The canon claude command surface and what each verb writes into a t
 
 # CLI
 
+## Overview
+
 - `canon claude init` seeds the project docs, `.claude/settings.json`, its hook scripts, and `CLAUDE.md` into a project
 - `canon claude seeds list` lists each seed destination beside its source
 - `canon claude sync` reconciles `.gitignore` against the claude manifest
 - `canon claude setup` installs user-level Claude config, `~/.claude/` by default
 
-## init
+## Layout
 
 ### What lands
 
@@ -19,12 +21,6 @@ description: The canon claude command surface and what each verb writes into a t
 - Coding and doc-authoring standards arrive separately via `canon gov install`, which `canon init` runs on every scaffold since `--stack` defaults to `base`
 - The seed `CLAUDE.md` has no `## Markdown` section. `governance/rules/writing/markdown.md` and `governance/rules/canon/context.md` deliver that routing path-scoped instead.
 - `--skip governance` reopens the gap by design, and the run warns that standards land without the rules that route to them
-
-### Seeded folders
-
-The Claude seeds carry nothing under `canon/context/`. `tooling/base/seeds/` installs the folder's `index.md`, `development.md`, and `ci.md` as user-owned files, and `canon init` runs base tooling before the Claude domain, so those land first and the Claude pass skips what is present.
-
-Do not add a context entry to the Claude seeds without checking `tooling/base/seeds/canon/context/` for the same path. Two seed sources writing one destination resolve by whichever domain runs first.
 
 ### PostToolUse hooks
 
@@ -68,33 +64,17 @@ Four PreToolUse hooks remind or deny before a tool runs, each paired with a scri
 - It blocks rather than reminds and calls `canon` from `PATH`, so a target on a CLI older than the flag has review posts refused until it upgrades
 - The decision and its rejected alternative are in `canon/context/development/hooks/command-scanners.md`
 
-### The search reminder
-
-On `WebSearch`, `search-reminder.sh` tells the session to load `canon:search-craft` before it searches, once per session. A skill description fires on what the user asked, so a session that decides mid-task to search never loads the method, and this hook is the one surface that sees the tool call.
-
-- It names the skill and carries no method text, and its wording says to report the skill when it does not resolve, since a project on governance alone has no plugin
-- It stays quiet on a payload with no `session_id` rather than dedupe on a shared key
-- The matcher stops at `WebSearch`, leaving `WebFetch` alone
-
-### The scratch guard
-
-On `Write` and `Edit`, `scratch-guard.sh` fires when a temp-path write lands outside `.canon/tmp/` and reminds the agent to write scratch there, once per session. It enforces the scratch rule deterministically instead of relying on CLAUDE.md prose that the harness scratchpad instruction competes with.
-
-- It strips `CLAUDE_PROJECT_DIR` before matching the temp patterns, since a bare `*/tmp/*` match would fire on every source write in a project whose own path carries a `tmp` segment
-- Stripping the root rather than exiting on it keeps a write to `<project>/tmp/`, a real violation, warning
-- It exempts the harness's `.claude/jobs/<id>/tmp/` by shape
-
 ### User-level settings
 
 User-level pieces (attribution, permission `allow` entries, and `.env` denies) live at `~/.claude/settings.json` and install once per machine via `canon claude setup`. Project settings layer on top, so per-project files carry only what is project-specific.
 
-## seeds
+### seeds list
 
 `canon claude seeds list [--json|--names]` enumerates the seed docs that `canon claude init` would copy into a project. Skills consume `--json` to compare a target's installed copies against the toolkit's current seed source and propose targeted edits.
 
 The CLI only emits content, and reconciliation is a hand merge against that source. The listing reads `planSeeds`, the same function `init` applies, so the two cannot disagree about what a seed install contains.
 
-## sync
+### sync
 
 `canon claude sync` reports whether each seeded project doc is present, then reconciles `.gitignore` against the `[gitignore]` section of `tooling/claude/manifest.toml`. It never touches seeded project docs, so `.gitignore` is the only file it writes.
 
@@ -103,7 +83,7 @@ The CLI only emits content, and reconciliation is a hand merge against that sour
 - The changed-file tracking in `src/sync/target.ts` watches `.gitignore` for this reason
 - Seed audits are not automated. Merge a drifted seed by hand against the toolkit copy, one `##` section at a time. `canon sync` prints a tip reminder at the tail.
 
-## setup
+### setup
 
 `canon claude setup [dest]` installs user-level Claude Code config from `tooling/claude/user/` into `~/.claude/`. Run it once per machine after cloning the toolkit. It is idempotent, and re-runs skip blocks that already match.
 
@@ -125,3 +105,29 @@ Three things land.
 The statusline renders as `Opus 4.8 | xhigh | 80k / 1000k | 92%`, being model name, effort level, tokens used against context window size, and remaining percentage. The effort field is omitted when the model does not report one.
 
 The percentage is colored by headroom, green at 30% or above, yellow below 30%, and red with a `⚠` prefix below 15%.
+
+## Decisions
+
+### The search reminder
+
+On `WebSearch`, `search-reminder.sh` tells the session to load `canon:search-craft` before it searches, once per session. A skill description fires on what the user asked, so a session that decides mid-task to search never loads the method, and this hook is the one surface that sees the tool call.
+
+- It names the skill and carries no method text, and its wording says to report the skill when it does not resolve, since a project on governance alone has no plugin
+- It stays quiet on a payload with no `session_id` rather than dedupe on a shared key
+- The matcher stops at `WebSearch`, leaving `WebFetch` alone
+
+### The scratch guard
+
+On `Write` and `Edit`, `scratch-guard.sh` fires when a temp-path write lands outside `.canon/tmp/` and reminds the agent to write scratch there, once per session. It enforces the scratch rule deterministically instead of relying on CLAUDE.md prose that the harness scratchpad instruction competes with.
+
+- It strips `CLAUDE_PROJECT_DIR` before matching the temp patterns, since a bare `*/tmp/*` match would fire on every source write in a project whose own path carries a `tmp` segment
+- Stripping the root rather than exiting on it keeps a write to `<project>/tmp/`, a real violation, warning
+- It exempts the harness's `.claude/jobs/<id>/tmp/` by shape
+
+## Gotchas
+
+### Seeded folders
+
+The Claude seeds carry nothing under `canon/context/`. `tooling/base/seeds/` installs the folder's `index.md`, `development.md`, and `ci.md` as user-owned files, and `canon init` runs base tooling before the Claude domain, so those land first and the Claude pass skips what is present.
+
+Do not add a context entry to the Claude seeds without checking `tooling/base/seeds/canon/context/` for the same path. Two seed sources writing one destination resolve by whichever domain runs first.
