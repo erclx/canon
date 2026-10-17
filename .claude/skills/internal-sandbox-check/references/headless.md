@@ -7,35 +7,37 @@ description: How internal-sandbox-check Step 6 drives one arm of the provisionin
 
 Step 6 of `internal-sandbox-check`. Step 4 reads the arm rule below before the report prints, and Step 6 reads the rest when neither skip condition in the body holds.
 
-Verify the `Provisioning:` scenario through `canon sandbox run`, which drives the skill under `claude -p` and returns without holding a terminal. One arm per invocation. Never sweep the `Queued:` list, which is what keeps the spend inside the $0.10 to $0.25 a run costs.
-
-Derive the arguments from the Step 2 mapping:
-
-- Target: `<category>:<rest>` from the scenario path `sandbox/<category>/<rest>.ts`
-- Prompt: `/canon:<skill-name>` with no arguments. The qualified form resolves through `--plugin-dir` whether or not the branch changed the skill. `canon sandbox run` injects no skill into its tree, so a bare `/<skill-name>` never reaches the branch's body.
-- Arm: required for a multi-arm scenario, omitted for a single-arm one
+Verify the `Provisioning:` scenario through `canon sandbox run`, which drives the skill under `claude -p` and returns without holding a terminal. Run one arm per invocation and never sweep the `Queued:` list, which keeps the spend inside the $0.10 to $0.25 a run costs.
 
 ```bash
 canon sandbox run <category>:<rest> "/canon:<skill-name>" <arm>
 ```
 
+Derive the arguments from the Step 2 mapping:
+
+- Target: `<category>:<rest>` from the scenario path `sandbox/<category>/<rest>.ts`
+- Prompt: `/canon:<skill-name>` with no arguments, since `canon sandbox run` injects no skill and only the qualified form reaches the branch's body through `--plugin-dir`
+- Arm: required for a multi-arm scenario, omitted for a single-arm one
+
 ## Resolving the arm
 
-Resolve the arm at Step 4, before the report prints. Count the keys under `arms` in the scenario file. More than one key makes it a multi-arm scenario. Roughly half the catalog has more than one, so treat the multi-arm case as ordinary rather than exceptional.
+Resolve the arm at Step 4, before the report prints. A scenario file with more than one key under `arms` is multi-arm, which is roughly half the catalog, so treat that case as ordinary.
 
-A multi-arm scenario run with no arm never reaches the skill session. `canon sandbox run` forwards the arm to the provisioning child, which sets `SANDBOX_SCENARIO` and `CANON_NON_INTERACTIVE` only when it receives one, so an empty arm leaves both unset and the scenario falls through to the picker. The picker aborts on a missing TTY, which is every agent-driven run, and it blocks on input when a TTY is attached. Passing `CANON_NON_INTERACTIVE=1` to dodge that is worse than not running, since the picker then takes the first arm and the verdict reports an arm nobody chose.
+A multi-arm scenario run with no arm never reaches the skill session. The provisioning child sets `SANDBOX_SCENARIO` and `CANON_NON_INTERACTIVE` only when it receives an arm, so without one the scenario falls through to the picker.
 
-Do not guess the arm from the scenario file. Ask the user: `Arm for <category>:<rest>? (arm name, or "none" to skip verification)`. Accept `none` as the `no-mechanism` gate. This mirrors the question Step 2a already asks when a skill maps to no scenario.
+- The picker aborts on a missing TTY, which is every agent-driven run, and blocks on input when one is attached
+- Passing `CANON_NON_INTERACTIVE=1` to dodge it is worse than not running, since the picker then takes the first arm and the verdict reports an arm nobody chose
+- Do not guess the arm from the scenario file. Ask `Arm for <category>:<rest>? (arm name, or "none" to skip verification)`, and read `none` as the `no-mechanism` gate.
 
 ## Running and reporting
 
 Print the target, prompt, and arm before running, since a wrong pairing is invisible in the verdict alone. A scenario that needs prompt arguments is a case to report, not to guess at.
 
-Report the verdict. Do not assert it. `canon sandbox run` merges a `verdict` object into the JSON envelope on stdout carrying `state`, `asserted`, `failed`, and `unchecked`. Print `state` as it came back, and say so when it is `unchecked`, which means the arm declared no expectations and the run asserted nothing.
+`canon sandbox run` merges a `verdict` object carrying `state`, `asserted`, `failed`, and `unchecked` into the JSON envelope on stdout. Report it rather than asserting it.
 
-Do not read `unchecked` as a pass or convert it into a failure. `--strict` covers a caller that has finished arming.
-
-Do not fix a failing verdict. The skill surfaces the result and the user decides.
+- Print `state` as it came back, and say so when it is `unchecked`, which means the arm declared no expectations and asserted nothing
+- Read `unchecked` as neither a pass nor a failure. `--strict` covers a caller that has finished arming.
+- Do not fix a failing verdict. The skill surfaces the result and the user decides.
 
 Print one line after the run:
 
@@ -45,7 +47,7 @@ Verification: <state>  <category>:<rest>  →  <asserted> asserted, <failed> fai
 
 ## Gate vocabulary
 
-An item shipping without live verification names exactly one gate. Cost, credentials, and no-mechanism are different facts with different fixes, and a report that collapses them lets an affordable run and an impossible one read the same.
+An item shipping without live verification names exactly one gate. Cost, credentials, and no-mechanism have different fixes, and a report collapsing them lets an affordable run and an impossible one read the same.
 
 | Gate           | What it blocks                                                  | Who clears it                                |
 | -------------- | --------------------------------------------------------------- | -------------------------------------------- |
