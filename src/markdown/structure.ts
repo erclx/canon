@@ -438,11 +438,7 @@ interface FoldedBullet extends BulletFinding {
   readonly text: string
 }
 
-/**
- * The walk `heavyBullets` reports from, keeping each past-checkpoint bullet's
- * text so `longBlocks` can ask whether a base copy of it exists. One walk
- * rather than two, for the reason `paragraphBlocks` is shared.
- */
+/** The walk `heavyBullets` reports from. */
 function foldBullets(
   lines: readonly BodyLine[],
   checkpoints: Checkpoints,
@@ -601,49 +597,6 @@ export function heavyParagraphs(
   }
 
   return findings
-}
-
-export interface LongBlock {
-  readonly kind: 'paragraph' | 'bullet'
-  readonly line: number
-  readonly characters: number
-  /** The block's source lines folded into one, as the paragraph and bullet folds read it. */
-  readonly text: string
-}
-
-/**
- * The paragraphs past the paragraph checkpoint and the top-level bullets past
- * the bullet checkpoint, each with its text.
- *
- * Weight alone, never the sentence cap, since the growth stage asks about the
- * two numbers the standard states in characters. The definitions are the
- * audit's own, so a block this names and a block the weight report names are
- * one set.
- */
-export function longBlocks(
-  lines: readonly BodyLine[],
-  checkpoints: Checkpoints,
-): LongBlock[] {
-  const blocks: LongBlock[] = []
-
-  for (const block of paragraphBlocks(lines)) {
-    const text = paragraphText(block)
-    const characters = visibleText(text).length
-    if (characters > checkpoints.paragraph) {
-      blocks.push({
-        kind: 'paragraph',
-        line: block[0].number,
-        characters,
-        text,
-      })
-    }
-  }
-
-  for (const bullet of foldBullets(lines, checkpoints)) {
-    blocks.push({ kind: 'bullet', ...bullet })
-  }
-
-  return blocks.sort((a, b) => a.line - b.line)
 }
 
 /** Punctuation either side of a word, so an opener is compared on its letters. */
