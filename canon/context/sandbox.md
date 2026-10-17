@@ -11,6 +11,10 @@ The sandbox provisions isolated project states for testing scripts, configs, and
 
 Every `canon sandbox` verb is toolkit-only, so run `bun src/cli.ts sandbox <verb>` from a checkout, since an installed `canon` refuses.
 
+- Anchor scenarios push to a real remote and need an authenticated `gh` plus membership in the org owning `canon-sandbox`. Everything else runs offline.
+- Sandboxes are minimal by default. `SANDBOX_INJECT_SEEDS` runs `canon claude init` and `SANDBOX_INJECT_GOV` runs `canon gov install`, so no hand copy drifts from the installer.
+- A scenario that reads commit history needs a checkout `canon` first on `PATH`, and the headless run calls that same one.
+
 ## Layout
 
 ### `sandbox/`
@@ -18,10 +22,10 @@ Every `canon sandbox` verb is toolkit-only, so run `bun src/cli.ts sandbox <verb
 Owns the scenario scripts, one folder per category and one `.ts` file per command, each holding one or more named arms.
 
 - Add a scenario as `sandbox/<category>/<command>.ts` default-exporting `scenario()` from `src/sandbox/scenario.ts`, named for the skill it drives. `sandbox/git/pr.ts` shows the shape.
-- `config` holds presence flags such as `SANDBOX_SKIP_AUTO_COMMIT`, `SANDBOX_INJECT_SEEDS`, `SANDBOX_INJECT_GOV`, and `SANDBOX_GOV_STACK`. `anchor: true` names the repository the scenario pushes to.
-- `arms` maps an arm name to a function staging the tree through `ctx`, the only way in. Commands run in `ctx.dir`, and arm order is routing order.
+- `config` holds presence flags such as `SANDBOX_SKIP_AUTO_COMMIT`, `SANDBOX_INJECT_SEEDS`, `SANDBOX_INJECT_GOV`, and `SANDBOX_GOV_STACK`. `anchor: true` names the push target.
+- `arms` maps an arm name to a function staging the tree through `ctx`, the only way in. Arm order is routing order, and a scenario argument sets `CANON_NON_INTERACTIVE=1`, so name the arm.
 - An arm ends its narration with an `Action:` line spelling the full command, arguments included, since a skill guarding on a missing argument refuses a bare prompt
-- `exempt.toml` names skills no arm should cover, each with a `reason`. Run `canon sandbox` bare for the live catalog.
+- `exempt.toml` names skills no arm should cover, each with a `reason`, and a stale or now-asserted one exits 1. Run `canon sandbox` bare for the live catalog.
 
 ### `sandbox/fixtures/`
 
@@ -39,7 +43,7 @@ Owns provisioning, the scenario contract, the checker, the coverage report, the 
 
 - `provision.ts` injects seeds and gov rules through the real installers, runs the arm, then commits and tags `refs/sandbox/baseline`, which `canon sandbox reset` restores
 - `expect.ts` returns pass, fail, or unchecked, and only a failure exits non-zero. A declaration with no mechanical assertion fails, and `--strict` fails an unchecked arm.
-- `coverage.ts` and `census.ts` rate each skill `asserted`, `should-be-asserted`, or `exempt`. A scenario pairs as `<category>-<command>` or `<command>`, and `SANDBOX_ASSERTED_FLOOR` fails a lost one.
+- `census.ts` rates skills `asserted`, `should-be-asserted`, or `exempt`, pairing on `<category>-<command>` or `<command>`. `internal-*` skills answer `none`, `create-*` read `no scenario`.
 - `equivalence.ts` diffs every arm's tree at a base ref against head. Add `--stub-remote` for anchor arms and `--base origin/main` where local `main` trails.
 - `tree.ts` puts the tree at `$XDG_STATE_HOME/canon/sandbox-<run-id>` outside the repository, and `assertSandboxDirSafe` refuses a path that is not a strict descendant of home or the temp root
 
@@ -47,11 +51,11 @@ Owns provisioning, the scenario contract, the checker, the coverage report, the 
 
 Owns the runner behind `canon sandbox run <cat:cmd> "<prompt>" [scenario]`.
 
-- `run.ts` provisions, snapshots the tree, spawns `claude -p --plugin-dir` under `bypassPermissions` on `sonnet`, and scores the diff. The record lands in `.canon/tmp/runs/sandbox/`.
-- Pass the prompt whole as `/canon:<skill> <args>`, since the runner adds nothing and a bare `/<skill>` does not reach the branch's body
-- `CANON_SKILL_TEST_MODEL`, `_TOOLS`, `_MAX_TURNS`, and `_PERMISSION_MODE` override the defaults. The cap of 30 turns is the only budget.
-- `watch.ts` reports writes to `.canon/plans`, `.canon/review`, `.canon/memory`, and `.canon/tasks` as escapes, which an arm's `escape_scope` turns into a result
-- `dispatch.ts` bounds a nested `claude --bg` with a PATH shim refusing the flag, a process-group reap after the verdict, and a before and after read of the session registry
+- `run.ts` provisions, snapshots the tree, and spawns `claude -p --plugin-dir` on `sonnet` under `bypassPermissions`, since `acceptEdits` denies writes under `.claude/`
+- The envelope carries `is_error`, `result`, `num_turns`, `total_cost_usd`, and a `verdict`. Read the verdict from `.canon/tmp/runs/sandbox/`, since a later `sandbox check` finds no sandbox.
+- Pass the prompt whole as `/canon:<skill> <args>`. Four `CANON_SKILL_TEST_*` variables override the defaults. `_TOOLS` restricts nothing under `bypassPermissions`.
+- The cap of 30 turns is the only budget, and an arm's `max_turns` above it goes green on a truncated run. An arm that must never reach a shell uses `dontAsk`, as `claude:deploy-app` does.
+- `watch.ts` flags writes to `.canon/plans`, `.canon/review`, `.canon/memory`, and `.canon/tasks` as escapes and sees nothing else. `dispatch.ts` bounds a nested `claude --bg` by shim and reap.
 
 ### Other folders
 
