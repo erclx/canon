@@ -76,7 +76,7 @@ Rewrite only the stale sections. Do not touch sections unrelated to the diff.
 
 ## Audit
 
-Run `canon markdown audit <path>` over every page this run rewrote, and fix each ban and density finding it reports per the markdown standard read above.
+Run `canon markdown audit <path>` over every page this run rewrote, and fix each ban, density, and reference shape finding it reports per the markdown standard and the docs reference read above.
 
 - Fix a finding inside a section this run rewrote, then re-run the audit on that page until it reports none there
 - Report a finding in a section the diff does not reach as an audit line in the summary, since the rule above leaves that section as it is

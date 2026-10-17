@@ -46,6 +46,32 @@ describe('referenceShapeFindings', () => {
     ])
   })
 
+  it('should report a section that comes before one it should follow', () => {
+    const source = page(
+      '## See also\n\n- `canon pr evidence`\n\n## Output\n\nA record on stdout.',
+    )
+
+    expect(referenceShapeFindings(source)).toEqual([
+      { kind: 'section-order', line: 14, text: 'Output' },
+    ])
+  })
+
+  it('should report a section that repeats', () => {
+    const source = page(`${CONFORMING}\n\n## See also\n\n- \`canon docs\``)
+
+    expect(referenceShapeFindings(source)).toEqual([
+      { kind: 'section-order', line: 24, text: 'See also' },
+    ])
+  })
+
+  it('should pass a page that leaves a section out', () => {
+    const source = page(
+      '## Output\n\nA record.\n\n## See also\n\n- `canon docs`',
+    )
+
+    expect(referenceShapeFindings(source)).toEqual([])
+  })
+
   it('should report a table whose first header cell names flags', () => {
     const source = page(
       `${CONFORMING}\n\n| Flag     | Meaning      |\n| -------- | ------------ |\n| \`--json\` | Add a record |`,

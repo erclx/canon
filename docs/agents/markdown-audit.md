@@ -69,7 +69,7 @@ The six layout limits, their scope, and their gate are in `markdown-audit-densit
 
 ### Reference shape
 
-A page opts in with `kind: reference` in its frontmatter, and an unmarked page is never measured. On a marked page, outside fenced blocks, an H2 other than `Output`, `Refusals`, or `See also` reports, as does any H3 and a table whose first header cell is `Flag` or `Option`.
+A page opts in with `kind: reference` in its frontmatter, and an unmarked page is never measured. On a marked page, outside fences, an H2 other than `Output`, `Refusals`, or `See also` reports, as does one repeated or out of that order, any H3, and a table headed `Flag` or `Option`.
 
 Each finding sits under `referenceShape` in the `--json` entry with `kind`, `line`, `text`, and `gating`. It gates under the prefixes density gates on.
 

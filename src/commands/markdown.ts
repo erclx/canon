@@ -124,9 +124,10 @@ export function register(program: Command): void {
         'Outside a canon checkout every density finding reports and none gates.',
         '',
         'A page whose frontmatter carries kind: reference takes the reference',
-        'shape: no H2 beyond Output, Refusals, and See also, no H3, and no',
-        'table whose first header cell names flags or options. It gates under',
-        'the same prefixes density does, and an unmarked page is never measured.',
+        'shape: no H2 beyond Output, Refusals, and See also, each at most once',
+        'and in that order, no H3, and no table whose first header cell names',
+        'flags or options. It gates under the same prefixes density does, and',
+        'an unmarked page is never measured.',
         '',
         'A mid-sentence colon and a heading with a capital after its first word',
         'report the same way. A proper noun is the one case the second cannot',
@@ -529,6 +530,7 @@ function reportDensity(reports: readonly FileReport[], gates: boolean): void {
 
 const REFERENCE_SHAPE_LABELS: Record<ReferenceShapeKind, string> = {
   'extra-section': 'section outside the shape',
+  'section-order': 'section out of order or repeated',
   subsection: 'H3',
   'flag-table': 'flag table',
 }
@@ -548,7 +550,7 @@ function reportReferenceShape(
 ): void {
   logStep('Reference shape')
   logInfo(
-    `A page whose frontmatter carries kind: reference holds its opening, then ${REFERENCE_SECTIONS.join(', ')}, with no H3 and no table of flags. An unmarked page is never measured.`,
+    `A page whose frontmatter carries kind: reference holds its opening, then ${REFERENCE_SECTIONS.join(', ')}, each at most once and in that order, with no H3 and no table of flags. An unmarked page is never measured.`,
   )
   logInfo(
     gates
@@ -577,7 +579,7 @@ function reportReferenceShape(
   )
   if (gating > 0) logWarn('A gating finding fails the run.')
   logInfo(
-    'Fold an H3 into its section, move a section the shape lacks into the opening or a linked page, and point at canon <verb> --help for flags.',
+    "Fold an H3 into its section, move a section the shape lacks into the opening or a linked page, and point at the command's own --help for flags.",
   )
   pipeOutput(
     carrying

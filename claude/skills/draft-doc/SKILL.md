@@ -58,7 +58,7 @@ Settle the path and check the catalog for a collision the way the reference stat
 ## Write
 
 - Write the file at the confirmed path, creating the folder when it is absent unless the reference narrows that.
-- Run `canon markdown audit <path>`, fix every ban and density finding it reports, and re-run it until it reports none. The whole file is this run's draft, so no finding in it belongs to anyone else.
+- Run `canon markdown audit <path>` and fix every ban, density, and reference shape finding until a re-run reports none. The whole file is this run's draft, so every finding is its own.
 - Run `canon indexes regen <folder>` on the folder the reference names, so its `index.md` picks up the new document. Skip it where the reference says the kind keeps no catalog.
 
 ## Response format

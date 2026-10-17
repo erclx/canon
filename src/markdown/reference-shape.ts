@@ -8,7 +8,11 @@ export const REFERENCE_SECTIONS: readonly string[] = [
   'See also',
 ]
 
-export type ReferenceShapeKind = 'extra-section' | 'subsection' | 'flag-table'
+export type ReferenceShapeKind =
+  | 'extra-section'
+  | 'section-order'
+  | 'subsection'
+  | 'flag-table'
 
 export interface ReferenceShapeFinding {
   readonly kind: ReferenceShapeKind
@@ -40,7 +44,8 @@ export function isReferencePage(source: string): boolean {
  * line order, and nothing on an unmarked page.
  *
  * The shape is an opening holding the command, then `## Output`,
- * `## Refusals`, and `## See also`, with no H3 and no table of flags, since
+ * `## Refusals`, and `## See also`, each at most once and in that order, though
+ * a page may leave one out, with no H3 and no table of flags, since
  * `--help` already prints them. The check reads headings and table headers
  * outside fences and leaves the opening to a reader.
  */
@@ -51,6 +56,7 @@ export function referenceShapeFindings(
 
   const found: ReferenceShapeFinding[] = []
   const lines = bodyLines(source)
+  let lastSection = -1
 
   for (const [index, line] of lines.entries()) {
     if (line.fenced) continue
@@ -60,8 +66,15 @@ export function referenceShapeFindings(
       const [, marks, text] = heading
       if (marks.length === 3) {
         found.push({ kind: 'subsection', line: line.number, text })
-      } else if (!REFERENCE_SECTIONS.includes(text)) {
-        found.push({ kind: 'extra-section', line: line.number, text })
+      } else {
+        const position = REFERENCE_SECTIONS.indexOf(text)
+        if (position === -1) {
+          found.push({ kind: 'extra-section', line: line.number, text })
+        } else if (position <= lastSection) {
+          found.push({ kind: 'section-order', line: line.number, text })
+        } else {
+          lastSection = position
+        }
       }
       continue
     }

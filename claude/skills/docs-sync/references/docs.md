@@ -72,7 +72,7 @@ A grouped catalog writes the declared shelves and nothing else, so `category` is
 A page marked `kind: reference` documents one command and holds a fixed set of parts. `canon markdown audit` checks the headings and tables on every marked page, and an unmarked page is never measured.
 
 - Open with the H1, one or two lines on what the command does, and the command in a fence
-- Follow with `## Output`, `## Refusals`, and `## See also`, in that order, and no other H2
+- Follow with `## Output`, `## Refusals`, and `## See also`, each at most once and in that order, and no other H2. A page may leave one out.
 - Use no H3. A part long enough to need one belongs on a page of its own.
 - Point at `<command> --help` for flags rather than tabling them. A table whose first header cell is `Flag` or `Option` is a finding.
 - Table the refusals by their `reason` where the command emits one
