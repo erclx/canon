@@ -157,6 +157,9 @@ export function slideNumberProps(theme: DeckTheme): PptxGenJS.SlideNumberProps {
   }
 }
 
+// An SVG mark keeps the broken PNG fallback pptxgenjs writes, because the
+// screenshot patch in export.ts reaches slides and never layouts, so the mark
+// is a raster file.
 function markImage(path: string, size: MarkSize): PptxGenJS.ImageProps {
   const scale = Math.min(MARK_BOX.w / size.width, MARK_BOX.h / size.height)
   const w = Math.round(size.width * scale * 1000) / 1000
