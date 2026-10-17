@@ -5,54 +5,129 @@ description: Each toolkit skill with a plausible community counterpart compared 
 
 # Redundancy audit
 
-Toolkit skills with a plausible community counterpart are compared below. Every one is kept, some have taken a borrowed section from the counterpart, and each taken borrow names the body it landed in. Most borrows found have been taken: the `session-worktree` submodule guard, the `ux-measure` CLS attribution, the `git-ship` verify gate, and the `git-worktree` path-prefix test. The `review-address` push-back borrow is the one still standing, a repair that edits a skill body no verdict pass has opened.
+Every toolkit skill with a plausible community counterpart is compared here, and every one is kept. Most borrows found have been taken, each into a named body.
+
+The `review-address` push-back borrow is the one still standing, a repair that edits a skill body no verdict pass has opened.
+
+| Borrow taken     | Landed in          |
+| ---------------- | ------------------ |
+| Submodule guard  | `session-worktree` |
+| CLS attribution  | `ux-measure`       |
+| Verify gate      | `git-ship`         |
+| Path-prefix test | `git-worktree`     |
 
 ## Decisions
 
-### Debugging, review, and planning counterparts
+### Debugging and audit counterparts
 
-- `canon:systematic-debugging` vs `obra/superpowers/systematic-debugging`. Same methodology. Ours is 98 lines to their 283 at `8ca22db`, capturing the four phases, circuit breaker, and red flags in a prose-tight form that matches toolkit conventions. No borrow from superpowers.
-  - Bisect, the reduce step, the non-reproducible branches, and error output as data were borrowed from `addyosmani/agent-skills`'s `debugging-and-error-recovery` instead, and the skill's `references/adopted.md` records each.
-- `canon:ux-audit` vs `impeccable`'s `/audit` and `/critique`. Different lenses. Ours enumerates UI surfaces to find missing states, edge cases, and inconsistencies. `/audit` scores technical quality across five dimensions and `/critique` scores design with Nielsen heuristics.
-  - They compose, so run `ux-audit` first to find gaps, then the `impeccable` commands to polish what exists. No skill body change, because third-party skill references belong on this surface rather than in a `SKILL.md` body.
-- `canon:plan-feature` vs the `obra/superpowers` planning skills `brainstorming`, `writing-plans`, and `executing-plans`. Different slots. Ours reads the full `.claude/` doc set and produces a structured plan at a coarser grain than the task-atomized `writing-plans`.
-  - Plan mode and Ultraplan are positioned separately in `canon/context/claude-plugin/boundaries.md`. No borrow, since the approval gate between plan and implement already covers the clarification case `brainstorming` handles upfront.
-- `canon:plan-groundwork` vs `obra/superpowers/brainstorming`. Closest external analogue, different output. `brainstorming` is an upfront clarification conversation feeding straight into a plan, so its product is a better-specified plan.
-  - Groundwork produces a durable numbered folder of measurements and rejected options that can legitimately conclude in doing nothing, and it runs before a plan is warranted rather than while one is being written. No borrow.
+Two skills in the debugging and audit slots take nothing from their counterparts.
 
-### Worktree and measurement counterparts
+- `canon:systematic-debugging` vs `obra/superpowers/systematic-debugging` is the same methodology, 98 lines to their 283 at `8ca22db`. No borrow
+- Bisect, the reduce step, the non-reproducible branches, and error output as data came from `addyosmani/agent-skills`'s `debugging-and-error-recovery`, and `references/adopted.md` records each
+- `canon:ux-audit` vs `impeccable`'s `/audit` and `/critique` are different lenses. Ours enumerates UI surfaces for missing states and inconsistencies, while theirs score technical quality and design
+- They compose, so run `ux-audit` first, then the `impeccable` commands to polish
+- No body change, because third-party skill references belong on this surface rather than in a `SKILL.md` body
 
-- `canon:session-worktree` vs `obra/superpowers/using-git-worktrees`. Different premises. Theirs is portable, so most of its 202 lines carry a fallback path for a harness with no native tool, down to an ignore check, a dependency install by ecosystem sniff, and a baseline test run. Ours assumes `EnterWorktree` and spends its 133 lines on what that tool leaves undone.
-  - Taken into `session-worktree`'s Guards, on the opposite branch from the one theirs describes. Their Step 0 adds `git rev-parse --show-superproject-working-tree` for a submodule where the git-dir reads differ, but an absorbed submodule returns one identical path from both reads, so that failure cannot occur here. What the same command closes is a submodule passing the first guard and building `.claude/worktrees/` inside a tree the superproject tracks as a commit. The skill body carries the measurement.
-- `canon:ux-measure` vs the user-scoped `web-perf` skill, read at 201 lines against our 110. Same subject and same three thresholds, different premises on every other axis.
-  - Theirs requires the `chrome-devtools` MCP server and stops when it is absent. Ours detects a browser MCP server, Playwright, or Lighthouse in that order and refuses to install any of them, which is the detected-rather-than-prescribed decision `canon/context/claude-plugin/skill-strategy/axes.md` records.
-  - Three further splits. Theirs traces one load and ours takes the median of three cold readings, on the ground that a single load carries startup noise wider than the gap between two thresholds. Theirs recommends fixes by name and ours reports the reading and stops, since a remedy is a change with its own review. Theirs folds in an accessibility snapshot and a codebase pass, both of which ours lists under `Not measured` and routes to `ux-audit`.
-  - Their threshold handling is the one place ours is the narrower design on purpose. `web-perf` retrieves boundaries from `web.dev` at run time and carries seven metrics to our three. Ours pins the published numbers in a table and forbids moving one to fit a reading, so adopting retrieval would contradict that rule rather than extend it. No borrow.
-  - Taken into `ux-measure` Step 3 and its report format. Their `CLSCulprits` insight names which elements shifted, where a bare CLS number carries no attribution. It sits inside our report-and-stop contract because it says where the score came from rather than what to do about it, and the body says so where it lands. The attribution comes off the run that produced the median rather than merging all three, since merged shares are proportions of a total no run measured.
+### Planning counterparts
+
+Both planning skills sit in different slots from the `obra/superpowers` skills nearest them.
+
+- `canon:plan-feature` vs `brainstorming`, `writing-plans`, and `executing-plans` reads the full `.claude/` doc set and plans at a coarser grain than the task-atomized `writing-plans`
+- No borrow, since the approval gate between plan and implement already covers the clarification `brainstorming` does upfront
+- `canon/context/claude-plugin/boundaries.md` positions Plan mode and Ultraplan
+- `canon:plan-groundwork` vs `brainstorming` is the closest analogue with a different output. Theirs is an upfront conversation whose product is a better-specified plan
+- Groundwork leaves a durable folder of measurements and rejected options that can conclude in doing nothing, and it runs before a plan is warranted. No borrow
+
+### Worktree counterpart
+
+`canon:session-worktree` vs `obra/superpowers/using-git-worktrees` differ in premise. Theirs is portable, so most of its 202 lines carry fallbacks for a harness with no native tool, such as an ignore check, a dependency install, and a baseline test run.
+
+- Ours assumes `EnterWorktree` and spends its 133 lines on what that tool leaves undone
+- The borrow landed in `session-worktree`'s Guards, on the opposite branch from theirs
+- Their Step 0 adds `git rev-parse --show-superproject-working-tree`, but an absorbed submodule returns one identical path from both reads
+- What it closes is a submodule passing the first guard and building `.claude/worktrees/` inside a tree the superproject tracks as a commit. The skill body carries the measurement
+
+### Measurement counterpart
+
+`canon:ux-measure` vs the user-scoped `web-perf` skill, 110 lines against their 201, shares the subject and the same three thresholds. Every other premise differs.
+
+- Theirs requires the `chrome-devtools` MCP server and stops without it. Ours detects a browser MCP server, Playwright, or Lighthouse in that order and installs none, per `axes.md`
+- Theirs traces one load, while ours takes the median of three cold readings, because one load carries startup noise wider than the gap between two thresholds
+- Theirs recommends fixes by name, while ours reports the reading and stops, since a remedy is a change with its own review
+- Theirs folds in an accessibility snapshot and a codebase pass, which ours lists under `Not measured` and routes to `ux-audit`
+
+`web-perf` retrieves boundaries from `web.dev` at run time across seven metrics. Ours pins the published numbers for three and forbids moving one to fit a reading, so retrieval would contradict that rule.
+
+The borrow went into `ux-measure` Step 3 and its report format. Their `CLSCulprits` insight names which elements shifted, where a bare CLS number carries no attribution.
+
+- It fits the report-and-stop contract because it says where the score came from rather than what to do about it
+- The attribution comes off the run that produced the median, since merged shares are proportions of a total no run measured
 
 ### Shipping counterparts
 
-- `canon:auto-ship` vs `obra/superpowers/executing-plans` and the `finishing-a-development-branch` it requires. Different products. Theirs walks plan tasks against a todo list and closes by handing the operator a merge, PR, or cleanup menu. Ours closes on a draft pull request with CI polled and offers no menu.
-  - No borrow. `executing-plans` opens by critiquing the plan, and this toolkit takes that at the `plan-feature` approval gate ahead of autoship.
-  - The comparison's one outcome is internal: `auto-ship`'s ship step invokes `git-ship` rather than restating its sequence, recorded under the `git-ship` bullet below.
-- `canon:git-ship` vs `obra/superpowers/finishing-a-development-branch`. Same moment, opposite postures. Theirs detects the workspace state and presents a four-option menu covering merge, pull request, keep, and discard, with a typed confirmation guarding the destructive one. Ours runs a fixed sequence, closes on an open pull request with CI polled, and offers no menu.
-  - The menu is the split rather than a section either side could adopt. A project on this toolkit answered the integration question at the plan-to-execute boundary, where `session-worktree` opens a branch that exists to become a pull request, so a skill asking again at the end reopens what a written artifact already settled. Theirs runs where no such artifact exists.
-  - Two halves of theirs have no counterpart here and belong elsewhere if anywhere. Worktree cleanup with its provenance check is `git-worktree`'s subject, and the discard path is a destructive operation this chain declines to offer at all.
-  - Taken as `git-ship`'s `## Verify` section. Their Step 1 refuses to present any option until the project's test suite passes. Without it, several `auto-ship` stop points hand the run back to `/git-ship`, which would reach the remote without re-running anything, so a manual fix after a verify stop could ship unverified. A project naming no verify command says so and continues, since a stop there would refuse every target without a suite.
-  - `git-ship` keeps the chain and `auto-ship`'s ship step invokes it rather than restating it, since `git-ship` is reachable on its own where that step is reached only inside the chain, so the body a reader meets alone is the one that should be complete. The draft marking is what the step keeps, placed ahead of the CI watch rather than after it, because a pull request marked afterward is mergeable for the length of the run.
-- `canon:git-worktree` vs the Step 6 cleanup inside `obra/superpowers/finishing-a-development-branch`. Different scopes at different moments.
-  - Theirs cleans the one worktree the session sits in, at the end of one branch, and only for two of its four options. Ours enumerates every worktree in the repository at any time, resolves each branch's merge state through `gh` with a local-ancestry fallback, and removes the merged set in one batch.
-  - Taken as a fourth enumeration test. Theirs tests the worktree path against a known prefix before removing anything and leaves a workspace the harness owns in place. Without it, `git worktree list` reporting every worktree could put a merged clean tree an operator added by hand elsewhere on disk inside the remove set, its branch following under `branch -D`. A non-main row whose path sits outside `<MAIN_ROOT>/.claude/worktrees/` reads as `foreign` and joins the skip set with that reason, in `list` and `cleanup` both.
+Two shipping skills compare against `executing-plans` and `finishing-a-development-branch`. Both counterparts end on a menu, and ours end on a draft pull request with CI polled.
 
-### Orchestration and review counterparts
+- `canon:auto-ship` vs `executing-plans` and the `finishing-a-development-branch` it requires is a different product. Theirs walks plan tasks against a todo list and closes on a menu
+- No borrow. `executing-plans` opens by critiquing the plan, and this toolkit does that at the `plan-feature` approval gate ahead of autoship
+- The one outcome is internal, since `auto-ship`'s ship step invokes `git-ship` rather than restating its sequence
 
-- `canon:role-orchestrator` vs `obra/superpowers/dispatching-parallel-agents` and the `subagent-driven-development` beside it. Same subject, opposite mechanism. Both of theirs delegate to in-process subagents and spend most of their length on constructing the context each one gets, since a subagent inherits nothing and is reached only through its final report.
-  - Ours dispatches a separate `claude --bg` process holding its own worktree and its own pull request, and forbids the Agent tool outright. `canon/context/claude-internal/orchestration/dispatch.md` records why under the dispatch boundary: independence, being steerable, and a worker's own pull request are the properties, and a subagent carries none of them.
-  - No borrow, and the reason is that the halves do not correspond. Their prompt-construction sections exist because a subagent starts empty, and a dispatched session reads the plan file instead. What ours carries that theirs has no room for is the collision check composing a worktree listing, a session roster, and the refs already naming the branch.
-- `canon:review-pr` vs `obra/superpowers/requesting-code-review` and Claude Code's own `/code-review`. Two counterparts at one moment, and the built-in is the closer of them.
-  - Theirs dispatches a reviewer subagent and returns findings into the requesting session, which is the shape the review trigger in `canon/context/claude-internal/orchestration/review.md` declines: a finding that lives in one session dies with it, and an orchestrator and worker pair outlive neither. Ours posts to the pull request so the record survives both.
-  - `/code-review` is the live overlap. It takes a pull request target, `--comment` posts findings as inline comments, and `ultra --post` posts a finished review as one comment from the operator's account. `canon/context/claude-plugin/boundaries.md` records the built-in against `review-pr`.
-  - What still separates ours is the re-review contract. A first pass reads the whole change, every later pass reads only the commits added since, the heading moves from `## Review` to `## Review closed` when a pass carries no finding, and a close-out that repeats one already standing is refused. No borrow.
-- `canon:review-address` vs `obra/superpowers/receiving-code-review`. Same moment, different kinds of document. Theirs is a posture: forbidden responses, how to handle unclear feedback, and how to correct a pushback that was wrong. Ours is a procedure: pull the findings and CI status, fix, verify, refresh stale docs, rebase, push, reply, confirm resolution.
-  - They compose rather than compete, so a session can hold both and neither section duplicates the other. Ours has one line where theirs has a chapter, being the note that a finding may be a question or a conscious-accept and answered in the reply rather than by editing.
-  - One borrow stands, not yet taken. Their `## When To Push Back` states six criteria for declining a finding, and ours states that a declined finding carries the fact that settled it without saying when declining is right. That is a judgment inside our existing reply path rather than a new step, so it fits and awaits a pass that opens the skill body.
+### git-ship against the branch-finishing skill
+
+`canon:git-ship` vs `finishing-a-development-branch` is the same moment with opposite postures. Theirs offers merge, pull request, keep, or discard, with a typed confirmation on the destructive one. Ours runs a fixed sequence and offers no menu.
+
+- The menu is the split. A project on this toolkit answered the integration question at the plan-to-execute boundary
+- `session-worktree` opens a branch there that exists to become a pull request, so asking again reopens a settled question
+- Two halves of theirs have no counterpart here. Worktree cleanup is `git-worktree`'s subject, and the discard path is a destructive operation this chain declines to offer
+
+The borrow is `git-ship`'s `## Verify` section, from their Step 1, which refuses to present any option until the project's test suite passes.
+
+- Without it, several `auto-ship` stop points hand the run back to `/git-ship`
+- That would reach the remote without re-running anything, so a manual fix after a verify stop could ship unverified
+- A project naming no verify command says so and continues, since a stop there would refuse every target without a suite
+
+`git-ship` keeps the chain, and `auto-ship`'s ship step invokes it rather than restating it. `git-ship` is reachable on its own while that step is reached only inside the chain, so the body a reader meets alone should be the complete one.
+
+- The step keeps the draft marking, placed ahead of the CI watch, because a pull request marked afterward is mergeable for the length of the run
+
+### git-worktree against the cleanup step
+
+`canon:git-worktree` vs the Step 6 cleanup in `finishing-a-development-branch` is a different scope at a different moment.
+
+- Theirs cleans the one worktree the session sits in, at the end of one branch, and only for two of its four options
+- Ours enumerates every worktree at any time, resolves each branch's merge state through `gh` with a local-ancestry fallback, and removes the merged set in one batch
+
+The borrow is a fourth enumeration test. Theirs checks the worktree path against a known prefix before removing anything and leaves a harness-owned workspace in place.
+
+- Without it, a merged clean tree an operator added by hand elsewhere on disk would land in the remove set, its branch following under `branch -D`
+- A non-main row outside `<MAIN_ROOT>/.claude/worktrees/` reads as `foreign` and joins the skip set with that reason, in `list` and `cleanup` both
+
+### Orchestration counterpart
+
+`canon:role-orchestrator` vs `dispatching-parallel-agents` and `subagent-driven-development` has the same subject and the opposite mechanism. Both of theirs delegate to in-process subagents and spend most of their length building each one's context, since a subagent inherits nothing.
+
+- Ours dispatches a separate `claude --bg` process with its own worktree and pull request, and forbids the Agent tool
+- `canon/context/claude-internal/orchestration/dispatch.md` records why, being that a subagent carries none of independence, steerability, or its own pull request
+- No borrow, because the halves do not correspond. Their prompt-construction sections exist since a subagent starts empty, and a dispatched session reads the plan file instead
+- Ours carries a collision check that theirs has no room for, composing a worktree listing, a session roster, and the refs already naming the branch
+
+### Review counterparts
+
+`canon:review-pr` has two counterparts at one moment, `obra/superpowers/requesting-code-review` and Claude Code's own `/code-review`, and the built-in is the closer.
+
+- Theirs dispatches a reviewer subagent and returns findings into the requesting session, the shape `canon/context/claude-internal/orchestration/review.md` declines
+- A finding in one session dies with it, so ours posts to the pull request
+- `/code-review` takes a pull request target, `--comment` posts inline comments, and `ultra --post` posts one comment from the operator's account
+- `canon/context/claude-plugin/boundaries.md` records the built-in against `review-pr`
+- What still separates ours is the re-review contract. A first pass reads the whole change and every later pass reads only the commits added since
+
+The heading moves from `## Review` to `## Review closed` when a pass carries no finding, and a close-out that repeats one already standing is refused. No borrow.
+
+### Review-response counterpart
+
+`canon:review-address` vs `obra/superpowers/receiving-code-review` is the same moment in different kinds of document. Theirs is a posture covering forbidden responses, unclear feedback, and correcting a wrong pushback. Ours is a procedure from pulling findings and CI status through fixing, verifying, rebasing, pushing, and replying.
+
+- They compose rather than compete, so a session can hold both
+- Ours has one line where theirs has a chapter, the note that a finding may be a question or a conscious-accept, answered in the reply
+- One borrow stands, not yet taken. Their `## When To Push Back` states six criteria for declining a finding
+- Ours says a declined finding carries the fact that settled it, without saying when declining is right
+- It is a judgment inside the existing reply path rather than a new step, so it awaits a pass that opens the skill body
