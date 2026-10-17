@@ -140,6 +140,8 @@ export const GATED_PATHS: readonly string[] = [
   'canon/context/ci/',
   'canon/context/scripts/',
   '.claude/skills/internal-',
+  'docs/agents/records.md',
+  'docs/agents/sessions-transfer.md',
 ]
 
 /**
