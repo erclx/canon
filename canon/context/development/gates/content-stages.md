@@ -98,7 +98,7 @@ Seven forms fail a push, each for what a reader holding a plugin cache rather th
 
 ### The docs-path pattern
 
-The docs-path pattern gates on resolution rather than shape, because shape cannot tell a citation of this repository's reference corpus from an illustration naming a target's own tree: `docs/agents/tasks.md` and `docs/retry.md` are the same token to a pattern with no filesystem behind it.
+The docs-path pattern gates on resolution rather than shape, because shape cannot tell a citation of this repository's reference corpus from an illustration naming a target's own tree: `docs/agents/widgets.md` and `docs/retry.md` are the same token to a pattern with no filesystem behind it.
 
 - `root` is a required argument on `referencesIn`, since a defaulted one dropped by a caller would silently report zero docs-path findings rather than fail to typecheck
 - `canon/context/` takes no such pattern, since `canon/context/index.md` (every target has one) and `canon/context/context-model.md` (ours alone) both resolve and only the second is a defect

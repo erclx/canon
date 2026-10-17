@@ -17,7 +17,7 @@ They read the remote rather than the remote-tracking ref, since a tracking ref i
 
 Roughly half a second against 0.001s for the local read, sampled at 0.41s, 0.55s, and 0.67s across two days, on callers that already spend a `gh` round trip on the same line.
 
-`docs/agents/pr-reads.md` carries why that spend is right in the orchestrator poll and wrong in `canon targets pulls`, a question about what each reading decides rather than what it costs.
+That spend is right in the orchestrator poll and wrong in `canon targets pulls`, a question about what each reading decides rather than what it costs. `canon pr head --help` states what the read resolves.
 
 ### `pr review-state`
 

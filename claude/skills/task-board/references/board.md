@@ -144,4 +144,4 @@ Add no fourth readiness group in place of this file. The three group names are t
 
 ## Validation
 
-`canon tasks validate` reads the board against the tree, and what it checks, what it refuses on, and what it reports are at `canon docs tasks-validate`. Run it when the readiness claim is made rather than on a schedule, since the board is gitignored per-machine scratch and no shared moment exists to hang it on.
+`canon tasks validate` reads the board against the tree, and what it checks, what it refuses on, and what it reports are at `canon tasks validate --help`. Run it when the readiness claim is made rather than on a schedule, since the board is gitignored per-machine scratch and no shared moment exists to hang it on.
