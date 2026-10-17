@@ -273,7 +273,7 @@ describe('recordIdempotence', () => {
 
   const cited = [
     { path: 'canon/context/development/scratch.md', rewritten: 1 },
-    { path: 'canon/context/sandbox/authoring.md', rewritten: 1 },
+    { path: 'canon/context/sandbox.md', rewritten: 1 },
   ]
 
   it('passes where the records have moved and a re-run would rewrite nothing', async () => {
@@ -296,7 +296,7 @@ describe('recordIdempotence', () => {
 
     expect(report.emissions.map((emission) => emission.text)).toEqual([
       'canon/context/development/scratch.md (1)',
-      'canon/context/sandbox/authoring.md (1)',
+      'canon/context/sandbox.md (1)',
     ])
   })
 

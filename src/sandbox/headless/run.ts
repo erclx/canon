@@ -417,7 +417,7 @@ async function drive(
 
   // Taken after provisioning, so a scenario that stages a live session record
   // of its own is already in the before snapshot rather than reported as a
-  // dispatch this run made. `canon/context/sandbox/isolation.md` carries why
+  // dispatch this run made. `canon/context/sandbox.md` carries why
   // such a scenario writes to the real registry at all.
   const registry = sessionsDir()
   const sessionsBefore = snapshotSessions(registry)

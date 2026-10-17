@@ -41,4 +41,4 @@ A router is reviewable only through what it says. A route ending in a handoff or
 - Pair every pin with a `manual` entry, because a reply naming a skill in a sentence declining to route still passes a substring check
 - Arms whose skills may execute nothing also assert the tree, meaning the root layout is still at the root and nothing appeared under `.claude/`
 
-Where a handoff may legitimately continue into the skill it names, as a fresh target's does into `target-setup`, no tree assertion is declared. None separates the router doing the work from the router routing to something that does. `canon/context/sandbox/coverage/arms.md` catalogs the arms.
+Where a handoff may legitimately continue into the skill it names, as a fresh target's does into `target-setup`, no tree assertion is declared. None separates the router doing the work from the router routing to something that does. The arms sit under `sandbox/fixtures/claude/`.

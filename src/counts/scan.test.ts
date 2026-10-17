@@ -125,7 +125,7 @@ describe('scanCounts', () => {
   })
 
   it('should name a stale count reached through a whole-catalog quantifier', async () => {
-    // `canon/context/sandbox/authoring.md` states `took all 69 rules`,
+    // `canon/context/sandbox.md` states `took all 69 rules`,
     // where the trigger the verb gate wants sits five words ahead of the
     // number and `all` is what sits against it.
     seedSkills(63)
