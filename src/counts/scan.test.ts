@@ -166,7 +166,7 @@ describe('scanCounts', () => {
   })
 
   it('should read past a total reached through an indirect noun, which is the false positive the gap axis would have admitted', async () => {
-    // Measured live at `canon/context/claude-plugin/overview.md`: widening
+    // Measured live at `canon/context/claude-plugin.md`: widening
     // the trigger-to-number gap to two words reaches this sentence and reads
     // a domain's own membership as the catalog's total. The trigger
     // vocabulary carried both live misses without it, so the gap stayed shut

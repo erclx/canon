@@ -22,7 +22,7 @@ A skill reference is opened by the model on purpose, so it ships inside the plug
 
 ### The criterion beat case by case
 
-`canon/context/claude-plugin/skill-references/overview.md` carries why a reference has one home in its owner skill. Revisit when Claude Code loads a document on demand from a catalog of its own.
+A reference has one home in its owner skill, and `canon/context/claude-plugin.md` states the sibling path a skill cites it by.
 
 ### The sync engine and its adapters
 

@@ -57,7 +57,7 @@ Print a sentinel from inside the eval and branch on that, covering a payload tha
 
 CI runs every stage through `bun run check:ci`, which passes `--all`. The local run scopes shell, types, and tests to the changed-file set, so it is the weaker of the two. See `canon/context/ci/overview.md`.
 
-The `core.bare` repair that runs ahead of every stage is TypeScript now, in `src/worktrees/bare-flag.ts`. `canon/context/claude-plugin/skill-procedures/worktree-entry.md` carries its narrative.
+The `core.bare` repair that runs ahead of every stage is TypeScript now, in `src/worktrees/bare-flag.ts`.
 
 ## Gotchas
 

@@ -83,7 +83,7 @@ Placing both on an internal surface strands a target, which would install an orc
 The runbook cites the script as `${CLAUDE_SKILL_DIR}/scripts/poll.ts` and the loop prompt it carries cannot. That variable expands while a skill body renders, and a recurring prompt arrives as a standalone turn where it stays a literal string, so the prompt block carries a placeholder the operator substitutes.
 
 - The runbook states a recurring prompt at roughly three minutes and gives `/loop 3m` as one example, since one client's command dates a file shipping to every target
-- `canon/context/claude-plugin/distribution.md` measured which variables survive, and carries what else an executable in the plugin changes
+- `canon/context/claude-plugin.md` measured which variables survive, and carries what else an executable in the plugin changes
 - The scripts are TypeScript, reached by the type check through the `claude/skills/*/scripts/**/*.ts` entry in `tsconfig.json`. The shell stages cover `review-ui/scripts/pw.sh` alone.
 
 ### The baseline

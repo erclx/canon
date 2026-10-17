@@ -27,7 +27,7 @@ The artifact is `claude/skills/teach-workspace/references/teach.md`, with `gloss
 
 ### Workspace naming
 
-A workspace is named `<nn>-<topic>` rather than a bare slug, so a listing sorts by when each opened. It is the first record folder to take that shape, which was free because the surface was greenfield. `canon/context/claude-plugin/skill-references/surfaces.md` carries the decision and the groundwork and intake folders' shared sequence.
+A workspace is named `<nn>-<topic>` rather than a bare slug, so a listing sorts by when each opened. It is the first record folder to take that shape, which was free because the surface was greenfield.
 
 ### Quiz option order
 
