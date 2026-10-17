@@ -66,7 +66,7 @@ Each row sits under the group its skill's `metadata.family` names. The landing p
 | Skill                 | When to use                                                                                     |
 | --------------------- | ----------------------------------------------------------------------------------------------- |
 | `canon:git-ship`      | To run the whole post-feature chain from the verify gate through open PR                        |
-| `canon:context-fold`  | When decisions diverged from the plan, or the diff left a context entry stale                   |
+| `canon:context-fold`  | When the diff moved a folder or left a context entry's bullet or gotcha untrue                  |
 | `canon:task-complete` | After the fold, to mark the outcomes the diff shipped, or to archive a task the merge hook left |
 | `canon:docs-sync`     | When a change since main left `README.md` or `docs/` stale                                      |
 | `canon:git-stage`     | When the staged set spans several concerns and wants one commit each                            |

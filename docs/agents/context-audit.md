@@ -23,7 +23,7 @@ canon context audit tooling/base/seeds --gate
 | `--json`           | Add a machine-readable record on stdout, keeping the frame                |
 | `--folder <list>`  | Comma-separated folder names (default: the three below)                   |
 | `--citations-only` | Run the gating citation check alone, printing nothing when it passes      |
-| `--gate`           | Fail on a missing required section, an off-set H2, or index drift as well |
+| `--gate`           | Fail on a missing section, an off-set H2, gated shape break, or drift too |
 
 `--citations-only` and `--gate` refuse together. The first runs the citation check alone, so the two findings the second adds are never measured, and a run honoring both would exit clean on a file short a required section.
 
@@ -43,7 +43,7 @@ Exit codes are `0` for a clean run, `1` for a refusal, and `2` for a gating find
 
 Entry length, reference form, table, provenance, the record's claim classification, and every word figure no record caps print and return `0` under every mode, because each is a judgment or a weight read alongside one, and failing a push on either would make the check something to route around.
 
-Required-section, off-set H2, and index findings sit between the two. Both are answerable from the file rather than weighed, so `--gate` promotes them to failing codes while a bare run leaves them advisory. The toolkit runs the bare form against itself and the widened form against the seed tree, described below.
+Required-section, off-set H2, and index findings sit between the two. Both are answerable from the file rather than weighed, so `--gate` promotes them to failing codes while a bare run leaves them advisory. A section shape break, such as a `## Decisions` H2 or a sixth gotcha, gates under `--gate` only in a shape-gated folder. The toolkit runs the bare form against itself and the widened form against the seed tree, described below.
 
 ## The seed gate
 
