@@ -21,7 +21,8 @@ Each kind has one standard and one reference. Load the reference for the resolve
 | readme  | a `README.md`, at the root or in a folder                | `${CLAUDE_SKILL_DIR}/../docs-sync/references/readme.md`     | `${CLAUDE_SKILL_DIR}/references/readme.md`    |
 
 - Read the kind off the destination the request names: a path, a folder, or the document's own name, such as "a context entry" or "a wiki page".
-- Ask which kind when the request names no destination, offering the candidates the subject fits with the likeliest first. Never default to `docs/` without saying so, since a subject documented in the wrong surface is invisible to the session that looks for it in the right one.
+- Ask which kind when the request names no destination, offering the candidates the subject fits with the likeliest first
+- Never default to `docs/` without saying so, since a subject documented in the wrong surface is invisible to the session that looks for it in the right one
 - If no subject is given for any kind but readme, stop: `❌ No subject given. Name what this document should cover.` A README covers the project or the folder it sits in, so its subject is the target path.
 
 ## Read
@@ -50,12 +51,13 @@ Settle the path and check the catalog for a collision the way the reference stat
 ## Confirm
 
 - Show the kind, the resolved path, whatever else the reference names for the preview, and the full drafted content before writing.
-- Confirm with the user. Wait for that answer rather than treating the tool permission dialog as the gate, since the kind, the placement, and every detection the reference runs are judgment calls with no diff to preview them against.
+- Confirm with the user, and wait for that answer rather than treating the tool permission dialog as the gate
+- The kind, the placement, and every detection the reference runs are judgment calls with no diff to preview them against, which is why the dialog cannot stand in
 
 ## Write
 
 - Write the file at the confirmed path, creating the folder when it is absent unless the reference narrows that.
-- Run `canon markdown audit <path>`.
+- Run `canon markdown audit <path>`, fix every ban and density finding it reports, and re-run it until it reports none. The whole file is this run's draft, so no finding in it belongs to anyone else.
 - Run `canon indexes regen <folder>` on the folder the reference names, so its `index.md` picks up the new document. Skip it where the reference says the kind keeps no catalog.
 
 ## Response format
@@ -72,6 +74,8 @@ Settle the path and check the catalog for a collision the way the reference stat
 ```
 
 ### After confirmation
+
+One line once the file is written and its audit reports nothing.
 
 ```plaintext
 ✅ Drafted: <path>
