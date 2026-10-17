@@ -117,9 +117,7 @@ The local classifier's sweep prompt reads a reason naming why an alternative was
 
 ### A context entry's H2 set is closed
 
-An entry carries `Overview`, `Layout`, and `Gotchas` as H2 and nothing else, and `canon context audit --gate` fails any other H2. Layout gives each working folder an H3 titled with its path, and Gotchas holds at most five one-line traps.
-
-An entry carries no decisions. Context grew by about 160 words a merged pull request while the standard called decisions the reason the folder exists, and the pull request already records each one. Measured at `1d277111d` on 2026-10-17.
+An entry carries `Overview`, `Layout`, and `Gotchas` as H2 and nothing else, and `canon context audit --gate` fails any other H2. It carries no decisions, since context grew about 160 words a merged pull request while the standard called them its reason to exist. Measured at `1d277111d` on 2026-10-17.
 
 - `Decisions` is a retired section, reported everywhere and gated only under a prefix `src/context/shape-gated.ts` lists, so an unrebuilt entry never fails a push
 - A `Sources` section for entries that are not about code was rejected
