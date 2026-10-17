@@ -28,13 +28,21 @@ const DENSITY_SCOPE = [
 ]
 
 /**
- * The path prefixes whose density findings fail a run, empty until a rewrite
- * batch brings its folders to zero and adds them here.
+ * The path prefixes whose density findings fail a run, each added once a rewrite
+ * batch brings its folders to zero.
  *
  * It describes this repository's rewrite progress and nothing about a target's
  * corpus, which is why the audit reads it only inside a canon checkout.
  */
-export const GATED_PATHS: readonly string[] = []
+export const GATED_PATHS: readonly string[] = [
+  'canon/context/sandbox/',
+  'canon/context/governance/',
+  'canon/context/tooling/',
+  'canon/context/web/',
+  'canon/context/context-model/',
+  'canon/context/design/',
+  'canon/context/index.md',
+]
 
 /**
  * The limit that gates before any folder is listed, and the surfaces it gates
