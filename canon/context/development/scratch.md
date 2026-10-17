@@ -15,7 +15,7 @@ description: Why shared scratch lives at the main worktree root, what worktree i
 
 - The scratch rule states only `.canon/tmp/`, since a rule names the current layout alone
 - It stays an ignore entry rather than a second scratch root, since only whether git sees the folder changed
-- `canon/context/context-model/overview.md` carries the entry as a temporary carve-out, retired once `canon migrate records` has moved every project off the fallback
+- `canon/context/context-model.md` carries the entry as a temporary carve-out, retired once `canon migrate records` has moved every project off the fallback
 
 ### What worktree isolation refuses
 

@@ -10,7 +10,7 @@ A CLI and Claude Code plugin. What it is for, its goals, and its constraints are
 
 ## Content ownership
 
-Each rule or fact lives in one surface. Others point at it. `canon/context/context-model/overview.md` carries the test that sorts a fact between surfaces.
+Each rule or fact lives in one surface. Others point at it. `canon/context/context-model.md` carries the test that sorts a fact between surfaces.
 
 | Kind of content                                                             | Owner                                                               |
 | --------------------------------------------------------------------------- | ------------------------------------------------------------------- |

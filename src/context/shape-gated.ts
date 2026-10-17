@@ -13,7 +13,11 @@
  * `tooling/base/seeds/`, and never collides with the entry a target installs
  * from it.
  */
-export const SHAPE_GATED_FOLDERS: readonly string[] = []
+export const SHAPE_GATED_FOLDERS: readonly string[] = [
+  'canon/context/context-model.md',
+  'canon/context/design.md',
+  'canon/context/web.md',
+]
 
 /** Whether a repository-relative entry path sits under a gated prefix. */
 export function isShapeGated(

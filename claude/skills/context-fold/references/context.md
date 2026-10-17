@@ -149,9 +149,9 @@ An entry states the repository that stands, so a bullet changes when its subject
 
 ### Splitting and naming
 
-A domain outgrowing one file splits into a folder, and small domains of one kind group into one.
+A domain outgrowing the ceiling splits into a folder, and small domains of one kind group into one.
 
-- Split into a folder (`canon/context/<domain>/<sub-area>.md`) when a domain has three or more sub-areas that do not fit cleanly in one file. That split is the natural ceiling.
+- Keep one entry per domain, and split into a folder (`canon/context/<domain>/<sub-area>.md`) only when the rebuilt entry passes the 300-line ceiling `markdown.md` states, never on a count of sub-areas
 - Group the single-file entries of two or more small domains into one folder when they share a kind, such as small feature domains that each own a verb
 - A grouping folder is not a split, so each entry in it covers one domain. Its generated `index.md` carries a `subtitle` naming the kind, and an entry to start with only when one frames the others.
 - Name an entry inside either folder per the `codebase-layout` skill, which never repeats the folder's name as the entry's stem or prefix

@@ -51,7 +51,7 @@ A measure that reaches a target resolves its own corpus, and the counter keeps r
 
 ### The routing report
 
-`canon claude routing` reports per `CLAUDE.md` section how many top-level bullets name a path and how many of those a path-scoped rule already covers. It answers what the always-loaded file is paying for, which the tier test in `canon/context/context-model/overview.md` decides case by case.
+`canon claude routing` reports per `CLAUDE.md` section how many top-level bullets name a path and how many of those a path-scoped rule already covers. It answers what the always-loaded file is paying for, which the tier test in `canon/context/context-model.md` decides case by case.
 
 ### A named path is evidence, not the judgment
 

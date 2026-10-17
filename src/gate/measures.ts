@@ -508,8 +508,12 @@ export const documentCeiling: Measure = async (ctx) => {
  * Exact rather than singular-aware, so `skills/skill.md` passes. A false
  * positive on a gate stage teaches a contributor to route around it, and a
  * widened match is cheap to add once a real echo slips through.
+ *
+ * `canon/context/context-model.md` is exempt, since "context model" is the
+ * domain's own name and the entry reads as nothing else without the prefix.
  */
 export function isFolderEchoedName(path: string): boolean {
+  if (path === 'canon/context/context-model.md') return false
   const segments = path.split('/')
   if (segments.length < 2) return false
   const folder = segments[segments.length - 2] ?? ''

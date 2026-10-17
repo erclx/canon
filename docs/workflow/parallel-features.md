@@ -64,7 +64,7 @@ A fan-out of N worktrees produces N pull requests. The order they merge in matte
 
 - `CLAUDE.md`, since cross-domain behavior lives there
 - `tooling/**`, since stack manifests, golden configs, and seeds are tightly coupled
-- `canon/context/context-model/overview.md` and `docs/agents/`, which several domains cross-reference
+- `canon/context/context-model.md` and `docs/agents/`, which several domains cross-reference
 - Any folder's `index.md`, since `canon indexes regen` rewrites it and two worktrees adding files to a regen-covered folder race on it. Resolve its conflict by running the regen over the rebased tree rather than by hand.
 
 Land any in-flight edit to a hotspot on `main` before fanning out where you can. A worktree on a stale `CLAUDE.md` costs more to rebase than it saved.

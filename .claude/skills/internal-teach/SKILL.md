@@ -21,7 +21,7 @@ Develop against `examples/teach/00-fixture/`, since real workspaces hold real le
 
 - `workspace.ts` resolves a root whose basename is already `teach` as that root rather than nesting a second `teach`, so a path ending in `teach` behaves differently
 - Renders committed under `examples/` are disclaimed rather than gated, since nothing outside `examples/` depends on them staying current
-- Decide a staleness gate there before adding one, per the split `canon/context/web/assets.md` draws between `assets/` and `examples/`
+- Decide a staleness gate there before adding one, per the split `canon/context/web.md` draws between `assets/` and `examples/`
 
 ## Sync checklist
 
@@ -54,5 +54,5 @@ The `teach-workspace` skill ships these to targets and owns the artifact shape.
 
 Two entries outside the teach domain bear on this surface.
 
-- `canon/context/design/tokens.md`: the token values this surface reads and does not own
+- `canon/context/design.md`: the token values this surface reads and does not own
 - `canon/context/development/evidence.md`: which `evidence` folders are dev baselines and which are prod captures, before touching `examples/teach/evidence/`

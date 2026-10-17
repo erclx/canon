@@ -30,4 +30,4 @@ Read `claude/skills/markdown-craft/references/markdown.md` and load the `write-h
 - `claude/skills/markdown-craft/references/markdown.md`: heading, list, code, punctuation, file-reference, banned-character, and frontmatter wording rules
 - The `write-human` skill: voice, rhythm, sentence construction, and information density
 - `claude/skills/context-fold/references/context.md`: the shape of a context entry
-- `canon/context/context-model/overview.md`: the tier test that sorts a fact between surfaces
+- `canon/context/context-model.md`: the tier test that sorts a fact between surfaces

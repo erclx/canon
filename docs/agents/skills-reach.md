@@ -52,7 +52,7 @@ A path a seed installs is disowned twice, under its own name and under the folde
 A correct citation and a defective one are the same string, and the sentence around it is the difference. A citation counts as decided when its line names the toolkit as the owner, matching the bodies that already spell it that way. The repair for a finding is to say whose copy the path is, never to delete the citation, since the paths name real documents a reader wants.
 
 ```markdown
-Read `canon/context/context-model/indexes.md` from the toolkit if context on the system is needed.
+Read `canon/context/context-model.md` from the toolkit if context on the system is needed.
 ```
 
 A line mentioning the toolkit for an unrelated reason exempts a citation on it. That is the accepted cost of a word over a notation every future body would have to learn.

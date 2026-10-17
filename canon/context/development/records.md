@@ -85,7 +85,7 @@ The citation sweep behind `canon migrate records` passes over the records themse
 
 ### The two roots take different rules
 
-The asymmetry is deliberate. `.canon/` is read whole, since `canon/context/context-model/overview.md` fixes the rule that every gitignored record moves there and nothing tracked lands there, covering a folder `RECORD_ENTRIES` has yet to learn about.
+The asymmetry is deliberate. `.canon/` is read whole, since `canon/context/context-model.md` fixes the rule that every gitignored record moves there and nothing tracked lands there, covering a folder `RECORD_ENTRIES` has yet to learn about.
 
 `.claude/` is mixed and has to be entry-scoped, because a bare prefix drops tracked files and strands a target's installed `.claude/rules/canon/canon/task-scope.md`, which the sweep repoints. The marker's comment syntax has to match the file it sits in, since the sweep tests the raw substring on the line or the nearest non-blank line above.
 

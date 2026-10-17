@@ -96,9 +96,9 @@ Read the skill's sibling `REQUIREMENT.md` first when one exists. A change closin
 
 ### Modifying either CLAUDE.md
 
-The root file and its seed are paired by `internal/rules/claude/seed-mirror.md`, which fires on an edit to either and holds the mirroring split alone. The routing criterion is the tier test in `canon/context/context-model/overview.md`.
+The root file and its seed are paired by `internal/rules/claude/seed-mirror.md`, which fires on an edit to either and holds the mirroring split alone. The routing criterion is the tier test in `canon/context/context-model.md`.
 
-The seed's "Context" section defines the three-tier context model, so keep it coherent with the same model in `canon/context/context-model/overview.md`.
+The seed's "Context" section defines the three-tier context model, so keep it coherent with the same model in `canon/context/context-model.md`.
 
 ## Reference
 
@@ -106,6 +106,5 @@ The context entries and seeds this skill draws on, beyond the ones named above.
 
 - `canon/context/claude-plugin/`: skill strategy, requirements, lifecycle, review paths, shared procedures, distribution, the CLI, and built-in overlap
 - `canon/context/claude-internal/`: internal skills, orchestration, plugin discovery
-- `canon/context/context-model/overview.md`: three-tier context model and how entries get populated
-- `canon/context/context-model/indexes.md`: index.md system rationale and contracts
+- `canon/context/context-model.md`: three-tier context model, how entries get populated, and the index.md system
 - `tooling/claude/reference.md`: seed layout and design notes
