@@ -225,4 +225,4 @@ hand. See [Parallel features](parallel-features.md) for merge order and
 
 - [Claude Code and git worktrees](../../wiki/claude/worktrees.md) for the worktree mechanism and its gotchas
 - [Claude Code subagents](../../wiki/claude/subagents.md) for in-session parallelism without worktrees, and [blocking subagents](../../wiki/claude/permissions.md#blocking-subagents) for the `permissions.deny` rule that stops every spawn
-- `canon/context/claude-plugin.md` for how the skills in the loop are categorized
+- [Skill map](skill-map.md) for how the skills in the loop are categorized
