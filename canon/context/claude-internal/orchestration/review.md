@@ -9,88 +9,163 @@ description: The review trigger and its poll and watch loops, where the poll liv
 
 ### The review trigger
 
-`role-orchestrator/scripts/poll.ts` reports pull request movement so the orchestrator learns a branch moved without checking by hand, and the runbook's routing block decides what each report earns. A first pass, a re-review, and the handback dispatch all run from that block, so the operator triggers none of them. Where a pass runs is decided by `orchestrator-review-dispatch.md` rather than by the poll. A reviewer dispatched under `role-reviewer` takes every pull request's read but a release one's, first pass included, and the warm session reviews none in place, keeping only one cross-branch pass per wave over file sets.
+`role-orchestrator/scripts/poll.ts` reports pull request movement, and the runbook's routing block decides what each report earns. A first pass, a re-review, and the handback dispatch all run from that block, so the operator triggers none of them.
 
-Groundwork 115 found a cold pass holding one pull request read the docs a warm pass holding eight had skimmed, and the file-set pass is what keeps the cross-branch half.
+- `orchestrator-review-dispatch.md` decides where a pass runs, not the poll
+- A reviewer dispatched under `role-reviewer` takes every pull request's read but a release one's, first pass included
+- The warm session reviews none in place and keeps one cross-branch pass per wave over file sets. Groundwork 115 found a cold pass on one pull request read what a warm pass on eight skimmed.
 
-Reviewing small prose changes in place was the alternative, and it lost because every in-place pass reads a whole diff into the one context the wave shares, so the cheap review on one pull request thins the attention every later one gets. The reviewer's model is picked by `## Pick the model` in `orchestrator-dispatch.md` rather than by the folder a change touches, since a folder reading sent a one-bullet rule to the larger model.
+### Why not review in place
 
-`review-pr` posts its findings as a comment on the pull request rather than returning them to the session that asked, since a finding posted there survives either session ending, and neither the orchestrator nor the worker is sure to outlive the review.
+Reviewing small prose changes in place lost because every in-place pass reads a whole diff into the one context the wave shares. A cheap review on one pull request thins the attention every later one gets.
 
-#### The cloud reviewer
+The reviewer's model comes from `## Pick the model` in `orchestrator-dispatch.md` rather than the folder a change touches, since a folder reading sent a one-bullet rule to the larger model. `review-pr` posts findings as a pull request comment, which survives either session ending.
 
-On the operator's pick, a dispatched code review runs on a cloud session through the cloud build's create. The posted review is its announcement, since the session cannot message the orchestrator, and `poll.ts` already lists every open pull request locally. A cloud reviewer posts only through REST, since the proxy refuses GraphQL, so every `canon pr` read and `review-pr` lookup runs on REST. A UI review stays local, and a re-review is a fresh dispatch, since a cloud session is absent from `canon sessions list`. A cloud reviewer cannot run `canon pr lift` either, since the verb's one write is the GraphQL mutation, so the controller lifts for it.
+### The cloud reviewer
 
-Only an open pull request starts it, since the script reads pull requests while a building worker has none, so a dispatch alone would cost a run every interval between launch and push and return nothing. The worker announces its own pull request instead, per `role-worker`, which is the one transition only that session can observe. The dispatch survives as a fallback the orchestrator applies to a worker still out after thirty minutes with no announcement, since nothing reports a silent failure of the announcement.
+On the operator's pick, a dispatched code review runs on a cloud session through the cloud build's create. The posted review is its announcement, since it cannot message the orchestrator and `poll.ts` already lists every open pull request locally.
 
-#### The watch loop
+- It posts only through REST, since the proxy refuses GraphQL, so every `canon pr` read and `review-pr` lookup runs on REST
+- A UI review stays local, and a re-review is a fresh dispatch, since a cloud session is absent from `canon sessions list`
+- It cannot run `canon pr lift`, whose one write is a GraphQL mutation, so the controller lifts for it
 
-`scripts/watch.ts` covers the same window on a loop of its own rather than on a scheduled prompt, reading the open pull request list and the session roster together every sixty seconds. The roster read is the half `poll.ts` cannot make and the reason both exist: a worker that finishes goes idle and one that crashes vanishes, so a trigger matching pull requests alone stays silent through the second. It classifies no pull request, leaving the routing block to decide what each report earns.
+### When the trigger fires
 
-A worker's own status is the one thing it judges directly. A `waiting` row whose dwell crosses `STALL_THRESHOLD_S` reports as `WORKER-STOPPED` once, tracked in the same per-name state the `WORKER`/`WORKER-GONE` pair already keeps, without routing through that block. A `waiting` row whose record carries neither `statusUpdatedAt` nor `updatedAt` reports as `WORKER-UNMEASURABLE` instead, rather than folding silently into the rows the threshold clears.
+Only an open pull request starts a review. A building worker has none, so a dispatch alone would cost a run every interval between launch and push and return nothing.
 
-Coverage behind that threshold is uneven, so read the split rather than assuming it from the mechanism. Across 352 registry records measured on 2026-08-31, 301 desktop sessions carry no status field at all, 34 of 34 background sessions launched under the CLI carry one, and 12 of 17 CLI interactive sessions do. A dispatched worker is the one population the threshold measured complete and the controller is the one where it measured zero, so `WORKER-STOPPED` reports faithfully for a wave of workers and says nothing about a desktop session or an interactive one gone quiet.
+The worker announces its own pull request per `role-worker`, the one transition only that session observes. The dispatch survives as a fallback for a worker still out after thirty minutes with no announcement, since nothing reports a silent failure of the announcement.
 
-A printed line has no route to the operator on its own, since a shell loop can call no session tool and the toolkit ships no notification verb. `orchestrator-watch.md` instructs the controller to push a notification on meeting either line, at the same one-per-stall cadence `watch.ts` already tracks. The push runs inside the controller's own turn, so a controller mid-turn or itself stopped still delivers nothing.
+### The watch loop
 
-The row goes out of `canon sessions list --json` tab-separated and back in read with `IFS` set to a tab, since a name this client writes carries spaces on its own, `Update session markdown and check runnable commands (3)` among them, and a whitespace split takes that one apart before anything reaches the threshold check.
+`scripts/watch.ts` covers the same window on a loop of its own, reading the open pull request list and the session roster together every sixty seconds. The roster is the half `poll.ts` cannot read. A finished worker goes idle and a crashed one vanishes, so a trigger on pull requests alone stays silent through the second.
 
-It resolves the repository through `git worktree list` the way the poll's baseline does, rather than a hardcoded path. And it counts every session on a branch other than the base one as a worker, rather than matching a name prefix, which would read a dispatched worker and miss every hand-launched one.
+It classifies no pull request, leaving the routing block to decide.
 
-#### Where the poll lives
+- It resolves the repository through `git worktree list` like the poll's baseline, not a hardcoded path
+- It counts every session on a branch other than the base as a worker, since a name prefix would miss every hand-launched one
+- Rows leave `canon sessions list --json` tab-separated and are read with `IFS` set to a tab, since names carry spaces, such as `Update session markdown and check runnable commands (3)`
 
-`orchestrator-poll.md` is a runbook and sits with the others, while the scripts it invokes take `scripts/` per `claude/skills/create-skill/references/skill.md`, which splits detail from deterministic operations. Placing both on an internal surface was the alternative, and it strands a target, which would install an orchestrator carrying its runbooks and no review trigger while the skill body names neither the poll nor the script.
+### Worker status
 
-Nothing catches a misplacement. The Skill paths measure in `src/gate/boundaries.ts` bans a single pattern, `wiki/`, so a skill citing a toolkit-only path passes it clean, and the placement rule holds only while a session applies the reasoning. The start and stop condition is unenforced the same way, and both halves belong to whoever holds the loop, since a session holding a recurring-prompt scheduler starts and cancels one without the operator.
+A worker's own status is the one thing the loop judges directly. A `waiting` row whose dwell crosses `STALL_THRESHOLD_S` reports once as `WORKER-STOPPED`, tracked in the per-name state the `WORKER`/`WORKER-GONE` pair keeps.
 
-The runbook cites the script as `${CLAUDE_SKILL_DIR}/scripts/poll.ts` and the loop prompt it carries cannot. That variable expands while a skill body renders, and a recurring-prompt invocation arrives as a standalone turn where it reaches the session as a literal string, so the prompt block carries a placeholder the operator substitutes. The runbook states the requirement as a recurring prompt at roughly three minutes and gives `/loop 3m` as one example, since naming a single client's command dates a file that ships to every target holding the plugin. `canon/context/claude-plugin/distribution.md` measured which variables survive.
+A `waiting` row carrying neither `statusUpdatedAt` nor `updatedAt` reports as `WORKER-UNMEASURABLE` rather than folding into the rows the threshold clears.
 
-The scripts are TypeScript, so the type check reaches them through the `claude/skills/*/scripts/**/*.ts` entry in `tsconfig.json`, and a further script costs nothing. The shell stages cover `review-ui/scripts/pw.sh` alone. `canon/context/claude-plugin/distribution.md` carries what else an executable in the plugin changes.
+### Threshold coverage is uneven
 
-The script is tracked and its baseline is not. State lives at `.canon/tmp/pr/poll/baseline.txt` under the main worktree root, resolved through `git worktree list` rather than through the script's own folder, so a poll started from a linked worktree reads what one started from main wrote.
+Across 352 registry records measured on 2026-08-31, coverage split by population.
+
+| Population                        | Carry a status field |
+| --------------------------------- | -------------------- |
+| Desktop sessions                  | 0 of 301             |
+| Background sessions under the CLI | 34 of 34             |
+| CLI interactive sessions          | 12 of 17             |
+
+`WORKER-STOPPED` reports faithfully for a wave of workers and says nothing about a desktop or interactive session gone quiet.
+
+### Notifying the operator
+
+A printed line has no route to the operator, since a shell loop can call no session tool and the toolkit ships no notification verb. `orchestrator-watch.md` instructs the controller to push a notification on either line, at the one-per-stall cadence `watch.ts` tracks.
+
+The push runs inside the controller's own turn, so a controller mid-turn or itself stopped delivers nothing.
+
+### Where the poll lives
+
+`orchestrator-poll.md` is a runbook and sits with the others. The scripts it invokes take `scripts/` per `claude/skills/create-skill/references/skill.md`, which splits detail from deterministic operations.
+
+Placing both on an internal surface strands a target, which would install an orchestrator with its runbooks and no review trigger while the skill body names neither.
+
+- Nothing catches a misplacement. The Skill paths measure in `src/gate/boundaries.ts` bans one pattern, `wiki/`, so a skill citing a toolkit-only path passes clean.
+- The start and stop condition is unenforced the same way. Both halves belong to whoever holds the loop, since a session with a recurring-prompt scheduler starts and cancels one without the operator.
+
+### The loop prompt
+
+The runbook cites the script as `${CLAUDE_SKILL_DIR}/scripts/poll.ts` and the loop prompt it carries cannot. That variable expands while a skill body renders, and a recurring prompt arrives as a standalone turn where it stays a literal string, so the prompt block carries a placeholder the operator substitutes.
+
+- The runbook states a recurring prompt at roughly three minutes and gives `/loop 3m` as one example, since one client's command dates a file shipping to every target
+- `canon/context/claude-plugin/distribution.md` measured which variables survive, and carries what else an executable in the plugin changes
+- The scripts are TypeScript, reached by the type check through the `claude/skills/*/scripts/**/*.ts` entry in `tsconfig.json`. The shell stages cover `review-ui/scripts/pw.sh` alone.
+
+### The baseline
+
+The script is tracked and its baseline is not. State lives at `.canon/tmp/pr/poll/baseline.txt` under the main worktree root, resolved through `git worktree list` rather than the script's folder, so a poll from a linked worktree reads what one from main wrote.
 
 How the script classifies a pull request, its base-movement readings, and its test harness sit in `poll.md`.
 
 ### The handback dispatch
 
-A posted finding reaches the worker as a message from the reviewer that posted it, which is the one session that already knows what the worker should do next. The worker sends its re-review request straight back to that reviewer, addressed by the sessionId the dispatch carried, since a reviewer holds the trunk branch and `canon sessions list --branch` finds no reviewer. `ListAgents` and `SendMessage` carry both and the source page linked from `wiki/claude/sessions.md` holds the transport, with the relay through a person as the alternative that lost.
+A posted finding reaches the worker as a message from the reviewer that posted it, the one session that knows what the worker should do next. The worker sends its re-review request straight back, addressed by the sessionId the dispatch carried.
 
-Relaying every leg through the controlling session also lost. A round cost that session four turns, each reading the whole wave's context, to forward messages whose content the reviewer and the worker already held. The controller now hears a round only on a close, on a refusal other than the other review still being open, and on a block, so a clean round costs it one inbound turn. Copying it on every direct message was declined, since that keeps its inbound count at the old two per round. It stays the fallback sender for a cloud reviewer, which can send no message, and for either side reporting the other unreachable, and the poll's after-finding rule fires only for a pass no live reviewer sent on, so a worker never gets two dispatches for one pass.
+- A reviewer holds the trunk branch, so `canon sessions list --branch` finds none
+- `ListAgents` and `SendMessage` carry both, and the source page linked from `wiki/claude/sessions.md` holds the transport
+- A relay through a person was the alternative that lost
 
-Three findings shape the rule. Any posted finding is the gate, which is the threshold `review-pr` states and posts its open heading under, so the heading and the counts beneath it answer the dispatch question alike. A session resolves at the moment of sending and never from a stored map, because names rotate and one written down earlier in a session goes stale inside the hour. A message carries plain text, so the step names a skill for the reader to run rather than embedding an invocation that would arrive as text.
+### Why the controller is off the path
 
-`canon sessions list --branch` performs that resolution. It answers with a count and a confidence rather than a row, so the routing reads how many sessions came back and how liveness was decided instead of addressing the first one.
+Relaying every leg through the controller also lost. A round cost it four turns, each reading the whole wave's context, to forward what the reviewer and worker already held.
 
-Reading the target off a bare listing was the alternative and it lost on measurement. Five rows came back carrying a name, a ref, a kind, a state, and an age, four sharing one project prefix and two of those four on different branches, so a resolution that got the project right still had a one in four chance of getting the branch right. A dispatched worker is named from its task rather than from its directory, which leaves that prefix absent rather than weak.
+- The controller now hears a close, a refusal other than the other review still being open, and a block, so a clean round costs one inbound turn
+- Copying it on every direct message was declined, since that keeps its inbound count at the old two per round
+- It stays the fallback sender for a cloud reviewer, which can send no message, and for either side reporting the other unreachable
+- The poll's after-finding rule fires only for a pass no live reviewer sent on, so a worker never gets two dispatches for one pass
 
-Severity alone is a poor gate in both directions: a mis-called minor dispatches nobody and lands as a defect the operator has to notice, while a should-fix raised over a decision the plan already declined sends a worker to act on nothing. A live minors-only pass would sit until the operator ran the address skill by hand. A dispatch on any finding still sends a worker to a should-fix the plan settled, and the return leg answers that rather than a grade nobody calls consistently.
+### Three findings shape the rule
 
-#### The return leg
+The rule rests on three findings about what a dispatch can rely on.
 
-The return leg is the strongest argument for the channel. A worker answering a posted finding by naming the plan question that already declined it changes the outcome in the moment, where a thread comment waits on whoever reads it next.
+- Any posted finding is the gate. It is the threshold `review-pr` states and posts its open heading under, so the heading and its counts answer the dispatch question alike.
+- A session resolves at the moment of sending, never from a stored map, because names rotate and one written down earlier goes stale inside the hour
+- A message carries plain text, so the step names a skill for the reader to run rather than embedding an invocation that would arrive as text
 
-That reply reaches the pull request rather than two transcripts that both end. The responding skill carries the fact behind a declined finding into the bullet its body already writes, and the reviewing skill states a withdrawal or a regrade with what produced it instead of dropping the finding from its next body. Keying the rule to a finding the body already enumerates is what makes it fire, since a rule asking a session to judge whether its own reply mattered is the judgment that fails in practice.
+### Resolving the target
 
-The other class stays off the thread by decision. A correction to what the reviewing session believes, such as which session holds which branch or that a worker's edits pass an approval gate, settles no finding on a pull request that closes, so it takes the route the skill already states for a change found while orchestrating and lands on the task owning that surface. Both halves are prose and no check tests a posted reply for either, so the split holds while a session applies it.
+`canon sessions list --branch` performs the resolution. It answers with a count and a confidence rather than a row, so the routing reads how many sessions came back and how liveness was decided instead of addressing the first one.
 
-One branch ships untested. Every dispatch in the trial found a live session, so the zero-session fallback, which launches the review-address shape and reports the invocation for a person only when that launch cannot run, rests on reasoning alone.
+Reading the target off a bare listing lost on measurement. Five rows came back, four sharing one project prefix and two of those on different branches, so getting the project right left a one in four chance on the branch. A dispatched worker is named from its task, which leaves that prefix absent rather than weak.
 
-The runbook holds the routing and the skill body points at it. Correcting a running loop is a cancel and a re-create rather than an edit, so the runbook states both directions of the divergence rather than only one.
+### Why not gate on severity
+
+Severity alone is a poor gate in both directions. A mis-called minor dispatches nobody and lands as a defect the operator must notice, and a should-fix over a decision the plan already declined sends a worker to act on nothing.
+
+A live minors-only pass would sit until the operator ran the address skill by hand. A dispatch on any finding still reaches a settled should-fix, and the return leg answers that rather than a grade nobody calls consistently.
+
+### The return leg
+
+The return leg is the strongest argument for the channel. A worker answering a finding by naming the plan question that declined it changes the outcome in the moment, where a thread comment waits on whoever reads it next.
+
+- The reply reaches the pull request rather than two transcripts that both end
+- The responding skill carries the fact behind a declined finding into the bullet its body already writes, and the reviewing skill states a withdrawal or regrade with what produced it
+- Keying the rule to a finding the body already enumerates is what makes it fire, since a rule asking a session to judge whether its reply mattered fails in practice
+
+### What stays off the thread
+
+A correction to what the reviewing session believes settles no finding on a pull request that closes. Which session holds which branch, or that a worker's edits pass an approval gate, are examples.
+
+It takes the route the skill states for a change found while orchestrating, and lands on the task owning that surface. Both halves are prose and no check tests a reply for either, so the split holds while a session applies it.
+
+### Untested and runbook ownership
+
+One branch ships untested. Every dispatch in the trial found a live session, so the zero-session fallback rests on reasoning alone. It launches the review-address shape and reports the invocation for a person only when that launch cannot run.
+
+The runbook holds the routing and the skill body points at it. Correcting a running loop is a cancel and a re-create rather than an edit, so the runbook states both directions of the divergence.
 
 ## Gotchas
 
 ### A stamped review can carry a stale head
 
-A review's `commit.oid` is stamped with the head at submission rather than with the commit the reviewer read, so `SEEN` can fire on a head still awaiting its first look at a real delta, when a pass written against an earlier commit lands stamped with a later head and the delta it skipped is a real fix.
+A review's `commit.oid` is stamped with the head at submission, not the commit the reviewer read. `SEEN` can fire on a head still awaiting its first look at a real delta, when a pass written against an earlier commit lands stamped with a later head.
 
-A pass writes the commit it read and the instant it read it as a marker in its own body, and both `poll.ts` and `review-pr` resolve the covered state through `canon pr review-state`, so a commit pushed inside a compose window reads as `MOVED`. The same risk still holds on a record whose `source` reads `fallback`, which is a pass posted before that marker shipped or a target whose CLI predates the verb. Treat a `SEEN` under `fallback` as worth one read of `gh api repos/{owner}/{repo}/pulls/<number>/reviews` before believing it.
+- A pass writes the commit it read and the instant it read it as a marker in its own body
+- `poll.ts` and `review-pr` resolve the covered state through `canon pr review-state`, so a commit pushed inside a compose window reads as `MOVED`
+- A record whose `source` reads `fallback` still carries the risk, being a pass posted before the marker shipped or a CLI predating the verb
+- Read `gh api repos/{owner}/{repo}/pulls/<number>/reviews` once before believing a `SEEN` there
 
 ### A pull request's draft flag can read ready mid-undo
 
-Marking a pull request a draft and reading the flag back are two separate calls, and nothing marks the moment between them completing. A read taken in that window sees a genuinely ready pull request about to become a draft, the opposite of what the worker reports. Read the flag itself rather than trusting a worker's own report for exactly this window.
+Marking a pull request a draft and reading the flag back are two calls, and nothing marks the moment between them completing. A read in that window sees a genuinely ready pull request about to become a draft, the opposite of what the worker reports. Read the flag itself rather than trusting a worker's report.
 
 ### A peer's merge claim needs the commits
 
-A pull request's net file diff can read as untouched for a file a peer session correctly described as changed, when an earlier commit in the same pull request added content and a later commit removed it before merge. A check reading the merged file list finds the file absent and reads the claim as false, while the individual commits show the add and the cut.
+A pull request's net file diff can read as untouched for a file a peer correctly described as changed. An earlier commit added content and a later one removed it before merge, so a check on the merged file list finds the file absent and reads the claim as false.
 
-Verify a peer's claim about what a merge did against its commits, not the net diff, whenever the claim names an add-then-remove, since the net diff a session reaches for first is blind to exactly that shape.
+Verify a peer's claim about what a merge did against its commits, not the net diff, whenever the claim names an add-then-remove.
