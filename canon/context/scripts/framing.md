@@ -5,46 +5,59 @@ description: Which domains still shell out, who opens the timeline frame once a 
 
 # UI framing
 
-Every `canon` command prints inside one timeline frame, and the frame has to survive a call crossing from TypeScript into bash and back. This file holds where that boundary sits today and which side owns the frame at each crossing. The output shape itself is in `docs/agents/output-shape.md`, and the frame described below is the one a new domain script prints inside.
+Every `canon` command prints inside one timeline frame, and the frame has to survive a call crossing from TypeScript into bash and back. This file holds where that boundary sits and which side owns the frame at each crossing. The output shape is in `docs/agents/output-shape.md`.
 
 ## Decisions
 
 ### The exec boundary
 
-No domain has a dispatcher.
+No domain has a dispatcher. Each command file handles its verbs in TypeScript and shells out for a few.
 
-- `src/commands/tooling.ts` handles `sync`, `inject`, `prune-gitignore`, and `list` in TypeScript and shells out for `ref`, `create`, and `verify`
+- `src/commands/tooling.ts` handles `sync`, `inject`, `prune-gitignore`, and `list`, and shells out for `ref`, `create`, and `verify`
 - `src/commands/gov.ts` handles `install`, `sync`, and `build`, and shells out for `list` alone
-- `src/commands/standards.ts` and `src/commands/docs.ts` are TypeScript end to end, `list` included
-- `src/commands/claude.ts` is TypeScript end to end, as are `sync` and `init`, which reach no verb script at all
+- `src/commands/standards.ts`, `src/commands/docs.ts`, and `src/commands/claude.ts` are TypeScript end to end
 
-A migrated list verb has to open that frame itself, and the gap is easy to miss because it only shows through the CLI. The bash verb never emits `┌`, so a baseline captured by running the script directly matches a frameless port exactly while a migrated list verb loses the header a pass-through dispatch would otherwise print. Capture equivalence baselines at the boundary the user invokes, not at the script.
+A migrated list verb has to open the frame itself. The bash verb never emits `┌`, so a baseline captured by running the script directly matches a frameless port exactly, while the migrated verb loses the header a pass-through dispatch would print. Capture equivalence baselines at the boundary the user invokes.
 
-`claude seeds list` is a real Commander subcommand rather than hand-rolled routing, since its script sits at `scripts/claude/seeds-list.sh` outside the `scripts/<domain>/<verb>.sh` shape a pass-through verb assumes. The parent `seeds` command keeps an action handler so an unknown or missing subcommand still reports the two errors a bash `case` would emit, since Commander falls through to the parent when no subcommand name matches.
+`claude seeds list` is a real Commander subcommand, since its script sits at `scripts/claude/seeds-list.sh` outside the `scripts/<domain>/<verb>.sh` shape a pass-through assumes. The parent `seeds` command keeps an action handler so an unknown or missing subcommand still reports the two errors a bash `case` would emit.
 
 ### Frame ownership
 
-The responsibility for opening the frame sits with the TypeScript command layer above a pass-through, since a bash verb script closes a frame it never opened. `src/commands/gov.ts` calls `intro('canon gov')` before it execs a pass-through, taking over that job. It skips the call when the args carry `-h` or `--help`, since a help screen prints its own frame.
+The TypeScript command layer opens the frame above a pass-through, since a bash verb script closes a frame it never opened. `src/commands/gov.ts` calls `intro('canon gov')` before it execs one, and skips the call when the args carry `-h` or `--help`, since a help screen prints its own frame.
 
-A TypeScript command that both bash and users invoke owns its frame and takes `--nested` to suppress it. `canon tooling inject` frames itself so direct invocation does not emit dangling `│` lines, while the tooling sandbox scenarios pass `--nested` because they have already opened one. This is the same split `canon gate run --nested` makes for a caller that has already opened a frame of its own. A migrated domain keeps the same frame because `src/cli/ui.ts` mirrors `lib/ui.sh`, and the mirror covers the color inside it as well as the frame around it.
+- A TypeScript command that both bash and users invoke owns its frame and takes `--nested` to suppress it
+- `canon tooling inject` frames itself so direct invocation emits no dangling `│` lines, and the tooling sandbox scenarios pass `--nested` because they have already opened one
+- `canon gate run --nested` makes the same split for a caller with a frame of its own
+- `src/cli/ui.ts` mirrors `lib/ui.sh`, so a migrated domain keeps the same frame and the same color inside it
 
-Once both sides of a call are TypeScript the flag is not needed at all: `canon claude` calls `injectGitignore` directly inside the already-open frame rather than shelling into `canon tooling inject --gitignore --nested`, which drops a process per invocation.
+When both sides of a call are TypeScript the flag is not needed. `canon claude` calls `injectGitignore` directly inside the open frame rather than shelling into `canon tooling inject --gitignore --nested`, which drops a process per invocation.
 
 ### The first option is what a headless run takes
 
-`select({nonInteractiveDefault})` returns the first option under `CANON_NON_INTERACTIVE=1`, so an option list ordered for a human at a terminal decides what an agent does. An option list whose first entry reaches outside the machine, such as `Commit and open PR` whenever `gh` is installed, would make a headless run push a branch and open a pull request on the target's repository with no confirmation, reproducible against a throwaway repo with a bare remote. Ask what the first option does rather than whether the list reads well. Reordering is enough for a local write, and an action reaching outside the machine refuses headlessly and reports what it would have done instead, which is what `runGitWorkflow` and the standards sync refusal both do.
+`select({nonInteractiveDefault})` returns the first option under `CANON_NON_INTERACTIVE=1`, so an option list ordered for a human decides what an agent does. A first entry like `Commit and open PR` would make a headless run open a pull request on the target's repository unconfirmed.
+
+Ask what the first option does rather than whether the list reads well. Reordering is enough for a local write. An action reaching outside the machine refuses headlessly and reports what it would have done, which is what `runGitWorkflow` and the standards sync refusal both do.
 
 ## Gotchas
 
 ### Hidden contracts
 
-- The timeline frame opens in the dispatcher rather than in each subcommand. Prompts and `log_*` assume a frame is already open, so opening it at the top prevents dangling output on error paths.
+The stream split decides how output pipes, and `exec` decides who owns the traps.
+
+- The frame opens in the dispatcher rather than in each subcommand, since prompts and `log_*` assume one is open and opening it first prevents dangling output on error paths
 - `log_*` writes to stderr and data goes to stdout, so JSON and lists pipe clean through any wrapper. This is why `--help` is the one exception that prints to stdout.
-- `exec` replaces the process and drops the parent trap, so every subcommand re-arms `trap close_timeline EXIT` itself before any early exit, including `--json` paths.
-- Subcommand scripts never emit their own `┌`. The dispatcher already did, and a second one produces two frames per invocation.
+- `exec` drops the parent trap, so every subcommand re-arms `trap close_timeline EXIT` before any early exit, including `--json` paths
+- Subcommand scripts never emit their own `┌`, since a second one produces two frames per invocation
 
-#### Color and palette
+### Color and palette
 
-- The color opt-out crosses this boundary by having each side answer for itself. `src/cli/exec.ts` runs a delegated script under `stdio: 'inherit'`, so no parent can filter a child's stream and the child reads `NO_COLOR` and its own `[ -t <fd> ]` instead.
-- `set_palette <fd>` in `scripts/lib/ui.sh` is the only place a bash escape is spelled, and it asks per stream rather than once per process. Every writer in that file declares all six palette names `local` and calls it for fd 2 at write time, so a redirect applied after the file was sourced still gets the right answer. A single source-time call answers for stdout, which is the stream 112 of the 125 palette reads across 13 consumer scripts reach with a bare `echo` in their own frames. The blank palette keeps every frame character and drops only the escapes.
-- A consumer framing to stderr with a bare `echo` asks for itself. Declare the six names `local` and call `set_palette 2` at the top of the function. Without that they read the stdout answer, and a run piping only its data emits a frame that is colored where a `log_*` writer drew it and plain where the script drew it. Place the declaration after any branch calling a help function, since dynamic scoping hands a callee whatever the caller declared. `tooling/ref.sh` held one of the six functions before it retired, so this count is already stale and wants a fresh reading now, not only on the next script naming `set_palette`.
+The color opt-out crosses the boundary by each side answering for itself. `src/cli/exec.ts` runs a delegated script under `stdio: 'inherit'`, so no parent can filter a child's stream and the child reads `NO_COLOR` and its own `[ -t <fd> ]`.
+
+- `set_palette <fd>` in `scripts/lib/ui.sh` is the only place a bash escape is spelled, and it asks per stream rather than once per process
+- Every writer in that file declares all six palette names `local` and calls it for fd 2 at write time, so a redirect applied after sourcing still gets the right answer
+- A source-time call answers for stdout, the stream 112 of 125 palette reads across 13 consumer scripts reach with a bare `echo`
+- The blank palette keeps every frame character and drops only the escapes
+
+A consumer framing to stderr with a bare `echo` declares the six names `local` and calls `set_palette 2` at the top of the function. Without that, a run piping only its data emits a frame colored where a `log_*` writer drew it and plain where the script drew it.
+
+Place the declaration after any branch calling a help function, since dynamic scoping hands a callee whatever the caller declared. The 112 of 125 count is stale and wants a fresh reading.

@@ -9,7 +9,7 @@ description: The gate stage table CI runs, the regeneration stages, the phase-la
 
 ### Stages
 
-Defined in `.github/workflows/verify.yml`, which runs one step, `bun run check:ci`. That resolves to `canon gate run --all`, so the stage list lives in `src/gate/stages.ts` rather than in the workflow and every stage runs regardless of what the branch touched. Two rows report rather than gate, and the table marks each.
+`.github/workflows/verify.yml` runs one step, `bun run check:ci`, which resolves to `canon gate run --all`. The stage list lives in `src/gate/stages.ts` rather than in the workflow, and every stage runs regardless of what the branch touched.
 
 | Stage                   | Command                                                                  | What it asserts                                                                                          |
 | ----------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
@@ -42,58 +42,76 @@ Defined in `.github/workflows/verify.yml`, which runs one step, `bun run check:c
 | Types                   | `bun run check:types`                                                    | `tsc --noEmit` passes against `src/`                                                                     |
 | Tests                   | `bun run test`                                                           | the vitest suite passes                                                                                  |
 
-Unreferenced rules and Audit set report rather than gate because every finding they carry is a judgment call, and a push failing on one would teach a contributor to route around the stage. Both still print what they found.
+Two stages report rather than gate. Unreferenced rules and Audit set carry only judgment calls, and a push failing on one would teach a contributor to route around the stage. Both still print what they found.
 
-One more qualification is a stage that could not read its input at all, which is a state any row can reach. Under `check:ci` that fails the run, since an absent tool on a runner is a broken workflow step. On a contributor's machine it warns and the run stays green, and the closing line names how many stages measured nothing rather than printing an unqualified pass. Shell, types, and tests skip on the changed-file set locally and never in CI, which is what `--all` buys.
+### Unmeasured stages
 
-Rebuild this table from `STAGES` in `src/gate/stages.ts` rather than editing rows by hand, since a hand edit can drift from the source it renders. The one format stage is an entry in that table, so a rebuild reaches it the way it reaches every other row. Nothing compares this table to the table it describes, so a stage added later can leave it wrong until the next rebuild.
+A stage that could not read its input at all is a state any row can reach.
 
-#### The regeneration stages
+- Under `check:ci` it fails the run, since an absent tool on a runner is a broken workflow step
+- On a contributor's machine it warns and the run stays green, and the closing line names how many stages measured nothing rather than printing an unqualified pass
+- Shell, types, and tests skip on the changed-file set locally and never in CI, which is what `--all` buys
 
-The two drift stages, Indexes and Consumed copies, regenerate and then assert twice through the `drift` check in `src/gate/sequencer.ts`, once with `git diff --exit-code` for modified tracked files and once with `git ls-files --others --exclude-standard` for new untracked ones. They catch content that was regenerated locally but committed stale, which is the failure a local-only gate lets through.
+### Keeping the table current
 
-Regeneration runs in every mode, so `check:ci` writes to the working tree even though it never formats.
+Rebuild the table from `STAGES` in `src/gate/stages.ts` rather than editing rows by hand, since a hand edit can drift from the source it renders. Nothing compares the table to `STAGES`, so a stage added later leaves it wrong until the next rebuild.
+
+### The regeneration stages
+
+The two drift stages, Indexes and Consumed copies, regenerate and then assert twice through the `drift` check in `src/gate/sequencer.ts`. They catch content regenerated locally but committed stale, which a local-only gate lets through.
+
+- `git diff --exit-code` covers modified tracked files
+- `git ls-files --others --exclude-standard` covers new untracked ones
+- Regeneration runs in every mode, so `check:ci` writes to the working tree even though it never formats
 
 ### The plugin CLI on the runner
 
-The runner installs the plugin CLI so the manifest stage gates on a real binary rather than skipping for want of one. The plugin is the toolkit's second delivery path, so a manifest validated only on the author's machine could still reach a marketplace install unchecked.
+The runner installs the plugin CLI so the manifest stage gates on a real binary rather than skipping for want of one. The plugin is the toolkit's second delivery path, so a manifest validated only on the author's machine could reach a marketplace install unchecked.
 
-`bun install -g @anthropic-ai/claude-code@2.1.236` lands the binary in the directory `setup-bun` already put on `PATH`. The version is pinned exactly rather than to a major, because `2.1.237` installs one package with no platform-native dependency and leaves a wrapper on `PATH` that cannot run. Whether a later release repairs the install on its own is unmeasured, so raising the pin is a move someone makes and reads the run for, rather than one the registry makes overnight.
+`bun install -g @anthropic-ai/claude-code@2.1.236` lands the binary in the directory `setup-bun` already put on `PATH`. The version is pinned exactly rather than to a major, so raising the pin is a move someone makes and reads the run for, rather than one the registry makes overnight.
 
-The release itself is not the defect: `2.1.237` answers `claude --version` and passes `claude plugin validate --strict` on both manifests locally, so the failure is a condition of `bun install -g` against that release on a fresh runner. Raising the pin has to be tested on a runner and cannot be cleared by running the new version locally.
+- `2.1.237` installs one package with no platform-native dependency and leaves a wrapper on `PATH` that cannot run
+- The release is not the defect, since it passes `claude plugin validate --strict` locally. The failure is `bun install -g` on a fresh runner, so test a raised pin on one.
+- Whether a later release repairs the install on its own is unmeasured
 
-The published tarball explains why the health guard checks behavior rather than presence alone. `bin/claude.exe` as shipped is a shell stub that prints a native-binary error and exits 1 on any invocation, and the postinstall step replaces that stub with the real binary. A global install landing the wrapper alone leaves a name that resolves and a command that fails, which is exactly what `claude --version` tests.
+The health guard checks behavior rather than presence because `bin/claude.exe` ships as a stub that prints a native-binary error and exits 1, until postinstall replaces it. A wrapper-only install leaves a name that resolves and a command that fails, which `claude --version` tests.
 
-Validation needs no credential, so this is an install step rather than a secret. The stage skips on a machine where the CLI is absent or cannot run, and fails instead when `CI` is set, because a silent skip on the runner would report the pass the stage exists to withhold.
+Validation needs no credential, so this is an install step rather than a secret. The stage skips on a machine where the CLI is absent or cannot run, and fails when `CI` is set, since a silent skip on the runner would report the pass the stage exists to withhold.
 
 ## Decisions
 
 ### The phase-label gate
 
-`phase-label-gate.yml` runs `canon labels scan` against `$GITHUB_EVENT_PATH`, since a pull request body and a posted review comment are the two things no stage in `bun run check` can see. It sits outside `verify.yml` rather than as a second job there, and the split turns on `types:` rather than on cost: this check exists to catch a title or body edited with no new commit, which needs `edited` on the trigger, and adding that to the shared trigger would re-run the whole Static Checks job on every such edit.
+`phase-label-gate.yml` runs `canon labels scan` against `$GITHUB_EVENT_PATH`, since a pull request body and a posted review comment are text no stage in `bun run check` sees. It sits outside `verify.yml` because it needs `edited` on the trigger, and adding that to the shared trigger would re-run the whole Static Checks job on every edit.
 
-A `pull_request_review` trigger reaches the second surface, firing on `submitted` and `edited`, and reads `review.body` rather than the pull request's own title and body, which is text a person can publish without touching either. That event carries no `branches` filter GitHub reads, so the job's own `if:` checks the base ref instead of the trigger.
+- A `pull_request_review` trigger fires on `submitted` and `edited` and reads `review.body`, text a person can publish without touching the pull request's own title or body
+- That event carries no `branches` filter GitHub reads, so the job's own `if:` checks the base ref
+- The checkout-root copy runs `bun src/cli.ts labels scan` after `bun install --frozen-lockfile`, dogfooding its own source tree
+- `tooling/base/configs/.github/workflows/phase-label-gate.yml` is the seeded copy, running `bunx -y @erclx/canon labels scan` with no install step, since a `python`-stack target has no lockfile
 
-The checkout-root copy stays on `bun src/cli.ts labels scan` and its `bun install --frozen-lockfile` step, its own source tree, rather than switching to the published CLI, the same dogfooding reason `verify.yml`'s root copy carries steps its `base` config does not.
+### Release pull requests and masking
 
-`tooling/base/configs/.github/workflows/phase-label-gate.yml` is the portable copy seeded to every scaffolded target, invoking `bunx -y @erclx/canon labels scan` instead, since a target has no `src/cli.ts` of its own to resolve. It carries no install step either: `bunx` fetches the published package fresh, so an install would serve nothing the scan uses and would fail outright on a target with no lockfile of its own, such as a `python`-stack scaffold.
+The scan tells a release-please pull request from an ordinary one by two fixed signals rather than a label, being the head branch prefix `release-please--branches--main` and the title prefix `chore(main): release `. Either alone is a string an ordinary pull request could reproduce to slip a leaked phase label past, so both must hold.
 
-It tells a release-please pull request apart from an ordinary one by two fixed signals rather than a label: the head branch prefix `release-please--branches--main` and the title prefix `chore(main): release `. Either alone is a string an ordinary pull request could reproduce to slip a leaked phase label past the check, so both have to hold together.
+The scan reads a title and body with every fenced block dropped and every inline code span blanked, the exclusions `canon markdown audit` takes. A code span can carry a version-shaped test fixture name that a naive scan would flag as a leaked label.
 
-The scan reads a title and a body with every fenced block dropped and every inline code span blanked first, the same two exclusions `canon markdown audit` takes from its own ban scan over the same kind of text. A link destination stays unmasked, unlike the ban scan's reading, because a release-please body's real semver reference sits inside its generated compare link and masking it would empty the record on the one pull request the check exists to pass.
+- A link destination stays unmasked, unlike the ban scan, since a release-please body's real semver reference sits inside its generated compare link
+- `VERSION_SPAN` in `src/labels/phase.ts` reads a span whose whole content is a version token as a hit, and a token folded into longer content clears it
+- Authors stay responsible for a label quoted alone in its own span, since narrowing the exclusion to fenced blocks or dropping it would give up every unbackticked leak, the common case
+- `claude/skills/git-commit/references/versioning.md` states the same three-way split
 
-The code-span exclusion exists because a test fixture can carry its own version-shaped name inside a backticked span, which a naive scan of every code span would flag as a leaked label.
+### Sections and character bans
 
-The board-identifier check (`VERSION_SPAN` in `src/labels/phase.ts`) reads a span whose whole content is a version token as a hit. A token folded into longer content clears it, which is the fixture-name shape the exclusion above protects. A phase label quoted alone in its own span still needs that check to catch it, since the phase-label check alone would clear it.
+The same gate holds the section list and the character bans, since both are text no stage in `bun run check` sees. The bans reuse `BAN_SETS` and run on every source, so a posted review is held to the same two characters as a pull request.
 
-The carve-out stays, leaving authors responsible for a label quoted alone in its own span, rather than narrowing it to fenced blocks alone or dropping it and giving up every leak written with no backticks, the common case the check was built for. `claude/skills/git-commit/references/versioning.md` states the same three-way split.
-
-The same gate also holds the section list and the character bans, since both are text no stage in `bun run check` sees. The headings check reads an ordinary pull request alone: a review body carries its own headings, a release-please body opens on a version link and takes the `isReleasePullRequest` test the phase scan already runs, and a scan carrying no title is a reply rather than a description. The bans reuse `BAN_SETS` and run on every source, so a posted review is held to the same two characters as a pull request.
+The headings check reads an ordinary pull request alone. A review body carries its own headings, a release-please body opens on a version link and takes the `isReleasePullRequest` test, and a scan carrying no title is a reply rather than a description.
 
 ### The install check
 
-`check:install` runs in CI as its own step, after `check:ci`. `Verify install` costs about 3 seconds against `Verify`'s 70, since the runner's `bun install --frozen-lockfile` step has already primed the same package cache moments earlier in the same job. The local gate and the pre-push hook exclude it anyway, because a contributor's first run gets no such head start, and what a cold pack-and-install costs there is unmeasured.
+`check:install` runs in CI as its own step after `check:ci`. It costs about 3 seconds against `Verify`'s 70, since the runner's `bun install --frozen-lockfile` has already primed the package cache. The local gate and the pre-push hook exclude it, because a contributor's first run gets no such head start and a cold pack-and-install is unmeasured.
 
-A clone answers whether a checkout installs, which `bun install --frozen-lockfile` already proves earlier in the same job. Packing and installing from the extracted tarball answers what the `files` field ships, which nothing else in this workflow tests, and `canon/context/cli/packaging.md` covers what that check proves and what it still cannot see.
+Packing and installing from the extracted tarball answers what the `files` field ships, which nothing else in this workflow tests. A clone only proves a checkout installs. `canon/context/cli/packaging.md` covers what the check proves and what it cannot see.
 
-`typescript` is a declared devDependency rather than a hoisted peer of `@astrojs/check`. It is pinned to the v5 line those peers expect, so a `bun add -D typescript` that selects v7 would be a compiler upgrade, not a dependency fix.
+### TypeScript pin
+
+`typescript` is a declared devDependency rather than a hoisted peer of `@astrojs/check`. It is pinned to the v5 line those peers expect, so a `bun add -D typescript` selecting v7 would be a compiler upgrade, not a dependency fix.

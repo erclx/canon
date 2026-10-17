@@ -1,6 +1,6 @@
 ---
 title: Catalog stages
-description: The gate stages reading a catalog or a count, covering sandbox coverage, plugin manifest validation, skill paths, the requirements record, the document ceiling, skill provenance, skill practice shape, and skill family
+description: The gate stages reading a catalog or a count, from sandbox coverage to the skill audits
 ---
 
 # Catalog stages
@@ -9,76 +9,91 @@ description: The gate stages reading a catalog or a count, covering sandbox cove
 
 ### Sandbox coverage
 
-`canon sandbox coverage` reports which scenarios declare expectations. The Sandbox coverage stage reads the same report and gates on it, so a scenario added with no expectation fails a push rather than sitting undeclared.
+`canon sandbox coverage` reports which scenarios declare expectations, and the Sandbox coverage stage gates on the same report, so a scenario added with no expectation fails a push rather than sitting undeclared.
 
-The gate is `SANDBOX_UNDECLARED_CEILING` in `src/gate/measures.ts`, an absolute count of scenarios declaring nothing, pinned at what a clean run reports. A floor under the declared count would pass the case the stage exists for, since adding an unarmed scenario leaves the declared count where it was, and a ratio moves when a scenario is legitimately deleted. The ceiling does neither: deleting an unarmed scenario lowers it, and deleting an armed one leaves it alone. Raising the number is a deliberate edit, so a branch shipping an unarmed scenario says in the diff which one and why, rather than a percentage drifting down over several merges with no single commit responsible.
+The gate is `SANDBOX_UNDECLARED_CEILING` in `src/gate/measures.ts`, an absolute count of scenarios declaring nothing, pinned at what a clean run reports.
 
-`SANDBOX_ASSERTED_FLOOR`, also in `src/gate/measures.ts`, gates the same command's `--skills` census on `asserted`. A floor is the right shape here for the reason a floor was wrong for the scenario count: a dropped skill-to-scenario pairing lowers `asserted` directly. A rename that drops pairings without touching any scenario file fails this floor even while the ceiling stays green, since the ceiling counts scenarios declaring an expectation rather than skills a scenario reaches.
+- A floor under the declared count would pass the case the stage exists for, since an unarmed scenario leaves the declared count where it was
+- A ratio moves when a scenario is legitimately deleted, while the ceiling falls on deleting an unarmed one and stays on an armed one
+- Raising the number is a deliberate edit, so the diff says which scenario and why, rather than a percentage drifting down with no commit responsible
 
-A coverage command that exits non-zero fails the stage under CI and warns on a contributor's machine. The scenario tree ships in the checkout, so a runner that cannot read it has a broken command rather than an absent tree, and taking the skip there would report the pass the stage exists to withhold.
+`SANDBOX_ASSERTED_FLOOR` in the same file gates the `--skills` census on `asserted`. A floor is right here because a dropped skill-to-scenario pairing lowers `asserted` directly, including a rename that drops pairings without touching a scenario file while the ceiling stays green.
+
+A coverage command that exits non-zero fails the stage under CI and warns on a contributor's machine. The scenario tree ships in the checkout, so a runner that cannot read it has a broken command, and a skip there would report the pass the stage exists to withhold.
 
 ### Manifest validation
 
-The Plugin manifests stage runs `claude plugin validate --strict` over every plugin and marketplace manifest the repository carries. It always runs, because a manifest edit is not the only thing that invalidates one and the whole stage costs about a third of a second.
+The Plugin manifests stage runs `claude plugin validate --strict` over every plugin and marketplace manifest. It always runs, because a manifest edit is not the only thing that invalidates one and the stage costs about a third of a second.
 
-It discovers its inputs instead of naming them. Two `git ls-files` listings, tracked and untracked, match `*.claude-plugin/plugin.json` and `*.claude-plugin/marketplace.json`, so a marketplace manifest added later is covered the day it lands. Both listings honor `.gitignore`, which is what keeps linked worktrees and dependency copies from being validated as if they were ours.
+- It discovers its inputs through tracked and untracked `git ls-files` listings matching `*.claude-plugin/plugin.json` and `marketplace.json`, so a later manifest is covered the day it lands
+- Both listings honor `.gitignore`, which keeps linked worktrees and dependency copies out
+- `--strict` promotes warnings to failures, so a Claude Code release adding a warning fails `bun run check` for everyone until the manifest answers it
 
-The guard tests twice, first that `claude` resolves on `PATH` and then that `claude --version` succeeds, because a global install can land the wrapper and none of the platform-native package behind it, which leaves a name that resolves and a binary that dies on the first real call. A contributor's machine takes a skip on either failure, since an absent or half-installed CLI there is someone mid-setup. CI installs the plugin CLI as a workflow step, so both failures refuse there, and the refusal for a binary that cannot run names the pinned version rather than the install step that already succeeded.
-
-`--strict` promotes warnings to failures, which is what makes the stage catch a manifest missing metadata rather than only one that fails to parse. The cost is that a Claude Code release introducing a new warning fails `bun run check` for everyone until the manifest answers it.
+The guard tests that `claude` resolves on `PATH` and that `claude --version` succeeds, since a global install can land the wrapper without the native package. A contributor's machine skips on either failure. CI refuses on both, and the refusal for a binary that cannot run names the pinned version.
 
 ### Skill paths
 
-The Skill paths stage runs the `skillPaths` measure over the shipped skill tree and fails on a path that resolves only in this repository. A shipped skill runs from a plugin cache in someone else's project, where this tree's top-level folders reach nothing, so a citation reading correctly here is a dead pointer everywhere the skill actually runs.
+The Skill paths stage runs the `skillPaths` measure over the shipped skill tree and fails on a path that resolves only in this repository. A shipped skill runs from a plugin cache in someone else's project, so a citation that reads correctly here is a dead pointer there.
 
-The walk reads inside fenced code blocks, which is what makes an illustrative example count. An example is the part of a reference a reader copies, so a target handed one built from this repository's own `docs/` and `wiki/` rows learns a folder set it does not have. That is a true positive rather than the fenced-example class the Seed independence stage accepts, and an example in shipped content invents its paths.
-
-The banned pattern is a bare `wiki/` with no exemption for a body that has a reason to name it. A shipped skill routing a page into a project's wiki has to describe both spellings, and only `.claude/wiki/` survives the match, so the root spelling is stated as a folder named `wiki` rather than as a path. That is the phrasing the promotion routing in `teach-workspace` carries.
+- The walk reads inside fenced code blocks, because an example is the part a reader copies, and one built from this repository's `docs/` and `wiki/` rows teaches a target a folder set it lacks
+- The banned pattern is a bare `wiki/` with no exemption, so a skill routing a page into a project's wiki names a folder called `wiki` rather than a path, as `teach-workspace` does
 
 ### Canonical records
 
-The Canonical records stage calls `measureRequirements` in-process. It fails when `canon/REQUIREMENTS.md` holds more words than the cap it states. The cap is the record's own clause, so a record stating none passes, and a project with no record passes and says so. The stage keeps its id and label, since a rename costs every doc citing the label for no behavior change.
+The Canonical records stage calls `measureRequirements` in-process and fails when `canon/REQUIREMENTS.md` holds more words than the cap it states. A record stating no cap passes, and a project with no record passes and says so.
 
-It reads the record directly because the Context citations stage runs `--citations-only`, which never opens it.
+The stage keeps its id and label, since a rename costs every doc citing the label for no behavior change. It reads the record directly because the Context citations stage runs `--citations-only`, which never opens it.
 
 ### Design prose
 
-The Design stage regenerates `canon/DESIGN.md` and asserts it for drift, and then runs the `designProse` measure over that record and `examples/design/DESIGN.md`. The measure counts each against the limits in `src/design/budget.ts`, which `claude/skills/canvas-board/references/design.md` states: a one-paragraph Overview, at most three rules a section, a word cap on each rule, and a short lead. A drift assert cannot see this, since a regenerated paragraph agrees with its source however long it grows.
+The Design stage regenerates `canon/DESIGN.md`, asserts drift, and runs the `designProse` measure over it and `examples/design/DESIGN.md`. The limits in `src/design/budget.ts`, stated in `claude/skills/canvas-board/references/design.md`, are a one-paragraph Overview, at most three rules a section, a word cap on each rule, and a short lead.
 
-A record that is absent is skipped, a tree holding neither passes and says so, and a path it cannot read reports unmeasured rather than passing.
+A drift assert cannot see these, since a regenerated paragraph agrees with its source however long it grows. An absent record is skipped, a tree holding neither passes and says so, and an unreadable path reports unmeasured.
 
 ### Document ceiling
 
-The Document ceiling stage reads every markdown file git lists, sums `documentHeight` over the whole source, and names each one past `CHECKPOINTS.ceiling`, 300 rendered lines. Frontmatter and fenced blocks count, since a session pays for every line it loads. A file named `CHANGELOG.md` is exempt by name, because the release tool rewrites it and would drop a marker, and any other file is exempt only through a whole-line `<!-- canon-length-exempt: <reason> -->` outside a fence. A committed list of exempt paths was the alternative, and every rename would have made it a second edit with nothing checking it.
+The Document ceiling stage reads every markdown file git lists, sums `documentHeight` over the whole source, and names each one past `CHECKPOINTS.ceiling`, 300 rendered lines. Frontmatter and fenced blocks count, since a session pays for every line it loads.
 
-The stage fails a push on any non-exempt document past the ceiling, naming every one with its height so a contributor sees the whole set in one pass, and the failure names the two remedies: split at a seam, or mark a verbatim record exempt. `canon markdown audit` prints the same list under its Length step and never exits 2 on it, because the plan and groundwork skills run that audit on a gitignored record where a long plan is not a defect. The stage owns the verdict for the same reason the Canonical records stage owns each record's caps while `canon context audit` only reports.
+- `CHANGELOG.md` is exempt by name, because the release tool rewrites it and would drop a marker
+- Any other file is exempt only through a whole-line `<!-- canon-length-exempt: <reason> -->` outside a fence, since a list of exempt paths would need a second edit on every rename
+- The failure names every document with its height and the two remedies, splitting at a seam or marking a verbatim record exempt
 
-A table counts at the width the formatter pads it to, so one wide cell raises every row to that width. A lookup table carrying long cells costs close to twice what the same rows cost as a bullet list, which the formatter never pads, and that conversion is the cheapest cut on a file sitting near the ceiling.
+`canon markdown audit` prints the same list under its Length step and never exits 2 on it, because the plan and groundwork skills run that audit on a gitignored record where a long plan is not a defect. The stage owns the verdict, as the Canonical records stage owns each record's caps while `canon context audit` only reports.
 
-Because frontmatter counts, a sweep adding a frontmatter field across a corpus pushes every body already at the ceiling over it. Measure each target's slack with `canon markdown audit` before planning such a sweep, and name the splits it forces in the plan.
+### Document ceiling measurement
+
+A table counts at the width the formatter pads it to, so one wide cell raises every row. A lookup table with long cells costs nearly twice what the same rows cost as a bullet list, which the formatter never pads, and that conversion is the cheapest cut on a file near the ceiling.
+
+Frontmatter counts too, so a sweep adding a field across a corpus pushes every body already at the ceiling over it. Measure each target's slack with `canon markdown audit` before planning such a sweep, and name the splits it forces in the plan.
 
 ### Folder-echoed filenames
 
-The Folder-echoed filenames stage reads every path `git ls-files` lists and fails on each one whose stem, the basename up to its first dot, equals its immediate parent folder's name or opens with `<folder>-`. The failure names every path in one pass. A tree git cannot list reports as unmeasured rather than passing. It reads the parent folder only, so the governance install layout under `.claude/rules/canon/canon/`, where a folder repeats a folder, stays out of reach.
+The stage reads every path `git ls-files` lists and fails on each whose stem, the basename up to its first dot, equals its immediate parent folder's name or opens with `<folder>-`. The failure names every path in one pass, and a tree git cannot list reports unmeasured.
 
-It is a gate stage rather than a `canon markdown audit` finding for two reasons. It reads paths rather than markdown, so it covers code and config files the audit never opens. The audit also runs inside every target through the tooling base stack, where a folder-named file may be a convention the target chose, and a finding there would fail a push on that choice. The rule itself sits in the `codebase-layout` skill and reaches targets as guidance, and this stage is this repository's only enforcement.
+It reads the parent folder only, so the governance install layout under `.claude/rules/canon/canon/`, where a folder repeats a folder, stays out of reach.
 
-Matching is exact rather than singular-aware, so `skills/skill.md` passes. A false positive on a gate stage teaches a contributor to route around it, and widening the match is cheap once a real plural echo slips through. The stage carries no exemption list, and one waits for the first hit someone argues for.
+- It is a gate stage rather than an audit finding because it reads paths, covering code and config files the audit never opens
+- The audit also runs inside every target through the tooling base stack, where a folder-named file may be the target's convention, and a finding would fail a push on that choice
+- The rule sits in the `codebase-layout` skill and reaches targets as guidance, so this stage is this repository's only enforcement
+- Matching is exact rather than singular-aware, so `skills/skill.md` passes, since a false positive teaches contributors to route around the gate and widening is cheap later
+- The stage carries no exemption list, and one waits for the first hit someone argues for
 
 ### Skill provenance
 
-The Skill provenance stage calls `auditSkills` in-process and fails on every ISO date its `datedProvenance` finding reads in a `SKILL.md` or a `references/` file, outside a fence or a code span, across both `claude/skills/` and `.claude/skills/`. The failure names each file, line, and date, and points the incident at `REQUIREMENT.md` under `Gap` or at git. A tree holding neither corpus reports as unmeasured.
+The Skill provenance stage calls `auditSkills` in-process and fails on every ISO date its `datedProvenance` finding reads in a `SKILL.md` or `references/` file, outside a fence or code span, across `claude/skills/` and `.claude/skills/`. The failure names each file, line, and date, and points the incident at `REQUIREMENT.md` under `Gap` or at git.
 
-It fails outright rather than reporting, because the corpus sits at zero and a report-only phase would have nothing to wait for. `canon claude skills audit` prints the same finding under its Provenance step and keeps its exit code on a missing requirement alone, so a target running the verb is told about a date and never fails on one. The stage is what makes the finding fail here, where the corpus is held at zero, and it reads the report in-process rather than through the verb's exit for that reason.
+- A tree holding neither corpus reports unmeasured
+- It fails outright because the corpus sits at zero and a report-only phase would have nothing to wait for
+- `canon claude skills audit` prints the same finding and keeps its exit on a missing requirement alone, so a target is told and never fails, which is why the stage reads the report in-process
 
 ### Skill practice shape
 
-The Skill practice shape stage calls `auditSkills` in-process and fails on every `practiceShape` finding, naming each listed practice skill and the closing H2 or the ledger it lacks, or the listed skill itself when no folder under `claude/skills/` matches it. It reads the same report the Skill provenance stage does and fails for the same reason: the verb keeps its exit on a missing requirement alone, so a target is told and never fails, while every listed skill here is held at zero.
+The Skill practice shape stage calls `auditSkills` in-process and fails on every `practiceShape` finding, naming each listed practice skill and the closing H2 or ledger it lacks, or the listed skill itself when no folder under `claude/skills/` matches it. It fails for the same reason as Skill provenance, since every listed skill is held at zero.
 
 It reports unmeasured when `claude/skills/` is absent rather than when both corpora are, since the list names shipped folders alone and a tree carrying only `.claude/skills/` would otherwise pass without reading a practice skill.
 
 ### Skill family
 
-The Skill family stage calls `auditSkills` in-process and fails on every `family` finding, naming each skill under `claude/skills/` whose `metadata.family` is missing or names no key in `src/claude/skills-families.ts`. The verb reports the same finding and keeps its exit on a missing requirement alone, the split the practice shape stage takes.
+The Skill family stage calls `auditSkills` in-process and fails on every `family` finding, naming each skill under `claude/skills/` whose `metadata.family` is missing or names no key in `src/claude/skills-families.ts`. The verb reports the same finding and keeps its exit on a missing requirement alone.
 
-The field needs a stage of its own because no stage reads the skill map. Its only reader is the web build, which CI runs when a skill or the map changes and `bun run check` never runs, so a skill with no family would otherwise reach the push and fail there. Internal skills take no family and the stage never asks them for one. A tree without `claude/skills/` reports unmeasured.
+The field needs a stage because no other stage reads the skill map. Its only reader is the web build, which CI runs when a skill or the map changes and `bun run check` never runs, so a skill with no family would reach the push and fail there. Internal skills take no family, and a tree without `claude/skills/` reports unmeasured.

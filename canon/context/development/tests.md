@@ -1,19 +1,19 @@
 ---
 title: Test scoping
-description: Which change runs which src/ test, the census of corpora a src/ test asserts over from outside src/, the machine lock that runs one suite per box at a time, the vitest invocation forms and their failure signatures, and the include and unused-import gaps
+description: Which change runs which src/ test, the corpus census, the machine lock that runs one suite per box, the vitest invocation forms, and the unused-import gap
 ---
 
 # Test scoping
 
 ## Decisions
 
-### A `src/` test and the corpus it asserts over
+### A src test and the corpus it asserts over
 
-Types and Tests run on a `src/` change, and Tests also runs on a change to any corpus a `src/` test asserts over from outside `src/`. `TEST_CORPORA_PATTERNS` in `src/gate/stages.ts` holds those corpora as patterns, and the Tests stage reads the joined result beside `^src/`, so a branch editing one of them runs the suite that covers it.
+Types and Tests run on a `src/` change, and Tests also runs on a change to any corpus a `src/` test asserts over from outside `src/`. `TEST_CORPORA_PATTERNS` in `src/gate/stages.ts` holds those corpora as patterns, and the Tests stage reads the joined result beside `^src/`, so a branch editing one runs the suite that covers it.
 
-#### The census
+### The census
 
-The array and the list below are two copies of one set with nothing comparing them. A corpus joining the census joins `TEST_CORPORA_PATTERNS` in the same change, and the direction that fails silently is the guard going stale while this entry reads current, so this entry is the carrier for that duty. A test asserting the regex against this prose would be a third copy, which a corpus this static does not earn.
+The array and the list below are two copies of one set with nothing comparing them. A corpus joining the census joins `TEST_CORPORA_PATTERNS` in the same change, since the silent failure is the guard going stale while this entry reads current. A test comparing them would be a third copy this static corpus does not earn.
 
 - **`claude/skills/*/SKILL.md`**: `bun --bun vitest run src/claude/cases/all.test.ts`, then `bun --bun vitest run src/claude/skills-headings.test.ts`
 - **`governance/rules/ui/*.md`** frontmatter globs: `bun --bun vitest run src/gov/list.test.ts`
@@ -25,33 +25,48 @@ The array and the list below are two copies of one set with nothing comparing th
 - **`claude/skills/role-orchestrator/scripts/watch.ts`**: `bun --bun vitest run src/claude/orchestrate-watch.test.ts`
 - **`tooling/web/configs/scripts/worktree-port.sh`**: `bun --bun vitest run src/tooling/worktree-port.test.ts`
 
-The patterns and the rows differ at both ends rather than by an omission. `^claude/skills/` covers the skill-body row and both script rows, `^governance/rules/` covers both governance rows, and the hooks row expands into two patterns because its test reaches the seed copy as well. The patterns that are directory prefixes exist because their tests walk the tree whole, and two of those reach a rule or a skill a branch adds rather than edits. `src/gov/adapter.test.ts` asserts an absence, that `governance/rules/project/` ships empty because the subfolder is reserved for a target, so adding a rule there is what trips it.
+### How patterns and rows differ
 
-#### How the census reads a test
+The patterns and the rows differ at both ends rather than by an omission.
 
-The census reads every file under `src/**/*.test.ts` that resolves a path outside `src/` against the repository root and asserts over what it finds there, and it excludes a test reading a fixture as data. That exclusion puts `src/comments/trend.test.ts` outside the set, since it replays fixed git revisions and skips itself when they are unreachable, and `src/commands/exit-code.test.ts`, which copies `src/` and `tsconfig.json` into a temp root. `src/git/gh-invocations.test.ts` and `src/cli/ui.test.ts` resolve the repository root, then walk `src/` alone.
+- `^claude/skills/` covers the skill-body row and both script rows, and `^governance/rules/` covers both governance rows
+- The hooks row expands into two patterns because its test reaches the seed copy too
+- Directory-prefix patterns exist because their tests walk the tree whole, and two reach a rule or skill a branch adds rather than edits
+- `src/gov/adapter.test.ts` asserts that `governance/rules/project/` ships empty, since the subfolder is reserved for a target, so adding a rule there trips it
 
-A temp root is not the repository root, which is the clause that decides three more. `src/commands/records-migrate.test.ts`, `src/commands/tooling-sync.test.ts`, and `src/records/backup.test.ts` each resolve against an `mkdtempSync` directory, so a sweep reading for the resolution form alone counts too many.
+### How the census reads a test
 
-A file can reach the root two ways and a sweep reading for one of them undercounts. Every file in the census names a root constant, being `PROJECT_ROOT`, `import.meta.dirname`, or `process.cwd()`, and none passes a bare relative path to a file read, which would resolve against the runner's working directory and name no constant at all. Grep for the implicit form as well as the explicit one, since a test added in that shape joins the census without reading as a member.
+The census reads every file under `src/**/*.test.ts` that resolves a path outside `src/` against the repository root and asserts over what it finds, excluding a test reading a fixture as data.
 
-#### Why Tests widened and Types did not
+- `src/comments/trend.test.ts` is outside the set, since it replays fixed git revisions and skips itself when they are unreachable
+- `src/commands/exit-code.test.ts` copies `src/` and `tsconfig.json` into a temp root, and `src/git/gh-invocations.test.ts` and `src/cli/ui.test.ts` resolve the root and walk `src/` alone
+- A temp root is not the repository root, which excludes `src/commands/records-migrate.test.ts`, `src/commands/tooling-sync.test.ts`, and `src/records/backup.test.ts`, each using `mkdtempSync`
 
-Tests admits the census and nothing wider. Widening to every change was the alternative and it charges twice as much for the same exposure: over a sample of 60 commits reaching `origin/main`, 42 already ran Tests under the `^src/` guard, 22 touched a census corpus, and 9 of those 22 ran no Tests stage at all. Widening newly charges the other 18, so the census reaches the whole measured gap at half the added load. The guard admits `package.json`, `tsconfig.json`, and `vitest.config.ts`, so a release commit touching one of those pays the suite already.
+A file can reach the root two ways and a sweep for one undercounts. Every file in the census names a root constant, being `PROJECT_ROOT`, `import.meta.dirname`, or `process.cwd()`, and none passes a bare relative path to a file read. Grep for the implicit form as well, since a test added in that shape joins the census without reading as a member.
 
-Types was left alone. Every census entry is a test asserting over a corpus, and a typecheck over unchanged TypeScript reports what it reported last run. Types therefore still skips a branch that fails a test through a corpus: dropping `'**/*.astro'` from the `paths:` list in `governance/rules/ui/link-behavior.md` fails `src/gov/list.test.ts`, and Types reports `Skipped, no TypeScript changes` while Tests catches it.
+### Why Tests widened and Types did not
 
-The gap is narrowed to what the census names rather than closed, since a corpus the census has not named is unguarded until someone adds its prefix. It is a local gap alone, since `hasChanged` in `src/gate/sequencer.ts` returns true whenever scoping is off and `bun run check:ci` passes `--all`, so CI runs every stage on every change.
+Tests admits the census and nothing wider, since widening to every change charges twice as much for the same exposure.
+
+- Over 60 commits reaching `origin/main`, 42 already ran Tests under the `^src/` guard and 22 touched a census corpus, 9 of them with no Tests stage at all
+- Widening newly charges the other 18, so the census reaches the measured gap at half the added load
+- The guard admits `package.json`, `tsconfig.json`, and `vitest.config.ts`, so a release commit touching one pays the suite already
+
+Types was left alone, since a typecheck over unchanged TypeScript reports what it reported last run. Dropping `'**/*.astro'` from the `paths:` list in `governance/rules/ui/link-behavior.md` fails `src/gov/list.test.ts`, and Types reports `Skipped, no TypeScript changes` while Tests catches it.
+
+The gap is narrowed to what the census names, not closed. It is local only, since `hasChanged` in `src/gate/sequencer.ts` returns true whenever scoping is off and `bun run check:ci` passes `--all`.
 
 ### The Tests stage holds a machine lock
 
-The Tests stage holds a lock file under the machine state folder while its suite runs, so one box runs one suite at a time however many worktrees push at once. `lock: 'tests'` on the stage in `src/gate/stages.ts` names it, `executeStage` in `src/gate/sequencer.ts` takes it once the scope check passes and releases it in a `finally`, and `src/gate/suite-lock.ts` owns the file.
+The Tests stage holds a lock file under the machine state folder while its suite runs, so one box runs one suite at a time however many worktrees push. `lock: 'tests'` in `src/gate/stages.ts` names it, `executeStage` in `src/gate/sequencer.ts` takes it after the scope check and releases it in a `finally`, and `src/gate/suite-lock.ts` owns the file.
 
-A gate that starts queuing says so on stderr at once, naming the holder's pid and worktree, since a stage prints only after it returns and a silent wait reads as a hung suite. Once the suite has run, the stage repeats the wait in its own output with the seconds it took. The stage's `ms` stays wall time and includes the wait, and `queuedMs` in the `--json` record carries the queued part.
+- A gate that starts queuing says so on stderr at once, naming the holder's pid and worktree, since a silent wait reads as a hung suite
+- Once the suite has run, the stage repeats the wait in its output with the seconds it took
+- The stage's `ms` stays wall time including the wait, and `queuedMs` in the `--json` record carries the queued part
 
-#### Why a lock and a worker cap together
+### Why a lock and a worker cap together
 
-vitest defaults to every core but one, which is 31 workers on the 32-core box the measurement ran on, and a wave of worktrees each starting that many starves the tests that spawn `bun src/cli.ts` or a browser past their timeouts. A lone default run on a quiet box passed every case.
+vitest defaults to every core but one, which is 31 workers on the 32-core box measured, and a wave of worktrees each starting that many starves the tests that spawn `bun src/cli.ts` or a browser past their timeouts. A lone default run on a quiet box passed every case.
 
 | Concurrent full suites | Workers each | Wall | Failed tests per run       |
 | ---------------------- | ------------ | ---- | -------------------------- |
@@ -59,11 +74,11 @@ vitest defaults to every core but one, which is 31 workers on the 32-core box th
 | 4                      | 8            | 48s  | 0 to 1, all the fixed port |
 | 7, fixed port excluded | 8            | 102s | 9 to 14                    |
 
-A cap thins each run's load and leaves the sum growing with the wave, so seven capped suites still failed. Only bounding how many suites run at once removes that failure, and it costs a queued worktree about the 17 seconds one lone run takes. The lock never gives up on a live holder, since a deadline turns a long queue back into the intermittent failure the lock removes.
+A cap thins each run's load and leaves the sum growing with the wave, so seven capped suites still failed. Only bounding how many suites run at once removes that failure, at the cost of about 17 seconds per queued run. The lock never gives up on a live holder, since a deadline would bring back the intermittent failure.
 
-#### What the lock left open
+### What the lock left open
 
-The lock did not settle the whole outcome. It serializes suites and cannot see the rest of the box, which during a wave carries other gates' non-test stages, hand-run test files, sandbox runs, browsers, and the sessions themselves. One suite at the default worker count holds about 62 runnable processes on 32 cores, since each worker spawns a child, so any outside load starves its spawn tests. A second run loaded the box with `yes` loops under a lone suite of 6309 tests.
+The lock serializes suites and cannot see the rest of the box, which in a wave carries other gates' stages, hand-run tests, sandbox runs, browsers, and sessions. One suite at the default count holds about 62 runnable processes on 32 cores, so outside load starves its spawn tests. A second run put `yes` loops under a lone 6309-test suite.
 
 | Load                      | Workers | Runs | Runs failing | Failed tests per run |
 | ------------------------- | ------- | ---- | ------------ | -------------------- |
@@ -75,23 +90,26 @@ The lock did not settle the whole outcome. It serializes suites and cannot see t
 | 96 busy threads           | default | 3    | 3            | 1 to 3               |
 | 96 busy threads           | 50%     | 3    | 1            | 1                    |
 
-#### Why the cap and not a timeout
+### Why the cap and not a timeout
 
-The cap and a longer timeout both cleared 64 threads. The cap removes load where the timeout tolerates a starved run, so `vitest.config.ts` sets `maxWorkers` to `'50%'` outside CI and no timeout or retry moves. A quiet box pays nothing for it, at 16 to 17 seconds against 18 to 19 at the default. The cap answers ambient load and the lock answers concurrent suites, so neither replaces the other.
+The cap and a longer timeout both cleared 64 threads. The cap removes load where the timeout tolerates a starved run, so `vitest.config.ts` sets `maxWorkers` to `'50%'` outside CI and no timeout or retry moves. A quiet box pays nothing, at 16 to 17 seconds against 18 to 19. The cap answers ambient load and the lock concurrent suites.
 
-A failed Tests stage outside CI also prints the load average and core count it ran under, taken from the kernel's 1-minute average. A report that says a spawn test timed out can then be sorted into starvation or a real failure.
+A failed Tests stage outside CI also prints the load average and core count it ran under, from the kernel's 1-minute average, so a report that a spawn test timed out can be sorted into starvation or a real failure.
 
-#### How a dead holder is taken over
+### How a dead holder is taken over
 
-The file records the holder's pid, its start time from `/proc`, and its worktree root. An acquirer meeting the file asks `liveness` in `src/sessions/live.ts` whether that holder still runs, and takes over at once when it does not, so a gate killed with `SIGKILL` mid-suite never wedges the queue. Comparing start times catches a pid another process inherited. Where `/proc` is absent, as on macOS, the check falls back to a signal probe, which a reused pid fools.
+The file records the holder's pid, its start time from `/proc`, and its worktree root. An acquirer meeting the file asks `liveness` in `src/sessions/live.ts` whether the holder still runs and takes over at once when it does not, so a gate killed with `SIGKILL` mid-suite never wedges the queue.
 
-A takeover renames the stale file aside rather than deleting it, because two acquirers judging one stale file would both get through a delete followed by a create. The rename hands the file to one of them, and the moved file is compared against what was judged, so an acquirer that moved a file another one had just written puts it back and waits.
+- Comparing start times catches a pid another process inherited
+- Where `/proc` is absent, as on macOS, the check falls back to a signal probe, which a reused pid fools
+- A takeover renames the stale file aside rather than deleting it, because two acquirers judging one stale file would both get through a delete followed by a create
+- The moved file is compared against what was judged, so an acquirer that moved a file another had just written puts it back and waits
 
-#### What the lock does not cover
+### What the lock does not cover
 
-CI skips the lock, since each runner runs one suite, and it keeps vitest's default workers for the same reason. The cap bounds one suite and does nothing about load from outside it. At three times the core count a capped run still failed once, in the canvas walk `src/canvas/shell.e2e.test.ts`, whose cases share one page so one starved case takes the rest.
+CI skips the lock, since each runner runs one suite, and keeps vitest's default workers for the same reason. The cap bounds one suite and does nothing about outside load. At three times the core count a capped run still failed once, in the canvas walk `src/canvas/shell.e2e.test.ts`, whose cases share one page so one starved case takes the rest.
 
-Starving CPU alone does not reproduce it. Measured on 2026-10-12 with seven workers building and the load average between 14 and 25, runs pinned to the CPU counts below, in cell order:
+Starving CPU alone does not reproduce it. Measured on 2026-10-12 with seven workers building and the load average between 14 and 25, runs pinned to the CPU counts below, in cell order.
 
 | Run                                | CPUs      | Runs    | Failing | Wall                             |
 | ---------------------------------- | --------- | ------- | ------- | -------------------------------- |
@@ -99,40 +117,43 @@ Starving CPU alone does not reproduce it. Measured on 2026-10-12 with seven work
 | all 11 browser test files together | 4, 2      | 2, 2    | 0       | 10 to 11 s, 25 to 30 s           |
 | full suite, 16 workers             | 8, 4      | 2, 2    | 0       | 48 to 55 s, 79 to 109 s          |
 
-The slowest typography case took 2.6 s, and the box has logged 173 s of full memory stall since the 2026-10-08 boot, which the load average folds into one number. A timeout CPU starvation cannot reproduce points at memory or I/O stalls, or at a race the jitter exposes. Two readings tell these apart:
+### Telling stall from a race
 
-- The failed-stage load line carries the `some avg10` stall share per resource from `/proc/pressure/`, as `, pressure cpu 7.5% memory 0.0% io 0.2% over 10s,`. It drops where the files are absent or PSI is off.
-- The walk writes `failed-<case slug>.png` and the server's stderr as `server.log` under `.canon/tmp/canvas-walk/`. The first `failed-*` file by case order is the one that matters, since every later case fails on the shared page. A passing walk writes none.
+The slowest typography case took 2.6 s, and the box has logged 173 s of full memory stall since the 2026-10-08 boot, which the load average folds into one number. A timeout CPU starvation cannot reproduce points at memory or I/O stalls, or at a race the jitter exposes. Two readings tell these apart.
 
-A suite run by hand through `bun run test` or `bun --bun vitest run` takes no lock either, so running the whole suite directly in a wave still oversubscribes the box. Run a single file that way and leave the full suite to `bun run check`.
+- The failed-stage load line carries the `some avg10` stall share per resource from `/proc/pressure/`, as `, pressure cpu 7.5% memory 0.0% io 0.2% over 10s,`, dropped where PSI is off
+- The walk writes `failed-<case slug>.png` and the server's stderr as `server.log` under `.canon/tmp/canvas-walk/`
+- The first `failed-*` file by case order is the one that matters, since every later case fails on the shared page, and a passing walk writes none
 
-The file records the gate's pid, while the suite runs in a child vitest tree. Killing the gate alone with `kill -9` leaves that tree running as orphans, so the next acquirer takes over at once while the orphaned suite still holds every core, and two suites overlap until it finishes. Closing it would mean recording and probing the holder's process group.
+### Gaps in the lock
+
+A suite run by hand through `bun run test` or `bun --bun vitest run` takes no lock, so running the whole suite directly in a wave still oversubscribes the box. Run a single file that way and leave the full suite to `bun run check`.
+
+The file records the gate's pid while the suite runs in a child vitest tree. Killing the gate alone with `kill -9` leaves that tree running as orphans, so the next acquirer takes over at once while the orphaned suite still holds every core. Closing it would mean recording and probing the holder's process group.
 
 ## Gotchas
 
-### Run a single test file through `bun --bun vitest`
+### Run a single test file through bun --bun vitest
 
-A single test file runs through `bun --bun vitest run <path>`, which is the form `package.json` spells in its `test` script, and never `bunx vitest run <path>`, `bun run vitest run <path>`, or bare `bun test`. Each wrong form fails with its own signature, and each reads like a regression rather than a bad invocation:
+A single test file runs through `bun --bun vitest run <path>`, the form `package.json` spells in its `test` script, and never `bunx vitest run <path>`, `bun run vitest run <path>`, or bare `bun test`. Each wrong form fails with its own signature that reads like a regression, and the tests pass unchanged under the right form.
 
-- Zero tests. Without `--bun`, vitest resolves under node, where a module reaching git through `$` from `bun` fails to import at collection time and the file reports zero tests rather than a failure. `Cannot find package 'bun' imported from src/git/ignore.ts` is one form of it.
-- Failures a green tree does not have. A module calling `Bun.Glob`, `Bun.TOML`, or `Bun.YAML` without importing anything collects and runs under node, then throws `ReferenceError: Bun is not defined` at the call site, so the file reports ordinary failures pointing at a source line. `src/context/citations.ts` and `src/indexes/walk.ts` both show it under `bunx`.
-- Every case failing identically. `src/commands/pr.test.ts` spawns `process.execPath`, which is node under `bunx`, so `src/cli.ts` never starts past its shebang, stdout comes back empty, and every case dies on `SyntaxError: Unexpected end of JSON input` at the test's own `JSON.parse` line.
-- `TypeError: expect is not a function`. Bare `bun test` runs Bun's own test runner, and `it.concurrent(name, async ({ expect }) => ...)` reads its `expect` off a vitest-only context argument that runner never supplies.
+- Zero tests: without `--bun`, vitest runs under node and a module importing `$` from `bun` fails at collection, as `Cannot find package 'bun' imported from src/git/ignore.ts`
+- Failures a green tree lacks: a module using `Bun.Glob`, `Bun.TOML`, or `Bun.YAML` throws `ReferenceError: Bun is not defined`, as `src/context/citations.ts` and `src/indexes/walk.ts` do under `bunx`
+- Every case failing identically: `src/commands/pr.test.ts` spawns `process.execPath`, node under `bunx`, so stdout is empty and each case dies on `SyntaxError: Unexpected end of JSON input`
+- `TypeError: expect is not a function`: bare `bun test` runs Bun's own runner, and `it.concurrent(name, async ({ expect }) => ...)` reads `expect` off a vitest-only context argument
 
-Re-run the same file through `bun --bun` before opening the source, since the tests pass unchanged under the right form.
+### A shell script's own test does not gate the script
 
-### A shell script's own test file does not gate the script
+A shell script under `claude/skills/*/scripts/` gates only the Shell stage unless its corpus is in the census, even where a `src/*.test.ts` file covers it. A branch touching only such a script can report clean on `bun run check` and `bash -n` while the covering test never runs. Run the test file by hand for a corpus the census never named.
 
-A shell script under `claude/skills/*/scripts/` gates only the Shell stage unless its corpus is in the census, even where a `src/*.test.ts` file covers it. A branch touching only such a script can report clean on `bun run check` and on `bash -n` alike while the test that covers its behavior never runs. Run the test file by hand for a corpus the census never named.
+### A root-level test file needs its path in the Tests scope
 
-### A root-level test file needs its path in the Tests stage scope
+`vitest.config.ts`'s `test.include` carries a bare `*.test.ts` entry, so `commitlint.config.test.ts` beside `commitlint.config.js` runs under `bun run test`. The Tests stage runs only when a changed path matches `TESTS_SCOPE` in `src/gate/stages.ts`, so a branch touching only such a pair reports `Skipped`.
 
-`vitest.config.ts`'s `test.include` carries a bare `*.test.ts` entry, so a test file sitting beside a root config it exercises, such as `commitlint.config.test.ts` beside `commitlint.config.js`, runs under `bun run test`. The gate's Tests stage runs only when a changed path matches `TESTS_SCOPE` in `src/gate/stages.ts`, so a branch touching only such a pair reports `Skipped` rather than a failure. The two commitlint files are in that scope. A new root-level pair needs its own pattern there, asserted in `src/gate/stages.test.ts`.
-
-### A test reaching a Bun global fails under plain vitest
-
-`bunx vitest run <path>` runs vitest on Node, so a test reaching `Bun.Glob` or another Bun global fails with `ReferenceError: Bun is not defined` before asserting anything. `bun run test` passes `--bun`, so run a single file through `bun --bun vitest run <path>` or `bun test <path>` instead.
+The two commitlint files are in that scope. A new root-level pair needs its own pattern there, asserted in `src/gate/stages.test.ts`.
 
 ### The Lint stage, not Types, reports an unused import
 
-`tsconfig.json` sets `strict` without `noUnusedLocals` or `noUnusedParameters`, so `check:types` passes a dead import and the Lint stage catches it instead. Every default rule `check:lint` runs is a warning, which oxlint exits 0 on, so `--max-warnings 0` is what makes one fail the stage. Types still catches a duplicate function implementation, as TS2393, so two helpers colliding on one name fails the gate rather than shadowing at runtime.
+`tsconfig.json` sets `strict` without `noUnusedLocals` or `noUnusedParameters`, so `check:types` passes a dead import and the Lint stage catches it. Every default rule `check:lint` runs is a warning, which oxlint exits 0 on, so `--max-warnings 0` is what makes one fail the stage.
+
+Types still catches a duplicate function implementation, as TS2393, so two helpers colliding on one name fail the gate rather than shadowing at runtime.
