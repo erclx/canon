@@ -9,60 +9,162 @@ description: The canon gov restated sweep, its asymmetric surfaces, recall-first
 
 ### Why a sweep for restated instructions
 
-- `canon gov restated` counts the instructions this repository's always-loaded file shares with the seed and with the skill bodies. A rule stated in three places can drift out of step with itself unnoticed until a shipped skill acts against the version it happened to load, so the value is catching the next such drift rather than any one instance already found.
-- A path-scoped rule was weighed first and cannot express this. The trigger is changing the text of an instruction, which fires on no path a glob can name, so a command that sweeps is the only shape left. That is the same argument the superseded sweep makes about its own key.
-- It sits under `gov` beside `test-order` and `superseded`, on the reason that one already records: all three measure a stated convention against the tree, and a session reaching for one finds the others.
+`canon gov restated` counts the instructions this repository's always-loaded file shares with the seed and the skill bodies. A rule stated in three places can drift out of step until a shipped skill acts against the version it loaded, so the value is catching the next drift.
 
-### What it reads and how it matches
+### A path-scoped rule cannot express it
 
-- The four surfaces are read asymmetrically. Every top-level bullet in `CLAUDE.md` or in a rule is a subject, and the seed, the skill bodies under both skill roots, and every rule again are searched against it, so a rule stated in two skill bodies and never in the always-loaded file or another rule is outside the reading.
-- A body is read as prose rather than as bullets, which the motivating case forced. That instruction reached `claude/skills/context-fold/SKILL.md` as a paragraph, so a bullet-only read would have missed the one instance the sweep exists for.
-- Matching is recall-first and keyed on shared distinctive tokens rather than on a phrase two surfaces spell the same way. Near-exact was the cheaper build and it misses the motivating case by construction, since that instance was one rule written three different ways. Recall-first narrows from real output where precision-first cannot widen without a rebuild.
-- A backticked token counts double against a plain word. An author marking a span as code named an identifier rather than describing one, and the weighting is what let the match floor rise high enough to drop a coincidental word pair without losing a rule two surfaces spelled entirely differently around one shared path.
-- The knobs are tuned against this corpus rather than reasoned to. `.canon/plans/` sits at 14 statements and is the anchor the motivating case turns on, `file` sits at 371 and matches most of the tree, so the ceiling sits at 20: cutting it to 12 would drop the real third surface while still keeping a two-word coincidence.
+The trigger is changing the text of an instruction, which fires on no path a glob can name. A command that sweeps is the only shape left, the argument the superseded sweep makes about its own key.
 
-### Corpus and mirrors
+### Where the verb sits
 
-- Skipping body frontmatter took the candidate corpus from 2543 statements to 2412. A `description` restates that skill's own purpose in every body, so sweeping it matched each skill against any subject naming its domain.
-- Mirrors are excluded by declared path pair rather than by content. `CLAUDE.md` and `tooling/claude/seeds/CLAUDE.md` are the one pair, since the duplication is a location fact the architecture record already carries and a content test would rediscover it on every run.
-- The exclusion reaches a repetition alone. A mirror is meant to agree, so a polarity split on a declared pair stays a finding rather than being absorbed by the pairing.
+It sits under `gov` beside `test-order` and `superseded`. All three measure a stated convention against the tree, and a session reaching for one finds the others.
 
-### The contradiction floor and polarity
+### Surfaces are read asymmetrically
 
-- The contradiction floor sits above the match floor deliberately. A thin match says two statements touch one subject, which is not enough to claim one forbids what the other prescribes, and at the match floor the class held 15 entries that were nearly all coincidence.
-- Polarity is read off the clause the anchors landed in rather than off the whole statement, and off the densest such clause rather than the union of every one carrying an anchor. A union answers true whenever any clause anywhere carries a marker, which is the whole statement again under another name.
-- The marker also has to open its clause, because an instruction leads with its verb. `Never delete a task file` prohibits where `a fallback never fires` reports, and no test reading the marker anywhere in the clause separates those two.
+Every top-level bullet in `CLAUDE.md` or in a rule is a subject. The seed, the skill bodies under both skill roots, and every rule again are searched against it, so a rule stated in two skill bodies and never in the always-loaded file or another rule is outside the reading.
+
+### A body is read as prose
+
+The motivating instruction reached `claude/skills/context-fold/SKILL.md` as a paragraph, so a bullet-only read would have missed the one instance the sweep exists for.
+
+### Matching is recall-first
+
+Matching keys on shared distinctive tokens rather than a phrase two surfaces spell the same way. Near-exact was cheaper and misses the motivating case by construction, since that instance was one rule written three different ways.
+
+Recall-first narrows from real output, where precision-first cannot widen without a rebuild.
+
+### Backticked tokens count double
+
+An author marking a span as code named an identifier rather than describing one. The weighting lets the match floor rise high enough to drop a coincidental word pair without losing a rule two surfaces spelled differently around one shared path.
+
+### The knobs are tuned, not derived
+
+`.canon/plans/` sits at 14 statements and anchors the motivating case, while `file` sits at 371 and matches most of the tree. The ceiling sits at 20, since cutting it to 12 would drop the real third surface while keeping a two-word coincidence.
+
+### Frontmatter is skipped
+
+Skipping body frontmatter took the candidate corpus from 2543 statements to 2412. A `description` restates that skill's own purpose in every body, so sweeping it matched each skill against any subject naming its domain.
+
+### Mirrors are excluded by path pair
+
+`CLAUDE.md` and `tooling/claude/seeds/CLAUDE.md` are the one declared pair. The duplication is a location fact the architecture record carries, and a content test would rediscover it every run.
+
+The exclusion reaches a repetition alone. A mirror is meant to agree, so a polarity split on a declared pair stays a finding.
+
+### The contradiction floor sits above the match floor
+
+A thin match says two statements touch one subject, which is not enough to claim one forbids what the other prescribes. At the match floor the class held 15 entries, nearly all coincidence.
+
+### Polarity reads one clause
+
+Polarity is read off the clause the anchors landed in, and off the densest such clause rather than the union of every one carrying an anchor. A union answers true whenever any clause anywhere carries a marker, which is the whole statement again.
+
+### The marker must open its clause
+
+An instruction leads with its verb. `Never delete a task file` prohibits where `a fallback never fires` reports, and no test reading the marker anywhere in the clause separates them.
 
 ### The position rule
 
-- Both rules answer the same class of false positive. The always-loaded file splits the stream-editor rule across two bullets where the seed folds them into one, so the subject can be the exception half alone while the seed's bullet carries a `never` from a clause the anchors never touch.
-- What the position rule costs is a prohibition written mid-clause, as in `edit with the tool, never a stream editor`, which now reads as description. That miss lands the pair in the repetition class rather than dropping it, so both surfaces still reach the report and only the label is weaker, which is the safe direction for a verb that reports.
-- The class is a polarity reading rather than a judgment about meaning, and nothing here can do better. Detecting that a skill performs the opposite of what a rule states needs a reader, so the report names both surfaces and the anchors behind the match and leaves the verdict to one.
+Both rules answer one class of false positive. The always-loaded file splits the stream-editor rule across two bullets where the seed folds them into one, so the subject can be the exception half alone while the seed's bullet carries a `never` from a clause the anchors never touch.
 
-### Authority and the first measurement
+### What the position rule costs
 
-- Authority is reported as unknown wherever the content-ownership table does not reach, which is a first-class answer rather than a gap. The table assigns a cross-domain rule and a domain-triggered one and reaches nothing stated in a body the always-loaded file never names, so guessing there would put a reader on a surface nobody decided.
-- The aggregate retains the contradiction and repetition counts and drops the mirrors, on the same reasoning the label audit drops its declined rows. It also drops the three-surface reach count, which measures how many surfaces an instruction reached rather than whether anything is wrong and moves in lockstep with the two retained.
-- Both refusals read as absences, which makes this the third tracked corpus taking that allowance beside the secret scan and the reach check. A target holds neither the seed nor a shipped skills tree, so without it every project installing this CLI reports the verb unmeasured forever.
-- Measured against `5da3214d` on 2026-08-25, the run reads 85 instructions against 2412 statements from the seed and 61 shipped bodies, and reports no contradiction, 53 repetitions outside a declared mirror, 43 on one, and 18 instructions reaching three surfaces or more.
-- Zero is the correct reading of this corpus rather than a class that cannot fire, since the unit cases hold the directive shape the class exists for and the count is what the corpus says instead of what the measure can reach.
+A prohibition written mid-clause, as in `edit with the tool, never a stream editor`, now reads as description. That lands the pair in the repetition class rather than dropping it, so both surfaces still reach the report and only the label is weaker.
 
-### Rules as a third source
+Polarity is a reading, not a judgment about meaning. Detecting that a skill does the opposite of what a rule states needs a reader, so the report names both surfaces and the anchors and leaves the verdict to one.
 
-- The corpus reads `governance/rules/`, the authoring root rather than the consumed copy under `.claude/rules/`, as a third source beside the seed and the shipped bodies. A stack takes a whole rule folder, so a bullet landing anywhere under it ships to every target the stack reaches the same way a bullet in the always-loaded file or the seed does. Without this third source, a bullet moved from `CLAUDE.md` into `governance/rules/claude/` reads as no longer restated anywhere rather than as still shipping under a different carrier, which is exactly the gap widening the corpus closes.
-- A rule reads as a subject as well as a candidate, unlike the seed and the shipped bodies, which stay candidate-only. The always-loaded file and a rule both state a directive directly rather than quoting one stated elsewhere, so the corpus has to compare two rules against each other to catch the shape that motivated this row: a retired rule's `## CLAUDE.md editing` section restated two instructions a second retired rule already carried, and neither file was ever a bullet in `CLAUDE.md`, so no subject existed to search from until rules joined that side too.
-- Giving one kind both roles risks reporting a duplicate pair twice, once with each end read as the subject, which no earlier pairing in this sweep could do since a subject kind and a candidate kind were always disjoint sets. An unordered key over the two statements' `file:line` is recorded the first time a pair clears the anchor floor and checked before every later attempt, so the pair a reader meets names whichever direction the subject loop reached first and the reverse never surfaces beside it.
-- Two bullets inside one rule file routinely share anchors, being adjacent instructions on one topic rather than the same rule shipped twice, so a candidate sharing its subject's file is skipped outright rather than left to the matcher. Nothing else in the corpus could reach that shape before a rule started reading as both a subject and a candidate.
+### Authority can be unknown
+
+The content-ownership table assigns a cross-domain rule and a domain-triggered one and reaches nothing stated in a body the always-loaded file never names. Reporting `unknown` there is a first-class answer, since guessing would put a reader on a surface nobody decided.
+
+### What the aggregate retains
+
+It retains the contradiction and repetition counts and drops the mirrors, as the label audit drops its declined rows. It also drops the three-surface reach count, which measures how many surfaces an instruction reached and moves in lockstep with the two retained.
+
+### Both refusals read as absences
+
+This is the third tracked corpus taking that allowance, beside the secret scan and the reach check. A target holds neither the seed nor a shipped skills tree, so without it every project installing this CLI reports the verb unmeasured forever.
+
+### The first measurement
+
+Measured against `5da3214d` on 2026-08-25, the run read 85 instructions against 2412 statements from the seed and 61 shipped bodies.
+
+- No contradiction
+- 53 repetitions outside a declared mirror and 43 on one
+- 18 instructions reaching three surfaces or more
+
+Zero contradictions is the correct reading, not a class that cannot fire, since the unit cases hold the directive shape the class exists for.
+
+### Rules are a third source
+
+The corpus reads `governance/rules/`, the authoring root rather than the copy under `.claude/rules/`. A stack takes a whole rule folder, so a bullet landing anywhere under it ships to every target the stack reaches, as a bullet in the always-loaded file does.
+
+Without it, a bullet moved from `CLAUDE.md` into `governance/rules/claude/` reads as no longer restated, rather than still shipping under a different carrier.
+
+### A rule is subject and candidate
+
+The seed and the shipped bodies stay candidate-only. The always-loaded file and a rule both state a directive directly, so the corpus must compare two rules against each other.
+
+That catches the shape that motivated this row. A retired rule's `## CLAUDE.md editing` section restated two instructions a second retired rule carried, and neither was ever a bullet in `CLAUDE.md`, so no subject existed until rules joined that side.
+
+### Pairs are keyed unordered
+
+One kind holding both roles risks reporting a pair twice, once with each end as the subject. An unordered key over the two statements' `file:line` is recorded when a pair first clears the anchor floor and checked before every later attempt.
+
+The pair a reader meets names whichever direction the subject loop reached first, and the reverse never surfaces.
+
+### Same-file candidates are skipped
+
+Two bullets inside one rule file routinely share anchors, being adjacent instructions on one topic rather than one rule shipped twice. A candidate sharing its subject's file is skipped outright instead of left to the matcher.
 
 ### The widened run
 
-- Measured against `5196cc9a` on 2026-08-27, the widened run reads 45 always-loaded instructions and 66 rule files against 3055 statements from the seed, the shipped bodies, and every rule again: 0 contradictions, 86 repetitions outside a declared mirror, 5 on one, and 18 instructions reaching three surfaces or more. `canon/config/baseline.json` records 86 as the floor for `repetitions`, a first reading of this corpus rather than a delta against the narrower one's own count. Thirteen of the 86 are a rule restating a different rule, which is the class the narrower corpus could never produce at all.
-- The reach count is read off connected clusters rather than off each entry's own `surfaces.length`, since a rule sitting on both sides lets one duplicated instruction fragment across several entries once the pair-skip strips an already-seen edge from the second member's own candidate list. `countThreeSurfaceClusters` in `src/gov/restated.ts` unions every pair the sweep reported and counts a component only once, however many entries it fragmented into: reading each entry's own count instead would double-count a cluster that fragments across more than one entry.
-- Rules are read from every root in `RULE_DIRS`, shared with `src/gov/citations.ts`, so `internal/rules/` joins `governance/rules/` on both sides. Each statement carries the root it was read from in its `file`, and the same-file skip compares that full path, so two same-named rules under the two roots still pair. `internal-rule-audit` read that folder's restatements by grep until this closed the gap.
-- `.claude/skills/*/SKILL.md` joins `claude/skills/` as a candidate root and stays candidate-only, keeping the asymmetry the shipped bodies already have. Here that folder holds the internal skills, and in a target it holds that project's own, which is equally a place a rule gets restated, so a target carrying its own skills measures rather than refusing `no-surfaces`. An internal body routinely quotes the rule it helps edit, so those pairs are the verb reporting correctly rather than noise to tune against.
+Measured against `5196cc9a` on 2026-08-27, the widened run read 45 always-loaded instructions and 66 rule files against 3055 statements.
 
-### Internal bodies and the latest read
+- 0 contradictions and 5 repetitions on a mirror
+- 86 repetitions outside a declared mirror, recorded in `canon/config/baseline.json` as the floor for `repetitions`
+- 18 instructions reaching three surfaces or more
+- Thirteen of the 86 are a rule restating a different rule, a class the narrower corpus could never produce
 
-- Authority for an internal body nearly always reads `unknown`, since `authorityFor` looks for the skill's folder name in the subject and an `internal-*` name almost never appears there verbatim.
-- A `no` opening a clause or a comma-set phrase directly on a code span reads as a prohibition, beside the clause-opening markers. It answers the one contradiction the verb reported at `e5766988`: `ci-workflow.md` saying never `@latest` against the `ci-workflow` body saying no `@latest`, two lines that agree. `not` and `never` in that position were tried and dropped, since each turned an agreeing pair into a new contradiction: a body saying not `pwd` against a rule negating plain words, and a body saying never `@latest` against a subject whose anchors tied on a clause without the marker.
-- Measured against `e5766988` on 2026-09-26, the run reads 34 instructions and 83 rule files against 4199 statements from the seed, 96 skill bodies, and every rule again: 0 contradictions, 126 repetitions, 0 mirrors, and 25 clusters reaching three surfaces. Before the widening it read 74 rule files, 85 bodies, 3817 statements, 1 contradiction, 109 repetitions, and 23 clusters. Nineteen earlier pairs dropped out as the larger corpus pushed an anchor past the ceiling, eight of them `ci-workflow.md` against `ci-workflow`, so the change is not additions alone.
+### Reach reads clusters
+
+A rule sitting on both sides lets one duplicated instruction fragment across several entries once the pair-skip strips an already-seen edge. `countThreeSurfaceClusters` in `src/gov/restated.ts` unions every reported pair and counts a component once, however many entries it fragmented into.
+
+Each entry's own `surfaces.length` would double-count a cluster fragmenting across more than one entry.
+
+### Rule roots are shared
+
+Rules are read from every root in `RULE_DIRS`, shared with `src/gov/citations.ts`, so `internal/rules/` joins `governance/rules/` on both sides. Each statement carries its root in `file`, and the same-file skip compares the full path, so two same-named rules under the two roots still pair.
+
+`internal-rule-audit` read that folder's restatements by grep until this closed the gap.
+
+### Internal skills are candidates
+
+`.claude/skills/*/SKILL.md` joins `claude/skills/` as a candidate root and stays candidate-only. In a target that folder holds the project's own skills, equally a place a rule gets restated, so a target carrying its own skills measures rather than refusing `no-surfaces`.
+
+An internal body routinely quotes the rule it helps edit, so those pairs are the verb reporting correctly rather than noise to tune against.
+
+### Internal authority reads unknown
+
+`authorityFor` looks for the skill's folder name in the subject, and an `internal-*` name almost never appears there verbatim.
+
+### A leading `no` reads as a prohibition
+
+A `no` opening a clause or a comma-set phrase directly on a code span counts beside the clause-opening markers. It answers the one contradiction reported at `e5766988`, where `ci-workflow.md` saying never `@latest` and the `ci-workflow` body saying no `@latest` agree.
+
+`not` and `never` in that position were tried and dropped. Each turned an agreeing pair into a new contradiction, such as a body saying not `pwd` against a rule negating plain words.
+
+### The latest read
+
+Measured against `e5766988` on 2026-09-26, the run read 34 instructions and 83 rule files against 4199 statements from the seed, 96 skill bodies, and every rule again.
+
+| Reading                | After widening | Before |
+| ---------------------- | -------------- | ------ |
+| Rule files             | 83             | 74     |
+| Skill bodies           | 96             | 85     |
+| Statements             | 4199           | 3817   |
+| Contradictions         | 0              | 1      |
+| Repetitions            | 126            | 109    |
+| Three-surface clusters | 25             | 23     |
+
+Nineteen earlier pairs dropped out as the larger corpus pushed an anchor past the ceiling, eight of them `ci-workflow.md` against `ci-workflow`, so the change is not additions alone. The run read 0 mirrors.
