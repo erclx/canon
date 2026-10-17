@@ -53,11 +53,12 @@ A per-arm permission set is worth building for its own reasons, since every arm 
 
 The runner watches `.canon/plans/`, `.canon/review/`, `.canon/memory/`, and `.canon/tasks/` under the toolkit roots, and reports what changed there as `escapes` rather than folding them into the write scope, since a file the session put outside the tree is not in it to be asserted over. Without a declaration, an escape is an unattributed warning.
 
-`escape_scope` in an arm's `expect.toml` turns that warning into a result, using the mechanism `write_scope` models. Globs match against what `escapeRoots` and `ESCAPE_SCRATCH_DIRS` in `src/sandbox/headless/watch.ts` found.
+`escape_scope` in an arm's `expect.toml` turns that warning into a result, using the mechanism `write_scope` models. Globs match against what `escapeRoots` and `ESCAPE_SCRATCH_DIRS` in `src/sandbox/headless/watch.ts` found. Declaring the key, even as `escape_scope = []`, makes a write matching a declared glob pass and everything else fail the arm.
 
-- Declaring the key, even as `escape_scope = []`, makes a write matching a declared glob pass and everything else fail the arm
 - Stating the exposure in prose lost, because the accidental bound it leaned on had already weakened once, when a machine-level target registry appeared as a side effect of an unrelated test
-- No arm declares it at present. An arm narrating a run that dispatches no worker declares `escape_scope = []`, and an arm driving the dispatch widens it from what that run measures.
+- No arm declares it at present
+- An arm narrating a run that dispatches no worker declares `escape_scope = []`, since a correct run touches none of the eight watched destinations
+- An arm driving the dispatch widens it from what that run measures
 - A scoped pass says nothing about a write past the watch's reach, such as a home directory, a sibling worktree, or the machine-level target registry, nor whether a seen write belongs to this run
 
 `snapshotRoot` returns an empty manifest both when a watch ran clean and when none of the four directories existed under a root. The runner therefore sets a flag whenever any root held one at snapshot time and passes it as `--escapes-watched`, and `checkEscapeScope` reports unmeasured rather than passing when no root did.
@@ -129,6 +130,7 @@ Two readings come before a finding.
 
 - An escape list covering the whole tree, or a failure count far past what the arm declares, reads as a tree collision, from a stale `canon` or two commands sharing one `CANON_SANDBOX_DIR`
 - Escape detection assumes the toolkit's shared scratch is quiet while a run is in flight, so a launching session editing the four directories mid-run draws an escape naming its own file
+- Run the harness from a session that leaves them alone, or read a reported escape against what else was happening
 
 ### A scenario faking a live session writes to the real registry
 
@@ -136,8 +138,8 @@ A scenario needing a live session record for a roster read, such as testing occu
 
 Provisioning and the spawned `claude -p` run are separate invocations with no shared environment, so a variable set during provisioning cannot repoint `CLAUDE_CONFIG_DIR`, and the scenario writes to the host's real `${CLAUDE_CONFIG_DIR:-$HOME/.claude}/sessions/`.
 
-- Bound the staged process well under a day, so the record drops out of the live roster on its own
-- Key the record's filename on the process's pid, so a second drive gets its own record instead of orphaning the first run's process
+- Bound the staged process well under a day, so the record drops out of the live roster on its own, and key its filename on the pid so a second drive does not orphan the first run's process
 - A TypeScript scenario spawns the staged process without `detached: true` and drops its handle from the event loop, so it stays in the provisioning process group
-- `canon sandbox equivalence` reaps an arm by killing that group, so a detached occupant would escape and leak a six-hour `sleep` on every run. `canon sandbox clean` does not reap it.
-- Such a record does not read as a nested dispatch, because the runner snapshots the registry after provisioning. Stage it in the scenario script rather than from inside the driven session.
+- `canon sandbox equivalence` reaps an arm by killing that group, so a detached occupant leaks a six-hour `sleep` while the manifest reads identical. `canon sandbox clean` does not reap it.
+
+Such a record does not read as a nested dispatch, because the runner snapshots the registry after provisioning. Stage it in the scenario script rather than from inside the driven session, where it would be reported.

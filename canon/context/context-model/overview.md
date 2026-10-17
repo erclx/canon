@@ -41,7 +41,7 @@ Revisit when Claude Code tells a session which nested memory files exist before 
 
 ### Which tier a fact belongs in
 
-A fact goes to `.claude/rules/` when it fires on a specific path being edited and violating it ships silently. Otherwise it goes to a context entry or a skill body. A `## Gotchas` line reaches too little, and eager loading does not substitute, since a session-start rule competes with the whole file.
+A fact goes to `.claude/rules/` when it fires on a path being edited and violating it ships silently. Otherwise it goes to a context entry or a skill body. A `## Gotchas` line reaches too little. Eager loading does not substitute, since a session-start rule competes with the whole file and a glob-matched one arrives attached to the action.
 
 The test rejects most of what it is run over, because a rule per gotcha rebuilds the `CLAUDE.md` the tiers exist to prevent. Firing is one axis of three.
 

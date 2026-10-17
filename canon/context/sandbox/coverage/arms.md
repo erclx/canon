@@ -20,7 +20,9 @@ A verdict covers the arm that ran, not the skill.
 
 ### Standards citation arms
 
-`claude/ui-checklist` runs against a target holding no slug reference copy, so the plugin root is the only route to the slug transform. It stages a branch carrying a `/`, and the `-` replacement appears in no skill body, so the output filename shows the citation resolved. It also asserts `.claude/skills/git-branch/references/slug.md` is absent.
+`claude/ui-checklist` runs against a target holding no slug reference copy, so the plugin root is the only route to the slug transform. It stages a branch carrying a `/`, and the `-` replacement appears in no skill body, so the output filename shows the citation resolved.
+
+- It also asserts `.claude/skills/git-branch/references/slug.md` is absent, so an arm staging a copy of its own goes red where it lands rather than quietly voiding the premise
 
 The arm asserts the exact checklist path, because the checklist is the skill's whole output and a run producing none has produced nothing. Its remaining entries stay `Semantic:`, since which changes land on the visual list and which layer each missing-test line names are the skill's calls.
 

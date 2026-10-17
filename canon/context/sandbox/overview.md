@@ -57,7 +57,7 @@ Gov rules and seeds provision through the real installer, `canon gov install` fo
 
 A scenario file is named for the skill it drives, not for the domain the skill sits in. `sandbox/claude/context-fold.ts` drives `/canon:context-fold`, and a diverging name would leave the `<category>/<rest>` mapping finding nothing and the audit reporting the skill unpaired. A renamed skill takes its scenario file with it.
 
-- A scenario whose expectation reads a slug checks out its branch explicitly, since `git init` inherits the machine's `init.defaultBranch`
+- A scenario whose expectation reads a slug checks out its branch explicitly, since `git init` inherits `init.defaultBranch` and an arm resting on the initial name passes or fails by local config
 - Git history initializes fresh each run, and a `refs/sandbox/baseline` ref marks the post-setup state so `canon sandbox reset` restores without provisioning again
 
 ### Two headless harnesses rather than one
@@ -82,7 +82,8 @@ Five traps catch a first-time author.
 
 Four constraints shape what an arm can reach.
 
-- Skills whose body forbids probing project surfaces, such as `canon-feedback`, stay out of scope, though `infra:feedback` asserts `canon feedback` refusing an incomplete report
+- Skills whose body forbids probing project surfaces, such as `canon-feedback`, stay out of scope
+- `infra:feedback` asserts `canon feedback` refusing an incomplete report, since a valid report opens a real issue rather than writing into the snapshot tree
 - A driven session calls the `canon` on PATH, the published release. A catalog the branch extends is absent until a release ships it. `canon/context/sandbox/headless.md` carries the repair.
 - Anchor scenarios take their starting tree from a fixture, so provisioning does not depend on the previous arm. The force-pushes remain, so an assertion reading `origin/main` is order-sensitive.
 - After provisioning, the terminal cwd may need a refresh, which a wrapper in `.zshrc` or `.bashrc` supplies
@@ -98,14 +99,14 @@ canon() {
 
 Six things a run cannot reach. Each is a property of the harness rather than a gap to close per task, so a claim depending on one is hand-verified and says so.
 
-| Limit                                                                     | Why                                                                                      |
-| ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Marketplace install behavior                                              | `canon sandbox run` points `--plugin-dir` at a worktree instead of installing the plugin |
-| A mid-session rule change                                                 | rules are discovered at session start and the harness spawns a fresh session per run     |
-| Host-conditional behavior such as linked-worktree locks                   | a standalone sandbox repo cannot trigger it                                              |
-| The sibling reference route of a changed skill                            | in an interactive sandbox both routes can land on one file                               |
-| A write outside the sandbox tree and the four watched scratch directories | `canon/context/sandbox/isolation.md` bounds the watch                                    |
-| Git state                                                                 | `snapshotTree` excludes `.git` and no declaration key reaches a commit or branch         |
+| Limit                                                                     | Why                                                                                                                                                 |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Marketplace install behavior                                              | `canon sandbox run` points `--plugin-dir` at a worktree instead of installing the plugin                                                            |
+| A mid-session rule change                                                 | rules are discovered at session start and the harness spawns a fresh session per run, so it binds the session doing the editing rather than the run |
+| Host-conditional behavior such as linked-worktree locks                   | a standalone sandbox repo cannot trigger it                                                                                                         |
+| The sibling reference route of a changed skill                            | in an interactive sandbox both routes can land on one file                                                                                          |
+| A write outside the sandbox tree and the four watched scratch directories | `canon/context/sandbox/isolation.md` bounds the watch                                                                                               |
+| Git state                                                                 | `snapshotTree` excludes `.git` and no declaration key reaches a commit or branch                                                                    |
 
 A nested background dispatch is not on this list. A shim bounds it and `sessions` records it, and `canon/context/sandbox/isolation.md` states the three cases that bound still misses.
 

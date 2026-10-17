@@ -112,7 +112,7 @@ The terminal framing keeps its own values on purpose. `scripts/lib/ui.sh` and `s
 
 A third spelling generated from the module would break that rule. `WHITE` and `GREY` name no role, so the record describes the terminal palette in part.
 
-- The rendered captures agree with the module by construction: `scripts/core/regen-hero.ts` fills `{{TOKENS}}` in each `assets/captures/*.html.tmpl` from `canon design css --no-components`
+- The rendered captures agree with the module by construction: `scripts/core/regen-hero.ts` fills `{{TOKENS}}` in each `assets/captures/*.html.tmpl`, so a moved value moves both frames
 - The component half is left out, since a static capture renders neither the status marker nor the webkit scrollbar
 - A component's `reads` array cannot cover `TEACH_STYLESHEET_COMPONENTS` in `src/design/css.test.ts`, since a name it both declares and reads satisfies itself
 - `TEACH_CHROME` declares seven legacy aliases that a lesson diagram consumes by name, `--panel`, `--rule`, `--ink`, `--ink-soft`, `--ink-faint`, `--accent`, and `--accent-bg`

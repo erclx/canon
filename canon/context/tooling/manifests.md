@@ -73,7 +73,7 @@ Both the repository `.gitignore` and the claude manifest's list carry `.canon/` 
 The Ignore parity measure in `src/gate/boundaries.ts` gates `bun run check` rather than reporting, because the manifest reaches every target on the next sync and a drift between the two lists surfaces to nobody.
 
 - It reads the whole file rather than one header, since a claude-scoped entry filed under a header of its own would read as missing
-- It drops the trailing slash so either side may omit one, and matches `.canon` as a bare root as well as a prefix
+- It drops the trailing slash so either side may omit one, and matches `.canon` as a bare root as well as a prefix, since a pattern outside the case the loop matches on passes having compared nothing
 - The comparison reads a closed set in both directions and is blind to a folder a shipped command creates that neither file names
 - A folder whose contents are committed on purpose belongs in neither, which is why `.claude/canon/` is absent from both
 

@@ -58,8 +58,9 @@ A rule's folder names who the rule serves.
 
 Grouping along the repository's three roots, `tooling/`, `claude/`, and `canon/`, left two groups with no honest home, since the generic code rules are not tooling and the prose rules are not about Claude.
 
-- An always-loaded rule reaches a target through `canon gov sync` rather than a seeded root file nothing refreshes. A `CLAUDE.md` bullet has the same priority.
-- `code/routing.md` and `code/testing.md` keep only pointers to the skills carrying the depth
+- An always-loaded rule reaches a target through `canon gov sync` rather than a seeded root file nothing refreshes
+- A `CLAUDE.md` bullet has the same priority, so the group is the only thing a move from a seed changes
+- `code/routing.md` and `code/testing.md` keep only pointers to the skills carrying the depth, so the floors load on demand rather than every session
 
 ### Pointer rules are authored by hand
 
@@ -128,7 +129,7 @@ Moving the files a rule governs breaks the rule twice. The `paths:` glob stops m
 
 A rule in a folder no stack names installs for nobody. `canon/context/governance/stacks.md` covers why `code` is the one folder a stack takes whole and the stage that reports the gap.
 
-Sync never retracts a rule a target's stack stopped naming, since `locateSource` matches a held basename in any folder. A `base` target installed before the audience regroup keeps `testing` under `core/` and `ci-workflow` under `ci/`, so moving a rule between stacks reaches new installs only.
+Sync never retracts a rule a target's stack stopped naming, since `locateSource` matches a held basename in any folder. A `base` target installed before the audience regroup keeps `testing` under `core/` and `ci-workflow` under `ci/`, so moving a rule between stacks reaches new installs only. The stray folders cost orientation, nothing at load.
 
 ### Counts
 
@@ -140,12 +141,15 @@ Three figures move independently: the authored total under `governance/rules/`, 
 
 A shipped rule can point at something a governance-only target lacks.
 
-- A rule that names a plugin skill, such as the markdown rule, `worktrees`, or `git`, tells the session to report the missing skill, which surfaces the gap without closing it
-- A rule that names a `canon` verb, such as `canon gov test-order`, sits on the slow side of the gap in `canon/context/claude-plugin/distribution.md`, since the verb waits on a release
-- A rule publishing a heading some command parses is program input, as `src/comments/vocabulary.ts` reads whichever rule publishes `## Degradation vocabulary`. Grep for a reader before writing the rule.
-- The program-input check in `internal-rule-audit` runs the same grep per rule and attaches the reader to any retire or merge verdict
+A rule naming a plugin skill, such as the markdown rule, `worktrees`, or `git`, tells the session to report the missing skill, which surfaces the gap without closing it.
+
+- A rule naming a `canon` verb, such as `canon gov test-order`, sits on the slow side of the gap in `canon/context/claude-plugin/distribution.md`, since the verb waits on a release, unseen
+- A rule publishing a heading some command parses is program input, as `src/comments/vocabulary.ts` reads whichever rule publishes `## Degradation vocabulary`
+- Adding that heading elsewhere changes what `canon comments scan` sweeps for, so grep for a reader before writing the rule, as `internal-rule-audit` does per rule
 - A glob can reach well past one folder, as `canon/indexes.md` globs `**/index.md` and reaches every folder in the tree
 
 ### Descriptions that break YAML
 
-A `description` holding a bare word, a colon, and a space breaks `Bun.YAML.parse`, which reads the shape as a nested key. `parseFrontmatter` treats the unparsable block as absent, so `canon gov list` lists the rule as unscoped rather than naming the colon. Rephrase the description rather than quoting it.
+A `description` holding a bare word, a colon, and a space breaks `Bun.YAML.parse`, which reads the shape as a nested key. `parseFrontmatter` treats the unparsable block as absent, so `canon gov list` and the citation check list the rule as unscoped rather than naming the colon.
+
+Rephrase the description rather than quoting it, since every other frontmatter example here is unquoted.

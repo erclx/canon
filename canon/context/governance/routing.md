@@ -47,8 +47,8 @@ A claude rule carries operative directives beside its pointer, since a rule arri
 
 The standard keeps the full specification either way, so a drift is a rule falling behind rather than two files disagreeing, and nothing checks it. No rule carries a directive for the root file and no standard governs it, so the seed holds the role a standard would.
 
-- `governance/rules/writing/markdown.md` stays pointer-only on both halves it routes, `markdown-craft` for format and `write-human` for voice, each told to load it
-- The compressible half of that guidance does the least work
+- `governance/rules/writing/markdown.md` stays pointer-only on both halves, `markdown-craft` for format and `write-human` for voice, each told to load it rather than carrying a compressed sample
+- The compressible half of that guidance does the least work, so a sample would buy little
 - The one inline line names the two characters `src/markdown/bans.ts` owns, so a ban added there is a one-line edit to the rule
 
 ### A rule loads the skill owning a reference
@@ -80,10 +80,11 @@ A rule reached by its own glob needs no citation from `CLAUDE.md`, while a skill
 
 ### Rules that always load
 
-No rule carries the channel between sessions. `session-relay` owns the send mechanics, and each role body states only which message it owes. A rule for a roleless session would load into every governed session. The retirement is an exception to the cut test below, since a project without the plugin goes without block-before-prompt.
+No rule carries the channel between sessions. `session-relay` owns the send mechanics, and each role body states only which message it owes and that it goes out first.
 
-`code-comments` owns the degradation term list rather than `src/comments/`, because `src/comments/vocabulary.ts` reads the terms out of whichever rule publishes `## Degradation vocabulary`.
+A rule for a roleless session would load into every governed session, since no glob exists for a session's own role, and the relay already serves that session directly. The retirement is an exception to the cut test below, since a project without the plugin goes without block-before-prompt.
 
+- `code-comments` owns the degradation term list rather than `src/comments/`, because `src/comments/vocabulary.ts` reads the terms from the rule publishing `## Degradation vocabulary`
 - Editing the backticked terms there changes what `canon comments scan` sweeps for here and in every target on `base`
 - Discovery anchors on the heading rather than the filename, so a renumber cannot empty the list
 
@@ -96,9 +97,9 @@ A rule telling sessions to use the structured question surface on a preference c
 
 ### What an always-loaded bullet has to carry alone
 
-An always-loaded bullet is cut only where another surface a governed target receives carries the same instruction. A path-scoped rule, a skill body, a hook, or a standard counts. A scaffold-time seed does not, since the rule arrives through `canon gov sync` and the seed never does. That is why `output.md` keeps its own linked-worktree bullet.
+An always-loaded bullet is cut only where another surface a governed target receives carries the same instruction. A path-scoped rule, a skill body, a hook, or a standard counts. A scaffold-time seed does not, since the rule arrives through `canon gov sync` and the seed never does.
 
-Two cuts refuse this test, both by the operator's choice rather than the test's.
+`output.md` therefore keeps its own linked-worktree bullet and names the `PostToolUse` path hook only as the preferred source. Two cuts refuse this test, both by the operator's choice rather than the test's.
 
 - The relay retirement recorded under "Rules that always load" above
 - The question-surface cut above, which also dropped the "answer from the artifact rather than re-asking" bullet that `plan.md` does not cover for intake and groundwork `- Suggested:` lines

@@ -116,16 +116,18 @@ Three traps depend on what is already in the tree or on the clock.
 - A trigger keyed to a file entering the tree never fires when the seed already put it there, as the setup commit carries `canon/REQUIREMENTS.md` and a later write produces `M` rather than `A`
 - Run `git show --name-status --format="" HEAD` after provisioning a new arm, and `rm -f` a seeded path before the initial commit when the arm needs it added later
 - A helper building a work list from `git diff --name-only` must skip a path no longer in the tree, or a delete-only branch fails with `cp: cannot stat`. Treat a non-fatal error mid-run as a defect.
-- A fixture modelling a timed heuristic must outlast the check window by a wide margin, since two equal sleeps finish in whichever order load puts them
+- A fixture modelling a timed heuristic must outlast the check window by a wide margin, since equal sleeps finish in load's order and an exact-window fixture makes the arm flaky
 - The `smoke-pass` and `smoke-fail` fixtures on `claude:target-setup` sleep three times the skill's five-second window
 
 ### Ignored and unpinned paths
 
 Three paths look present and are not.
 
-- With `SANDBOX_INJECT_SEEDS` on, a stage holding only records under `.canon/` leaves `git add .` nothing to commit and `set -e` aborts the provision. Drop the commit, as `claude:session-worktree` does.
+- With `SANDBOX_INJECT_SEEDS` on, a stage holding only records under `.canon/` leaves `git add .` nothing to commit and `set -e` aborts the provision
+- Drop the commit, as `claude:session-worktree` does
 - The root `.gitignore` carries `.env.*` beside `.env`, so a stored `.env.fixture` never reaches the index, and a scenario needing an env file writes it inline
-- `canon sandbox check` mints a fresh run id when nothing pins one, so it never finds a hand-provisioned tree. Set `CANON_SANDBOX_DIR` to that tree's path, per `canon/context/sandbox/isolation.md`.
+- `canon sandbox check` mints a fresh run id when nothing pins one, so it never finds a tree provisioned by hand or by an earlier call
+- Set `CANON_SANDBOX_DIR` to that tree's path, per `canon/context/sandbox/isolation.md`
 
 ### Matching a real install
 

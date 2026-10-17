@@ -56,6 +56,7 @@ Arm a skill when a wrong run is silent and the damage lands in a target project 
 
 - The rule describes the arms already written as well as the next ones, since every skill armed before it was stated mutates a tree with no reader watching
 - A gov injection flag does not select an arm, since `SANDBOX_INJECT_GOV` is a boolean naming no rule, so which scenario depends on which rule resolves by reading the skill bodies
-- The rule selects `git-stage` and `git-split` first, which the harness cannot assert, per the git-state limit in `canon/context/sandbox/overview.md`. Naming that gap is the rule working.
+- The rule selects `git-stage` and `git-split` first, which the harness cannot assert, per the git-state limit in `canon/context/sandbox/overview.md`
+- Naming that gap is the rule working, since it names the gap instead of hiding it behind a skill nobody nominated
 
 `sandbox/exempt.toml` holds the other half of the split. The rule says what to write, and an exemption says what never will be.

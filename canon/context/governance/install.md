@@ -28,7 +28,7 @@ Flags, arguments, and JSON shapes live in `docs/agents/install-and-sync.md` and 
 
 Bash cannot express the folder-entry match. The regex bash would apply to a rules array matches nothing for a folder entry, so `base` would report zero rules to the `target-setup` skill, which dedupes `--add` extras against that list. Expanding the match in bash would also put one rule-matching logic in two languages.
 
-`gov list --json` carries `unreferenced` and `staleDetect` beside `stacks` and `rules` on every call, and each rule carries its `detect` evidence or null. The gate stage and a session asking what a stack leaves out read one call, and the keys are additive.
+`gov list --json` carries `unreferenced` and `staleDetect` beside `stacks` and `rules` on every call, and each rule carries its `detect` evidence or null. The gate stage and a session asking what a stack leaves out read one call, and the keys are additive, so a consumer reading either of the other two is untouched.
 
 ### Workflow
 

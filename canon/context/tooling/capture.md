@@ -19,7 +19,7 @@ A claim file was the alternative and needs a lock. `strictPort` and Playwright's
 
 ### Leftover worktree folders are refused
 
-A folder left under `.claude/worktrees/` after its worktree was removed is refused rather than served. Git reports the parent repository from inside one, so the linked-worktree test passes it and it derives the main checkout's port, with no signal. Location separates a leftover from an ordinary subdirectory.
+A folder left under `.claude/worktrees/` after its worktree was removed is refused, not served. Git reports the parent repository from inside one, so the linked-worktree test passes it and it derives the main checkout's port, with no signal where a deliberate collision arrives through `strictPort`. Location separates a leftover from a subdirectory.
 
 A name-derived offset would only move which port collides.
 
