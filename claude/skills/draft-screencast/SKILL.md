@@ -10,8 +10,9 @@ metadata:
 ## Guards
 
 - If no topic is provided, stop: `❌ No screencast topic. Describe what you are recording.`
-- Draft, then hand off. Do not edit video or generate captions, and do not drive the application. A recording is another skill's job rather than something forbidden: write the draft, name `record-screencast` as the next step, and stop.
-- Stack-agnostic in the draft. Never name a recording tool, an editing tool, a font, or a window manager. Keep selectors, URLs, wait conditions, and timings out of the beats too, since those four are exactly what the compiler adds in a plan of its own. A beat carrying them stops being a document a person can read and edit down.
+- Draft, then hand off. Do not edit video, generate captions, or drive the application, since a recording is `record-screencast`'s job. Name it as the next step and stop.
+- Stack-agnostic in the draft. Never name a recording tool, an editing tool, a font, or a window manager.
+- Keep selectors, URLs, wait conditions, and timings out of the beats, since the compiler adds those four in a plan of its own and a beat carrying them stops being readable
 
 ## Step 1: read the project context
 
@@ -45,118 +46,11 @@ Build a 2-to-4-word kebab-case slug from the topic and discovery answers. Exampl
 
 Create `demos/<slug>/beats.md` at the project root, creating the folder if it does not exist. The file is committed with the rest of the demo's sources, so a recording can be rebuilt from the folder alone.
 
-Write all nine sections. Pre-seed every section with concrete content so the draft is shippable as-is. The user edits down rather than fills blanks.
+### Fill the template
 
-Load `canon:video-craft` for every zoom and caption value the draft names, and report it rather than proceeding silently when it does not resolve. The template below states none, since each number there traces to a source that skill records.
+Write all nine sections from `${CLAUDE_SKILL_DIR}/references/beats-template.md`, read on reaching this step. Pre-seed every section with concrete content so the draft ships as-is, and the user edits down rather than fills blanks. A run stopped at discovery skips it.
 
-```markdown
-# Screencast: <short title>
-
-## 1. Header
-
-- Audience: <from discovery>
-- Length: <from discovery>
-- Hero moment: <from discovery>
-- Pitch: <one sentence, derived from project context>
-
-## 2. Pre-recording checklist
-
-- [ ] Browser at 1920x1080 with notifications silenced
-- [ ] Session storage and history cleared for the recorded surfaces
-- [ ] Cursor highlighter on
-- [ ] Live URLs and fixtures verified healthy
-- [ ] <one or two project-specific items derived from context>
-
-## 3. Beat sheet
-
-Five beats. Each uses five fields. Add a sixth `Transition out` only when non-default.
-
-### Beat 1: Cold open
-
-- On screen: <derived from hero moment>
-- Action: <one verb, derived>
-- Watch for:
-- Emphasis: zoom onto the action, scale and speed per `canon:video-craft`
-- Caption:
-
-### Beat 2: Setup
-
-- On screen:
-- Action:
-- Watch for:
-- Emphasis: none
-- Caption:
-
-### Beat 3: Hero moment
-
-- On screen: <hero moment from discovery>
-- Action:
-- Watch for:
-- Emphasis: highlight overlay
-- Caption:
-
-### Beat 4: Payoff
-
-- On screen:
-- Action:
-- Watch for:
-- Emphasis: none
-- Caption:
-
-### Beat 5: Outro
-
-- On screen:
-- Action:
-- Watch for:
-- Emphasis: zoom out to full frame
-- Caption:
-
-## 4. Sequencing notes
-
-- Hover before click. The cursor needs a beat to register.
-- Do not cut mid-reset. Let state changes complete on screen.
-- Cut on action, not on stillness.
-- <one or two project-specific gotchas derived from context>
-
-## 5. Production notes
-
-- Resolution: 1920x1080
-- Frame rate: 30fps
-- Container: mp4 H.264
-- Zoom: only on an action too small to read at full frame, scale, speed, and dwell per `canon:video-craft`, zoomed out before every cut
-- Highlight overlay: ~1.5s soft glow
-
-## 6. Captions
-
-- Each caption names what its beat's frame shows, at most two lines of 42 characters, per `canon:video-craft`
-- Hold and reading rate per `canon:video-craft`, splitting a caption across beats rather than shortening its hold
-- Placed off the element the beat acts on
-
-## 7. Distribution
-
-Where the recording ships. Strike rows that do not apply.
-
-- [ ] Native upload to social platform
-- [ ] Canonical host (long-form video platform)
-- [ ] Linked from project README or release notes
-
-## 8. Resolved decisions
-
-Pre-seeded with the common picks. Strike or rewrite as needed.
-
-- Audio: silent plus captions
-- Language: English
-- Chip order: <leave for user, derived from beats>
-- Thumbnail: hero-moment frame
-
-## 9. Wrap
-
-What surrounds the take in the finished video. Each row carries a proposed default. Write `none` on every row to ship the raw take.
-
-- Intro: <proposed title card of two to three seconds naming the subject, or `none`>
-- Outro: <proposed closing card naming where to go next, or `none`>
-- Music: none
-```
+Load `canon:video-craft` for every zoom and caption value the draft names, and report it rather than proceeding silently when it does not resolve.
 
 ## Step 5: output
 
