@@ -39,15 +39,18 @@ Run these commands in parallel to gather git context:
 
 ### Primary concern
 
-- Identify the primary concern of the current branch. Rename it using `git branch -m` if the current name does not already match. Skip the rename if it already matches. Secondary concerns are extracted as new focused branches via cherry-pick.
-- If no single concern dominates (dumping-ground branch with no clear primary), split all commits into new focused branches and add `git branch -d <current>` to delete the original.
+The current branch keeps its primary concern, and each secondary concern leaves as a new focused branch via cherry-pick.
+
+- Rename the current branch with `git branch -m` when its name does not match the primary concern, and skip the rename when it does
+- If no single concern dominates, as on a dumping-ground branch, split every commit into new branches and add `git branch -d <current>`
 - Propose one new branch per secondary concern following branch.md format.
 
 ### Independent and stacked
 
-- Classify groups as independent or stacked before generating commands.
+Classify the groups before generating commands, since the mode decides each branch's base.
+
 - Independent groups: each group's commits apply to `main` without the others. Base every branch on `main`.
-- Stacked groups: groups are ordered and each depends on the commits before it. Base each branch on the previous group's branch. Cherry-pick only that group's commits onto it. The base branch already carries all prior commits.
+- Stacked groups: groups are ordered and each depends on the commits before it. Base each branch on the previous group's branch and cherry-pick only that group's commits.
 
 ## Response format
 
@@ -64,118 +67,43 @@ Run these commands in parallel to gather git context:
 
 **All <total> commits accounted for.**
 
-- For the primary concern (the current branch), show `<current_branch> → <new_name>` only when renaming. Show `<current_branch>` alone if the existing name already matches the concern.
+- For the primary concern, show `<current_branch> → <new_name>` only when renaming, and `<current_branch>` alone otherwise
 - For stacked mode, list rows in merge order: branches based on `main` first, then each layer above. For independent mode, list the primary concern first.
 
-If Mode is Stacked, append this line to the preview:
+### Merge order line
 
-`🔁 Sequential squash-merge loop. Squash-merge each PR bottom-up with --delete-branch. After each merge, signal me so I can restack the next branch onto main before you merge it.`
+Append the line for the run's mode to the preview.
 
-If Mode is Independent, append this line to the preview:
-
-`🔁 Squash-merge secondaries first, primary last. The primary keeps every cherry-picked commit, so merging it first lands every secondary's content on main and leaves the secondary PRs empty after rebase.`
+| Mode        | Line                                                                                                                                                                                                          |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Stacked     | `🔁 Sequential squash-merge loop. Squash-merge each PR bottom-up with --delete-branch. After each merge, signal me so I can restack the next branch onto main before you merge it.`                           |
+| Independent | `🔁 Squash-merge secondaries first, primary last. The primary keeps every cherry-picked commit, so merging it first lands every secondary's content on main and leaves the secondary PRs empty after rebase.` |
 
 After outputting the preview, execute the final commands immediately. Claude Code's tool permission dialog is the confirmation gate. Do not wait for user input.
 
-Before running them, run the scan in `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md` against every title and body. Each body stages under `.canon/tmp/` and leaves through `gh`, so the hook sees neither and this scan is the only gate. Each resulting branch reaches the `pull_request` check the git-pr surface carries once its own pull request opens, but not before, so this scan is what catches a leak ahead of that.
+### Pre-publish scan
+
+Before running them, run the scan in `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md` against every title and body. Each body stages under `.canon/tmp/` and leaves through `gh`, so the hook sees neither.
+
+Each branch reaches the `pull_request` check only once its own pull request opens, so this scan is what catches a leak ahead of that.
 
 ### Final commands
 
-For independent mode, base every branch on `main`:
+Read the command block for the run's mode on reaching this step, and skip the other.
 
-```bash
-# Rename current branch to reflect primary concern
-git branch -m <current_branch> <new_name>
+- Independent mode: `${CLAUDE_SKILL_DIR}/references/independent.md`
+- Stacked mode: `${CLAUDE_SKILL_DIR}/references/stacked.md`
 
-# Create, cherry-pick, push, and open PR for each secondary branch
-mkdir -p .canon/tmp/pr/split
-git switch -c <branch> main && git cherry-pick <sha> <sha> \
-  && git push -u origin <branch> \
-  && (cat <<'BODY' > .canon/tmp/pr/split/<branch>.md
-<body following pr.md template, written from the cherry-picked commits>
-BODY
-) && gh api -X POST 'repos/{owner}/{repo}/pulls' -f title="<title>" -f head=<branch> -f base=main -F body=@.canon/tmp/pr/split/<branch>.md --jq .html_url \
-  && printf 'opened=true\n' \
-  && rm .canon/tmp/pr/split/<branch>.md
+Every pull request opens through the REST pulls endpoint rather than the `gh pr` create subcommand, which runs on GraphQL and fails where a cloud session's GitHub proxy refuses it. The endpoint requires `base`, so each call names its layer's branch, and `-F` reads the body file where `-f` would post the path.
 
-# Return to primary branch, push, and open its PR
-git checkout <new_name> && git push -u origin <new_name> \
-  && (cat <<'BODY' > .canon/tmp/pr/split/<new_name>.md
-<body following pr.md template, written from the primary's commits>
-BODY
-) && gh api -X POST 'repos/{owner}/{repo}/pulls' -f title="<title>" -f head=<new_name> -f base=main -F body=@.canon/tmp/pr/split/<new_name>.md --jq .html_url \
-  && printf 'opened=true\n' \
-  && rm .canon/tmp/pr/split/<new_name>.md
-
-# Clean up the body-file dir if all PRs succeeded (no-op when non-empty)
-rmdir .canon/tmp/pr/split 2>/dev/null || true
-```
-
-Every pull request opens through the REST pulls endpoint rather than the `gh pr` create subcommand, which runs on GraphQL and fails where a cloud session's GitHub proxy refuses it. The endpoint requires `base`, so each call names the branch its layer sits on. `-F` reads the body file, where `-f` would post the path itself.
-
-A create the endpoint refuses, such as one for a head that already has an open pull request, exits non-zero and stops the chain before `opened=true` prints and before the body file is removed. The `opened=true` line is what a pull request creation log reads to count the opening, since the REST call prints a URL and never names itself.
-
-For stacked mode, base each branch on the previous and cherry-pick only that group's commits:
-
-```bash
-# Rename current branch to reflect primary concern
-git branch -m <current_branch> <new_name>
-
-mkdir -p .canon/tmp/pr/split
-
-# Group 1: based on main
-git switch -c <branch-1> main && git cherry-pick <g1-sha> <g1-sha> \
-  && git push -u origin <branch-1> \
-  && (cat <<'BODY' > .canon/tmp/pr/split/<branch-1>.md
-<body following pr.md template, written from the cherry-picked commits>
-BODY
-) && gh api -X POST 'repos/{owner}/{repo}/pulls' -f title="<title>" -f head=<branch-1> -f base=main -F body=@.canon/tmp/pr/split/<branch-1>.md --jq .html_url \
-  && printf 'opened=true\n' \
-  && rm .canon/tmp/pr/split/<branch-1>.md
-
-# Group 2: based on <branch-1>, this group's commits only
-git checkout -b <branch-2> && git cherry-pick <g2-sha> <g2-sha> \
-  && git push -u origin <branch-2> \
-  && (cat <<'BODY' > .canon/tmp/pr/split/<branch-2>.md
-<body following pr.md template, written from the cherry-picked commits>
-BODY
-) && gh api -X POST 'repos/{owner}/{repo}/pulls' -f title="<title>" -f head=<branch-2> -f base=<branch-1> -F body=@.canon/tmp/pr/split/<branch-2>.md --jq .html_url \
-  && printf 'opened=true\n' \
-  && rm .canon/tmp/pr/split/<branch-2>.md
-
-# Return to primary branch, push, and open its PR on the last group's branch
-git checkout <new_name> && git push -u origin <new_name> \
-  && (cat <<'BODY' > .canon/tmp/pr/split/<new_name>.md
-<body following pr.md template, written from the primary's commits>
-BODY
-) && gh api -X POST 'repos/{owner}/{repo}/pulls' -f title="<title>" -f head=<new_name> -f base=<branch-2> -F body=@.canon/tmp/pr/split/<new_name>.md --jq .html_url \
-  && printf 'opened=true\n' \
-  && rm .canon/tmp/pr/split/<new_name>.md
-
-# Clean up the body-file dir if all PRs succeeded (no-op when non-empty)
-rmdir .canon/tmp/pr/split 2>/dev/null || true
-```
+A create the endpoint refuses, such as one for a head with an open pull request, exits non-zero and stops the chain before `opened=true` prints and the body file is removed. A pull request creation log counts openings off `opened=true`, since the REST call prints a URL and never names itself.
 
 ## After execution
 
-Respond with exactly one line:
+Respond with exactly one line and add no other text, reading each URL off the line its create printed through `--jq .html_url`:
 
 `✅ Renamed: <old> → <new> | PRs: <primary-url>, <url1>, <url2>`
 
-Read each URL off the line its create printed through `--jq .html_url`.
-
-Do not add any other text.
-
 ## Stacked merge loop
 
-When the user signals the previous stacked PR has merged, restack the next one.
-
-1. Rebase and push. The own-commit-count comes from the original split table.
-   `git fetch origin main && git checkout <branch> && git rebase --onto origin/main HEAD~<own-commit-count> && git push --force-with-lease`
-2. Verify the PR's base auto-retargeted to main with `gh api repos/{owner}/{repo}/pulls/<num> --jq .base.ref`, a REST read a cloud session's GitHub proxy serves where it refuses GraphQL. If not, retarget it with `gh api -X PATCH repos/{owner}/{repo}/pulls/<num> -f base=main --silent`.
-3. Reply: `✅ <branch> rebased onto main. Ready for squash-merge.`
-
-Edge cases:
-
-- If this branch's commits modify a file added by an unmerged upstream PR, wait for that PR to merge before rebasing.
-- If the PR was orphaned by base-branch deletion, recreate it with the same create the final commands run, passing `-f head=<branch> -f base=main` and a regenerated body, and print `opened=true` after it.
+When the user signals the previous stacked PR has merged, restack the next one. Read `${CLAUDE_SKILL_DIR}/references/stacked.md` from its `## Stacked merge loop` section for the rebase, the retarget, the reply, and the two edge cases. An independent split skips it.
