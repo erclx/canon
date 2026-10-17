@@ -88,6 +88,8 @@ Read the doc each line names before running one of these. `canon docs install-an
 
 ### Design, migrate, and indexes
 
+Three more verbs rewrite files in place.
+
 - `canon design sync` replaces the shipped design files and leaves `.claude/design/project/` alone.
 - `canon migrate --write` rewrites files that cite a retired name or layout. It reports and writes nothing without the flag. See `canon docs migrate`.
 - `canon indexes regen` rewrites each generated `index.md` from the folder's current state, so a hand edit there is lost. See `canon docs indexes`.
@@ -96,4 +98,6 @@ Read the doc each line names before running one of these. `canon docs install-an
 
 ## Source of truth
 
-- `canon docs install-and-sync` states what each install and sync verb writes, refuses, or leaves alone. `canon docs indexes` and `canon docs migrate` state the same for their verbs. When a doc and this skill disagree, the doc wins.
+- `canon docs install-and-sync` states what each install and sync verb writes, refuses, or leaves alone
+- `canon docs indexes` and `canon docs migrate` state the same for their verbs
+- When a doc and this skill disagree, the doc wins

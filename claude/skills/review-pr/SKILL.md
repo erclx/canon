@@ -7,27 +7,37 @@ metadata:
 
 # Review PR
 
-This is a dispatched reviewer's independent review. It reviews an open PR the session
-did not write and posts the findings to the PR, so the vantage is independent
-and the output is durable.
+This is a dispatched reviewer's independent review. It reviews an open PR the session did not write and posts the findings to the PR, so the vantage is independent and the output is durable.
 
-It posts at least twice over a pull request's life. A first pass opens the
-review against the whole change, and every later pass reads only the commits
-added since. The heading reports state rather than pass number: a pass carrying
-anything owed takes `## Review`, and `## Review closed` covers a pass carrying
-none, so the most recent comment's heading reports whether any work is owed.
-Every pass is this skill, and which one it is gets detected from the thread
-rather than named by the caller.
+It posts at least twice over a pull request's life. A first pass reviews the whole change, every later pass reads only the commits added since, and which pass this is gets detected from the thread rather than named by the caller.
 
-The threshold is stated here and nowhere else, and every other surface acting on it cites this skill rather than restating the grades. One rule governs both the heading and the dispatch: a pass carrying anything owed takes `## Review` and owes a dispatch to the session holding the branch, and a pass carrying nothing at all takes `## Review closed` and owes none. Owed covers a finding at any severity, a Testing question, and a reviewer request nobody has answered alike, which is what keeps the two halves from separating. Sending that dispatch is `role-reviewer`'s step rather than this one, which posts and stops, and `role-orchestrator` sends it only as the fallback where no live reviewer can. Post the open heading whether it is the first pass or the fourth. A pull request thread then reads as `## Review`, the worker's answer under `## Review response` from `review-address`, another `## Review` while anything stays open, and `## Review closed` when nothing does.
+## The threshold
 
-Both of this skill's headings anchor as a section distinct from human threads, and neither invents beyond what the whole set already states. That set is eight headings across four families, stated here once so `role-orchestrator`'s poll and every reply-posting skill cite it rather than carry a copy. The review family, `## Review` and `## Review closed`, belongs to this skill alone. The reply family, `## Review response`, `## Rebase`, and `## Post-review findings`, belongs to `review-address`. The third family is a single heading, `## Evidence`, which `canon pr evidence` posts through `git-pr` and `git-followup` and which answers no comment already on the thread, so the poll excludes it from the unclassified count without reading it as a reply that owes a re-review. The fourth, `## UI review` and `## UI review closed`, belongs to `review-ui`, which posts it as a review beside this one, and nothing in this skill reads it.
+The threshold is stated here and nowhere else, and every other surface acting on it cites this skill rather than restating the grades. One rule governs both the heading and the dispatch.
 
-The first reply heading answers a finding this skill posted, the second reports a stale branch resolved without one, and the third carries a finding a worker produces after a close-out rather than in answer to one already on the thread, since a finding produced late is still a finding. A comment posted under a heading outside these eight reaches the poll as unclassified rather than as silence, so an invented ninth heading is a gap the next run reports instead of one it repeats.
+- A pass carrying anything owed takes `## Review` and owes a dispatch to the session holding the branch, whether it is the first pass or the fourth
+- A pass carrying nothing at all takes `## Review closed` and owes none, so the latest heading reports whether work is owed
+- Owed covers a finding at any severity, a Testing question, and an unanswered reviewer request alike, which keeps heading and dispatch together
+- Sending the dispatch is `role-reviewer`'s step, since this skill posts and stops. `role-orchestrator` sends it only where no live reviewer can.
 
-One live verdict stands at a time. A pass that would repeat a standing
-close-out rewrites that comment in place rather than posting beside it, so a
-reader scanning the thread finds the current verdict where the last one sat.
+A thread then reads as `## Review`, the worker's `## Review response` from `review-address`, another `## Review` while anything stays open, and `## Review closed` when nothing does.
+
+## The heading set
+
+Both headings anchor as a section distinct from human threads. The full set is eight headings across four families, stated here once so `role-orchestrator`'s poll and every reply-posting skill cite it rather than carry a copy.
+
+| Family   | Headings                                                     | Owner                                                                    |
+| -------- | ------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| Review   | `## Review`, `## Review closed`                              | This skill alone                                                         |
+| Reply    | `## Review response`, `## Rebase`, `## Post-review findings` | `review-address`                                                         |
+| Evidence | `## Evidence`                                                | `canon pr evidence`, through `git-pr` and `git-followup`                 |
+| UI       | `## UI review`, `## UI review closed`                        | `review-ui`, posted as a review beside this one and read by nothing here |
+
+- The reply headings in order answer a finding, report a stale branch resolved without one, and carry a finding a worker produced after a close-out
+- `## Evidence` answers no comment on the thread, so the poll leaves it out of the unclassified count rather than reading it as a reply owing a re-review
+- A comment under any other heading reaches the poll as unclassified rather than as silence, so an invented ninth heading is a gap the next run reports
+
+One live verdict stands at a time. A pass that would repeat a standing close-out rewrites that comment in place, so a reader finds the current verdict where the last one sat.
 
 ## Guards
 
@@ -42,23 +52,28 @@ Capture `<read-at>` first, ahead of every read this pass makes:
 date -u +%Y-%m-%dT%H:%M:%SZ
 ```
 
-Everything from that line to the post is the compose window, and a commit pushed inside it is one this pass never saw. Stamping the body with the instant the window opened is what leaves that commit outside the covered range, so the next pass reads it rather than assuming it covered. Taking the stamp later, at the head resolution below or at Step 4 where the body is composed, claims a stretch this pass had already stopped reading through.
+Everything from that line to the post is the compose window, and a commit pushed inside it is one this pass never saw. Stamping the window's opening instant leaves that commit outside the covered range, so the next pass reads it. A later stamp claims a stretch this pass had stopped reading.
 
-Then resolve the PR through `canon pr head --json` for the current branch, or `canon pr head <number> --json` for a number the user names. Take `<number>` off the record's `number` and `<headRefOid>` off its `tip`. The first seven characters are `<short-sha>`, which names the body file in Step 4. Read the title and body over REST:
+### Resolve the head
+
+Resolve the PR through `canon pr head --json` for the current branch, or `canon pr head <number> --json` for a number the user names. Take `<number>` off `number` and `<headRefOid>` off `tip`, whose first seven characters are `<short-sha>`, naming Step 4's body file. Read the title and body over REST:
 
 ```bash
 gh api repos/{owner}/{repo}/pulls/<number> --jq '{title, body, head: .head.sha, repo: .base.repo.html_url}'
 ```
 
-Every read in this skill runs on REST, since the `gh pr` lookups run on GraphQL and a cloud session's GitHub proxy refuses it. A target whose CLI predates the verb gets no record back. Fall back there to the `head` field above for `<headRefOid>`, and to `gh api "repos/{owner}/{repo}/pulls?head={owner}:<branch>&state=open" --jq '.[].number'` for a branch with no number named, stopping on the guard above when that prints anything but one number.
+- Every read here runs on REST, since `gh pr` runs on GraphQL and a cloud session's proxy refuses it
+- A target whose CLI predates the verb gets no record. Take `<headRefOid>` from the `head` field above instead.
+- With no number named there, read `gh api "repos/{owner}/{repo}/pulls?head={owner}:<branch>&state=open" --jq '.[].number'`, and stop on the guard unless it prints one number
+- `<headRefOid>` and `<read-at>` travel into Step 4's marker, and `<headRefOid>` with `repo` as `<repo-url>` into its links. Re-reading the head later would name a commit this pass did not review.
 
-`<headRefOid>` and `<read-at>` travel into Step 4's marker, and `<headRefOid>` with the `repo` field as `<repo-url>` into its finding links. None is re-derived after this point. Re-reading the head later in the pass would name a commit this pass did not review, which is the defect the marker exists against, reached from the inside.
+### Read the project context
 
 Read these in parallel from the project root, skipping any that do not exist:
 
 - `CLAUDE.md`: project type, conventions, and commands
 - `canon/REQUIREMENTS.md`: feature scope and non-goals
-- `.canon/tasks/priority.md`: where this feature sits on the board and what each neighboring row waits on. Resolve this one at the main worktree root the way `session-worktree` does, since the board is gitignored and a linked worktree holds no copy of it
+- `.canon/tasks/priority.md`: where this feature sits on the board and what each neighbor waits on, resolved at the main root the way `session-worktree` does, since a linked worktree holds no copy
 - `.canon/plans/feature-<slug>.md` for the branch, when present: the intent the PR should satisfy, and its `**Review focus:**` section as the inputs this pass must confirm the diff handles
 
 Coding standards from `.claude/rules/` are auto-loaded by Claude Code.
@@ -69,41 +84,77 @@ Read `${CLAUDE_SKILL_DIR}/references/scope.md` for finding the commit and verdic
 
 ## Step 3: review
 
-Invoke `canon:review-craft` with the skill tool now, and read nothing for findings until it has loaded, whatever the diff's size. It carries what to look for and how much evidence a finding needs, rendered output included, and this step carries no axis list of its own to fall back on. Read the diff and files against its axes. Add the two that stay here: rule violations, and checkout assumptions in a shipped file. Report it rather than proceeding silently when the skill does not resolve. Then add the three lenses a self-review structurally cannot apply:
+Invoke `canon:review-craft` with the skill tool now, and read nothing for findings until it has loaded, whatever the diff's size. It carries what to look for and how much evidence a finding needs, and this step has no axis list of its own to fall back on.
+
+Read the diff and files against its axes, plus the two that stay here, being rule violations and checkout assumptions in a shipped file. Report it rather than proceeding silently when the skill does not resolve. Then add the three lenses a self-review structurally cannot apply:
 
 - Integration: does this fit the board's order, the shared wiring seam, and any sibling PR in flight?
 - Contract: does a contract downstream features depend on land correctly, and should the plan itself be questioned?
-- Consumers: when the change touches a resource with more than one consumer, enumerate them and check the rule against each. A rule written for the consumer the change targets can be wrong for a sibling that writes.
+- Consumers: when the change touches a resource with more than one consumer, enumerate them and check the rule against each, since a rule right for the target can be wrong for a sibling that writes
 
-Read each test file the branch added or changed against the final filter in `canon:test-craft`, which owns what the filter asks. Scope it to those files rather than the suite. A fixed-pause wait is a `should-fix`, since the end to end rules already forbid it, and a test sitting at a higher layer than it needs is `minor` unless it is flaky or slows the gate measurably. Report it rather than proceeding silently when the skill does not resolve.
+### Tests
 
-Then read the description's `## Testing` section, which is the one part of a pull request body this session is positioned to falsify. The branch author cannot see what a sibling branch drove the same day, and the arm list is what settles the claim rather than the diff.
+Read each test file the branch added or changed against the final filter in `canon:test-craft`, scoped to those files rather than the suite. Report it rather than proceeding silently when the skill does not resolve.
 
-Test every unchecked box against the testing discipline in `${CLAUDE_SKILL_DIR}/../git-pr/references/pr.md`, which reserves an unchecked box for a capability the agent lacks. Raise the box when it names no human at all, when the human it names is a live agent session, or when it names a person for a step the repository ships a harness for, such as `canon sandbox run`. Cost alone is not an answer, since authorizing a spend is the operator's and performing the run is not. A refusal the author actually met is an answer, and it names which one.
+- A fixed-pause wait is a `should-fix`, since the end to end rules already forbid it
+- A test at a higher layer than it needs is `minor`, unless it is flaky or slows the gate measurably
 
-Test every ticked box too, bounded to one naming a file or a command. Confirm what it names still exists at `<headRefOid>`, `git show <headRefOid>:<path>` for a file or `git grep <command> <headRefOid>` for a command, rather than re-running what it claims. A box naming neither stays untested, since nothing here can confirm a claim carrying no artifact. A box ticked before a later commit removed or replaced what it names is a `should-fix` finding on the body itself, filed under a `**PR body**` block ahead of the file blocks, since what it corrupts is the merge record rather than a file in the diff.
+### The testing section
 
-Then test what `## Key changes` claims against the diff it describes. Read `${CLAUDE_SKILL_DIR}/references/key-changes.md` for the verb that compares them, which field of its record becomes a finding, and which ones raise nothing.
+Then read the description's `## Testing` section, the one part of a pull request body this session can falsify. The author cannot see what a sibling branch drove the same day, so the arm list settles the claim rather than the diff.
 
-Ask rather than grade. Whether a human is genuinely required is a reading the branch author may hold a reason this session cannot see, so the question carries no severity and enters no count. What it does carry is the heading and the dispatch, on the rule the opening states, because a question the author never receives corrects nothing and the author is the only party who can answer it. Answering it closes it, and the answer may be that the requirement holds.
+- Test every unchecked box against the testing discipline in `${CLAUDE_SKILL_DIR}/../git-pr/references/pr.md`, which reserves one for a capability the agent lacks
+- Raise a box naming no human, naming a live agent session, or naming a person for a step the repository ships a harness for, such as `canon sandbox run`
+- Cost alone is not an answer, since authorizing a spend is the operator's and performing the run is not. A refusal the author met is an answer, naming which.
 
-Read `## For the reviewer` the same way, bounded to the bullets under that heading rather than the Summary or the Technical context around it. Those two carry the author's argument for the change, and reading them while judging it is most of what an independent pass exists to avoid, so the read stops at the section itself.
+### Ticked boxes and key changes
 
-Answer each bullet in the body, on the same terms as a Testing question: no severity, no count. A request nobody can answer stays owed under the heading and dispatch the opening states, keeping the thread open exactly as an unanswered Testing box does. One the pass does answer carries no further weight, since the answer is discharged in the same comment that carries it.
+Test every ticked box too, bounded to one naming a file or a command. Confirm what it names exists at `<headRefOid>`, through `git show <headRefOid>:<path>` or `git grep <command> <headRefOid>`, rather than re-running it.
 
-On a first pass, confirm each `**Review focus:**` item the plan names against the diff, since the planning session named the inputs that would break the change before any code existed and no other reader holds that list. Report the items in a `**Review focus**` block after the `**For the reviewer**` block, one bullet per item naming what confirmed it, such as a test, a guard, or a branch in the code. The block carries no severity and enters no count. An item the pass cannot confirm becomes a `should-fix` finding under the file that should have handled it, so a reader can tell an item checked from one skipped. A plan whose section reads `None identified.`, or a branch with no plan, takes no block. The section binds the first pass only: a later pass checks whether the finding an unconfirmed item became has landed, like any other prior finding, and never re-raises a confirmed item against a delta that did not touch it.
+- A box naming neither stays untested, since nothing here confirms a claim carrying no artifact
+- A box ticked before a later commit removed what it names is a `should-fix` on the body, filed under a `**PR body**` block ahead of the file blocks, since it corrupts the merge record
+- Then test `## Key changes` against the diff. Read `${CLAUDE_SKILL_DIR}/references/key-changes.md` for the verb comparing them and which record field becomes a finding.
+
+### Ask rather than grade
+
+Whether a human is genuinely required is a reading the author may hold a reason for, so a Testing question carries no severity and enters no count. It does carry the heading and the dispatch, since a question the author never receives corrects nothing. Answering closes it, and the requirement may hold.
+
+### For the reviewer
+
+Read `## For the reviewer` the same way, bounded to the bullets under that heading. The Summary and Technical context carry the author's argument, and reading them while judging is what an independent pass exists to avoid.
+
+Answer each bullet in the body with no severity and no count. An unanswered request stays owed under the heading and dispatch, as an unanswered Testing box does, and an answered one is discharged in the same comment.
+
+### Review focus
+
+On a first pass, confirm each `**Review focus:**` item the plan names against the diff, since only the planning session's list names the inputs that would break the change. Report them in a `**Review focus**` block after `**For the reviewer**`, one bullet each naming what confirmed it.
+
+- The block carries no severity and enters no count
+- An item the pass cannot confirm becomes a `should-fix` finding under the file that should have handled it, so a checked item reads apart from a skipped one
+- A plan reading `None identified.`, or a branch with no plan, takes no block
+- The section binds the first pass only. A later pass checks the finding an unconfirmed item became, and never re-raises a confirmed item against an untouched delta.
+
+### The filter and the ladder
 
 Apply the high-signal filter: flag only what will cause incorrect behavior, break a documented rule, or mislead a downstream feature. If uncertain, do not flag.
 
-A later pass applies the same axes to the delta, and adds one check the first pass cannot make: did each prior finding land, and did the fix regress anything it touched. Findings of its own are normal findings, stated at the same severity and counted the same way. That count is one of the two things Step 4 reads to pick the heading, so a pass raising a finding of its own is not a close-out at any severity.
+Use severity: `critical` (blocks merge), `should-fix` (fix before merge), `minor` (blocks nothing). The ladder ranks a finding and decides nothing about who acts, since every grade takes the open heading and owes a dispatch.
 
-A prior finding can also be settled by argument rather than by a fix. A reply naming the plan question that already declined it, or a constraint this session could not see, withdraws the finding or moves its grade. State that outcome in the body under the finding it changes, naming the fact that produced it, whether the argument arrived on the thread or through the channel that carried the dispatch. Dropping the finding from this body instead leaves a reader unable to tell a withdrawal from an oversight, and the reasoning goes with the session that heard it. A withdrawal removes the finding from the count, so a pass that withdrew every finding it carried is a close-out. Write the withdrawal and its cause into that body rather than taking the short close-out line Step 4 supplies, which reports prior findings addressed and would credit a fix nobody made.
+### A later pass
 
-Use severity: `critical` (blocks merge), `should-fix` (fix before merge), `minor` (blocks nothing). The ladder ranks a finding and decides nothing about who acts on it, since every grade takes the open heading and owes a dispatch under the threshold the opening states.
+A later pass applies the same axes to the delta, and adds one check the first cannot make: did each prior finding land, and did the fix regress anything it touched. Its own findings count the same, so a pass raising one is not a close-out at any severity.
+
+A prior finding can also be settled by argument, such as a reply naming the plan question that declined it or a constraint this session could not see. That withdraws the finding or moves its grade.
+
+- State the outcome under the finding it changes, naming the fact that produced it, whether it arrived on the thread or through the dispatch channel
+- Dropping it silently leaves a withdrawal indistinguishable from an oversight, and the reasoning leaves with the session that heard it
+- A withdrawal leaves the count, so a pass that withdrew every finding is a close-out. Write the withdrawal into the body rather than Step 4's short close-out line, which would credit a fix nobody made.
 
 ## Step 4: post to the PR
 
-Read `${CLAUDE_SKILL_DIR}/references/post.md` for the body file name, the body shape, the PR body block, the marker every body carries, and the scans ahead of the post, and `${CLAUDE_SKILL_DIR}/references/body-variants.md` for the Testing and reviewer blocks and the close-out bodies. That file sends a pass repeating a standing close-out on to `${CLAUDE_SKILL_DIR}/references/close-out.md`, which rewrites the comment in place.
+Read `${CLAUDE_SKILL_DIR}/references/post.md` for the body file name, the body shape, the PR body block, the marker every body carries, and the scans ahead of the post, and `${CLAUDE_SKILL_DIR}/references/body-variants.md` for the Testing and reviewer blocks and the close-out bodies.
+
+That file sends a pass repeating a standing close-out on to `${CLAUDE_SKILL_DIR}/references/close-out.md`, which rewrites the comment in place.
 
 ## Step 5: output
 
@@ -111,8 +162,8 @@ Read `${CLAUDE_SKILL_DIR}/references/post.md` for the body file name, the body s
 X critical, Y should-fix, Z minor. Posted to PR #<number>.
 ```
 
-Add `N Testing question(s) raised.` to that line when the Step 3 check raised any. The counts cover findings alone, so a pass whose only output was a question otherwise reports as silent to the session that drove it. That session is not who the question is addressed to, which is what the dispatch covers.
+The counts cover findings alone, so a pass whose only output was a question or an answered request would otherwise report as silent to the session that drove it.
 
-Add `N reviewer request(s) answered.` to that line when the PR body carried a `## For the reviewer` section. The counts and the Testing question line both cover something else, so a pass that only answered a request otherwise reports as silent too.
-
-Report the merge decision as a plain recommendation in chat (merge, or address findings first). Do not merge.
+- Add `N Testing question(s) raised.` to that line when the Step 3 check raised any
+- Add `N reviewer request(s) answered.` when the PR body carried a `## For the reviewer` section
+- Report the merge decision as a plain recommendation in chat (merge, or address findings first). Do not merge.

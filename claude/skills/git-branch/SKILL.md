@@ -31,6 +31,8 @@ Run these commands in parallel to gather git context:
 
 ### Preview
 
+Output the preview first.
+
 - **Current:** <current_branch>
 - **Suggested:** <suggested_name>
 - **Length:** <count>/50
@@ -55,8 +57,6 @@ git branch -m <current> <suggested>
 
 ## After execution
 
-Respond with exactly one line:
+Respond with exactly one line and add no other text:
 
 `✅ Renamed: <current> → <suggested>`
-
-Do not add any other text.

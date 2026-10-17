@@ -7,23 +7,25 @@ metadata:
 
 # Session compact
 
-A compaction keeps conclusions and drops the reasoning that produced them. This writes the reasoning down first, in one file, outside the task board.
+A compaction keeps conclusions and drops the reasoning behind them. This skill writes that reasoning to one file, outside the task board, before it is lost.
 
-Write only what a compaction destroys. Everything a later session can read from git, from the tree, or from a durable record is already safe, and restating it is what makes a handoff untrustworthy rather than long.
+Write only what a compaction destroys. Git, the tree, and durable records are already safe, and restating them makes a handoff untrustworthy rather than long.
 
 ## Guards
 
-- If `git rev-parse --git-dir` does not resolve, the note still writes. The filename comes from the work rather than from the branch, so nothing here needs a repository.
-- Decline where the session holds no reasoning a reader could not get faster from git or from a record already written. Say so in one line and write nothing. A padded note is worse than an absent one, because a reader who finds a note trusts it.
-- Resolve `.canon/` at the main worktree root and send the write out as a heredoc, both the way `session-worktree` states.
+- Write the note even when `git rev-parse --git-dir` does not resolve, since the filename comes from the work rather than the branch
+- Decline in one line and write nothing when the session holds no reasoning git or a record would not show faster. A padded note is worse than none, because a reader trusts what they find.
+- Resolve `.canon/` at the main worktree root and send the write out as a heredoc, both the way `session-worktree` states
 
 ## Step 1: write the note
 
-Write one file to `.canon/compact/<slug>.md`. Name `<slug>` for the work as a short kebab-case phrase, taken from what the session did rather than from the branch, so a session that ran on `main` still gets a name a reader recognizes. Use `latest` when nothing in the session names the work.
+Write one file to `.canon/compact/<slug>.md`, overwriting any note of the same name.
 
-Follow `${CLAUDE_SKILL_DIR}/references/handoff-note.md` for what each section carries and what stays out. Read it before drafting rather than working the shape from memory.
-
-Overwrite a note of the same name. One session's work has one note, and a second file for the same work splits the handoff.
+| Part     | Rule                                                                                                                     |
+| -------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `<slug>` | Short kebab-case phrase for what the session did, not the branch, so work on `main` still gets a name. `latest` if none. |
+| Sections | Follow `${CLAUDE_SKILL_DIR}/references/handoff-note.md`, read before drafting rather than worked from memory             |
+| Count    | One note per piece of work. A second file for the same work splits the handoff.                                          |
 
 ## Step 2: report
 
@@ -32,7 +34,10 @@ Overwrite a note of the same name. One session's work has one note, and a second
 Move: canon records push, then canon sessions export <id>
 ```
 
-Print the `Move:` line only when the caller named moving the session to another machine, and leave it off every other report. Fill `<id>` from the `sessionId` of `canon sessions list --self --json`, and leave the literal `<id>` where that read refuses, since an id taken from any other row packs the wrong session. The push comes first so the note travels with the session. Name both commands for the operator and run neither: an export packs a transcript that can hold credentials, so the order belongs to the caller.
+- Print the `Move:` line only when the caller named moving the session to another machine
+- Fill `<id>` from the `sessionId` of `canon sessions list --self --json`. Leave the literal `<id>` where that read refuses, since an id from any other row packs the wrong session.
+- The push comes first so the note travels with the session
+- Name both commands and run neither. An export packs a transcript that can hold credentials, so the order belongs to the caller.
 
 A decline reports itself so a caller can tell it from a failure:
 
@@ -46,7 +51,7 @@ A decline reports itself so a caller can tell it from a failure:
 - Name what was decided together with what it beat. A decision with no rejected alternative reads as arbitrary and gets reopened.
 - Write `## Where to pick up` as one instruction, not a menu. A reader who has to choose has not been handed off to.
 - Leave the task board alone. A task is work somebody filed, and a handoff is context for one reader.
-- Do not write a `## State` section. A session that committed nothing has no state a reader could not get from `git status` faster, and one that did has it in the log.
+- Do not write a `## State` section, since `git status` and the log already hold it
 
 ## What this delegates
 

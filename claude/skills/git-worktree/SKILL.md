@@ -49,17 +49,32 @@ For each row, determine merge state of its branch:
    - `OPEN`: state is `open`, record PR number and URL.
    - `CLOSED`: state is `closed` (not merged), record PR number.
    - Command fails or returns no PR: fall through.
-3. Fallback: `git branch --merged main --format='%(refname:short)' 2>/dev/null | grep -qx "<branch>"` to detect linear-merge ancestry. On match, mark `merged (local)`. Otherwise `unmerged`. Match the name alone. Without `--format`, git decorates the current branch with `*` and every branch checked out in a linked worktree with `+`, which is the whole set being enumerated.
+3. Fallback: `git branch --merged main --format='%(refname:short)' 2>/dev/null | grep -qx "<branch>"`. On match, mark `merged (local)`, otherwise `unmerged`.
 
-Determine dirtiness: `git -C <path> status --porcelain` non-empty means `dirty`.
+Match the name alone in the fallback. Without `--format`, git decorates the current branch with `*` and every branch checked out in a linked worktree with `+`, which is the whole set being enumerated.
 
-Determine current: the row whose `path` equals `git rev-parse --show-toplevel`. Resolve the root rather than comparing `pwd`, which equals the worktree root only when the session sits at the top of it. A session in any subdirectory would match no row, and the current-worktree exclusion in `cleanup` would pass its own worktree into the remove set.
+### Dirty, current, and foreign
 
-Determine provenance: a non-main row is `foreign` when its `path` does not start with `<MAIN_ROOT>/.claude/worktrees/`. That prefix is the folder `session-worktree` creates under, a convention of that skill rather than a fact this one owns. A tree an operator registered by hand anywhere else on disk reads as `foreign`. Step 1 has already marked the main row `main`, so it never reaches this test.
+Three more marks come from the row's own path.
 
-Determine occupancy: run `canon sessions list --json` once for the whole enumeration, never once per row. Resolve each enumerated row's `path` and each live session's `worktree` field with `realpath` before comparing, since a session registered from a second clone of this repository reports a path under that clone rather than under `MAIN_ROOT`, and a raw string compare would hold nothing back. A row is `occupied` when a resolved `worktree` from any live session equals its resolved `path`. A resolved session `worktree` outside `MAIN_ROOT` names a different checkout, so it clears no row here and marks none as occupied.
+| Mark      | Test                                                                             |
+| --------- | -------------------------------------------------------------------------------- |
+| `dirty`   | `git -C <path> status --porcelain` is non-empty                                  |
+| current   | `path` equals `git rev-parse --show-toplevel`                                    |
+| `foreign` | A non-main row whose `path` does not start with `<MAIN_ROOT>/.claude/worktrees/` |
 
-The roster is unreadable when the command exits non-zero, when its JSON carries a `reason` field instead of a populated `sessions` array, or when `sessions` is non-empty but no entry carries a `worktree` key at all, which is the shape an older binary prints and cannot be told apart from a roster answering that nothing is occupied. `list` leaves the Notes column silent on that failure rather than changing behavior beyond it. `cleanup` refuses instead, stated in its own section below.
+Resolve the root rather than comparing `pwd`, which equals it only at the top of the worktree. A session in a subdirectory would match no row, and `cleanup` would pass its own worktree into the remove set.
+
+The `foreign` prefix is the folder `session-worktree` creates under, a convention of that skill rather than a fact this one owns. A tree an operator registered by hand anywhere else reads as `foreign`, and the main row never reaches this test.
+
+### Occupancy
+
+Run `canon sessions list --json` once for the whole enumeration, never once per row. A row is `occupied` when a live session's `worktree` equals its `path`.
+
+- Resolve both sides with `realpath` before comparing, since a session from a second clone reports a path under that clone and a raw compare would hold nothing back
+- A resolved session `worktree` outside `MAIN_ROOT` names a different checkout, so it marks no row occupied
+
+The roster is unreadable when the command exits non-zero, when its JSON carries a `reason` instead of a populated `sessions` array, or when `sessions` is non-empty and no entry carries a `worktree` key. An older binary prints that last shape, which cannot be told apart from nothing occupied.
 
 ## `list` mode
 
@@ -70,7 +85,7 @@ Print the enumeration as a table, then stop. `list` has no final command.
 | -- | ---------------------------------- | ----------------- | -------- | ------ | -------- |
 ```
 
-Notes column shows the first that applies of `current`, `occupied`, `foreign`, `dirty`, or empty. Show paths relative to `MAIN_ROOT` (`.claude/worktrees/<name>`). A `foreign` row sits outside `MAIN_ROOT`, so print its path in full.
+Notes column shows the first that applies of `current`, `occupied`, `foreign`, `dirty`, or empty. Show paths relative to `MAIN_ROOT` (`.claude/worktrees/<name>`), and a `foreign` row's path in full. An unreadable roster leaves the Notes column silent and changes nothing else.
 
 After the table, append a one-line hint:
 
@@ -79,54 +94,17 @@ After the table, append a one-line hint:
 
 ## `cleanup` mode
 
-If Enumeration marked the roster unreadable, stop: `❌ Session roster unreadable, so occupancy cannot be checked. Resolve the canon sessions list failure, then re-run cleanup.` Hold every non-main row rather than computing the remove set from the other five tests alone, since removing a tree a live session holds is the failure this skill exists to prevent and a sweep that removes nothing costs one re-run.
+If Enumeration marked the roster unreadable, stop: `❌ Session roster unreadable, so occupancy cannot be checked. Resolve the canon sessions list failure, then re-run cleanup.`
 
-From the enumeration, include a worktree in the remove set when all hold:
+Hold every non-main row rather than computing the remove set from the other tests, since removing a tree a live session holds is the failure this skill exists to prevent, and a sweep that removes nothing costs one re-run.
 
-1. Not the main row.
-2. Not the current session's worktree.
-3. Not occupied by a live session.
-4. Not a `foreign` tree.
-5. State is `merged` or `merged (local)`.
-6. Working tree is clean.
+### Remove set and final command
 
-Every other non-main row goes to the skip set with a one-word reason, the first that applies in this order: `current`, `occupied`, `foreign`, `dirty`, `open`, `closed`, `unmerged`. A `foreign` tree that is also dirty reports `foreign`, since `dirty` is a state the operator can clear and `foreign` is not. Leading with the transient reason invites a commit or stash that changes nothing, after which the row reports `foreign` and holds back anyway.
-
-### Preview
-
-```plaintext
-**Removing:** <count>
-
-| Path | Branch | PR |
-| ---- | ------ | -- |
-
-**Skipping:** <count>
-
-| Path | Branch | Reason |
-| ---- | ------ | ------ |
-```
-
-If the remove set is empty, stop with `❌ Nothing to remove. All linked worktrees are current, dirty, unmerged, or foreign.`
-
-### Final command
-
-After the preview, execute immediately. Claude Code's tool permission dialog is the confirmation gate. Do not wait for user input.
-
-```bash
-git -C <MAIN_ROOT> worktree remove <path1> \
-  && git -C <MAIN_ROOT> branch -D <branch1> \
-  && git -C <MAIN_ROOT> worktree remove <path2> \
-  && git -C <MAIN_ROOT> branch -D <branch2> \
-  && git -C <MAIN_ROOT> worktree prune
-```
-
-Chain one `worktree remove` + `branch -D` pair per row in the remove set, then a single `worktree prune` at the end.
+Read `${CLAUDE_SKILL_DIR}/references/cleanup.md` for the remove set, the skip reasons and their order, the preview, and the final command. `list` mode skips it.
 
 ## After execution
 
-Respond with exactly one line:
+Respond with exactly one line and add no other text:
 
 - `list`: `✅ <n> worktrees listed`
 - `cleanup`: `✅ Removed: <count> worktrees, <count> branches pruned`
-
-Do not add any other text.

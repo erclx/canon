@@ -11,31 +11,38 @@ metadata:
 
 Run a learning workspace on one subject across sessions. The workspace holds what the learner has been through, so a session weeks later resumes from the folder rather than from the conversation.
 
-The shape of the workspace is fixed by `${CLAUDE_SKILL_DIR}/references/teach.md`. Read it before writing anything into the folder. The glossary answers to `${CLAUDE_SKILL_DIR}/references/glossary.md` wherever it lands. The pedagogy sits in `${CLAUDE_SKILL_DIR}/references/pedagogy.md`, the lesson craft and its build in `${CLAUDE_SKILL_DIR}/references/lesson-craft.md` and `lesson-build.md`, the record's revisit schedule in `revisit.md`, and the promotion routing in `${CLAUDE_SKILL_DIR}/references/promotion.md`.
+## References
+
+Read `${CLAUDE_SKILL_DIR}/references/teach.md` before writing anything into the folder, since it fixes the workspace's shape. The glossary answers to `${CLAUDE_SKILL_DIR}/references/glossary.md` wherever it lands.
+
+The pedagogy sits in `${CLAUDE_SKILL_DIR}/references/pedagogy.md`, the lesson craft and its build in `${CLAUDE_SKILL_DIR}/references/lesson-craft.md` and `lesson-build.md`, the revisit schedule in `revisit.md`, and the promotion routing in `${CLAUDE_SKILL_DIR}/references/promotion.md`.
 
 ## Guards
 
 - If the invocation names no subject and no existing workspace matches, stop: `❌ No subject. Invoke with the subject to learn, or the topic of a workspace to resume.`
 - Never trust recall for what the subject says. Research first, cite what was read, and say what was not.
-- Write nothing outside the workspace folder, apart from the one handoff file Step 6 names and the destinations the fold mode lands from that file. A durable page stays in `reference/` until the operator confirms a destination, and only the fold mode copies it out, from a branch.
+- Write nothing outside the workspace folder, apart from the one handoff file Step 6 names and the destinations the fold mode lands from that file
+- A durable page stays in `reference/` until the operator confirms a destination, and only the fold mode copies it out, from a branch
 
 ### Workspaces and promotion
 
+One subject takes one workspace, and only its reference pages ever leave it.
+
 - Do not open a second workspace on a subject one already covers. Resume that one.
 - Never promote a lesson. It is generated markup carrying a quiz and a learner, and no request makes it promotable.
-- Never write a favicon link by hand. `canon teach nav` puts the toolkit's icon on every page it generates and inside a lesson's `style` region, so a hand-written one in a lesson's `<head>` gives the page two.
+- Never write a favicon link by hand. `canon teach nav` puts the toolkit's icon on every page and in a lesson's `style` region, so a hand-written one gives the page two.
 
 ## Step 0: let the CLI resolve the workspace root
 
 Workspaces live at the main worktree root, never inside a linked worktree. A copy per worktree forks the learning records, and the learner is one person.
 
-Every `canon teach` verb resolves that root in-process, so no step below composes a path to a workspace file. Read the folder through the CLI rather than deriving its location:
+Every `canon teach` verb resolves that root in-process, so no step below composes a path to a workspace file. Read the folder through the CLI:
 
 ```bash
 canon teach list --json
 ```
 
-It reports every workspace with its path, its counts, and the ordinal a new one would take. A `no-teach` refusal means the project has opened none yet, which is the new-workspace path in Step 1 rather than a reason to stop. The open verb creates the folder.
+It reports every workspace with its path, its counts, and the ordinal a new one would take. A `no-teach` refusal means the project has opened none yet, which is Step 1's new-workspace path, and the open verb creates the folder.
 
 Every path under the main root is a main-root write, routed the way `session-worktree` states. The route splits by what the write does to the file:
 
@@ -44,15 +51,23 @@ Every path under the main root is a main-root write, routed the way `session-wor
 
 ## Step 1: open or resume
 
-A topic the listing already carries is a resume, and anything else is a new workspace. An invocation asking to promote is neither: read the named workspace through the listing and go to Step 6, which teaches nothing and writes no lesson. An invocation asking to fold confirmed promotions in is neither as well: go to `## Fold mode`.
+A topic the listing already carries is a resume, and anything else is a new workspace. Two invocations are neither.
 
-On a resume, run `canon teach list <topic> --json` for the files behind each count, then read the highest-numbered learning record and `GLOSSARY.md`. Those carry where the learner stopped and what they got wrong. The listing record carries `success`, the mission's success lines, which are the exit criteria this workspace is finished against. Report them with what is already met before teaching anything.
+- One asking to promote reads the named workspace through the listing and goes to Step 6, which teaches nothing and writes no lesson
+- One asking to fold confirmed promotions in goes to `## Fold mode`
 
-It also carries `due`, what the learning records schedule, soonest first. Each entry names the item, its date, the rung it has reached, whether it is `overdue`, and the two dates the next record could write. Read it here rather than later: it is the input to what this session opens on, and `canon teach lesson` takes a `--slug` naming a choice already made. Report what is overdue before proposing a lesson. An empty `due` on a workspace holding records means no record scheduled anything, which is a gap in the records rather than a clear schedule.
+### On a resume
 
-On a new workspace, settle the starting point first, by asking rather than by assuming. Difficulty with no floor under it teaches nobody, and the mission cannot be written without it.
+Run `canon teach list <topic> --json` for the files behind each count, then read the highest-numbered learning record and `GLOSSARY.md`, which carry where the learner stopped and what they got wrong.
 
-Then open the workspace, which derives the ordinal and writes all three required files:
+- The record's `success` holds the mission's success lines, the exit criteria. Report them with what is already met before teaching anything.
+- `due` lists what the learning records schedule, soonest first, each with its item, date, rung, `overdue` flag, and the two dates the next record could write
+- Read `due` here, since `canon teach lesson` takes a `--slug` naming a choice already made. Report what is overdue before proposing a lesson.
+- An empty `due` on a workspace holding records means no record scheduled anything, which is a gap in the records rather than a clear schedule
+
+### On a new workspace
+
+Settle the starting point first, by asking rather than by assuming. Difficulty with no floor under it teaches nobody, and the mission cannot be written without it. Then open the workspace, which derives the ordinal and writes all three required files:
 
 ```bash
 canon teach open <topic> --json \
@@ -82,14 +97,20 @@ A claim nothing was read for is the failure this step exists against. Where no s
 
 Pick the next lesson from the learning records rather than from the subject's own order. The target is the band immediately past what the learner can already do unaided, which `${CLAUDE_SKILL_DIR}/references/pedagogy.md` states in full.
 
-Open on what `due` reports as overdue, oldest date first, before anything new. Where nothing is overdue, open on retrieval of what the last session got wrong. A learner who cannot retrieve the previous lesson is not ready for the next one, and moving on anyway buys fluency that decays. Never place from the last record alone, since a topic missed three sessions ago is invisible to that read and sits in `due` with a date already past.
+- Open on what `due` reports as overdue, oldest date first, before anything new
+- Where nothing is overdue, open on retrieval of what the last session got wrong. A learner who cannot retrieve the previous lesson is not ready for the next one.
+- Never place from the last record alone, since a topic missed three sessions ago is invisible to that read and sits in `due` with a date already past
 
 ## Step 4: write the lesson and the reference
 
 Two outputs with two lifetimes, and the split decides the format.
 
-- A lesson is a self-contained page carrying its own quiz, a teach-back block, and the feedback for each question. It embeds one shared stylesheet rather than restating styles, and it is disposable and never promoted. Its `refs` pass the source ladder, and a learner's or organization's file goes in the body, labeled.
-- A reference page goes to `reference/<slug>.md`, written for a reader with no learner in it. This is the half that survives the workspace, so it is written in markdown to pass the authoring gates a promotion would put it through. `canon teach nav` renders it to a `reference/<slug>.html` sibling, and a lesson links that sibling, since a served `.md` opens as plain text.
+- A lesson is a self-contained page carrying its own quiz, a teach-back block, and feedback per question, embedding one shared stylesheet. It is disposable and never promoted.
+- A reference page goes to `reference/<slug>.md`, written for a reader with no learner in it. It is the half that survives, so it passes the authoring gates a promotion applies.
+- A lesson's `refs` pass the source ladder, and a learner's or organization's file goes in the body, labeled
+- `canon teach nav` renders a reference to a `reference/<slug>.html` sibling, and a lesson links that sibling, since a served `.md` opens as plain text
+
+### Resolve the lesson
 
 Resolve the lesson before writing it, rather than composing its name or its quiz order by hand:
 
@@ -106,47 +127,55 @@ It writes nothing and reports three things:
 - `success`, the mission's success lines, carried here so Step 5 needs no second read.
 - `quiz`, one entry per question, carrying `order` and `answer`.
 
-Write the correct option first, then present the options in the order `order` reports, reading it as authored indices where `0` is the correct one. Take the order as given, since a lesson that reorders on its own judgment puts the answer back in the first slot.
+Write the correct option first, then present the options in the order `order` reports, as authored indices where `0` is the correct one. Take the order as given, since a lesson that reorders by judgment puts the answer back in the first slot.
 
 ### The quiz, the teach-back block, and the lesson body
 
-Read `${CLAUDE_SKILL_DIR}/references/lesson-craft.md` before writing the lesson. `## Quiz construction` and `## Teach back` there fix the markup `canon teach nav`'s stepper gates on, so a quiz in any other shape shows every question at once and nothing reports it. Then read `${CLAUDE_SKILL_DIR}/references/lesson-build.md` for the block list, the four marker pairs, the render, nav, stylesheet, and glossary verbs, and the rule against hand-composing any of them. Keep every quiz answer the same length, so formatting leaks no clue about which one is correct. Decide the figure first, by `## Diagrams` in `lesson-craft.md`.
+Read `${CLAUDE_SKILL_DIR}/references/lesson-craft.md` before writing the lesson. Its `## Quiz construction` and `## Teach back` fix the markup `canon teach nav`'s stepper gates on, and a quiz in any other shape shows every question at once with nothing reporting it.
+
+- Then read `${CLAUDE_SKILL_DIR}/references/lesson-build.md` for the block list, the four marker pairs, the render, nav, stylesheet, and glossary verbs, and the rule against hand-composing any of them
+- Keep every quiz answer the same length, so formatting leaks no clue about which one is correct
+- Decide the figure first, by `## Diagrams` in `lesson-craft.md`
 
 ### Hand over a link, never a path
 
-A lesson is a page carrying a script, and an editor preview cannot run it, so a path alone opens markup with no working quiz. Serve the teach root and give the learner a link they can click. One verb refreshes every page's chrome and serves the folder from the main worktree root:
+A lesson is a page carrying a script, and an editor preview cannot run it, so a path alone opens markup with no working quiz. Serve the teach root and give the learner a link. One verb refreshes every page's chrome and serves the folder from the main worktree root:
 
 ```bash
 canon teach up <topic> --json
 ```
 
-Where the installed CLI predates `up`, run the line the `Open` step of `canon teach list <topic>` prints with `--json` appended instead, never `canon serve .canon/teach` written by hand, which serves an absent folder from a linked worktree.
-
-Start it in the background so the session keeps going, and read `url` off the record rather than composing one. The verb walks past a port already in use, so the port it took is exactly the half a guessed URL gets wrong. Report the refusal and its `reason` when `ok` is false, and report it rather than proceeding silently when the verb does not resolve at all, which is an installed CLI predating it.
-
-Do this on every run that opens or resumes a workspace, including one that writes no lesson, since the learner's route into what is already there is the same link.
+- Where the installed CLI predates `up`, run the line the `Open` step of `canon teach list <topic>` prints, with `--json` appended
+- Never hand-write `canon serve .canon/teach`, which serves an absent folder from a linked worktree
+- Start it in the background and read `url` off the record, since the verb walks past a port already in use and a guessed URL gets that port wrong
+- Report the refusal and its `reason` when `ok` is false, and report it rather than proceeding silently when the verb does not resolve at all
+- Do this on every run that opens or resumes a workspace, including one that writes no lesson, since the learner's route in is the same link
 
 ## Step 5: record what happened
 
 Write `learning-records/<nnnn>-<slug>.md` before the session ends, carrying the lessons covered, what the learner retrieved unaided, what they got wrong with the wrong answer itself, and a `## Revisit` section.
 
-Record the wrong answer rather than the count. The next session places the learner from this file, and a tally carries no misconception to work against.
+- Record the wrong answer rather than the count. The next session places the learner from this file, and a tally carries no misconception to work against.
+- Record what the teach-back left out under what the learner got wrong, naming the concept and where the explanation broke, since both are retrieval failures one section holds
+- Read `${CLAUDE_SKILL_DIR}/references/revisit.md` before writing `## Revisit`, for the bullet shape, where each date and rung comes from, and an unscheduled item's first schedule
 
-Record what the teach-back left out under what the learner got wrong, naming the concept and where the explanation broke. A produced answer and a selected one are both retrieval failures the next session places from, so a second heading would split one input across two sections.
+### Restate the mission
 
-Then write `## Revisit`. Read `${CLAUDE_SKILL_DIR}/references/revisit.md` before writing it, for the bullet shape, where each date and rung is copied from, and the first schedule for an item no record has set.
+Restate the mission's success lines from the `success` the lesson verb reported, rather than from `MISSION.md` by eye. Report each line as met or not met, and name what the learner did that meets it.
 
-Then restate the mission's success lines with what is now met, reading them from the `success` the lesson verb already reported rather than from `MISSION.md` by eye. Report each line as met or not met, and name what the learner did that meets it. A mission whose lines are all met is finished, and saying so is what closes a workspace.
+A mission whose lines are all met is finished, and saying so is what closes a workspace.
 
 ## Step 6: propose where the durable half belongs
 
-Run this when the invocation asks for it, or offer it in one line when a mission finishes, since that is when the workspace stops growing and its reference pages stop changing. Never run it unasked mid-course.
+Run this when the invocation asks for it, or offer it in one line when a mission finishes, since its reference pages then stop changing. Never run it unasked mid-course.
 
-Read `${CLAUDE_SKILL_DIR}/references/promotion.md` first. It carries what may be promoted, the routing test, both spellings of the wiki folder, the refusal when a project has none, what each destination expects a page to carry, and under `## Proposing and handing off` the proposal block, the handoff file this step writes in place of any destination, and how the operator is told to fold it. Propose and wait, and write nothing to a destination here.
+Read `${CLAUDE_SKILL_DIR}/references/promotion.md` first. It carries what may be promoted, the routing test, the wiki folder and its refusal, each destination's expectations, and under `## Proposing and handing off` the proposal, the handoff file, and the fold instruction. Propose and wait, and write nothing to a destination here.
 
 ## Fold mode
 
-Run this only when the invocation asks to fold, and only from a branch in a linked worktree, since every destination is a tracked file that commits with the branch while the handoff sits in gitignored scratch at the main root. Read `${CLAUDE_SKILL_DIR}/references/promotion-fold.md` for how each block lands, the overwrite refusal, the handoff delete, and the output lines, which replace the Output block below.
+Run this only when the invocation asks to fold, and only from a branch in a linked worktree, since every destination is a tracked file committing with the branch while the handoff sits in gitignored scratch at the main root.
+
+Read `${CLAUDE_SKILL_DIR}/references/promotion-fold.md` for how each block lands, the overwrite refusal, the handoff delete, and the output lines, which replace the Output block below.
 
 ## Output
 
@@ -160,10 +189,9 @@ Progress:  <n> of <m> success lines met
 Open:      [<the url the serve verb reported>](<the same url>)
 ```
 
-Omit the reference line where the lesson produced no durable page. The open line is the one line that is never omitted, since it is the only route the learner has into the page, and it carries what the serving verb reported rather than a URL composed here. Where the verb refused, that line names the refusal instead of a link.
-
-Write that line as a markdown link carrying the URL as both its text and its target, rather than as a bare URL and never inside backticks, since a code span is text the reader has to copy.
-
-Emit every path from the project root, in the form the project's instruction file sets.
+- Omit the reference line where the lesson produced no durable page
+- Never omit the open line, the learner's only route into the page. It carries what the serving verb reported, or names the refusal where the verb refused.
+- Write that line as a markdown link with the URL as both text and target, never a bare URL or a code span the reader has to copy
+- Emit every path from the project root, in the form the project's instruction file sets
 
 A promotion pass reports the shape `${CLAUDE_SKILL_DIR}/references/promotion.md` gives at the end of `## Proposing and handing off` instead.

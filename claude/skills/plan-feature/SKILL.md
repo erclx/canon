@@ -12,7 +12,14 @@ metadata:
 - If no feature description is provided, stop: `❌ No feature description. Describe what you want to add.`
 - Do not implement anything. Output the plan and stop.
 - When the feature description spans two or more independent concerns, write one plan file per concern. Do not bundle them under a single slug.
-- Before Step 3, name the next three questions you would ask about what the ask must achieve, and predict the operator's answer to each from the ask and the project context. An answer you can predict settles its criterion, which Step 3 writes as a `**Verification:**` bullet rather than a question. Only a prediction still open goes under `**Questions:**` with a `- Suggested:` line, so a fully specified ask carries none and Small mode stays reachable. When you can predict none of the three, so no checkable success criterion can be stated, ask before Step 3 through whatever route reaches the operator, including a message to a dispatching session. The test reads the ask's success criteria, never the plan's open questions, which a `- Suggested:` line answers.
+
+### Predict the next three questions
+
+Before Step 3, name the next three questions you would ask about what the ask must achieve, and predict the operator's answer to each. The test reads the ask's success criteria, never the plan's open questions.
+
+- A predictable answer settles its criterion, which Step 3 writes as a `**Verification:**` bullet rather than a question
+- Only a prediction still open goes under `**Questions:**` with a `- Suggested:` line, so a fully specified ask carries none and Small mode stays reachable
+- When you can predict none of the three, ask before Step 3 through whatever route reaches the operator, including a message to a dispatching session
 
 ## Step 1: read the Claude setup
 
@@ -22,26 +29,29 @@ Read these in parallel from the project root, skipping any that do not exist:
 - `canon/REQUIREMENTS.md`: feature scope and non-goals
 - `.canon/tasks/index.md`: current scope and status, then any task file the feature relates to
 
-Also read these when the feature touches code or UI. Skip them for prose, docs, catalog, or config-only changes:
+Also read `canon/DESIGN.md` when the feature touches code or UI, for visual intent and component rules, with values read from the stylesheet its lead names. Skip it for prose, docs, catalog, or config-only changes.
 
-- `canon/DESIGN.md`: visual intent and component rules, with values read from the stylesheet its lead names
-
-Coding standards live in `.claude/rules/`. Claude Code loads them automatically. Path-scoped rules apply to the files they match.
+Coding standards live in `.claude/rules/`. Claude Code loads them automatically, and path-scoped rules apply to the files they match.
 
 ## Step 2: scan relevant source files
 
-Based on the feature description, identify and read source files that are directly relevant. Do not read entire directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at.
+Read the source files directly relevant to the feature, never whole directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at.
 
-Measure against the tree rather than recall. Grep for each construct the plan will name and count the sites, so the plan carries the count the tree holds today. The tree tells a new path what exists beside it, not where it belongs, so a flat folder is a reading to place against rather than a pattern to copy. Confirm any work the plan sequences behind is still open, so it does not lead with an item that already shipped.
+Measure against the tree rather than recall, since a count carried from an earlier session or a summary is the most common way a plan ships the wrong scope.
 
-Open each file before describing what is in it. A count or a claim carried from an earlier session, a summary, or another document is the most common way a plan ships the wrong scope.
+- Open each file before describing what is in it
+- Grep for each construct the plan will name and count the sites
+- Confirm any work the plan sequences behind is still open
+- Read a flat folder as a reading to place against rather than a pattern to copy, since the tree shows what exists beside a new path, not where it belongs
 
-When a decision the plan will make rests on an outside practice or a third-party behavior, invoke `canon:search-craft` before searching, fetch each source, and record the passage relied on. Skip this for a plan that rests on nothing outside the project.
+### Outside sources
 
-- Ask the fetch for the verbatim passage, and confirm the wording through `curl` where a decision turns on exact wording, since `WebFetch` returns a model's answer rather than the page.
-- Route a Claude Code subject to the `claude-code-guide` agent.
-- Mark a source that could not be fetched as unverified rather than citing recall.
-- Report it rather than proceeding silently when `canon:search-craft` does not resolve.
+When a decision rests on an outside practice or a third-party behavior, invoke `canon:search-craft` before searching, fetch each source, and record the passage relied on. Skip this for a plan that rests on nothing outside the project.
+
+- Confirm exact wording through `curl` where a decision turns on it, since `WebFetch` returns a model's answer rather than the page
+- Route a Claude Code subject to the `claude-code-guide` agent
+- Mark a source that could not be fetched as unverified rather than citing recall
+- Report it rather than proceeding silently when `canon:search-craft` does not resolve
 
 ## Step 3: build the plan
 
@@ -49,37 +59,30 @@ The section list, what each section holds, and the suggested-and-answer contract
 
 What this skill adds on top of the standard:
 
-- Reframe a vague ask as success criteria before writing `**Files to touch:**`. Each criterion names something observable and a check that decides it, such as a measure and the threshold it must stay under, drawn from the ask or the project context. "Make it faster" names no criterion, while a stated budget for one path does. Each criterion becomes one `**Verification:**` bullet.
-- Confirm a concrete project or use case drives the feature before shaping it, and lift patterns from that project where precedent exists. A feature with no named user is a guess about what one will want.
+- Reframe a vague ask as success criteria before `**Files to touch:**`, each an observable result and its check, which becomes one `**Verification:**` bullet. "Make it faster" names none.
+- Confirm a concrete project or use case drives the feature, and lift patterns from it where precedent exists. A feature with no named user is a guess.
 - Prefer one layout that serves both a new and a grown project over a dual-mode toggle or a migration shim. Two modes double what every later change has to hold.
 
 ### Suggestions and sections
 
-- Apply senior judgment to every `- Suggested:` line. Pick the best option and state it in one line with its reason or main tradeoff. No padding, no alternatives unless they change the pick.
-- Suggest a real default when best practice, the codebase, or prior context points to one.
-- Load the `canon:codebase-layout` skill before writing the `**Files to touch:**` entries when any of them names a file or folder that does not exist yet, and give each new path its placement reason in its entry. Skip the load when every entry edits an existing file. Report it rather than proceeding silently when the skill does not resolve.
-- Write `**Verification:**` as one bullet per outcome naming the test or command that proves it, and `**Review focus:**` as the inputs or states that would break the change. You understood the risk before any diff existed, and these two sections carry it to the executing session and to the reviewer.
+Every `- Suggested:` line takes senior judgment, picking the best option in one line with its reason or main tradeoff, and naming alternatives only when they change the pick.
+
+- Suggest a real default when best practice, the codebase, or prior context points to one
+- Load `canon:codebase-layout` before `**Files to touch:**` when an entry names a path that does not exist yet, and give each new path its placement reason. Report it if it does not resolve.
+- Write `**Verification:**` as one bullet per outcome naming the test or command that proves it
+- Write `**Review focus:**` as the inputs or states that would break the change, carrying the risk you understood to the executor and the reviewer
 
 ### Sources and size
 
-- Cite the `**Sources:**` entry for every decision Step 2 sourced, each with its quoted passage or the word `unverified`.
-- Prefer `None identified.` over low-signal fillers. A small feature should produce a short plan, not a padded one.
+A small feature produces a short plan, not a padded one.
+
+- Cite the `**Sources:**` entry for every decision Step 2 sourced, each with its quoted passage or the word `unverified`
+- Prefer `None identified.` over low-signal fillers
 - When three or more questions remain, keep chat output to the file pointer plus a short summary. Inline chat is fine when two or fewer remain.
 
 ## Pull request boundaries
 
-A plan sequencing its work into batches declares where one pull request ends, here rather than at ship time. A dependency chain cannot be split once it is built, so the choice exists only while the batches are still a plan.
-
-- One batch is one pull request, and one pull request is one plan file, named for its own concern rather than a numeric suffix. `canon tasks plan-branch` derives one branch from one plan filename, so a `**Batch N**` sub-heading inside one file's `**Files to touch:**` shares that one branch across every batch, and the batch that merges first strands every batch behind it with nothing left to open a pull request against. Write a plan opening five batches as five files before the first line of any of them.
-- State a dependent batch's dependency on the ones before it in its own `**Constraints:**`, naming the earlier batch's slug and stacking rather than merging into it. A batch that builds after another and shares most of its files with it folds into that batch as contiguous commits on one branch, since each pull request pays a fixed cost a same-file slice cannot earn back, and the rebases between stacked slices land on the same files. Keep a batch apart only where a reviewer or the operator would judge it apart: a contract a later batch is built against, a taste call the operator judges in its own sitting, or a fold that would exceed one review. Write that reason as ``Judged apart from `feature-<parent>`: <reason>`` in the batch's `**Constraints:**`. `canon records validate plans` reports a stacked batch that should have folded, and its thresholds live there.
-- Mark each batch dependent or independent by comparing the file sets rather than the descriptions. A batch sharing no file with another is independent and earns its own branch even where both arrived in one request. One run measured at 68 files carried three such batches into a single review because nothing drew the boundary.
-
-### Slicing and sequence
-
-- Slice a batch by one user-visible path end to end rather than by layer, so each batch ships something a person can exercise. The slice decides what a batch contains, and the file-set comparison above still decides whether two batches depend on each other, so two slices sharing a file stay marked dependent. A path too thin to pay a pull request of its own folds forward into the next.
-- Sequence the riskiest batch first, so the batch most likely to change the plan is built while every later batch can still move. A sweep is the one exception and stays last even when it is the riskiest, per the next bullet.
-- Sequence a sweep last. A batch deliberately rewriting files earlier batches touched is coherent as the final one and forces every batch behind it into one review anywhere else.
-- Keep each batch's commits contiguous once the work starts. A later fix to an earlier batch belongs on that batch's own commits, since a batch interrupted by another cannot be lifted onto its own branch afterward.
+A plan sequencing its work into batches declares where each pull request ends, since a dependency chain cannot be split once it is built. Read `${CLAUDE_SKILL_DIR}/references/batches.md` when the plan carries more than one batch, for the one-file-per-batch rule, when a dependent batch folds, and the build order. A single-batch plan skips it.
 
 ## Step 4: output
 
@@ -88,11 +91,11 @@ Decide the mode based on what Step 3 produced:
 - **Small** when the plan touches 2 files or fewer, has no architectural or cross-cutting choices, and both Risks and Questions come out `None identified.`
 - **Full** otherwise
 
-A consumer list is a `Risks` entry, which already forces Full. Establishing a resource with more than one consumer, where at least one writes, is a cross-cutting choice wherever that list ends up living, so such a plan stays Full even at two files.
+A consumer list is a `Risks` entry, which already forces Full. A resource with more than one consumer, at least one writing, is a cross-cutting choice, so such a plan stays Full even at two files.
 
 ### Small mode
 
-Output the plan to chat. Do not write a plan file. The markers match the standard's, so a plan that later grows into a file keeps the shape it was drafted in.
+Output the plan to chat and write no plan file. The markers match the standard's, so a plan that later grows into a file keeps its shape.
 
 ```markdown
 **Files to touch:**
@@ -104,7 +107,7 @@ Output the plan to chat. Do not write a plan file. The markers match the standar
 - <outcome>: `<test or command that proves it>`
 ```
 
-Small mode carries no `**Review focus:**`, since it already requires Risks to come out `None identified.` and a change with no risk leaves the reviewer no breaking input to name.
+Small mode carries no `**Review focus:**`, since its Risks already came out `None identified.` and the reviewer has no breaking input to name.
 
 If real questions exist, include a numbered `**Questions:**` section below, each with a `- Suggested:` line and an `- Answer:` slot:
 
@@ -120,17 +123,20 @@ Omit empty sections. Do not print `None identified.` in chat.
 
 ### Full mode
 
-Derive a 2-to-4-word kebab-case slug from the feature description. Write the full plan to `.canon/plans/feature-<slug>.md` at the main worktree root, not the current worktree. Resolve that root the way `session-worktree` does. Create the directory if it does not exist.
+Derive a 2-to-4-word kebab-case slug from the feature description. Write the plan to `.canon/plans/feature-<slug>.md` at the main worktree root, resolved the way `session-worktree` does, creating the directory if needed.
 
-The plan is a main-root write, from a linked worktree and from a background session sitting at the main root with none entered alike, so it goes out as a heredoc, routed the way `session-worktree` states.
+The plan is a main-root write, from a linked worktree and from a background session at the main root alike, so it goes out as a heredoc routed the way `session-worktree` states. Copy the shape from the template in `${CLAUDE_SKILL_DIR}/references/plan.md` rather than from this body, so one edit to the standard moves every plan.
 
-The file follows the template in `${CLAUDE_SKILL_DIR}/references/plan.md`. Copy the shape from there rather than from this body, so one edit to the standard moves every plan.
+### Checking the written plan
 
-Run `canon records validate plans` after writing the file when the CLI is on PATH. It reports a section, a filename, or an answer slot that does not hold, and it writes nothing.
+Two commands check the file once it lands, and both write nothing.
 
-Run `canon markdown audit .canon/plans/feature-<slug>.md` beside it, naming the file. `.canon/plans/` is gitignored and the audit's default path set is what git lists, so no other gate ever opens a plan, and six ban hits landed across four plans written without this call. Rewrite the sentence carrying a hit rather than swapping the token for a near-synonym.
+- Run `canon records validate plans` when the CLI is on PATH. It reports a section, a filename, or an answer slot that does not hold.
+- Run `canon markdown audit .canon/plans/feature-<slug>.md`, naming the file, since the gitignored plan reaches no other gate. Rewrite a hit's sentence rather than swapping the token.
 
-When Step 1 resolved an existing task for this feature, run `canon tasks plan-link <task> .canon/plans/feature-<slug>.md` right after the file lands, naming the stem Step 1 read. Skip the call when Step 1 found no task, since there is nothing to link yet. Report a refusal rather than stopping on it. The plan file is already written, and `canon tasks validate` still catches an unlinked task through `plan-uncited` if this call cannot run.
+When Step 1 resolved an existing task, run `canon tasks plan-link <task> .canon/plans/feature-<slug>.md` right after the file lands, naming the stem Step 1 read. Skip it when Step 1 found no task, and report a refusal rather than stopping, since `canon tasks validate` still catches an unlinked task through `plan-uncited`.
+
+### Chat output
 
 Then output in chat:
 
@@ -145,7 +151,7 @@ Then output in chat:
 Next: /session-worktree
 ```
 
-Show only the path line and the `Next:` line when there are no questions. The `.canon/plans/` directory is gitignored. Do not stage or commit the file.
+Show only the path line and the `Next:` line when there are no questions. The `.canon/plans/` directory is gitignored, so do not stage or commit the file.
 
 Do not proceed to implementation until the user explicitly says to continue.
 
@@ -153,6 +159,6 @@ Do not proceed to implementation until the user explicitly says to continue.
 
 After the plan is written, the user may re-ping with follow-up questions or pushback. Keep chat output to a decision-help shape.
 
-- State each pick as one-line pick plus one-line reason. Do not use section headers, context blocks, or multi-section breakdowns in chat. Those belong in the plan file.
-- Put numbered decisions to resolve at the bottom of the response, not interleaved with findings.
-- When a finding needs more than two lines to explain, update `.canon/plans/feature-<slug>.md` in place with the detail and point the user at the file instead.
+- State each pick as one-line pick plus one-line reason. Section headers, context blocks, and multi-section breakdowns belong in the plan file.
+- Put numbered decisions to resolve at the bottom of the response, not interleaved with findings
+- When a finding needs more than two lines, update `.canon/plans/feature-<slug>.md` in place and point the user at the file

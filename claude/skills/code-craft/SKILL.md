@@ -7,7 +7,7 @@ metadata:
 
 # Code craft
 
-A session writing code takes its shape from whatever sits nearby. It copies a function rather than changing the one it found, spreads one decision across the files it happened to open, and adds a class hierarchy for a second case that may never come. Each choice reads fine in the diff and costs the next change. This skill carries the judgment at the moment the shape is chosen, before the body exists.
+A session writing code takes its shape from what sits nearby. It copies a function rather than changing it, spreads one decision across the files it opened, and builds a hierarchy for a case that may never come. Each reads fine in the diff and costs the next change. This skill carries the judgment as the shape is chosen, before the body exists.
 
 Load it before writing a new function, class, or module, and before extracting, abstracting, or copying existing code. Skip it for a change that fills in a body whose shape is already fixed.
 
@@ -24,7 +24,7 @@ Good design is design that makes the likely change cheap. Judge a shape by the c
 A unit is worth having when its interface is much simpler than what it does, so a caller learns a little and gets a lot.
 
 - Add a function or a class only when its name and parameters are easier to hold than its body. One that forwards its arguments to another call with nothing added is a pass-through, so inline it.
-- Split a module by the decision it hides, such as a file format, a storage choice, or a pricing rule, rather than by processing step. A split by step makes every change to one decision touch every step.
+- Split a module by the decision it hides, such as a file format, a storage choice, or a pricing rule, not by processing step, which makes one decision's change touch every step
 - Keep a decision in one unit, so changing it opens one file. A decision whose details leak into its callers is not hidden, whatever the folder says.
 - Prefer one longer function a reader can follow top to bottom over many tiny ones they have to stitch back together.
 
@@ -32,9 +32,9 @@ A unit is worth having when its interface is much simpler than what it does, so 
 
 Each principle below has a case where the other side wins. State which case you are in before following either.
 
-- **One piece of knowledge, one place, against false sharing.** Merge two copies when they encode the same rule, so changing the rule means changing both. Leave them apart when they only look alike and would change for different reasons, since merging them couples two things that drift.
-- **Build only what is asked, against seams that ease change.** Build no capability for a feature nobody has asked for. A refactor, a test, or a parameter that makes the asked-for code easier to change is not speculative, and building it is not a breach.
-- **One reason to change, against too many pieces.** Split a unit when two unrelated changes would both land in it. Stop splitting when the pieces only make sense read together, since a reader then rebuilds the whole across files.
+- **One piece of knowledge, one place, against false sharing.** Merge two copies encoding one rule, so a change never misses one. Leave apart two that only look alike, since merging couples them.
+- **Build only what is asked, against seams that ease change.** Build no capability nobody asked for. A refactor, test, or parameter easing change to the asked-for code is not speculative.
+- **One reason to change, against too many pieces.** Split a unit two unrelated changes would both land in. Stop when the pieces only make sense together and a reader rebuilds the whole.
 
 ## Reach for a pattern only past its wrong case
 
@@ -51,7 +51,7 @@ A pattern earns its indirection only when the problem it solves is present now. 
 
 ## Pass hidden inputs in
 
-- Pass the clock, the environment, randomness, and any global into the code that reads them, rather than reaching for them inside. A function that reads the time itself cannot be tested at a chosen time.
+- Pass the clock, the environment, randomness, and any global into the code that reads them, rather than reaching for them inside, since a function reading the time cannot be tested at a chosen one
 - Keep business rules free of transport and storage code, so a rule can be read and tested without a request or a database.
 - Skip ports and adapters for an application that only reads and writes records. The layers cost more than the change they protect against.
 
@@ -86,6 +86,8 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 
 ### Defaults and fixes
 
+Defaults and fixes carry their own signs.
+
 - You wrote a default value, a threshold, or a fallback the task never named.
 - A fix is adding a special case, a catch, or a disabled check rather than changing the code that misbehaved.
 - The code reads the current time, an environment variable, or a global from inside a rule.
@@ -100,6 +102,8 @@ Check each line against the code the change produced. A line answering no is fix
 - Every pattern in the diff solves a problem present now, with more than one case behind it.
 
 ### Inputs, scope, and fixes
+
+Check the inputs, the scope, and the fixes the same way.
 
 - Clock, environment, and global reads are passed in rather than taken inside a rule.
 - The diff holds no feature, option, or default the task did not ask for or state.

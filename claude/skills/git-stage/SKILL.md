@@ -34,10 +34,14 @@ Run these commands in parallel to gather git context:
 
 ### Order and commands
 
+Order and stage the groups so each commit lands whole.
+
 - Order commits by dependency: commit dependencies before the files that import them.
 - Prefix the full command sequence with `git restore --staged .` to unstage everything, then stage and commit each group in order.
 - For `D` status files, use `git rm <file>`. For `A` or `M` files, use `git add <file>`.
-- For `R<score>` status rows, `--name-status` emits three tab-separated fields: `R<score>\t<old>\t<new>`. Treat the pair as one file, keep both paths in the same group, and restage them together with `git add <old> <new>` so git detects the rename at commit time. Splitting the pair across groups produces an add-plus-delete pair instead of a rename.
+- For `R<score>` status rows, `--name-status` emits three tab-separated fields, `R<score>\t<old>\t<new>`
+
+Treat a rename pair as one file. Keep both paths in one group and restage them with `git add <old> <new>`, so git detects the rename at commit time rather than recording an add plus a delete.
 
 ## Response format
 
@@ -53,11 +57,11 @@ Run these commands in parallel to gather git context:
 
 **All <total> files accounted for.**
 
-Count characters in each `<type>(<scope>): <subject>` line. Shorten any subject that exceeds 72 characters and update the table.
-
-After outputting the preview, execute the final command immediately. Claude Code's tool permission dialog is the confirmation gate. Do not wait for user input.
+Count characters in each `<type>(<scope>): <subject>` line, shortening any subject past 72 characters and updating the table. Then execute the final command immediately without waiting for user input, since Claude Code's tool permission dialog is the confirmation gate.
 
 ### Final command
+
+Run it as soon as the preview is out.
 
 ```bash
 git restore --staged .
@@ -71,8 +75,6 @@ git add <old> <new> && git commit -m "<type>(<scope>): <subject>"
 
 ## After execution
 
-Respond with exactly one line:
+Respond with exactly one line and add no other text:
 
 `✅ Committed: <n> commits`
-
-Do not add any other text.

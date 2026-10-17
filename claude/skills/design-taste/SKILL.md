@@ -7,11 +7,9 @@ metadata:
 
 # Design taste
 
-A model with no stated direction draws the population average of what it has seen. That is why unguided design output reads as templated while satisfying every rule of craft it was given, and it is why adding more craft rules does not fix it. This skill carries the direction: where a decision sits, what settles before it, and which defaults to reach past.
+A model with no stated direction draws the population average of what it has seen, so unguided output reads as templated while satisfying every craft rule, and more craft rules do not fix it. This skill carries the direction: where a decision sits, what settles before it, and which defaults to reach past.
 
-Load this before drafting rather than after. A revision pass recovers a color and never recovers the composition the draft already settled.
-
-Skip it for work that does not change how something looks, feels, moves, or is interacted with.
+Load this before drafting rather than after, since a revision pass recovers a color and never the composition the draft already settled. Skip it for work that does not change how something looks, feels, moves, or is interacted with.
 
 ## The defaults you are reaching past
 
@@ -24,6 +22,8 @@ This is what the population average looks like. Each one is what gets drawn when
 - A scroll cue at the bottom of the first screen.
 
 ### Details and copy
+
+The rest of the ten sit in the details and the copy.
 
 - A colored dot before every navigation item, row or badge.
 - A glow standing in for elevation, on a pure black or pure white ground.
@@ -53,9 +53,10 @@ Put the read to the operator through the structured question surface where it ge
 
 ## The layers, and the order they settle
 
-A lower layer constrains every layer above it. Two consequences follow, they run in opposite directions, and collapsing them is the mistake worth avoiding.
+A lower layer constrains every layer above it. Two consequences follow in opposite directions, and collapsing them is the mistake worth avoiding.
 
-Settling a higher layer over a broken lower one changes nothing, which is why a palette round against a broken composition is wasted. Judging a lower layer through a finished higher one is nearly impossible, which is why grey-boxing works.
+- Settling a higher layer over a broken lower one changes nothing, which is why a palette round against a broken composition is wasted
+- Judging a lower layer through a finished higher one is nearly impossible, which is why grey-boxing works
 
 The model is Jesse James Garrett's five planes from _The Elements of User Experience_ (2000), subdivided to the granularity a drafting round works at.
 
@@ -73,10 +74,11 @@ The model is Jesse James Garrett's five planes from _The Elements of User Experi
 
 ### What follows from the order
 
-- Work at the lowest layer the complaint reaches. A complaint is voiced at the layer a person can name and usually lives lower. "It feels gloomy" reads as palette and is frequently composition, since a page with one section shape reads flat whatever color it is.
+Work at the lowest layer the complaint reaches. A complaint is voiced at the layer a person can name and usually lives lower, so "it feels gloomy" reads as palette and is frequently composition, since a page with one section shape reads flat whatever its color.
+
 - A round varies one layer and says which. Varying three answers nothing, because the pick cannot say which difference decided it.
-- Never settle a higher layer before the one below it. Imagery and palette are the one pair that settle together, since a real photograph sets a ground rather than accepting one.
-- Content leads the order and is frequently absent when drafting starts. Draft against real copy where it exists, stand in for it where it does not, and treat the composition as unsettled until real copy has run through it.
+- Never settle a higher layer before the one below it. Imagery and palette settle together, since a real photograph sets a ground rather than accepting one.
+- Content leads the order and is often absent at the start. Draft against real copy where it exists, stand in where it does not, and treat the composition as unsettled until real copy runs through it.
 - Name the layer the complaint sits at, then check the layers below are settled. Where one is not, that is the round, and say so rather than drafting the requested one.
 
 ## Grey-box when judging layers 1 to 4
@@ -114,7 +116,7 @@ Never change these without saying so and getting agreement, because each one bre
 
 ## Setting up the scales
 
-Read `${CLAUDE_SKILL_DIR}/references/systems.md` when establishing or revising what a surface draws from, being the space scale, the type scale, and the relationships a palette holds. Every other reference here is read against a draft. That one is read before there is one, so a project reaches for it at the start and on a system revision rather than on an ordinary round.
+Read `${CLAUDE_SKILL_DIR}/references/systems.md` when establishing or revising what a surface draws from, being the space scale, the type scale, and the relationships a palette holds. Every other reference is read against a draft, and this one before there is one, at the start and on a system revision.
 
 It states no values. A value belongs to the project's own stylesheet, and its intent to the design document.
 
@@ -122,7 +124,9 @@ It states no values. A value belongs to the project's own stylesheet, and its in
 
 Read `${CLAUDE_SKILL_DIR}/references/tells.md` before handing over anything a model drafted, and whenever output satisfies every rule here and still reads generic. The ten above are the common cases. It holds the rest, plus the countable composition limits and the first-screen budget.
 
-Skip `tells.md` on a small change to a surface with a settled direction. The catalog is a diagnostic and costs a read on every invocation that does not need one.
+Skip `tells.md` on a small change to a surface with a settled direction, since the catalog is a diagnostic and costs a read wherever it is not needed.
+
+### Source record
 
 Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidance or arguing against a rule in it. It records which external catalog items were adopted, which declined, and why.
 
@@ -149,6 +153,8 @@ Run `${CLAUDE_SKILL_DIR}/references/preflight.md` against the output. It is the 
 - Rendered copy casing, button labels, error message shape: the same rules
 
 ### Other skills
+
+Four neighbors own the rest.
 
 - The candidate loop, the arm set, the render, and the pick: `draft-and-pick`
 - The shape of the project's design document and where its values live: `${CLAUDE_SKILL_DIR}/../canvas-board/references/design.md`

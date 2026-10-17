@@ -16,18 +16,25 @@ its own reply, so skip the comment in step 7. The push and body sync still run.
 
 - If `git branch --show-current` returns `main`, stop: `❌ On main. Switch to a PR branch first.`
 - If `git status --porcelain` is empty, stop: `❌ No changes to ship.`
-- Resolve `<number>` once, here, through `canon pr head --json`, reading the record's `number`. Every later step names this `<number>` rather than resolving it again. A record refusing with `ambiguous-pull` stops: `❌ Two open PRs on this branch. Name the one to update.`
-- When no record comes back, or it carries no `number`, read the open pull requests on the branch over REST instead. The branch is encoded so a `/` in its name reaches the query as `%2F`:
+- Resolve `<number>` once, here, through `canon pr head --json`, reading the record's `number`. Every later step names this `<number>` rather than resolving it again.
+- A record refusing with `ambiguous-pull` stops: `❌ Two open PRs on this branch. Name the one to update.`
 
-  ```bash
-  gh api "repos/{owner}/{repo}/pulls?head={owner}:$(git branch --show-current | jq -Rr @uri)&state=open" --jq '.[].number'
-  ```
+### Fallback lookup
 
-  Nothing printed stops: `❌ No open PR for this branch. Use git-ship to open one.` More than one number takes the `ambiguous-pull` stop above rather than the first, since two open pull requests on one head against different bases leave nothing to say which one this push updates.
+When no record comes back, or it carries no `number`, read the open pull requests on the branch over REST instead. The branch is encoded so a `/` in its name reaches the query as `%2F`:
 
-Every read and write in this skill runs on REST, since the `gh pr` subcommands run on GraphQL and a cloud session's GitHub proxy refuses it. A cloud worker answering a review reaches this skill through `review-address`, so one GraphQL call here breaks that whole leg.
+```bash
+gh api "repos/{owner}/{repo}/pulls?head={owner}:$(git branch --show-current | jq -Rr @uri)&state=open" --jq '.[].number'
+```
 
-A missing tracking ref is no longer a guard. An open pull request proves the branch reached the remote, and a branch created by worktree entry has been measured carrying an open pull request with no tracking ref, where the old guard reported that the branch still needed pushing. That message describes a state the branch is not in, so the run stopped on a diagnosis nobody could act on. Step 4 sets the ref instead.
+- Nothing printed stops: `❌ No open PR for this branch. Use git-ship to open one.`
+- More than one number takes the `ambiguous-pull` stop rather than the first, since two open pull requests on one head leave nothing to say which one this push updates
+
+### REST and the tracking ref
+
+Every read and write in this skill runs on REST, since the `gh pr` subcommands run on GraphQL and a cloud session's GitHub proxy refuses it. A cloud worker reaches this skill through `review-address`, so one GraphQL call breaks that whole leg.
+
+A missing tracking ref is not a guard, since an open pull request proves the branch reached the remote. A branch created by worktree entry carries an open pull request with no tracking ref, so step 4 sets the ref instead.
 
 ## Sequence
 
@@ -40,7 +47,7 @@ A missing tracking ref is no longer a guard. An open pull request proves the bra
 
    The lease is what stops the force from overwriting a commit this session never read. Run the ancestry test only where an upstream resolves, since it reads `@{u}`.
 
-5. Post the evidence comparison, on every invocation including `reply-owned`, since this comment is not the reply step 8 owns. Run `canon pr evidence <number> --json` and read `reason` on the record rather than the exit code.
+5. Post the evidence comparison on every invocation, `reply-owned` included, since it is not step 8's reply. Run `canon pr evidence <number> --json` and read `reason` rather than the exit code.
    - `no-evidence`: nothing changed under an `evidence/` segment this push. Say nothing and move on.
    - `ok`: write `body` to `.canon/tmp/pr/evidence/body-<number>.md` at the main worktree root (resolved the way `session-worktree` does), then post the comment with `gh api -X POST repos/{owner}/{repo}/issues/<number>/comments -F body=@<main-root>/.canon/tmp/pr/evidence/body-<number>.md --silent` when the record carries no `commentId`, or edit the existing one in place with `gh api -X PATCH repos/{owner}/{repo}/issues/comments/<commentId> -F body=@<main-root>/.canon/tmp/pr/evidence/body-<number>.md` when it does. Clean up the tmp file only after the call reports success.
    - Any other reason is one of the mirrored git refusals (`gh-missing`, `gh-failed`, `no-base`, `unreadable-changes`, `would-empty`). Report it and continue without stopping the chain.

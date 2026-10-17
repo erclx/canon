@@ -15,7 +15,7 @@ One batch is the whole point. A session that asks one question, acts, then asks 
 ## Guards
 
 - If nothing is open, stop: `❌ Nothing to escalate. Every open call is one this session can make.`
-- Escalate only a decision whose answer turns on the operator's preference. A judgment call with two or three reasonable options the session can weigh is a pick with the tradeoff stated in one sentence, taken without asking.
+- Escalate only a decision whose answer turns on the operator's preference. A judgment call the session can weigh between two or three options is a pick taken without asking, its tradeoff in a sentence.
 - Escalate only what is open now. A decision already taken this session goes to the artifact that records it rather than back to the operator.
 - Do not act on any decision in the batch before it is answered. Continue the work that depends on none of them.
 - Do not escalate a question the session can answer by reading the repository. Read first, and escalate what the tree does not settle.
@@ -39,11 +39,11 @@ Cap the batch at four. A structured question tool takes four, and a batch past t
 
 ## Step 3: put the batch
 
-Put every question in one turn. Never split the batch across turns and never ask the first while the rest stay unstated.
+Put every question in one turn, never splitting the batch across turns or asking the first while the rest stay unstated. Send the batch through a structured question tool wherever the session runs on one, and write the shape below where it does not. One call carries the whole set, one entry per decision, so the operator answers them together.
 
-Send the batch through a structured question tool wherever the session runs on one, and write the shape below where it does not. What a batch adds is that one call carries the whole set, with one entry per decision, so the operator answers them together instead of one per turn.
+The test is the surface rather than the project's instruction file. A target scaffolded before the rule shipped still reaches the tool, and loses only the option shape `CLAUDE.md` states, which the example below carries.
 
-The test is the surface rather than the project's instruction file. A target scaffolded before the rule shipped still reaches the tool, and what it loses is the option shape `CLAUDE.md` states, which the example below carries instead.
+### The fallback shape
 
 Batch shape on the fallback surface:
 
@@ -69,7 +69,10 @@ An operator who answers some and not others has answered those. Continue on the 
 
 Restate each pick in one line, then continue the work.
 
-A pick that changes a written artifact goes into that artifact under the rule its own standard sets. An answer to an open plan question rewrites that question's `- Suggested:` line to the pick and names the operator as its source, leaving the `- Answer:` slot blank, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`. The standard bars a session from filling that slot even when the operator supplied the pick, and the blank slot resolves to the rewritten suggestion, so the record carries the operator's decision either way. A pick that settles nothing written stays in the session.
+A pick that changes a written artifact goes into it under the rule its own standard sets, and a pick that settles nothing written stays in the session.
+
+- An answer to an open plan question rewrites its `- Suggested:` line to the pick, naming the operator as source, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`
+- Leave the `- Answer:` slot blank, since the standard bars a session from filling it, and the blank resolves to the rewritten suggestion
 
 Output after the answers land:
 

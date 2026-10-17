@@ -10,15 +10,16 @@ metadata:
 ## Guards
 
 - If no draft path is given, stop: `❌ No draft path. Pass the path draft-screencast printed.`
-- Never guess or fill an unresolved field, a target, a URL, or anything else the compile or run record names. Report it and stop. Filling one in reproduces the failure `canon demo run`'s `plan-unresolved` reason exists to catch, one layer up where nothing enforces it.
-- Never pass `--force` to compile. A plan already at the default output path may carry timing tuned by hand, and the draft cannot reproduce that, so leave it untouched.
+- Never guess or fill an unresolved field, a target, a URL, or anything else the compile or run record names. Report it and stop.
+- Filling one in reproduces the failure `canon demo run`'s `plan-unresolved` reason exists to catch, one layer up where nothing enforces it
+- Never pass `--force` to compile. A plan at the default output path may carry timing tuned by hand that the draft cannot reproduce.
 - Drive the application through `canon demo run` alone. Never open a browser, click through the app, or write to the output paths some other way.
 
 ## Step 1: resolve the plan path
 
-A draft lives at `demos/<slug>/beats.md`, so `<slug>` is the name of the folder holding it, and the plan sits beside it at `demos/<slug>/plan.json`. `demos/inline-edit/beats.md` resolves to `demos/inline-edit/plan.json`. Pass `--slug <slug>` to compile, since its default reads the draft's filename and would name every demo `beats`.
+A draft lives at `demos/<slug>/beats.md`, so `<slug>` is the folder holding it and the plan sits beside it at `demos/<slug>/plan.json`. `demos/inline-edit/beats.md` resolves to `demos/inline-edit/plan.json`.
 
-A plan compiled before the folder layout sits at `demos/<slug>.json`. Pass it to Step 3 by path when the caller names it, since only the default moved.
+Pass `--slug <slug>` to compile, since its default reads the draft's filename and would name every demo `beats`. A plan compiled before the folder layout sits at `demos/<slug>.json`, so pass it to Step 3 by path when the caller names it.
 
 ## Step 2: compile only when no plan exists yet
 
@@ -47,19 +48,31 @@ canon demo run <plan> --json
 
 Branch on the record's `reason`:
 
-- `plan-unresolved`: report every field in `unresolved`, one per line, and stop. This is the path a pre-existing plan takes, since Step 2 skipped compiling and never read its fields.
-- Any other reason (`plan-missing`, `plan-unreadable`, `no-output-requested`, `cursor-unreadable`, `engine-missing`, `browser-missing`): report the reason, plus the record's `message` or `install` line when it carries one, and stop.
-- No `reason` key, meaning the run wrote its output: continue to Step 4.
+| `reason`                                                                                                           | Do                                                                                                      |
+| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `plan-unresolved`                                                                                                  | Report every field in `unresolved`, one per line, and stop. A pre-existing plan skipped Step 2's check. |
+| `plan-missing`, `plan-unreadable`, `no-output-requested`, `cursor-unreadable`, `engine-missing`, `browser-missing` | Report the reason, plus the record's `message` or `install` line when it carries one, and stop          |
+| None, meaning the run wrote its output                                                                             | Continue to Step 4                                                                                      |
 
 The take lands in `demos/<slug>/take/`, which git ignores.
 
 ## Step 4: compose when the draft asks for it
 
-Read the draft's `## Wrap` section. When intro, outro, and music all say `none`, or the section is absent, stop at the take and go to Step 6. Composing an empty video adds a render that says nothing the take does not.
+Read the draft's `## Wrap` section. When intro, outro, and music all say `none`, or the section is absent, stop at the take and go to Step 6, since an empty composition says nothing the take does not.
 
-Otherwise confirm HyperFrames' `hyperframes` skill resolves. `bunx` would fetch the package on a machine without it, which installs by the back door, so the skill is the presence test. When it does not resolve, stop and report the install command, `bunx -y hyperframes init`, with the warning that init installs its skills machine-wide without asking, and report the take's paths as Step 6 does so the operator still holds the recording the run wrote. Never install it from here.
+### Presence test
 
-When it resolves, load it, then load `canon:video-craft` for the captions, zoom, pointer, and audio judgment a video of software needs, reporting it rather than proceeding silently when it does not resolve. Build `demos/<slug>/index.html` around the take, with the intro, outro, and music the wrap section names, aiming each zoom from the timeline the run wrote beside the take. Those two skills own the composition rules, so this body states none of them. Then run both from `demos/<slug>/`:
+Otherwise confirm HyperFrames' `hyperframes` skill resolves. `bunx` would fetch the package on a machine without it, which installs by the back door, so the skill is the presence test.
+
+- When it does not resolve, stop and report `bunx -y hyperframes init`, warning that init installs its skills machine-wide without asking
+- Report the take's paths as Step 6 does, so the operator still holds the recording
+- Never install it from here
+
+### Build and render
+
+When it resolves, load it, then load `canon:video-craft` for the captions, zoom, pointer, and audio judgment, reporting it rather than proceeding silently when it does not resolve. Those two skills own the composition rules, so this body states none.
+
+Build `demos/<slug>/index.html` around the take with the intro, outro, and music the wrap names, aiming each zoom from the timeline the run wrote beside the take. Then run both from `demos/<slug>/`:
 
 ```bash
 bunx -y hyperframes check
@@ -74,6 +87,13 @@ Hand the render to `read-frames` as its video path, so the composed result is ch
 
 ## Step 6: output
 
-The record carries `video`, `mp4`, `gif`, `still`, and `timeline`, each a path or `null`. Report each one that is not `null`, one per line, skipping the rest, and add the render path when Step 4 wrote one. Name the mp4 as the deliverable, the webm as the raw take, the gif as the form for a host that strips video, and the timeline as the per-step timing a composition aims its zooms from.
+The record carries `video`, `mp4`, `gif`, `still`, and `timeline`, each a path or `null`. Report each one that is not `null`, one per line, and add the render path when Step 4 wrote one.
+
+| Output     | Name it as                                            |
+| ---------- | ----------------------------------------------------- |
+| `mp4`      | The deliverable                                       |
+| webm       | The raw take                                          |
+| `gif`      | The form for a host that strips video                 |
+| `timeline` | The per-step timing a composition aims its zooms from |
 
 Say so plainly if `canon demo compile` or `canon demo run` is not available, rather than driving the application some other way. Both ship with the CLI and this skill ships with the plugin, so a project carrying one and not the other is a real state.

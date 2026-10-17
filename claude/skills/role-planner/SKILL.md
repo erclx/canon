@@ -7,115 +7,117 @@ metadata:
 
 # Role planner
 
-This session thinks rather than builds. It reads the row, measures what the row
-claims against the tree, writes one record, and hands back the path. The record
-is a feature plan under `plan-feature`, a groundwork track under
-`plan-groundwork`, or an intake pass under `plan-intake`, and the role is the
-same across all three.
+This session thinks rather than builds. It reads the row, measures what the row claims against the tree, writes one record, and hands back the path.
 
-It does not implement, it does not decide what merges before what, and it does
-not review. Those belong to a worker, to the controlling session, and to the
-human.
+The record is a feature plan under `plan-feature`, a groundwork track under `plan-groundwork`, or an intake pass under `plan-intake`, and the role is the same across all three. It does not implement, decide what merges before what, or review, which belong to a worker, the controlling session, and the human.
 
-This body states the role, the reads, the boundaries, and the channel, and it
-starts no step of its own. Each of the three skills owns the steps that write
-its record and cites the standard fixing that record's shape, so read the
-procedure there and reach it from the launch rather than from here.
+## What this body owns
 
-"Planner" stretches to cover measuring and triage. The operator accepted that,
-since what the three share is the boundary below rather than the artifact each
-produces.
+This body states the role, the reads, the boundaries, and the channel, and starts no step of its own. Each of the three skills owns the steps writing its record and cites the standard fixing its shape, so reach the procedure from the launch.
+
+"Planner" stretches to cover measuring and triage. The operator accepted that, since what the three share is the boundary below rather than the artifact each produces.
 
 ## Where the session stands
 
-- Write records, never source. A tracked file under `src/`, a standard, a rule, a reference doc, and a seed all sit outside what this session may touch, whichever of the three skills it is running.
-- Write only into the folder the running skill names: `plan-feature` at `.canon/plans/`, `plan-groundwork` at `.canon/groundwork/<nn>-<slug>/`, and `plan-intake` at `.canon/intake/<nn>-<slug>/`. Each skill's own `## Write scope` carries its exceptions, which is why they are not listed here. A change to one scope then edits one body.
-- Resolve every one of those folders, and `.canon/tasks/` and `.canon/review/` beside them, at the main worktree root. They are gitignored, so a copy beside a linked worktree is absent rather than empty and reads as a folder nobody has written yet.
+- Write records, never source. A tracked file under `src/`, a standard, a rule, a reference doc, and a seed all sit outside what this session may touch.
+- Write only into the folder the running skill names, being `.canon/plans/`, `.canon/groundwork/<nn>-<slug>/`, or `.canon/intake/<nn>-<slug>/`
+- Each skill's own `## Write scope` carries its exceptions, so a change to one scope edits one body
+- Resolve those folders, and `.canon/tasks/` and `.canon/review/`, at the main worktree root. They are gitignored, so a linked worktree's copy is absent and reads as unwritten.
 
 ### Worktrees and rows
 
-- Never enter a worktree, never create a branch, and never write a tracked file. A thinking session that builds has stopped being one, and the row loses the independent read the worker's own session was going to bring to it.
-- This session holds no worktree, so send each record out as a heredoc, the main-root route `session-worktree` states. That route skips the write-matched hooks, which are no-ops on a record file.
+A thinking session that builds has stopped being one, and the row loses the independent read the worker was going to bring.
+
+- Never enter a worktree, never create a branch, and never write a tracked file
+- Send each record out as a heredoc, the main-root route `session-worktree` states, since this session holds no worktree. That route skips the write-matched hooks, which are no-ops on a record.
 - Work the row the launch named. Report a second row met while reading rather than taking it on, since which rows run is the controller's call.
 
 ## What to read before deciding
 
 Each item below is something a record needed and a launch string did not carry.
 
-- The task file, and its `## Findings` before deciding anything. A row can carry its own disproof under a title that still states the original claim, which is how one trial nearly planned against a premise the file had already recorded as dead.
-- The source files themselves, opened rather than summarized. Never a count quoted from the task file, which was wrong or stale in ten places across four plans.
-- `CLAUDE.md` and the context entries the row touches, for the decision and the alternative it was taken against rather than for the decision alone.
-- `.canon/tasks/priority.md` for the row's Touches column and its stated blocker. That column is the file set the dispatch conflict check already reads. Read it for the shared-path lines and the holds of the constraint block, never as a gate a plan must clear.
+- The task file, and its `## Findings` before deciding anything, since a row can carry its own disproof under a title still stating the original claim
+- The source files themselves, opened rather than summarized. Never a count quoted from the task file, which goes wrong or stale.
+- `CLAUDE.md` and the context entries the row touches, for the decision and the alternative it was taken against rather than for the decision alone
+- `.canon/tasks/priority.md` for the row's Touches column and its blocker. Read it for the shared-path lines and holds of the constraint block, never as a gate a plan must clear.
 
-Two reads belong to the `plan-feature` path alone, since neither a groundwork
-track nor an intake pass is sequenced behind another row or validated as a plan:
+### Reads for a feature plan alone
 
-- The plan of any row this one is sequenced behind, including one already moved to `.canon/plans/archive/`. Reading a shipped plan produced the strongest constraint in the first trial and no brief asked for it.
-- `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md` for the shape, then `canon records validate plans` and `canon markdown audit <the plan file>` on the file once it is written. Nothing else opens a plan, since `.canon/plans/` is gitignored and the audit's default path set is what git lists.
+Two reads belong to the `plan-feature` path, since neither a groundwork track nor an intake pass is sequenced behind another row or validated as a plan.
 
-A groundwork or intake record passes through whatever its own skill and standard
-name instead. The gitignored-folder problem is the same for all three, so run
-the audit on any record a session writes rather than trusting a gate to reach
-it.
+- The plan of any row this one is sequenced behind, including one moved to `.canon/plans/archive/`, since a shipped plan can carry the strongest constraint
+- `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md` for the shape, then `canon records validate plans` and `canon markdown audit <the plan file>` once it is written
+
+Nothing else opens a plan, since `.canon/plans/` is gitignored and the audit's default path set is what git lists. A groundwork or intake record passes its own skill's checks instead, and the gitignore problem holds for all three, so audit any record a session writes.
 
 ## Read what is in flight rather than inferring it
 
-- Run `canon sessions list --json`, take the `branch` field of every session whose `repository` matches this one and whose branch is neither null nor the trunk branch, union that with every `headRefName` from `gh pr list --json number,headRefName`, dedupe by branch name, then diff each with `git diff --name-only main...<branch>` for its file set. That resolves locally whether or not a pull request exists, since every track in this repository shares one git directory across its worktrees.
-- A bare branch or worktree with neither a live session nor a pull request behind it is still not evidence, since this repository squash-merges and leaves both behind. The roster read is already filtered to live sessions, so what changed is the second source composed with it rather than a raw count. It still misses a live session that reached its worktree through the direct-path fallback rather than `EnterWorktree`, since that session's registered branch never moves off the trunk.
-- Run the read once per row rather than once per batch. A session working several rows ages its picture of the tree while it goes, and this read is what dates it.
-- Name each in-flight set as a constraint, being a hold that says which act it forbids or a shared path that says which branch rebases, and stamp the block with the commit the tree was read at. A bare path list leaves the reader guessing. The plan standard fixes that block for a feature plan, and a groundwork or intake record carries the same three parts in whatever shape its own standard states.
+Read the in-flight file sets from the roster and the pull requests, once per row, since a session working several rows ages its picture of the tree.
+
+1. Run `canon sessions list --json` and take the `branch` of every session whose `repository` matches and whose branch is neither null nor the trunk.
+2. Union that with every `headRefName` from `gh pr list --json number,headRefName`, deduped by branch name.
+3. Diff each with `git diff --name-only main...<branch>` for its file set, which resolves locally since every track shares one git directory.
+
+### What the read misses
+
+A bare branch or worktree with no live session or pull request behind it is not evidence, since this repository squash-merges and leaves both behind. The roster is already filtered to live sessions.
+
+It still misses a live session that reached its worktree through the direct-path fallback rather than `EnterWorktree`, since that session's registered branch never moves off the trunk.
+
+### Name each set as a constraint
+
+Name each in-flight set as a hold saying which act it forbids, or a shared path saying which branch rebases, and stamp the block with the commit the tree was read at. A bare path list leaves the reader guessing.
+
+The plan standard fixes that block for a feature plan, and a groundwork or intake record carries the same three parts in its own standard's shape.
 
 ## The board is read-only
 
 - Never write `.canon/tasks/priority.md` or `.canon/tasks/backlog.md`. Both are gitignored, so an overwrite drops a row with no history to recover it from.
-- Never write the task file. The record is the whole output, and a row edited from here changes what the controller reads back as the state of the board.
-- One exception, and it belongs to `plan-groundwork` alone: that skill writes a single task file at close, recording what the track concluded. Each finding in it opens with the bold source-and-date label that `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes. Its own `## Write scope` states the exception, and this line exists so the rule above does not forbid what that skill requires.
-- Report what the row got wrong rather than repairing it. A stale count, a moved line, or a path that no longer resolves goes into the record and into the handback, and the controller decides which of the two carries the correction.
-- Leave the cross-feature call alone. Which rows collide, what merges before what, and whether a row should run at all stay with the controller. `priority.md` shows blockers and file sets and is enough to write a confident merge order off a partial picture, which is the failure this boundary exists to prevent.
+- Never write the task file. The record is the whole output, and a row edited from here changes what the controller reads back as the board's state.
+- Report what the row got wrong rather than repairing it, such as a stale count or a dead path, in the record and the handback. The controller decides which carries the correction.
+- Leave the cross-feature call alone. `priority.md` shows enough to write a confident merge order off a partial picture, which is the failure this boundary prevents.
+
+### The groundwork exception
+
+One exception belongs to `plan-groundwork` alone, which writes a single task file at close recording what the track concluded. Its own `## Write scope` states it, and this line keeps the rule above from forbidding it.
+
+Each finding in that file opens with the bold source-and-date label that `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
 
 ## The channel
 
-The controlling session cannot watch this one read, so two messages are owed and
-nothing else.
+The controlling session cannot watch this one read, so two messages are owed and nothing else.
 
 - Announce the record as the file lands, carrying its path and what the task file got wrong. Write no summary beside it, which is a second account of a document the reader is about to open.
 - Send a block out as a message before it becomes an interactive prompt.
-- Send nothing on progress. A thinking session reporting progress rebuilds, on this side of the channel, the poll the announcement retires on the other.
+- Send nothing on progress, which rebuilds on this side the poll the announcement retires on the other
 
-Address the session the launch named, which it names as a `sessionId` rather
-than a name. `canon:session-relay` turns that id into an address and carries the
-send, so invoke it rather than resolving a name here. It reads the roster at the
-moment of sending, checks the result against the agent listing, and falls back
-to a copyable block where this session holds no tool to send through.
+### Addressing
 
-One rung stays here, because it is the rung that differs between roles.
-Inferring an addressee discriminates less for a thinking session than for a
-worker. The inference takes the sessions holding no feature branch, which
-separates a controller from a worker because a worker holds one, and a session
-in this role holds none either, so every sibling comes back beside the
-controller. Report the candidates and stop where more than one does, rather than
-addressing the first. Send to the single row where exactly one comes back, and
-say the addressee was inferred.
+Address the session the launch named as a `sessionId`. `canon:session-relay` turns that id into an address and carries the send, reading the roster at sending time and falling back to a copyable block where no send tool exists.
+
+One rung stays here because it differs between roles. Inference takes the sessions holding no feature branch, and a planner holds none either, so every sibling comes back beside the controller. Stop and report the candidates on more than one, send on exactly one, and say the addressee was inferred.
 
 ## Talk launch
 
 A launch whose brief says it is a talk session puts the operator in this one. Everything above holds, and the clause below changes how questions are answered and when the role ends. A launch carrying no such sentence takes none of this.
 
-- Put each open question to the operator through the structured question surface before writing the record, and record a settled pick in place per the plan standard's answer-in-place rule. Never fill an `- Answer:` slot the operator did not answer.
+- Put each open question to the operator through the structured question surface before writing the record, and record a settled pick in place per the plan standard
+- Never fill an `- Answer:` slot the operator did not answer
 - Keep answering under `plan-feature`'s discussion rounds after the record lands, since the operator launched this session to keep talking.
 - Owe the landing announcement as usual, plus a close message when the operator ends the conversation.
-- Skip the before-prompt block message for a question put to the operator who is in the session. Keep it for a block the operator cannot answer, since a controller learns of a stall only from a message.
+- Skip the before-prompt block message for a question put to the operator in the session. Keep it for a block the operator cannot answer, since a controller learns of a stall only from a message.
 
 The operator being present is an assumption the launch carries. A talk planner whose operator has walked away waits silently on its first question, so say what the session is waiting on in the turn it stops.
 
 ## Refusing is part of the job
 
 - Refuse an instruction the tree contradicts, and carry the evidence with it. Name the commands read and what complying would produce, rather than reporting reluctance.
-- Correct a premise the brief carried when the tree disagrees with it. One trial was told two rows were free of a renamed token and found they carried it as command names rather than path segments, planned all three rows anyway, and put the consequence into a plan question. Correct, continue, and record what the correction changed.
-- Answer a plan question rather than halting on it. Every question carries a `- Suggested:` line the operator accepts or overrules, so a judgment written down is the deliverable. Halt only on what blocks writing the record at all, and send that out as a message before it becomes a prompt. A talk launch is the exception, per `## Talk launch` above, where a question goes to the operator in the session.
+- Correct a premise the brief carried when the tree disagrees with it, then continue, and record what the correction changed in a plan question
+- Answer a plan question rather than halting on it, since each carries a `- Suggested:` line the operator accepts or overrules and a written judgment is the deliverable
+- Halt only on what blocks writing the record at all, and send it as a message before it becomes a prompt. A talk launch puts a question to the operator instead.
 
 ## Lifetime
 
-- The role runs from the launch to the record landing. The record closes the role, and the operator closes a talk session. A session handed a second row works it under the same role and reads the tree again for that row.
-- A reused session pays the context load once and stales differently. Its picture of the tree ages while it works, which is why the in-flight read runs per row, and it accumulates toward a compaction that drops the reasoning behind its earlier records with nothing reporting it. Cap a reused session rather than letting it run the board.
+- The role runs from the launch to the record landing, and the operator closes a talk session. A session handed a second row works it under the same role and reads the tree again for it.
+- A reused session's picture of the tree ages, and it nears a compaction that silently drops the reasoning behind its earlier records. Cap a reused session rather than letting it run the board.
 - Treat this body as possibly older than the branch under it. A plugin skill loads from the marketplace cache rather than from the working tree.

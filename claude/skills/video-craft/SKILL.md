@@ -7,11 +7,13 @@ metadata:
 
 # Video craft
 
-A session composing a video with no stated direction reaches for the defaults: a push-in of over two seconds, one ease on every move, a caption centered in a pill, and an intro card holding the product name and a slogan. Each default is reasonable alone, and together they read as generic. This skill carries the judgment specific to a video of software, which HyperFrames' own skills leave out.
+A session composing a video with no stated direction reaches for defaults, such as a slow push-in, one ease on every move, a centered caption pill, and a slogan intro card. Together they read as generic. This skill carries the judgment specific to a video of software, which HyperFrames' own skills leave out.
 
-Load `hyperframes-creative` and `hyperframes-animation` first. They own general motion, being ease and speed variety, anchoring, and click timing, and this body names none of their rules. Read `${CLAUDE_SKILL_DIR}/references/adopted.md` for the source behind every number below, and only when extending this guidance or arguing against a rule in it.
+Load `hyperframes-creative` and `hyperframes-animation` first. They own general motion, being ease and speed variety, anchoring, and click timing, and this body names none of their rules.
 
-The guidance covers landscape 16:9 video. Vertical 9:16 framing is not covered yet.
+## Scope and sources
+
+The guidance covers landscape 16:9 video, and vertical 9:16 framing is not covered yet. Read `${CLAUDE_SKILL_DIR}/references/adopted.md` for the source behind every number below, only when extending this guidance or arguing against a rule in it.
 
 ## Captions name what the frame shows
 
@@ -24,8 +26,9 @@ The guidance covers landscape 16:9 video. Vertical 9:16 framing is not covered y
 ## A zoom is earned by an action
 
 - Zoom only on a click, fill, or hover whose result is too small to read at full frame. A navigate, a wait, or a hold has nothing to aim at.
-- Aim the zoom at the action's own place and moment. `canon demo run` writes a timeline beside the take carrying each step's start, end, and target box, so read the zoom's target and its start off that file rather than adding up holds by hand.
-- Run a push that lands on an action no faster than the floor HyperFrames' `viewport-change` rule states, and never past 1 second. That rule's own range suits an ambient reveal with no action to land on, and reads slow on a push onto a click.
+- Aim the zoom at the action's own place and moment. `canon demo run` writes a timeline beside the take with each step's start, end, and target box, so read the zoom off it, never summing holds.
+- Run a push that lands on an action no faster than the floor HyperFrames' `viewport-change` rule states, and never past 1 second
+- That rule's own range suits an ambient reveal with no action to land on, and reads slow on a push onto a click
 - Leave the scale and the dwell after a zoom settles to the `viewport-change` rule, which states both.
 
 ## A real pointer on a real interface
@@ -36,8 +39,9 @@ The guidance covers landscape 16:9 video. Vertical 9:16 framing is not covered y
 ## Music, silence, and a voice
 
 - Choose silence over a music bed that competes with a voiceover. A bed earns its place on a video with no voice, where it carries the pacing between beats.
-- Sit music at least 20 dB under the voice. Check `media-use`'s narrated bed default against that floor rather than take it as given, since it has sat short of it. The mechanism, a carve rather than a flat duck, is `hyperframes-audio`'s.
-- Keep a captioned voiceover at or under 160 words a minute, since captions follow the voice and a faster voice forces captions past their reading limit. `hyperframes-creative`'s narration pace sits under that ceiling.
+- Sit music at least 20 dB under the voice. Check `media-use`'s narrated bed default against that floor, since it has sat short of it.
+- The mechanism, a carve rather than a flat duck, is `hyperframes-audio`'s
+- Keep a captioned voiceover at or under 160 words a minute, since a faster voice forces captions past their reading limit. `hyperframes-creative`'s narration pace sits under that ceiling.
 
 ## Read the frame before dismissing a finding
 
@@ -63,6 +67,8 @@ The guidance covers landscape 16:9 video. Vertical 9:16 framing is not covered y
 
 ### Timing and checks
 
+These flags catch a composition built from memory rather than from the take.
+
 - The zoom's start time was added up by hand while a timeline file sits beside the take.
 - Two pointers appear on one frame.
 - A checker finding was dismissed and no frame was opened.
@@ -82,6 +88,8 @@ The guidance covers landscape 16:9 video. Vertical 9:16 framing is not covered y
 - The carve that sits music under a voice: `hyperframes-audio`
 
 ### Media, capture, and reading
+
+The assets around the composition belong to other skills too.
 
 - Fetching or generating music, effects, voice, and imagery: `media-use`
 - Recording the take and writing its timeline: `record-screencast` through `canon demo run`

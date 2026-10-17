@@ -17,7 +17,7 @@ metadata:
 Review the session to identify what was built or changed. Split each change two ways:
 
 - **Visual-only:** spacing, alignment, color, typography, layout proportions, animation timing. These are what the checklist exists for, since nothing asserts them programmatically.
-- **Automatable:** interactions, state transitions, form submissions, keyboard handling, conditional rendering, loading, empty, and error states, plus journeys across routes and behavior only a real browser renders.
+- **Automatable:** interactions, state transitions, forms, keyboard handling, conditional rendering, loading, empty, and error states, journeys across routes, and behavior only a real browser renders.
 
 An automatable change already covered by a test written during implementation is done. What is left is the missing-test list below.
 
@@ -35,19 +35,23 @@ Group visual items by feature area. Use `- [ ]` checkbox syntax, and write each 
 
 Write each box so a session driving the running app can run it without guessing:
 
-- **Route.** Name where the box is driven, as a path or the control that reaches it. A box naming no route is driven from the address the driver opens, so a single-page app with no routing needs no invented path. Write "from the page the app opens on" when a state is reached by a sequence rather than a URL.
-- **Width.** Name the width a box is driven at only when the change can make it differ by width, such as layout, spacing, or anything responsive. A box about copy, color, or a state that renders the same everywhere leaves the width off rather than inventing one.
-- **Verb.** Open on an action a driver performs, such as "scroll to", "click", "resize to", or "tab to". Never open on "read" or "look at", which name no action.
-- **Taste.** End the line with `(taste)` when the result is a judgment of look or feel rather than a fact a driver can observe. A driver reports such a box as needing a person's eyes instead of passing it.
-- **Setup.** A box needing a state the page does not open in states the setup inline. When a hosted preview cannot reach that state, such as a stopped service or a seeded record, end the line with `(local only)` instead.
+| Part  | Rule                                                                                                                                                                            |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Route | A path or the control that reaches it. A box naming none is driven from the address the driver opens. Write "from the page the app opens on" for a state reached by a sequence. |
+| Width | Only when the change can differ by width, such as layout, spacing, or anything responsive. Copy, color, or a state rendering the same everywhere leaves it off.                 |
+| Verb  | An action a driver performs, such as "scroll to", "click", "resize to", or "tab to". Never "read" or "look at", which name no action.                                           |
+| Taste | End the line with `(taste)` when the result is a judgment of look or feel. A driver reports such a box as needing a person's eyes rather than passing it.                       |
+| Setup | State inline any setup the page does not open in. End the line with `(local only)` when a hosted preview cannot reach that state, such as a stopped service or a seeded record. |
 
 The checkbox stays `- [ ]` followed by the action and the result, since the evidence comment reads boxes by that shape. Only the UI reviewer ticks a box, stamping it with the commit it passed at, and the comment carries that tick forward only while the head it names is current.
 
 ## The missing-test list
 
-Name every automatable change this branch ships with no test, one per line, with the layer `test-craft` would place it at. Do not write the test and do not read the project's test config to write one against.
+Name every automatable change this branch ships with no test, one per line, with the layer `test-craft` would place it at. Do not write the test or read the project's test config to write one against.
 
-Route each through the `test-craft` layer table: a journey or a browser-only behavior to end to end, a rendered state to a component test, and logic that renders nothing to a unit test. When the project has no runner at that layer, say so on the line rather than moving the item to a layer that does.
+- A journey or a browser-only behavior goes to end to end
+- A rendered state goes to a component test, and logic that renders nothing to a unit test
+- When the project has no runner at that layer, say so on the line rather than moving the item to a layer that does
 
 This list ships inside the checklist file, below the visual items, so a reviewer reads what is untested next to what to look at:
 
@@ -63,15 +67,13 @@ Omit the heading when every automatable change is covered.
 
 Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`. Fall back to `latest` on an empty result.
 
-When a checklist is produced, write it directly to `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root, not the current worktree. Resolve that root the way `session-worktree` does. Create the directory if it does not exist. Always overwrite. This is a handoff file rather than a deliverable: `git-pr` renders it into the evidence comment once a pull request opens, then removes it, and nothing here talks to `gh` directly.
+When a checklist is produced, write it to `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root, resolved the way `session-worktree` does, creating the directory if needed and always overwriting.
 
-The path names the artifact rather than this skill, so it does not move when the skill is renamed. A checklist written by an older binary still lands where the consumer looks.
-
-The checklist is a main-root write, so it goes out as a heredoc, routed the way `session-worktree` states.
-
-Skip the file write when there is nothing to verify visually and nothing shipping untested.
-
-The `.canon/tmp/` directory is gitignored. Do not stage or commit the file.
+- It is a handoff file rather than a deliverable. `git-pr` renders it into the evidence comment once a pull request opens, then removes it, and nothing here calls `gh`.
+- The path names the artifact rather than this skill, so a rename moves nothing and an older binary's checklist lands where the consumer looks
+- The checklist is a main-root write, so it goes out as a heredoc, routed the way `session-worktree` states
+- Skip the write when there is nothing to verify visually and nothing shipping untested
+- `.canon/tmp/` is gitignored, so do not stage or commit the file
 
 ## Output order
 
