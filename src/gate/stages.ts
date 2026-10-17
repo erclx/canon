@@ -11,12 +11,10 @@ import {
   captureStamps,
   clientCommandCitations,
   designProse,
-  bulletStacks,
   documentCeiling,
   folderEchoedNames,
   markdownBans,
   type Measure,
-  paragraphGrowth,
   pluginManifests,
   readmeCitations,
   recordIdempotence,
@@ -355,23 +353,6 @@ export const STAGES: readonly Stage[] = [
     checks: [{ kind: 'measure', measure: documentCeiling }],
   },
   {
-    // Unscoped, since any branch can add a bullet to any entry. A run of more
-    // than 5 plain bullets fails the push in the context entries, the docs
-    // pages, and the skill bodies and references. Apart from the audit's exit
-    // code for the reason the Document ceiling stage above states.
-    id: 'bullet-stacks',
-    label: 'Bullet stacks',
-    checks: [{ kind: 'measure', measure: bulletStacks }],
-  },
-  {
-    // Context entries only, where length drifts. A paragraph past 700
-    // characters or a top-level bullet past 250 fails when this branch added or
-    // changed it, and an unchanged one passes until it is edited.
-    id: 'paragraph-growth',
-    label: 'Paragraph growth',
-    checks: [{ kind: 'measure', measure: paragraphGrowth }],
-  },
-  {
     // Unscoped, since any branch can add a file anywhere and one git ls-files
     // costs nothing. Reads paths rather than markdown, so it sits here rather
     // than in the markdown audit that also runs inside every target.
@@ -410,8 +391,10 @@ export const STAGES: readonly Stage[] = [
     checks: [{ kind: 'measure', measure: recordIdempotence }],
   },
   {
-    id: 'markdown-bans',
-    label: 'Markdown bans',
+    // Bans and dead links in every file, and a density finding on a path the
+    // audit gates, all read off one exit code.
+    id: 'markdown',
+    label: 'Markdown',
     checks: [{ kind: 'measure', measure: markdownBans }],
   },
   {

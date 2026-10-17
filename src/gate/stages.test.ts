@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  bulletStacks,
-  clientCommandCitations,
-  paragraphGrowth,
-} from '@/gate/measures'
+import { clientCommandCitations } from '@/gate/measures'
 import { STAGES } from '@/gate/stages'
 
 function scopeOf(id: string): RegExp {
@@ -192,26 +188,14 @@ describe('the hero stage', () => {
   })
 })
 
-describe('the length stages beside the document ceiling', () => {
-  const ids = STAGES.map((stage) => stage.id)
+describe('the markdown stage', () => {
+  it('should replace the retired length stages with one audit reading', () => {
+    const ids = STAGES.map((stage) => stage.id)
 
-  it('should register the bullet and growth stages after the ceiling', () => {
-    const ceiling = ids.indexOf('document-ceiling')
-
-    expect(ids.indexOf('bullet-stacks')).toBe(ceiling + 1)
-    expect(ids.indexOf('paragraph-growth')).toBe(ceiling + 2)
-  })
-
-  it('should read each measure unscoped, so no changed-file pattern skips it', () => {
-    const stack = STAGES.find((stage) => stage.id === 'bullet-stacks')
-    const growth = STAGES.find((stage) => stage.id === 'paragraph-growth')
-
-    expect(stack?.scope).toBeUndefined()
-    expect(stack?.checks).toEqual([{ kind: 'measure', measure: bulletStacks }])
-    expect(growth?.scope).toBeUndefined()
-    expect(growth?.checks).toEqual([
-      { kind: 'measure', measure: paragraphGrowth },
-    ])
+    expect(ids).toContain('markdown')
+    expect(ids).not.toContain('markdown-bans')
+    expect(ids).not.toContain('bullet-stacks')
+    expect(ids).not.toContain('paragraph-growth')
   })
 })
 

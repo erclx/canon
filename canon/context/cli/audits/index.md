@@ -15,7 +15,7 @@ The aggregate and its baseline, the context and markdown audits, the skill and r
 - [Markdown audit](markdown-bans.md): The markdown ban scan and its gate, the relative-link check, why one rule set reads every path, and the edit-time hook that calls the same verb
 - [Markdown cadence](markdown-cadence.md): The sentence-spread and opener measures read off the write-human rhythm rules, why the verbless share is not measured, and the shipped reading baseline
 - [Markdown triage](markdown-triage.md): The three shapes a triage records rather than rewrites, what each remedy costs in punctuation, cohesion, and lost clauses, and the floor a triage leaves
-- [Markdown weights](markdown-weights.md): The bullet, paragraph, and depth checkpoints, where each number sits and why, and the section markers that break a depth run
+- [Markdown weights](markdown-weights.md): The density limits and the gate on a fact that overturned report-only weight, the bullet, paragraph, and depth checkpoints, where each number sits and why, and the section markers that break a depth run
 - [Overview](overview.md): What the audit commands own, how their engines split, the aggregate that runs the set, what it gates on, and why the pipeline runs it without gating
 - [Record validator](records.md): The canon records validate kinds, why the board keeps its own verb, and root resolution per kind
 - [Reports](reports.md): The comment census, the test-order report, the label coverage report, and the key-changes bijection
