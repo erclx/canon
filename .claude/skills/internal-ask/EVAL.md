@@ -11,7 +11,7 @@ Run each prompt in a fresh session. Invoke with `/internal-ask <question>`. Judg
 ## 2. docs/ hit, CLI surface
 
 - **Prompt:** `/internal-ask what CLI commands does the toolkit expose?`
-- **Expected source:** `docs/agents/commands.md`
+- **Expected source:** `canon --help`
 - **Shape:** names the agent surface doc, lists at most a couple examples.
 
 ## 3. wiki/ hit, Claude Code concept

@@ -16,7 +16,7 @@ description: Fetch YouTube transcripts with metadata frontmatter into any repo
 
 ### Related
 
-`docs/agents/commands.md` holds the CLI flags and invocation contract for `canon transcripts`.
+`canon transcripts --help` prints the CLI flags and invocation contract for `canon transcripts`.
 
 ## Decisions
 
