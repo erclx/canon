@@ -1467,6 +1467,14 @@ describe('isFolderEchoedName', () => {
   it('should read the immediate parent only', () => {
     expect(isFolderEchoedName('rules/canon/canon/worktrees.md')).toBe(false)
   })
+
+  it('should pass the context-model entry, whose domain name is the model', () => {
+    expect(isFolderEchoedName('canon/context/context-model.md')).toBe(false)
+  })
+
+  it('should still flag another entry prefixed with the context folder', () => {
+    expect(isFolderEchoedName('canon/context/context-notes.md')).toBe(true)
+  })
 })
 
 describe('folderEchoedNames', () => {
