@@ -5,58 +5,131 @@ description: What the published package carries and excludes, how a browser comm
 
 # Packaging
 
-The CLI ships to the registry as `@erclx/canon` with nothing built, so what the package carries is decided entirely by the `files` list. Two trees are excluded plus every test file, and the four browser commands are what set the pattern any command backed by a heavy import follows.
+The CLI ships to the registry as `@erclx/canon` with nothing built, so the `files` list decides what the package carries. Two trees are excluded plus every test file, and the four browser commands set the pattern any command backed by a heavy import follows.
 
 ## Decisions
 
 ### Keeping an engine off the startup path
 
-A command backed by a browser reaches its engine through a dynamic import inside the action. `src/cli.ts` imports every command's `register` at module scope, so a browser reference at a command's top level would put a browser resolution in front of every other command rather than in front of the one that needs it. `src/commands/capture.ts` therefore holds wiring only and `src/capture/render.ts` holds every browser reference, which `src/commands/demo.ts`, `src/commands/inventory.ts`, and `src/commands/driver.ts` each repeat against a module of their own. The two engine-absence predicates the four share sit in `src/browser/engine.ts` rather than being spelled once per command.
+A command backed by a browser reaches its engine through a dynamic import inside the action. `src/cli.ts` imports every command's `register` at module scope, so a top-level browser reference would put a browser resolution in front of every other command.
 
-All four ship, and the split reads as a startup cost rather than as a way to report an absence. `src/capture/render.ts` imports from `playwright-core` rather than `@playwright/test`, since no published tarball carries a development dependency. Importing the test package would throw `ERR_MODULE_NOT_FOUND` on the first dynamic import in every target.
+`src/commands/capture.ts` holds wiring only and `src/capture/render.ts` holds every browser reference. `demo.ts`, `inventory.ts`, and `driver.ts` under `src/commands/` each repeat the split against a module of their own, and the two engine-absence predicates the four share sit in `src/browser/engine.ts`.
 
-Both aliases the command uses for the render module's types are `typeof import(...)` queries rather than `import type` statements, which keeps the dynamic path out of the shipped file's import list where a reviewer checks for it.
+### The split is a startup cost
 
-An argument check runs in the order that puts the message on what was actually wrong. `canon capture` defaults its source to `assets` and requires `--selector`, so validating the source first would answer `assets not found` from the caller's own working directory and never name the flag that was missing. The refusal on the flag therefore runs first, and the source default stays for its own reason: refusing loud rather than failing silently.
+All four ship. `src/capture/render.ts` imports from `playwright-core` rather than `@playwright/test`, since no published tarball carries a development dependency, and the test package would throw `ERR_MODULE_NOT_FOUND` on the first dynamic import in every target.
 
-`canon sandbox` is the one surface left where availability is the question, and it detects a missing directory rather than a missing module, so the guard is an existence check on where `SANDBOX_DIR` resolves rather than a caught import. One check there serves the interactive picker and `coverage` both, and it makes `coverage` exit 1 without printing a percentage. A denominator nobody looked at is not a zero, and reporting one reads as a suite that examined everything and found it clean.
+The two aliases the command uses for the render module's types are `typeof import(...)` queries rather than `import type` statements, which keeps the dynamic path out of the shipped file's import list where a reviewer checks for it.
+
+### Argument checks name what was wrong
+
+`canon capture` defaults its source to `assets` and requires `--selector`. Validating the source first would answer `assets not found` from the caller's working directory and never name the missing flag, so the flag refusal runs first.
+
+The source default stays for its own reason, refusing loud rather than failing silently.
+
+### `canon sandbox` detects a directory
+
+It is the one surface left where availability is the question, and it detects a missing directory rather than a missing module, so the guard is an existence check on where `SANDBOX_DIR` resolves.
+
+One check serves the interactive picker and `coverage` both, and makes `coverage` exit 1 without printing a percentage. A denominator nobody looked at is not a zero.
 
 ### The capture sources
 
-A capture proves its declared font resolved and asserts nothing about its output size. The height of `assets/frames/install.png` is whatever the terminal block wrapped to at a fixed width, so pinning that number would harden an accident, while the font is the input that actually decides the wrap. The check compares text metrics against a family that cannot exist, because `document.fonts.check` reports every system family as present, invented ones included.
+A capture proves its declared font resolved and asserts nothing about its output size. The height of `assets/frames/install.png` is whatever the terminal block wrapped to at a fixed width, so pinning it would harden an accident, while the font is the input that decides the wrap.
 
-Both capture sources under `assets/captures/` are generated and both are asserted. `scripts/core/regen-hero.ts` fills `hero.html.tmpl` from five catalogs so no count on the image is maintained by hand, and it fills both templates with what `canon design css --no-components` emits so neither frame carries its own copy of a hex value. The `Hero` stage in the merge gate runs `regen-hero.ts --check`, which fills into a temp folder and asks only whether the regen can run, so a stale frame passes and the refresh workflow regenerates the committed files after a merge, per `canon/context/development/gates/content-stages.md`. The terminal text on `install.html` comes from a real run, captured into the template. The frame reads type, spacing, and radius from the token block and hand-sets only the block line height at 1.62, since `--type-code-lh` is specified for an inline code span and a terminal block is not one. Its four commands end on `canon --help` quoted as the `Project` group's first three rows with the box glyph column stripped, which a pipe emits and no command above it carries. Height is the trade: the rebuilt frame is taller than the three-command one it replaced. The images the two render to sit under `assets/evidence/`, so a run rebuilding them passes `--out assets/evidence` rather than letting each PNG land beside its markup.
+The check compares text metrics against a family that cannot exist, because `document.fonts.check` reports every system family as present, invented ones included.
 
-The gate never byte-checks the PNG, because it is a chromium render whose bytes move with the browser version and a byte check over it would fail on a machine whose browser differs rather than on a stale count. A stamp assert covers the image instead, comparing the digest each capture recorded over the markup it read and the image it wrote, across both capture sets.
+### Both sources are generated and asserted
 
-Nothing on the frame comes from `package.json`, since a pull request builds against the merge commit and an embedded version would drift every open branch on the next release. The generator samples entry names at even spacing across each sorted catalog rather than taking the first ten, since the skill names are domain-prefixed and an alphabetical head returns eight `claude-*` entries and reads as a narrower catalog than the one that ships.
+`scripts/core/regen-hero.ts` fills `hero.html.tmpl` from five catalogs so no count on the image is maintained by hand. It fills both templates with what `canon design css --no-components` emits, so neither frame carries its own copy of a hex value.
 
-### The published package
+### The hero stage checks only that the regen runs
 
-`bun install --global @erclx/canon` is the install path a plugin user follows. Nothing builds. `bin` points at `src/cli.ts`, whose `#!/usr/bin/env bun` shebang runs the source directly, which is why `src/` ships as TypeScript with `tsconfig.json` beside it so the `@/*` alias resolves.
+The `Hero` stage in the merge gate runs `regen-hero.ts --check`, which fills into a temp folder, so a stale frame passes and the refresh workflow regenerates the committed files after a merge, per `canon/context/development/gates/content-stages.md`.
 
-`PROJECT_ROOT` resolves from the CLI's own install root, so the package carries the catalogs rather than only `src/`. The `files` list covers `src/`, `scripts/`, `governance/`, `tooling/`, `claude/`, and `docs/`. Dropping any one produces a CLI that installs nothing for that domain, and dropping `docs/` breaks `canon docs <topic>`, which two shipped skills call in a command position. `internal/` stays out under the same rule that keeps it out of the plugin, and `wiki/` stays out because `src/wiki/` scaffolds into a target and never reads the toolkit's own copy.
+### The install frame
 
-`scripts/eval` is excluded by negation rather than by leaving `scripts/` out, since the domain scripts beside it are what `execScript` dispatches to. It holds the frozen records of a retired toolkit-development harness and never ships. The scenario tree sits at `sandbox/` in the project root, outside every `files` entry, so it needs no negation: shipping it would carry a quarter of the file count for a command that can only fail in a target.
+The terminal text on `install.html` comes from a real run, captured into the template. The frame reads type, spacing, and radius from the token block and hand-sets only the block line height at 1.62, since `--type-code-lh` is specified for an inline code span.
 
-`src/capture` ships rather than being excluded, and renders its own sources rather than this repository's: a target has no use for the `assets/` paths that live only here. `scripts/core/install-check.sh` verifies an exclusion by packing the tarball and installing from it, because every other check in the repository runs where the excluded files are present and passes either way.
+Its four commands end on `canon --help` quoted as the `Project` group's first three rows with the box glyph column stripped, which a pipe emits and no command above it carries. The rebuilt frame is taller than the three-command one it replaced.
 
-#### What `.claude/` costs by being absent
+### Output folder
 
-`.claude/` never ships, which has three consequences worth knowing before touching any of these surfaces. The second root `canon docs <topic>` resolves against is absent in an installed package, so `listDocs` in `src/docs/list.ts` reports no context section when no context root exists rather than listing an empty one.
+The images the two render to sit under `assets/evidence/`, so a run rebuilding them passes `--out assets/evidence` rather than letting each PNG land beside its markup.
 
-Version stays owned by release-please, which already writes `claude/.claude-plugin/plugin.json` through `extra-files`, so the package version and the plugin version cannot disagree. The publish job on the release workflow checks out the release tag rather than `main`, so the tarball matches the tag. What gates that job, why it publishes with `--ignore-scripts`, and why the runner's npm version decides whether that flag does anything all live in `canon/context/ci/releases.md`, which owns the release path.
+### The gate never byte-checks the PNG
+
+A chromium render's bytes move with the browser version, so a byte check would fail on a machine whose browser differs rather than on a stale count. A stamp assert covers the image, comparing the digest each capture recorded over the markup it read and the image it wrote, across both capture sets.
+
+### The frame reads no version
+
+Nothing on the frame comes from `package.json`, since a pull request builds against the merge commit and an embedded version would drift every open branch on the next release.
+
+The generator samples entry names at even spacing across each sorted catalog rather than taking the first ten. Skill names are domain-prefixed, so an alphabetical head returns eight `claude-*` entries and reads as a narrower catalog than the one that ships.
+
+### The install path
+
+`bun install --global @erclx/canon` is the install path a plugin user follows, and nothing builds. `bin` points at `src/cli.ts`, whose `#!/usr/bin/env bun` shebang runs the source directly, so `src/` ships as TypeScript with `tsconfig.json` beside it for the `@/*` alias.
+
+### What the package carries
+
+`PROJECT_ROOT` resolves from the CLI's own install root, so the package carries the catalogs rather than only `src/`. The `files` list covers `src/`, `scripts/`, `governance/`, `tooling/`, `claude/`, and `docs/`.
+
+Dropping any one produces a CLI that installs nothing for that domain. Dropping `docs/` breaks `canon docs <topic>`, which two shipped skills call in a command position.
+
+### What stays out
+
+Four trees stay out of the package, each for its own reason.
+
+- `internal/` stays out under the rule that keeps it out of the plugin
+- `wiki/` stays out because `src/wiki/` scaffolds into a target and never reads the toolkit's own copy
+- `scripts/eval` is excluded by negation, since the domain scripts beside it are what `execScript` dispatches to, and it holds the frozen records of a retired harness
+- `sandbox/` sits outside every `files` entry, so it needs no negation, and shipping it would carry a quarter of the file count for a command that can only fail in a target
+
+### `src/capture` ships
+
+It renders its own sources rather than this repository's, since a target has no use for the `assets/` paths that live only here.
+
+`scripts/core/install-check.sh` verifies an exclusion by packing the tarball and installing from it, because every other check here runs where the excluded files are present and passes either way.
+
+### What `.claude/` costs by being absent
+
+`.claude/` never ships. The second root `canon docs <topic>` resolves against is absent in an installed package, so `listDocs` in `src/docs/list.ts` reports no context section when no context root exists rather than listing an empty one.
+
+### Version and release
+
+Version stays owned by release-please, which writes `claude/.claude-plugin/plugin.json` through `extra-files`, so the package and plugin versions cannot disagree. The publish job checks out the release tag rather than `main`, so the tarball matches the tag.
+
+`canon/context/ci/releases.md` owns what gates that job, why it publishes with `--ignore-scripts`, and why the runner's npm version decides whether that flag does anything.
 
 ## Gotchas
 
-- A scoped package defaults to restricted access. `publishConfig.access` is set to `public` in the manifest, since a restricted first publish succeeds and only surfaces as an install failure for everyone outside the scope.
+### Restricted access by default
 
-A packed tarball's file list proves inclusion and nothing about whether the installed CLI runs. The registry-publish plan named its own check as packing and listing the contents by hand. That listing came back clean at 467 files with every catalog present, and it could not see that `canon docs list` wrote a raw `find` error to stderr, because `canon/context/` is a second read root the package deliberately does not ship. Installing the tarball into a scratch directory and running `canon init` surfaced it on the first command. A path the package omits fails at read time rather than at pack time.
+A scoped package defaults to restricted access. `publishConfig.access` is set to `public` in the manifest, since a restricted first publish succeeds and only surfaces as an install failure for everyone outside the scope.
 
-`scripts/core/install-check.sh` runs that pack-and-install as an ongoing check rather than a one-time pass. It asserts a named excluded path, `sandbox`, exists in the source tree and is absent from the extracted one, so the absence cannot pass on a path that moved, and that `canon --help` and `canon init` both run against a `bun install --production` install with no devDependencies present.
+### A tarball listing proves inclusion only
 
-`bun pm pack` runs the package's own `prepack` and `prepare` scripts by default, so packing a checkout with no `node_modules` fails on `husky: command not found` before it produces a tarball. A production install of the extracted package never carries `husky` either, since it is a devDependency. Both the pack step and the install step in `install-check.sh` pass `--ignore-scripts` for that reason.
+The registry-publish plan named its check as packing and listing the contents by hand. That listing came back clean at 467 files with every catalog present, and it could not see that `canon docs list` wrote a raw `find` error to stderr, because `canon/context/` is a second read root the package does not ship.
 
-What it proves is inclusion, and that the installed package resolves without the development tree behind it. It says nothing about whether an excluded module stays reachable through some other path at runtime, which is the class the dynamic-import split in `src/capture/render.ts` already closes by keeping every browser reference behind a call-time import rather than a module-scope one.
+Installing the tarball into a scratch directory and running `canon init` surfaced it on the first command. A path the package omits fails at read time rather than at pack time.
 
-A pointer body naming the release that removes it asserts what `release-please` will do, and the bump comes from the commit types in the branch rather than from the sentence. Pick the commit type that produces the version and say so in the plan or the pull request, and prefer one release claim repeated by reference over a copy written into every surface that needs it.
+### `install-check.sh` runs that as a standing check
+
+`scripts/core/install-check.sh` asserts a named excluded path, `sandbox`, exists in the source tree and is absent from the extracted one, so the absence cannot pass on a path that moved. It also asserts that `canon --help` and `canon init` run against a `bun install --production` install with no devDependencies.
+
+### Pack without scripts
+
+`bun pm pack` runs the package's own `prepack` and `prepare` scripts, so packing a checkout with no `node_modules` fails on `husky: command not found` before it produces a tarball. A production install never carries `husky` either, since it is a devDependency.
+
+Both the pack and install steps in `install-check.sh` pass `--ignore-scripts` for that reason.
+
+### What the check does not prove
+
+It proves inclusion, and that the installed package resolves without the development tree behind it. It says nothing about whether an excluded module stays reachable through another path at runtime, the class the dynamic-import split in `src/capture/render.ts` closes by keeping every browser reference behind a call-time import.
+
+### Release claims in pointer bodies
+
+A pointer body naming the release that removes it asserts what `release-please` will do, and the bump comes from the commit types in the branch rather than the sentence.
+
+Pick the commit type that produces the version and say so in the plan or the pull request. Prefer one release claim repeated by reference over a copy in every surface that needs it.

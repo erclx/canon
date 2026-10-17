@@ -9,69 +9,119 @@ description: What canon tasks validate checks on the board, from shape and order
 
 ### Why the verb sits off the check
 
-- `canon tasks validate` measures a corpus that is gitignored per-machine scratch, which is what keeps it off `bun run check` and off every hook. There is no shared moment to hang it on, so the sweep runbook in `claude/skills/role-orchestrator/references/orchestrator-sweep.md` calls it at the moment the readiness claim is actually made.
-- `src/tasks/validate.ts` parses and checks while `src/commands/tasks.ts` renders, the same split `archive.ts` already uses beside it
+`canon tasks validate` measures gitignored per-machine scratch, which keeps it off `bun run check` and every hook. With no shared moment to hang it on, the sweep runbook in `claude/skills/role-orchestrator/references/orchestrator-sweep.md` calls it when the readiness claim is made.
+
+`src/tasks/validate.ts` parses and checks while `src/commands/tasks.ts` renders, the split `archive.ts` already uses.
 
 ### Reading columns and groups
 
-- Board columns are read from each table's own header rather than by position. Three of the surfaces this repository ships reach a target, and a board laid out differently has to be reported for what it lacks rather than have its second cell read as something it never was.
-- A task file is accounted for against `priority.md` and `backlog.md` both, which is one check rather than two so a task moving between the surfaces never reads as a dropped file. An absent backlog reads as empty rather than refusing, which leaves the one-to-one mapping the check ran before the second surface existed, and a task named by both is reported the way a task in two groups is.
-- A heading outside the three the standard fixes yields no group at all, which refuses instead of reporting a clean board nothing parsed
+Board columns are read from each table's own header, not by position. A board laid out differently is reported for what it lacks rather than having its second cell read as something it never was.
+
+- A task file is accounted for against `priority.md` and `backlog.md` in one check, so a task moving between them never reads as a dropped file
+- An absent backlog reads as empty, and a task named by both is reported like a task in two groups
+- A heading outside the three the standard fixes yields no group, which refuses rather than reporting a clean board nothing parsed
 
 ### Paths and stems
 
-- An absent `Touches` column and an unreadable one are one finding, not two states. Reporting only the second passed a `## Run now` table declaring no file set, which is the shape where the shared-file report silently pairs nothing.
-- A backticked span counts as a path when it holds a slash or ends in an extension opening with a letter. The letter is what separates `commands.md` from a task version, whose trailing segment opens with a digit, since reading the version as a path collides two rows that merely cite the same task. <!-- audit-ignore-citations -->
-- `RESERVED_STEMS` moved out of `archive.ts` as an export, so the two verbs cannot count a board sibling as a task the other does not. `isReservedStem` wraps it because the pre-compaction handoff takes one file per session named for the branch, so the test matches the fixed stems plus any stem opening `session-`. That is what keeps the one-to-one mapping check from reporting every handoff as a task carrying no row.
+An absent `Touches` column and an unreadable one are one finding. Reporting only the second passed a `## Run now` table declaring no file set, where the shared-file report silently pairs nothing.
+
+- A backticked span counts as a path when it holds a slash or ends in a letter-led extension, separating `commands.md` from a version ending in a digit <!-- audit-ignore-citations -->
+- Reading a version as a path collides two rows that merely cite the same task
+- `RESERVED_STEMS` is exported from `archive.ts` so the two verbs cannot disagree on what counts as a board sibling
+- `isReservedStem` also matches any stem opening `session-`, since the pre-compaction handoff takes one file per session, and a handoff must not read as a task carrying no row
 
 ### Blocker citations
 
-- The blocker check reads citations out of the `Waiting on` cell and never parses it into fields. The board standard fixes three forms for the cell and leaves it prose, so a grammar written against today's phrasing meets a cell nobody phrased that way, against a corpus of a handful of rows.
-- Both halves gate on a citation in the cell rather than on a column beside it. Keying the collision half on the row's own `Touches` column fires on any parked row whose declared files nothing running holds, and the row then counts as re-tested and leaves the untested list, so a board whose blockers all still hold reports clean.
-- A cited task is a bare sibling filename, the way the `Task` column spells one. A target carrying a directory is a plan pointer, and reading its stem as a task would report a row settled against a folder the plan does not sit in.
-- The outcome list comes off `readOutcomes` rather than a pattern of its own, so the blocker check cannot disagree with the archive and outcome verbs about which checkboxes are outcomes and which sit inside a block a task displays.
-- A cited task carrying no outcome box settles nothing. A file the check could not parse is not evidence of a finished one, and treating it as one clears a row against a task still open.
+The blocker check reads citations out of the `Waiting on` cell and never parses it into fields. The board standard fixes three forms and leaves the cell prose, so a grammar written against today's phrasing meets cells nobody phrased that way.
+
+- Both halves gate on a citation in the cell, not on a column beside it, because keying on `Touches` fires on any parked row whose files nothing running holds
+- That row would then count as re-tested and leave the untested list, so a board whose blockers all still hold reports clean
+- A cited task is a bare sibling filename. A target carrying a directory is a plan pointer, and reading its stem as a task would settle a row against a folder the plan is not in.
+- The outcome list comes off `readOutcomes`, so the check cannot disagree with the archive and outcome verbs about which checkboxes are outcomes
+- A cited task carrying no outcome box settles nothing, since a file the check could not parse is not evidence of a finished one
 
 ### Settling a blocker
 
-- A cited task that closed every outcome settles the row only once its `Pull request:` line names work the trunk carries. `task-complete` marks outcomes as step two of the ship chain and `git-pr` opens the pull request several steps later, so the checkbox alone reported four rows settled against branches still in review. A task closing every outcome and naming no pull request goes to the untested array, and so does one whose number no trunk ref could answer for, because the only local signal left is the checkbox that produced the defect.
-- `src/tasks/trunk.ts` reads the trunk as the clone already holds it, `origin/main` first and local `main` behind it, and never fetches. A validate runs several times a sweep and a fetch per run is a cost this command does not carry, so a clone behind its remote under-reports a settled row rather than claiming work landed. The reader is injectable, which is what lets the check be tested from a fixture rather than from a git history.
-- A citation resolving in neither the board nor the archive takes `blocker-unresolved` rather than reading as archived. An absent file is a broken pointer under a typo or a rename, and naming it archived is a specific claim about a file nobody wrote.
-- Untested rows go to a second array rather than to the findings, so they move no exit code. Three of the five blocker kinds rest on a person's judgment, and a clean findings list over a board whose parked rows were never testable reads as a clean board.
+A cited task that closed every outcome settles the row only once its `Pull request:` line names work the trunk carries. `task-complete` ticks outcomes at step two of the ship chain and `git-pr` opens the pull request later, so the checkbox alone reported four rows settled against branches still in review.
+
+- A task closing every outcome with no pull request goes to the untested array, and so does one whose number no trunk ref answers for
+- `src/tasks/trunk.ts` reads the trunk as the clone holds it, `origin/main` then local `main`, and never fetches, because a fetch per validate run is a cost the command does not carry
+- A clone behind its remote under-reports a settled row rather than claiming work landed
+- The trunk reader is injectable, so the check tests from a fixture rather than a git history
+- A citation resolving in neither the board nor the archive takes `blocker-unresolved`, since naming an absent file archived claims something nobody wrote
+
+### Untested rows move no exit code
+
+Untested rows go to a second array rather than the findings. Three of the five blocker kinds rest on a person's judgment, and a clean findings list over parked rows that were never testable reads as a clean board.
 
 ### Readiness in the task list
 
-- `canon tasks list` derives each live file's readiness from the board and the backlog, through `readBoard` and `readBacklog` rather than a second parse of either file. A `backlog/` folder beside `archive/` and `declined/` was the rejected alternative, on three costs. Backlog rows move in both directions through the parked-row walk and the refill sweep, where the two folders hold terminal states a file enters once. A move rewrites every bare sibling link and every `../plans/` origin line one folder deeper. The folder and `backlog.md` would both state readiness, two sources in a gitignored corpus with no history.
-- The `readiness` values are the three `BOARD_GROUPS` names plus `backlog`, `unplaced`, and `both`, so no fourth spelling exists for a skill to key on. The verb lists the live root only, and a flag for the archive waits on a second concrete case.
+`canon tasks list` derives each live file's readiness from `readBoard` and `readBacklog`, not a second parse of either file. The `readiness` values are the three `BOARD_GROUPS` names plus `backlog`, `unplaced`, and `both`, so no fourth spelling exists for a skill to key on.
 
-### Shared files and claims
+- The verb lists the live root only, and an archive flag waits on a second concrete case
+- A `backlog/` folder beside `archive/` and `declined/` was rejected, since backlog rows move in both directions where the other two hold terminal states
+- A move would rewrite every bare sibling link and every `../plans/` origin line one folder deeper
+- The folder and `backlog.md` would both state readiness, two sources in a gitignored corpus with no history
 
-- Two `## Run now` rows naming a path in common go to a `shared` array, moving no exit code. A collision finding exiting 2 is the retired alternative. It held while the dispatch gate serialized on a shared file, and once the gate held only on a dependency, a contract, a relocation, a sweep, or a stated reason, it failed every sweep over two independent rows writing one canvas doc. A `Touches` cell cannot say which hold a pair carries, so the array lists the candidates for merge order and the dispatcher's reading.
-- The shared entry names which row contributed the containing path. `sharesPath` colliding a directory with a file inside it is the intended reading rather than a coarse one, and a message printing the shared strings alone would leave an over-broad cell and a genuine overlap identical, which is what reads as a defect in the verb rather than as a working check.
-- A `Touches` cell naming a bare folder goes to a third array, `claims`, moving no exit code the way the untested rows do. A row rewriting a whole directory has no other way to say so, so the claim states its reach rather than reading as a defect, and a measure failing on a legitimate cell teaches a reader to skip it.
-- Folder against file is decided by asking the tree for a path that resolves, and by the extension only for a path the row has yet to create. The name alone reads a file carrying no extension, such as a hook script, as a folder claim.
-- The claims scan stops at `## Run now`, where the shared-file report stops, and the board carried a parked case when that was decided. A cell in another group describes unplanned work as a sentence and is rewritten once a plan exists, so a claim read off one reports on prose rather than on a file set, which is the shape that teaches a reader to skip a report.
+### Shared files
 
-### Shape and position
+Two `## Run now` rows naming a path in common go to a `shared` array and move no exit code. The array lists candidates for merge order, since a `Touches` cell cannot say which hold a pair carries.
 
-- Shape runs ahead of every other check, since a row failing it carries no dependable fields for the rest to read. A blank or prose line ends the table above it, so a row stranded there is checked against the line behind it rather than treated as a continuation, and a row that clears that test is still checked cell by cell against its own header.
-- Ordering reads a `## Needs a plan` row's stated position off the same walk that already reads its other fields, rather than opening a second pass over the file. The phrase is prose searched for anywhere in the cell, `<ordinal> here` or the bare word `last`, since every live row states its position at the end of a sentence rather than at the front. A gap, a duplicate, and a sequence starting somewhere other than first all surface as the same disagreement between a stated position and a real one.
-- A cell stating no position of either form is `row-unranked` rather than unordered, since reading it as unordered would make the check silent over the whole live board: no cell writes an ordinal, so the one finding Ordering carries would reach zero rows while a board sorted by recency passes every check it has. The two findings sit inside one check rather than in an eighth, since Ordering already scopes to the group and already reads a position phrase off the walk, and an eighth row in the docs table would split one question about whether the stated position holds across two.
+- A collision finding exiting 2 held while the dispatch gate serialized on a shared file
+- Once the gate held only on a dependency, a contract, a relocation, a sweep, or a stated reason, it failed every sweep over two independent rows writing one canvas doc
+- The entry names which row contributed the containing path, so an over-broad cell and a genuine overlap read differently
+- `sharesPath` colliding a directory with a file inside it is the intended reading
+
+### Folder claims
+
+A `Touches` cell naming a bare folder goes to a third array, `claims`, and moves no exit code. A row rewriting a whole directory has no other way to say so, and a measure failing on a legitimate cell teaches a reader to skip it.
+
+- Folder against file is decided by asking the tree for a path that resolves, and by extension only for a path the row has yet to create
+- The name alone would read an extensionless file, such as a hook script, as a folder claim
+- The claims scan stops at `## Run now` like the shared-file report, since a cell in another group describes unplanned work as a sentence
+
+### Shape runs first
+
+Shape runs ahead of every other check, since a row failing it carries no dependable fields. A blank or prose line ends the table above it, so a stranded row is checked against the line behind it and then cell by cell against its own header.
+
+### Ordering
+
+Ordering reads a `## Needs a plan` row's stated position off the walk that reads its other fields. The phrase is prose searched anywhere in the cell, `<ordinal> here` or the bare word `last`, since live rows state position at the end of a sentence.
+
+- A gap, a duplicate, and a sequence not starting first all surface as one disagreement between stated and real position
+- A cell stating no position is `row-unranked` rather than unordered, since reading it as unordered would reach zero rows while a board sorted by recency passes
+- The two findings share one check, since Ordering already scopes to the group and reads a position phrase, and an eighth row in the docs table would split one question
 
 ### The comparative phrase
 
-- The comparative phrase is a closed verb list required to share a clause with a positional object, a `vNN.N` label or the word `group`, `row`, or `rows`. A bare verb test was measured against the live board and accepts `it closes a gap the reference gate leaves open`, which claims no position, where the verb-plus-object test passes all 16 live cells and rejects it. The clause bound is what stops a verb in one half of a cell pairing with an object in the other, and `CLAUSE_BREAK` keeps its period away from digits on both sides so `v80.4` survives the split as one token, since a phase label is the commonest object on the board.
-- An ordinal exempts a row from the comparative half, being a comparative claim already and already checked for agreement.
-- The residue runs both ways. A cell phrased comparatively and unusually reads as unranked, which is the false negative and the safe direction for a check over prose, and it is the same trade `readOrdinal` already took by bounding itself to a word list. A vocabulary verb reaching a positional object non-positionally reads as ranked, which is the false positive: `it follows from two rows the audit already covers`, `it closes a gap the row above leaves open`, and `it precedes no rows in any meaningful order` each pass the shipped predicate while claiming no position. Widening the pattern to separate those from a positional `follows` is grading prose, which is what `readOrdinal` refused and what this check takes its shape from, so the class is named here rather than closed in the regex.
+A comparative phrase is a closed verb list sharing a clause with a positional object, a `vNN.N` label or the word `group`, `row`, or `rows`. A bare verb test accepted `it closes a gap the reference gate leaves open`, which claims no position. The verb-plus-object test passes all 16 live cells and rejects it.
+
+- The clause bound stops a verb in one half of a cell pairing with an object in the other
+- `CLAUSE_BREAK` keeps its period away from digits on both sides, so `v80.4` survives the split as one token
+- An ordinal exempts a row from the comparative half, being a comparative claim already checked for agreement
+
+### Residue in the comparative check
+
+A cell phrased comparatively and unusually reads as unranked, the false negative and the safe direction for a check over prose. `readOrdinal` took the same trade by bounding itself to a word list.
+
+A vocabulary verb reaching a positional object non-positionally reads as ranked, the false positive.
+
+- `it follows from two rows the audit already covers` and `it precedes no rows in any meaningful order` both pass while claiming no position
+- Telling them from a positional `follows` is grading prose, which `readOrdinal` refused, so the regex leaves the class open
 
 ### Why the check proves little live
 
-- The live board passes this once every row is phrased comparatively, so the check itself proves nothing there and the fixture board in `validate.test.ts` is what exercises the finding. Encoding the check is what replaces holding that convention in one session's memory.
-- `readOrdinal` reads the phrase anywhere in the cell rather than anchored to where the cell opens, since every live `## Needs a plan` row states its position mid-sentence or at the end rather than at the front.
-- The search stops short of the whole cell on the `last` branch, reading `LAST_AT_END` rather than `\blast\b` anywhere: a cell reading `the last of the two instruments this rename needs` would otherwise resolve `last` as a position claim, a false positive the vocabulary bound exists to prevent. `LAST_AT_END` anchors the bare word to the end of the cell instead, which is where every row that actually declares itself last puts it.
+The live board passes once every row is phrased comparatively, so the fixture board in `validate.test.ts` is what exercises the finding. Encoding the check replaces holding that convention in one session's memory.
+
+- `readOrdinal` reads the phrase anywhere in the cell, since every live row states its position mid-sentence or at the end
+- The `last` branch reads `LAST_AT_END` rather than `\blast\b`, since `the last of the two instruments this rename needs` would otherwise resolve as a position claim
+- `LAST_AT_END` anchors the bare word to the end of the cell, where every row declaring itself last puts it
 
 ### Wide code spans
 
-- A code span too wide for the preview goes to a fourth array, `wide`, moving no exit code, since the threshold is a heuristic and a measure failing on a cell that fits teaches a reader to skip it. The limit is 60 characters of longest whitespace-free run, one round step above the widest span measured fitting at 57, and 78 was measured overflowing, so 58 to 77 stays unmeasured.
-- The wide scan reads every group where the claims scan stops at `## Run now`, since the overflow that prompted it sat under `## Up next`. It reads the cells off `BoardRow.cells`, split by `splitCells` like every other check, and strips a link target before scanning because only its label renders. A brace-glob flags at any width.
-- The preview pane draws a table wider than itself with a sideways scroll rather than wrapping a span, which is why only code spans are read: prose breaks at spaces and a bare word at a hyphen.
+A code span too wide for the preview goes to a fourth array, `wide`, and moves no exit code, since the threshold is a heuristic. The limit is 60 characters of longest whitespace-free run. The widest span measured fitting was 57 and 78 was measured overflowing, so 58 to 77 stays unmeasured.
+
+- The wide scan reads every group, since the overflow that prompted it sat under `## Up next`
+- It reads cells off `BoardRow.cells`, split by `splitCells`, and strips a link target because only the label renders
+- A brace-glob flags at any width
+- Only code spans are read, since the preview draws a wide table with a sideways scroll while prose breaks at spaces and a bare word at a hyphen

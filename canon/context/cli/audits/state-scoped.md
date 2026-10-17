@@ -5,38 +5,89 @@ description: The secret scan and the dependency advisory read, which measure wha
 
 # State-scoped checks
 
-`canon secrets scan` and `canon deps audit` are the first two members whose subject is what is already committed rather than what is arriving. Every review surface a session can reach is scoped to a range, so a risk that predates that range is invisible to all of them by construction, and these two close that by scope rather than by subject. Neither re-reads a diff anywhere, which is what keeps them complementary to the review surfaces instead of competing with them.
+`canon secrets scan` and `canon deps audit` are the first two members whose subject is what is already committed rather than what is arriving. Every review surface a session reaches is scoped to a range, so a risk predating the range is invisible to all of them.
 
-### The corpus is the package's own files field
+Neither re-reads a diff, which keeps them complementary to the review surfaces.
 
-The secret scan reads what `package.json` publishes rather than a list of trees kept beside the check. That field is already the single statement of which trees leave this repository, so a second list would answer the same question and drift out of step with the publish. It also carries the negations the publish makes, which is what puts `scripts/eval` and every test file out of scope, alongside `sandbox/`, which no `files` entry names, by the rule that keeps them out of the tarball rather than by an exclusion the check invented: a tree such as `src/capture` moves into or out of scope automatically as the publish negations themselves change. Hardcoding the shipped trees was the alternative, and it is the one that would need an exclusion list for the fixture trees from the start.
+## Decisions
 
-The plugin route lands in the same corpus without a second mechanism. `claude/` is a `files` entry, and its `standards` symlink resolves into a tree the field lists in its own right. The symlink itself fails to open as text and is counted under skipped, which costs no coverage, since the check reads the real trees directly.
+### The corpus is the package's `files` field
 
-What the corpus leaves out is stated on every run rather than left for a reader to derive. Measured against this repository on 2026-08-21, the scan read 544 files and left 593 of the 1139 git lists unread, being everything under `.claude/`, `wiki/`, and `internal/`, the `.github/` workflows, and the trees the publish negations remove. This repository is public, so a clean run that named only its passing count would read as no credential anywhere in it. Widening to every tracked file stays a separate decision, since the row puts the shipped tree first deliberately.
+The secret scan reads what `package.json` publishes rather than a list of trees kept beside the check. That field already states which trees leave this repository, so a second list would drift out of step with the publish.
 
-### Keying on values is what empties the exclusion set
+Hardcoding the shipped trees was rejected, since it would need an exclusion list for the fixture trees from the start.
 
-Every pattern matches an issued value and none matches a word. A scan keyed on `password`, `secret`, or `token` fires on the environment reads, the workflow inputs, and the prose naming those things, and this repository ships all three, so the keying rather than the exemption mechanism is what decides how much noise there is to exclude. Measured on 2026-08-21 across 544 files, the shipped tree produced zero findings with nothing exempted.
+### The field carries the negations
 
-That measurement is what settled the exemption design. A path allow-list was declined because the noise it would target is word-keyed and not confined to the fixture trees, so it would have hidden part of the noise and none of the risk. The inline marker in `src/secrets/marker.ts` ships with an empty user set instead, shaped on the `stub: true` precedent: only a marker naming a reason counts, so a typo cannot mute a finding, and the exemption travels with the line rather than sitting in a list away from it. Add the first marker when the first false positive appears rather than in anticipation of one.
+The field's negations put `scripts/eval` and every test file out of scope, and `sandbox/`, which no entry names, falls out by the rule keeping it out of the tarball. A tree such as `src/capture` moves into or out of scope as the negations change, with no exclusion the check invented.
 
-The rule set is in scope like any other file, so `src/secrets/scan.test.ts` asserts that no pattern matches the text of its own definition. A pattern that did would report this repository on every run and train a reader to mute the check.
+### The plugin route needs no second mechanism
 
-### Upstream is a third corpus, not a variant of the other two
+`claude/` is a `files` entry, and its `standards` symlink resolves into a tree the field lists in its own right. The symlink fails to open as text and counts under skipped, which costs no coverage since the check reads the real trees directly.
 
-The advisory check shells the runtime's own command rather than carrying an index. A vendored database would be a second corpus to keep current, and what this check is worth is the report rather than the data. That buys one failure mode nothing else in the set carries, since the command reaches a network and an unreachable index has to be told apart from a tree with nothing against it. Exit codes cannot draw that line, because `bun audit` exits non-zero on advisories found and on a lookup that failed alike, so the record on stdout is what decides.
+### What the corpus leaves out is stated each run
 
-Which refusals read as an absence lives on the spec rather than being derived from the corpus alone. `absentReasons` overrides what the corpus would answer, and the secret scan is the reason it exists: its corpus is tracked, a tracked corpus admits no absence at all, and a project that publishes nothing refuses on every run. Those projects are where most targets installing this CLI sit, so deriving the set from the corpus alone would pin the aggregate at `incomplete` in all of them permanently.
+Measured on 2026-08-21, the scan read 544 files and left 593 of the 1139 git lists unread. Those are everything under `.claude/`, `wiki/`, and `internal/`, the `.github/` workflows, and the trees the publish negations remove.
 
-An absent `files` field is not folded into that allowance, since npm packs the whole tree when the field is absent, which makes that project the one publishing the most rather than one publishing nothing. `private: true` is what separates them, being the only declaration that a project is never published, so `no-publish` joins the allowance and `no-files-field` reports `unmeasured` beside `no-git`. Both of those are a corpus that exists and went unread, which is the state the aggregate reserves that code for.
+This repository is public, so a clean run naming only its passing count would read as no credential anywhere. Widening to every tracked file stays a separate decision, since the shipped tree went first deliberately.
 
-The population it turns on is measured rather than assumed. All four targets this CLI is installed into declare `private: true` and carry no `files` field, measured on 2026-08-21, so every one lands on `no-publish` and stays inside the allowance, which is what keeps the split from pinning the aggregate at `incomplete` where the design says it must not.
+### Keying on values empties the exclusion set
 
-`Corpus` gained `upstream` for it rather than borrowing either existing value. The count moves when someone publishes rather than when someone edits here, so a retained baseline would report growth against a tree nobody touched, which is the risk the plan named and the reason it stays out of the record beside gitignored scratch. The same value answers the offline run: an index this machine could not reach reports `absent` and moves no verdict, where reading it as unmeasured would pin the aggregate at `incomplete` on every machine without a network.
+Every pattern matches an issued value and none matches a word. A scan keyed on `password`, `secret`, or `token` fires on environment reads, workflow inputs, and prose naming them, and this repository ships all three.
 
-Adding the member cost two consumers a branch each. `compareBaseline` reports an `upstream` delta kind rather than mislabelling it per-machine, and the report line says growth is not this tree rather than saying no baseline is kept for a machine. `AuditResult` carries `corpus` alongside `tracked` for that reason: the boolean says whether a count is retained and cannot say why, and the two callers needed the why.
+Measured on 2026-08-21 across 544 files, the shipped tree produced zero findings with nothing exempted.
+
+### The exemption design
+
+A path allow-list was declined, since the noise it would target is word-keyed and not confined to fixture trees, so it would hide part of the noise and none of the risk.
+
+The inline marker in `src/secrets/marker.ts` ships with an empty user set, shaped on the `stub: true` precedent.
+
+- Only a marker naming a reason counts, so a typo cannot mute a finding
+- The exemption travels with the line rather than sitting in a list away from it
+- Add the first marker when the first false positive appears, not in anticipation
+
+### The rule set is scanned too
+
+`src/secrets/scan.test.ts` asserts that no pattern matches the text of its own definition. A pattern that did would report this repository on every run and train a reader to mute the check.
+
+### Upstream is a third corpus
+
+The advisory check shells the runtime's own command rather than carrying an index. A vendored database would be a second corpus to keep current, and the check is worth the report rather than the data.
+
+That buys a failure mode nothing else carries, since the command reaches a network and an unreachable index must be told from a tree with nothing against it. `bun audit` exits non-zero on advisories found and on a failed lookup alike, so the record on stdout decides.
+
+### Absent reasons live on the spec
+
+`absentReasons` overrides what the corpus would answer. The secret scan is why it exists, since its corpus is tracked, a tracked corpus admits no absence, and a project that publishes nothing refuses on every run.
+
+Those projects are where most targets sit, so deriving the set from the corpus alone would pin the aggregate at `incomplete` in all of them.
+
+### A missing `files` field is not an allowance
+
+npm packs the whole tree when the field is absent, so that project publishes the most. `private: true` is the only declaration that a project is never published, so `no-publish` joins the allowance.
+
+`no-files-field` reports `unmeasured` beside `no-git`. Both are a corpus that exists and went unread, the state the aggregate reserves that code for.
+
+### The population was measured
+
+All four targets this CLI is installed into declare `private: true` and carry no `files` field, measured on 2026-08-21. Each lands on `no-publish`, which keeps the split from pinning the aggregate at `incomplete`.
+
+### `Corpus` gained `upstream`
+
+The count moves when someone publishes rather than when someone edits here, so a retained baseline would report growth against a tree nobody touched. That keeps it out of the record beside gitignored scratch.
+
+The same value answers the offline run. An unreachable index reports `absent` and moves no verdict, since unmeasured would pin the aggregate at `incomplete` on every machine without a network.
+
+### Two consumers gained a branch
+
+Adding the member cost two consumers a branch each.
+
+- `compareBaseline` reports an `upstream` delta kind, not a mislabelled per-machine one, and the report line says growth is not this tree
+- `AuditResult` carries `corpus` beside `tracked`, since the boolean says whether a count is retained and cannot say why
 
 ### What was deliberately not built
 
-A general state-scoped bug scanner. Change-scoped correctness review already exists and a state-scoped bug scan is a different product from the one asked for, so the boundary here is scope rather than subject and widening it to every source file buys tooling this repository does not own. The shipped seeds and golden configs are the part nothing else is positioned to check, which is why that corpus went first.
+A general state-scoped bug scanner. Change-scoped correctness review already exists, and a state-scoped bug scan is a different product from the one asked for.
+
+The boundary is scope rather than subject. The shipped seeds and golden configs are what nothing else is positioned to check, so that corpus went first.

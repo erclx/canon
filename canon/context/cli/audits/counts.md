@@ -9,34 +9,93 @@ description: The canon gov counts sweep, its closed catalog set, the trigger sha
 
 ### What the sweep reads
 
-- `canon gov counts` reads a sentence stating how many members a closed catalog holds and compares the stated figure against what the tree actually counts. A document going stale on its own self-stated figure is otherwise caught only by a reviewer recomputing it. The scope is deliberately narrower than `canon/context/cli/audits/restated.md`: a number with a command behind it is in scope and two English sentences stating one rule are not.
-- The verb sits under `gov` beside `test-order`, `superseded`, and `restated`, on the reasoning already recorded for each: all four measure a stated convention against the tree, and a session reaching for one finds the others.
-- The catalog set is closed rather than derived from every list command this CLI ships: skills, governance rules, standards, CLI commands, and audit ids, each read off the filesystem directly rather than through its own `canon` subprocess, since this module already runs inside the process that would spawn one.
+`canon gov counts` reads a sentence stating how many members a closed catalog holds and compares the figure against what the tree counts. Otherwise a document going stale on its own figure is caught only by a reviewer recomputing it.
 
-### How the matcher narrowed
+The scope is narrower than `canon/context/cli/audits/restated.md`. A number with a command behind it is in scope, and two English sentences stating one rule are not.
 
-- A bare number next to a catalog noun anywhere in the tracked corpus was the first design tried, and it returned 290 findings against a tree whose actionable instance count was one. `18 rules citing a standard`, `21 skill bodies`, and `eight internal skills` all pair a number with a catalog noun while naming a subset, an example, or a different catalog than the one matched, and that shape dominates ordinary prose.
-- Requiring an assertion verb (`loads`, `ships`, `carries`, and nine more) directly ahead of the number took the false-positive count from 290 to five on the same tree. Every instance this sweep was written against reads the number as the direct object of a verb asserting the catalog's own total, `distribution.md`'s own `loads` sentence being the live one.
-- A plausibility filter closed the remaining four. `carries two rules about a standard's own lifecycle` and `documents two similar commands` still passed the verb gate, reading `rules` and `commands` for something other than this tree's own catalogs, and what told those apart from the live finding was magnitude: a genuine staleness claim sits within a factor of two of the true count, and `2` beside a true count of `59` is a different `rules` entirely. Both bounds are tuned against this one run rather than reasoned to, the way the restated sweep's own document-frequency ceiling is.
-- A sentence carrying a calendar date or a backticked commit reference reads past whole, on the same convention `.claude/ARCHITECTURE.md` wrote its own figures against. `canon/context/cli/overview.md` carries several bare skill counts with neither marker, narrating a specific incident rather than stating a live catalog size, and the verb gate is what keeps those from matching rather than the date rule the plan proposed for them.
-- A delta phrased as a transition, a fraction, and a total reached through an indirect noun (`denominator of sixty-one shipped skills`) are each a catalog-size claim this corpus carries and none matches the trigger shape read here. Each stays a known gap. The bullets below carry the false-positive measurement that decides whether any of them closes.
+### Where the verb sits
 
-### Catalogs and the first measurement
+The verb sits under `gov` beside `test-order`, `superseded`, and `restated`. All four measure a stated convention against the tree, and a session reaching for one finds the others.
 
-- `commands` is the one catalog with no meaning outside this repository, the way `regen-hero.ts` documents itself as clone-only for the same reason. A tree carrying no `src/cli.ts` reads that catalog as not applicable rather than as zero, since zero would report a finding against any such project stating its command count as anything but zero, forever.
-- Measured against `a24b65ce` on 2026-08-27, the verb-gated run named one live stale figure and no false positive over 533 tracked markdown files. It joins the aggregate with `gatingExits: []` rather than as a gate, since one clean run does not settle a false-positive rate.
-- A verb-only trigger misses a stale total whose sentence puts its verb after the noun rather than ahead of the number. Admitting an article ahead of the number reaches that shape, and it also reads a real subset as a claim about the whole catalog when a qualifying adjective fills the same optional-word slot a genuine total needs to match at all.
+### The catalog set is closed
 
-### False positives and dating
+The set is skills, governance rules, standards, CLI commands, and audit ids, not every list command this CLI ships. Each is read off the filesystem directly, since the module already runs inside the process a `canon` subprocess would spawn.
 
-- That subset false positive closes without a matcher change. A sentence true when written and unmarked as a past state takes a date, the way `canon/ARCHITECTURE.md` dated its own figures before it was retired, and the date exclusion reads it past rather than needing a narrower qualifier rule. Correcting the figure is not available, since the number was correct for the moment it described.
-- What an author has to write for a count to be seen at all, which nothing stated before this row: a trigger word sitting against the number, then the number, then at most one qualifying word, then the catalog's own noun. The trigger is one of thirteen assertion verbs (`loads`, `ships`, `carries`, `authors`, and nine more), the quantifier `all`, or an article. `the toolkit authors 49 rules` and `took all 49 rules` are in. `a domain of 55 skills` and `denominator of sixty-one shipped skills` are out, because a noun stands between the trigger and the number. A sentence carrying a calendar date or a backticked commit is out whatever its shape, which is the escape an author reaches for when the figure is a past state rather than a live claim.
-- A code span is no shelter here, which parts this sweep from the markdown ban scan and catches anyone documenting it. The ban scan drops a code span, so a standard quoting its own banned character reports nothing, where this one reads the span as prose and a sentence quoting a matchable phrase reports itself. Explaining the shape rather than reproducing it is the way to write about a stale figure without becoming one.
+### A bare number was the first design
 
-### Widening the trigger
+A bare number next to a catalog noun anywhere in the corpus returned 290 findings against a tree with one actionable instance. `18 rules citing a standard`, `21 skill bodies`, and `eight internal skills` pair a number with a catalog noun while naming a subset, an example, or another catalog.
 
-- A finding count cannot measure whether a widening reaches the sentence it was written for, which is the trap any pass over this sweep or its siblings has to design around. The verb reports only where a stated figure disagrees with the tree, so a target sentence stating the true figure is reached and reports nothing, which reads the same as a matcher that never matched it at all. Both target sentences here stated 69 against a true count of 69, so reading findings alone showed the two candidate axes producing identical output, and reading matched sentences instead is what separated them.
-- The gap between the trigger and the number is the axis this design held open for widening once its false-positive rate had a measurement behind it, and the measurement closes the axis rather than opening it. Over 518 files and 31,836 sentences, allowing one, two, or three words to stand between the trigger and the number reaches 77, 104, and 132 sentences against a baseline of 65.
-- Neither live miss comes back at an affordable width. No width reaches `took all 49 rules`, whose nearest trigger is the `The` opening the sentence with five words between it and the number, and the width that does reach `the toolkit authors 49 rules` is the same width that admits `a domain of 55 skills`, which is the indirect-noun shape this sweep already declines. Widening the vocabulary instead carries both misses at 75 sentences reached and no false positive.
-- Both live misses had causes a single fix could not share, which is why the answer is two words rather than one axis. `all` is a third trigger class beside the verbs and the articles and the only one that states a total outright, since `all 49 rules` names the catalog entire where `the 60 rules` leaves a reader to judge whether a qualifier narrows it. `authors` is an ordinary extension of the verb vocabulary and generalizes to nothing, taken knowingly because the axis that would have generalized costs a false-positive class the sweep already named. `every` and `both` were measured beside `all`, reached nothing, and do not ship.
-- A finding splits on whether its sentence states a live claim or records a past one, which is the same test the date exclusion runs. A live claim takes a corrected figure and a past one takes a date.
+### An assertion verb cut it to five
+
+Requiring an assertion verb (`loads`, `ships`, `carries`, and nine more) directly ahead of the number took false positives from 290 to five on the same tree. Every instance the sweep was written against reads the number as the direct object of a verb asserting the catalog's own total.
+
+### A plausibility filter closed the rest
+
+`carries two rules about a standard's own lifecycle` and `documents two similar commands` still passed the verb gate while reading `rules` and `commands` as something other than this tree's catalogs. Magnitude told them from the live finding.
+
+- A genuine staleness claim sits within a factor of two of the true count
+- `2` beside a true count of `59` is a different `rules` entirely
+- Both bounds are tuned against this one run, like the restated sweep's document-frequency ceiling
+
+### Dates and commits read past a sentence
+
+A sentence carrying a calendar date or a backticked commit reference is read past whole, the convention `.claude/ARCHITECTURE.md` wrote its own figures against. `canon/context/cli/overview.md` carries bare skill counts with neither marker, narrating an incident rather than a live size, and the verb gate keeps those from matching.
+
+### Known gaps
+
+A delta phrased as a transition, a fraction, and a total reached through an indirect noun (`denominator of sixty-one shipped skills`) are each a size claim the trigger shape does not match. Each stays a gap until a false-positive measurement says one closes.
+
+### `commands` applies only here
+
+`commands` is the one catalog with no meaning outside this repository, the way `regen-hero.ts` documents itself as clone-only. A tree carrying no `src/cli.ts` reads it as not applicable rather than zero, since zero would report a finding against any project stating a nonzero command count, forever.
+
+### The first measurement
+
+Measured against `a24b65ce` on 2026-08-27, the verb-gated run named one live stale figure and no false positive over 533 tracked markdown files. It joins the aggregate with `gatingExits: []`, since one clean run does not settle a false-positive rate.
+
+### Article-after-noun order is open
+
+A stale total whose sentence puts its verb after the noun is missed. Admitting an article ahead of the number reaches it, but it also reads a real subset as a claim about the whole catalog when a qualifying adjective fills the same optional slot.
+
+### Dating closes the subset false positive
+
+A sentence true when written and unmarked as a past state takes a date, the way `canon/ARCHITECTURE.md` dated its figures before it was retired. The date exclusion then reads it past, with no narrower qualifier rule. Correcting the figure is not available, since the number was correct for the moment it described.
+
+### What an author must write
+
+For a count to be seen, the sentence needs a trigger against the number, then the number, then at most one qualifying word, then the catalog's own noun.
+
+- The trigger is one of thirteen assertion verbs (`loads`, `ships`, `carries`, `authors`, and nine more), the quantifier `all`, or an article
+- `the toolkit authors 49 rules` and `took all 49 rules` are in
+- `a domain of 55 skills` and `denominator of sixty-one shipped skills` are out, since a noun stands between trigger and number
+- A calendar date or backticked commit puts a sentence out whatever its shape, the escape for a past state
+
+### A code span is no shelter
+
+The ban scan drops a code span, so a standard quoting its own banned character reports nothing. This sweep reads the span as prose, so a sentence quoting a matchable phrase reports itself. Explain the shape rather than reproducing it when writing about a stale figure.
+
+### Findings cannot measure a widening
+
+A finding count cannot show whether a widening reaches its target sentence. The verb reports only where a stated figure disagrees with the tree, so a target stating the true figure reads the same as a matcher that never matched it.
+
+Both target sentences stated 69 against a true count of 69, so findings showed the two candidate axes producing identical output. Reading matched sentences is what separated them.
+
+### Gap width closed the axis
+
+Allowing one, two, or three words between trigger and number reaches 77, 104, and 132 sentences against a baseline of 65, over 518 files and 31,836 sentences.
+
+- No width reaches `took all 49 rules`, whose nearest trigger is the sentence-opening `The` with five words before the number
+- The width reaching `the toolkit authors 49 rules` also admits `a domain of 55 skills`, the indirect-noun shape the sweep declines
+- Widening the vocabulary carries both misses at 75 sentences reached and no false positive
+
+### Two words, not one axis
+
+The two live misses had causes one fix could not share.
+
+- `all` is a third trigger class and the only one stating a total outright, since `all 49 rules` names the catalog entire where `the 60 rules` leaves a qualifier to narrow it
+- `authors` extends the verb vocabulary and generalizes to nothing, taken knowingly because the generalizing axis costs a named false-positive class
+- `every` and `both` were measured beside `all`, reached nothing, and do not ship
+
+### Live claim or past one
+
+A finding splits on whether its sentence states a live claim or records a past one, the test the date exclusion runs. A live claim takes a corrected figure and a past one takes a date.
