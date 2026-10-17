@@ -28,13 +28,62 @@ const DENSITY_SCOPE = [
 ]
 
 /**
- * The path prefixes whose density findings fail a run, empty until a rewrite
- * batch brings its folders to zero and adds them here.
+ * The path prefixes whose density findings fail a run, each added by the
+ * rewrite batch that brought it to zero.
  *
  * It describes this repository's rewrite progress and nothing about a target's
  * corpus, which is why the audit reads it only inside a canon checkout.
  */
-export const GATED_PATHS: readonly string[] = []
+export const GATED_PATHS: readonly string[] = [
+  'claude/skills/api-design/SKILL.md',
+  'claude/skills/auto-ship/SKILL.md',
+  'claude/skills/backlog-triage/SKILL.md',
+  'claude/skills/backlog-triage/references/apply.md',
+  'claude/skills/build-in-slices/SKILL.md',
+  'claude/skills/canon-cli/SKILL.md',
+  'claude/skills/canon-feedback-triage/SKILL.md',
+  'claude/skills/canon-feedback/SKILL.md',
+  'claude/skills/canvas-board/SKILL.md',
+  'claude/skills/ci-workflow/SKILL.md',
+  'claude/skills/code-craft/SKILL.md',
+  'claude/skills/codebase-layout/SKILL.md',
+  'claude/skills/context-fold/SKILL.md',
+  'claude/skills/create-rule/SKILL.md',
+  'claude/skills/create-skill/SKILL.md',
+  'claude/skills/decision-escalate/SKILL.md',
+  'claude/skills/deploy-app/SKILL.md',
+  'claude/skills/deprecation-migration/SKILL.md',
+  'claude/skills/design-taste/SKILL.md',
+  'claude/skills/docs-sync/SKILL.md',
+  'claude/skills/document-health/SKILL.md',
+  'claude/skills/draft-and-pick/SKILL.md',
+  'claude/skills/draft-doc/SKILL.md',
+  'claude/skills/draft-figure/SKILL.md',
+  'claude/skills/draft-identity/SKILL.md',
+  'claude/skills/draft-identity/references/card-route.md',
+  'claude/skills/draft-ready/SKILL.md',
+  'claude/skills/draft-screencast/SKILL.md',
+  'claude/skills/draft-screencast/references/beats-template.md',
+  'claude/skills/draft-slides/SKILL.md',
+  'claude/skills/git-branch/SKILL.md',
+  'claude/skills/git-commit/SKILL.md',
+  'claude/skills/git-followup/SKILL.md',
+  'claude/skills/git-issue/SKILL.md',
+  'claude/skills/git-pr/SKILL.md',
+  'claude/skills/git-ship/SKILL.md',
+  'claude/skills/git-ship/references/ci-watch.md',
+  'claude/skills/git-split/SKILL.md',
+  'claude/skills/git-split/references/independent.md',
+  'claude/skills/git-split/references/stacked.md',
+  'claude/skills/git-stage/SKILL.md',
+  'claude/skills/git-worktree/SKILL.md',
+  'claude/skills/git-worktree/references/cleanup.md',
+  'claude/skills/markdown-craft/SKILL.md',
+  'claude/skills/plan-feature/SKILL.md',
+  'claude/skills/plan-feature/references/batches.md',
+  'claude/skills/plan-groundwork/SKILL.md',
+  'claude/skills/plan-groundwork/references/output.md',
+]
 
 /**
  * The limit that gates before any folder is listed, and the surfaces it gates
