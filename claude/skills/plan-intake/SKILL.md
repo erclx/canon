@@ -21,7 +21,7 @@ The test is one question. Can the item be answered by reading the repository tod
 
 Apply the test per item rather than per dump. A dump of forty items typically yields one groundwork candidate, so routing the whole dump on its worst item buys a folder nobody can close.
 
-The wrong surface fails either way. Intake on a question that needs measuring yields a confident verdict with nothing behind it, and groundwork refuses a brain dump through its own qualifying guard.
+The wrong surface fails either way. Intake on a question that needs measuring yields a confident verdict with nothing behind it, and groundwork refuses a brain dump through its own qualifying guard. Forced past that guard, it holds dozens of unrelated threads under a decision file that can close one.
 
 ## Guards
 

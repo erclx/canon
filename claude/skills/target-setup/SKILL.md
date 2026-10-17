@@ -41,7 +41,7 @@ time:
 | ------------------- | ------------------------------------------ | ---------------------------------------------------------- | ----------------------------------------------------- |
 | `indexes`           | Confirm its folder list                    | `--all` for every candidate, `--folders <a>,<b>` for a set | Reports its candidates and stops rather than choosing |
 | `install` and `gov` | Confirm the proposed extras                | `--extras <a>,<b>` for a set, `--extras none` for none     | Takes every proposal and lists each in the report     |
-| `gov`               | Stop on a detected technology with no rule | `--skip-gaps`, proceeding with the matched layer           | Stops, and `--skip-gaps` lists the gap in the report  |
+| `gov`               | Stop on a detected technology with no rule | `--skip-gaps`, which proceeds and lists the gap            | Stops on the gap                                      |
 
 Claude Code's tool permission dialog is the confirmation gate for everything
 else. Do not pause for a separate confirmation beyond the extras question.

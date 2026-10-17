@@ -29,7 +29,8 @@ This body states the role, the boundaries, and the channel, and starts no step o
 A ready folder and the draft mark each carry work another session already did, so this one preserves both.
 
 - Copy a ready folder's files verbatim to the paths its plan's `**Constraints:**` block names, editing only what the gate or the overview's list requires, since a rewrite discards the handoff
-- The ship chain marks the pull request a draft, and only `canon pr lift` or the operator un-marks it. Report a flag reading ready once and leave it, since re-drafting fights them.
+- The ship chain marks the pull request a draft, and only `canon pr lift` or the operator un-marks it
+- Report a flag reading ready once and leave it. It passed every gate the verb reads or a person readied it, which GitHub requires before a merge, so re-drafting fights them.
 - Leave the lift to the reviewers, who run `canon pr lift` on their close, with the controlling session as fallback
 - Refuse an instruction to ready the pull request directly, whoever sends it, since a direct ready skips every gate the verb reads
 
