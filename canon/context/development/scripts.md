@@ -9,6 +9,8 @@ description: The bash scripts under scripts/, the frame library they source, the
 
 Owns the bash under `scripts/`, being repo maintenance, the shared frame library, and the frozen records of a retired eval. No domain keeps a bash dispatcher or a verb folder, since `src/commands/<domain>.ts` routes every verb. The TypeScript side is described in `canon/context/surfaces/cli.md`.
 
+No command under `src/commands/` shells into bash, and `execScript` in `src/cli/exec.ts` has no caller. The bash left is the scripts here, the hooks under `.claude/hooks/`, and the stack scripts under `tooling/`, which run in targets with no guaranteed runtime.
+
 ## Layout
 
 ### `scripts/`
