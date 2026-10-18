@@ -117,13 +117,29 @@ const writeThread = (
   )
   writeFileSync(join(root, 'fixtures', 'head-7.txt'), `${head}\n`)
 
-  // The verb reads the code family alone, so a UI pass posted after the code
-  // pass leaves the scope where the code pass put it.
+  // The top-level fields carry the code family alone, so a UI pass posted
+  // after the code pass leaves the scope where the code pass put it. The UI
+  // family rides in `ui`, covered when its marker, or the stamp without one,
+  // names the head.
   const last = reviews
     .filter((review) => CODE_HEADINGS.has(review.heading))
     .at(-1)
-  writeScope(
-    last === undefined
+  const lastUi = reviews
+    .filter((review) => review.heading.startsWith('## UI review'))
+    .at(-1)
+  const uiCommit = lastUi?.marker ?? lastUi?.stamp ?? head
+  const ui =
+    lastUi === undefined
+      ? { source: 'none', state: 'none', isCovered: false }
+      : {
+          commit: uiCommit,
+          heading: lastUi.heading,
+          isCovered: head.startsWith(uiCommit),
+          source: lastUi.marker === undefined ? 'fallback' : 'marker',
+          state: lastUi.heading === '## UI review' ? 'open' : 'closed',
+        }
+  writeScope({
+    ...(last === undefined
       ? { source: 'none', state: 'none' }
       : {
           commit: head,
@@ -131,12 +147,13 @@ const writeThread = (
           source: 'fallback',
           state: last.heading === '## Review' ? 'open' : 'closed',
           submittedAt: last.submittedAt,
-        },
-  )
+        }),
+    ui,
+  })
 }
 
 /** Overrides what the verb answers, which is how a marker reaches the script. */
-const writeScope = (record: Record<string, string>): void => {
+const writeScope = (record: Record<string, unknown>): void => {
   writeFileSync(join(root, 'fixtures', 'scope-7.json'), JSON.stringify(record))
 }
 
@@ -485,6 +502,28 @@ describe('poll', () => {
       expect(poll().stdout).toContain('SEEN')
 
       writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+
+      expect(poll().stdout).not.toContain('UI-')
+    })
+
+    it('should read the UI family as unread when the verb record carries no ui', () => {
+      writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+      expect(poll().stdout).toContain('SEEN')
+
+      writeThread(
+        [
+          { heading: '## Review closed', submittedAt: CLOSE_OUT },
+          { heading: '## UI review closed', marker: HEAD, submittedAt: UI_AT },
+        ],
+        [],
+      )
+      writeScope({
+        commit: HEAD,
+        heading: '## Review closed',
+        source: 'fallback',
+        state: 'closed',
+        submittedAt: CLOSE_OUT,
+      })
 
       expect(poll().stdout).not.toContain('UI-')
     })

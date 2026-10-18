@@ -85,7 +85,8 @@ export const STALE_AFTER = 7200
 // so a heading added in one of them breaks a test here that no check reaches
 // across. The review family reaches this file through `canon pr review-state`,
 // so its two headings are pinned only for the fallback that answers a target
-// whose CLI predates that verb.
+// whose CLI predates that verb. The UI family reaches it through the same
+// record and is pinned nowhere here.
 const REVIEW_HEADINGS = ['## Review', '## Review closed']
 const REPLY_HEADINGS = [
   '## Review response',
@@ -95,8 +96,6 @@ const REPLY_HEADINGS = [
 // An evidence comment answers no review, so it stays out of the reply family
 // and is excluded from the unmatched filter on its own.
 const KNOWN_HEADINGS = [...REVIEW_HEADINGS, ...REPLY_HEADINGS, '## Evidence']
-const UI_HEADINGS = ['## UI review', '## UI review closed']
-const UI_MARKER = /^<!-- review-ui: head=([0-9a-f]{7,40}) -->$/
 
 const firstLine = (body: null | string | undefined): string =>
   (body ?? '').split('\n')[0].replace(/\r$/, '')
@@ -200,29 +199,22 @@ export const scopeFallback = (payload: Payload, now: number): Scope => {
 }
 
 /**
- * The UI family is posted as a pull request review, so it is read off
- * `reviews`. The newest UI heading decides the state, and the head it covered
- * comes from the marker on the body's last line, since the submission stamp
- * moves onto a commit pushed while the pass drove. A marker may name a short
- * sha, so coverage is a prefix match.
+ * Reads the UI family off the verb's record, so the poll and the lift agree on
+ * which head a close covers, a close carried across unpainted pushes included.
+ * A record carrying no `ui` object is a refusal or a CLI predating the field,
+ * and reads as unread, which leaves the baseline's value standing.
  */
-export const uiState = (payload: Payload, head: string): string => {
-  const last = (payload.reviews ?? [])
-    .filter((review) => UI_HEADINGS.includes(firstLine(review.body)))
-    .at(-1)
-  if (last === undefined) return 'none'
+export const uiFromVerb = (record: unknown): string => {
+  if (typeof record !== 'object' || record === null) return ''
+  const ui = (record as Record<string, unknown>).ui
+  if (typeof ui !== 'object' || ui === null) return ''
 
-  const heading = firstLine(last.body) === '## UI review' ? 'open' : 'closed'
-  const lastLine = (last.body ?? '')
-    .split('\n')
-    .map((line) => line.replace(/\r$/, ''))
-    .filter((line) => line !== '')
-    .at(-1)
-  const marked = lastLine === undefined ? null : UI_MARKER.exec(lastLine)
-  const commit = marked?.[1] ?? last.commit?.oid ?? 'none'
-  const covered = commit !== 'none' && head.startsWith(commit)
+  const fields = ui as Record<string, unknown>
+  if (fields.state !== 'open' && fields.state !== 'closed') return 'none'
+  const commit = typeof fields.commit === 'string' ? fields.commit : 'none'
+  const covered = fields.isCovered === true && commit !== 'none'
 
-  return `${heading}-${covered ? 'head' : 'behind'}-${commit.slice(0, 7)}`
+  return `${fields.state}-${covered ? 'head' : 'behind'}-${commit.slice(0, 7)}`
 }
 
 /** Takes the first ten fields and ignores the rest, so a short or padded line still reads. */
@@ -792,7 +784,7 @@ const buildRow = (
     resp: replies.count,
     stale: stale.stale,
     staleFiles: stale.files,
-    ui: uiState(payload, head),
+    ui: uiFromVerb(record),
     unmatchedCount: unmatched.count,
     unmatchedHeading: unmatched.heading,
   }
