@@ -26,7 +26,7 @@ paths:
 
 ## Content
 
-- Define collections in `src/content.config.ts`, each with a `glob()` or `file()` loader and a Zod schema.
+- Define collections in `content.config.ts` at the root of `src/`, each with a `glob()` or `file()` loader and a Zod schema.
 - Read entries through `getCollection()` and `getEntry()`, never by importing content files directly.
 
 ## Styles and assets
