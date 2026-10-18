@@ -6,7 +6,10 @@ paths:
   - '**/*.jsx'
   - '**/*.vue'
   - '**/*.svelte'
+  - '**/*.astro'
+  - '**/*.html'
   - '**/*.css'
+  - '**/*.scss'
 ---
 
 # Design reference standards
