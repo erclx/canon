@@ -3,7 +3,7 @@ title: Orchestrator dispatch runbook
 description: The plan-answer gate, the collision check before a self-dispatch, the conflict check against the tracks in flight and the evidence it rests on, the branch the launch names, the one model test applied to each role, the fallback to a human launch, and the loop's stopping condition
 ---
 
-Run this at loop step 4, for a `## Run now` row whose plan is verified, in place of handing the worktree to a human. The conflict check below is where that row is tested against every track in flight, and it is the one statement of what holds a row there.
+Run this at loop step 4, for a `## Up next` row whose plan is verified, in place of handing the worktree to a human. The conflict check below is where that row is tested against every track in flight, and it is the one statement of what holds a row there.
 
 ## Contents
 
@@ -152,6 +152,8 @@ A row qualifies for that pick when its plan carries no open question and touches
 
 Read `${CLAUDE_SKILL_DIR}/references/orchestrator-launch.md` once every check above clears, and launch from its build template, which sits beside the review-address and planning shapes that skip these checks. A cloud row launches from `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md`, since the VM shares no plugin or board.
 
+Once the launch succeeds, run `canon tasks promote <stem>` to move the row under `## Run now`, which reads as dispatched.
+
 ## Fall back to the human
 
 Hand the row to the human-launch line in step 4 instead of dispatching when any of these hold, and name which one. A shared file alone is not listed.
@@ -171,4 +173,4 @@ Hand the person one command, `/canon:auto-ship <plan>`, naming the row, the plan
 
 ## Stop the loop
 
-Wrapped in `/loop`, re-run the check against `## Run now` on each wake, and stop once the group is empty or every row reads `claimed: true`. Report that once, on the wake that finds it, rather than polling a board nobody is clearing, the reasoning `orchestrator-poll.md` carries for the review trigger.
+Wrapped in `/loop`, re-run the check against `## Up next` on each wake, and stop once the group is empty or every row reads `claimed: true`. Report that once, on the wake that finds it, rather than polling a board nobody is clearing, the reasoning `orchestrator-poll.md` carries for the review trigger.

@@ -72,7 +72,8 @@ The plan standard fixes that block for a feature plan, and a groundwork or intak
 
 ## The board is read-only
 
-- Never write `.canon/tasks/priority.md` or `.canon/tasks/backlog.md`. Both are gitignored, so an overwrite drops a row with no history to recover it from.
+- Never write `.canon/tasks/priority.md` or `.canon/tasks/backlog.md` by hand. Both are gitignored, so an overwrite drops a row with no history to recover it from.
+- `canon tasks plan-link` is the one board write this role makes. It moves the row out of `## Needs a plan` once the plan is linked, in one read and one write a hand edit cannot match.
 - Never write the task file. The record is the whole output, and a row edited from here changes what the controller reads back as the board's state.
 - Report what the row got wrong rather than repairing it, such as a stale count or a dead path, in the record and the handback. The controller decides which carries the correction.
 - Leave the cross-feature call alone. `priority.md` shows enough to write a confident merge order off a partial picture, which is the failure this boundary prevents.

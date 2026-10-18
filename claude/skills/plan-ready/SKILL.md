@@ -87,9 +87,9 @@ Branch on the record rather than on the exit. The `Ready:` line orients a worker
 
 ### Place the row
 
-A task file with no row is a dropped task, so place the row in the same pass. The plan exists, so the row takes `## Run now`, per the tests in `${CLAUDE_SKILL_DIR}/../task-board/references/board.md`.
+A task file with no row is a dropped task, so place the row in the same pass. The plan exists and no worker holds it yet, so the row takes `## Up next`, per the tests in `${CLAUDE_SKILL_DIR}/../task-board/references/board.md`.
 
-A path `canon tasks plan-reach` reports as claimed is a shared file rather than a hold. Name each one and its holder wherever the row is reported, so whoever controls the board decides whether a contract, a relocation, or a sweep moves the row to `## Up next`.
+A path `canon tasks plan-reach` reports as claimed is a shared file rather than a hold. Name each one and its holder wherever the row is reported, so whoever controls the board decides whether a contract, a relocation, or a sweep holds the row.
 
 ### Check the roster
 
@@ -97,7 +97,7 @@ Check the roster the way `canon:task-board` Step 4 does, reading `canon sessions
 
 - **Orchestrator found.** Write neither file. Message that session with the row's title, the plan link, and the group with its reason, so two sessions never write the board at once.
 - **Not found, and this session's name starts with `worker-` or `planner-`.** Write neither file, since both role bodies ban a board write. Report the row and its group in Step 8.
-- **Not found otherwise, or the roster read fails.** Write the row into `priority.md` through the task file's `Bash` route, since a failed read looks like a solo project and stopping strands the task.
+- **Not found otherwise, or the roster read fails.** Run `canon tasks place <stem> --group up-next --waiting "Planned, not dispatched yet"`, since stopping on a failed read strands the task.
 
 Say which branch fired in Step 8.
 

@@ -55,7 +55,7 @@ Every measurement this pass takes decides whether a row can start rather than ho
 
 Write the result into the row, since a re-test reported in chat is lost at the next compaction and measured again.
 
-- Rewrite a blocker cell whose test no longer holds, and move the row to the group its new state puts it in
+- Rewrite a blocker cell whose test no longer holds through `canon tasks block <stem> "<blocker>"`, and move the row to the group its new state puts it in through `canon tasks place`
 - Record the measurement in the task's `## Findings` as a line labeled with this session and the date, per `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`
 - `### Writing the board` in `role-orchestrator` owns the method, and `canon tasks validate` runs once the board is rewritten and before the report
 
@@ -69,7 +69,7 @@ A backlog row carries no blocker cell, since `${CLAUDE_SKILL_DIR}/../task-board/
 
 ### Moving a cleared row
 
-A cleared row moves out of `backlog.md` onto the bottom of `## Needs a plan`, with a `Waiting on` cell stating what changed and ending with the word `last`.
+A cleared row moves out of `backlog.md` onto the bottom of `## Needs a plan` in one call, `canon tasks place <stem> --group needs-a-plan --bottom --waiting "<what changed>. Last"`.
 
 - `canon tasks validate`'s ordering check reads `last` as the ordinal the bottom placement claims
 - A cell stating only what changed matches neither the ordinal nor the rank reading, raising a finding against the pass's own row
