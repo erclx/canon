@@ -115,6 +115,26 @@ describe('tooling sync write authorization', () => {
     expect(sync(['--check']).status).toBe(0)
   })
 
+  it('should write no package.json under --check', () => {
+    sync(['--check'])
+
+    expect(existsSync(join(target, 'package.json'))).toBe(false)
+  })
+
+  it('should list package.json as added under --check', () => {
+    expect(sync(['--check']).stderr).toContain('package.json')
+  })
+
+  it('should exit 1 from diff while the manifest is still to be written', () => {
+    expect(diff([]).status).toBe(1)
+  })
+
+  it('should write package.json under --write', () => {
+    sync(['--write'])
+
+    expect(existsSync(join(target, 'package.json'))).toBe(true)
+  })
+
   it('should refuse a run passing both --check and --write', () => {
     expect(sync(['--check', '--write']).status).toBe(1)
   })
@@ -330,10 +350,11 @@ describe('tooling sync into a subfolder', () => {
     expect(existsSync(join(web, 'cspell.json'))).toBe(false)
   })
 
-  it('should still end on the success line with no package.json', () => {
+  it('should end on the success line and write the subfolder a package.json', () => {
     expect(runSubfolder('sync', ['--write']).stderr).toContain(
       'Tooling sync complete',
     )
+    expect(existsSync(join(web, 'package.json'))).toBe(true)
   })
 
   it('should report the withheld paths under diff --json', () => {
