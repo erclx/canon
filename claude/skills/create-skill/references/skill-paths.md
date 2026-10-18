@@ -32,19 +32,22 @@ A body failing any of these is non-conforming even when every path resolves in t
 
 Know which root a file lives under before referencing it.
 
-- Bundled skill assets (`references/`, `scripts/`, `assets/`) resolve against the skill's own directory. Reference them with `${CLAUDE_SKILL_DIR}/<path>`, never a bare relative path, which resolves against the session cwd and fails when a plugin skill runs from another project.
+- Bundled skill assets (`references/`, `scripts/`, `assets/`) resolve against the skill's own directory, so reference them with `${CLAUDE_SKILL_DIR}/<path>`
+- Never use a bare relative path for one, which resolves against the session cwd and fails when a plugin skill runs from another project
 - Installed shared docs (`.claude/rules/`, `canon/context/`) resolve against the target project cwd, where install placed them. Reference them by that path.
-- Do not hand-copy another skill's reference into a skill. If a skill must carry its own copy, generate it from the single source and reference it through `${CLAUDE_SKILL_DIR}`, so one owner keeps every copy in sync.
+- Do not hand-copy another skill's reference. A skill that must carry its own copy generates it from the single source and reads it through `${CLAUDE_SKILL_DIR}`.
 
 ## Citing another skill's reference
 
 A reference shared across skills lives in the `references/` of the skill that owns it, so a body cites it by the sibling path.
 
-- Cite another skill's reference as `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md`. The plugin ships the skills side by side, so the sibling path resolves in every install. Name the owner skill rather than copying the file.
-- State the path once per body, at the site that reads the reference. A later mention of a reference the body already read stays bare, since repeating the path at every mention is noise rather than instruction.
+- Cite another skill's reference as `${CLAUDE_SKILL_DIR}/../<skill>/references/<name>.md`, naming the owner. The plugin ships the skills side by side, so the sibling path resolves in every install.
+- State the path once per body, at the site that reads the reference. A later mention stays bare, since repeating the path at every mention is noise.
 - A guard on a reference's presence names the file rather than the folder holding it, since a folder test answers for a sibling that happens to be there.
 
 ### Form and ownership
+
+One variable expands reliably, and one owner holds each procedure.
 
 - Use `${CLAUDE_SKILL_DIR}`, never a bare `../../` and never `${CLAUDE_PLUGIN_ROOT}`, since only the first expands before the body reaches the model.
 - Cite a shared procedure, never restate it. A procedure two or more skills execute gets one definition in its owner's reference and a citation in each body.

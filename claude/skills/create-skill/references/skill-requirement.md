@@ -29,9 +29,11 @@ A requirement that leaves any of the three open is non-conforming regardless of 
 
 ## Purpose
 
-- Treat the file as the compressed statement of what the skill is for. A skill body is procedural by design, so its purpose sits spread across its steps, and a reader gets this file before opening the body whether or not the skill's scope is contested.
+- Treat the file as the compressed statement of what the skill is for. A body is procedural by design, so its purpose sits spread across its steps.
+- A reader gets this file before opening the body, whether or not the skill's scope is contested
 - Read it before editing the skill. When a change closes no gap the requirement states, change the requirement first or drop the change.
-- Write the gaps from what the skill is for, then compare the body against them. A requirement derived from the body records the body's accidents as the requirement, and misinforms a reader who reads it in place of the body.
+- Write the gaps from what the skill is for, then compare the body against them
+- A requirement derived from the body records the body's accidents as the requirement, and misinforms a reader who reads it in place of the body
 
 ## Content
 
