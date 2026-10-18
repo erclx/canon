@@ -30,6 +30,17 @@ const UI_CLOSED_AT_MOVED: ReviewRow = {
   body: `## UI review closed\n\nall boxes\n<!-- review-ui: head=${MOVED} -->`,
 }
 
+// A close rewritten in place by a `PUT`: GitHub keeps the stamp on the head the
+// comment was first posted against, and the body's marker names the new head.
+const CODE_CLOSED_EDITED: ReviewRow = {
+  body: CODE_CLOSED.body,
+  commit: { oid: MOVED },
+}
+const UI_CLOSED_EDITED: ReviewRow = {
+  body: UI_CLOSED.body,
+  commit: { oid: MOVED },
+}
+
 interface Fixture {
   pull?: Partial<PullState>
   tip?: string
@@ -279,6 +290,17 @@ describe('lift', () => {
     )
   })
 
+  describe('review gate on a rewritten close', () => {
+    it('should pass on a code close rewritten in place to the head', async () => {
+      const { api, calls } = makeApi({ reviews: [CODE_CLOSED_EDITED] })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('lifted')
+      expect(calls.marks).toEqual(['PR_node'])
+    })
+  })
+
   describe('UI gate', () => {
     const withChecklist = { hasChecklist: true }
 
@@ -299,6 +321,33 @@ describe('lift', () => {
       const record = await lift(api, { isCheck: false, waitSeconds: 60 })
 
       expect(record.reason).toBe('lifted')
+    })
+
+    it('should pass on a UI close rewritten in place to the head', async () => {
+      const { api, calls } = makeApi({
+        evidence: withChecklist,
+        reviews: [CODE_CLOSED, UI_CLOSED_EDITED],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('lifted')
+      expect(calls.reads).toEqual([])
+    })
+
+    it('should refuse ui-behind on a rewritten close whose marker names an older head', async () => {
+      const { api } = makeApi({
+        evidence: withChecklist,
+        reviews: [
+          CODE_CLOSED,
+          { body: UI_CLOSED_AT_MOVED.body, commit: { oid: HEAD } },
+        ],
+        changed: { isAncestor: false, paths: [] },
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('ui-behind')
     })
 
     it('should refuse ui-missing when a checklist exists and no verdict does', async () => {

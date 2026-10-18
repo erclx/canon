@@ -64,6 +64,8 @@ interface Review {
   heading: string
   // The head a UI pass names in its own marker, which can trail the stamp.
   marker?: string
+  // The commit GitHub pinned the review to, which a `PUT` rewrite never moves.
+  stamp?: string
   submittedAt: string
 }
 
@@ -99,7 +101,7 @@ const writeThread = (
           review.marker === undefined
             ? `${review.heading}\n\nbody`
             : `${review.heading}\n\nbody\n\n<!-- review-ui: head=${review.marker} -->`,
-        commit_id: head,
+        commit_id: review.stamp ?? head,
         submitted_at: review.submittedAt,
       })),
     ),
@@ -510,6 +512,28 @@ describe('poll', () => {
         [
           { heading: '## Review closed', submittedAt: CLOSE_OUT },
           { heading: '## UI review closed', marker: HEAD, submittedAt: UI_AT },
+        ],
+        [],
+      )
+
+      expect(poll().stdout).toContain('UI-CLOSED #7 closed at 1111111')
+    })
+
+    it('should report an edited UI close at the head its marker names', () => {
+      writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+      expect(poll().stdout).toContain('SEEN')
+
+      // A `PUT` rewrite leaves the stamp on the head the close was first posted
+      // at and moves the marker onto the head the clean re-pass drove.
+      writeThread(
+        [
+          { heading: '## Review closed', submittedAt: CLOSE_OUT },
+          {
+            heading: '## UI review closed',
+            marker: HEAD,
+            stamp: READ_HEAD,
+            submittedAt: UI_AT,
+          },
         ],
         [],
       )
