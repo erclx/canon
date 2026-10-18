@@ -227,7 +227,11 @@ export function register(program: Command): void {
 }
 
 type GatedAddRefusal =
-  'canon-checkout' | 'malformed-config' | 'bad-prefix' | 'no-git' | 'findings'
+  | 'canon-checkout'
+  | 'malformed-config'
+  | 'bad-prefix'
+  | 'no-git'
+  | 'findings'
 
 async function runGatedAdd(
   prefix: string,
