@@ -90,7 +90,8 @@ jobs:
 
   cleanup-preview:
     name: 🧹 Delete Branch Previews
-    if: github.event_name == 'pull_request'
+    # Dependabot branches publish no preview and the run holds no Cloudflare secrets
+    if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
       # Deployments are listed through the REST API rather than wrangler, whose
