@@ -16,18 +16,24 @@ let target: string
 
 // A git hook exports GIT_DIR, so a run under pre-push would resolve the fixture
 // against the toolkit's own repository rather than the temp directory.
-const buildEnv = (): NodeJS.ProcessEnv => ({
+const buildEnv = (headless: boolean): NodeJS.ProcessEnv => ({
   ...Object.fromEntries(
-    Object.entries(process.env).filter(([key]) => !key.startsWith('GIT_')),
+    Object.entries(process.env).filter(
+      ([key]) => !key.startsWith('GIT_') && key !== 'CANON_NON_INTERACTIVE',
+    ),
   ),
-  CANON_NON_INTERACTIVE: '1',
+  ...(headless ? { CANON_NON_INTERACTIVE: '1' } : {}),
 })
 
-const install = (args: readonly string[], cwd?: string): Run => {
+const install = (
+  args: readonly string[],
+  cwd?: string,
+  headless = true,
+): Run => {
   const run = spawnSync('bun', [CLI, 'gov', 'install', ...args], {
     cwd,
     encoding: 'utf8',
-    env: buildEnv(),
+    env: buildEnv(headless),
   })
 
   return { status: run.status, stderr: run.stderr }
@@ -86,5 +92,50 @@ describe('gov install --add with no stack', () => {
 
     expect(run.status).toBe(1)
     expect(run.stderr).toContain('no-such-rule (source not found, skipping)')
+  })
+})
+
+describe('gov install --yes', () => {
+  it('should install with no TTY and CANON_NON_INTERACTIVE unset', () => {
+    const run = install(['--add', 'tasks', '--yes', target], undefined, false)
+
+    expect(run.status).toBe(0)
+    expect(existsSync(canonRule('canon', 'tasks'))).toBe(true)
+  })
+
+  it('should install a named stack with no TTY and CANON_NON_INTERACTIVE unset', () => {
+    const run = install(['node', '--yes', target], undefined, false)
+
+    expect(run.status).toBe(0)
+    expect(stampedChain(readStamp(target), 'governance')).toEqual(['node'])
+  })
+
+  it('should print no confirm line when CANON_NON_INTERACTIVE is also set', () => {
+    const run = install(['--add', 'tasks', '--yes', target])
+
+    expect(run.status).toBe(0)
+    expect(run.stderr).not.toContain('Install 1 rules')
+  })
+
+  it('should refuse the confirm without it and name --yes', () => {
+    const run = install(['--add', 'tasks', target], undefined, false)
+
+    expect(run.status).toBe(1)
+    expect(run.stderr).toContain('requires a TTY. Pass --yes or set')
+    expect(existsSync(canonRule('canon', 'tasks'))).toBe(false)
+  })
+
+  it('should still exit 1 when no named rule resolves', () => {
+    const run = install(['--add', 'no-such-rule', '--yes', target])
+
+    expect(run.status).toBe(1)
+    expect(run.stderr).not.toContain('Cancelled')
+  })
+
+  it('should still exit 1 for an unknown stack', () => {
+    const run = install(['no-such-stack', '--yes', target])
+
+    expect(run.status).toBe(1)
+    expect(run.stderr).toContain('Stack not found')
   })
 })
