@@ -208,6 +208,7 @@ const PLAN_SECTIONS = [
   'Summary',
   'Constraints',
   'Files to touch',
+  'Design references',
   'Verification',
   'Risks',
   'Review focus',
@@ -225,6 +226,22 @@ const PLAN_REQUIRED: readonly PlanSection[] = [
   'Review focus',
   'Questions',
 ]
+
+/**
+ * The files whose edit changes what a person sees, the set the `ui/a11y` rule
+ * globs plus the other markup and style extensions a plan names. A plan touching
+ * one owes a `Design references` section, so a set too wide forces it on every
+ * plan and one too narrow lets a UI plan skip it.
+ */
+const RENDERED_SURFACE = /\.(?:tsx|jsx|astro|vue|svelte|html|css)$/
+
+export function touchesRenderedSurface(entries: readonly string[]): boolean {
+  return entries.some((entry) =>
+    [...entry.matchAll(/`([^`]+)`/g)].some((span) =>
+      RENDERED_SURFACE.test(span[1]),
+    ),
+  )
+}
 
 /**
  * A line standing alone as a bold label or an H2, whatever it names. A plan is
@@ -448,6 +465,20 @@ export function checkPlan(name: string, text: string): Finding[] {
         ),
       )
     }
+  }
+
+  if (
+    !sections.has('Design references') &&
+    touchesRenderedSurface(sections.get('Files to touch') ?? [])
+  ) {
+    findings.push(
+      finding(
+        'section-missing',
+        name,
+        preferredMarker('Design references'),
+        'is required when Files to touch names a rendered-surface file. Write None identified. when no reference folder governs it.',
+      ),
+    )
   }
 
   for (const line of sections.get('Files to touch') ?? []) {

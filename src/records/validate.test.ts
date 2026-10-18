@@ -291,6 +291,61 @@ describe('checkPlan', () => {
     expect(findings[0].subject).toBe('**Verification:**')
   })
 
+  describe('Design references', () => {
+    function uiPlan(designReferences: string[]): string {
+      return conformingPlan()
+        .replace(
+          '- `standards/plan.md`: the sections and the answer contract',
+          '- `src/app/button.tsx`: the pressed state',
+        )
+        .replace(
+          '**Verification:**',
+          [...designReferences, '**Verification:**'].join('\n'),
+        )
+    }
+
+    it('should report a plan touching a rendered-surface file with no section', () => {
+      const findings = checkPlan('feature-a-b.md', uiPlan([]))
+
+      expect(kinds(findings)).toEqual(['section-missing'])
+      expect(findings[0].subject).toBe('**Design references:**')
+    })
+
+    it('should pass a rendered-surface plan citing a reference folder', () => {
+      const body = uiPlan([
+        '**Design references:**',
+        '',
+        '- `canon/design/button/`: the pressed state',
+        '',
+      ])
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
+    it('should pass a rendered-surface plan that writes None identified', () => {
+      const body = uiPlan([
+        '**Design references:**',
+        '',
+        'None identified.',
+        '',
+      ])
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
+    it('should not require the section on a plan touching no rendered-surface file', () => {
+      expect(checkPlan('feature-a-b.md', conformingPlan())).toEqual([])
+    })
+
+    it('should require the section for a stylesheet entry', () => {
+      const body = uiPlan([]).replace('button.tsx', 'theme.css')
+
+      expect(kinds(checkPlan('feature-a-b.md', body))).toEqual([
+        'section-missing',
+      ])
+    })
+  })
+
   it('should report a missing Review focus section', () => {
     const body = conformingPlan().replace(
       '**Review focus:**\n\nNone identified.\n\n',
