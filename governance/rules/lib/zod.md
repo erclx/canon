@@ -13,8 +13,8 @@ paths:
 
 ## Boundary validation
 
-- Parse untrusted input with `z.strictObject()` so an unknown key fails, never the legacy `.strict()`.
-- Narrow a schema with `.pick()` or `.omit()`, never by passing unknown keys through with `z.looseObject()` or `.passthrough()`.
+- Parse untrusted input with `z.strictObject()` so an unknown key fails, never with a method the Zod 4 changelog marks legacy.
+- Narrow a schema with `.pick()` or `.omit()`, never by passing unknown keys through with `z.looseObject()`.
 - Call `.parse()` where a failure should throw, and `.safeParse()` where the caller recovers, such as a form.
 - Restrict `z.coerce` to string input at an I/O boundary such as URL params, since it converts with `String()` or `Boolean()`.
 
