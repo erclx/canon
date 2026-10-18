@@ -177,6 +177,16 @@ export function creationRel(
   return join(at, spell(at, folder), ...rest)
 }
 
+/** Whether a root holds the backup history or a record folder, at its spelling. */
+function holdsRecords(root: string, candidate: RecordRoot): boolean {
+  return RECORD_ENTRIES.some(
+    (entry) =>
+      entry !== 'README.md' &&
+      entry !== SCRATCH &&
+      existsSync(join(root, candidate, spell(candidate, entry))),
+  )
+}
+
 /**
  * The record root itself, for a caller whose subject is the root rather than a
  * folder inside it.
@@ -186,11 +196,18 @@ export function creationRel(
  * one answer. Splitting them would let a push resolve a history at one root and
  * stage a work tree at the other, which stages the deletion of every folder the
  * move relocated.
+ *
+ * A root counts when it holds a `.records.git` or a record folder. The bare
+ * directory does not, because `.claude/` exists in every installed project for
+ * its hooks and rules, so testing it pinned a fresh clone to the retired root.
+ * `README.md` and the scratch folder are left out: a records pull writes the
+ * first back and the second is deletable, so a root holding only them has
+ * nothing to protect.
  */
 export function recordRoot(root: string): string {
   return join(
     root,
-    RECORD_ROOTS.find((candidate) => existsSync(join(root, candidate))) ??
+    RECORD_ROOTS.find((candidate) => holdsRecords(root, candidate)) ??
       CREATION_ROOT,
   )
 }
