@@ -69,6 +69,7 @@ import {
   serializeSettings,
   writeSettings,
 } from '@/claude/settings'
+import { readSessionDefaults } from '@/migrate/session-defaults'
 import { copyPreservingMode } from '@/sync/copy'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
 import { recordDir } from '@/roots/record'
@@ -661,6 +662,15 @@ async function runSync(target: string): Promise<number> {
   for (const name of SEEDED_DIRS) {
     if (isDirectory(seededDirPath(resolved, name))) logInfo(`${name}/`)
     else logWarn(`${name}/ missing. Run \`canon claude init\``)
+  }
+
+  // Sync never rewrites an existing settings file, so a target seeded before
+  // the session defaults learns of them only here.
+  const defaults = await readSessionDefaults(resolved, PROJECT_ROOT)
+  if (defaults.kind === 'planned' && defaults.plan.changed) {
+    logWarn(
+      'settings.json lacks the session defaults. Run `canon migrate session-defaults --write`',
+    )
   }
 
   logStep('Scanning .gitignore')
