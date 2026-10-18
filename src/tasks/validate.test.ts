@@ -1853,6 +1853,23 @@ describe('validateBoard verb-written shape', () => {
     expect(outcome.ok && outcome.untested).toEqual([])
   })
 
+  it('should not settle a row whose cell names archived history before its live blocker', async () => {
+    await seedTask('v9.0-a', '', undefined, NO_PLAN)
+    await seedArchivedTask('v7.0-history')
+    await seedTask('v8.0-live', '- [ ] open', undefined, NO_PLAN)
+    await seedBoard(
+      boardBody([
+        needsPlanTable([
+          '| [v9.0-a](v9.0-a.md) | Reworked after v7.0, now waits on v8.0 merging. First here |',
+        ]),
+      ]),
+    )
+
+    const outcome = await validateBoard(ROOT, UNREACHABLE_TRUNK)
+
+    expect(outcome.ok && kinds(outcome.findings)).toEqual([])
+  })
+
   it('should leave a row untested when a bare label matches two live tasks', async () => {
     await seedTask('v9.0-a', '', undefined, NO_PLAN)
     await seedTask('v8.0-one', '', undefined, NO_PLAN)

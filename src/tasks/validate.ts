@@ -1168,32 +1168,61 @@ interface LabelFolders {
 }
 
 type LabelCitation =
-  | { readonly kind: 'stem'; readonly stem: string }
+  | { readonly kind: 'stems'; readonly stems: readonly string[] }
   | { readonly kind: 'ambiguous'; readonly label: string }
-  | undefined
 
 /**
- * Reads a bare `vNNN.N` phase label a `Waiting on` cell names outside any
- * link, resolved to the one task it labels. The live folder answers first,
+ * Reads every bare `vNNN.N` phase label a `Waiting on` cell names outside a
+ * link, each resolved to the one task it labels. The live folder answers first,
  * since a live task and a declined one can share a label and the live one is
  * what the row waits on. Two matches in the folder that answers leave the row
  * untested rather than guessing between them, and a label no folder holds is
  * read as prose rather than as a broken pointer, since a version number in a
  * sentence is not always a citation.
  */
-function bareLabel(cell: string, folders: LabelFolders): LabelCitation {
+function bareLabels(cell: string, folders: LabelFolders): LabelCitation {
   const prose = cell.replace(/\[[^\]]*\]\([^)]*\)/g, ' ')
+  const stems: string[] = []
 
   for (const match of prose.matchAll(/\bv\d+\.\d+\b/g)) {
     const prefix = `${match[0]}-`
-    for (const stems of [folders.live, folders.archived, folders.declined]) {
-      const hits = stems.filter((stem) => stem.startsWith(prefix))
-      if (hits.length === 1) return { kind: 'stem', stem: hits[0] }
+    for (const folder of [folders.live, folders.archived, folders.declined]) {
+      const hits = folder.filter((stem) => stem.startsWith(prefix))
       if (hits.length > 1) return { kind: 'ambiguous', label: match[0] }
+      if (hits.length === 1) {
+        if (!stems.includes(hits[0])) stems.push(hits[0])
+        break
+      }
     }
   }
 
-  return undefined
+  return { kind: 'stems', stems }
+}
+
+/**
+ * Tests every task a cell cites by bare label, and reports the row only when
+ * none of them is still open. A cell naming settled history beside its live
+ * blocker would otherwise read as settled on the history alone.
+ */
+async function checkCitedTasks(
+  group: BoardGroup,
+  subject: string,
+  stems: readonly string[],
+  root: string,
+  trunk: TrunkReader,
+): Promise<CitedResult> {
+  const results = await Promise.all(
+    stems.map((stem) => checkCitedTask(group, subject, stem, root, trunk)),
+  )
+  const open = results.some(
+    (result) => result.findings.length === 0 && result.untested.length === 0,
+  )
+  if (open) return nothing()
+
+  return {
+    findings: results.flatMap((result) => result.findings),
+    untested: results.flatMap((result) => result.untested),
+  }
 }
 
 async function readLabelFolders(root: string): Promise<LabelFolders> {
@@ -1379,8 +1408,8 @@ async function checkParked(
     const subject = row.stem ?? row.label
     const cell = row.waiting ?? ''
     const linked = citedStem(cell)
-    const bare = linked ? undefined : bareLabel(cell, folders)
-    const cited = linked ?? (bare?.kind === 'stem' ? bare.stem : undefined)
+    const bare = linked ? undefined : bareLabels(cell, folders)
+    const cited = linked ? [linked] : bare?.kind === 'stems' ? bare.stems : []
     const contested = readPaths(cell)
 
     if (bare?.kind === 'ambiguous') {
@@ -1392,8 +1421,8 @@ async function checkParked(
       continue
     }
 
-    if (cited) {
-      const result = await checkCitedTask(
+    if (cited.length > 0) {
+      const result = await checkCitedTasks(
         row.group,
         subject,
         cited,
@@ -1419,7 +1448,7 @@ async function checkParked(
       })
     }
 
-    if (!cited && contested.length === 0) {
+    if (cited.length === 0 && contested.length === 0) {
       untested.push({
         group: row.group,
         subject,
