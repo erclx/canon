@@ -29,7 +29,7 @@ A rule with no `paths:` field always applies, at the same priority as `CLAUDE.md
 
 A rule with `paths:` loads on a read or a write of a matching file, inside a linked worktree as in the main one. A session creating the first matching file gets the rule only after that write lands.
 
-- A rule meant to shape new files therefore also belongs in the skill or the always-on rule a session reads before it writes
+- The first write's floor therefore belongs to the skill that creates the file, per `## Whether a skill belongs behind the rule`
 - Measured again on Claude Code 2.1.302, when the rule attached after the first write to a new file and before the second
 - Revisit when Claude Code loads a path-scoped rule before a write to a matching path
 - Re-measure with two headless `claude -p` runs, one writing a new matching file and one reading a matching file first, each read for when the rule attached

@@ -12,7 +12,7 @@ For each bullet in the rule under audit, return `✅ keep`, `⚠️ revise`, or 
 ## Criteria
 
 1. **Concrete enough to verify.** A reviewer can read a line of code and say whether it complies. "Prefer `pathlib.Path` over `os.path`" passes, since it names both sides.
-2. **Catches a real footgun.** A violation produces a concrete bug class, such as data injection or blocking I/O in async. Drop it if the worst case is "code looks off".
+2. **Catches a real footgun or a project convention.** A violation produces a bug class, such as blocking I/O in async, or departs from a convention the content test admits. Drop it otherwise.
 3. **Not redundant with the toolchain.** Skip anything the project's formatter, linter, type checker, or spell checker already enforces. Rules cover what tools cannot.
 4. **Uncontested.** When the community is split, drop the bullet or pick a side with a short reason tied to the stack.
 5. **Inside the shape.** At most 200 characters and 2 sentences, one directive plus at most one exception, condition, or short reason, per `## Shape` in `rule.md`.

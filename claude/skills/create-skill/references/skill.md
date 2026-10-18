@@ -54,10 +54,10 @@ Answer all four before editing, and carry the answers into wherever the change i
 A skill fires when a session invokes it or its description matches the request. A path-scoped rule fires when a session reads or writes a file matching its glob, with no session decision. The rule is the floor and the skill is the depth.
 
 - Run the two-part test over the body before calling the skill done. Does the invariant fire when a specific path is edited, and does violating it ship silently?
-- An invariant passing both halves belongs in a rule as well, since a session that never invoked the skill still edits that path
+- An invariant passing both halves moves to a rule, since a session that never invoked the skill still edits that path. It stays here when this skill creates the file the rule globs.
 - An invariant failing either half stays here, which is most of a body
 
-Write that rule to the shape `rule.md` sets, keeping one copy of each invariant. A skill creating the file the rule globs owns the floor beside the rule's pointer, and a skill editing existing files points at the rule.
+Write that rule to the shape `rule.md` sets, keeping one copy of each invariant. A skill that only edits existing files points at the rule.
 
 ## Skill types
 
