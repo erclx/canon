@@ -3,7 +3,7 @@ name: script-screencast
 description: Why a recording script ships pre-seeded rather than blank, what the four discovery questions buy, and why the draft stays stack-agnostic
 ---
 
-# Draft screencast requirement
+# Script screencast requirement
 
 ## Gap
 

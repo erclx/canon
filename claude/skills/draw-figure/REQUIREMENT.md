@@ -3,7 +3,7 @@ name: draw-figure
 description: Why a figure decides between Mermaid, an architecture view, and freehand SVG before drawing, and why the Mermaid path carries a render-verification loop
 ---
 
-# Draft figure requirement
+# Draw figure requirement
 
 ## Gap
 

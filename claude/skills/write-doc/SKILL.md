@@ -5,7 +5,7 @@ metadata:
   family: generate
 ---
 
-# Doc draft
+# Write doc
 
 Drafts one brand-new project document end to end: resolve its kind, read the standard that kind answers to, check the catalog for a collision, place it, draft, confirm with the user, then write.
 

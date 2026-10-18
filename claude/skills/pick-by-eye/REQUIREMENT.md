@@ -3,7 +3,7 @@ name: pick-by-eye
 description: Why a decision settled by looking needs its own surface, and where its boundary against the planning, audit, measurement, and recording skills falls
 ---
 
-# Draft and pick requirement
+# Pick by eye requirement
 
 ## Gap
 

@@ -5,7 +5,7 @@ metadata:
   family: generate
 ---
 
-# Draft ready
+# Plan ready
 
 A warm session that has already written a change hands the exact text to the worker that ships it. This skill writes the three artifacts that handoff needs and stops before anyone is dispatched.
 

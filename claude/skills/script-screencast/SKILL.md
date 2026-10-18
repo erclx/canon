@@ -5,7 +5,7 @@ metadata:
   family: generate
 ---
 
-# Draft screencast
+# Script screencast
 
 ## Guards
 

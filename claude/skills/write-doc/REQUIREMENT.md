@@ -3,7 +3,7 @@ name: write-doc
 description: Why a brand-new project document needs its kind's standard, a catalog collision check, and a confirm step, not the rewrite and refresh paths docs-sync and context-fold already own
 ---
 
-# Doc draft requirement
+# Write doc requirement
 
 ## Gap
 

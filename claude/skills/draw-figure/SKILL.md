@@ -5,7 +5,7 @@ metadata:
   family: generate
 ---
 
-# Draft figure
+# Draw figure
 
 Decide whether a requested figure reduces to a graph Mermaid can draw, is one of the architecture views, or needs freehand SVG, then draw it and verify what a reader will actually see.
 

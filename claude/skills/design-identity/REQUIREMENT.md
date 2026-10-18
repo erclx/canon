@@ -3,7 +3,7 @@ name: design-identity
 description: Why the mark and the card are one pick rather than two, and where the size sequence and the write folder come from before either is drafted
 ---
 
-# Draft identity requirement
+# Design identity requirement
 
 ## Gap
 

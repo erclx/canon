@@ -3,7 +3,7 @@ name: plan-ready
 description: Why writing a ready folder, its overview, the thin plan, and the task row is one invocation rather than four hand writes, and where the boundary against the planning and shipping skills falls
 ---
 
-# Draft ready requirement
+# Plan ready requirement
 
 ## Gap
 

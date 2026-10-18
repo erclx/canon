@@ -5,7 +5,7 @@ metadata:
   family: generate
 ---
 
-# Draft slides
+# Make deck
 
 Draw each slide as an HTML file in a deck folder, then shell out to `canon slides render`. The CLI lays every slide out in a browser and rebuilds it as editable PowerPoint shapes. This skill owns the content, the slide markup, and the design choices the markup encodes.
 

@@ -3,7 +3,7 @@ name: make-deck
 description: Why the skill draws a deck as HTML in the project's tokens inside its own folder, why the CLI owns the conversion, and why one render is read back before the deck is called done
 ---
 
-# Draft slides requirement
+# Make deck requirement
 
 ## Gap
 

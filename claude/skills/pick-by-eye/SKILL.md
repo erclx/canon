@@ -5,7 +5,7 @@ metadata:
   family: decide
 ---
 
-# Draft and pick
+# Pick by eye
 
 Some decisions are settled by looking rather than by reasoning, and no draft is wrong until one is picked. Every step here puts several candidates in front of the operator and keeps the real surface untouched until they have chosen.
 

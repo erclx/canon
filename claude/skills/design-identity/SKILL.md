@@ -5,7 +5,7 @@ metadata:
   family: generate
 ---
 
-# Draft identity
+# Design identity
 
 One identity rendered twice: the same mark sized down to an icon sequence and composed with type into the social card sized up. Drafting both from one pick keeps the mark and its card composition from settling on shapes that do not match.
 
