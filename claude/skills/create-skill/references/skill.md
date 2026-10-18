@@ -51,9 +51,9 @@ Answer all four before editing, and carry the answers into wherever the change i
 
 ## Whether a rule belongs beside the skill
 
-A skill fires when a session invokes it or its description matches the request. A path-scoped rule fires when a session reads or writes a file matching its glob, with no decision from the session. The rule is the floor and the skill is the depth.
+A skill fires when a session invokes it or its description matches the request. A path-scoped rule fires when a session reads or writes a file matching its glob, with no session decision. The rule is the floor and the skill is the depth.
 
-- Run the two-part test over the body before calling the skill finished. Does the invariant fire when a specific path is edited, and does violating it ship silently?
+- Run the two-part test over the body before calling the skill done. Does the invariant fire when a specific path is edited, and does violating it ship silently?
 - An invariant passing both halves belongs in a rule as well, since a session that never invoked the skill still edits that path
 - An invariant failing either half stays here, which is most of a body
 
@@ -91,10 +91,10 @@ allowed-tools: <tools required>
 
 ## Structure
 
-A skill is a folder named in kebab-case. It holds `SKILL.md` and `REQUIREMENT.md`, both required, and optionally `EVAL.md`, `scripts/`, `references/`, and `assets/`.
+A skill is a folder named in kebab-case. It holds `SKILL.md` and `REQUIREMENT.md`, both required, and maybe `EVAL.md`, `scripts/`, `references/`, and `assets/`.
 
 - Create a new skill with its `REQUIREMENT.md` beside it, even where nobody contests its scope, since an absence reads as a gap rather than as a verdict
-- Name a file sitting directly in the skill folder in capitals and a bundled folder in lowercase, so the parts a reader opens are distinct from the ones a skill loads
+- Name a file sitting directly in the skill folder in capitals and a bundled folder in lowercase, so the parts a reader opens differ from the ones a skill loads
 - `EVAL.md` holds prompts and a judging rubric a person runs by hand, since the automated `claude plugin eval` runner is gated in early access
 
 ### Folder and file rules
@@ -136,11 +136,11 @@ A body holds behavioral rules and pointers to reference docs, front-loading the 
 
 ### Current rule and grouping
 
-State the current rule only, in the body and in every file under `references/`. The incident and the date that earned a rule go in `REQUIREMENT.md` under `Gap`, or stay in git, while a date inside a fence or a code span is example data and stays.
+State the current rule only, in the body and in every file under `references/`. The incident and the date that earned a rule go in `REQUIREMENT.md` under `Gap`, or stay in git, and a date inside a fence or a code span is example data and stays.
 
 - Cut any rule that resists crisp one-line phrasing. Vague guidance is worse than none.
 - Group bullets under H2 headings by concern, keeping dos and don'ts together rather than in flat rules and constraints sections
-- One actionable constraint per bullet. Prefer the `X over Y` form for preferences.
+- One constraint per bullet. Prefer the `X over Y` form for preferences.
 
 ### Examples and density
 
@@ -189,7 +189,7 @@ Use `scripts/` for operations that must be deterministic or repetitive. First as
 
 - Write a script in TypeScript and run it as `bun ${CLAUDE_SKILL_DIR}/scripts/<name>.ts`. Keep bash for a few lines that start one command.
 - Import no package. A plugin loads from a cache that carries no `node_modules`, so only `node:` built-ins and the CLIs the skill already requires resolve.
-- Use XML tags in script output for reliable parsing: `<SECTION>content</SECTION>`
+- Use XML tags in script output for parsing: `<SECTION>content</SECTION>`
 - Guard a git or shell command a body runs inline with `2>/dev/null || echo "FALLBACK"`. A TypeScript script uses try and catch instead.
 
 The TypeScript rule governs a new script, so bash kept by decision is no breach and is not ported unasked. Examples are `review-ui`'s `scripts/pw.sh` as glue and the shell scripts the web tooling stacks ship, whose port was deferred.
@@ -201,7 +201,16 @@ The TypeScript rule governs a new script, so bash kept by decision is no breach 
 
 ## Examples
 
-- Correct: `description: Reviews code for bugs and clarity. Use when asked to "review this" or "check the PR".`, naming the action, then the trigger phrases
-- Correct: `Read ${CLAUDE_SKILL_DIR}/references/post.md on reaching this step.`, since a moved step keeps its heading and one load line
-- Incorrect: `description: Handles all code tasks in scripts/, src/, and lib/, and any file ending in .ts .js .py .sh.`, being path-focused and keyword-stuffed
-- Incorrect: `A good review checks bugs, performance, security, style, naming, coverage, docs, and SOLID...`, dumping everything inline rather than citing a standard
+### Correct
+
+Each line names its reason after the `#`.
+
+- `description: Reviews code for bugs and clarity. Use when asked to "review this" or "check the PR".` # names the action, then the trigger phrases
+- `Read ${CLAUDE_SKILL_DIR}/references/post.md on reaching this step.` # a moved step keeps its heading and one load line
+
+### Incorrect
+
+Each line names its fault after the `#`.
+
+- `description: Handles all code tasks in scripts/, src/, and lib/, and any file ending in .ts .js .py .sh.` # path-focused and keyword-stuffed
+- `A good review checks bugs, performance, security, style, naming, coverage, docs, and SOLID...` # dumps everything inline instead of citing a standard

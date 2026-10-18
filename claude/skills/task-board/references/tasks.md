@@ -133,7 +133,7 @@ Every task names where it came from, through a `Plan:`, `Groundwork:`, `Intake:`
 
 ### Both directions
 
-A task with no origin is lost context or work nobody decided to do. The reverse bites harder, since a groundwork track, intake folder, or open issue no task points at is decided work being forgotten, and an intake folder fully answered with no task citing it is a dump nobody acted on.
+A task with no origin is lost context or work nobody decided to do. The reverse bites harder, since a groundwork track, intake folder, or open issue no task points at is decided work being forgotten, and an intake folder fully answered with no task citing it, live, archived, or declined, is a dump nobody acted on.
 
 ### Link form
 
@@ -198,7 +198,7 @@ Session history and ordering both have homes off the task file.
 
 ## Archiving
 
-Never delete a task file. A shipped task moves to `.canon/tasks/archive/` under its own name through `canon tasks archive`, and a flat `.claude/task-archive/` names an older binary rather than a second archive.
+Never delete a task file. A shipped task moves to `.canon/tasks/archive/` under its own name through `canon tasks archive`, and the live index regenerates without it. What the verb does and refuses on is at `canon tasks archive --help`, and a flat `.claude/task-archive/` names an older binary rather than a second archive.
 
 ### The plan and ready folder
 
