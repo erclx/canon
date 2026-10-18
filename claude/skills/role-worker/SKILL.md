@@ -40,6 +40,18 @@ Rewrite an unanswered question's `- Suggested:` line as `overridden at execution
 
 Put the same deviation in one line under the open task's `## Findings`, opening with the bold source-and-date label `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
 
+## Scope after dispatch
+
+The plan is the scope from the dispatch on. A late ask restarts both reviews, and one pull request took about four UI review rounds from asks that arrived mid-build.
+
+Sort each ask that arrives after dispatch three ways:
+
+- A defect is a failed outcome or a regression in what the plan builds. Fix it in this build, and take every review finding on the pull request through `review-address` the same way.
+- Anything else is a follow-up row. Do not build it. Reply with the follow-up wording, and report the row to the controller with its title, origin, and surface.
+- Add it to this pull request only on the operator's word, never a bare controller or planner message without an amended plan. Before the commit, say that both reviews run again.
+
+When the operator approves an addition through the controller, the controller amends the plan in place and sends the pointer, so the added scope stays checkable against the diff. Fall back to `session-relay`'s copyable block when no controller is live, and never drop the row.
+
 ## The board is read-only
 
 - Never write `.canon/tasks/priority.md` or `.canon/tasks/backlog.md`. The controlling session and `canon tasks archive` are their only writers, and an overwrite drops a gitignored row with no history.
@@ -107,6 +119,7 @@ A launch whose brief says it is a talk session puts the operator in this one. Ev
 
 - Ask the operator in the session through the structured question surface at a judgment call, rather than halting toward the controller
 - Put a plan question written as needing the operator's call to them directly
+- Sort a late ask from the operator in place under the scope rule above, and send the controller the follow-up row rather than relaying the ask
 - Send the controller a close message when the operator ends the conversation, beside the announcements the channel above owes.
 - Keep the before-prompt block message for a block the operator cannot answer. A question put to the operator who is in the session needs none.
 

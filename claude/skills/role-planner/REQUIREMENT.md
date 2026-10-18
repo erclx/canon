@@ -61,7 +61,7 @@ four carried at least one, caught only because the planner ran
 - Owe an announcement when the record lands, carrying the path and what the row got wrong, since the controller cannot watch the read happen
 - Owe a message before a block becomes an interactive prompt, since a session already waiting on input never reaches the tool round an inbound message drains at
 - Keep correcting the dispatcher a first-class move carrying its evidence, since a trial corrected a brief's premise, planned every row anyway, and carried the consequence into a plan question
-- Carry a talk clause for a launch whose operator is in the session, putting each open question to them, recording a settled pick in place, and owing a close message when they end the conversation, since a cold planner's halting rules contradict a brief that asks it to talk
+- Carry a talk clause for a launch whose operator is in the session, putting each open question to them, recording a settled pick in place, sending an ask about a row now building to the controller rather than the worker, and owing a close message when they end the conversation, since a cold planner's halting rules contradict a brief that asks it to talk
 - Point at each of the three skills for its record's shape and the steps that write it
 - Defer the addressee resolution to `session-relay` and keep only the last-rung inference, which discriminates differently here than it does for a worker because a session in this role holds no feature branch either
 
