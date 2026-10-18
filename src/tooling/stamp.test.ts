@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -74,7 +74,7 @@ describe('recordToolingChain', () => {
     const recorded = await recordToolingChain(
       '/nowhere',
       TARGET,
-      [manifest('vite-react'), manifest('base')],
+      [{ ...manifest('vite-react'), parent: 'base' }, manifest('base')],
       NOW,
     )
 
@@ -105,5 +105,106 @@ describe('recordToolingChain', () => {
     await recordToolingChain('/nowhere', TARGET, [manifest('web'), kept], NOW)
 
     expect(stampedChain(readStamp(TARGET), 'tooling')).toEqual(['web'])
+  })
+
+  describe('with an add-on stack', () => {
+    let TOOLKIT: string
+
+    /** Writes the manifest `loadManifest` reads for a stack the stamp already holds. */
+    function stack(name: string, extendsName = ''): Manifest {
+      const dir = join(TOOLKIT, 'tooling', name)
+      mkdirSync(dir, { recursive: true })
+      writeFileSync(
+        join(dir, 'manifest.toml'),
+        `[stack]\nname = "${name}"\nextends = "${extendsName}"\n`,
+      )
+      return {
+        ...manifest(name),
+        ...(extendsName === '' ? {} : { parent: extendsName }),
+      }
+    }
+
+    beforeEach(() => {
+      TOOLKIT = mkdtempSync(join(tmpdir(), 'canon-tooling-toolkit-'))
+    })
+
+    afterEach(() => {
+      rmSync(TOOLKIT, { recursive: true, force: true })
+    })
+
+    it('should keep the recorded chain when an add-on syncs after it', async () => {
+      const chain = [
+        stack('vite-react', 'web'),
+        stack('web', 'base'),
+        stack('base'),
+      ]
+      await recordToolingChain(TOOLKIT, TARGET, chain, NOW)
+
+      await recordToolingChain(TOOLKIT, TARGET, [stack('public')], NOW)
+
+      expect(stampedChain(readStamp(TARGET), 'tooling')).toEqual([
+        'vite-react',
+        'web',
+        'base',
+        'public',
+      ])
+    })
+
+    it('should keep the add-on when a stack syncs after it', async () => {
+      await recordToolingChain(TOOLKIT, TARGET, [stack('public')], NOW)
+
+      await recordToolingChain(
+        TOOLKIT,
+        TARGET,
+        [stack('web', 'base'), stack('base')],
+        NOW,
+      )
+
+      expect(stampedChain(readStamp(TARGET), 'tooling')).toEqual([
+        'web',
+        'base',
+        'public',
+      ])
+    })
+
+    it('should record two add-ons side by side', async () => {
+      await recordToolingChain(TOOLKIT, TARGET, [stack('shell')], NOW)
+
+      await recordToolingChain(TOOLKIT, TARGET, [stack('public')], NOW)
+
+      expect(stampedChain(readStamp(TARGET), 'tooling')).toEqual([
+        'shell',
+        'public',
+      ])
+    })
+
+    it('should not record an add-on twice on a repeat sync', async () => {
+      await recordToolingChain(TOOLKIT, TARGET, [stack('public')], NOW)
+
+      await recordToolingChain(TOOLKIT, TARGET, [stack('public')], NOW)
+
+      expect(stampedChain(readStamp(TARGET), 'tooling')).toEqual(['public'])
+    })
+
+    it('should replace the core chain when a different stack syncs', async () => {
+      await recordToolingChain(
+        TOOLKIT,
+        TARGET,
+        [stack('vite-react', 'base'), stack('base')],
+        NOW,
+      )
+
+      await recordToolingChain(
+        TOOLKIT,
+        TARGET,
+        [stack('astro', 'base'), stack('base')],
+        NOW,
+      )
+
+      expect(stampedChain(readStamp(TARGET), 'tooling')).toEqual([
+        'astro',
+        'base',
+      ])
+    })
   })
 })
