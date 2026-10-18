@@ -11,7 +11,7 @@ Run independent features in parallel, one git worktree and one Claude Code sessi
 ## One worktree per feature
 
 - Invoke `canon:plan-feature` in each session. Plans land at `.canon/plans/feature-<slug>.md` at the main root.
-- `ui-checklist` writes a per-branch handoff at `tmp/handoff/ui-checklist/<slug>.md`, which `git-pr` posts and removes. The slug is the branch name minus its leading type segment.
+- `ui-checklist` writes a per-branch handoff at `tmp/handoff/ui-checklist/<slug>.md`, which `pr-evidence` posts and removes. The slug is the branch name minus its leading type segment.
 - Ship each worktree with `canon:git-ship`, or `canon:auto-ship` for a draft pull request
 - Only the operator or the controlling session readies a draft
 
