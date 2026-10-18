@@ -30,7 +30,7 @@ The three skipped refusals are the ones `task-number.md` skips, and for the same
 
 - Put the lines last in `## Summary`, after its sentences, one per issue
 - Write `Closes #NNN` with no trailing period, since GitHub reads the keyword and the number and a period adds nothing
-- Write one keyword per issue, because GitHub reads `Closes #12, #13` as closing #12 alone
+- Write one keyword per issue, because GitHub reads a keyword followed by a comma list as closing the first number alone
 
 The scan takes the same list, so a missing line or a closing keyword the verb did not name fails the body:
 
