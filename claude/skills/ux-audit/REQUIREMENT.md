@@ -24,12 +24,8 @@ The pass slides into fixing what it finds, and then the audit and the change lan
 - Suggest an implementation or change any code
 - Flag a surface the task board marks in progress
 - Report a preference no stated intent supports
-- Repeat the full report in chat, which is what loses it
-- Stage or commit the report, which is gitignored scratch
-
-## Guards
-
-- No UI surfaces in the project: stop, since there is nothing to audit
+- Repeat the full report in chat, which is what loses it, or stage the report, which is gitignored scratch
+- Audit a project carrying no UI surface, since there is nothing to observe
 
 ## Out of scope
 
@@ -37,4 +33,4 @@ The pass slides into fixing what it finds, and then the audit and the change lan
 - Feature planning, which `plan-feature` owns
 - Verifying one specific change, which `ui-checklist` owns
 - Defining the intent it audits against, which the design document owns
-- Measuring what a running interface costs to paint, block, or shift, which `ux-measure` owns. Contrast stays here rather than going with it, being computable from two color values this skill already reads off the stylesheet's custom properties.
+- Measuring what a running interface costs to paint, block, or shift, which `ux-measure` owns, while contrast stays here as two color values off the stylesheet
