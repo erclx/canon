@@ -27,7 +27,7 @@ canon migrate record-tree --json
 canon migrate record-tree --write --json
 ```
 
-It covers `diagrams`, `memory`, `plans`, `proposals`, `review`, `tasks`, and `teach`. The record tree is untracked, so read the report before `--write`, since a wrong rewrite has no git undo.
+It covers `diagrams`, `memory`, `plans`, `proposals`, `review`, `tasks`, and `teach`. Read the report before `--write`. The record tree is untracked, and a wrong rewrite has no undo.
 
 ## Back records up off this machine, once
 
@@ -130,7 +130,7 @@ The `standard` name became `skill-reference.md` in `create-skill`.
 The wireframes record is retired, and nothing deletes what a project holds.
 
 - `canon/wireframes/` stays yours and unaudited. Keep it as notes or delete it.
-- Delete the `@canon/wireframes/index.md` line in your `CLAUDE.md` with the folder, since `canon claude sync` does not rewrite it.
+- Delete the `@canon/wireframes/index.md` line in your `CLAUDE.md` with the folder. `canon claude sync` does not rewrite it.
 - `canon gov sync` removes `.claude/rules/canon/standards/wireframes.md`
 
 ## Move decisions out of a held architecture record, once

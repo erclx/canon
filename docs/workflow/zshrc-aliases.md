@@ -32,7 +32,7 @@ alias clpac='clpa --cwd .'
 # <<< canon aliases <<<
 ```
 
-To opt out, delete the block and run `bun install` and `bun link` yourself. Bash takes the block unchanged in `~/.bashrc`, pasted by hand, since bootstrap writes `~/.zshrc` alone.
+To opt out, delete the block and run `bun install` and `bun link` yourself. Bash takes the block unchanged in `~/.bashrc`, pasted by hand. Bootstrap writes `~/.zshrc` alone.
 
 ## What each one does
 
