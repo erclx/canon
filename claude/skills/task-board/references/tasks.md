@@ -140,7 +140,7 @@ A task with no origin is lost context or work nobody decided to do. The reverse 
 `Plan:`, `Groundwork:`, `Intake:`, and `Ready:` name their target as a markdown link whose text is the stem, so the line resolves on a ctrl-click as `priority.md` rows do.
 
 - Write the path relative to `.canon/tasks/`, as `../plans/`, `../groundwork/`, and `../intake/`. A path from the project root resolves to nothing in an editor rooted there.
-- `Issue:` stays a bare `#NNN`, since an issue number is not a path and a full URL writes the remote into a gitignored file
+- `Issue:` stays a bare `#NNN`, since a full URL writes the remote into a gitignored file. Several issues list comma-separated, each getting a `git-pr` closing line.
 - `Ready:` links `../ready/<nn>-<slug>/`, the folder the plan copies from, only when it exists. `canon tasks archive` reads it to move the folder, falling back to a path in the plan.
 
 ### The `Plan:` line

@@ -55,6 +55,10 @@ A body describes the new behavior and nothing the diff or the commits already sa
 - `## Summary`: 1-2 sentences following `<Action Verb> <Direct Object> to <Result>`, expand for clarity if needed
 - `## Key changes`: name actual files, functions, or modules (e.g., `AuthService.verify()` not "auth handler"). Always use bullet points, never prose.
 
+### Closing lines
+
+The closing lines end `## Summary`, one `Closes #NNN` per issue and no trailing period. A task shipped in slices carries them on its last slice only. `closing-issues.md` states how the list is decided, and `canon labels scan --closes` fails a body that disagrees with it.
+
 ### Context section
 
 `## Technical context` is optional and carries 1-2 lines of architectural reasoning explaining why, not what.

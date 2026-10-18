@@ -5,6 +5,7 @@ import { execa } from 'execa'
 import { gitEnv } from '@/git/env'
 import { diffLabels } from '@/labels/apply'
 import { type LabelAuditRefusal, auditLabels } from '@/labels/audit'
+import { checkClosing } from '@/labels/closing'
 import { resolveScanInput } from '@/labels/event'
 import { checkTitleFormat, type TitleFormatIssue } from '@/labels/format'
 import { MAP_REL } from '@/labels/map'
@@ -34,6 +35,7 @@ interface ScanOptions {
   readonly body?: string
   readonly bodyFile?: string
   readonly head?: string
+  readonly closes?: string
   readonly json?: boolean
 }
 
@@ -196,6 +198,10 @@ export function register(program: Command): void {
       'Body to scan, read from a file, overriding the event payload',
     )
     .option('--head <ref>', 'Head branch, overriding the event payload')
+    .option(
+      '--closes <numbers>',
+      'Issues the body must close, a comma list or `none`, graded when given',
+    )
     .option('--json', 'Add a machine-readable record on stdout')
     .addHelpText(
       'after',
@@ -239,12 +245,20 @@ export function register(program: Command): void {
         'character, an em dash or a semicolon, in the title or body of a pull',
         'request or a review, outside a code span or a link.',
         '',
+        'With --closes, it also grades the closing lines. Each issue named needs',
+        'its own `Closes #NNN` keyword in the body, and a closing keyword for an',
+        'issue the list leaves out fails. `none` expects no closing line.',
+        'Without the flag the check does not run, so the pull request job and a',
+        'followup keep their behavior. A keyword in a code span or a fence is',
+        'not read, as GitHub does not read it.',
+        '',
         'Exit codes:',
-        '  0  none of the six found',
+        '  0  none of the eight found',
         '  1  refused, with the reason on stderr or in the JSON record',
         '  2  the title or body carries a phase label, a board identifier, a',
         '     session link, a banned character, a heading outside the closed',
-        '     list or a required one missing, or a title',
+        '     list or a required one missing, a missing or stray closing line',
+        '     under --closes, or a title',
         "     breaking claude/skills/git-pr/references/pr.md's format, casing, or length",
         '',
         'Examples:',
@@ -536,10 +550,41 @@ async function runApply(number: string, opts: ApplyOptions): Promise<number> {
   return owed.length === 0 ? 0 : 2
 }
 
+/**
+ * Reads `--closes` as the issues the body must close. Undefined when the flag
+ * is absent, which skips the check, and a message when the value is neither
+ * `none` nor a comma list of numbers, since a guessed list would grade the
+ * body against the wrong issues.
+ */
+function parseCloses(value: string | undefined): number[] | string | undefined {
+  if (value === undefined) return undefined
+  if (value === 'none') return []
+  if (!/^\d+(,\d+)*$/.test(value)) {
+    return `--closes takes a comma list of issue numbers or none, not ${value}`
+  }
+
+  return [...new Set(value.split(',').map(Number))]
+}
+
 async function runScan(opts: ScanOptions): Promise<number> {
   const emitJson = opts.json ?? false
 
   intro('canon labels scan')
+
+  const expected = parseCloses(opts.closes)
+
+  if (typeof expected === 'string') {
+    logStep('Refused')
+    logWarn(expected)
+    outro()
+
+    if (emitJson) {
+      process.stdout.write(
+        `${JSON.stringify({ reason: 'bad-input', message: expected })}\n`,
+      )
+    }
+    return 1
+  }
 
   const resolved = resolveScanInput(opts)
 
@@ -693,6 +738,37 @@ async function runScan(opts: ScanOptions): Promise<number> {
     for (const issue of titleFormatIssues) logWarn(TITLE_FORMAT_MESSAGES[issue])
   }
 
+  const closing =
+    expected === undefined
+      ? { missing: [], stray: [] }
+      : checkClosing(resolved.body, expected)
+
+  logStep(
+    expected === undefined
+      ? 'Closing lines not checked'
+      : closing.missing.length === 0 && closing.stray.length === 0
+        ? 'Clean'
+        : 'Closing line issue found',
+  )
+  if (expected === undefined) {
+    logInfo('no --closes list, so the closing lines are not graded')
+  } else if (closing.missing.length === 0 && closing.stray.length === 0) {
+    logInfo('the closing lines match the issues the task closes')
+  } else {
+    if (closing.missing.length > 0) {
+      logWarn(
+        `${plural(closing.missing.length, 'issue')} with no closing line. Add one \`Closes #NNN\` per issue.`,
+      )
+      for (const number of closing.missing) logWarn(`#${number}`)
+    }
+    if (closing.stray.length > 0) {
+      logWarn(
+        `${plural(closing.stray.length, 'closing line')} for an issue this pull request does not close. Delete each.`,
+      )
+      for (const number of closing.stray) logWarn(`#${number}`)
+    }
+  }
+
   outro()
 
   if (emitJson) {
@@ -706,6 +782,8 @@ async function runScan(opts: ScanOptions): Promise<number> {
         titleFormatIssues,
         sections: { checked: sectionsChecked, ...sections },
         bannedCharacters,
+        missingClosures: closing.missing,
+        strayClosures: closing.stray,
       })}\n`,
     )
   }
@@ -716,7 +794,9 @@ async function runScan(opts: ScanOptions): Promise<number> {
     titleFormatIssues.length === 0 &&
     sections.outside.length === 0 &&
     sections.missing.length === 0 &&
-    banFindings.length === 0
+    banFindings.length === 0 &&
+    closing.missing.length === 0 &&
+    closing.stray.length === 0
     ? 0
     : 2
 }

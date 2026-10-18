@@ -75,6 +75,10 @@ Follow Testing discipline in `${CLAUDE_SKILL_DIR}/references/pr.md`. Run each ch
 
 Leave a box unchecked only for the human-only cases the reference defines, and name which human and why on the same line. A request for the reviewer is not a test result, so it belongs under `## For the reviewer` rather than in the Testing list.
 
+### Name the issues the pull request closes
+
+Ask `canon tasks closes` which issues this pull request closes before writing the body, and put one `Closes #NNN` line per issue last in `## Summary`. Read `${CLAUDE_SKILL_DIR}/references/closing-issues.md` on reaching this step for the invocation, the refusals it skips silently, and why an earlier slice of a sliced task carries none.
+
 ### Pre-publish scan
 
 Before running the final command, run the scan in `${CLAUDE_SKILL_DIR}/references/publish.md` against the PR title and body, on top of the banned phrases in `${CLAUDE_SKILL_DIR}/references/pr.md`. The title and body go straight to the remote, so run it whatever backs it downstream.
@@ -94,12 +98,14 @@ BODY
 Then run:
 
 ```bash
-canon labels scan --title "<title>" --body-file .canon/tmp/pr/body.md --json
+canon labels scan --title "<title>" --body-file .canon/tmp/pr/body.md --closes <numbers|none> --json
 ```
+
+Drop `--closes` when the closes step skipped a refusal, since no list was decided to grade against.
 
 ### Reading the scan
 
-Branch on the JSON record rather than the exit code, since a shell function wrapping `canon` can flatten a non-zero exit to 0. Stop and fix the title or body on any key below, and do not proceed to `### Final command` until a re-run comes back clean on all six.
+Branch on the JSON record rather than the exit code, since a shell function wrapping `canon` can flatten a non-zero exit to 0. Stop and fix the title or body on any key below, and do not proceed to `### Final command` until a re-run comes back clean on all eight.
 
 | Key                 | Fix                                                                                  |
 | ------------------- | ------------------------------------------------------------------------------------ |
@@ -109,6 +115,8 @@ Branch on the JSON record rather than the exit code, since a shell function wrap
 | `titleFormatIssues` | Fix the `## Title` rule in `pr.md` it names, being structure, casing, or length      |
 | `bannedCharacters`  | Restructure the sentence around the named character                                  |
 | `sections`          | Rename or drop each heading in `outside`, and add each required heading in `missing` |
+| `missingClosures`   | Add a `Closes #NNN` line for each number listed                                      |
+| `strayClosures`     | Delete the closing keyword for each number listed                                    |
 
 Leave `cutsRelease` and `semverTags` alone, since a release-please pull request legitimately carries version references its own fixed shape explains.
 

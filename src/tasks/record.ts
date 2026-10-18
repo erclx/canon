@@ -400,7 +400,7 @@ async function resolveStem(
   return matched[0]
 }
 
-async function openTask(
+export async function openTask(
   root: string,
   selector: RecordSelector,
 ): Promise<{ readonly stem: string; readonly path: string } | RecordRefused> {

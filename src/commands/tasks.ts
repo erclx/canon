@@ -33,6 +33,7 @@ import {
   claimLabel,
   nextLabel,
 } from '@/tasks/label'
+import { type ClosureOutcome, readClosure } from '@/tasks/closes'
 import { listTasks } from '@/tasks/list'
 import {
   type Claim,
@@ -137,6 +138,13 @@ interface PlanLinkCommandOptions {
 
 interface OutcomeCommandOptions {
   readonly close?: readonly string[]
+  readonly json?: boolean
+  readonly plan?: string
+  readonly root?: string
+}
+
+interface ClosesCommandOptions {
+  readonly branch?: string
   readonly json?: boolean
   readonly plan?: string
   readonly root?: string
@@ -633,6 +641,57 @@ export function register(program: Command): void {
     )
     .action(async (task: string | undefined, opts: OutcomeCommandOptions) => {
       process.exitCode = await runOutcome(task, opts)
+    })
+
+  tasks
+    .command('closes')
+    .description('Name the issues the branch pull request closes')
+    .argument('[task]', 'Task filename stem, as in v28.1-trigger-escalation')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--plan <slug>', 'Select the task whose Plan line names this plan')
+    .option(
+      '--branch <name>',
+      'Branch to treat as this pull request, defaulting to the checked-out one',
+    )
+    .option('--json', 'Emit a machine-readable record on stdout')
+    .option('--root <path>', 'Board root, defaulting to the main worktree')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Refusals, read off `reason`:',
+        '  no-board   the repository holds no `.canon/tasks/` board',
+        '  no-match   no task matches the selector',
+        '  ambiguous  more than one task matches the selector',
+        '  bad-input  a task and a plan both named, or neither',
+        '',
+        'Exit codes:',
+        '  0  the task is read, whether or not it closes',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '',
+        'Reads the `Issue:` lines, each `#NNN` or a comma list, and reports',
+        '`issues` and `closing`. The pull request closes them only when it is',
+        "the task's last slice, the condition the merge-time archive applies:",
+        'no open outcome and no other branch on `Pending branch:`. The branch',
+        'and the names it carried before a rename count as this one. Read off',
+        '`reason` when `closing` is false:',
+        '  no-issues       the task carries no `Issue:` number',
+        '  earlier-slice   this branch has a pull request on the task that is not',
+        '                  the last listed, so a later number closes the issue',
+        '  lookup-failed   the pull request lookup failed while the task already',
+        '                  lists a pull request, so an earlier slice cannot be ruled out',
+        '  open-outcomes   an outcome is still open, so a later slice closes it',
+        '  pending-branch  another branch is on `Pending branch:`',
+        '  no-outcomes     the task carries no outcomes',
+        '',
+        'Examples:',
+        '  canon tasks closes --plan closing-issue-references --json',
+        '  canon tasks closes v28.1-trigger-escalation --branch feat/x',
+        '',
+      ].join('\n'),
+    )
+    .action(async (task: string | undefined, opts: ClosesCommandOptions) => {
+      process.exitCode = await runCloses(task, opts)
     })
 
   tasks
@@ -1196,6 +1255,67 @@ async function branchPullNumbers(
   }
 }
 
+/**
+ * The pull request numbers whose head is `branch`, read over REST because a
+ * cloud session's GitHub proxy refuses the GraphQL `gh pr list` runs on.
+ * Unlike `branchPullNumbers`, a failed or unreadable answer is null rather
+ * than an empty list, since the closing decision must not read a failure as
+ * a branch with no pull request.
+ */
+async function branchPullNumbersRest(
+  branch: string | undefined,
+): Promise<readonly number[] | null> {
+  if (branch === undefined) return []
+
+  const owner = await execa(
+    'gh',
+    ['api', 'repos/{owner}/{repo}', '--jq', '.owner.login'],
+    {
+      cwd: process.cwd(),
+      reject: false,
+      timeout: GH_TIMEOUT_MS,
+      env: gitEnv(),
+      extendEnv: false,
+    },
+  )
+  if (owner.exitCode !== 0 || owner.stdout.trim() === '') return null
+
+  const result = await execa(
+    'gh',
+    [
+      'api',
+      '-X',
+      'GET',
+      'repos/{owner}/{repo}/pulls',
+      '-f',
+      `head=${owner.stdout.trim()}:${branch}`,
+      '-f',
+      'state=all',
+      '--jq',
+      '[.[].number]',
+    ],
+    {
+      cwd: process.cwd(),
+      reject: false,
+      timeout: GH_TIMEOUT_MS,
+      env: gitEnv(),
+      extendEnv: false,
+    },
+  )
+  if (result.exitCode !== 0) return null
+
+  try {
+    const numbers: unknown = JSON.parse(result.stdout)
+    if (!Array.isArray(numbers)) return null
+
+    return numbers.every((number) => Number.isInteger(number))
+      ? (numbers as number[])
+      : null
+  } catch {
+    return null
+  }
+}
+
 async function runPlanLink(
   task: string,
   plan: string,
@@ -1375,6 +1495,66 @@ function reportPlanLink(
   if (outcome.action !== 'unchanged') logAdd(relative(root, outcome.path))
   logInfo(
     `board row ${outcome.board.moved ? '' : 'not moved, '}${outcome.board.note}`,
+  )
+  outro()
+
+  return 0
+}
+
+async function runCloses(
+  task: string | undefined,
+  opts: ClosesCommandOptions,
+): Promise<number> {
+  const emitJson = opts.json ?? false
+  const selector = selectorFor(task, opts.plan)
+
+  if ('ok' in selector) {
+    return reportRecord('canon tasks closes', selector, emitJson, process.cwd())
+  }
+
+  const root = opts.root ?? (await mainWorktreeRoot())
+  const branch = opts.branch ?? (await workingBranch())
+  const branches = branch ? [branch, ...(await formerNames(branch))] : []
+  const outcome = await readClosure(
+    root,
+    selector,
+    branches,
+    await branchPullNumbersRest(branch),
+  )
+
+  return reportCloses(outcome, emitJson, root)
+}
+
+function reportCloses(
+  outcome: ClosureOutcome,
+  emitJson: boolean,
+  root: string,
+): number {
+  if (!outcome.ok) {
+    return reportRecord('canon tasks closes', outcome, emitJson, root)
+  }
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({
+        ok: true,
+        root,
+        task: outcome.stem,
+        path: relative(root, outcome.path),
+        issues: outcome.issues,
+        closing: outcome.closing,
+        reason: outcome.reason,
+      })}\n`,
+    )
+    return 0
+  }
+
+  intro('canon tasks closes')
+  logStep(outcome.closing ? 'Closes' : 'Closes nothing')
+  logInfo(
+    outcome.issues.length > 0
+      ? `${outcome.stem} names ${outcome.issues.map((n) => `#${n}`).join(', ')}, ${outcome.reason}`
+      : `${outcome.stem} names no issue`,
   )
   outro()
 

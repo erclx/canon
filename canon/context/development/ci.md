@@ -37,7 +37,7 @@ CI differs from a local run in scope and in what an unmeasured stage means. The 
 
 ### `src/labels/`
 
-`phase-label-gate.yml` runs `canon labels scan` on the event payload, since a pull request body and a posted review are text no gate stage sees. It sits outside `verify.yml` because it needs `edited` on its trigger.
+`phase-label-gate.yml` runs `canon labels scan` on the event payload, since a pull request body and a posted review are text no gate stage sees. It sits outside `verify.yml` because it needs `edited` on its trigger. It never passes `--closes`, since the closing-line check needs a task board a remote lacks and only `git-pr` runs it.
 
 - It also triggers on `pull_request_review` and reads `review.body`, and its `if:` checks the base ref because that event carries no `branches` filter
 - A release-please pull request is told apart by both the `release-please--branches--main` head prefix and the `chore(main): release ` title prefix
