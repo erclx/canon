@@ -9,7 +9,7 @@ Applies to every hand-drawn figure, wherever it is authored. A figure sits insid
 
 ## Scope
 
-Governs a hand-drawn figure wherever one is authored, naming no path because an attribute standard governs a fragment rather than a document type: when it earns its place, the render-first policy routing a graph-shaped subject through Mermaid, the wrapping and caption every figure carries, and its color and accessibility rules. It carries no template, since a figure has no document shape of its own and sits inside one another standard sets.
+Governs a hand-drawn figure wherever one is authored, being when it earns its place, the render-first policy routing a graph-shaped subject through Mermaid, the wrapping and caption every figure carries, and its color and accessibility rules. It names no path and carries no template, since it governs a fragment rather than a document type.
 
 Does not govern:
 
@@ -35,10 +35,12 @@ A figure failing these is non-conforming even when it satisfies every shape rule
 
 ## The render-first policy
 
-- Route a graph-shaped subject, one whose relationship, boundary, or path a flowchart already expresses, through Mermaid's own hand-drawn look rather than through model-authored SVG coordinates. `mermaid.md` governs the fence itself.
-- Reserve freehand inline SVG, plain shapes and lines authored directly in the markup, for a subject that is not graph-shaped. A figure that cannot express its subject through the deterministic path is a worse failure than an inconsistent one drawn by hand, so the hatch stays open rather than forcing every figure through the renderer.
-- Draw a figure in a teach lesson freehand whatever its shape. A lesson letters its figures in a hand font the renderer cannot load, so Mermaid measures every label in a narrower fallback face, and the page then clips the wider text it actually shows.
-- State this as a render-first policy rather than a ban on a tool-exported drawing. Routing a graph-shaped figure through Mermaid is itself running it through an external tool, so a rule banning any diagram "exported from a diagramming tool" would forbid the path this policy requires.
+Route a graph-shaped subject, one whose relationship, boundary, or path a flowchart already expresses, through Mermaid's own hand-drawn look rather than through model-authored SVG coordinates. `mermaid.md` governs the fence itself.
+
+- Reserve freehand inline SVG, plain shapes and lines authored in the markup, for a subject that is not graph-shaped
+- A figure that cannot express its subject through the deterministic path is a worse failure than an inconsistent hand-drawn one, so the hatch stays open
+- Draw a figure in a teach lesson freehand whatever its shape. Its hand font cannot load in the renderer, so Mermaid measures labels in a narrower fallback face and the page clips them.
+- State this as a render-first policy rather than a ban on a tool-exported drawing, since routing through Mermaid is itself running an external tool
 
 ## Wrapping and captioning
 
@@ -47,5 +49,5 @@ A figure failing these is non-conforming even when it satisfies every shape rule
 
 ## Color and accessibility
 
-- Color every fill and stroke through a custom property the surrounding document's own stylesheet defines, never a literal hex value. The figure then re-colors itself on the same switch that re-colors the page.
+- Color every fill and stroke through a custom property the surrounding document's stylesheet defines, never a literal hex value, so the figure re-colors on the switch that re-colors the page
 - Give the drawing an accessible name: `role="img"` with `aria-label` for one short line, or `aria-labelledby` pointing at a `<title>` element inside it for a longer one.

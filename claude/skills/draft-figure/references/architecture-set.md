@@ -25,11 +25,15 @@ Stay inside `flowchart` and `sequenceDiagram`. C4, state, ER, and class diagrams
 
 ## Sources
 
-- Read `canon/REQUIREMENTS.md`, `canon/context/index.md`, `CLAUDE.md`, and the language manifest (`package.json`, `pyproject.toml`, `Cargo.toml`) when present, plus the top-level folder layout through `ls`. Do not recurse speculatively.
+- Read `canon/REQUIREMENTS.md`, `canon/context/index.md`, `CLAUDE.md`, and the language manifest (`package.json`, `pyproject.toml`, `Cargo.toml`) when present
+- Read the top-level folder layout through `ls`, and do not recurse speculatively
 - When neither planning file exists and no folder structure names a boundary, stop: `❌ No source signal for <view>. Add canon/REQUIREMENTS.md or run inside a project folder.`
 - When the view came from a code scan rather than planning prose, open the caption with `Source: code.` and add `Fidelity is lower than prose-driven figures. Verify against the project's intent.`
 
 ## Caption and prose
 
-- Name one or two code paths a reader can open, in the caption or the prose beside the figure. Cite only paths that exist and spell each one exactly, since a reader deciding whether the figure still holds starts by opening them.
-- Keep implementation detail out of the figure: function names and call signatures, library versions, config keys and environment variable names, retry counts and timeouts, and workarounds needing more than a sentence. That detail belongs in a `canon/context/` entry, which the caption points at by path when a reader needs the mechanism.
+Name one or two code paths a reader can open, in the caption or the prose beside the figure. Cite only paths that exist and spell each one exactly, since a reader deciding whether the figure still holds starts by opening them.
+
+- Keep implementation detail out of the figure, being function names and call signatures, library versions, config keys and environment variable names, retry counts and timeouts
+- A workaround needing more than a sentence stays out too
+- That detail belongs in a `canon/context/` entry, which the caption points at by path when a reader needs the mechanism
