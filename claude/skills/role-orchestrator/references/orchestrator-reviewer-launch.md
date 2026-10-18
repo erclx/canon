@@ -15,11 +15,15 @@ No branch and no worktree are entered here. The reviewer reads the pull request 
 claude --bg --model <model> -n "reviewer-<project>-<number>" "Run /canon:role-reviewer, then /canon:review-pr <number>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. When the pass posts under ## Review, message the worker holding the branch to run review-address, carrying your own sessionId, and send it to the controller instead when no worker resolves. When it posts ## Review closed, run canon pr lift <number> --json and message the controller with the heading, the count line, and the reason the verb returned, unless that reason names the UI review as still open or missing. Message the controller again if you stop on a question."
 ```
 
-`<number>` is the pull request's number, and the brief pins no head, since `review-pr` resolves the head itself and stamps the range it covered in its marker. `<model>` comes from `## Pick the model` in `orchestrator-dispatch.md`, which states the test for a reviewer as for every other role. `<dispatcher-id>` and `<project>` resolve the same way they do in `orchestrator-launch.md`.
+- `<number>` is the pull request's number, and the brief pins no head, since `review-pr` resolves it and stamps the covered range in its marker
+- `<model>` comes from `## Pick the model` in `orchestrator-dispatch.md`, which states the test for a reviewer as for every other role
+- `<dispatcher-id>` and `<project>` resolve the same way they do in `orchestrator-launch.md`
+- Append the cross-branch facts after the controller clause, per `### What the brief may carry` in `orchestrator-launch.md`
+- Check `canon sessions list --json` for a live `reviewer-<project>-<number>` before launching, and message it instead when one holds the pull request
 
-The channel clauses restate what `role-reviewer` holds, so a reviewer whose plugin cache predates that body still sends the dispatch itself rather than leaving it to this session. The worker reads the reviewer's sessionId off that message and sends its re-review request back to it, since a reviewer holds the trunk branch and no branch lookup finds it. Append the cross-branch facts after the controller clause, per `### What the brief may carry` in `orchestrator-launch.md`.
+### The channel clauses
 
-Check `canon sessions list --json` for a live `reviewer-<project>-<number>` before launching, and message that session instead when one holds the pull request.
+The channel clauses restate what `role-reviewer` holds, so a reviewer whose plugin cache predates that body still sends the dispatch itself. The worker reads the reviewer's sessionId off that message and sends its re-review request back to it, since a reviewer holds the trunk branch and no branch lookup finds it.
 
 ## Dispatch a review to a cloud reviewer
 
@@ -33,8 +37,13 @@ Read `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md` when the oper
 claude --bg --model sonnet -n "reviewer-ui-<project>-<number>" "Run /canon:role-reviewer, then /canon:review-ui <number>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. When the pass posts under ## UI review, message the worker holding the branch to run review-address, carrying your own sessionId, and send it to the controller instead when no worker resolves. When it posts ## UI review closed, run canon pr lift <number> --json and message the controller with the heading, the count line, and the reason the verb returned, unless that reason names the code review as still open or missing. Message the controller again if you stop on a question."
 ```
 
-The model is `sonnet`, always, as the UI reviewer line in `## Pick the model` in `orchestrator-dispatch.md` states with its measured reason.
+The model is `sonnet`, always, as the UI reviewer line in `## Pick the model` in `orchestrator-dispatch.md` states with its measured reason. `<number>`, `<dispatcher-id>`, and `<project>` resolve the same way they do in `orchestrator-launch.md`.
 
-Name an address in the brief only when the evidence record carries no `preview` and no `local` field, as `Drive <url>.` after the controller clause. An address the record already holds is the one the pass reads first, and a second in the brief is a second source for one fact. Name a CLI config path the same way when the operator keeps a GPU recipe for this machine, since the pass renders in software otherwise. Carry nothing else: the UI reviewer reads no diff and no code verdict, so the cross-branch facts the code brief carries stay out of this one.
+- The prefix reads `reviewer-ui-` so a roster read for `reviewer-<project>-<number>` never matches it, and the two passes stay two sessions
+- Carry no cross-branch facts, since the UI reviewer reads no diff and no code verdict
 
-`<number>`, `<dispatcher-id>`, and `<project>` resolve the same way they do in `orchestrator-launch.md`. The prefix reads `reviewer-ui-` so a roster read for `reviewer-<project>-<number>` never matches the UI reviewer, and the two passes on one pull request stay two sessions.
+### What the UI brief may carry
+
+Name an address only when the evidence record carries no `preview` and no `local` field, as `Drive <url>.` after the controller clause. An address the record holds is the one the pass reads first, and a second in the brief is a second source for one fact.
+
+Name a CLI config path the same way when the operator keeps a GPU recipe for this machine, since the pass renders in software otherwise.
