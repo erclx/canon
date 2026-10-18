@@ -70,7 +70,7 @@ Restate each pick in one line, then continue the work.
 
 A pick that changes a written artifact goes into it under the rule its own standard sets, and a pick that settles nothing written stays in the session.
 
-- Record an answer to an open plan question under the answer contract in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`, naming the operator as source
+- Record an answer to an open plan question per `### Overrides and settled questions` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`
 
 Output after the answers land:
 
