@@ -121,7 +121,7 @@ CANON_NON_INTERACTIVE=1 canon tooling sync python ./backend --skip base --write
 - Without `--skip base`, each subtree re-drops husky, and git honors only one `core.hooksPath`, so the extra hook dirs silently break
 - Each subtree keeps its own framework configs, and its stack reference reads through `canon tooling reference <stack>`
 - A subtree sync withholds `.github/`, since GitHub reads workflows only at the root, and names each withheld file with the `working-directory` a root CI job needs
-- A subtree needs its own `bun init` before its scripts and dependencies land, and the sync warns and skips them until then
+- A subtree with no `package.json` gets a minimal one from the sync, so its scripts and dependencies land in the same pass
 
 ### Post-sync fixups
 
