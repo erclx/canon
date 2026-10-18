@@ -37,7 +37,7 @@ Does not govern:
 - **`rule.md`**: path-scoped coding rules, which load on a file match rather than on a request match
 - **the `write-human` skill**: voice, rhythm, and sentence construction in a skill body
 - **`markdown.md`**: punctuation, formatting, and word choice in a skill body
-- **`slug.md`**: the transform from a branch name to a slug a skill carries in a filename
+- **`slug.md`**: the transform from a branch name to a filename slug
 - **the `create-skill` skill and the creation-time bullet in the `skill` governance rule**: whether a new skill earns its place, by the three-question test
 
 ## Changing a skill
@@ -140,7 +140,7 @@ State the current rule only, in the body and in every file under `references/`. 
 
 - Cut any rule that resists crisp one-line phrasing. Vague guidance is worse than none.
 - Group bullets under H2 headings by concern, keeping dos and don'ts together rather than in flat rules and constraints sections
-- One constraint per bullet. Prefer the `X over Y` form for preferences.
+- One actionable constraint per bullet. Prefer the `X over Y` form for preferences.
 
 ### Examples and density
 
