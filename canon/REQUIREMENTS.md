@@ -22,7 +22,7 @@ This record holds at most 600 words.
 
 - **Workflow.** An agent's work runs from plan to merge, in parallel, with each step handed to a session that owns it and leaves a record the next one reads.
 - **Practice.** The code an agent writes follows established engineering practice. Every practice the toolkit teaches cites the source it comes from, and a check rather than a reminder holds the agent to it.
-- **Product.** The agent produces what a project needs beyond its code, being its design system and board, its decks, its demos, and its learning workspaces, from the same setup and in the project's own design, with the design board driven through Frameboard.
+- **Product.** The agent produces what a project needs beyond its code, being its design system, its decks, its demos, and its learning workspaces, from the same setup and in the project's own design, with the design board driven through Frameboard, which carries the canvas in its own repository.
 - **Shared setup.** One authoritative source for rules, standards, skills, and seeds, installed and synced into any repository without hand-patching. The three goals above run on it.
 
 ## Non-goals
