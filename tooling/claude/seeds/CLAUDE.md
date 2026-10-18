@@ -4,14 +4,14 @@
 
 ## Context
 
-- Before non-trivial work in a domain read `canon/context/<domain>.md`. Pick which from the index anchor below.
+- Before non-trivial work in a domain, read its entry under `canon/context/`. Find it from the index anchor below.
 
 @canon/REQUIREMENTS.md
 @canon/context/index.md
 
 ## Commands
 
-- [Command to run before committing]
+- Run `bun run check` to verify and `bun run format` to fix before committing. The pre-push hook runs `check`, which writes nothing.
 
 ## Key paths
 
