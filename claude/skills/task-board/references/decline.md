@@ -7,15 +7,13 @@ description: How task-board gathers the reason a task is decided against, runs c
 
 The Decline mode of `task-board`. The session reads this file when the request names a task decided against.
 
-Read `${CLAUDE_SKILL_DIR}/references/tasks-decline.md` first. It holds the declined folder, the `Declined:` line, and what the move does to a plan and a board row.
-
-A task decided against carries no `post-merge` hook of its own, so every decline request arrives here directly rather than through work the hook already did.
-
-Do not move the file, edit `priority.md` or `backlog.md`, or regenerate the index by hand. `canon tasks decline` owns all three as one unit.
+- Read `${CLAUDE_SKILL_DIR}/references/tasks-decline.md` first, for the declined folder, the `Declined:` line, and what the move does to a plan and a board row
+- A declined task carries no `post-merge` hook of its own, so every decline request arrives here directly
+- `canon tasks decline` moves the file, edits `priority.md` or `backlog.md`, and regenerates the index as one unit. Do none of the three by hand.
 
 ## Step 1: gather the reason
 
-Ask for the reason when the request does not carry one, and stop rather than guessing: `❌ No reason. Say why the task is being declined.` The command takes it as `--reason <text>` and refuses without it, so gathering it here saves a round trip through that refusal.
+Ask for the reason when the request carries none, and stop rather than guessing with `❌ No reason. Say why the task is being declined.` The command refuses without `--reason <text>`, so asking first saves the round trip.
 
 ## Step 2: run the decline
 
@@ -25,18 +23,36 @@ Pass the task's filename stem:
 canon tasks decline <stem> --reason "<text>" [--by <name>] --json
 ```
 
-The command refuses rather than reports, and the refusal reaches this skill through the record rather than through the exit, the same wrapper hazard `canon tasks archive` carries. Branch on `ok`, then on `reason`.
+Branch on the record's `ok`, then on `reason`, never on the exit. A shell wrapper can flatten the exit, the same hazard `canon tasks archive` carries.
 
-On success the record carries `from`, `to`, `priorityRowRemoved`, `backlogRowRemoved`, and `indexRegenerated`, where `backlogRowRemoved` is decline's own field since a task can be declined straight off `backlog.md` and archive never checks that file. It also carries `plans`, one `from` and `to` for each live plan the task was the last live citation of, empty when nothing moved, the same shape `canon tasks archive` uses for its own `plans` field.
+### Success record
+
+A successful decline returns one record whose fields match `canon tasks archive` where the two overlap.
+
+| Field                | Holds                                                                    |
+| -------------------- | ------------------------------------------------------------------------ |
+| `from`, `to`         | The task's old and new path                                              |
+| `priorityRowRemoved` | Whether a `priority.md` row was dropped                                  |
+| `backlogRowRemoved`  | Whether a `backlog.md` row was dropped, a field archive lacks            |
+| `indexRegenerated`   | Whether the index was rewritten                                          |
+| `plans`              | A `from` and `to` per live plan the task last cited, empty if none moved |
+
+`backlogRowRemoved` is decline's own, since a task can be declined straight off `backlog.md` and archive never checks that file.
 
 ## Step 3: route on a refusal
 
-- `no-match`: the stem does not name exactly one task. Either none matches, or exactly one starts with it and the full name is needed. Check the name against the listed stems.
-- `ambiguous`: the stem is a prefix more than one task starts with, unlike archive's own `ambiguous`, which fires on a shared pull request. Decline takes no pull-request selector, so this is the only route to it. Pass the full stem.
-- `bad-input`: the command line was wrong rather than the board. Read the message, fix the arguments, and run it again. Nothing on the board needs repair, which is what separates this from the two above.
+Each refusal names its cause and the fix.
 
-Do not move a plan by hand from this skill. The command carries the plan with the task when no other live task cites it, and retargets the declined task's `Plan:` line at the new path. A second mover drifts into relocating the same file differently.
+| `reason`    | Cause                                                                | Fix                                        |
+| ----------- | -------------------------------------------------------------------- | ------------------------------------------ |
+| `no-match`  | No task matches, or one starts with the stem and needs its full name | Check against the listed stems             |
+| `ambiguous` | The stem is a prefix of more than one task                           | Pass the full stem                         |
+| `bad-input` | The command line was wrong rather than the board                     | Read the message, fix the arguments, rerun |
+
+Archive's own `ambiguous` fires on a shared pull request instead, and decline takes no pull-request selector. A `bad-input` leaves nothing on the board to repair, which separates it from the other two.
+
+Never move a plan by hand from this skill. The command carries the plan along when no other live task cites it and retargets the `Plan:` line, and a second mover relocates the same file differently.
 
 ## Step 4: clear prose naming the task
 
-The command drops the task's row from `.canon/tasks/priority.md` or `.canon/tasks/backlog.md` and leaves prose alone. Remove any sentence that still names the declined task or counts the rows that changed, since a stale count reads as board state.
+The command drops the row from `.canon/tasks/priority.md` or `.canon/tasks/backlog.md` and leaves prose alone. Remove any sentence that still names the declined task or counts the changed rows, since a stale count reads as board state.
