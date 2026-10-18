@@ -13,7 +13,6 @@ paths:
 ## Framework
 
 - Use the standard `testing` package. Do not add an assertion library for what `t.Errorf` and `t.Fatalf` already state.
-- Place a test beside the code it tests, in a `_test.go` file of the same package.
 - Use an external `<pkg>_test` package when a test should see only the exported API.
 
 ## Table-driven cases
@@ -24,7 +23,7 @@ paths:
 ## Helpers and setup
 
 - Call `t.Helper()` first in every test helper.
-- Use `t.Cleanup` over `defer` for teardown a helper registers.
+- Use `t.Cleanup` over `defer` for teardown a helper registers, since a `defer` runs when the helper returns.
 - Use `t.TempDir` and `t.Setenv` over hand-rolled temp directories or environment stashes.
 - Use `net/http/httptest` over a real listener.
 

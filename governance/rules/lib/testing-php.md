@@ -15,16 +15,15 @@ paths:
 
 - Use PHPUnit for all tests.
 - Declare each test class `final` and extend `PHPUnit\Framework\TestCase`.
-- Place tests under `tests/`, mirroring the `src/` namespace layout, in files named `*Test.php`.
 
 ## Attributes
 
-- Use attributes (`#[Test]`, `#[DataProvider]`, `#[CoversClass]`) over docblock annotations.
-- Use a static data provider method for table-driven cases over per-case test methods.
+- On PHPUnit 10 or later, use attributes (`#[Test]`, `#[DataProvider]`, `#[CoversClass]`) over docblock annotations, which PHPUnit 12 no longer reads.
+- Use a `public static` data provider method for table-driven cases over per-case test methods.
 
 ## Assertions and doubles
 
-- Use `assertSame` over `assertEquals`.
-- Use `expectException` over `try` and `catch` for expected exceptions.
+- Use `assertSame` over `assertEquals`, which compares with `==`.
+- Call `expectException` before the throwing call, over `try` and `catch`, for an expected exception.
 - Use `createStub` where no interaction is asserted. Reserve `createMock` for asserting a call.
 - Do not make real network calls. Use a fake or a stubbed client.

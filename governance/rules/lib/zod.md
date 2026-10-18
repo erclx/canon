@@ -9,17 +9,15 @@ paths:
 
 ## Type inference
 
-- Use `z.infer<typeof Schema>` to generate TypeScript types (Single Source of Truth).
-- Do not manually declare interfaces that duplicate Zod schemas.
-- Do not export the runtime Schema if only the inferred Type is required by consumers.
+- Derive a schema's type with `z.infer<typeof Schema>`, never a hand-written interface that duplicates the schema.
 
 ## Boundary validation
 
-- Use `.strict()` for untrusted external API boundaries to prevent data pollution.
-- Use `.parse()` for blocking validation (env vars) and `.safeParse()` for recoverable flows (forms).
-- Restrict `z.coerce` to I/O boundaries (e.g., URL params). Never use it for internal data flow.
+- Parse untrusted input with `z.strictObject()` so an unknown key fails, never with a method the Zod 4 changelog marks legacy.
+- Narrow a schema with `.pick()` or `.omit()`, never by passing unknown keys through with `z.looseObject()`.
+- Call `.parse()` where a failure should throw, and `.safeParse()` where the caller recovers, such as a form.
+- Restrict `z.coerce` to string input at an I/O boundary such as URL params, since it converts with `String()` or `Boolean()`.
 
 ## Schema safety
 
-- Use `z.unknown()` for truly ambiguous inputs instead of `z.any()`.
-- Prefer `.strict()` at boundaries or explicit `.pick()`/`.omit()` over `.passthrough()`.
+- Use `z.unknown()` for an input of unknown shape, never `z.any()`, which infers `any` and switches off checking downstream.

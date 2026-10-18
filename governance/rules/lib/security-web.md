@@ -9,24 +9,20 @@ paths:
 
 # Web security standards
 
-## Link safety
-
-- Add `rel="noopener noreferrer"` to all external links with `target="_blank"`.
-
 ## Content sanitization
 
-- Sanitize all user-generated content rendered via `dangerouslySetInnerHTML` using DOMPurify or equivalent.
-- Never use `dangerouslySetInnerHTML` without sanitization.
+- Sanitize HTML with DOMPurify before passing it to `dangerouslySetInnerHTML`, `innerHTML`, or `set:html`. Never render it raw.
+- Allow only `http:` and `https:` in a user-supplied URL before rendering it in `href` or `src`.
 
 ## Input validation
 
-- Validate all URL parameters and query strings using schema validation before use.
+- Parse URL parameters and query strings through a schema before use.
 
 ## Storage and tokens
 
-- Do not store sensitive data (tokens, passwords, PII) in `localStorage` or `sessionStorage`.
-- Store authentication tokens in httpOnly cookies over exposing them to JavaScript.
+- Never store a session token, password, or personal data in `localStorage` or `sessionStorage`, which any script on the page can read.
+- Keep an authentication token in an `HttpOnly` cookie, out of reach of JavaScript.
 
 ## Third-party scripts
 
-- Audit and pin versions for all third-party scripts loaded in the browser.
+- Pin a third-party script to a version and load it with an `integrity` hash.

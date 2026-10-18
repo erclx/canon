@@ -12,29 +12,20 @@ paths:
 ## Unit and integration
 
 - Use Vitest for unit and integration tests.
-- Co-locate unit tests with their respective components.
-- Use `userEvent` over synthetic events for interaction simulation.
-- Use MSW for network mocking. Do not mock fetch or axios manually.
-- Select elements by accessibility attributes first (`getByRole`, `getByLabelText`).
+- Simulate interaction with `userEvent` over `fireEvent`, since it refuses what a browser would, such as a click on a hidden element.
+- Mock the network with MSW. Never mock `fetch` or axios by hand, and never let a unit test make a real call.
+- Query by role or label first, such as `getByRole` and `getByLabelText`, and by test ID only when neither matches.
 
 ## End-to-end
 
 - Use Playwright for end-to-end tests.
-- Place all Playwright tests within the `e2e/` directory.
-- Never place Playwright tests inside `src/`.
-- Scope the three rules above to tests the Playwright runner executes. A Vitest test importing a browser driver to exercise project code stays beside its module, where Vitest looks for it.
-- Keep specs apart from their fixtures, page objects, and helpers inside `e2e/`. Load the `canon:codebase-layout` skill for the folder shape.
+- Place every test the Playwright runner executes under `e2e/`, never `src/`. A Vitest test that drives a browser stays beside its module.
 
 ## Timers and async
 
-- Never use `vi.useFakeTimers()` in `beforeEach` when tests use `waitFor`, `act`, or `userEvent`.
-- Scope fake timers to the individual test that needs them.
-- Restore real timers with `vi.useRealTimers()` in a matching `afterEach`.
+- Pass `advanceTimers: vi.advanceTimersByTime` to `userEvent.setup()` whenever fake timers are on.
+- Restore real timers with `vi.useRealTimers()` in `afterEach`, after `vi.runOnlyPendingTimers()`.
 
 ## Conventions
 
-- Use `.test.ts` / `.test.tsx` for unit tests.
-- Use `.spec.ts` / `.spec.tsx` for integration tests and for Playwright tests under `e2e/`.
-- Do not make real network calls in unit tests.
-- `describe()` labels use the exact identifier of the subject under test in its natural casing.
-- `it()` descriptions use "should" + sentence case.
+- Name a unit test `.test.ts` or `.test.tsx`, and an integration or Playwright test `.spec.ts` or `.spec.tsx`.
