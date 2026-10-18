@@ -183,6 +183,7 @@ After the chain, report as well:
 - Any domains or scripts that failed
 - Any detection gaps surfaced during resolve
 - Claude Code plugins as an onboarding step this chain does not cover, so a clean result does not read as onboarding complete
+- `/canon:write-doc README.md` when the root `README.md` is missing or carries no H1 naming the project, and nothing when it is authored
 
 A resolved name and a fallback read alike once written, so the preview marks the
 fallback rather than this report. The preview is the last point before the first
