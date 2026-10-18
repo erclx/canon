@@ -119,8 +119,28 @@ This chain adds one thing. Mark the pull request as a draft as soon as `git-ship
 
 - Read `${CLAUDE_SKILL_DIR}/references/draft-mark.md` on reaching that point for the one command that proves the target, marks it, and reads the flag back
 - A `false` read stops the chain, and never re-issue the mark on it
-- Emit the Output block on the wake after `git-ship`'s background CI watch exits on `passing`, not when the turn ends on its watch line
+- Move to Step 7 on the wake after `git-ship`'s background CI watch exits on `passing`, not when the turn ends on its watch line
 - Keep `git-ship`'s own verify gate, which repeats Step 3 on a clean run, since a resumed run enters at that gate
+
+## Step 7: wait for the reviews
+
+Read review state through `canon pr review-state` alone, since both review families post as pull request reviews and the verb reads them the way `canon pr lift` does. Polling issue comments finds neither close, and a worker that did so stalled with both reviewers idle behind it.
+
+Run this in the background, naming the number Step 6 returned. The wait outlasts a foreground shell call, so act on the wake rather than holding the turn.
+
+```bash
+canon pr review-state <number> --wait 1200 --json
+```
+
+Branch on the record's `reason` rather than on the exit, which a shell function wrapping `canon` can flatten to zero.
+
+| `reason`    | Route                                                                                                                  |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `covered`   | Emit the Output block. Invoke `canon:review-address` when `review.reason` or `ui.reason` reads open at the tip         |
+| `timeout`   | Send the record to the controller per `canon:role-worker`, emit the Output block, and stop rather than waiting again   |
+| Any refusal | Report the `reason` to the controller the same way and stop, since an unread thread is not one nobody has reviewed yet |
+
+Skip the `review-address` call when a reviewer's message already started it, since that message carries the same posted pass. A close in both families needs nothing from this session, since the reviewers run the lift on their close.
 
 ## Output
 
