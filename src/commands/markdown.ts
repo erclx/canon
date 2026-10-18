@@ -29,7 +29,16 @@ import {
   bodyLines,
   scanBans,
 } from '@/markdown/scan'
-import { densityGates, GATED_PATHS, inDensityScope } from '@/markdown/scope'
+import {
+  appendGatedPrefix,
+  findingsUnder,
+  GATED_CONFIG_REL,
+  type GatedList,
+  prefixShapeError,
+  readGatedConfig,
+  resolveGatedList,
+} from '@/markdown/gated'
+import { densityGates, inDensityScope } from '@/markdown/scope'
 import {
   BASELINE,
   CHECKPOINTS,
@@ -48,6 +57,9 @@ import {
   plural,
 } from '@/cli/ui'
 import { isOwnCheckout } from '@/roots/project'
+
+/** A config the audit cannot read refuses rather than gating nothing. */
+type AuditRefusal = MarkdownAuditRefusal | 'malformed-config'
 
 const EXIT_REFUSED = 1
 const EXIT_GATE = 2
@@ -119,9 +131,12 @@ export function register(program: Command): void {
         'a row, a 200-character bullet, 5 plain bullets in a row, no H4, and a',
         'paragraph or table opening every H3. Only context, docs, skills, tooling',
         'seeds and references, the wiki, README.md, and CONTRIBUTING.md take a',
-        'finding. One gates under a prefix in GATED_PATHS in src/markdown/scope.ts,',
-        'and a bullet run gates in context, docs, and skills from the start.',
-        'Outside a canon checkout every density finding reports and none gates.',
+        'finding. In a canon checkout one gates under a prefix in GATED_PATHS in',
+        'src/markdown/scope.ts, and a bullet run gates in context, docs, and',
+        'skills from the start. Elsewhere one gates only under a prefix',
+        'canon/config/markdown.toml lists, which canon markdown gated add writes,',
+        'and with no such file every density finding reports and none gates.',
+        'A config that does not parse refuses with its path named.',
         '',
         'A page whose frontmatter carries kind: reference takes the reference',
         'shape: no H2 beyond Output, Refusals, and See also, each at most once',
@@ -165,6 +180,127 @@ export function register(program: Command): void {
     .action(async (paths: string[], opts: AuditCommandOptions) => {
       process.exitCode = await runAudit(paths, opts)
     })
+
+  const gated = markdown
+    .command('gated')
+    .description("Read and extend a project's gated density prefixes")
+    .helpOption('-h, --help', 'Show this help message')
+
+  gated
+    .command('add')
+    .description(
+      'Gate a folder or file once it carries no density or reference shape finding',
+    )
+    .argument(
+      '<prefix>',
+      'A folder ending in a slash, or the path of one existing file',
+    )
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Exit codes:',
+        '  0  the prefix is listed, appended now or already present',
+        '  1  refused, with the reason on stderr, and the config left untouched',
+        '',
+        'Appends the prefix to canon/config/markdown.toml only when every file',
+        'under it carries zero findings that would gate once it is listed, so a',
+        'gated folder never fails a push the moment it is added. A folder holding',
+        'no markdown file passes. A prefix without a trailing slash would also',
+        'match a sibling such as docs-old/, so one must name an existing file.',
+        "A skill's REQUIREMENT.md gates only on its own path, never a folder.",
+        '',
+        "Canon's own checkout lists its prefixes in GATED_PATHS in",
+        'src/markdown/scope.ts, so the verb refuses there.',
+        '',
+        'Examples:',
+        '  canon markdown gated add docs/',
+        '  canon markdown gated add .claude/skills/my-skill/REQUIREMENT.md --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (prefix: string, opts: AuditCommandOptions) => {
+      process.exitCode = await runGatedAdd(prefix, opts)
+    })
+}
+
+type GatedAddRefusal =
+  'canon-checkout' | 'malformed-config' | 'bad-prefix' | 'no-git' | 'findings'
+
+async function runGatedAdd(
+  prefix: string,
+  opts: AuditCommandOptions,
+): Promise<number> {
+  const root = process.cwd()
+  const json = opts.json ?? false
+  const refuseAdd = (
+    reason: GatedAddRefusal,
+    message: string,
+    extra: Record<string, unknown> = {},
+  ): number => {
+    intro('canon markdown gated add')
+    logStep('Refused')
+    logWarn(message)
+    outro()
+    if (json) {
+      process.stdout.write(
+        `${JSON.stringify({ root, prefix, reason, message, ...extra })}\n`,
+      )
+    }
+    return EXIT_REFUSED
+  }
+
+  if (isOwnCheckout(root)) {
+    return refuseAdd(
+      'canon-checkout',
+      'This is a canon checkout, which gates through GATED_PATHS in src/markdown/scope.ts. Add the prefix there.',
+    )
+  }
+
+  const config = readGatedConfig(root)
+  if (config.kind === 'malformed') {
+    return refuseAdd('malformed-config', config.message)
+  }
+
+  const shape = prefixShapeError(root, prefix)
+  if (shape !== undefined) return refuseAdd('bad-prefix', shape)
+
+  const findings = await findingsUnder(root, prefix)
+  if (!findings) {
+    return refuseAdd(
+      'no-git',
+      'git could not list the tree, so nothing under the prefix was measured. Run inside a git repository.',
+    )
+  }
+  if (findings.length > 0) {
+    return refuseAdd(
+      'findings',
+      `${plural(findings.length, 'finding')} under ${prefix} would gate once it is listed. Run 'canon markdown audit ${prefix}' and bring it to zero first.`,
+      { findings },
+    )
+  }
+
+  const current = config.kind === 'listed' ? config.prefixes : []
+  const action = appendGatedPrefix(root, current, prefix)
+
+  intro('canon markdown gated add')
+  logStep(action === 'appended' ? 'Appended' : 'Already listed')
+  logInfo(
+    action === 'appended'
+      ? `${prefix} now gates in ${GATED_CONFIG_REL}.`
+      : `${prefix} was already listed in ${GATED_CONFIG_REL}, so nothing was written.`,
+  )
+  outro()
+
+  if (json) {
+    process.stdout.write(
+      `${JSON.stringify({ root, prefix, action, config: GATED_CONFIG_REL })}\n`,
+    )
+  }
+
+  return 0
 }
 
 async function runAudit(
@@ -194,12 +330,20 @@ async function runAudit(
     )
   }
 
+  const resolution = resolveGatedList(root)
+  if (resolution.kind === 'malformed') {
+    return refuse(
+      'malformed-config',
+      resolution.message,
+      root,
+      opts.json ?? false,
+    )
+  }
+  const gated = resolution.list
+
   const bans = BAN_SETS
   const empty = emptyBanSets(bans)
   const checkpoints = CHECKPOINTS
-  // `GATED_PATHS` describes this repository's rewrite progress, so a target
-  // reads every density finding as a report until its own corpus is gated.
-  const gates = isOwnCheckout(root)
 
   const reports: FileReport[] = await Promise.all(
     scope.files.map(async (rel) => {
@@ -216,12 +360,17 @@ async function runAudit(
         density: inDensityScope(rel)
           ? densityFindings(lines).map((finding) => ({
               ...finding,
-              gating: gates && densityGates(rel, finding.kind),
+              gating: densityGates(
+                rel,
+                finding.kind,
+                gated.prefixes,
+                gated.alwaysGated,
+              ),
             }))
           : [],
         referenceShape: referenceShapeFindings(source).map((finding) => ({
           ...finding,
-          gating: gates && referenceShapeGates(rel),
+          gating: referenceShapeGates(rel, gated.prefixes),
         })),
         links: findBrokenLinks(lines, (path) =>
           existsSync(resolve(dirname(abs), path)),
@@ -239,8 +388,8 @@ async function runAudit(
   reportLinks(reports, root)
   reportColons(reports)
   reportHeadingCase(reports)
-  reportDensity(reports, gates)
-  reportReferenceShape(reports, gates)
+  reportDensity(reports, gated, resolution.source)
+  reportReferenceShape(reports, gated)
   reportBullets(reports, checkpoints)
   reportParagraphs(reports, checkpoints)
   reportCadence(reports, checkpoints)
@@ -308,7 +457,7 @@ async function runAudit(
 }
 
 function refuse(
-  reason: MarkdownAuditRefusal,
+  reason: AuditRefusal,
   message: string,
   root: string,
   emitJson: boolean,
@@ -480,7 +629,11 @@ function describeDensity(finding: GatedDensityFinding): string {
  * under no gated prefix reports the same finding a gated one fails on and a
  * reader has to tell the two apart in one frame.
  */
-function reportDensity(reports: readonly FileReport[], gates: boolean): void {
+function reportDensity(
+  reports: readonly FileReport[],
+  gated: GatedList,
+  source: 'canon' | 'config' | 'absent',
+): void {
   logStep('Density')
   logInfo(
     `Paragraphs past ${CHECKPOINTS.paragraph} characters, more than 2 paragraphs in a row, bullets past ${CHECKPOINTS.bullet} characters, more than 5 plain bullets in a row, a heading past H3, and an H3 opening with neither a paragraph nor a table.`,
@@ -488,11 +641,7 @@ function reportDensity(reports: readonly FileReport[], gates: boolean): void {
   logInfo(
     'Measured on context entries, docs, skill bodies, references, and requirements, tooling seeds and stack references, the wiki, README.md, and CONTRIBUTING.md. Every other path takes no density finding.',
   )
-  logInfo(
-    gates
-      ? `A finding gates under a gated prefix (${GATED_PATHS.length === 0 ? 'none yet' : GATED_PATHS.join(', ')}), and a bullet run gates in context, docs, and skills already. Every other finding reports.`
-      : 'This tree is not a canon checkout, so every density finding reports and none gates.',
-  )
+  logInfo(densityGatingLine(gated, source))
 
   const carrying = reports
     .filter((report) => report.density.length > 0)
@@ -528,6 +677,20 @@ function reportDensity(reports: readonly FileReport[], gates: boolean): void {
   )
 }
 
+function densityGatingLine(
+  gated: GatedList,
+  source: 'canon' | 'config' | 'absent',
+): string {
+  if (source === 'absent') {
+    return `No ${GATED_CONFIG_REL} lists a gated prefix, so every density finding reports and none gates. Run 'canon markdown gated add <prefix>' once a folder reaches zero.`
+  }
+  const listed =
+    gated.prefixes.length === 0 ? 'none yet' : gated.prefixes.join(', ')
+  return source === 'canon'
+    ? `A finding gates under a gated prefix (${listed}), and a bullet run gates in context, docs, and skills already. Every other finding reports.`
+    : `A finding gates under a prefix ${GATED_CONFIG_REL} lists (${listed}). Every other finding reports.`
+}
+
 const REFERENCE_SHAPE_LABELS: Record<ReferenceShapeKind, string> = {
   'extra-section': 'section outside the shape',
   'section-order': 'section out of order or repeated',
@@ -546,16 +709,16 @@ function describeReferenceShape(finding: GatedReferenceShapeFinding): string {
  */
 function reportReferenceShape(
   reports: readonly FileReport[],
-  gates: boolean,
+  gated: GatedList,
 ): void {
   logStep('Reference shape')
   logInfo(
     `A page whose frontmatter carries kind: reference holds its opening, then ${REFERENCE_SECTIONS.join(', ')}, each at most once and in that order, with no H3 and no table of flags. An unmarked page is never measured.`,
   )
   logInfo(
-    gates
+    gated.prefixes.length > 0
       ? 'A finding gates under the prefixes the density step names. Every other finding reports.'
-      : 'This tree is not a canon checkout, so every reference shape finding reports and none gates.',
+      : 'No prefix is gated, so every reference shape finding reports and none gates.',
   )
 
   const carrying = reports.filter((report) => report.referenceShape.length > 0)
