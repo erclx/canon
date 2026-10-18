@@ -39,7 +39,7 @@ Load `markdown-craft` and `write-human`, then rewrite each failing block by its 
 Re-run the audit on the folder alone after each file:
 
 ```bash
-CANON_NON_INTERACTIVE=1 canon markdown audit <folder> --json
+CANON_NON_INTERACTIVE=1 canon markdown audit <prefix> --json
 ```
 
 Read `${CLAUDE_SKILL_DIR}/references/batches.md` for what a rewrite may cut. A stated reason survives every rewrite, and the audit reaching zero cannot see one that went missing.
@@ -47,8 +47,10 @@ Read `${CLAUDE_SKILL_DIR}/references/batches.md` for what a rewrite may cut. A s
 ## Step 4: gate the folder
 
 ```bash
-CANON_NON_INTERACTIVE=1 canon markdown gated add <folder>/ --json
+CANON_NON_INTERACTIVE=1 canon markdown gated add <prefix> --json
 ```
+
+Pass the prefix exactly as the batch named it: a folder with its one trailing slash, such as `docs/`, and a file by its bare path, such as `README.md`. The verb refuses a doubled slash and a slash after a file, since either matches nothing and would gate nothing.
 
 Branch on the record. `action: appended` or `present` means the folder gates now. `reason: findings` means one is left, so return to Step 3 with the paths the record lists. Never edit the config by hand, since the verb is what holds the folder to zero.
 
@@ -65,8 +67,8 @@ CANON_NON_INTERACTIVE=1 canon markdown gated add .claude/skills/<name>/REQUIREME
 One line per batch, then the folders left:
 
 ```markdown
-✅ Gated `<folder>/`: <n> files rewritten, <m> findings cleared.
-Left: `<folder>/` (<k> findings), `<folder>/` (<k> findings).
+✅ Gated `<prefix>`: <n> files rewritten, <m> findings cleared.
+Left: `<prefix>` (<k> findings), `<prefix>` (<k> findings).
 ```
 
 Name a folder the batch stopped short on with the findings still open, rather than reporting it gated.
