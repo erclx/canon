@@ -26,7 +26,9 @@ Run the audit over the whole tree and take the density and reference shape findi
 CANON_NON_INTERACTIVE=1 canon markdown audit --json
 ```
 
-Group the findings by folder, and drop every folder `canon/config/markdown.toml` already lists, since a listed folder already gates. A folder with no finding needs no rewrite and goes straight to Step 4.
+Take the candidate folders from the order table in `${CLAUDE_SKILL_DIR}/references/batches.md` rather than from the findings, since a clean folder carries no finding and would never be gated. Drop every folder `canon/config/markdown.toml` already lists, since a listed folder already gates.
+
+Sort what is left in two. A candidate the findings never name needs no rewrite, so gate it through Step 4 before the first batch. Group the findings under the rest, which Steps 2 and 3 rewrite.
 
 ## Step 2: pick one folder
 
