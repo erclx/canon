@@ -61,11 +61,6 @@ demos/*.png
 # worktree here and requires its target to sit here, so relocating it breaks the
 # harness rather than the toolkit.
 .claude/worktrees/
-# The scratch rule's fallback spelling, for a project the record move has not
-# reached. Ignored for as long as the guard hook accepts it and
-# canon migrate records has targets left to migrate off it.
-# canon-keep-record-root
-.claude/.tmp/
 
 # Editor
 .vscode/

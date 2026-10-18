@@ -9,7 +9,7 @@ name = "claude"
 extends = ""
 
 [gitignore]
-"# Claude" = [".claude/.tmp/", ".claude/plans/", ".claude/tasks/"]
+"# Claude" = [".canon/tmp/", ".claude/plans/", ".claude/tasks/"]
 `
 
 const dirs: string[] = []
@@ -51,7 +51,7 @@ describe('planGitignore', () => {
     const entries = planGitignore(claudeChain(root), target)
 
     expect(entries).toEqual([
-      { entry: '.claude/.tmp/', present: false },
+      { entry: '.canon/tmp/', present: false },
       { entry: '.claude/plans/', present: false },
       { entry: '.claude/tasks/', present: false },
     ])
@@ -65,7 +65,7 @@ describe('planGitignore', () => {
     const entries = planGitignore(claudeChain(root), target)
 
     expect(pendingEntries(entries).map((entry) => entry.entry)).toEqual([
-      '.claude/.tmp/',
+      '.canon/tmp/',
       '.claude/tasks/',
     ])
   })
@@ -73,11 +73,11 @@ describe('planGitignore', () => {
   it('should treat a directory entry without its trailing slash as present', async () => {
     const root = await makeRoot()
     const target = await makeDir()
-    await writeFile(join(target, '.gitignore'), '.claude/.tmp\n')
+    await writeFile(join(target, '.gitignore'), '.canon/tmp\n')
 
     const entries = planGitignore(claudeChain(root), target)
 
-    expect(entries[0]).toEqual({ entry: '.claude/.tmp/', present: true })
+    expect(entries[0]).toEqual({ entry: '.canon/tmp/', present: true })
   })
 
   it('should not match an entry that only appears as a substring', async () => {
@@ -95,14 +95,14 @@ describe('planGitignore', () => {
     await mkdir(join(root, 'tooling', 'claude'), { recursive: true })
     await writeFile(
       join(root, 'tooling', 'claude', 'manifest.toml'),
-      '[stack]\nname = "claude"\n\n[gitignore]\n"# Claude" = [\n  ".claude/.tmp/",\n  ".claude/plans/",\n]\n',
+      '[stack]\nname = "claude"\n\n[gitignore]\n"# Claude" = [\n  ".canon/tmp/",\n  ".claude/plans/",\n]\n',
     )
     const target = await makeDir()
 
     const entries = planGitignore(claudeChain(root), target)
 
     expect(entries.map((entry) => entry.entry)).toEqual([
-      '.claude/.tmp/',
+      '.canon/tmp/',
       '.claude/plans/',
     ])
   })
@@ -114,7 +114,7 @@ describe('planGitignore', () => {
     const entries = planGitignore(claudeChain(root), target)
 
     expect(entries.map((entry) => entry.entry)).toEqual([
-      '.claude/.tmp/',
+      '.canon/tmp/',
       '.claude/plans/',
       '.claude/tasks/',
     ])

@@ -49,11 +49,10 @@ Convert by hand, once per project.
 
 ## Gitignore
 
-The `# Claude` group holds three entries, being `.canon/`, `.claude/worktrees/`, and `.claude/.tmp/`. <!-- canon-keep-record-root -->
+The `# Claude` group holds two entries, being `.canon/` and `.claude/worktrees/`.
 
 - The first entry covers the whole record root, so a record folder added later needs no line here and no sync.
 - The second is the carve-out the harness owns, since it creates a worktree under `.claude/` and requires its target to sit there.
-- The third is the scratch rule's fallback spelling, carried for a project the record move has not reached and retired once none is left.
 
 ## CLI
 

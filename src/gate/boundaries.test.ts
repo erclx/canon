@@ -108,8 +108,8 @@ describe('ignoreParity', () => {
   })
 
   it('should read a pattern and an entry that differ only in the trailing slash as one path', async () => {
-    writeGitignore('# Claude', '.claude/.tmp')
-    writeManifestEntries('.claude/.tmp/')
+    writeGitignore('# Claude', '.canon/tmp')
+    writeManifestEntries('.canon/tmp/')
 
     expect((await measure(ignoreParity)).failure).toBeUndefined()
   })
