@@ -3,7 +3,13 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { PROJECT_ROOT } from '@/roots/project'
-import { readReference, referenceRoots, resolveReference } from '@/tooling/read'
+import { loadManifest } from '@/tooling/manifest'
+import {
+  readReference,
+  referenceRoots,
+  renderStackSections,
+  resolveReference,
+} from '@/tooling/read'
 
 /**
  * A root outside this repository is what separates the package copy from the
@@ -41,6 +47,7 @@ describe('resolveReference', () => {
 
     expect(resolveReference(ROOT, 'base')).toEqual({
       path: join(ROOT, 'tooling', 'base', 'reference.md'),
+      root: ROOT,
       source: join('tooling', 'base', 'reference.md'),
     })
   })
@@ -50,6 +57,7 @@ describe('resolveReference', () => {
 
     expect(resolved).toEqual({
       path: join(PROJECT_ROOT, 'tooling', 'base', 'reference.md'),
+      root: PROJECT_ROOT,
       source: join('<canon>', 'tooling', 'base', 'reference.md'),
     })
   })
@@ -71,5 +79,70 @@ describe('readReference', () => {
     const resolved = resolveReference(ROOT, 'base')
 
     expect(resolved && readReference(resolved)).toBe('# Base\n')
+  })
+})
+
+describe('renderStackSections', () => {
+  function writeStack(manifest: string): void {
+    writeReference('tooling/demo/manifest.toml', manifest)
+  }
+
+  it('should list the stack configs and seeds under Sync and its gitignore groups', () => {
+    writeStack(
+      [
+        '[stack]',
+        'name = "demo"',
+        'extends = "base"',
+        '',
+        '[gitignore]',
+        '"# Build" = ["dist/"]',
+        '"# Playwright" = ["test-results/", "playwright-report/"]',
+        '',
+      ].join('\n'),
+    )
+    writeReference('tooling/demo/configs/.oxlintrc.json', '{}\n')
+    writeReference('tooling/demo/configs/tsconfig.json', '{}\n')
+    writeReference('tooling/demo/seeds/canon/context/index.md', '# Index\n')
+    const manifest = loadManifest(ROOT, 'demo')
+
+    expect(manifest && renderStackSections(manifest)).toBe(
+      [
+        '',
+        '## Sync',
+        '',
+        'Sync keeps these current, from `configs/`:',
+        '',
+        '- `.oxlintrc.json`',
+        '- `tsconfig.json`',
+        '',
+        'Sync copies these once, from `seeds/`:',
+        '',
+        '- `canon/context/index.md`',
+        '',
+        '## Gitignore',
+        '',
+        '- `# Build`: `dist/`',
+        '- `# Playwright`: `test-results/`, `playwright-report/`',
+        '',
+      ].join('\n'),
+    )
+  })
+
+  it('should print no empty heading for a stack with no seeds or groups', () => {
+    writeStack('[stack]\nname = "demo"\n')
+    writeReference('tooling/demo/configs/tsconfig.json', '{}\n')
+    const manifest = loadManifest(ROOT, 'demo')
+    const printed = manifest ? renderStackSections(manifest) : ''
+
+    expect(printed).toContain('`tsconfig.json`')
+    expect(printed).not.toContain('seeds/')
+    expect(printed).not.toContain('## Gitignore')
+  })
+
+  it('should print nothing for a stack shipping no files and no groups', () => {
+    writeStack('[stack]\nname = "demo"\n')
+    const manifest = loadManifest(ROOT, 'demo')
+
+    expect(manifest && renderStackSections(manifest)).toBe('')
   })
 })
