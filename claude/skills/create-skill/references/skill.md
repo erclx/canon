@@ -57,7 +57,7 @@ A skill fires when a session invokes it or its description matches the request. 
 - An invariant passing both halves belongs in a rule as well, since a session that never invoked the skill still edits that path
 - An invariant failing either half stays here, which is most of a body
 
-Write that rule to the shape `rule.md` sets and leave the procedure here, since the two carry one invariant at two depths rather than two copies of it. Nothing checks the split.
+Write that rule to the shape `rule.md` sets, keeping one copy of each invariant. A skill creating the file the rule globs owns the floor beside the rule's pointer, and a skill editing existing files points at the rule.
 
 ## Skill types
 
