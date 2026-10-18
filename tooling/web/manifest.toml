@@ -47,7 +47,7 @@ packages = [
 
 [gitignore]
 "# Build" = ["dist/"]
-"# Coverage" = ["coverage/"]
+"# Coverage" = ["coverage/", ".vitest/"]
 "# Playwright" = [
   "test-results/",
   "playwright-report/",
