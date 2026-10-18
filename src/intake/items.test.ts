@@ -9,6 +9,8 @@ import {
 interface ItemFixture {
   readonly label: string
   readonly title?: string
+  readonly problem?: string | null
+  readonly fix?: string | null
   readonly open?: string
   readonly suggested?: string
   readonly answer?: string
@@ -17,6 +19,8 @@ interface ItemFixture {
 function item({
   label,
   title = 'Something is wrong',
+  problem = 'a measured defect',
+  fix = 'the one change proposed',
   open,
   suggested,
   answer,
@@ -24,10 +28,12 @@ function item({
   const lines = [
     `### ${label}. ${title}`,
     '',
-    '- **Problem:** a measured defect',
-    '- **Fix:** the one change proposed',
     '- **Worth it:** yes, it is cheap',
   ]
+
+  if (problem !== null) lines.splice(2, 0, `- **Problem:** ${problem}`)
+  if (fix !== null)
+    lines.splice(problem === null ? 2 : 3, 0, `- **Fix:** ${fix}`)
 
   if (open) lines.push(`- **Open:** ${open}`)
   if (suggested) lines.push(`- **Suggested:** ${suggested}`)
@@ -104,6 +110,27 @@ describe('readItems', () => {
 
     expect(items[0].open).toBe('ship now or later?')
     expect(items[0].suggested).toBe('later, it is cheap')
+  })
+
+  it('should carry the problem and fix whole, past a colon, a code span, and a quote', () => {
+    const problem =
+      'hook `scratch-guard.sh` fails open: a crash lets "any" write through'
+    const fix = 'set `onFailure: "block"` on it'
+
+    const [target] = readItems(cluster(item({ label: '1', problem, fix })))
+
+    expect(target.problem).toBe(problem)
+    expect(target.fix).toBe(fix)
+  })
+
+  it('should leave problem and fix absent on an item lacking either line', () => {
+    const [target] = readItems(
+      cluster(item({ label: '1', problem: null, fix: null })),
+    )
+
+    expect(target.problem).toBeUndefined()
+    expect(target.fix).toBeUndefined()
+    expect(isUnread(target)).toBe(true)
   })
 
   it('should ignore an item displayed inside a fenced sample', () => {
