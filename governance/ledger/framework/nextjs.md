@@ -67,15 +67,20 @@ Every bullet the rewrite removed or reshaped, grouped by why.
 - Cut "use route segment files for their documented purpose" as a convention Claude already follows.
 - Cut "place HTTP endpoints in `app/**/route.ts`, never `pages/api/`" as covered by the App Router bullet.
 - Cut "export named HTTP methods" as enforced by the framework, which only routes the named exports.
-- Cut "do not fetch in client components when a server alternative exists" as merged into the server-by-default bullet, since the docs list fetching among a Server Component's uses.
-- Cut "use `next/font` over manual link tags" to hold the word count, since the rule loads on every TypeScript file.
 - Cut "export `metadata` or `generateMetadata` over manual head tags" as a convention Claude already follows.
+
+### Cut for the word budget
+
+A sourced practice cut only because the rule loads on every TypeScript file. A later pass with room can bring it back.
+
+- Cut "use `next/font` over manual link tags", which the docs still recommend.
 
 ### Merged or reworded
 
+- Merged "do not fetch in client components when a server alternative exists" into the server-by-default bullet, since the docs list fetching among a Server Component's uses.
 - Merged "do not introduce `pages/` in new code" into the App Router bullet.
 - Merged "push the boundary as deep as possible" into the leaf bullet.
 - Merged "mark Server Actions with `'use server'`", which the build requires, into the mutation bullets.
 - Reworded "validate Server Action inputs with a Zod schema" to any validation, since [Data Security](https://nextjs.org/docs/app/guides/data-security) names no library.
 - Reworded "use `revalidatePath` or `revalidateTag` over manual refetch loops" to the call the mutation page shows.
-- Merged "never read unprefixed server-only env vars from a client component" into the environment bullet, since Next.js replaces an unprefixed variable with an empty string in the client bundle.
+- Merged "never read unprefixed env vars in a client component" into the env bullet, since [Server and Client Components](https://nextjs.org/docs/app/getting-started/server-and-client-components) says "If variables are not prefixed, Next.js replaces them with an empty string".

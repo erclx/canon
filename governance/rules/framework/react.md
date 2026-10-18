@@ -22,7 +22,7 @@ paths:
 
 ## Memoization
 
-- Leave memoization to React Compiler where it is enabled, the default for new projects. Add `useMemo` only for precise control.
+- Leave memoization to React Compiler where it is enabled, as React recommends for new code. Add `useMemo` only for precise control.
 - Without the compiler, memoize only a calculation measured at 1ms or more, or a value a `memo` child or a Hook dependency reads.
 
 ## Composition

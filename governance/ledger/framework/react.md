@@ -77,7 +77,7 @@ Every bullet the rewrite removed or reshaped, grouped by why.
 
 - Merged "no default exports" into the named-exports bullet, which states the same choice.
 - Narrowed "custom hooks for all fetching and complex effects" to data fetching, since [Reusing logic with custom hooks](https://react.dev/learn/reusing-logic-with-custom-hooks) says "you can (but don't have to) extract custom Hooks".
-- Merged "no `setState` in an effect to sync derived state" into the derive bullet. The `react-hooks/set-state-in-effect` lint already errors in the shipped configs.
+- Merged "no `setState` in an effect to sync derived state" into the derive bullet, the same ban. Only the `web` and `nextjs` oxlint configs error on `react/set-state-in-effect`.
 - Reworded "a sentinel from asynchronously hydrating hooks" to `useSyncExternalStore` with a matching server snapshot, the API the reference names for a value React does not own.
 - Reworded "error boundaries at route level", since the reference places a boundary by where a message makes sense rather than at a fixed level.
 - Merged "no single root error boundary as the only net" into the placement bullet.
