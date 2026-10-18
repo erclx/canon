@@ -18,11 +18,13 @@ kind: reference
 | `rule-layout`      | A flat installed-rule layout onto the `canon/`-wrapped one                                                                                  |
 | `scratch-evidence` | A folder a durable record cites out of `.tmp/`, with its citations                                                                          |
 | `record-layout`    | Review receipts, memory archives, feedback, renders, picks, and evidence into their current folders                                         |
+| `session-defaults` | The seeded session defaults into an existing `.claude/settings.json`: `Agent` and `Task` denied, auto memory off                            |
 
 - `skill-names` takes no `--scope` and skips the changelog and eval transcripts
 - `surface-roots` leaves `rules/`, `skills/`, `hooks/`, and `settings.json` where Claude Code reads them
 - `rule-layout` classifies each flat file against the stamp as clean, edited, or unclaimed. Clean and edited files move untouched, and an unclaimed name stays.
 - `record-layout` labels each evidence folder `(pick)` or `(evidence)` in the dry run
+- `session-defaults` adds a key only when absent. It never removes a deny entry or changes a set `autoMemoryEnabled`, and a missing settings file is nothing to do.
 
 ## Output
 
@@ -43,14 +45,15 @@ Three markers keep an old spelling on a line. Each also covers the nearest non-b
 
 ## Refusals
 
-| Verb               | Refuses when                                                                        |
-| ------------------ | ----------------------------------------------------------------------------------- |
-| `records`          | The project does not ignore `.canon/`. Run `canon tooling sync --write` first.      |
-| `records`          | A record folder already exists at the destination                                   |
-| `surface-roots`    | Any destination already exists under `canon/`, refusing the whole plan              |
-| `scratch-evidence` | A destination is occupied                                                           |
-| `record-layout`    | A destination already exists, each move refused on its own                          |
-| `rule-layout`      | A destination holds different bytes. Neither file is touched and other moves apply. |
+| Verb               | Refuses when                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------- |
+| `records`          | The project does not ignore `.canon/`. Run `canon tooling sync --write` first.        |
+| `records`          | A record folder already exists at the destination                                     |
+| `surface-roots`    | Any destination already exists under `canon/`, refusing the whole plan                |
+| `scratch-evidence` | A destination is occupied                                                             |
+| `record-layout`    | A destination already exists, each move refused on its own                            |
+| `rule-layout`      | A destination holds different bytes. Neither file is touched and other moves apply.   |
+| `session-defaults` | The settings file is not valid JSON, or `permissions` or its `deny` has another shape |
 
 A `rule-layout` destination holding the same bytes marks a duplicate, which `--write` deletes.
 
