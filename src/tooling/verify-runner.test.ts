@@ -146,10 +146,10 @@ describe.each(['base', 'go', 'php', 'python', 'web'] as const)(
       expect(runVerify().status).toBe(1)
     })
 
-    it('should name bun init when no package.json exists', () => {
+    it('should tell the reader to sync when no package.json exists', () => {
       writeList(stack)
 
-      expect(runVerify().stdout).toContain("Run 'bun init'")
+      expect(runVerify().stdout).toContain('Sync the stack to write one')
     })
   },
 )

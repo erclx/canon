@@ -208,7 +208,10 @@ export async function injectManifest(
  * Only an existing package.json that fails to parse reaches here with installs
  * pending, since an absent one was written above. It is left untouched.
  */
-function warnUnreadablePackage(chain: readonly Manifest[], target: string): void {
+function warnUnreadablePackage(
+  chain: readonly Manifest[],
+  target: string,
+): void {
   if (!declaresInstalls(chain)) return
 
   const deps = collectDeps(chain, {}).map((dep) => dep.spec)
@@ -222,5 +225,7 @@ function warnUnreadablePackage(chain: readonly Manifest[], target: string): void
   if (scripts.length > 0) {
     logWarn(`Scripts not added: ${scripts.join(', ')}`)
   }
-  logWarn(`package.json is not valid JSON: fix it in ${target}, then sync again`)
+  logWarn(
+    `package.json is not valid JSON: fix it in ${target}, then sync again`,
+  )
 }
