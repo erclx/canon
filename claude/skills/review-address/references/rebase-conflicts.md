@@ -21,6 +21,13 @@ Pop only when the stash ran. On a clean tree, which is what a run whose findings
 
 Never merge `main` into the branch. The repository squash-merges, so a merge commit here reads as noise on the pull request.
 
+### A branch carrying merges
+
+A branch carrying merge commits of its own, such as a fan-in integrator's, rebases with `git rebase --rebase-merges origin/main` instead. A plain rebase drops the merges and replays every member commit in one line, which loses the one merge commit per member a reviewer reads.
+
+- `--rebase-merges` re-runs each merge without the resolution it recorded, so resolve each again by the rules below
+- `git config rerere.enabled true`, set before the first merge, replays a recorded resolution in place of resolving it again
+
 ## Resolving a conflict
 
 These rules apply to a hunk from the rebase and a hunk from the stash pop alike:

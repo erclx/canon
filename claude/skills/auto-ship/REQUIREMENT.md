@@ -19,6 +19,7 @@ Without this skill, the run from an approved plan to an open pull request is a c
 - Open the pull request as a draft before the continuous integration watch begins, since a pull request marked after it is mergeable for the length of the run
 - Continue past a produced UI checklist rather than stopping on it, and report its unchecked boxes in the closing block, since the draft mark already holds the merge
 - Prove the draft target's head is the current branch and its state is open before marking it, and stop with nothing marked on a mismatch, since the number is retyped between steps and a draft mark on a release pull request holds that release
+- Stop a fan-in member after its verify and test order with a push and a done message rather than a pull request, and open an integrator's build by merging the member branches, since parallel batches sharing edge files put every open sibling into conflict on each merge
 - Name the recovery for the stop it took, since the value of stopping is that the user knows where to resume
 
 ## Must not

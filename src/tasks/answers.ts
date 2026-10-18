@@ -1,8 +1,15 @@
 import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { basename, isAbsolute, relative, resolve } from 'node:path'
+import { branchRefs } from '@/git/worktree'
+import { fanInBranch, fanInFindings, readFanInMembers } from '@/tasks/fan-in'
 import { isUnder } from '@/tasks/paths'
-import { JUDGED_APART_REMEDY, readLivePlans, stackPairs } from '@/tasks/stack'
+import {
+  JUDGED_APART_REMEDY,
+  readLivePlans,
+  type StackPlan,
+  stackPairs,
+} from '@/tasks/stack'
 import { recordDir, recordDirs } from '@/roots/record'
 import {
   hasStagedBatches,
@@ -48,6 +55,28 @@ export interface PlanAnswers {
 }
 
 export type AnswersOutcome = PlanAnswers | AnswersRefused
+
+/**
+ * Whether `refs/remotes/origin/<branch>` exists, or `null` when the read
+ * itself failed. Injected so the gate is testable without a repository.
+ */
+export type RemoteBranchReader = (
+  root: string,
+  branch: string,
+) => Promise<boolean | null>
+
+/**
+ * Reads the remote-tracking ref as the last fetch left it, so a member pushed
+ * since then reads as absent and holds its integrator, which fails safe. The
+ * local head is not read, since it exists mid-build and a pushed branch is the
+ * only signal a member writes when it is done.
+ */
+export const originBranchPushed: RemoteBranchReader = async (root, branch) => {
+  const report = await branchRefs(branch, root)
+  if (!report.readable) return null
+
+  return report.refs.includes(`refs/remotes/origin/${branch}`)
+}
 
 /**
  * A reference that named a live plan, carrying the absolute path a reader opens
@@ -217,6 +246,7 @@ export function resolvePlanReference(
 export async function planAnswers(
   root: string,
   reference: string,
+  readRemoteBranch: RemoteBranchReader = originBranchPushed,
 ): Promise<AnswersOutcome> {
   const resolved = resolvePlanReference(root, reference)
   if (!resolved.ok) return resolved
@@ -233,7 +263,8 @@ export async function planAnswers(
   }
 
   const stem = basename(resolved.path, '.md')
-  const pairs = stackPairs(await readLivePlans(root))
+  const live = await readLivePlans(root)
+  const pairs = stackPairs(live)
 
   for (const { child, parent, shared } of pairs) {
     if (child !== stem) continue
@@ -244,12 +275,58 @@ export async function planAnswers(
     })
   }
 
+  open.push(...(await fanInEntries(root, stem, text, live, readRemoteBranch)))
+
   return {
     ok: true,
     plan: resolved.plan,
     launchable: open.length === 0,
     open,
   }
+}
+
+/**
+ * A plan whose fan-in set disagrees holds on `Fan-in set`, on either side,
+ * since an integrator listing an archived member would otherwise read that
+ * member's leftover branch as done. An integrator whose set agrees holds on
+ * `Fan-in pending` until every member branch is on origin.
+ */
+async function fanInEntries(
+  root: string,
+  stem: string,
+  text: string,
+  live: readonly StackPlan[],
+  readRemoteBranch: RemoteBranchReader,
+): Promise<OpenQuestion[]> {
+  const entries: OpenQuestion[] = fanInFindings(live)
+    .filter(({ record }) => record === `${stem}.md`)
+    .map(({ message }) => ({ label: 'Fan-in set', why: message }))
+
+  const branches = readFanInMembers(text).map(fanInBranch)
+  if (branches.length === 0 || entries.length > 0) return entries
+
+  const pushed = await Promise.all(
+    branches.map((branch) => readRemoteBranch(root, branch)),
+  )
+
+  if (pushed.includes(null)) {
+    return [
+      {
+        label: 'Fan-in pending',
+        why: 'git could not read the member branches on origin, so the set is unread rather than done.',
+      },
+    ]
+  }
+
+  const absent = branches.filter((_, index) => pushed[index] !== true)
+  if (absent.length === 0) return []
+
+  return [
+    {
+      label: 'Fan-in pending',
+      why: `waits on ${absent.map((branch) => `\`${branch}\``).join(', ')} reaching origin. Fetch, then read again.`,
+    },
+  ]
 }
 
 function refuse(

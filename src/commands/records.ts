@@ -44,6 +44,7 @@ import {
   plural,
 } from '@/cli/ui'
 import { currentWorktreeRoot, mainWorktreeRoot } from '@/git/worktree'
+import { fanInFindings } from '@/tasks/fan-in'
 import { readLivePlans, stackFindings } from '@/tasks/stack'
 
 /** Returned when a record carries a finding, which is the gating result. */
@@ -742,7 +743,7 @@ async function runValidate(
 }
 
 /**
- * Appends the one plans finding that reads across files. It sits in the command
+ * Appends the plans findings that read across files. They sit in the command
  * layer because `src/records/` sits below `src/tasks/`.
  */
 async function validateWithStacks(
@@ -752,9 +753,16 @@ async function validateWithStacks(
   const outcome = await validateRecords(root, kind)
   if (!outcome.ok || kind !== 'plans') return outcome
 
-  const stacked = stackFindings(await readLivePlans(root))
+  const live = await readLivePlans(root)
 
-  return { ...outcome, findings: [...outcome.findings, ...stacked] }
+  return {
+    ...outcome,
+    findings: [
+      ...outcome.findings,
+      ...stackFindings(live),
+      ...fanInFindings(live),
+    ],
+  }
 }
 
 function report(

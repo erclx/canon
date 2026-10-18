@@ -48,6 +48,7 @@ export const FINDING_KINDS = [
   'batch-unsplit',
   'source-unquoted',
   'stack-foldable',
+  'fan-in-unmatched',
 ] as const
 
 export type FindingKind = (typeof FINDING_KINDS)[number]

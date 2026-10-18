@@ -106,3 +106,50 @@ describe('canon records stale canonical', () => {
     expect(result.stderr).toContain('canon/REQUIREMENTS.md')
   })
 })
+
+describe('canon records validate plans', () => {
+  let root: string
+
+  beforeEach(async () => {
+    root = await mkdtemp(join(tmpdir(), 'canon-records-validate-'))
+    await mkdir(join(root, '.canon', 'plans'), { recursive: true })
+  })
+
+  afterEach(async () => {
+    await rm(root, { recursive: true, force: true })
+  })
+
+  it('should report an orphan fan-in member as fan-in-unmatched', async () => {
+    await writeFile(
+      join(root, '.canon', 'plans', 'feature-a.md'),
+      [
+        '# Feature: A member',
+        '',
+        '**Constraints:**',
+        '',
+        '- Fan-in member of `feature-whole`.',
+        '',
+        '**Files to touch:**',
+        '',
+        '- `src/a.ts`: the change.',
+        '',
+      ].join('\n'),
+    )
+
+    const result = await runCli([
+      'records',
+      'validate',
+      'plans',
+      '--json',
+      '--root',
+      root,
+    ])
+
+    const { findings } = JSON.parse(result.stdout) as {
+      findings: { kind: string; record: string; subject: string }[]
+    }
+    expect(
+      findings.filter(({ kind }) => kind === 'fan-in-unmatched'),
+    ).toMatchObject([{ record: 'feature-a.md', subject: 'feature-whole' }])
+  })
+})

@@ -61,6 +61,14 @@ Announce the pull request as the ship chain's pull request step returns, carryin
 - Say the reach was unread rather than clear when the installed binary carries no such subcommand, and leave the undeclared list to the pull request
 - Carry a row this build turned up with its title, origin, and surface. Send it alone only when the session ends before a pull request opens.
 
+### A fan-in member
+
+A member of a fan-in set opens no pull request, so its done message stands in for the announcement. `auto-ship` sends it after the push.
+
+- Carry the branch, the head commit, and the integrator the plan names in place of a pull request number
+- Carry no reach, since the integrator's announcement carries it once for the whole set
+- An integrator is an ordinary worker and owes the announcement above
+
 ### Re-review and blocks
 
 Ask for the re-review as `review-address` Step 8 returns, carrying what was addressed and the PR's new CI state. That transition is the other moment only this session knows, and the message starts the re-review.
@@ -117,5 +125,6 @@ Never concede on the name alone or proceed as if the sets never collided. A work
 ## Lifetime
 
 - The role runs from the worktree entry to the merge of the branch it built, and nothing carries to a second row, which is a new build under a new plan
+- A fan-in member's role ends at its push, since the integrator merges the branch and fixes on its own branch whatever the merge surfaces
 - A talk session outlives the merge and ends when the operator says the conversation is over
 - Treat this body as possibly older than the branch under it. A plugin skill loads from the marketplace cache, so a session changing its own skills may hold the copy from before the last update.

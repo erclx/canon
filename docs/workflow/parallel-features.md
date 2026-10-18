@@ -41,6 +41,7 @@ Assert the orchestrator role in one warm session with `canon:role-orchestrator`.
 
 Merge order matters only when two branches touch the same file. Expect to rebase over `CLAUDE.md`, `tooling/**`, `canon/context/context-model.md`, `docs/agents/`, and any folder's `index.md`. Resolve an `index.md` conflict with `canon indexes regen` over the rebased tree.
 
+- **Fan-in.** Batches of one change sharing edge files ship as one pull request, opened by an integrator that merges each member branch. See `claude/skills/plan-feature/references/batches.md`.
 - **Merge order.** Merge the smallest hotspot footprint first, and a branch touching `CLAUDE.md` or a context entry last.
 - **Rebase.** The branch merging second runs `/review-address`, which trial-merges against `origin/main` and rebases. Push, then merge.
 - **Clean up.** Run `/git-worktree cleanup` to remove merged worktrees. To start fresh, `ExitWorktree(action: "keep")`, then `/session-worktree <new-name>`.

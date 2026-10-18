@@ -41,7 +41,7 @@ export interface StackPair {
  * One string per `**Constraints:**` bullet, with a wrapped continuation line
  * joined to the bullet it belongs to.
  */
-function constraintBullets(text: string): string[] {
+export function constraintBullets(text: string): string[] {
   const bullets: string[] = []
 
   for (const line of splitPlanSections(text).get('Constraints') ?? []) {
