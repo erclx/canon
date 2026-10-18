@@ -90,12 +90,19 @@ export function prefixShapeError(
   if (prefix === '' || prefix.startsWith('/') || prefix.includes('..')) {
     return `${prefix || '(empty)'} is not a repository-relative path`
   }
-  if (prefix.endsWith('/')) return undefined
-  if (
-    existsSync(join(root, prefix)) &&
-    !statSync(join(root, prefix)).isDirectory()
-  )
-    return undefined
+  // A listed prefix is a `startsWith` match against repository paths, so either
+  // shape below matches no file and would gate nothing while reading as clean.
+  if (prefix.includes('//')) {
+    return `${prefix} carries a doubled slash, so it matches no file`
+  }
+  const path = join(root, prefix.replace(/\/$/, ''))
+  const isFile = existsSync(path) && !statSync(path).isDirectory()
+  if (prefix.endsWith('/')) {
+    return isFile
+      ? `${prefix} names a file, so drop the trailing slash`
+      : undefined
+  }
+  if (isFile) return undefined
   return `${prefix} names no file. End a folder prefix with a slash.`
 }
 

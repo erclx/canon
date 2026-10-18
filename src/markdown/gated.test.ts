@@ -73,6 +73,15 @@ describe('prefixShapeError', () => {
     writeFileSync(join(root, 'README.md'), '# Readme\n')
     expect(prefixShapeError(root, 'README.md')).toBeUndefined()
   })
+
+  it('should refuse a doubled slash, which matches no file', () => {
+    expect(prefixShapeError(root, 'docs//')).toContain('doubled slash')
+  })
+
+  it('should refuse a trailing slash after a file', () => {
+    writeFileSync(join(root, 'README.md'), '# Readme\n')
+    expect(prefixShapeError(root, 'README.md/')).toContain('names a file')
+  })
 })
 
 describe('appendGatedPrefix', () => {
