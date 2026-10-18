@@ -11,7 +11,9 @@ import { readRegistry, type SessionRecord } from '@/sessions/registry'
 
 /** Why a row carries no branch, stated rather than left as an absent key. */
 export type Unresolved =
-  'not-a-repository' | 'detached-head' | 'git-unavailable'
+  | 'not-a-repository'
+  | 'detached-head'
+  | 'git-unavailable'
 
 export interface ResolvedSession {
   readonly name: string
