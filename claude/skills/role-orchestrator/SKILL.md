@@ -132,6 +132,8 @@ A worker is a separate process the controller can steer, and scope reaches it th
 - Do not edit tracked files from this session, at any size. The boundary offers no proportionality exception and nothing enforces it.
 - Do not hand a worker anything but a plan, which carries exact diffs only when already known and otherwise states scope and open questions
 
+A late ask about a building row is a follow-up filed through `task-board` with the running task as origin. Amend the plan in place only on the operator's word, naming the re-review cost, and message the worker the pointer.
+
 The tracked-file boundary collides with `CLAUDE.md`, which says to handle a small edit immediately, and this rule wins wherever the two meet. A session that writes a change cannot review it independently afterwards, which is the separation `review-pr` exists to supply.
 
 ### Filing a row

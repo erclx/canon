@@ -104,7 +104,7 @@ A launch whose brief says it is a talk session puts the operator in this one. Ev
 - Put each open question to the operator through the structured question surface before writing the record, and record a settled pick in place per the plan standard
 - Never fill an `- Answer:` slot the operator did not answer
 - Keep answering under `plan-feature`'s discussion rounds after the record lands, since the operator launched this session to keep talking.
-- Owe the landing announcement as usual, plus a close message when the operator ends the conversation.
+- Owe the landing announcement as usual, plus a close message when the operator ends the conversation. Send an ask about a building row to the controller, never the worker.
 - Skip the before-prompt block message for a question put to the operator in the session. Keep it for a block the operator cannot answer, since a controller learns of a stall only from a message.
 
 The operator being present is an assumption the launch carries. A talk planner whose operator has walked away waits silently on its first question, so say what the session is waiting on in the turn it stops.

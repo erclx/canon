@@ -35,6 +35,7 @@ The draft mark fails from both ends. On 2026-08-31 four sessions re-drafted a pu
 - Keep refusing a dispatcher a first-class move carrying its evidence, since the halts measured so far were correct and the cost of each fell where it belonged
 - State that a held body may be older than the branch under it, since a plugin skill loads from the marketplace cache rather than from the working tree
 - Carry a talk clause for a launch whose operator is in the session, asking them at a judgment call and sending a close message when they end the conversation, since a cold worker's halt-toward-the-controller and merge-ends-the-role rules contradict a brief that asks it to talk
+- Freeze the plan's scope at dispatch, sorting a late ask into a defect to fix, a follow-up row to report, or an addition the operator's word admits with its re-review cost stated, since intake 155 measured about four UI review rounds on one pull request from late asks, each re-running both reviews
 - Point at `session-worktree`, `auto-ship`, and `review-address` for the steps each already owns
 
 ## Must not
