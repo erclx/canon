@@ -132,7 +132,7 @@ A body holds behavioral rules and pointers to reference docs, front-loading the 
 
 ### Current rule and grouping
 
-State the current rule only, in the body and in every file under `references/`. The incident and the date that earned a rule go in `REQUIREMENT.md` under `Gap`, or stay in git, and a date inside a fence or a code span is example data and stays.
+State the current rule only, in the body and in every file under `references/`. The incident and the date that earned a rule stay in git, and a date inside a fence or a code span is example data and stays.
 
 - Cut any rule that resists crisp one-line phrasing. Vague guidance is worse than none.
 - Group bullets under H2 headings by concern, keeping dos and don'ts together rather than in flat rules and constraints sections

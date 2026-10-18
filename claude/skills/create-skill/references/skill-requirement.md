@@ -95,7 +95,7 @@ Without this skill, a session <failure it hits today>. <A second failure, when t
 
 ### Worked example
 
-`git-commit`'s requirement in this shape, at 183 words.
+`git-commit`'s requirement in this shape, at 167 words as the audit counts them.
 
 ```markdown
 ---

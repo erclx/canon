@@ -1,4 +1,10 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -287,43 +293,25 @@ describe('auditSkills requirement limits', () => {
   }
 
   it('should pass the worked example in the standard', async () => {
-    skillWithRequirement(
-      [
-        '---',
-        'name: git-commit',
-        'description: What commit generation is for',
-        '---',
-        '',
-        '# Git commit requirement',
-        '',
-        '## Gap',
-        '',
-        'Without this skill, a commit message takes whatever shape the session picks. The type and scope drift from the history convention, the subject runs past the log width, and a lockfile diff crowds out the change the message should describe.',
-        '',
-        'A plain request to commit also reaches the grouping sibling, which restages whole files, so a hunk-level selection ships wider than the user reviewed.',
-        '',
-        '## Must',
-        '',
-        '- The message follows the commit format and versioning references',
-        '- The message describes the staged diff with lockfiles excluded',
-        '- The user sees the message and its length before the commit runs',
-        '- The committed set is exactly the staged set',
-        '- The description claims single-concern and hunk-level staged sets, and names `git-stage` for a mixed one',
-        '',
-        '## Must not',
-        '',
-        '- Stage or unstage anything',
-        '- Commit when nothing is staged',
-        '- Emit anything after the result line',
-        '',
-        '## Out of scope',
-        '',
-        '- Splitting a mixed diff into several commits, which `git-stage` owns',
-        '- Naming a branch, which `git-branch` owns',
-        '- Pushing or opening a pull request, which `git-pr` owns',
-        '',
-      ].join('\n'),
+    const standard = readFileSync(
+      join(
+        import.meta.dirname,
+        '..',
+        '..',
+        'claude',
+        'skills',
+        'create-skill',
+        'references',
+        'skill-requirement.md',
+      ),
+      'utf8',
     )
+    const example =
+      /### Worked example[\s\S]*?```markdown\n([\s\S]*?)\n```/.exec(
+        standard,
+      )?.[1]
+    expect(example).toContain('## Must')
+    skillWithRequirement(`${example}\n`)
 
     const report = await auditSkills(root)
 

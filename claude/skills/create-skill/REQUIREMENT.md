@@ -24,7 +24,7 @@ A fifth failure is the confirmation itself. A worker running a plan that adds a 
 - Draft the sibling `REQUIREMENT.md` beside the body, from what the skill is for rather than from the drafted body
 - Confirm the name and both files with the user before writing, where a person is present to answer. The name is the routing key and a folder that disagrees with its frontmatter fails silently. Where nobody is present, record the three answers and both paths in the output and write.
 - Write to the conventional skills path, so discovery finds it without configuration. That is `.claude/skills/` in a target project. In the toolkit's own checkout, which the project root's `claude/.claude-plugin/plugin.json` marks, an `internal-*` skill goes under `.claude/skills/` and a plugin skill under `claude/skills/`
-- Leave the skills audit's dated-provenance check clean for the new folder before reporting it, with each incident moved to the requirement's `Gap`
+- Leave the skills audit's dated-provenance check clean for the new folder before reporting it, with each incident cut and left to git
 
 ## Must not
 

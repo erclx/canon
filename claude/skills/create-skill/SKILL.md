@@ -38,7 +38,7 @@ Read these in the same pass:
    - Does the body carry a procedure a session would get wrong from first principles? A one-line wrapper around a single command needs no skill.
    - Will anything invoke it other than the author typing its name? Carry this one into the drafted `REQUIREMENT.md`'s `Must not` section as a review criterion instead, since nothing can answer it before the skill has run.
    - Tell the user and stop when the first answer is yes or the second is no. A non-interactive run stops on both too, reporting which question failed and writing no folder.
-2. Draft the full `SKILL.md` from the user's description, stating the current rule alone. An incident and the date it happened belong in the requirement's `Gap`, not in the body or a reference.
+2. Draft the full `SKILL.md` from the user's description, stating the current rule alone. An incident and the date it happened stay in git, never in the body, a reference, or the requirement.
 3. Draft the sibling `REQUIREMENT.md` from what the skill is for, in the shape the requirement standard states.
    - Write the gaps from the user's description rather than from the drafted body, since a requirement derived from the body records whatever the draft overfitted to.
 4. Confirm the skill name and both files with the user before writing, when a person can answer.
@@ -53,7 +53,7 @@ Steps 5 to 7 write the folder and check what landed before the run reports.
    - The root is `.claude/skills/` in a target project.
    - Where the project root holds `claude/.claude-plugin/plugin.json`, which is the toolkit's own checkout, an `internal-*` skill goes under `.claude/skills/` and every other skill under `claude/skills/`, since the plugin ships that tree.
 6. Run `canon claude skills audit --json` and read `findings.datedProvenance` for rows under `<root>/<name>/`.
-   - Move each row's incident into `REQUIREMENT.md` under `Gap`, cut the date from the file the row names, and re-run until no row names the folder.
+   - Cut each row's date and incident from the file the row names, leaving them to git, and re-run until no row names the folder.
    - When `canon` does not resolve or its record carries no `datedProvenance` key, say the check did not run rather than reporting the skill clean.
 7. Run `canon markdown audit <root>/<name>/` over the new body and any references, and fix every ban and density finding it reports.
    - Re-run it until it reports none, since every file in the folder is this run's draft.
