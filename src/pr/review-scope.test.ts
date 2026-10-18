@@ -250,6 +250,21 @@ describe('resolveUiScope', () => {
     })
   })
 
+  it('should read the marker a PUT rewrite left on the standing UI close', () => {
+    // `PUT` keeps `commit.oid` at the head the close was first posted against
+    // and replaces the body, so only the marker names the head the clean
+    // re-pass drove.
+    const rewritten = review(`${UI_CLOSED}\n${uiMarker(UI_HEAD)}`, STAMPED)
+    const scope = resolveUiScope({ reviews: [rewritten] })
+
+    expect(scope).toEqual({
+      heading: '## UI review closed',
+      state: 'closed',
+      commit: UI_HEAD,
+      source: 'marker',
+    })
+  })
+
   it('should take the newest UI verdict over an older one', () => {
     const scope = resolveUiScope({
       reviews: [

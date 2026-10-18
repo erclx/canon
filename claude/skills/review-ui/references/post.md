@@ -104,11 +104,13 @@ The count line and the sections beneath it hold the same totals, and Step 10's p
 
 ## The marker
 
-End every body on `<!-- review-ui: head=<head> -->`, carrying the full sha Step 1 resolved. The orchestrator's poll reads it off the last non-empty line to decide whether the verdict covers the current head, and the submission stamp cannot answer that, since GitHub stamps it with whatever the head is at the moment of posting.
+End every body on `<!-- review-ui: head=<head> -->`, carrying the full sha Step 1 resolved. A body that replaces a standing close by `PUT` carries it too, at the head this pass drove. The orchestrator's poll reads it off the last non-empty line to decide whether the verdict covers the current head, and the submission stamp cannot answer that, since GitHub stamps it with whatever the head is at the moment of posting.
 
 ## Posting
 
 Run `canon labels scan --body-file .canon/tmp/pr/review-ui/body-<number>-<short-sha>.md` against the body first, which applies the rule in `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md`, since nothing gates a file under `.canon/tmp/` before the review-event run does. Fix the body and scan again on a finding. Then post it as a review rather than an issue comment, since the poll reads the UI family off reviews:
+
+Do not run the post below when the newest verdict from Step 1 reads `## UI review closed` at an older head and this pass closes too. That pass replaces the standing close, so read `${CLAUDE_SKILL_DIR}/references/close-out.md` instead of posting. Posting first leaves two closes, both naming a head.
 
 Record the instant just before the post, in UTC, as `<posted-at>`. Step 9 keeps only review-event runs created after it, since the code review posts its own review on the same head and fires a run of the same gate.
 

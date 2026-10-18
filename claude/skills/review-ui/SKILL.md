@@ -148,6 +148,8 @@ A console error or an overflow is a finding. A probe result is a reading to conf
 
 Read `${CLAUDE_SKILL_DIR}/references/post.md` for the heading rule, the body shape, the marker every body ends on, and the post command. Each box lands in the section its verdict names, and the `link` its Step 5 push returned goes as given into that box's own entry.
 
+That file sends a pass closing under a prior `## UI review closed` at an older head on to `${CLAUDE_SKILL_DIR}/references/close-out.md`, which rewrites the standing close in place.
+
 ## Step 8: tick the passed boxes
 
 Read `${CLAUDE_SKILL_DIR}/references/tick.md` once the verdict has posted, for how every box that passed is ticked through `canon pr tick` at the head this pass drove, and what a refusal reports.
