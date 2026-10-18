@@ -62,21 +62,25 @@ The symmetry runs in both directions, and the direction that breaks is the manif
 
 ## Example
 
-An excerpt from the current `vite-react` reference, which the verb follows with its printed `## Sync`.
+An excerpt from the current `web` reference, grouped by tool with one decision per bullet, which the verb follows with its printed `## Sync`.
 
 ```markdown
-# Tooling vite-react reference
+# Tooling web reference
 
-> Extends: `web`. Apply web stack first.
+> Extends: `base`. Apply base stack first.
 
 ## Overview
 
-The vite-react stack covers Vite + React + TypeScript web apps and Chrome extensions.
+The web layer covers the tooling shared across Vite + React, Astro, and Next.js.
 
-## What ships as golden configs
+## oxlint
 
-- `vite.config.ts` adds `@vitejs/plugin-react`, `@tailwindcss/vite`, and the `@` alias to `./src`.
-- It serves dev on port `5173` and preview on `4173`, each plus `WORKTREE_PORT_OFFSET`, both with `strictPort`.
+- Pin oxlint exactly, since its JS plugin host is alpha and a minor release could break `check-file` or `simple-import-sort`
+- Keep import sorting on `simple-import-sort`, because oxfmt's built-in sort orders differently and would rewrite every import block
+
+## Ports
+
+- Read `WORKTREE_PORT_OFFSET` in a config and add it to the stack's default port. Unset yields the default, so a plain clone keeps its port.
 ```
 
 ### Before and after
