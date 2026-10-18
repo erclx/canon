@@ -15,7 +15,6 @@ const STATUS_LINE = 'bash /home/dev/.claude/statusline-command.sh'
 
 function makeTemplate(): SettingsRecord {
   return {
-    attribution: { commit: '', pr: '' },
     permissions: {
       allow: ['Bash(bun run *)'],
       deny: ['Read(**/.env)', 'Read(**/.env.*)'],
@@ -61,7 +60,6 @@ describe('planSettings', () => {
 
     expect(plan.keys.map((key) => key.label)).toEqual([
       'statusLine',
-      'attribution',
       'permissions.allow',
       'permissions.deny',
     ])
@@ -141,8 +139,32 @@ describe('planSettings', () => {
       'model',
       'permissions',
       'statusLine',
-      'attribution',
     ])
+  })
+
+  it('should remove the empty attribution pair an earlier setup wrote', () => {
+    const current: SettingsRecord = { attribution: { commit: '', pr: '' } }
+
+    const plan = planSettings(current, makeTemplate(), STATUS_LINE)
+
+    expect(plan.next).not.toHaveProperty('attribution')
+    expect(plan.keys).toContainEqual({ label: 'attribution', changed: true })
+  })
+
+  it('should leave a person own attribution alone', () => {
+    const attribution = { commit: 'Co-authored-by: me', pr: '' }
+
+    const plan = planSettings({ attribution }, makeTemplate(), STATUS_LINE)
+
+    expect(plan.next.attribution).toEqual(attribution)
+    expect(plan.keys.map((key) => key.label)).not.toContain('attribution')
+  })
+
+  it('should leave an absent attribution absent', () => {
+    const plan = planSettings({}, makeTemplate(), STATUS_LINE)
+
+    expect(plan.next).not.toHaveProperty('attribution')
+    expect(plan.keys.map((key) => key.label)).not.toContain('attribution')
   })
 })
 
