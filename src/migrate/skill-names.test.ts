@@ -327,6 +327,37 @@ describe('isExcludedPath under the skill preset', () => {
     ).toBe(true)
   })
 
+  it.each([
+    'claude/skills/draft-doc/SKILL.md',
+    'claude/skills/draft-doc/REQUIREMENT.md',
+    'claude/skills/draft-figure/SKILL.md',
+    'claude/skills/draft-figure/REQUIREMENT.md',
+    'claude/skills/draft-identity/SKILL.md',
+    'claude/skills/draft-identity/REQUIREMENT.md',
+    'claude/skills/draft-slides/SKILL.md',
+    'claude/skills/draft-slides/REQUIREMENT.md',
+    'claude/skills/draft-and-pick/SKILL.md',
+    'claude/skills/draft-and-pick/REQUIREMENT.md',
+    'claude/skills/draft-ready/SKILL.md',
+    'claude/skills/draft-ready/REQUIREMENT.md',
+    'claude/skills/draft-screencast/SKILL.md',
+    'claude/skills/draft-screencast/REQUIREMENT.md',
+  ])(
+    'should exclude the pointer file %s, which a later sweep would move onto its survivor',
+    (path) => {
+      expect(isExcludedPath(path, SKILL_NAME_RULES)).toBe(true)
+    },
+  )
+
+  it('should still move a reference left under an old draft- folder', () => {
+    expect(
+      isExcludedPath(
+        'claude/skills/draft-doc/references/doc.md',
+        SKILL_NAME_RULES,
+      ),
+    ).toBe(false)
+  })
+
   it('should not exclude an ordinary shipped body', () => {
     expect(
       isExcludedPath('claude/skills/claude-docs/SKILL.md', SKILL_NAME_RULES),

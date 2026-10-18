@@ -134,6 +134,26 @@ export const SKILL_CITATION_MAP: Readonly<Record<string, string>> = {
 }
 
 /**
+ * The old `draft-` names that still answer as a pointer skill, each naming the
+ * skill it became.
+ *
+ * Each pointer's own files spell the old name on purpose, so the sweep must
+ * never reach them. A later run would otherwise move the stub onto the real
+ * body at the new name. Their paths join the exclusions only once the sweep
+ * that moved the real bodies has run, since excluding them first leaves each
+ * body unmoved at its old path.
+ */
+export const RENAMED_DRAFT_POINTERS: readonly string[] = [
+  'draft-doc',
+  'draft-figure',
+  'draft-identity',
+  'draft-slides',
+  'draft-and-pick',
+  'draft-ready',
+  'draft-screencast',
+]
+
+/**
  * The skill rename.
  *
  * It protects nothing. The `aitk` sweep had to guard a sibling repository
@@ -174,5 +194,9 @@ export const SKILL_NAME_RULES: RenameRules = defineRenameRules({
     'CHANGELOG.md',
     'src/migrate/skill-names.ts',
     'src/migrate/skill-names.test.ts',
+    ...RENAMED_DRAFT_POINTERS.flatMap((name) => [
+      `claude/skills/${name}/SKILL.md`,
+      `claude/skills/${name}/REQUIREMENT.md`,
+    ]),
   ],
 })
