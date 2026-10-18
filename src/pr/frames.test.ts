@@ -233,10 +233,44 @@ describe('referenceSlug', () => {
   )
 })
 
+describe('referenceSlug on a design folder path', () => {
+  it('should join the surface and the name of a tracked reference', () => {
+    expect(referenceSlug('canon/design/button/dark.png')).toBe(
+      'design--button--dark',
+    )
+  })
+
+  it('should read the name with or without its png extension', () => {
+    expect(referenceSlug('canon/design/button/light')).toBe(
+      'design--button--light',
+    )
+  })
+
+  it.each([
+    'canon/design/button',
+    'canon/design/button/dark/extra',
+    'canon/design/../dark.png',
+    'canon/design/a--b/dark.png',
+    'canon/other/button/dark.png',
+    'design/button/dark.png',
+  ])(
+    'should refuse %s since it names no single tracked reference',
+    (address) => {
+      expect(referenceSlug(address)).toBeUndefined()
+    },
+  )
+})
+
 describe('referencePath', () => {
   it('should file a reference beside the box frames of one pass', () => {
     expect(referencePath(12, HEAD, PASS, 'home/hero')).toBe(
       `pr-12/abcdef0/${PASS}/ref-home--hero.png`,
+    )
+  })
+
+  it('should file a tracked reference beside the box frames of one pass', () => {
+    expect(referencePath(12, HEAD, PASS, 'canon/design/button/dark.png')).toBe(
+      `pr-12/abcdef0/${PASS}/ref-design--button--dark.png`,
     )
   })
 

@@ -1818,6 +1818,50 @@ describe('canon pr frames', () => {
     expect(calls()).toEqual([])
   })
 
+  it('should refuse as bad-reference naming the path when a tracked reference does not exist', async () => {
+    const outcome = await runFrames([
+      '7',
+      '--add',
+      join(tempDir, 'box-1.png'),
+      '--reference',
+      'canon/design/button/dark.png',
+      '--head',
+      'abc1234',
+      '--pass',
+      '20261002T154450Z',
+    ])
+
+    expect({ reason: outcome.record.reason, calls: calls() }).toEqual({
+      reason: 'bad-reference',
+      calls: [],
+    })
+    expect(JSON.stringify(outcome.record)).toContain(
+      'canon/design/button/dark.png',
+    )
+  })
+
+  it('should pass a tracked reference that exists through to the write', async () => {
+    mkdirSync(join(tempDir, 'canon', 'design', 'button'), { recursive: true })
+    writeFileSync(
+      join(tempDir, 'canon', 'design', 'button', 'dark.png'),
+      readFileSync(join(tempDir, 'box-1.png')),
+    )
+
+    const outcome = await runFrames([
+      '7',
+      '--add',
+      join(tempDir, 'box-1.png'),
+      '--reference',
+      'canon/design/button/dark.png',
+      '--head',
+      'abc1234',
+      '--pass',
+      '20261002T154450Z',
+    ])
+
+    expect(outcome.record.reason).toBe('read-only')
+  })
+
   it('should refuse as bad-theme when --theme rides a reference', async () => {
     const outcome = await runFrames([
       '7',

@@ -57,6 +57,7 @@ import {
   pruneFramesWithLegacy,
   pushFrame,
   readFrame,
+  isDesignReference,
   referenceSlug,
   type TreeEntry,
 } from '@/pr/frames'
@@ -224,7 +225,7 @@ const FRAMES_REFUSALS: Record<FramesCommandRefusal, string> = {
   'bad-box':
     '--add takes --box <n>, a positive whole number naming the checklist box, or --reference <page>/<frame>, never both.',
   'bad-reference':
-    '--reference takes <page>/<frame>, each half opening on a letter or digit and holding only letters, digits, dots, underscores, and dashes, with no `--` in either, so the capture files under a name that reads back as the frame.',
+    '--reference takes <page>/<frame> or a tracked canon/design/<surface>/<name> path, each half opening on a letter or digit and holding only letters, digits, dots, underscores, and dashes, with no `--` in either, so the capture files under a name that reads back as the frame.',
   'bad-head':
     '--head takes a commit sha, 7 to 40 lowercase hex characters. A branch name or a path would file the frame under a folder that names no commit.',
   'bad-pass':
@@ -1060,7 +1061,7 @@ export function register(program: Command): void {
     .option('--box <n>', 'The checklist box the frame shows, with --add')
     .option(
       '--reference <address>',
-      'The design reference the capture shows, as <page>/<frame>, with --add in place of --box',
+      'The design reference the capture shows, as <page>/<frame> or a tracked canon/design/<surface>/<name> path, with --add in place of --box',
     )
     .option(
       '--head <sha>',
@@ -1109,7 +1110,7 @@ export function register(program: Command): void {
         '  bad-mode          not exactly one of --add, --drop, --prune',
         '  no-number         --add or --drop named no pull request',
         '  bad-box           --add with both --box and --reference, or neither',
-        '  bad-reference     --reference is not <page>/<frame> in the safe name form',
+        '  bad-reference     --reference is not <page>/<frame> or canon/design/<surface>/<name> in the safe name form, or the tracked path is no file',
         '  bad-head          --head is not 7 to 40 lowercase hex characters',
         '  bad-pass          --add without a compact UTC --pass stamp',
         '  bad-theme         --theme is not dark or light, or no --add, or rides a --reference',
@@ -3196,6 +3197,19 @@ async function runFrames(
     opts.add === undefined ? undefined : await readFrame(resolve(opts.add))
   if (opts.add !== undefined && bytes === undefined) {
     return refuseFrames('unreadable-frame')
+  }
+
+  if (
+    opts.reference !== undefined &&
+    isDesignReference(opts.reference) &&
+    !existsSync(resolve(root, opts.reference))
+  ) {
+    return refuseWith(
+      'bad-reference',
+      `${opts.reference} is not a file under the repository, so no tracked reference can be filed from it.`,
+      emitJson,
+      root,
+    )
   }
 
   if (Bun.which('gh') === null) return refuseFrames('gh-missing')

@@ -22,6 +22,9 @@ const ADD_ATTEMPTS = 3
 /** One half of a reference address. It opens on a letter or digit and holds no separator, so `..` and `/` cannot survive it. */
 const REFERENCE_PART = /^[A-Za-z0-9][A-Za-z0-9._-]*$/
 
+/** A tracked reference, `canon/design/<surface>/<name>`, whose name may carry its `.png`. The halves are validated as a canvas address's are. */
+const DESIGN_REFERENCE = /^canon\/design\/([^/]+)\/([^/]+?)(?:\.png)?$/
+
 const FOLDER_PATTERN = /^pr-(\d+)$/
 
 const DAY_MS = 86_400_000
@@ -163,20 +166,28 @@ export function frameLink(repo: string, path: string): string {
 }
 
 /**
- * The file-name slug of a `<page>/<frame>` address, or undefined when the
+ * The file-name slug of a `<page>/<frame>` address or a tracked
+ * `canon/design/<surface>/<name>` path, or undefined when the
  * address would not round-trip. Each half must open on a letter or digit and
  * hold only letters, digits, dots, underscores, and dashes, and neither may
  * carry `--`, so the joined slug reads back as the same two names and a path
  * never gains a directory or escapes the pass folder.
  */
 export function referenceSlug(address: string): string | undefined {
-  const parts = address.split('/')
+  const tracked = DESIGN_REFERENCE.exec(address)
+  const parts = tracked ? [tracked[1], tracked[2]] : address.split('/')
   if (parts.length !== 2) return undefined
   const [page, frame] = parts as [string, string]
   const valid = [page, frame].every(
     (part) => REFERENCE_PART.test(part) && !part.includes('--'),
   )
-  return valid ? `${page}--${frame}` : undefined
+  if (!valid) return undefined
+  return tracked ? `design--${page}--${frame}` : `${page}--${frame}`
+}
+
+/** Whether a reference names a tracked `canon/design/<surface>/<name>` file rather than a `<page>/<frame>` address. */
+export function isDesignReference(address: string): boolean {
+  return DESIGN_REFERENCE.test(address)
 }
 
 /**
