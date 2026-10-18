@@ -636,3 +636,37 @@ describe('classifying an audit run by its exit code', () => {
     expect(result.reason).toContain('137')
   })
 })
+
+describe('the rules audit', () => {
+  const rules = () => specFor('rules')
+
+  it('should report rather than gate, absent in a tree with no rule corpus', () => {
+    expect(rules().argv).toEqual(['gov', 'audit', '--json'])
+    expect(rules().gatingExits).toEqual([])
+    expect(rules().absentReasons).toEqual(['no-rules'])
+  })
+
+  it('should count rules with a shape finding apart from ledger findings', () => {
+    const record = {
+      rules: [
+        { findings: [{ limit: 'words' }], ledger: { status: 'not-required' } },
+        { findings: [], ledger: { status: 'missing', path: 'a.md' } },
+        {
+          findings: [{ limit: 'chars' }],
+          ledger: { status: 'present', mismatches: [{ heading: 'A' }] },
+        },
+        { findings: [], ledger: { status: 'present', mismatches: [] } },
+      ],
+    }
+
+    expect(countsFor(rules(), record)).toEqual({
+      shapeRules: 2,
+      missingLedgers: 1,
+      ledgerMismatches: 1,
+    })
+  })
+
+  it('should read a record carrying no rules array as unmeasured', () => {
+    expect(countsFor(rules(), { ok: true })).toBeUndefined()
+  })
+})

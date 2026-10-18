@@ -14,7 +14,7 @@ The skill body holds the order, the guards, and the report shape. This holds the
 | Field          | Value                                                                                      |
 | -------------- | ------------------------------------------------------------------------------------------ |
 | Measures       | Whether a document, or a passage inside it, has grown past what a reader takes in one pass |
-| Verb           | `canon markdown audit --json`                                                              |
+| Verbs          | `canon markdown audit --json`, and `canon gov audit --json` for a rule                     |
 | Evidence class | `measured`                                                                                 |
 
 The record carries the checkpoints it read against under `checkpoints` and the per-file weights under `entries`. Read both from the record rather than from a number stated here, since the CLI moves a checkpoint on its own cadence and a copy goes stale in place.
@@ -23,6 +23,7 @@ The record carries the checkpoints it read against under `checkpoints` and the p
 - `heavyParagraphs`: a paragraph past the sentence or character checkpoint
 - `longestRun`, against `longestRunLine`: unbroken rendered lines between headings, which is the depth checkpoint
 - `cadence`, carrying `measured`, `flat`, and `repeating`: sentence-length spread and repeated openers
+- `rules[].findings`: a rule past one of its own six shape limits or carrying an emphasis word, since the density weights above never read a rule file
 
 ### Reading a length finding
 

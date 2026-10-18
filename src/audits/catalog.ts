@@ -4,6 +4,7 @@ import type { ReachRefusal } from '@/claude/skills-reach'
 import type { ContextAuditRefusal } from '@/context/audit'
 import type { SweepVerdict } from '@/context/classify/patterns'
 import type { AuditRefusal } from '@/deps/audit'
+import type { RuleAuditRefusal } from '@/gov/audit'
 import type { RestatedRefusal } from '@/gov/restated'
 import type { LabelAuditRefusal } from '@/labels/audit'
 import type { ValidateRefusal as RecordRefusal } from '@/records/validate'
@@ -412,6 +413,33 @@ function restatedCounts(record: unknown): Record<string, number> | undefined {
   })
 }
 
+/**
+ * Counts rules rather than findings, since a rule past four limits is one
+ * rewrite, and keeps the two ledger findings apart because a missing ledger and
+ * a short one are fixed by different passes.
+ */
+function ruleCounts(record: unknown): Record<string, number> | undefined {
+  const rules = asObject(record)?.rules
+  if (!Array.isArray(rules)) return undefined
+
+  let shapeRules = 0
+  let missingLedgers = 0
+  let ledgerMismatches = 0
+
+  for (const raw of rules) {
+    const rule = asObject(raw)
+    const findings = lengthOf(rule?.findings)
+    const ledger = asObject(rule?.ledger)
+    if (findings === undefined || ledger === undefined) return undefined
+
+    if (findings > 0) shapeRules += 1
+    if (ledger.status === 'missing') missingLedgers += 1
+    if ((lengthOf(ledger.mismatches) ?? 0) > 0) ledgerMismatches += 1
+  }
+
+  return { shapeRules, missingLedgers, ledgerMismatches }
+}
+
 function findingsOnly(record: unknown): Record<string, number> | undefined {
   const root = asObject(record)
   if (root === undefined) return undefined
@@ -680,6 +708,20 @@ export const AUDITS: readonly AuditSpec[] = [
       'no-surfaces',
     ] satisfies RestatedRefusal[],
     counts: restatedCounts,
+  },
+  {
+    id: 'rules',
+    label: 'Rule shape and ledgers',
+    argv: ['gov', 'audit', '--json'],
+    // Reports rather than gates. The corpus starts far from zero, and the
+    // `rule-shape` stage already fails a push on each folder once its rewrite
+    // lists it as gated, so gating the whole set here would fail every push.
+    gatingExits: [],
+    corpus: 'tracked',
+    // A target that authors no rule of its own has no corpus here, which is an
+    // absence rather than a break, on the same test the restated sweep takes.
+    absentReasons: ['no-rules'] satisfies RuleAuditRefusal[],
+    counts: ruleCounts,
   },
   {
     id: 'counts',
