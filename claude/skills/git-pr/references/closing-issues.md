@@ -42,4 +42,6 @@ canon labels scan --title "<title>" --body-file .canon/tmp/pr/body.md --closes <
 
 The verb applies the condition the merge-time archive applies, being no open outcome and no other branch on the task's `Pending branch:` line. The issue then closes exactly when the task archives. An earlier slice merging with a closing keyword would close the issue while later slices are still to ship.
 
+A re-run on an earlier slice's branch reads the same way. The verb looks up the branch's own pull request numbers, and one that is on the task's `Pull request:` line without being last reports `earlier-slice` and no closing line.
+
 `git-ship` ticks the outcomes before `git-pr` runs, so the condition holds at body time. A run with outcomes not yet ticked reads as an earlier slice and writes no line. That is the safe side, since the issue stays open, and the record's `reason` names why.

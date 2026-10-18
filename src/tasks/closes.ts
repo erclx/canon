@@ -1,5 +1,10 @@
 import { readFile } from 'node:fs/promises'
-import { fenceMask, readOutcomes, readPendingBranches } from '@/tasks/archive'
+import {
+  fenceMask,
+  readOutcomes,
+  readPendingBranches,
+  readPullRequest,
+} from '@/tasks/archive'
 import {
   openTask,
   type RecordRefused,
@@ -12,6 +17,7 @@ import {
  * merge time, so an issue closes exactly when the task archives.
  */
 export type ClosingReason =
+  | 'earlier-slice'
   | 'last-slice'
   | 'no-issues'
   | 'no-outcomes'
@@ -68,10 +74,21 @@ export function readIssues(text: string): readonly number[] {
 export function decideClosing(
   text: string,
   branches: readonly string[],
+  pulls: readonly number[] = [],
 ): Closure {
   const issues = readIssues(text)
   if (issues.length === 0) {
     return { issues, closing: false, reason: 'no-issues' }
+  }
+
+  const listed = readPullRequest(text)
+  const last = listed.at(-1)
+  if (
+    last !== undefined &&
+    !pulls.includes(last) &&
+    pulls.some((number) => listed.includes(number))
+  ) {
+    return { issues, closing: false, reason: 'earlier-slice' }
   }
 
   const others = readPendingBranches(text).filter(
@@ -98,11 +115,12 @@ export async function readClosure(
   root: string,
   selector: RecordSelector,
   branches: readonly string[],
+  pulls: readonly number[] = [],
 ): Promise<ClosureOutcome> {
   const opened = await openTask(root, selector)
   if ('ok' in opened) return opened
 
   const text = await readFile(opened.path, 'utf8')
 
-  return { ok: true, ...opened, ...decideClosing(text, branches) }
+  return { ok: true, ...opened, ...decideClosing(text, branches, pulls) }
 }

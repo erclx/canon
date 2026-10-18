@@ -71,6 +71,29 @@ describe('decideClosing', () => {
     expect(decideClosing(alone, ['feat/a', 'feat/old']).closing).toBe(true)
   })
 
+  it('should not close from an earlier slice once a later number is recorded', () => {
+    const text = task(['Issue: #12', 'Pull request: #10, #11'])
+
+    expect(decideClosing(text, ['feat/a'], [10])).toMatchObject({
+      issues: [12],
+      closing: false,
+      reason: 'earlier-slice',
+    })
+  })
+
+  it('should close from the last recorded slice', () => {
+    const text = task(['Issue: #12', 'Pull request: #10, #11'])
+
+    expect(decideClosing(text, ['feat/b'], [11]).closing).toBe(true)
+  })
+
+  it('should ignore pull request numbers this branch does not own', () => {
+    const text = task(['Issue: #12', 'Pull request: #10'])
+
+    expect(decideClosing(text, ['feat/b'], [11]).closing).toBe(true)
+    expect(decideClosing(text, ['feat/b']).closing).toBe(true)
+  })
+
   it('should not close a task with no outcomes', () => {
     expect(decideClosing(task(['Issue: #12'], []), [])).toMatchObject({
       closing: false,

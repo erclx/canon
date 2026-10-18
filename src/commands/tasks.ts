@@ -676,6 +676,8 @@ export function register(program: Command): void {
         'and the names it carried before a rename count as this one. Read off',
         '`reason` when `closing` is false:',
         '  no-issues       the task carries no `Issue:` number',
+        '  earlier-slice   this branch has a pull request on the task that is not',
+        '                  the last listed, so a later number closes the issue',
         '  open-outcomes   an outcome is still open, so a later slice closes it',
         '  pending-branch  another branch is on `Pending branch:`',
         '  no-outcomes     the task carries no outcomes',
@@ -1450,7 +1452,12 @@ async function runCloses(
   const root = opts.root ?? (await mainWorktreeRoot())
   const branch = opts.branch ?? (await workingBranch())
   const branches = branch ? [branch, ...(await formerNames(branch))] : []
-  const outcome = await readClosure(root, selector, branches)
+  const outcome = await readClosure(
+    root,
+    selector,
+    branches,
+    await branchPullNumbers(branch),
+  )
 
   return reportCloses(outcome, emitJson, root)
 }
