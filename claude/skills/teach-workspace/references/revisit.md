@@ -15,8 +15,14 @@ Then write `## Revisit`, one bullet per item, in the shape `${CLAUDE_SKILL_DIR}/
 - **<what comes back up>**: due <YYYY-MM-DD>, rung <n>
 ```
 
-Take both the date and the rung from the `due` entry Step 1 already read, copying `hit` for an item the learner retrieved unaided and `miss` for one they did not, with the rung stepped the same way. Do not compute a date from the ladder. A session told to widen a gap still picks the number by judgment, which is the reason the verb reports both dates at all.
+## Where the date comes from
 
-An item the records have never scheduled has no `due` entry to copy from. Open it at rung 1, dated the day after this session, which is the ladder's floor and the one number this body states. Every later date for it comes from the verb.
+Take both the date and the rung from the `due` entry Step 1 already read. Copy `hit` for an item the learner retrieved unaided and `miss` for one they did not, with the rung stepped the same way.
+
+- Do not compute a date from the ladder. A session told to widen a gap still picks the number by judgment, which is why the verb reports both dates.
+- An item never scheduled has no `due` entry. Open it at rung 1, dated the day after this session, the ladder's floor and the one number this body states.
+- Every later date for that item comes from the verb
+
+## Writing the shape exactly
 
 An entry outside this shape schedules nothing and nothing reports that it was skipped, so write the shape exactly. A later record naming the same item supersedes an earlier entry, so revise a schedule by writing the new bullet rather than editing the record it was set in.

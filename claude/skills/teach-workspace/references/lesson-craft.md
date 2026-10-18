@@ -25,7 +25,8 @@ A workspace accumulates lessons over weeks. The learner reads them as one body o
 - `canon teach nav` embeds and re-embeds the shared stylesheet into every lesson on each run, so growing that stylesheet, by promoting anything used a second time into it, is the only step left by hand.
 - Keep the structural furniture identical across lessons: where the title sits, where the quiz sits, what a correct answer looks like
 - Do not restate styles inside a lesson. A local override is a decision the next lesson has to either copy or contradict.
-- Refer to another lesson in the same workspace as "lesson" followed by its four-digit number, such as "lesson 0003", and let `canon teach nav` turn the mention into a link and report a number naming no lesson. A hand-written link is the one form nav never checks.
+- Refer to another lesson in the workspace as "lesson" plus its four-digit number, such as "lesson 0003". `canon teach nav` links the mention and reports a number naming no lesson.
+- Never hand-write a link to another lesson, the one form nav never checks
 
 ## Typography
 
@@ -51,7 +52,7 @@ Decide the figure once per lesson, before writing the body.
 
 1. Name the one relationship, boundary, path, or before-and-after the lesson is about. A lesson about none ends here, with `Figure: none, <why it names no structure>` on the reply.
 2. Hold it against the bar in `${CLAUDE_SKILL_DIR}/../draft-figure/references/figures.md`, which also carries the drawing rules.
-3. Draw it hand-written through `canon:draft-figure` into a `raw` block before the quiz, never inside it or after its feedback, which breaks the stepper's gating. Report it, never draw it yourself, if the skill does not resolve.
+3. Draw it through `canon:draft-figure` into a `raw` block before the quiz, never inside it or after its feedback, which breaks the stepper's gating. Report an unresolved skill rather than drawing.
 4. Or write one line on why prose carries it better, such as a structure an earlier lesson gave.
 
 A structure lesson takes step 3 or 4, never neither. Put the outcome on the reply's `Figure:` line, off the lesson page. Never draw to satisfy the step, or on every section (`## Restraint`).
@@ -61,10 +62,12 @@ A structure lesson takes step 3 or 4, never neither. Put the outcome on the repl
 The quiz is the retrieval, so a leak in its construction turns it into a reading test.
 
 - Write every option to the same length, in words and in characters. A longer option reads as the considered one.
-- Write the correct option first and let the ordering verb place it. Position is not the author's to pick: an author who varies it by hand still varies it by judgment, and the judgment settles on the first slot.
+- Write the correct option first and let the ordering verb place it. An author varying position by hand varies it by judgment, which settles on the first slot.
 - Make each wrong option a misconception someone actually holds. An obviously wrong option removes itself and shrinks the question.
-- Write one feedback block per question, covering the correct option and why each distractor fails, saying why rather than whether. One block reads as an explanation where a block per option reads as four verdicts, and only the explanation names what separates a wrong option from the answer.
+- Write one feedback block per question, covering the correct option and why each distractor fails, saying why rather than whether
 - Give feedback after the attempt, never alongside the question
+
+One feedback block reads as an explanation where a block per option reads as four verdicts, and only the explanation names what separates a wrong option from the answer.
 
 ### The markup
 
@@ -85,7 +88,9 @@ The quiz shape is a contract rather than a convention. `canon teach nav` splices
 - Mark the correct option with `data-a="1"` and leave the others without the attribute
 - Carry `data-k` on the `label`, since the workspace stylesheet renders the key letter from it
 
-#### Structure and the legacy button
+### Structure and the legacy button
+
+The nesting matters as much as the class names.
 
 - Keep `.fb` the last child of its `.q`. The stepper reveals it as a direct child, and a feedback block nested deeper stays hidden.
 - Put the option text in a `<span>` inside the label rather than bare beside the input, so the workspace can lay the two out
@@ -97,9 +102,9 @@ The stepper hides and shows and sets nothing else, so how a selected option look
 
 A quiz is recognition and a teach-back is production, which is the form retrieval practice prefers. Carry both: the quiz places the learner against options someone could hold, and the teach-back is where the learner finds out what they cannot say without help.
 
-- Ask for an explanation to a named audience rather than for an answer. Asking the learner to explain to somebody who has never written a pattern why a lazy quantifier is not an optional one gives the explanation a floor, where asking them to explain lazy quantifiers gives it none.
+- Ask for an explanation to a named audience rather than for an answer. Telling a non-programmer why a lazy quantifier is not an optional one has a floor, and "explain lazy quantifiers" has none.
 - Ask about the thing the lesson was for, not a detail beside it. A teach-back on a footnote tests attention rather than the material.
-- Carry a self-check the learner can open, as a `<details>` listing what a complete explanation covers, closed by default. A learner reading with no session in the room otherwise gets an ask they cannot grade, and closed leaks nothing.
+- Carry a self-check as a closed `<details>` listing what a complete explanation covers. A learner with no session in the room otherwise cannot grade the ask, and closed leaks nothing.
 - Write the self-check as what the explanation has to cover rather than as the explanation itself. A model answer is read instead of produced, which turns the block back into reading.
 
 ```html

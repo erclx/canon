@@ -73,7 +73,10 @@ A workspace failing these is non-conforming even when it satisfies every shape r
 | `lessons/`              | Numbered lessons, generated and disposable                              | Optional |
 | `assets/`               | Files several lessons share, including the stylesheet                   | Optional |
 
-Only the markdown half answers to a conformance check: `MISSION.md`, `RESOURCES.md`, `GLOSSARY.md`, `NOTES.md`, the markdown under `reference/`, and `learning-records/`. A lesson is generated markup that nothing downstream cites, so this standard fixes its filename and its location and says nothing about what it contains. A rendered reference page is the same kind of output, rewritten from its markdown on every `nav` run.
+Only the markdown half answers to a conformance check: `MISSION.md`, `RESOURCES.md`, `GLOSSARY.md`, `NOTES.md`, the markdown under `reference/`, and `learning-records/`.
+
+- A lesson is generated markup nothing downstream cites, so this standard fixes its filename and location and nothing about its contents
+- A rendered reference page is the same kind of output, rewritten from its markdown on every `nav` run
 
 ## Frontmatter
 
@@ -131,7 +134,11 @@ Take the date and the rung from what the surface driving the workspace reports r
 
 ## GLOSSARY.md
 
-Required in every workspace, holding one entry per term the subject defines. The glossary reference the `canon:teach-workspace` skill carries fixes what an entry looks like, how the file orders and groups them, and which terms it carries, so this standard states only that the file exists and sits at the workspace root. That reference ships with the plugin rather than installing here, because a promoted glossary keeps its shape wherever it lands and no project folder covers every destination. Say so and stop rather than working the shape from memory when the project has no plugin to read it from.
+Required in every workspace, holding one entry per term the subject defines. This standard states only that the file exists and sits at the workspace root.
+
+- The glossary reference the `canon:teach-workspace` skill carries fixes the entry shape, the order and grouping, and which terms the file carries
+- That reference ships with the plugin rather than installing here, because a promoted glossary keeps its shape wherever it lands and no project folder covers every destination
+- When the project has no plugin to read it from, say so and stop rather than working the shape from memory
 
 Name the lesson or reference page a term first appears in as that reference requires. A workspace is the case it was written for, so a glossary here has a first appearance to name.
 
@@ -155,6 +162,8 @@ Rest each general claim on the highest rung that covers it:
 
 A subject nobody owns, such as a mathematical topic or a craft, has no first rung, so its list starts at the second and is not missing anything. Record a third-rung source with the claim it covers and why no higher rung does, since that reason is what a later session checks the choice against.
 
+### What never counts
+
 The learner's own projects and material specific to one employer or organization are never a source for a general claim. Either may appear in the workspace as a worked application labeled with whose it is, and neither stands in `RESOURCES.md` as proof of what the subject says.
 
 A source reachable only through a paywall or a summary stays a lead until it is opened. A review or summary of a book is a different source from the book, so list the summary as read on its own rung and the book as a lead.
@@ -170,9 +179,9 @@ A source reachable only through a paywall or a summary stays a lead until it is 
 - **The mission with no test.** Success stated as understanding rather than as a task leaves nothing able to say the mission is finished.
 - **The lesson filed as reference.** A page written to be worked through once sits in `lessons/`, and putting it in `reference/` puts disposable output in the half that gets promoted.
 - **The record that counts errors.** A tally of how many were missed carries none of the misconception, which is the only part a later session can act on.
-- **The revisit note with no date.** A line naming what to come back to and not when is read by nothing and schedules nothing, so the next session picks from the last record alone, which is the state the section exists to end.
-- **The date left in the body.** A frontmatter field and a sentence both claiming the opening date resolve to whichever a reader happens to hit, and only one of them is readable by a walker.
-- **The first search result as the source list.** A workspace resting on whatever a search returned first teaches the weakest account of the subject, and nothing in the folder says a stronger one was never looked for.
+- **The revisit note with no date.** A line naming what to come back to and not when schedules nothing, so the next session picks from the last record alone, the state the section exists to end.
+- **The date left in the body.** A frontmatter field and a sentence both claiming the opening date resolve to whichever a reader hits, and a walker reads only one.
+- **The first search result as the source list.** A workspace resting on the first search hit teaches the weakest account of the subject, and nothing in the folder says a stronger one went unsought.
 - **The renumbered folder.** Closing a gap in the ordinals moves every name a reader or a record already cited.
 
 ## Template
