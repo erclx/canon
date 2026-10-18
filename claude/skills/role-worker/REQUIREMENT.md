@@ -9,13 +9,13 @@ description: What a building session is, the shared surfaces it may not write, a
 
 Without this skill, a building session is told what to do and never what it is. It writes shared surfaces, hand-writing the board from a stale copy, filing a task with no row, or re-drafting a readied pull request. From a linked worktree it finds no plan folder and reports the task has no plan.
 
-The channel fails on the worker's side. A block opens a prompt nobody is attached to, a finished pull request goes idle unannounced, and a review wait stalls in silence. A late ask widens the scope both reviews already read, and a session told only to report upward never argues back with the evidence that corrects a wrong instruction.
+The channel fails on the worker's side. Blocks open prompts nobody is attached to, and a finished pull request goes idle unannounced or stalls silently on its reviews. Painted ones ship with no address for the UI reviewer. Late asks widen the reviewed scope, and a worker told only to report upward never argues back.
 
 ## Must
 
 - Session scratch resolves at the main worktree root, and a plan that fails to resolve is reported unreadable from there rather than absent
-- The pull request announcement carries the number, the branch, the task, the reach, and any row the build turned up, and a fan-in member's done message carries its branch and head commit
-- A block goes out as a message before it becomes a prompt, and a timed-out review wait sends the `canon pr review-state` record to the controller
+- The pull request announcement carries the number, the branch, the task, the reach, and any row the build turned up, and a painted diff has its preview server running before the pull request opens
+- A block goes out as a message before it becomes a prompt, a fan-in member's done message carries its branch and head commit, and a review wait that times out reaches the controller
 - The plan's scope freezes at dispatch, and a late ask is sorted into a defect, a follow-up row, or an addition on the operator's word
 - A refusal of an instruction the tree contradicts carries its evidence, and a talk launch puts its judgment calls to the operator in the session
 
