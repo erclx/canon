@@ -52,7 +52,7 @@ Owns the gov half of every verb, being the stack reader, the rule lookup, the ca
 
 ### `claude/skills/create-rule/`
 
-Holds the standard for what a rule states, which these tests apply before a rule is written.
+Holds the standard for what a rule states, being its shape limits, content test, and one-copy test, and the bullet checklist `create-rule` runs over a rule after writing it.
 
 - A rule passes when its invariant fires on a path edit and violating it ships silently, and a rejected candidate is recorded by which half failed
 - A claude rule carries at most five directives beside its pointer, since past that it reproduces the standard's structure rather than what must not go wrong
