@@ -4,128 +4,188 @@
 
 ## Overview
 
-The web layer covers web-universal tooling shared across Vite + React, Astro, and any future web stack. It ships golden configs for oxlint, Vitest, Playwright, Tailwind v4, screenshots, VS Code integration, and CI. Framework-specific wiring (Vite plugins, Astro islands, Next.js config) lives in per-stack adapter folders that extend this layer.
+The web layer covers the tooling shared across Vite + React, Astro, and any future web stack. It ships golden configs for oxlint, Vitest, Playwright, Tailwind v4, screenshots, VS Code integration, and CI. Framework wiring (Vite plugins, Astro islands, Next.js config) lives in per-stack adapter folders that extend this layer.
 
 ## What ships as golden configs
 
-Golden config files live in `tooling/web/configs/` and are copied into the target on `canon tooling sync web . --write`, replacing whatever sits at those paths. They are the source of truth. The reference covers rationale and tradeoffs. Configs show the concrete setup.
+Golden configs live in `tooling/web/configs/`. `canon tooling sync web . --write` copies them into the target and replaces whatever sits at those paths. They are the source of truth, so this reference covers rationale and the configs show the setup.
 
-- `.oxlintrc.json`: migrated from the ESLint config it replaced. Runs the recommended JS and TypeScript rules, the React hooks and refresh rules, test-scoped vitest rules plus `no-focused-tests`, and `check-file` and `simple-import-sort` as JS plugins.
-- `src/test/setup.ts`: `@testing-library/jest-dom/vitest` import, `cleanup` after each test.
-- `e2e/screenshot.ts`: capture template. A single `CASES` record at the top carries one entry per output file, each naming a section, a theme, and a route, and the loop below crosses every case with the `VIEWPORTS` array and writes `screenshots/<hostname>/<section>/<width>--<theme>.png`, keyed on `SCREENSHOT_BASE_URL`'s hostname so a local and a deployed run land in different folders. `VIEWPORTS` holds four breakpoint buckets named by width, 320, 768, 1280 and 1536, with 320 as the base a page has to hold without wrapping or clipping. A case flagged `evidence: true` additionally writes `evidence/<section>/<width>--<theme>.png`, with no hostname segment, at the viewports flagged `evidence` alone, which are 320 and 1280. Committing all four multiplies the tracked frames by the width count, so the flag is what keeps the tracked set at twice the sections rather than four times. A case may name `excludeViewports` to skip a width, for a route whose long-form prose reflows at 320 instead of breaking. `SCREENSHOT_FILTER` narrows a run to the cases whose label, `<section>/<width>--<theme>`, contains any comma-separated term, exits 1 when nothing matches and lists the labels that exist, and leaves the rest of the sweep alone. `--require-base-url` skips a flagged case entirely, so a production smoke run neither writes to the committed path nor counts an evidence route in its console-clean check, and exits 1 when that leaves zero cases run, so flagging every case cannot silence the production check without saying so. Per-project cases extend the one record. A route's widths and themes sit together under its section folder, so the filename carries both. A case may also name `sections`, one `{ name, selector }` per addressable part of the route, and each writes its own frame at `screenshots/<hostname>/<section>/<name>/<width>--<theme>.png` beside the whole-page one, plus `evidence/<section>/<name>/<width>--<theme>.png` where the case is flagged and the width carries `evidence`. The field is optional, so a case that names none captures the page alone as before, and a selector matching nothing is reported and skipped rather than raised, since `CASES` is a template a project rewrites and a target that syncs this file before editing its own list would otherwise capture nothing at all. Testing that every named section resolves belongs to the project that owns the selectors, beside its own page. A case may also name `mask`, a list of selectors whose boxes are painted over in every frame the case writes, whole-page and section alike, for a value that moves between runs with no code change, so a double capture still compares everything else. A mask selector matching nothing is reported and skipped the same way. Every case settles before anything is shot: the context is created with `reducedMotion: 'reduce'`, each named section is scrolled into view so an `IntersectionObserver` fires and a frame marked `loading="lazy"` loads, the page returns to the top, and fonts, images and same-origin frames are waited out on a bounded condition rather than on a second `networkidle`, which is a lifecycle event of the navigation and does not re-arm for a load a scroll started. A section frame drops the page's floating chrome, being whatever computes to `position: sticky` or `fixed`, because a section taller than the viewport is scrolled into view to be cut and a sticky bar otherwise rides that scroll into the middle of the frame. The whole-page frame is shot first and keeps its chrome. `--check-console-clean` collects `console`-level error messages per case and exits 1 with the list if any fired, turning the capture into a smoke check. `--require-base-url` exits 1 before launching a browser when `SCREENSHOT_BASE_URL` is unset, guarding a script meant to run against a real deployment from silently capturing `localhost`.
-- `scripts/screenshot.sh`: sources `scripts/lib/preview-server.sh`, then runs the capture against the served preview.
-- `scripts/lib/preview-server.sh`: sourced, never executed. Builds, serves on `PREVIEW_PORT`, blocks until the port answers, and traps the whole process group on exit, including the detached grandchild `lsof` finds. Both capture scripts source it so the startup lives once.
-- `scripts/readme-screenshot.sh`: captures one case under `SCREENSHOT_FILTER` and copies its light and dark frames to `assets/evidence/readme/`. `README_FILTER` ships empty with `header/1280` as its example, and the script exits 1 until a project fills it, since a shipped default would capture the wrong part of the page in every project but one. Its copy reads from `screenshots/<hostname>/`, which is where the harness writes.
-- `.github/workflows/readme-screenshot.yml`: refreshes that frame on a pull request and commits it back to the branch. The path list ships as `REPLACE_WITH_PROJECT_PATHS`, and the job's first step after checkout exits 1 while it stays, since a job that never fires leaves no run and no diff to notice. The workflow's own path is in the list so the installing pull request reaches that step. When a commit-back is right and when a report is, `governance/rules/tooling/ci-workflow.md` states the test.
-- `.github/workflows/verify.yml`: `static-checks`, `unit-tests`, `build-verify`, and `e2e-tests` jobs.
-- `scripts/verify.json`: the phases base's verify runner requires here, being typecheck, lint, unit tests, and build. `## Verify script` covers the order and the card exclusion stage.
-- `scripts/worktree-port.sh`: prints a base port plus this working directory's offset. Called with no argument it prints the offset alone. It refuses a folder left under the worktrees directory after its worktree was removed, rather than printing a port for it.
+### Lint and test setup
+
+Two configs carry the lint and unit-test baseline.
+
+- `.oxlintrc.json` is migrated from the ESLint config it replaced. It runs the recommended, React, and test-scoped vitest rules, with `check-file` and `simple-import-sort` as JS plugins.
+- `src/test/setup.ts` imports `@testing-library/jest-dom/vitest` and runs `cleanup` after each test.
+
+### Screenshot cases
+
+`e2e/screenshot.ts` is the capture template. One `CASES` record carries an entry per output file, each naming a section, a theme, and a route, and per-project cases extend it.
+
+- The loop crosses every case with `VIEWPORTS` and writes `screenshots/<hostname>/<section>/<width>--<theme>.png`. The hostname of `SCREENSHOT_BASE_URL` keeps a local run and a deployed run apart.
+- `VIEWPORTS` holds 320, 768, 1280, and 1536. Width 320 is the base a page has to hold without wrapping or clipping.
+- `excludeViewports` skips a width, for a route whose long-form prose reflows at 320 instead of breaking.
+- `evidence: true` also writes `evidence/<section>/<width>--<theme>.png` at 320 and 1280 alone, keeping the tracked set at twice the sections rather than four times.
+
+### Sections and masks
+
+A case may name `sections`, one `{ name, selector }` per addressable part of the route. Each writes its own frame beside the whole-page one.
+
+- A section frame lands at `screenshots/<hostname>/<section>/<name>/<width>--<theme>.png`, plus the same path under `evidence/` where the case and width are flagged.
+- A selector matching nothing is reported and skipped, since a target syncing the template before editing its list would otherwise capture nothing.
+- Testing that every section resolves belongs to the project owning the selectors.
+- `mask` lists selectors painted over in every frame, for a value that moves with no code change, so a double capture compares the rest.
+
+### Settling before a shot
+
+Every case settles before anything is shot.
+
+- The context uses `reducedMotion: 'reduce'`, and each named section scrolls into view so an `IntersectionObserver` fires and `loading="lazy"` frames load. The page then returns to the top.
+- Fonts, images, and same-origin frames are waited out on a bounded condition. A second `networkidle` does not re-arm for a load a scroll started.
+- A section frame drops floating chrome (`position: sticky` or `fixed`), which would otherwise ride the scroll into the frame. The whole-page frame is shot first and keeps its chrome.
+
+### Run flags
+
+Three controls narrow or harden a run.
+
+- `SCREENSHOT_FILTER` keeps cases whose `<section>/<width>--<theme>` label contains a comma-separated term. It exits 1 and lists the labels on no match.
+- `--check-console-clean` exits 1 with the list if any `console` error fired, turning the capture into a smoke check.
+- `--require-base-url` exits 1 before launching a browser when `SCREENSHOT_BASE_URL` is unset, so a deployment script cannot capture `localhost`.
+- With a base URL, it skips every flagged case so a production smoke run writes nothing to the committed path, and exits 1 when zero cases run.
+
+### Scripts and workflows
+
+The wrappers around the capture and the verify run. `governance/rules/tooling/ci-workflow.md` states when a workflow's commit-back is right and when a report is.
+
+- `scripts/screenshot.sh` sources `scripts/lib/preview-server.sh`, never executed itself. It builds, serves on `PREVIEW_PORT`, waits for the port, and traps the whole process group on exit.
+- `scripts/readme-screenshot.sh` captures one case under `SCREENSHOT_FILTER` into `assets/evidence/readme/`. `README_FILTER` ships empty, so it exits 1 until a project fills it.
+- `.github/workflows/readme-screenshot.yml` ships its path list as `REPLACE_WITH_PROJECT_PATHS`, and its first step exits 1 while that stays.
+- `.github/workflows/verify.yml` runs `static-checks`, `unit-tests`, `build-verify`, and `e2e-tests`.
 
 ## What stays in per-stack adapters
 
-Framework glue lives in `tooling/vite-react/configs/` or `tooling/astro/configs/` because the merge helpers and config shapes differ:
+Framework glue lives in `tooling/vite-react/configs/` or `tooling/astro/configs/`, because merge helpers and config shapes differ.
 
-- `vite.config.ts` or `astro.config.mjs`: the framework's config.
-- `vitest.config.ts`: uses `mergeConfig` in Vite stacks, `getViteConfig` from `astro/config` in Astro.
-- `playwright.config.ts`: `webServer` command differs per stack.
-- `tsconfig.json`: `extends` target differs. Astro uses `astro/tsconfigs/strict`. Vite projects use scaffold defaults.
+- `vite.config.ts` or `astro.config.mjs` holds the framework's config.
+- `vitest.config.ts` uses `mergeConfig` in Vite stacks and `getViteConfig` from `astro/config` in Astro.
+- `playwright.config.ts` differs in its `webServer` command.
+- `tsconfig.json` differs in its `extends` target. Astro uses `astro/tsconfigs/strict` and Vite projects use scaffold defaults.
 
 ## File layout
 
-- `src/` for app code, `e2e/` for Playwright, `scripts/` for shell, `src/test/setup.ts` for Vitest globals.
+- `src/` holds app code, `e2e/` Playwright, `scripts/` shell, and `src/test/setup.ts` the Vitest globals.
 - Path alias `@` maps to `./src` in both tsconfig and the framework's build config.
-- Tsconfig is unified at root with `noEmit: true` in Vite stacks. Astro uses the scaffold default from `@astrojs/check`.
+- Tsconfig sits at root with `noEmit: true` in Vite stacks. Astro keeps the scaffold default from `@astrojs/check`.
 
 ## Ports
 
 Two worktrees of one repository run the same stack, so a fixed port makes the second one attach to the first.
 
+### Deriving the port
+
+The helper owns the offset, and a config only adds it.
+
 - Derive every served port from `scripts/worktree-port.sh`. Never write a port literal into a script string.
-- Read `WORKTREE_PORT_OFFSET` in a config and add it to the stack's default port. Unset yields the default, so a plain clone keeps the port it has always served on.
-- Draw the offset from a band of 50, hashed from the worktree folder name. Two worktrees can hash to one offset, so set `WORKTREE_PORT_OFFSET` by hand to break a tie.
-- Expect a non-zero exit and no port from a folder left under `.claude/worktrees/` once its worktree is gone. Git reports the parent repository from inside one, so the helper cannot read it as a worktree and every base it serves would land on the main checkout's port. Both shapes refuse, and they reach differently. A folder whose own `.git` was deleted refuses only under that directory, since location is the only thing separating it from an ordinary subdirectory the base port is correct for. A folder whose `.git` names a pruned administrative directory refuses wherever it sits, because a pointer to nothing is broken regardless of where the folder is.
-- Call it as `VAR=$(bash scripts/worktree-port.sh) && export VAR && <server>`, never as the shorter `VAR=$(bash scripts/worktree-port.sh) <server>`. An assignment prefix discards the exit status of its own substitution, so the shorter form starts the server with `VAR` set to the empty string, every config reads that back as an offset of zero, and the refusal lands on the port it was raised to protect. The assignment alone carries the status, which is what the `&&` reads.
-- Set `WORKTREE_PORT_OFFSET` by hand to serve from such a folder anyway. That is the one override, and it is checked before any directory test.
-- Force-replace `dev` and `preview` through `[scripts.override]`. Both stacks' scaffolds define those keys, and a plain `[scripts]` entry never replaces a key the scaffold already wrote.
-- Set `strictPort` on every dev and preview server. A server that walks to the next free port serves where nothing is looking for it.
-- Set Playwright `reuseExistingServer: false`. Reuse attaches to whatever answers on the port, which reports a pass against another branch's code and prints nothing to say so.
+- Read `WORKTREE_PORT_OFFSET` in a config and add it to the stack's default port. Unset yields the default, so a plain clone keeps its port.
+- The offset comes from a band of 50 hashed from the worktree folder name. Two worktrees can collide, so set `WORKTREE_PORT_OFFSET` by hand to break a tie.
+- Force-replace `dev` and `preview` through `[scripts.override]`, since a plain `[scripts]` entry never replaces a key the scaffold wrote.
+- Set `strictPort` on every dev and preview server, and Playwright `reuseExistingServer: false`. A server that walks to another port, or a reused one, passes against the wrong code silently.
+
+### Calling the helper
+
+Call it as `VAR=$(bash scripts/worktree-port.sh) && export VAR && <server>`, never as `VAR=$(bash scripts/worktree-port.sh) <server>`. An assignment prefix discards the exit status of its own substitution. The shorter form starts the server with `VAR` empty, which every config reads as offset zero.
+
+### Refusal in a removed worktree
+
+Expect a non-zero exit and no port from a folder left under `.claude/worktrees/` once its worktree is gone. Git reports the parent repository from inside one, so every base served would land on the main checkout's port.
+
+- A folder whose own `.git` was deleted refuses only under that directory, since location alone separates it from an ordinary subdirectory.
+- A folder whose `.git` names a pruned administrative directory refuses wherever it sits.
+- Set `WORKTREE_PORT_OFFSET` by hand to serve from such a folder anyway. It is the one override and is checked before any directory test.
 
 ## Anti-patterns
 
-Sticky negative knowledge. Do not relearn.
+Negative knowledge that costs a failed run to relearn.
 
-- Do NOT use `tsc -b` in a Vite project. Composite mode emits `.js` next to `.ts` and the linter lints the emitted files. Use `tsc --noEmit`.
-- Do NOT trust `vite-react`'s scaffolded `lint` script. It ships a bare `"lint": "oxlint"`, which exits 0 on warnings. `[scripts.override]` forces `--max-warnings 0` over it, and the golden `.oxlintrc.json` overwrites the scaffold's bare one.
-- Do NOT rely on bare-folder exclude globs like `exclude: ["e2e"]`. Use `"e2e/**/*"`.
-- Do NOT ship Vitest with no-tests-fail. Fresh scaffolds have zero tests. Use `passWithNoTests: true` or equivalent until the project has at least one test.
-- Do NOT put Playwright `trace` at the top level of `defineConfig`. It lives under `use`.
-- Do NOT skip `skipLibCheck: true` in Vite + React tsconfig. `@testing-library/jest-dom` and Vite's `module-runner` produce type conflicts otherwise.
-- Do NOT run `bunx shadcn@latest init` over a pre-existing `src/styles/global.css`. Shadcn silently overwrites it. Back up first or run shadcn init before writing custom global styles. Use flags `-t <template> -b <base> -p <primary> -y` to avoid interactive prompts.
+| Do NOT                                          | Why and what to do                                                                                     |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Use `exclude: ["e2e"]`                          | Bare-folder globs miss. Use `"e2e/**/*"`.                                                              |
+| Put Playwright `trace` at the top of the config | It lives under `use`.                                                                                  |
+| Ship Vitest failing on no tests                 | Fresh scaffolds have none. Use `passWithNoTests: true` until one exists.                               |
+| Skip `skipLibCheck: true` in Vite + React       | `@testing-library/jest-dom` and Vite's `module-runner` conflict otherwise.                             |
+| Use `tsc -b` in a Vite project                  | Composite mode emits `.js` next to `.ts` and the linter lints it. Use `tsc --noEmit`.                  |
+| Trust `vite-react`'s scaffolded `lint` script   | Its bare `oxlint` exits 0 on warnings. `[scripts.override]` forces `--max-warnings 0` over it.         |
+| Run `bunx shadcn@latest init` over `global.css` | It silently overwrites `src/styles/global.css`. Back up first, and pass `-t -b -p -y` to skip prompts. |
 
 ## Tool pairing
 
-- Unit tests: Vitest with jsdom, globals on, setup file at `src/test/setup.ts`, `@testing-library/react`, `@testing-library/user-event`.
-- E2E: Playwright in `e2e/`. Chromium-only for Chrome extensions, all browsers for web apps.
-- Tailwind: v4 via `@tailwindcss/vite`. Never the v3 integration.
-- Lint: oxlint at an exact pin, since its JS plugin host is alpha and a minor release could break `check-file` or `simple-import-sort`. Astro keeps ESLint, which its own reference covers.
+- Unit tests use Vitest with jsdom, globals on, `src/test/setup.ts`, `@testing-library/react`, and `@testing-library/user-event`.
+- E2E uses Playwright in `e2e/`, Chromium only for Chrome extensions and all browsers for web apps.
+- Tailwind is v4 through `@tailwindcss/vite`, never the v3 integration.
+- Lint is oxlint at an exact pin, since its JS plugin host is alpha and a minor release could break `check-file` or `simple-import-sort`. Astro keeps ESLint, which its own reference covers.
 
 ## oxlint
 
-- Set `lint` and `lint:fix` through `[scripts.override]`, so an already-synced target stops running ESLint on its next sync.
-- Delete a leftover `eslint.config.js` or `eslint.config.mjs`, and `bun remove` the ESLint packages this stack stopped shipping, by hand after that sync. Sync deletes nothing a stack stopped shipping.
-- Keep import sorting on `simple-import-sort` rather than oxfmt's built-in sort, which orders imports differently and would rewrite every import block.
+- Set `lint` and `lint:fix` through `[scripts.override]`, so a synced target stops running ESLint on its next sync.
+- After that sync, delete a leftover `eslint.config.js` or `eslint.config.mjs` and `bun remove` the ESLint packages by hand. Sync deletes nothing a stack stopped shipping.
+- Keep import sorting on `simple-import-sort`, because oxfmt's built-in sort orders differently and would rewrite every import block.
 
 ## lint-staged (extend)
 
-- Add `**/*.{js,jsx,ts,tsx}` glob running `oxlint --fix --max-warnings 0`, and `oxfmt --no-error-on-unmatched-pattern`.
-- Extend the oxfmt glob to include `css`: `**/*.{json,css,md}`.
+- Add `**/*.{js,jsx,ts,tsx}` running `oxlint --fix --max-warnings 0` and `oxfmt --no-error-on-unmatched-pattern`.
+- Extend the oxfmt glob to include `css`, giving `**/*.{json,css,md}`.
 
 ## CI docs (extend)
 
 Extend `canon/context/development/ci.md` so the `## Checks` table reflects the web jobs. <!-- audit-ignore-citations: canon/context/development/ci.md -->
 
-Append rows:
-
-| Typecheck | `bun run typecheck` | framework-specific typecheck passes |
-| Lint | `bun run lint` | oxlint passes with zero warnings |
-| Tests | `bun run test:coverage` | Vitest passes with coverage thresholds |
-| Build | `bun run build` | Production build succeeds |
-| E2E | `bun run test:e2e` | Playwright passes against the built preview |
+| Check     | Command                 | What it asserts                             |
+| --------- | ----------------------- | ------------------------------------------- |
+| Typecheck | `bun run typecheck`     | framework-specific typecheck passes         |
+| Lint      | `bun run lint`          | oxlint passes with zero warnings            |
+| Tests     | `bun run test:coverage` | Vitest passes with coverage thresholds      |
+| Build     | `bun run build`         | Production build succeeds                   |
+| E2E       | `bun run test:e2e`      | Playwright passes against the built preview |
 
 Under `## Running CI locally`, document that `bun run check:full` runs verify plus `test:e2e`.
 
 ## Development docs (extend)
 
-Extend the `development` context entry under `canon/context/` so the `## Scripts` table lists every web script. Stack adapters add their `dev`, `build`, `preview`, `typecheck` rows.
+Extend the `development` context entry under `canon/context/` so the `## Scripts` table lists every web script. Stack adapters add their `dev`, `build`, `preview`, and `typecheck` rows.
 
-Append rows:
+| Command                     | Purpose                                 |
+| --------------------------- | --------------------------------------- |
+| `bun run lint`              | Run oxlint, no warnings allowed.        |
+| `bun run lint:fix`          | Auto-fix oxlint issues.                 |
+| `bun run test`              | Run Vitest in watch mode.               |
+| `bun run test:run`          | Run Vitest once, verbose.               |
+| `bun run test:coverage`     | Run Vitest with coverage.               |
+| `bun run test:e2e`          | Run Playwright E2E tests.               |
+| `bun run test:e2e:changed`  | Run specs the diff's import graph hits. |
+| `bun run screenshot`        | Build, preview, capture screenshots.    |
+| `bun run readme-screenshot` | Capture the README frame.               |
+| `bun run smoke:prod`        | Capture against a required base URL.    |
 
-| `bun run lint` | Run oxlint with zero warnings allowed. |
-| `bun run lint:fix` | Auto-fix oxlint issues. |
-| `bun run test` | Run Vitest in watch mode. |
-| `bun run test:run` | Run Vitest once with verbose reporter. |
-| `bun run test:coverage` | Run Vitest with coverage. |
-| `bun run test:e2e` | Run Playwright E2E tests. |
-| `bun run test:e2e:changed` | Run Playwright E2E tests for specs the import graph reaches from the current diff. |
-| `bun run screenshot` | Build, preview, then capture screenshots. |
-| `bun run readme-screenshot` | Build, preview, then capture the README frame into `assets/evidence/readme/`. |
-| `bun run smoke:prod` | Capture against `SCREENSHOT_BASE_URL`, requiring it set and failing on any console error. |
+### Screenshot contract
 
-`canon tooling verify <stack>` is the only automated caller of `bun run screenshot`, running it for any stack whose `package.json` declares the script and asserting that PNG files land under `screenshots/`. It counts them with a recursive find carrying no depth limit, so the section folders the seed writes satisfy the assertion without a change to it. Do not flatten the layout to protect that check. No ship chain captures a screenshot, so the output path the seed writes is a contract that one verifier reads rather than a default a ship step depends on.
+`canon tooling verify <stack>` is the only automated caller of `bun run screenshot`. It runs the script for any stack whose `package.json` declares it and asserts that PNG files land under `screenshots/`.
 
-`governance/rules/ui/surface-capture.md` is what asks a session to run the capture after a surface changes. It now fires on every component file too, reversing the route-and-page-only scope this reference once described, after a shipped batch of components carried no capture and a defect went unseen. The rule body states its own exemption for a component the production build strips out, so a reader chasing that case reads it there rather than here.
-
-The sweep under `screenshots/` is ignored again, and only a flagged case's `evidence/` output tracks in git, so the first capture a scaffolded target runs after this change is the baseline it commits there. A case naming sections commits a folder per section under that baseline rather than one file per theme, which is what lets a pull request comparison land on the part of the page that moved instead of on one image of the whole of it. The count is the section list times the themes, so a list is worth sizing against how many frames each later change has to regenerate and a reviewer has to read.
+- The count is a recursive find with no depth limit, so the seed's section folders satisfy it. Do not flatten the layout to protect that check.
+- `governance/rules/ui/surface-capture.md` asks a session to run the capture after a surface changes, component files included, with an exemption for a component the production build strips out.
+- The sweep under `screenshots/` is ignored and only a flagged case's `evidence/` output tracks, so a target's first capture is the baseline it commits.
+- A case naming sections commits a folder per section, so size the list against the frames each later change regenerates.
 
 ## Gitignore (extend)
 
-`[gitignore]` groups this stack edits, restated here per the manifest-to-reference symmetry:
+These `[gitignore]` groups mirror the manifest.
 
 - `"# Playwright" = ["test-results/", "playwright-report/", "blob-report/", "playwright/.cache/"]`
 - `"# Screenshots" = ["screenshots/"]`
 
 ## Verify script
 
-The web layer's `scripts/verify.json` requires `typecheck`, `lint`, `test:run`, and `build`, and base's `scripts/verify.ts` runs them in its fixed order: typecheck, lint, format, shell where the `shell` stack declares it, unit tests, build, markdown bans, then the card exclusion check where one is installed. astro, vite-react, and nextjs inherit the list, since the nearest stack's copy wins. An adapter whose phases differ ships its own `verify.json` rather than a script.
+The web layer's `scripts/verify.json` requires `typecheck`, `lint`, `test:run`, and `build`. Base's `scripts/verify.ts` runs them in its fixed order, being typecheck, lint, format, shell where the `shell` stack declares it, unit tests, build, markdown bans, then the card exclusion check where installed.
 
-The card stage runs `scripts/check-card-exclusion.sh` whenever that file is installed, which keeps the social card route's build exclusion on the default path rather than behind a flag. It tests for the script rather than the stack, so a project with no card route runs one less stage with no override, and the stack shipping a card route owns what the check reads, being the build the stage before it produced. The astro reference carries the route itself.
+- Astro, vite-react, and nextjs inherit the list, since the nearest stack's copy wins. An adapter whose phases differ ships its own `verify.json` rather than a script.
+- The card stage runs `scripts/check-card-exclusion.sh` whenever that file is installed, keeping the social card route's build exclusion on the default path rather than behind a flag.
+- It tests for the script rather than the stack, so a project with no card route runs one less stage with no override.
+- The stack shipping a card route owns what the check reads, being the build the stage before it produced. The astro reference carries the route itself.

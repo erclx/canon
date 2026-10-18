@@ -9,30 +9,48 @@ The go stack covers Go modules linted and formatted by `golangci-lint` v2, type-
 ## Scaffold checklist
 
 1. Scaffold with `go mod init <module-path>`. The module path is the project's own identity, so this stack never ships a `go.mod`.
-2. Keep `./...` out of `node_modules`: `go mod edit -ignore=./node_modules`. At a root sync the base layer installs `node_modules/` inside the module, and a package there can ship a `.go` file that `go vet`, `go test`, and `golangci-lint` would otherwise walk. The directive needs Go 1.25 or later.
-3. Seed `package.json` so the base layer's bun-side tools (husky, oxfmt, commitlint) have a target to install into: `bun init -y`.
-4. Install base tooling: `canon tooling sync base . --write`
-5. Install go tooling: `canon tooling sync go . --write`
-6. Install the linter: `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest`. The manifest declares no `[dependencies.dev]`, because manifest injection runs `bun add -D`, which cannot install a Go tool. This step stays manual.
+2. Keep `./...` out of `node_modules` with `go mod edit -ignore=./node_modules` (Go 1.25 or later). A root sync installs `node_modules/` in the module, and a package there can ship `.go` files.
+3. Seed `package.json` with `bun init -y`, so the base layer's bun-side tools (husky, oxfmt, commitlint) have a target to install into.
+4. Install base tooling with `canon tooling sync base . --write`.
+5. Install go tooling with `canon tooling sync go . --write`.
+6. Install the linter with `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest`. This stays manual, since manifest injection runs `bun add -D`, which cannot install a Go tool.
 7. Run `bun run lint:fix`, then `bun run format`, then `bun run check`.
 
-The go stack also ships `smoke_test.go` at the module root as a copy-once seed. A module with no `.go` file fails `golangci-lint run`, `go vet`, and `go test` on an empty package list, so the seed is what lets `bun run check` pass on a fresh scaffold. It declares `package main`, so delete or rename it once the root package takes another name, or the build reports two packages in one folder.
+### The smoke test seed
+
+The stack ships `smoke_test.go` at the module root as a copy-once seed. A module with no `.go` file fails the linter, `go vet`, and `go test` on an empty package list, so the seed lets `bun run check` pass on a fresh scaffold.
+
+It declares `package main`. Delete or rename it once the root package takes another name, or the build reports two packages in one folder.
 
 ## golangci-lint
 
-- Use config `version: '2'`.
-- Start from `default: standard`.
-- Enable `bodyclose`, `errorlint`, `gosec`, `misspell`, `noctx`, `revive`, `sqlclosecheck`, `rowserrcheck`, and `unconvert`. The two SQL linters report only on `database/sql` call sites, so they cost nothing in a module without a database.
-- Enable formatters `gofmt` and `goimports`. `lint:fix` runs `golangci-lint fmt` ahead of `golangci-lint run --fix`.
-- Exclude `node_modules` from both linters and formatters. The `go.mod` `ignore` directive in the checklist covers every Go tool, but `go.mod` belongs to the project and sync cannot write it, so the config keeps `golangci-lint run` from reporting and `golangci-lint fmt` from rewriting a vendored `.go` file in a module that never added the directive.
+The config uses `version: '2'` and starts from `default: standard`.
+
+- Enable `bodyclose`, `errorlint`, `gosec`, `misspell`, `noctx`, `revive`, `sqlclosecheck`, `rowserrcheck`, and `unconvert`.
+- The two SQL linters report only on `database/sql` call sites, so they cost nothing without a database.
+- Enable formatters `gofmt` and `goimports`, with `lint:fix` running `golangci-lint fmt` ahead of `golangci-lint run --fix`.
+- Exclude `node_modules` from both linters and formatters. The `go.mod` `ignore` directive covers every Go tool, but `go.mod` belongs to the project and sync cannot write it.
+- That exclusion keeps `golangci-lint run` from reporting, and `golangci-lint fmt` from rewriting, a vendored `.go` file in a module that never added the directive.
 
 ## verify.json
 
-- Require Typecheck (`go vet`), Lint (`golangci-lint run`), and Unit tests (`go test -v`). Base's runner adds the four base phases wherever the folder declares their scripts, then the markdown bans stage.
+### Phases
+
+The go phase list requires three phases and probes the tools first.
+
+- Require Typecheck (`go vet`), Lint (`golangci-lint run`), and Unit tests (`go test -v`).
+- Base's runner adds the four base phases where the folder declares their scripts, then the markdown bans stage.
 - Probe `go` and `golangci-lint` first, and name the `go install` command when `golangci-lint` is missing.
-- Keep `build` out of `verify.json`, even though the stack declares the script. `go build ./...` exits 1 with `no packages to build` on a module holding only a test file, and a seeded `main.go` would assume every module is a binary rather than a library.
-- Keep `-race` out of `test:run`. The race detector needs cgo and a C toolchain, so it belongs in CI rather than in a local `bun run check`.
-- The manifest's `[verify] prepare` runs checklist steps 3 and 6 for `canon tooling verify go`: `bun init -y`, then the `golangci-lint` `go install` when the binary is not already on PATH. The scaffold writes no `package.json`, and a verify that reaches its end with none fails.
+
+### Left out and prepared
+
+Two things stay out of the list, and one step runs before it.
+
+- Keep `build` out, though the stack declares the script. `go build ./...` exits 1 with `no packages to build` on a module holding only a test file.
+- A seeded `main.go` would assume every module is a binary rather than a library.
+- Keep `-race` out of `test:run`. The race detector needs cgo and a C toolchain, so it belongs in CI rather than a local `bun run check`.
+- The manifest's `[verify] prepare` runs checklist steps 3 and 6 for `canon tooling verify go`, being `bun init -y` and the `go install` when the binary is not on PATH.
+- The scaffold writes no `package.json`, and a verify that reaches its end with none fails.
 
 ## CI
 
@@ -48,15 +66,21 @@ The go stack also ships `smoke_test.go` at the module root as a copy-once seed. 
 
 ## Development docs (extend)
 
-Append to the `## Scripts` table:
+Append these rows to the `## Scripts` table.
 
-| `bun run lint` | Run `golangci-lint run`. |
-| `bun run lint:fix` | Format with `golangci-lint fmt`, then auto-fix with `golangci-lint run --fix`. |
-| `bun run typecheck` | Run `go vet`. |
-| `bun run test` | Run `go test`. |
-| `bun run test:run` | Run `go test -v` (used by `verify`). |
-| `bun run build` | Run `go build`. |
+| Command             | Purpose                                                                        |
+| ------------------- | ------------------------------------------------------------------------------ |
+| `bun run lint`      | Run `golangci-lint run`.                                                       |
+| `bun run lint:fix`  | Format with `golangci-lint fmt`, then auto-fix with `golangci-lint run --fix`. |
+| `bun run typecheck` | Run `go vet`.                                                                  |
+| `bun run test`      | Run `go test`.                                                                 |
+| `bun run test:run`  | Run `go test -v` (used by `verify`).                                           |
+| `bun run build`     | Run `go build`.                                                                |
 
 ## CI docs (extend)
 
-In `canon/context/development/ci.md`, the Typecheck row's assertion reads: `` `go vet ./...` passes ``. Add a Lint row whose assertion reads: `` `golangci-lint run` passes ``. Add a Tests row whose assertion reads: `` `go test -race ./...` exits 0 ``. <!-- audit-ignore-citations: canon/context/development/ci.md -->
+In `canon/context/development/ci.md`, add or change three rows. <!-- audit-ignore-citations: canon/context/development/ci.md -->
+
+- The Typecheck row asserts `` `go vet ./...` passes ``.
+- A Lint row asserts `` `golangci-lint run` passes ``.
+- A Tests row asserts `` `go test -race ./...` exits 0 ``.

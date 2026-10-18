@@ -12,7 +12,6 @@
 [![License MIT](https://img.shields.io/npm/l/@erclx/canon)](LICENSE)
 
 canon is a CLI and Claude Code plugin that runs your agent's work from plan to merge, holds it to the practices that make code worth keeping, and installs the same setup in every repository.
-
 **[See it run at canon.erclx.dev](https://canon.erclx.dev)**
 
 </div>
@@ -21,9 +20,13 @@ That page is one real session the toolkit ran on itself, and every count on it i
 
 ## Why
 
-If an agent writes code for you in more than one repository, this is for you. canon runs that work from plan to merge. A planner writes the plan, a worker builds it on its own branch, and a separate session reviews the pull request. It holds the work to a practice, with rules that load when a matching path is edited and checks that fail when a rule is ignored. Both run on one setup, installed the same way in every repository you keep.
+If an agent writes code for you in more than one repository, this is for you. canon runs that work from plan to merge. A planner writes the plan, a worker builds it on its own branch, and a separate session reviews the pull request.
 
-That shared setup is what the rest of this page describes, and it is the part that drifts without a source. Every AI coding setup accumulates the same assets. Prompts to reuse, rules agents should follow, slash commands, skills, seed docs, sync scripts. Once you have enough projects, your copies drift and your agents stop getting consistent signals.
+It holds the work to a practice, with rules that load when a matching path is edited and checks that fail when a rule is ignored. Both run on one setup, installed the same way in every repository you keep.
+
+### The shared setup
+
+That shared setup is what the rest of this page describes, and it drifts without a source. Every AI coding setup accumulates the same assets. Prompts to reuse, rules agents should follow, slash commands, skills, seed docs, sync scripts. Once you have enough projects, your copies drift and your agents stop getting consistent signals.
 
 Three design choices shape the toolkit.
 
@@ -61,17 +64,21 @@ bun install --global @erclx/canon
 
 Each domain has a canonical source in this repo and a thin install or sync CLI on your side. The domains split on one line: some are copied into your project and become yours to edit, and some are never copied at all.
 
-| Domain         | What it is                                                                                                                                                                   | How it reaches you                                              |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Plugin skills  | Skills that plan a feature, review a diff, sync the planning docs, and run the ship chain                                                                                    | Loaded live from the plugin, never copied                       |
-| Governance     | Coding and authoring rules that load into a Claude session when a matching path is edited                                                                                    | Installed per project by `canon gov install`, refreshed by sync |
-| Tooling stacks | Golden configs, seeds, and a reference per framework                                                                                                                         | Laid down by `canon init`, reconciled by `canon tooling sync`   |
-| Design system  | Ships a `DESIGN.md` intent format that points at the project's stylesheet for values, a skill that drafts one from an existing project or from scratch, and a render command | `canon design render`                                           |
-| Slides         | A folder of HTML slides per deck, drawn in the project's tokens and rebuilt as editable shapes                                                                               | `canon slides render` writes PowerPoint                         |
-| Teach          | Lessons, sources, and a glossary in one workspace, rendered to a small site                                                                                                  | `canon teach`                                                   |
-| Canvas         | Pages of HTML frames on a local pan and zoom surface, each frame drawn with the project's tokens                                                                             | `canon canvas serve`                                            |
-| Transcripts    | A YouTube transcript with metadata frontmatter                                                                                                                               | `canon transcripts <url>` writes it into any repo               |
-| Sandbox        | Scenario scaffolds that provision an isolated project state for verifying each domain flow                                                                                   | `canon sandbox`                                                 |
+### Domain catalog
+
+| Domain         | What it is                                                                                                              | How it reaches you                                              |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Plugin skills  | Skills that plan a feature, review a diff, sync the planning docs, and run the ship chain                               | Loaded live from the plugin, never copied                       |
+| Governance     | Coding and authoring rules that load into a Claude session when a matching path is edited                               | Installed per project by `canon gov install`, refreshed by sync |
+| Tooling stacks | Golden configs, seeds, and a reference per framework                                                                    | Laid down by `canon init`, reconciled by `canon tooling sync`   |
+| Design system  | Ships a `DESIGN.md` intent format pointing at your stylesheet for values, a skill that drafts one, and a render command | `canon design render`                                           |
+| Slides         | A folder of HTML slides per deck, drawn in the project's tokens and rebuilt as editable shapes                          | `canon slides render` writes PowerPoint                         |
+| Teach          | Lessons, sources, and a glossary in one workspace, rendered to a small site                                             | `canon teach`                                                   |
+| Canvas         | Pages of HTML frames on a local pan and zoom surface, each frame drawn with the project's tokens                        | `canon canvas serve`                                            |
+| Transcripts    | A YouTube transcript with metadata frontmatter                                                                          | `canon transcripts <url>` writes it into any repo               |
+| Sandbox        | Scenario scaffolds that provision an isolated project state for verifying each domain flow                              | `canon sandbox`                                                 |
+
+### How domains reach you
 
 Those domains reach you in three shapes. A tooling stack lands as real files under version control, because a config is something your build reads and your project owns. A plugin skill and the references it carries are never copied, so there is no copy in your repo to drift from this one.
 
@@ -117,6 +124,8 @@ The first two update the skills, the third updates the CLI, and they move indepe
 
 `canon upgrade` reads the package manager off its own install path and reinstalls with that one, so you don't have to remember which put it there. It names what it detected before it runs anything, and it refuses a source checkout rather than reinstalling over your clone.
 
+### Checking for drift
+
 You don't have to wait until something breaks to find out you're behind. `canon sync --check` and `canon claude skills drift` both report the installed version against the newest published one, and neither changes its exit code over it, so an offline machine reads unknown rather than red.
 
 To stop doing this by hand, turn auto-update on once under `/plugin` in the Marketplaces tab. Confirm what you are running with `canon --version` and `claude plugin list`.
@@ -126,6 +135,8 @@ To stop doing this by hand, turn auto-update on once under `/plugin` in the Mark
 Working on the toolkit starts from a clone. Running the CLI doesn't, since it installs from the registry. Skip this section unless you're changing the toolkit itself.
 
 ### Prerequisites
+
+Bun, Git, and a shell are required, and the GitHub CLI is optional.
 
 - [Bun](https://bun.sh) for the CLI runtime and scripts
 - [Git](https://git-scm.com) with worktree support
@@ -141,7 +152,10 @@ bun install
 bun run bootstrap
 ```
 
-The script is idempotent, so re-run it after pulling upstream changes without duplicating anything. That also means it leaves an alias block you already have alone rather than refreshing it, so an alias added upstream needs the block deleted and the script re-run. It confirms the install by resolving `canon --help` on the last step. See [zshrc aliases](docs/workflow/zshrc-aliases.md) for what each alias does, how to pick up a new one, and how to opt out of the block.
+The script is idempotent, so re-run it after pulling upstream changes without duplicating anything. It confirms the install by resolving `canon --help` on the last step.
+
+- It leaves an alias block you already have alone rather than refreshing it, so an alias added upstream needs the block deleted and the script re-run.
+- [Zshrc aliases](docs/workflow/zshrc-aliases.md) covers what each alias does, how to pick up a new one, and how to opt out of the block.
 
 With the CLI linked, scaffold a fresh project.
 
@@ -151,9 +165,12 @@ git init
 canon init
 ```
 
-`canon init` installs base tooling configs, Claude seeds, and governance rules in one pass, and scaffolds a `.claude/wiki/` stub for your project's own reference pages. Governance defaults to the `base` stack, so a bare init lands the workflow and doc-authoring rules in `.claude/rules/`. Each rule names the skill it loads, so no corpus is copied into your project.
+`canon init` installs base tooling configs, Claude seeds, and governance rules in one pass, and scaffolds a `.claude/wiki/` stub for your project's own reference pages.
 
-Pass `--stack <name>` for a language stack such as `node` or `python`, or `--skip governance` to leave rules out. Run `canon tooling list --json` to see the catalog.
+- Governance defaults to the `base` stack, so a bare init lands the workflow and doc-authoring rules in `.claude/rules/`.
+- Each rule names the skill it loads, so no corpus is copied into your project.
+- Pass `--stack <name>` for a language stack such as `node` or `python`, or `--skip governance` to leave rules out.
+- Run `canon tooling list --json` to see the catalog.
 
 For the full journey from scaffold through adding a domain later to syncing upstream drift, see [target projects](docs/target/projects.md).
 

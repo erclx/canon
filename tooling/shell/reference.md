@@ -6,13 +6,13 @@ The shell stack is an add-on that formats and lints the shell scripts a project 
 
 ## Install
 
-- Install `shfmt` and `shellcheck` by hand, through `sudo apt-get install shfmt shellcheck` or `brew install shfmt shellcheck`. Injection runs only `bun add -D`, and neither tool ships through the registry.
+- Install `shfmt` and `shellcheck` by hand with `sudo apt-get install shfmt shellcheck` or `brew install shfmt shellcheck`. Injection runs only `bun add -D`, and neither ships through the registry.
 - `scripts/verify.ts` probes both before the `Shell` phase and names the install command when one is missing, rather than letting `find` report a missing executable.
 
 ## shfmt
 
 - Indent with 2 spaces, set through `--indent 2` on every call.
-- `.editorconfig` carries an `[*.sh]` block with `indent_style = space` and `indent_size = 2`, so the editor and shfmt agree. Dropping the block because shfmt already sets indentation produces spurious diffs.
+- `.editorconfig` carries an `[*.sh]` block with `indent_style = space` and `indent_size = 2`, so the editor and shfmt agree. Dropping it because shfmt sets indentation produces spurious diffs.
 
 ## shellcheck
 
@@ -27,16 +27,17 @@ The shell stack is an add-on that formats and lints the shell scripts a project 
 
 ## Verify
 
-- `scripts/verify.ts` runs `check:shell` in its `Shell` phase wherever `package.json` declares it, between the format check and the unit tests. No stack's `scripts/verify.json` requires it, so a folder that never synced this stack skips the phase.
+`scripts/verify.ts` runs `check:shell` in its `Shell` phase wherever `package.json` declares it, between the format check and the unit tests. No stack's `scripts/verify.json` requires it, so a folder that never synced this stack skips the phase.
 
 ## lint-staged
 
-- `.lintstagedrc` is a base seed this stack cannot reach once written. Add a `**/*.sh` entry by hand, running `shfmt --write --indent 2` then `shellcheck --severity=warning`, to run the checks on commit.
+- `.lintstagedrc` is a base seed this stack cannot reach once written. Add a `**/*.sh` entry by hand to run the checks on commit.
+- That entry runs `shfmt --write --indent 2` then `shellcheck --severity=warning`.
 - Do NOT copy that glob into a `package.json` script. lint-staged expands its own globs and passes matched files as arguments, which a bare shell script does not.
 
 ## CI
 
-- `.github/workflows/shell.yml` runs on pull requests targeting `main` and on `workflow_dispatch`: checkout, setup Bun, `bun install --frozen-lockfile`, install both tools through apt, then `check:shell`.
+`.github/workflows/shell.yml` runs on pull requests targeting `main` and on `workflow_dispatch`. Its steps are checkout, setup Bun, `bun install --frozen-lockfile`, installing both tools through apt, then `check:shell`.
 
 ## CLI
 

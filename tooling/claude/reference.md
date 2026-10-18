@@ -2,7 +2,7 @@
 
 ## Overview
 
-The claude stack installs the `.claude/` workflow directory into a project. State docs are seeds, written once and never overwritten by tooling. `CLAUDE.md` is a seed, filled in per project after init.
+The claude stack installs the `.claude/` workflow directory into a project. Tooling writes state docs once and never overwrites them. `CLAUDE.md` is one of those seeds, and a project fills it in after init.
 
 ## Structure
 
@@ -26,52 +26,70 @@ canon/
 └── tmp/               ← ephemeral scratch space, safe to delete without loss
 ```
 
-One ignore entry covers `.canon/` whole, so nothing under it is named separately and nothing tracked may ever land there. A project scaffolded before the move keeps its records under `.claude/`, and every command reads either root.
+One ignore entry covers `.canon/` whole, so nothing under it is named separately and nothing tracked may land there. A project scaffolded before the move keeps its records under `.claude/`, and every command reads either root.
 
 ## Moving the records to `.canon/`
 
-A project installed before the split still holds its records under `.claude/`. `canon migrate records` moves them and repoints every tracked file that cites one, reporting the plan until `--write` is passed.
+A project installed before the split holds its records under `.claude/`. `canon migrate records` moves them and repoints every tracked file that cites one, reporting the plan until `--write` is passed.
 
-Run `canon tooling sync claude . --write` first. The verb refuses while the project does not ignore `.canon/`, because every folder it relocates is ignored where it stands and landing one under a tracked root commits the task board and the plans. Until the move runs, this project's records sit at a root the shipped ignore set no longer names, so a `git add -A` in that window picks them up.
-
-The verb ships with the change that split the roots and is not in a published release yet, so an installed binary answers `unknown command` until one carries it. Run it out of a canon checkout in the meantime, as `bun src/cli.ts migrate records --root <project> --write`, and read the `ok` field out of `--json` rather than the exit code, which a shell wrapper around `canon` can flatten.
+- Run `canon tooling sync claude . --write` first. The verb refuses until the project ignores `.canon/`, since a relocated folder under a tracked root commits the task board and plans.
+- Until the move runs, the records sit at a root the shipped ignore set no longer names, so a `git add -A` in that window picks them up.
+- An installed binary answers `unknown command` until a published release carries the verb. Meanwhile run `bun src/cli.ts migrate records --root <project> --write` from a canon checkout.
+- Read the `ok` field out of `--json` rather than the exit code, which a shell wrapper around `canon` can flatten.
 
 ## Upgrading from a single-file board
 
-A project installed before the board became a folder still holds `.claude/TASKS.md`. Nothing migrates it. `canon claude init` seeds an empty `.canon/tasks/index.md` beside it and leaves the old file untouched, so every skill reads the empty catalog while the real board sits unreferenced.
+A project installed before the board became a folder still holds `.claude/TASKS.md`, and nothing migrates it. `canon claude init` seeds an empty `.canon/tasks/index.md` beside it and leaves the old file untouched, so every skill reads the empty catalog while the real board sits unreferenced.
 
-Convert by hand, once per project:
+Convert by hand, once per project.
 
-1. Split each `###` block into `.canon/tasks/vXX.Y-<slug>.md`, adding the `title` and `description` frontmatter the tasks reference in the `task-board` skill requires. Compare each new file against the block it came from rather than checking that every block landed somewhere.
+1. Split each `###` block into `.canon/tasks/vXX.Y-<slug>.md`, adding the `title` and `description` frontmatter the `task-board` skill requires. Compare each new file against its source block.
 2. Run `canon indexes regen --no-stage --root . .canon/tasks/<any-task>.md` to build the catalog.
 3. Delete `.claude/TASKS.md`, and swap its `.gitignore` entry for `.canon/tasks/`.
 
 ## Gitignore
 
-- `# Claude`: `.canon/`, `.claude/worktrees/`, `.claude/.tmp/` <!-- canon-keep-record-root -->
+The `# Claude` group holds three entries, being `.canon/`, `.claude/worktrees/`, and `.claude/.tmp/`. <!-- canon-keep-record-root -->
 
-The first entry covers the whole record root, so a record folder added later needs no line here and no sync. The second is the carve-out the harness owns, since it creates a worktree under `.claude/` and requires its target to sit there. The third is the scratch rule's fallback spelling, carried for a project the record move has not reached and retired once none is left to reach.
+- The first entry covers the whole record root, so a record folder added later needs no line here and no sync.
+- The second is the carve-out the harness owns, since it creates a worktree under `.claude/` and requires its target to sit there.
+- The third is the scratch rule's fallback spelling, carried for a project the record move has not reached and retired once none is left.
 
 ## CLI
 
-| Command              | What it does                                                                                                                                         |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `canon claude init`  | Seeds `.claude/` workflow docs, updates `.gitignore`                                                                                                 |
-| `canon claude sync`  | Reconciles `.gitignore` against the manifest. Reports seeded file status.                                                                            |
-| `canon claude setup` | Installs user-level config to `~/.claude/`: statusline, attribution, and the `permissions.allow` and `permissions.deny` lists. Run once per machine. |
+| Command              | What it does                                                                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `canon claude init`  | Seeds `.claude/` workflow docs, updates `.gitignore`                                                                            |
+| `canon claude sync`  | Reconciles `.gitignore` against the manifest. Reports seeded file status.                                                       |
+| `canon claude setup` | Installs user-level config to `~/.claude/` once per machine: statusline, attribution, and the permissions allow and deny lists. |
 
 ## CLAUDE.md
 
-- Ships as a seed with placeholder project name, description, and key paths. Fill these in after init.
-- Section layout: `Context`, `Commands`, `Key paths`. Each section groups rules that share a surface so skills can detect, extend, or skip by heading.
-- The `Context` section points at `.claude/` state docs one line. `plan-feature` does the parallel read when invoked. The seed intentionally does not re-list every file.
+- It ships as a seed with placeholder project name, description, and key paths, to fill in after init.
+- Its sections are `Context`, `Commands`, and `Key paths`. Each groups rules that share a surface, so skills can detect, extend, or skip by heading.
+- The `Context` section points at `.claude/` state docs in one line. `plan-feature` does the parallel read when invoked, so the seed does not re-list every file.
 
 ## Seed docs
 
-- Seed docs ship with a guidelines preamble above the first H2. These are instructions Claude internalizes before filling in the sections below. They are not sections to populate.
+Seed docs ship with a guidelines preamble above the first H2. Claude internalizes those instructions before filling in the sections below, and they are not sections to populate.
 
 ## settings.json
 
-- Project seed at `tooling/claude/seeds/.claude/settings.json` ships three PreToolUse hooks (pairing with `.claude/hooks/index-reminder.sh`, `.claude/hooks/search-reminder.sh`, and `.claude/hooks/scratch-guard.sh`) and a PostToolUse hook (pairs with `.claude/hooks/standards-audit.sh`). Project settings layer over user settings, so per-project files only carry what is genuinely project-specific.
-- User-level template at `tooling/claude/user/settings.template.json` carries `attribution.commit` and `attribution.pr` (empty strings to suppress co-author tags), `permissions.allow` with `Bash(bun run *)`, and `permissions.deny` with `Read(**/.env)` and `Read(**/.env.*)` to block accidental secret exposure across any project. Installed once per machine via `canon claude setup`.
+The project and user files split what is project-specific from what is personal.
+
+### Project seed
+
+The seed at `tooling/claude/seeds/.claude/settings.json` ships hooks that pair with scripts under `.claude/hooks/`.
+
+- Three PreToolUse hooks pair with `index-reminder.sh`, `search-reminder.sh`, and `scratch-guard.sh`.
+- A PostToolUse hook pairs with `standards-audit.sh`.
+- Project settings layer over user settings, so a project file carries only what is project-specific.
+
+### User template
+
+The template at `tooling/claude/user/settings.template.json` is installed once per machine by `canon claude setup`.
+
+- It sets `attribution.commit` and `attribution.pr` to empty strings to suppress co-author tags.
+- It allows `Bash(bun run *)` under `permissions.allow`.
+- Its `permissions.deny` holds `Read(**/.env)` and `Read(**/.env.*)`, blocking accidental secret exposure across any project.
 - The deprecated `includeCoAuthoredBy` key is not used.
