@@ -77,7 +77,7 @@ Holds this repository's Claude Code hooks, wired through `.claude/settings.json`
 - Every hook reading a payload opens with `IFS= read -r -d '' -t 2 input`, never `cat`, as `src/hooks/guard.test.ts` holds. The bound is canon's own, and `scratch-guard.sh` fails open on it
 - `memory-guard.sh` and `review-post-scan.sh` cut a `Bash` command with one `awk` pass that drops heredoc bodies, and an arithmetic or `let` shift is text rather than an opener
 - `precompact-handoff.sh` blocks the first manual `/compact` once and instructs on `auto`, where a block reaches nobody. `silent-turn.sh` and `reply-links.sh` block once on `Stop`.
-- `autoCompactWindow`, `autoContinueAtUsageLimit`, and `crossSessionInbound` stay unset here as per-operator values, and `autoMemoryEnabled: false` is the one setting this repository sets
+- Auto memory is off and `Agent` and `Task` are denied, as in the seed, though Workflow agents still run. Compaction, usage-limit, and inbound settings stay per-operator.
 
 ### `.husky/`
 
