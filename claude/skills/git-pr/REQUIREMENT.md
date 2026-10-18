@@ -9,7 +9,7 @@ description: What pull request generation is for, the gaps it closes, and what i
 
 Without this skill, a pull request body is written from memory rather than the diff, so it describes the intent and omits what the work became. Testing boxes get ticked from intent, a second push errors or opens a duplicate, and banned characters survive into a body the hook never sees.
 
-Every pull request lands unlabelled, so a merged list cannot be filtered by surface. A lookup by head branch alone resolves a reused name to the merged pull request, then rewrites its title and body and reports nothing wrong. A pull request changing a rendered surface reaches review with no screenshots.
+Every pull request lands unlabelled, so a merged list cannot be filtered by surface. A head-branch lookup resolves a reused name to the merged pull request and rewrites it. A pull request changing a rendered surface reaches review with no screenshots, and a hand-written `Closes` line closes an issue on a middle slice or misses one the task names.
 
 ## Must
 
