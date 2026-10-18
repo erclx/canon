@@ -31,11 +31,11 @@ Holds the one stack that lints with ESLint and formats `.astro` files with Prett
 
 ### `tooling/web/`
 
-Holds the layer that ships the capture harness and the served port. Its `verify.yml` is a config shadowing base's seed at the same path, so a web target receives every change to it.
+Holds the layer that ships the capture harness and the served port. Its `verify.yml` shadows base's seed, so a web target receives every change to it. The harness `e2e/screenshot.ts` is a config that loads `CASES` and `EVIDENCE_ROOT` from the seed `e2e/capture/cases.ts`, copied once, and exits 1 when it is missing.
 
 - `configs/scripts/worktree-port.sh` prints a base plus an offset hashed from the worktree folder name, and refuses a leftover folder under `.claude/worktrees/` whose `.git` is gone
 - Every manifest script calling the helper guards it with `&& export VAR &&`, because an assignment prefix discards the substitution's exit status
-- The capture seed writes `<section>/<name>/<theme>.png` per case at 320, 768, 1280, and 1536 pixels, and a case flagged `evidence: true` lands in a committed folder that `--require-base-url` skips
+- A case flagged `evidence: true` lands under `EVIDENCE_ROOT` (default `e2e/evidence`), and the toolkit's own `web/e2e/capture/cases.ts` feeds `capture-home.sh`
 - `configs/scripts/screenshot.sh` builds, previews, and polls, and its `EXIT` trap kills the preview by pid and by port, as `src/tooling/screenshot-trap.test.ts` exercises
 - `bun run screenshot` shoots the running app, where `canon capture` in `src/capture/render.ts` drives Chromium over static HTML files
 

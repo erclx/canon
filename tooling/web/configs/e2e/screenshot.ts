@@ -1,21 +1,15 @@
 import type { Locator, Page } from '@playwright/test'
 import { chromium } from '@playwright/test'
+import { existsSync } from 'fs'
 import { mkdir } from 'fs/promises'
 import path from 'path'
-
-/** One addressable part of a route, captured beside the whole-page frame. */
-interface CaptureSection {
-  name: string
-  selector: string
-}
-
-interface Viewport {
-  readonly name: string
-  readonly width: number
-  readonly height: number
-  /** Whether a case flagged `evidence: true` also writes its frames at this width. */
-  readonly evidence: boolean
-}
+import { pathToFileURL } from 'url'
+import type {
+  CaptureCase,
+  CaptureModule,
+  CaptureSection,
+  Viewport,
+} from './capture-types'
 
 /**
  * The breakpoint buckets every case is crossed with, named by width. 320 is
@@ -30,61 +24,18 @@ const VIEWPORTS: readonly Viewport[] = [
   { name: '1536', width: 1536, height: 800, evidence: false },
 ]
 
-interface CaptureCase {
-  section: string
-  theme: string
-  route: string
-  /** Names of viewports this case skips, for a route that reflows rather than breaks at that width. */
-  excludeViewports?: readonly string[]
-  evidence?: boolean
-  /** Selectors painted over in every frame the case writes, for a value that moves between runs with no code change. */
-  mask?: readonly string[]
-  sections?: CaptureSection[]
-  setup?: (page: Page) => Promise<void>
+const CASES_FILE = path.resolve('e2e/capture/cases.ts')
+
+if (!existsSync(CASES_FILE)) {
+  console.error(
+    'e2e/capture/cases.ts is missing. Run canon tooling sync to seed it.',
+  )
+  process.exit(1)
 }
 
-/**
- * The landing page's own beats, top to bottom. Every entry is a section a
- * reviewer reads on its own, so a diff lands on the part that moved rather
- * than on one image of the whole page.
- */
-const HOME_SECTIONS: CaptureSection[] = [
-  { name: 'top', selector: '#top' },
-  { name: 'proof', selector: '#proof' },
-  { name: 'ask', selector: '#ask' },
-  { name: 'rules', selector: '#rules' },
-  { name: 'skills', selector: '#skills' },
-  { name: 'plan', selector: '#plan' },
-  { name: 'dispatch', selector: '#dispatch' },
-  { name: 'workers', selector: '#workers' },
-  { name: 'gate', selector: '#gate' },
-  { name: 'evidence', selector: '#evidence' },
-  { name: 'loop', selector: '#loop' },
-  { name: 'merge', selector: '#merge' },
-  { name: 'provenance', selector: '#provenance' },
-  { name: 'start', selector: '#start' },
-  { name: 'field', selector: '#field' },
-  { name: 'close', selector: '#close' },
-]
-
-const CASES: CaptureCase[] = [
-  {
-    section: 'home',
-    theme: 'default',
-    route: '/',
-    evidence: true,
-    mask: ['.version'],
-    sections: HOME_SECTIONS,
-  },
-  {
-    section: 'home',
-    theme: 'dark',
-    route: '/',
-    mask: ['.version'],
-    sections: HOME_SECTIONS,
-    setup: (page) => page.emulateMedia({ colorScheme: 'dark' }),
-  },
-]
+const { CASES, EVIDENCE_ROOT } = (await import(
+  pathToFileURL(CASES_FILE).href
+)) as CaptureModule
 
 /** One case at one viewport, which is the unit a filter selects and a context is built for. */
 interface CaptureRun {
@@ -170,9 +121,9 @@ async function settle(
     const element = page.locator(section.selector)
     // Read the count before scrolling, since a selector matching nothing
     // otherwise costs the default timeout once per section. A miss is
-    // reported and skipped rather than raised, because `CASES` is a template
-    // a project rewrites and a target that syncs this file before editing its
-    // own list would otherwise capture nothing at all. The project owning the
+    // reported and skipped rather than raised, because the seeded `CASES` name
+    // sections a fresh target's page may not have, and it would otherwise
+    // capture nothing at all. The project owning the
     // selectors is the one that tests them, which is what the section spec
     // beside its own page does.
     if ((await element.count()) === 0) {
@@ -240,7 +191,7 @@ async function markFloatingChrome(page: Page) {
 /**
  * Turns a case's mask selectors into the locators every frame paints over. A
  * selector matching nothing is reported and kept out rather than raised, for
- * the same template reason `settle` gives for a missing section.
+ * the same reason `settle` gives for a missing section.
  */
 async function resolveMask(
   page: Page,
@@ -318,7 +269,7 @@ for (const { captureCase, viewport, label } of RUNS) {
   const mask = await resolveMask(page, label, captureCase.mask ?? [])
 
   const sweepDir = path.join(OUT_DIR, captureCase.section)
-  const evidenceDir = path.join('evidence', captureCase.section)
+  const evidenceDir = path.join(EVIDENCE_ROOT, captureCase.section)
   const file = `${viewport.name}--${captureCase.theme}.png`
   const writesEvidence = captureCase.evidence && viewport.evidence
 
