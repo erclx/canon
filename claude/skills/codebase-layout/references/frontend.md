@@ -10,7 +10,8 @@ Read this before placing a new component, hook, helper, route, or fixture in an 
 ## Feature folders against shared UI
 
 - Put code that serves one feature under that feature's folder, holding only the subfolders it needs: its components, its hooks, its data access, its types ([bulletproof-react](https://github.com/alan2207/bulletproof-react/blob/master/docs/project-structure.md)).
-- Keep the shared `components/` folder for pieces two or more features render, such as a button, a dialog, or a layout shell. A component only one feature renders is feature code, even when it looks generic.
+- Keep the shared `components/` folder for pieces two or more features render, such as a button, a dialog, or a layout shell
+- A component only one feature renders is feature code, even when it looks generic
 - Never import one feature from another. Lift the piece both need to shared code, or compose the two features at the app or route level ([bulletproof-react](https://github.com/alan2207/bulletproof-react/blob/master/docs/project-structure.md)).
 - Enforce the flow from shared toward features toward the app where the project already lints imports. An import-path restriction turns the direction into a check rather than a habit.
 
@@ -23,13 +24,15 @@ Read this before placing a new component, hook, helper, route, or fixture in an 
 ## Routes
 
 - Follow the router's own conventions where the framework ships file-based routing, and treat everything outside them as project strategy.
-- A framework calling itself unopinionated about organization leaves the strategy to the project. Pick one of keeping code outside the routes folder, top-level folders inside it, or splitting by feature or route, and "be consistent across the project" ([Next.js project structure](https://nextjs.org/docs/app/getting-started/project-structure)).
+- A framework calling itself unopinionated about organization leaves the strategy to the project ([Next.js project structure](https://nextjs.org/docs/app/getting-started/project-structure))
+- Pick one of code outside the routes folder, top-level folders inside it, or a split by feature or route, and "be consistent across the project"
 - Colocate a component only one route renders beside that route, in a folder the router excludes from routing, such as a private `_components` folder in a router that supports one.
 - Treat `components` and `lib` as placeholder names with no framework meaning. Their contents still follow the body's rules.
 
 ## Hooks and helpers
 
-- Put a hook or helper one feature uses inside that feature. Promote it to a shared `hooks/` or `lib/` folder when a second feature needs it, and move it in the change that adds the second consumer ([Robin Wieruch](https://www.robinwieruch.de/react-folder-structure/)).
+- Put a hook or helper one feature uses inside that feature ([Robin Wieruch](https://www.robinwieruch.de/react-folder-structure/))
+- Promote it to a shared `hooks/` or `lib/` folder when a second feature needs it, in the change that adds the second consumer
 - Split a shared `lib/` by what each file serves once it holds two roles, such as data access beside formatting beside browser APIs. A flat `lib/` is the second folder to overflow after `components/`.
 - Name a helper file for what it does rather than `utils` or `helpers`, so the folder listing reads as an index.
 
@@ -40,4 +43,8 @@ Read this before placing a new component, hook, helper, route, or fixture in an 
 
 ## A worked failure
 
-An interface project's `components/` folder held 11 files when its first plan landed and 46 six days later, with its `lib/` at 36, all flat. Every plan in between named each new file as a sibling of the last, since the folder it was measured against was flat. The installed rules said to split by role and to keep domain logic in feature folders, and neither was applied. The split, when it came, touched 98 files, and the project's end to end folder has since grown flat again, four specs beside five helpers. Placing the twelfth component in a named subfolder would have cost that plan one folder.
+An interface project's `components/` folder held 11 files when its first plan landed and 46 six days later, with its `lib/` at 36, all flat. Every plan in between named each new file as a sibling of the last, since the folder it was measured against was flat.
+
+- The installed rules said to split by role and to keep domain logic in feature folders, and neither was applied
+- The split, when it came, touched 98 files, and the end to end folder has since grown flat again, four specs beside five helpers
+- Placing the twelfth component in a named subfolder would have cost that plan one folder
