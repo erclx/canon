@@ -51,7 +51,7 @@ describe('flagsProvided', () => {
   })
 
   it('should read a skip as operator-provided', () => {
-    expect(readFlagsProvided(['--skip', 'wiki'])).toBe(true)
+    expect(readFlagsProvided(['--skip', 'records'])).toBe(true)
   })
 
   it('should read an explicitly passed add list as operator-provided', () => {

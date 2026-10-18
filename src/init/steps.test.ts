@@ -150,17 +150,15 @@ describe('buildSteps', () => {
       'Base tooling',
       'Claude workflow',
       'Governance',
-      'Wiki',
       'Records backup',
     ])
   })
 
   it('should drop a skipped domain from the list entirely', () => {
-    expect(labels(steps({ skip: parseSkip('wiki') }))).toEqual([
+    expect(labels(steps({ skip: parseSkip('records') }))).toEqual([
       'Base tooling',
       'Claude workflow',
       'Governance',
-      'Records backup',
     ])
   })
 

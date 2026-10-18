@@ -55,14 +55,6 @@ export function buildSteps(
     })
   }
 
-  if (!flags.skip.skipped.has('wiki')) {
-    steps.push({
-      kind: 'run',
-      label: 'Wiki',
-      run: child(['wiki', 'init', resolved]),
-    })
-  }
-
   if (!flags.skip.skipped.has('records')) {
     // `skip` here means there is nothing to run non-interactively, not that
     // the caller opted out, unlike every other push of this kind above.

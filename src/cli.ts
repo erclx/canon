@@ -7,7 +7,6 @@ import { register as sync } from '@/commands/sync'
 import { register as gov } from '@/commands/gov'
 import { register as tooling } from '@/commands/tooling'
 import { register as claude } from '@/commands/claude'
-import { register as wiki } from '@/commands/wiki'
 import { register as indexes } from '@/commands/indexes'
 import { register as docs } from '@/commands/docs'
 import { register as design } from '@/commands/design'
@@ -68,7 +67,6 @@ sync(program)
 gov(program)
 tooling(program)
 claude(program)
-wiki(program)
 indexes(program)
 docs(program)
 design(program)

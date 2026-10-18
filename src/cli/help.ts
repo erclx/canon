@@ -29,7 +29,6 @@ export const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
       ['gov [cmd]', 'Governance rules'],
       ['tooling [cmd]', 'Tooling stacks'],
       ['claude [cmd]', 'Claude workflow'],
-      ['wiki [cmd]', 'Wiki pages'],
       ['indexes [cmd]', 'Regenerate index.md files'],
       ['docs [cmd|topic]', 'Emit toolkit reference docs'],
     ],
