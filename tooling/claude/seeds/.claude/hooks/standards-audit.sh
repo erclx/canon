@@ -18,11 +18,9 @@ case "$file" in
 *) exit 0 ;;
 esac
 
-# Three record folders, at either root. A skip list fixed at the old spelling
-# audits a project's own session records the moment the move reaches it, which
-# reports findings against prose nobody publishes.
+# Session record folders are skipped, since they hold prose nobody publishes.
 case "$file" in
-*.claude/.tmp/* | *.claude/review/* | *.claude/plans/*) exit 0 ;;
+*.claude/review/* | *.claude/plans/*) exit 0 ;;
 *.canon/tmp/* | *.canon/review/* | *.canon/plans/*) exit 0 ;;
 esac
 

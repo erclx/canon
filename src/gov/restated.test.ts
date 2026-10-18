@@ -119,12 +119,12 @@ describe('readRestated', () => {
   it('classes an agreeing skill body restatement as a repetition', () => {
     write(
       'CLAUDE.md',
-      '- Write temporary files to `.claude/.tmp/<slug>/<file>.md` in the project root.',
+      '- Write temporary files to `.canon/tmp/<slug>/<file>.md` in the project root.',
     )
     write('tooling/claude/seeds/CLAUDE.md', '- Unrelated seed guidance.')
     write(
       'claude/skills/alpha/SKILL.md',
-      '# Alpha\n\nWrite scratch output to `.claude/.tmp/<slug>/<file>.md` under the project root.',
+      '# Alpha\n\nWrite scratch output to `.canon/tmp/<slug>/<file>.md` under the project root.',
     )
 
     const report = measured(readRestated(ROOT))
@@ -192,19 +192,19 @@ describe('readRestated', () => {
   it('names the anchors a match rested on, so a finding is auditable', () => {
     write(
       'CLAUDE.md',
-      '- Route a scratch file to `.claude/.tmp/<slug>/` under the repository root.',
+      '- Route a scratch file to `.canon/tmp/<slug>/` under the repository root.',
     )
     write('tooling/claude/seeds/CLAUDE.md', '- Unrelated seed guidance.')
     write(
       'claude/skills/alpha/SKILL.md',
-      '# Alpha\n\nEvery scratch file lands in `.claude/.tmp/<slug>/` beneath the repository root.',
+      '# Alpha\n\nEvery scratch file lands in `.canon/tmp/<slug>/` beneath the repository root.',
     )
 
     const report = measured(readRestated(ROOT))
     const entry = entryFor(report, 'Route a scratch file')
 
     expect(entry.surfaces[0].anchors.length).toBeGreaterThanOrEqual(2)
-    expect(entry.surfaces[0].anchors).toContain('.claude/.tmp/<slug>/')
+    expect(entry.surfaces[0].anchors).toContain('.canon/tmp/<slug>/')
   })
 
   it('assigns a skill body the authority when the subject names that skill', () => {
@@ -313,11 +313,11 @@ describe('readRestated', () => {
     write('CLAUDE.md', '- Unrelated top-level guidance.')
     write(
       'governance/rules/core/055-scratch.md',
-      '# Scratch\n\n## Temporary files\n\n- Write temporary files to `.claude/.tmp/<slug>/<file>.md` in the project root.',
+      '# Scratch\n\n## Temporary files\n\n- Write temporary files to `.canon/tmp/<slug>/<file>.md` in the project root.',
     )
     write(
       'claude/skills/alpha/SKILL.md',
-      '# Alpha\n\nWrite scratch output to `.claude/.tmp/<slug>/<file>.md` under the project root.',
+      '# Alpha\n\nWrite scratch output to `.canon/tmp/<slug>/<file>.md` under the project root.',
     )
 
     const report = measured(readRestated(ROOT))
@@ -332,7 +332,7 @@ describe('readRestated', () => {
   it('reads past a fenced block, so an example is not swept as an instruction', () => {
     write(
       'CLAUDE.md',
-      '- Route a scratch file to `.claude/.tmp/<slug>/` under the repository root.',
+      '- Route a scratch file to `.canon/tmp/<slug>/` under the repository root.',
     )
     write('tooling/claude/seeds/CLAUDE.md', '- Unrelated seed guidance.')
     write(
@@ -341,7 +341,7 @@ describe('readRestated', () => {
         '# Alpha',
         '',
         '```bash',
-        'echo "route a scratch file to .claude/.tmp/<slug>/ under the repository root"',
+        'echo "route a scratch file to .canon/tmp/<slug>/ under the repository root"',
         '```',
       ].join('\n'),
     )
@@ -354,7 +354,7 @@ describe('readRestated', () => {
   it('reads past a body frontmatter block, which is metadata rather than a rule', () => {
     write(
       'CLAUDE.md',
-      '- Route a scratch file to `.claude/.tmp/<slug>/` under the repository root.',
+      '- Route a scratch file to `.canon/tmp/<slug>/` under the repository root.',
     )
     write('tooling/claude/seeds/CLAUDE.md', '- Unrelated seed guidance.')
     write(
@@ -362,7 +362,7 @@ describe('readRestated', () => {
       [
         '---',
         'name: alpha',
-        'description: Routes a scratch file to `.claude/.tmp/<slug>/` under the repository root.',
+        'description: Routes a scratch file to `.canon/tmp/<slug>/` under the repository root.',
         '---',
         '',
         '# Alpha',
@@ -418,11 +418,11 @@ describe('readRestated', () => {
   it('reads an internal skill body as a candidate against the always-loaded file', () => {
     write(
       'CLAUDE.md',
-      '- Write temporary files to `.claude/.tmp/<slug>/<file>.md` in the project root.',
+      '- Write temporary files to `.canon/tmp/<slug>/<file>.md` in the project root.',
     )
     write(
       '.claude/skills/internal-alpha/SKILL.md',
-      '# Alpha\n\nWrite scratch output to `.claude/.tmp/<slug>/<file>.md` under the project root.',
+      '# Alpha\n\nWrite scratch output to `.canon/tmp/<slug>/<file>.md` under the project root.',
     )
 
     const report = measured(readRestated(ROOT))

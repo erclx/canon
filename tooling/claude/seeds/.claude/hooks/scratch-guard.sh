@@ -18,12 +18,9 @@ esac
 file_path=$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty')
 [ -n "$file_path" ] || exit 0
 
-# Both record roots, and the scratch folder loses its leading dot under the new
-# one, since inside a dotted root the dot hides nothing already hidden. A guard
-# fixed at the old spelling warns on every correct scratch write in a project
-# the move has reached.
+# The scratch folder is `.canon/tmp/`, so a write there is the correct one.
 case "$file_path" in
-*/.claude/.tmp/* | */.canon/tmp/*) exit 0 ;;
+*/.canon/tmp/*) exit 0 ;;
 esac
 
 # A background session's temp folder is the harness's own, told to the session
@@ -55,11 +52,7 @@ esac
 session=$(printf '%s' "$input" | jq -r '.session_id // "none"')
 key=$(printf '%s' "$session" | tr -c 'A-Za-z0-9' '_')
 project="${CLAUDE_PROJECT_DIR:-.}"
-if [ -d "$project/.canon" ]; then
-  marker_dir="$project/.canon/tmp/hooks/scratch-guard"
-else
-  marker_dir="$project/.claude/.tmp/hooks/scratch-guard"
-fi
+marker_dir="$project/.canon/tmp/hooks/scratch-guard"
 marker="$marker_dir/$key"
 [ -f "$marker" ] && exit 0
 mkdir -p "$marker_dir"

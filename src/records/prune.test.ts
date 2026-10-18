@@ -172,16 +172,17 @@ describe('pruneScratch at a .canon root', () => {
   })
 })
 
-describe('pruneScratch at a legacy .claude root', () => {
+describe('pruneScratch at a tree holding only the old scratch folder', () => {
   beforeEach(() => {
     mkdirSync(join(ROOT, '.claude'), { recursive: true })
   })
 
-  it('should resolve .claude/.tmp/ when no .canon root exists', async () => {
+  it('should report nothing to prune and never list the old folder', async () => {
     writeAt('.claude/.tmp', 'old-spike/note.md', 20)
 
     const report = await read()
 
-    expect(paths(report)).toContain('.claude/.tmp/old-spike')
+    expect(paths(report)).toEqual([])
+    expect(JSON.stringify(report)).not.toContain('.claude/.tmp')
   })
 })
