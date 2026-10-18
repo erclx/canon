@@ -15,13 +15,21 @@ External catalogs were read and filtered rather than imported. This file is the 
 
 ## Declined from the catalogs
 
+Each item below is real advice placed in the wrong surface, or a rule that decides nothing.
+
+### Values and dials
+
 **Banned fonts by name.** A font ban is a value ban, and a value belongs to the project's own design document rather than to a skill that loads everywhere. A project that wants a typeface ruled out rules it out there.
 
 **Numeric intensity dials.** Every external source carries a 1-to-10 scale for variance, motion and density. A session picks a middle value and reports compliance. That satisfies the rule, decides nothing, and leaves no trace a later reader could check it by. The declared read carries the same information in a sentence somebody can argue with.
 
+### Rules owned elsewhere
+
 **The em dash ban as a design rule.** One source bans the character on a page as a visual tell. The markdown standard already bans it for prose reasons and `canon markdown audit` gates that from package data, so restating it here would put a second copy of an enforced rule behind an unenforced pointer.
 
 **The official-package map.** A table routing a brief to Fluent, Material, Carbon, Polaris, Primer or a government design system. It is real advice and it is a stack decision a project takes once, so it belongs in that project's own records rather than in a skill that loads on every design round.
+
+### Scope
 
 **Scoping out application UI.** The largest source covers landing pages, portfolios and redesigns, and excludes dashboards, data tables and multi-step product UI. Those exclusions are most of what software projects actually build, so the kinds reference carries application UI as a first-class kind.
 
@@ -33,7 +41,7 @@ Each failed the test in `REQUIREMENT.md`. Recorded so they are not argued again.
 - **Specific ratios for a type scale**, such as a named musical interval. Falsifiable and arbitrary, and a project picking a different ratio is not wrong.
 - **Named palettes or banned hues.** A value ban, which belongs to the project's design document. This is where every external catalog of this kind ends up, and it is why theirs cannot be imported.
 - **A minimum contrast figure.** A threshold with a number, which the accessibility rules own.
-- **Imagery as a system.** There is no scale to establish. What a model gets wrong about images is using fake ones, which `tells.md` already covers, so the layer stays thin on purpose rather than by oversight.
+- **Imagery as a system.** There is no scale to establish. What a model gets wrong about images is using fake ones, which `tells.md` covers, so the layer stays thin on purpose.
 
 ## Carried as a caution
 

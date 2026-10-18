@@ -28,12 +28,16 @@ Skip nothing on the ground that it is obviously fine. A rule is on this list bec
 
 ### Section rhythm
 
+Each box here is a count from `tells.md`.
+
 - [ ] No layout family used twice. Eight sections carry at least four families
 - [ ] No three consecutive sections sharing the image-and-text split
 - [ ] Small uppercase labels above headings number no more than one per three sections, per `interface-casing`
 - [ ] At most one horizontal marquee
 
 ### Content and first screen
+
+The grid and the first screen are shaped to the content counted.
 
 - [ ] Grid cells equal content items, with no blank tile filling a gap
 - [ ] Lists over five items use something other than a longer list
@@ -46,11 +50,15 @@ Skip this group where the surface draws on a system already settled.
 
 ### Space and type
 
+The scales come from `systems.md`.
+
 - [ ] Every gap comes from one scale, and the distinct spacing values number under about eight
 - [ ] Space between groups exceeds space within them
 - [ ] The type scale carries five to seven steps, each visibly different from its neighbors
 
 ### Color
+
+Each box is a relationship, never a value.
 
 - [ ] The accent is rare enough to read as an accent
 - [ ] Neutrals sit in one family at one temperature
@@ -64,6 +72,8 @@ Skip this group where the surface draws on a system already settled.
 
 ### Type detail
 
+The detail boxes come from `craft.md`.
+
 - [ ] No orphaned word closing a heading
 - [ ] Body text measure is capped
 - [ ] Changing numbers set in tabular figures
@@ -76,6 +86,8 @@ Skip this group where the surface draws on a system already settled.
 - [ ] No placeholder that reads as placeholder: generic names, generic company names, reused portraits, identical dates
 
 ### Wording
+
+Every word on the surface states what is true of it.
 
 - [ ] No filler verbs
 - [ ] Sentence case throughout, with exceptions per `interface-casing`
