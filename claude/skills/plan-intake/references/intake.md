@@ -113,9 +113,9 @@ Where an item touches a task already on the board, say so in the index rather th
 - **You:**
 ```
 
-- `Problem:`, `Fix:`, `Worth it:`, and the empty `You:` slot ship on every item. The other two are conditional.
+- `Problem:`, `Fix:`, `Worth it:`, and the empty `You:` slot ship on every item, each on one line since the reader takes nothing after it. The other two are conditional.
 - Number items per cluster file, giving a finding split later a letter suffix such as `3a` beside `3`, since renumbering moves every cited label
-- `Suggested:` is required whenever `Open:` is present, since `ok` against two defensible options carries no information
+- `Open:` reads on its own, with no bare "it" or "this" for the Fix, and `Suggested:` is required beside it, since `ok` against two options carries no information
 - Where the answer is the operator's preference rather than a technical call, say so in that form rather than inventing a default
 - `Overlaps:` never replaces `Worth it:`, since an item a live board task might have wrong is the one whose verdict matters most
 
