@@ -1,0 +1,8 @@
+# Code roots the context audit measures.
+#
+# `canon context audit` reports any folder directly under a root that no
+# context entry names in its Layout, and any folder given a Layout H3 in two
+# entries. A glob such as "packages/*/src" expands to every match, and an
+# empty list opts the project out. Without this file the root defaults to
+# "src" when that folder exists.
+roots = ["src"]
