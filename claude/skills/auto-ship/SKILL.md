@@ -73,6 +73,8 @@ When this run decides against a suggestion, rewrite its line as `overridden at e
 
 Load `canon:build-in-slices`, reporting it when it does not resolve, and implement only what the plan describes. Do not expand scope, refactor neighbors, or touch files outside the plan's "Files to touch" list without reason.
 
+When the plan's `**Constraints:**` carry a `Fans in` bullet, this run is a fan-in integrator, so open this step by merging the member branches, per `${CLAUDE_SKILL_DIR}/references/fan-in.md`.
+
 ## Step 3: verify
 
 Run the verify commands defined in `CLAUDE.md` (lint, typecheck, tests). On failure:
@@ -96,6 +98,10 @@ The verb reads git history rather than the working tree, so it catches a violati
 ### When the verb is absent
 
 Never read a missing subcommand as clean. Read `${CLAUDE_SKILL_DIR}/references/verb-absent.md` on meeting one.
+
+### A fan-in member stops here
+
+When the plan's `**Constraints:**` carry a `Fan-in member of` bullet, push the branch, announce it done, and stop before Step 5. A member opens no pull request, since its integrator ships the whole set. Read `${CLAUDE_SKILL_DIR}/references/fan-in.md` for the push and the message.
 
 ## Step 5: UI checklist (conditional)
 
