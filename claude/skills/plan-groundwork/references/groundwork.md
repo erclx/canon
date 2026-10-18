@@ -88,20 +88,13 @@ A folder missing `06` and `07` is live, and that is its only status marker.
 
 ## README.md
 
-Orients. Holds no findings.
+Orients and holds no findings. It states the phase out loud in its first three lines, in the form `Groundwork phase. Nothing here is a feature plan.`
 
 - A one-line definition of the investigation
 - A `## Why` section stating why the track is running now
 - A file-map table of filename and what it holds, kept current
 - A `## Method` section splitting internal sources from external ones, naming which were used and which were not yet done, and listing under a leads heading any external source found but not opened
-
-### Closing sections and phase
-
-The README closes on two sections and states its phase near the top.
-
-- A `## Prior art` section
-- A `## Source citation` section stating the rule below, so a returning session finds it in the folder
-- The phase stated out loud in the first three lines, in the form `Groundwork phase. Nothing here is a feature plan.`
+- Closing `## Prior art` and `## Source citation` sections, the second stating the rule below so a returning session finds it in the folder
 
 Every claim about a source outside the project carries a link to it, wherever the claim appears in the folder, so a later reader can tell a fetched page from recall. A source found and not read is listed as a lead and never cited, since a link to a page nobody opened is worse than none. Listing it stops a later pass re-searching for it.
 
@@ -161,9 +154,9 @@ A lean is weaker than a plan's suggestion: it records the current read on an ope
 
 ## Template
 
-### README.md
+The orienting README comes first, then the closing decision, with an H3 per dropped alternative.
 
-The orienting file, opened first.
+**`README.md`**
 
 ```markdown
 ---
@@ -208,9 +201,7 @@ Every claim about a source outside the project carries a link. A source found
 and not read is listed as a lead and is never cited.
 ```
 
-### 06-decision.md
-
-The closing file, with an H3 per dropped alternative.
+**`06-decision.md`**
 
 ```markdown
 ---
