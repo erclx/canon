@@ -1,51 +1,40 @@
 ---
-description: Enforce opinionated React architecture and component patterns
+description: Enforce React render purity, state derivation, memoization, and boundary placement
 paths:
   - '**/*.tsx'
   - '**/*.ts'
 ---
 
-# React architecture standards
+# React standards
 
-## Export conventions
+## Rendering
 
-- Use named exports exclusively for components and hooks.
-- Do not use default exports.
-
-## Project structure
-
-- Place domain logic in `src/features/` and restrict `src/components/` to shared UI.
-- Do not place feature-specific components in the global components folder.
-- Import environment variables only from the validated configuration module.
-
-## Component patterns
-
-- Use function declarations for components over arrow functions.
-- Define TypeScript interfaces for props immediately above the component.
-- Use `<>` shorthand for fragments unless key prop is required.
-- Use stable, unique keys for list items over array index.
-- Extract components when JSX exceeds a single responsibility.
+- Keep components and hooks pure during render. Move side effects and `Math.random()` into an event handler or an effect.
+- Never mutate props or state. Build a new value and pass it to the `useState` setter.
+- Key list items by a stable ID from the data, never by array index or a value generated during render.
 
 ## State and effects
 
-- Encapsulate data fetching and complex effects in custom hooks.
-- Use `useMemo` for derived state over `useEffect`.
-- Do not call `setState` inside `useEffect` to sync derived state. The `react-hooks/set-state-in-effect` lint enforces this.
-- Compare the previous value during render and call `setState` from the render body when it changes, over syncing in an effect.
-- Lift the state to a parent and reset the child with a `key` prop, over running a reset effect in the child.
-- Return a sentinel (`undefined` or a `useSyncExternalStore` placeholder) from hooks that hydrate asynchronously and gate consumers on it, over running a hydration effect.
+- Calculate a value derivable from props or state during render, never in an effect that syncs it into state.
+- Reset a child's state by passing it a new `key`, over a reset effect in the child.
+- Read a browser or external store with `useSyncExternalStore` and a `getServerSnapshot` matching the server output.
+- Wrap a data-fetching effect in a custom hook whose cleanup ignores stale responses, when the framework has no fetching primitive.
 
 ## Memoization
 
-- Memoize components receiving non-primitive props with `React.memo`.
-- Use `useCallback` for handler props passed to children.
+- Leave memoization to React Compiler where it is enabled, as React recommends for new code. Add `useMemo` only for precise control.
+- Without the compiler, memoize only a calculation measured at 1ms or more, or a value a `memo` child or a Hook dependency reads.
 
-## Composition and props
+## Composition
 
-- Avoid prop drilling beyond 2 levels. Use context or composition.
+- Pass props first, then extract components and pass JSX as `children`. Reach for context only when neither works.
 
-## Error boundaries and Suspense
+## Error and loading boundaries
 
-- Place error boundaries at route level.
-- Place Suspense at data-fetching boundaries.
-- Do not use a single root-level error boundary as the only safety net.
+- Place an error boundary where an error message makes sense, such as around a list and each item, never around every component.
+- Expect Suspense to catch `lazy`, `use` on a cached Promise, or a framework loader, never a fetch inside an effect.
+- Place Suspense boundaries to match the loading sequence the user should see.
+
+## Exports
+
+- Use named exports for components and hooks, since a default export renamed at import drifts from its name in a search.

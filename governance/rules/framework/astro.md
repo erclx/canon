@@ -1,5 +1,5 @@
 ---
-description: Enforce astro static-first architecture with explicit island opt-in
+description: Enforce Astro static-first rendering, explicit island hydration, content collections, and asset placement
 paths:
   - '**/*.astro'
   - 'src/pages/**'
@@ -11,31 +11,29 @@ paths:
 
 ## Static first
 
-- Write pages and components as `.astro` unless interactivity requires a framework island.
-- Do not add a framework integration until the first island needs it.
-- Prefer server-rendered content over client-fetched data.
+- Write a component as `.astro` when it has no client-side state or event handlers, since it renders to HTML with no client JS.
+- Fetch page data in the component frontmatter, which runs at build or request time, not in a client island.
 
 ## Islands
 
-- Apply `client:*` directives on the component boundary, not on parents.
-- Prefer `client:visible` or `client:idle` over `client:load`. Use `client:load` only for above-the-fold interactivity.
-- Keep islands leaf-level. Do not wrap layout chrome in a framework component to enable nested islands.
+- Put a `client:*` directive on the framework component itself, imported directly into a `.astro` file.
+- Use `client:visible` for a component below the fold and `client:idle` for a low-priority one. Keep `client:load` for interactive UI above the fold.
 
 ## Routing and layouts
 
-- Place routes in `src/pages/`. Use `[param].astro` for dynamic segments and `[...rest].astro` for catch-alls.
-- Extract shared chrome into `src/layouts/` and compose pages with a `<Layout>` wrapper.
+- Give a dynamic `[param].astro` route a `getStaticPaths()` in static output, which builds only the paths it returns.
+- Wrap pages in a layout from `src/layouts/` that renders the page through `<slot />`.
 
 ## Content
 
-- Use content collections in `src/content/` with a `config.ts` schema for any repeated structured content.
-- Access collection entries via `getCollection` and `getEntry` over direct file imports.
+- Define collections in `content.config.ts` at the root of `src/`, each with a `glob()` or `file()` loader and a Zod schema.
+- Read entries through `getCollection()` and `getEntry()`, never by importing content files directly.
 
 ## Styles and assets
 
-- Component styles are scoped by default. Use `is:global` only in layouts for reset or base styles.
-- Import images from `src/assets/` to get optimization. Use `public/` only for untouched static files.
+- Keep component styles scoped. Use `is:global` or `:global()` only for a reset or base style in a layout.
+- Keep local images in `src/` so Astro optimizes them. Use `public/` only for files served as-is.
 
 ## Environment
 
-- Read environment variables via `import.meta.env`. Prefix client-exposed variables with `PUBLIC_`.
+- Read variables through `astro:env` with a schema, or `import.meta.env`, and prefix client-exposed ones with `PUBLIC_`.
