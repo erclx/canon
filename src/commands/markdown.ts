@@ -486,7 +486,7 @@ function reportDensity(reports: readonly FileReport[], gates: boolean): void {
     `Paragraphs past ${CHECKPOINTS.paragraph} characters, more than 2 paragraphs in a row, bullets past ${CHECKPOINTS.bullet} characters, more than 5 plain bullets in a row, a heading past H3, and an H3 opening with neither a paragraph nor a table.`,
   )
   logInfo(
-    'Measured on context entries, docs, skill bodies and references, tooling seeds and stack references, the wiki, README.md, and CONTRIBUTING.md. Every other path takes no density finding.',
+    'Measured on context entries, docs, skill bodies, references, and requirements, tooling seeds and stack references, the wiki, README.md, and CONTRIBUTING.md. Every other path takes no density finding.',
   )
   logInfo(
     gates

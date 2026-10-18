@@ -1,4 +1,10 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -263,6 +269,186 @@ describe('auditSkills', () => {
 
     expect(report.corpora).toEqual([])
     expect(report.skills).toBe(0)
+  })
+})
+
+describe('auditSkills requirement limits', () => {
+  const requirementPath = join(
+    'claude',
+    'skills',
+    'git-commit',
+    'REQUIREMENT.md',
+  )
+
+  function skillWithRequirement(requirement: string): void {
+    const dir = conformingSkill('git-commit')
+    writeFileSync(join(dir, 'REQUIREMENT.md'), requirement)
+  }
+
+  function bullets(count: number): string {
+    return Array.from(
+      { length: count },
+      (_, index) => `- Item ${index}\n`,
+    ).join('')
+  }
+
+  it('should pass the worked example in the standard', async () => {
+    const standard = readFileSync(
+      join(
+        import.meta.dirname,
+        '..',
+        '..',
+        'claude',
+        'skills',
+        'create-skill',
+        'references',
+        'skill-requirement.md',
+      ),
+      'utf8',
+    )
+    const example =
+      /### Worked example[\s\S]*?```markdown\n([\s\S]*?)\n```/.exec(
+        standard,
+      )?.[1]
+    expect(example).toContain('## Must')
+    skillWithRequirement(`${example}\n`)
+
+    const report = await auditSkills(root)
+
+    expect(report.requirementLimits).toEqual([])
+    expect(report.requirementSections).toEqual([])
+  })
+
+  it('should stay silent when Must not and Out of scope are absent', async () => {
+    skillWithRequirement(
+      '# Requirement\n\n## Gap\n\nFails.\n\n## Must\n\n- Do\n',
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.requirementLimits).toEqual([])
+  })
+
+  it('should report a list past 5 bullets', async () => {
+    skillWithRequirement(
+      `# Requirement\n\n## Gap\n\nFails.\n\n## Must\n\n${bullets(6)}`,
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.requirementLimits).toEqual([
+      { rel: requirementPath, detail: '## Must: 6 bullets, cap 5' },
+    ])
+  })
+
+  it('should pass a list of exactly 5 bullets', async () => {
+    skillWithRequirement(
+      `# Requirement\n\n## Gap\n\nFails.\n\n## Must\n\n${bullets(5)}`,
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.requirementLimits).toEqual([])
+  })
+
+  it('should leave a nested bullet out of the count', async () => {
+    skillWithRequirement(
+      `# Requirement\n\n## Gap\n\nFails.\n\n## Must\n\n${bullets(5)}  - Nested\n`,
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.requirementLimits).toEqual([])
+  })
+
+  it('should report a body past 400 words', async () => {
+    skillWithRequirement(
+      `# Requirement\n\n## Gap\n\n${'word '.repeat(400)}\n\n## Must\n\n- Do\n`,
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.requirementLimits).toEqual([
+      { rel: requirementPath, detail: '404 words, cap 400' },
+    ])
+  })
+
+  it('should leave frontmatter out of the word count', async () => {
+    skillWithRequirement(
+      `---\nname: git-commit\ndescription: ${'word '.repeat(50)}\n---\n\n# Requirement\n\n## Gap\n\n${'word '.repeat(380)}\n\n## Must\n\n- Do\n`,
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.requirementLimits).toEqual([])
+  })
+
+  it('should report a date in Gap', async () => {
+    skillWithRequirement(
+      '# Requirement\n\n## Gap\n\nA worker lost its branch on 2026-08-27.\n\n## Must\n\n- Do\n',
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.requirementLimits).toEqual([
+      { rel: requirementPath, detail: 'line 5: 2026-08-27 in Gap' },
+    ])
+  })
+
+  it('should report an issue number in Gap', async () => {
+    skillWithRequirement(
+      '# Requirement\n\n## Gap\n\nThe worker in #2412 lost its branch.\n\n## Must\n\n- Do\n',
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.requirementLimits).toEqual([
+      { rel: requirementPath, detail: 'line 5: #2412 in Gap' },
+    ])
+  })
+
+  it('should stay silent on a date inside a code span in Gap', async () => {
+    skillWithRequirement(
+      '# Requirement\n\n## Gap\n\nA session writes `2026-08-27` where `#12` belongs.\n\n## Must\n\n- Do\n',
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.requirementLimits).toEqual([])
+  })
+
+  it('should stay silent on a date outside Gap', async () => {
+    skillWithRequirement(
+      '# Requirement\n\n## Gap\n\nFails.\n\n## Must\n\n- Dates read as 2026-08-27 and cite #12\n',
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.requirementLimits).toEqual([])
+  })
+
+  it('should report a Guards section', async () => {
+    skillWithRequirement(
+      '# Requirement\n\n## Gap\n\nFails.\n\n## Must\n\n- Do\n\n## Guards\n\n- Refuse\n',
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.requirementLimits).toEqual([
+      {
+        rel: requirementPath,
+        detail: '## Guards: retired, fold it into Must not',
+      },
+    ])
+  })
+
+  it('should stay silent when the requirement is absent', async () => {
+    const dir = skillDir('git-commit')
+    writeFileSync(join(dir, 'SKILL.md'), frontmatter('git-commit', 'Commits'))
+
+    const report = await auditSkills(root)
+
+    expect(report.requirementLimits).toEqual([])
   })
 })
 

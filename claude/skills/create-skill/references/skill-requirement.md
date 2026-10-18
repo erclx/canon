@@ -35,12 +35,36 @@ A requirement that leaves any of the three open is non-conforming regardless of 
 - Write the gaps from what the skill is for, then compare the body against them
 - A requirement derived from the body records the body's accidents as the requirement, and misinforms a reader who reads it in place of the body
 
+## Sections
+
+The file carries these H2s in this order and no others. `canon claude skills audit` reports a missing Gap or Must and a Guards heading.
+
+| Section        | When                                      | Holds                                                         |
+| -------------- | ----------------------------------------- | ------------------------------------------------------------- |
+| `Gap`          | Always                                    | The failures a session hits today without the skill, as prose |
+| `Must`         | Always                                    | The outcomes that close those failures, one per bullet        |
+| `Must not`     | When a behavior closes a gap and is wrong | That behavior, one per bullet                                 |
+| `Out of scope` | When a sibling owns an adjacent behavior  | The behavior and the skill that owns it                       |
+
+`Guards` is retired. A refusal condition is a `Must not` bullet, and the message it prints belongs to the body.
+
+## Caps
+
+The audit reports each cap it finds breached, and a rewrite batch turns the report into a gate for the files it brings under.
+
+- Each list holds at most 5 bullets. A sixth `Must` is a sign the skill does two jobs or the list restates its steps.
+- The file holds at most 400 words of body, frontmatter excluded
+- Gap carries no `YYYY-MM-DD` date and no `#NNN` issue or pull request number outside a code span
+
 ## Content
 
-- State each gap as an observed failure, not an intent. "Without this skill a session invents its own filename" can be shown wrong. "This skill helps manage tasks" cannot fail, so it constrains nothing.
-- Trace everything under `## Must` to a stated gap. A `Must` with no gap behind it is the padding the file exists to prevent.
-- Keep it high level. A requirement that outgrows one file has stopped being a requirement, and `references/` already holds detail.
-- Use `name` and `description` frontmatter, matching `SKILL.md` so the pair is consistent.
+- State each gap as a failure a session hits today, in the present tense. "Without this skill a session invents its own filename" can be shown wrong.
+- Never state a gap as an intent. "This skill helps manage tasks" cannot fail, so it constrains nothing.
+- Keep history out of Gap. The incident, its date, and the pull request that earned a rule stay in git, where `git log` on the file finds them.
+- Write each `Must` as an outcome a reader can check against the body, never as a step the body takes. "The committed set is exactly the staged set" is an outcome.
+- Trace every `Must` to a stated gap. A `Must` with no gap behind it is the padding the file exists to prevent.
+
+The frontmatter carries `name` and `description`, matching `SKILL.md` so the pair is consistent.
 
 ## Template
 
@@ -54,21 +78,56 @@ description: <one line, distinct from the SKILL.md description>
 
 ## Gap
 
-Without this skill, a session <observed failure>, <observed failure>.
+Without this skill, a session <failure it hits today>. <A second failure, when there is one>.
 
 ## Must
 
-- <behavior that closes a named gap>
+- <outcome that closes a named failure>
 
 ## Must not
 
 - <behavior that would be wrong even though it closes a gap>
 
-## Guards
+## Out of scope
 
-- <the refusal condition and its message>
+- <adjacent behavior>, which `<sibling-skill>` owns
+```
+
+### Worked example
+
+`git-commit`'s requirement in this shape, at 167 words as the audit counts them.
+
+```markdown
+---
+name: git-commit
+description: What commit generation is for, the gaps it closes, and where the family boundary sits
+---
+
+# Git commit requirement
+
+## Gap
+
+Without this skill, a commit message takes whatever shape the session picks. The type and scope drift from the history's convention, the subject runs past the log's width, and a lockfile diff crowds out the change the message should describe.
+
+A plain request to commit also reaches the grouping sibling, which restages whole files, so a hunk-level selection ships wider than the user reviewed.
+
+## Must
+
+- The message follows the commit format and versioning references
+- The message describes the staged diff with lockfiles excluded
+- The user sees the message and its length before the commit runs
+- The committed set is exactly the staged set
+- The description claims single-concern and hunk-level staged sets, and names `git-stage` for a mixed one
+
+## Must not
+
+- Stage or unstage anything
+- Commit when nothing is staged
+- Emit anything after the result line
 
 ## Out of scope
 
-- <the adjacent thing this deliberately does not cover, and what covers it>
+- Splitting a mixed diff into several commits, which `git-stage` owns
+- Naming a branch, which `git-branch` owns
+- Pushing or opening a pull request, which `git-pr` owns
 ```

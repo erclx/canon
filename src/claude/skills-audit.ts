@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { isFamilyKey } from '@/claude/skills-families'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
-import { bodyLines, maskDisplayed } from '@/markdown/scan'
+import { type BodyLine, bodyLines, maskDisplayed } from '@/markdown/scan'
 
 /** Returned when a skill folder carries no `REQUIREMENT.md`, the gating check. */
 export const EXIT_MISSING_REQUIREMENT = 2
@@ -12,6 +12,19 @@ export const DESCRIPTION_LIMIT = 1024
 
 /** The two headings the requirement template declares, matched at any level. */
 export const REQUIREMENT_SECTIONS: readonly string[] = ['Gap', 'Must']
+
+/**
+ * The caps `claude/skills/create-skill/references/skill-requirement.md` states.
+ * Words count body tokens carrying a letter or digit, so a heading or bullet
+ * marker costs nothing and frontmatter is left out.
+ */
+export const REQUIREMENT_LIMITS = { bullets: 5, words: 400 } as const
+
+/** The section the standard retired into Must not, matched at any level. */
+export const RETIRED_REQUIREMENT_SECTION = 'Guards'
+
+/** The section that states today's failures, where history is reported. */
+const GAP_SECTION = 'Gap'
 
 /** The one tree that ships to a target, and the only one the practice list names. */
 export const SHIPPED_CORPUS = join('claude', 'skills')
@@ -100,6 +113,13 @@ const SECTION = /^##\s+(.+?)\s*$/
  */
 const ISO_DATE = /\b\d{4}-\d{2}-\d{2}\b/g
 
+/** An issue or pull request number, which a heading's `#` never matches. */
+const ISSUE_NUMBER = /(?<![\w&/#])#\d+\b/g
+
+const TOP_LEVEL_BULLET = /^(?:[-*+]|\d+[.)])\s/
+
+const WORD = /\S*[\p{L}\p{N}]\S*/gu
+
 export interface SkillFinding {
   readonly rel: string
   readonly detail: string
@@ -126,6 +146,7 @@ export interface SkillsAudit {
   readonly nameMismatch: readonly SkillFinding[]
   readonly longDescription: readonly SkillFinding[]
   readonly requirementSections: readonly SkillFinding[]
+  readonly requirementLimits: readonly SkillFinding[]
   readonly datedProvenance: readonly SkillFinding[]
   readonly practiceShape: readonly SkillFinding[]
   readonly referenceContents: readonly SkillFinding[]
@@ -142,6 +163,7 @@ interface SkillSource {
   readonly family: string | undefined
   /** Undefined when the folder carries no `REQUIREMENT.md` at all. */
   readonly requirementHeadings: readonly string[] | undefined
+  readonly requirement: string | undefined
   /** Every H2 in `SKILL.md` outside a fence, for the practice shape. */
   readonly sections: readonly string[]
   readonly hasLedger: boolean
@@ -198,6 +220,7 @@ export async function auditSkills(root: string): Promise<SkillsAudit> {
     nameMismatch: sources.flatMap(nameFindings),
     longDescription: sources.flatMap(lengthFindings),
     requirementSections: sources.flatMap(sectionFindings),
+    requirementLimits: sources.flatMap(limitFindings),
     datedProvenance: sources.flatMap((source) =>
       source.bodies.flatMap(dateFindings),
     ),
@@ -269,6 +292,7 @@ async function readSkill(
     family: declaredFamily(fields?.fields.metadata),
     requirementHeadings:
       requirement === undefined ? undefined : headings(requirement),
+    requirement,
     sections: sectionsOf(body),
     hasLedger: existsSync(join(skillDir, PRACTICE_LEDGER)),
     bodies: [
@@ -347,6 +371,94 @@ function sectionFindings(source: SkillSource): SkillFinding[] {
       detail: `missing: ${missing.join(', ')}`,
     },
   ]
+}
+
+/**
+ * Reports every cap the standard states, each as its own finding so a file
+ * breaching two reads as two edits. Silent on an absent requirement for the
+ * reason `sectionFindings` is.
+ */
+function limitFindings(source: SkillSource): SkillFinding[] {
+  const { requirement, requirementHeadings } = source
+  if (requirement === undefined || requirementHeadings === undefined) return []
+
+  const rel = join(source.rel, 'REQUIREMENT.md')
+  const lines = bodyLines(requirement)
+  const details = [
+    ...bulletDetails(lines),
+    ...wordDetails(lines),
+    ...gapHistoryDetails(lines),
+    ...(requirementHeadings.includes(RETIRED_REQUIREMENT_SECTION)
+      ? [`## ${RETIRED_REQUIREMENT_SECTION}: retired, fold it into Must not`]
+      : []),
+  ]
+
+  return details.map((detail) => ({ rel, detail }))
+}
+
+/**
+ * Counts top-level bullets per H2, since the template holds one list per
+ * section. A nested bullet elaborates its parent rather than adding to it.
+ */
+function bulletDetails(lines: readonly BodyLine[]): string[] {
+  const counts = new Map<string, number>()
+  let section: string | undefined
+
+  for (const line of lines) {
+    if (line.fenced) continue
+    const heading = SECTION.exec(line.text)?.[1]
+    if (heading !== undefined) {
+      section = heading
+      continue
+    }
+    if (section === undefined || !TOP_LEVEL_BULLET.test(line.text)) continue
+    counts.set(section, (counts.get(section) ?? 0) + 1)
+  }
+
+  return [...counts]
+    .filter(([, count]) => count > REQUIREMENT_LIMITS.bullets)
+    .map(
+      ([name, count]) =>
+        `## ${name}: ${count} bullets, cap ${REQUIREMENT_LIMITS.bullets}`,
+    )
+}
+
+function wordDetails(lines: readonly BodyLine[]): string[] {
+  const words = lines.reduce(
+    (total, line) => total + (line.text.match(WORD)?.length ?? 0),
+    0,
+  )
+  if (words <= REQUIREMENT_LIMITS.words) return []
+  return [`${words} words, cap ${REQUIREMENT_LIMITS.words}`]
+}
+
+/**
+ * Gap states what fails today, so a date or a number naming the incident that
+ * earned a line is history git already holds. A code span is quoted data, such
+ * as a sample filename, and is masked before matching.
+ */
+function gapHistoryDetails(lines: readonly BodyLine[]): string[] {
+  const details: string[] = []
+  let inGap = false
+
+  for (const line of lines) {
+    if (line.fenced) continue
+    const heading = HEADING.exec(line.text)?.[1]
+    if (heading !== undefined) {
+      inGap = heading === GAP_SECTION
+      continue
+    }
+    if (!inGap) continue
+    const masked = maskDisplayed(line.text)
+    for (const match of [
+      ...masked.matchAll(ISO_DATE),
+      ...masked.matchAll(ISSUE_NUMBER),
+    ]) {
+      details.push(`line ${line.number}: ${match[0]} in ${GAP_SECTION}`)
+    }
+  }
+
+  return details
 }
 
 /**
