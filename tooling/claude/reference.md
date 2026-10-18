@@ -25,7 +25,7 @@ The claude stack installs the Claude Code workflow into a project through `canon
 The `# Claude` group ignores `.canon/` whole, so nothing tracked may land there and a record folder added later needs no new entry. <!-- canon-keep-record-root -->
 
 - Keep `.claude/worktrees/` as its own entry, since the harness requires a worktree's target to sit under `.claude/`
-- Keep `.claude/.tmp/` until no project predates the record move, since it is the scratch rule's fallback spelling
+- Keep `.claude/.tmp/` until no project predates the record move, since it is the scratch rule's fallback spelling <!-- canon-keep-record-root -->
 - Expect a project scaffolded before the move to keep its records under `.claude/`, since every command reads either root
 - Expect `canon gov sync` to remove a retired `.claude/GOV.md` left by a prior install
 
