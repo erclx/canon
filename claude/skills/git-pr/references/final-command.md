@@ -54,7 +54,7 @@ case "$links" in
   printf 'Removed %s session link(s) from the live body of #%s.\n' "$links" "$pr_number" >&2
   ;;
 esac
-record=$(canon labels apply "$pr_number" --base "$base_branch" --json 2>/dev/null | tail -n 1)
+record=$(canon labels apply "$pr_number" --json 2>/dev/null | tail -n 1)
 if printf '%s' "$record" | jq -e 'has("earned")' >/dev/null 2>&1; then
   owed=$(printf '%s' "$record" | jq -r '.owed | join(",")')
   missing=$(printf '%s' "$record" | jq -r '.missingOnRemote | join(",")')
