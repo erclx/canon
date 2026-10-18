@@ -39,7 +39,7 @@ export const GATED_PATHS: readonly string[] = [
   'canon/context/claude-internal.md',
   'canon/context/orchestration.md',
   'canon/context/features/',
-  'canon/context/cli/',
+  'canon/context/cli.md',
   'canon/context/sandbox.md',
   'canon/context/governance.md',
   'canon/context/tooling.md',

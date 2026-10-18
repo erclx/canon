@@ -77,6 +77,11 @@ const CLIENT_DEPS = ['preact', '@preact/signals'] as const
  * the bundler then answers `/` with an empty page rather than an error. The
  * caller passes the package root the binary runs from, never the served
  * project's, so a global install serving a target finds its own copies.
+ *
+ * `Bun.resolveSync` and `createRequire(...).resolve` fall back to Bun's global
+ * install cache when no ancestor of the starting directory holds a
+ * `node_modules`, so a presence check from such a directory passes where the
+ * bundler fails. The package root always sits under one.
  */
 export function missingClientDeps(from: string): Refused | undefined {
   const missing = CLIENT_DEPS.filter((name) => {
