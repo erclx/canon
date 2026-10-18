@@ -97,6 +97,7 @@ Holds the attribute-standard audit behind `canon markdown audit` and the fence w
 - `density.ts` measures bullet runs and sentence weight. `scope.ts` names the measured documents in `DENSITY_SCOPE` and the prefixes that fail a run in `GATED_PATHS`
 - A rewrite batch replaces its folder prefix with the entry path in `GATED_PATHS`, never adding beside it
 - `gated.ts` reads a target's list from `canon/config/markdown.toml`, where a bullet run gates only under a listed prefix, and `gated add` and `canon init` append a prefix only once it is clean
+- A skill's `REQUIREMENT.md` gates only on its exact path in `GATED_PATHS`, so a folder prefix such as `.claude/skills/internal-` never reaches it
 - `colons.ts` and `heading-case.ts` only report, and the edit hook scopes them to the lines being edited
 
 ### `src/pr/`
