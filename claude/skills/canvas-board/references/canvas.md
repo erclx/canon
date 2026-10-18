@@ -25,7 +25,8 @@ The folder is gitignored, so nothing in a repository checks its shape and nothin
 
 Governs the canvas content under `.canon/canvas/`: page folder names, frame files, the `layout.json` shape, how tokens reach a frame, and what a frame must not assume about where it renders.
 
-Also governs the house style of an explanation frame, being a diagram, a board of notes, or a comparison. A mockup of the project's own interface is not an explanation frame, and it follows the project's design document for type, color, and layout.
+- Also governs the house style of an explanation frame, being a diagram, a board of notes, or a comparison
+- A mockup of the project's own interface is not an explanation frame, and follows the project's design document for type, color, and layout
 
 Does not govern:
 
@@ -61,6 +62,8 @@ A canvas failing these is non-conforming even when it satisfies every shape rule
 
 ### Content and edits
 
+A frame is the only copy of its markup, so it carries everything it needs.
+
 - Keep a frame self-contained. Inline its own styles and scripts, or link a file inside the same page folder, since a frame is served from its page and nothing outside the canvas resolves.
 - Use the project's custom properties, `var(--<name>)`, for every value the token stylesheet defines. A literal copied from it shows the right color today and the wrong one after the next token change.
 - Edit a frame by rewriting its file. The file is the frame, and nothing else holds a copy of its markup.
@@ -76,9 +79,12 @@ Applies to an explanation frame only. A mockup of the project's interface render
 
 ### Colors, faces, and fit
 
-- Take colors from the project's custom properties. A frame that defines colors of its own sets the dark values on `:root` and the light ones under `[data-theme="light"]`, since the shell sets `data-theme` on each frame's root.
-- Name only the faces the canvas serves into every frame: `Geist Variable` for text, `Noto Sans Mono` for code, and `Excalifont` for a hand-drawn look. They render the same in a capture and in any browser, so a height fitted against them holds.
-- Make each box tall enough to show all its content, with no scrollbar and no clipped line. Run `canon canvas fit <page>/<frame>` rather than estimating, since it measures the content in the capture browser and sets the height.
+Take colors from the project's custom properties. A frame defining colors of its own sets the dark values on `:root` and the light ones under `[data-theme="light"]`, since the shell sets `data-theme` on each frame's root.
+
+- Name only the faces the canvas serves into every frame, being `Geist Variable` for text, `Noto Sans Mono` for code, and `Excalifont` for a hand-drawn look
+- Those render the same in a capture and in any browser, so a height fitted against them holds
+- Make each box tall enough to show all its content, with no scrollbar and no clipped line
+- Run `canon canvas fit <page>/<frame>` rather than estimating, since it measures the content in the capture browser and sets the height
 - Read frames left to right in reading order. Let `frame add` place each frame after the last with the standard gap, and move one only when the operator asks for a position.
 
 ## Layout
@@ -88,6 +94,8 @@ Applies to an explanation frame only. A mockup of the project's interface render
 - Give every box four finite numbers in pixels: `x` and `y` for its top-left corner on the page, `width` for the width the frame renders at, and `height` for the height it shows on the canvas.
 
 ### Missing boxes and writes
+
+The layout file is shared state, so a write never discards a box another writer or reader holds.
 
 - Leave a frame out of the layout only when its position does not matter yet. A reader places an unnamed frame in a row after the others, at the default size of 1440 by 900.
 - Never write the file while a writer holds its lock, which is the same name with `.lock` appended. Two writers each replacing the whole file lose one of the two edits.
@@ -107,7 +115,8 @@ The keys below are the ones a reader parses. The frame names are placeholders.
 ## Tokens
 
 - Expect the token stylesheet first in every frame's `head` when it is served, ahead of anything the frame links. A stylesheet the frame links itself still wins the cascade.
-- Read where the tokens come from in this order: the canvas tool's own module inside its own checkout, else the project's installed base stylesheet plus anything in its project override folder, else none. A canvas with no token source renders unstyled and says so.
+- Read the tokens from the canvas tool's own module inside its own checkout, else the project's installed base stylesheet plus its project override folder, else none
+- A canvas with no token source renders unstyled and says so
 - Never paste the token stylesheet into a frame. The injected copy follows the project, and a pasted one stops following it the moment it is written.
 
 ## What a frame must not assume
@@ -118,7 +127,9 @@ The keys below are the ones a reader parses. The frame names are placeholders.
 
 ### Font, source, and checkout
 
-- Do not assume a default font. Set `font-family` with a served face first on an element the frame's text inherits from, since a capture checks the first family of the text it renders and the browser's default serif is absent from many machines. A frame naming a machine family such as `DejaVu Sans` renders at another height in another browser, which `canon canvas fit` reports.
+Do not assume a default font. Set `font-family` with a served face first on an element the frame's text inherits from, since a capture checks the first family of the text it renders and the browser's default serif is absent from many machines.
+
+- A frame naming a machine family such as `DejaVu Sans` renders at another height in another browser, which `canon canvas fit` reports
 - Do not assume the frame is the source. A picked direction is carried into the project's design document or a plan, and the operator clears the frame once it has been carried.
 - Do not assume the canvas survives the checkout. The folder is gitignored, so a lost checkout loses every page in it.
 

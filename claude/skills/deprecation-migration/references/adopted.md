@@ -5,49 +5,68 @@ description: Which external sources on deprecation and migration this skill adop
 
 # Adopted and declined
 
-External sources were read and filtered rather than imported. This file is the record. A later session extending the skill adds to it rather than re-arguing an item already settled here.
+External sources were read and filtered rather than imported. This file is the record, and a later session extending the skill adds to it rather than re-arguing an item settled here.
 
-## Adopted
+## Adopted from the default shelf
 
-### From the default shelf
+### Deprecation
 
-**Deprecation.** [Software Engineering at Google, chapter 15](https://abseil.io/resources/swe-book/html/ch15.html). Adopted from it:
+[Software Engineering at Google, chapter 15](https://abseil.io/resources/swe-book/html/ch15.html) supplies four positions the body states.
 
-- Advisory and compulsory deprecation as the two types, with compulsory carrying a removal date. The body allows compulsory only once a replacement has shipped, which the chapter implies and the four questions make explicit.
-- Warnings that are actionable and relevant: a warning names what the caller does, and surfaces where the caller uses the old surface.
-- Deprecation as a process with an owner, since the chapter observes that unowned deprecation work makes no progress. Adopted as the fourth decision question and the rule against an advisory deprecation left open with no owner.
-- Finding consumers before removal, which the chapter does with static analysis across one repository. Generalized into the zero-consumers check across caller kinds, since a target project rarely has a whole-company code index and its callers often live outside the repository.
+- **Two types.** Advisory and compulsory, the second carrying a removal date. The body allows compulsory only once a replacement ships, which the chapter implies and the four questions make explicit.
+- **Actionable, relevant warnings.** A warning names what the caller does, and surfaces where the caller uses the old surface.
+- **An owner.** The chapter observes that unowned deprecation work makes no progress. Adopted as the fourth decision question and the rule against an ownerless advisory deprecation left open.
+- **Finding consumers before removal.** The chapter's static analysis over one repository becomes the zero-consumers check across caller kinds, since a target's callers often live outside it.
 
-**The Churn Rule.** [Software Engineering at Google, chapter 1](https://abseil.io/resources/swe-book/html/ch01.html), under "Policies That Don't Scale": infrastructure teams move their internal users to new versions themselves, or update in place in a backward-compatible way. Adopted as the group on migrating callers yourself, with the backward-compatible path kept for callers the owner cannot edit.
+### Migrating callers yourself
 
-### The decision and the bridges
+[Software Engineering at Google, chapter 1](https://abseil.io/resources/swe-book/html/ch01.html), under "Policies That Don't Scale", has infrastructure teams move their internal users to new versions themselves, or update in place in a backward-compatible way.
 
-**Deprecation and migration.** Addy Osmani's `agent-skills`, pinned at addyosmani/agent-skills@2686b620, [`skills/deprecation-and-migration/SKILL.md`](https://github.com/addyosmani/agent-skills/blob/2686b620/skills/deprecation-and-migration/SKILL.md). Adopted from it:
+Adopted as the group on migrating callers yourself, with the backward-compatible path kept for callers the owner cannot edit.
 
-- The five-question deprecation decision, cut to four. Its unique-value and maintenance-cost questions merge into one question about what keeping the surface costs. Its per-consumer migration-cost question drops, since the Churn Rule puts that cost on the owner rather than weighing it per caller. The owner question from the book takes the freed place.
-- The rule never to deprecate without a replacement, as the third decision question.
-- The strangler and adapter patterns, stated as when each fits rather than as worked code tied to one stack.
+## Adopted for the decision and the bridges
 
-#### Migration, zombie code, and red flags
+Addy Osmani's `agent-skills`, pinned at addyosmani/agent-skills@2686b620, [`skills/deprecation-and-migration/SKILL.md`](https://github.com/addyosmani/agent-skills/blob/2686b620/skills/deprecation-and-migration/SKILL.md), supplies the decision and the bridge patterns.
 
-- Expand, migrate, contract, lifted out of its schema section and stated for any surface as three separate changes.
-- Zombie code, narrowed to code that is unowned, uncalled, and still built, and settled by the same zero-consumers check rather than a list of staleness signals.
-- The rationalizations and red flags that carry across stacks, reworded for any surface rather than a service or a column. Two excuse rows come from here:
-  - The row on a search that found nothing, from its red flag against removing code without verifying zero active consumers.
-  - The row on adding the new one and dropping the old one now, generalized from its rationalization about adding a column and dropping the old one in the same migration.
+### The decision
+
+Its five-question deprecation decision is cut to four. The unique-value and maintenance-cost questions merge into one about what keeping the surface costs, and the per-consumer migration-cost question drops, since the Churn Rule puts that cost on the owner.
+
+- The owner question from the book takes the freed place
+- The rule never to deprecate without a replacement is the third decision question
+- The strangler and adapter patterns are stated as when each fits rather than as worked code tied to one stack
+
+### Migration, zombie code, and red flags
+
+The migration shape and the excuse rows carry across stacks once reworded for any surface rather than a service or a column.
+
+- Expand, migrate, contract, lifted out of its schema section and stated for any surface as three separate changes
+- Zombie code, narrowed to code that is unowned, uncalled, and still built, and settled by the zero-consumers check rather than a list of staleness signals
+- The excuse row on a search that found nothing, from its red flag against removing code without verifying zero active consumers
+- The excuse row on adding the new one and dropping the old one now, generalized from its rationalization about a column added and dropped in one migration
 
 ## Declined
 
-**Its database schema section.** The column rename worked example, the tested down path, batched backfills, and concurrent index builds. Declined because a project's persistence rule owns schema changes, and restating them here puts two owners on one rule. Only the expand, migrate, contract shape was lifted, generalized beyond schemas.
+Each item below was read and left out, with the reason it changes nothing a session does here.
+
+### The schema section and its mechanisms
+
+**Its database schema section.** The column rename worked example, the tested down path, batched backfills, and concurrent index builds. A project's persistence rule owns schema changes, so only the expand, migrate, contract shape was lifted, generalized beyond schemas.
 
 **Feature flag migration.** Declined because it is one way to run a strangler, and naming a flag mechanism ties the body to a runtime a target may not have.
 
-**The traffic percentages in its strangler phases.** Declined because they describe a service behind a router, and most surfaces a session retires, such as a function, a flag, or a file, have callers rather than traffic.
+### Numbers that fit one project
 
-**"Default to advisory" as a standing default with no exit.** Kept advisory as the starting state, and declined leaving it open, since an advisory deprecation with no date and no owner is the stalled case the body exists to prevent.
+**The traffic percentages in its strangler phases.** They describe a service behind a router, and most surfaces a session retires, such as a function, a flag, or a file, have callers rather than traffic.
 
-**The thresholds in its zombie signs and rebuttals.** No commits in six months, and comparing costs over two or three years. Declined for the same reason the body states no deprecation window: a number fits one project's cadence and not another's.
+**The thresholds in its zombie signs and rebuttals.** No commits in six months, and comparing costs over two or three years. Declined for the reason the body states no deprecation window, since a number fits one project's cadence and not another's.
 
-**"Code is a liability" and design-time deprecation planning as sections.** Declined as framing a session already accepts by loading the skill. The cost question carries the first, and designing a new surface for removal belongs to the skill shaping that surface.
+### Defaults and framing
+
+**"Default to advisory" as a standing default with no exit.** Advisory is kept as the starting state and leaving it open is declined, since an advisory deprecation with no date and no owner is the stalled case the body exists to prevent.
+
+**"Code is a liability" and design-time deprecation planning as sections.** Framing a session already accepts by loading the skill. The cost question carries the first, and designing a new surface for removal belongs to the skill shaping that surface.
+
+### Ceremony
 
 **The celebration step and the deprecation notice template.** Declined because neither changes what a session does, and the template's example names a package runner and a migration script tied to one stack.

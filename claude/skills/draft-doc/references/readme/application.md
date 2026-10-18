@@ -22,10 +22,14 @@
 
 ### Requirements
 
+Install <what the machine needs> before setup.
+
 - <Runtime and version>
 - <Service the app depends on>
 
 ### Set up
+
+Run these from <where to run them>.
 
 ```bash
 <clone command>
@@ -36,11 +40,13 @@
 
 ### Run locally
 
+The dev server runs <what it runs>.
+
 ```bash
 <dev server command>
 ```
 
-<Address the app serves on.>
+It serves on <address>.
 
 ### Configuration
 
@@ -50,7 +56,7 @@
 
 ### Deploy
 
-<Where the app deploys and the command or workflow that does it.>
+The app deploys to <where>, through <the command or workflow>.
 
 ## Support
 

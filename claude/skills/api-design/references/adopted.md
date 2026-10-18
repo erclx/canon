@@ -5,36 +5,56 @@ description: Which external API design sources this skill adopted, which it decl
 
 # Adopted and declined
 
-External sources were read and filtered rather than imported. This file is the record. A later session extending the skill adds to it rather than re-arguing an item already settled here.
+External sources were read and filtered rather than imported. This file is the record, and a later session extending the skill adds to it rather than re-arguing an item settled here.
 
-## Adopted
+## Adopted from the default shelf
 
-### From the default shelf
+### Observable behavior
 
-**Hyrum's Law.** [Software Engineering at Google, ch. 1](https://abseil.io/resources/swe-book/html/ch01.html): with enough users, every observable behavior of a system is depended on by somebody, whatever the contract promises. Adopted as the opening group, stated as design rules rather than as an observation, so a session decides what is observable before a caller decides it for them. Ordering and timing are named because the chapter's own examples are hash iteration order and timing.
+[Software Engineering at Google, ch. 1](https://abseil.io/resources/swe-book/html/ch01.html) states Hyrum's Law, that with enough users, every observable behavior of a system is depended on by somebody, whatever the contract promises.
 
-**The One-Version Rule.** [Software Engineering at Google, ch. 21](https://abseil.io/resources/swe-book/html/ch21.html): a repository keeps one version of each dependency, so a change to it migrates every caller rather than leaving two versions live. Adopted under additive change for a caller that cannot pin, which is any module imported from inside one repository.
+Adopted as the opening group, stated as design rules rather than as an observation, so a session decides what is observable before a caller decides it for them. Ordering and timing are named because the chapter's own examples are hash iteration order and timing.
 
-### From one external skill
+### One version per dependency
 
-From `addyosmani/agent-skills@2686b620`, [`skills/api-and-interface-design/SKILL.md`](https://github.com/addyosmani/agent-skills/blob/2686b620fc1fed2e8f60c704839c766b8594c6b6/skills/api-and-interface-design/SKILL.md):
+[Software Engineering at Google, ch. 21](https://abseil.io/resources/swe-book/html/ch21.html) states the One-Version Rule, keeping one version of each dependency in a repository, so a change to it migrates every caller rather than leaving two versions live. Adopted under additive change for a caller that cannot pin, which is any module imported from inside one repository.
+
+## Adopted from one external skill
+
+From `addyosmani/agent-skills@2686b620`, [`skills/api-and-interface-design/SKILL.md`](https://github.com/addyosmani/agent-skills/blob/2686b620fc1fed2e8f60c704839c766b8594c6b6/skills/api-and-interface-design/SKILL.md).
+
+### Contract and errors
 
 **Contract first.** Write the interface before the body. Adopted as its own group, widened from an endpoint to a signature, a flag set, an output shape, and a schema.
 
-**One error shape.** Every failure on one surface carries the same structure. Adopted with a stable code added for the caller to branch on, and a clause keeping internal implementation details out of the message, since no project rule carries either for every code stack.
+**One error shape.** Every failure on one surface carries the same structure. Adopted with a stable code for the caller to branch on, and internal details kept out of the message, since no project rule carries either for every code stack.
+
+### Input and change
 
 **Validation at the boundary.** Check input where it enters and trust it inside. Adopted, with a value read back from a file or another service counted as input.
 
-**Additive change.** New fields optional, nothing removed in place. Adopted, with a change of meaning under an existing name added as its own ban, since it breaks a caller as surely as a removal and no rename shows in the diff.
+**Additive change.** New fields optional, nothing removed in place. Adopted, with a change of meaning under an existing name as its own ban, since it breaks a caller as surely as a removal and no rename shows in the diff.
 
-**Idempotency.** A stored key honored on retry, an atomic claim under a unique constraint, a reused key with a different body failing loudly, and retention past the longest retry. Adopted as four rules, keeping the reused-key rule, which is the one most often left out.
+### Idempotency
 
-**Excuses, red flags, and a closing checklist.** The same source's skill anatomy, adopted toolkit-wide through `${CLAUDE_SKILL_DIR}/../create-skill/references/skill-practice.md`. Each excuse row here rebuts a reason a session gives when it is about to break a caller, such as "nobody depends on that field".
+A stored key honored on retry, an atomic claim under a unique constraint, a reused key with a different body failing loudly, and retention past the longest retry. Adopted as four rules, keeping the reused-key rule, which is the one most often left out.
+
+### The closing sections
+
+The same source's skill anatomy supplies the excuses, red flags, and closing checklist, adopted toolkit-wide through `${CLAUDE_SKILL_DIR}/../create-skill/references/skill-practice.md`. Each excuse row here rebuts a reason a session gives when about to break a caller, such as "nobody depends on that field".
 
 ## Declined
 
-**Protocol-specific guidance.** The source skill carries verbs, status codes, pagination, and URL shapes for one protocol style. Declined because the body has to hold for a function's exports, a command's flags, and a file format as much as an endpoint, and a protocol section would route every non-network surface to rules that do not apply. A project needing those conventions states them in its own stack rule.
+Each item below was read and left out, with the reason it changes nothing a session does here.
 
-**Interface depth.** Ousterhout's deep modules, after [A Philosophy of Software Design](https://web.stanford.edu/~ouster/cgi-bin/book.php), judge how much a module hides behind its surface. Declined here because depth is about what sits behind a boundary, and this skill owns only what crosses it. `code-craft` carries it.
+### Protocol-specific guidance
 
-**Versioned surfaces as the default.** Shipping a new version beside the old for every breaking change. Declined as the default because additive change avoids the break in the first place, and two live versions split the callers. The One-Version Rule covers a caller that cannot pin.
+The source skill carries verbs, status codes, pagination, and URL shapes for one protocol style. Declined because the body holds for a function's exports, a command's flags, and a file format as much as an endpoint, so a protocol section would route every non-network surface to rules that do not apply.
+
+A project needing those conventions states them in its own stack rule.
+
+### Depth and versions
+
+**Interface depth.** Ousterhout's deep modules, after [A Philosophy of Software Design](https://web.stanford.edu/~ouster/cgi-bin/book.php), judge how much a module hides behind its surface. Depth is about what sits behind a boundary, and this skill owns only what crosses it, so `code-craft` carries it.
+
+**Versioned surfaces as the default.** Shipping a new version beside the old for every breaking change. Additive change avoids the break in the first place and two live versions split the callers, so the One-Version Rule covers a caller that cannot pin.

@@ -13,10 +13,14 @@
 
 ### Requirements
 
+Install <what the machine needs> before setup.
+
 - <Agent tool and minimum version>
 - <Runtime the listing command needs>
 
 ### Set up
+
+Run these from <where to run them>.
 
 ```bash
 <clone command>
@@ -30,6 +34,8 @@
 `<file an agent reads at session start>` carries <what that file holds>. It points at <the files it imports or links>.
 
 ### List what the project exposes
+
+The listing shows <what it shows>.
 
 ```bash
 <command that lists skills, rules, or commands>

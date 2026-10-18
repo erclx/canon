@@ -13,12 +13,13 @@ A project the surface move has not reached keeps its context folder under `.clau
 
 ## Guards
 
-- Derive a kebab-case slug from the domain and check whether `<context-root>/<slug>.md` or `<context-root>/<slug>/index.md` already exists. Either resolving means the domain is already covered under that exact name. Stop: `❌ <slug> already has a context entry. Use context-fold to refresh it instead.`
+Derive a kebab-case slug from the domain and check whether `<context-root>/<slug>.md` or `<context-root>/<slug>/index.md` already exists. Either resolving means the domain is covered under that exact name, so stop: `❌ <slug> already has a context entry. Use context-fold to refresh it instead.`
 
 ## Placement
 
-- Read `<context-root>/index.md` and check every title and description it lists against the domain. Stop on a match: `❌ <path> already covers this domain under a different name. Use context-fold to refresh it instead.`
-- Default a brand-new entry to a flat file, `<context-root>/<slug>.md`. A domain starts as one page's worth of narrative, and the standard splits it into a folder only once the entry passes the 300-line ceiling, which a fresh domain never does on day one.
+- Read `<context-root>/index.md` and check every title and description it lists against the domain
+- Stop on a match: `❌ <path> already covers this domain under a different name. Use context-fold to refresh it instead.`
+- Default a brand-new entry to a flat file, `<context-root>/<slug>.md`, since the standard splits an entry into a folder only past the 300-line ceiling, which a fresh domain never reaches
 
 ## Draft
 
