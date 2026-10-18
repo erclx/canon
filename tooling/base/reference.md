@@ -2,65 +2,86 @@
 
 ## Overview
 
-The base layer covers every project the toolkit scaffolds, whatever language sits on top. It ships formatting, conventional commits, git hooks, CI, and the verify runner. Every other stack extends it, so a decision made here is one every stack inherits. Shell formatting and linting live in the `shell` add-on stack, which a project syncs once it writes shell.
+The base layer covers every project the toolkit scaffolds, whatever language sits on top. It ships formatting, conventional commits, git hooks, CI, and the verify runner. Every other stack extends it, so a decision made here is one every stack inherits. Shell formatting and linting live in the `shell` add-on stack.
 
 A repository with several language roots layers this stack once at the root and skips it per subtree, since git honors only one `core.hooksPath` and a re-dropped husky silently breaks. `canon docs scenarios` carries the recipe.
 
 ## What ships as golden configs
 
-Golden config files live in `tooling/base/configs/` and are copied into the target on `canon tooling sync base . --write`, replacing whatever sits at those paths. They are the source of truth. The reference covers rationale and tradeoffs. Configs show the concrete setup.
+Golden configs live in `tooling/base/configs/`. `canon tooling sync base . --write` copies them into the target and replaces whatever sits at those paths. They are the source of truth, so this reference covers rationale and the configs show the setup.
 
-- `.oxfmtrc.json`: `semi: false`, `singleQuote: true`, `printWidth: 80`, and `sortPackageJson: false`, which keep the output Prettier wrote. The `astro` stack repeats these options in its own copy, so copy a change here into it.
-- `commitlint.config.js`: ESM default export extending `@commitlint/config-conventional`. Rules are `header-max-length: 72`, `scope-case: lower-case`, `subject-full-stop: never`, `subject-case` disabled, and a local `no-claude-co-author` rule refusing a `Co-authored-by` trailer that names Claude or Anthropic.
-- `.husky/`: `pre-commit`, `commit-msg`, `pre-push`, `post-merge`, `post-rewrite`.
-- `scripts/verify.ts`: the one verify runner every stack shares, and the command behind `check`. It runs typecheck, lint, format check, shell, unit tests, build, markdown bans, then card exclusion, always in that order, and skips any phase the folder's `scripts/verify.json` leaves out. Node modules only, since a target's own lint and typecheck read it.
-- `scripts/verify.json`: the phases a stack requires, plus any tools and preconditions it probes first. The nearest stack's copy wins. A required phase whose script `package.json` lacks fails the run. A base phase the list leaves out runs only where the folder declares its script. Base requires `check:format`, so a base-only target still fails on a missing one. The shell phase runs only where `package.json` declares `check:shell`, which the `shell` stack adds, and probes for `shfmt` and `shellcheck` first. These two files are base's `[sync] per_root` set, which a `--skip base` subfolder still receives.
+### Formatting and commit configs
+
+Two configs fix how output looks and how commits read.
+
+- `.oxfmtrc.json` sets `semi: false`, `singleQuote: true`, `printWidth: 80`, and `sortPackageJson: false`, keeping the output Prettier wrote.
+- The `astro` stack repeats those options in its own copy, so copy a change here into it.
+- `commitlint.config.js` is an ESM default export extending `@commitlint/config-conventional`. It sets `header-max-length: 72`, `scope-case: lower-case`, and `subject-full-stop: never`.
+- Its `subject-case` rule is off, and a local `no-claude-co-author` rule refuses a `Co-authored-by` trailer that names Claude or Anthropic.
+- `.husky/` holds `pre-commit`, `commit-msg`, `pre-push`, `post-merge`, and `post-rewrite`.
+
+### Verify runner
+
+`scripts/verify.ts` is the one verify runner every stack shares, and the command behind `check`. It uses Node modules only, since a target's own lint and typecheck read it.
+
+- It runs typecheck, lint, format check, shell, unit tests, build, markdown bans, then card exclusion, always in that order, and skips any phase the folder's `scripts/verify.json` leaves out.
+- `scripts/verify.json` lists the phases a stack requires, plus any tools and preconditions it probes first. The nearest stack's copy wins.
+- A required phase whose script `package.json` lacks fails the run. A base phase the list leaves out runs only where the folder declares its script.
+- Base requires `check:format`, so a base-only target still fails on a missing one.
+- The shell phase runs only where `package.json` declares `check:shell`, which the `shell` stack adds, and probes for `shfmt` and `shellcheck` first.
+
+These two files are base's `[sync] per_root` set, which a `--skip base` subfolder still receives.
 
 ## What ships as user-owned seeds
 
 Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and never overwrites it, so a project extends them freely.
 
-- `.lintstagedrc`: the glob map below.
-- `.github/workflows/verify.yml`: runs on pull requests targeting `main` and on `workflow_dispatch`. A project with more than one language root adds its own jobs here.
-- `.github/pull_request_template.md`: `## Summary`, `## Key changes`, `## Technical context`, `## Testing`. A project adds the checklist lines its own review needs.
-- `canon/context/`: extend the `ci` and `development` entries with project-specific commands, workflows, or deploy steps. Canonical rationale stays in this reference.
+- `.lintstagedrc` holds the glob map below.
+- `.github/workflows/verify.yml` runs on pull requests targeting `main` and on `workflow_dispatch`. A multi-root project adds its own jobs here.
+- `.github/pull_request_template.md` has `## Summary`, `## Key changes`, `## Technical context`, and `## Testing`. A project adds its own checklist lines.
+- `canon/context/` holds the `ci` and `development` entries. Extend them with project-specific commands, workflows, or deploy steps, and keep canonical rationale in this reference.
 
 ## Tool pairing
 
-- Runtime: `bun` as package manager and script runner, `bunx` over `npx` for a one-off executable.
-- Formatting: oxfmt for what it parses, pinned to an exact version so an upgrade arrives as a reviewed diff. oxfmt has no shell parser, so shell formatting is the `shell` stack's.
-- Commits: commitlint against conventional commits, wired through the husky `commit-msg` hook. Format is `<type>(<scope>): <subject>` in imperative mood with no trailing period.
-- Dev dependencies: `oxfmt`, `husky`, `@commitlint/cli`, `@commitlint/config-conventional`. Install via `bun add -D`.
+- Runtime is `bun` as package manager and script runner, with `bunx` over `npx` for a one-off executable.
+- Formatting is oxfmt for what it parses, pinned to an exact version so an upgrade arrives as a reviewed diff. Shell formatting is the `shell` stack's, since oxfmt has no shell parser.
+- Commits go through commitlint against conventional commits, wired through the husky `commit-msg` hook. The format is `<type>(<scope>): <subject>` in imperative mood with no trailing period.
+- Dev dependencies are `oxfmt`, `husky`, `@commitlint/cli`, and `@commitlint/config-conventional`, installed via `bun add -D`.
 
 ## oxfmt
 
 - Add a project's own ignores to `.prettierignore`, which oxfmt reads beside `.gitignore` by default. Sync overwrites `.oxfmtrc.json`, so an entry in its `ignorePatterns` is lost on the next sync.
-- Delete a leftover `.prettierrc` and run `bun remove prettier` by hand after the first sync onto oxfmt. Sync deletes nothing a stack stopped shipping, and the script overrides already stop Prettier from running.
+- After the first sync onto oxfmt, delete a leftover `.prettierrc` and run `bun remove prettier`. Sync deletes nothing a stack stopped shipping.
 
 ## File layout
 
-- Hooks live in `.husky/`, seeded context docs in `canon/context/`.
-- The `canon/context/` location matches the three-tier context model: project-wide invariants in `CLAUDE.md` and `canon/REQUIREMENTS.md`, path-scoped rules in `.claude/rules/`, and on-demand domain narrative in `canon/context/`. Indexes stay opt-in.
+Hooks live in `.husky/` and seeded context docs in `canon/context/`. That location matches the three-tier context model.
+
+- Project-wide invariants sit in `CLAUDE.md` and `canon/REQUIREMENTS.md`.
+- Path-scoped rules sit in `.claude/rules/`.
+- On-demand domain narrative sits in `canon/context/`, with indexes opt-in.
 
 ## Hooks
 
 - `pre-commit` runs `bunx lint-staged`.
 - `commit-msg` runs `bunx commitlint --edit "$1"`.
 - `pre-push` runs `bun run check`.
-- `post-merge` runs `canon hooks post-merge`: archive the task a merged pull request closed, push the records, reclaim merged worktrees, reinstall the CLI, and update the plugin. It does nothing when the board is absent. `CANON_SKIP_RECLAIM`, `CANON_SKIP_UPGRADE`, and `CANON_SKIP_PLUGIN_UPDATE` turn off the three steps that act on the machine. Run `canon hooks post-merge --help` for the contract.
 - `post-rewrite` delegates to `post-merge` on `rebase`, so a `pull.rebase=true` machine still gets the check.
+- `post-merge` runs `canon hooks post-merge`, which archives the task a merged pull request closed, pushes the records, reclaims merged worktrees, reinstalls the CLI, and updates the plugin.
+
+The hook does nothing when the board is absent. `CANON_SKIP_RECLAIM`, `CANON_SKIP_UPGRADE`, and `CANON_SKIP_PLUGIN_UPDATE` turn off the three steps that act on the machine, and `canon hooks post-merge --help` states the contract.
 
 ## lint-staged
 
-Seeded baseline globs:
+The seeded baseline globs.
 
 - `**/*.{json,md}` runs `oxfmt --no-error-on-unmatched-pattern`. Without the flag, a staged file every pattern ignores, such as `CHANGELOG.md`, exits 2 and fails the commit.
-- `**/*.md` runs `canon indexes regen`
+- `**/*.md` runs `canon indexes regen`.
 
 ## CI
 
-- Steps: checkout, setup Bun at latest, `bun install --frozen-lockfile`, then `check:format`.
-- CI asserts and never writes. Format must be clean before push.
+- Steps are checkout, setup Bun at latest, `bun install --frozen-lockfile`, then `check:format`.
+- CI asserts and never writes, so format must be clean before push.
 
 ## Gitignore
 
@@ -71,22 +92,32 @@ Seeded baseline globs:
 
 ## Anti-patterns
 
-Sticky negative knowledge. Do not relearn.
+Negative knowledge that costs a failed run to relearn.
 
 - Do NOT pass `--ignore-path` to oxfmt. It replaces the default `.gitignore` and `.prettierignore` pair rather than adding to it.
 - Do NOT put logic in a husky hook and expect its shebang to hold. Husky runs hooks as `sh -e`, so a hook carrying logic is POSIX sh under errexit whatever the first line says.
 
 ## CLI
 
-| Script                 | What it does                                                                                                                                               |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bun run check`        | Gates a checkout through `scripts/verify.ts` and writes nothing. Honors `VERIFY_NESTED=true` to suppress timeline boundaries when another script calls it. |
-| `bun run check:format` | Asserts oxfmt formatting without writing                                                                                                                   |
-| `bun run format`       | Writes oxfmt formatting in place                                                                                                                           |
-| `bun run prepare`      | Initializes husky hooks, run automatically on `bun install`                                                                                                |
+| Script                 | What it does                                                                                                                  |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `bun run check`        | Gates a checkout through `scripts/verify.ts`, writing nothing. `VERIFY_NESTED=true` suppresses timeline boundaries in a call. |
+| `bun run check:format` | Asserts oxfmt formatting without writing                                                                                      |
+| `bun run format`       | Writes oxfmt formatting in place                                                                                              |
+| `bun run prepare`      | Initializes husky hooks, run automatically on `bun install`                                                                   |
+
+### The check script
 
 Base writes `check` as a `[scripts.override]`, so a sync replaces whatever `check` a target declared, including one that chained further checks after the runner. Re-add a chained check as its own script after a sync.
 
-`bun run check` gates a checkout and writes nothing. Formatting drift fails it at `check:format`, and the failure line names `bun run format`, the one command that writes. It once ran `format` first to auto-fix drift, which rewrote files in a checkout several sessions share on every push and left a gate that could not fail. That was rejected, so the writing pass stays in `bun run format` and a push fails until it runs. The pull request workflow calls `check:format` directly as well.
+- `bun run check` writes nothing. Formatting drift fails it at `check:format`, and the failure line names `bun run format`, the one command that writes.
+- Auto-fixing drift inside `check` rewrote files in a shared checkout on every push and left a gate that could not fail, so the writing pass stays in `bun run format`.
+- The pull request workflow calls `check:format` directly as well.
 
-`scripts/verify.ts`'s `Markdown bans` stage gates on banned characters. It runs `canon markdown audit` over every tracked markdown file except `CHANGELOG.md`, since a generated changelog carries commit subjects nobody wrote against the ban set, and exits `2` on a finding or `3` on a shipped-empty ban set, failing `bun run check` and the `pre-push` hook that calls it. A refusal to measure exits `1` and is logged as a skip rather than a failure, as does a corpus with no file left to check once `CHANGELOG.md` is set aside. The stage needs `canon` on PATH. `canon docs projects` names the install command. Without it, the stage is skipped and logged, and coverage falls back to the format check above.
+### The markdown bans stage
+
+The `Markdown bans` stage of `scripts/verify.ts` runs `canon markdown audit` over every tracked markdown file except `CHANGELOG.md`, since a generated changelog carries commit subjects nobody wrote against the ban set.
+
+- It exits `2` on a finding or `3` on a shipped-empty ban set, failing `bun run check` and the `pre-push` hook that calls it.
+- A refusal to measure exits `1` and is logged as a skip, as does a corpus with no file left once `CHANGELOG.md` is set aside.
+- The stage needs `canon` on PATH, and `canon docs projects` names the install command. Without it the stage is skipped and logged.

@@ -9,17 +9,19 @@ The php stack covers Composer projects on PHP 8.3 or later, formatted by PHP CS 
 ## Scaffold checklist
 
 1. Scaffold with `composer init -n --name <vendor>/<name> --autoload src/`. The package name and namespace are the project's own identity, so this stack never ships a `composer.json`.
-2. Seed `package.json` so the base layer's bun-side tools (husky, oxfmt, commitlint) have a target to install into: `bun init -y`.
-3. Install base tooling: `canon tooling sync base . --write`
-4. Install php tooling: `canon tooling sync php . --write`
-5. Install the dev tools: `composer require --dev friendsofphp/php-cs-fixer phpstan/phpstan phpunit/phpunit`. The manifest declares no `[dependencies.dev]`, because manifest injection runs `bun add -D`, which cannot install a Composer package. This step stays manual.
+2. Seed `package.json` with `bun init -y`, so the base layer's bun-side tools (husky, oxfmt, commitlint) have a target to install into.
+3. Install base tooling with `canon tooling sync base . --write`.
+4. Install php tooling with `canon tooling sync php . --write`.
+5. Install the dev tools with `composer require --dev friendsofphp/php-cs-fixer phpstan/phpstan phpunit/phpunit`. This stays manual, since manifest injection runs `bun add -D`.
 6. Run `bun run lint:fix`, then `bun run format`, then `bun run check`.
+
+### Requirements
 
 Use PHP 8.3 or later, since PHPUnit 12 requires it.
 
-Keep both `src/` and `tests/` in place. All three tools read both paths and fail when either is missing. The scaffold creates `src/`, but git does not commit an empty folder, so a fresh clone with no source yet fails `lint` and `typecheck` until the first class lands there.
-
-The php stack also ships `tests/SmokeTest.php` as a copy-once seed, so `bun run check` passes on a fresh scaffold. Delete or replace it with real tests.
+- Keep both `src/` and `tests/` in place, since all three tools read both paths and fail when either is missing.
+- The scaffold creates `src/`, but git does not commit an empty folder. A fresh clone with no source fails `lint` and `typecheck` until the first class lands there.
+- The stack ships `tests/SmokeTest.php` as a copy-once seed, so `bun run check` passes on a fresh scaffold. Delete or replace it with real tests.
 
 ## PHP CS Fixer
 
@@ -41,10 +43,21 @@ The php stack also ships `tests/SmokeTest.php` as a copy-once seed, so `bun run 
 
 ## verify.json
 
+### Phases
+
+The php phase list probes its tools and holds one precondition.
+
 - Probe `php` and `composer` first.
 - Hold a precondition on `vendor/bin/phpunit`, so the run stops and names `composer install` when it is missing.
-- Require Typecheck (`phpstan analyse`), Lint (`php-cs-fixer check`), and Unit tests (`phpunit --testdox`). Base's runner adds the four base phases wherever the folder declares their scripts, then the markdown bans stage.
-- The manifest's `[verify] prepare` runs checklist steps 2 and 5 for `canon tooling verify php`: `bun init -y`, then the `composer require --dev` line. The scaffold writes no `package.json`, and a verify that reaches its end with none fails.
+- Require Typecheck (`phpstan analyse`), Lint (`php-cs-fixer check`), and Unit tests (`phpunit --testdox`).
+- Base's runner adds its own four phases where the folder declares their scripts, then the markdown bans stage.
+
+### Prepare
+
+The manifest prepares a scaffold that lacks a `package.json`.
+
+- The manifest's `[verify] prepare` runs checklist steps 2 and 5 for `canon tooling verify php`, being `bun init -y` and the `composer require --dev` line.
+- The scaffold writes no `package.json`, and a verify that reaches its end with none fails.
 
 ## Gitignore
 
@@ -63,14 +76,20 @@ The php stack also ships `tests/SmokeTest.php` as a copy-once seed, so `bun run 
 
 ## Development docs (extend)
 
-Append to the `## Scripts` table:
+Append these rows to the `## Scripts` table.
 
-| `bun run lint` | Run `php-cs-fixer check --diff`. |
-| `bun run lint:fix` | Auto-fix with `php-cs-fixer fix`. |
-| `bun run typecheck` | Run `phpstan analyse`. |
-| `bun run test` | Run `phpunit`. |
-| `bun run test:run` | Run `phpunit --testdox` (used by `verify`). |
+| Command             | Purpose                                     |
+| ------------------- | ------------------------------------------- |
+| `bun run lint`      | Run `php-cs-fixer check --diff`.            |
+| `bun run lint:fix`  | Auto-fix with `php-cs-fixer fix`.           |
+| `bun run typecheck` | Run `phpstan analyse`.                      |
+| `bun run test`      | Run `phpunit`.                              |
+| `bun run test:run`  | Run `phpunit --testdox` (used by `verify`). |
 
 ## CI docs (extend)
 
-In `canon/context/development/ci.md`, the Typecheck row's assertion reads: `` `phpstan analyse` passes ``. Add a Lint row whose assertion reads: `` `php-cs-fixer check` passes ``. Add a Tests row whose assertion reads: `` `phpunit` exits 0 ``. <!-- audit-ignore-citations: canon/context/development/ci.md -->
+In `canon/context/development/ci.md`, add or change three rows. <!-- audit-ignore-citations: canon/context/development/ci.md -->
+
+- The Typecheck row asserts `` `phpstan analyse` passes ``.
+- A Lint row asserts `` `php-cs-fixer check` passes ``.
+- A Tests row asserts `` `phpunit` exits 0 ``.
