@@ -37,6 +37,7 @@ import {
   hasFinding,
   PRACTICE_FOLDERS,
   readRuleAudit,
+  RULE_GATE_EXEMPT,
   RULE_GATED_FOLDERS,
   RULE_LIMITS,
   type RuleAuditReport,
@@ -631,6 +632,7 @@ export function register(program: Command): void {
         '  inside it.',
         '',
         `Gated folders: ${RULE_GATED_FOLDERS.length === 0 ? 'none yet' : RULE_GATED_FOLDERS.join(', ')}`,
+        `Exempt from the gate: ${RULE_GATE_EXEMPT.length === 0 ? 'none' : RULE_GATE_EXEMPT.join(', ')}`,
         '',
         'Exit codes:',
         '  0  no finding, or under --gate no finding in a gated folder',
@@ -691,6 +693,7 @@ async function runAudit(
         root,
         limits: RULE_LIMITS,
         gated: RULE_GATED_FOLDERS,
+        exempt: RULE_GATE_EXEMPT,
         ...report,
       })}\n`,
     )
@@ -699,6 +702,7 @@ async function runAudit(
   return auditExit(report, {
     gate: opts.gate ?? false,
     gated: RULE_GATED_FOLDERS,
+    exempt: RULE_GATE_EXEMPT,
   })
 }
 
