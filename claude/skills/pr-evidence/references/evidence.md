@@ -35,7 +35,7 @@ canon pr local --json
 The verb reports the lowest port serving an HTML page whose process runs inside this worktree, never one in another worktree or the main checkout, which shows a different branch. `canon pr local --help` states the contract. Read `reason` on the record rather than the exit code.
 
 - `ok`: hold the record's `url` for the evidence step below.
-- `no-server` or `no-listener-reader`: hold the reason for the closing report and pass no link. Never start a server here, since one started inside the ship chain has no owner to stop it.
+- `no-server` or `no-listener-reader`: hold the reason for the closing report and pass no link. Never start a server here, since the ship chain cannot own one. A worker starts one under `role-worker`.
 - Anything else, including no record or an older binary's unknown-subcommand error: move on silently, as a skip rather than a stop.
 
 ### Where the link lands
