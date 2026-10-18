@@ -2033,7 +2033,14 @@ describe('canon pr reads through REST alone', () => {
   it('should take the covered range from the newest marker across pages', async () => {
     const pages = [
       [markedReview('aaaaaaa', '2026-10-03T09:00:00Z')],
-      [markedReview('bbbbbbb', '2026-10-03T10:01:00Z')],
+      [
+        markedReview('bbbbbbb', '2026-10-03T10:01:00Z'),
+        {
+          body: `## UI review closed\n\nall boxes\n\n<!-- review-ui: head=${tip} -->`,
+          commit_id: 'f'.repeat(40),
+          submitted_at: '2026-10-03T10:02:00Z',
+        },
+      ],
     ]
     writeFixture(
       'reviews.json',
@@ -2047,7 +2054,30 @@ describe('canon pr reads through REST alone', () => {
       state: 'open',
       commit: 'bbbbbbb',
       source: 'marker',
+      head: tip,
+      review: { reason: 'review-open', isCovered: false },
+      ui: { state: 'closed', commit: tip, isBound: false, isCovered: true },
     })
+  })
+
+  it('should report timeout with the waited seconds when no pass covers the tip by the deadline', async () => {
+    writeFixture('reviews.json', [
+      markedReview('bbbbbbb', '2026-10-03T10:01:00Z'),
+    ])
+
+    const record = await runVerb('review-state', ['7', '--wait', '0'])
+
+    expect(record).toMatchObject({
+      reason: 'timeout',
+      waitedSeconds: 0,
+      review: { isCovered: false },
+    })
+  })
+
+  it('should refuse a review-state --wait that is not a whole number', async () => {
+    const record = await runVerb('review-state', ['7', '--wait', 'soon'])
+
+    expect(record.reason).toBe('bad-wait')
   })
 
   it('should refuse rather than report a first pass when the reviews read is refused', async () => {

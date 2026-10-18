@@ -97,7 +97,7 @@ Owns the orchestrator body and requirement, which state the dispatch policy.
 Holds `poll.ts`, `watch.ts`, and the `repo.ts` they share. Tests sit in `src/claude/orchestrate-poll.test.ts` and `orchestrate-watch.test.ts`.
 
 - `poll.ts` keeps its baseline at `.canon/tmp/pr/poll/baseline.txt` under the main worktree root, read as the first ten space-separated fields
-- `RESPONSE` needs a new reply count and a reply newer than the last pass, and `canon pr review-state` is the only parser of the `review-pr` marker
+- `RESPONSE` needs a new reply count and a reply newer than the last pass, and `canon pr review-state` is the only parser of the `review-pr` and `review-ui` markers
 - `STALE` and `OVERLAP` read the base from the pull request's diff against `git merge-base`, and `OVERLAP` merges only pairs sharing a written path
 - `poll.ts --check <number>` rereads base and head without writing, since the draft lift cannot trust a baseline as old as the last run
 - `watch.ts` reads pull requests and the roster every 60 seconds, and `WORKER-STOPPED` fires on a `waiting` row past `STALL_THRESHOLD_S`

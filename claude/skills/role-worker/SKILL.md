@@ -78,6 +78,14 @@ Ask for the re-review as `review-address` Step 8 returns, carrying what was addr
 - Send a block out as a message before it becomes an interactive prompt.
 - Send nothing on progress. A worker reporting progress rebuilds, on this side of the channel, the poll the announcement retired on the other.
 
+### Waiting on the reviews
+
+A worker that improvised this read polled issue comments, never saw a UI close posted as a review, and stalled with both reviewers idle. One verb reads it the way the lift does.
+
+- Read review state only through `canon pr review-state`, never off issue comments, where neither review family posts
+- Enter `canon pr review-state <number> --wait 1200 --json` again in the background after asking for the re-review, the same wait `auto-ship` Step 7 runs
+- Send the controller that record on `timeout` rather than waiting on, since a silent wait past the deadline is the stall the verb exists to end
+
 ### Addressing
 
 Address the session the launch named, and the reviewer by its dispatch's sessionId, each as a `sessionId` rather than a name. `canon:session-relay` turns that id into an address and carries the send, falling back to a copyable block where no send tool exists.

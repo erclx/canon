@@ -107,7 +107,12 @@ import {
   reviewRowOf,
   selectBranchPull,
 } from '@/pr/rest'
-import { resolveReviewScope } from '@/pr/review-scope'
+import {
+  readReviewState,
+  type ReviewStateApi,
+  type ReviewStateRecord,
+  waitForReviews,
+} from '@/pr/review-state'
 import { PROJECT_ROOT } from '@/roots/project'
 import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
 
@@ -137,6 +142,10 @@ interface EvidenceOptions extends ReadOptions {
 
 interface LiftCommandOptions extends ReadOptions {
   readonly check?: boolean
+  readonly wait?: string
+}
+
+interface ReviewStateOptions extends ReadOptions {
   readonly wait?: string
 }
 
@@ -561,11 +570,17 @@ export function register(program: Command): void {
     })
 
   pr.command('review-state')
-    .description('Report the commit and instant the last review pass covered')
+    .description(
+      'Report what the last code review and UI review passes covered at the tip',
+    )
     .argument('[number]', 'Pull request to read, defaulting to this branch')
     .helpOption('-h, --help', 'Show this help message')
     .option('--root <path>', 'Repository to read, defaulting to the cwd')
     .option('--json', 'Add a machine-readable record on stdout')
+    .option(
+      '--wait <seconds>',
+      `Hold until a pass covers the tip in every bound family, default ${DEFAULT_WAIT_SECONDS}`,
+    )
     .addHelpText(
       'after',
       [
@@ -587,6 +602,31 @@ export function register(program: Command): void {
         '  fallback  a pass posted before the marker shipped, off GitHub stamps',
         '  none      the thread carries no pass, so the next one is a first pass',
         '',
+        'Those code review fields stay at the top level of the record. Beside',
+        'them, `head` is the branch tip read from the remote, and `review` and',
+        '`ui` carry each family at that tip:',
+        '  reason     the refusal `canon pr lift` gives the family, absent when',
+        '             its gate passes, read through the same gate function',
+        '  isCovered  a pass covers the tip: the gate passes, or the newest pass,',
+        '             open or unmarked, names the tip',
+        '',
+        '`ui` also carries the newest `## UI review` pass (`heading`, `state`,',
+        '`commit`, `source`), `isBound`, which is whether the evidence comment',
+        'carries a checklist, and `carriedFrom` or `paintedPaths` when the lift',
+        'carried a close forward or refused to. An unbound family reads covered.',
+        '',
+        'Both families post as pull request reviews, so this reads',
+        '`pulls/<n>/reviews` alone, as the lift does. Issue comments are not',
+        'read: neither review skill posts there, and a heading found only in a',
+        'comment would let a worker move on a pass the lift then refuses.',
+        '',
+        '`--wait <seconds>` holds until `isCovered` reads true in both families',
+        'or the deadline passes, re-reading the tip every 30 seconds so a push',
+        'moves what a pass must cover. The evidence is read once at the start.',
+        'The record then adds `reason`, `covered` or `timeout`, and',
+        '`waitedSeconds`. A wait past 600 seconds outlasts a foreground shell',
+        'call, so run it in the background.',
+        '',
         'Refusals, read off `reason`:',
         '  ambiguous-pull    two open pull requests share the branch against',
         '                    different bases, so name a number',
@@ -599,18 +639,22 @@ export function register(program: Command): void {
         '  gh-missing        `gh` is not on the path, so no pull request resolved',
         '  gh-failed         `gh` could not answer for this branch, so name a number',
         '  no-object-head    the pull request object reported no head commit',
+        '  bad-wait          --wait takes a whole number of seconds',
         '',
         'Exit codes:',
-        '  0  the thread was read, whether it carries a pass or not',
-        '  1  refused, with the reason on stderr or in the JSON record',
+        '  0  the thread was read, whether it carries a pass or not, or the',
+        '     wait ended covered',
+        '  1  refused, with the reason on stderr or in the JSON record, or the',
+        '     wait reached its deadline as `timeout`',
         '',
         'Examples:',
         '  canon pr review-state',
         '  canon pr review-state 1341 --json',
+        '  canon pr review-state 1341 --wait 1200 --json',
         '',
       ].join('\n'),
     )
-    .action(async (number: string | undefined, opts: ReadOptions) => {
+    .action(async (number: string | undefined, opts: ReviewStateOptions) => {
       process.exitCode = await runReviewState(number, opts)
     })
 
@@ -1818,12 +1862,20 @@ async function runChecks(
 
 async function runReviewState(
   number: string | undefined,
-  opts: ReadOptions,
+  opts: ReviewStateOptions,
 ): Promise<number> {
   const root = resolve(opts.root ?? process.cwd())
   const emitJson = opts.json ?? false
 
   intro('canon pr review-state')
+
+  let waitSeconds: number | undefined
+  if (opts.wait !== undefined) {
+    if (!/^\d+$/.test(opts.wait)) {
+      return refuseWith('bad-wait', LIFT_REFUSALS['bad-wait'], emitJson, root)
+    }
+    waitSeconds = Number(opts.wait)
+  }
 
   if (Bun.which('gh') === null) {
     return refuseWith('gh-missing', PULL_REFUSALS['gh-missing'], emitJson, root)
@@ -1841,20 +1893,84 @@ async function runReviewState(
     )
   }
 
-  const reviews = await listReviews(root, resolved.number)
-  if (reviews.kind === 'refused') {
-    const reason =
-      reviews.reason === 'gh-failed' ? 'gh-failed' : 'reviews-unreadable'
-    return refuseWith(reason, PULL_REFUSALS[reason], emitJson, root)
+  const read = await readIdentity(root, resolved.number)
+  if (read.kind === 'refused') {
+    return refuseWith(read.reason, PULL_REFUSALS[read.reason], emitJson, root)
   }
 
-  const listing = { number: Number(resolved.number) }
-  const scope = resolveReviewScope({
-    reviews: reviews.rows.map(reviewRowOf),
-  })
+  // The module refuses every failed read as `gh-failed`. The api keeps each
+  // read's own reason, so a caller still tells an unreadable thread from an
+  // unreadable remote.
+  let failure: PullRefusal | HeadRefusal = 'gh-failed'
+  const git = gitRunner(root)
+  const api: ReviewStateApi = {
+    readTip: async () => {
+      const tip = await resolveTip(read.identity.branch, refReader(root))
+      if (tip.kind === 'read') return tip.tip
+      failure = tip.reason
+      return undefined
+    },
+    readReviews: async () => {
+      const reviews = await listReviews(root, resolved.number)
+      if (reviews.kind === 'read') return reviews.rows.map(reviewRowOf)
+      failure =
+        reviews.reason === 'gh-failed' ? 'gh-failed' : 'reviews-unreadable'
+      return undefined
+    },
+    readEvidence: () => readEvidenceGate(root, resolved.number),
+    readChanged: (from, to) => readChangedPaths(git, from, to),
+    sleep: (ms) => new Promise((done) => setTimeout(done, ms)),
+    now: () => Date.now(),
+  }
 
+  const painted = loadPaintedPatterns(root)
+  const wait =
+    waitSeconds === undefined
+      ? undefined
+      : await waitForReviews(api, { waitSeconds, painted })
+  const state = wait ?? (await readReviewState(api, painted))
+  if (state.kind === 'refused') {
+    return refuseWith(failure, PULL_REFUSALS[failure], emitJson, root)
+  }
+
+  const { record } = state
+  const pull = Number(resolved.number)
+  logReviewState(pull, record)
+  const waited =
+    wait?.kind === 'read'
+      ? { reason: wait.reason, waitedSeconds: wait.waitedSeconds }
+      : undefined
+  if (waited !== undefined) {
+    logStep(waited.reason === 'covered' ? 'Covered' : 'Timeout')
+    logInfo(
+      waited.reason === 'covered'
+        ? `a pass covers ${record.head.slice(0, 8)} in every bound family after ${waited.waitedSeconds}s`
+        : `no pass covered ${record.head.slice(0, 8)} in every bound family within ${waited.waitedSeconds}s`,
+    )
+  }
+
+  outro()
+
+  if (emitJson) {
+    const { scope, ...families } = record
+    process.stdout.write(
+      `${JSON.stringify({
+        root,
+        number: pull,
+        ...scope,
+        ...families,
+        ...waited,
+      })}\n`,
+    )
+  }
+
+  return waited?.reason === 'timeout' ? 1 : 0
+}
+
+function logReviewState(number: number, record: ReviewStateRecord): void {
+  const { scope } = record
   logStep('Scope')
-  logInfo(`#${listing.number}`)
+  logInfo(`#${number} at ${record.head.slice(0, 8)}`)
 
   if (scope.source === 'none') {
     logStep('First pass')
@@ -1874,19 +1990,17 @@ async function runReviewState(
     )
   }
 
-  outro()
-
-  if (emitJson) {
-    process.stdout.write(
-      `${JSON.stringify({
-        root,
-        number: listing.number,
-        ...scope,
-      })}\n`,
-    )
+  for (const [name, family] of [
+    ['review', record.review],
+    ['ui', record.ui],
+  ] as const) {
+    const line = `${name}: ${family.reason ?? 'clear'}, ${family.isCovered ? 'a pass covers the tip' : 'no pass covers the tip'}`
+    if (family.isCovered) logInfo(line)
+    else logWarn(line)
   }
-
-  return 0
+  if (!record.ui.isBound) {
+    logInfo('ui: the evidence carries no checklist, so the family is unbound')
+  }
 }
 
 interface PullFiles {
