@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  type ChangedRead,
   type ChecksGate,
   type EvidenceGate,
   type GitRunner,
@@ -7,6 +8,7 @@ import {
   type LiftApi,
   type PullState,
   readBaseStanding,
+  readChangedPaths,
   type Standing,
 } from '@/pr/lift'
 import type { ReviewRow } from '@/pr/review-scope'
@@ -24,6 +26,9 @@ const CODE_OPEN: ReviewRow = {
 const UI_CLOSED: ReviewRow = {
   body: `## UI review closed\n\nall boxes\n<!-- review-ui: head=${HEAD} -->`,
 }
+const UI_CLOSED_AT_MOVED: ReviewRow = {
+  body: `## UI review closed\n\nall boxes\n<!-- review-ui: head=${MOVED} -->`,
+}
 
 interface Fixture {
   pull?: Partial<PullState>
@@ -34,16 +39,31 @@ interface Fixture {
   /** One reading per call, the last repeating. */
   checks?: readonly (ChecksGate | undefined)[]
   isMarked?: boolean
+  isDrafted?: boolean
+  /** What the read answers, null for one that failed. */
+  changed?: ChangedRead | null
 }
 
 interface Harness {
   readonly api: LiftApi
-  readonly calls: { marks: string[]; checks: number; sleeps: number[] }
+  readonly calls: {
+    marks: string[]
+    drafts: string[]
+    reads: (readonly [string, string])[]
+    checks: number
+    sleeps: number[]
+  }
 }
 
 /** The api over a fake clock that only `sleep` advances. */
 function makeApi(fixture: Fixture = {}): Harness {
-  const calls = { marks: [] as string[], checks: 0, sleeps: [] as number[] }
+  const calls = {
+    marks: [] as string[],
+    drafts: [] as string[],
+    reads: [] as (readonly [string, string])[],
+    checks: 0,
+    sleeps: [] as number[],
+  }
   let clock = 0
   const pull: PullState = {
     isDraft: true,
@@ -76,6 +96,15 @@ function makeApi(fixture: Fixture = {}): Harness {
       calls.marks.push(nodeId)
       return fixture.isMarked ?? true
     },
+    readChanged: async (from, to) => {
+      calls.reads.push([from, to])
+      if (fixture.changed === null) return undefined
+      return fixture.changed ?? { isAncestor: true, paths: [] }
+    },
+    markDraft: async (nodeId) => {
+      calls.drafts.push(nodeId)
+      return fixture.isDrafted ?? true
+    },
     sleep: async (ms) => {
       calls.sleeps.push(ms)
       clock += ms
@@ -98,13 +127,119 @@ describe('lift', () => {
     expect(calls.marks).toEqual(['PR_node'])
   })
 
-  it('should report already-ready and call no mutation when the mark is already off', async () => {
-    const { api, calls } = makeApi({ pull: { isDraft: false } })
+  describe('ready pull request', () => {
+    const ready = { pull: { isDraft: false } }
 
-    const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+    it('should stay ready and call no mutation when every gate clears', async () => {
+      const { api, calls } = makeApi(ready)
 
-    expect(record).toMatchObject({ reason: 'already-ready', isOk: true })
-    expect(calls.marks).toEqual([])
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record).toMatchObject({ reason: 'already-ready', isOk: true })
+      expect(calls.marks).toEqual([])
+      expect(calls.drafts).toEqual([])
+    })
+
+    it.each([
+      ['review-open', { reviews: [CODE_OPEN] }],
+      ['review-missing', { reviews: [] }],
+      ['evidence-owed', { evidence: { isSettled: false } }],
+      [
+        'ui-missing',
+        { evidence: { hasChecklist: true }, reviews: [CODE_CLOSED] },
+      ],
+    ] as const)('should return to draft naming %s', async (failed, fixture) => {
+      const { api, calls } = makeApi({ ...ready, ...fixture })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record).toMatchObject({
+        reason: 'redrafted',
+        isOk: false,
+        failed,
+      })
+      expect(calls.drafts).toEqual(['PR_node'])
+    })
+
+    it('should return to draft on a painted push after a UI close', async () => {
+      const { api, calls } = makeApi({
+        ...ready,
+        evidence: { hasChecklist: true },
+        reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
+        changed: { isAncestor: true, paths: ['src/App.tsx'] },
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record).toMatchObject({
+        reason: 'redrafted',
+        failed: 'ui-behind',
+        paintedPaths: ['src/App.tsx'],
+      })
+      expect(calls.drafts).toEqual(['PR_node'])
+    })
+
+    it('should stay ready on a test-only push after a UI close', async () => {
+      const { api, calls } = makeApi({
+        ...ready,
+        evidence: { hasChecklist: true },
+        reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
+        changed: { isAncestor: true, paths: ['src/App.test.tsx'] },
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record).toMatchObject({
+        reason: 'already-ready',
+        carriedFrom: MOVED,
+      })
+      expect(calls.drafts).toEqual([])
+    })
+
+    it.each([
+      ['a stale standing', { standing: 'stale' }],
+      [
+        'a failing run',
+        { checks: [{ state: 'failing', isConflicted: false }] },
+      ],
+    ] as const)('should stay ready on %s', async (_label, fixture) => {
+      const { api, calls } = makeApi({ ...ready, ...fixture })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record).toMatchObject({ reason: 'already-ready', isOk: true })
+      expect(calls.drafts).toEqual([])
+    })
+
+    it('should refuse gh-failed when the draft mutation does not take', async () => {
+      const { api } = makeApi({
+        ...ready,
+        reviews: [CODE_OPEN],
+        isDrafted: false,
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('gh-failed')
+    })
+
+    it('should report a failing gate under --check and write nothing', async () => {
+      const { api, calls } = makeApi({ ...ready, reviews: [CODE_OPEN] })
+
+      const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+      expect(record).toMatchObject({ reason: 'review-open', isOk: false })
+      expect(calls.drafts).toEqual([])
+    })
+
+    it('should report already-ready under --check when every gate clears', async () => {
+      const { api, calls } = makeApi(ready)
+
+      const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+      expect(record).toMatchObject({ reason: 'already-ready', isOk: true })
+      expect(calls.drafts).toEqual([])
+    })
   })
 
   it('should refuse a closed pull request', async () => {
@@ -191,15 +326,114 @@ describe('lift', () => {
     it('should refuse ui-behind on a close behind the head', async () => {
       const { api } = makeApi({
         evidence: withChecklist,
-        reviews: [
-          CODE_CLOSED,
-          { body: `## UI review closed\n<!-- review-ui: head=${MOVED} -->` },
-        ],
+        reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
+        changed: { isAncestor: false, paths: [] },
       })
 
       const record = await lift(api, { isCheck: false, waitSeconds: 60 })
 
       expect(record.reason).toBe('ui-behind')
+    })
+
+    describe('carried forward', () => {
+      it('should carry a close across a push touching no painted path', async () => {
+        const { api, calls } = makeApi({
+          evidence: withChecklist,
+          reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
+          changed: { isAncestor: true, paths: ['src/a.test.ts', 'README.md'] },
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('lifted')
+        expect(record.carriedFrom).toBe(MOVED)
+        expect(calls.reads[0]).toEqual([MOVED, HEAD])
+      })
+
+      it('should read a close covering the head without a diff', async () => {
+        const { api, calls } = makeApi({
+          evidence: withChecklist,
+          reviews: [CODE_CLOSED, UI_CLOSED],
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.carriedFrom).toBeUndefined()
+        expect(calls.reads).toEqual([])
+      })
+
+      it('should refuse ui-behind and name only the painted path of a mixed push', async () => {
+        const { api } = makeApi({
+          evidence: withChecklist,
+          reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
+          changed: {
+            isAncestor: true,
+            paths: ['src/a.test.ts', 'src/App.tsx'],
+          },
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record).toMatchObject({
+          reason: 'ui-behind',
+          paintedPaths: ['src/App.tsx'],
+        })
+        expect(record.carriedFrom).toBeUndefined()
+      })
+
+      it('should refuse ui-behind and carry nothing when the close is not an ancestor', async () => {
+        const { api } = makeApi({
+          evidence: withChecklist,
+          reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
+          changed: { isAncestor: false, paths: [] },
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('ui-behind')
+        expect(record.carriedFrom).toBeUndefined()
+      })
+
+      it('should refuse gh-failed when the diff read fails', async () => {
+        const { api } = makeApi({
+          evidence: withChecklist,
+          reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
+          changed: null,
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('gh-failed')
+      })
+
+      it('should never carry an open verdict', async () => {
+        const { api } = makeApi({
+          evidence: withChecklist,
+          reviews: [
+            CODE_CLOSED,
+            UI_CLOSED_AT_MOVED,
+            { body: `## UI review\n<!-- review-ui: head=${MOVED} -->` },
+          ],
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('ui-open')
+      })
+
+      it('should never carry a close with no marker', async () => {
+        const { api } = makeApi({
+          evidence: withChecklist,
+          reviews: [
+            CODE_CLOSED,
+            { body: '## UI review closed', commit: { oid: MOVED } },
+          ],
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('ui-unmarked')
+      })
     })
 
     it('should refuse ui-unmarked on a verdict stamped at the head with no marker', async () => {
@@ -402,6 +636,70 @@ describe('lift', () => {
         record.gates.filter((gate) => !gate.isOk).map((gate) => gate.reason),
       ).toEqual(['review-open', 'evidence-owed', 'standing-stale'])
     })
+  })
+})
+
+describe('readChangedPaths', () => {
+  const FULL = MOVED
+
+  function gitOf(answers: Record<string, string | undefined>): GitRunner {
+    return async (args) => {
+      const verb = args.find((arg) => !arg.startsWith('-')) ?? ''
+      return answers[verb]
+    }
+  }
+
+  it('should list the paths changed since an ancestor close', async () => {
+    const git = gitOf({
+      'cat-file': '',
+      'rev-parse': `${FULL}\n`,
+      'merge-base': `${FULL}\n`,
+      diff: 'src/a.ts\nsrc/App.tsx\n',
+    })
+
+    expect(await readChangedPaths(git, '1111111', HEAD)).toEqual({
+      isAncestor: true,
+      paths: ['src/a.ts', 'src/App.tsx'],
+    })
+  })
+
+  it('should read not an ancestor when the close was rewritten away', async () => {
+    const git = gitOf({
+      'cat-file': '',
+      'rev-parse': `${FULL}\n`,
+      'merge-base': 'ffffffffffffffffffffffffffffffffffffffff\n',
+    })
+
+    expect(await readChangedPaths(git, FULL, HEAD)).toEqual({
+      isAncestor: false,
+      paths: [],
+    })
+  })
+
+  it('should read not an ancestor when the close does not resolve', async () => {
+    const git = gitOf({ 'cat-file': '', 'rev-parse': undefined })
+
+    expect(await readChangedPaths(git, FULL, HEAD)).toEqual({
+      isAncestor: false,
+      paths: [],
+    })
+  })
+
+  it('should read a failed read when the head does not resolve', async () => {
+    const git = gitOf({ 'cat-file': undefined })
+
+    expect(await readChangedPaths(git, FULL, HEAD)).toBeUndefined()
+  })
+
+  it('should read a failed read when the diff fails', async () => {
+    const git = gitOf({
+      'cat-file': '',
+      'rev-parse': `${FULL}\n`,
+      'merge-base': `${FULL}\n`,
+      diff: undefined,
+    })
+
+    expect(await readChangedPaths(git, FULL, HEAD)).toBeUndefined()
   })
 })
 

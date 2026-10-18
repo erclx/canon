@@ -1,0 +1,7 @@
+{
+  "painted": [
+    "src/design/**",
+    "src/canvas/client/**/*.ts",
+    "src/teach/browser/**/*.ts"
+  ]
+}
