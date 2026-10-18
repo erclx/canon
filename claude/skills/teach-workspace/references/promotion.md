@@ -41,7 +41,7 @@ A project carrying neither gets a refusal rather than a scaffold:
 ❌ No wiki folder. Create `.claude/wiki/` with an `index.md`, then promote again.
 ```
 
-Creating the folder as a side effect of promoting one page hands the project a surface it never chose, and the refusal is one command from resolved.
+Creating the folder as a side effect of promoting one page hands the project a surface it never chose, and the refusal is one step from resolved.
 
 ## What a promoted page owes its destination
 

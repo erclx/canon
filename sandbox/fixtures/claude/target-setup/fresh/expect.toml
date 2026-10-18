@@ -38,6 +38,7 @@ absent = [
   "vite.config.ts",
   ".oxlintrc.json",
   ".claude/standards",
+  ".claude/wiki",
 ]
 
 # No `write_scope`. `canon init` writes a whole project scaffold and the verify
