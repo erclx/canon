@@ -7,51 +7,68 @@ description: Which external review patterns this skill adopted, which it decline
 
 External sources were read and filtered rather than imported. This file is the record. A later session extending the skill adds to it rather than re-arguing an item already settled here.
 
+The `addyosmani/agent-skills` citations below all pin commit `addyosmani/agent-skills@2686b620`.
+
 ## Adopted
 
 ### Design and scope
 
 **The design procedure.** The nine ordered steps under the design axis draw on four sources, each restated without a language, a framework, or a transport so the walk holds on any stack.
 
-- Ousterhout's deep modules, information hiding, and pass-through methods ([A Philosophy of Software Design](https://web.stanford.edu/~ouster/cgi-bin/book.php)): the step asking what each unit hides and flagging a unit that passes its arguments straight through.
-- Parnas's criterion that a module boundary hides a decision likely to change ([On the Criteria To Be Used in Decomposing Systems into Modules](https://dl.acm.org/doi/10.1145/361598.361623)): the opening step naming the next likely change and counting what it touches.
-- Beck's design rules as Fowler records them, especially no duplication and fewest elements ([BeckDesignRules](https://martinfowler.com/bliki/BeckDesignRules.html)): the one-place step and the step matching each pattern to a problem the code has today.
-- Google's reviewer guide on design, complexity, and over-engineering ([What to look for in a code review](https://google.github.io/eng-practices/review/reviewer/looking-for.html)): the frame for the whole walk, and the reason a speculative abstraction is a finding.
+| Source                                                                                                                                                                               | Step it backs                                                                               |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| Ousterhout's deep modules, information hiding, and pass-through methods, [A Philosophy of Software Design](https://web.stanford.edu/~ouster/cgi-bin/book.php)                        | Asking what each unit hides, and flagging a unit that passes its arguments straight through |
+| Parnas's criterion that a boundary hides a decision likely to change, [On the Criteria To Be Used in Decomposing Systems into Modules](https://dl.acm.org/doi/10.1145/361598.361623) | The opening step, naming the next likely change and counting what it touches                |
+| Beck's design rules as Fowler records them, especially no duplication and fewest elements, [BeckDesignRules](https://martinfowler.com/bliki/BeckDesignRules.html)                    | The one-place step, and matching each pattern to a problem the code has today               |
+| Google's reviewer guide on design, complexity, and over-engineering, [What to look for in a code review](https://google.github.io/eng-practices/review/reviewer/looking-for.html)    | The frame for the whole walk, and the reason a speculative abstraction is a finding         |
 
 The procedure stays in the body rather than a reference, since every review reads the design axis and a reference would cost a read on every run.
 
-**Change sizing as a split.** Google's [small CLs](https://google.github.io/eng-practices/review/developer/small-cls.html) asks for one self-contained change. Adopted as the scope check that names a split when two concerns could land as two changes. From `addyosmani/agent-skills@2686b620`, `skills/code-review-and-quality/SKILL.md`, the same check.
+### Scope checks
 
-**Relocate versus reduce.** From the same `code-review-and-quality` skill: a refactor counts the concepts a reader must hold before and after. Adopted as the scope check that reports moved complexity as moved.
+Three scope checks come from outside sources, each adopted as one check.
 
-**Chesterton's Fence.** From `addyosmani/agent-skills@2686b620`, `skills/code-simplification/SKILL.md`: read why code exists before removing it. Adopted as the scope check that reads `git blame` and the commit that added a removed path before calling it dead.
+- **Change sizing as a split.** Google's [small CLs](https://google.github.io/eng-practices/review/developer/small-cls.html) and `skills/code-review-and-quality/SKILL.md` ask for one self-contained change, so the check names a split when two concerns could land apart.
+- **Relocate versus reduce.** The same `code-review-and-quality` skill counts the concepts a reader holds before and after a refactor, so moved complexity reports as moved.
+- **Chesterton's Fence.** `skills/code-simplification/SKILL.md` reads why code exists before removing it, so the check reads `git blame` and the adding commit before calling a path dead.
 
 ### Guard the bar
 
-From `addyosmani/agent-skills@2686b620`, `skills/constraint-driven-development/SKILL.md`: a change must not pass by weakening the constraint it has to meet. Adopted as its own axis after tests, listing the moved threshold, the skipped or hollowed test, the inline suppression, the excluded path, the throwing stub, the empty catch, and the new config exception. The clause accepting a suppression whose stated reason holds is this skill's own, since a legitimate suppression with its reason beside it would otherwise report noise the procedures' filter then drops.
+From `skills/constraint-driven-development/SKILL.md`, a change must not pass by weakening the constraint it has to meet. Adopted as its own axis after tests.
+
+- It lists the moved threshold, the skipped or hollowed test, the inline suppression, the excluded path, the throwing stub, the empty catch, and the new config exception
+- The clause accepting a suppression whose stated reason holds is this skill's own, since a legitimate one would otherwise report noise the procedures then drop
 
 ### Performance
 
-From `addyosmani/agent-skills@2686b620`, `skills/code-review-and-quality/SKILL.md` for the axis itself, a call inside a loop and an unbounded fetch, and `skills/performance-optimization/SKILL.md` for keep or revert: measure before and after the same way, and a neutral result argues for removing the added complexity. The repeated-run requirement against noise is stated here so one run on each side reads as an anecdote.
+The axis itself, a call inside a loop and an unbounded fetch, comes from `skills/code-review-and-quality/SKILL.md`. Keep or revert comes from `skills/performance-optimization/SKILL.md`.
+
+- Measure before and after the same way, and a neutral result argues for removing the added complexity
+- The repeated-run requirement against noise is stated here, so one run on each side reads as an anecdote
 
 ### Security additions
 
-From `addyosmani/agent-skills@2686b620`, `skills/security-and-hardening/SKILL.md`: the threat model first and the derived-path rule. Adopted as the opening step of `references/security.md`, which names who supplies each input and what the code can reach before any class is read, and as the destructive-operations class, which asks for the empty-value collapse, the glob or symlink escape, the missing root check, and no read of what is there before the call. Both stay stack-neutral. No red run measures them, so they ship as lifts rather than as an answer to a miss.
+From `skills/security-and-hardening/SKILL.md`, the threat model first and the derived-path rule. Both stay stack-neutral, and no red run measures them, so they ship as lifts rather than as an answer to a miss.
+
+- The threat model is the opening step of `references/security.md`, naming who supplies each input and what the code can reach before any class is read
+- The derived-path rule is the destructive-operations class, asking for the empty-value collapse, the glob or symlink escape, the missing root check, and no read before the call
 
 ### Closing sections
 
-The excuses, red flags, and closing checklist follow the practice skill shape every practice skill in this toolkit carries, taken from `addyosmani/agent-skills@2686b620`, [`docs/skill-anatomy.md`](https://github.com/addyosmani/agent-skills/blob/2686b620fc1fed2e8f60c704839c766b8594c6b6/docs/skill-anatomy.md). Each excuse row rebuts a reason a review stops at the hunk, such as passing tests against a test the diff skipped, rather than an objection nobody raised.
+The excuses, red flags, and closing checklist follow the shape every practice skill in this toolkit carries, from [`docs/skill-anatomy.md`](https://github.com/addyosmani/agent-skills/blob/2686b620fc1fed2e8f60c704839c766b8594c6b6/docs/skill-anatomy.md). Each excuse row rebuts a reason a review stops at the hunk, such as passing tests against a test the diff skipped.
 
 ## Declined
 
-**Google's approval standard.** "Approve a change once it definitely improves the overall code health" is a grading rule. Grading and posting belong to the procedures that load this skill, which each own a severity ladder, so the standard stays out of the body.
+Each item names what was declined and the reason it stays out.
 
-**A fixed line count for sizing.** Google's small-CL page sets no hard limit, and one concern regularly runs past a hundred lines here. A number would fire on nearly every branch, so the split is stated by concern instead.
+- **Google's approval standard.** "Approve a change once it definitely improves the overall code health" is a grading rule, and grading belongs to the procedures that load this skill.
+- **A fixed line count for sizing.** Google's page sets no hard limit, and one concern regularly runs past a hundred lines here, so the split is stated by concern.
+- **Named structural remedies as a catalog.** A list of refactorings reads as a menu a session fills in. A design finding states the cost, and the remedy is the author's.
+- **STRIDE and abuse-case tests as a procedure.** They belong to a design session, and the threat-model opening takes the one step a diff supports.
+- **The web and database tables from `performance-optimization`.** They name a stack, and the axis stays stack-neutral until a target asks for one.
 
-**Named structural remedies as a catalog.** A list of refactorings to propose reads as a menu a session fills in. A design finding states the cost, and the remedy is the author's.
+### A dependency upgrade reference
 
-**A dependency upgrade reference.** From `addyosmani/agent-skills@2686b620`, `skills/code-review-and-quality/SKILL.md`: read the changelog across the range, one dependency per change, and the lockfile diff. Declined because the seeded upgrade is not a miss. The body without such a reference reported the planted major bump and the install script in the lockfile on the second of two runs, which passed the assertion naming them. Revisit when a run on a changed lockfile misses what a reference would have named.
+`skills/code-review-and-quality/SKILL.md` reads the changelog across the range, one dependency per change, and the lockfile diff. Declined because the seeded upgrade is not a miss. The body without such a reference reported the planted major bump and the lockfile install script on the second of two runs, passing the assertion.
 
-**STRIDE and abuse-case tests as a procedure.** They belong to a design session rather than a diff read, and the threat-model opening in the security reference takes the one step a diff supports, naming who supplies each input.
-
-**The web and database tables from `performance-optimization`.** They name a stack, and the axis stays stack-neutral until a target asks for a per-stack reference.
+Revisit when a run on a changed lockfile misses what a reference would have named.

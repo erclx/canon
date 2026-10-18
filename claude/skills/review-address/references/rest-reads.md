@@ -5,7 +5,9 @@ description: The reads review-address runs over REST, being the findings on the 
 
 # REST reads
 
-The guard and Step 1 of `review-address`. The session reads this file on reaching Step 1, and from the guard when `canon pr head --json` hands back no `number`. Every read runs on REST, since the `gh pr` subcommands run on GraphQL and a cloud session's GitHub proxy refuses it. A cloud worker answering a review runs this skill, so one GraphQL call breaks the whole leg.
+The guard and Step 1 of `review-address`. The session reads this file on reaching Step 1, and from the guard when `canon pr head --json` hands back no `number`.
+
+Every read runs on REST, since the `gh pr` subcommands run on GraphQL and a cloud session's GitHub proxy refuses it. A cloud worker answering a review runs this skill, so one GraphQL call breaks the whole leg.
 
 ## The findings
 
