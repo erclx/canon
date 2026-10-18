@@ -55,7 +55,7 @@ Two failures land specifically on where the folder sits. A workspace resolved ag
 ## Guards
 
 - No subject named and no existing workspace matching, stop rather than opening a workspace with nothing to learn
-- No wiki folder in the project and a page routing there, refuse and name the command that creates one rather than scaffolding a surface the project never chose
+- No wiki folder in the project and a page routing there, refuse and name the folder to create rather than scaffolding a surface the project never chose
 
 ## Out of scope
 

@@ -88,7 +88,7 @@ preview proposed, per the detect reference. Run from the
 target project's current directory. Do not cd into the toolkit source tree. The
 `canon` CLI is global.
 
-Step 1: `canon init` installs base tooling, claude seeds, governance rules, and wiki.
+Step 1: `canon init` installs base tooling, claude seeds, and governance rules.
 
 ```bash
 CANON_NON_INTERACTIVE=1 canon init \

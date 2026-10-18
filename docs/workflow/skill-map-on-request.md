@@ -40,4 +40,4 @@ These skills serve a request rather than a moment. With the [skill map](skill-ma
 | `canon:markdown-craft`      | Before a substantial markdown edit                    |
 | `canon:write-human`         | Before drafting or revising prose                     |
 
-Ask `canon:teach-workspace` to promote a learning workspace's reference pages and glossaries. It proposes a destination per page and waits. An Anthropic-owned subject goes to the wiki, an internal one to the matching context entry, and the rest to the public docs. A project with no wiki folder gets a refusal naming `canon wiki init`.
+Ask `canon:teach-workspace` to promote a learning workspace's reference pages and glossaries. It proposes a destination per page and waits. An Anthropic-owned subject goes to the wiki, an internal one to the matching context entry, and the rest to the public docs. A project with no wiki folder gets a refusal naming the folder to create.

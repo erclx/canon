@@ -29,8 +29,9 @@ function seedStylesheet(ctx: StageContext): void {
  * The promote arm alone. A project with no wiki folder gets a refusal from the
  * skill rather than a scaffold, so the arm that drives a proposal has to seed
  * one, and it seeds the `.claude/` spelling. The wiki holds only
- * Anthropic-owned subjects, so seeding it here is what gives the routing test something to correctly pass over: the regex page belongs to
- * nobody, which routes it to docs instead.
+ * Anthropic-owned subjects, so seeding it here is what gives the routing
+ * test something to correctly pass over: the regex page belongs to nobody,
+ * which routes it to docs instead.
  */
 function seedWiki(ctx: StageContext): void {
   ctx.mkdir('.claude/wiki')

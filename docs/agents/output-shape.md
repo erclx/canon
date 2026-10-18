@@ -62,14 +62,13 @@ Discover names at runtime rather than hardcoding them.
 Set `CANON_NON_INTERACTIVE=1` to refuse every prompt.
 
 ```bash
-CANON_NON_INTERACTIVE=1 canon init --stack node --skip wiki /path/to/project
+CANON_NON_INTERACTIVE=1 canon init --stack node --skip records /path/to/project
 CANON_NON_INTERACTIVE=1 canon sync /path/to/project
 CANON_NON_INTERACTIVE=1 canon gov install node --add astro,shadcn /path/to/project
 CANON_NON_INTERACTIVE=1 canon gov sync /path/to/project
 CANON_NON_INTERACTIVE=1 canon gov build /path/to/project
 CANON_NON_INTERACTIVE=1 canon tooling diff astro /path/to/project
 CANON_NON_INTERACTIVE=1 canon tooling sync astro /path/to/project --write
-CANON_NON_INTERACTIVE=1 canon wiki init /path/to/project
 canon tooling inject base /path/to/project --configs --seeds
 canon tooling prune-gitignore base /path/to/project
 canon tooling verify vite-react

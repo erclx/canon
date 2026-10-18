@@ -93,7 +93,6 @@ A language root below the repository root whose language the stack does not carr
 A language root below the repository root takes its own `canon tooling sync <stack> <path> --skip base`, since `canon init` already lands `base` once at the root.
 
 - Leave a root whose stack resolves to `base` out of the commands, since that sync lands nothing. A root `package.json` hosting only formatters and hooks is that case and adds no row.
-- `wiki` installs by default. Add `--skip wiki` only when the user explicitly wants it left out.
 
 ## Gap handling
 

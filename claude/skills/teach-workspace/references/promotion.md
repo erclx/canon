@@ -26,10 +26,10 @@ A page a reader cannot sort by that question is a page whose subject has not bee
 
 ## Where the wiki sits
 
-The folder has two spellings and a project carries whichever its scaffold wrote:
+The folder has two spellings and a project carries whichever the project created:
 
-- `.claude/wiki/`, which is where the scaffolding verb creates one
-- A folder named `wiki` at the project root, which is where a project scaffolded before the move keeps its pages
+- `.claude/wiki/`, the folder inside the Claude setup
+- A folder named `wiki` at the project root
 
 Read which one exists rather than composing either. A project carrying both keeps its pages at the root, so propose the root spelling and say the other folder is there.
 
@@ -38,7 +38,7 @@ Read which one exists rather than composing either. A project carrying both keep
 A project carrying neither gets a refusal rather than a scaffold:
 
 ```plaintext
-❌ No wiki folder. Run canon wiki init to create one, then promote again.
+❌ No wiki folder. Create `.claude/wiki/` with an `index.md`, then promote again.
 ```
 
 Creating the folder as a side effect of promoting one page hands the project a surface it never chose, and the refusal is one command from resolved.
