@@ -1,0 +1,13 @@
+---
+title: Routing
+description: How the router builds its table from the handler folder
+---
+
+# Routing
+
+The router reads the handler folder once at startup and caches the table it builds.
+
+## Traps
+
+- A handler added while the process runs is not routed until a restart
+- The development server restarts itself on a change to the handler folder

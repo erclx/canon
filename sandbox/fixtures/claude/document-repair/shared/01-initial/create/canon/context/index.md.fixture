@@ -1,0 +1,8 @@
+---
+title: Context
+description: Per-domain narrative loaded on demand
+---
+
+# Context
+
+- [Routing](routing.md): How the router builds its table from the handler folder
