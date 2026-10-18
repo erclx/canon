@@ -27,7 +27,9 @@ Holds the source ledger for each outside-practice rule at the rule's own path, o
 
 - `canon gov audit` matches a ledger's table rows to the rule's bullets by count under each H2 of the same name, so a row added or dropped without its bullet fails the folder
 - A cut bullet goes in a `## Declined` list rather than a table, since every table row under a heading counts as a bullet's row
-- `framework/` is the first folder through, so its six ledgers are the worked shape for `lang/`, `lib/`, `ui/`, and `tooling/`
+- `framework/` was the first folder through, so its six ledgers are the worked shape for `lang/`, `ui/`, and `tooling/`
+- `lib/` follows it with twelve ledgers, and a ledger whose rule names a version-bound API records the major in the `Read` column
+- A `|` inside a code span still splits a table cell, so a glob such as `@(spec|test)` in a ledger row is written `@(spec\|test)`
 
 ### `governance/stacks/`
 
