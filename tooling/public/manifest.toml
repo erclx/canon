@@ -1,0 +1,8 @@
+[stack]
+name = "public"
+extends = ""
+runtime = "bun"
+scaffold = ""
+
+[sync]
+source = "configs"

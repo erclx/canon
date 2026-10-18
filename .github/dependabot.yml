@@ -4,7 +4,16 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    groups:
+      actions:
+        update-types: [minor, patch]
   - package-ecosystem: bun
     directory: /
     schedule:
       interval: weekly
+    groups:
+      bun:
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']

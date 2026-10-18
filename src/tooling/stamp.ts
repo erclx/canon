@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { writeChainStamp } from '@/sync/stamp'
-import { isWholeStack, type Manifest } from '@/tooling/manifest'
+import { readStamp, stampedChain, writeChainStamp } from '@/sync/stamp'
+import { isWholeStack, loadManifest, type Manifest } from '@/tooling/manifest'
 import { readPackage } from '@/tooling/package'
 
 /**
@@ -17,7 +17,9 @@ export function isWorkspaceRoot(target: string): boolean {
 }
 
 /**
- * Records the chain an install resolved, and returns whether it wrote one. A
+ * Records the chain an install resolved, and returns the names it wrote, or
+ * nothing when it wrote none. The names are the merged list, which can carry
+ * stacks an earlier sync recorded. A
  * workspace root is the single refusal: one chain recorded there would be a
  * guess at what its packages hold, and the report reading tooling as unmeasured
  * is the true answer rather than a clean one.
@@ -27,16 +29,58 @@ export async function recordToolingChain(
   target: string,
   chain: readonly Manifest[],
   now: Date,
-): Promise<boolean> {
-  if (isWorkspaceRoot(target)) return false
+): Promise<string[] | undefined> {
+  if (isWorkspaceRoot(target)) return undefined
 
-  await writeChainStamp(
-    target,
-    { domain: 'tooling', toolkitRoot },
-    recordedStacks(chain),
-    now,
+  const merged = mergeAddOns(
+    toolkitRoot,
+    stampedChain(readStamp(target), 'tooling'),
+    chain,
   )
-  return true
+  await writeChainStamp(target, { domain: 'tooling', toolkitRoot }, merged, now)
+  return merged
+}
+
+/**
+ * An add-on stands alone beside a core chain, so syncing one must not displace
+ * the chain it layers onto. Base extends nothing and still heads a core chain.
+ */
+export function isAddOn(manifest: Manifest | undefined): boolean {
+  return (
+    manifest !== undefined &&
+    manifest.parent === undefined &&
+    manifest.name !== 'base'
+  )
+}
+
+/**
+ * Merges what this sync resolved into what an earlier one recorded. The core
+ * chain is the one just synced, or the recorded one when only add-ons synced.
+ * Add-ons accumulate after it, so a later stackless report measures them all.
+ */
+function mergeAddOns(
+  toolkitRoot: string,
+  recorded: readonly string[],
+  chain: readonly Manifest[],
+): string[] {
+  const synced = chain.filter(isWholeStack)
+  const syncedCore = synced.filter((m) => !isAddOn(m)).map((m) => m.name)
+  const syncedAddOns = synced.filter(isAddOn).map((m) => m.name)
+
+  const recordedManifests = recorded.map((name) => ({
+    name,
+    manifest: loadManifest(toolkitRoot, name),
+  }))
+  const recordedCore = recordedManifests
+    .filter(({ manifest }) => !isAddOn(manifest))
+    .map(({ name }) => name)
+  const recordedAddOns = recordedManifests
+    .filter(({ manifest }) => isAddOn(manifest))
+    .map(({ name }) => name)
+
+  const core = syncedCore.length > 0 ? syncedCore : recordedCore
+  const addOns = [...new Set([...recordedAddOns, ...syncedAddOns])]
+  return [...core, ...addOns]
 }
 
 /**

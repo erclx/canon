@@ -38,6 +38,7 @@ import {
   resolveChain,
 } from '@/tooling/manifest'
 import { scan } from '@/tooling/scan'
+import { isAddOn } from '@/tooling/stamp'
 import { readSkew, type SkewReport } from '@/version/skew'
 
 /**
@@ -300,6 +301,20 @@ export function buildToolingReport(
  * stacks are exactly the recorded ones.
  */
 function resolveRecorded(
+  toolkitRoot: string,
+  recorded: readonly string[],
+): Manifest[] {
+  const addOns = recorded
+    .map((name) => loadManifest(toolkitRoot, name))
+    .filter((manifest) => manifest !== undefined)
+    .filter(isAddOn)
+  const addOnNames = new Set(addOns.map((manifest) => manifest.name))
+  const core = recorded.filter((name) => !addOnNames.has(name))
+
+  return [...resolveCore(toolkitRoot, core), ...addOns]
+}
+
+function resolveCore(
   toolkitRoot: string,
   recorded: readonly string[],
 ): Manifest[] {

@@ -1,0 +1,30 @@
+name: Release
+# canon-no-seed: an add-on stack's workflow with no root counterpart by design, since the toolkit cuts its own releases through its own workflow.
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  release-please:
+    name: 🏷️ Release Please
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    # Queues rather than cancels, since a cancel can land after the release exists and before its outputs do
+    concurrency:
+      group: release-please
+      cancel-in-progress: false
+    steps:
+      - name: Release Please
+        uses: googleapis/release-please-action@v5
+        with:
+          # A personal token lets CI run on the release pull request, which the default token's bot author does not
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
