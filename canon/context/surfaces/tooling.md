@@ -76,6 +76,8 @@ Owns the manifest walk, scan, injection engine, stamp, reference resolver, and v
 - `canon tooling diff` dispatches into `runSync` with `check` set and exits 1 on any difference, and `--json` answers `{ ok: false, reason, message }` on a refusal
 - A target below its git toplevel syncs as a subfolder, withholds every `.github/` file, and with no `package.json` lands only the gitignore
 
+`recordToolingChain` keeps a standalone add-on such as `shell` or `public` beside the core chain, so syncing one never displaces the stack it layers onto. Base extends nothing and still counts as core.
+
 ### `src/tooling/verify-stack.ts`
 
 Runs `canon tooling verify <stack>` by scaffolding into `.canon/tmp/runs/verify-<stack>/`, running `[verify] prepare`, syncing, then running `lint:fix`, `format`, `check`, `test:e2e`, and `screenshot` with `CI` set.
