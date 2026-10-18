@@ -21,6 +21,7 @@ kind: reference
 | `session-defaults` | The seeded session defaults into an existing `.claude/settings.json`: `Agent` and `Task` denied, auto memory off                            |
 
 - `skill-names` takes no `--scope` and skips the changelog and eval transcripts
+- `skill-names` also moves the seven `draft-` skills onto verb-first names, such as `draft-doc` to `write-doc` and `draft-and-pick` to `pick-by-eye`, and skips the pointer left under each old name <!-- canon-keep-retired -->
 - `surface-roots` leaves `rules/`, `skills/`, `hooks/`, and `settings.json` where Claude Code reads them
 - `rule-layout` classifies each flat file against the stamp as clean, edited, or unclaimed. Clean and edited files move untouched, and an unclaimed name stays.
 - `record-layout` labels each evidence folder `(pick)` or `(evidence)` in the dry run

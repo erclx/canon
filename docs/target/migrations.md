@@ -46,7 +46,9 @@ Run it once, ahead of `canon gov sync` or `canon gov install`.
 
 ## Rename the skill citations, once
 
-Plugin skills dropped their `claude-` prefix, so `canon:claude-docs` answers as `canon:context-fold` and `canon:claude-tasks` as `canon:task-board`. The five per-kind drafters merged into `draft-doc`, and no pointer under an old name ships. <!-- canon-keep-retired -->
+Plugin skills dropped their `claude-` prefix, so `canon:claude-docs` answers as `canon:context-fold` and `canon:claude-tasks` as `canon:task-board`. The five per-kind drafters merged into `write-doc`, and no pointer under an old name ships. <!-- canon-keep-retired -->
+
+The seven `draft-` skills took verb-first names for what each makes. `draft-doc` is now `write-doc`, `draft-figure` is `draw-figure`, `draft-identity` is `design-identity`, `draft-slides` is `make-deck`, `draft-and-pick` is `pick-by-eye`, `draft-ready` is `plan-ready`, and `draft-screencast` is `script-screencast`. `canon migrate skill-names --write` carries a project across, and a pointer under each old name answers a typed invocation until it retires. <!-- canon-keep-retired -->
 
 - `canvas` is now `canvas-board`. The sweep rewrites only `canon:canvas` and `skills/canvas`, so replace a bare prose mention by hand. <!-- canon-keep-retired -->
 - `design-extract` and `sketch-design` are replaced by `canon:canvas-board`. <!-- canon-keep-retired -->
