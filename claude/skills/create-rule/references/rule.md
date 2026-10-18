@@ -1,6 +1,6 @@
 ---
 title: Governance rule reference
-description: Rule frontmatter, body shape, and voice for .claude/rules files
+description: Rule frontmatter, shape limits, content test, sources, body shape, and voice for .claude/rules files
 ---
 
 # Governance rule reference
@@ -9,7 +9,10 @@ description: Rule frontmatter, body shape, and voice for .claude/rules files
 
 - [Overview](#overview)
 - [Scope](#scope)
+- [Shape](#shape)
+- [Content](#content)
 - [Whether a skill belongs behind the rule](#whether-a-skill-belongs-behind-the-rule)
+- [Sources](#sources)
 - [Location](#location)
 - [Names](#names)
 - [Frontmatter](#frontmatter)
@@ -18,7 +21,7 @@ description: Rule frontmatter, body shape, and voice for .claude/rules files
 
 ## Overview
 
-Rules give Claude Code coding constraints scoped to file paths. Claude Code discovers `.claude/rules/**/*.md` at session start.
+Rules give Claude Code coding constraints scoped to file paths. Claude Code discovers `.claude/rules/**/*.md` at session start, and a rule in `~/.claude/rules/` applies to every project on the machine.
 
 A rule with no `paths:` field always applies, at the same priority as `CLAUDE.md`. A rule with `paths:` applies when Claude reads or writes a file matching the glob. Author one rule per topic so the scope stays precise.
 
@@ -27,28 +30,75 @@ A rule with no `paths:` field always applies, at the same priority as `CLAUDE.md
 A rule with `paths:` loads on a read or a write of a matching file, inside a linked worktree as in the main one. A session creating the first matching file gets the rule only after that write lands.
 
 - A rule meant to shape new files therefore also belongs in the skill or the always-on rule a session reads before it writes
+- Measured again on Claude Code 2.1.302 on 2026-10-18, when the rule attached after the first write to a new file and before the second
 - Revisit when Claude Code loads a path-scoped rule before a write to a matching path
-- Re-measure with two headless `claude -p` runs in a linked worktree, one reading a matching file and one reading a file that does not, each asking whether the rule's content is in context
+- Re-measure with two headless `claude -p` runs, one writing a new matching file and one reading a matching file first, each read for when the rule attached
 
 ## Scope
 
-Governs governance rules under `.claude/rules/`: their location, names, frontmatter, and body shape.
+Governs governance rules under `.claude/rules/`, being their shape, content, sources, location, names, frontmatter, and body.
 
 Does not govern:
 
 - Authoring conventions for a document type, which are standards rather than rules. A rule points at the standard that owns one and never restates it.
 - Skill folders and skill frontmatter: `skill.md`
 - Cross-domain behavior rules, which live in `CLAUDE.md` at the project root
+- Judging each bullet after writing, which is `checklist.md`
+
+## Shape
+
+Every limit is a count a reviewer can take, so a rule passes or fails it without judgment.
+
+| Limit                | Value                                                           |
+| -------------------- | --------------------------------------------------------------- |
+| Words in the body    | 300                                                             |
+| Bullets per file     | 15                                                              |
+| H2s per file         | 6                                                               |
+| Bullets per H2       | 7                                                               |
+| Bullet length        | 200 characters                                                  |
+| Sentences per bullet | 2, one directive plus one exception, condition, or short reason |
+
+- Name one concern in `description`. A rule needing a seventh H2 holds two concerns and splits into two files.
+- Keep a reason to the why of its directive, never a paragraph of background
+
+## Content
+
+A bullet loads on every matching edit, so it earns its place only when removing it would cause a mistake.
+
+| Put in a rule                              | Leave out                                                |
+| ------------------------------------------ | -------------------------------------------------------- |
+| What Claude cannot guess                   | Standard language conventions Claude already knows       |
+| A convention that differs from the default | Anything the linter, formatter, or type checker enforces |
+| A footgun that ships silently              | Information that changes often                           |
+
+- Write every bullet concrete enough to verify against a line of code. "Prefer `pathlib.Path` over `os.path`" passes, since it names both sides.
+- Pair a ban with the alternative to take, unless the ban or a neighbor bullet already names it
+- Use no emphasis words such as "CRITICAL" or "You MUST", which newer models overtrigger on
 
 ## Whether a skill belongs behind the rule
 
-A rule fires on a path match with no decision from the session, which is what makes it a floor. Every bullet is one directive and nothing else, so an invariant needing procedure, worked cases, or a branch on project state has no room in the body.
+A rule fires on a path match with no decision from the session, which is what makes it a floor. Procedure, worked cases, and a branch on project state have no room in its bullets, so they belong to a skill.
 
-- Run the two-part test in reverse before calling the rule finished. The rule already holds what fires on a path edit and ships silently when violated.
-- Ask what a session still needs past the directive, and give that to a skill the rule points at
+Each invariant has one copy, in either the rule or the skill. `skill.md` carries the same test for a session arriving from the other side.
+
+- A skill that creates the file the rule globs owns the floor, since the rule loads only after the first write. The rule keeps the edit-time bullets and a pointer.
+- A skill that edits existing files points at the rule, and the rule owns the floor
+- A pointer bullet earns its load only when the skill's description does not already fire on the same edit
+- Keep at most five directives beside a pointer
 - A rule that grows a procedure has become a skill body wearing rule frontmatter
 
-Write both when both apply. A rule stating the directive and a skill stating how to carry it out are one invariant at two depths rather than two copies of it, and `skill.md` carries the same checkpoint for a session arriving from the other side. Nothing checks either one.
+### Checking the installed skills
+
+Before writing, read the descriptions of the skills in the session's listing and stop at one that names the topic. Point the rule at that skill rather than restating it, and skip the check when the listing holds no skills.
+
+## Sources
+
+A bullet claiming outside practice, such as a language idiom or a library's correct use, rests on a primary source. Unsourced practice drifts, and the bullet goes on loading after it turns wrong.
+
+- Cite the source in the commit that adds the rule, naming a primary page or the bug class the bullet prevents
+- Cut a bullet that has neither a source nor a bug class behind it
+- The toolkit holds its outside-practice rules to a source ledger kept outside the installed tree, so the citation costs no load
+- A bullet resting on how Claude Code behaves ends with a `Revisit when` sentence, per `### Phrasing`
 
 ## Location
 
@@ -76,8 +126,8 @@ A rule's filename is its slug, with no number in front. Nothing orders rules at 
 
 ## Frontmatter
 
-- `description` (required): one line naming what the rule enforces and where
-- `paths` (optional): one glob per entry, for a rule scoped to a file set
+- `description` (required): one line naming what the rule enforces and where. It is canon's own field, read by `canon gov list`.
+- `paths` (optional): one glob per entry, for a rule scoped to a file set. It is the only field Claude Code reads.
 - Omit `paths` for an always-on rule that states a global principle with no file scope
 - Do not emit the legacy Cursor keys `globs`, `alwaysApply`, or `priority`. They are not read.
 
@@ -89,12 +139,14 @@ paths:
 ---
 ```
 
+Frontmatter that fails to parse loads the rule as if it had no `paths`, so a broken glob turns a scoped rule always-on. Quote every glob that opens with `*` or `{`.
+
 ## Body
 
 - Open with an H1 `# <Topic> standards` in sentence case, then group rules under H2 sections. Proper nouns keep their casing (`# TypeScript standards`, `# Next.js standards`).
 - Use imperative voice for every rule (`Prefix booleans with is`, not `Booleans should be prefixed`)
 - State one rule per bullet as a single directive line
-- State what to do and what not to do. Do not explain the reasoning behind a rule.
+- State what to do and what not to do. Add one short reason when the why is not obvious, inside the limits in `## Shape`.
 
 ### Phrasing
 
@@ -116,27 +168,31 @@ A rule file holds one topic in its current shape.
 
 ### Correct
 
-A scoped description, a `paths` list, and one directive per bullet.
+A scoped description, a `paths` list, and one directive per bullet, one of them carrying a short reason.
 
 ```markdown
 ---
-description: Enforce naming conventions for functions, booleans, and collections
+description: Enforce migrations, bound queries, and transaction ownership for persistence code
 paths:
   - '**/*.ts'
 ---
 
-# Naming standards
+# Persistence standards
 
-## Semantics
+## Schema changes
 
-- Prefix booleans with `is`, `has`, `should`, or `can`
-- Name functions as actions describing what they do
-- Name collections as plurals and items as singulars
+- Express every schema change as a migration file committed to version control.
+- Never edit a migration that has run in a shared environment. Add a new one.
+
+## Query construction
+
+- Pass every runtime value as a bound parameter.
+- Map a table name or sort direction through an allow-list, since neither can be bound.
 ```
 
 ### Incorrect
 
-A vague description, legacy Cursor keys, and reasoning in place of directives.
+A vague description, legacy Cursor keys, and a paragraph of reasoning in place of directives.
 
 ```markdown
 ---
