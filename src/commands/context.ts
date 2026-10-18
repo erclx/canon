@@ -56,6 +56,11 @@ import {
   presentNames,
   resolveFolders,
 } from '@/context/folders'
+import {
+  type CoverageReport,
+  measureCoverage,
+  readRoots,
+} from '@/context/coverage'
 import { isGating } from '@/context/gate'
 import { isShapeGated, SHAPE_GATED_FOLDERS } from '@/context/shape-gated'
 import { currentWorktreeRoot } from '@/git/worktree'
@@ -101,7 +106,7 @@ export function register(program: Command): void {
   context
     .command('audit')
     .description(
-      'Report required sections, entry length, citations, reference form, catalog tables, provenance, index drift, and the requirements record against its own word cap',
+      'Report required sections, entry length, citations, reference form, catalog tables, provenance, index drift, code folders no entry names, and the requirements record against its own word cap',
     )
     .argument('[path]', 'Project root, defaulting to the current directory')
     .helpOption('-h, --help', 'Show this help message')
@@ -113,7 +118,7 @@ export function register(program: Command): void {
     .option('--citations-only', 'Run the gating citation check alone')
     .option(
       '--gate',
-      'Also fail on a missing required section, an H2 outside the set, a shape break in a gated folder, or index drift, the findings that are facts',
+      'Also fail on a missing required section, an H2 outside the set, a shape break in a gated folder, index drift, or a code folder no entry names, the findings that are facts',
     )
     .addHelpText(
       'after',
@@ -129,7 +134,9 @@ export function register(program: Command): void {
         '--citations-only, which never measures it. A record stating no',
         'cap is reported and never gated. --gate widens the gate to the',
         'findings that are facts rather than judgments: a missing',
-        'required section, an H2 outside the closed set, and index drift.',
+        'required section, an H2 outside the closed set, index drift, and',
+        'a code folder no Layout names or two entries claim. The roots come',
+        'from canon/config/context.toml and default to src when present.',
         'A context entry requires Overview and Layout and allows Gotchas.',
         'A shape break, such as a Decisions section or a sixth gotcha, is',
         'reported everywhere and gated only under a shape-gated folder.',
@@ -667,6 +674,9 @@ async function runAudit(
         isShapeGated(relative(top, join(root, rel))),
       )
   const length = gateOnly ? undefined : lengthFindings(entries)
+  const coverage: CoverageReport | undefined = gateOnly
+    ? undefined
+    : measureCoverage(root, readRoots(root), folders)
   // Absent under `--citations-only` and null when the project carries no
   // record. A run that never looked and a project with nothing to look at are
   // different answers, and one value for both reports the second as the first.
@@ -685,6 +695,7 @@ async function runAudit(
     reportTables(entries)
     reportProvenance(entries, folders)
     reportDrift(drift)
+    reportCoverage(coverage ?? { kind: 'no-root' })
     reportRequirements(requirements, root)
     outro()
   }
@@ -721,6 +732,8 @@ async function runAudit(
         extraSections: extras,
         shapeFindings: shape,
         indexDrift: drift,
+        // Absent under `--citations-only`, which never measures it.
+        coverage,
         // Null says the run opened the project and found no record, which a
         // target that never wrote one is entitled to. Absent says the run
         // never looked, which is `--citations-only`.
@@ -753,6 +766,7 @@ async function runAudit(
     extraSections: extras,
     shape,
     drift,
+    coverage: coverage ?? { kind: 'no-root' },
     widened,
   })
 
@@ -1208,6 +1222,46 @@ function reportProvenance(
       )
       .join('\n'),
   )
+}
+
+function reportCoverage(report: CoverageReport): void {
+  logStep('Coverage')
+
+  if (report.kind === 'no-root') {
+    logInfo(
+      'No code root found, since no canon/config/context.toml declares one and there is no src/, so nothing was measured.',
+    )
+    return
+  }
+
+  if (report.kind === 'invalid') {
+    logWarn(report.reason)
+    return
+  }
+
+  if (report.kind === 'opted-out') {
+    logInfo(
+      'canon/config/context.toml declares roots = [], so coverage was not measured.',
+    )
+    return
+  }
+
+  const { unnamed, doubled, missingRoots } = report.findings
+  const lines = [
+    ...missingRoots.map((root) => `${root}  matches no folder`),
+    ...unnamed.map((folder) => `${folder}  named in no Layout`),
+    ...doubled.map(
+      ({ folder, rels }) => `${folder}  Layout H3 in ${rels.join(', ')}`,
+    ),
+  ]
+
+  if (lines.length === 0) {
+    logInfo(`Every folder under ${report.roots.join(', ')} is named once.`)
+    return
+  }
+
+  logWarn(plural(lines.length, 'coverage finding'))
+  pipeOutput(lines.join('\n'))
 }
 
 /** Reports the requirements record against the word cap it states, if any. */

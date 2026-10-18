@@ -25,16 +25,6 @@ Owns the workflows in `.github/workflows/` that verify a pull request, scan its 
 
 Runs weekly and on dispatch, one matrix job per scaffoldable stack through `canon tooling verify`. Only its `report` job holds `issues: write`, keeping one open `stack-verify: <stack>` issue per red stack. A layer or an add-on never joins the matrix, since the verb refuses it.
 
-### `src/gate/`
-
-CI differs from a local run in scope and in what an unmeasured stage means. The stage list, the sequencer, and every threshold live here.
-
-- A local `bun run check` scopes shell, types, and tests to the files changed against `origin/main`, while CI passes `--all`. Reproduce CI with `bun run check:ci`.
-- A stage that could not read its input fails under `check:ci` and warns locally, where the closing line counts the stages that measured nothing
-- Indexes and Consumed copies regenerate and then assert, so `check:ci` writes to the working tree even though it never formats
-- Plugin manifests runs `claude plugin validate --strict` and skips locally without the CLI, but fails when `CI` is set
-- Unreferenced rules and Audit set print what they find and never fail the push
-
 ### `src/labels/`
 
 `phase-label-gate.yml` runs `canon labels scan` on the event payload, since a pull request body and a posted review are text no gate stage sees. It sits outside `verify.yml` because it needs `edited` on its trigger. It never passes `--closes`, since the closing-line check needs a task board a remote lacks and only `git-pr` runs it.

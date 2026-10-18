@@ -12,6 +12,12 @@
  * sweeps sharing a module constant would have to agree on a single map, and
  * the second rename this repository needed shares nothing with the first
  * except the scanning discipline above.
+ *
+ * Two misses survive a clean run. The sweep reads spelled text only, so a path
+ * assembled as `join('.claude', ...)` is never joined back into a token and
+ * keeps its old spelling. And rewriting a test's fixtures can collapse a
+ * fallback test into a copy of its neighbor, which keeps passing while it
+ * covers nothing, so read the rewritten fixtures rather than trusting the run.
  */
 
 /**
