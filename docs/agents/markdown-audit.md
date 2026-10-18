@@ -45,8 +45,10 @@ A page marked `kind: reference` holds its opening, then `Output`, `Refusals`, an
 - A paragraph under a list item counts toward that bullet, never as a paragraph
 - A table, fence, list, heading, or bold section marker ends a run of paragraphs
 - A run whose every item opens with a bold label or a link is exempt, and numbered items never count
-- Only context entries, docs, skill bodies and references, tooling seeds and stack references, the wiki, `README.md`, and `CONTRIBUTING.md` take a finding
-- A bullet run gates everywhere those paths sit, and the rest gates under `GATED_PATHS` in `src/markdown/scope.ts`. Outside a canon checkout nothing gates.
+- Only context entries, docs, skill bodies, references, and requirements, tooling seeds and stack references, the wiki, `README.md`, and `CONTRIBUTING.md` take a finding
+- A bullet run gates on those paths, and the rest gates under `GATED_PATHS` in `src/markdown/scope.ts`. Outside a canon checkout nothing gates.
+
+A requirement is the one exception to both. It gates only once `GATED_PATHS` names its own file, never through its skill's prefix and never on a bullet run alone.
 
 Five measures report and never set the exit code on their own.
 
