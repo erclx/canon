@@ -20,7 +20,7 @@ jobs:
 
       - name: Checkout
         if: github.event.pull_request.head.repo.full_name == github.repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Bun
         if: github.event.pull_request.head.repo.full_name == github.repository

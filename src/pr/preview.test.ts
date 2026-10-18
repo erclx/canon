@@ -17,7 +17,7 @@ const FENCED = [
   'jobs:',
   '  deploy:',
   '    steps:',
-  '      - uses: cloudflare/wrangler-action@v3',
+  '      - uses: cloudflare/wrangler-action@v4',
   '        with:',
   // biome-ignore lint/suspicious/noTemplateCurlyInString: a workflow expression, not a template
   '          command: pages deploy dist --project-name=site --branch=${{ github.ref_name }}',

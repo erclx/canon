@@ -11,6 +11,9 @@ on:
     types: [submitted, edited]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   phase-label-gate:
     name: 🏷️ Phase Label Gate
@@ -18,7 +21,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.base.ref == 'main'
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
