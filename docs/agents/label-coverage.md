@@ -79,7 +79,7 @@ canon labels apply 123 --json
 canon labels apply 123 --check
 ```
 
-It binds to the pull request before anything is read or written, and refuses with `head-mismatch` unless the head is the current branch and the state is open, under `--check` as well. It adds and never removes, so a label a person applied stays. A label the remote does not carry lands in `missingOnRemote` and is never created. `--check` writes nothing and exits 2 when labels are owed. A project declaring no map adds nothing and exits 0.
+It binds to the pull request before anything is read or written, and refuses with `head-mismatch` unless the head is the current branch and the state is open, under `--check` as well. The earned set comes from the pull request's own files listing, so the labels describe the exact diff GitHub shows, and a failed read refuses with `gh-failed` rather than falling back to git. Passing `--base <ref>` selects the git range instead. It adds and never removes, so a label a person applied stays. A label the remote does not carry lands in `missingOnRemote` and is never created. `--check` writes nothing and exits 2 when labels are owed. A project declaring no map adds nothing and exits 0.
 
 ## What it does not measure
 
