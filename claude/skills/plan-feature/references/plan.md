@@ -105,6 +105,8 @@ A constraint measured against work in flight expires when that work merges, as a
 - Re-test a stamped constraint before honoring it with `git fetch origin main --quiet && git log <commit>..origin/main --oneline -- <the paths the constraint names>`. Any commit it reports means the track landed and the constraint is dead. Fetch and scope the log to the paths in the same command, since a stale ref reads a dead constraint as live and a squashed subject names no track.
 - Read an unstamped constraint as unverified rather than as live, and confirm it against the open pull request list for the named paths.
 
+A batch in a fan-in set declares its side in a constraint bullet, ``Fan-in member of `feature-<integrator>` `` on a member and ``Fans in `feature-<a>`, `feature-<b>` `` on the integrator. `batches.md` holds when to fan in, and `canon records validate plans` reports `fan-in-unmatched` for a set whose two sides disagree.
+
 A constraint naming a `.canon/ready/` folder is a third shape beside the hold and the shared path. It makes that folder's files the verbatim source for the paths this plan's `**Files to touch:**` lists, per `ready.md`, so the executing session copies those paths rather than authoring them.
 
 ### Verification
