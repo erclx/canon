@@ -399,7 +399,7 @@ export function renderedLength(cell: string): number {
   return cell.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').length
 }
 
-function checkWaiting(text: string): BoardRefused | undefined {
+export function checkWaiting(text: string): BoardRefused | undefined {
   if (text.trim() === '' || /[|\n]/.test(text)) {
     return refuse(
       'bad-input',
@@ -667,6 +667,50 @@ export async function promoteTask(
 
     return { board: next, group: target, from: found.group, ruled: target }
   })
+}
+
+/** What linking a plan did to the task's row, and why when it did nothing. */
+export interface LinkPromotion {
+  readonly moved: boolean
+  /** The group the row sat in before, undefined when it has no row. */
+  readonly from: BoardGroup | undefined
+  readonly note: string
+}
+
+/**
+ * Promotes a task's row out of `## Needs a plan` once its plan is linked, and
+ * leaves every other row where it is. A row already under `## Up next` or
+ * `## Run now` is past the planning a link records, and a task with no row was
+ * never placed, which is the controller's call rather than the link's.
+ */
+export async function promoteOnLink(
+  root: string,
+  stem: string,
+  options: PromoteOptions = {},
+): Promise<LinkPromotion> {
+  const path = orderingPath(root)
+  if (!existsSync(path)) {
+    return { moved: false, from: undefined, note: 'no ordering file' }
+  }
+
+  const parse = parseBoard(await readFile(path, 'utf8'))
+  const found = parse.ok ? findRow(parse.board, stem) : undefined
+  if (!found) {
+    return { moved: false, from: undefined, note: 'no row on the board' }
+  }
+
+  if (found.group !== 'Needs a plan') {
+    return {
+      moved: false,
+      from: found.group,
+      note: `already under ${found.group}`,
+    }
+  }
+
+  const outcome = await promoteTask(root, stem, options)
+  return outcome.ok
+    ? { moved: true, from: found.group, note: `moved to ${outcome.group}` }
+    : { moved: false, from: found.group, note: outcome.message }
 }
 
 /** Repositions a row inside the group it already sits in. */

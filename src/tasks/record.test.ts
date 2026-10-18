@@ -632,6 +632,135 @@ describe('recordPlan', () => {
     ).resolves.toMatchObject({ ok: true, stem })
   })
 
+  describe('on the board', () => {
+    async function seedGroup(group: string, header: string): Promise<void> {
+      const columns = header.split(' | ')
+      const divider = columns.map((column) => '-'.repeat(column.length))
+      const cells = columns.slice(1).map(() => 'x')
+      await writeFile(
+        join(tasksDir(ROOT), 'priority.md'),
+        [
+          '# Priority',
+          '',
+          `## ${group}`,
+          '',
+          `| ${header} |`,
+          `| ${divider.join(' | ')} |`,
+          `| [v28.1: A task](v28.1-trigger-escalation.md) | ${cells.join(' | ')} |`,
+          '',
+        ].join('\n'),
+      )
+    }
+
+    function groupsOf(text: string): string[] {
+      return text.split('\n').filter(
+        (line, index, lines) =>
+          line.startsWith('## ') &&
+          lines
+            .slice(index + 1)
+            .find((next) => next.startsWith('## ') || next.includes('v28.1-'))
+            ?.includes('v28.1-'),
+      )
+    }
+
+    it('should report the row it promotes from Needs a plan to Up next', async () => {
+      const stem = await seedTask()
+      await seedPlan('worktree-scratch-routing')
+      await seedGroup('Needs a plan', 'Task | Waiting on')
+
+      const outcome = await recordPlan(ROOT, stem, 'worktree-scratch-routing')
+
+      expect(outcome).toMatchObject({
+        ok: true,
+        board: { moved: true, from: 'Needs a plan' },
+      })
+      const board = await readFile(join(tasksDir(ROOT), 'priority.md'), 'utf8')
+      expect(groupsOf(board)).toEqual(['## Up next'])
+      expect(board).toContain('| Planned, not dispatched yet |')
+    })
+
+    it('should carry the named Waiting on text into the row it promotes', async () => {
+      const stem = await seedTask()
+      await seedPlan('worktree-scratch-routing')
+      await seedGroup('Needs a plan', 'Task | Waiting on')
+
+      await recordPlan(
+        ROOT,
+        stem,
+        'worktree-scratch-routing',
+        false,
+        'The gate merging first',
+      )
+
+      await expect(
+        readFile(join(tasksDir(ROOT), 'priority.md'), 'utf8'),
+      ).resolves.toContain('| The gate merging first |')
+    })
+
+    it('should leave a row already under Up next where it is', async () => {
+      const stem = await seedTask()
+      await seedPlan('worktree-scratch-routing')
+      await seedGroup('Up next', 'Task | Touches | Waiting on')
+
+      const outcome = await recordPlan(ROOT, stem, 'worktree-scratch-routing')
+
+      expect(outcome).toMatchObject({
+        ok: true,
+        board: { moved: false, from: 'Up next' },
+      })
+    })
+
+    it('should leave a row already under Run now where it is', async () => {
+      const stem = await seedTask()
+      await seedPlan('worktree-scratch-routing')
+      await seedGroup('Run now', 'Task | Touches | Plan')
+      const before = await readFile(join(tasksDir(ROOT), 'priority.md'), 'utf8')
+
+      const outcome = await recordPlan(ROOT, stem, 'worktree-scratch-routing')
+
+      expect(outcome).toMatchObject({
+        ok: true,
+        board: { moved: false, from: 'Run now' },
+      })
+      await expect(
+        readFile(join(tasksDir(ROOT), 'priority.md'), 'utf8'),
+      ).resolves.toBe(before)
+    })
+
+    it('should move nothing for a task with no row', async () => {
+      const stem = await seedTask()
+      await seedPlan('worktree-scratch-routing')
+      await writeFile(
+        join(tasksDir(ROOT), 'priority.md'),
+        '# Priority\n\n## Needs a plan\n\n| Task | Waiting on |\n| ---- | ---------- |\n',
+      )
+
+      const outcome = await recordPlan(ROOT, stem, 'worktree-scratch-routing')
+
+      expect(outcome).toMatchObject({
+        ok: true,
+        board: { moved: false, from: undefined, note: 'no row on the board' },
+      })
+    })
+
+    it('should refuse a Waiting on text past the cap before writing the line', async () => {
+      const stem = await seedTask()
+      await seedPlan('worktree-scratch-routing')
+      const before = await readTask(stem)
+
+      const outcome = await recordPlan(
+        ROOT,
+        stem,
+        'worktree-scratch-routing',
+        false,
+        'x'.repeat(121),
+      )
+
+      expect(outcome).toMatchObject({ ok: false, reason: 'bad-input' })
+      await expect(readTask(stem)).resolves.toBe(before)
+    })
+  })
+
   it('should refuse when the task does not exist', async () => {
     await seedTask()
     await seedPlan('worktree-scratch-routing')

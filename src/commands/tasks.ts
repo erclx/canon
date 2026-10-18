@@ -130,6 +130,7 @@ interface PullRequestCommandOptions {
 
 interface PlanLinkCommandOptions {
   readonly add?: boolean
+  readonly waiting?: string
   readonly json?: boolean
   readonly root?: string
 }
@@ -534,6 +535,10 @@ export function register(program: Command): void {
       '--add',
       'Append the plan to the line, for a task sliced over plans',
     )
+    .option(
+      '--waiting <text>',
+      `The Waiting on cell a promoted row carries, "${PLANNED_WAITING}" when omitted`,
+    )
     .option('--json', 'Emit a machine-readable record on stdout')
     .option('--root <path>', 'Board root, defaulting to the main worktree')
     .addHelpText(
@@ -561,6 +566,10 @@ export function register(program: Command): void {
         'With --add it keeps every link in order and appends the plan, so a',
         'sliced task links one plan per slice. It reports unchanged when the',
         'plan is already listed and is allowed on a line holding several.',
+        '',
+        'A row under Needs a plan moves to the bottom of Up next through the',
+        'board verbs, and `board` in the record says whether it moved and why',
+        'not. A row elsewhere, or a task with no row, stays where it is.',
         '',
         'Examples:',
         '  canon tasks plan-link v28.1-trigger-escalation dispatch-answer-gate',
@@ -1192,7 +1201,13 @@ async function runPlanLink(
 ): Promise<number> {
   const emitJson = opts.json ?? false
   const root = opts.root ?? (await mainWorktreeRoot())
-  const outcome = await recordPlan(root, task, plan, opts.add ?? false)
+  const outcome = await recordPlan(
+    root,
+    task,
+    plan,
+    opts.add ?? false,
+    opts.waiting,
+  )
 
   return reportPlanLink(outcome, emitJson, root)
 }
@@ -1345,6 +1360,7 @@ function reportPlanLink(
         plan: outcome.plan,
         action: outcome.action,
         replaced: outcome.replaced,
+        board: { ...outcome.board, from: outcome.board.from ?? null },
       })}\n`,
     )
     return 0
@@ -1355,6 +1371,9 @@ function reportPlanLink(
   logInfo(`${outcome.stem} names plan ${outcome.plan}`)
   if (outcome.replaced) logInfo(`replaced ${outcome.replaced}`)
   if (outcome.action !== 'unchanged') logAdd(relative(root, outcome.path))
+  logInfo(
+    `board row ${outcome.board.moved ? '' : 'not moved, '}${outcome.board.note}`,
+  )
   outro()
 
   return 0
