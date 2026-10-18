@@ -69,7 +69,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@types/bun": "^1.2.10",
     "@types/micromatch": "^4.0.10",
-    "astro": "^6.1.9",
+    "astro": "^7.3.8",
     "happy-dom": "^20.14.5",
     "husky": "^9.1.7",
     "micromatch": "^4.0.8",
