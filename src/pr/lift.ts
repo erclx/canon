@@ -5,6 +5,7 @@ import {
   resolveReviewScope,
   resolveUiScope,
 } from '@/pr/review-scope'
+import { DEFAULT_PAINTED, isPainted, type PaintedPatterns } from '@/pr/painted'
 
 /** How long `--wait` holds for a pending CI run, in seconds, when none is named. */
 export const DEFAULT_WAIT_SECONDS = 1200
@@ -42,6 +43,17 @@ export interface GateResult {
   readonly isOk: boolean
   /** Absent when the gate passed. */
   readonly reason?: LiftRefusal
+  /** The commit a UI close was carried forward from, when it covered an earlier head. */
+  readonly carriedFrom?: string
+  /** The painted paths that kept a UI close from carrying forward. */
+  readonly paintedPaths?: readonly string[]
+}
+
+/** How an earlier commit sits against the head, and what changed since. */
+export interface ChangedRead {
+  /** False when the commit is rewritten away or does not resolve. */
+  readonly isAncestor: boolean
+  readonly paths: readonly string[]
 }
 
 /** How the head sits against the base the pull request targets. */
@@ -85,6 +97,10 @@ export interface LiftApi {
   readChecks(tip: string): Promise<ChecksGate | undefined>
   /** The one GraphQL call the verb makes. */
   markReady(nodeId: string): Promise<boolean>
+  /** The paths changed from an earlier commit to the head, undefined when the read failed. */
+  readChanged(from: string, to: string): Promise<ChangedRead | undefined>
+  /** The one GraphQL call that returns a ready pull request to draft. */
+  markDraft(nodeId: string): Promise<boolean>
   sleep(ms: number): Promise<void>
   now(): number
 }
@@ -93,10 +109,20 @@ export interface LiftOptions {
   readonly isCheck: boolean
   readonly waitSeconds: number
   readonly pollMs?: number
+  readonly painted?: PaintedPatterns
 }
 
 export interface LiftRecord {
-  readonly reason: 'lifted' | 'already-ready' | 'clear' | LiftRefusal
+  readonly reason:
+    | 'lifted'
+    | 'already-ready'
+    | 'redrafted'
+    | 'clear'
+    | LiftRefusal
+  /** The gate that read not clear when a ready pull request went back to draft. */
+  readonly failed?: LiftRefusal
+  readonly carriedFrom?: string
+  readonly paintedPaths?: readonly string[]
   readonly isLifted: boolean
   /** Whether the caller can treat the pull request as ready afterwards. */
   readonly isOk: boolean
@@ -129,22 +155,51 @@ function reviewGate(reviews: readonly ReviewRow[], head: string): GateResult {
   return pass('review')
 }
 
-/** Binds only where the evidence record carries a checklist to drive. */
-function uiGate(
+/** What the UI gate says about a close carried across commits, for a record. */
+function carried(gates: readonly GateResult[]): {
+  carriedFrom?: string
+  paintedPaths?: readonly string[]
+} {
+  const ui = gates.find((gate) => gate.gate === 'ui')
+  return {
+    ...(ui?.carriedFrom !== undefined && { carriedFrom: ui.carriedFrom }),
+    ...(ui?.paintedPaths !== undefined && { paintedPaths: ui.paintedPaths }),
+  }
+}
+
+/**
+ * Binds only where the evidence record carries a checklist to drive.
+ *
+ * A close behind the head still holds when it is an ancestor of the head and
+ * no painted path changed since, since a push that paints nothing leaves the
+ * checklist the reviewer drove as true as it was. A close that is not an
+ * ancestor, which a force-push or a rebase leaves, never carries.
+ */
+async function uiGate(
+  api: LiftApi,
+  painted: PaintedPatterns,
   reviews: readonly ReviewRow[],
   head: string,
   hasChecklist: boolean,
-): GateResult {
+): Promise<GateResult> {
   if (!hasChecklist) return pass('ui')
 
   const scope = resolveUiScope({ reviews })
   if (scope.state === 'none') return fail('ui', 'ui-missing')
   if (scope.state === 'open') return fail('ui', 'ui-open')
   if (scope.source !== 'marker') return fail('ui', 'ui-unmarked')
-  if (scope.commit === undefined || !coversHead(scope.commit, head)) {
-    return fail('ui', 'ui-behind')
+  if (scope.commit === undefined) return fail('ui', 'ui-behind')
+  if (coversHead(scope.commit, head)) return pass('ui')
+
+  const changed = await api.readChanged(scope.commit, head)
+  if (changed === undefined) return fail('ui', 'gh-failed')
+  if (!changed.isAncestor) return fail('ui', 'ui-behind')
+
+  const paintedPaths = changed.paths.filter((path) => isPainted(path, painted))
+  if (paintedPaths.length > 0) {
+    return { ...fail('ui', 'ui-behind'), paintedPaths }
   }
-  return pass('ui')
+  return { ...pass('ui'), carriedFrom: scope.commit }
 }
 
 function standingGate(standing: Standing): GateResult {
@@ -207,6 +262,56 @@ function refused(
     ...(head !== undefined && { head }),
     gates,
     waitedSeconds,
+    ...carried(gates),
+  }
+}
+
+/** The gates whose failure sends a ready pull request back to draft. */
+const REDRAFT_GATES: readonly GateName[] = ['review', 'ui', 'evidence']
+
+/**
+ * Reads a ready pull request against the gates a person's ready mark vouched
+ * for. A failing review, UI, or evidence gate returns it to draft, since the
+ * mark no longer holds. Standing and CI are reported and never written on, as
+ * either would flap a merge-ready pull request on a run still going.
+ */
+async function settleReady(
+  api: LiftApi,
+  opts: LiftOptions,
+  pull: PullState,
+  tip: string,
+  gates: readonly GateResult[],
+): Promise<LiftRecord> {
+  const blocked = gates.find(
+    (gate) => REDRAFT_GATES.includes(gate.gate) && !gate.isOk,
+  )
+  if (blocked?.reason === undefined) {
+    return {
+      reason: 'already-ready',
+      isLifted: false,
+      isOk: true,
+      head: tip,
+      gates,
+      waitedSeconds: 0,
+      ...carried(gates),
+    }
+  }
+  if (opts.isCheck || blocked.reason === 'gh-failed') {
+    return refused(blocked.reason, gates, tip)
+  }
+
+  const isDrafted = await api.markDraft(pull.nodeId)
+  if (!isDrafted) return refused('gh-failed', gates, tip)
+
+  return {
+    reason: 'redrafted',
+    failed: blocked.reason,
+    isLifted: false,
+    isOk: false,
+    head: tip,
+    gates,
+    waitedSeconds: 0,
+    ...carried(gates),
   }
 }
 
@@ -224,20 +329,11 @@ export async function lift(
   opts: LiftOptions,
 ): Promise<LiftRecord> {
   const pollMs = opts.pollMs ?? CHECKS_POLL_MS
+  const painted = opts.painted ?? DEFAULT_PAINTED
 
   const pull = await api.readPull()
   if (pull === undefined) return refused('gh-failed', [], undefined)
   if (!pull.isOpen) return refused('pull-closed', [], pull.head)
-  if (!pull.isDraft) {
-    return {
-      reason: 'already-ready',
-      isLifted: false,
-      isOk: true,
-      head: pull.head,
-      gates: [],
-      waitedSeconds: 0,
-    }
-  }
 
   // The tip, not the object's head, since the object lags the ref by up to a
   // minute after a push and a review marker names the commit it read.
@@ -255,10 +351,12 @@ export async function lift(
 
   const gates: GateResult[] = [
     reviewGate(reviews, tip),
-    uiGate(reviews, tip, evidence.hasChecklist),
+    await uiGate(api, painted, reviews, tip, evidence.hasChecklist),
     evidence.isSettled ? pass('evidence') : fail('evidence', 'evidence-owed'),
     standingGate(standing),
   ]
+  if (!pull.isDraft) return settleReady(api, opts, pull, tip, gates)
+
   const blocked = gates.find((gate) => !gate.isOk)
 
   if (opts.isCheck) {
@@ -284,6 +382,7 @@ export async function lift(
       head: tip,
       gates: all,
       waitedSeconds: 0,
+      ...carried(all),
     }
   }
 
@@ -316,13 +415,14 @@ export async function lift(
       head: nowTip,
       gates: cleared,
       waitedSeconds: ci.waited,
+      ...carried(cleared),
     }
   }
   if (nowTip !== tip) return refused('head-moved', cleared, nowTip, ci.waited)
 
   const reread = [
     reviewGate(nowReviews, nowTip),
-    uiGate(nowReviews, nowTip, evidence.hasChecklist),
+    await uiGate(api, painted, nowReviews, nowTip, evidence.hasChecklist),
   ].find((gate) => !gate.isOk)
   if (reread?.reason !== undefined) {
     return refused(reread.reason, cleared, nowTip, ci.waited)
@@ -345,6 +445,7 @@ export async function lift(
     head: nowTip,
     gates: cleared,
     waitedSeconds: ci.waited,
+    ...carried(cleared),
   }
 }
 
@@ -415,4 +516,37 @@ export async function readBaseStanding(
   if (moved === undefined) return 'unknown'
 
   return nonEmptyLines(moved).length > 0 ? 'stale' : 'fresh'
+}
+
+/**
+ * Reads what changed between a close commit and the head. A commit that does
+ * not resolve, or that the head does not descend from, reads as not an
+ * ancestor and carries nothing. A head that does not resolve, or a diff that
+ * fails, is a read that failed, so the gate refuses rather than passes.
+ *
+ * The abbreviated marker resolves first, so the ancestry test runs on the full
+ * sha. Renames are split into both sides so a move out of a painted path
+ * still reads as painted.
+ */
+export async function readChangedPaths(
+  git: GitRunner,
+  from: string,
+  to: string,
+): Promise<ChangedRead | undefined> {
+  if ((await git(['cat-file', '-e', `${to}^{commit}`])) === undefined) {
+    return undefined
+  }
+
+  const full = (
+    await git(['rev-parse', '--verify', '-q', `${from}^{commit}`])
+  )?.trim()
+  if (full === undefined || full === '') return { isAncestor: false, paths: [] }
+
+  const base = (await git(['merge-base', full, to]))?.trim()
+  if (base !== full) return { isAncestor: false, paths: [] }
+
+  const diff = await git(['diff', '--name-only', '--no-renames', full, to])
+  if (diff === undefined) return undefined
+
+  return { isAncestor: true, paths: nonEmptyLines(diff) }
 }

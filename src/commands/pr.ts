@@ -69,7 +69,9 @@ import {
   type LiftRefusal,
   type PullState,
   readBaseStanding,
+  readChangedPaths,
 } from '@/pr/lift'
+import { loadPaintedPatterns } from '@/pr/painted'
 import {
   dropAddressLine,
   findLocalServer,
@@ -3248,6 +3250,43 @@ const LIFT_REFUSALS: Record<LiftRefusal | 'bad-wait' | 'gh-missing', string> = {
 const READY_MUTATION =
   'mutation($id: ID!) { markPullRequestReadyForReview(input: {pullRequestId: $id}) { pullRequest { isDraft } } }'
 
+const CONVERT_DRAFT_MUTATION =
+  'mutation($id: ID!) { convertPullRequestToDraft(input: {pullRequestId: $id}) { pullRequest { isDraft } } }'
+
+/**
+ * Runs one pull request mutation and answers whether the draft flag now reads
+ * `isDraft`. The flag is read back rather than the exit trusted, since the
+ * mutation can answer 200 with an errors array and no change.
+ */
+async function flipDraft(
+  root: string,
+  mutation: string,
+  field: 'markPullRequestReadyForReview' | 'convertPullRequestToDraft',
+  nodeId: string,
+  isDraft: boolean,
+): Promise<boolean> {
+  const result = await execa(
+    'gh',
+    ['api', 'graphql', '-f', `query=${mutation}`, '-f', `id=${nodeId}`],
+    {
+      cwd: root,
+      reject: false,
+      timeout: GH_TIMEOUT_MS,
+      env: gitEnv(),
+      extendEnv: false,
+    },
+  )
+  if (result.exitCode !== 0) return false
+  try {
+    const body = JSON.parse(String(result.stdout)) as {
+      data?: Record<string, { pullRequest?: { isDraft?: boolean } } | undefined>
+    }
+    return body.data?.[field]?.pullRequest?.isDraft === isDraft
+  } catch {
+    return false
+  }
+}
+
 function gitRunner(root: string): GitRunner {
   return async (args) => {
     const result = await execa('git', ['-C', root, ...args], {
@@ -3371,44 +3410,23 @@ function liftApi(root: string, number: string, baseRef: string): LiftApi {
         return undefined
       }
     },
-    markReady: async (nodeId) => {
-      const result = await execa(
-        'gh',
-        [
-          'api',
-          'graphql',
-          '-f',
-          `query=${READY_MUTATION}`,
-          '-f',
-          `id=${nodeId}`,
-        ],
-        {
-          cwd: root,
-          reject: false,
-          timeout: GH_TIMEOUT_MS,
-          env: gitEnv(),
-          extendEnv: false,
-        },
-      )
-      if (result.exitCode !== 0) return false
-      // The flag is read back rather than the exit trusted, since the
-      // mutation can answer 200 with an errors array and no change.
-      try {
-        const body = JSON.parse(String(result.stdout)) as {
-          data?: {
-            markPullRequestReadyForReview?: {
-              pullRequest?: { isDraft?: boolean }
-            }
-          }
-        }
-        return (
-          body.data?.markPullRequestReadyForReview?.pullRequest?.isDraft ===
-          false
-        )
-      } catch {
-        return false
-      }
-    },
+    markReady: (nodeId) =>
+      flipDraft(
+        root,
+        READY_MUTATION,
+        'markPullRequestReadyForReview',
+        nodeId,
+        false,
+      ),
+    markDraft: (nodeId) =>
+      flipDraft(
+        root,
+        CONVERT_DRAFT_MUTATION,
+        'convertPullRequestToDraft',
+        nodeId,
+        true,
+      ),
+    readChanged: (from, to) => readChangedPaths(git, from, to),
     sleep: (ms) => new Promise((done) => setTimeout(done, ms)),
     now: () => Date.now(),
   }
@@ -3464,6 +3482,7 @@ async function runLift(
   const record = await lift(liftApi(root, resolved.number, `origin/${base}`), {
     isCheck: opts.check ?? false,
     waitSeconds,
+    painted: loadPaintedPatterns(root),
   })
 
   logStep(record.reason)
@@ -3472,9 +3491,11 @@ async function runLift(
       ? `#${resolved.number} is ready for review at ${record.head?.slice(0, 8)}`
       : record.reason === 'already-ready'
         ? `#${resolved.number} is already ready for review`
-        : record.reason === 'clear'
-          ? `every gate reads clear for #${resolved.number}`
-          : LIFT_REFUSALS[record.reason],
+        : record.reason === 'redrafted'
+          ? `#${resolved.number} is back to draft, since ${record.failed === undefined ? 'a gate' : LIFT_REFUSALS[record.failed]}`
+          : record.reason === 'clear'
+            ? `every gate reads clear for #${resolved.number}`
+            : LIFT_REFUSALS[record.reason],
   )
   for (const gate of record.gates) {
     if (!gate.isOk) logWarn(`${gate.gate}: ${gate.reason ?? 'not clear'}`)
