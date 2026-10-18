@@ -37,17 +37,18 @@ The web layer covers the tooling shared across Vite + React, Astro, and Next.js.
 
 ## Screenshot cases
 
-- Extend the one `CASES` record in `e2e/screenshot.ts`, an entry per output file naming a section, a theme, and a route
-- Expect each case crossed with `VIEWPORTS`, written to `screenshots/<hostname>/<section>/<width>--<theme>.png`, so a local run and a deployed run stay apart
+- Edit the `CASES` in the seeded `e2e/capture/cases.ts`, one entry per output file naming a section, a theme, and a route, since sync overwrites the `e2e/screenshot.ts` harness
+- Move cases from `e2e/screenshot.ts` to `e2e/capture/cases.ts` before a sync, and set `EVIDENCE_ROOT = 'evidence'` to keep an existing baseline
+- Expect each case crossed with `VIEWPORTS`, written to `screenshots/<hostname>/<section>/<width>--<theme>.png`, so local and deployed runs stay apart
 - `VIEWPORTS` holds 320, 768, 1280, and 1536. Width 320 is the base a page has to hold without wrapping or clipping.
 - Set `excludeViewports` to skip a width, for a route whose long-form prose reflows at 320 instead of breaking
-- Set `evidence: true` to also write `evidence/<section>/<width>--<theme>.png` at 320 and 1280 alone, keeping the tracked set at twice the sections
 
 ## Screenshot sections and masks
 
+- Set `evidence: true` to also write `<EVIDENCE_ROOT>/<section>/<width>--<theme>.png` at 320 and 1280 alone. `EVIDENCE_ROOT` defaults to `e2e/evidence`.
 - Name `sections` on a case, one `{ name, selector }` per addressable part of the route, each written as its own frame beside the whole-page one
-- Expect a section frame at `screenshots/<hostname>/<section>/<name>/<width>--<theme>.png`, plus the same path under `evidence/` where flagged
-- Expect a selector matching nothing to be reported and skipped, and test that every section resolves in the project owning the selectors
+- Expect a section frame at `screenshots/<hostname>/<section>/<name>/<width>--<theme>.png`, plus the same path under `EVIDENCE_ROOT` where flagged
+- Expect a selector matching nothing to be reported and skipped, since a seeded list may name sections the page lacks, and test that they resolve in the project owning the selectors
 - List under `mask` the selectors painted over in every frame, for a value that moves with no code change, so a double capture compares the rest
 
 ## Screenshot settling
@@ -65,7 +66,7 @@ The web layer covers the tooling shared across Vite + React, Astro, and Next.js.
 
 ## Screenshot evidence
 
-- Expect the sweep under `screenshots/` to be ignored and only a flagged case's `evidence/` output tracked, so a target's first capture is the baseline it commits
+- Expect the sweep under `screenshots/` to be ignored and only a flagged case's `EVIDENCE_ROOT` output tracked, so a target's first capture is the baseline it commits
 - Size a case's `sections` list against the frames each later change regenerates, since a case naming sections commits a folder per section
 - Run the capture after a surface changes, component files included, per `governance/rules/ui/surface-capture.md`, unless the production build strips the component out
 

@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process'
-import { mkdtemp, readdir, readFile } from 'node:fs/promises'
+import { copyFile, mkdir, mkdtemp, readdir, readFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -19,6 +19,8 @@ const CAPTURE_TIMEOUT = 180_000
 const HARNESS = fileURLToPath(
   new URL('../../tooling/web/configs/e2e/screenshot.ts', import.meta.url),
 )
+
+const CASES = fileURLToPath(new URL('./capture/cases.ts', import.meta.url))
 
 /**
  * The viewport the run below is filtered to. A frame is compared against a box
@@ -146,6 +148,10 @@ test.describe('the section capture', () => {
     test.setTimeout(CAPTURE_TIMEOUT)
     expect(baseURL).toBeTruthy()
     const out = await mkdtemp(path.join(tmpdir(), 'canon-section-capture-'))
+    // The harness loads its cases from the working directory, so the run's
+    // temp folder gets the toolkit's own copy.
+    await mkdir(path.join(out, 'e2e', 'capture'), { recursive: true })
+    await copyFile(CASES, path.join(out, 'e2e', 'capture', 'cases.ts'))
 
     // `--require-base-url` skips the case flagged `evidence: true`, leaving the
     // dark case alone to run, which halves what this test waits for.

@@ -32,7 +32,7 @@ canon targets list --sweep <root> --json
 
 - The root is a folder to verify when it carries a `package.json`.
 - Each path in the record's `targets` that sits under the root and carries its own `package.json` is a folder to verify.
-- A path under the root with no `package.json` is not verified. Name it as skipped with its fix, `run 'bun init' in <path>, then sync the stack again`, and carry on with the rest.
+- A path under the root with no `package.json` is not verified. Name it as skipped with its fix, `sync the stack in <path> to write one`, and carry on with the rest.
 - If neither the root nor any stamped subfolder carries a `package.json`, stop: `❌ No package.json at the root or in any synced subfolder. Cannot verify.`
 - In each folder to verify, if `node_modules/` does not exist, run `bun install` there first, then proceed.
 
@@ -103,7 +103,7 @@ port to poll across stacks, so port-probing is out of reach here.
 ## Step 3: report
 
 Report per folder, under a heading naming its path relative to the root, and
-list each skipped folder with its `bun init` fix. For each script run, report
+list each skipped folder with its sync fix. For each script run, report
 one of:
 
 - `✅ <script>`

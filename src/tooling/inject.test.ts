@@ -8,7 +8,7 @@ import {
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { gitEnv } from '@/git/env'
 import { PROJECT_ROOT } from '@/roots/project'
@@ -18,7 +18,7 @@ import {
   injectManifest,
   injectSeeds,
 } from '@/tooling/inject'
-import { resolveChain } from '@/tooling/manifest'
+import { type Manifest, resolveChain } from '@/tooling/manifest'
 
 let target: string
 
@@ -47,52 +47,70 @@ const subfolder = (): string => {
   return sub
 }
 
+const scriptsOnly = (scripts: Record<string, string>): Manifest => ({
+  name: 'scripts-only',
+  dir: '/tooling/scripts-only',
+  configsDir: '/tooling/scripts-only/configs',
+  seedsDir: '/tooling/scripts-only/seeds',
+  scripts,
+  scriptOverrides: {},
+  gitignore: [],
+  devPackages: [],
+})
+
+const readManifest = (): Record<string, unknown> =>
+  JSON.parse(readFileSync(join(target, 'package.json'), 'utf8'))
+
 describe('injectManifest', () => {
-  it('should name a declared script it could not install without a package.json', async () => {
-    const stderr = captureStderr()
+  it('should write a minimal package.json before installing scripts into it', async () => {
+    captureStderr()
 
-    await injectManifest(resolveChain(PROJECT_ROOT, 'web'), target)
+    await injectManifest([scriptsOnly({ check: 'bun run lint' })], target)
 
-    expect(stderr()).toContain('test:run')
+    const written = readManifest()
+    expect(written.name).toBe(basename(target).toLowerCase())
+    expect(written.version).toBe('0.0.0')
+    expect(written.type).toBe('module')
+    expect(written.scripts).toEqual({ check: 'bun run lint' })
+    expect(Object.keys(written)).not.toContain('private')
+    expect(Object.keys(written)).not.toContain('description')
+    expect(Object.keys(written)).not.toContain('main')
   })
 
-  it('should name an override script it could not install without a package.json', async () => {
-    const stderr = captureStderr()
+  it('should leave an existing package.json as it was', async () => {
+    captureStderr()
+    const body = '{"name":"mine","scripts":{"check":"x"}}\n'
+    writeFileSync(join(target, 'package.json'), body)
 
-    await injectManifest(resolveChain(PROJECT_ROOT, 'web'), target)
+    await injectManifest([scriptsOnly({ check: 'y', lint: 'z' })], target)
 
-    const listed = stderr()
-      .match(/Scripts not added: (.*)/)?.[1]
-      .split(', ')
-    expect(listed).toContain('check:format')
-    expect(listed).toContain('lint')
+    const written = readManifest()
+    expect(written.name).toBe('mine')
+    expect(written.version).toBeUndefined()
+    expect(written.scripts).toEqual({ check: 'x', lint: 'z' })
   })
 
-  it('should list a script declared as both plain and override once', async () => {
+  it('should leave an invalid package.json byte for byte and say it is invalid', async () => {
     const stderr = captureStderr()
+    const body = '{ not json'
+    writeFileSync(join(target, 'package.json'), body)
 
-    await injectManifest(resolveChain(PROJECT_ROOT, 'vite-react'), target)
+    await injectManifest([scriptsOnly({ check: 'y' })], target)
 
-    const listed = stderr()
-      .match(/Scripts not added: (.*)/)?.[1]
-      .split(', ')
-    expect(listed?.filter((key) => key === 'build')).toEqual(['build'])
+    expect(readFileSync(join(target, 'package.json'), 'utf8')).toBe(body)
+    expect(stderr()).toContain(
+      `package.json is not valid JSON: fix it in ${target}, then sync again`,
+    )
+    expect(stderr()).not.toContain('bun init')
   })
 
-  it('should name a declared dev dependency it could not install without a package.json', async () => {
+  it('should write no package.json when the chain installs nothing', async () => {
     const stderr = captureStderr()
 
-    await injectManifest(resolveChain(PROJECT_ROOT, 'web'), target)
+    await injectManifest([scriptsOnly({})], target)
 
-    expect(stderr()).toContain('eslint-plugin-check-file')
-  })
-
-  it('should tell the reader to run bun init in the target', async () => {
-    const stderr = captureStderr()
-
-    await injectManifest(resolveChain(PROJECT_ROOT, 'web'), target)
-
-    expect(stderr()).toContain(`run 'bun init' in ${target}`)
+    expect(existsSync(join(target, 'package.json'))).toBe(false)
+    expect(stderr()).not.toContain('bun init')
   })
 })
 

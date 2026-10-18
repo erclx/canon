@@ -4,6 +4,7 @@ import {
   applyScripts,
   collectDeps,
   collectScripts,
+  minimalPackage,
   parseSpec,
 } from '@/tooling/package'
 
@@ -255,5 +256,37 @@ describe('applyScripts', () => {
 
     expect(result.pkg.scripts?.lint).toBe('eslint . --max-warnings 0')
     expect(result.overridden).toContain('lint')
+  })
+})
+
+describe('minimalPackage', () => {
+  it('should carry exactly a name, a version, and the module type', () => {
+    expect(minimalPackage('/work/my-app')).toEqual({
+      name: 'my-app',
+      version: '0.0.0',
+      type: 'module',
+    })
+  })
+
+  it('should lowercase the folder name and replace spaces', () => {
+    expect(minimalPackage('/work/My App').name).toBe('my-app')
+  })
+
+  it('should strip a leading dot or underscore', () => {
+    expect(minimalPackage('/work/.hidden').name).toBe('hidden')
+    expect(minimalPackage('/work/__core').name).toBe('core')
+  })
+
+  it('should replace a tilde, which npm rejects in a new package name', () => {
+    expect(minimalPackage('/work/my~app').name).toBe('my-app')
+  })
+
+  it('should cap the name at the 214 characters npm allows', () => {
+    expect(minimalPackage(`/work/${'a'.repeat(300)}`).name).toHaveLength(214)
+  })
+
+  it('should fall back to project when nothing is left', () => {
+    expect(minimalPackage('/work/.').name).toBe('project')
+    expect(minimalPackage('/work/...').name).toBe('project')
   })
 })
