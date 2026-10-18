@@ -5,7 +5,9 @@ description: Orientation and toolkit lessons for spawning a subagent from a skil
 
 # Claude Code subagents
 
-A subagent is a separate Claude session spawned from the main thread through the `Agent` tool. It runs in its own context, makes its own tool calls, and returns a single final message to the parent. It fits a task that needs independence, isolation, or parallel lenses that a same-session step cannot give. Source: [Create custom subagents](https://code.claude.com/docs/en/sub-agents.md), with the SDK side in [Subagents in the SDK](https://code.claude.com/docs/en/agent-sdk/subagents.md).
+A subagent is a separate Claude session spawned from the main thread through the `Agent` tool. It runs in its own context, makes its own tool calls, and returns a single final message to the parent. It fits a task that needs independence, isolation, or parallel lenses that a same-session step cannot give.
+
+Source: [Create custom subagents](https://code.claude.com/docs/en/sub-agents.md), with the SDK side in [Subagents in the SDK](https://code.claude.com/docs/en/agent-sdk/subagents.md).
 
 ## Independence is the case for a cold one
 
