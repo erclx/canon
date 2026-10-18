@@ -525,6 +525,19 @@ describe('the shipped stage table', () => {
     })
   })
 
+  it('should run the rule audit in gate mode right after the citations', () => {
+    const ids = STAGES.map((entry) => entry.id)
+    const shape = STAGES.find((entry) => entry.id === 'rule-shape')
+
+    expect(ids.indexOf('rule-shape')).toBe(ids.indexOf('rule-citations') + 1)
+    expect(shape?.checks).toEqual([
+      expect.objectContaining({
+        kind: 'cli',
+        argv: ['gov', 'audit', '--gate'],
+      }),
+    ])
+  })
+
   it('should health check the hero regen without writing a frame', () => {
     const hero = STAGES.find((entry) => entry.id === 'hero')
 

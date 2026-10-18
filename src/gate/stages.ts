@@ -381,6 +381,21 @@ export const STAGES: readonly Stage[] = [
     success: 'Rule citations resolve',
   },
   {
+    // Reads the whole rule corpus and fails only on a folder the verb lists as
+    // gated, so the finding count prints on every push while the rewrite moves
+    // folder by folder toward zero.
+    id: 'rule-shape',
+    label: 'Rule shape',
+    checks: [
+      {
+        kind: 'cli',
+        argv: ['gov', 'audit', '--gate'],
+        failure:
+          'A rule in a gated folder is past a shape limit or short of its ledger. Run bun src/cli.ts gov audit.',
+      },
+    ],
+  },
+  {
     // A citation naming the old record root resolves to nothing once the
     // folders have moved, and the sweep that would repoint it only runs when a
     // person calls it. Reading its plan back is what turns a silent stale
