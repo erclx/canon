@@ -1,14 +1,23 @@
 import { existsSync } from 'node:fs'
-import { readFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import { basename, join } from 'node:path'
 import {
   linkTo,
   readPlanTargets,
+  removeBacklogRow,
   resolveLivePlan,
   tasksDir,
 } from '@/tasks/archive'
 import { readDeclarations } from '@/tasks/reach'
-import { BOARD_GROUPS, type BoardGroup } from '@/tasks/validate'
+import {
+  BOARD_GROUPS,
+  type BoardGroup,
+  backlogPath,
+  type FindingKind,
+  groupRuleFindings,
+  orderingPath,
+  readBoard,
+} from '@/tasks/validate'
 
 /**
  * The columns each group owns, fixed by the operator on 2026-10-18. Every
@@ -311,4 +320,411 @@ export async function renderBoard(root: string, board: Board): Promise<string> {
   if (trailing.length > 0) out.push('', ...trailing)
 
   return `${out.join('\n')}\n`
+}
+
+export const BOARD_REFUSALS = [
+  'no-board',
+  'no-ordering',
+  'no-match',
+  'no-row',
+  'unreadable-row',
+  'group-rule',
+  'no-column',
+  'top-group',
+  'cell-long',
+  'bad-input',
+] as const
+
+export type BoardRefusal = (typeof BOARD_REFUSALS)[number]
+
+export interface BoardRefused {
+  readonly ok: false
+  readonly reason: BoardRefusal
+  readonly message: string
+  readonly detail: readonly string[]
+}
+
+/** Where a row lands in its group. A named sibling must already sit in that group. */
+export type Position =
+  | { readonly at: 'top' }
+  | { readonly at: 'bottom' }
+  | { readonly before: string }
+  | { readonly after: string }
+
+export interface BoardWritten {
+  readonly ok: true
+  readonly stem: string
+  readonly group: BoardGroup
+  /** Where the row sat before the write, `backlog` for a backlog line, undefined for neither. */
+  readonly from: BoardGroup | 'backlog' | undefined
+  /** The row's 1-based position in its group after the write. */
+  readonly position: number
+  readonly path: string
+  /** Whether the call also removed the task's backlog line. */
+  readonly backlog: boolean
+}
+
+export type BoardOutcome = BoardWritten | BoardRefused
+
+/** The `Waiting on` a row promoted out of `## Needs a plan` carries when the caller names none. */
+export const PLANNED_WAITING = 'Planned, not dispatched yet'
+
+/**
+ * The finding kinds each group's rule forbids, read off the same predicates
+ * `canon tasks validate` reports through `groupRuleFindings`.
+ */
+const GROUP_RULES: Readonly<Record<BoardGroup, readonly FindingKind[]>> = {
+  'Run now': ['plan-unstated', 'touches-unstated'],
+  'Up next': ['plan-absent'],
+  'Needs a plan': ['plan-parked'],
+}
+
+/** The group one step closer to `## Run now`, which is where `promote` sends a row. */
+const PROMOTES_TO: Readonly<Record<BoardGroup, BoardGroup | undefined>> = {
+  'Run now': undefined,
+  'Up next': 'Run now',
+  'Needs a plan': 'Up next',
+}
+
+function refuse(
+  reason: BoardRefusal,
+  message: string,
+  detail: readonly string[] = [],
+): BoardRefused {
+  return { ok: false, reason, message, detail }
+}
+
+/** The width a cell renders at, a link counting as its label alone. */
+export function renderedLength(cell: string): number {
+  return cell.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').length
+}
+
+function checkWaiting(text: string): BoardRefused | undefined {
+  if (text.trim() === '' || /[|\n]/.test(text)) {
+    return refuse(
+      'bad-input',
+      'A Waiting on cell is one line of text carrying no pipe.',
+      [text],
+    )
+  }
+
+  const width = renderedLength(text.trim())
+  if (width > WAITING_LIMIT) {
+    return refuse(
+      'cell-long',
+      `The Waiting on cell renders ${width} characters, past the ${WAITING_LIMIT} a board cell holds. Name the blocker and drop the history.`,
+      [text],
+    )
+  }
+
+  return undefined
+}
+
+function findRow(
+  board: Board,
+  stem: string,
+): { readonly group: BoardGroup; readonly row: PlacedRow } | undefined {
+  for (const group of BOARD_GROUPS) {
+    const row = board.groups[group].find((entry) => entry.stem === stem)
+    if (row) return { group, row }
+  }
+
+  return undefined
+}
+
+function anchorOf(position: Position): string | undefined {
+  if ('before' in position) return position.before
+  if ('after' in position) return position.after
+  return undefined
+}
+
+/**
+ * Takes the row out of every group and puts it back at a position in one, so a
+ * row that sat anywhere lands once. A sibling the position names but the group
+ * does not hold is refused rather than read as the bottom.
+ */
+function placed(
+  board: Board,
+  group: BoardGroup,
+  row: PlacedRow,
+  position: Position,
+): Board | BoardRefused {
+  const groups = emptyGroups<PlacedRow>()
+  for (const each of BOARD_GROUPS) {
+    groups[each] = board.groups[each].filter((entry) => entry.stem !== row.stem)
+  }
+
+  const rows = groups[group]
+  if ('at' in position) {
+    groups[group] = position.at === 'top' ? [row, ...rows] : [...rows, row]
+    return { ...board, groups }
+  }
+
+  const anchor = anchorOf(position) ?? ''
+  const at = rows.findIndex((entry) => entry.stem === anchor)
+  if (at === -1) {
+    return refuse(
+      'bad-input',
+      `${anchor} has no row under ${group}, so ${row.stem} has nothing to sit beside.`,
+      [anchor],
+    )
+  }
+
+  const index = 'before' in position ? at : at + 1
+  groups[group] = [...rows.slice(0, index), row, ...rows.slice(index)]
+  return { ...board, groups }
+}
+
+interface Edited {
+  readonly board: Board
+  readonly group: BoardGroup
+  readonly from: BoardGroup | undefined
+  /** The group whose rule the write must pass, undefined when the row kept its group. */
+  readonly ruled: BoardGroup | undefined
+}
+
+/**
+ * Runs one verb as one read, one render, and one write of `priority.md`, so a
+ * call never leaves a partial table behind. A row changing group is checked
+ * against the target group's rule on the rendered board before anything is
+ * written, which reads the board exactly as `validate` will.
+ */
+async function writeBoard(
+  root: string,
+  stem: string,
+  edit: (board: Board) => Edited | BoardRefused,
+): Promise<BoardOutcome> {
+  const dir = tasksDir(root)
+  if (!existsSync(dir)) return refuse('no-board', `No task board at ${dir}.`)
+
+  const path = orderingPath(root)
+  if (!existsSync(path)) {
+    return refuse('no-ordering', `No ordering file at ${path}.`)
+  }
+
+  const file = join(dir, `${stem}.md`)
+  if (!existsSync(file)) {
+    return refuse('no-match', `No task file at ${file}.`, [stem])
+  }
+
+  const parse = parseBoard(await readFile(path, 'utf8'))
+  if (!parse.ok) {
+    return refuse(
+      'unreadable-row',
+      `${path} holds a row naming no task, which a render would drop. Fix that row by hand first.`,
+      [parse.line],
+    )
+  }
+
+  const edited = edit(parse.board)
+  if ('ok' in edited) return edited
+
+  const text = await renderBoard(root, edited.board)
+
+  if (edited.ruled) {
+    const forbidden = GROUP_RULES[edited.ruled]
+    const broken = (await groupRuleFindings(readBoard(text).rows, root)).filter(
+      (finding) => finding.subject === stem && forbidden.includes(finding.kind),
+    )
+    if (broken.length > 0) {
+      return refuse(
+        'group-rule',
+        `${stem} cannot sit under ${edited.ruled}. ${broken.map((finding) => `${finding.kind}: ${finding.message}`).join(' ')}`,
+        broken.map((finding) => finding.kind),
+      )
+    }
+  }
+
+  await writeFile(path, text)
+
+  return {
+    ok: true,
+    stem,
+    group: edited.group,
+    from: edited.from,
+    position:
+      edited.board.groups[edited.group].findIndex((row) => row.stem === stem) +
+      1,
+    path,
+    backlog: false,
+  }
+}
+
+export interface PlaceOptions {
+  readonly waiting?: string
+  readonly position?: Position
+}
+
+/**
+ * Puts a task under a group from anywhere: another group, the backlog, or no
+ * surface at all. A backlog line is removed in the same call, since a task on
+ * both surfaces is the `row-duplicated` finding and a two-step move strands it
+ * between them.
+ */
+export async function placeTask(
+  root: string,
+  stem: string,
+  group: BoardGroup,
+  options: PlaceOptions = {},
+): Promise<BoardOutcome> {
+  if (options.waiting !== undefined) {
+    const bad = checkWaiting(options.waiting)
+    if (bad) return bad
+  }
+
+  const written = await writeBoard(root, stem, (board) => {
+    const found = findRow(board, stem)
+    const owns = GROUP_COLUMNS[group].includes('Waiting on')
+    const waiting = owns
+      ? (options.waiting?.trim() ?? found?.row.waiting)
+      : undefined
+
+    if (owns && waiting === undefined) {
+      return refuse(
+        'bad-input',
+        `${group} carries a Waiting on cell and ${stem} has none to keep. Pass --waiting.`,
+      )
+    }
+
+    const next = placed(
+      board,
+      group,
+      { stem, label: found?.row.label ?? stem, waiting },
+      options.position ?? { at: 'bottom' },
+    )
+    if ('ok' in next) return next
+
+    return {
+      board: next,
+      group,
+      from: found?.group,
+      ruled: found?.group === group ? undefined : group,
+    }
+  })
+  if (!written.ok) return written
+
+  const removed = await removeFromBacklog(root, stem)
+  return {
+    ...written,
+    from: written.from ?? (removed ? 'backlog' : undefined),
+    backlog: removed,
+  }
+}
+
+async function removeFromBacklog(root: string, stem: string): Promise<boolean> {
+  const path = backlogPath(root)
+  if (!existsSync(path)) return false
+
+  const { text, removed } = removeBacklogRow(await readFile(path, 'utf8'), stem)
+  if (removed) await writeFile(path, text)
+  return removed
+}
+
+export interface PromoteOptions {
+  readonly waiting?: string
+}
+
+/**
+ * Moves a row one group closer to `## Run now`, to the bottom of that group.
+ * Dispatch runs it once a launch succeeds, so `## Run now` reads as
+ * dispatched, and `plan-link` runs it on a `## Needs a plan` row once the plan
+ * is linked.
+ */
+export async function promoteTask(
+  root: string,
+  stem: string,
+  options: PromoteOptions = {},
+): Promise<BoardOutcome> {
+  if (options.waiting !== undefined) {
+    const bad = checkWaiting(options.waiting)
+    if (bad) return bad
+  }
+
+  return writeBoard(root, stem, (board) => {
+    const found = findRow(board, stem)
+    if (!found) return refuse('no-row', `${stem} has no row on the board.`)
+
+    const target = PROMOTES_TO[found.group]
+    if (!target) {
+      return refuse(
+        'top-group',
+        `${stem} already sits under Run now, the top group.`,
+      )
+    }
+
+    const waiting = GROUP_COLUMNS[target].includes('Waiting on')
+      ? (options.waiting?.trim() ?? PLANNED_WAITING)
+      : undefined
+    const next = placed(
+      board,
+      target,
+      { ...found.row, waiting },
+      {
+        at: 'bottom',
+      },
+    )
+    if ('ok' in next) return next
+
+    return { board: next, group: target, from: found.group, ruled: target }
+  })
+}
+
+/** Repositions a row inside the group it already sits in. */
+export async function moveTask(
+  root: string,
+  stem: string,
+  position: Position,
+): Promise<BoardOutcome> {
+  if (anchorOf(position) === stem) {
+    return refuse('bad-input', `${stem} cannot sit beside itself.`, [stem])
+  }
+
+  return writeBoard(root, stem, (board) => {
+    const found = findRow(board, stem)
+    if (!found) return refuse('no-row', `${stem} has no row on the board.`)
+
+    const next = placed(board, found.group, found.row, position)
+    if ('ok' in next) return next
+
+    return {
+      board: next,
+      group: found.group,
+      from: found.group,
+      ruled: undefined,
+    }
+  })
+}
+
+/** Rewrites the `Waiting on` cell of a row in place. */
+export async function blockTask(
+  root: string,
+  stem: string,
+  waiting: string,
+): Promise<BoardOutcome> {
+  const bad = checkWaiting(waiting)
+  if (bad) return bad
+
+  return writeBoard(root, stem, (board) => {
+    const found = findRow(board, stem)
+    if (!found) return refuse('no-row', `${stem} has no row on the board.`)
+
+    if (!GROUP_COLUMNS[found.group].includes('Waiting on')) {
+      return refuse(
+        'no-column',
+        `${stem} sits under ${found.group}, which carries no Waiting on cell.`,
+      )
+    }
+
+    const groups = { ...board.groups }
+    groups[found.group] = board.groups[found.group].map((row) =>
+      row.stem === stem ? { ...row, waiting: waiting.trim() } : row,
+    )
+
+    return {
+      board: { ...board, groups },
+      group: found.group,
+      from: found.group,
+      ruled: undefined,
+    }
+  })
 }
