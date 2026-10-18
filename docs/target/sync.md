@@ -47,7 +47,7 @@ Add `--json` for a machine-readable report and `--exit-code` to fail CI when a t
 - Tooling configs and seeds: read differences with `canon tooling diff <stack> <path>`, then `canon tooling sync <stack> <path> --write`, which overwrites golden configs and copies each seed once
 - Index regeneration: `canon indexes regen`
 
-Try a scenario from [sandbox](../../canon/context/sandbox.md) before syncing a real project.
+Try a scenario from [sandbox](../../canon/context/development/sandbox.md) before syncing a real project.
 
 ## Running sync from an agent session
 

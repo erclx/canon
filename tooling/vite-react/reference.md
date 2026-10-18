@@ -44,4 +44,4 @@ Append to the `## Scripts` table:
 
 ## CI docs (extend)
 
-In `canon/context/ci.md`, the Typecheck row's assertion reads: `` `tsc --noEmit` passes ``. <!-- audit-ignore-citations: canon/context/ci.md -->
+In `canon/context/development/ci.md`, the Typecheck row's assertion reads: `` `tsc --noEmit` passes ``. <!-- audit-ignore-citations: canon/context/development/ci.md -->

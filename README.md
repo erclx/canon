@@ -161,13 +161,13 @@ For the full journey from scaffold through adding a domain later to syncing upst
 
 Each domain carries an entry written for someone maintaining the toolkit rather than installing it. These paths resolve in a clone only. The published package ships `docs` and not `.claude`, so an installed copy does not carry them.
 
-- [Claude Code plugin](canon/context/claude-plugin.md)
-- [Governance rules](canon/context/governance.md)
-- [Tooling stacks](canon/context/tooling.md)
-- [Design system](canon/context/design.md)
+- [Claude Code plugin](canon/context/surfaces/plugin.md)
+- [Governance rules](canon/context/surfaces/governance.md)
+- [Tooling stacks](canon/context/surfaces/tooling.md)
+- [Design system](canon/context/features/design.md)
 - [Slides](canon/context/features/slides.md)
 - [Transcripts](canon/context/features/transcripts.md)
-- [Sandbox](canon/context/sandbox.md)
+- [Sandbox](canon/context/development/sandbox.md)
 
 ## Contributing
 

@@ -84,14 +84,14 @@ export default scenario({
         'Context: feat/provider-switch branch with diff in src/features/chat/',
       )
       ctx.log.info(
-        '         canon/context/web.md already exists. Its Layer responsibilities section names src/features/chat/.',
+        '         canon/context/development/web.md already exists. Its Layer responsibilities section names src/features/chat/.',
       )
       ctx.log.info('Action:  /context-fold')
       ctx.log.info(
         'Expect:  The fold reads the diff, maps src/features/chat/api-key-gate.tsx to web.md (which references that path)',
       )
       ctx.log.info(
-        '         Rewrites the relevant section of canon/context/web.md from the diff content',
+        '         Rewrites the relevant section of canon/context/development/web.md from the diff content',
       )
       ctx.log.info(
         '         Does NOT create new entries (no auto-creation per design)',

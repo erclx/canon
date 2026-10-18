@@ -167,7 +167,7 @@ beforeAll(() => {
 
   const project = join(fixture, 'project')
   for (const dir of [
-    join(project, 'canon/context'),
+    join(project, 'canon/context/development'),
     join(project, '.claude/tasks'),
     join(project, '.claude/worktrees/demo'),
     join(project, 'indexed'),
@@ -327,7 +327,7 @@ beforeAll(() => {
   )
   writeFileSync(join(project, 'indexed/index.md'), '# Index\n')
   writeFileSync(
-    join(project, 'canon/context/development.md'),
+    join(project, 'canon/context/development/local-loop.md'),
     'Dev commands.\n',
   )
   writeFileSync(join(project, '.claude/tasks/sample.md'), 'no frontmatter\n')

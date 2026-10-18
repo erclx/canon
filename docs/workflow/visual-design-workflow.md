@@ -14,7 +14,7 @@ The default. `canon/DESIGN.md` holds visual intent as one Overview paragraph, at
 
 - The seed is `tooling/claude/seeds/canon/DESIGN.md`, and its column headers stay verbatim
 - `canon design render` previews it in `.canon/tmp/render/design/`
-- `canon design install` copies a neutral base to `.claude/design/base.css`, so override values in `.claude/design/project/`. See `canon/context/design.md`.
+- `canon design install` copies a neutral base to `.claude/design/base.css`, so override values in `.claude/design/project/`. See `canon/context/features/design.md`.
 
 These skills cover the tier:
 

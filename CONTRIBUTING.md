@@ -18,7 +18,7 @@ The markers are how a re-run recognizes its own block and skips, so the script n
 
 The `pre-push` hook runs `bun run check`, so a push fails on formatting drift until `bun run format` runs and the result is committed.
 
-The [development notes](canon/context/development.md) carry the full script table, what each stage gates on, and the rest of the hooks.
+The [development notes](canon/context/development/local-loop.md) carry the full script table, what each stage gates on, and the rest of the hooks.
 
 ## Where to author
 

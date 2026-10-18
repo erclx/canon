@@ -818,6 +818,7 @@ describe('shape', () => {
     'canon/context/development.md',
     'canon/context/development/overview.md',
     'development.md',
+    'canon/context/development/local-loop.md',
   ])('should accept a Scripts table in the development entry at %s', (rel) => {
     const source = `${FRONTMATTER}## Layout\n\n### Scripts\n\n| Command | Purpose |\n| --- | --- |\n| \`bun run check\` | Verify |\n`
 

@@ -7,13 +7,13 @@ description: The GitHub Actions workflows that gate pull requests into main, sca
 
 ## Overview
 
-Owns the workflows in `.github/workflows/` that verify a pull request, scan its text, release after a merge, and refresh the landing-page frames. CI runs the gate through one entry point, `bun run check:ci`, and `check:install` beside it. The stages themselves sit in `src/gate/` and are described in `canon/context/development.md`.
+Owns the workflows in `.github/workflows/` that verify a pull request, scan its text, release after a merge, and refresh the landing-page frames. CI runs the gate through one entry point, `bun run check:ci`, and `check:install` beside it. The stages themselves sit in `src/gate/` and are described in `canon/context/development/local-loop.md`.
 
 ## Layout
 
 ### `.github/workflows/`
 
-`verify.yml` calls the gate once rather than naming each stage, so a stage added to `src/gate/stages.ts` is enforced with no workflow edit. Each workflow states its reasons in comments beside the line. The web previews belong to `canon/context/web.md`.
+`verify.yml` calls the gate once rather than naming each stage, so a stage added to `src/gate/stages.ts` is enforced with no workflow edit. Each workflow states its reasons in comments beside the line. The web previews belong to `canon/context/development/web.md`.
 
 - `verify.yml` runs on pull requests into `main`, pushes to `main`, `merge_group`, dispatch, and a weekly cron that runs `dependency-advisories` alone
 - The Install Plugin CLI step pins `@anthropic-ai/claude-code` exactly. Test a raised pin with `bun install -g` on a fresh runner, since `2.1.237` left a wrapper that cannot run.

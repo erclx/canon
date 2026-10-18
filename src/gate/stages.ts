@@ -302,7 +302,7 @@ export const STAGES: readonly Stage[] = [
   {
     // A hook, a workflow, or a husky script reaching one side of the seed or
     // config boundary and not the other is a capability withheld with no
-    // recorded reason, per the criterion in canon/context/tooling.md.
+    // recorded reason, per the criterion in canon/context/surfaces/tooling.md.
     id: 'capability-seeding',
     label: 'Capability seeding',
     checks: [{ kind: 'measure', measure: capabilitySeeding }],

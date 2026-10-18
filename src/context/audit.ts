@@ -108,12 +108,13 @@ export const OTHER_FOLDERS = 'Other folders'
 export const SCRIPTS_HEADING = 'Scripts'
 
 /**
- * Whether an entry path is the development entry, being the flat entry or the
- * overview of a split one a target may still carry. The standard exempts the
+ * Whether an entry path is the development entry, being the flat entry, the
+ * overview of a split one a target may still carry, or this repository's
+ * `local-loop` entry. The standard exempts the
  * `Scripts` H3 for that entry alone, so the path is what tells.
  */
 function isDevelopmentEntry(rel: string): boolean {
-  return /(?:^|\/)development(?:\/overview)?\.md$/.test(rel)
+  return /(?:^|\/)development(?:\/(?:overview|local-loop))?\.md$/.test(rel)
 }
 
 /**

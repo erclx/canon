@@ -57,7 +57,7 @@ Load the skill before editing anything in its domain.
 
 ## Commands
 
-- Run `bun run check` to verify and `bun run format` to fix before committing. The pre-push hook runs `check`, which fails on formatting drift and writes nothing for it. Full reference in `canon/context/development.md`.
+- Run `bun run check` to verify and `bun run format` to fix before committing. The pre-push hook runs `check`, which fails on formatting drift and writes nothing for it. Full reference in `canon/context/development/local-loop.md`.
 
 ## Wiki
 

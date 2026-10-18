@@ -34,7 +34,7 @@ function seedFolder(ctx: StageContext): void {
   ctx.fixtures('infra', 'context', 'shared', 'folder')
 
   writeEntry(ctx, 'canon/context/api.md', 'API')
-  writeEntry(ctx, 'canon/context/web.md', 'Web')
+  writeEntry(ctx, 'canon/context/development/web.md', 'Web')
 }
 
 function listEntry(ctx: StageContext, name: string, title: string): void {
@@ -111,8 +111,8 @@ function seedTables(ctx: StageContext): void {
 
 function seedDrift(ctx: StageContext): void {
   seedFolder(ctx)
-  writeEntry(ctx, 'canon/context/sandbox.md', 'Sandbox')
-  ctx.run('rm', ['canon/context/web.md'])
+  writeEntry(ctx, 'canon/context/development/sandbox.md', 'Sandbox')
+  ctx.run('rm', ['canon/context/development/web.md'])
 }
 
 // Three shapes the required-section rule reads differently. A short entry in the

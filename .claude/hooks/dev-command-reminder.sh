@@ -28,7 +28,7 @@ project="${CLAUDE_PROJECT_DIR:-.}"
 # reminder rather than silence.
 entry=""
 for root in canon .claude; do
-  candidate="$root/context/development.md"
+  candidate="$root/context/development/local-loop.md"
   if [ -f "$project/$candidate" ]; then
     entry="$candidate"
     break

@@ -5,12 +5,12 @@ description: Claude Code plugin and tooling. Use for adding or modifying plugin 
 
 # Claude
 
-Read `canon/context/claude-plugin.md` for the shipped plugin, its marketplace and release wiring, and `canon claude`, and `canon/context/claude-internal.md` for internal skills and plugin setup before editing.
+Read `canon/context/surfaces/plugin.md` for the shipped plugin, its marketplace and release wiring, and `canon claude`, and `canon/context/workflow/internal-skills.md` for internal skills and plugin setup before editing.
 
 ## Editing rules
 
 - When updating an internal skill, write to `{base-dir}/SKILL.md`, where `{base-dir}` is the path the skill header shows at load time
-- Read `canon/context/claude-plugin.md` before adding a plugin skill and `canon/context/claude-internal.md` before adding an internal one
+- Read `canon/context/surfaces/plugin.md` before adding a plugin skill and `canon/context/workflow/internal-skills.md` before adding an internal one
 - Run `canon claude skills list` for the plugin roster, which no entry restates
 - Follow `claude/skills/create-skill/references/skill.md` for skill structure and frontmatter
 
@@ -64,7 +64,7 @@ When editing any file under `.claude/` here, check `tooling/claude/seeds/` for a
 Adding a skill touches the catalog, the skill map, the family key, a scenario, a routing case, and the hero.
 
 - Create the skill folder and `SKILL.md` in `claude/skills/`
-- An internal skill needs no catalog edit, since `canon/context/claude-internal.md` describes the folder. A plugin skill takes a `skill-*` entry only for reasoning no existing child covers.
+- An internal skill needs no catalog edit, since `canon/context/workflow/internal-skills.md` describes the folder. A plugin skill takes a `skill-*` entry only for reasoning no existing child covers.
 - Add a row to the skill's group in `docs/workflow/skill-map.md`, or in `skill-map-on-request.md` beside it for the artifact and question groups. Every listed name takes exactly one row across the two.
 - Set `metadata.family` to the group's key from `canon claude skills list --json`. The Skill family gate stage fails a skill without one, and the web build refuses a row under another group.
 
@@ -73,12 +73,12 @@ Adding a skill touches the catalog, the skill map, the family key, a scenario, a
 Draft a `sandbox/<category>/<skill>.ts` scenario beside `SKILL.md`, even for judgment-driven output, since the seeded input is the point. Skip it, and list no follow-up, only for a skill whose body forbids probing, listing, grepping, or reading project surfaces.
 
 - `canon sandbox run <cat:cmd> "<prompt>"` drives the arm through `claude -p`, so the sandbox can drive Claude
-- The operator authorizes the spend and the session performs it, per `canon/context/scripts.md`
+- The operator authorizes the spend and the session performs it, per `canon/context/development/scripts.md`
 - `src/claude/cases/all.test.ts` fails `bun run check` until a routing case for the new skill lands in one of `src/claude/cases/*.ts`
 - A changed skill count fails the Hero gate stage until `bun scripts/core/regen-hero.ts` runs and `canon capture assets/captures --selector .window --out assets/frames` re-renders the frame
 - Commit the hero markup, the image, and the stamp together
 
-`canon/context/claude-plugin.md` lists both gates under its `claude/skills/` layout.
+`canon/context/surfaces/plugin.md` lists both gates under its `claude/skills/` layout.
 
 ### Modifying a skill
 
@@ -97,7 +97,7 @@ The seed's "Context" section defines the three-tier context model, so keep it co
 
 The context entries and seeds this skill draws on, beyond the ones named above.
 
-- `canon/context/claude-plugin.md`: the plugin root, skills, marketplace entry, `canon claude`, and seeds
-- `canon/context/claude-internal.md` and `canon/context/orchestration.md`: internal skills, plugin discovery, and multi-session coordination
+- `canon/context/surfaces/plugin.md`: the plugin root, skills, marketplace entry, `canon claude`, and seeds
+- `canon/context/workflow/internal-skills.md` and `canon/context/workflow/orchestration.md`: internal skills, plugin discovery, and multi-session coordination
 - `canon/context/context-model.md`: three-tier context model, how entries get populated, and the index.md system
 - `tooling/claude/reference.md`: seed layout and design notes

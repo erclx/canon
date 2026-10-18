@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Run by hand, inside this repository, in the operator's own session. Each run turns every Claude Code release since the stored cursor into ranked findings with evidence and files them as one intake pass. It is a first pass: recall is incomplete, so say so in the overview and do not present the result as exhaustive.
 
-Why the cursor advances last, and which folder holds the digest code, is in `canon/context/claude-internal.md`. The verb contract is in `canon upstream --help`.
+Why the cursor advances last, and which folder holds the digest code, is in `canon/context/workflow/internal-skills.md`. The verb contract is in `canon upstream --help`.
 
 ## Guards
 

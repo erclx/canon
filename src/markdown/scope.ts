@@ -35,17 +35,11 @@ const DENSITY_SCOPE = [
  * corpus, which is why the audit reads it only inside a canon checkout.
  */
 export const GATED_PATHS: readonly string[] = [
-  'canon/context/claude-plugin.md',
-  'canon/context/claude-internal.md',
-  'canon/context/orchestration.md',
+  'canon/context/surfaces/',
+  'canon/context/workflow/',
+  'canon/context/development/',
   'canon/context/features/',
-  'canon/context/cli.md',
-  'canon/context/sandbox.md',
-  'canon/context/governance.md',
-  'canon/context/tooling.md',
-  'canon/context/web.md',
   'canon/context/context-model.md',
-  'canon/context/design.md',
   'canon/context/index.md',
   'claude/skills/api-design/SKILL.md',
   'claude/skills/auto-ship/SKILL.md',
@@ -132,9 +126,6 @@ export const GATED_PATHS: readonly string[] = [
   'claude/skills/video-craft/SKILL.md',
   'claude/skills/write-human/SKILL.md',
   'claude/skills/youtube-transcripts/SKILL.md',
-  'canon/context/development.md',
-  'canon/context/ci.md',
-  'canon/context/scripts.md',
   '.claude/skills/internal-',
   'docs/',
 ]

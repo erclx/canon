@@ -7,7 +7,7 @@ description: The local dev loop, the run command table, how bun run check sequen
 
 ## Overview
 
-Owns the local development loop, being the run commands, the gate behind `bun run check`, and the Claude Code and git hooks around it. CI runs the same stages through `bun run check:ci`, covered in `canon/context/ci.md`.
+Owns the local development loop, being the run commands, the gate behind `bun run check`, and the Claude Code and git hooks around it. CI runs the same stages through `bun run check:ci`, covered in `canon/context/development/ci.md`.
 
 `CONTRIBUTING.md` states the contributor-facing subset, and what each script does is in the entry for its domain.
 
