@@ -84,6 +84,7 @@ const CANON_RULES_REL = join('.claude', 'rules', 'canon')
 
 interface InstallOptions {
   readonly add?: string
+  readonly yes?: boolean
 }
 
 interface RegenOptions {
@@ -147,6 +148,7 @@ export function register(program: Command): void {
     .argument('[target]', 'Target directory', '.')
     .helpOption('-h, --help', 'Show this help message')
     .option('--add <rules>', 'Comma-separated rules to layer on the stack')
+    .option('--yes', 'Answer the install confirm without a prompt')
     .addHelpText(
       'after',
       [
@@ -156,6 +158,7 @@ export function register(program: Command): void {
         '  canon gov install node ../my-app',
         '  canon gov install node --add astro,shadcn ../my-app',
         '  canon gov install --add tasks,plan ../my-app',
+        '  canon gov install node --yes ../my-app',
         '',
         'With --add and no stack, the named rules install alone. A first',
         'positional naming a stack is read as the stack, so pass . or a path',
@@ -163,6 +166,10 @@ export function register(program: Command): void {
         '',
         'Copies each rule into .claude/rules/canon/, replacing a copy already',
         'there. Rules under .claude/rules/project/ are never read.',
+        '',
+        'The install confirm needs a TTY. --yes answers it, so a headless call',
+        'installs without setting CANON_NON_INTERACTIVE=1. It does not pick a',
+        'stack, so a headless call still names one.',
         '',
         'Exit codes:',
         '  0  installed, the stack held no rules, or the prompt was cancelled',
@@ -1268,8 +1275,9 @@ async function runInstall(
   intro('canon gov install')
 
   const add = opts.add ?? ''
+  const yes = opts.yes === true
   if (add !== '' && isAddWithoutStack(stack, target)) {
-    return installExtras(add, stack ?? target)
+    return installExtras(add, stack ?? target, yes)
   }
 
   const resolved = resolveTarget(target, PROJECT_ROOT)
@@ -1314,14 +1322,7 @@ async function runInstall(
   for (const rule of missing) logWarn(`${rule} (source not found, skipping)`)
   for (const source of found) logInfo(source.rule)
 
-  const shouldInstall = await select({
-    message: `Install ${found.length} rules to ${displayPath(target, CANON_RULES_REL)}?`,
-    options: [
-      { value: true, label: 'Yes' },
-      { value: false, label: 'No' },
-    ],
-    nonInteractiveDefault: true,
-  })
+  const shouldInstall = await confirmInstall(found.length, target, yes)
 
   if (!shouldInstall) {
     logWarn('Cancelled')
@@ -1348,6 +1349,28 @@ async function runInstall(
 }
 
 /**
+ * The install confirm. `--yes` answers it without a prompt, so the line it
+ * would have printed is skipped rather than duplicated under
+ * `CANON_NON_INTERACTIVE=1`.
+ */
+async function confirmInstall(
+  count: number,
+  target: string,
+  yes: boolean,
+): Promise<boolean> {
+  if (yes) return true
+  return select({
+    message: `Install ${count} rules to ${displayPath(target, CANON_RULES_REL)}?`,
+    options: [
+      { value: true, label: 'Yes' },
+      { value: false, label: 'No' },
+    ],
+    nonInteractiveDefault: true,
+    ttyHint: 'Pass --yes',
+  })
+}
+
+/**
  * Whether `--add` runs with no stack under it. Commander fills the first
  * positional before the second, so `--add a,b ../my-app` arrives with the
  * target in `stack` and the default `.` in `target`. A first positional that
@@ -1366,7 +1389,11 @@ function isAddWithoutStack(stack: string | undefined, target: string): boolean {
  * extras are not a stack, and overwriting the chain would cost a target the
  * missing-rule report its stack install recorded.
  */
-async function installExtras(add: string, target: string): Promise<number> {
+async function installExtras(
+  add: string,
+  target: string,
+  yes: boolean,
+): Promise<number> {
   const resolved = resolveTarget(target, PROJECT_ROOT)
   if (typeof resolved === 'number') return resolved
 
@@ -1382,14 +1409,7 @@ async function installExtras(add: string, target: string): Promise<number> {
     return 1
   }
 
-  const shouldInstall = await select({
-    message: `Install ${found.length} rules to ${displayPath(target, CANON_RULES_REL)}?`,
-    options: [
-      { value: true, label: 'Yes' },
-      { value: false, label: 'No' },
-    ],
-    nonInteractiveDefault: true,
-  })
+  const shouldInstall = await confirmInstall(found.length, target, yes)
 
   if (!shouldInstall) {
     logWarn('Cancelled')

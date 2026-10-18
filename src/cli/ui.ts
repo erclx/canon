@@ -162,6 +162,8 @@ export async function select<Value>(opts: {
   message: string
   options: { value: Value; label: string; hint?: string }[]
   nonInteractiveDefault?: boolean
+  /** Replaces the "Pass an argument" clause of the TTY refusal. */
+  ttyHint?: string
 }): Promise<Value> {
   const { message, options } = opts
   const { GREEN, GREY, NC, RED, WHITE } = palette(process.stderr)
@@ -196,7 +198,7 @@ export async function select<Value>(opts: {
   return new Promise<Value>((resolve) => {
     if (!process.stdin.isTTY) {
       process.stderr.write(
-        `${GREY}│${NC} ${RED}✗${NC} ${message} requires a TTY. Pass an argument or set CANON_NON_INTERACTIVE=1.\n${GREY}└${NC}\n`,
+        `${GREY}│${NC} ${RED}✗${NC} ${message} requires a TTY. ${opts.ttyHint ?? 'Pass an argument'} or set CANON_NON_INTERACTIVE=1.\n${GREY}└${NC}\n`,
       )
       process.exit(1)
     }
