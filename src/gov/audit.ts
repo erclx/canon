@@ -101,7 +101,7 @@ export interface RuleReading extends Omit<RuleShape, 'groups'> {
   readonly ledger: LedgerReading
 }
 
-export type RuleAuditRefusal = 'no-rules' | 'no-path'
+export type RuleAuditRefusal = 'no-rules' | 'no-path' | 'outside-root'
 
 export type RuleAuditReport =
   | {
@@ -350,6 +350,18 @@ export async function readRuleAudit(
         kind: 'unreadable',
         reason: 'no-path',
         message: `No rule at ${missing.join(', ')}.`,
+      }
+    }
+    // A path outside the root takes a `../` file name, which no gated prefix
+    // and no ledger path can match, so it would pass `--gate` unread.
+    const outside = paths.filter((path) =>
+      relative(root, resolve(root, path)).startsWith('..'),
+    )
+    if (outside.length > 0) {
+      return {
+        kind: 'unreadable',
+        reason: 'outside-root',
+        message: `${outside.join(', ')} sits outside ${root}. Pass --root at the tree that holds it.`,
       }
     }
     files = paths.map((path) => resolve(root, path))

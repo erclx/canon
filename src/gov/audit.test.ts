@@ -232,6 +232,30 @@ describe('readRuleAudit in a target', () => {
 
     expect(report).toMatchObject({ kind: 'unreadable', reason: 'no-path' })
   })
+
+  it('should refuse a named path outside the root', async () => {
+    const outside = mkdtempSync(join(tmpdir(), 'gov-audit-outside-'))
+    writeFileSync(join(outside, 'go.md'), rule(bullets(1)))
+
+    const report = await readRuleAudit(ROOT, [join(outside, 'go.md')])
+    rmSync(outside, { recursive: true, force: true })
+
+    expect(report).toMatchObject({ kind: 'unreadable', reason: 'outside-root' })
+  })
+
+  it('should resolve a named path against the root rather than the cwd', async () => {
+    write(join('.claude', 'rules', 'project', 'api.md'), rule(bullets(1)))
+
+    const report = measured(
+      await readRuleAudit(ROOT, [
+        join('.claude', 'rules', 'project', 'api.md'),
+      ]),
+    )
+
+    expect(report.rules.map((reading) => reading.file)).toEqual([
+      join('.claude', 'rules', 'project', 'api.md'),
+    ])
+  })
 })
 
 describe('auditExit', () => {

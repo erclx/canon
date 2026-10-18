@@ -623,7 +623,9 @@ export function register(program: Command): void {
         '  at governance/ledger/<folder>/<slug>.md, one table row per bullet',
         '  under a heading of the same name.',
         '  Any other tree reads .claude/rules/project/ alone and asks no ledger.',
-        '  .claude/rules/canon/ is fixed at the toolkit source and never read.',
+        '  .claude/rules/canon/ is fixed at the toolkit source and never read',
+        '  unless named. A named path resolves against --root and must sit',
+        '  inside it.',
         '',
         `Gated folders: ${RULE_GATED_FOLDERS.length === 0 ? 'none yet' : RULE_GATED_FOLDERS.join(', ')}`,
         '',
@@ -633,8 +635,9 @@ export function register(program: Command): void {
         '  2  at least one finding, or under --gate one in a gated folder',
         '',
         'Reasons:',
-        '  no-rules  the tree holds no rule corpus to read',
-        '  no-path   a named path does not exist',
+        '  no-rules      the tree holds no rule corpus to read',
+        '  no-path       a named path does not exist',
+        '  outside-root  a named path sits outside --root',
         '',
         'Examples:',
         '  canon gov audit',
@@ -658,10 +661,7 @@ async function runAudit(
   opts: AuditOptions,
 ): Promise<number> {
   const root = resolve(opts.root ?? process.cwd())
-  const report = await readRuleAudit(
-    root,
-    paths.map((path) => resolve(path)),
-  )
+  const report = await readRuleAudit(root, paths)
   const emitJson = opts.json ?? false
 
   if (report.kind === 'unreadable') {
@@ -759,7 +759,7 @@ function reportAudit(
   const failing = report.rules.filter(hasFinding).length
   logStep('Summary')
   logInfo(
-    `${failing} of ${report.rules.length} rule(s) carry a finding: ${shaped.length} with a shape finding,${ledgers.length} ledger finding(s)`,
+    `${failing} of ${report.rules.length} rule(s) carry a finding: ${shaped.length} with a shape finding, ${ledgers.length} ledger finding(s)`,
   )
   logInfo(
     RULE_GATED_FOLDERS.length === 0
