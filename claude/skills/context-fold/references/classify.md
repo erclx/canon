@@ -30,7 +30,9 @@ Each finding carries `file`, a `verdict` of `KEEP`, `REPLACE`, `HISTORY`, or `MO
 
 ## Scope
 
-Answer every non-`KEEP` finding the verb returns, not only the files Step 3 wrote this run. A branch carrying earlier commits from a prior session has doc edits the fold is equally responsible for, and the verb's own extraction already scopes to canonical doc types and reports nothing when the range carries none, so there is no narrower check to add here.
+Answer every non-`KEEP` finding the verb returns, not only the files Step 3 wrote this run, since a branch carrying a prior session's commits has doc edits the fold is equally responsible for.
+
+The verb's own extraction already scopes to canonical doc types and reports nothing when the range carries none, so there is no narrower check to add here.
 
 ## Applying a finding
 
@@ -40,7 +42,7 @@ Locate the finding by its `quote` in the file's current content. The quote is of
   - `REPLACE`: rewrite the sentence or bullet carrying the quote in place with the fact that now stands, per Step 3's rewrite-in-place rule. State what is current and drop what the quote restated, in the one edit.
   - `HISTORY`: rewrite the sentence or bullet carrying the quote to drop the narration and keep any current fact the same clause states. The quote narrates how the fact arrived rather than stating the fact, which a canonical doc excludes regardless of what wrote it, and a literal cut of the fragment alone would leave the rest of the clause grammatically stranded.
   - `MOVE`: do not cut. The verdict means correct content sitting on the wrong surface, such as a rule written into a context entry that belongs in a path-scoped rule, and only the model layer returns it. Cutting would delete content a fold with no model configured would never have flagged at all. Report the finding instead, naming the surface the `reason` names as where the content belongs, and leave the file unedited.
-- **Found more than once, or not found at all.** Report that the finding could not be located rather than guessing which occurrence or rewriting nothing silently. A model verdict paraphrasing the quote it read is the ordinary way this happens.
+- **Found more than once, or not found at all.** Report it as not located rather than guessing an occurrence or silently rewriting nothing. A model paraphrasing its quote is the usual cause.
 
 Run the classifier once per fold. Do not re-run it after applying a finding to check the edit, since a second pass over what this step wrote is the loop the verb's own reference already warns against.
 
@@ -50,25 +52,18 @@ Keep a non-`KEEP` finding without applying it only when the quote is itself the 
 
 ## When the verb is absent or refused
 
-The verb ships with the CLI and this skill ships with the plugin, so a target holding an older installed binary carries no `context classify` subcommand. Report:
+The verb ships with the CLI and this skill ships with the plugin, so a target holding an older installed binary carries no `context classify` subcommand. Never read a missing subcommand as a clean pass, which would report a run that never checked anything as one that found nothing.
 
-`⚠ Classify: canon context classify not available on the installed binary. Skipped.`
-
-and continue. Never read a missing subcommand as a clean pass, which would report a run that never checked anything as one that found nothing.
-
-A refused range reports the same way, naming the verb's own message:
-
-`⚠ Classify: <message>`
+| Case               | Report, then continue                                                                |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| Subcommand missing | `⚠ Classify: canon context classify not available on the installed binary. Skipped.` |
+| Range refused      | `⚠ Classify: <message>`, naming the verb's own message                               |
 
 Neither case stops the fold. This step checks what the fold wrote, and a check that cannot run is not a reason to leave the fold's own output unshipped.
 
 ## Report
 
-One line naming what ran:
-
-`✅ Classify: <n> findings, regex ran, model <modelLayer>`
-
-Then one line per non-`KEEP` finding:
+Print one line naming what ran, `✅ Classify: <n> findings, regex ran, model <modelLayer>`, then one line per non-`KEEP` finding:
 
 - `✏ Rewrote: <file>, "<quote>" (<reason>)`
 - `✂ Cut: <file>, "<quote>" (<reason>)`
