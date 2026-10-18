@@ -8,7 +8,7 @@ description: Folder layout, filename convention, file format, origin lines, and 
 Applies to `.canon/tasks/`. Tracks what is being built and why, at the level of features and outcomes, one file per task. Update a task when it starts, completes, or changes scope.
 
 - When to open a task at all is project policy rather than a shape rule, and lives in `CLAUDE.md`
-- The folder is gitignored. Board state changes when work ships, so committing it would put a claim about the future into an unrelated pull request. The git log records what shipped.
+- The folder is gitignored, since committing board state would put a claim about the future into an unrelated pull request
 
 ## Contents
 
@@ -49,18 +49,10 @@ Does not govern:
 └── v13.0-toolkit-drift.md   # canon-allow-reference: illustrates the vXX.Y-slug filename this section defines
 ```
 
-One file per task keeps the board safe under parallel sessions. Two sessions on different tasks never write the same file, and a gitignored board has no history to recover a clobbered write from.
+One file per task keeps the board safe under parallel sessions, since a gitignored board has no history to recover a clobbered write from.
 
-### Siblings
-
-Siblings sit in the folder without being tasks, each governed somewhere. Anything filtering the folder to tasks skips them, so a name outside the set is a task whatever it holds.
-
-- `index.md`, `priority.md`, and `backlog.md` are governed by `board.md`
-- Every `session-` file is an optional pre-compaction handoff governed by `session.md`
-
-### Which skill writes
-
-The `task-board` skill creates and declines task files. The `task-complete` skill marks outcomes `[x]` and archives a shipped task along with its plan, and neither does the other's job.
+- Siblings are governed elsewhere, `index.md`, `priority.md`, and `backlog.md` by `board.md` and each `session-` file by `session.md`. A name outside that set is a task.
+- `task-board` creates and declines task files, and `task-complete` marks outcomes `[x]` and archives a shipped task with its plan
 
 ## Filenames
 
@@ -141,22 +133,15 @@ Every task names where it came from, through a `Plan:`, `Groundwork:`, `Intake:`
 
 ### Both directions
 
-A task with no origin is lost context or work nobody decided to do. The reverse bites harder, since a groundwork track, intake folder, or open issue no task points at is decided work on its way to being forgotten.
-
-An intake folder answers the reverse at folder scope. A folder with every item answered and no task citing it, live, archived, or declined, is a dump nobody acted on.
+A task with no origin is lost context or work nobody decided to do. The reverse bites harder, since a groundwork track, intake folder, or open issue no task points at is decided work being forgotten, and an intake folder fully answered with no task citing it is a dump nobody acted on.
 
 ### Link form
 
-`Plan:`, `Groundwork:`, and `Intake:` name their target as a markdown link whose text is the file or folder stem, so the line resolves on a ctrl-click as `priority.md` rows do.
+`Plan:`, `Groundwork:`, `Intake:`, and `Ready:` name their target as a markdown link whose text is the stem, so the line resolves on a ctrl-click as `priority.md` rows do.
 
 - Write the path relative to `.canon/tasks/`, as `../plans/`, `../groundwork/`, and `../intake/`. A path from the project root resolves to nothing in an editor rooted there.
 - `Issue:` stays a bare `#NNN`, since an issue number is not a path and a full URL writes the remote into a gitignored file
-
-### The `Ready:` line
-
-`Ready:` names the ready folder a task's plan copies from, as a link to `../ready/<nn>-<slug>/` with a folder's trailing slash. Include it only when the folder exists.
-
-`canon tasks archive` reads it to move the folder. With no line, it falls back to a `.canon/ready/<nn>-<slug>/` path in the plan.
+- `Ready:` links `../ready/<nn>-<slug>/`, the folder the plan copies from, only when it exists. `canon tasks archive` reads it to move the folder, falling back to a path in the plan.
 
 ### The `Plan:` line
 
@@ -168,13 +153,9 @@ An intake folder answers the reverse at folder scope. A folder with every item a
 | Shipped, plan archived        | `../plans/archive/feature-<slug>.md`    |
 | Task archived a folder deeper | `../../plans/archive/feature-<slug>.md` |
 
-A project that archived plans before the folder nested under `.canon/plans/` holds closed tasks pointing at `../plans-archive/` or `../.tmp/plans-archive/`. Leave those, since each resolves against its files and retargeting without moving the plan leads nowhere.
-
-### One plan per task
-
-One plan per task, or one per slice, which the board check reads as distinct plans on one line. A plan cited by two tasks is a misfile.
-
-`canon tasks plan-link <task> <plan>` writes or corrects the `Plan:` line, and `--add` appends a slice's plan, so the line is never hand-edited.
+- One plan per task, or one per slice as distinct plans on one line. A plan cited by two tasks is a misfile.
+- `canon tasks plan-link <task> <plan>` writes or corrects the line, and `--add` appends a slice's plan, so it is never hand-edited
+- Leave an older `../plans-archive/` or `../.tmp/plans-archive/` pointer alone, since it resolves and retargeting without moving the plan leads nowhere
 
 ### The `Groundwork:` and `Intake:` lines
 
@@ -217,9 +198,7 @@ Session history and ordering both have homes off the task file.
 
 ## Archiving
 
-Never delete a task file. A shipped task moves to `.canon/tasks/archive/` under its own name and the live index regenerates without it, a move `canon tasks archive` owns, with its refusals at `canon tasks archive --help`.
-
-A flat `.claude/task-archive/` sibling is what a binary predating this convention writes. Meeting one names an older checkout rather than a second archive to reconcile.
+Never delete a task file. A shipped task moves to `.canon/tasks/archive/` under its own name through `canon tasks archive`, and a flat `.claude/task-archive/` names an older binary rather than a second archive.
 
 ### The plan and ready folder
 
@@ -230,6 +209,4 @@ Archiving a task archives its plan alongside it when the task is that plan's las
 
 ### Open outcomes
 
-A task with an open outcome stays on the board, and so does its plan. Close it, or cut the outcome when the work is abandoned, so what was dropped is recorded rather than inferred.
-
-Cutting strikes the outcome's body, as `- ~~<outcome>~~ <why>`. A struck body reads as cut whatever its checkbox holds, so a task carrying only cut outcomes still archives.
+A task with an open outcome stays on the board, and so does its plan. Close it, or cut an abandoned outcome by striking its body, as `- ~~<outcome>~~ <why>`, which reads as cut whatever its checkbox holds, so a task of cut outcomes still archives.

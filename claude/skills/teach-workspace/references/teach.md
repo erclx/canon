@@ -128,19 +128,18 @@ Write one bullet per item, in this shape and no other:
 - **<what comes back up>**: due <YYYY-MM-DD>, rung <n>
 ```
 
-The rung is where the item sits on the spacing ladder, and it travels in the record rather than being counted from how many records name the item, since a miss drops it back and a count only climbs. A later record naming the same item supersedes an earlier one, so revise the schedule by writing the new entry rather than editing the old record.
+The rung is the item's place on the spacing ladder. It travels in the record rather than being counted from records naming the item, since a miss drops it back and a count only climbs.
 
-Take the date and the rung from what the surface driving the workspace reports rather than picking either. An entry outside this shape schedules nothing, and nothing reports that it was skipped.
+- A later record naming the item supersedes an earlier one, so revise by writing a new entry rather than editing the old record
+- Take the date and rung from what the driving surface reports. An entry outside this shape schedules nothing, silently.
 
 ## GLOSSARY.md
 
-Required in every workspace, holding one entry per term the subject defines. This standard states only that the file exists and sits at the workspace root.
+Required at the root of every workspace, one entry per term the subject defines. The glossary reference the `canon:teach-workspace` skill carries fixes the entry shape, order, grouping, and which terms it holds.
 
-- The glossary reference the `canon:teach-workspace` skill carries fixes the entry shape, the order and grouping, and which terms the file carries
-- That reference ships with the plugin rather than installing here, because a promoted glossary keeps its shape wherever it lands and no project folder covers every destination
-- When the project has no plugin to read it from, say so and stop rather than working the shape from memory
-
-Name the lesson or reference page a term first appears in as that reference requires. A workspace is the case it was written for, so a glossary here has a first appearance to name.
+- That reference ships with the plugin rather than installing here, since a promoted glossary keeps its shape wherever it lands
+- With no plugin to read it from, say so and stop rather than working the shape from memory
+- Name the lesson or reference page a term first appears in, which a workspace always has
 
 ## RESOURCES.md
 
@@ -150,7 +149,7 @@ Splits what was read from what was found.
 - List under a leads heading any source found and not opened, and never cite one
 - Say which claims in the workspace rest on which source
 
-A source found and not read is listed as a lead because a link attached to a page nobody opened is worse than no link. Listing it still pays, since it stops a later session searching for what this one already surfaced.
+An unread source is a lead because a link to a page nobody opened is worse than none. Listing it stops a later session searching again.
 
 ### Choosing sources
 
