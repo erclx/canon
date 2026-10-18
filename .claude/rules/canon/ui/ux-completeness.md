@@ -10,56 +10,33 @@ paths:
 
 # UX completeness standards
 
-## Mutation feedback
+## Feedback
 
-- Every user-initiated mutation (save, delete, sync, import, export) must show inline feedback on success.
-- Feedback must be transient: auto-dismiss after 2-3 seconds without requiring user action.
-- Show inline error feedback when a mutation fails. Do not fail silently.
+- Confirm every user-initiated mutation, such as a save, delete, or import, inline on success, and show an inline error when it fails.
+- Auto-dismiss a success message only when its outcome stays visible elsewhere. Keep a message carrying the only copy of its information until dismissed (WCAG 2.2.1).
+- Show no optimistic status, such as a green dot or "connected", while unsaved edits are pending.
 
 ## Empty states
 
-- Every list, table, or collection view must handle the empty state explicitly.
-- Empty states must include a next action: a button, link, or instruction that tells the user what to do.
-- Distinguish between "nothing exists yet" (onboarding) and "nothing matches your filter" (recovery). Use different copy for each.
-- Filter-driven empty states must include a way to clear the filter (link or button).
+- Give every list, table, or collection an explicit empty state carrying a next action, such as a button or link.
+- Write different copy for "nothing exists yet" and "nothing matches your filter", and give the filtered state a way to clear the filter.
 
 ## Loading states
 
-- Every async operation visible to the user must show a loading indicator (spinner, skeleton, or disabled state).
-- Do not show stale content while new content is loading. Either show a loading state or keep the previous content with a progress indicator.
+- Show a progress indicator for any operation a person waits on for longer than about one second.
+- Mark previous content as updating while new content loads, rather than showing it unmarked as current.
 
 ## Destructive actions
 
-- Destructive actions (delete, disconnect, discard) must require confirmation before executing.
-- Confirmation UI must be dismissible via Escape in addition to a cancel button.
+- Confirm a destructive action, such as a delete, disconnect, or discard, before it runs, unless it can be undone afterward.
 
-## Inline confirmations
+## Element states
 
-- All inline confirmation rows (delete, discard, cancel) must be dismissible via Escape.
-- Confirmation labels and destructive buttons must have sufficient contrast in both light and dark modes.
+- Give every interactive element distinct hover, active, focus, and disabled styles.
+- Never flash an intermediate state, such as a light frame before a dark theme or a layout jump before data arrives. Reserve the space or settle it first.
 
-## Status indicators
+## Overflow
 
-- Status indicators (dots, badges, connection status) must reset to a neutral state when their source input changes.
-- Do not show optimistic status (green dot, "connected") while unsaved edits are pending.
-
-## State transitions
-
-- Do not flash intermediate states during transitions (e.g., white flash on theme load, layout jump before data arrives).
-- Use CSS transitions or deferred rendering to prevent visible flicker between states.
-
-## Interactive element states
-
-- All interactive elements must visually respond to hover, active, focus, and disabled states.
-- Disabled elements must use reduced opacity or muted colors and `cursor: not-allowed`.
-- Do not rely on a single state (e.g., focus only) to communicate interactivity.
-
-## Overflow and truncation
-
-- Long text in constrained containers must truncate with ellipsis, not overflow or wrap unexpectedly.
-- Truncated text must be accessible via `title` attribute or expandable interaction.
-
-## Scroll and clipping
-
-- Focus rings and interactive borders must not be clipped by parent `overflow: hidden` or `overflow: auto` containers.
-- Add padding or adjust overflow to prevent clipping on edge items in scrollable lists.
+- Truncate long text in a constrained container with an ellipsis rather than letting it overflow.
+- Expose truncated text through an expand control or full text on focus, never through a `title` tooltip alone.
+- Keep focus rings and interactive borders clear of a parent's `overflow` clipping, padding the edge items of a scrollable list.

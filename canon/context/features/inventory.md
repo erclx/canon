@@ -7,7 +7,7 @@ description: The route walk behind canon inventory, the subject readers it runs,
 
 ## Overview
 
-`canon inventory` walks every route a project declares and reports one computed property per element, grouped by the answer rather than by the component. Its one subject today is the focus ring, which `governance/rules/ui/a11y.md` states rules against. The command reports a listing and gates nothing. Start from `canon inventory --help`.
+`canon inventory` walks every route a project declares and reports one computed property per element, grouped by the answer rather than by the component. Its one subject today is the focus ring, which `governance/rules/ui/keyboard.md` states rules against. The command reports a listing and gates nothing. Start from `canon inventory --help`.
 
 ## Layout
 
@@ -31,5 +31,5 @@ The browser helpers sit beside the walk.
 
 - A `:focus-visible` ring only shows in keyboard modality, so the walk presses Tab once per route and the reader blurs that focused element before it reads rest state
 - A subject reader is serialized to source and evaluated in the page, so a helper declared at module scope typechecks and then throws there
-- Only two of the three `a11y.md` focus rules are measurable from computed style, since the 3:1 contrast rule needs a background source the walk does not have
+- Only two of the three `keyboard.md` focus rules are measurable from computed style, since the 3:1 contrast rule needs a background source the walk does not have
 - A test for the server-unreachable refusal needs a port the kernel handed out and released, because a low reserved port fails in the engine first

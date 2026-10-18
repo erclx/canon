@@ -130,6 +130,7 @@ describe('governance/rules/ui', () => {
       'design-reference',
       'forms',
       'interface-casing',
+      'keyboard',
       'link-behavior',
       'motion',
       'surface-capture',
