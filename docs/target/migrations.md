@@ -160,3 +160,11 @@ canon migrate session-defaults --write --json
 ```
 
 The verb only adds a key that is absent. A person who wants auto memory back sets it in their own `.claude/settings.local.json`.
+
+## Move the capture cases out of the harness, once
+
+A web project's `e2e/screenshot.ts` is a config, so sync overwrites it. It now loads `CASES` from a seeded `e2e/capture/cases.ts` that sync copies once and never overwrites. Cases edited in the old harness leave the working tree on the first sync and stay in git history.
+
+- Copy your cases from the old `e2e/screenshot.ts` into `e2e/capture/cases.ts` before the next sync.
+- Evidence now defaults to `e2e/evidence/`. Set `export const EVIDENCE_ROOT = 'evidence'` in `e2e/capture/cases.ts` to keep a committed baseline at the old path.
+- A run from a folder with no `e2e/capture/cases.ts` exits 1 and names the file.

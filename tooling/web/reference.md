@@ -25,7 +25,7 @@ Two configs carry the lint and unit-test baseline.
 - `VIEWPORTS` holds 320, 768, 1280, and 1536. Width 320 is the base a page has to hold without wrapping or clipping.
 - `excludeViewports` skips a width, for a route whose long-form prose reflows at 320 instead of breaking.
 - `evidence: true` also writes `<EVIDENCE_ROOT>/<section>/<width>--<theme>.png` at 320 and 1280 alone. `EVIDENCE_ROOT` defaults to `e2e/evidence`.
-- Migration: move cases from a project's own `e2e/screenshot.ts` to `e2e/capture/cases.ts` before the next sync, and set `EVIDENCE_ROOT = 'evidence'` to keep the baseline.
+- Migration: move cases from `e2e/screenshot.ts` to `e2e/capture/cases.ts` before a sync, and set `EVIDENCE_ROOT = 'evidence'` to keep the baseline.
 
 ### Sections and masks
 

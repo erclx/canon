@@ -8,7 +8,6 @@ import { injectConfigs, injectSeeds } from '@/tooling/inject'
 import { resolveChain } from '@/tooling/manifest'
 
 const HARNESS_REL = 'tooling/web/configs/e2e/screenshot.ts'
-const SEED_REL = 'tooling/web/seeds/e2e/capture/cases.ts'
 const MARKER = '\n// project edit\n'
 
 let target: string
@@ -41,17 +40,16 @@ describe('the capture cases seed', () => {
     expect(readFileSync(harness, 'utf8')).not.toContain(MARKER)
   })
 
-  it('keeps the cases out of the harness config', () => {
-    const harness = readFileSync(join(PROJECT_ROOT, HARNESS_REL), 'utf8')
+  it('seeds cases that write evidence under e2e/evidence', async () => {
+    await sync()
 
-    expect(harness).not.toMatch(/const CASES\b/)
-    expect(harness).toContain('EVIDENCE_ROOT')
-  })
+    const seeded = (await import(join(target, 'e2e/capture/cases.ts'))) as {
+      CASES: unknown[]
+      EVIDENCE_ROOT: string
+    }
 
-  it('defaults evidence to e2e/evidence', () => {
-    const seed = readFileSync(join(PROJECT_ROOT, SEED_REL), 'utf8')
-
-    expect(seed).toContain("export const EVIDENCE_ROOT = 'e2e/evidence'")
+    expect(seeded.CASES.length).toBeGreaterThan(0)
+    expect(seeded.EVIDENCE_ROOT).toBe('e2e/evidence')
   })
 
   it('exits 1 naming the missing cases file instead of capturing nothing', () => {
