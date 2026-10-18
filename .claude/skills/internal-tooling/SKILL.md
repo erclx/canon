@@ -65,6 +65,41 @@ Agent-facing prose seeds under `tooling/*/seeds/` use lowercase filenames, such 
 - An unmoved project gets them beside the entries it still holds under `.claude/context/` <!-- canon-keep-surface-root -->
 - Never seed agent-facing content under `tooling/*/seeds/docs/`, since `docs/` is reserved for human-facing prose
 
+## Web stack authoring
+
+The `web` reference serves a project that installed the stack, so the guidance below, for a session changing `web` or a framework stack on it, lives here.
+
+### Framework adapters
+
+Framework glue lives in `tooling/vite-react/configs/` or `tooling/astro/configs/`, because merge helpers and config shapes differ.
+
+- `vite.config.ts` or `astro.config.mjs` holds the framework's config
+- `vitest.config.ts` uses `mergeConfig` in a Vite stack and `getViteConfig` from `astro/config` in Astro
+- `playwright.config.ts` differs in its `webServer` command
+- `tsconfig.json` differs in its `extends` target. Astro uses `astro/tsconfigs/strict` and a Vite stack uses scaffold defaults.
+
+### Config traps
+
+Each costs a failed `canon tooling verify` run to relearn.
+
+| Do not                                          | Why and what to do                                                                             |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Use `exclude: ["e2e"]`                          | Bare-folder globs miss. Use `"e2e/**/*"`.                                                      |
+| Put Playwright `trace` at the top of the config | It lives under `use`.                                                                          |
+| Ship Vitest failing on no tests                 | Fresh scaffolds have none. Use `passWithNoTests: true` until one exists.                       |
+| Drop `skipLibCheck: true` in Vite + React       | `@testing-library/jest-dom` and Vite's `module-runner` conflict otherwise.                     |
+| Trust `vite-react`'s scaffolded `lint` script   | Its bare `oxlint` exits 0 on warnings. `[scripts.override]` forces `--max-warnings 0` over it. |
+
+### Ports, verify, and screenshots
+
+These hold the shipped behavior the `web` reference describes in place.
+
+- Force-replace `dev` and `preview` through `[scripts.override]`, since a plain `[scripts]` entry never replaces a key the scaffold wrote
+- Let astro, vite-react, and nextjs inherit `scripts/verify.json`, since the nearest stack's copy wins, and ship an adapter's own `verify.json` only when its phases differ
+- Keep what the card check reads owned by the stack shipping a card route, being the build the stage before it produced. The astro reference carries the route.
+- `canon tooling verify <stack>` is the only automated caller of `bun run screenshot`, and asserts PNG files land under `screenshots/`
+- Keep the seed's section folders, since that count is a recursive find with no depth limit and flattening the layout to protect it breaks the capture
+
 ## Reference
 
 - `canon/context/surfaces/tooling.md`: system overview, configs vs seeds vs references, extends chain, manifest authoring
