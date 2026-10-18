@@ -14,7 +14,7 @@ A track fanning out to subagents returns findings without their reasoning. Under
 ## Must
 
 - Detect open, resume, and close from the folder itself, matching the topic against existing tracks first, and number a new folder past the highest ordinal across groundwork and intake
-- Measure the current state now, carry a lean and the finding that would overturn it on every open question, and link every outside claim
+- Measure the current state now, carry a lean and the finding that would overturn it on every open question, link every outside claim, and end a pass with every question leaned on a plain retell
 - Confine writes to the track folder, plus the close-time task file, the experiment fixture, and the intake routing
 - Route a closing finding the task does not cover through `plan-intake` in the same session, and place the closing task's row through `task-board`
 - Put a fixture a headless run is pointed at outside the repository, and write the next-session file self-contained
