@@ -9,7 +9,17 @@ description: Shape and content rules for tooling stack reference docs, and the m
 
 A stack reference records the explicit decisions a tooling stack makes, so a reader knows what the stack chose without opening every config. It lives at `tooling/<stack>/reference.md` and reads through `canon tooling reference <stack>`, resolving the working root first and the packaged corpus after.
 
-Nothing installs it into a target and nothing generates it, so it is written and kept current by hand.
+- Write for a session working in a project that installed the stack, since that session is the one the verb serves
+- Keep guidance for authoring or maintaining the stack in the `internal-tooling` skill. A target session cannot act on it.
+- Nothing installs the reference and nothing generates it, so it is written and kept current by hand
+
+### What the verb prints after it
+
+The verb appends two sections from the stack's manifest and folders, so no reference writes either one. A hand list drifts from the files it names.
+
+- `## Sync` lists the files sync keeps current, from `configs/`, and the files it copies once, from `seeds/`
+- `## Gitignore` lists the manifest's `[gitignore]` groups
+- Each lists the stack's own entries alone, and a section with nothing to list prints no heading
 
 ## The manifest pair
 
@@ -18,7 +28,7 @@ The reference and `tooling/<stack>/manifest.toml` are one decision recorded twic
 The symmetry runs in both directions, and the direction that breaks is the manifest moving first. A reader arrives here because they touched one of the two files, not because they set out to keep the pair aligned.
 
 - Edit both files in the same change. Neither one is the source the other derives from.
-- Restate every `[gitignore]` group verbatim. This is the group that has drifted, because a group reads as a config detail rather than as a documented decision.
+- Leave `[gitignore]` groups and the shipped file list out of the reference, since the verb prints both from the manifest and the folders. Record a group's reason only when it is non-obvious.
 - Record a `[scripts]` key in the `## CLI` table when the stack introduces a command.
 - Document the manual install step when `runtime` is not `bun`, since injection runs `bun add -D` and such a manifest leaves `[dependencies.dev]` empty.
 
@@ -52,23 +62,29 @@ The symmetry runs in both directions, and the direction that breaks is the manif
 
 ## Example
 
+An excerpt from the current `vite-react` reference, which the verb follows with its printed `## Sync`.
+
 ```markdown
 # Tooling vite-react reference
 
-> Extends: `base`. Apply base stack first.
+> Extends: `web`. Apply web stack first.
 
 ## Overview
 
-The vite-react stack covers Vite, React, and TypeScript projects, including web apps and Chrome extensions.
+The vite-react stack covers Vite + React + TypeScript web apps and Chrome extensions.
 
-## Prettier (extend)
+## What ships as golden configs
 
-- Add `jsxSingleQuote: true`.
-- Add `prettier-plugin-tailwindcss` to the plugins array.
-
-## Vitest
-
-- Environment: `jsdom`.
-- Globals: `true`.
-- Setup file: `src/test/setup.ts`. Imports `@testing-library/jest-dom` and runs `cleanup` after each test.
+- `vite.config.ts` adds `@vitejs/plugin-react`, `@tailwindcss/vite`, and the `@` alias to `./src`.
+- It serves dev on port `5173` and preview on `4173`, each plus `WORKTREE_PORT_OFFSET`, both with `strictPort`.
 ```
+
+### Before and after
+
+Each pair is taken from a reference that broke the standard and the shape it was rewritten to.
+
+| Before                                                              | After                                                          |
+| ------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `claude` drew its seeded files as a tree inside a `plaintext` fence | Nothing, since the verb prints `## Sync` from `seeds/`         |
+| `web` carried "What stays in per-stack adapters" for stack authors  | The same guidance under `## Web stack authoring` in this skill |
+| `Prettier is configured with semi set to false`                     | `Use semi: false`                                              |
