@@ -8,7 +8,7 @@ import {
 
 describe('SKILL_NAME_MAP', () => {
   it('should carry one row for every renamed skill', () => {
-    expect(Object.keys(SKILL_NAME_MAP)).toHaveLength(37)
+    expect(Object.keys(SKILL_NAME_MAP)).toHaveLength(44)
   })
 
   it('should retire the prefix on every row', () => {
@@ -44,15 +44,18 @@ describe('SKILL_NAME_MAP', () => {
     const shared = [...byName.values()].filter((keys) => keys.length > 1)
 
     expect(shared).toEqual([
-      ['claude-diagram', 'draft-diagram'],
+      ['claude-diagram', 'draft-diagram', 'draft-figure'],
       ['claude-docs', 'docs-fold'],
       ['claude-ui-test', 'ui-test'],
+      ['canon-screencast', 'draft-screencast'],
+      ['canon-slides-draft', 'draft-slides'],
       [
         'draft-docs',
         'draft-context',
         'draft-wireframes',
         'draft-readme',
         'draft-wiki',
+        'draft-doc',
       ],
     ])
   })
@@ -197,13 +200,13 @@ describe('renameText under the skill preset', () => {
     )
   })
 
-  it('should rewrite the two canon- names that join the draft- family', () => {
+  it('should land the two canon- names that once joined the draft- family on their verb-first names in one pass', () => {
     expect(
       renameText(
         'canon:canon-screencast and canon:canon-slides-draft',
         SKILL_NAME_RULES,
       ),
-    ).toBe('canon:draft-screencast and canon:draft-slides')
+    ).toBe('canon:script-screencast and canon:make-deck')
   })
 
   it('should land both ui spellings on the new name in one pass', () => {
@@ -218,7 +221,7 @@ describe('renameText under the skill preset', () => {
         'canon:draft-docs, draft-context, draft-wireframes, draft-readme, draft-wiki',
         SKILL_NAME_RULES,
       ),
-    ).toBe('canon:draft-doc, draft-doc, draft-doc, draft-doc, draft-doc')
+    ).toBe('canon:write-doc, write-doc, write-doc, write-doc, write-doc')
   })
 
   it('should land both diagram spellings on the figure skill that absorbed them', () => {
@@ -227,7 +230,33 @@ describe('renameText under the skill preset', () => {
         'canon:claude-diagram and canon:draft-diagram',
         SKILL_NAME_RULES,
       ),
-    ).toBe('canon:draft-figure and canon:draft-figure')
+    ).toBe('canon:draw-figure and canon:draw-figure')
+  })
+
+  it.each([
+    ['draft-doc', 'write-doc'],
+    ['draft-figure', 'draw-figure'],
+    ['draft-identity', 'design-identity'],
+    ['draft-slides', 'make-deck'],
+    ['draft-and-pick', 'pick-by-eye'],
+    ['draft-ready', 'plan-ready'],
+    ['draft-screencast', 'script-screencast'],
+  ])('should rename %s for what it makes', (old, name) => {
+    expect(renameText(`run canon:${old} now`, SKILL_NAME_RULES)).toBe(
+      `run canon:${name} now`,
+    )
+  })
+
+  it('should land the merged docs drafter on the new doc skill rather than on the retired draft-doc', () => {
+    expect(renameText('canon:draft-docs', SKILL_NAME_RULES)).toBe(
+      'canon:write-doc',
+    )
+  })
+
+  it('should leave a longer name that only opens with a renamed draft- name', () => {
+    expect(
+      renameText('draft-docsets and draft-ready-made', SKILL_NAME_RULES),
+    ).toBe('draft-docsets and draft-ready-made')
   })
 
   it('should rewrite the two canon- names that take a standalone verb-first name', () => {
