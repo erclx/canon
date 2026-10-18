@@ -20,7 +20,13 @@ gh api --paginate 'repos/{owner}/{repo}/issues/<number>/comments?per_page=100' -
 
 Take the comment whose body carries a `<!-- pr-evidence: head=<sha> -->` marker. Match the marker, never the first line, since the body opens with `## Evidence` and a comment posted before that layout opens with a `**Preview:**` line instead.
 
-Flag the change as shipping no screenshot when it paints and the pull request carries no marked comment, carries one with no comparison, meaning no `**Base:**` line and no `<details>` table, or carries only a checklist posted alone. The `## Evidence` heading opens every marked comment, a checklist-only one included, so the heading alone never means screenshots are present. Then decide how to raise it by whether the project keeps captures, which is the same test `canon pr evidence` applies:
+Flag the change as shipping no screenshot when it paints and the pull request carries any of three comment shapes.
+
+- No marked comment at all
+- A marked comment with no comparison, meaning no `**Base:**` line and no `<details>` table
+- Only a checklist posted alone, since `## Evidence` opens every marked comment and the heading alone never means screenshots are present
+
+Then decide how to raise it by whether the project keeps captures, the same test `canon pr evidence` applies:
 
 ```bash
 git ls-tree -r --name-only <base> | grep -E '(^|/)evidence/.*\.(png|jpe?g|gif|webp|avif|svg)$' | head -1
@@ -45,7 +51,11 @@ mkdir -p .canon/tmp/pr/review/evidence/<number>
 git show <sha>:<path> > .canon/tmp/pr/review/evidence/<number>/<side>-<name>.png
 ```
 
-Take the sha from the row, so the base and head sides are exactly what the comment shows. Then open each file with the file-reading tool. A `*(new)*` base cell has no before image, and a view or flat block whose cases are all added has no base column at all. A view row holds one case per theme cell, so a width row names two images where a flat row names one. Read the URL out of the `src=` of each `<img>`, or out of `![](` in a comment posted before the embed changed.
+Take the sha from the row, so the base and head sides are exactly what the comment shows. Then open each file with the file-reading tool.
+
+- Read the URL out of the `src=` of each `<img>`, or out of `![](` in a comment posted before the embed changed
+- A `*(new)*` base cell has no before image, and a view or flat block whose cases are all added has no base column at all
+- A view row holds one case per theme cell, so a width row names two images where a flat row names one
 
 ## How many to open
 
@@ -59,21 +69,26 @@ A second theme earns a read only when the diff touches a color token. Name the s
 
 ## Comparing
 
-Check each opened image against the layout its checklist box claims, and check the tokens the image makes visible, being color, type scale, and spacing, against the stylesheet `canon/DESIGN.md`'s lead names, and its component rules against the record itself.
+Check each opened image against the layout its checklist box claims. A finding names the checklist box or design-file line the image breaks, never a taste.
 
-Read the width and theme from whatever the image path carries, and fix no width list, since which widths matter belongs to the project. Skip the design file comparison silently when the project has none.
-
-A finding names the checklist box or design-file line the image breaks, never a taste.
+- Check the visible tokens, being color, type scale, and spacing, against the stylesheet `canon/DESIGN.md`'s lead names
+- Check its component rules against the record itself, and skip the design file comparison silently when the project has none
+- Read the width and theme from whatever the image path carries, and fix no width list, since which widths matter belongs to the project
 
 ## The checklist
 
 The `## What to look at` block between the `pr-checklist` markers holds what was claimed as verified. A tick stamped `passed at` the current head is the UI reviewer's pass, and an unstamped tick is an author's or operator's claim.
 
-- Test each ticked box against an opened image showing the state and width it names, a stamped one included, since the UI reviewer drove the running app and not the committed stills. Flag a box whose image contradicts it, quoting the box.
+- Test each ticked box against an opened image showing the state and width it names, a stamped one included, since the UI reviewer drove the app and not the stills
+- Flag a box whose image contradicts it, quoting the box
 - A ticked box no image covers is untested rather than confirmed, and the finding says so.
 - Test only the rows the current comment shows. The next render clears a tick whose stamp names another head, so a tick not stamped at the current head may describe images the comment no longer carries.
 - Leave unchecked boxes to the procedure's own read of the description.
 
 ## With no pull request
 
-A local review has no comment to read. Read each changed image under an `evidence/` path segment from the working tree, and its base side with `git show <base>:<path>`. Read the checklist handoff at `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root when it exists. A painting change with no changed evidence image takes the flag from the first section, decided by the same `git ls-tree` test.
+A local review has no comment to read, so it reads the tree.
+
+- Read each changed image under an `evidence/` path segment from the working tree, and its base side with `git show <base>:<path>`
+- Read the checklist handoff at `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root when it exists
+- A painting change with no changed evidence image takes the flag from the first section, decided by the same `git ls-tree` test

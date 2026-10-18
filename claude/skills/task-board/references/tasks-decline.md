@@ -27,12 +27,19 @@ A declined task works when a later reader can tell, from the folder and the file
 
 ## Declining
 
-A task decided against moves to `.canon/tasks/declined/` rather than `.canon/tasks/archive/`. The two folders answer different questions: archive means the work shipped, declined means somebody decided against doing it. Neither reading fits a task that is merely unscheduled, which stays on `backlog.md` rather than moving anywhere, since nobody has decided against it and it may still rise when the board has room.
+A task decided against moves to `.canon/tasks/declined/` rather than `.canon/tasks/archive/`. Archive means the work shipped, and declined means somebody decided against doing it.
 
-`canon tasks decline` carries no outcome-state gate, so a task can be decided against at any outcome state, open outcomes included.
+- A merely unscheduled task fits neither. It stays on `backlog.md`, since nobody decided against it and it may still rise.
+- `canon tasks decline` carries no outcome-state gate, so a task can be declined at any outcome state, open outcomes included
+- The move clears whichever of `priority.md` or `backlog.md` holds the task's row
 
-The decision is recorded on the task itself with a `Declined:` line, in the `Plan:`/`Pull request:` family: `Declined: <reason>, <who> on <YYYY-MM-DD>`. It anchors the same way `Pull request:` does, after the last origin line the task carries. The line is free prose after the colon, since it names no file to link.
+### The `Declined:` line
 
-Declining a task moves its plan alongside it the same way archiving does, when the declining task is that plan's last live citation. A plan several tasks share stays where it is, and a declined task's plan lands in `.canon/plans/archive/` indistinguishable from a shipped one by folder alone. The task file under `.canon/tasks/declined/` is what records which it was.
+The decision is recorded on the task with a `Declined:` line in the `Plan:` and `Pull request:` family, as `Declined: <reason>, <who> on <YYYY-MM-DD>`. It anchors after the last origin line the task carries, as `Pull request:` does, and stays free prose since it names no file to link.
 
-The move clears whichever of `priority.md` or `backlog.md` holds the task's row.
+### The plan
+
+Declining moves the plan alongside the task when the task is that plan's last live citation, as archiving does. A plan several tasks share stays where it is.
+
+- A declined task's plan lands in `.canon/plans/archive/`, indistinguishable from a shipped one by folder alone
+- The task file under `.canon/tasks/declined/` records which it was

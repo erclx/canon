@@ -25,9 +25,11 @@ Read four fields off the same report, then two verbs:
 
 - `unmigrated`: a domain still at the root layout with nothing under `.claude/`. The most urgent finding, because such a domain reports no drift of its own while being entirely behind.
 - `superseded`: a file a newer seed folder replaced. No command moves it, since the content is the project's own.
-- `unmovedSurfaces`: a surface held only at its `.claude/` spelling, each entry carrying `rel` and `movesTo`. Every other field reads clean for such a target, and the report's drift status ignores it by design, so read the array itself rather than an exit status.
+- `unmovedSurfaces`: a surface held only at its `.claude/` spelling, each carrying `rel` and `movesTo`. Read the array itself, since every other field and the drift status read clean here by design.
 
 ### Reverse and the verbs
+
+The fourth field and the two verbs cover what the toolkit stopped shipping and what the context folder holds.
 
 - `reverse`: `unclaimed` names folders at roots the toolkit stopped shipping, each with an `attribution` of `dropped`, `unattributed`, or `project`.
 - `canon context audit --json`: required sections, entry length, citations, and index drift across the context folder.
@@ -35,9 +37,12 @@ Read four fields off the same report, then two verbs:
 
 ### Verdicts
 
+Each of the three states takes all six reads together.
+
 - Current: `unmigrated`, `superseded`, and `unmovedSurfaces` all empty, `reverse.unclaimed` carrying nothing outside `project` attribution, and both verbs finding nothing.
 - Behind: any of those carrying an entry. Name the entry and its attribution, and for `unmovedSurfaces` each `rel` with its `movesTo`.
-- Unread: `historyUnavailable` set on `reverse`, a `reverse` or `unmovedSurfaces` key the report does not carry at all, or either verb refusing. A missing key is a binary predating the field rather than a target with nothing to report, so name the installed version beside it.
+- Unread: `historyUnavailable` set on `reverse`, a `reverse` or `unmovedSurfaces` key the report does not carry, or either verb refusing
+- A missing key is a binary predating the field rather than a target with nothing to report, so name the installed version beside it
 
 Routes by finding.
 
@@ -53,22 +58,38 @@ Read `domains` off the report and take every entry it carries rather than naming
 The states are `matching`, `stale`, `customized`, `drifted`, `orphaned`, `retired`, `stranded`, and `missing`. A `retired` rule is one the toolkit no longer ships, and the next sync deletes it.
 
 - Current: every count but `matching` reads zero.
-- Behind: any other count is non-zero. Report the counts and name the paths behind `stale` and `missing`, which a sync repairs, separately from `customized` and `drifted`, which the project wrote and a sync would overwrite.
+- Behind: any other count is non-zero. Report the counts, and name the paths behind each state.
 - Unread: `stamped` false with no entries, or the domain absent from the array while the target carries installed rules.
+- Keep `stale` and `missing`, which a sync repairs, apart from `customized` and `drifted`, which the project wrote and a sync would overwrite
 
 Routes to `canon <domain> sync`, or to `canon sync` for every installed domain at once. Read the `canon-cli` skill before naming either, since a command name says nothing about what it does to a file already there, and a `customized` entry is exactly the file a sync takes back.
 
 ## 4. Tooling
 
-Read the `tooling` block off the report first, because the comparison command needs a value it carries.
+Read the `tooling` block off the report first, because the comparison command needs a value it carries. Read `measured` before anything under it, since every count is zero when it is false, an absence of measurement rather than a measured zero.
 
-Read `measured` before anything under it. Every count is zero when `measured` is false, which is an absence of measurement rather than a measured zero.
+### The comparison
 
-On a measured report, take `<stack>` from the first name in `chain` and run `canon tooling sync --check <stack>`. Never run it bare. The stack argument is what the target carries, and omitting it reaches a prompt that the non-interactive variable resolves to the catalog's first entry rather than refusing, which compares the target against a stack it does not use and reports the difference as drift.
+On a measured report, take `<stack>` from the first name in `chain` and run `canon tooling sync --check <stack>`. Never run it bare.
+
+- Omitting the stack reaches a prompt the non-interactive variable resolves to the catalog's first entry rather than refusing
+- That compares the target against a stack it does not use and reports the difference as drift
+
+### Verdicts
+
+Unread splits three ways, so it takes its own table below.
 
 - Current: `measured` true, `chain` naming stacks the toolkit still ships, and `--check` reporting nothing it would change.
 - Behind: `--check` naming files it would replace, or `counts.gitignore` carrying missing managed entries.
-- Unread: `measured` false. It splits three ways, and each is reported as unmeasured with its cause named rather than as clean. An empty `chain` at a workspace root is by design, since a chain there would guess at what the packages hold. An empty `chain` anywhere else means no tooling install is recorded. A `chain` carrying names the toolkit no longer ships means injecting would write against a retired name.
+- Unread: `measured` false. Report it as unmeasured with its cause named rather than as clean.
+
+| Cause                                   | Meaning                                                              |
+| --------------------------------------- | -------------------------------------------------------------------- |
+| Empty `chain` at a workspace root       | By design, since a chain there would guess at what the packages hold |
+| Empty `chain` anywhere else             | No tooling install is recorded                                       |
+| `chain` naming stacks no longer shipped | Injecting would write against a retired name                         |
+
+### Routes
 
 Routes to `canon tooling sync <stack>`, or to `canon tooling inject --gitignore <stack>` for ignore entries alone, taking `<stack>` the same way the comparison above does. An unmeasured report names no stack, so it routes to neither.
 
@@ -88,12 +109,19 @@ A seed entry matching says the file's bytes match the shipped seed. It says noth
 
 ## 6. The Claude harness
 
-No verb reads this domain. Report it `unchecked` on every run and report it as a row rather than omitting it.
+No verb reads this domain. Report it `unchecked` on every run, as a row rather than omitted.
 
-What goes unread is whether the target's hooks fire, whether `.claude/settings.json` registers them, which plugin version the target's sessions actually load, and whether the marketplace cache matches what the toolkit ships.
+What goes unread is whether the target's hooks fire, whether `.claude/settings.json` registers them, which plugin version the target's sessions load, and whether the marketplace cache matches what the toolkit ships.
 
-Confirm the gap against the live surface rather than against a list held here, by reading `canon claude --help` and the help of any subcommand under it that sounds like an answer. A list written into this file freezes on the day it was written and would report a gap a later release had closed. `canon claude skills drift` is the verb that comes nearest, and it reads the toolkit's own history against a ref, which says what moved upstream rather than what this target holds. Report the domain checked, with what the verb answered, on the run where a verb does answer one of the four questions above.
+### Confirm the gap live
 
-Reading it by file inspection is the alternative and it is refused. Every other section here answers from the verb under test, and a section answering from a hand-rolled read of the same files reaches a verdict nothing else in the report is entitled to make. A hole a reader can see is worth more than a number nobody can trace.
+Confirm the gap against `canon claude --help` and the help of any subcommand that sounds like an answer, rather than a list held here. A list in this file freezes on the day it was written and reports a gap a later release closed.
+
+- `canon claude skills drift` comes nearest, but it reads the toolkit's own history against a ref, which says what moved upstream rather than what this target holds
+- On a run where a verb answers one of the four questions, report the domain checked with what the verb answered
+
+### No file inspection
+
+Reading the domain by file inspection is the alternative and it is refused. Every other section here answers from the verb under test, and a section answering from a hand-rolled read of the same files reaches a verdict nothing else in the report is entitled to make. A hole a reader can see is worth more than a number nobody can trace.
 
 `canon claude plugin-update` is what an operator runs to bring a cache forward. Name it as the action available rather than as a repair for a finding, since no finding was taken.

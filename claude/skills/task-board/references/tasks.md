@@ -5,11 +5,10 @@ description: Folder layout, filename convention, file format, origin lines, and 
 
 # Tasks reference
 
-Applies to `.canon/tasks/`. Tracks what is being built and why, at the level of features and outcomes. One file per task.
+Applies to `.canon/tasks/`. Tracks what is being built and why, at the level of features and outcomes, one file per task. Update a task when it starts, completes, or changes scope.
 
-Update when a task starts, completes, or changes scope. When to open a task at all is project policy, not a shape rule, and lives in `CLAUDE.md`.
-
-The folder is gitignored. Board state changes when work ships rather than when a branch is written, so committing it would put a claim about the future into the diff of an unrelated pull request. The git log records what shipped.
+- When to open a task at all is project policy rather than a shape rule, and lives in `CLAUDE.md`
+- The folder is gitignored, since committing board state would put a claim about the future into an unrelated pull request
 
 ## Contents
 
@@ -50,17 +49,19 @@ Does not govern:
 └── v13.0-toolkit-drift.md   # canon-allow-reference: illustrates the vXX.Y-slug filename this section defines
 ```
 
-One file per task is what keeps the board safe under parallel sessions. Two sessions working different tasks never write the same file, which matters because a gitignored board has no history to recover a clobbered write from.
+One file per task keeps the board safe under parallel sessions, since a gitignored board has no history to recover a clobbered write from.
 
-Siblings sit in the folder without being tasks, and each earns its place by being governed somewhere. `index.md`, `priority.md`, and `backlog.md` are governed by `board.md`. Every `session-` file is a pre-compaction handoff governed by `session.md`, and each is optional: a project whose sessions never approach a compaction carries none. Anything filtering the folder to tasks skips all of them, so a name outside the set is a task whatever it holds.
-
-The `task-board` skill creates and declines task files. The `task-complete` skill marks outcomes `[x]` in an existing file and archives a shipped one, and the archive carries the task's plan with it. Neither does the other's job.
+- Siblings are governed elsewhere, `index.md`, `priority.md`, and `backlog.md` by `board.md` and each `session-` file by `session.md`. A name outside that set is a task.
+- `task-board` creates and declines task files, and `task-complete` marks outcomes `[x]` and archives a shipped task with its plan
 
 ## Filenames
 
 `vXX.Y-<slug>.md`, where the version is the phase label zero-padded to two digits and the slug is kebab-case.
 
-Padding is load-bearing. Index entries sort by filename and nothing else, so a bare `v9.0` sorts after `v15.0` and the catalog reads out of board order. `${CLAUDE_SKILL_DIR}/../git-commit/references/versioning.md` governs the label itself and permits free renumbering, so expect the occasional rename. Nothing points at a task filename, since a `Plan:` line runs from task to plan rather than the reverse. <!-- canon-allow-reference: illustrates the padding rule's own sort collision, not a citation of a real task -->
+Padding is load-bearing. Index entries sort by filename alone, so a bare `v9.0` sorts after `v15.0` and the catalog reads out of board order. <!-- canon-allow-reference: illustrates the padding rule's own sort collision, not a citation of a real task -->
+
+- `${CLAUDE_SKILL_DIR}/../git-commit/references/versioning.md` governs the label and permits free renumbering, so expect the occasional rename
+- Nothing points at a task filename, since a `Plan:` line runs from task to plan rather than the reverse
 
 ## Frontmatter
 
@@ -78,15 +79,19 @@ description: Record what a target installed and report the delta against the too
 
 ## File format
 
-Two headings, `## Outcomes` and `## Findings`. Outcomes are future and checkable, findings are past and factual, and as flat bullets at the same indent they are visually identical. A heading separates them at no cost.
+Two headings, `## Outcomes` and `## Findings`. Outcomes are future and checkable and findings are past and factual, yet as flat bullets they look identical, so a heading separates them at no cost.
 
-Add no third heading. Status stays inline on an outcome rather than becoming an "In progress" section.
+- Add no third heading. Status stays inline on an outcome rather than becoming an "In progress" section.
+- Outcomes stay a checklist, since the board tools read them by their `- [ ]` line
+- Open each finding with a bold label naming its source and date, as in `- **planner, 2026-10-11:** <finding>`. Keep it to a few sentences, moving anything longer into the plan or groundwork folder.
 
-Open each finding with a bold label naming its source and date, as in `- **planner, 2026-10-11:** <finding>`, and keep it to a few sentences. Anything longer moves into the plan or the groundwork folder. Outcomes stay a checklist, since the board tools read them by their `- [ ]` line.
+### Sizing outcomes
 
-Size the outcomes so one pull request closes all of them, and split the task before handing it off rather than after. A task closes whole or not at all, so outcomes spanning two pull requests leave the board showing in-progress work no branch carries.
+Size the outcomes so one pull request closes all of them, and split the task before handing it off rather than after. A task closes whole, so outcomes spanning two pull requests leave the board showing work no branch carries.
 
-A sliced task is the one allowed exception: a task the operator decided to ship across several pull requests on purpose, one slice each. Its `Pull request:` line lists every slice, so the board records which merged work covered which outcomes, and it closes whole when the last slice's merge finds every outcome ticked and no slice left pending.
+A sliced task is the one exception, shipped across several pull requests on purpose by the operator. Its `Pull request:` line lists every slice, and it closes when the last slice's merge finds every outcome ticked and no slice pending.
+
+### Title and template
 
 Prefix the H1 with the `vX.Y:` phase label, then a short title whose form depends on the task type:
 
@@ -126,29 +131,49 @@ Why this task exists and what it depends on.
 
 Every task names where it came from, through a `Plan:`, `Groundwork:`, `Intake:`, or `Issue:` line under the title. Include each only when the file, folder, or issue it names exists.
 
-A task with no origin is either lost context or work nobody decided to do. The invariant runs both ways, and the second direction is the one that bites: a groundwork track, an intake folder, or an open issue that no task points at is work already decided and on its way to being forgotten.
+### Both directions
 
-An intake folder answers that direction at folder scope rather than item scope. A folder with every item answered and no task citing it, live, archived, or declined, is a dump nobody acted on.
+A task with no origin is lost context or work nobody decided to do. The reverse bites harder, since a groundwork track, intake folder, or open issue no task points at is decided work being forgotten, and an intake folder fully answered with no task citing it, live, archived, or declined, is a dump nobody acted on.
 
-`Plan:`, `Groundwork:`, and `Intake:` name their target as a markdown link whose text is the file or folder stem, so the line resolves on a ctrl-click the way `priority.md` rows already do. Write the path relative to `.canon/tasks/`, which makes it `../plans/`, `../groundwork/`, and `../intake/`. A path written from the project root renders as a link and resolves to nothing in an editor rooted at the project. `Ready:` names the ready folder a task's plan copies from, as a link to `../ready/<nn>-<slug>/` with the trailing slash a folder carries. Include it only when the folder exists. `canon tasks archive` reads it to move the folder, and falls back to a `.canon/ready/<nn>-<slug>/` path in the plan when a task carries no line.
+### Link form
 
-`Issue:` stays a bare `#NNN`, since an issue number is not a path and a full URL would write the remote into a gitignored file.
+`Plan:`, `Groundwork:`, `Intake:`, and `Ready:` name their target as a markdown link whose text is the stem, so the line resolves on a ctrl-click as `priority.md` rows do.
 
-`Plan:` points at `../plans/feature-<slug>.md` while the task is open. Once the task ships and the plan is archived, it points at `../plans/archive/feature-<slug>.md`, and at `../../plans/archive/feature-<slug>.md` once the task itself is archived a folder deeper. Retarget both halves of the link rather than dropping it, so a completed task still leads to the reasoning behind it.
+- Write the path relative to `.canon/tasks/`, as `../plans/`, `../groundwork/`, and `../intake/`. A path from the project root resolves to nothing in an editor rooted there.
+- `Issue:` stays a bare `#NNN`, since an issue number is not a path and a full URL writes the remote into a gitignored file
+- `Ready:` links `../ready/<nn>-<slug>/`, the folder the plan copies from, only when it exists. `canon tasks archive` reads it to move the folder, falling back to a path in the plan.
 
-A project that archived plans before the folder nested under `.canon/plans/` holds closed tasks pointing at `../plans-archive/` or `../.tmp/plans-archive/`. Leave those pointers where they are, since each resolves against the files it names and a task retargeted without its plan moving leads nowhere.
+### The `Plan:` line
 
-One plan per task, or one per slice, which the board check reads as distinct plans on one line. A plan cited by two tasks is a misfile.
+`Plan:` points at `../plans/feature-<slug>.md` while the task is open. Retarget both halves of the link as things move rather than dropping it, so a completed task still leads to its reasoning.
 
-`canon tasks plan-link <task> <plan>` writes or corrects the `Plan:` line, and `--add` appends a slice's plan, so the line is never hand-edited.
+| State                         | Target                                  |
+| ----------------------------- | --------------------------------------- |
+| Open                          | `../plans/feature-<slug>.md`            |
+| Shipped, plan archived        | `../plans/archive/feature-<slug>.md`    |
+| Task archived a folder deeper | `../../plans/archive/feature-<slug>.md` |
 
-`Groundwork:` points at `../groundwork/<slug>/`, the folder `plan-groundwork` fills. It names the surface it points at the way `Plan:` does. Use this key alone. `Research record` and `Decision record` are earlier spellings of the same thing and both convert to it.
+- One plan per task, or one per slice as distinct plans on one line. A plan cited by two tasks is a misfile.
+- `canon tasks plan-link <task> <plan>` writes or corrects the line, and `--add` appends a slice's plan, so it is never hand-edited
+- Leave an older `../plans-archive/` or `../.tmp/plans-archive/` pointer alone, since it resolves and retargeting without moving the plan leads nowhere
 
-`Intake:` points at `../intake/<slug>/`, the folder an intake pass fills. Use it rather than `Groundwork:`, so the line records which kind of pass produced the task. It names the folder rather than an item inside it, and the item numbers belong in that task's `## Findings`.
+### The `Groundwork:` and `Intake:` lines
 
-`Pull request:` records which pull requests carry the task's work, each as a bare `#NNN` the way `Issue:` does. It lists every pull request that shipped part of the task, oldest first and separated by commas, as in `Pull request: #NNN, #NNN`, and a task shipped whole lists one. It is not an origin, so a task without one is well-formed. `git-pr` appends to it when a pull request opens.
+`Groundwork:` points at `../groundwork/<slug>/`, the folder `plan-groundwork` fills. `Intake:` points at `../intake/<slug>/`, the folder an intake pass fills.
 
-The line is what lets a merge close its own task. `canon tasks archive --pull-request <n>` finds the task by any number the line lists and archives it only on the last. One pull request, one task: two tasks naming the same number refuse to archive rather than both moving. `Pending branch: <branch>` holds that merge back while a branch that ticked an outcome waits on its own number, since `canon tasks outcome` writes it and `canon tasks pull-request` clears it. `canon tasks outcome` skips the write when the branch's own pull request is already on the line.
+- Use `Groundwork:` alone for its key. `Research record` and `Decision record` are earlier spellings and both convert to it.
+- Use `Intake:` rather than `Groundwork:` for an intake pass, so the line records which kind of pass produced the task
+- `Intake:` names the folder rather than an item, and item numbers belong in the task's `## Findings`
+
+### The `Pull request:` line
+
+`Pull request:` lists every pull request that shipped part of the task as bare numbers, oldest first and comma-separated, as in `Pull request: #NNN, #NNN`. It is not an origin, so a task without one is well-formed, and `git-pr` appends to it when a pull request opens.
+
+The line lets a merge close its own task. `canon tasks archive --pull-request <n>` finds the task by any listed number and archives it only on the last.
+
+- One pull request, one task. Two tasks naming the same number refuse to archive rather than both moving.
+- `Pending branch: <branch>` holds that merge back while a branch that ticked an outcome waits on its own number
+- `canon tasks outcome` writes that line, skipping it when the branch's pull request is already listed, and `canon tasks pull-request` clears it
 
 ## What goes in
 
@@ -161,20 +186,27 @@ The line is what lets a merge close its own task. `canon tasks archive --pull-re
 
 - Class names, file paths, function names, or prop names in any entry or title
 - Code-level steps or implementation detail. Behavioral specifics are fine.
-- Architectural reasoning that outlives the task. A finding explains why this task is shaped as it is. A decision the system keeps after the task closes belongs in the context entry of the domain it constrains.
+- Architectural reasoning that outlives the task. A decision the system keeps after the task closes belongs in the context entry of the domain it constrains.
 
 ### Narrative and sequencing
 
-- Narrative of the session that produced the task. A finding states what constrains the task, so what was probed, what it cost, and who decided belongs in the groundwork folder the `Groundwork:` line names. A task with no groundwork folder cuts the narrative rather than relocating it, since the board is not the fallback destination for it.
+Session history and ordering both have homes off the task file.
+
+- Narrative of the session that produced the task. What was probed, what it cost, and who decided belongs in the groundwork folder, and a task with none cuts it, since the board is no fallback.
 - "In progress" or "Blocked" headings. Note status inline on the outcome instead.
-- Sequencing rationale or which version is active. Why this task is planned before its neighbors goes on its row in `priority.md`, in the cell that already carries what it is waiting on. Rationale wider than one row has no home at all, so cut it rather than filing it here.
+- Sequencing rationale or which version is active. It goes on the task's `priority.md` row, and rationale wider than one row is cut.
 
 ## Archiving
 
-Never delete a task file. A shipped task moves to `.canon/tasks/archive/` under its own name, and the live index regenerates without it. `canon tasks archive` owns that move, and what it does and what it refuses on are at `canon tasks archive --help`.
+Never delete a task file. A shipped task moves to `.canon/tasks/archive/` under its own name through `canon tasks archive`, and the live index regenerates without it. What the verb does and refuses on is at `canon tasks archive --help`, and a flat `.claude/task-archive/` names an older binary rather than a second archive.
 
-The archive nests inside `.canon/tasks/` rather than sitting beside it as a flat `.claude/task-archive/`, which is what a binary predating this convention still writes. Meeting the flat sibling names an older checkout rather than a second archive to reconcile.
+### The plan and ready folder
 
-Archiving a task archives its plan alongside it, when the closing task is that plan's last live citation. The archived task's `Plan:` line is retargeted at `../../plans/archive/feature-<slug>.md`. The ready folder its `Ready:` line names moves with the plan to `.canon/ready/archive/<nn>-<slug>/`, and both pointers to it are retargeted. A plan several tasks share stays live with its ready folder, and the task archives anyway.
+Archiving a task archives its plan alongside it when the task is that plan's last live citation. A plan several tasks share stays live with its ready folder, and the task archives anyway.
 
-A task with an open outcome stays on the board, and so does its plan. Close it, or cut it from the task when the work is being abandoned, so what was dropped is recorded rather than inferred from an archived file. Cutting means striking the outcome's body: `- ~~<outcome>~~ <why>`. A struck body reads as cut whatever its checkbox holds, so a task carrying only cut outcomes still archives.
+- The archived task's `Plan:` line is retargeted at `../../plans/archive/feature-<slug>.md`
+- The folder its `Ready:` line names moves to `.canon/ready/archive/<nn>-<slug>/`, and both pointers to it are retargeted
+
+### Open outcomes
+
+A task with an open outcome stays on the board, and so does its plan. Close it, or cut an abandoned outcome by striking its body, as `- ~~<outcome>~~ <why>`, which reads as cut whatever its checkbox holds, so a task of cut outcomes still archives.

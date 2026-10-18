@@ -50,12 +50,20 @@ A plan failing these is non-conforming even when it satisfies every shape rule b
 ## Filename and slug
 
 - Name the file `feature-<slug>.md`, with `<slug>` two to four kebab-case words naming the concern.
-- Write one concern per file. A request spanning two independent concerns takes two plans rather than one bundling both, since a bundled plan cannot be executed by two sessions or abandoned by half.
-- A staged batch is a concern of its own and takes its own file rather than a `**Batch N**` sub-heading inside one plan's `**Files to touch:**`. One plan filename derives one branch, so batches sharing a file have nothing to open a pull request against once the first merges. State a batch's dependency on the ones before it in its own `**Constraints:**`. A batch that stacks on another and shares most of its files with it folds into that batch as contiguous commits on one branch rather than taking a file, unless its constraints carry ``Judged apart from `feature-<parent>`: <reason>`` with a reason after the colon. `canon records validate plans` reports `stack-foldable` for a stacked batch that has neither.
+- Write one concern per file, since a plan bundling two cannot be executed by two sessions or abandoned by half
 - Derive the slug from the concern rather than from a branch, because the plan is written before the branch exists.
-- Give the branch that executes the plan the same slug. A later surface finds the plan from the branch name and finds nothing when the two spellings differ.
+- Give the executing branch the same slug, since a later surface finds the plan from the branch name and finds nothing when the spellings differ
 
 A plan carries no frontmatter. Its filename is the whole of its identity, so a folder of plans is read by name rather than by a generated catalog.
+
+### Staged batches
+
+A staged batch is a concern of its own and takes its own file rather than a `**Batch N**` sub-heading inside one plan's `**Files to touch:**`. One plan filename derives one branch, so batches sharing a file have nothing to open a pull request against once the first merges.
+
+- State a batch's dependency on the ones before it in its own `**Constraints:**`
+- A batch stacking on another and sharing most of its files folds into that batch as contiguous commits on one branch, rather than taking a file
+- It takes a file anyway when its constraints carry ``Judged apart from `feature-<parent>`: <reason>`` with a reason after the colon
+- `canon records validate plans` reports `stack-foldable` for a stacked batch that has neither
 
 ## Sections
 
@@ -73,37 +81,53 @@ The document opens with `# Feature: <short title>` and one paragraph stating wha
 | `**Sources:**`        | the outside sources a decision rests on, each with its quoted passage     | When a decision rests on an outside source |
 
 - Write each marker as the table gives it. `Summary` opens the prose a reader scans, so it takes an H2, and the others are labels over lists rather than sections of prose.
-- A section written in the other spelling is still that section, since `## Risks` and `**Risks:**` name one thing. Write the table's form in a new plan and leave an existing plan's spelling alone. Either spelling breaks a depth run.
+- A section in the other spelling is still that section, since `## Risks` and `**Risks:**` name one thing, and either spelling breaks a depth run
+- Write the table's form in a new plan and leave an existing plan's spelling alone
 - Write `None identified.` under a required section with nothing to report rather than dropping the marker. A dropped section and an unconsidered one read identically.
 - Aim `## Summary` at a person scanning the plan, not at the session executing it. The other sections carry what execution needs.
 
 ### Files to touch entries
 
-- Give every `**Files to touch:**` entry a backticked path and something said about it. A bare path states scope and not intent, and the reason is what an executing session checks its edit against. Lead with the path or lead with a label carrying the path, whichever reads better for the entry.
-- Separate the two halves with a colon, and keep every path the entry declares ahead of it. What sits before the colon reads as a target, so both sides of a rename belong there and a file merely cited by the reason does not.
-- Read the list as what the branch sets out to write rather than as a bound on it, since the doc syncs at ship write past it on nearly every branch. `canon tasks plan-reach <plan>` reads the branch back against this list and every other live plan.
+Give every `**Files to touch:**` entry a backticked path and something said about it. A bare path states scope and not intent, and the reason is what an executing session checks its edit against.
+
+- Lead with the path or with a label carrying the path, whichever reads better for the entry
+- Separate the two halves with a colon, and keep every path the entry declares ahead of it, since what sits before the colon reads as a target
+- Both sides of a rename belong before the colon, and a file merely cited by the reason does not
+- Read the list as what the branch sets out to write rather than a bound, since the doc syncs at ship write past it on nearly every branch
+- `canon tasks plan-reach <plan>` reads the branch back against this list and every other live plan
 
 ### Measured claims
 
-- State every count and every claim about the tree as measured during the pass that wrote the plan. A figure carried in from a summary or an earlier session is the most common way a plan ships the wrong scope.
-- Prefer a short plan over a padded one. A section filled to look thorough costs the reader the same attention as one that matters.
+State every count and every claim about the tree as measured during the pass that wrote the plan. A figure carried in from a summary or an earlier session is the most common way a plan ships the wrong scope.
+
+Prefer a short plan over a padded one. A section filled to look thorough costs the reader the same attention as one that matters.
 
 ### Constraints
 
 Work in flight reaches a plan as a hold or as a shared path. A hold leaves a surface alone and says which of two acts it forbids, rather than leaving the executing session to guess. Neither act is forbidden over a shared path.
 
-- Write a hold only for a dependency, a contract the other track consumes, a relocation, or a sweep, which a rebase cannot settle mechanically. A bare shared file is none of these, and forbidding it sends a worker to concede a file the change needs.
+Write a hold only for a dependency, a contract the other track consumes, a relocation, or a sweep, which a rebase cannot settle mechanically. A bare shared file is none of these, and forbidding it sends a worker to concede a file the change needs.
+
 - Forbid conforming that surface to whatever shape the change introduces, which keeps the branch to one concern.
-- Never forbid retargeting a pointer the change breaks. A rename, a split, or a deletion that leaves a citation behind ships a dangling reference, so repairing it is required work rather than scope creep.
+- Never forbid retargeting a pointer the change breaks, since a rename, split, or deletion leaving a citation behind ships a dangling reference
 - Decide both acts for every surface a hold names, not for one file among its siblings.
 - Write a shared path as the track, the path, and the branch that rebases, being the one merging second. The executing session edits the file and keeps both sides on the rebase.
+
+### Stamping a constraint
 
 A constraint measured against work in flight expires when that work merges, as a shared-path line does, so stamp the block with what it was measured against.
 
 - Give the stamp its own leading bullet, written as Measured against `<commit>` on <YYYY-MM-DD>. One stamp covers the whole block.
-- Stamp the commit rather than the track names or a date alone. The constraint already names each track, and a date does not separate two plans written on either side of a merge.
-- Re-test a stamped constraint before honoring it with `git fetch origin main --quiet && git log <commit>..origin/main --oneline -- <the paths the constraint names>`. Any commit it reports means the track landed and the constraint is dead. Fetch and scope the log to the paths in the same command, since a stale ref reads a dead constraint as live and a squashed subject names no track.
+- Stamp the commit rather than the track names or a date alone, since a date does not separate two plans written either side of a merge
 - Read an unstamped constraint as unverified rather than as live, and confirm it against the open pull request list for the named paths.
+
+Re-test a stamped constraint before honoring it, fetching and scoping the log in one command, since a stale ref reads a dead constraint as live and a squashed subject names no track. Any commit it reports means the track landed and the constraint is dead.
+
+```bash
+git fetch origin main --quiet && git log <commit>..origin/main --oneline -- <the paths the constraint names>
+```
+
+### Fan-in and ready constraints
 
 A batch in a fan-in set declares its side in a constraint bullet, ``Fan-in member of `feature-<integrator>` `` on a member and ``Fans in `feature-<a>`, `feature-<b>` `` on the integrator. `batches.md` holds when to fan in, and `canon records validate plans` reports `fan-in-unmatched` for a set whose two sides disagree.
 
@@ -111,23 +135,31 @@ A constraint naming a `.canon/ready/` folder is a third shape beside the hold an
 
 ### Verification
 
+Every outcome reaches the review with its proof named.
+
 - Name, for each outcome, the test or the command that proves it, as one bullet leading with the outcome and ending on the command in backticks.
 - Write a command a later session can run as given, from the project root. A description of what would be checked leaves the executing session to invent the check.
 - Name the visual check where no test reaches, and say it is visual, so a reader can tell a proof from a look.
 
 ### Risks
 
-- Name the collision rather than the category. A risk a reader cannot act on is padding.
-- Where the work establishes a resource with more than one consumer, list the consumers and mark each one read or write. A policy stated over that resource has to hold for the writers and not only for the consumer that prompted it.
-- Where the work changes a contract another track consumes, such as an exported signature, a verb's flags or record, or a config key, name the contract and list each consumer. The dispatcher reads this bullet for the contract hold, so a change left out reaches it as a clean shared file.
+Name the collision rather than the category, since a risk a reader cannot act on is padding.
+
+- For a resource with more than one consumer, list the consumers and mark each read or write, so a policy over it holds for every writer
+- For a changed contract another track consumes, such as an exported signature, a verb's flags or record, or a config key, name it and list each consumer
+- The dispatcher reads that contract bullet for the hold, so a change left out reaches it as a clean shared file
 
 ### Review focus
 
+This section is where the planner's understanding of the risk reaches the review pass.
+
 - Name each input or state that would break the change if the implementation got it wrong, one bullet each, with what the change must do there.
-- Write it for the reviewer rather than the builder, since this section is where the planner's understanding of the risk reaches the review pass.
+- Write it for the reviewer rather than the builder
 - Keep it apart from `**Risks:**`. A risk is something the work might collide with, and a focus item is something the finished diff must be shown to handle.
 
 ### Sources
+
+A source earns an entry only once someone opened it.
 
 - Give each entry a link, the decision it backs, and the passage relied on in double quotes.
 - Mark a source that could not be fetched `unverified` and never quote it. A quote for a page nobody opened is the failure this section exists to prevent.
@@ -158,14 +190,19 @@ An execution that deviates rewrites the suggestion into the form below, leaving 
 
 ### Preference questions and answers
 
+The suggestion line is the planner's, and the answer line belongs to whoever owns the call.
+
 - Write `- Suggested: needs your call, <why>` where the answer turns on preference rather than on a technical default. Fabricating a default there hides an open question behind an accepted answer.
 - Never fill an `- Answer:` slot on behalf of the person who owns it. Recording the pick as the suggestion is what the suggestion line is for.
 
 ### Overrides and settled questions
 
-- Rewrite the `- Suggested:` line to the pick execution made when it deviates from an unanswered question, and leave the slot blank. The prohibition above reaches the answer line alone, so the suggestion line is where a deviation goes.
-- Open the rewritten text with `overridden at execution to <pick>,` and follow it with the measurement that moved the pick. The fixed phrase is what tells an override from an authored suggestion, which routinely carries a number too.
-- Take a deviation from an answered question back to whoever answered it rather than rewriting either line. A filled slot is a decision already made, and a suggestion rewritten under one leaves the plan holding two picks with no default resolving them.
+A deviation from an unanswered question rewrites the `- Suggested:` line to the pick execution made and leaves the slot blank, since the prohibition above reaches the answer line alone.
+
+- Open the rewritten text with `overridden at execution to <pick>,` and follow it with the measurement that moved the pick
+- The fixed phrase tells an override from an authored suggestion, which routinely carries a number too
+- Take a deviation from an answered question back to whoever answered it rather than rewriting either line
+- A filled slot is a decision already made, and a suggestion rewritten under one leaves two picks with no default resolving them
 - Answer in place when a question is settled in conversation, so the file and the decision do not disagree.
 
 The plan is archived at ship, so the same deviation takes one line in the open task's `## Findings` naming what shipped. The plan holds why the pick moved and the task holds what the tree now has.

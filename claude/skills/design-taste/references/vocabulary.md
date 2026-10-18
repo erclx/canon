@@ -7,9 +7,11 @@ description: The layer, property, pattern and process terms this skill uses, so 
 
 Terms used by `design-taste` and by the skills it is loaded alongside. It changes when a design round needs a name it cannot look up here.
 
-This glossary departs from one rule in `glossary.md`: an entry does not name where the term first appears. The material is five short files a reader can scan, so a location per entry costs more than it returns.
+This glossary departs from one rule in `glossary.md`, since an entry does not name where the term first appears. The material is five short files a reader can scan, so a location per entry costs more than it returns.
 
-Every other rule there holds, and the one deciding membership holds strictly. A term appears here once this skill's own material uses it, never ahead of that, and the section below records what was considered and left out.
+- Every other rule there holds, and the one deciding membership holds strictly
+- A term appears here once this skill's own material uses it, never ahead of that
+- The last section records what was considered and left out
 
 ## Layers
 
@@ -28,7 +30,7 @@ Ordered by when each settles, not alphabetically, since the order is the content
 ## Properties
 
 - **Casing**: whether text is set upper, lower, title or sentence case, treated as a hierarchy decision rather than a typing one.
-- **Density**: how much information a given area carries. High density is correct in an application surface and reads as clutter on a marketing one, which is why it belongs to the kind rather than to taste.
+- **Density**: how much information a given area carries. Correct in an application surface and clutter on a marketing one, so it belongs to the kind rather than to taste.
 - **Hierarchy**: the order a reader takes things in, produced by weight, color, space and position together rather than by size alone.
 - **Ground**: the surface a thing sits on, whether the page behind everything or the fill behind one element. Named apart from "background" because the relationship that matters is what sits against it.
 - **Line height**: the vertical distance from one baseline to the next, set against size rather than fixed across a scale. Avoid "leading", which names the same thing.
@@ -52,9 +54,9 @@ Named compositions, carried so an operator can ask for one by name instead of de
 
 How a draft is staged while unfinished.
 
-- **FPO**: a placeholder held at the true final size and marked as a placeholder, from print production where it abbreviates "for position only". Marking it is the point, since an unmarked stand-in gets read as a decision.
+- **FPO**: a placeholder held at the true final size and marked as one, from the print term "for position only". Marking it is the point, since an unmarked stand-in gets read as a decision.
 - **Greeking**: standing text in for copy that does not exist yet, of which lorem ipsum is the common form. Correct while judging space and wrong once an arm is judged on content.
-- **Grey-box**: drawing every element as a flat neutral block so the layers above the one under judgment are removed from view. Avoid "wireframe", which reads as a deliverable rather than a drafting stage.
+- **Grey-box**: drawing every element as a flat neutral block, removing the layers above the one under judgment from view. Avoid "wireframe", which reads as a deliverable rather than a stage.
 
 ## Terms this vocabulary deliberately does not carry
 

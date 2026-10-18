@@ -9,7 +9,7 @@ Applies to every Mermaid fence, wherever it is written. A fence sits inside a do
 
 ## Scope
 
-Governs the Mermaid attribute wherever a fence is written, naming no path because an attribute standard governs a drawing rather than a document type: direction and layout, node and edge budgets, the accessibility fields, how punctuation reaches a label, and how a rendered diagram is verified. It carries no template, since a fence has no document shape of its own and sits inside one another standard sets.
+Governs the Mermaid attribute wherever a fence is written, being direction and layout, node and edge budgets, the accessibility fields, how punctuation reaches a label, and how a rendered diagram is verified. It names no path and carries no template, since it governs a drawing rather than a document type.
 
 Does not govern:
 
@@ -31,16 +31,20 @@ A diagram failing these is non-conforming even when it satisfies every shape rul
 
 ## Layout
 
-- Declare `flowchart TB` by default. Mermaid ignores a subgraph's direction whenever that subgraph links outward, and an architecture diagram links across its subgraphs as the normal case, so top-bottom is a declaration rather than a guarantee.
+- Declare `flowchart TB` by default. Mermaid ignores a subgraph's direction when it links outward, as an architecture diagram normally does, so top-bottom is a declaration, not a guarantee.
 - Restructure a diagram that renders diagonal or left-to-right. Repeating the direction keyword does not fix it.
 - Render a context, component, or pipeline diagram taller than wide. A `sequenceDiagram` is wide by construction and is exempt.
 
 ### Rows and edges
 
+A row or a bundle asserts something about the system, so each is drawn only where it is true.
+
 - Do not let independent nodes render in a row. A row of siblings reads as a sequential chain and asserts a pipeline the system does not have.
 - Do not converge many edges on one node from one side. A crossing bundle is unreadable whatever it encodes.
 
 ### Labels and subgraphs
+
+A label names a node, and the paragraph below the diagram carries the detail.
 
 - Keep node labels short. Three or four words max. Detail goes in the paragraph below the diagram.
 - Use `<br/>` for a second short line on a node when the label is two ideas, never for a sentence.
@@ -51,12 +55,13 @@ A diagram failing these is non-conforming even when it satisfies every shape rul
 - Hold a diagram to roughly 5 to 10 nodes. Split it past 15.
 - Watch edge count harder than node count. It binds first, and a diagram whose edges outnumber its nodes is already too dense to read.
 - Treat a diagram that cannot be described in one sentence as two diagrams.
-- Warn rather than refuse on a budget, and name the split that would fix it. These numbers come from published Mermaid practice rather than from a measurement against a corpus, so a hard refusal on them will be wrong sometimes and unarguable when it is.
+- Warn rather than refuse on a budget, and name the split that would fix it
+- These numbers come from published Mermaid practice rather than a measurement, so a hard refusal on them would be wrong sometimes and unarguable when it is
 
 ## Labels
 
-- Apply the punctuation bans in `markdown.md` to node and subgraph labels. A label is not prose, so a check scoped to prose does not reach it, and reading the labels before shipping is the only gate they have.
-- Treat the prose around a fence and the text inside it as two surfaces. The paragraphs are prose and follow `markdown.md` and the `write-human` skill. The fenced block is not, which is why a check scoped to prose is the wrong thing to rely on for what sits inside it.
+- Apply the punctuation bans in `markdown.md` to node and subgraph labels. A check scoped to prose does not reach a label, so reading the labels before shipping is their only gate.
+- Treat the prose around a fence and the text inside it as two surfaces. The paragraphs follow `markdown.md` and the `write-human` skill, and a prose check does not reach the fenced block.
 
 ## Accessibility
 

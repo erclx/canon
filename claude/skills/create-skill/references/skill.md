@@ -26,7 +26,7 @@ Skills give Claude Code domain-specific constraints and rules inline, so it can 
 
 ## Scope
 
-Governs a skill folder under `skills/` as one artifact: `SKILL.md`, its siblings `REQUIREMENT.md` and `EVAL.md`, and the bundled reference, script, and asset folders beside them.
+Governs a skill folder under `skills/` as one artifact, being `SKILL.md`, its siblings `REQUIREMENT.md` and `EVAL.md`, and the bundled reference, script, and asset folders beside them.
 
 Does not govern:
 
@@ -37,7 +37,7 @@ Does not govern:
 - **`rule.md`**: path-scoped coding rules, which load on a file match rather than on a request match
 - **the `write-human` skill**: voice, rhythm, and sentence construction in a skill body
 - **`markdown.md`**: punctuation, formatting, and word choice in a skill body
-- **`slug.md`**: the transform from a branch name to a slug a skill carries in a filename
+- **`slug.md`**: the transform from a branch name to a filename slug
 - **the `create-skill` skill and the creation-time bullet in the `skill` governance rule**: whether a new skill earns its place, by the three-question test
 
 ## Changing a skill
@@ -51,9 +51,11 @@ Answer all four before editing, and carry the answers into wherever the change i
 
 ## Whether a rule belongs beside the skill
 
-A skill fires when a session invokes it or its description matches the request. A path-scoped rule fires when a session reads or writes a file matching its glob, with no decision from the session at all. The rule is the floor and the skill is the depth.
+A skill fires when a session invokes it or its description matches the request. A path-scoped rule fires when a session reads or writes a file matching its glob, with no session decision. The rule is the floor and the skill is the depth.
 
-Run the two-part test over what the body states before calling the skill finished. Does the invariant fire when a specific path is edited, and does violating it ship silently? An invariant passing both halves belongs in a rule as well, since a session that never invoked the skill still edits that path. An invariant failing either half stays here, which is most of a body.
+- Run the two-part test over the body before calling the skill done. Does the invariant fire when a specific path is edited, and does violating it ship silently?
+- An invariant passing both halves belongs in a rule as well, since a session that never invoked the skill still edits that path
+- An invariant failing either half stays here, which is most of a body
 
 Write that rule to the shape `rule.md` sets and leave the procedure here, since the two carry one invariant at two depths rather than two copies of it. Nothing checks the split.
 
@@ -89,12 +91,15 @@ allowed-tools: <tools required>
 
 ## Structure
 
-- Skill is a folder named in kebab-case containing `SKILL.md` (required), `REQUIREMENT.md` (required), `EVAL.md` (optional), `scripts/` (optional), `references/` (optional), `assets/` (optional)
-- Create a new skill with its `REQUIREMENT.md` beside it, even where nobody contests its scope. A requirement present for some skills and absent for others cannot be scanned, since an absence reads as a gap rather than as a verdict
-- Name a file sitting directly in the skill folder in capitals and a bundled folder in lowercase, so the parts a reader opens are distinct from the ones a skill loads
+A skill is a folder named in kebab-case. It holds `SKILL.md` and `REQUIREMENT.md`, both required, and maybe `EVAL.md`, `scripts/`, `references/`, and `assets/`.
+
+- Create a new skill with its `REQUIREMENT.md` beside it, even where nobody contests its scope, since an absence reads as a gap rather than as a verdict
+- Name a file sitting directly in the skill folder in capitals and a bundled folder in lowercase, so the parts a reader opens differ from the ones a skill loads
 - `EVAL.md` holds prompts and a judging rubric a person runs by hand, since the automated `claude plugin eval` runner is gated in early access
 
 ### Folder and file rules
+
+The loader reads the folder name as the skill name, so the name follows the same casing everywhere.
 
 - `SKILL.md` must start with YAML frontmatter between `---` delimiters
 - No `README.md` inside the skill folder
@@ -104,10 +109,12 @@ allowed-tools: <tools required>
 
 - **`name`** (required): kebab-case, matches folder name, no spaces or capitals
 - **`description`** (required): what it does + when to use it, under 1024 chars, no XML tags
-- **`disable-model-invocation: true`**: Claude will not auto-trigger, and the `Skill` tool also refuses the operator's own request made in words. Set it only on a skill run by slash command alone. A skill wanting just the first effect writes `Do NOT auto-trigger` in its description.
+- **`disable-model-invocation: true`**: Claude will not auto-trigger, and the `Skill` tool also refuses the operator's request made in words. Set it only on a skill run by slash command alone.
 - **`allowed-tools`**: restrict tool access when the skill is active
 - **`metadata`**: optional key-value pairs (`author`, `version`, `mcp-server`)
-- **`metadata.family`** (required on a skill under `claude/skills/`): the skill map group the skill's row sits under, as one key from `families` in `canon claude skills list --json`. A skill under `.claude/skills/` takes none.
+- **`metadata.family`** (required under `claude/skills/`): the skill map group, as one key from `families` in `canon claude skills list --json`. A skill under `.claude/skills/` takes none.
+
+A skill wanting only the no-auto-trigger effect writes `Do NOT auto-trigger` in its description rather than setting `disable-model-invocation`.
 
 ## Description
 
@@ -119,57 +126,73 @@ allowed-tools: <tools required>
 
 ### Rule content and scope
 
-- Use imperative voice throughout, and sentence case for every heading
-- Front-load critical instructions
-- Contain only behavioral rules (what to do, what not to do) and pointers to reference docs. Narrative descriptions of what files are or how the system works belong in `docs/`, not in the skill body.
-- State rules, not inventories. Reference docs for lists that change, and phrase a rule as a ban on the forbidden shape rather than an enumeration of allowed options, so it stays stable as categories change.
+A body holds behavioral rules and pointers to reference docs, front-loading the critical ones. Narrative about what files are or how the system works belongs in `docs/`.
 
-#### Current rule and grouping
+- Use imperative voice throughout, and sentence case for every heading
+- State rules, not inventories. Reference docs for lists that change.
+- Phrase a rule as a ban on the forbidden shape rather than an enumeration of allowed options, so it stays stable as categories change
+- When referencing project files, include "from the project root" in the read instruction
+- Run independent operations, such as file reads and shell commands, in parallel to reduce latency
+
+### Current rule and grouping
+
+State the current rule only, in the body and in every file under `references/`. The incident and the date that earned a rule go in `REQUIREMENT.md` under `Gap`, or stay in git, and a date inside a fence or a code span is example data and stays.
 
 - Cut any rule that resists crisp one-line phrasing. Vague guidance is worse than none.
-- State the current rule only, in the body and in every file under `references/`. The incident and the date that earned a rule go in `REQUIREMENT.md` under `Gap`, or stay in git. A date inside a fence or a code span is example data and stays.
-- Group bullets under H2 headings by domain concern. Keep dos and don'ts together under the topic they belong to rather than splitting them into flat rules and constraints sections.
+- Group bullets under H2 headings by concern, keeping dos and don'ts together rather than in flat rules and constraints sections
 - One actionable constraint per bullet. Prefer the `X over Y` form for preferences.
 
-#### Examples and density
+### Examples and density
 
-- Do not include code examples unless a one to three line inline snippet captures a pattern the model cannot infer.
-- Keep a statement only when removing it would change what the agent does, naming a principle as a few-word handle rather than explaining it. Revisit when a run shows the model ignoring a principle named only as a handle.
+Every statement in a body costs a read on each invocation.
+
+- Do not include code examples unless a one to three line inline snippet captures a pattern the model cannot infer
+- Keep a statement only when removing it would change what the agent does, naming a principle as a few-word handle rather than explaining it
+- Revisit when a run shows the model ignoring a principle named only as a handle
 
 ### Progressive disclosure
 
 Keeping a body and its references under the ceiling, what moves to `references/` and what stays, and how a body names a reference are in `skill-disclosure.md`.
 
-### Reading and running commands
-
-- When referencing project files, include "from the project root" in the read instruction
-- When executing multiple independent operations (file reads, shell commands), run them in parallel to reduce latency
-
 ### Anti-patterns to avoid
 
-- Avoid flags that dispatch between alternate flows. The model misreads them and runs the vanilla path. Dry-run-style toggles are fine. For alternate flows, prefer a separate skill or manual invocation of two skills in sequence.
+Avoid flags that dispatch between alternate flows, since the model misreads them and runs the vanilla path. Dry-run-style toggles are fine, and an alternate flow takes a separate skill or two skills invoked in sequence.
+
 - When a skill should fire from multiple callers, rely on description matching with strong trigger phrases. Do not hardcode `Skill` calls in sibling skills that could trigger it naturally.
-- Before collapsing a manual multi-step flow into a skill, ask what the manual pauses do. Where a pause carries external timing, error-surfacing, or judgment weight, prefer explicit per-step confirmation.
+- Before collapsing a manual multi-step flow into a skill, ask what the manual pauses do
+- Where a pause carries external timing, error-surfacing, or judgment weight, prefer explicit per-step confirmation
 
-### Output and tuning
+### Output paths
 
-- Skill success lines emit the full relative path from the project root (`<dir>/<file>`) for any file written, updated, or deleted. A bare filename names a file the reader cannot open. The `## Output` section of the project's instruction file sets the form that path takes, so a skill body states which path is emitted and leaves the form to that section.
-- Before a skill writes anything, decide whether the output is a deliverable the project keeps or a toolkit session record. A deliverable lands among the project's own tracked files. A session record lands under `.canon/`, in the named subfolder for its kind (`tasks/`, `plans/`, `review/`, `groundwork/`, `intake/`, `proposals/`, `diagrams/`, `teach/`, `ready/`, `feedback/`, `picks/`, `evidence/`, `transcripts/`, or `walkthroughs/`, with `tmp/` for scratch nothing else claims), never in a folder the body invents. A `review/` writer names its file `<kind>-<slug>.md` and writes it flat, and an `evidence/` folder takes the next two-digit ordinal as `<nn>-<slug>/`, numbered in the order the folders first appeared.
-- Codify a skill's posted or generated output as a fenced template, and keep the body consistent with every capability the frontmatter description names.
-- When a skill gathers user input or pre-seeds a template, attach a concrete proposed default to every question, derived from project context. Accept "use defaults" as a bulk-confirm.
-- Separate correctness axes (routing, sourcing, escalation, decline) from shape axes (line count, formatting, variant sprawl) when tuning a skill. Tighten only on correctness regressions, never turning a soft cap hard for aesthetic drift.
+A success line emits the full relative path from the project root (`<dir>/<file>`) for any file written, updated, or deleted, since a bare filename names a file the reader cannot open. The `## Output` section of the project's instruction file sets the form that path takes, so the body states which path and leaves the form to that section.
+
+### Where output lands
+
+Before writing, decide whether the output is a deliverable, which lands among the project's tracked files, or a session record. A session record lands under `.canon/` in the named subfolder for its kind, never in a folder the body invents.
+
+- Kinds: `tasks/`, `plans/`, `review/`, `groundwork/`, `intake/`, `proposals/`, `diagrams/`, `teach/`, `ready/`, `feedback/`, `picks/`, `evidence/`, `transcripts/`, `walkthroughs/`
+- `tmp/` takes scratch nothing else claims
+- A `review/` writer names its file `<kind>-<slug>.md` and writes it flat
+- An `evidence/` folder takes the next two-digit ordinal as `<nn>-<slug>/`, numbered in the order the folders first appeared
+
+### Templates, input, and tuning
+
+Codify a skill's posted or generated output as a fenced template, and keep the body consistent with every capability the frontmatter description names.
+
+- When a skill gathers input or pre-seeds a template, attach a proposed default derived from project context to every question. Accept "use defaults" as a bulk-confirm.
+- Separate correctness axes (routing, sourcing, escalation, decline) from shape axes (line count, formatting, variant sprawl) when tuning a skill
+- Tighten only on correctness regressions, never turning a soft cap hard for aesthetic drift
 
 ## Scripts
 
-- Use `scripts/` for operations that must be deterministic or repetitive
-- Ask whether a CLI verb the project already has does the job before writing a script. A verb is already installed and tested, and a script beside it is a second copy that drifts
-- Write a script in TypeScript and run it as `bun ${CLAUDE_SKILL_DIR}/scripts/<name>.ts`. Keep bash for a few lines that start one command. The rule governs a new script, so bash kept by decision is no breach and is not ported unasked, such as `review-ui`'s `scripts/pw.sh` as glue and the shell scripts the web tooling stacks ship, whose port was deferred
-- Import no package. A plugin loads from a cache that carries no `node_modules`, so only `node:` built-ins and the CLIs the skill already requires resolve
-- Use XML tags in script output for reliable parsing: `<SECTION>content</SECTION>`
+Use `scripts/` for operations that must be deterministic or repetitive. First ask whether a CLI verb the project already has does the job, since a verb is installed and tested and a script beside it is a second copy that drifts.
 
-### Inline commands
+- Write a script in TypeScript and run it as `bun ${CLAUDE_SKILL_DIR}/scripts/<name>.ts`. Keep bash for a few lines that start one command.
+- Import no package. A plugin loads from a cache that carries no `node_modules`, so only `node:` built-ins and the CLIs the skill already requires resolve.
+- Use XML tags in script output for parsing: `<SECTION>content</SECTION>`
+- Guard a git or shell command a body runs inline with `2>/dev/null || echo "FALLBACK"`. A TypeScript script uses try and catch instead.
 
-- Always include `2>/dev/null || echo "FALLBACK"` guards on git and shell commands a skill body runs inline. A TypeScript script handles failure with try and catch instead
+The TypeScript rule governs a new script, so bash kept by decision is no breach and is not ported unasked. Examples are `review-ui`'s `scripts/pw.sh` as glue and the shell scripts the web tooling stacks ship, whose port was deferred.
 
 ## Invocation
 
@@ -180,10 +203,14 @@ Keeping a body and its references under the ceiling, what moves to `references/`
 
 ### Correct
 
+Each line names its reason after the `#`.
+
 - `description: Reviews code for bugs and clarity. Use when asked to "review this" or "check the PR".` # names the action, then the trigger phrases
 - `Read ${CLAUDE_SKILL_DIR}/references/post.md on reaching this step.` # a moved step keeps its heading and one load line
 
 ### Incorrect
+
+Each line names its fault after the `#`.
 
 - `description: Handles all code tasks in scripts/, src/, and lib/, and any file ending in .ts .js .py .sh.` # path-focused and keyword-stuffed
 - `A good review checks bugs, performance, security, style, naming, coverage, docs, and SOLID...` # dumps everything inline instead of citing a standard

@@ -11,12 +11,21 @@ The readme standard claims the voice of a repository-root README. `write-human` 
 
 ## Guards
 
-- Default the target to `README.md` at the repository root when no path is given. A caller naming a path under a folder, a harness, or an internal tool is drafting a nested README instead, which keeps the reference voice per the standard's `## Voice` section rather than the root voice.
-- Read the target if it exists.
-  - It carries an H1 naming the project: it is authored. Stop: `❌ <path> already exists and covers the project. Run canon:docs-sync instead.` Report rather than offering to overwrite it or to conform it to what this kind would draft, since the project's own citations into its README are invisible from here.
-  - It carries no H1, or its only headings restate the tool that scaffolded it rather than the project: it is unedited generator output. Continue, drafting over it rather than syncing its sections.
-  - It does not exist: continue.
-- A hand-authored README opening with a badge block, or a title in some other form the H1 test misses, falls into the no-H1 branch the same as a scaffold page. The Confirm step is what catches that case before the write happens, so treat it as load-bearing rather than a courtesy: never skip it on the reasoning that the guard already decided.
+Default the target to `README.md` at the repository root when no path is given. A caller naming a path under a folder, a harness, or an internal tool is drafting a nested README, which keeps the reference voice per the standard's `## Voice` section.
+
+### Reading an existing target
+
+Read the target if it exists, and branch on its headings.
+
+| Target                                                         | Reading          | Route                                                                                 |
+| -------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------- |
+| Carries an H1 naming the project                               | Authored         | Stop: `❌ <path> already exists and covers the project. Run canon:docs-sync instead.` |
+| Carries no H1, or only headings restating the scaffolding tool | Generator output | Continue, drafting over it rather than syncing its sections                           |
+| Does not exist                                                 | Nothing to read  | Continue                                                                              |
+
+- On the authored branch, report rather than offering to overwrite it or to conform it, since the project's own citations into its README are invisible from here
+- A hand-authored README opening with a badge block, or a title the H1 test misses, falls into the no-H1 branch the same as a scaffold page
+- The Confirm step catches that case before the write, so it is load-bearing. Never skip it on the reasoning that the guard already decided.
 
 ## Placement
 
@@ -26,15 +35,18 @@ The target path is the placement. A README keeps no catalog, so there is no coll
 
 Read the project's manifest (`package.json`, `pyproject.toml`, `Cargo.toml`, or equivalent) and the tree, then test each type on its own signal. Note every type that matches rather than stopping at the first, since a project is often several at once.
 
-- Library: an installable package name, counted only when no application, CLI, or plugin signal matches, since a named package is also what a site, a CLI, or a plugin carries. An agent-facing match leaves it in place, so a library with a `CLAUDE.md` still gets its quickstart.
+- Library: an installable package name, counted only when no application, CLI, or plugin signal matches, since a site, a CLI, or a plugin also carries a named package
 - CLI: a `bin` field, a `[project.scripts]` table in `pyproject.toml`, a `[[bin]]` table in `Cargo.toml`, or a CLI entry point.
 - Application: a site framework dependency, a site config file, or an app entry point.
 - Agent-facing: a `.claude/skills/` folder, or a file an agent loads such as `CLAUDE.md`.
 - Plugin: a `plugin.json` or a marketplace manifest.
 
-A match on no type falls back to the standard's generic template. Say so in the preview, and never force the nearest type.
+An agent-facing match leaves the library type in place, so a library with a `CLAUDE.md` still gets its quickstart. A match on no type falls back to the standard's generic template. Say so in the preview, and never force the nearest type.
 
-- Check for a page. A dependency on a site framework or a site config file in the manifest or the tree marks a project as having one. Read a live URL separately, from a `homepage` field or a deploy config, since a project can have a page and no known URL.
+### Page, mark, and screenshot
+
+A site framework dependency or a site config file in the manifest or the tree marks a project as having a page. Read a live URL separately, from a `homepage` field or a deploy config, since a project can have a page and no known URL.
+
 - A monorepo can carry a page in one package and a CLI in another, so both signals may fire. Report each rather than picking one.
 - Look for the mark and the screenshot among images the project already commits: scan the existing README for image references, then the asset and public folders.
 
@@ -61,12 +73,17 @@ Between agent-facing and plugin alone, a repository with no plugin manifest take
 
 ## Draft
 
-- Start from the picked or combined template. Draft the H1, a 2-3 sentence description in plain text, then the required sections, then whichever optional sections and per-type content Detect found. A README takes no frontmatter.
-- Open the page with the standard's header block, filling each slot from what Detect found: mark, title, badges, a one-line claim from the manifest description, the live link, then the product screenshot.
-- Fill the screenshot slot only with an image the project already commits, referenced with alt text naming what it depicts. This kind cannot capture one. Omit the slot when no such image exists and say so in the preview. Never write a placeholder path or invent a mark.
-- Omit the link and the screenshot for a project with no page, and the mark for a project with none, without a note in the drafted page. A project with a page and no known URL gets the screenshot slot, and the Confirm step asks for the link.
+Start from the picked or combined template. Draft the H1, a 2-3 sentence description in plain text, the required sections, then whichever optional sections and per-type content Detect found. A README takes no frontmatter.
+
+- Open with the standard's header block, filled from Detect in order: mark, title, badges, a one-line claim from the manifest description, the live link, then the product screenshot
+- Fill the screenshot slot only with an image the project already commits, with alt text naming what it depicts, since this kind cannot capture one
+- With no such image, omit the slot and say so in the preview. Never write a placeholder path or invent a mark.
+- Omit the link and the screenshot for a project with no page, and the mark for a project with none, with no note in the page
+- A project with a page and no known URL gets the screenshot slot, and the Confirm step asks for the link
 
 ### Types and badges
+
+A badge earns its place only once its rendered value is checked.
 
 - Cover every applicable project type from the standard's `## Content` list rather than picking the closest one.
 - Candidate badges: check for a published package (a registry field in the manifest), a CI workflow, and a `LICENSE` file.

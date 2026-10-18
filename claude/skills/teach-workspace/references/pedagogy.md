@@ -25,11 +25,13 @@ Pulling an answer out of memory strengthens it far more than reading it again. R
 - Let the learner fail an attempt before correcting it. A failed retrieval followed by the answer beats being told first.
 - Do not cue the answer in the question. A question restating the material tests reading rather than memory.
 
-The teach-back block is the production form this section prefers, and it is why a lesson carries one beside its quiz rather than a quiz alone. A quiz is recognition, so a lesson offering only one tests the weak form and reports it as retrieval. Asking the learner to explain the material to somebody who does not have it makes them produce the whole structure rather than pick from four, and what the explanation leaves out is the gap the next session places from.
+The teach-back block is the production form this section prefers, which is why a lesson carries one beside its quiz. A quiz is recognition, so a lesson offering only one tests the weak form and reports it as retrieval.
+
+Explaining the material to somebody who lacks it makes the learner produce the whole structure rather than pick from four. What the explanation leaves out is the gap the next session places from.
 
 - Carry a teach-back block in every lesson, asking for an explanation rather than an answer
 - Name the audience the explanation is for, since an explanation with no reader has no floor to sit above
-- Record what the explanation left out under what the learner got wrong. A produced answer and a selected one are both retrieval failures, and splitting them across two sections splits one placement input.
+- Record what the explanation left out under what the learner got wrong. A missed production and a missed selection are both retrieval failures, and two sections would split one placement input.
 
 ## Spacing
 
@@ -41,7 +43,8 @@ The same total time spread across days beats the same time in one sitting. Forge
 
 The ladder is 1, 3, 7, 16, and 35 days. A topic retrieved unaided moves up a rung and a miss drops it back one, held inside the ladder at either end, so a topic the learner keeps missing stays on the shortest gap rather than restarting a sequence.
 
-Do not compute a date from that ladder by hand. `canon teach list <topic> --json` reports the schedule with both dates already resolved for every item, which is what turns the ladder into a number to copy rather than a rule to apply. An author told to widen a gap still picks the gap by judgment, and this is the same reason quiz option order is drawn by a verb rather than stated here.
+- Do not compute a date from that ladder by hand. `canon teach list <topic> --json` reports both dates resolved for every item, a number to copy rather than a rule to apply.
+- An author told to widen a gap still picks it by judgment, the same reason quiz option order is drawn by a verb rather than stated here
 
 ## Interleaving
 

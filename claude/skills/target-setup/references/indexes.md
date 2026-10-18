@@ -29,7 +29,8 @@ before scanning.
 
 - Bootstrap un-indexed folders only. Skip folders that already contain an `index.md`.
 - All-or-nothing per chosen folder. Every `*.md` sibling in a chosen folder gets `title` and `description` injected, or none does. Partial migration creates folders that hard-error on regen.
-- This phase is where an install wanting the Claude layer without the tooling chain arrives, once `canon claude init` has seeded the docs. The work is the same either way, since the scan below prunes `.claude` and reads the project's own documentation folders whichever route reached it.
+- An install wanting the Claude layer without the tooling chain arrives here once `canon claude init` has seeded the docs
+- The work is the same either way, since the scan prunes `.claude` and reads the project's own documentation folders whichever route reached it
 
 ## Scan
 
@@ -75,7 +76,8 @@ candidate list and stop rather than choosing on the operator's behalf.
 For each chosen folder, read every `*.md` sibling and draft frontmatter:
 
 - `title`: derived from the first H1. If absent, derive from the filename in sentence case.
-- `description`: one line summarizing the file's purpose, drawn from the first paragraph after the H1. Follow `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md` § Frontmatter descriptions for length and style.
+- `description`: one line summarizing the file's purpose, drawn from the first paragraph after the H1
+- Follow `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md` § Frontmatter descriptions for the description's length and style
 
 Surface every drafted entry to the user grouped by file:
 
@@ -131,10 +133,10 @@ canon indexes regen --json
 ```
 
 Count the `written` actions in that record and report the number. Read the real
-run the same way the dry run is read, since the exit carries nothing reliable
-back to a session. An operator's shell profile may wrap `canon` in a function
-that runs the binary and then a second command and takes the second status, so a
-regen that errored on a sibling missing `title` arrives here as a clean pass.
+run the way the dry run is read, since the exit carries nothing reliable back.
+
+- An operator's shell profile may wrap `canon` in a function that takes a second command's status
+- A regen that errored on a sibling missing `title` then arrives here as a clean pass
 
 ## Offer the convention seed
 

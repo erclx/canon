@@ -25,11 +25,17 @@ Does not govern:
 
 ### Description content
 
+The description names the change, and 2 words stays the target.
+
 - Capture the core change, not the commit message verbatim
 - For branches with multiple commits, use the unifying concern as the description.
 - Do not duplicate type in description (e.g., `feat/feature-login`)
 
-The upper bound reads 4 rather than 3 for every branch, whoever named it. It was widened so that a branch taking its description from a planning document's own filename stops being renamed at ship, since a rename there is a third derivation and parts the branch from the filename that later tooling reads back to find the document. Nothing can tell such a name from any other, so the wider bound holds for all of them and 2 words stays the target.
+### Why the bound reads 4
+
+The upper bound reads 4 for every branch, whoever named it, so a branch taking its description from a planning document's filename is not renamed at ship. A rename there is a third derivation, and it parts the branch from the filename later tooling reads back to find the document.
+
+Nothing can tell such a name from any other, so the wider bound holds for all of them.
 
 ## Types
 
@@ -51,6 +57,8 @@ The upper bound reads 4 rather than 3 for every branch, whoever named it. It was
 
 ### Correct
 
+Each line names its reason after the `#`.
+
 ```plaintext
 feat/jwt-expiration                    # clear feature scope
 fix/AUTH-123-connection-pool           # includes ticket ID
@@ -58,6 +66,8 @@ refactor/remove-deprecated-endpoints   # clear refactor intent
 ```
 
 ### Incorrect
+
+Each line names its fault after the `#`.
 
 ```plaintext
 feature/auth_stuff                                        # wrong type + underscore

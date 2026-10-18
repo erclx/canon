@@ -7,7 +7,7 @@ description: Scan an author runs against finished text, the cross-reference form
 
 ## Scope
 
-Governs the scan an author runs against finished text on its way out, the form a pull request or issue reference takes in every destination, and the responses available when a source it reaches for cannot be read. It is an attribute standard rather than a document-type one, so it applies wherever no automated check covers the text, whether that text is leaving through a channel or sitting in the repository, and it carries no template because a scan has no document to shape.
+Governs the scan an author runs against finished text on its way out, the form a pull request or issue reference takes in every destination, and the response when a source the scan reaches for cannot be read. As an attribute standard it applies wherever no automated check covers the text, and carries no template.
 
 Does not govern:
 
@@ -18,68 +18,82 @@ Does not govern:
 
 ## When it runs
 
-Wherever text leaves through a channel no automated check covers, the author is the only gate and runs this scan. Text sent to another service, written to a path the project's checks exclude, and text inside a fenced block are the usual cases. The surface that publishes the text is what knows which gap applies, so it names its own rather than reading one here.
+Wherever text leaves through a channel no automated check covers, the author is the only gate and runs this scan. Text sent to another service, text written to a path the checks exclude, and text inside a fenced block are the usual cases.
 
-Run the scan as an explicit step against the finished text. Having read the underlying rules before drafting does not cover it, because the check has to happen after the text exists.
+- The surface publishing the text knows which gap applies, so it names its own rather than reading one here
+- Run the scan as an explicit step against the finished text, since the check has to happen after the text exists
 
-Scope every check below by destination. Text published to a remote takes all of them. Text staying in the repository takes the character bans alone, since those hold wherever the text lands, and skips whichever check depends on the reader holding something only this checkout carries. The two checks below that depend on it say so under their own headings.
+### Scope by destination
+
+Text published to a remote takes every check below. Text staying in the repository takes the character bans alone, since those hold wherever the text lands.
+
+- Phase labels and board identifiers depend on the reader holding this checkout, so repository text skips both
+- Session links depend on the reader holding the account, a narrower dependency stated under their own heading
 
 ## Banned characters
 
 `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md` holds the character bans. Read it at scan time rather than working the sets from memory, then scan the drafted text and rewrite each occurrence.
 
-`canon labels scan` fails on these characters in a title or body, outside a code span or a link, so the scan is the check and the read above is the reason. It holds a pull request and a posted review alike.
-
-Restructure the sentence rather than substituting the character. A semicolon swapped for a period leaves both clauses in the order the semicolon chose, which is the shape the ban exists to remove.
+- `canon labels scan` fails on these characters in a title or body outside a code span or a link, for a pull request and a posted review alike
+- Restructure the sentence rather than substituting the character, since a semicolon swapped for a period keeps the shape the ban exists to remove
 
 ## Phase labels
 
 `${CLAUDE_SKILL_DIR}/../git-commit/references/versioning.md` holds the label rule and the table of surfaces. Read it at scan time rather than working the format from memory.
 
-This check is one of the two the destination rule above scopes. The reader inside the repository has the task board and the reader on a remote does not.
+The reader inside the repository has the task board and the reader on a remote does not, so this check is scoped by destination.
 
 ## Board identifiers
 
-A phase label is one way text names the board, and a path under a record root is the other. Both resolve for a reader holding this checkout and neither resolves for anyone else, so this check is the second one the destination rule scopes.
+A phase label is one way text names the board, and a path under a record root is the other. Both resolve for a reader holding this checkout and for nobody else, so this check is scoped by destination too.
 
-Two shapes get past a reader scanning for a bare label. A code span quoting a label is still the label, so read a span whose whole content is one as a hit and leave a longer token inside a span alone, which is a fixture name rather than a reference. The second shape is a path under a record root, gitignored and therefore absent from every clone, so `.canon/feedback/` names a folder the remote's reader cannot open.
+- A code span whose whole content is a label is still the label and a hit. A longer token inside a span is a fixture name and stays.
+- A path under a record root is gitignored and absent from every clone, so `.canon/feedback/` names a folder the remote's reader cannot open
+- Tracked `canon/` and `.claude/` paths are no hit, since `canon/context/surfaces/governance.md` resolves everywhere
+- Every path under `.canon/` is a hit whichever folder it names, since one ignore line covers the root whole
 
-Under the tracked `canon/` and `.claude/` folders there is no hit, since `canon/context/surfaces/governance.md` resolves everywhere. `.canon/` carries no such carve-out: one ignore line covers the root whole, so every path beneath it is a hit regardless of which folder names it.
+### Fixing a hit
 
-Rewrite a hit to name what the reader can reach rather than deleting it. A row's subject stated plainly replaces its label, and what a record folder holds, said in a sentence, replaces its path.
+Rewrite a hit to name what the reader can reach rather than deleting it. State a row's subject plainly in place of its label, and say in a sentence what a record folder holds in place of its path.
 
-`canon labels scan` runs this check and the phase-label one over a pull request title and body, and over a posted review's own text once one is submitted. Any other channel, a plain issue comment among them, is still the author's own scan.
+`canon labels scan` runs this check and the phase-label one over a pull request title and body, and over a posted review's text once submitted. Any other channel, a plain issue comment among them, is still the author's own scan.
 
 ## Session links
 
-A link to one Claude Code session names the session that wrote the text rather than the change the text describes. It enters because the harness tells the composing session to end its published text with one, so the author writes it deliberately and it reads as required rather than as a slip. That is what carries it past a scan the same author runs, and it is why a rule stating the ban does not reach the case: the session is following an instruction it was given, and reads its own compliance as correct.
+A link to one Claude Code session names the session that wrote the text rather than the change it describes. The harness tells the composing session to end its published text with one, so the author writes it deliberately and reads that compliance as correct. That is how it passes a scan the same author runs.
 
-This check depends on the reader holding the account rather than the checkout, which is narrower than the dependency the destination rule above scopes. A reader inside this checkout opens a record path and still cannot open a session, since the session resolves for the one account that started it and for nobody else. The scoping still sits at the invocation site, because `canon labels scan` reads a pull request title and body and reaches no other text.
-
-Delete a hit rather than rewriting it. The other two checks replace a hit with what the reader can reach instead, and a session has no such form, so what stands in its place is the body already written above it.
-
-Removing the link before a merge does not substitute for never writing it. One branch removed it, read the live body back clean, and the squashed commit landed carrying it anyway off an earlier snapshot, which is permanent on the trunk.
+- The session resolves only for the account that started it, so a reader inside this checkout still cannot open it
+- The scoping sits at the invocation site, because `canon labels scan` reads a pull request title and body and no other text
+- Delete a hit rather than rewriting it, since a session has no reachable form and the body above it already stands in its place
+- Removing it before a merge is no substitute for never writing it, since a squash can land it from an earlier snapshot, permanently on the trunk
 
 ## Cross-reference form
 
-A number referring to a pull request or an issue takes the form its destination renders. Write it bare where the destination auto-links it, and in backticks where it does not. Both spellings are correct, each in one place, so a reference moved from one destination to the other is rewritten rather than copied.
+A number referring to a pull request or an issue takes the form its destination renders. Write it bare where the destination auto-links it and in backticks where it does not, so a reference moved between destinations is rewritten rather than copied.
 
-Text published to a remote is the auto-linking half: a pull request body, an issue body, a comment on either, and a commit message. Write `#123` there, and `owner/repo#123` where the reference crosses repositories, which the same auto-linking reaches. A markdown file browsed from the repository tree is the other half, where neither spelling links and the backticked one marks the number as an identifier. <!-- canon-allow-reference: the two spellings this section defines, which a qualified form would destroy -->
+| Destination                                               | Form                                                                                                                                                         |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Pull request or issue body, a comment on either, a commit | `#123`, or `owner/repo#123` across repositories <!-- canon-allow-reference: the two spellings this section defines, which a qualified form would destroy --> |
+| A markdown file browsed from the repository tree          | the number in backticks, since neither spelling links there                                                                                                  |
+| Content installed into another repository                 | qualified against a different, resolvable repository, or no number                                                                                           |
 
-Content that installs into another repository is the third destination, and it splits on which repository the number names. A skill body loads from a plugin cache and a docs page is read through `canon docs`, so the reader holds their own repository rather than the one a bare number belongs to. Qualifying a number against a different, resolvable repository fixes that, since the reader can open that repository even without this one.
+A commit message takes the bare form even though the log links nothing, since the remote is what the form is chosen for. Text quoted from another surface keeps the spelling it arrived with, since rewriting it reports the source as saying something it never said.
 
-Qualifying it against `erclx/canon` fixes nothing, because a reader holding only the plugin cache or the published package still cannot open this repository's own history. A same-repository citation takes no number here at all, bare or qualified. State the fact the citation was standing in for instead, and where the identifier is the only trace of a one-off incident rather than a reproducible count, carry it into the `canon/context/` entry that owns the surface.
+### Installed content
 
-Write `owner/repo#123` and `owner/repo@abc1234` for a citation of a different, resolvable repository, across every such surface. `canon gate run` fails a push on a bare reference there, and a line whose bare form is the point carries `canon-allow-reference: <reason>` on itself or on the line above.
+A skill body loads from a plugin cache and a docs page is read through `canon docs`, so the reader holds their own repository rather than the one a bare number belongs to.
 
-Choose the number over the sha where the citation names a decided change, since a pull request number resolves to the diff and the review behind it. Take the sha only for a tree or measurement state, the `Measured at <sha>` shape a context entry already uses. The choice holds for both spellings this section fixes, the bare form a remote auto-links and the qualified form a cross-repository citation carries.
+- Write `owner/repo#123` and `owner/repo@abc1234` for a different, resolvable repository, which the reader can open without this one
+- Qualifying against `erclx/canon` fixes nothing, since a reader holding the cache or the package still cannot open this repository's history
+- A same-repository citation takes no number, so state the fact it stood in for, and carry a one-off incident's identifier into the `canon/context/` entry owning the surface
+- `canon gate run` fails a push on a bare reference there, and a line whose bare form is the point carries `canon-allow-reference: <reason>` on itself or the line above
 
-A commit message takes the bare form even though it is also read through the log, where nothing links. The remote is what the form is chosen for, since a reader in the log loses only a link that plain text never carried.
+### Number or sha
 
-Text quoted from another surface keeps the spelling it arrived with. A reference inside a quotation belongs to what is being quoted rather than to the text doing the quoting, so rewriting it reports the source as having said something it never said.
+Choose the number where the citation names a decided change, since it resolves to the diff and the review behind it. Take the sha only for a tree or measurement state, the `Measured at <sha>` shape a context entry already uses. The choice holds for the bare and the qualified spelling alike.
 
 ## An unreadable source
 
 Stop and name the source when one this scan reaches for cannot be read. Do not scan what resolved and report the result.
 
-A run that covers half its sources and says nothing is worse than one that visibly did not happen, because the surfaces running this scan are the ones that describe themselves as the only gate. A clean result from a half-run scan is read as coverage.
+A half-run scan that says nothing is worse than one that visibly did not happen, because the surfaces running this scan describe themselves as the only gate. Its clean result is read as coverage.

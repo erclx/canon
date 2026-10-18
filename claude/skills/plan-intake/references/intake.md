@@ -7,7 +7,7 @@ description: Folder layout, ordinal naming, reserved index number, frontmatter a
 
 Applies to an intake folder at `.canon/intake/<nn>-<slug>/`. One folder holds one dump, filed by domain, and every finding in it is an item carrying a measured problem, one proposed fix, and a verdict.
 
-The folder is gitignored, and backed wherever a records remote is configured: `canon records push` and `canon records pull` protect it against the machine being lost there, refuse with `no-remote` where it is not, and neither protects against a compaction dropping a session's reasoning before anyone has pushed. No check reaches its contents, so the shape below survives only by being read.
+The folder is gitignored. Where a records remote is configured, `canon records push` and `canon records pull` protect it against losing the machine, and elsewhere they refuse with `no-remote`. Neither saves reasoning a compaction drops before a push. No check reaches its contents, so the shape below survives only by being read.
 
 <!-- canon-length-exempt: the folder shape and the item template share one reader, and a split into a second reference is queued as its own change -->
 
@@ -41,11 +41,13 @@ Does not govern:
 
 ## Folder name
 
-- Name the folder `<nn>-<slug>`, a two-digit zero-padded ordinal followed by a kebab-case slug. This is the folder's own ordinal, distinct from the `NN-<domain>.md` numbering a cluster file carries inside it.
+- Name the folder `<nn>-<slug>`, a two-digit zero-padded ordinal and a kebab-case slug, distinct from the `NN-<domain>.md` numbering of its cluster files
 - The ordinal marks a folder per track, opened once and worked over time, distinct from a file addressed by name, one already carrying its own sorting prefix, or one deliberately overwritten.
-- Claim the ordinal through `canon records ordinal intake <slug> --claim`, which reads the highest one already present across both `.canon/intake/` and `.canon/groundwork/` and creates the folder in the same atomic act, closing the race a read-then-create sequence leaves open between two sessions opening at once. A listing then sorts by when each folder opened rather than alphabetically, and the count includes both kinds because the two share one creation-order line.
-- With neither folder holding an entry, the first one opened takes `01`. Do not read this off the numbering inside a dump, which starts at `00` and disagrees with groundwork's own first required file.
-- Never renumber an existing folder. The ordinal is the order it opened, and a later reader cites it by that name.
+- Claim the ordinal through `canon records ordinal intake <slug> --claim`, which reads the highest across `.canon/intake/` and `.canon/groundwork/`, since the two share one creation order
+- The claim creates the folder in the same atomic act, closing the race a read-then-create leaves open between two sessions opening at once
+- With neither folder holding an entry, the first one opened takes `01`, never read off a dump's inner numbering, which starts at `00`
+
+Never renumber an existing folder. The ordinal is the order it opened, and a later reader cites it by that name.
 
 ## What a working intake looks like
 
@@ -68,9 +70,8 @@ An intake failing these is non-conforming even when it satisfies every shape rul
 
 `00` is the only reserved number. Everything else is read order, and the domain rides in the filename so a reader knows what `07-tooling.md` holds without opening it.
 
-Do not reserve mid-range numbers. Clusters differ per dump, so a contract over `06` would force every future intake into one dump's shape. A folder whose shape is fixed can reserve its numbers, and that half of the convention does not transfer.
-
-Let the file count follow the number of separable domains. A large dump with two domains is a small folder.
+- Do not reserve mid-range numbers, since clusters differ per dump and a contract over `06` would force every intake into one dump's shape
+- Let the file count follow the number of separable domains. A large dump with two domains is a small folder.
 
 ## Frontmatter and dating
 
@@ -113,35 +114,39 @@ Where an item touches a task already on the board, say so in the index rather th
 ```
 
 - `Problem:`, `Fix:`, `Worth it:`, and the empty `You:` slot ship on every item. The other two are conditional.
-- Number items per cluster file, and give a finding split after the fact a letter suffix on the number it came from, as in `3a` beside `3`. Renumbering the items below it instead moves every label a reader or an answer already cited.
-- `Suggested:` is required whenever `Open:` is present. A bare question invites a bare answer, and `ok` against two defensible options carries no information. Where the answer is the operator's preference rather than a technical call, say so in that form rather than inventing a default.
-- `Overlaps:` never replaces `Worth it:`. The items where a live board task might be the thing that is wrong are exactly the ones whose verdict matters most.
+- Number items per cluster file, giving a finding split later a letter suffix such as `3a` beside `3`, since renumbering moves every cited label
+- `Suggested:` is required whenever `Open:` is present, since `ok` against two defensible options carries no information
+- Where the answer is the operator's preference rather than a technical call, say so in that form rather than inventing a default
+- `Overlaps:` never replaces `Worth it:`, since an item a live board task might have wrong is the one whose verdict matters most
 
-Two heading levels is the right depth inside a cluster file. A third means the cluster should have been its own file.
-
-An item may carry a bolded standalone line between the bullets where a finding needs a name of its own. Keep it rare. Everything fitting the four bullets belongs in them.
+Two heading levels is the right depth inside a cluster file. A third means the cluster should have been its own file. An item may carry a rare bolded standalone line between the bullets where a finding needs a name of its own, and everything fitting the four bullets belongs in them.
 
 ## The answer contract
 
-`You:` belongs to the operator and ships empty on every item.
+`You:` belongs to the operator and ships empty on every item. Empty means unread and never agreement, so accepting a verdict is typed as one token, `- **You:** ok`.
 
-Empty means unread. It never means agreement. Accepting a verdict is typed as one token, `- **You:** ok`.
+- Never fill a `You:` slot, and never infer a disposition from an empty one
+- On a resume pass, report unread items by count rather than deciding them
 
-That inverts the plan file's contract, where a blank answer slot means accept the suggestion, and the inversion is deliberate. A plan is read in one sitting with every question already surfaced in conversation. An intake folder is read over weeks, so an empty slot is ambiguous between accepting the verdict and never having reached the item, and the second reading is far more likely. Acting on silence as consent ships a change nobody approved.
+### Why silence is not consent
 
-Never fill a `You:` slot, and never infer a disposition from an empty one. On a resume pass, report unread items by count rather than deciding them.
+This inverts the plan file's contract, where a blank slot means accept the suggestion. A plan is read in one sitting with every question already surfaced. An intake folder is read over weeks, so an empty slot more likely means nobody reached the item, and acting on it ships a change nobody approved.
 
-A slot is filled two ways. The operator types into the cluster file, or answers in chat and a verb lands the selection on the item. Both put the answer on the item, which is what keeps retrieval working, and neither lets a session decide one. An answer given in conversation and never written back leaves the item unread, since the file rather than the conversation is the record.
+### Filling a slot
 
-An item already carrying an answer is refused rather than overwritten, whichever route the second answer arrives by. A filled slot is a decision already made, and revising one is the operator editing their own line.
+The operator types into the cluster file, or answers in chat and a verb lands the selection on the item. Both put the answer on the item, which keeps retrieval working, and neither lets a session decide one.
+
+- An answer given in conversation and never written back leaves the item unread, since the file is the record
+- An item already carrying an answer is refused rather than overwritten, whichever route the second answer takes
+- Revising a filled slot is the operator editing their own line
 
 ## Retrieval
 
-Answers live on items, so one pass over the folder reports every touched slot.
+Answers live on items, so one pass over the folder reports every touched slot. With the toolkit CLI on PATH, read the folder through `canon intake list`, the surface under test.
 
-A session with the toolkit CLI on PATH reads the folder through `canon intake list`, which reports per-folder counts bare and one folder's items with `--json`, and takes `--unread` to keep only the empty slots. It is the surface under test, and it skips the index and every fenced sample, which the greps below cannot do.
-
-The greps stay for a reader without the CLI, and they overcount by whatever the folder displays in a fence.
+- Bare, it reports per-folder counts, `--json` gives one folder's items, and `--unread` keeps only the empty slots
+- It skips the index and every fenced sample, which the greps below cannot do
+- The greps stay for a reader without the CLI, and they overcount by whatever the folder displays in a fence
 
 ```bash
 awk '/^### /{h=FILENAME": "$0} /^- \*\*You:\*\*./{print h; print "   "$0}' *.md

@@ -12,7 +12,9 @@ description: Authoring a freehand SVG, its color and accessibility audit, and th
 - Author the SVG by hand: plain shapes and lines authored directly in the markup.
 - Follow the `## Color and accessibility` section of `${CLAUDE_SKILL_DIR}/references/figures.md` for every fill, stroke, and accessible name.
 
-There is no external render to verify a freehand drawing against before it is written. The check here is the stroke-and-fill audit above and a read of the markup against what the subject means to show, done once rather than looped. Hand-placed coordinates can drift out of line where a layout engine would not, so a freehand figure bound for a rendered page also takes the in-page capture below.
+There is no external render to verify a freehand drawing against before it is written. The check is the stroke-and-fill audit above and one read of the markup against what the subject means to show, done once rather than looped.
+
+Hand-placed coordinates can drift out of line where a layout engine would not, so a freehand figure bound for a rendered page also takes the in-page capture below.
 
 ## Capture in the page
 

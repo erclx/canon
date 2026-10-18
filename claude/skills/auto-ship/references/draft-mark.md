@@ -19,14 +19,40 @@ gh api graphql -f query='mutation($id: ID!) { convertPullRequestToDraft(input: {
 gh api repos/{owner}/{repo}/pulls/<number> --jq '{isDraft: .draft}'
 ```
 
-The target check and the read-back go through REST. The mark itself is a GraphQL mutation, because the REST pull request update carries no draft field, so the mark is local-only: a cloud session's GitHub access blocks GraphQL, the mutation fails there, and the read-back reports `false`. A cloud worker's pull request therefore opens ready, and its chain stops at this step with the pull request already open.
+## Why the mark is local-only
 
-Name the number `git-ship`'s pull request step returned in every position rather than leaving any to resolve by branch. `${CLAUDE_SKILL_DIR}/../git-pr/REQUIREMENT.md` states why: a lookup that resolves by branch alone can return a closed pull request sharing that head, so the number is resolved once and reused rather than re-derived.
+The target check and the read-back go through REST. The mark itself is a GraphQL mutation, because the REST pull request update carries no draft field.
 
-A refusal is a stop. Report the line the shell printed, then resolve the number from the `number=` and `head=` lines of `git-pr`'s output and re-run the command by hand. The comparison sits in the shell rather than in the session's reading of a printed value, which is the same split `git-pr`'s `assert_own_pr` makes, because the judgment that picked a wrong number is the one that would read the check.
+- A cloud session's GitHub access blocks GraphQL, so the mutation fails there and the read-back reports `false`
+- A cloud worker's pull request therefore opens ready, and its chain stops at this step with the pull request already open
 
-The number crosses from that step's output into a command this session types, which is the one place a number gets authored rather than derived. A number misread there, or inferred from the newest pull request in view, would draft a stranger's pull request. A release pull request is the worst such target, since the mark holds the release and this role may not lift it again.
+## The number
 
-Report what the read returned rather than what the command printed, since the exit says the call ran and says nothing about the state. A `true` reports a draft. A `false` reports the pull request as opened ready and unsupervised, and the chain stops there. Never re-issue the mark on a disagreeing read, which fights whoever readied it instead of guarding anything.
+Name the number `git-ship`'s pull request step returned in every position rather than leaving any to resolve by branch. `${CLAUDE_SKILL_DIR}/../git-pr/REQUIREMENT.md` states why, since a lookup by branch alone can return a closed pull request sharing that head.
 
-Placement is why the call sits ahead of the watch rather than after it. Marking afterwards leaves the pull request unmarked for the whole CI run, which is the stretch an unattended worker's branch is least supervised. What the mark buys is a reader learning the pull request has had no review yet. It buys no bound on that stretch: readying a pull request to merge lifts the mark, GitHub requires it before a merge, and the act runs through `canon pr lift`, which a reviewer runs on its close and the controlling session runs as the fallback, or through the operator directly. `role-worker` states the mirroring refusal of an instruction to ready the pull request directly, whoever sends it.
+The number crosses from that step's output into a command this session types, the one place a number gets authored rather than derived. A number misread there, or inferred from the newest pull request in view, would draft a stranger's pull request.
+
+- A release pull request is the worst such target, since the mark holds the release and this role may not lift it again
+
+### A refusal
+
+A refusal is a stop. Report the line the shell printed, then resolve the number from the `number=` and `head=` lines of `git-pr`'s output and re-run the command by hand.
+
+The comparison sits in the shell rather than in the session's reading of a printed value, the same split `git-pr`'s `assert_own_pr` makes. The judgment that picked a wrong number is the one that would read the check.
+
+## The read-back
+
+Report what the read returned rather than what the command printed, since the exit says the call ran and says nothing about the state.
+
+- A `true` reports a draft
+- A `false` reports the pull request as opened ready and unsupervised, and the chain stops there
+- Never re-issue the mark on a disagreeing read, which fights whoever readied it instead of guarding anything
+
+## Why the mark sits ahead of the watch
+
+Marking afterwards leaves the pull request unmarked for the whole CI run, the stretch an unattended worker's branch is least supervised. What the mark buys is a reader learning the pull request has had no review yet.
+
+It buys no bound on that stretch. Readying a pull request to merge lifts the mark, and GitHub requires it before a merge.
+
+- The lift runs through `canon pr lift`, which a reviewer runs on its close and the controlling session runs as the fallback, or through the operator directly
+- `role-worker` states the mirroring refusal of an instruction to ready the pull request directly, whoever sends it

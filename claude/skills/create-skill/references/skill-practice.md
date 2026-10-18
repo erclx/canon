@@ -31,9 +31,11 @@ A practice skill failing any of these is non-conforming even when every heading 
 
 ## Closing sections
 
-- Follow every concern group with three H2s in this order: `## Excuses and rebuttals`, `## Red flags`, and `## Before handing over`. A section naming what the skill delegates comes after the three, and nothing else does.
+Follow every concern group with `## Excuses and rebuttals`, `## Red flags`, and `## Before handing over`, in that order. Only a section naming what the skill delegates comes after.
+
 - Spell each heading exactly. An H3, or a heading carrying more words such as `## Red flags that mean start over`, reads as missing.
-- Write `## Excuses and rebuttals` as a two-column table pairing a reason a session gives to skip or shortcut the practice with the answer to it. Never write a row rebutting an objection nobody raised, since that row is ceremony. Revisit when a practice skill's table is observed failing to stop an excuse it names.
+- Write `## Excuses and rebuttals` as a two-column table pairing a reason a session gives to skip or shortcut the practice with the answer to it
+- Never write a row rebutting an objection nobody raised, since that row is ceremony. Revisit when a table is observed failing to stop an excuse it names.
 - Write `## Red flags` as bullets naming signs a session can observe in its own work mid-task, never a restatement of a rule above.
 - Write `## Before handing over` as the exit checklist, each line a check against what the session produced.
 
@@ -47,6 +49,7 @@ A practice skill failing any of these is non-conforming even when every heading 
 ## Which skills are practice skills
 
 - `canon claude skills audit` keeps the list of practice skills and checks each listed one for the three closing sections and the ledger.
-- It keeps a wider ledger list beside it, holding every practice skill plus the skills that teach a craft drawn from outside sources without a practice's closing shape. A skill on the wider list alone owes the ledger and none of the three sections.
+- It keeps a wider ledger list beside it, adding the skills that teach a craft drawn from outside sources without a practice's closing shape
+- A skill on the wider list alone owes the ledger and none of the three sections
 - Never mark a skill as a practice skill in its own frontmatter, since a self-declared kind lets a skill exempt itself.
 - Both lists name this toolkit's shipped skills alone, so a project's own practice skill takes this shape with no check behind it.

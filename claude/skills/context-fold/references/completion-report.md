@@ -7,16 +7,18 @@ description: The lines context-fold prints once every step has run, being one pe
 
 The close of `context-fold`. The session reads this file once every step has run, before printing anything.
 
-Output one line per file updated:
+## Lines
 
-`✅ Updated: <path written>`
+| When                                                 | Line                                                                                        |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Per file updated                                     | `✅ Updated: <path written>`                                                                |
+| Step 2 noted a requirements change                   | `↪ Direction changed this session: run document-health on canon/REQUIREMENTS.md`            |
+| Per audit finding Step 4 reported                    | `⚠ Audit:` in the shape the body gives                                                      |
+| Step 4's classify half applied or reported a finding | The exact shape `${CLAUDE_SKILL_DIR}/references/classify.md` gives under its Report section |
+| No file updated and Step 4 reported nothing          | `✅ No changes needed.`                                                                     |
 
-When Step 2 noted a requirements change: `↪ Direction changed this session: run document-health on canon/REQUIREMENTS.md`
+Do not shorten or paraphrase the audit and classify lines here or in the reply, since the quote and the reason are what a reader checks the finding against.
 
-Step 4 adds one `⚠ Audit:` line per audit finding it reported, in the shape the body gives. Its classify half adds its own lines when it applied or reported a finding, in the exact shape `${CLAUDE_SKILL_DIR}/references/classify.md` gives them under its own Report section. Do not shorten or paraphrase those lines here or in the reply, since the quote and the reason are what a reader checks the finding against.
+## Suppressing the closing line
 
-If no files were updated and Step 4 reported nothing, output:
-
-`✅ No changes needed.`
-
-Suppress that line when Step 2 already reported no context updates. It closes the run on its own, and emitting both leaves a quiet session reporting success twice for one outcome.
+Suppress `✅ No changes needed.` when Step 2 already reported no context updates. That report closes the run on its own, and emitting both leaves a quiet session reporting success twice for one outcome.

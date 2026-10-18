@@ -30,7 +30,14 @@ A plan lost to deletion, or carrying two answers to one question, fails both.
 ## Lifecycle
 
 - Write the plan before implementation starts, and treat it as the scope of the run that executes it. A subject that has to be measured before anyone can plan against it takes a measurement track first.
-- Keep every plan at one root. A plan copied into each parallel working tree forks, and the copies answer the same question differently.
-- Amend the plan in place when a decision changes mid-flight. Do not append a second passage narrating the change, which leaves a reader to work out which of two answers is current. An execution-time deviation from a suggestion is one such amendment, and the suggested-and-answer contract in `plan.md` fixes which line takes it.
-- Move the plan to `.canon/plans/archive/` when the work it describes ships or is declined. Never delete it, because the plan is where the rejected alternative is written down. A flat `.claude/plans-archive/` sibling is the older layout.
 - Write the plan in the same session that opens the task it serves. The session executing it later inherits reasoning it would otherwise re-derive.
+- Keep every plan at one root. A plan copied into each parallel working tree forks, and the copies answer the same question differently.
+
+### Amending and archiving
+
+A plan changes in place and leaves only by a move.
+
+- Amend the plan in place when a decision changes mid-flight, never appending a passage narrating the change, which leaves two answers to reconcile
+- An execution-time deviation from a suggestion is one such amendment, and the suggested-and-answer contract in `plan.md` fixes which line takes it
+- Move the plan to `.canon/plans/archive/` when its work ships or is declined, and never delete it, since it records the rejected alternative
+- A flat `.claude/plans-archive/` sibling is the older layout.

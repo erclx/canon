@@ -5,39 +5,38 @@ description: The visual defaults a model reaches for when nothing states a direc
 
 # Machine tells in design
 
-Each item below is a shape rather than a value, which is why no ban list of colors or fonts reaches any of them. Read this before handing over anything a model drafted. Skip it on a small change to a surface that already has a settled direction.
+Each item below is a shape rather than a value, which is why no ban list of colors or fonts reaches any of them. Read this before handing over anything a model drafted, and skip it on a small change to a surface that already has a settled direction.
 
-The skill body carries the ten most common of these. This is the same catalog at full length, so an item appearing in both is one list rather than two.
-
-An item is a default to reach past, not a prohibition. A brief that explicitly asks for one gets it, and the point is that it was chosen rather than defaulted into.
+The skill body carries the ten most common of these, and this is the same catalog at full length. An item is a default to reach past, not a prohibition, so a brief that explicitly asks for one gets it, chosen rather than defaulted into.
 
 ## Composition
 
-- **The three equal cards.** Three identical boxes in a row under a heading is the most-reached-for feature section in existence. Reach for a two-column alternation, an asymmetric grid, a list with one item given weight, or a single worked example.
-- **One section shape repeated down the page.** A page where every section is a centered heading over a centered body reads flat whatever its palette. Vary alignment, container width and the ratio between sections.
+- **The three equal cards.** Three identical boxes in a row under a heading. Reach for a two-column alternation, an asymmetric grid, a list with one item given weight, or a single worked example.
+- **One section shape repeated down the page.** Every section a centered heading over a centered body reads flat whatever its palette. Vary alignment, container width and the ratio between sections.
 - **The centered hero over a dark wash.** Centered headline, centered subhead, two buttons, gradient behind. Reach for an asymmetric split, a full-bleed artifact, or content that starts immediately.
-- **Decoration standing in for structure.** Hairline grids, crosshairs, floating rules and corner marks added so a page feels designed. Use them where they organize real content and remove them where they do not.
-- **The corner floater.** A large left-aligned section heading with a small explanatory paragraph floating in the top right, aligned to nothing. Put the sub-text under the heading or build a real two-column header.
+- **Decoration standing in for structure.** Hairline grids, crosshairs, floating rules and corner marks added so a page feels designed. Keep them only where they organize real content.
+- **The corner floater.** A large left-aligned heading with a small paragraph floating top right, aligned to nothing. Put the sub-text under the heading or build a real two-column header.
 
 ## Content and labels
 
 - **Enumerated eyebrows.** `001 / Capabilities`, `Phase 02`, `Step 1`, `Stage One`. The content is the label. Where progression genuinely matters, use the verb.
 - **Poetic section labels.** "From the field", "On our desks", "Currently on the bench". Use the plain functional label or drop the label.
-- **Atmospheric strips.** City, time zone, temperature, coordinates, build version, last-sync time, placed for texture rather than information. Keep one only where it carries real state a reader acts on.
+- **Atmospheric strips.** City, time zone, temperature, coordinates, build version, last-sync time, placed for texture. Keep one only where it carries real state a reader acts on.
 - **Scroll cues.** "Scroll", an animated wheel, a downward arrow with a label. A reader looking at the top of a page knows what scrolling is.
-- **Decorative status dots.** A coloured dot before every nav item, list row or badge. Keep it only where it reports genuine state, and then sparingly.
-- **Filler verbs.** A verb chosen for its warmth rather than for what it reports, such as `elevate`, `unleash`, `empower` or `next-generation`. Name the thing the surface does.
-- **Placeholder that reads as placeholder.** Generic person names, egg avatars, invented company names of the `Acme` family, one portrait reused for several people, every item dated identically. Real collections are uneven and specific.
-- **Invented precision.** A figure like 4.1x or 48k either came from real data, is marked as sample, or does not appear. There is no fourth case. Inventing a number to look engineered is the version of this that gets shipped, because it reads as confidence.
+- **Decorative status dots.** A colored dot before every nav item, list row or badge. Keep it only where it reports genuine state, and then sparingly.
+- **Filler verbs.** A verb chosen for warmth rather than for what it reports, such as `elevate`, `unleash`, `empower` or `next-generation`. Name the thing the surface does.
+- **Placeholder that reads as placeholder.** Generic names, egg avatars, `Acme`-family companies, one portrait for several people, every item dated alike. Real collections are uneven and specific.
+- **Invented precision.** A figure like 4.1x or 48k came from real data, is marked as sample, or does not appear. An invented number gets shipped, because it reads as confidence.
 - **The fake screenshot built from boxes.** A product UI simulated out of styled rectangles inside a hero. Show the real thing, a real capture, or nothing.
-- **Copy nobody re-read.** Read every visible string once as a reader rather than as its author, before handing anything over. Rewrite what is grammatically broken, what carries a pronoun with no antecedent on the page, and what reaches for charm it has not earned. Plain beats clever and wrong, which is what a model drafting copy produces by default.
+- **Copy nobody re-read.** Read every visible string once as a reader rather than its author before handing over. Plain beats clever and wrong, which is what a model drafting copy produces by default.
+- **What the re-read rewrites.** A string that is grammatically broken, carries a pronoun with no antecedent on the page, or reaches for charm it has not earned.
 
 ## Surface and palette
 
 - **Glow as depth.** Outer glows and neon rims standing in for elevation. Use a border, a tint, or a real shadow with direction.
 - **Pure black and pure white as grounds.** Both are harsher than nearly any surface wants. Move off the extreme.
-- **Saturation everywhere.** An accent at full saturation next to neutrals that are also tinted leaves nothing to anchor on. Desaturate the neutrals and let one accent carry.
-- **The gradient as a substitute for a decision.** A gradient covering a section, a heading, or a button set, applied because the flat version looked plain. Flat is usually the fix for flat composition, not gradient.
+- **Saturation everywhere.** A full-saturation accent beside tinted neutrals leaves nothing to anchor on. Desaturate the neutrals and let one accent carry.
+- **The gradient as a substitute for a decision.** A gradient over a section, a heading, or a button set because flat looked plain. Flat composition is fixed by composition, not gradient.
 - **Uniform radius and uniform elevation.** Every card at the same radius with the same shadow flattens hierarchy. Let the thing that matters differ.
 
 ## Typography
@@ -49,28 +48,28 @@ An item is a default to reach past, not a prohibition. A brief that explicitly a
 
 ## Motion
 
-- **Motion nobody can justify.** Before adding any animation, say in one sentence what it communicates: hierarchy, sequence, feedback, or a state that changed. "It looked good" is not one of those. A sentence that will not come is the answer, and the animation goes.
+- **Motion nobody can justify.** Before adding any animation, name the hierarchy, sequence, feedback, or changed state it communicates. A sentence that will not come means it goes.
 - **The permanent loop.** Anything animating forever with no input. It costs attention on every frame and earns none back.
 - **Motion on arrival for everything.** Every section fading up on scroll. Reserve entrance motion for what genuinely needs the eye.
-- **Motion claimed but not present, or present but not claimed.** A surface described as restrained that animates on every scroll, or one described as fluid that sits still, has decided nothing. Ship the motion or drop the claim.
-- **Motion that ignores a reduced-motion preference.** Not a taste failure at all. It is a correctness failure the `ui` governance rules own, listed here only so a motion pass does not read this catalog as the whole of what motion owes.
+- **Motion claimed but absent, or present but unclaimed.** A "restrained" surface animating on every scroll, or a "fluid" one sitting still, has decided nothing. Ship the motion or drop the claim.
+- **Motion that ignores a reduced-motion preference.** A correctness failure the `ui` governance rules own, not a taste one. It sits here so a motion pass does not read this catalog as all motion owes.
 
 ## The countable limits
 
-These are the rules with numbers, so they are checked by counting rather than by judging. Every one came out of production testing by people shipping model-drafted pages.
+These rules carry numbers, so they are checked by counting rather than by judging. Every one came out of production testing by people shipping model-drafted pages.
 
 - **A layout family appears once.** Once a section uses a shape, no other section on the surface uses it. Eight sections need at least four distinct families.
-- **Two consecutive splits, never three.** Alternating image-left and image-right reads as considered twice and as filler by the third. Break it with a full-width section, a vertical stack, a grid, or anything else.
-- **One small uppercase label per three sections.** The tiny wide-tracked line above a heading is the single most over-reached default in model output. `interface-casing` carries the count. The fix is usually to delete it, since a section's position already says what it is.
+- **Two consecutive splits, never three.** Alternating image sides reads as considered twice and as filler by the third. Break it with a full-width section, a vertical stack, or a grid.
+- **One small uppercase label per three sections.** The most over-reached default in model output, with the count in `interface-casing`. Usually delete it, since position already says what a section is.
 - **One marquee.** Two sliding strips on one surface read as filler rather than as a device.
 - **Cells equal items.** A grid with a hole in it, or a blank tile at the end, means the grid was shaped before the content was counted. Reshape it.
-- **Over five items wants a different component.** A longer list is the lazy answer. Group into clusters, split into columns, give each item a card, make them scrollable, or collapse the tail behind a disclosure.
+- **Over five items wants a different component.** Group into clusters, split into columns, give each item a card, make them scrollable, or collapse the tail behind a disclosure.
 
 ## The first screen
 
-- **It fits.** The point and the primary action are both visible without scrolling. If the copy will not fit, the copy is too long or the type is too large, and the second is the more common cause.
+- **It fits.** The point and the primary action are both visible without scrolling. Copy that will not fit is too long or set too large, and the second is the more common cause.
 - **At most four text elements.** A label or a brand strip, a headline, a short supporting line, and the actions. That is the whole budget.
-- **Everything else moves down.** A small tagline under the actions, a trust strip, a pricing hint, a feature list, a row of faces. Each of those is a section of its own below, not a fifth element above.
+- **Everything else moves down.** A tagline under the actions, a trust strip, a pricing hint, a feature list, a row of faces. Each is a section of its own below, not a fifth element.
 - **Plan the type scale against the asset.** A headline wrapping to four lines is a size error rather than a length error.
 - **Logos go under it, never inside it.** A credibility row shares no space with the point.
 

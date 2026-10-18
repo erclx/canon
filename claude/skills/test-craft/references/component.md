@@ -5,7 +5,9 @@ description: Render with real children, query by role, drive with user events, w
 
 # Component tests
 
-Read this before writing the first test at the component layer. A component's logic is its rendered behavior, so the lowest layer that catches a break in a loading state, an interaction, or a validation message is a rendered component test rather than a browser run across the whole site. Kent C. Dodds's testing trophy makes this the widest band for UI code ([Write tests](https://kentcdodds.com/blog/write-tests)), on the principle Testing Library states: "The more your tests resemble the way your software is used, the more confidence they can give you" ([guiding principles](https://testing-library.com/docs/guiding-principles)).
+Read this before writing the first test at the component layer. A component's logic is its rendered behavior, so the lowest layer catching a break in a loading state, an interaction, or a validation message is a rendered component test rather than a whole-site browser run.
+
+Kent C. Dodds's testing trophy makes this the widest band for UI code ([Write tests](https://kentcdodds.com/blog/write-tests)), on the principle Testing Library states: "The more your tests resemble the way your software is used, the more confidence they can give you" ([guiding principles](https://testing-library.com/docs/guiding-principles)).
 
 ## What belongs here
 
@@ -36,7 +38,8 @@ Read this before writing the first test at the component layer. A component's lo
 
 A simulated DOM computes no layout, no scroll position, and no animation frame. When the behavior under test is one of those, move to a runner that renders the component in a real browser rather than promoting the test to end to end.
 
-- Vitest browser mode runs tests "in the browser natively", with Playwright or WebdriverIO as the provider, and lists React, Vue, Svelte, Angular, Lit, Preact, and Qwik. Astro is not on the list ([Vitest browser mode](https://vitest.dev/guide/browser/)). For a static site, test the client module that drives the behavior against a fixture DOM here.
-- Playwright component testing is stable in plain `@playwright/test` through a mount fixture, and "if your dev server can render it, Playwright can test it" ([Playwright component testing](https://playwright.dev/docs/test-components)). The experimental `-ct-*` packages were removed after 1.62.
+- Vitest browser mode runs tests "in the browser natively" through Playwright or WebdriverIO, for React, Vue, Svelte, Angular, Lit, Preact, and Qwik ([Vitest browser mode](https://vitest.dev/guide/browser/))
+- Astro is not on that list. For a static site, test the client module driving the behavior against a fixture DOM in Vitest browser mode.
+- Playwright component testing is stable in plain `@playwright/test` through a mount fixture ([Playwright component testing](https://playwright.dev/docs/test-components)). The experimental `-ct-*` packages were removed after 1.62.
 
-Either runs in a real browser without navigating the whole site, which keeps the test at the component's cost while observing what only a browser computes.
+Playwright's own claim is that "if your dev server can render it, Playwright can test it". Either runs in a real browser without navigating the whole site, which keeps the test at the component's cost while observing what only a browser computes.

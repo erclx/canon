@@ -31,7 +31,8 @@ The file is optional, since measuring what is already there settles most questio
 Each spike carries four things:
 
 - The open question it answers, named by file and number. A spike attached to no question is a runaway.
-- The method, stated fully enough for a later reader to re-run it. Name the fixture and where it lived, since an arm pointed at a fixture inside the project measured the project, plus the exact command and the repetition count.
+- The method, stated fully enough for a later reader to re-run it, with the exact command and the repetition count.
+- The fixture and where it lived, since an arm pointed at a fixture inside the project measured the project
 - The result, and which question it closes. Record a spike that settles nothing too, so a later pass does not pay for it twice.
 - The measured cost, even for a single read, and the caveats bounding what the result proves. Cost is a report rather than a limit, and it makes the next spike estimable.
 
@@ -46,6 +47,8 @@ A file a reader opens to verify how a result was produced or what it showed live
 - `clones/`: checkouts and copies of outside material a claim rests on, kept small enough to hold in the folder. A checkout too large to keep is cited by its address and commit instead.
 
 Open no other subfolder: `spikes/`, `web/`, and `research/` fold into these three, with a fetched page in `clones/` and a reference-site screenshot in `evidence/`.
+
+### Harnesses and read checks
 
 Reach for a test harness the project already carries before building one. An experiment no existing harness can express is a finding for the folder, not a new abstraction.
 

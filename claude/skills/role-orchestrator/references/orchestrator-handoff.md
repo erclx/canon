@@ -7,45 +7,59 @@ description: Retirement act the wind-down owes the fleet it dispatched, the talk
 
 Settle this act before writing the map. A session retired afterwards is one the map already listed as running, and the map is what the next session reads the fleet off.
 
-The act reaches every session this one dispatched that no verb can decide. `canon worktrees reclaim` refuses a directory on any of seven conditions and reclaims one that trips none, and three of the seven are what this act turns on: a merged pull request, a clean tree, and no live session holding the directory. A running session trips the third whatever its branch did, and retiring it is what clears that one, which is why the retirement runs ahead of the reclaim rather than after it.
+The act reaches every session this one dispatched that no verb can decide. `canon worktrees reclaim` refuses a directory on any of seven conditions, and three are what this act turns on, being a merged pull request, a clean tree, and no live session holding the directory.
 
-Two cases stay undecided even once the session is gone. A worker whose branch has not merged is refused on `no-merged-pull-request`, and a planner is refused as `main-worktree` and handed a null removal route, since it never enters a worktree and registers against the tree it was launched from.
-
-Name the planner as the case always in this set, and scope the act no narrower. A rule covering planners alone leaves the unmerged worker unreached while reading as complete.
+- A running session trips the third whatever its branch did, and retiring it clears that one, so the retirement runs ahead of the reclaim
+- A worker whose branch has not merged stays undecided once gone, refused on `no-merged-pull-request`
+- A planner stays undecided too, refused as `main-worktree` with a null removal route, since it registers against the tree it was launched from
+- Name the planner as the case always in this set, and scope the act no narrower, since a rule for planners alone leaves the unmerged worker unreached
 
 ### Which sessions this session may retire unasked
 
-Retire what this session dispatched. Report a hand-launched session and leave the act to the operator, since the knowledge making the act safe is a delivery this session received and it received nothing from a session it never launched. The `worker-` and `planner-` name prefixes separate the two populations, per `orchestrator-launch.md`.
+Retire what this session dispatched. Report a hand-launched session and leave the act to the operator, since what makes the act safe is a delivery this session received, and it received nothing from a session it never launched.
 
-A talk session is the exception inside the dispatched population. Retire it only on the operator's word, given here or carried in the session's own close message, and never on its delivery, at wind-down or at any other point. Its plan landing or its pull request opening tells this session nothing about whether the conversation is over. Until the word arrives, report it as held open next to the hand-launched read. A talk session is found by the `sessionId` the prior map records or this session's own launch output carries, since the client can rename it and drop the `-talk` suffix `orchestrator-launch.md` gives it.
+- The `worker-` and `planner-` name prefixes separate the two populations, per `orchestrator-launch.md`
+- A capability gap sits beside that knowledge gap. A hand-launched session is often interactive, and `claude rm <id>` has no id to take for one.
 
-A capability gap sits beside the knowledge gap, and it holds even where delivery is somehow known. A hand-launched session is as often interactive as background, and `claude rm <id>` has no id to take for an interactive one at all, so the command cannot reach it whatever this session learned about its delivery.
+### Talk sessions
+
+A talk session is the exception inside the dispatched population. Retire it only on the operator's word, given here or carried in the session's own close message, and never on its delivery, at wind-down or any other point.
+
+- Its plan landing or its pull request opening tells this session nothing about whether the conversation is over
+- Until the word arrives, report it as held open next to the hand-launched read
+- Find it by the `sessionId` the prior map records or this session's launch output carries, since the client can rename it and drop the `-talk` suffix
 
 ### Telling a delivered session from a blocked one
 
-No status field carries the difference. `status` reads `busy` or `waiting` straight off the client record, and both describe the last turn rather than the work, so `waiting` is the ordinary answer for a session that reported and stopped, which is what a correct delivery looks like. The `statusDwellMs` beside it separates a long idle from a short one and separates nothing else.
+No status field carries the difference. `status` reads `busy` or `waiting` off the client record, both describing the last turn rather than the work, so `waiting` is the ordinary answer for a session that reported and stopped. `statusDwellMs` separates a long idle from a short one and nothing else.
 
-The read is the report this session is holding. Retire a session whose delivery arrived here, and leave every other one. A plan sitting at `.canon/plans/feature-<slug>.md` corroborates that report and never stands in for it, because a planner writes the file and can then stop on a follow-up question with the file already landed. Retiring a blocked session destroys the context it held and nothing on disk records what it had read, so the act runs in the keeping direction the reclaim reading already takes: retire what is recorded as delivered, and leave the rest for the operator.
+The read is the report this session is holding. Retire a session whose delivery arrived here, and leave every other one for the operator.
+
+- A plan at `.canon/plans/feature-<slug>.md` corroborates that report and never stands in for it, since a planner can stop on a question after writing it
+- Retiring a blocked session destroys its context and nothing on disk records what it had read, so the act keeps, as the reclaim reading does
 
 ### The act, and the order it runs in
 
-`claude rm <id>` is meant to remove a background session and its worktree together, though its own report is not reliable, so `canon worktrees list` is the reading to trust afterward. It takes one target per call, so a wave costs one call per session. The argument is the id rather than the name, which `claude agents --json` carries beside the name on every row, so a session read off a roster by name is matched to its id there before the call. The name form answers `No job matching`.
+`claude rm <id>` is meant to remove a background session and its worktree together, though its own report is not reliable, so trust `canon worktrees list` afterward. It takes one target per call, so a wave costs one call per session.
 
-The command belongs to the client rather than to this toolkit, so a target running another client performs whatever removal that client offers.
-
-Run `canon worktrees reclaim` after the retirements rather than before them. `held-by-session` is one of the conditions that reading refuses on, so a reclaim taken first refuses the directories the retirement is about to free and reports a board with nothing left to do.
-
-Report the retired sessions as a list, the hand-launched ones under it as a read rather than an act, and what the reclaim removed below both.
+- The argument is the id, which `claude agents --json` carries beside the name on every row, and the name form answers `No job matching`
+- The command belongs to the client, so a target running another client performs whatever removal that client offers
+- Run `canon worktrees reclaim` after the retirements, since it refuses on `held-by-session` and a reclaim taken first finds nothing left to do
+- Report the retired sessions as a list, the hand-launched ones under it as a read rather than an act, and what the reclaim removed below both
 
 ## Write the map
 
-Write the pre-compaction handoff as orchestrator. Invoke `canon:session-map` for the generic half, which is the filename, the three core sections, the write procedure, the drift step and the ref it reads, and the citation rule. Everything in this section is the extension this role adds over that core, and none of it belongs to a session holding no delegated authority.
+Write the pre-compaction handoff as orchestrator. Invoke `canon:session-map` for the generic half, being the filename, the three core sections, the write procedure, the drift step and the ref it reads, and the citation rule. Everything in this section is the extension this role adds.
 
-Settle all three steps below before the door writes, so one write carries the core and the extension together. The door reports the map as written and knows nothing of this role, so its success line ends the generic half rather than this runbook, and a session that stops there ships a map missing everything this section adds to it.
+Settle all three steps below before the door writes, so one write carries the core and the extension together. The door's success line ends the generic half rather than this runbook, so a session stopping there ships a map missing everything this section adds.
 
-1. Add `## Decisions taken under delegated authority` directly after `## State`, holding each decision and why it went that way, so nobody re-proposes it. It sits there rather than after the core because a decision is read against the state it was taken in.
-2. Add `## Talk sessions held open` directly after that section, with one line per open talk session giving its name, its `sessionId`, and its row, or `None.` when there are none. The next session reads it to know which sessions it must not retire on a delivery.
-3. Close the file with the block below, resolving `${CLAUDE_SKILL_DIR}/references/orchestrator-resume.md` and `${CLAUDE_SKILL_DIR}/references/orchestrator-poll.md` to absolute paths as you write it and pasting each in place of `<RESUME_RUNBOOK>` and `<POLL_RUNBOOK>`:
+1. Add `## Decisions taken under delegated authority` directly after `## State`, holding each decision and why it went that way, so nobody re-proposes it.
+   - It sits there because a decision is read against the state it was taken in
+2. Add `## Talk sessions held open` directly after that, one line per open talk session giving its name, its `sessionId`, and its row, or `None.`.
+   - The next session reads it to know which sessions it must not retire on a delivery
+3. Close the file with the block below, resolving each runbook path to an absolute one as you write it.
+   - Paste `${CLAUDE_SKILL_DIR}/references/orchestrator-resume.md` resolved in place of `<RESUME_RUNBOOK>`
+   - Paste `${CLAUDE_SKILL_DIR}/references/orchestrator-poll.md` resolved in place of `<POLL_RUNBOOK>`
 
 ```markdown
 Resume by loading the orchestrator skill and asking it to resume after a compaction. This repository spells that `/canon:role-orchestrator` followed by the request. Following <RESUME_RUNBOOK> reaches the same place with no skill loaded at all.
@@ -53,14 +67,22 @@ Resume by loading the orchestrator skill and asking it to resume after a compact
 That resume reads the board and stops. It restarts nothing, so the review poll is a second thing owed here, and <POLL_RUNBOOK> holds the prompt and the condition. Do not reach for `session-resume`, which reads tracked work and reports the newest map without restarting this loop.
 ```
 
-The delegated-authority section is the orchestrator's alone because a worker holds no delegation to have exercised, and a section a session cannot fill teaches its reader to skip the file. The closing block is the orchestrator's for the same reason from the other direction: it restarts a review poll no other role runs.
+### Why these sections are the orchestrator's
 
-The substitution belongs in step 3 because that step ends the write. A reader who treats the list as finished elsewhere ships the literal placeholders, and the variable expands while this runbook renders rather than in the turn that reads the handoff back, so a path left unresolved reaches a session holding no skill as a string matching nothing. `orchestrator-poll.md` resolves its script at the same point and for the same reason.
+The delegated-authority section is the orchestrator's alone because a worker holds no delegation to have exercised, and a section a session cannot fill teaches its reader to skip the file. The closing block is the orchestrator's because it restarts a review poll no other role runs.
 
-That block sits in this runbook and again in the file this runbook writes, which is the fix rather than a copy for a later pass to collapse. A session has to already be holding this runbook to read it, and a compaction that took the skill body took the routing to it too, so the session that most needs the resume is the one that can no longer find it. The map survives that, so it carries the invocation itself. Each of the two reaches a reader the other cannot.
+- The substitution sits in step 3 because that step ends the write
+- The variable expands while this runbook renders, never when the handoff is read back
+- A path left unresolved reaches a session holding no skill as a string matching nothing. `orchestrator-poll.md` resolves its script at the same point.
 
-The requirement is a resume request to the orchestrator skill with that skill loaded first. The command the block carries is this repository's spelling rather than the only one, since the skill ships to every target holding the plugin and each runs whatever client it runs. The poll restart is named beside it because the resume performs none.
+### Why the block appears twice
 
-This runbook varies the door rather than replacing it, which is why the door is invoked first and this runbook states only what differs. The generic half moved out whole, the drift step and its ref recovery with it, so nothing here restates a step the door already carries and the two cannot disagree.
+That block sits here and again in the file this runbook writes, which is the fix rather than a copy to collapse. A compaction that took the skill body took the routing to this runbook too, so the map carries the invocation itself, and each copy reaches a reader the other cannot.
 
-This session commits nothing, and the orchestrator's boundaries forbid writing a context entry from it. A domain fact belongs to the task that owns the surface and goes in that task's Findings, and so does a lesson about how to work, since nothing reads a lesson left only in the map once the session after it is past it.
+- The requirement is a resume request to the orchestrator skill with it loaded first, and the command shown is this repository's spelling, not the only one
+- The poll restart is named beside it because the resume performs none
+- This runbook varies the door rather than replacing it, stating only what differs, so the two cannot disagree
+
+## Where a lesson goes
+
+This session commits nothing, and the orchestrator's boundaries forbid writing a context entry from it. A domain fact goes in the Findings of the task owning the surface, and so does a lesson about how to work, since nothing reads a lesson left only in the map once the next session is past it.

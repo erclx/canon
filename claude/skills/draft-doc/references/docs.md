@@ -9,12 +9,15 @@ description: The guard, placement, draft additions, and regen folder for a brand
 
 ## Guards
 
-- Derive a kebab-case slug from the topic and run `canon docs <slug>`. A resolved page means the topic is already covered under that exact name. Stop: `❌ <slug> already resolves to an existing page. Run canon:docs-sync instead.` This is a name match rather than a topic match. Placement checks the wider case.
+Derive a kebab-case slug from the topic and run `canon docs <slug>`. A resolved page means the topic is covered under that exact name, so stop: `❌ <slug> already resolves to an existing page. Run canon:docs-sync instead.`
+
+This is a name match rather than a topic match, and Placement checks the wider case.
 
 ## Placement
 
-- Read `docs/index.md` and its sub-catalogs for the closest existing `category`. <!-- canon-allow-reference: illustrates the target project's own docs/ tree, not a citation of this repository's own corpus -->
-- Check every page title and description that read surfaces against the topic. Stop on a match: `❌ <path> already covers this topic under a different name. Run canon:docs-sync instead.`
+- Read `docs/index.md` and its sub-catalogs for the closest existing `category`. <!-- canon-allow-reference: the target project's own docs/ tree -->
+- Check every page title and description that read surfaces against the topic
+- Stop on a match: `❌ <path> already covers this topic under a different name. Run canon:docs-sync instead.`
 - Reuse a matching `category` value verbatim. A near-miss spelling opens a second shelf holding one page, per the docs standard.
 - Default to the `docs/` root with no `category` when nothing fits. A subfolder earns itself only once a shelf of pages already sits there, per the standard's splitting rule.
 
