@@ -51,7 +51,7 @@ fi
 # Exit 2 carries findings, so the status is read off the record rather than
 # the exit code.
 record=$(canon tasks validate --json --root "$root" 2>/dev/null)
-ok=$(printf '%s' "$record" | jq -r '.ok // empty' 2>/dev/null)
+ok=$(printf '%s' "$record" | jq -r '.ok | tostring' 2>/dev/null)
 
 if [ "$ok" = false ]; then
   report "canon tasks validate refused the board after this edit: $(printf '%s' "$record" | jq -r '.message // .reason')"

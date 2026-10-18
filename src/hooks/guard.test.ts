@@ -183,6 +183,7 @@ beforeAll(() => {
     join(fixture, 'bin-scan-fail'),
     join(fixture, 'bin-scan-pass'),
     join(fixture, 'bin-board'),
+    join(fixture, 'bin-board-refused'),
     join(fixture, 'no-source'),
     join(fixture, 'read-only'),
     join(fixture, 'elsewhere/tmp'),
@@ -305,6 +306,15 @@ beforeAll(() => {
     `#!/usr/bin/env bash\nprintf '%s\\n' '{"ok":true,"findings":[{"kind":"cell-long","group":"Needs a plan","subject":"v1.0-a","message":"carries a long cell."}]}'\nexit 2\n`,
   )
   chmodSync(board, 0o755)
+
+  // A refused validation carries `ok:false`, which jq's `//` reads as absent,
+  // so this stub is what makes the refusal branch observable.
+  const refused = join(fixture, 'bin-board-refused/canon')
+  writeFileSync(
+    refused,
+    `#!/usr/bin/env bash\nprintf '%s\\n' '{"ok":false,"message":"no board here."}'\nexit 1\n`,
+  )
+  chmodSync(refused, 0o755)
 
   // The reply-links hook decides on the record the verb writes, so a stub
   // answering a missing path stands in for the verb, and logs each call so a
@@ -602,6 +612,29 @@ describe('board-validate.sh scope', () => {
         expect(result.code).toBe(0)
       })
     }
+  }
+})
+
+// A refusal carries `ok:false`, and a hook that reads it with `// empty` reports
+// the board as unvalidated instead of refused.
+describe('board-validate.sh refusal', () => {
+  for (const tree of TREES) {
+    it(`should report a refused validation on ${tree.label}`, async () => {
+      const result = await run(
+        join(tree.dir, 'board-validate.sh'),
+        payloadFor({
+          tool_input: {
+            file_path: join(fixture, 'project/.canon/tasks/priority.md'),
+          },
+          tool_name: 'Edit',
+        }),
+        [join(fixture, 'bin-board-refused'), hookPath].join(delimiter),
+      )
+
+      expect(result.stdout).toContain('refused the board after this edit')
+      expect(result.stdout).toContain('no board here.')
+      expect(result.code).toBe(0)
+    })
   }
 })
 
