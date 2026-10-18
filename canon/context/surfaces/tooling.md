@@ -68,15 +68,13 @@ Is storage for `canon claude` and no stack, so `EXCLUDED_STACKS` in `src/tooling
 
 ### `src/tooling/`
 
-Owns the manifest walk, scan, injection engine, stamp, reference resolver, and verify.
+Owns the manifest walk, scan, injection engine, stamp, reference resolver, and verify. The stamp keeps a standalone add-on such as `shell` or `public` beside the core chain, so syncing one never displaces the stack it layers onto.
 
 - `scan` walks the current stack first and a file seen there blocks the same path from every parent, so dependencies and gitignore entries alone resolve from the furthest ancestor inward
 - `mergeSections` writes a group header only when the whole group is missing, treats `.canon/tmp` and `.canon/tmp/` as one entry, and never rewrites a line
 - `resolveWriteMode` in `src/commands/tooling.ts` maps `--check` to report, `--write` to apply, and a TTY to a prompt, and a headless caller with neither flag reports and exits 1
 - `canon tooling diff` dispatches into `runSync` with `check` set and exits 1 on any difference, and `--json` answers `{ ok: false, reason, message }` on a refusal
 - A target below its git toplevel syncs as a subfolder, withholds every `.github/` file, and with no `package.json` lands only the gitignore
-
-`recordToolingChain` keeps a standalone add-on such as `shell` or `public` beside the core chain, so syncing one never displaces the stack it layers onto. Base extends nothing and still counts as core.
 
 ### `src/tooling/verify-stack.ts`
 
