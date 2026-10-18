@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs'
+import { existsSync, statSync } from 'node:fs'
 import { readFile, realpath } from 'node:fs/promises'
 import { basename, join, resolve } from 'node:path'
 import { $ } from 'bun'
@@ -223,7 +223,7 @@ const FRAMES_REFUSALS: Record<FramesCommandRefusal, string> = {
   'no-number':
     '--add and --drop write for one pull request, so name its number.',
   'bad-box':
-    '--add takes --box <n>, a positive whole number naming the checklist box, or --reference <page>/<frame>, never both.',
+    '--add takes --box <n>, a positive whole number naming the checklist box, or --reference, as <page>/<frame> or a tracked canon/design/<surface>/<name> path, never both.',
   'bad-reference':
     '--reference takes <page>/<frame> or a tracked canon/design/<surface>/<name> path, each half opening on a letter or digit and holding only letters, digits, dots, underscores, and dashes, with no `--` in either, so the capture files under a name that reads back as the frame.',
   'bad-head':
@@ -1088,7 +1088,9 @@ export function register(program: Command): void {
         'so nothing is checked out and no other branch is touched. A frame lands',
         'at pr-<number>/<short-head>/<pass>/box-<n>.png, or box-<n>-<theme>.png',
         'with --theme, or ref-<page>--<frame>.png for a design reference capture',
-        'passed as --reference <page>/<frame> in place of --box, and `link` names that',
+        'passed as --reference <page>/<frame> in place of --box, or',
+        'ref-design--<surface>--<name>.png for a tracked canon/design/<surface>/<name>',
+        'reference, whose --add must name that same file, and `link` names that',
         `path on ${FRAMES_BRANCH}, so it survives a rewrite that drops other pull`,
         'requests and resolves until its own pull request is dropped. The pass',
         'segment keeps a second pass at one head and box from replacing an image',
@@ -3193,23 +3195,31 @@ async function runFrames(
   const invalid = framesArgumentRefusal(number, opts)
   if (invalid !== undefined) return refuseFrames(invalid)
 
+  if (opts.reference !== undefined && isDesignReference(opts.reference)) {
+    const tracked = resolve(
+      root,
+      opts.reference.endsWith('.png')
+        ? opts.reference
+        : `${opts.reference}.png`,
+    )
+    const refuseTracked = (message: string) =>
+      refuseWith('bad-reference', message, emitJson, root)
+    if (!statSync(tracked, { throwIfNoEntry: false })?.isFile()) {
+      return refuseTracked(
+        `${opts.reference} is not a file under the repository, so no tracked reference can be filed from it.`,
+      )
+    }
+    if (opts.add === undefined || resolve(opts.add) !== tracked) {
+      return refuseTracked(
+        `--add must name ${tracked}, since a tracked reference files its own image and a different one would disagree with its label.`,
+      )
+    }
+  }
+
   const bytes =
     opts.add === undefined ? undefined : await readFrame(resolve(opts.add))
   if (opts.add !== undefined && bytes === undefined) {
     return refuseFrames('unreadable-frame')
-  }
-
-  if (
-    opts.reference !== undefined &&
-    isDesignReference(opts.reference) &&
-    !existsSync(resolve(root, opts.reference))
-  ) {
-    return refuseWith(
-      'bad-reference',
-      `${opts.reference} is not a file under the repository, so no tracked reference can be filed from it.`,
-      emitJson,
-      root,
-    )
   }
 
   if (Bun.which('gh') === null) return refuseFrames('gh-missing')

@@ -233,7 +233,7 @@ const PLAN_REQUIRED: readonly PlanSection[] = [
  * one owes a `Design references` section, so a set too wide forces it on every
  * plan and one too narrow lets a UI plan skip it.
  */
-const RENDERED_SURFACE = /\.(?:tsx|jsx|astro|vue|svelte|html|css)$/
+const RENDERED_SURFACE = /\.(?:tsx|jsx|astro|vue|svelte|html|css|scss)$/
 
 export function touchesRenderedSurface(entries: readonly string[]): boolean {
   return entries.some((entry) =>

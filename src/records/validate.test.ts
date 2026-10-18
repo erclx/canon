@@ -337,6 +337,14 @@ describe('checkPlan', () => {
       expect(checkPlan('feature-a-b.md', conformingPlan())).toEqual([])
     })
 
+    it('should require the section for a scss entry', () => {
+      const body = uiPlan([]).replace('button.tsx', 'theme.scss')
+
+      expect(kinds(checkPlan('feature-a-b.md', body))).toEqual([
+        'section-missing',
+      ])
+    })
+
     it('should require the section for a stylesheet entry', () => {
       const body = uiPlan([]).replace('button.tsx', 'theme.css')
 
