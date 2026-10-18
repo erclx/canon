@@ -59,7 +59,11 @@ Send it to the worker holding the branch as `review-pr` Step 5 returns an open `
 - Carry the pull request number, the heading, that step's count line verbatim, and this session's own sessionId for the worker's reply
 - Resolve the worker with `canon sessions list --branch <branch> --json`, where `<branch>` is the pull request's head branch
 - Send to it only when exactly one session comes back with its confidence reading `confirmed`
-- On zero, on any other count or confidence, or on a refusal, send the same message to the controller, saying no worker resolved
+- On zero, on any other count or confidence, or on a refusal, send the same message to the controller, naming the cause the roster read gives
+  - Say the roster rests on sockets from another pid namespace, so the worker may be live and unconfirmed, when a row reads `via: "socket"` or an empty roster carries a `foreignDead` count above zero
+  - Say the roster rests on a pid answering alone, since start times could not be read, when the confidence reads `unverified` and no row reads `via: "socket"`
+  - Say no worker resolved only for a `confirmed` roster of zero rows, and name the count and confidence for any other
+  - Name the refusal and what the verb returned when `canon sessions list` refused, since a refusal has no roster to read
 
 ### The close
 

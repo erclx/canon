@@ -7,17 +7,17 @@ description: What a dispatched reviewing session is, what it writes and reads, t
 
 ## Gap
 
-Without this skill, review is the one stage of the loop that does not fan out. Every first pass runs inside the controlling session with several pull requests in one context, and that session skims the docs a branch touches. A cold session reviewing one pull request finds what it missed.
+Without this skill, review is the one stage that does not fan out. Every first pass runs inside the controlling session with several pull requests in one context, and that session skims the docs a branch touches. A cold session reviewing one pull request finds what it missed.
 
-Each launch also restates the reviewer's bounds by hand, though they belong to the role. A reviewer asked to fix has reviewed its own change, and one posting a close is a step from readying the pull request by hand, which skips the gates `canon pr lift` reads. One with no checkout reads the trunk, so its findings describe a tree the pull request never changed.
+Each launch also restates the reviewer's bounds, though they belong to the role. A reviewer asked to fix has reviewed its own change, and one posting a close is a step from readying the pull request, skipping the gates `canon pr lift` reads. One with no checkout reads the trunk, so its findings describe a tree the pull request never changed.
 
 ## Must
 
 - The role is asserted, with writes bounded to the comment and body file the pass posts, and the tracked file, branch, worktree, board, and commit named as outside them
-- Every file read a finding rests on goes through `git show <head>:<path>` at the resolved head, and cross-branch facts a launch carries are read as inputs
+- Every file read a finding rests on goes through `git show <head>:<path>` at the resolved head, and launch-carried cross-branch facts are inputs
 - The fix, a draft lift by any route but `canon pr lift`, and the merge are refused whoever asks, naming each owner, and the lift runs after a close is posted
-- An open pass sends the worker the `review-address` dispatch with this session's sessionId, and a close messages the controller with the lift's reason unless the other review is still open
-- A re-review stays with the reviewer that took the first pass while it is live, and a message goes out before a block becomes an interactive prompt
+- An open pass sends the worker the `review-address` dispatch and this session's id, else the controller the cause, and a close sends the lift's reason unless the other review is open or missing
+- A re-review stays with the reviewer that took the first pass while it is live, and a block is messaged before it becomes an interactive prompt
 
 ## Must not
 
@@ -28,7 +28,7 @@ Each launch also restates the reviewer's bounds by hand, though they belong to t
 
 ## Out of scope
 
-- The pass itself, its scoping, its body, and its post, which `review-pr` owns
+- The pass itself, its scope, body, and post, which `review-pr` owns
 - What a review looks for, which `review-craft` owns
 - The cross-branch pass per wave and which pull requests take a reviewer, which `role-orchestrator` owns
 - Answering the review, which `review-address` owns

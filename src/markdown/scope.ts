@@ -297,6 +297,7 @@ export const GATED_PATHS: readonly string[] = [
   'claude/skills/role-orchestrator/references/orchestrator-watch.md',
   'claude/skills/role-planner/REQUIREMENT.md',
   'claude/skills/role-planner/SKILL.md',
+  'claude/skills/role-reviewer/REQUIREMENT.md',
   'claude/skills/role-reviewer/SKILL.md',
   'claude/skills/role-worker/REQUIREMENT.md',
   'claude/skills/role-worker/SKILL.md',
