@@ -7,6 +7,10 @@ export const GIT_CASES: readonly SkillCase[] = [
     expect: 'git-branch',
   },
   {
+    prompt: 'I am on main and about to start a feature, create its branch.',
+    expect: 'git-branch',
+  },
+  {
     prompt: "Turn what's staged into one commit message.",
     expect: 'git-commit',
   },
