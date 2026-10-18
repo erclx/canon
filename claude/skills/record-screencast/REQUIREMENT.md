@@ -7,32 +7,29 @@ description: Why compiling and running a screencast draft needs a routed skill r
 
 ## Gap
 
-Without this skill, `script-screencast` writes a draft and names `canon demo compile` as the next step, and nothing after that routes a session there or to `canon demo run`. An operator has to know both verbs, type them in order, and read the compile record for unresolved fields by hand. A session that fills one in on its own reproduces the exact failure `canon demo run`'s `plan-unresolved` reason exists to catch, one layer up where nothing enforces it.
+Without this skill, nothing routes a session from a screencast draft to `canon demo compile` and `canon demo run`. An operator has to know both verbs, type them in order, and read the compile record for unresolved fields by hand.
+
+A session that fills an unresolved field in on its own reproduces the failure `plan-unresolved` exists to catch, where nothing enforces it. A take with no composition ships raw, and an unguided one reaches for generic defaults.
 
 ## Must
 
-- Resolve the default plan path the same way `canon demo compile` does, so a caller passing only the draft path reaches the plan without naming it
-- Skip compiling when a plan already exists at that path, since its timing may be tuned by hand and a draft cannot reproduce that
-- Report every unresolved field from the compile or run record and stop rather than filling one in
-- Report every path a run wrote, video, mp4, gif, still, and timeline, skipping any the record carries as null
-- Load the video craft guidance before composing, so a composition applies sourced judgment on captions, zoom, pointer, and audio rather than the defaults an unguided session reaches for
-- Compose the take into a finished mp4 through HyperFrames when the draft's wrap section asks for anything, check the composition before rendering, and hand the render to `read-frames`
-- Stop at the take when the wrap section says `none` throughout, and stop with the install command when HyperFrames is absent
+- The default plan path resolves the way `canon demo compile` resolves it, and an existing plan there is run rather than recompiled, since its timing may be tuned by hand
+- Every unresolved field from the compile or run record is reported and the run stops there
+- Every path a run wrote is reported, skipping any the record carries as null
+- The video craft guidance loads before composing, and a draft whose wrap section asks for anything becomes a finished mp4 through HyperFrames, checked before rendering and handed to `read-frames`
+- A wrap section reading `none` throughout stops at the take, and an absent HyperFrames stops with its install command
 
 ## Must not
 
-- Pass `--force` to compile
+- Pass `--force` to compile, or guess what to compile when no draft path is given
 - Guess or fill a target, a URL, or any other unresolved field
 - Drive the application through anything other than `canon demo run`
-- Install HyperFrames, vendor it, or restate its composition rules, which its own skills own
-- Assume this skill's own invocation frequency needs no check. `script-screencast`'s closing block names it by hand, but whether anything else reaches for it beyond that pointer or an operator typing its name has no answer at creation time, so a review pass some months in should read that back rather than take it on faith.
-
-## Guards
-
-- No draft path given: stop rather than guessing what to compile
+- Install HyperFrames, vendor it, or restate its composition rules
+- Assume anything reaches for this skill beyond `script-screencast`'s closing pointer or an operator, which a later review reads back
 
 ## Out of scope
 
 - Drafting the beats, which `script-screencast` owns
-- Filling an existing plan's target or URL, which is the operator's own edit
-- Verifying a recording beyond its own caption, which nothing in the toolkit does yet
+- The captions, zoom, pointer, and audio judgment, which `video-craft` owns
+- Reading the render back, which `read-frames` owns
+- Filling an existing plan's target or URL, which the operator owns

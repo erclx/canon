@@ -7,42 +7,29 @@ description: Why a session composing a video of software needs sourced judgment 
 
 ## Gap
 
-Without this skill, a session composing a video applies no judgment specific to a video of software. HyperFrames' own skills carry general motion craft, being ease and speed variety, anchoring, and click timing, and nothing carries what a demo needs on top: what a caption says, which moment earns a zoom, how a recorded pointer behaves, and how far music sits under a voice.
+Without this skill, a composed video of software gets general motion craft from HyperFrames and nothing on top. Nothing says what a caption says, which moment earns a zoom, how a recorded pointer behaves, or how far music sits under a voice. A render pushes in slowly, narrates the whole flow in one caption, and opens on a slogan card.
 
-The miss is measured. Two unguided renders of one demo in October 2026 pushed in over 2.2 and 1.4 seconds, used one ease on every move, centered the caption in a pill, and opened on a card holding the product name and a slogan over a gradient. The operator watched both and judged them generic, naming the zoom as too slow, and added that a caption has to name what the frame shows at that moment rather than narrate the whole flow. Rendering the first again with HyperFrames' creative and animation skills loaded fixed the general motion and left the four points above untouched.
-
-Numbers from recall are the second gap. HyperFrames' zoom rule states 1.0 to 2.0 seconds with no source, and its default music bed sits about 18 dB under a voice where the accessibility guideline asks for 20. A session taking either as given reproduces the defaults the operator rejected.
+Numbers from recall are the second gap. HyperFrames states its zoom duration with no source, and its default music bed sits closer under a voice than the accessibility guideline asks. A session taking either as given reproduces the defaults that read generic.
 
 ## Must
 
-- State that a caption names only what its frame shows, with its on-screen time, line count, line length, and reading rate traced to published subtitle guidelines
-- State which moment earns a zoom, aim it from the timeline `canon demo run` writes beside the take, and give a sourced duration for a push onto an action
-- State how a recorded pointer behaves on a real interface: one pointer, and each click inside its recorded target. Smoothing and hiding the pointer are recorder settings a composition cannot change, so they stay out
-- Cover choosing music or silence, the level music sits under a voice, and the pace of a captioned voiceover, each number sourced
-- State that a checker finding is dismissed only after the frame it names is read
-- Record the source behind every number in `references/adopted.md`, and name each conflict between sources with its pick rather than averaging
-- Close with the practice skill's excuses, red flags, and closing checklist
-- Be loaded by `record-screencast` before it composes, reporting when the skill does not resolve
+- A caption names only what its frame shows, with its timing, line count, line length, and reading rate traced to published subtitle guidelines
+- A zoom lands on an action, aimed from the take's timeline with a sourced push duration, and one pointer clicks inside each recorded target
+- The choice of music or silence, the music's level under a voice, and a voiceover's pace each carry a sourced number
+- A checker finding is dismissed only after the frame it names is read
+- Every number traces to a source in `references/adopted.md`, a conflict between sources names its pick, and the body closes with the practice skill's three closing sections
 
 ## Must not
 
-- Restate a rule HyperFrames' own skills carry, such as ease variety, anchoring, click timing, the scale and dwell of a zoom, safe margins, or the carve that sits music under a voice. Point at the skill that owns it.
-- State a number that `references/adopted.md` does not trace to a source
+- Restate a rule HyperFrames' own skills carry, such as ease variety, anchoring, click timing, a zoom's scale and dwell, safe margins, or the carve under a voice
+- State a number `references/adopted.md` does not trace to a source, or claim loading the skill improves a render before a with-and-without comparison
 - Fetch, generate, or install a media file or HyperFrames itself
 - Name this repository's demos, branches, or render files, since the body ships to targets holding none of them
-
-## Guards
-
-- Two sources disagreeing on a number are named together with the side the body takes, never averaged
+- Set pointer smoothing or hiding, which are recorder settings a composition cannot change
 
 ## Out of scope
 
-- General motion and composition rules: `hyperframes-animation` and `hyperframes-creative`
-- Sourcing media: `media-use`
-- Recording the take: `record-screencast`
-- Vertical 9:16 framing, until a project asks for it
-- Whether loading the skill improves a render, which needs a with-and-without comparison rather than a rule here
-
-## Measured
-
-Not yet measured. The comparison owed is a demo composed with the skill loaded, judged by the operator against the unguided renders described under Gap. Whether the result reads designed is a taste call, so a pattern check cannot stand in for it.
+- General motion and composition rules, which `hyperframes-animation` and `hyperframes-creative` own
+- Sourcing media, which `media-use` owns
+- Recording the take, and loading this skill before it composes, which `record-screencast` owns
+- Vertical 9:16 framing, which no skill owns until a project asks for it
