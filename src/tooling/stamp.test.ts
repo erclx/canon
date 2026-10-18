@@ -78,7 +78,7 @@ describe('recordToolingChain', () => {
       NOW,
     )
 
-    expect(recorded).toBe(true)
+    expect(recorded).toEqual(['vite-react', 'base'])
     expect(stampedChain(readStamp(TARGET), 'tooling')).toEqual([
       'vite-react',
       'base',
@@ -95,7 +95,7 @@ describe('recordToolingChain', () => {
       NOW,
     )
 
-    expect(recorded).toBe(false)
+    expect(recorded).toBeUndefined()
     expect(readStamp(TARGET)).toBeUndefined()
   })
 
@@ -165,6 +165,24 @@ describe('recordToolingChain', () => {
         'base',
         'public',
       ])
+    })
+
+    it('should return the merged chain it wrote', async () => {
+      await recordToolingChain(
+        TOOLKIT,
+        TARGET,
+        [stack('web', 'base'), stack('base')],
+        NOW,
+      )
+
+      const recorded = await recordToolingChain(
+        TOOLKIT,
+        TARGET,
+        [stack('public')],
+        NOW,
+      )
+
+      expect(recorded).toEqual(['web', 'base', 'public'])
     })
 
     it('should record two add-ons side by side', async () => {

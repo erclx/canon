@@ -17,7 +17,9 @@ export function isWorkspaceRoot(target: string): boolean {
 }
 
 /**
- * Records the chain an install resolved, and returns whether it wrote one. A
+ * Records the chain an install resolved, and returns the names it wrote, or
+ * nothing when it wrote none. The names are the merged list, which can carry
+ * stacks an earlier sync recorded. A
  * workspace root is the single refusal: one chain recorded there would be a
  * guess at what its packages hold, and the report reading tooling as unmeasured
  * is the true answer rather than a clean one.
@@ -27,23 +29,23 @@ export async function recordToolingChain(
   target: string,
   chain: readonly Manifest[],
   now: Date,
-): Promise<boolean> {
-  if (isWorkspaceRoot(target)) return false
+): Promise<string[] | undefined> {
+  if (isWorkspaceRoot(target)) return undefined
 
-  await writeChainStamp(
-    target,
-    { domain: 'tooling', toolkitRoot },
-    mergeAddOns(toolkitRoot, stampedChain(readStamp(target), 'tooling'), chain),
-    now,
+  const merged = mergeAddOns(
+    toolkitRoot,
+    stampedChain(readStamp(target), 'tooling'),
+    chain,
   )
-  return true
+  await writeChainStamp(target, { domain: 'tooling', toolkitRoot }, merged, now)
+  return merged
 }
 
 /**
  * An add-on stands alone beside a core chain, so syncing one must not displace
  * the chain it layers onto. Base extends nothing and still heads a core chain.
  */
-function isAddOn(manifest: Manifest | undefined): boolean {
+export function isAddOn(manifest: Manifest | undefined): boolean {
   return (
     manifest !== undefined &&
     manifest.parent === undefined &&

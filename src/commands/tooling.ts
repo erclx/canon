@@ -18,7 +18,7 @@ import {
 } from '@/tooling/manifest'
 import { readReference, resolveReference } from '@/tooling/read'
 import { scan, type ScanResult } from '@/tooling/scan'
-import { recordedStacks, recordToolingChain } from '@/tooling/stamp'
+import { recordToolingChain } from '@/tooling/stamp'
 import { subfolderPath } from '@/tooling/subfolder'
 import { verifyStack } from '@/tooling/verify-stack'
 import {
@@ -513,8 +513,8 @@ async function stampChain(chain: Manifest[], target: string): Promise<void> {
     new Date(),
   )
 
-  if (recorded) {
-    logInfo(`Recorded chain: ${recordedStacks(chain).join(' < ')}`)
+  if (recorded !== undefined) {
+    logInfo(`Recorded chain: ${recorded.join(' < ')}`)
     return
   }
 

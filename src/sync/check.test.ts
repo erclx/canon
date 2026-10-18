@@ -228,6 +228,26 @@ describe('buildToolingReport', () => {
 
     expect(report.counts.configs).toBe(1)
   })
+
+  it('should still measure the skipped parent when an add-on is recorded after the core chain', () => {
+    writeStack('base')
+    writeFileSync(
+      join(TOOLKIT, 'tooling/base/manifest.toml'),
+      '[stack]\n\n[sync]\nper_root = ["base.config.json"]\n',
+    )
+    writeStack('vite-react', 'base')
+    writeStack('shell')
+    writeFileSync(join(TARGET, 'vite-react.config.json'), 'vite-react\n')
+    writeFileSync(join(TARGET, 'shell.config.json'), 'shell\n')
+
+    const report = buildToolingReport(
+      TOOLKIT,
+      TARGET,
+      stampChain(['vite-react', 'shell']),
+    )
+
+    expect(report.counts.configs).toBe(1)
+  })
 })
 
 describe('installedStampDomains', () => {
