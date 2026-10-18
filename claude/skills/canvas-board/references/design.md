@@ -30,8 +30,8 @@ Does not govern:
 
 ## Two shapes
 
-- **An intent record** is the shape a project writes by hand. It carries rules, omissions, and each role's intent, and its lead names the stylesheet the values live in. It carries no value, since a hand-typed copy of the stylesheet drifts from it.
-- **A values record** is generated from a token source and carries the value tables beside the rules. It is never edited by hand, and its lead names the module it is rendered from. The toolkit's own record is one.
+- **An intent record** is the shape a project writes by hand, carrying rules, omissions, and each role's intent, with a lead naming the stylesheet. It carries no value, since a hand-typed copy drifts.
+- **A values record** is generated from a token source and carries value tables beside the rules. Never hand-edited, its lead names the module it renders from. The toolkit's own record is one.
 
 Everything below applies to both shapes unless it names one.
 
@@ -68,24 +68,43 @@ Headings and table rows are never counted, and a section holding a table and no 
 
 ## Sections
 
-Use `## Overview`, `## Colors`, `## Typography`, `## Spacing`, `## Shapes`, `## Motion`, and `## Iconography`, in that order, which follows Google's DESIGN.md for the sections the two share. An optional `## Layout` sits between Spacing and Shapes. The parser still reads a record written under the earlier names, `## Personality`, `## Color`, and `## Borders`, as the sections they became.
+Use `## Overview`, `## Colors`, `## Typography`, `## Spacing`, `## Shapes`, `## Motion`, and `## Iconography`, in that order, which follows Google's DESIGN.md for the sections the two share.
+
+- An optional `## Layout` sits between Spacing and Shapes
+- The parser still reads the earlier names `## Personality`, `## Color`, and `## Borders` as the sections they became
 
 In an intent record, `## Colors` carries a `Role | Property | Intent` table and `## Shapes` a `Role | Property | When used` table. Each row names the custom property the stylesheet declares for that role, such as `--color-accent`. Typography and Spacing carry rules alone.
 
 Add either optional section when the project has content for it:
 
-- `## Layout`: page width, breakpoints, and grid rules, as current constraints. The surface-capture rule reads the breakpoints from here, so a project with none declared here is captured at the 320 reflow floor alone.
+- `## Layout`: page width, breakpoints, and grid rules as current constraints. The surface-capture rule reads breakpoints here, so a project declaring none is captured at the 320 reflow floor alone.
 - `## Mark`: the logo's construction rules and the files that carry it
 
 ## The uncertainty tag
 
 Applies to a values record alone. An intent record carries no value to tag, and a guessed value is marked where it is written, in the stylesheet.
 
-A cell no source anchors ends in ` ? verify`, written inside the cell rather than as a trailing column, since a trailing marker breaks the table parse. A cell wrapping itself in a code span carries the tag inside the span, as in `` `#ffffff ? verify` ``. Both spellings parse.
+### Writing the tag
 
-The renderer splits the tag off the value, so a swatch and a font sample are built from the value alone and the marker shows beside it. The preview also reports how many cells are anchored against how many are tagged, which is the reading a reviewer takes the record's overall confidence from.
+A cell no source anchors ends in ` ? verify`, written inside the cell rather than as a trailing column, since a trailing marker breaks the table parse. A cell wrapping itself in a code span carries the tag inside the span, as in `` `#ffffff ? verify` ``, and both spellings parse.
 
-Which columns that ratio reads is fixed by the table rather than by the record. The first column of each table names its row, and `Multiplier` and `When used` restate what the row already carries, so none of them is something a source could anchor and none is counted. That leaves `Intent` and `Value` in Colors, `Family`, `Weight`, `Size`, and `Line height` in Typography, `Value` in Spacing, and `Radius` and `Width` in Shapes. A cell tagged outside that set counts anyway, so a marker the preview draws is never missing from the ratio beside it.
+- The renderer splits the tag off the value, so a swatch and a font sample are built from the value alone and the marker shows beside it
+- The preview reports anchored cells against tagged ones, which is where a reviewer reads the record's overall confidence
+
+### Which columns count
+
+The table fixes which columns the ratio reads, not the record. The first column names its row, and `Multiplier` and `When used` restate what the row carries, so no source could anchor them and none is counted.
+
+| Section    | Counted columns                           |
+| ---------- | ----------------------------------------- |
+| Colors     | `Intent`, `Value`                         |
+| Typography | `Family`, `Weight`, `Size`, `Line height` |
+| Spacing    | `Value`                                   |
+| Shapes     | `Radius`, `Width`                         |
+
+A cell tagged outside that set counts anyway, so a marker the preview draws is never missing from the ratio beside it.
+
+### Prose sections
 
 A prose section takes its uncertainty inline instead, in a sentence saying what is proposed and what has yet to confirm it. A tag appended to a paragraph renders verbatim.
 
