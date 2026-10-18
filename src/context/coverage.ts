@@ -13,12 +13,15 @@ export const DEFAULT_ROOT = 'src'
  *
  * `none` says the project carries no declaration and no `src/`, which reports
  * and never gates so a seed tree audited at its own root keeps passing.
- * `opted-out` is an explicit `roots = []`.
+ * `opted-out` is an explicit `roots = []`. `invalid` is a declaration that
+ * exists and cannot be used, which gates rather than falling back to `src`,
+ * since a project that wrote one meant it.
  */
 export type RootDeclaration =
   | { readonly kind: 'roots'; readonly patterns: readonly string[] }
   | { readonly kind: 'opted-out' }
   | { readonly kind: 'none' }
+  | { readonly kind: 'invalid'; readonly reason: string }
 
 export interface DoubleClaim {
   readonly folder: string
@@ -42,30 +45,40 @@ export type CoverageReport =
     }
   | { readonly kind: 'opted-out' }
   | { readonly kind: 'no-root' }
+  | { readonly kind: 'invalid'; readonly reason: string }
 
 /** Reads the declaration, falling back to `src` when that folder exists. */
 export function readRoots(root: string): RootDeclaration {
   const path = join(root, CONTEXT_CONFIG_REL)
 
   if (existsSync(path)) {
-    let parsed: Record<string, unknown> = {}
+    let parsed: Record<string, unknown>
     try {
       parsed = Bun.TOML.parse(readFileSync(path, 'utf8')) as Record<
         string,
         unknown
       >
     } catch {
-      // An unreadable declaration falls through to the default below.
+      return {
+        kind: 'invalid',
+        reason: `${CONTEXT_CONFIG_REL} is not valid TOML`,
+      }
     }
 
-    if (Array.isArray(parsed.roots)) {
-      const patterns = parsed.roots.filter(
-        (entry): entry is string => typeof entry === 'string' && entry !== '',
-      )
-      return patterns.length === 0
-        ? { kind: 'opted-out' }
-        : { kind: 'roots', patterns }
+    const declared = parsed.roots
+    if (
+      !Array.isArray(declared) ||
+      !declared.every((entry) => typeof entry === 'string' && entry !== '')
+    ) {
+      return {
+        kind: 'invalid',
+        reason: `${CONTEXT_CONFIG_REL} needs roots as a list of folder or glob strings`,
+      }
     }
+
+    return declared.length === 0
+      ? { kind: 'opted-out' }
+      : { kind: 'roots', patterns: declared as string[] }
   }
 
   return isDirectory(join(root, DEFAULT_ROOT))
@@ -146,6 +159,9 @@ export function measureCoverage(
 ): CoverageReport {
   if (declaration.kind === 'opted-out') return { kind: 'opted-out' }
   if (declaration.kind === 'none') return { kind: 'no-root' }
+  if (declaration.kind === 'invalid') {
+    return { kind: 'invalid', reason: declaration.reason }
+  }
 
   const named = new Set<string>()
   const claims = new Map<string, Set<string>>()
@@ -187,6 +203,7 @@ export function measureCoverage(
 
 /** Whether the report holds a finding that should fail a widened gate. */
 export function hasCoverageFindings(report: CoverageReport): boolean {
+  if (report.kind === 'invalid') return true
   if (report.kind !== 'measured') return false
   const { unnamed, doubled, missingRoots } = report.findings
   return unnamed.length > 0 || doubled.length > 0 || missingRoots.length > 0

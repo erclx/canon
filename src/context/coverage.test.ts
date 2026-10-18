@@ -128,6 +128,20 @@ describe('measureCoverage', () => {
     })
     expect(hasCoverageFindings({ kind: 'no-root' })).toBe(false)
   })
+
+  it('carries an invalid declaration through as a gating finding', () => {
+    const report = measureCoverage(
+      ROOT,
+      { kind: 'invalid', reason: 'roots must be a list of strings' },
+      [],
+    )
+
+    expect(report).toEqual({
+      kind: 'invalid',
+      reason: 'roots must be a list of strings',
+    })
+    expect(hasCoverageFindings(report)).toBe(true)
+  })
 })
 
 describe('readRoots', () => {
@@ -146,5 +160,24 @@ describe('readRoots', () => {
 
     write('canon/config/context.toml', 'roots = []\n')
     expect(readRoots(ROOT)).toEqual({ kind: 'opted-out' })
+  })
+
+  it('reports a malformed declaration instead of falling back to src', () => {
+    mkdirs('src')
+    write('canon/config/context.toml', 'roots = [\n')
+
+    const declaration = readRoots(ROOT)
+    expect(declaration.kind).toBe('invalid')
+  })
+
+  it.each([
+    ['a string', 'roots = "src"\n'],
+    ['a non-string entry', 'roots = ["src", 3]\n'],
+    ['a missing key', 'root = ["src"]\n'],
+  ])('reports a declaration with %s as invalid', (_label, toml) => {
+    mkdirs('src')
+    write('canon/config/context.toml', toml)
+
+    expect(readRoots(ROOT).kind).toBe('invalid')
   })
 })

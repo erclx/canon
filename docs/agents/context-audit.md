@@ -36,7 +36,11 @@ canon context audit tooling/base/seeds --gate
 | Tables              | Six or more body rows whose first column mostly carries a path, command, or link                                                                      | Every audited folder    | Reports                                                     |
 | Provenance          | A date, change number, or release label. A date after measured, verified, driven, passed, or fired is excluded                                        | `canon/context/`        | Reports                                                     |
 
-The coverage roots come from `roots` in `canon/config/context.toml`, a list of folders or globs such as `packages/*/src`. Without the file the root defaults to `src` when that folder exists. An empty `roots = []` opts out, and the audit says so. With no declaration and no `src/`, it reports no code root and never gates.
+The coverage roots come from `roots` in `canon/config/context.toml`, a list of folders or globs such as `packages/*/src`.
+
+- Without the file the root defaults to `src` when that folder exists, and `roots = []` opts out
+- A file that is not valid TOML, or holds no list of strings under `roots`, gates under `--gate`
+- With no declaration and no `src/`, the audit reports no code root and never gates
 
 A shape break is any of these:
 

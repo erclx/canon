@@ -1234,6 +1234,11 @@ function reportCoverage(report: CoverageReport): void {
     return
   }
 
+  if (report.kind === 'invalid') {
+    logWarn(report.reason)
+    return
+  }
+
   if (report.kind === 'opted-out') {
     logInfo(
       'canon/config/context.toml declares roots = [], so coverage was not measured.',

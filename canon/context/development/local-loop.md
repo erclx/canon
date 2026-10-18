@@ -36,11 +36,11 @@ The run commands, which stack references and `docs/target/projects.md` send a se
 
 Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`, and every threshold comparison in `measures.ts`.
 
-- Stages run in table order and the first to find a fact halts the run. A stage that cannot read its input is `unmeasured`, which warns locally and refuses under CI.
+- Stages run in table order and the first to find a fact halts the run. Unreferenced rules and Audit set report and never fail the push
 - The changed set unions the diff against `origin/main`, the working tree, and untracked files. Fallbacks widen, and `--all` forces every stage. On `main` the local ref is HEAD, so the base is remote.
-- Tests runs on `^src/` and on any corpus in `TEST_CORPORA_PATTERNS`, which a `src/` test reads from outside `src/`. A test reading a new corpus joins the array in the same change.
+- Tests runs on `^src/` and any corpus in `TEST_CORPORA_PATTERNS`. A root-level test pair or a script under `claude/skills/*/scripts/` needs a `TESTS_SCOPE` pattern asserted in `stages.test.ts`
 - Indexes and Consumed copies regenerate then assert, so the first run after an edit reports drift and `check:ci` writes the tree. Stage the rewrite and run again, since a rerun alone repeats the diff.
-- A root-level test pair or a script under `claude/skills/*/scripts/` needs its own pattern in `TESTS_SCOPE`, asserted in `stages.test.ts`, or a branch touching only it skips the Tests stage
+- A stage that cannot read its input is `unmeasured`, which warns locally and refuses under CI. Plugin manifests skips locally without the CLI and fails when `CI` is set
 
 ### `src/init/`
 
