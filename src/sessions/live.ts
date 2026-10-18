@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync, readlinkSync } from 'node:fs'
 import type { SessionRecord } from '@/sessions/registry'
 
 /**
@@ -7,13 +7,19 @@ import type { SessionRecord } from '@/sessions/registry'
  * `confirmed` means the running process was matched against the start time the
  * record stamped, so the pid belongs to the session that wrote the file.
  * `unverified` means the pid answers a signal probe and nothing more, which
- * cannot separate the original session from whatever inherited its pid.
+ * cannot separate the original session from whatever inherited its pid, or,
+ * for a `foreign` row, that its messaging socket still exists.
  */
 export type Confidence = 'confirmed' | 'unverified'
 
 export interface Liveness {
   readonly alive: boolean
   readonly confidence: Confidence
+  /**
+   * Set only when the record belongs to another pid namespace, so the pid was
+   * never probed. Absent rather than false on every other path.
+   */
+  readonly foreign?: true
 }
 
 export interface LivenessProbes {
@@ -21,6 +27,14 @@ export interface LivenessProbes {
   readonly procStartOf: (pid: number) => string | null
   /** Whether the pid answers at all, ignoring which process holds it. */
   readonly responds: (pid: number) => boolean
+  /**
+   * The reader's own pid namespace in `pid:[inode]` form, or null where it
+   * cannot be read. Optional so a caller with no use for the foreign branch,
+   * such as the gate's lock, states nothing and takes the pid path.
+   */
+  readonly ownDomain?: () => string | null
+  /** Whether the messaging socket a foreign record names still exists. */
+  readonly socketExists?: (path: string) => boolean
 }
 
 /**
@@ -51,7 +65,21 @@ function responds(pid: number): boolean {
   }
 }
 
-export const SYSTEM_PROBES: LivenessProbes = { procStartOf, responds }
+/** The link target reads `pid:[inode]`, which a record's `pidDomain` ends with. */
+function ownDomain(): string | null {
+  try {
+    return readlinkSync('/proc/self/ns/pid')
+  } catch {
+    return null
+  }
+}
+
+export const SYSTEM_PROBES: LivenessProbes = {
+  procStartOf,
+  responds,
+  ownDomain,
+  socketExists: existsSync,
+}
 
 /**
  * Decides whether a record describes a session that is still running.
@@ -62,13 +90,32 @@ export const SYSTEM_PROBES: LivenessProbes = { procStartOf, responds }
  * probe alone stands, and every surviving row is marked so a caller never reads
  * a recycled pid as a confirmed identity.
  *
- * It reads two fields and asks for no more, so a record that is not a session,
- * such as the gate's machine lock, carries the same proof.
+ * A record from another pid namespace is judged first, on its messaging
+ * socket, because its pid names nothing in this namespace and either probe
+ * would read an unrelated process or none. That answer is always `unverified`,
+ * since a crashed session leaves its socket behind.
+ *
+ * The pid and start time are the only fields the rest needs, so a record that
+ * is not a session, such as the gate's machine lock, carries the same proof and
+ * takes the pid path for want of a `pidDomain`.
  */
 export function liveness(
-  record: Pick<SessionRecord, 'pid' | 'procStart'>,
+  record: Pick<SessionRecord, 'pid' | 'procStart'> &
+    Partial<Pick<SessionRecord, 'pidDomain' | 'messagingSocketPath'>>,
   probes: LivenessProbes = SYSTEM_PROBES,
 ): Liveness {
+  const own = probes.ownDomain?.() ?? null
+  if (
+    own !== null &&
+    record.pidDomain !== undefined &&
+    !record.pidDomain.endsWith(own)
+  ) {
+    const socket = record.messagingSocketPath
+    const alive =
+      socket !== undefined && (probes.socketExists?.(socket) ?? false)
+    return { alive, confidence: 'unverified', foreign: true }
+  }
+
   const started = record.procStart
 
   if (started !== undefined && started.length > 0) {
