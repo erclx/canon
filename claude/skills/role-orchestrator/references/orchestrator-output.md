@@ -65,5 +65,8 @@ Keep the detail below the block and keep it skippable. A decision reached at the
 
 - Reuse the vocabulary above rather than inventing a second one
 - Keep a file set on the row claiming it, so the reader can check a hold or a shared-path claim instead of taking it
+- Name a session by its launch name in any line sending the operator into it, such as `claude attach worker-frameboard-design-reference-set`, with the id at most in parentheses
+  - A bare id tells the operator nothing about which session it is
+  - `claude rm` takes the id alone, so that line carries the id
 
 Write no shape for a correction. A correction is a sentence, and a format for admitting error invites ceremony where plainness is the whole value.
