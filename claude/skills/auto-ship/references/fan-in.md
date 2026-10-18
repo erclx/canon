@@ -42,16 +42,18 @@ git merge --no-ff --no-edit origin/<member branch>
 - Resolve each conflict by `## Resolving a conflict` in `${CLAUDE_SKILL_DIR}/../review-address/references/rebase-conflicts.md`
 - Stop on a hunk needing a decision with `git merge --abort` in place of the rebase abort that file names
 - Regenerate the indexes once, after the last merge, rather than resolving a generated file by hand at each one
-- Rebase the branch with `--rebase-merges` when it goes stale, since a plain rebase flattens the member merges into one line
+- Run `git config rerere.enabled true` before the first merge, since a stale integrator rebases with `--rebase-merges` per the same file and that replays each merge without its recorded resolution
 
 Continue Step 2 with the integrator plan's own `**Files to touch:**`, then the rest of the chain as an ordinary worker.
 
 ### What the pull request carries
 
-Say in the pull request body that each member is one merge commit and name the members in merge order. Once the pull request merges, delete each member branch on origin:
+Say in the pull request body that each member is one merge commit and name the members in merge order. Once the pull request merges, delete each member's branch on origin, its worktree, and its local branch:
 
 ```bash
 git push origin --delete <member branch>
+git worktree remove <member worktree>
+git branch -D <member branch>
 ```
 
-The integrator holds the member list, so the deletion is its step rather than a sweep's. A member branch left on origin reads as abandoned work to every later reclaim.
+Read each member's worktree path off `git worktree list --porcelain` by its branch. The integrator holds the member list, so the deletion is its step rather than a sweep's. No member opens a pull request, so `canon worktrees reclaim` never reads a member's branch as merged and reports a leftover worktree as unmerged work on every run.

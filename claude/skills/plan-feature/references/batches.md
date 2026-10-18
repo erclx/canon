@@ -65,6 +65,7 @@ Each side names the other in its `**Constraints:**`, and `canon records validate
 
 - A member writes ``Fan-in member of `feature-<integrator>` ``, naming one integrator
 - The integrator writes ``Fans in `feature-<a>`, `feature-<b>`, and `feature-<c>` ``, in the order it merges them
+- The task's `Plan:` line cites every member and the integrator, since the merge archives only the plans that line cites and a live integrator listing archived members reports `fan-in-unmatched`
 - The integrator is its own plan, since its writes, being the shared lists, the citer repoints, and the index regeneration, need a `**Files to touch:**` of their own
 
 `canon tasks plan-answers` holds a member whose integrator is missing or does not list it with a `Fan-in set` entry. It holds the integrator with a `Fan-in pending` entry until every member branch is on origin.
