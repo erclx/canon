@@ -18,6 +18,11 @@ The subdir gets picked by feel, so a UI copy rule lands in the always-on folder 
 - Write under `.claude/rules/project/`, the subfolder the sync engine reads as project-authored by location
 - Take a slug no rule in the chosen project subdir uses and that equals no subdir name
 - Read the rule standard before writing the body
+- Hold the body to the rule standard's shape limits on words, bullets, sections, and bullet length
+- Apply the content test, leaving out what Claude already knows, what the toolchain enforces, and what changes often
+- Check the installed skills for one already covering the topic and point the rule at it, skipping the check when none are listed
+- Run every written bullet through the checklist and fix what fails before reporting
+- Tell the user to cite a source in the commit that adds a rule claiming outside practice
 - Emit the path scope for a path-scoped rule and omit the key entirely for an always-on one
 - Preview the resolved path, subdir, slug, and frontmatter, then write without pausing
 - Say when the rule loads, since path-scoped and always-on rules behave differently

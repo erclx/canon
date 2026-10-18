@@ -51,7 +51,8 @@ When adding a stack:
 
 After writing or revising a rule, or on "audit this rule" or "review the governance rule", audit each bullet against the checklist.
 
-- Read `.claude/skills/internal-governance/references/rule-audit.md` for the criteria and output shape.
+- Read `claude/skills/create-rule/references/checklist.md` for the criteria and output shape. It ships with `canon:create-rule`, so a target runs the same checklist.
+- A toolkit rule under `lang/`, `lib/`, `framework/`, `ui/`, or `tooling/` carries a source ledger at `governance/ledger/<folder>/<slug>.md`, one row per bullet.
 - A verdict on whether a whole rule earns its place, where it loads, and whom it reaches is `internal-rule-audit`.
 
 ## Reference

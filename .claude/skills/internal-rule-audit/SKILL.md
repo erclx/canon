@@ -1,11 +1,11 @@
 ---
 name: internal-rule-audit
-description: Audits the governance rule set as a set, running nine checks per rule against the verbs and files that answer them and returning one row per rule with a verdict of keep, move, retire, or merge. Use when asked to "audit the governance rules", "does this rule earn its place", "is this rule worth keeping", or before a plan that regroups, retires, or re-scopes rules. Do NOT use to review the bullets of a rule just written or revised, which is the bullet checklist in `internal-governance`, and do NOT use to edit a rule, a stack, or a task file.
+description: Audits the governance rule set as a set, running nine checks per rule against the verbs and files that answer them and returning one row per rule with a verdict of keep, move, retire, or merge. Use when asked to "audit the governance rules", "does this rule earn its place", "is this rule worth keeping", or before a plan that regroups, retires, or re-scopes rules. Do NOT use to review the bullets of a rule just written or revised, which is the bullet checklist in `canon:create-rule`, and do NOT use to edit a rule, a stack, or a task file.
 ---
 
 # Internal rule audit
 
-Turn each rule's load mode, reach, restatements, and enforcement into a verdict on the rule as a whole. The bullet checklist in `internal-governance` judges whether a bullet is well written. This skill judges whether the file should exist where it is.
+Turn each rule's load mode, reach, restatements, and enforcement into a verdict on the rule as a whole. The bullet checklist in `canon:create-rule` judges whether a bullet is well written. This skill judges whether the file should exist where it is.
 
 The skill reports and writes nothing the rule set reads. A plan acts on the verdicts.
 

@@ -22,6 +22,7 @@ Resolve both from the request, and ask only for what is missing. Attach a propos
 
 - What the rule enforces: one topic, phrased as a standard (`<topic> conventions`).
 - Scope: a path glob relative to the project root (`<dir>/**/*.<ext>`) for a path-scoped rule, or always-on when the rule states a global principle with no file scope.
+- An installed skill already covering the topic, found per `### Checking the installed skills` in `${CLAUDE_SKILL_DIR}/references/rule.md`. Point the rule at it rather than restating it.
 
 ## Step 2: resolve the subdir
 
@@ -74,6 +75,13 @@ paths:
 
 Title casing is sentence case, with proper nouns keeping their own casing (`# TypeScript standards`). `${CLAUDE_SKILL_DIR}/references/rule.md` owns the rest of the body shape.
 
+## Step 5: check each bullet
+
+Read `${CLAUDE_SKILL_DIR}/references/checklist.md` and run every bullet of the written rule through it, along with the shape limits and the content test in `rule.md`.
+
+- Rewrite a bullet marked revise and cut one marked drop, then run the checklist again over what changed
+- Report the verdict counts with the path, and name any bullet kept against a criterion with the reason
+
 ## After writing
 
-Emit the full path on its own line: `.claude/rules/project/<subdir>/<slug>.md`. Remind the user that Claude Code loads path-scoped rules when it reads or writes a matching file, and always-on rules every session.
+Emit the full path on its own line: `.claude/rules/project/<subdir>/<slug>.md`. Remind the user that Claude Code loads path-scoped rules when it reads or writes a matching file, and always-on rules every session. When a bullet claims outside practice, tell them to cite its source in the commit that adds the rule.
