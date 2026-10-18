@@ -33,6 +33,7 @@ export type RuleLimit = keyof typeof RULE_LIMITS | 'emphasis'
 export const RULE_GATED_FOLDERS: readonly string[] = [
   join('governance', 'rules', 'claude') + sep,
   join('governance', 'rules', 'code') + sep,
+  join('governance', 'rules', 'framework') + sep,
   join('governance', 'rules', 'writing') + sep,
   join('internal', 'rules') + sep,
 ]
