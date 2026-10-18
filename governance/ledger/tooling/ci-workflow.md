@@ -30,4 +30,4 @@ The field is continuous integration on GitHub Actions, and the authority is GitH
 
 ## Declined
 
-Nothing was cut. Every bullet already sat inside the shape limits, and the split with the skill stays as settled in #2484.
+Nothing was cut. Every bullet already sat inside the shape limits, and the rule keeps its split with the skill, a pointer plus at most five directives.
