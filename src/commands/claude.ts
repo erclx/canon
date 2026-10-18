@@ -32,7 +32,9 @@ import {
   PRACTICE_LEDGER,
   PRACTICE_SECTIONS,
   PRACTICE_SKILLS,
+  REQUIREMENT_LIMITS,
   REQUIREMENT_SECTIONS,
+  RETIRED_REQUIREMENT_SECTION,
   SHIPPED_CORPUS,
   type SkillFinding,
   type SkillsAudit,
@@ -441,7 +443,7 @@ export function register(program: Command): void {
         'Refuses when neither claude/skills/ nor .claude/skills/ resolves.',
         '',
         'Only a missing REQUIREMENT.md sets a failing exit code. Name, description,',
-        'folder, and requirement-section findings are advisory.',
+        'folder, and requirement shape and limit findings are advisory.',
         '',
         'Examples:',
         '  canon claude skills audit',
@@ -1503,6 +1505,7 @@ async function runSkillsAudit(
           readme: report.readme,
           folderName: report.folderName,
           requirementSections: report.requirementSections,
+          requirementLimits: report.requirementLimits,
           datedProvenance: report.datedProvenance,
           practiceShape: report.practiceShape,
           referenceContents: report.referenceContents,
@@ -1511,6 +1514,7 @@ async function runSkillsAudit(
         checkpoints: {
           descriptionLimit: DESCRIPTION_LIMIT,
           requirementSections: REQUIREMENT_SECTIONS,
+          requirementLimits: REQUIREMENT_LIMITS,
           corpora: CORPORA,
           practiceSkills: PRACTICE_SKILLS,
           ledgerSkills: LEDGER_SKILLS,
@@ -1671,21 +1675,40 @@ function reportRequirementShape(report: SkillsAudit): void {
     'A folder carrying no requirement is reported above rather than counted twice here.',
   )
 
-  if (report.requirementSections.length === 0) {
-    logInfo('Every requirement declares both.')
+  logInfo(
+    `Each list holds at most ${REQUIREMENT_LIMITS.bullets} top-level bullets, the body at most ${REQUIREMENT_LIMITS.words} words, and Gap no date or issue number outside a code span.`,
+  )
+  logInfo(
+    `A ## ${RETIRED_REQUIREMENT_SECTION} section is retired into Must not. These limits report and never fail the run.`,
+  )
+
+  if (
+    report.requirementSections.length === 0 &&
+    report.requirementLimits.length === 0
+  ) {
+    logInfo('Every requirement declares both and holds to the limits.')
     return
   }
 
-  logWarn(
-    `${plural(report.requirementSections.length, 'requirement')} short a declared section`,
-  )
-  reportFindings(report.requirementSections)
+  if (report.requirementSections.length > 0) {
+    logWarn(
+      `${plural(report.requirementSections.length, 'requirement')} short a declared section`,
+    )
+    reportFindings(report.requirementSections)
+  }
+
+  if (report.requirementLimits.length > 0) {
+    logWarn(
+      `${plural(report.requirementLimits.length, 'finding')} past a requirement limit`,
+    )
+    reportFindings(report.requirementLimits)
+  }
 }
 
 /**
- * Names where the date belongs, since the finding is a date to move rather
- * than one to delete, and reports without failing the run for the same reason
- * the frontmatter measures do.
+ * Names where the date belongs, since a reader deleting it should know git
+ * still holds it, and reports without failing the run for the same reason the
+ * frontmatter measures do.
  */
 function reportProvenance(report: SkillsAudit): void {
   logStep('Provenance')
@@ -1693,7 +1716,7 @@ function reportProvenance(report: SkillsAudit): void {
     'A SKILL.md and its references state the current rule, with no ISO date outside a fence or code span.',
   )
   logInfo(
-    'The incident and date that earned a rule go in REQUIREMENT.md under Gap, or stay in git.',
+    'The incident and date that earned a rule stay in git, where the log of the file finds them.',
   )
 
   if (report.datedProvenance.length === 0) {
