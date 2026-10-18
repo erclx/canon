@@ -7,44 +7,29 @@ description: Why the visual half of a UI change needs a written record a reviewe
 
 ## Gap
 
-Without this skill, UI work ships on the confidence of the session that wrote it. Nobody states which part of the change an eye has to judge, so a reviewer opens the diff and reads the automatable half, which the tests already cover, and never looks at the half that only rendering shows.
+Without this skill, UI work ships on the confidence of the session that wrote it. Nobody states which part of the change an eye has to judge, so a reviewer reads the automatable half and never looks at what only rendering shows. A checklist printed into chat scrolls away.
 
-The visual half is where the record is lost. A checklist printed into chat scrolls away before anyone verifies it, so the ship step has nothing to gate on and the work reads as verified because a list was produced. Written from a linked worktree against `pwd`, the file lands where the caller does not look.
-
-Writing the checklist correctly to disk does not close the gap either. The file sits under a gitignored folder on the machine that authored it, so a pull request reviewer, on that machine or another, never sees it. A record that only the author can open reads as verified for the same reason a record that never existed does.
-
-Posting it as a comment of its own is the next failure. The screenshots the checklist annotates sit in a second comment, so a reviewer reads "the hero settles without a jump" with no picture of the hero beside it and scrolls looking for one. Two comments describing one change also drift: a later push re-renders the screenshots and leaves the checklist claiming what an older head showed.
-
-The automatable half has its own gap, and it is no longer this skill's to close by writing the tests. `test-first` writes a behavior's test while the code is written, and `test-craft` owns which layer it belongs at. A skill writing tests after implementation duplicates both, and what it produces is the test the session already skipped rather than the test the behavior needed. What stays open is that nobody names the behaviors shipping untested, which is a list rather than a test.
+A file under a gitignored folder is unreadable to a pull request reviewer, and a checklist posted as its own comment sits apart from the screenshots it annotates. A later push then re-renders the screenshots and leaves the checklist describing an older head. Nobody names the behaviors shipping untested either, which is a list rather than a test.
 
 ## Must
 
-- Split every change into visual-only and automatable before writing anything
-- Write the checklist for the visual-only half, each item an action and the result a person is looking for
-- Give each item what a driver needs to run it without guessing: the route, the width where the change can differ by width, an action verb to open on, a `(taste)` marker on a judgment of look or feel, and the setup or a `(local only)` marker for a state the page does not open in
-- Name every automatable change shipping with no test, with the layer `test-craft` would place it at, as a section of the same file
-- Write the file to the `.canon/tmp/handoff/ui-checklist/<slug>.md` handoff at the main worktree root, overwriting
-- Report that there is nothing to verify rather than manufacturing a checklist to show work
+- Every change is split into visual-only and automatable before anything is written
+- The checklist covers the visual-only half, each item an action and the result a person looks for, with its route, width, and a `(taste)` or `(local only)` marker where one applies
+- Every automatable change shipping with no test is named, with the layer `test-craft` would place it at, in the same file
+- The file is written to the `.canon/tmp/handoff/ui-checklist/<slug>.md` handoff at the main worktree root, overwriting
+- A change with nothing visual and nothing untested reports the coverage and writes no file
 
 ## Must not
 
-- Write a test at any layer, which is `test-first` while the code is written and `test-craft` for where it goes
-- Read a project's test config or runner in order to write against it
-- Try to assert a visual property programmatically
-- Repeat the full checklist in chat, which is what made it evaporate
-- Stage or commit the checklist, which is gitignored scratch
-- Talk to GitHub directly. Posting the checklist belongs to `pr-evidence`, the sole consumer of the handoff file
+- Write a test at any layer, read a project's test config to write against it, or assert a visual property programmatically
+- Repeat the full checklist in chat, stage or commit it, or talk to GitHub directly
 - Move the handoff path to match this skill's name, which strands a checklist an older binary wrote
-
-## Guards
-
-- No implementation context in the session: stop, since there is nothing to split
-- Nothing visual and nothing untested: skip the file write and report the coverage
+- Run in a session with no implementation context, since there is nothing to split
 
 ## Out of scope
 
 - Judging whether the UI is any good, which `ux-audit` owns
-- The rules for choosing a layer, which `test-craft` owns
-- Writing the test itself, which is `test-first`
-- Deciding whether an outstanding checklist blocks the ship, which the calling pipeline gates on
-- Performing the visual verification, which needs a person
+- The rules for choosing a test layer, which `test-craft` owns
+- Writing the test itself, which `test-first` owns
+- Posting the checklist, which `pr-evidence` owns as the sole consumer of the handoff file
+- Performing the visual verification, which `review-ui` owns for the boxes a driver can run
