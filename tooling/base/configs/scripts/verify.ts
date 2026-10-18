@@ -323,7 +323,7 @@ function checkMarkdownBans(): void {
     case 2:
       pipeOutput(output)
       fail(
-        'Markdown prose carries a banned character, or a relative link resolves to nothing on disk',
+        'Markdown prose carries a banned character, a relative link resolves to nothing on disk, or a gated path breaks a density limit',
       )
       break
     case 3:
