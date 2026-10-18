@@ -6,93 +6,56 @@ category: Workflow
 
 # Parallel features
 
-When features are independent, run them in parallel instead of sequentially. Use one git worktree per feature so each session has its own working tree and branch.
+Run independent features in parallel, one git worktree and one Claude Code session per feature.
 
 ## One worktree per feature
 
-- Create a worktree per feature, then start a Claude Code session in each
-- Invoke `canon:plan-feature` in each session. Plans land at the main worktree root as `.canon/plans/feature-<slug>.md`, one per feature, no collisions. Small features stay in chat and skip the file.
-- Implement, verify, and review each feature independently. `ui-checklist` writes a per-branch checklist handoff there too (`tmp/handoff/ui-checklist/<slug>.md`) that `git-pr` posts to the pull request and removes, so parallel sessions do not overwrite each other. The slug is the branch name with any leading type segment dropped, so `feat/jwt-expiration` and the plan at `feature-jwt-expiration.md` meet on one name
-- Ship each worktree separately with `canon:git-ship`
-- For full autonomy per worktree, invoke `canon:auto-ship` instead of the manual chain. Approve the plan, walk away, come back to a pull request the chain marked as a draft and then read the flag back on. The mark says the work has had no review yet, and it holds no window, since readying a pull request to merge lifts it directly, an act reserved to the operator or to the controlling session that closed the review.
+- Invoke `canon:plan-feature` in each session. Plans land at `.canon/plans/feature-<slug>.md` at the main root.
+- `ui-checklist` writes a per-branch handoff at `tmp/handoff/ui-checklist/<slug>.md`, which `git-pr` posts and removes. The slug is the branch name minus its leading type segment.
+- Ship each worktree with `canon:git-ship`, or `canon:auto-ship` for a draft pull request
+- Only the operator or the controlling session readies a draft
 
 ## A coordinated flow
 
-To run several worktrees as a coordinated flow rather than ad hoc, assert the orchestrator role in one warm session with `canon:role-orchestrator`. It holds the cross-feature call, plans each feature itself or dispatches a cold planner under `canon:role-planner` to write the plan, refills the ready queue so a free worker never waits, and reviews each worker's PR with `canon:review-pr` or dispatches a cold reviewer under `canon:role-reviewer` to run it, then tells the session holding that branch to run `canon:review-address` whenever the pass posted a finding at any severity, which is the same threshold `canon:review-pr` states and posts its open heading under. The human launches workers and merges. See [operating model](operating-model.md) for the full loop.
+Assert the orchestrator role in one warm session with `canon:role-orchestrator`. It plans each feature or dispatches a cold planner under `canon:role-planner`, and dispatches a reviewer under `canon:role-reviewer` for each PR. The human launches workers and merges. See [operating model](operating-model.md).
 
-Execution order comes off `.canon/tasks/priority.md` and nothing sequences work into versions. Scope stays in `canon/REQUIREMENTS.md` as a statement of what is wanted, and it reaches the board as discrete tasks the orchestrator orders by readiness.
-
-Run one orchestrator at a time. The board is gitignored, so a second session reads none of the first one's writes and the two collide on labels and archives.
-
-See [operating model](operating-model.md) for what caps the worker tracks under it and what conflict holds one behind another. An operator caps a session's workers by saying so, and that cap binds for the session rather than standing as a number in a file.
-
-Before a handoff, the orchestrator checks the plan against the tree rather than reading it: grep each construct it names and count the sites, confirm every phase label it cites is still open, and open each file it describes. A plan goes stale from whatever merged after it was written, and reading cannot catch that.
-
-A constraint naming a track in flight carries the same problem past the handoff, so the block opens with the commit it was measured against. A worker re-tests before honoring one, fetching and then logging that commit against `origin/main` over the paths the constraint names, and any merge there means the track landed and the constraint is dead. An unstamped block reads as unverified rather than as live, which covers every plan written before the rule.
+- Run one orchestrator at a time
+- Execution order comes off `.canon/tasks/priority.md`
+- Before a handoff, grep each construct the plan names and open each file it describes
+- A constraint naming a track in flight opens with the commit it was measured against. A merge of that track into `origin/main` over the named paths kills the constraint.
 
 ## Records at the main root
 
-`.canon/plans/` and `.canon/review/` both resolve at the main worktree root, so artifacts created in any session are visible from any sibling worktree. A session inside a worktree reads them directly, since the file-editing tools refuse a main-root path but `Read` resolves normally. It writes a whole file through the shell and makes a change inside an existing file through a `canon` verb, which resolves the main root in-process. See [Claude Code and git worktrees](../../wiki/claude/worktrees.md) for why the tool refuses the write, and the fan-out section below for the domain-level guidance.
+`.canon/plans/` and `.canon/review/` resolve at the main worktree root. File-editing tools refuse a main-root path from a worktree, so write a whole file through the shell and change an existing one through a `canon` verb.
 
-The plan's shape is fixed by `claude/skills/plan-feature/references/plan.md`: the section list, the filename, and the contract its questions keep. Its lifecycle, from the session that writes it to the archive, is `claude/skills/plan-feature/references/plan-lifecycle.md`. Every question carries a `- Suggested:` line and an empty `- Answer:` slot, and a blank answer accepts the suggestion at execution time. That default is what makes a plan decision-ready in one pass, and it is the opposite of the contract an intake folder keeps, where an empty slot means nobody reached the item.
+`claude/skills/plan-feature/references/plan.md` fixes the plan's shape and `claude/skills/plan-feature/references/plan-lifecycle.md` its lifecycle. A blank `- Answer:` slot accepts the `- Suggested:` line.
 
-An execution that picks other than the suggestion rewrites the `- Suggested:` line as `overridden at execution to <pick>,` followed by the measurement that moved it, and leaves the slot blank. That fixed phrase is how a reader of the archived plan tells an override from a suggestion the execution accepted, since an authored suggestion often carries a number of its own. The same deviation takes one line in the open task's `## Findings`, which is the register that survives the plan being archived. A deviation from a question somebody already answered goes back to whoever answered it instead, since a filled slot is a decision already made.
+- To pick otherwise, rewrite that line as `overridden at execution to <pick>,` plus the measurement, and add one line to the open task's `## Findings`
 
-`canon records validate plans` reports where a plan and that standard disagree: a filename that is not `feature-<slug>.md`, a missing required section, a files-to-touch entry naming no file, and a question carrying a suggestion with no answer slot. The same verb takes `groundwork`, `intake`, and `teach`, which are governed the same way and were unreachable for the same reason. Nothing fires it automatically, because all four folders are gitignored and every check the repository runs reads changed files from git. It reports and never writes, since the folders are per-machine scratch with no history to recover a wrong repair from.
-
-`canon records push` carries these folders off the disk they live on, and `canon records pull` brings them back. Every top-level entry under `.canon/` is backed except `tmp`, `ordinal-locks`, and `.records.git`, so a folder added later enters the payload on its own rather than waiting on a name written into a list. Push names each folder it carries the first time it sees it, which is what keeps a stray folder visible instead of silently entering the payload. It refuses the whole push, naming each path, when a new or changed file is over 25 MB or carries a credential `canon secrets scan` would report. The history lives in a second git directory at `.canon/.records.git` with `.canon/` as its work tree, so every path a task file cites stays where it is.
-
-A person points it at a private repository once and both verbs refuse until they have, and `push` refuses when that origin is also a remote of the project, since the payload is the task board and the groundwork trails. `.husky/post-merge` runs the push after its archive loop, on every merge rather than only on one that closed a task. See [records](../agents/records.md) for the refusal table.
-
-`canon records size` reports what each of these folders holds, heaviest first, along with `.canon/tmp`. Each row carries the file count, the bytes, how many files were written in the last 7 and 30 days, and the dates of the least and most recently written one. Nothing fails on a number, because a record folder has no correct size. What the verb replaces is a reading somebody had to remember to take: a pen went from 44 entries to 236 between two counts made by hand a fortnight apart, and nothing reported the rate in between.
-
-`canon records prune-tmp` reports scratch under `.canon/tmp` nobody has touched inside an age window, and deletes it only with `--write`. A `tmp/handoff/` folder and the live `tmp/pr/poll/` baseline are never offered, since a reader deletes a handoff once it is read and a poll baseline is state a session still needs. See [records](../agents/records.md) for the candidate shapes and the exit codes.
-
-`canon records stale canonical` reports when the requirements record was last reviewed and how many releases have shipped since, so a review of it starts from a count rather than from the tag list. It writes nothing. Run `canon records stale --help` for how the count is taken and the refusals.
-
-A plan that ships is archived, never deleted. `canon tasks archive` moves it to `.canon/plans/archive/` alongside the task it belonged to and retargets that task's `Plan:` line at the new location, so a completed task still leads to the reasoning behind it. An archive sits inside the record folder it archives rather than beside it, so one ignore entry and one backed-folder entry cover a record and everything it has retired. The folder is gitignored, which is why a deleted plan had no recovery path. A plan cited by more than one task stays put until the last of them closes, since moving it early would strand every other pointer.
-
-An older branch review report takes the other route and is swept rather than archived. It sits flat in `.canon/review/` as `branch-<slug>.md`, the session addressing it read it once, and the durable record of what a review found is the comment `review-pr` posts on the pull request, so `canon:task-complete` deletes any report whose branch is gone. The body that writes a report owns how long it lives, which leaves the shipping branch's own report on disk through the run that cites it and collects it a branch later. What that loses is a local-only review on a branch that never opened a pull request, which is why the report says so where a reader meets it.
-
-`canon:task-complete` decides which task closed by reading the diff rather than the conversation, as the ship-chain step after `canon:context-fold`. It resolves a merge base against `origin/main`, unions the committed diff with the working tree and untracked files, then matches unchecked outcomes on the board against what shipped. A task that shipped without ever being discussed still gets marked. `canon:context-fold` reads the same diff and rewrites a context entry only where a folder moved or a bullet or gotcha went untrue, and the pull request records each decision. The requirements record is never folded. A direction change gets one report line naming `canon:document-health`, which reviews that record only when asked.
+- `canon records validate plans` reports a plan breaking its standard, and takes `groundwork`, `intake`, and `teach`
+- `canon records push` and `canon records pull` carry `.canon/` to and from a private repository. See [records](../agents/records.md).
+- `canon records size`, `canon records prune-tmp`, and `canon records stale canonical` report folder size, idle scratch, and releases since the requirements review
+- `canon tasks archive` moves a shipped plan to `.canon/plans/archive/` and retargets the task's `Plan:` line
 
 ## Shipping a fan-out
 
-A fan-out of N worktrees produces N pull requests. The order they merge in matters only when two branches touch the same file.
+Merge order matters only when two branches touch the same file. Expect to rebase over `CLAUDE.md`, `tooling/**`, `canon/context/context-model.md`, `docs/agents/`, and any folder's `index.md`. Resolve an `index.md` conflict with `canon indexes regen` over the rebased tree.
 
-**Rebase profile.** Work confined to one domain directory, such as a new skill under its own folder or independent fixes in different subtrees of `scripts/`, rarely touches a sibling's files. A shared file does not hold a branch back, per the conflict test in [operating model](operating-model.md). These paths are shared hotspots, the ones a second branch should expect to rebase over and resolve:
-
-- `CLAUDE.md`, since cross-domain behavior lives there
-- `tooling/**`, since stack manifests, golden configs, and seeds are tightly coupled
-- `canon/context/context-model.md` and `docs/agents/`, which several domains cross-reference
-- Any folder's `index.md`, since `canon indexes regen` rewrites it and two worktrees adding files to a regen-covered folder race on it. Resolve its conflict by running the regen over the rebased tree rather than by hand.
-
-Land any in-flight edit to a hotspot on `main` before fanning out where you can. A worktree on a stale `CLAUDE.md` costs more to rebase than it saved.
-
-**Merge order.** Merge the branch with the smallest hotspot footprint first. A branch touching `CLAUDE.md`, a context entry, or a regenerated `index.md` merges last, and its siblings rebase on the new `main` once it lands.
-
-**Rebase before the next merge.** After one squash-merge, each sibling is behind `main` and may carry a stale copy of a shared file. The branch merging second resolves, in the session that built it and after the first lands, never against a sibling still building: run `/review-address` there, which trial-merges against `origin/main` and rebases a branch that no longer merges or whose files `main` changed. Push, then merge. Never force-merge a stale branch.
-
-**Clean up after merge.** Run `/git-worktree cleanup` to remove worktrees whose branches merged on GitHub and prune the local branches. The skill reads merge state through `gh pr view`. To start a fresh feature from a stale worktree, `ExitWorktree(action: "keep")` back to main, then `/session-worktree <new-name>`.
-
-**When fan-out was the wrong call.** Sharing a file was never the reason. If every rebase needs a decision the tree does not carry, because one branch depended on another, changed a contract the other consumed, moved a path the other wrote, or swept a folder the other wrote inside, the branches should have serialized. Land one, wait, then start the next. The cleanup skill only tidies a flow that already worked.
+- **Merge order.** Merge the smallest hotspot footprint first, and a branch touching `CLAUDE.md` or a context entry last.
+- **Rebase.** The branch merging second runs `/review-address`, which trial-merges against `origin/main` and rebases. Push, then merge.
+- **Clean up.** Run `/git-worktree cleanup` to remove merged worktrees. To start fresh, `ExitWorktree(action: "keep")`, then `/session-worktree <new-name>`.
+- **Wrong call.** If a rebase needs a decision the tree does not carry, land one branch before starting the next.
 
 ## The task board
 
-`.canon/tasks/` is gitignored and resolves at the main worktree root, so every session shares one board. One file per task is what keeps concurrent sessions from overwriting each other, since a gitignored board has no history to recover a lost write from. Its `index.md` is generated by a hook rather than by `bun run check`, because the whole-repo index walk skips gitignored folders.
+`.canon/tasks/` is gitignored and resolves at the main worktree root, one file per task. A hook generates `index.md`, and `priority.md` carries execution order and blockers.
 
-A hand-maintained `priority.md` sits beside the index carrying execution order and what each task is waiting on, which the alphabetical index cannot express.
+`canon tasks validate` reports and never writes:
 
-`canon tasks validate` reads a row against its own table before it reads anything the row claims. A blank or prose line closes the table above it, so a row stranded there is checked against the line behind it rather than parsed as a continuation, and a row that clears that test still has its cell count checked against its header. A `## Needs a plan` row that states its own position, searched for `<ordinal> here` or the bare word `last` anywhere in the cell rather than at its start, is checked against where it actually sits, which is what catches a gap, a duplicate, and a sequence starting somewhere other than first alike.
+- A row's cell count must match its header, and a `## Needs a plan` row stating its position is checked against where it sits
+- Every plan pointer resolves, every task file is named once, and every ready row names its files
+- A parked row is reported when its cited task reached the trunk
 
-Past that shape, it checks what a surviving row claims against what the tree holds: every plan pointer resolves, every task file is named by a board row or a backlog line and never by both, no task sits in two groups, and every row marked ready names its files. One check across both surfaces is what lets a task move between the board and the backlog without the move reading as a dropped file. Paths two ready rows share go to a `shared` array moving no exit code, the candidate list the orchestrator's conflict check reads. Blockers re-takes what a parked row waits on, reporting one whose cited task reached the trunk and one whose cited file nothing running still holds. A cited task settles the row by being archived, or by closing every outcome and naming a pull request the trunk carries, since the checkbox alone is marked while the branch is still in review. Both halves read a citation out of the blocker cell, so a row citing neither is reported as untested rather than counted clean, and so is a cited task the trunk could not answer for. It reports and never writes, because a row is the orchestrator's claim and a validator repairing one would assert the claim it exists to test. Nothing fires it automatically, since the board is gitignored per-machine scratch with no shared moment to hang a hook on, so the orchestrator's sweep calls it at the point the readiness claim is made and follows it with the parked re-test.
+`canon:task-board` creates a task file, and `canon:task-complete` marks outcomes. The `post-merge` hook archives the task a merged pull request closed, with its plan, and a `post-rewrite` hook does the same for a rebase pull. Both archive only when the merge carried a PR number and the task is closed.
 
-`canon:task-board` creates the file, holding the filename convention and the frontmatter contract so a malformed write cannot break the index for every sibling, and declines a task decided against. `canon:task-complete` marks a shipped task's outcomes and moves one the merge hook left to `.canon/tasks/archive/`. Creation is where the origin invariant is enforced: every task names a plan, a groundwork folder, an intake folder, or an issue, since a task with no origin is either lost context or work nobody decided to do.
-
-Archiving a task carries its plan with it, in the same act. The merge is what settles a plan, and the hook below reaches the archive with nobody watching, so a second call after it would be a second failure point leaving the task archived and the plan live. A task whose plan a sibling still cites archives on its own and leaves the plan live, since moving it on the first task to close strands every other pointer at a path that has gone.
-
-Nothing chained that archive until the `post-merge` git hook landed. Every earlier step fires from `canon:auto-ship` or `canon:git-ship`, both of which finish while the pull request is still open, so a task archived there would close for work that may be abandoned. The board is gitignored, which rules out reading it from anywhere but the machine that pulled. The hook archives the task a merged pull request closed, through the same verb the base stack ships to every target, and does nothing on a project with no board.
-
-The archive gates on a pull request number the merge carried and a closed task, because outcomes are marked on the branch and a task can read all `[x]` while its pull request is still open, so `canon:task-complete` still confirms the work reached `main` when a person archives by hand. A companion `post-rewrite` hook carries the same steps for anyone pulling with rebase, which fires that event instead of `post-merge`.
-
-The hook archives through `canon tasks archive`, which carries the refusals above, so a task whose pull request has not merged stays where it is. Both hooks ship with the `base` tooling stack, so a target project running this workflow gets the same trigger, and `CANON_SKIP_RECLAIM`, `CANON_SKIP_UPGRADE`, and `CANON_SKIP_PLUGIN_UPDATE` turn off the three steps that act on the machine.
+`CANON_SKIP_RECLAIM`, `CANON_SKIP_UPGRADE`, and `CANON_SKIP_PLUGIN_UPDATE` turn off the three hook steps that act on the machine.

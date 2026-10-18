@@ -11,7 +11,7 @@ Read `claude/skills/markdown-craft/references/markdown.md` and load the `write-h
 
 ## Routing a document by its reader
 
-- Put consumer-facing reference in `docs/`, read by someone operating the toolkit without the source open. The CLI contract sits in `docs/agents/`.
+- Put consumer-facing reference in `docs/`, read by someone operating the toolkit without the source open. `docs/agents/` covers verbs run by hand. A skill-only verb has its skill and `--help`.
 - Put what a domain does, where it lives, and the traps a session would hit in it in `canon/context/<domain>/`, read by someone maintaining the toolkit, per the content ownership row in `CLAUDE.md`.
 - Decide the reader before writing. A misplaced document reads fine where it sits, and costs later when a target reads prose meant for this repository or a session searches the wrong tier.
 

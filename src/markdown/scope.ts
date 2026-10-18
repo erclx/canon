@@ -132,18 +132,11 @@ export const GATED_PATHS: readonly string[] = [
   'claude/skills/video-craft/SKILL.md',
   'claude/skills/write-human/SKILL.md',
   'claude/skills/youtube-transcripts/SKILL.md',
-  'docs/agents/indexes.md',
-  'docs/agents/install-and-sync.md',
-  'docs/agents/migrate.md',
-  'docs/agents/output-shape.md',
-  'docs/agents/overview.md',
-  'docs/agents/targets.md',
   'canon/context/development.md',
   'canon/context/ci.md',
   'canon/context/scripts.md',
   '.claude/skills/internal-',
-  'docs/agents/records.md',
-  'docs/agents/sessions-transfer.md',
+  'docs/',
 ]
 
 /**

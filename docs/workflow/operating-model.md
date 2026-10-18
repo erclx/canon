@@ -6,17 +6,9 @@ category: Workflow
 
 # Operating model
 
-A way to build fast and reliably across parallel Claude Code sessions without a
-loop and without losing the human review gate. One warm session holds the
-cross-feature call and reviews. Planning runs there or in a session of its own.
-Cold worker sessions build. The human launches workers and merges.
-
-This page covers the roles and the loop. For merge order and fan-out rules, see
-[Parallel features](parallel-features.md), and for worktree gotchas, [Claude Code and git worktrees](../../wiki/claude/worktrees.md).
+One warm session holds the cross-feature call and reviews. Cold worker sessions build, and the human launches workers and merges. For merge order see [Parallel features](parallel-features.md), and for worktree gotchas see [Claude Code and git worktrees](../../wiki/claude/worktrees.md).
 
 ## Four roles
-
-The split is by vantage, not by capability. All four are Claude Code sessions.
 
 | Role         | Session                               | Owns                                                 | Does not                           |
 | ------------ | ------------------------------------- | ---------------------------------------------------- | ---------------------------------- |
@@ -25,204 +17,58 @@ The split is by vantage, not by capability. All four are Claude Code sessions.
 | Planner      | One session per row, warm or cold     | Measure the row against the tree, write one plan     | Enter a worktree, write the board  |
 | Worker       | One cold worktree session per feature | Implement, self-check, open PR, answer the reviewer  | Write the shared board, merge      |
 
-Each role is asserted explicitly rather than inferred. The orchestrator loads
-`role-orchestrator` at the start of its session, a worker loads `role-worker`,
-which `auto-ship` invokes at Step 0 so a dispatched build and a
-hand-launched one reach it on the same path, and a planner loads
-`role-planner` and a reviewer `role-reviewer` from the launch that dispatches
-it. All four are framing and boundaries rather than logic.
-
-The planner is the one role the orchestrator also performs. Per-row planning
-runs warm inside the orchestrator's own session or cold in a dispatched one, and
-the boundary between them is the cross-feature call: which rows conflict, what
-merges before what, and whether a row should run at all stay with the
-orchestrator, because a session reading the board sees blockers and file sets
-and can write a confident merge order off a partial picture. The per-row
-measurement is free to go cold, since a cold planner reads the tree rather than
-trusting what the task file claims.
-
-A dispatched planner owes two messages: the plan's path as the file lands, with
-what the task file got wrong beside it, and a block before that block becomes an
-interactive prompt. The plan file is its only write. A stale count, a moved line,
-or a path that no longer resolves is reported rather than repaired, since the
-task file and the board stay the orchestrator's to write.
-
-A worker that halts on a plan question it may not answer, or argues back against
-an instruction the tree contradicts, is working correctly. It writes neither
-`.canon/tasks/priority.md`, the backlog, nor a task file for work it turns up,
-and hands the row to the orchestrator. `role-worker` gives the reason for each.
-
-The orchestrator's cell reads every tracked file rather than every feature, and
-it offers no exception for a small one. A correction found while orchestrating
-goes to the task that owns the surface, or folds into the next task touching it,
-because a session that writes a change cannot review it independently afterwards
-and no later session recovers that vantage.
-
-Filing that row stops at the defect and the surface it was seen on. How far the
-defect reaches and what causes it belong to whoever plans the row, so it arrives
-carrying neither a count nor an asserted mechanism, and the seat that found it
-says as much in a plain sentence rather than supplying either. What separates the
-two is what a measurement decides: the blocker re-test, the branch check, and
-the conflict check against every track in flight all decide whether a row can
-start, and only a count of the defect's extent decides how big it is.
+- The orchestrator loads `role-orchestrator`, a worker loads `role-worker` through `auto-ship` Step 0, and a planner and a reviewer load theirs from the launch that dispatches them
+- The orchestrator decides which rows conflict, what merges first, and whether a row runs at all. Per-row planning can go cold.
+- A dispatched planner writes only the plan, and reports what the task file got wrong rather than repairing it
+- A worker that halts on a plan question, or argues back against an instruction the tree contradicts, is working correctly
+- The orchestrator edits no tracked file. File a row with the defect and the surface, with no count or cause.
 
 ## The loop
 
-One feature travels this path end to end.
+1. Plan the next feature with `plan-feature` into `.canon/plans/`. Run it warm when the row turns on a contract other rows consume, and dispatch a planner otherwise.
+2. Check the plan waits on nobody, the branch is unclaimed, and no track in flight conflicts. Dispatch a background worker with `claude --bg`, naming the branch and the model.
+3. The worker enters its own worktree, builds, self-checks, opens a PR, and stops there.
+4. Dispatch a reviewer under `role-reviewer` for every PR but a release one. It posts `review-pr` findings, and `review-ui` drives any visual checklist.
+5. The reviewer tells the session holding the branch to run `review-address`, found with `canon sessions list --branch`, once a pass posts a finding at any severity.
+6. The worker addresses the findings, rebases onto `origin/main` if a sibling landed on its files, pushes, and asks that reviewer for a re-review of the added commits.
+7. A pass posts `## Review` while anything is open and `## Review closed` when nothing is. The reviewer then runs `canon pr lift`.
+8. The human merges. The orchestrator tells any trailing worker whose files the merge touched to run `review-address`, which rebases.
 
-1. The next feature is planned with `plan-feature`, writing a plan to `.canon/plans/`. The orchestrator runs it warm when the row turns on a contract other features consume or a dependency on another row, and dispatches a planner under `role-planner` otherwise. A cold planner measures the row against the tree rather than trusting what the row claims, and it reads what is in flight by composing the live session roster with open pull requests. A bare branch or worktree is not evidence on its own, since this repository leaves both behind after a squash merge.
-2. Orchestrator checks the plan waits on nobody, checks the branch is unclaimed, and checks no conflict holds the plan behind a track in flight, then dispatches a background worker with `claude --bg` against the plan, naming the branch and the model on the launch rather than leaving the worker to derive either. No count caps how many run at once. The branch travels as the argument to the worker's own worktree call, which is the one place the name is read rather than inferred. It falls back to naming the invocation for a human to run through `session-worktree` and `auto-ship` when the plan still waits on an answer only the operator can give, the branch check refuses, or a conflict holds the plan behind a track already in flight. Either way, the worker enters its own worktree, builds, self-checks, opens a PR, and stops at the PR boundary.
-3. Orchestrator dispatches a reviewer under `role-reviewer` for every pull request but a release one, which posts `review-pr` findings, and `review-ui` drives any visual checklist beside it.
-4. The reviewer tells the session holding that branch to run `review-address` once the pass posted a finding at any severity, resolving it with `canon sessions list --branch` and falling back to the orchestrator when none is live. The worker addresses the findings, rebases onto `origin/main` when a sibling landed first on a file it writes, then pushes a follow-up. A pass carrying only minor findings dispatches too, since the grade runs low often enough that a floor at should-fix loses fixes a worker would have made. `review-pr` states that threshold and the heading follows it, so an open heading is itself the signal to send.
-5. The worker asks that reviewer for the re-review directly, and the reviewer closes the review out with `review-pr` again. The second pass reads only the commits the follow-up added, or the worker's response alone when the follow-up added none, and posts under `## Review` when it finds anything and under `## Review closed` when it finds nothing, so a reader learns from the heading whether work is still owed and takes the merge decision from the counts on the line under it. A pass finding nothing where a close-out already stands rewrites that comment to cover what it read rather than posting a second one, so the thread carries one live verdict. Repeat from step 4 until a pass closes the review. Each reviewer then runs `canon pr lift`, which lifts the draft mark once every gate it reads is clear.
-6. The human reads the result and merges. After each merge, the orchestrator tells any trailing worker whose files the merged diff touches to run `review-address`, which rebases whether or not the review left anything open.
-
-There is no loop construct here. Each worker is a single build that halts at the
-PR. The merge stays a manual human gate. Reliability comes from the plan being
-complete enough that the cold session does not come back with questions, and
-from merging promptly so the next PR does not rot against a moving main.
+Each worker halts at the PR, and the merge stays a human gate.
 
 ## The review layer
 
-The worker's chain carries no review step. The session that wrote the code is
-structurally blind to its own misreadings, because the same misreading wrote
-both the code and any review of it, so the first review a change gets is a
-dispatched reviewer's.
+The first review a change gets is a dispatched reviewer's. The worker's gate inside `auto-ship` decides whether the PR opens, and the draft mark holds the merge. The reviewer pass is the merge gate.
 
-- Worker gate, inside `auto-ship`: the session that wrote the code. Its job is "did I build the plan and does it pass?" The verify commands and the test order read decide whether the PR opens, and the draft mark holds the merge.
-- Reviewer pass, via `review-pr`: a fresh session holding one pull request, briefed with the cross-feature facts the orchestrator's wave pass found (a sibling PR in flight, a shared file, the merge order). Its job is "is this right and does it fit?" It can question the plan itself. This is the merge gate.
-
-The human read at merge is the final gate. No layer repeats another.
-
-The orchestrator's pass also reads the pull request body against itself, which is
-a vantage the worker never has. This repository squash-merges, so the body
-becomes the commit message and the record on the trunk once the branch is gone.
-`canon pr key-changes` compares the paths the body's Key changes claims against
-its own changed-file list, and a claim the diff does not carry is a finding on
-the body rather than on a file. See
-`canon pr key-changes --help`.
+`canon pr key-changes` flags a Key changes claim the diff does not carry. See `canon pr key-changes --help`.
 
 ## The review channel
 
-Findings travel on the PR. `review-pr` posts them there.
-`review-address` reads them back, fixes each, replies or resolves the
-threads, and pushes a follow-up. `review-pr` then runs again, reading only
-what the follow-up added.
+Findings travel on the PR. `review-pr` posts them, `review-address` fixes them and pushes, and `review-pr` runs again on the added commits.
 
-Both halves of that loop key on a commit rather than on the pull request object,
-which trails the branch ref by up to a minute after a push and says nothing
-about the trail. `canon pr head` resolves the tip the review pass scopes its
-delta against, and `canon pr checks` reports the runs belonging to that tip, so a
-follow-up push cannot be read as green off the predecessor's completed run. See
-`canon pr head --help`.
-
-Three messages travel from the worker to its controller, each stated with its
-reason in `role-worker`: the pull request as it opens, carrying any row the
-build turned up, the end of each address-review pass with the new CI state, and
-a block before it becomes an interactive prompt. Nothing is sent on progress. An
-open pull request is what starts the controller's review poll, with a dispatch
-still silent after thirty minutes kept as a fallback.
-
-What the session channel carries is the handback instruction and the worker's
-reply to it, which is a notification layer over a record that stays on the PR. A
-reply that changes an outcome, such as a worker naming the plan question that
-already declined a finding, still belongs back on the PR, since the session
-holding it ends and the thread is what a later reader opens.
-
-Two rules put it there rather than leaving that to whoever remembers. A finding
-the worker declines carries the fact that settled it in the same reply body that
-already maps every finding, and a pass accepting that argument states the
-withdrawal or the regrade with what produced it instead of dropping the finding
-from its next comment.
-
-A reply that corrects the reviewing session rather than a finding stays off the
-thread. Which session holds which branch, or what gate a worker's edits pass
-through, changes no finding on a pull request that closes, so it goes to the task
-owning that surface. Nothing checks either rule, so both hold while a session
-applies them.
-
-A finding answered without a commit leaves the head where the first pass read it,
-which a gitignored record and a finding accepted as recorded both produce. The
-close-out is still owed there, since the newest heading is what tells an operator
-whether the branch is blocked, so the pass reads the worker's response rather than
-a delta and names its body from that response instead of from a tree that did not
-change.
-
-A branch `main` moved under during review, conflicting or not, is the worker's
-problem to close. `review-address` rebases onto `origin/main` between the fixes
-and the push, so one force-push carries both and the reviewer reads one delta.
-The staleness test sits ahead of the no-findings guard, so a branch whose review
-closed clean and then went stale still rebases when the skill is invoked. The
-re-read costs a full pass rather than a delta, since the prior reviewed commit no
-longer reaches the head, and `review-pr` detects that itself.
-
-The heading carries the state rather than the pass number. A pass carrying
-anything owed takes `## Review` and a pass carrying nothing takes
-`## Review closed`, so a thread can be scanned for what still owes work without
-opening a comment. One threshold governs the heading and the dispatch alike, and
-`review-pr` is where it is stated, so every other surface cites that skill
-rather than restating the grades.
-
-The merge decision comes off the counts on the summary line, since an open
-heading now covers a minor as well as a critical. One thing the pass posts sits
-outside those counts and inside the threshold anyway. It reads the description's
-Testing section against what the repository can drive, and asks about a box left
-unchecked for a person where a harness already covers the run. The question
-takes no severity, because whether a human is required is a judgment the author
-may hold a reason for, and it still opens the heading and sends the dispatch,
-because the author is the only party who can answer it.
-
-A minor the worker declines goes to the findings of the task the
-branch closes, since a thread does not survive the merge. Feedback kept on the
-PR outlives both sessions, so no human copies review between them.
+- `canon pr head` resolves the tip a pass scopes against, and `canon pr checks` reports the runs for it. See `canon pr head --help`.
+- A worker messages its controller when the PR opens with any row it turned up, when each address pass ends with the CI state, and before a block becomes a prompt. It sends nothing on progress.
+- A declined finding carries the fact that settled it in its reply body, and a minor goes to the findings of the task the branch closes
+- A finding answered without a commit still owes a close-out, read from the worker's response
+- A branch `main` moved under is the worker's to rebase, in the same force-push as the fixes
 
 ## Feature sizing
 
-The unit is fixed by the ceremony: one feature is one plan, one worktree, one
-PR, one review sitting. Split a feature down when a backend contract and its
-consumer both change, landing the contract first so no UI is built on a shaky
-contract. Merge a change up into an ordinary edit when it is a few lines with no
-new contract, skipping the plan and worktree entirely. The smell test: if the
-whole change does not fit in your head at review time it was too big, and if the
-coordination costs more than the change it was too small.
+One feature is one plan, one worktree, one PR, one review sitting. Split a feature when a backend contract and its consumer both change, landing the contract first. Make a few-line change an ordinary edit.
 
 ## Where work comes from
 
-Two tiers hold work at different altitudes.
-
-- Tasks (`.canon/tasks/`): the active few pulled into the current turn, one file each. Gitignored, high churn. Shape governed by the `task-board` skill. `priority.md` beside them carries execution order, and `backlog.md` carries what nobody is scheduling, both shaped by the same skill.
-- Edits: a few lines, done immediately with no ceremony.
-
-Nothing above these sequences work into versions. Scope is stated in
-`canon/REQUIREMENTS.md` and reaches the board as discrete tasks, so why one
-task runs before its neighbors is on its row and why one group of work runs
-before another is carried nowhere at all.
+Tasks in `.canon/tasks/` hold the active few, one file each. `priority.md` carries execution order and `backlog.md` carries what nobody schedules.
 
 ## Parallelism
 
-Review attention binds, and no number caps worker tracks, so stop adding once you cannot review every output. A row waits only on a conflict a merge cannot settle, which the `role-orchestrator` dispatch runbook states once. A shared file is not one: both rows build, and the branch merging second resolves any conflict in its own session after the first lands, since no practice source serializes on a file. [Fowler](https://martinfowler.com/articles/branching-patterns.html) has whoever integrates second check health "even if it's a clean merge", and [DORA](https://dora.dev/capabilities/trunk-based-development/) keeps branches to hours with no integration phase.
+Stop adding worker tracks once you cannot review every output. A row waits only on a conflict a merge cannot settle, as the `role-orchestrator` runbook states. A shared file is not one, and the branch merging second resolves it. See [Fowler](https://martinfowler.com/articles/branching-patterns.html) and [DORA](https://dora.dev/capabilities/trunk-based-development/).
 
-Review splits by vantage. A reviewer under `role-reviewer` takes every pull
-request's read but a release one's and trades each round with the worker. The
-orchestrator keeps one cross-branch pass per wave over file sets and merge order.
-
-Inbound turns cost the controlling session as well, so weigh the spend before
-widening. A message from one of your other sessions arrives as a new turn
-carrying the whole accumulated context, and a recurring poll bills that window
-again on its own interval, which means a wide wave spends against the
-orchestrator rather than against any worker. `crossSessionInbound` is the one
-control over that and stays unset here, since `hold` and `refuse` both break the
-worker handback and `accept` bounds nothing.
-
-Unit checks run freely in many worktrees at once.
-A dev server, an end-to-end run, and a screenshot run alongside each other on a
-web stack, since every worktree derives its own port. Singleton resources (one
-local model server, one GPU) still serialize, as does any port a stack fixes by
-hand. See [Parallel features](parallel-features.md) for merge order and
-[Claude Code and git worktrees](../../wiki/claude/worktrees.md) for port collisions.
+- The orchestrator keeps one cross-branch pass per wave
+- Checks, dev servers, and screenshots run in many worktrees at once, each on its own port, while singleton resources serialize
 
 ## Related
 
-- [Claude Code and git worktrees](../../wiki/claude/worktrees.md) for the worktree mechanism and its gotchas
-- [Claude Code subagents](../../wiki/claude/subagents.md) for in-session parallelism without worktrees, and [blocking subagents](../../wiki/claude/permissions.md#blocking-subagents) for the `permissions.deny` rule that stops every spawn
+- [Claude Code and git worktrees](../../wiki/claude/worktrees.md) for the mechanism and port collisions
+- [Claude Code subagents](../../wiki/claude/subagents.md) for in-session parallelism, and [blocking subagents](../../wiki/claude/permissions.md#blocking-subagents) for the `permissions.deny` rule
 - [Skill map](skill-map.md) for how the skills in the loop are categorized

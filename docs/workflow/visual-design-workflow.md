@@ -6,146 +6,54 @@ category: Workflow
 
 # Visual design workflow
 
-Three tiers cover the range from prose-only design docs to a fully graphical design source of truth. Pick one per project based on how UI-heavy the work is, whether stakeholders review visuals, and whether a designer is involved. Tiers stack, so moving up does not invalidate work done at a lower tier.
-
-The tier framework sits alongside [Claude Design](../../wiki/claude/design.md), the one catalog page in this range. Excalidraw and the surrounding MCP and skill ecosystem are named inline below rather than catalogued separately. This page decides when to reach for what.
-
-[Claude Design](../../wiki/claude/design.md), released 2026-04-17 and priced inside Claude subscriptions, is the ceiling tool for tier 1 and tier 2. Reserve it for codebase extraction and the richly annotated handoff bundle.
+Three tiers run from prose-only design docs to a graphical source of truth, and tiers stack. [Claude Design](../../wiki/claude/design.md) is the ceiling tool for tiers 1 and 2.
 
 ## Tier 0: prose only
 
-The default. `canon/DESIGN.md` holds visual intent, being one Overview paragraph, at most three one-line rules a section, and a table naming what each color and shape role is for. Its lead names the stylesheet the values live in, since a hand-typed copy of them drifts from the CSS.
+The default. `canon/DESIGN.md` holds visual intent as one Overview paragraph, at most three one-line rules a section, and a table naming each color and shape role, with a lead naming the stylesheet. Claude Code alone suffices, and [`test-craft`](../../claude/skills/test-craft/SKILL.md) says which layer a Playwright journey belongs at.
 
-Claude Code reads it and writes the implementation. Works for CLI tools, internal dashboards, admin panels, and backend-focused projects.
+- The seed is `tooling/claude/seeds/canon/DESIGN.md`, and its column headers stay verbatim
+- `canon design render` previews it in `.canon/tmp/render/design/`
+- `canon design install` copies a neutral base to `.claude/design/base.css`, so override values in `.claude/design/project/`. See `canon/context/design.md`.
 
-### Seed shape
+These skills cover the tier:
 
-The toolkit seed in `tooling/claude/seeds/canon/DESIGN.md` ships an intent template with a starting set of roles, each naming its custom property, and `claude/skills/canvas-board/references/design.md` carries the same tables under `## Template` with placeholder rows. The column headers are what the parser reads, so they stay verbatim in either, while the rows are the project's own. The seed's lead asks for the project's own stylesheet, such as `src/styles/tokens.css` or a Tailwind `@theme` block, and falls back to `.claude/design/project/` only when the project has none.
+- `canon:ui-checklist`, `canon:ux-audit`, and `canon:ux-measure` review and measure a UI
+- `canon:draft-and-pick` drafts candidates as frames on the canvas and takes your pick
+- `canon:canvas-board` works a direction out as HTML frames you edit in the browser. Only the pick moves into `canon/DESIGN.md`.
+- `canon:draft-identity` drafts a logo mark and social card
 
-`canon design render` writes an HTML plus CSS preview to `.canon/tmp/render/design/` for eyeballing the current system without leaving Claude Code. See `canon/context/design.md`.
-
-A project wanting a neutral starting point to override runs `canon design install`, which copies one stylesheet to `.claude/design/base.css` carrying an achromatic token set as custom properties and two components built on them. Greys run from near-black to near-white and the accent is monochrome, so the only palette the project renders is one it writes itself. That file is toolkit-owned and `canon design sync` refreshes it, so a project overrides a value in `.claude/design/project/` instead, which sync never touches. Nothing arrives without that install, and the two channels are independent: a record the project wrote is its own, and the installed stylesheet is the toolkit's.
-
-A record generated from a token source carries the values in tables instead, which is the shape this toolkit's own record takes. There a cell no source anchors ends in `? verify`, and the preview shows that marker beside the value rather than folding it in, so a swatch and a font sample stay built from the value alone. A confidence line above the sections names how many cells are anchored against how many are tagged, which is what tells a reader whether they are looking at a record of the code or a proposal about it. It reads the columns a source could anchor and leaves out the row names, so the ratio is not diluted by cells no tag could ever reach. The proposal path tags nearly all of them, so that count reads low on day one by design.
-
-### Tools
-
-- None beyond Claude Code itself
-- Playwright CLI optional for verifying journeys across routes and browser-only behavior. See [`test-craft`](../../claude/skills/test-craft/SKILL.md) for which layer a journey belongs at.
-
-### Skills
-
-#### Reviewing and measuring
-
-- `canon:ui-checklist` for what a reviewer has to look at after UI changes, and what ships without a test
-- `canon:ux-audit` for UX gap detection on existing surfaces
-- `canon:ux-measure` for what a running surface costs to paint, read against published thresholds
-
-#### Drafting
-
-- `canon:draft-and-pick` for a call settled by looking, drafting several candidates as frames on the canvas and taking your pick
-- `canon:canvas-board` for a direction worked out over several turns, drawn as HTML frames you drag, select, and restyle in the browser while the session reads your changes back. Only the pick moves into `canon/DESIGN.md`, since the canvas folder is gitignored
-- `canon:draft-identity` to draft a project's logo mark and compose it into an icon sequence and a social card, through `draft-and-pick`'s own render-and-pick loop. On an Astro project holding the card route scaffold, the card lands as a route the project keeps and is captured through a running server, so it reads the project's real stylesheet rather than typed copies of every color. Everywhere else it ships as a PNG and the run says so.
-- Anthropic's `frontend-design` plugin optional for light visual steering
-
-### When to pick
-
-- UI is not the core product
-- Design decisions are few and can be written as sentences
-- No designer on the project
-- Stakeholders review code or behavior rather than mockups
+Pick tier 0 when the UI is not the core product, decisions fit in sentences, and stakeholders review code.
 
 ## Tier 1: visual companion
 
-Prose stays as source of truth. Add a visual render as a feedback surface for the agent and for human review.
+Prose stays the source of truth, with a visual render as a feedback surface. Human edits to these derived artifacts are review annotations.
 
-- Excalidraw handles agent-drawn layouts when the round-trip canvas loop matters
-- Claude Design joins only when codebase extraction or the annotated handoff bundle is worth the ceiling cost
+- Excalidraw canvas server plus the community [`yctimlin/mcp_excalidraw`](https://github.com/yctimlin/mcp_excalidraw) MCP, where the agent draws, reads back, and revises
+- Playwright MCP ([`microsoft/playwright-mcp`](https://github.com/microsoft/playwright-mcp)) for browser checks off the accessibility tree
+- Chrome DevTools MCP ([`ChromeDevTools/chrome-devtools-mcp`](https://github.com/ChromeDevTools/chrome-devtools-mcp)) for traces, network, DOM, and CSS
+- Claude Design for codebase extraction or a polished handoff bundle
+- A frontend design skill: [pbakaus/impeccable](https://github.com/pbakaus/impeccable), [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill), or Anthropic's `frontend-design`
 
-Both produce derived artifacts, so human edits are review annotations rather than source changes.
+Impeccable keeps its own root `DESIGN.md` and `PRODUCT.md`, separate from `canon/DESIGN.md`. Use Excalidraw for agent-driven layout iteration, and Claude Design for one extraction pass or the final handoff. Most projects pick one.
 
-### Seed shape
-
-Same as tier 0. `DESIGN.md` stays human-maintained.
-
-Impeccable, if installed, keeps its own root `DESIGN.md` and `PRODUCT.md` in its own format. These are separate files from the toolkit's `canon/DESIGN.md` and are not synced with it. Treat impeccable's pair as its own source of truth for its commands, and the toolkit's `canon/DESIGN.md` as the source other toolkit skills read.
-
-### Tools
-
-- Excalidraw canvas server on localhost plus the community [`yctimlin/mcp_excalidraw`](https://github.com/yctimlin/mcp_excalidraw) MCP shim, for projects that need an agent to draw, read back, and revise a canvas. MIT-licensed, plaintext JSON scene format. `describe_scene` and `get_canvas_screenshot` let the agent verify its own layout before claiming it is correct.
-- Playwright MCP ([`microsoft/playwright-mcp`](https://github.com/microsoft/playwright-mcp)) for browser-side verification, driven off the accessibility tree rather than screenshots.
-- Chrome DevTools MCP ([`ChromeDevTools/chrome-devtools-mcp`](https://github.com/ChromeDevTools/chrome-devtools-mcp)) for live frontend debugging: performance traces, network inspection, and DOM and CSS inspection.
-- Claude Design as the ceiling option for codebase extraction or polished handoff bundles. See [Claude Design](../../wiki/claude/design.md).
-
-### Skills
-
-- Everything from tier 0
-- A frontend design skill to steer visual quality. Pick one of [pbakaus/impeccable](https://github.com/pbakaus/impeccable), which bundles curated anti-pattern references and is the strongest default, [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill), which maps product type to UI rules through a reasoning engine, or Anthropic's `frontend-design` plugin.
-
-### When to pick
-
-- UI is a meaningful part of the product but not the entire product
-- Stakeholders want to see layout proposals before code exists
-- Design decisions benefit from visual inspection
-- A single contributor owns both design and implementation
-
-### Excalidraw vs Claude Design in tier 1
-
-The two tools solve non-overlapping halves of the visual companion problem.
-
-Excalidraw gives the agent a canvas it can read back over MCP. Output is agent-facing and persists as a JSON file in the repo. Pick it when Claude Code needs to iterate on layouts autonomously, not when a human needs polished review artifacts.
-
-Claude Design reads the raw codebase without prose curation and produces a polished handoff bundle with chat history. Weekly quota makes it expensive, so reserve it for the extraction pass or the final handoff moment, not daily iteration.
-
-Most tier 1 projects pick one. Projects with a messy codebase and no curated `DESIGN.md` may want Claude Design once for the initial extraction.
+Pick tier 1 when stakeholders want layouts before code and one contributor owns design and implementation.
 
 ## Tier 2: visual as source of truth
 
-Design happens in a graphical tool. `canon/DESIGN.md` either regenerates from the graphical source or takes a secondary role as agent-facing summary. Implementation follows the graphical source, either through an MCP round-trip or a one-way handoff bundle. Fits teams with a dedicated designer or projects where design iteration outpaces code changes.
+Design happens in a graphical tool, and implementation follows it. `canon/DESIGN.md` becomes generated, with a top note naming the upstream Claude Design project ID or Figma file URL.
 
-### Seed shape
+- Figma desktop with the official [Figma Dev Mode MCP](https://www.figma.com/blog/introducing-claude-code-to-figma/) for teams with a designer already on Figma. It syncs both ways and captures a running UI into editable frames.
+- Claude Design with its Claude Code handoff bundle for teams without Figma. The handoff is one-way.
+- The Playwright and Chrome DevTools MCPs from tier 1
 
-`canon/DESIGN.md` becomes a generated artifact. A top-of-file note identifies the upstream source, either a Claude Design project ID or a Figma file URL. Manual edits in the seed carry a warning tag because they will not survive regeneration.
-
-### Tools
-
-- Figma desktop app with the official [Figma Dev Mode MCP](https://www.figma.com/blog/introducing-claude-code-to-figma/) for teams with a dedicated designer already on Figma. Bidirectional sync and Code to Canvas capture of a running Claude Code UI into editable Figma frames.
-- Claude Design with its Claude Code handoff bundle for teams without an existing Figma investment and for solo founders or PMs driving design themselves. One-way handoff, no bidirectional sync. See [Claude Design](../../wiki/claude/design.md).
-- Playwright and Chrome DevTools MCPs as in tier 1
-
-### Skills
-
-- Everything from tier 1
-
-### When to pick
-
-- UI is the product or a major differentiator
-- A dedicated designer is on the project or will join
-- Design review happens in the graphical tool rather than in code
-- Design changes more often than implementation
-
-### Figma vs Claude Design in tier 2
-
-Figma wins when a dedicated designer already owns a Figma file, external collaborators expect Figma for review, or the workflow needs the agent to capture a running Claude Code UI and push it back as editable frames via Code to Canvas. Figma's MCP is bidirectional.
-
-Claude Design wins when nobody on the team has a Figma workflow yet and the handoff bundle with chat history is the intended implementation path. Claude Design's handoff is one-way, and its quota limits daily iteration, so it is most useful for the initial extraction pass and the final handoff moment rather than day-to-day design work.
+Pick tier 2 when the UI is the product, a designer owns it, and design changes more often than code.
 
 ## Decision guide
 
-Four questions. Each yes weighs toward a higher tier.
+Count yes answers to four questions. Zero or one is tier 0, two or three is tier 1, and four is tier 2.
 
 - Is the UI the product rather than a thin interface over a backend?
 - Do non-engineers review visual proposals before code exists?
 - Is there a dedicated designer, or will there be one?
 - Does design iterate independently of code?
-
-Zero or one yes: tier 0. Two or three: tier 1. Four: tier 2.
-
-Resist over-tiering early. Moving up is cheap because tiers stack. Moving down means abandoning tooling and confusing collaborators.
-
-## References
-
-- [Claude Design](../../wiki/claude/design.md): first-party hosted design product and handoff bundle
-- [`microsoft/playwright-mcp`](https://github.com/microsoft/playwright-mcp): browser automation MCP used in tier 1 and tier 2
-- [`ChromeDevTools/chrome-devtools-mcp`](https://github.com/ChromeDevTools/chrome-devtools-mcp): live frontend debugging MCP used in tier 1 and tier 2
-- [`yctimlin/mcp_excalidraw`](https://github.com/yctimlin/mcp_excalidraw): community MCP server behind the tier 1 visual companion

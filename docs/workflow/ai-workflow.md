@@ -6,13 +6,11 @@ category: Agent surface
 
 # AI workflow reference
 
-A concise reference for when to reach for which tool, organized by what you're trying to do.
-
-> **Mental model:** Claude Code for everything: planning, implementation, review, docs, git, and release.
+Which tool to reach for, by what you are trying to do.
 
 ## Documents
 
-Project docs split across three roots at the project root. What the project authors and commits lives in `canon/`, what Claude Code reads lives in `.claude/`, and every gitignored session record lives in `.canon/`, which a single ignore entry covers.
+Project docs split across three roots. `canon/` holds what the project authors and commits, `.claude/` holds what Claude Code reads, and `.canon/` holds every gitignored session record.
 
 ```plaintext
 canon/
@@ -24,96 +22,52 @@ canon/
 └── rules/           ← path-scoped governance rules, written by canon gov install
 
 .canon/
-├── tasks/           ← one file per task with a generated index.md, local scratch
-├── plans/           ← one plan per feature, archived inside itself once it ships
-└── tmp/             ← deletable scratch, safe to remove without loss
+├── tasks/           ← one file per task with a generated index.md
+├── plans/           ← one plan per feature, archived once it ships
+└── tmp/             ← deletable scratch
 ```
 
-A project scaffolded before the move keeps its records under `.claude/`, and every command reads either root. `canon migrate records` moves one project across and repoints what cites it, and `canon migrate record-tree` follows it to reach the citations inside the records themselves, which the first verb passes over because it enumerates through git. A project scaffolded before the surface move keeps its context and loose documents under `.claude/` the same way, and `canon migrate surface-roots` moves those to `canon/` with the history following each file.
+A project scaffolded before the move keeps its records under `.claude/`, and every command reads either root. See [target migrations](../target/migrations.md).
 
-Three tiers of context load with different cost: always-loaded (root `CLAUDE.md` and `canon/REQUIREMENTS.md`), path-scoped lazy (`.claude/rules/<scope>.md` with `paths:` glob), and on-demand lookup (`canon/context/<domain>.md`, or `canon/context/<domain>/` once a domain outgrows one file, discovered via `canon/context/index.md`). See [the context model](../../canon/context/context-model.md) for the full picture.
-
-Run `canon init` to seed the `.claude/` directory, a root `CLAUDE.md` file, and `.claude/rules/` in one pass. `canon init` chains claude init and governance install. Claude Code auto-loads every file in `.claude/rules/` at session start, applying always-on rules unconditionally and path-scoped rules to files matching their `paths:` glob.
+Context loads always (`CLAUDE.md` and `canon/REQUIREMENTS.md`), by path (`.claude/rules/` with a `paths:` glob), or on demand (`canon/context/`, found through its `index.md`). Run `canon init` to seed `.claude/`, `CLAUDE.md`, and the rules.
 
 ## Scenarios
 
 ### Bootstrap a new project
 
-See [target projects](../target/projects.md) for the scaffold decision, core domains and skips, and the full lifecycle across scaffold, add-a-domain-later, and upstream sync.
+See [target projects](../target/projects.md).
 
 ### New feature
 
-One session works for most features. Prefer splitting across two sessions only when the feature is large enough that you want a cold, independent reviewer on the diff. Plan and implement in session 1, then review and ship in session 2.
+Plan and build in session 1, then review and ship in a fresh session 2 when you want a cold reviewer on the diff.
 
-#### Session 1
+- For a pile of findings, invoke `canon:plan-intake`, and for a grown backlog `canon:backlog-triage`
+- For an unmeasured state with live approaches, invoke `canon:plan-groundwork`
+- Invoke `canon:plan-feature`, implement, and run the `CLAUDE.md` commands until they pass
+- For UI changes, invoke `canon:ui-checklist`
+- Invoke `canon:context-fold` before closing
 
-Work in Claude Code directly. It reads `CLAUDE.md` automatically and has full file access, no pasting needed.
-
-- When the input is a pile of findings rather than one feature, invoke `canon:plan-intake` first. It files the dump into `.canon/intake/<nn>-<slug>/`, one item per finding carrying a problem measured against the tree, a proposed fix, and a verdict, then names which items are plan-ready, which need measuring, and which are already settled.
-- When the backlog has grown past what anyone rereads, invoke `canon:backlog-triage`. It files one item per backlog row into an intake folder, suggesting decline, archive, keep, or promote and leaning toward decline, and once `canon:plan-intake-answer` has taken your answers, a second run applies the approved verdicts through the task verbs.
-- When the current state is unmeasured and more than one approach is live, invoke `canon:plan-groundwork` first. It opens a track folder under `.canon/groundwork/<nn>-<slug>/` and ends in a decision, which may be to do nothing. Skip it when the approach is already settled.
-
-Then plan and build:
-
-- Invoke `canon:plan-feature` to scan for code-level conflicts and ambiguities, confirm approach before proceeding
-- Implement the feature, then Claude Code runs the commands defined in `CLAUDE.md`, fixes failures, and iterates until all pass
-- For UI changes, invoke `canon:ui-checklist` to write what a reviewer has to look at and name any behavior shipping without a test
-  End the session once the feature works and tests pass. Invoke `canon:context-fold` before closing to refresh any context entry the diff left untrue.
-
-The routing test is whether the repository can answer an item today. A session grepping handles the yes, and a groundwork track handles the no.
-
-A groundwork track may run experiments to settle a question, writing a fixture it reads itself under `.canon/tmp/runs/groundwork-fixtures/<slug>/` and spawning up to three billed headless runs before it asks. A fixture a headless run is pointed at sits outside the repository, since a session started under the project root inherits that project's `CLAUDE.md` and rules and would measure them instead of the arm.
-
-A spike starts against a sample, bounded on input size, duration, and spend, and scales up once the sample shows the method works. Nothing checks this, so it holds while a session reads the standard.
-
-What a spike leaves behind splits on whether a later reader needs the file to check a claim. Bulk input, such as a large fixture, is re-runnable and cited by nothing, so the scratch path above is the right lifetime for it. Everything a reader opens to verify a result lives inside the track in one of three folders: `evidence/` for a recording or a render, `scripts/` for the arm scripts, and `clones/` for checkouts and copies of outside material a claim rests on. The scratch tree holds only what can be deleted without loss, which none of those is.
-
-#### Session 2
-
-Start a fresh Claude Code session. The diff is sufficient context for ship.
-
-- Invoke `canon:git-ship` to run the project's verify commands, sync docs, commit by concern, rename branch, and open PR
+Session 2 invokes `canon:git-ship` to verify, sync docs, commit by concern, and open the pull request.
 
 ### Parallel features
 
-When features are independent, run them in parallel, one worktree and one session per feature. See [parallel features](parallel-features.md) for the loop in each worktree, the orchestrated flow, and the records and task board every session shares.
+Run independent features in parallel, one worktree and one session each. See [parallel features](parallel-features.md).
 
 ### Autonomous ship
 
-For features on a mature stack, chain the post-plan pipeline in one session. Approve the plan, invoke `canon:auto-ship`, and the skill runs implement → verify → ship sequentially.
+On a mature stack, approve the plan and invoke `canon:auto-ship` to implement, verify, and ship in one session.
 
-- Use when the plan is tight and the stack has real verify commands and test coverage
-- Autoship stops on: verify failure after one fix attempt, or hook failure
-- A produced UI checklist does not stop it. The checklist rides to the draft pull request's evidence comment, and the closing block names how many visual boxes are still unchecked and who owes them
-- Every stop leaves recoverable state. Fix and resume with `/git-ship`
-- Skip autoship for auth, migrations, security-sensitive changes, or work where the plan itself is uncertain
-
-### UI polish
-
-Verify the change manually in the browser. Invoke `canon:ui-checklist` if you need a written list of what to look at. For the fix itself, describe the change in Claude Code directly.
-
-### Quick fix
-
-- Verify failure or isolated bug → continue in Claude Code (it has the implementation context)
-- Design or planning conflict → escalate to a new Claude chat session with the relevant plan context
-- Fast file edit (a task file, config, renaming) → Claude Code directly, no chat needed
+- It stops on a verify failure after one fix attempt, or on a hook failure, and you resume with `/git-ship`
+- Skip it for auth, migrations, security-sensitive changes, or an uncertain plan
 
 ### Review
 
-Review runs on the pull request. An independent session invokes `canon:review-pr` once `canon:git-ship` has opened it, and the worker answers what it posts with `canon:review-address`.
+An independent session invokes `canon:review-pr` once the pull request is open, and the worker answers with `canon:review-address`. A verify failure goes to the session that built it, a design conflict to a new chat session with the plan, and a review finding to the worker.
 
 ### UI-heavy project
 
-Before the first feature session on a UI-heavy project, pick a design tier. The tier determines seed shape, installed MCP servers, and installed plugin skills. See [visual design workflow](visual-design-workflow.md) for the framework and decision guide.
+Pick a design tier before the first feature session. See [visual design workflow](visual-design-workflow.md).
 
 ## Skills
 
-The [skill map](skill-map.md) and its sibling [skill map on request](skill-map-on-request.md) give every skill the plugin ships one row saying when to reach for it. The first groups rows by the moment a project meets them, and the sibling holds the skills that answer a request.
-
-## Feedback routing
-
-```plaintext
-verify fails  → Session 1 (it has implementation context)
-design fails  → new Claude chat session (planning problem)
-review finds  → Session 2 (fix alongside review, before ship)
-```
+The [skill map](skill-map.md) and [skill map on request](skill-map-on-request.md) give every plugin skill one row saying when to reach for it.

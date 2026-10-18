@@ -13,8 +13,8 @@ import { SURFACE_ROOTS } from '@/roots/surface'
  * `src/`, `scripts/`, and bare `docs/` are deliberately absent. A body naming
  * one of those is describing the reader's own tree, so listing them would
  * report a correct citation on every run and bury the defect this measures.
- * `docs/agents/` is the exception, being the CLI contract pages that exist
- * here alone.
+ * `docs/agents/` is the exception, being the reference pages for verbs run by
+ * hand, which exist here alone.
  *
  * The context folder carries both surface-root spellings, since this list
  * decides whether a shipped body names this repository's own tree and a body

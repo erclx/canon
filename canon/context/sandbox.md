@@ -63,7 +63,7 @@ The state and the remote a run touches sit outside the repository.
 
 - `$XDG_STATE_HOME/canon/sandbox-<run-id>` owns the provisioned project, one tree per process, which `CANON_SANDBOX_DIR` overrides
 - `${GITHUB_ORG}/canon-sandbox` owns the disposable remote, which each anchor scenario resets by closing its PRs, deleting its branches, and force-pushing a fresh `main`
-- `docs/agents/sandbox.md` owns the verb flags, the JSON shapes, and every `expect.toml` key
+- `canon sandbox check --help` owns the verb flags and the verdict states, and the `expect.toml` files under `sandbox/` show every key
 
 ## Gotchas
 

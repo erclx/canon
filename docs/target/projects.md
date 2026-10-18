@@ -6,24 +6,18 @@ category: Agent surface
 
 # Target projects
 
-How a project outside this repo consumes the toolkit across its lifecycle. Three phases: scaffold once, add a domain later when a new need appears, and sync when the upstream toolkit moves.
-
-This doc stays at the narrative layer. For command flags and JSON shapes, see [agents](../agents/index.md). For per-domain mechanics, see each `canon/context/<domain>.md`.
+A project outside this repo scaffolds once, adds a domain later, and syncs when the upstream moves. For flags and JSON shapes see [agents](../agents/index.md).
 
 ## Getting the skills
 
-The skills reach a session through a marketplace install, once per machine. Every session on that machine carries them afterward, and the installed copy stays at the version it was installed at. Claude Code ships auto-update off for third-party marketplaces, so neither a push nor a release reaches that copy until someone refreshes it with `claude plugin marketplace update canon` followed by `claude plugin update canon@canon`, or turns auto-update on once under `/plugin`. The `canon` CLI moves on its own schedule through the registry, so a machine can hold current skills against a stale CLI or the reverse.
+Install the plugin once per machine. The installed copy stays at its version until you refresh it with `claude plugin marketplace update canon` and `claude plugin update canon@canon`, or turn on auto-update under `/plugin`. The URL form clones over HTTPS, and the `erclx/canon` shorthand resolves to SSH.
 
 ```bash
 claude plugin marketplace add https://github.com/erclx/canon
 claude plugin install canon@canon
 ```
 
-The URL form clones over HTTPS. The `erclx/canon` shorthand resolves to SSH and fails on a machine with no key configured.
-
-A machine that installed the plugin under its previous name re-registers by hand, once. The marketplace and the plugin both moved, so the old `enabledPlugins` entry and the old marketplace key name things that no longer resolve, and the plugin stops loading without reporting anything. `canon migrate rename` does not reach this: it takes a `--root` and rewrites inside one project, where the plugin registration is machine-level state outside every project.
-
-Both stale keys come out explicitly, since installing under the new name writes a new entry and leaves the old one sitting there. Uninstall before removing the marketplace, so the plugin is cleared while the marketplace it came from still resolves.
+A machine that installed the plugin under its previous name re-registers once, uninstalling before removing the marketplace.
 
 ```bash
 claude plugin uninstall aitk@aitk
@@ -32,107 +26,71 @@ claude plugin marketplace add https://github.com/erclx/canon
 claude plugin install canon@canon
 ```
 
-The `canon` CLI is separate. Twenty skills invoke it in a command position, and a marketplace install does not put it on `PATH`, so it installs from the registry as its own step.
+Skills invoke the `canon` CLI, which the marketplace install does not put on `PATH`.
 
 ```bash
 bun install --global @erclx/canon
 ```
 
-The package ships the catalogs the CLI reads, not only `src/`, so `canon init` resolves governance, tooling, and the seeds from wherever the package landed.
-
-Pointing Claude Code at a checkout stays the development path, where a local skill edit overrides the installed copy for that session.
-
-```bash
-claude --plugin-dir <toolkit>/claude
-```
+To develop against a checkout, run `claude --plugin-dir <toolkit>/claude`.
 
 ## Scaffold
 
-Two steps, in order:
+1. Run the framework's own scaffold if the project needs one, such as `bun init` or `npm create vite`
+2. Invoke `canon:target-setup` in Claude Code. It detects the stack, previews the chain with the opt-in rules `canon gov detect` proposes, and runs it on your confirmation.
 
-1. Run the framework's own scaffold if the project needs one, such as `bun init`, `npm create vite`, or `npm create astro`. The toolkit does not wrap framework scaffolding.
-2. Invoke `canon:target-setup` in Claude Code. The skill detects the stack, asks `canon gov detect` which opt-in rules the project's evidence proposes, previews the full chain with those proposals for you to confirm, and runs it end-to-end.
+The chain runs these phases:
 
-The chain is:
+- `canon init` installs base tooling, Claude seeds, and governance rules into `.claude/rules/`
+- `canon tooling sync <stack> --write` adds stack dependencies, scripts, and gitignore entries
+- The agent follows `canon tooling reference <stack>` and extends `canon/context/ci.md` and `canon/context/development.md` <!-- audit-ignore-citations -->
+- The `verify` phase runs the installed `package.json` scripts and reports pass or fail
+- The `indexes` phase bootstraps `index.md` over the project's documentation folders, confirming candidates with you
 
-- `canon init` installs base tooling, Claude seeds, and governance rules into `.claude/rules/` in the same pass
-- `canon tooling sync <stack> --write` adds stack-specific deps, scripts, and gitignore entries
-- The agent reads `canon tooling reference <stack>` (plus parents) as its audit context, follows it to generate oxlint, vitest, playwright configs and the stack's setup script, and extends `canon/context/ci.md` and `canon/context/development.md` per the reference's extend sections <!-- audit-ignore-citations: canon/context/ci.md, canon/context/development.md -->
-- The `verify` phase runs the installed `package.json` scripts (lint, typecheck, check, test, build) and reports pass or fail
-- The `indexes` phase bootstraps the `index.md` system over the project's own documentation folders, confirming candidate folders with the operator rather than running unattended
+An existing project goes to `canon:target-check` first. For the Claude layer alone, run `canon claude init` and then `canon:target-setup indexes`. Run `canon:target-setup verify deep` by hand for the heavier smoke and screenshot pass.
 
-The chain stops at the project edge. `git-commit` also ships, reaching the project's history, and does not run as part of it. The chain serves a fresh scaffold and names a destination for the three states it does not. An existing project goes to `canon:target-check`, which reports what the project already carries against what the toolkit ships before anything is repaired. An install wanting the Claude layer without the tooling chain runs `canon claude init` for the seed docs and then `canon:target-setup indexes` for the index system. A language the toolkit ships no stack for is the one of the three the chain still runs for, on `base`, with the fallback marked in the preview so it can be declined there.
-
-Run `canon:target-setup verify deep` by hand once the default depth passes, for the heavier server smoke, end-to-end, and screenshot pass, since the same flakiness reasons that keep those stages out of the default depth keep them out of this unattended chain too.
-
-Keep the `## Scripts` table in `canon/context/development.md` current as scripts are added. Base tooling seeds that entry with the commands it installs, and each stack reference extends the table. A session reads it to start the app or run a check on request, so a command missing from the table cannot be found that way. A project whose entry outgrew one file and split into `canon/context/development/` keeps the table in `overview.md`, which is where the skill looks next. <!-- audit-ignore-citations: canon/context/development.md -->
+Keep the `## Scripts` table in `canon/context/development.md` current as scripts are added. A split entry keeps it in `overview.md`. <!-- audit-ignore-citations: canon/context/development.md -->
 
 ### From scaffold to first feature
 
-Scaffold installs tooling and seeds. It does not fill the planning docs or the design system. Complete those before the first feature session:
+Before the first feature session:
 
-1. Fill `canon/REQUIREMENTS.md`. The seed asks for the problem in one line, then goals and non-goals, and the scope is yours to write. The seed states its own cap of 600 words, and `canon context audit` gates on it. Edit the number in the record to loosen it. A decision about how the project is built lives in the pull request that made it, and a `canon/context/` entry carries the domain's folders and traps.
-2. For a UI project, write `canon/DESIGN.md` from the seed template and name the project's stylesheet in its lead, or work the direction out with `canon:canvas-board` and carry the pick in. Skip for non-UI projects.
-3. Optionally invoke `canon:draft-figure` naming an architecture view, such as system context or components, and the document it belongs in. It draws the view from the context index, the folder layout, and the requirements and renders it to verify the layout, which downloads the Mermaid CLI on first use and takes about 15 seconds.
-4. Start the feature loop. See [AI workflow](../workflow/ai-workflow.md) for the per-feature sequence.
-
-A machine without a renderer still gets the figure and is told which check was skipped.
-
-Nothing watches a figure once it is drawn. Run `canon:draft-figure` again when the code a view is drawn from moves.
+1. Fill `canon/REQUIREMENTS.md` with the problem, goals, and non-goals. The seed's 600-word cap gates under `canon context audit`.
+2. For a UI project, write `canon/DESIGN.md` from the seed and name the stylesheet in its lead, or work the direction out with `canon:canvas-board`
+3. Optionally invoke `canon:draft-figure` for an architecture view. The Mermaid CLI downloads on first use.
+4. Start the feature loop in [AI workflow](../workflow/ai-workflow.md)
 
 ### Stack decision
 
-The default path is `base`. `canon init` on `base` installs base tooling configs, Claude seeds, and the ten `base` governance rules, and scaffolds an empty `.claude/wiki/`. Most projects need nothing more.
+The default is `base`. Escalate only for a project writing code, and `target-setup` picks the tooling stack from the manifest and framework configs, and the governance stack for the root's language. Run `canon tooling list --json` and `canon gov list --json` for the catalogs.
 
-Escalate for a project writing code. The `target-setup` skill reads `package.json` and the framework configs, then picks the matching tooling stack (`canon tooling list --json` names the current set) and the governance stack for the root's language (`node`, `python`, `go`, `php`). Framework rules arrive as extras `canon gov detect` proposes from the manifest, so a Next.js app lands on `node` with the App Router rule proposed, and a Vite React app gets no such proposal.
-
-In a monorepo the skill reads each folder holding a `package.json`, `pyproject.toml`, `go.mod`, `composer.json`, or `Cargo.toml` to depth two, skipping what git ignores. Each of those folders gets its own tooling stack and a `canon tooling sync <stack> <folder> --skip base` in the preview. Governance still installs once at the root, since a rule's `paths:` globs reach every subfolder, so a subfolder's language rules join the root install through `--add`.
-
-The server-side security and persistence rules belong to no stack. `canon gov detect` proposes both from a server framework or database client in the manifest, which you confirm in the preview, or add them by hand with `--add security-server,database`.
-
-Markdown-heavy projects, CLI tools, docs sites, research notebooks, and scripting repos stay on `base`. Escalation is a ceiling move, not a default.
-
-A project the toolkit ships no stack for lands on `base` the same way, and the skill marks that resolution as a fallback in its preview rather than reporting it as a match. Configs, seeds, and gitignore entries land either way, and the JavaScript development dependencies, scripts, and hook activation land only where a `package.json` exists to carry them. A project outside that ecosystem declines at the preview and takes `canon:target-setup gov` for the governance layer alone, which is language-neutral. Go and PHP ship a governance stack beside their tooling stack, so a project in either takes `go` or `php` for both.
-
-Run `canon tooling list --json` and `canon gov list --json` to see the current catalogs. Never hardcode stack names.
+- In a monorepo each manifest folder gets `canon tooling sync <stack> <folder> --skip base`. Governance installs once at the root, with subfolder languages through `--add`.
+- Server security and persistence rules come from `canon gov detect`, or `--add security-server,database`
+- A language with no stack lands on `base`, marked as a fallback in the preview. Decline it and run `canon:target-setup gov` for governance alone.
 
 ### Core domains and skips
 
-`canon init` installs base tooling, Claude workflow, and governance, and scaffolds `.claude/wiki/`. Governance defaults to the `base` stack, so a bare init carries the rules that route a project. Pass `--stack <name>` to install a language stack instead.
+`canon init` installs base tooling, the Claude workflow, and governance, and scaffolds `.claude/wiki/`. Pass `--stack <name>` for a language stack.
 
-No reference corpus is written into the project. Each governance rule carries its operative lines inline and names the plugin skill that owns the rest, and every toolkit skill reads the references in its own plugin root. A target that installs governance without the plugin gets the inline lines alone, since no verb answers for a skill's reference there. `canon markdown audit` needs no reference at all, its ban set and checkpoints shipping with the package as data.
-
-`governance` and `wiki` are skippable:
-
-- `--skip governance`: leave `.claude/rules/` empty, so no coding standard loads on a file match. The preview names any `--add` rules the skip drops, and the run prints the `canon gov install <stack> <path>` command to add rules afterward, carrying those extras so one paste restores what the skip declined.
-- `--skip wiki`: skip the `.claude/wiki/` scaffold. A target that already carries a root `wiki/` keeps it, since the verb reports that folder rather than migrating it.
-
-The plugin corpus carries runtime behavior rather than reference prose alone, because the pre-publish scan and the branch-slug transform each have a standard of their own, `publish.md` and `slug.md`, cited by the skills that run them.
+- `--skip governance` leaves `.claude/rules/` empty. The run prints the `canon gov install <stack> <path>` command that restores the rules it dropped.
+- `--skip wiki` skips the `.claude/wiki/` scaffold. A root `wiki/` is kept.
 
 ## Add a domain later
 
-When a new need appears after scaffold, install the one domain without re-running `canon init`.
+Install one domain without re-running `canon init`.
 
-- Governance rule for a newly adopted library: run `canon gov detect <path> --json` to see what the project's evidence proposes, then `canon gov install --add <rule> <path>`, which installs the rule with no stack
-- Project-specific rule the toolkit does not ship: invoke `canon:create-rule`. It scaffolds a rule into `.claude/rules/project/` with a non-colliding number, and `canon gov sync` leaves it untouched. A rule placed under `.claude/rules/canon/` instead is deleted on the next sync, since that folder belongs to the toolkit.
-- Index.md system for a markdown-heavy folder that emerged: invoke `canon:target-setup indexes`
+- A rule for a newly adopted library: run `canon gov detect <path> --json`, then `canon gov install --add <rule> <path>`
+- A project-specific rule: invoke `canon:create-rule`, which writes into `.claude/rules/project/`. A rule under `.claude/rules/canon/` is deleted on the next sync.
+- An `index.md` system for a markdown-heavy folder: invoke `canon:target-setup indexes`
 
-Skill references are not on that list, and there is nothing to add for them. They install into no project, by default or by flag, and a session reads one from the plugin that loaded the skill rather than from a project copy. A project holding a `standards` folder under `.claude/` from an older toolkit is carrying a stale artifact nothing reads, and deleting it is safe. The toolkit retired snippets entirely, and [target migrations](migrations.md) covers the `.claude/snippets/` folder an older one left behind.
-
-Per-domain mechanics live in the corresponding `docs/<domain>.md`. The skill body in `claude/skills/<skill>/SKILL.md` covers detection and preview.
+For a leftover `.claude/snippets/` see [target migrations](migrations.md).
 
 ## Sync upstream drift
 
-When the toolkit updates, a target pulls changes per domain. A project scaffolded before a layout move runs the one-time moves in [target migrations](migrations.md) first. [Target sync](sync.md) then covers reading what drifted, the catch-all and targeted entry points, verifying a sync in the sandbox, and running one from an agent session.
-
-## Scenarios
-
-[Target scenarios](scenarios.md) walks a markdown-heavy project, a web application, and a monorepo with several language roots from the first session through ongoing maintenance.
+A project scaffolded before a layout move runs the one-time moves in [target migrations](migrations.md) first. [Target sync](sync.md) covers reading drift and running a sync. [Target scenarios](scenarios.md) walks three worked setups.
 
 ## Related
 
-- [agents](../agents/index.md): CLI flags, exit codes, and JSON output shapes
-- [target migrations](migrations.md), [target sync](sync.md), [target scenarios](scenarios.md): the one-time moves, the recurring sync, and worked setups
-- [AI workflow](../workflow/ai-workflow.md): feature-development loop inside a toolkit-managed project
+- [AI workflow](../workflow/ai-workflow.md): the feature loop inside a managed project
 - [tooling](../../canon/context/tooling.md), [governance](../../canon/context/governance.md), [claude plugin](../../canon/context/claude-plugin.md), [indexes](../../canon/context/context-model.md): per-domain mechanics
 - [sandbox](../../canon/context/sandbox.md): scenario catalog for verifying domain flows
