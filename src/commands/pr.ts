@@ -1070,7 +1070,7 @@ export function register(program: Command): void {
         '  bad-reference     --reference is not <page>/<frame> in the safe name form',
         '  bad-head          --head is not 7 to 40 lowercase hex characters',
         '  bad-pass          --add without a compact UTC --pass stamp',
-        '  bad-theme         --theme is not dark or light, or no --add',
+        '  bad-theme         --theme is not dark or light, or no --add, or rides a --reference',
         '  bad-days          --prune without a positive number of days',
         '  unreadable-frame  the --add file is missing, empty, or not a PNG',
         '  read-only         GitHub refused the write, as on a fork token',
