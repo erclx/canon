@@ -128,6 +128,10 @@ export const GATED_PATHS: readonly string[] = [
   'claude/skills/youtube-transcripts/SKILL.md',
   '.claude/skills/internal-',
   'docs/',
+  'tooling/',
+  'wiki/',
+  'README.md',
+  'CONTRIBUTING.md',
 ]
 
 /**
@@ -136,8 +140,8 @@ export const GATED_PATHS: readonly string[] = [
  * entries, the docs pages, and the skill bodies and references through a stage
  * of its own before this measure existed, and waiting on `GATED_PATHS` would
  * reopen that hole. The seeds, the stack references, the wiki, and the root
- * guides were never held to it, and seven runs in the stack references would
- * fail the push on the day this lands, so those wait for their batch.
+ * guides were never held to it, so they joined `GATED_PATHS` only once their
+ * rewrite brought them to zero.
  */
 const ALWAYS_GATED: readonly DensityKind[] = ['bullet-run']
 
