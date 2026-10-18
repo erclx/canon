@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.45.0](https://github.com/erclx/canon/compare/v5.44.0...v5.45.0) (2026-10-18)
+
+
+### Features
+
+* **cli:** retire the wiki install ([#2513](https://github.com/erclx/canon/issues/2513)) ([c3eb03e](https://github.com/erclx/canon/commit/c3eb03ea2395724c262d558aa708e049c05b8ed6))
+* **governance:** gate the lang, lib, ui, and tooling rules on ledgers ([#2512](https://github.com/erclx/canon/issues/2512)) ([e7f2d3c](https://github.com/erclx/canon/commit/e7f2d3c45046967cd8d10642c286f81af586baa5))
+* **tooling:** ignore vitest output and group base context seeds ([#2518](https://github.com/erclx/canon/issues/2518)) ([3622641](https://github.com/erclx/canon/commit/36226410f191b0d1352b9de4f46dfe93aee5759b))
+* **tooling:** print sync files and gitignore groups after a reference ([#2509](https://github.com/erclx/canon/issues/2509)) ([2879f3e](https://github.com/erclx/canon/commit/2879f3e60e00fdb2f294d0782e489f3115c9f742))
+* **tooling:** run browser-mode tests in the web unit-tests job ([#2506](https://github.com/erclx/canon/issues/2506)) ([a44527f](https://github.com/erclx/canon/commit/a44527f6fef9e5f2cb60f6024cb582d61feed3c1))
+* **tooling:** split the capture cases from the web harness ([#2511](https://github.com/erclx/canon/issues/2511)) ([b3eb8d0](https://github.com/erclx/canon/commit/b3eb8d077be0eb15cedbe79c86748a6ebb18a7c7))
+* **tooling:** write a minimal package.json when sync finds none ([#2510](https://github.com/erclx/canon/issues/2510)) ([5b63874](https://github.com/erclx/canon/commit/5b6387457595d919b53a5b3f37e31e2cee1ab79b))
+
+
+### Bug Fixes
+
+* **labels:** skip Renovate pull requests in the label gate ([#2501](https://github.com/erclx/canon/issues/2501)) ([69f4222](https://github.com/erclx/canon/commit/69f4222489e7a178b76ff49a5797e964c50d2cb0))
+
 ## [5.44.0](https://github.com/erclx/canon/compare/v5.43.0...v5.44.0) (2026-10-18)
 
 
