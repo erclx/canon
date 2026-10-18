@@ -1,4 +1,5 @@
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -749,7 +750,7 @@ describe('pullRecords', () => {
     await pushRecords(ROOT)
 
     const fresh = mkdtempSync(join(tmpdir(), 'canon-backup-fresh-'))
-    mkdirSync(join(fresh, '.claude'), { recursive: true })
+    mkdirSync(join(fresh, '.claude', 'hooks'), { recursive: true })
     await git(['init', '--quiet', fresh])
     await git([
       '-C',
@@ -759,7 +760,9 @@ describe('pullRecords', () => {
       'origin',
       'https://example.test/owner/repo.git',
     ])
-    await makeRecordsRepo(fresh, ORIGIN)
+    mkdirSync(join(fresh, '.canon'), { recursive: true })
+    await canonRecordsGit(fresh, ['init'])
+    await canonRecordsGit(fresh, ['remote', 'add', 'origin', ORIGIN])
 
     const outcome = await pullRecords(fresh)
 
@@ -767,8 +770,9 @@ describe('pullRecords', () => {
     if (!outcome.ok) return
     expect(outcome.files).toBe(BACKED_FOLDERS.length)
     expect(
-      readFileSync(join(fresh, '.claude', 'tasks', 'entry.md'), 'utf8'),
+      readFileSync(join(fresh, '.canon', 'tasks', 'entry.md'), 'utf8'),
     ).toBe('# tasks\n')
+    expect(existsSync(join(fresh, '.claude', 'tasks'))).toBe(false)
 
     rmSync(fresh, { recursive: true, force: true })
   })
@@ -779,6 +783,22 @@ describe('pullRecords', () => {
     expect(outcome.ok).toBe(false)
     if (outcome.ok) return
     expect(outcome.reason).toBe('no-repository')
+  })
+
+  it('should name the new root in the setup commands on a fresh clone', async () => {
+    const fresh = mkdtempSync(join(tmpdir(), 'canon-backup-fresh-'))
+    mkdirSync(join(fresh, '.claude', 'hooks'), { recursive: true })
+    await git(['init', '--quiet', fresh])
+
+    const outcome = await pullRecords(fresh)
+
+    expect(outcome.ok).toBe(false)
+    if (outcome.ok) return
+    expect(outcome.reason).toBe('no-repository')
+    expect(outcome.message).toContain(join('.canon', '.records.git'))
+    expect(outcome.message).not.toContain(join('.claude', '.records.git'))
+
+    rmSync(fresh, { recursive: true, force: true })
   })
 })
 

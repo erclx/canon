@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -140,15 +140,64 @@ describe('creationRel', () => {
 })
 
 describe('recordRoot', () => {
-  it('should take the new root when it exists', () => {
-    seed('.canon')
-    seed('.claude')
+  it('should take the new root when it holds records', () => {
+    seed('.canon', 'plans')
+    seed('.claude', 'plans')
 
     expect(recordRoot(ROOT)).toBe(join(ROOT, '.canon'))
   })
 
-  it('should take the old root when the new one is absent', () => {
+  it('should take the old root when only it holds records', () => {
+    seed('.claude', 'plans')
+
+    expect(recordRoot(ROOT)).toBe(join(ROOT, '.claude'))
+  })
+
+  it('should take the old root when it holds only a records history', () => {
+    seed('.claude', '.records.git')
+
+    expect(recordRoot(ROOT)).toBe(join(ROOT, '.claude'))
+  })
+
+  it('should take the old root when the new one is empty', () => {
+    seed('.canon')
+    seed('.claude', 'tasks')
+
+    expect(recordRoot(ROOT)).toBe(join(ROOT, '.claude'))
+  })
+
+  it.each(['hooks', 'rules', 'skills', 'worktrees'])(
+    'should not read .claude/%s as a record folder',
+    (folder) => {
+      seed('.claude', folder)
+
+      expect(recordRoot(ROOT)).toBe(join(ROOT, '.canon'))
+    },
+  )
+
+  it('should not read a settings file as records', () => {
     seed('.claude')
+    writeFileSync(join(ROOT, '.claude', 'settings.json'), '{}\n')
+
+    expect(recordRoot(ROOT)).toBe(join(ROOT, '.canon'))
+  })
+
+  it('should not read a lone README as records at either root', () => {
+    seed('.claude')
+    writeFileSync(join(ROOT, '.claude', 'README.md'), '# records\n')
+
+    expect(recordRoot(ROOT)).toBe(join(ROOT, '.canon'))
+  })
+
+  it('should not read a lone scratch folder as records', () => {
+    seed('.claude', SCRATCH)
+
+    expect(recordRoot(ROOT)).toBe(join(ROOT, '.canon'))
+  })
+
+  it('should not read a lone scratch folder at the new root as records', () => {
+    seed('.canon', 'tmp')
+    seed('.claude', 'tasks')
 
     expect(recordRoot(ROOT)).toBe(join(ROOT, '.claude'))
   })

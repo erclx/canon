@@ -56,7 +56,7 @@ vi.mock('node:fs/promises', async (importOriginal) => {
 
 beforeEach(() => {
   ROOT = mkdtempSync(join(tmpdir(), 'canon-size-'))
-  mkdirSync(join(ROOT, '.claude'), { recursive: true })
+  mkdirSync(join(ROOT, '.claude', '.records.git'), { recursive: true })
 })
 
 afterEach(() => {
