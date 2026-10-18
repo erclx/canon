@@ -22,7 +22,7 @@ esac
 # audits a project's own session records the moment the move reaches it, which
 # reports findings against prose nobody publishes.
 case "$file" in
-*.claude/.tmp/* | *.claude/review/* | *.claude/plans/*) exit 0 ;;
+*.claude/review/* | *.claude/plans/*) exit 0 ;;
 *.canon/tmp/* | *.canon/review/* | *.canon/plans/*) exit 0 ;;
 esac
 

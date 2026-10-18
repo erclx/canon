@@ -52,7 +52,7 @@ function deriveAcceptPatterns(source: string, hookPath: string): string[] {
   return patterns
 }
 
-// `*/.claude/.tmp/*` matches any path carrying that segment, the glob wrapper
+// `*/.canon/tmp/*` matches any path carrying that segment, the glob wrapper
 // included. check-ignore reasons about a path rather than a bash case
 // pattern, so the probe strips the wrapper down to the folder git has to
 // ignore.
