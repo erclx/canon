@@ -6,9 +6,11 @@ Which surface a durable page from a learning workspace belongs to, and what to d
 
 Only the durable half. A reference page under `reference/` and `GLOSSARY.md` carry no learner and are ordinary reference prose about a subject, so they sort under the routing test like anything else.
 
-A lesson is never promoted, at any age and on any request. It is generated markup written to be worked through once, it carries a quiz and a second person, and nothing downstream cites it. Promoting one puts ungated markup into a corpus every other page passed a gate to enter.
+A lesson is never promoted, at any age and on any request. It is generated markup worked through once, carrying a quiz and a second person, and nothing downstream cites it.
 
-A reference page that reads like a lesson is a lesson wearing the wrong extension. Where a page under `reference/` carries a quiz, a second person, or an instruction to the learner, say so and propose rewriting it in place before promotion rather than promoting it and repairing it at the destination.
+- Promoting one puts ungated markup into a corpus every other page passed a gate to enter
+- A reference page carrying a quiz, a second person, or an instruction to the learner is a lesson wearing the wrong extension
+- Say so, and propose rewriting that page in place before promotion rather than repairing it at the destination
 
 ## The routing test
 
@@ -31,9 +33,13 @@ The folder has two spellings and a project carries whichever its scaffold wrote:
 
 Read which one exists rather than composing either. A project carrying both keeps its pages at the root, so propose the root spelling and say the other folder is there.
 
+### Neither spelling
+
 A project carrying neither gets a refusal rather than a scaffold:
 
-`❌ No wiki folder. Run canon wiki init to create one, then promote again.`
+```plaintext
+❌ No wiki folder. Run canon wiki init to create one, then promote again.
+```
 
 Creating the folder as a side effect of promoting one page hands the project a surface it never chose, and the refusal is one command from resolved.
 
@@ -63,7 +69,11 @@ Still owed:    <what the destination expects that the page does not carry yet>
 
 Then stop and let the operator strike, redirect, or confirm each block.
 
-Write nothing to a destination here. One skill owns the durable writes, and two skills editing one file at one step is the failure that rule exists against. Record each confirmed block in `.canon/tmp/handoff/teach-promotion/<slug>.md` at the main worktree root instead, appending when the file exists, with one H2 per destination naming its path, the source page beneath it, and the page body fenced:
+### Record the handoff
+
+Write nothing to a destination here. One skill owns the durable writes, and two skills editing one file at one step is the failure that rule exists against.
+
+Record each confirmed block in `.canon/tmp/handoff/teach-promotion/<slug>.md` at the main worktree root instead, appending when the file exists. Each destination takes one H2 naming its path, the source page beneath it, and the page body fenced:
 
 ````markdown
 ## <destination path>
@@ -75,13 +85,26 @@ Source: .canon/teach/<nn>-<topic>/reference/<slug>.md
 ```
 ````
 
-The body is fenced rather than written bare because a reference page carries headings of its own, and the reader splits this file on its H2 lines. An unfenced body turns every section heading in the page into a destination naming no path. Open the body fence with four backticks so a page carrying a fenced code block of its own still closes where it should, and widen both fences together if it carries a four-backtick fence.
-
 Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`. Fall back to `latest` on an empty result.
 
-The handoff is its own file rather than a shared one. The routed-facts file another skill writes is deleted by whichever pass folds it, so a second producer's unread work goes with it, and a sibling path costs the folding skill one more read and removes the interaction.
+### Why the fence
 
-An append is a whole-file operation, so send it as a heredoc, per the skill's Step 0. Then tell the operator that `/teach-workspace fold` folds the file in from a branch. The proposal costs nothing tracked and runs anywhere, while the page it describes is a tracked file, so the fold is a worktree operation and the workspace it came from is not.
+A reference page carries headings of its own, and the reader splits this file on its H2 lines. An unfenced body turns every section heading in the page into a destination naming no path.
+
+- Open the body fence with four backticks, so a page carrying a fenced code block still closes where it should
+- Widen both fences together if the page carries a four-backtick fence
+
+### Why a file of its own
+
+The routed-facts file another skill writes is deleted by whichever pass folds it, so a second producer's unread work would go with it. A sibling path costs the folding skill one more read and removes the interaction.
+
+### Sending and reporting
+
+An append is a whole-file operation, so send it as a heredoc, per the skill's Step 0. Then tell the operator that `/teach-workspace fold` folds the file in from a branch.
+
+The proposal costs nothing tracked and runs anywhere. The page it describes is a tracked file, so the fold is a worktree operation and the workspace it came from is not.
+
+### Output
 
 A promotion pass reports this shape in place of the skill's Output block, one line per page the operator confirmed and one naming the handoff:
 

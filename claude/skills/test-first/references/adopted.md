@@ -9,13 +9,21 @@ The loop predates this ledger, so this file records the sources it matches rathe
 
 ## Adopted
 
-**The loop itself.** Kent Beck's [Canon TDD](https://newsletter.kentbeck.com/p/canon-tdd) states it as turning one item into "an actual, concrete, runnable test", changing the code "to make the test (& all previous tests) pass", then refactoring. Adopted as steps 2, 4, 5, and 6, with the whole suite run after the pass rather than the new test alone.
+### The loop itself
 
-**Making it pass without designing.** The same post warns against "mixing refactoring into making the test pass", and keeps implementation design decisions for the refactor. Adopted as step 4's smallest change and step 6's cleanup of the shortcuts that change left.
+Kent Beck's [Canon TDD](https://newsletter.kentbeck.com/p/canon-tdd) states it as turning one item into "an actual, concrete, runnable test", changing the code "to make the test (& all previous tests) pass", then refactoring. Adopted as steps 2, 4, 5, and 6, with the whole suite run after the pass rather than the new test alone.
 
-**Never faking the pass.** The same post lists deleting assertions "so the test pretends to pass" and "copying actual, computed values & pasting them into the expected values" as mistakes. Adopted as step 5's rule that a pass must be the one the test was written to prove.
+### Making it pass without designing
 
-**Refactoring is a step, not an option.** Martin Fowler's [TestDrivenDevelopment](https://martinfowler.com/bliki/TestDrivenDevelopment.html) names "neglecting the third step" as the most common way to get the practice wrong. Adopted as step 6 being mandatory where Canon TDD writes "optionally refactor".
+The same post warns against "mixing refactoring into making the test pass", and keeps implementation design decisions for the refactor. Adopted as step 4's smallest change and step 6's cleanup of the shortcuts that change left.
+
+### Never faking the pass
+
+The same post lists deleting assertions "so the test pretends to pass" and "copying actual, computed values & pasting them into the expected values" as mistakes. Adopted as step 5's rule that a pass must be the one the test was written to prove.
+
+### Refactoring is a step, not an option
+
+Martin Fowler's [TestDrivenDevelopment](https://martinfowler.com/bliki/TestDrivenDevelopment.html) names "neglecting the third step" as the most common way to get the practice wrong. Adopted as step 6 being mandatory where Canon TDD writes "optionally refactor".
 
 ## Declined
 

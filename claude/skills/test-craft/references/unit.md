@@ -5,7 +5,9 @@ description: Doubles in preference order, descriptive over shared setup, table-d
 
 # Unit and integration tests
 
-Read this before writing the first test at the unit or integration layer. A unit test runs in one process with no network, no sleep, and no real I/O. An integration test may touch the local machine, such as a temporary directory or a local database, and nothing beyond it. Google's size vocabulary draws the same line by what a test may touch rather than what it covers ([Software Engineering at Google, ch. 11](https://abseil.io/resources/swe-book/html/ch11.html)).
+Read this before writing the first test at the unit or integration layer. A unit test runs in one process with no network, no sleep, and no real I/O.
+
+An integration test may touch the local machine, such as a temporary directory or a local database, and nothing beyond it. Google's size vocabulary draws the same line by what a test may touch rather than what it covers ([Software Engineering at Google, ch. 11](https://abseil.io/resources/swe-book/html/ch11.html)).
 
 ## Doubles
 
