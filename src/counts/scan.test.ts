@@ -143,7 +143,7 @@ describe('scanCounts', () => {
   })
 
   it('should name a stale count reached through a production verb outside the original list', async () => {
-    // `canon/context/development/regeneration.md` states `the toolkit
+    // A context entry asserting `the toolkit
     // authors 69 rules`, the assertion shape this gate was built for with a
     // verb the first list did not carry.
     seedSkills(63)

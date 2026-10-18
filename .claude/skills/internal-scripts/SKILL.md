@@ -57,11 +57,11 @@ After editing install or sync code (`manage-*.sh`, `src/tooling/`):
 
 ## Captures
 
-- Read `canon/context/development/evidence.md` before editing `src/capture/` or `src/pr/`. It sorts the `evidence` folders into dev baselines and prod captures, which `canon pr evidence` compares.
+- Read `canon/context/development.md` before editing `src/capture/` or `src/pr/`. It sorts the `evidence` folders into dev baselines and prod captures, which `canon pr evidence` compares.
 
 ## Hooks and husky
 
-Read `canon/context/development/hooks/index.md` before touching `.claude/hooks/` or `.husky/`, then the file it names for the hook at hand. The folder covers the hook stdin guard, the husky POSIX `sh` constraint, and the `canon-no-seed:` marker rule from `canon/context/tooling.md`.
+Read `canon/context/development.md` before touching `.claude/hooks/` or `.husky/`. It covers the hook stdin guard, the husky POSIX `sh` constraint, and the `canon-no-seed:` marker rule from `canon/context/tooling.md`.
 
 ## Reference
 

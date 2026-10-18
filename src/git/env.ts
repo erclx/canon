@@ -26,6 +26,12 @@ const RESOLUTION_VARS = [
  * Read per call rather than captured at module load. A long-lived process can
  * have these set after import, and a snapshot would then hand git the very
  * variables this exists to strip.
+ *
+ * Hooks export `GIT_DIR`, `GIT_WORK_TREE`, `GIT_INDEX_FILE`, and `GIT_PREFIX`,
+ * which beat `-C`. Under pre-push an inherited `GIT_DIR` made a `-C src` read
+ * resolve against the whole repository, and in a fixture it let a config write
+ * overwrite the real repository's committer identity, so route every shelled
+ * call through this, fixtures included.
  */
 export function gitEnv(): Record<string, string> {
   return Object.fromEntries(

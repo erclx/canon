@@ -405,6 +405,9 @@ describe('startServer', () => {
 
   it('should walk past a port already in use', () => {
     seed('index.html', '<h1>root</h1>')
+    // Binds the fixed default port, so any unrelated listener on a shared
+    // machine fails this with `bind-failed` whatever diff is under review.
+    // Check `ss` or `lsof` for the holder before blaming the change.
     const first = start(ROOT, { port: DEFAULT_PORT })
 
     const second = start(ROOT, { port: DEFAULT_PORT })
