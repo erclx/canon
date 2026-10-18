@@ -80,6 +80,7 @@ export const GATED_PATHS: readonly string[] = [
   'claude/skills/create-rule/references/rule.md',
   'claude/skills/create-skill/SKILL.md',
   'claude/skills/create-skill/references/skill-disclosure.md',
+  'claude/skills/create-skill/references/skill-frontmatter.md',
   'claude/skills/create-skill/references/skill-paths.md',
   'claude/skills/create-skill/references/skill-practice.md',
   'claude/skills/create-skill/references/skill-reference.md',

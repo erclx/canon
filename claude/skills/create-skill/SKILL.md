@@ -13,6 +13,7 @@ Read these files in parallel:
 - `${CLAUDE_SKILL_DIR}/references/skill-requirement.md`: what `REQUIREMENT.md` must answer, its sections, and its template
 - `${CLAUDE_SKILL_DIR}/references/skill-paths.md`: which root a path in the body resolves against, and how the body cites another skill's reference
 - `${CLAUDE_SKILL_DIR}/references/skill-disclosure.md`: where each reference is named, the contents block, the trigger and guard that stay in the body, and what moves to `references/`
+- `${CLAUDE_SKILL_DIR}/references/skill-frontmatter.md`: the frontmatter fields, their limits, and which keys an upload accepts
 
 ### Writing standards
 

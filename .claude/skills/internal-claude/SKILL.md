@@ -49,9 +49,19 @@ A plugin skill test handed off from a linked worktree prints two lines, a `cd` t
 - Keep structural checks such as negative parallelism, hollow openers, and paragraph length out of a hook, since regex detection on those fires against legitimate prose
 - Default cross-project behavior rules, such as output formatting and path printing, to the seeded `CLAUDE.md` plus the toolkit's own. Reserve `~/.claude/` for terminal capability and machine specifics.
 
+### Hook limits
+
+A stalled hook does not block, so a hard deny goes through the permission system rather than a hook.
+
+- Hook text output caps at 10,000 characters, and the default command timeout is 600 seconds
+- `SessionStart` runs on every session, so keep those hooks fast
+- Run `claude --debug` on a hook whose JSON is ignored, since the log names the parse failure
+
 ## Plugin variables
 
-- `$CLAUDE_PLUGIN_ROOT` and `$CLAUDE_PROJECT_DIR` are empty in model Bash. Resolve a plugin or project path another way when a skill or hook step runs through the Bash tool.
+Checked against the [hooks reference](https://code.claude.com/docs/en/hooks) on `2026-10-18`.
+
+- `$CLAUDE_PLUGIN_ROOT` and `$CLAUDE_PROJECT_DIR` aren't present in model Bash. Resolve a plugin or project path another way when a skill or hook step runs through the Bash tool.
 
 ## Couplings
 
