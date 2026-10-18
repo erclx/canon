@@ -54,13 +54,12 @@ Holds every module that reads repository state, named for what it reads.
 
 ### `src/sync/`
 
-Holds the one engine `gov` and `design` install and sync through, the workflow `canon sync` runs afterward, and the install stamp.
+Holds the one engine `gov` and `design` install and sync through, the workflow `canon sync` runs afterward, and the install stamp. `format.ts` formats the stamp alone with the target's `oxfmt` or `prettier`, since a formatted seed would read as `customized`.
 
 - An adapter supplies `installedRoot`, `locateSource`, and optional hooks. Widen `SyncAdapter` rather than branching on a domain name in `engine.ts`
 - `planSync` marks each walked file with a state such as `stale`, `orphaned`, `retired`, or `renamed`. Location decides ownership before a name lookup, through `projectSubdir` and `ownsInstalledRoot`
 - Declare a rename in `governance/renames.toml`, or the old rule lands as `retired` and is deleted. `src/gov/renames.test.ts` fails on a live key, a dead chain, or a cycle
 - `stamp.ts` writes `canon/config/config.json` after the copies land and reads three older spellings. Adding a domain means choosing `STAMP_DOMAINS` or `SCANNED_DOMAINS`, and retiring one edits both
-- `format.ts` runs the target's installed `oxfmt` or `prettier` over the stamp once `stamp.ts` writes it, so a project formatter leaves no whitespace diff on a file nobody edited. Seeds and goldens stay as copied, since their hashes are taken against source bytes and a formatted copy would read as `customized`
 - `check.ts` builds `canon sync --check`, `history.ts` recovers `stale` when unstamped, and `reverse.ts` finds dropped files. `hasDrift` skips `orphaned`, tooling, and the new and reverse sections
 
 ### `src/targets/`
