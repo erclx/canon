@@ -19,4 +19,4 @@ paths:
 
 ## Token scopes
 
-- Add a write scope to the job that needs it, never to the workflow-level block, so every other job keeps the read-only token.
+- In a workflow with more than one job, add a write scope to the job that needs it, never to the workflow-level block, so every other job keeps the read-only token.
