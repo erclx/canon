@@ -138,6 +138,14 @@ export function register(program: Command): void {
         'cannot rule out a pid handed to an unrelated process, so a roster',
         'reported that way is a candidate list rather than an identity.',
         '',
+        'A reader in another pid namespace, such as a sandboxed shell, cannot',
+        'see the pid of a record stamped elsewhere. That row is judged on its',
+        'messaging socket instead: it stays on the roster as "unverified" with',
+        '"via": "socket", since a crashed session leaves its socket behind. A',
+        'foreign record whose socket is gone is left off the roster and',
+        'counted in "foreignDead", so an empty roster beside a count above zero',
+        'is one this reader could not check, not one whose sessions ended.',
+        '',
         'The JSON record also carries "statusUpdatedAt" (the stamp the client',
         'wrote beside "status", or null where its record carries none) and',
         '"statusDwellMs" (the elapsed milliseconds since that stamp, falling',
@@ -464,7 +472,13 @@ async function runList(opts: ListCommandOptions): Promise<number> {
 
   intro('canon sessions list')
   reportConfidence(report)
-  reportSessions(shown, opts.branch, repository, own !== null)
+  reportSessions(
+    shown,
+    opts.branch,
+    repository,
+    own !== null,
+    report.foreignDead,
+  )
   if (claim) reportClaim(claim)
   outro()
 
@@ -473,6 +487,7 @@ async function runList(opts: ListCommandOptions): Promise<number> {
       `${JSON.stringify({
         dir: report.dir,
         confidence: report.confidence,
+        foreignDead: report.foreignDead,
         branch: opts.branch ?? null,
         repository,
         worktree: claim?.worktree ?? null,
@@ -522,7 +537,9 @@ function reportConfidence(
   // per session ever run, which is what makes the empty result worth stating.
   if (report.sessions.length === 0) {
     logInfo(
-      'No row to decide. Every record belongs to a session that has ended.',
+      report.foreignDead > 0
+        ? 'No row to decide.'
+        : 'No row to decide. Every record belongs to a session that has ended.',
     )
     return
   }
@@ -530,6 +547,13 @@ function reportConfidence(
   if (report.confidence === 'confirmed') {
     logInfo(
       'Every row matched a running process against the start time its record stamped.',
+    )
+    return
+  }
+
+  if (report.sessions.some((session) => session.via === 'socket')) {
+    logWarn(
+      'This reader sits in another pid namespace than some records, so those rows rest on a messaging socket existing alone. A crashed session leaves its socket behind, so treat the mapping as inferred and open by asking to be corrected.',
     )
     return
   }
@@ -544,6 +568,7 @@ function reportSessions(
   branch: string | undefined,
   repository: string | null,
   scoped: boolean,
+  foreignDead: number,
 ): void {
   logStep('Sessions')
 
@@ -567,7 +592,9 @@ function reportSessions(
     }
 
     logInfo(
-      'No live session. Every record in the registry belongs to a session that has ended.',
+      foreignDead > 0
+        ? `No live session could be confirmed. ${foreignDead} of the records come from another pid namespace and no socket answers for them, so this reader could not check whether they ended.`
+        : 'No live session. Every record in the registry belongs to a session that has ended.',
     )
     return
   }
