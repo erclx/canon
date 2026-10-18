@@ -1,0 +1,16 @@
+name: Feature request
+description: Suggest something this project should do
+labels: [enhancement]
+body:
+  - type: textarea
+    id: job
+    attributes:
+      label: The job
+      description: What you were trying to get done when the project fell short, and how you work around it today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like
+      description: The behavior you have in mind, if you have one.

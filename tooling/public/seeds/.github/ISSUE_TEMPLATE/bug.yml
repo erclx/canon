@@ -1,0 +1,48 @@
+name: Bug report
+description: Something does not work as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run `<command>`
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: The smallest input that shows the problem. Paste it, or link a repository or gist.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The release or commit you ran.
+    validations:
+      required: true
+  - type: input
+    id: runtime
+    attributes:
+      label: Runtime and version
+      placeholder: Node 22.12.0, or Bun 1.3.0
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: macOS 26.1, Windows 11, Ubuntu 24.04
+    validations:
+      required: true

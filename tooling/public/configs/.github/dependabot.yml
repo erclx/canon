@@ -1,0 +1,12 @@
+# canon-no-seed: an add-on stack's config with no root counterpart by design.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        update-types: [minor, patch]
