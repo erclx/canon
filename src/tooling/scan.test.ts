@@ -129,7 +129,7 @@ describe('scan', () => {
     expect(result.gitignore).toEqual([{ entry: 'dist/', state: 'present' }])
   })
 
-  it('should skip scripts and deps when the target has no package.json', () => {
+  it('should scan scripts and deps against an empty manifest when the target has no package.json', () => {
     const manifest = makeManifest('base', {
       scripts: { check: './verify.sh' },
       devPackages: ['prettier'],
@@ -138,8 +138,51 @@ describe('scan', () => {
     const result = scan([manifest], target())
 
     expect(result.hasPackageJson).toBe(false)
+    expect(result.newManifest).toBe(true)
+    expect(result.scripts).toEqual([{ key: 'check', state: 'missing' }])
+    expect(result.deps).toEqual([
+      { spec: 'prettier', name: 'prettier', state: 'missing' },
+    ])
+  })
+
+  it('should count the new manifest once in the total', () => {
+    const manifest = makeManifest('base', {
+      scripts: { check: './verify.sh' },
+      devPackages: ['prettier'],
+    })
+
+    const result = scan([manifest], target())
+
+    expect(result.totalChanges).toBe(3)
+  })
+
+  it('should report no new manifest when the chain installs nothing', () => {
+    const result = scan([makeManifest('base')], target())
+
+    expect(result.newManifest).toBe(false)
+    expect(result.totalChanges).toBe(0)
+  })
+
+  it('should report no new manifest when package.json exists', () => {
+    const dir = target()
+    writeFileSync(join(dir, 'package.json'), '{}\n')
+    const manifest = makeManifest('base', { scripts: { check: 'x' } })
+
+    const result = scan([manifest], dir)
+
+    expect(result.newManifest).toBe(false)
+    expect(result.hasPackageJson).toBe(true)
+  })
+
+  it('should report no new manifest over an invalid package.json', () => {
+    const dir = target()
+    writeFileSync(join(dir, 'package.json'), '{ not json')
+    const manifest = makeManifest('base', { scripts: { check: 'x' } })
+
+    const result = scan([manifest], dir)
+
+    expect(result.newManifest).toBe(false)
     expect(result.scripts).toEqual([])
-    expect(result.deps).toEqual([])
   })
 
   it('should count every pending change once in the total', () => {
