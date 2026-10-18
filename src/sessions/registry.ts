@@ -45,6 +45,17 @@ export interface SessionRecord {
    * been handed to something else.
    */
   readonly procStart: string | undefined
+  /**
+   * The pid namespace the client stamped, ending in the `pid:[inode]` form that
+   * `/proc/self/ns/pid` reads as. A reader in another namespace cannot see the
+   * record's pid, so this is what tells a foreign row from a dead one.
+   */
+  readonly pidDomain: string | undefined
+  /**
+   * The socket the session listens on for messages. It is the only evidence of
+   * life a foreign-namespace reader can reach, since the pid is out of sight.
+   */
+  readonly messagingSocketPath: string | undefined
 }
 
 /**

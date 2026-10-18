@@ -42,6 +42,7 @@ function roster(sessions: readonly ResolvedSession[] = []): SessionReport {
     kind: 'resolved',
     dir: '/registry',
     confidence: 'confirmed',
+    foreignDead: 0,
     sessions,
   }
 }
@@ -54,6 +55,7 @@ function session(fields: Partial<ResolvedSession>): ResolvedSession {
     cwd: '/repo',
     kind: 'interactive',
     status: 'idle',
+    via: 'pid',
     startedAt: null,
     statusUpdatedAt: null,
     statusDwellMs: null,
@@ -443,6 +445,20 @@ describe('reclaimReport', () => {
     expect(report.kind).toBe('unreadable')
     if (report.kind !== 'unreadable') return
     expect(report.reason).toBe('sessions-unreadable')
+  })
+
+  it('should refuse the whole reading when foreign records have no answering socket', async () => {
+    linked('wt-parser', 'feat/parser')
+
+    const report = await reclaimReport({
+      cwd: ROOT,
+      resolve: async () => ({ ...roster(), foreignDead: 2 }),
+      mergedPullRequests: async () => merged(['feat/parser', 673]),
+    })
+
+    expect(report.kind).toBe('unreadable')
+    if (report.kind !== 'unreadable') return
+    expect(report.reason).toBe('sessions-unchecked')
   })
 
   // One call for the whole repository rather than one per worktree, which is

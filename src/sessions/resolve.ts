@@ -22,6 +22,12 @@ export interface ResolvedSession {
   readonly cwd: string
   readonly kind: string
   readonly status: string
+  /**
+   * What decided the row was live. `socket` means the record belongs to another
+   * pid namespace and only its messaging socket answered, so the row can be a
+   * crashed session's leftover and no start time backs it.
+   */
+  readonly via: 'pid' | 'socket'
   readonly startedAt: string | null
   /**
    * The stamp the record carries beside `status`, kept alongside the dwell it
@@ -64,6 +70,13 @@ export type SessionReport =
        * tells a caller whether the roster can be trusted as an identity.
        */
       readonly confidence: Confidence
+      /**
+       * Foreign-namespace records whose socket is gone. They read dead, but the
+       * reader could not check their pid, so an empty roster beside a count
+       * above zero is a roster that could not be checked rather than one that
+       * ended.
+       */
+      readonly foreignDead: number
       readonly sessions: readonly ResolvedSession[]
     }
 
@@ -167,6 +180,7 @@ function present(
   record: SessionRecord,
   located: Located,
   now: number,
+  via: ResolvedSession['via'],
 ): ResolvedSession {
   return {
     name: record.name,
@@ -175,6 +189,7 @@ function present(
     cwd: record.cwd,
     kind: record.kind ?? 'unknown',
     status: record.status ?? 'unknown',
+    via,
     startedAt:
       record.startedAt === undefined
         ? null
@@ -213,21 +228,33 @@ export async function resolveSessions(
 
   if (registry.kind === 'absent') return { kind: 'absent', dir: registry.dir }
 
-  const live: SessionRecord[] = []
+  const live: { record: SessionRecord; via: ResolvedSession['via'] }[] = []
   let confidence: Confidence = 'confirmed'
+  let foreignDead = 0
 
   for (const record of registry.records) {
     const state = liveness(record, probes)
-    if (!state.alive) continue
+    if (!state.alive) {
+      if (state.foreign) foreignDead += 1
+      continue
+    }
     if (state.confidence === 'unverified') confidence = 'unverified'
-    live.push(record)
+    live.push({ record, via: state.foreign ? 'socket' : 'pid' })
   }
 
   const sessions = await Promise.all(
-    live.map(async (record) => present(record, await find(record.cwd), now)),
+    live.map(async ({ record, via }) =>
+      present(record, await find(record.cwd), now, via),
+    ),
   )
 
-  return { kind: 'resolved', dir: registry.dir, confidence, sessions }
+  return {
+    kind: 'resolved',
+    dir: registry.dir,
+    confidence,
+    foreignDead,
+    sessions,
+  }
 }
 
 /** The environment slice the caller's own identity is read from. */

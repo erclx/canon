@@ -121,6 +121,7 @@ Holds the live-session roster, split by what a stub has to replace.
 
 - `registry.ts` reads one JSON file per session under `claudeConfigDir()`. No published contract describes it, so an absent registry refuses rather than reporting an empty roster
 - `live.ts` matches a record to the start time it stamped through the process filesystem, and marks the roster unverified where it can only probe a signal
+- `live.ts` judges a record from another pid namespace on its messaging socket, always unverified. A record with no `pidDomain`, such as the gate's lock, keeps the pid path
 - `resolve.ts` joins a session to its branch, and `claim.ts` asks whether a session or worktree holds one. `--branch` scopes to the shared directory, since names collide across projects
 - `transfer/` moves a session between machines and treats a transcript as opaque bytes
 

@@ -19,6 +19,12 @@ export interface ClaimReport {
   readonly refs: readonly string[]
   /** False when the session roster could not be read, so `claimed` covers the readings around it alone and cannot be trusted as a clean "unclaimed". */
   readonly sessionsReadable: boolean
+  /**
+   * Foreign-namespace records whose socket is gone. They read dead, so a branch
+   * one of them holds can read unclaimed, which a caller with a count above
+   * zero should treat as unverified.
+   */
+  readonly foreignDead: number
   /** False when the ref read failed, which is the same false clean under a different reading. */
   readonly refsReadable: boolean
 }
@@ -80,6 +86,7 @@ export async function checkClaim(
     sessions,
     refs: refs.refs,
     sessionsReadable: report.kind === 'resolved',
+    foreignDead: report.kind === 'resolved' ? report.foreignDead : 0,
     refsReadable: refs.readable,
   }
 }

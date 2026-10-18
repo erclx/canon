@@ -37,7 +37,11 @@ export type Refusal =
   | 'held-by-session'
 
 /** Why the whole reading was refused, so no verdict was produced at all. */
-export type Unreadable = 'gh-missing' | 'gh-failed' | 'sessions-unreadable'
+export type Unreadable =
+  | 'gh-missing'
+  | 'gh-failed'
+  | 'sessions-unreadable'
+  | 'sessions-unchecked'
 
 /**
  * Which removal shape applies. `session` removes the background session and its
@@ -392,6 +396,17 @@ export async function reclaimReport(
       kind: 'unreadable',
       reason: 'sessions-unreadable',
       detail: `No session registry at ${sessions.dir}, so nothing was read about which worktrees are still held.`,
+    }
+  }
+
+  // A foreign-namespace record whose socket is gone reads dead, but a reader
+  // that cannot see the pid may also be unable to see the socket, so it may be
+  // a live holder. The roster drops it, and a removal on that reading is final.
+  if (sessions.foreignDead > 0) {
+    return {
+      kind: 'unreadable',
+      reason: 'sessions-unchecked',
+      detail: `${sessions.foreignDead} session records come from another pid namespace and no socket answers for them, so nothing was read about whether they still hold a worktree.`,
     }
   }
 

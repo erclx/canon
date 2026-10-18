@@ -36,6 +36,7 @@ function session(fields: Partial<ResolvedSession>): ResolvedSession {
     cwd: '/repo/worktrees/w1',
     kind: 'interactive',
     status: 'idle',
+    via: 'pid',
     startedAt: null,
     statusUpdatedAt: null,
     statusDwellMs: null,
@@ -55,6 +56,7 @@ describe('checkClaim', () => {
         kind: 'resolved',
         dir: '/registry',
         confidence: 'confirmed',
+        foreignDead: 0,
         sessions: [],
       }),
     })
@@ -65,8 +67,25 @@ describe('checkClaim', () => {
       sessions: [],
       refs: [],
       sessionsReadable: true,
+      foreignDead: 0,
       refsReadable: true,
     })
+  })
+
+  it('should carry the foreign dead count so an unclaimed answer reads as unverified', async () => {
+    const report = await checkClaim('feat/parser', {
+      cwd: ROOT,
+      resolve: async () => ({
+        kind: 'resolved',
+        dir: '/registry',
+        confidence: 'confirmed',
+        foreignDead: 3,
+        sessions: [],
+      }),
+    })
+
+    expect(report.claimed).toBe(false)
+    expect(report.foreignDead).toBe(3)
   })
 
   // The branch behind a merged pull request has no worktree and no session, and
@@ -81,6 +100,7 @@ describe('checkClaim', () => {
         kind: 'resolved',
         dir: '/registry',
         confidence: 'confirmed',
+        foreignDead: 0,
         sessions: [],
       }),
     })
@@ -102,6 +122,7 @@ describe('checkClaim', () => {
         kind: 'resolved',
         dir: '/registry',
         confidence: 'confirmed',
+        foreignDead: 0,
         sessions: [],
       }),
     })
@@ -117,6 +138,7 @@ describe('checkClaim', () => {
         kind: 'resolved',
         dir: '/registry',
         confidence: 'confirmed',
+        foreignDead: 0,
         sessions: [],
       }),
       branchRefs: async () => ({ readable: false, refs: [] }),
@@ -136,6 +158,7 @@ describe('checkClaim', () => {
         kind: 'resolved',
         dir: '/registry',
         confidence: 'confirmed',
+        foreignDead: 0,
         sessions: [],
       }),
     })
@@ -153,6 +176,7 @@ describe('checkClaim', () => {
         kind: 'resolved',
         dir: '/registry',
         confidence: 'confirmed',
+        foreignDead: 0,
         sessions: [session({ branch: 'feat/parser', repository })],
       }),
     })
@@ -169,6 +193,7 @@ describe('checkClaim', () => {
         kind: 'resolved',
         dir: '/registry',
         confidence: 'confirmed',
+        foreignDead: 0,
         sessions: [
           session({ branch: 'feat/parser', repository: '/other/.git' }),
         ],
@@ -203,6 +228,7 @@ describe('checkClaim', () => {
           kind: 'resolved',
           dir: '/registry',
           confidence: 'confirmed',
+          foreignDead: 0,
           sessions: [
             session({ branch: 'chore/toolkit-sync', repository: target }),
           ],
@@ -238,6 +264,7 @@ describe('checkClaim', () => {
           kind: 'resolved',
           dir: '/registry',
           confidence: 'confirmed',
+          foreignDead: 0,
           sessions: [
             session({ branch: 'chore/toolkit-sync', repository: target }),
           ],
@@ -263,6 +290,7 @@ describe('checkClaim', () => {
       sessions: [],
       refs: [],
       sessionsReadable: false,
+      foreignDead: 0,
       refsReadable: true,
     })
   })
