@@ -27,11 +27,15 @@
 
 ### Run a command
 
+The most common invocation is <what it does>.
+
 ```bash
 <command> <argument>
 ```
 
 ### Flags
+
+Most runs need <the flags a reader reaches for first>.
 
 ```bash
 <command> --<flag> <value>
@@ -44,7 +48,7 @@
 
 ### Exit codes
 
-<What each non-zero exit means, when a script depends on it.>
+A non-zero exit means <what each code means>, when a script depends on it.
 
 ## Documentation
 

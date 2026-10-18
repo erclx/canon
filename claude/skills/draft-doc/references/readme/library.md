@@ -29,11 +29,15 @@
 
 ### Quickstart
 
+The snippet shows <the core behavior>.
+
 ```<language>
 <Import and one call that shows the core behavior>
 ```
 
 ### <Second common task>
+
+Reach for this when <the reader's situation>.
 
 ```<language>
 <Snippet for the task>

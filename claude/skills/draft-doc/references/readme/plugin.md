@@ -18,17 +18,23 @@
 
 ### <First channel name>
 
+Install through this channel when <who it suits>.
+
 ```bash
 <install command for this channel>
 ```
 
 ### <Second channel name>
 
+Install through this channel when <who it suits>.
+
 ```bash
 <install command for this channel>
 ```
 
 ### Update
+
+Update when <the trigger>, which replaces <what it replaces>.
 
 ```bash
 <update command>
@@ -37,6 +43,8 @@
 ## Usage
 
 ### Invoke a skill
+
+Type the command in <where the user types it>.
 
 ```text
 /<plugin name>:<skill name> <argument>
@@ -50,7 +58,7 @@
 
 ### Configuration
 
-<Setting the plugin reads and where the user sets it, when one exists.>
+Set <the setting the plugin reads> in <where the user sets it>, when one exists.
 
 ## Support
 
