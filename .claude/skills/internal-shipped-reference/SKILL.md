@@ -29,10 +29,10 @@ Never test a token against what a scaffolded project's seed ships, since the see
 
 ### Layout and count claims
 
-Each layout, stack, or config-path claim takes the same two verdicts.
+Each layout, stack, or config-path claim takes the same two verdicts against the checkout-only line in `authoring-layout.md`.
 
-- **Fine.** The claim names a portable convention true of any project carrying the same toolkit surface, such as a fixed install path (`canon/config/pr-labels.toml`).
-- **Fails.** The claim states a count, a stack choice, or a folder shape true of this checkout specifically, phrased as if every target shared it.
+- **Fine.** The claim holds for any project carrying the same toolkit surface.
+- **Fails.** The claim is one that line bars, phrased as if every target shared it.
 
 ## Repair menu
 
