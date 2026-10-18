@@ -34,7 +34,7 @@ import {
   slugOf,
 } from '@/migrate/evidence-ordinal'
 import { presentFolders } from '@/records/backup'
-import { recordDir, SCRATCH } from '@/roots/record'
+import { LEGACY_SCRATCH_REL, recordDir, SCRATCH } from '@/roots/record'
 
 /**
  * Every folder this promotion moves, at the name it carries under scratch.
@@ -64,9 +64,15 @@ export const PROMOTED_FOLDERS: readonly string[] = [
   'target-survey',
 ]
 
-/** Where a promoted folder sits before the move. */
+/**
+ * Where a promoted folder sits before the move: the retired scratch folder
+ * when it still holds the folder, and `.canon/tmp` otherwise. The verb is a
+ * migration, so it reads an unmigrated target where it is.
+ */
 export function sourcePath(root: string, folder: string): string {
-  return recordDir(root, SCRATCH, folder)
+  const legacy = join(root, LEGACY_SCRATCH_REL, folder)
+
+  return existsSync(legacy) ? legacy : recordDir(root, SCRATCH, folder)
 }
 
 /** The folder a promoted one lands inside, under whichever root carries it. */
@@ -85,7 +91,7 @@ function escape(value: string): string {
  * swallowing a sibling folder whose name extends it.
  */
 const OLD_PREFIXES = [
-  '.claude/.tmp/',
+  '.claude/.tmp/', // canon-keep-record-root
   '.canon/tmp/',
   '../.tmp/',
   '../tmp/',

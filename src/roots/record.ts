@@ -29,16 +29,21 @@ export type RecordRoot = (typeof RECORD_ROOTS)[number]
 export const CREATION_ROOT: RecordRoot = '.canon'
 
 /**
- * The deletable scratch folder, named at the spelling `.claude/` gives it.
+ * The deletable scratch folder, named at the spelling `.claude/` gave it.
  *
- * It is the one folder whose name differs by root, and callers name it at the
- * old spelling because `spell` is the only place the variant is decided. Inside
- * a dotted root the leading dot hides nothing already hidden and costs a bare
- * `ls` that omits the folder, so the move dropped it. Every other record folder
- * keeps its name, `.records.git` included, where the dot marks the mechanism
- * apart from a payload rather than hiding it.
+ * Scratch resolves at `.canon/tmp` only. The `.claude/.tmp` spelling is a
+ * migration source, named through `LEGACY_SCRATCH_REL` by the verbs that move
+ * it, and no lookup falls back to it. Callers still name the folder at this
+ * spelling because `spell` is the only place the variant is decided. Inside a
+ * dotted root the leading dot hides nothing already hidden and costs a bare
+ * `ls` that omits the folder, so the move dropped it. Every other record
+ * folder keeps its name, `.records.git` included, where the dot marks the
+ * mechanism apart from a payload rather than hiding it.
  */
 export const SCRATCH = '.tmp'
+
+/** The retired scratch location, read only as the source of a migration. */
+export const LEGACY_SCRATCH_REL = '.claude/.tmp' // canon-keep-record-root
 
 /** The scratch folder's name under `.canon/`. */
 const CANON_SCRATCH = 'tmp'
@@ -109,6 +114,8 @@ export function spell(root: RecordRoot, folder: string): string {
  * records it belongs to rather than at the creation default.
  */
 function rootOf(root: string, folder: string): RecordRoot {
+  if (folder === SCRATCH) return CREATION_ROOT
+
   return (
     RECORD_ROOTS.find((candidate) =>
       existsSync(join(root, candidate, spell(candidate, folder))),
@@ -147,7 +154,9 @@ export function recordDirs(
   folder: string,
   ...rest: string[]
 ): string[] {
-  return RECORD_ROOTS.map((candidate) =>
+  const candidates = folder === SCRATCH ? [CREATION_ROOT] : RECORD_ROOTS
+
+  return candidates.map((candidate) =>
     join(root, candidate, spell(candidate, folder), ...rest),
   )
 }
