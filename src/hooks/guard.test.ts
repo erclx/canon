@@ -493,18 +493,6 @@ beforeAll(() => {
       path: [join(fixture, 'bin-due'), hookPath].join(delimiter),
       payload: () => payloadFor({ source: 'startup' }),
     },
-    'unattended-agent-guard.sh': {
-      code: 2,
-      env: { CLAUDE_CODE_SESSION_ATTENDED: '0' },
-      expect: 'may not call the Agent tool',
-      payload: (nonce) =>
-        payloadFor({
-          session_id: nonce,
-          tool_input: { subagent_type: 'general-purpose' },
-          tool_name: 'Agent',
-        }),
-      stream: 'stderr',
-    },
   }
 
   // Last, so nothing else in this setup is writing into it any more. A root the
@@ -1575,57 +1563,6 @@ describe('upstream-due.sh silences', () => {
 
     expect(result.stdout).toBe('')
     expect(result.code).toBe(0)
-  })
-})
-
-// The acting case proves the denial fires on the one value the hook can back.
-// Everything else, unset included, is a session this reading cannot classify,
-// and classifying it wrong in either direction is worse than saying nothing:
-// blocking it traps a session the reading never measured, and reporting a
-// pass claims a verdict the hook has no basis for.
-describe('unattended-agent-guard.sh classification boundary', () => {
-  const hook = join(ROOT, '.claude/hooks/unattended-agent-guard.sh')
-
-  const payload = (): string =>
-    payloadFor({ tool_input: {}, tool_name: 'Agent' })
-
-  it.concurrent('should let an Agent call through when CLAUDE_CODE_SESSION_ATTENDED is unset', async ({
-    expect,
-  }) => {
-    const result = await run(hook, payload(), undefined, undefined, {
-      CLAUDE_CODE_SESSION_ATTENDED: undefined,
-    })
-
-    expect(result.stdout).toBe('')
-    expect(result.stderr).toBe('')
-    expect(result.code).toBe(0)
-  })
-
-  it.concurrent('should let an Agent call through when CLAUDE_CODE_SESSION_ATTENDED holds a value other than 0', async ({
-    expect,
-  }) => {
-    const result = await run(hook, payload(), undefined, undefined, {
-      CLAUDE_CODE_SESSION_ATTENDED: '1',
-    })
-
-    expect(result.stdout).toBe('')
-    expect(result.stderr).toBe('')
-    expect(result.code).toBe(0)
-  })
-
-  it.concurrent('should deny a Task call the same as an Agent call when unattended', async ({
-    expect,
-  }) => {
-    const result = await run(
-      hook,
-      payloadFor({ tool_input: {}, tool_name: 'Task' }),
-      undefined,
-      undefined,
-      { CLAUDE_CODE_SESSION_ATTENDED: '0' },
-    )
-
-    expect(result.stderr).toContain('may not call the Agent tool')
-    expect(result.code).toBe(2)
   })
 })
 

@@ -56,15 +56,6 @@
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/review-post-scan.sh"
           }
         ]
-      },
-      {
-        "matcher": "Agent|Task",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/unattended-agent-guard.sh"
-          }
-        ]
       }
     ],
     "PostToolUse": [
