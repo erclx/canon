@@ -44,9 +44,11 @@ Does not govern:
 
 - Name the folder `<nn>-<slug>`, a two-digit ordinal and a kebab-case slug.
 - The ordinal marks a folder per track, opened once and worked over time, unlike a file addressed by name, one with its own sorting prefix, or one overwritten on purpose.
-- Claim the ordinal through `canon records ordinal groundwork <slug> --claim`, which reads the highest one across both `.canon/groundwork/` and `.canon/intake/` and creates the folder in one atomic act, so two sessions opening at once never share a number. The two kinds share one order.
+- Claim the ordinal through `canon records ordinal groundwork <slug> --claim`, which reads the highest across `.canon/groundwork/` and `.canon/intake/`, since the two kinds share one order
+- The claim creates the folder in the same atomic act, so two sessions opening at once never share a number
 - With neither folder holding an entry, the first one opened takes `01`, whatever number a track's own files start at.
-- Never renumber an existing folder. The ordinal is the order it opened, and a later reader cites it by that name.
+
+Never renumber an existing folder. The ordinal is the order it opened, and a later reader cites it by that name.
 
 ## What a working track looks like
 
@@ -95,11 +97,13 @@ Orients. Holds no findings.
 
 ### Closing sections and phase
 
+The README closes on two sections and states its phase near the top.
+
 - A `## Prior art` section
 - A `## Source citation` section stating the rule below, so a returning session finds it in the folder
 - The phase stated out loud in the first three lines, in the form `Groundwork phase. Nothing here is a feature plan.`
 
-Every claim about a source outside the project carries a link to it, wherever the claim appears in the folder. Without one, a later reader cannot tell a fetched page from recall. A source found and not read is listed as a lead and is never cited, since a link to a page nobody opened is worse than no link. Listing it stops a later pass re-searching for it.
+Every claim about a source outside the project carries a link to it, wherever the claim appears in the folder, so a later reader can tell a fetched page from recall. A source found and not read is listed as a lead and never cited, since a link to a page nobody opened is worse than none. Listing it stops a later pass re-searching for it.
 
 Where the track supersedes an earlier plan or an earlier folder, name it and say not to go looking for it. Without that, the old reasoning keeps circulating.
 
@@ -117,11 +121,10 @@ Written when the subject is large enough to run away. Holds constraints, risks, 
 
 ## 06-decision.md
 
-Closes the folder. Everything above it is input. Write it from the skeleton under `## Template`, with an H3 per dropped alternative.
+Closes the folder. Everything above it is input. Write it from the skeleton under `## Template`, with an H3 per dropped alternative, a list that stops a future session re-proposing a rejected idea.
 
-`## Revisit when` carries the "Overturned by" line of each lean that became the decision, as written. A lean the decision did not take carries nothing, and a track whose deciding leans carried no overturn line omits the section.
-
-The dropped list stops a future session re-proposing a rejected idea.
+- `## Revisit when` carries the "Overturned by" line of each lean that became the decision, as written
+- A lean the decision did not take carries nothing, and a track whose deciding leans carried no overturn line omits the section
 
 ## 07-next-session.md
 
@@ -159,6 +162,8 @@ A lean is weaker than a plan's suggestion: it records the current read on an ope
 ## Template
 
 ### README.md
+
+The orienting file, opened first.
 
 ```markdown
 ---
@@ -204,6 +209,8 @@ and not read is listed as a lead and is never cited.
 ```
 
 ### 06-decision.md
+
+The closing file, with an H3 per dropped alternative.
 
 ```markdown
 ---
