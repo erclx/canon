@@ -49,19 +49,18 @@ Owns the `canon tasks` verbs that validate, archive, derive from, and write the 
 - `sharesPath` collides a folder claim with a file inside it on purpose, so a bare folder in a `Touches` cell collides with every row under it
 - `plan-reach` reports the paths a branch wrote beyond its plan and gates nothing
 
-### `src/sessions/`
+### `src/intake/`
 
-Owns the roster reads and the branch claim.
+Reads and answers the intake folders under `.canon/intake/`, behind `canon intake list` and `canon intake answer`.
 
-- `claim.ts` composes `claimed` from the roster, `listWorktrees()`, and `branchRefs()`, so a branch behind a merged pull request still reads taken
-- `sessionsReadable` and `refsReadable` stay separate flags, so a failed read never reads as an unclaimed branch
-- `branchRefs()` reads the local head and the `origin` ref in one `git for-each-ref` and misses a branch pushed from another machine since the last fetch
+- `items.ts` parses an item's heading and its bolded field bullets, and skips `00-overview.md`, which points at items and carries no answer slot
+- `folder.ts` resolves a slug to a folder and refuses with a named reason, such as `ambiguous-slug` or `answered`, before it writes a selection into an answer slot
 
 ### `src/worktrees/`
 
 Owns the reclaim reading behind `canon worktrees list` and `reclaim`. `stop.ts` signals every listener inside a reclaimable path ahead of the removal, and a machine with no listener reader removes anyway and records `stopped` as null, never zero.
 
-- A worktree is reclaimable only with a merged pull request, a clean tree, and no live session, and `refusals` names every failing condition
+- A worktree is reclaimable only with a merged pull request, a clean tree, and no live session in the roster `src/sessions/` holds, and `refusals` names every failing condition
 - Git ancestry cannot decide it, since squash merges leave a merged branch outside `main`
 - The merged read is one `gh pr list` over the latest 200 merges, run through `gitEnv()` so a stray `GIT_DIR` cannot aim `gh` at another repository
 - An unreadable input refuses the whole reading, because a false clean ends in a removal

@@ -42,15 +42,6 @@ Holds `marketplace.json`, the catalog an installer adds. Its one entry names the
 - `**/.claude-plugin/*.json` is excluded from oxfmt because `release-please` serializes the manifest its own way, and the marketplace file is re-included because nothing else writes it
 - `claude plugin validate --strict` accepts a manifest whose `source` points at nothing, so an install is the only proof of a shape
 
-### `src/migrate/`
-
-Owns `canon migrate skill-names`, which moves a renamed or merged skill's body and every citation of it. The rename logic is in `rename.ts` and the map is in `skill-names.ts`.
-
-- A rename or merge adds a map row and leaves a pointer at the old name, with `disable-model-invocation: true` on a merged one
-- The pointer counts as a shipped skill, so it needs a routing case, `metadata.family`, and a skill-map row
-- Each old spelling in the pointer takes a `canon-keep-retired` marker so a later sweep does not move it onto the survivor
-- The pointer's paths join the map's `excludedPaths` only after the sweep runs, since excluding first leaves the real body unmoved while every citation names the new one
-
 ### `src/claude/`
 
 Owns the logic behind `canon claude`, with its verbs registered in `src/commands/claude.ts`.
@@ -79,7 +70,7 @@ The skills and rules around the plugin each own one slice.
 - `docs/workflow/` owns the skill map a coverage claim is measured against, one row per skill
 - `.claude/skills/` owns the toolkit-internal `internal-*` skills, covered in `canon/context/workflow/internal-skills.md`
 - `sandbox/claude/` owns the per-skill scenarios that provision a seeded project for a headless run
-- `src/labels/` owns `canon labels`, which `git-pr` calls to label a pull request from `canon/config/pr-labels.toml`
+- `src/labels/` and `src/feedback/` own the verbs `git-pr` and `git-issue` call, labelling from `canon/config/pr-labels.toml` and filing a toolkit issue from a feedback block
 
 ## Gotchas
 

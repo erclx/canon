@@ -39,7 +39,7 @@ Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`,
 - Stages run in table order and the first to find a fact halts the run. A stage that cannot read its input is `unmeasured`, which warns locally and refuses under CI.
 - The changed set unions the diff against `origin/main`, the working tree, and untracked files. Fallbacks widen, and `--all` forces every stage. On `main` the local ref is HEAD, so the base is remote.
 - Tests runs on `^src/` and on any corpus in `TEST_CORPORA_PATTERNS`, which a `src/` test reads from outside `src/`. A test reading a new corpus joins the array in the same change.
-- A regenerating stage reports its own regeneration as drift on the first run after an edit. Stage the rewritten file and run again, since re-running alone regenerates the same diff.
+- Indexes and Consumed copies regenerate then assert, so the first run after an edit reports drift and `check:ci` writes the tree. Stage the rewrite and run again, since a rerun alone repeats the diff.
 - A root-level test pair or a script under `claude/skills/*/scripts/` needs its own pattern in `TESTS_SCOPE`, asserted in `stages.test.ts`, or a branch touching only it skips the Tests stage
 
 ### `src/init/`
@@ -49,15 +49,6 @@ Installs each domain `canon init` runs, as the steps `runDomains` walks in `run.
 - `runDomains` catches a failed domain and lets init report the ones that worked, so the `check:install` assert loop is the only guard against a silently truncated install
 - Every domain init installs needs at least one asserted path in `scripts/core/install-check.sh`, and a conditional domain needs its condition met in the gate's `canon init --stack base` call
 - `check:install` clones the last commit, so an uncommitted fix is invisible to it
-
-### `src/audits/`
-
-Owns the audit catalog behind the report-only Audit set stage, which reads the whole tracked and per-machine set and fails nothing.
-
-- The stage reports growth against `canon/config/baseline.json` rather than gating it, since a push failing on a judgment teaches a reader to route around it
-- `deps` carries `corpus: 'upstream'` and runs weekly in `.github/workflows/verify.yml`, and `auditDependencies` times out at 120 seconds as `no-record`
-- A per-machine corpus missing its gitignored folder reports as absent, but a tracked tree that cannot be found is a broken checkout and still warns
-- To separate a branch's growth from main's, run `bun src/cli.ts audits run` in the main worktree and diff the reports, or restore the branch's paths from the base, rerun, and compare
 
 ### `src/process/`
 
@@ -125,6 +116,7 @@ Smaller folders the loop touches.
 
 - `scripts/` owns every shell script except the Claude Code hooks, grouped by domain
 - `scripts/core/` owns the checks that stay scripts, such as the skill-path and seed-independence walks
+- `src/hooks/` owns `canon hooks`, whose `post-merge` verb the `.husky/` hook hands off to, and the guard tests the shell hooks answer to
 
 ## Gotchas
 

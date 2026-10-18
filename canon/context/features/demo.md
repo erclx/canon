@@ -35,6 +35,7 @@ Holds one demo, with the raw take in the ignored `take/` and a composed render i
 Two folders the feature leans on are shared with other commands.
 
 - `src/browser/` owns the engine helpers shared with `canon inventory` and `canon drive`
+- `src/driver/` owns `canon drive`, which runs a plan of steps and probes against a running page for `pick-by-eye` and `review-ui`
 - `src/capture/` ships beside `src/demo/` and imports `chromium` from `playwright-core`
 
 ## Gotchas
