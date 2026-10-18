@@ -9,22 +9,37 @@ Part of Step 4 of `review-pr`, reached only on the branch `post.md` names. Every
 
 When `<prior-heading>` from Step 2 reads `## Review closed` and this pass carries nothing owed, the thread already holds this verdict. Replace the standing close-out rather than posting a second one beside it.
 
+## The rewrite
+
 Resolve its numeric id off the REST listing, keeping the newest match across every page:
 
 ```bash
 gh api --paginate 'repos/{owner}/{repo}/pulls/<number>/reviews?per_page=100' --jq '.[] | select((.body // "") | split("\n")[0] | rtrimstr("\r") == "## Review closed") | .id' | tail -n 1
 ```
 
-Write the replacement body to `<body-file>`, the name `post.md` already derived at the top of Step 4, keeping the heading and the footer and naming what this pass covered on the scope line in place of what the old one covered. Derive that name the same way whichever path reached here, since the guard reads `<prior-heading>` alone and a repeated head resolves the third segment as usual. The folder then gains a record of every covered head rather than losing the one the standing comment named. Then replace the comment:
+Write the replacement body to `<body-file>`, the name `post.md` already derived at the top of Step 4. Keep the heading and the footer, and name what this pass covered on the scope line in place of what the old one covered.
+
+- Derive that name the same way whichever path reached here, since the guard reads `<prior-heading>` alone and a repeated head resolves the third segment as usual
+- The folder then gains a record of every covered head rather than losing the one the standing comment named
 
 ```bash
 gh api -X PUT repos/{owner}/{repo}/pulls/<number>/reviews/<review-id> -F body=@<body-file>
 ```
 
-`PUT` keeps the comment's timestamp and its position in the thread, so the verdict stays where a reader already found it and the thread gains no second entry. A submitted review cannot be deleted, which is why this rewrites the standing comment rather than posting a fresh one.
+`PUT` keeps the comment's timestamp and its position in the thread, so the verdict stays where a reader already found it. A submitted review cannot be deleted, which is why this rewrites the standing comment rather than posting a fresh one.
 
-The guard fires on `## Review closed` alone. Two open passes carry different findings and both are worth reading, so a repeated `## Review` posts normally. A pass carrying anything owed posts normally too, under `## Review`, which is what keeps a finding raised after a close-out from being swallowed by the guard that exists for a silent one.
+## When the guard fires
 
-The rewrite used to cost the review's `commit.oid`, which `PUT` leaves pinned at the commit the standing close-out was first submitted against. Step 2's `<prior-oid>` and the prior commit `poll.ts` derives both read that field, so the next pass read a range wider than its delta, and the poll's `SEEN` branch, which fires on `prior` equalling the head, could never be reached at all: an out-of-band pass reported as `MOVED` for the rest of the pull request's life.
+The guard fires on `## Review closed` alone.
 
-The marker closes both, because `PUT` replaces the body and the marker is in it. The rewritten close-out carries the commit this pass read rather than the one the comment was first submitted against, and every reader now takes that in preference to the pinned field. The one thing `PUT` still cannot move is `submittedAt`, which stays at the original submission and is what the poll's age test reads, so a rewritten close-out ages from when it first landed rather than from when it was last rewritten. That is the correct reading for a thread waiting on a human, which is the question the age test asks.
+- Two open passes carry different findings and both are worth reading, so a repeated `## Review` posts normally
+- A pass carrying anything owed posts normally under `## Review`, so a finding raised after a close-out is never swallowed by the guard
+
+## What the PUT leaves pinned
+
+`PUT` leaves the review's `commit.oid` pinned at the commit the close-out was first submitted against. Step 2's `<prior-oid>` and the prior commit `poll.ts` derives would read too wide a range from it, and the poll's `SEEN` branch, firing on `prior` equalling the head, could never be reached.
+
+The marker answers both, because `PUT` replaces the body and the marker is in it. It carries the commit this pass read, and every reader takes it in preference to the pinned field.
+
+- `submittedAt` still stays at the original submission, and the poll's age test reads it
+- A rewritten close-out therefore ages from when it first landed, which is the right reading for a thread waiting on a human
