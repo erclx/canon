@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.41.0](https://github.com/erclx/canon/compare/v5.40.0...v5.41.0) (2026-10-18)
+
+
+### Features
+
+* **git-branch:** create the branch from main or master ([#2446](https://github.com/erclx/canon/issues/2446)) ([d8e3702](https://github.com/erclx/canon/commit/d8e37021325e339cd1a4eb79a4546542f2759235))
+* **pr:** file a design reference capture on canon/frames ([#2445](https://github.com/erclx/canon/issues/2445)) ([1fd333d](https://github.com/erclx/canon/commit/1fd333dd1ff3e394c03d319d861ef3aab35275b1))
+* **review-ui:** rewrite a repeated UI close in place ([#2447](https://github.com/erclx/canon/issues/2447)) ([86e6928](https://github.com/erclx/canon/commit/86e6928f58b4bfc47d5261490d7b92b41d7ed6f9))
+* **tasks:** fan batches of one change in to one pull request ([#2448](https://github.com/erclx/canon/issues/2448)) ([7369500](https://github.com/erclx/canon/commit/7369500ebabb2f0eb85722de9e0f96fa7aad2b0a))
+
+
+### Bug Fixes
+
+* **skills:** let the Skill tool run four skills when asked ([#2444](https://github.com/erclx/canon/issues/2444)) ([e530576](https://github.com/erclx/canon/commit/e5305764fd38a1ce5ad5cfc9d3d61e354c3584dc))
+
 ## [5.40.0](https://github.com/erclx/canon/compare/v5.39.0...v5.40.0) (2026-10-18)
 
 
