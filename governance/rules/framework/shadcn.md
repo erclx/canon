@@ -1,5 +1,5 @@
 ---
-description: Enforce shadcn/ui v4 component patterns, semantic tokens, and composition rules
+description: Enforce shadcn/ui component ownership, typed primitives, semantic tokens, and composition props
 paths:
   - '**/*.tsx'
   - '**/*.jsx'
@@ -9,26 +9,22 @@ paths:
 
 ## Source files
 
-- Do not edit component files installed by the shadcn CLI. Treat them as vendored.
-- Check `components.json` for the install path.
-- Extend behavior via wrapper components over modifying installed files.
+- Edit an installed component in place when the design needs it, since the code is the project's own.
+- Read `shadcn add --diff` before running `--overwrite` on a component, since overwriting discards local edits.
+- Import components and `cn` through the aliases in `components.json`, which the CLI uses to place files and rewrite imports.
 
 ## Component authoring
 
-- Use `React.ComponentProps<typeof Primitive>` over `React.forwardRef`.
-- Add `data-slot="component-name"` to every primitive root for Tailwind targeting.
+- Type a component's props as `React.ComponentProps<typeof Primitive>`, not `React.forwardRef`.
+- Add `data-slot="<name>"` to the root of a new primitive, matching the installed components.
 
 ## Tokens and styling
 
-- Use semantic color tokens (`bg-background`, `text-foreground`, `border-border`) over hardcoded colors.
-- Use `cn()` from `@/lib/utils` for all className merging and conditional classes.
-- Do not override shadcn component internals with arbitrary classes.
-- Extend via `className` prop only.
+- Use semantic tokens such as `bg-background`, `text-foreground`, and `border-border` over hardcoded colors.
+- Merge classes with `cn()` from `@/lib/utils`, so a caller's `className` overrides the component's defaults.
 
 ## Composition
 
-- Compose shadcn primitives as documented.
-- Do not destructure or restructure internal component trees.
-- Use `asChild` prop with `<Slot>` for polymorphic rendering.
-- Do not wrap primitives in extra DOM elements.
-- Use `sonner` for toasts over the deprecated `toast` component.
+- Compose through `render` in a Base UI project, the default for new ones, and through `asChild` in a Radix one.
+- Style a link as a button with `buttonVariants()`, never a Base UI `Button` rendering an `<a>`, which forces `role="button"`.
+- Use `sonner` for toasts, since the `toast` component is deprecated.
