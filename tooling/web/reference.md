@@ -74,7 +74,7 @@ The web layer covers the tooling shared across Vite + React, Astro, and Next.js.
 - `scripts/screenshot.sh` sources `scripts/lib/preview-server.sh`, builds, serves on `PREVIEW_PORT`, waits for the port, and traps the whole process group on exit
 - `scripts/readme-screenshot.sh` captures one case under `SCREENSHOT_FILTER` into `assets/evidence/readme/`, and exits 1 until a project fills `README_FILTER`
 - `.github/workflows/readme-screenshot.yml` ships its path list as `REPLACE_WITH_PROJECT_PATHS`, and its first step exits 1 while that stays
-- `.github/workflows/verify.yml` runs `static-checks`, `unit-tests`, `build-verify`, and `e2e-tests`
+- `.github/workflows/verify.yml` runs `static-checks`, `unit-tests`, `build-verify`, and `e2e-tests`. `unit-tests` installs Chromium and runs `test:browser` only when the project defines that script.
 - Read `governance/rules/tooling/ci-workflow.md` for when a workflow's commit-back is right and when a report is
 
 ## Ports

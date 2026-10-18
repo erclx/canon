@@ -26,8 +26,3 @@ paths:
 - Mark a string paraphrasing `README.md` with `canon-allow-readme-paraphrase: <reason>` rather than forcing a distorted quote.
 - Write a citation with more than one phrase as `// README.md: "<phrase>" "<phrase>"` on the one anchor line, never split across two comments.
 - Put a borrowed quote on the same line as `canon-allow-readme-paraphrase`, since the marker exempts only the unquoted part and `readmeCitations` still checks the quote.
-
-## Before shipping
-
-- Run `bun run web:build`, whose `astro check` is the only typecheck `web/` gets, since it sits outside the gate's `types` stage.
-- Run `cd web && bunx playwright test`, whose section-count assertion fails an added or removed section by design.
