@@ -107,9 +107,9 @@ export const EXCLUDED_ENTRIES = [
 /**
  * Whether a top-level name stays out of every push, at either root.
  *
- * `SCRATCH` is the legacy `.tmp` spelling, which a records index opened before
- * the move can still carry and which `EXCLUDED_ENTRIES` names at its `.canon`
- * spelling only.
+ * `SCRATCH` is the retired `.tmp` spelling. It is a guard rather than a lookup,
+ * keeping a stray `.tmp` out of a push, and `EXCLUDED_ENTRIES` names the
+ * `.canon` spelling only.
  */
 function isExcluded(name: string): boolean {
   return (

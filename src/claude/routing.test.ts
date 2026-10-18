@@ -28,8 +28,8 @@ afterEach(() => {
 
 describe('namedPaths', () => {
   it('should read a backticked folder as a named path', () => {
-    expect(namedPaths('- Write scratch to `.claude/.tmp/`.')).toEqual([
-      '.claude/.tmp/',
+    expect(namedPaths('- Write scratch to `.canon/tmp/`.')).toEqual([
+      '.canon/tmp/',
     ])
   })
 

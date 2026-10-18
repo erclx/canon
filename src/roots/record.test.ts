@@ -77,11 +77,11 @@ describe('recordDir', () => {
     )
   })
 
-  it('should keep the scratch folder dot at the old root', () => {
+  it('should resolve scratch at the new root when only the old one carries it', () => {
     seed('.claude', '.tmp')
 
     expect(recordDir(ROOT, SCRATCH, 'gov', 'rules.md')).toBe(
-      join(ROOT, '.claude', '.tmp', 'gov', 'rules.md'),
+      join(ROOT, '.canon', 'tmp', 'gov', 'rules.md'),
     )
   })
 
@@ -100,11 +100,8 @@ describe('recordDirs', () => {
     ])
   })
 
-  it('should name each root scratch spelling', () => {
-    expect(recordDirs(ROOT, SCRATCH)).toEqual([
-      join(ROOT, '.canon', 'tmp'),
-      join(ROOT, '.claude', '.tmp'),
-    ])
+  it('should name the new root alone for scratch', () => {
+    expect(recordDirs(ROOT, SCRATCH)).toEqual([join(ROOT, '.canon', 'tmp')])
   })
 })
 

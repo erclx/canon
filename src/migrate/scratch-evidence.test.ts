@@ -63,6 +63,31 @@ describe('planScratchEvidence', () => {
     ])
   })
 
+  it('should still plan a move for a folder an unmigrated target keeps at the old scratch root', async () => {
+    write('.claude/.tmp/system-map/how-it-works.md', 'the map\n') // canon-keep-record-root
+
+    const plan = await planFrom(root)
+
+    expect(plan.moves).toEqual([
+      {
+        folder: 'system-map',
+        from: join(root, '.claude/.tmp/system-map'), // canon-keep-record-root
+        to: join(root, '.canon/evidence/01-system-map'),
+      },
+    ])
+  })
+
+  it('should plan the new scratch copy when both roots hold the folder', async () => {
+    write('.claude/.tmp/system-map/how-it-works.md', 'stale\n') // canon-keep-record-root
+    write('.canon/tmp/system-map/how-it-works.md', 'newer\n')
+
+    const plan = await planFrom(root)
+
+    expect(plan.moves.map((move) => move.from)).toEqual([
+      join(root, '.canon/tmp/system-map'),
+    ])
+  })
+
   it('should number promoted folders by first appearance, continuing past an existing ordinal', async () => {
     write('.canon/evidence/02-older-trail/notes.md', 'x')
     writeAt(

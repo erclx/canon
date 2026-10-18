@@ -21,8 +21,4 @@ scaffold = ""
 # array no longer tells it to ignore them, so the first sign is a memory file or
 # a task board appearing in someone's commit.
 [gitignore]
-"# Claude" = [
-  ".canon/",
-  ".claude/worktrees/",
-  ".claude/.tmp/", # canon-keep-record-root
-]
+"# Claude" = [".canon/", ".claude/worktrees/"]

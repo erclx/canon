@@ -264,7 +264,9 @@ describe('sizeRecords', () => {
   })
 
   it('should read the scratch folder a backup skips', async () => {
-    writeRecord('.tmp/memory-routing/pen.md', 'body', 1)
+    const path = join(ROOT, '.canon', 'tmp', 'memory-routing', 'pen.md')
+    mkdirSync(join(path, '..'), { recursive: true })
+    writeFileSync(path, 'body')
 
     expect(folder(await read(), '.tmp').files).toBe(1)
   })
