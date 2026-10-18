@@ -295,6 +295,127 @@ describe('planAnswers', () => {
     })
   })
 
+  describe('a plan in a fan-in set', () => {
+    async function writeConstrained(
+      slug: string,
+      constraints: readonly string[],
+    ): Promise<void> {
+      await writeFile(
+        join(ROOT, '.canon', 'plans', `feature-${slug}.md`),
+        [
+          `# Feature: ${slug}`,
+          '',
+          '**Constraints:**',
+          '',
+          ...constraints.map((line) => `- ${line}`),
+          '',
+          '**Files to touch:**',
+          '',
+          '- `src/a.ts`: the change.',
+          '',
+        ].join('\n'),
+        'utf8',
+      )
+    }
+
+    const MEMBER = 'Fan-in member of `feature-whole`.'
+    const INTEGRATOR = 'Fans in `feature-a` and `feature-b`.'
+
+    function pushed(branches: readonly string[]) {
+      return async (_root: string, branch: string) => branches.includes(branch)
+    }
+
+    it('should hold a member whose integrator is absent with a Fan-in set entry', async () => {
+      await writeConstrained('a', [MEMBER])
+
+      const outcome = await planAnswers(ROOT, 'a', pushed([]))
+
+      assertOk(outcome)
+      expect(outcome.launchable).toBe(false)
+      expect(outcome.open.map(({ label }) => label)).toEqual(['Fan-in set'])
+    })
+
+    it('should launch a member its integrator lists', async () => {
+      await writeConstrained('a', [MEMBER])
+      await writeConstrained('b', [MEMBER])
+      await writeConstrained('whole', [INTEGRATOR])
+
+      const outcome = await planAnswers(ROOT, 'a', pushed([]))
+
+      assertOk(outcome)
+      expect(outcome.launchable).toBe(true)
+    })
+
+    it('should hold the integrator naming the one member branch absent from origin', async () => {
+      await writeConstrained('a', [MEMBER])
+      await writeConstrained('b', [MEMBER])
+      await writeConstrained('whole', [INTEGRATOR])
+
+      const outcome = await planAnswers(ROOT, 'whole', pushed(['feat/a']))
+
+      assertOk(outcome)
+      expect(outcome.launchable).toBe(false)
+      expect(outcome.open).toHaveLength(1)
+      expect(outcome.open[0]?.label).toBe('Fan-in pending')
+      expect(outcome.open[0]?.why).toContain('`feat/b`')
+      expect(outcome.open[0]?.why).not.toContain('`feat/a`')
+    })
+
+    it('should launch the integrator once every member branch is on origin', async () => {
+      await writeConstrained('a', [MEMBER])
+      await writeConstrained('b', [MEMBER])
+      await writeConstrained('whole', [INTEGRATOR])
+
+      const outcome = await planAnswers(
+        ROOT,
+        'whole',
+        pushed(['feat/a', 'feat/b']),
+      )
+
+      assertOk(outcome)
+      expect(outcome.launchable).toBe(true)
+    })
+
+    it('should hold the integrator when the ref read fails', async () => {
+      await writeConstrained('a', [MEMBER])
+      await writeConstrained('b', [MEMBER])
+      await writeConstrained('whole', [INTEGRATOR])
+
+      const outcome = await planAnswers(ROOT, 'whole', async () => null)
+
+      assertOk(outcome)
+      expect(outcome.launchable).toBe(false)
+      expect(outcome.open.map(({ label }) => label)).toEqual(['Fan-in pending'])
+    })
+
+    it('should hold an integrator listing an archived member even with its branch on origin', async () => {
+      await writeConstrained('a', [MEMBER])
+      await writeConstrained('whole', [INTEGRATOR])
+
+      const outcome = await planAnswers(
+        ROOT,
+        'whole',
+        pushed(['feat/a', 'feat/b']),
+      )
+
+      assertOk(outcome)
+      expect(outcome.launchable).toBe(false)
+      expect(outcome.open.map(({ label }) => label)).toEqual(['Fan-in set'])
+    })
+
+    it('should never read refs for a plan carrying no fan-in bullet', async () => {
+      await writeConstrained('plain', ['Measured against `abc` on 2026-10-18'])
+      const read = async (): Promise<boolean | null> => {
+        throw new Error('read refs for a plain plan')
+      }
+
+      const outcome = await planAnswers(ROOT, 'plain', read)
+
+      assertOk(outcome)
+      expect(outcome.open).toEqual([])
+    })
+  })
+
   it('should launch an ordinary plan carrying no staged batch', async () => {
     await writePlan('gate', [
       { suggested: 'the first, since the group already carries a verb.' },
