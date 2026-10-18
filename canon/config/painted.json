@@ -1,0 +1,3 @@
+{
+  "painted": ["src/design/components.ts", "src/canvas/client/**/*.ts"]
+}

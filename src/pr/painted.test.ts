@@ -1,6 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, it } from 'vitest'
 import {
   DEFAULT_PAINTED,
@@ -67,6 +68,17 @@ describe('loadPaintedPatterns', () => {
     )
 
     expect(isPainted('fixtures/page.html', patterns)).toBe(false)
+  })
+
+  it('should paint this repository own rendered sources through its shipped override', () => {
+    const patterns = loadPaintedPatterns(
+      fileURLToPath(new URL('../..', import.meta.url)),
+    )
+
+    expect(isPainted('src/design/components.ts', patterns)).toBe(true)
+    expect(isPainted('src/canvas/client/selection.ts', patterns)).toBe(true)
+    expect(isPainted('src/canvas/client/keys.test.ts', patterns)).toBe(false)
+    expect(isPainted('src/pr/lift.ts', patterns)).toBe(false)
   })
 
   it('should keep the default when the override does not parse', () => {
