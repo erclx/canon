@@ -51,7 +51,7 @@ Open every question with a lead-in of one to three plain sentences, written fres
 
 - An item with no `fix` still states the problem and the call, and one with no `Open:` says what the verdict accepts
 - As filed, "which hooks take it" means nothing lifted out of the Fix line it was written under
-- With a lead-in: "Claude Code 2.1.295 lets a hook fail closed. Today a crashed `scratch-guard.sh` lets the write through. Should `unattended-agent-guard.sh` get the fix too?"
+- With a lead-in: "Claude Code 2.1.295 lets a hook fail closed. A crashed `scratch-guard.sh` lets writes through, and the fix sets `onFailure: "block"`. Should `unattended-agent-guard.sh` get it too?"
 
 Give every option what it means and what it costs. An option with no stated cost is not an option, since the operator picks it without knowing what the other one buys.
 
