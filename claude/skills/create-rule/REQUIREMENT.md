@@ -9,7 +9,7 @@ description: Why a project-local rule needs a subdir, a slug free in it, and a s
 
 Without this skill, a project rule is written into the rules folder under a name already taken, or one a shipped rule claims later and overwrites. Writing under `.claude/rules/project/` closes that by location, leaving only a slug taken in the same subdir to check.
 
-The subdir gets picked by feel, so a UI copy rule loads on every session. The scope key fails both ways, with an always-on rule carrying a path scope and a path-scoped rule missing one. Written from memory, the body also drifts from the rule standard's shape.
+The subdir gets picked by feel, so a UI copy rule loads on every session. The scope key fails both ways, and a body written from memory drifts from the rule standard's shape. A rule restating what canon ships duplicates it, and one committed unseen lands before the operator read it.
 
 ## Must
 

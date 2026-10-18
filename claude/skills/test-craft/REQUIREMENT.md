@@ -29,5 +29,6 @@ A stated rule is one a session talks itself out of, since each misplaced test sa
 
 - The red, green, refactor loop, which `test-first` owns
 - Reproducing a failure with no known cause, which `systematic-debugging` owns
+- Runner choice, file suffix, placement, and query conventions, which the TypeScript and Python testing rules own
 - Writing a UI change's visual checklist, which `ui-checklist` owns
 - Grading the tests a pull request adds, which `review-pr` owns

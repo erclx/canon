@@ -9,7 +9,7 @@ description: Why sending to another session is one skill any session reaches, wh
 
 Without this skill, every session that owes another a message resolves the addressee itself, so one protocol lives in each role body and in whatever a roleless session improvises, and a fix reaching one copy misses the rest. A skill matched only by request never fires, so firing rests on the pointer in each role's channel section.
 
-A relayed message goes out with no sender, so an operator carrying it cannot say whose turn produced it. A name prefix can resolve to the wrong session, and the send to it still reports success, so the message is lost with nothing flagging it. Nothing else tells a roleless session why a block goes out before a prompt.
+A relayed message carries no sender, so an operator cannot say whose turn produced it. A name prefix can resolve to the wrong session and still report success. A send to another repository's session, or from a sender with no roster row, lands where nobody asked for it. Nothing else tells a roleless session why a block goes before a prompt.
 
 ## Must
 

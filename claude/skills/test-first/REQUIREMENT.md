@@ -29,5 +29,5 @@ A session implementing a planned change writes the test after the code, or write
 - Choosing a test's layer and judging whether it is good, which `test-craft` owns
 - Finding the cause of an unexplained failure, which `systematic-debugging` owns
 - Shaping the function, class, or module the implementation writes, which `code-craft` owns
-- Committing the behavior as a slice, which `build-in-slices` owns
+- Committing the behavior as a slice, which `build-in-slices` owns, and the mechanical test-order audit `auto-ship` invokes, which `canon gov test-order` owns
 - Confirming visual output after a change lands, which `ui-checklist` owns

@@ -9,7 +9,7 @@ description: Why creating and declining a task file is one skill, the origin inv
 
 Without this skill, a task file gets a filename and frontmatter invented on the spot, so the board sorts wrong and the index reads fields that are not there. A task with no origin is lost context or work nobody decided on, and nothing recovers which. A label picked by hand repeats one the archive spent.
 
-Two sessions filing at once claim one label twice or land rows beside each other unread. A worker filing what its build turned up writes a row the controlling session never placed, and a decline forced around a refusal leaves the board disagreeing with its own verbs.
+Two sessions filing at once claim one label twice or land rows beside each other unread. A worker filing what its build turned up writes a row the controlling session never placed, and a decline forced around a refusal leaves the board disagreeing with its own verbs. A task opened for a small edit or finished work adds a row nobody acts on.
 
 ## Must
 

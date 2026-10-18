@@ -5,7 +5,7 @@ description: Which comparable research skills this skill was read against, what 
 
 # Adopted and declined
 
-Three third-party research skills were read before this one was written. None of them was imported, and most of the body rests on paired searches measured in this skill's `REQUIREMENT.md` rather than on any of them. A later session extending the skill adds to this file rather than re-arguing an item settled here.
+Three third-party research skills were read before this one was written. None of them was imported, and most of the body rests on paired open and scoped searches run against this skill's own question rather than on any of them. A later session extending the skill adds to this file rather than re-arguing an item settled here.
 
 ## Adopted
 
@@ -37,6 +37,6 @@ None of the three is one, and each earns its keep on access and cost instead. A 
 
 ## Stated by no source
 
-**Naming the field and deriving its authorities.** No comparable skill takes a thinking step before searching. The step rests on the paired open and scoped searches recorded in `REQUIREMENT.md` under `Gap`, where the scoped run returned primary sources and caught a wrong version number the open run carried.
+**Naming the field and deriving its authorities.** No comparable skill takes a thinking step before searching. The step rests on paired open and scoped searches, where the scoped run returned primary sources and caught a wrong version number the open run carried.
 
 **Preferring a public API over a fetched page.** It rests on the same probes, where the scholarly and reference APIs returned the dates, authors, and identifiers a citation needs and a fetched page returned a summary.
