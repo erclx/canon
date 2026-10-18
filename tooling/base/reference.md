@@ -18,7 +18,6 @@ Two configs fix how output looks and how commits read.
 - The `astro` stack repeats those options in its own copy, so copy a change here into it.
 - `commitlint.config.js` is an ESM default export extending `@commitlint/config-conventional`. It sets `header-max-length: 72`, `scope-case: lower-case`, and `subject-full-stop: never`.
 - Its `subject-case` rule is off.
-- `.husky/` holds `pre-commit`, `commit-msg`, `pre-push`, `post-merge`, and `post-rewrite`.
 
 ### Verify runner
 
@@ -39,7 +38,7 @@ Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and n
 - `.lintstagedrc` holds the glob map below.
 - `.github/workflows/verify.yml` runs on pull requests targeting `main` and on `workflow_dispatch`. A multi-root project adds its own jobs here.
 - `.github/pull_request_template.md` has `## Summary`, `## Key changes`, `## Technical context`, and `## Testing`. A project adds its own checklist lines.
-- `canon/context/` holds the `ci` and `development` entries. Extend them with project-specific commands, workflows, or deploy steps, and keep canonical rationale in this reference.
+- `canon/context/development/` holds the `setup` and `ci` entries under a folder index. Extend them with project-specific commands and workflows, and keep canonical rationale here.
 
 ## Tool pairing
 
