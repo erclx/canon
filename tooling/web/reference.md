@@ -19,20 +19,20 @@ Two configs carry the lint and unit-test baseline.
 
 ### Screenshot cases
 
-`e2e/screenshot.ts` is the capture template. One `CASES` record carries an entry per output file, each naming a section, a theme, and a route, and per-project cases extend it.
+`e2e/screenshot.ts` is the capture harness, overwritten on sync. The seeded `e2e/capture/cases.ts` holds the `CASES` a project edits, one entry per output file naming a section, a theme, and a route.
 
-- The loop crosses every case with `VIEWPORTS` and writes `screenshots/<hostname>/<section>/<width>--<theme>.png`. The hostname of `SCREENSHOT_BASE_URL` keeps a local run and a deployed run apart.
+- The loop crosses every case with `VIEWPORTS` and writes `screenshots/<hostname>/<section>/<width>--<theme>.png`. The hostname of `SCREENSHOT_BASE_URL` keeps local and deployed runs apart.
 - `VIEWPORTS` holds 320, 768, 1280, and 1536. Width 320 is the base a page has to hold without wrapping or clipping.
 - `excludeViewports` skips a width, for a route whose long-form prose reflows at 320 instead of breaking.
-- `evidence: true` also writes `evidence/<section>/<width>--<theme>.png` at 320 and 1280 alone, keeping the tracked set at twice the sections rather than four times.
+- `evidence: true` also writes `<EVIDENCE_ROOT>/<section>/<width>--<theme>.png` at 320 and 1280 alone. `EVIDENCE_ROOT` defaults to `e2e/evidence`.
+- Migration: move cases from a project's own `e2e/screenshot.ts` to `e2e/capture/cases.ts` before the next sync, and set `EVIDENCE_ROOT = 'evidence'` to keep the baseline.
 
 ### Sections and masks
 
 A case may name `sections`, one `{ name, selector }` per addressable part of the route. Each writes its own frame beside the whole-page one.
 
-- A section frame lands at `screenshots/<hostname>/<section>/<name>/<width>--<theme>.png`, plus the same path under `evidence/` where the case and width are flagged.
-- A selector matching nothing is reported and skipped, since a target syncing the template before editing its list would otherwise capture nothing.
-- Testing that every section resolves belongs to the project owning the selectors.
+- A section frame lands at `screenshots/<hostname>/<section>/<name>/<width>--<theme>.png`, plus the same path under `EVIDENCE_ROOT` where the case and width are flagged.
+- A selector matching nothing is reported and skipped, since a seeded list may name sections the page lacks. The project owning the selectors tests that they resolve.
 - `mask` lists selectors painted over in every frame, for a value that moves with no code change, so a double capture compares the rest.
 
 ### Settling before a shot
