@@ -182,6 +182,7 @@ beforeAll(() => {
     join(fixture, 'bin-due'),
     join(fixture, 'bin-scan-fail'),
     join(fixture, 'bin-scan-pass'),
+    join(fixture, 'bin-board'),
     join(fixture, 'no-source'),
     join(fixture, 'read-only'),
     join(fixture, 'elsewhere/tmp'),
@@ -295,6 +296,16 @@ beforeAll(() => {
   writeFileSync(scanPass, '#!/usr/bin/env bash\nexit 0\n')
   chmodSync(scanPass, 0o755)
 
+  // The board hook reads its findings out of a `tasks validate --json` record
+  // and exits 0 whatever the verb exits, so a stub answering one finding with
+  // the verb's own exit 2 stands in for a board a hand edit broke.
+  const board = join(fixture, 'bin-board/canon')
+  writeFileSync(
+    board,
+    `#!/usr/bin/env bash\nprintf '%s\\n' '{"ok":true,"findings":[{"kind":"cell-long","group":"Needs a plan","subject":"v1.0-a","message":"carries a long cell."}]}'\nexit 2\n`,
+  )
+  chmodSync(board, 0o755)
+
   // The reply-links hook decides on the record the verb writes, so a stub
   // answering a missing path stands in for the verb, and logs each call so a
   // test reads whether the hook spawned it at all. The real check is covered
@@ -338,6 +349,15 @@ beforeAll(() => {
   // quiet fall-through instead, so these are what make the guard's fidelity
   // observable rather than assumed.
   acting = {
+    'board-validate.sh': {
+      expect: 'cell-long: v1.0-a carries a long cell.',
+      path: [join(fixture, 'bin-board'), hookPath].join(delimiter),
+      payload: () =>
+        payloadFor({
+          tool_input: { file_path: join(project, '.canon/tasks/priority.md') },
+          tool_name: 'Edit',
+        }),
+    },
     'dev-command-reminder.sh': {
       expect: 'Dev commands have gotchas',
       payload: (nonce) =>
@@ -560,6 +580,30 @@ for (const tree of TREES) {
     }
   })
 }
+
+// The board hook validates the ordering file alone, so an edit to a sibling
+// record exits before the verb, which the finding stub would otherwise report.
+describe('board-validate.sh scope', () => {
+  for (const tree of TREES) {
+    for (const name of ['backlog.md', 'index.md']) {
+      it(`should stay silent on an edit to ${name} in ${tree.label}`, async () => {
+        const result = await run(
+          join(tree.dir, 'board-validate.sh'),
+          payloadFor({
+            tool_input: {
+              file_path: join(fixture, `project/.canon/tasks/${name}`),
+            },
+            tool_name: 'Edit',
+          }),
+          [join(fixture, 'bin-board'), hookPath].join(delimiter),
+        )
+
+        expect(result.stdout).toBe('')
+        expect(result.code).toBe(0)
+      })
+    }
+  }
+})
 
 // The block fires once, and a reply with no link never starts the CLI. The
 // acting case above proves the stub still answers, which is what makes the
