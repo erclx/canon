@@ -11,21 +11,18 @@ paths:
 
 ## Punctuation
 
-- Do not use em dashes (`—`) or semicolons (`;`). Use a comma or period, or restructure the sentence.
-- Do not add punctuation to button labels or short action strings.
+- Write no em dash (`—`) or semicolon in rendered copy. Use a comma or a period, or restructure the sentence.
+- Add no trailing punctuation to a button label or a short action string.
 
 ## Button copy
 
-- Use imperative verbs for actions: `Save`, `Delete`, `Connect`, `Cancel`.
-- Avoid padded phrasing: `Save` over `Save changes`, `Delete` over `Click to delete`.
+- Label a button with the verb of the action it performs, such as `Save` or `Delete`, never with filler such as `Click to delete`.
 
 ## Error messages
 
-- State what to do, not what went wrong: `Enter a valid email` over `Email is invalid`.
-- Keep messages short and actionable.
-- One sentence maximum.
+- Tell the person how to fix the error, such as `Enter an email address` over `Email is invalid`.
+- Keep an error message to one short sentence in plain language, with no technical jargon or error codes.
 
 ## Placeholder text
 
-- Show format examples over instructions: `name@example.com` over `Enter your email here`.
-- Reserve instructions for labels or helper text below the input.
+- Never use placeholder text as a label, a hint, or an example. Put a format example such as `name@example.com` in hint text under the label.

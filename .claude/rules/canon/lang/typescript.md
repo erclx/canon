@@ -1,5 +1,5 @@
 ---
-description: Enforce strict TypeScript type safety and patterns
+description: Enforce strict TypeScript type safety, declarations, and import patterns
 paths:
   - '**/*.ts'
   - '**/*.tsx'
@@ -7,34 +7,24 @@ paths:
 
 # TypeScript standards
 
-## Casing conventions
+## File names
 
-- Use `kebab-case` for filenames and directories.
-- Use `camelCase` for variables, functions, and methods.
-- Use `PascalCase` for types, interfaces, classes, and components.
-- Use `UPPER_SNAKE_CASE` for constants and environment variables.
+- Use `kebab-case` for filenames and directories, since a case-only difference resolves on macOS and fails on Linux.
 
 ## Type declarations
 
-- Enforce explicit types or strict inference.
-- Use `unknown` over `any`.
-- Use `interface` for object shapes and component props.
-- Use `type` for unions, intersections, and utility types.
-- Do not prefix interfaces with `I`.
-- Use constant objects or union types instead of `enum`.
+- Use `unknown` over `any`, and narrow it before use.
+- Use `interface` for an object shape until it needs a feature only `type` has, such as a union or a mapped type.
+- Use a constant object with `as const` or a union of literals instead of `enum`.
 
 ## Type safety
 
-- Use type guards and narrowing over type assertions.
-- Use discriminated unions for error handling over throwing exceptions.
-- Use built-in utility types (`Partial`, `Pick`, `Omit`) over manual type manipulation.
-- Prefer `readonly` properties for data objects.
-- Do not use non-null assertions.
-- Use `Promise.all()` for independent async operations.
+- Narrow with a type guard or a runtime check over a type assertion or a non-null `!`, neither of which checks at runtime.
+- Run independent async operations through `Promise.all()` rather than awaiting each in turn.
 
 ## Imports and configuration
 
-- Use absolute imports mapping `@/` to `src/`.
+- Import through the `@/` alias where tsconfig.json and the bundler both map it to `src/`, over a `../../` chain.
 - Import from the module's source file directly over barrel `index` re-exports.
 - Use `import type` for type-only imports.
 - Enable `strict: true` in tsconfig.json with no exceptions.

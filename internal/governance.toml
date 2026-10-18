@@ -33,6 +33,7 @@ add = [
   "e2e-reliability",
   "copy",
   "a11y",
+  "keyboard",
   "forms",
   "ux-completeness",
   "surface-capture",

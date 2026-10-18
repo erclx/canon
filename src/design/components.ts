@@ -520,7 +520,7 @@ html.sb-shut .pane { border-left: 0; }
 }
 
 /* A bar link is its own tap target rather than a line of text, so it carries
-   the 24 pixel minimum the a11y rule sets. */
+   the 24 pixel minimum the keyboard rule sets. */
 .mast a,
 .mast summary {
   min-height: 1.6rem;

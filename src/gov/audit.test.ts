@@ -336,6 +336,35 @@ describe('auditExit', () => {
     ).toBe(2)
   })
 
+  it('should exit 0 under the gate flag when the finding is in an exempt file', async () => {
+    const canvas = join('governance', 'rules', 'ui', 'canvas.md')
+    write(canvas, rule(bullets(16)))
+    const report = measured(await readRuleAudit(ROOT))
+
+    expect(
+      auditExit(report, {
+        gate: true,
+        gated: [join('governance', 'rules', 'ui') + '/'],
+        exempt: [canvas],
+      }),
+    ).toBe(0)
+  })
+
+  it('should exit 2 under the gate flag when a sibling of an exempt file has a finding', async () => {
+    const canvas = join('governance', 'rules', 'ui', 'canvas.md')
+    write(canvas, rule(bullets(16)))
+    write(join('governance', 'rules', 'ui', 'forms.md'), rule(bullets(16)))
+    const report = measured(await readRuleAudit(ROOT))
+
+    expect(
+      auditExit(report, {
+        gate: true,
+        gated: [join('governance', 'rules', 'ui') + '/'],
+        exempt: [canvas],
+      }),
+    ).toBe(2)
+  })
+
   it('should exit 0 on a clean corpus', async () => {
     write(framework, rule(bullets(1)))
     write(

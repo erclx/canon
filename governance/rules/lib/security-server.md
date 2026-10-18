@@ -19,7 +19,7 @@ paths:
 
 ## Credentials
 
-- Hash passwords with a memory-hard algorithm and a per-record salt. Never store a reversible password.
+- Hash passwords with Argon2id, or scrypt or bcrypt where it is missing, and a per-password salt. Never store a reversible password.
 - Compare tokens, signatures, and password hashes with a constant-time function.
 - Expire and revoke sessions and refresh tokens on the server. Do not rely on client-side deletion.
 
@@ -27,7 +27,7 @@ paths:
 
 - Read every secret from the environment or a secret manager at runtime.
 - Never commit a secret, connection string, or private key to the repository.
-- Never return a secret, connection string, or internal hostname in a response body.
+- Never return a secret, connection string, stack trace, or internal hostname in a response body.
 
 ## Abuse limits
 
@@ -37,5 +37,5 @@ paths:
 
 ## Transport
 
-- Serve every route over TLS and reject plaintext requests.
-- Restrict CORS to an explicit origin list. Never reflect the request origin or pair a wildcard with credentials.
+- Serve every route over TLS. Fail a plaintext API request rather than redirecting it.
+- List CORS origins explicitly whenever credentials are allowed, since a wildcard is refused then. Never reflect the request origin.

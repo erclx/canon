@@ -36,6 +36,21 @@ export const RULE_GATED_FOLDERS: readonly string[] = [
   join('governance', 'rules', 'framework') + sep,
   join('governance', 'rules', 'writing') + sep,
   join('internal', 'rules') + sep,
+  join('governance', 'rules', 'lang') + sep,
+  join('governance', 'rules', 'lib') + sep,
+  join('governance', 'rules', 'ui') + sep,
+  join('governance', 'rules', 'tooling') + sep,
+]
+
+/**
+ * Rule files in a gated folder whose findings `--gate` still passes, one path
+ * each and never a folder, so a new rule beside one is gated the day it lands.
+ *
+ * `ui/canvas.md` carries a shape finding and no ledger, and v149.2 removes the
+ * rule, so this entry goes with it.
+ */
+export const RULE_GATE_EXEMPT: readonly string[] = [
+  join('governance', 'rules', 'ui', 'canvas.md'),
 ]
 
 /** The folders whose rules claim outside practice, so each carries a ledger. */
@@ -429,13 +444,18 @@ export function hasFinding(reading: RuleReading): boolean {
  */
 export function auditExit(
   report: Extract<RuleAuditReport, { kind: 'measured' }>,
-  options: { readonly gate: boolean; readonly gated: readonly string[] },
+  options: {
+    readonly gate: boolean
+    readonly gated: readonly string[]
+    readonly exempt?: readonly string[]
+  },
 ): number {
   const failing = report.rules.filter(
     (reading) =>
       hasFinding(reading) &&
       (!options.gate ||
-        options.gated.some((prefix) => reading.file.startsWith(prefix))),
+        (options.gated.some((prefix) => reading.file.startsWith(prefix)) &&
+          !options.exempt?.includes(reading.file))),
   )
   return failing.length > 0 ? 2 : 0
 }

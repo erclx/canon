@@ -16,14 +16,12 @@ paths:
 - Write a comment only when it records a fact the reader cannot recover from the code: an external contract, a rejected alternative, or the reason a surprising line is correct.
 - Do not restate in prose what the line beside it already says.
 - Do not comment a self-contained function whose signature and body already carry its behavior.
-- Let comment density follow how much of a file's behavior is decided outside that file. Treat density as an outcome, never as a target.
-- Do not add or delete a comment to move a file toward a density figure.
+- Do not add or delete a comment to move a file toward a density figure, since density follows how much of its behavior is decided outside it.
 
 ## What a comment may claim
 
-- State only what is true of the code as written.
+- Keep each comment true of the code as written, and update or delete one a change invalidates in that same change.
 - Describe a function's contract and its constraints, never its steps line by line.
-- Update or delete an invalidated comment in the same change that invalidates it.
 - Do not name a person, a ticket, or a date in place of the fact itself.
 
 ## What never goes in a comment

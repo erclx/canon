@@ -168,3 +168,13 @@ A web project's `e2e/screenshot.ts` is a config, so sync overwrites it. It now l
 - Copy your cases from the old `e2e/screenshot.ts` into `e2e/capture/cases.ts` before the next sync.
 - Evidence now defaults to `e2e/evidence/`. Set `export const EVIDENCE_ROOT = 'evidence'` in `e2e/capture/cases.ts` to keep a committed baseline at the old path.
 - A run from a folder with no `e2e/capture/cases.ts` exits 1 and names the file.
+
+## Add the keyboard rule beside a held a11y rule, once
+
+The `a11y` rule split in two. Focus styles, Escape and shortcuts, composite widgets, focus management, and pointer target size moved to a new `keyboard` rule. `canon gov sync` refreshes only the rules a project holds, so it rewrites `a11y.md` without those bullets and never adds `keyboard.md`.
+
+A project holding `.claude/rules/canon/ui/a11y.md` adds the new rule alone:
+
+```bash
+canon gov install --add keyboard --yes .
+```

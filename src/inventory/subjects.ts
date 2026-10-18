@@ -27,7 +27,7 @@ export interface Subject {
 
 /**
  * Reports what each element changes about itself when it takes focus, which is
- * the reading `governance/rules/ui/a11y.md` states three rules against and
+ * the reading `governance/rules/ui/keyboard.md` states three rules against and
  * nothing measures.
  *
  * The difference between rest and focus is the treatment, rather than the

@@ -27,7 +27,9 @@ Holds the source ledger for each outside-practice rule at the rule's own path, o
 
 - `canon gov audit` matches a ledger's table rows to the rule's bullets by count under each H2 of the same name, so a row added or dropped without its bullet fails the folder
 - A cut bullet goes in a `## Declined` list rather than a table, since every table row under a heading counts as a bullet's row
-- `framework/` is the first folder through, so its six ledgers are the worked shape for `lang/`, `lib/`, `ui/`, and `tooling/`
+- Every `PRACTICE_FOLDERS` entry is gated, so a new outside-practice rule fails the push until its ledger lands, and `RULE_GATE_EXEMPT` spares `ui/canvas.md` alone until v149.2
+- A ledger whose rule names a version-bound API records the major in the `Read` column
+- A `|` inside a code span still splits a table cell, so a glob such as `@(spec|test)` in a ledger row is written `@(spec\|test)`
 
 ### `governance/stacks/`
 
@@ -55,7 +57,7 @@ Owns the gov half of every verb, being the stack reader, the rule lookup, the ca
 - `install` bootstraps a stack and overwrites, `sync` refreshes only what is installed and never adds, and `build` writes the paste payload
 - `gov list --json` carries `unreferenced` and `staleDetect` beside `stacks` and `rules`, and `recordStamp` holds the file hashes while `writeChainStamp` holds the stack name
 - `src/sync/engine.ts` runs the scan, prompt, and apply loop, and matches an installed rule to its source by name so a moved rule syncs into the subfolder the target uses
-- `canon gov citations` gates on a dead rule citation or internal glob, and `canon gov audit` on a rule past a shape limit or short of a ledger in a folder `RULE_GATED_FOLDERS` lists
+- `canon gov citations` gates on a dead rule citation or internal glob, and `canon gov audit` on a rule past a shape limit or short of a ledger in a gated folder, bar an exempt file
 - `canon gov install` and `sync` refuse the toolkit root, `regen` runs there on purpose, and `CANON_NON_INTERACTIVE=1` takes each confirm's first option but not the stack picker
 
 ### `claude/skills/create-rule/`

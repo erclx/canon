@@ -8,31 +8,29 @@ paths:
 
 ## Models
 
-- Use `pydantic.BaseModel` over `dataclass` at I/O and API boundaries.
-- Use `model_config = ConfigDict(...)` over the legacy nested `Config` class.
-- Set `extra="forbid"` on models receiving external input to prevent data pollution.
-- Use `Field(...)` for defaults, descriptions, and constraints over docstring conventions.
+- Use `pydantic.BaseModel` over a standard library `dataclass` at I/O and API boundaries, since a `dataclass` validates nothing.
+- On Pydantic 2, configure a model with `model_config = ConfigDict(...)`, never the deprecated nested `Config` class.
+- Set `extra="forbid"` on a model receiving external input, since the default ignores an unknown key silently.
+- Declare a constraint with `Field(...)`, such as `gt=0`, so validation enforces it rather than a docstring.
 
 ## Validation
 
-- Use `Model.model_validate(data)` over `Model(**data)` for untrusted dict input.
-- Use `Model.model_validate_json(s)` over `json.loads` followed by validation.
-- Use `@field_validator` over the legacy `@validator`.
-- Use `@model_validator(mode="after")` for cross-field invariants.
+- Validate an untrusted dict with `Model.model_validate(data)`, and a JSON string with `Model.model_validate_json(s)` rather than `json.loads` first.
+- On Pydantic 2, write `@field_validator` and `@model_validator`, never the deprecated `@validator` or `@root_validator`.
+- Check a cross-field invariant in `@model_validator(mode="after")`.
 
 ## Types
 
-- Use `AnyUrl`, `EmailStr`, `SecretStr`, and `PositiveInt` over hand-rolled regex constraints.
-- Use `Annotated[T, Field(...)]` over default-value `Field(...)` for reusable constrained types.
-- Do not use `Any` in fields. Reach for `JsonValue` or a `Union` of concrete types.
+- Use `SecretStr` for a credential, so its value stays out of logs and tracebacks.
+- Use a constrained type such as `PositiveInt` or `EmailStr` over a hand-rolled regex.
+- Share a constrained type as `Annotated[T, Field(...)]`.
+- Never type a field `Any`, which allows any value including `None`. Use `JsonValue` or a union of concrete types.
 
 ## Settings
 
-- Use `pydantic_settings.BaseSettings` for env-driven configuration.
-- Load environment through a single `Settings` model. Do not read `os.environ` directly elsewhere.
+- Load environment through one `pydantic_settings.BaseSettings` model. Never read `os.environ` directly elsewhere.
 
 ## Serialization
 
-- Use `model.model_dump(mode="json")` over the legacy `.dict()`.
-- Use `model.model_dump_json()` over `json.dumps(model.dict())`.
-- Use `by_alias=True` when serializing to external schemas with non-Python field names.
+- On Pydantic 2, serialize with `model_dump(mode="json")` or `model_dump_json()`, never the deprecated `.dict()` or `.json()`.
+- Pass `by_alias=True` when serializing to an external schema, since a dump ignores aliases by default.
