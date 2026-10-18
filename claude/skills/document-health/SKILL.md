@@ -1,6 +1,6 @@
 ---
 name: document-health
-description: Reports which of a project's documents have rotted, one section per document, across length, placement, and staleness. Reads each axis through the verb that owns it and marks the evidence class each answer carries. Use when asked to "check document health", "which docs have gone stale", "audit the docs for rot", "are these documents still accurate", "which docs are too long", or after a target check reports the structural side. Do NOT use to repair a finding, which the owning command or skill does, and do NOT use to check whether a document exists or holds the right sections, which is `target-check`.
+description: Reports which of a project's documents have rotted, one section per document, across length, placement, and staleness. Reads each axis through the verb that owns it and marks the evidence class each answer carries. Use when asked to "check document health", "which docs have gone stale", "audit the docs for rot", "are these documents still accurate", "which docs are too long", or after a target check reports the structural side. Do NOT use to repair a finding, which the owning command or skill does, such as `document-repair` for a length finding, and do NOT use to check whether a document exists or holds the right sections, which is `target-check`.
 metadata:
   family: check
 ---
@@ -74,7 +74,7 @@ Nothing triggers this review but a request. A finished review hands the rewrite 
 
 ## Step 4: report per document
 
-Give each document its three axes, and give each axis three things: the state, the evidence class, and the command or skill that repairs it. Naming the repair is not running it.
+Give each document its three axes, and give each axis three things: the state, the evidence class, and the command or skill that repairs it. Naming the repair is not running it. A length finding names `document-repair`, which rewrites a folder to zero and gates it.
 
 The three classes are what keep the axes apart:
 
