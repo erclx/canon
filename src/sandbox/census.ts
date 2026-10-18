@@ -69,7 +69,7 @@ export function listSkills(root: string): string[] {
 /**
  * Maps a scenario to the skill it drives, trying two spellings in order.
  *
- * `<category>-<command>` is the rule `canon/context/sandbox.md` states, and it
+ * `<category>-<command>` is the rule `canon/context/development/sandbox.md` states, and it
  * alone pairs 29 of 54 skills. The bare `<command>` fallback is what reaches the
  * rest: `claude/target-setup.ts` drives the `target-setup` skill, not a `claude-target-setup` that
  * does not exist. Stating one spelling and shipping two is what let the audit

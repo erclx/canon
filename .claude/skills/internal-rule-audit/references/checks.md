@@ -9,7 +9,7 @@ Each check names the source that answers it, so the audit reads rather than re-d
 
 ## 1. Load mode
 
-An always-on rule must pass "would removing this cause a mistake in every session this rule reaches". A path-scoped rule must pass the two-part test in `canon/context/governance.md`, that the invariant fires when a matching path is edited and violating it ships silently.
+An always-on rule must pass "would removing this cause a mistake in every session this rule reaches". A path-scoped rule must pass the two-part test in `canon/context/surfaces/governance.md`, that the invariant fires when a matching path is edited and violating it ships silently.
 
 - **Source:** the rule's `paths` in `gov list --json`, where `null` means always-on. A file under `internal/rules/` is unlisted, so read its own `paths:` frontmatter.
 - **Fails toward:** move, when a subject with a glob loads always, or a subject with no glob is path-scoped and never fires
@@ -33,7 +33,7 @@ The `unreferenced` array in the same record names every governance rule no stack
 
 ## 3. Restated elsewhere
 
-Two surfaces a target receives stating one instruction means one goes. A surface reaching a target only through a seed copied at scaffold time does not count, per `canon/context/governance.md`.
+Two surfaces a target receives stating one instruction means one goes. A surface reaching a target only through a seed copied at scaffold time does not count, per `canon/context/surfaces/governance.md`.
 
 - **Source:** `gov restated --json`. Keep each `restatements` entry whose `subject.file` ends in the rule's filename, and read its `surfaces`, each of kind `rule`, `skill`, or `seed`.
 - **Own skills:** a surface under `.claude/skills/` counts against an `internal/rules/` subject alone, since no target receives this repository's own skills
@@ -41,7 +41,7 @@ Two surfaces a target receives stating one instruction means one goes. A surface
 
 ## 4. Owned by a standard
 
-A directive beside the pointer states what must not go wrong rather than restating the standard's structure. `canon/context/governance.md` caps directives beside a pointer at five.
+A directive beside the pointer states what must not go wrong rather than restating the standard's structure. `canon/context/surfaces/governance.md` caps directives beside a pointer at five.
 
 - **Source:** the standard the rule points at, read with `bun src/cli.ts standards <name>`.
 - **Fails toward:** keep with the restated directives to cut. A rule whose every directive restates its standard retires to the pointer alone, which reads as keep when the pointer still earns the load.

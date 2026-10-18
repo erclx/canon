@@ -65,7 +65,7 @@ export function writesBetween(before: Manifest, after: Manifest): string[] {
  *
  * It makes an escape visible rather than impossible. A session can write to a
  * home directory, to a sibling worktree, or to any path outside these roots, and
- * none of that is watched. `canon/context/sandbox.md` names the four
+ * none of that is watched. `canon/context/development/sandbox.md` names the four
  * directories the watch reads.
  *
  * A linked worktree is the normal place to develop this repository, and the
@@ -108,7 +108,7 @@ export function escapeRoots(projectRoot: string): string[] {
  * `dispatch.ts`, so the key defined against this file-write watch keeps one
  * meaning. An arm whose skill is meant to reach past the sandbox tree declares
  * `escape_scope` in its `expect.toml`, which bounds a legitimate write rather
- * than the run. Read `canon/context/sandbox.md` before writing a claim past
+ * than the run. Read `canon/context/development/sandbox.md` before writing a claim past
  * that.
  */
 export const ESCAPE_SCRATCH_DIRS = [

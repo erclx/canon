@@ -22,7 +22,7 @@ The astro stack covers Astro + TypeScript projects: content sites, marketing sit
 - `playwright.config.ts`: all browsers, `webServer` runs `bun run build && bun run preview` on port `4321` plus `WORKTREE_PORT_OFFSET`, `reuseExistingServer: false`. Astro's dev/prod gap is wide (MDX, island hydration, asset optimization), so E2E always tests the built `dist/`. `DIST_PREBUILT` set in the environment drops the `build` half, running `bun run preview` alone against a `dist/` a prior CI job already produced.
 - `tsconfig.json`: extends `astro/tsconfigs/strict`, adds `skipLibCheck`, `vitest/globals` and `@testing-library/jest-dom/vitest` in types, `@/` paths.
 - `card.config.mjs`, `card-src/pages/og-card.astro`, and `scripts/check-card-exclusion.sh`: the social card route, its structural build exclusion, and the check enforcing it. See `## Social card route` below.
-- `eslint.config.js`: this stack's own flat config, since the web layer lints with oxlint, which parses no `.astro` file. Adds `eslint-plugin-astro` (`.astro` parser via `astro-eslint-parser`). React-hooks scoped to `.jsx`/`.tsx` only (`.astro` is not React). The shared block's `files` selector includes `.astro`, so `check-file/filename-naming-convention` reaches `.ts`, `.tsx`, and `.astro` under `KEBAB_CASE`, overriding Astro's own PascalCase component convention deliberately, on the ground that a component's name in markup comes from the import binding rather than the filename. `.js` and `.jsx` stay out of the rule's own pattern, matching `web` and `nextjs`. `check-file/folder-naming-convention` reaches every `src/**` folder except `__tests__` and the whole `pages/` subtree, which carries its own off-block for the bracket-named dynamic routes and nested slug folders Astro's file-based routing produces. See `canon/context/tooling.md` for the measurement.
+- `eslint.config.js`: this stack's own flat config, since the web layer lints with oxlint, which parses no `.astro` file. Adds `eslint-plugin-astro` (`.astro` parser via `astro-eslint-parser`). React-hooks scoped to `.jsx`/`.tsx` only (`.astro` is not React). The shared block's `files` selector includes `.astro`, so `check-file/filename-naming-convention` reaches `.ts`, `.tsx`, and `.astro` under `KEBAB_CASE`, overriding Astro's own PascalCase component convention deliberately, on the ground that a component's name in markup comes from the import binding rather than the filename. `.js` and `.jsx` stay out of the rule's own pattern, matching `web` and `nextjs`. `check-file/folder-naming-convention` reaches every `src/**` folder except `__tests__` and the whole `pages/` subtree, which carries its own off-block for the bracket-named dynamic routes and nested slug folders Astro's file-based routing produces. See `canon/context/surfaces/tooling.md` for the measurement.
 
 ## Typecheck
 
@@ -60,7 +60,7 @@ Append to the `## Scripts` table:
 
 ## CI docs (extend)
 
-In `canon/context/ci.md`, the Typecheck row's assertion reads: `` `astro check` passes ``. The Build row's assertion reads: `` `astro build` succeeds ``. <!-- audit-ignore-citations: canon/context/ci.md -->
+In `canon/context/development/ci.md`, the Typecheck row's assertion reads: `` `astro check` passes ``. The Build row's assertion reads: `` `astro build` succeeds ``. <!-- audit-ignore-citations: canon/context/development/ci.md -->
 
 ## Social card route
 

@@ -3,7 +3,7 @@
 # Runs the post-merge steps through `canon hooks post-merge`: archive the task a
 # merged pull request closed, push the records, reclaim merged worktrees,
 # reinstall the CLI, and update the plugin cache. The verb owns the order and
-# each line it prints. `canon/context/development.md` carries why.
+# each line it prints. `canon/context/development/local-loop.md` carries why.
 #
 # CANON_SKIP_RECLAIM=1 turns off the worktree reclaim.
 # CANON_SKIP_UPGRADE=1 turns off the CLI reinstall.

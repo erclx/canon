@@ -20,7 +20,7 @@ Report numbers. A sentence about what the source looks like is what this exists 
 Read these in parallel from the project root, skipping any that do not exist:
 
 - `package.json`: the `scripts` block naming a dev, preview, or start command
-- `canon/context/development.md`: the documented run commands and the port each serves
+- `canon/context/development/local-loop.md`: the documented run commands and the port each serves
 - `CLAUDE.md`: project type and conventions
 
 Prefer a production-shaped build (`preview`, `start`) over the dev server, since a dev server ships unminified modules and reports a cost no user pays.

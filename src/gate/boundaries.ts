@@ -211,7 +211,7 @@ function collectCommands(value: unknown, into: string[] = []): string[] {
 /**
  * A hook, a workflow, or a husky script reaching one side of the seed or config
  * boundary and not the other is a capability withheld with no recorded reason,
- * per the criterion in `canon/context/tooling.md`.
+ * per the criterion in `canon/context/surfaces/tooling.md`.
  *
  * Presence on either side clears a name, and a `canon-no-seed:` comment in the
  * file is the recorded reason. The same marker on a destination clears a

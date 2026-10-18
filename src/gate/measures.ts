@@ -1401,7 +1401,7 @@ export const pluginManifests: Measure = async (ctx) => {
     return {
       emissions: [],
       unmeasured:
-        'claude is on PATH and claude --version fails, so the install brought down no platform-native binary and no manifest was read. Raise or lower the pinned version at the Install Plugin CLI step in .github/workflows/verify.yml, then test the raised pin as `canon/context/ci.md` states.',
+        'claude is on PATH and claude --version fails, so the install brought down no platform-native binary and no manifest was read. Raise or lower the pinned version at the Install Plugin CLI step in .github/workflows/verify.yml, then test the raised pin as `canon/context/development/ci.md` states.',
     }
   }
 

@@ -7,7 +7,7 @@ description: Toolkit-only internal skills, the upstream release digest behind th
 
 ## Overview
 
-Owns the Claude surfaces that never leave this repository, being the `internal-*` skills, the upstream release digest, and how a local session loads the plugin. What ships to targets sits in `canon/context/claude-plugin.md`, and multi-session coordination in `canon/context/orchestration.md`.
+Owns the Claude surfaces that never leave this repository, being the `internal-*` skills, the upstream release digest, and how a local session loads the plugin. What ships to targets sits in `canon/context/surfaces/plugin.md`, and multi-session coordination in `canon/context/workflow/orchestration.md`.
 
 ## Layout
 
@@ -44,7 +44,7 @@ The entries around this domain each own one slice.
 
 - `claude/.claude-plugin/` is where a session inside this repository auto-discovers the plugin, with no flag on a fresh launch
 - Elsewhere pass `--plugin-dir`, and pass it again on `claude --resume`, which restores the registration the session started with
-- `docs/workflow/zshrc-aliases.md` owns the launch aliases, and `canon claude setup` provisions user-level config as `canon/context/claude-plugin.md` states
+- `docs/workflow/zshrc-aliases.md` owns the launch aliases, and `canon claude setup` provisions user-level config as `canon/context/surfaces/plugin.md` states
 
 ## Gotchas
 

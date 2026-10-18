@@ -43,13 +43,13 @@ The chain runs these phases:
 
 - `canon init` installs base tooling, Claude seeds, and governance rules into `.claude/rules/`
 - `canon tooling sync <stack> --write` adds stack dependencies, scripts, and gitignore entries
-- The agent follows `canon tooling reference <stack>` and extends `canon/context/ci.md` and `canon/context/development.md` <!-- audit-ignore-citations -->
+- The agent follows `canon tooling reference <stack>` and extends `canon/context/development/ci.md` and `canon/context/development/local-loop.md` <!-- audit-ignore-citations -->
 - The `verify` phase runs the installed `package.json` scripts and reports pass or fail
 - The `indexes` phase bootstraps `index.md` over the project's documentation folders, confirming candidates with you
 
 An existing project goes to `canon:target-check` first. For the Claude layer alone, run `canon claude init` and then `canon:target-setup indexes`. Run `canon:target-setup verify deep` by hand for the heavier smoke and screenshot pass.
 
-Keep the `## Scripts` table in `canon/context/development.md` current as scripts are added. A split entry keeps it in `overview.md`. <!-- audit-ignore-citations: canon/context/development.md -->
+Keep the `## Scripts` table in `canon/context/development/local-loop.md` current as scripts are added. A split entry keeps it in `overview.md`. <!-- audit-ignore-citations: canon/context/development/local-loop.md -->
 
 ### From scaffold to first feature
 
@@ -92,5 +92,5 @@ A project scaffolded before a layout move runs the one-time moves in [target mig
 ## Related
 
 - [AI workflow](../workflow/ai-workflow.md): the feature loop inside a managed project
-- [tooling](../../canon/context/tooling.md), [governance](../../canon/context/governance.md), [claude plugin](../../canon/context/claude-plugin.md), [indexes](../../canon/context/context-model.md): per-domain mechanics
-- [sandbox](../../canon/context/sandbox.md): scenario catalog for verifying domain flows
+- [tooling](../../canon/context/surfaces/tooling.md), [governance](../../canon/context/surfaces/governance.md), [claude plugin](../../canon/context/surfaces/plugin.md), [indexes](../../canon/context/context-model.md): per-domain mechanics
+- [sandbox](../../canon/context/development/sandbox.md): scenario catalog for verifying domain flows
