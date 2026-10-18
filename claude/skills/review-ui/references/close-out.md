@@ -31,9 +31,10 @@ gh api repos/{owner}/{repo}/compare/<prior-head>...<head> --jq .total_commits
 Re-checked at `<short-sha>`, <N> commits since the prior pass.
 ```
 
-Omit the line when the standing verdict carried no marker, since there is no prior head to count from. Run the scan `post.md` states against the file, then replace the comment:
+Omit the line when the standing verdict carried no marker, since there is no prior head to count from. Run the scan `post.md` states against the file. Then record the instant just before the call, in UTC, as `<posted-at>`, since Step 9 keeps only the review-event runs created after it and the `PUT` fires one on `edited`. Replace the comment:
 
 ```bash
+date -u +%Y-%m-%dT%H:%M:%SZ
 gh api -X PUT repos/{owner}/{repo}/pulls/<number>/reviews/<review-id> -F body=@<body-file>
 ```
 
