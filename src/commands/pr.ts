@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs'
-import { readdir, readFile, readlink, realpath } from 'node:fs/promises'
+import { readFile, realpath } from 'node:fs/promises'
 import { basename, join, resolve } from 'node:path'
 import { $ } from 'bun'
 import type { Command } from 'commander'
