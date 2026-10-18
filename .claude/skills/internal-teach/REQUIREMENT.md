@@ -7,42 +7,26 @@ description: Why the teach implementation and its fixture need a domain skill be
 
 ## Gap
 
-Without this skill, a session editing the teach implementation:
+Without this skill, a session editing the teach implementation hand-edits chrome inside a marker pair that the next `canon teach nav` silently overwrites. It meets the refusal on a lesson with no marker pairs as a verb bug, and picks a quiz option order by judgment, the failure the drawn order exists to prevent.
 
-- Hand-edits chrome inside a marker pair, and the next `canon teach nav` overwrites it with nothing reporting the loss, so the edit reads as applied and is gone.
-- Writes a lesson with no marker pairs and meets a refusal it reads as a bug in the verb rather than as the contract the verb states.
-- Chooses a quiz option order by judgment, which is the exact failure `canon teach lesson` draws the order to prevent, and nothing downstream compares what the verb drew against what the body shipped.
-- Runs a bare `canon teach list` and reports on the operator's live workspaces while believing it read the committed fixture, so a claim about the fixture describes a tree the change never touched.
-- Reads the `teach-workspace` skill as covering this work. It owns workspace content under `.canon/teach/`, and reaches neither `src/teach/` nor `examples/teach/`.
-- Adds a staleness gate over the renders under `examples/`, which inverts the split `canon/context/development/web.md` draws between a folder whose output something depends on and one whose output nothing does.
-- Encodes a workspace's required shape in code or in a skill body rather than in the standard that governs it, leaving two sources for one shape.
+It runs a bare `canon teach list` and reports on the operator's live workspaces as if they were the fixture. It reads `teach-workspace` as covering `src/teach/`, adds a staleness gate over renders nothing depends on, and encodes a workspace's shape in code rather than in its standard.
 
 ## Must
 
-- Point at `canon/context/features/teach.md` for structure and traps rather than restating them, so one edit to the entry moves what every reader sees.
-- Name the chrome splice as the domain's first trap, and carry the marker contract in a reference the session opens when authoring rather than in the body every session loads.
-- State which `canon teach` invocation reaches the fixture and which reaches the operator's live workspaces.
-- Route a change in a workspace's required shape to `claude/skills/teach-workspace/references/teach.md` or `glossary.md` rather than absorbing it.
-- Carry a sync checklist naming what to run after a render-pipeline change, since the splice rewrites committed files and a change that skips the diff ships them unread.
+- The skill points at `canon/context/features/teach.md` for structure and traps rather than restating it
+- The chrome splice is named as the first trap, with the marker contract in a reference opened when authoring
+- The skill states which `canon teach` invocation reaches the fixture and which reaches live workspaces
+- A change in a workspace's required shape is routed to `teach.md` or `glossary.md` under `teach-workspace`
+- A sync checklist names what to run after a render-pipeline change
 
 ## Must not
 
-- Restate what `claude/skills/teach-workspace/references/teach.md` or `glossary.md` fixes. Each is the single source for the artifact it governs and a second copy here drifts on its own cadence.
-- Restate `canon/context/features/teach.md`'s structure or gotchas. The ownership table in `CLAUDE.md` puts per-domain narrative in the context entry, and a skill paraphrasing its own entry is the duplication that table exists to prevent.
-- Carry the pedagogy that decides what to teach next. `claude/skills/teach-workspace/references/` owns it.
-- Fire on a `.canon/teach/**` edit. `teach-workspace` owns that path and ships to targets, where this skill is toolkit-internal and does not.
-
-## Guards
-
-No refusal strings. This is a domain skill loaded before editing rather than a procedure with entry conditions.
+- Restate what `teach.md` or `glossary.md` fixes, or the entry's structure and gotchas
+- Fire on a `.canon/teach/**` edit
 
 ## Out of scope
 
-- `internal-web` covers the outward-facing surface and its committed images.
-- `internal-scripts` covers `src/` generally. This covers what `src/teach/` means, which that skill does not carry.
-- `canon:create-skill` covers the shape of a skill reference, which the teach and glossary references are. This routes a shape change there and stops.
-- `teach-workspace` is the shipped skill an operator runs to teach. This is for editing the machinery underneath it.
-
-### The open question this cannot answer
-
-Whether anything invokes this other than a session reading the `CLAUDE.md` domain table and loading it by name. That is unanswerable before the skill has run, and it is the criterion to re-read after a few sessions have edited this domain with it in place. A domain skill nothing loads is a context entry with extra steps.
+- The outward-facing surface and its committed images, which `internal-web` owns
+- `src/` beyond the teach domain, which `internal-scripts` owns
+- The shape of a skill reference, which `create-skill` owns
+- Teaching in a workspace and the pedagogy deciding what comes next, which `teach-workspace` owns

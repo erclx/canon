@@ -7,31 +7,25 @@ description: Scope boundary for the rule catalog and its stacks, and where a rul
 
 ## Gap
 
-Without this skill, a session writes a rule straight into `.claude/rules/` where the next check deletes it, adds a source rule no stack names so it installs into nothing, picks a slug another rule or a folder already holds so a stack entry resolves to the wrong file, widens a rule without committing the regenerated copy, and lands a gov-specific sync change in the engine three other domains inherit.
+Without this skill, a session writes a rule into `.claude/rules/` where the next check deletes it, picks a slug another rule or folder holds, widens a rule without committing the regenerated copy, and lands a gov-specific sync change in the engine three other domains inherit.
 
-The registration failure is the one that passes every gate. A rule sitting in `governance/rules/` under a free slug and a correct shape looks landed, and the drift assertion agrees, because the consumed copy still matches what the record resolves to. Nothing reports that the record names it nowhere, so the rule reaches no target and no session ever loads it.
+An unregistered rule passes every gate. A source rule with a free slug and a correct shape looks landed, and the drift assertion agrees because the consumed copy matches the record. Nothing reports that no stack names it, so it reaches no target.
 
 ## Must
 
-- Register a new rule where the record resolves it, meaning a stack in `governance/stacks/`, the `add` list in `internal/governance.toml`, or `internal/rules/` when it governs toolkit authoring alone
-- Pick a slug no other rule and no folder holds, so a stack entry and a rename resolve to one file
-- Commit the regenerated `.claude/rules/` copy alongside the source change, since the drift assertion turns a stale copy into a failing check
-- Route a sync change by axis, sending source location and what counts as a change to the adapter, and the scan report, the prompt, and the apply loop to the engine every other domain inherits
+- A new rule is registered where the record resolves it, being a stack, the `add` list in `internal/governance.toml`, or `internal/rules/` for toolkit authoring alone
+- A new slug is held by no other rule and no folder
+- The regenerated `.claude/rules/` copy is committed with the source change
+- A sync change goes to the adapter for source location and change detection, and to the shared engine for the scan, the prompt, and the apply loop
 
 ## Must not
 
-- Hand-edit `.claude/rules/`. It is produced output, regenerated from the record on the next check.
-- Ship a rule routing to a path no target install creates. A toolkit-only route is authored under `internal/rules/`, where location keeps it out of everything the plugin carries.
-- Duplicate `ruleSubdir` or frontmatter stripping. Each has one owner and the callers that justify its position.
-
-## Guards
-
-- `install` and `sync` refuse the toolkit root, because a target's rules belong to its operator. `regen` is the verb that writes here.
-- A rule whose subject is not a file has no glob to match and never fires. Reach that surface by instruction plus a check, and leave it unrouted on purpose.
+- Hand-edit `.claude/rules/`, which the next check regenerates from the record
+- Ship a rule routing to a path no target install creates, rather than authoring it under `internal/rules/`
+- Duplicate `ruleSubdir` or frontmatter stripping outside their one owner
 
 ## Out of scope
 
-- The frontmatter, headings, and bullet conventions a rule file carries, which `claude/skills/create-rule/references/rule.md` states
-- Creating a project-local rule inside a target, which the shipped `create-rule` skill does against that project's own subdirs
-- Authoring the reference a rule routes to, which lives in its owner skill's `references/` and which `internal-claude` covers under `claude/skills/`
-- The per-rule verdict on whether a rule earns its place, its load mode, and its reach: `internal-rule-audit`
+- The frontmatter, headings, and bullets a rule file carries, and creating a rule inside a target, which `create-rule` owns
+- The reference a rule routes to, which `internal-claude` owns
+- The verdict on whether a rule earns its place, its load mode, and its reach, which `internal-rule-audit` owns
