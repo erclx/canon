@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { densityGates, inDensityScope } from '@/markdown/scope'
+import {
+  densityGates,
+  GATED_SCOPE_ROOTS,
+  inDensityScope,
+} from '@/markdown/scope'
 
 describe('inDensityScope', () => {
   it.each([
@@ -58,6 +62,18 @@ describe('densityGates', () => {
     expect(densityGates('docs/agents/gate.md', 'bullet-run', [])).toBe(true)
   })
 
+  it('should leave a bullet run ungated outside a target list', () => {
+    expect(
+      densityGates('docs/agents/gate.md', 'bullet-run', ['wiki/'], false),
+    ).toBe(false)
+  })
+
+  it('should gate a bullet run under a target list prefix', () => {
+    expect(
+      densityGates('docs/agents/gate.md', 'bullet-run', ['docs/'], false),
+    ).toBe(true)
+  })
+
   it('should leave a bullet run on a surface the old stage never held to its batch', () => {
     expect(densityGates('tooling/web/reference.md', 'bullet-run', [])).toBe(
       false,
@@ -93,4 +109,14 @@ describe('densityGates', () => {
       densityGates('canon/REQUIREMENTS.md', 'bullet-run', ['canon/']),
     ).toBe(false)
   })
+})
+
+describe('GATED_SCOPE_ROOTS', () => {
+  it.each(GATED_SCOPE_ROOTS)(
+    'should name a root inside the density scope: %s',
+    (root) => {
+      const sample = root.endsWith('/') ? `${root}a/SKILL.md` : root
+      expect(inDensityScope(sample)).toBe(true)
+    },
+  )
 })
