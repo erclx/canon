@@ -59,7 +59,7 @@ Owns the roster reads and the branch claim.
 
 ### `src/worktrees/`
 
-Owns the reclaim reading behind `canon worktrees list` and `reclaim`.
+Owns the reclaim reading behind `canon worktrees list` and `reclaim`. `stop.ts` signals every listener inside a reclaimable path ahead of the removal, and a machine with no listener reader removes anyway and records `stopped` as null, never zero.
 
 - A worktree is reclaimable only with a merged pull request, a clean tree, and no live session, and `refusals` names every failing condition
 - Git ancestry cannot decide it, since squash merges leave a merged branch outside `main`

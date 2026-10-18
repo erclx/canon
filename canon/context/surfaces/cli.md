@@ -108,6 +108,13 @@ Holds the readers and writers behind `canon pr`, all over REST since a cloud ses
 - `preview.ts` and `local.ts` write and remove the address line. The first reads what a branch serves from the deploy workflow's push trigger, the second finds a server by its cwd
 - `lift.ts` readies a pull request only when every gate passes, and returns a ready one to draft on a failing review, ui, or evidence gate. `painted.ts` lists the paths no UI close carries across
 
+### `src/listeners/`
+
+Holds the reads of which process listens on a port, shared by `canon pr local` and `canon worktrees reclaim`.
+
+- `machine.ts` reads through `/proc` first and lsof second, and reports no reader at all rather than an empty list on a machine with neither
+- `parse.ts` turns each tool's output into pid and port pairs. `belongs.ts` is the nesting test that keeps a listener in the main checkout or a sibling worktree out of a worktree's set
+
 ### `src/sessions/`
 
 Holds the live-session roster, split by what a stub has to replace.
