@@ -26,12 +26,12 @@ A thread then reads as `## Review`, the worker's `## Review response` from `revi
 
 Both headings anchor as a section distinct from human threads. The full set is eight headings across four families, stated here once so `role-orchestrator`'s poll and every reply-posting skill cite it rather than carry a copy.
 
-| Family   | Headings                                                     | Owner                                                                    |
-| -------- | ------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| Review   | `## Review`, `## Review closed`                              | This skill alone                                                         |
-| Reply    | `## Review response`, `## Rebase`, `## Post-review findings` | `review-address`                                                         |
-| Evidence | `## Evidence`                                                | `canon pr evidence`, through `git-pr` and `git-followup`                 |
-| UI       | `## UI review`, `## UI review closed`                        | `review-ui`, posted as a review beside this one and read by nothing here |
+| Family   | Headings                                                     | Owner                                                                       |
+| -------- | ------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| Review   | `## Review`, `## Review closed`                              | This skill alone                                                            |
+| Reply    | `## Review response`, `## Rebase`, `## Post-review findings` | `review-address`                                                            |
+| Evidence | `## Evidence`                                                | `canon pr evidence`, through `pr-evidence` from `git-pr` and `git-followup` |
+| UI       | `## UI review`, `## UI review closed`                        | `review-ui`, posted as a review beside this one and read by nothing here    |
 
 - The reply headings in order answer a finding, report a stale branch resolved without one, and carry a finding a worker produced after a close-out
 - `## Evidence` answers no comment on the thread, so the poll leaves it out of the unclassified count rather than reading it as a reply owing a re-review

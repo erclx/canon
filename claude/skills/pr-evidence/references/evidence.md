@@ -119,6 +119,7 @@ Run this step when the evidence step returned `ok`, the fallback posted a checkl
 
 - The first two mean the pull request changes a rendered surface, and a reviewer holding a checklist with no screenshots needs the live page most
 - The third is how `git-ship` reaches this step alone when an earlier run's deploy timed out
+- An evidence record carrying a `commentId` takes the third alone, since a preview already on the comment counts as settled whatever head built it, so a later push does not re-mint one
 - The evidence comment is already posted, so the reviewer has the screenshots while the deploy runs
 
 ```bash

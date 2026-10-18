@@ -89,7 +89,7 @@ On a `passing` wake, run `canon pr evidence <number> --check --json` against the
 | Any other `reason`, such as `gh-failed` | Stop and report it, since an unread thread is not a settled one                                         |
 | No record, or an unknown flag error     | The binary predates `--check`, so report the thread unread and continue without claiming it was checked |
 
-On `owed`, run the named steps from `canon:git-pr`'s `references/evidence.md`, evidence first and then preview, and re-read with the same command. Continue only on `settled`, and stop on any other reading with the `reason` and the `owed` list, never looping back.
+On `owed`, invoke `canon:pr-evidence` with the number, which runs the evidence step first and then the preview the thread owes, and re-read with the same command. Continue only on `settled`, and stop on any other reading with the `reason` and the `owed` list, never looping back.
 
 A refused preview step or a failed deploy leaves `preview` owed on the re-read, so that is the stop and not a retry. The read is a closing step, so the draft mark stays the only thing between steps 8 and 9, and a caller closing on its own block waits on the same wake.
 

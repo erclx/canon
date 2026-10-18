@@ -107,7 +107,7 @@ When the plan's `**Constraints:**` carry a `Fan-in member of` bullet, push the b
 
 If the diff touches UI files (JSX, TSX, Vue, Svelte, HTML, or CSS under `src/`), invoke `canon:ui-checklist`, then continue to Step 6 whatever it returns, in every run. The Step 6 draft mark holds the merge, so a stop here protects nothing.
 
-When it produces a checklist, read `${CLAUDE_SKILL_DIR}/references/ui-checklist.md` for the counts to hold before `git-pr` removes the file.
+When it produces a checklist, read `${CLAUDE_SKILL_DIR}/references/ui-checklist.md` for the counts to hold before `pr-evidence` removes the file.
 
 ## Step 6: ship
 

@@ -47,12 +47,11 @@ A missing tracking ref is not a guard, since an open pull request proves the bra
 
    The lease is what stops the force from overwriting a commit this session never read. Run the ancestry test only where an upstream resolves, since it reads `@{u}`.
 
-5. Post the evidence comparison on every invocation, `reply-owned` included, since it is not step 8's reply. Run `canon pr evidence <number> --json` and read `reason` rather than the exit code.
-   - `no-evidence`: nothing changed under an `evidence/` segment this push. Say nothing and move on.
-   - `ok`: write `body` to `.canon/tmp/pr/evidence/body-<number>.md` at the main worktree root (resolved the way `session-worktree` does), then post the comment with `gh api -X POST repos/{owner}/{repo}/issues/<number>/comments -F body=@<main-root>/.canon/tmp/pr/evidence/body-<number>.md --silent` when the record carries no `commentId`, or edit the existing one in place with `gh api -X PATCH repos/{owner}/{repo}/issues/comments/<commentId> -F body=@<main-root>/.canon/tmp/pr/evidence/body-<number>.md` when it does. Clean up the tmp file only after the call reports success.
-   - Any other reason is one of the mirrored git refusals (`gh-missing`, `gh-failed`, `no-base`, `unreadable-changes`, `would-empty`). Report it and continue without stopping the chain.
-
-   After an `ok` post, read what the pull request is still owed with `canon pr evidence <number> --check --json`, branching on `reason` and `owed` rather than the exit. When `owed` lists `preview`, mint it through the preview section of `canon:git-pr`'s `references/evidence.md`, then re-read once. Report anything but `settled` after that re-read and continue, since a refused deploy would otherwise loop. A binary lacking `--check` reports the thread unread rather than settled. A preview already on the comment counts as settled whatever head built it, so a later push does not re-mint one.
+5. Invoke `canon:pr-evidence` with `<number>` on every invocation, `reply-owned` included, since it is not step 8's reply.
+   - It edits the marked comment in place, carries the checklist forward, and mints the preview only when the thread still owes one
+   - Report it rather than proceeding silently when the skill does not resolve
+   - Then read `canon pr evidence <number> --check --json` once, branching on `reason` and `owed` rather than the exit
+   - Report anything but `settled` and continue, since a refused deploy would otherwise loop. A binary lacking `--check` reports the thread unread rather than settled.
 
 6. Check for existing review comments: `gh api 'repos/{owner}/{repo}/pulls/<number>/comments' --jq 'length'`.
 7. Sync the body and title on every invocation, before the routing below decides on the reply.

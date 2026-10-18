@@ -33,7 +33,7 @@ The automatable half has its own gap, and it is no longer this skill's to close 
 - Try to assert a visual property programmatically
 - Repeat the full checklist in chat, which is what made it evaporate
 - Stage or commit the checklist, which is gitignored scratch
-- Talk to GitHub directly. Posting the checklist belongs to `git-pr`, the sole consumer of the handoff file
+- Talk to GitHub directly. Posting the checklist belongs to `pr-evidence`, the sole consumer of the handoff file
 - Move the handoff path to match this skill's name, which strands a checklist an older binary wrote
 
 ## Guards
