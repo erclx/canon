@@ -1,5 +1,7 @@
+import { logInfo, logWarn, plural } from '@/cli/ui'
 import { type InitFlags, resolveStack } from '@/init/plan'
 import type { DomainStep } from '@/init/run'
+import { GATED_CONFIG_REL, gateScopeRoots } from '@/markdown/gated'
 
 /** Builds the child-process invocation for one domain. */
 export type RunFactory = (args: readonly string[]) => () => Promise<boolean>
@@ -55,6 +57,16 @@ export function buildSteps(
     })
   }
 
+  // In-process rather than a child verb, since the audit reads the working
+  // directory and every child here is handed the target as an argument. It
+  // runs after every seeding domain so the roots it measures hold what they
+  // will ship with.
+  steps.push({
+    kind: 'run',
+    label: 'Markdown gating',
+    run: () => gateMarkdown(resolved),
+  })
+
   if (!flags.skip.skipped.has('records')) {
     // `skip` here means there is nothing to run non-interactively, not that
     // the caller opted out, unlike every other push of this kind above.
@@ -66,6 +78,37 @@ export function buildSteps(
   }
 
   return steps
+}
+
+/**
+ * Starts a new project with every density root gated that passes now. A root
+ * with a finding is named and left out, since gating it would fail the first
+ * push on prose a scaffolder wrote.
+ */
+async function gateMarkdown(root: string): Promise<boolean> {
+  const result = await gateScopeRoots(root)
+
+  if (result.kind === 'exists') {
+    logInfo(`${GATED_CONFIG_REL} already exists, so its list is kept.`)
+    return true
+  }
+
+  if (result.kind === 'unavailable') {
+    logWarn(
+      "git could not list the tree, so no root was gated. Run 'canon markdown gated add <prefix>' once it can.",
+    )
+    return false
+  }
+
+  logInfo(
+    `Gated ${result.gated.length === 0 ? 'nothing' : result.gated.join(', ')} in ${GATED_CONFIG_REL}.`,
+  )
+  for (const { prefix, findings } of result.left) {
+    logWarn(
+      `Left ${prefix} ungated with ${plural(findings, 'finding')}. Repair it, then run 'canon markdown gated add ${prefix}'.`,
+    )
+  }
+  return true
 }
 
 /**
