@@ -43,6 +43,8 @@ Write each box so a session driving the running app can run it without guessing:
 | Taste | End the line with `(taste)` when the result is a judgment of look or feel. A driver reports such a box as needing a person's eyes rather than passing it.                       |
 | Setup | State inline any setup the page does not open in. End the line with `(local only)` when a hosted preview cannot reach that state, such as a stopped service or a seeded record. |
 
+When the plan cites `canon/design/<surface>/` under `**Design references:**`, name the reference as the comparison on each box for that surface, such as "→ matches `canon/design/<surface>/` in light and dark". The reviewer then judges the build against the accepted design instead of against taste.
+
 The checkbox stays `- [ ]` followed by the action and the result, since the evidence comment reads boxes by that shape. Only the UI reviewer ticks a box, stamping it with the commit it passed at, and the comment carries that tick forward only while the head it names is current.
 
 ## The missing-test list

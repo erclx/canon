@@ -29,7 +29,7 @@ Read these in parallel from the project root, skipping any that do not exist:
 - `canon/REQUIREMENTS.md`: feature scope and non-goals
 - `.canon/tasks/index.md`: current scope and status, then any task file the feature relates to
 
-Also read `canon/DESIGN.md` when the feature touches code or UI, for visual intent and component rules, with values read from the stylesheet its lead names. Skip it for prose, docs, catalog, or config-only changes.
+Also read `canon/DESIGN.md` when the feature touches code or UI, for visual intent and component rules, with values read from the stylesheet its lead names. Skip it for prose, docs, catalog, or config-only changes. For a UI feature, read `canon/design/index.md` too, if it exists, for the surfaces with an accepted design.
 
 Coding standards live in `.claude/rules/`. Claude Code loads them automatically, and path-scoped rules apply to the files they match.
 
@@ -69,6 +69,7 @@ Every `- Suggested:` line takes senior judgment, picking the best option in one 
 
 - Suggest a real default when best practice, the codebase, or prior context points to one
 - Load `canon:codebase-layout` before `**Files to touch:**` when an entry names a path that does not exist yet, and give each new path its placement reason. Report it if it does not resolve.
+- Fill `**Design references:**` with the `canon/design/<surface>/` folder for each surface a UI file in `**Files to touch:**` renders, and write `None identified.` in a project with no folder
 - Write `**Verification:**` as one bullet per outcome naming the test or command that proves it
 - Write `**Review focus:**` as the inputs or states that would break the change, carrying the risk you understood to the executor and the reviewer
 

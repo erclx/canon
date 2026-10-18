@@ -69,16 +69,17 @@ A staged batch is a concern of its own and takes its own file rather than a `**B
 
 The document opens with `# Feature: <short title>` and one paragraph stating what is being built and why now. The sections below follow in this order.
 
-| Section               | Holds                                                                     | Required                                   |
-| --------------------- | ------------------------------------------------------------------------- | ------------------------------------------ |
-| `## Summary`          | three to five one-line bullets: the goal, the deliverables, the trade-off | Always                                     |
-| `**Constraints:**`    | durable rules the work must respect                                       | When supplied                              |
-| `**Files to touch:**` | each file with a one-line reason                                          | Always                                     |
-| `**Verification:**`   | the test or command that proves each outcome                              | Always                                     |
-| `**Risks:**`          | conflicts, coupling, and the tricky spots                                 | Always                                     |
-| `**Review focus:**`   | the inputs or states that would break the change, for the reviewer        | Always                                     |
-| `**Questions:**`      | numbered open decisions, each with a suggestion and an answer slot        | Always                                     |
-| `**Sources:**`        | the outside sources a decision rests on, each with its quoted passage     | When a decision rests on an outside source |
+| Section                  | Holds                                                                       | Required                                          |
+| ------------------------ | --------------------------------------------------------------------------- | ------------------------------------------------- |
+| `## Summary`             | three to five one-line bullets: the goal, the deliverables, the trade-off   | Always                                            |
+| `**Constraints:**`       | durable rules the work must respect                                         | When supplied                                     |
+| `**Files to touch:**`    | each file with a one-line reason                                            | Always                                            |
+| `**Design references:**` | the tracked design folders the change builds against, each with its surface | When Files to touch names a rendered-surface file |
+| `**Verification:**`      | the test or command that proves each outcome                                | Always                                            |
+| `**Risks:**`             | conflicts, coupling, and the tricky spots                                   | Always                                            |
+| `**Review focus:**`      | the inputs or states that would break the change, for the reviewer          | Always                                            |
+| `**Questions:**`         | numbered open decisions, each with a suggestion and an answer slot          | Always                                            |
+| `**Sources:**`           | the outside sources a decision rests on, each with its quoted passage       | When a decision rests on an outside source        |
 
 - Write each marker as the table gives it. `Summary` opens the prose a reader scans, so it takes an H2, and the others are labels over lists rather than sections of prose.
 - A section in the other spelling is still that section, since `## Risks` and `**Risks:**` name one thing, and either spelling breaks a depth run
@@ -132,6 +133,15 @@ git fetch origin main --quiet && git log <commit>..origin/main --oneline -- <the
 A batch in a fan-in set declares its side in a constraint bullet, ``Fan-in member of `feature-<integrator>` `` on a member and ``Fans in `feature-<a>`, `feature-<b>` `` on the integrator. `batches.md` holds when to fan in, and `canon records validate plans` reports `fan-in-unmatched` for a set whose two sides disagree.
 
 A constraint naming a `.canon/ready/` folder is a third shape beside the hold and the shared path. It makes that folder's files the verbatim source for the paths this plan's `**Files to touch:**` lists, per `ready.md`, so the executing session copies those paths rather than authoring them.
+
+### Design references
+
+A plan whose `**Files to touch:**` names a rendered-surface file (`.tsx`, `.jsx`, `.astro`, `.vue`, `.svelte`, `.html`, or `.css`) carries this section. It tells the building session which accepted design to open before it writes a line.
+
+- Give each entry a folder path under `canon/design/` and the surface it governs, as one bullet
+- Write `None identified.` when the project has no `canon/design/` folder or no folder governs the change, so the section reads as considered
+- Cite a tracked folder only, since the building session opens its light and dark images and its frame HTML from the working tree
+- `canon records validate plans` reports `section-missing` for a plan that names a rendered-surface file and omits the section
 
 ### Verification
 
@@ -232,6 +242,10 @@ This contract inverts the one an intake folder keeps, where an empty slot means 
 **Files to touch:**
 
 - `<path/to/file>`: <reason>
+
+**Design references:**
+
+- `canon/design/<surface>/`: <the surface it governs>
 
 **Verification:**
 
