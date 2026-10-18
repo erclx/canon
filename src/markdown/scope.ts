@@ -9,18 +9,27 @@ const BULLET_RUN_SCOPE = [
 ]
 
 /**
+ * The requirement beside each skill. Its findings gate only on a `GATED_PATHS`
+ * entry naming the file itself, so the prefix that gates a skill's body never
+ * sweeps in a requirement the rewrite has not reached yet.
+ */
+const REQUIREMENT_SCOPE =
+  /^(?:claude|\.claude)\/skills\/[^/]+\/REQUIREMENT\.md$/
+
+/**
  * The tracked documents the density limits hold: the context entries, the docs
- * pages, the skill bodies and references of both skill trees, the tooling
- * seeds and stack references, the wiki, and the two root guides.
+ * pages, the skill bodies, references, and requirements of both skill trees,
+ * the tooling seeds and stack references, the wiki, and the two root guides.
  *
  * Rules stay out, since a rule is one imperative per bullet. So do
- * `CLAUDE.md`, the requirement and design records, a seed carrying one of
- * those three names, the changelog, the examples, and every `.canon/` record,
- * each with a shape and cap of its own. Named here and nowhere else, so the
- * audit, the gate stage reading its exit, and their tests read one scope.
+ * `CLAUDE.md`, the project requirement and design records, a seed carrying one
+ * of those three names, the changelog, the examples, and every `.canon/`
+ * record, each with a shape and cap of its own. Named here and nowhere else, so
+ * the audit, the gate stage reading its exit, and their tests read one scope.
  */
 const DENSITY_SCOPE = [
   ...BULLET_RUN_SCOPE,
+  REQUIREMENT_SCOPE,
   /^tooling\/[^/]+\/seeds\/(?:.+\/)?(?!(?:CLAUDE|REQUIREMENTS|DESIGN)\.md$)[^/]+\.md$/,
   /^tooling\/[^/]+\/reference\.md$/,
   /^wiki\/.+\.md$/,
@@ -301,6 +310,7 @@ export function densityGates(
   gated: readonly string[] = GATED_PATHS,
 ): boolean {
   if (!inDensityScope(rel)) return false
+  if (REQUIREMENT_SCOPE.test(rel)) return gated.includes(rel)
   if (
     ALWAYS_GATED.includes(kind) &&
     BULLET_RUN_SCOPE.some((pattern) => pattern.test(rel))

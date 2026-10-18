@@ -12,6 +12,8 @@ describe('inDensityScope', () => {
     'tooling/base/seeds/canon/context/ci.md',
     'tooling/base/reference.md',
     'wiki/claude/code.md',
+    'claude/skills/git-pr/REQUIREMENT.md',
+    '.claude/skills/internal-docs/REQUIREMENT.md',
     'README.md',
     'CONTRIBUTING.md',
   ])('should hold %s', (rel) => {
@@ -29,7 +31,7 @@ describe('inDensityScope', () => {
     'examples/teach/README.md',
     '.canon/plans/feature-density-check.md',
     '.canon/groundwork/154-markdown-density/06-decision.md',
-    'claude/skills/git-pr/REQUIREMENT.md',
+    'claude/skills/git-pr/EVAL.md',
     'tooling/claude/seeds/CLAUDE.md',
     'tooling/claude/seeds/canon/REQUIREMENTS.md',
     'tooling/claude/seeds/canon/DESIGN.md',
@@ -60,6 +62,30 @@ describe('densityGates', () => {
     expect(densityGates('tooling/web/reference.md', 'bullet-run', [])).toBe(
       false,
     )
+  })
+
+  it('should report without gating a requirement under a gated skill prefix', () => {
+    expect(
+      densityGates(
+        '.claude/skills/internal-docs/REQUIREMENT.md',
+        'paragraph-length',
+        ['.claude/skills/internal-'],
+      ),
+    ).toBe(false)
+  })
+
+  it('should leave a bullet run in a requirement ungated', () => {
+    expect(
+      densityGates('claude/skills/git-pr/REQUIREMENT.md', 'bullet-run', []),
+    ).toBe(false)
+  })
+
+  it('should gate a requirement listed by its own path', () => {
+    expect(
+      densityGates('claude/skills/git-pr/REQUIREMENT.md', 'paragraph-length', [
+        'claude/skills/git-pr/REQUIREMENT.md',
+      ]),
+    ).toBe(true)
   })
 
   it('should never gate an out-of-scope path, whatever the prefix', () => {
