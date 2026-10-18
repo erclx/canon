@@ -52,7 +52,10 @@ describe('formatWritten', () => {
   it('should fall back to prettier when oxfmt is absent', async () => {
     const prettier = installFormatter('prettier')
     await formatWritten(TARGET, ['a.json'])
-    expect(readFileSync(prettier, 'utf8')).toContain('a.json')
+    expect(readFileSync(prettier, 'utf8').trim().split('\n')).toEqual([
+      '--write',
+      join(TARGET, 'a.json'),
+    ])
   })
 
   it('should hand the formatter only the written formattable paths', async () => {
