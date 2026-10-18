@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { PROJECT_ROOT } from '@/roots/project'
@@ -22,6 +22,19 @@ describe('web gitignore', () => {
     const coverage = sections.find((s) => s.header === '# Coverage')
 
     expect(coverage?.entries).toEqual(['coverage/', '.vitest/'])
+  })
+})
+
+describe('base seeded context', () => {
+  const context = join(PROJECT_ROOT, 'tooling/base/seeds/canon/context')
+
+  it('should group the setup and ci entries under a development folder', () => {
+    expect(readdirSync(context).sort()).toEqual(['development', 'index.md'])
+    expect(readdirSync(join(context, 'development')).sort()).toEqual([
+      'ci.md',
+      'index.md',
+      'setup.md',
+    ])
   })
 })
 

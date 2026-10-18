@@ -1,9 +1,9 @@
 ---
-title: Development
+title: Setup
 description: Local dev workflow, scripts, and husky hooks
 ---
 
-# Development
+# Setup
 
 ## Overview
 
