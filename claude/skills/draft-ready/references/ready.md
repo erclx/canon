@@ -81,9 +81,7 @@ Below the frontmatter, state in prose what the worker still owns beyond copying 
 
 Every other file in the folder sits at the same relative path its destination has in the project.
 
-<!-- canon-allow-reference: the example shows a target tree, where the standard sits under standards/ -->
-
-- For example, `standards/ready.md` in the destination tree sits at `<nn>-<slug>/standards/ready.md` in the ready folder
+- For example, `standards/ready.md` in the destination tree sits at `<nn>-<slug>/standards/ready.md` in the ready folder <!-- canon-allow-reference: a target tree -->
 - Carry no file the destination tree would not carry. The folder is a source for `git mv`-shaped copies, never a scratch pad, and anything else goes in the plan or the pull request body.
 - Write each file exactly as it should land. The worker copies verbatim and edits only what the gate or the overview's list requires, so a placeholder ships as written.
 

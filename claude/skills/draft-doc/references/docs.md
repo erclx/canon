@@ -15,9 +15,7 @@ This is a name match rather than a topic match, and Placement checks the wider c
 
 ## Placement
 
-<!-- canon-allow-reference: illustrates the target project's own docs/ tree, not a citation of this repository's own corpus -->
-
-- Read `docs/index.md` and its sub-catalogs for the closest existing `category`.
+- Read `docs/index.md` and its sub-catalogs for the closest existing `category`. <!-- canon-allow-reference: the target project's own docs/ tree -->
 - Check every page title and description that read surfaces against the topic
 - Stop on a match: `❌ <path> already covers this topic under a different name. Run canon:docs-sync instead.`
 - Reuse a matching `category` value verbatim. A near-miss spelling opens a second shelf holding one page, per the docs standard.
