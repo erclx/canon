@@ -1,87 +1,69 @@
 ---
 title: Context audit
-description: Running the audit, its flags and folder scope, the exit codes, the citation gate, and the widened gate the seed stage runs
+description: Running the context audit, its folder scope, the exit codes, every check with the folders it reaches and whether it gates, the seed gate, and the citation exclusions
+kind: reference
 ---
 
 # Context audit
 
-`canon context audit [path]` reports the structural state of the folders following the index-plus-entry contract, meaning a generated `index.md` beside entries carrying frontmatter, and it measures `canon/REQUIREMENTS.md` beside them. It reads and reports. Fixing what it finds is separate work. What each finding means is in `context-audit-checks.md`, including the requirements record's word cap.
-
-Findings stated over every markdown file rather than over a context entry are measured by `canon markdown audit`, described in `markdown-audit.md`. That command resolves no folder, so it reaches trees this one refuses.
+`canon context audit [path]` reports the structure of the folders following the index-plus-entry contract, meaning a generated `index.md` beside entries carrying frontmatter, and measures `canon/REQUIREMENTS.md` beside them. It reads and reports. Findings over every markdown file belong to `canon markdown audit`, in `markdown-audit.md`.
 
 ```bash
 canon context audit
 canon context audit --json
 canon context audit --citations-only
 canon context audit --folder context,diagrams
-canon context audit --folder docs
 canon context audit tooling/base/seeds --gate
 ```
 
-| Option             | Behavior                                                                  |
-| ------------------ | ------------------------------------------------------------------------- |
-| `--json`           | Add a machine-readable record on stdout, keeping the frame                |
-| `--folder <list>`  | Comma-separated folder names (default: the three below)                   |
-| `--citations-only` | Run the gating citation check alone, printing nothing when it passes      |
-| `--gate`           | Fail on a missing section, an off-set H2, gated shape break, or drift too |
+`--gate` widens the failing set to the findings marked below. `--citations-only` runs the citation check alone, and the two refuse together.
 
-`--citations-only` and `--gate` refuse together. The first runs the citation check alone, so the two findings the second adds are never measured, and a run honoring both would exit clean on a file short a required section.
+`--folder` takes comma-separated names, defaulting to `context`, `decisions`, and `diagrams`. A folder the project lacks is skipped, and `folders[].base` names where each resolved.
 
-## Folder scope
+## Output
 
-Scope defaults to `context`, `decisions`, and `diagrams`, and a folder the project does not carry is skipped rather than reported. A domain that outgrew one file and split into `<domain>/` is audited as its own folder, so a split entry measures at the same grain as a flat one.
+| Check               | Reports                                                                                                                                          | Reaches                 | Finding                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- | ----------------------------------------------------------- |
+| Citations           | A path into an audited folder that resolves nowhere                                                                                              | Every audited folder    | Gates always                                                |
+| Requirements record | Words past the cap the record states as `This record holds at most 600 words.`                                                                   | `canon/REQUIREMENTS.md` | Gates past a stated cap, never under `--citations-only`     |
+| Required sections   | An entry missing `Overview` or `Layout`. A split folder answers by any sibling                                                                   | `canon/context/`        | Gates under `--gate`                                        |
+| Closed set          | An H2 outside `Overview`, `Layout`, and `Gotchas`, under `extraSections`                                                                         | `canon/context/`        | Gates under `--gate`                                        |
+| Shape               | `retired-section`, `gotcha-count`, `gotcha-heading`, `gotcha-paragraph`, `layout-heading`, `layout-bullets`, `layout-paragraphs`, `layout-depth` | `canon/context/`        | Gates under `--gate` in a `SHAPE_GATED_FOLDERS` folder only |
+| Index drift         | An entry its index does not link, or a link resolving to nothing                                                                                 | Every audited folder    | Gates under `--gate`                                        |
+| Reference form      | A backticked bare filename matching a sibling entry, under `bareReferences`                                                                      | Split folders           | Reports                                                     |
+| Length              | An entry past about 150 rendered lines at 80 columns, with its `causes`                                                                          | Every audited folder    | Reports                                                     |
+| Tables              | Six or more body rows whose first column mostly carries a path, command, or link                                                                 | Every audited folder    | Reports                                                     |
+| Provenance          | A date, change number, or release label. A date after measured, verified, driven, passed, or fired is excluded                                   | `canon/context/`        | Reports                                                     |
 
-A name passed to `--folder` resolves under the record roots first, `.canon/` ahead of `.claude/`, and at the project root last, which is what puts `docs/` and any later corpus in reach of the same engine. The root base is reached only by a name the caller passes, so the default list still resolves under a record root alone and a project holding a root folder of one of those names is not audited against a standard it never adopted. `diagrams` is the one default name that is a session record and moves with them, which is why both record roots are in the list rather than one, and `docs/agents/records.md` states the read order every verb shares. The scope line prints the resolved path, so a project carrying both spellings reads which one was taken. The JSON record carries the base per folder as `folders[].base`.
+A shape break is any of these:
 
-A run where no requested name resolves refuses, whichever list it read. Naming the absent ones narrows to `--folder`, since a project carrying one of the three default folders is the ordinary case and a name it never asked for is not a typo. The JSON record carries those names as `unresolvedFolders`.
+- A `## Decisions` H2, or a `Gotchas` section past five bullets or holding a heading or paragraph
+- A `Layout` H3 titled neither a code-spanned path nor `Other folders`, or a heading below H3 under `Layout`
+- A folder H3 past five bullets or its one-paragraph lead
 
-## Exit codes
+The development entry may carry a `Scripts` H3 exempt from both folder caps. `SHAPE_GATED_FOLDERS` lives in `src/context/shape-gated.ts`.
 
-Exit codes are `0` for a clean run, `1` for a refusal, and `2` for a gating finding. An unresolved citation gates under every mode. A requirements record stating a word cap gates past it, on any run that measures it, which is every mode except `--citations-only`. A record stating none is reported and never gated.
+| Code | Meaning                                    |
+| ---- | ------------------------------------------ |
+| `0`  | A clean run, or findings that report       |
+| `1`  | Refused, with the reason on stderr         |
+| `2`  | A gating finding for the mode the run took |
 
-`bun run check` in the toolkit repository reads every one of these rules through its own Canonical records stage as well as through this verb, whose gating stage there runs `--gate`.
+- `bun run check` runs `--gate` against every `tooling/<stack>/seeds/` directory carrying a `.claude/` folder
+- A root resolving no audited folder refuses with `1` and warns, a root measuring no entry warns, and a seed short a section fails with `2`
+- A seed omitting a required section on purpose sets `stub: true` in its frontmatter. Only the value `true` counts, and both install paths strip the field.
 
-Entry length, reference form, table, provenance, the record's claim classification, and every word figure no record caps print and return `0` under every mode, because each is a judgment or a weight read alongside one, and failing a push on either would make the check something to route around.
+The citation check skips fenced blocks, fixture and harness trees including `*.test.ts`, and a path into a folder the project lacks.
 
-Required-section, off-set H2, and index findings sit between the two. Both are answerable from the file rather than weighed, so `--gate` promotes them to failing codes while a bare run leaves them advisory. A section shape break, such as a `## Decisions` H2 or a sixth gotcha, gates under `--gate` only in a shape-gated folder. The toolkit runs the bare form against itself and the widened form against the seed tree, described below.
+Append `<!-- audit-ignore-citations: <path> -->` to a line that displays a path without pointing at it. The marker excuses only the paths it names, and a bare `<!-- audit-ignore-citations -->` excuses every citation on the line. In seeds, plugin skill bodies, and stack references, which install into a target, reword the line instead.
 
-## The seed gate
+## Refusals
 
-`bun run check` runs `--gate` against every `tooling/<stack>/seeds/` directory carrying a `.claude/` folder, discovered per run so a new stack is covered without a script edit. The seed tree installs into every scaffolded project, so a seed breaking the standard it seeds teaches the wrong shape to each one, and no rule path reaches the tree to report it.
+- No requested `--folder` name resolves, with the names under `unresolvedFolders`
+- `--citations-only` together with `--gate`
+- `--citations-only` over folders that all resolved at the project root, which is out of scope
 
-The widened gate is correct here and wrong at the project root. A seed is authored once and read by every target, while a context entry in a live project is edited under time pressure by the people who own it. A missing section in the first is a defect shipping outward, and in the second it is a threshold worth reporting and not worth blocking a push over.
+## See also
 
-Coverage follows the index-plus-entry contract, so it reaches seeded entries and the indexes beside them. `DESIGN.md` sitting directly under `.claude/` belongs to no audited folder and stays outside it, while `REQUIREMENTS.md` is measured on its own path. The seed record states its own 600-word cap, which gates the same way a project's record does.
-
-The stage prints the entries it measured per root and warns on a root that measured none. A root can resolve an audited folder and hold no entry in it, which `tooling/claude/seeds` does today, so a single pass line over the set would report coverage of a tree nothing opened.
-
-It reads the exit code rather than pass against fail, since the two failing codes mean opposite things. A root carrying a `.claude/` that resolves no audited folder refuses at 1 and warns, while a seed short a required section gates at 2 and fails the push. A new stack seeding `.claude/` alone therefore reports what it is rather than a violation it does not have.
-
-### Exempting a skeleton
-
-A seed that deliberately omits a required section sets `stub: true` in its frontmatter, and the section check then skips it. Every other measure still reads the file, since a stub is exempt from owing sections rather than from being well formed.
-
-```markdown
----
-title: Architecture
-stub: true
----
-```
-
-Only `true` counts. A field holding anything else reads as a seed that meant to turn the exemption off, so a typo cannot silence the gate. Both install paths strip the field on the way into a target, which keeps toolkit bookkeeping out of a project whose own tooling would never read it. A block holding nothing else is dropped whole.
-
-The exemption exists because the section check has a false-positive class. A standard may sanction omitting a section, and no measure separates that from a file that forgot it, which is why the finding stays advisory everywhere the widened gate is not running. No seed sets the field today.
-
-## The citation gate
-
-The citation check resolves every path into an audited folder that appears anywhere in the repository, and it is the half wired into `bun run check`. A stale reference has a silent failure mode: the session opens nothing and carries on.
-
-Three exclusions keep it from firing on prose about paths. Fenced blocks are skipped in markdown, which covers a standard displaying a path as an example. Fixture and harness trees are skipped by location, covering sandbox scenarios that describe their own scratch tree, the eval harness naming its target project, and `*.test.ts`. A path into a folder the project does not carry is skipped, so a skill directing a reader to an optional folder's `index.md` stays valid in a project that carries it and silent in one that does not.
-
-Two cases remain, and no syntax separates either from a real reference. One is a sentence naming a hypothetical entry to show the shape of a name. The other is a line instructing a target project about its own tree, which resolves against the target rather than against this repository and passes here only while the two layouts agree. Splitting a seeded domain into a folder ends that agreement and turns every such line red at once.
-
-Append `<!-- audit-ignore-citations: <path> -->` to the source line in either case, naming the exact path the sentence displays. The marker excuses only the paths it names, so a line carrying a real reference beside the displayed one keeps that reference checked. A bare `<!-- audit-ignore-citations -->` with no path excuses every citation the line carries instead, and the reference-form check reads either form the same way, since both ask whether a line points at a file and the marker is how a line says it displays a name instead.
-
-The marker itself stays out of anything that installs. A seed, a plugin skill body, and a stack reference all reach a target, so a marker there lands as toolkit bookkeeping in someone else's tree. Reword those lines to drop the path instead, and where a stop message has to spell it, move that message into a fenced block, which this check already skips.
-
-The pattern spells both record-root prefixes, so a citation into a folder that has moved still resolves and a folder resolved at the project root is measured by every other check while contributing nothing here. A pattern fixed at one root matches nothing after a move and reports nothing, which is a stale reference passing the check written to find it. Widening it to a bare `docs/x.md` would match prose that references nothing, which is a separate decision from where entries come from. A run whose folders all resolved at the root says the check is out of scope rather than reporting that zero paths resolved, and the same run under `--citations-only` refuses, because a gate exiting clean on a scope it could not build is the failure the gate exists to catch.
+- `markdown-audit.md`: depth and bullet weight, which this audit no longer measures
+- `audits.md`: the aggregate that runs this audit

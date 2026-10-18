@@ -1,11 +1,12 @@
 ---
 title: Audits
-description: Running every health check as one set, what the single verdict means, the exit code each outcome takes, the retained baseline and the delta it reports, and which corpora are kept out of the record
+description: Running every health check as one set, the verdict and exit codes, the corpus states, the retained baseline and its delta, and a catalog of every audit verb with whether a finding gates
+kind: reference
 ---
 
 # Audits
 
-`canon audits run` runs every audit this repository owns, reports each one under a single verdict, and compares each count to the floor the last recorded run left behind. Nothing here is a new measure. Every number it prints comes from a verb that already published it, which is what makes the command cheap and what separates it from writing another check.
+`canon audits run` runs every audit this repository owns, reports each under one verdict, and compares each count to the baseline the last recorded run left. Every number comes from a verb in the catalog below.
 
 ```bash
 canon audits run
@@ -15,36 +16,11 @@ canon audits run --corpus tracked --corpus per-machine
 canon audits list --json
 ```
 
-| Option            | Behavior                                                                                                   |
-| ----------------- | ---------------------------------------------------------------------------------------------------------- |
-| `--json`          | Add a machine-readable record on stdout, keeping the frame                                                 |
-| `--root <path>`   | Measure this tree instead of the current worktree                                                          |
-| `--record`        | Write this run's tracked counts to `canon/config/baseline.json`                                            |
-| `--corpus <name>` | Limit the run to one corpus (`tracked`, `per-machine`, `upstream`), repeatable, defaulting to every corpus |
+`--record` writes the tracked counts to `canon/config/baseline.json`. `--corpus` limits the run to `tracked`, `per-machine`, or `upstream` and repeats. `--root <path>` measures another tree. `canon audits list` prints the catalog the run reads.
 
-## What it runs
+## Output
 
-Twenty-one verbs, listed by `canon audits list`. Each runs once in its fullest form, and the aggregate reads that verb's own record rather than imposing a shared envelope on it. Every one of those records already has consumers naming its keys, so a common shape would be a breaking change bought for tidiness.
-
-The verbs walk separate trees and share no state, so they run together. Measured on the authoring machine at twelve verbs, a run finished in 0.8 seconds of wall clock against 4.4 seconds of processor, which is under every other stage in `bun run check`. `canon deps audit` is the one that changes that reading, since it reaches a network rather than a tree and its latency is the index's rather than this machine's: three clean runs measured 44.7, 77.6, and 62.9 seconds, and a stalled lookup runs to an explicit 120-second timeout rather than to bun's own 299-second ceiling. `--corpus` is what keeps a caller from paying that cost when it wants only the corpora on this disk.
-
-Eighteen of the twenty-one read a tree on this disk, the one added by `restated.md` and the one added by `census.md` among them, since the first reads four such trees against each other and the second counts every file in one. The two added by `state-scoped-risk.md` read committed state rather than an arriving change, which is the gap every review surface here leaves by construction, and the one added by `label-coverage.md` reads a branch range against a map the project declares.
-
-The placement entry runs `canon context classify sweep` pinned to `--backend off`, so it reads the regex layer alone whatever classifier setting the project resolves. A count that moves with whichever model a machine runs is not comparable across clones, and the model layer turned a sub-second read into one measured at about 17 minutes over this repository's context sections on the authoring machine. It retains one tally per verdict, `keep`, `rewrite`, and `move`, and gates on nothing, since each verdict is a judgment. `document-health` is the surface that reads the same sections with the model.
-
-Each is invoked as the CLI the caller is running rather than as a global `canon`. A globally installed binary resolves to the main checkout no matter which worktree is executing, so the aggregate would measure a tree the branch never touched and report a pass over it.
-
-## What gates and what reports
-
-Five findings fail the run: an unresolved context citation, a banned character, a relative link resolving to nothing on disk, a skill folder carrying no `REQUIREMENT.md`, and a credential-shaped value in the tree the package ships. Each is a fact with no false-positive class behind it.
-
-Four of the five are the ones `canon gate run` already fails a push on. The secret scan is the one entry gating without a stage behind it, added on that same fact-or-judgment test rather than as a side effect of registering a measure, and the toolkit already ranks content leaving the repository above content that stays.
-
-Everything else reports. A heavy bullet, a long entry, a board row nothing resolves, a degradation term in a comment, and an implementation reaching history ahead of its test are judgments a reader settles. A push failing on one of those teaches contributors to route around the stage, which is the split recorded across every audit here and the one this command inherits rather than moves.
-
-Growth against the baseline reports too. The standards behind the largest measures set no hard cap, so a count that rose is a fact about the corpus and a judgment about whether it matters.
-
-## Exit codes
+`summary.verdict` is `clean`, `reported`, `findings`, or `incomplete`. Every run also states how many corpora it measured against how many it skipped.
 
 | Code | Meaning                                                              |
 | ---- | -------------------------------------------------------------------- |
@@ -53,52 +29,77 @@ Growth against the baseline reports too. The standards behind the largest measur
 | `2`  | An audit carries a finding that is a fact                            |
 | `3`  | An audit did not report, so the run measured less than the whole set |
 
-`3` is a defect in the run rather than in the tree, which is why it takes a code of its own. An aggregate reporting a pass over a set it never finished measuring is the failure the command exists against, so an unparseable record, a verb that could not be started, and an exit no verb documents all land there instead of quietly counting as clean. The `markdown audit` empty-ban-set exit is the precedent: a corpus walked with nothing looked for is a broken check, not a clean tree.
+Code `3` marks a defect in the run rather than in the tree. An unparseable record, a verb that could not start, and an undocumented exit all land there.
 
-The verdict is published as a field as well as an exit code. A reader branching on `summary.verdict` gets `clean`, `reported`, `findings`, or `incomplete` without inferring the difference between a quiet corpus and one nobody finished measuring.
+Four findings gate, being an unresolved context citation, a banned character, a skill folder with no `REQUIREMENT.md`, and a credential-shaped value in the shipped tree. Everything else reports, and growth against the baseline reports too.
 
-### An absent corpus is not an unmeasured one
+**Corpus states.**
 
-A per-machine folder that is not on this disk reports as `absent` and moves neither the verdict nor the exit code. Every one of those folders is gitignored, so a fresh clone and every CI run carry none of them, and counting six expected absences as failures pins the verdict at `incomplete` forever. A signal that never changes is one nobody reads after the second time they see it.
+An audit that finds no corpus reports `absent`, which moves neither the verdict nor the exit code. Anything unread that should exist is `unmeasured`, which sets `incomplete` and exit `3`.
 
-Which refusals count as an absence is declared per audit rather than inferred from the corpus alone. A per-machine corpus counts a missing folder. An upstream corpus counts every reason the advisory verb publishes, since each of the three means there is nothing resolved to measure. Several tracked audits override that default too, wherever the corpus not being there is the ordinary state of a target rather than a broken checkout: the secret scan for a project that publishes nothing, the skill corpora, the citation reach check, and the routing measure for a project holding no skills tree, and the context audit for a project that adopted none of the folders it measures.
+- A per-machine folder missing from this disk is `absent`
+- `upstream` is `absent` offline, and stays out of the baseline
+- The secret scan reports `no-manifest`, `no-publish`, and `no-shipped-files` as `absent`, and `no-files-field` and `no-git` as `unmeasured`
+- The skill audits, the citation reach check, and the routing measure report `absent` for a project with no skills tree
+- The context audit reports `absent` for a project that adopted none of its folders, and a tree git cannot list is `unmeasured`
 
-Everything else stays `unmeasured`. That covers a tree git cannot list, which is a broken checkout, and a package declaring no `files` field, where a publish would pack the whole tree and the scan read none of it. Both are a corpus that exists and went unread, so softening either would report a pass over a shipped tree nobody measured.
+**Baseline.**
 
-Each override exists because the corpus answers the wrong question for that audit. The secret scan earns its from `private: true`, the one declaration that a package is never published, so a project carrying it reports an absent corpus rather than a broken one. Without that the aggregate would report `incomplete` in every such project on every run, which is the permanent signal this section opens by rejecting.
+`canon/config/baseline.json` holds the counts from the last `--record`, with the day and the commit. It falls back to `.claude/canon/baseline.json` for a project that has not moved. Each run reports which counts moved and by how much.
 
-`upstream` is the third corpus value, carried by the advisory check alone. Its count moves when someone publishes rather than when someone edits here, so it is kept out of the retained baseline for the mirror image of the reason gitignored scratch is, and an offline run reports it absent rather than pinning the verdict at `incomplete` on every machine without a network.
+- A run with no baseline says so rather than showing a delta of zero
+- A key on one side only is named as new or gone
+- A per-machine record and the task board are reported every run and never recorded
+- An audit that did not report is left out, never written as zero
+- A baseline that does not parse refuses the run
 
-Every run states how many corpora it measured against how many it skipped, including a run with no findings at all. A count of what passed reads as a verdict on the whole set unless the run also says what it never reached.
+`gov test-order` reads zero in a shallow clone, so read its delta only from a clone carrying the history.
 
-### What a shallow checkout changes
+**In `bun run check`.**
 
-`canon gov test-order` scopes its range against the trunk and falls back to the root commit when no trunk ref resolves. A depth-1 checkout has neither, so the range is empty and the verb reports zero of everything rather than refusing. The numbers are real for the history present, which means a shallow run under-reports against a baseline taken from a full clone and shows as shrinkage. That is the safe direction, and it is the reason a `test-order` delta is worth reading only from a clone carrying the history.
+`bun run check` runs `--corpus tracked --corpus per-machine` as a reporting stage after the gating stages, and never fails on it. `summary` is a flat object of unique scalar keys that a shell stage greps without a JSON parser. `deps` runs weekly instead.
 
-## The retained baseline
+The placement entry runs pinned to `--backend off`, so its tally stays comparable across machines. Each audit runs as the CLI the caller is running, never a global `canon`.
 
-`canon/config/baseline.json` holds the counts from the last run recorded with `--record`, alongside the day it was taken and the commit it was read at, falling back to `.claude/canon/baseline.json` for a project that has not moved. Each later run reports which counts moved and by how much.
+**Catalog.**
 
-The file is committed. A per-machine record cannot answer the question this half exists for, which is whether a number grew since anyone last looked, and a fresh checkout has to inherit that answer rather than start over. The cost is that a branch moving a count either fixes it or re-records it and says why, which is the shape the consumed-copy assertion already carries.
+`canon audits list` reports the first 19 rows. The rows marked `outside` run by hand or from a skill and sit beside the aggregate.
 
-It sits under the project root rather than beside the aggregator in `src/`. The numbers describe one repository's corpus, and `src/` ships to every project that installs the CLI, so a baseline in the package would hand a target these counts to measure its own tree against.
+| Id                   | Verb                                | Measures                                                                           | Finding        |
+| -------------------- | ----------------------------------- | ---------------------------------------------------------------------------------- | -------------- |
+| `context`            | `canon context audit`               | Context folder structure, citations, and the requirements record's word cap        | Gates          |
+| `placement`          | `canon context classify sweep`      | Keep, rewrite, and move tally per context section, regex layer only                | Reports        |
+| `markdown`           | `canon markdown audit`              | Bans, dead links, density, and reference shape                                     | Gates          |
+| `skills`             | `canon claude skills audit`         | Both skill corpora against the skill standards                                     | Gates          |
+| `skills-reach`       | `canon claude skills reach`         | Skill bodies citing a path no target receives                                      | Reports        |
+| `skills-rank`        | `canon claude skills rank`          | Whether skill descriptions separate against a routing case corpus                  | Reports        |
+| `tasks`              | `canon tasks validate`              | Board rows nothing resolves                                                        | Reports        |
+| `records-plans`      | `canon records validate plans`      | Plan records against their shape                                                   | Reports        |
+| `records-groundwork` | `canon records validate groundwork` | Groundwork folders against their shape                                             | Reports        |
+| `records-intake`     | `canon records validate intake`     | Intake folders against their shape                                                 | Reports        |
+| `records-teach`      | `canon records validate teach`      | Teach records against their shape                                                  | Reports        |
+| `comments`           | `canon comments scan`               | Comment density by language and kind, and `TODO`, `FIXME`, `HACK`, `XXX`           | Reports        |
+| `test-order`         | `canon gov test-order`              | Implementations that reached branch history before their test                      | Reports        |
+| `secrets`            | `canon secrets scan`                | Credential-shaped values in the shipped tree                                       | Gates          |
+| `labels`             | `canon labels audit`                | Changed paths no row of the label map reaches                                      | Reports        |
+| `restated`           | `canon gov restated`                | Instructions `CLAUDE.md` states that a second surface states too                   | Reports        |
+| `counts`             | `canon gov counts`                  | Sentences stating a closed catalog's size that disagree with the tree              | Reports        |
+| `census`             | `canon census`                      | File count, extension breakdown, and line total                                    | Reports        |
+| `deps`               | `canon deps audit`                  | Advisories against the resolved dependencies                                       | Reports        |
+| `outside`            | `canon gov citations`               | Rule citations and internal frontmatter globs reaching nothing                     | Gates in check |
+| `outside`            | `canon gov superseded <old> <new>`  | Where the tree still asserts a value a changed convention no longer produces       | Reports        |
+| `outside`            | `canon claude skills drift <ref>`   | Shipped skill bodies rewritten since a ref                                         | Reports        |
+| `outside`            | `canon claude routing`              | Per `CLAUDE.md` section, how many bullets name a path and whether a rule covers it | Reports        |
+| `outside`            | `canon context classify diff`       | Classification of the chunks a git range changed                                   | Reports        |
 
-### What is kept out of it
+A deliberate secret takes a `canon-allow-secret: <reason>` marker. A deliberate citation takes `canon-allow-citation: <reason>` and a deliberate superseded value takes `canon-allow-superseded: <reason>`, each on its own line or the one above. Run any verb with `--help` for its flags and refusal reasons.
 
-A gitignored record folder holds one machine's session scratch. Its counts describe somebody else's disk, so committing them writes a floor no other clone can reproduce and every contributor reads a regression against a number that was never about their tree. The board and every record kind are therefore reported on every run and recorded in none.
+## Refusals
 
-An audit that did not report is left out rather than written as zero. Zero there records a clean corpus nobody measured, and the next run reads its real numbers as a regression against a floor that was never taken.
+- A baseline that does not parse
+- A `--root` that is not a tree git can list
 
-### The first run
+## See also
 
-A run with no baseline behind it says so rather than showing a delta of zero. Those two states say the same thing to a reader and mean opposite things, which is a defect this repository has already had to fix twice elsewhere. The same reasoning covers a check the baseline never recorded, a key the run produced that the record does not carry, and a key the record carries that this run did not produce. Each is named for what it is.
-
-A hand-edited baseline that does not parse refuses the whole run. Reading a broken record as an absent one would reset the floor the file exists to hold, silently.
-
-## In the verify pipeline
-
-`bun run check` runs a reporting stage after the three gating stages, and never fails on it. Those three stages keep their own specific remedies, so the aggregate reports the rest and the growth, and a fact still fails the push at the stage that names what to do about it.
-
-The stage runs `--corpus tracked --corpus per-machine` rather than the full set, so `deps` and its network latency sit outside the gate entirely. A weekly job reads the advisory index instead, on a schedule rather than on every push. `summary.audited` in the gate's own record therefore reads 19 against the 20 `canon audits run` reaches with no filter.
-
-The stage reads `summary`, a flat object of scalars published beside the nested arrays. Every key in it is unique across the whole record, so a shell stage greps one out without a JSON parser. The three verbs the gating stages already ran walk their trees a second time here, which is the 0.8 seconds measured above and the reason the scoped set runs rather than only the part those stages skip: one verdict over the corpora describing this tree is the value, and a stage measuring a narrower subset would report a health nobody took.
+- `markdown-audit.md`: the markdown audit
+- `context-audit.md`: the context audit
