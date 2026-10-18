@@ -108,7 +108,7 @@ From the registry the walk reports `historyUnavailable`, so check both paths by 
 | `context-fold`    | `context`                                                     |
 | `canvas-board`    | `canvas`, `design`                                            |
 | `docs-sync`       | `docs`, `readme`                                              |
-| `draft-figure`    | `figures`, `mermaid`                                          |
+| `draw-figure`     | `figures`, `mermaid`                                          |
 | `create-rule`     | `rule`                                                        |
 | `create-skill`    | `skill`, `skill-paths`, `skill-practice`, `skill-requirement` |
 | `git-branch`      | `branch`, `slug`                                              |
@@ -119,8 +119,8 @@ From the registry the walk reports `historyUnavailable`, so check both paths by 
 | `plan-groundwork` | `groundwork`, `groundwork-spikes`                             |
 | `plan-intake`     | `intake`                                                      |
 | `plan-feature`    | `plan`, `plan-lifecycle`                                      |
-| `draft-ready`     | `ready`                                                       |
-| `draft-doc`       | `requirements`, `wiki`                                        |
+| `plan-ready`      | `ready`                                                       |
+| `write-doc`       | `requirements`, `wiki`                                        |
 | `session-map`     | `session`                                                     |
 
 The `standard` name became `skill-reference.md` in `create-skill`.

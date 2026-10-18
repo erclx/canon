@@ -28,4 +28,4 @@ The routing failure is the one with no local symptom. A misplaced document reads
 - Word choice, punctuation, and formatting, which `claude/skills/markdown-craft/references/markdown.md` states directly, and voice and rhythm, which the `write-human` skill carries. Read those rather than loading this skill to reach them.
 - The content of a Claude context entry that a plugin or skill change dates, which `internal-claude` updates. This skill owns the entry's shape through `claude/skills/context-fold/references/context.md`.
 - A shape reference under a skill's `references/`, which `internal-claude` covers under `claude/skills/`.
-- A wiki page under `wiki/`, which `claude/skills/draft-doc/references/wiki.md` governs.
+- A wiki page under `wiki/`, which `claude/skills/write-doc/references/wiki.md` governs.

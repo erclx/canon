@@ -14,14 +14,14 @@ These skills serve a request rather than a moment. With the [skill map](skill-ma
 | ------------------------- | ------------------------------------------------- |
 | `canon:create-rule`       | A project rule the toolkit does not ship          |
 | `canon:create-skill`      | A new `SKILL.md`                                  |
-| `canon:draft-doc`         | A new `docs/` page, context entry, or `README.md` |
-| `canon:draft-ready`       | Finished files a worker should copy               |
-| `canon:draft-figure`      | A figure or architecture view inside a doc        |
+| `canon:write-doc`         | A new `docs/` page, context entry, or `README.md` |
+| `canon:plan-ready`        | Finished files a worker should copy               |
+| `canon:draw-figure`       | A figure or architecture view inside a doc        |
 | `canon:ci-workflow`       | A GitHub Actions workflow file                    |
-| `canon:draft-slides`      | A deck rendered to editable PowerPoint            |
-| `canon:draft-screencast`  | A recording script with beats seeded              |
+| `canon:make-deck`         | A deck rendered to editable PowerPoint            |
+| `canon:script-screencast` | A recording script with beats seeded              |
 | `canon:record-screencast` | Recording a screencast draft into a finished mp4  |
-| `canon:draft-identity`    | A logo mark and social card                       |
+| `canon:design-identity`   | A logo mark and social card                       |
 
 ## Answer a question at any point
 

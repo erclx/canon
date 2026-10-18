@@ -183,7 +183,7 @@ Read `${CLAUDE_SKILL_DIR}/references/promotion-fold.md` for how each block lands
 Lesson:    .canon/teach/<nn>-<topic>/lessons/<nnnn>-<slug>.html
 Reference: .canon/teach/<nn>-<topic>/reference/<slug>.md
 Record:    .canon/teach/<nn>-<topic>/learning-records/<nnnn>-<slug>.md
-Figure:    <drawn through draft-figure, or the one-line reason prose carries it>
+Figure:    <drawn through draw-figure, or the one-line reason prose carries it>
 Progress:  <n> of <m> success lines met
 Open:      [<the url the serve verb reported>](<the same url>)
 ```

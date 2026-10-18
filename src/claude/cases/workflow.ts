@@ -22,12 +22,12 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt: 'Draw me a diagram of how the pieces of this system connect.',
-    expect: 'draft-figure',
+    expect: 'draw-figure',
   },
   {
     prompt:
       'This onboarding doc needs a hand-drawn picture of the signup-to-active path, sketch it in and make sure it actually renders correctly.',
-    expect: 'draft-figure',
+    expect: 'draw-figure',
   },
   {
     prompt:
@@ -108,11 +108,11 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt: 'Draft me a script with beats for a screencast recording.',
-    expect: 'draft-screencast',
+    expect: 'script-screencast',
   },
   {
     prompt: 'Turn this topic into a slide deck I can render.',
-    expect: 'draft-slides',
+    expect: 'make-deck',
   },
   // Rot across documents nobody changed is what this reads, rather than a
   // stated rule broken on a given line. It is also not `target-check`, which

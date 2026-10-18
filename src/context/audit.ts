@@ -209,7 +209,7 @@ const SENTENCE_END = /[.!?:;]\s(?=[^.!?:;]*$)/
  * reading that field for a gain of one word.
  *
  * `claude/skills/context-fold/references/context.md` opens its scope by handing figures to the
- * `draft-figure` skill, so a marker reported in a diagrams entry would cite a
+ * `draw-figure` skill, so a marker reported in a diagrams entry would cite a
  * rule that entry's own standard routes elsewhere. The length and table
  * checkpoints are quoted from the same standard and keep reaching every audited
  * folder, because a threshold on how far a reader travels generalizes across

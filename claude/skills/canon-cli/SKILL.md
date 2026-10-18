@@ -43,11 +43,11 @@ Each verb here has a skill that owns the job. Load the skill rather than driving
 
 | Job                                          | Verb                | Skill                       |
 | -------------------------------------------- | ------------------- | --------------------------- |
-| Render the design system                     | `canon design`      | `canon:draft-figure`        |
-| Render a slide deck                          | `canon slides`      | `canon:draft-slides`        |
-| Render an HTML source to a PNG               | `canon capture`     | `canon:draft-identity`      |
+| Render the design system                     | `canon design`      | `canon:draw-figure`         |
+| Render a slide deck                          | `canon slides`      | `canon:make-deck`           |
+| Render an HTML source to a PNG               | `canon capture`     | `canon:design-identity`     |
 | Serve a directory and print the link         | `canon serve`       | none                        |
-| Record a running app                         | `canon demo`        | `canon:draft-screencast`    |
+| Record a running app                         | `canon demo`        | `canon:script-screencast`   |
 | Report one computed property across routes   | `canon inventory`   | `canon:target-check`        |
 | Walk a page through interactions and measure | `canon drive`       | `canon:ux-measure`          |
 | Fetch a YouTube transcript                   | `canon transcripts` | `canon:youtube-transcripts` |

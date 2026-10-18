@@ -91,9 +91,9 @@ In `canon/context/development/ci.md`, the Typecheck row asserts `` `astro check`
 
 ## Social card route
 
-The social card is a route the project keeps rather than a page a render writes and deletes. Re-rendering it after a rename is an edit to one string and a re-capture, not another pass through the `draft-identity` pick loop.
+The social card is a route the project keeps rather than a page a render writes and deletes. Re-rendering it after a rename is an edit to one string and a re-capture, not another pass through the `design-identity` pick loop.
 
-`canon:draft-identity` writes the picked composition into the route and captures it through the server below.
+`canon:design-identity` writes the picked composition into the route and captures it through the server below.
 
 ### What ships
 

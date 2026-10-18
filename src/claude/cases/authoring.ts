@@ -22,26 +22,26 @@ export const AUTHORING_CASES: readonly SkillCase[] = [
   {
     prompt:
       'Write a brand-new docs page for the capture command, nothing under docs/ covers it yet.',
-    expect: 'draft-doc',
+    expect: 'write-doc',
   },
   {
     prompt:
       'I already wrote the finished skill files, package them as a ready folder with a plan and a task for a worker to copy.',
-    expect: 'draft-ready',
+    expect: 'plan-ready',
   },
   {
     prompt: 'This project has no README.md at all, write one from scratch.',
-    expect: 'draft-doc',
+    expect: 'write-doc',
   },
   {
     prompt:
       'Write a context entry for the payments domain, there is no canon/context page for it yet.',
-    expect: 'draft-doc',
+    expect: 'write-doc',
   },
   {
     prompt:
       'Write a wiki reference page for Claude Code output styles, no page covers that subject yet.',
-    expect: 'draft-doc',
+    expect: 'write-doc',
   },
   {
     prompt: 'This passage reads flat and robotic, give it some real cadence.',

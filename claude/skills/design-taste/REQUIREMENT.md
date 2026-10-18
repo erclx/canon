@@ -9,9 +9,9 @@ description: Why a design round needs a stated layer ordering and a taste catalo
 
 Without this skill, a design round has no vocabulary to declare what it is varying and no standard of quality once it has. Both halves failed together and each is measured.
 
-The failure was measured on a real page. Four `draft-and-pick` rounds ran against one landing page in a single working session, and three changed nothing the operator could see. Each varied a property at Surface, being palette, figure treatment, heading separation and underline reach, against a page whose defect sat at composition.
+The failure was measured on a real page. Four `pick-by-eye` rounds ran against one landing page in a single working session, and three changed nothing the operator could see. Each varied a property at Surface, being palette, figure treatment, heading separation and underline reach, against a page whose defect sat at composition.
 
-The instruction against that already existed. `draft-and-pick` Step 1 says to name the layer and Step 2 says a palette cannot be picked ahead of a composition. All four rounds skipped both, and nothing reported it. A session told to name a layer has no catalog to name from, so the rule had nothing behind it.
+The instruction against that already existed. `pick-by-eye` Step 1 says to name the layer and Step 2 says a palette cannot be picked ahead of a composition. All four rounds skipped both, and nothing reported it. A session told to name a layer has no catalog to name from, so the rule had nothing behind it.
 
 The second half is the output itself. A model with no stated direction draws the population average of its training data, which produces interfaces that satisfy every craft rule and still read templated.
 
@@ -56,7 +56,7 @@ A rule failing any of the four is recorded as considered and declined rather tha
 - Express intensity as a numeric scale. A session picks a middle value and reports compliance, which satisfies the rule and decides nothing.
 - Claim the reported failure is closed. Nothing measures whether a round follows these rules, so this skill states them and the measurement is owed separately.
 - Duplicate a rule a surface already states for itself, such as slide layout or terminal color, where pointing at that surface is the whole of the correct answer
-- Be reached only by an author typing its name. `claude/skills/create-skill/references/skill.md` makes this a review criterion rather than a check, since nothing answers it before the skill has run. The intended non-author caller is the declared read in `draft-and-pick`'s output. A round producing no read, with this skill never loaded, is the evidence that the description's triggers are too weak.
+- Be reached only by an author typing its name. `claude/skills/create-skill/references/skill.md` makes this a review criterion rather than a check, since nothing answers it before the skill has run. The intended non-author caller is the declared read in `pick-by-eye`'s output. A round producing no read, with this skill never loaded, is the evidence that the description's triggers are too weak.
 
 ## Guards
 
@@ -70,7 +70,7 @@ A rule failing any of the four is recorded as considered and declined rather tha
 - State coverage, empty and loading treatment, destructive confirmation and truncation, which `ux-completeness` owns
 - Validation timing, error placement and save blocking, which `forms` owns
 - Rendered copy casing, button labels and error wording, which `copy` owns
-- The candidate loop, the arm set, the render and the pick, which `draft-and-pick` owns and which this skill is loaded alongside rather than inside
+- The candidate loop, the arm set, the render and the pick, which `pick-by-eye` owns and which this skill is loaded alongside rather than inside
 - The shape of the project's design document, its sections and its role tables, which `claude/skills/canvas-board/references/design.md` governs
 - Prose on the surface being designed, which `write-human` and `markdown.md` govern between them
 - Measuring whether finished output followed these rules, which needs a check this skill does not carry and which no command reaches while a render is an image rather than a parse

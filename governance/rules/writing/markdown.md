@@ -20,4 +20,4 @@ paths:
 
 ## Figures
 
-- Load the `canon:draft-figure` skill before drafting or revising a Mermaid fence or a figure, and report it rather than proceeding silently when it does not resolve.
+- Load the `canon:draw-figure` skill before drafting or revising a Mermaid fence or a figure, and report it rather than proceeding silently when it does not resolve.

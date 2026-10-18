@@ -57,7 +57,7 @@ Owns the procedure a session follows.
 
 Two skills and one rule sit around the canvas.
 
-- `claude/skills/draft-and-pick/` lays candidates out as frames on one page and takes the pick
+- `claude/skills/pick-by-eye/` lays candidates out as frames on one page and takes the pick
 - The opt-in rule `canvas` on `.canon/canvas/**` points at the `canvas-board` house style, is listed in no stack, and a project takes it with `--add canvas`
 
 ## Gotchas

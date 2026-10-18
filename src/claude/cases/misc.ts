@@ -10,7 +10,7 @@ export const MISC_CASES: readonly SkillCase[] = [
   {
     prompt:
       'Show me a few different treatments for this callout so I can pick one by looking.',
-    expect: 'draft-and-pick',
+    expect: 'pick-by-eye',
   },
   {
     prompt:
@@ -20,7 +20,7 @@ export const MISC_CASES: readonly SkillCase[] = [
   {
     prompt:
       'This project has no logo yet. Draft one and give me a social card to go with it.',
-    expect: 'draft-identity',
+    expect: 'design-identity',
   },
   {
     prompt:

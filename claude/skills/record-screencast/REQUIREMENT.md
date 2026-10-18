@@ -7,7 +7,7 @@ description: Why compiling and running a screencast draft needs a routed skill r
 
 ## Gap
 
-Without this skill, `draft-screencast` writes a draft and names `canon demo compile` as the next step, and nothing after that routes a session there or to `canon demo run`. An operator has to know both verbs, type them in order, and read the compile record for unresolved fields by hand. A session that fills one in on its own reproduces the exact failure `canon demo run`'s `plan-unresolved` reason exists to catch, one layer up where nothing enforces it.
+Without this skill, `script-screencast` writes a draft and names `canon demo compile` as the next step, and nothing after that routes a session there or to `canon demo run`. An operator has to know both verbs, type them in order, and read the compile record for unresolved fields by hand. A session that fills one in on its own reproduces the exact failure `canon demo run`'s `plan-unresolved` reason exists to catch, one layer up where nothing enforces it.
 
 ## Must
 
@@ -25,7 +25,7 @@ Without this skill, `draft-screencast` writes a draft and names `canon demo comp
 - Guess or fill a target, a URL, or any other unresolved field
 - Drive the application through anything other than `canon demo run`
 - Install HyperFrames, vendor it, or restate its composition rules, which its own skills own
-- Assume this skill's own invocation frequency needs no check. `draft-screencast`'s closing block names it by hand, but whether anything else reaches for it beyond that pointer or an operator typing its name has no answer at creation time, so a review pass some months in should read that back rather than take it on faith.
+- Assume this skill's own invocation frequency needs no check. `script-screencast`'s closing block names it by hand, but whether anything else reaches for it beyond that pointer or an operator typing its name has no answer at creation time, so a review pass some months in should read that back rather than take it on faith.
 
 ## Guards
 
@@ -33,6 +33,6 @@ Without this skill, `draft-screencast` writes a draft and names `canon demo comp
 
 ## Out of scope
 
-- Drafting the beats, which `draft-screencast` owns
+- Drafting the beats, which `script-screencast` owns
 - Filling an existing plan's target or URL, which is the operator's own edit
 - Verifying a recording beyond its own caption, which nothing in the toolkit does yet

@@ -1,5 +1,5 @@
 /**
- * Reads the human-facing draft `draft-screencast` writes. Nothing here knows
+ * Reads the human-facing draft `script-screencast` writes. Nothing here knows
  * about a browser: the draft is prose aimed at a person, and turning it into
  * something executable is `@/demo/compile`'s job.
  */
