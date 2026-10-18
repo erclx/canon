@@ -9,9 +9,9 @@ What each verb writes, refuses, and leaves alone. `canon --help` lists flags.
 
 ## Bootstrap
 
-`canon init [path]` installs up to five core domains and reports each independently. A failed domain does not abort the run, which finishes the rest and exits 1 naming the failures.
+`canon init [path]` installs up to four core domains and reports each independently. A failed domain does not abort the run, which finishes the rest and exits 1 naming the failures.
 
-Any flag skips the confirmation prompt, but the `base` default of `--stack` does not count, so a bare `canon init` still prompts. `--skip` takes `wiki`, `governance`, and `records`, and warns on any other value.
+Any flag skips the confirmation prompt, but the `base` default of `--stack` does not count, so a bare `canon init` still prompts. `--skip` takes `governance` and `records`, and warns on any other value.
 
 ## Governance install
 

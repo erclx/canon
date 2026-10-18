@@ -33,15 +33,15 @@ describe('parseSkip', () => {
   })
 
   it('should read a comma-separated list', () => {
-    expect([...parseSkip('wiki,governance').skipped]).toEqual([
-      'wiki',
+    expect([...parseSkip('records,governance').skipped]).toEqual([
+      'records',
       'governance',
     ])
   })
 
   it('should trim whitespace around each value', () => {
-    expect([...parseSkip(' wiki , governance ').skipped]).toEqual([
-      'wiki',
+    expect([...parseSkip(' records , governance ').skipped]).toEqual([
+      'records',
       'governance',
     ])
   })
@@ -68,9 +68,9 @@ describe('parseSkip', () => {
   })
 
   it('should report an unrecognized value without dropping the valid ones', () => {
-    const plan = parseSkip('wiki,gov')
+    const plan = parseSkip('records,gov')
 
-    expect([...plan.skipped]).toEqual(['wiki'])
+    expect([...plan.skipped]).toEqual(['records'])
     expect(plan.unknown).toEqual(['gov'])
   })
 
@@ -82,16 +82,16 @@ describe('parseSkip', () => {
   })
 
   it('should ignore empty entries from a trailing comma', () => {
-    const plan = parseSkip('wiki,')
+    const plan = parseSkip('records,')
 
-    expect([...plan.skipped]).toEqual(['wiki'])
+    expect([...plan.skipped]).toEqual(['records'])
     expect(plan.unknown).toEqual([])
   })
 })
 
 describe('planInit', () => {
-  it('should count five domains when no flags are given', () => {
-    expect(planInit(flags()).total).toBe(5)
+  it('should count four domains when no flags are given', () => {
+    expect(planInit(flags()).total).toBe(4)
   })
 
   it('should install the default stack when none is named', () => {
@@ -107,7 +107,7 @@ describe('planInit', () => {
   it('should warn about governance rather than counting it when skipped', () => {
     const plan = planInit(flags({ skip: parseSkip('governance') }))
 
-    expect(plan.total).toBe(4)
+    expect(plan.total).toBe(3)
     expect(plan.preview).toContainEqual({
       level: 'warn',
       text: 'governance (skipped)',
@@ -131,28 +131,28 @@ describe('planInit', () => {
     expect(texts(plan)).toContain('governance (stack: astro, extras: shadcn)')
   })
 
-  it('should drop a skipped domain from the preview and the count', () => {
-    const plan = planInit(flags({ stack: 'base', skip: parseSkip('wiki') }))
+  it('should subtract every skip from the count', () => {
+    const plan = planInit(flags({ skip: parseSkip('records,governance') }))
 
-    expect(plan.total).toBe(4)
-    expect(texts(plan)).not.toContain('wiki (.claude/wiki/ with a stub index)')
+    expect(plan.total).toBe(2)
   })
 
-  it('should subtract every skip from the count', () => {
-    const plan = planInit(flags({ skip: parseSkip('wiki,governance') }))
+  it('should report wiki as unrecognized and skip nothing, since it no longer installs', () => {
+    const plan = planInit(flags({ skip: parseSkip('wiki') }))
 
-    expect(plan.total).toBe(3)
+    expect(plan.total).toBe(4)
+    expect(parseSkip('wiki').unknown).toEqual(['wiki'])
   })
 
   it('should drop the records notice from the preview and the count when skipped', () => {
     const plan = planInit(flags({ skip: parseSkip('records') }))
 
-    expect(plan.total).toBe(4)
+    expect(plan.total).toBe(3)
     expect(texts(plan)).not.toContain('records (one-time backup setup notice)')
   })
 
   it('should keep the count equal to the domains that will run', () => {
-    const plan = planInit(flags({ stack: 'base', skip: parseSkip('wiki') }))
+    const plan = planInit(flags({ stack: 'base', skip: parseSkip('records') }))
 
     expect(plan.preview.filter((line) => line.level === 'info')).toHaveLength(
       plan.total,

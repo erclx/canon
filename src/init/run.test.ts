@@ -56,10 +56,10 @@ describe('runDomains', () => {
     const failed = await runDomains([
       failing('Base tooling', order),
       passing('Claude workflow', order),
-      failing('Wiki', order),
+      failing('Governance', order),
     ])
 
-    expect(failed).toEqual(['Base tooling', 'Wiki'])
+    expect(failed).toEqual(['Base tooling', 'Governance'])
   })
 
   it('should run the domains in the order given', async () => {

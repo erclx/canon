@@ -165,7 +165,7 @@ git init
 canon init
 ```
 
-`canon init` installs base tooling configs, Claude seeds, and governance rules in one pass, and scaffolds a `.claude/wiki/` stub for your project's own reference pages.
+`canon init` installs base tooling configs, Claude seeds, and governance rules in one pass.
 
 - Governance defaults to the `base` stack, so a bare init lands the workflow and doc-authoring rules in `.claude/rules/`.
 - Each rule names the skill it loads, so no corpus is copied into your project.

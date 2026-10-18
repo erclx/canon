@@ -28,10 +28,10 @@ function seedStylesheet(ctx: StageContext): void {
 /**
  * The promote arm alone. A project with no wiki folder gets a refusal from the
  * skill rather than a scaffold, so the arm that drives a proposal has to seed
- * one, and it seeds the `.claude/` spelling a scaffolded target carries. The
- * wiki holds only Anthropic-owned subjects, so seeding it here is what gives
- * the routing test something to correctly pass over: the regex page belongs to
- * nobody, which routes it to docs instead.
+ * one, and it seeds the `.claude/` spelling. The wiki holds only
+ * Anthropic-owned subjects, so seeding it here is what gives the routing
+ * test something to correctly pass over: the regex page belongs to nobody,
+ * which routes it to docs instead.
  */
 function seedWiki(ctx: StageContext): void {
   ctx.mkdir('.claude/wiki')
@@ -199,7 +199,7 @@ export default scenario({
         'Context: .canon/teach/01-regex/ holds one reference page, one lesson,',
       )
       ctx.log.info(
-        '  and a glossary. The project carries .claude/wiki/ with a stub index,',
+        '  and a glossary. The project carries a seeded .claude/wiki/,',
       )
       ctx.log.info(
         '  but the wiki holds only Anthropic-owned subjects, so the routing test',

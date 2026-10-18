@@ -25,7 +25,6 @@ paths = [
   "CLAUDE.md",
   ".claude/rules/canon/claude/output.md",
   ".claude/rules/canon/canon/scratch.md",
-  ".claude/wiki/index.md",
   "commitlint.config.js",
 ]
 
@@ -39,6 +38,7 @@ absent = [
   "vite.config.ts",
   ".oxlintrc.json",
   ".claude/standards",
+  ".claude/wiki",
 ]
 
 # No `write_scope`. `canon init` writes a whole project scaffold and the verify

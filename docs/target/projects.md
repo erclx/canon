@@ -70,10 +70,9 @@ The default is `base`. Escalate only for a project writing code, and `target-set
 
 ### Core domains and skips
 
-`canon init` installs base tooling, the Claude workflow, and governance, and scaffolds `.claude/wiki/`. Pass `--stack <name>` for a language stack.
+`canon init` installs base tooling, the Claude workflow, and governance. Pass `--stack <name>` for a language stack.
 
 - `--skip governance` leaves `.claude/rules/` empty. The run prints the `canon gov install <stack> <path>` command that restores the rules it dropped.
-- `--skip wiki` skips the `.claude/wiki/` scaffold. A root `wiki/` is kept.
 
 ## Add a domain later
 

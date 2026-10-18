@@ -33,7 +33,6 @@ Consult to pick the `canon` verb for a job, and before running a verb that write
 | Install or sync governance rules                                | `canon gov`     |
 | Sync a tooling stack's configs and seeds, or read its reference | `canon tooling` |
 | Set up or sync the Claude workflow                              | `canon claude`  |
-| Scaffold a wiki                                                 | `canon wiki`    |
 | Regenerate the `index.md` files                                 | `canon indexes` |
 | Read a toolkit reference doc                                    | `canon docs`    |
 
