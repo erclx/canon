@@ -21,6 +21,14 @@ Holds the source rules, one subfolder per audience, each at `<folder>/<slug>.md`
 - Adding a rule means creating the file, committing the regenerated `.claude/rules/` copy, and running `canon gov counts` until clean, as authored, consumed, and `base` counts move apart
 - A rule in `code/` reaches every language stack, and one elsewhere reaches nobody until a stack or detect names it, so its glob should cover every ecosystem it governs
 
+### `governance/ledger/`
+
+Holds the source ledger for each outside-practice rule at the rule's own path, outside the installed tree so a ledger never loads or ships.
+
+- `canon gov audit` matches a ledger's table rows to the rule's bullets by count under each H2 of the same name, so a row added or dropped without its bullet fails the folder
+- A cut bullet goes in a `## Declined` list rather than a table, since every table row under a heading counts as a bullet's row
+- `framework/` is the first folder through, so its six ledgers are the worked shape for `lang/`, `lib/`, `ui/`, and `tooling/`
+
 ### `governance/stacks/`
 
 Holds one `.toml` per stack with an optional `extends` and a `rules` list, where an entry names a rule or a whole rule folder.
