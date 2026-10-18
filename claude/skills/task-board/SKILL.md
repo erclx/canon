@@ -32,6 +32,13 @@ Do not run the regen command directly, except after a shell write from a linked 
 
 ## Create
 
+### Decide a task is needed
+
+Open a task only for work that spans multiple sessions or has real dependencies, and handle a small edit immediately without one.
+
+- Add no task for work already completed, since git shows it
+- Give a task needing execution detail beyond its own file a plan in `.canon/plans/`, linked by its `Plan:` line per Step 3
+
 ### Step 1: require an origin
 
 Every task traces to a plan, a groundwork folder, an intake folder, or a GitHub issue. Ask for it when the request does not carry one, and stop rather than guessing: `❌ No origin. Name the plan, groundwork folder, intake folder, or issue this task comes from.`

@@ -22,6 +22,7 @@ Resolve both from the request, and ask only for what is missing. Attach a propos
 
 - What the rule enforces: one topic, phrased as a standard (`<topic> conventions`).
 - Scope: a path glob relative to the project root (`<dir>/**/*.<ext>`) for a path-scoped rule, or always-on when the rule states a global principle with no file scope.
+- Whether canon already ships a rule for the topic, read from `canon gov list --rules --json`. When one does, point the user at it and at `canon gov install --add` rather than authoring a copy.
 - An installed skill already covering the topic, found per `### Checking the installed skills` in `${CLAUDE_SKILL_DIR}/references/rule.md`. Point the rule at it rather than restating it.
 
 ## Step 2: resolve the subdir
@@ -86,3 +87,5 @@ Read `${CLAUDE_SKILL_DIR}/references/checklist.md` and run every bullet of the w
 ## After writing
 
 Emit the full path on its own line: `.claude/rules/project/<subdir>/<slug>.md`. Remind the user that Claude Code loads path-scoped rules when it reads or writes a matching file, and always-on rules every session. When a bullet claims outside practice, tell them to cite its source in the commit that adds the rule.
+
+Show the new rule as a diff in chat and commit nothing until the operator says OK.

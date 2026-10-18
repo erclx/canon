@@ -139,4 +139,12 @@ describe('shipped ledger', () => {
 
     expect(resolved).toEqual([])
   })
+
+  it('should resolve no successor for a retired task-scope rule', () => {
+    const resolved = ['035-tasks', '602-tasks', 'task-scope'].filter(
+      (name) => resolveSuccessor(ledger, index, name) !== undefined,
+    )
+
+    expect(resolved).toEqual([])
+  })
 })

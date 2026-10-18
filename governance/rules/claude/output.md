@@ -1,5 +1,5 @@
 ---
-description: Report file paths correctly for the reading surface and group them when the response covers many
+description: Report file paths correctly for the reading surface, group them when the response covers many, and name sessions to a person
 ---
 
 # Output standards
@@ -17,3 +17,7 @@ description: Report file paths correctly for the reading surface and group them 
 
 - Group paths under `**Created:**`, `**Modified:**`, and `**Deleted:**` headers when the response covers multiple files, with every path under them in that form.
 - Put a single-file change's path on its own line, with no header.
+
+## Naming sessions
+
+- Name a session to a person by its roster name from `canon sessions list`, and give its id only beside the name, never alone.

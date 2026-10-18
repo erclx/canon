@@ -118,7 +118,6 @@ describe('resolveRules', () => {
 describe('resolveRules on the shipped stacks', () => {
   const BASE = [
     'output',
-    'task-scope',
     'scratch',
     'worktrees',
     'git',
@@ -129,7 +128,7 @@ describe('resolveRules on the shipped stacks', () => {
     'markdown',
   ]
 
-  it('should give base its ten rules and no folder whole', () => {
+  it('should give base its nine rules and no folder whole', () => {
     expect(resolveRules(PROJECT_ROOT, 'base')).toEqual({
       ok: true,
       rules: BASE,

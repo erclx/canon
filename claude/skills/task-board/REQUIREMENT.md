@@ -15,6 +15,7 @@ Placing a row without checking for another writer collides the same way. Two ses
 
 - Resolve the board at the main worktree root, since a linked worktree writing to `pwd` creates a second board nothing reads
 - Read the tasks standard before writing, rather than working the filename and frontmatter from memory
+- Decide a task is needed before opening one, since a small edit or finished work needs none
 - Require an origin at creation, because that is the only moment the invariant is enforceable
 - Claim the phase label with `canon tasks next-label --claim` rather than reading or proposing one by hand
 - Check the roster for a live orchestrator before writing a row, and hand off rather than write when one is found
