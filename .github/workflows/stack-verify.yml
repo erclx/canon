@@ -19,6 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         # Only the stacks that scaffold. A layer or an add-on is refused by the verb.
+        # Keep in step with the stack list in the report job's loop
         stack: [astro, nextjs, vite-react, go, php, python]
     steps:
       - name: Checkout
@@ -39,7 +40,19 @@ jobs:
 
       - name: Check Go
         if: matrix.stack == 'go'
-        run: go version
+        run: |
+          go version
+          # The stack's prepare installs golangci-lint here, off the runner's PATH
+          echo "$HOME/go/bin" >> "$GITHUB_PATH"
+
+      - name: Install Playwright System Dependencies
+        if: contains(fromJSON('["astro","nextjs","vite-react"]'), matrix.stack)
+        timeout-minutes: 10
+        run: bunx playwright install-deps chromium firefox webkit
+
+      - name: Install Playwright Browsers
+        if: contains(fromJSON('["astro","nextjs","vite-react"]'), matrix.stack)
+        run: bunx playwright install chromium firefox webkit
 
       - name: Check PHP and Composer
         if: matrix.stack == 'php'
@@ -93,6 +106,7 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
+          # Keep in step with the matrix above. A stack missing here gets no issue.
           for stack in astro nextjs vite-react go php python; do
             title="stack-verify: $stack"
             # A job that died before recording counts as a failure
