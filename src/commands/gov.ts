@@ -596,7 +596,10 @@ export function register(program: Command): void {
       'Report every rule past a shape limit, and in this repository every outside-practice rule missing a source ledger',
     )
     .helpOption('-h, --help', 'Show this help message')
-    .argument('[paths...]', 'Rule files to read, defaulting to the corpus')
+    .argument(
+      '[paths...]',
+      'Rule files or folders of rules to read, defaulting to the corpus',
+    )
     .option('--root <path>', 'Tree to read, defaulting to the cwd')
     .option('--json', 'Add a machine-readable record on stdout')
     .option(
@@ -635,7 +638,7 @@ export function register(program: Command): void {
         '  2  at least one finding, or under --gate one in a gated folder',
         '',
         'Reasons:',
-        '  no-rules      the tree holds no rule corpus to read',
+        '  no-rules      the tree holds no rule corpus to read, or a named folder holds no rule',
         '  no-path       a named path does not exist',
         '  outside-root  a named path sits outside --root',
         '',
