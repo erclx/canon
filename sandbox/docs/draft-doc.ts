@@ -73,7 +73,7 @@ export default scenario({
         'Action:  /canon:draft-doc write a wiki page for Claude Code subagents',
       )
       ctx.log.info(
-        'Expect:  drafted at wiki/claude/subagents.md, sourced through claude-code-guide rather than recall, confirmed before write',
+        'Expect:  drafted at wiki/claude/subagents.md, sourced from the fetched docs page rather than recall, confirmed before write',
       )
     },
     'wiki-project-owned': (ctx) => {

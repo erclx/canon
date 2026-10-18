@@ -49,7 +49,7 @@ Measure against the tree rather than recall, since a count carried from an earli
 When a decision rests on an outside practice or a third-party behavior, invoke `canon:search-craft` before searching, fetch each source, and record the passage relied on. Skip this for a plan that rests on nothing outside the project.
 
 - Confirm exact wording through `curl` where a decision turns on it, since `WebFetch` returns a model's answer rather than the page
-- Route a Claude Code subject to the `claude-code-guide` agent
+- Fetch a Claude Code subject from Anthropic's docs directly, starting at the index `https://code.claude.com/docs/llms.txt` and reading the `.md` form of the page it names
 - Mark a source that could not be fetched as unverified rather than citing recall
 - Report it rather than proceeding silently when `canon:search-craft` does not resolve
 

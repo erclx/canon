@@ -42,7 +42,7 @@ Access is a second gap a session cannot derive. Probed on 2026-10-02, Reddit ref
 ## Out of scope
 
 - The form a citation takes: the procedure or standard writing it
-- A Claude Code subject: the `claude-code-guide` agent, which `draft-doc`'s wiki sourcing step already routes to
+- A Claude Code subject: a direct fetch of `https://code.claude.com/docs/llms.txt` and the `.md` page it names, as `draft-doc`'s wiki sourcing step already does
 - Image generation, which makes a picture rather than finding a source
 - Loading on every web search rather than on a research-shaped request: a hook matching `WebSearch`, planned on its own
 - Whether a session already scopes searches without the skill, which only a run on a fresh research request without it would show
