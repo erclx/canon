@@ -334,7 +334,7 @@ export const STAGES: readonly Stage[] = [
         kind: 'cli',
         argv: ['context', 'audit', '--gate'],
         failure:
-          'A cited context path does not resolve, an entry lacks a required section or carries an H2 outside Overview, Layout, and Gotchas, an entry under a shape-gated folder breaks the section shape, or an index disagrees with its folder. Run bun src/cli.ts context audit --gate.',
+          'A cited context path does not resolve, an entry lacks a required section or carries an H2 outside Overview, Layout, and Gotchas, an entry under a shape-gated folder breaks the section shape, an index disagrees with its folder, or a code folder is named in no Layout or claimed by two entries. Run bun src/cli.ts context audit --gate.',
       },
     ],
     success: 'Context citations resolve',

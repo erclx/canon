@@ -3,6 +3,7 @@ import type {
   SectionFinding,
   ShapeFinding,
 } from '@/context/audit'
+import { type CoverageReport, hasCoverageFindings } from '@/context/coverage'
 import type { FolderDrift } from '@/context/index-drift'
 
 export interface GateInput {
@@ -26,6 +27,12 @@ export interface GateInput {
   readonly shape: readonly ShapeFinding[]
   readonly drift: readonly FolderDrift[]
   /**
+   * Folders under the declared code roots that no Layout names or two entries
+   * claim, gating under `--gate` alone. A project with no code root reads as
+   * not measured and never gates.
+   */
+  readonly coverage: CoverageReport
+  /**
    * Whether the caller asked for the widened gate. False leaves a missing
    * section and a drifted index advisory, which is what the project-root stage
    * runs so a judgment threshold never fails a push.
@@ -48,8 +55,8 @@ export function hasDrift(drift: readonly FolderDrift[]): boolean {
  * for itself, which makes it a fact rather than a threshold a reader weighs.
  * The findings `--gate` adds are the ones answerable from the file itself: a
  * required section it does not declare, an H2 outside the closed set, a shape
- * break in a folder rebuilt to the shape, and an index disagreeing with its
- * folder. Entry length, depth, bullet, table, provenance, and the record's
+ * break in a folder rebuilt to the shape, an index disagreeing with its
+ * folder, and a code folder no entry names or two entries claim. Entry length, depth, bullet, table, provenance, and the record's
  * claim coverage are judgments, so they stay out under both modes.
  */
 export function isGating({
@@ -59,6 +66,7 @@ export function isGating({
   extraSections,
   shape,
   drift,
+  coverage,
   widened,
 }: GateInput): boolean {
   if (unresolvedCitations > 0) return true
@@ -69,6 +77,7 @@ export function isGating({
     sections.length > 0 ||
     extraSections.length > 0 ||
     shape.some((finding) => finding.gated) ||
-    hasDrift(drift)
+    hasDrift(drift) ||
+    hasCoverageFindings(coverage)
   )
 }

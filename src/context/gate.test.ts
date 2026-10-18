@@ -4,6 +4,7 @@ import type {
   SectionFinding,
   ShapeFinding,
 } from '@/context/audit'
+import type { CoverageReport } from '@/context/coverage'
 import { type GateInput, hasDrift, isGating } from '@/context/gate'
 import type { FolderDrift } from '@/context/index-drift'
 
@@ -34,6 +35,12 @@ function makeShape(overrides: Partial<ShapeFinding> = {}): ShapeFinding {
   }
 }
 
+const UNNAMED: CoverageReport = {
+  kind: 'measured',
+  roots: ['src'],
+  findings: { unnamed: ['src/x'], doubled: [], missingRoots: [] },
+}
+
 function makeInput(overrides: Partial<GateInput> = {}): GateInput {
   return {
     unresolvedCitations: 0,
@@ -42,6 +49,7 @@ function makeInput(overrides: Partial<GateInput> = {}): GateInput {
     extraSections: [],
     shape: [],
     drift: [],
+    coverage: { kind: 'no-root' },
     widened: false,
     ...overrides,
   }
@@ -150,5 +158,20 @@ describe('isGating', () => {
     const input = makeInput({ shape: [makeShape({ gated: true })] })
 
     expect(isGating(input)).toBe(false)
+  })
+
+  it('should leave a coverage finding advisory under the narrow gate', () => {
+    expect(isGating(makeInput({ coverage: UNNAMED }))).toBe(false)
+  })
+
+  it('should fail a coverage finding under the widened gate', () => {
+    expect(isGating(makeInput({ coverage: UNNAMED, widened: true }))).toBe(true)
+  })
+
+  it('should pass a widened gate that found no code root or an opt-out', () => {
+    expect(isGating(makeInput({ widened: true }))).toBe(false)
+    expect(
+      isGating(makeInput({ coverage: { kind: 'opted-out' }, widened: true })),
+    ).toBe(false)
   })
 })
