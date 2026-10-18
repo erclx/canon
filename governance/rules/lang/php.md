@@ -19,7 +19,7 @@ paths:
 
 ## Data shapes
 
-- Use a backed `enum` for a closed set over class constants.
+- Use an `enum` for a closed set over class constants, backed by a string or int when the value is stored or serialized.
 - Use `readonly` properties or a `readonly` class for value objects.
 - Declare classes `final` unless they are designed for extension.
 - Do not pass an associative array across a public boundary where a typed object fits.
@@ -27,5 +27,5 @@ paths:
 ## Errors
 
 - Throw a domain exception for a failure. Do not return `false` or `null` to signal one.
-- Never suppress an error with the `@` operator.
-- Do not use `extract`, variable variables, or `eval`.
+- Never suppress an error with the `@` operator. Check the condition first or catch the exception.
+- Do not use `extract`, variable variables, or `eval`. Name each variable and call each function directly.
