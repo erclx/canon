@@ -1,43 +1,39 @@
 ---
-description: Enforce FastAPI router, dependency injection, and async handler patterns
+description: Enforce FastAPI routers, sync and async handlers, dependency injection, lifespan, and error mapping
 paths:
   - '**/*.py'
 ---
 
 # FastAPI standards
 
-## Project structure
+## Routers
 
-- Mount routes through `APIRouter` modules. Do not register handlers directly on `FastAPI()`.
-- Group routers by feature under `src/<pkg>/api/` and include them from the root app factory.
-- Use an `app_factory()` callable over a module-level `app = FastAPI()` for testability.
+- Declare path operations on one `APIRouter` per feature and add each with `app.include_router()`, not on `FastAPI()` directly.
+- Put a dependency every route in a group needs, such as auth, in the router's `dependencies=[...]`.
 
-## Handlers
+## Path operations
 
-- Define path operations as `async def` unless the handler is purely CPU-bound.
-- Do not perform blocking I/O inside `async def`. Use async clients or `run_in_threadpool`.
-- Annotate path, query, and body parameters explicitly. Do not rely on `**kwargs`.
-- Return pydantic models and set `response_model=` on the decorator for serialization control.
+- Declare a path operation `async def` only when every I/O call in it is awaited. Use plain `def` for a blocking library, which FastAPI runs in a threadpool.
+- Declare the return type or `response_model` as a model that omits secrets, since FastAPI filters the output to it.
+- Take a request body as a Pydantic model parameter, never by parsing `await request.json()` by hand.
 
-## Dependency injection
+## Dependencies
 
-- Express shared logic (auth, db sessions, settings) as `Depends(...)` over decorators or globals.
-- Use `Annotated[T, Depends(...)]` over default-value `Depends()` for reusable dependencies.
-- Scope db sessions per request via a generator dependency that yields then closes.
+- Declare a dependency as `Annotated[T, Depends(fn)]`, and share a repeated one as a type alias.
+- Open a database session in a `yield` dependency and close it after the `yield`, so each request gets its own.
+- Replace a dependency in tests through `app.dependency_overrides`, never by patching the module.
 
-## Lifespan and configuration
+## Lifespan and settings
 
-- Use the `lifespan` context manager for startup and shutdown over deprecated `@app.on_event`.
-- Load settings via `pydantic_settings.BaseSettings`, injected through a cached dependency.
+- Run startup and shutdown in a `lifespan` context manager, never `@app.on_event`, which stops running once `lifespan` is set.
+- Load settings through `pydantic_settings.BaseSettings` behind an `@lru_cache` dependency, so `.env` is read once and tests can override it.
 
 ## Errors
 
-- Raise `HTTPException` for client-facing errors with explicit status codes.
-- Register `@app.exception_handler` mappings for domain exceptions over per-route try/except.
-- Do not leak internal exception messages. Map to safe summaries at the boundary.
+- Raise `HTTPException` with an explicit status code for a client error.
+- Map a domain exception to a response in one `@app.exception_handler`, over a try and except in each route.
+- Return a safe summary from a handler, never the exception's message or traceback.
 
-## Validation and security
+## Middleware
 
-- Validate request bodies through pydantic models. Do not parse `Request.json()` manually.
-- Apply `dependencies=[Depends(auth)]` at the router or app level for cross-cutting auth.
-- Configure CORS, trusted hosts, and HTTPS redirects through middleware, not per-route checks.
+- Configure CORS through `CORSMiddleware`, listing origins explicitly when `allow_credentials=True`, since a wildcard is refused then.
