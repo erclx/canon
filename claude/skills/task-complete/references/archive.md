@@ -55,6 +55,7 @@ An empty `plans` means the task cited no live plan, or a sibling still holds eve
 Each reason has one resolution, and none of them is to archive around it.
 
 - `open-outcomes`: the named outcomes are unmarked or genuinely open. Run `task-complete` when the work shipped unmarked, and leave the task on the board when the outcome is real.
+  - An outcome only the operator or another repository can close is the exception. The orchestrator's merge sweep strikes it with its reason and lists it in the report, per `${CLAUDE_SKILL_DIR}/../role-orchestrator/references/orchestrator-refill.md`, and the archive then runs. An outcome this repository owes is never struck for that.
 - `ambiguous`: two tasks name one pull request, the misfile `${CLAUDE_SKILL_DIR}/references/tasks.md` rules out. Resolve the citation by hand, since no sweep repairs it.
 - `earlier-slice`: the number is listed on the task but is not the last. Leave the task on the board, and its last slice's merge archives it.
 

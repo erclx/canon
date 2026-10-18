@@ -93,6 +93,8 @@ Announce the pull request as the ship chain's pull request step returns, carryin
 - Say the reach was unread rather than clear when the installed binary carries no such subcommand, and leave the undeclared list to the pull request
 - Carry a row this build turned up with its title, origin, and surface. Send it alone only when the session ends before a pull request opens.
 
+Name any billed run the Testing section needs that the operator has not cleared, so the controller asks before the first review. Leave it out when no spend is owed or it is cleared, and send no second message for it.
+
 ### A fan-in member
 
 A member of a fan-in set opens no pull request, so its done message stands in for the announcement. `auto-ship` sends it after the push.
