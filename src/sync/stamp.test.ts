@@ -1,4 +1,5 @@
 import {
+  chmodSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -398,6 +399,17 @@ describe('the machine-level target index', () => {
 })
 
 describe('writeStamp', () => {
+  it('should hand the stamp file to the target formatter', async () => {
+    const log = join(TARGET, 'formatter.log')
+    const bin = join(TARGET, 'node_modules', '.bin', 'oxfmt')
+    writeFixture(bin, `#!/bin/sh\nprintf '%s\\n' "$@" > "${log}"\n`)
+    chmodSync(bin, 0o755)
+
+    await writeStamp(TARGET, GOVERNANCE, { 'a.md': 'sha256:aa' }, NOW)
+
+    expect(readFileSync(log, 'utf8').trim()).toBe(stampPath(TARGET))
+  })
+
   it('should record the hashes under the domain key', async () => {
     await writeStamp(TARGET, GOVERNANCE, { 'a.md': 'sha256:aa' }, NOW)
 

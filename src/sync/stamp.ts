@@ -4,6 +4,7 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, join, sep } from 'node:path'
 import { execa } from 'execa'
 import { resolveExisting } from '@/roots/legacy'
+import { formatWritten } from '@/sync/format'
 import { recordTarget } from '@/targets/registry'
 import { compareVersions, parseVersion } from '@/version/compare'
 import { readInstalled } from '@/version/installed'
@@ -286,6 +287,11 @@ async function putDomain(
   const path = stampPath(target)
   await mkdir(dirname(path), { recursive: true })
   await writeFile(path, `${JSON.stringify(stamp, null, 2)}\n`)
+
+  // The stamp hashes every file but itself, so reshaping it cannot read as
+  // drift. Seeds and goldens stay as copied for the opposite reason: their
+  // hashes are taken against the source bytes.
+  await formatWritten(target, [path])
 
   // Every install and sync that stamps a target passes through here, which is
   // what makes this the one place the machine-level index can be kept without
