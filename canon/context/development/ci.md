@@ -21,6 +21,10 @@ Owns the workflows in `.github/workflows/` that verify a pull request, scan its 
 - `publish-check` reads only the newest release, so a lost release followed by a good one goes unreported, as 5.0.0 did and stays GitHub-only
 - `refresh-capture-frames.yml` runs on `main` only and queues `gh pr merge --auto --squash`. Its push step rebuilds the branch on a fresh `main` and carries only the files it wrote or dropped.
 
+### `stack-verify.yml`
+
+Runs weekly and on dispatch, one matrix job per scaffoldable stack through `canon tooling verify`. Only its `report` job holds `issues: write`, keeping one open `stack-verify: <stack>` issue per red stack. A layer or an add-on never joins the matrix, since the verb refuses it.
+
 ### `src/gate/`
 
 CI differs from a local run in scope and in what an unmeasured stage means. The stage list, the sequencer, and every threshold live here.
