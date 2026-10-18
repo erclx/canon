@@ -32,6 +32,6 @@ The bullet checklist does not close this. It judges whether a freshly written bu
 
 ## Out of scope
 
-- Judging a single bullet of a rule just written or revised, which the bullet checklist in `internal-governance` owns
+- Judging a single bullet of a rule just written or revised, which the bullet checklist in `canon:create-rule` owns
 - Lifting the mechanical checks into a `canon gov` verb, deferred until the hand reads repeat
 - Acting on a verdict, which belongs to the plan that reads the report
