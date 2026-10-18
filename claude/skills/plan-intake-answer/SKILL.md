@@ -31,7 +31,7 @@ Never guess from the topic of the conversation. A session resuming against the w
 
 ## Step 2: collect one cluster
 
-Run `canon intake list <slug> --unread --json`. It returns the unread items grouped by the cluster file holding them, each carrying its label, title, open question, and suggestion.
+Run `canon intake list <slug> --unread --json`. It returns the unread items grouped by the cluster file holding them, each carrying its label, title, `problem`, `fix`, open question, and suggestion. The `problem` and `fix` fields are absent on an item that lacks the line, so write the lead-in from whichever are present.
 
 Work one cluster at a time, in the order the folder numbers them. A dump of six clusters holding five items each is thirty questions, and a surface putting all of them at once is unusable. The cluster boundary is also where an operator who runs out of attention stops cleanly, leaving whole clusters unread rather than one file half answered.
 
@@ -46,6 +46,12 @@ Offer every item with an empty slot, not only the ones carrying an open question
 | Label, title | Name the question, so the operator knows which item is being asked about        |
 | `Open:`      | That question, with its `Suggested:` line ranked first and marked as suggestion |
 | No `Open:`   | Its verdict, with `ok` ranked first and alternatives from what it could be      |
+
+Open every question with a lead-in of one to three plain sentences, written fresh from `problem`, `fix`, and `open` for an operator who has not opened the file. It says what is wrong today, what the fix is, and what the call is, condensing a long `problem` rather than pasting it.
+
+- An item with no `fix` still states the problem and the call, and one with no `Open:` says what the verdict accepts
+- As filed, "which hooks take it" means nothing lifted out of the Fix line it was written under
+- With a lead-in: "Claude Code 2.1.295 lets a hook fail closed. A crashed `scratch-guard.sh` lets writes through, and the fix sets `onFailure: "block"`. Should `unattended-agent-guard.sh` get it too?"
 
 Give every option what it means and what it costs. An option with no stated cost is not an option, since the operator picks it without knowing what the other one buys.
 

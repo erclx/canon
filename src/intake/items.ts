@@ -44,6 +44,10 @@ export interface IntakeItem {
   readonly answerLine: number | undefined
   /** Text in the slot, absent when the slot is empty and the item is unread. */
   readonly answer: string | undefined
+  /** What is wrong today, absent when the item carries no `Problem:` line. */
+  readonly problem: string | undefined
+  /** The one change proposed, absent when the item carries no `Fix:` line. */
+  readonly fix: string | undefined
   readonly open: string | undefined
   readonly suggested: string | undefined
   readonly worth: string | undefined
@@ -55,6 +59,8 @@ interface Draft {
   line: number
   answerLine: number | undefined
   answer: string | undefined
+  problem: string | undefined
+  fix: string | undefined
   open: string | undefined
   suggested: string | undefined
   worth: string | undefined
@@ -89,6 +95,8 @@ export function readItems(text: string): IntakeItem[] {
         line: line.number,
         answerLine: undefined,
         answer: undefined,
+        problem: undefined,
+        fix: undefined,
         open: undefined,
         suggested: undefined,
         worth: undefined,
@@ -113,6 +121,12 @@ export function readItems(text: string): IntakeItem[] {
       case 'you':
         draft.answerLine = line.number
         draft.answer = value === '' ? undefined : value
+        break
+      case 'problem':
+        draft.problem = value
+        break
+      case 'fix':
+        draft.fix = value
         break
       case 'open':
         draft.open = value

@@ -14,7 +14,7 @@ The write fails where no prose rule catches it. A worker's file-editing tools re
 ## Must
 
 - Offer every item with an empty slot, batched by cluster in the folder's numbering and capped at four items, so a stop leaves whole clusters unread
-- Rank the item's own suggestion first and give every option its cost
+- Open each question with a lead-in an operator who has not opened the file can follow, then rank the item's own suggestion first and give every option its cost
 - Land each selection through a verb that resolves the root in-process and rewrites the whole line, one cluster per call
 - Pass the cluster and the label exactly as the heading spells them, letter suffix included
 - Report what stays unread by count after each cluster, and stop when there is no folder or no unread item
