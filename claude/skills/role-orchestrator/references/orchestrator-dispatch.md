@@ -40,6 +40,7 @@ Never shorten a non-conforming slug here, since a rename parts the branch from t
 
 Run `canon tasks plan-answers <plan> --json` and read `launchable` off the record. Branch on `launchable` rather than on the exit code, which a wrapping shell function can flatten to zero and so read a held row as clear.
 
+- Hold a row whose `Waiting on` has not cleared, which no other check reads
 - `launchable: true`: the plan answers itself, so proceed to the branch check.
 - `launchable: false`: report every entry in `open`, each with its question label and stated reason, and hand the row to the human-launch line below
 - Never fill the slot on the operator's behalf, the one move the plan standard forbids outright
@@ -152,7 +153,7 @@ A row qualifies for that pick when its plan carries no open question and touches
 
 Read `${CLAUDE_SKILL_DIR}/references/orchestrator-launch.md` once every check above clears, and launch from its build template, which sits beside the review-address and planning shapes that skip these checks. A cloud row launches from `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md`, since the VM shares no plugin or board.
 
-Once the launch succeeds, run `canon tasks promote <stem>` to move the row under `## Run now`, which reads as dispatched.
+Once the launch succeeds, run `canon tasks promote <stem>`.
 
 ## Fall back to the human
 
@@ -173,4 +174,4 @@ Hand the person one command, `/canon:auto-ship <plan>`, naming the row, the plan
 
 ## Stop the loop
 
-Wrapped in `/loop`, re-run the check against `## Up next` on each wake, and stop once the group is empty or every row reads `claimed: true`. Report that once, on the wake that finds it, rather than polling a board nobody is clearing, the reasoning `orchestrator-poll.md` carries for the review trigger.
+Wrapped in `/loop`, re-run the check against `## Up next` on each wake, and stop once the group is empty or every row left in it is held. Report that once, on the wake that finds it, rather than polling a board nobody is clearing, the reasoning `orchestrator-poll.md` carries for the review trigger.

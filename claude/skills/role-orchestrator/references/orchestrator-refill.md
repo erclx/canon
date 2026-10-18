@@ -25,7 +25,7 @@ The third trigger reaches a window the first two cannot. A session with three wo
    - Run `task-complete` to archive one the hook left in place
    - A task whose outcomes are standing policy never closes, so hand it to a worker to encode the policy where it is enforced, then cut the outcomes with the reason and archive once that branch merges
    - Encoding it from this session would write a tracked file, which `## Boundaries` in the skill body forbids
-4. Read `.canon/tasks/priority.md` and count the rows under `## Up next`, which carry a written plan and no worker yet. `## Run now` is what is running, so keep one in reserve beyond it.
+4. Read `.canon/tasks/priority.md` and count the `## Up next` rows whose `Waiting on` has cleared, since a blocked row is no reserve. `## Run now` is what is running, so keep one in reserve beyond it.
 5. Promote from the top of `## Needs a plan`, where the last sweep recorded what to plan next.
    - Depart from that order when something changed under it and say what, since a position nobody honors is the ordering going stale
    - The order is set by whether a task establishes functionality, so prefer one that adds or proves a mechanism over one that trims, tidies, or audits
