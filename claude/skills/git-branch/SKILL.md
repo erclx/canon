@@ -23,7 +23,7 @@ Take the name from the invocation. An argument ending in `.md` or resolving unde
 
 - For a plan, run `canon tasks plan-branch <plan> --json` and take the record's `branch`. The verb fixes the type at `feat`, so a plan never yields another type.
 - When the verb refuses or the record carries `conforms: false`, stop and relay its reason. Never invent a name in its place.
-- For a name, check it against `branch.md` for a known type, kebab-case with no underscore, and 50 characters at most.
+- For a name, check it against the whole Format section of `branch.md`, including the description word bound and the no-repeated-type rule, as the rename guard does.
 
 ### Context
 

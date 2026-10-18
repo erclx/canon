@@ -1,3 +1,7 @@
+import { mkdtempSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+
 import { scenario } from '@/sandbox/scenario'
 
 export default scenario({
@@ -37,6 +41,13 @@ export default scenario({
 
       ctx.git('branch', 'feat/taken-locally')
 
+      const remote = mkdtempSync(join(tmpdir(), 'branch-remote-'))
+      ctx.run('git', ['init', '--bare', '-q', remote])
+      ctx.git('remote', 'add', 'origin', remote)
+      ctx.git('branch', 'feat/taken-remotely')
+      ctx.git('push', '-q', 'origin', 'feat/taken-remotely')
+      ctx.git('branch', '-D', 'feat/taken-remotely')
+
       ctx.log.step('Scenario ready: branch creation from main')
 
       ctx.log.info('Test A (create from a name):')
@@ -60,8 +71,7 @@ export default scenario({
       ctx.log.bar()
 
       ctx.log.info('Test D (remote collision):')
-      ctx.log.info('  Setup: push a branch to a remote, delete the local ref')
-      ctx.log.info('  Action: /canon:git-branch <that name>')
+      ctx.log.info('  Action: /canon:git-branch feat/taken-remotely')
       ctx.log.info('  Expect: refusal naming origin, no ref created')
     },
   },
