@@ -2,6 +2,10 @@
  * The inspector's own rules. Every value reads a chrome token, the same set
  * shell.css reads. Each field's glyph sits inside its box, so two fields share
  * a row without a label column eating the width.
+ *
+ * These rules share one class namespace with shell.css, where the Theme tab
+ * owns `.token`, so a new class here takes its own prefix, as `.token-option`
+ * does.
  */
 
 .inspector-section {

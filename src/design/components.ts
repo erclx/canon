@@ -250,7 +250,7 @@ const TEACH_CHROME: Component = {
     'navigation shared by every teach page. Recovered from two gitignored',
     'course.css files that predate a regression that dropped this layer from the',
     "generator, and rewritten onto this module's tokens rather than the",
-    'incompatible palette they carried. See canon/context/features/teach/chrome.md',
+    'incompatible palette they carried. See canon/context/features/teach.md',
     'for the shape.',
   ].join('\n   '),
   reads: [

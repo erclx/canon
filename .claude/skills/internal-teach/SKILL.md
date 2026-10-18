@@ -5,7 +5,7 @@ description: Learning workspace implementation, the committed fixture, and the t
 
 # Teach
 
-Read `canon/context/features/teach/overview.md` for structure, the render pipeline, and the decisions behind the surface before editing, and `canon/context/features/teach/chrome.md` before editing the chrome, its styles, or `src/teach/browser/`.
+Read `canon/context/features/teach.md` for structure, the render pipeline, the chrome, and the traps before editing.
 
 The `teach-workspace` skill owns the workspace shape and the glossary, and its references ship to targets. This skill covers the implementation and the fixture, which the skill does not reach.
 
@@ -38,8 +38,7 @@ After changing what a workspace's files must contain:
 
 ## Reference
 
-- `canon/context/features/teach/overview.md`: structure, the render pipeline, decisions and gotchas
-- `canon/context/features/teach/chrome.md`: the chrome, its styles, and the page scripts
+- `canon/context/features/teach.md`: structure, the render pipeline, the chrome and its page scripts, and gotchas
 - `references/lesson-chrome.md`: the four markers, what `canon teach nav` rewrites, and the authored-versus-generated boundary
 
 ### Shipped skill references
@@ -55,4 +54,4 @@ The `teach-workspace` skill ships these to targets and owns the artifact shape.
 Two entries outside the teach domain bear on this surface.
 
 - `canon/context/design.md`: the token values this surface reads and does not own
-- `canon/context/development/evidence.md`: which `evidence` folders are dev baselines and which are prod captures, before touching `examples/teach/evidence/`
+- `canon/context/development.md`: which `evidence` folders are dev baselines and which are prod captures, before touching `examples/teach/evidence/`

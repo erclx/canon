@@ -43,4 +43,4 @@ Every change to the shell posts evidence and hands the UI reviewer a live addres
 - `canon canvas --help`: every verb, record, and refusal
 - `claude/skills/canvas-board/`: the procedure a session follows to drive the canvas, which is the shipped skill's concern rather than this one's
 - `claude/skills/canvas-board/references/canvas.md`: the frame content format both writers share
-- `canon/context/development/evidence.md`: which `evidence` folders are dev baselines and which are prod captures, before committing a walk's states
+- `canon/context/development.md`: which `evidence` folders are dev baselines and which are prod captures, before committing a walk's states

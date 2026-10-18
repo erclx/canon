@@ -125,9 +125,8 @@ describe('scanCounts', () => {
   })
 
   it('should name a stale count reached through a whole-catalog quantifier', async () => {
-    // `canon/context/sandbox/authoring.md` states `took all 69 rules`,
-    // where the trigger the verb gate wants sits five words ahead of the
-    // number and `all` is what sits against it.
+    // A sentence reading `took all 69 rules` puts the trigger the verb gate
+    // wants five words ahead of the number, with `all` sitting against it.
     seedSkills(63)
     write('docs/sandbox.md', 'The copy it replaced took all 59 skills.\n')
 
@@ -144,7 +143,7 @@ describe('scanCounts', () => {
   })
 
   it('should name a stale count reached through a production verb outside the original list', async () => {
-    // `canon/context/development/regeneration.md` states `the toolkit
+    // A context entry asserting `the toolkit
     // authors 69 rules`, the assertion shape this gate was built for with a
     // verb the first list did not carry.
     seedSkills(63)

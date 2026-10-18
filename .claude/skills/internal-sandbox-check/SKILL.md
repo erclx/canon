@@ -103,7 +103,7 @@ If a domain produces no `infra/<domain>.ts`, do not guess. Ask `Scenario for <sc
 - **none**: the user answered `none` at a Step 2a rule 3 or rule 6 prompt, or at a Step 2b prompt.
 - **unmapped**: no scenario was identified, no census verdict applies, and the user did not answer `none`, or the item is under `src/**`.
 
-`canon/context/sandbox/coverage/census.md` owns what each verdict means. `none` covers only an answer given this run, which separates deferring verification on one branch from ruling that no arm should ever exist.
+`canon/context/sandbox.md` owns what each verdict means. `none` covers only an answer given this run, which separates deferring verification on one branch from ruling that no arm should ever exist.
 
 Every status but `aligned` and `stale` leaves the row with no scenario. The skip conditions below test that one property rather than restating the labels, so they cannot drift as labels are added.
 

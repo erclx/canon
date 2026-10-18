@@ -119,6 +119,11 @@ const CONDITIONS = [
   'command is running in, since git removes the directory a caller stands',
   'in and every later call scoped to it then fails.',
   '',
+  'A "refusals" entry is one of these reasons:',
+  ...Object.entries(REFUSALS).map(
+    ([reason, meaning]) => `  ${reason.padEnd(24)}${meaning}`,
+  ),
+  '',
   'An unreadable input refuses the whole reading rather than reporting',
   'every worktree as not reclaimable, since an absent merge state and a',
   'branch with no merged pull request produce the same empty answer.',

@@ -39,8 +39,8 @@ export const GATED_PATHS: readonly string[] = [
   'canon/context/claude-internal.md',
   'canon/context/orchestration.md',
   'canon/context/features/',
-  'canon/context/cli/',
-  'canon/context/sandbox/',
+  'canon/context/cli.md',
+  'canon/context/sandbox.md',
   'canon/context/governance.md',
   'canon/context/tooling.md',
   'canon/context/web.md',
@@ -138,10 +138,12 @@ export const GATED_PATHS: readonly string[] = [
   'docs/agents/output-shape.md',
   'docs/agents/overview.md',
   'docs/agents/targets.md',
-  'canon/context/development/',
-  'canon/context/ci/',
-  'canon/context/scripts/',
+  'canon/context/development.md',
+  'canon/context/ci.md',
+  'canon/context/scripts.md',
   '.claude/skills/internal-',
+  'docs/agents/records.md',
+  'docs/agents/sessions-transfer.md',
 ]
 
 /**

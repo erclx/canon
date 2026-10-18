@@ -10,4 +10,4 @@ The records that stay:
 - `result-wireframes.md`: the 2026-07-31 run against `standards/wireframes.md`
 - `result-seed.md`: the run against the Claude seed
 
-Each record quotes paths and rules as they stood on its run date, so a path inside one that no longer resolves is the record working. What the arms measured and what the results report past is in `canon/context/scripts/eval.md`.
+Each record quotes paths and rules as they stood on its run date, so a path inside one that no longer resolves is the record working. What the arms measured and what the results report past is in `canon/context/scripts.md`.
