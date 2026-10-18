@@ -25,6 +25,7 @@ A lookup that resolves by head branch alone carries its own failure. A branch na
 - Resolve the pull request once and reuse what that resolution returned, so the number recorded never depends on how a lookup ranks two pull requests sharing a head
 - Prove before every write to an existing pull request that its head is the current branch and its state is open, and refuse with nothing written on a mismatch, so a wrong number reaching a write never lands on another branch's pull request
 - Print the head branch beside the number, so a caller writing to the pull request later has a value to check the number against
+- Close the task's issues with one `Closes #NNN` line each when the pull request is the task's last slice, and fail the scan on a body that disagrees with `canon tasks closes`
 - Label from the paths the branch changed, against a map the project declares, so the label set belongs to the project rather than to the skill
 - Apply labels after the pull request exists, so a label the remote does not carry costs a warning rather than the pull request
 - Report a refused label, since a warning nothing surfaces leaves the run indistinguishable from one that labelled
@@ -37,6 +38,7 @@ A lookup that resolves by head branch alone carries its own failure. A branch na
 - Create a second pull request when one is open
 - Edit a pull request that is not open, or record its number on a task
 - Name a domain of any one project in the skill body or its references
+- Write a closing line on a non-last slice, since the merge would close an issue while later slices are still to ship
 - Create a label the map names and the remote lacks
 - Emit anything after the result line
 
