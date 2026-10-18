@@ -396,7 +396,26 @@ async function runApply(number: string, opts: ApplyOptions): Promise<number> {
   if (target === null) return refuse('gh-failed')
   if (target.trim() !== `${head} open`) return refuse('head-mismatch')
 
-  const report = await auditLabels(root, { base: opts.base })
+  // An explicit --base is an explicit request for the git route. Otherwise the
+  // pull request's own file listing is the diff the labels describe, and a
+  // failed read refuses rather than falling back, since binding needed gh too.
+  let paths: string[] | undefined
+  if (opts.base === undefined) {
+    const listing = await gh(root, [
+      'api',
+      '--paginate',
+      `repos/{owner}/{repo}/pulls/${number}/files`,
+      '--jq',
+      '.[].filename',
+    ])
+    if (listing === null) return refuse('gh-failed')
+    paths = nonEmptyLines(listing)
+  }
+
+  const report = await auditLabels(root, {
+    base: opts.base,
+    ...(paths !== undefined && { paths }),
+  })
 
   // A project declaring no map earns nothing and is labelled silently, which
   // is an answer and exits clean rather than reading as a break.
