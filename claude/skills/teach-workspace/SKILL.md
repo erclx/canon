@@ -1,7 +1,6 @@
 ---
 name: teach-workspace
-description: Opens and runs a learning workspace on one subject, holding a mission, resources, numbered lessons, reference pages, a glossary, and learning records that survive across sessions, proposes where a durable page from one belongs once it outgrows the workspace, and lands the confirmed pages from a branch. Use when asked to "teach me X", "open a learning workspace", "I want to learn X", "quiz me on this", "continue the lesson", "resume my workspace on X", "promote this reference page", or "fold the promoted pages in". Do NOT use to write project documentation, which belongs to the surface owning that document, and do NOT use to answer one question, which is an ordinary reply.
-disable-model-invocation: true
+description: Opens and runs a learning workspace on one subject, holding a mission, resources, numbered lessons, reference pages, a glossary, and learning records that survive across sessions, proposes where a durable page from one belongs once it outgrows the workspace, and lands the confirmed pages from a branch. Use when asked to "teach me X", "open a learning workspace", "I want to learn X", "quiz me on this", "continue the lesson", "resume my workspace on X", "promote this reference page", or "fold the promoted pages in". Do NOT use to write project documentation, which belongs to the surface owning that document, and do NOT use to answer one question, which is an ordinary reply. Do NOT auto-trigger.
 argument-hint: <subject to learn, the topic of a workspace to resume or promote, or fold>
 metadata:
   family: answer

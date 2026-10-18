@@ -34,4 +34,4 @@ Reconstruction from source is the failure that reads best and is worth least. It
 
 - Editing whatever the answer names, which routes to the `internal-*` skill owning that domain
 - Reference on an externally owned tool past what `wiki/` records, which belongs to that tool's own documentation
-- Deciding when to fire. The skill is user-invoked through `disable-model-invocation`, so routing a question to it is the operator's call rather than a description match.
+- Deciding when to fire. The description states `Do NOT auto-trigger`, so routing a question to it is the operator's call rather than a description match.

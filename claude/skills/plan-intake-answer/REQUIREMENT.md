@@ -45,4 +45,4 @@ The batching fails a fifth way. A folder holding thirty unread items put as thir
 - Promoting an answered item onto the board, which is `task-board` and runs after the answers land
 - The item format, the answer contract, and retrieval, which the `plan-intake` skill's `references/intake.md` owns and this skill cites
 - The comparable answer slots in groundwork and feature plans, which carry their own contracts and are a separate measurement
-- Deciding when to fire. The skill is user-invoked through `disable-model-invocation`, so answering is the operator's call rather than a description match.
+- Deciding when to fire. The description states `Do NOT auto-trigger`, so answering is the operator's call rather than a description match.
