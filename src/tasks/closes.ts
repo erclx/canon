@@ -1,9 +1,5 @@
 import { readFile } from 'node:fs/promises'
-import {
-  fenceMask,
-  readOutcomes,
-  readPendingBranches,
-} from '@/tasks/archive'
+import { fenceMask, readOutcomes, readPendingBranches } from '@/tasks/archive'
 import {
   openTask,
   type RecordRefused,

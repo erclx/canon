@@ -1444,12 +1444,7 @@ async function runCloses(
   const selector = selectorFor(task, opts.plan)
 
   if ('ok' in selector) {
-    return reportRecord(
-      'canon tasks closes',
-      selector,
-      emitJson,
-      process.cwd(),
-    )
+    return reportRecord('canon tasks closes', selector, emitJson, process.cwd())
   }
 
   const root = opts.root ?? (await mainWorktreeRoot())
