@@ -106,7 +106,7 @@ Holds the readers and writers behind `canon pr`, all over REST since a cloud ses
 - `head.ts` and `checks.ts` key on the remote tip, not the local branch, and `checks.ts` tells a conflicted branch from runs that have not started
 - `evidence.ts`, `tick.ts`, and `bijection.ts` own the marked comment, the checklist ticks, and the key-changes comparison. `frames.ts` stores review images on the `canon/frames` branch
 - `preview.ts` and `local.ts` write and remove the address line. The first reads what a branch serves from the deploy workflow's push trigger, the second finds a server by its cwd
-- `lift.ts` reads every gate in order and readies a pull request only when each passes, so no caller readies one directly. It returns a ready one to draft when the review, ui, or evidence gate fails, and carries a UI close across a push touching no path on `painted.ts`'s list, which `canon/config/painted.json` overrides
+- `lift.ts` readies a pull request only when every gate passes, and returns a ready one to draft on a failing review, ui, or evidence gate. `painted.ts` lists the paths no UI close carries across
 
 ### `src/sessions/`
 
