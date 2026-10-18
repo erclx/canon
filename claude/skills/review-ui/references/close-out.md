@@ -9,7 +9,8 @@ Part of Step 7 of `review-ui`, reached only on the branch `post.md` names. The b
 
 When the newest UI verdict from Step 1 reads `## UI review closed` at an older head and this pass closes too, the thread already holds this verdict. Replace the standing close rather than posting a second one beside it.
 
-Only a closed prior is replaced. A prior `## UI review` stays in the thread when this pass closes, so the close posts normally. A pass that owes anything posts under `## UI review` normally too, whatever the prior read, since a rewrite there would hide a failed box behind a heading that reads closed.
+- Only a closed prior is replaced, so after a prior `## UI review` this pass's close posts normally
+- A pass that owes anything posts under `## UI review` whatever the prior read, since a rewrite would hide a failed box behind a closed heading
 
 Resolve the standing close's numeric id off the REST listing, keeping the newest match across every page:
 
@@ -40,8 +41,9 @@ gh api -X PUT repos/{owner}/{repo}/pulls/<number>/reviews/<review-id> -F body=@<
 
 ## The marker
 
-The body ends on `<!-- review-ui: head=<head> -->` at the full head this pass drove, with no line below it. `PUT` leaves the review's `commit.oid` pinned at the head the close was first posted against, and the marker is what `resolveUiScope`, the lift gate, and the orchestrator poll read in its place. A body missing it reads as the pinned stamp, so the lift refuses `ui-behind` and the poll reports the close as behind.
+The body ends on `<!-- review-ui: head=<head> -->` at the full head this pass drove, with no line below it. `PUT` leaves the review's `commit.oid` pinned at the head the close was first posted against, so `resolveUiScope`, the lift gate, and the orchestrator poll read the marker in its place.
 
-`PUT` keeps the comment's timestamp and its place in the thread, so the poll's age test reads a rewritten close as old, the same reading the code review accepts. A submitted review cannot be deleted, which is why this rewrites the standing close rather than replacing it with a fresh one.
-
-The frames the standing verdict linked sit under their own pass stamp on the frames branch. The new body links this pass's frames, and the old images stay reachable by path.
+- A body missing it reads as the pinned stamp, so the lift refuses `ui-behind` and the poll reports the close as behind
+- `PUT` keeps the comment's timestamp and place, so the poll's age test reads a rewritten close as old, the reading the code review accepts
+- A submitted review cannot be deleted, which is why this rewrites the standing close rather than posting a fresh one
+- The standing verdict's frames sit under their own pass stamp on the frames branch, so the new body links this pass's frames and the old stay reachable by path
