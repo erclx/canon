@@ -64,12 +64,6 @@ Next has no config-file port hook, unlike `server.port` in `astro.config.mjs` or
 
 `create-next-app`'s default `tsconfig.json` needs no changes beyond project-specific path aliases, so a golden copy would ship nothing the scaffold does not already write.
 
-## Gitignore (extend)
-
-These `[gitignore]` groups mirror the manifest.
-
-- `"# Next" = [".next/"]`
-
 ## Development docs (extend)
 
 Append these rows to the `## Scripts` table.

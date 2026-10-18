@@ -83,13 +83,6 @@ The seeded baseline globs.
 - Steps are checkout, setup Bun at latest, `bun install --frozen-lockfile`, then `check:format`.
 - CI asserts and never writes, so format must be clean before push.
 
-## Gitignore
-
-- `# System`: `.DS_Store`
-- `# Dependencies`: `node_modules/`
-- `# Secrets`: `.env`, `.env.*`, `*.local`, `!.env.example`
-- `# VSCode`: `.vscode/`
-
 ## Anti-patterns
 
 Negative knowledge that costs a failed run to relearn.
