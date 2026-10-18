@@ -10,5 +10,8 @@ description: Enter a linked worktree for implementation, resolve shared session 
 
 ## Shared session scratch
 
-- Shared session scratch (`.canon/plans/`, `.canon/review/`, `.canon/tasks/`) lives at the main worktree root, not inside a linked worktree. From a linked worktree, resolve these paths against the main root via `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`. Fall back to `pwd` if not a git repo.
-- From a linked worktree, or from a background session that entered none, `Edit` and `Write` refuse a main-root path and redirect to a worktree copy no later session reads. Never take that redirect. Route the write the way the `session-worktree` skill states, and report it rather than proceeding silently when that skill does not resolve. It ships with the plugin and this rule ships with the CLI, so a project that installed governance alone does not have it.
+- Resolve shared session scratch (`.canon/plans/`, `.canon/review/`, `.canon/tasks/`) at the main worktree root, never inside a linked worktree.
+- Read the main root from `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, and fall back to `pwd` outside a git repo.
+- Never take the worktree copy `Edit` and `Write` redirect a main-root path to, since no later session reads it. Revisit when Edit and Write stop redirecting a main-root path from a linked worktree.
+- Route a main-root write from a linked worktree, or from a background session that entered none, the way the `session-worktree` skill states.
+- Report it rather than proceeding silently when `session-worktree` does not resolve, as in a project that installed governance without the plugin.

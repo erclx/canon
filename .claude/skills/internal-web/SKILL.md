@@ -7,11 +7,11 @@ description: The landing page and this repository's own rendered images. Use for
 
 Read `canon/context/development/web.md` for structure, the Astro build, and the gotchas before editing, then the file it names for the change at hand.
 
-`internal/rules/claude/landing-page.md` is scoped to `web/**` and holds the page's conventions, each of which fails silently when broken. It loads on the edit and this skill loads for the domain. Open the rule before drafting rather than after, since a draft that never read it reproduces what it forbids.
+`internal/rules/claude/landing-page.md` and `internal/rules/claude/landing-style.md` are scoped to `web/**` and hold the page's conventions, each failing silently. They load on the edit and this skill loads for the domain. Open both rules before drafting rather than after, since a draft that never read them reproduces what they forbid.
 
 ## Before drafting a page change
 
-- Read the rule. Do not work its conventions from memory, and do not restate them in a plan, since a paraphrase of a convention is how a plan ships a requirement the rule does not carry.
+- Read both rules. Do not work their conventions from memory, and do not restate them in a plan, since a paraphrase of a convention is how a plan ships a requirement the rules do not carry.
 - Read `references/citation-anchors.md` before adding or editing any string in `web/src/content/copy.ts`.
 - Check whether the change moves a count. A count is read from the CLI at build time and never typed, so a number in a draft is a defect the build cannot catch on its own.
 
@@ -35,7 +35,8 @@ Before shipping any change under `web/`:
 ## Reference
 
 - `canon/context/development/web.md`: structure, the Astro build, decisions, and the CI and layout gaps
-- `internal/rules/claude/landing-page.md`: the page's conventions, each failing silently
+- `internal/rules/claude/landing-page.md`: where the page's counts, images, and citations come from, each failing silently
+- `internal/rules/claude/landing-style.md`: the page's motion test and closed accent set, each failing silently
 - `references/citation-anchors.md`: how a string in `copy.ts` anchors to `README.md` and what the gate reads
 
 ### Neighboring entries

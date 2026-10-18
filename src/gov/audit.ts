@@ -26,11 +26,16 @@ export type RuleLimit = keyof typeof RULE_LIMITS | 'emphasis'
 /**
  * Rule folders whose findings fail `--gate`, as path prefixes from the root.
  *
- * Empty while the corpus is rewritten. Each folder's rewrite appends its own
- * line once that folder reaches zero, so the slices merge without touching one
- * another's entries.
+ * Each folder's rewrite appends its own line once that folder reaches zero, so
+ * the slices merge without touching one another's entries. `canon/` waits on
+ * `plan.md`, which a later slice rewrites.
  */
-export const RULE_GATED_FOLDERS: readonly string[] = []
+export const RULE_GATED_FOLDERS: readonly string[] = [
+  join('governance', 'rules', 'claude') + sep,
+  join('governance', 'rules', 'code') + sep,
+  join('governance', 'rules', 'writing') + sep,
+  join('internal', 'rules') + sep,
+]
 
 /** The folders whose rules claim outside practice, so each carries a ledger. */
 export const PRACTICE_FOLDERS: readonly string[] = [

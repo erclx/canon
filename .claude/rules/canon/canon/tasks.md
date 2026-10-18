@@ -8,7 +8,8 @@ paths:
 
 ## Task files
 
-- Load the `canon:task-board` skill before a hand edit under `.canon/tasks/`. It carries the folder layout, filename convention, file format, origin lines, and archiving for a task file. Report it rather than proceeding silently when the skill does not resolve.
+- Load the `canon:task-board` skill before a hand edit under `.canon/tasks/`, since it carries the layout, filenames, format, origin lines, and archiving of a task file.
+- Report it rather than proceeding silently when `canon:task-board` does not resolve.
 - Follow the board shape the `canon:task-board` skill carries for `priority.md` and `backlog.md`, their readiness groups, and row order.
 - Never hand-edit `.canon/tasks/index.md`. A hook regenerates it from sibling frontmatter.
 - Follow the decline shape the `canon:task-board` skill carries for a task decided against.
