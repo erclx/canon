@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           # Not GITHUB_TOKEN, which opens a pull request no check ever runs on
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}

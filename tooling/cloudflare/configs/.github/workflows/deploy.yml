@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -50,7 +50,7 @@ jobs:
         run: bun run build
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist
@@ -84,7 +84,7 @@ jobs:
       # as dead weight breaks the deploy on every push.
       - name: Checkout
         if: steps.secrets-check.outputs.skip == 'false'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Bun
         if: steps.secrets-check.outputs.skip == 'false'
@@ -94,7 +94,7 @@ jobs:
 
       - name: Download artifact
         if: steps.secrets-check.outputs.skip == 'false'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist
@@ -104,7 +104,7 @@ jobs:
       - name: Publish
         id: publish
         if: steps.secrets-check.outputs.skip == 'false'
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
