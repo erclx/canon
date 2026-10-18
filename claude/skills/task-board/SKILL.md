@@ -67,10 +67,12 @@ Write `.canon/tasks/vXX.Y-<slug>.md` under the claimed label, reading the file f
 
 A task file with no row is a dropped task, so name its surface in the same pass that creates it. The test and both file shapes are in `${CLAUDE_SKILL_DIR}/references/board.md`.
 
-| Task                                        | Surface                                                                                                                         |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Plausibly planned within the next few waves | A row under `## Needs a plan` in `.canon/tasks/priority.md`, positioned against the rows there, with the reason in `Waiting on` |
-| Anything else                               | A line in `.canon/tasks/backlog.md`, which is unordered                                                                         |
+| Task                                        | Surface                                                                                                                                   |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Plausibly planned within the next few waves | A row under `## Needs a plan` in `.canon/tasks/priority.md`, through `canon tasks place <stem> --group needs-a-plan --waiting "<reason>"` |
+| Anything else                               | A line in `.canon/tasks/backlog.md`, which is unordered                                                                                   |
+
+Position the row against its siblings with `--before <stem>` or `--after <stem>`, and state what it ranks against in the reason.
 
 ### Check for a live orchestrator
 
@@ -80,11 +82,11 @@ Check the roster before writing either file. Read `canon sessions list --self --
 - Its `name` starts with `orchestrator-`, the convention every hand-launched controller here uses, which excludes every `worker-` and `planner-` session
 - Treat a refusal from either call the same as a roster read that failed
 
-| Roster read                                                                | Act                                                                                                          |
-| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Found**                                                                  | Write neither file. Report the surface and reason, and message that session so it places the row itself      |
-| **Not found**, and this session's name starts with `worker-` or `planner-` | Write neither file, since both role bodies ban a board write. Report the row and its surface.                |
-| **Not found otherwise**, or the read fails                                 | Write the row directly, through the same heredoc route as the file. A failed read looks like a solo project. |
+| Roster read                                                                | Act                                                                                                     |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Found**                                                                  | Write neither file. Report the surface and reason, and message that session so it places the row itself |
+| **Not found**, and this session's name starts with `worker-` or `planner-` | Write neither file, since both role bodies ban a board write. Report the row and its surface.           |
+| **Not found otherwise**, or the read fails                                 | Place the row through `canon tasks place`. A failed read looks like a solo project.                     |
 
 Say which branch fired and why in the report. A placement with no stated reason is one the next sweep re-derives from nothing.
 

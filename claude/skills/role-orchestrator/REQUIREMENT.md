@@ -79,7 +79,7 @@ Dispatch parts from what it checked in three ways. The gate and the worker each 
 - Name each self-dispatched worker explicitly with the `worker-` prefix, since that is the role the name marks and a client-derived name is a fragment of the session's identifier
 - Carry the dispatcher's `sessionId` in the launch prompt, since a worker owed two messages has no property on the roster that resolves a controller and a name goes stale inside the window it builds in
 - Report each self-dispatch and the row it fired against loudly enough to follow, since a person no longer watches the launch step happen
-- Stop dispatching once `## Run now` is empty or every row in it reads claimed, rather than waking again to fire on a board nobody is clearing
+- Stop dispatching once `## Up next` is empty or every row left in it is held, rather than waking again to fire on a board nobody is clearing
 - Launch a planner or worker the operator will talk with from the talk shape, with the `-talk` suffix and the brief sentence that tells it so, since a cold launch retires the session the moment its delivery lands while the operator still wants the conversation
 - Retire a talk session only on the operator's word and report it as held open until then, since its delivery says nothing about whether the conversation is over
 - Dispatch every non-release pull request's review to `role-reviewer`, leave each round's messages to it and the worker, and keep one cross-branch pass per wave here, since any pass or relay run here bills the context the wave shares

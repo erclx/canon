@@ -16,6 +16,7 @@ import {
   readPullRequest,
   tasksDir,
 } from '@/tasks/archive'
+import { checkWaiting, type LinkPromotion, promoteOnLink } from '@/tasks/board'
 
 /**
  * Lines a task carries above its outcomes naming where the work came from. The
@@ -79,6 +80,8 @@ export interface PlanRecorded {
   readonly action: LineAction
   /** The target the line named before a correction. Undefined unless it differed. */
   readonly replaced: string | undefined
+  /** Whether the link moved the task's row out of `## Needs a plan`. */
+  readonly board: LinkPromotion
 }
 
 export type PlanOutcome = PlanRecorded | RecordRefused
@@ -472,7 +475,13 @@ export async function recordPlan(
   stem: string,
   reference: string,
   add = false,
+  waiting?: string,
 ): Promise<PlanOutcome> {
+  if (waiting !== undefined) {
+    const bad = checkWaiting(waiting)
+    if (bad) return refuse('bad-input', bad.message, bad.detail)
+  }
+
   const opened = await openTask(root, { kind: 'stem', stem })
   if ('ok' in opened) return opened
 
@@ -500,7 +509,17 @@ export async function recordPlan(
   const { text, action, replaced } = written
   if (action !== 'unchanged') await writeFile(path, text)
 
-  return { ok: true, stem: opened.stem, path, plan: target, action, replaced }
+  const board = await promoteOnLink(root, opened.stem, { waiting })
+
+  return {
+    ok: true,
+    stem: opened.stem,
+    path,
+    plan: target,
+    action,
+    replaced,
+    board,
+  }
 }
 
 /**

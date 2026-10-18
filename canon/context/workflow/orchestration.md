@@ -13,7 +13,7 @@ description: The task, plan, and ready artifacts coordinating multi-session work
 
 ### `.canon/tasks/`
 
-Holds one task file per task, the board surfaces `priority.md` and `backlog.md`, and one `session-<slug>.md` handoff per session.
+Holds one task file per task, the board surfaces `priority.md` and `backlog.md`, and one `session-<slug>.md` handoff per session. `canon tasks place`, `promote`, `move`, `block`, and `plan-link` write `priority.md`, each rendering every table from the task files and their plans, so only `Waiting on` is typed.
 
 - `priority.md` groups rows under `## Run now`, `## Up next`, and `## Needs a plan`, and `backlog.md` holds decided work nobody has scheduled, which is no fourth group
 - `canon tasks validate` reads and never writes, since a validator repairing a row asserts the claim it tests, and lists `## Run now` overlaps in `shared` without moving an exit code
@@ -41,7 +41,7 @@ Owns the plan shape that a planner writes and a worker or controller reads.
 
 ### `src/tasks/`
 
-Owns the `canon tasks` verbs that validate, archive, and derive from the board.
+Owns the `canon tasks` verbs that validate, archive, derive from, and write the board. `board.ts` refuses a row naming no task or one whose blocker its header cannot place, since a render would drop or rewrite it in a gitignored file, and checks a group move against the predicates `validate.ts` exports.
 
 - `plan-branch` is the one branch derivation, called by the dispatcher and by `auto-ship` Step 0, and its type is a constant because the type is cosmetic
 - `plan-answers` reports `launchable` from a `needs your call` suggestion over an empty slot, and holds a fan-in integrator until each member branch is on origin, since a local head exists mid-build
@@ -71,7 +71,7 @@ Owns the reclaim reading behind `canon worktrees list` and `reclaim`. `stop.ts` 
 
 Holds the runbooks for moments the model cannot detect, shipped inside the skill so they resolve in a project running no install.
 
-- `orchestrator-dispatch.md` launches a `## Run now` row through `claude --bg` in five steps, being the branch, the plan answers, the branch claim, the conflict check, and the launch template
+- `orchestrator-dispatch.md` launches a `## Up next` row through `claude --bg` after checking its branch, plan answers, claim, and conflicts, then promotes it to `## Run now`
 - A row holds behind a track in flight only on a dependency, a changed contract, a relocation, a sweep, or a stated reason, and a shared file is no hold
 - A launch names its model by the cost of a miss, and a worker is named `worker-<…>` and carries the controller's `sessionId`, resolved to a name at send time
 - `orchestrator-sweep.md` refills the queue and then fires `orchestrator-parked.md`, which re-tests untested blockers on a merge and walks every parked row and the backlog when idle
@@ -123,7 +123,7 @@ The remaining surfaces each own one slice.
 ## Gotchas
 
 - A plan carried as an intro link rather than a `Plan:` line is skipped silently by the `git-pr` number write, so the merge archives no plan
-- `canon tasks archive` retargets only the closing task's `Plan:` line, so a sibling row in `priority.md` keeps a dead link that `validate` reports
+- `canon tasks archive` retargets only the closing task's `Plan:` line, so a sibling row in `priority.md` keeps a dead link until the next board verb re-derives its Plan cell
 - A review's `commit.oid` is the head at submission, so a `SEEN` with `source` reading `fallback` may cover a commit the pass never read
 - `src/gate/boundaries.ts` bans only `wiki/` in the Skill paths measure, so a skill citing a toolkit-only path passes clean
 - `OPERATOR_CALL_PHRASES` in `src/records/validate.ts` covers two paraphrases of the operator-call phrase, so a third reads `launchable: true`

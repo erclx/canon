@@ -25,12 +25,12 @@ An item already applied, by the test in the skill's Step 1, is skipped silently,
 
 Take the task stem from the item heading. Every verdict leaves the folder slug on its task, which is how Step 1 and `task-board`'s unlinked-origin scan both see the folder as acted on.
 
-| Verdict | Command and board write                                                                                                                                 |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| decline | `canon tasks decline <stem> --reason "<reason>, backlog triage <slug> item <cluster>#<n>" --json`, which clears the backlog line                        |
-| archive | `canon tasks outcome <stem> --close <p> ... --json` for the named positions, then `canon tasks archive <stem> --json`                                   |
-| keep    | Append the `## Findings` line naming what reproduced, leaving the backlog line                                                                          |
-| promote | Move the backlog line to the bottom of `## Needs a plan` in `.canon/tasks/priority.md`, its `Waiting on` cell stating what cleared and ending in `last` |
+| Verdict | Command and board write                                                                                                          |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| decline | `canon tasks decline <stem> --reason "<reason>, backlog triage <slug> item <cluster>#<n>" --json`, which clears the backlog line |
+| archive | `canon tasks outcome <stem> --close <p> ... --json` for the named positions, then `canon tasks archive <stem> --json`            |
+| keep    | Append the `## Findings` line naming what reproduced, leaving the backlog line                                                   |
+| promote | `canon tasks place <stem> --group needs-a-plan --bottom --waiting "<what cleared>. Last" --json`, which clears the backlog line  |
 
 ### Archive and missing files
 

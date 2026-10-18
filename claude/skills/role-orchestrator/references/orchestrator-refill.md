@@ -25,7 +25,7 @@ The third trigger reaches a window the first two cannot. A session with three wo
    - Run `task-complete` to archive one the hook left in place
    - A task whose outcomes are standing policy never closes, so hand it to a worker to encode the policy where it is enforced, then cut the outcomes with the reason and archive once that branch merges
    - Encoding it from this session would write a tracked file, which `## Boundaries` in the skill body forbids
-4. Read `.canon/tasks/priority.md` and count entries under its `## Run now` heading that carry a written plan. Keep one in reserve beyond what is running.
+4. Read `.canon/tasks/priority.md` and count the `## Up next` rows whose `Waiting on` has cleared, since a blocked row is no reserve. `## Run now` is what is running, so keep one in reserve beyond it.
 5. Promote from the top of `## Needs a plan`, where the last sweep recorded what to plan next.
    - Depart from that order when something changed under it and say what, since a position nobody honors is the ordering going stale
    - The order is set by whether a task establishes functionality, so prefer one that adds or proves a mechanism over one that trims, tidies, or audits
@@ -53,27 +53,32 @@ That block is the detail. Lead the reply with the three slots under `## Every la
 
 ## Writing the board
 
-Promoting, demoting, and archiving a row all write `.canon/tasks/priority.md`, and this session is the only writer apart from `canon tasks archive`. Moving a task between the board and `.canon/tasks/backlog.md` writes both files, and this session is that file's only writer.
+Write `.canon/tasks/priority.md` through the `canon tasks` verbs alone, each reading the file once, rendering every table, and writing it once. Beside this session, `canon tasks archive` drops a shipped row and `plan-link` promotes a parked one.
 
-- Edit with the file-editing tool, which errors on a non-match, where a shell stream editor or an inline replace exits clean and leaves the board wrong
-- Write both halves of a move before reporting it, since a row on neither surface leaves a task file nothing names in a gitignored folder with no history
-- `canon tasks validate` reports that state, so run it after any move
-- Put the reason a row sits where it does in its Waiting on cell, since a row promoted with the cell left alone carries an order the next sweep cannot check
+| Move                                      | Verb                                                       |
+| ----------------------------------------- | ---------------------------------------------------------- |
+| A backlog row onto the board, or across   | `canon tasks place <stem> --group <group> --waiting "..."` |
+| A planned row to `## Run now` on dispatch | `canon tasks promote <stem>`                               |
+| A row up or down inside its group         | `canon tasks move <stem> --before <stem>`                  |
+| What a row waits on, or why it sits there | `canon tasks block <stem> "<reason>"`                      |
+
+- `place` removes the task's backlog line in the same call, so a row never sits on both surfaces or on neither
+- Demoting a row to `backlog.md` has no verb yet. Add the backlog line first, then delete the row with the file-editing tool, which errors on a non-match.
+- Put the reason a row sits where it does in its Waiting on cell through `block`, since a row promoted with the cell left alone carries an order the next sweep cannot check
+- Run `canon tasks validate` after any move, which reports a hand edit the verbs would have refused
 
 ### Columns and read-back
 
-Each column carries a fact a later reader checks rather than reasons again.
+The verbs derive the Task, Touches, and Plan cells from the task file and its live plans, so a later reader checks them rather than reasoning again.
 
-- Put a pointer in the Plan column, never prose, since `auto-ship` refuses at its guard when the column leads to no plan, spending a dispatch
-- `## Run now` claims a written plan covers every open outcome, which is what the pointer backs
-- Name the file set in the Touches column, which feeds the merge order and the shared paths a dispatch names, so step 6's hold call stays checkable later
-- Re-resolve every Plan pointer after anything archives a plan
-- Read the file back after writing it, since the row that lands is the row a worker acts on
+- `place` and `promote` refuse a row the target group's test fails, so a Plan cell never leads `auto-ship` to no plan and spends a dispatch
+- A Touches cell differing from its plan's list is `touches-stale`. Change the plan's list rather than the cell, and step 6's hold call reads the result.
+- Read the board back after a write, since the row that lands is the row a worker acts on
 
 ### Stale plan pointers
 
 A Plan pointer goes stale from a merge this board never sees. The `post-merge` hook moves a plan to `.canon/plans/archive/` through `canon tasks archive` and rewrites the citation in the archived task file alone.
 
-- A row for a task still on the board keeps pointing into `.canon/plans/` at a file that has moved
+- A row for a task still on the board keeps pointing into `.canon/plans/` at a file that has moved, until the next verb call re-derives every Plan cell from the live plans
 - `task-complete` marks outcomes on each worker's branch and moves nothing, so the move lands at the merge
 - The board then reads as correct until a pointer is followed

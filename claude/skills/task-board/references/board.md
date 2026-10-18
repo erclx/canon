@@ -70,28 +70,31 @@ Group tasks by readiness rather than by status, one row per task, under the colu
 
 Readiness is three groups under fixed headings, `## Run now`, `## Up next`, and `## Needs a plan`, in that order. A task belongs to exactly one, and the tests are read in order.
 
-| Group             | Test                                                                                   |
-| ----------------- | -------------------------------------------------------------------------------------- |
-| `## Run now`      | A written plan covers every open outcome, and nothing stated keeps the task from start |
-| `## Up next`      | A written plan exists, and the `Waiting on` column names why the task cannot start     |
-| `## Needs a plan` | Everything else. No plan, or a plan that no longer describes the work                  |
+| Group             | Test                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------ |
+| `## Run now`      | A worker was dispatched on it, under a written plan covering every open outcome      |
+| `## Up next`      | A written plan exists and no worker holds it yet, and `Waiting on` names what is due |
+| `## Needs a plan` | Everything else. No plan, or a plan that no longer describes the work                |
 
 The names are the contract. A board grouped by readiness under names of its own reads as empty to anything counting rows under a heading, so add no fourth group.
+
+### Writing the board
+
+Every write goes through `canon tasks place`, `promote`, `move`, or `block`, each reading the file once, rendering the columns the template fixes, and writing it once. `plan-link` promotes a parked row the same way. Only `Waiting on` is typed, since every other cell derives from the task and its live plans.
 
 ### What blocks a run
 
 A collision with running work blocks a task only where no merge settles it, being a contract, a relocation, or a sweep. A shared file alone is none, since the branch merging second rebases.
 
-- A worker is handed a task from `## Run now` alone, and its `Touches` column states the set to read
-- Each group's columns follow from its test. Neither half of the `## Run now` test is checkable without the file set and the plan beside the task.
+- A dispatcher picks from `## Up next` and runs `canon tasks promote` once the launch succeeds
+- Each group's columns follow from its test. Neither half of the `## Up next` test is checkable without the file set and the plan beside the task.
 
 ### The `Touches` cell
 
-A `Touches` cell is copied from its plan's list, so it states what the branch sets out to write rather than a bound on it. A branch outgrows it while the row still reads as it did at dispatch.
+A `Touches` cell is the first three paths of its plan's `**Files to touch:**` and a count of the rest, the union in line order for a sliced task. It states what the branch sets out to write, and a running branch outgrows it.
 
-- Once a branch runs, correct the cell from the diff rather than the plan, which is the prediction that already went stale
-- `canon tasks plan-reach <plan>` reads that diff against every live plan and every cell in the group
-- The row's owner writes the correction. A worker never edits this board.
+- `canon tasks plan-reach <plan>` reads the current reach off the branch's diff
+- Change the plan's list to change the cell. A worker never edits this board.
 
 ### Cell width
 
@@ -118,7 +121,7 @@ The `Waiting on` column under `## Up next` carries the reason in one of three fo
 | Sibling task       | That task                                                                     |
 | External condition | The condition and what would satisfy it                                       |
 
-Naming what would satisfy a condition separates a blocked row from one nobody examined, so a condition with no way out fails the test. The header text is the contract, since a reader resolves the column by header rather than position.
+Naming what would satisfy a condition separates a blocked row from one nobody examined, so a condition with no way out fails the test. The header text is the contract, since a reader resolves the column by header rather than position. A cell renders at most 120 characters, a link counting as its label alone, and the verbs refuse a longer one.
 
 ### The needs-a-plan cell
 

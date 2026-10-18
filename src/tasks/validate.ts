@@ -12,6 +12,12 @@ import {
   resolveLivePlan,
   tasksDir,
 } from '@/tasks/archive'
+import {
+  deriveCells,
+  GROUP_COLUMNS,
+  renderedLength,
+  WAITING_LIMIT,
+} from '@/tasks/board'
 import { gitTrunkReader, type TrunkReader } from '@/tasks/trunk'
 
 const ORDERING_FILE = 'priority.md'
@@ -50,6 +56,9 @@ export const FINDING_KINDS = [
   'row-misordered',
   'row-unranked',
   'touches-unstated',
+  'touches-stale',
+  'columns-mismatched',
+  'cell-long',
   'blocker-settled',
   'blocker-unresolved',
   'blocker-declined',
@@ -145,6 +154,8 @@ export interface BoardRow {
   readonly plan: string | undefined
   /** Absent when the group fixes no `Touches` column, empty when it read none. */
   readonly touches: readonly string[] | undefined
+  /** The `Touches` cell as written, which the stale check compares against the derivation. */
+  readonly touchesText: string | undefined
   /** Absent when the group fixes no `Waiting on` column, which is `## Run now`. */
   readonly waiting: string | undefined
   /** The ordinal phrase a `Waiting on` cell states about its own position, undefined when the cell carries none. */
@@ -271,8 +282,8 @@ function splitCells(line: string): string[] {
   return line
     .trim()
     .replace(/^\|/, '')
-    .replace(/\|$/, '')
-    .split('|')
+    .replace(/(?<!\\)\|$/, '')
+    .split(/(?<!\\)\|/)
     .map((cell) => cell.trim())
 }
 
@@ -286,6 +297,21 @@ function columnIndex(header: readonly string[], name: string): number {
 
 function isGroup(heading: string): heading is BoardGroup {
   return (BOARD_GROUPS as readonly string[]).includes(heading)
+}
+
+/**
+ * Whether a header is the set of columns its group owns. Order is left to the
+ * reader, which resolves every column by name, so only a missing or a foreign
+ * column is a finding.
+ */
+function ownsColumns(group: BoardGroup, header: readonly string[]): boolean {
+  const owned = GROUP_COLUMNS[group].map((column) => column.toLowerCase())
+  const named = header.map((cell) => cell.toLowerCase())
+
+  return (
+    named.length === owned.length &&
+    owned.every((column) => named.includes(column))
+  )
 }
 
 const ORDINAL_WORDS = [
@@ -460,6 +486,14 @@ export function readBoard(text: string): {
       }
 
       header = cells
+      if (!ownsColumns(group, cells)) {
+        findings.push({
+          kind: 'columns-mismatched',
+          group,
+          subject: line.trim(),
+          message: `is not the ${GROUP_COLUMNS[group].join(', ')} header ${group} owns.`,
+        })
+      }
       continue
     }
 
@@ -489,6 +523,7 @@ export function readBoard(text: string): {
       stem: target ? stemOf(target) : undefined,
       plan,
       touches: touchesAt >= 0 ? readPaths(cells[touchesAt] ?? '') : undefined,
+      touchesText: touchesAt >= 0 ? (cells[touchesAt] ?? '') : undefined,
       waiting,
       ordinal: waiting ? readOrdinal(waiting) : undefined,
       ranked: waiting ? readRank(waiting) : false,
@@ -1125,6 +1160,83 @@ function citedStem(cell: string): string | undefined {
   return target ? stemOf(target) : undefined
 }
 
+/** The task stems in each folder a bare label can resolve through, live first. */
+interface LabelFolders {
+  readonly live: readonly string[]
+  readonly archived: readonly string[]
+  readonly declined: readonly string[]
+}
+
+type LabelCitation =
+  | { readonly kind: 'stems'; readonly stems: readonly string[] }
+  | { readonly kind: 'ambiguous'; readonly label: string }
+
+/**
+ * Reads every bare `vNNN.N` phase label a `Waiting on` cell names outside a
+ * link, each resolved to the one task it labels. The live folder answers first,
+ * since a live task and a declined one can share a label and the live one is
+ * what the row waits on. Two matches in the folder that answers leave the row
+ * untested rather than guessing between them, and a label no folder holds is
+ * read as prose rather than as a broken pointer, since a version number in a
+ * sentence is not always a citation.
+ */
+function bareLabels(cell: string, folders: LabelFolders): LabelCitation {
+  const prose = cell.replace(/\[[^\]]*\]\([^)]*\)/g, ' ')
+  const stems: string[] = []
+
+  for (const match of prose.matchAll(/\bv\d+\.\d+\b/g)) {
+    const prefix = `${match[0]}-`
+    for (const folder of [folders.live, folders.archived, folders.declined]) {
+      const hits = folder.filter((stem) => stem.startsWith(prefix))
+      if (hits.length > 1) return { kind: 'ambiguous', label: match[0] }
+      if (hits.length === 1) {
+        if (!stems.includes(hits[0])) stems.push(hits[0])
+        break
+      }
+    }
+  }
+
+  return { kind: 'stems', stems }
+}
+
+/**
+ * Tests every task a cell cites by bare label, and reports the row only when
+ * none of them is still open. A cell naming settled history beside its live
+ * blocker would otherwise read as settled on the history alone.
+ */
+async function checkCitedTasks(
+  group: BoardGroup,
+  subject: string,
+  stems: readonly string[],
+  root: string,
+  trunk: TrunkReader,
+): Promise<CitedResult> {
+  const results = await Promise.all(
+    stems.map((stem) => checkCitedTask(group, subject, stem, root, trunk)),
+  )
+  const open = results.some(
+    (result) => result.findings.length === 0 && result.untested.length === 0,
+  )
+  if (open) return nothing()
+
+  return {
+    findings: results.flatMap((result) => result.findings),
+    untested: results.flatMap((result) => result.untested),
+  }
+}
+
+async function readLabelFolders(root: string): Promise<LabelFolders> {
+  const read = async (dir: string): Promise<string[]> =>
+    existsSync(dir) ? listTaskStems(dir) : []
+  const [live, archived, declined] = await Promise.all([
+    read(tasksDir(root)),
+    read(archiveDir(root)),
+    read(declinedDir(root)),
+  ])
+
+  return { live, archived, declined }
+}
+
 /** What one blocker citation produced, since a row can be neither settled nor open. */
 interface CitedResult {
   readonly findings: readonly Finding[]
@@ -1288,17 +1400,29 @@ async function checkParked(
   const findings: Finding[] = []
   const untested: Untested[] = []
   const running = rows.filter((row) => row.group === 'Run now')
+  const folders = await readLabelFolders(root)
 
   for (const row of rows) {
     if (row.group === 'Run now') continue
 
     const subject = row.stem ?? row.label
     const cell = row.waiting ?? ''
-    const cited = citedStem(cell)
+    const linked = citedStem(cell)
+    const bare = linked ? undefined : bareLabels(cell, folders)
+    const cited = linked ? [linked] : bare?.kind === 'stems' ? bare.stems : []
     const contested = readPaths(cell)
 
-    if (cited) {
-      const result = await checkCitedTask(
+    if (bare?.kind === 'ambiguous') {
+      untested.push({
+        group: row.group,
+        subject,
+        message: `waits on ${bare.label}, which labels more than one task, so the blocker is not read.`,
+      })
+      continue
+    }
+
+    if (cited.length > 0) {
+      const result = await checkCitedTasks(
         row.group,
         subject,
         cited,
@@ -1324,7 +1448,7 @@ async function checkParked(
       })
     }
 
-    if (!cited && contested.length === 0) {
+    if (cited.length === 0 && contested.length === 0) {
       untested.push({
         group: row.group,
         subject,
@@ -1335,6 +1459,79 @@ async function checkParked(
   }
 
   return { findings, untested }
+}
+
+/**
+ * Reports a `Waiting on` cell rendering past the cap. A verb refuses to write
+ * one, so a cell this long is a hand edit, which is why it moves the exit code.
+ */
+function checkCellWidth(rows: readonly BoardRow[]): Finding[] {
+  return rows.flatMap((row) => {
+    const width = row.waiting ? renderedLength(row.waiting) : 0
+    if (width <= WAITING_LIMIT) return []
+
+    return [
+      {
+        kind: 'cell-long' as const,
+        group: row.group,
+        subject: subjectOf(row),
+        message: `carries a Waiting on cell rendering ${width} characters, past the ${WAITING_LIMIT} a board cell holds.`,
+      },
+    ]
+  })
+}
+
+/**
+ * Reports a `Touches` cell that differs from what the task's plans derive. A
+ * verb writes the derivation on every call, so a difference is a hand edit or a
+ * plan that changed since the last write. An empty derivation is left alone,
+ * since a row with no live plan or no declared file is `plan-absent`,
+ * `plan-unresolved`, or `touches-unstated` to report, not stale.
+ */
+async function checkStaleTouches(
+  rows: readonly BoardRow[],
+  root: string,
+): Promise<Finding[]> {
+  const found = await Promise.all(
+    rows.map(async (row): Promise<Finding | undefined> => {
+      if (row.touchesText === undefined || !row.stem) return undefined
+
+      const { touches } = await deriveCells(root, {
+        stem: row.stem,
+        label: row.label,
+      })
+      if (touches === '' || touches === row.touchesText) return undefined
+
+      return {
+        kind: 'touches-stale',
+        group: row.group,
+        subject: row.stem,
+        message: `states ${row.touchesText || 'no file'}, and its plan derives ${touches}. A board verb rewrites the cell.`,
+      }
+    }),
+  )
+
+  return found.filter((finding): finding is Finding => finding !== undefined)
+}
+
+/**
+ * The claims a group name makes about a row, being a stated plan and file set
+ * under `## Run now`, a live plan under `## Up next`, and none under
+ * `## Needs a plan`. The board verbs read these same findings off the board
+ * they are about to write, so a placement and a validation cannot disagree on
+ * what a group allows.
+ */
+export async function groupRuleFindings(
+  rows: readonly BoardRow[],
+  root: string,
+): Promise<Finding[]> {
+  const dir = tasksDir(root)
+
+  return [
+    ...checkPlans(rows, dir, root),
+    ...(await checkGroupClaims(rows, dir, root)),
+    ...checkTouches(rows),
+  ]
 }
 
 function refuse(reason: ValidateRefusal, message: string): ValidateRefused {
@@ -1397,10 +1594,10 @@ export async function validateBoard(
   const findings = [
     ...shapeFindings,
     ...checkMapping(rows, backlog, dir),
-    ...checkPlans(rows, dir, root),
+    ...(await groupRuleFindings(rows, root)),
     ...(await checkPlanAgreement(rows, dir, root)),
-    ...(await checkGroupClaims(rows, dir, root)),
-    ...checkTouches(rows),
+    ...(await checkStaleTouches(rows, root)),
+    ...checkCellWidth(rows),
     ...checkOrdering(rows),
     ...parked.findings,
   ]

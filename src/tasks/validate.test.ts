@@ -1081,6 +1081,7 @@ describe('validateBoard', () => {
     const outcome = await validateBoard(ROOT)
 
     expect(outcome.ok && kinds(outcome.findings)).toEqual([
+      'columns-mismatched',
       'touches-unstated',
       'touches-unstated',
     ])
@@ -1725,6 +1726,164 @@ describe('validateBoard', () => {
         message:
           'cites no task and no file, so neither half of its blocker is mechanical.',
       },
+    ])
+  })
+})
+
+describe('validateBoard verb-written shape', () => {
+  async function seedDeclaringPlan(
+    stem: string,
+    files: readonly string[],
+  ): Promise<void> {
+    const plans = recordDir(ROOT, 'plans')
+    mkdirSync(plans, { recursive: true })
+    await writeFile(
+      join(plans, `feature-${stem}.md`),
+      `# ${stem}\n\n**Files to touch:**\n\n${files.map((file) => `- \`${file}\`: why`).join('\n')}\n`,
+    )
+  }
+
+  it('should report a header that is not the set its group owns', async () => {
+    await seedTask('v9.0-a', '', undefined, NO_PLAN)
+    await seedBoard(
+      boardBody([
+        '## Needs a plan',
+        '',
+        '| Task | Touches | Waiting on |',
+        '| ---- | ------- | ---------- |',
+        '| [v9.0-a](v9.0-a.md) | `a.ts` | nothing yet, first here |',
+        '',
+      ]),
+    )
+
+    const outcome = await validateBoard(ROOT, UNREACHABLE_TRUNK)
+
+    expect(outcome.ok && kinds(outcome.findings)).toEqual([
+      'columns-mismatched',
+    ])
+  })
+
+  it('should report a Waiting on cell rendering past 120 characters', async () => {
+    await seedTask('v9.0-a', '', undefined, NO_PLAN)
+    await seedBoard(
+      boardBody([
+        needsPlanTable([
+          `| [v9.0-a](v9.0-a.md) | ${'x'.repeat(110)}. First here |`,
+        ]),
+      ]),
+    )
+
+    const outcome = await validateBoard(ROOT, UNREACHABLE_TRUNK)
+
+    expect(outcome.ok && kinds(outcome.findings)).toEqual(['cell-long'])
+  })
+
+  it('should pass a cell of 120 rendered characters whose link target runs it past', async () => {
+    await seedTask('v9.0-a', '', undefined, NO_PLAN)
+    await seedBoard(
+      boardBody([
+        needsPlanTable([
+          `| [v9.0-a](v9.0-a.md) | [x](v8.0-a-very-long-target.md) ${'x'.repeat(118)} |`,
+        ]),
+      ]),
+    )
+
+    const outcome = await validateBoard(ROOT, UNREACHABLE_TRUNK)
+
+    expect(outcome.ok && kinds(outcome.findings)).not.toContain('cell-long')
+  })
+
+  it('should report a Touches cell that differs from what the plan derives', async () => {
+    await seedTask('v1.0-first')
+    await seedDeclaringPlan('v1.0-first', ['src/b.ts'])
+    await seedBoard(boardBody([readyTable([{ stem: 'v1.0-first' }])]))
+
+    const outcome = await validateBoard(ROOT, UNREACHABLE_TRUNK)
+
+    expect(outcome.ok && outcome.findings).toMatchObject([
+      { kind: 'touches-stale', subject: 'v1.0-first' },
+    ])
+  })
+
+  it('should pass a Touches cell that matches the derivation', async () => {
+    await seedTask('v1.0-first')
+    await seedDeclaringPlan('v1.0-first', ['src/a.ts'])
+    await seedBoard(boardBody([readyTable([{ stem: 'v1.0-first' }])]))
+
+    expect(await validateBoard(ROOT, UNREACHABLE_TRUNK)).toMatchObject({
+      findings: [],
+    })
+  })
+
+  it('should settle a row waiting on a bare label whose task is archived', async () => {
+    await seedTask('v9.0-a', '', undefined, NO_PLAN)
+    await seedArchivedTask('v8.0-done')
+    await seedBoard(
+      boardBody([
+        needsPlanTable(['| [v9.0-a](v9.0-a.md) | v8.0 merging. First here |']),
+      ]),
+    )
+
+    const outcome = await validateBoard(ROOT, UNREACHABLE_TRUNK)
+
+    expect(outcome.ok && outcome.findings).toMatchObject([
+      {
+        kind: 'blocker-settled',
+        subject: 'v9.0-a',
+        message: 'waits on v8.0-done, which is archived.',
+      },
+    ])
+  })
+
+  it('should read a bare label through the live task over a declined one', async () => {
+    await seedTask('v9.0-a', '', undefined, NO_PLAN)
+    await seedTask('v8.0-live', '- [ ] open', undefined, NO_PLAN)
+    await seedDeclinedTask('v8.0-dropped')
+    await seedBoard(
+      boardBody([
+        needsPlanTable(['| [v9.0-a](v9.0-a.md) | v8.0 merging. First here |']),
+      ]),
+    )
+
+    const outcome = await validateBoard(ROOT, UNREACHABLE_TRUNK)
+
+    expect(outcome.ok && kinds(outcome.findings)).not.toContain(
+      'blocker-declined',
+    )
+    expect(outcome.ok && outcome.untested).toEqual([])
+  })
+
+  it('should not settle a row whose cell names archived history before its live blocker', async () => {
+    await seedTask('v9.0-a', '', undefined, NO_PLAN)
+    await seedArchivedTask('v7.0-history')
+    await seedTask('v8.0-live', '- [ ] open', undefined, NO_PLAN)
+    await seedBoard(
+      boardBody([
+        needsPlanTable([
+          '| [v9.0-a](v9.0-a.md) | Reworked after v7.0, now waits on v8.0 merging. First here |',
+        ]),
+      ]),
+    )
+
+    const outcome = await validateBoard(ROOT, UNREACHABLE_TRUNK)
+
+    expect(outcome.ok && kinds(outcome.findings)).toEqual([])
+  })
+
+  it('should leave a row untested when a bare label matches two live tasks', async () => {
+    await seedTask('v9.0-a', '', undefined, NO_PLAN)
+    await seedTask('v8.0-one', '', undefined, NO_PLAN)
+    await seedTask('v8.0-two', '', undefined, NO_PLAN)
+    await seedBoard(
+      boardBody([
+        needsPlanTable(['| [v9.0-a](v9.0-a.md) | v8.0 merging. First here |']),
+      ]),
+    )
+
+    const outcome = await validateBoard(ROOT, UNREACHABLE_TRUNK)
+
+    expect(outcome.ok && outcome.untested).toMatchObject([
+      { subject: 'v9.0-a', message: expect.stringContaining('v8.0') },
     ])
   })
 })
