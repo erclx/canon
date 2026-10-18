@@ -166,6 +166,8 @@ export function register(program: Command): void {
         'Reasons:',
         '  head-mismatch  the pull request is not open on the current branch, under',
         '                 --check as well',
+        '  gh-failed      the files listing or the labels could not be read, and the',
+        '                 run does not fall back to git',
         '',
         'Examples:',
         '  canon labels apply 123 --json',
