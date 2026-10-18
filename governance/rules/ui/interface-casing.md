@@ -13,19 +13,17 @@ paths:
 
 ## Sentence case
 
-- Use sentence case for all rendered interface text: headings, labels, nav items, tab titles, and dialog titles.
-- Retain original casing for proper nouns and product names: `GitHub`, `macOS`, `TypeScript`.
-- Treat title case on every heading as a template tell, since it reads as a default rather than a choice.
+- Use sentence case for rendered headings, labels, nav items, tab titles, and dialog titles, since title case on every heading reads as a template default.
+- Keep the original casing of a proper noun or product name, such as `GitHub`, `macOS`, or `TypeScript`.
 
 ## Uppercase labels
 
-- Keep small uppercase labels above headings to one per three sections, with the first screen counting as one. More than `ceil(sections / 3)` is too many, and the fix is usually to delete the label, since a section's position already says what it is.
-- Treat the count as a judgment, since a glob cannot check it.
+- Keep small uppercase labels above headings to `ceil(sections / 3)`, the first screen counting as one. Delete the extra labels, since position already names a section.
 
 ## Where it applies
 
-- The rule covers markup, MDX, and content modules under a `content/` folder. Copy kept elsewhere, such as a locale file, is not reached, so apply the same casing there without the rule firing.
+- Apply the same casing to interface copy kept outside the globs, such as a locale file, which this rule never fires on.
 
 ## Overriding
 
-- Depart from sentence case where the case needs it, such as an acronym, a brand mark, or a set-in-caps identity the design chose on purpose.
+- Depart from sentence case only where the case needs it, such as an acronym, a brand mark, or a set-in-caps identity the design chose on purpose.
