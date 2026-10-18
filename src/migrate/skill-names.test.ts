@@ -8,7 +8,7 @@ import {
 
 describe('SKILL_NAME_MAP', () => {
   it('should carry one row for every renamed skill', () => {
-    expect(Object.keys(SKILL_NAME_MAP)).toHaveLength(44)
+    expect(Object.keys(SKILL_NAME_MAP)).toHaveLength(43)
   })
 
   it('should retire the prefix on every row', () => {
@@ -84,6 +84,20 @@ describe('SKILL_CITATION_MAP', () => {
     )
 
     expect(chained).toEqual([])
+  })
+})
+
+describe('renameText under the draft-ready citation rows', () => {
+  it('should rewrite the skill folder path', () => {
+    expect(
+      renameText('claude/skills/draft-ready/SKILL.md', SKILL_NAME_RULES),
+    ).toBe('claude/skills/plan-ready/SKILL.md')
+  })
+
+  it('should leave the prose sense of a pull request moving from draft to ready', () => {
+    expect(
+      renameText('The PR is draft-ready once CI passes.', SKILL_NAME_RULES),
+    ).toBe('The PR is draft-ready once CI passes.')
   })
 })
 

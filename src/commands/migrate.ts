@@ -1335,7 +1335,7 @@ export function register(program: Command): void {
         '',
         `Rewrites ${Object.keys(SKILL_NAME_MAP).length} skill names and moves the folders that carry them.`,
         `It also carries ${Object.keys(SKILL_CITATION_MAP).length} namespaced-only rows for a skill renamed from a single word.`,
-        'Seven rows move the draft- skills onto verb-first names, such as',
+        'The seven draft- skills move onto verb-first names, such as',
         // The old spellings below are the rename itself. canon-keep-retired
         'draft-doc to write-doc and draft-and-pick to pick-by-eye, and a',
         'pointer left under each old name is never moved.',

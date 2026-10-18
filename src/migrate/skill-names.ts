@@ -52,6 +52,7 @@ import { defineRenameRules, type RenameRules } from '@/migrate/rename'
  * `pick-by-eye`, `plan-ready`, and `script-screencast`. Every older key that
  * landed on a `draft-` name is retargeted straight onto its new one, so a
  * target on the oldest spelling lands in one pass rather than two.
+ * `draft-ready` alone keys on its namespaced forms below rather than here.
  *
  * Every name takes two words. Ten of these would have landed as a bare single
  * word under a plain strip, and a bare word such as `review` or `docs` is a
@@ -110,7 +111,6 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
   'draft-identity': 'design-identity',
   'draft-slides': 'make-deck',
   'draft-and-pick': 'pick-by-eye',
-  'draft-ready': 'plan-ready',
   'draft-screencast': 'script-screencast',
 }
 
@@ -125,12 +125,20 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
  * guard rejects a following `-`, so a rewritten `canon:canvas-board` is not
  * matched again.
  *
+ * `draft-ready` became `plan-ready` and takes the same treatment for a
+ * different reason. It is two words, but they are ordinary prose for a pull
+ * request moving from draft to ready, and the sweep takes no scope in a
+ * target, so a bare key would rewrite that sentence in every tracked file a
+ * project wrote.
+ *
  * What this leaves behind is a prose mention of the skill by its bare name,
  * which has no token for a sweep to find and is fixed by hand.
  */
 export const SKILL_CITATION_MAP: Readonly<Record<string, string>> = {
   'canon:canvas': 'canon:canvas-board',
   'skills/canvas': 'skills/canvas-board',
+  'canon:draft-ready': 'canon:plan-ready',
+  'skills/draft-ready': 'skills/plan-ready',
 }
 
 /**
