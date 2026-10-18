@@ -7,7 +7,7 @@ description: The landing page and this repository's own rendered images. Use for
 
 Read `canon/context/development/web.md` for structure, the Astro build, and the gotchas before editing, then the file it names for the change at hand.
 
-`internal/rules/claude/landing-page.md` and `internal/rules/claude/landing-style.md` are scoped to `web/**` and hold the page's conventions, each of which fails silently when broken. They load on the edit and this skill loads for the domain. Open both rules before drafting rather than after, since a draft that never read them reproduces what they forbid.
+`internal/rules/claude/landing-page.md` and `internal/rules/claude/landing-style.md` are scoped to `web/**` and hold the page's conventions, each failing silently. They load on the edit and this skill loads for the domain. Open both rules before drafting rather than after, since a draft that never read them reproduces what they forbid.
 
 ## Before drafting a page change
 
