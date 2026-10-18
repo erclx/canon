@@ -13,7 +13,7 @@ Two sessions filing at once claim one label twice or land rows beside each other
 
 ## Must
 
-- A task is opened only when needed, since a small edit or finished work needs none, the board resolves at the main worktree root, and the filename and frontmatter come from the tasks standard rather than memory
+- A task is opened only when needed, the board resolves at the main worktree root, and the filename and frontmatter come from the tasks standard rather than memory
 - Every created task carries an origin, since creation is the only moment the invariant is enforceable
 - The phase label is claimed through `canon tasks next-label --claim`
 - A live orchestrator on the roster receives the row as a handoff rather than as a write beside it

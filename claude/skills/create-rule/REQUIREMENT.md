@@ -16,7 +16,7 @@ The subdir gets picked by feel, so a UI copy rule loads on every session. The sc
 - Resolve what the rule enforces and where it applies, asking only for what the request leaves missing, and stop when it names no behavior
 - Write under `.claude/rules/project/` in a subdir picked from the topic, with a slug no rule in that subdir uses, and propose a narrower slug when it is taken
 - Read the rule standard before writing, then hold the body to its shape limits and content test and run every bullet through its checklist before reporting
-- Emit the path scope for a path-scoped rule and omit the key for an always-on one, and say when the rule loads, then write without pausing and show the written rule as a diff, leaving the commit to the operator's OK
+- Emit the path scope for a path-scoped rule and omit the key for an always-on one, say when the rule loads, then write and show the diff, leaving the commit to the operator's OK
 - Check what canon ships and the installed skills for one already covering the topic and point the rule at it, and tell the user to cite a source in the commit when the rule claims outside practice
 
 ## Must not

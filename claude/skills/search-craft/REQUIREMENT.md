@@ -17,7 +17,7 @@ Access is a second gap a session cannot derive. Some sites refuse a fetch, a fee
 - Run the query scoped to those authorities and open beside it, prefer the scoped result on a conflict, and say the two disagreed
 - Check a scoped result's domain before citing it, since the filter is not strict
 - Prefer a public API over a fetched page where one exists, and keep a dated access note grown from failures a session hit
-- Stop for the operator before a paid or logged-in route, and close with the practice skill's excuses, red flags, and checklist
+- Stop for the operator before a paid or logged-in route, and close with the practice skill's excuses, red flags, checklist, and the sources adopted and declined with the reason for each
 
 ## Must not
 

@@ -13,9 +13,9 @@ A relayed message goes out with no sender, so an operator carrying it cannot say
 
 ## Must
 
-- Any session sending to another reaches the skill, with or without a role and with or without a message-sending tool
-- The sender's name comes from `canon sessions list --self --json`, degrading to a name from the environment when the installed CLI lacks `--self`
-- The addressee resolves from a `sessionId` or a branch at the moment of sending, never by name prefix, is refused in another repository than the sender's unless the caller names the operator's ask (a sender with no roster row reads as unread, not a match), and is checked against the agent listing with its `[ref]` added under more than one row
+- Any session sending to another reaches the skill, with or without a role or a send tool, and a send to a row in another repository is refused unless the caller names the operator's ask
+- The sender's name comes from `canon sessions list --self --json`, degrading to a name from the environment when the installed CLI lacks `--self`, and a sender with no roster row reads as unread
+- The addressee resolves from a `sessionId` or a branch at the moment of sending, never by name prefix, and is checked against the agent listing with its `[ref]` added under more than one row
 - The send goes through a message-sending tool where one exists, and a copyable block opening on a sender, addressee, and purpose header is composed where none does or the listing has no row
 - The body carries the message verbatim from its caller, and states why a block goes out before a prompt as the one surface holding that reason
 

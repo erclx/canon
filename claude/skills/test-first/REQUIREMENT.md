@@ -15,7 +15,7 @@ A session implementing a planned change writes the test after the code, or write
 - Run the test before implementing and confirm it fails for the missing behavior rather than a mistake in the test
 - Implement the minimum the current test demands, then start a new test before extending past it
 - Load `code-craft` before the implementation when its shape is still open, then confirm the pass is the one the test was written to prove
-- Refactor the implementation and the test once the suite is green, re-running it after each change
+- Refactor the implementation and the test once the suite is green, re-running it after each change, and record the external sources adopted and declined with the reason for each
 
 ## Must not
 

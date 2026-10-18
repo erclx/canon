@@ -17,7 +17,7 @@ Sharpening the rules does not reach the decision. An always-loaded line competes
 - Keep to the project's existing layout strategy, naming it before placing a file, and propose a strategy change as its own decision
 - Split a folder when a second role enters it, with a file count only as a prompt to look, and colocate with the one consumer until a second promotes the file
 - Give every new path a one-clause placement reason, and name a file for what it covers rather than repeating its folder
-- Hold the stack-neutral core in the body, with category specifics in a reference, then close with excuses, red flags, and a checklist
+- Hold the stack-neutral core in the body, with category specifics in a reference, then close with excuses, red flags, a checklist, and the external sources adopted and declined with the reason for each
 
 ## Must not
 

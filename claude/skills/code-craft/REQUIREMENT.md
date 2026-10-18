@@ -17,7 +17,7 @@ Agents fail there in recorded ways. They copy where reuse belonged, spread one c
 - State depth as rules a session can act on, covering a unit's interface being simpler than its work, inlined pass-throughs, and splitting by the decision hidden
 - State each tension as when one side wins, such as one place for knowledge against coupling two things that only look alike
 - State hidden inputs: pass in the clock, environment, and randomness, and keep business rules free of transport and storage code
-- Close with the agent failure modes as checks on the session's own diff, with excuses, red flags, and a checklist
+- Close with the agent failure modes as checks on the session's own diff, with excuses, red flags, a checklist, and the external sources adopted and declined with the reason for each
 
 ## Must not
 

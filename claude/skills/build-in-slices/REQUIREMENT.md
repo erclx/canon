@@ -17,7 +17,7 @@ Without those, a session builds in one pass and tests at the end, so the diff ou
 - Choose the next slice as one path end to end, the riskiest piece first, and the contract first when two sides are written against it
 - Keep each commit safe to revert alone, with one logical change, a test committed with or ahead of its code, and no delete sharing a commit with its replacement
 - Route a defect noticed outside the plan to the open task's findings or the handover, and leave its file unchanged
-- Re-run a check only after an edit it could see, never as a reason to skip a verify step a chain runs, then close with excuses, red flags, and a checklist
+- Re-run a check only after an edit it could see, never to skip a chain's verify step, then close with excuses, red flags, a checklist, and the sources adopted and declined with the reason for each
 
 ## Must not
 

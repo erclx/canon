@@ -17,7 +17,7 @@ A stated rule is one a session talks itself out of, since each misplaced test sa
 - Open every test with the question of which production change makes it fail, and whether that change is a bug or a decision
 - Run a final filter over each test, covering mirror assertions, change detectors, mock assertions, fixed pauses, and the mutation check, and rewrite or cut one that fails
 - Hold the structure floors in the body and each layer's specifics in a reference loaded only for that layer
-- Load on writing or changing any test, after implementing as well as before, and close with excuses, red flags, and a checklist
+- Load on writing or changing any test, after implementing as well as before, and close with excuses, red flags, a checklist, and the external sources adopted and declined with the reason for each
 
 ## Must not
 

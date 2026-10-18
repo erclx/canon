@@ -17,7 +17,7 @@ The result is an expand step with no contract step behind it, a fallback kept "u
 - Separate advisory from compulsory deprecation, allowing compulsory only once a replacement has shipped and a removal date sits where a caller looks
 - Make the owner of a surface migrate its callers rather than announce and wait
 - Prove zero consumers across imports, string references, configuration, documentation, and outside copies before removal, naming any kind the search could not reach
-- Run expand, migrate, and contract as three changes, then close with excuses, red flags, and a checklist
+- Run expand, migrate, and contract as three changes, then close with excuses, red flags, a checklist, and the external sources adopted and declined with the reason for each
 
 ## Must not
 

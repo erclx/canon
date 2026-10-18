@@ -17,7 +17,7 @@ No skill carries the subject, and the core code rule's two error bullets say not
 - Write the contract before the body, with one error shape per surface carrying a stable code, and validate once at the boundary
 - Make change additive by default, with new fields optional and nothing renamed, removed, or redefined in place, and the One-Version Rule for a caller that cannot pin
 - State four idempotency rules: honor a caller's key, claim it atomically, fail loudly on a reused key with a different body, and keep it past the retry window
-- Close with excuses, red flags, and a checklist, and exclude visual interfaces by name in the description
+- Close with excuses, red flags, a checklist, and the external sources adopted and declined with the reason for each, and exclude visual interfaces by name in the description
 
 ## Must not
 
