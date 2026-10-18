@@ -80,6 +80,7 @@ Title casing is sentence case, with proper nouns keeping their own casing (`# Ty
 Read `${CLAUDE_SKILL_DIR}/references/checklist.md` and run every bullet of the written rule through it, along with the shape limits and the content test in `rule.md`.
 
 - Rewrite a bullet marked revise and cut one marked drop, then run the checklist again over what changed
+- Run `canon gov audit .claude/rules/project/<subdir>/<slug>.md` and fix every finding it reports, since the shape limits are counts the verb takes rather than a judgment
 - Report the verdict counts with the path, and name any bullet kept against a criterion with the reason
 
 ## After writing
