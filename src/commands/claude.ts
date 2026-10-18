@@ -255,7 +255,7 @@ export function register(program: Command): void {
 
   claude
     .command('setup')
-    .description('One-shot user-level config (statusline, attribution)')
+    .description('One-shot user-level config (statusline, permissions)')
     .argument('[dest]', 'User config directory', join(homedir(), '.claude'))
     .helpOption('-h, --help', 'Show this help message')
     .action(async (dest: string) => {
