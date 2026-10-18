@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.42.0](https://github.com/erclx/canon/compare/v5.41.0...v5.42.0) (2026-10-18)
+
+
+### Features
+
+* **pr:** read both review families and wait on them in review-state ([#2452](https://github.com/erclx/canon/issues/2452)) ([cd596fb](https://github.com/erclx/canon/commit/cd596fb3036e05c03a89dd566895e8b0b9ce2c67))
+* **rules:** ship a checkable rule standard through create-rule ([#2457](https://github.com/erclx/canon/issues/2457)) ([089e770](https://github.com/erclx/canon/commit/089e770afffe4bea79b5cc91b2d0517fea62dfc2))
+* **skills:** split pull request evidence into its own pr-evidence skill ([#2458](https://github.com/erclx/canon/issues/2458)) ([b05be4a](https://github.com/erclx/canon/commit/b05be4a051a7e29489fbc43e88e8427356bfeaa5))
+
 ## [5.41.0](https://github.com/erclx/canon/compare/v5.40.0...v5.41.0) (2026-10-18)
 
 
