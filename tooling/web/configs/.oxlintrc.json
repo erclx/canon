@@ -184,6 +184,13 @@
       }
     },
     {
+      "files": ["**/components/ui/**"],
+      "plugins": ["react"],
+      "rules": {
+        "react/only-export-components": "off"
+      }
+    },
+    {
       "files": ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
       "rules": {
         "vitest/expect-expect": "error",
