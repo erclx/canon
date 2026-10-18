@@ -20,7 +20,7 @@ The plugin root, the directory the marketplace entry sources. Everything under i
 - `.claude-plugin/plugin.json` is the manifest. Its `name` is `canon`, which namespaces each invocation as `/canon:<skill>`, and `release-please` writes its `version`.
 - The root holds no symlink, since an installer copies what sits behind one into every cache. The Plugin boundary measure in `src/gate/boundaries.ts` fails on any file resolving under `internal/`.
 - A script under a skill imports `node:` builtins only, because a cached plugin root carries no `node_modules`, and reads its base branch from `origin/HEAD`
-- `poll.ts` routes on a review comment's first line, `## Review` or `## UI review` and a `closed` form of each, so renaming one in a review skill silently stops routing
+- `poll.ts` routes on what `canon pr review-state` reads off a review's first line, `## Review` or `## UI review` and a `closed` form of each, so renaming one in a review skill silently stops routing
 - `tsconfig.json` reaches `claude/skills/*/scripts/**/*.ts` through its own `include` entry, and the shell stages glob `claude` for `.sh` files alone
 
 ### `claude/skills/`
