@@ -130,7 +130,10 @@ export function register(program: Command): void {
     )
     .argument('<number>', "This branch's open pull request")
     .helpOption('-h, --help', 'Show this help message')
-    .option('--base <ref>', 'Far side of the range, defaulting to the trunk')
+    .option(
+      '--base <ref>',
+      "Read the git range back to this ref instead of the pull request's files",
+    )
     .option('--root <path>', 'Repository to read, defaulting to the cwd')
     .option('--check', 'Report the labels owed and write nothing')
     .option('--json', 'Add a machine-readable record on stdout')
@@ -138,9 +141,10 @@ export function register(program: Command): void {
       'after',
       [
         '',
-        'Resolves the earned set the way `canon labels audit` does, binds to the',
-        'pull request only when its head is the current branch and it is open,',
-        'and adds each earned label the pull request lacks over REST.',
+        "Resolves the earned set from the pull request's own files listing, or",
+        'from the git range when --base is passed, binds to the pull request only',
+        'when its head is the current branch and it is open, and adds each earned',
+        'label the pull request lacks over REST.',
         '',
         'It adds and never removes, so a label a person applied by hand stays.',
         'A label the remote does not carry is reported under missingOnRemote and',
@@ -396,7 +400,26 @@ async function runApply(number: string, opts: ApplyOptions): Promise<number> {
   if (target === null) return refuse('gh-failed')
   if (target.trim() !== `${head} open`) return refuse('head-mismatch')
 
-  const report = await auditLabels(root, { base: opts.base })
+  // An explicit --base is an explicit request for the git route. Otherwise the
+  // pull request's own file listing is the diff the labels describe, and a
+  // failed read refuses rather than falling back, since binding needed gh too.
+  let paths: string[] | undefined
+  if (opts.base === undefined) {
+    const listing = await gh(root, [
+      'api',
+      '--paginate',
+      `repos/{owner}/{repo}/pulls/${number}/files`,
+      '--jq',
+      '.[].filename',
+    ])
+    if (listing === null) return refuse('gh-failed')
+    paths = nonEmptyLines(listing)
+  }
+
+  const report = await auditLabels(root, {
+    base: opts.base,
+    ...(paths !== undefined && { paths }),
+  })
 
   // A project declaring no map earns nothing and is labelled silently, which
   // is an answer and exits clean rather than reading as a break.

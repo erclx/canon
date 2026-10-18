@@ -82,7 +82,7 @@ What it leaves unmeasured is a prefix reaching no path, so a row left behind by 
 
 Apply labels after the pull request resolves, never as a field on the create. A create carrying a label the remote lacks either fails whole or creates the label, depending on the surface, and neither is the map's call. One step against a pull request that already exists covers the create and the edit path alike. It runs over REST, so it works where GraphQL is blocked, and the REST endpoint creates any label it is handed that the remote lacks, so the step reads each name off the remote first and warns on a missing one rather than adding it.
 
-`canon labels apply <number>` is that step. It resolves the earned set the way `canon labels audit` does, binds to the pull request only when its head is the current branch and it is open, and adds each earned label the pull request lacks. `--check` reports what is owed and writes nothing. The record carries `number`, `earned`, `present`, `added`, `owed`, `missingOnRemote`, and `uncovered`.
+`canon labels apply <number>` is that step. It resolves the earned set from the pull request's own files listing, or from the git range when `--base` is passed, binds to the pull request only when its head is the current branch and it is open, and adds each earned label the pull request lacks. `--check` reports what is owed and writes nothing. The record carries `number`, `earned`, `present`, `added`, `owed`, `missingOnRemote`, and `uncovered`.
 
 A pull request opened outside this skill, such as by `gh pr create`, takes the same command, since nothing else labels it.
 

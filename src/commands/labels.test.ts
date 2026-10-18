@@ -209,6 +209,9 @@ describe('canon labels apply', { timeout: RUN_TIMEOUT_MS }, () => {
     readonly target?: string
     readonly present?: string[]
     readonly remote?: string[]
+    /** Files the pull request lists. Set, the run omits --base and reads them. */
+    readonly files?: string[]
+    readonly filesFail?: boolean
   }
 
   let root: string
@@ -257,6 +260,7 @@ describe('canon labels apply', { timeout: RUN_TIMEOUT_MS }, () => {
         'echo "$*" >> "$FAKE_LOG"',
         'case "$*" in',
         '  *"-X POST"*) exit 0 ;;',
+        '  *pulls/7/files*) [ -n "$FAKE_FILES_FAIL" ] && exit 1; printf \'%s\' "$FAKE_FILES" ;;',
         '  *pulls/7*) printf \'%s\\n\' "$FAKE_TARGET" ;;',
         '  *issues/7/labels*) printf \'%s\' "$FAKE_PRESENT" ;;',
         '  *repos/{owner}/{repo}/labels*) printf \'%s\' "$FAKE_REMOTE" ;;',
@@ -273,7 +277,14 @@ describe('canon labels apply', { timeout: RUN_TIMEOUT_MS }, () => {
     const bin = await writeFakeGh()
     const result = await execa(
       process.execPath,
-      [CLI, 'labels', 'apply', '--json', '--base', 'main', ...args],
+      [
+        CLI,
+        'labels',
+        'apply',
+        '--json',
+        ...(fake.files === undefined ? ['--base', 'main'] : []),
+        ...args,
+      ],
       {
         cwd: root,
         reject: false,
@@ -285,6 +296,8 @@ describe('canon labels apply', { timeout: RUN_TIMEOUT_MS }, () => {
           FAKE_LOG: logFile,
           FAKE_TARGET: fake.target ?? 'feat/x open',
           FAKE_PRESENT: (fake.present ?? []).join('\n'),
+          FAKE_FILES: (fake.files ?? []).join('\n'),
+          FAKE_FILES_FAIL: fake.filesFail ? '1' : '',
           FAKE_REMOTE: (fake.remote ?? ['cli', 'docs']).join('\n'),
         },
       },
@@ -394,5 +407,47 @@ describe('canon labels apply', { timeout: RUN_TIMEOUT_MS }, () => {
 
     expect(record.reason).toBe('head-mismatch')
     expect(record.exitCode).toBe(1)
+  })
+
+  it('should label from the pull request files listing when no base is passed', async () => {
+    await seedRepo(true)
+
+    const record = await runApply(['7'], { files: ['docs/new.md'] })
+
+    expect(record.earned).toEqual(['docs'])
+    expect(record.added).toEqual(['docs'])
+    expect(record.calls.some((call) => call.includes('pulls/7/files'))).toBe(
+      true,
+    )
+  })
+
+  it('should read the same listing under --check', async () => {
+    await seedRepo(true)
+
+    const record = await runApply(['7', '--check'], { files: ['src/b.ts'] })
+
+    expect(record.owed).toEqual(['cli'])
+    expect(record.exitCode).toBe(2)
+  })
+
+  it('should keep the git route when --base is passed', async () => {
+    await seedRepo(true)
+
+    const record = await runApply(['7'], {})
+
+    expect(record.earned).toEqual(['cli', 'docs'])
+    expect(record.calls.some((call) => call.includes('pulls/7/files'))).toBe(
+      false,
+    )
+  })
+
+  it('should refuse with gh-failed and write nothing when the listing read fails', async () => {
+    await seedRepo(true)
+
+    const record = await runApply(['7'], { files: [], filesFail: true })
+
+    expect(record.reason).toBe('gh-failed')
+    expect(record.exitCode).toBe(1)
+    expect(record.calls.some((call) => call.includes('-X POST'))).toBe(false)
   })
 })
