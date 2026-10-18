@@ -11,7 +11,7 @@ Read this at loop step 6, once the poll reports a branch stale or conflicted, or
 - Resolve the target at the moment of sending with `canon sessions list --branch`, never from a mapping written down earlier, since names rotate as sessions end and one recorded earlier in a session has failed inside the hour. `orchestrator-poll.md` routes on the count and the confidence it answers with
 - Open the message with the worktree and branch the sender believes the reader holds, asking to be corrected, whenever that mapping is inferred rather than confirmed
 - Name the skill for the reader to run rather than writing an invocation, which arrives as text
-- Read the pull request's own draft flag rather than the state a worker reports, and report what the read returned and when rather than the state alone. `canon docs pr-reads` states why a reported field can lag and say nothing about it. The flag settles the question only once the worker's chain has run its undo, and nothing marks that moment, so a read taken between the pull request opening and that call sees a genuinely ready pull request about to become a draft and has told an operator the opposite of what the worker had said.
+- Read the pull request's own draft flag rather than the state a worker reports, and report what the read returned and when rather than the state alone. `canon pr head --help` states why a reported field can lag and say nothing about it. The flag settles the question only once the worker's chain has run its undo, and nothing marks that moment, so a read taken between the pull request opening and that call sees a genuinely ready pull request about to become a draft and has told an operator the opposite of what the worker had said.
 
 ## The rebase handback
 

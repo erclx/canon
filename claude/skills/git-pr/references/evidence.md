@@ -31,7 +31,7 @@ A reviewer on the operator's machine can open the branch's running dev server, w
 canon pr local --json
 ```
 
-The verb reads the listening sockets on this machine, keeps those whose process runs inside this worktree, and reports the lowest port serving an HTML page. A server in another worktree or in the main checkout is never reported, since it shows a different branch. `canon docs pr-local` states the contract. Read `reason` on the record rather than the exit code.
+The verb reads the listening sockets on this machine, keeps those whose process runs inside this worktree, and reports the lowest port serving an HTML page. A server in another worktree or in the main checkout is never reported, since it shows a different branch. `canon pr local --help` states the contract. Read `reason` on the record rather than the exit code.
 
 - `ok`: hold the record's `url` for the evidence step below.
 - `no-server` or `no-listener-reader`: hold the reason for the closing report, pass no link, and move on. Do not start a server here, since one started inside the ship chain has no owner to stop it.
@@ -110,7 +110,7 @@ The evidence comment is already posted, so the reviewer has the screenshots whil
 canon pr preview <number> --json
 ```
 
-The verb dispatches the project's Pages deploy on the pull request's branch and waits on the run for up to 15 minutes. It refuses before dispatching anything when the deploy command passes no `--branch`, since that deploy would publish the branch to production, and when the workflow's own push path filter matches no path the pull request changed, since a dispatch ignores that filter and the site it published would show none of the change. `canon docs pr-preview` states the contract. Read `reason` on the record rather than the exit code.
+The verb dispatches the project's Pages deploy on the pull request's branch and waits on the run for up to 15 minutes. It refuses before dispatching anything when the deploy command passes no `--branch`, since that deploy would publish the branch to production, and when the workflow's own push path filter matches no path the pull request changed, since a dispatch ignores that filter and the site it published would show none of the change. `canon pr preview --help` states the contract. Read `reason` on the record rather than the exit code.
 
 - `ok`: re-render the evidence body with the address on the line under `## Evidence`, then post or update it exactly as the evidence step does, through the same tmp file and the `commentId` the record carries:
 

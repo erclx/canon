@@ -105,7 +105,7 @@ The asymmetry is deliberate. `.canon/` is read whole, since `canon/context/conte
 
 ### Backing the record folders off the disk
 
-Archiving moves a record between folders on one disk, so `canon records push` carries them to a private remote and `canon records pull` brings them back. `docs/agents/records-push.md` carries the verb surface and refusal table.
+Archiving moves a record between folders on one disk, so `canon records push` carries them to a private remote and `canon records pull` brings them back. `docs/agents/records.md` carries the verb surface and refusal table.
 
 The set is the record root's entries less three: `tmp`, deletable by definition, `ordinal-locks`, transient per claim, and `.records.git`, the history the rest push into. Those names bound the records index too, so one an older binary committed leaves the history once rather than being re-staged by the `--force` that carries the payload.
 
