@@ -15,7 +15,6 @@
 # file.
 [renamed]
 "015-output" = "566-output"
-"035-tasks" = "602-tasks"
 "055-scratch" = "604-scratch"
 "085-worktrees" = "605-worktrees"
 "087-git" = "606-git"
@@ -32,7 +31,6 @@
 "655-tasks" = "tasks"
 "570-skill" = "skill"
 "801-markdown" = "markdown"
-"602-tasks" = "task-scope"
 "604-scratch" = "scratch"
 "605-worktrees" = "worktrees"
 "606-git" = "git"
