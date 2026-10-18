@@ -5,9 +5,11 @@ description: Filename and location, the sections a handoff carries, the write an
 
 # Session map reference
 
-Applies to `.canon/tasks/session-<slug>.md`. A session writes one before a compaction, because a compaction keeps conclusions and drops the reasoning that produced them. It is rewritten whenever the session that owns it learns something the next session would otherwise re-derive, and it is optional: a project whose sessions never approach a compaction carries none.
+Applies to `.canon/tasks/session-<slug>.md`. A session writes one before a compaction, because a compaction keeps conclusions and drops the reasoning that produced them.
 
-Any session writes one. The role a session holds decides which sections it adds on top of the core, never whether it may write at all.
+- Rewrite it whenever its owner learns something the next session would otherwise re-derive
+- It is optional, and a project whose sessions never approach a compaction carries none
+- Any session writes one. The role a session holds decides which sections it adds over the core, never whether it may write.
 
 ## Contents
 
@@ -70,13 +72,30 @@ Add a section only for content that fits none of the three and would otherwise b
 
 The `session-map` skill is the invocable route onto this procedure and holds no role, so a session reaching for a handoff without knowing this document exists still lands here. A session that arrives at this document directly follows the steps below unchanged.
 
-1. Run `canon claude skills drift <the commit this session started from>` and record what it names under `## Standing cautions`. A skill body enters a session once and re-invoking the skill does not re-read the file, so the drift is worst at exactly this moment and a name here is a body the session has been following out of date. Recording a name is not acting on it, and the verb misses a body this session edited and has not committed. This step belongs to session length rather than to any role, so every writer runs it, and a refusal names the boundary of what the verb can read rather than a fault.
-2. Recover that commit from how long the session has been running with `git log -1 --format=%H --before='<duration> ago'`, rounding the duration up rather than down. Nothing on the machine records it. A ref older than the oldest load over-reports, and confirming a name costs one read of the body, so the generous end is the safe one and a guess at the exact commit is not worth making. An empty result means no commit predates the window, so take the oldest commit the history holds and say which of the two the ref came from.
-3. Write only what a compaction destroys and no other artifact already carries. The board holds the ordering and what each task waits on, a task file holds its own findings, and a measurement folder holds its track.
+1. Run `canon claude skills drift <the commit this session started from>` and record what it names under `## Standing cautions`.
+2. Recover that commit with `git log -1 --format=%H --before='<duration> ago'`, rounding the session's running time up rather than down.
+3. Write only what a compaction destroys and no other artifact already carries. The board holds the ordering, a task file its findings, and a measurement folder its track.
 4. Cite a commit, a task, or a file and line for every claim, so the next session can tell a read from a recall.
-5. Fill a section from reasoning the session actually holds. A session with no cross-feature picture that fills `## State` from what is already in git has written a summary of the tree, which the reader can produce faster than they can read it.
+5. Fill a section from reasoning the session actually holds.
 
 Do not restate the board, and do not summarize the work that shipped, since version control already carries it.
+
+### Why the drift step
+
+A skill body enters a session once, and re-invoking the skill does not re-read the file. Drift is worst at this moment, so a name here is a body the session followed out of date.
+
+- Recording a name is not acting on it, and the verb misses a body this session edited and has not committed
+- The step belongs to session length rather than any role, so every writer runs it. A refusal names the boundary of what the verb can read rather than a fault.
+
+### Recovering the start commit
+
+Nothing on the machine records the start commit. A ref older than the oldest load over-reports, and confirming a name costs one read of the body, so the generous end is safe and an exact guess is not worth making.
+
+An empty result means no commit predates the window. Take the oldest commit the history holds, and say which of the two the ref came from.
+
+### Filling from what the session holds
+
+A session with no cross-feature picture that fills `## State` from git has written a summary of the tree. The reader produces that faster than they can read it.
 
 ## Reading one back
 
@@ -90,7 +109,7 @@ Do not restate the board, and do not summarize the work that shipped, since vers
 - Let the adding surface fix where its own section sits, so a role can place one between core sections where that reads better. The core order holds among the core sections alone.
 - Keep a section out of the core when a session holding no such role would leave it unfilled. An unfilled section teaches a reader to skip the file.
 - Cite the route onto `## Writing one` rather than restating the procedure, so the extension is the only thing the adding surface carries and the two cannot fall out of step
-- Carry a resume instruction inside the map itself when the routing to that instruction is what a compaction takes. The map survives what the instruction was loaded from, so each reaches a reader the other cannot.
+- Carry a resume instruction inside the map when a compaction takes the routing to it. The map survives what the instruction was loaded from, so each reaches a reader the other cannot.
 
 ## Template
 
