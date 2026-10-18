@@ -57,6 +57,7 @@ import {
   pruneFramesWithLegacy,
   pushFrame,
   readFrame,
+  referenceSlug,
   type TreeEntry,
 } from '@/pr/frames'
 import { type HeadRefusal, resolveHead, resolveTip } from '@/pr/head'
@@ -184,6 +185,7 @@ const LOCAL_REFUSALS: Record<LocalRefusal | 'gh-failed', string> = {
 interface FramesOptions extends ReadOptions {
   readonly add?: string
   readonly box?: string
+  readonly reference?: string
   readonly head?: string
   readonly pass?: string
   readonly theme?: string
@@ -196,6 +198,7 @@ type FramesCommandRefusal =
   | 'bad-mode'
   | 'no-number'
   | 'bad-box'
+  | 'bad-reference'
   | 'bad-head'
   | 'bad-pass'
   | 'bad-theme'
@@ -212,13 +215,15 @@ const FRAMES_REFUSALS: Record<FramesCommandRefusal, string> = {
   'no-number':
     '--add and --drop write for one pull request, so name its number.',
   'bad-box':
-    '--add takes --box <n>, a positive whole number naming the checklist box.',
+    '--add takes --box <n>, a positive whole number naming the checklist box, or --reference <page>/<frame>, never both.',
+  'bad-reference':
+    '--reference takes <page>/<frame>, each half opening on a letter or digit and holding only letters, digits, dots, underscores, and dashes, with no `--` in either, so the capture files under a name that reads back as the frame.',
   'bad-head':
     '--head takes a commit sha, 7 to 40 lowercase hex characters. A branch name or a path would file the frame under a folder that names no commit.',
   'bad-pass':
     '--add takes --pass <stamp>, the instant the pass started in compact UTC such as 20261002T154450Z, so a second pass never replaces an earlier one.',
   'bad-theme':
-    '--theme takes dark or light and goes with --add, so a second shot of one box never replaces the first.',
+    '--theme takes dark or light and goes with --add --box, so a second shot of one box never replaces the first.',
   'bad-days': '--prune takes a positive whole number of days.',
   'unreadable-frame':
     'The file named by --add is missing, empty, or not a PNG, so it would embed as a broken image. Nothing is pushed.',
@@ -1012,6 +1017,10 @@ export function register(program: Command): void {
     .option('--add <file>', 'Push this PNG as a frame')
     .option('--box <n>', 'The checklist box the frame shows, with --add')
     .option(
+      '--reference <address>',
+      'The design reference the capture shows, as <page>/<frame>, with --add in place of --box',
+    )
+    .option(
       '--head <sha>',
       "The head the frame was driven at, with --add, defaulting to the pull request's",
     )
@@ -1035,7 +1044,8 @@ export function register(program: Command): void {
         `An add writes only refs/heads/${FRAMES_BRANCH}, through the GitHub git data API,`,
         'so nothing is checked out and no other branch is touched. A frame lands',
         'at pr-<number>/<short-head>/<pass>/box-<n>.png, or box-<n>-<theme>.png',
-        'with --theme, and `link` names that',
+        'with --theme, or ref-<page>--<frame>.png for a design reference capture',
+        'passed as --reference <page>/<frame> in place of --box, and `link` names that',
         `path on ${FRAMES_BRANCH}, so it survives a rewrite that drops other pull`,
         'requests and resolves until its own pull request is dropped. The pass',
         'segment keeps a second pass at one head and box from replacing an image',
@@ -1056,10 +1066,11 @@ export function register(program: Command): void {
         '  ok                an add pushed, or a drop or prune finished',
         '  bad-mode          not exactly one of --add, --drop, --prune',
         '  no-number         --add or --drop named no pull request',
-        '  bad-box           --add without a positive --box',
+        '  bad-box           --add with both --box and --reference, or neither',
+        '  bad-reference     --reference is not <page>/<frame> in the safe name form',
         '  bad-head          --head is not 7 to 40 lowercase hex characters',
         '  bad-pass          --add without a compact UTC --pass stamp',
-        '  bad-theme         --theme is not dark or light, or no --add',
+        '  bad-theme         --theme is not dark or light, or no --add, or rides a --reference',
         '  bad-days          --prune without a positive number of days',
         '  unreadable-frame  the --add file is missing, empty, or not a PNG',
         '  read-only         GitHub refused the write, as on a fork token',
@@ -3084,9 +3095,17 @@ function framesArgumentRefusal(
   if (number === undefined || !POSITIVE_WHOLE.test(number)) return 'no-number'
   if (
     opts.add !== undefined &&
-    (opts.box === undefined || !POSITIVE_WHOLE.test(opts.box))
+    (opts.box === undefined) === (opts.reference === undefined)
   ) {
     return 'bad-box'
+  }
+  if (opts.add !== undefined && opts.box !== undefined) {
+    if (!POSITIVE_WHOLE.test(opts.box)) return 'bad-box'
+  }
+  if (opts.reference !== undefined) {
+    if (opts.add === undefined || referenceSlug(opts.reference) === undefined) {
+      return 'bad-reference'
+    }
   }
   if (opts.head !== undefined && !isFrameHead(opts.head)) return 'bad-head'
   if (
@@ -3097,7 +3116,9 @@ function framesArgumentRefusal(
   }
   if (
     opts.theme !== undefined &&
-    (opts.add === undefined || !isFrameTheme(opts.theme))
+    (opts.add === undefined ||
+      opts.reference !== undefined ||
+      !isFrameTheme(opts.theme))
   ) {
     return 'bad-theme'
   }
@@ -3199,7 +3220,8 @@ async function runFrames(
   if (head === undefined || head === '') return refuseFrames('no-object-head')
   if (!isFrameHead(head)) return refuseFrames('bad-head')
 
-  const box = Number(opts.box)
+  const box = opts.box === undefined ? undefined : Number(opts.box)
+  const reference = opts.reference
   const pass = opts.pass ?? ''
   const theme = opts.theme as FrameTheme | undefined
   const result = await pushFrame(api, {
@@ -3207,6 +3229,7 @@ async function runFrames(
     head,
     pass,
     box,
+    reference,
     theme,
     bytes: bytes ?? new Uint8Array(),
   })
@@ -3215,7 +3238,7 @@ async function runFrames(
   return finish(
     {
       number: pull,
-      box,
+      ...(box === undefined ? { reference } : { box }),
       ...(theme === undefined ? {} : { theme }),
       head,
       pass,

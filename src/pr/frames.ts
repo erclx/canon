@@ -19,6 +19,9 @@ const PASS_PATTERN = /^\d{8}T\d{6}Z$/
 /** How many times an add rebuilds on a tip another writer moved. */
 const ADD_ATTEMPTS = 3
 
+/** One half of a reference address. It opens on a letter or digit and holds no separator, so `..` and `/` cannot survive it. */
+const REFERENCE_PART = /^[A-Za-z0-9][A-Za-z0-9._-]*$/
+
 const FOLDER_PATTERN = /^pr-(\d+)$/
 
 const DAY_MS = 86_400_000
@@ -77,7 +80,8 @@ export interface FrameInput {
   readonly number: number
   readonly head: string
   readonly pass: string
-  readonly box: number
+  readonly box?: number
+  readonly reference?: string
   readonly theme?: FrameTheme
   readonly bytes: Uint8Array
 }
@@ -158,6 +162,39 @@ export function frameLink(repo: string, path: string): string {
   return `https://github.com/${repo}/blob/${FRAMES_BRANCH}/${path}?raw=true`
 }
 
+/**
+ * The file-name slug of a `<page>/<frame>` address, or undefined when the
+ * address would not round-trip. Each half must open on a letter or digit and
+ * hold only letters, digits, dots, underscores, and dashes, and neither may
+ * carry `--`, so the joined slug reads back as the same two names and a path
+ * never gains a directory or escapes the pass folder.
+ */
+export function referenceSlug(address: string): string | undefined {
+  const parts = address.split('/')
+  if (parts.length !== 2) return undefined
+  const [page, frame] = parts as [string, string]
+  const valid = [page, frame].every(
+    (part) => REFERENCE_PART.test(part) && !part.includes('--'),
+  )
+  return valid ? `${page}--${frame}` : undefined
+}
+
+/**
+ * Where a design reference capture lands, beside the evidence frames of one
+ * pass. The slug repeats for one reference, so a second capture in a pass
+ * overwrites only itself. Undefined when the address has no valid slug.
+ */
+export function referencePath(
+  number: number,
+  head: string,
+  pass: string,
+  address: string,
+): string | undefined {
+  const slug = referenceSlug(address)
+  if (slug === undefined) return undefined
+  return `pr-${number}/${head.slice(0, SHORT_HEAD_LENGTH)}/${pass}/ref-${slug}.png`
+}
+
 /** The frame's bytes, or undefined when the file is absent, empty, or not a PNG. */
 export async function readFrame(path: string): Promise<Uint8Array | undefined> {
   const bytes = await readFile(path).catch(() => undefined)
@@ -179,17 +216,24 @@ export async function pushFrame(
   api: FramesApi,
   input: FrameInput,
 ): Promise<PushResult> {
-  const path = framePath(
-    input.number,
-    input.head,
-    input.pass,
-    input.box,
-    input.theme,
-  )
+  const path =
+    input.reference === undefined
+      ? framePath(
+          input.number,
+          input.head,
+          input.pass,
+          input.box ?? 0,
+          input.theme,
+        )
+      : referencePath(input.number, input.head, input.pass, input.reference)
+  if (path === undefined) return { kind: 'refused', reason: 'push-failed' }
   const blob = await api.createBlob(Buffer.from(input.bytes).toString('base64'))
   if (blob === undefined) return { kind: 'refused', reason: 'push-failed' }
   const entry: TreeEntry = { path, mode: '100644', type: 'blob', sha: blob }
-  const message = `chore(frames): add box ${input.box} of #${input.number}`
+  const message =
+    input.reference === undefined
+      ? `chore(frames): add box ${input.box} of #${input.number}`
+      : `chore(frames): add reference ${input.reference} of #${input.number}`
 
   for (let attempt = 0; attempt < ADD_ATTEMPTS; attempt += 1) {
     const tip = await api.readTip()
