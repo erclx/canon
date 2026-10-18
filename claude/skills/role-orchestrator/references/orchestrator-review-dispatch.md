@@ -35,7 +35,8 @@ This session keeps one pass per wave beside the dispatched reviews. It reads the
 A pull request whose Testing section names a billed run waits on the operator's approval, and the rule for what counts as a spend sits in `### Human-only boxes` of `${CLAUDE_SKILL_DIR}/../git-pr/references/pr.md`. Put it to the operator before the first reviewer is dispatched, since asking after review leaves the branch rebasing while it waits.
 
 - Take the spend from the worker's announcement, which carries it, and ask once
-- Dispatch the reviewer without holding for the answer when the operator already cleared the spend, and when the pull request names none
+- Dispatch the reviewer beside the question rather than holding it for the answer, since a review pass does not depend on the billed run and the box is re-read on a later pass
+- Ask nothing when the operator already cleared the spend or the pull request names none
 - Send the answer to the worker, which drives the run and records what it returned in the box
 
 ## Launching the reviewer

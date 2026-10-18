@@ -27,7 +27,7 @@ The third trigger reaches a window the first two cannot. A session with three wo
    - Encoding it from this session would write a tracked file, which `## Boundaries` in the skill body forbids
    - A merged task whose only open outcomes need the operator or another repository never archives, since `canon tasks archive` refuses `open-outcomes`. Strike each one on the task file as `- ~~<outcome>~~ <reason>`, with the reason on the same line, then archive. The task files are gitignored scratch, so this session may edit them.
    - Strike only an outcome the operator or another repository owes. An open outcome this repository owes stays on the board, and the task stays with it.
-   - Hand a struck outcome that another repository owes to that repository's orchestrator through `task-board` when a live `orchestrator-<project>` session exists, and name it in the report for the operator otherwise
+   - Send a struck outcome that another repository owes to that repository's orchestrator through `session-relay`, which resolves the address, and let the receiver file it with `task-board` on its own board. `task-board` here would file it on this board. Name it in the report for the operator when no such session is live.
    - List every struck outcome in the report's `Struck:` line, so the work is carried by a named owner rather than lost to the strike
 4. Read `.canon/tasks/priority.md` and count the `## Up next` rows whose `Waiting on` has cleared, since a blocked row is no reserve. `## Run now` is what is running, so keep one in reserve beyond it.
 5. Promote from the top of `## Needs a plan`, where the last sweep recorded what to plan next.
