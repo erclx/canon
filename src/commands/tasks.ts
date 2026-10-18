@@ -678,6 +678,8 @@ export function register(program: Command): void {
         '  no-issues       the task carries no `Issue:` number',
         '  earlier-slice   this branch has a pull request on the task that is not',
         '                  the last listed, so a later number closes the issue',
+        '  lookup-failed   the pull request lookup failed while the task already',
+        '                  lists a pull request, so an earlier slice cannot be ruled out',
         '  open-outcomes   an outcome is still open, so a later slice closes it',
         '  pending-branch  another branch is on `Pending branch:`',
         '  no-outcomes     the task carries no outcomes',
@@ -1253,6 +1255,67 @@ async function branchPullNumbers(
   }
 }
 
+/**
+ * The pull request numbers whose head is `branch`, read over REST because a
+ * cloud session's GitHub proxy refuses the GraphQL `gh pr list` runs on.
+ * Unlike `branchPullNumbers`, a failed or unreadable answer is null rather
+ * than an empty list, since the closing decision must not read a failure as
+ * a branch with no pull request.
+ */
+async function branchPullNumbersRest(
+  branch: string | undefined,
+): Promise<readonly number[] | null> {
+  if (branch === undefined) return []
+
+  const owner = await execa(
+    'gh',
+    ['api', 'repos/{owner}/{repo}', '--jq', '.owner.login'],
+    {
+      cwd: process.cwd(),
+      reject: false,
+      timeout: GH_TIMEOUT_MS,
+      env: gitEnv(),
+      extendEnv: false,
+    },
+  )
+  if (owner.exitCode !== 0 || owner.stdout.trim() === '') return null
+
+  const result = await execa(
+    'gh',
+    [
+      'api',
+      '-X',
+      'GET',
+      'repos/{owner}/{repo}/pulls',
+      '-f',
+      `head=${owner.stdout.trim()}:${branch}`,
+      '-f',
+      'state=all',
+      '--jq',
+      '[.[].number]',
+    ],
+    {
+      cwd: process.cwd(),
+      reject: false,
+      timeout: GH_TIMEOUT_MS,
+      env: gitEnv(),
+      extendEnv: false,
+    },
+  )
+  if (result.exitCode !== 0) return null
+
+  try {
+    const numbers: unknown = JSON.parse(result.stdout)
+    if (!Array.isArray(numbers)) return null
+
+    return numbers.every((number) => Number.isInteger(number))
+      ? (numbers as number[])
+      : null
+  } catch {
+    return null
+  }
+}
+
 async function runPlanLink(
   task: string,
   plan: string,
@@ -1456,7 +1519,7 @@ async function runCloses(
     root,
     selector,
     branches,
-    await branchPullNumbers(branch),
+    await branchPullNumbersRest(branch),
   )
 
   return reportCloses(outcome, emitJson, root)

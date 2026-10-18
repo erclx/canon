@@ -87,6 +87,22 @@ describe('decideClosing', () => {
     expect(decideClosing(text, ['feat/b'], [11]).closing).toBe(true)
   })
 
+  it('should not close when the lookup failed and pull requests are already recorded', () => {
+    const text = task(['Issue: #12', 'Pull request: #10'])
+
+    expect(decideClosing(text, ['feat/b'], null)).toMatchObject({
+      issues: [12],
+      closing: false,
+      reason: 'lookup-failed',
+    })
+  })
+
+  it('should close despite a failed lookup when no pull request is recorded yet', () => {
+    expect(decideClosing(task(['Issue: #12']), ['feat/a'], null).closing).toBe(
+      true,
+    )
+  })
+
   it('should ignore pull request numbers this branch does not own', () => {
     const text = task(['Issue: #12', 'Pull request: #10'])
 

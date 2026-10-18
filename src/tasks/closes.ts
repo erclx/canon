@@ -19,6 +19,7 @@ import {
 export type ClosingReason =
   | 'earlier-slice'
   | 'last-slice'
+  | 'lookup-failed'
   | 'no-issues'
   | 'no-outcomes'
   | 'open-outcomes'
@@ -74,7 +75,7 @@ export function readIssues(text: string): readonly number[] {
 export function decideClosing(
   text: string,
   branches: readonly string[],
-  pulls: readonly number[] = [],
+  pulls: readonly number[] | null = [],
 ): Closure {
   const issues = readIssues(text)
   if (issues.length === 0) {
@@ -83,8 +84,17 @@ export function decideClosing(
 
   const listed = readPullRequest(text)
   const last = listed.at(-1)
+
+  // A failed lookup cannot rule out that this branch is an earlier slice, and
+  // closing early is the unsafe direction. With nothing recorded yet there is
+  // no earlier slice to confuse it with, so that case still closes.
+  if (pulls === null && listed.length > 0) {
+    return { issues, closing: false, reason: 'lookup-failed' }
+  }
+
   if (
     last !== undefined &&
+    pulls !== null &&
     !pulls.includes(last) &&
     pulls.some((number) => listed.includes(number))
   ) {
@@ -115,7 +125,7 @@ export async function readClosure(
   root: string,
   selector: RecordSelector,
   branches: readonly string[],
-  pulls: readonly number[] = [],
+  pulls: readonly number[] | null = [],
 ): Promise<ClosureOutcome> {
   const opened = await openTask(root, selector)
   if ('ok' in opened) return opened
