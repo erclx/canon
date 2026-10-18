@@ -7,7 +7,7 @@ description: The bash scripts under scripts/, the frame library they source, the
 
 ## Overview
 
-Owns the bash under `scripts/`, being repo maintenance, the shared frame library, and the frozen records of a retired eval. No domain keeps a bash dispatcher or a verb folder, since `src/commands/<domain>.ts` routes every verb. The TypeScript side is described in `canon/context/cli/index.md`.
+Owns the bash under `scripts/`, being repo maintenance, the shared frame library, and the frozen records of a retired eval. No domain keeps a bash dispatcher or a verb folder, since `src/commands/<domain>.ts` routes every verb. The TypeScript side is described in `canon/context/cli.md`.
 
 ## Layout
 
@@ -54,7 +54,7 @@ Holds the frozen records of a retired test that asked whether a session that nev
 
 The scenario tree sits outside this folder.
 
-- `sandbox/` holds the scenario tree `canon sandbox` provisions from, described in `canon/context/sandbox/index.md`
+- `sandbox/` holds the scenario tree `canon sandbox` provisions from, described in `canon/context/sandbox.md`
 
 ## Gotchas
 

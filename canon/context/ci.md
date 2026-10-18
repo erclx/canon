@@ -7,7 +7,7 @@ description: The GitHub Actions workflows that gate pull requests into main, sca
 
 ## Overview
 
-Owns the workflows in `.github/workflows/` that verify a pull request, scan its text, release after a merge, and refresh the landing-page frames. CI runs the gate through one entry point, `bun run check:ci`, and `check:install` beside it. The stages themselves sit in `src/gate/` and are described in `canon/context/development/gates/index.md`.
+Owns the workflows in `.github/workflows/` that verify a pull request, scan its text, release after a merge, and refresh the landing-page frames. CI runs the gate through one entry point, `bun run check:ci`, and `check:install` beside it. The stages themselves sit in `src/gate/` and are described in `canon/context/development.md`.
 
 ## Layout
 
