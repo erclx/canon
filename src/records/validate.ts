@@ -228,9 +228,9 @@ const PLAN_REQUIRED: readonly PlanSection[] = [
 ]
 
 /**
- * The files whose edit changes what a person sees, the set the `ui/a11y` rule
- * globs plus the other markup and style extensions a plan names. A plan touching
- * one owes a `Design references` section, so a set too wide forces it on every
+ * The files whose edit changes what a person sees, the set the `ui/a11y` and
+ * `ui/keyboard` rules glob plus the other markup and style extensions a plan
+ * names. A plan touching one owes a `Design references` section, so a set too wide forces it on every
  * plan and one too narrow lets a UI plan skip it.
  */
 const RENDERED_SURFACE = /\.(?:tsx|jsx|astro|vue|svelte|html|css|scss)$/

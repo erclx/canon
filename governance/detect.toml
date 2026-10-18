@@ -169,6 +169,10 @@ files = ["index.html", "*/index.html"]
 deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
 files = ["index.html", "*/index.html"]
 
+["keyboard"]
+deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
+files = ["index.html", "*/index.html"]
+
 ["forms"]
 deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
 files = ["index.html", "*/index.html"]
