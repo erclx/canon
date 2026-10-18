@@ -6,7 +6,7 @@ category: Agent surface
 
 # Target scenarios
 
-Three worked setups, each from the first session through ongoing maintenance. [Target projects](projects.md) carries the lifecycle they walk.
+Three worked setups from the first session through maintenance. [Target projects](projects.md) carries the lifecycle they walk.
 
 ## Markdown-heavy project
 
@@ -15,9 +15,7 @@ cd <your-project>
 claude
 ```
 
-In the session, invoke `canon:target-setup`. The skill detects no framework and resolves tooling to `base` and governance to `base`. The preview marks both stacks as fallbacks, since neither came from a match, then the chain runs `canon init`.
-
-Ongoing: run `canon sync --check .` to see what has drifted, then merge seed drift by hand against the toolkit copy, or run `canon sync .` for a catch-all refresh.
+Invoke `canon:target-setup`. It detects no framework, resolves tooling and governance to `base`, marks both as fallbacks in the preview, and runs `canon init`. Later, run `canon sync --check .` to see drift, merge seed drift by hand, or run `canon sync .` for a catch-all refresh.
 
 ## Web application
 
@@ -26,19 +24,15 @@ bun create vite my-app && cd my-app
 claude
 ```
 
-Invoke `canon:target-setup`. The skill reads `package.json` and the Vite config, resolves tooling to `vite-react` and governance to `node`, proposes `react` and the other rules its manifest matches as extras, and runs `canon init` with the resolved flags.
+Invoke `canon:target-setup`. It reads `package.json` and the Vite config, resolves tooling to `vite-react` and governance to `node`, proposes the rules the manifest matches, and runs `canon init`.
 
-Ongoing maintenance:
-
-- What has drifted: `canon sync --check .`
-- Seed drift: merge by hand against the toolkit copy
-- Catch-all sync: `canon sync .`
-- Governance rule refresh only: `canon gov sync .`
-- Layer a new rule on top, for example `shadcn` after adopting shadcn: `canon gov install node --add shadcn .`
+- Check drift with `canon sync --check .` and sync everything with `canon sync .`
+- Refresh governance alone with `canon gov sync .`
+- Layer a rule on top, such as `canon gov install node --add shadcn .`
 
 ## Monorepo with multiple language roots
 
-The repo root owns the shared `base` layer, and each language lives in its own subfolder.
+The repo root owns the shared `base` layer, and each language lives in a subfolder.
 
 ```bash
 canon init --stack node --add react .
@@ -46,10 +40,6 @@ canon tooling sync vite-react ./frontend --skip base --write
 canon tooling sync python ./backend --skip base --write
 ```
 
-`--skip base` drops the `base` layer from each subtree sync, so husky, oxfmt, commitlint, and CI stay single at the repo root. The one exception is base's verify runner, `scripts/verify.ts` and `scripts/verify.json`, which every subtree still receives so it can verify on its own. Without it, every subtree re-drops husky, and since git honors only one `core.hooksPath` the extra hook dirs silently break. Each subtree still gets its own framework configs (oxlint, vitest, tsconfig, vite), and its own stack reference reads through `canon tooling reference <stack>`.
+`--skip base` keeps husky, oxfmt, commitlint, and CI at the root. Every subtree still receives `scripts/verify.ts` and `scripts/verify.json`, and its own framework configs.
 
-A sync whose target sits below the git root knows it is writing into a subfolder:
-
-- It withholds `.github/`, since GitHub reads workflows only at the repository root, and names each withheld file. Run the subtree from a job in the root workflow instead, with `working-directory` set to the subtree path the sync prints, such as `working-directory: frontend`.
-- It installs no dependencies and adds no scripts to a subtree without a `package.json`. It names what it skipped and ends on `run 'bun init' in <path>, then sync again`.
-- The subtree carries no `check` script, since that lives in the root's base layer, so run `bun scripts/verify.ts` there. It skips the format phase a subtree does not declare, since the root runs them, and still fails on a missing lint, typecheck, or test script, the phases its stack's `scripts/verify.json` requires.
+A sync into a subfolder withholds `.github/`, so run the subtree from the root workflow with `working-directory` set to the path the sync prints. It installs nothing into a subtree without a `package.json` and ends on `run 'bun init' in <path>, then sync again`. Run `bun scripts/verify.ts` in the subtree, since the `check` script lives at the root.
