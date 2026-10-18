@@ -87,6 +87,6 @@ These flags fire after the search has run.
 ## What this delegates
 
 - The form a citation takes: the surface writing it, such as the standard the procedure writes to
-- A Claude Code subject: a direct fetch of `https://code.claude.com/docs/llms.txt` and the `.md` page it names, as `draft-doc`'s wiki sourcing step does
+- A Claude Code subject: a direct fetch of `https://code.claude.com/docs/llms.txt` and the `.md` page it names, as `write-doc`'s wiki sourcing step does
 - Generating an image: whatever draws the surface, since making one is not search
 - Access code a session needs repeatedly: a `canon` verb, never a script in this skill

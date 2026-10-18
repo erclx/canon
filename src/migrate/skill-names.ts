@@ -13,13 +13,12 @@ import { defineRenameRules, type RenameRules } from '@/migrate/rename'
  * session roles together.
  *
  * The four `canon-` rows split the same way rather than sharing one
- * replacement prefix. `canon-screencast` and `canon-slides-draft` draft a
- * document, which is what the `draft-` family already means across its other
- * members, so they join it as `draft-screencast` and `draft-slides`.
- * `canon-record` and `canon-frames-read` are not drafting anything, so each
- * takes a standalone verb-first name, `record-screencast` and `read-frames`,
- * reading in sequence with `draft-screencast` as one three-step pipeline with
- * no prefix forcing that reading.
+ * replacement prefix. `canon-screencast` and `canon-slides-draft` each make
+ * an artifact, so each takes the verb-first name of what it makes,
+ * `script-screencast` and `make-deck`. `canon-record` and `canon-frames-read`
+ * take `record-screencast` and `read-frames`, reading in sequence with
+ * `script-screencast` as one three-step pipeline with no prefix forcing that
+ * reading.
  *
  * Two rows rename a skill rather than retiring a prefix. `ui-test` became
  * `ui-checklist` when the skill stopped writing tests and shrank to the
@@ -36,14 +35,24 @@ import { defineRenameRules, type RenameRules } from '@/migrate/rename'
  * Five rows merge skills rather than rename one. `draft-docs`,
  * `draft-context`, `draft-wireframes`, `draft-readme`, and `draft-wiki` ran
  * one procedure five times over, differing only in the standard each read and
- * the catalog each checked, so they became `draft-doc`, which picks the kind
- * from where the document lands. Every retired name lands on the one skill, so
- * a target citing any of them resolves after a single sweep.
+ * the catalog each checked, so they became one skill, which picks the kind
+ * from where the document lands. Every retired name lands on that skill, so a
+ * target citing any of them resolves after a single sweep.
  *
- * `draft-diagram` merged into `draft-figure` the same way, its architecture
+ * `draft-diagram` merged into the figure skill the same way, its architecture
  * views becoming one reference the figure skill reads. `claude-diagram` is
- * retargeted onto `draft-figure` rather than left on the retired name, for the
+ * retargeted onto the figure skill rather than left on a retired name, for the
  * same reason `claude-ui-test` was.
+ *
+ * The `draft-` family then dissolved. Its seven members shared a verb rather
+ * than a phase or a role, so the prefix grouped a deck, a figure, a brand
+ * identity, a pick loop, and a thin plan under one word that said nothing
+ * about which of them a skill makes. Each took a verb-first name for its
+ * output instead: `write-doc`, `draw-figure`, `design-identity`, `make-deck`,
+ * `pick-by-eye`, `plan-ready`, and `script-screencast`. Every older key that
+ * landed on a `draft-` name is retargeted straight onto its new one, so a
+ * target on the oldest spelling lands in one pass rather than two.
+ * `draft-ready` alone keys on its namespaced forms below rather than here.
  *
  * Every name takes two words. Ten of these would have landed as a bare single
  * word under a plain strip, and a bare word such as `review` or `docs` is a
@@ -63,7 +72,7 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
   'claude-address-review': 'review-address',
   'claude-autoship': 'auto-ship',
   'claude-design-extract': 'design-extract',
-  'claude-diagram': 'draft-figure',
+  'claude-diagram': 'draw-figure',
   'claude-docs': 'context-fold',
   'docs-fold': 'context-fold',
   'claude-feature': 'plan-feature',
@@ -87,16 +96,22 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
   'claude-ux-measure': 'ux-measure',
   'claude-worker': 'role-worker',
   'claude-worktree': 'session-worktree',
-  'canon-screencast': 'draft-screencast',
-  'canon-slides-draft': 'draft-slides',
+  'canon-screencast': 'script-screencast',
+  'canon-slides-draft': 'make-deck',
   'canon-record': 'record-screencast',
   'canon-frames-read': 'read-frames',
-  'draft-docs': 'draft-doc',
-  'draft-context': 'draft-doc',
-  'draft-wireframes': 'draft-doc',
-  'draft-readme': 'draft-doc',
-  'draft-wiki': 'draft-doc',
-  'draft-diagram': 'draft-figure',
+  'draft-docs': 'write-doc',
+  'draft-context': 'write-doc',
+  'draft-wireframes': 'write-doc',
+  'draft-readme': 'write-doc',
+  'draft-wiki': 'write-doc',
+  'draft-diagram': 'draw-figure',
+  'draft-doc': 'write-doc',
+  'draft-figure': 'draw-figure',
+  'draft-identity': 'design-identity',
+  'draft-slides': 'make-deck',
+  'draft-and-pick': 'pick-by-eye',
+  'draft-screencast': 'script-screencast',
 }
 
 /**
@@ -110,13 +125,41 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
  * guard rejects a following `-`, so a rewritten `canon:canvas-board` is not
  * matched again.
  *
+ * `draft-ready` became `plan-ready` and takes the same treatment for a
+ * different reason. It is two words, but they are ordinary prose for a pull
+ * request moving from draft to ready, and the sweep takes no scope in a
+ * target, so a bare key would rewrite that sentence in every tracked file a
+ * project wrote.
+ *
  * What this leaves behind is a prose mention of the skill by its bare name,
  * which has no token for a sweep to find and is fixed by hand.
  */
 export const SKILL_CITATION_MAP: Readonly<Record<string, string>> = {
   'canon:canvas': 'canon:canvas-board',
   'skills/canvas': 'skills/canvas-board',
+  'canon:draft-ready': 'canon:plan-ready',
+  'skills/draft-ready': 'skills/plan-ready',
 }
+
+/**
+ * The old `draft-` names that still answer as a pointer skill, each naming the
+ * skill it became.
+ *
+ * Each pointer's own files spell the old name on purpose, so the sweep must
+ * never reach them. A later run would otherwise move the stub onto the real
+ * body at the new name. Their paths join the exclusions only once the sweep
+ * that moved the real bodies has run, since excluding them first leaves each
+ * body unmoved at its old path.
+ */
+export const RENAMED_DRAFT_POINTERS: readonly string[] = [
+  'draft-doc',
+  'draft-figure',
+  'draft-identity',
+  'draft-slides',
+  'draft-and-pick',
+  'draft-ready',
+  'draft-screencast',
+]
 
 /**
  * The skill rename.
@@ -159,5 +202,9 @@ export const SKILL_NAME_RULES: RenameRules = defineRenameRules({
     'CHANGELOG.md',
     'src/migrate/skill-names.ts',
     'src/migrate/skill-names.test.ts',
+    ...RENAMED_DRAFT_POINTERS.flatMap((name) => [
+      `claude/skills/${name}/SKILL.md`,
+      `claude/skills/${name}/REQUIREMENT.md`,
+    ]),
   ],
 })

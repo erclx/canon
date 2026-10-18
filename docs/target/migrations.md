@@ -46,9 +46,22 @@ Run it once, ahead of `canon gov sync` or `canon gov install`.
 
 ## Rename the skill citations, once
 
-Plugin skills dropped their `claude-` prefix, so `canon:claude-docs` answers as `canon:context-fold` and `canon:claude-tasks` as `canon:task-board`. The five per-kind drafters merged into `draft-doc`, and no pointer under an old name ships. <!-- canon-keep-retired -->
+Plugin skills dropped their `claude-` prefix, so `canon:claude-docs` answers as `canon:context-fold` and `canon:claude-tasks` as `canon:task-board`. The five per-kind drafters merged into `write-doc`, and no pointer under an old name ships. <!-- canon-keep-retired -->
+
+The seven `draft-` skills took verb-first names for what each makes. `canon migrate skill-names --write` carries a project across, and a pointer under each old name answers a typed invocation until it retires.
+
+| Old name           | New name                                        |
+| ------------------ | ----------------------------------------------- |
+| `draft-doc`        | `write-doc` <!-- canon-keep-retired -->         |
+| `draft-figure`     | `draw-figure` <!-- canon-keep-retired -->       |
+| `draft-identity`   | `design-identity` <!-- canon-keep-retired -->   |
+| `draft-slides`     | `make-deck` <!-- canon-keep-retired -->         |
+| `draft-and-pick`   | `pick-by-eye` <!-- canon-keep-retired -->       |
+| `draft-ready`      | `plan-ready` <!-- canon-keep-retired -->        |
+| `draft-screencast` | `script-screencast` <!-- canon-keep-retired --> |
 
 - `canvas` is now `canvas-board`. The sweep rewrites only `canon:canvas` and `skills/canvas`, so replace a bare prose mention by hand. <!-- canon-keep-retired -->
+- `draft-ready` is rewritten only as `canon:draft-ready` and `skills/draft-ready`, since bare it also describes a pull request. Replace a bare mention of the skill by hand. <!-- canon-keep-retired -->
 - `design-extract` and `sketch-design` are replaced by `canon:canvas-board`. <!-- canon-keep-retired -->
 - `review-branch`, `seed-sync`, `restate-plainly`, `bash-cli-script`, `canon-operator`, and `canon-rollout` have no successor <!-- canon-keep-retired -->
 - `create-standard`, `markdown-propose`, `memory-review`, `project-commands`, `repo-metadata`, and `ux-walkthrough` have no successor <!-- canon-keep-retired -->
@@ -108,7 +121,7 @@ From the registry the walk reports `historyUnavailable`, so check both paths by 
 | `context-fold`    | `context`                                                     |
 | `canvas-board`    | `canvas`, `design`                                            |
 | `docs-sync`       | `docs`, `readme`                                              |
-| `draft-figure`    | `figures`, `mermaid`                                          |
+| `draw-figure`     | `figures`, `mermaid`                                          |
 | `create-rule`     | `rule`                                                        |
 | `create-skill`    | `skill`, `skill-paths`, `skill-practice`, `skill-requirement` |
 | `git-branch`      | `branch`, `slug`                                              |
@@ -119,8 +132,8 @@ From the registry the walk reports `historyUnavailable`, so check both paths by 
 | `plan-groundwork` | `groundwork`, `groundwork-spikes`                             |
 | `plan-intake`     | `intake`                                                      |
 | `plan-feature`    | `plan`, `plan-lifecycle`                                      |
-| `draft-ready`     | `ready`                                                       |
-| `draft-doc`       | `requirements`, `wiki`                                        |
+| `plan-ready`      | `ready`                                                       |
+| `write-doc`       | `requirements`, `wiki`                                        |
 | `session-map`     | `session`                                                     |
 
 The `standard` name became `skill-reference.md` in `create-skill`.

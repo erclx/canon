@@ -43,7 +43,7 @@ describe('requirements seed', () => {
 
     expect(line).toBeDefined()
     expect(
-      template(read('claude/skills/draft-doc/references/requirements.md')),
+      template(read('claude/skills/write-doc/references/requirements.md')),
     ).toContain(line)
   })
 })

@@ -10,6 +10,12 @@ export const MISC_CASES: readonly SkillCase[] = [
   {
     prompt:
       'Show me a few different treatments for this callout so I can pick one by looking.',
+    expect: 'pick-by-eye',
+  },
+  {
+    prompt:
+      'I typed draft-and-pick and it said the pick skill was renamed to pick-by-eye.', // canon-keep-retired
+    // The pointer answers under its old name on purpose. canon-keep-retired
     expect: 'draft-and-pick',
   },
   {
@@ -20,6 +26,12 @@ export const MISC_CASES: readonly SkillCase[] = [
   {
     prompt:
       'This project has no logo yet. Draft one and give me a social card to go with it.',
+    expect: 'design-identity',
+  },
+  {
+    prompt:
+      'I typed draft-identity and it said the identity skill was renamed to design-identity.', // canon-keep-retired
+    // The pointer answers under its old name on purpose. canon-keep-retired
     expect: 'draft-identity',
   },
   {

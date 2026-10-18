@@ -2,7 +2,7 @@
 
 A developer handing real work to an agent has no way to run it from plan to merge. Planning, building, review, and shipping each get improvised per session, and nothing holds the agent to the practices that make code worth keeping. What the project needs beyond its code, such as its design system, its decks, and what its people are learning, is made by hand outside that loop. All of it depends on setup every repository accumulates the same way and lets drift.
 
-Authoring guidance: `claude/skills/draft-doc/references/requirements.md`.
+Authoring guidance: `claude/skills/write-doc/references/requirements.md`.
 
 This record holds at most 600 words.
 

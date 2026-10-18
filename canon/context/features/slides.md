@@ -7,7 +7,7 @@ description: Deck folders, the render and list commands, the HTML converter and 
 
 ## Overview
 
-A deck is a folder of HTML slides under `.canon/slides/<deck>/`, drawn in the project's own tokens and rendered to a PowerPoint file whose text, shapes, images, tables, and charts stay editable. `canon slides list` and `canon slides render` are the verbs, and `canon:draft-slides` draws the slides from a topic. Start from `canon slides --help`.
+A deck is a folder of HTML slides under `.canon/slides/<deck>/`, drawn in the project's own tokens and rendered to a PowerPoint file whose text, shapes, images, tables, and charts stay editable. `canon slides list` and `canon slides render` are the verbs, and `canon:make-deck` draws the slides from a topic. Start from `canon slides --help`.
 
 ## Layout
 
@@ -45,7 +45,7 @@ Edits the package pptxgenjs wrote, since it declares nothing for transitions, an
 
 The skill that draws the slides sits outside `src/`.
 
-- `claude/skills/draft-slides/` reads decks through `canon slides list --json`, draws one `.html` file per slide, and renders through the verb
+- `claude/skills/make-deck/` reads decks through `canon slides list --json`, draws one `.html` file per slide, and renders through the verb
 - It runs one image quality pass over the render when `soffice` and `pdftoppm` exist
 
 ## Gotchas

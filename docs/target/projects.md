@@ -57,7 +57,7 @@ Before the first feature session:
 
 1. Fill `canon/REQUIREMENTS.md` with the problem, goals, and non-goals. The seed's 600-word cap gates under `canon context audit`.
 2. For a UI project, write `canon/DESIGN.md` from the seed and name the stylesheet in its lead, or work the direction out with `canon:canvas-board`
-3. Optionally invoke `canon:draft-figure` for an architecture view. The Mermaid CLI downloads on first use.
+3. Optionally invoke `canon:draw-figure` for an architecture view. The Mermaid CLI downloads on first use.
 4. Start the feature loop in [AI workflow](../workflow/ai-workflow.md)
 
 ### Stack decision

@@ -39,7 +39,7 @@ No refusal strings. This is a domain skill loaded before editing rather than a p
 - `internal-teach` covers the learning surface and its fixture.
 - `internal-docs` covers `docs/`, which this routes to through `canon:docs-sync` and does not edit.
 - `internal-scripts` covers `src/` and the regeneration scripts. This covers the surface those scripts render.
-- `draft-and-pick` decides how a surface should look. This is for editing one whose look is settled.
+- `pick-by-eye` decides how a surface should look. This is for editing one whose look is settled.
 
 ### The open question this cannot answer
 

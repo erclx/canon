@@ -176,14 +176,14 @@ describe('compareKeyChanges', () => {
   it("should credit a claim naming a rename's source path (#1611)", () => {
     const result = compareKeyChanges({
       body: keyChanges(
-        '- Move `claude/skills/identity/` to `claude/skills/draft-identity/`.',
+        '- Move `claude/skills/identity/` to `claude/skills/design-identity/`.',
       ),
-      changed: ['claude/skills/draft-identity/SKILL.md'],
-      roots: treeRoots(TRACKED, ['claude/skills/draft-identity/SKILL.md']),
+      changed: ['claude/skills/design-identity/SKILL.md'],
+      roots: treeRoots(TRACKED, ['claude/skills/design-identity/SKILL.md']),
       renames: [
         {
           from: 'claude/skills/identity/SKILL.md',
-          to: 'claude/skills/draft-identity/SKILL.md',
+          to: 'claude/skills/design-identity/SKILL.md',
         },
       ],
     })
@@ -206,10 +206,10 @@ describe('compareKeyChanges', () => {
   it('should downgrade an unmet-bound claim to unresolved when the evidence could not be read', () => {
     const result = compareKeyChanges({
       body: keyChanges(
-        '- Move `claude/skills/identity/` to `claude/skills/draft-identity/`.',
+        '- Move `claude/skills/identity/` to `claude/skills/design-identity/`.',
       ),
-      changed: ['claude/skills/draft-identity/SKILL.md'],
-      roots: treeRoots(TRACKED, ['claude/skills/draft-identity/SKILL.md']),
+      changed: ['claude/skills/design-identity/SKILL.md'],
+      roots: treeRoots(TRACKED, ['claude/skills/design-identity/SKILL.md']),
       evidenceUnread: true,
     })
 
