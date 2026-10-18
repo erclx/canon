@@ -13,7 +13,7 @@ Owns the GitHub Actions workflow that gates a merge, being which events start a 
 
 ### `.github/workflows/`
 
-Holds the workflow that gates a merge. A pull request targeting `main` starts it, and so does a manual `workflow_dispatch` run from the Actions tab.
+Holds `verify.yml`, the workflow that gates a merge. A pull request targeting `main` starts it, and so does a manual `workflow_dispatch` run from the Actions tab.
 
 - Every job must pass before merge
 - The Format check runs `bun run check:format` and asserts oxfmt is clean
