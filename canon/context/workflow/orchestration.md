@@ -41,7 +41,7 @@ Owns the plan shape that a planner writes and a worker or controller reads.
 
 ### `src/tasks/`
 
-Owns the `canon tasks` verbs that validate, archive, derive from, and write the board. `board.ts` refuses only a row naming no task, since a render dropping it loses a gitignored row, and checks a group move against the predicates `validate.ts` exports.
+Owns the `canon tasks` verbs that validate, archive, derive from, and write the board. `board.ts` refuses a row naming no task or one whose blocker its header cannot place, since a render would drop or rewrite it in a gitignored file, and checks a group move against the predicates `validate.ts` exports.
 
 - `plan-branch` is the one branch derivation, called by the dispatcher and by `auto-ship` Step 0, and its type is a constant because the type is cosmetic
 - `plan-answers` reports `launchable` from a `needs your call` suggestion over an empty slot, and holds a fan-in integrator until each member branch is on origin, since a local head exists mid-build

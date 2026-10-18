@@ -134,6 +134,47 @@ describe('parseBoard', () => {
       line: '| a loose note | nothing |',
     })
   })
+
+  it('should read the last cell of a row one short of a header ending in Waiting on', () => {
+    const text = board(...UP_NEXT, '| [v1.0: One](v1.0-one.md) | the gate |')
+
+    expect(parsed(text).groups['Up next'][0]?.waiting).toBe('the gate')
+  })
+
+  it('should refuse a row whose header carries no Waiting on rather than read a plan link as its blocker', () => {
+    const text = board(
+      '## Up next',
+      '',
+      '| Task | Touches | Plan |',
+      '| ---- | ------- | ---- |',
+      '| [v1.0: One](v1.0-one.md) | `a.ts` | [one](../plans/feature-one.md) |',
+    )
+
+    expect(parseBoard(text)).toMatchObject({ ok: false })
+  })
+
+  it('should refuse a row two cells short rather than read a path as its blocker', () => {
+    const text = board(
+      '## Up next',
+      '',
+      '| Task | Touches | Plan | Waiting on |',
+      '| ---- | ------- | ---- | ---------- |',
+      '| [v1.0: One](v1.0-one.md) | `z.ts` |',
+    )
+
+    expect(parseBoard(text)).toMatchObject({ ok: false })
+  })
+
+  it('should keep an escaped pipe inside a blocker cell', () => {
+    const text = board(
+      ...NEEDS_A_PLAN,
+      '| [v1.0: One](v1.0-one.md) | Waits on `a \\| b` merging |',
+    )
+
+    expect(parsed(text).groups['Needs a plan'][0]?.waiting).toBe(
+      'Waits on `a \\| b` merging',
+    )
+  })
 })
 
 describe('touchesCell', () => {
@@ -393,6 +434,24 @@ describe('placeTask', () => {
 
     expect(outcome).toMatchObject({ ok: false, reason: 'unreadable-row' })
     expect(await readFile(orderingPath(ROOT), 'utf8')).toBe(before)
+  })
+
+  it('should lose no row when two calls write the board at once', async () => {
+    await seedTask('v1.0-one')
+    await seedTask('v1.1-two')
+    await seedBoard(...NEEDS_A_PLAN)
+
+    const outcomes = await Promise.all([
+      placeTask(ROOT, 'v1.0-one', 'Needs a plan', { waiting: 'first' }),
+      placeTask(ROOT, 'v1.1-two', 'Needs a plan', { waiting: 'second' }),
+    ])
+    const landed = await stemsUnder('Needs a plan')
+
+    expect(
+      outcomes.map((outcome) =>
+        outcome.ok ? landed.includes(outcome.stem) : outcome.reason,
+      ),
+    ).not.toContain(false)
   })
 
   describe('refuses', () => {

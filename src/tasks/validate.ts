@@ -282,8 +282,8 @@ function splitCells(line: string): string[] {
   return line
     .trim()
     .replace(/^\|/, '')
-    .replace(/\|$/, '')
-    .split('|')
+    .replace(/(?<!\\)\|$/, '')
+    .split(/(?<!\\)\|/)
     .map((cell) => cell.trim())
 }
 

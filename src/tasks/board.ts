@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs'
-import { readFile, writeFile } from 'node:fs/promises'
+import { open, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { basename, join } from 'node:path'
 import {
   linkTo,
@@ -40,6 +40,14 @@ const TOUCHES_SHOWN = 3
  */
 export const WAITING_LIMIT = 120
 
+/** How long a verb waits on another verb's lock before refusing as busy. */
+const LOCK_WAIT_MS = 5_000
+
+/** A lock older than this was left by a call that died, since a render takes well under a second. */
+const LOCK_STALE_MS = 30_000
+
+const LOCK_POLL_MS = 20
+
 /** One row as the board holds it: the task it points at and the one typed cell. */
 export interface PlacedRow {
   readonly stem: string
@@ -77,8 +85,8 @@ function splitCells(line: string): string[] {
   return line
     .trim()
     .replace(/^\|/, '')
-    .replace(/\|$/, '')
-    .split('|')
+    .replace(/(?<!\\)\|$/, '')
+    .split(/(?<!\\)\|/)
     .map((cell) => cell.trim())
 }
 
@@ -100,30 +108,35 @@ function taskLink(
 }
 
 /**
- * Reads the `Waiting on` cell out of a row. The table's own header places it
- * when the row matches that header's width, and the last cell stands in when it
- * does not, since every owned shape puts `Waiting on` last. That fallback is
- * what lets a row stranded behind a short header or a closed table keep its
- * blocker through a render.
+ * Reads the `Waiting on` cell out of a row through the header above it, which
+ * still applies to a row stranded behind a closed table. A row one cell short
+ * of a header ending in `Waiting on` is read as missing its `Touches` cell, so
+ * its last cell stands in. Any other shape answers `undefined`, since guessing
+ * would write a path or a plan link into the blocker on the next render.
  */
 function waitingCell(
   cells: readonly string[],
   header: readonly string[] | undefined,
 ): string | undefined {
-  const at = header?.findIndex((cell) => cell.toLowerCase() === 'waiting on')
-  if (header && at !== undefined && at >= 0 && cells.length === header.length) {
-    return cells[at]
+  if (!header) return undefined
+  const at = header.findIndex((cell) => cell.toLowerCase() === 'waiting on')
+  if (at === -1) return undefined
+
+  if (cells.length === header.length) return cells[at]
+  if (at === header.length - 1 && cells.length === header.length - 1) {
+    return cells.at(-1)
   }
 
-  return cells.length >= 2 ? cells.at(-1) : undefined
+  return undefined
 }
 
 /**
  * Parses `priority.md` into the model. The parse is lenient where `readBoard`
  * is strict: a row after a closed table, under a header short a column, or
  * past a blank line inside a table is still a row of the group it sits under,
- * since the render exists to repair exactly those boards. A pipe line naming no
- * task is the one thing it refuses, since rendering it would drop it.
+ * since the render exists to repair exactly those boards. It refuses a pipe line
+ * naming no task, which a render would drop, and a row whose blocker the header
+ * cannot place, which a render would rewrite to the wrong cell.
  */
 export function parseBoard(text: string): BoardParse {
   const lines = text.split('\n')
@@ -172,11 +185,10 @@ export function parseBoard(text: string): BoardParse {
     }
 
     const owned = GROUP_COLUMNS[section].includes('Waiting on')
-    groups[section].push({
-      stem: link.stem,
-      label: link.label,
-      waiting: owned ? waitingCell(cells, header) : undefined,
-    })
+    const waiting = owned ? waitingCell(cells, header) : undefined
+    if (owned && waiting === undefined) return { ok: false, line: line.trim() }
+
+    groups[section].push({ stem: link.stem, label: link.label, waiting })
   }
 
   return { ok: true, board: { head, groups, notes, trailing } }
@@ -328,6 +340,8 @@ export const BOARD_REFUSALS = [
   'no-match',
   'no-row',
   'unreadable-row',
+  'board-busy',
+  'board-changed',
   'group-rule',
   'no-column',
   'top-group',
@@ -507,11 +521,62 @@ async function writeBoard(
     return refuse('no-match', `No task file at ${file}.`, [stem])
   }
 
-  const parse = parseBoard(await readFile(path, 'utf8'))
+  return withBoardLock(path, () => writeLocked(root, stem, path, edit))
+}
+
+/**
+ * Holds an exclusive lock file beside the board for one read, render, and
+ * write, so two verbs in two sessions cannot each replace the file with an
+ * edit that drops the other's. The render reads every task and plan, which is
+ * why the stale age sits well above any one call.
+ */
+async function withBoardLock(
+  path: string,
+  run: () => Promise<BoardOutcome>,
+): Promise<BoardOutcome> {
+  const lock = `${path}.lock`
+  const deadline = Date.now() + LOCK_WAIT_MS
+
+  for (;;) {
+    try {
+      await (await open(lock, 'wx')).close()
+      break
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
+      const modified = (await stat(lock).catch(() => undefined))?.mtimeMs
+      if (modified !== undefined && Date.now() - modified > LOCK_STALE_MS) {
+        await rm(lock, { force: true })
+        continue
+      }
+      if (Date.now() >= deadline) {
+        return refuse(
+          'board-busy',
+          `Another board verb holds ${lock}. Run this one again once it finishes.`,
+        )
+      }
+      await new Promise((settle) => setTimeout(settle, LOCK_POLL_MS))
+    }
+  }
+
+  try {
+    return await run()
+  } finally {
+    await rm(lock, { force: true })
+  }
+}
+
+async function writeLocked(
+  root: string,
+  stem: string,
+  path: string,
+  edit: (board: Board) => Edited | BoardRefused,
+): Promise<BoardOutcome> {
+  const before = await readFile(path, 'utf8')
+  const parse = parseBoard(before)
   if (!parse.ok) {
     return refuse(
       'unreadable-row',
-      `${path} holds a row naming no task, which a render would drop. Fix that row by hand first.`,
+      `${path} holds a row naming no task or carrying a Waiting on cell its header cannot place, so a render would drop or rewrite it. Fix that row by hand first.`,
       [parse.line],
     )
   }
@@ -533,6 +598,15 @@ async function writeBoard(
         broken.map((finding) => finding.kind),
       )
     }
+  }
+
+  // The lock holds off other verbs and nothing else, so a hand edit landing
+  // while the render awaited its reads is caught by comparing the file again.
+  if ((await readFile(path, 'utf8')) !== before) {
+    return refuse(
+      'board-changed',
+      `${path} changed while this call rendered it, so nothing was written. Run the verb again.`,
+    )
   }
 
   await writeFile(path, text)
