@@ -85,6 +85,14 @@ The seed at `tooling/claude/seeds/.claude/settings.json` ships hooks that pair w
 - A PostToolUse hook pairs with `standards-audit.sh`.
 - Project settings layer over user settings, so a project file carries only what is project-specific.
 
+### Session defaults
+
+The seed also sets two defaults every session in the target runs under.
+
+- `permissions.deny` holds `Agent` and `Task`, so no session spawns a subagent. Parallel work runs as separate background sessions instead.
+- `autoMemoryEnabled` is `false`. A person turns it back on for themselves in `settings.local.json`.
+- `canon migrate session-defaults` adds both to a target seeded before them, since sync never rewrites an existing settings file.
+
 ### User template
 
 The template at `tooling/claude/user/settings.template.json` is installed once per machine by `canon claude setup`.

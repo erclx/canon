@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import type { Command } from 'commander'
 import { listRepositoryFiles } from '@/git/files'
 import { indexSourceRules } from '@/gov/adapter'
@@ -26,6 +26,11 @@ import {
   walkFlatRules,
 } from '@/migrate/rule-layout'
 import {
+  applySessionDefaults,
+  readSessionDefaults,
+  type SessionDefaultsRead,
+} from '@/migrate/session-defaults'
+import {
   SKILL_CITATION_MAP,
   SKILL_NAME_MAP,
   SKILL_NAME_RULES,
@@ -50,7 +55,7 @@ import {
 } from '@/migrate/scratch-evidence'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
 import { readStamp, stampedHashes } from '@/sync/stamp'
-import { logError, logInfo, logStep, logWarn, plural } from '@/cli/ui'
+import { logAdd, logError, logInfo, logStep, logWarn, plural } from '@/cli/ui'
 
 interface SweepOptions {
   readonly json?: boolean
@@ -959,6 +964,81 @@ function toRuleLayoutRecord(
   }
 }
 
+interface SessionDefaultsOptions {
+  readonly json?: boolean
+  readonly write?: boolean
+  readonly root?: string
+}
+
+/**
+ * Adds the seeded session defaults to a target settings file that predates
+ * them. A missing file is nothing to do, since `canon claude init` seeds the
+ * whole file with the defaults already in it.
+ */
+async function runSessionDefaults(
+  opts: SessionDefaultsOptions,
+): Promise<number> {
+  const root = resolve(opts.root ?? process.cwd())
+
+  const mismatch = checkoutMismatchWarning(process.cwd())
+  if (mismatch !== undefined) logWarn(mismatch)
+
+  const read = await readSessionDefaults(root, PROJECT_ROOT)
+
+  if (opts.json) {
+    process.stdout.write(
+      `${JSON.stringify(toSessionDefaultsRecord(read, opts.write))}\n`,
+    )
+  }
+
+  if (read.kind === 'refused') {
+    logError(read.reason)
+    return 1
+  }
+
+  if (read.kind === 'absent') {
+    logInfo(`No ${read.path}, so there is nothing to migrate.`)
+    return 0
+  }
+
+  for (const key of read.plan.keys) {
+    if (key.changed) logAdd(key.label)
+    else logInfo(key.label)
+  }
+
+  if (!read.plan.changed) {
+    logInfo('Session defaults already present.')
+    return 0
+  }
+
+  if (!opts.write) {
+    logWarn('Nothing was written. Pass --write to apply this plan.')
+    return 2
+  }
+
+  await applySessionDefaults(read)
+  logStep(`Wrote ${read.path}.`)
+  return 0
+}
+
+function toSessionDefaultsRecord(
+  read: SessionDefaultsRead,
+  wrote: boolean | undefined,
+): unknown {
+  if (read.kind === 'refused') {
+    return { ok: false, wrote: false, reason: read.reason }
+  }
+  if (read.kind === 'absent') {
+    return { ok: true, wrote: false, path: read.path, keys: [] }
+  }
+  return {
+    ok: true,
+    wrote: wrote === true && read.plan.changed,
+    path: read.path,
+    keys: read.plan.keys,
+  }
+}
+
 export function register(program: Command): void {
   const migrate = program
     .command('migrate')
@@ -1321,5 +1401,44 @@ export function register(program: Command): void {
     )
     .action(async (opts: RuleLayoutOptions) => {
       process.exitCode = await runRuleLayout(opts)
+    })
+
+  migrate
+    .command('session-defaults')
+    .description('Add the seeded session defaults to a target settings file')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .option('--write', 'Apply the plan rather than reporting it')
+    .option(
+      '--root <path>',
+      'Project root, defaulting to the working directory',
+    )
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Adds Agent and Task to permissions.deny in .claude/settings.json,',
+        'appending to the list without reordering it, and sets',
+        'autoMemoryEnabled to false only when the key is absent. A deny entry',
+        'is never removed and an existing autoMemoryEnabled is never changed.',
+        '',
+        'A missing settings file is nothing to do. A file that is not valid',
+        'JSON, or whose permissions or deny has an unexpected shape, is',
+        'refused by name and never partly written.',
+        '',
+        'Exit codes:',
+        '  0  nothing to add, or --write applied the plan',
+        '  1  refused: the toolkit root, or an unreadable settings file',
+        '  2  a plan exists and --write was not passed',
+        '',
+        'Examples:',
+        '  canon migrate session-defaults',
+        '  canon migrate session-defaults --write',
+        '  canon migrate session-defaults --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (opts: SessionDefaultsOptions) => {
+      process.exitCode = await runSessionDefaults(opts)
     })
 }

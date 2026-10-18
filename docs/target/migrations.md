@@ -136,3 +136,14 @@ The wireframes record is retired, and nothing deletes what a project holds.
 ## Move decisions out of a held architecture record, once
 
 The toolkit no longer seeds `canon/ARCHITECTURE.md`, and a held file and its `CLAUDE.md` import stay. Move a trap a session would hit into that domain's `## Gotchas`, then delete the file and its `@canon/ARCHITECTURE.md` line.
+
+## Deny subagents and turn auto memory off, once
+
+The seeded `.claude/settings.json` now denies the `Agent` and `Task` tools and sets `autoMemoryEnabled` to `false`. `canon claude sync` never rewrites a settings file you hold, so it warns while the file holds neither default. Removing the deny later to allow subagents draws no warning.
+
+```bash
+canon migrate session-defaults --json
+canon migrate session-defaults --write --json
+```
+
+The verb only adds a key that is absent. A person who wants auto memory back sets it in their own `.claude/settings.local.json`.

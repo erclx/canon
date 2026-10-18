@@ -13,7 +13,7 @@ Governs how a project lays out agent context and every entry in `canon/context/`
 
 ### `canon/context/`
 
-Holds one flat entry per domain, listed by a generated `index.md` so a session picks one before touching the domain.
+Holds one folder per kind of domain, such as `development/`, `surfaces/`, `features/`, and `workflow/`, with `context-model.md` beside them at the root. Each folder and the root carry a generated `index.md`, so a session picks an entry before touching the domain.
 
 - A fact goes to `.claude/rules/` when it fires on a path being edited and violating it ships silently, otherwise to an entry or a skill body
 - A rule also buys conditional presence and a fix that governance sync carries to every project, which an eager `CLAUDE.md` line cannot

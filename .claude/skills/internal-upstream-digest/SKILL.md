@@ -1,6 +1,6 @@
 ---
 name: internal-upstream-digest
-description: Triages the Claude Code releases published since the last digest against this repository and files the findings as one intake pass. Use when asked to "run the upstream digest", "triage the Claude Code releases", or "what changed upstream since last time". Do NOT use for a single feature question, which is `internal-ask`, or to edit a wiki page.
+description: Triages the Claude Code releases published since the last digest against this repository and files the findings as one intake pass. Use when asked to "run the upstream digest", "triage the Claude Code releases", or "what changed upstream since last time". Do NOT use for a single feature question, which the root context index and the Wiki section of `CLAUDE.md` answer, or to edit a wiki page.
 disable-model-invocation: true
 ---
 

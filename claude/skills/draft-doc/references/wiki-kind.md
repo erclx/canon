@@ -37,7 +37,7 @@ Do not widen the split to admit a subject. Adding a sibling folder is a change t
 
 The standard forbids working from training knowledge, so the draft is built on a read rather than on recall.
 
-Fetch current information through the `claude-code-guide` agent for any subject that agent covers, and write from its answer. Reach any other subject through the owner's own published documentation.
+Fetch a Claude Code subject from Anthropic's docs directly, starting at the index `https://code.claude.com/docs/llms.txt` and reading the `.md` form of the page it names, and write from that page. Reach any other subject through the owner's own published documentation.
 
 - Invoke `canon:search-craft` with the skill tool before that search, since finding the owner's documentation is its field-and-authority step. Report it when it does not resolve.
 - Say the fetch failed and stop rather than substituting recall, even for a subject the session believes it knows. A page sourced from memory ships looking identical to one that was checked.

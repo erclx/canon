@@ -39,5 +39,5 @@ Without this skill, a session asked what changed upstream:
 ## Out of scope
 
 - The reminder that a digest is due, which a later hook owns.
-- A single question about one feature, which is `internal-ask`.
+- A single question about one feature, which the root context index and the Wiki section of `CLAUDE.md` answer.
 - Editing a wiki page a finding names, which `claude/skills/draft-doc/references/wiki.md` governs rather than `internal-docs`, whose scope stops at `docs/` and `canon/context/`.

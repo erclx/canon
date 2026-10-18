@@ -45,7 +45,7 @@ A page failing either is non-conforming even when it satisfies every shape rule 
 
 - Close the intro paragraph with a `Source:` sentence naming the owner. Link the canonical page where one exists, and name the owner alone where the subject has no single URL.
 - Link a docs page in its fetchable form, `https://code.claude.com/docs/en/<page>.md`, so a session reads the live text rather than a copy.
-- Fetch current information through the `claude-code-guide` agent when the subject is Claude Code. Do not work from training knowledge.
+- Fetch a Claude Code subject directly, starting at the index `https://code.claude.com/docs/llms.txt`. Do not work from training knowledge.
 - Propose an addition or correction and wait for confirmation. Do not write to a wiki file unasked.
 
 ## Shape
