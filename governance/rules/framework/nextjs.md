@@ -1,5 +1,5 @@
 ---
-description: Enforce Next.js App Router structure, server/client boundaries, and built-in primitives
+description: Enforce Next.js App Router boundaries, caching, Server Action security, and built-in primitives
 paths:
   - '**/*.tsx'
   - '**/*.ts'
@@ -7,42 +7,34 @@ paths:
 
 # Next.js standards
 
-## App Router structure
+## Routing
 
-- Use the App Router under `app/`. Do not introduce `pages/` in new code.
-- Use route segment files for their documented purpose: `page.tsx` for routes, `layout.tsx` for shared shells, `loading.tsx` for Suspense fallbacks, `error.tsx` for error boundaries, `route.ts` for HTTP handlers.
+- Add routes under `app/` with the App Router, never under `pages/`.
+- Await `params` and `searchParams`, which are Promises in a page, a layout, and a route handler.
 
 ## Server and client components
 
-- Default to Server Components. Add `"use client"` only when the file needs state, effects, browser APIs, or event handlers.
-- Place `"use client"` at the leaf, not at the layout. Push the boundary as deep as possible.
-- Do not import server-only modules (`fs`, db clients, secrets) from a client component. Mark server-only modules with `import "server-only"`.
-- Pass serializable props across the server/client boundary. Do not pass functions or class instances.
+- Default to Server Components. Add `'use client'` only to a file needing state, event handlers, effects, or browser APIs.
+- Put `'use client'` on the interactive leaf, not a layout, since every module it imports joins the client bundle.
+- Pass a Client Component only serializable props holding the fields it renders, never a whole database record.
+- Add `import 'server-only'` to a module that reads secrets or the database.
 
-## Data fetching
+## Data and caching
 
-- Fetch data in Server Components or Route Handlers. Do not fetch in client components when a server alternative exists.
-- Set explicit caching on `fetch`: `cache: "force-cache"`, `cache: "no-store"`, or `next: { revalidate: <seconds> }`. Do not rely on defaults.
-- Use `revalidatePath` or `revalidateTag` for invalidation over manual refetch loops.
+- Cache with `'use cache'` and a `cacheLife` call where Cache Components is on, the default for new apps. A `fetch` is not cached by default.
+- Wrap a component reading `cookies()`, `headers()`, or uncached data in `<Suspense>` with a fallback.
+- Call `revalidatePath` or `revalidateTag` in the Server Action after a mutation.
 
-## Server Actions
+## Mutations
 
-- Mark Server Actions with `"use server"` at the top of the file or function.
-- Validate Server Action inputs with a Zod schema before use. The client/server boundary is implicit and easy to miss.
-- Return serializable values. Do not return Response or stream objects from a Server Action.
-
-## Route handlers
-
-- Place HTTP endpoints in `app/**/route.ts`. Do not add `pages/api/`.
-- Export named methods (`GET`, `POST`, ...). Return `NextResponse` over raw `Response` for typed helpers.
-- Read params from the function signature (`{ params }`), not from the request URL.
+- Verify authentication and resource ownership inside every Server Action, since each is reachable by a direct POST.
+- Validate every Server Action argument before use, and return only the fields the UI needs.
 
 ## Built-in primitives
 
-- Use `next/link` over `<a>` for internal navigation. Use `next/image` over `<img>` for raster images. Use `next/font` over manual `<link>` tags for fonts.
-- Set explicit `width` and `height` (or `fill`) on `next/image`. Do not omit dimensions.
+- Use `next/link` for internal navigation and `next/image` for raster images.
+- Give `next/image` a `width` and `height` for a remote source, or `fill` inside a positioned parent.
 
-## Metadata and environment
+## Environment
 
-- Export `metadata` or `generateMetadata` from `layout.tsx` or `page.tsx` over manual `<head>` injection.
-- Prefix browser-exposed env vars with `NEXT_PUBLIC_`. Never read unprefixed server-only env vars from a client component.
+- Prefix a variable with `NEXT_PUBLIC_` only when the browser needs it, since its value is inlined at build time.
