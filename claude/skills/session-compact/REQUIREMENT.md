@@ -7,36 +7,26 @@ description: Why a plain session needs a handoff surface that is not the task bo
 
 ## Gap
 
-Without this skill, a session facing a compaction reaches for `session-map`, which writes `.canon/tasks/session-<slug>.md`. The board carries four such files today, and `session-resume` drops them by name prefix to read the real rows, so a reader works around a misplacement on every run.
+Without this skill, a session facing a compaction reaches for `session-map`, which writes onto the task board in the orchestrator's shape. That shape runs a drift check against a start commit nothing records and fills a `## State` section, so a session that shipped nothing pays for both and leaves a file every board reader filters out.
 
-`session-map` also carries the orchestrator's shape: a drift check against a start commit nothing records, a step for role sections, and a `## State` section. A session that shipped nothing pays all three to leave one note behind, and the `session-map` skill's `references/session.md` already names a `## State` filled from the tree as non-conforming, which is the failure that shape invites.
-
-Sessions also write the wrong thing into a handoff. They restate the tree, which survives a compaction, and omit what each decision beat, which does not.
+Sessions also write the wrong thing into a handoff. They restate the tree, which survives a compaction, and omit what each decision beat, which does not. A session about to move machines finds no surface naming the push and export it needs first.
 
 ## Must
 
-- Write to `.canon/compact/`, outside the task board and outside scratch.
-- Carry a stated shape for the note, so what belongs in it is not re-derived per session.
-- Require a citation for every claim, and a rejected alternative beside every decision.
-- Decline in one line where the session holds nothing a compaction would destroy.
-- Name `canon records push` then `canon sessions export` in the report when the caller asked to move the session to another machine, since this is the step a session takes before it moves and no other skill names either verb.
+- The note lands in `.canon/compact/`, outside the task board and outside scratch, and in a stated shape
+- Every claim carries a citation, and every decision carries the alternative it rejected
+- A session holding nothing a compaction would destroy gets a one-line decline rather than a padded note
+- A caller who asked to move the session gets `canon records push` then `canon sessions export` named in the report
+- The skill keeps a caller of its own beyond an operator typing it, being the `PreCompact` hook naming it on a manual compaction
 
 ## Must not
 
-- Write a task row, a plan, or anything under `.canon/tasks/`.
-- Write a `## State` section, or any section a reader could fill from `git status`.
-- Run a drift check or recover a start commit. Both belong to the role that ships code.
-- Lose its caller. The `PreCompact` hook names this skill on a manual compaction, and that hook plus an operator typing it are the two callers the third creation question asks for. A hook edit that names another skill leaves one caller, which is a reason to revisit this skill rather than to keep it.
-
-## Guards
-
-- No repository is required. The slug comes from the work, so a session outside git still writes a note.
-- `.canon/` resolves at the main worktree root. From a linked worktree the write goes through the shell, since the file-editing tools refuse that path.
-- Decline rather than pad. A note a reader finds is a note a reader trusts.
-- The note is backed up by `canon records push`, which carries every top-level `.canon/` folder, and the push is a run someone makes. Until it runs, or where no remote is configured, the note sits on one disk. The skill's report does not say so on an ordinary note, since it would restate a run the operator owns on every note. A caller who named a move is the exception, because the push is then the step the move depends on rather than a reminder, and the line prints on that report alone.
+- Write a task row, a plan, or anything under `.canon/tasks/`
+- Write a `## State` section, or any section a reader could fill from `git status`
+- Run a drift check or recover a start commit, which belong to the role that ships code
 
 ## Out of scope
 
-- The orchestrator's handoff, which carries a drift check and a board row: `canon:session-map`. The two skills are held apart by role, so a plain session belongs here and a session holding `canon:role-orchestrator` belongs there.
-- Reading a handoff back: `canon:session-resume`, which reads `.canon/compact/` ahead of the older task-board form.
-- A decision a groundwork track owns, which belongs in that track's `06-decision.md`: `canon:plan-groundwork`.
+- The orchestrator's handoff with its drift check and board row, which `session-map` owns
+- Reading a handoff back, which `session-resume` owns
+- A decision a groundwork track owns, which `plan-groundwork` owns in that track's decision file
