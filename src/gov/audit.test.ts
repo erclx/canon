@@ -201,6 +201,54 @@ describe('readRuleAudit in a canon checkout', () => {
       join('internal', 'rules', 'core', 'cli.md'),
     ])
   })
+
+  it('should measure every rule under a folder argument, trailing slash or not', async () => {
+    write(join('governance', 'rules', 'canon', 'a.md'), rule(bullets(1)))
+    write(join('governance', 'rules', 'canon', 'b.md'), rule(bullets(1)))
+    const files = [
+      join('governance', 'rules', 'canon', 'a.md'),
+      join('governance', 'rules', 'canon', 'b.md'),
+    ]
+
+    const bare = measured(
+      await readRuleAudit(ROOT, [join('governance', 'rules', 'canon')]),
+    )
+    const slashed = measured(
+      await readRuleAudit(ROOT, [join('governance', 'rules', 'canon') + '/']),
+    )
+
+    expect(bare.rules.map((reading) => reading.file)).toEqual(files)
+    expect(slashed.rules.map((reading) => reading.file)).toEqual(files)
+  })
+
+  it('should read a folder beside a file named with it', async () => {
+    write(join('governance', 'rules', 'canon', 'a.md'), rule(bullets(1)))
+
+    const report = measured(
+      await readRuleAudit(ROOT, [
+        join('governance', 'rules', 'canon'),
+        practice,
+      ]),
+    )
+
+    expect(report.rules.map((reading) => reading.file)).toEqual([
+      join('governance', 'rules', 'canon', 'a.md'),
+      practice,
+    ])
+  })
+
+  it('should refuse a folder holding no rule with no-rules naming it', async () => {
+    mkdirSync(join(ROOT, 'governance', 'rules', 'empty'), { recursive: true })
+
+    const report = await readRuleAudit(ROOT, [
+      join('governance', 'rules', 'empty'),
+    ])
+
+    expect(report).toMatchObject({ kind: 'unreadable', reason: 'no-rules' })
+    expect(report.kind === 'unreadable' && report.message).toContain(
+      join('governance', 'rules', 'empty'),
+    )
+  })
 })
 
 describe('readRuleAudit in a target', () => {

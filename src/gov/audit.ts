@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs'
+import { existsSync, statSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { join, relative, resolve, sep } from 'node:path'
 import { listRuleFiles } from '@/gov/payload'
@@ -364,7 +364,24 @@ export async function readRuleAudit(
         message: `${outside.join(', ')} sits outside ${root}. Pass --root at the tree that holds it.`,
       }
     }
-    files = paths.map((path) => resolve(root, path))
+    const expanded: string[] = []
+    for (const path of paths) {
+      const abs = resolve(root, path)
+      if (!statSync(abs).isDirectory()) {
+        expanded.push(abs)
+        continue
+      }
+      const found = listRuleFiles(abs)
+      if (found.length === 0) {
+        return {
+          kind: 'unreadable',
+          reason: 'no-rules',
+          message: `No rule under ${path}, and a folder with no rules passes each of its zero rules, so it refuses rather than reporting clean.`,
+        }
+      }
+      expanded.push(...found)
+    }
+    files = expanded
   } else {
     const dirs = corpus
       .map((rel) => resolve(root, rel))
