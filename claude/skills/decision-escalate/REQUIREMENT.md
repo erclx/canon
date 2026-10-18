@@ -41,4 +41,4 @@ The opposite failure is the one that ships silently. A session that takes a pref
 
 - Making the ordinary judgment call, which is a pick plus a one-sentence tradeoff and needs no surface
 - Writing the decision into a plan, task, or context entry, which each owning standard governs and this skill only routes to
-- Deciding when to fire. The skill is user-invoked through `disable-model-invocation`, so escalating is the operator's call rather than a description match.
+- Deciding when to fire. The description states `Do NOT auto-trigger`, so escalating is the operator's call rather than a description match.

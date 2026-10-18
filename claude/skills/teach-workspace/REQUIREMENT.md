@@ -62,4 +62,4 @@ Two failures land specifically on where the folder sits. A workspace resolved ag
 - Creating a wiki folder a project never chose
 - What the verbs do internally, which is the CLI domain's own contract rather than this skill's, and the records backup that carries the folder off one disk
 - What a lesson renders as and how a quiz behaves once rendered, which the lesson-craft reference shapes and a rendering layer executes
-- Deciding when to fire. The skill is user-invoked through `disable-model-invocation`, so opening a workspace is the learner's call rather than a description match.
+- Deciding when to fire. The description states `Do NOT auto-trigger`, so opening a workspace is the learner's call rather than a description match.

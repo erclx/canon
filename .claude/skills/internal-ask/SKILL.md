@@ -1,7 +1,6 @@
 ---
 name: internal-ask
-description: Answers repository-knowledge questions about this toolkit by looking up `docs/index.md`, `canon/context/index.md`, `standards/index.md`, and `wiki/index.md` first, then the specific file those indexes point to. Use when asked "how do I use X", "what does Y do", "where is Z documented", or "how do I set up a target project". Do NOT use for code changes, editing, debugging, or questions about external tools not documented in this repo.
-disable-model-invocation: true
+description: Answers repository-knowledge questions about this toolkit by looking up `docs/index.md`, `canon/context/index.md`, `standards/index.md`, and `wiki/index.md` first, then the specific file those indexes point to. Use when asked "how do I use X", "what does Y do", "where is Z documented", or "how do I set up a target project". Do NOT use for code changes, editing, debugging, or questions about external tools not documented in this repo. Do NOT auto-trigger.
 ---
 
 # Internal ask

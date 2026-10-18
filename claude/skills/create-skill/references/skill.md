@@ -104,7 +104,7 @@ allowed-tools: <tools required>
 
 - **`name`** (required): kebab-case, matches folder name, no spaces or capitals
 - **`description`** (required): what it does + when to use it, under 1024 chars, no XML tags
-- **`disable-model-invocation: true`**: user-invoked only, Claude will not auto-trigger. Set it on a skill that starts a process the operator owns, never on one reachable by a matched trigger.
+- **`disable-model-invocation: true`**: Claude will not auto-trigger, and the `Skill` tool also refuses the operator's own request made in words. Set it only on a skill run by slash command alone. A skill wanting just the first effect writes `Do NOT auto-trigger` in its description.
 - **`allowed-tools`**: restrict tool access when the skill is active
 - **`metadata`**: optional key-value pairs (`author`, `version`, `mcp-server`)
 - **`metadata.family`** (required on a skill under `claude/skills/`): the skill map group the skill's row sits under, as one key from `families` in `canon claude skills list --json`. A skill under `.claude/skills/` takes none.
