@@ -44,7 +44,7 @@ Owns the plan shape that a planner writes and a worker or controller reads.
 Owns the `canon tasks` verbs that validate, archive, and derive from the board.
 
 - `plan-branch` is the one branch derivation, called by the dispatcher and by `auto-ship` Step 0, and its type is a constant because the type is cosmetic
-- `plan-answers` reports `launchable` from a `needs your call` suggestion over an empty slot, read through `normalizeOperatorCall` in `src/records/validate.ts`
+- `plan-answers` reports `launchable` from a `needs your call` suggestion over an empty slot, and holds a fan-in integrator until each member branch is on origin, since a local head exists mid-build
 - `resolvePlanReference` tries the project root and then the board directory, and an archived plan refuses as `archived`
 - `sharesPath` collides a folder claim with a file inside it on purpose, so a bare folder in a `Touches` cell collides with every row under it
 - `plan-reach` reports the paths a branch wrote beyond its plan and gates nothing
