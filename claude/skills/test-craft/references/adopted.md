@@ -11,36 +11,70 @@ External sources were read and filtered rather than imported. This file is the r
 
 ### Choosing the layer
 
-**The smallest-layer rule.** Fowler: "Push your tests as far down the test pyramid as you can", and write a lower test when a higher one catches what no lower one did ([Practical Test Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html)). It is the body's layer rule and the reason for the decision table.
+Three sources settle which layer a test belongs at and how the decision table reads.
 
-**Sizing by what a test touches.** Google's small, medium, and large sizes name what a test may touch rather than what it covers ([Software Engineering at Google, ch. 11](https://abseil.io/resources/swe-book/html/ch11.html)). The decision table reads the same way, keyed on what the behavior touches, so it transfers across stacks without naming a runner. The scope names unit, component, and end to end stay as the labels, since those are the names a reader and a file suffix already use.
+| Adopted                                | Source                                                                                                                                                                          |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The smallest-layer rule                | Fowler, "push your tests as far down the test pyramid as you can" ([Practical Test Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html))                     |
+| Sizing by what a test touches          | Google's small, medium, and large sizes ([Software Engineering at Google, ch. 11](https://abseil.io/resources/swe-book/html/ch11.html))                                         |
+| The component layer carrying UI weight | Kent C. Dodds's trophy ([Write tests](https://kentcdodds.com/blog/write-tests)) and Testing Library's [guiding principles](https://testing-library.com/docs/guiding-principles) |
 
-**The component layer carrying UI weight.** Kent C. Dodds's trophy ([Write tests](https://kentcdodds.com/blog/write-tests)) and Testing Library's principle that tests resembling use give more confidence ([guiding principles](https://testing-library.com/docs/guiding-principles)). The pyramid and the trophy are one rule applied to different code: a component's logic is its rendered behavior, so its lowest layer is a rendered test.
+- Fowler writes a lower test when a higher one catches what no lower one did. It is the body's layer rule and the decision table's reason.
+- Google's sizes name what a test may touch rather than cover. The table keys on the same, so it transfers across stacks without naming a runner.
+- Testing Library holds that tests resembling use give more confidence
+
+The scope names unit, component, and end to end stay as the labels, since a reader and a file suffix already use them. The pyramid and the trophy are one rule applied to different code, since a component's logic is its rendered behavior and its lowest layer is a rendered test.
 
 ### Judging a test
 
-**The opening question and the final filter.** From `obra/superpowers@5bf4e78`, `skills/test-driven-development/writing-good-tests.md`: name the production change that makes a test fail and whether it is a bug or a decision, then cut mirror assertions, change detectors, assertions on mocks, framework tests, and run the mutation check. Adopted as the body's opening question and final filter, with the fixed pause added from the end to end incidents.
+The opening question and final filter come from `obra/superpowers@5bf4e78`, `skills/test-driven-development/writing-good-tests.md`. It names the production change that makes a test fail and whether it is a bug or a decision.
 
-**Doubles in preference order and DAMP over DRY.** From `addyosmani/agent-skills@c004a74`, `skills/test-driven-development/SKILL.md`: real, fake, stub, mock, and descriptive test bodies over shared helpers. Adopted in `unit.md`.
+- It then cuts mirror assertions, change detectors, assertions on mocks, and framework tests, and runs the mutation check
+- Adopted as the body's opening question and final filter, with the fixed pause added from the end to end incidents
 
-**Kent Beck's desiderata as background.** The twelve properties at [testdesiderata.com](https://testdesiderata.com/) trade against each other. "Behavioral" and "structure-insensitive" together are the whole of "test behavior, not implementation", which is why the body states that pair as asserting through the public surface.
+### Doubles in preference order and DAMP over DRY
 
-**Excuses, red flags, and a closing checklist.** From `addyosmani/agent-skills@2686b620`, [`docs/skill-anatomy.md`](https://github.com/addyosmani/agent-skills/blob/2686b620fc1fed2e8f60c704839c766b8594c6b6/docs/skill-anatomy.md): Common Rationalizations, Red Flags, and Verification. Adopted as the three closing sections every practice skill carries, with the final filter as the closing checklist. This reverses an earlier decline of the excuses table. That decline objected to arguments against imagined objections, so each row here rebuts an excuse this skill's requirement records a session acting on, such as extending the open end to end spec or adding a pause for a run that flakes under load.
+From `addyosmani/agent-skills@c004a74`, `skills/test-driven-development/SKILL.md`, which orders real, fake, stub, then mock, and prefers descriptive test bodies over shared helpers. Adopted in `unit.md`.
+
+### Kent Beck's desiderata
+
+The twelve properties at [testdesiderata.com](https://testdesiderata.com/) trade against each other and serve as background. "Behavioral" and "structure-insensitive" together are the whole of "test behavior, not implementation", which is why the body states that pair as asserting through the public surface.
+
+### Excuses, red flags, and a closing checklist
+
+From `addyosmani/agent-skills@2686b620`, [`docs/skill-anatomy.md`](https://github.com/addyosmani/agent-skills/blob/2686b620fc1fed2e8f60c704839c766b8594c6b6/docs/skill-anatomy.md): Common Rationalizations, Red Flags, and Verification. Adopted as the three closing sections every practice skill carries, with the final filter as the closing checklist.
+
+This reverses an earlier decline of the excuses table, which objected to arguments against imagined objections. Each row here rebuts an excuse this skill's requirement records a session acting on, such as extending the open end to end spec or adding a pause for a run that flakes under load.
 
 ### Per layer
 
-**Component query and wait rules.** Role queries first, user events over synthetic ones, one assertion per wait, no side effects inside a wait ([Common mistakes](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library)). Adopted in `component.md` with the library names removed from the rules.
+Each layer reference takes its rules from the tool's own guidance.
 
-**Web-first assertions, actionability, config-wide reduced motion, sharding.** From Playwright's own pages ([best practices](https://playwright.dev/docs/best-practices), [actionability](https://playwright.dev/docs/actionability), [TestOptions](https://playwright.dev/docs/api/class-testoptions)). Adopted in `e2e.md`, where the runner is named because the reference is the per-layer home for runner specifics.
+| Reference      | Adopted                                                                                                    | Source                                                                                                                                                                                                      |
+| -------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `component.md` | Role queries first, user events over synthetic ones, one assertion per wait, no side effects inside a wait | [Common mistakes](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library)                                                                                                                   |
+| `e2e.md`       | Web-first assertions, actionability, config-wide reduced motion, sharding                                  | Playwright's [best practices](https://playwright.dev/docs/best-practices), [actionability](https://playwright.dev/docs/actionability), and [TestOptions](https://playwright.dev/docs/api/class-testoptions) |
+
+`component.md` states its rules with the library names removed. `e2e.md` names the runner, since the reference is the per-layer home for runner specifics.
 
 ## Declined
 
-**A numeric mix.** Google targets roughly 80% unit, 15% integration, 5% end to end ([same chapter](https://abseil.io/resources/swe-book/html/ch11.html)). A ratio is a codebase-wide target that a session writing one test cannot act on, and web.dev's point that the shape "should fit your architecture" ([Pyramid or Crab](https://web.dev/articles/ta-strategies)) is what a motion-heavy static site needs. The body states the rule and the budget in words instead.
+Each item below stays out of the skill for the reason given.
 
-**Delete the code written before its test.** `superpowers`'s test-driven skill tells a session to delete implementation written ahead of a failing test. Declined: this toolkit audits the order after the fact with its test-order verb and reports rather than destroys, since deleting working code punishes the session without restoring the evidence the red run would have given.
+### A numeric mix
 
-**An iron law.** Both external test-driven skills carry an "Iron Law" stated as absolute. Declined for tone: this toolkit states a rule once with its reason.
+Google targets roughly 80% unit, 15% integration, 5% end to end ([same chapter](https://abseil.io/resources/swe-book/html/ch11.html)). A ratio is a codebase-wide target a session writing one test cannot act on.
 
-**One skill per layer.** A unit skill, a component skill, and an end to end skill each loaded on its own trigger. Declined because the layer has to be chosen before the right skill can load, so the choice ends up restated in all three or in a fourth skill that is this one.
+web.dev's point that the shape "should fit your architecture" ([Pyramid or Crab](https://web.dev/articles/ta-strategies)) is what a motion-heavy static site needs, so the body states the rule and the budget in words instead.
 
-**A standard in place of a skill.** The guidance is judgment applied while writing, loaded on intent. A standard governs an artifact a reader checks afterwards, and nobody checks a test file against a layer rule after the fact.
+### Delete the code written before its test
+
+`superpowers`'s test-driven skill tells a session to delete implementation written ahead of a failing test. This toolkit audits the order after the fact with its test-order verb and reports rather than destroys, since deleting working code punishes the session without restoring the evidence the red run would have given.
+
+### Other declines
+
+The remaining three were declined on tone or on shape.
+
+- **An iron law.** Both external test-driven skills carry an "Iron Law" stated as absolute. Declined for tone, since this toolkit states a rule once with its reason.
+- **One skill per layer.** The layer has to be chosen before the right skill can load, so the choice ends up restated in all three or in a fourth skill that is this one.
+- **A standard in place of a skill.** The guidance is judgment applied while writing, loaded on intent. Nobody checks a test file against a layer rule after the fact, which is what a standard governs.
