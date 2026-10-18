@@ -51,9 +51,9 @@ A plugin skill test handed off from a linked worktree prints two lines, a `cd` t
 
 ### Hook limits
 
-A stalled hook does not block, so a hard deny goes through the permission system rather than a hook.
+A stalled hook does not block by default, so a hard deny goes through the permission system rather than a hook. `onFailure: "block"` on a `command` or `http` hook makes a timeout block.
 
-- Hook text output caps at 10,000 characters, and the default command timeout is 600 seconds
+- Hook text output caps at 10,000 characters, and the default command timeout is 600 seconds, or 30 on `UserPromptSubmit`
 - `SessionStart` runs on every session, so keep those hooks fast
 - Run `claude --debug` on a hook whose JSON is ignored, since the log names the parse failure
 

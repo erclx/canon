@@ -12,4 +12,4 @@ Source: [Hooks reference](https://code.claude.com/docs/en/hooks.md), with the se
 ## Notes
 
 - Guard interactive-only output in a shell profile with `if [[ $- == *i* ]]`, since a stray `echo` in `~/.zshrc` corrupts the hook's JSON.
-- A stalled hook does not block, since the call continues through the normal permission flow. A hook is never the only gate on a hard deny, which belongs to the permission system.
+- A stalled hook does not block unless it sets `onFailure: "block"`, so a hook is never the only gate on a hard deny, which belongs to the permission system.

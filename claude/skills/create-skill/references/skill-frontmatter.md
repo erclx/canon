@@ -9,7 +9,8 @@ Checked against the [Claude Code skills](https://code.claude.com/docs/en/skills)
 
 ## Fields
 
-- **`name`** (required): kebab-case, matches folder name, no spaces or capitals, at most 64 characters, and never containing the reserved words `anthropic` or `claude`
+- **`name`** (required): kebab-case, matches folder name, no spaces or capitals, and at most 64 characters
+- **Reserved words**: an upload to claude.ai or the API rejects `anthropic` and `claude` in a name, and Claude Code does not.
 - **`description`** (required): what it does + when to use it, under 1024 chars, no XML tags. That is the portable maximum.
 - **Listing cap**: Claude Code truncates `description` plus `when_to_use` at 1,536 characters in its skill listing, so put the key use case first.
 - **`disable-model-invocation: true`**: Claude will not auto-trigger, and the `Skill` tool also refuses the operator's request made in words. Set it only on a skill run by slash command alone.

@@ -74,7 +74,7 @@ Spawns `src/cli.ts` as a real process against a temporary directory, so a case a
 Holds this repository's Claude Code hooks, wired through `.claude/settings.json`. Each seeded hook has a twin in `tooling/claude/seeds/.claude/hooks/` maintained by hand with nothing comparing the trees, and eight of the ten shared names stay byte-identical.
 
 - `standards-audit.sh` and `reply-links.sh` differ on purpose, since the seeded copy resolves an installed `canon` alone and this copy prefers the checkout's `src/cli.ts`
-- Every hook reading a payload opens with `IFS= read -r -d '' -t 2 input`, never `cat`, as `guard.test.ts` holds. The bound is canon's own, and a gate hook like `scratch-guard.sh` fails open on it
+- Every hook reading a payload opens with `IFS= read -r -d '' -t 2 input`, never `cat`, as `src/hooks/guard.test.ts` holds. The bound is canon's own, and `scratch-guard.sh` fails open on it
 - `memory-guard.sh` and `review-post-scan.sh` cut a `Bash` command with one `awk` pass that drops heredoc bodies, and an arithmetic or `let` shift is text rather than an opener
 - `precompact-handoff.sh` blocks the first manual `/compact` once and instructs on `auto`, where a block reaches nobody. `silent-turn.sh` and `reply-links.sh` block once on `Stop`.
 - `autoCompactWindow`, `autoContinueAtUsageLimit`, and `crossSessionInbound` stay unset here as per-operator values, and `autoMemoryEnabled: false` is the one setting this repository sets
