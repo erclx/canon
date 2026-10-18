@@ -17,7 +17,9 @@ import {
   type WorktreeVerdict,
 } from '@/worktrees/reclaim'
 import { mainWorktreeRoot } from '@/git/worktree'
+import { machineListenerReader } from '@/listeners/machine'
 import { repairBareFlag } from '@/worktrees/bare-flag'
+import { type StopReport, stopListeners } from '@/worktrees/stop'
 import {
   removeReclaimable,
   type RemovalOutcome,
@@ -57,6 +59,12 @@ export interface ReclaimRecord {
   readonly removed: number
   readonly failed: number
   readonly pruned: boolean
+  /**
+   * Processes signaled, or that a dry run would signal, for listening inside a
+   * reclaimed worktree. Null when the machine offered no way to read
+   * listeners, which says nothing about what is still running.
+   */
+  readonly stopped: number | null
   readonly outcomes: readonly RemovalOutcome[]
 }
 
@@ -79,6 +87,8 @@ export type ReclaimSource =
        * from a run that was asked not to act.
        */
       readonly removal: RemovalReport | null
+      /** Null when no stop ran, which is a reading with nothing reclaimable. */
+      readonly stop?: StopReport | null
     }
 
 const REFUSALS: Record<Refusal, string> = {
@@ -197,6 +207,14 @@ export function register(program: Command): void {
         'filed against. Each removal unlocks the worktree, removes it, then',
         'deletes its branch, and a run carrying a directory that is already',
         'gone sweeps stale registrations once before the branch deletes.',
+        '',
+        'Ahead of each removal it sends SIGTERM to every process listening from',
+        'inside a reclaimable worktree, so no dev server outlives the tree it',
+        'serves. A listener in the main checkout, in a refused worktree, or in',
+        'a worktree nested under another is left alone. A dry run signals',
+        'nothing and still reports what it would stop. "stopped" in the record',
+        'counts those processes, and reads null on a machine with neither lsof',
+        'nor /proc, where no listener could be read.',
         '',
         'It deletes only what a reading called reclaimable. A worktree a live',
         'session holds is refused rather than removed here. `claude rm <id>`',
@@ -324,11 +342,13 @@ export function reclaimRecord(source: ReclaimSource): ReclaimRecord {
       removed: 0,
       failed: 0,
       pruned: false,
+      stopped: 0,
       outcomes: [],
     }
   }
 
   const outcomes = source.removal?.outcomes ?? []
+  const stop = source.stop ?? null
 
   return {
     reason: null,
@@ -338,7 +358,27 @@ export function reclaimRecord(source: ReclaimSource): ReclaimRecord {
     removed: outcomes.filter((outcome) => outcome.removed).length,
     failed: outcomes.filter((outcome) => !outcome.removed).length,
     pruned: source.removal?.pruned ?? false,
+    stopped: stop === null ? 0 : countStopped(stop),
     outcomes,
+  }
+}
+
+function countStopped(stop: StopReport): number | null {
+  if (stop.kind === 'unread') return null
+  return stop.stopped.reduce((sum, server) => sum + server.pids.length, 0)
+}
+
+/** Names each server a stop took, or would take on a dry run, and says when none could be read. */
+function reportStop(stop: StopReport, dryRun: boolean): void {
+  if (stop.kind === 'unread') {
+    logWarn(
+      'This machine offers neither lsof nor /proc, so listening servers were not read and none was stopped.',
+    )
+    return
+  }
+  const verb = dryRun ? 'Would stop' : 'Stopped'
+  for (const { path, ports } of stop.stopped) {
+    logInfo(`${verb} the server on ${ports.join(', ')} in ${path}`)
   }
 }
 
@@ -381,8 +421,14 @@ async function runReclaim(opts: ReclaimCommandOptions): Promise<number> {
   logInfo(plural(reclaimable.length, 'worktree'))
   pipeOutput(reclaimable.map(describe).join('\n'))
 
+  const stop = await stopListeners(
+    reclaimable.map((entry) => entry.path),
+    { reader: machineListenerReader(), dryRun },
+  )
+
   if (dryRun) {
     logStep('Dry run')
+    reportStop(stop, dryRun)
     logWarn('Nothing was removed. Run this again without --dry-run to remove.')
     outro()
     emitReclaim(opts, {
@@ -390,6 +436,7 @@ async function runReclaim(opts: ReclaimCommandOptions): Promise<number> {
       dryRun,
       reclaimable: reclaimable.length,
       removal: null,
+      stop,
     })
     return 0
   }
@@ -403,6 +450,7 @@ async function runReclaim(opts: ReclaimCommandOptions): Promise<number> {
   })
 
   logStep('Removed')
+  reportStop(stop, dryRun)
   for (const outcome of removal.outcomes) reportOutcome(outcome)
   if (removal.pruned) {
     logInfo(
@@ -423,6 +471,7 @@ async function runReclaim(opts: ReclaimCommandOptions): Promise<number> {
     dryRun,
     reclaimable: reclaimable.length,
     removal,
+    stop,
   })
   return failed.length > 0 ? 1 : 0
 }

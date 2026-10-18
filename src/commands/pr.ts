@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs'
-import { readdir, readFile, readlink, realpath } from 'node:fs/promises'
+import { readFile, realpath } from 'node:fs/promises'
 import { basename, join, resolve } from 'node:path'
 import { $ } from 'bun'
 import type { Command } from 'commander'
@@ -72,15 +72,13 @@ import {
   readBaseStanding,
   readChangedPaths,
 } from '@/pr/lift'
+import { machineListenerReader } from '@/listeners/machine'
 import { loadPaintedPatterns } from '@/pr/painted'
 import {
   dropAddressLine,
   findLocalServer,
-  type Listener,
   type LocalRefusal,
   type LocalRunner,
-  parseLsofListeners,
-  parseProcNetTcp,
 } from '@/pr/local'
 import { KEY_CHANGES } from '@/pr/paths'
 import {
@@ -2730,81 +2728,10 @@ async function runPreviewCheck(
   return reading.reason === 'fresh' ? 0 : 1
 }
 
-async function readText(path: string): Promise<string | undefined> {
-  return readFile(path, 'utf8').catch(() => undefined)
-}
-
-/**
- * Every listening socket's owning pid, read from `/proc`. Only a process this
- * user owns exposes its `fd` table, which is also the only process whose
- * server this user's worktree could have started.
- */
-async function readProcListeners(): Promise<Listener[] | undefined> {
-  const tables = await Promise.all(
-    ['/proc/net/tcp', '/proc/net/tcp6'].map(readText),
-  )
-  if (tables.every((text) => text === undefined)) return undefined
-  const byInode = new Map(
-    tables.flatMap((text) =>
-      text === undefined
-        ? []
-        : parseProcNetTcp(text).map((s) => [s.inode, s.port] as const),
-    ),
-  )
-
-  const processIds = (await readdir('/proc').catch(() => [])).filter((name) =>
-    /^\d+$/.test(name),
-  )
-  const listeners: Listener[] = []
-  for (const pid of processIds) {
-    const fds = await readdir(`/proc/${pid}/fd`).catch(() => [])
-    for (const fd of fds) {
-      const target = await readlink(`/proc/${pid}/fd/${fd}`).catch(() => '')
-      const inode = /^socket:\[(\d+)\]$/.exec(target)?.[1]
-      const port = inode === undefined ? undefined : byInode.get(inode)
-      if (port !== undefined) listeners.push({ pid: Number(pid), port })
-    }
-  }
-  return listeners
-}
-
-/**
- * The machine half of a detection: `/proc` wherever it exists, lsof on a
- * machine without it, and no reader anywhere else.
- */
+/** The listener reads come from the machine, and the HTML probe from here. */
 function machineLocalRunner(): LocalRunner {
-  const hasLsof = Bun.which('lsof') !== null
   return {
-    async listListeners() {
-      // lsof 4.95 drops every process whose kernel-truncated name holds an
-      // unmatched `(`, which Next's `next-server (vX.Y.Z)` title cuts down to,
-      // so `/proc` goes first despite costing several times what lsof does.
-      if (existsSync('/proc/net/tcp')) {
-        const listeners = await readProcListeners()
-        if (listeners !== undefined) return listeners
-      }
-      if (hasLsof) {
-        const result = await $`lsof -nP -iTCP -sTCP:LISTEN -Fpn`
-          .quiet()
-          .nothrow()
-        // lsof exits 1 both when it matched nothing and when it could not
-        // read some process, and the rows it did print are real either way.
-        if (result.exitCode <= 1) return parseLsofListeners(result.text())
-      }
-      return undefined
-    },
-    async cwdOf(pid) {
-      if (existsSync(`/proc/${pid}/cwd`)) {
-        return readlink(`/proc/${pid}/cwd`).catch(() => undefined)
-      }
-      if (!hasLsof) return undefined
-      const result = await $`lsof -a -p ${pid} -d cwd -Fn`.quiet().nothrow()
-      const line = result
-        .text()
-        .split('\n')
-        .find((row) => row.startsWith('n'))
-      return line?.slice(1)
-    },
+    ...machineListenerReader(),
     // An HTML page rather than any answer, since a test runner's server or a
     // reload socket in the same tree answers too, and a reviewer opening one
     // gets a bare 404 instead of the branch.

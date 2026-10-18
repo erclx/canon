@@ -108,6 +108,65 @@ describe('reclaimRecord', () => {
     expect(record.removed).toBe(0)
   })
 
+  it('should count the processes a stop signaled', () => {
+    const record = reclaimRecord({
+      kind: 'read',
+      dryRun: false,
+      reclaimable: 2,
+      removal: removal([removed('/a', 'feat/a'), removed('/b', 'feat/b')]),
+      stop: {
+        kind: 'read',
+        stopped: [
+          { path: '/a', pids: [10, 11], ports: [5173] },
+          { path: '/b', pids: [20], ports: [4321, 4322] },
+        ],
+      },
+    })
+
+    expect(record.stopped).toBe(3)
+  })
+
+  it('should say the stop was unread rather than zero when the machine has no listener reader', () => {
+    const record = reclaimRecord({
+      kind: 'read',
+      dryRun: false,
+      reclaimable: 1,
+      removal: removal([removed('/a', 'feat/a')]),
+      stop: { kind: 'unread' },
+    })
+
+    expect(record.stopped).toBeNull()
+  })
+
+  it('should report zero stopped when no stop ran', () => {
+    const record = reclaimRecord({
+      kind: 'read',
+      dryRun: false,
+      reclaimable: 0,
+      removal: null,
+    })
+
+    expect(record.stopped).toBe(0)
+  })
+
+  it('should keep outcomes last with stopped ahead of it', () => {
+    const serialized = JSON.stringify(
+      reclaimRecord({
+        kind: 'read',
+        dryRun: false,
+        reclaimable: 1,
+        removal: removal([removed('/a', 'feat/a')]),
+      }),
+    )
+
+    expect(serialized.indexOf('"stopped"')).toBeGreaterThan(
+      serialized.indexOf('"pruned"'),
+    )
+    expect(serialized.indexOf('"outcomes"')).toBeGreaterThan(
+      serialized.indexOf('"stopped"'),
+    )
+  })
+
   it('should place outcomes last so a pattern anchored on a scalar cannot reach it', () => {
     const serialized = JSON.stringify(
       reclaimRecord({
