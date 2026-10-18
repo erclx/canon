@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.40.0](https://github.com/erclx/canon/compare/v5.39.0...v5.40.0) (2026-10-18)
+
+
+### Features
+
+* **gov:** add --yes to install and name it in the refusal ([#2437](https://github.com/erclx/canon/issues/2437)) ([bdf6d96](https://github.com/erclx/canon/commit/bdf6d961c3249ce54f13f61f6de17b1c0de0fd62))
+* **labels:** label apply from the pull request files ([#2436](https://github.com/erclx/canon/issues/2436)) ([b97512d](https://github.com/erclx/canon/commit/b97512de9902225df2472cbf67346befdf07e768))
+* **pr:** carry a UI close across unpainted pushes ([#2439](https://github.com/erclx/canon/issues/2439)) ([cb43bc2](https://github.com/erclx/canon/commit/cb43bc22e074d3f7af1893e24c74243738b9561b))
+* **sync:** format the install stamp after sync writes it ([#2435](https://github.com/erclx/canon/issues/2435)) ([9da2a7d](https://github.com/erclx/canon/commit/9da2a7d13d382f28871e5be1eb9653d5a186e2ff))
+
+
+### Bug Fixes
+
+* **records:** resolve the record root by its records ([#2440](https://github.com/erclx/canon/issues/2440)) ([dd1aaaa](https://github.com/erclx/canon/commit/dd1aaaad773457681219d5001820894001c79067))
+
 ## [5.39.0](https://github.com/erclx/canon/compare/v5.38.0...v5.39.0) (2026-10-17)
 
 
