@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs'
+import { basename } from 'node:path'
 import type { Manifest } from '@/tooling/manifest'
 
 export interface PackageJson {
@@ -25,6 +26,24 @@ export function readPackage(path: string): PackageJson | undefined {
     return JSON.parse(readFileSync(path, 'utf8')) as PackageJson
   } catch {
     return undefined
+  }
+}
+
+/**
+ * The manifest a sync writes into a folder that has none. The name is the
+ * folder's, reduced to the characters npm accepts, so it is never empty or
+ * invalid.
+ */
+export function minimalPackage(target: string): PackageJson {
+  const name = basename(target)
+    .toLowerCase()
+    .replace(/[^a-z0-9-._~]/g, '-')
+    .replace(/^[._]+/, '')
+
+  return {
+    name: name === '' ? 'project' : name,
+    version: '0.0.0',
+    type: 'module',
   }
 }
 

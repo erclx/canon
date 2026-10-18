@@ -4,6 +4,7 @@ import {
   applyScripts,
   collectDeps,
   collectScripts,
+  minimalPackage,
   parseSpec,
 } from '@/tooling/package'
 
@@ -255,5 +256,29 @@ describe('applyScripts', () => {
 
     expect(result.pkg.scripts?.lint).toBe('eslint . --max-warnings 0')
     expect(result.overridden).toContain('lint')
+  })
+})
+
+describe('minimalPackage', () => {
+  it('should carry exactly a name, a version, and the module type', () => {
+    expect(minimalPackage('/work/my-app')).toEqual({
+      name: 'my-app',
+      version: '0.0.0',
+      type: 'module',
+    })
+  })
+
+  it('should lowercase the folder name and replace spaces', () => {
+    expect(minimalPackage('/work/My App').name).toBe('my-app')
+  })
+
+  it('should strip a leading dot or underscore', () => {
+    expect(minimalPackage('/work/.hidden').name).toBe('hidden')
+    expect(minimalPackage('/work/__core').name).toBe('core')
+  })
+
+  it('should fall back to project when nothing is left', () => {
+    expect(minimalPackage('/work/.').name).toBe('project')
+    expect(minimalPackage('/work/...').name).toBe('project')
   })
 })
