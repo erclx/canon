@@ -7,58 +7,30 @@ description: What a building session is, the shared surfaces it may not write, a
 
 ## Gap
 
-Without this skill, a building session is told what to do and never what it is. One shipped body asserts a session role and it is the orchestrator, so worker behavior spreads across three skills that each own a step and none of them names the role or the channel it runs on. The handback works because a session reading plain text tends to follow it rather than because anything says it should, which held while a person launched every worker and stopped holding the first time one ran with nobody watching.
+Without this skill, a building session is told what to do and never what it is. It writes shared surfaces, hand-writing the board from a stale copy, filing a task with no row, or re-drafting a readied pull request. From a linked worktree it finds no plan folder and reports the task has no plan.
 
-The session then writes surfaces nothing told it were shared. One worker split a concern its own run could not reach, hand-wrote the priority board from a copy taken minutes earlier, and reverted a promotion with nothing reporting it, on a board that still validated afterwards because a reverted row is a well-formed board. A second added a row and labelled it with an identifier another row already held. The rule against both sits inside the controlling session's own body, which no worker loads.
-
-Standing in a linked worktree fails one step earlier and reports confidently while it does. The plan folder is gitignored, so `git worktree add` never creates it, and a worker reading it from the build tree reports that the task has no plan. That is true from where the session stands and wrong about the world, and a reader holding no second tree cannot tell those apart. Three workers hit it in one day and an absolute path unblocked all three.
-
-A blocked worker reaches nobody at all. Two dispatched sessions opened an interactive prompt inside a background session no operator was attached to, and the roster read both as alive throughout. An answer relayed afterwards arrives and does not land, since a queued message drains at the next tool round and a session waiting on input never reaches one, so the channel closes the gap only when it is used before the prompt opens. One of the two held uncommitted work across three files, which made stopping and relaunching a destructive recovery rather than a free one.
-
-Finishing is invisible from the other side. A worker that opens a pull request goes idle rather than exiting, so the one push signal available fired for a worker that was stopped and never fired for the one that finished, which then sat unnoticed for eighteen minutes. Polling covers that interval by spending a fixed cost against a worker with no pull request to report, measured as five consecutive runs reporting no movement across roughly fifteen minutes while one worker built.
-
-Nothing tells the session that refusing is allowed either. Four occasions across two days had a worker halt correctly with the cost falling on the dispatcher, and the correction that mattered most reached the right place because a worker argued back with evidence rather than complying. A role written only as report-upward suppresses exactly that.
-
-The draft mark fails from both ends. On 2026-08-31 four sessions re-drafted a pull request someone had readied, acting on a belief no surface in the tree stated. On 2026-09-07 a controlling session told a worker to lift the mark rather than lifting it itself, and the worker complied and reported against the surface rather than the outcome. From 2026-10-12 `canon pr lift` reads the gates itself, so the reviewers run it on a close and the controlling session runs it as the fallback. A worker leaves the verb to them and readies a pull request directly for nobody, since a direct ready skips every gate the verb reads.
+The channel fails on the worker's side. A block opens a prompt nobody is attached to, a finished pull request goes idle unannounced, and a review wait stalls in silence. A late ask widens the scope both reviews already read, and a session told only to report upward never argues back with the evidence that corrects a wrong instruction.
 
 ## Must
 
-- Assert what a building session is, what it may not do, and how long the role lasts, since the three step-owning skills each carry a procedure and none carries a role
-- State that session scratch resolves at the main worktree root, since a linked worktree holds none of those folders and their absence reads as a missing artifact rather than as a wrong vantage
-- State the shared board as read-only for a building session and name what it does instead when a row is owed, since a task file with no row is a dropped task and placing the row is the controlling session's call
-- Owe an announcement the moment the pull request opens, carrying the number, the branch, and the task, since that transition is the one interval only the worker can observe
-- Carry a row the build turned up in the pull request announcement, and send it alone only when the session ends before a pull request opens, since the worker files no task file of its own and the channel is the row's only route
-- Carry a fan-in member's branch and head commit in its done message in place of a pull request number, and end its role at the push, since a member opens no pull request and its integrator fixes what the merge surfaces
-- Send the controller the `canon pr review-state` record when a wait for the reviews times out, rather than waiting on, since a worker improvising that read stalled silently with both reviewers idle behind it
-- Owe a message before a block becomes an interactive prompt, since a session already waiting on input never reaches the tool round an inbound message drains at
-- Defer the addressee resolution to `session-relay` and keep only the operator ask and the last-rung inference, which discriminates here because a worker holds a feature branch and a controller does not, and which falls back to the roster and says so, since an operator's own launch names nobody
-- Keep refusing a dispatcher a first-class move carrying its evidence, since the halts measured so far were correct and the cost of each fell where it belonged
-- State that a held body may be older than the branch under it, since a plugin skill loads from the marketplace cache rather than from the working tree
-- Carry a talk clause for a launch whose operator is in the session, asking them at a judgment call and sending a close message when they end the conversation, since a cold worker's halt-toward-the-controller and merge-ends-the-role rules contradict a brief that asks it to talk
-- Freeze the plan's scope at dispatch, sorting a late ask into a defect to fix, a follow-up row to report, or an addition the operator's word admits with its re-review cost stated, since intake 155 measured about four UI review rounds on one pull request from late asks, each re-running both reviews
-- Own the local preview server for a painted diff, started as a tracked background command before the pull request opens, since a `no-server` read leaves the evidence comment and the UI reviewer without an address on the one path nobody watched being built (erclx/frameboard#1 and erclx/frameboard#4)
-- Point at `session-worktree`, `auto-ship`, and `review-address` for the steps each already owns
+- Session scratch resolves at the main worktree root, and a plan that fails to resolve is reported unreadable from there rather than absent
+- The pull request announcement carries the number, the branch, the task, the reach, and any row the build turned up, and a fan-in member's done message carries its branch and head commit
+- A block goes out as a message before it becomes a prompt, and a timed-out review wait sends the `canon pr review-state` record to the controller
+- The plan's scope freezes at dispatch, and a late ask is sorted into a defect, a follow-up row, or an addition on the operator's word
+- A refusal of an instruction the tree contradicts carries its evidence, and a talk launch puts its judgment calls to the operator in the session
 
 ## Must not
 
-- Restate a procedure any of the three step-owning skills carries, since thinness is what keeps one body correct for a dispatched worker reading it as its whole contract and for a hand-launched one reading it beside a person
-- Restate a boundary the orchestrator already states about itself
-- Report progress through the channel, which rebuilds on the sender's side the poll the announcement exists to retire
 - Write the priority board or the backlog, at any size
-- Create a task file for work the build turns up, through `task-board` or by hand, since the file lands with no row and the placement is not the worker's to make
-- Be a skill nothing invokes but its author typing the name. `auto-ship` Step 0 invokes it on every build, dispatched or hand-launched, so a stretch where only a typed invocation reaches it is the signal that the role never took.
-
-## Guards
-
-- Plan path does not resolve from inside the worktree: report it unreadable from here and name the main-root path, rather than reporting the task as having no plan
-- Plan carries a suggestion written as needing the operator's call: halt and message, rather than answering it
-- Launch named no controlling session: resolve from the roster, address the match, and say the addressee was inferred
-- No live session holds the other end: report what would have been sent and stop, rather than retrying or waiting
+- Create a task file for work the build turns up
+- Ready the pull request directly, or re-draft one someone readied
+- Report progress through the channel
+- Restate a procedure `session-worktree`, `auto-ship`, or `review-address` carries
 
 ## Out of scope
 
 - Entering the worktree, which `session-worktree` owns
 - The chain from implement through pull request, which `auto-ship` owns
-- How the build moves through the plan, slice by slice with a commit each, which `build-in-slices` owns
+- Moving through the plan slice by slice, which `build-in-slices` owns
 - Answering a posted review, which `review-address` owns
-- The controlling session's half of the channel, the review poll, and the watch beside it, which `role-orchestrator` and its runbooks hold
+- The controlling session's half of the channel and the review poll, which `role-orchestrator` owns
