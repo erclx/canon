@@ -27,8 +27,8 @@ paths:
 - State the fact behind a reference that resolves only here, since a target holds none of this repository's branches, history, or board.
 - Cite a same-repository pull request or commit the way `claude/skills/git-pr/references/publish.md` fixes.
 - Cite a docs page through `canon docs <name>`, per `docs/agents/overview.md`, never a raw `docs/<name>.md` or `canon/context/<name>.md` path.
-- Exempt a token that only illustrates a path shape, since it names no real page.
-- Never cite a phase label or an installed rule path from a shipped body, since a target holds no board and syncs rules separately.
+- Exempt a token that only illustrates a path shape.
+- Never cite a phase label from a shipped body, nor an installed rule path from a shipped skill body, since a target holds no board and syncs rules separately.
 - Mark a deliberate illustration with `<!-- canon-allow-reference: <why> -->`, since `canon gate run` has no skill-level carve-out.
 - Never state a count, a stack choice, or a folder shape true of this checkout alone, only a portable convention such as `canon/config/pr-labels.toml`.
 
