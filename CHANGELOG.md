@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.44.0](https://github.com/erclx/canon/compare/v5.43.0...v5.44.0) (2026-10-18)
+
+
+### Features
+
+* **governance:** source the framework rules against their docs ([#2488](https://github.com/erclx/canon/issues/2488)) ([2a05332](https://github.com/erclx/canon/commit/2a0533271770a299436e61dc097375572551073a))
+* **plans:** cite tracked design references in a UI plan ([#2490](https://github.com/erclx/canon/issues/2490)) ([a95a6ab](https://github.com/erclx/canon/commit/a95a6ab8833f9a8754dbac1776523bc5fe783f6a))
+* **skills:** hold skill requirements to a checked shape and caps ([#2496](https://github.com/erclx/canon/issues/2496)) ([6d2dac8](https://github.com/erclx/canon/commit/6d2dac8e681020d047cecd0bed288205dc370995))
+* **skills:** point setup at write-doc for a missing readme ([#2494](https://github.com/erclx/canon/issues/2494)) ([ba73ab1](https://github.com/erclx/canon/commit/ba73ab1a36c77cc27629418cab8972f7568e0b98))
+* **skills:** rename the seven draft skills for what each makes ([#2486](https://github.com/erclx/canon/issues/2486)) ([bef595b](https://github.com/erclx/canon/commit/bef595b031dbfb539f90b6335d81f34747f7cd42))
+* **tasks:** write the board through place, promote, move, and block ([#2491](https://github.com/erclx/canon/issues/2491)) ([66f18d3](https://github.com/erclx/canon/commit/66f18d39aaeafb4a8648ad428e4037d7bd8eac2b))
+
 ## [5.43.0](https://github.com/erclx/canon/compare/v5.42.0...v5.43.0) (2026-10-18)
 
 
