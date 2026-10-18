@@ -123,7 +123,13 @@ function waitingCell(
   if (at === -1) return undefined
 
   if (cells.length === header.length) return cells[at]
-  if (at === header.length - 1 && cells.length === header.length - 1) {
+
+  const missingTouches = header.some((cell) => cell.toLowerCase() === 'touches')
+  if (
+    missingTouches &&
+    at === header.length - 1 &&
+    cells.length === header.length - 1
+  ) {
     return cells.at(-1)
   }
 

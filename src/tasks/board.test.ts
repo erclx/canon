@@ -165,6 +165,12 @@ describe('parseBoard', () => {
     expect(parseBoard(text)).toMatchObject({ ok: false })
   })
 
+  it('should refuse a Needs a plan row carrying only its Task cell rather than read the link as its blocker', () => {
+    const text = board(...NEEDS_A_PLAN, '| [v1.0: One](v1.0-one.md) |')
+
+    expect(parseBoard(text)).toMatchObject({ ok: false })
+  })
+
   it('should keep an escaped pipe inside a blocker cell', () => {
     const text = board(
       ...NEEDS_A_PLAN,
