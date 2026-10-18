@@ -20,11 +20,13 @@ The subdir gets picked by feel, so a UI copy rule lands in the always-on folder 
 - Read the rule standard before writing the body
 - Hold the body to the rule standard's shape limits on words, bullets, sections, and bullet length
 - Apply the content test, leaving out what Claude already knows, what the toolchain enforces, and what changes often
+- Check what canon ships for the topic before authoring
 - Check the installed skills for one already covering the topic and point the rule at it, skipping the check when none are listed
 - Run every written bullet through the checklist and fix what fails before reporting
 - Tell the user to cite a source in the commit that adds a rule claiming outside practice
 - Emit the path scope for a path-scoped rule and omit the key entirely for an always-on one
-- Preview the resolved path, subdir, slug, and frontmatter, then write without pausing
+- Preview the resolved path, subdir, slug, and frontmatter, then write without pausing, since the diff follows the write
+- Show the written rule as a diff and leave the commit to the operator's OK
 - Say when the rule loads, since path-scoped and always-on rules behave differently
 
 ## Must not
