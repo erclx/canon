@@ -1,4 +1,5 @@
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -261,5 +262,20 @@ describe('Markdown gating step', () => {
     expect(readFileSync(join(target, GATED_CONFIG_REL), 'utf8')).toBe(
       '[markdown]\ngated = ["wiki/"]\n',
     )
+  })
+
+  it('should skip rather than fail outside a repository, writing no config', async () => {
+    const bare = mkdtempSync(join(tmpdir(), 'canon-init-bare-'))
+    try {
+      const step = buildSteps(bare, bare, flags(), recorder().child).find(
+        (each) => each.label === 'Markdown gating',
+      )
+      if (step?.kind !== 'run') throw new Error('No markdown gating run step')
+
+      expect(await step.run()).toBe(true)
+      expect(existsSync(join(bare, GATED_CONFIG_REL))).toBe(false)
+    } finally {
+      rmSync(bare, { recursive: true, force: true })
+    }
   })
 })

@@ -93,11 +93,13 @@ async function gateMarkdown(root: string): Promise<boolean> {
     return true
   }
 
+  // A scaffold such as `npm create vite` makes no repository, and nothing else
+  // in init needs one, so this is a skip rather than a failed domain.
   if (result.kind === 'unavailable') {
     logWarn(
-      "git could not list the tree, so no root was gated. Run 'canon markdown gated add <prefix>' once it can.",
+      "Skipped: not a git repository, so no root was measured or gated. Run 'canon markdown gated add <prefix>' once it is one.",
     )
-    return false
+    return true
   }
 
   logInfo(
