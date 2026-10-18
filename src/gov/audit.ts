@@ -27,10 +27,10 @@ export type RuleLimit = keyof typeof RULE_LIMITS | 'emphasis'
  * Rule folders whose findings fail `--gate`, as path prefixes from the root.
  *
  * Each folder's rewrite appends its own line once that folder reaches zero, so
- * the slices merge without touching one another's entries. `canon/` waits on
- * `plan.md`, which a later slice rewrites.
+ * the slices merge without touching one another's entries.
  */
 export const RULE_GATED_FOLDERS: readonly string[] = [
+  join('governance', 'rules', 'canon') + sep,
   join('governance', 'rules', 'claude') + sep,
   join('governance', 'rules', 'code') + sep,
   join('governance', 'rules', 'framework') + sep,
