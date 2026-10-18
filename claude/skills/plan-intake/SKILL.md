@@ -105,7 +105,7 @@ This overrides the paths-only reporting the project states generally, which stay
 - `.canon/intake/<nn>-<slug>/05-coverage.md` gains items 6 to 8 under a new `## What the merge gate covers`
 - `.canon/intake/<nn>-<slug>/00-overview.md` cluster rows and verdict counts updated
 
-**Routing:** <N> plan-ready, <N> groundwork candidates, <N> already settled
+**Routing:** <N> ready to plan, <N> groundwork candidates, <N> already settled
 
 **Open questions:** <N> awaiting your call
 
