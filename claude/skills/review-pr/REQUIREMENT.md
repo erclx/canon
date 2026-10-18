@@ -7,47 +7,28 @@ description: What the independent pull request review is for, the gaps it closes
 
 ## Gap
 
-Without this skill, a pull request is reviewed only by the session that wrote it, which cannot see the board's order or a sibling branch in flight. Findings land in chat, where they are read once and leave the thread with no record. A review that opens and never closes is worse than none, since a reader scanning the thread cannot tell an unanswered review from a confirmed one, and the author's claim that findings are fixed is the only evidence they are.
+Without this skill, a pull request is reviewed only by the session that wrote it, which cannot see a sibling branch in flight. Findings land in chat and leave the thread with no record. A review that opens and never closes is worse than none, since a reader cannot tell an unanswered review from a confirmed one.
 
-A finding also stops being true by argument rather than by a fix. A worker naming the plan question that already declined it, or a constraint the pass could not see, settles it in the exchange that carried the answer, and the pass that accepts the argument drops the finding from its next body. A reader then sees a finding raised once and never mentioned again, which is indistinguishable from one everyone forgot.
-
-A request written under `## For the reviewer` also reached no reader. The authoring standard names it as what the reviewing session should confirm, and nothing on this side read the section by that name, so a branch author's question sat in the body until this skill answered it.
-
-Scoping a later pass off GitHub's review stamp skipped real work. On 2026-09-07 an author pushed between a pass's read and its post, the stamp moved onto a commit that pass never saw, and the next pass scoped its delta past it and skipped a genuine fix. A closed review invites a second close-out too: on 2026-08-28 two passes over commits that raised nothing each posted a comment repeating the verdict above it, and the operator caught the pair rather than any check.
+A finding also stops being true by argument rather than by a fix, and dropping it silently reads like one everyone forgot. A `## For the reviewer` request reaches no reader unless this side reads it. Scoping a later pass off GitHub's review stamp skips real work, since the stamp follows an author's push onto a commit the pass never saw.
 
 ## Must
 
-- Post until the review closes. A first pass opens against the whole change, and each later pass checks whether the prior findings landed.
-- Set the heading from the finding count rather than the pass number, so the most recent review comment's heading reports whether anything is open
-- Detect the pass from the thread rather than taking it from the caller, matching the heading for equality so a neighboring comment cannot be read as a prior pass
-- Scope a later pass to the commits added since the prior one, once that commit is confirmed to still reach the head
-- Apply the integration, contract, and consumer lenses a self-review structurally cannot
-- Apply `canon:review-craft`'s axes and evidence bar, rendered output included, rather than carrying an axis list of its own
-- Read each test the branch added or changed against `canon:test-craft`'s final filter, scoped to those files and never the suite
-- Post the closing pass even with nothing to report, since a review left unanswered reads as one nobody closed
-- State a withdrawal or a regrade on the thread with the fact that settled it, since a finding dropped in silence reads the same as one nobody answered
-- Key the body file on the pull request number and the head commit, and on the response it answers once the head repeats, so no two passes overwrite each other
-- Link a file-bound finding to its line at the reviewed head, since a bare file block leaves a reader hunting the diff for the spot
-- Scan the comment for banned characters and internal phase labels before posting, since a finding phrased against a phase label reaches a reader with no task board
-- Answer a `## For the reviewer` bullet in the body, bounded to the section itself rather than the Summary or the Technical context around it, so the independent vantage stays clear of the author's framing
-- Confirm each `**Review focus:**` item the plan names on a first pass, and turn one the pass cannot confirm into a finding, since the planning session named the breaking inputs before the diff existed and no other reader holds that list
+- Passes post until the review closes, with the heading set from the finding count so the latest comment reports whether anything is open
+- The pass is detected from the thread by heading equality, and a later pass covers only the commits since the prior one, once that commit is confirmed to still reach the head
+- The review applies the integration, contract, and consumer lenses, `review-craft`'s axes and evidence bar, and `test-craft`'s filter over the tests the branch changed
+- A withdrawal or regrade is stated on the thread with the fact that settled it, and a `## For the reviewer` bullet and each `**Review focus:**` item are answered
+- The body file is keyed on the number, the head, and the response it answers, and the comment is scanned for banned characters and phase labels before posting
 
 ## Must not
 
-- Merge. Review and post, and leave the gate to the human.
-- Publish a claim the skill did not check. A failed fetch and a rebase both strand the prior commit, and only one of them is a rebase.
-- Invent a heading beyond the two it posts and the response heading `review-address` owns, or append a number GitHub already renders
-- Review local uncommitted changes
-- Lecture on process. The lenses land as findings, not as asides.
-
-## Guards
-
-- No open pull request for the target branch: stop and route to the local review skill
-- The fetch of the pull request head fails: stop rather than falling through to a full pass
-- The head repeats with no response since the prior pass: stop rather than posting a body restating one the folder holds
+- Merge, which stays the human's decision
+- Review local uncommitted changes, or run without an open pull request
+- Publish a claim it did not check, or fall through to a full pass when the head fetch fails or the head repeats with no response
+- Invent a heading beyond the two it posts and the one `review-address` owns
+- Lecture on process, since the lenses land as findings
 
 ## Out of scope
 
-- Fixing what it finds, which `review-address` owns. The split is by side of the channel: this one posts findings from an independent session and that one consumes them.
-- Reviewing local uncommitted work. This skill posts to a pull request it did not write.
-- Merging, which stays the human's decision
+- Fixing what it finds, which `review-address` owns
+- What a review looks for and how much evidence a finding needs, which `review-craft` owns
+- Which layer a test belongs at, which `test-craft` owns
