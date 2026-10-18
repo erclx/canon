@@ -119,14 +119,14 @@ This chain adds one thing. Mark the pull request as a draft as soon as `git-ship
 
 - Read `${CLAUDE_SKILL_DIR}/references/draft-mark.md` on reaching that point for the one command that proves the target, marks it, and reads the flag back
 - A `false` read stops the chain, and never re-issue the mark on it
-- Move to Step 7 on the wake after `git-ship`'s background CI watch exits on `passing`, not when the turn ends on its watch line
+- Act on the wake after the CI watch exits on `passing`, not when the turn ends on its watch line, moving to Step 7 under a named controller and to the Output block otherwise
 - Keep `git-ship`'s own verify gate, which repeats Step 3 on a clean run, since a resumed run enters at that gate
 
 ## Step 7: wait for the reviews
 
-Read review state through `canon pr review-state` alone, since both review families post as pull request reviews and the verb reads them the way `canon pr lift` does. Polling issue comments finds neither close, and a worker that did so stalled with both reviewers idle behind it.
+Run this step only when the launch named a controlling session, since only a controller dispatches the reviewers. A hand-launched run has nobody reviewing, so it emits the Output block on the CI wake instead of waiting on a pass that cannot arrive.
 
-Run this in the background, naming the number Step 6 returned. The wait outlasts a foreground shell call, so act on the wake rather than holding the turn.
+Read review state through `canon pr review-state` alone, since both families post as pull request reviews, and a worker polling issue comments instead stalled with both reviewers idle. Run it in the background with the number Step 6 returned, since the wait outlasts a foreground shell call, and act on the wake.
 
 ```bash
 canon pr review-state <number> --wait 1200 --json
