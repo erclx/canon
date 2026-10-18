@@ -25,7 +25,7 @@ Without this skill, a session editing the landing page or this repository's imag
 
 ## Must not
 
-- Restate the five conventions. `landing-page.md` is the single source, `v101.0` is rewriting two of them, and a copy here would be stale the day that lands.
+- Restate the five conventions. `landing-page.md` and `landing-style.md` are the single source, and a copy here would be stale the day either changes.
 - Restate the gotchas under `canon/context/development/web.md`. The ownership table in `CLAUDE.md` puts per-domain narrative in the context entry.
 - Own the design tokens. `canon/context/features/design.md` owns them and four surfaces read them, which makes them canonical rather than per-domain.
 - Absorb `examples/`. `canon/context/development/web.md` separates it from `assets/` on who each folder addresses, and a skill covering both would erase the line that decision draws.
