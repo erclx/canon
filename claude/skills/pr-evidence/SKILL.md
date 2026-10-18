@@ -35,7 +35,7 @@ Read `${CLAUDE_SKILL_DIR}/references/evidence.md` and run its sections in order 
 
 ## Report
 
-Print only the lines below whose condition holds, and nothing when none does. Print no result line of its own, since a caller such as `git-pr` prints one and then these lines.
+Collect only the lines below whose condition holds, and nothing when none does. A lone run prints them. A run another skill invoked hands them back to that caller and prints nothing, since `git-pr` prints its own result line and then these lines, and printing here too shows them twice.
 
 | Condition                                                 | Line                                                               |
 | --------------------------------------------------------- | ------------------------------------------------------------------ |
