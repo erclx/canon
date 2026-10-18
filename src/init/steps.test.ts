@@ -1,4 +1,16 @@
-import { describe, expect, it } from 'vitest'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { execa } from 'execa'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { GATED_CONFIG_REL } from '@/markdown/gated'
 import { type InitFlags, parseSkip } from '@/init/plan'
 import type { DomainStep } from '@/init/run'
 import { buildSteps } from '@/init/steps'
@@ -150,6 +162,7 @@ describe('buildSteps', () => {
       'Base tooling',
       'Claude workflow',
       'Governance',
+      'Markdown gating',
       'Records backup',
     ])
   })
@@ -159,6 +172,7 @@ describe('buildSteps', () => {
       'Base tooling',
       'Claude workflow',
       'Governance',
+      'Markdown gating',
     ])
   })
 
@@ -195,5 +209,73 @@ describe('buildSteps', () => {
     buildSteps('../app', '/abs/app', flags(), recorded.child)
 
     expect(recorded.calls.map(([verb]) => verb)).not.toContain('snippets')
+  })
+})
+
+describe('Markdown gating step', () => {
+  let target: string
+
+  beforeEach(async () => {
+    target = mkdtempSync(join(tmpdir(), 'canon-init-gating-'))
+    await execa('git', ['init', '-q'], { cwd: target })
+  })
+
+  afterEach(() => {
+    rmSync(target, { recursive: true, force: true })
+  })
+
+  function gatingStep(): DomainStep | undefined {
+    return buildSteps(target, target, flags(), recorder().child).find(
+      (step) => step.label === 'Markdown gating',
+    )
+  }
+
+  async function runStep(): Promise<boolean> {
+    const step = gatingStep()
+    if (step?.kind !== 'run') throw new Error('No markdown gating run step')
+    return step.run()
+  }
+
+  it('should gate a clean root and leave a failing one out', async () => {
+    writeFileSync(join(target, 'README.md'), '# App\n\nShort.\n')
+    mkdirSync(join(target, 'docs'))
+    writeFileSync(
+      join(target, 'docs', 'guide.md'),
+      `# Guide\n\n${'A sentence long enough to count here. '.repeat(12)}\n`,
+    )
+
+    expect(await runStep()).toBe(true)
+
+    const config = readFileSync(join(target, GATED_CONFIG_REL), 'utf8')
+    expect(config).toContain('"README.md"')
+    expect(config).not.toContain('"docs/"')
+  })
+
+  it('should keep an existing config untouched', async () => {
+    mkdirSync(join(target, 'canon', 'config'), { recursive: true })
+    writeFileSync(
+      join(target, GATED_CONFIG_REL),
+      '[markdown]\ngated = ["wiki/"]\n',
+    )
+
+    expect(await runStep()).toBe(true)
+    expect(readFileSync(join(target, GATED_CONFIG_REL), 'utf8')).toBe(
+      '[markdown]\ngated = ["wiki/"]\n',
+    )
+  })
+
+  it('should skip rather than fail outside a repository, writing no config', async () => {
+    const bare = mkdtempSync(join(tmpdir(), 'canon-init-bare-'))
+    try {
+      const step = buildSteps(bare, bare, flags(), recorder().child).find(
+        (each) => each.label === 'Markdown gating',
+      )
+      if (step?.kind !== 'run') throw new Error('No markdown gating run step')
+
+      expect(await step.run()).toBe(true)
+      expect(existsSync(join(bare, GATED_CONFIG_REL))).toBe(false)
+    } finally {
+      rmSync(bare, { recursive: true, force: true })
+    }
   })
 })

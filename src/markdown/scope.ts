@@ -37,11 +37,26 @@ const DENSITY_SCOPE = [
 ]
 
 /**
+ * The roots `canon init` gates in a new project when each passes at init time:
+ * every density surface a target authors itself, leaving out the toolkit's own
+ * `claude/skills/` and `tooling/` trees.
+ */
+export const GATED_SCOPE_ROOTS: readonly string[] = [
+  'canon/context/',
+  'docs/',
+  '.claude/skills/',
+  'wiki/',
+  'README.md',
+  'CONTRIBUTING.md',
+]
+
+/**
  * The path prefixes whose density findings fail a run, each added by the
  * rewrite batch that brought its folders to zero.
  *
  * It describes this repository's rewrite progress and nothing about a target's
- * corpus, which is why the audit reads it only inside a canon checkout.
+ * corpus, which is why the audit reads it only inside a canon checkout. A
+ * target keeps its own list in the file `src/markdown/gated.ts` reads.
  */
 export const GATED_PATHS: readonly string[] = [
   'canon/context/surfaces/',
@@ -114,6 +129,9 @@ export const GATED_PATHS: readonly string[] = [
   'claude/skills/docs-sync/references/readme.md',
   'claude/skills/document-health/SKILL.md',
   'claude/skills/document-health/references/axes.md',
+  'claude/skills/document-repair/REQUIREMENT.md',
+  'claude/skills/document-repair/SKILL.md',
+  'claude/skills/document-repair/references/batches.md',
   'claude/skills/pick-by-eye/REQUIREMENT.md',
   'claude/skills/pick-by-eye/SKILL.md',
   'claude/skills/pick-by-eye/references/live-arms.md',
@@ -307,15 +325,23 @@ export function inDensityScope(rel: string): boolean {
   return DENSITY_SCOPE.some((pattern) => pattern.test(rel))
 }
 
-/** Whether a density finding of this kind on this path fails the run. */
+/**
+ * Whether a density finding of this kind on this path fails the run.
+ *
+ * `alwaysGated` is off for a target's list, since no stage of a target's ever
+ * failed a push on a bullet run, and gating one unlisted would fail an older
+ * project's push on prose it has not touched since the limit landed.
+ */
 export function densityGates(
   rel: string,
   kind: DensityKind,
   gated: readonly string[] = GATED_PATHS,
+  alwaysGated = true,
 ): boolean {
   if (!inDensityScope(rel)) return false
   if (REQUIREMENT_SCOPE.test(rel)) return gated.includes(rel)
   if (
+    alwaysGated &&
     ALWAYS_GATED.includes(kind) &&
     BULLET_RUN_SCOPE.some((pattern) => pattern.test(rel))
   )

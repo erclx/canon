@@ -72,6 +72,8 @@ The default is `base`. Escalate only for a project writing code, and `target-set
 
 `canon init` installs base tooling, the Claude workflow, and governance. Pass `--stack <name>` for a language stack.
 
+Init then lists each markdown root that already passes the density limits in `canon/config/markdown.toml`, so those folders fail a push from the start. A root carrying a finding is named and left out, and `canon:document-repair` brings it to zero later. An existing config is kept as it is.
+
 - `--skip governance` leaves `.claude/rules/` empty. The run prints the `canon gov install <stack> <path>` command that restores the rules it dropped.
 
 ## Add a domain later
