@@ -1,5 +1,24 @@
 # Changelog
 
+## [5.43.0](https://github.com/erclx/canon/compare/v5.42.0...v5.43.0) (2026-10-18)
+
+
+### Features
+
+* **claude:** credit Claude as co-author on commits and pull requests ([#2463](https://github.com/erclx/canon/issues/2463)) ([047697e](https://github.com/erclx/canon/commit/047697ecb3eba5a869f978fc7abd020eca36d429))
+* **claude:** deny subagents and turn auto memory off by default ([#2475](https://github.com/erclx/canon/issues/2475)) ([10ac4f8](https://github.com/erclx/canon/commit/10ac4f88564dbc3ca0ebff06235e739e3c645187))
+* **gov:** check rule shape and source ledgers with gov audit ([#2466](https://github.com/erclx/canon/issues/2466)) ([485f65d](https://github.com/erclx/canon/commit/485f65db034c5cbecd18ac727ee3f7f44ab7340e))
+* **gov:** propose a design-reference rule on canon/design ([#2481](https://github.com/erclx/canon/issues/2481)) ([111def6](https://github.com/erclx/canon/commit/111def652f3a7d8cc0ac2b027520ebac240323d4))
+* **skills:** freeze a running build scope after dispatch ([#2462](https://github.com/erclx/canon/issues/2462)) ([67f0e69](https://github.com/erclx/canon/commit/67f0e69d44706e1b3b354a5a7a7d9ea059bc6b7c))
+* **skills:** name sessions by launch name in operator lines ([#2479](https://github.com/erclx/canon/issues/2479)) ([1ce5abd](https://github.com/erclx/canon/commit/1ce5abda4721e31eefa55561e66b4ace626f8f14))
+* **tooling:** add public add-on stack ([#2480](https://github.com/erclx/canon/issues/2480)) ([56f3ce3](https://github.com/erclx/canon/commit/56f3ce36fffd128fb57e685fffa617716e0ef34e))
+* **worker:** start the local preview server for a painted diff ([#2478](https://github.com/erclx/canon/issues/2478)) ([e3a0ec1](https://github.com/erclx/canon/commit/e3a0ec15c43d1831743707aa76ac7dfcac0fb890))
+
+
+### Bug Fixes
+
+* **gov:** audit every rule under a folder argument ([#2489](https://github.com/erclx/canon/issues/2489)) ([ddb86fe](https://github.com/erclx/canon/commit/ddb86fe4c064371f1cef699e14739cbc11f38c8c))
+
 ## [5.42.0](https://github.com/erclx/canon/compare/v5.41.0...v5.42.0) (2026-10-18)
 
 
