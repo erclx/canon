@@ -1,77 +1,32 @@
 ---
 name: session-relay
-description: Why a standalone skill with no firing condition never fired, why the first inline draft repeated the same protocol in two bodies, why the missing sender identity sat unaddressed through both attempts, and why the two guards that scoped it to a session holding a role and no send tool came off
+description: Why sending to another session is one skill any session reaches, why it resolves the address and names the sender, and why the message body and the addressee stay with the caller
 ---
 
 # Session relay requirement
 
 ## Gap
 
-Without this skill, every session that owes another session a message resolves
-the addressee itself. `role-worker` and `role-planner` each state the messages
-owed and each carried the resolution inline, and a session holding neither role
-carried it nowhere, so the mechanical half of the send existed in two copies
-plus however many a roleless caller improvised.
+Without this skill, every session that owes another a message resolves the addressee itself, so one protocol lives in each role body and in whatever a roleless session improvises, and a fix reaching one copy misses the rest. A skill matched only by request never fires, so firing rests on the pointer in each role's channel section.
 
-A standalone skill was proposed for the gap and declined the same day. It fired
-on no condition of its own, since nothing routes a session to a skill matching
-no request and reaching for no artifact, so a skill built to close the gap never
-closed it. That history is why the pointer inside each role's
-`## The channel` section still matters: it is a section both bodies read at
-session start rather than one reached by request match alone, and it is what
-makes the firing survive.
-
-The first draft of this plan closed the gap with a paragraph drafted inline,
-once inside `role-worker` and once inside `role-planner`. The operator overrode
-that call: two bodies carrying identical protocol text is the shared-surface
-case, since a later
-fix reaching one copy and not the other diverges silently.
-
-Neither attempt named who the relay is from. A message an operator relays by
-hand needs a sender as much as an addressee, and the standalone draft and the
-inline draft both composed a body and an addressee with no line stating whose
-turn produced it.
-
-Scoping the skill to a session holding a role and no send tool left two holes
-rather than one. A session holding neither role had no `## The channel` section
-to carry the pointer and was refused outright on arrival. A session that held a
-role and a send tool was refused too, which left the resolution ladder
-duplicated in both role bodies for the ordinary case. Both guards came off
-together, since the mechanics are the same whichever route carries the text.
-
-No governance rule carries the addressing or the reason for the order, so this
-body is the only surface stating either for a session holding neither role. A
-project that installs governance without the plugin therefore gets no surface
-telling a roleless session to send before it prompts, a cost the operator
-accepted over a rule loading into every session of every governed target.
+A relayed message goes out with no sender, so an operator carrying it cannot say whose turn produced it. A name prefix can resolve to the wrong session, and the send to it still reports success, so the message is lost with nothing flagging it. Nothing else tells a roleless session why a block goes out before a prompt.
 
 ## Must
 
-- Fire for any session sending to another session, with or without a role and with or without a message-sending tool
-- Read the sender's own name off `canon sessions list --self --json` before composing anything, and degrade to naming itself from the environment when the installed CLI answers `--self` with an unknown option rather than a refusal carrying a reason
-- Resolve the addressee from a `sessionId` or a branch at the moment of sending, never by a name prefix
-- Refuse a send to a row in another repository than the sender's, unless the caller names the operator's ask, and treat a sender with no roster row as unread rather than as a match
-- Check the resolved name against the agent listing, sending it bare under a single row and completing it with the `[ref]` under more than one
-- Send through a message-sending tool where one exists, and compose the copyable block where none does or where the listing carries no row to address
-- State why a block goes out before a prompt as the only surface carrying that reason, since no rule carries it and a caller restating the reason drifts from this body with nothing comparing them, while each caller still states that the message is owed
-- Carry the message body verbatim from whatever names it
-- Open the composed text with a header naming the sender, the addressee, and what the message is
-- State the header as a default a session may write around, rather than a fixed vocabulary
+- Any session sending to another reaches the skill, with or without a role and with or without a message-sending tool
+- The sender's name comes from `canon sessions list --self --json`, degrading to a name from the environment when the installed CLI lacks `--self`
+- The addressee resolves from a `sessionId` or a branch at the moment of sending, never by name prefix, is refused in another repository than the sender's unless the caller names the operator's ask (a sender with no roster row reads as unread, not a match), and is checked against the agent listing with its `[ref]` added under more than one row
+- The send goes through a message-sending tool where one exists, and a copyable block opening on a sender, addressee, and purpose header is composed where none does or the listing has no row
+- The body carries the message verbatim from its caller, and states why a block goes out before a prompt as the one surface holding that reason
 
 ## Must not
 
-- Draft a message body of its own. The text it composes belongs to the calling role's bullet or to the dispatch.
-- Decide who the message goes to. The caller names an id or a branch and this body turns it into an address.
-- Restate the last-rung inference `role-worker` and `role-planner` each carry, which differs between them
-
-## Guards
-
-- The roster cannot name the sender: report the refusal and its reason in place of a name
-- The resolution returns no row: report it rather than guessing, since the roster and the send channel enumerate different populations in both directions
-- The caller named no addressee at all: defer to the calling role's own last rung, and ask the operator where one is present
+- Draft a message body of its own
+- Decide who the message goes to, or guess an addressee when the resolution returns no row
+- Restate the last-rung inference the role bodies each carry
 
 ## Out of scope
 
-- Which messages are owed and when, which stays in the calling role's own bullet or in the dispatch
-- The last-rung inference, which stays in `role-worker` and `role-planner` because a worker holds a feature branch and a planner does not, so the two discriminate differently
-- Inbound reach as a distinct case. A relay in either direction is one session sending to another, which is what this body now covers.
+- Which messages are owed and when, which the calling role or the dispatch owns
+- The last-rung inference for a worker, which `role-worker` owns because a worker holds a feature branch
+- The last-rung inference for a planner, which `role-planner` owns because a planner holds none
