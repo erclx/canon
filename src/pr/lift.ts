@@ -144,7 +144,10 @@ function fail(gate: GateName, reason: LiftRefusal): GateResult {
  * since the commit it covers is a stamp GitHub wrote at submission, which the
  * marker exists to replace.
  */
-function reviewGate(reviews: readonly ReviewRow[], head: string): GateResult {
+export function reviewGate(
+  reviews: readonly ReviewRow[],
+  head: string,
+): GateResult {
   const scope = resolveReviewScope({ reviews })
   if (scope.state === 'none') return fail('review', 'review-missing')
   if (scope.state === 'open') return fail('review', 'review-open')
@@ -175,8 +178,8 @@ function carried(gates: readonly GateResult[]): {
  * checklist the reviewer drove as true as it was. A close that is not an
  * ancestor, which a force-push or a rebase leaves, never carries.
  */
-async function uiGate(
-  api: LiftApi,
+export async function uiGate(
+  api: Pick<LiftApi, 'readChanged'>,
   painted: PaintedPatterns,
   reviews: readonly ReviewRow[],
   head: string,
