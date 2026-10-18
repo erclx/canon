@@ -25,6 +25,8 @@ These three name the project's owner and terms.
 
 ### Release files
 
+These two start release-please at version zero.
+
 - Start `release-please-config.json` on the `simple` release type, with `initial-version` `0.0.1` and `bump-minor-pre-major` on.
 - Switch the type and add `extra-files` for a package that carries its version in a manifest.
 - Start `.release-please-manifest.json` at `0.0.0`.
