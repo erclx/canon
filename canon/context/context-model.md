@@ -19,7 +19,7 @@ Holds one folder per kind of domain, such as `development/`, `surfaces/`, `featu
 - A rule also buys conditional presence and a fix that governance sync carries to every project, which an eager `CLAUDE.md` line cannot
 - `index.md` is regenerated from each entry's `title` and `description` and is never hand-edited
 - An entry is created by hand to the shape in `claude/skills/context-fold/references/context.md`, which `context-fold` then keeps current at ship time and never creates
-- The stacks ship `development.md` and `ci.md` as user-owned seeds under `tooling/base/seeds/canon/context/`, so check both sources before calling an entry absent
+- The stacks ship `development/setup.md` and `development/ci.md` as user-owned seeds under `tooling/base/seeds/canon/context/`, so check both sources before calling an entry absent
 
 ### `canon/`
 
