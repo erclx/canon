@@ -10,8 +10,6 @@ One warm session holds the cross-feature call and reviews. Cold worker sessions 
 
 ## Four roles
 
-Each role is a Claude Code session that loads its role skill at the start.
-
 | Role         | Session                               | Owns                                                 | Does not                           |
 | ------------ | ------------------------------------- | ---------------------------------------------------- | ---------------------------------- |
 | Orchestrator | One warm, long-lived session          | The cross-feature call, review dispatch, merge order | Review in place, edit, merge PRs   |
@@ -23,7 +21,7 @@ Each role is a Claude Code session that loads its role skill at the start.
 - The orchestrator decides which rows conflict, what merges first, and whether a row runs at all. Per-row planning can go cold.
 - A dispatched planner writes only the plan, and reports what the task file got wrong rather than repairing it
 - A worker that halts on a plan question, or argues back against an instruction the tree contradicts, is working correctly
-- The orchestrator edits no tracked file. File a row with the defect and the surface, with no count and no asserted cause.
+- The orchestrator edits no tracked file. File a row with the defect and the surface, with no count or cause.
 
 ## The loop
 
@@ -66,9 +64,8 @@ Tasks in `.canon/tasks/` hold the active few, one file each. `priority.md` carri
 
 Stop adding worker tracks once you cannot review every output. A row waits only on a conflict a merge cannot settle, as the `role-orchestrator` runbook states. A shared file is not one, and the branch merging second resolves it. See [Fowler](https://martinfowler.com/articles/branching-patterns.html) and [DORA](https://dora.dev/capabilities/trunk-based-development/).
 
-- The orchestrator keeps one cross-branch pass per wave, and a wide wave bills its context through messages and polls
-- Unit checks, dev servers, end-to-end runs, and screenshots run in many worktrees at once, each on its own port
-- Singleton resources and any hand-fixed port still serialize
+- The orchestrator keeps one cross-branch pass per wave
+- Checks, dev servers, and screenshots run in many worktrees at once, each on its own port, while singleton resources serialize
 
 ## Related
 

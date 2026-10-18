@@ -55,14 +55,14 @@ Run independent features in parallel, one worktree and one session each. See [pa
 
 ### Autonomous ship
 
-On a mature stack with real verify commands, approve the plan and invoke `canon:auto-ship` to run implement, verify, and ship in one session.
+On a mature stack, approve the plan and invoke `canon:auto-ship` to implement, verify, and ship in one session.
 
 - It stops on a verify failure after one fix attempt, or on a hook failure, and you resume with `/git-ship`
 - Skip it for auth, migrations, security-sensitive changes, or an uncertain plan
 
 ### Review
 
-An independent session invokes `canon:review-pr` once the pull request is open, and the worker answers with `canon:review-address`.
+An independent session invokes `canon:review-pr` once the pull request is open, and the worker answers with `canon:review-address`. A verify failure goes to the session that built it, a design conflict to a new chat session with the plan, and a review finding to the worker.
 
 ### UI-heavy project
 

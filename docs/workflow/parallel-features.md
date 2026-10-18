@@ -11,7 +11,7 @@ Run independent features in parallel, one git worktree and one Claude Code sessi
 ## One worktree per feature
 
 - Invoke `canon:plan-feature` in each session. Plans land at `.canon/plans/feature-<slug>.md` at the main root.
-- `ui-checklist` writes a per-branch handoff at `tmp/handoff/ui-checklist/<slug>.md`, which `git-pr` posts and removes
+- `ui-checklist` writes a per-branch handoff at `tmp/handoff/ui-checklist/<slug>.md`, which `git-pr` posts and removes. The slug is the branch name minus its leading type segment.
 - Ship each worktree with `canon:git-ship`, or `canon:auto-ship` for a draft pull request
 - Only the operator or the controlling session readies a draft
 
@@ -56,6 +56,6 @@ Merge order matters only when two branches touch the same file. Expect to rebase
 - Every plan pointer resolves, every task file is named once, and every ready row names its files
 - A parked row is reported when its cited task reached the trunk
 
-`canon:task-board` creates a task file, and `canon:task-complete` marks outcomes. The `post-merge` hook archives the task a merged pull request closed, with its plan, and a `post-rewrite` hook does the same for a rebase pull.
+`canon:task-board` creates a task file, and `canon:task-complete` marks outcomes. The `post-merge` hook archives the task a merged pull request closed, with its plan, and a `post-rewrite` hook does the same for a rebase pull. Both archive only when the merge carried a PR number and the task is closed.
 
 `CANON_SKIP_RECLAIM`, `CANON_SKIP_UPGRADE`, and `CANON_SKIP_PLUGIN_UPDATE` turn off the three hook steps that act on the machine.

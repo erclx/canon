@@ -6,7 +6,7 @@ category: Workflow
 
 # Skill map
 
-Groups run in the order a project meets them. Every name `canon claude skills list --names` reports takes one row across this page and [skill map on request](skill-map-on-request.md), under the group its `metadata.family` names. A new group takes its entry in `src/claude/skills-families.ts` first.
+Groups run in the order a project meets them. Every name `canon claude skills list --names` reports takes one row across this page and [skill map on request](skill-map-on-request.md), under the group its `metadata.family` names.
 
 ## Set up a project
 
