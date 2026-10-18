@@ -1337,6 +1337,26 @@ async function checkParked(
   return { findings, untested }
 }
 
+/**
+ * The claims a group name makes about a row, being a stated plan and file set
+ * under `## Run now`, a live plan under `## Up next`, and none under
+ * `## Needs a plan`. The board verbs read these same findings off the board
+ * they are about to write, so a placement and a validation cannot disagree on
+ * what a group allows.
+ */
+export async function groupRuleFindings(
+  rows: readonly BoardRow[],
+  root: string,
+): Promise<Finding[]> {
+  const dir = tasksDir(root)
+
+  return [
+    ...checkPlans(rows, dir, root),
+    ...(await checkGroupClaims(rows, dir, root)),
+    ...checkTouches(rows),
+  ]
+}
+
 function refuse(reason: ValidateRefusal, message: string): ValidateRefused {
   return { ok: false, reason, message }
 }
@@ -1397,10 +1417,8 @@ export async function validateBoard(
   const findings = [
     ...shapeFindings,
     ...checkMapping(rows, backlog, dir),
-    ...checkPlans(rows, dir, root),
+    ...(await groupRuleFindings(rows, root)),
     ...(await checkPlanAgreement(rows, dir, root)),
-    ...(await checkGroupClaims(rows, dir, root)),
-    ...checkTouches(rows),
     ...checkOrdering(rows),
     ...parked.findings,
   ]
