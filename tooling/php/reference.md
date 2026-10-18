@@ -59,10 +59,6 @@ The manifest prepares a scaffold that lacks a `package.json`.
 - The manifest's `[verify] prepare` runs checklist steps 2 and 5 for `canon tooling verify php`, being `bun init -y` and the `composer require --dev` line.
 - The scaffold writes no `package.json`, and a verify that reaches its end with none fails.
 
-## Gitignore
-
-- `# PHP`: `vendor/`, `.php-cs-fixer.cache`, `.phpunit.cache/`, `.phpunit.result.cache`
-
 ## CI
 
 - Install PHP with `shivammathur/setup-php` and `tools: composer`.

@@ -10,7 +10,7 @@ paths:
 ## The manifest and reference pair
 
 - Edit `manifest.toml` and the stack's `reference.md` in the same change. Nothing compares them.
-- Restate every `[gitignore]` group verbatim in `reference.md`. A group edited in the manifest alone leaves the reference listing the old set.
+- Leave `[gitignore]` groups out of `reference.md`, since `canon tooling reference` prints them from the manifest, per the standard under Authority.
 - Write a `[gitignore]` group as an array on one line or wrapped across lines, since the manifest reader takes either whole. Leave the wrapping to the formatter.
 - Leave `[dependencies.dev]` empty when `runtime` is not `bun`, and document the manual install step in `reference.md`.
 

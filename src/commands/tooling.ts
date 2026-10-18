@@ -13,11 +13,16 @@ import { buildStackSummaries, describeStack } from '@/tooling/list'
 import {
   isStackExcluded,
   listStacks,
+  loadManifest,
   type Manifest,
   resolveChain,
   stackExists,
 } from '@/tooling/manifest'
-import { readReference, resolveReference } from '@/tooling/read'
+import {
+  readReference,
+  renderStackSections,
+  resolveReference,
+} from '@/tooling/read'
 import { scan, type ScanResult } from '@/tooling/scan'
 import { recordToolingChain } from '@/tooling/stamp'
 import { subfolderPath } from '@/tooling/subfolder'
@@ -303,6 +308,8 @@ function printReference(stack: string): number {
 
   logStep(resolved.source)
   process.stdout.write(readReference(resolved))
+  const manifest = loadManifest(resolved.root, stack)
+  if (manifest) process.stdout.write(renderStackSections(manifest))
   outro()
   return 0
 }
