@@ -42,6 +42,7 @@ function roster(sessions: readonly ResolvedSession[] = []): SessionReport {
     kind: 'resolved',
     dir: '/registry',
     confidence: 'confirmed',
+    foreignDead: 0,
     sessions,
   }
 }
@@ -54,6 +55,7 @@ function session(fields: Partial<ResolvedSession>): ResolvedSession {
     cwd: '/repo',
     kind: 'interactive',
     status: 'idle',
+    via: 'pid',
     startedAt: null,
     statusUpdatedAt: null,
     statusDwellMs: null,

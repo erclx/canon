@@ -36,6 +36,7 @@ function session(fields: Partial<ResolvedSession>): ResolvedSession {
     cwd: '/repo/worktrees/w1',
     kind: 'interactive',
     status: 'idle',
+    via: 'pid',
     startedAt: null,
     statusUpdatedAt: null,
     statusDwellMs: null,
@@ -55,6 +56,7 @@ describe('checkClaim', () => {
         kind: 'resolved',
         dir: '/registry',
         confidence: 'confirmed',
+        foreignDead: 0,
         sessions: [],
       }),
     })
@@ -81,6 +83,7 @@ describe('checkClaim', () => {
         kind: 'resolved',
         dir: '/registry',
         confidence: 'confirmed',
+        foreignDead: 0,
         sessions: [],
       }),
     })
@@ -102,6 +105,7 @@ describe('checkClaim', () => {
         kind: 'resolved',
         dir: '/registry',
         confidence: 'confirmed',
+        foreignDead: 0,
         sessions: [],
       }),
     })
@@ -117,6 +121,7 @@ describe('checkClaim', () => {
         kind: 'resolved',
         dir: '/registry',
         confidence: 'confirmed',
+        foreignDead: 0,
         sessions: [],
       }),
       branchRefs: async () => ({ readable: false, refs: [] }),
@@ -136,6 +141,7 @@ describe('checkClaim', () => {
         kind: 'resolved',
         dir: '/registry',
         confidence: 'confirmed',
+        foreignDead: 0,
         sessions: [],
       }),
     })
@@ -153,6 +159,7 @@ describe('checkClaim', () => {
         kind: 'resolved',
         dir: '/registry',
         confidence: 'confirmed',
+        foreignDead: 0,
         sessions: [session({ branch: 'feat/parser', repository })],
       }),
     })
@@ -169,6 +176,7 @@ describe('checkClaim', () => {
         kind: 'resolved',
         dir: '/registry',
         confidence: 'confirmed',
+        foreignDead: 0,
         sessions: [
           session({ branch: 'feat/parser', repository: '/other/.git' }),
         ],
@@ -203,6 +211,7 @@ describe('checkClaim', () => {
           kind: 'resolved',
           dir: '/registry',
           confidence: 'confirmed',
+          foreignDead: 0,
           sessions: [
             session({ branch: 'chore/toolkit-sync', repository: target }),
           ],
@@ -238,6 +247,7 @@ describe('checkClaim', () => {
           kind: 'resolved',
           dir: '/registry',
           confidence: 'confirmed',
+          foreignDead: 0,
           sessions: [
             session({ branch: 'chore/toolkit-sync', repository: target }),
           ],

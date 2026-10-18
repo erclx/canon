@@ -296,6 +296,7 @@ function row(pid: number, sessionId: string | null): ResolvedSession {
     cwd: `/repo/worktrees/w${pid}`,
     kind: 'interactive',
     status: 'idle',
+    via: 'pid',
     startedAt: null,
     statusUpdatedAt: null,
     statusDwellMs: null,
@@ -305,6 +306,81 @@ function row(pid: number, sessionId: string | null): ResolvedSession {
     unresolved: null,
   }
 }
+
+describe('resolveSessions from another pid namespace', () => {
+  const FOREIGN = {
+    pidDomain: 'linux:abc:pid:[4026532999]',
+    messagingSocketPath: '/run/user/1000/cc-socks/100.sock',
+  }
+
+  function reader(socketExists: boolean): LivenessProbes {
+    return {
+      procStartOf: () => null,
+      responds: () => false,
+      ownDomain: () => 'pid:[4026532221]',
+      socketExists: () => socketExists,
+    }
+  }
+
+  it('should keep a foreign row whose socket exists and mark it as socket evidence', async () => {
+    seed(100, FOREIGN)
+
+    const report = await resolveSessions({
+      dir: DIR,
+      probes: reader(true),
+      locate: locating('feat/parser'),
+    })
+
+    expect(report.kind === 'resolved' && report.sessions).toMatchObject([
+      { pid: 100, via: 'socket' },
+    ])
+    expect(report.kind === 'resolved' && report.confidence).toBe('unverified')
+  })
+
+  it('should count a foreign row whose socket is gone rather than listing it', async () => {
+    seed(100, FOREIGN)
+
+    const report = await resolveSessions({
+      dir: DIR,
+      probes: reader(false),
+      locate: locating('feat/parser'),
+    })
+
+    expect(report).toMatchObject({
+      kind: 'resolved',
+      sessions: [],
+      foreignDead: 1,
+    })
+  })
+
+  it('should leave a same-namespace dead row out of the foreign count', async () => {
+    seed(100, { ...FOREIGN, pidDomain: 'linux:abc:pid:[4026532221]' })
+
+    const report = await resolveSessions({
+      dir: DIR,
+      probes: { ...reader(true), procStartOf: () => 'other' },
+      locate: locating('feat/parser'),
+    })
+
+    expect(report).toMatchObject({
+      kind: 'resolved',
+      sessions: [],
+      foreignDead: 0,
+    })
+  })
+
+  it('should mark an ordinary row as decided by its pid', async () => {
+    seed(100)
+
+    const report = await resolveSessions({
+      dir: DIR,
+      probes: ALIVE,
+      locate: locating('feat/parser'),
+    })
+
+    expect(report.kind === 'resolved' && report.sessions[0]?.via).toBe('pid')
+  })
+})
 
 describe('callerIdentity', () => {
   it('should take the session identifier the environment states outright', () => {

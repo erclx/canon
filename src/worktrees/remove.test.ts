@@ -157,6 +157,7 @@ describe('removeReclaimable', () => {
         kind: 'resolved',
         dir: '/registry',
         confidence: 'confirmed',
+        foreignDead: 0,
         sessions: [],
       }),
       mergedPullRequests: async () => ({
