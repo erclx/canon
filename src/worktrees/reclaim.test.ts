@@ -447,6 +447,20 @@ describe('reclaimReport', () => {
     expect(report.reason).toBe('sessions-unreadable')
   })
 
+  it('should refuse the whole reading when foreign records have no answering socket', async () => {
+    linked('wt-parser', 'feat/parser')
+
+    const report = await reclaimReport({
+      cwd: ROOT,
+      resolve: async () => ({ ...roster(), foreignDead: 2 }),
+      mergedPullRequests: async () => merged(['feat/parser', 673]),
+    })
+
+    expect(report.kind).toBe('unreadable')
+    if (report.kind !== 'unreadable') return
+    expect(report.reason).toBe('sessions-unchecked')
+  })
+
   // One call for the whole repository rather than one per worktree, which is
   // nine network round trips at the board this was measured against.
   it('should read the pull request state once for every worktree', async () => {

@@ -657,6 +657,12 @@ function reportClaim(claim: ClaimReport): void {
     )
   }
 
+  if (claim.foreignDead > 0) {
+    logWarn(
+      `${claim.foreignDead} records from another pid namespace have no answering socket, so a session holding this branch may be missing. Treat it as unverified rather than clear.`,
+    )
+  }
+
   if (!claim.refsReadable) {
     logWarn(
       'The ref read failed, so this cannot say whether the branch already exists. Treat it as unverified rather than clear.',

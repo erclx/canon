@@ -109,6 +109,8 @@ const UNREADABLE: Record<Unreadable, string> = {
     'The pull request read failed, so every worktree would report as unmerged whatever its real state. Authenticate gh and run this again.',
   'sessions-unreadable':
     'The session roster could not be read, so nothing was read about which worktrees are still held.',
+  'sessions-unchecked':
+    'Some session records come from another pid namespace and no socket answers for them, so a live holder may be missing from the roster. Run this from the namespace the sessions run in.',
 }
 
 const CONDITIONS = [

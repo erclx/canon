@@ -1,4 +1,10 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { $ } from 'bun'
@@ -116,4 +122,62 @@ describe('canon sessions import', () => {
     expect(result.stdout).toBe('')
     expect(result.stderr).toContain(`claude --resume ${ID}`)
   })
+})
+
+describe('canon sessions list from another pid namespace', () => {
+  const FOREIGN_DOMAIN = 'linux:test:pid:[1]'
+  const readable = existsSync('/proc/self/ns/pid')
+
+  function seed(socket: string, socketPresent: boolean): void {
+    const registry = join(CONFIG, 'sessions')
+    mkdirSync(registry, { recursive: true })
+    if (socketPresent) writeFileSync(socket, '')
+    writeFileSync(
+      join(registry, '4242.json'),
+      JSON.stringify({
+        pid: 4242,
+        sessionId: 'id-4242',
+        cwd: REPO,
+        name: 'canon-4242',
+        kind: 'interactive',
+        status: 'idle',
+        startedAt: 1,
+        procStart: '1',
+        pidDomain: FOREIGN_DOMAIN,
+        messagingSocketPath: socket,
+      }),
+    )
+  }
+
+  it.skipIf(!readable)(
+    'should count a foreign record with no socket rather than call its session ended',
+    async () => {
+      seed(join(DIR, 'gone.sock'), false)
+
+      const result = await runSessions(['list', '--json'])
+
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        foreignDead: 1,
+        sessions: [],
+      })
+      expect(result.stderr).toContain('another pid namespace')
+      expect(result.stderr).not.toContain('has ended')
+    },
+  )
+
+  it.skipIf(!readable)(
+    'should keep a foreign record whose socket exists and warn that it rests on the socket',
+    async () => {
+      seed(join(DIR, 'live.sock'), true)
+
+      const result = await runSessions(['list', '--json'])
+
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        confidence: 'unverified',
+        foreignDead: 0,
+        sessions: [{ name: 'canon-4242', via: 'socket' }],
+      })
+      expect(result.stderr).toContain('messaging socket')
+    },
+  )
 })

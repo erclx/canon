@@ -67,8 +67,25 @@ describe('checkClaim', () => {
       sessions: [],
       refs: [],
       sessionsReadable: true,
+      foreignDead: 0,
       refsReadable: true,
     })
+  })
+
+  it('should carry the foreign dead count so an unclaimed answer reads as unverified', async () => {
+    const report = await checkClaim('feat/parser', {
+      cwd: ROOT,
+      resolve: async () => ({
+        kind: 'resolved',
+        dir: '/registry',
+        confidence: 'confirmed',
+        foreignDead: 3,
+        sessions: [],
+      }),
+    })
+
+    expect(report.claimed).toBe(false)
+    expect(report.foreignDead).toBe(3)
   })
 
   // The branch behind a merged pull request has no worktree and no session, and
@@ -273,6 +290,7 @@ describe('checkClaim', () => {
       sessions: [],
       refs: [],
       sessionsReadable: false,
+      foreignDead: 0,
       refsReadable: true,
     })
   })
