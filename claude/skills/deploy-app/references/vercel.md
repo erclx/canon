@@ -10,7 +10,8 @@ Run these steps once the body's Pick step resolves to Vercel. Read `vercel <comm
 ## Guard
 
 - If `vercel whoami` fails, stop: `❌ vercel is not authenticated. Run vercel login, then re-invoke.`
-- If `command -v jq` fails, stop: `❌ jq is not installed. Install it, then re-invoke.` Step 3 pipes its output into a secret, and a missing reader would set that secret empty while `gh secret list` still lists its name.
+- If `command -v jq` fails, stop: `❌ jq is not installed. Install it, then re-invoke.`
+- Step 3 pipes jq's output into a secret, and without jq the secret is set empty while `gh secret list` still lists its name
 
 ## Step 1: create and link the project
 
