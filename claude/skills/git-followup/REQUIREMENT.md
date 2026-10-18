@@ -7,38 +7,27 @@ description: What the follow-up push is for, the gaps it closes, and how it spli
 
 ## Gap
 
-Without this skill, an edit made after a pull request is already open ships as a bare push. The body still describes the scope from before the edit, so a reviewer returning to the page reads a description the diff no longer matches. A reviewer who left comments gets no reply, and when a caller has already posted its own reply, a second one lands underneath it.
+Without this skill, an edit made after a pull request opens ships as a bare push. The body still describes the scope from before the edit, and a review fix always changes what shipped, so the description a merge records is false by the time review ends. A reviewer who left comments gets no reply, or a second one under the caller's own.
 
-A caller that rebased the branch before handing over hits a rejected push, since the tracking branch no longer reaches the head. A branch entered through a worktree hits the opposite shape, carrying an open pull request with no tracking ref at all, which read as a branch that had never been pushed.
-
-A fix commit answering a review is the sharpest case of the first paragraph, since it always changes what shipped. The routing that once picked whether to sync the body keyed off the same branch that decides whether to reply, so reaching `reply-owned` or a nonzero comment count meant the sync never ran at all. The description a merge record carries was true when the pull request opened and false by the time review finished, with nothing between the two that read it back.
+The push itself fails on two branch shapes. A caller that rebased before handing over hits a rejected push, and a branch entered through a worktree carries an open pull request with no tracking ref, which reads as a branch never pushed.
 
 ## Must
 
-- Refuse unless the branch has an open pull request, since every later step addresses it
-- Set the tracking ref at the push when the branch has none, since a branch entered through a worktree carries an open pull request without one
-- Delegate the message to `git-commit` rather than composing one, so a follow-up commit reads like every other commit
-- Sync the body when the new commit moves the scope, and the title when the shift makes it inaccurate
-- Reply on the pull request when it carries review comments, and scan that reply for the banned characters and internal phase labels before posting. A hook on `Bash` scans the body file of that post and denies an inline body, so the reply goes through a file.
-- Suppress the reply when the caller owns it, and still run the push and the body sync
-- Post the evidence through `pr-evidence` and read `canon pr evidence <number> --check --json` after it, since a followup that posts the evidence and stops leaves the preview for a relay
-- Force the push under a lease when the tracking branch no longer reaches the head, so a caller's rebase lands and a commit this session never read is not overwritten
+- Every follow-up commit syncs the body when it moves the scope, and the title when the shift makes it inaccurate, whether or not a reply runs
+- The message comes from `git-commit`, so a follow-up reads like every other commit
+- A pull request carrying review comments gets one reply, scanned for banned characters and phase labels and posted through a file, and none when the caller owns it
+- The push lands on a branch with no tracking ref, and on a rebased one under a lease that protects a commit this session never read
+- The evidence is posted through `pr-evidence` and read back with `canon pr evidence <number> --check --json`
 
 ## Must not
 
-- Run on `main`
-- Open a pull request. A missing one is the stop condition, not a step to add.
+- Run on `main`, or with nothing changed
+- Open a pull request. A missing one is the stop.
 - Post a second reply when the caller has already replied
 - Emit anything after the result line
-
-## Guards
-
-- On `main`: stop and say to switch to a pull request branch
-- Nothing changed: stop
-- No open pull request: stop and route to the skill that opens one
 
 ## Out of scope
 
 - Opening the pull request, which `git-pr` owns and `git-ship` chains
-- Deciding what to fix from a review, which `review-address` owns. This skill is that flow's push leg and takes the fixes as already made.
-- Grouping a multi-concern diff, which `git-stage` owns. A follow-up is one concern by definition, which is why this skill stages everything into a single commit.
+- Deciding what to fix from a review, which `review-address` owns
+- Grouping a multi-concern diff, which `git-stage` owns
