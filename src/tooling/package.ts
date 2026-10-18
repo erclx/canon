@@ -30,6 +30,18 @@ export function readPackage(path: string): PackageJson | undefined {
 }
 
 /**
+ * Whether the chain asks for any dev dependency or script, which is what makes
+ * a missing package.json worth writing. A stack that installs nothing, such as
+ * the one `canon claude` drives, leaves a project without a manifest alone.
+ */
+export function declaresInstalls(chain: readonly Manifest[]): boolean {
+  if (collectDeps(chain, {}).length > 0) return true
+
+  const scripts = applyScripts({}, chain)
+  return scripts.added.length > 0 || scripts.overridden.length > 0
+}
+
+/**
  * The manifest a sync writes into a folder that has none. The name is the
  * folder's, reduced to the characters npm accepts, so it is never empty or
  * invalid.
