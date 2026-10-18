@@ -17,6 +17,7 @@ Each rule or fact lives in one surface. Others point at it. `canon/context/conte
 | Identity, goals, non-goals, constraints                                     | `canon/REQUIREMENTS.md`                                                   |
 | Behavior every session needs                                                | `CLAUDE.md`                                                               |
 | Behavior that fires on a path being edited                                  | `governance/rules/`, or `internal/rules/` for this repository alone       |
+| Sources behind an outside-practice rule                                     | `governance/ledger/`                                                      |
 | Shape of an artifact many sessions edit                                     | the owning skill's `references/`                                          |
 | What a session needs when editing domain X                                  | `.claude/skills/internal-<X>/SKILL.md`                                    |
 | What a domain does, where it lives, and the traps a session would hit in it | `canon/context/<X>/`                                                      |
