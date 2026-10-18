@@ -127,6 +127,7 @@ describe('governance/rules/ui', () => {
     expect(rulesMatching('ui', 'src/components/Card.astro')).toEqual([
       'a11y',
       'copy',
+      'design-reference',
       'forms',
       'interface-casing',
       'link-behavior',
