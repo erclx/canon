@@ -22,6 +22,8 @@ interface ScanRecord {
     readonly missing: string[]
   }
   readonly bannedCharacters: string[]
+  readonly missingClosures?: number[]
+  readonly strayClosures?: number[]
   readonly exitCode: number
 }
 
@@ -107,6 +109,76 @@ describe('canon labels scan text checks', { timeout: RUN_TIMEOUT_MS }, () => {
     expect(record.exitCode).toBe(2)
     expect(record.sections?.outside).toEqual(['## Commits', '## Whatever'])
     expect(record.sections?.missing).toEqual(['## Key changes'])
+  })
+
+  it('should fail a body missing the closing line --closes expects', async () => {
+    const body = await writeBody('## Summary\n\n- a\n\n## Key changes\n\n- b\n')
+
+    const record = await runScan([
+      '--title',
+      TITLE,
+      '--body-file',
+      body,
+      '--closes',
+      '12',
+    ])
+
+    expect(record.exitCode).toBe(2)
+    expect(record.missingClosures).toEqual([12])
+    expect(record.strayClosures).toEqual([])
+  })
+
+  it('should fail a closing line --closes did not name', async () => {
+    const body = await writeBody(
+      '## Summary\n\n- a\n\nFixes #99\n\n## Key changes\n\n- b\n',
+    )
+
+    const record = await runScan([
+      '--title',
+      TITLE,
+      '--body-file',
+      body,
+      '--closes',
+      'none',
+    ])
+
+    expect(record.exitCode).toBe(2)
+    expect(record.strayClosures).toEqual([99])
+  })
+
+  it('should pass a body whose closing lines match --closes', async () => {
+    const body = await writeBody(
+      '## Summary\n\n- a\n\nCloses #12\nCloses #13\n\n## Key changes\n\n- b\n',
+    )
+
+    const record = await runScan([
+      '--title',
+      TITLE,
+      '--body-file',
+      body,
+      '--closes',
+      '12,13',
+    ])
+
+    expect(record.exitCode).toBe(0)
+  })
+
+  it('should not grade closing lines without --closes', async () => {
+    const body = await writeBody(
+      '## Summary\n\n- a\n\nFixes #99\n\n## Key changes\n\n- b\n',
+    )
+
+    const record = await runScan(['--title', TITLE, '--body-file', body])
+
+    expect(record.exitCode).toBe(0)
+    expect(record.missingClosures).toEqual([])
+    expect(record.strayClosures).toEqual([])
+  })
+
+  it('should refuse a --closes value that is not a number list', async () => {
+    const record = await runScan(['--title', TITLE, '--closes', 'twelve'])
+
+    expect(record.exitCode).toBe(1)
   })
 
   it('should pass a body holding the required pair', async () => {
