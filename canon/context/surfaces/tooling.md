@@ -90,7 +90,8 @@ Runs `canon tooling verify <stack>` by scaffolding into `.canon/tmp/runs/verify-
 
 A few checks and finders sit beside the engine.
 
-- `tooling/*/reference.md` carries only what a config cannot express, and `internal/rules/claude/tooling-reference.md` holds its symmetry with the manifest
+- `tooling/*/reference.md` carries only what a config cannot express
+- `renderStackSections` in `src/tooling/read.ts` appends `## Sync` and `## Gitignore` to a printed reference, read from that stack's own manifest and folders
 - `ignoreParity` in `src/gate/boundaries.ts` fails when the repository `.gitignore` and the claude manifest disagree on `.canon/` or `.claude/worktrees/`, with no exception
 - A folder committed on purpose, such as `.claude/canon/`, belongs in neither list, and `diagrams` stays in `DEFAULT_FOLDERS` and `BACKED_FOLDERS` though a target ignores it
 - `seedRoots` in `src/tooling/seeds.ts` finds each `tooling/<stack>/seeds/` carrying `.claude/` or `canon/` for the seed gate
