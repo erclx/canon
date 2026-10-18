@@ -70,8 +70,7 @@ Restate each pick in one line, then continue the work.
 
 A pick that changes a written artifact goes into it under the rule its own standard sets, and a pick that settles nothing written stays in the session.
 
-- An answer to an open plan question rewrites its `- Suggested:` line to the pick, naming the operator as source, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`
-- Leave the `- Answer:` slot blank, since the standard bars a session from filling it, and the blank resolves to the rewritten suggestion
+- Record an answer to an open plan question per `### Overrides and settled questions` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`
 
 Output after the answers land:
 

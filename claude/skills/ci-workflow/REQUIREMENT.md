@@ -21,7 +21,8 @@ A cache keyed on a static string serves a stale browser or toolchain after a ver
 - Start the checks that share setup in one job and split them only once a run log puts the gate past roughly two minutes
 - Pin every action to a tag that cannot cross a major version
 - Key a cache on the version string of the thing it caches
-- Give every workflow a manual trigger beside its primary one
+- Give every workflow a manual trigger beside its primary one, except one that commits back, where a manual run has no branch to land on
+- Default the token to read-only and grant a write scope only on the job that needs it
 - Bound artifact upload to failures and set an expiry on it
 
 ## Must not

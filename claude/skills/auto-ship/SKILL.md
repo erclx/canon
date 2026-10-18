@@ -65,9 +65,9 @@ If neither form is present, stop: `❌ <path> carries no plan sections. A plan l
 
 ### Unanswered questions
 
-The plan's sections and answer contract are fixed by `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`. A blank `- Answer:` accepts the `- Suggested:` line above it, so an unanswered question is a decision this run executes rather than a reason to stop.
+Read `## The suggested-and-answer contract` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md` before acting on a question, for what it resolves to and the form an override takes. A question left open is a decision this run executes rather than a reason to stop.
 
-When this run decides against a suggestion, rewrite its line as `overridden at execution to <pick>,` plus the measurement, leaving `- Answer:` blank. Put the same deviation in one line under the open task's `## Findings`, opening with the bold source-and-date label `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
+Open the task's `## Findings` line for an override with the bold source-and-date label `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
 
 ## Step 2: implement
 

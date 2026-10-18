@@ -203,7 +203,7 @@ A deviation from an unanswered question rewrites the `- Suggested:` line to the 
 - The fixed phrase tells an override from an authored suggestion, which routinely carries a number too
 - Take a deviation from an answered question back to whoever answered it rather than rewriting either line
 - A filled slot is a decision already made, and a suggestion rewritten under one leaves two picks with no default resolving them
-- Answer in place when a question is settled in conversation, so the file and the decision do not disagree.
+- Record a pick settled in conversation on the `- Suggested:` line, naming who settled it, and leave the slot blank. A deviation from it goes back to whoever settled it.
 
 The plan is archived at ship, so the same deviation takes one line in the open task's `## Findings` naming what shipped. The plan holds why the pick moved and the task holds what the tree now has.
 

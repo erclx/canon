@@ -101,8 +101,8 @@ One rung stays here because it differs between roles. Inference takes the sessio
 
 A launch whose brief says it is a talk session puts the operator in this one. Everything above holds, and the clause below changes how questions are answered and when the role ends. A launch carrying no such sentence takes none of this.
 
-- Put each open question to the operator through the structured question surface before writing the record, and record a settled pick in place per the plan standard
-- Never fill an `- Answer:` slot the operator did not answer
+- Put each open question to the operator through the structured question surface before writing the record
+- Record each pick per `### Overrides and settled questions` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`
 - Keep answering under `plan-feature`'s discussion rounds after the record lands, since the operator launched this session to keep talking.
 - Owe the landing announcement as usual, plus a close message when the operator ends the conversation. Send an ask about a building row to the controller, never the worker.
 - Skip the before-prompt block message for a question put to the operator in the session. Keep it for a block the operator cannot answer, since a controller learns of a stall only from a message.

@@ -36,9 +36,9 @@ A ready folder and the draft mark each carry work another session already did, s
 
 ### Overriding a plan question
 
-Rewrite an unanswered question's `- Suggested:` line as `overridden at execution to <pick>,` plus the measurement when this build decides against it, leaving `- Answer:` blank, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
+Follow `### Overrides and settled questions` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md` when this build decides against a suggestion.
 
-Put the same deviation in one line under the open task's `## Findings`, opening with the bold source-and-date label `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
+Open the task's `## Findings` line for an override with the bold source-and-date label `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
 
 ### The preview server
 

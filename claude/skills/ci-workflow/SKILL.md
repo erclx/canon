@@ -17,7 +17,8 @@ Generate GitHub Actions workflow files for CI pipelines. Enforce parallel job ex
 
 ## Workflow setup
 
-- Include `workflow_dispatch` on every workflow alongside the primary trigger.
+- Include `workflow_dispatch` alongside the primary trigger, except on a commit-back workflow, where a manual run has no branch to commit onto and would pass while doing nothing.
+- Set `permissions: contents: read` at the top level, and grant a write scope only on the job that needs it.
 - Pin all actions to major version tags (`@v4`, never `@latest` or `@main`).
 - Use `runs-on: ubuntu-latest` for all jobs.
 
@@ -50,6 +51,14 @@ Generate GitHub Actions workflow files for CI pipelines. Enforce parallel job ex
 - Install with `bun install --frozen-lockfile`.
 - Cache Playwright browsers keyed on the Playwright version string, never a static key.
 
+## Commit-back
+
+A workflow that pushes a regenerated file onto the pull request branch takes these on top of the setup above.
+
+- Set the concurrency group on the ref so a newer push cancels the run committing onto a stale head.
+- Set `HUSKY: 0` on the commit step when the runner lacks a tool a hook shells out to.
+- Fail a template's first step while a path list still holds its placeholder, so an unfinished install fails loudly rather than never firing.
+
 ## Template
 
 Load `${CLAUDE_SKILL_DIR}/references/workflows.md` for the base workflow template. Adapt it to the project's stack, test commands, and build output. Add or remove jobs as needed. The template already carries the folded shape, and the split beside it applies once the granularity rule above calls for it.
@@ -58,7 +67,8 @@ Load `${CLAUDE_SKILL_DIR}/references/workflows.md` for the base workflow templat
 
 Before responding, verify:
 
-- `workflow_dispatch` is present alongside the primary trigger.
+- `workflow_dispatch` is present alongside the primary trigger, and absent from a commit-back workflow.
+- The top-level `permissions` reads `contents: read`, and every write scope sits on a job.
 - All actions pinned to major version tags, no `@latest` or `@main`.
 - A new pipeline folds static, unit, and build into one job, and a gate a run log put past two minutes gives them no `needs` so they run in parallel.
 - Every name in a `needs` matches a job declared in the same file. E2E names the artifact producer, release and deploy name E2E.
