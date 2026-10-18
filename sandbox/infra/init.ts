@@ -26,7 +26,7 @@ export default scenario({
       ctx.exec('bun', [join(ctx.root, 'src', 'cli.ts'), 'init', '.'])
     },
     'with-flags': (ctx) => {
-      ctx.log.step('Running: canon init --stack base --skip wiki .')
+      ctx.log.step('Running: canon init --stack base --skip records .')
       ctx.env.CANON_NON_INTERACTIVE = '1'
       ctx.exec('bun', [
         join(ctx.root, 'src', 'cli.ts'),
@@ -34,7 +34,7 @@ export default scenario({
         '--stack',
         'base',
         '--skip',
-        'wiki',
+        'records',
         '.',
       ])
     },

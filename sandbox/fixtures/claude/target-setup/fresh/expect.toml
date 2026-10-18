@@ -25,7 +25,6 @@ paths = [
   "CLAUDE.md",
   ".claude/rules/canon/claude/output.md",
   ".claude/rules/canon/canon/scratch.md",
-  ".claude/wiki/index.md",
   "commitlint.config.js",
 ]
 

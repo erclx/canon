@@ -100,7 +100,7 @@ log_step "Assert scaffold"
 # Authoring references name no path because they ship inside the plugin's
 # skills rather than installing into a target. The two
 # rule paths stand for the `claude` and `canon` groups `base` takes whole.
-for path in "CLAUDE.md" ".claude/wiki/index.md" ".claude" "canon/context/index.md" \
+for path in "CLAUDE.md" ".claude" "canon/context/index.md" \
   ".oxfmtrc.json" ".lintstagedrc" ".husky/pre-commit" ".github/workflows/verify.yml" "scripts/verify.ts" \
   ".claude/rules/canon/claude/output.md" ".claude/rules/canon/canon/scratch.md"; do
   if [ ! -e "$TARGET_DIR/$path" ]; then
