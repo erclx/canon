@@ -5,7 +5,7 @@ description: How git-pr finds the UI checklist and the local server, posts the e
 
 # Rendered-surface evidence
 
-The rendered-surface step of `git-pr`, reached after the final command printed the pull request number. The step runs on every pull request, with no test on the diff ahead of it. `no-evidence` is the silent branch, so a pull request that changes no rendered surface posts nothing.
+The rendered-surface step of `git-pr`, reached after the final command printed the pull request number. It runs on every pull request with no test on the diff ahead of it, since `no-evidence` is the silent branch for one that changes no rendered surface.
 
 ## Contents
 
@@ -17,76 +17,89 @@ The rendered-surface step of `git-pr`, reached after the final command printed t
 
 ## Find the UI checklist
 
-`ui-checklist` writes a visual checklist to `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root when a change needs visual verification, with `<slug>` derived per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`. This skill is the file's sole consumer. Resolve the main root the way `session-worktree` does (`git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-`, falling back to `pwd`) and check for the file there. A missing file means no checklist was produced, and the two steps below each skip their checklist half.
+`ui-checklist` writes a visual checklist to `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root when a change needs visual verification, with `<slug>` derived per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`. This skill is the file's sole consumer.
 
-When it exists, scan it against `${CLAUDE_SKILL_DIR}/references/publish.md` before either step posts it, the same as the pull request body in the skill's pre-publish scan.
-
-Where it lands is decided by the evidence step below rather than here, since a checklist reads next to the screenshots it annotates and posting it on its own is the fallback for a refused render.
+- Resolve the main root the way `session-worktree` does, `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-` falling back to `pwd`
+- A missing file means no checklist was produced, and the two steps below each skip their checklist half
+- Scan an existing file against `${CLAUDE_SKILL_DIR}/references/publish.md` before either step posts it, the same as the body
+- The evidence step decides where it lands, since a checklist reads next to its screenshots and posting it alone is the fallback for a refused render
 
 ## Find the local server
 
-A reviewer on the operator's machine can open the branch's running dev server, which screenshots and a checklist cannot stand in for. Ask the verb for the server this worktree is running before the evidence step, so the first evidence comment already carries the link:
+A reviewer on the operator's machine can open the branch's running dev server, which screenshots and a checklist cannot stand in for. Ask the verb before the evidence step, so the first evidence comment already carries the link:
 
 ```bash
 canon pr local --json
 ```
 
-The verb reads the listening sockets on this machine, keeps those whose process runs inside this worktree, and reports the lowest port serving an HTML page. A server in another worktree or in the main checkout is never reported, since it shows a different branch. `canon pr local --help` states the contract. Read `reason` on the record rather than the exit code.
+The verb reports the lowest port serving an HTML page whose process runs inside this worktree, never one in another worktree or the main checkout, which shows a different branch. `canon pr local --help` states the contract. Read `reason` on the record rather than the exit code.
 
 - `ok`: hold the record's `url` for the evidence step below.
-- `no-server` or `no-listener-reader`: hold the reason for the closing report, pass no link, and move on. Do not start a server here, since one started inside the ship chain has no owner to stop it.
-- Anything else, including no record at all: move on silently. An installed binary older than the verb answers with an unknown-subcommand error, which is a skip rather than a stop.
+- `no-server` or `no-listener-reader`: hold the reason for the closing report and pass no link. Never start a server here, since one started inside the ship chain has no owner to stop it.
+- Anything else, including no record or an older binary's unknown-subcommand error: move on silently, as a skip rather than a stop.
 
-Pass `--local` to the evidence step only on an `ok` here. The binary answering `ok` is the one carrying the flag, so a binary lacking the verb never meets a flag it would reject.
+### Where the link lands
 
-With a checklist, a diff carrying no evidence image still renders `ok`, and a local link rides in the same comment on the address line under `## Evidence`, above the checklist, so a reviewer gets both in one place. A local link with neither an evidence image nor a checklist still reports `no-evidence`, which keeps a branch that changed no rendered surface from getting a comment holding a link and nothing else.
+Pass `--local` to the evidence step only on an `ok`. The binary answering `ok` is the one carrying the flag, so a binary lacking the verb never meets a flag it would reject.
 
-A seeded workflow drops the whole address line once the pull request closes, hosted and local segments together and with no note in their place, so neither link outlives the branch it points at.
+- With a checklist, a diff carrying no evidence image still renders `ok`, and the link rides on the address line under `## Evidence`, above the checklist
+- A link with neither an evidence image nor a checklist still reports `no-evidence`, so a branch changing no rendered surface gets no comment holding a link alone
+- A seeded workflow drops the whole address line once the pull request closes, hosted and local together, so neither link outlives its branch
 
 ## Post the evidence comparison
 
-Run the verb once against the number the skill's final command printed. Pass `--checklist` when the checklist step found a file, and `--local` when the step above returned `ok`. Leave each flag off otherwise:
+Run the verb once against the number the final command printed. Pass `--checklist` when the checklist step found a file and `--local` when the step above returned `ok`, and leave each flag off otherwise:
 
 ```bash
 canon pr evidence <number> --checklist <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md --local <url> --json
 ```
 
-One call answers both questions because a checklist decides `no-evidence`. The verb renders `ok` on a diff carrying a checklist and no evidence image, with a marked body holding the checklist, so the checklist always lands in the one comment a later call finds and edits. Without a checklist, a diff carrying no evidence image reports `no-evidence`.
+One call answers both questions because a checklist decides `no-evidence`. A diff carrying a checklist and no evidence image renders `ok` with the checklist in a marked body, so the checklist lands in the one comment a later call finds and edits.
 
-Pass `--checklist` only for a file that exists. The verb refuses as `unreadable-checklist` on a path it cannot read or one holding nothing, which is a caller bug rather than a transient failure, so stop and repair the path rather than posting a body with the checklist silently dropped.
+- Pass `--checklist` only for a file that exists
+- The verb refuses as `unreadable-checklist` on a path it cannot read or one holding nothing, a caller bug rather than a transient failure
+- Stop and repair the path on that refusal rather than posting a body with the checklist silently dropped
+
+### Reading the record
 
 Read `reason` on the record rather than the exit code.
 
-- `no-evidence`: nothing changed under an `evidence/` segment and no checklist was passed, so no body was rendered. Say nothing about the evidence and move on.
-- `ok`: write `body` to `.canon/tmp/pr/evidence/body-<number>.md` at the main worktree root (resolved the way `session-worktree` does), then post or update the comment:
+- `no-evidence`: nothing changed under an `evidence/` segment and no checklist was passed. Say nothing about the evidence and move on.
+- `ok`: write `body` to `.canon/tmp/pr/evidence/body-<number>.md` at the main worktree root, then post or update the comment:
 
 ```bash
 gh api -X POST repos/{owner}/{repo}/issues/<number>/comments -F body=@<main-root>/.canon/tmp/pr/evidence/body-<number>.md --silent
 ```
 
-Both posts in this file go through the REST issue-comments endpoint, since the `gh pr` subcommands run on GraphQL and a cloud session's GitHub proxy refuses it. `git-followup` mints a preview through this file, so a GraphQL post here would break the cloud review-address leg.
+Both posts in this file use the REST issue-comments endpoint, since the `gh pr` subcommands run on GraphQL and a cloud session's GitHub proxy refuses it. `git-followup` mints a preview through this file, so a GraphQL post here would break the cloud review-address leg.
 
-When the record carries a `commentId`, edit that comment in place instead of posting a second one, reading the body field from the tmp file with `@`, which needs the typed-field flag `-F` because the raw-string flag `-f` posts the path itself as the body:
+When the record carries a `commentId`, edit that comment in place instead of posting a second. The body reads from the tmp file with `@`, which needs `-F`, since `-f` posts the path itself as the body:
 
 ```bash
 gh api -X PATCH repos/{owner}/{repo}/issues/comments/<commentId> -F body=@<main-root>/.canon/tmp/pr/evidence/body-<number>.md
 ```
 
-Delete the handoff file once that call reports success, per the cleanup below, since the checklist now lives on the pull request. Clean up the tmp body file the same way.
+Delete the handoff file and the tmp body once that call reports success, per the cleanup below, since the checklist now lives on the pull request.
 
-Any other `reason` is one of the mirrored git refusals (`gh-missing`, `gh-failed`, `no-base`, `unreadable-changes`, `would-empty`). Report it and move on without stopping the chain: a branch that carries no evidence images most of the time should not fail here on a transient git or `gh` read. Fall through to the checklist step, which posts the checklist alone rather than losing it to a transient read.
+### Git refusals
+
+Any other `reason` is a mirrored git refusal, being `gh-missing`, `gh-failed`, `no-base`, `unreadable-changes`, or `would-empty`. Report it and move on without stopping the chain, since a branch that rarely carries evidence images should not fail on a transient read.
+
+Fall through to the checklist step, which posts the checklist alone rather than losing it.
 
 ## Post the UI checklist alone
 
-Run this step only as the fallback, when the evidence step above reported one of the git refusals and a checklist file exists, since every other branch with a checklist rendered `ok` and carried it. The comment this posts carries no marker, so a later `canon pr evidence` call reports no `checklist` for it. Post it as its own comment on `<number>`:
+Run this step only as the fallback, when the evidence step reported a git refusal and a checklist file exists, since every other branch with a checklist rendered `ok` and carried it. The comment carries no marker, so a later `canon pr evidence` call reports no `checklist` for it.
 
 ```bash
 gh api -X POST repos/{owner}/{repo}/issues/<number>/comments -F body=@<main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md --silent
 ```
 
-Run the cleanup below only once the call that carried the checklist reports success, whichever of the two steps that was. On a failure, stop and leave the file in place: a retry needs the checklist to still be there, and deleting it on a failed post loses the only copy with nothing landed on the pull request.
+### Cleanup
 
-The cleanup is a main-root delete, so it goes out as a plain `rm` and then a plain `rmdir`, the file and then the folder, routed the way `session-worktree` states:
+Run the cleanup only once the call that carried the checklist reports success, whichever step that was. On a failure, stop and leave the file, since a retry needs it and deleting it loses the only copy.
+
+The cleanup is a main-root delete, so it goes out as a plain `rm` and then a plain `rmdir`, routed the way `session-worktree` states:
 
 ```bash
 rm <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md
@@ -96,29 +109,41 @@ rm <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md
 rmdir <main-root>/.canon/tmp/handoff/ui-checklist 2>/dev/null || true
 ```
 
-The `rmdir` is a no-op when another branch's pending checklist still sits in the folder, which keeps this step from deleting a handoff that is not its own.
-
-Deleting the file is what makes the later re-render safe. `git-followup` re-runs `canon pr evidence` with no `--checklist`, and the verb carries the checklist forward out of the comment it is editing, so the checklist survives the push. A tick survives a render at the head its stamp names and is cleared by one at a newer head, which leaves the next UI pass to earn it again.
+- The `rmdir` is a no-op while another branch's pending checklist sits in the folder, so this step never deletes a handoff not its own
+- `git-followup` re-runs `canon pr evidence` with no `--checklist`, and the verb carries the checklist forward out of the comment it edits
+- A tick survives a render at the head its stamp names and is cleared by one at a newer head, so the next UI pass earns it again
 
 ## Post the preview address
 
-Run this step when the evidence step above returned `ok`, a checklist was posted by the fallback, or `canon pr evidence <number> --check --json` lists `preview` in `owed`. The first two mean the pull request changes a rendered surface, and a reviewer holding a checklist with no screenshots needs the live page most. The third is how `git-ship` reaches this step alone when an earlier run's deploy timed out, so no evidence step ran in the current one. Otherwise skip it silently.
+Run this step when the evidence step returned `ok`, the fallback posted a checklist, or `canon pr evidence <number> --check --json` lists `preview` in `owed`. Otherwise skip it silently.
 
-The evidence comment is already posted, so the reviewer has the screenshots while the deploy runs. Mint the preview against the same `<number>`:
+- The first two mean the pull request changes a rendered surface, and a reviewer holding a checklist with no screenshots needs the live page most
+- The third is how `git-ship` reaches this step alone when an earlier run's deploy timed out
+- The evidence comment is already posted, so the reviewer has the screenshots while the deploy runs
 
 ```bash
 canon pr preview <number> --json
 ```
 
-The verb dispatches the project's Pages deploy on the pull request's branch and waits on the run for up to 15 minutes. It refuses before dispatching anything when the deploy command passes no `--branch`, since that deploy would publish the branch to production, and when the workflow's own push path filter matches no path the pull request changed, since a dispatch ignores that filter and the site it published would show none of the change. `canon pr preview --help` states the contract. Read `reason` on the record rather than the exit code.
+### What the verb refuses
 
-- `ok`: re-render the evidence body with the address on the line under `## Evidence`, then post or update it exactly as the evidence step does, through the same tmp file and the `commentId` the record carries:
+The verb dispatches the project's Pages deploy on the pull request's branch and waits on the run for up to 15 minutes. `canon pr preview --help` states the contract. It refuses before dispatching anything in two cases.
+
+- The deploy command passes no `--branch`, since that deploy would publish the branch to production
+- The workflow's push path filter matches no changed path, since a dispatch ignores that filter and the site would show none of the change
+
+### Reading the preview record
+
+Read `reason` on the record rather than the exit code.
+
+- `ok`: re-render the evidence body with the address under `## Evidence`, then post or update it as the evidence step does, through the same tmp file and the record's `commentId`:
 
 ```bash
 canon pr evidence <number> --preview <url> --json
 ```
 
-The hosted address opens the address line and a local link already on the comment follows it on the same line, carried forward with no flag.
+The hosted address opens the address line, and a local link already on the comment follows it, carried forward with no flag.
 
-- `no-deploy` or `unserved`: the project deploys nothing a dispatch can start, or nothing this branch changed is something its site builds from. Say nothing and move on.
-- Any other `reason`, being `unfenced`, `no-alias`, `run-failed`, `timeout`, or a mirrored `gh` refusal: report it with the record's `message` and move on without stopping the chain. A missing link costs the reviewer a click, and a held ship costs the whole chain.
+- `no-deploy` or `unserved`: the project deploys nothing a dispatch can start, or its site builds from nothing this branch changed. Say nothing and move on.
+- `unfenced`, `no-alias`, `run-failed`, `timeout`, or a mirrored `gh` refusal: report the record's `message` and move on without stopping the chain
+- A missing link costs the reviewer a click, and a held ship costs the whole chain

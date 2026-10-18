@@ -37,11 +37,11 @@ api = ["services/api/"]
 web = ["apps/web/", "packages/ui/"]
 ```
 
-A label takes more than one prefix when two folders read as one surface. Two labels may claim overlapping prefixes, and a path under both earns both.
-
-Matching is prefix-anchored, so a row written for an authoring root reaches nothing under the copy a project consumes. A surface living only under a dotted folder carries its own prefix on the row that owns its subject, and a folder holding several subjects rather than one splits across the rows that own them.
-
-The map is authored by hand, so a surface added after it was written labels nothing until someone adds a row. `canon labels audit` is what names that surface before the branch merges.
+- A label takes more than one prefix when two folders read as one surface, and a path under two overlapping labels earns both
+- Matching is prefix-anchored, so a row written for an authoring root reaches nothing under the copy a project consumes
+- A surface living only under a dotted folder carries its own prefix on the row owning its subject
+- A folder holding several subjects splits across the rows that own them
+- The map is hand-authored, so a surface added later labels nothing until someone adds a row, and `canon labels audit` names it before the merge
 
 ## Paths a map declines to label
 
@@ -55,44 +55,54 @@ release-managed = ["CHANGELOG.md", "package.json"]
 generated = ["build/manifest.json"]
 ```
 
-A table rather than a comment because the check reads it. A path here is a decision already taken and a path under neither table is a gap nobody has gotten to, and a report that could not tell those apart would be useful about neither.
-
-A path claimed by a `[domains]` row and a `[declined]` row takes the label. It already has a subject, so reporting it as deliberately unlabelled would contradict the label the same run applies.
+- It is a table rather than a comment because the check reads it, separating a decision already taken from a gap nobody has reached
+- A path claimed by both a `[domains]` row and a `[declined]` row takes the label, since it already has a subject
 
 ## Reporting a surface no row reaches
+
+The audit names every changed path no row reaches.
 
 ```bash
 canon labels audit --base <base> --json
 ```
 
-The record carries `labels`, `declined`, and `uncovered`. It exits 2 when `uncovered` has anything in it and 1 when it refuses, with `reason` naming the cause: `no-map` for a project that declared none, and a parse or range failure otherwise.
+The record carries `labels`, `declined`, and `uncovered`. It exits 2 when `uncovered` has anything in it and 1 when it refuses, with `reason` naming the cause, `no-map` for a project that declared none and a parse or range failure otherwise.
 
-It reports and never gates. Whether an uncovered surface deserves a label is a judgment only the person who owns that surface can make, and a push failing on one teaches a contributor to route around the check while nothing about the surface has changed.
-
-What it leaves unmeasured is a prefix reaching no path, so a row left behind by a deleted folder stays in the map. That is the map going stale from the other side and a second measure rather than this one.
+- It reports and never gates, since whether a surface deserves a label is a call only its owner makes
+- A push failing on one teaches a contributor to route around the check while the surface stays unchanged
+- A prefix reaching no path stays unmeasured, so a row left by a deleted folder stays in the map. That staleness needs a second measure.
 
 ## Matching
 
-- Take the changed set from `git diff --name-only <base>...HEAD`, resolved against the same base as the diff the body is written from. The three dots hold whether `<base>` arrives already resolved to a merge base or as a bare ref name, where the two-dot form is correct only in the first case and hands the branch somebody else's merged paths in the second
+- Take the changed set from `git diff --name-only <base>...HEAD`, against the same base the body is written from
+- The three dots hold whether `<base>` is already a merge base or a bare ref, where two dots would hand the branch somebody else's merged paths
 - A path earns a label when the path starts with one of that label's prefixes
 - Collect the distinct labels across the whole set, ordered as the map declares them, so two runs over one branch produce one string
 - Pass the result as a single comma-separated value. An empty result runs no labelling step.
 
 ## Applying
 
-Apply labels after the pull request resolves, never as a field on the create. A create carrying a label the remote lacks either fails whole or creates the label, depending on the surface, and neither is the map's call. One step against a pull request that already exists covers the create and the edit path alike. It runs over REST, so it works where GraphQL is blocked, and the REST endpoint creates any label it is handed that the remote lacks, so the step reads each name off the remote first and warns on a missing one rather than adding it.
+Apply labels after the pull request resolves, never as a field on the create. A create carrying a label the remote lacks either fails whole or creates the label, depending on the surface, and neither is the map's call.
 
-`canon labels apply <number>` is that step. It resolves the earned set from the pull request's own files listing, or from the git range when `--base` is passed, binds to the pull request only when its head is the current branch and it is open, and adds each earned label the pull request lacks. `--check` reports what is owed and writes nothing. The record carries `number`, `earned`, `present`, `added`, `owed`, `missingOnRemote`, and `uncovered`.
+- One step against an existing pull request covers the create and the edit path alike, over REST, so it works where GraphQL is blocked
+- The REST endpoint creates any label it is handed, so the step reads each name off the remote first and warns on a missing one
 
-A pull request opened outside this skill, such as by `gh pr create`, takes the same command, since nothing else labels it.
+### The apply verb
 
-Labelling runs whenever this skill runs and at no other time. Nothing else computes the set, so a push made any other way leaves the labels exactly as the last run left them. Any caller invoking this skill again reaches the step again, and it recomputes over the whole branch diff rather than over the new commits.
+`canon labels apply <number>` is that step. It resolves the earned set from the pull request's files listing, or from the git range when `--base` is passed, and adds each earned label the pull request lacks.
 
-An ordinary branch therefore labels once, when the pull request opens. The return leg that answers a review hands its push to `git-followup`, which refreshes the body without invoking this skill, so the commits that answer a review reach no labelling step.
+- It binds only when the pull request's head is the current branch and it is open
+- `--check` reports what is owed and writes nothing
+- The record carries `number`, `earned`, `present`, `added`, `owed`, `missingOnRemote`, and `uncovered`
+- A pull request opened outside this skill, such as by `gh pr create`, takes the same command, since nothing else labels it
 
-A follow-up push reaching a surface the earlier ones did not merges under-labelled, with nothing to report the miss. Keeping the step in one skill is worth that cost, since a review fix lands in the files the review named and rarely opens a surface the branch had not already touched.
+### When labelling runs
 
-The add endpoint adds and never removes. A label a person applied by hand is not this skill's to strip, and a re-run over a branch that has since dropped a surface keeps the label that surface earned.
+Labelling runs whenever this skill runs and at no other time, recomputing over the whole branch diff. A push made any other way leaves the labels as the last run left them, so an ordinary branch labels once, when the pull request opens.
+
+- The review return leg pushes through `git-followup`, which refreshes the body without this skill, so commits answering a review reach no labelling
+- A follow-up reaching a new surface merges under-labelled, a cost worth paying since a review fix rarely opens a surface the branch had not touched
+- The add endpoint never removes, so a hand-applied label stays and a surface the branch has since dropped keeps its label
 
 ## A label the remote does not carry
 
@@ -102,9 +112,9 @@ Warn and continue rather than creating it, naming the command in the warning:
 gh label create <name> --description "<text>"
 ```
 
-Creating a label writes to the repository settings from a run the user invoked to open a pull request, and a label created from a typo in the map is harder to notice than a warning is.
+Creating a label writes to the repository settings from a run invoked to open a pull request, and a label created from a map typo is harder to notice than a warning.
 
-The refusal names the label it rejected and applies none of the set, so a warning that reaches nobody leaves the run reading exactly like one that labelled. Surface it beside the result line rather than letting the pull request URL stand alone.
+The refusal names the label it rejected and applies none of the set, so an unseen warning leaves the run reading like one that labelled. Surface it beside the result line rather than letting the pull request URL stand alone.
 
 ## Release pull requests
 
@@ -118,14 +128,21 @@ The labels step of `git-pr` reads from here. Ask the CLI first:
 canon labels audit --base <base> --json
 ```
 
-The record carries `labels`, the set this branch earns, and `uncovered`, the changed paths no row of the map reaches. Join `labels` with commas into `pr_labels`, which the skill's final command takes. Report each `uncovered` path beside the result line, naming the map so the reader knows where a row would go, since a surface nobody covered merges bare and nothing else says so.
+Join the record's `labels`, the set this branch earns, with commas into `pr_labels`, which the final command takes. Report each `uncovered` path beside the result line, naming the map so the reader knows where a row would go, since an uncovered surface merges bare and nothing else says so.
 
-Branch on the record rather than on the exit. An operator's shell profile may wrap `canon` in a function whose status comes from a trailing command, and the binary exits 1 for an unknown subcommand and 1 for an ordinary refusal alike.
+### Reading the reason
 
-A `reason` of `no-map` is the answer that the project declared no map, which earns no labels and no warning: a label set this skill supplied would be a guess about that project's surfaces. Stop there and label nothing.
+Branch on the record rather than on the exit. A shell profile may wrap `canon` in a function whose status comes from a trailing command, and the binary exits 1 for an unknown subcommand and an ordinary refusal alike.
 
-Every other `reason` is a map or a range the verb could not read, which is `unreadable-map`, `no-domains`, `no-base`, and `unreadable-changes`, plus `bad-base` for a ref this skill resolved wrongly. Take the fallback below and warn beside the result line, naming the reason. A map with a typo in it still has rows a prefix match can reach, and reading the refusal as an absence would open the pull request with no labels and nothing said, which is the surface merging bare that the verb exists to name.
+- `no-map` means the project declared no map, so label nothing and warn about nothing, since a set this skill supplied would be a guess
+- `unreadable-map`, `no-domains`, `no-base`, `unreadable-changes`, and `bad-base` take the fallback below, with a warning naming the reason
+- A map with a typo still has rows a prefix can reach, and reading its refusal as absence would open the pull request bare and silent
 
-The fallback is reading `canon/config/pr-labels.toml`, or `.claude/canon/pr-labels.toml` when the project has not moved, and matching it against the name-only diff per `## Matching` above. It also covers no record coming back at all, which is an installed `canon` predating the verb, since a skill reaches a target the moment it merges while the CLI reaches one only when a release publishes. Naming both spellings matters exactly here: the binary old enough to need this fallback is the same binary that may predate the move, so the project's map can still sit at the older path. The fallback labels correctly. It reports an uncovered path only when `canon labels audit` answered, passing that record's `uncovered` on as `pr_uncovered`, and a binary too old for the audit has none to pass.
+### The fallback
 
-Leave `pr_labels` empty when no map resolves or no prefix matches, which skips the labelling command rather than running it against nothing.
+Read `canon/config/pr-labels.toml`, or `.claude/canon/pr-labels.toml` when the project has not moved, and match it against the name-only diff per `## Matching`. The fallback labels correctly.
+
+- It also covers no record at all, an installed `canon` predating the verb, since a skill reaches a target on merge and the CLI only on release
+- Both spellings matter here, since the binary old enough to need the fallback may predate the move too
+- It reports an uncovered path only when `canon labels audit` answered, passing that record's `uncovered` as `pr_uncovered`
+- Leave `pr_labels` empty when no map resolves or no prefix matches, which skips the labelling command

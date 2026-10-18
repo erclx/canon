@@ -14,7 +14,11 @@ The heading reports whether the branch owes anything, the way the code review's 
 - `## UI review` when a box failed, the sweep found a console error or an overflow, or a box was not driven for a cause on the page, such as a target the snapshot does not hold.
 - `## UI review closed` otherwise.
 
-A needs-eyes box leaves the review closed, and so does a box not driven for a cause off the page: an address that did not answer, or a `(local only)` box on a hosted preview. Each is owed to the person who merges rather than to the branch, and no commit on the branch can settle it, so opening the heading would hold the draft mark at every head. Name each such box in the count line's not-driven count and in its Not driven entry. Do not append the pull request number, which GitHub already renders.
+A needs-eyes box leaves the review closed, and so does a box not driven for a cause off the page, such as an address that did not answer or a `(local only)` box on a hosted preview.
+
+- Each is owed to the person who merges, and no commit can settle it, so opening the heading would hold the draft mark at every head
+- Name each such box in the count line's not-driven count and in its Not driven entry
+- Do not append the pull request number, which GitHub already renders
 
 ## The body
 
@@ -74,15 +78,35 @@ Driven at `<short-sha>` on <address>, rendered by <renderer>.
 
 The body opens on its count line, in that order, so the operator reads what they owe before anything else. The second line carries the address, the head, and the renderer, and says the address was driven unverified when it came from the local rung or the launch.
 
-Each section is dropped when it holds no box, along with its heading. Order is fixed: Failed, Needs your eyes, Not driven, then the folded blocks. A box takes exactly one section, chosen by its verdict, so a box that fails and also ends in `(taste)` appears once, under Failed.
+- Drop each section holding no box, along with its heading. Order is fixed: Failed, Needs your eyes, Not driven, then the folded blocks.
+- A box takes exactly one section by its verdict, so a box that fails and also ends in `(taste)` appears once, under Failed
+- Quote page text in backticks as content, never as the pass's own words
 
-A box in a section opens on its number and the box as written, in bold, with the reading beneath it in words. A failed box that rests on a frame shows that frame inline under its heading, the `![box <n>](link)` embed with the link exactly as `canon pr frames` returned it. It names the frame's path on the frames branch, which stays put while other pull requests' frames are dropped and carries this pass's stamp, so a later pass never changes the image. A failed box that rests on a read has no image.
+### A failed box
 
-A needs-eyes box shows its dark and light shots in a two-cell table ahead of anything else it carries, since the operator decides from them without opening the app. A cell is either the `link` Step 5 pushed or, for a theme the worker's evidence already shows, the evidence image at `https://github.com/<owner>/<repo>/blob/<head>/<path>?raw=true`, with `<path>` the matching state item's `path` off the evidence record. A box whose evidence holds one theme still renders both cells, one evidence link and one pushed link. A push that refused leaves its cell holding the words `not shown, <reason>`, so the table keeps its shape, and the box's line names what the frame showed. Never cite the local frame path, since a path under `.canon/` is a board identifier the label scan rejects.
+A box in a section opens on its number and the box as written, in bold, with the reading beneath it in words. A failed box that rests on a read has no image.
 
-The Passed block holds one row per passed box, with each row's measurement and the evidence stem it matched in backticks, so every reading stays one click away. A pass that cites a stem links it as the evidence image at the form above when the record holds the item. Omit the block when nothing passed.
+- A failed box resting on a frame shows it inline under its heading, the `![box <n>](link)` embed with the link exactly as `canon pr frames` returned it
+- That link names the frame's path on the frames branch, which stays put while other pull requests' frames are dropped and carries this pass's stamp
+- A later pass therefore never changes the image
 
-Omit the Sweep block when it found nothing, and the Guessed wording block when every box named its route and width, and drop the folded block when both are empty. Quote page text in backticks as content, never as the pass's own words.
+### A needs-eyes box
+
+A needs-eyes box shows its dark and light shots in a two-cell table ahead of anything else it carries, since the operator decides from them without opening the app. A box whose evidence holds one theme still renders both cells.
+
+- A cell is the `link` Step 5 pushed, or for a theme the worker's evidence shows, `https://github.com/<owner>/<repo>/blob/<head>/<path>?raw=true`
+- `<path>` there is the matching state item's `path` off the evidence record
+- A refused push leaves its cell reading `not shown, <reason>`, so the table keeps its shape, and the box's line names what the frame showed
+- Never cite the local frame path, since a path under `.canon/` is a board identifier the label scan rejects
+
+### The folded blocks
+
+The Passed block holds one row per passed box, with its measurement and the evidence stem it matched in backticks, so every reading stays one click away. A row citing a stem links it as the evidence image in the form above when the record holds the item.
+
+- Omit the Passed block when nothing passed, and the Sweep block when it found nothing
+- Omit the Guessed wording block when every box named its route and width, and drop the folded block when both are empty
+
+### An all-pass body
 
 A pass where every box passed is the heading, the count line, the folded Passed block, and the marker, with no empty headings:
 
@@ -104,23 +128,27 @@ The count line and the sections beneath it hold the same totals, and Step 10's p
 
 ## The marker
 
-End every body on `<!-- review-ui: head=<head> -->`, carrying the full sha Step 1 resolved. A body that replaces a standing close by `PUT` carries it too, at the head this pass drove. The orchestrator's poll reads it off the last non-empty line to decide whether the verdict covers the current head, and the submission stamp cannot answer that, since GitHub stamps it with whatever the head is at the moment of posting.
+End every body on `<!-- review-ui: head=<head> -->`, carrying the full sha Step 1 resolved. A body that replaces a standing close by `PUT` carries it too, at the head this pass drove.
+
+The orchestrator's poll reads it off the last non-empty line to decide whether the verdict covers the current head. The submission stamp cannot answer that, since GitHub stamps it with whatever the head is at the moment of posting.
 
 ## Posting
 
-Run `canon labels scan --body-file .canon/tmp/pr/review-ui/body-<number>-<short-sha>.md` against the body first, which applies the rule in `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md`, since nothing gates a file under `.canon/tmp/` before the review-event run does. Fix the body and scan again on a finding. Then post it as a review rather than an issue comment, since the poll reads the UI family off reviews:
+Run `canon labels scan --body-file .canon/tmp/pr/review-ui/body-<number>-<short-sha>.md` against the body first, which applies the rule in `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md`. Nothing gates a file under `.canon/tmp/` before the review-event run does. Fix the body and scan again on a finding.
 
-Do not run the post below when the newest verdict from Step 1 reads `## UI review closed` at an older head and this pass closes too. That pass replaces the standing close, so read `${CLAUDE_SKILL_DIR}/references/close-out.md` instead of posting. Posting first leaves two closes, both naming a head.
-
-Record the instant just before the post, in UTC, as `<posted-at>`. Step 9 keeps only review-event runs created after it, since the code review posts its own review on the same head and fires a run of the same gate.
+- Post it as a review rather than an issue comment, since the poll reads the UI family off reviews
+- Skip the post when Step 1's newest verdict reads `## UI review closed` at an older head and this pass closes too, and read `${CLAUDE_SKILL_DIR}/references/close-out.md` instead
+- Posting first in that case leaves two closes, both naming a head
+- Record the instant just before the post, in UTC, as `<posted-at>`, since Step 9 keeps only review-event runs created after it
+- The code review posts its own review on the same head and fires a run of the same gate, which is why that cutoff matters
 
 ```bash
 date -u +%Y-%m-%dT%H:%M:%SZ
 gh api -X POST 'repos/{owner}/{repo}/pulls/<number>/reviews' -f event=COMMENT -F body=@.canon/tmp/pr/review-ui/body-<number>-<short-sha>.md --jq .html_url
 ```
 
-The post goes through the REST reviews endpoint rather than the `gh pr` review subcommand, which runs on GraphQL and fails where a cloud session's GitHub proxy refuses it. `-F` reads the file into the body, where `-f` would post the path itself.
+The post goes through the REST reviews endpoint, since the `gh pr` review subcommand runs on GraphQL and fails where a cloud session's GitHub proxy refuses it.
 
-The ticks come after the post, in Step 8, so the verdict and the ticks report the same `<head>`. The post never ticks, and a pass that stops before posting ticks nothing.
-
-Never pass `event=APPROVE` or `event=REQUEST_CHANGES`, which carry a state the poll does not read and a weight this pass has not earned.
+- `-F` reads the file into the body, where `-f` would post the path itself
+- The ticks come after the post, in Step 8, so the verdict and the ticks report the same `<head>`. A pass that stops before posting ticks nothing.
+- Never pass `event=APPROVE` or `event=REQUEST_CHANGES`, which carry a state the poll does not read and a weight this pass has not earned

@@ -32,7 +32,16 @@ A box written before that format may carry no route, no width, and a verb such a
 - Text, presence, and attributes: `pw --raw eval "<expression>"`, quoting the value back.
 - Computed style: `getComputedStyle(<element>).<property>`.
 - Geometry and overflow: `getBoundingClientRect()`, and `scrollWidth` against `clientWidth` on `document.documentElement`.
-- A frame: `pw screenshot --filename=frames/<box-number>.png`, then open it with the file-reading tool before saying what it shows. A taste box takes the shot twice, once per theme, naming the theme in the file as `frames/<box-number>-<theme>.png`. Reach each theme through the page's own control when the box names one, and through `pw set-color-scheme <dark|light>` otherwise, then read the page's background before the shot to confirm it changed. A page that paints the same under both has no second theme to show, so the box is not driven, with the reason naming that. `pw clear-color-scheme` restores the default.
+- A frame: `pw screenshot --filename=frames/<box-number>.png`, then open it with the file-reading tool before saying what it shows.
+
+### Taste frames
+
+A taste box takes the shot twice, once per theme, naming the theme in the file as `frames/<box-number>-<theme>.png`.
+
+- Reach each theme through the page's own control when the box names one, and through `pw set-color-scheme <dark|light>` otherwise
+- Read the page's background before the shot to confirm the theme changed
+- A page painting the same under both has no second theme, so the box is not driven, with the reason naming that
+- `pw clear-color-scheme` restores the default
 
 ## The four verdicts
 
@@ -45,8 +54,19 @@ Each box takes exactly one.
 | needs eyes          | The box ends in `(taste)`                               | The dark and the light shot as a pair, each the matching evidence stem or a pushed frame's link, and what the frames showed, with nothing about whether it looks right |
 | not driven          | The state could not be reached                          | The reason, such as an unreachable address, a `(local only)` box on a hosted preview, or a target the snapshot does not hold                                           |
 
-A pass or fail resting on a frame carries one image at most, and never one the worker's evidence already shows. A needs-eyes box carries the pair, dark and light, since a taste call is made by comparing them. Match each theme separately: when a state and stem in the evidence record match the box's route, width, and that theme, the evidence names that stem and nothing is pushed for it, so a view with the dark shot in evidence pushes the light one alone. Otherwise the frame goes up through `canon pr frames` with `--theme`, and the `link` the record returned, which names the frame's path on the frames branch, goes in the box's own section of the body and never inside a folded block. Either way the words stay, describing the value or region judged, such as the element, its position, and the colors or text read, so a reader whose image fails to load can still check it.
-
-A push that refuses leaves the words alone, with the reason named. Never cite the local frame path. A path under `.canon/` is a board identifier the label scan rejects, and it resolves only on this machine.
-
 A fail names what was expected beside what was read. A not driven never reads as a fail, since it says the pass could not look rather than that the page is wrong. Its reason says whether the cause sits on the page or off it, since only a cause on the page opens the heading Step 7 picks.
+
+### Which image a verdict carries
+
+A pass or fail resting on a frame carries one image at most, and never one the worker's evidence already shows. A needs-eyes box carries the pair, dark and light, since a taste call is made by comparing them.
+
+- Match each theme separately. An evidence stem matching the box's route, width, and theme is named and nothing is pushed for it.
+- A view with the dark shot in evidence therefore pushes the light one alone
+- Otherwise push the frame through `canon pr frames` with `--theme`, and put the returned `link` in the box's own section, never inside a folded block
+
+### The words beside an image
+
+Either way the words stay, describing the value or region judged, such as the element, its position, and the colors or text read, so a reader whose image fails to load can still check it.
+
+- A push that refuses leaves the words alone, with the reason named
+- Never cite the local frame path, since a path under `.canon/` is a board identifier the label scan rejects and resolves only on this machine

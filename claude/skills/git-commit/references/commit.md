@@ -45,6 +45,8 @@ Does not govern:
 
 ### What a scope may not be
 
+A scope names a component, never a file or the type again.
+
 - Do not use specific filenames as scopes
 - Do not use a scope that duplicates the type
 - Write scopes for release readability. They surface in `changelogithub` release notes.
@@ -56,6 +58,8 @@ Does not govern:
 - Do not use vague verbs (`improve`, `refine`, `enhance`)
 
 ### Form and quoting
+
+The subject carries the change and nothing around it.
 
 - Do not repeat the scope in the subject line
 - Use single quotes if quoting
@@ -71,12 +75,16 @@ Does not govern:
 
 ### Correct
 
+Each line names a specific change in imperative mood.
+
 ```plaintext
 feat(api): add retry logic for failed webhooks       # specific verb + clear change
 fix(auth): update 'UserSession' validation logic     # scoped + imperative + single quotes
 ```
 
 ### Incorrect
+
+Each line breaks at least one rule above, noted in its comment.
 
 ```plaintext
 fix(user-auth): Fixed the redirect loop.    # wrong casing + period + multi-word scope
