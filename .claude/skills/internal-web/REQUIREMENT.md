@@ -7,40 +7,26 @@ description: Why the outward-facing surface needs a domain skill beside the path
 
 ## Gap
 
-Without this skill, a session editing the landing page or this repository's images:
+Without this skill, a session drafts a landing page change without opening the `web/**` rule and reproduces failures it names, or paraphrases that rule into a plan a worker then enforces wrongly. It types a count the CLI reads at build time, and hand-edits a generated frame under `assets/` that the next regeneration overwrites.
 
-- Drafts a page change without opening `internal/rules/claude/landing-page.md`, which is scoped to `web/**` and holds conventions that fail silently. A five-round drafting pass did this and reproduced three of the failures the rule names.
-- Paraphrases a convention into a plan rather than citing the rule, so a worker enforces a requirement the rule does not carry. One plan restated an image convention as a rule about where an `img` tag sits, where the actual convention is about what wrote the file.
-- Types a count into the page. Every count is read from the CLI at build time, and a typed one ships looking correct.
-- Hand-edits a generated frame under `assets/`, which the next regeneration overwrites and which the drift gate reports only once the digests disagree.
-- Ships a page change without `bun run web:build`, which is the only typecheck `web/` gets, since the `types` stage in `src/gate/stages.ts` never matches a web-only diff.
-- Writes a string into `copy.ts` with no readme anchor, or with a line number, or with a paraphrase marker over a string that also quotes.
+It ships a page change without `bun run web:build`, the only typecheck `web/` gets since the gate's types stage never matches a web-only diff. It writes a `copy.ts` string with no readme anchor, with a line number, or with a paraphrase marker over a string that also quotes.
 
 ## Must
 
-- Point at `canon/context/development/web.md` and at the path-scoped rule rather than restating either, so a rule rewrite moves what a reader sees without touching this skill.
-- Say to open the rule before drafting rather than after, since the failure this addresses is a draft produced without it.
-- Carry the citation contract in a reference the session opens when editing `copy.ts` rather than in the body every session loads.
-- Carry a sync checklist naming the build, the suite, and the gate, since `web/` is outside the automated typecheck and a session cannot infer that from the tree.
+- The skill points at `canon/context/development/web.md` and the path-scoped rule rather than restating either
+- The rule is opened before drafting, not after
+- The citation contract sits in a reference opened when editing `copy.ts`
+- A sync checklist names the build, the suite, and the gate
 
 ## Must not
 
-- Restate the five conventions. `landing-page.md` and `landing-style.md` are the single source, and a copy here would be stale the day either changes.
-- Restate the gotchas under `canon/context/development/web.md`. The ownership table in `CLAUDE.md` puts per-domain narrative in the context entry.
-- Own the design tokens. `canon/context/features/design.md` owns them and four surfaces read them, which makes them canonical rather than per-domain.
-- Absorb `examples/`. `canon/context/development/web.md` separates it from `assets/` on who each folder addresses, and a skill covering both would erase the line that decision draws.
-
-## Guards
-
-No refusal strings. This is a domain skill loaded before editing rather than a procedure with entry conditions.
+- Restate the landing conventions or the entry's gotchas
+- Own the design tokens, which `canon/context/features/design.md` holds for four surfaces
+- Absorb `examples/`, which the web entry separates from `assets/` by reader
 
 ## Out of scope
 
-- `internal-teach` covers the learning surface and its fixture.
-- `internal-docs` covers `docs/`, which this routes to through `canon:docs-sync` and does not edit.
-- `internal-scripts` covers `src/` and the regeneration scripts. This covers the surface those scripts render.
-- `pick-by-eye` decides how a surface should look. This is for editing one whose look is settled.
-
-### The open question this cannot answer
-
-Whether a session loads this rather than relying on the rule firing at edit time and the context entry arriving through the eagerly loaded index. Both already reach a web edit, which is the strongest argument against this skill existing, and the gap it claims is that neither carries the procedure: the rule states conventions without saying to read it first, and the entry states gotchas without a checklist. Re-read this criterion once a few sessions have edited `web/` with the skill in place. If it turns out nothing loads it, retire it and move the checklist into the context entry rather than leaving a third surface nobody opens.
+- The learning surface and its fixture, which `internal-teach` owns
+- `docs/`, which `internal-docs` owns
+- `src/` and the regeneration scripts, which `internal-scripts` owns
+- Deciding how a surface should look, which `pick-by-eye` owns
