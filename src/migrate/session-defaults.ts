@@ -25,6 +25,12 @@ export interface SessionDefaultsPlan {
   readonly keys: readonly SettingsKey[]
   readonly next: SettingsRecord
   readonly changed: boolean
+  /**
+   * True when the file holds no default at all. A file holding either one has
+   * been through the seed or this verb, so a missing deny there was removed
+   * on purpose, which is how an operator opts back into subagents.
+   */
+  readonly predates: boolean
 }
 
 export type SessionDefaultsRead =
@@ -68,7 +74,12 @@ export function planSessionDefaults(
     { label: 'permissions.deny', changed: missing.length > 0 },
     { label: 'autoMemoryEnabled', changed: memoryAbsent },
   ]
-  return { keys, next, changed: keys.some((key) => key.changed) }
+  return {
+    keys,
+    next,
+    changed: keys.some((key) => key.changed),
+    predates: memoryAbsent && missing.length === DENIED_TOOLS.length,
+  }
 }
 
 /**

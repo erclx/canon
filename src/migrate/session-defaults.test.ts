@@ -68,6 +68,24 @@ describe('planSessionDefaults', () => {
     expect(plan.next.autoMemoryEnabled).toBe(true)
   })
 
+  it('should read a file holding none of the defaults as predating them', () => {
+    const plan = planSessionDefaults({ permissions: { deny: ['Read(.env)'] } })
+
+    expect(plan.predates).toBe(true)
+  })
+
+  it('should not read a file whose deny was removed as predating them', () => {
+    const plan = planSessionDefaults({ autoMemoryEnabled: false })
+
+    expect(plan.predates).toBe(false)
+  })
+
+  it('should not read a file holding one denied tool as predating them', () => {
+    const plan = planSessionDefaults({ permissions: { deny: ['Task'] } })
+
+    expect(plan.predates).toBe(false)
+  })
+
   it('should report nothing changed when both defaults are present', () => {
     const plan = planSessionDefaults({
       autoMemoryEnabled: false,

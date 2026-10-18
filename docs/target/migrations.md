@@ -139,7 +139,7 @@ The toolkit no longer seeds `canon/ARCHITECTURE.md`, and a held file and its `CL
 
 ## Deny subagents and turn auto memory off, once
 
-The seeded `.claude/settings.json` now denies the `Agent` and `Task` tools and sets `autoMemoryEnabled` to `false`. `canon claude sync` never rewrites a settings file you hold, so it warns until you add both.
+The seeded `.claude/settings.json` now denies the `Agent` and `Task` tools and sets `autoMemoryEnabled` to `false`. `canon claude sync` never rewrites a settings file you hold, so it warns while the file holds neither default. Removing the deny later to allow subagents draws no warning.
 
 ```bash
 canon migrate session-defaults --json

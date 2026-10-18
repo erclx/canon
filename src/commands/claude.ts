@@ -667,7 +667,7 @@ async function runSync(target: string): Promise<number> {
   // Sync never rewrites an existing settings file, so a target seeded before
   // the session defaults learns of them only here.
   const defaults = await readSessionDefaults(resolved, PROJECT_ROOT)
-  if (defaults.kind === 'planned' && defaults.plan.changed) {
+  if (defaults.kind === 'planned' && defaults.plan.predates) {
     logWarn(
       'settings.json lacks the session defaults. Run `canon migrate session-defaults --write`',
     )
