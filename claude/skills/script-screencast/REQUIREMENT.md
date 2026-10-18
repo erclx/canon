@@ -7,34 +7,28 @@ description: Why a recording script ships pre-seeded rather than blank, what the
 
 ## Gap
 
-Without this skill, a recording plan arrives as a wall of blank fields, so the user fills a template instead of editing a draft and the work the skill was meant to do lands back on them. The opposite failure costs more. A session that skips discovery guesses the audience, the length, and the hero moment, then writes five beats for a video nobody asked for, and every one of them has to be thrown away rather than edited.
+Without this skill, a recording plan arrives as blank fields, so the user fills a template instead of editing a draft. The opposite failure costs more. A session skipping discovery guesses the audience, the length, and the hero moment, and writes beats that get thrown away. What surrounds the take surfaces only at compose time.
 
-A draft that names the recording software, the editing software, or the window manager pins the script to one machine and one person's setup, so it stops being reusable the moment anyone else records. And re-invoking to refine silently overwrites the edits the user made in the file, which is the one failure that destroys work rather than wasting it.
+A draft naming the recording software, the editing software, or the window manager pins the script to one person's setup. Re-invoking to refine silently overwrites the edits the user made in the file, which destroys work rather than wasting it.
 
 ## Must
 
-- Read project context and recent commits before proposing, since what shipped recently is usually the subject
-- Ask exactly four discovery questions, each carrying a default derived from that context
-- Wait for answers rather than reading silence as acceptance
-- Pre-seed every section with concrete content so the draft is shippable as written and the user edits down
-- Derive the slug from the topic and the discovery answers
-- Write to `demos/<slug>/beats.md` at the project root, the committed folder the rest of the demo lives in, and print that path on its own line
-- Seed a wrap section naming intro, outro, and music with a default each, so the choice of what surrounds the take is made at draft time rather than discovered at compose time
+- Project context and recent commits are read before proposing, and exactly four discovery questions each carry a default derived from them
+- The run waits for answers rather than reading silence as acceptance
+- Every section is pre-seeded with concrete content, so the draft ships as written and the user edits down
+- The draft lands at `demos/<slug>/beats.md` at the project root, with the slug derived from the topic and the answers, and its path printed on its own line
+- A wrap section names intro, outro, and music with a default each
 
 ## Must not
 
 - Name recording software, editing software, fonts, or window managers
 - Record, edit video, or generate captions
 - Re-run against an existing draft to refine it, since re-running overwrites
-- Infer the hero moment without asking, which is the beat the whole script is built around
-
-## Guards
-
-- No topic provided: stop rather than guessing what is being recorded
+- Infer the hero moment without asking, or guess the topic when none is given
 
 ## Out of scope
 
 - Producing the recording, which `record-screencast` owns
-- Refining an existing draft, which is a direct edit of the file
 - Slide decks, which `make-deck` owns
-- Where the recording ships, which the draft lists and the user decides
+- Refining an existing draft, which a direct edit of the file owns
+- Where the recording ships, which the user owns

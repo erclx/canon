@@ -44,7 +44,7 @@ This skill carries the step before the search. Work out where the field's author
 
 ## Access note
 
-Each line is a claim measured once, and `${CLAUDE_SKILL_DIR}/REQUIREMENT.md` records the date under its Gap. Sites change their blocking without notice, so re-check a line before relying on it. Add a line only for a failure a session actually hit, and record the date it hit in the requirement beside it.
+Each line is a claim measured once, and the commit that adds it carries the date. Sites change their blocking without notice, so re-check a line before relying on it. Add a line only for a failure a session actually hit.
 
 - Reddit refuses its RSS feed and its JSON search alike with a 403. `WebFetch` is refused for the site, so no keyless route reaches it.
 - X answers nothing without paying or a login. `curl` redirects to a login page and `WebFetch` returns 402.

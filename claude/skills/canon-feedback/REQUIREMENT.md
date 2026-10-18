@@ -7,36 +7,28 @@ description: Why a toolkit defect is reported from session context alone, and wh
 
 ## Gap
 
-Without this skill, a toolkit defect noticed inside a target project dies with the session. The user is told to mention it in the toolkit repository later, which means retyping a report they no longer have the context to write, so the defect is either reported badly or not at all.
+Without this skill, a toolkit defect noticed in a target project dies with the session. The user retypes a report later without the context, so it is reported badly or not at all. A block printed in chat needs a copy-paste into another repository, which gets skipped under time pressure, and a report naming no surface cannot be routed.
 
-The report itself fails two ways. A block printed in chat needs a copy-paste into another repository, and a step that manual is skipped under any time pressure. A report that names no surface cannot be routed, because the toolkit acts on a plugin skill, a CLI command, and a seed through different paths, and the difference is not recoverable from the symptom.
-
-The last failure is the session's own effort. Asked to report, a session starts diagnosing instead, searching the toolkit and reading its surfaces to find the cause. That spends the context the report was meant to capture cheaply, and it produces a diagnosis from a project that cannot see the toolkit's current source.
+Asked to report, a session also starts diagnosing, which spends the context the report was meant to capture and yields a diagnosis from a project that cannot see the toolkit's source.
 
 ## Must
 
-- Build the report from what the session already holds
-- Name the surface and its type, since the toolkit routes on that rather than on the symptom
-- Write the stated fallback for a field the session cannot fill, so an empty field reads as absent rather than as unreported
-- Open a GitHub issue on the toolkit repo through the CLI so the report lands where triage reads it, and print the returned URL on its own line
-- Surface the block and the reason when the issue call fails, since a failure that prints nothing leaves the report where nothing reads it
-- Carry the whole request in the issue body alone, since a comment is easy to miss and a body and a comment that differ leave triage choosing
+- Build the report from what the session already holds, name the surface and its type, and write the stated fallback for a field it cannot fill
+- Carry the whole request in the issue body alone, since a body and a comment that differ leave triage choosing
+- Open a GitHub issue on the toolkit repository through the CLI and print the returned URL on its own line
+- Surface the block and the reason when the issue call fails or the CLI is absent, so the report still exists
 - Hold a report the operator marks sensitive, since the issue is public
-- Fall back to printing the block when the CLI is absent, so the report still exists
 
 ## Must not
 
 - Probe the project, list files, grep, or read toolkit surfaces to enrich the report
-- Guess the surface type when the session is ambiguous. Ask one line.
+- Guess the surface type when the session is ambiguous
 - Diagnose or fix, which needs the toolkit's source rather than the target's
-
-## Guards
-
-- Nothing in session context pointing at a toolkit issue stops, since a report assembled from nothing wastes the triage it reaches
+- Report from a session holding nothing that points at a toolkit issue
 
 ## Out of scope
 
 - Fixing the defect, which happens in the toolkit repository against its own source
-- Draining the queue this fills: `canon-feedback-triage`
-- Filing an issue against the current project, which `git-issue` does and this skill cannot delegate to, since that skill targets the current repository
+- Draining the queue this fills, which `canon-feedback-triage` owns
+- Filing an issue against the current project, which `git-issue` owns
 - Complaints about tooling the toolkit does not own

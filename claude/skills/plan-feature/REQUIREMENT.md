@@ -7,37 +7,28 @@ description: What feature planning is for, the gaps it closes, and why it stops 
 
 ## Gap
 
-Without this skill, implementation starts before anyone knows what it touches. A session reads no project context and rediscovers a settled constraint halfway through, the file list emerges as the work goes rather than before it, and the ambiguities that needed a decision get resolved silently in whichever direction the first edit happened to go. A constraint naming a surface to leave alone forbids two different acts at once, so the executing session picks one and the branch either grows an excluded concern or ships a reference to a file the change deleted.
+Implementation starts before anyone knows what it touches. A session rediscovers a settled constraint halfway through, and an ambiguity gets resolved silently in whichever direction the first edit went. A feature stacked into pull requests over the same files pays the review cost once per slice.
+
+A constraint naming a surface to leave alone forbids two acts at once, conforming it and retargeting a pointer into it. A vague ask reaches the plan with no checkable criterion, and a decision rests on a practice recalled from memory.
 
 ## Must
 
-- Read the project's own Claude setup before scanning source, so the plan inherits decisions already made instead of reopening them
-- Reframe a vague ask as observable, checkable success criteria before listing any file, and carry each criterion into the plan's verification, so a plan never ships a check with nothing measurable to prove
-- Slice batches by a user-visible path rather than by layer, and sequence the riskiest batch first while a sweep stays last, so the batch most likely to change the plan lands while later ones can still move, and fold a stacked batch that shares most of its files into its parent unless the plan writes down why the two are judged apart, since a canvas inspector built as five stacked pull requests over 26 files paid the full review, rebase, and merge cost five times
-- Predict the operator's answers to the next three questions about the ask's success criteria, proceed on the ones it can predict, and ask when it can predict none, since a plan built on a guessed goal proves the wrong thing
-- Fetch the outside source a decision rests on, quote the passage relied on in the plan's `**Sources:**` section, and mark a source it could not fetch as unverified, since a planner that paraphrases a practice from model memory ships an unaudited claim. A measured planner run fetched its sources only after a follow-up message asked, and the `search-craft` measured run shows a plain research request never loaded that skill unprompted
-- Name every file the work touches with the reason it is touched
-- Place each new path against the layout guidance with a one-clause reason, loading that guidance only when the plan creates a file or folder, since the planner decides placement and the worker copies whatever path it is given
-- Name how each outcome is proven and which input or state would break the change, so the executing session has a check to run and the reviewer has a place to look
-- Surface each unresolved ambiguity as a numbered question carrying a suggested answer and an empty answer slot, so the plan is decision-ready in one pass
-- State which act a constraint forbids when it names a surface to leave alone, since conforming that surface and retargeting a pointer into it are different acts and only one is out of scope
-- Scale the output to the work. A two-file change with nothing to decide should not produce a plan file.
-- Stop at the plan and wait to be told to continue
+- Read the project's Claude setup before scanning source, and name every file the work touches with the reason it is touched
+- Reframe a vague ask as observable success criteria, carry each into the plan's verification, and ask when none can be predicted
+- Slice by user-visible path with the riskiest batch first, and fold a stacked batch sharing most of its files into its parent unless the plan says why they differ
+- Quote the fetched passage behind each outside source, mark an unfetched one unverified, and place each new path against the layout guidance with a one-clause reason
+- Surface each ambiguity as a numbered question with a suggested answer and an empty slot, and stop at the plan
 
 ## Must not
 
 - Implement, or edit any file the plan describes
-- Read directories speculatively. Context spent on files the feature does not touch is context the plan does not get.
-- Bundle independent concerns into one plan, since a plan covering two things gets executed as neither
-- Restate the plan in chat during follow-up rounds. The file is the source of truth and a chat copy of it goes stale immediately.
-
-## Guards
-
-- No feature description: stop and ask for one
-- No predictable success criterion: ask before planning rather than guessing the goal
+- Read directories speculatively, since context spent on files the feature does not touch is context the plan does not get
+- Bundle independent concerns into one plan
+- Restate the plan in chat during follow-up rounds, since the file is the source of truth
 
 ## Out of scope
 
-- Executing the plan, which is the ship pipeline
-- Task-board state, which `task-board` owns. A plan links to its task and does not create one.
-- Reconciling the context entries after the work lands, which `context-fold` owns, and marking the board, which `task-complete` owns
+- Executing the plan, which `auto-ship` owns
+- Creating a task for the plan, which `task-board` owns
+- Reconciling the context entries after the work lands, which `context-fold` owns
+- Marking the board, which `task-complete` owns

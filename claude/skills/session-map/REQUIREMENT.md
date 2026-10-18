@@ -7,44 +7,28 @@ description: Why the write procedure needs a board-side route for the orchestrat
 
 ## Gap
 
-Without this skill, the standard governing the pre-compaction handoff carries a complete numbered write procedure and nothing routes a session to it. The reading half already works, since the resume path opens the newest map and leads its report with it, so a file nobody is routed to write is read by a surface built to find it.
+Without this skill, the standard for the board-side handoff carries a full write procedure and nothing routes a session to it, though the resume path reads the newest map first. The only other routed writer is the orchestrator role, which hands a plain session a section it cannot fill.
 
-The only routed writer belongs to the orchestrator role. It disables model invocation, asserts that role on invocation, and adds a section for decisions taken under delegated authority, so a plain feature session that reaches it receives a section it cannot fill and a review poll it does not run.
-
-The drift step is the one most specific to session length and the easiest to skip. It reads the commit the session started from, nothing on the machine records that commit, and a route that names the step without naming how to recover the ref ships an instruction nobody can follow.
-
-A step that reads a surface a project may not carry gets skipped on the reasoning that it has nothing to act on. A cold session run against a project with no `.claude/` tree skipped the drift step and wrote its own rationale into the map, so the step the route exists to carry did not run on the first test from outside. The skip is worst where it looks most defensible, and a session that takes it quietly leaves a map indistinguishable from a conforming one.
-
-A body that restates the sections, the frontmatter, or the numbered steps becomes a second source that drifts from the standard, which is the failure the split between the role writer and the core was made to remove rather than move.
+The drift step reads a start commit nothing on the machine records, so naming the step without its recovery ships an instruction nobody can follow. Where the step's surface is missing, a session skips it as having nothing to act on and leaves a map that looks conforming. A body restating the standard drifts from it.
 
 ## Must
 
-- Write for an orchestrating session, or on a request naming the session map or the board, without asserting a role the session does not hold
-- Cite the standard for the filename, the frontmatter, the sections, the numbered procedure, and the citation rule rather than restating any of them
-- Run the drift step and state how to recover the ref it reads from how long the session has run
-- Record what the drift verb names, and read a refusal as the boundary of what the verb can read
-- Resolve the folder at the main worktree root, and write the file whole from the shell where the editing tools refuse that root
-- Fall back to the branchless filename on an empty slug rather than stopping
-- Leave model invocation enabled, so a session that has dropped its routing still reaches this by description
+- An orchestrating session, or a request naming the session map or the board, reaches the write without the skill asserting a role the session does not hold
+- The filename, frontmatter, sections, numbered steps, and citation rule come from the standard by citation, never restated
+- The drift step runs, its start ref is recovered from how long the session has run, and what the verb names or refuses is recorded as the boundary of what it read
+- The file lands whole at the main worktree root, through the shell where the editing tools refuse that root, under the branchless filename when the slug is empty
+- Model invocation stays enabled, so a session that has dropped its routing still reaches the write by description
 
 ## Must not
 
-- Restate the standard's sections, frontmatter, or numbered steps
 - Skip a step by predicting what its skill or verb would have answered, rather than running it and recording what came back
-- Assert a role, or add a role's section to a map written by a session holding no such role
+- Add a role's section to a map written by a session holding no such role
 - Take the worktree-local copy the editing tools offer in place of the main-root path
-- Summarize the board, the task files, or the work that shipped, each of which is carried by an artifact a compaction leaves standing
-
-## Guards
-
-- Not a git repository: stop, since the filename comes from the branch
-- Empty slug: fall back rather than stop, since the reasoning is worth more than the name
-- The drift verb refusing: record the boundary under standing cautions and keep writing
+- Summarize the board, the task files, or the shipped work, each of which survives a compaction on its own
+- Write a map outside a git repository, since the filename comes from the branch
 
 ## Out of scope
 
-- The handoff a plain session writes before a compaction, which is a note outside the board with no drift step and no `## State`: `session-compact`. Both skills once claimed the phrases "write the handoff" and "about to compact", so this description narrows to the orchestrator and to a request naming the map or the board, and a plain session belongs to `session-compact`.
-- Reading a handoff back at the start of the next session: `session-resume`
-- The sections a role adds over the core three, which belong to that role's own surface. `role-orchestrator` owns the orchestrator's and cites this route for the generic half.
-- Validating a written map against the standard, which no record kind covers, so a conforming shape rests on the standard being followed
-- Firing the write without being asked, which is a question about what the harness supports and is measured on its own track
+- The note a plain session writes before a compaction, outside the board and with no drift step, which `session-compact` owns
+- Reading a handoff back at the start of the next session, which `session-resume` owns
+- The orchestrator's sections over the core three, which `role-orchestrator` owns
