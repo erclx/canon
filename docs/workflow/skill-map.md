@@ -67,7 +67,7 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 | `canon:docs-sync`     | A change left `README.md` or `docs/` stale    |
 | `canon:git-stage`     | Staged changes span several concerns          |
 | `canon:git-commit`    | Staged changes are one concern                |
-| `canon:git-branch`    | A branch name needs generating or renaming    |
+| `canon:git-branch`    | A branch needs creating, naming, or renaming  |
 | `canon:git-pr`        | A pull request needs a title and body         |
 
 ## After the pull request opens
