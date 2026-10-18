@@ -7,37 +7,26 @@ description: What skill creation is for, the gaps it closes, and why it confirms
 
 ## Gap
 
-Without this skill, a new skill lands in the wrong shape and the wrong place. A session writes `SKILL.md` from its own idea of the format, writes malformed frontmatter that Claude Code routes on, and never opens the authoring standard that already answers every question it guessed at.
+Without this skill, a new skill lands in the wrong shape and place. A session writes `SKILL.md` and its frontmatter from its own idea of the format and never opens the authoring standard. With no requirement beside it, a later sweep must reconstruct what the skill was for.
 
-A skill born without its requirement is the second failure, and it surfaces much later. Coverage of the corpus is what the operator reads to decide whether a skill should exist, so every skill created without the sibling decays that reading, and the sweep that closes the gap has to reconstruct what the skill was for from the body it already shipped.
-
-A third failure is a folder created for a moment a rule, a verb, or an existing skill already reaches, or for a procedure no session would get wrong from first principles. Nothing caught that before the folder existed, so the corpus grew by a skill an inward audit later had to argue for removing, with only a commit body recording the argument.
-
-A fourth failure is dated provenance in the body. A target asked for an edit citing a measurement taken that day, and the draft carried "measured on" and the date inline, with the authoring standard, the markdown audit, and this skill all passing it. A body collecting those notes reads as history rather than as the rule a session follows.
-
-A fifth failure is the confirmation itself. A worker running a plan that adds a skill reached Step 4, asked a person nobody had dispatched, and the chain parked on a question nobody read. The same description named only the `.claude/skills/` root, which is where a target authors and where a toolkit checkout keeps its `internal-*` skills, but not where its plugin skills live.
+Nothing checks the folder before it exists, so a skill appears for a moment a rule, a verb, or a sibling already reaches. Bodies collect dated provenance. The confirm step stalls an unattended run, and a checkout keeps internal and plugin skills in different roots.
 
 ## Must
 
-- Read the authoring standard and the prose standard before drafting, so the draft starts conformant rather than getting corrected into shape
-- Answer, in writing, whether a rule, a verb, or an existing skill already reaches this moment, and whether the body carries a procedure a session would get wrong from first principles. A folder that fails either belongs to the surface that already covers it, not to a new skill.
-- Draft the sibling `REQUIREMENT.md` beside the body, from what the skill is for rather than from the drafted body
-- Confirm the name and both files with the user before writing, where a person is present to answer. The name is the routing key and a folder that disagrees with its frontmatter fails silently. Where nobody is present, record the three answers and both paths in the output and write.
-- Write to the conventional skills path, so discovery finds it without configuration. That is `.claude/skills/` in a target project. In the toolkit's own checkout, which the project root's `claude/.claude-plugin/plugin.json` marks, an `internal-*` skill goes under `.claude/skills/` and a plugin skill under `claude/skills/`
-- Leave the skills audit's dated-provenance check clean for the new folder before reporting it, with each incident cut and left to git
+- Read the authoring standard and the prose standard before drafting
+- Answer in writing whether a rule, a verb, or a skill already reaches this moment, and whether a session would get the procedure wrong unaided, since a folder failing either belongs elsewhere
+- Draft the sibling `REQUIREMENT.md` beside the body from what the skill is for, never from the drafted body
+- Confirm the name and both files before writing where a person is present, and where nobody is, record the three answers and both paths in the output and write
+- Write to the conventional skills path for the project, and leave the skills audit's dated-provenance check clean for the new folder before reporting
 
 ## Must not
 
-- Auto-trigger. Creation is a deliberate act and a skill invented from an ambiguous request is worse than none.
+- Auto-trigger, since creation is a deliberate act and a skill invented from an ambiguous request is worse than none
 - Write either file before the user has seen it, where a user is present
 - Derive the requirement from the drafted body, which records the draft's overfitting as the requirement
-- Gate creation on whether anything will invoke the new skill beyond the author typing its name. That question has no answer yet.
-
-## Guards
-
-- The authoring standard is not installed: stop and name the command that installs it
+- Gate creation on whether anything will invoke the new skill beyond the author typing its name
 
 ## Out of scope
 
 - Editing an existing skill, which the authoring standard and the skill's own requirement govern
-- Whether anything ends up invoking the new skill: the usage census the toolkit's own context entry tracks, read once the skill has run
+- Whether anything ends up invoking the new skill, which the toolkit's usage census owns
