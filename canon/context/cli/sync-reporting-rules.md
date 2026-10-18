@@ -107,4 +107,4 @@ Nothing in the reverse section reaches `hasDrift`. Every entry is a judgment abo
 
 The arm restores a dropped file at its published bytes rather than writing one by hand, because content is what the attribution matches on and a hand-written file would assert the wrong verdict.
 
-Both its history reads take the listing through a process substitution rather than a pipeline ending in an early exit, for the reason `canon/context/sandbox/authoring.md` states over every scenario file.
+Both its history reads take the listing through a process substitution rather than a pipeline ending in an early exit.
