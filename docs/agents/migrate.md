@@ -11,7 +11,7 @@ kind: reference
 | Verb               | Moves                                                                                                                                       |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | `rename`           | The retired `aitk` name. `--scope target` rewrites toolkit-owned folders only.                                                              |
-| `skill-names`      | Plugin skills off their `claude-` prefix and other retired names, with every citation                                                       |
+| `skill-names`      | Plugin skills off their `claude-` and `draft-` prefixes and other retired names, with every citation                                        |
 | `records`          | Session records from `.claude/` to `.canon/`, with every tracked citation                                                                   |
 | `surface-roots`    | `context/`, `wireframes/`, `ARCHITECTURE.md`, `REQUIREMENTS.md`, `DESIGN.md`, and the stamp folder from `.claude/` to `canon/`, by `git mv` |
 | `record-tree`      | Citations inside `.canon/` folders a session still follows: `diagrams`, `memory`, `plans`, `proposals`, `review`, `tasks`, `teach`          |
@@ -20,8 +20,7 @@ kind: reference
 | `record-layout`    | Review receipts, memory archives, feedback, renders, picks, and evidence into their current folders                                         |
 | `session-defaults` | The seeded session defaults into an existing `.claude/settings.json`: `Agent` and `Task` denied, auto memory off                            |
 
-- `skill-names` takes no `--scope` and skips the changelog and eval transcripts
-- `skill-names` also moves the seven `draft-` skills onto verb-first names, such as `draft-doc` to `write-doc` and `draft-and-pick` to `pick-by-eye`, and skips the pointer left under each old name <!-- canon-keep-retired -->
+- `skill-names` takes no `--scope`, and skips the changelog, eval transcripts, and the pointer each renamed `draft-` skill leaves at its old name
 - `surface-roots` leaves `rules/`, `skills/`, `hooks/`, and `settings.json` where Claude Code reads them
 - `rule-layout` classifies each flat file against the stamp as clean, edited, or unclaimed. Clean and edited files move untouched, and an unclaimed name stays.
 - `record-layout` labels each evidence folder `(pick)` or `(evidence)` in the dry run
