@@ -5,6 +5,8 @@ description: Skill structure and authoring rules for Claude Code
 
 # Claude skill reference
 
+Checked against the [Claude Code skills](https://code.claude.com/docs/en/skills) and [skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices) pages on `2026-10-18`.
+
 ## Contents
 
 - [Overview](#overview)
@@ -107,20 +109,14 @@ The loader reads the folder name as the skill name, so the name follows the same
 
 ## Frontmatter
 
-- **`name`** (required): kebab-case, matches folder name, no spaces or capitals
-- **`description`** (required): what it does + when to use it, under 1024 chars, no XML tags
-- **`disable-model-invocation: true`**: Claude will not auto-trigger, and the `Skill` tool also refuses the operator's request made in words. Set it only on a skill run by slash command alone.
-- **`allowed-tools`**: restrict tool access when the skill is active
-- **`metadata`**: optional key-value pairs (`author`, `version`, `mcp-server`)
-- **`metadata.family`** (required under `claude/skills/`): the skill map group, as one key from `families` in `canon claude skills list --json`. A skill under `.claude/skills/` takes none.
-
-A skill wanting only the no-auto-trigger effect writes `Do NOT auto-trigger` in its description rather than setting `disable-model-invocation`.
+Read `skill-frontmatter.md` for the required and optional fields, their limits, and which keys an upload accepts.
 
 ## Description
 
 - Structure: `[What it does] + [When to use it] + [Key trigger phrases]`, quoting phrases users would say
 - Be specific, not vague. Claude routes based on this field alone.
-- Add negative triggers if skill is over-triggering: `Do NOT use for X`
+- Write in the third person, since the description is injected into the system prompt. Write "Reviews code" over "I review code".
+- Add negative triggers if skill is over-triggering: `Do NOT use for X`. That form is canon's own, and Anthropic's pages do not mention it.
 
 ## Body
 
