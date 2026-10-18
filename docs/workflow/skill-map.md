@@ -99,8 +99,9 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 
 ## Keep the project current with the toolkit
 
-| Skill                         | When to use                                          |
-| ----------------------------- | ---------------------------------------------------- |
-| `canon:target-check`          | In a target, to compare each domain with the toolkit |
-| `canon:canon-feedback`        | The toolkit is broken, missing, or off               |
-| `canon:canon-feedback-triage` | In the toolkit repo, to file feedback issues         |
+| Skill                         | When to use                                             |
+| ----------------------------- | ------------------------------------------------------- |
+| `canon:target-check`          | In a target, to compare each domain with the toolkit    |
+| `canon:document-repair`       | Rewrite a failing docs folder to the limits and gate it |
+| `canon:canon-feedback`        | The toolkit is broken, missing, or off                  |
+| `canon:canon-feedback-triage` | In the toolkit repo, to file feedback issues            |

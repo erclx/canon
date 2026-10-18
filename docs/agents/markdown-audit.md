@@ -22,14 +22,14 @@ An argument is a file, a directory, or a glob, taken against the corpus git list
 
 The ban set and checkpoints ship in `src/markdown/bans.ts` and `src/markdown/structure.ts`. `markdown.md` states each rule and the `write-human` skill states the cadence numbers, so move a number in both places in one change.
 
-| Finding         | Reports                                                                              | Gates                     |
-| --------------- | ------------------------------------------------------------------------------------ | ------------------------- |
-| Bans            | The two characters `markdown.md` bans, outside frontmatter, fences, spans, and links | Always                    |
-| Links           | A relative link resolving to nothing on disk                                         | Always                    |
-| Density         | The six limits below, under `density`                                                | On a `GATED_PATHS` prefix |
-| Reference shape | A `kind: reference` page breaking its shape, under `referenceShape`                  | On a `GATED_PATHS` prefix |
-| Colons          | A colon followed by more text in a prose line, under `colons`                        | Never                     |
-| Heading case    | A capital after the first word of a heading or `title`, under `headingCase`          | Never                     |
+| Finding         | Reports                                                                              | Gates             |
+| --------------- | ------------------------------------------------------------------------------------ | ----------------- |
+| Bans            | The two characters `markdown.md` bans, outside frontmatter, fences, spans, and links | Always            |
+| Links           | A relative link resolving to nothing on disk                                         | Always            |
+| Density         | The six limits below, under `density`                                                | On a gated prefix |
+| Reference shape | A `kind: reference` page breaking its shape, under `referenceShape`                  | On a gated prefix |
+| Colons          | A colon followed by more text in a prose line, under `colons`                        | Never             |
+| Heading case    | A capital after the first word of a heading or `title`, under `headingCase`          | Never             |
 
 A page marked `kind: reference` holds its opening, then `Output`, `Refusals`, and `See also` as H2s, each at most once and in that order. It takes no H3 and no table headed `Flag` or `Option`. An unmarked page is never measured.
 
@@ -46,9 +46,14 @@ A page marked `kind: reference` holds its opening, then `Output`, `Refusals`, an
 - A table, fence, list, heading, or bold section marker ends a run of paragraphs
 - A run whose every item opens with a bold label or a link is exempt, and numbered items never count
 - Only context entries, docs, skill bodies, references, and requirements, tooling seeds and stack references, the wiki, `README.md`, and `CONTRIBUTING.md` take a finding
-- A bullet run gates on those paths, and the rest gates under `GATED_PATHS` in `src/markdown/scope.ts`. Outside a canon checkout nothing gates.
+- A requirement gates only once the gated list below names its own file, never through its skill's prefix and never on a bullet run alone
 
-A requirement is the one exception to both. It gates only once `GATED_PATHS` names its own file, never through its skill's prefix and never on a bullet run alone.
+| Root              | A density or reference shape finding gates                                                                 |
+| ----------------- | ---------------------------------------------------------------------------------------------------------- |
+| Canon's checkout  | Under a `GATED_PATHS` prefix in `src/markdown/scope.ts`, and a bullet run on every density path above      |
+| Any other project | Under a prefix `canon/config/markdown.toml` lists, a bullet run included. With no such file nothing gates. |
+
+A project's list grows through `canon markdown gated add <prefix>`, which appends a folder only once it carries no finding, and `canon init` starts a new project with every root that passes already listed. A config that does not parse refuses the audit with its path named.
 
 Five measures report and never set the exit code on their own.
 
