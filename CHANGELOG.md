@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.46.0](https://github.com/erclx/canon/compare/v5.45.0...v5.46.0) (2026-10-18)
+
+
+### Features
+
+* **context:** gate code folders no context entry names ([#2526](https://github.com/erclx/canon/issues/2526)) ([c880028](https://github.com/erclx/canon/commit/c8800283b0b596cbc6a1a6c62779ed0747df0b71))
+* **governance:** land six small rule and seed fixes ([#2514](https://github.com/erclx/canon/issues/2514)) ([47c750f](https://github.com/erclx/canon/commit/47c750fa62dd49cc6f585ed084f019b76d8cdb88))
+* **groundwork:** end a fully leaned pass on a plain retell ([#2527](https://github.com/erclx/canon/issues/2527)) ([a084490](https://github.com/erclx/canon/commit/a0844904034f4f567e70eb563b7609a8336c7175))
+* **intake:** carry problem and fix into intake questions ([#2528](https://github.com/erclx/canon/issues/2528)) ([6e8b158](https://github.com/erclx/canon/commit/6e8b15857eb8754e4654723dc1ed57107eec62d4))
+* **markdown:** gate every rewritten skill requirement ([#2523](https://github.com/erclx/canon/issues/2523)) ([60ab640](https://github.com/erclx/canon/commit/60ab6401d75e7c1138f4354a55fb74957cf234c8))
+* **markdown:** let a project gate and repair its markdown by folder ([#2507](https://github.com/erclx/canon/issues/2507)) ([eb0230c](https://github.com/erclx/canon/commit/eb0230cb6fc89b2cdac16b6323c7c8dd32efd441))
+* **sessions:** keep live sessions listed from another pid namespace ([#2517](https://github.com/erclx/canon/issues/2517)) ([362556d](https://github.com/erclx/canon/commit/362556d4d5918337ad61342c08bcbda7272dd702))
+* **skills:** close operator-only tasks at merge and ask spend early ([#2525](https://github.com/erclx/canon/issues/2525)) ([b8f94c5](https://github.com/erclx/canon/commit/b8f94c5649728f2e224d8f0f75bd6197c804d064))
+* **skills:** name the cause when a reviewer resolves no worker ([#2529](https://github.com/erclx/canon/issues/2529)) ([c1002ac](https://github.com/erclx/canon/commit/c1002ac5db4800d72bc245ca6ab9548cdc708f81))
+* **tasks:** close the issues a task names on its last slice ([#2516](https://github.com/erclx/canon/issues/2516)) ([6bd446b](https://github.com/erclx/canon/commit/6bd446b8f912aab50afd5dcfde2b81b725f02713))
+
 ## [5.45.0](https://github.com/erclx/canon/compare/v5.44.0...v5.45.0) (2026-10-18)
 
 
