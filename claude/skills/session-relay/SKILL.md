@@ -38,6 +38,8 @@ The caller names the addressee as a `sessionId` or a branch, never as a name. A 
 
 Refuse a send to a row whose `repository` differs from the sender's own, unless the caller names the operator's ask. Read the sender's repository from the Step 1 row and report the refusal with both paths.
 
+When Step 1 returned no row, the sender's repository is unread, so the comparison cannot run. Report it as unread and send only when the caller names the operator's ask.
+
 ### Check the name against the agent listing
 
 A name is not unique, and the roster carries no field separating two live sessions holding one. Check the name against the agent listing before sending.

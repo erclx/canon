@@ -50,7 +50,7 @@ accepted over a rule loading into every session of every governed target.
 - Fire for any session sending to another session, with or without a role and with or without a message-sending tool
 - Read the sender's own name off `canon sessions list --self --json` before composing anything, and degrade to naming itself from the environment when the installed CLI answers `--self` with an unknown option rather than a refusal carrying a reason
 - Resolve the addressee from a `sessionId` or a branch at the moment of sending, never by a name prefix
-- Refuse a send to a row in another repository than the sender's, unless the caller names the operator's ask
+- Refuse a send to a row in another repository than the sender's, unless the caller names the operator's ask, and treat a sender with no roster row as unread rather than as a match
 - Check the resolved name against the agent listing, sending it bare under a single row and completing it with the `[ref]` under more than one
 - Send through a message-sending tool where one exists, and compose the copyable block where none does or where the listing carries no row to address
 - State why a block goes out before a prompt as the only surface carrying that reason, since no rule carries it and a caller restating the reason drifts from this body with nothing comparing them, while each caller still states that the message is owed
