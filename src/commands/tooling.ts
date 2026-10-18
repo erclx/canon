@@ -1,4 +1,5 @@
-import { resolve } from 'node:path'
+import { existsSync } from 'node:fs'
+import { join, resolve } from 'node:path'
 import type { Command } from 'commander'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
 import {
@@ -625,12 +626,16 @@ function report(result: ScanResult, target: string): void {
     if (entry.state === 'missing') logAdd(entry.rel)
   }
 
-  if (result.hasPackageJson) {
+  if (result.newManifest) {
+    logStep('Scanning package.json')
+    logAdd('package.json')
     reportPackage(result)
-  } else {
+  } else if (result.hasPackageJson) {
+    reportPackage(result)
+  } else if (existsSync(join(target, 'package.json'))) {
     logStep('Scanning package.json')
     logWarn(
-      "Skipped scripts and deps: no package.json found (run 'bun init' to enable)",
+      `Skipped scripts and deps: package.json is not valid JSON (fix it in ${target}, then sync again)`,
     )
   }
 
@@ -688,6 +693,7 @@ function summarize(result: ScanResult): string {
     if (count > 0) parts.push(`${count} ${label}`)
   }
 
+  add(result.newManifest ? 1 : 0, 'package.json')
   add(
     result.configs.filter((entry) => entry.state !== 'matching').length,
     'configs',

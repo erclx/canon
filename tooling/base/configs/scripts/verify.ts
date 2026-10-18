@@ -225,7 +225,7 @@ function readPhaseList(): PhaseList {
 
 function readDeclaredScripts(): Set<string> {
   if (!existsSync('package.json')) {
-    fail("No package.json here. Run 'bun init', then sync the stack again")
+    fail('No package.json here. Sync the stack to write one')
   }
   return new Set(
     Object.keys(asRecord(asRecord(readJson('package.json')).scripts)),

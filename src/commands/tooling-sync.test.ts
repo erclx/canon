@@ -10,7 +10,10 @@ import {
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { PROJECT_ROOT } from '@/roots/project'
 import { stampPath } from '@/sync/stamp'
+import { resolveChain } from '@/tooling/manifest'
+import { collectDeps, parseSpec } from '@/tooling/package'
 
 const CLI = join(import.meta.dirname, '../cli.ts')
 const GOLDEN = '.oxfmtrc.json'
@@ -33,11 +36,29 @@ const buildEnv = (extra: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv => ({
   ...extra,
 })
 
+// A write run into a folder with no package.json would run `bun add -D` against
+// the registry. A package.json already naming the stack's packages leaves
+// nothing to install, so a test not about the manifest stays offline.
+const seedPackage = (dir: string, stack: string): void => {
+  const path = join(dir, 'package.json')
+  if (existsSync(path)) return
+
+  const devDependencies = Object.fromEntries(
+    collectDeps(resolveChain(PROJECT_ROOT, stack), {}).map((dep) => [
+      dep.name,
+      parseSpec(dep.spec).pin || '*',
+    ]),
+  )
+  writeFileSync(path, JSON.stringify({ devDependencies }))
+}
+
 const runVerb = (
   verb: 'diff' | 'sync',
   args: readonly string[],
   headless = true,
 ): Run => {
+  if (args.includes('--write')) seedPackage(target, 'base')
+
   const run = spawnSync(
     'bun',
     [CLI, 'tooling', verb, 'base', target, ...args],
@@ -113,6 +134,24 @@ describe('tooling sync write authorization', () => {
 
   it('should exit 0 under --check, since a report is not a failed sync', () => {
     expect(sync(['--check']).status).toBe(0)
+  })
+
+  it('should write no package.json under --check', () => {
+    sync(['--check'])
+
+    expect(existsSync(join(target, 'package.json'))).toBe(false)
+  })
+
+  it('should list package.json as added under --check', () => {
+    expect(sync(['--check']).stderr).toContain('package.json')
+  })
+
+  it('should report the manifest as new under diff --json', () => {
+    const record = JSON.parse(diff(['--json']).stdout ?? '') as {
+      newManifest: boolean
+    }
+
+    expect(record.newManifest).toBe(true)
   })
 
   it('should refuse a run passing both --check and --write', () => {
@@ -293,6 +332,8 @@ describe('tooling sync into a subfolder', () => {
     verb: 'diff' | 'sync',
     args: readonly string[],
   ): Run => {
+    if (args.includes('--write')) seedPackage(web, 'vite-react')
+
     const run = spawnSync(
       'bun',
       [CLI, 'tooling', verb, 'vite-react', web, '--skip', 'base', ...args],
@@ -330,7 +371,7 @@ describe('tooling sync into a subfolder', () => {
     expect(existsSync(join(web, 'cspell.json'))).toBe(false)
   })
 
-  it('should still end on the success line with no package.json', () => {
+  it('should still end on the success line', () => {
     expect(runSubfolder('sync', ['--write']).stderr).toContain(
       'Tooling sync complete',
     )

@@ -12,6 +12,7 @@ import {
 import {
   collectDeps,
   collectScripts,
+  declaresInstalls,
   type DepState,
   readPackage,
   type ScriptState,
@@ -48,6 +49,7 @@ export interface ScanResult {
   readonly deps: readonly DepState[]
   readonly gitignore: readonly EntryState[]
   readonly hasPackageJson: boolean
+  readonly newManifest: boolean
   readonly totalChanges: number
 }
 
@@ -128,8 +130,10 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
 
   const packagePath = join(target, 'package.json')
   const pkg = readPackage(packagePath)
-  const scripts = pkg ? collectScripts(chain, pkg) : []
-  const deps = pkg ? collectDeps(chain, pkg) : []
+  const newManifest = !existsSync(packagePath) && declaresInstalls(chain)
+  const basis = pkg ?? (newManifest ? {} : undefined)
+  const scripts = basis ? collectScripts(chain, basis) : []
+  const deps = basis ? collectDeps(chain, basis) : []
 
   const gitignorePath = join(target, '.gitignore')
   const gitignoreContent = existsSync(gitignorePath)
@@ -138,6 +142,7 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
   const gitignore = scanGitignore(chain, gitignoreContent)
 
   const totalChanges =
+    (newManifest ? 1 : 0) +
     configs.filter((entry) => entry.state !== 'matching').length +
     seeds.filter((entry) => entry.state === 'missing').length +
     scripts.filter((entry) => entry.state !== 'matching').length +
@@ -152,6 +157,7 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
     deps,
     gitignore,
     hasPackageJson: pkg !== undefined,
+    newManifest,
     totalChanges,
   }
 }

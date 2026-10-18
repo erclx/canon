@@ -16,6 +16,8 @@ import {
 import {
   applyScripts,
   collectDeps,
+  declaresInstalls,
+  minimalPackage,
   readPackage,
   serializePackage,
 } from '@/tooling/package'
@@ -156,15 +158,22 @@ export async function pruneGitignore(
 
 /**
  * Installs missing dev dependencies, fills package scripts, and merges
- * gitignore entries. A target with no package.json gets the gitignore alone,
- * plus a warning naming every install it skipped, since seeding a package.json
- * would pick a package manager and a project name on the target's behalf.
+ * gitignore entries. A target with no package.json gets a minimal one first
+ * when the chain installs anything. A package.json that exists but cannot be
+ * parsed is never rewritten, and the install is skipped with a warning.
  */
 export async function injectManifest(
   chain: readonly Manifest[],
   target: string,
 ): Promise<void> {
   const packagePath = join(target, 'package.json')
+
+  if (!existsSync(packagePath) && declaresInstalls(chain)) {
+    logStep('Writing package.json')
+    await writeFile(packagePath, serializePackage(minimalPackage(target)))
+    logAdd('package.json')
+  }
+
   const pkg = readPackage(packagePath)
 
   if (pkg) {
@@ -192,14 +201,22 @@ export async function injectManifest(
 
   await injectGitignore(chain, target)
 
-  if (!pkg) warnSkippedInstalls(chain, target)
+  if (!pkg) warnUnreadablePackage(chain, target)
 }
 
-function warnSkippedInstalls(chain: readonly Manifest[], target: string): void {
+/**
+ * Only an existing package.json that fails to parse reaches here with installs
+ * pending, since an absent one was written above. It is left untouched.
+ */
+function warnUnreadablePackage(
+  chain: readonly Manifest[],
+  target: string,
+): void {
+  if (!declaresInstalls(chain)) return
+
   const deps = collectDeps(chain, {}).map((dep) => dep.spec)
   const skipped = applyScripts({}, chain)
   const scripts = [...new Set([...skipped.added, ...skipped.overridden])]
-  if (deps.length === 0 && scripts.length === 0) return
 
   logStep('Skipped installs')
   if (deps.length > 0) {
@@ -208,5 +225,7 @@ function warnSkippedInstalls(chain: readonly Manifest[], target: string): void {
   if (scripts.length > 0) {
     logWarn(`Scripts not added: ${scripts.join(', ')}`)
   }
-  logWarn(`No package.json: run 'bun init' in ${target}, then sync again`)
+  logWarn(
+    `package.json is not valid JSON: fix it in ${target}, then sync again`,
+  )
 }

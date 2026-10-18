@@ -47,7 +47,7 @@ Holds the repository-root configs, including the verify runner, and every `--ski
 - `resolveChain` keeps a skipped stack carrying that key as a restricted manifest with those configs only, and `buildToolingReport` restores it so `canon sync --check` still measures them
 - Syncing a subtree without `--skip base` re-drops husky per subtree, and git honors one `core.hooksPath`, so the extra hook directories break silently
 - `scripts/verify.ts` runs the phases the nearest `scripts/verify.json` requires, and `check:format` and the `shell` add-on's `check:shell` run only where `package.json` declares the script
-- A missing `package.json` in a subfolder verify names `bun init`, and a missing `verify.json` names `canon tooling sync`
+- A missing `package.json` in a subfolder verify tells the caller to sync the stack, and a missing `verify.json` names `canon tooling sync`
 
 ### `tooling/base/seeds/`
 
@@ -74,7 +74,7 @@ Owns the manifest walk, scan, injection engine, stamp, reference resolver, and v
 - `mergeSections` writes a group header only when the whole group is missing, treats `.canon/tmp` and `.canon/tmp/` as one entry, and never rewrites a line
 - `resolveWriteMode` in `src/commands/tooling.ts` maps `--check` to report, `--write` to apply, and a TTY to a prompt, and a headless caller with neither flag reports and exits 1
 - `canon tooling diff` dispatches into `runSync` with `check` set and exits 1 on any difference, and `--json` answers `{ ok: false, reason, message }` on a refusal
-- A target below its git toplevel syncs as a subfolder, withholds every `.github/` file, and with no `package.json` lands only the gitignore
+- A target below its git toplevel syncs as a subfolder and withholds every `.github/` file. Sync writes a missing `package.json` only when the chain declares an install
 
 ### `src/tooling/verify-stack.ts`
 
