@@ -134,38 +134,27 @@ Read `${CLAUDE_SKILL_DIR}/references/final-command.md` on reaching this step, fo
 
 That command re-scans the live body for a session link, applies the labels through `canon labels apply`, and prints `number=`, `url=`, `head=`, `owed=`, `missingOnRemote=`, and `uncovered=`.
 
-### Post the rendered-surface evidence
-
-Run this step on every pull request this skill opens or edits. Read `${CLAUDE_SKILL_DIR}/references/evidence.md` for finding the checklist and the local server and for posting the evidence comparison, the checklist alone, and the preview address, each against the `<number>` the final command printed.
-
-Never judge from the diff whether an evidence image changed, since the verb answers `no-evidence` for a branch that changed none and a session cannot see an image it did not author.
-
 ### Record the number on the task
 
 Write the `number` the final command printed onto the task the branch is closing, through `canon tasks pull-request`, and never resolve it again. Skip it when the final command refused on a head mismatch and printed no number.
 
 Read `${CLAUDE_SKILL_DIR}/references/task-number.md` on reaching this step for which task it names, the invocation, the refusals it skips silently, and why the number lands here.
 
+### Post the rendered-surface evidence
+
+Invoke `canon:pr-evidence` with the `<number>` the final command printed, on every pull request this skill opens or edits. Skip it when the final command refused on a head mismatch and printed no number, since that skill must never run against a guessed one.
+
+It finds the checklist and the local server and posts the evidence comparison, the checklist alone, and the preview address. Report it rather than proceeding silently when the skill does not resolve.
+
 ## After execution
 
-Respond with `✅ PR: <url>`, using the `url` the final command printed, then add only the lines below whose condition holds. Add no other text.
+Respond with `✅ PR: <url>`, using the `url` the final command printed, then add only the label lines below whose condition holds, then the lines `pr-evidence` reported. Add no other text.
 
-| Condition                                                 | Line                                                                                                        |
-| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Each path in `uncovered=`                                 | `⚠️ No label covers <path>. Add a row to canon/config/pr-labels.toml or a [declined] entry.`                |
-| `owed=` or `missingOnRemote=` printed a value             | `⚠️ Labels not applied: <owed labels not in missingOnRemote>. Not on the remote: <missingOnRemote labels>.` |
-| A checklist posted in the evidence comment                | `📋 Posted the UI checklist to <number>, in the evidence comment.`                                          |
-| A checklist posted alone                                  | `📋 Posted the UI checklist to <number>, on its own.`                                                       |
-| The preview step returned an address                      | `🔗 Preview: <url>`                                                                                         |
-| The evidence step posted the local link                   | `🖥️ Local preview: <url>`                                                                                   |
-| The local step refused and evidence or a checklist posted | `🖥️ No local preview: <reason>`                                                                             |
+| Condition                                     | Line                                                                                                        |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Each path in `uncovered=`                     | `⚠️ No label covers <path>. Add a row to canon/config/pr-labels.toml or a [declined] entry.`                |
+| `owed=` or `missingOnRemote=` printed a value | `⚠️ Labels not applied: <owed labels not in missingOnRemote>. Not on the remote: <missingOnRemote labels>.` |
 
 ### The labels line
 
 `owed=` already holds every absent label, so the first half names `owed=` less the names in `missingOnRemote=`, and the second names `missingOnRemote=` alone. Drop either half that is empty.
-
-### The no-local-preview line
-
-It fires when the local step refused as `no-server` or `no-listener-reader`, since that pull request changes a rendered surface and a reviewer could have used the link. `git-followup` only carries a line forward, so it cannot add one the comment never had.
-
-To add the link later, start the server and run `canon pr local --json`, then `canon pr evidence <number> --local <url> --json`, adding `--checklist` when one is still owed. Post the body the way the evidence step does.

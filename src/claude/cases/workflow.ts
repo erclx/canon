@@ -83,6 +83,11 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
+      'I pushed another commit to the open PR. Update the screenshot comparison on it so the reviewer sees the current head.',
+    expect: 'pr-evidence',
+  },
+  {
+    prompt:
       'The screencast draft is finished. Turn it into an actual video now.',
     expect: 'record-screencast',
   },
