@@ -23,7 +23,7 @@ Take the folder a reader opens most, then the folder with the fewest findings.
 | 2     | `docs/`           | Pages written for a reader rather than an agent |
 | 3     | `canon/context/`  | Read on every session that touches its domain   |
 | 4     | `.claude/skills/` | Loaded on request, so a long body costs a turn  |
-| 5     | `wiki/`           | Orientation pages, read least often             |
+| 5     | The wiki folder   | Orientation pages, read least often             |
 
 Within a tier, a folder close to zero goes first, since it gates the soonest and stops drift there.
 
