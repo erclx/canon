@@ -78,6 +78,7 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 | `canon:review-ui`      | Beside code review, to drive the checklist    |
 | `canon:review-address` | As the worker, to fix posted findings         |
 | `canon:git-followup`   | A small edit on a branch with an open PR      |
+| `canon:pr-evidence`    | A new head needs its screenshots re-posted    |
 | `canon:git-split`      | A branch carries unrelated commits            |
 | `canon:git-issue`      | Something belongs on the tracker              |
 | `canon:git-worktree`   | After a merge, to reclaim worktrees           |

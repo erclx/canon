@@ -69,7 +69,7 @@ Derive `<slug>` per `${CLAUDE_SKILL_DIR}/../git-branch/references/slug.md`. Fall
 
 When a checklist is produced, write it to `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root, resolved the way `session-worktree` does, creating the directory if needed and always overwriting.
 
-- It is a handoff file rather than a deliverable. `git-pr` renders it into the evidence comment once a pull request opens, then removes it, and nothing here calls `gh`.
+- It is a handoff file rather than a deliverable. `pr-evidence` renders it into the evidence comment once a pull request opens, then removes it, and nothing here calls `gh`.
 - The path names the artifact rather than this skill, so a rename moves nothing and an older binary's checklist lands where the consumer looks
 - The checklist is a main-root write, so it goes out as a heredoc, routed the way `session-worktree` states
 - Skip the write when there is nothing to verify visually and nothing shipping untested

@@ -1,11 +1,11 @@
 ---
 title: Rendered-surface evidence
-description: How git-pr finds the UI checklist and the local server, posts the evidence comparison or the checklist alone as the fallback for a git refusal, and adds the preview address, for a change that touches a rendered surface
+description: How pr-evidence finds the UI checklist and the local server, posts the evidence comparison or the checklist alone as the fallback for a git refusal, and adds the preview address, for a change that touches a rendered surface
 ---
 
 # Rendered-surface evidence
 
-The rendered-surface step of `git-pr`, reached after the final command printed the pull request number. It runs on every pull request with no test on the diff ahead of it, since `no-evidence` is the silent branch for one that changes no rendered surface.
+The procedure of `pr-evidence`, run in order against one pull request number. It runs on every pull request with no test on the diff ahead of it, since `no-evidence` is the silent branch for one that changes no rendered surface.
 
 ## Contents
 
@@ -21,7 +21,7 @@ The rendered-surface step of `git-pr`, reached after the final command printed t
 
 - Resolve the main root the way `session-worktree` does, `git worktree list --porcelain | grep -m 1 '^worktree ' | cut -d' ' -f2-` falling back to `pwd`
 - A missing file means no checklist was produced, and the two steps below each skip their checklist half
-- Scan an existing file against `${CLAUDE_SKILL_DIR}/references/publish.md` before either step posts it, the same as the body
+- Scan an existing file against `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md` before either step posts it, the same as the body
 - The evidence step decides where it lands, since a checklist reads next to its screenshots and posting it alone is the fallback for a refused render
 
 ## Find the local server
@@ -48,7 +48,7 @@ Pass `--local` to the evidence step only on an `ok`. The binary answering `ok` i
 
 ## Post the evidence comparison
 
-Run the verb once against the number the final command printed. Pass `--checklist` when the checklist step found a file and `--local` when the step above returned `ok`, and leave each flag off otherwise:
+Run the verb once against the pull request number. Pass `--checklist` when the checklist step found a file and `--local` when the step above returned `ok`, and leave each flag off otherwise:
 
 ```bash
 canon pr evidence <number> --checklist <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md --local <url> --json
@@ -71,7 +71,7 @@ Read `reason` on the record rather than the exit code.
 gh api -X POST repos/{owner}/{repo}/issues/<number>/comments -F body=@<main-root>/.canon/tmp/pr/evidence/body-<number>.md --silent
 ```
 
-Both posts in this file use the REST issue-comments endpoint, since the `gh pr` subcommands run on GraphQL and a cloud session's GitHub proxy refuses it. `git-followup` mints a preview through this file, so a GraphQL post here would break the cloud review-address leg.
+Both posts in this file use the REST issue-comments endpoint, since the `gh pr` subcommands run on GraphQL and a cloud session's GitHub proxy refuses it. `git-followup` runs this skill, so a GraphQL post here would break the cloud review-address leg.
 
 When the record carries a `commentId`, edit that comment in place instead of posting a second. The body reads from the tmp file with `@`, which needs `-F`, since `-f` posts the path itself as the body:
 
@@ -119,6 +119,7 @@ Run this step when the evidence step returned `ok`, the fallback posted a checkl
 
 - The first two mean the pull request changes a rendered surface, and a reviewer holding a checklist with no screenshots needs the live page most
 - The third is how `git-ship` reaches this step alone when an earlier run's deploy timed out
+- An evidence record carrying a `commentId` takes the third alone, since a preview already on the comment counts as settled whatever head built it, so a later push does not re-mint one
 - The evidence comment is already posted, so the reviewer has the screenshots while the deploy runs
 
 ```bash

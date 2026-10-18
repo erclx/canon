@@ -1,6 +1,6 @@
 ---
 title: UI checklist counts
-description: What auto-ship Step 5 holds when ui-checklist produces a checklist, so the closing block can name the unchecked visual boxes after git-pr has removed the file
+description: What auto-ship Step 5 holds when ui-checklist produces a checklist, so the closing block can name the unchecked visual boxes after pr-evidence has removed the file
 ---
 
 # Hold the checklist counts
@@ -16,7 +16,7 @@ Count two things in `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main work
 - `<N>`, the `- [ ]` lines
 - `<M>`, how many of those end in `(taste)`
 
-Hold both until the Output block. `git-pr` removes the file once it posts the evidence comment, so a count taken after Step 6 reads nothing.
+Hold both until the Output block. `pr-evidence` removes the file once it posts the evidence comment, so a count taken after Step 6 reads nothing.
 
 ## Reading the counts into the closing block
 

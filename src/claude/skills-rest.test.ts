@@ -14,13 +14,14 @@ const ANY_GRAPHQL = /\bgh (pr [a-z]+|repo view)\b/
 
 /**
  * Paths under `claude/skills/`, each a whole skill folder or one file. The
- * review-address leg borrows `git-pr`'s evidence reference to mint a preview,
- * so that file sits on it while the rest of `git-pr` does not.
+ * review-address leg runs `pr-evidence` through `git-followup` to post the
+ * evidence and mint a preview, so that skill sits on it while `git-pr`, which
+ * also calls it, does not.
  */
 const CLOUD_PATHS: readonly string[] = [
   'review-address',
   'git-followup',
-  'git-pr/references/evidence.md',
+  'pr-evidence',
   'review-ui',
   'git-split',
 ]

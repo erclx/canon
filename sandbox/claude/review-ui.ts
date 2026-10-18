@@ -77,8 +77,9 @@ function seedTrunk(ctx: StageContext): void {
 
 /**
  * Opens a pull request on `branch` carrying new captures, then posts the
- * evidence comment `git-pr` would have posted, with the checklist and any extra
- * flags the arm passes, such as `--local <url>`. Returns the pull request number.
+ * evidence comment `pr-evidence` would have posted, with the checklist and any
+ * extra flags the arm passes, such as `--local <url>`. Returns the pull request
+ * number.
  */
 function seedPr(
   ctx: StageContext,

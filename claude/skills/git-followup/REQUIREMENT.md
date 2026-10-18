@@ -21,7 +21,7 @@ A fix commit answering a review is the sharpest case of the first paragraph, sin
 - Sync the body when the new commit moves the scope, and the title when the shift makes it inaccurate
 - Reply on the pull request when it carries review comments, and scan that reply for the banned characters and internal phase labels before posting. A hook on `Bash` scans the body file of that post and denies an inline body, so the reply goes through a file.
 - Suppress the reply when the caller owns it, and still run the push and the body sync
-- Read `canon pr evidence <number> --check --json` after posting the evidence and mint the preview when it is owed, since a followup that posts the evidence and stops leaves the preview for a relay
+- Post the evidence through `pr-evidence` and read `canon pr evidence <number> --check --json` after it, since a followup that posts the evidence and stops leaves the preview for a relay
 - Force the push under a lease when the tracking branch no longer reaches the head, so a caller's rebase lands and a commit this session never read is not overwritten
 
 ## Must not
