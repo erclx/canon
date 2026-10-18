@@ -1792,6 +1792,64 @@ describe('canon pr frames', () => {
     expect(calls().filter((call) => call.includes('canon-frames'))).toEqual([])
   })
 
+  it('should refuse as bad-box when --add carries both --box and --reference', async () => {
+    const outcome = await runFrames([
+      ...addArgs('box-1.png'),
+      '--reference',
+      'home/hero',
+    ])
+
+    expect(outcome.record.reason).toBe('bad-box')
+    expect(calls()).toEqual([])
+  })
+
+  it('should refuse as bad-reference when the address would escape the pass folder', async () => {
+    const outcome = await runFrames([
+      '7',
+      '--add',
+      join(tempDir, 'box-1.png'),
+      '--reference',
+      '../../x',
+      '--pass',
+      '20261002T154450Z',
+    ])
+
+    expect(outcome.record.reason).toBe('bad-reference')
+    expect(calls()).toEqual([])
+  })
+
+  it('should refuse as bad-theme when --theme rides a reference', async () => {
+    const outcome = await runFrames([
+      '7',
+      '--add',
+      join(tempDir, 'box-1.png'),
+      '--reference',
+      'home/hero',
+      '--theme',
+      'dark',
+      '--pass',
+      '20261002T154450Z',
+    ])
+
+    expect(outcome.record.reason).toBe('bad-theme')
+  })
+
+  it('should pass a valid reference through to the write', async () => {
+    const outcome = await runFrames([
+      '7',
+      '--add',
+      join(tempDir, 'box-1.png'),
+      '--reference',
+      'home/hero',
+      '--head',
+      'abc1234',
+      '--pass',
+      '20261002T154450Z',
+    ])
+
+    expect(outcome.record.reason).toBe('read-only')
+  })
+
   it('should list every refusal reason in the help text', async () => {
     const result = await execa(
       process.execPath,
@@ -1804,6 +1862,7 @@ describe('canon pr frames', () => {
         'bad-mode',
         'no-number',
         'bad-box',
+        'bad-reference',
         'bad-days',
         'unreadable-frame',
         'read-only',

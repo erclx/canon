@@ -17,6 +17,8 @@ import {
   pruneFramesWithLegacy,
   pushFrame,
   readFrame,
+  referencePath,
+  referenceSlug,
   type TreeEntry,
 } from '@/pr/frames'
 
@@ -206,6 +208,43 @@ describe('framePath', () => {
   })
 })
 
+describe('referenceSlug', () => {
+  it('should join the page and the frame with a double dash', () => {
+    expect(referenceSlug('home/hero.v2')).toBe('home--hero.v2')
+  })
+
+  it.each([
+    'home',
+    'home/hero/extra',
+    '../hero',
+    'home/..',
+    'home/../x',
+    '/hero',
+    'home/',
+    'my page/hero',
+    'home/.hidden',
+    'a--b/hero',
+    'home/a--b',
+  ])(
+    'should refuse %s since its slug would not stay one file name',
+    (address) => {
+      expect(referenceSlug(address)).toBeUndefined()
+    },
+  )
+})
+
+describe('referencePath', () => {
+  it('should file a reference beside the box frames of one pass', () => {
+    expect(referencePath(12, HEAD, PASS, 'home/hero')).toBe(
+      `pr-12/abcdef0/${PASS}/ref-home--hero.png`,
+    )
+  })
+
+  it('should return nothing for an address without a slug', () => {
+    expect(referencePath(12, HEAD, PASS, '../../x')).toBeUndefined()
+  })
+})
+
 describe('isFrameTheme', () => {
   it('should accept dark and light and nothing else', () => {
     const answers = ['dark', 'light', 'Dark', 'sepia', ''].map(isFrameTheme)
@@ -334,6 +373,74 @@ describe('pushFrame', () => {
     const result = await pushFrame(fake.api, frame(12, 1))
 
     expect(result).toEqual({ kind: 'refused', reason: 'push-failed' })
+  })
+})
+
+describe('pushFrame with a reference', () => {
+  const reference = (address: string): FrameInput => ({
+    number: 12,
+    head: HEAD,
+    pass: PASS,
+    reference: address,
+    bytes: PNG,
+  })
+
+  it('should land a reference at ref-<page>--<frame>.png and return that path', async () => {
+    const fake = fakeApi()
+
+    const result = await pushFrame(fake.api, reference('home/hero'))
+
+    expect({ result, files: fake.filesAtTip() }).toEqual({
+      result: expect.objectContaining({
+        kind: 'pushed',
+        path: `pr-12/abcdef0/${PASS}/ref-home--hero.png`,
+      }),
+      files: [`pr-12/abcdef0/${PASS}/ref-home--hero.png`],
+    })
+  })
+
+  it('should keep a box frame at box-<n>.png beside the reference', async () => {
+    const fake = fakeApi()
+
+    await pushFrame(fake.api, frame(12, 1))
+    await pushFrame(fake.api, reference('home/hero'))
+
+    expect(fake.filesAtTip()).toEqual([
+      `pr-12/abcdef0/${PASS}/box-1.png`,
+      `pr-12/abcdef0/${PASS}/ref-home--hero.png`,
+    ])
+  })
+
+  it('should overwrite only itself when one reference is captured twice in a pass', async () => {
+    const fake = fakeApi()
+
+    await pushFrame(fake.api, reference('home/hero'))
+    await pushFrame(fake.api, reference('home/hero'))
+
+    expect(fake.filesAtTip()).toEqual([
+      `pr-12/abcdef0/${PASS}/ref-home--hero.png`,
+    ])
+  })
+
+  it('should write nothing for an address that would escape the pass folder', async () => {
+    const fake = fakeApi()
+
+    const result = await pushFrame(fake.api, reference('../../pr-1/x'))
+
+    expect({ result, files: fake.filesAtTip() }).toEqual({
+      result: { kind: 'refused', reason: 'push-failed' },
+      files: [],
+    })
+  })
+
+  it('should clear a reference when its pull request is dropped', async () => {
+    const fake = fakeApi()
+    await pushFrame(fake.api, reference('home/hero'))
+    await pushFrame(fake.api, frame(13, 1))
+
+    await dropFrames(fake.api, [12])
+
+    expect(fake.filesAtTip()).toEqual([`pr-13/abcdef0/${PASS}/box-1.png`])
   })
 })
 
