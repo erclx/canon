@@ -26,7 +26,15 @@ The web layer covers the tooling shared across Vite + React, Astro, and Next.js.
 ## Tailwind
 
 - Use v4 through `@tailwindcss/vite`, never the v3 integration
-- Back up `src/styles/global.css` before `bunx shadcn@latest init`, which silently overwrites it, and pass `-t -b -p -y` to skip prompts
+- Add shadcn through the sequence under `## Adding shadcn`, since a bare `init` overwrites `src/styles/global.css` and waits on prompts
+
+## Adding shadcn
+
+1. Copy `src/styles/global.css` aside, since init overwrites it.
+2. Confirm `global.css` starts with `@import 'tailwindcss';`, which init reads to find Tailwind v4, and that the `@/*` alias sits in both `tsconfig.json` and `vite.config.ts`.
+3. Take a preset name from `bunx shadcn@latest init --help`, since `-p` names a preset and not a primary color, and the default drifts between releases.
+4. Run `bunx shadcn@latest init -t vite -b radix -p <preset> -y </dev/null` with a timeout. The stdin redirect stops a non-TTY session from hanging on a prompt.
+5. Expect `components.json`, `src/lib/utils.ts`, and `src/components/ui/button.tsx`. Init installs the `cn` package for the helper and merges its theme into `global.css`, so reapply any copied styles.
 
 ## TypeScript and layout
 
