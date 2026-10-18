@@ -33,6 +33,16 @@ import {
   SHIPPED_SKILLS_REL,
 } from '@/gov/restated'
 import {
+  auditExit,
+  hasFinding,
+  PRACTICE_FOLDERS,
+  readRuleAudit,
+  RULE_GATED_FOLDERS,
+  RULE_LIMITS,
+  type RuleAuditReport,
+  type RuleReading,
+} from '@/gov/audit'
+import {
   CITATION_MARKER,
   type CitationReport,
   GLOB_CORPUS,
@@ -121,6 +131,12 @@ interface RestatedOptions {
 interface CountsOptions {
   readonly root?: string
   readonly json?: boolean
+}
+
+interface AuditOptions {
+  readonly root?: string
+  readonly json?: boolean
+  readonly gate?: boolean
 }
 
 /** What a reader does about each way the sweep produced no reading. */
@@ -573,6 +589,185 @@ export function register(program: Command): void {
     .action((opts: RestatedOptions) => {
       process.exitCode = runRestated(opts)
     })
+
+  gov
+    .command('audit')
+    .description(
+      'Report every rule past a shape limit, and in this repository every outside-practice rule missing a source ledger',
+    )
+    .helpOption('-h, --help', 'Show this help message')
+    .argument('[paths...]', 'Rule files to read, defaulting to the corpus')
+    .option('--root <path>', 'Tree to read, defaulting to the cwd')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .option(
+      '--gate',
+      'Set 2 only for a finding in a gated folder, which the push stage reads',
+    )
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Limits, each a finding one past its number:',
+        `  words      ${RULE_LIMITS.words} words in the body`,
+        `  bullets    ${RULE_LIMITS.bullets} bullets in the file`,
+        `  h2         ${RULE_LIMITS.h2} H2 headings`,
+        `  perH2      ${RULE_LIMITS.perH2} bullets under one H2, the text above the first H2 a group`,
+        `  chars      ${RULE_LIMITS.chars} characters in one bullet, continuation lines folded in`,
+        `  sentences  ${RULE_LIMITS.sentences} sentences in one bullet`,
+        '  emphasis   any CRITICAL, IMPORTANT, MUST, ALWAYS, NEVER, or "you must"',
+        '             outside a code span',
+        '',
+        'Corpus:',
+        '  A tree holding governance/rules/ reads it and internal/rules/, and',
+        `  asks a ledger of each rule under ${PRACTICE_FOLDERS.join(', ')}`,
+        '  at governance/ledger/<folder>/<slug>.md, one table row per bullet',
+        '  under a heading of the same name.',
+        '  Any other tree reads .claude/rules/project/ alone and asks no ledger.',
+        '  .claude/rules/canon/ is fixed at the toolkit source and never read.',
+        '',
+        `Gated folders: ${RULE_GATED_FOLDERS.length === 0 ? 'none yet' : RULE_GATED_FOLDERS.join(', ')}`,
+        '',
+        'Exit codes:',
+        '  0  no finding, or under --gate no finding in a gated folder',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '  2  at least one finding, or under --gate one in a gated folder',
+        '',
+        'Reasons:',
+        '  no-rules  the tree holds no rule corpus to read',
+        '  no-path   a named path does not exist',
+        '',
+        'Examples:',
+        '  canon gov audit',
+        '  canon gov audit .claude/rules/project/api.md',
+        '  canon gov audit --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (paths: string[], opts: AuditOptions) => {
+      process.exitCode = await runAudit(paths, opts)
+    })
+}
+
+/**
+ * Reports by default and gates only under `--gate`, and there only for the
+ * folders `RULE_GATED_FOLDERS` lists. The corpus starts far from zero, so the
+ * push stage fails on a folder once its rewrite has brought it there.
+ */
+async function runAudit(
+  paths: readonly string[],
+  opts: AuditOptions,
+): Promise<number> {
+  const root = resolve(opts.root ?? process.cwd())
+  const report = await readRuleAudit(
+    root,
+    paths.map((path) => resolve(path)),
+  )
+  const emitJson = opts.json ?? false
+
+  if (report.kind === 'unreadable') {
+    intro('canon gov audit')
+    logStep('Refused')
+    logError(report.message)
+    outro()
+
+    if (emitJson) {
+      process.stdout.write(
+        `${JSON.stringify({ ok: false, reason: report.reason, message: report.message })}\n`,
+      )
+    }
+
+    return 1
+  }
+
+  reportAudit(report, root, paths.length > 0)
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({
+        ok: true,
+        root,
+        limits: RULE_LIMITS,
+        gated: RULE_GATED_FOLDERS,
+        ...report,
+      })}\n`,
+    )
+  }
+
+  return auditExit(report, {
+    gate: opts.gate ?? false,
+    gated: RULE_GATED_FOLDERS,
+  })
+}
+
+function describeLedger(reading: RuleReading): string[] {
+  const { ledger } = reading
+  if (ledger.status === 'missing') {
+    return [`${reading.file}: no ledger at ${ledger.path}`]
+  }
+  if (ledger.status !== 'present') return []
+  return ledger.mismatches.map(
+    (mismatch) =>
+      `${ledger.path}: ${mismatch.heading ?? '(above the first H2)'} has ${mismatch.rows} row(s) for ${mismatch.bullets} bullet(s)`,
+  )
+}
+
+function reportAudit(
+  report: Extract<RuleAuditReport, { kind: 'measured' }>,
+  root: string,
+  named: boolean,
+): void {
+  intro('canon gov audit')
+
+  const shaped = report.rules.filter((reading) => reading.findings.length > 0)
+  const ledgers = report.rules.flatMap(describeLedger)
+
+  logStep('Corpus')
+  logInfo(
+    named
+      ? `${report.rules.length} named rule(s) in ${root}`
+      : `${report.rules.length} rule(s) under ${report.corpus.join(' and ')} in ${root}`,
+  )
+
+  logStep('Shape')
+  if (shaped.length === 0) {
+    logInfo('every rule is within the six limits and carries no emphasis word')
+  } else {
+    for (const reading of shaped) {
+      for (const finding of reading.findings) {
+        const at =
+          finding.line === undefined
+            ? reading.file
+            : `${reading.file}:${finding.line}`
+        logWarn(
+          finding.limit === 'emphasis'
+            ? `${at}: emphasis word`
+            : `${at}: ${finding.limit} ${finding.count} past ${finding.max}`,
+        )
+      }
+    }
+  }
+
+  logStep('Ledgers')
+  if (report.scope === 'target') {
+    logInfo('not read, since ledgers live in the toolkit and never ship')
+  } else if (ledgers.length === 0) {
+    logInfo('every outside-practice rule has a ledger row per bullet')
+  } else {
+    for (const line of ledgers) logWarn(line)
+  }
+
+  const failing = report.rules.filter(hasFinding).length
+  logStep('Summary')
+  logInfo(
+    `${failing} of ${report.rules.length} rule(s) carry a finding: ${shaped.length} with a shape finding,${ledgers.length} ledger finding(s)`,
+  )
+  logInfo(
+    RULE_GATED_FOLDERS.length === 0
+      ? 'no folder is gated yet, so --gate passes every finding'
+      : `gated: ${RULE_GATED_FOLDERS.join(', ')}`,
+  )
+
+  outro()
 }
 
 /**
