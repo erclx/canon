@@ -146,6 +146,18 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
       'Are our requirements and architecture docs still true, and when were they last reviewed?',
     expect: 'document-health',
   },
+  // A repair rather than a report, and folder by folder until each gates,
+  // which is what separates it from `document-health` above.
+  {
+    prompt:
+      'Our docs folder fails the paragraph and bullet limits everywhere, so rewrite it until it passes and lock it in.',
+    expect: 'document-repair',
+  },
+  {
+    prompt:
+      'Bring the context entries under the density limits one folder at a time and gate each once it is clean.',
+    expect: 'document-repair',
+  },
   {
     prompt: 'Open a new entry on the task board for this piece of work.',
     expect: 'task-board',
