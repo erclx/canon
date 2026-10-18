@@ -123,7 +123,7 @@ Fix what the records name in the files this run wrote and re-run once. Report a 
 ✅ Ready folder written: .canon/ready/<nn>-<slug>/
    Plan: .canon/plans/feature-<slug>.md
    Task: .canon/tasks/<label>-<slug>.md
-   Row: <label> <title>, <written under ## Run now | reported to <orchestrator name> | left for the operator to place>, <reason>
+   Row: <label> <title>, <written under ## Up next | reported to <orchestrator name> | left for the operator to place>, <reason>
    Archive on ship: canon tasks archive moves the folder to .canon/ready/archive/<nn>-<slug>/
 ```
 
