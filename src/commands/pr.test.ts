@@ -1818,6 +1818,96 @@ describe('canon pr frames', () => {
     expect(calls()).toEqual([])
   })
 
+  it('should refuse as bad-reference naming the path when a tracked reference does not exist', async () => {
+    const outcome = await runFrames([
+      '7',
+      '--add',
+      join(tempDir, 'box-1.png'),
+      '--reference',
+      'canon/design/button/dark.png',
+      '--head',
+      'abc1234',
+      '--pass',
+      '20261002T154450Z',
+    ])
+
+    expect({ reason: outcome.record.reason, calls: calls() }).toEqual({
+      reason: 'bad-reference',
+      calls: [],
+    })
+    expect(JSON.stringify(outcome.record)).toContain(
+      'canon/design/button/dark.png',
+    )
+  })
+
+  describe('a tracked reference', () => {
+    const REFERENCE = 'canon/design/button/dark.png'
+
+    function trackedArgs(add: string, reference: string): string[] {
+      return [
+        '7',
+        '--add',
+        add,
+        '--reference',
+        reference,
+        '--head',
+        'abc1234',
+        '--pass',
+        '20261002T154450Z',
+      ]
+    }
+
+    function seedReference(): string {
+      mkdirSync(join(tempDir, 'canon', 'design', 'button'), {
+        recursive: true,
+      })
+      const file = join(tempDir, REFERENCE)
+      writeFileSync(file, readFileSync(join(tempDir, 'box-1.png')))
+      return file
+    }
+
+    it('should pass when --add names the tracked file itself', async () => {
+      const file = seedReference()
+
+      const outcome = await runFrames(trackedArgs(file, REFERENCE))
+
+      expect(outcome.record.reason).toBe('read-only')
+    })
+
+    it('should resolve the png extension a reference leaves off', async () => {
+      const file = seedReference()
+
+      const outcome = await runFrames(
+        trackedArgs(file, 'canon/design/button/dark'),
+      )
+
+      expect(outcome.record.reason).toBe('read-only')
+    })
+
+    it('should refuse as bad-reference when --add names a different image', async () => {
+      seedReference()
+
+      const outcome = await runFrames(
+        trackedArgs(join(tempDir, 'box-1.png'), REFERENCE),
+      )
+
+      expect({ reason: outcome.record.reason, calls: calls() }).toEqual({
+        reason: 'bad-reference',
+        calls: [],
+      })
+    })
+
+    it('should refuse as bad-reference when the path is a directory', async () => {
+      mkdirSync(join(tempDir, REFERENCE), { recursive: true })
+
+      const outcome = await runFrames(
+        trackedArgs(join(tempDir, 'box-1.png'), REFERENCE),
+      )
+
+      expect(outcome.record.reason).toBe('bad-reference')
+    })
+  })
+
   it('should refuse as bad-theme when --theme rides a reference', async () => {
     const outcome = await runFrames([
       '7',

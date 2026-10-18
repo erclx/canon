@@ -51,6 +51,15 @@ A painted pull request needs a server in this worktree for `canon pr local` to f
 
 A hand-run `git-ship` or `git-pr` starts no server, since only a worker has a lifetime to own one.
 
+### Building against a design reference
+
+A plan carrying a `**Design references:**` section names the accepted design for the surface it changes. Open it before building, since the build matches it and a worker that reads the dark image alone ships a light theme nobody saw.
+
+- Open each cited folder's light and dark images and its frame HTML before the first edit to that surface
+- Take sizes, spacing, and colors from the frame HTML rather than from the image
+- Report a reference that does not resolve in the working tree, naming the path, rather than building without it
+- Leave `None identified.` as it stands and build without a reference
+
 ## Scope after dispatch
 
 The plan is the scope from the dispatch on. A late ask restarts both reviews, and one pull request took about four UI review rounds from asks that arrived mid-build.
