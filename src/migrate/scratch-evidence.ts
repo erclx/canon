@@ -65,14 +65,16 @@ export const PROMOTED_FOLDERS: readonly string[] = [
 ]
 
 /**
- * Where a promoted folder sits before the move: the retired scratch folder
- * when it still holds the folder, and `.canon/tmp` otherwise. The verb is a
- * migration, so it reads an unmigrated target where it is.
+ * Where a promoted folder sits before the move: `.canon/tmp` when it holds the
+ * folder, so a target part-way through a move promotes the newer copy, and the
+ * retired scratch folder otherwise. The verb is a migration, so it reads an
+ * unmigrated target where it is.
  */
 export function sourcePath(root: string, folder: string): string {
+  const current = recordDir(root, SCRATCH, folder)
   const legacy = join(root, LEGACY_SCRATCH_REL, folder)
 
-  return existsSync(legacy) ? legacy : recordDir(root, SCRATCH, folder)
+  return !existsSync(current) && existsSync(legacy) ? legacy : current
 }
 
 /** The folder a promoted one lands inside, under whichever root carries it. */
