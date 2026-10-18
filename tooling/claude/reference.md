@@ -57,11 +57,11 @@ The `# Claude` group holds three entries, being `.canon/`, `.claude/worktrees/`,
 
 ## CLI
 
-| Command              | What it does                                                                                                                    |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `canon claude init`  | Seeds `.claude/` workflow docs, updates `.gitignore`                                                                            |
-| `canon claude sync`  | Reconciles `.gitignore` against the manifest. Reports seeded file status.                                                       |
-| `canon claude setup` | Installs user-level config to `~/.claude/` once per machine: statusline, attribution, and the permissions allow and deny lists. |
+| Command              | What it does                                                                                                                                                                     |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `canon claude init`  | Seeds `.claude/` workflow docs, updates `.gitignore`                                                                                                                             |
+| `canon claude sync`  | Reconciles `.gitignore` against the manifest. Reports seeded file status.                                                                                                        |
+| `canon claude setup` | Installs user-level config to `~/.claude/` once per machine: statusline and the permissions allow and deny lists, and removes the empty attribution pair an earlier setup wrote. |
 
 ## CLAUDE.md
 
@@ -89,7 +89,5 @@ The seed at `tooling/claude/seeds/.claude/settings.json` ships hooks that pair w
 
 The template at `tooling/claude/user/settings.template.json` is installed once per machine by `canon claude setup`.
 
-- It sets `attribution.commit` and `attribution.pr` to empty strings to suppress co-author tags.
 - It allows `Bash(bun run *)` under `permissions.allow`.
 - Its `permissions.deny` holds `Read(**/.env)` and `Read(**/.env.*)`, blocking accidental secret exposure across any project.
-- The deprecated `includeCoAuthoredBy` key is not used.

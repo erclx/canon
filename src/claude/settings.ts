@@ -5,6 +5,10 @@ import { dirname } from 'node:path'
 const DEFAULT_INDENT = '  '
 const INDENT = /^([ \t]+)\S/m
 
+// The pair setup once wrote to suppress Claude's attribution. Only this exact
+// value is retracted, since anything else is a person's own choice.
+const RETIRED_ATTRIBUTION = { commit: '', pr: '' }
+
 export type SettingsRecord = Record<string, unknown>
 
 export interface SettingsKey {
@@ -107,10 +111,10 @@ export function planSettings(
   }
   keys.push({ label: 'statusLine', changed: statusLineChanged })
 
-  const attribution = template.attribution
-  const attributionChanged = !equals(next.attribution, attribution)
-  if (attributionChanged) next.attribution = attribution
-  keys.push({ label: 'attribution', changed: attributionChanged })
+  if (equals(next.attribution, RETIRED_ATTRIBUTION)) {
+    delete next.attribution
+    keys.push({ label: 'attribution', changed: true })
+  }
 
   const permissions = asRecord(next.permissions)
   const merged: SettingsRecord = { ...permissions }

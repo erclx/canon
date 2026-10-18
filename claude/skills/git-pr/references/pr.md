@@ -33,6 +33,7 @@ Does not govern:
 - Format: `<type>(<scope>): <subject>`, with `!` before the colon for a breaking change
 - Casing: lowercase for `<type>`, `<scope>`, and first word of `<subject>`
 - Length: 72 characters maximum
+- Subject: follows the subject rules in `commit.md`, including the one for a sync or upgrade title
 
 ## Content
 

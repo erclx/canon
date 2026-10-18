@@ -17,7 +17,7 @@ Two configs fix how output looks and how commits read.
 - `.oxfmtrc.json` sets `semi: false`, `singleQuote: true`, `printWidth: 80`, and `sortPackageJson: false`, keeping the output Prettier wrote.
 - The `astro` stack repeats those options in its own copy, so copy a change here into it.
 - `commitlint.config.js` is an ESM default export extending `@commitlint/config-conventional`. It sets `header-max-length: 72`, `scope-case: lower-case`, and `subject-full-stop: never`.
-- Its `subject-case` rule is off, and a local `no-claude-co-author` rule refuses a `Co-authored-by` trailer that names Claude or Anthropic.
+- Its `subject-case` rule is off.
 - `.husky/` holds `pre-commit`, `commit-msg`, `pre-push`, `post-merge`, and `post-rewrite`.
 
 ### Verify runner

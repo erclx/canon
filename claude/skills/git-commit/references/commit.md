@@ -56,6 +56,7 @@ A scope names a component, never a file or the type again.
 - Use imperative mood (`add` not `added`)
 - Describe the actual technical change, not that something changed
 - Do not use vague verbs (`improve`, `refine`, `enhance`)
+- Name what changed in the project on a sync or upgrade commit, never the toolkit version, since the config stamp records it
 
 ### Form and quoting
 
@@ -65,11 +66,6 @@ The subject carries the change and nothing around it.
 - Use single quotes if quoting
 - No backslash escaping or internal double quotes
 - No conversational filler or introductory phrases
-
-## Trailers
-
-- Do not add a `Co-authored-by` trailer crediting Claude or Anthropic, by name or by address
-- The `commit-msg` hook refuses a commit carrying one, so remove the line and commit again
 
 ## Examples
 
