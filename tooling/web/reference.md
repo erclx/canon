@@ -59,7 +59,7 @@ The wrappers around the capture and the verify run. `governance/rules/tooling/ci
 - `scripts/screenshot.sh` sources `scripts/lib/preview-server.sh`, never executed itself. It builds, serves on `PREVIEW_PORT`, waits for the port, and traps the whole process group on exit.
 - `scripts/readme-screenshot.sh` captures one case under `SCREENSHOT_FILTER` into `assets/evidence/readme/`. `README_FILTER` ships empty, so it exits 1 until a project fills it.
 - `.github/workflows/readme-screenshot.yml` ships its path list as `REPLACE_WITH_PROJECT_PATHS`, and its first step exits 1 while that stays.
-- `.github/workflows/verify.yml` runs `static-checks`, `unit-tests`, `build-verify`, and `e2e-tests`.
+- `.github/workflows/verify.yml` runs `static-checks`, `unit-tests`, `build-verify`, and `e2e-tests`. `unit-tests` installs Chromium and runs `test:browser` only when the project defines that script.
 
 ## What stays in per-stack adapters
 
