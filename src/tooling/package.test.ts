@@ -277,6 +277,14 @@ describe('minimalPackage', () => {
     expect(minimalPackage('/work/__core').name).toBe('core')
   })
 
+  it('should replace a tilde, which npm rejects in a new package name', () => {
+    expect(minimalPackage('/work/my~app').name).toBe('my-app')
+  })
+
+  it('should cap the name at the 214 characters npm allows', () => {
+    expect(minimalPackage(`/work/${'a'.repeat(300)}`).name).toHaveLength(214)
+  })
+
   it('should fall back to project when nothing is left', () => {
     expect(minimalPackage('/work/.').name).toBe('project')
     expect(minimalPackage('/work/...').name).toBe('project')

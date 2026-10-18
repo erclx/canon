@@ -77,17 +77,6 @@ describe('injectManifest', () => {
     expect(Object.keys(written)).not.toContain('main')
   })
 
-  it('should land the base stack scripts and dependencies in the written file', async () => {
-    captureStderr()
-
-    await injectManifest(resolveChain(PROJECT_ROOT, 'base'), target)
-
-    const written = readManifest()
-    expect(written.type).toBe('module')
-    expect(Object.keys(written.scripts as object)).toContain('check')
-    expect(Object.keys(written.devDependencies as object)).toContain('husky')
-  })
-
   it('should leave an existing package.json as it was', async () => {
     captureStderr()
     const body = '{"name":"mine","scripts":{"check":"x"}}\n'

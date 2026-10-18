@@ -49,8 +49,9 @@ export function declaresInstalls(chain: readonly Manifest[]): boolean {
 export function minimalPackage(target: string): PackageJson {
   const name = basename(target)
     .toLowerCase()
-    .replace(/[^a-z0-9-._~]/g, '-')
+    .replace(/[^a-z0-9-._]/g, '-')
     .replace(/^[._]+/, '')
+    .slice(0, 214)
 
   return {
     name: name === '' ? 'project' : name,
