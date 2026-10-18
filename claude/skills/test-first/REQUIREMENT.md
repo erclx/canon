@@ -7,33 +7,27 @@ description: Why the loop exists and where it stops short of a debugging session
 
 ## Gap
 
-Without this skill, a session implementing a planned change writes the test after the code, or writes both in one motion and never runs the test against the code as it stood before. Either way, nothing showed that the test would have caught the defect it exists to catch, so a test added after the fact protects nothing beyond what the author was already confident about.
+A session implementing a planned change writes the test after the code, or writes both in one motion and never runs the test against the code as it stood before. Nothing shows the test would have caught the defect it exists to catch, so a test added after the fact protects nothing beyond what the author already trusted.
 
 ## Must
 
-- Write or extend the test before the implementation it covers, for any behavior whose shape is already known
-- Run the test before implementing and confirm it fails for the missing behavior, not for an unrelated mistake in the test itself
-- Implement the minimum the current test demands, and start a new test before extending past it
-- Load `canon:code-craft` before writing the implementation when its shape is still open and the session has not loaded the skill, so the shape of the code is settled before the body rather than during refactor
-- Re-run the test after implementing and confirm the pass is the one the test was written to prove
-- Refactor the implementation and the test once the suite is green, re-running it after each change, since the smallest change that passes leaves duplication and shortcuts the loop exists to remove before they reach history
+- Write or extend the test before the implementation, for any behavior whose shape is already known
+- Run the test before implementing and confirm it fails for the missing behavior rather than a mistake in the test
+- Implement the minimum the current test demands, then start a new test before extending past it
+- Load `code-craft` before the implementation when its shape is still open, then confirm the pass is the one the test was written to prove
+- Refactor the implementation and the test once the suite is green, re-running it after each change
 
 ## Must not
 
 - Write the implementation and the test together with the test never run red first
-- Treat a test that already passes before any code change as evidence for the new behavior
-- Restate the reproducing-test step `canon:systematic-debugging` already owns for a failure with no known cause
-- Decide whether a change looks right visually, which runs after implementation as a separate check
-
-## Guards
-
-- A test failing for a reason other than the missing behavior blocks moving to implementation. Fix the test first.
+- Treat a test that passes before any code change as evidence for the new behavior
+- Move to implementation while the test fails for a reason other than the missing behavior
+- Decide whether a change looks right visually
 
 ## Out of scope
 
-- Choosing the layer a test belongs at and judging whether it is a good test: `canon:test-craft`, loaded at step 1 rather than restated here
-- Finding the cause of an unexplained failure: `canon:systematic-debugging`
-- Confirming visual output after a change lands: `ui-checklist` writes the list to confirm against
-- Shaping the function, class, or module the implementation writes: `canon:code-craft`, loaded at step 4 rather than restated here
-- Committing the behavior as a slice and ordering the slices of a larger build: `canon:build-in-slices`
-- The mechanical audit of whether an implementation reached history ahead of its test: `canon gov test-order`, invoked from `auto-ship`
+- Choosing a test's layer and judging whether it is good, which `test-craft` owns
+- Finding the cause of an unexplained failure, which `systematic-debugging` owns
+- Shaping the function, class, or module the implementation writes, which `code-craft` owns
+- Committing the behavior as a slice, which `build-in-slices` owns
+- Confirming visual output after a change lands, which `ui-checklist` owns
