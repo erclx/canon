@@ -42,6 +42,7 @@ export interface PullIdentity {
   readonly head?: string
   readonly base?: string
   readonly mergeState?: string
+  readonly body?: string
 }
 
 export type BranchPull =
@@ -70,6 +71,7 @@ export function identityOf(row: RestPull): PullIdentity {
     ...(row.head?.sha !== undefined && { head: row.head.sha }),
     ...(row.base?.ref !== undefined && { base: row.base.ref }),
     ...(mergeState !== undefined && { mergeState }),
+    ...(typeof row.body === 'string' && { body: row.body }),
   }
 }
 
