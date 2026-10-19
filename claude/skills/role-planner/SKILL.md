@@ -39,7 +39,7 @@ Each item below is something a record needed and a launch string did not carry.
 - The task file, and its `## Findings` before deciding anything, since a row can carry its own disproof under a title still stating the original claim
 - The source files themselves, opened rather than summarized. Never a count quoted from the task file, which goes wrong or stale.
 - `CLAUDE.md` and the context entries the row touches, for the decision and the alternative it was taken against rather than for the decision alone
-- `.canon/tasks/priority.md` for the row's Touches column and its blocker. Read it for the shared-path lines and holds of the constraint block, never as a gate a plan must clear.
+- `.canon/tasks/priority.md` for the row's blocker and the plan each running row links. Read those plans for the constraint block's shared paths and holds, never as a gate a plan must clear.
 
 ### Reads for a feature plan alone
 

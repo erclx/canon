@@ -125,7 +125,7 @@ No practitioner source serializes on a shared file. Each builds in parallel and 
 Read `canon sessions list --json` for the branches in flight as well as the board, since a hand-launched track carries no row, and read the plan of any branch no row names.
 
 - `canon tasks validate` and `canon tasks plan-reach` report the paths two rows share, a candidate list for the five holds and the paths a dispatch names
-- A shared folder means a Touches cell claimed it bare, so narrow that cell rather than reading the folder as a sweep
+- A shared folder means a plan declared it bare, so narrow that plan's list rather than reading the folder as a sweep
 - A declared set predicts rather than bounds, since `canon:context-fold`, `canon:docs-sync`, and the drift stages write past every plan
 - Such a crossing changes what the second branch rebases over, not whether a row holds, and `canon tasks plan-reach` at `canon:git-ship` step 5 names it
 
