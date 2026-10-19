@@ -36,15 +36,7 @@ Record `<pass>` once, as the instant this pass starts, with `date -u +%Y%m%dT%H%
 
 ### When the verb is absent
 
-Every read here runs on REST, since `gh pr` runs on GraphQL and a cloud session's proxy refuses it. A target whose CLI predates the verb gets no record back, so read the pull request directly:
-
-```bash
-gh api "repos/{owner}/{repo}/pulls?head={owner}:$(git branch --show-current | jq -Rr @uri)&state=open" --jq '.[].number'
-gh api repos/{owner}/{repo}/pulls/<number> --jq .head.sha
-```
-
-- With no number named, take the open pull requests on the current branch, and stop when that prints anything but one number
-- A named number skips that lookup, since this checkout's branch need not be the pull request's
+A target whose CLI predates `canon pr head` gets no record back. Read `${CLAUDE_SKILL_DIR}/references/verb-absent.md` for the REST reads that stand in for it.
 
 ### Read the newest verdict and reply
 
