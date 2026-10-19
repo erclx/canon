@@ -30,6 +30,11 @@ export interface ResolvedSession {
    * connection, which confirms the row wherever the start time cannot be read.
    */
   readonly via: 'pid' | 'socket' | 'listener'
+  /**
+   * How this row alone was decided, so a caller scoping the roster derives its
+   * confidence over the rows it keeps rather than over the whole machine.
+   */
+  readonly confidence: Confidence
   readonly startedAt: string | null
   /**
    * The stamp the record carries beside `status`, kept alongside the dwell it
@@ -81,6 +86,19 @@ export type SessionReport =
       readonly foreignDead: number
       readonly sessions: readonly ResolvedSession[]
     }
+
+/**
+ * The weakest confidence among the rows, so one read tells a caller whether
+ * every row it holds is an identity. A caller scoping the roster calls this on
+ * the rows it keeps, since one unrelated row it dropped must not weaken it.
+ */
+export function confidenceOf(
+  sessions: readonly Pick<ResolvedSession, 'confidence'>[],
+): Confidence {
+  return sessions.every((session) => session.confidence === 'confirmed')
+    ? 'confirmed'
+    : 'unverified'
+}
 
 /** A live socket here accepted in 2 ms, and every probe runs in parallel. */
 const LISTEN_TIMEOUT_MS = 250
@@ -186,6 +204,7 @@ function present(
   located: Located,
   now: number,
   via: ResolvedSession['via'],
+  confidence: Confidence,
 ): ResolvedSession {
   return {
     name: record.name,
@@ -195,6 +214,7 @@ function present(
     kind: record.kind ?? 'unknown',
     status: record.status ?? 'unknown',
     via,
+    confidence,
     startedAt:
       record.startedAt === undefined
         ? null
@@ -273,22 +293,16 @@ export async function resolveSessions(
     }),
   )
 
-  const confidence: Confidence = upgraded.every(
-    (row) => row.confidence === 'confirmed',
-  )
-    ? 'confirmed'
-    : 'unverified'
-
   const sessions = await Promise.all(
-    upgraded.map(async ({ record, via }) =>
-      present(record, await find(record.cwd), now, via),
+    upgraded.map(async ({ record, via, confidence }) =>
+      present(record, await find(record.cwd), now, via, confidence),
     ),
   )
 
   return {
     kind: 'resolved',
     dir: registry.dir,
-    confidence,
+    confidence: confidenceOf(sessions),
     foreignDead,
     sessions,
   }

@@ -3,6 +3,7 @@ import type { Command } from 'commander'
 import { checkClaim, type ClaimReport } from '@/sessions/claim'
 import {
   callerIdentity,
+  confidenceOf,
   repositoryOf,
   type ResolvedSession,
   resolveSessions,
@@ -139,7 +140,9 @@ export function register(program: Command): void {
         'process, so a roster reported that way is a candidate list rather than',
         'an identity. Where the start time cannot be read, a row whose messaging',
         'socket accepts a connection is confirmed instead and reads "via":',
-        '"listener". The probe connects and closes without writing.',
+        '"listener". The probe connects and closes without writing. Each row',
+        'carries its own "confidence", and the top-level field is the weakest of',
+        'the rows listed, so --branch is not weakened by a row it dropped.',
         '',
         'A reader in another pid namespace, such as a sandboxed shell, cannot',
         'see the pid of a record stamped elsewhere. That row is judged on its',
@@ -490,7 +493,8 @@ async function runList(opts: ListCommandOptions): Promise<number> {
     process.stdout.write(
       `${JSON.stringify({
         dir: report.dir,
-        confidence: report.confidence,
+        // Over the rows shown, so an unrelated row --branch dropped cannot weaken it.
+        confidence: confidenceOf(shown),
         foreignDead: report.foreignDead,
         branch: opts.branch ?? null,
         repository,

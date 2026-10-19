@@ -6,6 +6,7 @@ import type { LivenessProbes } from '@/sessions/live'
 import {
   callerIdentity,
   type Located,
+  confidenceOf,
   type ResolvedSession,
   resolveSessions,
   selfOf,
@@ -297,6 +298,7 @@ function row(pid: number, sessionId: string | null): ResolvedSession {
     kind: 'interactive',
     status: 'idle',
     via: 'pid',
+    confidence: 'confirmed',
     startedAt: null,
     statusUpdatedAt: null,
     statusDwellMs: null,
@@ -602,5 +604,34 @@ describe('resolveSessions with a listener probe', () => {
       { via: 'listener' },
     ])
     expect(report.kind === 'resolved' && report.confidence).toBe('confirmed')
+  })
+})
+
+describe('confidenceOf', () => {
+  it('should read confirmed only when every row is confirmed', () => {
+    expect(
+      confidenceOf([{ confidence: 'confirmed' }, { confidence: 'unverified' }]),
+    ).toBe('unverified')
+    expect(confidenceOf([{ confidence: 'confirmed' }])).toBe('confirmed')
+  })
+
+  it('should carry each row its own confidence in a mixed roster', async () => {
+    const other = '/run/user/1000/cc-socks/200.sock'
+    seed(100, { messagingSocketPath: '/run/user/1000/cc-socks/100.sock' })
+    seed(200, { messagingSocketPath: other })
+
+    const report = await resolveSessions({
+      dir: DIR,
+      probes: {
+        ...NO_PROC,
+        listens: async (path) => path.endsWith('100.sock'),
+      },
+      locate: locating('feat/parser'),
+    })
+
+    expect(
+      report.kind === 'resolved' &&
+        Object.fromEntries(report.sessions.map((s) => [s.pid, s.confidence])),
+    ).toEqual({ 100: 'confirmed', 200: 'unverified' })
   })
 })
