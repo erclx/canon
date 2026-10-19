@@ -23,11 +23,11 @@ An automatable change already covered by a test written during implementation is
 
 ## The checklist
 
-Group visual items by feature area. Use `- [ ]` checkbox syntax, and write each item as the action and the result a person is looking for, so a reviewer who did not build the change can run it.
+Group visual items under a bold label per feature area, at most five boxes a group, and split a larger area into two labels. Use `- [ ]` checkbox syntax, and write each item as the action and the result a person is looking for, so a reviewer who did not build the change can run it.
+
+The evidence comment already heads the list with `## What to look at`, so the file opens on its first feature label with no heading line of its own.
 
 ```markdown
-**What to verify visually:**
-
 **<Feature area>**
 
 - [ ] <route>[, <width>]: <verb> <target> → <expected visual result>

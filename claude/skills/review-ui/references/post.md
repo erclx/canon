@@ -76,6 +76,8 @@ Driven at `<short-sha>` on <address>, rendered by <renderer>.
 <!-- review-ui: head=<head> -->
 ```
 
+The post takes the length limits alone, with a box's reason under 350 characters and split into the reading and its cause where it runs longer, and keeps its H3 verdict groups and tables.
+
 The body opens on its count line, in that order, so the operator reads what they owe before anything else. The second line carries the address, the head, and the renderer, and says the address was driven unverified when it came from the local rung or the launch.
 
 - Drop each section holding no box, along with its heading. Order is fixed: Failed, Needs your eyes, Not driven, then the folded blocks.
