@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import {
   applySessionDefaults,
+  MERGE_DENIED,
   planSessionDefaults,
   readSessionDefaults,
   type SessionDefaultsRead,
@@ -45,7 +46,7 @@ describe('planSessionDefaults', () => {
     const plan = planSessionDefaults({})
 
     expect(plan.next).toEqual({
-      permissions: { deny: ['Agent', 'Task'] },
+      permissions: { deny: ['Agent', 'Task', ...MERGE_DENIED] },
       autoMemoryEnabled: false,
     })
     expect(plan.changed).toBe(true)
@@ -58,8 +59,73 @@ describe('planSessionDefaults', () => {
 
     expect(plan.next.permissions).toEqual({
       allow: ['Bash(ls)'],
-      deny: ['Read(**/.env)', 'Task', 'Agent'],
+      deny: ['Read(**/.env)', 'Task', 'Agent', ...MERGE_DENIED],
     })
+  })
+
+  it('should append only the merge entry a hand-added deny list lacks', () => {
+    const plan = planSessionDefaults({
+      autoMemoryEnabled: false,
+      permissions: {
+        deny: ['Read(**/.env)', 'Bash(gh pr merge:*)', 'Agent', 'Task'],
+      },
+    })
+
+    expect(plan.next.permissions).toEqual({
+      deny: [
+        'Read(**/.env)',
+        'Bash(gh pr merge:*)',
+        'Agent',
+        'Task',
+        'Bash(canon pr merge:*)',
+      ],
+    })
+  })
+
+  it('should add the merge entries without touching auto memory set to true', () => {
+    const plan = planSessionDefaults({
+      autoMemoryEnabled: true,
+      permissions: { deny: ['Agent', 'Task'] },
+    })
+
+    expect(plan.next).toEqual({
+      autoMemoryEnabled: true,
+      permissions: { deny: ['Agent', 'Task', ...MERGE_DENIED] },
+    })
+  })
+
+  it('should keep every other key a write passes over', () => {
+    const plan = planSessionDefaults({
+      model: 'opus',
+      hooks: { Stop: [] },
+      permissions: { allow: ['Bash(ls)'] },
+    })
+
+    expect(plan.next).toMatchObject({
+      model: 'opus',
+      hooks: { Stop: [] },
+      permissions: { allow: ['Bash(ls)'] },
+    })
+  })
+
+  it('should flag a file migrated before the merge entries as lacking them', () => {
+    const plan = planSessionDefaults({
+      autoMemoryEnabled: false,
+      permissions: { deny: ['Agent', 'Task'] },
+    })
+
+    expect(plan.lacksMergeDeny).toBe(true)
+    expect(plan.predates).toBe(false)
+    expect(plan.changed).toBe(true)
+  })
+
+  it('should not flag a file holding both merge entries as lacking them', () => {
+    const plan = planSessionDefaults({
+      autoMemoryEnabled: false,
+      permissions: { deny: ['Agent', 'Task', ...MERGE_DENIED] },
+    })
+
+    expect(plan.lacksMergeDeny).toBe(false)
   })
 
   it('should leave a person setting auto memory to true alone', () => {
@@ -86,10 +152,16 @@ describe('planSessionDefaults', () => {
     expect(plan.predates).toBe(false)
   })
 
+  it('should not read a file holding the merge entries alone as predating them', () => {
+    const plan = planSessionDefaults({ permissions: { deny: MERGE_DENIED } })
+
+    expect(plan.predates).toBe(false)
+  })
+
   it('should report nothing changed when both defaults are present', () => {
     const plan = planSessionDefaults({
       autoMemoryEnabled: false,
-      permissions: { deny: ['Task', 'Agent'] },
+      permissions: { deny: ['Task', 'Agent', ...MERGE_DENIED] },
     })
 
     expect(plan.changed).toBe(false)
@@ -141,7 +213,7 @@ describe('applySessionDefaults', () => {
     await applySessionDefaults(read)
 
     expect(await readTargetSettings(dir)).toBe(
-      '{\n    "model": "opus",\n    "permissions": {\n        "deny": [\n            "Agent",\n            "Task"\n        ]\n    },\n    "autoMemoryEnabled": false\n}\n',
+      '{\n    "model": "opus",\n    "permissions": {\n        "deny": [\n            "Agent",\n            "Task",\n            "Bash(canon pr merge:*)",\n            "Bash(gh pr merge:*)"\n        ]\n    },\n    "autoMemoryEnabled": false\n}\n',
     )
   })
 
