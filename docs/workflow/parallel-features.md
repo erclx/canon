@@ -58,6 +58,6 @@ Merge order matters only when two branches touch the same file. Expect to rebase
 - A parked row is reported when its cited task reached the trunk, whether the cell links it or names its bare label
 - A group header must be the columns the group owns, a `Touches` cell must match its plan, and a `Waiting on` cell renders at most 120 characters
 
-`canon:task-board` creates a task file, and `canon:task-complete` marks outcomes. The `post-merge` hook archives the task a merged pull request closed, with its plan, and a `post-rewrite` hook does the same for a rebase pull. Both archive only when the merge carried a PR number and the task is closed.
+`canon:task-board` creates a task file, and `canon:task-complete` marks outcomes. The `post-merge` hook archives the task a merged pull request closed, with its plan, and a `post-rewrite` hook does the same for a rebase pull. Both archive a closed task whose merge carried a PR number, and a slice merged before then moves only its own plan.
 
 `CANON_SKIP_RECLAIM`, `CANON_SKIP_UPGRADE`, and `CANON_SKIP_PLUGIN_UPDATE` turn off the three hook steps that act on the machine.
