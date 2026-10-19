@@ -136,11 +136,21 @@ export const UI_HEADINGS = ['## UI review', '## UI review closed'] as const
 
 export type UiHeading = (typeof UI_HEADINGS)[number]
 
+/** The four totals on a verdict's count line. */
+export interface UiCounts {
+  readonly failed: number
+  readonly eyes: number
+  readonly passed: number
+  readonly notDriven: number
+}
+
 export interface UiScope {
   readonly heading?: UiHeading
   readonly state: ReviewState
   /** The head the verdict covered, a full or abbreviated sha. */
   readonly commit?: string
+  /** The counts the verdict wrote, absent when its count line does not parse. */
+  readonly counts?: UiCounts
   /** `marker` is the verdict's own record, `fallback` is GitHub's stamp. */
   readonly source: ScopeSource
 }
@@ -151,6 +161,32 @@ export interface UiScope {
  * while the pass was driving.
  */
 const UI_MARKER = /^<!--\s*review-ui:\s*head=([0-9a-f]{7,40})\s*-->$/
+
+/**
+ * The count line `review-ui`'s `post.md` fixes as the verdict's first line
+ * under the heading. It is model-written prose, so a body that drifts from the
+ * form reads as no counts and a caller treats that as unchecked.
+ */
+const UI_COUNTS =
+  /^(\d+) failed · (\d+) need your eyes · (\d+) passed · (\d+) not driven$/
+
+export function readUiCounts(body: string): UiCounts | undefined {
+  for (const raw of body.split('\n').slice(1, 6)) {
+    const match = UI_COUNTS.exec(raw.trim())
+    if (match === null) continue
+    const [, failed, eyes, passed, notDriven] = match.map(Number)
+    if (
+      failed === undefined ||
+      eyes === undefined ||
+      passed === undefined ||
+      notDriven === undefined
+    ) {
+      return undefined
+    }
+    return { failed, eyes, passed, notDriven }
+  }
+  return undefined
+}
 
 function lastLine(body: string): string | undefined {
   const lines = body.split('\n')
@@ -185,9 +221,11 @@ export function resolveUiScope(listing: ReviewListing): UiScope {
   const line = lastLine(row.body ?? '')
   const match = line === undefined ? null : UI_MARKER.exec(line)
   const marked = match?.[1]
+  const counts = readUiCounts(row.body ?? '')
+  const counted = counts === undefined ? {} : { counts }
 
   if (marked !== undefined) {
-    return { heading, state, commit: marked, source: 'marker' }
+    return { heading, state, commit: marked, ...counted, source: 'marker' }
   }
 
   const oid = row.commit?.oid
@@ -195,6 +233,7 @@ export function resolveUiScope(listing: ReviewListing): UiScope {
     heading,
     state,
     ...(oid === undefined || oid === '' ? {} : { commit: oid }),
+    ...counted,
     source: 'fallback',
   }
 }

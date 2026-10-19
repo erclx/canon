@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { renderEvidenceBody } from '@/pr/evidence'
 import {
+  findEvidenceChecklist,
+  readChecklistBoxes,
+  renderEvidenceBody,
+} from '@/pr/evidence'
+import {
+  countTicksAtHead,
   readUiPassHead,
   tickBoxes,
   uiPassLine,
@@ -18,6 +23,10 @@ const CHECKLIST = [
 
 function bodyWith(checklist: string | undefined): string {
   return renderEvidenceBody([], 'o/r', 'aaaa000', HEAD, undefined, checklist)
+}
+
+function readBoxes(body: string) {
+  return readChecklistBoxes(findEvidenceChecklist([{ body }]) ?? '')
 }
 
 describe('tickBoxes', () => {
@@ -78,6 +87,38 @@ describe('tickBoxes', () => {
       kind: 'refused',
       reason: 'no-checklist',
     })
+  })
+})
+
+describe('countTicksAtHead', () => {
+  it('should count only driven boxes stamped at the tip', () => {
+    const first = tickBoxes(bodyWith(CHECKLIST), [1], '1111111aaaa')
+    if (first.kind !== 'ticked') throw new Error('expected a tick')
+    const both = tickBoxes(first.body, [2], HEAD)
+    if (both.kind !== 'ticked') throw new Error('expected a tick')
+
+    expect(countTicksAtHead(readBoxes(both.body), HEAD)).toBe(1)
+  })
+
+  it('should not count a tick nothing stamped', () => {
+    const body = bodyWith(
+      ['- [x] hero settles', '- [ ] nav wraps', '- [ ] calm (taste)'].join(
+        '\n',
+      ),
+    )
+
+    expect(countTicksAtHead(readBoxes(body), HEAD)).toBe(0)
+  })
+
+  it('should leave a taste box out of the count', () => {
+    const body = bodyWith(
+      [
+        `- [x] hero settles · passed at \`abcdef1\``,
+        `- [x] calm (taste) · passed at \`abcdef1\``,
+      ].join('\n'),
+    )
+
+    expect(countTicksAtHead(readBoxes(body), HEAD)).toBe(1)
   })
 })
 

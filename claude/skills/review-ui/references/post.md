@@ -11,14 +11,24 @@ Step 7 of `review-ui`.
 
 The heading reports whether the branch owes anything, the way the code review's does.
 
-- `## UI review` when a box failed, the sweep found a console error or an overflow, or a box was not driven for a cause on the page, such as a target the snapshot does not hold.
+- `## UI review` when a box failed, the sweep found a console error or an overflow, a box was not driven for a cause on the page, or the pass drove no box at all.
 - `## UI review closed` otherwise.
 
-A needs-eyes box leaves the review closed, and so does a box not driven for a cause off the page, such as an address that did not answer or a `(local only)` box on a hosted preview.
+A needs-eyes box leaves the review closed, and so does a box not driven for a cause off the page, such as an address that did not answer or a `(local only)` box on a hosted preview, as long as something else was driven.
 
 - Each is owed to the person who merges, and no commit can settle it, so opening the heading would hold the draft mark at every head
 - Name each such box in the count line's not-driven count and in its Not driven entry
 - Do not append the pull request number, which GitHub already renders
+
+### A pass that drove no box
+
+A pass with 0 failed, 0 need your eyes, 0 passed, and any box not driven looked at nothing, so it has not covered the head. It takes `## UI review` whatever the cause, including a checklist of only `(local only)` boxes on a hosted preview.
+
+- Put a line naming the cause directly under the count line, such as the addresses tried and what each returned, ahead of the address line
+- The cure is a re-drive on an address that answers, which Step 1 of `review-ui` allows past this verdict
+- Message the controller with the cause and send the worker no `review-address`, since the verdict holds no box a fix worker could change
+- `canon pr lift` refuses a close of this shape as `ui-undriven`, so a violation holds the draft mark
+- A checklist with no box at all, which counts 0 not driven too, is an empty pass and takes the closed heading
 
 ## The body
 
@@ -125,6 +135,8 @@ Driven at `<short-sha>` on <address>, rendered by <renderer>.
 
 </details>
 ```
+
+The count line is read by two verbs, `canon pr tick` for the passed count and `canon pr lift` for the driven test, so keep it exactly in the form `F failed · E need your eyes · P passed · N not driven`. A line that drifts reads as no counts, and both checks then stand down.
 
 The count line and the sections beneath it hold the same totals, and Step 10's printed line is the same four counts. A pass where every box needs eyes and nothing else is owed takes the closed heading.
 

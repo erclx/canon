@@ -4,6 +4,7 @@ import {
   type ReviewRow,
   resolveReviewScope,
   resolveUiScope,
+  type UiCounts,
 } from '@/pr/review-scope'
 import { DEFAULT_PAINTED, isPainted, type PaintedPatterns } from '@/pr/painted'
 
@@ -24,6 +25,7 @@ export type LiftRefusal =
   | 'ui-open'
   | 'ui-unmarked'
   | 'ui-behind'
+  | 'ui-undriven'
   | 'evidence-owed'
   | 'standing-stale'
   | 'standing-conflict'
@@ -171,6 +173,20 @@ function carried(gates: readonly GateResult[]): {
 }
 
 /**
+ * Whether a verdict's counts show boxes left undriven and none driven. An empty
+ * pass, with nothing not driven either, looked at no box because none was owed.
+ */
+function droveNothing(counts: UiCounts | undefined): boolean {
+  return (
+    counts !== undefined &&
+    counts.failed === 0 &&
+    counts.eyes === 0 &&
+    counts.passed === 0 &&
+    counts.notDriven > 0
+  )
+}
+
+/**
  * Binds only where the evidence record carries a checklist to drive.
  *
  * A close behind the head still holds when it is an ancestor of the head and
@@ -192,6 +208,9 @@ export async function uiGate(
   if (scope.state === 'open') return fail('ui', 'ui-open')
   if (scope.source !== 'marker') return fail('ui', 'ui-unmarked')
   if (scope.commit === undefined) return fail('ui', 'ui-behind')
+  // Ahead of the head test so a close carried across commits is refused too.
+  // A verdict whose count line did not parse reads as unchecked and goes on.
+  if (droveNothing(scope.counts)) return fail('ui', 'ui-undriven')
   if (coversHead(scope.commit, head)) return pass('ui')
 
   const changed = await api.readChanged(scope.commit, head)
