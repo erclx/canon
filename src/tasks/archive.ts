@@ -1,7 +1,10 @@
 import { existsSync } from 'node:fs'
+import { execa } from 'execa'
 import { mkdir, readdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { basename, dirname, join, relative, resolve, sep } from 'node:path'
+import { gitEnv } from '@/git/env'
 import { regenOne } from '@/indexes/regen'
+import { planBranch } from '@/tasks/branch'
 import { isUnder } from '@/tasks/paths'
 import { recordDir, recordDirs } from '@/roots/record'
 
@@ -128,7 +131,24 @@ export interface ArchiveRefused {
   readonly reason: ArchiveRefusal
   readonly message: string
   readonly detail: readonly string[]
+  /**
+   * The slice plan a merged pull request settled while its task stayed open,
+   * moved into the archive. Set only on `earlier-slice` and `open-outcomes`.
+   */
+  readonly slice?: PlanMove
 }
+
+/**
+ * Answers the head branch a pull request merged from, or undefined when it
+ * cannot be read. Tests supply one rather than reaching for `gh`.
+ */
+export type HeadReader = (pullRequest: number) => Promise<string | undefined>
+
+export interface ArchiveOptions {
+  readonly head?: HeadReader
+}
+
+const GH_TIMEOUT_MS = 15_000
 
 export type ArchiveOutcome = ArchiveSuccess | ArchiveRefused
 
@@ -925,6 +945,7 @@ async function resolveStem(
 export async function archiveTask(
   root: string,
   selector: TaskSelector,
+  options: ArchiveOptions = {},
 ): Promise<ArchiveOutcome> {
   const dir = tasksDir(root)
 
@@ -944,9 +965,13 @@ export async function archiveTask(
   // while the last slice is still open. Only the last number closes the task.
   const last = readPullRequest(text).at(-1)
   if (selector.kind === 'pull-request' && last !== selector.number) {
-    return refuse(
-      'earlier-slice',
-      `${stem} lists #${last} after #${selector.number}, so the task closes when #${last} merges.`,
+    return withMergedSlice(
+      refuse(
+        'earlier-slice',
+        `${stem} lists #${last} after #${selector.number}, so the task closes when #${last} merges.`,
+      ),
+      { dir, root, stem, text, number: selector.number },
+      options.head ?? ghHeadReader(root),
     )
   }
 
@@ -966,11 +991,18 @@ export async function archiveTask(
   const { open, closed, cut, operator } = readOutcomes(text)
 
   if (open.length > 0) {
-    return refuse(
+    const refused = refuse(
       'open-outcomes',
       `${stem} has ${open.length} open outcome(s). Close them, or cut one with \`- ~~<outcome>~~ <why>\`, then archive.`,
       open,
     )
+    return selector.kind === 'pull-request'
+      ? withMergedSlice(
+          refused,
+          { dir, root, stem, text, number: selector.number },
+          options.head ?? ghHeadReader(root),
+        )
+      : refused
   }
 
   if (closed.length === 0 && cut.length === 0 && operator.length === 0) {
@@ -1035,6 +1067,102 @@ export async function archiveTask(
     operatorChecks: operator,
     relinked,
     relinkFailed: failed,
+  }
+}
+
+interface MergedSlice {
+  readonly dir: string
+  readonly root: string
+  readonly stem: string
+  readonly text: string
+  readonly number: number
+}
+
+/**
+ * Moves the slice plan a merged pull request built into the archive while its
+ * task stays open, and retargets the task's `Plan:` line at it, so the board
+ * row drops the slice through `livePlans`. The refusal still answers, since
+ * the task did not close.
+ *
+ * Only a task citing more than one live plan has a slice to drop. The plan is
+ * the one whose derived branch is the pull request's head, so a plan a worker
+ * renamed off its branch matches nothing and moves nothing. A plan another
+ * live task cites stays, for the reason `plansToArchive` gives, and an
+ * unreadable head leaves everything as it was.
+ */
+async function withMergedSlice(
+  refused: ArchiveRefused,
+  merged: MergedSlice,
+  head: HeadReader,
+): Promise<ArchiveRefused> {
+  const { dir, root, stem, text } = merged
+  const live = readPlanTargets(text).flatMap((target) => {
+    const path = resolveLivePlan(target, dir, root)
+    return path && existsSync(path) ? [{ target, path }] : []
+  })
+  if (new Set(live.map((entry) => entry.path)).size < 2) return refused
+
+  const branch = await head(merged.number)
+  if (branch === undefined) return refused
+
+  const slice = live.find((entry) => {
+    const derived = planBranch(root, entry.path)
+    return derived.ok && derived.branch === branch
+  })
+  if (!slice) return refused
+
+  const shared = await otherTasksCitingPlan(dir, root, slice.path, stem)
+  if (shared.length > 0) return refused
+
+  const move = {
+    from: slice.path,
+    to: join(recordDir(root, PLANS, ARCHIVE), basename(slice.path)),
+  }
+  if (existsSync(move.to)) return refused
+
+  await movePlans([move])
+  const targets = live.filter((entry) => entry.path === slice.path)
+  await writeFile(
+    join(dir, `${stem}.md`),
+    retargetPlanLine(
+      text,
+      new Map(targets.map((entry) => [entry.target, linkTo(dir, move.to)])),
+    ),
+  )
+
+  return { ...refused, slice: move }
+}
+
+/**
+ * Reads a pull request's head branch through `gh`, in the repository `root`
+ * resolves to. No `gh` on the path, or a failed read, answers undefined, so a
+ * machine without it keeps a slice plan live rather than guessing.
+ */
+export function ghHeadReader(root: string): HeadReader {
+  return async (pullRequest) => {
+    if (Bun.which('gh') === null) return undefined
+
+    try {
+      // `gh` resolves its repository through git, so the hook's resolution
+      // variables would point it elsewhere. `reclaim.ts` strips them the same way.
+      const result = await execa(
+        'gh',
+        [
+          'pr',
+          'view',
+          String(pullRequest),
+          '--json',
+          'headRefName',
+          '--jq',
+          '.headRefName',
+        ],
+        { cwd: root, timeout: GH_TIMEOUT_MS, env: gitEnv(), extendEnv: false },
+      )
+      const branch = result.stdout.trim()
+      return branch.length > 0 ? branch : undefined
+    } catch {
+      return undefined
+    }
   }
 }
 
