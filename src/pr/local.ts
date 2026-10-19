@@ -64,3 +64,29 @@ export function dropAddressLine(body: string): string | undefined {
   if (isGapAbove && (lines[first] ?? '').trim() === '') lines.splice(first, 1)
   return lines.join('\n')
 }
+
+/**
+ * A loopback URL with any port and path, and the backticks or angle brackets a
+ * pass may have wrapped it in. These hosts resolve on one machine for one
+ * session, so no later reader of the thread can open them.
+ */
+const LOOPBACK_URL =
+  /[`<]?https?:\/\/(?:localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(?::\d+)?(?:\/[^\s`>,]*)?[`>]?/g
+
+/**
+ * Rewrites the loopback address on a UI review's `Driven at` line to "a local
+ * preview", keeping the head and the renderer. Only that line is read, so a
+ * loopback URL a box reason quotes from the page stays as content. Undefined
+ * when no line changes, which is also what a second mask of the same body
+ * returns.
+ */
+export function maskLocalAddress(body: string): string | undefined {
+  let changed = false
+  const lines = body.split('\n').map((line) => {
+    if (!line.startsWith('Driven at ')) return line
+    const masked = line.replace(LOOPBACK_URL, 'a local preview')
+    if (masked !== line) changed = true
+    return masked
+  })
+  return changed ? lines.join('\n') : undefined
+}
