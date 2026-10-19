@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   coversHead,
+  readUiCounts,
   type ReviewRow,
   resolveReviewScope,
   resolveUiScope,
@@ -357,6 +358,52 @@ describe('resolveUiScope', () => {
     })
 
     expect(scope.source).toBe('fallback')
+  })
+})
+
+const COUNT_LINE = '0 failed · 0 need your eyes · 9 passed · 2 not driven'
+
+describe('readUiCounts', () => {
+  it('should read the four counts off the line post.md writes', () => {
+    const body = `## UI review closed\n\n${COUNT_LINE}\nDriven at \`9b1f2c3\` on http://localhost:5173, rendered by playwright.`
+
+    expect(readUiCounts(body)).toEqual({
+      failed: 0,
+      eyes: 0,
+      passed: 9,
+      notDriven: 2,
+    })
+  })
+
+  it('should read nothing when the body carries no count line', () => {
+    expect(readUiCounts(UI_CLOSED)).toBeUndefined()
+  })
+
+  it('should read nothing from a line that drifts from the form', () => {
+    expect(
+      readUiCounts('## UI review\n\n1 failed, 0 eyes, 3 passed'),
+    ).toBeUndefined()
+  })
+
+  it('should follow the newest verdict when scoping', () => {
+    const older = `## UI review\n\n1 failed · 0 need your eyes · 2 passed · 0 not driven\n${uiMarker(READ)}`
+    const newer = `## UI review closed\n\n${COUNT_LINE}\n${uiMarker(UI_HEAD)}`
+    const scope = resolveUiScope({ reviews: [review(older), review(newer)] })
+
+    expect(scope.counts).toEqual({
+      failed: 0,
+      eyes: 0,
+      passed: 9,
+      notDriven: 2,
+    })
+  })
+
+  it('should leave counts absent on a verdict whose line does not parse', () => {
+    const scope = resolveUiScope({
+      reviews: [review(`${UI_CLOSED}\n${uiMarker(UI_HEAD)}`)],
+    })
+
+    expect(scope.counts).toBeUndefined()
   })
 })
 
