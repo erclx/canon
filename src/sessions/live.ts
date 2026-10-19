@@ -1,4 +1,5 @@
 import { existsSync, readFileSync, readlinkSync } from 'node:fs'
+import { createConnection } from 'node:net'
 import type { SessionRecord } from '@/sessions/registry'
 
 /**
@@ -35,6 +36,12 @@ export interface LivenessProbes {
   readonly ownDomain?: () => string | null
   /** Whether the messaging socket a foreign record names still exists. */
   readonly socketExists?: (path: string) => boolean
+  /**
+   * Whether something accepts a connection on the socket within the timeout.
+   * Async, so `liveness()` never calls it and a caller with no use for it, such
+   * as the gate's lock, states nothing.
+   */
+  readonly listens?: (path: string, timeoutMs: number) => Promise<boolean>
 }
 
 /**
@@ -74,11 +81,30 @@ function ownDomain(): string | null {
   }
 }
 
+/**
+ * Connects and closes without writing, so the peer sees no bytes. The socket is
+ * destroyed on connect rather than waited on, since a listener that accepts and
+ * never closes would otherwise hold the probe open past its timeout.
+ */
+function listens(path: string, timeoutMs: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = createConnection(path)
+    const settle = (accepted: boolean): void => {
+      socket.destroy()
+      resolve(accepted)
+    }
+    socket.setTimeout(timeoutMs, () => settle(false))
+    socket.once('connect', () => settle(true))
+    socket.once('error', () => settle(false))
+  })
+}
+
 export const SYSTEM_PROBES: LivenessProbes = {
   procStartOf,
   responds,
   ownDomain,
   socketExists: existsSync,
+  listens,
 }
 
 /**
