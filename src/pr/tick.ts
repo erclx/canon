@@ -1,4 +1,5 @@
 import {
+  type ChecklistBox,
   CHECKLIST_END,
   CHECKLIST_START,
   parseBoxLine,
@@ -46,6 +47,25 @@ export function uiPassLine(summary: UiPassSummary): string {
   const box = summary.passed === summary.total ? 'x' : ' '
   const tail = taste === '' ? '' : `, ${taste}`
   return `- [${box}] UI pass, ${summary.passed} of ${summary.total} boxes passed at ${at}${tail} ${UI_PASS_MARKER}`
+}
+
+/**
+ * The driven boxes ticked at the head. A tick counts as this pass's only when
+ * stamped at the head, since an unstamped one is the author's claim and an
+ * older stamp names another head. Taste boxes are left out, as the body line
+ * leaves them out.
+ */
+export function countTicksAtHead(
+  boxes: readonly ChecklistBox[],
+  head: string,
+): number {
+  return boxes.filter(
+    (box) =>
+      !box.isTaste &&
+      box.isTicked &&
+      box.stamp !== undefined &&
+      head.startsWith(box.stamp),
+  ).length
 }
 
 /** The short sha the marked line names, absent when the body carries no such line. */

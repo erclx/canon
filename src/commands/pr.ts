@@ -94,6 +94,7 @@ import {
   type WorkflowFile,
 } from '@/pr/preview'
 import {
+  countTicksAtHead,
   readUiPassHead,
   type TickRefusal,
   tickBoxes,
@@ -164,11 +165,7 @@ interface TickOptions extends ReadOptions {
 }
 
 type TickReason =
-  | TickRefusal
-  | 'stale-head'
-  | 'bad-boxes'
-  | 'no-comment'
-  | 'body-refused'
+  TickRefusal | 'stale-head' | 'bad-boxes' | 'no-comment' | 'body-refused'
 
 const TICK_REFUSALS: Record<TickReason | 'gh-failed', string> = {
   'body-refused':
@@ -2997,14 +2994,7 @@ async function runTick(
   const driven = boxes.filter((box) => !box.isTaste)
   const summary: UiPassSummary = {
     kind: 'passed',
-    // A tick counts as this pass's only when stamped at the tip, since an
-    // unstamped one is the author's claim and an older stamp names another head.
-    passed: driven.filter(
-      (box) =>
-        box.isTicked &&
-        box.stamp !== undefined &&
-        reading.tip.startsWith(box.stamp),
-    ).length,
+    passed: countTicksAtHead(boxes, reading.tip),
     total: driven.length,
     taste: boxes.length - driven.length,
     head: reading.tip,
