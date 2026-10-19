@@ -222,6 +222,11 @@ export function register(program: Command): void {
         'listed, and pending-branch while a Pending branch: line names a branch',
         'whose own pull request is not recorded yet. A stem skips both.',
         '',
+        'On an earlier-slice or open-outcomes refusal from --pull-request, the',
+        'slice plan whose derived branch is the pull request head, read through',
+        'gh, moves to the plans archive and the task stays open. The record',
+        'names it under `slice`.',
+        '',
         'Refusals, read off `reason`:',
         '  no-board        the repository holds no `.canon/tasks/` board',
         '  no-match        no task matches the selector',
@@ -2187,6 +2192,10 @@ function report(
     logStep('Refused')
     logError(outcome.message)
     if (outcome.detail.length > 0) pipeOutput(outcome.detail.join('\n'))
+    if (outcome.slice) {
+      logStep('Slice plan archived')
+      logPlanMoves([outcome.slice], root)
+    }
     outro()
     return 1
   }
@@ -2276,6 +2285,9 @@ function recordFor(
       reason: outcome.reason,
       message: outcome.message,
       detail: outcome.detail,
+      ...(outcome.slice
+        ? { slice: planMovesFor([outcome.slice], root)[0] }
+        : {}),
     }
   }
 

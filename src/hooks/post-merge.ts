@@ -161,8 +161,19 @@ function archiveLines(
   if (reason === undefined || reason === 'no-match' || reason === 'no-board') {
     return undefined
   }
+  // A merged slice moves its own plan while the task stays open, so the line
+  // names the plan that dropped off the board row.
+  const slice =
+    fields.slice !== null && typeof fields.slice === 'object'
+      ? text(fields.slice as Fields, 'from')
+      : undefined
+  const moved =
+    slice === undefined
+      ? ''
+      : `🗂️  Archived the slice plan ${slice}, and the task stays open.\n`
   return (
     `\n📋 Task not archived for #${number}: ${text(fields, 'message') ?? reason}\n` +
+    moved +
     `Run /task-complete archive #${number} to resolve it by hand.\n\n`
   )
 }

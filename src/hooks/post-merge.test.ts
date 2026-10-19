@@ -244,6 +244,33 @@ describe('runPostMerge archive lines', () => {
       '\n📋 Task not archived for #7: waits on "feat/x" still\nRun /task-complete archive #7 to resolve it by hand.\n\n',
     )
   })
+
+  it('should name the slice plan a merged earlier slice moved', async () => {
+    const h = harness(
+      {
+        'archive:12': record(
+          {
+            ok: false,
+            reason: 'earlier-slice',
+            message:
+              'v1.0 lists #13 after #12, so the task closes when #13 merges.',
+            slice: {
+              from: '.canon/plans/feature-middle.md',
+              to: '.canon/plans/archive/feature-middle.md',
+            },
+          },
+          1,
+        ),
+      },
+      { subjects: ['x (#12)'] },
+    )
+
+    await h.go()
+
+    expect(h.output()).toContain(
+      '🗂️  Archived the slice plan .canon/plans/feature-middle.md, and the task stays open.\n',
+    )
+  })
 })
 
 describe('runPostMerge records push lines', () => {
