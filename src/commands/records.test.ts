@@ -240,6 +240,38 @@ describe('canon records validate plans', () => {
     ).toBe(true)
   })
 
+  it('should keep the cross-plan findings when the record carries .md', async () => {
+    await writeFile(
+      join(root, '.canon', 'plans', 'feature-a.md'),
+      [
+        '# Feature: A member',
+        '',
+        '## Constraints',
+        '',
+        '- Fan-in member of `feature-whole`.',
+        '',
+      ].join('\n'),
+    )
+
+    const result = await runCli([
+      'records',
+      'validate',
+      'plans',
+      'feature-a.md',
+      '--json',
+      '--root',
+      root,
+    ])
+
+    expect(result.exitCode).toBe(2)
+    const { findings } = JSON.parse(result.stdout) as {
+      findings: { kind: string; record: string }[]
+    }
+    expect(
+      findings.filter(({ kind }) => kind === 'fan-in-unmatched'),
+    ).toMatchObject([{ record: 'feature-a.md' }])
+  })
+
   it('should refuse a record the folder does not hold', async () => {
     const result = await runCli([
       'records',

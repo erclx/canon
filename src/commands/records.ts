@@ -758,7 +758,11 @@ async function runValidate(
 
   const root = opts.root ?? (await mainWorktreeRoot())
 
-  return report(await validateWithStacks(root, kind, record), emitJson, root)
+  // A plan named with its extension and without it is one record, so the walk
+  // and the cross-plan filter below both read the bare stem.
+  const stem = record?.replace(/\.md$/, '')
+
+  return report(await validateWithStacks(root, kind, stem), emitJson, root)
 }
 
 /**

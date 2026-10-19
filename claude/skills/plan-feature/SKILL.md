@@ -135,6 +135,7 @@ Two commands check the file once it lands, and both write nothing.
 - Run `canon records validate plans feature-<slug>` when the CLI is on PATH. Its `findings` name a section, a filename, or an answer slot that does not hold.
 - Fix each entry its `structure` array names before reporting, against `### Structure` in `${CLAUDE_SKILL_DIR}/references/plan.md`
 - Read that array rather than the exit code, since a structure entry never sets the exit
+- Say the check did not run when the binary refuses the plan argument or carries no `structure` key, rather than reporting the plan clean
 - Run `canon markdown audit .canon/plans/feature-<slug>.md`, naming the file, since the gitignored plan reaches no other gate. Rewrite a hit's sentence rather than swapping the token.
 
 When Step 1 resolved an existing task, run `canon tasks plan-link <task> .canon/plans/feature-<slug>.md` right after the file lands, naming the stem Step 1 read. Skip it when Step 1 found no task, and report a refusal rather than stopping, since `canon tasks validate` still catches an unlinked task through `plan-uncited`.
