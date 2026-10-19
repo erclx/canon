@@ -473,3 +473,134 @@ describe('selfOf', () => {
     expect(report.kind === 'unresolved' && report.reason).toBe('no-row')
   })
 })
+
+describe('resolveSessions with a listener probe', () => {
+  const SOCKET = '/run/user/1000/cc-socks/100.sock'
+
+  function reader(
+    accepting: readonly string[],
+    fields: Partial<LivenessProbes> = {},
+  ): LivenessProbes {
+    return {
+      ...NO_PROC,
+      listens: async (path) => accepting.includes(path),
+      ...fields,
+    }
+  }
+
+  it('should confirm an unverified row whose socket accepts and mark it as listener', async () => {
+    seed(100, { messagingSocketPath: SOCKET })
+
+    const report = await resolveSessions({
+      dir: DIR,
+      probes: reader([SOCKET]),
+      locate: locating('feat/parser'),
+    })
+
+    expect(report.kind === 'resolved' && report.sessions).toMatchObject([
+      { pid: 100, via: 'listener' },
+    ])
+    expect(report.kind === 'resolved' && report.confidence).toBe('confirmed')
+  })
+
+  it('should leave a row unverified when its socket refuses', async () => {
+    seed(100, { messagingSocketPath: SOCKET })
+
+    const report = await resolveSessions({
+      dir: DIR,
+      probes: reader([]),
+      locate: locating('feat/parser'),
+    })
+
+    expect(report.kind === 'resolved' && report.sessions).toMatchObject([
+      { via: 'pid' },
+    ])
+    expect(report.kind === 'resolved' && report.confidence).toBe('unverified')
+  })
+
+  it('should leave a row with no socket path exactly as it was', async () => {
+    seed(100)
+
+    const report = await resolveSessions({
+      dir: DIR,
+      probes: reader([SOCKET]),
+      locate: locating('feat/parser'),
+    })
+
+    expect(report.kind === 'resolved' && report.sessions).toMatchObject([
+      { via: 'pid' },
+    ])
+    expect(report.kind === 'resolved' && report.confidence).toBe('unverified')
+  })
+
+  it('should never probe a row the start time already confirmed', async () => {
+    seed(100, { messagingSocketPath: SOCKET })
+    const probed: string[] = []
+
+    const report = await resolveSessions({
+      dir: DIR,
+      probes: {
+        ...ALIVE,
+        listens: async (path) => {
+          probed.push(path)
+          return true
+        },
+      },
+      locate: locating('feat/parser'),
+    })
+
+    expect(probed).toEqual([])
+    expect(report.kind === 'resolved' && report.sessions[0]?.via).toBe('pid')
+  })
+
+  it('should never probe or upgrade a dead pid', async () => {
+    seed(100, { messagingSocketPath: SOCKET })
+
+    const report = await resolveSessions({
+      dir: DIR,
+      probes: reader([SOCKET], { responds: () => false }),
+      locate: locating('feat/parser'),
+    })
+
+    expect(report).toMatchObject({ kind: 'resolved', sessions: [] })
+  })
+
+  it('should report unverified while any live row stays unconfirmed in a mixed roster', async () => {
+    const other = '/run/user/1000/cc-socks/200.sock'
+    seed(100, { messagingSocketPath: SOCKET })
+    seed(200, { messagingSocketPath: other })
+
+    const report = await resolveSessions({
+      dir: DIR,
+      probes: reader([SOCKET]),
+      locate: locating('feat/parser'),
+    })
+
+    expect(
+      report.kind === 'resolved' &&
+        Object.fromEntries(report.sessions.map((s) => [s.pid, s.via])),
+    ).toEqual({ 100: 'listener', 200: 'pid' })
+    expect(report.kind === 'resolved' && report.confidence).toBe('unverified')
+  })
+
+  it('should confirm a foreign row whose socket accepts and drop its socket mark', async () => {
+    seed(100, {
+      pidDomain: 'linux:abc:pid:[4026532999]',
+      messagingSocketPath: SOCKET,
+    })
+
+    const report = await resolveSessions({
+      dir: DIR,
+      probes: reader([SOCKET], {
+        ownDomain: () => 'pid:[4026532221]',
+        socketExists: () => true,
+      }),
+      locate: locating('feat/parser'),
+    })
+
+    expect(report.kind === 'resolved' && report.sessions).toMatchObject([
+      { via: 'listener' },
+    ])
+    expect(report.kind === 'resolved' && report.confidence).toBe('confirmed')
+  })
+})
