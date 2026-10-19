@@ -124,7 +124,7 @@ This chain adds one thing. Mark the pull request as a draft as soon as `git-ship
 
 ## Step 7: wait for the reviews
 
-Run this step only when the launch named a controlling session, since only a controller dispatches the reviewers. A hand-launched run has nobody reviewing, so it emits the Output block on the CI wake instead of waiting on a pass that cannot arrive.
+Run this step only when the launch named a controlling session, since only a controller dispatches the reviewers. A launch naming no controller has nobody reviewing, so it emits the Output block on the CI wake instead of waiting on a pass that cannot arrive. A `Controller: <sessionId>` line names one, whether the launch was by hand or not.
 
 Read review state through `canon pr review-state` alone, since both families post as pull request reviews, and a worker polling issue comments instead stalled with both reviewers idle. Run it in the background with the number Step 6 returned, since the wait outlasts a foreground shell call, and act on the wake.
 

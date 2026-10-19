@@ -7,7 +7,7 @@ Run this when the operator launches sessions by hand rather than through `claude
 
 # Hand launch
 
-When the operator launches sessions by hand, write every prompt to one file, `.canon/tmp/dispatch/prompts.md`, and overwrite it at each wave. It lists every row not yet launched. A row launched from an older copy and again from a newer one would build twice, and the branch check in `orchestrator-dispatch.md` catches that.
+When the operator launches sessions by hand, write every prompt to one file, `.canon/tmp/dispatch/prompts.md`, and overwrite it at each wave. It lists every row with a session not yet launched. A row launched from an older copy and again from a newer one would build twice, and the branch check in `orchestrator-dispatch.md` catches that.
 
 The operator opens the file, reads one lead line, and pastes one fence per session. The shape is fixed:
 
@@ -19,7 +19,10 @@ Keep the command at position zero per `### Position zero` in `orchestrator-launc
 
 The `Controller:` line replaces the background template's message clauses, which `role-worker` and `session-relay` already own. `auto-ship` Step 0 loads `role-worker`, so the fence needs nothing more.
 
-- A reviewer launched by hand takes the `### Reviewer` H3 under its worker's H2, after `### Worker`, with the sibling facts `orchestrator-reviewer-launch.md` lists
+- A reviewer launched by hand takes the `### Reviewer` H3 under its row's H2, with the sibling facts `orchestrator-reviewer-launch.md` lists
+- Its `<number>` exists once the worker opened its pull request, so a later wave carries `### Reviewer` alone under the row, and the launched worker's H3 is gone
+
+The first wave carries the worker. The wave after its pull request opens carries the reviewer alone.
 
 ````markdown
 # Dispatch prompts
@@ -37,6 +40,14 @@ Model: opus.
 Controller: <sessionId>
 <branch-a> edits the section of <file> this plan leaves alone. Rebase over it when told.
 ```
+````
+
+````markdown
+# Dispatch prompts
+
+Head `<head>`. Merge `<label-a>` first, then `<label-b>`. Open each session in the repository root.
+
+## <label-b>: <title>
 
 ### Reviewer
 
