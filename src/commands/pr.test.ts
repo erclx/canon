@@ -2644,9 +2644,7 @@ describe('canon pr drive-copy', () => {
     )
   }
 
-  async function runDriveCopy(
-    args: string[],
-  ): Promise<{
+  async function runDriveCopy(args: string[]): Promise<{
     readonly record: Record<string, unknown>
     readonly exit: number
   }> {
