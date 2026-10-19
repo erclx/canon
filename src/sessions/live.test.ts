@@ -1,4 +1,5 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { spawn } from 'node:child_process'
+import { lstatSync, mkdtempSync, rmSync } from 'node:fs'
 import { createServer, type Server } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -179,12 +180,22 @@ describe('system listens probe', () => {
     expect(await probe(path)).toBe(true)
   })
 
-  it('should refuse a stale socket file nothing listens on', async () => {
+  it('should refuse a socket inode left behind by a killed listener', async () => {
     const path = join(dir, 'stale.sock')
-    await listen(path)
-    await new Promise((done) => server?.close(done))
-    writeFileSync(path, '')
+    const child = spawn(
+      process.execPath,
+      [
+        '-e',
+        `require('node:net').createServer().listen(${JSON.stringify(path)}, () => console.log('ready'))`,
+      ],
+      { stdio: ['ignore', 'pipe', 'ignore'] },
+    )
+    await new Promise((ready) => child.stdout.once('data', ready))
+    const exited = new Promise((done) => child.once('exit', done))
+    child.kill('SIGKILL')
+    await exited
 
+    expect(lstatSync(path).isSocket()).toBe(true)
     expect(await probe(path)).toBe(false)
   })
 
