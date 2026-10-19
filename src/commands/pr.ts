@@ -93,6 +93,7 @@ import {
   servesChange,
   type WorkflowFile,
 } from '@/pr/preview'
+import { coversHead, resolveUiScope } from '@/pr/review-scope'
 import {
   countTicksAtHead,
   readUiPassHead,
@@ -165,7 +166,12 @@ interface TickOptions extends ReadOptions {
 }
 
 type TickReason =
-  TickRefusal | 'stale-head' | 'bad-boxes' | 'no-comment' | 'body-refused'
+  | TickRefusal
+  | 'count-mismatch'
+  | 'stale-head'
+  | 'bad-boxes'
+  | 'no-comment'
+  | 'body-refused'
 
 const TICK_REFUSALS: Record<TickReason | 'gh-failed', string> = {
   'body-refused':
@@ -174,6 +180,8 @@ const TICK_REFUSALS: Record<TickReason | 'gh-failed', string> = {
     'The head named is not the branch tip on the remote, so a tick would claim a pass on a commit that is no longer the pull request. Re-drive the checklist at the tip.',
   'bad-boxes':
     '--boxes takes box numbers as a comma-separated list of positive whole numbers, such as 1,3, and --head takes the commit that was driven.',
+  'count-mismatch':
+    'The newest UI verdict at this head passed more boxes than the ticks this call would leave at the head, so a box that passed would stay unticked. Nothing was written. Re-run once with every box that passed.',
   'no-comment': 'No comment on this pull request carries the evidence marker.',
   'no-checklist': 'The evidence comment carries no checklist to tick.',
   'no-box':
@@ -1047,9 +1055,17 @@ export function register(program: Command): void {
         'driver can run is ticked, counts taste boxes apart, and is the only',
         'body text this verb writes, so hand edits elsewhere survive.',
         '',
+        'Before writing it reads the newest UI verdict. One that covers the tip',
+        'and carries a count line must match the ticks this call leaves at the',
+        'tip, so a re-drive passes every box that passed, since a new head',
+        'clears the older ticks. Any other verdict leaves the check unrun.',
+        '',
         'Read `reason` on the JSON record:',
         '  ticked       the boxes were ticked and the body line written, with the',
-        '               tip in `head`',
+        '               tip in `head` and `countCheck` as matched or unchecked',
+        '  count-mismatch the verdict passed more boxes than this call leaves',
+        '               ticked at the tip, nothing written, `passed` and `ticked`',
+        '               carry the two counts',
         '  body-refused the comment is ticked but gh could not edit the body,',
         '               exit 1 with `commentTicked`. Re-run to retry the body.',
         '  stale-head   --head is not the remote branch tip, nothing written',
@@ -2976,6 +2992,32 @@ async function runTick(
   const result = tickBoxes(marked.body, numbers.map(Number), reading.tip)
   if (result.kind === 'refused') return refuseTick(result.reason)
 
+  // Read ahead of the write so a short list refuses before it leaves the
+  // comment half ticked. A verdict that does not cover the tip, carries no
+  // count line, or cannot be read leaves the check unrun and says so.
+  const ticked = countTicksAtHead(
+    readChecklistBoxes(findEvidenceChecklist([{ body: result.body }]) ?? ''),
+    reading.tip,
+  )
+  const reviews = await listReviews(root, String(identity.number))
+  const verdict = resolveUiScope({
+    reviews: reviews.kind === 'read' ? reviews.rows.map(reviewRowOf) : [],
+  })
+  const isCounted =
+    verdict.counts !== undefined &&
+    verdict.commit !== undefined &&
+    coversHead(verdict.commit, reading.tip)
+  if (isCounted && verdict.counts.passed !== ticked) {
+    return refuseWith(
+      'count-mismatch',
+      TICK_REFUSALS['count-mismatch'],
+      emitJson,
+      root,
+      { passed: verdict.counts.passed, ticked },
+    )
+  }
+  const countCheck = isCounted ? 'matched' : 'unchecked'
+
   if (result.body !== marked.body) {
     const patched = await gh(root, [
       'api',
@@ -3016,6 +3058,7 @@ async function runTick(
           reason: 'body-refused',
           message: TICK_REFUSALS['body-refused'],
           commentTicked: true,
+          countCheck,
           head: reading.tip,
           boxes: numbers.map(Number),
           commentId,
@@ -3036,6 +3079,7 @@ async function runTick(
         root,
         number: identity.number,
         reason: 'ticked',
+        countCheck,
         head: reading.tip,
         boxes: numbers.map(Number),
         commentId,
@@ -3733,13 +3777,16 @@ function refuseWith(
   message: string,
   emitJson: boolean,
   root: string,
+  extra: Record<string, unknown> = {},
 ): number {
   logStep('Refused')
   logWarn(message)
   outro()
 
   if (emitJson) {
-    process.stdout.write(`${JSON.stringify({ root, reason, message })}\n`)
+    process.stdout.write(
+      `${JSON.stringify({ root, reason, message, ...extra })}\n`,
+    )
   }
   return 1
 }

@@ -396,6 +396,7 @@ function writeFakeGh(bin: string, comments: string, apiLog: string): void {
     `  api*pulls/7/files*) echo "$*" >> "$fx/files-calls.log"; [ -f "$fx/files-fail" ] && exit 1; { if [ -f "$fx/files.tsv" ]; then cat "$fx/files.tsv"; else git diff --name-status --no-renames main...HEAD | sed -e 's/^A/added/' -e 's/^M/modified/' -e 's/^D/removed/'; fi; } | jq -Rn '[inputs | select(length > 0) | split("\\t") | {status: .[0], filename: .[1]}]' | jq -r "$f" ;;`,
     `  api*contents/*) a="$*"; p=\${a##*contents/}; p=\${p%%\\?*}; r=\${a##*ref=}; [ -f "$fx/img/$r-$(basename "$p")" ] && cat "$fx/img/$r-$(basename "$p")" || exit 1 ;;`,
     '  api*compare/*) if [ -f "$fx/merge-base" ]; then cat "$fx/merge-base"; else git merge-base main HEAD; fi ;;',
+    `  api*pulls/7/reviews*) [ -f "$fx/ui-reviews.json" ] && jq -r "$f" "$fx/ui-reviews.json" ;;`,
     `  api*issues/7/comments*) jq '[.comments[] | {html_url: .url, body}]' '${comments}' | jq -r "$f" ;;`,
     '  "api -X PATCH repos/{owner}/{repo}/pulls/7 "*) [ -f "$fx/body-fail" ] && exit 1; printf \'%s\' "${@: -1}" > "$fx/body-write.log"; echo "{}" ;;',
     '  "api repos/{owner}/{repo}/pulls/7") if [ -f "$fx/head" ]; then h=$(cat "$fx/head"); else h=$(git rev-parse HEAD); fi; b=; [ -f "$fx/pr-body" ] && b=$(cat "$fx/pr-body"); jq -n --arg h "$h" --arg b "$b" \'{number:7,head:{ref:"feat/x",sha:$h},base:{ref:"main"},mergeable_state:"clean",body:$b}\' ;;',
@@ -1552,6 +1553,80 @@ describe('canon pr tick', () => {
       `- [x] the hero settles · passed at \`${tip.slice(0, 7)}\`\n`,
     )
     expect(written).toContain('- [ ] the footer wraps\n')
+  })
+
+  describe('count check', () => {
+    const verdict = (counts: string, head: string) => ({
+      body: `## UI review closed\n\n${counts}\nDriven.\n\n<!-- review-ui: head=${head} -->`,
+      commit_id: head,
+      submitted_at: '2026-10-19T10:00:00Z',
+    })
+    const TWO_PASSED = '0 failed · 1 need your eyes · 2 passed · 0 not driven'
+
+    function postVerdict(row: ReturnType<typeof verdict>): void {
+      writeFileSync(join(tempDir, 'ui-reviews.json'), JSON.stringify([row]))
+    }
+
+    it('should refuse a tick that leaves fewer ticks than the verdict passed and write nothing', async () => {
+      postVerdict(verdict(TWO_PASSED, tip))
+
+      const outcome = await runTick(['--boxes', '1', '--head', tip])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({
+          reason: 'count-mismatch',
+          passed: 2,
+          ticked: 1,
+        }),
+        exit: 1,
+      })
+      expect(existsSync(apiLog)).toBe(false)
+    })
+
+    it('should tick every box on a re-tick with the full passed list', async () => {
+      postVerdict(verdict(TWO_PASSED, tip))
+
+      const outcome = await runTick(['--boxes', '1,2', '--head', tip])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({
+          reason: 'ticked',
+          countCheck: 'matched',
+        }),
+        exit: 0,
+      })
+    })
+
+    it('should read a verdict that covers an older head as unchecked', async () => {
+      postVerdict(verdict(TWO_PASSED, 'a'.repeat(40)))
+
+      const outcome = await runTick(['--boxes', '1', '--head', tip])
+
+      expect(outcome.record).toEqual(
+        expect.objectContaining({ reason: 'ticked', countCheck: 'unchecked' }),
+      )
+    })
+
+    it('should read a verdict with no count line as unchecked', async () => {
+      postVerdict({
+        ...verdict('', tip),
+        body: `## UI review closed\n\nDone.\n\n<!-- review-ui: head=${tip} -->`,
+      })
+
+      const outcome = await runTick(['--boxes', '1', '--head', tip])
+
+      expect(outcome.record).toEqual(
+        expect.objectContaining({ reason: 'ticked', countCheck: 'unchecked' }),
+      )
+    })
+
+    it('should read a thread with no UI verdict as unchecked', async () => {
+      const outcome = await runTick(['--boxes', '1', '--head', tip])
+
+      expect(outcome.record).toEqual(
+        expect.objectContaining({ reason: 'ticked', countCheck: 'unchecked' }),
+      )
+    })
   })
 
   describe('body line', () => {
