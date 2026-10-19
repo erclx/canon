@@ -43,6 +43,7 @@ For each unchecked outcome, decide whether the diff shipped the behavior it name
 
 - Mark only outcomes already written on the board. Never infer a new task from the diff.
 - Match on the behavior an outcome describes, not on filenames or commit subjects. The path match above only narrowed which task files to open.
+- Never tick an outcome marked `Operator check:`, since a diff cannot prove a check only the operator can run.
 - Leave an outcome `[ ]` when the diff is ambiguous. An unmarked shipped outcome costs one manual edit, while a wrongly marked one hides work that never happened.
 - Do not touch task files the diff does not relate to.
 

@@ -198,7 +198,7 @@ Session history and ordering both have homes off the task file.
 
 ## Archiving
 
-Never delete a task file. A shipped task moves to `.canon/tasks/archive/` under its own name through `canon tasks archive`, and the live index regenerates without it. What the verb does and refuses on is at `canon tasks archive --help`, and a flat `.claude/task-archive/` names an older binary rather than a second archive.
+Never delete a task file. A shipped task moves to `.canon/tasks/archive/` under its own name through `canon tasks archive`, and the live index regenerates without it. What the verb does and refuses on is at `canon tasks archive --help`.
 
 ### The plan and ready folder
 
@@ -209,4 +209,6 @@ Archiving a task archives its plan alongside it when the task is that plan's las
 
 ### Open outcomes
 
-A task with an open outcome stays on the board, and so does its plan. Close it, or cut an abandoned outcome by striking its body, as `- ~~<outcome>~~ <why>`, which reads as cut whatever its checkbox holds, so a task of cut outcomes still archives.
+A task with an open outcome stays on the board with its plan. Close it, or cut an abandoned one by striking its body, as `- ~~<outcome>~~ <why>`, which reads as cut.
+
+An operator-only check outside this repository takes `- [ ] Operator check: <outcome>`, written before the pull request opens. It closes unticked.

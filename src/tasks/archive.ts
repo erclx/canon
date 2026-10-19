@@ -115,6 +115,8 @@ export interface ArchiveSuccess {
   readonly ready: ReadyMove | undefined
   readonly closed: number
   readonly cut: number
+  /** Unticked `Operator check:` outcomes the archive left as they were. */
+  readonly operatorChecks: readonly string[]
   /** Every task file whose links to the moved task were rewritten. */
   readonly relinked: readonly InboundRelink[]
   /** Every task file the pass could not read or write, left as it was. */
@@ -159,6 +161,8 @@ export interface TaskOutcomes {
   readonly open: readonly string[]
   readonly closed: readonly string[]
   readonly cut: readonly string[]
+  /** Unticked outcomes only the operator can check, which hold nothing open. */
+  readonly operator: readonly string[]
 }
 
 export function tasksDir(root: string): string {
@@ -197,6 +201,9 @@ const BULLET_PATTERN = /^- (?:\[([ xX])\] ?)?(.*)$/
  */
 const STRUCK_BODY_PATTERN = /^~~.+~~/
 
+/** The one spelling of an operator-owned outcome, anchored to the body's start. */
+const OPERATOR_BODY_PATTERN = /^Operator check: ?\S/
+
 /**
  * Marks the lines sitting inside a fenced block, the fence delimiters included.
  * A checkbox in a sample a task displays is not an outcome the task claims, and
@@ -232,6 +239,7 @@ export function readOutcomes(text: string): TaskOutcomes {
   const open: string[] = []
   const closed: string[] = []
   const cut: string[] = []
+  const operator: string[] = []
   const lines = text.split('\n')
   const fenced = fenceMask(lines)
 
@@ -252,13 +260,17 @@ export function readOutcomes(text: string): TaskOutcomes {
     if (box === undefined) continue
 
     if (box === ' ') {
-      open.push(body)
+      if (OPERATOR_BODY_PATTERN.test(body)) {
+        operator.push(body)
+      } else {
+        open.push(body)
+      }
     } else {
       closed.push(body)
     }
   }
 
-  return { open, closed, cut }
+  return { open, closed, cut, operator }
 }
 
 /**
@@ -951,7 +963,7 @@ export async function archiveTask(
     )
   }
 
-  const { open, closed, cut } = readOutcomes(text)
+  const { open, closed, cut, operator } = readOutcomes(text)
 
   if (open.length > 0) {
     return refuse(
@@ -961,7 +973,7 @@ export async function archiveTask(
     )
   }
 
-  if (closed.length === 0 && cut.length === 0) {
+  if (closed.length === 0 && cut.length === 0 && operator.length === 0) {
     return refuse(
       'no-outcomes',
       `${stem} carries no outcomes, so nothing marks it shipped.`,
@@ -1020,6 +1032,7 @@ export async function archiveTask(
     ready: ready || undefined,
     closed: closed.length,
     cut: cut.length,
+    operatorChecks: operator,
     relinked,
     relinkFailed: failed,
   }

@@ -145,6 +145,7 @@ describe('readOutcomes', () => {
       open: ['Outcome: pending'],
       closed: ['Outcome: shipped'],
       cut: [],
+      operator: [],
     })
   })
 
@@ -153,6 +154,7 @@ describe('readOutcomes', () => {
       open: [],
       closed: [],
       cut: [],
+      operator: [],
     })
   })
 
@@ -170,6 +172,7 @@ describe('readOutcomes', () => {
       open: [],
       closed: ['Outcome: real'],
       cut: [],
+      operator: [],
     })
   })
 
@@ -178,6 +181,7 @@ describe('readOutcomes', () => {
       open: [],
       closed: [],
       cut: ['~~Outcome: dropped~~ Cut 2026-09-02'],
+      operator: [],
     })
   })
 
@@ -195,6 +199,46 @@ describe('readOutcomes', () => {
     expect(readOutcomes(text).cut).toEqual([
       '~~Outcome: dropped~~ Cut 2026-09-02',
     ])
+  })
+
+  it('should read an unticked operator check as neither open nor closed', () => {
+    expect(readOutcomes('- [ ] Operator check: run it on a Mac\n')).toEqual({
+      open: [],
+      closed: [],
+      cut: [],
+      operator: ['Operator check: run it on a Mac'],
+    })
+  })
+
+  it('should read a ticked operator check as closed', () => {
+    const outcomes = readOutcomes('- [x] Operator check: run it on a Mac\n')
+
+    expect(outcomes.closed).toEqual(['Operator check: run it on a Mac'])
+    expect(outcomes.operator).toEqual([])
+  })
+
+  it('should read a struck operator check as cut', () => {
+    const outcomes = readOutcomes(
+      '- [ ] ~~Operator check: run it on a Mac~~ Cut 2026-09-02\n',
+    )
+
+    expect(outcomes.cut).toHaveLength(1)
+    expect(outcomes.operator).toEqual([])
+  })
+
+  it('should keep the mark to one spelling at the start of the body', () => {
+    const outcomes = readOutcomes(
+      '- [ ] Outcome: operator check: a Mac\n- [ ] operator check: a Mac\n',
+    )
+
+    expect(outcomes.open).toHaveLength(2)
+    expect(outcomes.operator).toEqual([])
+  })
+
+  it('should ignore an operator check inside a fenced block', () => {
+    const text = '```markdown\n- [ ] Operator check: a sample\n```\n'
+
+    expect(readOutcomes(text).operator).toEqual([])
   })
 })
 
@@ -623,6 +667,35 @@ describe('archiveTask', () => {
     expect(await archiveTask(ROOT, { kind: 'stem', stem })).toMatchObject({
       ok: false,
       reason: 'no-outcomes',
+    })
+  })
+
+  it('should archive a task whose only open outcomes are operator checks', async () => {
+    const stem = await seedTask({
+      outcomes: '- [x] Outcome: shipped\n- [ ] Operator check: run it on a Mac',
+    })
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(result).toMatchObject({
+      ok: true,
+      closed: 1,
+      operatorChecks: ['Operator check: run it on a Mac'],
+    })
+    expect(
+      await readFile(join(archiveDir(ROOT), `${stem}.md`), 'utf8'),
+    ).toContain('- [ ] Operator check: run it on a Mac')
+  })
+
+  it('should still refuse a build outcome open beside an operator check', async () => {
+    const stem = await seedTask({
+      outcomes: '- [ ] Operator check: a Mac\n- [ ] Outcome: pending',
+    })
+
+    expect(await archiveTask(ROOT, { kind: 'stem', stem })).toMatchObject({
+      ok: false,
+      reason: 'open-outcomes',
+      detail: ['Outcome: pending'],
     })
   })
 

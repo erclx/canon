@@ -29,6 +29,8 @@ export interface Closure {
   readonly issues: readonly number[]
   readonly closing: boolean
   readonly reason: ClosingReason
+  /** Unticked operator checks, read once the outcome test runs. */
+  readonly operatorChecks?: readonly string[]
 }
 
 export interface TaskClosure extends Closure {
@@ -108,16 +110,18 @@ export function decideClosing(
     return { issues, closing: false, reason: 'pending-branch' }
   }
 
-  const { open, closed, cut } = readOutcomes(text)
+  const { open, closed, cut, operator } = readOutcomes(text)
+  const operatorChecks = operator
+
   if (open.length > 0) {
-    return { issues, closing: false, reason: 'open-outcomes' }
+    return { issues, closing: false, reason: 'open-outcomes', operatorChecks }
   }
 
-  if (closed.length === 0 && cut.length === 0) {
-    return { issues, closing: false, reason: 'no-outcomes' }
+  if (closed.length === 0 && cut.length === 0 && operator.length === 0) {
+    return { issues, closing: false, reason: 'no-outcomes', operatorChecks }
   }
 
-  return { issues, closing: true, reason: 'last-slice' }
+  return { issues, closing: true, reason: 'last-slice', operatorChecks }
 }
 
 /** Resolves the task through the same selector `pull-request` takes. */
