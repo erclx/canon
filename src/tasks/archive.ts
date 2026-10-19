@@ -572,9 +572,17 @@ export function removeBacklogRow(
   return { text: kept.join('\n'), removed: kept.length !== lines.length }
 }
 
+/**
+ * A bullet is about a task when its first link targets it. A later link is a
+ * reference, such as a note on what the bullet waits for, and matching anywhere
+ * would drop that other task's line from a file no history backs.
+ */
 function isBulletFor(line: string, target: string): boolean {
   const trimmed = line.trimStart()
-  return /^[-*]\s/.test(trimmed) && trimmed.includes(target)
+  if (!/^[-*]\s/.test(trimmed)) return false
+
+  const first = trimmed.indexOf('](')
+  return first !== -1 && trimmed.startsWith(target, first)
 }
 
 /**
@@ -897,8 +905,8 @@ async function resolveStem(
 }
 
 /**
- * Archives one task as a single unit: the move, the ordering-row removal, and
- * the index regen. The hook and `task-complete` both call this, so every gate
+ * Archives one task as a single unit: the move, the ordering-row and backlog
+ * bullet removal, and the index regen. The hook and `task-complete` both call this, so every gate
  * refuses rather than reports. A caller with nobody watching cannot act on a
  * warning, and two callers gating differently is the drift this exists to stop.
  */

@@ -1000,6 +1000,18 @@ describe('archiveTask', () => {
     expect(existsSync(join(tasksDir(ROOT), 'backlog.md'))).toBe(false)
   })
 
+  it('should keep another task bullet that cites the archived task after its own link', async () => {
+    const stem = await seedTask()
+    const backlog = join(tasksDir(ROOT), 'backlog.md')
+    const body = `# Backlog\n\n- [globs](v32.1-sync-glob-narrowing.md): after [escalation](${stem}.md) ships\n`
+    await writeFile(backlog, body)
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(result).toMatchObject({ ok: true, backlogRowRemoved: false })
+    expect(await readFile(backlog, 'utf8')).toBe(body)
+  })
+
   it('should report no backlog row removed when the backlog names other tasks', async () => {
     const stem = await seedTask()
     const backlog = join(tasksDir(ROOT), 'backlog.md')
@@ -1506,6 +1518,16 @@ describe('removeBacklogRow', () => {
     expect(removeBacklogRow(text, 'v28.1-trigger-escalation').removed).toBe(
       false,
     )
+  })
+
+  it('should keep a bullet for another task that cites the task later', () => {
+    const text =
+      '- [globs](v32.1-sync-glob-narrowing.md): after [escalation](v28.1-trigger-escalation.md) ships'
+
+    expect(removeBacklogRow(text, 'v28.1-trigger-escalation')).toEqual({
+      text,
+      removed: false,
+    })
   })
 
   it('should leave prose naming the task untouched', () => {
