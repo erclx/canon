@@ -11,7 +11,7 @@ Step 7 of `review-ui`.
 
 The heading reports whether the branch owes anything, the way the code review's does.
 
-- `## UI review` when a box failed, the sweep found a console error or an overflow, a box was not driven for a cause on the page, or the pass drove no box at all.
+- `## UI review` when a box failed, the sweep found a console error or an overflow, the worktree check read `changed`, a box was not driven for a cause on the page, or the pass drove no box at all.
 - `## UI review closed` otherwise.
 
 A needs-eyes box leaves the review closed, and so does a box not driven for a cause off the page, such as an address that did not answer or a `(local only)` box on a hosted preview, as long as something else was driven.
@@ -46,6 +46,10 @@ Driven at `<short-sha>` on <address>, rendered by <renderer>.
 <the value read against what the box expects>
 
 ![box <n>](link)
+
+### Changed in the worktree
+
+- `<path>`
 
 ### Needs your eyes
 
@@ -90,7 +94,7 @@ The post takes the length limits alone, with a box's reason under 350 characters
 
 The body opens on its count line, in that order, so the operator reads what they owe before anything else. The second line carries the address, the head, and the renderer, and says the address was driven unverified when it came from the local rung or the launch.
 
-- Drop each section holding no box, along with its heading. Order is fixed: Failed, Needs your eyes, Not driven, then the folded blocks.
+- Drop each section holding no box, along with its heading. The order is fixed as Failed, Changed in the worktree, Needs your eyes, Not driven, then the folded blocks.
 - A box takes exactly one section by its verdict, so a box that fails and also ends in `(taste)` appears once, under Failed
 - Quote page text in backticks as content, never as the pass's own words
 
@@ -110,6 +114,14 @@ A box in a section opens on its number and the box as written, in bold, with the
 - A failed box resting on a frame shows it inline under its heading, the `![box <n>](link)` embed with the link exactly as `canon pr frames` returned it
 - That link names the frame's path on the frames branch, which stays put while other pull requests' frames are dropped and carries this pass's stamp
 - A later pass therefore never changes the image
+
+### The drive copy and the worktree check
+
+The two `canon pr drive-copy` reads at the start of Steps 4 and 7 each leave a mark on the body, so the operator knows what the drives touched.
+
+- When Step 4 read `copied`, add `Drove a throwaway copy of <copied paths>.` as its own line directly under the address line, naming each path in backticks
+- When Step 7's check read `changed`, list every path from `paths` under Changed in the worktree, in backticks, with no reading beside it. The heading opens, and Step 8 ticks nothing.
+- When either read refused, add `Worktree check did not run, <reason>.` on a line of its own under the address line, so a skipped check never reads as a clean one
 
 ### A needs-eyes box
 

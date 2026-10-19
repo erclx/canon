@@ -50,6 +50,8 @@ A painted pull request needs a server in this worktree for `canon pr local` to f
 - Wait up to 60 seconds for the verb to read `ok`, then ship either way. A stack with no `dev` script gets no start, and `pr-evidence` reports `no-server`.
 - Never detach it with `nohup`, `setsid`, or `disown`, since the owning session is the stop. `canon worktrees reclaim` ends any listener left in a worktree it removes.
 
+Run `canon pr drive-copy --json` before starting `dev`. On `copied`, start it with `env` set to `copyRoot`, so the operator's address serves the copy. On `no-config`, start it as it is. On a refusal, start nothing and send the controller the `reason`, since a broken config would send drives into tracked folders.
+
 A hand-run `git-ship` or `git-pr` starts no server, since only a worker has a lifetime to own one.
 
 ### Building against a design reference

@@ -36,15 +36,7 @@ Record `<pass>` once, as the instant this pass starts, with `date -u +%Y%m%dT%H%
 
 ### When the verb is absent
 
-Every read here runs on REST, since `gh pr` runs on GraphQL and a cloud session's proxy refuses it. A target whose CLI predates the verb gets no record back, so read the pull request directly:
-
-```bash
-gh api "repos/{owner}/{repo}/pulls?head={owner}:$(git branch --show-current | jq -Rr @uri)&state=open" --jq '.[].number'
-gh api repos/{owner}/{repo}/pulls/<number> --jq .head.sha
-```
-
-- With no number named, take the open pull requests on the current branch, and stop when that prints anything but one number
-- A named number skips that lookup, since this checkout's branch need not be the pull request's
+A target whose CLI predates `canon pr head` gets no record back. Read `${CLAUDE_SKILL_DIR}/references/verb-absent.md` for the REST reads that stand in for it.
 
 ### Read the newest verdict and reply
 
@@ -110,6 +102,7 @@ ${CLAUDE_SKILL_DIR}/scripts/pw.sh -s=<project>-<number> open <url>
 
 - Pass `--config=<path>` on `open` only when the launch names a CLI config path, which is how a machine's GPU recipe reaches the pass. Render in software otherwise.
 - Read the WebGL renderer once with an `eval` through the debug renderer extension and carry it into the comment, since a canvas page can paint differently in software
+- Before `open`, rebuild the drive copy and record the worktree's state per `${CLAUDE_SKILL_DIR}/references/drive-copy.md`
 
 ## Step 5: drive each box
 
@@ -147,7 +140,7 @@ A console error or an overflow is a finding. A probe result is a reading to conf
 
 ## Step 7: post
 
-Read `${CLAUDE_SKILL_DIR}/references/post.md` for the heading rule, the body shape, the marker every body ends on, and the post command. Each box lands in the section its verdict names, and the `link` its Step 5 push returned goes as given into that box's own entry.
+Run the worktree check in `${CLAUDE_SKILL_DIR}/references/drive-copy.md` first. Read `${CLAUDE_SKILL_DIR}/references/post.md` for the heading rule, the body shape, the marker every body ends on, and the post command. Each box lands in the section its verdict names, and the `link` its Step 5 push returned goes as given into that box's own entry.
 
 That file sends a pass closing under a prior `## UI review closed` at an older head on to `${CLAUDE_SKILL_DIR}/references/close-out.md`, which rewrites the standing close in place.
 
