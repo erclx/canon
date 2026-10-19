@@ -32,7 +32,7 @@ jobs:
         if: github.event.pull_request.head.repo.full_name == github.repository
         run: bun install --frozen-lockfile
 
-      - name: Drop the preview line from the evidence comment
+      - name: Drop the evidence preview line and mask UI review addresses
         if: github.event.pull_request.head.repo.full_name == github.repository
         env:
           GH_TOKEN: ${{ github.token }}
