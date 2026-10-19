@@ -8,7 +8,7 @@
 - <Verb> <specific component/file/function>
 
 <!-- ## Technical context (optional, omit for docs/config/trivial changes) -->
-<!-- - <Why this approach was taken, not what changed> -->
+<!-- **<Decision in a few words>.** <Why this approach, what the code can't show, and any shortcoming> -->
 
 ## Testing
 
