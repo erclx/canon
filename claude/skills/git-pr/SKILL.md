@@ -105,7 +105,7 @@ Drop `--closes` when the closes step skipped a refusal, since no list was decide
 
 ### Reading the scan
 
-Branch on the JSON record rather than the exit code, since a shell function wrapping `canon` can flatten a non-zero exit to 0. Stop and fix the title or body on any key below, and do not proceed to `### Final command` until a re-run comes back clean on all eight.
+Branch on the JSON record rather than the exit code, since a shell function wrapping `canon` can flatten a non-zero exit to 0. Stop and fix the title or body on any key below, and do not proceed to `### Final command` until a re-run comes back clean on all nine.
 
 | Key                 | Fix                                                                                  |
 | ------------------- | ------------------------------------------------------------------------------------ |
@@ -117,6 +117,7 @@ Branch on the JSON record rather than the exit code, since a shell function wrap
 | `sections`          | Rename or drop each heading in `outside`, and add each required heading in `missing` |
 | `missingClosures`   | Add a `Closes #NNN` line for each number listed                                      |
 | `strayClosures`     | Delete the closing keyword for each number listed                                    |
+| `density`           | Regroup or split the named section per `## Formatting` in `pr.md`, keeping each path |
 
 Leave `cutsRelease` and `semverTags` alone, since a release-please pull request legitimately carries version references its own fixed shape explains.
 

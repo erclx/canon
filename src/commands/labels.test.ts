@@ -22,6 +22,13 @@ interface ScanRecord {
     readonly missing: string[]
   }
   readonly bannedCharacters: string[]
+  readonly density?: {
+    readonly section: string | null
+    readonly kind: string
+    readonly line: number
+    readonly value: number | null
+    readonly limit: number | null
+  }[]
   readonly missingClosures?: number[]
   readonly strayClosures?: number[]
   readonly exitCode: number
@@ -187,6 +194,33 @@ describe('canon labels scan text checks', { timeout: RUN_TIMEOUT_MS }, () => {
     const record = await runScan(['--title', TITLE, '--body-file', body])
 
     expect(record.exitCode).toBe(0)
+  })
+
+  it('should report density findings and still exit 0 on them alone', async () => {
+    const body = await writeBody(
+      '## Summary\n\nOne.\n\n## Key changes\n\n- a\n- b\n- c\n- d\n- e\n- f\n',
+    )
+
+    const record = await runScan(['--title', TITLE, '--body-file', body])
+
+    expect(record.exitCode).toBe(0)
+    expect(record.density).toEqual([
+      {
+        section: 'Key changes',
+        kind: 'bullet-run',
+        line: 7,
+        value: 6,
+        limit: 5,
+      },
+    ])
+  })
+
+  it('should leave density empty on a body scanned with no title', async () => {
+    const body = await writeBody('### Heading\n\nOne.\n')
+
+    const record = await runScan(['--body-file', body])
+
+    expect(record.density).toEqual([])
   })
 
   it('should skip the headings check on a review event', async () => {
