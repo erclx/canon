@@ -13,6 +13,7 @@ import type { ReviewRow } from '@/pr/review-scope'
 /** One row of `repos/{owner}/{repo}/pulls/<n>` or of the pulls listing. */
 export interface RestPull {
   readonly number?: number
+  readonly title?: string
   readonly body?: string | null
   readonly head?: { readonly ref?: string; readonly sha?: string }
   readonly base?: { readonly ref?: string }

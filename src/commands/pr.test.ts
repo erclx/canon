@@ -2196,6 +2196,7 @@ describe('canon pr frames', () => {
  * Fixtures live in `FAKE_DIR`: `pull.json` answers the single pull read,
  * `listing.json` the branch lookup, `reviews.json` the reviews read (a stream
  * of arrays stands for several pages), and `reviews-fail` makes that read 403.
+ * `merge-409` makes the REST merge answer a moved head, as gh reports it.
  * The caller's `--jq` filter runs over each answer, as gh runs it.
  */
 const PROXY_GH = `#!/usr/bin/env bash
@@ -2204,6 +2205,7 @@ fx="$FAKE_DIR"
 echo "$*" >> "$fx/gh.log"
 f=.; p=; for a in "$@"; do [ "$p" = --jq ] && f=$a; p=$a; done
 case "$*" in
+  *"/pulls/7/merge"*) [ -f "$fx/merge-409" ] && { echo '{"message":"Head branch was modified. Review and try the merge again."}'; echo "gh: Head branch was modified. Review and try the merge again. (HTTP 409)" >&2; exit 1; }; echo '{"sha":"c0ffee0000000000000000000000000000000000","merged":true,"message":"Pull Request successfully merged"}' ;;
   *markPullRequestReadyForReview*) [ -f "$fx/mutation-fail" ] && { echo "gh: blocked by proxy (HTTP 403)" >&2; exit 1; }; echo '{"data":{"markPullRequestReadyForReview":{"pullRequest":{"isDraft":false}}}}' ;;
   *graphql*|"pr "*|"repo view"*) echo "gh: blocked by proxy (HTTP 403)" >&2; exit 1 ;;
   *"/pulls?head="*) jq -r "$f" "$fx/listing.json" ;;
@@ -2512,6 +2514,102 @@ describe('canon pr reads through REST alone', () => {
       const { record } = await runLift(['7', '--wait', 'soon'])
 
       expect(record.reason).toBe('bad-wait')
+    })
+  })
+
+  describe('merge', () => {
+    function stageReadyPull(): void {
+      writeFixture(
+        'pull.json',
+        pullRow({
+          draft: false,
+          state: 'open',
+          title: 'feat(pr): add a merge verb',
+          body: '## Summary\n\n- Merge one pull request\n\n## Key changes\n\n- Add `src/a.ts`\n\n## Testing\n\n- [x] check\n',
+        }),
+      )
+      writeFixture('checks.json', {
+        total_count: 1,
+        check_runs: [
+          {
+            head_sha: tip,
+            status: 'completed',
+            conclusion: 'success',
+            name: 'check',
+            id: 1,
+          },
+        ],
+      })
+    }
+
+    async function runMerge(
+      args: string[],
+    ): Promise<{ record: Record<string, unknown>; exit: number }> {
+      const result = await execa(
+        process.execPath,
+        [CLI, 'pr', 'merge', ...args, '--json', '--root', repoRoot],
+        {
+          cwd: repoRoot,
+          reject: false,
+          timeout: RUN_TIMEOUT_MS,
+          env: {
+            PATH: `${join(tempDir, 'bin')}:${process.env.PATH}`,
+            FAKE_DIR: tempDir,
+          },
+        },
+      )
+      return { record: JSON.parse(result.stdout), exit: result.exitCode ?? -1 }
+    }
+
+    /** The log from the merge call on, since its multiline message spans lines. */
+    function mergeCall(): string | undefined {
+      const log = readFileSync(join(tempDir, 'gh.log'), 'utf8')
+      const at = log.indexOf('-X PUT repos/{owner}/{repo}/pulls/7/merge')
+      return at === -1 ? undefined : log.slice(at)
+    }
+
+    it('should squash-merge over REST pinned to the head it read', async () => {
+      stageReadyPull()
+
+      const { record, exit } = await runMerge(['7'])
+
+      expect(record).toMatchObject({
+        reason: 'merged',
+        number: 7,
+        title: 'feat(pr): add a merge verb (#7)',
+        description:
+          '## Summary\n\n- Merge one pull request\n\n## Key changes\n\n- Add `src/a.ts`',
+        sha: 'c0ffee0000000000000000000000000000000000',
+      })
+      expect(exit).toBe(0)
+      const call = mergeCall()
+      expect(call).toContain(`sha=${tip}`)
+      expect(call).toContain('merge_method=squash')
+      expect(call).toContain('commit_title=feat(pr): add a merge verb (#7)')
+    })
+
+    it('should call no merge under --dry-run and exit 0', async () => {
+      stageReadyPull()
+
+      const { record, exit } = await runMerge(['7', '--dry-run'])
+
+      expect(record).toMatchObject({
+        reason: 'dry-run',
+        title: 'feat(pr): add a merge verb (#7)',
+      })
+      expect(exit).toBe(0)
+      expect(mergeCall()).toBeUndefined()
+    })
+
+    it('should refuse head-moved when the merge answers 409', async () => {
+      stageReadyPull()
+      writeFixture('merge-409', '')
+
+      const { record, exit } = await runMerge(['7'])
+
+      expect(record).toMatchObject({ reason: 'head-moved' })
+      expect(record.sha).toBeUndefined()
+      expect(exit).toBe(1)
     })
   })
 })
