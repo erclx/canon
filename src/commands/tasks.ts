@@ -2195,6 +2195,7 @@ function report(
     logInfo('retargeted the Ready: line')
   }
   if (outcome.priorityRowRemoved) logInfo('cleared the ordering row')
+  if (outcome.backlogRowRemoved) logInfo('cleared the backlog row')
   logRelinked(outcome.relinked, outcome.relinkFailed, root)
   if (outcome.indexRegenerated) logInfo('regenerated index.md')
   if (outcome.cut > 0) logInfo(`${outcome.cut} outcome(s) cut`)
@@ -2277,6 +2278,7 @@ function recordFor(
     from: relative(root, outcome.from),
     to: relative(root, outcome.to),
     priorityRowRemoved: outcome.priorityRowRemoved,
+    backlogRowRemoved: outcome.backlogRowRemoved,
     indexRegenerated: outcome.indexRegenerated,
     plans: planMovesFor(outcome.plans, root),
     ready: outcome.ready

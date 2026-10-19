@@ -8,7 +8,7 @@ description: How task-complete confirms a task's work reached main, runs canon t
 The Archive mode of `task-complete`. The session reads this file when the request names a task file already shipped.
 
 - The `post-merge` git hook archives the task a merge closed, so a request here is usually one the hook could not resolve. Run the steps against whatever it left in place.
-- `canon tasks archive` moves the file, edits `priority.md`, and regenerates the index as one unit. The hook calls the same command, so a hand-rolled move drifts from the unattended path.
+- `canon tasks archive` moves the file, edits `priority.md` and `backlog.md`, and regenerates the index as one unit. The hook calls it too, so a hand-rolled move drifts from the unattended path.
 
 ## Step 1: confirm the work reached main
 
@@ -45,6 +45,7 @@ A successful archive returns one record naming what moved.
 | -------------------- | --------------------------------------------------------------------- |
 | `from`, `to`         | The task's old and new path                                           |
 | `priorityRowRemoved` | Whether a `priority.md` row was dropped                               |
+| `backlogRowRemoved`  | Whether a `backlog.md` bullet was dropped                             |
 | `indexRegenerated`   | Whether the index changed                                             |
 | `plans`              | A `from` and `to` per live plan the task last cited, in `Plan:` order |
 
@@ -80,4 +81,4 @@ Leave `TASK-ARCHIVE.md` alone when it is present in the archive folder. It recor
 
 ## Step 4: clear prose naming the task
 
-The command drops the row from `.canon/tasks/priority.md` and leaves prose alone. Remove any sentence that still names the archived task or counts the changed rows, since a stale count reads as board state.
+The command drops the row from `.canon/tasks/priority.md` and the bullet from `.canon/tasks/backlog.md`, and leaves prose alone. Remove any sentence that still names the archived task or counts the changed rows, since a stale count reads as board state.

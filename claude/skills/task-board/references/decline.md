@@ -33,11 +33,11 @@ A successful decline returns one record whose fields match `canon tasks archive`
 | -------------------- | ------------------------------------------------------------------------ |
 | `from`, `to`         | The task's old and new path                                              |
 | `priorityRowRemoved` | Whether a `priority.md` row was dropped                                  |
-| `backlogRowRemoved`  | Whether a `backlog.md` row was dropped, a field archive lacks            |
+| `backlogRowRemoved`  | Whether a `backlog.md` row was dropped                                   |
 | `indexRegenerated`   | Whether the index was rewritten                                          |
 | `plans`              | A `from` and `to` per live plan the task last cited, empty if none moved |
 
-`backlogRowRemoved` is decline's own, since a task can be declined straight off `backlog.md` and archive never checks that file.
+A task can be declined straight off `backlog.md`, so decline checks that file as well as `priority.md`. Archive does the same and reports the same two fields.
 
 ## Step 3: route on a refusal
 
