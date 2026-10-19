@@ -6,6 +6,7 @@ import { gitEnv } from '@/git/env'
 import { diffLabels } from '@/labels/apply'
 import { type LabelAuditRefusal, auditLabels } from '@/labels/audit'
 import { checkClosing } from '@/labels/closing'
+import { bodyDensity } from '@/labels/density'
 import { resolveScanInput } from '@/labels/event'
 import { checkTitleFormat, type TitleFormatIssue } from '@/labels/format'
 import { MAP_REL } from '@/labels/map'
@@ -241,7 +242,18 @@ export function register(program: Command): void {
         'It grades the body of an ordinary pull request against the closed',
         'section list: a level-two heading outside it, or a missing',
         '## Summary or ## Key changes, fails. A review, a release-please body,',
-        'and a scan carrying no title skip this check. It also fails a banned',
+        'and a scan carrying no title skip this check.',
+        '',
+        'It reports the density of that same body per section under `density`,',
+        'without failing on it: a bullet past 200 characters, more than 5 plain',
+        'bullets or 2 paragraphs in a row, a paragraph past 350 characters, any',
+        'H3 or deeper heading, and Technical context mixing bullets with',
+        'paragraphs. A bold label alone on a line splits a Key changes run, a',
+        'bold-led paragraph starts a new Technical context run, and Testing',
+        'takes the heading limit alone. Each finding carries its section, kind,',
+        'line in the whole body, value, and limit.',
+        '',
+        'It also fails a banned',
         'character, an em dash or a semicolon, in the title or body of a pull',
         'request or a review, outside a code span or a link.',
         '',
@@ -692,6 +704,36 @@ async function runScan(opts: ScanOptions): Promise<number> {
     }
   }
 
+  // Reported and never gated yet. New bodies come back clean under the
+  // shape in pr.md first, so an older open pull request fails no edit event.
+  const density = sectionsChecked ? bodyDensity(resolved.body) : []
+
+  logStep(
+    !sectionsChecked
+      ? 'Density not checked'
+      : density.length === 0
+        ? 'Clean'
+        : 'Density finding found',
+  )
+  if (!sectionsChecked) {
+    logInfo('only an ordinary pull request body is graded for density')
+  } else if (density.length === 0) {
+    logInfo('every section is within its length, run, and heading limits')
+  } else {
+    logWarn(
+      `${plural(density.length, 'density finding')} in the body. Regroup the section under bold labels or split the long item rather than cutting a path.`,
+    )
+    for (const finding of density) {
+      const measured =
+        finding.value === null
+          ? ''
+          : ` (${finding.value} over ${finding.limit})`
+      logWarn(
+        `line ${finding.line} in ${finding.section ?? 'the opening'}: ${finding.kind}${measured}`,
+      )
+    }
+  }
+
   const banFindings = [
     ...scanBans(
       [{ number: 1, text: resolved.title, fenced: false }],
@@ -781,6 +823,7 @@ async function runScan(opts: ScanOptions): Promise<number> {
         sessionLinks: result.sessionLinks,
         titleFormatIssues,
         sections: { checked: sectionsChecked, ...sections },
+        density,
         bannedCharacters,
         missingClosures: closing.missing,
         strayClosures: closing.stray,
