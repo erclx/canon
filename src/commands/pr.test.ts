@@ -396,6 +396,7 @@ function writeFakeGh(bin: string, comments: string, apiLog: string): void {
     `  api*pulls/7/files*) echo "$*" >> "$fx/files-calls.log"; [ -f "$fx/files-fail" ] && exit 1; { if [ -f "$fx/files.tsv" ]; then cat "$fx/files.tsv"; else git diff --name-status --no-renames main...HEAD | sed -e 's/^A/added/' -e 's/^M/modified/' -e 's/^D/removed/'; fi; } | jq -Rn '[inputs | select(length > 0) | split("\\t") | {status: .[0], filename: .[1]}]' | jq -r "$f" ;;`,
     `  api*contents/*) a="$*"; p=\${a##*contents/}; p=\${p%%\\?*}; r=\${a##*ref=}; [ -f "$fx/img/$r-$(basename "$p")" ] && cat "$fx/img/$r-$(basename "$p")" || exit 1 ;;`,
     '  api*compare/*) if [ -f "$fx/merge-base" ]; then cat "$fx/merge-base"; else git merge-base main HEAD; fi ;;',
+    `  "api -X PUT repos/{owner}/{repo}/pulls/7/reviews/"*) id=\${4##*/}; echo "$id" >> "$fx/review-puts.log"; [ -f "$fx/review-put-fail-$id" ] && exit 1; printf '%s\\n' "\${@: -1}" >> "$fx/review-bodies.log"; echo "{}" ;;`,
     `  api*pulls/7/reviews*) [ -f "$fx/ui-reviews.json" ] && jq -r "$f" "$fx/ui-reviews.json" ;;`,
     `  api*issues/7/comments*) jq '[.comments[] | {html_url: .url, body}]' '${comments}' | jq -r "$f" ;;`,
     '  "api -X PATCH repos/{owner}/{repo}/pulls/7 "*) [ -f "$fx/body-fail" ] && exit 1; printf \'%s\' "${@: -1}" > "$fx/body-write.log"; echo "{}" ;;',
@@ -1376,6 +1377,7 @@ describe('canon pr local', () => {
     apiLog = join(tempDir, 'api.log')
     mkdirSync(repoRoot)
     writeFileSync(commentsFile, '{"comments":[]}')
+    writeFileSync(join(tempDir, 'ui-reviews.json'), '[]')
     writeFakeGh(bin, commentsFile, apiLog)
     initBranchRepo(repoRoot, {})
   })
@@ -1468,6 +1470,89 @@ describe('canon pr local', () => {
       record: expect.objectContaining({ reason: 'no-comment' }),
       exit: 0,
     })
+  })
+
+  function writeReviews(
+    reviews: readonly { readonly id: number; readonly body: string }[],
+  ): void {
+    writeFileSync(
+      join(tempDir, 'ui-reviews.json'),
+      JSON.stringify(
+        reviews.map((review) => ({
+          ...review,
+          commit_id: 'abc',
+          submitted_at: '2026-10-19T00:00:00Z',
+        })),
+      ),
+    )
+  }
+
+  function uiReview(id: number, address: string) {
+    return {
+      id,
+      body: [
+        '## UI review closed',
+        '',
+        '0 failed · 0 need your eyes · 2 passed · 0 not driven',
+        `Driven at \`38db88d\` on ${address}, rendered by agent-browser.`,
+        '',
+        '<!-- review-ui: head=38db88d -->',
+      ].join('\n'),
+    }
+  }
+
+  it('should rewrite the address in every UI review and leave a code review alone', async () => {
+    writeReviews([
+      uiReview(11, 'http://127.0.0.1:4211'),
+      {
+        id: 12,
+        body: '## Review\n\nDriven at `38db88d` on http://localhost:5173, rendered by agent-browser.\n\n<!-- review-pr: head=38db88d -->',
+      },
+      uiReview(13, 'http://localhost:5173'),
+    ])
+
+    const outcome = await runLocal(['7', '--remove'])
+
+    expect(outcome.record).toEqual(expect.objectContaining({ reviews: 2 }))
+    expect(readFileSync(join(tempDir, 'review-puts.log'), 'utf8')).toBe(
+      '11\n13\n',
+    )
+    expect(readFileSync(join(tempDir, 'review-bodies.log'), 'utf8')).toContain(
+      'body=## UI review closed\n\n0 failed · 0 need your eyes · 2 passed · 0 not driven\nDriven at `38db88d` on a local preview, rendered by agent-browser.',
+    )
+  })
+
+  it('should leave a UI review driven on a hosted preview unedited', async () => {
+    writeReviews([uiReview(11, 'https://feat-x.site.pages.dev')])
+
+    const outcome = await runLocal(['7', '--remove'])
+
+    expect(outcome.record).toEqual(expect.objectContaining({ reviews: 0 }))
+    expect(existsSync(join(tempDir, 'review-puts.log'))).toBe(false)
+  })
+
+  it('should report reviews 0 on a thread with no review', async () => {
+    const outcome = await runLocal(['7', '--remove'])
+
+    expect(outcome.record).toEqual(expect.objectContaining({ reviews: 0 }))
+  })
+
+  it('should refuse gh-failed on a refused update after trying the rest', async () => {
+    writeReviews([
+      uiReview(11, 'http://127.0.0.1:4211'),
+      uiReview(13, 'http://localhost:5173'),
+    ])
+    writeFileSync(join(tempDir, 'review-put-fail-11'), '')
+
+    const outcome = await runLocal(['7', '--remove'])
+
+    expect(outcome).toEqual({
+      record: expect.objectContaining({ reason: 'gh-failed', reviews: 1 }),
+      exit: 1,
+    })
+    expect(readFileSync(join(tempDir, 'review-puts.log'), 'utf8')).toBe(
+      '11\n13\n',
+    )
   })
 })
 
