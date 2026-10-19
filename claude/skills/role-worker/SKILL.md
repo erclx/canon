@@ -88,7 +88,7 @@ The controlling session cannot watch this one build, so the messages below are o
 
 ### The pull request announcement
 
-Announce the pull request as the ship chain's pull request step returns, carrying the number, the branch, and the task it closes. That transition is the one moment only this session knows, and the controller's review poll no longer starts on a dispatch.
+Announce the pull request as the ship chain's pull request step returns, carrying the number, the branch, the head sha, the CI state, the task it closes, and each point this build departed from the plan on. That transition is the one moment only this session knows, and the controller's review poll no longer starts on a dispatch.
 
 - Carry the reach in that message, being the paths this branch wrote that another live plan or `## Run now` row holds, and who holds each, which `canon tasks plan-reach` reports as `claimed`
 - Report each as a rebase the controller should order, never as a breach, since sharing a path is not a hold
@@ -125,7 +125,7 @@ A worker that improvised this read polled issue comments, never saw a UI close p
 
 ### Addressing
 
-Address the session the launch named, and the reviewer by its dispatch's sessionId, each as a `sessionId` rather than a name. `canon:session-relay` turns that id into an address and carries the send, falling back to a copyable block where no send tool exists.
+Address the session the launch named, and the reviewer by its dispatch's sessionId, each as a `sessionId` rather than a name. `canon:session-relay` turns that id into an address and carries the send, falling back to a copyable block where no send tool exists. A `Controller: <sessionId>` line in the launch names the controller.
 
 Ask the operator when the launch named nobody and a person is there, putting candidate rows through the structured question surface. The halt is the cheaper error, since a message sent to the wrong session reports success and is lost.
 
