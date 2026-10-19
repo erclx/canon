@@ -109,6 +109,48 @@ describe('latestReview', () => {
     ).toBe('closed')
   })
 
+  it('should read a restyled open pass from its first line', () => {
+    const body = [
+      '## Review',
+      '',
+      '0 critical, 1 should-fix, 0 minor. Reviewed against project docs and the board.',
+      '',
+      '**`src/a.ts`**',
+      '',
+      '- **should-fix** ([line 3](https://example.com/a.ts#L3)): The guard never runs.',
+      '  - Fix: move the guard above the return.',
+      '',
+      '<details>',
+      '<summary>Review focus, 1 checked</summary>',
+      '',
+      '- The empty input: covered by `a.test.ts`',
+      '',
+      '</details>',
+      '',
+      '🤖 Reviewed by Claude Code',
+      '',
+      '<!-- review-pr: commit=a0cf1a3 read-at=2026-10-19T06:14:57Z -->',
+    ].join('\n')
+
+    expect(latestReview([{ body }])).toBe('open')
+  })
+
+  it('should read a restyled close from its first line', () => {
+    const body = [
+      '## Review closed',
+      '',
+      '✅ 1 prior finding addressed at `a0cf1a3`. Re-reviewed the commits since `5653721`.',
+      '',
+      '- **should-fix**, `src/a.ts`: the guard runs above the return',
+      '',
+      '🤖 Reviewed by Claude Code',
+      '',
+      '<!-- review-pr: commit=a0cf1a3 read-at=2026-10-19T06:14:57Z -->',
+    ].join('\n')
+
+    expect(latestReview([{ body }])).toBe('closed')
+  })
+
   it('should read a heading written with carriage returns', () => {
     expect(latestReview([{ body: '## Review\r\n\r\n- a finding\r\n' }])).toBe(
       'open',
