@@ -2965,12 +2965,20 @@ async function runLocalRemove(
     listComments(root, resolved.number),
     listReviews(root, resolved.number),
   ])
-  if (comments === undefined || reviews.kind === 'refused') {
+  if (comments === undefined && reviews.kind === 'refused') {
     return refuseWith('gh-failed', LOCAL_REFUSALS['gh-failed'], emitJson, root)
   }
 
-  const evidence = await removeEvidenceAddress(root, comments)
-  const masked = await maskUiReviews(root, resolved.number, reviews.rows)
+  // A refused read on one side still lets the other side's edits land, and
+  // counts as a failure beside them, so one unread listing never strands both.
+  const [evidence, masked] = await Promise.all([
+    comments === undefined
+      ? Promise.resolve<EvidenceRemoval>({ kind: 'failed' })
+      : removeEvidenceAddress(root, comments),
+    reviews.kind === 'refused'
+      ? Promise.resolve({ rewritten: 0, failed: true })
+      : maskUiReviews(root, resolved.number, reviews.rows),
+  ])
   if (evidence.kind === 'failed' || masked.failed) {
     return refuseWith(
       'gh-failed',

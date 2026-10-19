@@ -1537,6 +1537,23 @@ describe('canon pr local', () => {
     expect(outcome.record).toEqual(expect.objectContaining({ reviews: 0 }))
   })
 
+  it('should still drop the evidence address line when the reviews read is refused', async () => {
+    writeMarkedComment(
+      '## Evidence\n\n**Local preview:** http://localhost:5173\n\n<!-- pr-evidence: head=abc -->',
+    )
+    rmSync(join(tempDir, 'ui-reviews.json'))
+
+    const outcome = await runLocal(['7', '--remove'])
+
+    expect(outcome).toEqual({
+      record: expect.objectContaining({ reason: 'gh-failed' }),
+      exit: 1,
+    })
+    expect(readFileSync(apiLog, 'utf8')).toBe(
+      'body=## Evidence\n\n<!-- pr-evidence: head=abc -->',
+    )
+  })
+
   it('should refuse gh-failed on a refused update after trying the rest', async () => {
     writeReviews([
       uiReview(11, 'http://127.0.0.1:4211'),
