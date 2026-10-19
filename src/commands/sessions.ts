@@ -134,15 +134,19 @@ export function register(program: Command): void {
         '',
         'The confidence field says how the liveness of a row was decided.',
         '"confirmed" matched the running process against the start time the',
-        'record stamped. "unverified" means only that the pid answers, which',
-        'cannot rule out a pid handed to an unrelated process, so a roster',
-        'reported that way is a candidate list rather than an identity.',
+        'record stamped, and reads "via": "pid". "unverified" means only that the',
+        'pid answers, which cannot rule out a pid handed to an unrelated',
+        'process, so a roster reported that way is a candidate list rather than',
+        'an identity. Where the start time cannot be read, a row whose messaging',
+        'socket accepts a connection is confirmed instead and reads "via":',
+        '"listener". The probe connects and closes without writing.',
         '',
         'A reader in another pid namespace, such as a sandboxed shell, cannot',
         'see the pid of a record stamped elsewhere. That row is judged on its',
         'messaging socket instead: it stays on the roster as "unverified" with',
         '"via": "socket", since a crashed session leaves its socket behind. A',
-        'foreign record whose socket is gone is left off the roster and',
+        'foreign record whose socket accepts a connection is confirmed as',
+        '"listener". One whose socket is gone is left off the roster and',
         'counted in "foreignDead", so an empty roster beside a count above zero',
         'is one this reader could not check, not one whose sessions ended.',
         '',
@@ -545,8 +549,13 @@ function reportConfidence(
   }
 
   if (report.confidence === 'confirmed') {
+    const listened = report.sessions.filter(
+      (session) => session.via === 'listener',
+    ).length
     logInfo(
-      'Every row matched a running process against the start time its record stamped.',
+      listened === 0
+        ? 'Every row matched a running process against the start time its record stamped.'
+        : `Every row is confirmed, ${listened} of them because their messaging socket accepted a connection and the rest by start time.`,
     )
     return
   }

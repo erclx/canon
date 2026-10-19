@@ -5,6 +5,7 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs'
+import { createServer } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { $ } from 'bun'
@@ -178,6 +179,25 @@ describe('canon sessions list from another pid namespace', () => {
         sessions: [{ name: 'canon-4242', via: 'socket' }],
       })
       expect(result.stderr).toContain('messaging socket')
+    },
+  )
+
+  it.skipIf(!readable)(
+    'should confirm a foreign record whose socket accepts and say the listener decided it',
+    async () => {
+      const socket = join(DIR, 'listening.sock')
+      seed(socket, false)
+      const server = createServer()
+      await new Promise<void>((done) => server.listen(socket, done))
+
+      const result = await runSessions(['list', '--json'])
+      await new Promise((done) => server.close(done))
+
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        confidence: 'confirmed',
+        sessions: [{ name: 'canon-4242', via: 'listener' }],
+      })
+      expect(result.stderr).toContain('accepted a connection')
     },
   )
 })
