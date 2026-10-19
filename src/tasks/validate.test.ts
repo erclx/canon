@@ -201,6 +201,13 @@ describe('readPaths', () => {
   it('should drop a task version whose trailing digits look like an extension', () => {
     expect(readPaths('waits on `v40.2` and `v41.7`')).toEqual([])
   })
+
+  it('should read no path out of a derived count, whose folders summarize', () => {
+    expect(readPaths('12 files under `src/tasks/`, `claude/skills/`')).toEqual(
+      [],
+    )
+    expect(readPaths('1 file under `docs/`, and 2 more')).toEqual([])
+  })
 })
 
 describe('readBoard', () => {
@@ -1859,11 +1866,73 @@ describe('validateBoard verb-written shape', () => {
   it('should pass a Touches cell that matches the derivation', async () => {
     await seedTask('v1.0-first')
     await seedDeclaringPlan('v1.0-first', ['src/a.ts'])
-    await seedBoard(boardBody([readyTable([{ stem: 'v1.0-first' }])]))
+    await seedBoard(
+      boardBody([
+        readyTable([{ stem: 'v1.0-first', touches: '1 file under `src/`' }]),
+      ]),
+    )
 
     expect(await validateBoard(ROOT, UNREACHABLE_TRUNK)).toMatchObject({
       findings: [],
     })
+  })
+
+  it('should list a path two plans declare under cells naming only folders', async () => {
+    await seedTask('v1.0-first')
+    await seedTask('v2.0-second')
+    await seedDeclaringPlan('v1.0-first', ['src/a.ts', 'docs/commands.md'])
+    await seedDeclaringPlan('v2.0-second', ['src/b.ts', 'docs/commands.md'])
+    await seedBoard(
+      boardBody([
+        readyTable([
+          {
+            stem: 'v1.0-first',
+            touches: '2 files under `src/`, `docs/`',
+          },
+          {
+            stem: 'v2.0-second',
+            touches: '2 files under `src/`, `docs/`',
+          },
+        ]),
+      ]),
+    )
+
+    const outcome = await validateBoard(ROOT, UNREACHABLE_TRUNK)
+
+    expect(outcome.ok && outcome.findings).toEqual([])
+    expect(outcome.ok && outcome.shared).toEqual([
+      {
+        group: 'Run now',
+        subject: 'v1.0-first and v2.0-second',
+        message: 'both touch docs/commands.md.',
+      },
+    ])
+    expect(outcome.ok && outcome.claims).toEqual([])
+  })
+
+  it('should read the written cell of a row whose task is gone', async () => {
+    await seedTask('v1.0-first')
+    await seedDeclaringPlan('v1.0-first', ['docs/commands.md'])
+    await seedBoard(
+      boardBody([
+        readyTable([
+          {
+            stem: 'v1.0-first',
+            touches: '1 file under `docs/`',
+          },
+          { stem: 'v2.0-gone', touches: '`docs/commands.md`' },
+        ]),
+      ]),
+    )
+
+    const outcome = await validateBoard(ROOT, UNREACHABLE_TRUNK)
+
+    expect(outcome.ok && outcome.shared).toMatchObject([
+      {
+        subject: 'v1.0-first and v2.0-gone',
+        message: 'both touch docs/commands.md.',
+      },
+    ])
   })
 
   it('should settle a row waiting on a bare label whose task is archived', async () => {

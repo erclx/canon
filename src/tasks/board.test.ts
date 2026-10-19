@@ -184,26 +184,39 @@ describe('parseBoard', () => {
 })
 
 describe('touchesCell', () => {
-  it('should list three paths with no tail', () => {
-    expect(touchesCell(['a.ts', 'b.ts', 'c.ts'], 1)).toBe(
-      '`a.ts`, `b.ts`, `c.ts`',
+  it('should count one file under its folder', () => {
+    expect(touchesCell(['src/tasks/board.ts'])).toBe(
+      '1 file under `src/tasks/`',
     )
   })
 
-  it('should count a fourth path the plan lists', () => {
-    expect(touchesCell(['a.ts', 'b.ts', 'c.ts', 'd.ts'], 1)).toBe(
-      '`a.ts`, `b.ts`, `c.ts`, and 1 more files the plan lists',
-    )
+  it('should name one folder for paths sharing it, two segments deep', () => {
+    expect(
+      touchesCell([
+        'claude/skills/task-board/SKILL.md',
+        'claude/skills/task-board/references/board.md',
+      ]),
+    ).toBe('2 files under `claude/skills/`')
   })
 
-  it('should name the plans in the plural for a sliced task', () => {
-    expect(touchesCell(['a.ts', 'b.ts', 'c.ts', 'd.ts', 'e.ts'], 2)).toBe(
-      '`a.ts`, `b.ts`, `c.ts`, and 2 more files the plans list',
-    )
+  it('should name the two fullest folders and count the rest', () => {
+    expect(
+      touchesCell([
+        'docs/a.md',
+        'src/tasks/a.ts',
+        'src/tasks/b.ts',
+        'src/hooks/c.ts',
+        'claude/skills/x/SKILL.md',
+      ]),
+    ).toBe('5 files under `src/tasks/`, `docs/`, and 2 more')
+  })
+
+  it('should name no folder for root files alone', () => {
+    expect(touchesCell(['package.json', 'tsconfig.json'])).toBe('2 files')
   })
 
   it('should read empty for a plan declaring nothing', () => {
-    expect(touchesCell([], 1)).toBe('')
+    expect(touchesCell([])).toBe('')
   })
 })
 
@@ -215,22 +228,27 @@ describe('deriveCells', () => {
     expect(await deriveCells(ROOT, { stem: 'v1.0-one', label: 'old' })).toEqual(
       {
         task: '[v1.0: One thing](v1.0-one.md)',
-        touches: '`src/a.ts`',
+        touches: '1 file under `src/`',
         plan: '[one](../plans/feature-one.md)',
+        paths: ['src/a.ts'],
       },
     )
   })
 
-  it('should union a sliced task in line order once each', async () => {
-    await seedPlan('first', ['a.ts', 'b.ts'])
-    await seedPlan('second', ['b.ts', 'c.ts', 'd.ts'])
+  it('should count the union of a sliced task in line order once each', async () => {
+    await seedPlan('first', ['src/a.ts', 'src/b.ts'])
+    await seedPlan('second', ['src/b.ts', 'docs/c.md', 'src/d.ts'])
     await seedTask('v1.0-one', { plans: ['first', 'second'] })
 
     const cells = await deriveCells(ROOT, { stem: 'v1.0-one', label: '' })
 
-    expect(cells.touches).toBe(
-      '`a.ts`, `b.ts`, `c.ts`, and 1 more files the plans list',
-    )
+    expect(cells.touches).toBe('4 files under `src/`, `docs/`')
+    expect(cells.paths).toEqual([
+      'src/a.ts',
+      'src/b.ts',
+      'docs/c.md',
+      'src/d.ts',
+    ])
     expect(cells.plan).toBe(
       '[first](../plans/feature-first.md), [second](../plans/feature-second.md)',
     )
@@ -252,13 +270,19 @@ describe('deriveCells', () => {
       task: '[v1.0: One](v1.0-one.md)',
       touches: '',
       plan: '',
+      paths: [],
     })
   })
 
   it('should keep the row label when the task file is gone', async () => {
     expect(
       await deriveCells(ROOT, { stem: 'v1.0-gone', label: 'v1.0: Gone' }),
-    ).toEqual({ task: '[v1.0: Gone](v1.0-gone.md)', touches: '', plan: '' })
+    ).toEqual({
+      task: '[v1.0: Gone](v1.0-gone.md)',
+      touches: '',
+      plan: '',
+      paths: [],
+    })
   })
 })
 
@@ -290,7 +314,7 @@ describe('renderBoard', () => {
         '',
         '| Task | Touches | Plan |',
         '| ---- | ------- | ---- |',
-        '| [v1.0: One](v1.0-one.md) | `src/a.ts` | [one](../plans/feature-one.md) |',
+        '| [v1.0: One](v1.0-one.md) | 1 file under `src/` | [one](../plans/feature-one.md) |',
         '',
         '## Up next',
         '',
@@ -361,7 +385,7 @@ const RUN_NOW_ONE = [
   '',
   '| Task | Touches | Plan |',
   '| ---- | ------- | ---- |',
-  '| [v1.0: One](v1.0-one.md) | `a.ts` | [one](../plans/feature-one.md) |',
+  '| [v1.0: One](v1.0-one.md) | 1 file | [one](../plans/feature-one.md) |',
 ]
 
 describe('placeTask', () => {
@@ -559,7 +583,7 @@ describe('promoteTask', () => {
     await promoteTask(ROOT, 'v1.0-one')
 
     expect(await readFile(orderingPath(ROOT), 'utf8')).toContain(
-      '| [v1.0: One](v1.0-one.md) | `a.ts` | Planned, not dispatched yet |',
+      '| [v1.0: One](v1.0-one.md) | 1 file | Planned, not dispatched yet |',
     )
   })
 

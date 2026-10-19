@@ -13,6 +13,7 @@ import {
   BOARD_GROUPS,
   type BoardGroup,
   backlogPath,
+  declaredRows,
   type FindingKind,
   groupRuleFindings,
   orderingPath,
@@ -30,8 +31,15 @@ export const GROUP_COLUMNS: Readonly<Record<BoardGroup, readonly string[]>> = {
   'Needs a plan': ['Task', 'Waiting on'],
 }
 
-/** How many declared paths a `Touches` cell spells out before it counts the rest. */
-const TOUCHES_SHOWN = 3
+/**
+ * How many folders a `Touches` cell names. A backticked path never wraps, so
+ * three of them pushed a table past an editor preview, and two short folders
+ * fit beside the count.
+ */
+const TOUCHES_FOLDERS = 2
+
+/** How deep a `Touches` folder reads, as in `src/tasks/` or `claude/skills/`. */
+const FOLDER_DEPTH = 2
 
 /**
  * The widest a `Waiting on` cell may render. The live board's cells measured 14
@@ -205,6 +213,8 @@ export interface DerivedCells {
   readonly task: string
   readonly touches: string
   readonly plan: string
+  /** The declared paths the Touches cell counts, which the overlap checks read in its place. */
+  readonly paths: readonly string[]
 }
 
 function titleOf(text: string): string | undefined {
@@ -227,17 +237,41 @@ function planLabel(path: string): string {
 }
 
 /**
- * The first `TOUCHES_SHOWN` declared paths, then a count of the rest. A task
- * sliced over several plans reads their union, so the tail names the plans in
- * the plural.
+ * The folder a path sits under, `FOLDER_DEPTH` segments deep at most and with a
+ * trailing slash, or undefined for a file at the root.
  */
-export function touchesCell(paths: readonly string[], plans: number): string {
-  const shown = paths.slice(0, TOUCHES_SHOWN).map((path) => `\`${path}\``)
-  const rest = paths.length - shown.length
-  if (rest === 0) return shown.join(', ')
+function folderOf(path: string): string | undefined {
+  const segments = path.split('/').slice(0, -1).slice(0, FOLDER_DEPTH)
+  return segments.length === 0 ? undefined : `${segments.join('/')}/`
+}
 
-  const lists = plans > 1 ? 'the plans list' : 'the plan lists'
-  return `${shown.join(', ')}, and ${rest} more files ${lists}`
+/**
+ * A count of the declared paths and the folders holding most of them, at most
+ * `TOUCHES_FOLDERS`, with ties going to the folder declared first. The file
+ * list lives in the plan the row links, so the cell only says where a row
+ * works. Root files count and name no folder.
+ */
+export function touchesCell(paths: readonly string[]): string {
+  if (paths.length === 0) return ''
+
+  const counts = new Map<string, number>()
+  for (const path of paths) {
+    const folder = folderOf(path)
+    if (folder !== undefined) counts.set(folder, (counts.get(folder) ?? 0) + 1)
+  }
+
+  const folders = [...counts.entries()]
+    .sort((left, right) => right[1] - left[1])
+    .map(([folder]) => folder)
+  const shown = folders
+    .slice(0, TOUCHES_FOLDERS)
+    .map((folder) => `\`${folder}\``)
+  const files = paths.length === 1 ? '1 file' : `${paths.length} files`
+  if (shown.length === 0) return files
+
+  const rest = folders.length - shown.length
+  const tail = rest === 0 ? '' : `, and ${rest} more`
+  return `${files} under ${shown.join(', ')}${tail}`
 }
 
 /**
@@ -270,6 +304,7 @@ export async function deriveCells(
       task: `[${row.label || row.stem}](${row.stem}.md)`,
       touches: '',
       plan: '',
+      paths: [],
     }
   }
 
@@ -279,13 +314,15 @@ export async function deriveCells(
     plans.map(async (plan) => readDeclarations(await readFile(plan, 'utf8'))),
   )
   const dir = tasksDir(root)
+  const paths = [...new Set(declared.flat())]
 
   return {
     task: `[${titleOf(text) ?? (row.label || row.stem)}](${row.stem}.md)`,
-    touches: touchesCell([...new Set(declared.flat())], plans.length),
+    touches: touchesCell(paths),
     plan: plans
       .map((plan) => `[${planLabel(plan)}](${linkTo(dir, plan)})`)
       .join(', '),
+    paths,
   }
 }
 
@@ -594,7 +631,8 @@ async function writeLocked(
 
   if (edited.ruled) {
     const forbidden = GROUP_RULES[edited.ruled]
-    const broken = (await groupRuleFindings(readBoard(text).rows, root)).filter(
+    const rows = await declaredRows(readBoard(text).rows, root)
+    const broken = (await groupRuleFindings(rows, root)).filter(
       (finding) => finding.subject === stem && forbidden.includes(finding.kind),
     )
     if (broken.length > 0) {
