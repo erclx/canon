@@ -33,7 +33,62 @@ const CLOSED = `## Review closed
 
 🤖 Reviewed by Claude Code`
 
+/** An open pass in the restyled shape, nested evidence and folded confirmations. */
+const RESTYLED_OPEN = `## Review
+
+0 critical, 1 should-fix, 0 minor. Reviewed against project docs and the board.
+
+**\`src/a.ts\`**
+
+- **should-fix** ([line 3](https://example.com/a.ts#L3)): The guard never runs.
+  - The caller returns first.
+  - Fix: move the guard above the return.
+
+<details>
+<summary>Review focus, 1 checked</summary>
+
+- The empty input: covered by \`a.test.ts\`
+
+</details>
+
+🤖 Reviewed by Claude Code`
+
+/** A close in the restyled shape, a count line and one line per prior finding. */
+const RESTYLED_CLOSED = `## Review closed
+
+✅ 1 prior finding addressed at \`a0cf1a3\`. Re-reviewed the commits since \`5653721\`.
+
+- **should-fix**, \`src/a.ts\`: the guard runs above the return
+
+🤖 Reviewed by Claude Code`
+
 describe('resolveReviewScope', () => {
+  it('should read a restyled open pass as the open state off its marker', () => {
+    const scope = resolveReviewScope({
+      reviews: [review(`${RESTYLED_OPEN}\n\n${marker(READ)}`)],
+    })
+
+    expect([scope.heading, scope.state, scope.commit, scope.source]).toEqual([
+      '## Review',
+      'open',
+      READ,
+      'marker',
+    ])
+  })
+
+  it('should read a restyled close as the closed state off its marker', () => {
+    const scope = resolveReviewScope({
+      reviews: [review(`${RESTYLED_CLOSED}\n\n${marker(READ)}`)],
+    })
+
+    expect([scope.heading, scope.state, scope.commit, scope.source]).toEqual([
+      '## Review closed',
+      'closed',
+      READ,
+      'marker',
+    ])
+  })
+
   it('should report a first pass when the thread carries no review', () => {
     expect(resolveReviewScope({ reviews: [] })).toEqual({
       state: 'none',

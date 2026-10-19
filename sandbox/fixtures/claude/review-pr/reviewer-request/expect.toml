@@ -5,8 +5,8 @@
 # The diff is clean (the handler already validates the title), so the only
 # thing this pass owes is the `## For the reviewer` bullet, and answering it
 # from the diff owes nothing further. The heading this proves is the fix
-# `59fd6f1` made: an answered bullet takes `## Review closed` with the block
-# standing in for the canned line, rather than forcing the review open.
+# `59fd6f1` made: an answered bullet takes `## Review closed` with the folded
+# block standing in for the canned line, rather than forcing the review open.
 
 # Same absence the `review` arm asserts, for the same reason: no target here
 # installed the corpus, so `${CLAUDE_SKILL_DIR}/../git-pr/references/pr.md` is the
@@ -42,12 +42,15 @@ manual = [
 path = ".canon/tmp/pr/review/body-*.md"
 pattern = '^## Review closed'
 
+# An answered bullet folds under a counted summary rather than an open bold
+# block, which would mark it owed.
 [[content]]
 path = ".canon/tmp/pr/review/body-*.md"
-pattern = '\*\*For the reviewer\*\*'
+pattern = '^<summary>For the reviewer, 1 confirmed</summary>'
 
-# The bullet as the author wrote it, proving the pass read the section itself
-# rather than paraphrasing it into a new question.
+# The request shortened inside the fold, proving the pass read the section
+# itself. The skill writes the request shortened, so only its subject and
+# object are fixed rather than the author's words.
 [[content]]
 path = ".canon/tmp/pr/review/body-*.md"
-pattern = 'Confirm handleCreate rejects a missing or empty title'
+pattern = '<summary>For the reviewer[^<]*</summary>[\s\S]*handleCreate[^\n]*title'

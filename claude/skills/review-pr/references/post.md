@@ -32,7 +32,7 @@ That satisfies both prohibitions above rather than carving an exception into eit
 A finding bound to a line links to it, so a reader skips the hunt:
 
 ```markdown
-- **should-fix** ([line 12](<repo-url>/blob/<headRefOid>/<path>#L12)): what breaks and the fix
+- **should-fix** ([line 12](<repo-url>/blob/<headRefOid>/<path>#L12)): what breaks, in one sentence
 ```
 
 - A span anchors as `#L12-L14`, with no spaces and no en dash, and a single line as `#L12`
@@ -60,12 +60,18 @@ X critical, Y should-fix, Z minor. Reviewed against project docs and the board.
 
 **`path/to/file.ext`**
 
-- **should-fix** ([line 12](<repo-url>/blob/<headRefOid>/path/to/file.ext#L12)): what breaks and the fix, in two or three sentences.
-- **minor** ([lines 30-34](<repo-url>/blob/<headRefOid>/path/to/file.ext#L30-L34)): finding.
+- **should-fix** ([line 12](<repo-url>/blob/<headRefOid>/path/to/file.ext#L12)): what breaks, in one sentence.
+  - one fact of evidence, with its link
+  - Fix: the change
+- **minor** ([lines 30-34](<repo-url>/blob/<headRefOid>/path/to/file.ext#L30-L34)): what breaks, in one sentence.
+  - Fix: the change
 
-**What is right**
+<details>
+<summary>Review focus, N checked</summary>
 
-- bounded confirmation.
+- the case: the test or read that covers it
+
+</details>
 
 🤖 Reviewed by Claude Code
 
@@ -81,14 +87,24 @@ Re-reviewed `<short-sha>`, N commits since the prior pass. X critical, Y should-
 
 **`path/to/file.ext`**
 
-- **should-fix** ([line 12](<repo-url>/blob/<headRefOid>/path/to/file.ext#L12)): what breaks and the fix, in two or three sentences.
+- **should-fix** ([line 12](<repo-url>/blob/<headRefOid>/path/to/file.ext#L12)): what breaks, in one sentence.
+  - Fix: the change
 
 🤖 Reviewed by Claude Code
 
 <!-- review-pr: commit=<headRefOid> read-at=<read-at> -->
 ```
 
-A Testing question or a `## For the reviewer` bullet Step 3 read takes its own block after the file blocks, per `${CLAUDE_SKILL_DIR}/references/body-variants.md`.
+### The finding shape
+
+A reader decides from the first line of a finding whether to open the rest, so the subject carries the failure alone.
+
+- The subject is one sentence under 200 characters, naming what breaks rather than how the pass found it
+- Each nested bullet carries one fact of evidence with its link, and the last one opens on `Fix:`
+- A nested bullet stays under 200 characters too, since `canon labels scan` measures it as a bullet of its own
+- A finding with nothing to add past its subject takes the `Fix:` bullet alone
+
+A Testing question or a `## For the reviewer` bullet Step 3 read takes its own block after the file blocks, per `${CLAUDE_SKILL_DIR}/references/body-variants.md`. A request or a focus case that fails leaves `<details>` and becomes a finding.
 
 ### The PR body block
 
@@ -123,9 +139,9 @@ A minor the dispatched worker declines needs a surface that survives the merge, 
 Name the scope in every summary line after the first pass, since a reader cannot otherwise tell a narrow read from a full one. When the fallback in Step 2 fired, replace the commit count with `Re-reviewed the full change, the prior pass's commit is no longer on the branch`.
 
 - Do not append the PR number to either heading, which GitHub already renders above the comment
-- State each finding as the failure and the fix in two or three sentences, not a paragraph of reasoning
+- State each finding in the shape above, never as a paragraph of reasoning
 - Omit files with no findings and do not lecture on process. The integration, contract, and consumer lenses stay as findings, not asides.
-- `What is right` is optional, capped at three bullets, and included only when it changes the merge decision
+- Leave `What is right` out unless the author asked a direct question it answers, then cap it at three bullets
 - Close with `🤖 Reviewed by Claude Code` on its own line, so the review reads as an independent machine pass, not a human sign-off
 
 ## The marker, the scans, and the post
@@ -156,7 +172,10 @@ The marker is the read-time record those fields are not.
 
 ### The scans
 
-Before posting, run `canon labels scan --body-file .canon/tmp/pr/review/body-<number>-<short-sha>.md`, which applies the rule in `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md`. Fix the body and scan again on a finding.
+Before posting, run `canon labels scan --body-file .canon/tmp/pr/review/body-<number>-<short-sha>.md`, which applies the rule in `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md`. Pass `--json` and fix the body and scan again on a finding.
+
+- A `density` entry is a finding here, naming a subject or nested bullet past 200 characters, a run past 5 plain bullets, or a paragraph past its limits, by its line in the whole body
+- Density never sets the exit code, so the hook below lets the post through on it and this step is the one that stops
 
 - A finding phrased against an internal phase label is what the label half of the scan catches here
 - The call carries no `--title`, so the scan reads the text as a review

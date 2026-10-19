@@ -1,6 +1,10 @@
-import { type DensityKind, densityFindings } from '@/markdown/density'
-import { type BodyLine, bodyLines } from '@/markdown/scan'
-import { LIST_ITEM } from '@/markdown/structure'
+import {
+  type DensityFinding,
+  type DensityKind,
+  densityFindings,
+} from '@/markdown/density'
+import { type BodyLine, bodyLines, visibleText } from '@/markdown/scan'
+import { CHECKPOINTS, LIST_ITEM } from '@/markdown/structure'
 
 /**
  * The four counted limits a pull request section carries. The heading limits
@@ -90,6 +94,159 @@ export function bodyDensity(body: string): BodyDensityFinding[] {
   }
 
   return found.sort((a, b) => a.line - b.line)
+}
+
+/**
+ * The opening headings of the posts a canon skill writes to a pull request,
+ * after `.canon/groundwork/170-github-comment-density/04-post-catalog.md`. A
+ * body opening on any other heading is not a post this reader grades.
+ */
+export const POST_HEADINGS = [
+  'Evidence',
+  'Review',
+  'Review closed',
+  'UI review',
+  'UI review closed',
+  'Review response',
+  'Post-review findings',
+  'Rebase',
+] as const
+
+export type PostDensityKind = CountedKind | 'heading-depth'
+
+export interface PostDensityFinding extends Omit<BodyDensityFinding, 'kind'> {
+  readonly kind: PostDensityKind
+}
+
+const LENGTHS: readonly DensityKind[] = ['paragraph-length', 'bullet-length']
+const NESTED_ITEM = /^(\s+)(?:[-*+]|\d+\.)\s+(.*)$/
+const CHECKBOX = /^\s*[-*+]\s+\[[ xX]\]/
+const FOOTER = /^🤖/
+
+/**
+ * Every density breach in a post a skill writes to a pull request, keyed on
+ * its opening H2, or none when that heading is not in `POST_HEADINGS`.
+ *
+ * A post allows H3s, which the UI review groups its verdicts under, so only a
+ * heading past H3 reports. The `🤖` footer and the marker never report, and a
+ * table never does. Inside `<details>` a block takes the length limits alone,
+ * since a reader opens it on purpose. A bold-led paragraph starts a new
+ * paragraph run, and a checklist box under `What to look at` takes no length
+ * limit, since a driver needs its route, action, and result.
+ *
+ * A nested item is measured as a bullet of its own, which `densityFindings()`
+ * leaves out of its parent, so a finding's subject and its evidence never sum.
+ */
+export function postDensity(body: string): PostDensityFinding[] {
+  const lines = bodyLines(body).map((line) =>
+    !line.fenced && FOOTER.test(line.text) ? { ...line, text: '' } : line,
+  )
+  if (!opensOnPostHeading(lines)) return []
+
+  const found: PostDensityFinding[] = []
+  const text = new Map(lines.map((line) => [line.number, line.text]))
+
+  for (const section of sectionsOf(lines)) {
+    const { outside, inside } = foldedApart(section.lines)
+    const measured = [
+      ...splitAt(outside, opensBlock(outside, BOLD_LED), false).flatMap(
+        (chunk) => densityFindings(chunk),
+      ),
+      ...densityFindings(inside).filter(({ kind }) => LENGTHS.includes(kind)),
+      ...nestedLengths(section.lines),
+    ]
+
+    for (const finding of measured) {
+      const { kind } = finding
+      if (!isCounted(kind) && kind !== 'heading-depth') continue
+      if (
+        section.name === 'What to look at' &&
+        kind === 'bullet-length' &&
+        CHECKBOX.test(text.get(finding.line) ?? '')
+      ) {
+        continue
+      }
+      found.push({ section: section.name, ...finding, kind })
+    }
+  }
+
+  return found.sort((a, b) => a.line - b.line)
+}
+
+/** Whether the body's first H2 outside a fence is one of `POST_HEADINGS`. */
+export function isPost(body: string): boolean {
+  return opensOnPostHeading(bodyLines(body))
+}
+
+function opensOnPostHeading(lines: readonly BodyLine[]): boolean {
+  const opening = lines.find((line) => !line.fenced && H2.test(line.text))
+  const heading = opening && H2.exec(opening.text)?.[1]
+  return (POST_HEADINGS as readonly string[]).includes(heading ?? '')
+}
+
+/**
+ * Parts a section into the lines outside `<details>` and the lines inside it.
+ * The tags stay outside, where each breaks a paragraph run as raw HTML does.
+ */
+function foldedApart(lines: readonly BodyLine[]): {
+  outside: BodyLine[]
+  inside: BodyLine[]
+} {
+  const outside: BodyLine[] = []
+  const inside: BodyLine[] = []
+  let depth = 0
+
+  for (const line of lines) {
+    const tag = line.fenced ? '' : line.text.trim()
+    if (tag.startsWith('<details')) {
+      depth++
+      outside.push(line)
+    } else if (tag.startsWith('</details')) {
+      depth = Math.max(0, depth - 1)
+      outside.push(line)
+    } else if (depth > 0) {
+      inside.push(line)
+    } else {
+      outside.push(line)
+    }
+  }
+
+  return { outside, inside }
+}
+
+/**
+ * A `bullet-length` finding for each nested item past the bullet limit, its
+ * length taken over the item and the lines indented under it that open no
+ * item of their own.
+ */
+function nestedLengths(lines: readonly BodyLine[]): DensityFinding[] {
+  const found: DensityFinding[] = []
+
+  for (const [index, line] of lines.entries()) {
+    const match = line.fenced ? null : NESTED_ITEM.exec(line.text)
+    if (!match) continue
+
+    const indent = match[1].length
+    const parts = [match[2].trim()]
+    for (const next of lines.slice(index + 1)) {
+      const lead = /^\s*/.exec(next.text)?.[0].length ?? 0
+      if (next.fenced || next.text.trim() === '' || lead <= indent) break
+      if (LIST_ITEM.test(next.text)) break
+      parts.push(next.text.trim())
+    }
+
+    const length = visibleText(parts.join(' ')).length
+    if (length > CHECKPOINTS.bullet) {
+      found.push({
+        kind: 'bullet-length',
+        line: line.number,
+        value: length,
+        limit: CHECKPOINTS.bullet,
+      })
+    }
+  }
+
+  return found
 }
 
 function sectionsOf(lines: readonly BodyLine[]): Section[] {

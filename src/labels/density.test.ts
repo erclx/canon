@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { bodyDensity } from '@/labels/density'
+import { bodyDensity, postDensity } from '@/labels/density'
 
 const LONG = 'word '.repeat(45).trim()
 const PARAGRAPH_OVER = 'word '.repeat(75).trim()
@@ -376,5 +376,364 @@ describe('bodyDensity against measured bodies', () => {
       ['bullet-length', 5],
       ['bullet-length', 6],
     ])
+  })
+})
+
+const FB =
+  'https://github.com/erclx/frameboard/blob/72a5268c1cc72fa28521e2a6a0aefdcdca8f35fe'
+const REVIEW_MARKER =
+  '<!-- review-pr: commit=72a5268c1cc72fa28521e2a6a0aefdcdca8f35fe read-at=2026-10-19T06:14:57Z -->'
+
+/** Frameboard #27's first review as posted, trimmed to one finding and the focus run. */
+const REVIEW_BEFORE = body(
+  '## Review',
+  '',
+  '0 critical, 1 should-fix, 0 minor. Reviewed against project docs and the board.',
+  '',
+  '**`src/server/look/inject.ts`**',
+  '',
+  `- **should-fix** ([line 15](${FB}/src/server/look/inject.ts#L15)): A frame only ever gets \`data-theme\` and \`color-scheme\`. Nothing adds the \`.dark\` class to its root, and the same is true of the live write in [\`frame.tsx\` line 56](${FB}/src/client/board/frame.tsx#L56). So with a shadcn-shaped \`--tokens\` sheet, the tab lists dark values that no dark frame ever renders.`,
+  '',
+  '**Review focus**',
+  '',
+  '- Bare fragment and BOM: two cases in `inject.test.ts` cover it.',
+  "- Frame's own sheet wins: `frames.test.ts` checks the import order.",
+  '- `<html data-theme="light">` on disk: the byte-for-byte test shows the file stays unchanged.',
+  '- Toggle with no reload: the e2e window mark shows that no frame reloaded.',
+  '- Toolbar never pressed: `theme.toggle` has no `checked`.',
+  '- Flipped canvas: covered by `frame.test.tsx`.',
+  '',
+  '🤖 Reviewed by Claude Code',
+  '',
+  REVIEW_MARKER,
+)
+
+/** The same review restyled to the catalog template. */
+const REVIEW_AFTER = body(
+  '## Review',
+  '',
+  '0 critical, 1 should-fix, 0 minor. Reviewed against project docs and the board.',
+  '',
+  '**`src/server/look/inject.ts`**',
+  '',
+  `- **should-fix** ([line 15](${FB}/src/server/look/inject.ts#L15)): Frames never get the \`.dark\` class, so a \`.dark\` token sheet lists dark values no frame renders.`,
+  `  - \`readTokenTable\` and the Theme tab treat \`.dark\` as dark ([\`token-table.ts\` line 17](${FB}/src/server/look/token-table.ts#L17)).`,
+  `  - Only \`data-theme\` and \`color-scheme\` reach a frame, here and in [\`frame.tsx\` line 56](${FB}/src/client/board/frame.tsx#L56).`,
+  "  - Fix: toggle `.dark` beside `data-theme` in both places, or drop `.dark` from the table and the tab's copy.",
+  '',
+  '<details>',
+  '<summary>Review focus, 6 checked</summary>',
+  '',
+  '- Bare fragment and BOM: two cases in `inject.test.ts`',
+  "- Frame's own sheet wins: import order checked in `frames.test.ts`",
+  '- `<html data-theme="light">` on disk: the byte-for-byte test',
+  '- Toggle with no reload: the e2e window mark',
+  '- Toolbar never pressed: `theme.toggle` has no `checked`',
+  '- Flipped canvas: `frame.test.tsx`',
+  '',
+  '</details>',
+  '',
+  '🤖 Reviewed by Claude Code',
+  '',
+  REVIEW_MARKER,
+)
+
+/** Canon's closed review at `fbac6b0` as posted, trimmed. */
+const CLOSED_BEFORE = body(
+  '## Review closed',
+  '',
+  "✅ Prior findings addressed. Re-reviewed the full change, the prior pass's commit is no longer on the branch.",
+  '',
+  'Both should-fix findings landed at `fbac6b0`. `canon/context/scripts.md` now carries the EXIT-trap guard, the `$(helper)` precondition, the exec trap re-arm, the `bun --eval` sentinel, and the command-count import shape. `canon/context/ci.md` restores the `bootstrap-sha` and `include-component-in-tag` reasons, the `typescript` v5 pin, and the `merge_queue` 422 cause. The Testing box is ticked.',
+  '',
+  '🤖 Reviewed by Claude Code',
+  '',
+  '<!-- review-pr: commit=fbac6b00c9c1ac144a5cc9f3763667b517fa7c51 read-at=2026-10-17T19:02:40Z -->',
+)
+
+const CLOSED_AFTER = body(
+  '## Review closed',
+  '',
+  "✅ 2 prior findings addressed at `fbac6b0`. Re-reviewed the full change, since the prior pass's commit is no longer on the branch.",
+  '',
+  '- **should-fix**, `canon/context/scripts.md`: carries the EXIT-trap guard, the `$(helper)` precondition, the exec trap re-arm, and the two import shapes',
+  '- **should-fix**, `canon/context/ci.md`: restores the release-please reasons, the `typescript` v5 pin, and the `merge_queue` 422 cause',
+  '',
+  '🤖 Reviewed by Claude Code',
+  '',
+  '<!-- review-pr: commit=fbac6b00c9c1ac144a5cc9f3763667b517fa7c51 read-at=2026-10-17T19:02:40Z -->',
+)
+
+/** Frameboard #27's review response as posted, trimmed to its first finding. */
+const RESPONSE_BEFORE = body(
+  '## Review response',
+  '',
+  'Both findings are fixed in two commits on top of `72a5268`, with no rebase in this pass.',
+  '',
+  '- **should-fix, `src/server/look/inject.ts` line 15:** Frames now get the `.dark` or `.light` class beside `data-theme` and `color-scheme`, so a shadcn-shaped sheet renders what the Theme tab lists. One function, `setFrameTheme()` in `src/shared/theme.ts`, does the write.',
+  '',
+  '🤖 Addressed by Claude Code',
+)
+
+const RESPONSE_AFTER = body(
+  '## Review response',
+  '',
+  'Both findings are fixed in two commits on top of `72a5268`, with no rebase.',
+  '',
+  '- **should-fix**, `inject.ts` line 15: fixed in `abc1234`. One function, `setFrameTheme()`, now sets `.dark` or `.light` beside `data-theme`.',
+  '- **minor**, `serve.ts` line 61: fixed in `def5678`. `serve --tokens` refuses anything that is not a file with `tokens-not-found`.',
+  '',
+  'Docs: `canon/context/content/themes-and-tokens.md` names the class beside `data-theme`.',
+  '',
+  '🤖 Addressed by Claude Code',
+)
+
+/** Canon's rebase note onto `8af11ce78` as posted, trimmed. */
+const REBASE_BEFORE = body(
+  '## Rebase',
+  '',
+  'Rebased onto main at `8af11ce78`, because the branch had stopped merging.',
+  '',
+  '- Resolved by hand: `src/init/steps.ts` and `src/init/steps.test.ts`. The Wiki step is gone, and `Markdown gating` now runs right after Governance, the last domain that seeds files, so it measures what Claude init wrote rather than gating a folder a later step fills.',
+  '- `docs/target/projects.md` replayed over #2513 with no conflict.',
+  '',
+  '🤖 Addressed by Claude Code',
+)
+
+const REBASE_AFTER = body(
+  '## Rebase',
+  '',
+  'Rebased onto main at `8af11ce78`, because #2513 retired the wiki install and capture refreshes regenerated the hero.',
+  '',
+  '- Resolved by hand: `src/init/steps.ts` and its test. The Wiki step is gone, and Markdown gating runs right after Governance.',
+  '- Rebuilt by the regen: `assets/captures/hero.html`, `assets/frames/hero.png`, and `assets/frames/hero.stamp`',
+  '- Replayed with no conflict: `docs/target/projects.md`',
+  '',
+  '🤖 Addressed by Claude Code',
+)
+
+/** Frameboard's closed UI review, trimmed, with its H3 verdict group kept. */
+const UI_CLOSED = body(
+  '## UI review closed',
+  '',
+  '0 failed · 0 need your eyes · 1 passed · 1 not driven',
+  'Driven at `729d348` on a local build served from the branch head, driven unverified.',
+  '',
+  '### Not driven',
+  '',
+  '**4. The button label renders in Geist rather than a system fallback (taste)**: the page ships one theme. The cause sits off the page.',
+  '',
+  '<details>',
+  '<summary>Passed (1)</summary>',
+  '',
+  '| Box | Proof |',
+  '| --- | --- |',
+  `| 1. \`/\`, 1280: button centered | ${'free space read on every side, '.repeat(12)}matches \`1280--light\`. |`,
+  '',
+  '</details>',
+  '',
+  '🤖 Driven by Claude Code',
+  '',
+  '<!-- review-ui: head=729d34873af76a5dd3675c18889115098fc9c2ec -->',
+)
+
+describe('postDensity against restyled samples', () => {
+  it.each([
+    ['## Review', REVIEW_BEFORE, ['bullet-length', 'bullet-run']],
+    ['## Review closed', CLOSED_BEFORE, ['paragraph-length']],
+    ['## Review response', RESPONSE_BEFORE, ['bullet-length']],
+    ['## Rebase', REBASE_BEFORE, ['bullet-length']],
+  ])('should report the %s sample as posted', (_, post, kinds) => {
+    expect(postDensity(post).map((finding) => finding.kind)).toEqual(kinds)
+  })
+
+  it.each([
+    ['## Review', REVIEW_AFTER],
+    ['## Review closed', CLOSED_AFTER],
+    ['## Review response', RESPONSE_AFTER],
+    ['## Rebase', REBASE_AFTER],
+    ['## UI review closed', UI_CLOSED],
+  ])('should report the %s sample restyled clean', (_, post) => {
+    expect(postDensity(post)).toEqual([])
+  })
+
+  it('should name the section and the line in the whole post', () => {
+    const [first] = postDensity(REVIEW_BEFORE)
+
+    expect([first.section, first.kind, first.line, first.limit]).toEqual([
+      'Review',
+      'bullet-length',
+      7,
+      200,
+    ])
+  })
+})
+
+describe('postDensity exemptions', () => {
+  it('should report nothing for a post whose opening heading is not a post heading', () => {
+    expect(postDensity(body('## Notes', '', PARAGRAPH_OVER))).toEqual([])
+  })
+
+  it('should report nothing for a pull request body', () => {
+    expect(postDensity(body('## Summary', '', ...bullets(8)))).toEqual([])
+  })
+
+  it('should report a nested bullet past 200 characters under a finding', () => {
+    const result = postDensity(
+      body(
+        '## Review',
+        '',
+        '- **minor** (line 1): A subject.',
+        `  - ${LONG} more`,
+      ),
+    )
+
+    expect(result).toEqual([
+      {
+        section: 'Review',
+        kind: 'bullet-length',
+        line: 4,
+        value: 229,
+        limit: 200,
+      },
+    ])
+  })
+
+  it('should report a long subject on its own line, not on its nested evidence', () => {
+    const result = postDensity(
+      body(
+        '## Review',
+        '',
+        `- **minor** (line 1): ${LONG}`,
+        '  - Short evidence.',
+        '  - Fix: short.',
+      ),
+    )
+
+    expect(result.map((finding) => [finding.kind, finding.line])).toEqual([
+      ['bullet-length', 3],
+    ])
+  })
+
+  it('should report no run for six findings under one file label', () => {
+    const findings = [1, 2, 3, 4, 5, 6].flatMap((index) => [
+      `- **minor** (line ${index}): Subject ${index}.`,
+      '  - Fix: short.',
+    ])
+
+    expect(
+      postDensity(body('## Review', '', '**`src/a.ts`**', '', ...findings)),
+    ).toEqual([])
+  })
+
+  it('should take the length limit and no run limit inside details', () => {
+    const result = postDensity(
+      body(
+        '## Review',
+        '',
+        '<details>',
+        '<summary>Review focus, 7 checked</summary>',
+        '',
+        ...bullets(6),
+        `- ${LONG}`,
+        `  - ${LONG}`,
+        '',
+        '</details>',
+      ),
+    )
+
+    expect(result.map((finding) => [finding.kind, finding.line])).toEqual([
+      ['bullet-length', 12],
+      ['bullet-length', 13],
+    ])
+  })
+
+  it('should never measure a table', () => {
+    const row = `| a | ${LONG} ${LONG} |`
+
+    expect(
+      postDensity(body('## Evidence', '', '| a | b |', '| - | - |', row)),
+    ).toEqual([])
+  })
+
+  it('should never measure the footer or the marker', () => {
+    const result = postDensity(
+      body(
+        '## Rebase',
+        '',
+        'One.',
+        '',
+        'Two.',
+        '',
+        `🤖 ${LONG} ${LONG}`,
+        '',
+        `<!-- review-pr: ${LONG} -->`,
+      ),
+    )
+
+    expect(result).toEqual([])
+  })
+
+  it('should report no subheading for the UI review verdict groups, but an H4', () => {
+    const result = postDensity(
+      body(
+        '## UI review',
+        '',
+        '### Failed',
+        '',
+        '**1. Box**: read.',
+        '',
+        '#### Detail',
+        '',
+        'More.',
+      ),
+    )
+
+    expect(result.map((finding) => [finding.kind, finding.line])).toEqual([
+      ['heading-depth', 7],
+    ])
+  })
+
+  it('should take no length limit on a checklist box, but report a group past five', () => {
+    const boxes = [1, 2, 3, 4, 5, 6].map(
+      (index) => `- [ ] /, 1280: box ${index} ${LONG}`,
+    )
+    const result = postDensity(
+      body(
+        '## Evidence',
+        '',
+        '## What to look at',
+        '',
+        '**Landing page**',
+        '',
+        ...boxes,
+      ),
+    )
+
+    expect(result).toEqual([
+      {
+        section: 'What to look at',
+        kind: 'bullet-run',
+        line: 7,
+        value: 6,
+        limit: 5,
+      },
+    ])
+  })
+
+  it('should break a paragraph run at each bold lead-in', () => {
+    const result = postDensity(
+      body(
+        '## UI review',
+        '',
+        '**1. Box**: one.',
+        '',
+        '**2. Box**: two.',
+        '',
+        '**3. Box**: three.',
+      ),
+    )
+
+    expect(result).toEqual([])
   })
 })
