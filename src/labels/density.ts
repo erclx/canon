@@ -7,17 +7,20 @@ import { LIST_ITEM } from '@/markdown/structure'
  * of `densityFindings()` are left out, since a body takes no subheading at all
  * and `subheading` reports that once.
  */
-const COUNTED: readonly DensityKind[] = [
+const COUNTED = [
   'paragraph-length',
   'paragraph-run',
   'bullet-length',
   'bullet-run',
-]
+] as const satisfies readonly DensityKind[]
 
-export type BodyDensityKind =
-  | (typeof COUNTED)[number]
-  | 'subheading'
-  | 'mixed-form'
+type CountedKind = (typeof COUNTED)[number]
+
+export type BodyDensityKind = CountedKind | 'subheading' | 'mixed-form'
+
+function isCounted(kind: DensityKind): kind is CountedKind {
+  return (COUNTED as readonly DensityKind[]).includes(kind)
+}
 
 export interface BodyDensityFinding {
   /** The H2 the finding sits under, without its hashes, or null before the first. */
@@ -46,7 +49,7 @@ interface Section {
  * `densityFindings()` stays the docs measure, so the PR exemptions live here
  * as splits around it rather than as options on it. Testing takes no counted
  * limit, since its checkboxes count as a bullet run. Key changes splits at
- * each bold label alone on a line, whatever its length, and Technical context
+ * each bold label alone on its own block, whatever its length, and Technical context
  * at each bold-led paragraph, so a lead-in starts a new run. Technical
  * context also reports mixing bullets with paragraphs.
  */
@@ -59,15 +62,16 @@ export function bodyDensity(body: string): BodyDensityFinding[] {
 
     const chunks =
       section.name === 'Key changes'
-        ? splitAt(section.lines, (line) => BOLD_ONLY.test(line.text), true)
+        ? splitAt(section.lines, opensBlock(section.lines, BOLD_ONLY), true)
         : section.name === 'Technical context'
-          ? splitAt(section.lines, startsBoldParagraph(section.lines), false)
+          ? splitAt(section.lines, opensBlock(section.lines, BOLD_LED), false)
           : [section.lines]
 
     for (const chunk of chunks) {
       for (const finding of densityFindings(chunk)) {
-        if (!COUNTED.includes(finding.kind)) continue
-        found.push({ section: section.name, ...finding })
+        const { kind } = finding
+        if (!isCounted(kind)) continue
+        found.push({ section: section.name, ...finding, kind })
       }
     }
 
@@ -148,12 +152,17 @@ function splitAt(
   return chunks
 }
 
-/** Picks a column-zero bold opening that starts a paragraph rather than continuing one. */
-function startsBoldParagraph(
+/**
+ * Picks a line matching the pattern that opens a block, after a blank line or
+ * at the section start. A line directly under a bullet or a paragraph renders
+ * as its lazy continuation, so it breaks nothing.
+ */
+function opensBlock(
   lines: readonly BodyLine[],
+  pattern: RegExp,
 ): (line: BodyLine, index: number) => boolean {
   return (line, index) =>
-    BOLD_LED.test(line.text) &&
+    pattern.test(line.text) &&
     (index === 0 || lines[index - 1].text.trim() === '')
 }
 

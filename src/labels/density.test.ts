@@ -143,7 +143,7 @@ describe('bodyDensity in Key changes groups', () => {
     expect(result).toEqual([])
   })
 
-  it('should keep a label sitting directly under a bullet out of its length', () => {
+  it('should read a label directly under a bullet as that bullet, as GitHub renders it', () => {
     const result = bodyDensity(
       body(
         '## Key changes',
@@ -154,7 +154,15 @@ describe('bodyDensity in Key changes groups', () => {
       ),
     )
 
-    expect(result).toEqual([])
+    expect(result).toEqual([
+      {
+        section: 'Key changes',
+        kind: 'bullet-length',
+        line: 3,
+        value: 209,
+        limit: 200,
+      },
+    ])
   })
 
   it('should still report a group past five bullets', () => {
