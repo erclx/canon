@@ -83,7 +83,7 @@ Two headings, `## Outcomes` and `## Findings`. Outcomes are future and checkable
 
 - Add no third heading. Status stays inline on an outcome rather than becoming an "In progress" section.
 - Outcomes stay a checklist, since the board tools read them by their `- [ ]` line
-- Open each finding with a bold label naming its source and date, as in `- **planner, 2026-10-11:** <finding>`. Keep it to a few sentences, moving anything longer into the plan or groundwork folder.
+- Open each finding with a bold label naming its source and date, as in `- **planner, 2026-10-11:** <finding>`. Past 200 characters it becomes a paragraph, and the plan holds anything longer.
 
 ### Sizing outcomes
 

@@ -107,6 +107,7 @@ Facts before opinion. Verified measurement only, taken during this pass.
 - Never carry a figure from a previous session without re-measuring, since every number built on a stale one is quietly wrong.
 - Mark an inference as an inference where one is unavoidable.
 - Measure only what an open question needs. A number with no question attached is how the groundwork becomes the work.
+- Give each measurement an H3, as a topic file gives each question one
 
 ## 00-scope.md
 
@@ -154,7 +155,7 @@ A lean is weaker than a plan's suggestion: it records the current read on an ope
 
 ## Template
 
-The orienting README comes first, then the closing decision, with an H3 per dropped alternative.
+The orienting README comes first, then the closing decision.
 
 **`README.md`**
 

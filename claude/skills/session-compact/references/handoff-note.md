@@ -39,7 +39,9 @@ Name what was not touched too. A session that changed no source says so, since a
 
 One bullet per decision, each naming what it beat. A decision with no rejected alternative reads as arbitrary and gets reopened by the next session that dislikes it.
 
-Where a decision rests on a measurement, give the number rather than the conclusion. `27 spacing values became 7` survives a reader disagreeing with it, where `the spacing was tidied` does not.
+- Keep each bullet under 200 characters, and give a decision needing more an H3 of its own and a short paragraph
+- The note holds to the six criteria under `### Structure` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`
+- Where a decision rests on a measurement, give the number rather than the conclusion. `27 spacing values became 7` survives a reader disagreeing with it, where `the spacing was tidied` does not.
 
 ### `## What is open`
 
