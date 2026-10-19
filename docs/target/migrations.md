@@ -150,9 +150,9 @@ The wireframes record is retired, and nothing deletes what a project holds.
 
 The toolkit no longer seeds `canon/ARCHITECTURE.md`, and a held file and its `CLAUDE.md` import stay. Move a trap a session would hit into that domain's `## Gotchas`, then delete the file and its `@canon/ARCHITECTURE.md` line.
 
-## Deny subagents and turn auto memory off, once
+## Deny subagents and merges, and turn auto memory off, once
 
-The seeded `.claude/settings.json` now denies the `Agent` and `Task` tools and sets `autoMemoryEnabled` to `false`. `canon claude sync` never rewrites a settings file you hold, so it warns while the file holds neither default. Removing the deny later to allow subagents draws no warning.
+The seeded `.claude/settings.json` now denies the `Agent` and `Task` tools and both merge commands, and sets `autoMemoryEnabled` to `false`. `canon claude sync` never rewrites a settings file you hold, so it warns while the file holds no default or lacks a merge entry. Removing `Agent` and `Task` later draws no warning.
 
 ```bash
 canon migrate session-defaults --json
@@ -161,7 +161,7 @@ canon migrate session-defaults --write --json
 
 The verb only adds a key that is absent. A person who wants auto memory back sets it in their own `.claude/settings.local.json`.
 
-The same verb adds `Bash(canon pr merge:*)` and `Bash(gh pr merge:*)` to the deny list, so a session cannot merge. `canon claude sync` warns while either is absent. `--write` also restores `Agent` and `Task` for a person who removed them to allow subagents, so remove them again after the run.
+The verb adds `Bash(canon pr merge:*)` and `Bash(gh pr merge:*)` so a session cannot merge. A project migrated before them runs `--write` once more, which also restores `Agent` and `Task` for a person who removed them to allow subagents, so remove them again after.
 
 ## Move the capture cases out of the harness, once
 
