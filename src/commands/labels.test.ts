@@ -223,6 +223,39 @@ describe('canon labels scan text checks', { timeout: RUN_TIMEOUT_MS }, () => {
     expect(record.density).toEqual([])
   })
 
+  it('should report post density on a review body and still exit 0 on it alone', async () => {
+    const body = await writeBody(
+      `## Review\n\n- **minor** (line 1): A subject.\n  - ${'word '.repeat(45)}\n\n🤖 Reviewed by Claude Code\n`,
+    )
+
+    const record = await runScan(['--body-file', body])
+
+    expect(record.exitCode).toBe(0)
+    expect(record.density).toEqual([
+      {
+        section: 'Review',
+        kind: 'bullet-length',
+        line: 4,
+        value: 224,
+        limit: 200,
+      },
+    ])
+  })
+
+  it('should report post density on a review event', async () => {
+    const event = await writeEvent({
+      review: { body: '## Review closed\n\n- a\n- b\n- c\n- d\n- e\n- f\n' },
+      pull_request: { head: { ref: 'feat/x' } },
+    })
+
+    const record = await runScan(['--event', event])
+
+    expect(record.exitCode).toBe(0)
+    expect(record.density?.map((finding) => finding.kind)).toEqual([
+      'bullet-run',
+    ])
+  })
+
   it('should skip the headings check on a review event', async () => {
     const event = await writeEvent({
       review: { body: '## Review\n\n- fine\n' },

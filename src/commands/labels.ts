@@ -6,7 +6,12 @@ import { gitEnv } from '@/git/env'
 import { diffLabels } from '@/labels/apply'
 import { type LabelAuditRefusal, auditLabels } from '@/labels/audit'
 import { checkClosing } from '@/labels/closing'
-import { bodyDensity } from '@/labels/density'
+import {
+  bodyDensity,
+  isPost,
+  POST_HEADINGS,
+  postDensity,
+} from '@/labels/density'
 import { resolveScanInput } from '@/labels/event'
 import { checkTitleFormat, type TitleFormatIssue } from '@/labels/format'
 import { MAP_REL } from '@/labels/map'
@@ -252,6 +257,15 @@ export function register(program: Command): void {
         'bold-led paragraph starts a new Technical context run, and Testing',
         'takes the heading limit alone. Each finding carries its section, kind,',
         'line in the whole body, value, and limit.',
+        '',
+        'A body the section check skips is graded as a post under the same',
+        '`density` key when its first level-two heading is one of',
+        `${POST_HEADINGS.map((heading) => `## ${heading}`).join(', ')}.`,
+        'A post takes the same length and run limits, allows an H3, and',
+        'measures a nested item as a bullet of its own. The footer, the',
+        'marker, and a table never report, a block inside <details> takes the',
+        'length limits alone, and a checklist box under ## What to look at',
+        'takes no length limit. Post density never fails the scan.',
         '',
         'It also fails a banned',
         'character, an em dash or a semicolon, in the title or body of a pull',
@@ -706,22 +720,30 @@ async function runScan(opts: ScanOptions): Promise<number> {
 
   // Reported and never gated yet. New bodies come back clean under the
   // shape in pr.md first, so an older open pull request fails no edit event.
-  const density = sectionsChecked ? bodyDensity(resolved.body) : []
+  // A post is never gated, since CI reads one only after it is published.
+  const post = !sectionsChecked && isPost(resolved.body)
+  const density = sectionsChecked
+    ? bodyDensity(resolved.body)
+    : post
+      ? postDensity(resolved.body)
+      : []
 
   logStep(
-    !sectionsChecked
+    !sectionsChecked && !post
       ? 'Density not checked'
       : density.length === 0
         ? 'Clean'
         : 'Density finding found',
   )
-  if (!sectionsChecked) {
-    logInfo('only an ordinary pull request body is graded for density')
+  if (!sectionsChecked && !post) {
+    logInfo(
+      'only an ordinary pull request body or a post opening on a post heading is graded for density',
+    )
   } else if (density.length === 0) {
     logInfo('every section is within its length, run, and heading limits')
   } else {
     logWarn(
-      `${plural(density.length, 'density finding')} in the body. Regroup the section under bold labels or split the long item rather than cutting a path.`,
+      `${plural(density.length, 'density finding')} in the ${post ? 'post' : 'body'}. Regroup the section under bold labels or split the long item rather than cutting a path.`,
     )
     for (const finding of density) {
       const measured =

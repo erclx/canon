@@ -141,9 +141,7 @@ export function postDensity(body: string): PostDensityFinding[] {
   const lines = bodyLines(body).map((line) =>
     !line.fenced && FOOTER.test(line.text) ? { ...line, text: '' } : line,
   )
-  const opening = lines.find((line) => !line.fenced && H2.test(line.text))
-  const heading = opening && H2.exec(opening.text)?.[1]
-  if (!(POST_HEADINGS as readonly string[]).includes(heading ?? '')) return []
+  if (!opensOnPostHeading(lines)) return []
 
   const found: PostDensityFinding[] = []
   const text = new Map(lines.map((line) => [line.number, line.text]))
@@ -173,6 +171,17 @@ export function postDensity(body: string): PostDensityFinding[] {
   }
 
   return found.sort((a, b) => a.line - b.line)
+}
+
+/** Whether the body's first H2 outside a fence is one of `POST_HEADINGS`. */
+export function isPost(body: string): boolean {
+  return opensOnPostHeading(bodyLines(body))
+}
+
+function opensOnPostHeading(lines: readonly BodyLine[]): boolean {
+  const opening = lines.find((line) => !line.fenced && H2.test(line.text))
+  const heading = opening && H2.exec(opening.text)?.[1]
+  return (POST_HEADINGS as readonly string[]).includes(heading ?? '')
 }
 
 /**
@@ -218,7 +227,7 @@ function nestedLengths(lines: readonly BodyLine[]): DensityFinding[] {
     if (!match) continue
 
     const indent = match[1].length
-    const parts = [match[2]]
+    const parts = [match[2].trim()]
     for (const next of lines.slice(index + 1)) {
       const lead = /^\s*/.exec(next.text)?.[0].length ?? 0
       if (next.fenced || next.text.trim() === '' || lead <= indent) break
