@@ -26,6 +26,7 @@ alias_block() {
   cat <<EOF
 $MARKER_OPEN
 TOOLKIT="$PROJECT_ROOT"
+export CLAUDE_CODE_ENABLE_TODO_TOOLS=1
 
 alias cl='claude'
 alias clr='cl -r'
