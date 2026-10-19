@@ -1009,6 +1009,40 @@ describe('archiveTask', () => {
       ])
     })
 
+    it('should drop the merged slice from the board row', async () => {
+      await seedPlan('feature-middle.md')
+      await seedPlan('feature-first.md')
+      await seedPlan('feature-last.md')
+      const stem = await seedTask({
+        planLine: SLICED,
+        pullRequest: [12, 673],
+      })
+      const priority = join(tasksDir(ROOT), 'priority.md')
+      await writeFile(
+        priority,
+        [
+          '# Priority',
+          '',
+          '## Run now',
+          '',
+          '| Task | Touches | Plan |',
+          '| ---- | ------- | ---- |',
+          `| [v28.1: A task](${stem}.md) | | [first](../plans/feature-first.md), [middle](../plans/feature-middle.md), [last](../plans/feature-last.md) |`,
+          '',
+        ].join('\n'),
+      )
+
+      await archiveTask(
+        ROOT,
+        { kind: 'pull-request', number: 12 },
+        headOf({ 12: 'feat/middle' }),
+      )
+
+      expect(await readFile(priority, 'utf8')).toContain(
+        `| [v28.1: A task](${stem}.md) |  | [first](../plans/feature-first.md), [last](../plans/feature-last.md) |`,
+      )
+    })
+
     it('should archive the merged slice plan when the task keeps open outcomes', async () => {
       await seedPlan('feature-first.md')
       const last = await seedPlan('feature-last.md')

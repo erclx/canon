@@ -4,6 +4,7 @@ import { mkdir, readdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { basename, dirname, join, relative, resolve, sep } from 'node:path'
 import { gitEnv } from '@/git/env'
 import { regenOne } from '@/indexes/regen'
+import { rerenderRow } from '@/tasks/board'
 import { planBranch } from '@/tasks/branch'
 import { isUnder } from '@/tasks/paths'
 import { recordDir, recordDirs } from '@/roots/record'
@@ -1129,6 +1130,10 @@ async function withMergedSlice(
       new Map(targets.map((entry) => [entry.target, linkTo(dir, move.to)])),
     ),
   )
+  // The closing path clears its row, and this one keeps it, so the row is
+  // rendered again to drop the slice from its Plan and Touches cells. A row
+  // the board cannot write, being absent or busy, stays for `validate` to report.
+  await rerenderRow(root, stem)
 
   return { ...refused, slice: move }
 }

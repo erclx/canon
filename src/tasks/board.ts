@@ -831,6 +831,23 @@ export async function promoteOnLink(
     : { moved: false, from: found.group, note: outcome.message }
 }
 
+/**
+ * Rewrites the board with a task's row where it sits, so its derived cells
+ * catch up with a plan that moved under it. A merged slice archives its plan
+ * from the post-merge hook, where no other board verb runs.
+ */
+export async function rerenderRow(
+  root: string,
+  stem: string,
+): Promise<BoardOutcome> {
+  return writeBoard(root, stem, (board) => {
+    const found = findRow(board, stem)
+    if (!found) return refuse('no-row', `${stem} has no row on the board.`)
+
+    return { board, group: found.group, from: found.group, ruled: undefined }
+  })
+}
+
 /** Repositions a row inside the group it already sits in. */
 export async function moveTask(
   root: string,
