@@ -107,6 +107,7 @@ export interface ArchiveSuccess {
   readonly from: string
   readonly to: string
   readonly priorityRowRemoved: boolean
+  readonly backlogRowRemoved: boolean
   readonly indexRegenerated: boolean
   /** Every live plan the task cited that no other live task still holds, in line order. */
   readonly plans: readonly PlanMove[]
@@ -556,7 +557,7 @@ function isRowFor(line: string, target: string): boolean {
 }
 
 /**
- * Drops the declined task's bullet from the backlog. A backlog line is a
+ * Drops the task's bullet from the backlog. A backlog line is a
  * bullet carrying a link rather than a table row, so the match is a bullet
  * prefix and the link target rather than `isRowFor`'s pipe-delimited cell.
  */
@@ -996,6 +997,7 @@ export async function archiveTask(
 
   const { relinked, failed } = await repointInboundLinks(root, from, to)
   const priorityRowRemoved = await clearPriorityRow(dir, stem)
+  const backlogRowRemoved = await clearBacklogRow(dir, stem)
   const regen = await regenOne(dir, { dryRun: false })
 
   return {
@@ -1004,6 +1006,7 @@ export async function archiveTask(
     from,
     to,
     priorityRowRemoved,
+    backlogRowRemoved,
     indexRegenerated: regen.action === 'written',
     plans: plans.moves,
     ready: ready || undefined,

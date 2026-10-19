@@ -974,6 +974,43 @@ describe('archiveTask', () => {
       priorityRowRemoved: false,
     })
   })
+
+  it('should clear the archived task bullet from the backlog', async () => {
+    const stem = await seedTask()
+    const backlog = join(tasksDir(ROOT), 'backlog.md')
+    await writeFile(
+      backlog,
+      `# Backlog\n\n- [v28.1](${stem}.md)\n- [v32.1 globs](v32.1-sync-glob-narrowing.md)\n`,
+    )
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(result).toMatchObject({ ok: true, backlogRowRemoved: true })
+    const text = await readFile(backlog, 'utf8')
+    expect(text).not.toContain(`${stem}.md`)
+    expect(text).toContain('v32.1-sync-glob-narrowing.md')
+  })
+
+  it('should report no backlog row removed when no backlog file exists', async () => {
+    const stem = await seedTask()
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(result).toMatchObject({ ok: true, backlogRowRemoved: false })
+    expect(existsSync(join(tasksDir(ROOT), 'backlog.md'))).toBe(false)
+  })
+
+  it('should report no backlog row removed when the backlog names other tasks', async () => {
+    const stem = await seedTask()
+    const backlog = join(tasksDir(ROOT), 'backlog.md')
+    const body = '# Backlog\n\n- [v32.1 globs](v32.1-sync-glob-narrowing.md)\n'
+    await writeFile(backlog, body)
+
+    const result = await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(result).toMatchObject({ ok: true, backlogRowRemoved: false })
+    expect(await readFile(backlog, 'utf8')).toBe(body)
+  })
 })
 
 async function seedSibling(
