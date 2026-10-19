@@ -24,18 +24,18 @@ The `Controller:` line replaces the background template's message clauses, which
 ````markdown
 # Dispatch prompts
 
-Head `e60c86363`. Merge v160.1 first, then v160.3. Open each session in the repository root.
+Head `<head>`. Merge `<label-a>` first, then `<label-b>`. Open each session in the repository root.
 
-## v160.3: Hand-launch prompts in one lean file
+## <label-b>: <title>
 
 ### Worker
 
 Model: opus.
 
 ```text
-/canon:auto-ship .canon/plans/feature-hand-launch-prompts.md
-Controller: 7d2f1c0e-4b8a-4e55-9a31-0c6f2d9b8e14
-feat/review-ui-drive-copy edits the preview server section of role-worker. Leave it alone and rebase over it when told.
+/canon:auto-ship .canon/plans/feature-<slug>.md
+Controller: <sessionId>
+<branch-a> edits the section of <file> this plan leaves alone. Rebase over it when told.
 ```
 
 ### Reviewer
@@ -44,6 +44,6 @@ Model: opus.
 
 ```text
 Run /canon:role-reviewer, then /canon:review-pr <number>
-Controller: 7d2f1c0e-4b8a-4e55-9a31-0c6f2d9b8e14
+Controller: <sessionId>
 ```
 ````
