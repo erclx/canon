@@ -85,6 +85,7 @@ import { machineListenerReader } from '@/listeners/machine'
 import { loadPaintedPatterns } from '@/pr/painted'
 import {
   dropAddressLine,
+  maskLocalAddress,
   findLocalServer,
   type LocalRefusal,
   type LocalRunner,
@@ -1037,7 +1038,10 @@ export function register(program: Command): void {
     .helpOption('-h, --help', 'Show this help message')
     .option('--root <path>', 'Worktree to read, defaulting to the cwd')
     .option('--json', 'Add a machine-readable record on stdout')
-    .option('--remove', "Drop the evidence comment's preview address line")
+    .option(
+      '--remove',
+      "Drop the evidence comment's preview address line and mask local addresses in UI reviews",
+    )
     .addHelpText(
       'after',
       [
@@ -1060,6 +1064,11 @@ export function register(program: Command): void {
         'and drops the hosted link too because the same close deletes the',
         "branch's preview deployments.",
         '',
+        'It also rewrites the loopback address on the Driven at line of every',
+        'review carrying the review-ui marker to "a local preview", keeping',
+        'the head and the renderer. A hosted address and a code review are',
+        'left alone, and `reviews` on the JSON record counts the rewrites.',
+        '',
         'Read `reason` on the JSON record:',
         '  ok                  a page answered, with its address in `url`',
         '  no-server           nothing inside this worktree served a page',
@@ -1070,7 +1079,8 @@ export function register(program: Command): void {
         '',
         'Refusals, read off `reason`:',
         '  gh-missing  `--remove` needs `gh` and it is not on the path',
-        '  gh-failed   `--remove` could not read or edit the comment',
+        '  gh-failed   `--remove` could not read the thread, or edit the',
+        '              comment or a review, after trying every edit',
         '',
         'Exit codes:',
         '  0  a server was found, or --remove finished, including a no-op',
@@ -1733,7 +1743,7 @@ async function listReviews(cwd: string, number: string) {
   return listPages<RestReview>(
     cwd,
     `repos/{owner}/{repo}/pulls/${number}/reviews`,
-    'body, commit_id, submitted_at',
+    'id, body, commit_id, submitted_at',
   )
 }
 
@@ -2922,9 +2932,9 @@ async function runLocal(opts: LocalOptions): Promise<number> {
 }
 
 /**
- * Drops the address line on the marked comment. The verb writes here rather
- * than handing a body back, because its caller is a close workflow with no
- * session to post one.
+ * Drops the address line on the marked comment and masks the loopback address
+ * on every UI review. The verb writes here rather than handing a body back,
+ * because its caller is a close workflow with no session to post one.
  */
 async function runLocalRemove(
   number: string | undefined,
@@ -2951,32 +2961,79 @@ async function runLocalRemove(
       root,
     )
   }
-  const comments = await listComments(root, resolved.number)
-  if (comments === undefined) {
+  const [comments, reviews] = await Promise.all([
+    listComments(root, resolved.number),
+    listReviews(root, resolved.number),
+  ])
+  if (comments === undefined && reviews.kind === 'refused') {
     return refuseWith('gh-failed', LOCAL_REFUSALS['gh-failed'], emitJson, root)
   }
 
-  const finish = (reason: string, message: string): number => {
-    logStep(reason === 'removed' ? 'Removed' : 'Skipped')
-    logInfo(message)
-    outro()
-    if (emitJson) {
-      process.stdout.write(`${JSON.stringify({ root, reason })}\n`)
-    }
-    return 0
+  // A refused read on one side still lets the other side's edits land, and
+  // counts as a failure beside them, so one unread listing never strands both.
+  const [evidence, masked] = await Promise.all([
+    comments === undefined
+      ? Promise.resolve<EvidenceRemoval>({ kind: 'failed' })
+      : removeEvidenceAddress(root, comments),
+    reviews.kind === 'refused'
+      ? Promise.resolve({ rewritten: 0, failed: true })
+      : maskUiReviews(root, resolved.number, reviews.rows),
+  ])
+  if (evidence.kind === 'failed' || masked.failed) {
+    return refuseWith(
+      'gh-failed',
+      LOCAL_REFUSALS['gh-failed'],
+      emitJson,
+      root,
+      {
+        reviews: masked.rewritten,
+      },
+    )
   }
 
+  logStep(evidence.reason === 'removed' ? 'Removed' : 'Skipped')
+  logInfo(evidence.message)
+  logInfo(`${masked.rewritten} UI review addresses masked`)
+  outro()
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({ root, reason: evidence.reason, reviews: masked.rewritten })}\n`,
+    )
+  }
+  return 0
+}
+
+type EvidenceRemoval =
+  | {
+      readonly kind: 'done'
+      readonly reason: 'removed' | 'no-comment' | 'no-line'
+      readonly message: string
+    }
+  | { readonly kind: 'failed' }
+
+async function removeEvidenceAddress(
+  root: string,
+  comments: readonly { url?: string; body: string }[],
+): Promise<EvidenceRemoval> {
   const commentId = findEvidenceCommentId(comments)
   const marked = comments.find((comment) =>
     comment.url?.endsWith(`#issuecomment-${commentId}`),
   )
   if (commentId === undefined || marked === undefined) {
-    return finish('no-comment', 'No comment carries the evidence marker.')
+    return {
+      kind: 'done',
+      reason: 'no-comment',
+      message: 'No comment carries the evidence marker.',
+    }
   }
 
   const dropped = dropAddressLine(marked.body)
   if (dropped === undefined) {
-    return finish('no-line', 'The evidence comment carries no address line.')
+    return {
+      kind: 'done',
+      reason: 'no-line',
+      message: 'The evidence comment carries no address line.',
+    }
   }
 
   const patched = await gh(root, [
@@ -2987,11 +3044,43 @@ async function runLocalRemove(
     '-f',
     `body=${dropped}`,
   ])
-  if (patched === null) {
-    return refuseWith('gh-failed', LOCAL_REFUSALS['gh-failed'], emitJson, root)
-  }
+  return patched === null
+    ? { kind: 'failed' }
+    : { kind: 'done', reason: 'removed', message: `comment ${commentId}` }
+}
 
-  return finish('removed', `comment ${commentId}`)
+const UI_REVIEW_MARKER = '<!-- review-ui: head='
+
+/**
+ * Masks the loopback address on each review `review-ui` posted, selected by
+ * its marker so a code review quoting a local URL is never edited. Every
+ * update is tried before a refusal is reported, so one refused review leaves
+ * the rest masked.
+ */
+async function maskUiReviews(
+  root: string,
+  number: string,
+  reviews: readonly RestReview[],
+): Promise<{ readonly rewritten: number; readonly failed: boolean }> {
+  const updates = reviews.flatMap((review) => {
+    const body = review.body ?? ''
+    if (review.id === undefined || !body.includes(UI_REVIEW_MARKER)) return []
+    const masked = maskLocalAddress(body)
+    if (masked === undefined) return []
+    return [
+      gh(root, [
+        'api',
+        '-X',
+        'PUT',
+        `repos/{owner}/{repo}/pulls/${number}/reviews/${review.id}`,
+        '-f',
+        `body=${masked}`,
+      ]),
+    ]
+  })
+  const results = await Promise.all(updates)
+  const rewritten = results.filter((stdout) => stdout !== null).length
+  return { rewritten, failed: rewritten < results.length }
 }
 
 const POSITIVE_WHOLE = /^[1-9]\d*$/

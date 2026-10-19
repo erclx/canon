@@ -25,6 +25,8 @@ export interface RestPull {
 
 /** One row of `repos/{owner}/{repo}/pulls/<n>/reviews`. */
 export interface RestReview {
+  /** The id the update call `pulls/<n>/reviews/<id>` names. */
+  readonly id?: number
   readonly body?: string | null
   readonly commit_id?: string | null
   readonly submitted_at?: string | null

@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import type { Listener } from '@/listeners/parse'
-import { dropAddressLine, findLocalServer, type LocalRunner } from '@/pr/local'
+import {
+  dropAddressLine,
+  findLocalServer,
+  type LocalRunner,
+  maskLocalAddress,
+} from '@/pr/local'
 
 const MAIN = '/repo'
 const LINKED = '/repo/.claude/worktrees/feat-a'
@@ -220,6 +225,96 @@ describe('dropAddressLine', () => {
     const once = dropAddressLine(body) ?? ''
 
     const twice = dropAddressLine(once)
+
+    expect(twice).toBeUndefined()
+  })
+})
+
+describe('maskLocalAddress', () => {
+  const UI_MARKER = '<!-- review-ui: head=38db88d -->'
+
+  function uiBody(addressLine: string): string {
+    return [
+      '## UI review closed',
+      '',
+      '0 failed · 0 need your eyes · 3 passed · 0 not driven',
+      addressLine,
+      '',
+      UI_MARKER,
+    ].join('\n')
+  }
+
+  it.each([
+    ['localhost', 'http://localhost:5173'],
+    ['127.0.0.1', 'http://127.0.0.1:4211'],
+    ['0.0.0.0', 'http://0.0.0.0:3000'],
+    ['[::1]', 'http://[::1]:8080'],
+    ['a host with no port', 'http://localhost'],
+  ])('should mask a %s address on the Driven at line', (_, address) => {
+    const body = uiBody(
+      `Driven at \`38db88d\` on ${address}, rendered by agent-browser.`,
+    )
+
+    const masked = maskLocalAddress(body)
+
+    expect(masked).toBe(
+      uiBody(
+        'Driven at `38db88d` on a local preview, rendered by agent-browser.',
+      ),
+    )
+  })
+
+  it('should mask an address wrapped in backticks without leaving them behind', () => {
+    const body = uiBody(
+      'Driven at `38db88d` on `http://127.0.0.1:4211/`, unverified, rendered by agent-browser.',
+    )
+
+    const masked = maskLocalAddress(body)
+
+    expect(masked).toBe(
+      uiBody(
+        'Driven at `38db88d` on a local preview, unverified, rendered by agent-browser.',
+      ),
+    )
+  })
+
+  it('should keep a hosted address', () => {
+    const body = uiBody(
+      'Driven at `38db88d` on https://feat-x.site.pages.dev, rendered by agent-browser.',
+    )
+
+    const masked = maskLocalAddress(body)
+
+    expect(masked).toBeUndefined()
+  })
+
+  it('should leave a loopback URL quoted in a box reason', () => {
+    const body = [
+      '## UI review',
+      '',
+      '1 failed · 0 need your eyes · 0 passed · 0 not driven',
+      'Driven at `38db88d` on http://localhost:5173, rendered by agent-browser.',
+      '',
+      '**1. The link opens the docs**',
+      'The link reads `http://localhost:5173/docs` rather than the hosted docs.',
+      '',
+      UI_MARKER,
+    ].join('\n')
+
+    const masked = maskLocalAddress(body)
+
+    expect(masked).toContain(
+      'The link reads `http://localhost:5173/docs` rather than the hosted docs.',
+    )
+  })
+
+  it('should return undefined on a body it already masked', () => {
+    const body = uiBody(
+      'Driven at `38db88d` on http://localhost:5173, rendered by agent-browser.',
+    )
+    const once = maskLocalAddress(body) ?? ''
+
+    const twice = maskLocalAddress(once)
 
     expect(twice).toBeUndefined()
   })

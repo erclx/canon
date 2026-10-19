@@ -20,7 +20,7 @@ gh api --paginate 'repos/{owner}/{repo}/pulls/<number>/reviews?per_page=100' --j
 
 ## Write the replacement
 
-Write the full body for this pass to the file `post.md` names, with the heading, the count line, and the Passed table regenerated from what this pass drove. Patching only the marker would leave a count line and an address naming the old head.
+Write the full body for this pass to the file `post.md` names, with the heading, the count line, and the Passed table regenerated from what this pass drove. Patching only the marker would leave a count line and an address naming the old head. A loopback address reads as a local preview here too, as on a first post.
 
 Add one line under the count line, reading the prior head off the standing verdict's marker and the commit count off the compare:
 

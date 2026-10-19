@@ -24,7 +24,7 @@ A needs-eyes box leaves the review closed, and so does a box not driven for a ca
 
 A pass with 0 failed, 0 need your eyes, 0 passed, and any box not driven looked at nothing, so it has not covered the head. It takes `## UI review` whatever the cause, including a checklist of only `(local only)` boxes on a hosted preview.
 
-- Put a line naming the cause directly under the count line, such as the addresses tried and what each returned, ahead of the address line
+- Put a line naming the cause directly under the count line, such as the addresses tried and what each returned, ahead of the address line, naming a loopback address as A loopback address says
 - The cure is a re-drive on an address that answers, which Step 1 of `review-ui` allows past this verdict
 - Message the controller with the cause and send the worker no `review-address`, since the verdict holds no box a fix worker could change
 - `canon pr lift` refuses a close of this shape as `ui-undriven`, so a violation holds the draft mark
@@ -93,6 +93,15 @@ The body opens on its count line, in that order, so the operator reads what they
 - Drop each section holding no box, along with its heading. Order is fixed: Failed, Needs your eyes, Not driven, then the folded blocks.
 - A box takes exactly one section by its verdict, so a box that fails and also ends in `(taste)` appears once, under Failed
 - Quote page text in backticks as content, never as the pass's own words
+
+### A loopback address
+
+A loopback address has `localhost`, `127.0.0.1`, `0.0.0.0`, or `[::1]` as its host, with any port. It never appears in the post, so the second line reads ``Driven at `<short-sha>` on a local preview, unverified, rendered by <renderer>.`` instead.
+
+- The cause line of a pass that drove no box, and every Not driven entry, name a loopback address it tried as a local preview with its port, such as `a local preview on port 4211`
+- A hosted address posts as written, since it outlives the session, and the close drops it from the evidence comment
+- The evidence comment carries the local link while the pull request is open, for an operator on the same machine
+- `canon pr local --remove` masks a loopback address left on a review's `Driven at` line when the pull request closes
 
 ### A failed box
 
