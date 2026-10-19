@@ -14,7 +14,7 @@ Each launch also restates the reviewer's bounds, though they belong to the role.
 ## Must
 
 - The role is asserted, with writes bounded to the comment and body file the pass posts, and the tracked file, branch, worktree, board, and commit named as outside them
-- Every file read a finding rests on goes through `git show <head>:<path>` at the resolved head, and launch-carried cross-branch facts are inputs. A task list runs from launch, one item per pass step, wherever the host offers one.
+- Every file read a finding rests on goes through `git show <head>:<path>` at the resolved head, and launch-carried cross-branch facts are inputs. A task list tracks each pass step.
 - The fix, a draft lift by any route but `canon pr lift`, and the merge are refused whoever asks, naming each owner, and the lift runs after a close is posted
 - An open pass sends the worker the `review-address` dispatch and this session's id, else the controller the cause, and a close sends the lift's reason unless the other review is open or missing
 - A re-review stays with the reviewer that took the first pass while it is live, and a block is messaged before it becomes an interactive prompt
