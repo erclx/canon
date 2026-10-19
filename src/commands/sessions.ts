@@ -478,7 +478,7 @@ async function runList(opts: ListCommandOptions): Promise<number> {
     : null
 
   intro('canon sessions list')
-  reportConfidence(report)
+  reportConfidence(shown, report)
   reportSessions(
     shown,
     opts.branch,
@@ -536,6 +536,7 @@ function selfRefusal(own: Extract<SelfReport, { kind: 'unresolved' }>): string {
  * addresses a session directly and the second opens by asking to be corrected.
  */
 function reportConfidence(
+  shown: readonly ResolvedSession[],
   report: Extract<SessionReport, { kind: 'resolved' }>,
 ): void {
   logStep('Liveness')
@@ -543,17 +544,17 @@ function reportConfidence(
   // A roster of none decided nothing, so the confirmed line would claim a check
   // over rows that do not exist. The registry is never pruned and holds a record
   // per session ever run, which is what makes the empty result worth stating.
-  if (report.sessions.length === 0) {
+  if (shown.length === 0) {
     logInfo(
-      report.foreignDead > 0
+      report.foreignDead > 0 || report.sessions.length > 0
         ? 'No row to decide.'
         : 'No row to decide. Every record belongs to a session that has ended.',
     )
     return
   }
 
-  if (report.confidence === 'confirmed') {
-    const listened = report.sessions.filter(
+  if (confidenceOf(shown) === 'confirmed') {
+    const listened = shown.filter(
       (session) => session.via === 'listener',
     ).length
     logInfo(
@@ -564,7 +565,7 @@ function reportConfidence(
     return
   }
 
-  if (report.sessions.some((session) => session.via === 'socket')) {
+  if (shown.some((session) => session.via === 'socket')) {
     logWarn(
       'This reader sits in another pid namespace than some records, so those rows rest on a messaging socket existing alone. A crashed session leaves its socket behind, so treat the mapping as inferred and open by asking to be corrected.',
     )

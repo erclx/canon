@@ -233,6 +233,8 @@ describe('canon sessions list from another pid namespace', () => {
         confidence: 'confirmed',
         sessions: [{ name: 'canon-4242', via: 'listener' }],
       })
+      expect(result.stderr).toContain('accepted a connection')
+      expect(result.stderr).not.toContain('messaging socket existing alone')
     },
   )
 })
