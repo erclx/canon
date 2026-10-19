@@ -34,7 +34,7 @@ One warm session holds the cross-feature call and reviews. Cold worker sessions 
 7. A pass posts `## Review` while anything is open and `## Review closed` when nothing is. The reviewer then runs `canon pr lift`.
 8. The human merges with `canon pr merge <number>`. The orchestrator tells any trailing worker whose files the merge touched to run `review-address`, which rebases.
 
-Each worker halts at the PR, and the merge stays a human gate. `canon pr merge` squashes with the body's Summary, Key changes, and Technical context as the message, and a deny rule keeps every agent off it. The merge button stays for a pull request a bot opens, such as a dependency bump or a release, whose body carries none of those sections.
+Each worker halts at the PR, and the merge stays a human gate. `canon pr merge` squashes with the body's Summary, Key changes, and Technical context as the message, and the seeded deny rule covers the forms an agent writes by default. The merge button stays for a bot's pull request, such as a dependency bump or a release.
 
 ## The review layer
 
