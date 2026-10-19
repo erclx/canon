@@ -52,8 +52,17 @@ A body describes the new behavior and nothing the diff or the commits already sa
 
 ## Sections
 
-- `## Summary`: 1-2 sentences following `<Action Verb> <Direct Object> to <Result>`, expand for clarity if needed
-- `## Key changes`: name actual files, functions, or modules (e.g., `AuthService.verify()` not "auth handler"). Always use bullet points, never prose.
+- `## Summary`: one paragraph following `<Action Verb> <Direct Object> to <Result>`, then the closing lines
+- `## Key changes`: bullets only, one change each, naming actual files, functions, or modules (e.g., `AuthService.verify()` not "auth handler")
+- Name every changed path in a Key changes bullet. A trim may cut a clause and never a path, since `canon pr key-changes` reports a path no bullet claims.
+
+### Key changes groups
+
+Past 5 bullets, group Key changes under bold labels, 5 bullets a group at most.
+
+- A label sits on its own line, names the area a reviewer opens together, and ends with no period
+- Write a label in plain words, since a code span inside bold renders unbolded
+- Open each group on a bullet, never on prose
 
 ### Closing lines
 
@@ -61,10 +70,12 @@ The closing lines end `## Summary`, one `Closes #NNN` per issue and no trailing 
 
 ### Context section
 
-`## Technical context` is optional and carries 1-2 lines of architectural reasoning explaining why, not what.
+`## Technical context` is optional and says why, naming the decisions the code can't show and any shortcoming of the approach.
 
 - Omit Technical context for docs, config, or trivial changes
-- Use bullet points for multiple reasons, one sentence for a single reason
+- Take one form per section, never bullets and paragraphs mixed
+- Use bullets when every reason fits one sentence under 200 characters
+- Otherwise write one paragraph per decision, opening on a bold lead-in that ends with a period and runs into the paragraph
 
 ### Testing section
 
@@ -72,6 +83,7 @@ The closing lines end `## Summary`, one `Closes #NNN` per issue and no trailing 
 
 - Omit Testing for docs, config, or trivial sync changes
 - Use checkboxes, never prose. See Testing discipline for which box gets ticked.
+- Write one box per command, pointing at a test file rather than listing its cases
 
 ### Reviewer section and visuals
 
@@ -110,6 +122,17 @@ A live agent session is never the human a box waits on.
 ## Formatting
 
 - End every bullet point with a period
+- Carry no H3 or H4 anywhere in a body. GitHub draws an H3 one step under an H2, so stacked H3s compete with the sections.
+- Group with a bold label or lead-in instead, in the forms the Sections rules above state
+
+### Density
+
+`canon labels scan` reports each section's density under `density`, naming the section, the kind, and the line in the whole body. Its help lists every limit.
+
+- Every section but Testing holds bullets to 200 characters and 5 in a row, and paragraphs to 350 characters and 2 in a row
+- Any section reports a `subheading`, and Technical context reports a `mixed-form`
+- A bold label alone on a line breaks a Key changes run, and a bold lead-in starts a new Technical context run
+- Fix a finding by regrouping or splitting, never by cutting a path
 
 ## Examples
 
@@ -122,19 +145,29 @@ Every section a body may carry, in order.
 
 <Action Verb> <Direct Object> to <Result>.
 
+Closes #<number>
+
 ## Key changes
+
+**<Area a reviewer opens together>**
 
 - <Verb> <specific component/file/function> (<reason if non-obvious>)
 - <Verb> <specific component/file/function>
 
+**<Next area>**
+
+- <Verb> <specific component/file/function>
+
 ## Technical context
 
-- <Architectural reasoning explaining why, not what>
+**<Decision in a few words>.** <Why this approach, what the code can't show, and any shortcoming>
+
+**<Next decision>.** <Why>
 
 ## Testing
 
 - [x] <Command run> <observed result>
-- [x] <Edge case verified> <what was observed>
+- [x] <Test file run> <observed result>
 - [ ] <Human-only check> (<which human, why>)
 
 ## For the reviewer
@@ -151,14 +184,24 @@ Each line's comment names the rule it follows.
 
 Update auth middleware to enforce jwt expiration checks. # imperative + direct object + result
 
+Closes #42 # closing line ends Summary
+
 ## Key changes
 
+**Validation** # bold label on its own line, no period
+
 - Add `verifyExpiration()` to `src/auth/validators.ts`. # specific function + file path
+- Add the clock skew window to `src/auth/config.ts`. # one change per bullet
+
+**Session handling** # one label per area a reviewer opens together
+
 - Refactor `AuthService.authenticate()` to handle 401 codes. # named component + clear change
 
 ## Technical context
 
-- Migration to stateless session management for horizontal scalability. # why, not what
+**Stateless sessions.** Expiry lives in the token, so any instance can reject it without a shared store. # bold lead-in + why
+
+**Clock skew.** A 30-second window absorbs drift between instances, so a token can outlive its expiry by that much. # decision + shortcoming
 
 ## Testing
 
@@ -182,8 +225,16 @@ This PR updates the authentication system to be more robust. # "This PR" opener 
 
 ## Key changes
 
+### Middleware # H3 inside a body
+
 - Updated auth middleware files # vague, no specific component, no period
 - The old system used to check tokens differently # describes historical behavior
+
+## Technical context
+
+- Tokens are stateless now. # a bullet
+
+The skew window trades precision for no shared store. # mixed with a paragraph in one section
 
 ## Testing
 
