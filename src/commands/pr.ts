@@ -63,6 +63,7 @@ import {
 } from '@/pr/frames'
 import { type HeadRefusal, resolveHead, resolveTip } from '@/pr/head'
 import {
+  type ChecksGate,
   DEFAULT_WAIT_SECONDS,
   type EvidenceGate,
   type GitRunner,
@@ -3604,6 +3605,34 @@ async function readEvidenceGate(
   }
 }
 
+async function readChecksGate(
+  root: string,
+  number: string,
+  tip: string,
+): Promise<ChecksGate | undefined> {
+  const [listed, pulled] = await Promise.all([
+    gh(root, [
+      'api',
+      `repos/{owner}/{repo}/commits/${tip}/check-runs?per_page=100`,
+    ]),
+    gh(root, ['api', `repos/{owner}/{repo}/pulls/${number}`]),
+  ])
+  if (listed === null) return undefined
+  try {
+    const mergeState =
+      pulled === null
+        ? undefined
+        : mergeStateOf((JSON.parse(pulled) as RestPull).mergeable_state)
+    const reading = withMergeState(
+      mergeState,
+      collapseChecks(tip, JSON.parse(listed) as CheckRunListing),
+    )
+    return { state: reading.state, isConflicted: reading.conflicted }
+  } catch {
+    return undefined
+  }
+}
+
 function liftApi(root: string, number: string, baseRef: string): LiftApi {
   const git = gitRunner(root)
 
@@ -3641,29 +3670,7 @@ function liftApi(root: string, number: string, baseRef: string): LiftApi {
     readEvidence: () => readEvidenceGate(root, number),
     readStanding: (head) =>
       readBaseStanding(git, Number(number), head, baseRef),
-    readChecks: async (tip) => {
-      const [listed, pulled] = await Promise.all([
-        gh(root, [
-          'api',
-          `repos/{owner}/{repo}/commits/${tip}/check-runs?per_page=100`,
-        ]),
-        gh(root, ['api', `repos/{owner}/{repo}/pulls/${number}`]),
-      ])
-      if (listed === null) return undefined
-      try {
-        const mergeState =
-          pulled === null
-            ? undefined
-            : mergeStateOf((JSON.parse(pulled) as RestPull).mergeable_state)
-        const reading = withMergeState(
-          mergeState,
-          collapseChecks(tip, JSON.parse(listed) as CheckRunListing),
-        )
-        return { state: reading.state, isConflicted: reading.conflicted }
-      } catch {
-        return undefined
-      }
-    },
+    readChecks: (tip) => readChecksGate(root, number, tip),
     markReady: (nodeId) =>
       flipDraft(
         root,
