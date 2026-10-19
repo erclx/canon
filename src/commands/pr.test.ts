@@ -1569,6 +1569,23 @@ describe('canon pr tick', () => {
       )
     })
 
+    it('should not count a box ticked by hand or at another head as passed by this pass', async () => {
+      writeFileSync(join(tempDir, 'pr-body'), BODY)
+      writeMarkedComment(
+        [
+          '- [ ] the hero settles',
+          '- [x] the footer wraps',
+          '- [ ] the mood is calm (taste)',
+        ].join('\n'),
+      )
+
+      await runTick(['--boxes', '1', '--head', tip])
+
+      expect(readFileSync(join(tempDir, 'body-write.log'), 'utf8')).toContain(
+        '- [ ] UI pass, 1 of 2 boxes passed',
+      )
+    })
+
     it('should leave the line unchecked while a driven box is still empty', async () => {
       writeFileSync(join(tempDir, 'pr-body'), BODY)
 

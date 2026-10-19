@@ -2995,7 +2995,14 @@ async function runTick(
   const driven = boxes.filter((box) => !box.isTaste)
   const summary: UiPassSummary = {
     kind: 'passed',
-    passed: driven.filter((box) => box.isTicked).length,
+    // A tick counts as this pass's only when stamped at the tip, since an
+    // unstamped one is the author's claim and an older stamp names another head.
+    passed: driven.filter(
+      (box) =>
+        box.isTicked &&
+        box.stamp !== undefined &&
+        reading.tip.startsWith(box.stamp),
+    ).length,
     total: driven.length,
     taste: boxes.length - driven.length,
     head: reading.tip,
