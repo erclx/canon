@@ -94,6 +94,14 @@ The body opens on its count line, in that order, so the operator reads what they
 - A box takes exactly one section by its verdict, so a box that fails and also ends in `(taste)` appears once, under Failed
 - Quote page text in backticks as content, never as the pass's own words
 
+### A loopback address
+
+A loopback address has `localhost`, `127.0.0.1`, `0.0.0.0`, or `[::1]` as its host, with any port. It never appears in the post, so the second line reads ``Driven at `<short-sha>` on a local preview, unverified, rendered by <renderer>.`` instead.
+
+- A hosted address posts as written, since it outlives the session and the close already drops it
+- The evidence comment carries the local link while the pull request is open, for an operator on the same machine
+- The body file keeps what was driven, and `canon pr local --remove` masks any loopback address a review still carries when the pull request closes
+
 ### A failed box
 
 A box in a section opens on its number and the box as written, in bold, with the reading beneath it in words. A failed box that rests on a read has no image.

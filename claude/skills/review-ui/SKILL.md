@@ -96,7 +96,7 @@ When the hosted rung answers, read `${CLAUDE_SKILL_DIR}/references/hosted-previe
 
 ### Unverified and unanswered addresses
 
-The check covers the hosted address only. The local rung and a launch-named address have no deploy run to read, so say in the comment they were driven unverified.
+The check covers the hosted address only. The local rung and a launch-named address have no deploy run to read, so the post says they were driven unverified and names no loopback address, per `${CLAUDE_SKILL_DIR}/references/post.md`.
 
 An address that exists and does not answer differs from no address. When every rung fails to answer, skip the drive, record each box as not driven with the addresses tried and what each returned, and go to Step 7. No box was driven, so Step 7 posts it open.
 
