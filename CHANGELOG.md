@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.49.0](https://github.com/erclx/canon/compare/v5.48.0...v5.49.0) (2026-10-19)
+
+
+### Features
+
+* **pr:** drive a throwaway copy and check the worktree in UI review ([#2558](https://github.com/erclx/canon/issues/2558)) ([974d0d8](https://github.com/erclx/canon/commit/974d0d87d6c6d112db1f8a6e9e8627dd25436c63))
+* **pr:** mask local addresses in UI reviews ([#2556](https://github.com/erclx/canon/issues/2556)) ([f6d7e28](https://github.com/erclx/canon/commit/f6d7e28f11450bd205f5c5e33c3d26f417e82178))
+* **records:** read records by heading and report structure misses ([#2557](https://github.com/erclx/canon/issues/2557)) ([2ce8a34](https://github.com/erclx/canon/commit/2ce8a34540c0b0640b4de21ac5edc13998fe344c))
+* **skills:** give hand-launch prompts one lean file ([#2559](https://github.com/erclx/canon/issues/2559)) ([e7ae01d](https://github.com/erclx/canon/commit/e7ae01de9eefd936f9f1cf55435c00b1ad809062))
+* **tasks:** render touches as a count and drop merged slices ([#2560](https://github.com/erclx/canon/issues/2560)) ([a1c1a25](https://github.com/erclx/canon/commit/a1c1a258455501d9b3292311bed124c01fa86788))
+
 ## [5.48.0](https://github.com/erclx/canon/compare/v5.47.0...v5.48.0) (2026-10-19)
 
 
