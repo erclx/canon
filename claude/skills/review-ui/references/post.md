@@ -108,10 +108,10 @@ A box in a section opens on its number and the box as written, in bold, with the
 
 ### The drive copy and the worktree check
 
-The two `canon pr drive-copy` reads from Steps 4 and 6 each leave a mark on the body, so the operator knows what the drives touched.
+The two `canon pr drive-copy` reads at the start of Steps 4 and 7 each leave a mark on the body, so the operator knows what the drives touched.
 
 - When Step 4 read `copied`, add `Drove a throwaway copy of <copied paths>.` as its own line directly under the address line, naming each path in backticks
-- When Step 6 read `changed`, list every path from `paths` under Changed in the worktree, in backticks, with no reading beside it. The heading opens, and Step 8 ticks nothing.
+- When Step 7's check read `changed`, list every path from `paths` under Changed in the worktree, in backticks, with no reading beside it. The heading opens, and Step 8 ticks nothing.
 - When either read refused, add `Worktree check did not run, <reason>.` on a line of its own under the address line, so a skipped check never reads as a clean one
 
 ### A needs-eyes box
