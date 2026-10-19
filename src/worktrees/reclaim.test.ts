@@ -56,6 +56,7 @@ function session(fields: Partial<ResolvedSession>): ResolvedSession {
     kind: 'interactive',
     status: 'idle',
     via: 'pid',
+    confidence: 'confirmed',
     startedAt: null,
     statusUpdatedAt: null,
     statusDwellMs: null,

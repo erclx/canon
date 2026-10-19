@@ -132,9 +132,9 @@ Holds the reads of which process listens on a port, shared by `canon pr local` a
 Holds the live-session roster and the branch claim, split by what a stub has to replace. `transfer/` moves a session between machines and treats a transcript as opaque bytes.
 
 - `registry.ts` reads one JSON file per session under `claudeConfigDir()`. No published contract describes it, so an absent registry refuses rather than reporting an empty roster
-- `live.ts` matches a record to the start time it stamped through the process filesystem, and marks the roster unverified where it can only probe a signal
-- `live.ts` judges a record from another pid namespace on its messaging socket, always unverified. A record with no `pidDomain`, such as the gate's lock, keeps the pid path
+- `live.ts` matches a record to its stamped start time, and marks it unverified where it can only probe a signal or, across pid namespaces, a socket file. `liveness()` stays synchronous for the gate
 - `resolve.ts` joins a session to its branch, and `--branch` scopes to the shared directory, since names collide across projects
+- `resolve.ts` also upgrades an unverified row to `via: 'listener'` when its socket accepts a connection, which is how macOS, with no process filesystem, confirms a row
 - `claim.ts` composes `claimed` from the roster, worktrees, and `branchRefs()`, which misses a branch pushed since the last fetch. Two readable flags stay apart so a failed read never reads unclaimed
 
 ### `package.json`

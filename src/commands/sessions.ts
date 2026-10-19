@@ -3,6 +3,7 @@ import type { Command } from 'commander'
 import { checkClaim, type ClaimReport } from '@/sessions/claim'
 import {
   callerIdentity,
+  confidenceOf,
   repositoryOf,
   type ResolvedSession,
   resolveSessions,
@@ -134,15 +135,21 @@ export function register(program: Command): void {
         '',
         'The confidence field says how the liveness of a row was decided.',
         '"confirmed" matched the running process against the start time the',
-        'record stamped. "unverified" means only that the pid answers, which',
-        'cannot rule out a pid handed to an unrelated process, so a roster',
-        'reported that way is a candidate list rather than an identity.',
+        'record stamped, and reads "via": "pid". "unverified" means only that the',
+        'pid answers, which cannot rule out a pid handed to an unrelated',
+        'process, so a roster reported that way is a candidate list rather than',
+        'an identity. Where the start time cannot be read, a row whose messaging',
+        'socket accepts a connection is confirmed instead and reads "via":',
+        '"listener". The probe connects and closes without writing. Each row',
+        'carries its own "confidence", and the top-level field is the weakest of',
+        'the rows listed, so --branch is not weakened by a row it dropped.',
         '',
         'A reader in another pid namespace, such as a sandboxed shell, cannot',
         'see the pid of a record stamped elsewhere. That row is judged on its',
         'messaging socket instead: it stays on the roster as "unverified" with',
         '"via": "socket", since a crashed session leaves its socket behind. A',
-        'foreign record whose socket is gone is left off the roster and',
+        'foreign record whose socket accepts a connection is confirmed as',
+        '"listener". One whose socket is gone is left off the roster and',
         'counted in "foreignDead", so an empty roster beside a count above zero',
         'is one this reader could not check, not one whose sessions ended.',
         '',
@@ -471,7 +478,7 @@ async function runList(opts: ListCommandOptions): Promise<number> {
     : null
 
   intro('canon sessions list')
-  reportConfidence(report)
+  reportConfidence(shown, report)
   reportSessions(
     shown,
     opts.branch,
@@ -486,7 +493,8 @@ async function runList(opts: ListCommandOptions): Promise<number> {
     process.stdout.write(
       `${JSON.stringify({
         dir: report.dir,
-        confidence: report.confidence,
+        // Over the rows shown, so an unrelated row --branch dropped cannot weaken it.
+        confidence: confidenceOf(shown),
         foreignDead: report.foreignDead,
         branch: opts.branch ?? null,
         repository,
@@ -528,6 +536,7 @@ function selfRefusal(own: Extract<SelfReport, { kind: 'unresolved' }>): string {
  * addresses a session directly and the second opens by asking to be corrected.
  */
 function reportConfidence(
+  shown: readonly ResolvedSession[],
   report: Extract<SessionReport, { kind: 'resolved' }>,
 ): void {
   logStep('Liveness')
@@ -535,23 +544,28 @@ function reportConfidence(
   // A roster of none decided nothing, so the confirmed line would claim a check
   // over rows that do not exist. The registry is never pruned and holds a record
   // per session ever run, which is what makes the empty result worth stating.
-  if (report.sessions.length === 0) {
+  if (shown.length === 0) {
     logInfo(
-      report.foreignDead > 0
+      report.foreignDead > 0 || report.sessions.length > 0
         ? 'No row to decide.'
         : 'No row to decide. Every record belongs to a session that has ended.',
     )
     return
   }
 
-  if (report.confidence === 'confirmed') {
+  if (confidenceOf(shown) === 'confirmed') {
+    const listened = shown.filter(
+      (session) => session.via === 'listener',
+    ).length
     logInfo(
-      'Every row matched a running process against the start time its record stamped.',
+      listened === 0
+        ? 'Every row matched a running process against the start time its record stamped.'
+        : `Every row is confirmed, ${listened} of them because their messaging socket accepted a connection and the rest by start time.`,
     )
     return
   }
 
-  if (report.sessions.some((session) => session.via === 'socket')) {
+  if (shown.some((session) => session.via === 'socket')) {
     logWarn(
       'This reader sits in another pid namespace than some records, so those rows rest on a messaging socket existing alone. A crashed session leaves its socket behind, so treat the mapping as inferred and open by asking to be corrected.',
     )

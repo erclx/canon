@@ -5,6 +5,7 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs'
+import { createServer } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { $ } from 'bun'
@@ -178,6 +179,62 @@ describe('canon sessions list from another pid namespace', () => {
         sessions: [{ name: 'canon-4242', via: 'socket' }],
       })
       expect(result.stderr).toContain('messaging socket')
+    },
+  )
+
+  it.skipIf(!readable)(
+    'should confirm a foreign record whose socket accepts and say the listener decided it',
+    async () => {
+      const socket = join(DIR, 'listening.sock')
+      seed(socket, false)
+      const server = createServer()
+      await new Promise<void>((done) => server.listen(socket, done))
+
+      const result = await runSessions(['list', '--json'])
+      await new Promise((done) => server.close(done))
+
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        confidence: 'confirmed',
+        sessions: [{ name: 'canon-4242', via: 'listener' }],
+      })
+      expect(result.stderr).toContain('accepted a connection')
+    },
+  )
+
+  it.skipIf(!readable)(
+    'should score --branch over the rows it lists, not the whole machine',
+    async () => {
+      const socket = join(DIR, 'branch.sock')
+      seed(socket, false)
+      const registry = join(CONFIG, 'sessions')
+      writeFileSync(
+        join(registry, '4243.json'),
+        JSON.stringify({
+          pid: 4243,
+          sessionId: 'id-4243',
+          cwd: DIR,
+          name: 'canon-4243',
+          kind: 'interactive',
+          status: 'idle',
+          startedAt: 2,
+          procStart: '1',
+          pidDomain: FOREIGN_DOMAIN,
+          messagingSocketPath: join(DIR, 'unrelated.sock'),
+        }),
+      )
+      writeFileSync(join(DIR, 'unrelated.sock'), '')
+      const server = createServer()
+      await new Promise<void>((done) => server.listen(socket, done))
+
+      const result = await runSessions(['list', '--branch', 'main', '--json'])
+      await new Promise((done) => server.close(done))
+
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        confidence: 'confirmed',
+        sessions: [{ name: 'canon-4242', via: 'listener' }],
+      })
+      expect(result.stderr).toContain('accepted a connection')
+      expect(result.stderr).not.toContain('messaging socket existing alone')
     },
   )
 })
