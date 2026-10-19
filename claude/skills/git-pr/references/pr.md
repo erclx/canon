@@ -102,6 +102,8 @@ The closing lines end `## Summary`, one `Closes #NNN` per issue and no trailing 
 - A ticked box describes the tree as it stands. A later commit removing or replacing what it names makes the box false.
 - The branch that made that commit corrects the box in the same pass, as with any other stale claim in the body
 
+Leave the `UI pass` line to `canon pr tick`, and carry it on a rewrite.
+
 ### Human-only boxes
 
 Leave a box unchecked only when a human is required, and name which human and why on the same line. The agent runs everything else.

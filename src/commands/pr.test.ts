@@ -397,7 +397,8 @@ function writeFakeGh(bin: string, comments: string, apiLog: string): void {
     `  api*contents/*) a="$*"; p=\${a##*contents/}; p=\${p%%\\?*}; r=\${a##*ref=}; [ -f "$fx/img/$r-$(basename "$p")" ] && cat "$fx/img/$r-$(basename "$p")" || exit 1 ;;`,
     '  api*compare/*) if [ -f "$fx/merge-base" ]; then cat "$fx/merge-base"; else git merge-base main HEAD; fi ;;',
     `  api*issues/7/comments*) jq '[.comments[] | {html_url: .url, body}]' '${comments}' | jq -r "$f" ;;`,
-    '  "api repos/{owner}/{repo}/pulls/7") if [ -f "$fx/head" ]; then h=$(cat "$fx/head"); else h=$(git rev-parse HEAD); fi; echo "{\\"number\\":7,\\"head\\":{\\"ref\\":\\"feat/x\\",\\"sha\\":\\"$h\\"},\\"base\\":{\\"ref\\":\\"main\\"},\\"mergeable_state\\":\\"clean\\"}" ;;',
+    '  "api -X PATCH repos/{owner}/{repo}/pulls/7 "*) [ -f "$fx/body-fail" ] && exit 1; printf \'%s\' "${@: -1}" > "$fx/body-write.log"; echo "{}" ;;',
+    '  "api repos/{owner}/{repo}/pulls/7") if [ -f "$fx/head" ]; then h=$(cat "$fx/head"); else h=$(git rev-parse HEAD); fi; b=; [ -f "$fx/pr-body" ] && b=$(cat "$fx/pr-body"); jq -n --arg h "$h" --arg b "$b" \'{number:7,head:{ref:"feat/x",sha:$h},base:{ref:"main"},mergeable_state:"clean",body:$b}\' ;;',
     '  "api repos/{owner}/{repo}") echo "{\\"full_name\\":\\"o/r\\"}" ;;',
     `  api*) printf '%s' "\${@: -1}" > '${apiLog}'; echo "{}" ;;`,
     '  *) exit 1 ;;',
@@ -601,6 +602,59 @@ describe('canon pr evidence reports the marked comment', () => {
 
       expect(record.body).toContain('- [ ] the hero settles')
       expect(record.body).not.toContain('- [x]')
+    })
+
+    it('should reset the body line to unchecked naming the new head', async () => {
+      writeComments([markedCommentBody()])
+      writeFileSync(
+        join(tempDir, 'pr-body'),
+        '## Testing\n\n- [x] UI pass, 1 of 1 boxes passed at `1111111` <!-- pr-ui-pass -->\n',
+      )
+
+      await runEvidenceRecord({ 'docs/guide.md': '# guide\n' })
+
+      const head = execaSync('git', [
+        '-C',
+        repoRoot,
+        'rev-parse',
+        'HEAD',
+      ]).stdout
+      expect(readFileSync(join(tempDir, 'body-write.log'), 'utf8')).toBe(
+        `body=## Testing\n\n- [ ] UI pass, not run at \`${head.slice(0, 7)}\` <!-- pr-ui-pass -->`,
+      )
+    })
+
+    it('should leave the body alone when the line already names this head', async () => {
+      writeComments([markedCommentBody()])
+      const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' })
+      const head = String(record.head).slice(0, 7)
+      writeFileSync(
+        join(tempDir, 'pr-body'),
+        `## Testing\n\n- [x] UI pass, 1 of 1 boxes passed at \`${head}\` <!-- pr-ui-pass -->\n`,
+      )
+      rmSync(join(tempDir, 'body-write.log'), { force: true })
+
+      await execa(
+        process.execPath,
+        [CLI, 'pr', 'evidence', '7', '--json', '--root', repoRoot],
+        {
+          cwd: repoRoot,
+          reject: false,
+          timeout: RUN_TIMEOUT_MS,
+          env: { PATH: `${bin}:${process.env.PATH}` },
+        },
+      )
+
+      expect(existsSync(join(tempDir, 'body-write.log'))).toBe(false)
+    })
+
+    it('should write no body line when the body carries none', async () => {
+      writeComments([markedCommentBody()])
+      writeFileSync(join(tempDir, 'pr-body'), '## Testing\n\n- [x] ran it\n')
+
+      await runEvidenceRecord({ 'docs/guide.md': '# guide\n' })
+
+      expect(existsSync(join(tempDir, 'body-write.log'))).toBe(false)
     })
 
     it('should report the boxes as posted rather than as the render settles them', async () => {
@@ -1498,6 +1552,73 @@ describe('canon pr tick', () => {
       `- [x] the hero settles · passed at \`${tip.slice(0, 7)}\`\n`,
     )
     expect(written).toContain('- [ ] the footer wraps\n')
+  })
+
+  describe('body line', () => {
+    const BODY = '## Summary\n\n- x\n\n## Testing\n\n- [x] ran it\n'
+
+    it('should write the pass count into the body beside what is there', async () => {
+      writeFileSync(join(tempDir, 'pr-body'), BODY)
+
+      await runTick(['--boxes', '1,2', '--head', tip])
+
+      const written = readFileSync(join(tempDir, 'body-write.log'), 'utf8')
+      expect(written).toContain('- [x] ran it\n')
+      expect(written).toContain(
+        `- [x] UI pass, 2 of 2 boxes passed at \`${tip.slice(0, 7)}\`, 1 taste box left to the operator`,
+      )
+    })
+
+    it('should not count a box ticked by hand or at another head as passed by this pass', async () => {
+      writeFileSync(join(tempDir, 'pr-body'), BODY)
+      writeMarkedComment(
+        [
+          '- [ ] the hero settles',
+          '- [x] the footer wraps',
+          '- [ ] the mood is calm (taste)',
+        ].join('\n'),
+      )
+
+      await runTick(['--boxes', '1', '--head', tip])
+
+      expect(readFileSync(join(tempDir, 'body-write.log'), 'utf8')).toContain(
+        '- [ ] UI pass, 1 of 2 boxes passed',
+      )
+    })
+
+    it('should leave the line unchecked while a driven box is still empty', async () => {
+      writeFileSync(join(tempDir, 'pr-body'), BODY)
+
+      await runTick(['--boxes', '1', '--head', tip])
+
+      expect(readFileSync(join(tempDir, 'body-write.log'), 'utf8')).toContain(
+        '- [ ] UI pass, 1 of 2 boxes passed',
+      )
+    })
+
+    it('should report the comment as ticked and the body as refused when the body edit fails', async () => {
+      writeFileSync(join(tempDir, 'pr-body'), BODY)
+      writeFileSync(join(tempDir, 'body-fail'), '')
+
+      const outcome = await runTick(['--boxes', '1', '--head', tip])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({
+          reason: 'body-refused',
+          commentTicked: true,
+        }),
+        exit: 1,
+      })
+      expect(readFileSync(apiLog, 'utf8')).toContain('- [x] the hero settles')
+    })
+
+    it('should write no body line when the tick is refused', async () => {
+      writeFileSync(join(tempDir, 'pr-body'), BODY)
+
+      await runTick(['--boxes', '1,3', '--head', tip])
+
+      expect(existsSync(join(tempDir, 'body-write.log'))).toBe(false)
+    })
   })
 
   it('should refuse a head that is not the remote tip and write nothing', async () => {

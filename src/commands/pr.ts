@@ -93,7 +93,13 @@ import {
   servesChange,
   type WorkflowFile,
 } from '@/pr/preview'
-import { type TickRefusal, tickBoxes } from '@/pr/tick'
+import {
+  readUiPassHead,
+  type TickRefusal,
+  tickBoxes,
+  type UiPassSummary,
+  writeUiPassLine,
+} from '@/pr/tick'
 import {
   commentRowOf,
   identityOf,
@@ -157,9 +163,16 @@ interface TickOptions extends ReadOptions {
   readonly head?: string
 }
 
-type TickReason = TickRefusal | 'stale-head' | 'bad-boxes' | 'no-comment'
+type TickReason =
+  | TickRefusal
+  | 'stale-head'
+  | 'bad-boxes'
+  | 'no-comment'
+  | 'body-refused'
 
 const TICK_REFUSALS: Record<TickReason | 'gh-failed', string> = {
+  'body-refused':
+    'The boxes are ticked on the evidence comment, but gh could not edit the pull request body, so its UI pass line still shows the earlier result. Re-run the tick to retry the body.',
   'stale-head':
     'The head named is not the branch tip on the remote, so a tick would claim a pass on a commit that is no longer the pull request. Re-drive the checklist at the tip.',
   'bad-boxes':
@@ -736,6 +749,11 @@ export function register(program: Command): void {
         'comment. Together with --checklist the link and the checklist land in',
         'one comment.',
         '',
+        "A render at a new head also resets the pull request body's UI pass",
+        'line, the one `canon pr tick` writes under ## Testing, to unchecked',
+        'naming that head. It touches no other body text, leaves a line already',
+        'naming this head alone, and reports `uiPass` as reset or reset-refused.',
+        '',
         'Both reasons carry what the marked comment already posted, each field',
         'present only when that comment holds it:',
         '  preview    the hosted **Preview:** address the comment carries',
@@ -1024,8 +1042,17 @@ export function register(program: Command): void {
         'it. A later render at another head clears a tick whose stamp names',
         'a different commit.',
         '',
+        "It also keeps one marked line in the pull request body's ## Testing,",
+        'such as `- [x] UI pass, 17 of 17 boxes passed at <short sha>, 1 taste',
+        'box left to the operator`. The line is ticked only when every box a',
+        'driver can run is ticked, counts taste boxes apart, and is the only',
+        'body text this verb writes, so hand edits elsewhere survive.',
+        '',
         'Read `reason` on the JSON record:',
-        '  ticked       the boxes were ticked, with the tip in `head`',
+        '  ticked       the boxes were ticked and the body line written, with the',
+        '               tip in `head`',
+        '  body-refused the comment is ticked but gh could not edit the body,',
+        '               exit 1 with `commentTicked`. Re-run to retry the body.',
         '  stale-head   --head is not the remote branch tip, nothing written',
         '  taste-box    a named box ends in (taste), nothing written',
         '  no-box       a named number is past the checklist, nothing written',
@@ -2437,10 +2464,30 @@ async function runEvidence(
     return 1
   }
 
+  // A UI pass line stamped at an earlier head describes a tree that is gone,
+  // so a render at a new head puts it back to unchecked. A line already
+  // naming this head is left alone, since each body edit reruns the label gate.
+  const priorBody = identity.body ?? ''
+  const stampedHead = readUiPassHead(priorBody)
+  let uiPass: 'reset' | 'reset-refused' | undefined
+  if (stampedHead !== undefined && !identity.head.startsWith(stampedHead)) {
+    const reset = writeUiPassLine(priorBody, {
+      kind: 'reset',
+      head: identity.head,
+    })
+    uiPass = (await patchPullBody(root, identity.number, reset))
+      ? 'reset'
+      : 'reset-refused'
+  }
+
   logStep('Scope')
   logInfo(
     `${plural(caseCount, 'case')} across ${plural(states.length, 'state')}`,
   )
+  if (uiPass === 'reset') logInfo('UI pass line reset to the new head')
+  if (uiPass === 'reset-refused') {
+    logWarn('gh could not edit the body, so its UI pass line names an old head')
+  }
   if (sized.unread.length > 0) {
     logWarn(
       `width unread for ${plural(sized.unread.length, 'image')}, rendered at 1000: ${sized.unread.join(', ')}`,
@@ -2469,6 +2516,7 @@ async function runEvidence(
         body,
         states,
         ...(sized.unread.length > 0 && { widthUnread: sized.unread }),
+        ...(uiPass !== undefined && { uiPass }),
         ...(commentId !== undefined && { commentId }),
         ...carried,
       })}\n`,
@@ -2941,9 +2989,53 @@ async function runTick(
     if (patched === null) return refuseTick('gh-failed')
   }
 
+  const boxes = readChecklistBoxes(
+    findEvidenceChecklist([{ body: result.body }]) ?? '',
+  )
+  const driven = boxes.filter((box) => !box.isTaste)
+  const summary: UiPassSummary = {
+    kind: 'passed',
+    // A tick counts as this pass's only when stamped at the tip, since an
+    // unstamped one is the author's claim and an older stamp names another head.
+    passed: driven.filter(
+      (box) =>
+        box.isTicked &&
+        box.stamp !== undefined &&
+        reading.tip.startsWith(box.stamp),
+    ).length,
+    total: driven.length,
+    taste: boxes.length - driven.length,
+    head: reading.tip,
+  }
+  const priorBody = identity.body ?? ''
+  const nextBody = writeUiPassLine(priorBody, summary)
+  if (
+    nextBody !== priorBody &&
+    !(await patchPullBody(root, identity.number, nextBody))
+  ) {
+    logStep('Partly ticked')
+    logWarn(TICK_REFUSALS['body-refused'])
+    outro()
+    if (emitJson) {
+      process.stdout.write(
+        `${JSON.stringify({
+          root,
+          number: identity.number,
+          reason: 'body-refused',
+          message: TICK_REFUSALS['body-refused'],
+          commentTicked: true,
+          head: reading.tip,
+          boxes: numbers.map(Number),
+          commentId,
+        })}\n`,
+      )
+    }
+    return 1
+  }
+
   logStep('Ticked')
   logInfo(
-    `${plural(numbers.length, 'box')} at ${reading.tip.slice(0, 7)} on comment ${commentId}`,
+    `${plural(numbers.length, 'box')} at ${reading.tip.slice(0, 7)} on comment ${commentId}, UI pass line on the body`,
   )
   outro()
   if (emitJson) {
@@ -2959,6 +3051,23 @@ async function runTick(
     )
   }
   return 0
+}
+
+/** Replaces a pull request's body, which `gh` takes through the REST pulls endpoint a cloud proxy serves. */
+async function patchPullBody(
+  root: string,
+  number: number,
+  body: string,
+): Promise<boolean> {
+  const patched = await gh(root, [
+    'api',
+    '-X',
+    'PATCH',
+    `repos/{owner}/{repo}/pulls/${number}`,
+    '-f',
+    `body=${body}`,
+  ])
+  return patched !== null
 }
 
 /** One `gh api` call, keeping the HTTP status of a failure so a refused write can be told from a missing ref. */

@@ -5,7 +5,7 @@ const EVIDENCE_SEGMENT = 'evidence'
 const EVIDENCE_OPEN_LIMIT = 6
 
 /** Length of the commit names the visible line shows, the width `git` abbreviates to. */
-const SHORT_SHA_LENGTH = 7
+export const SHORT_SHA_LENGTH = 7
 
 /** Prefix of the trailing marker this module writes and reads back. */
 const MARKER_PREFIX = '<!-- pr-evidence:'
