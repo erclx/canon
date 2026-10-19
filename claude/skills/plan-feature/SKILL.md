@@ -17,8 +17,8 @@ metadata:
 
 Before Step 3, name the next three questions you would ask about what the ask must achieve, and predict the operator's answer to each. The test reads the ask's success criteria, never the plan's open questions.
 
-- A predictable answer settles its criterion, which Step 3 writes as a `**Verification:**` bullet rather than a question
-- Only a prediction still open goes under `**Questions:**` with a `- Suggested:` line, so a fully specified ask carries none and Small mode stays reachable
+- A predictable answer settles its criterion, which Step 3 writes as a `## Verification` bullet rather than a question
+- Only a prediction still open goes under `## Questions` with a `- Suggested:` line, so a fully specified ask carries none and Small mode stays reachable
 - When you can predict none of the three, ask before Step 3 through whatever route reaches the operator, including a message to a dispatching session
 
 ## Step 1: read the Claude setup
@@ -59,7 +59,7 @@ The section list, what each section holds, and the suggested-and-answer contract
 
 What this skill adds on top of the standard:
 
-- Reframe a vague ask as success criteria before `**Files to touch:**`, each an observable result and its check, which becomes one `**Verification:**` bullet. "Make it faster" names none.
+- Reframe a vague ask as success criteria before `## Files to touch`, each an observable result and its check, which becomes one `## Verification` bullet. "Make it faster" names none.
 - Confirm a concrete project or use case drives the feature, and lift patterns from it where precedent exists. A feature with no named user is a guess.
 - Prefer one layout that serves both a new and a grown project over a dual-mode toggle or a migration shim. Two modes double what every later change has to hold.
 
@@ -68,16 +68,16 @@ What this skill adds on top of the standard:
 Every `- Suggested:` line takes senior judgment, picking the best option in one line with its reason or main tradeoff, and naming alternatives only when they change the pick.
 
 - Suggest a real default when best practice, the codebase, or prior context points to one
-- Load `canon:codebase-layout` before `**Files to touch:**` when an entry names a path that does not exist yet, and give each new path its placement reason. Report it if it does not resolve.
-- Fill `**Design references:**` with the `canon/design/<surface>/` folder for each surface a UI file in `**Files to touch:**` renders, and write `None identified.` in a project with no folder
-- Write `**Verification:**` as one bullet per outcome naming the test or command that proves it
-- Write `**Review focus:**` as the inputs or states that would break the change, carrying the risk you understood to the executor and the reviewer
+- Load `canon:codebase-layout` before `## Files to touch` when an entry names a path that does not exist yet, and give each new path its placement reason. Report it if it does not resolve.
+- Fill `## Design references` with the `canon/design/<surface>/` folder for each surface a UI file in `## Files to touch` renders, and write `None identified.` in a project with no folder
+- Write `## Verification` as one bullet per outcome naming the test or command that proves it
+- Write `## Review focus` as the inputs or states that would break the change, carrying the risk you understood to the executor and the reviewer
 
 ### Sources and size
 
 A small feature produces a short plan, not a padded one.
 
-- Cite the `**Sources:**` entry for every decision Step 2 sourced, each with its quoted passage or the word `unverified`
+- Cite the `## Sources` entry for every decision Step 2 sourced, each with its quoted passage or the word `unverified`
 - Prefer `None identified.` over low-signal fillers
 - When three or more questions remain, keep chat output to the file pointer plus a short summary. Inline chat is fine when two or fewer remain.
 
@@ -99,21 +99,21 @@ A consumer list is a `Risks` entry, which already forces Full. A resource with m
 Output the plan to chat and write no plan file. The markers match the standard's, so a plan that later grows into a file keeps its shape.
 
 ```markdown
-**Files to touch:**
+## Files to touch
 
 - `path/to/file`: reason
 
-**Verification:**
+## Verification
 
 - <outcome>: `<test or command that proves it>`
 ```
 
-Small mode carries no `**Review focus:**`, since its Risks already came out `None identified.` and the reviewer has no breaking input to name.
+Small mode carries no `## Review focus`, since its Risks already came out `None identified.` and the reviewer has no breaking input to name.
 
-If real questions exist, include a numbered `**Questions:**` section below, each with a `- Suggested:` line and an `- Answer:` slot:
+If real questions exist, include a numbered `## Questions` section below, each with a `- Suggested:` line and an `- Answer:` slot:
 
 ```markdown
-**Questions:**
+## Questions
 
 1. <question>
    - Suggested: <pick>, <reason or tradeoff>
@@ -132,7 +132,9 @@ The plan is a main-root write, from a linked worktree and from a background sess
 
 Two commands check the file once it lands, and both write nothing.
 
-- Run `canon records validate plans` when the CLI is on PATH. It reports a section, a filename, or an answer slot that does not hold.
+- Run `canon records validate plans feature-<slug>` when the CLI is on PATH. Its `findings` name a section, a filename, or an answer slot that does not hold.
+- Fix each entry its `structure` array names before reporting, against `### Structure` in `${CLAUDE_SKILL_DIR}/references/plan.md`
+- Read that array rather than the exit code, since a structure entry never sets the exit
 - Run `canon markdown audit .canon/plans/feature-<slug>.md`, naming the file, since the gitignored plan reaches no other gate. Rewrite a hit's sentence rather than swapping the token.
 
 When Step 1 resolved an existing task, run `canon tasks plan-link <task> .canon/plans/feature-<slug>.md` right after the file lands, naming the stem Step 1 read. Skip it when Step 1 found no task, and report a refusal rather than stopping, since `canon tasks validate` still catches an unlinked task through `plan-uncited`.
@@ -144,7 +146,7 @@ Then output in chat:
 ```markdown
 📝 Wrote .canon/plans/feature-<slug>.md
 
-**Questions:**
+## Questions
 
 1. <question>
    - Suggested: <pick>, <reason or tradeoff>

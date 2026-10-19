@@ -38,35 +38,35 @@ destinations:
 - <what the change does, one bullet per file group>
 - <branch type and what the worker still owns>
 
-**Constraints:**
+## Constraints
 
 - `.canon/ready/<nn>-<slug>/` holds the verbatim source for every path below. Copy each file whole rather than reading it as a description and writing a version.
 - <a live plan or run row holding a path, when one exists>
 
-**Files to touch:**
+## Files to touch
 
 - `<path/to/file>`: copy from the ready folder, <one clause on what it changes>
 
-**Verification:**
+## Verification
 
 - <the command that proves the copy landed, or "None identified.">
 
-**Risks:**
+## Risks
 
 - <what could go wrong, or "None identified.">
 
-**Review focus:**
+## Review focus
 
 - <an input the copied files must handle, or "None identified.">
 
-**Questions:**
+## Questions
 
 None identified.
 ```
 
 ## The destination match check
 
-Read the overview's `destinations` and the plan's `**Files to touch:**` paths, then compare the two sets:
+Read the overview's `destinations` and the plan's `## Files to touch` paths, then compare the two sets:
 
 - A path in `destinations` and not in the plan is invisible to `plan-reach`, so the plan gains the line.
 - A path in the plan and not in `destinations` names a file the folder does not carry, so either the folder gains the file or the plan loses the line.
