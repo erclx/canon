@@ -26,6 +26,19 @@ const CODE_OPEN: ReviewRow = {
 const UI_CLOSED: ReviewRow = {
   body: `## UI review closed\n\nall boxes\n<!-- review-ui: head=${HEAD} -->`,
 }
+const UNDRIVEN_LINE = '0 failed · 0 need your eyes · 0 passed · 10 not driven'
+const UI_CLOSED_UNDRIVEN: ReviewRow = {
+  body: `## UI review closed\n\n${UNDRIVEN_LINE}\n<!-- review-ui: head=${HEAD} -->`,
+}
+const UI_CLOSED_UNDRIVEN_AT_MOVED: ReviewRow = {
+  body: `## UI review closed\n\n${UNDRIVEN_LINE}\n<!-- review-ui: head=${MOVED} -->`,
+}
+const UI_CLOSED_EYES_ONLY: ReviewRow = {
+  body: `## UI review closed\n\n0 failed · 3 need your eyes · 0 passed · 0 not driven\n<!-- review-ui: head=${HEAD} -->`,
+}
+const UI_CLOSED_EMPTY: ReviewRow = {
+  body: `## UI review closed\n\n0 failed · 0 need your eyes · 0 passed · 0 not driven\n<!-- review-ui: head=${HEAD} -->`,
+}
 const UI_CLOSED_AT_MOVED: ReviewRow = {
   body: `## UI review closed\n\nall boxes\n<!-- review-ui: head=${MOVED} -->`,
 }
@@ -382,6 +395,52 @@ describe('lift', () => {
       const record = await lift(api, { isCheck: false, waitSeconds: 60 })
 
       expect(record.reason).toBe('ui-behind')
+    })
+
+    it('should refuse ui-undriven on a close that drove no box at the head', async () => {
+      const { api } = makeApi({
+        evidence: withChecklist,
+        reviews: [CODE_CLOSED, UI_CLOSED_UNDRIVEN],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('ui-undriven')
+    })
+
+    it('should refuse ui-undriven on a close carried from an older head', async () => {
+      const { api, calls } = makeApi({
+        evidence: withChecklist,
+        reviews: [CODE_CLOSED, UI_CLOSED_UNDRIVEN_AT_MOVED],
+        changed: { isAncestor: true, paths: ['README.md'] },
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('ui-undriven')
+      expect(calls.reads).toEqual([])
+    })
+
+    it('should lift on a close holding only needs-eyes boxes', async () => {
+      const { api } = makeApi({
+        evidence: withChecklist,
+        reviews: [CODE_CLOSED, UI_CLOSED_EYES_ONLY],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('lifted')
+    })
+
+    it('should not read an empty pass as undriven', async () => {
+      const { api } = makeApi({
+        evidence: withChecklist,
+        reviews: [CODE_CLOSED, UI_CLOSED_EMPTY],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('lifted')
     })
 
     describe('carried forward', () => {

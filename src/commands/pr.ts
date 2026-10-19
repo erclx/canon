@@ -834,7 +834,9 @@ export function register(program: Command): void {
         '            on an earlier commit still holds when it is an ancestor of the',
         '            head and no painted path changed since, and the record names',
         '            it as `carriedFrom`. A painted change refuses `ui-behind` and',
-        '            lists the paths as `paintedPaths`',
+        '            lists the paths as `paintedPaths`. A close whose count line',
+        '            shows boxes not driven and none passed, failed, or needing',
+        '            eyes refuses `ui-undriven`, carried or not',
         '  evidence  the evidence check reads settled',
         '  standing  the head is fresh against the base, not stale or conflicted',
         '  ci        every check run on the tip passed, waited on up to --wait',
@@ -860,7 +862,7 @@ export function register(program: Command): void {
         '  lifted, already-ready, redrafted, clear (--check)',
         '  pull-closed, review-missing, review-open, review-unmarked,',
         '  review-behind, ui-missing, ui-open, ui-unmarked, ui-behind,',
-        '  evidence-owed, standing-stale, standing-conflict, standing-unknown,',
+        '  ui-undriven, evidence-owed, standing-stale, standing-conflict, standing-unknown,',
         '  ci-pending (--check), ci-failing, ci-conflicted, ci-timeout,',
         '  head-moved, gh-failed',
         '',
@@ -3443,6 +3445,8 @@ const LIFT_REFUSALS: Record<LiftRefusal | 'bad-wait' | 'gh-missing', string> = {
     'The newest UI review carries no head marker, so the commit it covers is a GitHub stamp this gate does not trust.',
   'ui-behind':
     'The newest UI review closed on an earlier commit than the head.',
+  'ui-undriven':
+    'The newest UI review closed having driven no box, so it looked at nothing. Re-drive the checklist on an address that answers.',
   'evidence-owed':
     'The evidence check reads owed, so the ship chain left a step undone.',
   'standing-stale':
