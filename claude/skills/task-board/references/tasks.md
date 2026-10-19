@@ -209,4 +209,6 @@ Archiving a task archives its plan alongside it when the task is that plan's las
 
 ### Open outcomes
 
-A task with an open outcome stays on the board, and so does its plan. Close it, or cut an abandoned outcome by striking its body, as `- ~~<outcome>~~ <why>`, which reads as cut whatever its checkbox holds, so a task of cut outcomes still archives. A check only the operator can run takes `- [ ] Operator check: <outcome>`, written before the pull request opens, and the task closes with it unticked. Work the repository owes never takes it.
+A task with an open outcome stays on the board with its plan. Close it, or cut an abandoned one by striking its body, as `- ~~<outcome>~~ <why>`, which reads as cut.
+
+An operator-only check outside this repository takes `- [ ] Operator check: <outcome>`, written before the pull request opens. It closes unticked.
