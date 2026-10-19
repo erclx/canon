@@ -32,7 +32,7 @@ The blocker cell states what the row waits on, and each kind is tested different
 
 ### A hold behind a track in flight
 
-The validator tests the file the cell cites against the Touches column of every `## Run now` row. A track that merged since the row was parked is no longer in flight, whatever the sets still share.
+The validator tests the file the cell cites against the files every `## Run now` row's plans declare. A track that merged since the row was parked is no longer in flight, whatever the sets still share.
 
 - Re-test the cell under the conflict check in `orchestrator-dispatch.md` too, since a row parked on a shared file alone holds on nothing and moves up
 - A cell naming the file in prose rather than backticks cites nothing, so rewrite the hold in the board's spelling and the next run picks it up

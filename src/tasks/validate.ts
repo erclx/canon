@@ -23,6 +23,9 @@ import { gitTrunkReader, type TrunkReader } from '@/tasks/trunk'
 const ORDERING_FILE = 'priority.md'
 const BACKLOG_FILE = 'backlog.md'
 
+/** The opening `touchesCell` writes, as in `12 files under` or a bare `2 files`. */
+const DERIVED_COUNT = /^\d+ files?(?: under |$)/
+
 /**
  * The readiness headings `claude/skills/task-board/references/board.md` fixes. The names are the
  * contract rather than a suggestion, so a board grouping under names of its own
@@ -152,7 +155,11 @@ export interface BoardRow {
   readonly label: string
   readonly stem: string | undefined
   readonly plan: string | undefined
-  /** Absent when the group fixes no `Touches` column, empty when it read none. */
+  /**
+   * Absent when the group fixes no `Touches` column, empty when it read none.
+   * `readBoard` reads the written cell, and `declaredRows` replaces it with the
+   * paths the task's plans declare.
+   */
   readonly touches: readonly string[] | undefined
   /** The `Touches` cell as written, which the stale check compares against the derivation. */
   readonly touchesText: string | undefined
@@ -235,8 +242,14 @@ function stemOf(target: string): string | undefined {
  * An extension opens with a letter, which is what separates `commands.md` from
  * a task version like `v40.2`. Reading the version as a path would collide two
  * rows that merely cite the same task.
+ *
+ * A cell a board verb derived opens with its file count, and its folders say
+ * where the row works rather than claiming every file under them, so it yields
+ * nothing. Its reader takes the declared paths from the plans instead.
  */
 export function readPaths(cell: string): string[] {
+  if (DERIVED_COUNT.test(cell.trim())) return []
+
   const spans = cell.match(/`[^`]+`/g) ?? []
   const paths = spans
     .map((span) => span.slice(1, -1).trim())
@@ -1517,6 +1530,29 @@ async function checkStaleTouches(
 }
 
 /**
+ * Gives each row the paths its task's live plans declare in place of the ones
+ * read off its `Touches` cell, which states a count and folders rather than
+ * files. A row whose task is gone, or whose plans declare nothing, keeps what
+ * its cell named, so a hand-written cell still feeds the overlap checks.
+ */
+export async function declaredRows(
+  rows: readonly BoardRow[],
+  root: string,
+): Promise<BoardRow[]> {
+  return Promise.all(
+    rows.map(async (row) => {
+      if (row.touches === undefined || !row.stem) return row
+
+      const { paths } = await deriveCells(root, {
+        stem: row.stem,
+        label: row.label,
+      })
+      return paths.length === 0 ? row : { ...row, touches: paths }
+    }),
+  )
+}
+
+/**
  * The claims a group name makes about a row, being a stated plan and file set
  * under `## Run now`, a live plan under `## Up next`, and none under
  * `## Needs a plan`. The board verbs read these same findings off the board
@@ -1566,10 +1602,11 @@ export async function validateBoard(
   }
 
   const {
-    rows,
+    rows: written,
     groups,
     findings: shapeFindings,
   } = readBoard(await readFile(ordering, 'utf8'))
+  const rows = await declaredRows(written, root)
 
   if (groups.length === 0) {
     return refuse(

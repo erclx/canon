@@ -91,9 +91,9 @@ A collision with running work blocks a task only where no merge settles it, bein
 
 ### The `Touches` cell
 
-A `Touches` cell is the first three paths of its plan's `**Files to touch:**` and a count of the rest, the union in line order for a sliced task. It states what the branch sets out to write, and a running branch outgrows it.
+A `Touches` cell counts its plans' declared files and names the two fullest folders, as in ``12 files under `src/tasks/`, `claude/skills/` ``. The linked plan holds the file list, which the overlap checks read.
 
-- `canon tasks plan-reach <plan>` reads the current reach off the branch's diff
+- `canon tasks plan-reach <plan>` reads the reach a running branch grew to
 - Change the plan's list to change the cell. A worker never edits this board.
 
 ### Cell width

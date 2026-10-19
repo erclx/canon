@@ -971,6 +971,185 @@ describe('archiveTask', () => {
     expect(existsSync(join(tasksDir(ROOT), `${stem}.md`))).toBe(true)
   })
 
+  describe('a merged slice', () => {
+    const SLICED =
+      'Plan: [feature-first](../plans/feature-first.md), [feature-middle](../plans/feature-middle.md), [feature-last](../plans/feature-last.md)'
+
+    function headOf(branches: Record<number, string>) {
+      return { head: async (number: number) => branches[number] }
+    }
+
+    it('should archive the middle slice plan and keep the task open', async () => {
+      const middle = await seedPlan('feature-middle.md')
+      await seedPlan('feature-first.md')
+      await seedPlan('feature-last.md')
+      const stem = await seedTask({
+        planLine: SLICED,
+        pullRequest: [12, 673],
+      })
+
+      expect(
+        await archiveTask(
+          ROOT,
+          { kind: 'pull-request', number: 12 },
+          headOf({ 12: 'feat/middle' }),
+        ),
+      ).toMatchObject({
+        ok: false,
+        reason: 'earlier-slice',
+        slice: { from: middle, to: archivedPlan('feature-middle.md') },
+      })
+      expect(existsSync(middle)).toBe(false)
+      expect(existsSync(archivedPlan('feature-middle.md'))).toBe(true)
+      const text = await readFile(join(tasksDir(ROOT), `${stem}.md`), 'utf8')
+      expect(readPlanTargets(text)).toEqual([
+        '../plans/feature-first.md',
+        '../plans/archive/feature-middle.md',
+        '../plans/feature-last.md',
+      ])
+    })
+
+    it('should drop the merged slice from the board row', async () => {
+      await seedPlan('feature-middle.md')
+      await seedPlan('feature-first.md')
+      await seedPlan('feature-last.md')
+      const stem = await seedTask({
+        planLine: SLICED,
+        pullRequest: [12, 673],
+      })
+      const priority = join(tasksDir(ROOT), 'priority.md')
+      await writeFile(
+        priority,
+        [
+          '# Priority',
+          '',
+          '## Run now',
+          '',
+          '| Task | Touches | Plan |',
+          '| ---- | ------- | ---- |',
+          `| [v28.1: A task](${stem}.md) | | [first](../plans/feature-first.md), [middle](../plans/feature-middle.md), [last](../plans/feature-last.md) |`,
+          '',
+        ].join('\n'),
+      )
+
+      await archiveTask(
+        ROOT,
+        { kind: 'pull-request', number: 12 },
+        headOf({ 12: 'feat/middle' }),
+      )
+
+      expect(await readFile(priority, 'utf8')).toContain(
+        `| [v28.1: A task](${stem}.md) |  | [first](../plans/feature-first.md), [last](../plans/feature-last.md) |`,
+      )
+    })
+
+    it('should archive the merged slice plan when the task keeps open outcomes', async () => {
+      await seedPlan('feature-first.md')
+      const last = await seedPlan('feature-last.md')
+      await seedTask({
+        planLine:
+          'Plan: [feature-first](../plans/feature-first.md), [feature-last](../plans/feature-last.md)',
+        pullRequest: 673,
+        outcomes: '- [ ] Outcome: still open',
+      })
+
+      expect(
+        await archiveTask(
+          ROOT,
+          { kind: 'pull-request', number: 673 },
+          headOf({ 673: 'feat/last' }),
+        ),
+      ).toMatchObject({
+        ok: false,
+        reason: 'open-outcomes',
+        slice: { from: last },
+      })
+      expect(existsSync(last)).toBe(false)
+    })
+
+    it('should close the task as today when the last slice merges', async () => {
+      await seedPlan('feature-first.md')
+      await seedPlan('feature-last.md')
+      const stem = await seedTask({
+        planLine:
+          'Plan: [feature-first](../plans/feature-first.md), [feature-last](../plans/feature-last.md)',
+        pullRequest: [12, 673],
+      })
+
+      expect(
+        await archiveTask(
+          ROOT,
+          { kind: 'pull-request', number: 673 },
+          headOf({ 673: 'feat/last' }),
+        ),
+      ).toMatchObject({
+        ok: true,
+        stem,
+        plans: [
+          { to: archivedPlan('feature-first.md') },
+          { to: archivedPlan('feature-last.md') },
+        ],
+      })
+    })
+
+    it('should move nothing when the head branch matches no slice plan', async () => {
+      const middle = await seedPlan('feature-middle.md')
+      await seedPlan('feature-first.md')
+      await seedPlan('feature-last.md')
+      const stem = await seedTask({
+        planLine: SLICED,
+        pullRequest: [12, 673],
+      })
+      const before = await readFile(join(tasksDir(ROOT), `${stem}.md`), 'utf8')
+
+      const outcome = await archiveTask(
+        ROOT,
+        { kind: 'pull-request', number: 12 },
+        headOf({ 12: 'feat/renamed-by-hand' }),
+      )
+
+      expect(outcome).toMatchObject({ ok: false, reason: 'earlier-slice' })
+      expect(outcome).not.toHaveProperty('slice')
+      expect(existsSync(middle)).toBe(true)
+      expect(await readFile(join(tasksDir(ROOT), `${stem}.md`), 'utf8')).toBe(
+        before,
+      )
+    })
+
+    it('should move nothing when the head branch cannot be read', async () => {
+      const middle = await seedPlan('feature-middle.md')
+      await seedPlan('feature-first.md')
+      await seedTask({ planLine: SLICED, pullRequest: [12, 673] })
+
+      expect(
+        await archiveTask(
+          ROOT,
+          { kind: 'pull-request', number: 12 },
+          headOf({}),
+        ),
+      ).not.toHaveProperty('slice')
+      expect(existsSync(middle)).toBe(true)
+    })
+
+    it('should keep the only plan of a task that was never sliced', async () => {
+      const plan = await seedPlan('feature-only.md')
+      await seedTask({
+        planLine: 'Plan: [feature-only](../plans/feature-only.md)',
+        pullRequest: 673,
+        outcomes: '- [ ] Outcome: still open',
+      })
+
+      expect(
+        await archiveTask(
+          ROOT,
+          { kind: 'pull-request', number: 673 },
+          headOf({ 673: 'feat/only' }),
+        ),
+      ).toMatchObject({ ok: false, reason: 'open-outcomes' })
+      expect(existsSync(plan)).toBe(true)
+    })
+  })
+
   it('should refuse the last number while a branch is still pending', async () => {
     const stem = await seedTask({
       pullRequest: [12, 673],

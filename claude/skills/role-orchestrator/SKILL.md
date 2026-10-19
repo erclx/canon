@@ -109,7 +109,7 @@ The handback runbook holds how the message is addressed and worded, what to do w
 
 ### Constraints from the tracks in flight
 
-A plan written here targets a tree several branches are changing, so it names each in-flight track's file set as a constraint, read from that track's Touches column. State for each set which of the two acts it forbids, per Constraints in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
+A plan written here targets a tree several branches are changing, so it names each in-flight track's file set as a constraint, read from the plan its row links. State for each set which of the two acts it forbids, per Constraints in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
 
 - A bare path list leaves the worker guessing, and can end up forbidding the repair of a citation the change broke
 - A shared path forbids an act only where the conflict check in `orchestrator-dispatch.md` holds the pair. Otherwise it names what the second branch to merge rebases over.
