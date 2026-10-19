@@ -32,9 +32,9 @@ One warm session holds the cross-feature call and reviews. Cold worker sessions 
 5. The reviewer tells the session holding the branch to run `review-address`, found with `canon sessions list --branch`, once a pass posts a finding at any severity.
 6. The worker addresses the findings, rebases onto `origin/main` if a sibling landed on its files, pushes, and asks that reviewer for a re-review of the added commits.
 7. A pass posts `## Review` while anything is open and `## Review closed` when nothing is. The reviewer then runs `canon pr lift`.
-8. The human merges. The orchestrator tells any trailing worker whose files the merge touched to run `review-address`, which rebases.
+8. The human merges with `canon pr merge <number>`. The orchestrator tells any trailing worker whose files the merge touched to run `review-address`, which rebases.
 
-Each worker halts at the PR, and the merge stays a human gate.
+Each worker halts at the PR, and the merge stays a human gate. `canon pr merge` squashes with the body's Summary, Key changes, and Technical context as the message, and a deny rule keeps every agent off it. The merge button stays for Dependabot and release pull requests.
 
 ## The review layer
 
