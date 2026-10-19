@@ -100,7 +100,7 @@ A loopback address has `localhost`, `127.0.0.1`, `0.0.0.0`, or `[::1]` as its ho
 
 - A hosted address posts as written, since it outlives the session and the close already drops it
 - The evidence comment carries the local link while the pull request is open, for an operator on the same machine
-- The body file keeps what was driven, and `canon pr local --remove` masks any loopback address a review still carries when the pull request closes
+- `canon pr local --remove` masks any loopback address a review still carries when the pull request closes
 
 ### A failed box
 
