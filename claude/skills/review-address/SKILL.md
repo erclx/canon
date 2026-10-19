@@ -88,33 +88,45 @@ Once the fixes are commits, re-run step 5's staleness test against the new head.
 
 ### Write the reply
 
-Write a summary reply to `.canon/tmp/pr/reply/reply-<number>.md`, keyed on the PR number so two sessions addressing different pull requests never overwrite each other. Load `write-human` for voice, follow `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md`, and keep each mapping to a line or two.
+Write a summary reply to `.canon/tmp/pr/reply/reply-<number>.md`, keyed on the PR number so two sessions addressing different pull requests never overwrite each other. Load `write-human` for voice, follow `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md`, and keep each mapping to one line.
 
 | Part     | Content                                                                                                                                        |
 | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | Heading  | `## Review response`, distinct from human threads and subordinate to the review's own `## Review`                                              |
 | Summary  | One sentence. After a step 5 rebase, say so and name files resolved by hand and those the regen rebuilt, since the next review is a full pass. |
-| Findings | One bullet per finding, opening with the bolded identifier, naming what changed or a one-line reason for a conscious-accept                    |
+| Findings | One line per finding under 200 characters, naming its outcome and the commit that carries it, in the shape below                               |
 | Docs     | Any `.claude/` docs refreshed as a result of the fixes                                                                                         |
 | Close    | `🤖 Addressed by Claude Code` on its own line, so the reply reads as a machine pass rather than a human sign-off                               |
+
+```markdown
+- **<severity>**, `<file>` line <n>: fixed in `<sha>`. <What now holds, in one sentence.>
+- **<severity>**, `<file>` line <n>: declined. <The fact that settled it.>
+```
+
+The commit carries the fix and its test, so the line names neither.
 
 A run the guard sent straight to step 5 has no findings to map, so it takes the `## Rebase` body in `${CLAUDE_SKILL_DIR}/references/rebase-only.md` instead. A run with findings skips that file.
 
 ### What a declined finding carries
 
-A finding this run declined carries the fact that settled it inside its own bullet, such as the plan question that answered it, a constraint the diff does not show, or a measurement the reviewer lacked. Left in the channel, that fact is lost when both sessions end.
+A finding this run declined carries the fact that settled it inside its own line, which may take a second sentence for it, such as the plan question that answered it, a constraint the diff does not show, or a measurement the reviewer lacked. Left in the channel, that fact is lost when both sessions end.
 
 The rule reaches a finding and nothing else. A correction to what the reviewing session believes about the world changes no finding here, so answer it wherever the dispatch reached this session and keep it off the comment.
 
 ### Scan and post
 
-Nothing tests the reply for either rule above. Follow `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md` and run its scan, which reads for banned characters and phase labels alone:
+Nothing tests the reply for either rule above. Follow `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md` and run its scan, which reads for banned characters and phase labels, and reports the reply's density:
 
 ```bash
-canon labels scan --body-file .canon/tmp/pr/reply/reply-<number>.md
+canon labels scan --body-file .canon/tmp/pr/reply/reply-<number>.md --json
 ```
 
-The hook skips `.canon/tmp/`, and the `pull_request` check reads only a pull request's own title and body, so this scan is the only gate on the reply. Fix any hit, then post and keep the `id` the POST answers with, since Step 7 edits this exact comment:
+The hook skips `.canon/tmp/`, and the `pull_request` check reads only a pull request's own title and body, so this scan is the only gate on the reply.
+
+- Fix any hit, and stop on a `density` entry too, shortening the line it names
+- Read the record rather than the exit, since density never sets the exit code
+
+Then post and keep the `id` the POST answers with, since Step 7 edits this exact comment:
 
 ```bash
 gh api -X POST 'repos/{owner}/{repo}/issues/<number>/comments' -F body=@.canon/tmp/pr/reply/reply-<number>.md --jq .id > .canon/tmp/pr/reply/reply-<number>.id

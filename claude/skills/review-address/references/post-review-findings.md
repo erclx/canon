@@ -12,9 +12,12 @@ Outside the numbered flow of `review-address`. The session reads this file when 
 Write the body the way Step 6 writes a reply.
 
 - Load `write-human` for voice and word choice, and follow `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md` for punctuation
-- Run the `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md` scan before posting, with `canon labels scan --body-file .canon/tmp/pr/reply/reply-<number>.md`
+- Run the `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md` scan before posting, with `canon labels scan --body-file .canon/tmp/pr/reply/reply-<number>.md --json`
+- Stop on a `density` entry as on any hit, since density never sets the exit code
 - Open with `## Post-review findings` rather than `## Review response`, since nothing on the thread is being answered
 - Close the body with `🤖 Addressed by Claude Code` on its own line, matching the reply's footer
+
+Give each finding one line under 200 characters in the response's shape, naming its severity, its file and line, and what holds now or what was filed.
 
 `review-pr` states the full heading set this belongs to and routes it the same as a response, so `role-orchestrator`'s poll picks it up and sends the reviewing session back for a pass.
 
