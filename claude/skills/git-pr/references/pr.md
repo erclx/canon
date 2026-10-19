@@ -184,8 +184,6 @@ Each line's comment names the rule it follows.
 
 Update auth middleware to enforce jwt expiration checks. # imperative + direct object + result
 
-Closes #42 # closing line ends Summary
-
 ## Key changes
 
 **Validation** # bold label on its own line, no period
