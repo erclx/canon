@@ -30,6 +30,7 @@ The session writes its comment and nothing tracked. Each kind of reviewer writes
 - Read a file a finding rests on at the head `review-pr` resolved, through `git show <head>:<path>`, since the main worktree's copy is the trunk the pull request never changed
 - Resolve `.canon/plans/`, `.canon/tasks/`, and `.canon/tmp/` at the main worktree root, and send the body file as a heredoc, the main-root route `session-worktree` states
 - Report a plan or task that fails to resolve there as unreadable, naming the path, rather than reviewing as though the branch had none
+- Keep a task list from launch, one item per step of the pass, and tick each as it completes. Skip it on a host that offers no list tool, since the list is for the operator watching and not a gate.
 
 Review the pull request the launch named. Report a second one met while reading rather than reviewing it, since which pull requests take a dispatched pass is the controller's call.
 

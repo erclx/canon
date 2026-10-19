@@ -115,6 +115,7 @@ ${CLAUDE_SKILL_DIR}/scripts/pw.sh -s=<project>-<number> open <url>
 
 Read `${CLAUDE_SKILL_DIR}/references/driving.md` on reaching this step for how a box's line maps to calls, how each value is read, and the four verdicts with the evidence each one carries.
 
+- Make each box its own item on the session's task list, and tick it as its verdict lands
 - Give every box exactly one verdict, in checklist order, since skipping a box silently reads the same as passing it
 - Drive a box the pass could not place on a route or a width from the opened address at 1440 wide, and name the guess in the verdict
 - Never judge a box ending in `(taste)`. Drive to the state, capture both themes, and mark it needs eyes.

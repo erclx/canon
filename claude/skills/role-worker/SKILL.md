@@ -23,6 +23,7 @@ This body states the role, the boundaries, and the channel, and starts no step o
 - Resolve `.canon/plans/`, `.canon/tasks/`, `.canon/review/`, and `.canon/ready/` at the main worktree root, never the linked worktree. Being gitignored, they are absent there rather than empty.
 - Report a plan that fails to resolve as unreadable from here, naming the main-root path. Reporting the task as having no plan is wrong about the world, and a reader cannot tell the two apart.
 - Build the plan the launch named. Never write a second one when the path fails to resolve, since a row citing a plan already has one.
+- Keep a task list from launch, one item per slice, and tick each as its slice lands. Skip it on a host that offers no list tool, since the list is for the operator watching and not a gate.
 
 ### Ready folders and the draft mark
 
