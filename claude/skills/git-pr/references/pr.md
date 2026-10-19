@@ -89,6 +89,7 @@ The closing lines end `## Summary`, one `Closes #NNN` per issue and no trailing 
 - Quote the count or output the run reported, never a figure carried from elsewhere.
 - A ticked box describes the tree as it stands. A later commit removing or replacing what it names makes the box false.
 - The branch that made that commit corrects the box in the same pass, as with any other stale claim in the body
+- Leave the `UI pass` line to `canon pr tick`. It writes the line between its own marker and resets it on a new head, so never write or tick it by hand, and carry it forward when rewriting the body.
 
 ### Human-only boxes
 
