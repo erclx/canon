@@ -1315,8 +1315,10 @@ async function checkCitedTask(
   }
 
   const text = await readFile(live, 'utf8')
-  const { open, closed } = readOutcomes(text)
-  if (open.length > 0 || closed.length === 0) return nothing()
+  const { open, closed, operator } = readOutcomes(text)
+  if (open.length > 0 || closed.length + operator.length === 0) {
+    return nothing()
+  }
 
   const pending = readPendingBranches(text)
   if (pending.length > 0) {

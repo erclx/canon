@@ -1307,6 +1307,30 @@ describe('validateBoard', () => {
     ])
   })
 
+  it('should read a cited task made only of operator checks as closed', async () => {
+    await seedTask('v1.0-first', '- [ ] Operator check: run it on a Mac')
+    await seedTask('v2.0-second')
+    await seedPlan('v2.0-second')
+    await seedPlan('v1.0-first')
+    await seedBoard(
+      boardBody([
+        readyTable([{ stem: 'v1.0-first', touches: '`src/a.ts`' }]),
+        parkedTable([
+          '| [v2.0-second](v2.0-second.md) | `src/a.ts` | [v1.0-first](v1.0-first.md) |',
+        ]),
+      ]),
+    )
+
+    const outcome = await validateBoard(ROOT, trunkHolding(673))
+
+    expect(outcome.ok && outcome.untested).toMatchObject([
+      {
+        subject: 'v2.0-second',
+        message: expect.stringContaining('names no pull request'),
+      },
+    ])
+  })
+
   it('should read a cited task holding only operator checks open as closed', async () => {
     await seedTask(
       'v1.0-first',
