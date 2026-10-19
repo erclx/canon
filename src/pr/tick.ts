@@ -8,7 +8,7 @@ import {
   writeBoxLine,
 } from '@/pr/evidence'
 
-const UI_PASS_MARKER = '<!-- pr-ui-pass -->'
+export const UI_PASS_MARKER = '<!-- pr-ui-pass -->'
 const TESTING_HEADING = /^## Testing\s*$/
 const SECTION_HEADING = /^## /
 const REVIEWER_HEADING = /^## For the reviewer\s*$/
