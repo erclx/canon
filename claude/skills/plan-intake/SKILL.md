@@ -91,6 +91,14 @@ Write `00-overview.md` last, once the clusters are filed and the counts are real
 - Add `99-next-session.md` only where the pass ends holding context no cluster file carries, such as a dump half filed or a measurement to redo
 - Write that file self-contained, since a compaction drops the conversation behind it whether or not the folder is backed
 
+## Step 7: check the folder
+
+Run `canon records validate intake <nn>-<slug>` on the folder this pass wrote, and fix each entry its `structure` array names before reporting. An `intake-spill` entry is content under a field that `canon intake list` never shows the operator, so move it onto the field's line or split the item.
+
+- Pass the slug every time, since the bare kind reads every old dump and buries this one under their entries
+- Read the array rather than the exit, which a structure entry never sets
+- Say the check did not run when the binary carries no `structure` key, rather than reporting the folder clean
+
 ## Output
 
 Emit the full relative path of every file written, with the heading and the act beside it. A bare path cannot tell three new items from one reworded sentence in a long-lived file, so the reader would diff against memory.

@@ -11,18 +11,18 @@ Applies to a feature plan that sequences its work into more than one batch. A de
 
 One batch is one pull request, and one pull request is one plan file, named for its own concern rather than a numeric suffix. `canon tasks plan-branch` derives one branch from one plan filename. A fan-in member is the exception, keeping its own file and branch and opening no pull request, per `## Fan-in`.
 
-- A `**Batch N**` sub-heading inside one file's `**Files to touch:**` shares that branch across every batch, so the first merge strands the rest
+- A `**Batch N**` sub-heading inside one file's `## Files to touch` shares that branch across every batch, so the first merge strands the rest
 - Write a plan opening five batches as five files before the first line of any of them
 
 ## Dependent batches
 
-State a dependent batch's dependency on the ones before it in its own `**Constraints:**`, naming the earlier batch's slug and stacking rather than merging into it.
+State a dependent batch's dependency on the ones before it in its own `## Constraints`, naming the earlier batch's slug and stacking rather than merging into it.
 
 A batch that builds after another and shares most of its files folds into that batch as contiguous commits on one branch. Each pull request pays a fixed cost a same-file slice cannot earn back, and the rebases between stacked slices land on the same files.
 
 ### Judged apart
 
-Keep a batch apart only where a reviewer or the operator would judge it apart. Write that reason as ``Judged apart from `feature-<parent>`: <reason>`` in the batch's `**Constraints:**`.
+Keep a batch apart only where a reviewer or the operator would judge it apart. Write that reason as ``Judged apart from `feature-<parent>`: <reason>`` in the batch's `## Constraints`.
 
 - A contract a later batch is built against
 - A taste call the operator judges in its own sitting
@@ -61,12 +61,12 @@ Keep separate pull requests when the pieces are independent features, when one n
 
 ### Declaring the set
 
-Each side names the other in its `**Constraints:**`, and `canon records validate plans` reports `fan-in-unmatched` wherever the two disagree.
+Each side names the other in its `## Constraints`, and `canon records validate plans` reports `fan-in-unmatched` wherever the two disagree.
 
 - A member writes ``Fan-in member of `feature-<integrator>` ``, naming one integrator
 - The integrator writes ``Fans in `feature-<a>`, `feature-<b>`, and `feature-<c>` ``, in the order it merges them
 - The task's `Plan:` line cites every member and the integrator, since the merge archives only the plans that line cites and a live integrator listing archived members reports `fan-in-unmatched`
-- The integrator is its own plan, since its writes, being the shared lists, the citer repoints, and the index regeneration, need a `**Files to touch:**` of their own
+- The integrator is its own plan, since its writes, being the shared lists, the citer repoints, and the index regeneration, need a `## Files to touch` of their own
 
 `canon tasks plan-answers` holds a member whose integrator is missing or does not list it with a `Fan-in set` entry. It holds the integrator with a `Fan-in pending` entry until every member branch is on origin.
 

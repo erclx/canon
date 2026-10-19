@@ -44,7 +44,7 @@ A ready folder works when a worker that has never seen the warm session's conver
 - Which destination path does each file land at, and does the folder hold nothing else?
 - What is the worker still responsible for that the files themselves do not carry, such as a docs sync, a sandbox scenario, or a test?
 - What branch type does the change take?
-- Is every path the folder mirrors also declared in the thin plan's `**Files to touch:**`?
+- Is every path the folder mirrors also declared in the thin plan's `## Files to touch`?
 
 A ready folder failing these is non-conforming even when it satisfies every shape rule below.
 
@@ -63,7 +63,7 @@ Every ready folder carries `00-overview.md` at its root, beside the mirrored tre
 - `title` (required): the change in sentence case
 - `description` (required): one line naming what the handoff carries
 - `type` (required): the branch type the plan should take, one of the types `branch.md` fixes
-- `destinations` (required): the list of destination paths the folder mirrors, matching the thin plan's `**Files to touch:**` exactly
+- `destinations` (required): the list of destination paths the folder mirrors, matching the thin plan's `## Files to touch` exactly
 
 ```yaml
 ---
@@ -77,6 +77,8 @@ destinations:
 
 Below the frontmatter, state in prose what the worker still owns beyond copying the files: a docs sync, a sandbox scenario update, a test the files do not include, or "nothing further" where the files are the whole of the change.
 
+The overview body and the thin plan both hold to the six structure criteria under `### Structure` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`. The mirrored files are exempt, since each lands as its destination's own standard fixes.
+
 ## The mirrored tree
 
 Every other file in the folder sits at the same relative path its destination has in the project.
@@ -88,10 +90,10 @@ Every other file in the folder sits at the same relative path its destination ha
 ## The thin-plan contract
 
 - A ready folder ships through an ordinary task row and a plan at `.canon/plans/feature-<slug>.md`, per `plan.md`. No new plan shape exists for it.
-- Name the ready folder in the plan's `**Constraints:**`, stating that the folder's files are the verbatim source for the paths the plan's `**Files to touch:**` lists.
-- List every destination path in `**Files to touch:**`, matching `00-overview.md`'s `destinations` field
+- Name the ready folder in the plan's `## Constraints`, stating that the folder's files are the verbatim source for the paths the plan's `## Files to touch` lists.
+- List every destination path in `## Files to touch`, matching `00-overview.md`'s `destinations` field
 - A path the plan omits is invisible to `plan-reach`'s collision check, so a mismatch between the two lists is a defect in the plan, not a variant
-- Keep the plan thin. Its `**Files to touch:**` entries may point at the folder's copy for the reason behind each file, since the overview and the files carry that detail.
+- Keep the plan thin. Its `## Files to touch` entries may point at the folder's copy for the reason behind each file, since the overview and the files carry that detail.
 
 ## Lifecycle
 
@@ -102,7 +104,7 @@ Every other file in the folder sits at the same relative path its destination ha
 
 ## Anti-patterns
 
-- **The folder with an undeclared destination.** A file the plan's `**Files to touch:**` omits passes the collision check unseen, so a second track can write the same path with neither side finding out.
+- **The folder with an undeclared destination.** A file the plan's `## Files to touch` omits passes the collision check unseen, so a second track can write the same path with neither side finding out.
 - **The rewritten copy.** A worker that reads the folder's files as inspiration and writes its own version loses the exact text the handoff exists to carry.
 - **The folder as scratch.** Notes, alternates, or draft passages left in the folder beside the real files leave the worker guessing which is the source.
 - **The folder left live after shipping.** An unmoved folder reads as unshipped work to the next session listing it. The verb skips one whose task has no `Ready:` line and whose plan cites no folder.

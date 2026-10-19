@@ -21,9 +21,9 @@ absent = [".canon/plans/*.md"]
 
 write_scope = [".canon/tmp/**"]
 
-reply = ["**Files to touch:**", "**Verification:**", "README.md"]
+reply = ["## Files to touch", "## Verification", "README.md"]
 
 manual = [
   "The decoy `DESIGN.md` sentinel is not surfaced in the reply. Semantic: a negative over the reply passes on every spelling the pattern did not anticipate.",
-  "The reply carries no `**Review focus:**`. Semantic: same reason, a negative over the reply.",
+  "The reply carries no `## Review focus`. Semantic: same reason, a negative over the reply.",
 ]

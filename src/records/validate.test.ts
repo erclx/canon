@@ -222,9 +222,9 @@ describe('linesOutsideFences', () => {
 })
 
 describe('preferredMarker', () => {
-  it('should name Summary as a heading and the rest as bold labels', () => {
+  it('should name every section as the H2 the template ships', () => {
     expect(preferredMarker('Summary')).toBe('## Summary')
-    expect(preferredMarker('Files to touch')).toBe('**Files to touch:**')
+    expect(preferredMarker('Files to touch')).toBe('## Files to touch')
   })
 })
 
@@ -277,7 +277,7 @@ describe('checkPlan', () => {
     const findings = checkPlan('feature-a-b.md', body)
 
     expect(kinds(findings)).toEqual(['section-missing'])
-    expect(findings[0].subject).toBe('**Risks:**')
+    expect(findings[0].subject).toBe('## Risks')
   })
 
   it('should report a missing Verification section', () => {
@@ -288,7 +288,7 @@ describe('checkPlan', () => {
     const findings = checkPlan('feature-a-b.md', body)
 
     expect(kinds(findings)).toEqual(['section-missing'])
-    expect(findings[0].subject).toBe('**Verification:**')
+    expect(findings[0].subject).toBe('## Verification')
   })
 
   describe('Design references', () => {
@@ -308,7 +308,7 @@ describe('checkPlan', () => {
       const findings = checkPlan('feature-a-b.md', uiPlan([]))
 
       expect(kinds(findings)).toEqual(['section-missing'])
-      expect(findings[0].subject).toBe('**Design references:**')
+      expect(findings[0].subject).toBe('## Design references')
     })
 
     it('should pass a rendered-surface plan citing a reference folder', () => {
@@ -362,7 +362,7 @@ describe('checkPlan', () => {
     const findings = checkPlan('feature-a-b.md', body)
 
     expect(kinds(findings)).toEqual(['section-missing'])
-    expect(findings[0].subject).toBe('**Review focus:**')
+    expect(findings[0].subject).toBe('## Review focus')
   })
 
   it('should accept both new sections written as headings', () => {
@@ -665,6 +665,108 @@ describe('validateRecords', () => {
     const outcome = await validateRecords(ROOT, 'plans')
 
     expect(outcome).toMatchObject({ ok: true, records: 1, findings: [] })
+  })
+
+  it('should validate an old bold-label plan and report S1 under structure alone', async () => {
+    await seedPlan('feature-plan-standards.md', conformingPlan())
+    const outcome = await validateRecords(ROOT, 'plans')
+
+    expect(outcome.ok).toBe(true)
+    if (!outcome.ok) return
+    expect(outcome.findings).toEqual([])
+    expect(outcome.structure.map((entry) => entry.criterion)).toEqual([
+      'S1',
+      'S1',
+      'S1',
+      'S1',
+      'S1',
+    ])
+    expect(outcome.structure[0]).toMatchObject({
+      record: 'feature-plan-standards.md',
+      subject: 'feature-plan-standards.md',
+      line: 9,
+    })
+  })
+
+  it('should read only the plan a record names, by its stem', async () => {
+    await seedPlan('feature-plan-standards.md', conformingPlan())
+    await seedPlan('feature-broken.md', '# Broken\n')
+    const outcome = await validateRecords(ROOT, 'plans', 'feature-broken')
+
+    expect(outcome.ok).toBe(true)
+    if (!outcome.ok) return
+    expect(outcome.records).toBe(1)
+    expect(outcome.structure).toEqual([])
+    expect(
+      outcome.findings.every((f) => f.record === 'feature-broken.md'),
+    ).toBe(true)
+  })
+
+  it('should refuse a record the folder does not hold', async () => {
+    await seedPlan('feature-plan-standards.md', conformingPlan())
+    const outcome = await validateRecords(ROOT, 'plans', 'feature-absent')
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'no-record' })
+  })
+
+  it('should read the numbered files of a track and never its evidence', async () => {
+    await seedFolder('groundwork', 'skew', {
+      'README.md': frontmatter(
+        'title: Skew\ndescription: One line\ndate: 2026-08-04',
+      ),
+      '01-current-state.md': [
+        '---',
+        'title: State',
+        'description: One line',
+        '---',
+        '',
+        '**Measured:**',
+        '',
+      ].join('\n'),
+    })
+    mkdirSync(join(recordsDir(ROOT, 'groundwork'), 'skew', 'evidence'))
+    await writeFile(
+      join(recordsDir(ROOT, 'groundwork'), 'skew', 'evidence', 'rewrite.md'),
+      '**Files to touch:**\n',
+    )
+    const outcome = await validateRecords(ROOT, 'groundwork', 'skew')
+
+    expect(outcome.ok).toBe(true)
+    if (!outcome.ok) return
+    expect(outcome.structure).toMatchObject([
+      { criterion: 'S1', record: 'skew', subject: '01-current-state.md' },
+    ])
+  })
+
+  it('should report an intake field spilling past its line', async () => {
+    await seedFolder('intake', 'dump', {
+      '00-overview.md': frontmatter(
+        'title: Dump\ndescription: One line\ndate: 2026-08-04',
+      ),
+      '01-cluster.md': [
+        '---',
+        'title: Cluster',
+        'description: One line',
+        '---',
+        '',
+        '### 1. Item',
+        '',
+        '- **Problem:** Each kind:',
+        '  - one',
+        '- **Fix:** one change',
+        '- **Worth it:** Yes.',
+        '- **You:**',
+        '',
+      ].join('\n'),
+    })
+    const outcome = await validateRecords(ROOT, 'intake', 'dump')
+
+    expect(outcome.ok).toBe(true)
+    if (!outcome.ok) return
+    expect(outcome.findings).toEqual([])
+    expect(outcome.structure).toMatchObject([
+      { criterion: 'intake-spill', subject: '01-cluster.md', line: 9 },
+    ])
   })
 
   it('should carry the record name on every plan finding', async () => {

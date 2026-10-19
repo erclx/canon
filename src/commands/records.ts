@@ -31,6 +31,7 @@ import {
   RECORD_KINDS,
   type RecordKind,
   type ValidateOutcome,
+  type StructureFinding,
   validateRecords,
 } from '@/records/validate'
 import {
@@ -89,6 +90,10 @@ export function register(program: Command): void {
     .command('validate')
     .description('Report where a file and the standard governing it disagree')
     .argument('<kind>', `Record folder: ${RECORD_KINDS.join(', ')}`)
+    .argument(
+      '[record]',
+      'One plan stem or folder slug, narrowing both findings and structure to it',
+    )
     .helpOption('-h, --help', 'Show this help message')
     .option('--json', 'Add a machine-readable record on stdout')
     .option('--root <path>', 'Project root, defaulting to the main worktree')
@@ -101,12 +106,18 @@ export function register(program: Command): void {
         '  groundwork  README and current-state files, numbering, dating, and a half-closed track',
         '  intake      overview file, numbering, dating, and the four bullets every item carries',
         '',
+        'Structure, under `structure` and never in the exit:',
+        "  S1 to S5 from the plan standard, read on plans, a track's README and",
+        '  numbered files, and intake clusters, plus intake-spill for content under',
+        '  a field. A record written before the criteria misses S1, so it reports alone.',
+        '',
         'Refusals, read off `reason`:',
         "  no-folder     none of the kind's directories exist at either record root",
+        '  no-record     the folder holds no record by the name given',
         '  unknown-kind  the argument names no published kind',
         '',
         'Exit codes:',
-        '  0  every check passed',
+        '  0  no record carries a finding, whatever structure reports',
         '  1  refused, with the reason on stderr or in the JSON record',
         '  2  at least one record carries a finding',
         '',
@@ -115,14 +126,21 @@ export function register(program: Command): void {
         '',
         'Examples:',
         '  canon records validate plans',
+        '  canon records validate plans feature-records-by-heading',
         '  canon records validate teach',
         '  canon records validate intake --json',
         '',
       ].join('\n'),
     )
-    .action(async (kind: string, opts: ValidateCommandOptions) => {
-      process.exitCode = await runValidate(kind, opts)
-    })
+    .action(
+      async (
+        kind: string,
+        record: string | undefined,
+        opts: ValidateCommandOptions,
+      ) => {
+        process.exitCode = await runValidate(kind, record, opts)
+      },
+    )
 
   records
     .command('ordinal')
@@ -721,6 +739,7 @@ function reportRefusal(
 
 async function runValidate(
   kind: string,
+  record: string | undefined,
   opts: ValidateCommandOptions,
 ): Promise<number> {
   const emitJson = opts.json ?? false
@@ -739,7 +758,11 @@ async function runValidate(
 
   const root = opts.root ?? (await mainWorktreeRoot())
 
-  return report(await validateWithStacks(root, kind), emitJson, root)
+  // A plan named with its extension and without it is one record, so the walk
+  // and the cross-plan filter below both read the bare stem.
+  const stem = record?.replace(/\.md$/, '')
+
+  return report(await validateWithStacks(root, kind, stem), emitJson, root)
 }
 
 /**
@@ -749,18 +772,21 @@ async function runValidate(
 async function validateWithStacks(
   root: string,
   kind: RecordKind,
+  record: string | undefined,
 ): Promise<ValidateOutcome> {
-  const outcome = await validateRecords(root, kind)
+  const outcome = await validateRecords(root, kind, record)
   if (!outcome.ok || kind !== 'plans') return outcome
 
   const live = await readLivePlans(root)
+  const across = [...stackFindings(live), ...fanInFindings(live)]
 
   return {
     ...outcome,
     findings: [
       ...outcome.findings,
-      ...stackFindings(live),
-      ...fanInFindings(live),
+      ...(record === undefined
+        ? across
+        : across.filter((found) => found.record === `${record}.md`)),
     ],
   }
 }
@@ -801,6 +827,7 @@ function report(
         kind: outcome.kind,
         records: outcome.records,
         findings: outcome.findings,
+        structure: outcome.structure,
       })}\n`,
     )
   } else {
@@ -814,6 +841,11 @@ function report(
     } else {
       for (const found of outcome.findings) logWarn(describe(found))
     }
+
+    if (outcome.structure.length > 0) {
+      logStep('Structure, reported and never in the exit')
+      for (const entry of outcome.structure) logInfo(describeStructure(entry))
+    }
     outro()
   }
 
@@ -823,6 +855,11 @@ function report(
 function describe(found: Finding): string {
   const scope = found.record === found.subject ? '' : `${found.record}: `
   return `${scope}${found.subject} ${found.message}`
+}
+
+function describeStructure(entry: StructureFinding): string {
+  const scope = entry.record === entry.subject ? '' : `${entry.record}/`
+  return `${entry.criterion} ${scope}${entry.subject}:${entry.line} ${entry.message}`
 }
 
 async function runOrdinal(

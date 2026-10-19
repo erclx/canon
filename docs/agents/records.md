@@ -57,5 +57,5 @@ Branch on `reason` in the `--json` record, not the exit code.
 ## See also
 
 - `canon records ordinal <kind> <slug> --claim`: reserve the next intake or groundwork ordinal
-- `canon records validate <kind> --help`: where a record folder disagrees with its standard
+- `canon records validate <kind> [record] --help`: where a record disagrees with its standard, plus a `structure` report that never sets the exit
 - `canon records stale --help`: when the requirements record was last reviewed

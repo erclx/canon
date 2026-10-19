@@ -119,7 +119,15 @@ Where an item touches a task already on the board, say so in the index rather th
 - Where the answer is the operator's preference rather than a technical call, say so in that form rather than inventing a default
 - `Overlaps:` never replaces `Worth it:`, since an item a live board task might have wrong is the one whose verdict matters most
 
-Two heading levels is the right depth inside a cluster file. A third means the cluster should have been its own file. An item may carry a rare bolded standalone line between the bullets where a finding needs a name of its own, and everything fitting the four bullets belongs in them.
+### One line per field
+
+A field keeps all its content on its own line, with no nested list, paragraph, or standalone line under it or after the last field. `canon intake list` reads a field's line and nothing below it, so a nested line never reaches the operator answering in chat.
+
+- Write a list the Problem needs inline, separated by commas, rather than as nested bullets under a line ending on a colon
+- Split an item too big for its fields into two, numbered as `3a` and `3b`, rather than stretching one field across lines
+- `canon records validate intake <slug>` reports each block sitting under a field as `intake-spill` under `structure`
+
+Two heading levels is the right depth inside a cluster file. A third means the cluster should have been its own file. A cluster file otherwise holds to the six structure criteria under `### Structure` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`, with an item's fields exempt from `S4` and its numbered heading from `S3`.
 
 ## The answer contract
 

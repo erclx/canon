@@ -4,6 +4,11 @@ import { join } from 'node:path'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import { linesOutsideFences } from '@/markdown/scan'
 import {
+  intakeStructure,
+  type StructureEntry,
+  structureFindings,
+} from '@/records/structure'
+import {
   recordDir as resolveRecordDir,
   recordDirs as resolveRecordDirs,
 } from '@/roots/record'
@@ -27,7 +32,11 @@ export type RecordKind = (typeof RECORD_KINDS)[number]
  * union covering only what the walk returns would type a record the command can
  * emit as impossible.
  */
-export const VALIDATE_REFUSALS = ['no-folder', 'unknown-kind'] as const
+export const VALIDATE_REFUSALS = [
+  'no-folder',
+  'no-record',
+  'unknown-kind',
+] as const
 
 export type ValidateRefusal = (typeof VALIDATE_REFUSALS)[number]
 
@@ -61,11 +70,24 @@ export interface Finding {
   readonly message: string
 }
 
+/**
+ * A place a record misses a structure criterion. It sits apart from `Finding`
+ * so it never sets the exit, since every record written before the criteria
+ * misses `S1` and a gate on it would fail them all.
+ */
+export interface StructureFinding extends StructureEntry {
+  /** The record the entry sits in, relative to the validated folder. */
+  readonly record: string
+  /** The file inside a folder record, or the record itself for a plan. */
+  readonly subject: string
+}
+
 export interface ValidateReport {
   readonly ok: true
   readonly kind: RecordKind
   readonly records: number
   readonly findings: readonly Finding[]
+  readonly structure: readonly StructureFinding[]
 }
 
 export interface ValidateRefused {
@@ -267,7 +289,7 @@ export function sectionMarker(line: string): PlanSection | undefined {
 
 /** The spelling a finding names, which is the one the standard's template ships. */
 export function preferredMarker(section: PlanSection): string {
-  return section === 'Summary' ? '## Summary' : `**${section}:**`
+  return `## ${section}`
 }
 
 export function splitPlanSections(text: string): Map<string, string[]> {
@@ -915,6 +937,42 @@ const FOLDER_CHECK: Readonly<
   teach: checkWorkspace,
 }
 
+/**
+ * The files of a folder record the structure report reads. A groundwork
+ * track's `evidence/`, `scripts/`, and `clones/` sit below the top level and
+ * hold copies and raw output, so only its index and numbered files are read.
+ * An intake folder's reserved files hold no items, so only clusters are.
+ */
+const STRUCTURE_FILES: Readonly<
+  Partial<Record<RecordKind, (file: string) => boolean>>
+> = {
+  groundwork: (file) => file === GROUNDWORK_INDEX || NUMBERED_FILE.test(file),
+  intake: (file) => file !== INTAKE_INDEX && file !== INTAKE_HANDOFF,
+}
+
+async function folderStructure(
+  dir: string,
+  kind: RecordKind,
+  slug: string,
+): Promise<StructureFinding[]> {
+  const reads = STRUCTURE_FILES[kind]
+  if (!reads) return []
+
+  const report = kind === 'intake' ? intakeStructure : structureFindings
+  const files = (await listMarkdown(dir)).filter(reads)
+  const perFile = await Promise.all(
+    files.map(async (file) =>
+      report(await readFile(join(dir, file), 'utf8')).map((entry) => ({
+        ...entry,
+        record: slug,
+        subject: file,
+      })),
+    ),
+  )
+
+  return perFile.flat()
+}
+
 function refuse(reason: ValidateRefusal, message: string): ValidateRefused {
   return { ok: false, reason, message }
 }
@@ -923,17 +981,42 @@ function refuse(reason: ValidateRefusal, message: string): ValidateRefused {
 async function validateFiles(
   dir: string,
   kind: RecordKind,
+  files: readonly string[],
   check: (name: string, text: string) => Finding[],
 ): Promise<ValidateReport> {
-  const files = await listMarkdown(dir)
-
   const perFile = await Promise.all(
-    files.map(async (file) =>
-      check(file, await readFile(join(dir, file), 'utf8')),
-    ),
+    files.map(async (file) => {
+      const text = await readFile(join(dir, file), 'utf8')
+      return {
+        findings: check(file, text),
+        structure: structureFindings(text).map((entry) => ({
+          ...entry,
+          record: file,
+          subject: file,
+        })),
+      }
+    }),
   )
 
-  return { ok: true, kind, records: files.length, findings: perFile.flat() }
+  return {
+    ok: true,
+    kind,
+    records: files.length,
+    findings: perFile.flatMap((one) => one.findings),
+    structure: perFile.flatMap((one) => one.structure),
+  }
+}
+
+/**
+ * Narrows a listing to the one record a caller named, by a plan's stem or a
+ * folder's slug, so a writing skill reads its own record and not every old one.
+ */
+function narrow(
+  names: readonly string[],
+  record: string | undefined,
+): readonly string[] {
+  if (record === undefined) return names
+  return names.filter((name) => name === record || name === `${record}.md`)
 }
 
 /**
@@ -944,6 +1027,7 @@ async function validateFiles(
 export async function validateRecords(
   root: string,
   kind: RecordKind,
+  record?: string,
 ): Promise<ValidateOutcome> {
   const dir = recordsDir(root, kind)
 
@@ -954,13 +1038,30 @@ export async function validateRecords(
     )
   }
 
-  if (kind === 'plans') return validateFiles(dir, kind, checkPlan)
-
-  const folders = await listFolders(dir)
-  const check = FOLDER_CHECK[kind]
-  const perFolder = await Promise.all(
-    folders.map((slug) => check(join(dir, slug), slug)),
+  const names = narrow(
+    kind === 'plans' ? await listMarkdown(dir) : await listFolders(dir),
+    record,
   )
 
-  return { ok: true, kind, records: folders.length, findings: perFolder.flat() }
+  if (record !== undefined && names.length === 0) {
+    return refuse('no-record', `No ${kind} record named ${record} in ${dir}.`)
+  }
+
+  if (kind === 'plans') return validateFiles(dir, kind, names, checkPlan)
+
+  const check = FOLDER_CHECK[kind]
+  const perFolder = await Promise.all(
+    names.map(async (slug) => ({
+      findings: await check(join(dir, slug), slug),
+      structure: await folderStructure(join(dir, slug), kind, slug),
+    })),
+  )
+
+  return {
+    ok: true,
+    kind,
+    records: names.length,
+    findings: perFolder.flatMap((one) => one.findings),
+    structure: perFolder.flatMap((one) => one.structure),
+  }
 }

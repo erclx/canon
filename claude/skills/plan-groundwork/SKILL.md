@@ -134,6 +134,14 @@ The standard sets the open question format inside a topic file and in `00-scope.
 
 Aside from an experiment fixture, Steps 4 and 5 are the only ways close mode reaches outside the folder. Do not close while an open question quietly fails an outcome. Resolve it, or record it in `06-decision.md` as knowingly accepted.
 
+## Check the folder
+
+Run `canon records validate groundwork <nn>-<slug>` on the folder this run wrote, in every mode, before reporting. Fix each entry its `structure` array names, against `### Structure` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
+
+- Pass the slug every time, since the bare kind reads every old track and buries this one under their entries
+- Read the array rather than the exit, which a structure entry never sets
+- Say the check did not run when the binary carries no `structure` key, rather than reporting the folder clean
+
 ## Output
 
 Emit the full relative path from the project root for every file written or updated, since a bare filename names a file the reader cannot open. Read `${CLAUDE_SKILL_DIR}/references/output.md` on reaching this step for the open and resume template, the retell, and the close template. A run that stops on a guard skips it.

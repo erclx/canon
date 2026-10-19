@@ -152,4 +152,141 @@ describe('canon records validate plans', () => {
       findings.filter(({ kind }) => kind === 'fan-in-unmatched'),
     ).toMatchObject([{ record: 'feature-a.md', subject: 'feature-whole' }])
   })
+
+  it('should exit 0 on a plan missing structure criteria alone', async () => {
+    await writeFile(
+      join(root, '.canon', 'plans', 'feature-old.md'),
+      [
+        '# Feature: Old shape',
+        '',
+        '## Summary',
+        '',
+        '- The goal',
+        '',
+        '**Files to touch:**',
+        '',
+        '- `src/a.ts`: the change',
+        '',
+        '**Verification:**',
+        '',
+        '- `bun test`',
+        '',
+        '**Risks:**',
+        '',
+        'None identified.',
+        '',
+        '**Review focus:**',
+        '',
+        'None identified.',
+        '',
+        '**Questions:**',
+        '',
+        'None identified.',
+        '',
+      ].join('\n'),
+    )
+
+    const result = await runCli([
+      'records',
+      'validate',
+      'plans',
+      '--json',
+      '--root',
+      root,
+    ])
+
+    expect(result.exitCode).toBe(0)
+    const parsed = JSON.parse(result.stdout) as {
+      findings: unknown[]
+      structure: { criterion: string }[]
+    }
+    expect(parsed.findings).toEqual([])
+    expect(parsed.structure).toHaveLength(5)
+  })
+
+  it('should narrow both arrays to the record named', async () => {
+    await writeFile(
+      join(root, '.canon', 'plans', 'feature-a.md'),
+      '# Feature: A\n\n**Risks:**\n',
+    )
+    await writeFile(
+      join(root, '.canon', 'plans', 'feature-b.md'),
+      '# Feature: B\n\n**Risks:**\n',
+    )
+
+    const result = await runCli([
+      'records',
+      'validate',
+      'plans',
+      'feature-b',
+      '--json',
+      '--root',
+      root,
+    ])
+
+    const parsed = JSON.parse(result.stdout) as {
+      records: number
+      findings: { record: string }[]
+      structure: { record: string }[]
+    }
+    expect(parsed.records).toBe(1)
+    expect(
+      [...parsed.findings, ...parsed.structure].map(({ record }) => record),
+    ).toContain('feature-b.md')
+    expect(
+      [...parsed.findings, ...parsed.structure].every(
+        ({ record }) => record === 'feature-b.md',
+      ),
+    ).toBe(true)
+  })
+
+  it('should keep the cross-plan findings when the record carries .md', async () => {
+    await writeFile(
+      join(root, '.canon', 'plans', 'feature-a.md'),
+      [
+        '# Feature: A member',
+        '',
+        '## Constraints',
+        '',
+        '- Fan-in member of `feature-whole`.',
+        '',
+      ].join('\n'),
+    )
+
+    const result = await runCli([
+      'records',
+      'validate',
+      'plans',
+      'feature-a.md',
+      '--json',
+      '--root',
+      root,
+    ])
+
+    expect(result.exitCode).toBe(2)
+    const { findings } = JSON.parse(result.stdout) as {
+      findings: { kind: string; record: string }[]
+    }
+    expect(
+      findings.filter(({ kind }) => kind === 'fan-in-unmatched'),
+    ).toMatchObject([{ record: 'feature-a.md' }])
+  })
+
+  it('should refuse a record the folder does not hold', async () => {
+    const result = await runCli([
+      'records',
+      'validate',
+      'plans',
+      'feature-absent',
+      '--json',
+      '--root',
+      root,
+    ])
+
+    expect(result.exitCode).toBe(1)
+    expect(JSON.parse(result.stdout)).toMatchObject({
+      ok: false,
+      reason: 'no-record',
+    })
+  })
 })

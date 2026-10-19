@@ -67,9 +67,9 @@ install -D -m 0644 <source> <main-root>/.canon/ready/<nn>-<slug>/<destination pa
 
 Write `<main-root>/.canon/plans/feature-<slug>.md` from the template, by heredoc, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
 
-- List every Step 1 destination under `**Files to touch:**`, each with one clause on why it changes, pointing at the folder's copy rather than restating it.
-- Add a `**Constraints:**` line naming the ready folder as the verbatim source for those paths.
-- Name the branch type from Step 1 in `## Summary`. Write `None identified.` under `**Questions:**` unless a call is genuinely the operator's.
+- List every Step 1 destination under `## Files to touch`, each with one clause on why it changes, pointing at the folder's copy rather than restating it.
+- Add a `## Constraints` line naming the ready folder as the verbatim source for those paths.
+- Name the branch type from Step 1 in `## Summary`. Write `None identified.` under `## Questions` unless a call is genuinely the operator's.
 
 Run the match check in `${CLAUDE_SKILL_DIR}/references/assembly.md` before going further. The two lists are one list, and a path in either without the other stops the run.
 
