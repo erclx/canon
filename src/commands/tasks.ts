@@ -680,7 +680,9 @@ export function register(program: Command): void {
         '                  the last listed, so a later number closes the issue',
         '  lookup-failed   the pull request lookup failed while the task already',
         '                  lists a pull request, so an earlier slice cannot be ruled out',
-        '  open-outcomes   an outcome is still open, so a later slice closes it',
+        '  open-outcomes   an outcome is still open, so a later slice closes it.',
+        '                  A `- [ ] Operator check: <outcome>` line holds nothing open and',
+        '                  is listed under `operatorChecks`',
         '  pending-branch  another branch is on `Pending branch:`',
         '  no-outcomes     the task carries no outcomes',
         '',
@@ -1544,6 +1546,7 @@ function reportCloses(
         issues: outcome.issues,
         closing: outcome.closing,
         reason: outcome.reason,
+        operatorChecks: outcome.operatorChecks ?? [],
       })}\n`,
     )
     return 0
@@ -1556,6 +1559,9 @@ function reportCloses(
       ? `${outcome.stem} names ${outcome.issues.map((n) => `#${n}`).join(', ')}, ${outcome.reason}`
       : `${outcome.stem} names no issue`,
   )
+  for (const check of outcome.operatorChecks ?? []) {
+    logInfo(`operator check: ${check}`)
+  }
   outro()
 
   return 0
@@ -2199,6 +2205,7 @@ function report(
   logRelinked(outcome.relinked, outcome.relinkFailed, root)
   if (outcome.indexRegenerated) logInfo('regenerated index.md')
   if (outcome.cut > 0) logInfo(`${outcome.cut} outcome(s) cut`)
+  for (const check of outcome.operatorChecks) logInfo(check)
   outro()
 
   return 0
@@ -2289,6 +2296,7 @@ function recordFor(
       : null,
     closed: outcome.closed,
     cut: outcome.cut,
+    operatorChecks: outcome.operatorChecks,
     relinked: relinkedFor(outcome.relinked, root),
     relinkFailed: relinkFailedFor(outcome.relinkFailed, root),
   }

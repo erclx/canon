@@ -47,6 +47,7 @@ describe('decideClosing', () => {
       issues: [12],
       closing: true,
       reason: 'last-slice',
+      operatorChecks: [],
     })
   })
 
@@ -56,6 +57,7 @@ describe('decideClosing', () => {
       issues: [12],
       closing: false,
       reason: 'open-outcomes',
+      operatorChecks: [],
     })
   })
 
@@ -114,6 +116,55 @@ describe('decideClosing', () => {
     expect(decideClosing(task(['Issue: #12'], []), [])).toMatchObject({
       closing: false,
       reason: 'no-outcomes',
+    })
+  })
+})
+
+describe('decideClosing operator checks', () => {
+  const operator = '- [ ] Operator check: run it on a Mac'
+
+  it('should close with only an operator check open and list it', () => {
+    const text = task(['Issue: #12'], ['- [x] a', operator])
+
+    expect(decideClosing(text, ['feat/a'])).toEqual({
+      issues: [12],
+      closing: true,
+      reason: 'last-slice',
+      operatorChecks: ['Operator check: run it on a Mac'],
+    })
+  })
+
+  it('should close a task whose outcomes are all operator checks', () => {
+    expect(
+      decideClosing(task(['Issue: #12'], [operator]), ['feat/a']),
+    ).toMatchObject({ closing: true, reason: 'last-slice' })
+  })
+
+  it('should hold on a build outcome open beside an operator check', () => {
+    const text = task(['Issue: #12'], [operator, '- [ ] b'])
+
+    expect(decideClosing(text, ['feat/a'])).toMatchObject({
+      closing: false,
+      reason: 'open-outcomes',
+      operatorChecks: ['Operator check: run it on a Mac'],
+    })
+  })
+
+  it('should keep the earlier-slice reason on an operator-only task', () => {
+    const text = task(['Issue: #12', 'Pull request: #10, #11'], [operator])
+
+    expect(decideClosing(text, ['feat/a'], [10])).toMatchObject({
+      closing: false,
+      reason: 'earlier-slice',
+    })
+  })
+
+  it('should keep the pending-branch reason on an operator-only task', () => {
+    const text = task(['Issue: #12', 'Pending branch: feat/b'], [operator])
+
+    expect(decideClosing(text, ['feat/a'])).toMatchObject({
+      closing: false,
+      reason: 'pending-branch',
     })
   })
 })
