@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.48.0](https://github.com/erclx/canon/compare/v5.47.0...v5.48.0) (2026-10-19)
+
+
+### Features
+
+* **migrate:** add merge deny entries to existing targets ([#2550](https://github.com/erclx/canon/issues/2550)) ([4bcfaeb](https://github.com/erclx/canon/commit/4bcfaeb0c1342305db1d63192e2d8189a01b3020))
+* **pr:** add a merge verb that squashes only the change ([#2546](https://github.com/erclx/canon/issues/2546)) ([6e3a7d8](https://github.com/erclx/canon/commit/6e3a7d8a77c1599884fc9db8aca309711528c555))
+* **pr:** check UI ticks against the verdict and refuse undriven closes ([#2545](https://github.com/erclx/canon/issues/2545)) ([25ba1d0](https://github.com/erclx/canon/commit/25ba1d066be9de38f20c047e25a4e5c73a132146))
+* **tasks:** close and archive on operator checks left open ([#2549](https://github.com/erclx/canon/issues/2549)) ([0692810](https://github.com/erclx/canon/commit/069281083e5b8e7f9ce7e611a2e896e12e80fa37))
+
 ## [5.47.0](https://github.com/erclx/canon/compare/v5.46.0...v5.47.0) (2026-10-19)
 
 
