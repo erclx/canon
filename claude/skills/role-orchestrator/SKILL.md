@@ -38,11 +38,11 @@ No surface carries cross-version sequencing, so report none, since reasoning spa
 
 ## Runbooks on request
 
-A compaction is a moment this skill cannot detect, so the human asks for each side of it and this skill reads the matching runbook.
+The human asks for each side of a compaction, and this skill reads the runbook.
 
 - On a request to write the handoff, follow `${CLAUDE_SKILL_DIR}/references/orchestrator-handoff.md`. It sends the generic half to `canon:session-map` and adds decisions taken under delegated authority.
 - That map follows `${CLAUDE_SKILL_DIR}/../session-map/references/session.md`. Write nothing to the handoff that the board, a task file, or a groundwork folder already carries.
-- On a request to launch by hand, write the prompts as `${CLAUDE_SKILL_DIR}/references/orchestrator-launch.md` states under `## Hand launch`
+- Hand launch: `${CLAUDE_SKILL_DIR}/references/orchestrator-hand-launch.md`
 - A lesson about how to work goes to the owning task's Findings, as a bold-labeled line per `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`
 - On a request to resume after a compaction, read `${CLAUDE_SKILL_DIR}/references/orchestrator-resume.md`, which reads that file back with the board and the groundwork behind the live work
 
