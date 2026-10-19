@@ -82,7 +82,7 @@ The document opens with `# Feature: <short title>` and one paragraph stating wha
 | `## Sources`           | the outside sources a decision rests on, each with its quoted passage       | When a decision rests on an outside source        |
 
 - Write each section as the H2 the table gives, so a reader scans the plan by its outline
-- A section in the old bold spelling is still that section, since `## Risks` and `**Risks:**` name one thing to every parser. Leave an existing plan's spelling alone.
+- A section written as a bold label, the spelling before this one, is still that section to every parser. Leave an existing plan's spelling alone.
 - Write `None identified.` under a required section with nothing to report rather than dropping the marker. A dropped section and an unconsidered one read identically.
 - Aim `## Summary` at a person scanning the plan, not at the session executing it. The other sections carry what execution needs.
 

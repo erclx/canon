@@ -7,7 +7,7 @@ description: Why writing a ready folder, its overview, the thin plan, and the ta
 
 ## Gap
 
-A session handing finished files to a worker writes the folder, the overview, the plan, and the task row by hand, and the four drift. A destination missing from the plan's `**Files to touch:**` is invisible to `plan-reach`, so a second track writes the same file.
+A session handing finished files to a worker writes the folder, the overview, the plan, and the task row by hand, and the four drift. A destination missing from the plan's `## Files to touch` is invisible to `plan-reach`, so a second track writes the same file.
 
 Numbering scans one place, so an ordinal can reuse a number an archive already spent, and a bare phase label reserves nothing. A draft beside the real files, or no verbatim-source line, sends the worker off to write its own version. A main-root write from a worktree lands in a copy nobody reads, and the archive move goes unreported.
 
@@ -15,8 +15,8 @@ Numbering scans one place, so an ordinal can reuse a number an archive already s
 
 - Refuse before writing when the operator named no finished file or a named file does not resolve
 - Read the ordinal from the live folder and the archive together, and take the label from `canon tasks next-label --claim`, stopping on a binary that predates the flag
-- Derive the overview's `destinations` and the plan's `**Files to touch:**` from one list and compare them before reporting
-- Copy each finished file whole into the folder with nothing else, and write the plan's `**Constraints:**` line naming the folder as the verbatim source
+- Derive the overview's `destinations` and the plan's `## Files to touch` from one list and compare them before reporting
+- Copy each finished file whole into the folder with nothing else, and write the plan's `## Constraints` line naming the folder as the verbatim source
 - Place the task's row by the branches `task-board` states, route main-root writes through `Bash`, and name the archive move in the closing report
 
 ## Must not
