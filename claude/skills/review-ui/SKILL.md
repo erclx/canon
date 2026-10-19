@@ -22,8 +22,8 @@ The checklist is its only statement of intent, so it tests the feature the way a
 
 A pass stops rather than repeat a verdict that already covers the head.
 
-- The newest UI verdict is `## UI review closed` at the current head: stop, `The UI review already covers <short-sha>.`
-- An open verdict at the head stops the same way, unless a `## Review response` or `## Post-review findings` comment is newer than it or the launch names an address
+- The newest UI verdict is `## UI review closed` at the current head and drove a box: stop, `The UI review already covers <short-sha>.`
+- An open verdict at the head stops the same way, unless a `## Review response` or `## Post-review findings` comment is newer, the launch names an address, or it drove no box, as `post.md` defines
 - The hosted preview was not built from the head: stop and post nothing, naming `built`, `tip`, and `canon pr preview <number> --json` for the dispatcher
 - Post, then run `canon pr lift <number>` on a close. Never merge or ready the PR by hand, and edit the evidence comment only through `canon pr tick`.
 - A push after a close owes a re-drive only when it changed a painted path, since the lift carries the close across the rest.
@@ -98,7 +98,7 @@ When the hosted rung answers, read `${CLAUDE_SKILL_DIR}/references/hosted-previe
 
 The check covers the hosted address only. The local rung and a launch-named address have no deploy run to read, so say in the comment they were driven unverified.
 
-An address that exists and does not answer differs from no address. When every rung fails to answer, skip the drive, record each box as not driven with the addresses tried and what each returned, and go to Step 7.
+An address that exists and does not answer differs from no address. When every rung fails to answer, skip the drive, record each box as not driven with the addresses tried and what each returned, and go to Step 7. No box was driven, so Step 7 posts it open.
 
 ## Step 4: open the browser
 
