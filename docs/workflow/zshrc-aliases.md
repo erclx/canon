@@ -17,6 +17,7 @@ A hand-written block without markers is detected through its `alias clp=` line, 
 ```zsh
 # >>> canon aliases >>>
 TOOLKIT="/path/to/toolkit"
+export CLAUDE_CODE_ENABLE_TODO_TOOLS=1
 
 alias cl='claude'
 alias clr='cl -r'
@@ -31,6 +32,8 @@ alias clpa='clp agents'
 alias clpac='clpa --cwd .'
 # <<< canon aliases <<<
 ```
+
+The export gives a session started from your terminal the task tools, which Claude Code reads before it starts, so workers and reviewers can show their checklist on `Ctrl+T`. A background session has them without it.
 
 To opt out, delete the block and run `bun install` and `bun link` yourself. Bash takes the block unchanged in `~/.bashrc`, pasted by hand. Bootstrap writes `~/.zshrc` alone.
 
