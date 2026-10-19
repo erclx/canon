@@ -123,7 +123,11 @@ Whether a human is genuinely required is a reading the author may hold a reason 
 
 Read `## For the reviewer` the same way, bounded to the bullets under that heading. The Summary and Technical context carry the author's argument, and reading them while judging is what an independent pass exists to avoid.
 
-Answer each bullet in the body with no severity and no count. An unanswered request stays owed under the heading and dispatch, as an unanswered Testing box does, and an answered one is discharged in the same comment.
+Answer each bullet in the body with no severity and no count.
+
+- An unanswered request stays owed under the heading and dispatch, as an unanswered Testing box does
+- An answered one is discharged in the same comment
+- A request the diff answers against the author becomes a graded finding under the file that should have handled it, and enters the count, as an unconfirmed Review focus item does
 
 ### Review focus
 

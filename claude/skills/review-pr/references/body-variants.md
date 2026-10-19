@@ -60,6 +60,7 @@ A pass carrying nothing at all takes `## Review closed` and a short body, with t
 ```
 
 - Each line names what holds now rather than the commit that fixed it, and stays under 200 characters
+- A prior finding this pass withdrew leaves the count, and its line names the fact that settled it rather than a fix, per the withdrawal rule below
 - A closing remark that fits no prior finding, such as a ticked Testing box, takes one line of its own after them
 
 ### Only minors

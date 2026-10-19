@@ -4,8 +4,8 @@
 #
 # The plan names two inputs under `**Review focus:**`. The diff rejects an
 # empty title and places no cap on length, so a conforming first pass confirms
-# the first item in a `**Review focus**` block and files the second as a
-# `should-fix` finding, which keeps the review open.
+# the first item under a folded `Review focus, N checked` summary and files the
+# second as a `should-fix` finding, which keeps the review open.
 
 # The short-sha segment is derived from the PR's head commit, so only the
 # prefix is fixed.
@@ -30,7 +30,7 @@ pattern = '^## Review[ \t]*$'
 
 [[content]]
 path = ".canon/tmp/pr/review/body-*.md"
-pattern = '^\*\*Review focus\*\*'
+pattern = '^<summary>Review focus, [0-9]+ checked</summary>'
 
 [[content]]
 path = ".canon/tmp/pr/review/body-*.md"
@@ -38,8 +38,8 @@ pattern = '\*\*should-fix\*\*'
 
 # The should-fix sits under `src/tasks.ts`, so its own bullet links to its line
 # at the reviewed head. The pattern opens on the should-fix bullet, so a plain
-# bullet fails it and a link inside a minor or a `**Review focus**` bullet does
-# not satisfy it.
+# bullet fails it and a link inside a minor or a folded Review focus bullet
+# does not satisfy it.
 [[content]]
 path = ".canon/tmp/pr/review/body-*.md"
 pattern = '\*\*should-fix\*\* \(\[lines? [0-9-]+\]\([^)]*blob/[0-9a-f]{40}/src/tasks\.ts#L[0-9]+'
