@@ -127,7 +127,7 @@ Answer each bullet in the body with no severity and no count. An unanswered requ
 
 ### Review focus
 
-On a first pass, confirm each `**Review focus:**` item the plan names against the diff, since only the planning session's list names the inputs that would break the change. Report them in a `**Review focus**` block after `**For the reviewer**`, one bullet each naming what confirmed it.
+On a first pass, confirm each `**Review focus:**` item the plan names against the diff, since only the planning session's list names the inputs that would break the change. Report them folded under `<details>` after the reviewer block, with the count in its summary as `Review focus, N checked`, one bullet each naming the case and what confirmed it.
 
 - The block carries no severity and enters no count
 - An item the pass cannot confirm becomes a `should-fix` finding under the file that should have handled it, so a checked item reads apart from a skipped one
@@ -155,6 +155,9 @@ A prior finding can also be settled by argument, such as a reply naming the plan
 Read `${CLAUDE_SKILL_DIR}/references/post.md` for the body file name, the body shape, the PR body block, the marker every body carries, and the scans ahead of the post, and `${CLAUDE_SKILL_DIR}/references/body-variants.md` for the Testing and reviewer blocks and the close-out bodies.
 
 That file sends a pass repeating a standing close-out on to `${CLAUDE_SKILL_DIR}/references/close-out.md`, which rewrites the comment in place.
+
+- Stop on a `density` entry in the body scan's record as on any other finding, and regroup or split the item it names before posting
+- Read the record rather than the exit, since the scan exits 0 on density alone
 
 ## Step 5: output
 

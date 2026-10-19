@@ -542,7 +542,7 @@ export default scenario({
         'Expect:  reads ## For the reviewer bounded to its own bullets, answers it from the diff',
       )
       ctx.log.info(
-        '         posts a **For the reviewer** block carrying the answer',
+        '         folds the answer under a For the reviewer, 1 confirmed details block',
       )
       ctx.log.info(
         '         posts under ## Review closed, since the bullet is answered and nothing else is owed',
@@ -765,7 +765,7 @@ export default scenario({
         "Expect:  reads the plan's **Review focus:** and checks each item against the diff",
       )
       ctx.log.info(
-        '         confirms the empty-title item in a **Review focus** block, naming the guard',
+        '         confirms the empty-title item in a folded Review focus details block, naming the guard',
       )
       ctx.log.info(
         '         files the unbounded-length item as a should-fix under src/tasks.ts',
