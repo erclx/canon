@@ -71,6 +71,8 @@ A project installed before the board became a folder still holds `.claude/TASKS.
 - Expect `autoMemoryEnabled` to be `false`. A person turns it back on for themselves in `settings.local.json`.
 - Run `canon migrate session-defaults` on a target seeded before those two defaults, since sync never rewrites an existing settings file
 
+The seed's deny list also holds `Bash(canon pr merge:*)` and `Bash(gh pr merge:*)`, so the operator alone merges. Only a newly seeded target gets them, since the migration adds `Agent` and `Task` alone, so an existing target adds both by hand. Neither covers more than the form an agent writes by default.
+
 ## User settings
 
 - `canon claude setup` installs `tooling/claude/user/settings.template.json` once per machine

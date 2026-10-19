@@ -112,7 +112,7 @@ Holds the one-shot moves behind `canon migrate`, being `records`, `surface-roots
 
 ### `src/pr/`
 
-Holds the readers and writers behind `canon pr`, all over REST since a cloud session's proxy refuses GraphQL.
+Holds the readers and writers behind `canon pr`, all over REST since a cloud session's proxy refuses GraphQL. The squash merge in `merge.ts` is a REST `PUT` too, pinned to the head it read so a push landing after the read refuses.
 
 - `rest.ts` is the one boundary where REST payloads take the field names the rest of the folder reads, and list endpoints go through `gh api --paginate`
 - `head.ts` and `checks.ts` key on the remote tip, not the local branch, and `checks.ts` tells a conflicted branch from runs that have not started

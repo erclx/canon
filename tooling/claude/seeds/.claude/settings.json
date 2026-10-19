@@ -1,7 +1,7 @@
 {
   "autoMemoryEnabled": false,
   "permissions": {
-    "deny": ["Agent", "Task"]
+    "deny": ["Agent", "Task", "Bash(canon pr merge:*)", "Bash(gh pr merge:*)"]
   },
   "hooks": {
     "PreToolUse": [
