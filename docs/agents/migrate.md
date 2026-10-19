@@ -18,13 +18,13 @@ kind: reference
 | `rule-layout`      | A flat installed-rule layout onto the `canon/`-wrapped one                                                                                  |
 | `scratch-evidence` | A folder a durable record cites out of `.tmp/`, with its citations                                                                          |
 | `record-layout`    | Review receipts, memory archives, feedback, renders, picks, and evidence into their current folders                                         |
-| `session-defaults` | The seeded session defaults into an existing `.claude/settings.json`: `Agent` and `Task` denied, auto memory off                            |
+| `session-defaults` | The seeded session defaults into an existing `.claude/settings.json`: `Agent`, `Task`, and both merge commands denied, auto memory off      |
 
 - `skill-names` takes no `--scope`, and skips the changelog, eval transcripts, and the pointer each renamed `draft-` skill leaves at its old name
 - `surface-roots` leaves `rules/`, `skills/`, `hooks/`, and `settings.json` where Claude Code reads them
 - `rule-layout` classifies each flat file against the stamp as clean, edited, or unclaimed. Clean and edited files move untouched, and an unclaimed name stays.
 - `record-layout` labels each evidence folder `(pick)` or `(evidence)` in the dry run
-- `session-defaults` adds a key only when absent. It never removes a deny entry or changes a set `autoMemoryEnabled`, and a missing settings file is nothing to do.
+- `session-defaults` adds a key only when absent, merge entries included, and each older project runs it once. `--write` restores a removed `Agent` or `Task` and never removes a deny entry.
 
 ## Output
 

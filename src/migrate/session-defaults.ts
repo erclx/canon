@@ -1,6 +1,7 @@
 /**
  * Adds the session defaults the seeded `.claude/settings.json` carries to a
- * target that was seeded before them.
+ * target that was seeded before them: the subagent deny, the memory default, and
+ * the merge deny entries.
  *
  * `canon claude init` copies a seed only when the file is absent, so a target
  * holding its own settings never sees a later seed change. This verb adds each
@@ -21,6 +22,12 @@ import {
 /** Both names, since `Task` is the tool's name before Claude Code renamed it. */
 export const DENIED_TOOLS: readonly string[] = ['Agent', 'Task']
 
+/** The merge entries the seeded deny list carries, so a session cannot merge. */
+export const MERGE_DENIED: readonly string[] = [
+  'Bash(canon pr merge:*)',
+  'Bash(gh pr merge:*)',
+]
+
 export interface SessionDefaultsPlan {
   readonly keys: readonly SettingsKey[]
   readonly next: SettingsRecord
@@ -31,6 +38,8 @@ export interface SessionDefaultsPlan {
    * on purpose, which is how an operator opts back into subagents.
    */
   readonly predates: boolean
+  /** True when the deny list lacks any merge entry, whatever else it holds. */
+  readonly lacksMergeDeny: boolean
 }
 
 export type SessionDefaultsRead =
@@ -52,8 +61,8 @@ function isRecord(value: unknown): value is SettingsRecord {
 }
 
 /**
- * Appends the denied tools a list lacks, keeping the list's own order, so the
- * diff a person reads is the added entries alone.
+ * Appends the denied tools and merge entries a list lacks, keeping the list's
+ * own order, so the diff a person reads is the added entries alone.
  */
 export function planSessionDefaults(
   current: SettingsRecord,
@@ -62,7 +71,9 @@ export function planSessionDefaults(
   const permissions = isRecord(current.permissions) ? current.permissions : {}
   const deny = Array.isArray(permissions.deny) ? permissions.deny : []
 
-  const missing = DENIED_TOOLS.filter((tool) => !deny.includes(tool))
+  const subagentsMissing = DENIED_TOOLS.filter((tool) => !deny.includes(tool))
+  const mergeMissing = MERGE_DENIED.filter((entry) => !deny.includes(entry))
+  const missing = [...subagentsMissing, ...mergeMissing]
   if (missing.length > 0) {
     next.permissions = { ...permissions, deny: [...deny, ...missing] }
   }
@@ -78,7 +89,11 @@ export function planSessionDefaults(
     keys,
     next,
     changed: keys.some((key) => key.changed),
-    predates: memoryAbsent && missing.length === DENIED_TOOLS.length,
+    predates:
+      memoryAbsent &&
+      subagentsMissing.length === DENIED_TOOLS.length &&
+      mergeMissing.length === MERGE_DENIED.length,
+    lacksMergeDeny: mergeMissing.length > 0,
   }
 }
 
