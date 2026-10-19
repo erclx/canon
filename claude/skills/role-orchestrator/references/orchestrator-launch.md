@@ -12,6 +12,7 @@ Run this once `orchestrator-dispatch.md` has cleared a row, or from its planning
 - [Dispatch to address a review](#dispatch-to-address-a-review)
 - [Dispatch to plan a row](#dispatch-to-plan-a-row)
 - [Dispatch a talk session](#dispatch-a-talk-session)
+- [Hand launch](#hand-launch)
 - [Dispatch a reviewer](#dispatch-a-reviewer)
 
 ## Dispatch
@@ -155,6 +156,10 @@ The ellipsis stands for the rest of the cold template's message clauses, unchang
 Read the session's `sessionId` off the launch output, carry it in this session's own context, and write it into the map's `## Talk sessions held open` at the next handoff. The client can rename a session and drop the suffix, so the id is the durable marker and the suffix is only for display.
 
 The map exists only once the handoff writes it, so this session's own launches, read with the prior map, are what the first wind-down reads talk sessions from.
+
+## Hand launch
+
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-hand-launch.md` when the operator launches sessions by hand. It states the single prompts file at `.canon/tmp/dispatch/prompts.md`, the lean shape of each fence, and a filled example, while the background templates above keep their full controller paragraph.
 
 ## Dispatch a reviewer
 

@@ -9,7 +9,7 @@ Run this once `orchestrator-review-dispatch.md` has sent a pull request to a dis
 
 `review-pr` is a single pass rather than a role, so a launch naming it alone reaches no `role-reviewer` and owes no message. Reach the role first on this launch, the way the planning shape in `orchestrator-launch.md` reaches `role-planner`. `orchestrator-review-dispatch.md` decides whether a pull request takes this shape at all.
 
-No branch and no worktree are entered here. The reviewer reads the pull request at the head `review-pr` resolves and writes the comment and its body file alone.
+No branch and no worktree are entered here. The reviewer reads the pull request at the head `review-pr` resolves and writes the comment and its body file alone. A reviewer the operator launches by hand takes the `### Reviewer` H3 that `orchestrator-hand-launch.md` states.
 
 ```bash
 claude --bg --model <model> -n "reviewer-<project>-<number>" "Run /canon:role-reviewer, then /canon:review-pr <number>. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. When the pass posts under ## Review, message the worker holding the branch to run review-address, carrying your own sessionId, and send it to the controller instead when no worker resolves. When it posts ## Review closed, run canon pr lift <number> --json and message the controller with the heading, the count line, and the reason the verb returned, unless that reason names the UI review as still open or missing. Message the controller again if you stop on a question."
