@@ -181,7 +181,7 @@ const TICK_REFUSALS: Record<TickReason | 'gh-failed', string> = {
   'bad-boxes':
     '--boxes takes box numbers as a comma-separated list of positive whole numbers, such as 1,3, and --head takes the commit that was driven.',
   'count-mismatch':
-    'The newest UI verdict at this head passed more boxes than the ticks this call would leave at the head, so a box that passed would stay unticked. Nothing was written. Re-run once with every box that passed.',
+    'The newest UI verdict at this head passed a different number of boxes than the ticks this call would leave at the head. Nothing was written. With fewer ticks than passed, re-run once with every box that passed. With more, a box ticked earlier at this head has since failed, which only the operator can untick.',
   'no-comment': 'No comment on this pull request carries the evidence marker.',
   'no-checklist': 'The evidence comment carries no checklist to tick.',
   'no-box':
@@ -1063,9 +1063,11 @@ export function register(program: Command): void {
         'Read `reason` on the JSON record:',
         '  ticked       the boxes were ticked and the body line written, with the',
         '               tip in `head` and `countCheck` as matched or unchecked',
-        '  count-mismatch the verdict passed more boxes than this call leaves',
-        '               ticked at the tip, nothing written, `passed` and `ticked`',
-        '               carry the two counts',
+        '  count-mismatch the verdict passed a different number of boxes than',
+        '               this call leaves ticked at the tip, nothing written,',
+        '               `passed` and `ticked` carry the two counts. Fewer ticks',
+        '               owe a re-run with every passed box, more ticks owe the',
+        '               operator an untick of a box that has since failed',
         '  body-refused the comment is ticked but gh could not edit the body,',
         '               exit 1 with `commentTicked`. Re-run to retry the body.',
         '  stale-head   --head is not the remote branch tip, nothing written',

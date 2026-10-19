@@ -1583,6 +1583,31 @@ describe('canon pr tick', () => {
       expect(existsSync(apiLog)).toBe(false)
     })
 
+    it('should refuse when a box ticked at the tip has since failed, leaving more ticks than passed', async () => {
+      writeMarkedComment(
+        [
+          `- [x] the hero settles · passed at \`${tip.slice(0, 7)}\``,
+          '- [ ] the footer wraps',
+          '- [ ] the mood is calm (taste)',
+        ].join('\n'),
+      )
+      postVerdict(
+        verdict('1 failed · 1 need your eyes · 1 passed · 0 not driven', tip),
+      )
+
+      const outcome = await runTick(['--boxes', '2', '--head', tip])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({
+          reason: 'count-mismatch',
+          passed: 1,
+          ticked: 2,
+        }),
+        exit: 1,
+      })
+      expect(existsSync(apiLog)).toBe(false)
+    })
+
     it('should tick every box on a re-tick with the full passed list', async () => {
       postVerdict(verdict(TWO_PASSED, tip))
 

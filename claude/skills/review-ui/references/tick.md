@@ -17,7 +17,7 @@ Number the boxes off the `boxes` field Step 2 kept. Leave a box that failed, nee
 
 The verb refuses a taste box and a head that is no longer the remote tip, writing nothing in either case. Branch on the record's `reason`, which reads `ticked` on success.
 
-- `count-mismatch`: the posted verdict passed more boxes than this call leaves ticked, and nothing was written. Re-run once with every box that passed, then report a second refusal on `Ticks:`.
+- `count-mismatch`: nothing was written. With `ticked` below `passed`, re-run once with every passed box. With it above, a box ticked earlier has failed, so report it on `Ticks:` for the operator.
 - `stale-head`: a push landed while this pass drove. Report it on the `Ticks:` line of Step 10 and never retry at the new tip, since the boxes were driven at the old one.
 - `body-refused`: the comment is ticked and the body is not. Retry the same call once, then report the partial result on the `Ticks:` line rather than claiming both.
 - Any other refusal: report the `reason` on the `Ticks:` line and tick nothing further.

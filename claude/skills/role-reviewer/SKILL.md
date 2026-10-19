@@ -56,7 +56,7 @@ Nobody watches this pass, so the messages below are owed and nothing else. The w
 
 ### The address-review dispatch
 
-Send it to the worker holding the branch as `review-pr` Step 5 returns an open `## Review`, or as `review-ui` reports an open `## UI review`.
+Send it to the worker holding the branch as `review-pr` Step 5 returns an open `## Review`, or as `review-ui` reports an open `## UI review` that drove a box. A `## UI review` that drove no box goes to the controller with its cause instead, per `${CLAUDE_SKILL_DIR}/../review-ui/references/post.md`.
 
 - Carry the pull request number, the heading, that step's count line verbatim, and this session's own sessionId for the worker's reply
 - Resolve the worker with `canon sessions list --branch <branch> --json`, where `<branch>` is the pull request's head branch

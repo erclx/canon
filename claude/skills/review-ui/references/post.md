@@ -26,7 +26,7 @@ A pass with 0 failed, 0 need your eyes, 0 passed, and any box not driven looked 
 
 - Put a line naming the cause directly under the count line, such as the addresses tried and what each returned, ahead of the address line
 - The cure is a re-drive on an address that answers, which Step 1 of `review-ui` allows past this verdict
-- Message the dispatcher with the cause and send no `review-address`, since the verdict holds no box a fix worker could change
+- Message the controller with the cause and send the worker no `review-address`, since the verdict holds no box a fix worker could change
 - `canon pr lift` refuses a close of this shape as `ui-undriven`, so a violation holds the draft mark
 - A checklist with no box at all, which counts 0 not driven too, is an empty pass and takes the closed heading
 
