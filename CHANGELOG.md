@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.47.0](https://github.com/erclx/canon/compare/v5.46.0...v5.47.0) (2026-10-19)
+
+
+### Features
+
+* **labels:** grade pull request posts by density and restyle them ([#2542](https://github.com/erclx/canon/issues/2542)) ([e7fd790](https://github.com/erclx/canon/commit/e7fd7908f83e54b012e8a4620d1620c43f1e2c0b))
+* **labels:** report pull request body density per section ([#2537](https://github.com/erclx/canon/issues/2537)) ([fce0148](https://github.com/erclx/canon/commit/fce0148b5c8bd776c79a6707ff7ca84a096f0b2b))
+* **pr:** write a UI pass line into the body on tick ([#2540](https://github.com/erclx/canon/issues/2540)) ([4c0513b](https://github.com/erclx/canon/commit/4c0513bac38b7dc51d3fa0ba0910a1f741fd72aa))
+* **sessions:** confirm a live row by its socket listener ([#2536](https://github.com/erclx/canon/issues/2536)) ([077d5f0](https://github.com/erclx/canon/commit/077d5f0ef509c1a71f6dceb207236fea097da9fc))
+* **skills:** keep a task list in every worker and reviewer ([#2535](https://github.com/erclx/canon/issues/2535)) ([c179781](https://github.com/erclx/canon/commit/c179781d60bb93583fdf1a17900c109bc954f9c8))
+* **tasks:** clear the backlog bullet when archiving a task ([#2541](https://github.com/erclx/canon/issues/2541)) ([de31e5e](https://github.com/erclx/canon/commit/de31e5eada95b2a25ffd1251029b3acf53cbf4e4))
+
 ## [5.46.0](https://github.com/erclx/canon/compare/v5.45.0...v5.46.0) (2026-10-18)
 
 
