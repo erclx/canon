@@ -9,7 +9,7 @@ description: Scope boundary for driving the local design canvas, and the line be
 
 Without this skill, a session asked to draw on the canvas writes frames nothing is serving and reports them drawn. It trusts a passing capture, though a blank shell passes every capture while the operator sees an empty tab. From a linked worktree it writes a copy the canvas never serves, and it captures after every edit.
 
-It reads "this one" from the conversation rather than the operator's selection, or acts on a stale element pick and edits the wrong element. It restyles through a class while the operator's inspector edit sits inline, so the change never shows. A picked frame stays on the canvas as the only record, and the design document never learns it.
+It reads "this one" from the conversation rather than the operator's selection, or acts on a stale element pick and edits the wrong element. It restyles through a class while the operator's inspector edit sits inline, so the change never shows. A picked frame stays on the canvas as the only record, and the project's design record never learns it.
 
 ## Must
 
@@ -17,7 +17,7 @@ It reads "this one" from the conversation rather than the operator's selection, 
 - Pages and frames go through the verbs, so the session and the operator's drags share one writer, and a frame from a linked worktree takes the main-root route
 - The operator's selection decides what "this one" means, and a stale element pick reads as unknown
 - A frame's inline styles are read before a restyle, the run names which operator edits it kept and dropped, and capture runs once per finished frame or page
-- A picked value lands in the project's stylesheet and its intent in the design document, while a picked layout stays on the canvas for the plan that builds it
+- A picked frame is handed to `design-record` by page and frame, while a picked layout stays on the canvas for the plan that builds it
 
 ## Must not
 
@@ -31,4 +31,5 @@ It reads "this one" from the conversation rather than the operator's selection, 
 - Drafting candidates for a taste decision and taking the pick, which `pick-by-eye` owns
 - What the canvas verbs do internally, which the CLI's own contract owns
 - The content format a frame and a layout take, which the canvas standard owns
-- Tracing reference images into design values, writing the design document from code, and backing up the canvas folder, which no skill owns
+- Landing a pick in the reference folder and carrying its values into the design document, which `design-record` owns
+- Tracing reference images into design values and backing up the canvas folder, which no skill owns

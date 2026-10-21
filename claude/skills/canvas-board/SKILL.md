@@ -1,6 +1,6 @@
 ---
 name: canvas-board
-description: Drives the local design canvas, where pages hold HTML frames the operator sees, drags, selects, and edits in the browser. Starts the canvas when it is not running, confirms the live shell loads, makes pages and frames, edits a frame through its file, reads what the operator selected or restyled, captures finished frames, and carries a picked direction into the project's design document. Use when asked to "open the canvas", "put this on the canvas", "draw a frame for X", "change the one I selected", "what did I pick", "capture this frame", or "move that frame on the canvas". Do NOT use to draft candidates for a taste decision, which is `pick-by-eye`.
+description: Drives the local design canvas, where pages hold HTML frames the operator sees, drags, selects, and edits in the browser. Starts the canvas when it is not running, confirms the live shell loads, makes pages and frames, edits a frame through its file, reads what the operator selected or restyled, captures finished frames, and hands a picked frame to `design-record`. Use when asked to "open the canvas", "put this on the canvas", "draw a frame for X", "change the one I selected", "what did I pick", "capture this frame", or "move that frame on the canvas". Do NOT use to draft candidates for a taste decision, which is `pick-by-eye`.
 metadata:
   family: decide
 ---
@@ -16,7 +16,7 @@ Every verb below is `canon canvas`. Run `canon canvas --help` for the verbs and 
 - If `canon` is not on PATH, stop: `❌ canon CLI not found.`
 - If `canon canvas --help` reports no such command, stop: `❌ The installed canon carries no canvas command. Update the CLI and re-run.`
 - Write no frame before the canvas is serving and the shell has loaded. A frame nobody can see is a draft reported as delivered.
-- Never present a frame as the project's design. The canvas is a drafting surface and the project's design document holds what was decided.
+- Never present a frame as the project's design. The canvas is a drafting surface and the project's design record holds what was decided.
 - Never promise the canvas survives a lost checkout. Its folder is gitignored and nothing backs it up.
 
 ## Step 1: start the canvas and confirm the shell
@@ -122,13 +122,12 @@ Capture once per finished frame or page, not after every edit. The live canvas i
 
 A capture refused because a font is not installed names the family it read off the frame's text. Set that text's `font-family` to a named family the machine has, never a generic keyword such as `sans-serif`, and capture again rather than reporting the frame as captured.
 
-## Step 7: carry a picked direction back
+## Step 7: hand a picked frame on
 
-When the operator picks a frame, the decision leaves the canvas. Leave structure and layout on the canvas, and name the frame in the plan that builds it.
+When the operator picks a frame, the decision leaves the canvas. Hand it to `canon:design-record`, which lands the frame in the project's reference folder and carries its values into the design document. Report it rather than proceeding silently when that skill does not resolve.
 
-- Carry color, type, spacing, and radius into the stylesheet the design document's lead names, and their intent into its sections under the `design.md` standard
-- A project with no stylesheet yet takes the values under `.claude/design/project/` after `canon design install`, and the lead names that path
-- Name the frame the decision came from in the reply, and leave the frame on the canvas until the operator clears it.
+- Name the page and frame the decision came from in the handoff and the reply, and leave the frame on the canvas until the operator clears it
+- Name the frame in the plan that builds a picked layout, since the layout reaches code through that plan
 - Never cite a frame path from a tracked file. The folder is gitignored, so the citation resolves on this machine alone.
 
 ## Output
@@ -138,7 +137,7 @@ When the operator picks a frame, the decision leaves the canvas. Leave structure
 Page:     <page>, <n> frames
 Selected: <page>/<frame>, element <index>, or none, or stale
 Capture:  <path of each capture written>
-Carried:  <the stylesheet and design document the pick went to, the plan that cites the frame, or not yet>
+Handed:   <the frame handed to design-record, the plan that cites it, or not yet>
 ```
 
-Write the canvas line's URL as a markdown link. Omit the capture line when nothing was captured and the carried line when no direction was picked. Emit every path from the project root.
+Write the canvas line's URL as a markdown link. Omit the capture line when nothing was captured and the handed line when no frame was picked. Emit every path from the project root.
