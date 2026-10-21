@@ -64,6 +64,7 @@ web = ["web/"]
 # registers those hooks, so it rides the same row.
 ci = [
   ".github/",
+  "scripts/ci/",
   "scripts/core/",
   ".husky/",
   ".claude/hooks/",
