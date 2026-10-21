@@ -26,7 +26,7 @@ import {
   logStep,
   logWarn,
   outro,
-  palette,
+  outroSuccess,
   select,
 } from '@/cli/ui'
 import { compareVersions, parseVersion } from '@/version/compare'
@@ -436,7 +436,6 @@ export async function runDomainSync(
   }
 
   const plan = planSync(adapter, resolved)
-  const { GREEN, GREY, NC } = palette(process.stderr)
 
   if (
     !existsSync(adapter.installedRoot(resolved)) &&
@@ -453,8 +452,7 @@ export async function runDomainSync(
   if (count === 0) {
     await adapter.onComplete?.(resolved)
     await recordStamp(adapter, resolved, new Date())
-    outro()
-    process.stderr.write(`${GREEN}✓ Everything up to date${NC}\n`)
+    outroSuccess('Everything up to date')
     return 0
   }
 
@@ -489,10 +487,7 @@ export async function runDomainSync(
   await adapter.onComplete?.(resolved)
   await recordStamp(adapter, resolved, new Date())
 
-  outro()
-  process.stderr.write(
-    `${GREEN}✓ Sync complete${NC} ${GREY}(${count} ${adapter.unit})${NC}\n`,
-  )
+  outroSuccess('Sync complete', `(${count} ${adapter.unit})`)
   return 0
 }
 

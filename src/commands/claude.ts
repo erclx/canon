@@ -91,6 +91,7 @@ import {
   logStep,
   logWarn,
   outro,
+  outroSuccess,
   palette,
   pipeOutput,
   plural,
@@ -604,9 +605,7 @@ export function register(program: Command): void {
 }
 
 function succeed(message: string): number {
-  const { GREEN, NC } = palette(process.stderr)
-  outro()
-  process.stderr.write(`${GREEN}✓ ${message}${NC}\n`)
+  outroSuccess(message)
   return 0
 }
 

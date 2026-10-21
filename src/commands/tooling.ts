@@ -36,7 +36,7 @@ import {
   logStep,
   logWarn,
   outro,
-  palette,
+  outroSuccess,
   select,
 } from '@/cli/ui'
 
@@ -412,7 +412,6 @@ async function runSync(
   }
 
   const mode = resolveWriteMode(opts)
-  const { GREEN, NC } = palette(process.stderr)
 
   if (result.totalChanges === 0) {
     // The stamp is a write like any other, so a run with no authority to write
@@ -421,8 +420,7 @@ async function runSync(
     if (mode === 'apply' || mode === 'prompt') {
       await stampChain(prepared.chain, prepared.target)
     }
-    outro()
-    process.stderr.write(`${GREEN}✓ Everything up to date${NC}\n`)
+    outroSuccess('Everything up to date')
     return 0
   }
 
@@ -450,8 +448,7 @@ async function runSync(
 
   await stampChain(prepared.chain, prepared.target)
 
-  outro()
-  process.stderr.write(`${GREEN}✓ Tooling sync complete${NC}\n`)
+  outroSuccess('Tooling sync complete')
   return 0
 }
 

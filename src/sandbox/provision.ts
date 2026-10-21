@@ -27,7 +27,7 @@ import {
   logStep,
   logWarn,
   outro,
-  palette,
+  outroSuccess,
   select,
 } from '@/cli/ui'
 
@@ -99,9 +99,7 @@ function readGit(cwd: string, args: string[]): string | undefined {
 }
 
 function finish(message: string): void {
-  const { GREEN, NC } = palette(process.stderr)
-  outro()
-  process.stderr.write(`\n${GREEN}${message}${NC}\n`)
+  outroSuccess(message)
 }
 
 function stageAnchorTree(
@@ -475,14 +473,14 @@ async function provisionScenario(
   must(commitScenarioChanges(sandbox, isSkipAutoCommit, env))
   tagBaseline(sandbox, env)
 
-  finish('✓ Sandbox Ready')
+  finish('Sandbox Ready')
 }
 
 function cleanSandbox(sandbox: string): void {
   logStep('Removing sandbox')
   rmSync(sandbox, { recursive: true, force: true })
   logRemove(sandbox)
-  finish('✓ Sandbox clean')
+  finish('Sandbox clean')
 }
 
 function isAtBaseline(sandbox: string): boolean {
@@ -520,7 +518,7 @@ async function resetSandbox(sandbox: string): Promise<void> {
 
   if (isAtBaseline(sandbox)) {
     logInfo('At baseline')
-    finish('✓ Sandbox at baseline')
+    finish('Sandbox at baseline')
     return
   }
 
@@ -556,7 +554,7 @@ async function resetSandbox(sandbox: string): Promise<void> {
     must(run('git', ['checkout-index', '-a', '-f'], quiet))
   }
   logInfo('Sandbox reset to baseline')
-  finish('✓ Sandbox reset complete')
+  finish('Sandbox reset complete')
 }
 
 /**
