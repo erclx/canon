@@ -37,7 +37,7 @@ The field is learning science and cognitive psychology, with educational measure
 - Passage: "the ISI producing maximal retention increased as retention interval increased"
 - Adopted as the spacing section's principle. It names no schedule, which is why the ladder below is house judgment.
 
-[Pashler et al. 2007, IES practice guide 20072004](https://ies.ed.gov/ncee/wwc/Docs/PracticeGuide/20072004.pdf) backs the same at classroom scale, and its panel rates the evidence moderate.
+[Pashler et al. 2007, IES practice guide NCER 2007-2004](https://ies.ed.gov/ncee/wwc/Docs/PracticeGuide/20072004.pdf) backs the same at classroom scale, and its panel rates the evidence moderate.
 
 - Passage: key concepts seen on at least two occasions, "separated by a period of several weeks to several months"
 - Adopted as the rule to revisit once forgetting has begun rather than while the material is fresh
