@@ -79,10 +79,12 @@ When the changelog range is empty, `migrate status` lists nothing pending or ref
 
 ## Step 4: migrate
 
-Run each pending migration in the order `migrate status` gave, one at a time, as `canon migrate <name> --write --json`. Run `canon migrate status --json` again after each write, since an applied move can turn a clean entry pending.
+Run each pending migration in the order `migrate status` gave, one at a time, as the entry's `verb` with `--write --json` appended. The verb carries the flags its dry run used, so a bare `canon migrate <name>` would apply a plan the preview never showed.
 
+- Run `canon migrate status --json` again after each write, since an applied move can turn a clean entry pending
 - Stop and ask on a `refused` entry, quoting its reason and the remedy it names. Run the remedy only on the operator's word, since a refusal guards a destination the project may own.
-- Commit each migration through `canon:git-commit` right after its write, one commit per migration, since `canon sync` refuses a dirty tree and a revert should undo one move
+- Stage each write with `git add -A`, since no migrate verb stages and the tree was clean before it, then commit through `canon:git-commit`, one commit per migration
+- Skip the commit when the write changed no tracked file, as `record-tree` does by touching only gitignored records
 
 ### Markers
 
@@ -109,13 +111,15 @@ A `customized` rule is the file `canon sync` replaces, so read it back after the
 
 ### What the toolkit dropped
 
-Read `reverse.unclaimed` by attribution. Delete a `dropped` folder, read an `unattributed` one and ask before deleting it, and leave a `project` one alone. A `superseded` file is the project's content in a retired place, so name it and move nothing.
+Read `reverse.unclaimed` by attribution. Delete a `dropped` folder, read an `unattributed` one and ask before deleting it, and leave a `project` one alone.
+
+Read the report's top-level `superseded` and `unmigrated` lists apart from it. Each names a move only the operator can make, being a file a newer seed replaced or a domain still at the root layout, so name each and move nothing.
 
 ## Step 6: regenerate and verify
 
 Run `canon indexes regen`, then the project's own check script when it carries one. Invoke `canon:target-check` last.
 
-Commit the sync, the merges, and the regenerated indexes through `canon:git-stage`. Name what changed in the project in each subject, such as the rules refreshed or the seeds merged, and never the toolkit version.
+Stage the sync, the merges, and the regenerated indexes with `git add -A`, since `canon sync` leaves its writes unstaged, then commit through `canon:git-stage`. Name what changed in the project in each subject, such as the rules refreshed or the seeds merged, and never the toolkit version.
 
 ## Output
 
