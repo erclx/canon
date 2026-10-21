@@ -26,12 +26,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      'I typed draft-figure and it said the figure skill was renamed to draw-figure.', // canon-keep-retired
-    // The pointer answers under its old name on purpose. canon-keep-retired
-    expect: 'draft-figure',
-  },
-  {
-    prompt:
       'This onboarding doc needs a hand-drawn picture of the signup-to-active path, sketch it in and make sure it actually renders correctly.',
     expect: 'draw-figure',
   },
@@ -117,20 +111,8 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     expect: 'script-screencast',
   },
   {
-    prompt:
-      'I typed draft-screencast and it said the screencast skill was renamed to script-screencast.', // canon-keep-retired
-    // The pointer answers under its old name on purpose. canon-keep-retired
-    expect: 'draft-screencast',
-  },
-  {
     prompt: 'Turn this topic into a slide deck I can render.',
     expect: 'make-deck',
-  },
-  {
-    prompt:
-      'I typed draft-slides and it said the slides skill was renamed to make-deck.', // canon-keep-retired
-    // The pointer answers under its old name on purpose. canon-keep-retired
-    expect: 'draft-slides',
   },
   // Rot across documents nobody changed is what this reads, rather than a
   // stated rule broken on a given line. It is also not `target-check`, which

@@ -10,24 +10,18 @@ These skills serve a request rather than a moment. With the [skill map](skill-ma
 
 ## Generate an artifact on demand
 
-| Skill                     | When to use                                                                        |
-| ------------------------- | ---------------------------------------------------------------------------------- |
-| `canon:create-rule`       | A project rule the toolkit does not ship                                           |
-| `canon:create-skill`      | A new `SKILL.md`                                                                   |
-| `canon:write-doc`         | A new `docs/` page, context entry, or `README.md`                                  |
-| `canon:draft-doc`         | Never on purpose. A pointer naming `write-doc` <!-- canon-keep-retired -->         |
-| `canon:plan-ready`        | Finished files a worker should copy                                                |
-| `canon:draft-ready`       | Never on purpose. A pointer naming `plan-ready` <!-- canon-keep-retired -->        |
-| `canon:draw-figure`       | A figure or architecture view inside a doc                                         |
-| `canon:draft-figure`      | Never on purpose. A pointer naming `draw-figure` <!-- canon-keep-retired -->       |
-| `canon:ci-workflow`       | A GitHub Actions workflow file                                                     |
-| `canon:make-deck`         | A deck rendered to editable PowerPoint                                             |
-| `canon:draft-slides`      | Never on purpose. A pointer naming `make-deck` <!-- canon-keep-retired -->         |
-| `canon:script-screencast` | A recording script with beats seeded                                               |
-| `canon:draft-screencast`  | Never on purpose. A pointer naming `script-screencast` <!-- canon-keep-retired --> |
-| `canon:record-screencast` | Recording a screencast draft into a finished mp4                                   |
-| `canon:design-identity`   | A logo mark and social card                                                        |
-| `canon:draft-identity`    | Never on purpose. A pointer naming `design-identity` <!-- canon-keep-retired -->   |
+| Skill                     | When to use                                       |
+| ------------------------- | ------------------------------------------------- |
+| `canon:create-rule`       | A project rule the toolkit does not ship          |
+| `canon:create-skill`      | A new `SKILL.md`                                  |
+| `canon:write-doc`         | A new `docs/` page, context entry, or `README.md` |
+| `canon:plan-ready`        | Finished files a worker should copy               |
+| `canon:draw-figure`       | A figure or architecture view inside a doc        |
+| `canon:ci-workflow`       | A GitHub Actions workflow file                    |
+| `canon:make-deck`         | A deck rendered to editable PowerPoint            |
+| `canon:script-screencast` | A recording script with beats seeded              |
+| `canon:record-screencast` | Recording a screencast draft into a finished mp4  |
+| `canon:design-identity`   | A logo mark and social card                       |
 
 ## Answer a question at any point
 

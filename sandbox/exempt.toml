@@ -44,31 +44,3 @@ reason = "Carries teaching judgment and writes no artifact of its own. A lesson 
 
 [markdown-craft]
 reason = "Carries rules that `canon markdown audit` already asserts mechanically, so an arm would assert the audit twice."
-
-# A pointer at the old name, kept until it retires. canon-keep-retired
-[draft-doc]
-reason = "A pointer that prints one line naming write-doc and writes no artifact, so there is nothing to assert over."
-
-# A pointer at the old name, kept until it retires. canon-keep-retired
-[draft-figure]
-reason = "A pointer that prints one line naming draw-figure and writes no artifact, so there is nothing to assert over."
-
-# A pointer at the old name, kept until it retires. canon-keep-retired
-[draft-identity]
-reason = "A pointer that prints one line naming design-identity and writes no artifact, so there is nothing to assert over."
-
-# A pointer at the old name, kept until it retires. canon-keep-retired
-[draft-slides]
-reason = "A pointer that prints one line naming make-deck and writes no artifact, so there is nothing to assert over."
-
-# A pointer at the old name, kept until it retires. canon-keep-retired
-[draft-and-pick]
-reason = "A pointer that prints one line naming pick-by-eye and writes no artifact, so there is nothing to assert over."
-
-# A pointer at the old name, kept until it retires. canon-keep-retired
-[draft-ready]
-reason = "A pointer that prints one line naming plan-ready and writes no artifact, so there is nothing to assert over."
-
-# A pointer at the old name, kept until it retires. canon-keep-retired
-[draft-screencast]
-reason = "A pointer that prints one line naming script-screencast and writes no artifact, so there is nothing to assert over."

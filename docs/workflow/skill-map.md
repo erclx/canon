@@ -17,19 +17,18 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 
 ## Decide what to build
 
-| Skill                      | When to use                                                                  |
-| -------------------------- | ---------------------------------------------------------------------------- |
-| `canon:plan-intake`        | The input is a pile of findings                                              |
-| `canon:plan-intake-answer` | An intake folder holds unread slots                                          |
-| `canon:backlog-triage`     | The backlog needs pruning                                                    |
-| `canon:plan-groundwork`    | The state is unmeasured and approaches compete                               |
-| `canon:decision-escalate`  | Open decisions turn on your preference                                       |
-| `canon:pick-by-eye`        | The call is taste, wanting candidates side by side                           |
-| `canon:draft-and-pick`     | Never on purpose. A pointer naming `pick-by-eye` <!-- canon-keep-retired --> |
-| `canon:canvas-board`       | A direction should be drawn as editable frames                               |
-| `canon:task-board`         | A decided item needs a file on the board                                     |
-| `canon:plan-feature`       | The approach is settled and needs a plan                                     |
-| `canon:codebase-layout`    | A change adds a file and needs a folder                                      |
+| Skill                      | When to use                                        |
+| -------------------------- | -------------------------------------------------- |
+| `canon:plan-intake`        | The input is a pile of findings                    |
+| `canon:plan-intake-answer` | An intake folder holds unread slots                |
+| `canon:backlog-triage`     | The backlog needs pruning                          |
+| `canon:plan-groundwork`    | The state is unmeasured and approaches compete     |
+| `canon:decision-escalate`  | Open decisions turn on your preference             |
+| `canon:pick-by-eye`        | The call is taste, wanting candidates side by side |
+| `canon:canvas-board`       | A direction should be drawn as editable frames     |
+| `canon:task-board`         | A decided item needs a file on the board           |
+| `canon:plan-feature`       | The approach is settled and needs a plan           |
+| `canon:codebase-layout`    | A change adds a file and needs a folder            |
 
 ## Build the feature
 
