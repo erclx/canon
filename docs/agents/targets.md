@@ -12,6 +12,13 @@ kind: reference
 - Each stamping sync records its target in `$XDG_STATE_HOME/canon/targets.json`, and no row is removed
 - A sweep finds installs the index never held
 
+`canon changelog` prints the releases a target has not seen, from the `CHANGELOG.md` the installed package ships. It reads no registry and needs no `gh`.
+
+- The start defaults to the oldest `version` across the target's stamp domains. `--since <version>` overrides it, and `--root <path>` names the target.
+- `--json` carries `since`, `running`, and `entries`, each with its `version` and raw `markdown`, oldest first
+- A start equal to the running version is the one empty range, since that target is current
+- A refusal names its `reason` instead of printing an empty range, being `no-stamp`, `no-changelog`, or `unknown-version`. The last covers a pre-release and a start newer than the binary.
+
 ## Output
 
 - `bound` on a sweep names the roots walked, the depth, and what it skipped. Read it before trusting a count.
