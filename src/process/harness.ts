@@ -90,8 +90,7 @@ export function snapshotStateDir(): string {
  *
  * A git hook exports `GIT_DIR`, which would resolve a fixture's git-aware
  * reads against this checkout instead of the temporary directory a case
- * builds, so every spawn drops the `GIT_` prefix before adding the headless
- * flag every case needs to avoid a picker blocking on stdin.
+ * builds, so every spawn drops the `GIT_` prefix.
  *
  * `CANON_STATE_DIR` and `CANON_SANDBOX_DIR` get the same treatment as `GIT_DIR`,
  * each pointed at a folder under the case's own `cwd` rather than dropped,
