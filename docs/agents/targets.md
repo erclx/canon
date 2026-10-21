@@ -1,6 +1,6 @@
 ---
 title: Targets
-description: The projects this toolkit installed into, where each answer comes from, and the cross-target pull request read
+description: The projects this toolkit installed into, where each answer comes from, the cross-target pull request read, and the releases since a target's install
 kind: reference
 ---
 
