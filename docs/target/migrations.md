@@ -150,22 +150,17 @@ The wireframes record is retired, and nothing deletes what a project holds.
 
 ## Keep or delete the retired product files, your call
 
-The learning workspace, the deck renderer, the app recorder, and the canvas are retired with their verbs and skills, and nothing deletes what a project holds.
+The learning workspace, deck renderer, app recorder, canvas, and design install are retired with their verbs, and nothing deletes what a project holds.
 
-- `.canon/teach/` holds rendered HTML that opens as it is, so it needs nothing <!-- canon-keep-retired -->
+- `.canon/teach/` holds HTML that opens as it is <!-- canon-keep-retired -->
 - `.canon/slides/` and a `demos/` folder hold sources nothing renders any more, so delete them once nothing cites them <!-- canon-keep-retired -->
+- Move `.claude/design/project/` values into the stylesheet your `canon/DESIGN.md` lead names, then delete `.claude/design/`
+
+A reference to a retired skill takes a hand edit.
+
 - Replace a `canon:teach-workspace` reference with `canon:teach-craft` by hand, since `canon migrate skill-names` does not rewrite it <!-- canon-keep-retired -->
 - Delete a `canon:make-deck`, `canon:script-screencast`, `canon:record-screencast`, `canon:read-frames`, or `canon:video-craft` reference, since none has a successor <!-- canon-keep-retired -->
 - Delete a `canon:canvas-board` reference too. Frameboard, which `canon:pick-by-eye` drives, reads each `.canon/canvas/` folder as a project, so move a kept page under one <!-- canon-keep-retired -->
-
-## Move the design install into your own stylesheet, once
-
-The design install, sync, fonts, and render verbs are retired, and `canon sync` no longer reports a `design` domain. A held `.claude/design/` stops showing drift, and nothing deletes it. <!-- canon-keep-retired -->
-
-- Move each value under `.claude/design/project/` into the stylesheet your app loads, faces in `project/fonts/` included
-- Name that stylesheet in the lead of `canon/DESIGN.md`, the way `canon:design-record` writes it
-- Delete `.claude/design/` once nothing imports `base.css` or a file under `project/`
-- A stamp from an older sync still carries a `design` entry, which `canon sync --check` ignores and the next sync drops
 
 ## Move decisions out of a held architecture record, once
 

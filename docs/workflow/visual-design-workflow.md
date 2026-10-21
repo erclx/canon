@@ -10,7 +10,9 @@ Three tiers run from prose-only design docs to a graphical source of truth, and 
 
 ## Tier 0: prose only
 
-The default. `canon/DESIGN.md` holds visual intent as one Overview paragraph, at most three one-line rules a section, and a table naming each color and shape role, with a lead naming the stylesheet. Claude Code alone suffices, and [`test-craft`](../../claude/skills/test-craft/SKILL.md) says which layer a Playwright journey belongs at. The seed is `tooling/claude/seeds/canon/DESIGN.md`, and its column headers stay verbatim.
+The default. `canon/DESIGN.md` holds visual intent as one Overview paragraph, at most three one-line rules a section, and a table naming each color and shape role, with a lead naming the stylesheet. Claude Code alone suffices, and [`test-craft`](../../claude/skills/test-craft/SKILL.md) says which layer a Playwright journey belongs at.
+
+- The seed is `tooling/claude/seeds/canon/DESIGN.md`, and its column headers stay verbatim
 
 These skills cover the tier:
 
