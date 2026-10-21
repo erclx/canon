@@ -2,7 +2,7 @@ import { join } from 'node:path'
 import { execa } from 'execa'
 
 export interface CliRunOptions {
-  /** Sets `CANON_NON_INTERACTIVE=1` for the child. Defaults to false. */
+  /** Closes the child's stdin, which makes it headless. Defaults to false. */
   readonly nonInteractive?: boolean
   /** Defaults to `inherit`, so a child prompt still reaches the operator. */
   readonly stdin?: 'ignore' | 'inherit'
@@ -28,13 +28,12 @@ export function cliRun(
   options: CliRunOptions = {},
 ): () => Promise<boolean> {
   return async () => {
-    const env = options.nonInteractive
-      ? { ...process.env, CANON_NON_INTERACTIVE: '1' }
-      : process.env
+    const stdin = options.nonInteractive
+      ? 'ignore'
+      : (options.stdin ?? 'inherit')
 
     const result = await execa('bun', [path, ...args], {
-      stdio: [options.stdin ?? 'inherit', 'inherit', 'inherit'],
-      env,
+      stdio: [stdin, 'inherit', 'inherit'],
       reject: false,
     })
 

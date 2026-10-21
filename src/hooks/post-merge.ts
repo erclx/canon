@@ -359,11 +359,8 @@ export async function runPostMerge(input: PostMergeInput): Promise<void> {
   }
 
   if (!isSkipped('CANON_SKIP_UPGRADE')) {
-    await step(
-      input,
-      at([...STEP_VERBS.upgrade, '--json'], { CANON_NON_INTERACTIVE: '1' }),
-      (result, fields) =>
-        moveLines(result, fields, '⬆️  ', 'CLI not upgraded', []),
+    await step(input, at([...STEP_VERBS.upgrade, '--json']), (result, fields) =>
+      moveLines(result, fields, '⬆️  ', 'CLI not upgraded', []),
     )
   }
 

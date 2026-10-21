@@ -13,6 +13,7 @@ import {
 import { createRequire } from 'node:module'
 import { dirname, join, relative } from 'node:path'
 import {
+  isNonInteractive,
   logError,
   logInfo,
   logStep,
@@ -580,8 +581,9 @@ export function createStageContext(options: ContextOptions): StageContext {
 }
 
 /**
- * Picks the arm: a routed name first,
- * echoed on the frame, then the first arm for a headless caller, then a prompt.
+ * Picks the arm: a routed name first, echoed on the frame, then a prompt. A
+ * headless caller naming no arm is refused rather than handed the first one,
+ * since a verdict on an arm nobody chose reads as a verdict on the scenario.
  */
 async function routeArm(
   names: readonly string[],
@@ -600,17 +602,9 @@ async function routeArm(
   const routed = env.SANDBOX_SCENARIO ?? ''
   if (routed !== '') return echo(routed)
 
-  // Read off the scenario's environment rather than this process's, as
-  // `is_non_interactive` read the shell it ran in.
-  const isHeadless =
-    env.CANON_NON_INTERACTIVE === '1' ||
-    // canon-keep-retired
-    env.AITK_NON_INTERACTIVE === '1'
-  if (isHeadless) return echo(names[0] ?? DEFAULT_ARM_NAME)
-
-  if (!process.stdin.isTTY) {
+  if (isNonInteractive()) {
     logError(
-      `${prompt} requires a TTY. Pass an argument or set CANON_NON_INTERACTIVE=1.`,
+      `${prompt} requires a TTY. Pass the arm as the scenario argument, one of: ${names.join(', ')}.`,
     )
     throw new ScenarioStop(1, 'exited')
   }

@@ -90,8 +90,7 @@ export function snapshotStateDir(): string {
  *
  * A git hook exports `GIT_DIR`, which would resolve a fixture's git-aware
  * reads against this checkout instead of the temporary directory a case
- * builds, so every spawn drops the `GIT_` prefix before adding the headless
- * flag every case needs to avoid a picker blocking on stdin.
+ * builds, so every spawn drops the `GIT_` prefix.
  *
  * `CANON_STATE_DIR` and `CANON_SANDBOX_DIR` get the same treatment as `GIT_DIR`,
  * each pointed at a folder under the case's own `cwd` rather than dropped,
@@ -99,7 +98,8 @@ export function snapshotStateDir(): string {
  * `HOME` to this machine's real `~/.local/state/canon`. `stateDir()` and
  * `sandboxTree()` resolve the same three ways and share that parent, so both
  * overrides move together. A case explicitly passing its own value through
- * `options.env` still wins, matching `CANON_NON_INTERACTIVE` below.
+ * `options.env` still wins. The child's stdin is a pipe rather than a
+ * terminal, so every case runs headless.
  *
  * The `stateDir()` snapshot before and after the spawn is what actually
  * catches an escape past that redirection, since a default can be wrong in a
@@ -125,7 +125,6 @@ export function runCli(
     timeout: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
     env: {
       ...inherited,
-      CANON_NON_INTERACTIVE: '1',
       CANON_STATE_DIR: join(options.cwd, '.canon-state'),
       CANON_SANDBOX_DIR: join(options.cwd, '.canon-state', 'sandbox'),
       ...options.env,

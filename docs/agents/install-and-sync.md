@@ -15,8 +15,8 @@ Any flag skips the confirmation prompt, but the `base` default of `--stack` does
 
 ## Governance install
 
-- `canon gov install <stack> [target]` needs the stack under `CANON_NON_INTERACTIVE=1`, else lists the valid names on stderr and exits 1
-- `--yes` answers the install confirm with no TTY and no env var. Without it, a headless call refuses and the message names `--yes`. It does not pick a stack.
+- `canon gov install <stack> [target]` needs the stack on a call with no terminal, else lists the valid names on stderr and exits 1
+- A headless call takes Yes at the install confirm, and `--yes` answers it at a terminal too. Neither picks a stack.
 - It refuses the toolkit root and a missing path
 - `--add <rules>` with no stack installs into the one positional, or the current directory, keeping the recorded chain. Pass `./node` for a target named like a stack.
 

@@ -42,7 +42,7 @@ Read these in the same pass:
 3. Draft the sibling `REQUIREMENT.md` from what the skill is for, in the shape the requirement standard states.
    - Write the gaps from the user's description rather than from the drafted body, since a requirement derived from the body records whatever the draft overfitted to.
 4. Confirm the skill name and both files with the user before writing, when a person can answer.
-   - Skip the confirmation when `CANON_NON_INTERACTIVE=1` is set or another skill's run invoked this one, such as `auto-ship` or a dispatched worker.
+   - Skip the confirmation when another skill's run invoked this one, such as `auto-ship`, or when a dispatched worker runs it.
    - Then put the three Step 1 answers and the two drafted paths in the output and continue to Step 5, since a question nobody reads parks the chain.
 
 ### Write and check

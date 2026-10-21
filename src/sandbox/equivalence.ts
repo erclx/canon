@@ -517,7 +517,6 @@ function provisionEnv(
 ): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {
     ...process.env,
-    CANON_NON_INTERACTIVE: '1',
     CANON_SANDBOX_DIR: dir,
     CANON_SANDBOX_RUN_ID: PINNED_RUN_ID,
     CLAUDE_CONFIG_DIR: configDirFor(dir),

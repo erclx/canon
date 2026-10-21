@@ -1,8 +1,6 @@
 import { join } from 'node:path'
 import { type StageContext, scenario } from '@/sandbox/scenario'
 
-const HEADLESS = { CANON_NON_INTERACTIVE: '1' }
-
 function cli(ctx: StageContext, ...args: string[]): string[] {
   return [join(ctx.root, 'src', 'cli.ts'), ...args]
 }
@@ -60,12 +58,11 @@ export default scenario({
       ctx.exec('bun', cli(ctx, 'tooling', 'sync', 'base', '.'))
     },
     'sync-headless': (ctx) => {
-      ctx.log.step('Running: CANON_NON_INTERACTIVE=1 canon tooling sync base .')
+      ctx.log.step('Running: canon tooling sync base . with no terminal')
       ctx.log.info(
         'Expected: the report lists every path, nothing is written, and the exit is 1.',
       )
       const status = ctx.run('bun', cli(ctx, 'tooling', 'sync', 'base', '.'), {
-        env: HEADLESS,
         allowFailure: true,
       })
       if (status !== 0) ctx.log.info(`Exit: ${status}`)
@@ -97,23 +94,17 @@ export default scenario({
       )
       ctx.run('bun', cli(ctx, 'tooling', 'reference', 'base'))
 
-      ctx.log.step(
-        'Running: CANON_NON_INTERACTIVE=1 canon tooling sync base . --write',
-      )
+      ctx.log.step('Running: canon tooling sync base . --write')
       ctx.log.info(
         'Expected: the stale .claude/tooling/base.md is left untouched. diff HEAD -- .claude/tooling/base.md should be empty.',
       )
-      ctx.run('bun', cli(ctx, 'tooling', 'sync', 'base', '.', '--write'), {
-        env: HEADLESS,
-      })
+      ctx.run('bun', cli(ctx, 'tooling', 'sync', 'base', '.', '--write'))
       ctx.log.step('Diffing the stale copy against HEAD')
       ctx.exec('git', ['diff', 'HEAD', '--', '.claude/tooling/base.md'])
     },
     monorepo: (ctx) => {
       ctx.log.step('Staging base tooling at repo root')
-      ctx.run('bun', cli(ctx, 'tooling', 'sync', 'base', '.', '--write'), {
-        env: HEADLESS,
-      })
+      ctx.run('bun', cli(ctx, 'tooling', 'sync', 'base', '.', '--write'))
       ctx.run('bunx', ['husky'])
       ctx.mkdir('frontend')
 

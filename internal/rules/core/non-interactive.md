@@ -9,7 +9,7 @@ paths:
 
 ## Picker defaults
 
-- List the option a headless caller should get first, since `select` in `src/cli/ui.ts` returns it under `CANON_NON_INTERACTIVE=1` when `nonInteractiveDefault` is set.
+- List the option a headless caller should get first, since `select` in `src/cli/ui.ts` returns it when `nonInteractiveDefault` is set and stdin is not a terminal.
 - Never list a review or preview option first, which sends agents down an interactive branch.
 - Refuse headlessly when a picker stands in for a required argument. Return 1 with the valid names rather than defaulting, which picks a whole stack or category for the caller.
 - Keep `nonInteractiveDefault` on a confirm-then-apply prompt, where the caller has already named what to apply and the apply is additive.

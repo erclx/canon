@@ -33,9 +33,9 @@ rather than a step within it, so the full chain never runs it separately.
 
 ## Non-interactive path
 
-Every phase runs under `CANON_NON_INTERACTIVE=1` with no TTY. Three phases
-otherwise pause, and each takes an argument that answers its prompt ahead of
-time:
+Every phase runs headless with no prefix, since a call with no terminal on
+stdin is already headless. Three phases otherwise pause, and each takes an
+argument that answers its prompt ahead of time:
 
 | Phase               | Pauses to                                  | Answered ahead by                                          | With neither and no TTY                               |
 | ------------------- | ------------------------------------------ | ---------------------------------------------------------- | ----------------------------------------------------- |
@@ -91,7 +91,7 @@ target project's current directory. Do not cd into the toolkit source tree. The
 Step 1: `canon init` installs base tooling, claude seeds, and governance rules.
 
 ```bash
-CANON_NON_INTERACTIVE=1 canon init \
+canon init \
   --stack <stack> \
   --add <rules> \
   <target>
@@ -106,7 +106,7 @@ Step 2: `canon tooling sync <tooling-stack> --write` installs stack deps, script
 - A fresh target has nothing to lose, so pass `--write` directly rather than reading a report first
 
 ```bash
-CANON_NON_INTERACTIVE=1 canon tooling sync <tooling-stack> <target> --write
+canon tooling sync <tooling-stack> <target> --write
 ```
 
 ### Monorepo with multiple language roots
@@ -114,8 +114,8 @@ CANON_NON_INTERACTIVE=1 canon tooling sync <tooling-stack> <target> --write
 Run `canon init` once at the repo root so `base` (husky, oxfmt, commitlint, CI) lands once, then sync each subtree with `--skip base`. Take the subtree commands from the preview's per-root rows rather than picking folders by hand.
 
 ```bash
-CANON_NON_INTERACTIVE=1 canon tooling sync vite-react ./frontend --skip base --write
-CANON_NON_INTERACTIVE=1 canon tooling sync python ./backend --skip base --write
+canon tooling sync vite-react ./frontend --skip base --write
+canon tooling sync python ./backend --skip base --write
 ```
 
 - Without `--skip base`, each subtree re-drops husky, and git honors only one `core.hooksPath`, so the extra hook dirs silently break
@@ -139,7 +139,7 @@ Resolve exactly as the detect reference states, confirm the proposed extras
 there, then run:
 
 ```bash
-CANON_NON_INTERACTIVE=1 canon gov install <stack> --add <extras> <target>
+canon gov install <stack> --add <extras> <target>
 ```
 
 Report the rule count installed, the target path, and any rules that failed to

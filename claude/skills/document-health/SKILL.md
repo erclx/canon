@@ -15,7 +15,7 @@ Three axes carry the report. Two answer from a verb and the third answers from a
 
 - `canon` absent from the path: stop. `❌ canon is not on PATH, so neither measured axis can be read.`
 - `git ls-files '*.md'` listing nothing: stop. `❌ No tracked markdown here, so there is no corpus to read.`
-- Run every command under `CANON_NON_INTERACTIVE=1` and prompt at no point. A caller reaching this from a rollout wave has nobody present to answer.
+- Prompt at no point, since a caller reaching this from a rollout wave has nobody present to answer. A call with no terminal on stdin already runs headless, so no command takes a prefix.
 - Branch on each record's own fields rather than on an exit status, since a shell profile may wrap `canon` in a function whose trailing command reports every refusal as success
 - Repair nothing, write no file in the project, and open no pull request. Whoever read the report decides what to fix.
 
@@ -30,8 +30,8 @@ Drop what nobody hand-authors before reporting a finding against it: a generated
 Run these from the project root, in parallel:
 
 ```bash
-CANON_NON_INTERACTIVE=1 canon markdown audit --json
-CANON_NON_INTERACTIVE=1 canon context audit --json
+canon markdown audit --json
+canon context audit --json
 ```
 
 The first answers length, carrying the bullet, paragraph, and depth checkpoints and the per-file weights read against them. The second answers placement for the folders it resolves, carrying entry length, reference form, and index drift.
@@ -39,8 +39,8 @@ The first answers length, carrying the bullet, paragraph, and depth checkpoints 
 Then read which classifier would run, and deepen placement with the verdicts per section:
 
 ```bash
-CANON_NON_INTERACTIVE=1 canon context classifier show
-CANON_NON_INTERACTIVE=1 canon context classify sweep --json
+canon context classifier show
+canon context classify sweep --json
 ```
 
 The first names the backend, the model, and the source that decided both. Report which layer answered, since a project with the model layer off reads from the regex layer alone and the sweep says nothing about which one it used.
@@ -65,7 +65,7 @@ Mark every staleness finding as a reading. It is this session's judgment rather 
 When the scope reaches `canon/REQUIREMENTS.md`, read it for identity drift as well as for stale paths, and take the review point from the verb:
 
 ```bash
-CANON_NON_INTERACTIVE=1 canon records stale canonical --json
+canon records stale canonical --json
 ```
 
 The doc in the record carries `reviewed` and `releasesSince`. `${CLAUDE_SKILL_DIR}/references/axes.md` holds the identity claim shapes to test and how the record reads. Skip both the read and the verb when the scope excludes the doc.

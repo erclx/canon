@@ -17,7 +17,7 @@ This entry owns the layers every command stands on, from the process layer and r
 
 Holds the terminal and process layer every command shares. A `--json` run goes quiet through the `preAction` hook in `src/cli.ts`, leaving warnings and errors alone on stderr, so a test asserts the record and a success line goes through `outroSuccess`.
 
-- `ui.ts` draws the timeline frame on a terminal and bare marks on a pipe, and alone may define an escape. `palette(stream)` reads `NO_COLOR` and that stream's `isTTY` at write time.
+- `ui.ts` draws the frame on a terminal, bare marks on a pipe, and alone defines an escape. `palette(stream)` reads `NO_COLOR` and that stream's `isTTY`, and `isNonInteractive()` reads stdin's
 - `help.ts` renders the top block from `COMMAND_GROUPS`, framed only on a TTY, and `help-option.test.ts` fails on a command with no row
 - The web command field parses that block through `commandNamesFromHelp`, so a row-shape change has to keep every row readable
 - `help-all.ts` routes `--help --all` before `program.parse()`. A bare `canon --help --all` prints the top block, and a group with no operand refuses an unknown word with exit 1

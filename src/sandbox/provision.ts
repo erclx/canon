@@ -208,7 +208,7 @@ function install(
   env: NodeJS.ProcessEnv,
 ): void {
   const result = spawnSync('bun', [join(root, 'src', 'cli.ts'), ...args], {
-    env: { ...env, CANON_NON_INTERACTIVE: '1' },
+    env,
     encoding: 'utf8',
     stdio: ['ignore', 'ignore', 'pipe'],
   })
@@ -430,10 +430,7 @@ async function provisionScenario(
   baseEnv: NodeJS.ProcessEnv,
 ): Promise<void> {
   const env: NodeJS.ProcessEnv = { ...baseEnv }
-  if (scenario.arm !== undefined) {
-    env.SANDBOX_SCENARIO = scenario.arm
-    env.CANON_NON_INTERACTIVE = '1'
-  }
+  if (scenario.arm !== undefined) env.SANDBOX_SCENARIO = scenario.arm
 
   const sandboxDir = join(root, 'sandbox')
   const declared = declareScenario(root, scenario, env)

@@ -59,7 +59,7 @@ Owns the gov half of every verb, being the stack reader, the rule lookup, the ca
 - `gov list --json` carries `unreferenced` and `staleDetect` beside `stacks` and `rules`, and `recordStamp` holds the file hashes while `writeChainStamp` holds the stack name
 - `src/sync/engine.ts` runs the scan, prompt, and apply loop, and matches an installed rule to its source by name so a moved rule syncs into the subfolder the target uses
 - `canon gov citations` gates on a dead rule citation or internal glob, and `canon gov audit` on a rule past a shape limit or short of a ledger in a gated folder, bar an exempt file
-- `canon gov install` and `sync` refuse the toolkit root, `regen` runs there on purpose, and `CANON_NON_INTERACTIVE=1` takes each confirm's first option but not the stack picker
+- `canon gov install` and `sync` refuse the toolkit root, `regen` runs there on purpose, and a call with no terminal on stdin takes each confirm's first option but not the stack picker
 
 ### `claude/skills/create-rule/`
 

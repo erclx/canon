@@ -72,10 +72,7 @@ Read the `tooling` block off the report first, because the comparison command ne
 
 ### The comparison
 
-On a measured report, take `<stack>` from the first name in `chain` and run `canon tooling sync --check <stack>`. Never run it bare.
-
-- Omitting the stack reaches a prompt the non-interactive variable resolves to the catalog's first entry rather than refusing
-- That compares the target against a stack it does not use and reports the difference as drift
+On a measured report, take `<stack>` from the first name in `chain` and run `canon tooling sync --check <stack>`. Never run it bare, since omitting the stack reaches a prompt that refuses a headless caller and compares nothing.
 
 ### Verdicts
 

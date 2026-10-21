@@ -23,7 +23,7 @@ Owns the scenario scripts, one folder per category and one `.ts` file per comman
 
 - Add a scenario as `sandbox/<category>/<command>.ts` default-exporting `scenario()` from `src/sandbox/scenario.ts`, named for the skill it drives. `sandbox/git/pr.ts` shows the shape.
 - `config` holds presence flags such as `SANDBOX_SKIP_AUTO_COMMIT`, `SANDBOX_INJECT_SEEDS`, `SANDBOX_INJECT_GOV`, and `SANDBOX_GOV_STACK`. `anchor: true` names the push target.
-- `arms` maps an arm name to a function staging the tree through `ctx`, the only way in. Arm order is routing order, and a scenario argument sets `CANON_NON_INTERACTIVE=1`, so name the arm.
+- `arms` maps an arm name to a function staging the tree through `ctx`, the only way in. Arm order is routing order, and a headless call naming no arm is refused with the arm names, so name the arm.
 - An arm ends its narration with an `Action:` line spelling the full command, arguments included, since a skill guarding on a missing argument refuses a bare prompt
 - `exempt.toml` names skills no arm should cover, each with a `reason`, and a stale or now-asserted one exits 1. Run `canon sandbox` bare for the live catalog.
 

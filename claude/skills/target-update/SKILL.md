@@ -24,7 +24,7 @@ Stop with the line beside each state.
 
 Then hold two rules for every verb this body runs.
 
-- Run it under `CANON_NON_INTERACTIVE=1` from the target root
+- Run it from the target root with no prefix, since a call with no terminal on stdin already runs headless
 - Branch on its record's fields rather than its exit, which a shell function wrapping `canon` can flatten
 
 ## Step 1: bring the binary and plugin forward
@@ -38,12 +38,12 @@ Both write to the machine rather than the target, and the preview needs the verb
 Run these in parallel from the target root:
 
 ```bash
-CANON_NON_INTERACTIVE=1 canon changelog --json
-CANON_NON_INTERACTIVE=1 canon migrate status --json
-CANON_NON_INTERACTIVE=1 canon sync --check . --json
+canon changelog --json
+canon migrate status --json
+canon sync --check . --json
 ```
 
-Then take `<stack>` from the first name in the report's `tooling.chain` and run `canon tooling diff <stack> . --json`. Never run it bare, since the stack prompt resolves to the catalog's first entry under the non-interactive variable. Report tooling unmeasured when `tooling.measured` is false or `chain` names nothing.
+Then take `<stack>` from the first name in the report's `tooling.chain` and run `canon tooling diff <stack> . --json`. Never run it bare, since the stack prompt refuses a headless caller. Report tooling unmeasured when `tooling.measured` is false or `chain` names nothing.
 
 ### When a read refuses
 

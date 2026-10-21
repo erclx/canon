@@ -114,13 +114,15 @@ describe('runPostMerge steps', () => {
     expect(retired.every((call) => call.cwd === CWD)).toBe(true)
   })
 
-  it('should run the upgrade non-interactively', async () => {
+  it('should run the upgrade on the same environment as every other step', async () => {
     const h = harness()
 
     await h.go()
 
     const upgrade = h.calls.find((call) => call.args[0] === 'upgrade')
-    expect(upgrade?.env.CANON_NON_INTERACTIVE).toBe('1')
+    const push = h.calls.find((call) => call.args[1] === 'push')
+    expect(push).toBeDefined()
+    expect(upgrade?.env).toEqual(push?.env)
   })
 
   it('should strip the hook repository variables from every child', async () => {

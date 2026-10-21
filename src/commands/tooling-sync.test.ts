@@ -52,11 +52,7 @@ const seedPackage = (dir: string, stack: string): void => {
   writeFileSync(path, JSON.stringify({ devDependencies }))
 }
 
-const runVerb = (
-  verb: 'diff' | 'sync',
-  args: readonly string[],
-  headless = true,
-): Run => {
+const runVerb = (verb: 'diff' | 'sync', args: readonly string[]): Run => {
   if (args.includes('--write')) seedPackage(target, 'base')
 
   const run = spawnSync(
@@ -64,15 +60,14 @@ const runVerb = (
     [CLI, 'tooling', verb, 'base', target, ...args],
     {
       encoding: 'utf8',
-      env: buildEnv(headless ? { CANON_NON_INTERACTIVE: '1' } : {}),
+      env: buildEnv(),
     },
   )
 
   return { status: run.status, stderr: run.stderr, stdout: run.stdout }
 }
 
-const sync = (args: readonly string[], headless = true): Run =>
-  runVerb('sync', args, headless)
+const sync = (args: readonly string[]): Run => runVerb('sync', args)
 
 const diff = (args: readonly string[]): Run => runVerb('diff', args)
 
@@ -80,7 +75,7 @@ const diffStack = (stack: string, args: readonly string[] = []): Run => {
   const run = spawnSync(
     'bun',
     [CLI, 'tooling', 'diff', stack, target, ...args],
-    { encoding: 'utf8', env: buildEnv({ CANON_NON_INTERACTIVE: '1' }) },
+    { encoding: 'utf8', env: buildEnv() },
   )
 
   return { status: run.status, stderr: run.stderr, stdout: run.stdout }
@@ -171,6 +166,36 @@ describe('tooling sync write authorization', () => {
     sync([])
 
     expect(() => readFileSync(stampPath(target))).toThrow()
+  })
+})
+
+describe('tooling sync and diff with no stack', () => {
+  // The picker stands in for a required argument, so a headless call has to
+  // refuse rather than lay the catalog's first stack over the target.
+  const bare = (verb: 'diff' | 'sync', args: readonly string[]): Run => {
+    const run = spawnSync('bun', [CLI, 'tooling', verb, ...args], {
+      cwd: target,
+      encoding: 'utf8',
+      env: buildEnv(),
+    })
+
+    return { status: run.status, stderr: run.stderr, stdout: run.stdout }
+  }
+
+  it('should refuse a headless sync naming the stack argument and write nothing', () => {
+    const run = bare('sync', ['--write'])
+
+    expect(run.status).toBe(1)
+    expect(run.stderr).toContain('Pass a stack')
+    expect(run.stderr).toContain('base')
+    expect(goldenContent()).toBe(LOCAL_EDIT)
+  })
+
+  it('should refuse a headless diff rather than report against a stack nobody named', () => {
+    const run = bare('diff', [])
+
+    expect(run.status).toBe(1)
+    expect(run.stderr).toContain('Pass a stack')
   })
 })
 
@@ -294,7 +319,7 @@ describe('tooling sync checkout-mismatch warning', () => {
     const run = spawnSync(
       'bun',
       [CLI, 'tooling', 'sync', 'base', target, '--check'],
-      { cwd, encoding: 'utf8', env: buildEnv({ CANON_NON_INTERACTIVE: '1' }) },
+      { cwd, encoding: 'utf8', env: buildEnv() },
     )
 
     return { status: run.status, stderr: run.stderr }
@@ -340,7 +365,6 @@ describe('tooling sync into a subfolder', () => {
       {
         encoding: 'utf8',
         env: buildEnv({
-          CANON_NON_INTERACTIVE: '1',
           CANON_STATE_DIR: stateDir,
         }),
       },
@@ -400,7 +424,7 @@ describe('tooling sync shell', () => {
   const syncShell = (): void => {
     spawnSync('bun', [CLI, 'tooling', 'sync', 'shell', target, '--write'], {
       encoding: 'utf8',
-      env: buildEnv({ CANON_NON_INTERACTIVE: '1' }),
+      env: buildEnv(),
     })
   }
 

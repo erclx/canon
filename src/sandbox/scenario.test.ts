@@ -50,7 +50,7 @@ function stage(
   return stageScenarioInProcess(definition, {
     root,
     dir: tree,
-    env: { ...process.env, CANON_NON_INTERACTIVE: '1', ...env },
+    env: { ...process.env, ...env },
     arm: undefined,
   })
 }
@@ -139,7 +139,17 @@ describe('stageScenarioInProcess', () => {
     expect(ran).toEqual(['second:second'])
   })
 
-  it('should run the first arm for a headless caller naming none', async () => {
+  it('should refuse a headless caller naming no arm, listing the arms', async () => {
+    const writes: string[] = []
+    vi.spyOn(process.stderr, 'write').mockImplementation((chunk) => {
+      writes.push(String(chunk))
+      return true
+    })
+    const stdin = Object.getOwnPropertyDescriptor(process.stdin, 'isTTY')
+    Object.defineProperty(process.stdin, 'isTTY', {
+      configurable: true,
+      value: undefined,
+    })
     const ran: string[] = []
     const definition = definitionOf({
       first: () => {
@@ -150,9 +160,16 @@ describe('stageScenarioInProcess', () => {
       },
     })
 
-    await stage(definition, { SANDBOX_SCENARIO: '' })
+    try {
+      const outcome = await stage(definition, { SANDBOX_SCENARIO: '' })
 
-    expect(ran).toEqual(['first'])
+      expect(outcome).toEqual({ status: 1, ending: 'exited' })
+    } finally {
+      if (stdin) Object.defineProperty(process.stdin, 'isTTY', stdin)
+      else delete (process.stdin as { isTTY?: boolean }).isTTY
+    }
+    expect(ran).toEqual([])
+    expect(writes.join('')).toContain('first, second')
   })
 
   it('should refuse an unknown arm without running any', async () => {

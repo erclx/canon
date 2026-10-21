@@ -101,7 +101,7 @@ export function register(program: Command): void {
         'Examples:',
         '  canon tooling sync base',
         '  canon tooling sync base --check',
-        '  CANON_NON_INTERACTIVE=1 canon tooling sync base --write',
+        '  canon tooling sync base --write',
         '  canon tooling sync vite-react web --skip base',
         '',
         'A target below its git root syncs as a subfolder. It withholds',
@@ -604,7 +604,7 @@ async function promptForStack(): Promise<string | undefined> {
   return select({
     message: 'Select tooling stack:',
     options: stacks.map((name) => ({ value: name, label: name })),
-    nonInteractiveDefault: true,
+    ttyHint: `Pass a stack, one of: ${stacks.join(', ')}`,
   })
 }
 

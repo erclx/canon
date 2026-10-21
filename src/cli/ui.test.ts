@@ -17,6 +17,7 @@ import {
   outroSuccess,
   palette,
   pipeOutput,
+  select,
   setQuiet,
   supportsColor,
 } from '@/cli/ui'
@@ -328,11 +329,14 @@ describe('isNonInteractive', () => {
   const saved = {
     canon: process.env.CANON_NON_INTERACTIVE,
     retired: process.env.AITK_NON_INTERACTIVE,
+    stdin: Object.getOwnPropertyDescriptor(process.stdin, 'isTTY'),
   }
 
   afterEach(() => {
     restore('CANON_NON_INTERACTIVE', saved.canon)
     restore('AITK_NON_INTERACTIVE', saved.retired)
+    if (saved.stdin) Object.defineProperty(process.stdin, 'isTTY', saved.stdin)
+    else delete (process.stdin as { isTTY?: boolean }).isTTY
   })
 
   function restore(name: string, value: string | undefined): void {
@@ -340,32 +344,127 @@ describe('isNonInteractive', () => {
     else process.env[name] = value
   }
 
-  it('should read the current variable', () => {
-    process.env.CANON_NON_INTERACTIVE = '1'
+  /** The runner's own stdin varies by host, so every case pins it. */
+  function stdinIs(isTTY: boolean | undefined): void {
+    delete process.env.CANON_NON_INTERACTIVE
     delete process.env.AITK_NON_INTERACTIVE
+    Object.defineProperty(process.stdin, 'isTTY', {
+      configurable: true,
+      value: isTTY,
+    })
+  }
+
+  it('should be headless when stdin is not a terminal and nothing is set', () => {
+    stdinIs(undefined)
 
     expect(isNonInteractive()).toBe(true)
   })
 
-  it('should read the retired variable, which every existing caller still sets', () => {
-    delete process.env.CANON_NON_INTERACTIVE
+  it('should be interactive when stdin is a terminal and nothing is set', () => {
+    stdinIs(true)
+
+    expect(isNonInteractive()).toBe(false)
+  })
+
+  it('should let the current variable force headless on a terminal', () => {
+    stdinIs(true)
+    process.env.CANON_NON_INTERACTIVE = '1'
+
+    expect(isNonInteractive()).toBe(true)
+  })
+
+  it('should let the retired variable, which plugin caches still set, force headless', () => {
+    stdinIs(true)
     process.env.AITK_NON_INTERACTIVE = '1'
 
     expect(isNonInteractive()).toBe(true)
   })
 
-  it('should be false when neither is set', () => {
-    delete process.env.CANON_NON_INTERACTIVE
-    delete process.env.AITK_NON_INTERACTIVE
+  it('should ignore a value other than 1 on a terminal', () => {
+    stdinIs(true)
+    process.env.CANON_NON_INTERACTIVE = 'yes'
 
     expect(isNonInteractive()).toBe(false)
   })
 
-  it('should be false when the value is not 1', () => {
-    process.env.CANON_NON_INTERACTIVE = 'yes'
-    delete process.env.AITK_NON_INTERACTIVE
+  describe('select with no terminal', () => {
+    const options = [
+      { value: 'first', label: 'First' },
+      { value: 'second', label: 'Second' },
+    ]
 
-    expect(isNonInteractive()).toBe(false)
+    it('should take the first option when the prompt opts in', async () => {
+      stdinIs(undefined)
+      const written: string[] = []
+      const spy = vi
+        .spyOn(process.stderr, 'write')
+        .mockImplementation((chunk: string | Uint8Array) => {
+          written.push(String(chunk))
+          return true
+        })
+
+      try {
+        await expect(
+          select({ message: 'Pick', options, nonInteractiveDefault: true }),
+        ).resolves.toBe('first')
+      } finally {
+        spy.mockRestore()
+      }
+
+      expect(written.join('')).toBe('◇ Pick First\n')
+    })
+
+    it('should write nothing for the default under a quiet run', async () => {
+      stdinIs(undefined)
+      setQuiet(true)
+      const written: string[] = []
+      const spy = vi
+        .spyOn(process.stderr, 'write')
+        .mockImplementation((chunk: string | Uint8Array) => {
+          written.push(String(chunk))
+          return true
+        })
+
+      try {
+        await expect(
+          select({ message: 'Pick', options, nonInteractiveDefault: true }),
+        ).resolves.toBe('first')
+      } finally {
+        spy.mockRestore()
+        setQuiet(false)
+      }
+
+      expect(written).toEqual([])
+    })
+
+    it('should refuse with a bare mark naming the hint and never the variable', async () => {
+      stdinIs(undefined)
+      const written: string[] = []
+      const write = vi
+        .spyOn(process.stderr, 'write')
+        .mockImplementation((chunk: string | Uint8Array) => {
+          written.push(String(chunk))
+          return true
+        })
+      const exit = vi.spyOn(process, 'exit').mockImplementation(() => {
+        throw new Error('exit')
+      })
+
+      let codes: unknown[][] = []
+      try {
+        await expect(
+          select({ message: 'Pick', options, ttyHint: 'Pass --stack' }),
+        ).rejects.toThrow('exit')
+        codes = [...exit.mock.calls]
+      } finally {
+        write.mockRestore()
+        exit.mockRestore()
+      }
+
+      const out = written.join('')
+      expect(out).toBe('✗ Pick requires a TTY. Pass --stack.\n')
+      expect(codes).toEqual([[1]])
+    })
   })
 })
 
