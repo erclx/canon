@@ -172,6 +172,10 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     expect: 'teach-workspace',
   },
   {
+    prompt: 'Quiz me on what we covered about regular expressions yesterday.',
+    expect: 'teach-craft',
+  },
+  {
     prompt:
       'The restyle is finished. Write down what a reviewer has to look at by eye, and which behaviors have no test.',
     expect: 'ui-checklist',

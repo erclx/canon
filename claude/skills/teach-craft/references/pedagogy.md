@@ -5,7 +5,7 @@ description: Fluency against storage strength, retrieval practice, spacing, inte
 
 # Pedagogy reference
 
-The rules a lesson is built from. Read this before picking what to teach next, not while writing the markup.
+The rules a lesson is built from. Read this before picking what to teach next.
 
 ## Fluency is not storage strength
 
@@ -43,8 +43,7 @@ The same total time spread across days beats the same time in one sitting. Forge
 
 The ladder is 1, 3, 7, 16, and 35 days. A topic retrieved unaided moves up a rung and a miss drops it back one, held inside the ladder at either end, so a topic the learner keeps missing stays on the shortest gap rather than restarting a sequence.
 
-- Do not compute a date from that ladder by hand. `canon teach list <topic> --json` reports both dates resolved for every item, a number to copy rather than a rule to apply.
-- An author told to widen a gap still picks it by judgment, the same reason quiz option order is drawn by a verb rather than stated here
+- Apply the ladder as written rather than picking a gap by judgment, since an author told to widen a gap settles on whatever feels right
 
 ## Interleaving
 

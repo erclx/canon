@@ -37,6 +37,7 @@ These skills serve a request rather than a moment. With the [skill map](skill-ma
 | `canon:youtube-transcripts` | A video transcript wanted as context                  |
 | `canon:read-frames`         | To read a recorded demo back frame by frame           |
 | `canon:teach-workspace`     | To learn a subject across sessions                    |
+| `canon:teach-craft`         | To teach a subject so it sticks                       |
 | `canon:markdown-craft`      | Before a substantial markdown edit                    |
 | `canon:write-human`         | Before drafting or revising prose                     |
 
