@@ -93,6 +93,9 @@ jobs:
       # The only job that writes, and only issues
       issues: write
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
       - name: Download results
         uses: actions/download-artifact@v8
         with:
@@ -105,24 +108,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          set -euo pipefail
-          # Keep in step with the matrix above. A stack missing here gets no issue.
-          for stack in astro nextjs vite-react go php python; do
-            title="stack-verify: $stack"
-            # A job that died before recording counts as a failure
-            outcome=failure
-            [ -f "results/$stack" ] && outcome=$(cat "results/$stack")
-            number=$(gh issue list --state open --search "\"$title\" in:title" --json number,title \
-              --jq "[.[] | select(.title == \"$title\")][0].number // empty")
-            if [ "$outcome" = success ]; then
-              if [ -n "$number" ]; then
-                gh issue close "$number" --comment "Passing again in $RUN_URL"
-              fi
-            elif [ -n "$number" ]; then
-              gh issue comment "$number" --body "Still failing in $RUN_URL"
-            else
-              gh issue create --title "$title" \
-                --body "\`canon tooling verify $stack\` failed in $RUN_URL. The issue closes itself when a later run passes."
-            fi
-          done
+        # Keep in step with the matrix above. A stack missing here gets no issue.
+        run: scripts/ci/stack-issues.sh astro nextjs vite-react go php python
