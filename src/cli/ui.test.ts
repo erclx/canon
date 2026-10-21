@@ -410,9 +410,34 @@ describe('isNonInteractive', () => {
       } finally {
         spy.mockRestore()
       }
+
+      expect(written.join('')).toBe('◇ Pick First\n')
     })
 
-    it('should refuse naming the hint and never the variable', async () => {
+    it('should write nothing for the default under a quiet run', async () => {
+      stdinIs(undefined)
+      setQuiet(true)
+      const written: string[] = []
+      const spy = vi
+        .spyOn(process.stderr, 'write')
+        .mockImplementation((chunk: string | Uint8Array) => {
+          written.push(String(chunk))
+          return true
+        })
+
+      try {
+        await expect(
+          select({ message: 'Pick', options, nonInteractiveDefault: true }),
+        ).resolves.toBe('first')
+      } finally {
+        spy.mockRestore()
+        setQuiet(false)
+      }
+
+      expect(written).toEqual([])
+    })
+
+    it('should refuse with a bare mark naming the hint and never the variable', async () => {
       stdinIs(undefined)
       const written: string[] = []
       const write = vi
@@ -437,8 +462,7 @@ describe('isNonInteractive', () => {
       }
 
       const out = written.join('')
-      expect(out).toContain('Pick requires a TTY. Pass --stack.')
-      expect(out).not.toContain('CANON_NON_INTERACTIVE')
+      expect(out).toBe('✗ Pick requires a TTY. Pass --stack.\n')
       expect(codes).toEqual([[1]])
     })
   })

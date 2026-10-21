@@ -227,9 +227,11 @@ export async function select<Value>(opts: {
   let cursor = 0
 
   if (opts.nonInteractiveDefault && isNonInteractive()) {
-    process.stderr.write(
-      `${GREY}│${NC}\n${GREY}◇${NC} ${message} ${WHITE}${options[0].label}${NC}\n`,
-    )
+    if (!quiet) {
+      process.stderr.write(
+        markLine('GREY', '◇', `${message} ${options[0].label}`),
+      )
+    }
     return options[0].value
   }
 
@@ -253,9 +255,10 @@ export async function select<Value>(opts: {
 
   return new Promise<Value>((resolve) => {
     if (isNonInteractive()) {
-      process.stderr.write(
-        `${GREY}│${NC} ${RED}✗${NC} ${message} requires a TTY. ${opts.ttyHint ?? 'Pass an argument'}.\n${GREY}└${NC}\n`,
+      logError(
+        `${message} requires a TTY. ${opts.ttyHint ?? 'Pass an argument'}.`,
       )
+      outro()
       process.exit(1)
     }
 
