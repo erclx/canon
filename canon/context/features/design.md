@@ -33,7 +33,7 @@ Holds what an install lands in a target, being `base.css` at its root and the ta
 
 The skills and docs around the module each own one slice.
 
-- `claude/skills/canvas-board/` owns the step that carries a picked direction from the canvas into the record
+- `claude/skills/design-record/` owns the record's standard and the reference folder's, and the steps that land a pick in `canon/design/` and carry its values into the record
 - `claude/skills/design-taste/` owns the layer model, the coherence locks, and grey-boxing, and `governance/rules/ui/design-taste.md` routes stylesheet and `canon/DESIGN.md` edits to it
 - `assets/brand/mark.svg` is the one authored icon, and the path data in `src/design/render.ts` and the README `mark-accent` pair are static copies nothing compares
 - `examples/design/` owns an intent record for an invented project, with no committed capture
