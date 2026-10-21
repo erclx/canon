@@ -2,7 +2,9 @@
 
 ## Overview
 
-The cloudflare stack ships one parameterized GitHub Actions workflow that deploys a static build to Cloudflare Pages. It is keyed on host rather than on framework and carries no dependencies, seeds, or scripts of its own, so it syncs onto a project already carrying `astro`, `vite-react`, or any other stack without colliding.
+The cloudflare stack ships one parameterized GitHub Actions workflow that deploys a static build to Cloudflare Pages. It is keyed on host rather than on framework and carries no dependencies or seeds of its own, so it syncs onto a project already carrying `astro`, `vite-react`, or any other stack without colliding.
+
+It ships one script, `scripts/delete-previews.sh`, which the cleanup job calls and which overwrites a project's own file of that name on every sync.
 
 ## Deploy workflow
 
@@ -28,7 +30,8 @@ Every branch gets a preview URL rather than only `main`.
 
 A `pull_request` trigger on `closed` runs only the `cleanup-preview` job, which deletes every preview deployment Cloudflare holds for that branch.
 
-- It lists them through the Pages REST API, because the wrangler listing has no branch filter.
+- It checks out the default branch and runs `scripts/delete-previews.sh` with the Pages project name and the closing branch as arguments.
+- The script lists them through the Pages REST API, because the wrangler listing has no branch filter.
 - It deletes each with `force=true`, so a deployment still holding the branch alias goes too.
 - It skips with a notice when the secrets are absent, the same as the deploy job.
 
@@ -38,9 +41,9 @@ Three values in the seeded file have no generic default, and a project sets them
 
 - The `paths:` filter under the `push` trigger ships as a single `src/**` glob. Widen it to every path the build reads when the build draws on catalogs or generated content outside `src/`.
 - The `concurrency.group` name ships as `deploy-${{ github.ref_name }}`, enough for one deploy. Rename the `deploy` prefix only for a second deploy workflow, and keep the ref suffix.
-- The Pages project name appears twice as `REPLACE_WITH_PROJECT_NAME`, in the `--project-name` flag and as `PROJECT_NAME` in the cleanup job.
+- The Pages project name appears twice as `REPLACE_WITH_PROJECT_NAME`, in the `--project-name` flag and as the first argument to `scripts/delete-previews.sh` in the cleanup job.
 - Set both to the name the `deploy-app` skill creates the project under.
 
 ## Re-sync
 
-`configs/` is golden and always overwrites. Re-running `canon tooling sync cloudflare . --write` after hand-editing any of the three parameters above discards that edit and restores the shipped defaults. Re-fill the parameters after any re-sync rather than expecting the file to preserve them.
+`configs/` is golden and always overwrites, `scripts/delete-previews.sh` included. Re-running `canon tooling sync cloudflare . --write` after hand-editing any of the three parameters above discards that edit and restores the shipped defaults. Re-fill the parameters after any re-sync rather than expecting the file to preserve them.
