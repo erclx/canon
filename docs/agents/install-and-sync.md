@@ -70,14 +70,6 @@ After a rename the new name shows as `missing` when the stamp records a stack, a
 
 `canon tooling inject` and `prune-gitignore` apply one stack with no scan or prompt, and the latter prints the number removed on stdout. Use `sync` unless scripting provisioning, and pass `--nested` inside an open frame.
 
-## Design
-
-- `canon design install` copies `base.css` to `.claude/design/` and creates no override
-- Project overrides live in `.claude/design/project/`, which `design sync` never touches
-- `canon design fonts add <file> --family <name>` copies a `woff2`, `woff`, `ttf`, or `otf` face into `project/fonts/` with its `fonts.css` rule, and refuses mismatched bytes as `invalid-font`
-- `fonts list --json` flags a missing or out-of-folder file as a `problem`
-- `canon sync` skips the domain where `design install` never ran
-
 ## Whole-project sync
 
 `canon sync [path]` runs every installed domain sync, then offers a commit and pull request. Headlessly it applies the syncs, refuses the git workflow, reports what it would have made, and exits 0. It refuses a dirty working tree.

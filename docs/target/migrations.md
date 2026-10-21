@@ -158,6 +158,15 @@ The learning workspace, the deck renderer, the app recorder, and the canvas are 
 - Delete a `canon:make-deck`, `canon:script-screencast`, `canon:record-screencast`, `canon:read-frames`, or `canon:video-craft` reference, since none has a successor <!-- canon-keep-retired -->
 - Delete a `canon:canvas-board` reference too. Frameboard, which `canon:pick-by-eye` drives, reads each `.canon/canvas/` folder as a project, so move a kept page under one <!-- canon-keep-retired -->
 
+## Move the design install into your own stylesheet, once
+
+The design install, sync, fonts, and render verbs are retired, and `canon sync` no longer reports a `design` domain. A held `.claude/design/` stops showing drift, and nothing deletes it. <!-- canon-keep-retired -->
+
+- Move each value under `.claude/design/project/` into the stylesheet your app loads, faces in `project/fonts/` included
+- Name that stylesheet in the lead of `canon/DESIGN.md`, the way `canon:design-record` writes it
+- Delete `.claude/design/` once nothing imports `base.css` or a file under `project/`
+- A stamp from an older sync still carries a `design` entry, which `canon sync --check` ignores and the next sync drops
+
 ## Move decisions out of a held architecture record, once
 
 The toolkit no longer seeds `canon/ARCHITECTURE.md`, and a held file and its `CLAUDE.md` import stay. Move a trap a session would hit into that domain's `## Gotchas`, then delete the file and its `@canon/ARCHITECTURE.md` line.
