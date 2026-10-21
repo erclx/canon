@@ -819,19 +819,31 @@ describe('shape', () => {
     'canon/context/development/overview.md',
     'development.md',
     'canon/context/development/local-loop.md',
+    'canon/context/development/local.md',
   ])('should accept a Scripts table in the development entry at %s', (rel) => {
     const source = `${FRONTMATTER}## Layout\n\n### Scripts\n\n| Command | Purpose |\n| --- | --- |\n| \`bun run check\` | Verify |\n`
 
     expect(measureEntry(rel, source).shape).toEqual([])
   })
 
-  it('should report a Scripts H3 in an entry other than the development entry', () => {
-    const source = `${FRONTMATTER}## Layout\n\n### Scripts\n\n- One\n`
+  it('should accept Scripts tables grouped under several lead sentences', () => {
+    const source = `${FRONTMATTER}## Layout\n\n### Scripts\n\nThe checks.\n\n| Command | Purpose |\n| --- | --- |\n| \`bun run check\` | Verify |\n\nThe servers.\n\n| Command | Purpose |\n| --- | --- |\n| \`bun run dev\` | Serve |\n`
 
-    expect(measureEntry('canon/context/ci.md', source).shape).toEqual([
-      { line: 8, kind: 'layout-heading', text: 'Scripts' },
-    ])
+    expect(
+      measureEntry('canon/context/development/local.md', source).shape,
+    ).toEqual([])
   })
+
+  it.each(['canon/context/ci.md', 'canon/context/development/x/y.md'])(
+    'should report a Scripts H3 in %s, which is not a development entry',
+    (rel) => {
+      const source = `${FRONTMATTER}## Layout\n\n### Scripts\n\n- One\n`
+
+      expect(measureEntry(rel, source).shape).toEqual([
+        { line: 8, kind: 'layout-heading', text: 'Scripts' },
+      ])
+    },
+  )
 
   it('should report a folder H3 with a two-paragraph lead', () => {
     const source = '## Layout\n\n### `src/`\n\nFirst.\n\nSecond.\n\n- One\n'

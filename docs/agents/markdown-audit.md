@@ -1,6 +1,6 @@
 ---
 title: Markdown audit
-description: Running the markdown audit over any path, each finding it reports with whether it gates, the six density limits, the advisory measures, the exit codes, and where the audit runs
+description: Running the markdown audit over any path, each finding with whether it gates, the density and table limits, the advisory measures, the exit codes, and where the audit runs
 kind: reference
 ---
 
@@ -28,10 +28,13 @@ The ban set and checkpoints ship in `src/markdown/bans.ts` and `src/markdown/str
 | Links           | A relative link resolving to nothing on disk                                         | Always            |
 | Density         | The six limits below, under `density`                                                | On a gated prefix |
 | Reference shape | A `kind: reference` page breaking its shape, under `referenceShape`                  | On a gated prefix |
+| Tables          | The four table limits below, under `tables`                                          | Never             |
 | Colons          | A colon followed by more text in a prose line, under `colons`                        | Never             |
 | Heading case    | A capital after the first word of a heading or `title`, under `headingCase`          | Never             |
 
 A page marked `kind: reference` holds its opening, then `Output`, `Refusals`, and `See also` as H2s, each at most once and in that order. It takes no H3 and no table headed `Flag` or `Option`. An unmarked page is never measured.
+
+Tables take the four limits in the `markdown-craft` skill's `tables.md`, on the paths density measures. A cell past 120 visible characters reports as `table-cell`, more than 8 body rows as `table-rows`, a list right after a table as `table-then-list`, and a code span with a run past 30 characters as `table-token`. None sets the exit code.
 
 | Density limit       | Finding                                                    |
 | ------------------- | ---------------------------------------------------------- |

@@ -14,6 +14,7 @@ The rules also have three carriers, a standard, a generated rule pointing at it,
 ## Must
 
 - Hold the format and structure reference in `references/markdown.md`, the one copy, read by sibling path from every skill that writes markdown
+- Hold the table limits in `references/tables.md`, the one copy, since `markdown.md` sits at the document ceiling and points at it
 - Send the session to `canon markdown audit` after an edit, since the audit reads the bans from the package and a restated list would drift
 - Route voice to `write-human` and a Mermaid fence to `draw-figure` rather than restating either
 

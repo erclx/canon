@@ -7,9 +7,14 @@ metadata:
 
 # Markdown craft
 
-Read `${CLAUDE_SKILL_DIR}/references/markdown.md` before a substantial markdown edit. Every rule in it is a fact a scan can settle, so do not work the banned characters from memory.
+Read the references below before a substantial markdown edit. Every rule in them is a fact a scan can settle, so do not work the banned characters from memory.
+
+- `${CLAUDE_SKILL_DIR}/references/markdown.md`: headings, density, code spans, punctuation, and every other format rule
+- `${CLAUDE_SKILL_DIR}/references/tables.md`: the four table limits and their fixes, read before writing a table or fixing a table finding
 
 Run `canon markdown audit <path>` after the edit, and fix every ban and density finding it reports before moving on. Rewrite the sentence carrying a ban hit rather than swapping the token for a near-synonym, and fix a density finding by its shape rather than trimming characters.
+
+A table finding reports without failing the run. Fix it the way `tables.md` gives for its limit.
 
 ## Routes
 

@@ -1,6 +1,7 @@
 import { existsSync, statSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
+import { codeSpans, unbrokenRun } from '@/markdown/tables'
 import {
   archiveDir,
   declinedDir,
@@ -1084,28 +1085,30 @@ function checkFolderClaims(
 /**
  * The widest the longest unbroken run in a code span may be before a table
  * scrolls in the preview pane. A 57-character span fit and a 78-character one
- * did not, so the limit sits at the nearest round number above the first.
+ * did not, so the limit sits at the nearest round number above the first. It
+ * is still too high: a 36-character path with no hyphen widened a board column
+ * until the next one ran off the pane, which is why a table cell reads the same
+ * measure at 30. The board keeps 60 until its own report is revisited.
  */
 const WIDE_LIMIT = 60
 
 /**
- * Reports a code span a table cell cannot wrap. A span breaks only at
- * whitespace, so the longest whitespace-free run is what is measured, and a
- * link target is stripped first because only its label renders. Every group is
- * scanned, since the overflow this exists for happened under `## Up next`,
- * where the folder-claim scan would not have looked. Prose breaks at spaces
- * and bare words at hyphens, so only a span is read.
+ * Reports a code span a table cell cannot wrap, measured by `unbrokenRun`,
+ * which `canon markdown audit` reads for a table too. A rendered preview breaks
+ * a span at whitespace and after a hyphen or a slash, so a long run either
+ * widens its column or splits mid-token. Every group is scanned, since the
+ * overflow this exists for happened under `## Up next`, where the folder-claim
+ * scan would not have looked. Prose breaks at spaces and bare words at hyphens,
+ * so only a span is read.
  */
 function checkWideTokens(rows: readonly BoardRow[]): WideToken[] {
   const wide: WideToken[] = []
 
   for (const row of rows) {
     for (const cell of row.cells) {
-      const spans = cell.replace(/\]\([^)]*\)/g, ']').match(/`[^`]+`/g) ?? []
-
-      for (const span of spans) {
-        const text = span.slice(1, -1)
-        const run = Math.max(...text.split(/\s+/).map((part) => part.length))
+      for (const text of codeSpans(cell)) {
+        const span = `\`${text}\``
+        const run = unbrokenRun(text)
 
         if (/\{[^}]*,[^}]*\}/.test(text)) {
           wide.push({

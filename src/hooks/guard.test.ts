@@ -178,6 +178,7 @@ beforeAll(() => {
     join(fixture, 'bin-jq-trap'),
     join(fixture, 'bin-empty-set'),
     join(fixture, 'bin-advisory'),
+    join(fixture, 'bin-tables'),
     join(fixture, 'bin-no-record'),
     join(fixture, 'bin-due'),
     join(fixture, 'bin-scan-fail'),
@@ -264,6 +265,15 @@ beforeAll(() => {
     `#!/usr/bin/env bash\nprintf '%s\\n' '{"entries":[{"path":"doc.md","bans":[],"colons":[{"line":3,"column":14,"text":"Prose sentence: another clause.","lead":"sentence"},{"line":5,"column":14,"text":"Ship it 🚀 now: it works.","lead":"now"}],"headingCase":[{"line":1,"text":"Key Changes","words":["Changes"]}]}],"bans":{"emptySets":[]}}'\n`,
   )
   chmodSync(advisory, 0o755)
+
+  // A record carrying table findings alone, one counted and one a shape, so
+  // both branches of the hook's line format are observable.
+  const tables = join(fixture, 'bin-tables/canon')
+  writeFileSync(
+    tables,
+    `#!/usr/bin/env bash\nprintf '%s\\n' '{"entries":[{"path":"doc.md","bans":[],"tables":[{"kind":"table-cell","line":7,"value":130,"limit":120},{"kind":"table-then-list","line":8,"value":null,"limit":null}]}],"bans":{"emptySets":[]}}'\n`,
+  )
+  chmodSync(tables, 0o755)
 
   // A verb that declined to measure writes no record at all, which is what it
   // does outside a git repository. Reading the findings alone reports that as a
@@ -1182,6 +1192,21 @@ describe('.claude/hooks/standards-audit.sh runner', () => {
     expect(result.stdout).toContain('no record')
     expect(result.code).toBe(0)
   })
+
+  it.concurrent('should hand back table findings as a report that never fails a push', async ({
+    expect,
+  }) => {
+    const path = [join(fixture, 'bin-tables'), hookPath].join(delimiter)
+
+    const result = await run(hook, payload(), path, join(fixture, 'no-source'))
+
+    expect(result.stdout).toContain(':7  table-cell  130 past 120')
+    expect(result.stdout).toContain(
+      ':8  table-then-list  a list follows the table with no lead sentence',
+    )
+    expect(result.stdout).toContain('never fail a push')
+    expect(result.code).toBe(0)
+  })
 })
 
 // The seed reaches one runner where the toolkit copy reaches two, so the branch
@@ -1240,6 +1265,21 @@ describe('seeds standards-audit.sh runner', () => {
 
     expect(result.stdout).toContain('shipped ban set is empty')
     expect(result.stdout).toContain('characters')
+    expect(result.code).toBe(0)
+  })
+
+  it.concurrent('should hand back table findings as a report that never fails a push', async ({
+    expect,
+  }) => {
+    const path = [join(fixture, 'bin-tables'), hookPath].join(delimiter)
+
+    const result = await run(hook, payload(), path)
+
+    expect(result.stdout).toContain(':7  table-cell  130 past 120')
+    expect(result.stdout).toContain(
+      ':8  table-then-list  a list follows the table with no lead sentence',
+    )
+    expect(result.stdout).toContain('never fail a push')
     expect(result.code).toBe(0)
   })
 

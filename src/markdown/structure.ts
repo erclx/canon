@@ -67,7 +67,7 @@ const MARKER_WIDTH = 20
 
 export const LIST_ITEM = /^(\s*)([-*+]|\d+\.)\s+/
 export const TABLE_ROW = /^\s*\|/
-const TABLE_SEPARATOR = /^\s*\|[\s:|-]+\|\s*$/
+export const TABLE_SEPARATOR = /^\s*\|[\s:|-]+\|\s*$/
 export const BLOCKQUOTE = /^\s*>/
 
 /**

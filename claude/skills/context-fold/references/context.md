@@ -88,9 +88,10 @@ Entries get read top-down and often partially, so the boundary sits above the fo
 
 ## The development entry
 
-Only the `development` entry carries this section, as an H3 under `## Layout`. It is not a general-purpose heading for other domains.
+Only the development entry carries this section, as an H3 under `## Layout`. That entry is the flat `development` entry or any entry directly under a `development/` folder, and the heading is not a general-purpose one for other domains.
 
-- `### Scripts`: a table of run commands (command plus purpose). The single discoverable surface for how to run the project. Keep run commands here, not scattered across `CLAUDE.md`.
+- `### Scripts`: run commands as tables of command plus purpose. The single discoverable surface for how to run the project. Keep run commands here, not scattered across `CLAUDE.md`.
+- Group a long set of commands into short tables, each under a lead sentence naming its group, since a table past 8 body rows breaks the table limits. This H3 alone may carry several lead paragraphs.
 
 ## What goes in
 
@@ -157,7 +158,7 @@ A domain outgrowing the ceiling splits into a folder, and small domains of one k
 - Name an entry inside either folder per the `codebase-layout` skill, which never repeats the folder's name as the entry's stem or prefix
 - Keep a split domain's `index.md` generated, since regen rewrites its body. The domain's own overview and layout go in a sibling file, which the `subtitle` names.
 
-Author a catalog that grows a row per shipped thing as a bullet list, never a markdown table. A table pads its columns to a shared width, so one row outgrowing its column reflows every row and conflicts with any sibling branch.
+Author a catalog that grows a row per shipped thing as a bullet list, never a markdown table. A table pads its columns to a shared width, so one row outgrowing its column reflows every row and conflicts with any sibling branch. The development entry's `### Scripts` is the one exception, kept small by grouping.
 
 ## Examples
 
