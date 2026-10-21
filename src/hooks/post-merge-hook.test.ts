@@ -56,38 +56,12 @@ function calls(name: string): string {
   return existsSync(log) ? readFileSync(log, 'utf8') : ''
 }
 
-/**
- * A `canon` that lacks the verb until `upgrade` runs, then carries it, so a
- * test reads whether the hook reinstalled before handing the verb over.
- */
-function upgradableStub(): void {
-  const log = join(root, 'canon.log')
-  const flag = join(root, 'upgraded')
-  writeFileSync(
-    join(bin, 'canon'),
-    [
-      '#!/bin/sh',
-      'for arg in "$@"; do',
-      '  if [ "$arg" = "--help" ]; then',
-      `    if [ -f '${flag}' ]; then echo '${VERB_USAGE}'; else echo '${ROOT_USAGE}'; fi`,
-      '    exit 0',
-      '  fi',
-      'done',
-      `echo "$*" >> '${log}'`,
-      `if [ "$1" = "upgrade" ]; then touch '${flag}'; fi`,
-      '',
-    ].join('\n'),
-  )
-  chmodSync(join(bin, 'canon'), 0o755)
-}
-
-function runHook(hook: string, skipUpgrade = true): number {
+function runHook(hook: string): number {
   const result = execaSync('sh', ['-e', hook], {
     cwd: root,
     env: {
       ...gitEnv(),
       PATH: `${bin}:/usr/bin:/bin`,
-      ...(skipUpgrade ? { CANON_SKIP_UPGRADE: '1' } : {}),
     },
     extendEnv: false,
     reject: false,
@@ -119,31 +93,14 @@ describe.each(HOOKS)('post-merge hook ($name copy)', ({ path }) => {
     expect(calls('canon')).toBe(`hooks post-merge --root ${root}\n`)
   })
 
-  it('should reinstall once and then run the verb when the binary gains it', () => {
-    upgradableStub()
-
-    runHook(path, false)
-
-    expect(calls('canon')).toBe(`upgrade\nhooks post-merge --root ${root}\n`)
-  })
-
-  it('should not reinstall when CANON_SKIP_UPGRADE is set', () => {
-    upgradableStub()
+  // A binary older than the verb is left for its owner to upgrade by hand,
+  // so the hook calls nothing on it and still exits zero.
+  it('should leave a binary lacking the verb alone and exit zero', () => {
+    stub('canon', ROOT_USAGE)
 
     const code = runHook(path)
 
     expect({ code, canon: calls('canon') }).toEqual({ code: 0, canon: '' })
-  })
-
-  it('should exit zero when the binary never gains the verb', () => {
-    stub('canon', ROOT_USAGE)
-
-    const code = runHook(path, false)
-
-    expect({ code, canon: calls('canon') }).toEqual({
-      code: 0,
-      canon: 'upgrade\n',
-    })
   })
 
   it('should exit zero with no canon on PATH', () => {

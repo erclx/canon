@@ -27,22 +27,13 @@ if ! command -v canon >/dev/null 2>&1; then
   exit 0
 fi
 
-# A global binary older than the verb cannot run it, and the verb carries the
-# only step that would update it, so reinstall here and probe again. The probe
-# reads the verb's own usage line rather than the exit, since an older binary
-# answers an unknown command's `--help` with its root help and exits zero.
+# A global binary older than the verb cannot run it, and its owner upgrades it
+# by hand. The probe reads the verb's own usage line rather than the exit,
+# since an older binary answers an unknown command's `--help` with its root
+# help and exits zero.
 has_verb() {
   canon hooks post-merge --help 2>/dev/null | grep -q '^Usage: canon hooks post-merge'
 }
-
-# Only an older binary reaches the upgrade, and it reads headless off the
-# variable alone, so the call keeps it beside the closed stdin a current binary
-# reads. A `git pull` at a terminal would otherwise hand it a prompt.
-if ! has_verb; then
-  if [ -z "$CANON_SKIP_UPGRADE" ]; then
-    CANON_NON_INTERACTIVE=1 canon upgrade </dev/null >/dev/null 2>&1 || true
-  fi
-fi
 
 if has_verb; then
   canon hooks post-merge --root "$root" || true
