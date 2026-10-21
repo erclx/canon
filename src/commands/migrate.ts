@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import type { Command } from 'commander'
+import { cliRunner } from '@/gate/sequencer'
 import { listRepositoryFiles } from '@/git/files'
 import { indexSourceRules } from '@/gov/adapter'
 import { applyRecordsMove, applyRename, readSources } from '@/migrate/apply'
@@ -35,6 +36,7 @@ import {
   SKILL_NAME_MAP,
   SKILL_NAME_RULES,
 } from '@/migrate/skill-names'
+import { readMigrationStatus, statusExitCode } from '@/migrate/status'
 import {
   planSurfaceRootsMove,
   type SurfaceRootsPlan,
@@ -1039,6 +1041,43 @@ function toSessionDefaultsRecord(
   }
 }
 
+interface StatusOptions {
+  readonly json?: boolean
+  readonly root?: string
+}
+
+/**
+ * Lists every migration a project still needs by running each subcommand's own
+ * dry run, so it reads the contract they share and writes nothing.
+ */
+async function runStatus(opts: StatusOptions): Promise<number> {
+  const root = resolve(opts.root ?? process.cwd())
+
+  const mismatch = checkoutMismatchWarning(process.cwd())
+  if (mismatch !== undefined) logWarn(mismatch)
+
+  const report = await readMigrationStatus(cliRunner(root))
+
+  if (opts.json) {
+    process.stdout.write(
+      `${JSON.stringify({ ok: report.refused === 0, ...report })}\n`,
+    )
+  }
+
+  for (const entry of report.migrations) {
+    if (entry.state === 'pending') logInfo(`Pending: ${entry.verb}`)
+    if (entry.state === 'refused') {
+      logError(`Refused: ${entry.verb}: ${entry.reason ?? 'no reason given'}`)
+    }
+  }
+
+  if (report.pending === 0 && report.refused === 0) {
+    logInfo('No migration is pending.')
+  }
+
+  return statusExitCode(report)
+}
+
 export function register(program: Command): void {
   const migrate = program
     .command('migrate')
@@ -1445,5 +1484,40 @@ export function register(program: Command): void {
     )
     .action(async (opts: SessionDefaultsOptions) => {
       process.exitCode = await runSessionDefaults(opts)
+    })
+
+  migrate
+    .command('status')
+    .description('List every migration a project still needs, in run order')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .option(
+      '--root <path>',
+      'Project root, defaulting to the working directory',
+    )
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Runs each migrate subcommand as a dry run and sorts it by its exit',
+        'code, in the order a project runs them, records first. It passes',
+        'no --write and writes nothing. A migration is pending or not, with',
+        "the subcommand's own record attached, since the records share no",
+        'count field.',
+        '',
+        'Exit codes:',
+        '  0  no migration is pending',
+        '  1  a subcommand refused, which outranks a pending plan',
+        '  2  at least one migration is pending',
+        '',
+        'Examples:',
+        '  canon migrate status',
+        '  canon migrate status --json',
+        '  canon migrate status --root ../project',
+        '',
+      ].join('\n'),
+    )
+    .action(async (opts: StatusOptions) => {
+      process.exitCode = await runStatus(opts)
     })
 }
