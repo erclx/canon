@@ -17,7 +17,7 @@ Six domains carry the report. Five answer from a verb that already exists and th
 - No `.claude/` directory at the working root: stop. `❌ No .claude/ here, so nothing is installed to check. Run canon init first.`
 - A `claude/skills/` folder at the root, no leading dot: stop. `❌ This is the toolkit itself rather than a target. Ask the orchestrator for a worker per repository to take a change out to the targets.`
   - A target receives skills at `.claude/skills/` and authors none, so the spelling without the dot separates the source from what it installs into
-- Run every command under `CANON_NON_INTERACTIVE=1` and prompt at no point, since every caller is a dispatched worker with nobody to answer
+- Prompt at no point, since every caller is a dispatched worker with nobody to answer. A call with no terminal on stdin already runs headless, so no command takes a prefix.
 - Branch on each record's own fields rather than on an exit status. A shell function wrapping `canon` can report every refusal as success.
 
 ## Step 1: read the reports
@@ -25,23 +25,23 @@ Six domains carry the report. Five answer from a verb that already exists and th
 Run these from the target root, in parallel:
 
 ```bash
-CANON_NON_INTERACTIVE=1 canon sync --check . --json
-CANON_NON_INTERACTIVE=1 canon context audit --json
+canon sync --check . --json
+canon context audit --json
 ```
 
 The first answers five domains from one read, being `skew`, `domains`, `seeds`, `tooling`, and the layout fields `unmigrated`, `superseded`, `unmovedSurfaces`, and `reverse`. The second deepens a domain that first read only counts.
 
-Then run `CANON_NON_INTERACTIVE=1 canon records validate <kind> --json` once per record folder the target carries, taking `<kind>` from what is present under the record root rather than from a list held here.
+Then run `canon records validate <kind> --json` once per record folder the target carries, taking `<kind>` from what is present under the record root rather than from a list held here.
 
 ### The tooling read takes a stack, always
 
 The tooling comparison runs last, because it needs a value the first read returns. Take `<stack>` from the first name in the report's `tooling.chain`, which records the stack nearest the target, and pass it:
 
 ```bash
-CANON_NON_INTERACTIVE=1 canon tooling sync --check <stack>
+canon tooling sync --check <stack>
 ```
 
-Refuse the domain and report it unread when `chain` names nothing, rather than running the command bare. A bare call reaches the stack prompt, which the non-interactive variable resolves to the catalog's first option instead of refusing.
+Refuse the domain and report it unread when `chain` names nothing, rather than running the command bare. A bare call reaches the stack prompt, which a headless call resolves to the catalog's first option instead of refusing.
 
 Every target would then be compared against whichever stack sorts first, on every run, and the drift reported would be an artifact of the wrong comparison rather than anything the target did.
 

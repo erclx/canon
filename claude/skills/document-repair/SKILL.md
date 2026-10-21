@@ -16,14 +16,14 @@ The CLI holds every number. `canon markdown audit` measures, and `canon markdown
 - `canon` absent from the path: stop. `❌ canon is not on PATH, so nothing can be measured or gated.`
 - The audit refusing: stop and name its `reason`. A `malformed-config` refusal names the file to fix by hand, since the verb will not append to a file it cannot read.
 - `gated add` refusing with `canon-checkout`: stop. Canon's own checkout gates through a constant in its source, which a code change edits.
-- Run every command under `CANON_NON_INTERACTIVE=1`, and branch on each record's own fields rather than on an exit status a shell wrapper can flatten
+- Branch on each record's own fields rather than on an exit status a shell wrapper can flatten. A call with no terminal on stdin already runs headless, so no command takes a prefix.
 
 ## Step 1: read the audit
 
 Run the audit over the whole tree and take the density and reference shape findings from its record:
 
 ```bash
-CANON_NON_INTERACTIVE=1 canon markdown audit --json
+canon markdown audit --json
 ```
 
 Take the candidate folders from the order table in `${CLAUDE_SKILL_DIR}/references/batches.md` rather than from the findings, since a clean folder carries no finding and would never be gated. Drop every folder `canon/config/markdown.toml` already lists, since a listed folder already gates.
@@ -41,7 +41,7 @@ Load `markdown-craft` and `write-human`, then rewrite each failing block by its 
 Re-run the audit on the folder alone after each file:
 
 ```bash
-CANON_NON_INTERACTIVE=1 canon markdown audit <prefix> --json
+canon markdown audit <prefix> --json
 ```
 
 Read `${CLAUDE_SKILL_DIR}/references/batches.md` for what a rewrite may cut. A stated reason survives every rewrite, and the audit reaching zero cannot see one that went missing.
@@ -49,7 +49,7 @@ Read `${CLAUDE_SKILL_DIR}/references/batches.md` for what a rewrite may cut. A s
 ## Step 4: gate the folder
 
 ```bash
-CANON_NON_INTERACTIVE=1 canon markdown gated add <prefix> --json
+canon markdown gated add <prefix> --json
 ```
 
 Pass the prefix exactly as the batch named it: a folder with its one trailing slash, such as `docs/`, and a file by its bare path, such as `README.md`. The verb refuses a doubled slash and a slash after a file, since either matches nothing and would gate nothing.
@@ -61,7 +61,7 @@ Branch on the record. `action: appended` or `present` means the folder gates now
 A skill's `REQUIREMENT.md` gates only on its own path, never through a folder prefix, so gating `.claude/skills/` leaves each requirement reporting. Gate each one that reaches zero by its path:
 
 ```bash
-CANON_NON_INTERACTIVE=1 canon markdown gated add .claude/skills/<name>/REQUIREMENT.md --json
+canon markdown gated add .claude/skills/<name>/REQUIREMENT.md --json
 ```
 
 ## Output
