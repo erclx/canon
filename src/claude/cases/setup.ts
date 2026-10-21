@@ -66,6 +66,13 @@ export const SETUP_CASES: readonly SkillCase[] = [
       'Report what this project has fallen behind the toolkit on, domain by domain, and fix nothing.',
     expect: 'target-check',
   },
+  // The applying half of the same moment. It previews what the check would
+  // report and then writes, which is the line between the two.
+  {
+    prompt:
+      'A new toolkit release is out, bring this project up to it and run whatever migrations it needs.',
+    expect: 'target-update',
+  },
   {
     prompt:
       "This project needs its own coding rule that the toolkit doesn't ship.",

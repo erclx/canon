@@ -8,6 +8,8 @@ category: Agent surface
 
 Each section is a move a project runs once, when it was scaffolded before the change it names. Run `canon upgrade` first, then `canon migrate status --json` to list the moves a project still needs in the order to run them. The recurring sync that follows is in [target sync](sync.md).
 
+`canon:target-update` is the guided path through both. It runs the moves in that order once you approve its preview.
+
 ## Move the records first, once
 
 Gitignored session records, being the task board, plans, review reports, and scratch, moved from `.claude/` to `.canon/`. Run these from inside the project, and read the `ok` field of the `--json` record rather than the exit code.

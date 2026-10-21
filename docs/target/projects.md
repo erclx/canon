@@ -47,7 +47,7 @@ The chain runs these phases:
 - The `verify` phase runs the installed `package.json` scripts and reports pass or fail
 - The `indexes` phase bootstraps `index.md` over the project's documentation folders, confirming candidates with you
 
-An existing project goes to `canon:target-check` first. For the Claude layer alone, run `canon claude init` and then `canon:target-setup indexes`. Run `canon:target-setup verify deep` by hand for the heavier smoke and screenshot pass.
+An existing project goes to `canon:target-check` first, then to `canon:target-update` to apply the catch-up. For the Claude layer alone, run `canon claude init` and then `canon:target-setup indexes`. Run `canon:target-setup verify deep` by hand for the heavier smoke and screenshot pass.
 
 Keep the `## Scripts` table in `canon/context/development/local-loop.md` current as scripts are added. A split entry keeps it in any entry directly under `development/`, grouping a long set into short tables under lead sentences. <!-- audit-ignore-citations: canon/context/development/local-loop.md -->
 

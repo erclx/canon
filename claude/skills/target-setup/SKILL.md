@@ -59,7 +59,7 @@ Three states reach this skill that the chain does not serve. Name the destinatio
 
 ### An existing project
 
-Stop and hand off to `target-check`, which reports what the target already carries before anything is repaired. This chain never reads that, so a per-domain install picked here is a guess against configs nobody read.
+Stop and hand off to `target-check`, which reports what the target already carries before anything is repaired. This chain never reads that, so a per-domain install picked here is a guess against configs nobody read. Name `target-update` when the operator wants the catch-up applied.
 
 ### The `.claude/` folder alone
 

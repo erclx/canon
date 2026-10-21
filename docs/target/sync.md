@@ -10,7 +10,7 @@ A target pulls toolkit changes per domain, through one catch-all and several tar
 
 ## Check first
 
-`canon sync --check <path>` reports drift without writing, split by cause. `canon:target-check` groups the same state by domain and repairs nothing.
+`canon sync --check <path>` reports drift without writing, split by cause. `canon:target-check` groups the same state by domain and repairs nothing. `canon:target-update` is the guided path, previewing the drift and then applying it on your go-ahead.
 
 The report opens with the binary version against the newest published one, and a version behind means run `canon upgrade` first.
 

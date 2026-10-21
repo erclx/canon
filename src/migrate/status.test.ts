@@ -54,6 +54,15 @@ describe('readMigrationStatus', () => {
     expect(statusExitCode(report)).toBe(2)
   })
 
+  it('reports the command a migration dry-ran with, flags included', async () => {
+    const { run } = runnerFor({ rename: { exitCode: 2 } })
+
+    const report = await readMigrationStatus(run)
+
+    const rename = report.migrations.find((m) => m.name === 'rename')
+    expect(rename?.verb).toBe('canon migrate rename --scope target')
+  })
+
   it('reads an exit of 1 as refused with its stderr reason, never clean', async () => {
     const { run } = runnerFor({
       'rule-layout': { exitCode: 1, stderr: 'toolkit root\n' },

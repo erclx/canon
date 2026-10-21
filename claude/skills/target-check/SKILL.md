@@ -98,3 +98,5 @@ No overall verdict. The harness row is unchecked rather than passing.
 ```
 
 Keep the harness row `unchecked` on every run until a verb reads it. A domain left out of the table reads as a domain that passed, which is the one shape the row exists to prevent.
+
+Close on one line naming `/canon:target-update` as the skill that applies the catch-up, when a domain reads behind and `target-update` did not invoke this check.

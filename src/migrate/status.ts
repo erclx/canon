@@ -68,7 +68,11 @@ async function readOne(
   run: RunCommand,
   migration: Migration,
 ): Promise<MigrationStatus> {
-  const verb = `canon migrate ${migration.name}`
+  // The flags ride in the verb, since a caller appending --write to a bare
+  // name would apply a different plan than the one this dry run read.
+  const verb = ['canon', 'migrate', migration.name, ...migration.flags].join(
+    ' ',
+  )
   const result = await run([
     'migrate',
     migration.name,
