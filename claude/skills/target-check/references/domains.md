@@ -21,7 +21,7 @@ This domain is first because it conditions the other five. A target a release be
 
 ## 2. The `canon/` folder
 
-Read four fields off the same report, then two verbs:
+Read four fields off the same report, then three verbs:
 
 - `unmigrated`: a domain still at the root layout with nothing under `.claude/`. The most urgent finding, because such a domain reports no drift of its own while being entirely behind.
 - `superseded`: a file a newer seed folder replaced. No command moves it, since the content is the project's own.
@@ -34,19 +34,21 @@ The fourth field and the two verbs cover what the toolkit stopped shipping and w
 - `reverse`: `unclaimed` names folders at roots the toolkit stopped shipping, each with an `attribution` of `dropped`, `unattributed`, or `project`.
 - `canon context audit --json`: required sections, entry length, citations, and index drift across the context folder.
 - `canon records validate <kind> --json`, once per record folder the target carries.
+- `canon migrate status --json`: every migration in run order, each with a `state` of `pending`, `clean`, or `refused`. It exits 2 while any is pending.
 
 ### Verdicts
 
-Each of the three states takes all six reads together.
+Each of the three states takes all seven reads together.
 
-- Current: `unmigrated`, `superseded`, and `unmovedSurfaces` all empty, `reverse.unclaimed` carrying nothing outside `project` attribution, and both verbs finding nothing.
-- Behind: any of those carrying an entry. Name the entry and its attribution, and for `unmovedSurfaces` each `rel` with its `movesTo`.
-- Unread: `historyUnavailable` set on `reverse`, a `reverse` or `unmovedSurfaces` key the report does not carry, or either verb refusing
+- Current: `unmigrated`, `superseded`, and `unmovedSurfaces` all empty, `reverse.unclaimed` carrying nothing outside `project` attribution, and all three verbs finding nothing.
+- Behind: any of those carrying an entry, or a `pending` migration. Name the entry and its attribution, and for `unmovedSurfaces` each `rel` with its `movesTo`.
+- Unread: `historyUnavailable` set on `reverse`, a `reverse` or `unmovedSurfaces` key the report does not carry, or any verb refusing, a `refused` migration included
 - A missing key is a binary predating the field rather than a target with nothing to report, so name the installed version beside it
 
 Routes by finding.
 
-- `unmovedSurfaces` routes to `canon migrate surface-roots`, which only reports its plan until `--write` is passed. Name the verb with each entry's `rel` and `movesTo`, and run neither form.
+- A `pending` migration routes to its entry's `verb`, which only reports its plan until `--write` is passed. Name each in the order the status gives, and run neither form.
+- `unmovedSurfaces` is the `surface-roots` migration. Name each entry's `rel` and `movesTo` beside its verb.
 - `unmigrated` routes to a relocation the user runs, since no command moves it.
 - `superseded` routes to a split the user makes, since no command moves the content and no skill proposes it.
 - An `unclaimed` folder carrying `project` attribution routes nowhere, since history proved the project owns it.
