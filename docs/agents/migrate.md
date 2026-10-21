@@ -10,6 +10,7 @@ kind: reference
 
 | Verb               | Moves                                                                                                                                       |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `status`           | Nothing. It lists every migration the project still needs, in run order.                                                                    |
 | `rename`           | The retired `aitk` name. `--scope target` rewrites toolkit-owned folders only.                                                              |
 | `skill-names`      | Plugin skills off their `claude-` and `draft-` prefixes and other retired names, with every citation                                        |
 | `records`          | Session records from `.claude/` to `.canon/`, with every tracked citation                                                                   |
@@ -32,6 +33,7 @@ kind: reference
 - `record-tree` reports closed groundwork and intake trails, the scratch folder, and backup history as counts and rewrites none
 - `records` reports skipped record folders as a count on its own line
 - A `record-tree` rewrite has no undo in version control, so read the report before `--write`
+- `status` runs each verb as a dry run and exits 2 while any is pending, a refusal outranking that. Each entry carries the verb's own record unread and no count.
 
 Three markers keep an old spelling on a line. Each also covers the nearest non-blank line, below it for `canon-keep-record-root` and above it for `canon-keep-surface-root`.
 
