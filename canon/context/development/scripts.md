@@ -33,6 +33,14 @@ Holds the scripts run by `bun run` name or fired by a gate stage or workflow, an
 - The command count greps `import { register as ` lines in `src/cli.ts`, so a command registered in another shape leaves the frame low and nothing reports it
 - `check-color-source.sh` fails when a `.sh` outside `scripts/lib/ui.sh` spells an SGR escape. Its walk stops at `scripts/` and `sandbox/`, since seed scripts keep their own escapes.
 
+### `scripts/ci/`
+
+Holds the programs a workflow step calls once it passes five lines or carries a branch, a loop, or a function. A script takes its inputs as arguments or env and keeps the flags its step ran under, since the move relocates a step and does not rewrite it.
+
+- Each script is committed `100755` and runs after `actions/checkout`, so a job that never checked out gets one added
+- A workflow step keeps `permissions` and secrets in its own `env`, so the token scope reads off the YAML
+- `delete-previews.sh` has a seeded sibling at `tooling/cloudflare/configs/scripts/`, which adds a skip for absent secrets. Keep the two otherwise the same.
+
 ### `scripts/lib/`
 
 Holds `ui.sh` alone, sourced and never executed. It provides the framed log lines and the color palette, and holds no picker, which lives in `src/cli/ui.ts`. Sourcing it under bash below 4 exits with `brew install bash` instructions.
