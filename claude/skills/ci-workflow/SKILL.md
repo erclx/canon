@@ -75,7 +75,7 @@ A workflow that pushes a regenerated file onto the pull request branch takes the
 - Put the script at `scripts/<name>.sh`, or a `.ts` file for a Bun project, and call it after `actions/checkout`, since the runner holds no copy before that.
 - Pass inputs as arguments or `env`, never spliced into the script text, so a branch name with a quote or `$(...)` in it cannot run.
 - Keep `permissions` and secrets on the workflow step, with the script reading its token from `env`.
-- Open the script with `set -euo pipefail`, since a `run:` step defaults to `bash -e` and a script without the flags stops failing on a pipeline error.
+- Open the script with `set -e` at least, since the runner gives a `run:` step `bash -e` and a script called directly gets no flags.
 
 ## Template
 
