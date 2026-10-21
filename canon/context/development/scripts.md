@@ -31,7 +31,6 @@ Holds the scripts run by `bun run` name or fired by a gate stage or workflow, an
 - `regen-hero.ts` fills each `assets/captures/*.html.tmpl`, reading every catalog in-process, and a placeholder nothing fills fails the run. Its pure half sits in `src/capture/frame-values.ts`.
 - `FEATURED_SKILLS` in that module is a hand-chosen list of exactly `LISTED` names, so renaming or retiring a shipped skill fails the Hero stage until the list is updated
 - The command count greps `import { register as ` lines in `src/cli.ts`, so a command registered in another shape leaves the frame low and nothing reports it
-- `check-color-source.sh` fails when a `.sh` outside `scripts/lib/ui.sh` spells an SGR escape. Its walk stops at `scripts/` and `sandbox/`, since seed scripts keep their own escapes.
 
 ### `scripts/ci/`
 
@@ -43,11 +42,9 @@ Holds the programs a workflow step calls once it passes five lines or carries mo
 
 ### `scripts/lib/`
 
-Holds `ui.sh` alone, sourced and never executed. It provides the framed log lines and the color palette, and holds no picker, which lives in `src/cli/ui.ts`. Sourcing it under bash below 4 exits with `brew install bash` instructions.
+Holds `ui.sh` alone, sourced and never executed. It provides the framed log lines with no color, and holds no picker, which lives in `src/cli/ui.ts`. Sourcing it under bash below 4 exits with `brew install bash` instructions.
 
 - `open_timeline` and `close_timeline` frame stderr, paired with `trap close_timeline EXIT`. `log_*` writes stderr and data goes to stdout, so output pipes clean.
-- `set_palette <fd>` is the one place a bash escape is spelled, and it answers per stream. A writer declares the six palette names `local` and calls it for fd 2 at write time.
-- A consumer framing to stderr with a bare `echo` does the same, placed after any branch that calls a help function, since dynamic scoping hands a callee what its caller declared
 - A TypeScript command that a bash caller invokes owns its frame and takes `--nested` to suppress it, as `canon gate run` and `canon tooling inject` do
 
 ### `scripts/eval/`
