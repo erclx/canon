@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.51.0](https://github.com/erclx/canon/compare/v5.50.0...v5.51.0) (2026-10-21)
+
+
+### Features
+
+* **changelog:** add a verb that prints releases since a stamp ([#2574](https://github.com/erclx/canon/issues/2574)) ([da35585](https://github.com/erclx/canon/commit/da355859bc1ac5094f619ab29a6a956ab7f109e4))
+* **ci:** keep long workflow steps in script files ([#2579](https://github.com/erclx/canon/issues/2579)) ([e4c97b4](https://github.com/erclx/canon/commit/e4c97b46dd4b921fbf7ee63c62bf232d03aea044))
+* **migrate:** add a status verb listing pending migrations ([#2573](https://github.com/erclx/canon/issues/2573)) ([898e06f](https://github.com/erclx/canon/commit/898e06f4f9ced49676fa74bda2e7cc45801eb4e0))
+* **skills:** let ci-workflow jobs target a stated platform ([#2575](https://github.com/erclx/canon/issues/2575)) ([4b29e19](https://github.com/erclx/canon/commit/4b29e19174632d821f934ab29d84af67d3dec983))
+* **tooling:** seed a design folder stub and load its rule on a group ([#2576](https://github.com/erclx/canon/issues/2576)) ([6b091fd](https://github.com/erclx/canon/commit/6b091fd2e24f381b7fc0d671856224d9c1096283))
+* **worktrees:** retire fan-in members when their integrator merges ([#2580](https://github.com/erclx/canon/issues/2580)) ([02f79c0](https://github.com/erclx/canon/commit/02f79c0a69e50cc575083d0b37e6bde0b6a5731e))
+
 ## [5.50.0](https://github.com/erclx/canon/compare/v5.49.0...v5.50.0) (2026-10-21)
 
 
