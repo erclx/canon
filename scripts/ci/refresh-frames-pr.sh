@@ -22,7 +22,7 @@ if [ -z "$(git status --porcelain assets/captures assets/frames assets/evidence)
   exit 0
 fi
 git config user.name "github-actions[bot]"
-git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+git config user.email "41898282+github-actions[bot]@users.noreply.github.com" # canon-allow-reference: the bot account id, not a commit
 git add assets/captures assets/frames assets/evidence
 git commit -m "$title"
 rendered=$(git rev-parse HEAD)
