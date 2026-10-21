@@ -561,14 +561,16 @@ for (const tree of TREES) {
     for (const name of hooks) {
       const hook = join(tree.dir, name)
 
-      it.concurrent(`should refuse ${name} with a usage line when no payload arrives`, async ({
-        expect,
-      }) => {
-        const result = await run(hook)
+      it.concurrent(
+        `should refuse ${name} with a usage line when no payload arrives`,
+        async ({ expect }) => {
+          const result = await run(hook)
 
-        expect(result.code).not.toBe(0)
-        expect(result.stderr).toContain('cannot be run by hand')
-      }, REFUSAL_TIMEOUT_MS)
+          expect(result.code).not.toBe(0)
+          expect(result.stderr).toContain('cannot be run by hand')
+        },
+        REFUSAL_TIMEOUT_MS,
+      )
 
       it.concurrent(`should leave ${name} silent on a payload it ignores`, async ({
         expect,
