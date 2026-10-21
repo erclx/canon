@@ -3839,7 +3839,7 @@ async function readEvidenceGate(
       cwd: root,
       reject: false,
       timeout: GH_TIMEOUT_MS * 2,
-      env: { ...gitEnv(), CANON_NON_INTERACTIVE: '1' },
+      env: gitEnv(),
       extendEnv: false,
     },
   )

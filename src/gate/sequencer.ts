@@ -525,7 +525,7 @@ async function spawn(
     cwd,
     reject: false,
     all: true,
-    env: { ...gitEnv(), CANON_NON_INTERACTIVE: '1', ...env },
+    env: { ...gitEnv(), ...env },
     extendEnv: false,
   })
 

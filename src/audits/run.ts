@@ -74,7 +74,7 @@ export function spawnAudit(root: string): Spawn {
       // extending it. Spreading `process.env` alongside would put back the very
       // variables it strips, and a hook's `GIT_DIR` would then point every
       // history-reading verb at a repository nobody asked about.
-      env: { ...gitEnv(), CANON_NON_INTERACTIVE: '1' },
+      env: gitEnv(),
       extendEnv: false,
     })
 

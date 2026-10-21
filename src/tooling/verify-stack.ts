@@ -124,7 +124,7 @@ async function run({
   await phase(state, 'Sync', () =>
     execa('bun', [cli, 'tooling', 'sync', stack, '.', '--write'], {
       ...captured(state.dir),
-      env: { CI: '1', CANON_NON_INTERACTIVE: '1' },
+      env: { CI: '1' },
     }),
   )
 
