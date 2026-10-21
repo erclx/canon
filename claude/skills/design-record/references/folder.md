@@ -66,4 +66,4 @@ Each group holds accepted frames a build matches, light and dark.
 
 ## Lifetime
 
-Keep a reference while its surface exists. Redraw it only on an intentional design change, and remove its folder or files and its index row in the change that removes the surface.
+The design-reference governance rule states how long a reference stays, when it is redrawn, and when it goes with its surface.
