@@ -1,6 +1,6 @@
 # Requirements
 
-A developer handing real work to an agent has no way to run it from plan to merge. Planning, building, review, and shipping each get improvised per session, and nothing holds the agent to the practices that make code worth keeping. What the project needs beyond its code, such as its design system, its decks, and what its people are learning, is made by hand outside that loop. All of it depends on setup every repository accumulates the same way and lets drift.
+A developer handing real work to an agent has no way to run it from plan to merge. Planning, building, review, and shipping each get improvised per session, and nothing holds the agent to the practices that make code worth keeping. All of it depends on setup every repository accumulates the same way and lets drift.
 
 Authoring guidance: `claude/skills/write-doc/references/requirements.md`.
 
@@ -21,15 +21,15 @@ This record holds at most 600 words.
 ## Goals
 
 - **Workflow.** An agent's work runs from plan to merge, in parallel, with each step handed to a session that owns it and leaves a record the next one reads.
-- **Practice.** The code an agent writes follows established engineering practice. Every practice the toolkit teaches cites the source it comes from, and a check rather than a reminder holds the agent to it.
-- **Product.** The agent produces what a project needs beyond its code, being its design system, its decks, its demos, and its learning workspaces, from the same setup and in the project's own design, with the design board driven through Frameboard, which carries the canvas in its own repository.
-- **Shared setup.** One authoritative source for rules, standards, skills, and seeds, installed and synced into any repository without hand-patching. The three goals above run on it.
+- **Practice.** The code and interfaces an agent builds follow established engineering practice. Every practice the toolkit teaches cites the source it comes from, and a check rather than a reminder holds the agent to it.
+- **Shared setup.** One authoritative source for rules, standards, skills, seeds, and the project's design record, installed and synced into any repository without hand-patching. The two goals above run on it.
 
 ## Non-goals
 
 - Replace human code review on risky changes. Agents augment the review loop and humans own the final call.
 - Ship runtime dependencies or application code to target projects. The toolkit ships configs, seeds, rules, and code proven to stay out of the production build, verified per instance.
 - First-class support for every AI coding tool. Claude Code is the platform. Another tool stays deferred until a concrete use case drives it.
+- Produce visual, video, or teaching artifacts as products. Frameboard carries the design board in its own repository, and composed video goes to a tool built for it.
 - Wrap framework scaffolding. Users run `bun init`, `npm create vite`, and similar themselves, and the toolkit layers on top.
 - Provide a hosted service. Everything runs locally. Publishing to a registry someone else hosts stays in scope.
 
