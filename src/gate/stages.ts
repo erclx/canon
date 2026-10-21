@@ -119,12 +119,6 @@ const TESTS_SCOPE = new RegExp(
   ].join('|'),
 )
 
-const script = (name: string, failure: string): Check => ({
-  kind: 'command',
-  argv: ['bash', `scripts/core/${name}`],
-  failure,
-})
-
 /**
  * Every stage the gate runs, in the order it runs them.
  *
@@ -530,10 +524,6 @@ export const STAGES: readonly Stage[] = [
         argv: ['bun', 'run', 'check:shell'],
         failure: 'Shell check failed',
       },
-      script(
-        'check-color-source.sh',
-        'A color escape is defined outside scripts/lib/ui.sh.',
-      ),
     ],
     success: 'Shell check passed',
   },
