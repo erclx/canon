@@ -88,7 +88,7 @@ Six limits keep a file scannable on sight, each a fact `canon markdown audit` me
 | Heading depth       | H3 at most, no H4                                 |
 | H3 opening          | First block under an H3 is a paragraph or a table |
 
-Rules, `CLAUDE.md`, a requirements or design record, a changelog, examples, and `.canon/` records take no density finding, since a rule is one imperative per bullet and each record keeps its own shape.
+Rules, a requirements or design record, a changelog, examples, and `.canon/` records take no density finding, since each keeps its own shape. `CLAUDE.md` takes the run limit and the H3 opening inside `## Key paths` alone.
 
 ### How each limit counts
 

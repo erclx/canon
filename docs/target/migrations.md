@@ -180,3 +180,10 @@ A project holding `.claude/rules/canon/ui/a11y.md` adds the new rule alone:
 ```bash
 canon gov install --add keyboard --yes .
 ```
+
+## Group a long paths section in `CLAUDE.md`, once
+
+The `## Key paths` section of `CLAUDE.md` now keeps to 5 bullets in a row, and every other section stays exempt. `canon claude sync` never rewrites a `CLAUDE.md` you hold, so it warns with the line of each longer run.
+
+- Regroup the section by hand under H3s, each opening on a one-sentence lead.
+- List `CLAUDE.md` in `canon/config/markdown.toml` to gate it from then on.

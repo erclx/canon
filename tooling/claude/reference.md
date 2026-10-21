@@ -57,6 +57,7 @@ A project installed before the board became a folder still holds `.claude/TASKS.
 
 - Fill in the seed's placeholder project name, description, and key paths after init
 - Keep its sections `Context`, `Commands`, and `Key paths`, since skills detect, extend, or skip by heading
+- Group `Key paths` under H3s, each opening on a lead sentence, before it runs past 5 bullets. `canon markdown audit` and `canon claude sync` both report a longer run.
 - Keep the `Context` section to one line pointing at the state docs, since `plan-feature` does the parallel read when invoked
 
 ## Seed docs
