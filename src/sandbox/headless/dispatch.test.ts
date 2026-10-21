@@ -131,7 +131,7 @@ describe('installDispatchShim', () => {
 
 describe('reapProcessGroup', () => {
   it('should report a group that has already exited rather than signalling one', async () => {
-    const child = startGroup('/bin/true')
+    const child = startGroup('true')
     await exited(child)
 
     expect(reapProcessGroup(child.pid ?? 0)).toBe('clear')
