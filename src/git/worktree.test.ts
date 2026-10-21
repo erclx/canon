@@ -1,5 +1,5 @@
 import { execaSync } from 'execa'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync, realpathSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -16,7 +16,7 @@ function git(...args: string[]): string {
 }
 
 beforeEach(() => {
-  ROOT = mkdtempSync(join(tmpdir(), 'canon-worktree-list-'))
+  ROOT = realpathSync(mkdtempSync(join(tmpdir(), 'canon-worktree-list-')))
   git('init', '--quiet', '--initial-branch=main')
   git('config', 'user.email', 'test@example.com')
   git('config', 'user.name', 'Test')

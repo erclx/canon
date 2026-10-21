@@ -1,5 +1,13 @@
 import { existsSync } from 'node:fs'
-import { cp, mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
+import {
+  cp,
+  mkdir,
+  mkdtemp,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { AUDITS } from '@/audits/catalog'
@@ -314,7 +322,9 @@ describe('refusal records over an unmeasured corpus', () => {
   let workDir: string
 
   beforeAll(async () => {
-    workDir = await mkdtemp(join(tmpdir(), 'canon-refusal-record-'))
+    workDir = await realpath(
+      await mkdtemp(join(tmpdir(), 'canon-refusal-record-')),
+    )
   }, SETUP_TIMEOUT_MS)
 
   afterAll(async () => {

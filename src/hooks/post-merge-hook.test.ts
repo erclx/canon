@@ -4,6 +4,7 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  realpathSync,
   readFileSync,
   rmSync,
   writeFileSync,
@@ -95,7 +96,7 @@ function runHook(hook: string, skipUpgrade = true): number {
 }
 
 beforeEach(() => {
-  root = mkdtempSync(join(tmpdir(), 'canon-post-merge-hook-'))
+  root = realpathSync(mkdtempSync(join(tmpdir(), 'canon-post-merge-hook-')))
   bin = join(root, '.bin')
   mkdirSync(bin)
   mkdirSync(join(root, '.canon/tasks'), { recursive: true })

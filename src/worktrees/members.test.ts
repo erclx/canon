@@ -1,5 +1,11 @@
 import { execaSync } from 'execa'
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdtempSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -34,7 +40,7 @@ function commit(cwd: string, message: string): void {
 }
 
 beforeEach(() => {
-  SCRATCH = mkdtempSync(join(tmpdir(), 'canon-members-'))
+  SCRATCH = realpathSync(mkdtempSync(join(tmpdir(), 'canon-members-')))
   ORIGIN = join(SCRATCH, 'origin.git')
   ROOT = join(SCRATCH, 'repo')
   execaSync(
