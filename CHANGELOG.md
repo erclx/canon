@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.55.0](https://github.com/erclx/canon/compare/v5.54.0...v5.55.0) (2026-10-21)
+
+
+### Features
+
+* **cli:** decide headless from a missing terminal on stdin ([#2600](https://github.com/erclx/canon/issues/2600)) ([63e9af6](https://github.com/erclx/canon/commit/63e9af6fcd2b23c1aa4abe45e0fb818519b0e314))
+* **cli:** quiet stderr on --json runs and drop the frame off a terminal ([#2599](https://github.com/erclx/canon/issues/2599)) ([824861b](https://github.com/erclx/canon/commit/824861b55ce9a1c92227b3b8c96f541684d2da8b))
+
 ## [5.54.0](https://github.com/erclx/canon/compare/v5.53.0...v5.54.0) (2026-10-21)
 
 
