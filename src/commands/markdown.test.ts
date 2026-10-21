@@ -77,6 +77,40 @@ describe('markdown audit', () => {
     expect((await run(['markdown', 'audit'])).exitCode).toBe(0)
   })
 
+  it('should report table findings on a gated path and still exit 0', async () => {
+    write(
+      'docs/guide.md',
+      `# Guide\n\nThe lead.\n\n| A | B |\n| - | - |\n| ${'a'.repeat(130)} | b |\n- item\n`,
+    )
+    write(GATED_CONFIG_REL, '[markdown]\ngated = ["docs/"]\n')
+
+    const result = await run(['markdown', 'audit', '--json'])
+
+    expect(result.exitCode).toBe(0)
+    expect(JSON.parse(result.stdout).entries).toMatchObject([
+      {
+        path: 'docs/guide.md',
+        tables: [
+          { kind: 'table-cell', line: 7, value: 130, limit: 120 },
+          { kind: 'table-then-list', line: 8 },
+        ],
+      },
+    ])
+  })
+
+  it('should measure no table outside the density scope', async () => {
+    write(
+      'notes/scratch.md',
+      `# Notes\n\n| A |\n| - |\n| ${'a'.repeat(130)} |\n`,
+    )
+
+    const result = await run(['markdown', 'audit', '--json'])
+
+    expect(JSON.parse(result.stdout).entries).toMatchObject([
+      { path: 'notes/scratch.md', tables: [] },
+    ])
+  })
+
   it('should refuse a malformed config with its path named', async () => {
     write('docs/guide.md', '# Guide\n\nShort.\n')
     write(GATED_CONFIG_REL, '[markdown\n')

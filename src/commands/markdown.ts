@@ -40,6 +40,14 @@ import {
 } from '@/markdown/gated'
 import { densityGates, inDensityScope } from '@/markdown/scope'
 import {
+  TABLE_CELL,
+  TABLE_ROWS,
+  TABLE_TOKEN,
+  type TableFinding,
+  tableFindings,
+  type TableKind,
+} from '@/markdown/tables'
+import {
   BASELINE,
   CHECKPOINTS,
   type Checkpoints,
@@ -86,6 +94,8 @@ interface FileReport {
   readonly headingCase: readonly HeadingCaseFinding[]
   /** Empty on a path outside the density scope, so a plan never carries one. */
   readonly density: readonly GatedDensityFinding[]
+  /** Empty outside the density scope, and never gating anywhere. */
+  readonly tables: readonly TableFinding[]
   /** Empty on a page whose frontmatter does not carry `kind: reference`. */
   readonly referenceShape: readonly GatedReferenceShapeFinding[]
   readonly structure: StructureReport
@@ -137,6 +147,10 @@ export function register(program: Command): void {
         'canon/config/markdown.toml lists, which canon markdown gated add writes,',
         'and with no such file every density finding reports and none gates.',
         'A config that does not parse refuses with its path named.',
+        '',
+        'Tables take four limits on the same paths: a 120-character cell, 8 body',
+        'rows, a list as the next block, and a code span with a run past 30',
+        'characters. A table finding reports and never fails a run.',
         '',
         'A page whose frontmatter carries kind: reference takes the reference',
         'shape: no H2 beyond Output, Refusals, and See also, each at most once',
@@ -372,6 +386,7 @@ async function runAudit(
               ),
             }))
           : [],
+        tables: inDensityScope(rel) ? tableFindings(lines) : [],
         referenceShape: referenceShapeFindings(source).map((finding) => ({
           ...finding,
           gating: referenceShapeGates(rel, gated.prefixes),
@@ -393,6 +408,7 @@ async function runAudit(
   reportColons(reports)
   reportHeadingCase(reports)
   reportDensity(reports, gated, resolution.source)
+  reportTables(reports)
   reportReferenceShape(reports, gated)
   reportBullets(reports, checkpoints)
   reportParagraphs(reports, checkpoints)
@@ -430,6 +446,7 @@ async function runAudit(
           colons: report.colons,
           headingCase: report.headingCase,
           density: report.density,
+          tables: report.tables,
           referenceShape: report.referenceShape,
           longestRun: report.structure.longestRun,
           longestRunLine: report.structure.longestRunLine,
@@ -693,6 +710,63 @@ function densityGatingLine(
   return source === 'canon'
     ? `A finding gates under a gated prefix (${listed}), and a bullet run gates in context, docs, and skills already. Every other finding reports.`
     : `A finding gates under a prefix ${GATED_CONFIG_REL} lists (${listed}). Every other finding reports.`
+}
+
+const TABLE_LABELS: Record<TableKind, string> = {
+  'table-cell': 'cell length',
+  'table-rows': 'rows',
+  'table-then-list': 'list after table',
+  'table-token': 'wide token',
+}
+
+function describeTable(finding: TableFinding): string {
+  const measured =
+    finding.kind === 'table-then-list'
+      ? 'follows the table with no lead sentence'
+      : `${finding.value} past ${finding.limit}`
+  return `  :${finding.line}  ${TABLE_LABELS[finding.kind]}  ${measured}`
+}
+
+/**
+ * Lists every table finding on the density scope's paths. None gates yet,
+ * since a gate is decided per path rather than per kind, and a new density
+ * kind would fail every gated folder carrying a table hit at once.
+ */
+function reportTables(reports: readonly FileReport[]): void {
+  logStep('Tables')
+  logInfo(
+    `Cells past ${TABLE_CELL} characters, tables past ${TABLE_ROWS} body rows, a list directly after a table, and a code span in a cell holding a run past ${TABLE_TOKEN} characters.`,
+  )
+  logInfo(
+    'Measured on the paths density measures, outside fenced blocks. This never fails a run.',
+  )
+
+  const carrying = reports
+    .filter((report) => report.tables.length > 0)
+    .sort((a, b) => b.tables.length - a.tables.length)
+
+  if (carrying.length === 0) {
+    logInfo('No table finding.')
+    return
+  }
+
+  const total = carrying.reduce((sum, report) => sum + report.tables.length, 0)
+  logWarn(
+    `${plural(total, 'finding')} across ${plural(carrying.length, 'file')}`,
+  )
+  logInfo(
+    'Move a long cell into a bullet under the lead, split a long table into groups each under a lead sentence, give a trailing list its own lead, and move a wide token out of the table.',
+  )
+  pipeOutput(
+    carrying
+      .map(
+        (report) =>
+          `${report.rel}  ${plural(report.tables.length, 'finding')}\n${report.tables
+            .map(describeTable)
+            .join('\n')}`,
+      )
+      .join('\n'),
+  )
 }
 
 const REFERENCE_SHAPE_LABELS: Record<ReferenceShapeKind, string> = {
