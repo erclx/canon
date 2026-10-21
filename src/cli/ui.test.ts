@@ -227,6 +227,42 @@ describe('quiet mode', () => {
   })
 })
 
+describe('a --json run', () => {
+  // The switch is set from the parsed command, so only a real run reads the
+  // wiring rather than the helper.
+  it('writes its record and no progress, leaving warnings to stderr', () => {
+    const result = spawnSync(
+      'bun',
+      [
+        join(ROOT, 'src/cli.ts'),
+        'markdown',
+        'audit',
+        join(ROOT, 'canon/REQUIREMENTS.md'),
+        '--json',
+      ],
+      { encoding: 'utf8' },
+    )
+    expect(result.status).toBe(0)
+    expect(JSON.parse(result.stdout)).toBeTypeOf('object')
+    expect(result.stderr).not.toContain('canon markdown audit')
+    expect(result.stderr).not.toContain('✓')
+  })
+
+  it('leaves the progress on for a text run of the same verb', () => {
+    const result = spawnSync(
+      'bun',
+      [
+        join(ROOT, 'src/cli.ts'),
+        'markdown',
+        'audit',
+        join(ROOT, 'canon/REQUIREMENTS.md'),
+      ],
+      { encoding: 'utf8' },
+    )
+    expect(result.stderr).toContain('✓ 1 markdown file')
+  })
+})
+
 describe('outroSuccess', () => {
   it('closes the frame above the success line on a terminal', () => {
     withEnv('1', () => {

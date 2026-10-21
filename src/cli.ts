@@ -40,6 +40,7 @@ import { register as changelog } from '@/commands/changelog'
 import { readInstalled, UNKNOWN_LABEL } from '@/version/installed'
 import { renderHelp } from '@/cli/help'
 import { renderAll, routeHelp } from '@/cli/help-all'
+import { setQuiet } from '@/cli/ui'
 
 function showHelp(): void {
   console.log(renderHelp(process.stdout))
@@ -57,6 +58,11 @@ program.on('option:help', () => {
   process.exit(0)
 })
 program.option('-h, --help', 'Show help')
+// A caller asking for a record reads it from stdout, so the frame on stderr is
+// noise it pays for. Warnings and errors still write.
+program.hook('preAction', (_program, action) => {
+  if (action.opts().json === true) setQuiet(true)
+})
 
 init(program)
 sandbox(program)

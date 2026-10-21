@@ -196,8 +196,6 @@ describe('canon sessions list from another pid namespace', () => {
         foreignDead: 1,
         sessions: [],
       })
-      expect(result.stderr).toContain('another pid namespace')
-      expect(result.stderr).not.toContain('has ended')
     },
   )
 
@@ -232,7 +230,6 @@ describe('canon sessions list from another pid namespace', () => {
         confidence: 'confirmed',
         sessions: [{ name: 'canon-4242', via: 'listener' }],
       })
-      expect(result.stderr).toContain('accepted a connection')
     },
   )
 
@@ -268,7 +265,6 @@ describe('canon sessions list from another pid namespace', () => {
         confidence: 'confirmed',
         sessions: [{ name: 'canon-4242', via: 'listener' }],
       })
-      expect(result.stderr).toContain('accepted a connection')
       expect(result.stderr).not.toContain('messaging socket existing alone')
     },
   )
