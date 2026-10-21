@@ -18,13 +18,14 @@ Consult to pick the `canon` verb for a job, and before running a verb that write
 
 ## Project setup
 
-| Job                                          | Verb            |
-| -------------------------------------------- | --------------- |
-| Bootstrap a project with toolkit domains     | `canon init`    |
-| Bring every installed domain current         | `canon sync`    |
-| Reinstall the CLI itself                     | `canon upgrade` |
-| Move a project off a retired name or layout  | `canon migrate` |
-| List the projects the toolkit installed into | `canon targets` |
+| Job                                          | Verb              |
+| -------------------------------------------- | ----------------- |
+| Bootstrap a project with toolkit domains     | `canon init`      |
+| Bring every installed domain current         | `canon sync`      |
+| Reinstall the CLI itself                     | `canon upgrade`   |
+| Move a project off a retired name or layout  | `canon migrate`   |
+| Read the releases since a target's install   | `canon changelog` |
+| List the projects the toolkit installed into | `canon targets`   |
 
 ## Domains
 

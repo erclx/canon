@@ -154,7 +154,7 @@ Each of these owns one slice the folders above lean on.
 - `src/records/`, `src/tasks/`, and `src/worktrees/` own the record-folder, task-board, and worktree verbs, each planning before it applies
 - `src/gate/` and `src/shipped/` own the gate stages and the shipped-references check
 - `src/comments/`, `src/secrets/`, `src/deps/`, `src/labels/`, `src/counts/`, and `src/census/` own the remaining audit engines
-- `src/sweep/` owns the skip and mute contract line sweeps read, and `src/version/` and `src/upstream/` own the skew read behind `canon upgrade` and the release digest
+- `src/sweep/` owns the skip and mute contract line sweeps read, and `src/version/` and `src/upstream/` own the skew read, the release digest, and the `canon changelog` split
 
 ## Gotchas
 

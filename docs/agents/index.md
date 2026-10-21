@@ -18,4 +18,4 @@ CLI catalog and invocation rules for agents, split by command domain. Start with
 - [Overview](overview.md): What this folder covers, the invocation rules every command inherits, and how canon docs resolves a topic name
 - [Records](records.md): Backing the record folders to a private remote, restoring them on a new machine, reading folder size, and pruning stale scratch
 - [Sessions transfer](sessions-transfer.md): Moving a session to another machine with export and import, the manifest fields, the refusal reasons, and what a resume on the target depends on
-- [Targets](targets.md): The projects this toolkit installed into, where each answer comes from, and the cross-target pull request read
+- [Targets](targets.md): The projects this toolkit installed into, where each answer comes from, the cross-target pull request read, and the releases since a target's install
