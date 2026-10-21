@@ -88,7 +88,7 @@ mkdir -p "$TARGET_DIR"
 log_info "Initialized git in $TARGET_DIR"
 
 log_step "Run canon init"
-(cd "$TARGET_DIR" && CANON_NON_INTERACTIVE=1 bun run "$EXTRACT_DIR/src/cli.ts" init --stack base 2>&1 | pipe_output) || log_error "canon init failed"
+(cd "$TARGET_DIR" && bun run "$EXTRACT_DIR/src/cli.ts" init --stack base </dev/null 2>&1 | pipe_output) || log_error "canon init failed"
 log_info "canon init completed"
 
 log_step "Assert scaffold"
