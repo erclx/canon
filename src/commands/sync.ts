@@ -423,7 +423,7 @@ async function runSync(target: string): Promise<number> {
 /**
  * Each domain sync runs as its own process. They open their own frames and
  * prompt for their own changes, so stdin stays inherited. Claude is the one
- * exception: it runs headless because the combined pull request preview is the
+ * exception: its stdin is closed because the combined pull request preview is the
  * single confirmation gate for the whole sync, and `canon claude sync` writes
  * only `.gitignore`.
  */

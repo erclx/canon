@@ -9,7 +9,7 @@ const TOKEN = /`([^`\s]+)`/g
 
 /**
  * A path a reader could open. Admits no `$`, `*`, or `=`, so an assignment
- * (`CANON_NON_INTERACTIVE=1`) and a variable are both excluded.
+ * (`NAME=value`) and a variable are both excluded.
  */
 const PATH_TOKEN = /^[.A-Za-z0-9_][A-Za-z0-9._/-]*$/
 
