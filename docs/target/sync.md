@@ -51,4 +51,4 @@ Try a scenario from [sandbox](../../canon/context/development/sandbox.md) before
 
 ## Running sync from an agent session
 
-`canon sync .` applies every domain sync, then offers a commit and pull request that needs a terminal. Under `CANON_NON_INTERACTIVE=1` the syncs apply, the git step is refused, and the command exits 0. Commit yourself. Sync refuses a dirty working tree, and `canon sync --check .` does not.
+`canon sync .` applies every domain sync, then offers a commit and pull request that needs a terminal. With no terminal on stdin the syncs apply, the git step is refused, and the command exits 0. Commit yourself. Sync refuses a dirty working tree, and `canon sync --check .` does not.

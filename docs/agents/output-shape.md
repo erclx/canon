@@ -60,16 +60,16 @@ Discover names at runtime rather than hardcoding them.
 
 ## Headless invocation
 
-Set `CANON_NON_INTERACTIVE=1` to refuse every prompt.
+A call with no terminal on stdin is headless and needs no prefix. Each prompt takes its documented default or refuses and names the flag to pass.
 
 ```bash
-CANON_NON_INTERACTIVE=1 canon init --stack node --skip records /path/to/project
-CANON_NON_INTERACTIVE=1 canon sync /path/to/project
-CANON_NON_INTERACTIVE=1 canon gov install node --add astro,shadcn /path/to/project
-CANON_NON_INTERACTIVE=1 canon gov sync /path/to/project
-CANON_NON_INTERACTIVE=1 canon gov build /path/to/project
-CANON_NON_INTERACTIVE=1 canon tooling diff astro /path/to/project
-CANON_NON_INTERACTIVE=1 canon tooling sync astro /path/to/project --write
+canon init --stack node --skip records /path/to/project
+canon sync /path/to/project
+canon gov install node --add astro,shadcn /path/to/project
+canon gov sync /path/to/project
+canon gov build /path/to/project
+canon tooling diff astro /path/to/project
+canon tooling sync astro /path/to/project --write
 canon tooling inject base /path/to/project --configs --seeds
 canon tooling prune-gitignore base /path/to/project
 canon tooling verify vite-react

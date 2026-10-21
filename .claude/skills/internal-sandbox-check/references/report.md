@@ -13,11 +13,11 @@ Print one block to chat:
 Sandbox check
 
 Provisioning:
-  CANON_NON_INTERACTIVE=1 bun src/cli.ts sandbox <category>:<scenario>
+  bun src/cli.ts sandbox <category>:<scenario>
 
 Queued (run manually after testing the current scenario):
-  CANON_NON_INTERACTIVE=1 bun src/cli.ts sandbox <category>:<scenario>
-  CANON_NON_INTERACTIVE=1 bun src/cli.ts sandbox <category>:<scenario>
+  bun src/cli.ts sandbox <category>:<scenario>
+  bun src/cli.ts sandbox <category>:<scenario>
 
 Headless verification (this session runs it):
   canon sandbox run <category>:<rest> "/canon:<skill-name>" <arm>

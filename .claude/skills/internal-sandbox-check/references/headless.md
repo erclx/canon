@@ -23,10 +23,10 @@ Derive the arguments from the Step 2 mapping:
 
 Resolve the arm at Step 4, before the report prints. A scenario file with more than one key under `arms` is multi-arm, which is roughly half the catalog, so treat that case as ordinary.
 
-A multi-arm scenario run with no arm never reaches the skill session. The provisioning child sets `SANDBOX_SCENARIO` and `CANON_NON_INTERACTIVE` only when it receives an arm, so without one the scenario falls through to the picker.
+A multi-arm scenario run with no arm never reaches the skill session. The provisioning child sets `SANDBOX_SCENARIO` only when it receives an arm, so without one the scenario falls through to the picker.
 
-- The picker aborts on a missing TTY, which is every agent-driven run, and blocks on input when one is attached
-- Passing `CANON_NON_INTERACTIVE=1` to dodge it is worse than not running, since the picker then takes the first arm and the verdict reports an arm nobody chose
+- The picker refuses a caller with no terminal on stdin, which is every agent-driven run, and lists the arm names in the refusal. It blocks on input when a terminal is attached.
+- It never takes the first arm for a headless caller, so the refusal is the whole outcome and no verdict follows it
 - Do not guess the arm from the scenario file. Ask `Arm for <category>:<rest>? (arm name, or "none" to skip verification)`, and read `none` as the `no-mechanism` gate.
 
 ## Running and reporting
