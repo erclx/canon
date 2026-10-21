@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.54.0](https://github.com/erclx/canon/compare/v5.53.0...v5.54.0) (2026-10-21)
+
+
+### Features
+
+* **canvas:** move the design board to Frameboard and retire the canvas ([#2593](https://github.com/erclx/canon/issues/2593)) ([19e0d4f](https://github.com/erclx/canon/commit/19e0d4f4c0022f02bdc94253a743ef757ec44bcc))
+* **ci:** prove canon on macOS with the stock bash ([#2591](https://github.com/erclx/canon/issues/2591)) ([0220169](https://github.com/erclx/canon/commit/0220169cf6f10fb45ff07ffba7fb58a708ade5e2))
+* **design:** retire the canvas-only design verbs and sync domain ([#2598](https://github.com/erclx/canon/issues/2598)) ([ed15567](https://github.com/erclx/canon/commit/ed1556768df49a015b8c9a921df41382e2d19e89))
+* **skills:** give teach-craft a cited source ledger ([#2592](https://github.com/erclx/canon/issues/2592)) ([d67d18c](https://github.com/erclx/canon/commit/d67d18ccf6de3a04963fc20c0ff0624ea7b479f4))
+
 ## [5.53.0](https://github.com/erclx/canon/compare/v5.52.0...v5.53.0) (2026-10-21)
 
 
