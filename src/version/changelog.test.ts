@@ -3,6 +3,7 @@ import {
   entriesSince,
   oldestVersion,
   parseChangelog,
+  resolveChangelog,
 } from '@/version/changelog'
 
 const COMPARE = 'https://github.com/erclx/canon/compare'
@@ -106,6 +107,79 @@ describe('entriesSince', () => {
     const range = entriesSince(entries, 'latest', '5.50.0')
 
     expect(range).toEqual({ kind: 'unknown-version', version: 'latest' })
+  })
+})
+
+describe('resolveChangelog', () => {
+  it('should default the start to the oldest stamped version', () => {
+    const result = resolveChangelog({
+      text: CHANGELOG,
+      running: '5.50.0',
+      stamped: ['5.49.0', '5.48.0'],
+    })
+
+    expect(result).toMatchObject({
+      kind: 'range',
+      since: '5.48.0',
+      running: '5.50.0',
+    })
+  })
+
+  it('should take an explicit since over the stamp', () => {
+    const result = resolveChangelog({
+      text: CHANGELOG,
+      running: '5.50.0',
+      since: '5.49.0',
+      stamped: ['5.48.0'],
+    })
+
+    expect(result).toMatchObject({ kind: 'range', since: '5.49.0' })
+  })
+
+  it('should refuse with no-stamp when no since was named and nothing was stamped', () => {
+    const result = resolveChangelog({
+      text: CHANGELOG,
+      running: '5.50.0',
+      stamped: [],
+    })
+
+    expect(result).toEqual({ kind: 'refused', reason: 'no-stamp' })
+  })
+
+  it('should refuse with no-changelog when the file could not be read', () => {
+    const result = resolveChangelog({
+      text: undefined,
+      running: '5.50.0',
+      since: '5.48.0',
+      stamped: [],
+    })
+
+    expect(result).toEqual({ kind: 'refused', reason: 'no-changelog' })
+  })
+
+  it('should refuse with no-changelog when the file carries no release heading', () => {
+    const result = resolveChangelog({
+      text: '# Changelog\n',
+      running: '5.50.0',
+      since: '5.48.0',
+      stamped: [],
+    })
+
+    expect(result).toEqual({ kind: 'refused', reason: 'no-changelog' })
+  })
+
+  it('should refuse with unknown-version naming the version the file lacks', () => {
+    const result = resolveChangelog({
+      text: CHANGELOG,
+      running: '5.50.0',
+      stamped: ['5.40.0'],
+    })
+
+    expect(result).toEqual({
+      kind: 'refused',
+      reason: 'unknown-version',
+      version: '5.40.0',
+    })
   })
 })
 

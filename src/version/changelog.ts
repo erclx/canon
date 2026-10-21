@@ -86,6 +86,58 @@ export function entriesSince(
   return { kind: 'range', entries: inRange.toReversed() }
 }
 
+export interface ChangelogInput {
+  /** The file's text, or undefined when it could not be read. */
+  readonly text: string | undefined
+  readonly running: string
+  /** An explicit start, which wins over the stamp. */
+  readonly since?: string
+  /** The version each stamped domain recorded. */
+  readonly stamped: readonly string[]
+}
+
+export type ChangelogReport =
+  | {
+      readonly kind: 'range'
+      readonly since: string
+      readonly running: string
+      readonly entries: readonly ChangelogEntry[]
+    }
+  | {
+      readonly kind: 'refused'
+      readonly reason: 'no-stamp' | 'no-changelog' | 'unknown-version'
+      readonly version?: string
+    }
+
+/**
+ * Every input arrives as a value, so the refusals are decided here rather than
+ * where the file and the stamp are read. A file with no release heading refuses
+ * as `no-changelog`, since the entries it would range over are not there.
+ */
+export function resolveChangelog(input: ChangelogInput): ChangelogReport {
+  const since = input.since ?? oldestVersion(input.stamped)
+  if (since === undefined) return { kind: 'refused', reason: 'no-stamp' }
+
+  const entries = input.text === undefined ? [] : parseChangelog(input.text)
+  if (entries.length === 0) return { kind: 'refused', reason: 'no-changelog' }
+
+  const range = entriesSince(entries, since, input.running)
+  if (range.kind === 'unknown-version') {
+    return {
+      kind: 'refused',
+      reason: 'unknown-version',
+      version: range.version,
+    }
+  }
+
+  return {
+    kind: 'range',
+    since,
+    running: input.running,
+    entries: range.entries,
+  }
+}
+
 /** The oldest version that parses, or undefined when none does. */
 export function oldestVersion(versions: readonly string[]): string | undefined {
   let oldest:
