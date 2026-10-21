@@ -38,3 +38,4 @@ This record holds at most 600 words.
 - Agent-first: every command has a non-interactive path, and data on stdout pipes clean through any wrapper.
 - The toolkit is the authoritative source. Target projects consume through install and sync and never author in place.
 - Skills call the CLI and never reimplement it.
+- The toolkit runs on Linux and macOS, and CI proves both.
