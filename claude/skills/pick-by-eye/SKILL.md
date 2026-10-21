@@ -34,7 +34,7 @@ Inside a live `plan-groundwork` track, renders land in the track's own `evidence
 Every arm of a round sits as one frame on one board page, side by side. The operator judges that page, never a set of separate images compared from memory.
 
 1. Start the board the way `references/board.md` states, unless this run already has. Note whether this run started the server, read off `reused`, since Step 6 ends only a server this run started.
-2. Read `frameboard list --root <board> --json`, which takes no `--project`. Add the project with `frameboard project add picks --root <board> --json` when the record lists no `picks`.
+2. Read `frameboard list --root <board> --json` with no `--project`, so it lists every project. Run `frameboard project add picks --root <board> --json` when it lists no `picks`.
 3. Add the round's page with `frameboard page add <page>` and record its `ref` on the run's list of pages. A `name-taken` refusal means the name is somebody else's, so take the next free suffix.
 4. Add each arm with `frameboard frame add <page>/arm-<id> --width <px> --height <px> --x <px> --y <px>`, placing the frames in one row in arm order. Step 6's archive keys on the `arm-<id>` names.
 5. Write each arm's whole document to the `path` the add verb reported. From a linked worktree, take the heredoc route `session-worktree` gives for a main-root write.
