@@ -48,12 +48,26 @@ Continue Step 2 with the integrator plan's own `**Files to touch:**`, then the r
 
 ### What the pull request carries
 
-Say in the pull request body that each member is one merge commit and name the members in merge order. Once the pull request merges, delete each member's branch on origin, its worktree, and its local branch:
+Say in the pull request body that each member is one merge commit, and name the members on one line in `## Summary`, backticked, in merge order:
 
-```bash
-git push origin --delete <member branch>
-git worktree remove <member worktree>
-git branch -D <member branch>
+```markdown
+Fan-in members: `feat/a`, `feat/b`, `feat/c`
 ```
 
-Read each member's worktree path off `git worktree list --porcelain` by its branch. The integrator holds the member list, so the deletion is its step rather than a sweep's. No member opens a pull request, so `canon worktrees reclaim` never reads a member's branch as merged and reports a leftover worktree as unmerged work on every run.
+The line names branches rather than plan stems, since the branch is what gets deleted. Nothing outside it is read, so a branch named in prose elsewhere in the body is never a candidate.
+
+### After the merge
+
+The post-merge hook runs `canon worktrees retire-members` for each merged pull request number, and the verb deletes each member's branch on origin, its worktree, and its local branch. No session runs a step.
+
+No member opens a pull request, so neither head-branch deletion nor `canon worktrees reclaim` ever reads one as merged. The member line is what reaches them.
+
+- A member half goes only when its tip is an ancestor of the integrator's merged head, so a commit added after the merge keeps that half
+- A worktree a live session holds, or one with uncommitted work, stays with its local branch
+- A line naming the trunk, the integrator's own branch, or a branch with an open pull request deletes nothing
+
+Run the verb by hand for a merge the hook missed, reading the dry run first:
+
+```bash
+canon worktrees retire-members --pull-request <number> --dry-run
+```

@@ -68,6 +68,8 @@ Past 5 bullets, group Key changes under bold labels, 5 bullets a group at most.
 
 The closing lines end `## Summary`, one `Closes #NNN` per issue and no trailing period. A task shipped in slices carries them on its last slice only. `closing-issues.md` states how the list is decided, and `canon labels scan --closes` fails a body that disagrees with it.
 
+A fan-in integrator puts its `Fan-in members:` line above them, per `${CLAUDE_SKILL_DIR}/../auto-ship/references/fan-in.md`.
+
 ### Context section
 
 `## Technical context` is optional and says why, naming the decisions the code can't show and any shortcoming of the approach.

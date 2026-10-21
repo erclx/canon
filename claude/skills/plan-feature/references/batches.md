@@ -90,4 +90,4 @@ The integrator merges each member branch with `git merge --no-ff` in the order i
 
 - Say in the pull request body that each member is one merge commit, so a reviewer reads `git log --first-parent` one member at a time
 - Fix a semantic conflict a merge surfaces on the integrator's branch, since a member has no pull request to fix it on
-- Delete each member branch on origin with `git push origin --delete <branch>` once the pull request merges
+- Name the members on the body's `Fan-in members:` line, which the post-merge hook reads to delete each member's branches and worktree, per `${CLAUDE_SKILL_DIR}/../auto-ship/references/fan-in.md`
