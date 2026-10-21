@@ -12,7 +12,6 @@ async function runCli(args: string[]) {
   return execa(process.execPath, [CLI, ...args], {
     reject: false,
     timeout: RUN_TIMEOUT_MS,
-    env: { CANON_NON_INTERACTIVE: '1' },
   })
 }
 

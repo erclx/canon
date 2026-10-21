@@ -12,7 +12,6 @@ const buildEnv = (): NodeJS.ProcessEnv => ({
   ...Object.fromEntries(
     Object.entries(process.env).filter(([key]) => !key.startsWith('GIT_')),
   ),
-  CANON_NON_INTERACTIVE: '1',
 })
 
 let decoy: string

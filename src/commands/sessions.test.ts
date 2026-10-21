@@ -38,7 +38,6 @@ async function runSessions(args: string[]): Promise<{
     env: {
       ...process.env,
       CLAUDE_CONFIG_DIR: CONFIG,
-      CANON_NON_INTERACTIVE: '1',
     },
     reject: false,
     timeout: RUN_TIMEOUT_MS,

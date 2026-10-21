@@ -43,7 +43,6 @@ async function run(
     cwd: target,
     reject: false,
     timeout: RUN_TIMEOUT_MS,
-    env: { CANON_NON_INTERACTIVE: '1' },
   })
   return {
     exitCode: result.exitCode ?? 1,

@@ -55,7 +55,6 @@ const seedPackage = (dir: string, stack: string): void => {
 const runVerb = (
   verb: 'diff' | 'sync',
   args: readonly string[],
-  headless = true,
 ): Run => {
   if (args.includes('--write')) seedPackage(target, 'base')
 
@@ -64,15 +63,14 @@ const runVerb = (
     [CLI, 'tooling', verb, 'base', target, ...args],
     {
       encoding: 'utf8',
-      env: buildEnv(headless ? { CANON_NON_INTERACTIVE: '1' } : {}),
+      env: buildEnv(),
     },
   )
 
   return { status: run.status, stderr: run.stderr, stdout: run.stdout }
 }
 
-const sync = (args: readonly string[], headless = true): Run =>
-  runVerb('sync', args, headless)
+const sync = (args: readonly string[]): Run => runVerb('sync', args)
 
 const diff = (args: readonly string[]): Run => runVerb('diff', args)
 
@@ -80,7 +78,7 @@ const diffStack = (stack: string, args: readonly string[] = []): Run => {
   const run = spawnSync(
     'bun',
     [CLI, 'tooling', 'diff', stack, target, ...args],
-    { encoding: 'utf8', env: buildEnv({ CANON_NON_INTERACTIVE: '1' }) },
+    { encoding: 'utf8', env: buildEnv() },
   )
 
   return { status: run.status, stderr: run.stderr, stdout: run.stdout }
@@ -294,7 +292,7 @@ describe('tooling sync checkout-mismatch warning', () => {
     const run = spawnSync(
       'bun',
       [CLI, 'tooling', 'sync', 'base', target, '--check'],
-      { cwd, encoding: 'utf8', env: buildEnv({ CANON_NON_INTERACTIVE: '1' }) },
+      { cwd, encoding: 'utf8', env: buildEnv() },
     )
 
     return { status: run.status, stderr: run.stderr }
@@ -340,7 +338,6 @@ describe('tooling sync into a subfolder', () => {
       {
         encoding: 'utf8',
         env: buildEnv({
-          CANON_NON_INTERACTIVE: '1',
           CANON_STATE_DIR: stateDir,
         }),
       },
@@ -400,7 +397,7 @@ describe('tooling sync shell', () => {
   const syncShell = (): void => {
     spawnSync('bun', [CLI, 'tooling', 'sync', 'shell', target, '--write'], {
       encoding: 'utf8',
-      env: buildEnv({ CANON_NON_INTERACTIVE: '1' }),
+      env: buildEnv(),
     })
   }
 

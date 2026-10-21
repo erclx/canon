@@ -180,7 +180,7 @@ describe('runGitWorkflow', () => {
     expect(git.calls).toEqual([])
   })
 
-  it('should refuse the git workflow entirely under CANON_NON_INTERACTIVE', async () => {
+  it('should refuse the git workflow entirely for a headless caller', async () => {
     const target = await makeRepo()
     const git = makeGit({ status: DRIFTED_GOVERNANCE })
     const prCalls: string[] = []

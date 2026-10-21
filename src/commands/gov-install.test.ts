@@ -15,25 +15,21 @@ interface Run {
 let target: string
 
 // A git hook exports GIT_DIR, so a run under pre-push would resolve the fixture
-// against the toolkit's own repository rather than the temp directory.
-const buildEnv = (headless: boolean): NodeJS.ProcessEnv => ({
-  ...Object.fromEntries(
+// against the toolkit's own repository rather than the temp directory. The
+// retired headless override is stripped too, so the piped stdin alone is what
+// makes each run headless.
+const buildEnv = (): NodeJS.ProcessEnv =>
+  Object.fromEntries(
     Object.entries(process.env).filter(
       ([key]) => !key.startsWith('GIT_') && key !== 'CANON_NON_INTERACTIVE',
     ),
-  ),
-  ...(headless ? { CANON_NON_INTERACTIVE: '1' } : {}),
-})
+  )
 
-const install = (
-  args: readonly string[],
-  cwd?: string,
-  headless = true,
-): Run => {
+const install = (args: readonly string[], cwd?: string): Run => {
   const run = spawnSync('bun', [CLI, 'gov', 'install', ...args], {
     cwd,
     encoding: 'utf8',
-    env: buildEnv(headless),
+    env: buildEnv(),
   })
 
   return { status: run.status, stderr: run.stderr }
@@ -96,21 +92,21 @@ describe('gov install --add with no stack', () => {
 })
 
 describe('gov install --yes', () => {
-  it('should install with no TTY and CANON_NON_INTERACTIVE unset', () => {
-    const run = install(['--add', 'tasks', '--yes', target], undefined, false)
+  it('should install with no TTY', () => {
+    const run = install(['--add', 'tasks', '--yes', target])
 
     expect(run.status).toBe(0)
     expect(existsSync(canonRule('canon', 'tasks'))).toBe(true)
   })
 
-  it('should install a named stack with no TTY and CANON_NON_INTERACTIVE unset', () => {
-    const run = install(['node', '--yes', target], undefined, false)
+  it('should install a named stack with no TTY', () => {
+    const run = install(['node', '--yes', target])
 
     expect(run.status).toBe(0)
     expect(stampedChain(readStamp(target), 'governance')).toEqual(['node'])
   })
 
-  it('should print no confirm line when CANON_NON_INTERACTIVE is also set', () => {
+  it('should print no confirm line, which the flag answered', () => {
     const run = install(['--add', 'tasks', '--yes', target])
 
     expect(run.status).toBe(0)
@@ -118,7 +114,7 @@ describe('gov install --yes', () => {
   })
 
   it('should take the confirm default with no TTY and no --yes', () => {
-    const run = install(['--add', 'tasks', target], undefined, false)
+    const run = install(['--add', 'tasks', target])
 
     expect(run.status).toBe(0)
     expect(run.stderr).not.toContain('requires a TTY')

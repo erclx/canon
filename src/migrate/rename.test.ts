@@ -16,8 +16,8 @@ describe('renameText', () => {
   })
 
   it('should rewrite the uppercase token so an environment prefix moves with it', () => {
-    expect(renameText('AITK_NON_INTERACTIVE=1', AITK_RULES)).toBe(
-      'CANON_NON_INTERACTIVE=1',
+    expect(renameText('AITK_STATE_DIR=1', AITK_RULES)).toBe(
+      'CANON_STATE_DIR=1',
     )
   })
 

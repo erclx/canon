@@ -65,23 +65,23 @@ function writeStampFixture(
 
 const STAMPED_RULE = '.claude/rules/core/000-const.md'
 
-let PREVIOUS_NON_INTERACTIVE: string | undefined
+const STDIN_TTY = Object.getOwnPropertyDescriptor(process.stdin, 'isTTY')
 
+// Pinned rather than read off the runner, whose stdin varies by host.
 beforeEach(() => {
   ROOT = mkdtempSync(join(tmpdir(), 'canon-engine-'))
   SOURCE = join(ROOT, 'source')
   TARGET = join(ROOT, 'target')
-  PREVIOUS_NON_INTERACTIVE = process.env.CANON_NON_INTERACTIVE
-  process.env.CANON_NON_INTERACTIVE = '1'
+  Object.defineProperty(process.stdin, 'isTTY', {
+    configurable: true,
+    value: undefined,
+  })
 })
 
 afterEach(() => {
   rmSync(ROOT, { recursive: true, force: true })
-  if (PREVIOUS_NON_INTERACTIVE === undefined) {
-    delete process.env.CANON_NON_INTERACTIVE
-  } else {
-    process.env.CANON_NON_INTERACTIVE = PREVIOUS_NON_INTERACTIVE
-  }
+  if (STDIN_TTY) Object.defineProperty(process.stdin, 'isTTY', STDIN_TTY)
+  else delete (process.stdin as { isTTY?: boolean }).isTTY
 })
 
 describe('listInstalled', () => {
