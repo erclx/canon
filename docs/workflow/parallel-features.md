@@ -32,7 +32,7 @@ Assert the orchestrator role in one warm session with `canon:role-orchestrator`.
 
 - To pick otherwise, rewrite that line as `overridden at execution to <pick>,` plus the measurement, and add one line to the open task's `## Findings`
 
-- `canon records validate plans [plan]` reports a plan breaking its standard, plus `structure` misses that never set the exit, and takes `groundwork`, `intake`, and `teach`
+- `canon records validate plans [plan]` reports a plan breaking its standard, plus `structure` misses that never set the exit, and takes `groundwork` and `intake`
 - `canon records push` and `canon records pull` carry `.canon/` to and from a private repository. See [records](../agents/records.md).
 - `canon records size`, `canon records prune-tmp`, and `canon records stale canonical` report folder size, idle scratch, and releases since the requirements review
 - `canon tasks archive` moves a shipped plan to `.canon/plans/archive/` and retargets the task's `Plan:` line

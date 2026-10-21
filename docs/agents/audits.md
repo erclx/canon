@@ -77,7 +77,6 @@ The placement entry runs pinned to `--backend off`, so its tally stays comparabl
 | `records-plans`      | `canon records validate plans`      | Plan records against their shape                                                   | Reports        |
 | `records-groundwork` | `canon records validate groundwork` | Groundwork folders against their shape                                             | Reports        |
 | `records-intake`     | `canon records validate intake`     | Intake folders against their shape                                                 | Reports        |
-| `records-teach`      | `canon records validate teach`      | Teach records against their shape                                                  | Reports        |
 | `comments`           | `canon comments scan`               | Comment density by language and kind, and `TODO`, `FIXME`, `HACK`, `XXX`           | Reports        |
 | `test-order`         | `canon gov test-order`              | Implementations that reached branch history before their test                      | Reports        |
 | `secrets`            | `canon secrets scan`                | Credential-shaped values in the shipped tree                                       | Gates          |
