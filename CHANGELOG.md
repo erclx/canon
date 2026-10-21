@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.53.0](https://github.com/erclx/canon/compare/v5.52.0...v5.53.0) (2026-10-21)
+
+
+### Features
+
+* **products:** drop teach, slides, and demo for a teach-craft skill ([#2588](https://github.com/erclx/canon/issues/2588)) ([bb1930f](https://github.com/erclx/canon/commit/bb1930fa8911ae637eddadbaabfa498e6e7f769d))
+
 ## [5.52.0](https://github.com/erclx/canon/compare/v5.51.0...v5.52.0) (2026-10-21)
 
 
