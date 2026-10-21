@@ -2,7 +2,9 @@
 
 ## Overview
 
-The cloudflare stack ships one parameterized GitHub Actions workflow that deploys a static build to Cloudflare Pages. It is keyed on host rather than on framework and carries no dependencies or seeds of its own, so it syncs onto a project already carrying `astro`, `vite-react`, or any other stack without colliding. It ships one script, `scripts/delete-previews.sh`, which the cleanup job calls and which overwrites a project's own file of that name on every sync.
+The cloudflare stack ships one parameterized GitHub Actions workflow that deploys a static build to Cloudflare Pages. It is keyed on host rather than on framework and carries no dependencies or seeds of its own, so it syncs onto a project already carrying `astro`, `vite-react`, or any other stack without colliding.
+
+It ships one script, `scripts/delete-previews.sh`, which the cleanup job calls and which overwrites a project's own file of that name on every sync.
 
 ## Deploy workflow
 

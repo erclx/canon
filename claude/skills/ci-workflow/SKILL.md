@@ -71,7 +71,7 @@ A workflow that pushes a regenerated file onto the pull request branch takes the
 
 ## Steps
 
-- Keep an inline `run:` step to five lines at most, with at most one guard that exits or writes an output. Move any other branching, loop, trap, or function to a script whatever its length. A script runs on a laptop and under shellcheck.
+- Keep an inline `run:` step to five lines and one guard that exits or writes an output. Move other branching, a loop, trap, or function to a script, which runs on a laptop and under shellcheck.
 - Put the script at `scripts/<name>.sh`, or a `.ts` file for a Bun project, and call it after `actions/checkout`, since the runner holds no copy before that.
 - Pass inputs as arguments or `env`, never spliced into the script text, so a branch name with a quote or `$(...)` in it cannot run.
 - Keep `permissions` and secrets on the workflow step, with the script reading its token from `env`.
