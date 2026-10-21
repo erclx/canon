@@ -52,10 +52,7 @@ const seedPackage = (dir: string, stack: string): void => {
   writeFileSync(path, JSON.stringify({ devDependencies }))
 }
 
-const runVerb = (
-  verb: 'diff' | 'sync',
-  args: readonly string[],
-): Run => {
+const runVerb = (verb: 'diff' | 'sync', args: readonly string[]): Run => {
   if (args.includes('--write')) seedPackage(target, 'base')
 
   const run = spawnSync(

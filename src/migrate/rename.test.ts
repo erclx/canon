@@ -16,9 +16,7 @@ describe('renameText', () => {
   })
 
   it('should rewrite the uppercase token so an environment prefix moves with it', () => {
-    expect(renameText('AITK_STATE_DIR=1', AITK_RULES)).toBe(
-      'CANON_STATE_DIR=1',
-    )
+    expect(renameText('AITK_STATE_DIR=1', AITK_RULES)).toBe('CANON_STATE_DIR=1')
   })
 
   it('should rewrite the title-case token', () => {
