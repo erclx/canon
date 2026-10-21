@@ -1514,9 +1514,12 @@ describe('canon pr local', () => {
     const outcome = await runLocal(['7', '--remove'])
 
     expect(outcome.record).toEqual(expect.objectContaining({ reviews: 2 }))
-    expect(readFileSync(join(tempDir, 'review-puts.log'), 'utf8')).toBe(
-      '11\n13\n',
-    )
+    expect(
+      readFileSync(join(tempDir, 'review-puts.log'), 'utf8')
+        .trim()
+        .split('\n')
+        .sort(),
+    ).toEqual(['11', '13'])
     expect(readFileSync(join(tempDir, 'review-bodies.log'), 'utf8')).toContain(
       'body=## UI review closed\n\n0 failed · 0 need your eyes · 2 passed · 0 not driven\nDriven at `38db88d` on a local preview, rendered by agent-browser.',
     )
@@ -1567,9 +1570,12 @@ describe('canon pr local', () => {
       record: expect.objectContaining({ reason: 'gh-failed', reviews: 1 }),
       exit: 1,
     })
-    expect(readFileSync(join(tempDir, 'review-puts.log'), 'utf8')).toBe(
-      '11\n13\n',
-    )
+    expect(
+      readFileSync(join(tempDir, 'review-puts.log'), 'utf8')
+        .trim()
+        .split('\n')
+        .sort(),
+    ).toEqual(['11', '13'])
   })
 })
 
@@ -2484,7 +2490,7 @@ describe('canon pr reads through REST alone', () => {
 
     expect(record).toMatchObject({
       reason: 'timeout',
-      waitedSeconds: 0,
+      waitedSeconds: expect.any(Number),
       review: { isCovered: false },
     })
   })

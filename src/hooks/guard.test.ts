@@ -67,10 +67,14 @@ interface ActingCase {
 
 interface Run {
   readonly code: number | null
-  readonly elapsed: number
   readonly stderr: string
   readonly stdout: string
 }
+
+// A hook hanging on an open stdin never exits, so the test timeout is what
+// fails it. A wall-clock bound on the guard's two seconds left a one-second
+// margin that a loaded machine overran with no hook at fault.
+const REFUSAL_TIMEOUT_MS = 15_000
 
 let fixture: string
 let hookPath: string
@@ -106,7 +110,6 @@ const run = (
   env?: Record<string, string | undefined>,
 ): Promise<Run> =>
   new Promise((resolve) => {
-    const started = performance.now()
     const childEnv: NodeJS.ProcessEnv = {
       ...process.env,
       CLAUDE_PROJECT_DIR: root ?? join(fixture, 'project'),
@@ -130,7 +133,7 @@ const run = (
       stderr += chunk.toString()
     })
     child.on('close', (code) => {
-      resolve({ code, elapsed: performance.now() - started, stderr, stdout })
+      resolve({ code, stderr, stdout })
     })
 
     if (payload !== undefined) child.stdin.end(payload)
@@ -558,15 +561,16 @@ for (const tree of TREES) {
     for (const name of hooks) {
       const hook = join(tree.dir, name)
 
-      it.concurrent(`should refuse ${name} with a usage line when no payload arrives`, async ({
-        expect,
-      }) => {
-        const result = await run(hook)
+      it.concurrent(
+        `should refuse ${name} with a usage line when no payload arrives`,
+        async ({ expect }) => {
+          const result = await run(hook)
 
-        expect(result.code).not.toBe(0)
-        expect(result.stderr).toContain('cannot be run by hand')
-        expect(result.elapsed).toBeLessThan(3000)
-      })
+          expect(result.code).not.toBe(0)
+          expect(result.stderr).toContain('cannot be run by hand')
+        },
+        REFUSAL_TIMEOUT_MS,
+      )
 
       it.concurrent(`should leave ${name} silent on a payload it ignores`, async ({
         expect,

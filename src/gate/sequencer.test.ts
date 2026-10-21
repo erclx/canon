@@ -246,6 +246,30 @@ describe('a stage holding a machine lock', () => {
     expect(outcome.status).toBe('passed')
   })
 
+  it('should tell a command check which lock the gate holds', async () => {
+    const envs: (Readonly<Record<string, string>> | undefined)[] = []
+    const run: RunCommand = async (_argv, env) => {
+      envs.push(env)
+      return result()
+    }
+
+    await runStage(stage('suite', { lock: 'suite' }), contextWith({ run }))
+
+    expect(envs).toEqual([{ CANON_HELD_LOCK: 'suite' }])
+  })
+
+  it('should tell an unlocked stage command check of no held lock', async () => {
+    const envs: (Readonly<Record<string, string>> | undefined)[] = []
+    const run: RunCommand = async (_argv, env) => {
+      envs.push(env)
+      return result()
+    }
+
+    await runStage(stage('plain'), contextWith({ run }))
+
+    expect(envs).toEqual([{}])
+  })
+
   it('should announce the queue before the stage finishes', async () => {
     placeLiveHolder('/worktrees/other')
     setTimeout(() => unlinkSync(lockPath()), 50)

@@ -130,28 +130,69 @@ async function runGate(opts: RunCommandOptions): Promise<number> {
       process.stderr.write(`${failed.label}: ${failed.failure}\n`)
     }
     process.stdout.write(
-      `${JSON.stringify({
-        ok: code === 0,
-        root,
-        scoped: changed.scoped,
-        changed: changed.files.length,
-        summary,
-        ms: results.reduce((total, result) => total + result.ms, 0),
-        stages: results.map(({ id, label, status, failure, ms, queuedMs }) => ({
-          id,
-          label,
-          status,
-          failure,
-          ms,
-          queuedMs,
-        })),
-      })}\n`,
+      `${JSON.stringify(
+        gateRecord({ ok: code === 0, root, changed, summary, results }),
+      )}\n`,
     )
     return code
   }
 
   if (!nested) close(summary, code)
   return code
+}
+
+/** Lines of a failed stage's output the record keeps, counted from the end. */
+const OUTPUT_TAIL_LINES = 200
+
+interface GateRecordInput {
+  readonly ok: boolean
+  readonly root: string
+  readonly changed: {
+    readonly scoped: boolean
+    readonly files: readonly string[]
+  }
+  readonly summary: Summary
+  readonly results: readonly StageResult[]
+}
+
+/**
+ * The `--json` record. A failed stage carries the tail of the output its
+ * checks printed, since a caller reading the record alone otherwise reruns
+ * the stage by hand to learn which test failed. The tail rather than a parse
+ * of the `FAIL` lines, so a generic stage stays free of one runner's format,
+ * and a dot-reporter run prints its failures and summary last.
+ */
+export function gateRecord(input: GateRecordInput) {
+  const { ok, root, changed, summary, results } = input
+  return {
+    ok,
+    root,
+    scoped: changed.scoped,
+    changed: changed.files.length,
+    summary,
+    ms: results.reduce((total, result) => total + result.ms, 0),
+    stages: results.map(
+      ({ id, label, status, failure, ms, queuedMs, emissions }) => ({
+        id,
+        label,
+        status,
+        failure,
+        ms,
+        queuedMs,
+        output: status === 'failed' ? outputTail(emissions) : undefined,
+      }),
+    ),
+  }
+}
+
+function outputTail(emissions: StageResult['emissions']): string {
+  const lines = emissions
+    .filter((emission) => emission.kind === 'output')
+    .map((emission) => emission.text.trimEnd())
+    .filter((text) => text !== '')
+    .join('\n')
+    .split('\n')
+  return lines.slice(-OUTPUT_TAIL_LINES).join('\n')
 }
 
 function report(result: StageResult): void {
