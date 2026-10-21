@@ -8,11 +8,10 @@ const CLI = join(import.meta.dirname, '../cli.ts')
 
 // A git hook exports GIT_DIR, so a run under pre-push would resolve the decoy
 // against the toolkit's own repository rather than the temp directory.
-const buildEnv = (): NodeJS.ProcessEnv => ({
-  ...Object.fromEntries(
+const buildEnv = (): NodeJS.ProcessEnv =>
+  Object.fromEntries(
     Object.entries(process.env).filter(([key]) => !key.startsWith('GIT_')),
-  ),
-})
+  )
 
 let decoy: string
 let plain: string
