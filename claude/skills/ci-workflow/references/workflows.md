@@ -1,5 +1,13 @@
 # CI workflow template
 
+## Contents
+
+- [Base template](#base-template)
+- [Splitting the check job](#splitting-the-check-job)
+- [Targeting another platform](#targeting-another-platform)
+
+## Base template
+
 Copy this base template and adapt it to the project's stack, test commands, and build output. It carries the shape a new pipeline starts in, with the checks that share setup in one job, per the granularity rule in the skill body. `e2e` and anything gated on it stay separate jobs at either size.
 
 ```yaml
@@ -98,4 +106,24 @@ jobs:
         with:
           name: build-output
           path: dist/
+```
+
+## Targeting another platform
+
+Add this job beside the Linux ones only when the project states macOS as a supported platform, per the runner platform rules in the skill body. It runs the unit layer, since that layer differs by platform, and the rest stay on `ubuntu-latest`.
+
+```yaml
+jobs:
+  unit-macos:
+    name: '🧪 Unit Tests (macOS)'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Resolve the temp folder
+        run: echo "TMPDIR=$(realpath "$RUNNER_TEMP")" >> "$GITHUB_ENV"
+      - run: bun run test
 ```

@@ -20,7 +20,17 @@ Generate GitHub Actions workflow files for CI pipelines. Enforce parallel job ex
 - Include `workflow_dispatch` alongside the primary trigger, except on a commit-back workflow, where a manual run has no branch to commit onto and would pass while doing nothing.
 - Set `permissions: contents: read` at the top level, and grant a write scope only on the job that needs it.
 - Pin all actions to major version tags (`@v4`, never `@latest` or `@main`).
-- Use `runs-on: ubuntu-latest` for all jobs.
+- Use `runs-on: ubuntu-latest` for every job, except one the runner platform rules below move to another platform.
+
+## Runner platform
+
+Linux stays the default. A job leaves it only for a layer whose result differs by platform, and only on a platform the project states.
+
+- Read the stated platforms from the project's requirements record or README. A platform stated in neither keeps every job on Linux.
+- Keep lint, build, and browser jobs on Linux, since their result does not differ by platform. Name the layers that may leave it and never the steps they run.
+- Name another runner by its `-latest` label, such as `macos-latest`, matching the `ubuntu-latest` convention above.
+- Resolve a macOS `$TMPDIR` or `mktemp` path with `realpath` before comparing it with a tool's output, since the `/var` to `/private/var` symlink hides the target. Treat `$RUNNER_TEMP` alike.
+- Expect a macOS job to cost more per minute than a Linux one. GitHub bills the two differently, so read the rate from its billing page rather than quoting a multiplier.
 
 ## Job naming
 
@@ -79,5 +89,6 @@ Before responding, also verify:
 
 - Artifacts upload on `if: failure()` only with `retention-days: 7`.
 - Job names use emoji + title format.
+- Every job runs on `ubuntu-latest`, except one that targets a platform the project states and runs a layer that differs by platform.
 - Deploy, publish, and release jobs carry a placeholder step and a named handoff, never a guessed deploy command.
 - Bun projects use `oven-sh/setup-bun@v2` with `bun install --frozen-lockfile`.
