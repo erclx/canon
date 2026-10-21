@@ -115,8 +115,8 @@ describe('renderDesignDocument', () => {
 
   /**
    * The document has one reader that is not a person: the preview parses it
-   * back. A render the parser cannot read would leave `canon design render`
-   * reporting an empty record for a file full of values.
+   * back. A render the parser cannot read would leave the landing page's token
+   * preview reporting an empty record for a file full of values.
    */
   it('round-trips through the parser the preview reads it with', () => {
     const path = join(root, 'DESIGN.md')

@@ -270,9 +270,10 @@ export const gate = {
 
 /**
  * The capture pair is two fixed renders of one pull request, base against
- * head, by `canon design render` at one viewport and one crop. Both commits are
- * history, so nothing regenerates them, and the caption says how they were
- * made rather than implying a live read.
+ * head, by `canon design render` (canon-keep-retired) at one viewport and one
+ * crop. The verb has since retired and both commits are history, so nothing
+ * regenerates them, and the caption says how they were made rather than
+ * implying a live read.
  */
 // README.md: canon-allow-readme-paraphrase: narrates the review attachment, which no README sentence describes.
 export const evidence = {
@@ -295,9 +296,9 @@ export const evidence = {
   ],
   foot: {
     before: 'Rendered by ',
-    verb: 'canon design render',
+    verb: 'canon design render', // canon-keep-retired
     after:
-      ' from each side of the merge, at one viewport and one crop, so the only thing that differs is the tokens.',
+      ', since retired, from each side of the merge, at one viewport and one crop, so the only thing that differs is the tokens.',
   },
 }
 
@@ -348,10 +349,10 @@ export const merge = {
     'canon worktrees reclaim': 'the worktree the merged branch was built in',
   } as Record<string, string>,
   foot: 'A tick is a claim a session makes. A merge is a fact the trunk shows, and only the second fires this.',
-  // README.md: "a `DESIGN.md` intent format" "and a render command"
+  // README.md: "a `DESIGN.md` intent format"
   tokens: {
     title: 'The tokens that merge landed, as this page renders them',
-    note: 'Rendered from canon/DESIGN.md by canon design render at build time, and embedded live rather than captured.',
+    note: 'Rendered from canon/DESIGN.md by bun run web:previews at build time, and embedded live rather than captured.',
     frameTitle: 'The design tokens this page renders from',
   },
 }
