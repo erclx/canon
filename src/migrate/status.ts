@@ -61,7 +61,7 @@ function refusalReason(stderr: string): string {
     .filter((line) => line.startsWith('✗'))
     .map((line) => line.replace(/^✗\s*/, ''))
   const kept = errors.length > 0 ? errors : lines.filter(Boolean)
-  return kept.join('. ')
+  return kept.map((line) => line.replace(/\.+$/, '')).join('. ')
 }
 
 async function readOne(

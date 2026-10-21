@@ -87,6 +87,17 @@ describe('readMigrationStatus', () => {
     )
   })
 
+  it('joins error lines without doubling a period one already ends in', async () => {
+    const framed = '│ ✗ Ignored where it stands.\n│ ✗ Run canon tooling sync\n'
+    const { run } = runnerFor({ records: { exitCode: 1, stderr: framed } })
+
+    const report = await readMigrationStatus(run)
+
+    expect(report.migrations[0].reason).toBe(
+      'Ignored where it stands. Run canon tooling sync',
+    )
+  })
+
   it('strips the frame from a stderr with no error marker', async () => {
     const { run } = runnerFor({
       rename: { exitCode: 1, stderr: '┌\n│ plain failure\n└\n' },
