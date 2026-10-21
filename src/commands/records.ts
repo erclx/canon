@@ -127,7 +127,6 @@ export function register(program: Command): void {
         'Examples:',
         '  canon records validate plans',
         '  canon records validate plans feature-records-by-heading',
-        '  canon records validate teach',
         '  canon records validate intake --json',
         '',
       ].join('\n'),

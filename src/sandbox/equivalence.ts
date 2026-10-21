@@ -75,11 +75,6 @@ export const MASKS: readonly Mask[] = [
       'the install stamp carries a `syncedAt` wall-clock time, so two provisions of one commit differ',
   },
   {
-    arm: 'claude:read-frames/resolved',
-    key: /^file:demos\/cold-open\.webm$/,
-    reason: 'ffmpeg output carries an encoder timestamp, so two runs differ',
-  },
-  {
     key: /^log$/,
     replace: /sandbox-occupant-\d+|\(pid \d+\)/g,
     reason:

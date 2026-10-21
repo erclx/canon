@@ -5,7 +5,7 @@ description: Authoring a freehand SVG, its color and accessibility audit, and th
 
 # Hand-drawn path
 
-`draw-figure` reads this file when Step 3 routes a figure to a freehand drawing: a teach lesson whatever its subject, or a subject no flowchart reduces to.
+`draw-figure` reads this file when Step 3 routes a figure to a freehand drawing, for a subject no flowchart reduces to.
 
 ## Draw
 

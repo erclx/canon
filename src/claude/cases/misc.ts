@@ -14,12 +14,6 @@ export const MISC_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      'I typed draft-and-pick and it said the pick skill was renamed to pick-by-eye.', // canon-keep-retired
-    // The pointer answers under its old name on purpose. canon-keep-retired
-    expect: 'draft-and-pick',
-  },
-  {
-    prompt:
       'Which layer of this landing page should I settle first, and what has to stay constant across it?',
     expect: 'design-taste',
   },
@@ -27,12 +21,6 @@ export const MISC_CASES: readonly SkillCase[] = [
     prompt:
       'This project has no logo yet. Draft one and give me a social card to go with it.',
     expect: 'design-identity',
-  },
-  {
-    prompt:
-      'I typed draft-identity and it said the identity skill was renamed to design-identity.', // canon-keep-retired
-    // The pointer answers under its old name on purpose. canon-keep-retired
-    expect: 'draft-identity',
   },
   {
     prompt:
@@ -96,11 +84,6 @@ export const MISC_CASES: readonly SkillCase[] = [
     prompt:
       'Find me the strongest evidence on whether rent control reduces housing supply. Where should I look?',
     expect: 'search-craft',
-  },
-  {
-    prompt:
-      'The composed demo video looks generic and the zoom drags. What should the captions say, and how fast should the push-in be?',
-    expect: 'video-craft',
   },
   {
     prompt:

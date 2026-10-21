@@ -72,8 +72,6 @@ Each domain has a canonical source in this repo and a thin install or sync CLI o
 | Governance     | Coding and authoring rules that load into a Claude session when a matching path is edited                               | Installed per project by `canon gov install`, refreshed by sync |
 | Tooling stacks | Golden configs, seeds, and a reference per framework                                                                    | Laid down by `canon init`, reconciled by `canon tooling sync`   |
 | Design system  | Ships a `DESIGN.md` intent format pointing at your stylesheet for values, a skill that drafts one, and a render command | `canon design render`                                           |
-| Slides         | A folder of HTML slides per deck, drawn in the project's tokens and rebuilt as editable shapes                          | `canon slides render` writes PowerPoint                         |
-| Teach          | Lessons, sources, and a glossary in one workspace, rendered to a small site                                             | `canon teach`                                                   |
 | Canvas         | Pages of HTML frames on a local pan and zoom surface, each frame drawn with the project's tokens                        | `canon canvas serve`                                            |
 | Transcripts    | A YouTube transcript with metadata frontmatter                                                                          | `canon transcripts <url>` writes it into any repo               |
 | Sandbox        | Scenario scaffolds that provision an isolated project state for verifying each domain flow                              | `canon sandbox`                                                 |
@@ -93,7 +91,7 @@ The workflow this toolkit ships is the workflow that built it. Several Claude Co
  <img src="demos/agent-view-light/demo.gif" alt="The canon landing page scrolling from the dispatch section to the branch graph, three workers and a planner on disjoint file sets with the pull request each opened">
 </picture>
 
-That recording is the landing page's own `dispatch` and `workers` sections, driven by `canon demo run` against a local build. The branch graph beside the pull request numbers is authored rather than read, because nothing on a build machine records which files four sessions held.
+That recording is the landing page's own `dispatch` and `workers` sections, driven through a browser against a local build. The branch graph beside the pull request numbers is authored rather than read, because nothing on a build machine records which files four sessions held.
 
 ## Documentation
 
@@ -182,7 +180,6 @@ Each domain carries an entry written for someone maintaining the toolkit rather 
 - [Governance rules](canon/context/surfaces/governance.md)
 - [Tooling stacks](canon/context/surfaces/tooling.md)
 - [Design system](canon/context/features/design.md)
-- [Slides](canon/context/features/slides.md)
 - [Transcripts](canon/context/features/transcripts.md)
 - [Sandbox](canon/context/development/sandbox.md)
 

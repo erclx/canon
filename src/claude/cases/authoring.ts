@@ -26,20 +26,8 @@ export const AUTHORING_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      'I typed draft-doc and it said the doc skill was renamed to write-doc.', // canon-keep-retired
-    // The pointer answers under its old name on purpose. canon-keep-retired
-    expect: 'draft-doc',
-  },
-  {
-    prompt:
       'I already wrote the finished skill files, package them as a ready folder with a plan and a task for a worker to copy.',
     expect: 'plan-ready',
-  },
-  {
-    prompt:
-      'I typed draft-ready and it said the ready skill was renamed to plan-ready.', // canon-keep-retired
-    // The pointer answers under its old name on purpose. canon-keep-retired
-    expect: 'draft-ready',
   },
   {
     prompt: 'This project has no README.md at all, write one from scratch.',

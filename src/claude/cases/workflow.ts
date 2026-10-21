@@ -26,12 +26,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      'I typed draft-figure and it said the figure skill was renamed to draw-figure.', // canon-keep-retired
-    // The pointer answers under its old name on purpose. canon-keep-retired
-    expect: 'draft-figure',
-  },
-  {
-    prompt:
       'This onboarding doc needs a hand-drawn picture of the signup-to-active path, sketch it in and make sure it actually renders correctly.',
     expect: 'draw-figure',
   },
@@ -44,11 +38,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     prompt:
       'Sketch out a plan for adding this new capability before we touch any code.',
     expect: 'plan-feature',
-  },
-  {
-    prompt:
-      'The video just finished recording. Read it back and tell me what each part shows.',
-    expect: 'read-frames',
   },
   {
     prompt:
@@ -94,11 +83,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      'The screencast draft is finished. Turn it into an actual video now.',
-    expect: 'record-screencast',
-  },
-  {
-    prompt:
       'What should a review of a change look for beyond bugs, and how much evidence does a finding need?',
     expect: 'review-craft',
   },
@@ -111,26 +95,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     prompt:
       'Our backlog only ever grows, measure each row and suggest which to decline.',
     expect: 'backlog-triage',
-  },
-  {
-    prompt: 'Draft me a script with beats for a screencast recording.',
-    expect: 'script-screencast',
-  },
-  {
-    prompt:
-      'I typed draft-screencast and it said the screencast skill was renamed to script-screencast.', // canon-keep-retired
-    // The pointer answers under its old name on purpose. canon-keep-retired
-    expect: 'draft-screencast',
-  },
-  {
-    prompt: 'Turn this topic into a slide deck I can render.',
-    expect: 'make-deck',
-  },
-  {
-    prompt:
-      'I typed draft-slides and it said the slides skill was renamed to make-deck.', // canon-keep-retired
-    // The pointer answers under its old name on purpose. canon-keep-retired
-    expect: 'draft-slides',
   },
   // Rot across documents nobody changed is what this reads, rather than a
   // stated rule broken on a given line. It is also not `target-check`, which
@@ -168,8 +132,8 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     expect: 'task-complete',
   },
   {
-    prompt: 'Open a learning workspace so I can study this topic properly.',
-    expect: 'teach-workspace',
+    prompt: 'Quiz me on what we covered about regular expressions yesterday.',
+    expect: 'teach-craft',
   },
   {
     prompt:

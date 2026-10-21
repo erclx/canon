@@ -16,7 +16,7 @@ description: DESIGN.md as a generated record, the token module and component lay
 Owns the token module, the component layer, the renderers, the markdown parser, the sync adapter, and the contrast reading.
 
 - `tokens.ts` holds the values. Every hex role but `success` is solved in OKLCH for a contrast target, and dark is its own anchor set.
-- `components.ts` holds the component layer, since the record keeps CSS class names out. `buildDesignCss` takes `TEACH_COMPONENTS` only through its `components` option.
+- `components.ts` holds the component layer, since the record keeps CSS class names out. `buildDesignCss` takes a list other than `COMPONENTS` only through its `components` option.
 - `neutral.ts` holds the achromatic set `canon design install` hands a target, and `neutral.test.ts` holds its roles to the same list as `TOKENS`
 - `document.ts` renders the record, `css.ts` the stylesheet, `regen.ts` writes both, and `budget.ts` counts the record against the prose budget
 - `parse.ts` and `render.ts` write the gitignored preview at `.canon/tmp/render/design/`, and `prose()` reads only Overview, Motion, and Iconography, so no other rule reaches it

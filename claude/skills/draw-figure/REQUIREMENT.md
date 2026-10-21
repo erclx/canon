@@ -7,13 +7,13 @@ description: Why a figure decides between Mermaid, an architecture view, and fre
 
 ## Gap
 
-Without this skill, a session asked for a figure takes the first path it thinks of. A graph gets SVG coordinates nobody checked against a render, and a subject that is not a graph gets forced through Mermaid. In a teach lesson the renderer cannot load the hand font, so labels clip, and a check reading the standalone image passes them.
+Without this skill, a session asked for a figure takes the first path it thinks of. A graph gets SVG coordinates nobody checked against a render, and a subject that is not a graph gets forced through Mermaid.
 
 Asked to refresh one architecture view, it redraws every view beside it. It judges the source and calls the figure verified, though a valid source can render a picture asserting something false. Mermaid's theme writes literal hex values, so the figure stops re-coloring when the page switches palette.
 
 ## Must
 
-- The figure clears the standard's earn-its-place bar, and its path follows whether the subject reduces to a graph, with a teach lesson drawn freehand whatever its shape
+- The figure clears the standard's earn-its-place bar, and its path follows whether the subject reduces to a graph
 - An architecture view is drawn from its named source signal in `flowchart` or `sequenceDiagram`, and only the view the request names changes
 - The Mermaid render uses the hand-drawn look and the figure font stack, with every literal color rewritten to the host's custom property
 - The render is read back against what the figure means to say, and a figure bound for a rendered page is verified by a capture inside that page
@@ -31,5 +31,4 @@ Asked to refresh one architecture view, it redraws every view beside it. It judg
 
 - Mermaid's layout, budgets, and label rules inside the fence, which the mermaid standard owns
 - A UI screen mockup, and design tokens or the visual system, which `canvas-board` owns
-- Which lesson needs a figure and where it sits, which `teach-workspace` owns
 - Implementation detail behind an architecture view, which the context entry the caption points at owns

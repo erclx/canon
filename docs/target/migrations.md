@@ -130,7 +130,7 @@ From the registry the walk reports `historyUnavailable`, so check both paths by 
 | `git-commit`      | `commit`, `versioning`                                        |
 | `git-pr`          | `pr`, `publish`                                               |
 | `markdown-craft`  | `markdown`                                                    |
-| `teach-workspace` | `glossary`, `teach`                                           |
+| `teach-workspace` | `glossary`, `teach` <!-- canon-keep-retired -->               |
 | `plan-groundwork` | `groundwork`, `groundwork-spikes`                             |
 | `plan-intake`     | `intake`                                                      |
 | `plan-feature`    | `plan`, `plan-lifecycle`                                      |
@@ -147,6 +147,15 @@ The wireframes record is retired, and nothing deletes what a project holds.
 - `canon/wireframes/` stays yours and unaudited. Keep it as notes or delete it.
 - Delete the `@canon/wireframes/index.md` line in your `CLAUDE.md` with the folder. `canon claude sync` does not rewrite it.
 - `canon gov sync` removes `.claude/rules/canon/standards/wireframes.md`
+
+## Keep or delete the retired product files, your call
+
+The learning workspace, the deck renderer, and the app recorder are retired with their verbs and skills, and nothing deletes what a project holds.
+
+- `.canon/teach/` holds rendered HTML that opens as it is, so it needs nothing <!-- canon-keep-retired -->
+- `.canon/slides/` and a `demos/` folder hold sources nothing renders any more, so delete them once nothing cites them <!-- canon-keep-retired -->
+- Replace a `canon:teach-workspace` reference with `canon:teach-craft` by hand, since `canon migrate skill-names` does not rewrite it <!-- canon-keep-retired -->
+- Delete a `canon:make-deck`, `canon:script-screencast`, `canon:record-screencast`, `canon:read-frames`, or `canon:video-craft` reference, since none has a successor <!-- canon-keep-retired -->
 
 ## Move decisions out of a held architecture record, once
 

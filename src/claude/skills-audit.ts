@@ -55,7 +55,6 @@ export const PRACTICE_SKILLS: readonly string[] = [
   join(SHIPPED_CORPUS, 'build-in-slices'),
   join(SHIPPED_CORPUS, 'deprecation-migration'),
   join(SHIPPED_CORPUS, 'search-craft'),
-  join(SHIPPED_CORPUS, 'video-craft'),
 ]
 
 /**

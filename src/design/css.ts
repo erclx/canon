@@ -133,8 +133,8 @@ ${component.rules}`,
 /**
  * `@font-face` rules carrying a font list as base64, so a stylesheet renders
  * in the same typeface everywhere regardless of what the reader's machine has
- * installed. Defaults to the mono stack's primary family; teach passes its own
- * three faces instead of widening this default for every consumer.
+ * installed. Defaults to the mono stack's primary family; a caller wanting
+ * other faces passes its own list instead of widening this default.
  */
 export function fontFaceBlock(
   faces: readonly FontFace[],
@@ -158,14 +158,13 @@ export interface CssOptions {
   readonly banner?: string
   /**
    * Component rules ride along by default; a token-only consumer opts out
-   * with `false`. Pass an explicit list, such as teach's own chrome set, to
-   * emit those instead of the generic default.
+   * with `false`. Pass an explicit list to emit those instead of the generic default.
    */
   readonly components?: boolean | readonly Component[]
   /**
    * Off by default. `true` embeds the mono stack's faces as base64
-   * `@font-face` rules. Pass an explicit list, such as teach's three faces,
-   * to embed those instead.
+   * `@font-face` rules. Pass an explicit list, such as
+   * `HAND_DRAWN_FONT_FACES`, to embed those instead.
    */
   readonly embedFonts?: boolean | readonly FontFace[]
 }

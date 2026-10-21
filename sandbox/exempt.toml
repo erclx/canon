@@ -39,33 +39,8 @@ reason = "Reads tracked work and context and writes nothing. A run leaves the tr
 [canon-feedback]
 reason = "Opens an issue on the toolkit repository rather than touching the project it runs in. canon sandbox run reports that as an escape and cannot assert its content, since the path is outside the tree the snapshot covers."
 
+[teach-craft]
+reason = "Carries teaching judgment and writes no artifact of its own. A lesson lands wherever the session already writes, so there is nothing to assert over."
+
 [markdown-craft]
 reason = "Carries rules that `canon markdown audit` already asserts mechanically, so an arm would assert the audit twice."
-
-# A pointer at the old name, kept until it retires. canon-keep-retired
-[draft-doc]
-reason = "A pointer that prints one line naming write-doc and writes no artifact, so there is nothing to assert over."
-
-# A pointer at the old name, kept until it retires. canon-keep-retired
-[draft-figure]
-reason = "A pointer that prints one line naming draw-figure and writes no artifact, so there is nothing to assert over."
-
-# A pointer at the old name, kept until it retires. canon-keep-retired
-[draft-identity]
-reason = "A pointer that prints one line naming design-identity and writes no artifact, so there is nothing to assert over."
-
-# A pointer at the old name, kept until it retires. canon-keep-retired
-[draft-slides]
-reason = "A pointer that prints one line naming make-deck and writes no artifact, so there is nothing to assert over."
-
-# A pointer at the old name, kept until it retires. canon-keep-retired
-[draft-and-pick]
-reason = "A pointer that prints one line naming pick-by-eye and writes no artifact, so there is nothing to assert over."
-
-# A pointer at the old name, kept until it retires. canon-keep-retired
-[draft-ready]
-reason = "A pointer that prints one line naming plan-ready and writes no artifact, so there is nothing to assert over."
-
-# A pointer at the old name, kept until it retires. canon-keep-retired
-[draft-screencast]
-reason = "A pointer that prints one line naming script-screencast and writes no artifact, so there is nothing to assert over."

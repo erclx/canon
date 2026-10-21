@@ -132,26 +132,6 @@ describe('command action exit codes', () => {
     await rm(workDir, { recursive: true, force: true })
   })
 
-  /**
-   * Decks resolve against the working directory, so each case gets a project
-   * of its own rather than sharing a slides folder another case wrote into.
-   */
-  async function writeDecks(
-    name: string,
-    decks: Record<string, Record<string, string>>,
-  ): Promise<string> {
-    const project = join(workDir, `${name}-project`)
-    await mkdir(project)
-    for (const [deck, files] of Object.entries(decks)) {
-      const dir = join(project, '.canon', 'slides', deck)
-      await mkdir(dir, { recursive: true })
-      for (const [file, body] of Object.entries(files)) {
-        await writeFile(join(dir, file), body, 'utf8')
-      }
-    }
-    return project
-  }
-
   it('should exit 1 when design render cannot find its source', async () => {
     const result = await runCli(
       ['design', 'render', '--source', 'absent-design.md'],
@@ -160,70 +140,6 @@ describe('command action exit codes', () => {
 
     expect(result.exitCode).toBe(1)
     expect(result.stderr).toContain('absent-design.md not found')
-  })
-
-  it('should exit 1 when slides render finds no deck', async () => {
-    const project = await writeDecks('no-deck', {})
-
-    const result = await runCli(['slides', 'render'], { cwd: project })
-
-    expect(result.exitCode).toBe(1)
-    expect(result.stderr).toContain('No deck under .canon/slides/')
-  })
-
-  it('should exit 1 when slides render is given no name among several decks', async () => {
-    const project = await writeDecks('several', {
-      alpha: { '01.html': '<p>one</p>\n' },
-      beta: { '01.html': '<p>one</p>\n' },
-    })
-
-    const result = await runCli(['slides', 'render'], { cwd: project })
-
-    expect(result.exitCode).toBe(1)
-    expect(result.stderr).toContain('name one: alpha, beta')
-  })
-
-  it('should exit 1 when slides render names neither a deck nor a folder', async () => {
-    const project = await writeDecks('unknown', {
-      alpha: { '01.html': '<p>one</p>\n' },
-    })
-
-    const result = await runCli(['slides', 'render', 'absent'], {
-      cwd: project,
-    })
-
-    expect(result.exitCode).toBe(1)
-    expect(result.stderr).toContain('absent is neither a deck nor a folder')
-  })
-
-  it('should exit 1 when slides render is given a folder holding no html slides', async () => {
-    const project = await writeDecks('empty-folder', {})
-    const source = join(project, 'empty-deck')
-    await mkdir(source)
-    await writeFile(join(source, 'notes.md'), '# not a slide\n', 'utf8')
-
-    const result = await runCli(['slides', 'render', source], {
-      cwd: project,
-    })
-
-    expect(result.exitCode).toBe(1)
-    expect(result.stderr).toContain(`${source} holds no .html slides`)
-  })
-
-  it('should exit 1 when slides render reads a malformed deck file', async () => {
-    const project = await writeDecks('malformed', {
-      broken: {
-        '01.html': '<p>one</p>\n',
-        'deck.json': JSON.stringify({ slideNumbers: 'on' }),
-      },
-    })
-
-    const result = await runCli(['slides', 'render', 'broken'], {
-      cwd: project,
-    })
-
-    expect(result.exitCode).toBe(1)
-    expect(result.stderr).toContain('slideNumbers must be true or false')
   })
 
   it('should exit 1 when feedback receives an empty body on stdin', async () => {

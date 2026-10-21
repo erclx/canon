@@ -220,7 +220,7 @@ describe('deriveDomainLabels', () => {
   })
 
   it('should ignore domain words after the first comma', () => {
-    const body = report({ Surface: 'CLI, canon teach nav' })
+    const body = report({ Surface: 'CLI, canon tasks list' })
 
     expect(deriveDomainLabels(body)).toEqual(['cli'])
   })

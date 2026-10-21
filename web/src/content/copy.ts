@@ -439,15 +439,7 @@ export const field = {
     total: `${total} skills`,
     used: `${used} used`,
   }),
-  usedCommands: [
-    'gov',
-    'tooling',
-    'claude',
-    'tasks',
-    'design',
-    'teach',
-    'records',
-  ],
+  usedCommands: ['gov', 'tooling', 'claude', 'tasks', 'design', 'records'],
   usedSkills: [
     'plan-feature',
     'task-board',

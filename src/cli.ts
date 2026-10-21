@@ -10,17 +10,14 @@ import { register as claude } from '@/commands/claude'
 import { register as indexes } from '@/commands/indexes'
 import { register as docs } from '@/commands/docs'
 import { register as design } from '@/commands/design'
-import { register as slides } from '@/commands/slides'
 import { register as capture } from '@/commands/capture'
 import { register as serve } from '@/commands/serve'
-import { register as demo } from '@/commands/demo'
 import { register as inventory } from '@/commands/inventory'
 import { register as driver } from '@/commands/driver'
 import { register as feedback } from '@/commands/feedback'
 import { register as transcripts } from '@/commands/transcripts'
 import { register as tasks } from '@/commands/tasks'
 import { register as intake } from '@/commands/intake'
-import { register as teach } from '@/commands/teach'
 import { register as canvas } from '@/commands/canvas'
 import { register as comments } from '@/commands/comments'
 import { register as context } from '@/commands/context'
@@ -71,17 +68,14 @@ claude(program)
 indexes(program)
 docs(program)
 design(program)
-slides(program)
 capture(program)
 serve(program)
-demo(program)
 inventory(program)
 driver(program)
 feedback(program)
 transcripts(program)
 tasks(program)
 intake(program)
-teach(program)
 canvas(program)
 comments(program)
 context(program)

@@ -33,4 +33,3 @@ The evidence fails as well. Arms get reported without being rendered or judged, 
 - Finding roughness by reading source, which `ux-audit` owns
 - Measuring what a running interface costs to paint, which `ux-measure` owns
 - Listing what to look at on a change already made, which `ui-checklist` owns
-- Scripting a recording of something already built, which `script-screencast` owns

@@ -96,9 +96,9 @@ Holds the dev regression baselines, one subfolder per area. Dev evidence is what
 
 - The location tells the kind. Under `assets/evidence/` is dev, and any other tracked `evidence` folder is prod. `canon pr evidence` compares both.
 - `assets/evidence/home/` is the site baseline, and `assets/evidence/canvas/<area>/` holds `arrange`, `inspector`, `layers`, and `shell`
-- `examples/teach/evidence/` is prod with a `.stamp` per image from `canon capture`, and `web/public/evidence/` is prod and hand-placed
+- `web/public/evidence/` is prod and hand-placed
 - `.canon/evidence/` and a groundwork track's `evidence/` are gitignored proof a record cites, and `canon migrate scratch-evidence` moves a cited folder out of `tmp/`
-- Teach, slides, and design commit no dev baseline yet, and the marketing images in `assets/frames/` are neither kind
+- Design commits no dev baseline yet, and the marketing images in `assets/frames/` are neither kind
 
 ### `assets/captures/`
 

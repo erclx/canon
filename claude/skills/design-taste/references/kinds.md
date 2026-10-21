@@ -47,7 +47,6 @@ Documentation, articles, reference pages, learning material. The reader arrived 
 ## Kinds this file does not cover
 
 - **Transactional flows** such as checkout, sign-up and settings are read as application UI. Their distinctive rules, state coverage and error recovery, sit in the `ui` governance rules.
-- **Presentation surfaces** such as slide decks are drafted by `make-deck`, which carries the deck's design rules. Take the layer ordering and the floor from the body and the rest from it.
 - **Terminal and text-mode surfaces** have no layout engine and their own color rules, stated where the writing surface is decided rather than here.
 
 A read naming any of the three above takes the body's rules and says it has no per-kind guidance, naming the surface that governs it. A read naming a kind this file does not list at all says so rather than borrowing the nearest section.

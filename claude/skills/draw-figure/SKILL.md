@@ -30,12 +30,11 @@ Apply the standard's bar: a relationship, a boundary, a path, or a before-and-af
 
 Take the first that matches, and state which path was picked and why in one sentence:
 
-1. **A teach lesson**, a page in a learning workspace's `lessons/` folder: the hand-drawn path, any shape. The renderer cannot load the lesson's hand font, so Mermaid labels measure narrow and clip.
-2. **An architecture view**, meaning the request names system context, components, request flow, data pipeline, or deployment: the architecture set, then the Mermaid path.
-3. **Graph-shaped**, meaning the relationship, boundary, or path is already what a flowchart or sequence diagram expresses: the Mermaid path.
-4. **Anything else**, a spatial or physical arrangement no flowchart reduces to: the hand-drawn path.
+1. **An architecture view**, meaning the request names system context, components, request flow, data pipeline, or deployment: the architecture set, then the Mermaid path.
+2. **Graph-shaped**, meaning the relationship, boundary, or path is already what a flowchart or sequence diagram expresses: the Mermaid path.
+3. **Anything else**, a spatial or physical arrangement no flowchart reduces to: the hand-drawn path.
 
-The standard states this as a render-first policy rather than a ban on any tool-exported drawing, so outside a teach lesson a graph-shaped subject always routes through Mermaid even though that is itself an external renderer.
+The standard states this as a render-first policy rather than a ban on any tool-exported drawing, so a graph-shaped subject always routes through Mermaid even though that is itself an external renderer.
 
 ## Step 4: draw
 
