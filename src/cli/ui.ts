@@ -53,7 +53,38 @@ export function palette(stream: { isTTY?: boolean }): Palette {
   return supportsColor(stream) ? COLOR : PLAIN
 }
 
+let quiet = false
+
+/**
+ * Silences the progress frame for a caller that asked for a record, since an
+ * agent reads both streams and the frame outweighed the data. Warnings and
+ * errors still write, since diagnostics reach stderr in every mode.
+ */
+export function setQuiet(on: boolean): void {
+  quiet = on
+}
+
+/**
+ * The frame is drawn only for a terminal. A pipe or a file gets each line's
+ * mark alone, since a reader there gains nothing from `┌ │ ├ └` and an agent
+ * pays for every one of them.
+ */
+function framed(): boolean {
+  return process.stderr.isTTY === true
+}
+
+function markLine(color: keyof Palette, mark: string, message: string): string {
+  if (!framed()) return `${mark} ${message}\n`
+  const { GREY, NC, [color]: tint } = palette(process.stderr)
+  return `${GREY}│${NC} ${tint}${mark}${NC} ${message}\n`
+}
+
 export function intro(title: string): void {
+  if (quiet) return
+  if (!framed()) {
+    process.stderr.write(`${title}\n`)
+    return
+  }
   const { GREY, NC, WHITE } = palette(process.stderr)
   process.stderr.write(`${GREY}┌${NC}\n${GREY}│${NC} ${WHITE}${title}${NC}\n`)
 }
@@ -64,23 +95,22 @@ export function intro(title: string): void {
  * leaving stdout clean for JSON and lists.
  */
 export function logInfo(message: string): void {
-  const { GREEN, GREY, NC } = palette(process.stderr)
-  process.stderr.write(`${GREY}│${NC} ${GREEN}✓${NC} ${message}\n`)
+  if (quiet) return
+  process.stderr.write(markLine('GREEN', '✓', message))
 }
 
 export function logWarn(message: string): void {
-  const { GREY, NC, YELLOW } = palette(process.stderr)
-  process.stderr.write(`${GREY}│${NC} ${YELLOW}!${NC} ${message}\n`)
+  process.stderr.write(markLine('YELLOW', '!', message))
 }
 
 export function logAdd(message: string): void {
-  const { GREEN, GREY, NC } = palette(process.stderr)
-  process.stderr.write(`${GREY}│${NC} ${GREEN}+${NC} ${message}\n`)
+  if (quiet) return
+  process.stderr.write(markLine('GREEN', '+', message))
 }
 
 export function logRemove(message: string): void {
-  const { GREY, NC, RED } = palette(process.stderr)
-  process.stderr.write(`${GREY}│${NC} ${RED}-${NC} ${message}\n`)
+  if (quiet) return
+  process.stderr.write(markLine('RED', '-', message))
 }
 
 /**
@@ -89,18 +119,35 @@ export function logRemove(message: string): void {
  * exit code rather than terminating mid-write.
  */
 export function logError(message: string): void {
-  const { GREY, NC, RED } = palette(process.stderr)
-  process.stderr.write(`${GREY}│${NC} ${RED}✗${NC} ${message}\n`)
+  process.stderr.write(markLine('RED', '✗', message))
 }
 
 export function logStep(message: string): void {
+  if (quiet) return
+  if (!framed()) {
+    process.stderr.write(`${message}\n`)
+    return
+  }
   const { GREY, NC, WHITE } = palette(process.stderr)
   process.stderr.write(`${GREY}│${NC}\n${GREY}├${NC} ${WHITE}${message}${NC}\n`)
 }
 
 export function outro(): void {
+  if (quiet || !framed()) return
   const { GREY, NC } = palette(process.stderr)
   process.stderr.write(`${GREY}└${NC}\n`)
+}
+
+/**
+ * Closes the frame on the green line a command ends a success on. The line
+ * sits below the frame rather than inside it, and a quiet run writes neither.
+ */
+export function outroSuccess(message: string, detail?: string): void {
+  if (quiet) return
+  outro()
+  const { GREEN, GREY, NC } = palette(process.stderr)
+  const suffix = detail === undefined ? '' : ` ${GREY}${detail}${NC}`
+  process.stderr.write(`${GREEN}✓ ${message}${NC}${suffix}\n`)
 }
 
 /**
@@ -109,11 +156,11 @@ export function outro(): void {
  * such as a pull request body or the output of a git mutation.
  */
 export function pipeOutput(text: string): void {
+  if (quiet) return
   const { GREY, NC } = palette(process.stderr)
+  const bar = framed() ? `${GREY}│${NC}` : ''
   const lines = text.replace(/\n$/, '').split('\n')
-  process.stderr.write(
-    `${lines.map((line) => `${GREY}│${NC}  ${line}`).join('\n')}\n`,
-  )
+  process.stderr.write(`${lines.map((line) => `${bar}  ${line}`).join('\n')}\n`)
 }
 
 /** Counts a noun for a report line, where the plural is the bare `s` form. */
@@ -122,6 +169,10 @@ export function plural(count: number, noun: string): string {
 }
 
 export function frameError(message: string): void {
+  if (!framed()) {
+    process.stderr.write(`✗ ${message}\n`)
+    return
+  }
   const { GREY, NC, RED } = palette(process.stderr)
   process.stderr.write(
     `${GREY}┌${NC}\n${GREY}│${NC} ${RED}✗${NC} ${message}\n${GREY}└${NC}\n`,
@@ -129,6 +180,11 @@ export function frameError(message: string): void {
 }
 
 export function frameSuccess(command: string, target: string): void {
+  if (quiet) return
+  if (!framed()) {
+    process.stderr.write(`${command}\n✓ ${target}\n`)
+    return
+  }
   const { GREEN, GREY, NC, WHITE } = palette(process.stderr)
   process.stderr.write(
     `${GREY}┌${NC}\n${GREY}│${NC} ${WHITE}${command}${NC}\n${GREY}│${NC}\n${GREY}│${NC} ${GREEN}✓${NC} ${target}\n${GREY}└${NC}\n`,
