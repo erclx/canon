@@ -5,7 +5,7 @@ import { buildDesignCss } from '@/design/css'
 import { HAND_DRAWN_FONT_FACES } from '@/design/fonts'
 import { DESIGN_DOCUMENT, regenDesign } from '@/design/regen'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
-import { logWarn, palette } from '@/cli/ui'
+import { intro, logError, logInfo, logWarn, outro } from '@/cli/ui'
 
 export function register(program: Command): void {
   const design = program
@@ -29,8 +29,6 @@ export function register(program: Command): void {
       ].join('\n'),
     )
     .action(() => {
-      const { GREEN, GREY, NC, RED, WHITE } = palette(process.stderr)
-
       // The guard below catches a `PROJECT_ROOT` with no record at all, which
       // is an installed package. It cannot catch a second real checkout that
       // has one, so both paths carry the warning. It is a frame-interior line,
@@ -42,24 +40,21 @@ export function register(program: Command): void {
       // The record is already committed here and ships with no package, so
       // its absence is what separates the two.
       if (!existsSync(join(PROJECT_ROOT, DESIGN_DOCUMENT))) {
-        process.stderr.write(`${GREY}┌${NC}\n`)
+        intro('Regenerate design source')
         if (mismatch !== undefined) logWarn(mismatch)
-        process.stderr.write(
-          `${GREY}│${NC} ${RED}✗${NC} No ${DESIGN_DOCUMENT} at ${PROJECT_ROOT}. Regen runs in the toolkit checkout, not against a target.\n${GREY}└${NC}\n`,
+        logError(
+          `No ${DESIGN_DOCUMENT} at ${PROJECT_ROOT}. Regen runs in the toolkit checkout, not against a target.`,
         )
+        outro()
         process.exitCode = 1
         return
       }
 
-      process.stderr.write(
-        `${GREY}┌${NC}\n${GREY}│${NC} ${WHITE}Regenerate design source${NC}\n`,
-      )
+      intro('Regenerate design source')
       if (mismatch !== undefined) logWarn(mismatch)
       const result = regenDesign(PROJECT_ROOT)
-      process.stderr.write(
-        `${GREY}│${NC} ${GREEN}✓${NC} ${relative(PROJECT_ROOT, result.documentPath)}\n`,
-      )
-      process.stderr.write(`${GREY}└${NC}\n`)
+      logInfo(relative(PROJECT_ROOT, result.documentPath))
+      outro()
     })
 
   design

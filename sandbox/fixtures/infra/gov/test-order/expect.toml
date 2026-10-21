@@ -60,13 +60,13 @@ pattern = '"scope":\{"extensions":\[""?\.ts'
 path = "test-order-status.txt"
 pattern = '^2$'
 
-# The frame renders on stderr while the record holds stdout alone, which is the
-# split `docs/agents/output-shape.md` fixes for every mode including `--json`.
-# Asserting the frame file is non-empty is what catches a regression that sends
-# the frame to stdout and leaves a consumer parsing a banner.
+# A `--json` run keeps stderr to warnings while the record holds stdout alone,
+# which is the split `docs/agents/output-shape.md` fixes. Each finding leaves a
+# `subject → test` warning there, so asserting it catches a regression that
+# sends the warning to stdout or quiets it with the progress.
 [[content]]
 path = "test-order-frame.log"
-pattern = 'Findings'
+pattern = '→'
 
 [[content]]
 path = "test-order-record.json"

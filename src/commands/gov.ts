@@ -1160,7 +1160,7 @@ function runTestOrder(opts: TestOrderOptions): number {
   const report = readTestOrder(root, { base: opts.base })
   const emitJson = opts.json ?? false
 
-  // The frame renders on stderr in both modes and the record goes to stdout
+  // The refusal reaches stderr in both modes and the record goes to stdout
   // alone, which is the split `docs/agents/output-shape.md` fixes. A consumer
   // reading stdout sees pure data either way, and an operator reading the
   // terminal sees the refusal rather than a command that appeared to do nothing.

@@ -2,7 +2,7 @@ import { resolve } from 'node:path'
 import type { Command } from 'commander'
 import { recordDir } from '@/roots/record'
 import { ensureYtDlp, fetchOne } from '@/transcripts/fetch'
-import { palette } from '@/cli/ui'
+import { intro, logError, logInfo, outro } from '@/cli/ui'
 import { mainWorktreeRoot } from '@/git/worktree'
 
 interface TranscriptOptions {
@@ -37,10 +37,7 @@ export function register(program: Command): void {
     )
     .action(async (url: string, opts: TranscriptOptions) => {
       const outDir = await resolveOutDir(opts)
-      const { GREEN, GREY, NC, RED, WHITE } = palette(process.stderr)
-      process.stderr.write(
-        `${GREY}┌${NC}\n${GREY}│${NC} ${WHITE}canon transcripts${NC}\n`,
-      )
+      intro('canon transcripts')
       try {
         ensureYtDlp()
         const target = await fetchOne(url, {
@@ -48,14 +45,12 @@ export function register(program: Command): void {
           keepTimestamps: opts.keepTimestamps ?? false,
         })
         process.stdout.write(`${target}\n`)
-        process.stderr.write(
-          `${GREY}│${NC} ${GREEN}✓${NC} ${target}\n${GREY}└${NC}\n`,
-        )
+        logInfo(target)
+        outro()
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
-        process.stderr.write(
-          `${GREY}│${NC} ${RED}✗${NC} ${message}\n${GREY}└${NC}\n`,
-        )
+        logError(message)
+        outro()
         process.exitCode = 1
       }
     })
