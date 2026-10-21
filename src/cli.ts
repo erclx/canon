@@ -40,6 +40,7 @@ import { register as census } from '@/commands/census'
 import { register as upstream } from '@/commands/upstream'
 import { register as targets } from '@/commands/targets'
 import { register as upgrade } from '@/commands/upgrade'
+import { register as changelog } from '@/commands/changelog'
 import { readInstalled, UNKNOWN_LABEL } from '@/version/installed'
 import { renderHelp } from '@/cli/help'
 import { renderAll, routeHelp } from '@/cli/help-all'
@@ -100,6 +101,7 @@ upstream(program)
 audits(program)
 gate(program)
 upgrade(program)
+changelog(program)
 
 const route = routeHelp(program, process.argv.slice(2))
 if (route.kind === 'top') showHelp()

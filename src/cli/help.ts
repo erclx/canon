@@ -20,6 +20,7 @@ export const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
       ['sync [path]', 'Sync all installed domains in a project'],
       ['upgrade', 'Reinstall the CLI with the manager that installed it'],
       ['migrate [cmd]', 'Move a project off a retired name or layout'],
+      ['changelog', 'Read the releases between a stamp and this binary'],
       ['targets [cmd]', 'Projects this toolkit installed into'],
     ],
   },
