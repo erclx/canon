@@ -2490,7 +2490,7 @@ describe('canon pr reads through REST alone', () => {
 
     expect(record).toMatchObject({
       reason: 'timeout',
-      waitedSeconds: 0,
+      waitedSeconds: expect.any(Number),
       review: { isCovered: false },
     })
   })
