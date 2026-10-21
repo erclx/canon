@@ -15,5 +15,14 @@
 
 ## Key paths
 
+### Code
+
+[One sentence on what the code paths below hold]
+
 - `src/`: [description]
+
+### Content
+
+[One sentence on what the content paths below hold]
+
 - `canon/DESIGN.md`: visual intent, pointing at the stylesheet that holds the values

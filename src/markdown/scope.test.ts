@@ -115,10 +115,10 @@ describe('densityGates', () => {
 
 describe('GATED_SCOPE_ROOTS', () => {
   it.each(GATED_SCOPE_ROOTS)(
-    'should name a root inside the density scope: %s',
+    'should name a root its own listing gates: %s',
     (root) => {
       const sample = root.endsWith('/') ? `${root}a/SKILL.md` : root
-      expect(inDensityScope(sample)).toBe(true)
+      expect(densityGates(sample, 'bullet-run', [root], false)).toBe(true)
     },
   )
 })

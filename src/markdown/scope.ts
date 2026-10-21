@@ -82,8 +82,9 @@ export function scopedDensityFindings(
 
 /**
  * The roots `canon init` gates in a new project when each passes at init time:
- * every density surface a target authors itself, leaving out the toolkit's own
- * `claude/skills/` and `tooling/` trees.
+ * every density surface a target authors itself and the Key paths of its
+ * `CLAUDE.md`, leaving out the toolkit's own `claude/skills/` and `tooling/`
+ * trees.
  */
 export const GATED_SCOPE_ROOTS: readonly string[] = [
   'canon/context/',
@@ -92,6 +93,7 @@ export const GATED_SCOPE_ROOTS: readonly string[] = [
   'wiki/',
   'README.md',
   'CONTRIBUTING.md',
+  'CLAUDE.md',
 ]
 
 /**
@@ -441,6 +443,7 @@ export const GATED_PATHS: readonly string[] = [
   'wiki/',
   'README.md',
   'CONTRIBUTING.md',
+  'CLAUDE.md',
 ]
 
 /**

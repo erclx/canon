@@ -45,14 +45,28 @@ Load the skill before editing anything in its domain.
 
 ## Key paths
 
+### Shipped surfaces
+
+What install and sync carry into a target, beside the rules that never leave.
+
 - `governance/rules/`: governance rules that ship to targets
 - `internal/`: toolkit-only rules, outside every installable surface
 - `tooling/`: golden configs, references, and manifests per stack
 - `claude/skills/`: plugin skills installable in target projects
+
+### Code
+
+The programs that build, test, and serve the toolkit.
+
 - `src/`: the TypeScript CLI, including the product verbs
 - `scripts/`: remaining bash and maintenance scripts
 - `sandbox/`: scenarios, fixtures, and the headless runner
 - `web/`: the landing page, deployed on its own
+
+### Reference
+
+Material a session reads for orientation rather than edits as part of a feature.
+
 - `examples/`: worked examples of the product outputs
 - `wiki/`: reference pages for Anthropic-owned subjects
 
