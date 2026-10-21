@@ -71,6 +71,9 @@ import {
   serializeSettings,
   writeSettings,
 } from '@/claude/settings'
+import { bodyLines } from '@/markdown/scan'
+import { scopedDensityFindings } from '@/markdown/scope'
+import { CAP } from '@/markdown/stacks'
 import { readSessionDefaults } from '@/migrate/session-defaults'
 import { copyPreservingMode } from '@/sync/copy'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
@@ -176,6 +179,22 @@ export function seededDirPath(resolved: string, name: string): string {
     ? surfaceDir(resolved, name)
     : recordDir(resolved, name)
 }
+
+/**
+ * Each bullet run past the limit in the target's `CLAUDE.md` Key paths, read
+ * through the scope the audit gates on. Sync warns rather than gates, since a
+ * target gates only the prefixes its own config lists.
+ */
+export async function longKeyPathsRuns(
+  resolved: string,
+): Promise<{ line: number; count: number }[]> {
+  const path = join(resolved, 'CLAUDE.md')
+  if (!existsSync(path)) return []
+  const lines = bodyLines(await readFile(path, 'utf8'))
+  return scopedDensityFindings('CLAUDE.md', lines)
+    .filter((finding) => finding.kind === 'bullet-run')
+    .map((finding) => ({ line: finding.line, count: finding.value ?? 0 }))
+}
 const USER_DIR = join('tooling', 'claude', 'user')
 const STATUSLINE = 'statusline-command.sh'
 const PLUGIN_MANIFEST = join('claude', '.claude-plugin', 'plugin.json')
@@ -244,7 +263,8 @@ export function register(program: Command): void {
         'Writes .gitignore alone: adds the entries the claude manifest lists',
         'and drops ones under its headers that the manifest no longer lists.',
         'A seeded file is reported, never rewritten, and a missing one points',
-        'at `canon claude init`.',
+        'at `canon claude init`. A CLAUDE.md Key paths running past 5 bullets',
+        'is reported with the H3 grouping that fixes it.',
         '',
         'Exit codes:',
         '  0  synced, already up to date, or the prompt was cancelled',
@@ -664,6 +684,11 @@ async function runSync(target: string): Promise<number> {
   for (const name of SEEDED_DIRS) {
     if (isDirectory(seededDirPath(resolved, name))) logInfo(`${name}/`)
     else logWarn(`${name}/ missing. Run \`canon claude init\``)
+  }
+  for (const run of await longKeyPathsRuns(resolved)) {
+    logWarn(
+      `CLAUDE.md:${run.line} runs ${run.count} Key paths bullets past ${CAP}. Group them under H3s, each opening on a lead sentence`,
+    )
   }
 
   // Sync never rewrites an existing settings file, so a target seeded before
