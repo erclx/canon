@@ -63,13 +63,7 @@ jobs:
         run: bunx playwright install chromium firefox webkit
 
       - name: Verify Playwright Browsers Restored
-        run: |
-          for browser in chromium firefox webkit; do
-            ls ~/.cache/ms-playwright 2>/dev/null | grep -q "^${browser}-" || {
-              echo "Missing Playwright browser: ${browser}" >&2
-              exit 1
-            }
-          done
+        run: scripts/ci/check-browsers.sh chromium firefox webkit
 
       - name: Run E2E Tests
         run: bun run web:e2e
@@ -118,11 +112,7 @@ jobs:
         run: bunx playwright install chromium
 
       - name: Verify Playwright Browsers Restored
-        run: |
-          ls ~/.cache/ms-playwright 2>/dev/null | grep -q "^chromium-" || {
-            echo "Missing Playwright browser: chromium" >&2
-            exit 1
-          }
+        run: scripts/ci/check-browsers.sh chromium
 
       # Builds, serves, and captures the page, then clears and refills
       # assets/evidence/home so the report below diffs the frames against the
@@ -166,20 +156,4 @@ jobs:
       # ruled out. This step keeps reporting whether the captured
       # frames match the baseline, which stays true on a pull request.
       - name: Report whether the baseline moved
-        run: |
-          if git diff --quiet -- assets/evidence/home; then
-            echo "The captured frames match the committed baseline." >>"$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          {
-            echo "### The landing page capture moved"
-            echo
-            echo "These frames differ from the committed baseline. That is expected"
-            echo "when a catalog this page counts has moved, and it is not a failure."
-            echo
-            echo '```'
-            git diff --stat -- assets/evidence/home
-            echo '```'
-            echo
-            echo "Download the \`landing-page-capture\` artifact to view them."
-          } >>"$GITHUB_STEP_SUMMARY"
+        run: scripts/ci/report-baseline.sh
