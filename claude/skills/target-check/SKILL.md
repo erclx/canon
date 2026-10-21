@@ -43,8 +43,6 @@ canon tooling sync --check <stack>
 
 Refuse the domain and report it unread when `chain` names nothing, rather than running the command bare. A bare call reaches the stack prompt, which refuses a headless caller, so it would report nothing about the domain.
 
-Every target would then be compared against whichever stack sorts first, on every run, and the drift reported would be an artifact of the wrong comparison rather than anything the target did.
-
 ### Domains come from the report
 
 Read every installed domain from the catalog the report returns rather than from a name written into this body. `domains` enumerates what the target stamped, so a later domain reaches this report with no edit here.
