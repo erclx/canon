@@ -1,4 +1,9 @@
-import type { DensityKind } from '@/markdown/density'
+import {
+  type DensityFinding,
+  type DensityKind,
+  densityFindings,
+} from '@/markdown/density'
+import type { BodyLine } from '@/markdown/scan'
 
 /** The surfaces the retired bullet-stacks stage held, per `ALWAYS_GATED`. */
 const BULLET_RUN_SCOPE = [
@@ -21,11 +26,12 @@ const REQUIREMENT_SCOPE =
  * pages, the skill bodies, references, and requirements of both skill trees,
  * the tooling seeds and stack references, the wiki, and the two root guides.
  *
- * Rules stay out, since a rule is one imperative per bullet. So do
- * `CLAUDE.md`, the project requirement and design records, a seed carrying one
- * of those three names, the changelog, the examples, and every `.canon/`
- * record, each with a shape and cap of its own. Named here and nowhere else, so
- * the audit, the gate stage reading its exit, and their tests read one scope.
+ * Rules stay out, since a rule is one imperative per bullet, and so does every
+ * `CLAUDE.md` section but Key paths, which `KEY_PATHS_SCOPE` holds. So do the
+ * project requirement and design records, a seed carrying one of those three
+ * names, the changelog, the examples, and every `.canon/` record, each with a
+ * shape and cap of its own. Named here and nowhere else, so the audit, the gate
+ * stage reading its exit, and their tests read one scope.
  */
 const DENSITY_SCOPE = [
   ...BULLET_RUN_SCOPE,
@@ -35,6 +41,44 @@ const DENSITY_SCOPE = [
   /^wiki\/.+\.md$/,
   /^(?:README|CONTRIBUTING)\.md$/,
 ]
+
+/**
+ * The root `CLAUDE.md` and its seed, measured inside `## Key paths` alone. That
+ * section is a catalog rather than rules, so it takes the run limit and the H3
+ * opening a grouped catalog needs, and nothing else a rule would breach.
+ */
+const KEY_PATHS_SCOPE = /^(?:tooling\/claude\/seeds\/)?CLAUDE\.md$/
+const KEY_PATHS_HEADING = /^## Key paths\s*$/
+const KEY_PATHS_KINDS: readonly DensityKind[] = ['bullet-run', 'h3-opening']
+
+/** The lines under `## Key paths` up to the next H1 or H2, keeping their numbers. */
+function keyPathsSection(lines: readonly BodyLine[]): readonly BodyLine[] {
+  const start = lines.findIndex(
+    (line) => !line.fenced && KEY_PATHS_HEADING.test(line.text),
+  )
+  if (start === -1) return []
+  const rest = lines.slice(start + 1)
+  const end = rest.findIndex(
+    (line) => !line.fenced && /^#{1,2}\s/.test(line.text),
+  )
+  return end === -1 ? rest : rest.slice(0, end)
+}
+
+/**
+ * The density findings a path takes, being every finding on a density-scope
+ * file and the Key paths findings on a `CLAUDE.md`. The audit, the init probe,
+ * and `canon claude sync` all read this, so the three agree on what counts.
+ */
+export function scopedDensityFindings(
+  rel: string,
+  lines: readonly BodyLine[],
+): DensityFinding[] {
+  if (inDensityScope(rel)) return densityFindings(lines)
+  if (!KEY_PATHS_SCOPE.test(rel)) return []
+  return densityFindings(keyPathsSection(lines)).filter((finding) =>
+    KEY_PATHS_KINDS.includes(finding.kind),
+  )
+}
 
 /**
  * The roots `canon init` gates in a new project when each passes at init time:
@@ -428,7 +472,7 @@ export function densityGates(
   gated: readonly string[] = GATED_PATHS,
   alwaysGated = true,
 ): boolean {
-  if (!inDensityScope(rel)) return false
+  if (!inDensityScope(rel) && !KEY_PATHS_SCOPE.test(rel)) return false
   if (REQUIREMENT_SCOPE.test(rel)) return gated.includes(rel)
   if (
     alwaysGated &&
