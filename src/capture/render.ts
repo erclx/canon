@@ -16,7 +16,7 @@ import { formatStamp, hashSource, stampPath } from '@/capture/stamp'
  * `src/commands/capture.ts` reaches it through a dynamic import so `src/cli.ts`
  * never resolves the engine at startup.
  *
- * It ships, like `@/demo/drive`, `@/inventory/walk`, and `@/driver/drive`.
+ * It ships, like `@/inventory/walk` and `@/driver/drive`.
  * Regenerating this repository's own committed images was the reason it stayed
  * behind, and it was a reason about one caller rather than about the mechanism:
  * a target renders its own generated pages and proves its own fonts resolved,

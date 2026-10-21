@@ -41,11 +41,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      'The video just finished recording. Read it back and tell me what each part shows.',
-    expect: 'read-frames',
-  },
-  {
-    prompt:
       'We need to measure this properly before committing to an approach.',
     expect: 'plan-groundwork',
   },
@@ -88,11 +83,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      'The screencast draft is finished. Turn it into an actual video now.',
-    expect: 'record-screencast',
-  },
-  {
-    prompt:
       'What should a review of a change look for beyond bugs, and how much evidence does a finding need?',
     expect: 'review-craft',
   },
@@ -105,10 +95,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     prompt:
       'Our backlog only ever grows, measure each row and suggest which to decline.',
     expect: 'backlog-triage',
-  },
-  {
-    prompt: 'Draft me a script with beats for a screencast recording.',
-    expect: 'script-screencast',
   },
   // Rot across documents nobody changed is what this reads, rather than a
   // stated rule broken on a given line. It is also not `target-check`, which

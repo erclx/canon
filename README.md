@@ -91,7 +91,7 @@ The workflow this toolkit ships is the workflow that built it. Several Claude Co
  <img src="demos/agent-view-light/demo.gif" alt="The canon landing page scrolling from the dispatch section to the branch graph, three workers and a planner on disjoint file sets with the pull request each opened">
 </picture>
 
-That recording is the landing page's own `dispatch` and `workers` sections, driven by `canon demo run` against a local build. The branch graph beside the pull request numbers is authored rather than read, because nothing on a build machine records which files four sessions held.
+That recording is the landing page's own `dispatch` and `workers` sections, driven through a browser against a local build. The branch graph beside the pull request numbers is authored rather than read, because nothing on a build machine records which files four sessions held.
 
 ## Documentation
 

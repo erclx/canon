@@ -40,7 +40,6 @@ export const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
       ['design [cmd]', 'Design system'],
       ['capture [source]', 'Render HTML capture sources to PNG'],
       ['serve [dir]', 'Serve a directory on localhost, print the link'],
-      ['demo [cmd]', 'Record a running app'],
       ['inventory [subj]', 'Report one computed property across every route'],
       ['drive <url> <run>', 'Walk a page through interactions, measure each'],
       ['transcripts <url>', 'Fetch a YouTube transcript with frontmatter'],

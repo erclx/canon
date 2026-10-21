@@ -23,7 +23,7 @@ import type {
  * `src/commands/driver.ts` reaches it through a dynamic import so no other
  * command resolves the engine at startup.
  *
- * Like `@/demo/drive`, `@/inventory/walk`, and `@/capture/render`, this module
+ * Like `@/inventory/walk` and `@/capture/render`, this module
  * ships. A command whose whole purpose is measuring someone else's page cannot
  * stay toolkit-only, and nothing here reaches into `@/capture/`, so the two
  * surfaces move independently.
@@ -141,9 +141,8 @@ async function driveViewport(
 ): Promise<{ findings: PlacedFinding[]; passes: PassReading[] }> {
   const context = await browser.newContext({
     viewport,
-    // Pointed the opposite way from `@/demo/drive`, which asks for the motion
-    // the interface was designed with. A measurement wants it suppressed, since
-    // geometry read mid-transition is a reading of neither state.
+    // A measurement wants motion suppressed, since geometry read
+    // mid-transition is a reading of neither state.
     reducedMotion: 'reduce',
   })
 

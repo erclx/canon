@@ -12,7 +12,6 @@ import { register as docs } from '@/commands/docs'
 import { register as design } from '@/commands/design'
 import { register as capture } from '@/commands/capture'
 import { register as serve } from '@/commands/serve'
-import { register as demo } from '@/commands/demo'
 import { register as inventory } from '@/commands/inventory'
 import { register as driver } from '@/commands/driver'
 import { register as feedback } from '@/commands/feedback'
@@ -71,7 +70,6 @@ docs(program)
 design(program)
 capture(program)
 serve(program)
-demo(program)
 inventory(program)
 driver(program)
 feedback(program)

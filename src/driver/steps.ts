@@ -9,11 +9,8 @@ import {
  * The interaction vocabulary a caller writes a run in, and the runner that
  * performs one step of it.
  *
- * Adapted from `@/demo/drive`'s `runStep` with the pointer travel, the video
- * context, and the caption bar dropped. Driving for a recording and driving for
- * a measurement want opposite things from the same actions: a recording pays
- * for visible motion between two points, and a measurement wants the page in
- * the next state as directly as the engine can put it there, since every
+ * It carries no pointer travel and no caption, since a measurement wants the
+ * page in the next state as directly as the engine can put it there, and every
  * millisecond of travel is a millisecond a probe is not reading.
  */
 

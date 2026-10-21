@@ -7,9 +7,8 @@
  * The two absences are different states with different remedies. A package that
  * never resolved means the target installed the CLI without the engine, and a
  * binary that was never downloaded means the engine is present and its browser
- * is not. Both were spelled inside `src/demo/` when `demo` was the only command
- * driving a browser, and a second command is what makes them shared rather than
- * local.
+ * is not. Every command driving a browser reads both, so they sit here rather
+ * than beside one caller.
  */
 
 /** Fetches the browser revision the pinned engine expects. */
@@ -72,9 +71,7 @@ export interface KeyboardPage {
  * browser in pointer modality, where that rule does not match, so a reader
  * calling it alone reports every correctly styled element as unstyled.
  *
- * It moved here when `@/driver/probes/focus` became the second call site,
- * matching how the launch-failure split moved out of `src/demo/` once
- * `canon inventory` became the second command driving a browser. One press
+ * It moved here when `@/driver/probes/focus` became the second call site. One press
  * covers the page rather than the element that happens to hold focus, so it
  * survives the blur every reader takes next.
  */
