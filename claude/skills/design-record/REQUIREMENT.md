@@ -7,9 +7,9 @@ description: What keeping the design record is for, the gaps it closes, and wher
 
 ## Gap
 
-Without this skill, no surface sets up the design reference folder or keeps it. A picked design stops at the canvas and reaches the folder only when the operator remembers the sync, or a session copies frames in by hand and they drift from what the canvas holds.
+Without this skill, no surface sets up the design reference folder or keeps it. A pick reaches the folder only when the operator remembers the sync, or a session copies frames in by hand and they drift. A reference outlives the surface it showed, since nothing removes it.
 
-Each project invents its own grouping and index, and the index restates the file tree rather than saying which code a group governs. A reference outlives the surface it showed, since nothing removes it.
+Each project invents its own grouping, and its index restates the file tree rather than naming the code a group governs. A picked color reaches the stylesheet with no intent written down, or lands as a hand-typed value in the design document.
 
 ## Must
 
@@ -17,6 +17,7 @@ Each project invents its own grouping and index, and the index restates the file
 - A pick lands through the project's design sync, with its index row written before the sync runs, and a project with no sync gets told what is missing
 - A redraw keeps the index row and leaves the files to the sync, and a retired surface takes its files and row out in the change that removes it
 - The run looks at each landed picture in both themes before reporting it landed
+- A picked value lands in the stylesheet and its intent in the design document under the design document standard, and a generated record changes through its module alone
 
 ## Must not
 

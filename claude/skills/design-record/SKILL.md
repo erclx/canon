@@ -1,13 +1,20 @@
 ---
 name: design-record
-description: Keeps the project's design reference folder at `canon/design/`, the accepted frames a build matches. Sets the folder up, lands a picked design through the project's design sync, keeps the index, and redraws or retires a reference when its surface changes. Use when asked to "add a design reference", "land this pick", "set up canon/design", "update the design index", "redraw the reference for X", or "remove the reference for X". Do NOT use to draft candidates or take a pick, which is `pick-by-eye`, to draw frames on the canvas, which is `canvas-board`, or to judge a design, which is `design-taste`.
+description: Keeps the project's design record, being the design document at `canon/DESIGN.md` and the reference folder at `canon/design/` holding the accepted frames a build matches. Sets the folder up, lands a picked design through the project's design sync, keeps the index, redraws or retires a reference when its surface changes, and carries a pick's values into the stylesheet and its intent into the design document. Use when asked to "add a design reference", "land this pick", "set up canon/design", "update the design index", "redraw the reference for X", "remove the reference for X", or "update DESIGN.md". Do NOT use to draft candidates or take a pick, which is `pick-by-eye`, to draw frames on the canvas, which is `canvas-board`, or to judge a design, which is `design-taste`.
 metadata:
   family: ship
 ---
 
 # Design record
 
-Keep the record of what the project's design is. The reference folder holds the accepted frames, and `${CLAUDE_SKILL_DIR}/references/folder.md` fixes its groups, file names, and index. Read it before writing anything under `canon/design/`.
+Keep the record of what the project's design is. The record has two halves, each with its own standard to read before writing it.
+
+| Half             | Path              | Standard                                   |
+| ---------------- | ----------------- | ------------------------------------------ |
+| Design document  | `canon/DESIGN.md` | `${CLAUDE_SKILL_DIR}/references/design.md` |
+| Reference folder | `canon/design/`   | `${CLAUDE_SKILL_DIR}/references/folder.md` |
+
+The document holds the rules and each role's intent, and the folder holds the pictures a build matches.
 
 ## Guards
 
@@ -54,13 +61,24 @@ Retire a reference in the change that removes its surface from the app.
 - Remove the group's index row when the group holds nothing else
 - When the sync leaves the files and its check reports them stray, name each path and ask the operator, since no session deletes a reference by hand
 
+## Step 6: carry a pick into the design document
+
+A pick that settles color, type, spacing, or radius changes the design document as well as the folder. Skip this step when the pick changed layout or structure alone, since the reference carries that.
+
+- Carry each value into the stylesheet the document's lead names, and its intent into the document's sections under `design.md`
+- A project with no stylesheet yet takes the values under `.claude/design/project/` after `canon design install`, and the lead names that path
+- A values record names in its lead the module it renders from and the command that renders it. Edit that module and run that command, never the document.
+
+Never cite a canvas frame path from the document or the index. The canvas folder is gitignored, so the citation resolves on one machine alone.
+
 ## Output
 
 ```plaintext
-✅ Design record: <landed, redrawn, retired, or set up>
+✅ Design record: <landed, redrawn, retired, set up, or carried>
 Group:  <group>, <name>
 Files:  <each file the sync wrote or removed>
 Index:  <the row added, changed, or removed, or unchanged>
+Design: <the stylesheet and design document the values went to, or unchanged>
 ```
 
 Emit every path from the project root. Omit the files line when nothing was written.

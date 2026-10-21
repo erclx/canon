@@ -331,7 +331,7 @@ export const designProse: Measure = async (ctx) => {
   if (failures.length > 0) {
     return {
       emissions: [],
-      failure: `${failures.join(' ')} Cut to the budget in claude/skills/canvas-board/references/design.md, moving the why to the context entry.`,
+      failure: `${failures.join(' ')} Cut to the budget in claude/skills/design-record/references/design.md, moving the why to the context entry.`,
     }
   }
   if (emissions.length === 0)

@@ -157,6 +157,6 @@ Run `${CLAUDE_SKILL_DIR}/references/preflight.md` against the output. It is the 
 Four neighbors own the rest.
 
 - The candidate loop, the arm set, the render, and the pick: `pick-by-eye`
-- The shape of the project's design document and where its values live: `${CLAUDE_SKILL_DIR}/../canvas-board/references/design.md`
+- The shape of the project's design document and where its values live: `${CLAUDE_SKILL_DIR}/../design-record/references/design.md`
 - Reading source for roughness: `ux-audit`. Measuring what a running interface costs to paint: `ux-measure`
 - Prose on the surface being designed: the `write-human` skill
