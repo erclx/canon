@@ -52,6 +52,41 @@ jobs:
       - name: Verify install
         run: bun run check:install
 
+  # The unit suite alone, since lint, types, format, shell, build, and browser
+  # results do not differ by platform. Reason in canon/context/development/ci.md
+  macos-unit-tests:
+    name: 🍎 macOS Unit Tests
+    runs-on: macos-latest
+    if: github.event_name != 'schedule'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          # Full history, matching the Linux job, so a test reading origin/main resolves.
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Pin Stock Bash
+        # Every spawned `bash` resolves here first, so hooks run on the 3.2 a Mac ships
+        run: |
+          mkdir -p "$RUNNER_TEMP/stock-bash"
+          ln -s /bin/bash "$RUNNER_TEMP/stock-bash/bash"
+          echo "$RUNNER_TEMP/stock-bash" >> "$GITHUB_PATH"
+
+      - name: Check Bash Version
+        # Fails a missed pin rather than letting the suite pass on a newer bash
+        run: bash -c 'echo "$BASH_VERSION"; [ "${BASH_VERSINFO[0]}" -eq 3 ]'
+
+      - name: Unit Tests
+        run: bun run test
+
   dependency-advisories:
     name: 📦 Dependency Advisories
     runs-on: ubuntu-latest

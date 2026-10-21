@@ -125,6 +125,41 @@ describe('canon sessions import', () => {
   })
 })
 
+// Carries no `pidDomain` and no start time, so the row takes the pid probe on
+// any platform and only an accepting socket can confirm it. The namespace cases
+// below skip wherever `/proc` is absent, which would leave the verb's listener
+// row unproven off Linux.
+describe('canon sessions list on a machine without a pid namespace', () => {
+  it('should confirm a row whose socket accepts and say the listener decided it', async () => {
+    const socket = join(DIR, 'local.sock')
+    const registry = join(CONFIG, 'sessions')
+    mkdirSync(registry, { recursive: true })
+    writeFileSync(
+      join(registry, `${process.pid}.json`),
+      JSON.stringify({
+        pid: process.pid,
+        sessionId: 'id-local',
+        cwd: REPO,
+        name: 'canon-local',
+        kind: 'interactive',
+        status: 'idle',
+        startedAt: 1,
+        messagingSocketPath: socket,
+      }),
+    )
+    const server = createServer()
+    await new Promise<void>((done) => server.listen(socket, done))
+
+    const result = await runSessions(['list', '--json'])
+    await new Promise((done) => server.close(done))
+
+    expect(JSON.parse(result.stdout)).toMatchObject({
+      confidence: 'confirmed',
+      sessions: [{ name: 'canon-local', via: 'listener' }],
+    })
+  })
+})
+
 describe('canon sessions list from another pid namespace', () => {
   const FOREIGN_DOMAIN = 'linux:test:pid:[1]'
   const readable = existsSync('/proc/self/ns/pid')

@@ -71,6 +71,8 @@ interface Run {
   readonly stdout: string
 }
 
+const BASH_DIAGNOSTIC = /: line \d+: /
+
 // A hook hanging on an open stdin never exits, so the test timeout is what
 // fails it. A wall-clock bound on the guard's two seconds left a one-second
 // margin that a loaded machine overran with no hook at fault.
@@ -602,6 +604,11 @@ for (const tree of TREES) {
 
         expect(result[expected.stream ?? 'stdout']).toContain(expected.expect)
         expect(result.code).toBe(expected.code ?? 0)
+        // A runtime error such as `declare -A` on bash 3.2 leaves the verdict
+        // and the exit intact, so only the diagnostic itself shows the break.
+        // Several hooks deliver their verdict on stderr, so the stream cannot
+        // be asserted empty, and the match is bash's `<file>: line <n>: ` form.
+        expect(result.stderr).not.toMatch(BASH_DIAGNOSTIC)
       })
     }
   })
