@@ -184,9 +184,9 @@ export function register(program: Command): void {
         'Copies each rule into .claude/rules/canon/, replacing a copy already',
         'there. Rules under .claude/rules/project/ are never read.',
         '',
-        'The install confirm needs a TTY. --yes answers it, so a headless call',
-        'installs without setting CANON_NON_INTERACTIVE=1. It does not pick a',
-        'stack, so a headless call still names one.',
+        'The install confirm needs a TTY. --yes answers it, and a call with no',
+        'terminal on stdin takes Yes. It does not pick a stack, so a headless',
+        'call still names one.',
         '',
         'Exit codes:',
         '  0  installed, the stack held no rules, or the prompt was cancelled',
@@ -1455,8 +1455,8 @@ function displayPath(target: string, rel: string): string {
 }
 
 /**
- * Refuses rather than picking. `select_option` returned `options[0]` under
- * `CANON_NON_INTERACTIVE=1`, so a headless `canon gov install` with no stack
+ * Refuses rather than picking. `select_option` returned `options[0]` with no
+ * terminal to answer it, so a headless `canon gov install` with no stack
  * installed whichever stack sorted first, measured as 26 astro rules into an
  * empty directory. Every documented agent path already passes the argument.
  */
@@ -1564,8 +1564,7 @@ async function runInstall(
 
 /**
  * The install confirm. `--yes` answers it without a prompt, so the line it
- * would have printed is skipped rather than duplicated under
- * `CANON_NON_INTERACTIVE=1`.
+ * would have printed is skipped rather than duplicated on a headless call.
  */
 async function confirmInstall(
   count: number,
@@ -1580,7 +1579,6 @@ async function confirmInstall(
       { value: false, label: 'No' },
     ],
     nonInteractiveDefault: true,
-    ttyHint: 'Pass --yes',
   })
 }
 

@@ -117,12 +117,12 @@ describe('gov install --yes', () => {
     expect(run.stderr).not.toContain('Install 1 rules')
   })
 
-  it('should refuse the confirm without it and name --yes', () => {
+  it('should take the confirm default with no TTY and no --yes', () => {
     const run = install(['--add', 'tasks', target], undefined, false)
 
-    expect(run.status).toBe(1)
-    expect(run.stderr).toContain('requires a TTY. Pass --yes or set')
-    expect(existsSync(canonRule('canon', 'tasks'))).toBe(false)
+    expect(run.status).toBe(0)
+    expect(run.stderr).not.toContain('requires a TTY')
+    expect(existsSync(canonRule('canon', 'tasks'))).toBe(true)
   })
 
   it('should still exit 1 when no named rule resolves', () => {

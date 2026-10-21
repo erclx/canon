@@ -192,17 +192,17 @@ export function frameSuccess(command: string, target: string): void {
 }
 
 /**
- * The retired spelling is still honored, and permanently.
+ * A caller with no terminal on stdin is headless, since nobody can answer a
+ * prompt there.
  *
- * This variable is the documented way to drive any command headlessly, so
- * every skill body, CI job, and operator script already written sets the old
- * name. Those callers live in other repositories and in plugin caches this
- * release cannot reach, and the failure mode of dropping the fallback is a
- * command that quietly waits for a TTY nobody is watching rather than one that
- * refuses and says why.
+ * Both variables are retired overrides that force headless on a terminal and
+ * stay readable permanently. Skill bodies, CI jobs, and operator scripts in
+ * other repositories and plugin caches this release cannot reach still set
+ * them, and dropping the read turns their call into a prompt nobody watches.
  */
 export function isNonInteractive(): boolean {
   return (
+    !process.stdin.isTTY ||
     process.env.CANON_NON_INTERACTIVE === '1' ||
     // canon-keep-retired
     process.env.AITK_NON_INTERACTIVE === '1'
@@ -211,8 +211,8 @@ export function isNonInteractive(): boolean {
 
 /**
  * `nonInteractiveDefault` opts a prompt into resolving to its first option
- * under `CANON_NON_INTERACTIVE=1` instead of failing. Callers that would rather fail loudly than pick
- * for the user leave it off.
+ * when the caller is headless instead of failing. Callers that would rather
+ * fail loudly than pick for the user leave it off.
  */
 export async function select<Value>(opts: {
   message: string
@@ -252,9 +252,9 @@ export async function select<Value>(opts: {
   }
 
   return new Promise<Value>((resolve) => {
-    if (!process.stdin.isTTY) {
+    if (isNonInteractive()) {
       process.stderr.write(
-        `${GREY}│${NC} ${RED}✗${NC} ${message} requires a TTY. ${opts.ttyHint ?? 'Pass an argument'} or set CANON_NON_INTERACTIVE=1.\n${GREY}└${NC}\n`,
+        `${GREY}│${NC} ${RED}✗${NC} ${message} requires a TTY. ${opts.ttyHint ?? 'Pass an argument'}.\n${GREY}└${NC}\n`,
       )
       process.exit(1)
     }
