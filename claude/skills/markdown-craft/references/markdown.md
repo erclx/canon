@@ -63,7 +63,7 @@ Two kinds of block are exempt from the 40-line checkpoint, since a subheading dr
 - A block whose lines are all list items at one level averaging under roughly 130 characters, since a flat list of short peers is already navigable
 - Weight decides rather than count, since a catalog of one-liners and a stack of paragraphs reach one count and read nothing alike. The cap on a bullet run is a separate rule.
 - Mixing prose into that list, or nesting levels in it, ends the exemption at any weight
-- A block whose lines are all table rows, at any length, since a subheading inside one splits the table rather than the run
+- A block of table rows, since a heading splits the table, with its length held by `${CLAUDE_SKILL_DIR}/../markdown-craft/references/tables.md`
 - Prose either side of the table ends that exemption, since the block has a seam and a heading breaks it there
 
 ### Bold section markers
