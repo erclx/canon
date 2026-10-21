@@ -5,7 +5,7 @@ description: Restraint, quiz design, teach back, and what makes a lesson worth r
 
 # Lesson craft reference
 
-Judgment rather than shape. This file covers what makes a lesson worth opening twice, whatever surface it renders on.
+Judgment rather than shape. This file covers what makes a lesson worth opening twice, whatever surface it renders on. Each section names its research or says it is house judgment, and `adopted.md` beside this file carries the passages.
 
 ## Contents
 
@@ -23,6 +23,8 @@ Every element competes with the material for attention.
 - Do not animate anything the learner did not trigger
 - Prefer whitespace over rules and boxes to separate sections
 
+This section is house judgment, an editorial call about a page rather than a claim about memory.
+
 ## Quiz design
 
 The quiz is the retrieval, so a leak in its construction turns it into a reading test.
@@ -35,6 +37,8 @@ The quiz is the retrieval, so a leak in its construction turns it into a reading
 
 One feedback block reads as an explanation where a block per option reads as four verdicts, and only the explanation names what separates a wrong option from the answer. Name the correct option in the feedback text, since it is what a learner reads to find out whether they were right.
 
+Butler and Roediger 2008 back the feedback block and the misconception distractors, since a lure left uncorrected becomes false knowledge. Kornell, Hays and Bjork 2009 back giving feedback after the attempt. Equal option length and the slot rotation are house judgment, since the item-writing review that would back them was not opened.
+
 ## Teach back
 
 A quiz is recognition and a teach-back is production, which is the form retrieval practice prefers. Carry both: the quiz places the learner against options someone could hold, and the teach-back is where the learner finds out what they cannot say without help.
@@ -44,9 +48,13 @@ A quiz is recognition and a teach-back is production, which is the form retrieva
 - Carry a self-check, hidden until the learner opens it, listing what a complete explanation covers. A learner with no session in the room otherwise cannot grade the ask, and hidden leaks nothing.
 - Write the self-check as what the explanation has to cover rather than as the explanation itself. A model answer is read instead of produced, which turns the block back into reading.
 
+Nestojko et al. 2014 back framing the ask as teaching a named audience. The self-check rules are house judgment.
+
 ## What makes a lesson worth returning to
 
 - The worked example is complete. A learner returning for the example finds the whole thing rather than a fragment they have to reconstruct.
 - The lesson states what it assumes. A returning reader can tell in one line whether they are in the right place.
 - The hard part is named as the hard part. Material that flattens everything to one difficulty gives a returning reader nothing to navigate by.
 - Nothing depends on the session it was written in. A lesson referring to what was discussed is unreadable a week later.
+
+This section is house judgment, like restraint above.

@@ -7,6 +7,12 @@ description: Which learning-science sources this skill's rules rest on, the pass
 
 The field is learning science and cognitive psychology, with educational measurement for quiz construction. Every source below was opened, the papers through the PubMed API and the practice guide as a PDF. Each entry quotes the passage relied on, and a later session extends this file rather than re-arguing an item settled here.
 
+## Contents
+
+- [Adopted](#adopted)
+- [Declined](#declined)
+- [House judgment](#house-judgment)
+
 ## Adopted
 
 ### Retrieval over restudy, and fluency against retention
