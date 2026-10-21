@@ -100,12 +100,19 @@ describe('screenshot.sh EXIT trap', () => {
     }
 
     const port = previewPort
+    // macOS ships no setsid, so the stub detaches the listener into its own
+    // session from node, which both platforms carry.
+    const listener = join(fixture, 'listener.js')
+    writeFileSync(
+      listener,
+      "require('net').createServer((c) => c.end()).listen(process.env.PREVIEW_PORT, () => require('fs').writeFileSync(process.env.READY_MARKER, ''))",
+    )
     stubBin(
       'bun',
       [
         'if [[ "$1 $2" == "run build" ]]; then exit 0; fi',
         'if [[ "$1 $2" == "run preview" ]]; then',
-        "  setsid node -e \"require('net').createServer((c) => c.end()).listen(process.env.PREVIEW_PORT, () => require('fs').writeFileSync(process.env.READY_MARKER, ''))\" </dev/null >/dev/null 2>&1 &",
+        `  node -e "require('child_process').spawn(process.execPath, ['${listener}'], { detached: true, stdio: 'ignore' }).unref()"`,
         '  exit 0',
         'fi',
         'if [[ "$1" == "e2e/screenshot.ts" ]]; then exit 0; fi',

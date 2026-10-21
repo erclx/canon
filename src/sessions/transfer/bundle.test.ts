@@ -2,6 +2,7 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  realpathSync,
   readFileSync,
   rmSync,
   utimesSync,
@@ -93,7 +94,7 @@ async function craftBundle(entries: Record<string, string>): Promise<string> {
 }
 
 beforeEach(async () => {
-  DIR = mkdtempSync(join(tmpdir(), 'canon-bundle-'))
+  DIR = realpathSync(mkdtempSync(join(tmpdir(), 'canon-bundle-')))
   SOURCE = join(DIR, 'source', 'canon')
   TARGET = join(DIR, 'elsewhere', 'canon')
   SOURCE_PROJECTS = join(DIR, 'source-config', 'projects')

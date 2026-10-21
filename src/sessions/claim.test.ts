@@ -1,5 +1,5 @@
 import { execaSync } from 'execa'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync, realpathSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -17,7 +17,7 @@ function git(...args: string[]): string {
 }
 
 beforeEach(() => {
-  ROOT = mkdtempSync(join(tmpdir(), 'canon-claim-'))
+  ROOT = realpathSync(mkdtempSync(join(tmpdir(), 'canon-claim-')))
   git('init', '--quiet', '--initial-branch=main')
   git('config', 'user.email', 'test@example.com')
   git('config', 'user.name', 'Test')
@@ -210,7 +210,9 @@ describe('checkClaim', () => {
   // branch is already held in another. Reading that as unclaimed is what sent
   // two sessions onto branches live sessions were holding.
   it('should answer for another repository when handed its path', async () => {
-    const other = mkdtempSync(join(tmpdir(), 'canon-claim-target-'))
+    const other = realpathSync(
+      mkdtempSync(join(tmpdir(), 'canon-claim-target-')),
+    )
     execaSync(
       'git',
       ['-C', other, 'init', '--quiet', '--initial-branch=main'],
@@ -246,7 +248,9 @@ describe('checkClaim', () => {
   // The same roster read from the caller's own repository has to keep answering
   // the way it did, or widening the reach would change every existing dispatch.
   it('should leave the default answer unchanged for a session in another repository', async () => {
-    const other = mkdtempSync(join(tmpdir(), 'canon-claim-target-'))
+    const other = realpathSync(
+      mkdtempSync(join(tmpdir(), 'canon-claim-target-')),
+    )
     execaSync(
       'git',
       ['-C', other, 'init', '--quiet', '--initial-branch=main'],
@@ -312,7 +316,9 @@ describe('checkClaim', () => {
   // precedence over `-C`, so a claim read from inside one answered about the
   // hook's own repository rather than the directory it was handed.
   it('should read the directory it was given when the environment names another repository', async () => {
-    const other = mkdtempSync(join(tmpdir(), 'canon-claim-other-'))
+    const other = realpathSync(
+      mkdtempSync(join(tmpdir(), 'canon-claim-other-')),
+    )
     execaSync(
       'git',
       ['-C', other, 'init', '--quiet', '--initial-branch=main'],
