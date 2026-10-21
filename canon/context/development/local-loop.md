@@ -58,13 +58,7 @@ Spawns `src/cli.ts` as a real process against a temporary directory, so a case a
 - To add a case, write the fixture under a per-test `mkdtempSync`, then assert the file tree, exit code, and parsed record together. Take a count from the verb's catalog.
 - `runCli` points `HOME` and the state folder under the case's `cwd` and throws `ContainmentViolation` when a spawn writes into the real `stateDir()`
 - Run one test file as `bun --bun vitest run <path>`. Without `--bun` a module importing `bun` fails at collection, and bare `bun test` runs Bun's own runner, which lacks vitest's `expect` context.
-
-The Tests stage holds a machine lock in `suite-lock.ts` so one box runs one suite, and `vitest.config.ts` caps `maxWorkers` at `'50%'` outside CI.
-
-- A full suite run by hand queues on the same lock through `vitest.global-setup.ts`, and `src/gate/hand-suite.ts` decides from argv whether a run is full
-- A run naming a path or a `-t` filter takes no lock, and neither does a watch session or a run under CI
-- The gate spawns its own suite with `CANON_HELD_LOCK` naming the lock it holds, so that suite skips the lock rather than waiting on its parent forever
-- The lock path resolves in the global setup, in the main process, since `vitest.setup.ts` points each worker's state folder at a temporary one
+- `vitest.global-setup.ts` queues a full hand run on the Tests stage lock, never a filtered, watch, or CI run, and a gate's suite skips it by `CANON_HELD_LOCK`. Outside CI `maxWorkers` is `'50%'`.
 
 ### `.claude/hooks/`
 
