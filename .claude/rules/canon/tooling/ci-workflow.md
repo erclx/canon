@@ -19,7 +19,7 @@ paths:
 
 ## Steps
 
-- Keep an inline `run:` step to five lines at most with no branching, loop, trap, or function, and call a script for anything longer, per the `canon:ci-workflow` skill.
+- Keep an inline `run:` step to five lines at most with one guard allowed and no other branching, loop, trap, or function, and call a script for anything longer, per the `canon:ci-workflow` skill.
 
 ## Token scopes
 

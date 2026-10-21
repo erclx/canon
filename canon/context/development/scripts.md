@@ -35,7 +35,7 @@ Holds the scripts run by `bun run` name or fired by a gate stage or workflow, an
 
 ### `scripts/ci/`
 
-Holds the programs a workflow step calls once it passes five lines or carries a branch, a loop, or a function. A script takes its inputs as arguments or env and keeps the flags its step ran under, since the move relocates a step and does not rewrite it.
+Holds the programs a workflow step calls once it passes five lines or carries more than one guard, a loop, or a function. A script takes its inputs as arguments or env and keeps the flags its step ran under, since the move relocates a step and does not rewrite it.
 
 - Each script is committed `100755` and runs after `actions/checkout`, so a job that never checked out gets one added
 - A workflow step keeps `permissions` and secrets in its own `env`, so the token scope reads off the YAML
