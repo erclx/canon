@@ -29,6 +29,6 @@ A session building this alone restates the render-and-pick loop from scratch, wh
 ## Out of scope
 
 - The render, hand-off, pick, and loop mechanics, which `pick-by-eye` owns
-- Carrying a picked direction into the design document, which `canvas-board` owns
+- Carrying a picked direction into the design document, which `design-record` owns
 - Auditing an implemented UI against its tokens, which `ux-audit` owns
 - Wiring the produced files into the project's head or manifest, which the operator owns

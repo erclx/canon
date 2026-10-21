@@ -28,22 +28,19 @@ export default scenario({
         '         treatment as undecided between a border, a ground shift, and an edge rule',
       )
       ctx.log.info(
-        'Browser: machine-dependent, and the sandbox does not decide it. The run serves the canvas',
+        'Browser: machine-dependent, and the sandbox does not decide it. The run serves a',
       )
       ctx.log.info(
-        '         with canon canvas serve and captures through canon canvas capture, which resolve',
+        '         Frameboard board with frameboard serve and captures through frameboard capture,',
       )
       ctx.log.info(
-        '         playwright-core through the installed canon rather than this project, so the',
+        '         reached as bunx -y frameboard@0.6 where no binary is on PATH. The render works',
       )
       ctx.log.info(
-        '         render works wherever bunx playwright install chromium has run once and takes',
+        '         wherever bunx playwright install chromium has run once, and capture refuses with',
       )
       ctx.log.info(
-        '         the refusal path everywhere else. A canon lacking the canvas client packages',
-      )
-      ctx.log.info(
-        '         refuses serve with missing-client-deps, and the run stops before drafting.',
+        '         browser-not-found everywhere else, which the run reports before drafting further.',
       )
       ctx.log.info(
         'Action:  /canon:pick-by-eye draft candidates for the callout treatment on index.html, and take arm 2 when you put the pick to me',
@@ -61,7 +58,7 @@ export default scenario({
         '         every arm captured under .canon/picks/, and the round pages the run added gone',
       )
       ctx.log.info(
-        '         from canon canvas list. Not yet measured on the canvas.',
+        '         from frameboard list. Not yet measured on Frameboard.',
       )
       ctx.log.info(
         'Not reached: the loop, the pick, and the hand-off. The loop stops on a person saying the',

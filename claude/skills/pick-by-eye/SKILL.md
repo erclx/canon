@@ -1,6 +1,6 @@
 ---
 name: pick-by-eye
-description: Drafts several candidates for a decision judged by looking, lays them out side by side as frames on one canvas page, hands the operator the address, takes the pick through the structured question surface, and loops on the pick until they stop. Use when asked to "draft some options", "show me a few versions", "try a few variations", "mock up alternatives", "give me candidates for X", or when a choice is taste rather than correctness. Do NOT use when the request already names the answer and asks for it to be built, which is `plan-feature`. Do NOT use to read source for roughness, which is `ux-audit`, to measure what a running interface costs to paint, which is `ux-measure`, or to write what to look at on a change already made, which is `ui-checklist`.
+description: Drafts several candidates for a decision judged by looking, lays them out side by side as frames on one Frameboard page, hands the operator the address, takes the pick through the structured question surface, and loops on the pick until they stop. Use when asked to "draft some options", "show me a few versions", "try a few variations", "mock up alternatives", "give me candidates for X", or when a choice is taste rather than correctness. Do NOT use when the request already names the answer and asks for it to be built, which is `plan-feature`. Do NOT use to read source for roughness, which is `ux-audit`, to measure what a running interface costs to paint, which is `ux-measure`, or to write what to look at on a change already made, which is `ui-checklist`.
 metadata:
   family: decide
 ---
@@ -9,13 +9,14 @@ metadata:
 
 Some decisions are settled by looking rather than by reasoning, and no draft is wrong until one is picked. Every step here puts several candidates in front of the operator and keeps the real surface untouched until they have chosen.
 
-The candidates live on the local design canvas, the surface `canon:canvas-board` drives. Every verb below is `canon canvas`, and `${CLAUDE_SKILL_DIR}/../canvas-board/references/canvas.md` fixes the content format a frame takes. Read that reference before writing the first frame.
+The candidates live on a Frameboard board at `.canon/canvas/`, in a project named `picks` so rounds never mix with an operator's project. Read `${CLAUDE_SKILL_DIR}/references/board.md` before the first `frameboard` verb, for the flags every verb carries and how a selection resolves.
 
 ## Guards
 
 - If the request names one answer and asks for it to be built, stop: `❌ This names one answer, so there is nothing to pick between. Use /canon:plan-feature.`
 - If the decision has no visible form, stop: `❌ Nothing to look at. Drafting candidates needs a decision a render can show.`
 - Draft no candidate for a decision the operator has not asked to make, since options everywhere spend their attention rather than saving it
+- If neither `frameboard` nor `bunx` is on PATH, stop: `❌ Frameboard not found. Install frameboard or bun and re-run.`
 
 ## Step 1: name the decision and the arms
 
@@ -28,26 +29,24 @@ The candidates live on the local design canvas, the surface `canon:canvas-board`
 
 Inside a live `plan-groundwork` track, renders land in the track's own `evidence/<slug>/renders/`, since a candidate render is evidence its decision file cites. Everywhere else they land in session scratch.
 
-## Step 2: draft the arms as frames on one canvas page
+## Step 2: draft the arms as frames on one page
 
-Every arm of a round sits as one frame on one canvas page, side by side. The operator judges that page, never a set of separate images compared from memory.
+Every arm of a round sits as one frame on one board page, side by side. The operator judges that page, never a set of separate images compared from memory.
 
-1. Start the canvas the way `canon:canvas-board` Step 1 states, unless this run already has. Note whether this run started the server, since Step 6 stops only a server this run started.
-2. Add the round's page with `canon canvas page add <page> --json` and record it on the run's list of pages. A name `canvas list` already shows is somebody else's, so take the next free suffix.
-3. Add each arm with `canon canvas frame add <page> arm-<id> --width <px> --height <px> --json`. Step 6's archive keys on the `arm-<id>` names.
-4. Write each arm's whole document to the `path` the add verb reported. From a linked worktree, take the heredoc route `canon:canvas-board` Step 3 gives for a main-root write.
-5. Lay the frames out in one row, in arm order, with `canon canvas frame move <page> arm-<id> --x <px> --y <px> --json`.
+1. Start the board the way `references/board.md` states, unless this run already has. Note whether this run started the server, read off `reused`, since Step 6 ends only a server this run started.
+2. Read `frameboard list --root <board> --json`, which takes no `--project`. Add the project with `frameboard project add picks --root <board> --json` when the record lists no `picks`.
+3. Add the round's page with `frameboard page add <page>` and record its `ref` on the run's list of pages. A `name-taken` refusal means the name is somebody else's, so take the next free suffix.
+4. Add each arm with `frameboard frame add <page>/arm-<id> --width <px> --height <px> --x <px> --y <px>`, placing the frames in one row in arm order. Step 6's archive keys on the `arm-<id>` names.
+5. Write each arm's whole document to the `path` the add verb reported. From a linked worktree, take the heredoc route `session-worktree` gives for a main-root write.
 
-The `canvas-board` start reads `canon canvas list --json`, serves with `canon canvas serve --json` in the background unless the operator named an address that answers, and checks the shell's body holds a `<script` tag. A refused serve or a blank shell stops the run with its `reason`, and no file stands in for a canvas.
-
-Set each frame's width to the one the arm is judged at. A frame renders at its own layout width on the canvas and in a capture alike, so a layout decision needs no device toolbar.
+Set each frame's width to the one the arm is judged at. A frame renders at its own layout width on the board and in a capture alike, so a layout decision needs no device toolbar.
 
 ### What every frame carries
 
-Each frame carries its own label and follows the canvas theme, so the set reads as one comparison.
+Each frame carries its own label and follows the board theme, so the set reads as one comparison.
 
 - Label each arm inside its frame with its id and its cost, since the composite capture draws no captions
-- Theme every arm off the `data-theme` attribute the canvas sets on each frame's root, so the theme toggle sets the whole set at once. A set spanning both themes cannot be compared.
+- Theme every arm off the `data-theme` attribute the board sets on each frame's root, so the theme toggle sets the whole set at once. A set spanning both themes cannot be compared.
 - Give no arm a script that stores a theme and reapplies it on load. It overwrites the toggle, and a fresh browser profile hides the fault.
 
 ### Default path and live app
@@ -55,8 +54,8 @@ Each frame carries its own label and follows the canvas theme, so the set reads 
 A running app under decision takes the live-app branch, and every other decision takes the default path.
 
 - Live app: lift the rendered markup and link a copy of the built stylesheet rather than inlining, per `${CLAUDE_SKILL_DIR}/references/live-arms.md`
-- Default path: inline every style, script, and asset. A frame resolves nothing outside its own page folder, so a build step or network font silently drops out.
-- Default path: name a real font first in the stack, one the machine has or the frame embeds, such as the project's own family. A generic keyword such as `system-ui` resolves differently per machine.
+- Default path: inline every style, script, and asset. A frame resolves nothing outside its page folder and its project's `assets/`, so a build step or network font silently drops out.
+- Default path: name a real font first in the stack, one the board serves, the machine has, or the frame embeds. A generic keyword such as `system-ui` resolves differently per machine.
 
 The capture refuses a frame that would rewrap against a substitute font rather than ship a false comparison. A frame naming no font is refused on whatever the default resolves to.
 
@@ -73,18 +72,18 @@ Vary one property across the arms, since a pick cannot say which of three differ
 Render the page and look at what came back before handing anything over:
 
 ```bash
-canon canvas capture <page> --composite --json
+frameboard capture --page <page> --composite --root <board> --project picks --json
 ```
 
-- Point `--out` at `evidence/<slug>/renders/<page>.png` inside a live track, and leave the scratch default elsewhere. Step 6 archives the picked round alone.
-- Read the PNG's `path` off the record. The composite shows each frame in its default theme, so check the other theme on the live canvas.
-- A capture refusing on a font names the family it read. Take the repair `canon:canvas-board` Step 6 gives and capture again.
+- Point `--out` at `evidence/<slug>/renders/` inside a live track, and leave the board's default elsewhere. Step 6 archives the picked round alone.
+- Read each image's `path` off the record's `images`. The composite lands once per theme, so look at both.
+- A `font-missing` refusal names the family it read. Set that text's `font-family` to a named family the board serves or the machine has, never a generic keyword, and capture again.
 
-When `canon canvas capture` refuses for a missing browser binary, report it and name `bunx playwright install chromium` as the repair. Stop the canvas server if this run started it, then stop rather than describe an arm nobody has seen.
+When the capture refuses with `browser-not-found`, report it and name `bunx playwright install chromium` as the repair. End the serve command if this run started it, then stop rather than describe an arm nobody has seen.
 
 ### Handing over
 
-Hand over the address rather than a description. Emit the canvas link first on its own line, naming the page, then the PNG path on its own line.
+Hand over the address rather than a description. Emit the board link first on its own line, naming the page, then each PNG path on its own line.
 
 - A still answers how a thing looks and none of a hover, a scroll-linked position, or a pace, which the live frame does
 - Never report a visual result you have not looked at, since a claim about appearance with no render behind it is a guess
@@ -103,14 +102,7 @@ Put the choice to the operator through the structured question surface, since a 
 
 Take no pick on the operator's behalf when two arms are both defensible and the difference is taste. That call is theirs, and a silent one is the failure this skill exists to prevent.
 
-Read `canon canvas selection --json` when the answer points at the canvas, such as "the selected one". Resolve it against the record's `page` as well as its `frame`, since every round reuses the `arm-<id>` names.
-
-| Selection                                                        | Reading                                        |
-| ---------------------------------------------------------------- | ---------------------------------------------- |
-| A frame on the current round's page                              | The pick                                       |
-| A frame on an earlier round's page                               | A revert, so name the round back before acting |
-| A fresh element inside a picked frame                            | A correction Step 5 carries by its `index`     |
-| `selection: null`, a page this run did not add, or `stale: true` | No answer, so ask again rather than guess      |
+Read the selection when the answer points at the board, such as "the selected one". `references/board.md` maps each record to a pick, a revert, a correction, or no answer.
 
 ## Step 5: loop on the pick
 
@@ -118,22 +110,22 @@ Read `canon canvas selection --json` when the answer points at the canvas, such 
 2. Write fresh arms off the pick and return to Step 2 where the correction opens a new question. Revise the one arm's frame where it does not.
 3. Re-render, hand off again, and take the next answer.
 4. Repeat until the operator says it is right. A run stopping because the arms stopped differing has stopped early.
-5. Hold the real surface untouched across every iteration. Nothing outside the run's own canvas pages changes until the pick is final.
+5. Hold the real surface untouched across every iteration. Nothing outside the run's own board pages changes until the pick is final.
 
 ## Step 6: close
 
 1. Apply the winning arm to the real surface, in one change.
 2. Close out any document stating the decision as open, in the same change, naming the winner and the arms that stayed defensible. Skip this where nothing stated the decision.
-3. Hand the winning frame to `canon:design-record` by its page and frame, which lands it in the project's design record. Report it rather than proceeding silently when that skill does not resolve.
-4. Capture the picked round's frames with `canon canvas capture <page> --out <archive-dir> --json`. Each lands as `arm-<id>.png`, keeping the losing arms as a revert record.
+3. Hand the winning frame's ref to `canon:design-record`, which lands it in the project's design record. Report it rather than proceeding silently when that skill does not resolve.
+4. Capture the picked round's frames with `frameboard capture --page <page> --out <archive-dir>`, keeping the losing arms as a revert record. Report each image's `path` off the record.
 5. Resolve `<archive-dir>` as `.canon/picks/<slug>/` against the main worktree root, since shared session scratch resolves there rather than in a linked worktree.
-6. Delete every page folder on the run's list from under the `content` folder `canon canvas list --json` reports. Touch no page the run did not add, whatever its name.
-7. Stop the canvas server if this run started it, and leave one the operator started running.
+6. Delete every page on the run's list with `frameboard page delete <page>`. Touch no page the run did not add, whatever its name, and never remove a page folder by hand.
+7. End the serve command if this run started it, since Frameboard carries no stop verb. Leave a server the operator started running.
 8. Leave the renders in a live track's `evidence/<slug>/renders/`, since `plan-groundwork` treats evidence as durable.
-9. Report each page whose delete is refused, naming the path for the operator to remove. The pick is applied either way.
+9. Report each page whose delete is refused, naming its `ref` and the `error.code`. The pick is applied either way.
 10. Report every surface that changed, each on its own line, name the winning arm by its id and its cost, and report the archive path.
 
-The picked round is the final one unless Step 4 resolved a revert. Archiving any other page lets item 6 delete the winning arm with nothing kept, and a variant left on the canvas is a second design nobody maintains.
+The picked round is the final one unless Step 4 resolved a revert. Archiving any other page lets item 6 delete the winning arm with nothing kept, and a variant left on the board is a second design nobody maintains.
 
 ## Reading a measurement
 
@@ -154,10 +146,11 @@ Cite these rather than restating them. A step reimplemented here rots against th
 - `design-taste` carries the layer catalog, the ordering, grey-boxing, and the defaults an arm should reach past
 - `write-human` carries the voice for any copy an arm puts in front of a reader
 
-### Git and review
+### Git, review, and the board
 
-Commits, review, and the canvas mechanics each have an owner.
+Commits, review, and the board mechanics each have an owner.
 
 - `git-stage`, `git-pr`, and `git-followup` carry the commits and the pull request
 - `review-pr` and `review-address` run the review pass
-- `canon:canvas-board` carries the canvas start-and-check sequence, the main-root write route for a frame, and the selection and capture refusals
+- `session-worktree` carries the main-root write route for a frame written from a linked worktree
+- Frameboard carries the board itself, and `frameboard docs --json` prints its verbs, record shapes, content format, and refusals

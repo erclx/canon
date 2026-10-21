@@ -14,8 +14,8 @@ The evidence fails as well. Arms get reported without being rendered or judged, 
 ## Must
 
 - Three to five arms, the shipping state among them, each carry an id, a label, and a cost, and vary only at a layer named from the `design-taste` catalog
-- Each round is one canvas page of frames at their judged widths, themed by the canvas toggle and captured once as a composite, with the link ahead of the first pick question
-- Every arm is rendered and judged against a stated bar before handover, and a missing browser or a canvas that will not start is reported as a refusal
+- Each round is one Frameboard page of frames at their judged widths, themed by the board toggle and captured once as a composite, with the link ahead of the first pick question
+- Every arm is rendered and judged against a stated bar before handover, and a missing browser or a board that will not start is reported as a refusal
 - The pick comes through the structured question surface with the recommendation first and every option's cost, and the winner lands in one change
 - Every round stays openable on its own page until the pick, and the picked round's arms are captured into the citing record at the main root before the run's pages go
 
@@ -24,8 +24,8 @@ The evidence fails as well. Arms get reported without being rendered or judged, 
 - Take the pick where two arms are defensible and the difference is taste
 - Draft candidates for a decision the operator has not asked to make, or for a request that already names one answer
 - Write into the real surface before the pick is final
-- Restate the mechanics `canon canvas` and `canon drive` own, or read a drive finding as a gate over the arms
-- Delete a canvas page or stop a server the run did not start
+- Restate the mechanics Frameboard and `canon drive` own, or read a drive finding as a gate over the arms
+- Delete a board page or stop a server the run did not start, or remove a page by any route but a `frameboard` verb
 
 ## Out of scope
 

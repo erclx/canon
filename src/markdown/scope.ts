@@ -203,6 +203,7 @@ export const GATED_PATHS: readonly string[] = [
   'claude/skills/document-repair/references/batches.md',
   'claude/skills/pick-by-eye/REQUIREMENT.md',
   'claude/skills/pick-by-eye/SKILL.md',
+  'claude/skills/pick-by-eye/references/board.md',
   'claude/skills/pick-by-eye/references/live-arms.md',
   'claude/skills/write-doc/REQUIREMENT.md',
   'claude/skills/write-doc/SKILL.md',
