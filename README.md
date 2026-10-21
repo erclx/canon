@@ -66,14 +66,14 @@ Each domain has a canonical source in this repo and a thin install or sync CLI o
 
 ### Domain catalog
 
-| Domain         | What it is                                                                                                              | How it reaches you                                              |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Plugin skills  | Skills that plan a feature, review a diff, sync the planning docs, and run the ship chain                               | Loaded live from the plugin, never copied                       |
-| Governance     | Coding and authoring rules that load into a Claude session when a matching path is edited                               | Installed per project by `canon gov install`, refreshed by sync |
-| Tooling stacks | Golden configs, seeds, and a reference per framework                                                                    | Laid down by `canon init`, reconciled by `canon tooling sync`   |
-| Design system  | Ships a `DESIGN.md` intent format pointing at your stylesheet for values, a skill that drafts one, and a render command | `canon design render`                                           |
-| Transcripts    | A YouTube transcript with metadata frontmatter                                                                          | `canon transcripts <url>` writes it into any repo               |
-| Sandbox        | Scenario scaffolds that provision an isolated project state for verifying each domain flow                              | `canon sandbox`                                                 |
+| Domain         | What it is                                                                                            | How it reaches you                                              |
+| -------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Plugin skills  | Skills that plan a feature, review a diff, sync the planning docs, and run the ship chain             | Loaded live from the plugin, never copied                       |
+| Governance     | Coding and authoring rules that load into a Claude session when a matching path is edited             | Installed per project by `canon gov install`, refreshed by sync |
+| Tooling stacks | Golden configs, seeds, and a reference per framework                                                  | Laid down by `canon init`, reconciled by `canon tooling sync`   |
+| Design system  | Ships a `DESIGN.md` intent format pointing at your stylesheet for values, and a skill that drafts one | `canon:design-record` drafts it in your repo                    |
+| Transcripts    | A YouTube transcript with metadata frontmatter                                                        | `canon transcripts <url>` writes it into any repo               |
+| Sandbox        | Scenario scaffolds that provision an isolated project state for verifying each domain flow            | `canon sandbox`                                                 |
 
 The design board lives outside canon in [Frameboard](https://www.npmjs.com/package/frameboard), which `canon:pick-by-eye` drives for each round of candidates.
 

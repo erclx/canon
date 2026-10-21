@@ -66,7 +66,7 @@ Retire a reference in the change that removes its surface from the app.
 A pick that settles color, type, spacing, or radius changes the design document as well as the folder. Skip this step when the pick changed layout or structure alone, since the reference carries that.
 
 - Carry each value into the stylesheet the document's lead names, and its intent into the document's sections under `design.md`
-- A project with no stylesheet yet takes the values under `.claude/design/project/` after `canon design install`, and the lead names that path
+- A project with no stylesheet yet writes one of its own for the values, and the lead names its path
 - A values record names in its lead the module it renders from and the command that renders it. Edit that module and run that command, never the document.
 
 Never cite a board frame path from the document or the index. The board folder is gitignored, so the citation resolves on one machine alone.

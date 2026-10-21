@@ -1,6 +1,6 @@
 ---
 title: Design
-description: DESIGN.md as a generated record, the token module and component layer it renders from, the render preview, and the neutral base a target inherits
+description: DESIGN.md as a generated record, the token module and component layer it renders from, and the token preview the landing page embeds
 ---
 
 # Design
@@ -13,21 +13,13 @@ description: DESIGN.md as a generated record, the token module and component lay
 
 ### `src/design/`
 
-Owns the token module, the component layer, the renderers, the markdown parser, the sync adapter, and the contrast reading.
+Owns the token module, the component layer, the renderers, the markdown parser, and the contrast reading.
 
 - `tokens.ts` holds the values. Every hex role but `success` is solved in OKLCH for a contrast target, and dark is its own anchor set.
 - `components.ts` holds the component layer, since the record keeps CSS class names out. `buildDesignCss` takes a list other than `COMPONENTS` only through its `components` option.
-- `neutral.ts` holds the achromatic set `canon design install` hands a target, and `neutral.test.ts` holds its roles to the same list as `TOKENS`
-- `document.ts` renders the record, `css.ts` the stylesheet, `regen.ts` writes both, and `budget.ts` counts the record against the prose budget
-- `parse.ts` and `render.ts` write the gitignored preview at `.canon/tmp/render/design/`, and `prose()` reads only Overview, Motion, and Iconography, so no other rule reaches it
-
-### `.claude/design/`
-
-Holds what an install lands in a target, being `base.css` at its root and the target's own values under `project/`.
-
-- A project's faces sit in `project/fonts/` with plain `@font-face` rules in `project/fonts.css`, which `canon design fonts add` writes and `project-fonts.ts` reads
-- A project rule for a vendored family replaces the vendored face
-- The synced `base.css` carries no `@font-face`, so a consumer embeds the faces it names at injection
+- `document.ts` renders the record, `css.ts` the stylesheet, `regen.ts` writes the record, and `budget.ts` counts the record against the prose budget
+- `parse.ts` and `render.ts` write the token preview the landing page embeds, and `prose()` reads only Overview, Motion, and Iconography, so no other rule reaches it
+- `renderDesignDoc` has no verb, and `bun run web:previews` is its only caller, so `render.ts` is live even with nothing in `src/` importing it
 
 ### Other folders
 
@@ -43,6 +35,6 @@ The skills and docs around the module each own one slice.
 
 - `canon design regen` resolves outputs from `PROJECT_ROOT`, the installed package in a target, and refuses there rather than writing into `node_modules`
 - The Typography table cannot hold the type steps, since `table()` in `src/design/parse.ts` reads every pipe row of a section as one table
-- `src/design/base.css` is written flat by `regen` and wrapped at 80 columns by oxfmt, so a value that renders past that width fails the `design` stage on drift
+- `web/src/styles/tokens.css` is written flat by `bun run web:tokens` and wrapped at 80 columns by oxfmt, so a value that renders past that width fails the `design` stage on drift
 - The `surface-capture` rule reads breakpoints from the record's `## Layout` as text, and the `capture widths` test in `src/design/css.test.ts` is its only check
 - A code-span cell keeps its backticks in `design.css` and paints nothing, and a non-hex value such as `ANSI 33` emits no `style`, so write a color cell as a bare hex

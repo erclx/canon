@@ -140,16 +140,6 @@ describe('command action exit codes', () => {
     await rm(workDir, { recursive: true, force: true })
   })
 
-  it('should exit 1 when design render cannot find its source', async () => {
-    const result = await runCli(
-      ['design', 'render', '--source', 'absent-design.md'],
-      { cwd: workDir },
-    )
-
-    expect(result.exitCode).toBe(1)
-    expect(result.stderr).toContain('absent-design.md not found')
-  })
-
   it('should exit 1 when feedback receives an empty body on stdin', async () => {
     const result = await runCli(['feedback'], { cwd: workDir, input: '   \n' })
 

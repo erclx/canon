@@ -54,7 +54,7 @@ Holds every module that reads repository state, named for what it reads.
 
 ### `src/sync/`
 
-Holds the one engine `gov` and `design` install and sync through, the workflow `canon sync` runs afterward, and the install stamp. `format.ts` formats the stamp alone with the target's `oxfmt` or `prettier`, since a formatted seed would read as `customized`.
+Holds the one engine `gov` installs and syncs through, the workflow `canon sync` runs afterward, and the install stamp. `format.ts` formats the stamp alone with the target's `oxfmt` or `prettier`, since a formatted seed would read as `customized`.
 
 - An adapter supplies `installedRoot`, `locateSource`, and optional hooks. Widen `SyncAdapter` rather than branching on a domain name in `engine.ts`
 - `planSync` marks each walked file with a state such as `stale`, `orphaned`, `retired`, or `renamed`. Location decides ownership before a name lookup, through `projectSubdir` and `ownsInstalledRoot`

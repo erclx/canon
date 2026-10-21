@@ -35,7 +35,6 @@ import { describeSkew } from '@/version/skew'
 
 const SYNC_ARGS: Record<SyncDomain, readonly string[]> = {
   governance: ['gov', 'sync'],
-  design: ['design', 'sync'],
   claude: ['claude', 'sync'],
 }
 
@@ -58,10 +57,10 @@ export function register(program: Command): void {
       'after',
       [
         '',
-        'Runs `canon gov sync`, `canon design sync`, and `canon claude sync`',
-        'on each domain installed, so each carries its own replace behavior:',
-        'governance replaces an edited rule and deletes a retired one, design',
-        'replaces its shipped files, and claude writes .gitignore alone.',
+        'Runs `canon gov sync` and `canon claude sync` on each domain',
+        'installed, so each carries its own replace behavior: governance',
+        'replaces an edited rule and deletes a retired one, and claude writes',
+        '.gitignore alone.',
         'Tooling is not synced. Refuses a dirty working tree.',
         '',
         'Exit codes:',

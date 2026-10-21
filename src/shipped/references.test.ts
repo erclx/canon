@@ -572,7 +572,7 @@ describe('isShippedCorpus', () => {
       false,
     )
     expect(isShippedCorpus('wiki/claude/worktrees.md')).toBe(false)
-    expect(isShippedCorpus('src/design/base.css')).toBe(false)
+    expect(isShippedCorpus('src/design/tokens.ts')).toBe(false)
   })
 
   it('should not match a corpus name as a bare prefix of another path', () => {

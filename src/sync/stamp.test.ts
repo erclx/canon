@@ -156,6 +156,32 @@ describe('readStamp', () => {
     ])
   })
 
+  it('should drop the retired design domain on the next write', async () => {
+    writeFixture(
+      stampPath(TARGET),
+      JSON.stringify({
+        covers: ['governance', 'design'],
+        domains: {
+          governance: { syncedAt: 'then', files: {} },
+          design: {
+            syncedAt: 'then',
+            files: { '.claude/design/base.css': 'a' },
+          },
+        },
+      }),
+    )
+
+    await writeStamp(TARGET, TOOLING, {}, NOW)
+
+    const raw = readRaw(TARGET)
+
+    expect(raw.covers).toEqual(['governance', 'tooling'])
+    expect(Object.keys(raw.domains as object)).toEqual([
+      'governance',
+      'tooling',
+    ])
+  })
+
   it('should return undefined when a chain entry is not a string', () => {
     writeFixture(
       stampPath(TARGET),

@@ -10,17 +10,17 @@ import { compareVersions, parseVersion } from '@/version/compare'
 import { readInstalled } from '@/version/installed'
 
 /**
- * Domains the stamp can record. Governance and design both attribute file by
- * file through the sync engine. Tooling runs its own inject and manifest
- * machinery, so it records the stack chain it resolved instead and carries no
- * file hashes.
+ * Domains the stamp can record. Governance attributes file by file through
+ * the sync engine. Tooling runs its own inject and manifest machinery, so it
+ * records the stack chain it resolved instead and carries no file hashes.
  *
  * A stamp written before the standards or snippets install channel closed
- * still carries a `standards` or `snippets` record. `isStamp` ignores the key
+ * still carries a `standards` or `snippets` record, and one written before the
+ * design install retired carries a `design` record. `isStamp` ignores the key
  * and `sortDomains` drops it on the next write, so the target loses a domain
  * nothing can refresh rather than losing the whole file.
  */
-export const STAMP_DOMAINS = ['governance', 'design', 'tooling'] as const
+export const STAMP_DOMAINS = ['governance', 'tooling'] as const
 
 export type StampDomain = (typeof STAMP_DOMAINS)[number]
 

@@ -16,7 +16,7 @@ The claude stack installs the Claude Code workflow into a project through `canon
 
 - `.canon/tasks/` holds one file per task plus a generated `index.md`, local scratch only, with `archive/` holding the tasks that shipped
 - `.canon/plans/` holds execution detail for multi-step tasks, and `canon tasks archive` moves a `feature-*.md` plan into `archive/` when the `post-merge` hook archives its task
-- `.canon/review/` holds one subfolder per producer, with `design/` for `canon design render`
+- `.canon/review/` holds the reports a review or measurement skill writes, such as `ux-measure-<slug>.md`
 - `.canon/tmp/` is ephemeral scratch, safe to delete without loss
 - `.claude/worktrees/` is where `EnterWorktree` creates a linked worktree, which is why it stays under `.claude/`
 
