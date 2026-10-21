@@ -50,7 +50,8 @@ Each verb here has a skill that owns the job. Load the skill rather than driving
 | Report one computed property across routes   | `canon inventory`   | `canon:target-check`        |
 | Walk a page through interactions and measure | `canon drive`       | `canon:ux-measure`          |
 | Fetch a YouTube transcript                   | `canon transcripts` | `canon:youtube-transcripts` |
-| Work on the local canvas                     | `canon canvas`      | `canon:canvas-board`        |
+
+The design board is Frameboard, a separate CLI outside canon, so a board job runs a `frameboard` verb rather than a `canon` one.
 
 ## Session and ship
 

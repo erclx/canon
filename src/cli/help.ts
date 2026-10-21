@@ -43,7 +43,6 @@ export const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
       ['inventory [subj]', 'Report one computed property across every route'],
       ['drive <url> <run>', 'Walk a page through interactions, measure each'],
       ['transcripts <url>', 'Fetch a YouTube transcript with frontmatter'],
-      ['canvas [cmd]', 'Local canvas of pages and frames'],
     ],
   },
   {
@@ -99,7 +98,6 @@ const EXAMPLES = [
   'canon docs list --json',
   'canon docs agents',
   'canon design render',
-  'canon canvas list --json',
   'canon capture assets/captures/install.html --selector .window --out assets/frames',
   'canon inventory focus --json',
   'canon drive http://localhost:4173 run.json --json',
