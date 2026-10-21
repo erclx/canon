@@ -20,6 +20,7 @@ The field is learning science and cognitive psychology, with educational measure
 [Roediger and Karpicke 2006, Test-enhanced learning](https://pubmed.ncbi.nlm.nih.gov/16507066/) backs testing before reviewing, and the rule that confidence says nothing about retention.
 
 - Passage: "prior testing produced substantially greater retention than studying, even though repeated studying increased students' confidence in their ability to remember the material"
+- The same abstract: "When the final test was given after 5 min, repeated studying improved recall relative to repeated testing"
 - Adopted in `pedagogy.md` as the fluency and retrieval sections, and in the body's excuses table
 
 ### Failing an attempt before the answer
@@ -32,10 +33,10 @@ The field is learning science and cognitive psychology, with educational measure
 
 ### Spacing, and the gap growing with the interval
 
-[Cepeda et al. 2006, Distributed practice in verbal recall tasks](https://pubmed.ncbi.nlm.nih.gov/16719566/) backs spacing and widening the gap.
+[Cepeda et al. 2006, Distributed practice in verbal recall tasks](https://pubmed.ncbi.nlm.nih.gov/16719566/) backs spacing, and the best gap growing with how long the material has to last.
 
 - Passage: "the ISI producing maximal retention increased as retention interval increased"
-- Adopted as the spacing section's principle. It names no schedule, which is why the ladder below is house judgment.
+- Adopted as the spacing section's principle. It names no schedule and reports no result for expanding gaps, so the ladder is house judgment.
 
 [Pashler et al. 2007, IES practice guide NCER 2007-2004](https://ies.ed.gov/ncee/wwc/Docs/PracticeGuide/20072004.pdf) backs the same at classroom scale, and its panel rates the evidence moderate.
 
@@ -66,10 +67,10 @@ The IES guide's Recommendation 2 backs worked examples for a learner taking on a
 
 ### Feedback on a quiz
 
-[Butler and Roediger 2008, Feedback and multiple-choice testing](https://pubmed.ncbi.nlm.nih.gov/18491500/) backs feedback on every question and distractors drawn from held misconceptions.
+[Butler and Roediger 2008, Feedback and multiple-choice testing](https://pubmed.ncbi.nlm.nih.gov/18491500/) backs giving feedback on a multiple-choice quiz.
 
 - Passage: "The selection of lures can lead students to acquire false knowledge", and feedback "reduced the proportion of intrusions"
-- Adopted as one feedback block per question naming why each distractor fails, since an uncorrected lure is what the learner keeps
+- Adopted as the rule to write feedback for every question. It tests feedback against none, not where distractors come from or how feedback explains them.
 - It found immediate and delayed feedback both help, so the timing rule rests on Kornell, Hays and Bjork instead
 
 ### The teach-back
@@ -98,7 +99,10 @@ Bjork on desirable difficulties, Vygotsky on the zone of proximal development, a
 
 These rules stay with no opened source behind them, each for the reason given.
 
-- **The review ladder.** The 1, 3, 7, 16, and 35 day rungs are a house schedule. An author told to widen a gap settles on whatever feels right, and Cepeda backs the direction the rungs move.
+- **The review ladder.** The 1, 3, 7, 16, and 35 day rungs, and moving a rung on each hit or miss, are a house schedule. An author told to widen a gap settles on whatever feels right.
+- **Forgetting as the mechanism of spacing.** It explains why the gap matters, and no opened source tests it.
+- **Production over selection, and no cue in the question.** Both studies above compare testing with restudy, and neither compares a recognition test.
+- **Misconception distractors, explained one by one.** A distractor nobody holds removes itself, and Butler tests only feedback against none.
 - **Interleaving topics rather than exemplars.** This extends Kornell and Bjork and the IES worked-example finding. It stays because working out which approach a problem calls for carries over.
 - **Never interleaving an unseen topic.** Telling two things apart needs something on each side.
 - **Where difficulty helps and hurts.** The split stays because it changes what a lesson withholds. Kornell, Hays and Bjork back difficulty at retrieval, and IES backs worked examples while acquiring.

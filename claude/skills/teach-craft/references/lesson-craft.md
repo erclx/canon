@@ -37,11 +37,11 @@ The quiz is the retrieval, so a leak in its construction turns it into a reading
 
 One feedback block reads as an explanation where a block per option reads as four verdicts, and only the explanation names what separates a wrong option from the answer. Name the correct option in the feedback text, since it is what a learner reads to find out whether they were right.
 
-Butler and Roediger 2008 back the feedback block and the misconception distractors, since a lure left uncorrected becomes false knowledge. Kornell, Hays and Bjork 2009 back giving feedback after the attempt. Equal option length and the slot rotation are house judgment, since the item-writing review that would back them was not opened.
+Butler and Roediger 2008 back giving feedback on a multiple-choice quiz, since its lures can teach false knowledge. Kornell, Hays and Bjork 2009 back giving it after the attempt. Misconception distractors, explaining each one, equal option length, and the slot rotation are house judgment.
 
 ## Teach back
 
-A quiz is recognition and a teach-back is production, which is the form retrieval practice prefers. Carry both: the quiz places the learner against options someone could hold, and the teach-back is where the learner finds out what they cannot say without help.
+A quiz is recognition and a teach-back is production, which this skill prefers as house judgment. Carry both: the quiz places the learner against options someone could hold, and the teach-back is where the learner finds out what they cannot say without help.
 
 - Ask for an explanation to a named audience rather than for an answer. Telling a non-programmer why a lazy quantifier is not an optional one has a floor, and "explain lazy quantifiers" has none.
 - Ask about the thing the lesson was for, not a detail beside it. A teach-back on a footnote tests attention rather than the material.

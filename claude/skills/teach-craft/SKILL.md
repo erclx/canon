@@ -7,7 +7,7 @@ metadata:
 
 # Teach craft
 
-A session asked to teach explains, and a smooth explanation reads as a lesson learned. It is fluency, which decays within days. This skill carries what turns teaching into retention: test before telling, space the returns, and grade only what the learner produced unaided.
+A session asked to teach explains, and a smooth explanation reads as a lesson learned. It is fluency, which does not survive a delay. This skill carries what turns teaching into retention: test before telling, space the returns, and grade only what the learner produced unaided.
 
 It produces nothing of its own. The lesson lands wherever the session already writes, being the conversation, a file, or a page.
 

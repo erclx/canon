@@ -21,14 +21,14 @@ Each section names the research behind it or says it is house judgment. The pass
 
 ## Fluency is not storage strength
 
-A learner who follows an explanation smoothly has demonstrated that the explanation was clear. That is fluency, and it decays within days. Storage strength is whether the material can be retrieved later without the explanation present, and the two move independently.
+A learner who follows an explanation smoothly has demonstrated that the explanation was clear. That is fluency, and it does not last. Storage strength is whether the material can be retrieved later without the explanation present, and the two move independently.
 
 The practical consequence is that a lesson cannot report its own success. Only a later retrieval can, which is why the learning record exists and why every session opens by testing the last one rather than by reviewing it.
 
 - Treat a learner's confidence as evidence about the lesson, never about their retention
 - Never advance on the strength of a smooth session. Advance on a retrieval the learner passed unaided.
 
-Roediger and Karpicke 2006 back this section. Repeated study raised confidence there, while prior testing produced the greater delayed retention.
+Roediger and Karpicke 2006 back this section. Restudying won on a test five minutes later and lost on the delayed tests, while it raised the learners' confidence.
 
 ## Retrieval practice
 
@@ -38,7 +38,7 @@ Pulling an answer out of memory strengthens it far more than reading it again. R
 - Prefer a question the learner has to produce an answer to over one they select from
 - Let the learner fail an attempt before correcting it. A failed retrieval followed by the answer beats being told first.
 - Do not cue the answer in the question. A question restating the material tests reading rather than memory.
-- Rest these on Roediger and Karpicke 2006 for testing over restudy, and on Kornell, Hays and Bjork 2009 for the failed attempt beating the answer shown with the question
+- Asking first and the failed attempt rest on Kornell, Hays and Bjork 2009. Production over selection and the no-cue rule are house judgment, since no opened study compared a recognition test.
 
 The teach-back block is the production form this section prefers, which is why a lesson carries one beside its quiz. A quiz is recognition, so a lesson offering only one tests the weak form and reports it as retrieval.
 
@@ -58,13 +58,13 @@ The same total time spread across days beats the same time in one sitting. Forge
 - Widen the gap each time a topic is retrieved correctly, and shorten it after a miss
 - Name what to revisit and when in the learning record, so the next session has a schedule rather than a guess
 
-Cepeda et al. 2006 found the best gap grew with how long the material had to last, and the IES practice guide recommends spacing at classroom scale.
+Cepeda et al. 2006 found the best gap grew with how long the material had to last, and the IES practice guide recommends spacing at classroom scale. Forgetting as the mechanism, and widening or shortening the gap after each retrieval, are house judgment.
 
 The ladder is 1, 3, 7, 16, and 35 days. A topic retrieved unaided moves up a rung and a miss drops it back one, held inside the ladder at either end, so a topic the learner keeps missing stays on the shortest gap rather than restarting a sequence.
 
 - Apply the ladder as written rather than picking a gap by judgment, since an author told to widen a gap settles on whatever feels right
 
-The ladder is house judgment. No opened source names a sequence of days, and Cepeda backs only the direction the rungs move.
+The ladder is house judgment. No opened source names a sequence of days or tests a gap that widens after each correct retrieval.
 
 ## Interleaving
 
