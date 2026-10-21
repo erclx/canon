@@ -29,6 +29,7 @@ function record(fields: Record<string, unknown>, exitCode = 0): StepResult {
 function stepKey(args: readonly string[]): string {
   if (args[0] === 'tasks') return `archive:${args[3]}`
   if (args[0] === 'records') return 'push'
+  if (args[1] === 'retire-members') return `members:${args[3]}`
   if (args[0] === 'worktrees') return 'reclaim'
   if (args[0] === 'upgrade') return 'upgrade'
   return 'plugin-update'
@@ -87,6 +88,7 @@ describe('runPostMerge steps', () => {
     expect(h.calls.map((call) => call.args)).toEqual([
       ['tasks', 'archive', '--pull-request', '7', '--root', ROOT, '--json'],
       ['records', 'push', '--root', ROOT, '--json'],
+      ['worktrees', 'retire-members', '--pull-request', '7', '--json'],
       ['worktrees', 'reclaim', '--json'],
       ['upgrade', '--json'],
       ['claude', 'plugin-update', '--json'],
@@ -100,6 +102,16 @@ describe('runPostMerge steps', () => {
 
     const reclaim = h.calls.find((call) => call.args[0] === 'worktrees')
     expect(reclaim?.cwd).toBe(CWD)
+  })
+
+  it('should retire members for every merged number from the caller cwd', async () => {
+    const h = harness({}, { subjects: ['a (#1)', 'b (#2)'] })
+
+    await h.go()
+
+    const retired = h.calls.filter((call) => call.args[1] === 'retire-members')
+    expect(retired.map((call) => call.args[3])).toEqual(['1', '2'])
+    expect(retired.every((call) => call.cwd === CWD)).toBe(true)
   })
 
   it('should run the upgrade non-interactively', async () => {
@@ -133,12 +145,16 @@ describe('runPostMerge steps', () => {
 })
 
 describe('runPostMerge skip switches', () => {
-  it('should skip only the reclaim under CANON_SKIP_RECLAIM', async () => {
-    const h = harness({}, { env: { CANON_SKIP_RECLAIM: '1' } })
+  it('should skip the member retirement and the reclaim under CANON_SKIP_RECLAIM', async () => {
+    const h = harness(
+      {},
+      { subjects: ['a (#7)'], env: { CANON_SKIP_RECLAIM: '1' } },
+    )
 
     await h.go()
 
     expect(h.calls.map((call) => stepKey(call.args))).toEqual([
+      'archive:7',
       'push',
       'upgrade',
       'plugin-update',
@@ -359,6 +375,96 @@ describe('runPostMerge reclaim lines', () => {
     await h.go()
 
     expect(h.output()).toBe('')
+  })
+})
+
+describe('runPostMerge member lines', () => {
+  const subjects = ['feat: integrate (#7)']
+
+  it('should count the members a merged integrator retired', async () => {
+    const h = harness(
+      {
+        'members:7': record({ reason: null, retired: 2, kept: 0, failed: 0 }),
+      },
+      { subjects },
+    )
+
+    await h.go()
+
+    expect(h.output()).toBe('\n🌿 Retired 2 fan-in member(s) of #7.\n\n')
+  })
+
+  it('should stay quiet on a body naming no members', async () => {
+    const h = harness(
+      {
+        'members:7': record({
+          reason: 'no-members',
+          retired: 0,
+          kept: 0,
+          failed: 0,
+        }),
+      },
+      { subjects },
+    )
+
+    await h.go()
+
+    expect(h.output()).toBe('')
+  })
+
+  it('should stay quiet on a machine without gh', async () => {
+    const h = harness(
+      {
+        'members:7': record(
+          { reason: 'gh-missing', retired: 0, kept: 0, failed: 0 },
+          1,
+        ),
+      },
+      { subjects },
+    )
+
+    await h.go()
+
+    expect(h.output()).toBe('')
+  })
+
+  it('should point a refused run at the verb', async () => {
+    const h = harness(
+      {
+        'members:7': record(
+          { reason: 'open-pull-request', retired: 0, kept: 0, failed: 0 },
+          1,
+        ),
+      },
+      { subjects },
+    )
+
+    await h.go()
+
+    expect(h.output()).toBe(
+      '\n🌿 Fan-in members of #7 not retired: open-pull-request\n' +
+        'Run canon worktrees retire-members --pull-request 7 --dry-run to read why.\n\n',
+    )
+  })
+
+  it('should name the members kept or failed beside the ones retired', async () => {
+    const h = harness(
+      {
+        'members:7': record(
+          { reason: null, retired: 1, kept: 1, failed: 1 },
+          1,
+        ),
+      },
+      { subjects },
+    )
+
+    await h.go()
+
+    expect(h.output()).toBe(
+      '\n🌿 Retired 1 fan-in member(s) of #7.\n\n' +
+        '\n🌿 2 fan-in member(s) of #7 kept or not fully deleted.\n' +
+        'Run canon worktrees retire-members --pull-request 7 --dry-run to read why.\n\n',
+    )
   })
 })
 

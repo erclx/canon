@@ -75,9 +75,9 @@ Holds this repository's Claude Code hooks, wired through `.claude/settings.json`
 Holds the git hooks, which run as POSIX sh under `sh -e`, so each `grep` that may match nothing sits in an `if` or behind `||`.
 
 - `pre-commit` runs `lint-staged`, `commit-msg` runs `commitlint`, and `pre-push` runs `bun run check`. `post-rewrite` delegates to `post-merge` on `rebase`.
-- `post-merge` returns when `.canon/tasks` or `canon` is absent, then hands off to `canon hooks post-merge`, whose verb in `src/hooks/post-merge.ts` owns the five steps and their order
-- The steps run as child verbs, being the task archive, `records push`, `worktrees reclaim`, `upgrade`, and `claude plugin-update`. A `CANON_SKIP_*` switch in the hook header turns one off.
-- The reclaim child carries no `--root`, so `reclaimReport` reads `process.cwd()` and refuses the worktree the pull ran in. Every other step passes the main root.
+- `post-merge` returns when `.canon/tasks` or `canon` is absent, then hands off to `canon hooks post-merge`, whose verb in `src/hooks/post-merge.ts` owns the six steps and their order
+- Each step is a child verb, being the task archive, `records push`, `worktrees retire-members`, `worktrees reclaim`, `upgrade`, and `claude plugin-update`, and a `CANON_SKIP_*` switch skips one
+- The two worktree children carry no `--root` and share `CANON_SKIP_RECLAIM`. `reclaimReport` reads `process.cwd()` and refuses the worktree the pull ran in, and every other step passes the main root.
 - `tooling/base/configs/.husky/post-merge` is the target's copy without the source-CLI fallback, and `post-merge-hook.test.ts` runs its shared cases against both
 
 ### `.canon/`

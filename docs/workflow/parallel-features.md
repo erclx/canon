@@ -60,4 +60,4 @@ Merge order matters only when two branches touch the same file. Expect to rebase
 
 `canon:task-board` creates a task file, and `canon:task-complete` marks outcomes. The `post-merge` hook archives the task a merged pull request closed, with its plan, and a `post-rewrite` hook does the same for a rebase pull. Both archive a closed task whose merge carried a PR number, and a slice merged before then moves only its own plan.
 
-`CANON_SKIP_RECLAIM`, `CANON_SKIP_UPGRADE`, and `CANON_SKIP_PLUGIN_UPDATE` turn off the three hook steps that act on the machine.
+The hook also deletes the member branches and worktrees a merged fan-in integrator names, and `canon worktrees retire-members --pull-request <n>` does it for a merge the hook missed. `CANON_SKIP_RECLAIM` turns off that step and the reclaim, and `CANON_SKIP_UPGRADE` and `CANON_SKIP_PLUGIN_UPDATE` turn off the other two.

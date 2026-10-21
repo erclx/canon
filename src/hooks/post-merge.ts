@@ -39,6 +39,7 @@ export interface PostMergeInput {
 export const STEP_VERBS = {
   archive: ['tasks', 'archive'],
   push: ['records', 'push'],
+  members: ['worktrees', 'retire-members'],
   reclaim: ['worktrees', 'reclaim'],
   upgrade: ['upgrade'],
   pluginUpdate: ['claude', 'plugin-update'],
@@ -226,6 +227,33 @@ function reclaimLines(fields: Fields): string | undefined {
 }
 
 /**
+ * Keyed on the fields, like the reclaim, since a run that retires one member
+ * and fails on another exits 1 with a branch already deleted. A body naming no
+ * members is every merge but an integrator's, so it stays quiet.
+ */
+function memberLines(number: number, fields: Fields): string | undefined {
+  let lines = ''
+  const retired = count(fields, 'retired')
+  if (retired > 0) {
+    lines += `\n🌿 Retired ${retired} fan-in member(s) of #${number}.\n\n`
+  }
+
+  const hint = `Run canon worktrees retire-members --pull-request ${number} --dry-run to read why.\n\n`
+  const reason = text(fields, 'reason')
+  const unfinished = count(fields, 'kept') + count(fields, 'failed')
+  if (
+    reason !== undefined &&
+    reason !== 'no-members' &&
+    reason !== 'gh-missing'
+  ) {
+    lines += `\n🌿 Fan-in members of #${number} not retired: ${reason}\n${hint}`
+  } else if (unfinished > 0) {
+    lines += `\n🌿 ${unfinished} fan-in member(s) of #${number} kept or not fully deleted.\n${hint}`
+  }
+  return lines.length > 0 ? lines : undefined
+}
+
+/**
  * Shared by the binary reinstall and the plugin update. `current` is the
  * ordinary outcome on most merges and stays quiet, and `quiet` names the
  * refusal reasons that describe a permanent condition on the machine. `icon`
@@ -271,8 +299,10 @@ async function step(
 }
 
 /**
- * Runs the five post-merge steps in order: archive, records push, reclaim,
- * upgrade, plugin update. The reclaim sits before the upgrade, since the
+ * Runs the six post-merge steps in order: archive, records push, member
+ * retirement, reclaim, upgrade, plugin update. The member retirement sits
+ * before the reclaim, so the reclaim reads a retired member's worktree as
+ * gone rather than racing it. Both sit before the upgrade, since the
  * upgrade reinstalls the binary every later child runs under, and the two
  * network-bound moves sit last so a slow registry delays nothing else.
  *
@@ -309,11 +339,20 @@ export async function runPostMerge(input: PostMergeInput): Promise<void> {
     pushLines,
   )
 
-  // No `--root` here, and that is load-bearing. The verb reads its own working
-  // directory to refuse the worktree it stands in, so a root would turn the
-  // running worktree into an ordinary candidate and let a pull inside a
-  // linked worktree delete the ground under itself.
+  // No `--root` on either worktree step, and that is load-bearing. Each verb
+  // reads its own working directory to refuse the worktree it stands in, so a
+  // root would turn the running worktree into an ordinary candidate and let a
+  // pull inside a linked worktree delete the ground under itself. One switch
+  // covers both, since both remove worktrees.
   if (!isSkipped('CANON_SKIP_RECLAIM')) {
+    for (const number of pullRequestNumbers(input.subjects)) {
+      await step(
+        input,
+        at([...STEP_VERBS.members, '--pull-request', String(number), '--json']),
+        (_, fields) => memberLines(number, fields),
+      )
+    }
+
     await step(input, at([...STEP_VERBS.reclaim, '--json']), (_, fields) =>
       reclaimLines(fields),
     )

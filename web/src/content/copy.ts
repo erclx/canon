@@ -343,6 +343,8 @@ export const merge = {
     'canon tasks archive':
       'the task closed by this pull request, and its plan with it',
     'canon records push': 'every gitignored record folder, off this disk',
+    'canon worktrees retire-members':
+      'the fan-in member branches and worktrees an integrator named',
     'canon worktrees reclaim': 'the worktree the merged branch was built in',
   } as Record<string, string>,
   foot: 'A tick is a claim a session makes. A merge is a fact the trunk shows, and only the second fires this.',

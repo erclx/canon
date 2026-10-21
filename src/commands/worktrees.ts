@@ -17,6 +17,14 @@ import {
   type WorktreeVerdict,
 } from '@/worktrees/reclaim'
 import { mainWorktreeRoot } from '@/git/worktree'
+import {
+  type Half,
+  type MemberOutcome,
+  type MemberRefusal,
+  type MembersRefusal,
+  type MembersReport,
+  retireMembers,
+} from '@/worktrees/members'
 import { machineListenerReader } from '@/listeners/machine'
 import { repairBareFlag } from '@/worktrees/bare-flag'
 import { type StopReport, stopListeners } from '@/worktrees/stop'
@@ -38,6 +46,31 @@ interface RepairBareFlagOptions {
 interface ReclaimCommandOptions {
   readonly dryRun?: boolean
   readonly json?: boolean
+}
+
+interface RetireMembersCommandOptions {
+  readonly pullRequest: string
+  readonly dryRun?: boolean
+  readonly json?: boolean
+}
+
+/**
+ * What the post-merge hook reads after an integrator merges. Every field it
+ * branches on is a number or a fixed word, and `members` sits last, for the
+ * reason `ReclaimRecord` states.
+ */
+export interface RetireMembersRecord {
+  readonly pullRequest: number
+  readonly reason: MembersRefusal | null
+  readonly detail: string | null
+  readonly dryRun: boolean
+  /** Members with a half deleted, or that a dry run would delete, and none kept or failed. */
+  readonly retired: number
+  /** Members with a half kept and none failed. */
+  readonly kept: number
+  /** Members with a half whose deletion failed. */
+  readonly failed: number
+  readonly members: readonly MemberOutcome[]
 }
 
 /**
@@ -145,6 +178,59 @@ const CONDITIONS = [
   'keeps a directory rather than removing one.',
 ]
 
+const MEMBERS_REFUSALS: Record<MembersRefusal, string> = {
+  'gh-missing': 'gh is not on the path, so the pull request could not be read',
+  'gh-failed': 'the pull request read failed',
+  'sessions-unreadable': 'the session roster could not be read',
+  'sessions-unchecked':
+    'some session records come from another pid namespace and no socket answers for them',
+  'not-merged': 'the pull request has not merged',
+  'no-members': 'the body carries no "Fan-in members:" line',
+  'trunk-named': 'the line names the branch the pull request merged into',
+  'head-named': "the line names the integrator's own branch",
+  'open-pull-request': 'a named branch has an open pull request of its own',
+  'head-unreadable':
+    'refs/pull/<n>/head could not be fetched, or names another commit than the merged head',
+}
+
+const MEMBER_REFUSALS: Record<MemberRefusal, string> = {
+  'not-in-merged-head':
+    "its tip is not an ancestor of the integrator's merged head, so it holds work the merge did not carry",
+  'remote-unreadable': 'origin could not be read for this branch',
+  'worktree-kept':
+    'its worktree was kept, and git refuses to delete a branch a worktree holds',
+  'main-worktree': 'it is checked out in the main worktree',
+  'current-worktree': 'its worktree is the one this command runs in',
+  'detached-head': 'its worktree has a detached HEAD',
+  'uncommitted-changes': 'its worktree holds uncommitted work',
+  'unreadable-worktree': 'its worktree could not be read',
+  'held-by-session': 'a live session holds its worktree',
+}
+
+const RETIRE_CONDITIONS = [
+  'Reads the "Fan-in members:" line of a merged integrator pull request,',
+  "whose backticked branches are the members, and deletes each one's",
+  'origin branch, worktree, and local branch. Nothing outside that line',
+  'is read.',
+  '',
+  "A member half is merged when its tip is an ancestor of the integrator's",
+  'merged head, fetched from refs/pull/<n>/head, rather than of the trunk,',
+  'which a squash merge never makes it. Origin and local are judged apart,',
+  'so an unpushed commit keeps the local branch and a commit pushed after',
+  'the merge keeps the origin branch. The worktree takes the same reading',
+  '`canon worktrees list` gives, with the members counted as merged.',
+  '',
+  'These refuse the whole run, and nothing is deleted:',
+  ...Object.entries(MEMBERS_REFUSALS).map(
+    ([reason, meaning]) => `  ${reason.padEnd(22)}${meaning}`,
+  ),
+  '',
+  'These keep one half of one member, named in its "reasons":',
+  ...Object.entries(MEMBER_REFUSALS).map(
+    ([reason, meaning]) => `  ${reason.padEnd(22)}${meaning}`,
+  ),
+]
+
 export function register(program: Command): void {
   const worktrees = program
     .command('worktrees')
@@ -238,6 +324,42 @@ export function register(program: Command): void {
     )
     .action(async (opts: ReclaimCommandOptions) => {
       process.exitCode = await runReclaim(opts)
+    })
+
+  worktrees
+    .command('retire-members')
+    .description(
+      'Delete the fan-in members a merged integrator pull request names, unless --dry-run',
+    )
+    .helpOption('-h, --help', 'Show this help message')
+    .requiredOption(
+      '--pull-request <number>',
+      'The merged integrator pull request',
+    )
+    .option('--dry-run', 'Report what would be deleted without deleting it')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Exit codes:',
+        '  0  every member was retired or kept, or the body names none',
+        '  1  refused, or a deletion failed, with the reason on stderr',
+        '',
+        ...RETIRE_CONDITIONS,
+        '',
+        'The post-merge hook runs this once per merged pull request number,',
+        'and CANON_SKIP_RECLAIM turns it off there. Run it by hand for a',
+        'merge the hook missed.',
+        '',
+        'Examples:',
+        '  canon worktrees retire-members --pull-request 2570 --dry-run',
+        '  canon worktrees retire-members --pull-request 2570 --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (opts: RetireMembersCommandOptions) => {
+      process.exitCode = await runRetireMembers(opts)
     })
 
   worktrees
@@ -562,4 +684,155 @@ export function describe(verdict: WorktreeVerdict): string {
     head,
     `  Reclaimable. Pull request #${verdict.pullRequest} merged it, ${tree}, and no session holds it.`,
   ].join('\n')
+}
+
+function halves(member: MemberOutcome): readonly Half[] {
+  return member.worktree === null
+    ? [member.origin, member.local]
+    : [member.origin, member.worktree, member.local]
+}
+
+/**
+ * Builds the record from the report, separate from the run so the counts are
+ * testable without a repository. A member already gone everywhere counts
+ * nowhere, so a run repeated by hand does not report a retirement it did not
+ * make.
+ */
+export function retireMembersRecord(
+  pullRequest: number,
+  dryRun: boolean,
+  report: MembersReport,
+): RetireMembersRecord {
+  if (report.kind === 'refused') {
+    return {
+      pullRequest,
+      reason: report.reason,
+      detail: report.detail,
+      dryRun,
+      retired: 0,
+      kept: 0,
+      failed: 0,
+      members: [],
+    }
+  }
+
+  const states = report.members.map((member) =>
+    halves(member).map((half) => half.state),
+  )
+  const failed = states.filter((each) => each.includes('failed')).length
+  const kept = states.filter(
+    (each) => !each.includes('failed') && each.includes('kept'),
+  ).length
+  const retired = states.filter(
+    (each) =>
+      !each.includes('failed') &&
+      !each.includes('kept') &&
+      each.some((state) => state === 'deleted' || state === 'would-delete'),
+  ).length
+
+  return {
+    pullRequest,
+    reason: null,
+    detail: null,
+    dryRun,
+    retired,
+    kept,
+    failed,
+    members: report.members,
+  }
+}
+
+/**
+ * A kept half is a refusal doing its job and a body naming no members is the
+ * ordinary merge, so neither fails the run.
+ */
+export function retireMembersExit(record: RetireMembersRecord): number {
+  if (record.reason !== null && record.reason !== 'no-members') return 1
+  return record.failed > 0 ? 1 : 0
+}
+
+function describeHalf(name: string, half: Half): string {
+  if (half.state === 'kept') {
+    const reasons = half.reasons.map((reason) => MEMBER_REFUSALS[reason])
+    return `  ${name}: kept, since ${reasons.join('; ')}.`
+  }
+  const state = half.state.replace('-', ' ')
+  return half.detail === null
+    ? `  ${name}: ${state}.`
+    : `  ${name}: ${state}. ${half.detail}`
+}
+
+async function runRetireMembers(
+  opts: RetireMembersCommandOptions,
+): Promise<number> {
+  const dryRun = opts.dryRun ?? false
+  const pullRequest = Number(opts.pullRequest)
+
+  intro(
+    dryRun
+      ? 'canon worktrees retire-members (dry-run)'
+      : 'canon worktrees retire-members',
+  )
+
+  if (!Number.isInteger(pullRequest) || pullRequest <= 0) {
+    logStep('Refused')
+    logWarn(
+      `--pull-request takes a pull request number, and "${opts.pullRequest}" is not one.`,
+    )
+    outro()
+    return 1
+  }
+
+  // The reading stays on the caller's directory, which is what refuses the
+  // worktree it stands in, and every write runs from the main root.
+  const report = await retireMembers(pullRequest, {
+    cwd: process.cwd(),
+    root: await mainWorktreeRoot(),
+    dryRun,
+  })
+  const record = retireMembersRecord(pullRequest, dryRun, report)
+
+  if (report.kind === 'refused') {
+    logStep(report.reason === 'no-members' ? 'Members' : 'Refused')
+    if (report.reason === 'no-members') logInfo(report.detail)
+    else {
+      logWarn(`Nothing was deleted: ${MEMBERS_REFUSALS[report.reason]}.`)
+      logInfo(report.detail)
+    }
+  } else {
+    logStep('Members')
+    pipeOutput(
+      report.members
+        .map((member) =>
+          [
+            member.branch,
+            describeHalf('origin', member.origin),
+            ...(member.worktree === null
+              ? []
+              : [
+                  describeHalf(
+                    `worktree ${member.worktree.path}`,
+                    member.worktree,
+                  ),
+                ]),
+            describeHalf('local', member.local),
+          ].join('\n'),
+        )
+        .join('\n'),
+    )
+    if (record.failed > 0) {
+      logWarn(
+        `${plural(record.failed, 'member')} could not be fully deleted. Read the reason above and clear it by hand.`,
+      )
+    }
+    if (dryRun) {
+      logWarn(
+        'Nothing was deleted. Run this again without --dry-run to delete.',
+      )
+    }
+  }
+
+  outro()
+  if (opts.json === true) process.stdout.write(`${JSON.stringify(record)}\n`)
+  return retireMembersExit(record)
 }
