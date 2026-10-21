@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.50.0](https://github.com/erclx/canon/compare/v5.49.0...v5.50.0) (2026-10-21)
+
+
+### Features
+
+* **claude:** hold CLAUDE.md Key paths to the five-bullet run limit ([#2570](https://github.com/erclx/canon/issues/2570)) ([08b0553](https://github.com/erclx/canon/commit/08b05530aabaad29072c051640721d567be1e0ba))
+* **gate:** queue hand-run suites and stop a wave flaking the check ([#2571](https://github.com/erclx/canon/issues/2571)) ([c0ce018](https://github.com/erclx/canon/commit/c0ce01871e86db6f5045eb9f3f61e0fcb4f844c9))
+* **markdown:** report table limits in the markdown audit ([#2566](https://github.com/erclx/canon/issues/2566)) ([38d4b42](https://github.com/erclx/canon/commit/38d4b421434d4c24ffd95c5f48cc3bd07b3eee30))
+* **skills:** add design-record to keep the design record ([#2565](https://github.com/erclx/canon/issues/2565)) ([4ccc872](https://github.com/erclx/canon/commit/4ccc8727e8a37fe4982db4d9715197f3ce5ef029))
+* **skills:** name the next step a plan's workflow takes ([#2569](https://github.com/erclx/canon/issues/2569)) ([70f2749](https://github.com/erclx/canon/commit/70f27490f7df5a177cb0f954b78db606fae9581f))
+
 ## [5.49.0](https://github.com/erclx/canon/compare/v5.48.0...v5.49.0) (2026-10-19)
 
 
