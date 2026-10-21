@@ -35,7 +35,7 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 
 | Skill                         | When to use                                        |
 | ----------------------------- | -------------------------------------------------- |
-| `canon:session-worktree`      | At plan-to-execute, for an isolated tree           |
+| `canon:session-worktree`      | Before building a plan in this session             |
 | `canon:auto-ship`             | After plan approval, to chain implement through PR |
 | `canon:test-first`            | Before implementing a planned change               |
 | `canon:test-craft`            | Writing or changing a test                         |

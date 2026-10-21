@@ -152,8 +152,20 @@ Then output in chat:
 1. <question>
    - Suggested: <pick>, <reason or tradeoff>
 
-Next: /session-worktree
+Next: <line from the table below>
 ```
+
+Pick the `Next:` line from the roster check `${CLAUDE_SKILL_DIR}/../task-board/SKILL.md` states under `### Check for a live orchestrator`, read there rather than restated here.
+
+| Roster read                                                                | `Next:` line                                                                                         |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Found**                                                                  | `<name> places and dispatches <task>`, naming the orchestrator row the check matched                 |
+| **Not found**, and this session's name starts with `worker-` or `planner-` | `Hand <task> to a worker`, naming no session, since none is live and the operator dispatches by hand |
+| **Not found otherwise**, or the read fails                                 | `/session-worktree`                                                                                  |
+
+- With a live orchestrator and no planner role held, send the plan path to it through `canon:session-relay`, resolved from its `sessionId`
+- A session holding `canon:role-planner` already owes that announcement through its own channel, so it sends none
+- Say which row fired in one clause, since a line with no stated reason is one the next reader re-derives.
 
 Show only the path line and the `Next:` line when there are no questions. The `.canon/plans/` directory is gitignored, so do not stage or commit the file.
 
