@@ -98,6 +98,11 @@ Before responding, also verify:
 - Artifacts upload on `if: failure()` only with `retention-days: 7`.
 - Job names use emoji + title format.
 - Every job runs on `ubuntu-latest`, except one that targets a platform the project states and runs a layer that differs by platform.
-- No `run:` step passes five lines or carries a branch, loop, trap, or function. A step that does calls a script, with its inputs as arguments or `env`.
 - Deploy, publish, and release jobs carry a placeholder step and a named handoff, never a guessed deploy command.
 - Bun projects use `oven-sh/setup-bun@v2` with `bun install --frozen-lockfile`.
+
+### Steps
+
+Before responding, also verify:
+
+- No `run:` step passes five lines or carries a branch, loop, trap, or function. A step that does calls a script, with its inputs as arguments or `env`.
