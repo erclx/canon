@@ -105,7 +105,7 @@ interface Confidence {
 }
 
 /**
- * The columns the confidence ratio reads, fixed by `claude/skills/canvas-board/references/design.md`. The
+ * The columns the confidence ratio reads, fixed by `claude/skills/design-record/references/design.md`. The
  * first column of each table names its row, and `Multiplier` and `When used`
  * restate what the row already carries, so none of them is something a source
  * could anchor and none belongs in the denominator.

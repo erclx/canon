@@ -16,7 +16,7 @@ import { NEUTRAL_TOKENS } from '@/design/neutral'
  * gate stage is what keeps silently out of it.
  */
 
-/** The rendered record, at the path `claude/skills/canvas-board/references/design.md` fixes for it. */
+/** The rendered record, at the path `claude/skills/design-record/references/design.md` fixes for it. */
 export const DESIGN_DOCUMENT = join('canon', 'DESIGN.md')
 
 /**

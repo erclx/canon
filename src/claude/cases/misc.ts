@@ -41,6 +41,11 @@ export const MISC_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
+      'The operator picked the new settings panel, so land it in canon/design with an index row for it.',
+    expect: 'design-record',
+  },
+  {
+    prompt:
       "We're about to hit the context limit, write the handoff before we lose state.",
     expect: 'session-compact',
   },

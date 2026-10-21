@@ -64,6 +64,7 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 | --------------------- | --------------------------------------------- |
 | `canon:git-ship`      | To run the post-feature chain through open PR |
 | `canon:context-fold`  | The diff left a context entry untrue          |
+| `canon:design-record` | A picked design needs landing in the record   |
 | `canon:task-complete` | After the fold, to mark shipped outcomes      |
 | `canon:docs-sync`     | A change left `README.md` or `docs/` stale    |
 | `canon:git-stage`     | Staged changes span several concerns          |

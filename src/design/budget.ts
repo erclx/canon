@@ -1,7 +1,7 @@
 import { canonicalHeading } from '@/design/parse'
 
 /**
- * The prose budget `claude/skills/canvas-board/references/design.md` sets for a design record, and the
+ * The prose budget `claude/skills/design-record/references/design.md` sets for a design record, and the
  * counter the `design` gate stage reads it through.
  *
  * The limits live here and in the standard, never in the stage, so the stage

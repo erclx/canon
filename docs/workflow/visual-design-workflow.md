@@ -20,7 +20,8 @@ These skills cover the tier:
 
 - `canon:ui-checklist`, `canon:ux-audit`, and `canon:ux-measure` review and measure a UI
 - `canon:pick-by-eye` drafts candidates as frames on the canvas and takes your pick
-- `canon:canvas-board` works a direction out as HTML frames you edit in the browser. Only the pick moves into `canon/DESIGN.md`.
+- `canon:canvas-board` works a direction out as HTML frames you edit in the browser, and hands the pick on
+- `canon:design-record` lands a pick in `canon/design/` and carries its values into `canon/DESIGN.md`
 - `canon:design-identity` drafts a logo mark and social card
 
 Pick tier 0 when the UI is not the core product, decisions fit in sentences, and stakeholders review code.

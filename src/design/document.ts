@@ -94,7 +94,7 @@ function borderRows(tokens: readonly BorderToken[]): string[][] {
  * and every reason behind them lives in the entry.
  */
 const LEAD = [
-  'Authoring guidance: `claude/skills/canvas-board/references/design.md`. Rendered from `src/design/tokens.ts` by `canon design regen`, so edit the module and never this file.',
+  'Authoring guidance: `claude/skills/design-record/references/design.md`. Rendered from `src/design/tokens.ts` by `canon design regen`, so edit the module and never this file.',
   'Why each value was chosen lives in `canon/context/features/design.md`.',
 ].join(' ')
 

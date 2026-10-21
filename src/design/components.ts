@@ -15,7 +15,7 @@
  * `buildDesignCss`'s `components` option, which is what widening that option
  * from a boolean to `boolean | readonly Component[]` bought.
  *
- * It does not live in `canon/DESIGN.md`. `claude/skills/canvas-board/references/design.md` keeps CSS class
+ * It does not live in `canon/DESIGN.md`. `claude/skills/design-record/references/design.md` keeps CSS class
  * names out of that record and says they live in code, which is here.
  */
 

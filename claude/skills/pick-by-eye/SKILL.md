@@ -124,15 +124,16 @@ Read `canon canvas selection --json` when the answer points at the canvas, such 
 
 1. Apply the winning arm to the real surface, in one change.
 2. Close out any document stating the decision as open, in the same change, naming the winner and the arms that stayed defensible. Skip this where nothing stated the decision.
-3. Capture the picked round's frames with `canon canvas capture <page> --out <archive-dir> --json`. Each lands as `arm-<id>.png`, keeping the losing arms as a revert record.
-4. Resolve `<archive-dir>` as `.canon/picks/<slug>/` against the main worktree root, since shared session scratch resolves there rather than in a linked worktree.
-5. Delete every page folder on the run's list from under the `content` folder `canon canvas list --json` reports. Touch no page the run did not add, whatever its name.
-6. Stop the canvas server if this run started it, and leave one the operator started running.
-7. Leave the renders in a live track's `evidence/<slug>/renders/`, since `plan-groundwork` treats evidence as durable.
-8. Report each page whose delete is refused, naming the path for the operator to remove. The pick is applied either way.
-9. Report every surface that changed, each on its own line, name the winning arm by its id and its cost, and report the archive path.
+3. Hand the winning frame to `canon:design-record` by its page and frame, which lands it in the project's design record. Report it rather than proceeding silently when that skill does not resolve.
+4. Capture the picked round's frames with `canon canvas capture <page> --out <archive-dir> --json`. Each lands as `arm-<id>.png`, keeping the losing arms as a revert record.
+5. Resolve `<archive-dir>` as `.canon/picks/<slug>/` against the main worktree root, since shared session scratch resolves there rather than in a linked worktree.
+6. Delete every page folder on the run's list from under the `content` folder `canon canvas list --json` reports. Touch no page the run did not add, whatever its name.
+7. Stop the canvas server if this run started it, and leave one the operator started running.
+8. Leave the renders in a live track's `evidence/<slug>/renders/`, since `plan-groundwork` treats evidence as durable.
+9. Report each page whose delete is refused, naming the path for the operator to remove. The pick is applied either way.
+10. Report every surface that changed, each on its own line, name the winning arm by its id and its cost, and report the archive path.
 
-The picked round is the final one unless Step 4 resolved a revert. Archiving any other page lets item 5 delete the winning arm with nothing kept, and a variant left on the canvas is a second design nobody maintains.
+The picked round is the final one unless Step 4 resolved a revert. Archiving any other page lets item 6 delete the winning arm with nothing kept, and a variant left on the canvas is a second design nobody maintains.
 
 ## Reading a measurement
 
@@ -149,6 +150,7 @@ A capture proves appearance and a measurement proves a relationship, so reach fo
 Cite these rather than restating them. A step reimplemented here rots against the skill that owns it.
 
 - `plan-feature` plans the work once the pick is made, and declares the pull request boundary that plan carries
+- `design-record` lands the winning frame in the reference folder and its values in the design document, and runs before item 6 deletes the page its sync reads
 - `design-taste` carries the layer catalog, the ordering, grey-boxing, and the defaults an arm should reach past
 - `write-human` carries the voice for any copy an arm puts in front of a reader
 
