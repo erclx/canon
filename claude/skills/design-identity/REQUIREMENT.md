@@ -23,7 +23,7 @@ A session building this alone restates the render-and-pick loop from scratch, wh
 
 - Draft a mark the operator did not ask for, or mutate an existing logo file, which is a plain edit
 - Add a logo section to the design document's fixed section set, which its parser reads as a fixed key set
-- Modify `pick-by-eye`, `canon capture`, or `canon design render`, which this skill composes
+- Modify `pick-by-eye` or `canon capture`, which this skill composes
 - Be taken as reached by more than an operator typing its name, which a later review reads back rather than assumes
 
 ## Out of scope
