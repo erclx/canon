@@ -6,7 +6,7 @@ category: Agent surface
 
 # Target migrations
 
-Each section is a move a project runs once, when it was scaffolded before the change it names. Run `canon upgrade` first. The recurring sync that follows is in [target sync](sync.md).
+Each section is a move a project runs once, when it was scaffolded before the change it names. Run `canon upgrade` first, then `canon migrate status --json` to list the moves a project still needs in the order to run them. The recurring sync that follows is in [target sync](sync.md).
 
 ## Move the records first, once
 
