@@ -124,6 +124,6 @@ jobs:
           bun-version: latest
       - run: bun install --frozen-lockfile
       - name: Resolve the temp folder
-        run: echo "TEMP_REAL=$(realpath "$RUNNER_TEMP")" >> "$GITHUB_ENV"
+        run: echo "TMPDIR=$(realpath "$RUNNER_TEMP")" >> "$GITHUB_ENV"
       - run: bun run test
 ```

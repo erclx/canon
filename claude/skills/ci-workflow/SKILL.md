@@ -29,7 +29,7 @@ Linux stays the default. A job leaves it only for a layer whose result differs b
 - Read the stated platforms from the project's requirements record or README. A platform stated in neither keeps every job on Linux.
 - Keep lint, build, and browser jobs on Linux, since their result does not differ by platform. Name the layers that may leave it and never the steps they run.
 - Name another runner by its `-latest` label, such as `macos-latest`, matching the `ubuntu-latest` convention above.
-- Resolve a macOS temp path with `realpath` from `$RUNNER_TEMP` before comparing it with a tool's output. The `/var` to `/private/var` symlink hides the target.
+- Resolve a macOS `$TMPDIR` or `mktemp` path with `realpath` before comparing it with a tool's output, since the `/var` to `/private/var` symlink hides the target. Treat `$RUNNER_TEMP` alike.
 - Expect a macOS job to cost more per minute than a Linux one. GitHub bills the two differently, so read the rate from its billing page rather than quoting a multiplier.
 
 ## Job naming
