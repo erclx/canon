@@ -22,18 +22,19 @@ Data goes to stdout. UI and logs go to stderr. Help is the exception and prints 
 - `└` closes the frame on stderr
 - An error renders as `│ ✗ message` inside the frame, never as a lone line
 - Help skips the banner and puts `Usage:` directly on `├`
+- A stderr that is not a terminal gets plain lines instead, with the banner and section titles bare and each item behind its mark alone
 
 A help request naming an unknown subcommand, under a group taking no operand, writes its refusal to stderr and exits 1.
 
 ## JSON and names modes
 
-`--json` and `--names` keep stdout pure data. The frame still renders on stderr, and diagnostics reach stderr in every mode. A JSON refusal carries an action and a reason, so branch on the record rather than on stderr.
+`--json` and `--names` keep stdout pure data. A `--json` run writes no progress to stderr, only its warnings and errors, since diagnostics reach stderr in every mode. A JSON refusal carries an action and a reason, so branch on the record rather than on stderr.
 
 A shell profile may wrap `canon` in a function that takes its status from a later command. Where a verb documents a record field, read the field rather than the exit.
 
 ## Color
 
-Escape sequences reach a destination that renders them and nowhere else, decided per stream. `NO_COLOR` set to any non-empty value turns color off, and so does a destination that is not a terminal. The frame glyphs and the `✓ ! + - ✗` marks survive both.
+Escape sequences reach a destination that renders them and nowhere else, decided per stream. `NO_COLOR` set to any non-empty value turns color off, and so does a destination that is not a terminal. The `✓ ! + - ✗` marks survive both. The frame glyphs need a terminal.
 
 ## Exit discipline
 
