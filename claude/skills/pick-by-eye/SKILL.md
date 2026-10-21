@@ -117,8 +117,8 @@ Read the selection when the answer points at the board, such as "the selected on
 1. Apply the winning arm to the real surface, in one change.
 2. Close out any document stating the decision as open, in the same change, naming the winner and the arms that stayed defensible. Skip this where nothing stated the decision.
 3. Hand the winning frame's ref to `canon:design-record`, which lands it in the project's design record. Report it rather than proceeding silently when that skill does not resolve.
-4. Capture the picked round's frames with `frameboard capture --page <page> --out <archive-dir>`, keeping the losing arms as a revert record. Report each image's `path` off the record.
-5. Resolve `<archive-dir>` as `.canon/picks/<slug>/` against the main worktree root, since shared session scratch resolves there rather than in a linked worktree.
+4. Capture the picked round's frames with `frameboard capture --page <page> --out <canon-dir>`, keeping the losing arms as a revert record. Report each image's `path` off the record.
+5. Resolve `<canon-dir>` as `.canon/` against the main worktree root, since shared session scratch resolves there. Frameboard appends the project and page, so the archive lands at `.canon/picks/<page>/`.
 6. Delete every page on the run's list with `frameboard page delete <page>`. Touch no page the run did not add, whatever its name, and never remove a page folder by hand.
 7. End the serve command if this run started it, since Frameboard carries no stop verb. Leave a server the operator started running.
 8. Leave the renders in a live track's `evidence/<slug>/renders/`, since `plan-groundwork` treats evidence as durable.
