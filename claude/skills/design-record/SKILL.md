@@ -25,7 +25,7 @@ The document holds the rules and each role's intent, and the folder holds the pi
 
 Read `canon/design/index.md` from the project root, and list the group folders beside it.
 
-- A missing folder or index sends the run to Step 3 before anything lands
+- A missing folder or index is set up at Step 3, once Step 2 has found the sync
 - An index carrying a file list or a canvas mapping is an older shape. Leave its rows in place, add new rows in the form `folder.md` gives, and say the index predates the standard.
 
 ## Step 2: find the project's design sync
