@@ -43,7 +43,7 @@ canon migrate status --json
 canon sync --check . --json
 ```
 
-Then take `<stack>` from the first name in the report's `tooling.chain` and run `canon tooling diff <stack> . --json`. Never run it bare, since a headless call resolves the stack prompt to the catalog's first entry. Report tooling unmeasured when `tooling.measured` is false or `chain` names nothing.
+Then take `<stack>` from the first name in the report's `tooling.chain` and run `canon tooling diff <stack> . --json`. Never run it bare, since the stack prompt refuses a headless caller. Report tooling unmeasured when `tooling.measured` is false or `chain` names nothing.
 
 ### When a read refuses
 
