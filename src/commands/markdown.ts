@@ -6,7 +6,7 @@ import { BAN_SETS, emptyBanSets } from '@/markdown/bans'
 import { isChangelog, lengthExemption } from '@/markdown/ceiling'
 import { type ColonFinding, findColons } from '@/markdown/colons'
 import { type MarkdownAuditRefusal, resolveMarkdown } from '@/markdown/files'
-import { densityFindings, type DensityKind } from '@/markdown/density'
+import type { DensityKind } from '@/markdown/density'
 import {
   type GatedDensityFinding,
   type GatedReferenceShapeFinding,
@@ -38,7 +38,11 @@ import {
   readGatedConfig,
   resolveGatedList,
 } from '@/markdown/gated'
-import { densityGates, inDensityScope } from '@/markdown/scope'
+import {
+  densityGates,
+  inDensityScope,
+  scopedDensityFindings,
+} from '@/markdown/scope'
 import {
   TABLE_CELL,
   TABLE_ROWS,
@@ -141,16 +145,19 @@ export function register(program: Command): void {
         'a row, a 200-character bullet, 5 plain bullets in a row, no H4, and a',
         'paragraph or table opening every H3. Only context, docs, skills, tooling',
         'seeds and references, the wiki, README.md, and CONTRIBUTING.md take a',
-        'finding. In a canon checkout one gates under a prefix in GATED_PATHS in',
-        'src/markdown/scope.ts, and a bullet run gates in context, docs, and',
-        'skills from the start. Elsewhere one gates only under a prefix',
-        'canon/config/markdown.toml lists, which canon markdown gated add writes,',
-        'and with no such file every density finding reports and none gates.',
+        'finding. CLAUDE.md and its seed take only the bullet run and the H3',
+        'opening, inside Key paths. In a canon checkout one gates under a',
+        'prefix in GATED_PATHS in src/markdown/scope.ts, and a bullet run gates',
+        'in context, docs, and skills from the start. Elsewhere one gates only',
+        'under a prefix canon/config/markdown.toml lists, which canon markdown',
+        'gated add writes, and with no such file every density finding reports',
+        'and none gates.',
         'A config that does not parse refuses with its path named.',
         '',
-        'Tables take four limits on the same paths: a 120-character cell, 8 body',
-        'rows, a list as the next block, and a code span with a run past 30',
-        'characters. A table finding reports and never fails a run.',
+        'Tables take four limits on the same paths, CLAUDE.md aside: a',
+        '120-character cell, 8 body rows, a list as the next block, and a code',
+        'span with a run past 30 characters. A table finding reports and never',
+        'fails a run.',
         '',
         'A page whose frontmatter carries kind: reference takes the reference',
         'shape: no H2 beyond Output, Refusals, and See also, each at most once',
@@ -375,17 +382,15 @@ async function runAudit(
         bans: scanBans(lines, bans),
         colons: advisory ? findColons(lines) : [],
         headingCase: advisory ? findHeadingCase(source) : [],
-        density: inDensityScope(rel)
-          ? densityFindings(lines).map((finding) => ({
-              ...finding,
-              gating: densityGates(
-                rel,
-                finding.kind,
-                gated.prefixes,
-                gated.alwaysGated,
-              ),
-            }))
-          : [],
+        density: scopedDensityFindings(rel, lines).map((finding) => ({
+          ...finding,
+          gating: densityGates(
+            rel,
+            finding.kind,
+            gated.prefixes,
+            gated.alwaysGated,
+          ),
+        })),
         tables: inDensityScope(rel) ? tableFindings(lines) : [],
         referenceShape: referenceShapeFindings(source).map((finding) => ({
           ...finding,
@@ -660,7 +665,7 @@ function reportDensity(
     `Paragraphs past ${CHECKPOINTS.paragraph} characters, more than 2 paragraphs in a row, bullets past ${CHECKPOINTS.bullet} characters, more than 5 plain bullets in a row, a heading past H3, and an H3 opening with neither a paragraph nor a table.`,
   )
   logInfo(
-    'Measured on context entries, docs, skill bodies, references, and requirements, tooling seeds and stack references, the wiki, README.md, and CONTRIBUTING.md. Every other path takes no density finding.',
+    'Measured on context entries, docs, skill bodies, references, and requirements, tooling seeds and stack references, the wiki, README.md, and CONTRIBUTING.md. CLAUDE.md and its seed take the bullet run and the H3 opening inside Key paths alone. Every other path takes no density finding.',
   )
   logInfo(densityGatingLine(gated, source))
 
@@ -738,7 +743,7 @@ function reportTables(reports: readonly FileReport[]): void {
     `Cells past ${TABLE_CELL} characters, tables past ${TABLE_ROWS} body rows, a list directly after a table, and a code span in a cell holding a run past ${TABLE_TOKEN} characters.`,
   )
   logInfo(
-    'Measured on the paths density measures, outside fenced blocks. This never fails a run.',
+    'Measured on the paths density measures in full, so never on CLAUDE.md, outside fenced blocks. This never fails a run.',
   )
 
   const carrying = reports

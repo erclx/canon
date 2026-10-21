@@ -34,7 +34,7 @@ The ban set and checkpoints ship in `src/markdown/bans.ts` and `src/markdown/str
 
 A page marked `kind: reference` holds its opening, then `Output`, `Refusals`, and `See also` as H2s, each at most once and in that order. It takes no H3 and no table headed `Flag` or `Option`. An unmarked page is never measured.
 
-Tables take the four limits in the `markdown-craft` skill's `tables.md`, on the paths density measures. A cell past 120 visible characters reports as `table-cell`, more than 8 body rows as `table-rows`, a list right after a table as `table-then-list`, and a code span with a run past 30 characters as `table-token`. None sets the exit code.
+Tables take the four limits in the `markdown-craft` skill's `tables.md`, on the density paths but never `CLAUDE.md`. A cell past 120 visible characters reports as `table-cell`, more than 8 body rows as `table-rows`, a list after a table as `table-then-list`, and a code span with a run past 30 characters as `table-token`. None sets the exit code.
 
 | Density limit       | Finding                                                    |
 | ------------------- | ---------------------------------------------------------- |
@@ -48,7 +48,7 @@ Tables take the four limits in the `markdown-craft` skill's `tables.md`, on the 
 - A paragraph under a list item counts toward that bullet, never as a paragraph
 - A table, fence, list, heading, or bold section marker ends a run of paragraphs
 - A run whose every item opens with a bold label or a link is exempt, and numbered items never count
-- Only context entries, docs, skill bodies, references, and requirements, tooling seeds and stack references, the wiki, `README.md`, and `CONTRIBUTING.md` take a finding
+- Only context entries, docs, skills, tooling seeds and references, the wiki, `README.md`, and `CONTRIBUTING.md` take a finding, plus the Key paths of `CLAUDE.md` on the run and H3 limits
 - A requirement gates only once the gated list below names its own file, never through its skill's prefix and never on a bullet run alone
 
 | Root              | A density or reference shape finding gates                                                                 |

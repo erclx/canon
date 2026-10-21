@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
+import { bodyLines } from '@/markdown/scan'
 import {
   densityGates,
   GATED_SCOPE_ROOTS,
   inDensityScope,
+  scopedDensityFindings,
 } from '@/markdown/scope'
 
 describe('inDensityScope', () => {
@@ -113,10 +115,71 @@ describe('densityGates', () => {
 
 describe('GATED_SCOPE_ROOTS', () => {
   it.each(GATED_SCOPE_ROOTS)(
-    'should name a root inside the density scope: %s',
+    'should name a root its own listing gates: %s',
     (root) => {
       const sample = root.endsWith('/') ? `${root}a/SKILL.md` : root
-      expect(inDensityScope(sample)).toBe(true)
+      expect(densityGates(sample, 'bullet-run', [root], false)).toBe(true)
     },
   )
+})
+
+describe('scopedDensityFindings', () => {
+  const kinds = (rel: string, source: string) =>
+    scopedDensityFindings(rel, bodyLines(source)).map((finding) => [
+      finding.kind,
+      finding.line,
+    ])
+
+  const bullets = (count: number) =>
+    Array.from({ length: count }, (_, index) => `- \`p${index}/\`: path`).join(
+      '\n',
+    )
+
+  it('should gate a Key paths run past five in CLAUDE.md', () => {
+    const source = `# Project\n\n## Key paths\n\n${bullets(6)}\n`
+    expect(kinds('CLAUDE.md', source)).toEqual([['bullet-run', 5]])
+    expect(densityGates('CLAUDE.md', 'bullet-run', ['CLAUDE.md'])).toBe(true)
+  })
+
+  it('should leave a long run in another CLAUDE.md section out', () => {
+    const source = `# Project\n\n## Behavior\n\n${bullets(6)}\n\n## Key paths\n\n${bullets(2)}\n`
+    expect(kinds('CLAUDE.md', source)).toEqual([])
+  })
+
+  it('should pass a Key paths grouped under lead-sentence H3s', () => {
+    const source = `## Key paths\n\n### Code\n\nThe code.\n\n${bullets(5)}\n\n### Content\n\nThe content.\n\n${bullets(5)}\n`
+    expect(kinds('CLAUDE.md', source)).toEqual([])
+  })
+
+  it('should report an H3 under Key paths opening on a bullet', () => {
+    const source = `## Key paths\n\n### Code\n\n${bullets(2)}\n`
+    expect(kinds('CLAUDE.md', source)).toEqual([['h3-opening', 3]])
+  })
+
+  it('should stop measuring at the next H2', () => {
+    const source = `## Key paths\n\n${bullets(3)}\n\n## Commands\n\n${bullets(3)}\n`
+    expect(kinds('CLAUDE.md', source)).toEqual([])
+  })
+
+  it('should keep only the run limit and the H3 opening inside Key paths', () => {
+    const source = `## Key paths\n\n${'x'.repeat(400)}\n\n- \`a/\`: ${'y'.repeat(250)}\n`
+    expect(kinds('CLAUDE.md', source)).toEqual([])
+  })
+
+  it('should hold the seed to the same scope, in whole-file lines', () => {
+    const source = `# Project\n\nAbout.\n\n## Key paths\n\n${bullets(6)}\n`
+    expect(kinds('tooling/claude/seeds/CLAUDE.md', source)).toEqual([
+      ['bullet-run', 7],
+    ])
+  })
+
+  it('should leave a nested CLAUDE.md out', () => {
+    const source = `## Key paths\n\n${bullets(6)}\n`
+    expect(kinds('src/CLAUDE.md', source)).toEqual([])
+  })
+
+  it('should measure a whole density-scope file as before', () => {
+    const source = `# Doc\n\n${bullets(6)}\n`
+    expect(kinds('docs/a.md', source)).toEqual([['bullet-run', 3]])
+  })
 })
