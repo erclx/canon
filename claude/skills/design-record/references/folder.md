@@ -15,7 +15,7 @@ Does not govern:
 
 - The design document at `canon/DESIGN.md`, which `design.md` beside this file governs
 - When a pick lands and how a build is held to a reference, which the design-reference governance rule states
-- The canvas content format a frame is drawn in, which the canvas standard owns
+- The content format a frame is drawn in, which Frameboard owns and `frameboard docs --json` prints
 
 ## What a working folder looks like
 

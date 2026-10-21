@@ -79,8 +79,6 @@ describe('loadPaintedPatterns', () => {
     expect(isPainted('src/design/css.ts', patterns)).toBe(true)
     expect(isPainted('src/design/render.ts', patterns)).toBe(true)
     expect(isPainted('src/design/css.test.ts', patterns)).toBe(false)
-    expect(isPainted('src/canvas/client/selection.ts', patterns)).toBe(true)
-    expect(isPainted('src/canvas/client/keys.test.ts', patterns)).toBe(false)
     expect(isPainted('src/pr/lift.ts', patterns)).toBe(false)
   })
 

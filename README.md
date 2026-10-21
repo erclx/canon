@@ -72,9 +72,10 @@ Each domain has a canonical source in this repo and a thin install or sync CLI o
 | Governance     | Coding and authoring rules that load into a Claude session when a matching path is edited                               | Installed per project by `canon gov install`, refreshed by sync |
 | Tooling stacks | Golden configs, seeds, and a reference per framework                                                                    | Laid down by `canon init`, reconciled by `canon tooling sync`   |
 | Design system  | Ships a `DESIGN.md` intent format pointing at your stylesheet for values, a skill that drafts one, and a render command | `canon design render`                                           |
-| Canvas         | Pages of HTML frames on a local pan and zoom surface, each frame drawn with the project's tokens                        | `canon canvas serve`                                            |
 | Transcripts    | A YouTube transcript with metadata frontmatter                                                                          | `canon transcripts <url>` writes it into any repo               |
 | Sandbox        | Scenario scaffolds that provision an isolated project state for verifying each domain flow                              | `canon sandbox`                                                 |
+
+The design board lives outside canon in [Frameboard](https://www.npmjs.com/package/frameboard), which `canon:pick-by-eye` drives for each round of candidates.
 
 ### How domains reach you
 

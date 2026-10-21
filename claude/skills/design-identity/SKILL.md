@@ -62,15 +62,15 @@ Announce which tier decided, naming the tier rather than the path alone, so the 
 
 Follow `${CLAUDE_SKILL_DIR}/../pick-by-eye/SKILL.md` Step 1, with the decision fixed rather than derived: "the project's logo mark and its composition into the social card." Vary the mark's shape or style across arms, keeping the card's type and layout fixed, per that skill's one-property rule.
 
-- Draft each arm inside the full 1200x630 card frame, mark and type together, and add its canvas frame at `--width 1200 --height 630`, so one pick settles shape and composition
+- Draft each arm inside the 1200x630 card frame, mark and type together, and add it with `frameboard frame add <page>/arm-<id> --width 1200 --height 630`, so one pick settles shape and composition
 - Arm 0 is the current mark when the Step 3 folder already holds a logo file (`favicon.svg`, `favicon.ico`, `logo.svg`, or similar). Arms start at 1 otherwise.
 - Structure every arm as a `.mark` element, the inline SVG alone, nested inside a `.card` element, the full composition, so Step 6 can address either
 
 ## Step 5: draft, render, pick, and loop
 
-Follow `${CLAUDE_SKILL_DIR}/../pick-by-eye/SKILL.md` Steps 2 through 5 against the arms from Step 4: draft the arms as frames on a canvas page, render and hand off, take the pick, and loop on it.
+Follow `${CLAUDE_SKILL_DIR}/../pick-by-eye/SKILL.md` Steps 2 through 5 against the arms from Step 4: draft the arms as frames on a Frameboard page, render and hand off, take the pick, and loop on it.
 
-The final icon and card renders below are not arms, so they stay off the canvas. Call the folder they render from `<dest>`, being `.canon/tmp/<slug>/` under the slug `pick-by-eye` Step 1 derived, which is where this project puts every temporary write.
+The final icon and card renders below are not arms, so they stay off the board. Call the folder they render from `<dest>`, being `.canon/tmp/<slug>/` under the slug `pick-by-eye` Step 1 derived, which is where this project puts every temporary write.
 
 ## Step 6: finalize the mark and the icons
 
@@ -110,9 +110,9 @@ canon capture <dest>/render/og-image.html --selector .render --out <write-folder
 
 It takes its own call because Step 6's batch is already captured by the time this step picks a path. Say that the card shipped as a PNG with no source, and that the project gains one when it grows a route to hold the composition.
 
-### Closing the scratch folder and the canvas
+### Closing the scratch folder and the board
 
-Delete `<dest>` once both captures land, then close the canvas through `pick-by-eye` Step 6 items 3 to 8, which archive every arm and delete the pages the run added. The route is not a leftover variant, since it holds the arm the operator picked.
+Delete `<dest>` once both captures land, then close the board through `pick-by-eye` Step 6 items 3 to 8, which archive every arm and delete the pages the run added. The route is not a leftover variant, since it holds the arm the operator picked.
 
 A project whose card was generated before this route existed keeps its PNG. Say so rather than regenerating it, since the pick loop spends attention on a file nobody complained about, and the next real edit picks up the route.
 
@@ -133,6 +133,6 @@ Card source: <the route, captured through the card server|a scratch page, since 
 Cite these rather than restating them.
 
 - `pick-by-eye` owns Steps 1 through 5 of the render-and-pick loop, cited above
-- `canon:canvas-board` carries a picked direction into `canon/DESIGN.md`. This skill only reads it.
+- `canon:design-record` carries a picked direction into `canon/DESIGN.md`. This skill only reads it.
 - `canon capture` owns the render mechanics, its font refusal, its fixed 2x scale, and its reported dimensions. It reads an `http(s)://` source, where `--out` names the PNG.
 - The `astro` tooling stack owns the card route's scaffold, its second config, and the exclusion check, read with `canon tooling reference astro`. This skill writes into the route and never reshapes it.

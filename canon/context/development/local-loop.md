@@ -95,7 +95,7 @@ Holds the gitignored record folders, where `canon/context/context-model.md` fixe
 Holds the dev regression baselines, one subfolder per area. Dev evidence is what a developer compares across a change, and prod evidence is a capture shown to a reader.
 
 - The location tells the kind. Under `assets/evidence/` is dev, and any other tracked `evidence` folder is prod. `canon pr evidence` compares both.
-- `assets/evidence/home/` is the site baseline, and `assets/evidence/canvas/<area>/` holds `arrange`, `inspector`, `layers`, and `shell`
+- `assets/evidence/home/` is the site baseline
 - `web/public/evidence/` is prod and hand-placed
 - `.canon/evidence/` and a groundwork track's `evidence/` are gitignored proof a record cites, and `canon migrate scratch-evidence` moves a cited folder out of `tmp/`
 - Design commits no dev baseline yet, and the marketing images in `assets/frames/` are neither kind

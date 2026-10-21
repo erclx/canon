@@ -45,13 +45,8 @@ export const RULE_GATED_FOLDERS: readonly string[] = [
 /**
  * Rule files in a gated folder whose findings `--gate` still passes, one path
  * each and never a folder, so a new rule beside one is gated the day it lands.
- *
- * `ui/canvas.md` carries a shape finding and no ledger, and v149.2 removes the
- * rule, so this entry goes with it.
  */
-export const RULE_GATE_EXEMPT: readonly string[] = [
-  join('governance', 'rules', 'ui', 'canvas.md'),
-]
+export const RULE_GATE_EXEMPT: readonly string[] = []
 
 /** The folders whose rules claim outside practice, so each carries a ledger. */
 export const PRACTICE_FOLDERS: readonly string[] = [

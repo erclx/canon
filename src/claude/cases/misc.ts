@@ -24,11 +24,6 @@ export const MISC_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      'Draw the signup screen as a frame on the canvas, then restyle the element I just selected there.',
-    expect: 'canvas-board',
-  },
-  {
-    prompt:
       'The operator picked the new settings panel, so land it in canon/design with an index row for it.',
     expect: 'design-record',
   },
