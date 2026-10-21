@@ -105,7 +105,7 @@ Holds the attribute-standard audit behind `canon markdown audit` and the fence w
 
 Holds the one-shot moves behind `canon migrate`, being `records`, `surface-roots`, `record-tree`, `scratch-evidence`, `record-layout`, `rename`, `skill-names`, `rule-layout`, and `session-defaults`. Each plans first and applies only under `--write`.
 
-- `status.ts` orders every move in `MIGRATIONS` and reads each by its exit through `cliRunner`, so a new move joins by one line there and the migrations guide cites the verb
+- `status.ts` orders every move in `MIGRATIONS` and reads each by its exit through `cliRunner`, and a test fails when a registered subcommand is missing from it, so a new move joins by one line there
 - `rename.ts` holds the token sweep and `skill-names.ts` the map it reads, so a renamed or merged skill is a map row plus a pointer left at the old name
 - A merged skill's pointer sets `disable-model-invocation: true`, counts as a shipped skill, and needs a routing case, `metadata.family`, and a skill-map row
 - Each old spelling in the pointer takes a `canon-keep-retired` marker so a later sweep does not move it onto the survivor

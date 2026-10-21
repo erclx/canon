@@ -33,7 +33,7 @@ kind: reference
 - `record-tree` reports closed groundwork and intake trails, the scratch folder, and backup history as counts and rewrites none
 - `records` reports skipped record folders as a count on its own line
 - A `record-tree` rewrite has no undo in version control, so read the report before `--write`
-- `status` runs each verb as a dry run and exits 2 while any is pending, a refusal outranking that. Each entry carries the verb's own record unread and no count.
+- `status` runs each verb as a dry run and exits 2 while any is pending, with a refusal outranking that. A clean entry can turn pending once an earlier one applies, so run it again after each `--write`.
 
 Three markers keep an old spelling on a line. Each also covers the nearest non-blank line, below it for `canon-keep-record-root` and above it for `canon-keep-surface-root`.
 
