@@ -28,6 +28,7 @@ Runs `🛡️ Static Checks` on Linux and `🍎 macOS Unit Tests` beside it, nei
 - The Pin Stock Bash step links `/bin/bash` 3.2 first on `PATH`, so every test spawning `bash` runs on what a Mac ships
 - The next step fails the job when `bash` reports a major version other than 3, so a missed pin cannot pass on Homebrew bash
 - A test assuming `shellcheck`, `shfmt`, `claude`, or `/proc` skips on macOS without it, and the job never gains an install step
+- A macOS temp root under `/var` is a symlink to `/private/var`, so a test comparing it with a path git or a child reports wraps `mkdtempSync` in `realpathSync`
 
 ### `stack-verify.yml`
 
