@@ -64,56 +64,6 @@ export default scenario({
         'Manual leg: whether the freehand drawing actually reads as the intended layout cannot be asserted here',
       )
     },
-    'teach-lesson': (ctx) => {
-      // A rendered lesson page rather than markdown, since the in-page capture needs a
-      // page to load. The stylesheet defines the custom properties a figure colors
-      // through, and the hand font is what Mermaid cannot measure. The body face is
-      // one every machine resolves, since `canon capture` refuses a page whose figure
-      // inherits a family the machine lacks.
-      ctx.fixtures('claude', 'draw-figure', 'teach-lesson', '01-initial')
-
-      ctx.log.step(
-        'Scenario ready: draft a graph-shaped figure into a teach lesson',
-      )
-      ctx.log.info(
-        'Context: .canon/teach/01-orders/lessons/0001-order-states.html states a',
-      )
-      ctx.log.info(
-        '  four-state order path in prose, with a refund branch, and draws nothing',
-      )
-      ctx.log.info(
-        '  The subject is graph-shaped, so outside a lesson it routes through Mermaid',
-      )
-      ctx.log.info('')
-      ctx.log.info(
-        'Action:  /canon:draw-figure the order path from placed to delivered, with the',
-      )
-      ctx.log.info(
-        '         refund branch, in .canon/teach/01-orders/lessons/0001-order-states.html,',
-      )
-      ctx.log.info(
-        '         ahead of the quiz. Write it without waiting for a confirmation.',
-      )
-      ctx.log.info(
-        'Expect:  declared in fixtures/claude/draw-figure/teach-lesson/expect.toml',
-      )
-      ctx.log.info(
-        '         Check it with: canon sandbox check claude:draw-figure teach-lesson',
-      )
-      ctx.log.info(
-        '         Render path decided as freehand because the destination is a teach lesson',
-      )
-      ctx.log.info(
-        '         No Mermaid source or config under .canon/tmp/figures/',
-      )
-      ctx.log.info(
-        '         The figure captured inside the lesson with canon capture --selector figure',
-      )
-      ctx.log.info(
-        "         <figure>, <figcaption>, and an inline SVG colored through the lesson's",
-      )
-      ctx.log.info('         custom properties, placed ahead of the quiz')
-    },
     'architecture-set': (ctx) => {
       // A small two-folder project with its requirements record and one context
       // entry to draw into. The request names an architecture view, so the run

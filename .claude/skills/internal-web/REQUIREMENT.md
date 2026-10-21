@@ -26,7 +26,6 @@ It ships a page change without `bun run web:build`, the only typecheck `web/` ge
 
 ## Out of scope
 
-- The learning surface and its fixture, which `internal-teach` owns
 - `docs/`, which `internal-docs` owns
 - `src/` and the regeneration scripts, which `internal-scripts` owns
 - Deciding how a surface should look, which `pick-by-eye` owns

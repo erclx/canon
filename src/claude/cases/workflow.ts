@@ -168,10 +168,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     expect: 'task-complete',
   },
   {
-    prompt: 'Open a learning workspace so I can study this topic properly.',
-    expect: 'teach-workspace',
-  },
-  {
     prompt: 'Quiz me on what we covered about regular expressions yesterday.',
     expect: 'teach-craft',
   },

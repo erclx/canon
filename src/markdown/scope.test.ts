@@ -34,7 +34,6 @@ describe('inDensityScope', () => {
     'canon/REQUIREMENTS.md',
     'canon/DESIGN.md',
     'CHANGELOG.md',
-    'examples/teach/README.md',
     '.canon/plans/feature-density-check.md',
     '.canon/groundwork/154-markdown-density/06-decision.md',
     'claude/skills/git-pr/EVAL.md',

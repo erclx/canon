@@ -52,7 +52,6 @@ Each verb here has a skill that owns the job. Load the skill rather than driving
 | Report one computed property across routes   | `canon inventory`   | `canon:target-check`        |
 | Walk a page through interactions and measure | `canon drive`       | `canon:ux-measure`          |
 | Fetch a YouTube transcript                   | `canon transcripts` | `canon:youtube-transcripts` |
-| Open a learning workspace                    | `canon teach`       | `canon:teach-workspace`     |
 | Work on the local canvas                     | `canon canvas`      | `canon:canvas-board`        |
 
 ## Session and ship

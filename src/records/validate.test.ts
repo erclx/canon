@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { dirname, join } from 'node:path'
+import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { linesOutsideFences } from '@/markdown/scan'
 import {
@@ -99,7 +99,7 @@ describe('isRecordKind', () => {
     expect(isRecordKind('plans')).toBe(true)
     expect(isRecordKind('groundwork')).toBe(true)
     expect(isRecordKind('intake')).toBe(true)
-    expect(isRecordKind('teach')).toBe(true)
+    expect(isRecordKind('teach')).toBe(false)
     expect(isRecordKind('standards')).toBe(false)
     expect(isRecordKind('review')).toBe(false)
     expect(isRecordKind('memory')).toBe(false)
@@ -936,172 +936,5 @@ describe('validateRecords', () => {
     const outcome = await validateRecords(ROOT, 'intake')
 
     expect(outcome).toMatchObject({ ok: true, records: 2, findings: [] })
-  })
-})
-
-function mission(fields: string): string {
-  return [
-    '---',
-    fields,
-    '---',
-    '',
-    '# Regular expressions',
-    '',
-    '## Success looks like',
-    '',
-    '- Rewrite a nested quantifier so it cannot backtrack',
-    '',
-  ].join('\n')
-}
-
-const MISSION_FIELDS =
-  'title: Regular expressions\ndescription: One line\ndate: 2026-08-19'
-
-async function seedWorkspace(
-  slug: string,
-  files: Readonly<Record<string, string>>,
-): Promise<void> {
-  const dir = join(recordsDir(ROOT, 'teach'), slug)
-
-  await Promise.all(
-    Object.entries(files).map(async ([name, body]) => {
-      const path = join(dir, name)
-      mkdirSync(dirname(path), { recursive: true })
-      await writeFile(path, body)
-    }),
-  )
-}
-
-function conformingWorkspace(): Record<string, string> {
-  return {
-    'MISSION.md': mission(MISSION_FIELDS),
-    'RESOURCES.md': frontmatter('title: Resources\ndescription: One line'),
-    'GLOSSARY.md': frontmatter('title: Glossary\ndescription: One line'),
-  }
-}
-
-describe('validateRecords over a teaching workspace', () => {
-  it('should report nothing on a conforming workspace', async () => {
-    await seedWorkspace('01-regex', {
-      ...conformingWorkspace(),
-      'reference/backtracking.md': frontmatter(
-        'title: Backtracking\ndescription: One line',
-      ),
-      'learning-records/0001-first-pass.md': frontmatter(
-        'title: First pass\ndescription: One line',
-      ),
-    })
-
-    expect(await validateRecords(ROOT, 'teach')).toMatchObject({
-      ok: true,
-      records: 1,
-      findings: [],
-    })
-  })
-
-  it('should report a workspace missing each required file', async () => {
-    await seedWorkspace('01-regex', {
-      'NOTES.md': frontmatter('title: Notes\ndescription: One line'),
-    })
-    const outcome = await validateRecords(ROOT, 'teach')
-
-    expect(outcome.ok).toBe(true)
-    if (!outcome.ok) return
-    expect(kinds(outcome.findings)).toEqual([
-      'index-missing',
-      'section-missing',
-      'section-missing',
-    ])
-  })
-
-  it('should report a folder carrying no ordinal ahead of its topic', async () => {
-    await seedWorkspace('regex', conformingWorkspace())
-    const outcome = await validateRecords(ROOT, 'teach')
-
-    expect(outcome.ok).toBe(true)
-    if (!outcome.ok) return
-    expect(kinds(outcome.findings)).toEqual(['name-malformed'])
-  })
-
-  it('should report a mission carrying no opening date and no success list', async () => {
-    await seedWorkspace('01-regex', {
-      ...conformingWorkspace(),
-      'MISSION.md': frontmatter(
-        'title: Regular expressions\ndescription: One line',
-      ),
-    })
-    const outcome = await validateRecords(ROOT, 'teach')
-
-    expect(outcome.ok).toBe(true)
-    if (!outcome.ok) return
-    expect(kinds(outcome.findings)).toEqual([
-      'date-malformed',
-      'section-missing',
-    ])
-  })
-
-  it('should report a learning record carrying no four-digit number', async () => {
-    await seedWorkspace('01-regex', {
-      ...conformingWorkspace(),
-      'learning-records/first-pass.md': frontmatter(
-        'title: First pass\ndescription: One line',
-      ),
-    })
-    const outcome = await validateRecords(ROOT, 'teach')
-
-    expect(outcome.ok).toBe(true)
-    if (!outcome.ok) return
-    expect(kinds(outcome.findings)).toEqual(['name-malformed'])
-    expect(outcome.findings[0].subject).toBe('learning-records/first-pass.md')
-  })
-
-  it('should report a reference page carrying a number no reader follows', async () => {
-    await seedWorkspace('01-regex', {
-      ...conformingWorkspace(),
-      'reference/0001-backtracking.md': frontmatter(
-        'title: Backtracking\ndescription: One line',
-      ),
-    })
-    const outcome = await validateRecords(ROOT, 'teach')
-
-    expect(outcome.ok).toBe(true)
-    if (!outcome.ok) return
-    expect(kinds(outcome.findings)).toEqual(['name-malformed'])
-  })
-
-  it('should walk neither the lessons nor the assets folder', async () => {
-    await seedWorkspace('01-regex', {
-      ...conformingWorkspace(),
-      'lessons/0001-backtracking.html': '<p>No frontmatter here</p>',
-      'lessons/notes.md': '# A stray markdown file carrying no frontmatter\n',
-      'assets/course.css': 'body { margin: 0 }',
-    })
-
-    expect(await validateRecords(ROOT, 'teach')).toMatchObject({
-      ok: true,
-      records: 1,
-      findings: [],
-    })
-  })
-
-  it('should skip a subfolder name held by a plain file rather than throwing', async () => {
-    await seedWorkspace('01-regex', {
-      ...conformingWorkspace(),
-      reference: 'A file sitting where the folder belongs\n',
-    })
-
-    expect(await validateRecords(ROOT, 'teach')).toMatchObject({
-      ok: true,
-      records: 1,
-      findings: [],
-    })
-  })
-
-  it('should name both record roots when no teach directory exists', async () => {
-    expect(await validateRecords(ROOT, 'teach')).toMatchObject({
-      ok: false,
-      reason: 'no-folder',
-      message: `No teach folder at ${join(ROOT, '.canon', 'teach')} or ${join(ROOT, '.claude', 'teach')}.`,
-    })
   })
 })

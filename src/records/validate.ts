@@ -1,4 +1,4 @@
-import { existsSync, statSync } from 'node:fs'
+import { existsSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
@@ -12,17 +12,8 @@ import {
   recordDir as resolveRecordDir,
   recordDirs as resolveRecordDirs,
 } from '@/roots/record'
-import {
-  TEACH_GLOSSARY,
-  TEACH_MISSION,
-  TEACH_RECORDS,
-  TEACH_REFERENCE,
-  TEACH_RESOURCES,
-  TEACH_SUCCESS_HEADING,
-  WORKSPACE_NAME,
-} from '@/teach/workspace'
 
-export const RECORD_KINDS = ['plans', 'groundwork', 'intake', 'teach'] as const
+export const RECORD_KINDS = ['plans', 'groundwork', 'intake'] as const
 
 export type RecordKind = (typeof RECORD_KINDS)[number]
 
@@ -759,171 +750,9 @@ async function checkDump(dir: string, slug: string): Promise<Finding[]> {
   return [...findings, ...perCluster.flat()]
 }
 
-const NUMBERED_RECORD = /^\d{4}-[a-z0-9]+(-[a-z0-9]+)*\.md$/
 /**
- * A kebab slug that does not open with an ordinal. The lookahead rejects a
- * leading run of digits followed by a hyphen and nothing else, so a subject
- * whose own name starts with a digit still passes.
- */
-const REFERENCE_NAME = /^(?!\d+-)[a-z0-9]+(-[a-z0-9]+)*\.md$/
-
-/** The two fields every markdown file in a workspace carries. */
-async function checkTeachFile(
-  dir: string,
-  slug: string,
-  file: string,
-  subject: string,
-): Promise<Finding[]> {
-  const frontmatter = parseFrontmatter(await readFile(join(dir, file), 'utf8'))
-
-  const missing = ['title', 'description'].filter(
-    (field) => !readField(frontmatter, field),
-  )
-
-  if (missing.length === 0) return []
-
-  return [
-    finding(
-      'frontmatter-incomplete',
-      slug,
-      subject,
-      `carries no ${missing.join(' and no ')}.`,
-    ),
-  ]
-}
-
-/**
- * One markdown subfolder of a workspace. `lessons/` and `assets/` are never
- * reached, because a lesson is generated markup carrying no frontmatter and a
- * walk over it would report every one as malformed.
- */
-async function checkTeachSubfolder(
-  dir: string,
-  slug: string,
-  folder: string,
-  name: RegExp,
-  message: string,
-): Promise<Finding[]> {
-  const path = join(dir, folder)
-
-  // Tested as a directory rather than for presence. Every other walk in this
-  // module takes its path from `listFolders`, and this one is built from a
-  // fixed name, so a workspace holding a plain file called `reference` would
-  // reach `readdir` and take the whole run down with `ENOTDIR`.
-  if (!statSync(path, { throwIfNoEntry: false })?.isDirectory()) return []
-
-  const files = await listMarkdown(path)
-
-  const malformed = files
-    .filter((file) => !name.test(file))
-    .map((file) =>
-      finding('name-malformed', slug, `${folder}/${file}`, message),
-    )
-
-  const perFile = await Promise.all(
-    files.map((file) => checkTeachFile(path, slug, file, `${folder}/${file}`)),
-  )
-
-  return [...malformed, ...perFile.flat()]
-}
-
-async function checkWorkspace(dir: string, slug: string): Promise<Finding[]> {
-  const findings: Finding[] = []
-
-  if (!WORKSPACE_NAME.test(slug)) {
-    findings.push(
-      finding(
-        'name-malformed',
-        slug,
-        slug,
-        'is not named NN-<topic> with a two-digit ordinal, so a listing sorts alphabetically rather than by when each workspace opened.',
-      ),
-    )
-  }
-
-  const files = await listMarkdown(dir)
-
-  if (!files.includes(TEACH_MISSION)) {
-    findings.push(
-      finding(
-        'index-missing',
-        slug,
-        TEACH_MISSION,
-        'is absent, so the workspace states no subject and no success to finish against.',
-      ),
-    )
-  }
-
-  for (const required of [TEACH_RESOURCES, TEACH_GLOSSARY]) {
-    if (!files.includes(required)) {
-      findings.push(
-        finding(
-          'section-missing',
-          slug,
-          required,
-          'is required and the workspace carries no such file.',
-        ),
-      )
-    }
-  }
-
-  const perFile = await Promise.all(
-    files.map((file) => checkTeachFile(dir, slug, file, file)),
-  )
-  findings.push(...perFile.flat())
-
-  if (files.includes(TEACH_MISSION)) {
-    const text = await readFile(join(dir, TEACH_MISSION), 'utf8')
-
-    if (!hasOpeningDate(parseFrontmatter(text)?.raw ?? '')) {
-      findings.push(
-        finding(
-          'date-malformed',
-          slug,
-          TEACH_MISSION,
-          'carries no date field as YYYY-MM-DD, so the workspace states no opening day.',
-        ),
-      )
-    }
-
-    if (
-      !linesOutsideFences(text).some(
-        (line) => line.trim() === TEACH_SUCCESS_HEADING,
-      )
-    ) {
-      findings.push(
-        finding(
-          'section-missing',
-          slug,
-          TEACH_SUCCESS_HEADING,
-          'is absent, so the mission names no observable thing the learner will be able to do.',
-        ),
-      )
-    }
-  }
-
-  return [
-    ...findings,
-    ...(await checkTeachSubfolder(
-      dir,
-      slug,
-      TEACH_REFERENCE,
-      REFERENCE_NAME,
-      'is not named <slug>.md as a kebab slug opening with no ordinal, so a page looked up rather than worked through implies an order no reader follows.',
-    )),
-    ...(await checkTeachSubfolder(
-      dir,
-      slug,
-      TEACH_RECORDS,
-      NUMBERED_RECORD,
-      'is not numbered NNNN-<slug>.md, so the records carry no read order.',
-    )),
-  ]
-}
-
-/**
- * The three kinds whose records are folders rather than files. Keyed by kind so
- * a seventh arrives as an entry here and the compiler names the walk it owes,
+ * The two kinds whose records are folders rather than files. Keyed by kind so
+ * a third arrives as an entry here and the compiler names the walk it owes,
  * where a ternary chain would silently fall through to whichever branch is last.
  */
 const FOLDER_CHECK: Readonly<
@@ -934,7 +763,6 @@ const FOLDER_CHECK: Readonly<
 > = {
   groundwork: checkTrack,
   intake: checkDump,
-  teach: checkWorkspace,
 }
 
 /**

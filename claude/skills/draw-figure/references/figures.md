@@ -39,7 +39,6 @@ Route a graph-shaped subject, one whose relationship, boundary, or path a flowch
 
 - Reserve freehand inline SVG, plain shapes and lines authored in the markup, for a subject that is not graph-shaped
 - A figure that cannot express its subject through the deterministic path is a worse failure than an inconsistent hand-drawn one, so the hatch stays open
-- Draw a figure in a teach lesson freehand whatever its shape. Its hand font cannot load in the renderer, so Mermaid measures labels in a narrower fallback face and the page clips them.
 - State this as a render-first policy rather than a ban on a tool-exported drawing, since routing through Mermaid is itself running an external tool
 
 ## Wrapping and captioning

@@ -29,7 +29,6 @@ The context entries describe the repository the session opened with. An entry ke
 ## Out of scope
 
 - Marking outcomes, sweeping receipts, and archiving a task, which `task-complete` owns
-- Landing a teach promotion page, which `teach-workspace` owns
 - Creating or declining a task file, which `task-board` owns
 - Public-facing docs, which `docs-sync` owns
 - Regenerating the context catalog, which a commit hook owns

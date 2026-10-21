@@ -31,9 +31,6 @@
     // render. bun run format runs oxfmt over the same files and would rewrite
     // them, so web:build and format each leave a file the other disagrees with.
     // The folder has one writer, the script, and nothing edits a preview by hand.
-    //
-    // The glob covers the whole folder rather than design-tokens alone, since the
-    // script writes teach-workspace too and it would carry the same two writers.
     // web/public/evidence/ and the hand-authored web sources keep their format gate.
     "/web/public/previews/",
 

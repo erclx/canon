@@ -20,7 +20,6 @@ import { register as feedback } from '@/commands/feedback'
 import { register as transcripts } from '@/commands/transcripts'
 import { register as tasks } from '@/commands/tasks'
 import { register as intake } from '@/commands/intake'
-import { register as teach } from '@/commands/teach'
 import { register as canvas } from '@/commands/canvas'
 import { register as comments } from '@/commands/comments'
 import { register as context } from '@/commands/context'
@@ -81,7 +80,6 @@ feedback(program)
 transcripts(program)
 tasks(program)
 intake(program)
-teach(program)
 canvas(program)
 comments(program)
 context(program)

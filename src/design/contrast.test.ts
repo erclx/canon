@@ -1,12 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { TEACH_SYNTAX } from '@/design/components'
-import {
-  AA_TEXT,
-  contrastRatio,
-  failing,
-  luminance,
-  readings,
-} from '@/design/contrast'
+import { contrastRatio, failing, luminance, readings } from '@/design/contrast'
 import { TOKENS } from '@/design/tokens'
 
 describe('luminance', () => {
@@ -70,25 +63,6 @@ describe('readings', () => {
         { role: 'text', intent: 'copy', value: '#ffffff', grounds: ['void'] },
       ]),
     ).toThrow(/unknown ground/)
-  })
-})
-
-describe('the teach syntax colors', () => {
-  const ground = (role: string): string =>
-    TOKENS.color.find((token) => token.role === role)?.value ?? ''
-
-  it('clears AA against the code surface in both themes', () => {
-    const readings = TEACH_SYNTAX.flatMap(({ name, dark, light }) => [
-      { at: `${name} dark`, ratio: contrastRatio(dark, ground('surface')) },
-      {
-        at: `${name} light`,
-        ratio: contrastRatio(light, ground('light-surface')),
-      },
-    ])
-
-    expect(
-      readings.filter(({ ratio }) => ratio < AA_TEXT).map(({ at }) => at),
-    ).toEqual([])
   })
 })
 

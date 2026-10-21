@@ -68,7 +68,7 @@ Holds the standard for what a rule states, being its shape limits, content test,
 - A rule passes when its invariant fires on a path edit and violating it ships silently, and a rejected candidate is recorded by which half failed
 - A claude rule carries at most five directives beside its pointer, since past that it reproduces the standard's structure rather than what must not go wrong
 - A rule loads with no skill context, so `${CLAUDE_SKILL_DIR}` expands to nothing and the rule names the owning skill by its `canon:` name
-- Test the target skill for a guard before writing `Load`, since `teach-workspace` refuses or starts a workspace where `write-human` only advises
+- Test the target skill for a guard before writing `Load`, since `auto-ship` stops on a missing plan where `write-human` only advises
 - A standard a target never authors is routed by an `internal/rules/` rule, and `tasks.md` globs the whole task folder and sends the session handoff to `canon:session-map`
 
 ### `internal/`
