@@ -75,7 +75,7 @@ import {
   logStep,
   logWarn,
   outro,
-  palette,
+  outroSuccess,
   select,
 } from '@/cli/ui'
 
@@ -1160,7 +1160,7 @@ function runTestOrder(opts: TestOrderOptions): number {
   const report = readTestOrder(root, { base: opts.base })
   const emitJson = opts.json ?? false
 
-  // The frame renders on stderr in both modes and the record goes to stdout
+  // The refusal reaches stderr in both modes and the record goes to stdout
   // alone, which is the split `docs/agents/output-shape.md` fixes. A consumer
   // reading stdout sees pure data either way, and an operator reading the
   // terminal sees the refusal rather than a command that appeared to do nothing.
@@ -1558,9 +1558,7 @@ async function runInstall(
     now,
   )
 
-  const { GREEN, NC } = palette(process.stderr)
-  outro()
-  process.stderr.write(`${GREEN}✓ Rules installed${NC}\n`)
+  outroSuccess('Rules installed')
   return 0
 }
 
@@ -1638,9 +1636,7 @@ async function installExtras(
 
   await recordStamp(createGovAdapter(PROJECT_ROOT), resolved, new Date())
 
-  const { GREEN, NC } = palette(process.stderr)
-  outro()
-  process.stderr.write(`${GREEN}✓ Rules installed${NC}\n`)
+  outroSuccess('Rules installed')
   return 0
 }
 
@@ -1689,10 +1685,6 @@ async function runBuild(target: string): Promise<number> {
   await writeFile(output, buildRulesPayload(files))
   logAdd(payload)
 
-  const { GREEN, NC } = palette(process.stderr)
-  outro()
-  process.stderr.write(
-    `${GREEN}✓ Rules built (${files.length} rules → ${payload})${NC}\n`,
-  )
+  outroSuccess(`Rules built (${files.length} rules → ${payload})`)
   return 0
 }

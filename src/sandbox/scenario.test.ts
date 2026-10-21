@@ -312,7 +312,7 @@ describe('stageScenarioInProcess', () => {
 
     await stage(definition)
 
-    expect(writes.join('')).toMatch(/^.*│.*  one\n.*│.*  two\n$/)
+    expect(writes.join('')).toBe('  one\n  two\n')
   })
 
   it('should drop the stderr of a captured command told to ignore it', async () => {

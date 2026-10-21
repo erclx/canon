@@ -19,6 +19,7 @@ import {
   logStep,
   logWarn,
   outro,
+  outroSuccess,
   palette,
   pipeOutput,
   plural,
@@ -216,20 +217,21 @@ function report(result: StageResult): void {
  * against.
  */
 function close(summary: Summary, code: number): void {
-  const { GREEN, NC, RED, YELLOW } = palette(process.stderr)
-  outro()
+  const { NC, RED, YELLOW } = palette(process.stderr)
 
   if (code !== 0) {
+    outro()
     process.stderr.write(`${RED}✗ Verification failed${NC}\n\n`)
     return
   }
 
   if (summary.unmeasured > 0) {
+    outro()
     process.stderr.write(
       `${YELLOW}! Verification passed, ${plural(summary.unmeasured, 'stage')} measured nothing${NC}\n\n`,
     )
     return
   }
 
-  process.stderr.write(`${GREEN}✓ Verification passed${NC}\n\n`)
+  outroSuccess('Verification passed')
 }

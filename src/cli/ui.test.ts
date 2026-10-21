@@ -3,13 +3,21 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
+  frameError,
   frameSuccess,
   intro,
   isNonInteractive,
+  logAdd,
+  logError,
   logInfo,
+  logRemove,
+  logStep,
   logWarn,
   outro,
+  outroSuccess,
   palette,
+  pipeOutput,
+  setQuiet,
   supportsColor,
 } from '@/cli/ui'
 
@@ -148,19 +156,130 @@ describe('the framed writers', () => {
     })
   })
 
-  it('keep the frame when the color is gone', () => {
-    withEnv(undefined, () => {
-      const output = captureStderr(() => {
-        intro('Render slides')
-        logInfo('done')
-        outro()
+  it('keep the frame on a terminal when the color is gone', () => {
+    withEnv('1', () => {
+      asTerminal(() => {
+        const output = captureStderr(() => {
+          intro('Render slides')
+          logInfo('done')
+          outro()
+        })
+        expect(output).toBe('┌\n│ Render slides\n│ ✓ done\n└\n')
       })
-      expect(output).toContain('┌')
-      expect(output).toContain('│')
-      expect(output).toContain('└')
-      expect(output).toContain('✓')
-      expect(output).toContain('Render slides')
     })
+  })
+
+  it('write plain marked lines to a destination that is not a terminal', () => {
+    const output = captureStderr(() => {
+      intro('Render slides')
+      logStep('Reading rules')
+      logInfo('done')
+      logAdd('added.md')
+      logRemove('gone.md')
+      logWarn('careful')
+      logError('broke')
+      pipeOutput('body\n')
+      outro()
+    })
+    expect(output).toBe(
+      'Render slides\nReading rules\n✓ done\n+ added.md\n- gone.md\n! careful\n✗ broke\n  body\n',
+    )
+  })
+
+  it('write a framed error as one plain line off a terminal', () => {
+    const output = captureStderr(() => {
+      frameError('no plan')
+    })
+    expect(output).toBe('✗ no plan\n')
+  })
+})
+
+describe('quiet mode', () => {
+  afterEach(() => {
+    setQuiet(false)
+  })
+
+  it('writes no progress', () => {
+    setQuiet(true)
+    const output = captureStderr(() => {
+      intro('Render slides')
+      logStep('Reading rules')
+      logInfo('done')
+      logAdd('added.md')
+      logRemove('gone.md')
+      pipeOutput('body')
+      frameSuccess('canon sync', '../my-app')
+      outroSuccess('Sync complete')
+    })
+    expect(output).toBe('')
+  })
+
+  // Diagnostics reach stderr in every mode, so a quiet run that hides a
+  // failure is the regression this guards.
+  it('still writes warnings and errors', () => {
+    setQuiet(true)
+    const output = captureStderr(() => {
+      logWarn('careful')
+      logError('broke')
+      frameError('no plan')
+    })
+    expect(output).toBe('! careful\n✗ broke\n✗ no plan\n')
+  })
+})
+
+describe('a --json run', () => {
+  // The switch is set from the parsed command, so only a real run reads the
+  // wiring rather than the helper.
+  it('writes its record and no progress, leaving warnings to stderr', () => {
+    const result = spawnSync(
+      'bun',
+      [
+        join(ROOT, 'src/cli.ts'),
+        'markdown',
+        'audit',
+        join(ROOT, 'canon/REQUIREMENTS.md'),
+        '--json',
+      ],
+      { encoding: 'utf8' },
+    )
+    expect(result.status).toBe(0)
+    expect(JSON.parse(result.stdout)).toBeTypeOf('object')
+    expect(result.stderr).not.toContain('canon markdown audit')
+    expect(result.stderr).not.toContain('✓')
+  })
+
+  it('leaves the progress on for a text run of the same verb', () => {
+    const result = spawnSync(
+      'bun',
+      [
+        join(ROOT, 'src/cli.ts'),
+        'markdown',
+        'audit',
+        join(ROOT, 'canon/REQUIREMENTS.md'),
+      ],
+      { encoding: 'utf8' },
+    )
+    expect(result.stderr).toContain('✓ 1 markdown file')
+  })
+})
+
+describe('outroSuccess', () => {
+  it('closes the frame above the success line on a terminal', () => {
+    withEnv('1', () => {
+      asTerminal(() => {
+        const output = captureStderr(() => {
+          outroSuccess('Sync complete', '(3 rules)')
+        })
+        expect(output).toBe('└\n✓ Sync complete (3 rules)\n')
+      })
+    })
+  })
+
+  it('writes the success line alone off a terminal', () => {
+    const output = captureStderr(() => {
+      outroSuccess('Rules installed')
+    })
+    expect(output).toBe('✓ Rules installed\n')
   })
 
   // Without this the fix passes every case above by never emitting at all.

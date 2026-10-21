@@ -19,7 +19,7 @@ import {
   logStep,
   logWarn,
   outro,
-  palette,
+  outroSuccess,
   pipeOutput,
   select,
 } from '@/cli/ui'
@@ -193,8 +193,6 @@ function promptChoice(canOpenPullRequest: boolean): Promise<WorkflowChoice> {
 }
 
 function succeed(message: string): number {
-  const { GREEN, NC } = palette(process.stderr)
-  outro()
-  process.stderr.write(`\n${GREEN}✓ ${message}${NC}\n`)
+  outroSuccess(message)
   return 0
 }

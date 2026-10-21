@@ -311,7 +311,7 @@ async function runAudit(paths: string[], opts: AuditOptions): Promise<number> {
 
   intro('canon labels audit')
 
-  // The frame renders on stderr in both modes and the record goes to stdout
+  // The refusal reaches stderr in both modes and the record goes to stdout
   // alone, so an operator reading the terminal sees the refusal rather than a
   // command that appeared to do nothing.
   if (report.kind === 'refused') {
