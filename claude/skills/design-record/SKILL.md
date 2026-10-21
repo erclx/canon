@@ -1,6 +1,6 @@
 ---
 name: design-record
-description: Keeps the project's design record, being the design document at `canon/DESIGN.md` and the reference folder at `canon/design/` holding the accepted frames a build matches. Sets the folder up, lands a picked design through the project's design sync, keeps the index, redraws or retires a reference when its surface changes, and carries a pick's values into the stylesheet and its intent into the design document. Use whenever a picked frame or design moves into `canon/design/` or `canon/DESIGN.md`, before running the project's design sync or editing the index, including when asked to "land it in the design references", "add a design reference", "land this pick", "set up canon/design", "update the design index", "redraw the reference for X", "remove the reference for X", or "update DESIGN.md". Do NOT use to draft candidates or take a pick, which is `pick-by-eye`, to draw frames on the canvas, which is `canvas-board`, or to judge a design, which is `design-taste`.
+description: Keeps the project's design record, being the design document at `canon/DESIGN.md` and the reference folder at `canon/design/` holding the accepted frames a build matches. Sets the folder up, lands a picked design through the project's design sync, keeps the index, redraws or retires a reference when its surface changes, and carries a pick's values into the stylesheet and its intent into the design document. Use whenever a picked frame or design moves into `canon/design/` or `canon/DESIGN.md`, before running the project's design sync or editing the index, including when asked to "land it in the design references", "add a design reference", "land this pick", "set up canon/design", "update the design index", "redraw the reference for X", "remove the reference for X", or "update DESIGN.md". Do NOT use to draft candidates or take a pick, which is `pick-by-eye`, to draw frames on a board, which is Frameboard, or to judge a design, which is `design-taste`.
 metadata:
   family: ship
 ---
@@ -19,7 +19,7 @@ The document holds the rules and each role's intent, and the folder holds the pi
 ## Guards
 
 - Write no reference file by hand, whether a copy, an edit, or a delete. The project's design sync writes the frames, so a hand-written file drifts from the frame it claims to show.
-- Never land a candidate the operator has not picked. The folder holds accepted designs, and a draft lives on the canvas.
+- Never land a candidate the operator has not picked. The folder holds accepted designs, and a draft lives on the board.
 
 ## Step 1: read the record
 
@@ -69,7 +69,7 @@ A pick that settles color, type, spacing, or radius changes the design document 
 - A project with no stylesheet yet takes the values under `.claude/design/project/` after `canon design install`, and the lead names that path
 - A values record names in its lead the module it renders from and the command that renders it. Edit that module and run that command, never the document.
 
-Never cite a canvas frame path from the document or the index. The canvas folder is gitignored, so the citation resolves on one machine alone.
+Never cite a board frame path from the document or the index. The board folder is gitignored, so the citation resolves on one machine alone.
 
 ## Output
 

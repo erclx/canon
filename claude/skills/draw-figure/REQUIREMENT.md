@@ -30,5 +30,5 @@ Asked to refresh one architecture view, it redraws every view beside it. It judg
 ## Out of scope
 
 - Mermaid's layout, budgets, and label rules inside the fence, which the mermaid standard owns
-- A UI screen mockup, and design tokens or the visual system, which `canvas-board` owns
+- A UI screen mockup, which belongs on a Frameboard board, and design tokens or the visual system, which `design-record` owns
 - Implementation detail behind an architecture view, which the context entry the caption points at owns
