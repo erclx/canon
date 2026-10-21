@@ -494,7 +494,10 @@ describe.skipIf(!hasBrowser)('exportHtmlDeck', () => {
       if (result.status !== 'written') return
       const renders = join(root, 'renders')
       mkdirSync(renders)
+      // A profile under the test's root, since every soffice on the machine
+      // otherwise shares one and a second conversion exits without writing.
       spawnSync('soffice', [
+        `-env:UserInstallation=file://${join(root, 'lo-profile')}`,
         '--headless',
         '--convert-to',
         'pdf',
