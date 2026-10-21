@@ -1,6 +1,6 @@
 ---
 title: Markdown audit
-description: Running the markdown audit over any path, each finding it reports with whether it gates, the six density limits, the four table limits, the advisory measures, the exit codes, and where the audit runs
+description: Running the markdown audit over any path, each finding with whether it gates, the density and table limits, the advisory measures, the exit codes, and where the audit runs
 kind: reference
 ---
 

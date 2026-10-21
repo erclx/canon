@@ -12,7 +12,7 @@ CLI catalog and invocation rules for agents, split by command domain. Start with
 - [Context audit](context-audit.md): Running the context audit, its folder scope, the exit codes, every check with the folders it reaches and whether it gates, the seed gate, and the citation exclusions
 - [Indexes](indexes.md): How canon indexes regen and canon indexes list resolve paths, what they stage, and the record and exit codes each emits
 - [Install and sync](install-and-sync.md): What each install and sync verb writes, refuses, or leaves alone, the drift report and its seven side sections, the rule detection record, and version skew states
-- [Markdown audit](markdown-audit.md): Running the markdown audit over any path, each finding it reports with whether it gates, the six density limits, the four table limits, the advisory measures, the exit codes, and where the audit runs
+- [Markdown audit](markdown-audit.md): Running the markdown audit over any path, each finding with whether it gates, the density and table limits, the advisory measures, the exit codes, and where the audit runs
 - [Migrate](migrate.md): What each canon migrate verb moves, the markers that keep an old spelling, and what each one refuses
 - [Output shape](output-shape.md): The framed output shape every command renders into, the JSON and color modes, the exit discipline, the runtime catalogs, and a headless invocation per domain
 - [Overview](overview.md): What this folder covers, the invocation rules every command inherits, and how canon docs resolves a topic name
