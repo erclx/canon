@@ -355,6 +355,8 @@ beforeAll(() => {
   writeFileSync(join(project, 'src/cli.ts'), '')
 
   writeFileSync(join(project, 'review-body.md'), '## Review\n')
+  mkdirSync(join(project, 'hooks-guard-Xray'))
+  writeFileSync(join(project, 'hooks-guard-Xray/review-body.md'), '## Review\n')
   writeFileSync(
     join(project, 'doc.md'),
     '# Doc\n\nA line with an em dash — in it.\n',
@@ -1440,6 +1442,21 @@ describe('review-post-scan.sh verdicts', () => {
         join(fixture, 'bin-scan-fail') + delimiter + hookPath,
       )
 
+      expect(result.code).toBe(2)
+    })
+
+    it.concurrent(`should not read a flag inside the body path as the method on ${tree.label}`, async ({
+      expect,
+    }) => {
+      const result = await run(
+        hook,
+        postPayload(
+          `gh api ${REVIEWS} -f event=COMMENT -F body=@${join(fixture, 'project/hooks-guard-Xray/review-body.md')}`,
+        ),
+        join(fixture, 'bin-scan-fail') + delimiter + hookPath,
+      )
+
+      expect(result.stderr).toContain('board identifier')
       expect(result.code).toBe(2)
     })
 

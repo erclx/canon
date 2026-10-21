@@ -121,7 +121,7 @@ check() {
 
   # gh sends POST when a field flag is present and no method is named, and the
   # explicit method wins when one is. A call naming neither is a read.
-  if [[ $call =~ (-X|--method)[[:space:]=]*([A-Za-z]+) ]]; then
+  if [[ $call =~ [[:space:]](-X|--method)[[:space:]=]*([A-Za-z]+) ]]; then
     method=$(printf '%s' "${BASH_REMATCH[2]}" | tr '[:lower:]' '[:upper:]')
   elif [[ $call =~ [[:space:]](-f|-F|--field|--raw-field|--input)([[:space:]=]|$) ]]; then
     method=POST
