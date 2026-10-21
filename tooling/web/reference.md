@@ -86,6 +86,11 @@ The web layer covers the tooling shared across Vite + React, Astro, and Next.js.
 - `.github/workflows/verify.yml` runs `static-checks`, `unit-tests`, `build-verify`, and `e2e-tests`. `unit-tests` installs Chromium and runs `test:browser` only when the project defines that script.
 - Read `governance/rules/tooling/ci-workflow.md` for when a workflow's commit-back is right and when a report is
 
+## Design references
+
+- Expect a seeded `canon/design/index.md` stub carrying `auto: false`, copied only when missing, so a project's own index is never replaced
+- Expect `governance/rules/ui/design-reference.md` to install once a group folder sits under `canon/design/`, since the stub alone is no reference
+
 ## Ports
 
 - Derive every served port from `scripts/worktree-port.sh`, never a port literal in a script string, since two worktrees of one repository otherwise attach to one server

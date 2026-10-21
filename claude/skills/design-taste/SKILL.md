@@ -154,9 +154,10 @@ Run `${CLAUDE_SKILL_DIR}/references/preflight.md` against the output. It is the 
 
 ### Other skills
 
-Four neighbors own the rest.
+Five neighbors own the rest.
 
 - The candidate loop, the arm set, the render, and the pick: `pick-by-eye`
 - The shape of the project's design document and where its values live: `${CLAUDE_SKILL_DIR}/../design-record/references/design.md`
+- The folder holding the accepted designs and how a reference lands in it: `${CLAUDE_SKILL_DIR}/../design-record/references/folder.md`
 - Reading source for roughness: `ux-audit`. Measuring what a running interface costs to paint: `ux-measure`
 - Prose on the surface being designed: the `write-human` skill

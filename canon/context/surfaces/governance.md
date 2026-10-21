@@ -47,6 +47,7 @@ Holds one table per opt-in rule, keyed by rule basename, listing the dependencie
 
 - `canon gov detect` reads the target's manifests and git-listed paths to depth two, skips what the caller's stack resolves, and returns each match with its evidence
 - The `Unreferenced rules` stage fails on a rule no stack names and no table proposes, and on a table naming no live rule
+- A `files` pattern ending in `/` matches folders only, so `design-reference` is proposed by a group folder under `canon/design/` and not by the seeded `index.md` beside it
 - `nextjs` is proposed from `next` in a manifest or a `next.config.*` file, since it globs every `.ts` and `.tsx` file
 - `security-server` and `database` glob Python, TypeScript, JavaScript, Go, and PHP, and `security-web` globs component and markup files alone
 

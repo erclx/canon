@@ -9,13 +9,14 @@ The rule states canon's own design handoff, generalized from Frameboard's projec
 
 ## Where the design lives
 
-| Bullet                         | Source                                                                                                                                                              | Read       |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Build against the tracked copy | House choice: a canvas changes under the build with no history, so a reviewer cannot tell which version a surface was built against                                 | 2026-10-18 |
-| Load the keeper skill          | House choice: the rule governs an edit and carries no procedure, so a session without the skill copies frames in by hand or skips the index row                     | 2026-10-21 |
-| Land a design first            | House choice: a design landing inside a feature pull request is reviewed as code, and a second feature building against it meanwhile reads a design nobody accepted | 2026-10-18 |
-| No hand edits                  | House choice: a reference edited by hand drifts from its canvas source, and the next sync overwrites the edit or reports it as a change nobody made                 | 2026-10-18 |
-| Index row before the sync      | House choice: the sync writes only the surfaces the index names, so a missing row drops the new surface's reference, and a stale row keeps a removed surface's      | 2026-10-18 |
+| Bullet                         | Source                                                                                                                                                            | Read       |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Build against the tracked copy | House choice: a canvas changes under the build with no history, so a reviewer cannot tell which version a surface was built against                               | 2026-10-18 |
+| Load the keeper skill          | House choice: the rule governs an edit and carries no procedure, so a session without the skill copies frames in by hand or skips the index row                   | 2026-10-21 |
+| Land a design with its build   | House choice: a design merged as its own pull request waits on a review that reads a picture with no build beside it, and the pick drifts before anything uses it | 2026-10-21 |
+| No hand edits                  | House choice: a reference edited by hand drifts from its canvas source, and the next sync overwrites the edit or reports it as a change nobody made               | 2026-10-18 |
+| Index row before the sync      | House choice: the sync writes only the surfaces the index names, so a missing row drops the new surface's reference                                               | 2026-10-21 |
+| Reference lifetime             | House choice: a reference kept past its surface misleads the next build, and one redrawn without a design change hides a departure the review should see          | 2026-10-21 |
 
 ## Building against a reference
 
@@ -31,12 +32,6 @@ The rule states canon's own design handoff, generalized from Frameboard's projec
 | Reference beside capture           | House choice: a reviewer shown the build alone has nothing to compare it to, and approves a departure without seeing it      | 2026-10-18 |
 | Name each departure                | House choice: an unnamed departure reads as an accident, and the next build against the same reference repeats or reverts it | 2026-10-18 |
 | Unexplained departure is a finding | House choice: without the finding, an unexplained departure merges as the new design with no one having chosen it            | 2026-10-18 |
-
-## Naming
-
-| Bullet                  | Source                                                                                                                                 | Read       |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| One folder per app part | House choice: a fixed folder and theme suffix let the sync and a reviewer find a surface's pair of references without reading an index | 2026-10-18 |
 
 ## Declined
 
