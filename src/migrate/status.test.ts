@@ -10,9 +10,10 @@ function result(partial: Partial<CommandResult>): CommandResult {
   return { exitCode: 0, stdout: '', stderr: '', all: '', ...partial }
 }
 
-function runnerFor(
-  byVerb: Record<string, Partial<CommandResult>>,
-): { run: RunCommand; calls: string[][] } {
+function runnerFor(byVerb: Record<string, Partial<CommandResult>>): {
+  run: RunCommand
+  calls: string[][]
+} {
   const calls: string[][] = []
   const run: RunCommand = async (argv) => {
     calls.push([...argv])
