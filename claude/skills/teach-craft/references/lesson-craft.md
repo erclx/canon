@@ -28,7 +28,7 @@ Every element competes with the material for attention.
 The quiz is the retrieval, so a leak in its construction turns it into a reading test.
 
 - Write every option to the same length, in words and in characters. A longer option reads as the considered one.
-- Place the correct option by a rule rather than by hand. An author varying position by judgment settles on the first slot.
+- Rotate the correct option's slot by question number, so question one puts it first, question two second, and so on. An author varying position by judgment settles on the first slot.
 - Make each wrong option a misconception someone actually holds. An obviously wrong option removes itself and shrinks the question.
 - Write one feedback block per question, covering the correct option and why each distractor fails, saying why rather than whether
 - Give feedback after the attempt, never alongside the question

@@ -77,4 +77,13 @@ Parametric recall is confident where it is wrong, and a learner cannot audit it.
 - Read the subject from sources before teaching, and record each one with its link
 - Mark any claim resting on recall as resting on recall, in the lesson itself
 - List a source found and not opened as a lead, and never cite it
-- Choose which sources to read by the ladder under `### Choosing sources` in the teach standard, which also rules out the learner's own work as proof of a general claim
+- Rest each general claim on the highest rung of the ladder below that covers it
+- Never take the learner's own projects, or material specific to one employer, as proof of a general claim. Either may appear as a worked application labeled with whose it is.
+
+The ladder runs in three rungs, highest first.
+
+1. Documentation or a specification published by whoever owns the subject
+2. A canonical work on the subject, such as the standard text, a reference book, or a primary paper
+3. Other material, such as a tutorial, a course, or a post, and only for a claim the first two rungs do not cover
+
+A subject nobody owns, such as a mathematical topic or a craft, has no first rung, so its list starts at the second. Record a third-rung source with the claim it covers and why no higher rung does, since that reason is what a later session checks the choice against.
