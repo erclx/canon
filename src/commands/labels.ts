@@ -249,8 +249,8 @@ export function register(program: Command): void {
         '## Summary or ## Key changes, fails. A review, a release-please body,',
         'and a scan carrying no title skip this check.',
         '',
-        'It reports the density of that same body per section under `density`,',
-        'without failing on it: a bullet past 200 characters, more than 5 plain',
+        'It fails the density of that same body, reported per section under',
+        '`density`: a bullet past 200 characters, more than 5 plain',
         'bullets or 2 paragraphs in a row, a paragraph past 350 characters, any',
         'H3 or deeper heading, and Technical context mixing bullets with',
         'paragraphs. A bold label alone on a line splits a Key changes run, a',
@@ -279,11 +279,12 @@ export function register(program: Command): void {
         'not read, as GitHub does not read it.',
         '',
         'Exit codes:',
-        '  0  none of the eight found',
+        '  0  none of the nine found',
         '  1  refused, with the reason on stderr or in the JSON record',
         '  2  the title or body carries a phase label, a board identifier, a',
         '     session link, a banned character, a heading outside the closed',
-        '     list or a required one missing, a missing or stray closing line',
+        '     list or a required one missing, a density finding in the body, a',
+        '     missing or stray closing line',
         '     under --closes, or a title',
         "     breaking claude/skills/git-pr/references/pr.md's format, casing, or length",
         '',
@@ -718,9 +719,9 @@ async function runScan(opts: ScanOptions): Promise<number> {
     }
   }
 
-  // Reported and never gated yet. New bodies come back clean under the
-  // shape in pr.md first, so an older open pull request fails no edit event.
-  // A post is never gated, since CI reads one only after it is published.
+  // A body's density fails the scan. A post's never does, since the review
+  // post hook denies on exit 2 and scans with no title, so a post-density
+  // fail would block every dense review or reply post.
   const post = !sectionsChecked && isPost(resolved.body)
   const density = sectionsChecked
     ? bodyDensity(resolved.body)
@@ -859,6 +860,7 @@ async function runScan(opts: ScanOptions): Promise<number> {
     titleFormatIssues.length === 0 &&
     sections.outside.length === 0 &&
     sections.missing.length === 0 &&
+    !(sectionsChecked && density.length > 0) &&
     banFindings.length === 0 &&
     closing.missing.length === 0 &&
     closing.stray.length === 0

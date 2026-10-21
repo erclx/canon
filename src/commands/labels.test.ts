@@ -196,14 +196,14 @@ describe('canon labels scan text checks', { timeout: RUN_TIMEOUT_MS }, () => {
     expect(record.exitCode).toBe(0)
   })
 
-  it('should report density findings and still exit 0 on them alone', async () => {
+  it('should fail on a body density finding alone and still report it', async () => {
     const body = await writeBody(
       '## Summary\n\nOne.\n\n## Key changes\n\n- a\n- b\n- c\n- d\n- e\n- f\n',
     )
 
     const record = await runScan(['--title', TITLE, '--body-file', body])
 
-    expect(record.exitCode).toBe(0)
+    expect(record.exitCode).toBe(2)
     expect(record.density).toEqual([
       {
         section: 'Key changes',
@@ -215,11 +215,29 @@ describe('canon labels scan text checks', { timeout: RUN_TIMEOUT_MS }, () => {
     ])
   })
 
-  it('should leave density empty on a body scanned with no title', async () => {
+  it('should fail a pull request event whose body is dense', async () => {
+    const event = await writeEvent({
+      pull_request: {
+        title: TITLE,
+        body: '## Summary\n\nOne.\n\n## Key changes\n\n- a\n- b\n- c\n- d\n- e\n- f\n',
+        head: { ref: 'feat/x' },
+      },
+    })
+
+    const record = await runScan(['--event', event])
+
+    expect(record.exitCode).toBe(2)
+    expect(record.density?.map((finding) => finding.kind)).toEqual([
+      'bullet-run',
+    ])
+  })
+
+  it('should leave density empty and exit 0 on a body scanned with no title', async () => {
     const body = await writeBody('### Heading\n\nOne.\n')
 
     const record = await runScan(['--body-file', body])
 
+    expect(record.exitCode).toBe(0)
     expect(record.density).toEqual([])
   })
 
