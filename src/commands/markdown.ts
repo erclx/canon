@@ -6,7 +6,7 @@ import { BAN_SETS, emptyBanSets } from '@/markdown/bans'
 import { isChangelog, lengthExemption } from '@/markdown/ceiling'
 import { type ColonFinding, findColons } from '@/markdown/colons'
 import { type MarkdownAuditRefusal, resolveMarkdown } from '@/markdown/files'
-import { densityFindings, type DensityKind } from '@/markdown/density'
+import type { DensityKind } from '@/markdown/density'
 import {
   type GatedDensityFinding,
   type GatedReferenceShapeFinding,
@@ -38,7 +38,11 @@ import {
   readGatedConfig,
   resolveGatedList,
 } from '@/markdown/gated'
-import { densityGates, inDensityScope } from '@/markdown/scope'
+import {
+  densityGates,
+  inDensityScope,
+  scopedDensityFindings,
+} from '@/markdown/scope'
 import {
   TABLE_CELL,
   TABLE_ROWS,
@@ -375,17 +379,15 @@ async function runAudit(
         bans: scanBans(lines, bans),
         colons: advisory ? findColons(lines) : [],
         headingCase: advisory ? findHeadingCase(source) : [],
-        density: inDensityScope(rel)
-          ? densityFindings(lines).map((finding) => ({
-              ...finding,
-              gating: densityGates(
-                rel,
-                finding.kind,
-                gated.prefixes,
-                gated.alwaysGated,
-              ),
-            }))
-          : [],
+        density: scopedDensityFindings(rel, lines).map((finding) => ({
+          ...finding,
+          gating: densityGates(
+            rel,
+            finding.kind,
+            gated.prefixes,
+            gated.alwaysGated,
+          ),
+        })),
         tables: inDensityScope(rel) ? tableFindings(lines) : [],
         referenceShape: referenceShapeFindings(source).map((finding) => ({
           ...finding,

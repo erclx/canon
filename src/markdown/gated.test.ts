@@ -160,6 +160,16 @@ describe('findingsUnder', () => {
     ])
   })
 
+  it('should find a long Key paths run in CLAUDE.md', async () => {
+    const paths = Array.from({ length: 6 }, (_, n) => `- \`p${n}/\`: path`)
+    await repoWith({
+      'CLAUDE.md': `# Project\n\n## Key paths\n\n${paths.join('\n')}\n`,
+    })
+    expect(await findingsUnder(root, 'CLAUDE.md')).toEqual([
+      { path: 'CLAUDE.md', kind: 'bullet-run', line: 5 },
+    ])
+  })
+
   it('should ignore a finding outside the prefix', async () => {
     await repoWith({ 'wiki/page.md': `# Page\n\n${LONG_PARAGRAPH}` })
     expect(await findingsUnder(root, 'docs/')).toEqual([])

@@ -9,7 +9,7 @@ import {
 import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { listRepositoryFiles } from '@/git/files'
-import { densityFindings, type DensityKind } from '@/markdown/density'
+import type { DensityKind } from '@/markdown/density'
 import { referenceShapeGates } from '@/markdown/gate'
 import {
   type ReferenceShapeKind,
@@ -20,7 +20,7 @@ import {
   densityGates,
   GATED_PATHS,
   GATED_SCOPE_ROOTS,
-  inDensityScope,
+  scopedDensityFindings,
 } from '@/markdown/scope'
 import { isOwnCheckout } from '@/roots/project'
 
@@ -198,11 +198,9 @@ export async function findingsUnder(
   const found = await Promise.all(
     under.map(async (rel) => {
       const source = await readFile(join(root, rel), 'utf8')
-      const density = inDensityScope(rel)
-        ? densityFindings(bodyLines(source)).filter((finding) =>
-            densityGates(rel, finding.kind, [prefix], false),
-          )
-        : []
+      const density = scopedDensityFindings(rel, bodyLines(source)).filter(
+        (finding) => densityGates(rel, finding.kind, [prefix], false),
+      )
       const shape = referenceShapeGates(rel, [prefix])
         ? referenceShapeFindings(source)
         : []
