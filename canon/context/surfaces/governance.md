@@ -27,7 +27,7 @@ Holds the source ledger for each outside-practice rule at the rule's own path, o
 
 - `canon gov audit` matches a ledger's table rows to the rule's bullets by count under each H2 of the same name, so a row added or dropped without its bullet fails the folder
 - A cut bullet goes in a `## Declined` list rather than a table, since every table row under a heading counts as a bullet's row
-- Every `PRACTICE_FOLDERS` entry is gated, so a new outside-practice rule fails the push until its ledger lands, and `RULE_GATE_EXEMPT` spares `ui/canvas.md` alone until v149.2
+- Every `PRACTICE_FOLDERS` entry is gated, so a new outside-practice rule fails the push until its ledger lands, and `RULE_GATE_EXEMPT` names a rule only while a finding waits on its removal
 - A ledger whose rule names a version-bound API records the major in the `Read` column
 - A `|` inside a code span still splits a table cell, so a glob such as `@(spec|test)` in a ledger row is written `@(spec\|test)`
 
