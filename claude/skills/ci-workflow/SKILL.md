@@ -69,6 +69,14 @@ A workflow that pushes a regenerated file onto the pull request branch takes the
 - Set `HUSKY: 0` on the commit step when the runner lacks a tool a hook shells out to.
 - Fail a template's first step while a path list still holds its placeholder, so an unfinished install fails loudly rather than never firing.
 
+## Steps
+
+- Keep an inline `run:` step to five lines at most, and move any branching, loop, trap, or function to a script whatever its length. A script runs on a laptop and under shellcheck.
+- Put the script at `scripts/<name>.sh`, or a `.ts` file for a Bun project, and call it after `actions/checkout`, since the runner holds no copy before that.
+- Pass inputs as arguments or `env`, never spliced into the script text, so a branch name with a quote or `$(...)` in it cannot run.
+- Keep `permissions` and secrets on the workflow step, with the script reading its token from `env`.
+- Open the script with `set -euo pipefail`, since a `run:` step defaults to `bash -e` and a script without the flags stops failing on a pipeline error.
+
 ## Template
 
 Load `${CLAUDE_SKILL_DIR}/references/workflows.md` for the base workflow template. Adapt it to the project's stack, test commands, and build output. Add or remove jobs as needed. The template already carries the folded shape, and the split beside it applies once the granularity rule above calls for it.
@@ -90,5 +98,6 @@ Before responding, also verify:
 - Artifacts upload on `if: failure()` only with `retention-days: 7`.
 - Job names use emoji + title format.
 - Every job runs on `ubuntu-latest`, except one that targets a platform the project states and runs a layer that differs by platform.
+- No `run:` step passes five lines or carries a branch, loop, trap, or function. A step that does calls a script, with its inputs as arguments or `env`.
 - Deploy, publish, and release jobs carry a placeholder step and a named handoff, never a guessed deploy command.
 - Bun projects use `oven-sh/setup-bun@v2` with `bun install --frozen-lockfile`.
