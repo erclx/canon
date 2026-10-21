@@ -1,16 +1,18 @@
 #!/usr/bin/env sh
 
 # Runs the post-merge steps through `canon hooks post-merge`: archive the task a
-# merged pull request closed, push the records, reclaim merged worktrees,
-# reinstall the CLI, and update the plugin cache. The verb owns the order and
-# each line it prints. `canon/context/development/local-loop.md` carries why.
+# merged pull request closed, push the records, retire the fan-in members a
+# merged integrator named, reclaim merged worktrees, reinstall the CLI, and
+# update the plugin cache. The verb owns the order and each line it prints.
+# `canon/context/development/local-loop.md` carries why.
 #
-# CANON_SKIP_RECLAIM=1 turns off the worktree reclaim.
+# CANON_SKIP_RECLAIM=1 turns off the member retirement and the worktree
+# reclaim, since both remove worktrees.
 # CANON_SKIP_UPGRADE=1 turns off the CLI reinstall.
 # CANON_SKIP_PLUGIN_UPDATE=1 turns off the plugin cache update.
 #
-# The reclaim reads merge state through `gh`, so a machine without it on PATH
-# reclaims nothing and says nothing. Install `gh` to turn it on.
+# Both read merge state through `gh`, so a machine without it on PATH retires
+# and reclaims nothing and says nothing. Install `gh` to turn them on.
 #
 # Husky runs this as `sh -e`, and `post-rewrite` sources it on a rebase, so
 # every test sits inside an `if` or an `||` and nothing here exits non-zero.

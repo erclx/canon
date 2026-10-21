@@ -61,7 +61,7 @@ Reads and answers the intake folders under `.canon/intake/`, behind `canon intak
 Owns the reclaim reading behind `canon worktrees list` and `reclaim`. `stop.ts` signals every listener inside a reclaimable path ahead of the removal, and a machine with no listener reader removes anyway and records `stopped` as null, never zero.
 
 - A worktree is reclaimable only with a merged pull request, a clean tree, and no live session in the roster `src/sessions/` holds, and `refusals` names every failing condition
-- Git ancestry cannot decide it, since squash merges leave a merged branch outside `main`
+- Ancestry to `main` cannot decide it after a squash. A fan-in member has no pull request, so `members.ts` reads the integrator's member line and checks each tip against its merged head.
 - The merged read is one `gh pr list` over the latest 200 merges, run through `gitEnv()` so a stray `GIT_DIR` cannot aim `gh` at another repository
 - An unreadable input refuses the whole reading, because a false clean ends in a removal
 - A planner reads `main-worktree` and an unmerged worker `no-merged-pull-request`, so the handoff retires both by hand and does so first
