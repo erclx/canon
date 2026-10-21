@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.52.0](https://github.com/erclx/canon/compare/v5.51.0...v5.52.0) (2026-10-21)
+
+
+### Features
+
+* **labels:** fail the scan on pull request body density ([#2585](https://github.com/erclx/canon/issues/2585)) ([121216f](https://github.com/erclx/canon/commit/121216fa258de521ff2b077aa0b897b5f2b9d519))
+* **skills:** add target-update to catch a target up to the toolkit ([#2583](https://github.com/erclx/canon/issues/2583)) ([065b971](https://github.com/erclx/canon/commit/065b9716df290bd87a94b16bed1e54e4ebf29f4e))
+
+
+### Bug Fixes
+
+* **hooks:** anchor the method flag in review-post-scan on whitespace ([#2584](https://github.com/erclx/canon/issues/2584)) ([32c52a2](https://github.com/erclx/canon/commit/32c52a25e4eef6d7d9a88d83aed3d16ab433dcf7))
+
 ## [5.51.0](https://github.com/erclx/canon/compare/v5.50.0...v5.51.0) (2026-10-21)
 
 
