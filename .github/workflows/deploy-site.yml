@@ -94,30 +94,17 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
-      # Deployments are listed through the REST API rather than wrangler, whose
-      # listing carries no branch filter. `force=true` is what lets a deployment
-      # still holding its branch alias be deleted.
+      # The default branch, since a closed pull request may have no merge ref to
+      # check out, and the script that holds the Cloudflare token should not
+      # come from the branch being closed.
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
       - name: Delete preview deployments
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          PROJECT_NAME: canon
           BRANCH: ${{ github.head_ref }}
-        run: |
-          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PROJECT_NAME/deployments"
-          auth="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
-          page=1
-          ids=""
-          while :; do
-            listing=$(curl -fsS -H "$auth" "$api?env=preview&per_page=25&page=$page")
-            [ "$(echo "$listing" | jq '.result | length')" -eq 0 ] && break
-            ids="$ids $(echo "$listing" | jq -r --arg branch "$BRANCH" '.result[] | select(.deployment_trigger.metadata.branch == $branch) | .id')"
-            page=$((page + 1))
-          done
-          deleted=0
-          for id in $ids; do
-            curl -fsS -X DELETE -H "$auth" "$api/$id?force=true" >/dev/null
-            echo "Deleted $id"
-            deleted=$((deleted + 1))
-          done
-          echo "Deleted $deleted preview deployments for $BRANCH."
+        run: scripts/ci/delete-previews.sh canon "$BRANCH"
