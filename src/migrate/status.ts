@@ -48,6 +48,22 @@ function parseRecord(stdout: string): unknown {
   }
 }
 
+const FRAME = /^[\s│├┌└]+/
+
+/**
+ * A refusing subcommand writes its stderr inside the CLI's frame, so the raw
+ * text would carry the glyphs into a record a skill reads as data. The error
+ * lines are the reason, and a stderr without a marker keeps every line.
+ */
+function refusalReason(stderr: string): string {
+  const lines = stderr.split('\n').map((line) => line.replace(FRAME, '').trim())
+  const errors = lines
+    .filter((line) => line.startsWith('✗'))
+    .map((line) => line.replace(/^✗\s*/, ''))
+  const kept = errors.length > 0 ? errors : lines.filter(Boolean)
+  return kept.join('. ')
+}
+
 async function readOne(
   run: RunCommand,
   migration: Migration,
@@ -75,7 +91,8 @@ async function readOne(
 
   const reason =
     result.spawnError ??
-    (result.stderr.trim() || `exited ${result.exitCode} with no message`)
+    (refusalReason(result.stderr) ||
+      `exited ${result.exitCode} with no message`)
   return {
     name: migration.name,
     verb,

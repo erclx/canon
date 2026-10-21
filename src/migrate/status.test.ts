@@ -1,4 +1,6 @@
+import { Command } from 'commander'
 import { describe, expect, it } from 'vitest'
+import { register } from '@/commands/migrate'
 import type { CommandResult, RunCommand } from '@/gate/measures'
 import {
   MIGRATIONS,
@@ -65,6 +67,37 @@ describe('readMigrationStatus', () => {
     expect(statusExitCode(report)).toBe(1)
   })
 
+  it('keeps the error lines of a framed stderr and drops the frame', async () => {
+    const framed = [
+      '┌',
+      '│ canon migrate records',
+      '│',
+      '├ Scope',
+      '│ ✗ Could not list files under /tmp/x',
+      '│ ✗ Second problem',
+      '└',
+      '',
+    ].join('\n')
+    const { run } = runnerFor({ records: { exitCode: 1, stderr: framed } })
+
+    const report = await readMigrationStatus(run)
+
+    expect(report.migrations[0].reason).toBe(
+      'Could not list files under /tmp/x. Second problem',
+    )
+  })
+
+  it('strips the frame from a stderr with no error marker', async () => {
+    const { run } = runnerFor({
+      rename: { exitCode: 1, stderr: '┌\n│ plain failure\n└\n' },
+    })
+
+    const report = await readMigrationStatus(run)
+
+    const refused = report.migrations.find((m) => m.name === 'rename')
+    expect(refused?.reason).toBe('plain failure')
+  })
+
   it('reads an exit outside the contract as refused', async () => {
     const { run } = runnerFor({ rename: { exitCode: 137 } })
 
@@ -124,5 +157,19 @@ describe('statusExitCode', () => {
     })
 
     expect(statusExitCode(await readMigrationStatus(run))).toBe(1)
+  })
+})
+
+describe('MIGRATIONS', () => {
+  it('names every migrate subcommand but status, so none reads clean unseen', () => {
+    const program = new Command()
+    register(program)
+    const migrate = program.commands.find((c) => c.name() === 'migrate')
+
+    const registered = (migrate?.commands ?? [])
+      .map((c) => c.name())
+      .filter((name) => name !== 'status')
+
+    expect([...registered].sort()).toEqual(MIGRATIONS.map((m) => m.name).sort())
   })
 })
