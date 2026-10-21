@@ -9,15 +9,15 @@ description: Scope boundary for pipeline structure against job contents, and the
 
 Without this skill, a session chains jobs with `needs` to express reading order rather than a data dependency, so the pipeline costs the sum of its jobs. The same session splits a one-minute gate into parallel jobs, each repaying checkout, install, and toolchain setup, so the gate gets slower while reporting no earlier.
 
-The rest surface as flakes. An action pinned to a moving ref changes under the project, a cache keyed on a static string serves a stale toolchain after a bump, artifacts upload on every run and never expire, a broad default token grants writes nobody needed, and a workflow with no manual trigger reproduces only by pushing a commit.
+The rest surface as flakes. A moving action ref changes under the project, a static cache key serves a stale toolchain, artifacts never expire, a broad default token grants unneeded writes, and a missing manual trigger leaves a run reproducible only by pushing a commit. A Linux-only pin also flags a supported macOS job as a departure.
 
 ## Must
 
 - A job is gated only on a data dependency or a cost that justifies the wait, and checks sharing setup stay in one job until a run log puts the gate past roughly two minutes
 - Every action is pinned to a tag that cannot cross a major version, and every cache is keyed on the version of what it caches
 - Every workflow carries a manual trigger beside its primary one, except one that commits back
-- The token defaults to read-only, with a write scope granted only on the job that needs it
-- Artifact upload is bounded to failures and expires
+- The token defaults to read-only, with a write scope granted only on the job that needs it, and artifact upload is bounded to failures and expires
+- A job runs on Linux unless the project states a platform for a layer that differs by platform
 
 ## Must not
 
