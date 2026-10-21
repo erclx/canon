@@ -17,6 +17,7 @@ Its quizzes leak the answer through option length or position, and nothing tests
 - Ask the learner's starting point and read the subject from sources, saying which claims rest on recall
 - State quiz design that leaks no answer, and pair a quiz with a teach-back
 - Hold that the wrong answer itself is what the next session places from
+- Cite an opened source in the ledger for every kept rule, or label it house judgment with the reason it stays, then close on excuses, red flags, and a checklist
 
 ## Must not
 
@@ -27,4 +28,3 @@ Its quizzes leak the answer through option length or position, and nothing tests
 ## Out of scope
 
 - Where a lesson is stored or how it renders, which belongs to whatever surface the session writes to
-- A cited source ledger for the practice family, which is a follow-on task

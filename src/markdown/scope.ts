@@ -373,6 +373,7 @@ export const GATED_PATHS: readonly string[] = [
   'claude/skills/task-complete/references/unusable-baseline.md',
   'claude/skills/teach-craft/REQUIREMENT.md',
   'claude/skills/teach-craft/SKILL.md',
+  'claude/skills/teach-craft/references/adopted.md',
   'claude/skills/teach-craft/references/lesson-craft.md',
   'claude/skills/teach-craft/references/pedagogy.md',
   'claude/skills/test-craft/REQUIREMENT.md',
