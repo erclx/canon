@@ -45,4 +45,6 @@ if has_verb canon; then
   canon hooks post-merge --root "$root" || true
 elif [ -f "$source_cli" ] && command -v bun >/dev/null 2>&1 && has_verb bun "$source_cli"; then
   bun "$source_cli" hooks post-merge --root "$root" || true
+else
+  echo 'canon is too old to run the post-merge hook. Run `canon upgrade`.' >&2
 fi

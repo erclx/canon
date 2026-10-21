@@ -37,4 +37,6 @@ has_verb() {
 
 if has_verb; then
   canon hooks post-merge --root "$root" || true
+else
+  echo 'canon is too old to run the post-merge hook. Run `canon upgrade`.' >&2
 fi

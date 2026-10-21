@@ -56,7 +56,7 @@ function calls(name: string): string {
   return existsSync(log) ? readFileSync(log, 'utf8') : ''
 }
 
-function runHook(hook: string): number {
+function runHookWithStderr(hook: string): { code: number; stderr: string } {
   const result = execaSync('sh', ['-e', hook], {
     cwd: root,
     env: {
@@ -66,7 +66,11 @@ function runHook(hook: string): number {
     extendEnv: false,
     reject: false,
   })
-  return result.exitCode ?? 1
+  return { code: result.exitCode ?? 1, stderr: result.stderr }
+}
+
+function runHook(hook: string): number {
+  return runHookWithStderr(hook).code
 }
 
 beforeEach(() => {
@@ -94,13 +98,18 @@ describe.each(HOOKS)('post-merge hook ($name copy)', ({ path }) => {
   })
 
   // A binary older than the verb is left for its owner to upgrade by hand,
-  // so the hook calls nothing on it and still exits zero.
+  // so the hook calls nothing on it, names the upgrade, and still exits zero.
   it('should leave a binary lacking the verb alone and exit zero', () => {
     stub('canon', ROOT_USAGE)
 
-    const code = runHook(path)
+    const { code, stderr } = runHookWithStderr(path)
 
-    expect({ code, canon: calls('canon') }).toEqual({ code: 0, canon: '' })
+    expect({ code, canon: calls('canon'), stderr }).toEqual({
+      code: 0,
+      canon: '',
+      stderr:
+        'canon is too old to run the post-merge hook. Run `canon upgrade`.',
+    })
   })
 
   it('should exit zero with no canon on PATH', () => {
