@@ -15,8 +15,7 @@ import { isMarked } from '@/sweep/exempt-marker'
  * number resolves.
  *
  * That is also what keeps the check a prose pattern rather than a parser.
- * `src/design/base.css` and `src/design/tokens.ts` carry sixteen values shaped
- * `#191512`, which no width or boundary rule separates from a pull request
+ * `src/design/tokens.ts` carries twenty values shaped `#191512`, which no width or boundary rule separates from a pull request
  * number, so telling them apart would need the line's syntactic position.
  */
 export const SHIPPED_CORPORA = [

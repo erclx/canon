@@ -16,17 +16,15 @@ export function register(program: Command): void {
   design
     .command('regen')
     .helpOption('-h, --help', 'Show this help message')
-    .description(
-      'Rewrite canon/DESIGN.md and the base stylesheet from src/design/tokens.ts',
-    )
+    .description('Rewrite canon/DESIGN.md from src/design/tokens.ts')
     .addHelpText(
       'after',
       [
         '',
         'This runs against the toolkit checkout rather than a target. It',
-        'rewrites the record and the base stylesheet from the token module and',
-        'refuses where the record is absent, which is what the CLI installed',
-        'into a project as a dependency looks like.',
+        'rewrites the record from the token module and refuses where the record',
+        'is absent, which is what the CLI installed into a project as a',
+        'dependency looks like.',
         '',
       ].join('\n'),
     )
@@ -39,10 +37,10 @@ export function register(program: Command): void {
       // so each emits it after its own opener rather than ahead of the branch.
       const mismatch = checkoutMismatchWarning(process.cwd())
 
-      // Both outputs resolve from `PROJECT_ROOT`, which is the installed
+      // The output resolves from `PROJECT_ROOT`, which is the installed
       // package directory when the CLI runs out of a target's `node_modules`.
-      // The record is the one output that is already committed here and ships
-      // with no package, so its absence is what separates the two.
+      // The record is already committed here and ships with no package, so
+      // its absence is what separates the two.
       if (!existsSync(join(PROJECT_ROOT, DESIGN_DOCUMENT))) {
         process.stderr.write(`${GREY}┌${NC}\n`)
         if (mismatch !== undefined) logWarn(mismatch)
@@ -58,11 +56,9 @@ export function register(program: Command): void {
       )
       if (mismatch !== undefined) logWarn(mismatch)
       const result = regenDesign(PROJECT_ROOT)
-      for (const path of [result.documentPath, result.cssPath]) {
-        process.stderr.write(
-          `${GREY}│${NC} ${GREEN}✓${NC} ${relative(PROJECT_ROOT, path)}\n`,
-        )
-      }
+      process.stderr.write(
+        `${GREY}│${NC} ${GREEN}✓${NC} ${relative(PROJECT_ROOT, result.documentPath)}\n`,
+      )
       process.stderr.write(`${GREY}└${NC}\n`)
     })
 

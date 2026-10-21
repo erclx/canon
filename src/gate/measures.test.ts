@@ -413,7 +413,7 @@ describe('shippedReferences', () => {
   })
 
   it('reads a tree carrying none of the corpora as unmeasured', async () => {
-    write('src/design/base.css', '--ink: #191512;\n')
+    write('src/design/tokens.ts', "const ink = '#191512'\n")
 
     const report = await shippedReferences(context())
 

@@ -212,10 +212,10 @@ export const STAGES: readonly Stage[] = [
   },
   {
     // `canon/DESIGN.md`, the web stylesheet, and the tab icon are written
-    // from `src/design/tokens.ts`, the base stylesheet from
-    // `src/design/neutral.ts`, and none is edited by hand. Four artifacts
-    // from two token sources is the cost of the token move, and a render step that has to run is only safe while something fails
-    // when it did not, which is this. The record and the worked example are
+    // from `src/design/tokens.ts`, and none is edited by hand. Three
+    // artifacts from one token source is the cost of the token move, and a
+    // render step that has to run is only safe while something fails when it
+    // did not, which is this. The record and the worked example are
     // then counted against the prose budget, which the drift asserts cannot
     // see since a regenerated paragraph agrees with its source.
     id: 'design',
@@ -231,12 +231,6 @@ export const STAGES: readonly Stage[] = [
         pathspec: 'canon/DESIGN.md',
         failure:
           'The design record drifted from the token source. Run bun run check and commit canon/DESIGN.md.',
-      },
-      {
-        kind: 'drift',
-        pathspec: 'src/design/base.css',
-        failure:
-          'The base stylesheet drifted from the token source. Run bun run check and commit src/design/base.css.',
       },
       {
         kind: 'command',

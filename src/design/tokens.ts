@@ -84,8 +84,9 @@ const MONO = 'Noto Sans Mono, DejaVu Sans Mono, monospace'
  * The proportional stack every role but `code` declares. Geist is the face the
  * visual-direction track set throughout, embedded through `FONT_FACES`.
  *
- * The stack stops at two names and a generic because `src/design/base.css` is
- * written by `canon design regen` and formatted by prettier, and a declaration
+ * The stack stops at two names and a generic because
+ * `web/src/styles/tokens.css` is written by `bun run web:tokens` and formatted
+ * by oxfmt, and a declaration
  * past 80 columns is wrapped by the second and flattened by the first. Every
  * emitted line stays inside the width so the two writers never disagree.
  */
