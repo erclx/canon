@@ -124,7 +124,7 @@ canon labels scan --body-file .canon/tmp/pr/reply/reply-<number>.md --json
 The hook skips `.canon/tmp/`, and the `pull_request` check reads only a pull request's own title and body, so this scan is the only gate on the reply.
 
 - Fix any hit, and stop on a `density` entry too, shortening the line it names
-- Read the record rather than the exit, since density never sets the exit code
+- Read the record rather than the exit, since a post's density never sets the exit code
 
 Then post and keep the `id` the POST answers with, since Step 7 edits this exact comment:
 
