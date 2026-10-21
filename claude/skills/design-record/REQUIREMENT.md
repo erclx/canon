@@ -14,7 +14,7 @@ Each project invents its own grouping, and its index restates the file tree rath
 ## Must
 
 - The folder takes the groups, file names, support folder, and index row form the folder standard fixes, and a project without one gets it set up rather than refused
-- A pick lands through the project's design sync, with its index row written before the sync runs, and a project with no sync gets told what is missing
+- A pick lands through the design sync after its index row, and a project with no sync is told before any write and still gets the design document half
 - A redraw keeps the index row and leaves the files to the sync, and a retired surface takes its files and row out in the change that removes it
 - The run looks at each landed picture in both themes before reporting it landed
 - A picked value lands in the stylesheet and its intent in the design document under the design document standard, and a generated record changes through its module alone

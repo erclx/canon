@@ -25,21 +25,21 @@ The document holds the rules and each role's intent, and the folder holds the pi
 
 Read `canon/design/index.md` from the project root, and list the group folders beside it.
 
-- A missing folder or index sends the run to Step 2 before anything lands
+- A missing folder or index sends the run to Step 3 before anything lands
 - An index carrying a file list or a canvas mapping is an older shape. Leave its rows in place, add new rows in the form `folder.md` gives, and say the index predates the standard.
 
-## Step 2: set up the folder
+## Step 2: find the project's design sync
+
+Find the sync before writing anything, since every folder step runs through it. Read the project's scripts, such as the `scripts` block of `package.json`, for the command that writes frames into `canon/design/`. Run its `--help` when it offers one, for its mapping file and its check.
+
+When no sync resolves, skip Steps 3 to 5 and capture no frame in the sync's place. Report `⚠ No design sync found, so the pick did not land in canon/design/. Add one or name the command, then re-run.` and go on to Step 6, which needs no sync.
+
+## Step 3: set up the folder
 
 Skip this step when `canon/design/index.md` exists, even as a stub, since a stub the project's stack seeded is the setup.
 
 1. Write `canon/design/index.md` from the template in `folder.md`, with one row per group the first pick needs.
 2. Leave the group folders to the sync, since git tracks no empty folder and the sync creates each one as it writes.
-
-## Step 3: find the project's design sync
-
-Read the project's scripts, such as the `scripts` block of `package.json`, for the command that writes frames into `canon/design/`. Run its `--help` when it offers one, for its mapping file and its check.
-
-Capture no frame in the sync's place. When no sync resolves, stop: `❌ No design sync found. canon/design/ is written by the project's design sync, so add one or name the command, then re-run.`
 
 ## Step 4: land a pick
 
