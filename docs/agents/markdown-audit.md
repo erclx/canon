@@ -48,7 +48,7 @@ Tables take the four limits in the `markdown-craft` skill's `tables.md`, on the 
 - A paragraph under a list item counts toward that bullet, never as a paragraph
 - A table, fence, list, heading, or bold section marker ends a run of paragraphs
 - A run whose every item opens with a bold label or a link is exempt, and numbered items never count
-- Only context entries, docs, skill bodies, references, and requirements, tooling seeds and stack references, the wiki, `README.md`, and `CONTRIBUTING.md` take a finding
+- Only context entries, docs, skills, tooling seeds and references, the wiki, `README.md`, and `CONTRIBUTING.md` take a finding, plus the Key paths of `CLAUDE.md` on the run and H3 limits
 - A requirement gates only once the gated list below names its own file, never through its skill's prefix and never on a bullet run alone
 
 | Root              | A density or reference shape finding gates                                                                 |
