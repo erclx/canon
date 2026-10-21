@@ -1,0 +1,111 @@
+import type { RunCommand } from '@/gate/measures'
+
+interface Migration {
+  readonly name: string
+  readonly flags: readonly string[]
+}
+
+/**
+ * Every `canon migrate` subcommand in the order a project runs them, records
+ * first. This is the source for that order, and `docs/target/migrations.md`
+ * cites the verb rather than keeping a second list. A new migration joins by
+ * one line here.
+ */
+export const MIGRATIONS: readonly Migration[] = [
+  { name: 'records', flags: [] },
+  { name: 'record-tree', flags: [] },
+  { name: 'scratch-evidence', flags: [] },
+  { name: 'record-layout', flags: [] },
+  { name: 'rule-layout', flags: [] },
+  { name: 'rename', flags: ['--scope', 'target'] },
+  { name: 'skill-names', flags: [] },
+  { name: 'surface-roots', flags: [] },
+  { name: 'session-defaults', flags: [] },
+]
+
+export type MigrationState = 'pending' | 'clean' | 'refused'
+
+export interface MigrationStatus {
+  readonly name: string
+  readonly verb: string
+  readonly state: MigrationState
+  /** The subcommand's own `--json` record, carried through unread. */
+  readonly record?: unknown
+  readonly reason?: string
+}
+
+export interface StatusReport {
+  readonly migrations: readonly MigrationStatus[]
+  readonly pending: number
+  readonly refused: number
+}
+
+function parseRecord(stdout: string): unknown {
+  try {
+    return JSON.parse(stdout)
+  } catch {
+    return undefined
+  }
+}
+
+async function readOne(
+  run: RunCommand,
+  migration: Migration,
+): Promise<MigrationStatus> {
+  const verb = `canon migrate ${migration.name}`
+  const result = await run([
+    'migrate',
+    migration.name,
+    ...migration.flags,
+    '--json',
+  ])
+
+  if (result.exitCode === 0) {
+    return { name: migration.name, verb, state: 'clean' }
+  }
+
+  if (result.exitCode === 2) {
+    return {
+      name: migration.name,
+      verb,
+      state: 'pending',
+      record: parseRecord(result.stdout),
+    }
+  }
+
+  const reason =
+    result.spawnError ??
+    (result.stderr.trim() || `exited ${result.exitCode} with no message`)
+  return {
+    name: migration.name,
+    verb,
+    state: 'refused',
+    record: parseRecord(result.stdout),
+    reason,
+  }
+}
+
+/**
+ * Runs each migration's own dry run and sorts it by the exit contract every
+ * subcommand shares: 0 with nothing to move, 2 with a plan and no `--write`,
+ * anything else a refusal. It never passes `--write`, and it reads no count,
+ * since the records share no field to count from.
+ */
+export async function readMigrationStatus(
+  run: RunCommand,
+): Promise<StatusReport> {
+  const migrations = await Promise.all(
+    MIGRATIONS.map((migration) => readOne(run, migration)),
+  )
+  return {
+    migrations,
+    pending: migrations.filter((m) => m.state === 'pending').length,
+    refused: migrations.filter((m) => m.state === 'refused').length,
+  }
+}
+
+/** A refusal outranks a pending plan, since a refused read measured nothing. */
+export function statusExitCode(report: StatusReport): 0 | 1 | 2 {
+  if (report.refused > 0) return 1
+  return report.pending > 0 ? 2 : 0
+}
