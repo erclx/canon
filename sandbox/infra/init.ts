@@ -27,8 +27,7 @@ export default scenario({
     },
     'with-flags': (ctx) => {
       ctx.log.step('Running: canon init --stack base --skip records .')
-      ctx.env.CANON_NON_INTERACTIVE = '1'
-      ctx.exec('bun', [
+      ctx.run('bun', [
         join(ctx.root, 'src', 'cli.ts'),
         'init',
         '--stack',
