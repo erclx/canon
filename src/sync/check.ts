@@ -2,7 +2,6 @@ import { existsSync } from 'node:fs'
 import { basename, join, sep } from 'node:path'
 import { execa } from 'execa'
 import { gitEnv } from '@/git/env'
-import { createDesignAdapter, DESIGN_INSTALL_DIR } from '@/design/adapter'
 import { createGovAdapter } from '@/gov/adapter'
 import { successorResolver } from '@/gov/renames'
 import { lookupRules } from '@/gov/install'
@@ -46,17 +45,11 @@ import { readSkew, type SkewReport } from '@/version/skew'
  * being one of these, because `src/tooling/` never calls `planSync`, so the
  * three lookups below have no entry to offer it. Standards and snippets left
  * the list with their install channels: nothing writes either corpus into a
- * target, so there is no installed copy to attribute.
- *
- * Design joins as a scanned domain rather than a stamp-only one because its
- * base file is attributed the same way a rule is, and its install marker is
- * what keeps it off a target that never asked for it: a project with no
- * `.claude/design/` is never scanned, so design values arrive on an install
- * rather than on the next sync.
+ * target, so there is no installed copy to attribute. Design left with its
+ * install verb for the same reason.
  */
 export const SCANNED_DOMAINS = [
   'governance',
-  'design',
 ] as const satisfies readonly StampDomain[]
 
 export type ScannedDomain = (typeof SCANNED_DOMAINS)[number]
@@ -68,17 +61,14 @@ export type ScannedDomain = (typeof SCANNED_DOMAINS)[number]
  */
 const SYNCED_SOURCES: Record<ScannedDomain, string> = {
   governance: 'governance/rules/',
-  design: 'src/design/',
 }
 
 const ADAPTERS: Record<ScannedDomain, (root: string) => SyncAdapter> = {
   governance: createGovAdapter,
-  design: createDesignAdapter,
 }
 
 const INSTALL_MARKERS: Record<ScannedDomain, readonly string[]> = {
   governance: ['.claude', 'rules', 'canon'],
-  design: DESIGN_INSTALL_DIR.split(sep),
 }
 
 export interface StateCounts {
@@ -216,32 +206,17 @@ export interface CheckReport {
 }
 
 /**
- * Scanned domains a target takes deliberately rather than by being managed.
- *
- * An absent one is a choice, so it is never reported as unstamped. Governance
- * wants the opposite reading, since a managed target without it has yet to
- * install what every project is expected to carry, and naming it is the only
- * place that shows up.
- */
-export const OPT_IN_DOMAINS: readonly ScannedDomain[] = ['design']
-
-/**
  * Scanned domains this target should have stamped and has not, which is the
  * one line a domain nobody installed ever appears on.
  *
  * An unmigrated domain is excluded because the relocation is its remedy rather
- * than a sync, and an opt-in domain the target does not hold is excluded
- * because there is nothing there to stamp and the sync it would name refuses.
+ * than a sync.
  */
 export function uncoveredDomains(report: CheckReport): ScannedDomain[] {
   const unmigrated = new Set(report.unmigrated.map((entry) => entry.domain))
-  const installed = new Set(report.domains.map((entry) => entry.domain))
 
   return SCANNED_DOMAINS.filter(
-    (domain) =>
-      !report.covers.includes(domain) &&
-      !unmigrated.has(domain) &&
-      (!OPT_IN_DOMAINS.includes(domain) || installed.has(domain)),
+    (domain) => !report.covers.includes(domain) && !unmigrated.has(domain),
   )
 }
 

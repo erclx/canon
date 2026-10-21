@@ -61,20 +61,8 @@ describe('detectDomains', () => {
 
     expect(detectDomains(target).map((state) => state.domain)).toEqual([
       'governance',
-      'design',
       'claude',
     ])
-  })
-
-  it('should report design as absent until a target installs it', async () => {
-    const target = await makeTarget()
-    await mkdir(join(target, '.claude', 'rules'), { recursive: true })
-
-    expect(installedDomains(detectDomains(target))).not.toContain('design')
-
-    await mkdir(join(target, '.claude', 'design'), { recursive: true })
-
-    expect(installedDomains(detectDomains(target))).toContain('design')
   })
 })
 

@@ -1,9 +1,8 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { DESIGN_INSTALL_DIR } from '@/design/adapter'
 import { isDirectory } from '@/targets/validate'
 
-export const SYNC_DOMAINS = ['governance', 'design', 'claude'] as const
+export const SYNC_DOMAINS = ['governance', 'claude'] as const
 
 export type SyncDomain = (typeof SYNC_DOMAINS)[number]
 
@@ -14,7 +13,6 @@ export interface DomainState {
 
 const DOMAIN_MARKERS: Record<SyncDomain, string> = {
   governance: join('.claude', 'rules'),
-  design: DESIGN_INSTALL_DIR,
   claude: '.claude',
 }
 
@@ -26,7 +24,6 @@ const DOMAIN_MARKERS: Record<SyncDomain, string> = {
  */
 const DOMAIN_PATHS: Record<SyncDomain, readonly string[]> = {
   governance: ['.claude/rules/', '.claude/GOV.md'],
-  design: ['.claude/design/'],
   claude: ['.gitignore'],
 }
 

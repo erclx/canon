@@ -909,30 +909,6 @@ describe('uncoveredDomains', () => {
     expect(uncoveredDomains(report)).not.toContain('governance')
   })
 
-  it('should stay quiet about an opt-in domain the target never installed', () => {
-    const report = buildReport([], { covers: [] })
-
-    expect(uncoveredDomains(report)).not.toContain('design')
-  })
-
-  it('should name an opt-in domain the target installed and never stamped', () => {
-    const report = buildReport([], {
-      covers: [],
-      domains: [
-        {
-          domain: 'design',
-          stamped: false,
-          counts: countStates([]),
-          entries: [],
-          historyUnavailable: false,
-          upstream: [],
-        },
-      ],
-    })
-
-    expect(uncoveredDomains(report)).toContain('design')
-  })
-
   it('should leave an unmigrated domain to the relocation rather than a sync', () => {
     const report = buildReport([], {
       covers: [],
