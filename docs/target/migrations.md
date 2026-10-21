@@ -154,7 +154,7 @@ The learning workspace, deck renderer, app recorder, canvas, and design install 
 
 - `.canon/teach/` holds HTML that opens as it is <!-- canon-keep-retired -->
 - `.canon/slides/` and a `demos/` folder hold sources nothing renders any more, so delete them once nothing cites them <!-- canon-keep-retired -->
-- Move `.claude/design/project/` values into the stylesheet your `canon/DESIGN.md` lead names, then delete `.claude/design/`
+- Move the `.claude/design/project/` values, `fonts/`, and `fonts.css` to the stylesheet your `canon/DESIGN.md` lead names, then delete `.claude/design/`
 
 A reference to a retired skill takes a hand edit.
 
