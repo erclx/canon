@@ -604,7 +604,7 @@ async function promptForStack(): Promise<string | undefined> {
   return select({
     message: 'Select tooling stack:',
     options: stacks.map((name) => ({ value: name, label: name })),
-    nonInteractiveDefault: true,
+    ttyHint: `Pass a stack, one of: ${stacks.join(', ')}`,
   })
 }
 

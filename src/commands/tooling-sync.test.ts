@@ -169,6 +169,36 @@ describe('tooling sync write authorization', () => {
   })
 })
 
+describe('tooling sync and diff with no stack', () => {
+  // The picker stands in for a required argument, so a headless call has to
+  // refuse rather than lay the catalog's first stack over the target.
+  const bare = (verb: 'diff' | 'sync', args: readonly string[]): Run => {
+    const run = spawnSync('bun', [CLI, 'tooling', verb, ...args], {
+      cwd: target,
+      encoding: 'utf8',
+      env: buildEnv(),
+    })
+
+    return { status: run.status, stderr: run.stderr, stdout: run.stdout }
+  }
+
+  it('should refuse a headless sync naming the stack argument and write nothing', () => {
+    const run = bare('sync', ['--write'])
+
+    expect(run.status).toBe(1)
+    expect(run.stderr).toContain('Pass a stack')
+    expect(run.stderr).toContain('base')
+    expect(goldenContent()).toBe(LOCAL_EDIT)
+  })
+
+  it('should refuse a headless diff rather than report against a stack nobody named', () => {
+    const run = bare('diff', [])
+
+    expect(run.status).toBe(1)
+    expect(run.stderr).toContain('Pass a stack')
+  })
+})
+
 describe('tooling sync over an extended base workflow and PR template', () => {
   const WORKFLOW = '.github/workflows/verify.yml'
   const TEMPLATE = '.github/pull_request_template.md'
