@@ -49,7 +49,7 @@ The chain runs these phases:
 
 An existing project goes to `canon:target-check` first. For the Claude layer alone, run `canon claude init` and then `canon:target-setup indexes`. Run `canon:target-setup verify deep` by hand for the heavier smoke and screenshot pass.
 
-Keep the `## Scripts` table in `canon/context/development/local-loop.md` current as scripts are added. A split entry keeps it in `overview.md`. <!-- audit-ignore-citations: canon/context/development/local-loop.md -->
+Keep the `## Scripts` table in `canon/context/development/local-loop.md` current as scripts are added. A split entry keeps it in any entry directly under `development/`, grouping a long set into short tables under lead sentences. <!-- audit-ignore-citations: canon/context/development/local-loop.md -->
 
 ### From scaffold to first feature
 
