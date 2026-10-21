@@ -13,7 +13,7 @@ Write the body the way Step 6 writes a reply.
 
 - Load `write-human` for voice and word choice, and follow `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md` for punctuation
 - Run the `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md` scan before posting, with `canon labels scan --body-file .canon/tmp/pr/reply/reply-<number>.md --json`
-- Stop on a `density` entry as on any hit, since density never sets the exit code
+- Stop on a `density` entry as on any hit, since a post's density never sets the exit code
 - Open with `## Post-review findings` rather than `## Review response`, since nothing on the thread is being answered
 - Close the body with `🤖 Addressed by Claude Code` on its own line, matching the reply's footer
 

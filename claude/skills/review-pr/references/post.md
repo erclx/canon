@@ -114,7 +114,7 @@ Run `canon labels scan --title "<title>" --body "<body>" --head <headRefName>` a
 
 - Name the token quoted from the title or body for a phase label, a board identifier, or a session link
 - Name the broken rule, being `structure`, a casing issue, or `length`, for a title-format hit
-- A heading in `sections.outside` or `sections.missing`, or a character in `bannedCharacters`, is a hit of the same weight, naming the heading or the character
+- A heading in `sections.outside` or `sections.missing`, an entry in `density`, or a character in `bannedCharacters`, is a hit of the same weight, naming the heading, the line and kind, or the character
 - This reads the pull request under review, distinct from the comment this pass posts, which the scan later in this step covers
 
 ### Why the threshold ignores the grade
@@ -175,7 +175,7 @@ The marker is the read-time record those fields are not.
 Before posting, run `canon labels scan --body-file .canon/tmp/pr/review/body-<number>-<short-sha>.md`, which applies the rule in `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md`. Pass `--json` and fix the body and scan again on a finding.
 
 - A `density` entry is a finding here, naming a subject or nested bullet past 200 characters, a run past 5 plain bullets, or a paragraph past its limits, by its line in the whole body
-- Density never sets the exit code, so the hook below lets the post through on it and this step is the one that stops
+- A post's density never sets the exit code, so the hook below lets the post through on it and this step is the one that stops
 
 - A finding phrased against an internal phase label is what the label half of the scan catches here
 - The call carries no `--title`, so the scan reads the text as a review

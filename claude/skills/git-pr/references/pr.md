@@ -129,7 +129,7 @@ A live agent session is never the human a box waits on.
 
 ### Density
 
-`canon labels scan` reports each section's density under `density`, naming the section, the kind, and the line in the whole body. Its help lists every limit.
+`canon labels scan` fails on a density finding, naming the section, the kind, and the line in the whole body under `density`. Its help lists every limit.
 
 - Every section but Testing holds bullets to 200 characters and 5 in a row, and paragraphs to 350 characters and 2 in a row
 - Any section reports a `subheading`, and Technical context reports a `mixed-form`
