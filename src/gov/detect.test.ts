@@ -123,6 +123,27 @@ describe('detectRules', () => {
     ])
   })
 
+  it('should not match a folder-only pattern on a folder holding only a file', async () => {
+    seedToolkit(`${DETECT}["design"]\ndeps = []\nfiles = ["canon/design/*/"]\n`)
+    write(root, 'governance/rules/ui/design.md', '# design\n')
+    write(target, 'canon/design/index.md', '# Design\n')
+
+    expect(await proposedRules()).toEqual([])
+  })
+
+  it('should match a folder-only pattern on a folder holding a group folder', async () => {
+    seedToolkit(`${DETECT}["design"]\ndeps = []\nfiles = ["canon/design/*/"]\n`)
+    write(root, 'governance/rules/ui/design.md', '# design\n')
+    write(target, 'canon/design/index.md', '# Design\n')
+    write(target, 'canon/design/home/home-dark.png', 'png')
+
+    const result = await detectRules(root, target)
+
+    expect(result.ok && result.proposals[0]?.evidence).toEqual([
+      { kind: 'file', match: 'canon/design/*/', path: 'canon/design/home' },
+    ])
+  })
+
   it('should leave out a rule the named stack already resolves', async () => {
     seedToolkit()
     write(

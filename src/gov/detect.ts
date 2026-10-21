@@ -99,25 +99,35 @@ function walkFiles(target: string): string[] {
   return files.sort()
 }
 
+interface Candidates {
+  readonly paths: readonly string[]
+  readonly folders: readonly string[]
+}
+
 /**
  * The paths a file glob is matched against: every file to depth two, plus
  * every folder on the way to any listed file, so an evidence folder such as
- * `.github/workflows` matches without naming the file inside it.
+ * `.github/workflows` matches without naming the file inside it. `folders`
+ * holds the folders alone, which a pattern ending in `/` is matched against.
  */
-async function candidatePaths(target: string): Promise<string[]> {
+async function candidatePaths(target: string): Promise<Candidates> {
   const listed = (await listRepositoryFiles(target)) ?? walkFiles(target)
   const paths = new Set<string>()
+  const folders = new Set<string>()
 
   for (const file of listed) {
     let dir = dirname(file)
     while (dir !== '.') {
-      if (depth(dir) <= MAX_DIRS) paths.add(dir)
+      if (depth(dir) <= MAX_DIRS) {
+        paths.add(dir)
+        folders.add(dir)
+      }
       dir = dirname(dir)
     }
     if (depth(file) <= MAX_DIRS) paths.add(file)
   }
 
-  return [...paths].sort()
+  return { paths: [...paths].sort(), folders: [...folders].sort() }
 }
 
 /** A PEP 508 requirement's distribution name, normalized per PEP 503. */
@@ -231,6 +241,11 @@ function readDependencies(
   return deps
 }
 
+/** A pattern ending in `/` matches folders only, so a file at that depth misses. */
+function isFolderPattern(pattern: string): boolean {
+  return pattern.endsWith('/')
+}
+
 /** A glob carrying no wildcard names one path rather than a pattern. */
 function isLiteral(pattern: string): boolean {
   return !/[*?[\]{}]/.test(pattern)
@@ -245,7 +260,7 @@ function matchEntry(
   entry: DetectEntry,
   target: string,
   deps: ReadonlyMap<string, readonly string[]>,
-  paths: readonly string[],
+  candidates: Candidates,
 ): Evidence[] {
   const evidence: Evidence[] = []
 
@@ -255,9 +270,12 @@ function matchEntry(
   }
 
   for (const pattern of entry.files) {
-    const glob = new Bun.Glob(pattern)
+    const folderOnly = isFolderPattern(pattern)
+    const glob = new Bun.Glob(folderOnly ? pattern.slice(0, -1) : pattern)
     const hit =
-      paths.find((path) => glob.match(path)) ??
+      (folderOnly ? candidates.folders : candidates.paths).find((path) =>
+        glob.match(path),
+      ) ??
       (isLiteral(pattern) && existsSync(join(target, pattern))
         ? pattern
         : undefined)
@@ -287,13 +305,13 @@ export async function detectRules(
   }
 
   const live = indexRuleSources(root)
-  const paths = await candidatePaths(target)
-  const deps = readDependencies(target, paths)
+  const candidates = await candidatePaths(target)
+  const deps = readDependencies(target, candidates.paths)
 
   const proposals = loadDetectEntries(root)
     .filter((entry) => live.has(entry.rule) && !covered.has(entry.rule))
     .flatMap((entry) => {
-      const evidence = matchEntry(entry, target, deps, paths)
+      const evidence = matchEntry(entry, target, deps, candidates)
       return evidence.length === 0 ? [] : [{ rule: entry.rule, evidence }]
     })
 

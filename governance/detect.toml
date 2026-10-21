@@ -207,4 +207,4 @@ files = [".canon/canvas"]
 
 ["design-reference"]
 deps = []
-files = ["canon/design"]
+files = ["canon/design/*/"]
