@@ -17,6 +17,10 @@ paths:
 - Skip a pull request from a fork with `github.event.pull_request.head.repo.full_name == github.repository`, since the default token cannot push to a fork's branch.
 - Never commit back to the trunk. A commit with no pull request and no reviewer needs an operator's decision, not a workflow's.
 
+## Steps
+
+- Keep an inline `run:` step to five lines at most with no branching, loop, trap, or function, and call a script for anything longer, per the `canon:ci-workflow` skill.
+
 ## Token scopes
 
 - In a workflow with more than one job, add a write scope to the job that needs it, never to the workflow-level block, so every other job keeps the read-only token.
