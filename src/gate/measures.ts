@@ -56,7 +56,14 @@ export interface CommandResult {
   readonly spawnError?: string
 }
 
-export type RunCommand = (argv: readonly string[]) => Promise<CommandResult>
+/**
+ * Spawns one command. `env` adds variables to the child's environment, which a
+ * locked stage uses to tell its child which lock the gate already holds.
+ */
+export type RunCommand = (
+  argv: readonly string[],
+  env?: Readonly<Record<string, string>>,
+) => Promise<CommandResult>
 
 export interface MeasureContext {
   readonly root: string

@@ -39,9 +39,7 @@ describe('a run that takes no lock', () => {
   })
 
   it('should not lock a run filtered by -t', () => {
-    expect(locksHandSuite(handRun({ args: ['run', '-t', 'lock'] }))).toBe(
-      false,
-    )
+    expect(locksHandSuite(handRun({ args: ['run', '-t', 'lock'] }))).toBe(false)
   })
 
   it('should not lock a run filtered by --testNamePattern=', () => {

@@ -8,6 +8,7 @@ import type {
   MeasureContext,
   RunCommand,
 } from '@/gate/measures'
+import { HELD_LOCK_VARIABLE } from '@/gate/hand-suite'
 import type { Check, Stage } from '@/gate/stages'
 import {
   acquireSuiteLock,
@@ -248,7 +249,7 @@ async function executeStage(
   }
 
   // CI runs one suite per runner, so a lock there queues behind nothing.
-  if (stage.lock === undefined || ctx.ci) return runChecks(stage, ctx, [])
+  if (stage.lock === undefined || ctx.ci) return runChecks(stage, ctx, [], {})
 
   const held = await acquireSuiteLock({
     path: machineLockPath(stage.lock),
@@ -266,8 +267,10 @@ async function executeStage(
         ]
 
   try {
+    // The suite's own global setup takes this lock for a hand run, so the
+    // child is told its parent holds it rather than waiting on the parent.
     const outcome = withLoadLine(
-      await runChecks(stage, ctx, queued),
+      await runChecks(stage, ctx, queued, { [HELD_LOCK_VARIABLE]: stage.lock }),
       stage,
       ctx,
     )
@@ -310,11 +313,12 @@ async function runChecks(
   stage: Stage,
   ctx: GateContext,
   leading: readonly Emission[],
+  env: Readonly<Record<string, string>>,
 ): Promise<StageOutcome> {
   const emissions: Emission[] = [...leading]
 
   for (const check of stage.checks) {
-    const outcome = await runCheck(check, ctx)
+    const outcome = await runCheck(check, ctx, env)
     emissions.push(...outcome.emissions)
 
     if (outcome.failure !== undefined) {
@@ -363,7 +367,11 @@ interface CheckOutcome {
   readonly unmeasured?: string
 }
 
-async function runCheck(check: Check, ctx: GateContext): Promise<CheckOutcome> {
+async function runCheck(
+  check: Check,
+  ctx: GateContext,
+  env: Readonly<Record<string, string>>,
+): Promise<CheckOutcome> {
   if (check.kind === 'measure') {
     const report = await check.measure(ctx)
     return {
@@ -378,7 +386,7 @@ async function runCheck(check: Check, ctx: GateContext): Promise<CheckOutcome> {
   }
 
   const run = check.kind === 'cli' ? ctx.cli : ctx.run
-  const result = await run(check.argv)
+  const result = await run(check.argv, env)
   return {
     emissions: [{ kind: 'output', text: result.all }],
     failure: result.exitCode === 0 ? undefined : check.failure,
@@ -492,7 +500,7 @@ export function exitCodeFor(results: readonly StageResult[]): number {
  * repository the hook points at rather than the tree being verified.
  */
 export function commandRunner(root: string): RunCommand {
-  return async (argv) => spawn(argv[0], argv.slice(1), root)
+  return async (argv, env) => spawn(argv[0], argv.slice(1), root, env)
 }
 
 /**
@@ -504,19 +512,20 @@ export function commandRunner(root: string): RunCommand {
  */
 export function cliRunner(root: string): RunCommand {
   const cli = join(PROJECT_ROOT, 'src', 'cli.ts')
-  return async (argv) => spawn(process.execPath, [cli, ...argv], root)
+  return async (argv, env) => spawn(process.execPath, [cli, ...argv], root, env)
 }
 
 async function spawn(
   file: string,
   args: readonly string[],
   cwd: string,
+  env: Readonly<Record<string, string>> = {},
 ): Promise<CommandResult> {
   const result = await execa(file, [...args], {
     cwd,
     reject: false,
     all: true,
-    env: { ...gitEnv(), CANON_NON_INTERACTIVE: '1' },
+    env: { ...gitEnv(), CANON_NON_INTERACTIVE: '1', ...env },
     extendEnv: false,
   })
 

@@ -1,4 +1,10 @@
 /**
+ * Names the machine lock a gate holds while a stage's commands run, so the
+ * suite it spawns knows not to wait on its own parent.
+ */
+export const HELD_LOCK_VARIABLE = 'CANON_HELD_LOCK'
+
+/**
  * The vitest invocation a hand-run lock decision reads.
  */
 export interface VitestRun {
@@ -7,7 +13,7 @@ export interface VitestRun {
   readonly ci: boolean
   readonly watch: boolean
   /**
-   * The lock a parent gate already holds for this run, from `CANON_HELD_LOCK`.
+   * The lock a parent gate already holds for this run, from `HELD_LOCK_VARIABLE`.
    * A gate's own suite waiting on that lock would wait on its parent forever.
    */
   readonly heldLock: string | undefined
