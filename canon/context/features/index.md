@@ -11,5 +11,4 @@ Small feature domains grouped by kind rather than split from one domain, one ent
 - [Demo](demo.md): The beats compiler and browser driver behind canon demo, the demo folder it writes, and the traps in painting a pointer inside the page
 - [Design](design.md): DESIGN.md as a generated record, the token module and component layer it renders from, the render preview, and the neutral base a target inherits
 - [Inventory](inventory.md): The route walk behind canon inventory, the subject readers it runs, and the focus reader's dependence on keyboard modality
-- [Slides](slides.md): Deck folders, the render and list commands, the HTML converter and deck master, the package step, and the draft skill
 - [Transcripts](transcripts.md): Fetch YouTube transcripts with metadata frontmatter into any repo

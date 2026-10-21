@@ -18,7 +18,6 @@ These skills serve a request rather than a moment. With the [skill map](skill-ma
 | `canon:plan-ready`        | Finished files a worker should copy               |
 | `canon:draw-figure`       | A figure or architecture view inside a doc        |
 | `canon:ci-workflow`       | A GitHub Actions workflow file                    |
-| `canon:make-deck`         | A deck rendered to editable PowerPoint            |
 | `canon:script-screencast` | A recording script with beats seeded              |
 | `canon:record-screencast` | Recording a screencast draft into a finished mp4  |
 | `canon:design-identity`   | A logo mark and social card                       |

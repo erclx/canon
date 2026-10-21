@@ -38,7 +38,6 @@ export const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
     title: 'Author and render',
     rows: [
       ['design [cmd]', 'Design system'],
-      ['slides [cmd]', 'Slide decks'],
       ['capture [source]', 'Render HTML capture sources to PNG'],
       ['serve [dir]', 'Serve a directory on localhost, print the link'],
       ['demo [cmd]', 'Record a running app'],
@@ -102,8 +101,6 @@ const EXAMPLES = [
   'canon docs agents',
   'canon design render',
   'canon canvas list --json',
-  'canon slides render',
-  'canon slides list --json',
   'canon capture assets/captures/install.html --selector .window --out assets/frames',
   'canon inventory focus --json',
   'canon drive http://localhost:4173 run.json --json',

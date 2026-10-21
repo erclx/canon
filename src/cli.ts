@@ -10,7 +10,6 @@ import { register as claude } from '@/commands/claude'
 import { register as indexes } from '@/commands/indexes'
 import { register as docs } from '@/commands/docs'
 import { register as design } from '@/commands/design'
-import { register as slides } from '@/commands/slides'
 import { register as capture } from '@/commands/capture'
 import { register as serve } from '@/commands/serve'
 import { register as demo } from '@/commands/demo'
@@ -70,7 +69,6 @@ claude(program)
 indexes(program)
 docs(program)
 design(program)
-slides(program)
 capture(program)
 serve(program)
 demo(program)

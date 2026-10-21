@@ -110,10 +110,6 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
     prompt: 'Draft me a script with beats for a screencast recording.',
     expect: 'script-screencast',
   },
-  {
-    prompt: 'Turn this topic into a slide deck I can render.',
-    expect: 'make-deck',
-  },
   // Rot across documents nobody changed is what this reads, rather than a
   // stated rule broken on a given line. It is also not `target-check`, which
   // asks whether a document exists and holds its sections rather than whether

@@ -54,9 +54,7 @@
     "@preact/signals": "^2.11.3",
     "commander": "^13.1.0",
     "execa": "^9.5.2",
-    "jszip": "^3.10.1",
     "playwright-core": "1.64.1",
-    "pptxgenjs": "^4.0.1",
     "preact": "^11.0.0"
   },
   "devDependencies": {

@@ -29,6 +29,5 @@ A draft naming the recording software, the editing software, or the window manag
 ## Out of scope
 
 - Producing the recording, which `record-screencast` owns
-- Slide decks, which `make-deck` owns
 - Refining an existing draft, which a direct edit of the file owns
 - Where the recording ships, which the user owns
