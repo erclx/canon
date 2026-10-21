@@ -37,7 +37,6 @@ Load the skill before editing anything in its domain.
 | `governance/rules/`, `governance/stacks/`               | `internal-governance` |
 | `claude/skills/`, `claude/README.md`, `.claude/skills/` | `internal-claude`     |
 | `web/`, `assets/`, the landing page                     | `internal-web`        |
-| `src/canvas/`, `src/commands/canvas.ts`                 | `internal-canvas`     |
 
 @canon/REQUIREMENTS.md
 @canon/context/index.md

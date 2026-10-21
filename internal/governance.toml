@@ -13,9 +13,6 @@
 # none of which is a framework route. `e2e-reliability` governs the driven
 # capture those surfaces are verified with.
 
-# `canvas` is added because this repository draws frames on the canvas
-# itself, and the rule is listed in no stack, so only `--add` reaches it.
-
 # `python` is added because sessions here write Python for groundwork
 # spikes and occasional skill scripts, and the `node` stack alone never loads it.
 
@@ -41,7 +38,6 @@ add = [
   "design-taste",
   "interface-casing",
   "motion",
-  "canvas",
   "ci-workflow",
   "dependencies",
   "config-comments",

@@ -9,8 +9,7 @@
 # root and in every folder to depth two. `files` are globs matched against the
 # target's git-listed paths to depth two, and against each folder on those
 # paths, so `.github/workflows` matches a folder holding a workflow. A glob with
-# no wildcard is also tested on disk, which reaches a gitignored path such as
-# `.canon/canvas`.
+# no wildcard is also tested on disk, which reaches a gitignored path.
 #
 # Every rule no stack reaches needs a table here, which the `unreferenced-rules`
 # gate stage checks, along with every key naming a live rule. A table for a rule
@@ -200,10 +199,6 @@ files = ["index.html", "*/index.html"]
 ["motion"]
 deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
 files = ["index.html", "*/index.html"]
-
-["canvas"]
-deps = []
-files = [".canon/canvas"]
 
 ["design-reference"]
 deps = []
