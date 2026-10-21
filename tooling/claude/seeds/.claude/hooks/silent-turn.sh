@@ -71,6 +71,8 @@ while IFS= read -r path; do
   esac
 done <<<"$paths"
 [ ${#unmentioned[@]} -eq 0 ] && exit 0
+typeset -A seen_paths
+: "${seen_paths[@]}"
 
 {
   echo 'This turn wrote or edited a file the final reply did not name:'
