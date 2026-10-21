@@ -17,6 +17,7 @@ paths:
 ## Where the design lives
 
 - Build UI against `canon/design/`, never against the canvas directly.
+- Load the `canon:design-record` skill before adding, redrawing, or removing a reference under `canon/design/`, and report it rather than proceeding silently when it does not resolve.
 - Land a picked or changed canvas design in `canon/design/` through the project's design sync, as its own pull request, before any feature builds against it.
 - Never copy, edit, or delete a reference file under `canon/design/` by hand.
 - Add a new surface's row to the index in `canon/design/` before running the sync, and remove it only in the change that removes the surface.
