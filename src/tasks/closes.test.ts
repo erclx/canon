@@ -189,6 +189,80 @@ describe('readClosure', () => {
     expect(result).toMatchObject({ ok: true, stem: 'v1-a', closing: true })
   })
 
+  it('should find the task whose plan derives the branch', async () => {
+    await writeFile(
+      join(tasksDir(root), 'v1-a.md'),
+      task(['Plan: [feature-a-b](../plans/feature-a-b.md)', 'Issue: #12']),
+    )
+
+    const result = await readClosure(
+      root,
+      { kind: 'branch', branches: ['feat/a-b'] },
+      ['feat/a-b'],
+    )
+
+    expect(result).toMatchObject({ ok: true, stem: 'v1-a', closing: true })
+  })
+
+  it('should match a name the branch carried before a rename', async () => {
+    await writeFile(
+      join(tasksDir(root), 'v1-a.md'),
+      task(['Plan: [feature-a-b](../plans/feature-a-b.md)', 'Issue: #12']),
+    )
+
+    const result = await readClosure(
+      root,
+      { kind: 'branch', branches: ['fix/renamed', 'feat/a-b'] },
+      ['fix/renamed', 'feat/a-b'],
+    )
+
+    expect(result).toMatchObject({ ok: true, stem: 'v1-a' })
+  })
+
+  it('should report no-match on a branch nothing owns', async () => {
+    await writeFile(
+      join(tasksDir(root), 'v1-a.md'),
+      task(['Plan: [feature-a-b](../plans/feature-a-b.md)']),
+    )
+    await writeFile(join(tasksDir(root), 'v1-b.md'), task(['Issue: #3']))
+
+    const result = await readClosure(
+      root,
+      { kind: 'branch', branches: ['feat/other'] },
+      ['feat/other'],
+    )
+
+    expect(result).toMatchObject({ ok: false, reason: 'no-match' })
+  })
+
+  it('should report no-match with no branch checked out', async () => {
+    await writeFile(
+      join(tasksDir(root), 'v1-a.md'),
+      task(['Plan: [feature-a-b](../plans/feature-a-b.md)']),
+    )
+
+    const result = await readClosure(root, { kind: 'branch', branches: [] }, [])
+
+    expect(result).toMatchObject({ ok: false, reason: 'no-match' })
+  })
+
+  it('should report ambiguous when two tasks derive the branch', async () => {
+    for (const stem of ['v1-a', 'v1-b']) {
+      await writeFile(
+        join(tasksDir(root), `${stem}.md`),
+        task(['Plan: [feature-a-b](../plans/feature-a-b.md)']),
+      )
+    }
+
+    const result = await readClosure(
+      root,
+      { kind: 'branch', branches: ['feat/a-b'] },
+      ['feat/a-b'],
+    )
+
+    expect(result).toMatchObject({ ok: false, reason: 'ambiguous' })
+  })
+
   it('should refuse a task that does not exist', async () => {
     const result = await readClosure(
       root,

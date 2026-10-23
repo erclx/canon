@@ -668,11 +668,14 @@ export function register(program: Command): void {
         '  no-board   the repository holds no `.canon/tasks/` board',
         '  no-match   no task matches the selector',
         '  ambiguous  more than one task matches the selector',
-        '  bad-input  a task and a plan both named, or neither',
+        '  bad-input  a task and a plan both named',
         '',
         'Exit codes:',
         '  0  the task is read, whether or not it closes',
         '  1  refused, with the reason on stderr or in the JSON record',
+        '',
+        'With no task or plan named, the task whose plan derives the branch is read,',
+        'and a branch nothing owns is no-match.',
         '',
         'Reads the `Issue:` lines, each `#NNN` or a comma list, and reports',
         '`issues` and `closing`. The pull request closes them only when it is',
@@ -1513,15 +1516,18 @@ async function runCloses(
   opts: ClosesCommandOptions,
 ): Promise<number> {
   const emitJson = opts.json ?? false
-  const selector = selectorFor(task, opts.plan)
+  const branch = opts.branch ?? (await workingBranch())
+  const branches = branch ? [branch, ...(await formerNames(branch))] : []
+  const selector =
+    !task && !opts.plan
+      ? ({ kind: 'branch', branches } as const)
+      : selectorFor(task, opts.plan)
 
   if ('ok' in selector) {
     return reportRecord('canon tasks closes', selector, emitJson, process.cwd())
   }
 
   const root = opts.root ?? (await mainWorktreeRoot())
-  const branch = opts.branch ?? (await workingBranch())
-  const branches = branch ? [branch, ...(await formerNames(branch))] : []
   const outcome = await readClosure(
     root,
     selector,

@@ -43,6 +43,11 @@ function slugOf(path: string): string {
   return stem.startsWith(PLAN_PREFIX) ? stem.slice(PLAN_PREFIX.length) : stem
 }
 
+/** The branch a plan file derives, from its filename alone. */
+export function branchOfPlan(path: string): string {
+  return `${PLAN_BRANCH_TYPE}/${slugOf(path)}`
+}
+
 /**
  * Derives the branch a dispatch checks and a worker takes, from the plan both
  * of them name. It is the one derivation, so the collision check and the
@@ -60,7 +65,7 @@ export function planBranch(root: string, reference: string): BranchOutcome {
   if (!resolved.ok) return resolved
 
   const slug = slugOf(resolved.path)
-  const branch = `${PLAN_BRANCH_TYPE}/${slug}`
+  const branch = branchOfPlan(resolved.path)
   const words = slug.split('-').filter((word) => word.length > 0).length
 
   return {

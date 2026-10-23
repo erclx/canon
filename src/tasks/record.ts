@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { basename, join, relative } from 'node:path'
 import { planCandidates } from '@/tasks/answers'
+import { branchOfPlan } from '@/tasks/branch'
 import {
   appendPlanLink,
   describeUnmatchedStem,
@@ -57,6 +58,7 @@ export interface RecordRefused {
 export type RecordSelector =
   | { readonly kind: 'stem'; readonly stem: string }
   | { readonly kind: 'plan'; readonly plan: string }
+  | { readonly kind: 'branch'; readonly branches: readonly string[] }
 
 export type LineAction = 'added' | 'appended' | 'corrected' | 'unchanged'
 
@@ -383,6 +385,25 @@ async function resolveStem(
     return selector.stem
   }
 
+  if (selector.kind === 'branch') {
+    const matched = await matchByBranch(dir, stems, selector.branches)
+    const label = selector.branches[0] ?? 'no branch'
+
+    if (matched.length === 0) {
+      return refuse('no-match', `No task's plan derives branch ${label}.`)
+    }
+
+    if (matched.length > 1) {
+      return refuse(
+        'ambiguous',
+        `${matched.length} tasks derive branch ${label}. One task, one plan.`,
+        matched,
+      )
+    }
+
+    return matched[0]
+  }
+
   const matched = await matchByPlan(dir, stems, selector.plan)
 
   if (matched.length === 0) {
@@ -398,6 +419,29 @@ async function resolveStem(
   }
 
   return matched[0]
+}
+
+/**
+ * Matches a branch to the tasks whose plan derives it. A task with no `Plan:`
+ * line carries no target and so never matches.
+ */
+async function matchByBranch(
+  dir: string,
+  stems: readonly string[],
+  branches: readonly string[],
+): Promise<string[]> {
+  const read = await Promise.all(
+    stems.map(async (stem) => ({
+      stem,
+      targets: readPlanTargets(await readFile(join(dir, `${stem}.md`), 'utf8')),
+    })),
+  )
+
+  return read
+    .filter((entry) =>
+      entry.targets.some((target) => branches.includes(branchOfPlan(target))),
+    )
+    .map(({ stem }) => stem)
 }
 
 export async function openTask(
