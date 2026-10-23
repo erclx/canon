@@ -13,12 +13,15 @@ This step runs ahead of Step 1, so what it holds is the raw invocation argument 
 canon tasks plan-branch <argument> --json
 ```
 
-| Record            | Route                                                                                                                                       |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `conforms: true`  | Pass the record's `branch`, already `<type>/<slug>`, and invoke nothing else to derive a name                                               |
-| `conforms: false` | The plan's filename breaks a cap in `${CLAUDE_SKILL_DIR}/../git-branch/references/branch.md`. Pass `branch` anyway and say the cap it broke |
-| Anything else     | Invoke `canon:session-worktree` bare and let its ladder derive the name, saying the verb did not answer                                     |
+| Record            | Route                                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------------- |
+| `conforms: true`  | Pass the record's `branch`, already `<type>/<slug>`, and invoke nothing else to derive a name           |
+| `conforms: false` | The plan's filename breaks a branch-name cap. Pass `branch` anyway and say the cap it broke             |
+| Anything else     | Invoke `canon:session-worktree` bare and let its ladder derive the name, saying the verb did not answer |
 
+Three notes on those routes:
+
+- The caps on a branch name sit in `${CLAUDE_SKILL_DIR}/../git-branch/references/branch.md`
 - On `conforms: false`, the alternative is a name this session shortened by hand, a second derivation and the thing this call exists to prevent. `git-branch` decides the rename at ship.
 - Anything else covers a refusal, a record carrying no `branch` key, and an installed binary carrying no `plan-branch` subcommand
 - Saying the verb did not answer lets a reader tell a derived name from a fallback one
