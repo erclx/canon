@@ -54,14 +54,16 @@ type Block =
  * here it belongs to the item: it counts toward the bullet's length and never
  * toward a paragraph run, since a reader sees it inside the list.
  *
- * A nested item is left out of its parent, as `heavyBullets` leaves it, and so
- * is everything indented under the nested item. An indented fence inside an
- * item stays with the item, and a column-zero one ends it.
+ * A nested item is a block of its own, taking the lines indented past its
+ * marker, and its parent leaves it out along with everything indented under it.
+ * An indented fence inside an item joins neither and ends the nested item, and
+ * a column-zero one ends both.
  */
 function blocksOf(lines: readonly BodyLine[]): Block[] {
   const blocks: Block[] = []
   let paragraph: { line: number; parts: string[] } | undefined
   let item: { line: number; parts: string[]; nested: boolean } | undefined
+  let child: { line: number; parts: string[]; indent: number } | undefined
   let inFence = false
   let afterBlank = false
 
@@ -76,7 +78,19 @@ function blocksOf(lines: readonly BodyLine[]): Block[] {
     paragraph = undefined
   }
 
+  const closeChild = (): void => {
+    if (child) {
+      blocks.push({
+        kind: 'item',
+        line: child.line,
+        text: child.parts.join(' '),
+      })
+    }
+    child = undefined
+  }
+
   const closeItem = (): void => {
+    closeChild()
     if (item) {
       blocks.push({ kind: 'item', line: item.line, text: item.parts.join(' ') })
     }
@@ -97,7 +111,8 @@ function blocksOf(lines: readonly BodyLine[]): Block[] {
       // The opening delimiter decides who owns the block. `bodyLines` marks a
       // delimiter and the body alike, so the opener is the first fenced line.
       if (!inFence) {
-        if (!(item && indented)) {
+        if (item && indented) closeChild()
+        else {
           closeAll()
           blocks.push({ kind: 'other', line: line.number, table: false })
         }
@@ -110,13 +125,27 @@ function blocksOf(lines: readonly BodyLine[]): Block[] {
 
     if (text === '') {
       closeParagraph()
+      closeChild()
       afterBlank = true
       continue
     }
 
     if (indented && item) {
-      if (LIST_ITEM.test(raw)) item.nested = true
-      else if (!item.nested && !TABLE_ROW.test(raw)) item.parts.push(text)
+      const lead = leadOf(raw)
+      if (LIST_ITEM.test(raw)) {
+        closeChild()
+        item.nested = true
+        child = {
+          line: line.number,
+          parts: [text.replace(LIST_ITEM, '')],
+          indent: lead,
+        }
+      } else if (child && lead > child.indent) {
+        if (!TABLE_ROW.test(raw)) child.parts.push(text)
+      } else {
+        closeChild()
+        if (!item.nested && !TABLE_ROW.test(raw)) item.parts.push(text)
+      }
       afterBlank = false
       continue
     }
@@ -163,6 +192,10 @@ function blocksOf(lines: readonly BodyLine[]): Block[] {
   closeAll()
 
   return blocks
+}
+
+function leadOf(raw: string): number {
+  return raw.length - raw.trimStart().length
 }
 
 /**

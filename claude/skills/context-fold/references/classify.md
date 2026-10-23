@@ -38,13 +38,26 @@ The verb's own extraction already scopes to canonical doc types and reports noth
 
 Locate the finding by its `quote` in the file's current content. The quote is often a narrow fragment rather than the whole clause it sits in, since the regex layer's own match is a short pattern hit, so the edit below targets the sentence or bullet the quote sits in rather than the literal substring alone.
 
-- **Found exactly once.** Apply the verdict:
-  - `REPLACE`: rewrite the sentence or bullet carrying the quote in place with the fact that now stands, per Step 3's rewrite-in-place rule. State what is current and drop what the quote restated, in the one edit.
-  - `HISTORY`: rewrite the sentence or bullet carrying the quote to drop the narration and keep any current fact the same clause states. The quote narrates how the fact arrived rather than stating the fact, which a canonical doc excludes regardless of what wrote it, and a literal cut of the fragment alone would leave the rest of the clause grammatically stranded.
-  - `MOVE`: do not cut. The verdict means correct content sitting on the wrong surface, such as a rule written into a context entry that belongs in a path-scoped rule, and only the model layer returns it. Cutting would delete content a fold with no model configured would never have flagged at all. Report the finding instead, naming the surface the `reason` names as where the content belongs, and leave the file unedited.
+- **Found exactly once.** Apply the verdict under its heading below.
 - **Found more than once, or not found at all.** Report it as not located rather than guessing an occurrence or silently rewriting nothing. A model paraphrasing its quote is the usual cause.
 
 Run the classifier once per fold. Do not re-run it after applying a finding to check the edit, since a second pass over what this step wrote is the loop the verb's own reference already warns against.
+
+### REPLACE
+
+Rewrite the sentence or bullet carrying the quote in place with the fact that now stands, per Step 3's rewrite-in-place rule. State what is current and drop what the quote restated, in the one edit.
+
+### HISTORY
+
+Rewrite the sentence or bullet carrying the quote to drop the narration and keep any current fact the same clause states. The quote narrates how the fact arrived rather than stating the fact, which a canonical doc excludes regardless of what wrote it.
+
+A literal cut of the fragment alone would leave the rest of the clause grammatically stranded.
+
+### MOVE
+
+Do not cut. The verdict means correct content sits on the wrong surface, such as a rule written into a context entry that belongs in a path-scoped rule, and only the model layer returns it.
+
+Report the finding instead, naming the surface the `reason` names as where the content belongs, and leave the file unedited. Cutting would delete content a fold with no model configured would never have flagged at all.
 
 ## Keeping a finding
 

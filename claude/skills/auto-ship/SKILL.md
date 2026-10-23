@@ -50,7 +50,7 @@ Each tier stops with its own message on a file that does not resolve.
 - Task: `❌ No task at <path>. Path was supplied, not derived, so check it and re-run.`
 - Plan: `❌ No plan at <path>. Path was supplied, not derived, so check it and re-run.`
 - Derived, which stops on the longer message below:
-  - `❌ No approved plan at .canon/plans/feature-<slug>.md, where <slug> was derived from the current branch, <branch>. The invocation carried no argument, so pass a plan or a task path, or run /plan-feature first.`
+  - `❌ No approved plan at .canon/plans/feature-<slug>.md, derived from branch <branch>. No argument was passed, so pass a plan or task path, or run /plan-feature first.`
 
 ### When a tier fails
 

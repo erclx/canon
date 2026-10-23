@@ -36,7 +36,7 @@ Read these in the same pass:
 1. Answer three questions in writing before drafting anything.
    - Does a rule, a verb, or an existing skill already reach this moment? A folder that only wraps something already reachable duplicates it rather than adding to the catalog.
    - Does the body carry a procedure a session would get wrong from first principles? A one-line wrapper around a single command needs no skill.
-   - Will anything invoke it other than the author typing its name? Carry this one into the drafted `REQUIREMENT.md`'s `Must not` section as a review criterion instead, since nothing can answer it before the skill has run.
+   - Will anything invoke it other than the author typing its name? Carry this into the drafted `REQUIREMENT.md`'s `Must not` section as a review criterion, since nothing answers it before the run.
    - Tell the user and stop when the first answer is yes or the second is no. A non-interactive run stops on both too, reporting which question failed and writing no folder.
 2. Draft the full `SKILL.md` from the user's description, stating the current rule alone. An incident and the date it happened stay in git, never in the body, a reference, or the requirement.
 3. Draft the sibling `REQUIREMENT.md` from what the skill is for, in the shape the requirement standard states.
@@ -51,7 +51,7 @@ Steps 5 to 7 write the folder and check what landed before the run reports.
 
 5. Resolve the root, then write `<root>/<name>/SKILL.md` and `<root>/<name>/REQUIREMENT.md`.
    - The root is `.claude/skills/` in a target project.
-   - Where the project root holds `claude/.claude-plugin/plugin.json`, which is the toolkit's own checkout, an `internal-*` skill goes under `.claude/skills/` and every other skill under `claude/skills/`, since the plugin ships that tree.
+   - In the toolkit's checkout, which holds `claude/.claude-plugin/plugin.json`, an `internal-*` skill goes under `.claude/skills/` and the rest under `claude/skills/`, since the plugin ships that tree.
 6. Run `canon claude skills audit --json` and read `findings.datedProvenance` for rows under `<root>/<name>/`.
    - Cut each row's date and incident from the file the row names, leaving them to git, and re-run until no row names the folder.
    - When `canon` does not resolve or its record carries no `datedProvenance` key, say the check did not run rather than reporting the skill clean.

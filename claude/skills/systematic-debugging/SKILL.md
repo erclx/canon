@@ -23,7 +23,9 @@ No fixes without root-cause investigation first. If phase 1 is incomplete, no fi
    - State. Run the case alone and again after the others, and look for shared caches, globals, and fixtures one case leaks into the next.
    - None of these. Add logging at the suspect and record the conditions of each occurrence, which hands off to the no-root-cause section below rather than to a fix.
 3. Check what changed. Run `git diff` and `git log --oneline -10` from the project root to see recent changes.
-   - For a regression with a known good commit, bisect rather than reading the log by eye: `git bisect start HEAD <good commit>`, then `git bisect run <the project's focused test command>` where a test reproduces the failure. Run `git bisect reset` once it names the commit, since bisect leaves the checkout on an old one.
+   - For a regression with a known good commit, bisect rather than reading the log by eye, with `git bisect start HEAD <good commit>`
+   - Where a test reproduces the failure, run `git bisect run <the project's focused test command>`
+   - Run `git bisect reset` once it names the commit, since bisect leaves the checkout on an old one
 4. For multi-component systems, add instrumentation at each component boundary and run once to see which layer fails before investigating further.
 5. Trace bad values backward to their source. Fix at the origin, not the symptom.
 

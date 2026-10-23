@@ -359,10 +359,20 @@ describe('heavyBullets', () => {
     expect(measure(source).heavyBullets).toEqual([])
   })
 
-  it('should leave a nested bullet unreported', () => {
+  it('should report a nested bullet past the checkpoint at its own line', () => {
     const source = `${FRONTMATTER}# CI\n\n- Parent\n  ${bullet(BULLET_CHECKPOINT + 1)}\n`
 
-    expect(measure(source).heavyBullets).toEqual([])
+    expect(measure(source).heavyBullets).toEqual([
+      { line: 9, characters: BULLET_CHECKPOINT + 1 },
+    ])
+  })
+
+  it('should leave a parent clean when only its nested bullet is heavy', () => {
+    const source = `${FRONTMATTER}# CI\n\n- Parent\n  ${bullet(BULLET_CHECKPOINT + 1)}\n`
+
+    expect(measure(source).heavyBullets.map(({ line }) => line)).not.toContain(
+      8,
+    )
   })
 
   it('should ignore a bullet that is an example inside a fenced block', () => {

@@ -123,6 +123,45 @@ describe('densityFindings', () => {
     it('should leave a nested item out of its parent', () => {
       expect(findingsIn(`- ${text(150)}\n  - ${text(150)}`)).toEqual([])
     })
+
+    it('should report a nested item at its own line and leave its parent clean', () => {
+      expect(findingsIn(`- ${text(20)}\n  - ${text(201)}`)).toEqual([
+        expect.objectContaining({
+          kind: 'bullet-length',
+          line: 2,
+          value: 201,
+          limit: 200,
+        }),
+      ])
+    })
+
+    it('should pass a nested item at 200 characters', () => {
+      expect(findingsIn(`- ${text(20)}\n  - ${text(200)}`)).toEqual([])
+    })
+
+    it('should fold a nested item continuation into the nested item', () => {
+      expect(
+        findingsIn(`- ${text(20)}\n  - ${text(150)}\n    ${text(60)}`),
+      ).toEqual([expect.objectContaining({ line: 2, value: 211 })])
+    })
+
+    it('should measure each nested level once under a numbered step', () => {
+      const source = `1. ${text(20)}\n   - ${text(201)}\n     - ${text(201)}`
+
+      expect(findingsIn(source).map(({ line }) => line)).toEqual([2, 3])
+    })
+
+    it('should leave a paragraph under the parent after its nested list out of both', () => {
+      const source = `- ${text(150)}\n  - ${text(20)}\n\n  ${text(100)}`
+
+      expect(findingsIn(source)).toEqual([])
+    })
+
+    it('should keep an indented table row out of a nested item length', () => {
+      const source = `- ${text(20)}\n  - ${text(150)}\n    | ${text(100)} |`
+
+      expect(findingsIn(source)).toEqual([])
+    })
   })
 
   describe('bullets in a row', () => {

@@ -42,8 +42,8 @@ A missing tracking ref is not a guard, since an open pull request proves the bra
 2. Run `git add -A` to stage every change
 3. Invoke `canon:git-commit` to generate one conventional commit from the staged diff
 4. Push, in one of two cases.
-   - When `git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null` is empty, the branch has an open pull request and no tracking ref, so run `git push -u origin HEAD` to send the commit and set the ref in one step.
-   - Otherwise push to the tracking branch with `git push`, and when `git merge-base --is-ancestor @{u} HEAD` exits non-zero, a caller rewrote the branch and a plain push is rejected, so push with `--force-with-lease` instead.
+   - When `git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null` is empty, no ref tracks the branch, so run `git push -u origin HEAD` to push and set the ref in one step.
+   - Otherwise run `git push`, and when `git merge-base --is-ancestor @{u} HEAD` exits non-zero, a caller rewrote the branch, so use `--force-with-lease`, since a plain push is rejected.
 
    The lease is what stops the force from overwriting a commit this session never read. Run the ancestry test only where an upstream resolves, since it reads `@{u}`.
 
@@ -55,15 +55,26 @@ A missing tracking ref is not a guard, since an open pull request proves the bra
 
 6. Check for existing review comments: `gh api 'repos/{owner}/{repo}/pulls/<number>/comments' --jq 'length'`.
 7. Sync the body and title on every invocation, before the routing below decides on the reply.
-   - Read the live title and body with `gh api repos/{owner}/{repo}/pulls/<number> --jq '{html_url, title, body}'`. Update the body with `gh api -X PATCH repos/{owner}/{repo}/pulls/<number> -F body=@<file> --silent` when the new commit changes scope, writing the new body to `<file>` first, and the title with `gh api -X PATCH repos/{owner}/{repo}/pulls/<number> -f title="<title>" --silent` when the scope shifted enough to make it inaccurate.
+   - Read the live title and body with `gh api repos/{owner}/{repo}/pulls/<number> --jq '{html_url, title, body}'`
+   - Update the body with `gh api -X PATCH repos/{owner}/{repo}/pulls/<number> -F body=@<file> --silent` when the new commit changes scope, writing the new body to `<file>` first
+   - Update the title with `gh api -X PATCH repos/{owner}/{repo}/pulls/<number> -f title="<title>" --silent` when the scope shifted enough to make it inaccurate
    - A fix commit answering a review changes what shipped exactly as much as an ordinary followup does, so the sync cannot wait on the invocation or the comment count below.
-   - A body a person edited by hand between rounds gets no special handling: judge it against the tree the same way regardless of who wrote it last, since a hand-edit the fix commit has made stale is the exact drift this sync exists to close.
+   - Judge a body a person edited by hand against the tree like any other, since a hand-edit the fix commit made stale is the drift this sync closes.
    - Carry a `UI pass` line marked `<!-- pr-ui-pass -->` into any rewritten body unchanged, since `canon pr tick` owns it and a dropped marker defeats the reset on a new head.
    - Carry a `Fan-in members:` line into any rewritten body unchanged, since the post-merge hook reads it to delete the members and a dropped line deletes nothing and says nothing.
 8. Route on the invocation and the comment count for the reply alone.
    - When invoked with `reply-owned`, skip this step: the caller posts its own reply.
-   - Otherwise, if the count is above zero, the followup addresses review feedback: write a one-line summary of the fix to `.canon/tmp/pr/followup/summary-<number>.md` in its own call, run `canon labels scan --body-file .canon/tmp/pr/followup/summary-<number>.md` against it, which applies the rule in `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md`, then post it with `gh api -X POST repos/{owner}/{repo}/issues/<number>/comments -F body=@.canon/tmp/pr/followup/summary-<number>.md --silent`. A hook on `Bash` runs the same scan on that body file and denies the post on a hit, and it refuses an inline `-f body=` value, so the body goes through a file. The `pull_request` check the git-pr surface carries triggers on a push or an open rather than a plain edit, so neither this comment nor the title and body step 7 synced reaches it.
+   - Otherwise, if the count is above zero, the followup addresses review feedback, so post the summary below.
    - If it is zero, nothing further runs. The sync in step 7 already did this branch's job.
+
+### Posting the step 8 reply
+
+The body goes through a file, since a hook on `Bash` refuses an inline `-f body=` value and runs `canon labels scan` on the file before it allows the post.
+
+- Write a one-line summary of the fix to `.canon/tmp/pr/followup/summary-<number>.md` in its own call
+- Run `canon labels scan --body-file .canon/tmp/pr/followup/summary-<number>.md` against it, which applies the rule in `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md`
+- Post it with `gh api -X POST repos/{owner}/{repo}/issues/<number>/comments -F body=@.canon/tmp/pr/followup/summary-<number>.md --silent`
+- The `pull_request` check the git-pr surface carries triggers on a push or an open rather than a plain edit, so neither this comment nor the step 7 sync reaches it
 
 ## After completion
 
