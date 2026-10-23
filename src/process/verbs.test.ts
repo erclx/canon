@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { runCli } from '@/process/harness'
+import { seedPackage } from '@/process/seeded-package'
 
 interface GovStack {
   readonly name: string
@@ -79,6 +80,7 @@ describe('tooling sync', () => {
   it('should replace a local edit once --write is passed', () => {
     const path = join(target, '.oxfmtrc.json')
     writeFileSync(path, '# a project owns this line\n')
+    seedPackage(target, 'base')
 
     const run = runCli(['tooling', 'sync', 'base', target, '--write'], {
       cwd: target,
