@@ -22,6 +22,8 @@ export type DensityKind =
   | 'bullet-run'
   | 'heading-depth'
   | 'h3-opening'
+  | 'table-cell'
+  | 'table-then-list'
 
 export interface DensityFinding {
   readonly kind: DensityKind

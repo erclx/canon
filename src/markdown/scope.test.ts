@@ -181,4 +181,35 @@ describe('scopedDensityFindings', () => {
     const source = `# Doc\n\n${bullets(6)}\n`
     expect(kinds('docs/a.md', source)).toEqual([['bullet-run', 3]])
   })
+
+  describe('table findings', () => {
+    const longCell = `| A | B |\n| - | - |\n| ${'a'.repeat(130)} | b |\n`
+
+    it('should append a cell finding on a density-scope path', () => {
+      expect(kinds('docs/a.md', longCell)).toEqual([['table-cell', 3]])
+    })
+
+    it('should append a trailing-list finding on a density-scope path', () => {
+      const source = '| A | B |\n| - | - |\n| a | b |\n- item\n'
+      expect(kinds('docs/a.md', source)).toEqual([['table-then-list', 4]])
+    })
+
+    it('should gate a cell finding under a gated prefix and report it elsewhere', () => {
+      expect(densityGates('docs/a.md', 'table-cell', ['docs/'])).toBe(true)
+      expect(densityGates('docs/a.md', 'table-cell', ['wiki/'])).toBe(false)
+    })
+
+    it('should never gate a cell finding for a bare always-gated list', () => {
+      expect(densityGates('docs/a.md', 'table-cell', [])).toBe(false)
+    })
+
+    it('should leave a long cell in CLAUDE.md out, Key paths included', () => {
+      const source = `## Key paths\n\n${longCell}`
+      expect(kinds('CLAUDE.md', source)).toEqual([])
+    })
+
+    it('should leave a path outside the scope out', () => {
+      expect(kinds('src/notes.md', longCell)).toEqual([])
+    })
+  })
 })

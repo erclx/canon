@@ -4,6 +4,7 @@ import {
   densityFindings,
 } from '@/markdown/density'
 import type { BodyLine } from '@/markdown/scan'
+import { tableDensityFindings } from '@/markdown/tables'
 
 /** The surfaces the retired bullet-stacks stage held, per `ALWAYS_GATED`. */
 const BULLET_RUN_SCOPE = [
@@ -68,12 +69,16 @@ function keyPathsSection(lines: readonly BodyLine[]): readonly BodyLine[] {
  * The density findings a path takes, being every finding on a density-scope
  * file and the Key paths findings on a `CLAUDE.md`. The audit, the init probe,
  * and `canon claude sync` all read this, so the three agree on what counts.
+ * The table cell and trailing-list findings join on a density-scope path only,
+ * since `densityFindings` stays what its direct callers grade.
  */
 export function scopedDensityFindings(
   rel: string,
   lines: readonly BodyLine[],
 ): DensityFinding[] {
-  if (inDensityScope(rel)) return densityFindings(lines)
+  if (inDensityScope(rel)) {
+    return [...densityFindings(lines), ...tableDensityFindings(lines)]
+  }
   if (!KEY_PATHS_SCOPE.test(rel)) return []
   return densityFindings(keyPathsSection(lines)).filter((finding) =>
     KEY_PATHS_KINDS.includes(finding.kind),

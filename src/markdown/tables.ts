@@ -1,3 +1,4 @@
+import type { DensityFinding } from '@/markdown/density'
 import { type BodyLine, visibleText } from '@/markdown/scan'
 import { LIST_ITEM, TABLE_ROW, TABLE_SEPARATOR } from '@/markdown/structure'
 
@@ -10,19 +11,14 @@ export const TABLE_ROWS = 8
 /** The longest unbroken run a code span in a table cell may carry. */
 export const TABLE_TOKEN = 30
 
-export type TableKind =
-  | 'table-cell'
-  | 'table-rows'
-  | 'table-then-list'
-  | 'table-token'
+export type TableKind = 'table-rows' | 'table-token'
 
 export interface TableFinding {
   readonly kind: TableKind
-  /** The row holding the cell or span, the header for a row count, or the list's first item. */
+  /** The span's row, or the header for a row count. */
   readonly line: number
-  /** What was measured, or null for a trailing list, which is a shape rather than a count. */
-  readonly value: number | null
-  readonly limit: number | null
+  readonly value: number
+  readonly limit: number
 }
 
 /**
@@ -55,16 +51,22 @@ function cellsOf(row: string): string[] {
 }
 
 /**
- * Every breach of the four table limits, in line order.
+ * Every breach of the four table limits, in line order, split by whether it
+ * gates.
  *
  * A table is a run of pipe rows whose second row is a delimiter, the shape a
  * renderer draws. Pipe lines with no delimiter render as paragraph text, and a
  * fenced line is an example, so neither is measured. The limits are a
  * 120-character cell, 8 body rows, a list as the next block, and a code span
- * holding a run past 30 characters. Every finding reports and none gates.
+ * holding a run past 30 characters. The cell and the trailing list are density
+ * findings, and the row count and the wide token report and never gate.
  */
-export function tableFindings(lines: readonly BodyLine[]): TableFinding[] {
-  const found: TableFinding[] = []
+function measureTables(lines: readonly BodyLine[]): {
+  reported: TableFinding[]
+  density: DensityFinding[]
+} {
+  const reported: TableFinding[] = []
+  const density: DensityFinding[] = []
   let index = 0
 
   while (index < lines.length) {
@@ -96,7 +98,7 @@ export function tableFindings(lines: readonly BodyLine[]): TableFinding[] {
       for (const cell of cellsOf(row.text)) {
         const length = visibleText(cell).length
         if (length > TABLE_CELL) {
-          found.push({
+          density.push({
             kind: 'table-cell',
             line: row.number,
             value: length,
@@ -106,7 +108,7 @@ export function tableFindings(lines: readonly BodyLine[]): TableFinding[] {
         for (const span of codeSpans(cell)) {
           const run = unbrokenRun(span)
           if (run > TABLE_TOKEN) {
-            found.push({
+            reported.push({
               kind: 'table-token',
               line: row.number,
               value: run,
@@ -119,7 +121,7 @@ export function tableFindings(lines: readonly BodyLine[]): TableFinding[] {
 
     const bodyRows = tableRows.length - 1
     if (bodyRows > TABLE_ROWS) {
-      found.push({
+      reported.push({
         kind: 'table-rows',
         line: header.number,
         value: bodyRows,
@@ -135,7 +137,7 @@ export function tableFindings(lines: readonly BodyLine[]): TableFinding[] {
       !following.fenced &&
       LIST_ITEM.test(following.text)
     ) {
-      found.push({
+      density.push({
         kind: 'table-then-list',
         line: following.number,
         value: null,
@@ -146,5 +148,17 @@ export function tableFindings(lines: readonly BodyLine[]): TableFinding[] {
     index = end
   }
 
-  return found.sort((a, b) => a.line - b.line)
+  return { reported, density }
+}
+
+/** The row count and wide token findings, which report and never gate. */
+export function tableFindings(lines: readonly BodyLine[]): TableFinding[] {
+  return measureTables(lines).reported.sort((a, b) => a.line - b.line)
+}
+
+/** The cell and trailing-list findings, which gate as density kinds do. */
+export function tableDensityFindings(
+  lines: readonly BodyLine[],
+): DensityFinding[] {
+  return measureTables(lines).density.sort((a, b) => a.line - b.line)
 }
