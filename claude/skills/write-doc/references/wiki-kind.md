@@ -17,10 +17,17 @@ If `<wiki-root>` does not resolve, say so and ask whether to create it before dr
 
 The standard sets two tests and a page has to pass both. Run them before drafting anything, since a page failing either is non-conforming however well it is written.
 
-| Test                                        | Fails on                                                                        | Refusal                                                                                                                                    |
-| ------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Owned outside this repository               | A subject describing how this repository works                                  | `❌ <subject> is owned by this project, so it belongs in the docs surface or a context entry. Re-run write-doc naming that destination.`   |
-| Owned by the vendor the folder split covers | A third-party tool or a vendor-neutral concept, however reference-like it reads | `❌ <subject> is outside the wiki's folder split. Route it to the docs surface or a skill body rather than adding a second folder for it.` |
+The first test is owned outside this repository, and it fails on a subject describing how this repository works. Refuse with this line:
+
+```plaintext
+❌ <subject> is owned by this project, so it belongs in the docs surface or a context entry. Re-run write-doc naming that destination.
+```
+
+The second test is owned by the vendor the folder split covers, and it fails on a third-party tool or a vendor-neutral concept, however reference-like it reads. Refuse with this line:
+
+```plaintext
+❌ <subject> is outside the wiki's folder split. Route it to the docs surface or a skill body rather than adding a second folder for it.
+```
 
 On the first test, offer the docs or context kind of this skill. The standard names one owner and one subfolder for the second.
 

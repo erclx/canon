@@ -54,13 +54,11 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 
 ## Excuses and rebuttals
 
-| Excuse                                   | Rebuttal                                                                                                                                    |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| The model already knows the good sites   | It does, and it does not use that knowledge unprompted. Left to rank, a search puts guides written to rank above a field's reference pages. |
-| One search was enough                    | One search gives nothing to check a wrong fact against. The scoped search is what catches the open summary's error.                         |
-| The open results look authoritative      | Ranking rewards pages written to rank, so advocates and thin guides sit beside the field's own record and tilt the summary.                 |
-| I scoped it, so every result is in scope | The domain filter is not strict, so a scoped search can return results from outside its list.                                               |
-| The summary already answers it           | A summary paraphrases. Fetch the page when two summaries disagree, since that is where the error sits.                                      |
+- **The model already knows the good sites.** It does, and it does not use that knowledge unprompted. Left to rank, a search puts guides written to rank above a field's reference pages.
+- **One search was enough.** One search gives nothing to check a wrong fact against. The scoped search is what catches the open summary's error.
+- **The open results look authoritative.** Ranking rewards pages written to rank, so advocates and thin guides sit beside the field's own record and tilt the summary.
+- **I scoped it, so every result is in scope.** The domain filter is not strict, so a scoped search can return results from outside its list.
+- **The summary already answers it.** A summary paraphrases. Fetch the page when two summaries disagree, since that is where the error sits.
 
 ## Red flags
 

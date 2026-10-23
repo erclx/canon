@@ -58,6 +58,8 @@ Every limit is a count a reviewer can take, so a rule passes or fails it without
 | Bullet length        | 200 characters                                                  |
 | Sentences per bullet | 2, one directive plus one exception, condition, or short reason |
 
+Two habits keep a rule inside those limits.
+
 - Name one concern in `description`. A rule needing a seventh H2 holds two concerns and splits into two files.
 - Keep a reason to the why of its directive, never a paragraph of background
 
@@ -70,6 +72,8 @@ A bullet loads on every matching edit, so it earns its place only when removing 
 | What Claude cannot guess                   | Standard language conventions Claude already knows       |
 | A convention that differs from the default | Anything the linter, formatter, or type checker enforces |
 | A footgun that ships silently              | Information that changes often                           |
+
+Three habits keep each bullet worth its load.
 
 - Write every bullet concrete enough to verify against a line of code. "Prefer `pathlib.Path` over `os.path`" passes, since it names both sides.
 - Pair a ban with the alternative to take, unless the ban or a neighbor bullet already names it

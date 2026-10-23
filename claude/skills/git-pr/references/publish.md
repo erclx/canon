@@ -71,11 +71,10 @@ A link to one Claude Code session names the session that wrote the text rather t
 
 A number referring to a pull request or an issue takes the form its destination renders. Write it bare where the destination auto-links it and in backticks where it does not, so a reference moved between destinations is rewritten rather than copied.
 
-| Destination                                               | Form                                                                                                                                                         |
-| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Pull request or issue body, a comment on either, a commit | `#123`, or `owner/repo#123` across repositories <!-- canon-allow-reference: the two spellings this section defines, which a qualified form would destroy --> |
-| A markdown file browsed from the repository tree          | the number in backticks, since neither spelling links there                                                                                                  |
-| Content installed into another repository                 | qualified against a different, resolvable repository, or no number                                                                                           |
+- Pull request or issue body, a comment on either, a commit: `#123` <!-- canon-allow-reference: the bare spelling this section defines, which a qualified form would destroy -->
+- The same destinations when the reference crosses repositories: `owner/repo#123` <!-- canon-allow-reference: the two spellings this section defines, which a qualified form would destroy -->
+- A markdown file browsed from the repository tree: the number in backticks, since neither spelling links there
+- Content installed into another repository: qualified against a different, resolvable repository, or no number
 
 A commit message takes the bare form even though the log links nothing, since the remote is what the form is chosen for. Text quoted from another surface keeps the spelling it arrived with, since rewriting it reports the source as saying something it never said.
 

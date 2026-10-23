@@ -74,10 +74,17 @@ Classify the groups before generating commands, since the mode decides each bran
 
 Append the line for the run's mode to the preview.
 
-| Mode        | Line                                                                                                                                                                                                          |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Stacked     | `🔁 Sequential squash-merge loop. Squash-merge each PR bottom-up with --delete-branch. After each merge, signal me so I can restack the next branch onto main before you merge it.`                           |
-| Independent | `🔁 Squash-merge secondaries first, primary last. The primary keeps every cherry-picked commit, so merging it first lands every secondary's content on main and leaves the secondary PRs empty after rebase.` |
+Stacked mode appends this line:
+
+```plaintext
+🔁 Sequential squash-merge loop. Squash-merge each PR bottom-up with --delete-branch. After each merge, signal me so I can restack the next branch onto main before you merge it.
+```
+
+Independent mode appends this line:
+
+```plaintext
+🔁 Squash-merge secondaries first, primary last. The primary keeps every cherry-picked commit, so merging it first lands every secondary's content on main and leaves the secondary PRs empty after rebase.
+```
 
 After outputting the preview, execute the final commands immediately. Claude Code's tool permission dialog is the confirmation gate. Do not wait for user input.
 
