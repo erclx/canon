@@ -47,11 +47,13 @@ A project installed before the board became a folder still holds `.claude/TASKS.
 
 ## CLI
 
-| Command              | What it does                                                                                                                                                                     |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `canon claude init`  | Seeds `.claude/` workflow docs, updates `.gitignore`                                                                                                                             |
-| `canon claude sync`  | Reconciles `.gitignore` against the manifest. Reports seeded file status.                                                                                                        |
-| `canon claude setup` | Installs user-level config to `~/.claude/` once per machine: statusline and the permissions allow and deny lists, and removes the empty attribution pair an earlier setup wrote. |
+| Command              | What it does                                                              |
+| -------------------- | ------------------------------------------------------------------------- |
+| `canon claude init`  | Seeds `.claude/` workflow docs, updates `.gitignore`                      |
+| `canon claude sync`  | Reconciles `.gitignore` against the manifest. Reports seeded file status. |
+| `canon claude setup` | Installs user-level config to `~/.claude/` once per machine               |
+
+`canon claude setup` writes the statusline and the permissions allow and deny lists, and removes the empty attribution pair an earlier setup wrote.
 
 ## CLAUDE.md
 

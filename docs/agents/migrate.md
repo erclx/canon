@@ -8,21 +8,23 @@ kind: reference
 
 `canon migrate <verb>` moves a project off a retired name or layout. Each verb reports its plan and writes nothing until `--write`, takes `--json`, and, except `rename`, takes `--root`. A second run rewrites nothing, which confirms the exclusions and markers fired.
 
-| Verb               | Moves                                                                                                                                       |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `status`           | Nothing. It lists every migration the project still needs, in run order.                                                                    |
-| `rename`           | The retired `aitk` name. `--scope target` rewrites toolkit-owned folders only.                                                              |
-| `skill-names`      | Plugin skills off their `claude-` and `draft-` prefixes and other retired names, with every citation                                        |
-| `records`          | Session records from `.claude/` to `.canon/`, with every tracked citation                                                                   |
-| `surface-roots`    | `context/`, `wireframes/`, `ARCHITECTURE.md`, `REQUIREMENTS.md`, `DESIGN.md`, and the stamp folder from `.claude/` to `canon/`, by `git mv` |
-| `record-tree`      | Citations inside `.canon/` folders a session still follows: `diagrams`, `memory`, `plans`, `proposals`, `review`, `tasks`, `teach`          |
-| `rule-layout`      | A flat installed-rule layout onto the `canon/`-wrapped one                                                                                  |
-| `scratch-evidence` | A folder a durable record cites out of `.tmp/`, with its citations                                                                          |
-| `record-layout`    | Review receipts, memory archives, feedback, renders, picks, and evidence into their current folders                                         |
-| `session-defaults` | The seeded session defaults into an existing `.claude/settings.json`: `Agent`, `Task`, and both merge commands denied, auto memory off      |
+| Verb               | Moves                                                                                                           |
+| ------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `status`           | Nothing. It lists every migration the project still needs, in run order.                                        |
+| `rename`           | The retired `aitk` name. `--scope target` rewrites toolkit-owned folders only.                                  |
+| `skill-names`      | Plugin skills off their `claude-` and `draft-` prefixes and other retired names, with every citation            |
+| `records`          | Session records from `.claude/` to `.canon/`, with every tracked citation                                       |
+| `surface-roots`    | Records such as `context/` and `REQUIREMENTS.md`, and the stamp folder, from `.claude/` to `canon/` by `git mv` |
+| `record-tree`      | Citations inside the `.canon/` folders a session still follows, listed below the table                          |
+| `rule-layout`      | A flat installed-rule layout onto the `canon/`-wrapped one                                                      |
+| `scratch-evidence` | A folder a durable record cites out of `.tmp/`, with its citations                                              |
+| `record-layout`    | Review receipts, memory archives, feedback, renders, picks, and evidence into their current folders             |
+| `session-defaults` | The seeded session defaults into an existing `.claude/settings.json`, listed below the table                    |
+
+`record-tree` follows citations in `diagrams`, `memory`, `plans`, `proposals`, `review`, `tasks`, and `teach`. `session-defaults` denies `Agent`, `Task`, and both merge commands, and turns auto memory off. The bullets below add detail per verb.
 
 - `skill-names` takes no `--scope`, and skips the changelog, eval transcripts, and the pointer each renamed `draft-` skill leaves at its old name
-- `surface-roots` leaves `rules/`, `skills/`, `hooks/`, and `settings.json` where Claude Code reads them
+- `surface-roots` moves `context/`, `wireframes/`, `ARCHITECTURE.md`, `REQUIREMENTS.md`, `DESIGN.md`, and the stamp folder, and leaves `rules/`, `skills/`, `hooks/`, and `settings.json` in place
 - `rule-layout` classifies each flat file against the stamp as clean, edited, or unclaimed. Clean and edited files move untouched, and an unclaimed name stays.
 - `record-layout` labels each evidence folder `(pick)` or `(evidence)` in the dry run
 - `session-defaults` adds a key only when absent, merge entries included, and each older project runs it once. `--write` restores a removed `Agent` or `Task` and never removes a deny entry.

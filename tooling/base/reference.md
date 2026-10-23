@@ -91,18 +91,19 @@ Negative knowledge that costs a failed run to relearn.
 
 ## CLI
 
-| Script                 | What it does                                                                                                                  |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `bun run check`        | Gates a checkout through `scripts/verify.ts`, writing nothing. `VERIFY_NESTED=true` suppresses timeline boundaries in a call. |
-| `bun run check:format` | Asserts oxfmt formatting without writing                                                                                      |
-| `bun run format`       | Writes oxfmt formatting in place                                                                                              |
-| `bun run prepare`      | Initializes husky hooks, run automatically on `bun install`                                                                   |
+| Script                 | What it does                                                  |
+| ---------------------- | ------------------------------------------------------------- |
+| `bun run check`        | Gates a checkout through `scripts/verify.ts`, writing nothing |
+| `bun run check:format` | Asserts oxfmt formatting without writing                      |
+| `bun run format`       | Writes oxfmt formatting in place                              |
+| `bun run prepare`      | Initializes husky hooks, run automatically on `bun install`   |
 
 ### The check script
 
 Base writes `check` as a `[scripts.override]`, so a sync replaces whatever `check` a target declared, including one that chained further checks after the runner. Re-add a chained check as its own script after a sync.
 
 - `bun run check` writes nothing. Formatting drift fails it at `check:format`, and the failure line names `bun run format`, the one command that writes.
+- `VERIFY_NESTED=true` suppresses timeline boundaries when `check` runs inside another call
 - Auto-fixing drift inside `check` rewrote files in a shared checkout on every push and left a gate that could not fail, so the writing pass stays in `bun run format`.
 - The pull request workflow calls `check:format` directly as well.
 
