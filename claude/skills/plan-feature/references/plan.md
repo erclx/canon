@@ -81,6 +81,8 @@ The document opens with `# Feature: <short title>` and one paragraph stating wha
 | `## Questions`         | numbered open decisions, each with a suggestion and an answer slot          | Always                                            |
 | `## Sources`           | the outside sources a decision rests on, each with its quoted passage       | When a decision rests on an outside source        |
 
+Four rules govern how a section is written:
+
 - Write each section as the H2 the table gives, so a reader scans the plan by its outline
 - A section written as a bold label, the spelling before this one, is still that section to every parser. Leave an existing plan's spelling alone.
 - Write `None identified.` under a required section with nothing to report rather than dropping the marker. A dropped section and an unconsidered one read identically.
