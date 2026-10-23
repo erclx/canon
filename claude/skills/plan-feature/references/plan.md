@@ -72,6 +72,7 @@ The document opens with `# Feature: <short title>` and one paragraph stating wha
 | Section                | Holds                                                                       | Required                                          |
 | ---------------------- | --------------------------------------------------------------------------- | ------------------------------------------------- |
 | `## Summary`           | three to five one-line bullets: the goal, the deliverables, the trade-off   | Always                                            |
+| `## Current behavior`  | each command run against the thing being changed and what it showed         | When the change touches something that runs       |
 | `## Constraints`       | durable rules the work must respect                                         | When supplied                                     |
 | `## Files to touch`    | each file with a one-line reason                                            | Always                                            |
 | `## Design references` | the tracked design folders the change builds against, each with its surface | When Files to touch names a rendered-surface file |
@@ -80,6 +81,8 @@ The document opens with `# Feature: <short title>` and one paragraph stating wha
 | `## Review focus`      | the inputs or states that would break the change, for the reviewer          | Always                                            |
 | `## Questions`         | numbered open decisions, each with a suggestion and an answer slot          | Always                                            |
 | `## Sources`           | the outside sources a decision rests on, each with its quoted passage       | When a decision rests on an outside source        |
+
+### Writing a section
 
 Four rules govern how a section is written:
 
@@ -125,6 +128,15 @@ Group the entries by area under H3s once they pass 5, each H3 opening on the rea
 State every count and every claim about the tree as measured during the pass that wrote the plan. A figure carried in from a summary or an earlier session is the most common way a plan ships the wrong scope.
 
 Prefer a short plan over a padded one. A section filled to look thorough costs the reader the same attention as one that matters.
+
+### Current behavior
+
+A plan changing a verb, a route, or a rendered surface starts from what that thing does today, so the section records the run the planner made and not a reading of the source.
+
+- Write one bullet per run, leading with the command or request in backticks and ending on what it showed
+- Run only a read form, per the safe forms in `onboarding.md`, since a planner writes its plan and nothing else
+- Record a run that could not happen as not run with the reason. Never leave it out silently.
+- Leave the section out of a plan touching nothing that runs, such as prose or a config seed
 
 ### Constraints
 
@@ -258,6 +270,10 @@ Each H3 below shows where a section groups once it passes 5 bullets. A section o
 - <one-line bullet covering the goal>
 - <one-line bullet covering the main deliverables>
 - <one-line bullet covering the key decision or trade-off>
+
+## Current behavior
+
+- `<command or request>`: <what it showed, or not run and why>
 
 ## Constraints
 

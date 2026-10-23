@@ -13,7 +13,7 @@ A constraint naming a surface to leave alone forbids two acts at once, conformin
 
 ## Must
 
-- Read the project's Claude setup before scanning source, and name every file the work touches with the reason it is touched
+- Read the project's Claude setup and the domain's context entry, run the existing thing once read-only, then scan source, and name every file touched with its reason
 - Reframe a vague ask as observable success criteria, carry each into the plan's verification, and ask when none can be predicted
 - Slice by user-visible path with the riskiest batch first, and fold a stacked batch sharing most of its files into its parent unless the plan says why they differ
 - Quote the fetched passage behind each outside source, mark an unfetched one unverified, and place each new path against the layout guidance with a one-clause reason
@@ -23,6 +23,7 @@ A constraint naming a surface to leave alone forbids two acts at once, conformin
 
 - Implement, or edit any file the plan describes
 - Read directories speculatively, since context spent on files the feature does not touch is context the plan does not get
+- Run a form that writes to the tree being planned against, since a planner writes its plan and nothing else
 - Bundle independent concerns into one plan
 - Restate the plan in chat during follow-up rounds, since the file is the source of truth
 

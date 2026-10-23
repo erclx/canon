@@ -33,7 +33,15 @@ Also read `canon/DESIGN.md` when the feature touches code or UI, for visual inte
 
 Coding standards live in `.claude/rules/`. Claude Code loads them automatically, and path-scoped rules apply to the files they match.
 
-## Step 2: scan relevant source files
+### Read the domain's context entry
+
+Onboard to each domain the feature touches before reading its code, through its context entry. Read `${CLAUDE_SKILL_DIR}/references/onboarding.md` for the lookup.
+
+## Step 2: run the surface, then scan relevant source files
+
+When the feature changes a verb, a route, or a rendered surface that already exists, run it once before reading its code and record what it showed. Read `${CLAUDE_SKILL_DIR}/references/onboarding.md` for the safe form per surface kind, the rules that keep the run from writing, and the not-run record.
+
+### Read the code
 
 Read the source files directly relevant to the feature, never whole directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at.
 
@@ -59,6 +67,7 @@ The section list, what each section holds, and the suggested-and-answer contract
 
 What this skill adds on top of the standard:
 
+- Record each command Step 2 ran and what it showed, or the not-run reason, under `## Current behavior`, and omit the section when nothing ran
 - Reframe a vague ask as success criteria before `## Files to touch`, each an observable result and its check, which becomes one `## Verification` bullet. "Make it faster" names none.
 - Confirm a concrete project or use case drives the feature, and lift patterns from it where precedent exists. A feature with no named user is a guess.
 - Prefer one layout that serves both a new and a grown project over a dual-mode toggle or a migration shim. Two modes double what every later change has to hold.
