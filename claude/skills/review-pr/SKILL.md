@@ -33,6 +33,8 @@ Both headings anchor as a section distinct from human threads. The full set is e
 | Evidence | `## Evidence`                                                | `canon pr evidence`, through `pr-evidence` from `git-pr` and `git-followup` |
 | UI       | `## UI review`, `## UI review closed`                        | `review-ui`, posted as a review beside this one and read by nothing here    |
 
+Three notes qualify the table.
+
 - The reply headings in order answer a finding, report a stale branch resolved without one, and carry a finding a worker produced after a close-out
 - `## Evidence` answers no comment on the thread, so the poll leaves it out of the unclassified count rather than reading it as a reply owing a re-review
 - A comment under any other heading reaches the poll as unclassified rather than as silence, so an invented ninth heading is a gap the next run reports

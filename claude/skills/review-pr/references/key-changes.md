@@ -13,12 +13,14 @@ Test what `## Key changes` claims against the diff it describes, with `canon pr 
 
 Branch on the record rather than on the exit code, which a shell function wrapping `canon` can flatten to zero. Each field the record carries takes its own reading.
 
-| Field        | Reading                                                                                                                             |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `unmet`      | a `should-fix` finding under the `**PR body**` block the stale box takes, one per path, quoting the `preview` bullet and the `head` |
-| `unnamed`    | read for yourself and raise nothing off the count                                                                                   |
-| `unresolved` | reported nowhere, since it was judged in neither direction                                                                          |
-| `incidental` | reported nowhere, since it owes no bullet                                                                                           |
+| Field        | Reading                                                                                |
+| ------------ | -------------------------------------------------------------------------------------- |
+| `unmet`      | a `should-fix` finding under the `**PR body**` block the stale box takes, one per path |
+| `unnamed`    | read for yourself and raise nothing off the count                                      |
+| `unresolved` | reported nowhere, since it was judged in neither direction                             |
+| `incidental` | reported nowhere, since it owes no bullet                                              |
+
+Each `unmet` finding quotes the `preview` bullet and the `head`.
 
 ### Before filing an unmet path
 

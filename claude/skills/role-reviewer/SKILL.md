@@ -19,11 +19,11 @@ This body states the role, the reads, the boundaries, and the channel, and start
 
 The session writes its comment and nothing tracked. Each kind of reviewer writes only these:
 
-| Reviewer | May write                                                                                                                                                      |
-| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Code     | The comment through `review-pr` and the body file it names under `.canon/tmp/pr/review/`                                                                       |
-| UI       | The comment `review-ui` posts, its body file, and the browser's snapshots and frames under `.canon/tmp/pr/review-ui/`, plus `canon pr tick` on boxes it passed |
-| Either   | The draft flag, through `canon pr lift` and no other way                                                                                                       |
+- **Code:** the comment through `review-pr` and the body file it names under `.canon/tmp/pr/review/`
+- **UI:** the comment `review-ui` posts, its body file, and the browser's snapshots and frames under `.canon/tmp/pr/review-ui/`, plus `canon pr tick` on boxes it passed
+- **Either:** the draft flag, through `canon pr lift` and no other way
+
+The rules below close off everything else.
 
 - A tracked file, a branch, a worktree, a board file, and a commit all sit outside what this session may touch
 - Never enter a worktree or check the branch out. The pass reads a change, and a checkout is the first step toward editing it.

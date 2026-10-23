@@ -69,6 +69,8 @@ Write `.canon/tasks/priority.md` through the `canon tasks` verbs alone, each rea
 | A row up or down inside its group         | `canon tasks move <stem> --before <stem>`                  |
 | What a row waits on, or why it sits there | `canon tasks block <stem> "<reason>"`                      |
 
+Four verbs cover every move the board takes, and the points below hold for all four.
+
 - `place` removes the task's backlog line in the same call, so a row never sits on both surfaces or on neither
 - Demoting a row to `backlog.md` has no verb yet. Add the backlog line first, then delete the row with the file-editing tool, which errors on a non-match.
 - Put the reason a row sits where it does in its Waiting on cell through `block`, since a row promoted with the cell left alone carries an order the next sweep cannot check
