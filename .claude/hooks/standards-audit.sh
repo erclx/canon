@@ -88,12 +88,13 @@ colons=$(printf '%s' "$record" |
 # returns them for a path in its scope and a finding the push does not fail on
 # yet is the one a rewrite has to clear before its folder is gated.
 density=$(printf '%s' "$record" |
-  jq -r '.entries[]?.density[]? | ":\(.line)  \(.kind)  " + (if .limit == null then "opens with neither a paragraph nor a table" else "\(.value) past \(.limit)" end) + (if .gating then "  gating" else "" end)' 2>/dev/null)
+  jq -r '.entries[]?.density[]? | ":\(.line)  \(.kind)  " + (if .kind == "table-then-list" then "a list follows the table with no lead sentence" elif .limit == null then "opens with neither a paragraph nor a table" else "\(.value) past \(.limit)" end) + (if .gating then "  gating" else "" end)' 2>/dev/null)
 
-# Table findings report and never gate, so each kind is handed back with the
-# fix its shape takes rather than the seam a density finding splits at.
+# The row count and the wide token report and never gate, so each kind is handed
+# back with the fix its shape takes rather than the seam a density finding
+# splits at. The cell and the trailing list arrive as density findings.
 tables=$(printf '%s' "$record" |
-  jq -r '.entries[]?.tables[]? | ":\(.line)  \(.kind)  " + (if .limit == null then "a list follows the table with no lead sentence" else "\(.value) past \(.limit)" end)' 2>/dev/null)
+  jq -r '.entries[]?.tables[]? | ":\(.line)  \(.kind)  " + "\(.value) past \(.limit)"' 2>/dev/null)
 
 # A page marked `kind: reference` carries reference shape findings, handed back
 # whole the same way, since a gated one fails the push like a density finding.
@@ -136,12 +137,12 @@ if [ -n "$colons" ]; then
 fi
 
 if [ -n "$density" ]; then
-  found=$(printf 'Standards-audit: %s breaks the markdown density limits, being a 350-character paragraph, 2 paragraphs in a row, a 200-character bullet, 5 plain bullets in a row, no H4, and a paragraph or table opening every H3. Split each block at its seam rather than trimming words to pass. A finding marked gating fails the push.\n%s' "$file" "$density")
+  found=$(printf 'Standards-audit: %s breaks the markdown density limits, being a 350-character paragraph, 2 paragraphs in a row, a 200-character bullet, 5 plain bullets in a row, no H4, and a paragraph or table opening every H3, a 120-character table cell, and no list directly after a table. Split each block at its seam rather than trimming words to pass. A finding marked gating fails the push.\n%s' "$file" "$density")
   msg="${msg:+$msg$nl}$found"
 fi
 
 if [ -n "$tables" ]; then
-  found=$(printf 'Standards-audit: %s breaks the markdown table limits, being a 120-character cell, 8 body rows, a list directly after a table, and a code span holding a run past 30 characters. These report and never fail a push. Move a long cell into a bullet under the table'"'"'s lead, split a long table into groups each under a lead sentence, give a trailing list its own lead sentence, and move a wide token out of the table.\n%s' "$file" "$tables")
+  found=$(printf 'Standards-audit: %s breaks the markdown table limits that report, being 8 body rows and a code span holding a run past 30 characters. These never fail a push. Split a long table into groups each under a lead sentence, and move a wide token out of the table.\n%s' "$file" "$tables")
   msg="${msg:+$msg$nl}$found"
 fi
 
