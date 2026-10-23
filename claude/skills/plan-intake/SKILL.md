@@ -63,7 +63,7 @@ Read these in parallel from the project root, skipping any that do not exist:
 
 Then read only what a live item needs, never whole directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at.
 
-For each domain an item touches, run `canon indexes list --json canon/context` and read the entry whose title or description matches, since it records the traps a grep will not show. Continue without one when the project has no `canon/context/` folder or no entry matches.
+For each domain an item touches, read its context entry through the lookup in `${CLAUDE_SKILL_DIR}/../plan-feature/references/onboarding.md`, since the entry records the traps a grep will not show.
 
 ## Step 3: measure against the tree
 

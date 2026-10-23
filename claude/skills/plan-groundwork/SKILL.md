@@ -98,11 +98,7 @@ Read these in parallel from the project root, skipping any that do not exist:
 - `canon/REQUIREMENTS.md`: scope and non-goals
 - `.canon/tasks/index.md`: what is already tracked, and what a prior track concluded. Open a task file only when its entry looks related.
 
-Then read only what a live question needs, never whole directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at.
-
-### Read the domain's context entry
-
-For each domain the topic touches, run `canon indexes list --json canon/context` and read the entry whose title or description matches, ahead of measuring. Continue without one when the project has no `canon/context/` folder or no entry matches.
+Then read only what a live question needs, never whole directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at. For each domain the topic touches, read its context entry ahead of measuring, through the lookup in `${CLAUDE_SKILL_DIR}/../plan-feature/references/onboarding.md`.
 
 Do not dispatch subagents. A groundwork track is a conversation, and fanning out loses the reasoning that makes the folder worth keeping. A search too large to run inline is a finding that the question is too broad.
 

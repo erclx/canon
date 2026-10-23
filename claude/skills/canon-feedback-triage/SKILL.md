@@ -53,7 +53,7 @@ For each remaining issue, measure its claim against the tree during this pass, n
 - Grep for the construct its defect names and count the sites
 - Check whether the behavior it asks for exists
 - Search the log for a commit or pull request that shipped it under another task
-- Run the issue's Repro section when it is one command that works here, and say on `Problem:` what it showed
+- Run the issue's Repro section in a form that writes nothing when it is one command that works here, and say on `Problem:` what it showed
 - Mark the item `not reproduced here` when the repro names another project's paths or needs more, per `## Repro versus groundwork` in the intake standard
 
 Classify each against the toolkit's own surfaces:
