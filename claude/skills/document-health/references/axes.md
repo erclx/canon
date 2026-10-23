@@ -19,7 +19,7 @@ The skill body holds the order, the guards, and the report shape. This holds the
 
 The record carries the checkpoints it read against under `checkpoints` and the per-file weights under `entries`. Read both from the record rather than from a number stated here, since the CLI moves a checkpoint on its own cadence and a copy goes stale in place.
 
-- `heavyBullets`: a top-level bullet past the character checkpoint, which is a paragraph wearing a dash
+- `heavyBullets`: a bullet past the character checkpoint, a nested one measured on its own, which is a paragraph wearing a dash
 - `heavyParagraphs`: a paragraph past the sentence or character checkpoint
 - `longestRun`, against `longestRunLine`: unbroken rendered lines between headings, which is the depth checkpoint
 - `cadence`, carrying `measured`, `flat`, and `repeating`: sentence-length spread and repeated openers
