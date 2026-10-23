@@ -373,6 +373,42 @@ describe('checkPlan', () => {
     expect(checkPlan('feature-a-b.md', body)).toEqual([])
   })
 
+  describe('Current behavior', () => {
+    const section = [
+      '## Current behavior',
+      '',
+      '- `canon indexes list --json`: lists every context entry',
+      '',
+    ].join('\n')
+
+    it('should pass a plan carrying the section after Summary', () => {
+      const body = conformingPlan().replace(
+        '**Files to touch:**',
+        `${section}\n**Files to touch:**`,
+      )
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
+    })
+
+    it('should key the section so its bullets stay out of Summary', () => {
+      const sections = splitPlanSections(
+        ['## Summary', '', '- goal', '', section].join('\n'),
+      )
+
+      const bullets = (name: string) =>
+        sections.get(name)?.filter((line) => line.trim() !== '')
+
+      expect(bullets('Summary')).toEqual(['- goal'])
+      expect(bullets('Current behavior')).toEqual([
+        '- `canon indexes list --json`: lists every context entry',
+      ])
+    })
+
+    it('should still pass a plan without the section', () => {
+      expect(checkPlan('feature-a-b.md', conformingPlan())).toEqual([])
+    })
+  })
+
   it('should report a missing Feature heading', () => {
     const body = conformingPlan().replace(
       '# Feature: A standard owns the plan format',

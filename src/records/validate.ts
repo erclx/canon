@@ -219,6 +219,7 @@ const QUESTION_ITEM = /^\d+[a-z]?\.[ \t]+\S/
 
 const PLAN_SECTIONS = [
   'Summary',
+  'Current behavior',
   'Constraints',
   'Files to touch',
   'Design references',
