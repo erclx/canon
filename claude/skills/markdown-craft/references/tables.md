@@ -5,7 +5,9 @@ description: The four limits a markdown table takes, being cell length, row coun
 
 # Table limits
 
-None of the density limits in `markdown.md` reads inside a table, so content too long for a bullet tends to move into a cell. Four table limits close that gap. `canon markdown audit` measures them on the paths density covers, outside fences. Cell length and a list after a table fail a push where density gates, and rows and a wide token report without failing one.
+None of the density limits in `markdown.md` reads inside a table, so content too long for a bullet tends to move into a cell. Four table limits close that gap. `canon markdown audit` measures them on the paths density covers, outside fences.
+
+Cell length and a list after a table fail a push where density gates. Rows and a wide token report without failing one.
 
 ## Limits
 
