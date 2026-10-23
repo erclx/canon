@@ -9,6 +9,13 @@ const CLI = join(PROJECT_ROOT, 'src/cli.ts')
 /** No case has ever needed longer, and a blocked verb should fail fast. */
 const DEFAULT_TIMEOUT_MS = 10_000
 
+/**
+ * A spawn that reaches `bun add` fails at once against this unreachable
+ * address, so an unseeded install is a loud defect rather than a test that
+ * passes or fails with the network. `options.env` still wins.
+ */
+const DEAD_REGISTRY = 'http://127.0.0.1:9'
+
 export interface ProcessRun {
   readonly status: number | null
   readonly stdout: string
@@ -127,6 +134,7 @@ export function runCli(
       ...inherited,
       CANON_STATE_DIR: join(options.cwd, '.canon-state'),
       CANON_SANDBOX_DIR: join(options.cwd, '.canon-state', 'sandbox'),
+      BUN_CONFIG_REGISTRY: DEAD_REGISTRY,
       ...options.env,
     },
   })
