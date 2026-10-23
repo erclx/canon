@@ -22,19 +22,19 @@ canon context audit tooling/base/seeds --gate
 
 ## Output
 
-| Check               | Reports                                                                                                        | Reaches                 | Finding                                                     |
-| ------------------- | -------------------------------------------------------------------------------------------------------------- | ----------------------- | ----------------------------------------------------------- |
-| Citations           | A path into an audited folder that resolves nowhere                                                            | Every audited folder    | Gates always                                                |
-| Requirements record | Words past the cap the record states as `This record holds at most 600 words.`                                 | `canon/REQUIREMENTS.md` | Gates past a stated cap, never under `--citations-only`     |
-| Required sections   | An entry missing `Overview` or `Layout`. A split folder answers by any sibling                                 | `canon/context/`        | Gates under `--gate`                                        |
-| Closed set          | An H2 outside `Overview`, `Layout`, and `Gotchas`, under `extraSections`                                       | `canon/context/`        | Gates under `--gate`                                        |
-| Shape               | A break of the entry shape, in any kind listed under the table                                                 | `canon/context/`        | Gates under `--gate` in a `SHAPE_GATED_FOLDERS` folder only |
-| Index drift         | An entry its index does not link, or a link resolving to nothing                                               | Every audited folder    | Gates under `--gate`                                        |
-| Coverage            | A folder under a code root no Layout names, a Layout H3 in two entries, or an unmatched root, under `coverage` | `canon/context/`        | Gates under `--gate`, never under `--citations-only`        |
-| Reference form      | A backticked bare filename matching a sibling entry, under `bareReferences`                                    | Split folders           | Reports                                                     |
-| Length              | An entry past about 150 rendered lines at 80 columns, with its `causes`                                        | Every audited folder    | Reports                                                     |
-| Tables              | Six or more body rows whose first column mostly carries a path, command, or link                               | Every audited folder    | Reports                                                     |
-| Provenance          | A date, change number, or release label. A date after measured, verified, driven, passed, or fired is excluded | `canon/context/`        | Reports                                                     |
+| Check               | Reports                                                                                                                 | Reaches                 | Finding                                                     |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------- | ----------------------------------------------------------- |
+| Citations           | A path into an audited folder that resolves nowhere                                                                     | Every audited folder    | Gates always                                                |
+| Requirements record | Words past the cap the record states as `This record holds at most 600 words.`                                          | `canon/REQUIREMENTS.md` | Gates past a stated cap, never under `--citations-only`     |
+| Required sections   | An entry missing `Overview` or `Layout`. A split folder answers by any sibling                                          | `canon/context/`        | Gates under `--gate`                                        |
+| Closed set          | An H2 outside `Overview`, `Layout`, and `Gotchas`, under `extraSections`                                                | `canon/context/`        | Gates under `--gate`                                        |
+| Shape               | A break of the entry shape, in any kind listed under the table                                                          | `canon/context/`        | Gates under `--gate` in a `SHAPE_GATED_FOLDERS` folder only |
+| Index drift         | An entry its index does not link, or a link resolving to nothing                                                        | Every audited folder    | Gates under `--gate`                                        |
+| Coverage            | A folder directly under a code root no Layout names, a Layout H3 in two entries, or an unmatched root, under `coverage` | `canon/context/`        | Gates under `--gate`, never under `--citations-only`        |
+| Reference form      | A backticked bare filename matching a sibling entry, under `bareReferences`                                             | Split folders           | Reports                                                     |
+| Length              | An entry past about 150 rendered lines at 80 columns, with its `causes`                                                 | Every audited folder    | Reports                                                     |
+| Tables              | Six or more body rows whose first column mostly carries a path, command, or link                                        | Every audited folder    | Reports                                                     |
+| Provenance          | A date, change number, or release label. A date after measured, verified, driven, passed, or fired is excluded          | `canon/context/`        | Reports                                                     |
 
 The coverage roots come from `roots` in `canon/config/context.toml`, a list of folders or globs such as `packages/*/src`.
 
@@ -56,7 +56,7 @@ The development entry may carry a `Scripts` H3 exempt from both folder caps. `SH
 | `1`  | Refused, with the reason on stderr         |
 | `2`  | A gating finding for the mode the run took |
 
-The exit code follows the mode the run took, and three cases set it beyond a plain finding.
+The exit code follows the mode the run took. The bullets cover where the gate runs, what refuses, and how a seed opts out.
 
 - `bun run check` runs `--gate` against every `tooling/<stack>/seeds/` directory carrying a `.claude/` folder
 - A root resolving no audited folder refuses with `1` and warns, a root measuring no entry warns, and a seed short a section fails with `2`

@@ -21,7 +21,7 @@ kind: reference
 | `record-layout`    | Review receipts, memory archives, feedback, renders, picks, and evidence into their current folders             |
 | `session-defaults` | The seeded session defaults into an existing `.claude/settings.json`, listed below the table                    |
 
-`record-tree` follows citations in `diagrams`, `memory`, `plans`, `proposals`, `review`, `tasks`, and `teach`. `session-defaults` denies `Agent`, `Task`, and both merge commands, and turns auto memory off. The bullets below cover the other verbs.
+`record-tree` follows citations in `diagrams`, `memory`, `plans`, `proposals`, `review`, `tasks`, and `teach`. `session-defaults` denies `Agent`, `Task`, and both merge commands, and turns auto memory off. The bullets below add detail per verb.
 
 - `skill-names` takes no `--scope`, and skips the changelog, eval transcripts, and the pointer each renamed `draft-` skill leaves at its old name
 - `surface-roots` moves `context/`, `wireframes/`, `ARCHITECTURE.md`, `REQUIREMENTS.md`, `DESIGN.md`, and the stamp folder, and leaves `rules/`, `skills/`, `hooks/`, and `settings.json` in place
