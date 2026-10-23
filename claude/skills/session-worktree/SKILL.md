@@ -73,6 +73,8 @@ Resolve `<type>` here too, since Step 3 previews it and Step 5 renames onto it, 
 | A plan, through tier 1 or tier 2             | The `type` field of `canon tasks plan-branch <plan> --json` |
 | A branch, a bare user name, or anything else | `feat`                                                      |
 
+The points below govern how the type is read.
+
 - The verb is the reading because a type read off a plan's sections is a judgment two sessions can grade differently, and the verb answers the same for both
 - Branch on the record rather than on the exit code, which a shell function wrapping `canon` can flatten to zero
 - Take `feat` and say the verb did not answer where it refuses, the record has no `type`, or the binary has no `plan-branch`

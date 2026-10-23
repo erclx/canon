@@ -90,13 +90,15 @@ Once the fixes are commits, re-run step 5's staleness test against the new head.
 
 Write a summary reply to `.canon/tmp/pr/reply/reply-<number>.md`, keyed on the PR number so two sessions addressing different pull requests never overwrite each other. Load `write-human` for voice, follow `${CLAUDE_SKILL_DIR}/../markdown-craft/references/markdown.md`, and keep each mapping to one line.
 
-| Part     | Content                                                                                                                                        |
-| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Heading  | `## Review response`, distinct from human threads and subordinate to the review's own `## Review`                                              |
-| Summary  | One sentence. After a step 5 rebase, say so and name files resolved by hand and those the regen rebuilt, since the next review is a full pass. |
-| Findings | One line per finding under 200 characters, naming its outcome and the commit that carries it, in the shape below                               |
-| Docs     | Any `.claude/` docs refreshed as a result of the fixes                                                                                         |
-| Close    | `🤖 Addressed by Claude Code` on its own line, so the reply reads as a machine pass rather than a human sign-off                               |
+| Part     | Content                                                                                                          |
+| -------- | ---------------------------------------------------------------------------------------------------------------- |
+| Heading  | `## Review response`, distinct from human threads and subordinate to the review's own `## Review`                |
+| Summary  | One sentence, plus the rebase note below                                                                         |
+| Findings | One line per finding under 200 characters, naming its outcome and the commit that carries it, in the shape below |
+| Docs     | Any `.claude/` docs refreshed as a result of the fixes                                                           |
+| Close    | `🤖 Addressed by Claude Code` on its own line, so the reply reads as a machine pass rather than a human sign-off |
+
+After a step 5 rebase, the summary says so and names the files resolved by hand and those the regen rebuilt, since the next review is a full pass.
 
 ```markdown
 - **<severity>**, `<file>` line <n>: fixed in `<sha>`. <What now holds, in one sentence.>

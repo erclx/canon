@@ -9,10 +9,12 @@ Re-test every parked row as orchestrator. A blocker cell is a measurement taken 
 
 Two triggers start this pass, and they differ in scope rather than in procedure.
 
-| Trigger                                                                                           | Scope                                                                                                                                |
-| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `orchestrator-sweep.md` sends the rows `canon tasks validate` listed untested                     | Those rows alone, since a merge changes the tree under every parked row and the validator already re-took the two kinds it settles   |
-| An idle session, with nothing merged, workers building, and no pull request awaiting a first pass | Every parked row, since no event narrowed them, plus every `backlog.md` row, which carries no blocker cell for the validator to name |
+- **Sweep.** `orchestrator-sweep.md` sends the rows `canon tasks validate` listed untested.
+  - Scope: those rows alone, since a merge changes the tree under every parked row and the validator already re-took the two kinds it settles
+- **Idle.** The session has nothing merged, workers building, and no pull request awaiting a first pass.
+  - Scope: every parked row, since no event narrowed them, plus every `backlog.md` row, which carries no blocker cell for the validator to name
+
+Three points hold for both triggers.
 
 - Neither trigger is a scheduler. `orchestrator-poll.md` owns the one recurring trigger, and a second loop firing into a static board is the always-on failure it warns about.
 - The sweep asks which parked row to promote next, taking the blocker cell as read, and this pass asks whether the cell is still true

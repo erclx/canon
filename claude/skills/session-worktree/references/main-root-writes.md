@@ -22,6 +22,8 @@ Each kind of write takes one route, and none of them is a stream editor.
 | Change inside a file | A `canon` verb resolving the main root in-process, such as `canon tasks outcome` or `canon tasks pull-request` |
 | Delete or move       | One plain `rm` or `mv` per call rather than chained                                                            |
 
+Three habits keep those routes from being refused or silently wrong.
+
 - Send `mkdir -p` for a missing folder as its own command first, since a `&&` compound is refused for complexity
 - Where no verb covers an edit, read the whole file and write it back whole through the heredoc route
 - Never reach for a stream editor, which rewrites the line it anchored to and exits zero on a non-match
