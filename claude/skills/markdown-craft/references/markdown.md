@@ -77,7 +77,7 @@ A bold section marker holding its line alone breaks a run the way a heading does
 
 ## Density
 
-Six limits keep a file scannable on sight, each a fact `canon markdown audit` measures that fails the push where the surface's gate is on. A table takes four more, in `tables.md` beside this file. Open an H3 with a lead sentence or a table, then a few bullets or a short paragraph, since monotone text is the defect whether all prose or all bullets.
+Six limits keep a file scannable on sight, each a fact `canon markdown audit` measures that fails the push where the surface's gate is on. A table takes four more in `tables.md`, two of them gating. Open an H3 with a lead sentence or a table, then a few bullets or a short paragraph, since monotone text is the defect.
 
 | Rule                | Limit                                             |
 | ------------------- | ------------------------------------------------- |
@@ -95,7 +95,7 @@ Rules, a requirements or design record, a changelog, examples, and `.canon/` rec
 A paragraph is read straight through and a bullet is scanned, so the paragraph limit sits above the bullet one. Four sentences to a paragraph stays advice rather than a limit.
 
 - A paragraph's length folds in the lines that wrap it. A paragraph inside a list item counts toward its bullet, never as a paragraph or toward a run.
-- A bullet's length counts its continuation lines and excludes any bullet nested under it
+- A bullet's length counts its continuation lines and excludes any bullet nested under it, and a nested bullet is not measured on its own
 - A heading, list, table, fence, or bold section marker ends a run of paragraphs
 - A blank line, a continuation, and a nested item do not break a run of bullets, and a paragraph or a heading does
 - A run whose every item opens with a bold label or a link is exempt from the run limit, since each item names its own subject. A task box is not a link, so a checklist counts as plain.
