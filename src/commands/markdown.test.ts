@@ -76,7 +76,7 @@ describe('markdown audit', () => {
     expect((await run(['markdown', 'audit'])).exitCode).toBe(0)
   })
 
-  it('should report table findings on a gated path and still exit 0', async () => {
+  it('should gate a cell and a trailing list as density kinds on a gated path', async () => {
     write(
       'docs/guide.md',
       `# Guide\n\nThe lead.\n\n| A | B |\n| - | - |\n| ${'a'.repeat(130)} | b |\n- item\n`,
@@ -85,15 +85,53 @@ describe('markdown audit', () => {
 
     const result = await run(['markdown', 'audit', '--json'])
 
-    expect(result.exitCode).toBe(0)
+    expect(result.exitCode).toBe(2)
     expect(JSON.parse(result.stdout).entries).toMatchObject([
       {
         path: 'docs/guide.md',
-        tables: [
-          { kind: 'table-cell', line: 7, value: 130, limit: 120 },
-          { kind: 'table-then-list', line: 8 },
+        tables: [],
+        density: [
+          {
+            kind: 'table-cell',
+            line: 7,
+            value: 130,
+            limit: 120,
+            gating: true,
+          },
+          { kind: 'table-then-list', line: 8, gating: true },
         ],
       },
+    ])
+  })
+
+  it('should report a cell finding under an unlisted prefix and exit 0', async () => {
+    write(
+      'docs/guide.md',
+      `# Guide\n\nThe lead.\n\n| A | B |\n| - | - |\n| ${'a'.repeat(130)} | b |\n`,
+    )
+    write(GATED_CONFIG_REL, '[markdown]\ngated = ["wiki/"]\n')
+
+    const result = await run(['markdown', 'audit', '--json'])
+
+    expect(result.exitCode).toBe(0)
+    expect(JSON.parse(result.stdout).entries).toMatchObject([
+      { density: [{ kind: 'table-cell', gating: false }] },
+    ])
+  })
+
+  it('should keep a row count and a wide token report-only on a gated path', async () => {
+    const rows = Array.from({ length: 9 }, (_, i) => `| a${i} | b |`).join('\n')
+    write(
+      'docs/guide.md',
+      `# Guide\n\nThe lead.\n\n| A | B |\n| - | - |\n${rows}\n`,
+    )
+    write(GATED_CONFIG_REL, '[markdown]\ngated = ["docs/"]\n')
+
+    const result = await run(['markdown', 'audit', '--json'])
+
+    expect(result.exitCode).toBe(0)
+    expect(JSON.parse(result.stdout).entries).toMatchObject([
+      { tables: [{ kind: 'table-rows', value: 9, limit: 8 }], density: [] },
     ])
   })
 

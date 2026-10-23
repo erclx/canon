@@ -5,18 +5,20 @@ description: The four limits a markdown table takes, being cell length, row coun
 
 # Table limits
 
-None of the density limits in `markdown.md` reads inside a table, so content too long for a bullet tends to move into a cell. Four table limits close that gap. `canon markdown audit` measures them on the paths density covers, outside fences, and reports each one without failing a push for now.
+None of the density limits in `markdown.md` reads inside a table, so content too long for a bullet tends to move into a cell. Four table limits close that gap. `canon markdown audit` measures them on the paths density covers, outside fences.
+
+Cell length and a list after a table fail a push where density gates. Rows and a wide token report without failing one.
 
 ## Limits
 
 Each limit is a count or a shape a scan settles, read the way a renderer draws the table. An escaped pipe stays inside its cell, and pipe lines with no delimiter row are not a table.
 
-| Rule             | Limit                                                 |
-| ---------------- | ----------------------------------------------------- |
-| Cell length      | 120 visible characters, counting a link by its label  |
-| Rows             | 8 body rows, not counting the header                  |
-| List after table | A list is never the next block after a table          |
-| Wide token       | No code span in a cell holds a run past 30 characters |
+| Rule             | Limit                                                 | Effect       |
+| ---------------- | ----------------------------------------------------- | ------------ |
+| Cell length      | 120 visible characters, counting a link by its label  | Gates        |
+| Rows             | 8 body rows, not counting the header                  | Reports only |
+| List after table | A list is never the next block after a table          | Gates        |
+| Wide token       | No code span in a cell holds a run past 30 characters | Reports only |
 
 A paragraph or a heading between a table and a list clears the third limit, and a blank line alone does not.
 

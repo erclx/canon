@@ -1,13 +1,24 @@
 import { describe, expect, it } from 'vitest'
 import { bodyLines } from '@/markdown/scan'
-import { codeSpans, tableFindings, unbrokenRun } from '@/markdown/tables'
+import {
+  codeSpans,
+  tableDensityFindings,
+  tableFindings,
+  unbrokenRun,
+} from '@/markdown/tables'
 
 function findingsIn(source: string) {
   return tableFindings(bodyLines(`${source}\n`))
 }
 
+function densityIn(source: string) {
+  return tableDensityFindings(bodyLines(`${source}\n`))
+}
+
 function kindsIn(source: string): string[] {
-  return findingsIn(source).map((finding) => finding.kind)
+  return [...findingsIn(source), ...densityIn(source)].map(
+    (finding) => finding.kind,
+  )
 }
 
 function table(rows: readonly string[]): string {
@@ -18,26 +29,26 @@ function rows(count: number): string[] {
   return Array.from({ length: count }, (_, i) => `| a${i} | b${i} |`)
 }
 
-describe('tableFindings', () => {
+describe('tableFindings and tableDensityFindings', () => {
   describe('cell length', () => {
     it('should pass a cell at 120 visible characters', () => {
-      expect(findingsIn(table([`| ${'a'.repeat(120)} | b |`]))).toEqual([])
+      expect(densityIn(table([`| ${'a'.repeat(120)} | b |`]))).toEqual([])
     })
 
     it('should report a cell at 121 characters on its row line', () => {
-      expect(findingsIn(table([`| ${'a'.repeat(121)} | b |`]))).toEqual([
+      expect(densityIn(table([`| ${'a'.repeat(121)} | b |`]))).toEqual([
         { kind: 'table-cell', line: 3, value: 121, limit: 120 },
       ])
     })
 
     it('should count a link in a cell by its label alone', () => {
       const cell = `${'a'.repeat(110)} [label](${'x'.repeat(60)}.md)`
-      expect(findingsIn(table([`| ${cell} | b |`]))).toEqual([])
+      expect(densityIn(table([`| ${cell} | b |`]))).toEqual([])
     })
 
     it('should read an escaped pipe as one cell rather than two', () => {
       const cell = `${'a'.repeat(70)} \\| ${'b'.repeat(70)}`
-      expect(findingsIn(table([`| ${cell} | c |`]))).toEqual([
+      expect(densityIn(table([`| ${cell} | c |`]))).toEqual([
         { kind: 'table-cell', line: 3, value: 143, limit: 120 },
       ])
     })
@@ -63,7 +74,7 @@ describe('tableFindings', () => {
 
   describe('list after a table', () => {
     it('should report a list directly under a table at the list line', () => {
-      expect(findingsIn(`${table(rows(1))}\n- item`)).toEqual([
+      expect(densityIn(`${table(rows(1))}\n- item`)).toEqual([
         { kind: 'table-then-list', line: 4, value: null, limit: null },
       ])
     })
@@ -75,11 +86,11 @@ describe('tableFindings', () => {
     })
 
     it('should pass a list behind a lead paragraph', () => {
-      expect(findingsIn(`${table(rows(1))}\n\nThe lead.\n\n- item`)).toEqual([])
+      expect(densityIn(`${table(rows(1))}\n\nThe lead.\n\n- item`)).toEqual([])
     })
 
     it('should pass a list behind a heading', () => {
-      expect(findingsIn(`${table(rows(1))}\n\n## Next\n\n- item`)).toEqual([])
+      expect(densityIn(`${table(rows(1))}\n\n## Next\n\n- item`)).toEqual([])
     })
   })
 
@@ -99,14 +110,31 @@ describe('tableFindings', () => {
     })
   })
 
+  describe('which function returns which kind', () => {
+    it('should keep the cell and the trailing list out of the reported findings', () => {
+      const source = `${table([`| ${'a'.repeat(130)} | b |`])}\n- item`
+      expect(findingsIn(source)).toEqual([])
+      expect(densityIn(source).map((finding) => finding.kind)).toEqual([
+        'table-cell',
+        'table-then-list',
+      ])
+    })
+
+    it('should keep the row count and the wide token out of the density findings', () => {
+      const source = table([...rows(8), `| \`${'a'.repeat(31)}\` | b |`])
+      expect(densityIn(source)).toEqual([])
+      expect(kindsIn(source)).toEqual(['table-rows', 'table-token'])
+    })
+  })
+
   describe('what is not a table', () => {
     it('should never measure a table inside a fence', () => {
       const fenced = `\`\`\`md\n${table([...rows(9), `| ${'a'.repeat(130)} | b |`])}\n\`\`\`\n- item`
-      expect(findingsIn(fenced)).toEqual([])
+      expect(kindsIn(fenced)).toEqual([])
     })
 
     it('should never measure pipe lines with no delimiter row', () => {
-      expect(findingsIn(`| ${'a'.repeat(130)} |\n| b |\n- item`)).toEqual([])
+      expect(kindsIn(`| ${'a'.repeat(130)} |\n| b |\n- item`)).toEqual([])
     })
   })
 })

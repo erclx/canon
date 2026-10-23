@@ -271,12 +271,12 @@ beforeAll(() => {
   )
   chmodSync(advisory, 0o755)
 
-  // A record carrying table findings alone, one counted and one a shape, so
-  // both branches of the hook's line format are observable.
+  // A record carrying table findings alone: two gated density kinds, one counted
+  // and one a shape, and one that only reports, so each message is observable.
   const tables = join(fixture, 'bin-tables/canon')
   writeFileSync(
     tables,
-    `#!/usr/bin/env bash\nprintf '%s\\n' '{"entries":[{"path":"doc.md","bans":[],"tables":[{"kind":"table-cell","line":7,"value":130,"limit":120},{"kind":"table-then-list","line":8,"value":null,"limit":null}]}],"bans":{"emptySets":[]}}'\n`,
+    `#!/usr/bin/env bash\nprintf '%s\\n' '{"entries":[{"path":"doc.md","bans":[],"density":[{"kind":"table-cell","line":7,"value":130,"limit":120,"gating":true},{"kind":"table-then-list","line":8,"value":null,"limit":null,"gating":true}],"tables":[{"kind":"table-token","line":9,"value":31,"limit":30}]}],"bans":{"emptySets":[]}}'\n`,
   )
   chmodSync(tables, 0o755)
 
@@ -1206,17 +1206,19 @@ describe('.claude/hooks/standards-audit.sh runner', () => {
     expect(result.code).toBe(0)
   })
 
-  it.concurrent('should hand back table findings as a report that never fails a push', async ({
+  it.concurrent('should hand back a gated cell and trailing list under the density message and a wide token as a report', async ({
     expect,
   }) => {
     const path = [join(fixture, 'bin-tables'), hookPath].join(delimiter)
 
     const result = await run(hook, payload(), path, join(fixture, 'no-source'))
 
-    expect(result.stdout).toContain(':7  table-cell  130 past 120')
+    expect(result.stdout).toContain(':7  table-cell  130 past 120  gating')
     expect(result.stdout).toContain(
-      ':8  table-then-list  a list follows the table with no lead sentence',
+      ':8  table-then-list  a list follows the table with no lead sentence  gating',
     )
+    expect(result.stdout).not.toContain('opens with neither')
+    expect(result.stdout).toContain(':9  table-token  31 past 30')
     expect(result.stdout).toContain('never fail a push')
     expect(result.code).toBe(0)
   })
@@ -1281,17 +1283,19 @@ describe('seeds standards-audit.sh runner', () => {
     expect(result.code).toBe(0)
   })
 
-  it.concurrent('should hand back table findings as a report that never fails a push', async ({
+  it.concurrent('should hand back a gated cell and trailing list under the density message and a wide token as a report', async ({
     expect,
   }) => {
     const path = [join(fixture, 'bin-tables'), hookPath].join(delimiter)
 
     const result = await run(hook, payload(), path)
 
-    expect(result.stdout).toContain(':7  table-cell  130 past 120')
+    expect(result.stdout).toContain(':7  table-cell  130 past 120  gating')
     expect(result.stdout).toContain(
-      ':8  table-then-list  a list follows the table with no lead sentence',
+      ':8  table-then-list  a list follows the table with no lead sentence  gating',
     )
+    expect(result.stdout).not.toContain('opens with neither')
+    expect(result.stdout).toContain(':9  table-token  31 past 30')
     expect(result.stdout).toContain('never fail a push')
     expect(result.code).toBe(0)
   })

@@ -141,9 +141,10 @@ export function register(program: Command): void {
         'Depth weight is a judgment a reader settles, so it reports and never',
         'fails a run.',
         '',
-        'Density holds six limits: a 350-character paragraph, 2 paragraphs in',
-        'a row, a 200-character bullet, 5 plain bullets in a row, no H4, and a',
-        'paragraph or table opening every H3. Only context, docs, skills, tooling',
+        'Density holds eight limits: a 350-character paragraph, 2 paragraphs in',
+        'a row, a 200-character bullet, 5 plain bullets in a row, no H4, a',
+        'paragraph or table opening every H3, a 120-character table cell, and no',
+        'list as the block after a table. Only context, docs, skills, tooling',
         'seeds and references, the wiki, README.md, and CONTRIBUTING.md take a',
         'finding. CLAUDE.md and its seed take only the bullet run and the H3',
         'opening, inside Key paths. In a canon checkout one gates under a',
@@ -154,10 +155,9 @@ export function register(program: Command): void {
         'and none gates.',
         'A config that does not parse refuses with its path named.',
         '',
-        'Tables take four limits on the same paths, CLAUDE.md aside: a',
-        '120-character cell, 8 body rows, a list as the next block, and a code',
-        'span with a run past 30 characters. A table finding reports and never',
-        'fails a run.',
+        'Tables take two more limits on the same paths, CLAUDE.md aside: 8 body',
+        'rows, and a code span with a run past 30 characters. Each reports and',
+        'never fails a run.',
         '',
         'A page whose frontmatter carries kind: reference takes the reference',
         'shape: no H2 beyond Output, Refusals, and See also, each at most once',
@@ -637,15 +637,19 @@ const DENSITY_LABELS: Record<DensityKind, string> = {
   'bullet-run': 'bullets in a row',
   'heading-depth': 'heading depth',
   'h3-opening': 'H3 opening',
+  'table-cell': 'cell length',
+  'table-then-list': 'list after table',
 }
 
 function describeDensity(finding: GatedDensityFinding): string {
   const measured =
     finding.kind === 'h3-opening'
       ? 'opens with neither a paragraph nor a table'
-      : finding.kind === 'heading-depth'
-        ? `H${finding.value} past H${finding.limit}`
-        : `${finding.value} past ${finding.limit}`
+      : finding.kind === 'table-then-list'
+        ? 'follows the table with no lead sentence'
+        : finding.kind === 'heading-depth'
+          ? `H${finding.value} past H${finding.limit}`
+          : `${finding.value} past ${finding.limit}`
   const gate = finding.gating ? '  gating' : ''
   return `  :${finding.line}  ${DENSITY_LABELS[finding.kind]}  ${measured}${gate}`
 }
@@ -662,10 +666,10 @@ function reportDensity(
 ): void {
   logStep('Density')
   logInfo(
-    `Paragraphs past ${CHECKPOINTS.paragraph} characters, more than 2 paragraphs in a row, bullets past ${CHECKPOINTS.bullet} characters, more than 5 plain bullets in a row, a heading past H3, and an H3 opening with neither a paragraph nor a table.`,
+    `Paragraphs past ${CHECKPOINTS.paragraph} characters, more than 2 paragraphs in a row, bullets past ${CHECKPOINTS.bullet} characters, more than 5 plain bullets in a row, a heading past H3, an H3 opening with neither a paragraph nor a table, a table cell past ${TABLE_CELL} characters, and a list directly after a table.`,
   )
   logInfo(
-    'Measured on context entries, docs, skill bodies, references, and requirements, tooling seeds and stack references, the wiki, README.md, and CONTRIBUTING.md. CLAUDE.md and its seed take the bullet run and the H3 opening inside Key paths alone. Every other path takes no density finding.',
+    'Measured on context entries, docs, skill bodies, references, and requirements, tooling seeds and stack references, the wiki, README.md, and CONTRIBUTING.md. CLAUDE.md and its seed take the bullet run and the H3 opening inside Key paths alone, with no table finding. Every other path takes no density finding.',
   )
   logInfo(densityGatingLine(gated, source))
 
@@ -689,7 +693,7 @@ function reportDensity(
   )
   if (gating > 0) logWarn('A gating finding fails the run.')
   logInfo(
-    'Split a long block at its seam, put a heading or a table between paragraphs, give a long list H3s, and open each H3 with a sentence or a table.',
+    'Split a long block at its seam, put a heading or a table between paragraphs, give a long list H3s, open each H3 with a sentence or a table, move a long cell into a bullet under the lead, and give a trailing list its own lead sentence.',
   )
   pipeOutput(
     carrying
@@ -718,29 +722,23 @@ function densityGatingLine(
 }
 
 const TABLE_LABELS: Record<TableKind, string> = {
-  'table-cell': 'cell length',
   'table-rows': 'rows',
-  'table-then-list': 'list after table',
   'table-token': 'wide token',
 }
 
 function describeTable(finding: TableFinding): string {
-  const measured =
-    finding.kind === 'table-then-list'
-      ? 'follows the table with no lead sentence'
-      : `${finding.value} past ${finding.limit}`
-  return `  :${finding.line}  ${TABLE_LABELS[finding.kind]}  ${measured}`
+  return `  :${finding.line}  ${TABLE_LABELS[finding.kind]}  ${finding.value} past ${finding.limit}`
 }
 
 /**
- * Lists every table finding on the density scope's paths. None gates yet,
- * since a gate is decided per path rather than per kind, and a new density
- * kind would fail every gated folder carrying a table hit at once.
+ * Lists the table findings that only report, on the density scope's paths. The
+ * cell and the trailing list gate as density kinds, so `reportDensity` lists
+ * them.
  */
 function reportTables(reports: readonly FileReport[]): void {
   logStep('Tables')
   logInfo(
-    `Cells past ${TABLE_CELL} characters, tables past ${TABLE_ROWS} body rows, a list directly after a table, and a code span in a cell holding a run past ${TABLE_TOKEN} characters.`,
+    `Tables past ${TABLE_ROWS} body rows and a code span in a cell holding a run past ${TABLE_TOKEN} characters.`,
   )
   logInfo(
     'Measured on the paths density measures in full, so never on CLAUDE.md, outside fenced blocks. This never fails a run.',
@@ -760,7 +758,7 @@ function reportTables(reports: readonly FileReport[]): void {
     `${plural(total, 'finding')} across ${plural(carrying.length, 'file')}`,
   )
   logInfo(
-    'Move a long cell into a bullet under the lead, split a long table into groups each under a lead sentence, give a trailing list its own lead, and move a wide token out of the table.',
+    'Split a long table into groups each under a lead sentence, and move a wide token out of the table.',
   )
   pipeOutput(
     carrying

@@ -14,7 +14,7 @@ Read the references below before a substantial markdown edit. Every rule in them
 
 Run `canon markdown audit <path>` after the edit, and fix every ban and density finding it reports before moving on. Rewrite the sentence carrying a ban hit rather than swapping the token for a near-synonym, and fix a density finding by its shape rather than trimming characters.
 
-A table finding reports without failing the run. Fix it the way `tables.md` gives for its limit.
+A table cell past its cap and a list after a table gate where density does, and the row count and the wide token report without failing the run. Fix each the way `tables.md` gives for its limit.
 
 ## Routes
 
