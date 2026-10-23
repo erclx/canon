@@ -43,7 +43,7 @@ Tables take the four limits in the `markdown-craft` skill's `tables.md`, on the 
 | ------------------- | ---------------------------------------------------------- |
 | Paragraph length    | A prose paragraph past 350 characters                      |
 | Paragraphs in a row | More than 2 paragraphs with nothing else between them      |
-| Bullet length       | A top-level bullet past 200 characters                     |
+| Bullet length       | A bullet past 200 characters, a nested one on its own      |
 | Bullets in a row    | More than 5 plain top-level bullets                        |
 | Heading depth       | Any heading past H3                                        |
 | H3 opening          | An H3 whose first block is neither a paragraph nor a table |
