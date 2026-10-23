@@ -57,7 +57,7 @@ From `skills/security-and-hardening/SKILL.md`, the threat model first and the de
 
 ### Closing sections
 
-The excuses, red flags, and closing checklist follow the shape every practice skill in this toolkit carries, from [`docs/skill-anatomy.md`](https://github.com/addyosmani/agent-skills/blob/2686b620fc1fed2e8f60c704839c766b8594c6b6/docs/skill-anatomy.md). Each excuse row rebuts a reason a review stops at the hunk, such as passing tests against a test the diff skipped.
+The excuses, red flags, and closing checklist follow the shape every practice skill in this toolkit carries, from [`docs/skill-anatomy.md`](https://github.com/addyosmani/agent-skills/blob/2686b620fc1fed2e8f60c704839c766b8594c6b6/docs/skill-anatomy.md). Each excuse rebuts a reason a review stops at the hunk, such as passing tests against a test the diff skipped.
 
 ## Declined
 

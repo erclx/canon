@@ -20,7 +20,7 @@ External sources were read and filtered rather than imported. This file is the r
 
 The excuses, red flags, and closing checklist follow the shape every practice skill in this toolkit carries, from `addyosmani/agent-skills@2686b620`, [`docs/skill-anatomy.md`](https://github.com/addyosmani/agent-skills/blob/2686b620fc1fed2e8f60c704839c766b8594c6b6/docs/skill-anatomy.md).
 
-Each excuse row rebuts a reason a session gives to skip the investigation rather than an objection nobody raised. Three come from the source's own rationalizations table and the rest from this skill's earlier red flags.
+Each excuse rebuts a reason a session gives to skip the investigation rather than an objection nobody raised. Three come from the source's own rationalizations table and the rest from this skill's earlier red flags.
 
 ### Default shelf
 
