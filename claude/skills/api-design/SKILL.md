@@ -61,16 +61,14 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 
 ## Excuses and rebuttals
 
-| Excuse                                                       | Rebuttal                                                                                                                                    |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nobody depends on that field                                 | You can see the callers you opened. A script parsing the output or a project importing the module is the one you did not.                   |
-| It's internal, so renaming it is fine                        | Internal to whom? If anything outside the module reads it, it is a surface. Add the new name beside the old.                                |
-| The old name is wrong, so keeping it is clutter              | Clutter costs a line. A rename breaks every caller you did not open, and they learn about it from a failure.                                |
-| Returning the record directly saves a mapping                | The mapping is the contract. Without it, a change to the storage layout is a breaking change to every caller.                               |
-| The caller already validates, so checking again is redundant | The boundary checks once for every caller, including the next one, which may not.                                                           |
-| Retries are rare, so the write does not need a key           | Rare is a duplicate charge, a double send, or a second row once a week. The key is cheaper than the cleanup.                                |
-| The error message is clear, so callers can match on it       | A message is written for a person and reworded freely. Give the caller a code it can branch on.                                             |
-| I'll update every caller in this change, so renaming is safe | That holds only when every caller lives in the change. Check that no caller outside the repository reads the surface before you rely on it. |
+- **Nobody depends on that field.** You can see the callers you opened. A script parsing the output or a project importing the module is the one you did not.
+- **It's internal, so renaming it is fine.** Internal to whom? If anything outside the module reads it, it is a surface. Add the new name beside the old.
+- **The old name is wrong, so keeping it is clutter.** Clutter costs a line. A rename breaks every caller you did not open, and they learn about it from a failure.
+- **Returning the record directly saves a mapping.** The mapping is the contract. Without it, a change to the storage layout is a breaking change to every caller.
+- **The caller already validates, so checking again is redundant.** The boundary checks once for every caller, including the next one, which may not.
+- **Retries are rare, so the write does not need a key.** Rare is a duplicate charge, a double send, or a second row once a week. The key is cheaper than the cleanup.
+- **The error message is clear, so callers can match on it.** A message is written for a person and reworded freely. Give the caller a code it can branch on.
+- **I'll update every caller in this change, so renaming is safe.** That holds only when every caller lives in the change. Check that nothing outside the repository reads the surface first.
 
 ## Red flags
 

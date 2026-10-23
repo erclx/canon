@@ -23,6 +23,8 @@ Read the target if it exists, and branch on its headings.
 | Carries no H1, or only headings restating the scaffolding tool | Generator output | Continue, drafting over it rather than syncing its sections                           |
 | Does not exist                                                 | Nothing to read  | Continue                                                                              |
 
+Three notes qualify those routes.
+
 - On the authored branch, report rather than offering to overwrite it or to conform it, since the project's own citations into its README are invisible from here
 - A hand-authored README opening with a badge block, or a title the H1 test misses, falls into the no-H1 branch the same as a scaffold page
 - The Confirm step catches that case before the write, so it is load-bearing. Never skip it on the reasoning that the guard already decided.

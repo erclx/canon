@@ -28,6 +28,8 @@ Read the tree for these signals before running any command. A file that exists c
 | `vercel.json` at the root                                                | vercel            |
 | a `wrangler` or `vercel` entry in `package.json` scripts or dependencies | the host it names |
 
+Read the signals together to settle the host.
+
 - Signals for one host only: take that host.
 - Signals for both, or for neither: ask the operator through the structured question surface, naming each signal found. Never default to a host, since a silent pick deploys to the wrong account.
 - A host the operator named in the request wins over the signals. Say which signals disagreed with it, if any.

@@ -81,15 +81,13 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 
 ## Excuses and rebuttals
 
-| Excuse                                                   | Rebuttal                                                                                                                         |
-| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| I searched for the name and nothing calls it             | A search finds one spelling in the files it read. A handler looked up by string, a config key, or a published copy stays hidden. |
-| I'll keep the fallback until callers move                | With no date and no owner, the fallback outlives every caller it was kept for. State when it goes and who removes it.            |
-| The callers can migrate when they get to it              | They will not. The owner of the surface moves its callers, or the deprecation never finishes.                                    |
-| It's cleaner to add the new one and drop the old one now | One change that adds and removes leaves no state where a missed caller still works, and a revert undoes the migration too.       |
-| This only matters on one machine                         | One caller is still a caller. Migrate it, or record it as the reason the old path stays.                                         |
-| Nobody owns this, so I can just delete it                | No owner is not no caller. Run the zero-consumers check before deciding, since unowned code is often the code nobody dares move. |
-| I'll mark it deprecated and move on                      | A notice with no shipped replacement and no removal date tells callers nothing they can act on.                                  |
+- **I searched for the name and nothing calls it.** A search finds one spelling in the files it read. A handler looked up by string, a config key, or a published copy stays hidden.
+- **I'll keep the fallback until callers move.** With no date and no owner, the fallback outlives every caller it was kept for. State when it goes and who removes it.
+- **The callers can migrate when they get to it.** They will not. The owner of the surface moves its callers, or the deprecation never finishes.
+- **It's cleaner to add the new one and drop the old one now.** One change that adds and removes leaves no state where a missed caller still works, and a revert undoes the migration too.
+- **This only matters on one machine.** One caller is still a caller. Migrate it, or record it as the reason the old path stays.
+- **Nobody owns this, so I can just delete it.** No owner is not no caller. Run the zero-consumers check before deciding, since unowned code is often the code nobody dares move.
+- **I'll mark it deprecated and move on.** A notice with no shipped replacement and no removal date tells callers nothing they can act on.
 
 ## Red flags
 

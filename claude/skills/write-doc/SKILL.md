@@ -13,12 +13,12 @@ Drafts one brand-new project document end to end: resolve its kind, read the sta
 
 Each kind has one standard and one reference. Load the reference for the resolved kind and no other, since every step below that differs by kind lives there.
 
-| Kind    | Lands at                                                 | Standard                                                    | Reference                                     |
-| ------- | -------------------------------------------------------- | ----------------------------------------------------------- | --------------------------------------------- |
-| docs    | a page under `docs/`                                     | `${CLAUDE_SKILL_DIR}/../docs-sync/references/docs.md`       | `${CLAUDE_SKILL_DIR}/references/docs.md`      |
-| context | an entry under `canon/context/`                          | `${CLAUDE_SKILL_DIR}/../context-fold/references/context.md` | `${CLAUDE_SKILL_DIR}/references/context.md`   |
-| wiki    | a reference page on a subject owned outside this project | `${CLAUDE_SKILL_DIR}/references/wiki.md`                    | `${CLAUDE_SKILL_DIR}/references/wiki-kind.md` |
-| readme  | a `README.md`, at the root or in a folder                | `${CLAUDE_SKILL_DIR}/../docs-sync/references/readme.md`     | `${CLAUDE_SKILL_DIR}/references/readme.md`    |
+- **docs** lands at a page under `docs/`. Standard `${CLAUDE_SKILL_DIR}/../docs-sync/references/docs.md`, reference `${CLAUDE_SKILL_DIR}/references/docs.md`.
+- **context** lands at an entry under `canon/context/`. Standard `${CLAUDE_SKILL_DIR}/../context-fold/references/context.md`, reference `${CLAUDE_SKILL_DIR}/references/context.md`.
+- **wiki** lands at a reference page on a subject owned outside this project. Standard `${CLAUDE_SKILL_DIR}/references/wiki.md`, reference `${CLAUDE_SKILL_DIR}/references/wiki-kind.md`.
+- **readme** lands at a `README.md`, at the root or in a folder. Standard `${CLAUDE_SKILL_DIR}/../docs-sync/references/readme.md`, reference `${CLAUDE_SKILL_DIR}/references/readme.md`.
+
+Resolve the kind from the request by the rules below.
 
 - Read the kind off the destination the request names: a path, a folder, or the document's own name, such as "a context entry" or "a wiki page".
 - Ask which kind when the request names no destination, offering the candidates the subject fits with the likeliest first

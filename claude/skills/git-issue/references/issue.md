@@ -59,17 +59,15 @@ A bug or task body carries up to four `##` sections, in this order.
 
 One `## Toolkit feedback` wrapper holds every field as a nested `###` heading. A flat `##` field is not recognized.
 
-| Field                            | Holds                                                                                                                        |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `### From project` (optional)    | the reporting project's name or kind.                                                                                        |
-| `### Surface` (required)         | the toolkit surface and its type, and the specific file or name when known.                                                  |
-| `### Observed` (required)        | the observed behavior.                                                                                                       |
-| `### Expected` (optional)        | the expected behavior, or `unclear`.                                                                                         |
-| `### Repro` (optional)           | repro details, or `none`.                                                                                                    |
-| `### Proposed fix` (required)    | a proposed fix, or `open` when the session settled on no direction.                                                          |
-| `### Suggested shape` (optional) | the template, output, or field list the change should take, inside a `<details>` block. Omit the heading when there is none. |
-| `### Why` (optional)             | the reasons for the fix, one bullet each. Omit the heading when there are none.                                              |
-| `### Links` (optional)           | the issues, pull requests, or documents the report cites, one per line. Omit the heading when there are none.                |
+- **`### From project`** (optional): the reporting project's name or kind.
+- **`### Surface`** (required): the toolkit surface and its type, and the specific file or name when known.
+- **`### Observed`** (required): the observed behavior.
+- **`### Expected`** (optional): the expected behavior, or `unclear`.
+- **`### Repro`** (optional): repro details, or `none`.
+- **`### Proposed fix`** (required): a proposed fix, or `open` when the session settled on no direction.
+- **`### Suggested shape`** (optional): the template, output, or field list the change should take, inside a `<details>` block. Omit the heading when there is none.
+- **`### Why`** (optional): the reasons for the fix, one bullet each. Omit the heading when there are none.
+- **`### Links`** (optional): the issues, pull requests, or documents the report cites, one per line. Omit the heading when there are none.
 
 A required field is refused when present but empty. Write the fallback literal for From project, Expected, and Repro rather than leaving one blank.
 
