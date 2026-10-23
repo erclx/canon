@@ -415,10 +415,10 @@ export function longestRun(
 }
 
 /**
- * Finds the top-level bullets carrying more than a decision.
+ * Finds the bullets carrying more than a decision, nested ones included.
  *
- * A nested item is left out rather than folded into its parent, since the
- * checkpoint asks what one bullet carries and a child carries its own. Lines
+ * A nested item is measured on its own and never folded into its parent, since
+ * the checkpoint asks what one bullet carries and a child carries its own. Lines
  * continuing a bullet do fold in, so a heavy bullet cannot fall under the
  * checkpoint by being wrapped across two source lines. A fenced line closes the
  * open bullet, which keeps a bullet from absorbing the example below it.
@@ -436,6 +436,8 @@ export function heavyBullets(
 interface FoldedBullet extends BulletFinding {
   /** The bullet's source lines joined by the space a wrap would have carried. */
   readonly text: string
+  /** The width of the indent before the marker, which a continuation must pass. */
+  readonly indent: number
 }
 
 /** The walk `heavyBullets` reports from. */
@@ -459,23 +461,30 @@ function foldBullets(
 
     const item = line.text.match(LIST_ITEM)
     const text = line.text.trim()
+    const lead = line.text.length - line.text.trimStart().length
 
     // Structure is read off the raw line and only the weight is masked. A line
     // carrying nothing but an autolink has no visible text at all, and reading
     // its masked form as blank would close the bullet it continues.
     if (item) {
       close()
-      if (item[1].length === 0) {
-        open = {
-          line: line.number,
-          characters: visibleText(text).length,
-          text,
-        }
+      open = {
+        line: line.number,
+        characters: visibleText(text).length,
+        text,
+        indent: item[1].length,
       }
       continue
     }
 
     if (text === '' || HEADING.test(line.text) || TABLE_ROW.test(line.text)) {
+      close()
+      continue
+    }
+
+    // An indented line that does not pass the marker's indent belongs to a
+    // parent or to nothing, so it ends a nested item rather than extending it.
+    if (open && lead > 0 && lead <= open.indent) {
       close()
       continue
     }

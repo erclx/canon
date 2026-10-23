@@ -1,10 +1,6 @@
-import {
-  type DensityFinding,
-  type DensityKind,
-  densityFindings,
-} from '@/markdown/density'
-import { type BodyLine, bodyLines, visibleText } from '@/markdown/scan'
-import { CHECKPOINTS, LIST_ITEM } from '@/markdown/structure'
+import { type DensityKind, densityFindings } from '@/markdown/density'
+import { type BodyLine, bodyLines } from '@/markdown/scan'
+import { LIST_ITEM } from '@/markdown/structure'
 
 /**
  * The four counted limits a pull request section carries. The heading limits
@@ -119,7 +115,6 @@ export interface PostDensityFinding extends Omit<BodyDensityFinding, 'kind'> {
 }
 
 const LENGTHS: readonly DensityKind[] = ['paragraph-length', 'bullet-length']
-const NESTED_ITEM = /^(\s+)(?:[-*+]|\d+\.)\s+(.*)$/
 const CHECKBOX = /^\s*[-*+]\s+\[[ xX]\]/
 const FOOTER = /^🤖/
 
@@ -134,8 +129,8 @@ const FOOTER = /^🤖/
  * paragraph run, and a checklist box under `What to look at` takes no length
  * limit, since a driver needs its route, action, and result.
  *
- * A nested item is measured as a bullet of its own, which `densityFindings()`
- * leaves out of its parent, so a finding's subject and its evidence never sum.
+ * A nested item is measured as a bullet of its own by `densityFindings()`, which
+ * leaves it out of its parent, so a finding's subject and its evidence never sum.
  */
 export function postDensity(body: string): PostDensityFinding[] {
   const lines = bodyLines(body).map((line) =>
@@ -153,7 +148,6 @@ export function postDensity(body: string): PostDensityFinding[] {
         (chunk) => densityFindings(chunk),
       ),
       ...densityFindings(inside).filter(({ kind }) => LENGTHS.includes(kind)),
-      ...nestedLengths(section.lines),
     ]
 
     for (const finding of measured) {
@@ -212,41 +206,6 @@ function foldedApart(lines: readonly BodyLine[]): {
   }
 
   return { outside, inside }
-}
-
-/**
- * A `bullet-length` finding for each nested item past the bullet limit, its
- * length taken over the item and the lines indented under it that open no
- * item of their own.
- */
-function nestedLengths(lines: readonly BodyLine[]): DensityFinding[] {
-  const found: DensityFinding[] = []
-
-  for (const [index, line] of lines.entries()) {
-    const match = line.fenced ? null : NESTED_ITEM.exec(line.text)
-    if (!match) continue
-
-    const indent = match[1].length
-    const parts = [match[2].trim()]
-    for (const next of lines.slice(index + 1)) {
-      const lead = /^\s*/.exec(next.text)?.[0].length ?? 0
-      if (next.fenced || next.text.trim() === '' || lead <= indent) break
-      if (LIST_ITEM.test(next.text)) break
-      parts.push(next.text.trim())
-    }
-
-    const length = visibleText(parts.join(' ')).length
-    if (length > CHECKPOINTS.bullet) {
-      found.push({
-        kind: 'bullet-length',
-        line: line.number,
-        value: length,
-        limit: CHECKPOINTS.bullet,
-      })
-    }
-  }
-
-  return found
 }
 
 function sectionsOf(lines: readonly BodyLine[]): Section[] {

@@ -915,11 +915,9 @@ function reportBullets(
 ): void {
   logStep('Bullets')
   logInfo(
-    'Top-level bullets measure characters, folding in continuation lines.',
+    'Bullets measure characters, folding in continuation lines, and a nested bullet measures on its own.',
   )
-  logInfo(
-    'Nested items and fenced blocks are excluded. Weight is a judgment, never a defect.',
-  )
+  logInfo('Fenced blocks are excluded. Weight is a judgment, never a defect.')
 
   const carrying = reports
     .filter((report) => report.structure.heavyBullets.length > 0)
