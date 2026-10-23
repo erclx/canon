@@ -100,6 +100,10 @@ Read these in parallel from the project root, skipping any that do not exist:
 
 Then read only what a live question needs, never whole directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at.
 
+### Read the domain's context entry
+
+For each domain the topic touches, run `canon indexes list --json canon/context` and read the entry whose title or description matches, ahead of measuring. Continue without one when the project has no `canon/context/` folder or no entry matches.
+
 Do not dispatch subagents. A groundwork track is a conversation, and fanning out loses the reasoning that makes the folder worth keeping. A search too large to run inline is a finding that the question is too broad.
 
 ## Open questions in chat
