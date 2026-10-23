@@ -147,11 +147,11 @@ A task with no origin is lost context or work nobody decided to do. The reverse 
 
 `Plan:` points at `../plans/feature-<slug>.md` while the task is open. Retarget both halves of the link as things move rather than dropping it, so a completed task still leads to its reasoning.
 
-| State                         | Target                                  |
-| ----------------------------- | --------------------------------------- |
-| Open                          | `../plans/feature-<slug>.md`            |
-| Shipped, plan archived        | `../plans/archive/feature-<slug>.md`    |
-| Task archived a folder deeper | `../../plans/archive/feature-<slug>.md` |
+- Open: `../plans/feature-<slug>.md`
+- Shipped, plan archived: `../plans/archive/feature-<slug>.md`
+- Task archived a folder deeper: `../../plans/archive/feature-<slug>.md`
+
+Three rules cover the line itself:
 
 - One plan per task, or one per slice as distinct plans on one line. A plan cited by two tasks is a misfile.
 - `canon tasks plan-link <task> <plan>` writes or corrects the line, and `--add` appends a slice's plan, so it is never hand-edited
