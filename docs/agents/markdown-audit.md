@@ -45,6 +45,8 @@ Tables take the four limits in the `markdown-craft` skill's `tables.md`, on the 
 | Heading depth       | Any heading past H3                                        |
 | H3 opening          | An H3 whose first block is neither a paragraph nor a table |
 
+Five notes fix how the limits count.
+
 - A paragraph under a list item counts toward that bullet, never as a paragraph
 - A table, fence, list, heading, or bold section marker ends a run of paragraphs
 - A run whose every item opens with a bold label or a link is exempt, and numbered items never count

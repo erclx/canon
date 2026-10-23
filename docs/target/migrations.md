@@ -62,18 +62,18 @@ The seven `draft-` skills took verb-first names for what each makes. `canon migr
 | `draft-ready`      | `plan-ready` <!-- canon-keep-retired -->        |
 | `draft-screencast` | `script-screencast` <!-- canon-keep-retired --> |
 
+Replace a citation of a skill with no successor by hand, or delete the sentence.
+
 - `canvas` is now `canvas-board`. The sweep rewrites only `canon:canvas` and `skills/canvas`, so replace a bare prose mention by hand. <!-- canon-keep-retired -->
 - `draft-ready` is rewritten only as `canon:draft-ready` and `skills/draft-ready`, since bare it also describes a pull request. Replace a bare mention of the skill by hand. <!-- canon-keep-retired -->
 - `design-extract` and `sketch-design` are replaced by `canon:canvas-board`. <!-- canon-keep-retired -->
 - `review-branch`, `seed-sync`, `restate-plainly`, `bash-cli-script`, `canon-operator`, and `canon-rollout` have no successor <!-- canon-keep-retired -->
 - `create-standard`, `markdown-propose`, `memory-review`, `project-commands`, `repo-metadata`, and `ux-walkthrough` have no successor <!-- canon-keep-retired -->
 
-Replace a citation of a skill with no successor by hand, or delete the sentence.
+The `memory` record kind left `canon records`, so `canon records validate memory` refuses as an unknown kind and `canon records migrate` is gone.
 
 - `canon repo metadata`, `canon autoship`, and the `120-bash` rule are gone, and `canon gov sync` removes the rule <!-- canon-keep-retired -->
 - `memory-capture`, the `603-memory` rule, and the `memory` standard are gone, so send a lesson to the context entry that owns the fact <!-- canon-keep-retired -->
-
-The `memory` record kind left `canon records`, so `canon records validate memory` refuses as an unknown kind and `canon records migrate` is gone.
 
 Two held files run, `.husky/post-merge` and `.claude/hooks/pr-create-log.sh`, and a stale copy calls a missing binary or names a removed skill. Resync what the toolkit owns before sweeping what the project wrote, and run the second line once per stack.
 

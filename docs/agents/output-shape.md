@@ -54,6 +54,8 @@ Discover names at runtime rather than hardcoding them.
 | `canon docs list --json`          | Consumer docs plus per-domain context                            |
 | `canon audits list --json`        | Audits the set runs, the corpus each reads, and whether it gates |
 
+The table names the verbs, and three notes cover how some of them render.
+
 - `gov list` expands each stack to its rules and carries `unreferenced`, the rules no stack reaches, which install only through `--add`
 - `claude skills list` reports shipped skills only. Each carries `family` (or `null`) and `requirement`, and a `false` requirement is a gap to close. `--names` and `--by-family` change the render.
 - A skill with unparseable frontmatter returns an empty description rather than failing the listing
