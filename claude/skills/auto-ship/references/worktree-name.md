@@ -19,7 +19,7 @@ canon tasks plan-branch <argument> --json
 | `conforms: false` | The plan's filename breaks a branch-name cap. Pass `branch` anyway and say the cap it broke             |
 | Anything else     | Invoke `canon:session-worktree` bare and let its ladder derive the name, saying the verb did not answer |
 
-Three notes on those routes:
+Four notes on those routes:
 
 - The caps on a branch name sit in `${CLAUDE_SKILL_DIR}/../git-branch/references/branch.md`
 - On `conforms: false`, the alternative is a name this session shortened by hand, a second derivation and the thing this call exists to prevent. `git-branch` decides the rename at ship.

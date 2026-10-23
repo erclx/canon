@@ -7,9 +7,15 @@ description: The step an operator resumes from after each auto-ship stop point, 
 
 Every stop point leaves recoverable state. The user resumes manually from the appropriate step, named below for each stop point.
 
+## Worktree entry
+
+The first stop comes at Step 0, ahead of any plan read:
+
+- Branch collision on worktree entry. `session-worktree` Step 5 found `<slug>` already as a local branch, so resolve manually (rename or delete the stale branch), then re-run autoship.
+
 ## Plan and task reads
 
-The first read stops on a missing or misshapen file, and each repair differs:
+The first plan read stops on a missing or misshapen file, and each repair differs:
 
 - No plan (derived). Run `/plan-feature` to create one.
 - No plan (caller-supplied). Check the path or slug passed to autoship, then re-run.
@@ -26,7 +32,6 @@ A task's `Plan:` pointer can also fail after it is read:
 
 These stops come after the plan reads:
 
-- Branch collision on worktree entry. `session-worktree` Step 5 found `<slug>` already as a local branch, so resolve manually (rename or delete the stale branch), then re-run autoship.
 - Verify fails. Read logs, fix manually, run `/git-ship`.
 - git-ship fails. Inspect the hook or remote error, then run again.
 
