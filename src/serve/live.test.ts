@@ -40,6 +40,14 @@ async function readFor(response: Response, ms: number): Promise<string> {
   return seen
 }
 
+/** Polls until the condition holds or the deadline passes, whichever is first. */
+async function until(condition: () => boolean, ms: number): Promise<void> {
+  const deadline = Date.now() + ms
+  while (!condition() && Date.now() < deadline) {
+    await new Promise((settle) => setTimeout(settle, 10))
+  }
+}
+
 /** Long enough for a write to reach the watcher and its settle window to pass. */
 const SETTLED_MS = 300
 
@@ -62,7 +70,14 @@ describe('LiveStream', () => {
     writeFileSync(join(ROOT, 'page.html'), 'three')
 
     const seen = await readFor(response, SETTLED_MS)
-    expect(seen.match(/^data: /gm)).toEqual(['data: '])
+    const paths = [...seen.matchAll(/^data: (.*)$/gm)].map(
+      (frame) => (JSON.parse(frame[1] ?? '') as { path: string }).path,
+    )
+    /* The watched directory can report itself, so count only the path written. */
+    expect(
+      paths.filter((path) => path === 'page.html'),
+      paths.join(', '),
+    ).toHaveLength(1)
   })
 
   it('should send nothing for a path the mapper drops', async () => {
@@ -86,7 +101,8 @@ describe('LiveStream', () => {
 
     writeFileSync(join(ROOT, 'page.html'), 'one')
 
-    expect(await readFor(response, SETTLED_MS)).toBe(': open\n\n')
+    await until(() => heard.length > 0, SETTLED_MS * 10)
+    expect(await readFor(response, 50)).toBe(': open\n\n')
     expect(heard).toEqual(['page.html'])
   })
 
