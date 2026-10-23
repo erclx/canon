@@ -19,6 +19,8 @@ Three sources settle which layer a test belongs at and how the decision table re
 | Sizing by what a test touches          | Google's small, medium, and large sizes ([Software Engineering at Google, ch. 11](https://abseil.io/resources/swe-book/html/ch11.html))                                         |
 | The component layer carrying UI weight | Kent C. Dodds's trophy ([Write tests](https://kentcdodds.com/blog/write-tests)) and Testing Library's [guiding principles](https://testing-library.com/docs/guiding-principles) |
 
+Each source below is read for what it settles.
+
 - Fowler writes a lower test when a higher one catches what no lower one did. It is the body's layer rule and the decision table's reason.
 - Google's sizes name what a test may touch rather than cover. The table keys on the same, so it transfers across stacks without naming a runner.
 - Testing Library holds that tests resembling use give more confidence

@@ -69,14 +69,12 @@ Most "no root cause" conclusions are incomplete investigations. Exhaust phase 1 
 
 ## Excuses and rebuttals
 
-| Excuse                                        | Rebuttal                                                                                                                                    |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| "I know what the bug is, so I'll just fix it" | Then reproducing it costs a minute. When the reading is wrong, the fix moves the symptom and reports success over a cause still in place.   |
-| "Quick fix for now, investigate later"        | Later never reads the code again. The quick fix becomes the record of what the bug was, and it names the wrong place.                       |
-| "It's probably flaky, rerun it"               | A rerun that passes says the failure is intermittent, not that it is gone. Take the timing, environment, or state branch in phase 1.        |
-| "It works on my machine"                      | That is the environment branch's first data point. Diff versions, config, and data against where it fails rather than closing on it.        |
-| "The error says to run this, so I'll run it"  | The error is data about the failure. Whatever wrote it is the thing that is broken, so surface the step to the user rather than running it. |
-| "I'll verify manually instead of a test"      | A manual check leaves nothing behind. The failing test is what shows the fix reached the cause, and what catches the bug's return.          |
+- **"I know what the bug is, so I'll just fix it."** Then reproducing it costs a minute. When the reading is wrong, the fix moves the symptom and reports success over a cause still in place.
+- **"Quick fix for now, investigate later."** Later never reads the code again. The quick fix becomes the record of what the bug was, and it names the wrong place.
+- **"It's probably flaky, rerun it."** A rerun that passes says the failure is intermittent, not that it is gone. Take the timing, environment, or state branch in phase 1.
+- **"It works on my machine."** That is the environment branch's first data point. Diff versions, config, and data against where it fails rather than closing on it.
+- **"The error says to run this, so I'll run it."** The error is data about the failure. Whatever wrote it is the thing that is broken, so surface the step to the user rather than running it.
+- **"I'll verify manually instead of a test."** A manual check leaves nothing behind. The failing test is what shows the fix reached the cause, and what catches the bug's return.
 
 ## Red flags
 

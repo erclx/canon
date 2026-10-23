@@ -87,15 +87,13 @@ Three scope checks follow the walk:
 
 ## Excuses and rebuttals
 
-| Excuse                                                      | Rebuttal                                                                                                                        |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| The tests pass, so the change works                         | Read what the diff did to the tests first. A test skipped, deleted, or stripped of its assertions passes by proving nothing.    |
-| The hunk reads clean, so the review is done                 | The hunk is where the author looked. A consumer, a doc a section away, and the commit that added a removed guard are not in it. |
-| The checker passes on the branch                            | Read the checker's config and the inline suppressions in the diff. A path excluded from the run passes by not being read.       |
-| It was split into smaller functions, so it is simpler       | Count the concepts a reader holds before and after. Moved complexity reads as simpler only to the person who moved it.          |
-| Nothing calls it, so deleting it is safe                    | Read why it was added. Code nobody calls today can still be guarding a path nobody exercised in the change.                     |
-| The description says it is faster                           | A claimed speedup with no measurement, or one run each side, is asserted. Ask for runs that beat the noise.                     |
-| The change only touches styles, so the screenshots can wait | A stylesheet diff says what changed and only the image says what a user sees. Open them, or say none exist.                     |
+- **The tests pass, so the change works.** Read what the diff did to the tests first. A test skipped, deleted, or stripped of its assertions passes by proving nothing.
+- **The hunk reads clean, so the review is done.** The hunk is where the author looked. A consumer, a doc a section away, and the commit that added a removed guard are not in it.
+- **The checker passes on the branch.** Read the checker's config and the inline suppressions in the diff. A path excluded from the run passes by not being read.
+- **It was split into smaller functions, so it is simpler.** Count the concepts a reader holds before and after. Moved complexity reads as simpler only to the person who moved it.
+- **Nothing calls it, so deleting it is safe.** Read why it was added. Code nobody calls today can still be guarding a path nobody exercised in the change.
+- **The description says it is faster.** A claimed speedup with no measurement, or one run each side, is asserted. Ask for runs that beat the noise.
+- **The change only touches styles, so the screenshots can wait.** A stylesheet diff says what changed and only the image says what a user sees. Open them, or say none exist.
 
 ## Red flags
 

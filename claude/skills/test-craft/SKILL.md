@@ -31,6 +31,8 @@ Size a test by what it touches rather than by what it covers. Pick the first row
 | Rendered behavior: states, interactions, conditional rendering, validation, focus    | Component                             |
 | A journey across routes, or what only a real browser renders: layout, scroll, motion | End to end                            |
 
+Four rules govern how a session reads the table.
+
 - Read the row off the behavior, never off the file. A component file holding a pure formatter takes a unit test for the formatter.
 - Split a behavior that spans rows. Test the copy at unit and the render at component, rather than asserting both in one browser run.
 - Write the lower test when a higher one catches a break no lower test did. A red end to end run with every unit and component test green names a missing lower test.

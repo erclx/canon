@@ -33,15 +33,14 @@ The evidence comment already heads the list with `## What to look at`, so the fi
 - [ ] <route>[, <width>]: <verb> <target> → <expected visual result>
 ```
 
-Write each box so a session driving the running app can run it without guessing:
+Write each box so a session driving the running app can run it without guessing, with one rule for each part:
 
-| Part  | Rule                                                                                                                                                                            |
-| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Route | A path or the control that reaches it. A box naming none is driven from the address the driver opens. Write "from the page the app opens on" for a state reached by a sequence. |
-| Width | Only when the change can differ by width, such as layout, spacing, or anything responsive. Copy, color, or a state rendering the same everywhere leaves it off.                 |
-| Verb  | An action a driver performs, such as "scroll to", "click", "resize to", or "tab to". Never "read" or "look at", which name no action.                                           |
-| Taste | End the line with `(taste)` when the result is a judgment of look or feel. A driver reports such a box as needing a person's eyes rather than passing it.                       |
-| Setup | State inline any setup the page does not open in. End the line with `(local only)` when a hosted preview cannot reach that state, such as a stopped service or a seeded record. |
+- **Route.** A path or the control that reaches it. A box naming none is driven from the address the driver opens.
+  - Write "from the page the app opens on" for a state reached by a sequence.
+- **Width.** Only when the change can differ by width, such as layout, spacing, or anything responsive. Copy, color, or a state rendering the same everywhere leaves it off.
+- **Verb.** An action a driver performs, such as "scroll to", "click", "resize to", or "tab to". Never "read" or "look at", which name no action.
+- **Taste.** End the line with `(taste)` when the result is a judgment of look or feel. A driver reports such a box as needing a person's eyes rather than passing it.
+- **Setup.** State inline any setup the page does not open in. End the line with `(local only)` when a hosted preview cannot reach that state, such as a stopped service or a seeded record.
 
 When the plan cites `canon/design/<surface>/` under `**Design references:**`, name the reference as the comparison on each box for that surface, such as "→ matches `canon/design/<surface>/` in light and dark". The reviewer then judges the build against the accepted design instead of against taste.
 
