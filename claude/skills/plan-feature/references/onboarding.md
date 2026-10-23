@@ -32,6 +32,6 @@ Three rules hold across every kind:
 
 ## Record a run that did not happen
 
-Write the surface as not run with the reason, such as a broken build, a verb with no read form, or a preview that will not start. A skipped run with no record reads the same as one nobody considered.
+Write the surface as not run with the reason, such as a broken build, a preview that will not start, or a verb with no read form that no sandbox scenario or temporary copy can reach. A skipped run with no record reads the same as one nobody considered.
 
 Step 3 writes each run, or its not-run reason, into `## Current behavior`.

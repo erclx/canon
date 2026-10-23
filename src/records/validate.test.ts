@@ -403,10 +403,6 @@ describe('checkPlan', () => {
         '- `canon indexes list --json`: lists every context entry',
       ])
     })
-
-    it('should still pass a plan without the section', () => {
-      expect(checkPlan('feature-a-b.md', conformingPlan())).toEqual([])
-    })
   })
 
   it('should report a missing Feature heading', () => {

@@ -35,15 +35,11 @@ Coding standards live in `.claude/rules/`. Claude Code loads them automatically,
 
 ### Read the domain's context entry
 
-Onboard to each domain the feature touches before reading its code. Run `canon indexes list --json canon/context` and read the entries matching the domain, reporting none when the project has no such folder. Read `${CLAUDE_SKILL_DIR}/references/onboarding.md` for the lookup and the run that follows.
+Onboard to each domain the feature touches before reading its code, through its context entry. Read `${CLAUDE_SKILL_DIR}/references/onboarding.md` for the lookup.
 
 ## Step 2: run the surface, then scan relevant source files
 
-When the feature changes a verb, a route, or a rendered surface that already exists, run it once in a form that writes nothing before reading its code, and record the command and what it showed. `${CLAUDE_SKILL_DIR}/references/onboarding.md` states the safe form per surface kind.
-
-- Write only the plan, so never run a form that writes to the tree being planned against
-- Record a run that cannot happen here as not run with the reason, never skip it silently
-- Skip the step for a feature touching nothing that runs, such as prose or a config seed
+When the feature changes a verb, a route, or a rendered surface that already exists, run it once before reading its code and record what it showed. Read `${CLAUDE_SKILL_DIR}/references/onboarding.md` for the safe form per surface kind, the rules that keep the run from writing, and the not-run record.
 
 ### Read the code
 
