@@ -45,14 +45,16 @@ A taste box takes the shot twice, once per theme, naming the theme in the file a
 
 ## The four verdicts
 
-Each box takes exactly one.
+Each box takes exactly one, keyed here by the state it answers.
 
-| Verdict             | When                                                    | Evidence it carries                                                                                                                                                    |
-| ------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| pass or fail, read  | The result is a fact the page reports                   | The value read, quoted, such as `scrollWidth 436 against clientWidth 320`                                                                                              |
-| pass or fail, frame | The result has a stated criterion only an image settles | The matching evidence stem or the pushed frame's link, inline under the failed box's heading, and what the frame shows, in words                                       |
-| needs eyes          | The box ends in `(taste)`                               | The dark and the light shot as a pair, each the matching evidence stem or a pushed frame's link, and what the frames showed, with nothing about whether it looks right |
-| not driven          | The state could not be reached                          | The reason, such as an unreachable address, a `(local only)` box on a hosted preview, or a target the snapshot does not hold                                           |
+- **pass or fail, read.** The result is a fact the page reports.
+  - The evidence is the value read, quoted, such as `scrollWidth 436 against clientWidth 320`.
+- **pass or fail, frame.** The result has a stated criterion only an image settles.
+  - The evidence is the matching evidence stem or the pushed frame's link, inline under the failed box's heading, and what the frame shows, in words.
+- **needs eyes.** The box ends in `(taste)`.
+  - The evidence is the dark and the light shot as a pair, each the matching evidence stem or a pushed frame's link, and what the frames showed, with nothing about whether it looks right.
+- **not driven.** The state could not be reached.
+  - The evidence is the reason, such as an unreachable address, a `(local only)` box on a hosted preview, or a target the snapshot does not hold.
 
 A fail names what was expected beside what was read. A not driven never reads as a fail, since it says the pass could not look rather than that the page is wrong. Its reason says whether the cause sits on the page or off it, since only a cause on the page opens the heading Step 7 picks.
 

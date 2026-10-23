@@ -13,14 +13,16 @@ The `addyosmani/agent-skills` citations below all pin commit `addyosmani/agent-s
 
 ### Design and scope
 
-**The design procedure.** The nine ordered steps under the design axis draw on four sources, each restated without a language, a framework, or a transport so the walk holds on any stack.
+**The design procedure.** The nine ordered steps under the design axis draw on four sources, each restated without a language, a framework, or a transport so the walk holds on any stack. Each source below carries the step it backs.
 
-| Source                                                                                                                                                                               | Step it backs                                                                               |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
-| Ousterhout's deep modules, information hiding, and pass-through methods, [A Philosophy of Software Design](https://web.stanford.edu/~ouster/cgi-bin/book.php)                        | Asking what each unit hides, and flagging a unit that passes its arguments straight through |
-| Parnas's criterion that a boundary hides a decision likely to change, [On the Criteria To Be Used in Decomposing Systems into Modules](https://dl.acm.org/doi/10.1145/361598.361623) | The opening step, naming the next likely change and counting what it touches                |
-| Beck's design rules as Fowler records them, especially no duplication and fewest elements, [BeckDesignRules](https://martinfowler.com/bliki/BeckDesignRules.html)                    | The one-place step, and matching each pattern to a problem the code has today               |
-| Google's reviewer guide on design, complexity, and over-engineering, [What to look for in a code review](https://google.github.io/eng-practices/review/reviewer/looking-for.html)    | The frame for the whole walk, and the reason a speculative abstraction is a finding         |
+- Ousterhout's deep modules, information hiding, and pass-through methods, [A Philosophy of Software Design](https://web.stanford.edu/~ouster/cgi-bin/book.php)
+  - Backs asking what each unit hides, and flagging a unit that passes its arguments straight through
+- Parnas's criterion that a boundary hides a decision likely to change, [On the Criteria To Be Used in Decomposing Systems into Modules](https://dl.acm.org/doi/10.1145/361598.361623)
+  - Backs the opening step, naming the next likely change and counting what it touches
+- Beck's design rules as Fowler records them, especially no duplication and fewest elements, [BeckDesignRules](https://martinfowler.com/bliki/BeckDesignRules.html)
+  - Backs the one-place step, and matching each pattern to a problem the code has today
+- Google's reviewer guide on design, complexity, and over-engineering, [What to look for in a code review](https://google.github.io/eng-practices/review/reviewer/looking-for.html)
+  - Backs the frame for the whole walk, and the reason a speculative abstraction is a finding
 
 The procedure stays in the body rather than a reference, since every review reads the design axis and a reference would cost a read on every run.
 
