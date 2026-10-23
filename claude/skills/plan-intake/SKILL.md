@@ -63,9 +63,13 @@ Read these in parallel from the project root, skipping any that do not exist:
 
 Then read only what a live item needs, never whole directories speculatively. Where a folder carries an `index.md`, read it first and load only the files it points at.
 
+For each domain an item touches, read its context entry through the lookup in `${CLAUDE_SKILL_DIR}/../plan-feature/references/onboarding.md`, since the entry records the traps a grep will not show.
+
 ## Step 3: measure against the tree
 
 Grep for each construct an item names and count the sites. Every problem line carries a number or a file path taken during this pass.
+
+When an item reports a defect with a one-command repro, run it in a read-only form and say on the `Problem:` line what it showed, or that it was not reproduced here. Read `${CLAUDE_SKILL_DIR}/references/intake.md` for where one command ends and groundwork begins.
 
 - Never carry a figure from an earlier session, a summary, or another document. The tree states the size of a complaint, and that is what separates an inventory from opinions.
 - Confirm any work an item sequences behind is still open, so no item leads with something already shipped

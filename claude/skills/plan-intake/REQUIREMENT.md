@@ -7,15 +7,15 @@ description: Why a brain dump gets a filed inventory rather than ten plans, and 
 
 ## Gap
 
-A brain dump reaches a session with nowhere to put it. One plan per concern turns forty findings into ten plans before anything is measured, and what gets filed instead is a list of opinions, because nothing forces a count against the tree.
+A brain dump reaches a session with nowhere to put it. One plan per concern turns forty findings into ten plans before anything is measured, and what gets filed instead is a list of opinions, because nothing forces a count against the tree. A defect confirmed from source alone reads the same as one that was run.
 
 An empty operator slot reads as consent under a blank-means-accept contract, which ships changes nobody approved. A report naming only a path hides what moved. A question filed without a pick comes back unresolved, and a pass with no write scope starts fixing what it files.
 
 ## Must
 
 - Route each item on whether the repository can answer it today, sending experiments to `plan-groundwork` and decided work to `plan-feature`
-- Measure every problem line against the tree, close every item with a verdict, and pair every open question with a suggested pick
-- Treat an empty operator slot as unread, and keep answers on items with the index pointing at them
+- Measure every problem line against the tree, running a defect's one-command repro read-only or marking it not reproduced here
+- Close every item with a verdict and a suggested pick on each question, and treat an empty operator slot as unread
 - Reserve the index number, carry the domain in every other filename, and number a new folder past the highest ordinal across intake and groundwork
 - Confine writes to the intake folder and name the heading and the act beside every path written
 

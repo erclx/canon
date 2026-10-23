@@ -19,6 +19,7 @@ The folder is gitignored. Where a records remote is configured, `canon records p
 - [Files](#files)
 - [Frontmatter and dating](#frontmatter-and-dating)
 - [00-overview.md](#00-overviewmd) <!-- canon-allow-reference: a heading anchor, not a pull request number -->
+- [Repro versus groundwork](#repro-versus-groundwork)
 - [Item format](#item-format)
 - [The answer contract](#the-answer-contract)
 - [Retrieval](#retrieval)
@@ -98,6 +99,15 @@ The index. It points at items and answers nothing itself.
 The index carries no answer slot. One question in two answerable places has no rule for which wins, and retrieval walks item headings, so an answer typed into the index is found by nothing and lost silently.
 
 Where an item touches a task already on the board, say so in the index rather than only inside the item. A reader deciding what to promote reads the index first.
+
+## Repro versus groundwork
+
+An item whose claim is a defect may carry one run of its repro, and the run is where intake's measuring stops. A repro that needs more is groundwork's.
+
+- Run one command in a form that writes nothing, per `${CLAUDE_SKILL_DIR}/../plan-feature/references/onboarding.md`, and put what it showed on `Problem:`
+- Mark the item `not reproduced here` on the same line when the repro needs a fixture project, repeated runs, a write, or another project's paths
+- Send the marked item to `plan-groundwork` only when its answer decides a plan, since a claim read from code alone is a reported defect and not a confirmed one
+- Never adapt a repro silently, because a changed command measures something the reporter did not
 
 ## Item format
 
