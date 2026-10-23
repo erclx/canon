@@ -161,6 +161,6 @@ Each of these owns one slice the folders above lean on.
 
 - `PROJECT_ROOT` is the installation the CLI runs from, so a catalog verb in a linked worktree reports that tree. Run `bun src/cli.ts` to answer from the worktree
 - A verb reading a tracked tree uses `currentWorktreeRoot()`, since the main root reports on files the session never edited
-- A test that spawns `gov install` or `gov sync` as a process sets `CANON_STATE_DIR`, or it writes a row for its fixture into the real target index
+- A spawned test sets `CANON_STATE_DIR`, or `gov install` writes a fixture row into the real target index. `runCli` also sets a dead `BUN_CONFIG_REGISTRY`, so a `--write` case seeds first
 - A subcommand registered after its parent keeps `passThroughOptions`, so `canon sandbox` words such as `reset` reach its action as words
 - A `canon docs` topic resolves `<topic>.md` before `<topic>/index.md`, and each lister pins its own depth, so a split domain needs both passes
