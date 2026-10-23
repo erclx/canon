@@ -163,6 +163,8 @@ Pick the `Next:` line from the roster check `${CLAUDE_SKILL_DIR}/../task-board/S
 | **Not found**, and this session's name starts with `worker-` or `planner-` | `Hand <task> to a worker`, naming no session, since none is live and the operator dispatches by hand |
 | **Not found otherwise**, or the read fails                                 | `/session-worktree`                                                                                  |
 
+Three rules apply to the `Next:` choice:
+
 - With a live orchestrator and no planner role held, send the plan path to it through `canon:session-relay`, resolved from its `sessionId`
 - A session holding `canon:role-planner` already owes that announcement through its own channel, so it sends none
 - Say which row fired in one clause, since a line with no stated reason is one the next reader re-derives.

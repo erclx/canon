@@ -25,16 +25,18 @@ The archived task is what makes that base matter. The standard points its line a
 
 Tier 1 stops on four failures, each naming a different repair. Test them in the order below.
 
-| Failure                      | Stop                                                                                                                                                |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The line links several plans | `❌ <path> links <N> plans on its Plan: line (<every target>), so the task does not say which one this run builds. Pass one plan path directly.`    |
-| No `Plan:` line at all       | `❌ <path> carries no Plan: line, so nothing there names a plan to run. Write the plan and point the task at it, or pass the plan path directly.`   |
-| Pointer into a plans archive | `❌ <path> points at an archived plan, which describes work that already shipped. Reopen the task against a live plan, or pass that plan directly.` |
-| Pointer resolves to no file  | `❌ <path> points at <target>, which does not exist. The citation is stale, so repoint the task or pass the plan path directly.`                    |
+1. The line links several plans. The stop reads:
+   - `❌ <path> links <N> plans on its Plan: line (<every target>), so the task does not say which one this run builds. Pass one plan path directly.`
+2. No `Plan:` line at all. The stop reads:
+   - `❌ <path> carries no Plan: line, so nothing there names a plan to run. Write the plan and point the task at it, or pass the plan path directly.`
+3. Pointer into a plans archive. The stop reads:
+   - `❌ <path> points at an archived plan, which describes work that already shipped. Reopen the task against a live plan, or pass that plan directly.`
+4. Pointer resolves to no file. The stop reads:
+   - `❌ <path> points at <target>, which does not exist. The citation is stale, so repoint the task or pass the plan path directly.`
 
 ### Why each test sits where it does
 
-Each row carries a reason a shortcut would get wrong.
+Each test carries a reason a shortcut would get wrong.
 
 - Test several links first, since taking the first link runs whichever plan leads the line and reports success
 - A row still awaiting a plan is the ordinary case, so the no-line message names the missing pointer rather than the plan sections a reader would then hunt for

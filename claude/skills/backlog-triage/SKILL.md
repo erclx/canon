@@ -73,10 +73,10 @@ For each row that reproduces, gather the evidence Step 5 reads, and record each 
 
 Keep and promote carry the burden of proof, and a defect that still exists does not meet it. A row filed against the tree nearly always reproduces, so a reproduction test alone keeps almost every row. A row earns keep or promote only by naming a cost or a reach from Step 4's evidence.
 
-| Ground | What it takes                                                                                                                                                |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Cost   | A wrong result this pass observed by running the verb or reading committed output, or an issue, run, person, or workaround commit it hit, not measured fixed |
-| Reach  | The defect sits on a shipped path, so everyone reaching it receives a wrong instruction, a broken or unbounded behavior, or a wrong output, hit or not       |
+The two grounds, and what each takes:
+
+- Cost. A wrong result this pass observed by running the verb or reading committed output, or an issue, run, person, or workaround commit it hit, not measured fixed.
+- Reach. The defect sits on a shipped path, so everyone reaching it receives a wrong instruction, a broken or unbounded behavior, or a wrong output, hit or not.
 
 A plausible cost names nothing. A row arguing what could go wrong off a shipped path, with no observed output and no hit, is declined however likely it sounds.
 
@@ -96,12 +96,12 @@ A missing feature earns keep through the cost arm when a user asked for it in an
 
 Age is evidence in neither direction. An old hit reads the same as a new one, by whether the pass measures it as still able to recur.
 
-| Verdict | When                                                                                                                                     |
-| ------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| keep    | The defect reproduces this pass, with a count or a path, and the row names a cost or a reach with its observation, hit, or shipped path  |
-| promote | It qualifies for keep, and what it was waiting on has cleared, naming what cleared it                                                    |
-| archive | Every open outcome is measured shipped, naming the commit or pull request per outcome position                                           |
-| decline | Anything else, including a reproduction naming no cost or reach, a defect the tree no longer holds, superseded work, or the filing alone |
+Each verdict takes one condition:
+
+- keep. The defect reproduces this pass, with a count or a path, and the row names a cost or a reach with its observation, hit, or shipped path.
+- promote. It qualifies for keep, and what it was waiting on has cleared, naming what cleared it.
+- archive. Every open outcome is measured shipped, naming the commit or pull request per outcome position.
+- decline. Anything else, including a reproduction naming no cost or reach, a defect the tree no longer holds, superseded work, or the filing alone.
 
 ### Step 6: write the items
 
