@@ -40,11 +40,21 @@ async function readFor(response: Response, ms: number): Promise<string> {
   return seen
 }
 
-/** Polls until the condition holds or the deadline passes, whichever is first. */
-async function until(condition: () => boolean, ms: number): Promise<void> {
+/**
+ * Rewrites a file every 100ms until the condition holds or the deadline
+ * passes. A recursive watcher on macOS goes live after it is constructed, so
+ * the first write can land before it and raise nothing.
+ */
+async function writeUntil(
+  path: string,
+  condition: () => boolean,
+  ms: number,
+): Promise<void> {
   const deadline = Date.now() + ms
+  let attempt = 0
   while (!condition() && Date.now() < deadline) {
-    await new Promise((settle) => setTimeout(settle, 10))
+    writeFileSync(path, String(attempt++))
+    await new Promise((settle) => setTimeout(settle, 100))
   }
 }
 
@@ -99,11 +109,14 @@ describe('LiveStream', () => {
     )
     const response = stream.open()
 
-    writeFileSync(join(ROOT, 'page.html'), 'one')
+    await writeUntil(
+      join(ROOT, 'page.html'),
+      () => heard.length > 0,
+      SETTLED_MS * 10,
+    )
 
-    await until(() => heard.length > 0, SETTLED_MS * 10)
     expect(await readFor(response, 50)).toBe(': open\n\n')
-    expect(heard).toEqual(['page.html'])
+    expect(new Set(heard)).toEqual(new Set(['page.html']))
   })
 
   it('should send a payload to every open client', async () => {
