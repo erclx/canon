@@ -15,11 +15,13 @@ The plan is the one `task-number.md` names, so reuse the filename an earlier ste
 canon tasks closes --plan feature-<slug> --json
 ```
 
-A branch with no plan runs the verb bare, which finds the task whose plan derives the branch and reports `no-match` when none does:
+A branch with no plan runs the verb bare:
 
 ```bash
 canon tasks closes --json
 ```
+
+The bare call matches the branch against `feat/<slug>` for each task's plan and the names the branch carried before a rename. A planned branch under any other name reads `no-match` and writes no closing line, so pass `--plan` for it.
 
 The verb reads the current branch itself and counts the names it carried before a rename, so pass nothing else. Branch on the record rather than the exit code.
 

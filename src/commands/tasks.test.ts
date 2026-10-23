@@ -56,6 +56,14 @@ describe('canon tasks closes with no task or plan named', () => {
     expect(record).toMatchObject({ ok: true, task: 'v1-a', closing: true })
   })
 
+  it('should read the checked-out branch when --branch is absent', async () => {
+    await execa('git', ['init', '-b', 'feat/a-b'], { cwd: root })
+
+    const record = await runCloses(root, [])
+
+    expect(record).toMatchObject({ ok: true, task: 'v1-a', closing: true })
+  })
+
   it('should report no-match on a branch nothing owns', async () => {
     const record = await runCloses(root, ['--branch', 'docs/other'])
 
