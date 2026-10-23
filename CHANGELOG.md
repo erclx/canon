@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.56.0](https://github.com/erclx/canon/compare/v5.55.0...v5.56.0) (2026-10-23)
+
+
+### Features
+
+* **markdown:** gate table cell and trailing list as density kinds ([#2630](https://github.com/erclx/canon/issues/2630)) ([1d1cbd3](https://github.com/erclx/canon/commit/1d1cbd3f78009dc6f748aee9579fd0245022aaf0))
+* **markdown:** measure nested bullets against the length cap ([#2632](https://github.com/erclx/canon/issues/2632)) ([b5b8f2b](https://github.com/erclx/canon/commit/b5b8f2b7765c801735b52f8bc22275f3ae478f74))
+
 ## [5.55.0](https://github.com/erclx/canon/compare/v5.54.0...v5.55.0) (2026-10-21)
 
 
