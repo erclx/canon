@@ -111,7 +111,7 @@ export const BULLET_LEDGER_SKILLS: Readonly<Record<string, BulletLedgerScope>> =
     [join(SHIPPED_CORPUS, 'deprecation-migration')]: { exempt: [], body: true },
     [join(SHIPPED_CORPUS, 'design-taste')]: {
       exempt: references('preflight', 'vocabulary'),
-      body: false,
+      body: true,
     },
   }
 
