@@ -223,7 +223,7 @@ export function register(program: Command): void {
   records
     .command('stale')
     .description(
-      'Report when the requirements record was last reviewed and how many releases have shipped since',
+      'Report when the requirements and design records were last reviewed and how many releases have shipped since',
     )
     .argument('<kind>', `Record folder: ${STALE_KINDS.join(', ')}`)
     .helpOption('-h, --help', 'Show this help message')
@@ -233,7 +233,8 @@ export function register(program: Command): void {
       'after',
       [
         '',
-        'canonical: reads REQUIREMENTS.md at whichever surface root carries it,',
+        'canonical: reads REQUIREMENTS.md and DESIGN.md at whichever surface root',
+        'carries each, skipping one the project lacks,',
         'in the current worktree since it is tracked. It reports its reviewed date',
         'and the release tags merged into HEAD after that day, or never when it',
         'carries no date.',

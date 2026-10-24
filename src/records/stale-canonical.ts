@@ -6,7 +6,7 @@ import { gitEnv } from '@/git/env'
 import { surfaceDir } from '@/roots/surface'
 
 /** The record whose drift is identity rather than a stale path. */
-const CANONICAL_DOCS = ['REQUIREMENTS.md'] as const
+const CANONICAL_DOCS = ['REQUIREMENTS.md', 'DESIGN.md'] as const
 
 export interface CanonicalDoc {
   /** Relative to the root, at whichever surface root carries the doc. */
