@@ -60,6 +60,16 @@ A refusal, an absent key, and a subcommand the project's binary does not carry e
 - `canon context audit` refuses with `reason: "no-folders"` where the layout is not the expected one. Reading that honest refusal as an empty finding set reports a healthy corpus nothing looked at.
 - A narrower read is not an unread one. The sweep running on its regex layer alone still answered, so report it with the layer named.
 
+### The design record
+
+`canon/DESIGN.md` reads outside both verbs above, since neither measures its prose budget or its tokens. When the scope reaches it, read it through its own verb:
+
+```bash
+canon design audit --json
+```
+
+The record carries `prose`, the lines past the budget with their counts, and `tokens`, the custom properties the stylesheet does not declare. `${CLAUDE_SKILL_DIR}/references/axes.md` holds how each reads and where it routes. Skip the verb when the scope excludes the record or the record is `null`.
+
 ## Step 3: read the staleness axis
 
 No verb answers whether a document still describes the tree it was written about. Read each document against the surfaces it names and report where the two have parted, taking the file paths, commands, and counts it states as the claims to test.
@@ -111,6 +121,14 @@ When Step 3 read the canonical records, add one reminder line per doc the verb r
 ```
 
 Write `reviewed value is not a date: <value>` for a doc carrying `invalidReviewed`, and `no release tags to count` in place of the count when `tagged` is false. Name the unread cause instead when the verb refused or the binary carries no `canonical` kind.
+
+### The design record row
+
+When Step 2 read the design record, add a row for `canon/DESIGN.md`, with both findings `measured`.
+
+- Put the `prose` findings in the Length cell and the `tokens` findings in the Placement cell
+- Write `unread: <reason>` in the Placement cell when `tokens.status` reads `unchecked`, since a check that could not run is no pass
+- Route every finding to `design-record`, never to `document-repair`
 
 Under the table, add one structure line per area folder that earned one, naming the entry and the split, or the finding and its owner:
 
