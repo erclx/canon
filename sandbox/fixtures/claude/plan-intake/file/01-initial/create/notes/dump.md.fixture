@@ -9,3 +9,4 @@ Unsorted, written fast, nothing checked against the code.
 - do I want the log module to own color output, or is that a formatter's job? genuinely unsure
 - switching the whole CLI onto a real argument parser instead of the loops, no idea what that costs until someone builds it three ways and measures the bundle
 - the error envelope task on the board might already own half the error mess
+- I think build --out with nothing after it should fail, but it seems to build into dist anyway

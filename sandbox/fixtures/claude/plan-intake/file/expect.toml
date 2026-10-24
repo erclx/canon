@@ -44,6 +44,7 @@ manual = [
   "The stderr bullet, fourth in the dump, carries a settled verdict, since the seeded CLAUDE.md already states the policy it proposes. The console-write bullet beside it stays a live finding, because the code violates that policy in four places. Semantic: both verdicts are prose, and a run folding the two into one item is a judgment rather than a format error.",
   "The error item names the v01.0 board task it overlaps and still carries its own verdict. Semantic: `Overlaps:` is optional, so its absence reads the same as a correct run that judged the overlap immaterial.",
   "The color question carries an `Open:` line with a `Suggested:` pick beneath it. Semantic: which item the run judges to be the operator's call is a judgment, and pinning it to the color item asserts the judgment rather than the format.",
+  "The trailing `--out` bullet, eighth and last in the dump, is filed as an item whose `Problem:` line quotes `building into dist`, reproduced by running `bun src/cli.ts build --out`. The argument-parser item still carries `not reproduced here`, since costing it takes builds. Semantic: which cluster file holds the `--out` item is the run's call, so a glob over the cluster files would pass or fail on the order the run named them.",
   "No `You:` slot is filled. Unwired: the run writes every slot empty on an open pass, so a filled one and a missing item are indistinguishable to a pattern that does not know how many items were filed.",
 ]
 
