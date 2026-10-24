@@ -353,6 +353,57 @@ describe('scan in a subfolder', () => {
   })
 })
 
+describe('scan cause on a drifted config', () => {
+  function recorded(dir: string, files: Record<string, string>): void {
+    seedFile(
+      stampPath(dir),
+      JSON.stringify({
+        covers: ['tooling'],
+        domains: { tooling: { syncedAt: 'then', files, chain: ['base'] } },
+      }),
+    )
+  }
+
+  function drifted(dir: string): ReturnType<typeof scan>['configs'][number] {
+    const manifest = makeManifest('base')
+    seedFile(join(manifest.configsDir, '.editorconfig'), 'root = true\n')
+    return scan([manifest], dir).configs[0]
+  }
+
+  it('should read a copy still at the recorded hash as stale', () => {
+    const dir = target()
+    seedFile(join(dir, '.editorconfig'), 'older golden\n')
+    recorded(dir, { '.editorconfig': hashContent('older golden\n') })
+
+    expect(drifted(dir)).toMatchObject({ state: 'drifted', cause: 'stale' })
+  })
+
+  it('should read a copy off the recorded hash as edited', () => {
+    const dir = target()
+    seedFile(join(dir, '.editorconfig'), 'mine\n')
+    recorded(dir, { '.editorconfig': hashContent('older golden\n') })
+
+    expect(drifted(dir)).toMatchObject({ state: 'drifted', cause: 'edited' })
+  })
+
+  it('should read a copy with no recorded hash as unattributed', () => {
+    const dir = target()
+    seedFile(join(dir, '.editorconfig'), 'mine\n')
+
+    expect(drifted(dir)).toMatchObject({
+      state: 'drifted',
+      cause: 'unattributed',
+    })
+  })
+
+  it('should give a matching config no cause', () => {
+    const dir = target()
+    seedFile(join(dir, '.editorconfig'), 'root = true\n')
+
+    expect(drifted(dir)).not.toHaveProperty('cause')
+  })
+})
+
 describe('scan with dispositions', () => {
   const WORKFLOW = '.github/workflows/ci.yml'
 

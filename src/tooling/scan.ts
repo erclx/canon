@@ -1,8 +1,13 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { resolveSurfacePath } from '@/roots/surface'
-import { type Disposition, hashFile } from '@/sync/stamp'
-import { readDispositions } from '@/tooling/disposition'
+import {
+  type Disposition,
+  hashFile,
+  readStamp,
+  stampedDispositions,
+  stampedHashes,
+} from '@/sync/stamp'
 import { mergeSections } from '@/tooling/gitignore'
 import {
   ancestorsFirst,
@@ -21,10 +26,14 @@ import {
 } from '@/tooling/package'
 import { isSubfolderTarget, isWithheldInSubfolder } from '@/tooling/subfolder'
 
+export type DriftCause = 'stale' | 'edited' | 'unattributed'
+
+/** `cause` is set on a drifted config alone. */
 export interface ConfigState {
   readonly rel: string
   readonly stack: string
   readonly state: 'new' | 'drifted' | 'matching'
+  readonly cause?: DriftCause
 }
 
 export interface SeedState {
@@ -70,6 +79,17 @@ export interface ScanResult {
   readonly totalChanges: number
 }
 
+/**
+ * Why a drifted config differs, which decides whether a write may replace it.
+ * A copy still at the hash the last write recorded is `stale`, since canon
+ * moved and the project did not. A copy off it is `edited`, and a copy with no
+ * recorded hash is `unattributed`, since nothing says who changed it.
+ */
+function driftCause(recorded: string | undefined, dest: string): DriftCause {
+  if (recorded === undefined) return 'unattributed'
+  return hashFile(dest) === recorded ? 'stale' : 'edited'
+}
+
 function isIdentical(a: string, b: string): boolean {
   if (!existsSync(b)) return false
   return readFileSync(a).equals(readFileSync(b))
@@ -96,7 +116,9 @@ function isIdentical(a: string, b: string): boolean {
  */
 export function scan(chain: readonly Manifest[], target: string): ScanResult {
   const isSubfolder = isSubfolderTarget(target)
-  const held = readDispositions(target)
+  const stamp = readStamp(target)
+  const held = stampedDispositions(stamp, 'tooling')
+  const recorded = stampedHashes(stamp, 'tooling')
   const configs: ConfigState[] = []
   const withheld: WithheldState[] = []
   const dispositions: DispositionState[] = []
@@ -130,13 +152,18 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
         continue
       }
 
-      const state = !existsSync(dest)
-        ? 'new'
-        : isIdentical(source, dest)
-          ? 'matching'
-          : 'drifted'
-
-      configs.push({ rel, stack: manifest.name, state })
+      if (!existsSync(dest)) {
+        configs.push({ rel, stack: manifest.name, state: 'new' })
+      } else if (isIdentical(source, dest)) {
+        configs.push({ rel, stack: manifest.name, state: 'matching' })
+      } else {
+        configs.push({
+          rel,
+          stack: manifest.name,
+          state: 'drifted',
+          cause: driftCause(recorded[rel], dest),
+        })
+      }
     }
   }
 
