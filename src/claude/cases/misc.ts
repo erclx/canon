@@ -19,6 +19,11 @@ export const MISC_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
+      'This settings form needs validation and an empty state, so what does it owe for keyboard users and error messages before I build it?',
+    expect: 'ui-craft',
+  },
+  {
+    prompt:
       'This project has no logo yet. Draft one and give me a social card to go with it.',
     expect: 'design-identity',
   },
