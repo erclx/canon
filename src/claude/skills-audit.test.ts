@@ -685,7 +685,9 @@ function listedPracticeSkillsExcept(omitted: string): void {
 
 describe('auditSkills ledger list', () => {
   const ledgerOnly =
-    LEDGER_SKILLS.find((rel) => !PRACTICE_SKILLS.includes(rel)) ?? ''
+    LEDGER_SKILLS.find(
+      (rel) => !PRACTICE_SKILLS.includes(rel) && !(rel in BULLET_LEDGER_SKILLS),
+    ) ?? ''
 
   beforeEach(() => {
     listedPracticeSkillsExcept(ledgerOnly)

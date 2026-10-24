@@ -1,0 +1,42 @@
+---
+title: Systems reference ledger
+description: Sources for claude/skills/design-taste/references/systems.md, one row per bullet
+---
+
+# Systems reference ledger
+
+The field is visual design systems. The authorities are the Nielsen Norman Group for proximity, Practical Typography for the type scale, Apple's Human Interface Guidelines for dark mode, and W3C for text contrast.
+
+A catalog row records what a community prompt skill observed models drawing, never an authority. A House choice row carries a count the toolkit set so a tell can be counted, and names the failure it prevents.
+
+## Space
+
+| Bullet                      | Source                                                                                                                                                                                                                                                                        | Read       |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Every gap from one scale    | Catalog observation, [Impeccable layout](https://github.com/pbakaus/impeccable/blob/main/skill/reference/layout.md): "Use a documented spacing scale rather than one-off values." The figure of about eight is a House choice: past it, a count tells a scale from arithmetic | 2026-10-24 |
+| Steps grow rather than add  | House choice: a scale stepping by a fixed amount spends its large steps on gaps a reader cannot tell apart, and has too few steps where small gaps need them                                                                                                                  | 2026-10-24 |
+| Between groups beats within | [NN/g, Proximity](https://www.nngroup.com/articles/gestalt-proximity/): "Items close together are likely to be perceived as part of the same group"                                                                                                                           | 2026-10-24 |
+| One gap everywhere          | [NN/g, Proximity](https://www.nngroup.com/articles/gestalt-proximity/): a tight label reads as one group "compared to a larger margin before the next label-field pair"                                                                                                       | 2026-10-24 |
+| Two or three section tiers  | House choice: enough tiers for rhythm, few enough that each section takes one, since a value per section leaves no rhythm to read                                                                                                                                             | 2026-10-24 |
+| Space follows the viewport  | House choice: a layout scaling every value with the viewport arrives at a phone with body type too small to read, while space shrinks without harm                                                                                                                            | 2026-10-24 |
+
+## Type
+
+| Bullet                       | Source                                                                                                                                                                                                                        | Read       |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Fewer steps than feel enough | [Practical Typography, Headings](https://practicaltypography.com/headings.html): "Limit yourself to three levels of headings. Two is better." The five to seven figure is a House choice: more holds steps nobody tells apart | 2026-10-24 |
+| Adjacent steps differ        | [Practical Typography, Headings](https://practicaltypography.com/headings.html): "Use the smallest increment necessary to make a visible difference."                                                                         | 2026-10-24 |
+| Body size anchors            | House choice: a scale worked down from a display size leaves body text at whatever size was left, and body text is most of what a reader reads                                                                                | 2026-10-24 |
+| Line height against size     | Catalog observation, [Redesign skill](https://github.com/nxpatterns/claude-taste-skill/blob/main/skills/redesign-skill/SKILL.md): headlines "reduce line-height", and for body text "Increase line-height for readability"    | 2026-10-24 |
+| Weights beside sizes         | [Practical Typography, Headings](https://practicaltypography.com/headings.html): "If you're using bold in your heading, you can also try reducing the point size"                                                             | 2026-10-24 |
+
+## Palette
+
+| Bullet                        | Source                                                                                                                                                                                                                                                                                                                                                                               | Read       |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| An accent is rare             | Catalog observation, [Minimalist skill](https://github.com/nxpatterns/claude-taste-skill/blob/main/skills/minimalist-skill/SKILL.md): "Color is a scarce resource, utilized only for semantic meaning or subtle accents."                                                                                                                                                            | 2026-10-24 |
+| One neutral temperature       | Catalog observation, [Redesign skill](https://github.com/nxpatterns/claude-taste-skill/blob/main/skills/redesign-skill/SKILL.md): "Mixing warm and cool grays. Stick to one gray family."                                                                                                                                                                                            | 2026-10-24 |
+| Surfaces near, content far    | [WCAG 2.2, Contrast (Minimum)](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html) backs the content half: text needs "a contrast ratio of at least 4.5:1". The surface half is a catalog observation, [Taste-Skill tells](https://github.com/leonxlnx/taste-skill/blob/main/skills/taste-skill/references/tells.md): "Opaque surfaces one tone step from the ground" | 2026-10-24 |
+| A semantic color is no accent | House choice: an accent borrowed for an error makes every accent read as an error, and leaves the surface no color free for emphasis                                                                                                                                                                                                                                                 | 2026-10-24 |
+| Dark mode re-derived          | [Apple HIG, Dark Mode](https://developer.apple.com/design/human-interface-guidelines/dark-mode): dark colors "aren't necessarily inversions of their light counterparts"                                                                                                                                                                                                             | 2026-10-24 |
+| Saturation has a budget       | Catalog observation, [Redesign skill](https://github.com/nxpatterns/claude-taste-skill/blob/main/skills/redesign-skill/SKILL.md): "Desaturate accents so they blend with neutrals instead of screaming."                                                                                                                                                                             | 2026-10-24 |
