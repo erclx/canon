@@ -57,18 +57,15 @@ An audit that finds no corpus reports `absent`, which moves neither the verdict 
 
 **In `bun run check`.**
 
-`bun run check` runs `--corpus tracked --corpus per-machine` as a reporting stage after the gating stages, and never fails on it. `summary` is a flat object of unique scalar keys that a shell stage greps without a JSON parser. `deps` runs weekly instead.
-
-The placement entry runs pinned to `--backend off`, so its tally stays comparable across machines. Each audit runs as the CLI the caller is running, never a global `canon`.
+`bun run check` runs `--corpus tracked --corpus per-machine` as a reporting stage after the gating stages, and never fails on it. `summary` is a flat object of unique scalar keys that a shell stage greps without a JSON parser. `deps` runs weekly instead. Each audit runs as the CLI the caller is running, never a global `canon`.
 
 **Catalog.**
 
-`canon audits list` reports the first 19 rows. The rows marked `outside` run by hand or from a skill and sit beside the aggregate.
+`canon audits list` reports the first 18 rows. The rows marked `outside` run by hand or from a skill and sit beside the aggregate.
 
 | Id                   | Verb                                | Measures                                                                           | Finding        |
 | -------------------- | ----------------------------------- | ---------------------------------------------------------------------------------- | -------------- |
 | `context`            | `canon context audit`               | Context folder structure, citations, and the requirements record's word cap        | Gates          |
-| `placement`          | `canon context classify sweep`      | Keep, rewrite, and move tally per context section, regex layer only                | Reports        |
 | `markdown`           | `canon markdown audit`              | Bans, dead links, density, and reference shape                                     | Gates          |
 | `skills`             | `canon claude skills audit`         | Both skill corpora against the skill standards                                     | Gates          |
 | `skills-reach`       | `canon claude skills reach`         | Skill bodies citing a path no target receives                                      | Reports        |
@@ -90,7 +87,6 @@ The placement entry runs pinned to `--backend off`, so its tally stays comparabl
 | `outside`            | `canon gov superseded <old> <new>`  | Where the tree still asserts a value a changed convention no longer produces       | Reports        |
 | `outside`            | `canon claude skills drift <ref>`   | Shipped skill bodies rewritten since a ref                                         | Reports        |
 | `outside`            | `canon claude routing`              | Per `CLAUDE.md` section, how many bullets name a path and whether a rule covers it | Reports        |
-| `outside`            | `canon context classify diff`       | Classification of the chunks a git range changed                                   | Reports        |
 
 A deliberate secret takes a `canon-allow-secret: <reason>` marker. A deliberate citation takes `canon-allow-citation: <reason>` and a deliberate superseded value takes `canon-allow-superseded: <reason>`, each on its own line or the one above. Run any verb with `--help` for its flags and refusal reasons.
 

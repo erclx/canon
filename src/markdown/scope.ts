@@ -154,7 +154,6 @@ export const GATED_PATHS: readonly string[] = [
   'claude/skills/codebase-layout/references/tests.md',
   'claude/skills/context-fold/REQUIREMENT.md',
   'claude/skills/context-fold/SKILL.md',
-  'claude/skills/context-fold/references/classify.md',
   'claude/skills/context-fold/references/completion-report.md',
   'claude/skills/context-fold/references/context-refresh.md',
   'claude/skills/context-fold/references/context.md',

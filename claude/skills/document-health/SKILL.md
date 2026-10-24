@@ -34,16 +34,7 @@ canon markdown audit --json
 canon context audit --json
 ```
 
-The first answers length, carrying the bullet, paragraph, and depth checkpoints and the per-file weights read against them. The second answers placement for the folders it resolves, carrying entry length, reference form, and index drift.
-
-Then read which classifier would run, and deepen placement with the verdicts per section:
-
-```bash
-canon context classifier show
-canon context classify sweep --json
-```
-
-The first names the backend, the model, and the source that decided both. Report which layer answered, since a project with the model layer off reads from the regex layer alone and the sweep says nothing about which one it used.
+The first answers length, carrying the bullet, paragraph, and depth checkpoints and the per-file weights read against them. The second answers placement for the folders it resolves, carrying entry length, reference form, and index drift. Placement reads `shapeFindings`, `extraSections`, and each entry's `provenance`, all `measured`.
 
 Take the checkpoints from the record each verb returns rather than from a number written here. A checkpoint the CLI moves reaches this report with no edit, and a number held in this body goes stale on its own cadence.
 
@@ -58,7 +49,6 @@ Emit the line only for a folder with an entry past the line checkpoint whose Lay
 A refusal, an absent key, and a subcommand the project's binary does not carry each leave an axis unread. Report it as unread against the documents it would have covered, name the read that could not be taken, and name the cause.
 
 - `canon context audit` refuses with `reason: "no-folders"` where the layout is not the expected one. Reading that honest refusal as an empty finding set reports a healthy corpus nothing looked at.
-- A narrower read is not an unread one. The sweep running on its regex layer alone still answered, so report it with the layer named.
 
 ### The design record
 
@@ -92,10 +82,9 @@ Nothing triggers this review but a request. A finished review hands the rewrite 
 
 Give each document its three axes, and give each axis three things: the state, the evidence class, and the command or skill that repairs it. Naming the repair is not running it. A length finding names `document-repair`, which rewrites a folder to zero and gates it.
 
-The three classes are what keep the axes apart:
+The two classes are what keep the axes apart:
 
 - `measured`: a verb returned a number read against a stated checkpoint
-- `classified`: a verb returned a verdict carrying its own confidence
 - `read`: this session's judgment, backed by no verb
 
 Emit no verdict across the three. Two answer from verbs and one answers from a reading, so a roll-up is a figure that lies about the third. Emit no score across the documents either, for the same reason one level up.
@@ -131,7 +120,7 @@ Structure `canon/context/surfaces/`: `cli.md` (300 lines) splits into `cli.md` t
 
 The line is a proposal for the operator, with the headings each entry takes and why. Health applies nothing, and `document-repair` offers the proposal before it rewrites.
 
-Keep the evidence line under the table on every run. A table read without it flattens a judgment into a measurement, which is the one shape the three classes exist to prevent.
+Keep the evidence line under the table on every run. A table read without it flattens a judgment into a measurement, which is the one shape the two classes exist to prevent.
 
 ### The design record row
 

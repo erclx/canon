@@ -2,7 +2,6 @@ import type { SkillsAuditRefusal } from '@/claude/skills-audit'
 import type { RankRefusal } from '@/claude/skills-rank'
 import type { ReachRefusal } from '@/claude/skills-reach'
 import type { ContextAuditRefusal } from '@/context/audit'
-import type { SweepVerdict } from '@/context/classify/patterns'
 import type { AuditRefusal } from '@/deps/audit'
 import type { RuleAuditRefusal } from '@/gov/audit'
 import type { RestatedRefusal } from '@/gov/restated'
@@ -159,45 +158,6 @@ function requirementsCounts(
     return {}
   }
   return { requirementsOverWords: record.words > record.wordCap ? 1 : 0 }
-}
-
-/**
- * The retained key for each verdict the sweep can return. A record rather than
- * a list, so the compiler fails here when the classifier gains a verdict,
- * instead of that verdict's sections dropping out of the tally.
- */
-const PLACEMENT_KEYS: Record<SweepVerdict, string> = {
-  KEEP: 'keep',
-  REWRITE: 'rewrite',
-  MOVE: 'move',
-}
-
-function isPlacementVerdict(value: unknown): value is SweepVerdict {
-  return typeof value === 'string' && Object.hasOwn(PLACEMENT_KEYS, value)
-}
-
-/**
- * Tallies the sweep's findings by verdict, with a zero for a verdict nothing
- * returned, so a baseline reads the same three keys on every run.
- *
- * `KEEP` is retained beside the two that ask for a change. It moves when a
- * section is added or split, which is what tells a falling `rewrite` count
- * from a corpus that shrank.
- */
-function placementCounts(record: unknown): Record<string, number> | undefined {
-  const findings = asObject(record)?.findings
-  if (!Array.isArray(findings)) return undefined
-
-  const counts: Record<string, number> = Object.fromEntries(
-    Object.values(PLACEMENT_KEYS).map((key) => [key, 0]),
-  )
-  for (const finding of findings) {
-    const verdict = asObject(finding)?.verdict
-    if (!isPlacementVerdict(verdict)) return undefined
-    counts[PLACEMENT_KEYS[verdict]] += 1
-  }
-
-  return counts
 }
 
 function contextCounts(record: unknown): Record<string, number> | undefined {
@@ -525,18 +485,6 @@ export const AUDITS: readonly AuditSpec[] = [
     // project reports the verb unmeasured on every run and never changes.
     absentReasons: ['no-folders'] satisfies ContextAuditRefusal[],
     counts: contextCounts,
-  },
-  {
-    id: 'placement',
-    label: 'Context placement',
-    // Pinned to the regex layer rather than the resolved classifier setting.
-    // A count that moves with whichever model a machine runs is not
-    // comparable across clones, and the model layer turns a sub-second read
-    // into a multi-minute one. `document-health` is where the model reads.
-    argv: ['context', 'classify', 'sweep', '--backend', 'off', '--json'],
-    gatingExits: [],
-    corpus: 'tracked',
-    counts: placementCounts,
   },
   {
     id: 'markdown',

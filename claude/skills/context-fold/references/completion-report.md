@@ -1,6 +1,6 @@
 ---
 title: Completion report
-description: The lines context-fold prints once every step has run, being one per file updated, the direction-change note, Step 4's audit and classify lines, and the closing line with when it is suppressed
+description: The lines context-fold prints once every step has run, being one per file updated, the direction-change note, Step 4's audit lines, and the closing line with when it is suppressed
 ---
 
 # Completion report
@@ -9,15 +9,14 @@ The close of `context-fold`. The session reads this file once every step has run
 
 ## Lines
 
-| When                                                 | Line                                                                                        |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Per file updated                                     | `✅ Updated: <path written>`                                                                |
-| Step 2 noted a requirements change                   | `↪ Direction changed this session: run document-health on canon/REQUIREMENTS.md`            |
-| Per audit finding Step 4 reported                    | `⚠ Audit:` in the shape the body gives                                                      |
-| Step 4's classify half applied or reported a finding | The exact shape `${CLAUDE_SKILL_DIR}/references/classify.md` gives under its Report section |
-| No file updated and Step 4 reported nothing          | `✅ No changes needed.`                                                                     |
+| When                                        | Line                                                                             |
+| ------------------------------------------- | -------------------------------------------------------------------------------- |
+| Per file updated                            | `✅ Updated: <path written>`                                                     |
+| Step 2 noted a requirements change          | `↪ Direction changed this session: run document-health on canon/REQUIREMENTS.md` |
+| Per audit finding Step 4 reported           | `⚠ Audit:` in the shape the body gives                                           |
+| No file updated and Step 4 reported nothing | `✅ No changes needed.`                                                          |
 
-Do not shorten or paraphrase the audit and classify lines here or in the reply, since the quote and the reason are what a reader checks the finding against.
+Do not shorten or paraphrase the audit lines here or in the reply, since the finding is what a reader checks it against.
 
 ## Suppressing the closing line
 

@@ -62,7 +62,7 @@ Write each updated file immediately. Claude Code's tool permission dialog is the
 
 ## Step 4: audit what the fold touched
 
-Run the structural audit, the markdown audit, and the content classifier, and answer each before the report. Findings never stop the fold.
+Run the structural audit and the markdown audit, and answer each before the report. Findings never stop the fold.
 
 ### Structural audit
 
@@ -84,16 +84,6 @@ Run `canon markdown audit <path>` over every entry Step 3 wrote this run, and fi
 - Fix a finding inside a section Step 3 rewrote, then re-run the audit on that entry until it reports none there
 - Report a finding in a section Step 3 left alone as `⚠ Audit: <rel>, <finding>`, since the rule above keeps unrelated sections as they are
 - Report a refusal as `⚠ Audit: <message>` and continue
-
-### Classify
-
-Skip the classifier only when the Diff baseline section could not resolve a base ref at all, reporting `⚠ No diff to scope against. Skipped the classify check.` The verb needs a resolvable ref, which is the one condition it cannot answer for itself.
-
-Otherwise read `${CLAUDE_SKILL_DIR}/references/classify.md` for the invocation, its scope, the record fields, applying a finding, the one-line keep reason, the unreachable and missing-subcommand lines, and the report shape.
-
-- `${CLAUDE_SKILL_DIR}` names this skill's own directory, resolved once when the skill loaded, so read the reference by that resolved path
-- Never guess a `.claude/skills/context-fold/references/classify.md` path from the install-time layout, which is a different root than this skill's own files
-- The invocation is `canon context classify diff --base <base> --json`, and it runs whether or not that reference resolves
 
 ## After completion
 
