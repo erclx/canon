@@ -26,7 +26,9 @@ export default scenario({
       // Design record seed in canon/DESIGN.md. The lead is past its word cap and
       // the Colors table names --color-muted, which src/styles/tokens.css does
       // not declare, so the design record row carries a prose and a token finding
-      // routed to design-record.
+      // routed to design-record. The frontmatter declares a dark theme whose block
+      // overrides --color-ink alone, so a per-theme finding names that selector,
+      // and its reviewed date gives the reminder line.
       ctx.fixtures('claude', 'document-health', 'shared', '01-initial')
 
       ctx.git('add', '.')
@@ -60,6 +62,9 @@ export default scenario({
       ctx.log.info(
         '  8. canon/DESIGN.md has a lead past its cap and names --color-muted, which tokens.css lacks',
       )
+      ctx.log.info(
+        '  9. canon/DESIGN.md declares a dark theme whose block omits --color-accent and --color-muted, and carries reviewed: 2026-01-01',
+      )
       ctx.log.info('Action:  /document-health')
       ctx.log.info(
         'Expect:  one section per document across length, placement, and staleness.',
@@ -90,6 +95,9 @@ export default scenario({
       )
       ctx.log.info(
         '         canon/DESIGN.md reads as measured, naming both findings and routing them to design-record.',
+      )
+      ctx.log.info(
+        '         The dark selector is named for its missing properties, and a review reminder line follows.',
       )
       ctx.log.info(
         '         Nothing is repaired: both files are byte-identical after the run.',

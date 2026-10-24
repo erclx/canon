@@ -1,3 +1,10 @@
+---
+themes:
+  - ':root'
+  - ":root[data-theme='dark']"
+reviewed: 2026-01-01
+---
+
 # Design
 
 Values live in `src/styles/tokens.css`. This record holds the intent behind them, and a long lead like this one reads past the forty word cap the design standard sets for it.

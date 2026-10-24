@@ -20,6 +20,8 @@ manual = [
   "The doubled finding proposes auth.md as the owner. Semantic: the reply naming both strings does not say which one owns the folder, and the owner follows from which entry holds the area's trap.",
   "Length findings on docs/overview.md read as measured and the staleness findings on api.md read as read. Semantic: the label is wording.",
   "The canon/DESIGN.md row reports the over-budget lead and the missing --color-muted as measured and routes both to design-record. Semantic: the reply naming design-record does not say the findings route there.",
+  "The canon/DESIGN.md row names the dark theme selector :root[data-theme='dark'] as missing --color-accent and --color-muted. Semantic: the cell is wording, and the selector must appear beside the properties.",
+  "The reply carries a review reminder line for canon/DESIGN.md naming its reviewed date, 2026-01-01, and the releases since. Semantic: the count depends on the tags the fixture repository carries.",
   "The structure line proposes splitting pipeline.md by its Ingest, Transform, and Publish headings. Semantic: wording.",
 ]
 

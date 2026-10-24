@@ -68,7 +68,7 @@ A refusal, an absent key, and a subcommand the project's binary does not carry e
 canon design audit --json
 ```
 
-The record carries `prose`, the lines past the budget with their counts, and `tokens`, the custom properties the stylesheet does not declare. `${CLAUDE_SKILL_DIR}/references/axes.md` holds how each reads and where it routes. Skip the verb when the scope excludes the record or the record is `null`.
+The record carries `prose`, the lines past the budget, and `tokens`, the custom properties the stylesheet lacks. Where the record declares `themes:`, `tokens.themes` adds one cell per theme. `${CLAUDE_SKILL_DIR}/references/axes.md` holds how each reads and where it routes. Skip the verb when the scope excludes the record or the record is `null`.
 
 ## Step 3: read the staleness axis
 
@@ -78,13 +78,13 @@ Mark every staleness finding as a reading. It is this session's judgment rather 
 
 ### The requirements record
 
-When the scope reaches `canon/REQUIREMENTS.md`, read it for identity drift as well as for stale paths, and take the review point from the verb:
+When the scope reaches `canon/REQUIREMENTS.md`, read it for identity drift as well as for stale paths. Take the review point for it and for the design record from the verb:
 
 ```bash
 canon records stale canonical --json
 ```
 
-The doc in the record carries `reviewed` and `releasesSince`. `${CLAUDE_SKILL_DIR}/references/axes.md` holds the identity claim shapes to test and how the record reads. Skip both the read and the verb when the scope excludes the doc.
+Each doc in the record carries `reviewed` and `releasesSince`, the design record's too where the project holds one. `${CLAUDE_SKILL_DIR}/references/axes.md` holds the identity claim shapes to test and how the record reads. Skip both the read and the verb when the scope excludes the doc.
 
 Nothing triggers this review but a request. A finished review hands the rewrite to the operator, and its last edit sets `reviewed:` in the doc's frontmatter to the day the operator's answers landed. This run writes neither.
 
@@ -118,6 +118,7 @@ When Step 3 read the canonical records, add one reminder line per doc the verb r
 
 ```markdown
 `canon/REQUIREMENTS.md`: reviewed <date>, <n> releases since.
+`canon/DESIGN.md`: reviewed <date>, <n> releases since.
 ```
 
 Write `reviewed value is not a date: <value>` for a doc carrying `invalidReviewed`, and `no release tags to count` in place of the count when `tagged` is false. Name the unread cause instead when the verb refused or the binary carries no `canonical` kind.
@@ -136,7 +137,7 @@ Keep the evidence line under the table on every run. A table read without it fla
 
 When Step 2 read the design record, add a row for `canon/DESIGN.md`, with both findings `measured`.
 
-- Put the `prose` findings in the Length cell and the `tokens` findings in the Placement cell
+- Put the `prose` findings in the Length cell and the `tokens` findings in the Placement cell, naming the selector of each `tokens.themes` cell that omits a property or matched no block
 - Write `unread: <reason>` in the Placement cell when `tokens.status` reads `unchecked`, since a check that could not run is no pass
 - Write `n/a: <reason>` there when it reads `not-applicable`, a values record with no property to compare
 - Route every finding to `design-record`, never to `document-repair`
