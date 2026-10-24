@@ -14,6 +14,10 @@ export default scenario({
       // Length seed in docs/overview.md. One paragraph past the sentence and
       // character checkpoints, and one top-level bullet carrying a paragraph's worth
       // of text behind a dash.
+      //
+      // Structure seed in canon/context/pipeline.md. One entry past the line
+      // checkpoint holding three stage domains under Layout, which earns a
+      // structure line proposing a split by heading.
       ctx.fixtures('claude', 'document-health', 'shared', '01-initial')
 
       ctx.git('add', '.')
@@ -38,6 +42,9 @@ export default scenario({
       ctx.log.info(
         '  5. docs/overview.md carries a top-level bullet past the character checkpoint',
       )
+      ctx.log.info(
+        '  6. canon/context/pipeline.md is past the line checkpoint and holds three stage domains',
+      )
       ctx.log.info('Action:  /document-health')
       ctx.log.info(
         'Expect:  one section per document across length, placement, and staleness.',
@@ -53,6 +60,12 @@ export default scenario({
       )
       ctx.log.info(
         '         No verdict across the three axes and no score across the documents.',
+      )
+      ctx.log.info(
+        '         A structure line proposes splitting pipeline.md by its Ingest, Transform,',
+      )
+      ctx.log.info(
+        '         and Publish headings, naming the headings each entry takes and why.',
       )
       ctx.log.info(
         '         Nothing is repaired: both files are byte-identical after the run.',

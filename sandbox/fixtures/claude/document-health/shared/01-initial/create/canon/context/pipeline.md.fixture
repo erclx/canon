@@ -1,0 +1,177 @@
+---
+title: Pipeline
+description: Ingest, transform, and publish stages of the data pipeline
+---
+
+# Pipeline
+
+## Overview
+
+Owns the ingest, transform, and publish stages. Each stage reads the previous stage's output.
+
+## Layout
+
+### Ingest
+
+The ingest stage owns its own queue and its own retry policy.
+
+- `src/pipeline/ingest/step1.ts` handles ingest step 1
+- `src/pipeline/ingest/step2.ts` handles ingest step 2
+- `src/pipeline/ingest/step3.ts` handles ingest step 3
+- `src/pipeline/ingest/step4.ts` handles ingest step 4
+- `src/pipeline/ingest/step5.ts` handles ingest step 5
+- `src/pipeline/ingest/step6.ts` handles ingest step 6
+- `src/pipeline/ingest/step7.ts` handles ingest step 7
+- `src/pipeline/ingest/step8.ts` handles ingest step 8
+- `src/pipeline/ingest/step9.ts` handles ingest step 9
+- `src/pipeline/ingest/step10.ts` handles ingest step 10
+- `src/pipeline/ingest/step11.ts` handles ingest step 11
+- `src/pipeline/ingest/step12.ts` handles ingest step 12
+- `src/pipeline/ingest/step13.ts` handles ingest step 13
+- `src/pipeline/ingest/step14.ts` handles ingest step 14
+- `src/pipeline/ingest/step15.ts` handles ingest step 15
+- `src/pipeline/ingest/step16.ts` handles ingest step 16
+- `src/pipeline/ingest/step17.ts` handles ingest step 17
+- `src/pipeline/ingest/step18.ts` handles ingest step 18
+- `src/pipeline/ingest/step19.ts` handles ingest step 19
+- `src/pipeline/ingest/step20.ts` handles ingest step 20
+- `src/pipeline/ingest/step21.ts` handles ingest step 21
+- `src/pipeline/ingest/step22.ts` handles ingest step 22
+- `src/pipeline/ingest/step23.ts` handles ingest step 23
+- `src/pipeline/ingest/step24.ts` handles ingest step 24
+- `src/pipeline/ingest/step25.ts` handles ingest step 25
+- `src/pipeline/ingest/step26.ts` handles ingest step 26
+- `src/pipeline/ingest/step27.ts` handles ingest step 27
+- `src/pipeline/ingest/step28.ts` handles ingest step 28
+- `src/pipeline/ingest/step29.ts` handles ingest step 29
+- `src/pipeline/ingest/step30.ts` handles ingest step 30
+- `src/pipeline/ingest/step31.ts` handles ingest step 31
+- `src/pipeline/ingest/step32.ts` handles ingest step 32
+- `src/pipeline/ingest/step33.ts` handles ingest step 33
+- `src/pipeline/ingest/step34.ts` handles ingest step 34
+- `src/pipeline/ingest/step35.ts` handles ingest step 35
+- `src/pipeline/ingest/step36.ts` handles ingest step 36
+- `src/pipeline/ingest/step37.ts` handles ingest step 37
+- `src/pipeline/ingest/step38.ts` handles ingest step 38
+- `src/pipeline/ingest/step39.ts` handles ingest step 39
+- `src/pipeline/ingest/step40.ts` handles ingest step 40
+- `src/pipeline/ingest/step41.ts` handles ingest step 41
+- `src/pipeline/ingest/step42.ts` handles ingest step 42
+- `src/pipeline/ingest/step43.ts` handles ingest step 43
+- `src/pipeline/ingest/step44.ts` handles ingest step 44
+- `src/pipeline/ingest/step45.ts` handles ingest step 45
+- `src/pipeline/ingest/step46.ts` handles ingest step 46
+- `src/pipeline/ingest/step47.ts` handles ingest step 47
+- `src/pipeline/ingest/step48.ts` handles ingest step 48
+- `src/pipeline/ingest/step49.ts` handles ingest step 49
+- `src/pipeline/ingest/step50.ts` handles ingest step 50
+
+### Transform
+
+The transform stage owns its own queue and its own retry policy.
+
+- `src/pipeline/transform/step1.ts` handles transform step 1
+- `src/pipeline/transform/step2.ts` handles transform step 2
+- `src/pipeline/transform/step3.ts` handles transform step 3
+- `src/pipeline/transform/step4.ts` handles transform step 4
+- `src/pipeline/transform/step5.ts` handles transform step 5
+- `src/pipeline/transform/step6.ts` handles transform step 6
+- `src/pipeline/transform/step7.ts` handles transform step 7
+- `src/pipeline/transform/step8.ts` handles transform step 8
+- `src/pipeline/transform/step9.ts` handles transform step 9
+- `src/pipeline/transform/step10.ts` handles transform step 10
+- `src/pipeline/transform/step11.ts` handles transform step 11
+- `src/pipeline/transform/step12.ts` handles transform step 12
+- `src/pipeline/transform/step13.ts` handles transform step 13
+- `src/pipeline/transform/step14.ts` handles transform step 14
+- `src/pipeline/transform/step15.ts` handles transform step 15
+- `src/pipeline/transform/step16.ts` handles transform step 16
+- `src/pipeline/transform/step17.ts` handles transform step 17
+- `src/pipeline/transform/step18.ts` handles transform step 18
+- `src/pipeline/transform/step19.ts` handles transform step 19
+- `src/pipeline/transform/step20.ts` handles transform step 20
+- `src/pipeline/transform/step21.ts` handles transform step 21
+- `src/pipeline/transform/step22.ts` handles transform step 22
+- `src/pipeline/transform/step23.ts` handles transform step 23
+- `src/pipeline/transform/step24.ts` handles transform step 24
+- `src/pipeline/transform/step25.ts` handles transform step 25
+- `src/pipeline/transform/step26.ts` handles transform step 26
+- `src/pipeline/transform/step27.ts` handles transform step 27
+- `src/pipeline/transform/step28.ts` handles transform step 28
+- `src/pipeline/transform/step29.ts` handles transform step 29
+- `src/pipeline/transform/step30.ts` handles transform step 30
+- `src/pipeline/transform/step31.ts` handles transform step 31
+- `src/pipeline/transform/step32.ts` handles transform step 32
+- `src/pipeline/transform/step33.ts` handles transform step 33
+- `src/pipeline/transform/step34.ts` handles transform step 34
+- `src/pipeline/transform/step35.ts` handles transform step 35
+- `src/pipeline/transform/step36.ts` handles transform step 36
+- `src/pipeline/transform/step37.ts` handles transform step 37
+- `src/pipeline/transform/step38.ts` handles transform step 38
+- `src/pipeline/transform/step39.ts` handles transform step 39
+- `src/pipeline/transform/step40.ts` handles transform step 40
+- `src/pipeline/transform/step41.ts` handles transform step 41
+- `src/pipeline/transform/step42.ts` handles transform step 42
+- `src/pipeline/transform/step43.ts` handles transform step 43
+- `src/pipeline/transform/step44.ts` handles transform step 44
+- `src/pipeline/transform/step45.ts` handles transform step 45
+- `src/pipeline/transform/step46.ts` handles transform step 46
+- `src/pipeline/transform/step47.ts` handles transform step 47
+- `src/pipeline/transform/step48.ts` handles transform step 48
+- `src/pipeline/transform/step49.ts` handles transform step 49
+- `src/pipeline/transform/step50.ts` handles transform step 50
+
+### Publish
+
+The publish stage owns its own queue and its own retry policy.
+
+- `src/pipeline/publish/step1.ts` handles publish step 1
+- `src/pipeline/publish/step2.ts` handles publish step 2
+- `src/pipeline/publish/step3.ts` handles publish step 3
+- `src/pipeline/publish/step4.ts` handles publish step 4
+- `src/pipeline/publish/step5.ts` handles publish step 5
+- `src/pipeline/publish/step6.ts` handles publish step 6
+- `src/pipeline/publish/step7.ts` handles publish step 7
+- `src/pipeline/publish/step8.ts` handles publish step 8
+- `src/pipeline/publish/step9.ts` handles publish step 9
+- `src/pipeline/publish/step10.ts` handles publish step 10
+- `src/pipeline/publish/step11.ts` handles publish step 11
+- `src/pipeline/publish/step12.ts` handles publish step 12
+- `src/pipeline/publish/step13.ts` handles publish step 13
+- `src/pipeline/publish/step14.ts` handles publish step 14
+- `src/pipeline/publish/step15.ts` handles publish step 15
+- `src/pipeline/publish/step16.ts` handles publish step 16
+- `src/pipeline/publish/step17.ts` handles publish step 17
+- `src/pipeline/publish/step18.ts` handles publish step 18
+- `src/pipeline/publish/step19.ts` handles publish step 19
+- `src/pipeline/publish/step20.ts` handles publish step 20
+- `src/pipeline/publish/step21.ts` handles publish step 21
+- `src/pipeline/publish/step22.ts` handles publish step 22
+- `src/pipeline/publish/step23.ts` handles publish step 23
+- `src/pipeline/publish/step24.ts` handles publish step 24
+- `src/pipeline/publish/step25.ts` handles publish step 25
+- `src/pipeline/publish/step26.ts` handles publish step 26
+- `src/pipeline/publish/step27.ts` handles publish step 27
+- `src/pipeline/publish/step28.ts` handles publish step 28
+- `src/pipeline/publish/step29.ts` handles publish step 29
+- `src/pipeline/publish/step30.ts` handles publish step 30
+- `src/pipeline/publish/step31.ts` handles publish step 31
+- `src/pipeline/publish/step32.ts` handles publish step 32
+- `src/pipeline/publish/step33.ts` handles publish step 33
+- `src/pipeline/publish/step34.ts` handles publish step 34
+- `src/pipeline/publish/step35.ts` handles publish step 35
+- `src/pipeline/publish/step36.ts` handles publish step 36
+- `src/pipeline/publish/step37.ts` handles publish step 37
+- `src/pipeline/publish/step38.ts` handles publish step 38
+- `src/pipeline/publish/step39.ts` handles publish step 39
+- `src/pipeline/publish/step40.ts` handles publish step 40
+- `src/pipeline/publish/step41.ts` handles publish step 41
+- `src/pipeline/publish/step42.ts` handles publish step 42
+- `src/pipeline/publish/step43.ts` handles publish step 43
+- `src/pipeline/publish/step44.ts` handles publish step 44
+- `src/pipeline/publish/step45.ts` handles publish step 45
+- `src/pipeline/publish/step46.ts` handles publish step 46
+- `src/pipeline/publish/step47.ts` handles publish step 47
+- `src/pipeline/publish/step48.ts` handles publish step 48
+- `src/pipeline/publish/step49.ts` handles publish step 49
+- `src/pipeline/publish/step50.ts` handles publish step 50
