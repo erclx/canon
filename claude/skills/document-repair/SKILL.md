@@ -20,7 +20,7 @@ The CLI holds every number. `canon markdown audit` measures, and `canon markdown
 
 ## Step 0: offer the restructure
 
-Restructure an overgrown context folder before rewriting it, so the effort is spent once. Run this step only when `canon/context/` is a candidate, and skip it silently otherwise.
+Restructure an overgrown context folder before rewriting it, so the effort is spent once. Run this step only when `canon/context/` is a candidate, meaning it is not yet listed in `canon/config/markdown.toml`, and skip it silently otherwise.
 
 - Take the structure line `document-health` reports for each area folder, or read it from `canon context audit --json` the way that skill does
 - A folder with no overgrown entry and no doubled or unnamed coverage finding has no line, so go straight to Step 1 with no prompt

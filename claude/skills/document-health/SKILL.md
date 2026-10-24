@@ -51,7 +51,7 @@ Take the checkpoints from the record each verb returns rather than from a number
 
 The context audit record already carries what a restructure needs, so the placement axis gains a structure line per area folder and runs no further verb. `${CLAUDE_SKILL_DIR}/references/axes.md` holds how to read `length` and `coverage` into a proposed split or owner.
 
-Emit the line only for a folder with an entry past the line checkpoint or a doubled or unnamed coverage finding. A folder with neither gets no line, and `document-repair` goes straight to its rewrite.
+Emit the line only for a folder with an entry past the line checkpoint whose Layout headings group into two or more domains, or with a doubled or unnamed coverage finding. A folder with neither gets no line, and `document-repair` goes straight to its rewrite.
 
 ### An unread axis is not a healthy one
 

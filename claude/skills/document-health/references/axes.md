@@ -58,7 +58,8 @@ The sweep classifies each section as keep, replace or rewrite, history, or move.
 
 The audit record's `length` array lists each entry past the line checkpoint, and `coverage.findings` lists the `doubled` and `unnamed` ones. The structure line reads both, so it carries the `measured` class for the finding and `read` for the proposal built on it.
 
-- **Overgrown entry:** group the entry's Layout headings by the domain each describes, one new entry per group beyond the first. Name each entry's headings and one reason.
+- **Overgrown entry:** read its `causes` in `length` first, since `history: yes` points at cutting provenance and one domain at a trim, so neither earns a split
+- **Split:** group the Layout headings by domain, one new entry per group beyond the first, naming each entry's headings and one reason
 - **Domain boundaries:** no verb measures one, so state the grouping as a judgment.
 - **Doubled coverage:** two entries describe one source area. Propose the one that owns it, from which entry already holds the area's traps, and the other points at it.
 - **Unnamed coverage:** no entry names the area. Propose an owner among the existing entries before a new one, since a new entry is the larger change.
