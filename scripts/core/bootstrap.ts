@@ -6,6 +6,7 @@
 import { appendFileSync, existsSync, readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import {
   intro,
@@ -17,7 +18,7 @@ import {
   outro,
 } from '../../src/cli/ui'
 
-const root = new URL('../..', import.meta.url).pathname.replace(/\/$/, '')
+const root = fileURLToPath(new URL('../..', import.meta.url)).replace(/\/$/, '')
 
 const MARKER_OPEN = '# >>> canon aliases >>>'
 const MARKER_CLOSE = '# <<< canon aliases <<<'
@@ -95,11 +96,7 @@ function installAliases(): void {
 
 function verifyCli(): void {
   logStep('Verifying the install')
-  const result = Bun.spawnSync(['canon', '--help'], {
-    stdout: 'ignore',
-    stderr: 'ignore',
-  })
-  if (result.exitCode === 0) {
+  if (Bun.which('canon') !== null) {
     logInfo('canon resolves on PATH')
   } else {
     logWarn(

@@ -5,6 +5,7 @@
  */
 import { existsSync, mkdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import {
   intro,
@@ -15,7 +16,7 @@ import {
   pipeOutput,
 } from '../../src/cli/ui'
 
-const root = new URL('../..', import.meta.url).pathname.replace(/\/$/, '')
+const root = fileURLToPath(new URL('../..', import.meta.url)).replace(/\/$/, '')
 const tmpRoot = join(root, '.canon/tmp/install-check')
 const packDir = join(tmpRoot, 'pack')
 const extractDir = join(tmpRoot, 'extract')
