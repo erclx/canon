@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { indexSourceRules } from '@/gov/adapter'
-import { loadSplits, partnerResolver } from '@/gov/splits'
+import { loadSplits } from '@/gov/splits'
 
 const REPO_ROOT = join(import.meta.dirname, '..', '..')
 
@@ -40,20 +40,6 @@ describe('loadSplits', () => {
     writeLedger('[split]\na = "b"\nc = [3]\nd = ["e"]\n')
 
     expect(loadSplits(TOOLKIT)).toEqual(new Map([['d', ['e']]]))
-  })
-})
-
-describe('partnerResolver', () => {
-  it('should return no partners for a rule the ledger does not list', () => {
-    writeLedger('[split]\nkeyboard = ["pointer"]\n')
-
-    expect(partnerResolver(TOOLKIT)('copy')).toEqual([])
-  })
-
-  it('should return the partners of a listed rule', () => {
-    writeLedger('[split]\nkeyboard = ["pointer"]\n')
-
-    expect(partnerResolver(TOOLKIT)('keyboard')).toEqual(['pointer'])
   })
 })
 

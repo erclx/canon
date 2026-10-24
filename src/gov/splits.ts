@@ -34,13 +34,3 @@ export function loadSplits(root: string): Splits {
   }
   return new Map(entries)
 }
-
-/**
- * Binds the ledger at `root` once, for a caller asking about many held names.
- */
-export function partnerResolver(
-  root: string,
-): (held: string) => readonly string[] {
-  const splits = loadSplits(root)
-  return (held) => splits.get(held) ?? []
-}
