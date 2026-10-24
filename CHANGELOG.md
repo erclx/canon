@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.59.0](https://github.com/erclx/canon/compare/v5.58.0...v5.59.0) (2026-10-24)
+
+
+### Features
+
+* **sandbox:** add a canon-feedback-triage anchor scenario ([#2656](https://github.com/erclx/canon/issues/2656)) ([ae45573](https://github.com/erclx/canon/commit/ae45573e2b385b97cdfbf300b4d1f9bb0f3db839))
+
 ## [5.58.0](https://github.com/erclx/canon/compare/v5.57.0...v5.58.0) (2026-10-24)
 
 
