@@ -21,11 +21,13 @@ import {
   type StampSource,
   stampedChain,
   stampedCommit,
+  stampedDispositions,
   stampedHashes,
   stampedVersion,
   stampPath,
   toStampKey,
   writeChainStamp,
+  writeDispositions,
   writeStamp,
 } from '@/sync/stamp'
 import { readTargetRegistry } from '@/targets/registry'
@@ -834,5 +836,130 @@ describe('stampedVersion', () => {
     )
 
     expect(readStamp(TARGET)).toBeUndefined()
+  })
+})
+
+describe('dispositions', () => {
+  function writeTooling(dispositions: unknown): void {
+    writeFixture(
+      stampPath(TARGET),
+      JSON.stringify({
+        covers: ['governance', 'tooling'],
+        domains: {
+          governance: { syncedAt: 'gov', files: { 'a.md': 'sha256:aa' } },
+          tooling: {
+            syncedAt: 'tool',
+            files: {},
+            chain: ['web'],
+            dispositions,
+          },
+        },
+      }),
+    )
+  }
+
+  it.each([
+    ['a string', 'declined'],
+    ['an array', ['ci.yml']],
+    ['an unknown disposition', { 'ci.yml': { disposition: 'ignored' } }],
+    [
+      'a non-string reason',
+      { 'ci.yml': { disposition: 'declined', reason: 7 } },
+    ],
+  ])(
+    'should keep governance readable and the map empty when dispositions is %s',
+    (_label, dispositions) => {
+      writeTooling(dispositions)
+
+      const stamp = readStamp(TARGET)
+
+      expect(stamp?.domains.governance?.syncedAt).toBe('gov')
+      expect(stampedDispositions(stamp, 'tooling')).toEqual({})
+    },
+  )
+
+  it('should drop only the malformed entry and keep a valid one beside it', () => {
+    writeTooling({
+      'ci.yml': { disposition: 'declined' },
+      'bad.yml': { disposition: 'ignored' },
+    })
+
+    expect(stampedDispositions(readStamp(TARGET), 'tooling')).toEqual({
+      'ci.yml': { disposition: 'declined' },
+    })
+  })
+
+  it('should read back what writeDispositions recorded', async () => {
+    await writeChainStamp(TARGET, TOOLING, ['web'], NOW)
+    await writeDispositions(
+      TARGET,
+      TOOLING,
+      { 'ci.yml': { disposition: 'declined', reason: 'no CI here' } },
+      NOW,
+    )
+
+    expect(stampedDispositions(readStamp(TARGET), 'tooling')).toEqual({
+      'ci.yml': { disposition: 'declined', reason: 'no CI here' },
+    })
+  })
+
+  it('should leave the sync anchor alone, since a disposition is not a sync', async () => {
+    await writeChainStamp(TARGET, TOOLING, ['web'], NOW)
+    await writeDispositions(
+      TARGET,
+      TOOLING,
+      { 'ci.yml': { disposition: 'declined' } },
+      new Date('2027-01-01T00:00:00.000Z'),
+    )
+
+    expect(readStamp(TARGET)?.domains.tooling?.syncedAt).toBe(NOW.toISOString())
+  })
+
+  it('should keep a valid map through a later chain write', async () => {
+    await writeChainStamp(TARGET, TOOLING, ['web'], NOW)
+    await writeDispositions(
+      TARGET,
+      TOOLING,
+      { 'ci.yml': { disposition: 'customized', base: 'sha256:bb' } },
+      NOW,
+    )
+    await writeChainStamp(TARGET, TOOLING, ['web', 'base'], NOW)
+
+    expect(stampedDispositions(readStamp(TARGET), 'tooling')).toEqual({
+      'ci.yml': { disposition: 'customized', base: 'sha256:bb' },
+    })
+  })
+
+  it('should keep the tooling map through a governance write', async () => {
+    await writeChainStamp(TARGET, TOOLING, ['web'], NOW)
+    await writeDispositions(
+      TARGET,
+      TOOLING,
+      { 'ci.yml': { disposition: 'declined' } },
+      NOW,
+    )
+    await writeStamp(TARGET, GOVERNANCE, { 'a.md': 'sha256:aa' }, NOW)
+    await writeChainStamp(TARGET, GOVERNANCE, ['astro'], NOW)
+
+    expect(stampedDispositions(readStamp(TARGET), 'tooling')).toEqual({
+      'ci.yml': { disposition: 'declined' },
+    })
+  })
+
+  it('should drop the key from the file when the map empties', async () => {
+    await writeChainStamp(TARGET, TOOLING, ['web'], NOW)
+    await writeDispositions(
+      TARGET,
+      TOOLING,
+      { 'ci.yml': { disposition: 'declined' } },
+      NOW,
+    )
+    await writeDispositions(TARGET, TOOLING, {}, NOW)
+
+    const raw = readRaw(TARGET) as {
+      domains: { tooling: Record<string, unknown> }
+    }
+
+    expect(raw.domains.tooling).not.toHaveProperty('dispositions')
   })
 })

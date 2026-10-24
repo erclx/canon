@@ -34,6 +34,23 @@ export interface StampSource {
 /** Target-relative posix path to content hash, for one domain. */
 export type DomainHashes = Readonly<Record<string, string>>
 
+export const DISPOSITIONS = ['declined', 'customized'] as const
+
+export type Disposition = (typeof DISPOSITIONS)[number]
+
+/**
+ * What a project decided about one golden file. `base` is the golden hash a
+ * customized file was taken from, so a later scan can tell the copy moved.
+ */
+export interface DispositionEntry {
+  readonly disposition: Disposition
+  readonly base?: string
+  readonly reason?: string
+}
+
+/** Golden posix path to the project's decision about it, for one domain. */
+export type DomainDispositions = Readonly<Record<string, DispositionEntry>>
+
 /**
  * One domain's record. The anchor sits here rather than at the top level
  * because domains sync independently, and a shared anchor would let a gov sync
@@ -61,6 +78,12 @@ export interface DomainStamp {
    * ancestors internally and a reader needs only the leaf to ask it again.
    */
   readonly chain?: readonly string[]
+  /**
+   * Golden files the project declined or customized. Validated apart from the
+   * record, so a malformed map reads as empty rather than failing the stamp
+   * and costing every other domain its record.
+   */
+  readonly dispositions?: DomainDispositions
 }
 
 export interface Stamp {
@@ -199,7 +222,7 @@ function withoutRetired(stamp: Stamp): Stamp {
   const domains: Partial<Record<StampDomain, DomainStamp>> = {}
   for (const domain of STAMP_DOMAINS) {
     const record = stamp.domains[domain]
-    if (record !== undefined) domains[domain] = record
+    if (record !== undefined) domains[domain] = withValidDispositions(record)
   }
 
   const covers = Array.isArray(stamp.covers)
@@ -245,6 +268,14 @@ export function stampedChain(
   return stamp?.domains[domain]?.chain ?? []
 }
 
+/** The golden files a domain's project declined or customized. */
+export function stampedDispositions(
+  stamp: Stamp | undefined,
+  domain: StampDomain,
+): DomainDispositions {
+  return stamp?.domains[domain]?.dispositions ?? {}
+}
+
 /**
  * Replaces one domain's file hashes and leaves the others, including that
  * domain's own chain, untouched. Domains install and sync independently but
@@ -275,10 +306,38 @@ export async function writeChainStamp(
   await putDomain(target, source, { chain: [...chain] }, now)
 }
 
+/**
+ * Replaces one domain's dispositions and leaves the rest of its record as it
+ * was, sync anchor included, since declining a file is not a sync. A domain
+ * with no record yet gets one through the ordinary write.
+ */
+export async function writeDispositions(
+  target: string,
+  source: StampSource,
+  dispositions: DomainDispositions,
+  now: Date,
+): Promise<void> {
+  const previous = readStamp(target)
+  const previousRecord = previous?.domains[source.domain]
+  if (previousRecord === undefined) {
+    await putDomain(target, source, { dispositions }, now)
+    return
+  }
+
+  const { dispositions: _replaced, ...rest } = previousRecord
+  await persist(
+    target,
+    previous,
+    source.domain,
+    { ...rest, ...dispositionsField(dispositions) },
+    now,
+  )
+}
+
 async function putDomain(
   target: string,
   source: StampSource,
-  payload: Partial<Pick<DomainStamp, 'files' | 'chain'>>,
+  payload: Partial<Pick<DomainStamp, 'files' | 'chain' | 'dispositions'>>,
   now: Date,
 ): Promise<void> {
   const previous = readStamp(target)
@@ -292,11 +351,24 @@ async function putDomain(
     syncedAt: now.toISOString(),
     files: payload.files ?? previousRecord?.files ?? {},
     ...resolveChainField(payload.chain, previousRecord?.chain),
+    ...dispositionsField(
+      payload.dispositions ?? previousRecord?.dispositions ?? {},
+    ),
   }
 
+  await persist(target, previous, source.domain, record, now)
+}
+
+async function persist(
+  target: string,
+  previous: Stamp | undefined,
+  domain: StampDomain,
+  record: DomainStamp,
+  now: Date,
+): Promise<void> {
   const domains = sortDomains({
     ...previous?.domains,
-    [source.domain]: record,
+    [domain]: record,
   })
 
   const stamp: Stamp = {
@@ -434,10 +506,52 @@ function resolveChainField(
   return resolved === undefined ? {} : { chain: resolved }
 }
 
+/** An empty map is left out of the file, as an unrecorded chain is. */
+function dispositionsField(
+  dispositions: DomainDispositions,
+): Pick<DomainStamp, 'dispositions'> {
+  return Object.keys(dispositions).length === 0
+    ? {}
+    : { dispositions: sortKeys(dispositions) }
+}
+
+/**
+ * Keeps each well-formed entry and drops the rest, so one bad entry costs only
+ * itself, and a map that is not an object costs only the map.
+ */
+function withValidDispositions(record: DomainStamp): DomainStamp {
+  const { dispositions, ...rest } = record
+  const raw: unknown = dispositions
+  if (raw === undefined) return record
+  if (!isRecord(raw)) return rest
+
+  return {
+    ...rest,
+    ...dispositionsField(
+      Object.fromEntries(
+        Object.entries(raw).filter(([, entry]) => isDispositionEntry(entry)),
+      ) as DomainDispositions,
+    ),
+  }
+}
+
+function isDispositionEntry(value: unknown): value is DispositionEntry {
+  if (!isRecord(value)) return false
+  if (!(DISPOSITIONS as readonly unknown[]).includes(value.disposition)) {
+    return false
+  }
+  if (value.base !== undefined && typeof value.base !== 'string') return false
+  return value.reason === undefined || typeof value.reason === 'string'
+}
+
 /** Deterministic key order keeps a re-sync diff empty and a merge conflict local. */
-function sortKeys(hashes: DomainHashes): DomainHashes {
+function sortKeys<T>(
+  entries: Readonly<Record<string, T>>,
+): Readonly<Record<string, T>> {
   return Object.fromEntries(
-    Object.entries(hashes).sort(([left], [right]) => left.localeCompare(right)),
+    Object.entries(entries).sort(([left], [right]) =>
+      left.localeCompare(right),
+    ),
   )
 }
 
