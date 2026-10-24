@@ -291,6 +291,18 @@ describe('recordIdempotence', () => {
     expect(report.failure).toContain('canon-keep-record-root')
   })
 
+  it('fails where only a covered ignore line is left to drop', async () => {
+    const report = await recordIdempotence(
+      context({
+        exitCode: 2,
+        stdout: '{"moves":[],"rewritten":0,"dropped":1,"paths":[]}\n',
+      }),
+    )
+
+    expect(report.failure).toContain('1 citation(s) still name the old root')
+    expect(report.failure).toContain('rewrite or drop')
+  })
+
   it('names each file the sweep would rewrite, so the count is actionable', async () => {
     const report = await recordIdempotence(context(planned([], 2, cited)))
 
