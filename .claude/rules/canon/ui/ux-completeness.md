@@ -31,4 +31,4 @@ paths:
 
 - Truncate long text in a constrained container with an ellipsis rather than letting it overflow.
 - Expose truncated text through an expand control or full text on focus, never through a `title` tooltip alone.
-- Keep focus rings and interactive borders clear of a parent's `overflow` clipping, padding the edge items of a scrollable list.
+- Keep interactive borders clear of a parent's `overflow` clipping, padding the edge items of a scrollable list.

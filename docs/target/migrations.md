@@ -191,7 +191,7 @@ A web project's `e2e/screenshot.ts` is a config, so sync overwrites it. It now l
 
 The splits created `pointer` and `ux-controls` and trimmed `keyboard`. Sync refreshes only held rules, so a held rule loses bullets and the new file never arrives.
 
-A project holding `a11y.md` adds all three. One holding only `keyboard.md` or `ux-completeness.md` adds the matching rule:
+Add the partner of each held rule: `pointer` for `keyboard.md`, `ux-controls` for `ux-completeness.md`, and all three for `a11y.md`, as below.
 
 ```bash
 canon gov install --add keyboard,pointer,ux-controls --yes .

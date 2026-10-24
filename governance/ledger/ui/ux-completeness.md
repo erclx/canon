@@ -32,11 +32,11 @@ The field is interaction design, and the authorities are the Nielsen Norman Grou
 
 ## Overflow
 
-| Bullet                        | Source                                                                                                                                                                                                                                  | Read       |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Ellipsis over overflow        | [text-overflow](https://developer.mozilla.org/en-US/docs/Web/CSS/text-overflow): `text-overflow: ellipsis` with `overflow: hidden` and `white-space: nowrap` clips text at the box with a visible marker                                | 2026-10-18 |
-| Never `title` alone           | [The title attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/title): "Use of the title attribute is highly problematic for" people using touch-only devices, keyboards, and assistive technology | 2026-10-18 |
-| Focus rings clear of clipping | House choice: a ring cut off by a parent's `overflow` shows on the middle items of a list and vanishes on the first and last, so the focus indicator fails exactly where the list ends                                                  | 2026-10-18 |
+| Bullet                    | Source                                                                                                                                                                                                                                  | Read       |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Ellipsis over overflow    | [text-overflow](https://developer.mozilla.org/en-US/docs/Web/CSS/text-overflow): `text-overflow: ellipsis` with `overflow: hidden` and `white-space: nowrap` clips text at the box with a visible marker                                | 2026-10-18 |
+| Never `title` alone       | [The title attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/title): "Use of the title attribute is highly problematic for" people using touch-only devices, keyboards, and assistive technology | 2026-10-18 |
+| Borders clear of clipping | House choice: a ring cut off by a parent's `overflow` shows on the middle items of a list and vanishes on the first and last, so the focus indicator fails exactly where the list ends                                                  | 2026-10-18 |
 
 ## Declined
 

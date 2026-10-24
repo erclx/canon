@@ -15,7 +15,7 @@ paths:
 - Style focus through the project's one focus ring rather than a per-component focus style.
 - Never set `outline: none` or `outline-none` without a replacement focus indicator in the same rule.
 - Give the focus ring 3:1 contrast against its background in every theme the project ships.
-- Keep the focus ring whole. Inset it with a negative `outline-offset` where an ancestor's `overflow` would clip it, since an outline sits outside the border edge.
+- Keep the focus ring whole. Where an ancestor's `overflow` would clip it, inset it with a negative `outline-offset` or pad the edge items of the list.
 
 ## Keyboard operation
 
