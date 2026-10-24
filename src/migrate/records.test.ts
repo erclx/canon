@@ -521,6 +521,7 @@ describe('planRecordsMove', () => {
         text: 'see .canon/plans/x.md',
         rewritten: 1,
         kept: 0,
+        dropped: 0,
       },
     ])
     expect(plan.rewritten).toBe(1)
@@ -657,6 +658,7 @@ describe('planRecordsMove', () => {
         ].join('\n'),
         rewritten: 1,
         kept: 0,
+        dropped: 0,
       },
     ])
   })
@@ -735,6 +737,7 @@ describe('planRecordsMove', () => {
         ].join('\n'),
         rewritten: 1,
         kept: 0,
+        dropped: 0,
       },
     ])
   })
@@ -769,7 +772,76 @@ describe('planRecordsMove', () => {
         ].join('\n'),
         rewritten: 1,
         kept: 0,
+        dropped: 0,
       },
     ])
+  })
+})
+
+describe('planRecordsMove on the root .gitignore', () => {
+  const plan = (path: string, text: string) =>
+    planRecordsMove(root, [{ path, text }])
+
+  it('should drop a legacy line the .canon/ entry already covers', () => {
+    const result = plan('.gitignore', '.canon/\n.claude/.tmp/\nnode_modules/\n')
+
+    expect(result.entries).toEqual([
+      {
+        path: '.gitignore',
+        text: '.canon/\nnode_modules/\n',
+        rewritten: 0,
+        kept: 0,
+        dropped: 1,
+      },
+    ])
+    expect(result.dropped).toBe(1)
+    expect(result.rewritten).toBe(0)
+  })
+
+  it('should rewrite the same line when .canon/ is not ignored', () => {
+    const result = plan('.gitignore', '.claude/.tmp/\n')
+
+    expect(result.entries[0]).toMatchObject({
+      text: '.canon/tmp/\n',
+      rewritten: 1,
+      dropped: 0,
+    })
+    expect(result.dropped).toBe(0)
+  })
+
+  it('should leave a negated line to rewrite', () => {
+    const result = plan('.gitignore', '.canon/\n!.claude/plans/keep.md\n')
+
+    expect(result.dropped).toBe(0)
+    expect(result.entries[0]?.text).toBe('.canon/\n!.canon/plans/keep.md\n')
+  })
+
+  it('should not drop a line carrying the keep marker', () => {
+    const result = plan(
+      '.gitignore',
+      '.canon/\n.claude/plans/ # canon-keep-record-root\n',
+    )
+
+    expect(result.dropped).toBe(0)
+    expect(result.entries).toEqual([])
+  })
+
+  it('should not drop a line that is only part of an entry', () => {
+    const result = plan('.gitignore', '.canon/\n.claude/plans/*.log\n')
+
+    expect(result.dropped).toBe(0)
+  })
+
+  it('should not drop from a nested .gitignore', () => {
+    const result = plan('web/.gitignore', '.canon/\n.claude/plans/\n')
+
+    expect(result.dropped).toBe(0)
+    expect(result.entries[0]?.text).toBe('.canon/\n.canon/plans/\n')
+  })
+
+  it('should keep CRLF endings and a missing final newline', () => {
+    const result = plan('.gitignore', '.canon/\r\n.claude/plans/\r\nlogs/')
+
+    expect(result.entries[0]?.text).toBe('.canon/\r\nlogs/')
   })
 })

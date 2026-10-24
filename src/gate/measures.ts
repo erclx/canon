@@ -590,10 +590,16 @@ export const recordIdempotence: Measure = async (ctx) => {
   }
 
   const record = parseJson(run.stdout) as
-    | { moves?: unknown; rewritten?: unknown; paths?: unknown }
+    | {
+        moves?: unknown
+        rewritten?: unknown
+        dropped?: unknown
+        paths?: unknown
+      }
     | undefined
   const moves = record?.moves
   const rewritten = record?.rewritten
+  const dropped = typeof record?.dropped === 'number' ? record.dropped : 0
 
   if (!Array.isArray(moves) || typeof rewritten !== 'number') {
     return {
@@ -613,14 +619,14 @@ export const recordIdempotence: Measure = async (ctx) => {
     }
   }
 
-  if (rewritten > 0) {
+  if (rewritten + dropped > 0) {
     return {
       // The payload already names every file, so listing them here is what
       // separates a count a reader has to go and reproduce from a remedy they
       // can act on. A malformed `paths` costs the list and not the finding,
       // since the count above it was read from a field of its own.
       emissions: citedPaths(record).map((path) => warn(path)),
-      failure: `The records are at .canon/ and ${rewritten} citation(s) still name the old root, so a second run of canon migrate records would rewrite them. Repoint each one, or mark it canon-keep-record-root where the sentence has to keep the old spelling.`,
+      failure: `The records are at .canon/ and ${rewritten + dropped} citation(s) still name the old root, so a second run of canon migrate records would rewrite or drop them. Repoint each one, or mark it canon-keep-record-root where the sentence has to keep the old spelling.`,
     }
   }
 
