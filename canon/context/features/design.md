@@ -29,7 +29,7 @@ The skills and docs around the module each own one slice.
 - `claude/skills/design-taste/` owns the layer model, the coherence locks, and grey-boxing, and `governance/rules/ui/design-taste.md` routes rendered-surface and `canon/DESIGN.md` edits to it
 - `assets/brand/mark.svg` is the one authored icon, and the path data in `src/design/render.ts` and the README `mark-accent` pair are static copies nothing compares
 - `examples/design/` owns an intent record for an invented project, with no committed capture
-- `canon design --help` owns the `canon design` flags, and `docs/workflow/visual-design-workflow.md` the tier framework
+- `canon design --help` owns the `canon design` flags, and `docs/workflow/visual-design-workflow.md` the plan, build, and review loop
 
 ## Gotchas
 
