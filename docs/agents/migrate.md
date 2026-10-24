@@ -38,6 +38,12 @@ kind: reference
 
 `status` runs each verb as a dry run and exits 2 while any is pending, with a refusal outranking that. Each entry's `verb` carries the flags its dry run used, so append `--write` to it. A clean entry can turn pending once an earlier one applies, so run it again after each `--write`.
 
+`status --json` also carries `retiredCallers`, the project calls to a verb a release retired.
+
+- Each entry has `file`, `line`, `verb`, `release`, and `movedTo`
+- The scan reads the workflow folder, the `package.json` scripts, `scripts/`, and the files those name, matching a command line or an argument list and never prose
+- A caller changes no exit code, since no `--write` fixes one, so edit the script by hand
+
 Three markers keep an old spelling on a line. Each also covers the nearest non-blank line, below it for `canon-keep-record-root` and above it for `canon-keep-surface-root`.
 
 | Marker                    | Keeps                                          |

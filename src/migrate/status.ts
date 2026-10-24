@@ -1,4 +1,5 @@
 import type { RunCommand } from '@/gate/measures'
+import { type RetiredCaller, scanRetiredCallers } from '@/migrate/callers'
 
 interface Migration {
   readonly name: string
@@ -38,6 +39,8 @@ export interface StatusReport {
   readonly migrations: readonly MigrationStatus[]
   readonly pending: number
   readonly refused: number
+  /** Project calls to a retired verb. Reported only, since no `--write` fixes one. */
+  readonly retiredCallers: readonly RetiredCaller[]
 }
 
 function parseRecord(stdout: string): unknown {
@@ -111,14 +114,19 @@ async function readOne(
  * subcommand shares: 0 with nothing to move, 2 with a plan and no `--write`,
  * anything else a refusal. It never passes `--write`, and it reads no count,
  * since the records share no field to count from.
+ * A retired caller is listed beside them and never changes the exit, since
+ * exit 2 means the pending verbs can be run.
  */
 export async function readMigrationStatus(
   run: RunCommand,
+  root?: string,
 ): Promise<StatusReport> {
-  const migrations = await Promise.all(
-    MIGRATIONS.map((migration) => readOne(run, migration)),
-  )
+  const [migrations, retiredCallers] = await Promise.all([
+    Promise.all(MIGRATIONS.map((migration) => readOne(run, migration))),
+    root === undefined ? [] : scanRetiredCallers(root),
+  ])
   return {
+    retiredCallers,
     migrations,
     pending: migrations.filter((m) => m.state === 'pending').length,
     refused: migrations.filter((m) => m.state === 'refused').length,
