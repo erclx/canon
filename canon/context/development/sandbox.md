@@ -62,6 +62,7 @@ Owns the runner behind `canon sandbox run <cat:cmd> "<prompt>" [scenario]`.
 The state and the remote a run touches sit outside the repository.
 
 - `$XDG_STATE_HOME/canon/sandbox-<run-id>` owns the provisioned project, one tree per process, which `CANON_SANDBOX_DIR` overrides
+- `.gitignore` keeps `.sandbox/` for a tree an older checkout left in the repository, or one `CANON_SANDBOX_DIR` pointed inside it
 - `${GITHUB_ORG}/canon-sandbox` owns the disposable remote, which each anchor scenario resets by closing its PRs, deleting its branches, and force-pushing a fresh `main`
 - `canon sandbox check --help` owns the verb flags and the verdict states, and the `expect.toml` files under `sandbox/` show every key
 
