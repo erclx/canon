@@ -1,0 +1,31 @@
+# What a correct `/canon:document-health` run leaves behind on the health fixture.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block. A bare key below
+# one belongs to that table in TOML and silently asserts nothing.
+#
+# The skill reports and repairs nothing, so the assertions pin what stays put
+# and what the reply names. The seeded overview sentence and the seeded stale
+# path surviving means neither seeded document was rewritten.
+#
+# No `write_scope` is declared. The checker skips an empty scope, so an empty
+# list would assert nothing, and a run writing a new file is not caught here.
+
+paths = ["docs/overview.md", "canon/context/api.md"]
+
+reply = ["src/auth", "auth.md"]
+
+manual = [
+  "The doubled finding proposes auth.md as the owner. Semantic: the reply naming both strings does not say which one owns the folder, and the owner follows from which entry holds the area's trap.",
+  "Length findings on docs/overview.md read as measured and the staleness findings on api.md read as read. Semantic: the label is wording.",
+  "The structure line proposes splitting pipeline.md by its Ingest, Transform, and Publish headings. Semantic: wording.",
+]
+
+[[content]]
+path = "docs/overview.md"
+pattern = 'The caching is deliberate and it is the reason the development server watches'
+
+[[content]]
+path = "canon/context/api.md"
+pattern = '`src/api/serialize\.ts` converts a domain record into a wire payload'

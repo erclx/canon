@@ -1,0 +1,20 @@
+---
+title: Auth
+description: Session lifetime and the token check
+---
+
+# Auth
+
+## Overview
+
+Owns session lifetime and the token check that runs before a handler.
+
+## Layout
+
+### `src/auth`
+
+Holds the session module, where `src/auth/session.ts` sets the session lifetime.
+
+## Gotchas
+
+- A session outlives its token by the lifetime in `src/auth/session.ts`, so a revoked token still reads as signed in until the session expires
