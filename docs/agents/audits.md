@@ -57,7 +57,7 @@ An audit that finds no corpus reports `absent`, which moves neither the verdict 
 
 **In `bun run check`.**
 
-`bun run check` runs `--corpus tracked --corpus per-machine` as a reporting stage after the gating stages, and never fails on it. `summary` is a flat object of unique scalar keys that a shell stage greps without a JSON parser. `deps` runs weekly instead.
+`bun run check` runs `--corpus tracked --corpus per-machine` as a reporting stage after the gating stages, and never fails on it. `summary` is a flat object of unique scalar keys that a shell stage greps without a JSON parser. `deps` runs weekly instead. Each audit runs as the CLI the caller is running, never a global `canon`.
 
 **Catalog.**
 
