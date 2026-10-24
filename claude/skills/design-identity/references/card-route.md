@@ -21,11 +21,11 @@ Check for a `card.config.mjs` with a `card-src/pages/og-card.astro` beside it. W
 
 ```plaintext
 No card route installed, so the card shipped as a PNG this run.
-`canon tooling sync astro . --write` installs the route, and it replaces every other
-golden config in the astro stack, so run it when you mean to sync the stack.
+`canon tooling sync astro . --write` installs the route, and it writes the astro
+stack's new and stale configs, so run it when you mean to sync the stack.
 ```
 
-Never run that sync to obtain the route, since it copies the whole stack over the project's own framework, lint, typescript, and test configs. Never hand-write the scaffold either, since a copy written here drifts from the one the stack maintains.
+Never run that sync to obtain the route, since it writes the stack's configs beside the project's own framework, lint, typescript, and test configs, holding only the ones the project edited. Never hand-write the scaffold either, since a copy written here drifts from the one the stack maintains.
 
 ## Writing and capturing the route
 

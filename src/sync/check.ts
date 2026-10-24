@@ -105,8 +105,13 @@ export interface UpstreamCommit {
 }
 
 /** Pending changes per category, from the same scan `canon tooling sync` reads. */
+/**
+ * `customized` counts a customization whose golden copy moved, which no write
+ * touches, so a caller points at `canon tooling lift` rather than `--write`.
+ */
 export interface ToolingCounts {
   readonly configs: number
+  readonly customized: number
   readonly seeds: number
   readonly scripts: number
   readonly deps: number
@@ -137,6 +142,7 @@ const UNMEASURED_TOOLING: ToolingReport = {
   chain: [],
   counts: {
     configs: 0,
+    customized: 0,
     seeds: 0,
     scripts: 0,
     deps: 0,
@@ -257,6 +263,8 @@ export function buildToolingReport(
     counts: {
       configs: result.configs.filter((entry) => entry.state !== 'matching')
         .length,
+      customized: result.dispositions.filter((entry) => entry.moved === true)
+        .length,
       seeds: result.seeds.filter((entry) => entry.state === 'missing').length,
       scripts: result.scripts.filter((entry) => entry.state !== 'matching')
         .length,
@@ -275,7 +283,7 @@ export function buildToolingReport(
  * skipped stack still shipped. The re-resolution is kept only when its whole
  * stacks are exactly the recorded ones.
  */
-function resolveRecorded(
+export function resolveRecorded(
   toolkitRoot: string,
   recorded: readonly string[],
 ): Manifest[] {

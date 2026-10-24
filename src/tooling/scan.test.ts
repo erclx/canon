@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gitEnv } from '@/git/env'
+import { hashContent, stampPath } from '@/sync/stamp'
 import type { Manifest } from '@/tooling/manifest'
 import { scan } from '@/tooling/scan'
 
@@ -349,5 +350,182 @@ describe('scan in a subfolder', () => {
     const result = scan([webManifest()], target())
 
     expect(result.withheld).toEqual([])
+  })
+})
+
+describe('scan cause on a drifted config', () => {
+  function recorded(dir: string, files: Record<string, string>): void {
+    seedFile(
+      stampPath(dir),
+      JSON.stringify({
+        covers: ['tooling'],
+        domains: { tooling: { syncedAt: 'then', files, chain: ['base'] } },
+      }),
+    )
+  }
+
+  function drifted(dir: string): ReturnType<typeof scan>['configs'][number] {
+    const manifest = makeManifest('base')
+    seedFile(join(manifest.configsDir, '.editorconfig'), 'root = true\n')
+    return scan([manifest], dir).configs[0]
+  }
+
+  it('should read a copy still at the recorded hash as stale', () => {
+    const dir = target()
+    seedFile(join(dir, '.editorconfig'), 'older golden\n')
+    recorded(dir, { '.editorconfig': hashContent('older golden\n') })
+
+    expect(drifted(dir)).toMatchObject({ state: 'drifted', cause: 'stale' })
+  })
+
+  it('should read a copy off the recorded hash as edited', () => {
+    const dir = target()
+    seedFile(join(dir, '.editorconfig'), 'mine\n')
+    recorded(dir, { '.editorconfig': hashContent('older golden\n') })
+
+    expect(drifted(dir)).toMatchObject({ state: 'drifted', cause: 'edited' })
+  })
+
+  it('should read a copy with no recorded hash as unattributed', () => {
+    const dir = target()
+    seedFile(join(dir, '.editorconfig'), 'mine\n')
+
+    expect(drifted(dir)).toMatchObject({
+      state: 'drifted',
+      cause: 'unattributed',
+    })
+  })
+
+  it('should give a matching config no cause', () => {
+    const dir = target()
+    seedFile(join(dir, '.editorconfig'), 'root = true\n')
+
+    expect(drifted(dir)).not.toHaveProperty('cause')
+  })
+})
+
+describe('scan with dispositions', () => {
+  const WORKFLOW = '.github/workflows/ci.yml'
+
+  function hold(dir: string, dispositions: Record<string, unknown>): void {
+    seedFile(
+      stampPath(dir),
+      JSON.stringify({
+        covers: ['tooling'],
+        domains: {
+          tooling: {
+            syncedAt: 'then',
+            files: {},
+            chain: ['web'],
+            dispositions,
+          },
+        },
+      }),
+    )
+  }
+
+  function webManifest(): Manifest {
+    const manifest = makeManifest('web')
+    seedFile(join(manifest.configsDir, WORKFLOW), 'on: push\n')
+    seedFile(join(manifest.configsDir, '.editorconfig'), 'root = true\n')
+    seedFile(join(manifest.seedsDir, 'notes/stack.md'), 'vite\n')
+    return manifest
+  }
+
+  it('should move a declined config the target deleted out of configs', () => {
+    const dir = target()
+    hold(dir, { [WORKFLOW]: { disposition: 'declined' } })
+
+    const result = scan([webManifest()], dir)
+
+    expect(result.configs.map((entry) => entry.rel)).toEqual(['.editorconfig'])
+    expect(result.dispositions).toEqual([
+      {
+        rel: WORKFLOW,
+        stack: 'web',
+        kind: 'config',
+        disposition: 'declined',
+        present: false,
+      },
+    ])
+  })
+
+  it('should keep a declined config out of the total', () => {
+    const dir = target()
+    hold(dir, { [WORKFLOW]: { disposition: 'declined' } })
+
+    expect(scan([webManifest()], dir).totalChanges).toBe(2)
+  })
+
+  it('should list a declined config the project still holds as present', () => {
+    const dir = target()
+    seedFile(join(dir, WORKFLOW), 'on: pull_request\n')
+    hold(dir, { [WORKFLOW]: { disposition: 'declined' } })
+
+    expect(scan([webManifest()], dir).dispositions[0]?.present).toBe(true)
+  })
+
+  it('should move a declined seed out of seeds', () => {
+    const dir = target()
+    hold(dir, { 'notes/stack.md': { disposition: 'declined' } })
+
+    const result = scan([webManifest()], dir)
+
+    expect(result.seeds).toEqual([])
+    expect(result.dispositions[0]).toMatchObject({
+      rel: 'notes/stack.md',
+      kind: 'seed',
+      present: false,
+    })
+  })
+
+  it('should not count a customized config whose golden is unchanged', () => {
+    const dir = target()
+    seedFile(join(dir, WORKFLOW), 'on: [push, pull_request]\n')
+    hold(dir, {
+      [WORKFLOW]: {
+        disposition: 'customized',
+        base: hashContent('on: push\n'),
+      },
+    })
+
+    const result = scan([webManifest()], dir)
+
+    expect(result.dispositions[0]).toMatchObject({
+      disposition: 'customized',
+      moved: false,
+    })
+    expect(result.totalChanges).toBe(2)
+  })
+
+  it('should mark and count a customized config whose golden moved', () => {
+    const dir = target()
+    seedFile(join(dir, WORKFLOW), 'on: [push, pull_request]\n')
+    hold(dir, {
+      [WORKFLOW]: { disposition: 'customized', base: hashContent('older\n') },
+    })
+
+    const result = scan([webManifest()], dir)
+
+    expect(result.dispositions[0]?.moved).toBe(true)
+    expect(result.totalChanges).toBe(3)
+  })
+
+  it('should list a declined .github path in a subfolder once, as declined', () => {
+    const repo = join(root, 'repo')
+    mkdirSync(repo, { recursive: true })
+    spawnSync('git', ['init', '-q', repo], { env: gitEnv() })
+    const sub = join(repo, 'web')
+    mkdirSync(sub)
+    hold(sub, { [WORKFLOW]: { disposition: 'declined' } })
+
+    const result = scan([webManifest()], sub)
+
+    expect(result.withheld).toEqual([])
+    expect(result.dispositions.map((entry) => entry.rel)).toEqual([WORKFLOW])
+  })
+
+  it('should list nothing held when the target has no stamp', () => {
+    expect(scan([webManifest()], target()).dispositions).toEqual([])
   })
 })

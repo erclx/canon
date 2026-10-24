@@ -11,6 +11,7 @@ import {
 } from '@/tooling/inject'
 import { buildStackSummaries, describeStack } from '@/tooling/list'
 import {
+  configFiles,
   isStackExcluded,
   listStacks,
   loadManifest,
@@ -23,6 +24,16 @@ import {
   renderStackSections,
   resolveReference,
 } from '@/tooling/read'
+import { resolveRecorded } from '@/sync/check'
+import { readStamp, stampedChain, writeDispositions } from '@/sync/stamp'
+import {
+  customize,
+  decline,
+  lift,
+  normalizeGoldenPath,
+  readDispositions,
+  resolveGolden,
+} from '@/tooling/disposition'
 import { scan, type ScanResult } from '@/tooling/scan'
 import { recordToolingChain } from '@/tooling/stamp'
 import { subfolderPath } from '@/tooling/subfolder'
@@ -44,13 +55,25 @@ interface SyncOptions {
   readonly skip?: string
   readonly check?: boolean
   readonly write?: boolean
+  readonly replace?: readonly string[]
   readonly diff?: { readonly json: boolean }
+}
+
+function collect(value: string, previous: readonly string[]): string[] {
+  return [...previous, value]
 }
 
 interface DiffOptions {
   readonly skip?: string
   readonly json?: boolean
 }
+
+interface DispositionOptions {
+  readonly reason?: string
+  readonly json?: boolean
+}
+
+type DispositionAction = 'decline' | 'customize' | 'lift'
 
 interface InjectOptions {
   readonly configs?: boolean
@@ -94,6 +117,12 @@ export function register(program: Command): void {
       'Report what would change and write nothing, always exiting 0. Prefer `canon tooling diff`',
     )
     .option('--write', 'Apply every change without prompting')
+    .option(
+      '--replace <path>',
+      'Replace a held config with the golden copy (repeatable)',
+      collect,
+      [],
+    )
     .addHelpText(
       'after',
       [
@@ -102,6 +131,7 @@ export function register(program: Command): void {
         '  canon tooling sync base',
         '  canon tooling sync base --check',
         '  canon tooling sync base --write',
+        '  canon tooling sync base --write --replace .oxfmtrc.json',
         '  canon tooling sync vite-react web --skip base',
         '',
         'A target below its git root syncs as a subfolder. It withholds',
@@ -115,8 +145,15 @@ export function register(program: Command): void {
         'what `canon sync --check --exit-code` spells with a flag. Pass --check',
         'to report the same list and always exit 0.',
         '',
-        '--write replaces every golden config that differs from the stack.',
+        '--write replaces a golden config only when canon changed it and the',
+        'project did not, which the hash the last write recorded tells apart.',
+        'A config the project edited, or one written before hashes were',
+        'recorded, is held and listed. Name it with --replace to take the',
+        'golden copy, or run `canon tooling customize <path>` to keep yours.',
+        'A config no recorded stack ships is a first install and never held,',
+        'so a fresh scaffold takes every golden config of a stack new to it.',
         'Seeds are copy-once, so a seed the target already holds is left alone.',
+        'A declined or customized path is never written.',
         '',
         'Exit codes:',
         '  0  synced, up to date, cancelled, or run with --check',
@@ -166,6 +203,88 @@ export function register(program: Command): void {
         })
       },
     )
+
+  const dispositionHelp = [
+    '',
+    '<path> is relative to the target, as `canon tooling diff` lists it, and',
+    'resolves against the chain the last sync recorded. These verbs are the',
+    'only writers of the record, kept under domains.tooling.dispositions in',
+    'canon/config/config.json. Nothing here deletes or edits the file itself.',
+    '',
+    'Exit codes:',
+    '  0  recorded',
+    '  1  refused: no-chain, bad-path, not-golden, already-held,',
+    '     seed-not-customizable, missing-file, not-held, or toolkit-root',
+    '',
+  ]
+
+  tooling
+    .command('decline')
+    .description('Keep sync and inject from ever writing one golden file')
+    .argument('<path>', 'Golden file path, relative to the target')
+    .argument('[target]', 'Target directory', '.')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--reason <text>', 'Record why the project declined it')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        ...dispositionHelp,
+        'Examples:',
+        '  canon tooling decline .github/workflows/readme-screenshot.yml',
+        '  canon tooling decline .oxlintrc.json web --reason "lint runs in CI only"',
+        '',
+      ].join('\n'),
+    )
+    .action(async (path: string, target: string, opts: DispositionOptions) => {
+      process.exitCode = await runDisposition('decline', path, target, opts)
+    })
+
+  tooling
+    .command('customize')
+    .description(
+      'Keep the project copy of one golden config through every write',
+    )
+    .argument('<path>', 'Golden config path, relative to the target')
+    .argument('[target]', 'Target directory', '.')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        ...dispositionHelp,
+        'The golden hash is recorded, so `canon tooling diff` exits 1 once the',
+        'stack ships a different copy. A seed cannot be customized, since sync',
+        'never overwrites one.',
+        '',
+        'Examples:',
+        '  canon tooling customize e2e/home.spec.ts',
+        '',
+      ].join('\n'),
+    )
+    .action(async (path: string, target: string, opts: DispositionOptions) => {
+      process.exitCode = await runDisposition('customize', path, target, opts)
+    })
+
+  tooling
+    .command('lift')
+    .description('Hand a declined or customized file back to sync')
+    .argument('<path>', 'Golden file path, relative to the target')
+    .argument('[target]', 'Target directory', '.')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        ...dispositionHelp,
+        'Examples:',
+        '  canon tooling lift .github/workflows/readme-screenshot.yml',
+        '',
+      ].join('\n'),
+    )
+    .action(async (path: string, target: string, opts: DispositionOptions) => {
+      process.exitCode = await runDisposition('lift', path, target, opts)
+    })
 
   tooling
     .command('inject')
@@ -380,7 +499,7 @@ async function runSync(
 
   if (opts.check === true && opts.write === true) {
     return refuse(
-      opts,
+      opts.diff?.json,
       'conflicting-flags',
       'Pass --check or --write, not both.',
     )
@@ -388,21 +507,36 @@ async function runSync(
 
   const selected = stack ?? (await promptForStack())
   if (selected === undefined) {
-    return refuse(opts, 'no-stacks', 'No tooling stacks found')
+    return refuse(opts.diff?.json, 'no-stacks', 'No tooling stacks found')
   }
 
   if (isStackExcluded(selected)) {
     return refuse(
-      opts,
+      opts.diff?.json,
       'excluded-stack',
       'Claude is managed by `canon claude`, not `canon tooling`. Run `canon claude sync` instead.',
     )
   }
 
   const prepared = prepare(selected, target, opts.skip)
-  if (!prepared.ok) return refuse(opts, prepared.reason, prepared.error)
+  if (!prepared.ok)
+    return refuse(opts.diff?.json, prepared.reason, prepared.error)
 
   const result = scan(prepared.chain, prepared.target)
+
+  const replace = (opts.replace ?? []).map(
+    (input) => normalizeGoldenPath(input) ?? input,
+  )
+  const unknown = replace.filter(
+    (rel) => !result.configs.some((entry) => entry.rel === rel),
+  )
+  if (unknown.length > 0) {
+    return refuse(
+      opts.diff?.json,
+      'unknown-replace',
+      `--replace names no config this chain writes: ${unknown.join(', ')}`,
+    )
+  }
 
   report(result, prepared.target)
 
@@ -442,15 +576,16 @@ async function runSync(
     return decision === 'unauthorized' ? 1 : 0
   }
 
+  const held = heldConfigs(result, replace, prepared.chain, prepared.target)
   if (result.configs.some((entry) => entry.state !== 'matching')) {
-    await injectConfigs(prepared.chain, prepared.target)
+    await injectConfigs(prepared.chain, prepared.target, new Set(held))
   }
 
   await injectSeeds(prepared.chain, prepared.target)
   const manifest = await injectManifest(prepared.chain, prepared.target)
   if (!manifest.ok) {
     return refuse(
-      opts,
+      false,
       manifest.reason,
       `${manifest.message}\nConfigs and seeds above were written. Scripts, gitignore entries, and the stamp were not, so the next sync retries.`,
     )
@@ -458,8 +593,72 @@ async function runSync(
 
   await stampChain(prepared.chain, prepared.target)
 
+  if (held.length > 0) {
+    reportHeld(held, selected, target, opts.skip)
+  }
+
   outroSuccess('Tooling sync complete')
   return 0
+}
+
+/**
+ * A drifted config the project edited, or one no write recorded, is held
+ * rather than replaced, since a write naming a stack is not consent to lose an
+ * edit inside it. Only a path `--replace` names is taken over.
+ *
+ * A path no recorded stack ships is a first install of that stack, so it is
+ * never held. `canon init` records `base` before a framework stack syncs over
+ * a fresh scaffold, whose own copies of that stack's configs came from the
+ * scaffold rather than from a project edit.
+ */
+function heldConfigs(
+  result: ScanResult,
+  replace: readonly string[],
+  chain: readonly Manifest[],
+  target: string,
+): string[] {
+  const recorded = new Set(stampedChain(readStamp(target), 'tooling'))
+  const installed = new Set(
+    chain
+      .filter((manifest) => recorded.has(manifest.name))
+      .flatMap(configFiles),
+  )
+
+  return result.configs
+    .filter(
+      (entry) =>
+        entry.state === 'drifted' &&
+        entry.cause !== 'stale' &&
+        installed.has(entry.rel) &&
+        !replace.includes(entry.rel),
+    )
+    .map((entry) => entry.rel)
+}
+
+/**
+ * Names every held path in one copyable command, so taking the first run's
+ * unattributed holds costs one paste rather than one flag per path typed.
+ */
+function reportHeld(
+  held: readonly string[],
+  stack: string,
+  target: string,
+  skip: string | undefined,
+): void {
+  logStep('Held')
+  for (const rel of held) logWarn(rel)
+  logInfo(
+    'The project changed these, or no earlier write recorded them, so --write left them as they are. Keep one with `canon tooling customize <path>`, or take the golden copies with:',
+  )
+  const command = [
+    'canon tooling sync',
+    stack,
+    target,
+    ...(skip === undefined ? [] : ['--skip', skip]),
+    '--write',
+    ...held.flatMap((rel) => ['--replace', rel]),
+  ]
+  logInfo(command.join(' '))
 }
 
 /**
@@ -467,13 +666,95 @@ async function runSync(
  * wrapper can flatten the status. Every refusal therefore answers with a reason
  * on stdout under `--json`, beside the exit 1 that keeps a gate failing.
  */
-function refuse(opts: SyncOptions, reason: string, message: string): number {
+function refuse(
+  json: boolean | undefined,
+  reason: string,
+  message: string,
+): number {
   logWarn(message)
-  if (opts.diff?.json) {
+  if (json === true) {
     process.stdout.write(`${JSON.stringify({ ok: false, reason, message })}\n`)
   }
   outro()
   return 1
+}
+
+/**
+ * Resolves the path against the chain the last sync recorded rather than a
+ * stack argument, since a disposition belongs to the path whichever stack
+ * ships it. An unstamped target has no chain to resolve against and refuses.
+ */
+async function runDisposition(
+  action: DispositionAction,
+  input: string,
+  target: string,
+  opts: DispositionOptions,
+): Promise<number> {
+  intro(`canon tooling ${action}`)
+
+  const resolved = resolve(target)
+  if (resolved === PROJECT_ROOT) {
+    return refuse(
+      opts.json,
+      'toolkit-root',
+      'Cannot run against toolkit root. Files here are the source of truth.',
+    )
+  }
+
+  const rel = normalizeGoldenPath(input)
+  if (rel === undefined) {
+    return refuse(
+      opts.json,
+      'bad-path',
+      `${input} is not a path inside the target. Pass it relative to the target.`,
+    )
+  }
+
+  const chain = resolveRecorded(
+    PROJECT_ROOT,
+    stampedChain(readStamp(resolved), 'tooling'),
+  )
+  if (chain.length === 0) {
+    return refuse(
+      opts.json,
+      'no-chain',
+      `No tooling chain is recorded in ${resolved}. Run \`canon tooling sync <stack>\` there first.`,
+    )
+  }
+
+  const current = readDispositions(resolved)
+  const golden = resolveGolden(chain, rel)
+  const transition =
+    action === 'decline'
+      ? decline(current, golden, opts.reason)
+      : action === 'customize'
+        ? customize(current, golden, existsSync(join(resolved, rel)))
+        : lift(current, rel)
+
+  if (!transition.ok) {
+    return refuse(opts.json, transition.reason, transition.message)
+  }
+
+  await writeDispositions(
+    resolved,
+    { domain: 'tooling', toolkitRoot: PROJECT_ROOT },
+    transition.dispositions,
+    new Date(),
+  )
+
+  const entry = transition.dispositions[rel]
+  if (opts.json === true) {
+    process.stdout.write(
+      `${JSON.stringify({ ok: true, action, path: rel, ...(entry === undefined ? {} : { entry }) })}\n`,
+    )
+  }
+
+  outroSuccess(
+    entry === undefined
+      ? `Lifted ${rel}. The next sync writes it again.`
+      : `Recorded ${rel} as ${entry.disposition}. Sync and inject skip it.`,
+  )
+  return 0
 }
 
 type WriteMode = 'apply' | 'prompt' | 'report' | 'unauthorized'
@@ -629,13 +910,18 @@ function report(result: ScanResult, target: string): void {
     if (entry.state === 'matching') logInfo(entry.rel)
   }
   for (const entry of result.configs) {
-    if (entry.state === 'drifted') logWarn(entry.rel)
+    if (entry.state === 'drifted') {
+      logWarn(
+        entry.cause === 'stale' ? entry.rel : `${entry.rel} (${entry.cause})`,
+      )
+    }
   }
   for (const entry of result.configs) {
     if (entry.state === 'new') logAdd(entry.rel)
   }
 
   if (result.withheld.length > 0) reportWithheld(result, target)
+  reportDispositions(result)
 
   logStep('Scanning seeds')
   for (const entry of result.seeds) {
@@ -681,6 +967,35 @@ function reportWithheld(result: ScanResult, target: string): void {
   logInfo(`working-directory: ${subfolderPath(target) ?? '.'}`)
 }
 
+function reportDispositions(result: ScanResult): void {
+  const declined = result.dispositions.filter(
+    (entry) => entry.disposition === 'declined',
+  )
+  const customized = result.dispositions.filter(
+    (entry) => entry.disposition === 'customized',
+  )
+
+  if (declined.length > 0) {
+    logStep('Declined')
+    for (const entry of declined) {
+      logInfo(entry.present ? `${entry.rel} (still here)` : entry.rel)
+    }
+  }
+
+  if (customized.length > 0) {
+    logStep('Customized')
+    for (const entry of customized) {
+      if (entry.moved === true) {
+        logWarn(
+          `${entry.rel}: the ${entry.stack} golden changed since it was customized. Run \`canon tooling lift ${entry.rel}\` to take the new copy on the next write, or lift and customize again to keep this one.`,
+        )
+      } else {
+        logInfo(entry.rel)
+      }
+    }
+  }
+}
+
 function reportPackage(result: ScanResult): void {
   if (result.scripts.length > 0) {
     logStep('Scanning scripts')
@@ -716,6 +1031,10 @@ function summarize(result: ScanResult): string {
   add(
     result.configs.filter((entry) => entry.state !== 'matching').length,
     'configs',
+  )
+  add(
+    result.dispositions.filter((entry) => entry.moved === true).length,
+    'moved customized',
   )
   add(result.seeds.filter((entry) => entry.state === 'missing').length, 'seeds')
   add(

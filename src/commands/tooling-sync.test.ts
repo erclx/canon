@@ -11,7 +11,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { seedPackage } from '@/process/seeded-package'
-import { stampPath } from '@/sync/stamp'
+import { hashContent, stampPath } from '@/sync/stamp'
 
 const CLI = join(import.meta.dirname, '../cli.ts')
 const GOLDEN = '.oxfmtrc.json'
@@ -93,7 +93,7 @@ describe('tooling sync write authorization', () => {
     expect(sync([]).stderr).toContain(GOLDEN)
   })
 
-  it('should replace the same local edit once --write is passed', () => {
+  it('should replace the same local edit once --write is passed on a first install', () => {
     sync(['--write'])
 
     expect(goldenContent()).not.toBe(LOCAL_EDIT)
@@ -472,5 +472,111 @@ describe('tooling sync and inject over a registry that refuses the install', () 
     expect(run.status).toBe(1)
     expect(run.stderr).toContain('Install failed. Tried:')
     expect(existsSync(stampPath(target))).toBe(false)
+  })
+})
+
+describe('tooling sync --write hold', () => {
+  const OLDER_GOLDEN = '{ "older": "golden" }\n'
+
+  // A record with a chain and no hashes is what every target synced before
+  // hashes existed carries, so the local edit reads unattributed.
+  beforeEach(() => {
+    mkdirSync(join(target, 'canon', 'config'), { recursive: true })
+    writeFileSync(
+      stampPath(target),
+      JSON.stringify({
+        covers: ['tooling'],
+        domains: { tooling: { syncedAt: 'then', files: {}, chain: ['base'] } },
+      }),
+    )
+  })
+
+  /** Records a clean write, then rolls the record back as if canon moved. */
+  const recordOlderGolden = (): void => {
+    sync(['--write', '--replace', GOLDEN])
+    writeFileSync(join(target, GOLDEN), OLDER_GOLDEN)
+    const path = stampPath(target)
+    const stamp = JSON.parse(readFileSync(path, 'utf8'))
+    stamp.domains.tooling.files[GOLDEN] = hashContent(OLDER_GOLDEN)
+    writeFileSync(path, JSON.stringify(stamp))
+  }
+
+  it('should hold a local edit no write recorded', () => {
+    sync(['--write'])
+
+    expect(goldenContent()).toBe(LOCAL_EDIT)
+  })
+
+  it('should replace the same local edit once --replace names it', () => {
+    sync(['--write', '--replace', GOLDEN])
+
+    expect(goldenContent()).not.toBe(LOCAL_EDIT)
+  })
+
+  it('should take a config only a stack new to the record ships, as after canon init', () => {
+    const WEB_ONLY = '.oxlintrc.json'
+    writeFileSync(join(target, WEB_ONLY), '{ "scaffold": true }\n')
+    seedPackage(target, 'web')
+
+    spawnSync('bun', [CLI, 'tooling', 'sync', 'web', target, '--write'], {
+      encoding: 'utf8',
+      env: buildEnv(),
+    })
+
+    expect(readFileSync(join(target, WEB_ONLY), 'utf8')).not.toBe(
+      '{ "scaffold": true }\n',
+    )
+    expect(goldenContent()).toBe(LOCAL_EDIT)
+  })
+
+  it('should name the held path with a copyable --replace command', () => {
+    const run = sync(['--write'])
+
+    expect(run.stderr).toContain(`--write --replace ${GOLDEN}`)
+  })
+
+  it('should exit 0 from the write that held', () => {
+    expect(sync(['--write']).status).toBe(0)
+  })
+
+  it('should still exit 1 headlessly when the only drift is held', () => {
+    sync(['--write'])
+
+    expect(sync([]).status).toBe(1)
+  })
+
+  it('should read the held path as unattributed under diff --json', () => {
+    const record = JSON.parse(diff(['--json']).stdout ?? '')
+
+    expect(record.configs).toContainEqual({
+      rel: GOLDEN,
+      stack: 'base',
+      state: 'drifted',
+      cause: 'unattributed',
+    })
+  })
+
+  it('should replace a stale config, which canon moved and the project did not', () => {
+    recordOlderGolden()
+
+    sync(['--write'])
+
+    expect(goldenContent()).not.toBe(OLDER_GOLDEN)
+  })
+
+  it('should hold a config edited after a recorded write', () => {
+    sync(['--write', '--replace', GOLDEN])
+    writeFileSync(join(target, GOLDEN), LOCAL_EDIT)
+
+    sync(['--write'])
+
+    expect(goldenContent()).toBe(LOCAL_EDIT)
+  })
+
+  it('should refuse a --replace naming no config the chain writes', () => {
+    const run = sync(['--write', '--replace', 'nope.json'])
+
+    expect(run.status).toBe(1)
+    expect(run.stderr).toContain('nope.json')
   })
 })

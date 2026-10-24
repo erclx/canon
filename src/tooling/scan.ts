@@ -1,6 +1,13 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { resolveSurfacePath } from '@/roots/surface'
+import {
+  type Disposition,
+  hashFile,
+  readStamp,
+  stampedDispositions,
+  stampedHashes,
+} from '@/sync/stamp'
 import { mergeSections } from '@/tooling/gitignore'
 import {
   ancestorsFirst,
@@ -19,10 +26,14 @@ import {
 } from '@/tooling/package'
 import { isSubfolderTarget, isWithheldInSubfolder } from '@/tooling/subfolder'
 
+export type DriftCause = 'stale' | 'edited' | 'unattributed'
+
+/** `cause` is set on a drifted config alone. */
 export interface ConfigState {
   readonly rel: string
   readonly stack: string
   readonly state: 'new' | 'drifted' | 'matching'
+  readonly cause?: DriftCause
 }
 
 export interface SeedState {
@@ -41,9 +52,24 @@ export interface WithheldState {
   readonly present: boolean
 }
 
+/**
+ * A golden file the project declined or customized, which every write skips.
+ * `moved` is set on a customized config alone, true once the golden copy no
+ * longer hashes to the one the project took.
+ */
+export interface DispositionState {
+  readonly rel: string
+  readonly stack: string
+  readonly kind: 'config' | 'seed'
+  readonly disposition: Disposition
+  readonly present: boolean
+  readonly moved?: boolean
+}
+
 export interface ScanResult {
   readonly configs: readonly ConfigState[]
   readonly withheld: readonly WithheldState[]
+  readonly dispositions: readonly DispositionState[]
   readonly seeds: readonly SeedState[]
   readonly scripts: readonly ScriptState[]
   readonly deps: readonly DepState[]
@@ -51,6 +77,17 @@ export interface ScanResult {
   readonly hasPackageJson: boolean
   readonly newManifest: boolean
   readonly totalChanges: number
+}
+
+/**
+ * Why a drifted config differs, which decides whether a write may replace it.
+ * A copy still at the hash the last write recorded is `stale`, since canon
+ * moved and the project did not. A copy off it is `edited`, and a copy with no
+ * recorded hash is `unattributed`, since nothing says who changed it.
+ */
+function driftCause(recorded: string | undefined, dest: string): DriftCause {
+  if (recorded === undefined) return 'unattributed'
+  return hashFile(dest) === recorded ? 'stale' : 'edited'
 }
 
 function isIdentical(a: string, b: string): boolean {
@@ -72,11 +109,19 @@ function isIdentical(a: string, b: string): boolean {
  * GitHub reads only at the root moves to `withheld` and counts as no change.
  * The scope is read here so every caller of `scan` agrees without passing a
  * flag.
+ *
+ * A path the project declined or customized moves to `dispositions` ahead of
+ * the subfolder test, so it is listed once. The record is read here for the
+ * same reason as the scope.
  */
 export function scan(chain: readonly Manifest[], target: string): ScanResult {
   const isSubfolder = isSubfolderTarget(target)
+  const stamp = readStamp(target)
+  const held = stampedDispositions(stamp, 'tooling')
+  const recorded = stampedHashes(stamp, 'tooling')
   const configs: ConfigState[] = []
   const withheld: WithheldState[] = []
+  const dispositions: DispositionState[] = []
   const seenConfigs = new Set<string>()
 
   for (const manifest of chain) {
@@ -87,18 +132,38 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
       const source = join(manifest.configsDir, rel)
       const dest = join(target, rel)
 
+      const entry = held[rel]
+      if (entry !== undefined) {
+        dispositions.push({
+          rel,
+          stack: manifest.name,
+          kind: 'config',
+          disposition: entry.disposition,
+          present: existsSync(dest),
+          ...(entry.disposition === 'customized'
+            ? { moved: hashFile(source) !== entry.base }
+            : {}),
+        })
+        continue
+      }
+
       if (isSubfolder && isWithheldInSubfolder(rel)) {
         withheld.push({ rel, stack: manifest.name, present: existsSync(dest) })
         continue
       }
 
-      const state = !existsSync(dest)
-        ? 'new'
-        : isIdentical(source, dest)
-          ? 'matching'
-          : 'drifted'
-
-      configs.push({ rel, stack: manifest.name, state })
+      if (!existsSync(dest)) {
+        configs.push({ rel, stack: manifest.name, state: 'new' })
+      } else if (isIdentical(source, dest)) {
+        configs.push({ rel, stack: manifest.name, state: 'matching' })
+      } else {
+        configs.push({
+          rel,
+          stack: manifest.name,
+          state: 'drifted',
+          cause: driftCause(recorded[rel], dest),
+        })
+      }
     }
   }
 
@@ -109,6 +174,18 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
     for (const rel of seedFiles(manifest)) {
       if (seenSeeds.has(rel)) continue
       seenSeeds.add(rel)
+
+      const entry = held[rel]
+      if (entry !== undefined) {
+        dispositions.push({
+          rel,
+          stack: manifest.name,
+          kind: 'seed',
+          disposition: entry.disposition,
+          present: existsSync(resolveSurfacePath(target, rel)),
+        })
+        continue
+      }
 
       if (isSubfolder && isWithheldInSubfolder(rel)) {
         withheld.push({
@@ -144,6 +221,7 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
   const totalChanges =
     (newManifest ? 1 : 0) +
     configs.filter((entry) => entry.state !== 'matching').length +
+    dispositions.filter((entry) => entry.moved === true).length +
     seeds.filter((entry) => entry.state === 'missing').length +
     scripts.filter((entry) => entry.state !== 'matching').length +
     deps.filter((entry) => entry.state === 'missing').length +
@@ -152,6 +230,7 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
   return {
     configs,
     withheld,
+    dispositions,
     seeds,
     scripts,
     deps,

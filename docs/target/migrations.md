@@ -75,7 +75,7 @@ The `memory` record kind left `canon records`, so `canon records validate memory
 - `canon repo metadata`, `canon autoship`, and the `120-bash` rule are gone, and `canon gov sync` removes the rule <!-- canon-keep-retired -->
 - `memory-capture`, the `603-memory` rule, and the `memory` standard are gone, so send a lesson to the context entry that owns the fact <!-- canon-keep-retired -->
 
-Two held files run, `.husky/post-merge` and `.claude/hooks/pr-create-log.sh`, and a stale copy calls a missing binary or names a removed skill. Resync what the toolkit owns before sweeping what the project wrote, and run the second line once per stack.
+Two held files run, `.husky/post-merge` and `.claude/hooks/pr-create-log.sh`, and a stale copy calls a missing binary or names a removed skill. Resync what the toolkit owns before sweeping what the project wrote, and run the second line once per stack, naming a held hook with `--replace`.
 
 ```bash
 canon gov sync
@@ -181,9 +181,9 @@ The verb adds `Bash(canon pr merge:*)` and `Bash(gh pr merge:*)` so a session ca
 
 ## Move the capture cases out of the harness, once
 
-A web project's `e2e/screenshot.ts` is a config, so sync overwrites it. It now loads `CASES` from a seeded `e2e/capture/cases.ts` that sync copies once and never overwrites. Cases edited in the old harness leave the working tree on the first sync and stay in git history.
+A web project's `e2e/screenshot.ts` is a config. It now loads `CASES` from a seeded `e2e/capture/cases.ts` that sync copies once and never overwrites. A harness you edited is held on `--write`, so the new one lands only once you pass `--replace e2e/screenshot.ts`.
 
-- Copy your cases from the old `e2e/screenshot.ts` into `e2e/capture/cases.ts` before the next sync.
+- Copy your cases from the old `e2e/screenshot.ts` into `e2e/capture/cases.ts`, then sync with `--replace e2e/screenshot.ts`.
 - Evidence now defaults to `e2e/evidence/`. Set `export const EVIDENCE_ROOT = 'evidence'` in `e2e/capture/cases.ts` to keep a committed baseline at the old path.
 - A run from a folder with no `e2e/capture/cases.ts` exits 1 and names the file.
 

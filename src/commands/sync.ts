@@ -285,7 +285,9 @@ function renderTooling(report: CheckReport): void {
     if (count > 0) logWarn(`${count} ${category}`)
   }
   logInfo(
-    'Run `canon tooling sync --check` to see which files, `--write` to apply.',
+    tooling.changes === tooling.counts.customized
+      ? 'A customized config moved upstream, and no write touches it. Run `canon tooling diff` to see which, and `canon tooling lift <path>` to take it.'
+      : 'Run `canon tooling sync --check` to see which files, `--write` to apply.',
   )
 }
 

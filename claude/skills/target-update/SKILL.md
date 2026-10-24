@@ -68,6 +68,8 @@ Target update: `<path>`, canon `<installed>` to `<running>`.
 
 **Drift:** <each non-empty cause from sync --check, with its count and paths>
 
+**Tooling holds:** <each tooling config the write would hold, being a drifted entry whose `cause` is `edited` or `unattributed`, then each `dispositions` entry, declined ones by path and customized ones marked when `moved` is true, or omitted when none>
+
 **Where it lands:** <the linked worktree this run is already in, or the worktree `.claude/worktrees/<name>/` it will enter, or the branch it will create in place when the operator declines a worktree>
 
 **Calls for you:** <each judgment call below this run meets, with the default this skill takes>
@@ -122,7 +124,13 @@ The record tree is untracked, so a `record-tree` rewrite has no undo. Run `canon
 
 ## Step 5: sync
 
-Run `canon sync .`, then `canon tooling sync <stack> . --write` when the tooling diff named files to change. Treat each drift cause the way the preview stated:
+Run `canon sync .`, then `canon tooling sync <stack> . --write` when the tooling diff named files to change. The write holds every config the preview listed under tooling holds.
+
+- Add `--replace <path>` only for a held path the operator named in the reply, never for the whole list the write prints
+- Offer `canon tooling customize <path>` for a held path the operator wants kept, and `canon tooling lift <path>` for a moved customized one they want to take
+- Leave a declined path alone, since no write reaches it
+
+Treat each governance drift cause the way the preview stated:
 
 | Cause                       | This skill                                                                                       |
 | --------------------------- | ------------------------------------------------------------------------------------------------ |

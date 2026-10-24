@@ -68,6 +68,40 @@ After a rename the new name shows as `missing` when the stamp records a stack, a
 - `present` marks a copy an earlier sync left, which is reported and never deleted
 - `canon tooling sync <stack> [target]` writes only under `--write`. `--check` reports and exits 0, and a headless run with neither flag exits 1.
 
+### Drift cause and the write hold
+
+A `drifted` entry in `configs` carries a `cause`, read against the golden hash the last write recorded for that path.
+
+- `stale`: the target still hashes to the record, so canon moved and the project did not. `--write` replaces it.
+- `edited`: the target no longer hashes to the record. `--write` holds it.
+- `unattributed`: no hash is recorded, as on every target synced before hashes existed. `--write` holds it.
+
+A config no stack in the recorded chain ships is a first install and is never held, so a fresh scaffold takes every golden config of a stack new to it, even after `canon init` recorded `base`.
+
+A held path stays drifted, so the next headless run still exits 1. Pass `--replace <path>` once per path to take the golden copy, as the command the write prints does. A `--replace` naming no config the chain writes refuses with `unknown-replace`.
+
+### Dispositions
+
+`decline <path> [target] [--reason <text>]`, `customize <path> [target]`, and `lift <path> [target]` set or clear one path's disposition, each with `--json`. The path is relative to the target and resolves against the recorded chain, never a stack argument.
+
+- A success answers `{ ok: true, action, path, entry? }`, where `entry` is the recorded `{ disposition, base?, reason? }` and is absent after a lift
+- A declined or customized path leaves `configs`, `seeds`, and `withheld` for `dispositions`, as `{ rel, stack, kind, disposition, present, moved? }`
+- `moved` is set on a customized config alone, and counts toward the exit once the golden copy no longer matches `base`
+- Sync and inject never write a path in `dispositions`, and nothing deletes one the project still holds
+
+A refusal answers `{ ok: false, reason, message }` with exit 1:
+
+| `reason`                | Meaning                                                   |
+| ----------------------- | --------------------------------------------------------- |
+| `no-chain`              | No tooling chain is recorded, so run `tooling sync` first |
+| `bad-path`              | The path leaves the target                                |
+| `not-golden`            | No stack in the recorded chain ships the path             |
+| `already-held`          | The path is already declined or customized, so lift it    |
+| `seed-not-customizable` | The path is a seed, which sync never overwrites           |
+| `missing-file`          | `customize` named a config the target does not hold       |
+| `not-held`              | `lift` named a path with no disposition                   |
+| `toolkit-root`          | The target is the toolkit checkout, the source of truth   |
+
 `canon tooling inject` and `prune-gitignore` apply one stack with no scan or prompt, and the latter prints the number removed on stdout. Use `sync` unless scripting provisioning, and pass `--nested` inside an open frame.
 
 ## Whole-project sync
