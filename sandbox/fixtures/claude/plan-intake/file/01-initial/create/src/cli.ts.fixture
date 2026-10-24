@@ -17,3 +17,5 @@ export function main(argv: string[]) {
   console.log('usage: sbx <build|serve> [options]')
   process.exit(1)
 }
+
+if (import.meta.main) main(process.argv)

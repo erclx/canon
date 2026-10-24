@@ -20,7 +20,7 @@ export default scenario({
       ctx.commit('feat(cli): build and serve commands')
 
       ctx.log.step('Scenario ready: a brain dump filed into an intake folder')
-      ctx.log.info('Context: notes/dump.md carries seven unmeasured complaints')
+      ctx.log.info('Context: notes/dump.md carries eight unmeasured complaints')
       ctx.log.info(
         '  src/ holds what they are about: console writes in three files, a',
       )
@@ -36,6 +36,10 @@ export default scenario({
       ctx.log.info(
         '  One item needs three builds measured, so it belongs to groundwork',
       )
+      ctx.log.info(
+        '  src/cli.ts runs, so a trailing --out prints building into dist and',
+      )
+      ctx.log.info('  the last bullet can be reproduced by one command')
       ctx.log.info('')
       ctx.log.info(
         'Action:  /canon:plan-intake file notes/dump.md as the cli-cleanup intake',
@@ -57,7 +61,7 @@ export default scenario({
       )
       ctx.log.info('         folder, and the reply reports the routing split.')
       ctx.log.info(
-        '         Five expectations need a reader and report as unchecked.',
+        '         Six expectations need a reader and report as unchecked.',
       )
     },
     route: (ctx) => {
