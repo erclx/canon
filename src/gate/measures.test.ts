@@ -1479,6 +1479,22 @@ describe('isFolderEchoedName', () => {
     expect(isFolderEchoedName('x/foo/foo.config.json')).toBe(true)
   })
 
+  it('should pass a consumer path a replay snapshot copies verbatim', () => {
+    expect(
+      isFolderEchoedName(
+        'sandbox/fixtures/replay/frameboard/canon/config/config.json.fixture',
+      ),
+    ).toBe(false)
+  })
+
+  it('should still flag the same name in another scenario fixture', () => {
+    expect(
+      isFolderEchoedName(
+        'sandbox/fixtures/git/commit/small/create/canon/config/config.json.fixture',
+      ),
+    ).toBe(true)
+  })
+
   it('should pass a stem that only shares a prefix with its folder', () => {
     expect(isFolderEchoedName('x/foo/food.md')).toBe(false)
   })
