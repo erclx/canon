@@ -13,6 +13,13 @@ metadata:
 - Do not implement anything. Output the plan and stop.
 - When the feature description spans two or more independent concerns, write one plan file per concern. Do not bundle them under a single slug.
 
+## Write scope
+
+Write the plan, and nothing else in the tree being planned against.
+
+- A file made only to look at goes to scratch under a topic slug, per `${CLAUDE_SKILL_DIR}/references/onboarding.md`
+- A fixture or headless session that must be its own project goes outside the repository, in a temporary directory
+
 ### Predict the next three questions
 
 Before Step 3, name the next three questions you would ask about what the ask must achieve, and predict the operator's answer to each. The test reads the ask's success criteria, never the plan's open questions.

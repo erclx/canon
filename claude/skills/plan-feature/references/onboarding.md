@@ -26,7 +26,7 @@ When the feature changes a verb, a route, or a rendered surface that already exi
 
 Three rules hold across every kind:
 
-- Write only the plan, so never run a form that writes to the tree being planned against
+- Write nothing into the planned tree beyond the plan, so never run a form that writes there. The exceptions are the scratch and outside-repository writes below.
 - Send a verb with no read form to a sandbox scenario or a temporary copy, and name which
 - Skip the step for a feature touching nothing that runs, such as prose or a config seed
 
@@ -35,10 +35,10 @@ Three rules hold across every kind:
 A checkout is often shared with sessions building other branches, so where a run happens matters as much as what it runs.
 
 - Keep a read-only run in the checkout and never switch its branch, since a switch changes the files under every other session reading it
-- Give a preview a free port, or run it from a temporary copy, so it never takes a port another session serves on
+- Serve a preview on a free port only when it writes nothing, and run one that builds from a temporary copy, since a build leaves caches and output under the checkout
 - Send a file made only to look at, such as a capture or a dump, to a scratch topic slug under the scratch rule, which owns the path and the reserved slugs
 - Put an own-project fixture or headless session outside the repository, since a tool that walks up to a project root measures the enclosing repository
-- Keep the plan's own text as the record of what a run showed, since a scratch file is gone with its worktree
+- Keep the plan's own text as the record of what a run showed, since scratch is gitignored and no later session reads it
 
 ### Name the binary a run measured
 
