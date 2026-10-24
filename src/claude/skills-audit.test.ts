@@ -6,7 +6,7 @@ import {
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { basename, join } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   auditExitCode,
@@ -18,6 +18,7 @@ import {
   PRACTICE_SECTIONS,
   PRACTICE_SKILLS,
   SKILL_LEDGERS,
+  skillLedgerPath,
 } from '@/claude/skills-audit'
 
 let root: string
@@ -663,11 +664,22 @@ function practiceSkill(
 
 /**
  * Writes a conforming fixture for every listed skill but the one a test
- * varies, so an append to the list needs no edit here.
+ * varies, so an append to the list needs no edit here. A file the per-bullet
+ * list names gets a bullet-free body and a row-free ledger, which pair.
  */
 function listedPracticeSkillsExcept(omitted: string): void {
   for (const rel of LEDGER_SKILLS.filter((rel) => rel !== omitted)) {
-    practiceSkill(CLOSING, { name: basename(rel) })
+    const name = basename(rel)
+    const dir = practiceSkill(CLOSING, { name })
+    for (const file of BULLET_LEDGER_SKILLS[rel] ?? []) {
+      if (file !== 'SKILL.md') {
+        mkdirSync(dirname(join(dir, file)), { recursive: true })
+        writeFileSync(join(dir, file), '# Reference\n')
+      }
+      const ledger = join(root, skillLedgerPath(name, file))
+      mkdirSync(dirname(ledger), { recursive: true })
+      writeFileSync(ledger, '# Ledger\n')
+    }
   }
 }
 
@@ -826,17 +838,18 @@ describe('auditSkills practice shape', () => {
 })
 
 describe('auditSkills reference ledgers', () => {
-  const [bulletLedgered = ''] = BULLET_LEDGER_SKILLS
+  const [[bulletLedgered, [listed = '']] = ['', []]] =
+    Object.entries(BULLET_LEDGER_SKILLS)
   const name = basename(bulletLedgered)
-  const reference = join(bulletLedgered, 'references', 'a11y.md')
-  const ledgerRel = join(SKILL_LEDGERS, name, 'a11y.md')
+  const reference = join(bulletLedgered, listed)
+  const ledgerRel = skillLedgerPath(name, listed)
 
   const TABLE = '| Bullet | Source |\n| --- | --- |\n'
 
-  function writeReference(text: string): void {
-    const dir = join(root, bulletLedgered, 'references')
-    mkdirSync(dir, { recursive: true })
-    writeFileSync(join(dir, 'a11y.md'), text)
+  function writeReference(text: string, file = listed): void {
+    const path = join(root, bulletLedgered, file)
+    mkdirSync(dirname(path), { recursive: true })
+    writeFileSync(path, text)
   }
 
   function writeLedger(text: string): void {
@@ -847,9 +860,10 @@ describe('auditSkills reference ledgers', () => {
   beforeEach(() => {
     listedPracticeSkillsExcept('')
     writeReference('# Accessibility\n\n## Semantics\n\n- One.\n- Two.\n')
+    rmSync(join(root, ledgerRel))
   })
 
-  it('should report a reference carrying no ledger', async () => {
+  it('should report a listed file carrying no ledger', async () => {
     const report = await auditSkills(root)
 
     expect(report.practiceShape).toEqual([
@@ -889,6 +903,44 @@ describe('auditSkills reference ledgers', () => {
     const report = await auditSkills(root)
 
     expect(report.practiceShape).toEqual([])
+  })
+
+  it('should ask no ledger of a reference the list does not name', async () => {
+    writeLedger(
+      `# Ledger\n\n## Semantics\n\n${TABLE}| One | x |\n| Two | y |\n`,
+    )
+    writeReference(
+      '# Checklist\n\n## Before handing over\n\n- [ ] One.\n',
+      join('references', 'unlisted-checklist.md'),
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+
+  it('should report a listed file the skill no longer carries', async () => {
+    rmSync(join(root, reference))
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      { rel: reference, detail: 'missing file: listed for a ledger' },
+    ])
+  })
+})
+
+describe('skillLedgerPath', () => {
+  it('should drop the references segment from a reference', () => {
+    expect(
+      skillLedgerPath('design-taste', join('references', 'craft.md')),
+    ).toBe(join('governance', 'ledger', 'skills', 'design-taste', 'craft.md'))
+  })
+
+  it('should keep the name of a listed skill body', () => {
+    expect(skillLedgerPath('api-design', 'SKILL.md')).toBe(
+      join('governance', 'ledger', 'skills', 'api-design', 'SKILL.md'),
+    )
   })
 })
 

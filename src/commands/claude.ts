@@ -1771,7 +1771,7 @@ function reportPracticeShape(report: SkillsAudit): void {
     `A listed practice skill closes with ${PRACTICE_SECTIONS.map((section) => `## ${section}`).join(', ')}, and every skill on the wider ledger list carries ${PRACTICE_LEDGER}.`,
   )
   logInfo(
-    `A skill on the per-bullet list, ${plural(BULLET_LEDGER_SKILLS.length, 'skill')} here, also matches each other reference to a ledger under ${SKILL_LEDGERS}, one row per bullet under each H2.`,
+    `A skill on the per-bullet list, ${plural(Object.keys(BULLET_LEDGER_SKILLS).length, 'skill')} here, also matches each file the list names to a ledger under ${SKILL_LEDGERS}, one row per bullet under each H2.`,
   )
   logInfo(
     `Both lists are kept here and name ${plural(PRACTICE_SKILLS.length, 'practice skill')} and ${plural(LEDGER_SKILLS.length, 'ledger skill')}, so a skill outside ${SHIPPED_CORPUS} is never read.`,
