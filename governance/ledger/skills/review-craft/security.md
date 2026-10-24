@@ -5,7 +5,7 @@ description: Sources for claude/skills/review-craft/references/security.md, one 
 
 # Review craft security ledger
 
-The field is application security review. MITRE's CWE entries name each weakness, ShellCheck carries the shell fixes, npm's own docs and Snyk's lockfile write-up carry the supply chain, and Anthropic's security review action at commit `0c6a49f1` carries the exclusions.
+The field is application security review. MITRE's CWE entries name each weakness, ShellCheck carries the shell fixes, npm's own docs and Snyk's lockfile write-up carry the supply chain, and Anthropic's security review action pinned at `anthropics/claude-code-security-review@0c6a49f1` carries the exclusions.
 
 The threat model section and the classes stated as prose carry no bullet, so they take no row.
 

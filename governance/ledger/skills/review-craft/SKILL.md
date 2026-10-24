@@ -5,7 +5,7 @@ description: Sources for claude/skills/review-craft/SKILL.md, one row per bullet
 
 # Review craft skill ledger
 
-The field is code review. Google's reviewer guide carries the axes, Parnas, Ousterhout, and Beck as Fowler records him carry the design walk, and the `addyosmani/agent-skills` skills at commit `2686b620` carry the bar, performance, and scope checks.
+The field is code review. Google's reviewer guide carries the axes, Parnas, Ousterhout, and Beck as Fowler records him carry the design walk, and the skills pinned at `addyosmani/agent-skills@2686b620` carry the bar, performance, and scope checks.
 
 The proof ladder and the evidence bar are this toolkit's own, so their rows name the failure each prevents. Closing sections and `## What this delegates` restate these rules or route, so they take no table.
 
