@@ -61,6 +61,26 @@ const COLLIDING = `<!doctype html>
   <body><main><p>Readable text</p></main></body>
 </html>`
 
+/**
+ * A page that sets a global of its own while the engine runs, the way a
+ * script a step lazy-loaded would. The engine calls `getComputedStyle` during
+ * the run and never while loading, so the global appears only mid-run.
+ */
+const LATE_GLOBAL = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" /><title>Late global</title>
+    <script>
+      const read = window.getComputedStyle.bind(window)
+      window.getComputedStyle = (...args) => {
+        window.lateGlobal = 'the page'
+        return read(...args)
+      }
+    </script>
+  </head>
+  <body><main><p>Readable text</p></main></body>
+</html>`
+
 async function browserAvailable(): Promise<boolean> {
   const { chromium } = await import('playwright-core')
   try {
@@ -178,6 +198,19 @@ describe.skipIf(!hasBrowser)('probeAxe against a rendered page', () => {
     // returned a string and no results at all.
     expect(findings.map((finding) => finding.rule)).toEqual(['html-has-lang'])
     expect(after).toEqual({ axe: 'the page', doT: 'the page', encode: false })
+  }, 120_000)
+
+  it('should keep a global the page set while the engine ran', async () => {
+    const page = await browser.newPage()
+    await page.setContent(LATE_GLOBAL)
+
+    await probeAxe(page)
+    const late = await page.evaluate(
+      () => (window as unknown as Record<string, unknown>).lateGlobal,
+    )
+    await page.close()
+
+    expect(late).toBe('the page')
   }, 120_000)
 
   it('should refuse by name when the engine source cannot be read', async () => {

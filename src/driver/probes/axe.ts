@@ -13,8 +13,9 @@ import type { Finding } from '@/driver/steps'
  * The bundle assigns `window.axe`, `doT`, and `_encodeHTML` as it loads, and
  * registers with any AMD loader the page carries. It is evaluated with
  * `define`, `module`, and `exports` shadowed, and every global it added or
- * replaced is put back once the run settles, so a page owning a global named
- * `axe` keeps it and a probe running after this one reads the page it found.
+ * replaced as it loaded is put back once the run settles, so a page owning a
+ * global named `axe` keeps it, a global the page sets during the run survives,
+ * and a probe running after this one reads the page it found.
  */
 
 /** The tags the groundwork measured on, which together are WCAG 2.2 A and AA. */
@@ -139,10 +140,22 @@ function runner(source: string): string {
     }
     const prior = before.get('axe')
 
+    // The keys the bundle's load added or replaced, read once it has loaded and
+    // before the run awaits, so a global the page sets mid-run stays the page's.
+    const loaded = () =>
+      Object.getOwnPropertyNames(scope).filter((key) => {
+        const was = before.get(key)
+        if (!was) return true
+        const now = Object.getOwnPropertyDescriptor(scope, key)
+        return Boolean(now && 'value' in was && now.value !== was.value)
+      })
+    let touched
+
     try {
       ;(function (define, module, exports) {
 ${source}
       }).call(scope)
+      touched = loaded()
 
       const engine = scope.axe
       if (!engine || engine === prior?.value || typeof engine.run !== 'function') {
@@ -170,16 +183,12 @@ ${source}
       read('incomplete', result.incomplete)
       return rows
     } finally {
-      for (const key of Object.getOwnPropertyNames(scope)) {
+      // A load that threw partway set nothing the page could have raced, so
+      // the keys that differ now are all the bundle's.
+      for (const key of touched ?? loaded()) {
         const was = before.get(key)
-        if (!was) {
-          delete scope[key]
-          continue
-        }
-        const now = Object.getOwnPropertyDescriptor(scope, key)
-        if (now && 'value' in was && now.value !== was.value) {
-          Object.defineProperty(scope, key, was)
-        }
+        if (was) Object.defineProperty(scope, key, was)
+        else delete scope[key]
       }
     }
   })()`
