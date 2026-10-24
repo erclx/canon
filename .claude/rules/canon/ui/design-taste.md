@@ -1,6 +1,10 @@
 ---
 description: Route edits that decide how a surface looks to the design-taste skill for the layer ordering, the coherence locks, and the defaults a model reaches for
 paths:
+  - '**/*.tsx'
+  - '**/*.jsx'
+  - '**/*.astro'
+  - '**/*.html'
   - '**/*.css'
   - '**/*.scss'
   - 'canon/DESIGN.md'
