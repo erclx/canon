@@ -18,12 +18,27 @@ The CLI holds every number. `canon markdown audit` measures, and `canon markdown
 - `gated add` refusing with `canon-checkout`: stop. Canon's own checkout gates through a constant in its source, which a code change edits.
 - Branch on each record's own fields rather than on an exit status a shell wrapper can flatten. A call with no terminal on stdin already runs headless, so no command takes a prefix.
 
+## Step 0: offer the restructure
+
+Restructure an overgrown context folder before rewriting it, so the effort is spent once. Run this step only when `canon/context/` is a candidate, meaning it is not yet listed in `canon/config/markdown.toml`, and skip it silently otherwise.
+
+- Take the structure line `document-health` reports for each area folder, or read it from `canon context audit --json` the way that skill does
+- A folder with no overgrown entry and no doubled or unnamed coverage finding has no line, so go straight to Step 1 with no prompt
+- Show the operator each proposal and ask before applying it, since a split moves files other entries cite. Re-run the audit afterward to confirm the citations still resolve.
+- Take a declined proposal as a decision and rewrite the entry as it stands
+
 ## Step 1: read the audit
 
 Run the audit over the whole tree and take the density and reference shape findings from its record:
 
 ```bash
 canon markdown audit --json
+```
+
+When `canon/context/` is a candidate, read the context shape beside it and keep each entry's `shapeFindings` issues as the baseline Step 3 holds the rewrite to:
+
+```bash
+canon context audit --json
 ```
 
 Take the candidate folders from the order table in `${CLAUDE_SKILL_DIR}/references/batches.md` rather than from the findings, since a clean folder carries no finding and would never be gated. Drop every folder `canon/config/markdown.toml` already lists, since a listed folder already gates.
@@ -45,6 +60,12 @@ canon markdown audit <prefix> --json
 ```
 
 Read `${CLAUDE_SKILL_DIR}/references/batches.md` for what a rewrite may cut. A stated reason survives every rewrite, and the audit reaching zero cannot see one that went missing.
+
+### Hold the context shape
+
+For a file under a folder the context audit resolves, also re-run `canon context audit --json` and compare the entry's `shapeFindings` issues with the baseline. A density fix that splits a Layout paragraph into several can grow `layout-paragraphs`.
+
+A rewrite leaving the entry with more shape issues than it started with is not done. Undo it, or fold the split into a table or a linked page, and report the entry as stopped when neither reaches the baseline. Zero density findings reached by growing shape findings only moves the failure.
 
 ## Step 4: gate the folder
 

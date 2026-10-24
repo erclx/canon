@@ -34,6 +34,15 @@ export default scenario({
       ctx.log.info(
         '         the reason the scan caches, and the skill states no limit number.',
       )
+      ctx.log.info(
+        '         canon/context/ has no overgrown entry, so Step 0 prompts nothing and',
+      )
+      ctx.log.info(
+        '         the run goes straight to the rewrite. A rewrite that grows the',
+      )
+      ctx.log.info(
+        '         context shapeFindings is undone rather than gated.',
+      )
     },
   },
 })

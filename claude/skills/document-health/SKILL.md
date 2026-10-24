@@ -47,6 +47,12 @@ The first names the backend, the model, and the source that decided both. Report
 
 Take the checkpoints from the record each verb returns rather than from a number written here. A checkpoint the CLI moves reaches this report with no edit, and a number held in this body goes stale on its own cadence.
 
+### The structure line
+
+The context audit record already carries what a restructure needs, so the placement axis gains a structure line per area folder and runs no further verb. `${CLAUDE_SKILL_DIR}/references/axes.md` holds how to read `length` and `coverage` into a proposed split or owner.
+
+Emit the line only for a folder with an entry past the line checkpoint whose Layout headings group into two or more domains, or with a doubled or unnamed coverage finding. A folder with neither gets no line, and `document-repair` goes straight to its rewrite.
+
 ### An unread axis is not a healthy one
 
 A refusal, an absent key, and a subcommand the project's binary does not carry each leave an axis unread. Report it as unread against the documents it would have covered, name the read that could not be taken, and name the cause.
@@ -105,5 +111,13 @@ When Step 3 read the canonical records, add one reminder line per doc the verb r
 ```
 
 Write `reviewed value is not a date: <value>` for a doc carrying `invalidReviewed`, and `no release tags to count` in place of the count when `tagged` is false. Name the unread cause instead when the verb refused or the binary carries no `canonical` kind.
+
+Under the table, add one structure line per area folder that earned one, naming the entry and the split, or the finding and its owner:
+
+```markdown
+Structure `canon/context/surfaces/`: `cli.md` (300 lines) splits into `cli.md` taking <headings> and `cli-<domain>.md` taking <headings>, because <reason>.
+```
+
+The line is a proposal for the operator, with the headings each entry takes and why. Health applies nothing, and `document-repair` offers the proposal before it rewrites.
 
 Keep the evidence line under the table on every run. A table read without it flattens a judgment into a measurement, which is the one shape the three classes exist to prevent.
