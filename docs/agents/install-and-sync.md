@@ -24,7 +24,7 @@ A flat installed-rule layout makes `gov sync` report "No governance surfaces fou
 
 ## Governance sync
 
-`canon gov sync [target]` updates what `.claude/rules/canon/` holds and adds nothing. `.claude/rules/project/` is never read, so put project rules there.
+`canon gov sync [target]` updates what `.claude/rules/canon/` holds and adds nothing. `.claude/rules/project/` is never read, so put project rules there. After an apply it lists each copied rule with its globs and matching file count, and `--json` puts `{ "coverage": [...] }` on stdout.
 
 - A rule the toolkit no longer ships is deleted, edited or not
 - A rule renamed in `governance/renames.toml` moves, and its local edits are dropped
