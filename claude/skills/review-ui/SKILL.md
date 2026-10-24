@@ -128,15 +128,16 @@ Push only a frame of the address this pass drove, since the branch is as public 
 
 ## Step 6: sweep
 
-Run three checks over every route the boxes reached, and nothing beyond them:
+Run four checks over every route the boxes reached, and nothing beyond them:
 
 - Console errors, through the wrapper's `console error` on each route.
 - Sideways overflow at each width a box named, as `document.documentElement.scrollWidth` against `clientWidth`.
 - The `focus` and `details` probes, through `canon drive <url> <run> --json` with a run file in the scratch folder.
+- The `axe` probe, named in the same run file and read by each finding's `gate` rather than a copy of the CLI's rule list. On `axe-missing`, drop it and name the refusal as an unread check.
 
 The probes launch their own browser at a URL, so a state the boxes reached by clicks reaches them only as steps the run file repeats. Where a state needs a step kind `canon drive` lacks, probe the route on arrival and say so.
 
-A console error or an overflow is a finding. A probe result is a reading to confirm, since every probe carries a known class of false finding, and it opens no heading on its own. Close the browser with `${CLAUDE_SKILL_DIR}/scripts/pw.sh -s=<project>-<number> close` once the sweep ends.
+A console error, an overflow, or an axe finding whose `gate` is true is a finding. Every other probe result is a reading to confirm, an `incomplete` axe outcome included, since each probe carries a known class of false finding. Close the browser with `${CLAUDE_SKILL_DIR}/scripts/pw.sh -s=<project>-<number> close` once the sweep ends.
 
 ## Step 7: post
 
