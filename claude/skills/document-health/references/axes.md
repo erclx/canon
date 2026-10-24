@@ -53,7 +53,7 @@ Three parts of the audit record name content sitting outside the shape its folde
 - `shapeFindings`: an entry whose sections break the shape its folder holds, such as a Decisions section or a sixth gotcha
 - `extraSections`: an H2 outside the closed set the folder allows
 - `entries[].provenance`: an entry narrating how it came to be, which is history rather than a description of the tree
-- **Routes to:** the document that owns the passage. The record names the file and the section but not the owner, so where the content crosses a tier rather than a file, the project's own content-ownership rules decide the destination.
+- **Routes to:** the document that owns the passage. The record names no owner, so the project's own content-ownership rules decide the destination.
 
 ### The structure line
 
