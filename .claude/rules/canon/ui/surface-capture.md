@@ -12,22 +12,21 @@ paths:
 
 ## What a surface is
 
-- Treat anything the project renders for a person as a surface, a generated page as much as a route.
+- Treat anything the project renders for a person as a surface, generated pages included.
 - Skip a component the production build strips out, such as a dev-only switcher.
 
 ## When to capture
 
-- Run the project's capture command against a preview server, never a dev server, after changing a surface. Report it when the project has none.
-- Capture every theme the surface ships, and again after fixing a defect a capture found.
-- Read your own capture against the `canon:ui-checklist` boxes before opening the pull request. Report it rather than proceeding silently when the skill does not resolve.
+- Run the project's capture command against a preview server, never a dev server, after changing a surface. Report a project with none.
+- Capture every theme the surface ships, and again after fixing a defect found.
+- Read your capture against the `canon:ui-checklist` boxes before opening the pull request, reporting a skill that does not resolve.
 
 ## What a capture covers
 
 - Capture the full page, never a component in isolation.
 - Capture a layout case at 320, the reflow floor in `a11y`, plus each breakpoint in the `## Layout` section of `DESIGN.md`, or at 320 alone when there is none.
 - Capture resizable chrome at its narrowest and widest clamp, at the narrowest width keeping it persistent. Judge the content width beside it.
-- Capture a state case at one width rather than the full set.
-- Drive a state an initial render cannot reach, such as an open menu or a rail tracking scroll.
+- Capture a state case at one width, driving states a first render cannot reach, such as an open menu.
 - Add a surface's case with the surface, and remove it with the surface.
 
 ## Sharing a capture
