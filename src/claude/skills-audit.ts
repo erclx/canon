@@ -113,6 +113,7 @@ export const BULLET_LEDGER_SKILLS: Readonly<Record<string, BulletLedgerScope>> =
       exempt: references('preflight', 'vocabulary'),
       body: true,
     },
+    [join(SHIPPED_CORPUS, 'test-craft')]: { exempt: [], body: true },
   }
 
 /** Where a per-bullet ledger lives, as `<skill>/<file>.md` below it. */
