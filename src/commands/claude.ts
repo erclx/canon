@@ -169,6 +169,15 @@ const SEEDED_FILES: readonly string[] = ['REQUIREMENTS.md', 'DESIGN.md']
 const SEEDED_DIRS: readonly string[] = ['tasks']
 
 /**
+ * Where a `SEEDED_FILES` entry resolves for the sync presence check, at either
+ * surface root, so a target holding its records under `canon/` is not sent to
+ * `canon claude init`.
+ */
+export function seededFilePath(resolved: string, name: string): string {
+  return surfaceDir(resolved, name)
+}
+
+/**
  * Where a `SEEDED_DIRS` entry resolves for the sync presence check.
  *
  * A tracked surface entry resolves under `canon/` ahead of `.claude/`, while
@@ -679,7 +688,7 @@ async function runSync(target: string): Promise<number> {
   // already holds.
   logStep('Seeded')
   for (const name of SEEDED_FILES) {
-    if (existsSync(join(resolved, '.claude', name))) logInfo(name)
+    if (existsSync(seededFilePath(resolved, name))) logInfo(name)
     else logWarn(`${name} missing. Run \`canon claude init\``)
   }
   for (const name of SEEDED_DIRS) {
