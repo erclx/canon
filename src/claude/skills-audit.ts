@@ -5,8 +5,8 @@ import { plural } from '@/cli/ui'
 import {
   compareLedger,
   countLedgerRows,
+  type HeadingCount,
   type LedgerMismatch,
-  measureRule,
 } from '@/gov/audit'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import {
@@ -106,9 +106,12 @@ export interface BulletLedgerScope {
 export const BULLET_LEDGER_SKILLS: Readonly<Record<string, BulletLedgerScope>> =
   {
     [join(SHIPPED_CORPUS, 'ui-craft')]: { exempt: [], body: false },
+    [join(SHIPPED_CORPUS, 'api-design')]: { exempt: [], body: true },
+    [join(SHIPPED_CORPUS, 'code-craft')]: { exempt: [], body: true },
+    [join(SHIPPED_CORPUS, 'deprecation-migration')]: { exempt: [], body: true },
     [join(SHIPPED_CORPUS, 'design-taste')]: {
       exempt: references('preflight', 'vocabulary'),
-      body: false,
+      body: true,
     },
   }
 
@@ -129,6 +132,16 @@ export const PRACTICE_SECTIONS: readonly string[] = [
   'Excuses and rebuttals',
   'Red flags',
   'Before handing over',
+]
+
+/**
+ * The H2s that end a listed body's concern groups. The closing sections
+ * restate the groups' rules as excuses, signs, and checks, and the delegates
+ * section routes, so neither states a rule of its own to source.
+ */
+export const BODY_CLOSERS: readonly string[] = [
+  ...PRACTICE_SECTIONS,
+  'What this delegates',
 ]
 
 /** The source ledger every practice skill carries beside its body. */
@@ -183,6 +196,12 @@ const ISO_DATE = /\b\d{4}-\d{2}-\d{2}\b/g
 const ISSUE_NUMBER = /(?<![\w&/#])#\d+\b/g
 
 const TOP_LEVEL_BULLET = /^(?:[-*+]|\d+[.)])\s/
+
+/**
+ * A line a skill ledger pairs with a row: a top-level `- ` bullet as a rule
+ * writes one, or a top-level ordered step, which states a directive as surely.
+ */
+const LEDGERED_LINE = /^(?:- |\d+[.)]\s)/
 
 const WORD = /\S*[\p{L}\p{N}]\S*/gu
 
@@ -414,8 +433,8 @@ async function readSkill(
 }
 
 /**
- * Pairs each ledgered file's bullets with its ledger's rows through the rule
- * audit's own comparison, so a skill file and a rule are held to one count.
+ * Pairs each ledgered file's directives with its ledger's rows through the rule
+ * audit's own comparison, so a skill file and a rule mismatch alike.
  */
 async function readReferenceLedgers(
   root: string,
@@ -429,13 +448,39 @@ async function readReferenceLedgers(
       const ledgerPath = join(root, ledgerRel)
       const mismatches = existsSync(ledgerPath)
         ? compareLedger(
-            measureRule(text).groups,
+            ledgerGroups(text, path === 'SKILL.md'),
             countLedgerRows(await Bun.file(ledgerPath).text()),
           )
         : undefined
       return { rel: join(skillRel, path), ledgerRel, mismatches }
     }),
   )
+}
+
+/**
+ * Directives per H2, `null` for any above the first. A contents list repeats
+ * the headings rather than stating a rule, so `## Contents` takes no rows. A
+ * nested bullet elaborates its parent, so only a top-level line counts. A body
+ * stops at its first closer, and a ledger table under one then reads as rows
+ * with no bullets rather than passing unread.
+ */
+function ledgerGroups(text: string, isBody: boolean): HeadingCount[] {
+  const counts = new Map<string | null, number>()
+  let heading: string | null = null
+
+  for (const line of bodyLines(text)) {
+    if (line.fenced) continue
+    const section = SECTION.exec(line.text)?.[1]
+    if (section !== undefined) {
+      if (isBody && BODY_CLOSERS.includes(section)) break
+      heading = section
+      continue
+    }
+    if (heading === CONTENTS_SECTION || !LEDGERED_LINE.test(line.text)) continue
+    counts.set(heading, (counts.get(heading) ?? 0) + 1)
+  }
+
+  return [...counts].map(([key, count]) => ({ heading: key, count }))
 }
 
 /**

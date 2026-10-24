@@ -903,6 +903,43 @@ describe('auditSkills reference ledgers', () => {
     expect(report.practiceShape).toEqual([])
   })
 
+  it('should ask no rows of a contents list', async () => {
+    writeReference(
+      '# Accessibility\n\n## Contents\n\n- [Semantics](#semantics)\n\n## Semantics\n\n- One.\n- Two.\n',
+    )
+    writeLedger(MATCHED)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+
+  it('should report an ordered step carrying no row', async () => {
+    writeReference(
+      '# Accessibility\n\n## Semantics\n\n- One.\n- Two.\n1. Three.\n',
+    )
+    writeLedger(MATCHED)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      { rel: reference, detail: '## Semantics: 3 bullets, 2 ledger rows' },
+    ])
+  })
+
+  it('should ask a table of a heading holding only ordered steps', async () => {
+    writeReference(
+      '# Accessibility\n\n## Semantics\n\n- One.\n- Two.\n\n## Steps\n\n1. Expand.\n   - A nested note.\n2. Contract.\n',
+    )
+    writeLedger(MATCHED)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      { rel: reference, detail: '## Steps: 2 bullets, 0 ledger rows' },
+    ])
+  })
+
   it('should ask no per-bullet ledger of the source record', async () => {
     writeLedger(MATCHED)
     writeFileSync(
@@ -938,6 +975,71 @@ describe('auditSkills reference ledgers', () => {
         rel: join(exempting, exempted),
         detail: 'missing file: exempt from a ledger',
       },
+    ])
+  })
+})
+
+describe('auditSkills body ledgers', () => {
+  const [[bodyListed] = ['']] = Object.entries(BULLET_LEDGER_SKILLS).filter(
+    ([, scope]) => scope.body,
+  )
+  const name = basename(bodyListed)
+  const body = join(bodyListed, 'SKILL.md')
+
+  const TABLE = '| Bullet | Source |\n| --- | --- |\n'
+  const DELEGATES = '## What this delegates\n\n- Layout: `codebase-layout`\n'
+
+  function writeBody(groups: string): void {
+    practiceSkill([groups, ...CLOSING, DELEGATES], { name })
+  }
+
+  function writeLedger(text: string): void {
+    writeFileSync(join(root, skillLedgerPath(name, 'SKILL.md')), text)
+  }
+
+  beforeEach(() => {
+    listedPracticeSkillsExcept('')
+    writeBody('## Contract\n\n- One.\n- Two.\n')
+  })
+
+  it('should ask no rows of the closing sections or the delegates section', async () => {
+    writeLedger(`# Ledger\n\n## Contract\n\n${TABLE}| One | x |\n| Two | y |\n`)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+
+  it('should report a concern group one row short', async () => {
+    writeLedger(`# Ledger\n\n## Contract\n\n${TABLE}| One | x |\n`)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      { rel: body, detail: '## Contract: 2 bullets, 1 ledger row' },
+    ])
+  })
+
+  it('should report a table under a closing section', async () => {
+    writeLedger(
+      `# Ledger\n\n## Contract\n\n${TABLE}| One | x |\n| Two | y |\n\n## Red flags\n\n${TABLE}| Do | z |\n`,
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      { rel: body, detail: '## Red flags: 0 bullets, 1 ledger row' },
+    ])
+  })
+
+  it('should count a bullet under an H3 toward its H2', async () => {
+    writeBody('## Contract\n\n- One.\n\n### Errors\n\n- Two.\n- Three.\n')
+    writeLedger(`# Ledger\n\n## Contract\n\n${TABLE}| One | x |\n| Two | y |\n`)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      { rel: body, detail: '## Contract: 3 bullets, 2 ledger rows' },
     ])
   })
 })

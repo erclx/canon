@@ -1,6 +1,6 @@
 ---
 title: Adopted and declined
-description: Where each design-taste rule comes from, being a quoted authority, the community catalog of model-output tells, or a house threshold, where the per-bullet rows for the rule references sit, and what was declined and why
+description: Where each design-taste rule comes from, being a quoted authority, the community catalog of model-output tells, or a house threshold, where the per-bullet rows for the body and the rule references sit, and what was declined and why
 ---
 
 # Adopted and declined
@@ -17,7 +17,6 @@ A rule a quoted passage only partly backs names the part it backs, and the rest 
 
 - [Where the rows sit](#where-the-rows-sit)
 - [The layer model](#the-layer-model)
-- [The focus ring's weight](#the-focus-rings-weight)
 - [The catalog](#the-catalog)
 - [Declined from the catalogs](#declined-from-the-catalogs)
 - [Declined from the systems reference](#declined-from-the-systems-reference)
@@ -25,26 +24,19 @@ A rule a quoted passage only partly backs names the part it backs, and the rest 
 
 ## Where the rows sit
 
-Each bullet in `craft.md`, `kinds.md`, `systems.md`, and `tells.md` has its own source row in a ledger outside the plugin, one ledger per reference and one row per bullet under the H2 the bullet sits under.
+Each bullet in the skill body's concern groups and in `craft.md`, `kinds.md`, `systems.md`, and `tells.md` has its own source row in a ledger outside the plugin, one ledger per file and one row per bullet under the H2 the bullet sits under.
 
-- The toolkit's skill audit fails a ledgered reference whose bullets and rows disagree in count under any heading, and a target never carries the rows
+- The toolkit's skill audit fails a ledgered file whose bullets and rows disagree in count under any heading, and a target never carries the rows
+- The body's `## What this delegates` takes no rows, since it routes rather than directs
 - `preflight.md` takes no ledger, since its boxes restate the rules the four ledgered references source
 - `vocabulary.md` takes none either, since it defines terms rather than directing
-- This record keeps the sources behind the skill body, which has no ledger of its own, and what was read and declined
+- This record keeps the layer model behind the body's order, and what was read and declined
 
 ## The layer model
 
 The body's layer order subdivides the five planes of Jesse James Garrett's [The Elements of User Experience](http://www.jjg.net/elements/). Its second chapter states the dependency the order rests on, that "Each plane is dependent on the planes below it."
 
 The same passage gives the constraint running the other way, that "the choices available to us on each plane are constrained by the decisions we make about issues on the planes below it". The nine layers and the grey-box stage are the skill's own subdivision of those planes.
-
-## The focus ring's weight
-
-One lock in the body is the toolkit's own choice.
-
-| Threshold       | Source                                                                                                   |
-| --------------- | -------------------------------------------------------------------------------------------------------- |
-| One ring weight | House choice: a ring varying by component reads as several products. The `ui-craft` skill owns the floor |
 
 ## The catalog
 
