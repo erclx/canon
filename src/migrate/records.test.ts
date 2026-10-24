@@ -336,6 +336,14 @@ describe('isExcludedPath', () => {
     expect(isExcludedPath('scripts/eval/result-2026-08-20.md')).toBe(true)
   })
 
+  it('should exclude a replay snapshot, a frozen copy of another repository', () => {
+    expect(
+      isExcludedPath(
+        'sandbox/fixtures/replay/jobtriage/.claude/hooks/memory-index.sh.fixture',
+      ),
+    ).toBe(true)
+  })
+
   it('should sweep an ordinary shipped body', () => {
     expect(isExcludedPath('claude/skills/auto-ship/SKILL.md')).toBe(false)
   })

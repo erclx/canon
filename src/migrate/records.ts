@@ -103,6 +103,11 @@ function escape(value: string): string {
  * never match. The guard then stops firing in a project the move has not
  * reached, which is silent: the index goes stale while every save succeeds.
  *
+ * A replay snapshot is a frozen copy of a consumer, its hooks included, and
+ * the replay tests the upgrade from exactly that state. Sweeping one rewrites
+ * the consumer's own old-root citations, so the snapshot stops matching the
+ * release it was cut at.
+ *
  * A file outside this list can still couple to one inside it, naming an
  * excluded path as plain text while it also carries a live citation of its
  * own, which `referencesExcluded` reports separately below. Widening this list
@@ -115,6 +120,7 @@ const EXCLUDED_PREFIXES: readonly string[] = [
   'scripts/eval/result-',
   '.claude/hooks/',
   'tooling/claude/seeds/.claude/hooks/',
+  'sandbox/fixtures/replay/',
 ]
 
 const EXCLUDED_PATHS: readonly string[] = [

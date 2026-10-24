@@ -1,0 +1,60 @@
+[domains]
+cli = ["src/cli/"]
+server = ["src/server/"]
+client = ["src/client/"]
+shared = ["src/shared/"]
+plugin = [
+  "plugins/frameboard/skills/",
+  "plugins/frameboard/hooks/",
+  "plugins/frameboard/monitors/",
+  "plugins/frameboard/lib/",
+  ".claude-plugin/",
+]
+design = ["canon/design/", "canon/DESIGN.md"]
+documentation = [
+  "README.md",
+  "CONTRIBUTING.md",
+  "SECURITY.md",
+  "LICENSE",
+  "canon/REQUIREMENTS.md",
+  "canon/context/",
+  ".github/ISSUE_TEMPLATE/",
+  ".github/pull_request_template.md",
+  ".github/social-card.png",
+]
+tests = [
+  "e2e/",
+  "test/",
+  "src/test/",
+  "playwright.config.ts",
+  "vitest.config.ts",
+]
+ci = [
+  ".github/workflows/",
+  ".github/dependabot.yml",
+  "release-please-config.json",
+]
+tooling = [
+  "scripts/",
+  ".husky/",
+  ".lintstagedrc",
+  ".oxfmtrc.json",
+  ".oxlintrc.json",
+  ".prettierignore",
+  ".gitignore",
+  "commitlint.config.js",
+  "components.json",
+  "rolldown.config.ts",
+  "tsconfig.json",
+  "vite.config.ts",
+  "bun.lock",
+]
+claude = [".claude/", "CLAUDE.md", "canon/config/"]
+
+[declined]
+release-managed = [
+  "CHANGELOG.md",
+  "package.json",
+  ".release-please-manifest.json",
+  "plugins/frameboard/.claude-plugin/plugin.json",
+]
