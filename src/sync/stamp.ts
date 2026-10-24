@@ -286,7 +286,7 @@ async function putDomain(
 
   const path = stampPath(target)
   await mkdir(dirname(path), { recursive: true })
-  await writeFile(path, `${JSON.stringify(stamp, null, 2)}\n`)
+  await writeFile(path, `${serializeStamp(stamp)}\n`)
 
   // The stamp hashes every file but itself, so reshaping it cannot read as
   // drift. Seeds and goldens stay as copied for the opposite reason: their
@@ -300,6 +300,56 @@ async function putDomain(
   // index is a cache over every such stamp, and a state folder nobody can
   // write is not a reason to fail a sync that already landed its files.
   recordTarget(target, now)
+}
+
+const WIDTH = 80
+
+/**
+ * `JSON.stringify` expands every array one element per line, a shape oxfmt and
+ * prettier both reject, so a sync with no formatter to run would leave a
+ * target's format gate red. This inlines a string array that fits the default
+ * print width and expands one that does not, as both formatters would, and
+ * leaves objects expanded, which both preserve. Content and key order are
+ * `JSON.stringify`'s own.
+ */
+function serializeStamp(value: unknown): string {
+  return serialize(value, 0, 0, true)
+}
+
+function serialize(
+  value: unknown,
+  depth: number,
+  taken: number,
+  last: boolean,
+): string {
+  if (Array.isArray(value) && value.every((item) => typeof item === 'string')) {
+    const inline = JSON.stringify(value).replace(/","/g, '", "')
+    // A comma follows every entry but the last of its object, and counts
+    // against the width as it does for a formatter.
+    return taken + inline.length + (last ? 0 : 1) <= WIDTH
+      ? inline
+      : expand(value, depth)
+  }
+
+  if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    const entries = Object.entries(value).filter(([, v]) => v !== undefined)
+    if (entries.length === 0) return '{}'
+
+    const pad = '  '.repeat(depth + 1)
+    const lines = entries.map(([key, child], index) => {
+      const head = `${pad}${JSON.stringify(key)}: `
+      return `${head}${serialize(child, depth + 1, head.length, index === entries.length - 1)}`
+    })
+    return `{\n${lines.join(',\n')}\n${'  '.repeat(depth)}}`
+  }
+
+  return JSON.stringify(value)
+}
+
+function expand(items: readonly string[], depth: number): string {
+  const pad = '  '.repeat(depth + 1)
+  const lines = items.map((item) => `${pad}${JSON.stringify(item)}`)
+  return `[\n${lines.join(',\n')}\n${'  '.repeat(depth)}]`
 }
 
 const commitCache = new Map<string, Promise<string | undefined>>()
