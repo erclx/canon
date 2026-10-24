@@ -33,7 +33,7 @@ For each surface, look for:
 
 1. **Missing feedback states**: loading, empty, error, disabled, in-progress
 2. **Unhandled edge cases**: long strings, overflow, zero items, many items, slow networks
-3. **Inconsistencies**: spacing, tone of voice, interaction patterns, icon use, keyboard affordances
+3. **Inconsistencies**: spacing, tone of voice, interaction patterns, icon use, keyboard affordances. Take what consistent interaction means from the `ui` rules in `.claude/rules/`, and skip that when the project installed none
 4. **Roughness in daily use**: friction, redundant steps, unclear affordances, ambiguous labels
 
 Use `canon/DESIGN.md` as ground truth for intent where it exists. Observations only, no implementation suggestions or fixes.
