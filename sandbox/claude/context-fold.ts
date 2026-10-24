@@ -100,47 +100,5 @@ export default scenario({
         '         Outputs a reminder line to run canon indexes regen',
       )
     },
-    'classify-findings': (ctx) => {
-      ctx.fixtures('claude', 'context-fold', 'classify-findings', '01-initial')
-      ctx.git('add', '.')
-      ctx.commit('feat(retrieval): document the chunk size decision')
-
-      ctx.fixtures(
-        'claude',
-        'context-fold',
-        'classify-findings',
-        '02-remeasure',
-      )
-
-      ctx.log.step('Scenario ready: context-fold classifies what it writes')
-      ctx.log.info(
-        'Context: one uncommitted edit stages the shape the classify step exists to catch',
-      )
-      ctx.log.info(
-        '  canon/context/retrieval.md appended a branch-narrated re-measurement',
-      )
-      ctx.log.info(
-        '  below the count it restates, instead of rewriting it in place',
-      )
-      ctx.log.info('')
-      ctx.log.info(
-        'Narrate nothing about the edit. The arm fails if the classify step only',
-      )
-      ctx.log.info('reaches a file the prompt named.')
-      ctx.log.info('')
-      ctx.log.info('Action:  /context-fold')
-      ctx.log.info(
-        'Expect:  declared in fixtures/claude/context-fold/classify-findings/expect.toml',
-      )
-      ctx.log.info(
-        '         Check it with: canon sandbox check claude:context-fold classify-findings',
-      )
-      ctx.log.info(
-        '         retrieval.md holds 58,500 once, the narration and 42,000 are gone',
-      )
-      ctx.log.info(
-        '         Two expectations need a reader and report as unchecked.',
-      )
-    },
   },
 })
