@@ -84,7 +84,7 @@ What this skill adds on top of the standard:
 Every `- Suggested:` line takes senior judgment, picking the best option in one line with its reason or main tradeoff, and naming alternatives only when they change the pick.
 
 - Suggest a real default when best practice, the codebase, or prior context points to one
-- Before `## Files to touch`, load `canon:codebase-layout` for a new path (give its placement reason) and `canon:api-design` for a changed verb, flag, output, or endpoint. Report either if missing.
+- Before `## Files to touch`, load `canon:codebase-layout` for a new path (its reason) and `canon:api-design` for a changed verb, flag, output, record shape, or endpoint. Report either if missing.
 - Fill `## Design references` with the `canon/design/<surface>/` folder for each surface a UI file in `## Files to touch` renders, and write `None identified.` in a project with no folder
 - Write `## Verification` as one bullet per outcome naming the test or command that proves it
 - Write `## Review focus` as the inputs or states that would break the change, carrying the risk you understood to the executor and the reviewer

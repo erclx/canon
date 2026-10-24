@@ -14,7 +14,7 @@ description: Routes code placement, shape, and interface decisions to the skills
 
 ## Interfaces
 
-- Load `canon:api-design` before changing a public function, flag or output, record format, endpoint, or caller-handled error, and report it rather than proceeding silently when it does not resolve.
+- Load `canon:api-design` before shaping a public function, flag or output, record format, endpoint, or caller-handled error, and report it rather than proceeding silently when it does not resolve.
 
 ## Libraries
 
