@@ -66,7 +66,7 @@ An independent session invokes `canon:review-pr` once the pull request is open, 
 
 ### UI-heavy project
 
-Pick a design tier before the first feature session. See [visual design workflow](visual-design-workflow.md).
+A UI feature runs the same plan, build, and review loop at any size. See [visual design workflow](visual-design-workflow.md).
 
 ## Skills
 

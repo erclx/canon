@@ -7,7 +7,7 @@ description: Orientation and toolkit lessons for Anthropic's hosted design produ
 
 [Claude Design](https://claude.ai/design) is Anthropic's hosted design product. It turns prompts, uploaded references, and a codebase into prototypes, wireframes, slide decks, and one-pagers, then exports them or hands them to Claude Code as a bundle. It is a research preview on paid Claude plans, and an Enterprise admin switches it on.
 
-The product has no Claude Code docs page and no `.md` form to fetch. Source: [Introducing Claude Design by Anthropic Labs](https://www.anthropic.com/news/claude-design-anthropic-labs). For where it sits among the design tiers, see [visual design workflow](../../docs/workflow/visual-design-workflow.md).
+The product has no Claude Code docs page and no `.md` form to fetch. Source: [Introducing Claude Design by Anthropic Labs](https://www.anthropic.com/news/claude-design-anthropic-labs). For where it fits in the loop, see its design authoring section in [visual design workflow](../../docs/workflow/visual-design-workflow.md).
 
 ## Cost measured on a Max 5x plan
 
