@@ -18,6 +18,11 @@ export default scenario({
       // Structure seed in canon/context/pipeline.md. One entry past the line
       // checkpoint holding three stage domains under Layout, which earns a
       // structure line proposing a split by heading.
+      //
+      // Design record seed in canon/DESIGN.md. The lead is past its word cap and
+      // the Colors table names --color-muted, which src/styles/tokens.css does
+      // not declare, so the design record row carries a prose and a token finding
+      // routed to design-record.
       ctx.fixtures('claude', 'document-health', 'shared', '01-initial')
 
       ctx.git('add', '.')
@@ -45,6 +50,9 @@ export default scenario({
       ctx.log.info(
         '  6. canon/context/pipeline.md is past the line checkpoint and holds three stage domains',
       )
+      ctx.log.info(
+        '  7. canon/DESIGN.md has a lead past its cap and names --color-muted, which tokens.css lacks',
+      )
       ctx.log.info('Action:  /document-health')
       ctx.log.info(
         'Expect:  one section per document across length, placement, and staleness.',
@@ -66,6 +74,9 @@ export default scenario({
       )
       ctx.log.info(
         '         and Publish headings, naming the headings each entry takes and why.',
+      )
+      ctx.log.info(
+        '         canon/DESIGN.md reads as measured, naming both findings and routing them to design-record.',
       )
       ctx.log.info(
         '         Nothing is repaired: both files are byte-identical after the run.',

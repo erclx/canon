@@ -1,7 +1,9 @@
 import { existsSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import type { Command } from 'commander'
+import { auditDesign } from '@/design/audit'
 import { buildDesignCss } from '@/design/css'
+import { currentWorktreeRoot } from '@/git/worktree'
 import { HAND_DRAWN_FONT_FACES } from '@/design/fonts'
 import { DESIGN_DOCUMENT, regenDesign } from '@/design/regen'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
@@ -11,7 +13,7 @@ export function register(program: Command): void {
   const design = program
     .command('design')
     .helpOption('-h, --help', 'Show this help message')
-    .description('Design system commands (regen, css)')
+    .description('Design system commands (regen, css, audit)')
 
   design
     .command('regen')
@@ -76,5 +78,59 @@ export function register(program: Command): void {
           embedFonts: opts.figures ? HAND_DRAWN_FONT_FACES : undefined,
         }),
       )
+    })
+
+  design
+    .command('audit')
+    .helpOption('-h, --help', 'Show this help message')
+    .description(
+      'Measure the design record against the prose budget and check its custom properties against the stylesheet',
+    )
+    .option('--json', 'Add a machine-readable record on stdout')
+    .option('--root <path>', 'Project root, defaulting to the current worktree')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Reads canon/DESIGN.md. Prose findings carry their counts against the',
+        'budget the design standard sets. Each custom property in the Colors and',
+        'Shapes tables is checked against the stylesheet the lead names. A lead',
+        'naming none reads as `tokens.status: "unchecked"`, never as a pass.',
+        '',
+        'Exit codes:',
+        '  0  the reading completed, whatever it found',
+        '',
+        'It gates nothing and writes nothing.',
+        '',
+        'Examples:',
+        '  canon design audit',
+        '  canon design audit --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (opts: { json?: boolean; root?: string }) => {
+      const root = opts.root ?? (await currentWorktreeRoot())
+      const audit = auditDesign(root)
+
+      if (opts.json ?? false) {
+        process.stdout.write(`${JSON.stringify(audit)}\n`)
+        return
+      }
+
+      intro('canon design audit')
+      if (audit.record === null) {
+        logInfo('No design record to audit')
+      } else {
+        for (const finding of audit.prose) logWarn(finding)
+        if (audit.tokens?.status === 'unchecked') {
+          logWarn(`Tokens unchecked: ${audit.tokens.reason}`)
+        } else if (audit.tokens) {
+          for (const property of audit.tokens.missing) {
+            logWarn(`${property} is not declared in ${audit.tokens.stylesheet}`)
+          }
+        }
+        if (audit.clean) logInfo(`${audit.record} is within budget`)
+      }
+      outro()
     })
 }
