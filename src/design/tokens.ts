@@ -95,6 +95,9 @@ const SANS = 'Geist Variable, DejaVu Sans, sans-serif'
 const DARK_GROUNDS = ['background', 'surface'] as const
 const LIGHT_GROUNDS = ['light-background', 'light-surface'] as const
 
+/** The day the record was last read whole, rendered into its frontmatter so `canon design regen` and the review point agree. */
+export const REVIEWED = '2026-10-24'
+
 export const TOKENS: DesignTokens = {
   personality:
     'Warm neutrals under one rust accent, set in Geist. The page reads as prose, and monospace appears only where a surface shows what a shell printed. One accent carries every count, link, and primary action.',
