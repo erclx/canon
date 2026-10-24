@@ -1,6 +1,8 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { resolveSurfacePath } from '@/roots/surface'
+import { type Disposition, hashFile } from '@/sync/stamp'
+import { readDispositions } from '@/tooling/disposition'
 import { mergeSections } from '@/tooling/gitignore'
 import {
   ancestorsFirst,
@@ -41,9 +43,24 @@ export interface WithheldState {
   readonly present: boolean
 }
 
+/**
+ * A golden file the project declined or customized, which every write skips.
+ * `moved` is set on a customized config alone, true once the golden copy no
+ * longer hashes to the one the project took.
+ */
+export interface DispositionState {
+  readonly rel: string
+  readonly stack: string
+  readonly kind: 'config' | 'seed'
+  readonly disposition: Disposition
+  readonly present: boolean
+  readonly moved?: boolean
+}
+
 export interface ScanResult {
   readonly configs: readonly ConfigState[]
   readonly withheld: readonly WithheldState[]
+  readonly dispositions: readonly DispositionState[]
   readonly seeds: readonly SeedState[]
   readonly scripts: readonly ScriptState[]
   readonly deps: readonly DepState[]
@@ -72,11 +89,17 @@ function isIdentical(a: string, b: string): boolean {
  * GitHub reads only at the root moves to `withheld` and counts as no change.
  * The scope is read here so every caller of `scan` agrees without passing a
  * flag.
+ *
+ * A path the project declined or customized moves to `dispositions` ahead of
+ * the subfolder test, so it is listed once. The record is read here for the
+ * same reason as the scope.
  */
 export function scan(chain: readonly Manifest[], target: string): ScanResult {
   const isSubfolder = isSubfolderTarget(target)
+  const held = readDispositions(target)
   const configs: ConfigState[] = []
   const withheld: WithheldState[] = []
+  const dispositions: DispositionState[] = []
   const seenConfigs = new Set<string>()
 
   for (const manifest of chain) {
@@ -86,6 +109,21 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
 
       const source = join(manifest.configsDir, rel)
       const dest = join(target, rel)
+
+      const entry = held[rel]
+      if (entry !== undefined) {
+        dispositions.push({
+          rel,
+          stack: manifest.name,
+          kind: 'config',
+          disposition: entry.disposition,
+          present: existsSync(dest),
+          ...(entry.disposition === 'customized'
+            ? { moved: hashFile(source) !== entry.base }
+            : {}),
+        })
+        continue
+      }
 
       if (isSubfolder && isWithheldInSubfolder(rel)) {
         withheld.push({ rel, stack: manifest.name, present: existsSync(dest) })
@@ -109,6 +147,18 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
     for (const rel of seedFiles(manifest)) {
       if (seenSeeds.has(rel)) continue
       seenSeeds.add(rel)
+
+      const entry = held[rel]
+      if (entry !== undefined) {
+        dispositions.push({
+          rel,
+          stack: manifest.name,
+          kind: 'seed',
+          disposition: entry.disposition,
+          present: existsSync(resolveSurfacePath(target, rel)),
+        })
+        continue
+      }
 
       if (isSubfolder && isWithheldInSubfolder(rel)) {
         withheld.push({
@@ -144,6 +194,7 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
   const totalChanges =
     (newManifest ? 1 : 0) +
     configs.filter((entry) => entry.state !== 'matching').length +
+    dispositions.filter((entry) => entry.moved === true).length +
     seeds.filter((entry) => entry.state === 'missing').length +
     scripts.filter((entry) => entry.state !== 'matching').length +
     deps.filter((entry) => entry.state === 'missing').length +
@@ -152,6 +203,7 @@ export function scan(chain: readonly Manifest[], target: string): ScanResult {
   return {
     configs,
     withheld,
+    dispositions,
     seeds,
     scripts,
     deps,
