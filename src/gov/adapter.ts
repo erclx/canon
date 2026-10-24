@@ -3,6 +3,7 @@ import { basename, join, relative, resolve } from 'node:path'
 import { readCoverage } from '@/gov/coverage'
 import { canonRulesDir, ruleSubdir } from '@/gov/install'
 import { loadRenames, resolveSuccessor } from '@/gov/renames'
+import { loadSplits } from '@/gov/splits'
 import { resolveMissingRules } from '@/gov/stacks'
 import type { InstalledFile, RetiredSurface, SyncAdapter } from '@/sync/engine'
 import { readStamp, stampedChain } from '@/sync/stamp'
@@ -125,14 +126,15 @@ function heldRulePath(target: string, rule: string): string | undefined {
 
 /**
  * Rules the target's recorded chain entitles it to and its tree does not
- * hold. Reports as `notice` text through the same shape `collectRetired`
- * already returns, since both are surfaces the file walk cannot see: one an
- * absence to remove, this one an absence to add.
+ * hold, then the partners of a held rule that split. Reports as `notice` text
+ * through the same shape `collectRetired` already returns, since both are
+ * surfaces the file walk cannot see: one an absence to remove, this one an
+ * absence to add.
  */
 function collectMissingGov(root: string, target: string): RetiredSurface[] {
   const chain = stampedChain(readStamp(target), 'governance')
 
-  return resolveMissingRules(root, target, chain).map((source) => {
+  const fromChain = resolveMissingRules(root, target, chain).map((source) => {
     const dest = join(canonRulesDir(target), source.subdir, `${source.rule}.md`)
     const rel = relative(target, dest)
     return {
@@ -141,6 +143,53 @@ function collectMissingGov(root: string, target: string): RetiredSurface[] {
       notice: `${rel} (listed by ${chain[0]}, not installed. Run canon gov install ${chain[0]} to add it.)`,
     }
   })
+
+  const listed = new Set(fromChain.map((entry) => entry.path))
+  const fromSplits = collectSplitPartners(root, target).filter(
+    (entry) => !listed.has(entry.path),
+  )
+
+  return [...fromChain, ...fromSplits]
+}
+
+/**
+ * Partners the split ledger names for a rule the target holds and whose own
+ * file it lacks. The ui rules sit in no stack, so no chain entitles a target
+ * to them and the chain-based read stays silent when one splits. Holding the
+ * rule is the entitlement, found by basename the way `heldRulePath` finds a
+ * predecessor, so a partner held under another folder reads as held.
+ */
+function collectSplitPartners(root: string, target: string): RetiredSurface[] {
+  const splits = loadSplits(root)
+  if (splits.size === 0) return []
+
+  const index = indexSourceRules(root)
+  const notices: RetiredSurface[] = []
+
+  for (const [held, partners] of splits) {
+    if (heldRulePath(target, held) === undefined) continue
+
+    for (const partner of partners) {
+      const source = index.get(partner)
+      if (source === undefined || heldRulePath(target, partner) !== undefined) {
+        continue
+      }
+
+      const dest = join(
+        canonRulesDir(target),
+        ruleSubdir(source, rulesSourceDir(root)),
+        `${partner}.md`,
+      )
+      const rel = relative(target, dest)
+      notices.push({
+        path: dest,
+        rel,
+        notice: `${rel} (${held}.md moved bullets here. Run canon gov install --add ${partner} to add it.)`,
+      })
+    }
+  }
+
+  return notices
 }
 
 function collectRetiredGov(target: string): RetiredSurface[] {

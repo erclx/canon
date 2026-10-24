@@ -32,7 +32,7 @@ A flat installed-rule layout makes `gov sync` report "No governance surfaces fou
 - A retired `.claude/GOV.md` is removed
 - A binary older than the stamp holds every rule it has no source for and asks for an upgrade
 
-After a rename the new name shows as `missing` when the stamp records a stack, and `gov install <stack>` adds it.
+After a rename the new name shows as `missing` when the stamp records a stack, and `gov install <stack>` adds it. A partner `governance/splits.toml` names shows as `missing` when the tree holds the split rule and lacks the partner, and `gov install --add <partner>` adds it.
 
 `canon gov regen [--root <path>]` runs against the toolkit root alone. It rewrites `.claude/rules/canon/` and `.claude/rules/internal/` from `internal/`, and exits 1 when the record names something that does not resolve.
 
@@ -112,16 +112,16 @@ A refusal answers `{ ok: false, reason, message }` with exit 1:
 
 `canon sync --check` writes nothing and needs no clean tree. `--json` emits the record, `--exit-code` fails CI.
 
-| State        | Meaning                                                            |
-| ------------ | ------------------------------------------------------------------ |
-| `stale`      | Still matches what the toolkit installed                           |
-| `customized` | The project edited it                                              |
-| `stranded`   | Sits at a path the toolkit no longer installs to                   |
-| `orphaned`   | The project authored it                                            |
-| `drifted`    | No stamp covers it                                                 |
-| `missing`    | Governance only. The recorded stack lists it and the tree lacks it |
-| `retired`    | Governance only. The toolkit no longer ships it                    |
-| `renamed`    | Governance only. The toolkit ships it under a new name             |
+| State        | Meaning                                                                 |
+| ------------ | ----------------------------------------------------------------------- |
+| `stale`      | Still matches what the toolkit installed                                |
+| `customized` | The project edited it                                                   |
+| `stranded`   | Sits at a path the toolkit no longer installs to                        |
+| `orphaned`   | The project authored it                                                 |
+| `drifted`    | No stamp covers it                                                      |
+| `missing`    | Governance only. The recorded stack lists it, or a split rule leaves it |
+| `retired`    | Governance only. The toolkit no longer ships it                         |
+| `renamed`    | Governance only. The toolkit ships it under a new name                  |
 
 `retired` and `renamed` count toward `--exit-code`. `orphaned` and `missing` do not.
 
