@@ -84,18 +84,45 @@ export const LEDGER_SKILLS: readonly string[] = [
   join(SHIPPED_CORPUS, 'ui-craft'),
 ]
 
+function references(...names: string[]): string[] {
+  return names.map((name) => join('references', `${name}.md`))
+}
+
+export interface BulletLedgerScope {
+  /** References left off, each a checklist or glossary naming no new source. */
+  readonly exempt: readonly string[]
+  /** True when `SKILL.md` carries directives of its own to ledger. */
+  readonly body: boolean
+}
+
 /**
  * The ledger-listed skills whose every reference but the source record carries
  * a ledger of its own, one table row per bullet under each H2, the way a rule
- * in a practice folder does. The ledgers sit outside the plugin as rule
- * ledgers do, so a target pays nothing for them.
+ * in a practice folder does. A reference is ledgered unless exempted by name,
+ * so one added later fails until its rows land rather than passing unread. The
+ * ledgers sit outside the plugin as rule ledgers do, so a target pays nothing
+ * for them.
  */
-export const BULLET_LEDGER_SKILLS: readonly string[] = [
-  join(SHIPPED_CORPUS, 'ui-craft'),
-]
+export const BULLET_LEDGER_SKILLS: Readonly<Record<string, BulletLedgerScope>> =
+  {
+    [join(SHIPPED_CORPUS, 'ui-craft')]: { exempt: [], body: false },
+    [join(SHIPPED_CORPUS, 'design-taste')]: {
+      exempt: references('preflight', 'vocabulary'),
+      body: false,
+    },
+  }
 
-/** Where a per-bullet ledger lives, as `<skill>/<reference>.md` below it. */
+/** Where a per-bullet ledger lives, as `<skill>/<file>.md` below it. */
 export const SKILL_LEDGERS = join('governance', 'ledger', 'skills')
+
+/**
+ * The ledger a ledgered file pairs with, keyed by the file's own name, so a
+ * reference drops its `references/` segment and a `SKILL.md` keeps its name.
+ */
+export function skillLedgerPath(folder: string, file: string): string {
+  const inside = relative('references', file)
+  return join(SKILL_LEDGERS, folder, inside.startsWith('..') ? file : inside)
+}
 
 /** The closing H2s a practice skill carries, matched exactly outside fences. */
 export const PRACTICE_SECTIONS: readonly string[] = [
@@ -213,8 +240,10 @@ interface SkillSource {
    * requirement is where the standard sends a date.
    */
   readonly bodies: readonly SkillText[]
-  /** One entry per reference of a skill on the per-bullet ledger list. */
+  /** One entry per ledgered file of a skill on the per-bullet ledger list. */
   readonly referenceLedgers: readonly ReferenceLedger[]
+  /** Exempted references the skill no longer carries, which exempt nothing. */
+  readonly staleExemptions: readonly string[]
 }
 
 interface ReferenceLedger {
@@ -342,15 +371,22 @@ async function readSkill(
 
   const fields = parseFrontmatter(body)
   const skillRel = join(rel, folder)
-  const referenceLedgers = BULLET_LEDGER_SKILLS.includes(skillRel)
-    ? await readReferenceLedgers(
-        root,
-        skillRel,
-        folder,
-        references,
-        referenceTexts,
-      )
-    : []
+  const scope = BULLET_LEDGER_SKILLS[skillRel]
+  const referenceLedgers =
+    scope === undefined
+      ? []
+      : await readReferenceLedgers(root, skillRel, folder, [
+          ...(scope.body ? [{ path: 'SKILL.md', text: body }] : []),
+          ...references
+            .map((path, index) => ({ path, text: referenceTexts[index] ?? '' }))
+            .filter(
+              ({ path }) =>
+                path !== PRACTICE_LEDGER && !scope.exempt.includes(path),
+            ),
+        ])
+  const staleExemptions = (scope?.exempt ?? [])
+    .filter((path) => !references.includes(path))
+    .map((path) => join(skillRel, path))
 
   return {
     rel: skillRel,
@@ -373,41 +409,32 @@ async function readSkill(
       })),
     ],
     referenceLedgers,
+    staleExemptions,
   }
 }
 
 /**
- * Pairs each reference's bullets with its ledger's rows through the rule
- * audit's own comparison, so a reference and a rule are held to one count.
- * The source record names authorities rather than stating bullets, so it is
- * the one reference asked for no ledger.
+ * Pairs each ledgered file's bullets with its ledger's rows through the rule
+ * audit's own comparison, so a skill file and a rule are held to one count.
  */
 async function readReferenceLedgers(
   root: string,
   skillRel: string,
   folder: string,
-  references: readonly string[],
-  texts: readonly string[],
+  files: readonly { path: string; text: string }[],
 ): Promise<ReferenceLedger[]> {
   return Promise.all(
-    references
-      .map((path, index) => ({ path, text: texts[index] ?? '' }))
-      .filter(({ path }) => path !== PRACTICE_LEDGER)
-      .map(async ({ path, text }) => {
-        const ledgerRel = join(
-          SKILL_LEDGERS,
-          folder,
-          relative('references', path),
-        )
-        const ledgerPath = join(root, ledgerRel)
-        const mismatches = existsSync(ledgerPath)
-          ? compareLedger(
-              measureRule(text).groups,
-              countLedgerRows(await Bun.file(ledgerPath).text()),
-            )
-          : undefined
-        return { rel: join(skillRel, path), ledgerRel, mismatches }
-      }),
+    files.map(async ({ path, text }) => {
+      const ledgerRel = skillLedgerPath(folder, path)
+      const ledgerPath = join(root, ledgerRel)
+      const mismatches = existsSync(ledgerPath)
+        ? compareLedger(
+            measureRule(text).groups,
+            countLedgerRows(await Bun.file(ledgerPath).text()),
+          )
+        : undefined
+      return { rel: join(skillRel, path), ledgerRel, mismatches }
+    }),
   )
 }
 
@@ -603,6 +630,10 @@ function practiceFindings(source: SkillSource): SkillFinding[] {
     ...sections,
     ...ledgerFindings(source),
     ...source.referenceLedgers.flatMap(referenceLedgerFindings),
+    ...source.staleExemptions.map((rel) => ({
+      rel,
+      detail: 'missing file: exempt from a ledger',
+    })),
   ]
 }
 

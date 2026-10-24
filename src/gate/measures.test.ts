@@ -1,10 +1,15 @@
 import { execaSync } from 'execa'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { basename, join } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { BASELINE_REL } from '@/audits/baseline'
-import { LEDGER_SKILLS, PRACTICE_SKILLS } from '@/claude/skills-audit'
+import {
+  BULLET_LEDGER_SKILLS,
+  LEDGER_SKILLS,
+  PRACTICE_SKILLS,
+  skillLedgerPath,
+} from '@/claude/skills-audit'
 import { CLIENT_COMMAND_MARKER } from '@/gate/client-commands'
 import { gitEnv } from '@/git/env'
 import type { CommandResult, MeasureContext } from '@/gate/measures'
@@ -1172,11 +1177,22 @@ describe('skillPracticeShape', () => {
 
   /**
    * Writes a conforming fixture for every listed skill but the one a test
-   * varies, so an append to the list needs no edit here.
+   * varies, so an append to the list needs no edit here. Each exempted
+   * reference is written so its exemption names a real file, and a listed body
+   * gets a row-free ledger.
    */
   const writeListedExcept = (omitted?: string): void => {
     for (const rel of LEDGER_SKILLS.filter((rel) => rel !== omitted)) {
       writePracticeSkill(CLOSED, rel)
+      const scope = BULLET_LEDGER_SKILLS[rel]
+      for (const file of scope?.exempt ?? []) {
+        writeFileSync(join(root, rel, file), '# Reference\n')
+      }
+      if (scope?.body) {
+        const ledger = join(root, skillLedgerPath(basename(rel), 'SKILL.md'))
+        mkdirSync(dirname(ledger), { recursive: true })
+        writeFileSync(ledger, '# Ledger\n')
+      }
     }
   }
 
