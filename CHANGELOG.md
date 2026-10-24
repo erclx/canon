@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.62.0](https://github.com/erclx/canon/compare/v5.61.0...v5.62.0) (2026-10-24)
+
+
+### Features
+
+* **governance:** cover more WCAG criteria in the ui rules ([#2677](https://github.com/erclx/canon/issues/2677)) ([25b6190](https://github.com/erclx/canon/commit/25b619039aa3656e239385713f796c5e34810485))
+* **governance:** name the partner of a split rule on sync ([#2681](https://github.com/erclx/canon/issues/2681)) ([1d6703e](https://github.com/erclx/canon/commit/1d6703e74deb7968b0121b5e3148e474ed836c89))
+* **tooling:** let a project decline or customize one golden file ([#2675](https://github.com/erclx/canon/issues/2675)) ([41c5ec0](https://github.com/erclx/canon/commit/41c5ec042a8d50b968e853a175f45eac5a59703c))
+
 ## [5.61.0](https://github.com/erclx/canon/compare/v5.60.0...v5.61.0) (2026-10-24)
 
 
