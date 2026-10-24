@@ -179,6 +179,7 @@ A `## Verbatim` section carries wording someone settled, landing in an existing 
 - Give each block an H3 naming it, then a lead sentence with the action, the full path, and the anchor, then a fenced `text` block holding the wording
 - Name the action as Add, Insert, or Replace. A Replace quotes the old line in the lead's code span.
 - Write the block as the project's formatter leaves it, since a formatter that re-pads a table row or rewraps a line makes the grep fail on correct text
+- Name the outcome in a grep bullet and put a command past 200 characters in a fenced `bash` block under it, since `S4` reports a longer bullet
 - Give each block one `## Verification` bullet running `grep -cF -e` on its whole first line against its file, so a reworded line fails a check the reviewer already runs.
 
 ### Design references
@@ -268,7 +269,7 @@ This contract inverts the one an intake folder keeps, where an empty slot means 
 
 ## Template
 
-Each H3 below shows where a section groups once it passes 5 bullets. A section of 5 or fewer drops its H3s and keeps its bullets flat, except `## Risks`, which takes an H3 per risk at any count.
+Each H3 below shows where a section groups once it passes 5 bullets. A section of 5 or fewer drops its H3s and keeps its bullets flat, except `## Risks` and `## Verbatim`, which take an H3 per risk or block at any count.
 
 ````markdown
 # Feature: <short title>
