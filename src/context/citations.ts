@@ -1,9 +1,10 @@
 import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
-import { resolve } from 'node:path'
+import { relative, resolve } from 'node:path'
 import { listRepositoryFiles } from '@/git/files'
 import { RECORD_ROOTS } from '@/roots/record'
 import { SURFACE_ROOTS } from '@/roots/surface'
+import { stampPaths } from '@/sync/stamp'
 
 /**
  * Suppresses citation checking for the source line carrying it.
@@ -191,7 +192,11 @@ export type CitationReport =
   | { readonly kind: 'unavailable' }
 
 /**
- * Resolves every cited path outside the fixture trees.
+ * Resolves every cited path outside the fixture trees and the install stamp.
+ *
+ * The stamp is written by the toolkit, and `canon tooling decline` records the
+ * declined path as a key in it, so scanning it reports a deliberate decline as
+ * a stale citation.
  *
  * This is the only check that gates the repository check, which makes it the
  * only one whose false positives cost a contributor anything. It reports a
@@ -206,7 +211,8 @@ export async function auditCitations(
   const listed = await listRepositoryFiles(root)
   if (!listed) return { kind: 'unavailable' }
 
-  const candidates = listed.filter((rel) => !isFixture(rel))
+  const stamps = new Set(stampPaths(root).map((path) => relative(root, path)))
+  const candidates = listed.filter((rel) => !isFixture(rel) && !stamps.has(rel))
   const citations: Citation[] = []
 
   for (const rel of candidates) {
