@@ -862,7 +862,8 @@ describe('auditSkills ledger contents', () => {
 
   it('should read a link inside a fenced block as no citation', async () => {
     practiceSkill(CLOSING, {
-      ledger: '# Adopted\n\n```markdown\n[A source](https://example.com)\n```\n',
+      ledger:
+        '# Adopted\n\n```markdown\n[A source](https://example.com)\n```\n',
     })
 
     const report = await auditSkills(root)

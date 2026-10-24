@@ -537,7 +537,9 @@ function ledgerFindings(source: SkillSource): SkillFinding[] {
     .some((text) => EXTERNAL_LINK.test(text) || HOUSE_CHOICE.test(text))
   if (cites) return []
 
-  return [{ rel: source.rel, detail: `ledger cites nothing: ${PRACTICE_LEDGER}` }]
+  return [
+    { rel: source.rel, detail: `ledger cites nothing: ${PRACTICE_LEDGER}` },
+  ]
 }
 
 /**
