@@ -85,11 +85,12 @@ The migrations, the sync, and the commits write the project, so they land on the
 
 Compare `git rev-parse --git-dir` with `git rev-parse --git-common-dir`, then take the first row that fits:
 
-| State                                         | This skill                                                                                  |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Different, so already in a linked worktree    | Uses it and enters nothing, since a second worktree would nest inside the first             |
-| Equal, and the operator took the worktree     | Invokes `canon:session-worktree` with `update-canon`, then runs Steps 4 to 6 from inside it |
-| Equal, and the operator declined the worktree | Invokes `canon:git-branch` for `chore/update-canon`, then runs Steps 4 to 6 in place        |
+| State                                      | This skill                                                                                        |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| Different, so already in a linked worktree | Uses it and enters nothing, since a second worktree would nest inside the first                   |
+| Equal, and the operator took the worktree  | Invokes `canon:session-worktree` with `chore/update-canon`, then runs Steps 4 to 6 from inside it |
+| Equal, declined, on `main` or `master`     | Invokes `canon:git-branch` for `chore/update-canon`, then runs Steps 4 to 6 in place              |
+| Equal, declined, on any other branch       | Stops and says so, since `canon:git-branch` would rename that branch under every session on it    |
 
 Four points govern the choice:
 
