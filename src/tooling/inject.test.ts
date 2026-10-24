@@ -104,6 +104,34 @@ describe('injectManifest', () => {
     expect(stderr()).not.toContain('bun init')
   })
 
+  it('should return the refusal and leave the scripts unwritten when the install fails', async () => {
+    const stderr = captureStderr()
+    const body = '{"name":"mine"}\n'
+    writeFileSync(join(target, 'package.json'), body)
+    writeFileSync(
+      join(target, 'bunfig.toml'),
+      '[install]\nregistry = "http://127.0.0.1:9"\n',
+    )
+
+    const result = await injectManifest(
+      [
+        {
+          ...scriptsOnly({ check: 'bun run lint' }),
+          devPackages: ['zz-nonexistent'],
+        },
+      ],
+      target,
+    )
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.reason).toBe('install-failed')
+    expect(result.message).toContain('zz-nonexistent')
+    expect(readFileSync(join(target, 'package.json'), 'utf8')).toBe(body)
+    expect(existsSync(join(target, '.gitignore'))).toBe(false)
+    expect(stderr()).not.toContain('Applying scripts')
+  }, 30_000)
+
   it('should write no package.json when the chain installs nothing', async () => {
     const stderr = captureStderr()
 
