@@ -128,6 +128,7 @@ describe('governance/rules/ui', () => {
       'a11y',
       'copy',
       'design-reference',
+      'design-taste',
       'forms',
       'interface-casing',
       'keyboard',
