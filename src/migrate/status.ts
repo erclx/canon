@@ -119,11 +119,11 @@ async function readOne(
  */
 export async function readMigrationStatus(
   run: RunCommand,
-  root?: string,
+  root: string,
 ): Promise<StatusReport> {
   const [migrations, retiredCallers] = await Promise.all([
     Promise.all(MIGRATIONS.map((migration) => readOne(run, migration))),
-    root === undefined ? [] : scanRetiredCallers(root),
+    scanRetiredCallers(root),
   ])
   return {
     retiredCallers,

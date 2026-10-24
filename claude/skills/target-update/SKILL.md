@@ -81,7 +81,7 @@ Summarize the changelog for this project, not for the toolkit. Drop an entry tha
 
 ### Nothing pending
 
-When the changelog range is empty, `migrate status` lists nothing pending or refused, and the drift lines hold nothing a step here would take, write nothing. Invoke `canon:target-check` and report the target current with its table.
+When the changelog range is empty, `migrate status` lists nothing pending or refused and no `retiredCallers`, and the drift lines hold nothing a step here would take, write nothing. Invoke `canon:target-check` and report the target current with its table.
 
 ### Take a branch after the go-ahead
 
