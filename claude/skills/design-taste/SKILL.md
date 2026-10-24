@@ -58,7 +58,7 @@ A lower layer constrains every layer above it. Two consequences follow in opposi
 - Settling a higher layer over a broken lower one changes nothing, which is why a palette round against a broken composition is wasted
 - Judging a lower layer through a finished higher one is nearly impossible, which is why grey-boxing works
 
-The model is Jesse James Garrett's five planes from _The Elements of User Experience_ (2000), subdivided to the granularity a drafting round works at.
+The model is Jesse James Garrett's five planes from [The Elements of User Experience](http://www.jjg.net/elements/) (2000), subdivided to the granularity a drafting round works at.
 
 | Order | Layer       | The question it answers                                                    |
 | ----- | ----------- | -------------------------------------------------------------------------- |
@@ -101,6 +101,7 @@ Coherence is a property of the whole and every one of these is broken one sectio
 - **One theme.** No inverted section dropped between its neighbors. A reader must not feel they walked into a different product mid-scroll.
 - **One copy register.** Technical, editorial and promotional voices do not mix in one composition unless the brand states that they do.
 - **One light source.** Every shadow on the surface falls the same way, and a shadow is tinted toward the ground rather than pure black.
+- **One focus ring weight.** Chosen once and drawn the same on every control. The `ui` rules own its visibility, contrast, and floor, and this lock sets the weight above them.
 
 ## Working on something that already exists
 
