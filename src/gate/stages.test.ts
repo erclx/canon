@@ -82,6 +82,8 @@ describe('the consumer replay stage scope', () => {
     expect(scope.test('src/sync/run.ts')).toBe(true)
     expect(scope.test('governance/rules/canon/git.md')).toBe(true)
     expect(scope.test('tooling/base/configs/.oxfmtrc.json')).toBe(true)
+    expect(scope.test('governance/renames.toml')).toBe(true)
+    expect(scope.test('governance/stacks/node.toml')).toBe(true)
     expect(
       scope.test('sandbox/fixtures/replay/jobtriage/CLAUDE.md.fixture'),
     ).toBe(true)
@@ -91,6 +93,9 @@ describe('the consumer replay stage scope', () => {
     const scope = scopeOf('consumer-replay')
 
     expect(scope.test('docs/agents/commands.md')).toBe(false)
+    expect(scope.test('governance/ledger/skills/code-craft/SKILL.md')).toBe(
+      false,
+    )
     expect(scope.test('canon/context/development/sandbox.md')).toBe(false)
     expect(
       scope.test('sandbox/fixtures/git/commit/small/create/a.ts.fixture'),

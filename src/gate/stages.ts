@@ -310,11 +310,13 @@ export const STAGES: readonly Stage[] = [
     // stage that reads this repository. Replaying the frozen consumer
     // snapshots through this checkout's sync is what reaches it before a
     // consumer does. Scoped to what a sync ships or reads, since a replay
-    // costs seconds a docs-only push should not pay.
+    // costs seconds a docs-only push should not pay. Governance is whole
+    // but for the ledger, since sync resolves stacks and renames as well as
+    // rules, and a rename is the class the stage was built against.
     id: 'consumer-replay',
     label: 'Consumer replay',
     scope:
-      /^src\/|^governance\/rules\/|^tooling\/|^sandbox\/fixtures\/replay\//,
+      /^src\/|^governance\/(?!ledger\/)|^tooling\/|^sandbox\/fixtures\/replay\//,
     skipped:
       'No synced surface or snapshot changed, so no consumer was replayed',
     checks: [
