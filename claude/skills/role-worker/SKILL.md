@@ -60,8 +60,9 @@ A plan carrying a `**Design references:**` section names the accepted design for
 
 - Open each cited folder's light and dark images and its frame HTML before the first edit to that surface
 - Take sizes, spacing, and colors from the frame HTML rather than from the image
-- Report a reference that does not resolve in the working tree, naming the path, rather than building without it
+- Report a missing reference by its path rather than building without it
 - Leave `None identified.` as it stands and build without a reference
+- Load `ui-craft` before editing a rendered surface, pointer rule or not
 
 ## Scope after dispatch
 

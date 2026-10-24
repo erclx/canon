@@ -48,7 +48,7 @@ The checkbox stays `- [ ]` followed by the action and the result, since the evid
 
 ## Boxes no engine reads
 
-The UI review runs axe over every route it reaches, so a box restating what axe checks, such as contrast, a missing name, or a page title, adds a drive and catches nothing. Derive a box instead for each behavior below that the changed surface carries:
+The UI review runs axe over every route it reaches, so a box restating what axe checks, such as contrast, a missing name, or a page title, adds a drive and catches nothing. Derive a box instead from the `ui-craft` references the changed surface reads, for each behavior below that it carries:
 
 - **Hover content.** Content shown on hover or focus stays while the pointer moves onto it, and Escape dismisses it, per WCAG 1.4.13.
 - **Keyboard trap.** Tab and Shift+Tab leave every widget the change added, per WCAG 2.1.2.

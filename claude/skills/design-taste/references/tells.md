@@ -73,7 +73,7 @@ The browser and the operating system draw some parts of every page, and a themed
 - **The permanent loop.** Anything animating forever with no input. It costs attention on every frame and earns none back.
 - **Motion on arrival for everything.** Every section fading up on scroll. Reserve entrance motion for what genuinely needs the eye.
 - **Motion claimed but absent, or present but unclaimed.** A "restrained" surface animating on every scroll, or a "fluid" one sitting still, has decided nothing. Ship the motion or drop the claim.
-- **Motion that ignores a reduced-motion preference.** A correctness failure the `ui` governance rules own, not a taste one. It sits here so a motion pass does not read this catalog as all motion owes.
+- **Motion that ignores a reduced-motion preference.** A correctness failure the `ui-craft` skill owns, not a taste one. It sits here so a motion pass does not read this catalog as all motion owes.
 
 ## The countable limits
 

@@ -1,6 +1,6 @@
 ---
 name: design-taste
-description: Carries the layer model that decides which design decision settles first, the rules that keep a surface coherent across sections, and the catalog of defaults a model reaches for when nothing states a direction. Use when drafting or judging an interface, a page, or any rendered surface, when output reads generic or templated, when redesigning something that already exists, or when asked to "make this look designed", "why does this look like AI made it", "give it taste", "what layer is this decision at", or "grey-box this first". Do NOT use for accessibility, forms, or state coverage, which the `ui` governance rules carry, for the shape of the project's design document, which `design.md` governs, or to run the candidate loop, which is `pick-by-eye`.
+description: Carries the layer model that decides which design decision settles first, the rules that keep a surface coherent across sections, and the catalog of defaults a model reaches for when nothing states a direction. Use when drafting or judging an interface, a page, or any rendered surface, when output reads generic or templated, when redesigning something that already exists, or when asked to "make this look designed", "why does this look like AI made it", "give it taste", "what layer is this decision at", or "grey-box this first". Do NOT use for accessibility, forms, or state coverage, which `ui-craft` carries, for the shape of the project's design document, which `design.md` governs, or to run the candidate loop, which is `pick-by-eye`.
 metadata:
   family: build
 ---
@@ -101,7 +101,7 @@ Coherence is a property of the whole and every one of these is broken one sectio
 - **One theme.** No inverted section dropped between its neighbors. A reader must not feel they walked into a different product mid-scroll.
 - **One copy register.** Technical, editorial and promotional voices do not mix in one composition unless the brand states that they do.
 - **One light source.** Every shadow on the surface falls the same way, and a shadow is tinted toward the ground rather than pure black.
-- **One focus ring weight.** Chosen once and drawn the same on every control. The `ui` rules own its visibility, contrast, and floor, and this lock sets the weight above them.
+- **One focus ring weight.** Chosen once and drawn the same on every control. The `ui-craft` skill owns its visibility, contrast, and floor, and this lock sets the weight above them.
 
 ## Working on something that already exists
 
@@ -149,9 +149,9 @@ Run `${CLAUDE_SKILL_DIR}/references/preflight.md` against the output. It is the 
 
 ## What this delegates
 
-- Focus, keyboard, ARIA, alt text, and every accessibility floor: the `ui` governance rules, which fire on the same paths this skill does and are the single source
-- States, empty and loading coverage, destructive confirmation, truncation: the same rules
-- Rendered copy casing, button labels, error message shape: the same rules
+- Focus, keyboard, ARIA, alt text, and every accessibility floor: the `ui-craft` skill, which the same pointer rule loads beside this one and is the single source
+- States, empty and loading coverage, destructive confirmation, truncation: the same skill
+- Rendered copy casing, button labels, error message shape: the same skill
 
 ### Other skills
 

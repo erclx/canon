@@ -29,8 +29,8 @@ The output has no standard of quality either. A model with no stated direction d
 
 ## Out of scope
 
-- Accessibility, keyboard interaction, state coverage, forms, and rendered copy, which the `a11y`, `keyboard`, `ux-completeness`, `forms`, and `copy` rules own
-- The focus ring's floors, which `keyboard` owns, though its weight is this skill's
+- Accessibility, keyboard interaction, state coverage, forms, and rendered copy, which `ui-craft` owns
+- The focus ring's floors, which `ui-craft` owns, though its weight is this skill's
 - The candidate loop and the pick, which `pick-by-eye` owns
 - The shape of the project's design document, which `design-record`'s design reference governs
 - Prose on the surface being designed, which `write-human` and `markdown-craft` own

@@ -135,9 +135,9 @@ The uppercase label count belongs to the `interface-casing` rule, whose own ledg
 
 One more lock is the toolkit's own choice.
 
-| Threshold       | Source                                                                                            |
-| --------------- | ------------------------------------------------------------------------------------------------- |
-| One ring weight | House choice: a ring varying by component reads as several products. The `ui` rules own the floor |
+| Threshold       | Source                                                                                                   |
+| --------------- | -------------------------------------------------------------------------------------------------------- |
+| One ring weight | House choice: a ring varying by component reads as several products. The `ui-craft` skill owns the floor |
 
 ## Declined from the catalogs
 

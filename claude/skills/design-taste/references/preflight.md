@@ -102,4 +102,4 @@ Every word on the surface states what is true of it.
 ## Handover
 
 - [ ] The weakest thing on the surface is named out loud, per `pick-by-eye` Step 3, and fixed where naming it would embarrass the work
-- [ ] The floor the `ui` governance rules carry has been applied, not assumed
+- [ ] The floor the `ui-craft` skill carries has been applied, not assumed

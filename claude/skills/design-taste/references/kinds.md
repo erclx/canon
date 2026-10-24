@@ -26,7 +26,7 @@ Dashboards, tools, admin surfaces, agentic and assistant interfaces. The reader 
 - **Optimizes for** throughput and state legibility. How fast can the reader see what is happening and act on it.
 - **High density is correct.** Cramming is a failure and spaciousness is also a failure, since a surface that shows six rows where thirty fit costs the reader a scroll per glance.
 - **The states carry the design weight.** Loading, empty, error, partial and stale are most of what the reader sees on this kind, so they are composed rather than handled.
-- **Whether each state exists** is the `ui` rules' question, not this file's.
+- **Whether each state exists** is the `ui-craft` skill's question, not this file's.
 - **An agentic surface adds three states.** Work running with something to read, work that needs the person, and work finished with a result to inspect. Each rests visibly, never as a spinner.
 - **Chrome is persistent and quiet.** Navigation, status and context stay put and stay recessive, since they are read constantly and looked at rarely.
 - **Motion is feedback, not entrance.** A thing moving should be reporting that something changed.
@@ -52,7 +52,7 @@ Documentation, articles, reference pages, learning material. The reader arrived 
 
 ## Kinds this file does not cover
 
-- **Transactional flows** such as checkout, sign-up and settings are read as application UI. Their distinctive rules, state coverage and error recovery, sit in the `ui` governance rules.
+- **Transactional flows** such as checkout, sign-up and settings are read as application UI. Their distinctive rules, state coverage and error recovery, sit in the `ui-craft` skill.
 - **Terminal and text-mode surfaces** have no layout engine and their own color rules, stated where the writing surface is decided rather than here.
 
 A read naming any of the three above takes the body's rules and says it has no per-kind guidance, naming the surface that governs it. A read naming a kind this file does not list at all says so rather than borrowing the nearest section.
