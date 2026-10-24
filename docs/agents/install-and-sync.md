@@ -62,11 +62,11 @@ After a rename the new name shows as `missing` when the stamp records a stack, a
 
 ## Tooling
 
-- `canon tooling diff <stack> [target]` is the read-only comparison, exiting 1 on any difference
+- `canon tooling diff <stack> [target]` is the read-only comparison, exiting 1 on any difference, and it reads a dependency on a later major than the stack pins as `ahead`, which counts as no change
 - A `--json` refusal answers `{ ok: false, reason, message }`, so branch on the record
 - `withheld` entries are `{ rel, stack, present }`, hold every `.github/` file below the git root, and count toward no exit
 - `present` marks a copy an earlier sync left, which is reported and never deleted
-- `canon tooling sync <stack> [target]` writes only under `--write`. `--check` reports and exits 0, and a headless run with neither flag exits 1.
+- `canon tooling sync <stack> [target]` writes only under `--write`. `--check` reports and exits 0, and a headless run with neither flag exits 1. It never installs over an `ahead` dependency.
 
 ### Drift cause and the write hold
 

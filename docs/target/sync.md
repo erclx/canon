@@ -59,13 +59,14 @@ A project can also opt out of one golden file without leaving the stack. Each ve
 
 ```bash
 canon tooling decline .github/workflows/readme-screenshot.yml --reason "no screenshots here"
-canon tooling customize e2e/home.spec.ts
+canon tooling customize e2e/screenshot.ts
 canon tooling lift .github/workflows/readme-screenshot.yml
 ```
 
 - `decline` keeps sync and inject from writing the file again, and leaves a copy the project still holds in place
 - `customize` keeps the project's copy of a config through every write, and `diff` exits 1 once the stack ships a newer golden copy
-- A seed cannot be customized, since sync never overwrites one
+- A seed cannot be customized, since sync never overwrites one, and the starter `e2e/home.spec.ts` is one
+- A dependency on a later major than the stack pins is left alone
 - `lift` hands the file back, so the next sync writes it
 
 These verbs are the only writers of the record in `canon/config/config.json`, so never edit it there by hand.

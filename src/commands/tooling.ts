@@ -258,7 +258,7 @@ export function register(program: Command): void {
         'never overwrites one.',
         '',
         'Examples:',
-        '  canon tooling customize e2e/home.spec.ts',
+        '  canon tooling customize e2e/screenshot.ts',
         '',
       ].join('\n'),
     )
