@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.64.0](https://github.com/erclx/canon/compare/v5.63.0...v5.64.0) (2026-10-24)
+
+
+### Features
+
+* **context:** remove the content classifier ([#2695](https://github.com/erclx/canon/issues/2695)) ([6d92b50](https://github.com/erclx/canon/commit/6d92b50bd0042a12d62574a034b1658eb6486e54))
+* **skills:** ledger the craft skill bodies on their concern groups ([#2700](https://github.com/erclx/canon/issues/2700)) ([02655a5](https://github.com/erclx/canon/commit/02655a5ede3879e572145316461e2c61e307985b))
+* **skills:** source every design-taste rule bullet in a ledger ([#2691](https://github.com/erclx/canon/issues/2691)) ([bb57e71](https://github.com/erclx/canon/commit/bb57e71e7db56ac4fc4d66f85e826b4ac2a3ae4a))
+
+
+### Bug Fixes
+
+* **claude:** resolve seeded records at either surface root ([#2696](https://github.com/erclx/canon/issues/2696)) ([288336c](https://github.com/erclx/canon/commit/288336c07c57c1a9b26a4cc6ea97c988f3338988))
+* **context:** skip the install stamp in the citation scan ([#2699](https://github.com/erclx/canon/issues/2699)) ([d2f0425](https://github.com/erclx/canon/commit/d2f0425bd33f69cf9f3529769d06e916a716b0d5))
+* **git:** leave deleted tracked paths out of the repository listing ([#2698](https://github.com/erclx/canon/issues/2698)) ([baa91e5](https://github.com/erclx/canon/commit/baa91e5a2a5d11bab9567bedf494eae5b63f7c09))
+
 ## [5.63.0](https://github.com/erclx/canon/compare/v5.62.0...v5.63.0) (2026-10-24)
 
 
