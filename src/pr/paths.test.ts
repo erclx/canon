@@ -402,6 +402,12 @@ describe('extractKeyChangePaths', () => {
     ).toEqual(['README.md', '.gitignore'])
   })
 
+  it('should keep a path cited by line after a bare span in the same bullet', () => {
+    expect(
+      pathsOf('- Note `README.md`, then `src/pr/paths.ts:12` and `:40`.'),
+    ).toEqual(['src/pr/paths.ts'])
+  })
+
   it('should strip a line suffix from a bare claim', () => {
     expect(bareOf('- Fix the note at `README.md:12`.')).toEqual(['README.md'])
   })
