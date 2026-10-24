@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.63.0](https://github.com/erclx/canon/compare/v5.62.0...v5.63.0) (2026-10-24)
+
+
+### Features
+
+* **design:** ground design-taste rules and gate ledgers on a citation ([#2682](https://github.com/erclx/canon/issues/2682)) ([b265be3](https://github.com/erclx/canon/commit/b265be30b359797ebe5d0019c8d1cd59acfe465b))
+* **plan:** add a verbatim section for settled wording ([#2688](https://github.com/erclx/canon/issues/2688)) ([1b3e337](https://github.com/erclx/canon/commit/1b3e3371f3f6b84ff780f1e9d956981783ee9515))
+* **skills:** move the ui practice into a ui-craft skill ([#2687](https://github.com/erclx/canon/issues/2687)) ([47ef097](https://github.com/erclx/canon/commit/47ef0979613a70d46721068db504c877210d7e2d))
+* **tooling:** read later majors as ahead and seed the starter spec ([#2683](https://github.com/erclx/canon/issues/2683)) ([dc3bc06](https://github.com/erclx/canon/commit/dc3bc06e2ca157ebbb1c3ba723251b21eb478c0a))
+
 ## [5.62.0](https://github.com/erclx/canon/compare/v5.61.0...v5.62.0) (2026-10-24)
 
 
