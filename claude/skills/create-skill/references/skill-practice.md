@@ -57,6 +57,11 @@ A skill whose files list outside-practice directives one per bullet takes a ledg
 - Keep the rows outside the plugin, so a target pays nothing for them
 - Move a source out of `adopted.md` once its row lands in a ledger, since two copies drift on the first edit. `adopted.md` keeps the catalog-level record and the sources behind any unledgered file.
 
+The audit counts a few lines in a ledgered file apart from a rule's.
+
+- Ledger a listed body's concern groups alone, every H2 before its closing sections or `## What this delegates`, since those restate the groups' rules or route
+- Give a top-level ordered step a row the way a bullet takes one, and a `## Contents` list none, since it repeats the headings
+
 ## Which skills are practice skills
 
 - `canon claude skills audit` keeps the list of practice skills and checks each listed one for the three closing sections and the ledger.

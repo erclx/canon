@@ -23,6 +23,11 @@ A rule under `lang/`, `lib/`, `framework/`, `ui/`, or `tooling/` claims outside 
 - A rule with no H2 takes one table under the title
 - Write no table elsewhere in the file, since every table row under a heading counts
 
+A skill ledger counts a few lines differently from a rule's.
+
+- Give each top-level ordered step a row, the way a bullet takes one, and give `## Contents` no table
+- Stop a listed `SKILL.md`'s tables at its first closing section or `## What this delegates`, since a table under either fails as rows with no bullets
+
 ## Rows
 
 Each row names the bullet and the one thing behind it.
