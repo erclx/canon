@@ -15,7 +15,7 @@ A folder repaired by hand also drifts back, since a target gates nothing until a
 
 - Each batch takes one folder and leaves it at zero findings or reports it ungated
 - A folder gates only through `canon markdown gated add`, which refuses one with a finding left
-- A rewrite keeps every stated reason, command, and path the original carried
+- A rewrite keeps every stated reason, command, and path the original carried, and leaves a context entry no more shape findings than it started with
 - The body names the verbs and states no limit number
 - A requirement gates by its own path, never through a folder prefix
 
@@ -23,6 +23,7 @@ A folder repaired by hand also drifts back, since a target gates nothing until a
 
 - Edit `canon/config/markdown.toml` by hand
 - Report a folder gated that the verb refused
+- Reach zero density findings by growing the context shape findings
 - Change what a document claims to pass the audit
 - Be reachable only by its name, since `document-health` names it for every length finding
 

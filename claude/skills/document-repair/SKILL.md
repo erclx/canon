@@ -26,6 +26,12 @@ Run the audit over the whole tree and take the density and reference shape findi
 canon markdown audit --json
 ```
 
+When `canon/context/` is a candidate, read the context shape beside it and keep each entry's `shapeFindings` issues as the baseline Step 3 holds the rewrite to:
+
+```bash
+canon context audit --json
+```
+
 Take the candidate folders from the order table in `${CLAUDE_SKILL_DIR}/references/batches.md` rather than from the findings, since a clean folder carries no finding and would never be gated. Drop every folder `canon/config/markdown.toml` already lists, since a listed folder already gates.
 
 Sort what is left in two. A candidate the findings never name needs no rewrite, so gate it through Step 4 before the first batch. Group the findings under the rest, which Steps 2 and 3 rewrite.
@@ -45,6 +51,12 @@ canon markdown audit <prefix> --json
 ```
 
 Read `${CLAUDE_SKILL_DIR}/references/batches.md` for what a rewrite may cut. A stated reason survives every rewrite, and the audit reaching zero cannot see one that went missing.
+
+### Hold the context shape
+
+For a file under a folder the context audit resolves, also re-run `canon context audit --json` and compare the entry's `shapeFindings` issues with the baseline. A density fix that splits a Layout paragraph into several can grow `layout-paragraphs`.
+
+A rewrite leaving the entry with more shape issues than it started with is not done. Undo it, or fold the split into a table or a linked page, and report the entry as stopped when neither reaches the baseline. Zero density findings reached by growing shape findings only moves the failure.
 
 ## Step 4: gate the folder
 
