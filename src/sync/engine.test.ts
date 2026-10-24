@@ -1044,6 +1044,30 @@ describe('runDomainSync', () => {
       ])
     })
 
+    it('should write an empty record when the policy refuses', async () => {
+      writeFixture(join(SOURCE, 'core/000-const.md'), 'new\n')
+      writeFixture(join(TARGET, '.claude/rules/core/000-const.md'), 'old\n')
+
+      await runDomainSync(
+        createAdapter({
+          nonInteractive: {
+            kind: 'refuse',
+            message: 'refused',
+            hint: 'run it',
+          },
+          coverage: async () => [
+            { rule: 'a.md', paths: [], files: undefined, ui: false },
+          ],
+        }),
+        TARGET,
+        { ...options, json: true },
+      )
+
+      expect(written.map((chunk) => JSON.parse(chunk))).toEqual([
+        { coverage: [] },
+      ])
+    })
+
     it('should write nothing on stdout without the flag', async () => {
       writeFixture(join(SOURCE, 'core/000-const.md'), 'new\n')
       writeFixture(join(TARGET, '.claude/rules/core/000-const.md'), 'old\n')
