@@ -18,3 +18,7 @@ Three files carry the domain:
 - `src/api/errors.ts` maps a thrown error onto a status code
 
 Run `canon api verify --strict` before shipping a handler change.
+
+### `src/auth`
+
+The token check runs before a handler does.
