@@ -35,24 +35,25 @@ Weight is a judgment a reader settles rather than a defect, as the verb states f
 
 ## Placement
 
-| Field          | Value                                                                                                                    |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Measures       | Whether a document's content sits in the file that owns it, and whether the catalogs pointing at it resolve              |
-| Verbs          | `canon context audit --json` for the structural half, `canon context classify sweep --json` for the per-section verdicts |
-| Evidence class | `measured` for the audit's findings, `classified` for the sweep's verdicts                                               |
+| Field          | Value                                                                                                       |
+| -------------- | ----------------------------------------------------------------------------------------------------------- |
+| Measures       | Whether a document's content sits in the file that owns it, and whether the catalogs pointing at it resolve |
+| Verb           | `canon context audit --json`                                                                                |
+| Evidence class | `measured`                                                                                                  |
 
 The audit answers required sections, entry length, citation resolution, reference form, catalog tables, provenance, and index drift. Required sections reach context entries.
 
 - A citation resolving to nothing is a fact and gates
 - Entry length, reference form, table shape, and provenance are judgments under every flag
 
-### The sweep's verdicts
+### The audit's placement arrays
 
-The sweep classifies each section as keep, replace or rewrite, history, or move. A `move` verdict is the placement finding proper, naming content sitting in the wrong document.
+Three parts of the audit record name content sitting outside the shape its folder allows. Each is a count or a list the verb returned, so every placement finding is `measured`.
 
-- Each verdict carries its own confidence, which is why the class is `classified` rather than `measured`
-- A low-confidence `move` is a prompt to look rather than an instruction to cut
-- **Routes to:** the document the verdict names as the owner. Where the move crosses a tier rather than a file, the project's own content-ownership rules decide the destination.
+- `shapeFindings`: an entry whose sections break the shape its folder holds, such as a Decisions section or a sixth gotcha
+- `extraSections`: an H2 outside the closed set the folder allows
+- `entries[].provenance`: an entry narrating how it came to be, which is history rather than a description of the tree
+- **Routes to:** the document that owns the passage. The record names the file and the section but not the owner, so where the content crosses a tier rather than a file, the project's own content-ownership rules decide the destination.
 
 ### The structure line
 
@@ -66,12 +67,9 @@ The audit record's `length` array lists each entry past the line checkpoint, and
 
 A proposal names headings and a reason, so an operator judges a concrete split. A split nobody can act on names none of those.
 
-### When a verb resolves nothing
+### When the verb resolves nothing
 
-Both verbs resolve their folders by surface root rather than by a path written into them, so a project laid out differently resolves nothing. The two degrade differently.
-
-- The audit refuses with `reason: "no-folders"`, naming the folders it looked for. Report that refusal as an unread axis.
-- The sweep with the model layer off answers from its regex layer alone, a narrower read rather than a refusal, so say which layer answered
+The audit resolves its folders by surface root rather than by a path written into it, so a project laid out differently resolves nothing. It then refuses with `reason: "no-folders"`, naming the folders it looked for. Report that refusal as an unread axis.
 
 ## The design record
 
@@ -139,7 +137,7 @@ A reading is the weakest evidence in the report and the most consequential findi
 The axes are not equally actionable, and a report flattening them implies they are. Each is worth reporting and each is worth a different response, so the class travels beside the state on every row rather than once in a preamble a reader skims.
 
 - A length finding is a number against a checkpoint
-- A placement finding is a verdict carrying a confidence
+- A placement finding is a count or a list the audit returned
 - A staleness finding is a judgment with nothing behind it
 
 Shipping staleness on weaker evidence than the other two is the trade taken deliberately. Cutting it would leave the report answering the two questions that were never the operator's complaint.

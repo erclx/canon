@@ -16,14 +16,13 @@ The context entries describe the repository the session opened with. An entry ke
 - Name the context entries in a trigger phrase, so a bare request to sync the docs separates this skill from `docs-sync`
 - Take the refresh scope from the diff and write tracked docs at the current worktree root, only when the diff adds, moves, or removes a folder, falsifies a bullet, or changes a trap
 - Report a requirements or direction change in one line naming `document-health` rather than writing it
-- Close on `canon context audit` and `canon context classify diff` over the fold's whole baseline, reporting findings on files this run wrote or the diff carries
-- Apply a `REPLACE` or `HISTORY` finding against its quote, report a `MOVE` with its surface rather than cutting it, and continue the fold when a check cannot run
+- Close on `canon context audit` over the fold's whole baseline, reporting findings on files this run wrote or the diff carries
+- Continue the fold when a check cannot run
 
 ## Must not
 
 - Write the task board, the design record, `CLAUDE.md`, the requirements record, or a promoted page
 - Create an entry for a domain the catalog does not list, or report a finding on an entry this run never touched
-- Pick a classifier backend, re-run the classifier after a fix, or apply a finding whose quote is not found exactly once
 - Stop the fold on a finding, a refusal, or a missing subcommand
 
 ## Out of scope
