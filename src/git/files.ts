@@ -140,7 +140,9 @@ export async function listIgnoreAdditions(
 /**
  * Lists the files under `root`: tracked, plus untracked files git does not
  * ignore. The untracked half is what keeps a file added on this branch in scope
- * rather than one push later.
+ * rather than one push later. A tracked path deleted in the working tree is
+ * left out, since a caller reading the listing would otherwise open a file that
+ * is gone.
  *
  * Returns undefined when git cannot answer, which every caller reports rather
  * than smoothing into an empty list. An empty list passes each of its zero
@@ -161,9 +163,12 @@ export async function listRepositoryFiles(
 
   const tracked = await run(['ls-files'])
   const untracked = await run(['ls-files', '--others', '--exclude-standard'])
-  if (!tracked || !untracked) return undefined
+  const deleted = await run(['ls-files', '--deleted'])
+  if (!tracked || !untracked || !deleted) return undefined
 
-  return [...new Set([...tracked, ...untracked])].sort()
+  const gone = new Set(deleted)
+  const present = tracked.filter((path) => !gone.has(path))
+  return [...new Set([...present, ...untracked])].sort()
 }
 
 /**
