@@ -18,6 +18,15 @@ The CLI holds every number. `canon markdown audit` measures, and `canon markdown
 - `gated add` refusing with `canon-checkout`: stop. Canon's own checkout gates through a constant in its source, which a code change edits.
 - Branch on each record's own fields rather than on an exit status a shell wrapper can flatten. A call with no terminal on stdin already runs headless, so no command takes a prefix.
 
+## Step 0: offer the restructure
+
+Restructure an overgrown context folder before rewriting it, so the effort is spent once. Run this step only when `canon/context/` is a candidate, and skip it silently otherwise.
+
+- Take the structure line `document-health` reports for each area folder, or read it from `canon context audit --json` the way that skill does
+- A folder with no overgrown entry and no doubled or unnamed coverage finding has no line, so go straight to Step 1 with no prompt
+- Show the operator each proposal and ask before applying it, since a split moves files other entries cite. Re-run the audit afterward to confirm the citations still resolve.
+- Take a declined proposal as a decision and rewrite the entry as it stands
+
 ## Step 1: read the audit
 
 Run the audit over the whole tree and take the density and reference shape findings from its record:

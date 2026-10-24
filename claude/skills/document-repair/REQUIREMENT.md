@@ -19,6 +19,10 @@ A folder repaired by hand also drifts back, since a target gates nothing until a
 - The body names the verbs and states no limit number
 - A requirement gates by its own path, never through a folder prefix
 
+## Restructure first
+
+An overgrown context folder is offered the restructure `document-health` proposes before any rewrite, and the restructure applies only on the operator's word.
+
 ## Must not
 
 - Edit `canon/config/markdown.toml` by hand
