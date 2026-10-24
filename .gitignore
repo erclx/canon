@@ -1,55 +1,25 @@
-# Secrets
-.env
-.env.*
-
-# Infrastructure
-# The sandbox provisions to $XDG_STATE_HOME/canon/sandbox now. This covers a tree
-# left by an older checkout or by a CANON_SANDBOX_DIR pointed back inside.
-.sandbox/
+# System
+.DS_Store
 
 # Dependencies
 node_modules/
 
+# Secrets
+.env
+.env.*
+
+# Sandbox
+.sandbox/
+
 # Web
-# The landing page's build output. tokens.css is generated too but stays
-# tracked, since nothing else gates web/ for drift.
 web/dist/
 web/.astro/
 web/playwright-report/
 web/test-results/
-# Social card
 web/card-dist/
-# screenshot.ts's own sweep. web/evidence/ is unused on purpose, not by
-# oversight: the `ui-craft` capture reference's "Sharing a capture" section lets a
-# project route a flagged case's evidence through its own established
-# convention instead, which this repository does at assets/evidence/home/.
 web/screenshots/
 web/evidence/
 
-
 # Claude
-# The root every gitignored session record sits under. One line covers the whole
-# tree, which is what the move bought: what is committed stays in .claude/ and
-# what is ignored lives here, so a record folder added later needs no entry.
-#
-# That holds only while nothing tracked ever lands under .canon/. The bare
-# .canon/ spelling is what blocks a carve-out at this file alone, not git
-# itself: written instead as .canon/*, a negation like !.canon/context/ stages
-# that folder, at one negation line per tracked folder, while a new record
-# folder stays auto-ignored under the wildcard either way. A second route
-# reaches the same result without touching this line: a nested .gitignore
-# inside the tracked folder itself, negating .canon/ at that deeper level,
-# carves out just that folder. sandbox/fixtures/claude/task-board/decline/
-# .gitignore is the first to take it. Nothing enforces either spelling
-# staying bare.
-#
-# Both entries are checked against the "# Claude" array in
-# tooling/claude/manifest.toml by the Ignore parity stage of `bun run check`.
 .canon/
-# The one .claude/ record folder that did not move. EnterWorktree creates a
-# worktree here and requires its target to sit here, so relocating it breaks the
-# harness rather than the toolkit.
 .claude/worktrees/
-
-# Editor
-.vscode/
