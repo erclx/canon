@@ -20,8 +20,8 @@ Each field below names the source its references cite, and a house choice covers
 
 ## Where the rows sit
 
-Each reference has a ledger of the same name under `governance/ledger/skills/ui-craft/` in the toolkit repository, holding one table row per bullet under the H2 the bullet sits under. `canon claude skills audit` fails a reference whose bullets and rows disagree in count under any heading.
+The rows sit in the toolkit's own repository rather than the plugin, one ledger per reference and one table row per bullet under the H2 the bullet sits under. The toolkit's skill audit fails a reference whose bullets and rows disagree in count under any heading, and a target never carries the rows.
 
 ## Declined
 
-Each ledger carries its own `## Declined` list, recording the bullets cut or reworded when the source rules were last rewritten. The move into this skill changed no wording, so it declined nothing.
+Each ledger carries its own `## Declined` list, recording the bullets cut or reworded when the source rules were last rewritten. The move into this skill changed no bullet's wording, so it declined nothing.
