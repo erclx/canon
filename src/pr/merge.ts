@@ -22,7 +22,13 @@ export interface MergePull {
   readonly body: string
   /** The head the merge is pinned to, so a push after the read refuses. */
   readonly head: string
+  /** The head branch name, which a bot pull request is recognized by. */
+  readonly branch: string
+  /** Whether the author is a bot account, which a release pull request's is not. */
+  readonly isBotAuthor: boolean
 }
+
+export type BotKind = 'release-please' | 'dependabot'
 
 export interface MergeRequest {
   readonly title: string
@@ -105,6 +111,63 @@ export function composeDescription(body: string): Composed {
   }
 }
 
+const RELEASE_BRANCH = 'release-please--branches--'
+const RELEASE_OPENING = ':robot: I have created a release'
+const RELEASE_FOOTER = 'This PR was generated with'
+const DEPENDABOT_BRANCH = 'dependabot/'
+
+/**
+ * The bot a pull request comes from, read off the pull request itself. The
+ * release pull request's author is the operator's own account, so the head
+ * branch carries it, and a second condition keeps a human pull request that
+ * borrows the branch prefix on the human path.
+ */
+export function botKind(
+  pull: Pick<MergePull, 'branch' | 'body' | 'isBotAuthor'>,
+): BotKind | undefined {
+  if (
+    pull.branch.startsWith(RELEASE_BRANCH) &&
+    pull.body.trimStart().startsWith(RELEASE_OPENING)
+  ) {
+    return 'release-please'
+  }
+  if (pull.branch.startsWith(DEPENDABOT_BRANCH) && pull.isBotAuthor) {
+    return 'dependabot'
+  }
+  return undefined
+}
+
+/**
+ * The squash description of a bot pull request, from the bot's own body. A
+ * release keeps its changelog without the robot line, the dividers, and the
+ * footer. Dependabot keeps its lead and package table and cuts at the first
+ * `Updates ` line, since the commands footer is gone from a truncated body. A
+ * body with nothing left refuses `missing-summary`.
+ */
+export function composeBotDescription(kind: BotKind, body: string): Composed {
+  const lines = body.replaceAll('\r\n', '\n').split('\n')
+  const kept =
+    kind === 'release-please'
+      ? lines.filter((line) => {
+          const text = line.trim()
+          return (
+            text !== '---' &&
+            !text.startsWith(RELEASE_OPENING) &&
+            !text.startsWith(RELEASE_FOOTER)
+          )
+        })
+      : lines.slice(
+          0,
+          lines.findIndex((line) => line.startsWith('Updates ')) >= 0
+            ? lines.findIndex((line) => line.startsWith('Updates '))
+            : lines.length,
+        )
+  const description = kept.join('\n').trim()
+  return description === ''
+    ? { kind: 'refused', reason: 'missing-summary' }
+    : { kind: 'composed', description }
+}
+
 /** The suffix the web merge adds and the trunk log carries. */
 export function mergeTitle(title: string, number: number): string {
   return `${title} (#${number})`
@@ -137,7 +200,11 @@ export async function merge(
   if (pull.isDraft) return refused('pull-draft', number)
 
   const title = mergeTitle(pull.title, number)
-  const composed = composeDescription(pull.body)
+  const bot = botKind(pull)
+  const composed =
+    bot === undefined
+      ? composeDescription(pull.body)
+      : composeBotDescription(bot, pull.body)
   if (composed.kind === 'refused') {
     return refused(composed.reason, number, { title })
   }

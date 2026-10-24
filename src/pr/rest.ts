@@ -20,6 +20,7 @@ export interface RestPull {
   readonly mergeable_state?: string
   readonly state?: string
   readonly draft?: boolean
+  readonly user?: { readonly type?: string }
   readonly node_id?: string
 }
 

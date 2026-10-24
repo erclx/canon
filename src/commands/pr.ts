@@ -935,7 +935,7 @@ export function register(program: Command): void {
 
   pr.command('merge')
     .description(
-      'Squash-merge a ready pull request with a message carrying only its Summary, Key changes, and Technical context',
+      "Squash-merge a ready pull request with a message carrying only the change: its Summary, Key changes, and Technical context, or a bot pull request's own changelog or package table",
     )
     .argument('[number]', 'Pull request to merge, defaulting to this branch')
     .helpOption('-h, --help', 'Show this help message')
@@ -954,6 +954,13 @@ export function register(program: Command): void {
         '`## Technical context`, in that order under their headings, with the',
         'UI pass line dropped. Technical context is optional. Testing, the',
         'reviewer requests, and every other section stay out of the trunk.',
+        '',
+        'A release-please or Dependabot pull request is read off its head',
+        'branch, plus the release body opening or a bot author, and needs no',
+        'flag. A release composes to its changelog without the robot line, the',
+        'dividers, and the footer. Dependabot composes to its lead and package',
+        'table, cut at the first `Updates ` line. A bot body with nothing left',
+        'refuses missing-summary.',
         '',
         'Refusals are read before the one write, which sends the head it read',
         'as `sha`, so a push after the read refuses rather than merging. The',
@@ -4124,6 +4131,8 @@ function mergeApi(root: string, number: string): MergeApi {
           title: row.title,
           body: row.body ?? '',
           head: row.head.sha,
+          branch: row.head.ref ?? '',
+          isBotAuthor: row.user?.type === 'Bot',
         }
       } catch {
         return undefined

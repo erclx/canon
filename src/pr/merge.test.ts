@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import type { ChecksGate } from '@/pr/lift'
 import {
+  botKind,
+  composeBotDescription,
   composeDescription,
   merge,
   type MergeApi,
@@ -167,6 +169,168 @@ describe('mergeTitle', () => {
   })
 })
 
+const RELEASE_BODY = [
+  ':robot: I have created a release *beep* *boop*',
+  '---',
+  '',
+  '',
+  '## [5.58.0](https://github.com/erclx/canon/compare/v5.57.0...v5.58.0) (2026-10-24)',
+  '',
+  '',
+  '### Features',
+  '',
+  '* **skills:** offer a restructure before document-repair rewrites ([#2648](https://github.com/erclx/canon/issues/2648)) ([7c2776a](https://github.com/erclx/canon/commit/7c2776a))',
+  '',
+  '### Bug Fixes',
+  '',
+  '* **context:** count table rows toward no folder paragraph ([#2646](https://github.com/erclx/canon/issues/2646)) ([a99b020](https://github.com/erclx/canon/commit/a99b020))',
+  '',
+  '---',
+  'This PR was generated with [Release Please](https://github.com/googleapis/release-please). See [documentation](https://github.com/googleapis/release-please#release-please).',
+].join('\n')
+
+const RELEASE_CHANGELOG = RELEASE_BODY.split('\n')
+  .slice(4, 14)
+  .join('\n')
+  .trim()
+
+const DEPENDABOT_LEAD = [
+  'Bumps the bun group with 3 updates:',
+  '',
+  '| Package | From | To |',
+  '| --- | --- | --- |',
+  '| [vitest](https://github.com/vitest-dev/vitest) | `4.0.1` | `4.0.2` |',
+  '| [typescript](https://github.com/microsoft/TypeScript) | `5.9.2` | `5.9.3` |',
+  '| [zod](https://github.com/colinhacks/zod) | `4.1.1` | `4.1.2` |',
+].join('\n')
+
+const DEPENDABOT_BODY = [
+  DEPENDABOT_LEAD,
+  '',
+  'Updates `vitest` from 4.0.1 to 4.0.2',
+  '<details>',
+  '<summary>Release notes</summary>',
+  '<p><em>Sourced from <a href="https://github.com/vitest-dev/vitest/releases">vitest releases</a>.</em></p>',
+  '</details>',
+  '',
+  'Updates `typescript` from 5.9.2 to 5.9.3',
+  '<details>',
+  '<summary>Commits</summary>',
+  '</details>',
+  '',
+  '_Description has been truncated_',
+].join('\n')
+
+describe('botKind', () => {
+  it('should read a release-please branch whose body opens on the robot line as release-please', () => {
+    expect(
+      botKind({
+        branch: 'release-please--branches--main--components--canon',
+        body: RELEASE_BODY,
+        isBotAuthor: false,
+      }),
+    ).toBe('release-please')
+  })
+
+  it('should read a dependabot branch authored by a bot as dependabot', () => {
+    expect(
+      botKind({
+        branch: 'dependabot/bun/bun-0523db4276',
+        body: DEPENDABOT_BODY,
+        isBotAuthor: true,
+      }),
+    ).toBe('dependabot')
+  })
+
+  it('should leave a human pull request on a dependabot branch on the human path', () => {
+    expect(
+      botKind({
+        branch: 'dependabot/bun/bun-0523db4276',
+        body: DEPENDABOT_BODY,
+        isBotAuthor: false,
+      }),
+    ).toBeUndefined()
+  })
+
+  it('should leave a human pull request on a release-please branch on the human path', () => {
+    expect(
+      botKind({
+        branch: 'release-please--branches--main--components--canon',
+        body: BODY,
+        isBotAuthor: false,
+      }),
+    ).toBeUndefined()
+  })
+
+  it('should leave an ordinary branch on the human path', () => {
+    expect(
+      botKind({ branch: 'feat/x', body: RELEASE_BODY, isBotAuthor: true }),
+    ).toBeUndefined()
+  })
+})
+
+describe('composeBotDescription for release-please', () => {
+  it('should keep the changelog and drop the robot line, both dividers, and the footer', () => {
+    expect(composeBotDescription('release-please', RELEASE_BODY)).toEqual({
+      kind: 'composed',
+      description: RELEASE_CHANGELOG,
+    })
+  })
+
+  it('should compose the same changelog from Windows line endings', () => {
+    const composed = composeBotDescription(
+      'release-please',
+      RELEASE_BODY.replaceAll('\n', '\r\n'),
+    )
+
+    expect(composed).toEqual({
+      kind: 'composed',
+      description: RELEASE_CHANGELOG,
+    })
+  })
+
+  it('should keep the changelog when the footer is missing', () => {
+    const body = RELEASE_BODY.split('\n').slice(0, -2).join('\n')
+
+    expect(composeBotDescription('release-please', body)).toEqual({
+      kind: 'composed',
+      description: RELEASE_CHANGELOG,
+    })
+  })
+
+  it('should refuse missing-summary when nothing is left after the drops', () => {
+    const body = ':robot: I have created a release *beep* *boop*\n---\n---\n'
+
+    expect(composeBotDescription('release-please', body)).toEqual({
+      kind: 'refused',
+      reason: 'missing-summary',
+    })
+  })
+})
+
+describe('composeBotDescription for dependabot', () => {
+  it('should keep the lead and table and cut at the first Updates line', () => {
+    expect(composeBotDescription('dependabot', DEPENDABOT_BODY)).toEqual({
+      kind: 'composed',
+      description: DEPENDABOT_LEAD,
+    })
+  })
+
+  it('should keep the whole body when no Updates line exists', () => {
+    expect(composeBotDescription('dependabot', DEPENDABOT_LEAD)).toEqual({
+      kind: 'composed',
+      description: DEPENDABOT_LEAD,
+    })
+  })
+
+  it('should refuse missing-summary when the body is empty', () => {
+    expect(composeBotDescription('dependabot', '\n  \n')).toEqual({
+      kind: 'refused',
+      reason: 'missing-summary',
+    })
+  })
+})
+
 interface Fixture {
   pull?: Partial<MergePull> | null
   checks?: ChecksGate | null
@@ -186,6 +350,8 @@ function harness(fixture: Fixture = {}): Harness {
     title: 'feat(pr): add a merge verb',
     body: BODY,
     head: HEAD,
+    branch: 'feat/add-merge-verb',
+    isBotAuthor: false,
     ...fixture.pull,
   }
   const api: MergeApi = {
@@ -310,5 +476,72 @@ describe('merge', () => {
     const record = await merge(api, { number: 2544, isDryRun: false })
 
     expect(record).toMatchObject({ reason: 'gh-failed', isOk: false })
+  })
+})
+
+describe('merge on a bot pull request', () => {
+  const RELEASE = {
+    title: 'chore(main): release 5.58.0',
+    body: RELEASE_BODY,
+    branch: 'release-please--branches--main--components--canon',
+  }
+  const DEPENDABOT = {
+    title: 'chore(deps): bump the bun group with 3 updates',
+    body: DEPENDABOT_BODY,
+    branch: 'dependabot/bun/bun-0523db4276',
+    isBotAuthor: true,
+  }
+
+  it('should merge a release pull request with the changelog as its description', async () => {
+    const { api, puts } = harness({ pull: RELEASE })
+
+    const record = await merge(api, { number: 2649, isDryRun: false })
+
+    expect(record).toMatchObject({ reason: 'merged', isOk: true })
+    expect(puts).toEqual([
+      {
+        title: 'chore(main): release 5.58.0 (#2649)',
+        description: RELEASE_CHANGELOG,
+        sha: HEAD,
+      },
+    ])
+  })
+
+  it('should merge a dependabot pull request with the lead and table as its description', async () => {
+    const { api, puts } = harness({ pull: DEPENDABOT })
+
+    await merge(api, { number: 2483, isDryRun: false })
+
+    expect(puts[0]?.description).toBe(DEPENDABOT_LEAD)
+  })
+
+  it.each([
+    ['pull-draft', { pull: { isDraft: true } }],
+    ['ci-failing', { checks: { state: 'failing', isConflicted: false } }],
+    ['ci-pending', { checks: { state: 'pending', isConflicted: false } }],
+    ['head-moved', { outcome: { kind: 'head-moved' } }],
+  ] as const)(
+    'should refuse %s the way a human pull request does',
+    async (reason, extra) => {
+      const fixture: Fixture = {
+        ...extra,
+        pull: { ...DEPENDABOT, ...('pull' in extra ? extra.pull : {}) },
+      }
+      const { api, puts } = harness(fixture)
+
+      const record = await merge(api, { number: 2483, isDryRun: false })
+
+      expect(record).toMatchObject({ reason, isOk: false })
+      expect(puts.length).toBe(reason === 'head-moved' ? 1 : 0)
+    },
+  )
+
+  it('should refuse missing-summary on a bot body that composes to nothing', async () => {
+    const { api, puts } = harness({ pull: { ...DEPENDABOT, body: '  ' } })
+
+    const record = await merge(api, { number: 2483, isDryRun: false })
+
+    expect(record).toMatchObject({ reason: 'missing-summary', isOk: false })
+    expect(puts).toEqual([])
   })
 })
