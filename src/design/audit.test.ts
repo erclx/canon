@@ -35,6 +35,11 @@ const record = (lead: string, rule = '- Keep it short.'): string =>
     '| ink | `--color-ink` | text |',
   ].join('\n\n')
 
+const themed = (themes: string[]): string =>
+  ['---', 'themes:', ...themes.map((theme) => `  - ${theme}`), '---', ''].join(
+    '\n',
+  ) + record(LEAD)
+
 const LEAD = 'Values live in `src/tokens.css`.'
 const CSS = ':root { --color-accent: red; --color-ink: black; }'
 
@@ -102,6 +107,88 @@ describe('auditDesign', () => {
     const audit = auditDesign(project(values))
 
     expect(audit.tokens).toMatchObject({ status: 'not-applicable' })
+    expect(audit.clean).toBe(true)
+  })
+
+  it('returns no themes key for a record that declares none', () => {
+    const audit = auditDesign(project(record(LEAD), CSS))
+
+    expect(audit.tokens).not.toHaveProperty('themes')
+  })
+
+  it('reports a dark theme missing a property under its selector', () => {
+    const css = `${CSS}\n:root[data-theme='dark'] { --color-accent: pink; }`
+    const audit = auditDesign(
+      project(themed(["':root'", '":root[data-theme=\'dark\']"']), css),
+    )
+
+    expect(audit.clean).toBe(false)
+    expect(audit.tokens).toMatchObject({
+      status: 'checked',
+      missing: [],
+      themes: [
+        { selector: ':root', matched: true, missing: [] },
+        {
+          selector: ":root[data-theme='dark']",
+          matched: true,
+          missing: ['--color-ink'],
+        },
+      ],
+    })
+  })
+
+  it('reports a declared selector that matches no block', () => {
+    const audit = auditDesign(project(themed(["':root'", "'.night'"]), CSS))
+
+    expect(audit.clean).toBe(false)
+    expect(audit.tokens).toMatchObject({
+      themes: [
+        { selector: ':root', matched: true },
+        { selector: '.night', matched: false },
+      ],
+    })
+  })
+
+  it('credits a root inside a declared media query to the query alone', () => {
+    const media = '@media (prefers-color-scheme: dark)'
+    const css = `${CSS}\n${media} { :root { --color-accent: pink; } }`
+    const audit = auditDesign(project(themed(["':root'", `'${media}'`]), css))
+
+    expect(audit.tokens).toMatchObject({
+      themes: [
+        { selector: ':root', matched: true, missing: [] },
+        { selector: media, matched: true, missing: ['--color-ink'] },
+      ],
+    })
+  })
+
+  it('matches each member of a selector list and ignores quote style', () => {
+    const css = `:root, .light { --color-accent: red; --color-ink: black; }\n[data-theme="dark"] { --color-accent: a; --color-ink: b; }`
+    const audit = auditDesign(
+      project(themed(["'.light'", '"[data-theme=\'dark\']"']), css),
+    )
+
+    expect(audit.tokens).toMatchObject({
+      themes: [
+        { selector: '.light', matched: true, missing: [] },
+        { selector: "[data-theme='dark']", matched: true, missing: [] },
+      ],
+    })
+  })
+
+  it('does not match a bare root to a root with an attribute', () => {
+    const css = `:root[data-theme='dark'] { --color-accent: a; --color-ink: b; }`
+    const audit = auditDesign(project(themed(["':root'"]), css))
+
+    expect(audit.tokens).toMatchObject({
+      themes: [{ selector: ':root', matched: false }],
+    })
+  })
+
+  it('matches a declared Tailwind theme block like any other prelude', () => {
+    const css = '@theme { --color-accent: red; --color-ink: black; }'
+    const audit = auditDesign(project(themed(["'@theme'"]), css))
+
     expect(audit.clean).toBe(true)
   })
 
