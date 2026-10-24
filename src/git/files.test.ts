@@ -8,6 +8,7 @@ import {
   listChangedFiles,
   listIgnoreAdditions,
   listRenames,
+  listRepositoryFiles,
   resolveBaseRef,
 } from '@/git/files'
 
@@ -177,5 +178,35 @@ describe('listIgnoreAdditions', () => {
     const additions = await listIgnoreAdditions(ROOT, base)
 
     expect(additions).toEqual([])
+  })
+})
+
+describe('listRepositoryFiles', () => {
+  it('should leave out a tracked path deleted in the working tree', async () => {
+    commit('feat: add notes', { 'notes.md': 'text' })
+    rmSync(join(ROOT, 'notes.md'))
+
+    expect(await listRepositoryFiles(ROOT)).toEqual(['README.md'])
+  })
+
+  it('should leave out a tracked path whose deletion is staged', async () => {
+    commit('feat: add notes', { 'notes.md': 'text' })
+    git('rm', '-q', 'notes.md')
+
+    expect(await listRepositoryFiles(ROOT)).toEqual(['README.md'])
+  })
+
+  it('should keep an untracked file beside the tracked ones', async () => {
+    write('draft.md', 'text')
+
+    expect(await listRepositoryFiles(ROOT)).toEqual(['README.md', 'draft.md'])
+  })
+
+  it('should keep a deleted path recreated untracked under the same name', async () => {
+    commit('feat: add notes', { 'notes.md': 'text' })
+    git('rm', '-q', '--cached', 'notes.md')
+    write('notes.md', 'again')
+
+    expect(await listRepositoryFiles(ROOT)).toEqual(['README.md', 'notes.md'])
   })
 })
