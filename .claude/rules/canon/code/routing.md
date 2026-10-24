@@ -1,5 +1,5 @@
 ---
-description: Routes code placement and shape decisions to the skills that carry them, and library calls to the official docs
+description: Routes code placement, shape, and interface decisions to the skills that carry them, and library calls to the official docs
 ---
 
 # Code standards
@@ -11,6 +11,10 @@ description: Routes code placement and shape decisions to the skills that carry 
 ## Shape
 
 - Load the `canon:code-craft` skill before deciding the shape of a new function, class, or module, and report it rather than proceeding silently when it does not resolve.
+
+## Interfaces
+
+- Load `canon:api-design` before shaping a public function, flag or output, record format, endpoint, or caller-handled error, and report it rather than proceeding silently when it does not resolve.
 
 ## Libraries
 
