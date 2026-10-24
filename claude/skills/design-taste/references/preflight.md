@@ -32,7 +32,7 @@ Each box here is a count from `tells.md`.
 
 - [ ] No layout family used twice. Eight sections carry at least four families
 - [ ] No three consecutive sections sharing the image-and-text split
-- [ ] Small uppercase labels above headings number no more than one per three sections, per `interface-casing`
+- [ ] Small uppercase labels above headings number no more than one per three sections, per the `ui-craft` copy reference
 - [ ] At most one horizontal marquee
 
 ### Content and first screen
@@ -90,7 +90,7 @@ The detail boxes come from `craft.md`.
 Every word on the surface states what is true of it.
 
 - [ ] No filler verbs
-- [ ] Sentence case throughout, with exceptions per `interface-casing`
+- [ ] Sentence case throughout, with exceptions per the `ui-craft` copy reference
 - [ ] Every claim about what the product does is a thing it does
 
 ## Motion
@@ -102,4 +102,4 @@ Every word on the surface states what is true of it.
 ## Handover
 
 - [ ] The weakest thing on the surface is named out loud, per `pick-by-eye` Step 3, and fixed where naming it would embarrass the work
-- [ ] The floor the `ui` governance rules carry has been applied, not assumed
+- [ ] The floor the `ui-craft` skill carries has been applied, not assumed

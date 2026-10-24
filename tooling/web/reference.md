@@ -78,7 +78,7 @@ The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project tha
 
 - Expect the sweep under `screenshots/` to be ignored and only a flagged case's `EVIDENCE_ROOT` output tracked, so a target's first capture is the baseline it commits
 - Size a case's `sections` list against the frames each later change regenerates, since a case naming sections commits a folder per section
-- Run the capture after a surface changes, component files included, per `governance/rules/ui/surface-capture.md`, unless the production build strips the component out
+- Run the capture after a surface changes, component files included, per the `ui-craft` skill's capture reference, unless the production build strips the component out
 
 ## Screenshot scripts and workflows
 

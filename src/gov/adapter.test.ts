@@ -16,6 +16,8 @@ import {
 import { applyChanges, type InstalledFile, planSync } from '@/sync/engine'
 import { writeChainStamp } from '@/sync/stamp'
 
+const REPO_ROOT = join(import.meta.dirname, '..', '..')
+
 let ROOT: string
 let TOOLKIT: string
 let TARGET: string
@@ -444,6 +446,24 @@ describe('createGovAdapter', () => {
       const plan = planSync(createGovAdapter(TOOLKIT), TARGET)
 
       expect(plan.changes.map((change) => change.kind)).toEqual(['delete'])
+    })
+
+    it('should fold several held ui rules onto the one shipped pointer', async () => {
+      const held = ['a11y', 'keyboard', 'design-taste'].map((name) =>
+        join(TARGET, `.claude/rules/canon/ui/${name}.md`),
+      )
+      for (const path of held) writeFixture(path, '# held\n')
+      const plan = planSync(createGovAdapter(REPO_ROOT), TARGET)
+
+      await applyChanges(plan.changes)
+
+      expect({
+        copies: plan.changes.filter((change) => change.kind === 'copy').length,
+        deletes: plan.changes.filter((change) => change.kind === 'delete')
+          .length,
+        pointer: existsSync(join(TARGET, '.claude/rules/canon/ui/craft.md')),
+        held: held.filter((path) => existsSync(path)),
+      }).toEqual({ copies: 1, deletes: 3, pointer: true, held: [] })
     })
 
     it('should install nothing in a target that never held the old name', () => {

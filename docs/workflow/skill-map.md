@@ -45,6 +45,7 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 | `canon:search-craft`          | Before searching outside the project               |
 | `canon:systematic-debugging`  | A test fails or a bug surfaces                     |
 | `canon:design-taste`          | Drafting or judging an interface                   |
+| `canon:ui-craft`              | Building or judging a component's behavior         |
 | `canon:ui-checklist`          | After a UI change, to list what to check           |
 
 ## Check the work before it leaves the branch

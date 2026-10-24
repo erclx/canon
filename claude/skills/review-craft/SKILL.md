@@ -49,7 +49,7 @@ An axis whose condition the diff meets is not optional. When the security or the
 Read each of these when the diff reaches what it names.
 
 7. **Security.** Read `${CLAUDE_SKILL_DIR}/references/security.md` when the diff runs a command, writes or deletes a file, takes outside input, touches a secret, adds a dependency, or changes a default.
-8. **Rendered output.** Read `${CLAUDE_SKILL_DIR}/references/ui.md` when the diff touches a file that paints, or when the pull request carries an evidence comment.
+8. **Rendered output.** Read `${CLAUDE_SKILL_DIR}/references/ui.md` when the diff paints or the pull request carries evidence. Judge behavior by `ui-craft` and the look by `design-taste`.
    - A file that paints is markup, a stylesheet, a component, a template, or a design token
    - A stylesheet diff says what the author changed and only the screenshot says what a user sees, so the reference opens the images and checks whether any exist
 9. **Developer experience and operations.** Ports, hooks, scripts, config, and scaffold defaults a consumer installs.

@@ -7,7 +7,7 @@ description: The route walk behind canon inventory, the subject readers it runs,
 
 ## Overview
 
-`canon inventory` walks every route a project declares and reports one computed property per element, grouped by the answer rather than by the component. Its one subject today is the focus ring, which `governance/rules/ui/keyboard.md` states rules against. The command reports a listing and gates nothing. Start from `canon inventory --help`.
+`canon inventory` walks every route a project declares and reports one computed property per element, grouped by the answer rather than by the component. Its one subject today is the focus ring, which the `ui-craft` keyboard reference states rules against. The command reports a listing and gates nothing. Start from `canon inventory --help`.
 
 ## Layout
 

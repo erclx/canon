@@ -23,6 +23,7 @@ This body states the role, the boundaries, and the channel, and starts no step o
 - Resolve `.canon/plans/`, `.canon/tasks/`, `.canon/review/`, and `.canon/ready/` at the main worktree root, never the linked worktree. Being gitignored, they are absent there rather than empty.
 - Report a plan that fails to resolve as unreadable from here, naming the main-root path. Reporting the task as having no plan is wrong about the world, and a reader cannot tell the two apart.
 - Build the plan the launch named. Never write a second one when the path fails to resolve, since a row citing a plan already has one.
+- Load `ui-craft` before editing a rendered surface, pointer rule or not
 - Keep a task list from launch, one item per slice, and tick each as its slice lands. Skip it on a host that offers no list tool, since the list is for the operator watching and not a gate.
 
 ### Ready folders and the draft mark
@@ -60,7 +61,7 @@ A plan carrying a `**Design references:**` section names the accepted design for
 
 - Open each cited folder's light and dark images and its frame HTML before the first edit to that surface
 - Take sizes, spacing, and colors from the frame HTML rather than from the image
-- Report a reference that does not resolve in the working tree, naming the path, rather than building without it
+- Report a missing reference by its path rather than building without it
 - Leave `None identified.` as it stands and build without a reference
 
 ## Scope after dispatch

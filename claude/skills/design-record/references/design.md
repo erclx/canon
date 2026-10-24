@@ -89,7 +89,7 @@ In an intent record, `## Colors` carries a `Role | Property | Intent` table and 
 
 Add either optional section when the project has content for it:
 
-- `## Layout`: page width, breakpoints, and grid rules as current constraints. The surface-capture rule reads breakpoints here, so a project declaring none is captured at the 320 reflow floor alone.
+- `## Layout`: page width, breakpoints, and grid rules as current constraints. `ui-craft` captures at these breakpoints, so a project declaring none is captured at the 320 reflow floor alone.
 - `## Mark`: the logo's construction rules and the files that carry it
 
 ## The uncertainty tag

@@ -294,7 +294,12 @@ export function countLedgerRows(text: string): HeadingCount[] {
   return [...counts].map(([key, count]) => ({ heading: key, count }))
 }
 
-function compareLedger(
+/**
+ * Pairs bullets and ledger rows under each heading, naming every heading whose
+ * counts differ. The skill audit reads a practice skill's references through
+ * it, so a rule and a reference are held to one comparison.
+ */
+export function compareLedger(
   groups: readonly HeadingCount[],
   rows: readonly HeadingCount[],
 ): LedgerMismatch[] {

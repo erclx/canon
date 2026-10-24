@@ -36,7 +36,7 @@ For each surface, look for:
 3. **Inconsistencies**: spacing, tone of voice, interaction patterns, icon use, keyboard affordances
 4. **Roughness in daily use**: friction, redundant steps, unclear affordances, ambiguous labels
 
-Use `canon/DESIGN.md` as ground truth for intent where it exists. Observations only, no implementation suggestions or fixes. Take what consistent interaction means from the `ui` rules in `.claude/rules/`, and skip that when the project installed none.
+Use `canon/DESIGN.md` as ground truth for intent where it exists. Observations only, no implementation suggestions or fixes. Take what consistent interaction means from the `ui-craft` skill's references.
 
 Where Step 1 found a committed capture for this surface, judge composed output (spacing, overlap, contrast, wrapping) against it rather than inferring layout from markup. Where none exists, judge from source and say so in that surface's findings, since a source read cannot see what only a render shows.
 
