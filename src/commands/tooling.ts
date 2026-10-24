@@ -107,6 +107,9 @@ export function register(program: Command): void {
         'A target below its git root syncs as a subfolder. It withholds',
         '.github/, which GitHub reads only at the root.',
         '',
+        'The dependency install is bounded at 120 seconds. A stalled or failed',
+        'install refuses with exit 1, and the stamp stays unwritten.',
+        '',
         'To gate CI on tooling drift, run headlessly with neither flag. That',
         'exits 1 when a file would be replaced and 0 when none would, which is',
         'what `canon sync --check --exit-code` spells with a flag. Pass --check',
@@ -444,7 +447,14 @@ async function runSync(
   }
 
   await injectSeeds(prepared.chain, prepared.target)
-  await injectManifest(prepared.chain, prepared.target)
+  const manifest = await injectManifest(prepared.chain, prepared.target)
+  if (!manifest.ok) {
+    return refuse(
+      opts,
+      manifest.reason,
+      `${manifest.message}\nConfigs and seeds above were written. Scripts, gitignore entries, and the stamp were not, so the next sync retries.`,
+    )
+  }
 
   await stampChain(prepared.chain, prepared.target)
 
@@ -553,7 +563,12 @@ async function runInject(
     await injectSeeds(prepared.chain, prepared.target)
   }
   if (opts.manifest || applyAll) {
-    await injectManifest(prepared.chain, prepared.target)
+    const manifest = await injectManifest(prepared.chain, prepared.target)
+    if (!manifest.ok) {
+      logWarn(manifest.message)
+      if (framed) outro()
+      return 1
+    }
   } else if (opts.gitignore) {
     await injectGitignore(prepared.chain, prepared.target)
   }
