@@ -66,6 +66,8 @@ Target update: `<path>`, canon `<installed>` to `<running>`.
 
 **Drift:** <each non-empty cause from sync --check, with its count and paths>
 
+**Where it lands:** <the linked worktree this run is already in, or the worktree `.claude/worktrees/<name>/` it will enter, or the branch it will create in place when the operator declines a worktree>
+
 **Calls for you:** <each judgment call below this run meets, with the default this skill takes>
 
 **Commands, in order:** <the exact commands Steps 4 to 6 will run>
@@ -76,6 +78,25 @@ Summarize the changelog for this project, not for the toolkit. Drop an entry tha
 ### Nothing pending
 
 When the changelog range is empty, `migrate status` lists nothing pending or refused, and the drift lines hold nothing a step here would take, write nothing. Invoke `canon:target-check` and report the target current with its table.
+
+### Take a branch after the go-ahead
+
+The migrations, the sync, and the commits write the project, so they land on their own branch rather than on the one the shared checkout holds, where every other session in it would follow. Step 1 stays where it ran, since it writes the machine rather than the project.
+
+Compare `git rev-parse --git-dir` with `git rev-parse --git-common-dir`, then take the first row that fits:
+
+| State                                         | This skill                                                                                  |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Different, so already in a linked worktree    | Uses it and enters nothing, since a second worktree would nest inside the first             |
+| Equal, and the operator took the worktree     | Invokes `canon:session-worktree` with `update-canon`, then runs Steps 4 to 6 from inside it |
+| Equal, and the operator declined the worktree | Invokes `canon:git-branch` for `chore/update-canon`, then runs Steps 4 to 6 in place        |
+
+Four points govern the choice:
+
+- Offer the worktree as the default in the preview's `Where it lands` line, and take a decline from the operator's reply to it
+- Report it rather than proceeding silently when `canon:session-worktree` does not resolve, as in a project that installed governance without the plugin, then fall back to `canon:git-branch`
+- Stop when neither skill resolves, saying the run would otherwise write onto the shared checkout's branch
+- Run the Guards' dirty-tree test again from the new tree. A fresh worktree starts clean, so a refusal there is a real one.
 
 ## Step 4: migrate
 
