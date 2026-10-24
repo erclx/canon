@@ -20,7 +20,7 @@ canon migrate records --json
 canon migrate records --write --json
 ```
 
-The first line takes the `.canon/` ignore entry the verb requires. The second reports the plan and the third applies it, repointing every tracked file that cites a moved folder. A line naming an old record path on purpose keeps it with `canon-keep-record-root` on that line or the nearest non-blank line above.
+The first line takes the `.canon/` ignore entry. The second reports and the third applies, repointing files that cite a moved folder and deleting a `.gitignore` line `.canon/` covers, as `dropped`. A line naming an old path keeps it via `canon-keep-record-root` on that line or the nearest non-blank one above.
 
 Then sweep the citations inside the records, which the verb above never reaches.
 

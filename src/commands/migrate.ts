@@ -326,6 +326,11 @@ function reportRecords(plan: RecordsPlan, records: number): void {
   logInfo(
     `${plural(plan.entries.length, 'file')} to change, ${plural(plan.rewritten, 'citation')} to rewrite.`,
   )
+  if (plan.dropped > 0) {
+    logInfo(
+      `${plural(plan.dropped, 'ignore line')} dropped, already covered by .canon/.`,
+    )
+  }
   logInfo(`${plural(plan.kept, 'citation')} marked to keep the old root.`)
 
   // A count rather than a list, and its own line rather than a place in
@@ -401,6 +406,7 @@ function toRecordsRecord(
     collisions: plan.collisions,
     files: plan.entries.length,
     rewritten: plan.rewritten,
+    dropped: plan.dropped,
     kept: plan.kept,
     excluded: plan.excluded.length,
     coupled: plan.coupled,
@@ -414,6 +420,7 @@ function toRecordsRecord(
     paths: plan.entries.map((entry) => ({
       path: entry.path,
       rewritten: entry.rewritten,
+      dropped: entry.dropped,
     })),
   }
 }
