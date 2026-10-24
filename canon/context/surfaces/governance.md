@@ -23,7 +23,7 @@ Holds the source rules, one subfolder per audience, each at `<folder>/<slug>.md`
 
 ### `governance/ledger/`
 
-Holds the source ledger for each outside-practice rule at the rule's own path, outside the installed tree so a ledger never loads or ships.
+Holds the source ledger for each outside-practice rule at the rule's own path, outside the installed tree so a ledger never loads or ships. Its `skills/<skill>/` folder holds one ledger per reference of a skill on the skill audit's per-bullet list, matched the same way by `canon claude skills audit`.
 
 - `canon gov audit` matches a ledger's table rows to the rule's bullets by count under each H2 of the same name, so a row added or dropped without its bullet fails the folder
 - A cut bullet goes in a `## Declined` list rather than a table, since every table row under a heading counts as a bullet's row
@@ -86,7 +86,7 @@ Holds `governance.toml`, which names the one stack and extras this repository co
 A few more surfaces shape where a rule lands.
 
 - `.claude/rules/` is produced output, so a hand edit is deleted on the next `bun run check` and the change belongs in the source or the record
-- `governance/renames.toml` carries one entry per renamed shipped rule so `canon gov sync` moves a target across
+- `governance/renames.toml` carries one entry per renamed shipped rule, or per rule folded onto a pointer such as `craft`, so `canon gov sync` moves a target across
 - `governance/splits.toml` maps a held rule to the partners its bullets moved to, so `canon gov sync` names each one a target lacks. A split is no rename entry, since its key is a live rule
 - `claude/skills/git-commit/references/versioning.md` governs no file, so skill instruction reaches it rather than a rule
 - A project holding `.cursor/rules/` from an older toolkit keeps those files, since sync never touches them
