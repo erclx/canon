@@ -7,11 +7,12 @@
 #
 # The skill reports and repairs nothing, so the assertions pin what stays put
 # and what the reply names. The seeded overview sentence and the seeded stale
-# path surviving means no document was rewritten.
+# path surviving means neither seeded document was rewritten.
+#
+# No `write_scope` is declared. The checker skips an empty scope, so an empty
+# list would assert nothing, and a run writing a new file is not caught here.
 
 paths = ["docs/overview.md", "canon/context/api.md"]
-
-write_scope = []
 
 reply = ["src/auth", "auth.md"]
 
