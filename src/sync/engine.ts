@@ -27,6 +27,7 @@ import {
   logWarn,
   outro,
   outroSuccess,
+  plural,
   select,
 } from '@/cli/ui'
 import { compareVersions, parseVersion } from '@/version/compare'
@@ -200,6 +201,14 @@ export interface SyncAdapter {
   readonly nonInteractive?: NonInteractivePolicy
   /** Runs on a completed sync, including one with no changes. */
   onComplete?(target: string): Promise<void>
+  /**
+   * What each rule an apply copied governs in the target. Called only after
+   * an apply, and advisory: a throw is reported and never changes the exit.
+   */
+  coverage?(
+    target: string,
+    changes: readonly SyncChange[],
+  ): Promise<readonly RuleCoverage[]>
   /** Where this domain's hashes are stamped. Unset domains go unstamped. */
   readonly stamp?: StampSource
 }
@@ -414,6 +423,8 @@ export async function applyChanges(
 export interface SyncRunOptions {
   /** Path the sync refuses to run against, normally the toolkit root. */
   readonly protectedRoot: string
+  /** Writes the coverage record to stdout on every run that exits 0. */
+  readonly json?: boolean
 }
 
 /**
@@ -453,6 +464,7 @@ export async function runDomainSync(
     plan.retired.length === 0
   ) {
     logWarn(adapter.missingMessage)
+    emitCoverage(options, [])
     outro()
     return 0
   }
@@ -463,6 +475,7 @@ export async function runDomainSync(
   if (count === 0) {
     await adapter.onComplete?.(resolved)
     await recordStamp(adapter, resolved, new Date())
+    emitCoverage(options, [])
     outroSuccess('Everything up to date')
     return 0
   }
@@ -475,6 +488,7 @@ export async function runDomainSync(
   ) {
     logWarn(policy.message)
     logInfo(policy.hint)
+    emitCoverage(options, [])
     outro()
     return 0
   }
@@ -490,6 +504,7 @@ export async function runDomainSync(
 
   if (!shouldApply) {
     logWarn('Sync cancelled')
+    emitCoverage(options, [])
     outro()
     return 0
   }
@@ -498,8 +513,66 @@ export async function runDomainSync(
   await adapter.onComplete?.(resolved)
   await recordStamp(adapter, resolved, new Date())
 
+  const coverage = await readAdapterCoverage(adapter, resolved, plan.changes)
+  reportCoverage(coverage)
+  emitCoverage(options, coverage)
+
   outroSuccess('Sync complete', `(${count} ${adapter.unit})`)
   return 0
+}
+
+async function readAdapterCoverage(
+  adapter: SyncAdapter,
+  target: string,
+  changes: readonly SyncChange[],
+): Promise<readonly RuleCoverage[]> {
+  if (adapter.coverage === undefined) return []
+
+  try {
+    return await adapter.coverage(target, changes)
+  } catch (error) {
+    logWarn(
+      `Coverage unavailable: ${error instanceof Error ? error.message : String(error)}`,
+    )
+    return []
+  }
+}
+
+function reportCoverage(coverage: readonly RuleCoverage[]): void {
+  if (coverage.length === 0) return
+
+  logStep('Coverage')
+  for (const entry of coverage) {
+    logInfo(describeCoverage(entry))
+    if (entry.ui) {
+      logInfo('  Audit those files with /canon:ux-audit.')
+    }
+  }
+}
+
+function describeCoverage(entry: RuleCoverage): string {
+  if (entry.paths.length === 0) return `${entry.rule} (loads everywhere)`
+
+  const globs = entry.paths.join(', ')
+  if (entry.files === undefined) return `${entry.rule} (${globs})`
+
+  return `${entry.rule} (${globs}): ${plural(entry.files, 'file')}`
+}
+
+/** The one stdout write of a `--json` run, so a pipe reads JSON alone. */
+function emitCoverage(
+  options: SyncRunOptions,
+  coverage: readonly RuleCoverage[],
+): void {
+  if (options.json !== true) return
+
+  const records = coverage.map((entry) => ({
+    rule: entry.rule,
+    paths: entry.paths,
+    files: entry.files ?? null,
+    ui: entry.ui,
+  }))
+  process.stdout.write(`${JSON.stringify({ coverage: records })}\n`)
 }
 
 /**

@@ -210,6 +210,7 @@ export function register(program: Command): void {
     .description('Update rules already installed under .claude/rules/canon/')
     .argument('[target]', 'Target directory', '.')
     .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Emit the coverage record as JSON on stdout')
     .addHelpText(
       'after',
       [
@@ -219,17 +220,22 @@ export function register(program: Command): void {
         'It adds no new rule, which is `canon gov install`, and never touches',
         '.claude/rules/project/.',
         '',
+        'After an apply it lists each rule it copied with the globs it loads on',
+        'and how many files in the target match them. --json writes the same',
+        'list as { "coverage": [{ rule, paths, files, ui }] } on stdout, empty',
+        'when nothing was copied. The report never changes the exit code.',
+        '',
         'Exit codes:',
         '  0  synced, already up to date, or the prompt was cancelled',
         '  1  the target is missing or is the toolkit root',
         '',
       ].join('\n'),
     )
-    .action(async (target: string) => {
+    .action(async (target: string, opts: { json?: boolean }) => {
       process.exitCode = await runDomainSync(
         createGovAdapter(PROJECT_ROOT),
         target,
-        { protectedRoot: PROJECT_ROOT },
+        { protectedRoot: PROJECT_ROOT, json: opts.json },
       )
     })
 

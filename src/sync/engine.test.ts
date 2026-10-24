@@ -934,6 +934,126 @@ describe('applyChanges', () => {
 describe('runDomainSync', () => {
   const options = { protectedRoot: '/nowhere' }
 
+  it('should hand the copied changes to the coverage hook after an apply', async () => {
+    writeFixture(join(SOURCE, 'core/000-const.md'), 'new\n')
+    writeFixture(join(TARGET, '.claude/rules/core/000-const.md'), 'old\n')
+    const seen: string[] = []
+
+    await runDomainSync(
+      createAdapter({
+        coverage: async (_target, changes) => {
+          seen.push(...changes.map((change) => change.rel))
+          return []
+        },
+      }),
+      TARGET,
+      options,
+    )
+
+    expect(seen).toEqual(['.claude/rules/core/000-const.md'])
+  })
+
+  it('should not call the coverage hook when the policy refuses', async () => {
+    writeFixture(join(SOURCE, 'core/000-const.md'), 'new\n')
+    writeFixture(join(TARGET, '.claude/rules/core/000-const.md'), 'old\n')
+    let called = false
+
+    await runDomainSync(
+      createAdapter({
+        nonInteractive: { kind: 'refuse', message: 'refused', hint: 'run it' },
+        coverage: async () => {
+          called = true
+          return []
+        },
+      }),
+      TARGET,
+      options,
+    )
+
+    expect(called).toBe(false)
+  })
+
+  it('should keep the exit at 0 when the coverage hook throws', async () => {
+    writeFixture(join(SOURCE, 'core/000-const.md'), 'new\n')
+    const dest = join(TARGET, '.claude/rules/core/000-const.md')
+    writeFixture(dest, 'old\n')
+
+    const code = await runDomainSync(
+      createAdapter({
+        coverage: async () => {
+          throw new Error('unreadable')
+        },
+      }),
+      TARGET,
+      { ...options, json: true },
+    )
+
+    expect(code).toBe(0)
+    expect(readFileSync(dest, 'utf8')).toBe('new\n')
+  })
+
+  describe('with json', () => {
+    let written: string[]
+    let original: typeof process.stdout.write
+
+    beforeEach(() => {
+      written = []
+      original = process.stdout.write
+      process.stdout.write = ((chunk: string | Uint8Array) => {
+        written.push(String(chunk))
+        return true
+      }) as typeof process.stdout.write
+    })
+
+    afterEach(() => {
+      process.stdout.write = original
+    })
+
+    it('should write one coverage record on stdout after an apply', async () => {
+      writeFixture(join(SOURCE, 'core/000-const.md'), 'new\n')
+      writeFixture(join(TARGET, '.claude/rules/core/000-const.md'), 'old\n')
+
+      await runDomainSync(
+        createAdapter({
+          coverage: async () => [
+            { rule: 'a.md', paths: ['**/*.ts'], files: 3, ui: false },
+            { rule: 'b.md', paths: [], files: undefined, ui: true },
+          ],
+        }),
+        TARGET,
+        { ...options, json: true },
+      )
+
+      expect(written).toHaveLength(1)
+      expect(JSON.parse(written[0])).toEqual({
+        coverage: [
+          { rule: 'a.md', paths: ['**/*.ts'], files: 3, ui: false },
+          { rule: 'b.md', paths: [], files: null, ui: true },
+        ],
+      })
+    })
+
+    it('should write an empty record when nothing changed', async () => {
+      writeFixture(join(SOURCE, 'core/000-const.md'), 'same\n')
+      writeFixture(join(TARGET, '.claude/rules/core/000-const.md'), 'same\n')
+
+      await runDomainSync(createAdapter(), TARGET, { ...options, json: true })
+
+      expect(written.map((chunk) => JSON.parse(chunk))).toEqual([
+        { coverage: [] },
+      ])
+    })
+
+    it('should write nothing on stdout without the flag', async () => {
+      writeFixture(join(SOURCE, 'core/000-const.md'), 'new\n')
+      writeFixture(join(TARGET, '.claude/rules/core/000-const.md'), 'old\n')
+
+      await runDomainSync(createAdapter(), TARGET, options)
+
+      expect(written).toEqual([])
+    })
+  })
+
   it('should apply drift in a headless run when no policy is set', async () => {
     writeFixture(join(SOURCE, 'core/000-const.md'), 'new\n')
     const dest = join(TARGET, '.claude/rules/core/000-const.md')
