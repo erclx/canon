@@ -1,6 +1,6 @@
 ---
 title: Machine tells in design
-description: The visual defaults a model reaches for when nothing states a direction, each with what to do instead, plus the countable composition limits and the first-screen budget
+description: The looks current AI design clusters in and the visual defaults a model reaches for when nothing states a direction, each with what to do instead, plus the countable composition limits and the first-screen budget
 ---
 
 # Machine tells in design
@@ -8,6 +8,20 @@ description: The visual defaults a model reaches for when nothing states a direc
 Each item below is a shape rather than a value, which is why no ban list of colors or fonts reaches any of them. Read this before handing over anything a model drafted, and skip it on a small change to a surface that already has a settled direction.
 
 The skill body carries the ten most common of these, and this is the same catalog at full length. An item is a default to reach past, not a prohibition, so a brief that explicitly asks for one gets it, chosen rather than defaulted into.
+
+## Where current AI design clusters
+
+Unguided output does not spread evenly. It lands in a handful of looks, and following every other rule in this catalog does not keep a page out of them.
+
+- **The warm paper page.** A cream ground near `#F4F1EA` under a serif display set at strong contrast, accented in clay or terracotta.
+- **Black with one loud accent.** A near-black ground lit by a single acid green or vermilion.
+- **The newspaper imitation.** Hairline rules, square corners, and tight columns borrowed from print.
+- **The card kit.** Every block in a matching rounded box under the same faint grey shadow, with gradient washes for decoration.
+- **Template chrome.** A tracked uppercase label over each heading, meta joined by middle dots, monospace for small data, an arrow on link text, and off-black for black.
+
+A page drafted under this skill landed on the first look at exactly that cream, which is why the list sits apart from the shapes below. Each look suits a brief that names it. Where the brief leaves an axis open, choose something else on purpose.
+
+The five restate the calibration list in Anthropic's [frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design) skill.
 
 ## Composition
 
@@ -39,6 +53,13 @@ The skill body carries the ten most common of these, and this is the same catalo
 - **The gradient as a substitute for a decision.** A gradient over a section, a heading, or a button set because flat looked plain. Flat composition is fixed by composition, not gradient.
 - **Uniform radius and uniform elevation.** Every card at the same radius with the same shadow flattens hierarchy. Let the thing that matters differ.
 
+## Platform surfaces
+
+The browser and the operating system draw some parts of every page, and a themed surface leaves them at their defaults unless someone decides otherwise.
+
+- **An unstyled platform control.** A dark surface whose scrollbars, selects, or checkboxes still wear the light defaults. Declare the page's color scheme and take the accent from the palette.
+- **A transparent color with no checkerboard.** An alpha swatch over a flat ground, where a faint red and a solid pink look alike. Draw it over a checkerboard, the way image editors do.
+
 ## Typography
 
 - **Scale as the only hierarchy.** An enormous heading over uniform body text. Weight, color, spacing and measure carry hierarchy at lower cost.
@@ -56,7 +77,7 @@ The skill body carries the ten most common of these, and this is the same catalo
 
 ## The countable limits
 
-These rules carry numbers, so they are checked by counting rather than by judging. Every one came out of production testing by people shipping model-drafted pages.
+These rules carry numbers, so they are checked by counting rather than by judging. Each number is a house choice made so the tell can be counted, and `adopted.md` records it as one.
 
 - **A layout family appears once.** Once a section uses a shape, no other section on the surface uses it. Eight sections need at least four distinct families.
 - **Two consecutive splits, never three.** Alternating image sides reads as considered twice and as filler by the third. Break it with a full-width section, a vertical stack, or a grid.
@@ -75,4 +96,4 @@ These rules carry numbers, so they are checked by counting rather than by judgin
 
 ## Adopted, declined, and why
 
-The record of which external catalog items were adopted, which declined, and why sits in `adopted.md` beside this file.
+Most items here are observations of what models draw unguided, gathered from community prompt skills rather than from a design authority. The record of which were adopted, which declined, and why sits in `adopted.md` beside this file, with the few an authority states and the links to the catalog behind the rest.
