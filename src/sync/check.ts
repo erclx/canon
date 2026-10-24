@@ -275,7 +275,7 @@ export function buildToolingReport(
  * skipped stack still shipped. The re-resolution is kept only when its whole
  * stacks are exactly the recorded ones.
  */
-function resolveRecorded(
+export function resolveRecorded(
   toolkitRoot: string,
   recorded: readonly string[],
 ): Manifest[] {
