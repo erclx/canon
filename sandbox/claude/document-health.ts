@@ -22,6 +22,11 @@ export default scenario({
       // Doubled seed in src/auth. Both canon/context/api.md and auth.md claim the
       // folder as a Layout H3. auth.md holds the area's trap and api.md holds only
       // the H3, so auth.md is the owner a structure line proposes.
+      //
+      // Design record seed in canon/DESIGN.md. The lead is past its word cap and
+      // the Colors table names --color-muted, which src/styles/tokens.css does
+      // not declare, so the design record row carries a prose and a token finding
+      // routed to design-record.
       ctx.fixtures('claude', 'document-health', 'shared', '01-initial')
 
       ctx.git('add', '.')
@@ -52,6 +57,9 @@ export default scenario({
       ctx.log.info(
         '  7. src/auth is claimed as a Layout H3 by both api.md and auth.md, and auth.md holds its trap',
       )
+      ctx.log.info(
+        '  8. canon/DESIGN.md has a lead past its cap and names --color-muted, which tokens.css lacks',
+      )
       ctx.log.info('Action:  /document-health')
       ctx.log.info(
         'Expect:  one section per document across length, placement, and staleness.',
@@ -79,6 +87,9 @@ export default scenario({
       )
       ctx.log.info(
         '         holds the area trap and api.md holds only the heading.',
+      )
+      ctx.log.info(
+        '         canon/DESIGN.md reads as measured, naming both findings and routing them to design-record.',
       )
       ctx.log.info(
         '         Nothing is repaired: both files are byte-identical after the run.',
