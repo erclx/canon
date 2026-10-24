@@ -88,7 +88,7 @@ Every palette rule but the dark mode row is catalog as well, being accent by rar
 
 ## Tells an authority states
 
-Three tells and one application UI rule rest on a source rather than on the catalog.
+Two tells and one application UI rule rest on a source rather than on the catalog.
 
 | Rule                              | Source                                                                                                                                                  |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -126,9 +126,10 @@ Each threshold below is the toolkit's, chosen so a tell can be counted rather th
 | Two or three section tiers    | House choice: enough tiers for rhythm, few enough that each section takes one                  |
 | One marquee                   | House choice: a second sliding strip is where the device reads as filler                       |
 | Two consecutive splits        | House choice: a third alternation is where the pattern reads as filler                         |
-| One uppercase label per three | House choice: the rate at which the label still marks a different kind of thing                |
 | Four first-screen text items  | House choice: a label, a headline, a supporting line, and the actions, so a fifth is countable |
 | One layout family, five items | House choice: a repeated shape and a long run become counts a reviewer can check               |
+
+The uppercase label count belongs to the `interface-casing` rule, whose own ledger records it as a house choice.
 
 ### The focus ring's weight
 
