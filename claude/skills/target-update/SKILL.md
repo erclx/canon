@@ -64,6 +64,8 @@ Target update: `<path>`, canon `<installed>` to `<running>`.
 
 **Migrations, in run order:** <each pending or refused entry from migrate status, with its verb>
 
+**Retired calls:** <each `retiredCallers` entry from migrate status, with its file, line, the release that retired the verb, and where the work went, or omitted when the list is empty>
+
 **Drift:** <each non-empty cause from sync --check, with its count and paths>
 
 **Where it lands:** <the linked worktree this run is already in, or the worktree `.claude/worktrees/<name>/` it will enter, or the branch it will create in place when the operator declines a worktree>
@@ -73,11 +75,13 @@ Target update: `<path>`, canon `<installed>` to `<running>`.
 **Commands, in order:** <the exact commands Steps 4 to 6 will run>
 ```
 
+A retired call is no migration, so no step here fixes it. Name it in the preview and leave the edit to the operator, who owns the script.
+
 Summarize the changelog for this project, not for the toolkit. Drop an entry that touches nothing the target holds, and lead with anything a migration or a sync will change.
 
 ### Nothing pending
 
-When the changelog range is empty, `migrate status` lists nothing pending or refused, and the drift lines hold nothing a step here would take, write nothing. Invoke `canon:target-check` and report the target current with its table.
+When the changelog range is empty, `migrate status` lists nothing pending or refused and no `retiredCallers`, and the drift lines hold nothing a step here would take, write nothing. Invoke `canon:target-check` and report the target current with its table.
 
 ### Take a branch after the go-ahead
 

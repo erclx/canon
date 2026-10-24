@@ -1,5 +1,8 @@
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { Command } from 'commander'
-import { describe, expect, it } from 'vitest'
+import { afterAll, describe, expect, it } from 'vitest'
 import { register } from '@/commands/migrate'
 import type { CommandResult, RunCommand } from '@/gate/measures'
 import {
@@ -24,11 +27,37 @@ function runnerFor(byVerb: Record<string, Partial<CommandResult>>): {
   return { run, calls }
 }
 
+const EMPTY_ROOT = await mkdtemp(join(tmpdir(), 'canon-status-empty-'))
+
+afterAll(() => rm(EMPTY_ROOT, { recursive: true }))
+
+describe('readMigrationStatus retiredCallers', () => {
+  it('should list a project call to a retired verb and keep the exit at 0', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'canon-status-'))
+    try {
+      await writeFile(
+        join(root, 'package.json'),
+        JSON.stringify({ scripts: { board: 'canon canvas serve' } }),
+      )
+      const { run } = runnerFor({})
+
+      const report = await readMigrationStatus(run, root)
+
+      expect(report.retiredCallers.map((c) => [c.file, c.verb])).toEqual([
+        ['package.json', 'canon canvas'],
+      ])
+      expect(statusExitCode(report)).toBe(0)
+    } finally {
+      await rm(root, { recursive: true })
+    }
+  })
+})
+
 describe('readMigrationStatus', () => {
   it('reads every migration clean when each exits 0', async () => {
     const { run } = runnerFor({})
 
-    const report = await readMigrationStatus(run)
+    const report = await readMigrationStatus(run, EMPTY_ROOT)
 
     expect(report.migrations.map((m) => m.state)).toEqual(
       MIGRATIONS.map(() => 'clean'),
@@ -43,7 +72,7 @@ describe('readMigrationStatus', () => {
       records: { exitCode: 2, stdout: '{"ok":true}' },
     })
 
-    const report = await readMigrationStatus(run)
+    const report = await readMigrationStatus(run, EMPTY_ROOT)
 
     const pending = report.migrations.filter((m) => m.state === 'pending')
     expect(pending.map((m) => m.verb)).toEqual([
@@ -57,7 +86,7 @@ describe('readMigrationStatus', () => {
   it('reports the command a migration dry-ran with, flags included', async () => {
     const { run } = runnerFor({ rename: { exitCode: 2 } })
 
-    const report = await readMigrationStatus(run)
+    const report = await readMigrationStatus(run, EMPTY_ROOT)
 
     const rename = report.migrations.find((m) => m.name === 'rename')
     expect(rename?.verb).toBe('canon migrate rename --scope target')
@@ -69,7 +98,7 @@ describe('readMigrationStatus', () => {
       records: { exitCode: 2 },
     })
 
-    const report = await readMigrationStatus(run)
+    const report = await readMigrationStatus(run, EMPTY_ROOT)
 
     const refused = report.migrations.find((m) => m.name === 'rule-layout')
     expect(refused).toMatchObject({ state: 'refused', reason: 'toolkit root' })
@@ -89,7 +118,7 @@ describe('readMigrationStatus', () => {
     ].join('\n')
     const { run } = runnerFor({ records: { exitCode: 1, stderr: framed } })
 
-    const report = await readMigrationStatus(run)
+    const report = await readMigrationStatus(run, EMPTY_ROOT)
 
     expect(report.migrations[0].reason).toBe(
       'Could not list files under /tmp/x. Second problem',
@@ -100,7 +129,7 @@ describe('readMigrationStatus', () => {
     const framed = '│ ✗ Ignored where it stands.\n│ ✗ Run canon tooling sync\n'
     const { run } = runnerFor({ records: { exitCode: 1, stderr: framed } })
 
-    const report = await readMigrationStatus(run)
+    const report = await readMigrationStatus(run, EMPTY_ROOT)
 
     expect(report.migrations[0].reason).toBe(
       'Ignored where it stands. Run canon tooling sync',
@@ -112,7 +141,7 @@ describe('readMigrationStatus', () => {
       rename: { exitCode: 1, stderr: '┌\n│ plain failure\n└\n' },
     })
 
-    const report = await readMigrationStatus(run)
+    const report = await readMigrationStatus(run, EMPTY_ROOT)
 
     const refused = report.migrations.find((m) => m.name === 'rename')
     expect(refused?.reason).toBe('plain failure')
@@ -121,7 +150,7 @@ describe('readMigrationStatus', () => {
   it('reads an exit outside the contract as refused', async () => {
     const { run } = runnerFor({ rename: { exitCode: 137 } })
 
-    const report = await readMigrationStatus(run)
+    const report = await readMigrationStatus(run, EMPTY_ROOT)
 
     const odd = report.migrations.find((m) => m.name === 'rename')
     expect(odd?.state).toBe('refused')
@@ -133,7 +162,7 @@ describe('readMigrationStatus', () => {
       records: { exitCode: 1, spawnError: 'bun is not on PATH' },
     })
 
-    const report = await readMigrationStatus(run)
+    const report = await readMigrationStatus(run, EMPTY_ROOT)
 
     expect(report.migrations[0].reason).toBe('bun is not on PATH')
   })
@@ -141,7 +170,7 @@ describe('readMigrationStatus', () => {
   it('leaves the record out when stdout is not JSON', async () => {
     const { run } = runnerFor({ records: { exitCode: 2, stdout: 'plain' } })
 
-    const report = await readMigrationStatus(run)
+    const report = await readMigrationStatus(run, EMPTY_ROOT)
 
     expect(report.migrations[0]).toMatchObject({ state: 'pending' })
     expect(report.migrations[0].record).toBeUndefined()
@@ -150,7 +179,7 @@ describe('readMigrationStatus', () => {
   it('never passes --write and always asks for --json', async () => {
     const { run, calls } = runnerFor({})
 
-    await readMigrationStatus(run)
+    await readMigrationStatus(run, EMPTY_ROOT)
 
     expect(calls).toHaveLength(MIGRATIONS.length)
     for (const argv of calls) {
@@ -162,7 +191,7 @@ describe('readMigrationStatus', () => {
   it('reads rename at the target scope', async () => {
     const { run, calls } = runnerFor({})
 
-    await readMigrationStatus(run)
+    await readMigrationStatus(run, EMPTY_ROOT)
 
     const rename = calls.find((argv) => argv[1] === 'rename')
     expect(rename).toEqual(['migrate', 'rename', '--scope', 'target', '--json'])
@@ -176,7 +205,7 @@ describe('statusExitCode', () => {
       'record-tree': { exitCode: 1, stderr: 'no' },
     })
 
-    expect(statusExitCode(await readMigrationStatus(run))).toBe(1)
+    expect(statusExitCode(await readMigrationStatus(run, EMPTY_ROOT))).toBe(1)
   })
 })
 

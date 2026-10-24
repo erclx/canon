@@ -47,7 +47,7 @@ Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`,
 Installs each domain `canon init` runs, as the steps `runDomains` walks in `run.ts`.
 
 - `runDomains` catches a failed domain and lets init report the ones that worked, so the `check:install` assert loop is the only guard against a silently truncated install
-- Every domain init installs needs at least one asserted path in `scripts/core/install-check.sh`, and a conditional domain needs its condition met in the gate's `canon init --stack base` call
+- Every domain init installs needs at least one asserted path in `scripts/core/install-check.ts`, and a conditional domain needs its condition met in the gate's `canon init --stack base` call
 - `check:install` clones the last commit, so an uncommitted fix is invisible to it
 
 ### `src/process/`

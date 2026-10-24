@@ -64,7 +64,7 @@ Holds the files every project starts with and then owns.
 Is storage for `canon claude` and no stack, so `EXCLUDED_STACKS` in `src/tooling/manifest.ts` keeps it out of discovery.
 
 - A seed exempts itself from the section check with `stub: true`, which `src/tooling/seed-marker.ts` strips on both install paths
-- `planSeeds` in `src/claude/seeds.ts` iterates a literal `SUBDIRS` array, so a new claude seed folder needs its entry, an `install-check.sh` assertion, and a `canon claude init` run
+- `planSeeds` in `src/claude/seeds.ts` iterates a literal `SUBDIRS` array, so a new claude seed folder needs its entry, an `install-check.ts` assertion, and a `canon claude init` run
 
 ### `src/tooling/`
 

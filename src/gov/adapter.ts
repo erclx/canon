@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs'
 import { basename, join, relative, resolve } from 'node:path'
+import { readCoverage } from '@/gov/coverage'
 import { canonRulesDir, ruleSubdir } from '@/gov/install'
 import { loadRenames, resolveSuccessor } from '@/gov/renames'
 import { resolveMissingRules } from '@/gov/stacks'
@@ -93,6 +94,7 @@ export function createGovAdapter(root: string): SyncAdapter {
           ),
       }
     },
+    coverage: readCoverage,
     stamp: { domain: 'governance', toolkitRoot: root },
   }
 }

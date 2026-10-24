@@ -54,7 +54,7 @@ Holds every module that reads repository state, named for what it reads.
 
 ### `src/sync/`
 
-Holds the one engine `gov` installs and syncs through, the workflow `canon sync` runs afterward, and the install stamp. `format.ts` formats the stamp alone with the target's `oxfmt` or `prettier`, since a formatted seed would read as `customized`.
+Holds the one engine `gov` installs and syncs through, the workflow `canon sync` runs afterward, and the install stamp. `format.ts` formats the stamp alone with the target's `oxfmt` or `prettier`, since a formatted seed would read as `customized`. `stamp.ts` already writes the shape both accept.
 
 - An adapter supplies `installedRoot`, `locateSource`, and optional hooks. Widen `SyncAdapter` rather than branching on a domain name in `engine.ts`
 - `planSync` marks each walked file with a state such as `stale`, `orphaned`, `retired`, or `renamed`. Location decides ownership before a name lookup, through `projectSubdir` and `ownsInstalledRoot`
@@ -113,7 +113,7 @@ Holds the one-shot moves behind `canon migrate`, being `records`, `surface-roots
 
 ### `src/pr/`
 
-Holds the readers and writers behind `canon pr`, all over REST since a cloud session's proxy refuses GraphQL. The squash merge in `merge.ts` is a REST `PUT` too, pinned to the head it read so a push landing after the read refuses.
+Holds the readers and writers behind `canon pr`, all over REST since a cloud session's proxy refuses GraphQL. The squash in `merge.ts` is a REST `PUT` pinned to the head it read, and a bot pull request composes from its own body.
 
 - `rest.ts` is the one boundary where REST payloads take the field names the rest of the folder reads, and list endpoints go through `gh api --paginate`
 - `head.ts` and `checks.ts` key on the remote tip, not the local branch, and `checks.ts` tells a conflicted branch from runs that have not started
@@ -145,7 +145,7 @@ Decides what the published package `@erclx/canon` carries.
 - `files` lists `src`, `scripts`, `governance`, `tooling`, `claude`, and `docs`, minus `scripts/eval` and every test file. `internal/`, `wiki/`, `sandbox/`, and `.claude/` stay out
 - `publishConfig.access` is `public`, since a scoped package defaults to restricted and a restricted publish only fails for everyone outside the scope
 - Release-please owns the version and writes the plugin manifest through `extra-files`
-- `scripts/core/install-check.sh` packs with `--ignore-scripts`, installs the tarball without development dependencies, and asserts an excluded path is absent from it
+- `scripts/core/install-check.ts` packs with `--ignore-scripts`, installs the tarball without development dependencies, and asserts an excluded path is absent from it
 
 ### Other folders
 

@@ -43,9 +43,11 @@ Add `--json` for a machine-readable report and `--exit-code` to fail CI when a t
 ## Targeted
 
 - Seed docs such as `CLAUDE.md` and `canon/REQUIREMENTS.md`: merge by hand, keeping the project's customizations
-- Installed governance rules: `canon gov sync <path>`, which adds no new rules
+- Installed governance rules: `canon gov sync <path>`, which adds no new rules and reports coverage afterward
 - Tooling configs and seeds: read differences with `canon tooling diff <stack> <path>`, then `canon tooling sync <stack> <path> --write`, which overwrites golden configs and copies each seed once
 - Index regeneration: `canon indexes regen`
+
+After `canon gov sync` applies, it lists each rule it copied with its globs and how many project files match. A `ui/` rule adds a pointer to `/canon:ux-audit`. `--json` writes `{ "coverage": [{ "rule", "paths", "files", "ui" }] }` to stdout, empty when nothing was copied, with `files` null outside git. The report never changes the exit code.
 
 Try a scenario from [sandbox](../../canon/context/development/sandbox.md) before syncing a real project.
 

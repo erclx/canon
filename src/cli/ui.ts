@@ -90,9 +90,8 @@ export function intro(title: string): void {
 }
 
 /**
- * Timeline log levels matching `scripts/lib/ui.sh`, so a migrated command
- * prints the same frame as the bash it replaced. All output is stderr,
- * leaving stdout clean for JSON and lists.
+ * Timeline log levels for the framed output every command and `scripts/core/`
+ * script prints. All output is stderr, leaving stdout clean for JSON and lists.
  */
 export function logInfo(message: string): void {
   if (quiet) return
@@ -151,8 +150,7 @@ export function outroSuccess(message: string, detail?: string): void {
 }
 
 /**
- * Indents borrowed output inside an open frame, matching `pipe_output` in
- * `scripts/lib/ui.sh`. Used for a document the command did not compose itself,
+ * Indents borrowed output inside an open frame. Used for a document the command did not compose itself,
  * such as a pull request body or the output of a git mutation.
  */
 export function pipeOutput(text: string): void {

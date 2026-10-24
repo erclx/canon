@@ -36,7 +36,7 @@ Each role keeps to its own writes, and five rules cover how the roles meet.
 7. A pass posts `## Review` while anything is open and `## Review closed` when nothing is. The reviewer then runs `canon pr lift`.
 8. The human merges with `canon pr merge <number>`. The orchestrator tells any trailing worker whose files the merge touched to run `review-address`, which rebases.
 
-Each worker halts at the PR, and the merge stays a human gate. `canon pr merge` squashes with the body's Summary, Key changes, and Technical context as the message, and the seeded deny rule covers the forms an agent writes by default. The merge button stays for a bot's pull request, such as a dependency bump or a release.
+Each worker halts at the PR, and the merge stays a human gate. `canon pr merge` squashes with the body's Summary, Key changes, and Technical context as the message, and the seeded deny rule covers the forms an agent writes by default. A release-please or Dependabot pull request merges the same way, from the bot's own body.
 
 ## The review layer
 
