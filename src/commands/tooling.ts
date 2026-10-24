@@ -149,6 +149,8 @@ export function register(program: Command): void {
         'A config the project edited, or one written before hashes were',
         'recorded, is held and listed. Name it with --replace to take the',
         'golden copy, or run `canon tooling customize <path>` to keep yours.',
+        'A target with no tooling record yet, such as a fresh scaffold, holds',
+        'nothing, so its first write takes every golden config.',
         'Seeds are copy-once, so a seed the target already holds is left alone.',
         'A declined or customized path is never written.',
         '',
@@ -573,7 +575,7 @@ async function runSync(
     return decision === 'unauthorized' ? 1 : 0
   }
 
-  const held = heldConfigs(result, replace)
+  const held = heldConfigs(result, replace, prepared.target)
   if (result.configs.some((entry) => entry.state !== 'matching')) {
     await injectConfigs(prepared.chain, prepared.target, new Set(held))
   }
@@ -602,8 +604,18 @@ async function runSync(
  * A drifted config the project edited, or one no write recorded, is held
  * rather than replaced, since a write naming a stack is not consent to lose an
  * edit inside it. Only a path `--replace` names is taken over.
+ *
+ * A target with no tooling record is a first install, as a fresh scaffold is,
+ * so nothing is held there. Its configs came from a scaffold rather than from
+ * a project edit, and holding them would leave the stack's golden copies out.
  */
-function heldConfigs(result: ScanResult, replace: readonly string[]): string[] {
+function heldConfigs(
+  result: ScanResult,
+  replace: readonly string[],
+  target: string,
+): string[] {
+  if (readStamp(target)?.domains.tooling === undefined) return []
+
   return result.configs
     .filter(
       (entry) =>

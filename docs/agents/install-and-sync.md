@@ -76,6 +76,8 @@ A `drifted` entry in `configs` carries a `cause`, read against the golden hash t
 - `edited`: the target no longer hashes to the record. `--write` holds it.
 - `unattributed`: no hash is recorded, as on every target synced before hashes existed. `--write` holds it.
 
+A target with no tooling record yet, such as a fresh scaffold, holds nothing, so its first write takes every golden config.
+
 A held path stays drifted, so the next headless run still exits 1. Pass `--replace <path>` once per path to take the golden copy, as the command the write prints does. A `--replace` naming no config the chain writes refuses with `unknown-replace`.
 
 ### Dispositions

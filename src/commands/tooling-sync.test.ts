@@ -93,14 +93,8 @@ describe('tooling sync write authorization', () => {
     expect(sync([]).stderr).toContain(GOLDEN)
   })
 
-  it('should hold a local edit no write recorded under --write', () => {
+  it('should replace the same local edit once --write is passed on a first install', () => {
     sync(['--write'])
-
-    expect(goldenContent()).toBe(LOCAL_EDIT)
-  })
-
-  it('should replace the same local edit once --replace names it', () => {
-    sync(['--write', '--replace', GOLDEN])
 
     expect(goldenContent()).not.toBe(LOCAL_EDIT)
   })
@@ -222,7 +216,7 @@ describe('tooling diff', () => {
   })
 
   it('should exit 0 once the target matches the stack', () => {
-    sync(['--write', '--replace', GOLDEN])
+    sync(['--write'])
 
     expect(diff([]).status).toBe(0)
   })
@@ -484,6 +478,19 @@ describe('tooling sync and inject over a registry that refuses the install', () 
 describe('tooling sync --write hold', () => {
   const OLDER_GOLDEN = '{ "older": "golden" }\n'
 
+  // A record with a chain and no hashes is what every target synced before
+  // hashes existed carries, so the local edit reads unattributed.
+  beforeEach(() => {
+    mkdirSync(join(target, 'canon', 'config'), { recursive: true })
+    writeFileSync(
+      stampPath(target),
+      JSON.stringify({
+        covers: ['tooling'],
+        domains: { tooling: { syncedAt: 'then', files: {}, chain: ['base'] } },
+      }),
+    )
+  })
+
   /** Records a clean write, then rolls the record back as if canon moved. */
   const recordOlderGolden = (): void => {
     sync(['--write', '--replace', GOLDEN])
@@ -493,6 +500,18 @@ describe('tooling sync --write hold', () => {
     stamp.domains.tooling.files[GOLDEN] = hashContent(OLDER_GOLDEN)
     writeFileSync(path, JSON.stringify(stamp))
   }
+
+  it('should hold a local edit no write recorded', () => {
+    sync(['--write'])
+
+    expect(goldenContent()).toBe(LOCAL_EDIT)
+  })
+
+  it('should replace the same local edit once --replace names it', () => {
+    sync(['--write', '--replace', GOLDEN])
+
+    expect(goldenContent()).not.toBe(LOCAL_EDIT)
+  })
 
   it('should name the held path with a copyable --replace command', () => {
     const run = sync(['--write'])
