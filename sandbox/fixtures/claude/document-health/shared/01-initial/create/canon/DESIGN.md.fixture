@@ -1,0 +1,12 @@
+# Design
+
+Values live in `src/styles/tokens.css`. This record holds the intent behind them, and a long lead like this one reads past the forty word cap the design standard sets for it.
+
+## Colors
+
+- Use the accent for links and the primary action only.
+
+| Role   | Property         | Intent        |
+| ------ | ---------------- | ------------- |
+| accent | `--color-accent` | links         |
+| muted  | `--color-muted`  | quiet content |

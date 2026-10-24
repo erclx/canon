@@ -73,6 +73,24 @@ Both verbs resolve their folders by surface root rather than by a path written i
 - The audit refuses with `reason: "no-folders"`, naming the folders it looked for. Report that refusal as an unread axis.
 - The sweep with the model layer off answers from its regex layer alone, a narrower read rather than a refusal, so say which layer answered
 
+## The design record
+
+| Field          | Value                                                                                            |
+| -------------- | ------------------------------------------------------------------------------------------------ |
+| Measures       | Whether the design record holds to its prose budget and names only properties its stylesheet has |
+| Verb           | `canon design audit --json`                                                                      |
+| Evidence class | `measured`                                                                                       |
+
+The record is exempt from the length and placement verbs above, so this is the only measured read it gets.
+
+- `prose`: each place the record passes the budget, with the count and the cap it was read against. Take the caps from the finding rather than from a number written here.
+- `tokens.missing`: a custom property a table names that the stylesheet the lead names does not declare
+- `tokens.status: "unchecked"`: the lead names no stylesheet, or the one it names does not resolve. Report the axis as unread with the `reason`, since nothing was compared.
+- `tokens.status: "not-applicable"`: a values record, which carries `Value` where an intent record carries `Property`. Report it as not applicable with the `reason`.
+- `record: null`: the project holds no design record, so there is nothing to report
+
+**Routes to:** `design-record`, which owns the record's shape. `document-repair` rewrites a context folder and does not know the budget.
+
 ## Staleness
 
 | Field          | Value                                                            |
