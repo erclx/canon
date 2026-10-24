@@ -62,7 +62,7 @@ The exit code follows the mode the run took. The bullets cover where the gate ru
 - A root resolving no audited folder refuses with `1` and warns, a root measuring no entry warns, and a seed short a section fails with `2`
 - A seed omitting a required section on purpose sets `stub: true` in its frontmatter. Only the value `true` counts, and both install paths strip the field.
 
-The citation check skips fenced blocks, fixture and harness trees including `*.test.ts`, and a path into a folder the project lacks.
+The citation check skips fenced blocks, fixture and harness trees including `*.test.ts`, the install stamp at any of its spellings, and a path into a folder the project lacks.
 
 Append `<!-- audit-ignore-citations: <path> -->` to a line that displays a path without pointing at it. The marker excuses only the paths it names, and a bare `<!-- audit-ignore-citations -->` excuses every citation on the line. In seeds, plugin skill bodies, and stack references, which install into a target, reword the line instead.
 
