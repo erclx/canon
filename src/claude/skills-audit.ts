@@ -1,6 +1,13 @@
 import { existsSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { dirname, join, relative } from 'node:path'
 import { isFamilyKey } from '@/claude/skills-families'
+import { plural } from '@/cli/ui'
+import {
+  compareLedger,
+  countLedgerRows,
+  type LedgerMismatch,
+  measureRule,
+} from '@/gov/audit'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import {
   type BodyLine,
@@ -74,7 +81,21 @@ export const LEDGER_SKILLS: readonly string[] = [
   join(SHIPPED_CORPUS, 'design-taste'),
   join(SHIPPED_CORPUS, 'write-human'),
   join(SHIPPED_CORPUS, 'test-first'),
+  join(SHIPPED_CORPUS, 'ui-craft'),
 ]
+
+/**
+ * The ledger-listed skills whose every reference but the source record carries
+ * a ledger of its own, one table row per bullet under each H2, the way a rule
+ * in a practice folder does. The ledgers sit outside the plugin as rule
+ * ledgers do, so a target pays nothing for them.
+ */
+export const BULLET_LEDGER_SKILLS: readonly string[] = [
+  join(SHIPPED_CORPUS, 'ui-craft'),
+]
+
+/** Where a per-bullet ledger lives, as `<skill>/<reference>.md` below it. */
+export const SKILL_LEDGERS = join('governance', 'ledger', 'skills')
 
 /** The closing H2s a practice skill carries, matched exactly outside fences. */
 export const PRACTICE_SECTIONS: readonly string[] = [
@@ -192,6 +213,15 @@ interface SkillSource {
    * requirement is where the standard sends a date.
    */
   readonly bodies: readonly SkillText[]
+  /** One entry per reference of a skill on the per-bullet ledger list. */
+  readonly referenceLedgers: readonly ReferenceLedger[]
+}
+
+interface ReferenceLedger {
+  readonly rel: string
+  readonly ledgerRel: string
+  /** Undefined when the ledger file is absent. */
+  readonly mismatches: readonly LedgerMismatch[] | undefined
 }
 
 interface SkillText {
@@ -214,7 +244,7 @@ export async function auditSkills(root: string): Promise<SkillsAudit> {
   )
 
   const perCorpus = await Promise.all(
-    present.map((corpus) => readCorpus(corpus.rel, corpus.dir)),
+    present.map((corpus) => readCorpus(root, corpus.rel, corpus.dir)),
   )
   const sources = perCorpus.flat()
 
@@ -266,15 +296,22 @@ export function auditExitCode(report: SkillsAudit): number {
   return report.missingRequirement.length > 0 ? EXIT_MISSING_REQUIREMENT : 0
 }
 
-async function readCorpus(rel: string, dir: string): Promise<SkillSource[]> {
+async function readCorpus(
+  root: string,
+  rel: string,
+  dir: string,
+): Promise<SkillSource[]> {
   const paths = [
     ...new Bun.Glob('*/SKILL.md').scanSync({ cwd: dir, onlyFiles: true }),
   ].sort()
 
-  return Promise.all(paths.map((path) => readSkill(rel, dir, dirname(path))))
+  return Promise.all(
+    paths.map((path) => readSkill(root, rel, dir, dirname(path))),
+  )
 }
 
 async function readSkill(
+  root: string,
   rel: string,
   dir: string,
   folder: string,
@@ -305,6 +342,15 @@ async function readSkill(
 
   const fields = parseFrontmatter(body)
   const skillRel = join(rel, folder)
+  const referenceLedgers = BULLET_LEDGER_SKILLS.includes(skillRel)
+    ? await readReferenceLedgers(
+        root,
+        skillRel,
+        folder,
+        references,
+        referenceTexts,
+      )
+    : []
 
   return {
     rel: skillRel,
@@ -326,7 +372,43 @@ async function readSkill(
         isReference: true,
       })),
     ],
+    referenceLedgers,
   }
+}
+
+/**
+ * Pairs each reference's bullets with its ledger's rows through the rule
+ * audit's own comparison, so a reference and a rule are held to one count.
+ * The source record names authorities rather than stating bullets, so it is
+ * the one reference asked for no ledger.
+ */
+async function readReferenceLedgers(
+  root: string,
+  skillRel: string,
+  folder: string,
+  references: readonly string[],
+  texts: readonly string[],
+): Promise<ReferenceLedger[]> {
+  return Promise.all(
+    references
+      .map((path, index) => ({ path, text: texts[index] ?? '' }))
+      .filter(({ path }) => path !== PRACTICE_LEDGER)
+      .map(async ({ path, text }) => {
+        const ledgerRel = join(
+          SKILL_LEDGERS,
+          folder,
+          relative('references', path),
+        )
+        const ledgerPath = join(root, ledgerRel)
+        const mismatches = existsSync(ledgerPath)
+          ? compareLedger(
+              measureRule(text).groups,
+              countLedgerRows(await Bun.file(ledgerPath).text()),
+            )
+          : undefined
+        return { rel: join(skillRel, path), ledgerRel, mismatches }
+      }),
+  )
 }
 
 /**
@@ -517,7 +599,21 @@ function practiceFindings(source: SkillSource): SkillFinding[] {
       detail: `missing section: ${section}`,
     }))
 
-  return [...sections, ...ledgerFindings(source)]
+  return [
+    ...sections,
+    ...ledgerFindings(source),
+    ...source.referenceLedgers.flatMap(referenceLedgerFindings),
+  ]
+}
+
+function referenceLedgerFindings(entry: ReferenceLedger): SkillFinding[] {
+  if (entry.mismatches === undefined) {
+    return [{ rel: entry.rel, detail: `missing ledger: ${entry.ledgerRel}` }]
+  }
+  return entry.mismatches.map((mismatch) => ({
+    rel: entry.rel,
+    detail: `${mismatch.heading === null ? 'above the first H2' : `## ${mismatch.heading}`}: ${plural(mismatch.bullets, 'bullet')}, ${plural(mismatch.rows, 'ledger row')}`,
+  }))
 }
 
 /**

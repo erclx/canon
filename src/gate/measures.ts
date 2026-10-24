@@ -12,6 +12,7 @@ import {
   auditSkills,
   LEDGER_SKILLS,
   PRACTICE_LEDGER,
+  SKILL_LEDGERS,
   PRACTICE_SKILLS,
   SHIPPED_CORPUS,
 } from '@/claude/skills-audit'
@@ -407,7 +408,7 @@ export const skillPracticeShape: Measure = async (ctx) => {
       .join(', ')
     return {
       emissions: [],
-      failure: `${plural(found.length, 'practice shape finding')}: ${where}. Add the closing H2 exactly as named to a practice skill, or the ledger at ${PRACTICE_LEDGER} to any skill on the ledger list, citing one linked source or one House choice row.`,
+      failure: `${plural(found.length, 'practice shape finding')}: ${where}. Add the closing H2 exactly as named to a practice skill, or the ledger at ${PRACTICE_LEDGER} to any skill on the ledger list, citing one linked source or one House choice row. A reference on the per-bullet list takes one ledger row per bullet under the same H2 at ${SKILL_LEDGERS}.`,
     }
   }
 

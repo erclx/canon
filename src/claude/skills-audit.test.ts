@@ -11,11 +11,13 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   auditExitCode,
   auditSkills,
+  BULLET_LEDGER_SKILLS,
   DESCRIPTION_LIMIT,
   EXIT_MISSING_REQUIREMENT,
   LEDGER_SKILLS,
   PRACTICE_SECTIONS,
   PRACTICE_SKILLS,
+  SKILL_LEDGERS,
 } from '@/claude/skills-audit'
 
 let root: string
@@ -816,6 +818,73 @@ describe('auditSkills practice shape', () => {
   it('should stay silent on an unlisted skill missing every section', async () => {
     practiceSkill(CLOSING)
     conformingSkill('git-commit')
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+})
+
+describe('auditSkills reference ledgers', () => {
+  const [bulletLedgered = ''] = BULLET_LEDGER_SKILLS
+  const name = basename(bulletLedgered)
+  const reference = join(bulletLedgered, 'references', 'a11y.md')
+  const ledgerRel = join(SKILL_LEDGERS, name, 'a11y.md')
+
+  const TABLE = '| Bullet | Source |\n| --- | --- |\n'
+
+  function writeReference(text: string): void {
+    const dir = join(root, bulletLedgered, 'references')
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(join(dir, 'a11y.md'), text)
+  }
+
+  function writeLedger(text: string): void {
+    mkdirSync(join(root, SKILL_LEDGERS, name), { recursive: true })
+    writeFileSync(join(root, ledgerRel), text)
+  }
+
+  beforeEach(() => {
+    listedPracticeSkillsExcept('')
+    writeReference('# Accessibility\n\n## Semantics\n\n- One.\n- Two.\n')
+  })
+
+  it('should report a reference carrying no ledger', async () => {
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      { rel: reference, detail: `missing ledger: ${ledgerRel}` },
+    ])
+  })
+
+  it('should report a ledger one row short under a heading', async () => {
+    writeLedger(`# Ledger\n\n## Semantics\n\n${TABLE}| One | x |\n`)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      { rel: reference, detail: '## Semantics: 2 bullets, 1 ledger row' },
+    ])
+  })
+
+  it('should pass a ledger matching every heading', async () => {
+    writeLedger(
+      `# Ledger\n\n## Semantics\n\n${TABLE}| One | x |\n| Two | y |\n`,
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+
+  it('should ask no per-bullet ledger of the source record', async () => {
+    writeLedger(
+      `# Ledger\n\n## Semantics\n\n${TABLE}| One | x |\n| Two | y |\n`,
+    )
+    writeFileSync(
+      join(root, bulletLedgered, 'references', 'adopted.md'),
+      `${LINKED_LEDGER}\n## Sources\n\n- A row.\n`,
+    )
 
     const report = await auditSkills(root)
 
