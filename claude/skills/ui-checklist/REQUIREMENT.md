@@ -13,7 +13,7 @@ A file under a gitignored folder is unreadable to a pull request reviewer, and a
 
 ## Must
 
-- Every change is split into visual-only and automatable before anything is written
+- Every change is split into visual-only and automatable before anything is written, and a behavior the review's engine cannot read, such as a keyboard trap, gets a box of its own
 - The checklist covers the visual-only half, each item an action and the result a person looks for, with its route, width, and a `(taste)` or `(local only)` marker where one applies
 - Every automatable change shipping with no test is named, with the layer `test-craft` would place it at, in the same file
 - The file is written to the `.canon/tmp/handoff/ui-checklist/<slug>.md` handoff at the main worktree root, overwriting

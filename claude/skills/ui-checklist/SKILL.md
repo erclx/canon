@@ -46,6 +46,18 @@ When the plan cites `canon/design/<surface>/` under `**Design references:**`, na
 
 The checkbox stays `- [ ]` followed by the action and the result, since the evidence comment reads boxes by that shape. Only the UI reviewer ticks a box, stamping it with the commit it passed at, and the comment carries that tick forward only while the head it names is current.
 
+## Boxes no engine reads
+
+The UI review runs axe over every route it reaches, so a box restating what axe checks, such as contrast, a missing name, or a page title, adds a drive and catches nothing. Derive a box instead for each behavior below that the changed surface carries:
+
+- **Hover content.** Content shown on hover or focus stays while the pointer moves onto it, and Escape dismisses it, per WCAG 1.4.13.
+- **Keyboard trap.** Tab and Shift+Tab leave every widget the change added, per WCAG 2.1.2.
+- **Outside press.** A menu, popover, or dialog the change added closes on a press outside it and when focus leaves it.
+- **Change on input.** Choosing an option or typing changes no route and moves no focus until the person submits, per WCAG 3.2.2.
+- **Clipped focus ring.** Tab to each control the change added and judge from the capture whether a parent clips its ring, per WCAG 2.4.7.
+
+Write each in the box shape above, naming the control. A surface carrying none of these behaviors takes no derived box.
+
 ## The missing-test list
 
 Name every automatable change this branch ships with no test, one per line, with the layer `test-craft` would place it at. Do not write the test or read the project's test config to write one against.

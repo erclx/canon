@@ -28,9 +28,19 @@ export const PROBE_NAMES = [
   'details',
   'diagram-geometry',
   'diagram-strokes',
+  'axe',
 ] as const
 
 export type ProbeName = (typeof PROBE_NAMES)[number]
+
+/**
+ * What a run that names no list measures. `axe` is left out because it loads a
+ * third-party script into the page under test, which a run opts into by name
+ * rather than inheriting.
+ */
+export const DEFAULT_PROBES: readonly ProbeName[] = PROBE_NAMES.filter(
+  (name) => name !== 'axe',
+)
 
 /**
  * One thing a probe measured and judged wrong. The step and the viewport are
@@ -44,6 +54,15 @@ export interface Finding {
   readonly selector: string
   readonly detail: string
   readonly measured: string
+  /** The engine rule that raised it, set by a probe that delegates to one. */
+  readonly rule?: string
+  /** Whether the engine judged the element or declined to decide. */
+  readonly outcome?: 'violation' | 'incomplete'
+  /**
+   * True when the finding is one a review holds open on. The probe sets it and
+   * still never gates, since a gate belongs to the reader, not to this command.
+   */
+  readonly gate?: boolean
 }
 
 /** A finding once the run has said where it happened. */
@@ -169,7 +188,7 @@ export function readDriverPlan(source: string): PlanRead {
 
 /** Returns the parsed list, or the message naming what failed. */
 function readProbeList(value: unknown): ProbeName[] | string {
-  if (value === undefined) return [...PROBE_NAMES]
+  if (value === undefined) return [...DEFAULT_PROBES]
   if (!Array.isArray(value)) return 'probes is not a list'
 
   const names: ProbeName[] = []

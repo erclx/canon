@@ -51,6 +51,7 @@
     "web:e2e": "cd web && playwright test"
   },
   "dependencies": {
+    "axe-core": "4.14.0",
     "commander": "^13.1.0",
     "execa": "^9.5.2",
     "playwright-core": "1.64.1"

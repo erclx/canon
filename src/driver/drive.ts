@@ -1,6 +1,7 @@
 import { chromium } from 'playwright-core'
 import type { Browser, Page } from 'playwright-core'
 import { isBrowserMissing, isServerUnreachable } from '@/browser/engine'
+import { AxeEngineMissing, probeAxe } from '@/driver/probes/axe'
 import { probeDetails } from '@/driver/probes/details'
 import {
   probeDiagramGeometry,
@@ -43,6 +44,19 @@ const PROBES: Record<ProbeName, (page: Page) => Promise<Finding[]>> = {
   details: probeDetails,
   'diagram-geometry': probeDiagramGeometry,
   'diagram-strokes': probeDiagramStrokes,
+  axe: probeAxe,
+}
+
+/**
+ * Runs `axe` after every other probe a step names, whatever order the run
+ * wrote, so every probe sharing its step reads the page before the engine's
+ * script has ever loaded into it.
+ */
+function inRunOrder(names: readonly ProbeName[]): ProbeName[] {
+  return [
+    ...names.filter((name) => name !== 'axe'),
+    ...names.filter((name) => name === 'axe'),
+  ]
 }
 
 export interface DriveOptions {
@@ -60,6 +74,7 @@ export interface PassReading {
 
 export type DriverRefusal =
   | 'browser-missing'
+  | 'axe-missing'
   | 'server-unreachable'
   | 'drive-failed'
 
@@ -107,6 +122,7 @@ export async function drive(options: DriveOptions): Promise<DriverResult> {
       passes.push(...pass.passes)
     }
   } catch (error) {
+    if (error instanceof AxeEngineMissing) return failed('axe-missing', error)
     return failed(
       isServerUnreachable(error) ? 'server-unreachable' : 'drive-failed',
       error,
@@ -159,7 +175,7 @@ async function driveViewport(
 
       const names = stepProbes(options.plan, step)
       let count = 0
-      for (const name of names) {
+      for (const name of inRunOrder(names)) {
         const probe = PROBES[name]
         for (const finding of await probe(page)) {
           findings.push({ ...finding, step: step.name, viewport: where })

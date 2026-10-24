@@ -11,7 +11,7 @@ Step 7 of `review-ui`.
 
 The heading reports whether the branch owes anything, the way the code review's does.
 
-- `## UI review` when a box failed, the sweep found a console error or an overflow, the worktree check read `changed`, a box was not driven for a cause on the page, or the pass drove no box at all.
+- `## UI review` when a box failed, the sweep raised a finding Step 6 names, the worktree check read `changed`, a box was not driven for a cause on the page, or the pass drove no box at all.
 - `## UI review closed` otherwise.
 
 A needs-eyes box leaves the review closed, and so does a box not driven for a cause off the page, such as an address that did not answer or a `(local only)` box on a hosted preview, as long as something else was driven.
@@ -77,7 +77,7 @@ Driven at `<short-sha>` on <address>, rendered by <renderer>.
 
 **Sweep**
 
-- <route>, <width>: <console error, overflow, or probe reading to confirm>
+- <route>, <width>: <console error, overflow, axe gate finding with its rule, or probe reading to confirm>
 
 **Guessed wording**
 

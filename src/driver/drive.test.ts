@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { PROBE_NAMES, readDriverPlan, stepProbes } from '@/driver/steps'
+import { readDriverPlan, stepProbes } from '@/driver/steps'
 import type { DriverPlan, DriverStep } from '@/driver/steps'
 
 /**
@@ -34,12 +34,25 @@ describe('readDriverPlan', () => {
     })
   })
 
-  it('should run every probe when the document names no list', () => {
+  it('should run every probe but axe when the document names no list', () => {
     const read = readDriverPlan(planSource({ steps: ONE_STEP }))
 
     expect(read.kind).toBe('read')
     if (read.kind !== 'read') return
-    expect(read.plan.probes).toEqual([...PROBE_NAMES])
+    expect(read.plan.probes).toEqual([
+      'focus',
+      'details',
+      'diagram-geometry',
+      'diagram-strokes',
+    ])
+  })
+
+  it('should run axe when the document names it', () => {
+    const read = readDriverPlan(
+      planSource({ probes: ['axe'], steps: ONE_STEP }),
+    )
+
+    expect(read).toMatchObject({ kind: 'read', plan: { probes: ['axe'] } })
   })
 
   it('should refuse text that is not JSON', () => {
