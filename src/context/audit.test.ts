@@ -853,6 +853,22 @@ describe('shape', () => {
     ])
   })
 
+  it('should leave a folder H3 with a lead, a table, and bullets unreported', () => {
+    const source =
+      '## Layout\n\n### `src/`\n\nA lead.\n\n| A | B |\n| - | - |\n| 1 | 2 |\n\n- One\n- Two\n'
+
+    expect(shapeOf(source)).toEqual([])
+  })
+
+  it('should report a folder H3 with a table and two prose paragraphs', () => {
+    const source =
+      '## Layout\n\n### `src/`\n\nFirst.\n\n| A |\n| - |\n| 1 |\n\nSecond.\n'
+
+    expect(shapeOf(source)).toEqual([
+      { line: 8, kind: 'layout-paragraphs', text: '`src/`', count: 2 },
+    ])
+  })
+
   it('should report six folder bullets split by a paragraph once for the bullets', () => {
     const source =
       '## Layout\n\n### `src/`\n\n- One\n- Two\n- Three\n\nA lead.\n\n- Four\n- Five\n- Six\n'

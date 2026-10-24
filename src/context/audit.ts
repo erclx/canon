@@ -702,6 +702,13 @@ function shapeIssues(
       continue
     }
 
+    if (TABLE_ROW.test(line.text)) {
+      inItem = false
+      inParagraph = false
+      afterBlank = false
+      continue
+    }
+
     const continues = inItem && (!afterBlank || INDENTED.test(line.text))
     afterBlank = false
     if (continues) continue
