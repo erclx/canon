@@ -7,7 +7,7 @@ description: The golden configs and seeds a project inherits, the stack layering
 
 ## Overview
 
-Owns the golden configs a project inherits, layered across a `base` to `web` to framework chain where each layer ships only its own slice. A stack is a folder of configs, seeds, a manifest, and a reference, and sync discovers a new one unaided. A config always overwrites on sync, and a seed is copied once and then belongs to the target.
+Owns the golden configs a project inherits, layered across a `base` to `web` to framework chain where each layer ships only its own slice. A stack is a folder of configs, seeds, a manifest, and a reference, and sync discovers a new one unaided. Sync replaces only a config the project left alone, and copies a seed once.
 
 ## Layout
 
@@ -75,6 +75,14 @@ Owns the manifest walk, scan, injection engine, stamp, reference resolver, and v
 - `resolveWriteMode` in `src/commands/tooling.ts` maps `--check` to report, `--write` to apply, and a TTY to a prompt, and a headless caller with neither flag reports and exits 1
 - `canon tooling diff` dispatches into `runSync` with `check` set and exits 1 on any difference, and `--json` answers `{ ok: false, reason, message }` on a refusal
 - A target below its git toplevel syncs as a subfolder and withholds every `.github/` file. Sync writes a missing `package.json` only when the chain declares an install
+
+### `src/tooling/disposition.ts`
+
+Holds the decline, customize, and lift transitions over `domains.tooling.dispositions` in the stamp. `scan` and both injectors read that record, so a held path is never written.
+
+- `recordToolingChain` hashes each config the target matches, and `scan` reads a drifted config against that hash as `stale`, `edited`, or `unattributed`
+- `sync --write` replaces only a stale config and holds the rest until `--replace` names them, while `canon tooling inject` holds nothing
+- `putDomain` rebuilds a record from the fields it knows, so a release older than the dispositions field drops it on its next tooling write and restores a declined file
 
 ### `src/tooling/install.ts`
 
