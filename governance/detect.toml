@@ -160,53 +160,9 @@ deps = [
 ]
 files = ["**/migrations", "**/schema.prisma", "**/*.sql"]
 
-["copy"]
-deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
-files = ["index.html", "*/index.html"]
-
-["a11y"]
-deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
-files = ["index.html", "*/index.html"]
-
-["keyboard"]
-deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
-files = ["index.html", "*/index.html"]
-
-["pointer"]
-deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
-files = ["index.html", "*/index.html"]
-
-["forms"]
-deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
-files = ["index.html", "*/index.html"]
-
-["ux-completeness"]
-deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
-files = ["index.html", "*/index.html"]
-
-["ux-controls"]
-deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
-files = ["index.html", "*/index.html"]
-
-["surface-capture"]
-deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
-files = ["index.html", "*/index.html"]
-
-["link-behavior"]
-deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
-files = ["index.html", "*/index.html"]
-
-["design-taste"]
+["craft"]
 deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
 files = ["canon/DESIGN.md", "index.html", "*/index.html"]
-
-["interface-casing"]
-deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
-files = ["index.html", "*/index.html"]
-
-["motion"]
-deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
-files = ["index.html", "*/index.html"]
 
 ["design-reference"]
 deps = []

@@ -8,18 +8,17 @@
 #
 # Rules under `internal/rules/` install alongside these and need no entry.
 
-# The `ui` rules are added because this repository renders surfaces of its own,
-# being design token previews, slide decks, capture sources, and teach lessons,
-# none of which is a framework route. `e2e-reliability` governs the driven
-# capture those surfaces are verified with.
+# The `craft` pointer is added because this repository renders surfaces of
+# its own, being design token previews, slide decks, capture sources, and teach
+# lessons, none of which is a framework route. `e2e-reliability` governs the
+# driven capture those surfaces are verified with.
 
 # `python` is added because sessions here write Python for groundwork
 # spikes and occasional skill scripts, and the `node` stack alone never loads it.
 
-# `skill`, the `tooling` rules, and `design-taste`, `interface-casing`,
-# and `motion` are added because base names its rules one by one and none
-# of them is among the ten, while this repository edits skills, workflows,
-# configs, and code, and renders the surfaces the newer `ui` rules govern.
+# `skill` and the `tooling` rules are added because base names its rules one
+# by one and none of them is among the ten, while this repository edits
+# skills, workflows, configs, and code.
 
 # `test-scope` is left out because it names `bun run test:e2e:changed`,
 # which no script in this repository's `package.json` carries.
@@ -28,18 +27,7 @@ stack = "node"
 add = [
   "python",
   "e2e-reliability",
-  "copy",
-  "a11y",
-  "keyboard",
-  "pointer",
-  "forms",
-  "ux-completeness",
-  "ux-controls",
-  "surface-capture",
-  "link-behavior",
-  "design-taste",
-  "interface-casing",
-  "motion",
+  "craft",
   "ci-workflow",
   "dependencies",
   "config-comments",

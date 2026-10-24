@@ -3,9 +3,11 @@
 # so `canon gov sync` replaces a held old file with the rule under its new name
 # rather than only deleting it.
 #
-# An entry declares one-to-one identity and nothing else. A fold of several
-# rules into one, or a split of one into several, is a retirement plus an
-# addition and takes no entry here. Add the entry in the same change as the
+# An entry declares one-to-one identity, or a fold onto a pointer rule that
+# now routes to the skill carrying the folded rules, so a target holding any
+# of them lands on the pointer rather than losing the practice with nothing in
+# its place. Any other fold of several rules into one, or a split of one into
+# several, is a retirement plus an addition and takes no entry here. Add the entry in the same change as the
 # rename or renumber. Prune an entry only once its target rule is retired and
 # the retire path covers it, since a chain ending on a rule nothing ships
 # resolves to nothing and a sync deletes the held file instead. Otherwise leave
@@ -73,3 +75,15 @@
 "460-design-taste" = "design-taste"
 "465-interface-casing" = "interface-casing"
 "470-motion" = "motion"
+"design-taste" = "craft"
+"a11y" = "craft"
+"keyboard" = "craft"
+"pointer" = "craft"
+"forms" = "craft"
+"motion" = "craft"
+"ux-controls" = "craft"
+"ux-completeness" = "craft"
+"surface-capture" = "craft"
+"copy" = "craft"
+"interface-casing" = "craft"
+"link-behavior" = "craft"

@@ -6,6 +6,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gitEnv } from '@/git/env'
 import { detectRules, staleDetectKeys } from '@/gov/detect'
 
+const REPO_ROOT = join(import.meta.dirname, '..', '..')
+
 let root: string
 let target: string
 
@@ -81,6 +83,19 @@ describe('detectRules', () => {
         },
       ],
     })
+  })
+
+  it('should propose the ui pointer and no retired ui rule from the shipped table', async () => {
+    write(target, 'package.json', packageJson({ react: '^19.0.0' }))
+
+    const result = await detectRules(REPO_ROOT, target)
+    const ui = result.ok
+      ? result.proposals
+          .map((proposal) => proposal.rule)
+          .filter((rule) => ['craft', 'a11y', 'design-taste'].includes(rule))
+      : []
+
+    expect(ui).toEqual(['craft'])
   })
 
   it('should propose a rule from a folder holding a workflow', async () => {

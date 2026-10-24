@@ -25,7 +25,7 @@ The field is browser test automation, and the authority is the Playwright docume
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | A script, not the suite      | House choice: a suite run answers a question about the page only through assertions written for another question, and costs the whole run                                                                   | 2026-10-18 |
 | No `fullyParallel`           | [Parallelism](https://playwright.dev/docs/test-parallel): by default "Tests in a single file are run in order, in the same worker process", and parallel tests "cannot share any state or global variables" | 2026-10-18 |
-| Pointer to `surface-capture` | House choice: a pointer to the rule that owns capture scope, claiming no practice of its own                                                                                                                | 2026-10-18 |
+| Pointer to `ui-craft`        | House choice: a pointer to the skill that owns capture scope, claiming no practice of its own                                                                                                               | 2026-10-18 |
 | Pointer to `e2e-reliability` | House choice: a pointer to the rule that owns waits and guards, claiming no practice of its own                                                                                                             | 2026-10-18 |
 
 ## Declined

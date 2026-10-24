@@ -11,5 +11,3 @@
 # entry only once its key or partner is retired, which the live-rule check in
 # `src/gov/splits.test.ts` forces.
 [split]
-keyboard = ["pointer"]
-ux-completeness = ["ux-controls"]

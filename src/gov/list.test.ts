@@ -123,21 +123,10 @@ function rulesMatching(domain: string, file: string): string[] {
 }
 
 describe('governance/rules/ui', () => {
-  it('should match an Astro component from every extension-scoped rule', () => {
+  it('should match an Astro component from the pointer and the design reference', () => {
     expect(rulesMatching('ui', 'src/components/Card.astro')).toEqual([
-      'a11y',
-      'copy',
+      'craft',
       'design-reference',
-      'design-taste',
-      'forms',
-      'interface-casing',
-      'keyboard',
-      'link-behavior',
-      'motion',
-      'pointer',
-      'surface-capture',
-      'ux-completeness',
-      'ux-controls',
     ])
   })
 })
