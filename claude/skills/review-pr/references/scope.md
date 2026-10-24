@@ -117,3 +117,11 @@ Carry `<prior-heading>` into Step 4 and run Step 3 unchanged. This guard turns o
 ## The read
 
 Read each changed file in scope. Skip deleted files. Run reads in parallel.
+
+### Load the UI rules on a later pass
+
+A path-scoped rule loads when a session reads a matching file, and a later pass reads only `<prior-oid>..<headRefOid>`. When that range changed a rendered-surface file, read it at `<headRefOid>` so the UI rules load, even when the diff alone already shows it.
+
+- Match the globs of `governance/rules/ui/design-taste.md`: `.tsx`, `.jsx`, `.astro`, `.html`, `.css`, `.scss`, and `canon/DESIGN.md`
+- Read only files the range changed, never the whole tree, so the cost stays bounded by the range
+- A range whose only rendered change is a deletion has no file to read, so skip it and carry on
