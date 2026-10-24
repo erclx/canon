@@ -53,7 +53,7 @@ Try a scenario from [sandbox](../../canon/context/development/sandbox.md) before
 
 ### Held, declined, and customized golden files
 
-`--write` replaces a golden config only when canon changed it and the project did not. A config the project edited, or one no earlier write recorded, is held and listed with a `--replace` command that takes the golden copy. A first sync into a target with no tooling record holds nothing.
+`--write` replaces a golden config only when canon changed it and the project did not. A config the project edited, or one no earlier write recorded, is held and listed with a `--replace` command that takes the golden copy. A config from a stack the target never synced is a first install and is never held.
 
 A project can also opt out of one golden file without leaving the stack. Each verb below takes the path relative to the target, as `canon tooling diff` lists it.
 

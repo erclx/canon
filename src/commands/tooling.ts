@@ -11,6 +11,7 @@ import {
 } from '@/tooling/inject'
 import { buildStackSummaries, describeStack } from '@/tooling/list'
 import {
+  configFiles,
   isStackExcluded,
   listStacks,
   loadManifest,
@@ -149,8 +150,8 @@ export function register(program: Command): void {
         'A config the project edited, or one written before hashes were',
         'recorded, is held and listed. Name it with --replace to take the',
         'golden copy, or run `canon tooling customize <path>` to keep yours.',
-        'A target with no tooling record yet, such as a fresh scaffold, holds',
-        'nothing, so its first write takes every golden config.',
+        'A config no recorded stack ships is a first install and never held,',
+        'so a fresh scaffold takes every golden config of a stack new to it.',
         'Seeds are copy-once, so a seed the target already holds is left alone.',
         'A declined or customized path is never written.',
         '',
@@ -575,7 +576,7 @@ async function runSync(
     return decision === 'unauthorized' ? 1 : 0
   }
 
-  const held = heldConfigs(result, replace, prepared.target)
+  const held = heldConfigs(result, replace, prepared.chain, prepared.target)
   if (result.configs.some((entry) => entry.state !== 'matching')) {
     await injectConfigs(prepared.chain, prepared.target, new Set(held))
   }
@@ -605,22 +606,30 @@ async function runSync(
  * rather than replaced, since a write naming a stack is not consent to lose an
  * edit inside it. Only a path `--replace` names is taken over.
  *
- * A target with no tooling record is a first install, as a fresh scaffold is,
- * so nothing is held there. Its configs came from a scaffold rather than from
- * a project edit, and holding them would leave the stack's golden copies out.
+ * A path no recorded stack ships is a first install of that stack, so it is
+ * never held. `canon init` records `base` before a framework stack syncs over
+ * a fresh scaffold, whose own copies of that stack's configs came from the
+ * scaffold rather than from a project edit.
  */
 function heldConfigs(
   result: ScanResult,
   replace: readonly string[],
+  chain: readonly Manifest[],
   target: string,
 ): string[] {
-  if (readStamp(target)?.domains.tooling === undefined) return []
+  const recorded = new Set(stampedChain(readStamp(target), 'tooling'))
+  const installed = new Set(
+    chain
+      .filter((manifest) => recorded.has(manifest.name))
+      .flatMap(configFiles),
+  )
 
   return result.configs
     .filter(
       (entry) =>
         entry.state === 'drifted' &&
         entry.cause !== 'stale' &&
+        installed.has(entry.rel) &&
         !replace.includes(entry.rel),
     )
     .map((entry) => entry.rel)

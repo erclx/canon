@@ -513,6 +513,22 @@ describe('tooling sync --write hold', () => {
     expect(goldenContent()).not.toBe(LOCAL_EDIT)
   })
 
+  it('should take a config only a stack new to the record ships, as after canon init', () => {
+    const WEB_ONLY = '.oxlintrc.json'
+    writeFileSync(join(target, WEB_ONLY), '{ "scaffold": true }\n')
+    seedPackage(target, 'web')
+
+    spawnSync('bun', [CLI, 'tooling', 'sync', 'web', target, '--write'], {
+      encoding: 'utf8',
+      env: buildEnv(),
+    })
+
+    expect(readFileSync(join(target, WEB_ONLY), 'utf8')).not.toBe(
+      '{ "scaffold": true }\n',
+    )
+    expect(goldenContent()).toBe(LOCAL_EDIT)
+  })
+
   it('should name the held path with a copyable --replace command', () => {
     const run = sync(['--write'])
 

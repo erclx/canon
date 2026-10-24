@@ -82,7 +82,7 @@ Holds the decline, customize, and lift transitions over `domains.tooling.disposi
 
 - `recordToolingChain` hashes each config the target matches, and `scan` reads a drifted config against that hash as `stale`, `edited`, or `unattributed`
 - `sync --write` replaces only a stale config and holds the rest until `--replace` names them, while `canon tooling inject` holds nothing
-- A target with no tooling record holds nothing either, since a fresh scaffold ships its own copies of golden configs and `tooling verify` syncs one
+- A config no recorded stack ships is never held, since a fresh scaffold ships its own copies and `canon init` records `base` before `target-setup` syncs the framework stack
 - `putDomain` rebuilds a record from the fields it knows, so a release older than the dispositions field drops it on its next tooling write and restores a declined file
 
 ### `src/tooling/install.ts`
