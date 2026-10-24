@@ -1,0 +1,40 @@
+# What a correct `/canon:target-update` run leaves behind on a target one release
+# behind the toolkit, with the worktree taken. Read by `canon sandbox check`.
+# Patterns use TOML literal strings so a regex needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block, since a bare key
+# below one binds to that table and asserts nothing.
+#
+# The claim under test is where the sync lands: the shared checkout stays on
+# main while a commit lands in a linked worktree, which restores the stale rule
+# and keeps the one the project edited.
+
+paths = [".git/HEAD", ".claude/rules/canon/canon/git.md"]
+
+reply = ["context.md"]
+
+manual = [
+  "No commit subject names a canon version.",
+  "The preview stopped before the write, and the prompt's go-ahead is what carried the run past it. Semantic: the reply or transcript shows the preview ahead of the sync.",
+  "The reply reports the governance state of the kept rule as behind. Semantic: any non-zero count but matching reads as behind, so the word current is wrong here.",
+]
+
+# The shared checkout stayed on main.
+[[content]]
+path = ".git/HEAD"
+pattern = '^ref: refs/heads/main$'
+
+# A commit landed in the linked worktree.
+[[content]]
+path = ".git/worktrees/*/logs/HEAD"
+pattern = 'commit'
+
+# The stale rule came back, H1 included.
+[[content]]
+path = ".claude/worktrees/*/.claude/rules/canon/canon/git.md"
+pattern = '^# \S'
+
+# The customized rule kept the project's bullet.
+[[content]]
+path = ".claude/worktrees/*/.claude/rules/canon/canon/context.md"
+pattern = 'project-written bullet'
