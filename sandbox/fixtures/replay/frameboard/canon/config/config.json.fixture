@@ -1,0 +1,91 @@
+{
+  "covers": ["governance", "tooling"],
+  "domains": {
+    "governance": {
+      "version": "5.63.0",
+      "syncedAt": "2026-10-24T18:05:51.347Z",
+      "files": {
+        ".claude/rules/canon/canon/context.md": "sha256:33bcec3a7fa5c14a8b8db2c530d84e67c532e848ba0e3dbbad4b34d1ae171be3",
+        ".claude/rules/canon/canon/git.md": "sha256:532887bc26378315c749365235cc0354ca5a4ee777fd4bcee9769a9203ef90d3",
+        ".claude/rules/canon/canon/indexes.md": "sha256:1f63d582719cf2db0f55d404fa2277fa5c599770e95a2d75b0c96b94da1b6c8c",
+        ".claude/rules/canon/canon/plan.md": "sha256:8956f6de6860437fad2f520e9acce8ae3015e3257690858b20e8b7101cad08ef",
+        ".claude/rules/canon/canon/scratch.md": "sha256:940835df2698ade3927435fde3b4fe7d4cc2df9465e58f778ba5113a054cc8fd",
+        ".claude/rules/canon/canon/tasks.md": "sha256:8d9d98149b24e84fd8ee0be45cd8beafb223396a2de9eb1a82aca5ce382846f4",
+        ".claude/rules/canon/canon/worktrees.md": "sha256:05b1de4dd0ac1adeef083f37bd6b798ff436990889abc036a6e5bb614dea6e68",
+        ".claude/rules/canon/claude/output.md": "sha256:9fe3963c8af61f896fc4c6b8a34a490d2e5977941e7e6c0fc5cb29e944ab74ca",
+        ".claude/rules/canon/code/routing.md": "sha256:dc34ede1f1b839199fb933c5f8f88b3639f76468c2565dc6223ecea24658379e",
+        ".claude/rules/canon/code/testing.md": "sha256:76e9ff5e862a1ef36db10f0cbc549b246fbe1bb403bf869aefefa74bbb7c7d65",
+        ".claude/rules/canon/framework/react.md": "sha256:3687c622d09895472d21deb509fa113cb1400307acbd3fbfb9e3d52e5a4ca374",
+        ".claude/rules/canon/framework/shadcn.md": "sha256:2e1423092c2edfa145fc5184dd4591398ecf9e564dee73bc79b0d3c3b263e275",
+        ".claude/rules/canon/framework/tailwind.md": "sha256:dc7663818d2c93946159f1c09a9e11d5dccb5af148a5cda78965dc434b9fb765",
+        ".claude/rules/canon/lang/typescript.md": "sha256:5c2729d919f8e25ef30e8ec3e3ec7154837d036bd21b3cf39da0100a7e236835",
+        ".claude/rules/canon/lib/e2e-reliability.md": "sha256:9b3331311e528184673305a149f0ac1b6b737cfe05d44fdaef775ac7fb06e05d",
+        ".claude/rules/canon/lib/security-server.md": "sha256:c7c8f4c7360a90030d0efb832d67bc72b9d3d09b3a1fcf58e3d423bcffb49c8b",
+        ".claude/rules/canon/lib/security-web.md": "sha256:2a02b9a4136c1efbd66eec3ffcfacb0f4d08c5910f186d45397c594c195924f8",
+        ".claude/rules/canon/lib/test-scope.md": "sha256:be592b8fb8e316a336bf4719b26e4e1ab186c0ac07ed0a17a45449b24b812972",
+        ".claude/rules/canon/lib/testing-ts.md": "sha256:48e6b1693fccf0931ce216247cbbef4f3b5694c6858ccbe397a5939e8504b23f",
+        ".claude/rules/canon/tooling/ci-workflow.md": "sha256:96f2beaf852bc6634a6523d21acc7b1b05abd9169e4e4523a52f214ef9e83884",
+        ".claude/rules/canon/tooling/code-comments.md": "sha256:98d585be0dcf8d97c063c80619d1e67c920e1c672df611ed621fe82c1ba862c8",
+        ".claude/rules/canon/tooling/config-comments.md": "sha256:df6b5c282cad711211d45620599bd550679d8a15c48c77c72a7ef44c384a2b53",
+        ".claude/rules/canon/tooling/dependencies.md": "sha256:beef3a95783523a1853a1501d2b235dea3ca88b46ba14bda77356349932a4093",
+        ".claude/rules/canon/ui/craft.md": "sha256:166ac910f3e81e0ecad2bf850741992801db4b6eb1055aece5a854ed4d159ba6",
+        ".claude/rules/canon/ui/design-reference.md": "sha256:c5b9847c0d8e4b68dcf6072de145426562889ed6cc2cd5faaba421f041d43b6a",
+        ".claude/rules/canon/writing/markdown.md": "sha256:657550b41cb769996c75fc706fb2ce11e6595d93874fb4724f83fd77dd0da31f"
+      },
+      "chain": ["node"]
+    },
+    "tooling": {
+      "version": "5.63.0",
+      "syncedAt": "2026-10-24T18:06:13.583Z",
+      "files": {
+        ".github/workflows/phase-label-gate.yml": "sha256:a4dd2f6e78751e22d2d9ecd8bc4a66f42e7e1022c04d4038a4f6689c791ed64f",
+        ".github/workflows/pr-local-preview.yml": "sha256:29a3541db02f1ffb0e7fbe6ae84e49462c6900728584398c28fe4fb8fa8f5b2d",
+        ".github/workflows/verify.yml": "sha256:0b6e3c9d3f347cf9c732886abbf6d08fbd78a0572568c8d30eb2703dbcc8ce35",
+        ".husky/commit-msg": "sha256:466995785613d23781be71a1338fec590dec636a8b2a0f13d7b850639358fbeb",
+        ".husky/post-merge": "sha256:ac70b19c4ec53acb87d49eb9b2f2989d93d200de41b5f72ec72fe27c6992e03a",
+        ".husky/post-rewrite": "sha256:4f35974c54e0cf6cb9ce587f8840c24132ea8d7e74ca5ae884ee546f7b878a91",
+        ".husky/pre-commit": "sha256:a7e3ee0be7554bb60837cd7a414e61aa6a51db987390e325a3799cbdc254ddd8",
+        ".husky/pre-push": "sha256:e059070389c708b2bcebd7b96f8787f4bdcedc866539c02af1dfd5d98630eb3e",
+        ".oxfmtrc.json": "sha256:3a1ed5ccecff4b639cda0dc20231f9e92a1511c463b0b5800aa0dea45b9c4dfe",
+        "scripts/lib/preview-server.sh": "sha256:5e1d0ea671970ba5a4c6a83c0c656f86e4e9e5caa45c6636487793cc6f17c20b",
+        "scripts/readme-screenshot.sh": "sha256:48aeea65c89cc68083bc11ca7be123426cf80869c1206e969935bd6eaa5947c0",
+        "scripts/screenshot.sh": "sha256:dc7a583c96c57cc7124842c51ead536c5b29987e52eda8e50eed51f28fbd4d96",
+        "scripts/verify.json": "sha256:5e9e1e78b1f5dafcc39baeba83d140975fbf0df5336c8afdd0267cd4749f1f85",
+        "scripts/verify.ts": "sha256:d8e397f6dff3378551a9f22b4754f2e17dd3ff1beb7e30608ea1932feaf75e39",
+        "scripts/worktree-port.sh": "sha256:3d0f0a5e01f796bda1b8591103aef0509c1c077d160d15dfff565edc4d3a30cb",
+        "src/test/setup.ts": "sha256:81c5f1d7ba79bea949bc636250c52d71d18f2d56bfeff58ac15181786b93211d"
+      },
+      "chain": ["web", "base"],
+      "dispositions": {
+        ".github/workflows/readme-screenshot.yml": {
+          "disposition": "declined",
+          "reason": "The README shows .github/social-card.png and commits no capture under assets/evidence/readme"
+        },
+        ".oxlintrc.json": {
+          "disposition": "customized",
+          "base": "sha256:89fffa9c7742952bdb5500ef24cf7e4132be3f819121e32071dfe58af75133b5"
+        },
+        "canon/context/development/setup.md": {
+          "disposition": "declined",
+          "reason": "canon/context/development/local.md already holds the setup steps"
+        },
+        "commitlint.config.js": {
+          "disposition": "customized",
+          "base": "sha256:741d826bc2a3d77c1097df6c11808f669737158dd5037caed6edfbb15a6966a0"
+        },
+        "e2e/capture-types.ts": {
+          "disposition": "declined",
+          "reason": "Frameboard's own e2e/screenshot.ts reads the case shape from e2e/capture/types.ts"
+        },
+        "e2e/capture/cases.ts": {
+          "disposition": "declined",
+          "reason": "Frameboard's capture cases live in e2e/capture/index.ts and board.ts"
+        },
+        "e2e/screenshot.ts": {
+          "disposition": "customized",
+          "base": "sha256:91a71054f64ce1455c641c62b4304fe6da154375d12d82ee1b8c0e23f414f13b"
+        }
+      }
+    }
+  }
+}

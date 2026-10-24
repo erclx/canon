@@ -34,7 +34,7 @@ The run commands, which stack references and `docs/target/projects.md` send a se
 
 ### `src/gate/`
 
-Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`, and every threshold comparison in `measures.ts`.
+Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`, and every threshold comparison in `measures.ts`. Consumer replay runs the frozen snapshots on a synced-surface change, so before a release run `bun src/cli.ts sandbox replay <checkout>...` against the real consumers.
 
 - Stages run in table order and the first to find a fact halts the run. Unreferenced rules and Audit set report and never fail the push
 - The changed set unions the diff against `origin/main`, the working tree, and untracked files. Fallbacks widen, and `--all` forces every stage. On `main` the local ref is HEAD, so the base is remote.

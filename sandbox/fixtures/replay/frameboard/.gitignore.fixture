@@ -1,0 +1,39 @@
+
+# System
+.DS_Store
+
+# Dependencies
+node_modules/
+
+# Secrets
+.env
+.env.*
+*.local
+!.env.example
+
+# VSCode
+.vscode/
+
+# Claude
+.claude/worktrees/
+
+# Canon
+.canon/
+
+# Build
+dist/
+
+# Coverage
+coverage/
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Screenshots
+screenshots/
+
+# Vitest browser mode
+.vitest/

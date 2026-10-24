@@ -1,0 +1,36 @@
+---
+description: Enforce UI copy and text standards for rendered strings in components
+paths:
+  - '**/*.tsx'
+  - '**/*.jsx'
+  - '**/*.astro'
+  - '**/*.html'
+---
+
+# UI copy standards
+
+## Casing
+
+- Use sentence case for all rendered UI text: headings, labels, nav items, tab titles, and dialog titles.
+- Retain original casing for proper nouns and product names: `GitHub`, `macOS`, `TypeScript`.
+
+## Punctuation
+
+- Do not use em dashes (`—`). Use a comma or period, or restructure the sentence.
+- Do not add punctuation to button labels or short action strings.
+
+## Button copy
+
+- Use imperative verbs for actions: `Save`, `Delete`, `Connect`, `Cancel`.
+- Avoid padded phrasing: `Save` over `Save changes`, `Delete` over `Click to delete`.
+
+## Error messages
+
+- State what to do, not what went wrong: `Enter a valid email` over `Email is invalid`.
+- Keep messages short and actionable.
+- One sentence maximum.
+
+## Placeholder text
+
+- Show format examples over instructions: `name@example.com` over `Enter your email here`.
+- Reserve instructions for labels or helper text below the input.

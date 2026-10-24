@@ -1,0 +1,2 @@
+[markdown]
+gated = ["README.md", "canon/context/"]

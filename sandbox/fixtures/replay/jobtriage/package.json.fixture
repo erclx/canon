@@ -1,0 +1,25 @@
+{
+  "name": "jobtriage",
+  "private": true,
+  "devDependencies": {
+    "@commitlint/cli": "^20.5.3",
+    "@commitlint/config-conventional": "^20.5.3",
+    "@cspell/dict-sv": "^2.3.2",
+    "cspell": "^10.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.5",
+    "prettier": "^3.8.3"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "format": "prettier --write --log-level warn --ignore-path .gitignore --ignore-path .prettierignore . && shfmt --write --indent 2 scripts/ python/scripts/ web/scripts/",
+    "check:format": "prettier --check --log-level warn --ignore-path .gitignore --ignore-path .prettierignore . && shfmt --diff --indent 2 scripts/ python/scripts/ web/scripts/",
+    "check:spell": "cspell '**' '.*/**' '.*' --no-progress --color --show-context",
+    "check:shell": "find scripts python/scripts web/scripts -name '*.sh' -exec shellcheck --severity=warning {} +",
+    "check": "./scripts/verify.sh",
+    "clean": "./scripts/clean.sh",
+    "dev:api": "./python/scripts/serve.sh --reload",
+    "restart:web": "./scripts/restart.sh",
+    "update": "./scripts/update.sh"
+  }
+}

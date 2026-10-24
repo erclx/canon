@@ -57,6 +57,23 @@ Owns the runner behind `canon sandbox run <cat:cmd> "<prompt>" [scenario]`.
 - The cap of 30 turns is the only budget, and an arm's `max_turns` above it goes green on a truncated run. An arm that must never reach a shell uses `dontAsk`, as `claude:deploy-app` does.
 - `watch.ts` flags writes to `.canon/plans`, `.canon/review`, `.canon/memory`, and `.canon/tasks` as escapes and sees nothing else. `dispatch.ts` bounds a nested `claude --bg` by shim and reap.
 
+### `src/sandbox/replay/`
+
+Owns `canon sandbox replay`, which syncs a copy of a consumer with this checkout's CLI and judges the reads that follow.
+
+- `run.ts` copies a source beside the provisioned tree, runs `sync .`, four `--json` health reads, and oxfmt over what sync wrote, then removes the copy
+- A named checkout is copied rather than cloned, since a clone drops the gitignored records the reads look for. One with uncommitted changes is refused.
+- `verdict.ts` reads a finding or a refusal as `ok` and carries each `!` line as a finding. A crash, unparsable `--json` stdout, or an unformatted write fails, and the verb exits 2.
+- The format step runs under `tooling/base/configs/.oxfmtrc.json`, since oxfmt's defaults double-quote frontmatter every consumer keeps single-quoted
+
+### `sandbox/fixtures/replay/`
+
+Owns the frozen consumers the bare verb replays, one folder each, holding the consumer's tracked managed paths and a stub `.canon/tasks/index.md`.
+
+- A snapshot tests the upgrade from the release it was cut at and misses a state only a newer consumer holds, which `sandbox replay <checkout>` covers before a release
+- Refresh one by hand. Copy the consumer's tracked managed paths over its folder with the `.fixture` suffix, keep the stub task index, and name the consumer commit in the message.
+- A `.canon/` file here needs `git add -f`, since the root ignore reaches it
+
 ### Other folders
 
 The state and the remote a run touches sit outside the repository.

@@ -1,0 +1,20 @@
+# System
+.DS_Store
+
+# Dependencies
+node_modules/
+
+# Secrets
+.env
+.env.*
+*.local
+!.env.example
+
+# Claude
+.canon/tmp/
+.claude/worktrees/
+
+# Runtime
+var/
+.vercel
+.canon/
