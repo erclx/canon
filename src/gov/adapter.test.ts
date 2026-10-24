@@ -229,6 +229,93 @@ describe('createGovAdapter', () => {
     })
   })
 
+  describe('a rule the toolkit split', () => {
+    const POINTER_REL = join('.claude', 'rules', 'canon', 'ui', 'pointer.md')
+
+    beforeEach(() => {
+      writeFixture(join(TOOLKIT, 'governance/rules/ui/keyboard.md'), '# kb\n')
+      writeFixture(join(TOOLKIT, 'governance/rules/ui/pointer.md'), '# pt\n')
+      writeFixture(
+        join(TOOLKIT, 'governance/splits.toml'),
+        '[split]\nkeyboard = ["pointer"]\n',
+      )
+    })
+
+    it('should name the partner a held rule split into', () => {
+      writeFixture(join(TARGET, '.claude/rules/canon/ui/keyboard.md'), '# kb\n')
+
+      expect(createGovAdapter(TOOLKIT).collectMissing?.(TARGET)).toEqual([
+        {
+          path: join(TARGET, POINTER_REL),
+          rel: POINTER_REL,
+          notice: `${POINTER_REL} (keyboard.md moved bullets here. Run canon gov install --add pointer to add it.)`,
+        },
+      ])
+    })
+
+    it('should stay silent once the target holds both', () => {
+      writeFixture(join(TARGET, '.claude/rules/canon/ui/keyboard.md'), '# kb\n')
+      writeFixture(join(TARGET, '.claude/rules/canon/ui/pointer.md'), '# pt\n')
+
+      expect(createGovAdapter(TOOLKIT).collectMissing?.(TARGET)).toEqual([])
+    })
+
+    it('should stay silent when the target holds only the partner', () => {
+      writeFixture(join(TARGET, '.claude/rules/canon/ui/pointer.md'), '# pt\n')
+
+      expect(createGovAdapter(TOOLKIT).collectMissing?.(TARGET)).toEqual([])
+    })
+
+    it('should stay silent for a held rule the ledger does not list', () => {
+      writeFixture(join(TOOLKIT, 'governance/rules/ui/copy.md'), '# copy\n')
+      writeFixture(join(TARGET, '.claude/rules/canon/ui/copy.md'), '# copy\n')
+
+      expect(createGovAdapter(TOOLKIT).collectMissing?.(TARGET)).toEqual([])
+    })
+
+    it('should stay silent when the target holds the partner in another folder', () => {
+      writeFixture(join(TARGET, '.claude/rules/canon/ui/keyboard.md'), '# kb\n')
+      writeFixture(
+        join(TARGET, '.claude/rules/canon/a11y/pointer.md'),
+        '# pt\n',
+      )
+
+      expect(createGovAdapter(TOOLKIT).collectMissing?.(TARGET)).toEqual([])
+    })
+
+    it('should name the partner once when the recorded chain lists it too', async () => {
+      writeFixture(
+        join(TOOLKIT, 'governance/stacks/astro.toml'),
+        'extends = ""\nrules = ["keyboard", "pointer"]\n',
+      )
+      writeFixture(join(TARGET, '.claude/rules/canon/ui/keyboard.md'), '# kb\n')
+      await writeChainStamp(
+        TARGET,
+        { domain: 'governance', toolkitRoot: TOOLKIT },
+        ['astro'],
+        new Date('2026-10-24T00:00:00.000Z'),
+      )
+
+      const missing = createGovAdapter(TOOLKIT).collectMissing?.(TARGET) ?? []
+
+      expect(missing.map((entry) => entry.rel)).toEqual([POINTER_REL])
+    })
+
+    it('should report nothing for a target with no rules folder', () => {
+      expect(createGovAdapter(TOOLKIT).collectMissing?.(TARGET)).toEqual([])
+    })
+
+    it('should queue no change for the notice', () => {
+      writeFixture(join(TARGET, '.claude/rules/canon/ui/keyboard.md'), '# kb\n')
+
+      const plan = planSync(createGovAdapter(TOOLKIT), TARGET)
+
+      expect(plan.changes.map((change) => change.rel)).not.toContain(
+        POINTER_REL,
+      )
+    })
+  })
+
   describe('a rule its recorded stack stopped listing', () => {
     beforeEach(async () => {
       writeFixture(
