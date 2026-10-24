@@ -133,6 +133,25 @@ describe('injectManifest', () => {
     expect(stderr()).not.toContain('Applying scripts')
   }, 30_000)
 
+  it('should install nothing for a dependency on a later major and keep the file', async () => {
+    const stderr = captureStderr()
+    const body = '{"devDependencies":{"typescript":"^7.0.0"}}\n'
+    writeFileSync(join(target, 'package.json'), body)
+    writeFileSync(
+      join(target, 'bunfig.toml'),
+      '[install]\nregistry = "http://127.0.0.1:9"\n',
+    )
+
+    const result = await injectManifest(
+      [{ ...scriptsOnly({}), devPackages: ['typescript@^6'] }],
+      target,
+    )
+
+    expect(result.ok).toBe(true)
+    expect(readFileSync(join(target, 'package.json'), 'utf8')).toBe(body)
+    expect(stderr()).not.toContain('Installing missing dependencies')
+  })
+
   it('should write no package.json when the chain installs nothing', async () => {
     const stderr = captureStderr()
 

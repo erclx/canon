@@ -79,6 +79,40 @@ describe('collectDeps', () => {
     expect(collectDeps(chain, pkg)[0].state).toBe('present')
   })
 
+  it('should report a later installed major as ahead with its version', () => {
+    const chain = [makeManifest('base', { devPackages: ['typescript@^6'] })]
+    const pkg = { devDependencies: { typescript: '^7.0.0' } }
+
+    expect(collectDeps(chain, pkg)).toEqual([
+      {
+        spec: 'typescript@^6',
+        name: 'typescript',
+        state: 'ahead',
+        installed: '^7.0.0',
+      },
+    ])
+  })
+
+  it.each(['latest', 'workspace:*', 'catalog:default', '*'])(
+    'should report an uncomparable spec %s as present',
+    (installed) => {
+      const chain = [makeManifest('base', { devPackages: ['react@19'] })]
+      const pkg = { dependencies: { react: installed } }
+
+      expect(collectDeps(chain, pkg)[0].state).toBe('present')
+    },
+  )
+
+  it('should judge ahead against the furthest ancestor pin', () => {
+    const chain = [
+      makeManifest('web', { devPackages: ['react@19'] }),
+      makeManifest('base', { devPackages: ['react@18'] }),
+    ]
+    const pkg = { dependencies: { react: '^19.0.0' } }
+
+    expect(collectDeps(chain, pkg)[0].state).toBe('ahead')
+  })
+
   it('should let the furthest ancestor win when both name a package', () => {
     const chain = [
       makeManifest('web', { devPackages: ['react@19'] }),

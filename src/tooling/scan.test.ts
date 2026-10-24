@@ -146,6 +146,20 @@ describe('scan', () => {
     ])
   })
 
+  it('should count a dependency on a later major as no change', () => {
+    const manifest = makeManifest('base', { devPackages: ['typescript@^6'] })
+    const dir = target()
+    writeFileSync(
+      join(dir, 'package.json'),
+      JSON.stringify({ devDependencies: { typescript: '^7.0.0' } }),
+    )
+
+    const result = scan([manifest], dir)
+
+    expect(result.deps.map((dep) => dep.state)).toEqual(['ahead'])
+    expect(result.totalChanges).toBe(0)
+  })
+
   it('should count the new manifest once in the total', () => {
     const manifest = makeManifest('base', {
       scripts: { check: './verify.sh' },

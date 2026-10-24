@@ -17,7 +17,9 @@ export interface ScriptState {
 export interface DepState {
   readonly spec: string
   readonly name: string
-  readonly state: 'missing' | 'present'
+  readonly state: 'missing' | 'present' | 'ahead'
+  /** The spec the target records, set only when it is `ahead` of the pin. */
+  readonly installed?: string
 }
 
 export function readPackage(path: string): PackageJson | undefined {
@@ -89,18 +91,24 @@ function firstInteger(value: string): string | undefined {
 
 /**
  * Compares a manifest pin against what package.json records. A spec counts as
- * missing when absent, or when the pinned major differs from the installed
- * major. Anything looser than a major mismatch is left alone.
+ * missing when absent or on an earlier major than the pin, and ahead when it
+ * sits on a later one, which a write leaves alone. A spec with no integer to
+ * compare, such as `latest` or `workspace:*`, counts as present.
  */
-function isSatisfied(installed: string | undefined, pin: string): boolean {
-  if (installed === undefined) return false
-  if (pin === '') return true
+function compareSpec(
+  installed: string | undefined,
+  pin: string,
+): DepState['state'] {
+  if (installed === undefined) return 'missing'
+  if (pin === '') return 'present'
 
   const pinMajor = firstInteger(pin)
   const installedMajor = firstInteger(installed)
-  if (pinMajor === undefined) return true
+  if (pinMajor === undefined || installedMajor === undefined) return 'present'
 
-  return pinMajor === installedMajor
+  const delta = Number(installedMajor) - Number(pinMajor)
+  if (delta === 0) return 'present'
+  return delta > 0 ? 'ahead' : 'missing'
 }
 
 /**
@@ -121,11 +129,12 @@ export function collectDeps(
       if (name === '' || seen.has(name)) continue
       seen.add(name)
 
-      states.push({
-        spec,
-        name,
-        state: isSatisfied(installed[name], pin) ? 'present' : 'missing',
-      })
+      const state = compareSpec(installed[name], pin)
+      states.push(
+        state === 'ahead'
+          ? { spec, name, state, installed: installed[name] }
+          : { spec, name, state },
+      )
     }
   }
 
