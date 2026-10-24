@@ -56,9 +56,9 @@ function catalogRows(count: number): string[] {
   )
 }
 
-/** A bullet of an exact character count, so a boundary case lands on it. */
-function bullet(characters: number): string {
-  return `- ${'w'.repeat(characters - 2)}`
+/** A bullet whose text after its marker is an exact character count, so a boundary case lands on it. */
+function bullet(characters: number, marker = '-'): string {
+  return `${marker} ${'w'.repeat(characters)}`
 }
 
 /** Links whose destinations outweigh the anchor text a reader is shown. */
@@ -357,6 +357,23 @@ describe('heavyBullets', () => {
     const source = `${FRONTMATTER}# CI\n\n${bullet(BULLET_CHECKPOINT)}\n`
 
     expect(measure(source).heavyBullets).toEqual([])
+  })
+
+  it.each(['-', '1.'])(
+    'should leave a bullet at the checkpoint after its %s marker unreported',
+    (marker) => {
+      const source = `${FRONTMATTER}# CI\n\n${bullet(BULLET_CHECKPOINT, marker)}\n`
+
+      expect(measure(source).heavyBullets).toEqual([])
+    },
+  )
+
+  it('should report a numbered bullet one character past the checkpoint', () => {
+    const source = `${FRONTMATTER}# CI\n\n${bullet(BULLET_CHECKPOINT + 1, '1.')}\n`
+
+    expect(measure(source).heavyBullets).toEqual([
+      { line: 8, characters: BULLET_CHECKPOINT + 1 },
+    ])
   })
 
   it('should report a nested bullet past the checkpoint at its own line', () => {
