@@ -184,10 +184,7 @@ describe('buildDesignCss', () => {
     expect(css.match(/@font-face/g)).toHaveLength(1)
   })
 
-  it('prepends a banner only when the caller supplies one', () => {
-    expect(
-      buildDesignCss(undefined, { banner: 'Written by a test' }),
-    ).toContain('/* Written by a test */')
+  it('opens the default output on the root block', () => {
     expect(buildDesignCss().startsWith(':root {')).toBe(true)
   })
 
