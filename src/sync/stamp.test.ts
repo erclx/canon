@@ -547,6 +547,18 @@ describe('writeStamp shape without a formatter', () => {
     expect([check('oxfmt'), check('prettier')]).toEqual([0, 0])
   })
 
+  it('should keep a chain that ends exactly at 80 columns inline', async () => {
+    const chain = Array.from({ length: 5 }, (_, i) => `step-nm-${i}`)
+    await writeChainStamp(TARGET, GOVERNANCE, chain, NOW)
+
+    const line = readFileSync(stampPath(TARGET), 'utf8')
+      .split('\n')
+      .find((text) => text.includes('"chain"'))
+
+    expect(line?.length).toBe(80)
+    expect([check('oxfmt'), check('prettier')]).toEqual([0, 0])
+  })
+
   it('should round trip three domains through readStamp unchanged', async () => {
     await writeStamp(TARGET, GOVERNANCE, { 'a.md': 'sha256:aa' }, NOW)
     await writeStamp(TARGET, TOOLING, { 'b.md': 'sha256:bb' }, NOW)

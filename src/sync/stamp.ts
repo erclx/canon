@@ -313,14 +313,22 @@ const WIDTH = 80
  * `JSON.stringify`'s own.
  */
 function serializeStamp(value: unknown): string {
-  return serialize(value, 0, 0)
+  return serialize(value, 0, 0, true)
 }
 
-function serialize(value: unknown, depth: number, taken: number): string {
+function serialize(
+  value: unknown,
+  depth: number,
+  taken: number,
+  last: boolean,
+): string {
   if (Array.isArray(value) && value.every((item) => typeof item === 'string')) {
     const inline = JSON.stringify(value).replace(/","/g, '", "')
-    // The trailing comma counts against the width, as it does for a formatter.
-    return taken + inline.length + 1 <= WIDTH ? inline : expand(value, depth)
+    // A comma follows every entry but the last of its object, and counts
+    // against the width as it does for a formatter.
+    return taken + inline.length + (last ? 0 : 1) <= WIDTH
+      ? inline
+      : expand(value, depth)
   }
 
   if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
@@ -328,9 +336,9 @@ function serialize(value: unknown, depth: number, taken: number): string {
     if (entries.length === 0) return '{}'
 
     const pad = '  '.repeat(depth + 1)
-    const lines = entries.map(([key, child]) => {
+    const lines = entries.map(([key, child], index) => {
       const head = `${pad}${JSON.stringify(key)}: `
-      return `${head}${serialize(child, depth + 1, head.length)}`
+      return `${head}${serialize(child, depth + 1, head.length, index === entries.length - 1)}`
     })
     return `{\n${lines.join(',\n')}\n${'  '.repeat(depth)}}`
   }
