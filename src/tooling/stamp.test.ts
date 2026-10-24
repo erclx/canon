@@ -1,8 +1,13 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { readStamp, stampedChain } from '@/sync/stamp'
+import {
+  hashContent,
+  readStamp,
+  stampedChain,
+  stampedHashes,
+} from '@/sync/stamp'
 import type { Manifest } from '@/tooling/manifest'
 import { isWorkspaceRoot, recordToolingChain } from '@/tooling/stamp'
 
@@ -223,6 +228,79 @@ describe('recordToolingChain', () => {
         'astro',
         'base',
       ])
+    })
+  })
+
+  describe('file hashes', () => {
+    let TOOLKIT: string
+
+    function shipping(name: string, files: Record<string, string>): Manifest {
+      const configsDir = join(TOOLKIT, name, 'configs')
+      for (const [rel, body] of Object.entries(files)) {
+        mkdirSync(dirname(join(configsDir, rel)), { recursive: true })
+        writeFileSync(join(configsDir, rel), body)
+      }
+      return { ...manifest(name), configsDir }
+    }
+
+    function hashes(): Record<string, string> {
+      return { ...stampedHashes(readStamp(TARGET), 'tooling') }
+    }
+
+    beforeEach(() => {
+      TOOLKIT = mkdtempSync(join(tmpdir(), 'canon-tooling-hashes-'))
+    })
+
+    afterEach(() => {
+      rmSync(TOOLKIT, { recursive: true, force: true })
+    })
+
+    it('should record the golden hash of a config the target matches', async () => {
+      const base = shipping('base', { 'a.json': 'golden\n' })
+      writeFileSync(join(TARGET, 'a.json'), 'golden\n')
+
+      await recordToolingChain(TOOLKIT, TARGET, [base], NOW)
+
+      expect(hashes()).toEqual({ 'a.json': hashContent('golden\n') })
+    })
+
+    it('should record no hash for a config the target edited and never matched', async () => {
+      const base = shipping('base', { 'a.json': 'golden\n' })
+      writeFileSync(join(TARGET, 'a.json'), 'mine\n')
+
+      await recordToolingChain(TOOLKIT, TARGET, [base], NOW)
+
+      expect(hashes()).toEqual({})
+    })
+
+    it('should keep the previous hash of a config held this run', async () => {
+      writeFileSync(join(TARGET, 'a.json'), 'golden\n')
+      await recordToolingChain(
+        TOOLKIT,
+        TARGET,
+        [shipping('base', { 'a.json': 'golden\n' })],
+        NOW,
+      )
+      writeFileSync(join(TARGET, 'a.json'), 'mine\n')
+
+      await recordToolingChain(
+        TOOLKIT,
+        TARGET,
+        [shipping('base', { 'a.json': 'newer golden\n' })],
+        NOW,
+      )
+
+      expect(hashes()).toEqual({ 'a.json': hashContent('golden\n') })
+    })
+
+    it('should record the nearest stack copy a shadowed config matches', async () => {
+      const web = shipping('web', { 'a.json': 'web\n' })
+      const base = shipping('base', { 'a.json': 'base\n' })
+      writeFileSync(join(TARGET, 'a.json'), 'web\n')
+
+      await recordToolingChain(TOOLKIT, TARGET, [web, base], NOW)
+
+      expect(hashes()).toEqual({ 'a.json': hashContent('web\n') })
     })
   })
 })

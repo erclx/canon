@@ -1,7 +1,19 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { readStamp, stampedChain, writeChainStamp } from '@/sync/stamp'
-import { isWholeStack, loadManifest, type Manifest } from '@/tooling/manifest'
+import {
+  type DomainHashes,
+  hashFile,
+  readStamp,
+  stampedChain,
+  stampedHashes,
+  writeChainStamp,
+} from '@/sync/stamp'
+import {
+  configFiles,
+  isWholeStack,
+  loadManifest,
+  type Manifest,
+} from '@/tooling/manifest'
 import { readPackage } from '@/tooling/package'
 
 /**
@@ -32,13 +44,45 @@ export async function recordToolingChain(
 ): Promise<string[] | undefined> {
   if (isWorkspaceRoot(target)) return undefined
 
-  const merged = mergeAddOns(
-    toolkitRoot,
-    stampedChain(readStamp(target), 'tooling'),
-    chain,
+  const stamp = readStamp(target)
+  const merged = mergeAddOns(toolkitRoot, stampedChain(stamp, 'tooling'), chain)
+  await writeChainStamp(
+    target,
+    { domain: 'tooling', toolkitRoot },
+    merged,
+    now,
+    matchedHashes(chain, target, stampedHashes(stamp, 'tooling')),
   )
-  await writeChainStamp(target, { domain: 'tooling', toolkitRoot }, merged, now)
   return merged
+}
+
+/**
+ * The golden hash of every config the target now matches, over the hashes an
+ * earlier run recorded. A config the target holds a different copy of keeps
+ * its previous hash, so a held edit still reads as edited on the next run
+ * rather than as a stale copy the write may replace.
+ */
+function matchedHashes(
+  chain: readonly Manifest[],
+  target: string,
+  previous: DomainHashes,
+): DomainHashes {
+  const hashes: Record<string, string> = { ...previous }
+  const seen = new Set<string>()
+
+  for (const manifest of chain) {
+    for (const rel of configFiles(manifest)) {
+      if (seen.has(rel)) continue
+      seen.add(rel)
+
+      const dest = join(target, rel)
+      if (!existsSync(dest)) continue
+      const golden = hashFile(join(manifest.configsDir, rel))
+      if (hashFile(dest) === golden) hashes[rel] = golden
+    }
+  }
+
+  return hashes
 }
 
 /**

@@ -12,7 +12,8 @@ import { readInstalled } from '@/version/installed'
 /**
  * Domains the stamp can record. Governance attributes file by file through
  * the sync engine. Tooling runs its own inject and manifest machinery, so it
- * records the stack chain it resolved instead and carries no file hashes.
+ * records the stack chain it resolved, and hashes only the configs a target
+ * matched, which is what lets a later write tell a stale copy from an edit.
  *
  * A stamp written before the standards or snippets install channel closed
  * still carries a `standards` or `snippets` record, and one written before the
@@ -292,18 +293,27 @@ export async function writeStamp(
 }
 
 /**
- * Records the stack chain an install resolved and leaves that domain's file
- * hashes untouched. Tooling calls this with no files ever recorded, since
- * `src/tooling/` never runs the sync engine and the chain is its whole record.
- * Governance calls it alongside `writeStamp`, since it records both.
+ * Records the stack chain an install resolved, and leaves that domain's file
+ * hashes untouched unless `files` is passed. Tooling passes the golden hash of
+ * each config the target matches, since it never runs the sync engine.
+ * Governance calls it alongside `writeStamp`, since that records its files.
  */
 export async function writeChainStamp(
   target: string,
   source: StampSource,
   chain: readonly string[],
   now: Date,
+  files?: DomainHashes,
 ): Promise<void> {
-  await putDomain(target, source, { chain: [...chain] }, now)
+  await putDomain(
+    target,
+    source,
+    {
+      chain: [...chain],
+      ...(files === undefined ? {} : { files: sortKeys(files) }),
+    },
+    now,
+  )
 }
 
 /**
