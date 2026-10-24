@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.58.0](https://github.com/erclx/canon/compare/v5.57.0...v5.58.0) (2026-10-24)
+
+
+### Features
+
+* **governance:** widen design-taste paths to component files ([#2645](https://github.com/erclx/canon/issues/2645)) ([01b1445](https://github.com/erclx/canon/commit/01b144514eced1150c90b18acc78f0be33990a23))
+* **rules:** route interface changes to api-design ([#2647](https://github.com/erclx/canon/issues/2647)) ([09a073c](https://github.com/erclx/canon/commit/09a073ca38324a399de5c2c2e702fbcede6bb38c))
+* **skills:** offer a restructure before document-repair rewrites ([#2648](https://github.com/erclx/canon/issues/2648)) ([7c2776a](https://github.com/erclx/canon/commit/7c2776a95b86a6626c44e399056b9eaa22418d65))
+
+
+### Bug Fixes
+
+* **context:** count table rows toward no folder paragraph ([#2646](https://github.com/erclx/canon/issues/2646)) ([a99b020](https://github.com/erclx/canon/commit/a99b02064105b81bc3a4f6e4820c73198942785e))
+
 ## [5.57.0](https://github.com/erclx/canon/compare/v5.56.0...v5.57.0) (2026-10-24)
 
 
