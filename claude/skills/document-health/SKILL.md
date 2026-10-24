@@ -122,14 +122,6 @@ When Step 3 read the canonical records, add one reminder line per doc the verb r
 
 Write `reviewed value is not a date: <value>` for a doc carrying `invalidReviewed`, and `no release tags to count` in place of the count when `tagged` is false. Name the unread cause instead when the verb refused or the binary carries no `canonical` kind.
 
-### The design record row
-
-When Step 2 read the design record, add a row for `canon/DESIGN.md`, with both findings `measured`.
-
-- Put the `prose` findings in the Length cell and the `tokens` findings in the Placement cell
-- Write `unread: <reason>` in the Placement cell when `tokens.status` reads `unchecked`, since a check that could not run is no pass
-- Route every finding to `design-record`, never to `document-repair`
-
 Under the table, add one structure line per area folder that earned one, naming the entry and the split, or the finding and its owner:
 
 ```markdown
@@ -139,3 +131,12 @@ Structure `canon/context/surfaces/`: `cli.md` (300 lines) splits into `cli.md` t
 The line is a proposal for the operator, with the headings each entry takes and why. Health applies nothing, and `document-repair` offers the proposal before it rewrites.
 
 Keep the evidence line under the table on every run. A table read without it flattens a judgment into a measurement, which is the one shape the three classes exist to prevent.
+
+### The design record row
+
+When Step 2 read the design record, add a row for `canon/DESIGN.md`, with both findings `measured`.
+
+- Put the `prose` findings in the Length cell and the `tokens` findings in the Placement cell
+- Write `unread: <reason>` in the Placement cell when `tokens.status` reads `unchecked`, since a check that could not run is no pass
+- Write `n/a: <reason>` there when it reads `not-applicable`, a values record with no property to compare
+- Route every finding to `design-record`, never to `document-repair`

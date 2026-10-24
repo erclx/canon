@@ -89,6 +89,22 @@ describe('auditDesign', () => {
     expect(audit.clean).toBe(false)
   })
 
+  it('reads a values record with no Property column as not applicable', () => {
+    const values = [
+      '# Design',
+      'Rendered from `src/design/tokens.ts`.',
+      '## Colors',
+      '| Role | Intent | Value |',
+      '| ---- | ------ | ----- |',
+      '| accent | links | #2255cc |',
+    ].join('\n\n')
+
+    const audit = auditDesign(project(values))
+
+    expect(audit.tokens).toMatchObject({ status: 'not-applicable' })
+    expect(audit.clean).toBe(true)
+  })
+
   it('reads a project with no record as nothing to audit', () => {
     expect(auditDesign(project(null))).toMatchObject({
       record: null,

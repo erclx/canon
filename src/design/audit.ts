@@ -21,6 +21,7 @@ export type TokenCheck =
       readonly missing: readonly string[]
     }
   | { readonly status: 'unchecked'; readonly reason: string }
+  | { readonly status: 'not-applicable'; readonly reason: string }
 
 export interface DesignAudit {
   readonly ok: true
@@ -51,13 +52,26 @@ export function auditDesign(root: string): DesignAudit {
   const tokens = checkTokens(root, path, source)
   const clean =
     prose.length === 0 &&
-    tokens.status === 'checked' &&
-    tokens.missing.length === 0
+    tokens.status !== 'unchecked' &&
+    (tokens.status !== 'checked' || tokens.missing.length === 0)
 
   return { ok: true, record: DESIGN_DOCUMENT, prose, tokens, clean }
 }
 
 function checkTokens(root: string, path: string, source: string): TokenCheck {
+  const doc = parseDesignDoc(path)
+  const rows = [...doc.color, ...doc.borders]
+
+  // A values record renders from a token module and carries `Value` where an
+  // intent record carries `Property`, so it has no property to compare.
+  if (!rows.some((row) => 'Property' in row)) {
+    return {
+      status: 'not-applicable',
+      reason:
+        'The record has no Property column, so it holds no property to compare.',
+    }
+  }
+
   const lead = source.split(/^##\s/m)[0]
   const named = lead.match(STYLESHEET)?.[1]
   if (named === undefined) {
@@ -78,10 +92,9 @@ function checkTokens(root: string, path: string, source: string): TokenCheck {
   const css = readFileSync(stylesheet, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
   const declared = new Set([...css.matchAll(DECLARATION)].map((m) => m[1]))
 
-  const doc = parseDesignDoc(path)
   const properties = [
     ...new Set(
-      [...doc.color, ...doc.borders].flatMap((row) =>
+      rows.flatMap((row) =>
         [...(row['Property']?.value.matchAll(PROPERTY) ?? [])].map((m) => m[0]),
       ),
     ),

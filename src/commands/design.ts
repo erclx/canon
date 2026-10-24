@@ -124,7 +124,7 @@ export function register(program: Command): void {
         for (const finding of audit.prose) logWarn(finding)
         if (audit.tokens?.status === 'unchecked') {
           logWarn(`Tokens unchecked: ${audit.tokens.reason}`)
-        } else if (audit.tokens) {
+        } else if (audit.tokens?.status === 'checked') {
           for (const property of audit.tokens.missing) {
             logWarn(`${property} is not declared in ${audit.tokens.stylesheet}`)
           }
