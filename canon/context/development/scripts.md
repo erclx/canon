@@ -27,7 +27,7 @@ Traps for any bash script edited under this folder, each a failure that passed a
 
 Holds the scripts run by `bun run` name or fired by a gate stage or workflow, and none is a `canon` verb. `capture-home.sh` builds the landing page for `pr-visual-checks.yml` and the frame refresh, and `regen-web-*.ts` write the committed previews and favicon.
 
-- `bootstrap.sh` installs dependencies, links the CLI globally, and appends the alias block to `~/.zshrc`. A re-run stops at the marker, so a grown block reaches no one until they delete the old one.
+- `bootstrap.ts` installs dependencies, links the CLI globally, and appends the alias block to `~/.zshrc`. A re-run stops at the marker, so a grown block reaches no one until they delete the old one.
 - `regen-hero.ts` fills each `assets/captures/*.html.tmpl`, reading every catalog in-process, and a placeholder nothing fills fails the run. Its pure half sits in `src/capture/frame-values.ts`.
 - `FEATURED_SKILLS` in that module is a hand-chosen list of exactly `LISTED` names, so renaming or retiring a shipped skill fails the Hero stage until the list is updated
 - The command count greps `import { register as ` lines in `src/cli.ts`, so a command registered in another shape leaves the frame low and nothing reports it
@@ -39,13 +39,6 @@ Holds the programs a workflow step calls once it passes five lines or carries mo
 - Each script is committed `100755` and runs after `actions/checkout`, so a job that never checked out gets one added
 - A workflow step keeps `permissions` and secrets in its own `env`, so the token scope reads off the YAML
 - `delete-previews.sh` has a seeded sibling at `tooling/cloudflare/configs/scripts/`, which adds a skip for absent secrets. Keep the two otherwise the same.
-
-### `scripts/lib/`
-
-Holds `ui.sh` alone, sourced and never executed. It provides the framed log lines with no color, and holds no picker, which lives in `src/cli/ui.ts`. Sourcing it under bash below 4 exits with `brew install bash` instructions.
-
-- `open_timeline` and `close_timeline` frame stderr, paired with `trap close_timeline EXIT`. `log_*` writes stderr and data goes to stdout, so output pipes clean.
-- A TypeScript command that a bash caller invokes owns its frame and takes `--nested` to suppress it, as `canon gate run` and `canon tooling inject` do
 
 ### `scripts/eval/`
 
