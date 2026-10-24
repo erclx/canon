@@ -23,6 +23,20 @@ const record = (sections: Record<string, string>, lead = ''): string =>
   ].join('\n\n')
 
 describe('measureDesignProse', () => {
+  it('leaves frontmatter out of the lead count', () => {
+    const source = [
+      '---',
+      'themes:',
+      '  - ":root"',
+      '  - ":root[data-theme=\'dark\']"',
+      'reviewed: 2026-10-24',
+      '---',
+      record({}, words(DESIGN_BUDGET.leadWords)),
+    ].join('\n')
+
+    expect(measureDesignProse(source)).toEqual([])
+  })
+
   it('passes a section holding a table and the rule cap', () => {
     const source = record({
       Color: `${rules(DESIGN_BUDGET.rules)}\n\n${TABLE}`,

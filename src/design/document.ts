@@ -5,7 +5,7 @@ import type {
   SpaceToken,
   TypeToken,
 } from '@/design/tokens'
-import { TOKENS } from '@/design/tokens'
+import { REVIEWED, TOKENS } from '@/design/tokens'
 
 /**
  * Renders `canon/DESIGN.md` from the token source.
@@ -110,6 +110,10 @@ function section(heading: string, ...blocks: string[]): string {
 
 export function renderDesignDocument(tokens: DesignTokens = TOKENS): string {
   const body = [
+    '---',
+    `reviewed: ${REVIEWED}`,
+    '---',
+    '',
     '# Design',
     '',
     LEAD,

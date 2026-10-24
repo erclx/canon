@@ -15,9 +15,9 @@ description: DESIGN.md as a generated record, the token module and component lay
 
 Owns the token module, the component layer, the renderers, the markdown parser, and the contrast reading.
 
-- `tokens.ts` holds the values. Every hex role but `success` is solved in OKLCH for a contrast target, and dark is its own anchor set.
-- `components.ts` holds the component layer, since the record keeps CSS class names out. `buildDesignCss` takes a list other than `COMPONENTS` only through its `components` option.
-- `document.ts` renders the record, `css.ts` the stylesheet, `regen.ts` writes the record, and `budget.ts` counts its prose, and `audit.ts` adds a check that a property is declared in any theme
+- `tokens.ts` holds the values and `REVIEWED`, which the record's frontmatter renders. Every hex role but `success` is solved in OKLCH for a contrast target, and dark is its own anchor set.
+- `components.ts` holds the component layer, since the record keeps CSS class names out. `buildDesignCss` takes another list only through its `components` option.
+- `document.ts` renders and `regen.ts` writes the record. `css.ts` builds the stylesheet, `budget.ts` counts prose, and `audit.ts` with `themes.ts` checks tokens per theme.
 - `parse.ts` and `render.ts` write the token preview the landing page embeds, and `prose()` reads only Overview, Motion, and Iconography, so no other rule reaches it
 - `renderDesignDoc` has no verb, and `bun run web:previews` is its only caller, so `render.ts` is live even with nothing in `src/` importing it
 

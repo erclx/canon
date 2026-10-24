@@ -17,7 +17,7 @@ Length, placement, and staleness answer to different evidence, and one list hand
 - Propose a split or an owner as a structure line for each overgrown entry and doubled or unnamed coverage finding, with the headings and the reason
 - Ship the staleness axis as a reading rather than cutting it for lacking a verb
 - Report a refusal, an absent key, or a missing subcommand as an unread axis naming the cause, and say which layer answered the classifier sweep
-- Run standalone, reading the requirements record for drift with its reminder, and the design record through `canon design audit --json`, routing its findings to `design-record`
+- Run standalone, reading the requirements record for drift with its reminder, and the design record through `canon design audit --json` and its review reminder, routing findings to `design-record`
 
 ## Must not
 

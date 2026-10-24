@@ -2,3 +2,7 @@
   --color-accent: #2255cc;
   --color-ink: #111111;
 }
+
+:root[data-theme='dark'] {
+  --color-ink: #eeeeee;
+}

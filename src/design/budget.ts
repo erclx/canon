@@ -1,4 +1,5 @@
 import { canonicalHeading } from '@/design/parse'
+import { stripFrontmatter } from '@/markdown/frontmatter'
 
 /**
  * The prose budget `claude/skills/design-record/references/design.md` sets for a design record, and the
@@ -91,7 +92,7 @@ function splitSections(source: string): Section[] {
   const sections: { heading: string | undefined; lines: string[] }[] = [
     { heading: undefined, lines: [] },
   ]
-  for (const line of source.split('\n')) {
+  for (const line of stripFrontmatter(source).split('\n')) {
     const match = line.match(/^##\s+(.+?)\s*$/)
     if (match) {
       sections.push({ heading: match[1], lines: [] })
