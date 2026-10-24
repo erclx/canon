@@ -51,11 +51,11 @@ Follow every concern group with `## Excuses and rebuttals`, `## Red flags`, and 
 
 A skill whose files list outside-practice directives one per bullet takes a ledger per such file beside `adopted.md`, with one table row per bullet under each H2, the way a governance rule's ledger does.
 
-- Name each directing file, a rule reference or a `SKILL.md`, on the per-bullet list `canon claude skills audit` keeps
-- The audit fails a listed file whose bullets and rows disagree in count under any heading, and a listed file the skill no longer carries
-- Leave off a checklist restating rules a ledgered file sources, which would cite each source twice, and a glossary, whose definitions direct nothing
+- Once a skill joins the per-bullet list `canon claude skills audit` keeps, every reference but `adopted.md` takes a ledger, so one added later fails until its rows land
+- Exempt by name a checklist restating rules a ledgered file sources, which would cite each source twice, and a glossary, whose definitions direct nothing
+- Mark the skill's `SKILL.md` for a ledger too when the body carries directives of its own
 - Keep the rows outside the plugin, so a target pays nothing for them
-- Move a source out of `adopted.md` once its row lands in a ledger, since two copies drift on the first edit. `adopted.md` keeps the catalog-level record and the sources behind any unlisted file.
+- Move a source out of `adopted.md` once its row lands in a ledger, since two copies drift on the first edit. `adopted.md` keeps the catalog-level record and the sources behind any unledgered file.
 
 ## Which skills are practice skills
 

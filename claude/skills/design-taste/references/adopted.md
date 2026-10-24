@@ -27,7 +27,7 @@ A rule a quoted passage only partly backs names the part it backs, and the rest 
 
 Each bullet in `craft.md`, `kinds.md`, `systems.md`, and `tells.md` has its own source row in a ledger outside the plugin, one ledger per reference and one row per bullet under the H2 the bullet sits under.
 
-- The toolkit's skill audit fails a listed reference whose bullets and rows disagree in count under any heading, and a target never carries the rows
+- The toolkit's skill audit fails a ledgered reference whose bullets and rows disagree in count under any heading, and a target never carries the rows
 - `preflight.md` takes no ledger, since its boxes restate the rules the four ledgered references source
 - `vocabulary.md` takes none either, since it defines terms rather than directing
 - This record keeps the sources behind the skill body, which has no ledger of its own, and what was read and declined

@@ -11,7 +11,7 @@ A rule under `lang/`, `lib/`, `framework/`, `ui/`, or `tooling/` claims outside 
 
 - Mirror the rule's path under `governance/ledger/`, so `governance/rules/framework/react.md` takes `governance/ledger/framework/react.md`
 - Behavioral folders and `internal/rules/` carry none, since a behavioral bullet's source is the pull request `git log` already names
-- A skill file on the per-bullet list in `src/claude/skills-audit.ts` takes `governance/ledger/skills/<skill>/<file>.md`, keyed by the file's own name
+- A ledgered file of a skill on the per-bullet list in `src/claude/skills-audit.ts`, being each reference it does not exempt and a marked body, takes `governance/ledger/skills/<skill>/<file>.md`
 - So `claude/skills/design-taste/references/craft.md` takes `governance/ledger/skills/design-taste/craft.md`, and a listed `SKILL.md` takes `governance/ledger/skills/<skill>/SKILL.md`
 
 ## Shape

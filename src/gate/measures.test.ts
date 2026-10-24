@@ -1177,17 +1177,19 @@ describe('skillPracticeShape', () => {
 
   /**
    * Writes a conforming fixture for every listed skill but the one a test
-   * varies, so an append to the list needs no edit here. A file the per-bullet
-   * list names gets a bullet-free body and a row-free ledger, which pair.
+   * varies, so an append to the list needs no edit here. Each exempted
+   * reference is written so its exemption names a real file, and a listed body
+   * gets a row-free ledger.
    */
   const writeListedExcept = (omitted?: string): void => {
     for (const rel of LEDGER_SKILLS.filter((rel) => rel !== omitted)) {
       writePracticeSkill(CLOSED, rel)
-      for (const file of BULLET_LEDGER_SKILLS[rel] ?? []) {
-        if (file !== 'SKILL.md') {
-          writeFileSync(join(root, rel, file), '# Reference\n')
-        }
-        const ledger = join(root, skillLedgerPath(basename(rel), file))
+      const scope = BULLET_LEDGER_SKILLS[rel]
+      for (const file of scope?.exempt ?? []) {
+        writeFileSync(join(root, rel, file), '# Reference\n')
+      }
+      if (scope?.body) {
+        const ledger = join(root, skillLedgerPath(basename(rel), 'SKILL.md'))
         mkdirSync(dirname(ledger), { recursive: true })
         writeFileSync(ledger, '# Ledger\n')
       }

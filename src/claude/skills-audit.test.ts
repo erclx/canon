@@ -664,19 +664,21 @@ function practiceSkill(
 
 /**
  * Writes a conforming fixture for every listed skill but the one a test
- * varies, so an append to the list needs no edit here. A file the per-bullet
- * list names gets a bullet-free body and a row-free ledger, which pair.
+ * varies, so an append to the list needs no edit here. Each exempted reference
+ * is written so its exemption names a real file, and a listed body gets a
+ * row-free ledger.
  */
 function listedPracticeSkillsExcept(omitted: string): void {
   for (const rel of LEDGER_SKILLS.filter((rel) => rel !== omitted)) {
     const name = basename(rel)
     const dir = practiceSkill(CLOSING, { name })
-    for (const file of BULLET_LEDGER_SKILLS[rel] ?? []) {
-      if (file !== 'SKILL.md') {
-        mkdirSync(dirname(join(dir, file)), { recursive: true })
-        writeFileSync(join(dir, file), '# Reference\n')
-      }
-      const ledger = join(root, skillLedgerPath(name, file))
+    const scope = BULLET_LEDGER_SKILLS[rel]
+    for (const file of scope?.exempt ?? []) {
+      mkdirSync(dirname(join(dir, file)), { recursive: true })
+      writeFileSync(join(dir, file), '# Reference\n')
+    }
+    if (scope?.body) {
+      const ledger = join(root, skillLedgerPath(name, 'SKILL.md'))
       mkdirSync(dirname(ledger), { recursive: true })
       writeFileSync(ledger, '# Ledger\n')
     }
@@ -840,16 +842,27 @@ describe('auditSkills practice shape', () => {
 })
 
 describe('auditSkills reference ledgers', () => {
-  const [[bulletLedgered, [listed = '']] = ['', []]] =
-    Object.entries(BULLET_LEDGER_SKILLS)
+  const [[bulletLedgered] = ['']] = Object.entries(BULLET_LEDGER_SKILLS)
+  const [
+    [
+      exempting,
+      {
+        exempt: [exempted = ''],
+      },
+    ] = ['', { exempt: [] }],
+  ] = Object.entries(BULLET_LEDGER_SKILLS).filter(
+    ([, scope]) => scope.exempt.length > 0,
+  )
   const name = basename(bulletLedgered)
-  const reference = join(bulletLedgered, listed)
-  const ledgerRel = skillLedgerPath(name, listed)
+  const added = join('references', 'added-later.md')
+  const reference = join(bulletLedgered, added)
+  const ledgerRel = skillLedgerPath(name, added)
 
   const TABLE = '| Bullet | Source |\n| --- | --- |\n'
+  const MATCHED = `# Ledger\n\n## Semantics\n\n${TABLE}| One | x |\n| Two | y |\n`
 
-  function writeReference(text: string, file = listed): void {
-    const path = join(root, bulletLedgered, file)
+  function writeReference(text: string, skill = bulletLedgered): void {
+    const path = join(root, skill, added)
     mkdirSync(dirname(path), { recursive: true })
     writeFileSync(path, text)
   }
@@ -862,10 +875,9 @@ describe('auditSkills reference ledgers', () => {
   beforeEach(() => {
     listedPracticeSkillsExcept('')
     writeReference('# Accessibility\n\n## Semantics\n\n- One.\n- Two.\n')
-    rmSync(join(root, ledgerRel))
   })
 
-  it('should report a listed file carrying no ledger', async () => {
+  it('should report a reference no list names carrying no ledger', async () => {
     const report = await auditSkills(root)
 
     expect(report.practiceShape).toEqual([
@@ -884,9 +896,7 @@ describe('auditSkills reference ledgers', () => {
   })
 
   it('should pass a ledger matching every heading', async () => {
-    writeLedger(
-      `# Ledger\n\n## Semantics\n\n${TABLE}| One | x |\n| Two | y |\n`,
-    )
+    writeLedger(MATCHED)
 
     const report = await auditSkills(root)
 
@@ -894,9 +904,7 @@ describe('auditSkills reference ledgers', () => {
   })
 
   it('should ask no per-bullet ledger of the source record', async () => {
-    writeLedger(
-      `# Ledger\n\n## Semantics\n\n${TABLE}| One | x |\n| Two | y |\n`,
-    )
+    writeLedger(MATCHED)
     writeFileSync(
       join(root, bulletLedgered, 'references', 'adopted.md'),
       `${LINKED_LEDGER}\n## Sources\n\n- A row.\n`,
@@ -907,13 +915,11 @@ describe('auditSkills reference ledgers', () => {
     expect(report.practiceShape).toEqual([])
   })
 
-  it('should ask no ledger of a reference the list does not name', async () => {
-    writeLedger(
-      `# Ledger\n\n## Semantics\n\n${TABLE}| One | x |\n| Two | y |\n`,
-    )
-    writeReference(
+  it('should ask no ledger of an exempted reference', async () => {
+    writeLedger(MATCHED)
+    writeFileSync(
+      join(root, exempting, exempted),
       '# Checklist\n\n## Before handing over\n\n- [ ] One.\n',
-      join('references', 'unlisted-checklist.md'),
     )
 
     const report = await auditSkills(root)
@@ -921,13 +927,17 @@ describe('auditSkills reference ledgers', () => {
     expect(report.practiceShape).toEqual([])
   })
 
-  it('should report a listed file the skill no longer carries', async () => {
-    rmSync(join(root, reference))
+  it('should report an exemption naming a file the skill lacks', async () => {
+    writeLedger(MATCHED)
+    rmSync(join(root, exempting, exempted))
 
     const report = await auditSkills(root)
 
     expect(report.practiceShape).toEqual([
-      { rel: reference, detail: 'missing file: listed for a ledger' },
+      {
+        rel: join(exempting, exempted),
+        detail: 'missing file: exempt from a ledger',
+      },
     ])
   })
 })

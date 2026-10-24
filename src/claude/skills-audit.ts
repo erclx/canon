@@ -88,40 +88,35 @@ function references(...names: string[]): string[] {
   return names.map((name) => join('references', `${name}.md`))
 }
 
+export interface BulletLedgerScope {
+  /** References left off, each a checklist or glossary naming no new source. */
+  readonly exempt: readonly string[]
+  /** True when `SKILL.md` carries directives of its own to ledger. */
+  readonly body: boolean
+}
+
 /**
- * The ledger-listed skills mapped to the files each carries a ledger for, one
- * table row per bullet under each H2, the way a rule in a practice folder does.
- * A file is named rather than every reference taken, so a checklist restating
- * sourced rules or a glossary defining terms stays off, and a `SKILL.md` can be
- * listed. The ledgers sit outside the plugin as rule ledgers do, so a target
- * pays nothing for them.
+ * The ledger-listed skills whose every reference but the source record carries
+ * a ledger of its own, one table row per bullet under each H2, the way a rule
+ * in a practice folder does. A reference is ledgered unless exempted by name,
+ * so one added later fails until its rows land rather than passing unread. The
+ * ledgers sit outside the plugin as rule ledgers do, so a target pays nothing
+ * for them.
  */
-export const BULLET_LEDGER_SKILLS: Readonly<Record<string, readonly string[]>> =
+export const BULLET_LEDGER_SKILLS: Readonly<Record<string, BulletLedgerScope>> =
   {
-    [join(SHIPPED_CORPUS, 'ui-craft')]: references(
-      'a11y',
-      'capture',
-      'controls',
-      'copy',
-      'forms',
-      'keyboard',
-      'motion',
-      'pointer',
-      'states',
-    ),
-    [join(SHIPPED_CORPUS, 'design-taste')]: references(
-      'craft',
-      'kinds',
-      'systems',
-      'tells',
-    ),
+    [join(SHIPPED_CORPUS, 'ui-craft')]: { exempt: [], body: false },
+    [join(SHIPPED_CORPUS, 'design-taste')]: {
+      exempt: references('preflight', 'vocabulary'),
+      body: false,
+    },
   }
 
 /** Where a per-bullet ledger lives, as `<skill>/<file>.md` below it. */
 export const SKILL_LEDGERS = join('governance', 'ledger', 'skills')
 
 /**
- * The ledger a listed file pairs with, keyed by the file's own name, so a
+ * The ledger a ledgered file pairs with, keyed by the file's own name, so a
  * reference drops its `references/` segment and a `SKILL.md` keeps its name.
  */
 export function skillLedgerPath(folder: string, file: string): string {
@@ -245,16 +240,16 @@ interface SkillSource {
    * requirement is where the standard sends a date.
    */
   readonly bodies: readonly SkillText[]
-  /** One entry per file a skill on the per-bullet ledger list names. */
+  /** One entry per ledgered file of a skill on the per-bullet ledger list. */
   readonly referenceLedgers: readonly ReferenceLedger[]
+  /** Exempted references the skill no longer carries, which exempt nothing. */
+  readonly staleExemptions: readonly string[]
 }
 
 interface ReferenceLedger {
   readonly rel: string
   readonly ledgerRel: string
-  /** True when the list names a file the skill does not carry. */
-  readonly fileMissing: boolean
-  /** Undefined when the listed file or its ledger is absent. */
+  /** Undefined when the ledger file is absent. */
   readonly mismatches: readonly LedgerMismatch[] | undefined
 }
 
@@ -376,11 +371,22 @@ async function readSkill(
 
   const fields = parseFrontmatter(body)
   const skillRel = join(rel, folder)
-  const listed = BULLET_LEDGER_SKILLS[skillRel]
+  const scope = BULLET_LEDGER_SKILLS[skillRel]
   const referenceLedgers =
-    listed === undefined
+    scope === undefined
       ? []
-      : await readReferenceLedgers(root, skillRel, folder, skillDir, listed)
+      : await readReferenceLedgers(root, skillRel, folder, [
+          ...(scope.body ? [{ path: 'SKILL.md', text: body }] : []),
+          ...references
+            .map((path, index) => ({ path, text: referenceTexts[index] ?? '' }))
+            .filter(
+              ({ path }) =>
+                path !== PRACTICE_LEDGER && !scope.exempt.includes(path),
+            ),
+        ])
+  const staleExemptions = (scope?.exempt ?? [])
+    .filter((path) => !references.includes(path))
+    .map((path) => join(skillRel, path))
 
   return {
     rel: skillRel,
@@ -403,36 +409,31 @@ async function readSkill(
       })),
     ],
     referenceLedgers,
+    staleExemptions,
   }
 }
 
 /**
- * Pairs each listed file's bullets with its ledger's rows through the rule
+ * Pairs each ledgered file's bullets with its ledger's rows through the rule
  * audit's own comparison, so a skill file and a rule are held to one count.
- * A listed file the skill no longer carries is reported rather than skipped,
- * since a renamed reference would otherwise leave the gate unread.
  */
 async function readReferenceLedgers(
   root: string,
   skillRel: string,
   folder: string,
-  skillDir: string,
-  files: readonly string[],
+  files: readonly { path: string; text: string }[],
 ): Promise<ReferenceLedger[]> {
   return Promise.all(
-    files.map(async (file) => {
-      const filePath = join(skillDir, file)
-      const ledgerRel = skillLedgerPath(folder, file)
+    files.map(async ({ path, text }) => {
+      const ledgerRel = skillLedgerPath(folder, path)
       const ledgerPath = join(root, ledgerRel)
-      const fileMissing = !existsSync(filePath)
-      const mismatches =
-        !fileMissing && existsSync(ledgerPath)
-          ? compareLedger(
-              measureRule(await Bun.file(filePath).text()).groups,
-              countLedgerRows(await Bun.file(ledgerPath).text()),
-            )
-          : undefined
-      return { rel: join(skillRel, file), ledgerRel, fileMissing, mismatches }
+      const mismatches = existsSync(ledgerPath)
+        ? compareLedger(
+            measureRule(text).groups,
+            countLedgerRows(await Bun.file(ledgerPath).text()),
+          )
+        : undefined
+      return { rel: join(skillRel, path), ledgerRel, mismatches }
     }),
   )
 }
@@ -629,13 +630,14 @@ function practiceFindings(source: SkillSource): SkillFinding[] {
     ...sections,
     ...ledgerFindings(source),
     ...source.referenceLedgers.flatMap(referenceLedgerFindings),
+    ...source.staleExemptions.map((rel) => ({
+      rel,
+      detail: 'missing file: exempt from a ledger',
+    })),
   ]
 }
 
 function referenceLedgerFindings(entry: ReferenceLedger): SkillFinding[] {
-  if (entry.fileMissing) {
-    return [{ rel: entry.rel, detail: 'missing file: listed for a ledger' }]
-  }
   if (entry.mismatches === undefined) {
     return [{ rel: entry.rel, detail: `missing ledger: ${entry.ledgerRel}` }]
   }
