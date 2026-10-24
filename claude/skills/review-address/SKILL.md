@@ -82,7 +82,7 @@ This skill owns the reply, so do not reimplement the followup flow here.
 
 - `git-followup` syncs the body and title on every invocation, `reply-owned` included, so the merge record reflects this pass. The reply still maps fixes to findings in the review's own thread.
 - A rebase in step 5 rewrote the branch, so the push is a force-push `git-followup` resolves from the tracking branch. Worker branches are single-owner, which makes that safe.
-- `git-followup` stops on an unchanged tree, as when every finding was a conscious-accept and the rebase left generated files alone. Push that with `git push --force-with-lease`.
+- `git-followup` runs on a clean tree too, since the rebased commits are ahead of the tracking branch. A pass of conscious-accepts after a rebase pushes through it and syncs the body like any other.
 
 Once the fixes are commits, re-run step 5's staleness test against the new head. A conflict appearing only now is one the fixes introduced against lines `main` moved, so rebase again under `${CLAUDE_SKILL_DIR}/references/rebase-conflicts.md` and force-push.
 

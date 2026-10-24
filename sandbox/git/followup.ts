@@ -123,6 +123,50 @@ export default scenario({
         'Expect:  stage -> commit -> push -> reply comment posted on the PR',
       )
     },
+    'unpushed-commit': (ctx) => {
+      resetRemote(ctx)
+      openLowercasePullRequest(ctx)
+
+      ctx.fixtures('git', 'followup', 'open-pr', '02-trim')
+      ctx.git('add', 'utils.js')
+      ctx.commit('feat(utils): add trim helper')
+
+      ctx.log.step('Scenario ready: open PR, clean tree, one unpushed commit')
+      ctx.log.info(
+        'Context: feat/utils-followup tracks origin, PR open, trim() committed but not pushed',
+      )
+      ctx.log.info('Action:  /git-followup')
+      ctx.log.info(
+        'Expect:  staging and commit skipped -> push -> PR body updated to mention trim helper',
+      )
+    },
+    'nothing-to-ship-guard': (ctx) => {
+      resetRemote(ctx)
+      openLowercasePullRequest(ctx)
+
+      ctx.log.step('Scenario ready: open PR, clean tree, nothing unpushed')
+      ctx.log.info(
+        'Context: feat/utils-followup tracks origin, PR open, tree clean and level with upstream',
+      )
+      ctx.log.info('Action:  /git-followup')
+      ctx.log.info('Expect:  guard fires with "No changes to ship."')
+    },
+    'no-upstream-commit': (ctx) => {
+      resetRemote(ctx)
+      openLowercasePullRequest(ctx)
+      ctx.git('branch', '--unset-upstream')
+
+      ctx.fixtures('git', 'followup', 'open-pr', '02-trim')
+      ctx.git('add', 'utils.js')
+      ctx.commit('feat(utils): add trim helper')
+
+      ctx.log.step('Scenario ready: open PR, clean tree, no tracking ref')
+      ctx.log.info(
+        'Context: feat/utils-followup has an open PR but no upstream, trim() committed',
+      )
+      ctx.log.info('Action:  /git-followup')
+      ctx.log.info('Expect:  push -u sets the ref -> PR body updated')
+    },
     'no-pr-guard': (ctx) => {
       resetRemote(ctx)
       ctx.git('checkout', '-b', BRANCH, '-q')

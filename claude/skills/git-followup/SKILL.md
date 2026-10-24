@@ -1,6 +1,6 @@
 ---
 name: git-followup
-description: Ships a small self-review edit on the current PR branch by staging, committing, pushing, and syncing the open PR, replying on the PR when it carries review comments. Use when asked to "ship a followup", "push the PR fix", "followup", or "commit and push this small change". Do NOT use when there is no open PR for the branch (use git-ship instead).
+description: Ships a small self-review edit on the current PR branch by staging, committing, pushing, and syncing the open PR, replying on the PR when it carries review comments. A clean tree with unpushed commits skips the staging and commit. Use when asked to "ship a followup", "push the PR fix", "followup", or "commit and push this small change". Do NOT use when there is no open PR for the branch (use git-ship instead).
 metadata:
   family: after-pr
 ---
@@ -15,7 +15,11 @@ its own reply, so skip the comment in step 7. The push and body sync still run.
 ## Guards
 
 - If `git branch --show-current` returns `main`, stop: `❌ On main. Switch to a PR branch first.`
-- If `git status --porcelain` is empty, stop: `❌ No changes to ship.`
+- If `git branch --show-current` is empty, stop: `❌ Detached HEAD. Checkout the PR branch first.` This runs ahead of the next guard, which reads `@{u}`.
+- If `git status --porcelain` is empty and no commit is unpushed, stop: `❌ No changes to ship.`
+  - A commit is unpushed when `git rev-list @{u}..HEAD` lists one
+  - Count against `origin/<branch>` when `@{u}` does not resolve and that ref does
+  - Every commit is unpushed only when neither ref resolves
 - Resolve `<number>` once, here, through `canon pr head --json`, reading the record's `number`. Every later step names this `<number>` rather than resolving it again.
 - A record refusing with `ambiguous-pull` stops: `❌ Two open PRs on this branch. Name the one to update.`
 
@@ -37,6 +41,8 @@ Every read and write in this skill runs on REST, since the `gh pr` subcommands r
 A missing tracking ref is not a guard, since an open pull request proves the branch reached the remote. A branch created by worktree entry carries an open pull request with no tracking ref, so step 4 sets the ref instead.
 
 ## Sequence
+
+Steps 1 to 3 run only when the tree is dirty. A clean tree carrying unpushed commits already holds its commits, so it starts at step 4.
 
 1. Run `git status` to confirm the changes are intentional
 2. Run `git add -A` to stage every change
