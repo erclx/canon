@@ -46,7 +46,7 @@ The shape kinds are `retired-section`, `gotcha-count`, `gotcha-heading`, `gotcha
 
 - A `## Decisions` H2, or a `Gotchas` section past five bullets or holding a heading or paragraph
 - A `Layout` H3 titled neither a code-spanned path nor `Other folders`, or a heading below H3 under `Layout`
-- A folder H3 past five bullets or its one-paragraph lead
+- A folder H3 past five bullets or its one-paragraph lead, where table rows and the sentence leading the bullets after a table count toward neither
 
 The development entry may carry a `Scripts` H3 exempt from both folder caps. `SHAPE_GATED_FOLDERS` lives in `src/context/shape-gated.ts`.
 
