@@ -1,8 +1,8 @@
 import { existsSync } from 'node:fs'
 import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join, relative } from 'node:path'
-import { $ } from 'bun'
 import { copyPreservingMode } from '@/sync/copy'
+import { type InstallResult, installDevDependencies } from '@/tooling/install'
 import { rewritesOnInstall, stripSeedMarker } from '@/tooling/seed-marker'
 import { resolveSurfacePath } from '@/roots/surface'
 import { mergeSections, pruneSections } from '@/tooling/gitignore'
@@ -165,7 +165,7 @@ export async function pruneGitignore(
 export async function injectManifest(
   chain: readonly Manifest[],
   target: string,
-): Promise<void> {
+): Promise<InstallResult> {
   const packagePath = join(target, 'package.json')
 
   if (!existsSync(packagePath) && declaresInstalls(chain)) {
@@ -183,7 +183,8 @@ export async function injectManifest(
 
     if (missing.length > 0) {
       logStep('Installing missing dependencies')
-      await $`bun add -D ${missing}`.cwd(target)
+      const installed = await installDevDependencies(missing, target)
+      if (!installed.ok) return installed
       for (const spec of missing) logAdd(spec)
     }
 
@@ -202,6 +203,8 @@ export async function injectManifest(
   await injectGitignore(chain, target)
 
   if (!pkg) warnUnreadablePackage(chain, target)
+
+  return { ok: true }
 }
 
 /**

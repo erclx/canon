@@ -445,3 +445,32 @@ describe('tooling sync shell', () => {
     expect(existsSync(join(target, 'commitlint.config.js'))).toBe(false)
   })
 })
+
+describe('tooling sync and inject over a registry that refuses the install', () => {
+  beforeEach(() => {
+    writeFileSync(join(target, 'package.json'), '{"name":"t"}\n')
+    writeFileSync(
+      join(target, 'bunfig.toml'),
+      '[install]\nregistry = "http://127.0.0.1:9"\n',
+    )
+  })
+
+  it('should exit 1 with the refusal and write no stamp on sync --write', () => {
+    const run = sync(['--write'])
+
+    expect(run.status).toBe(1)
+    expect(run.stderr).toContain('Install failed. Tried:')
+    expect(existsSync(stampPath(target))).toBe(false)
+  })
+
+  it('should exit 1 with the refusal and write no stamp on inject', () => {
+    const run = spawnSync('bun', [CLI, 'tooling', 'inject', 'base', target], {
+      encoding: 'utf8',
+      env: buildEnv(),
+    })
+
+    expect(run.status).toBe(1)
+    expect(run.stderr).toContain('Install failed. Tried:')
+    expect(existsSync(stampPath(target))).toBe(false)
+  })
+})

@@ -76,6 +76,13 @@ Owns the manifest walk, scan, injection engine, stamp, reference resolver, and v
 - `canon tooling diff` dispatches into `runSync` with `check` set and exits 1 on any difference, and `--json` answers `{ ok: false, reason, message }` on a refusal
 - A target below its git toplevel syncs as a subfolder and withholds every `.github/` file. Sync writes a missing `package.json` only when the chain declares an install
 
+### `src/tooling/install.ts`
+
+`installDevDependencies` is the one place canon runs the package manager. It bounds `bun add -D` at 120 seconds and returns a refusal rather than throwing.
+
+- A refusal carries reason `install-timeout` or `install-failed`, leaves the configs and seeds written, and skips the scripts, the gitignore merge, and the stamp, so the next sync retries
+- Test a stall with a local TCP server that accepts and never replies, since a dead port fails at once with `ConnectionRefused`
+
 ### `src/tooling/verify-stack.ts`
 
 Runs `canon tooling verify <stack>` by scaffolding into `.canon/tmp/runs/verify-<stack>/`, running `[verify] prepare`, syncing, then running `lint:fix`, `format`, `check`, `test:e2e`, and `screenshot` with `CI` set.
