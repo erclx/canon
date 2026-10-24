@@ -55,11 +55,11 @@ Holds one table per opt-in rule, keyed by rule basename, listing the dependencie
 
 Owns the gov half of every verb, being the stack reader, the rule lookup, the catalog behind `list`, the install copy, the sync adapter, the citation, restated, and rule shape checks, and the payload builder behind `build`. Frontmatter stripping lives in `src/markdown/frontmatter.ts`, which `docs` shares, and is never duplicated here.
 
-- `install` bootstraps a stack and overwrites, `sync` refreshes only what is installed and never adds, and `build` writes the paste payload
+- `install` bootstraps a stack and overwrites, `sync` refreshes only what is installed and never adds but reports each copied rule's file count in `src/gov/coverage.ts`, and `build` writes a payload
 - `gov list --json` carries `unreferenced` and `staleDetect` beside `stacks` and `rules`, and `recordStamp` holds the file hashes while `writeChainStamp` holds the stack name
 - `src/sync/engine.ts` runs the scan, prompt, and apply loop, and matches an installed rule to its source by name so a moved rule syncs into the subfolder the target uses
 - `canon gov citations` gates on a dead rule citation or internal glob, and `canon gov audit` on a rule past a shape limit or short of a ledger in a gated folder, bar an exempt file
-- `canon gov install` and `sync` refuse the toolkit root, `regen` runs there on purpose, and a call with no terminal on stdin takes each confirm's first option but not the stack picker
+- `canon gov install` and `sync` refuse the toolkit root, `regen` runs there on purpose, and a headless call takes each confirm's first option but not the stack picker
 
 ### `claude/skills/create-rule/`
 
