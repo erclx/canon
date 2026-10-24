@@ -5,6 +5,8 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readdirSync,
+  realpathSync,
   rmSync,
 } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
@@ -157,6 +159,56 @@ function git(tree: string, ...args: string[]): void {
     )
 }
 
+/** Every folder under the snapshot root, each one consumer's frozen managed paths. */
+export function listSnapshots(dir: string): ReplaySource[] {
+  if (!existsSync(dir)) return []
+
+  return readdirSync(dir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort()
+    .map((name) => ({ name, path: join(dir, name), kind: 'snapshot' }))
+}
+
+export interface SourceRefusal {
+  readonly reason: 'not-found' | 'not-a-repo' | 'dirty'
+  readonly message: string
+}
+
+/**
+ * Why a named checkout cannot be replayed, or undefined when it can. A dirty
+ * tree is refused rather than copied, since sync refuses one and the replay
+ * would then read a tree nobody synced, reporting the refusal as a clean run.
+ */
+export function checkoutRefusal(path: string): SourceRefusal | undefined {
+  if (!existsSync(path))
+    return { reason: 'not-found', message: `No folder at ${path}` }
+
+  const top = spawnSync('git', ['rev-parse', '--show-toplevel'], {
+    cwd: path,
+    env: childEnv(),
+    encoding: 'utf8',
+  })
+  if (top.status !== 0 || top.stdout.trim() !== realpathSync(path))
+    return {
+      reason: 'not-a-repo',
+      message: `${path} is not the root of a git repository`,
+    }
+
+  const status = spawnSync('git', ['status', '--porcelain'], {
+    cwd: path,
+    env: childEnv(),
+    encoding: 'utf8',
+  })
+  if (status.stdout.trim() !== '')
+    return {
+      reason: 'dirty',
+      message: `${path} has uncommitted changes. Commit or stash them, then replay it.`,
+    }
+
+  return undefined
+}
+
 /** Added, modified, and untracked paths after the sync. A deletion has nothing to format. */
 function writtenPaths(tree: string): string[] {
   const result = spawnSync(
@@ -186,7 +238,7 @@ export function replaySource(
   context: ReplayContext,
 ): ReplayResult {
   mkdirSync(context.tempRoot, { recursive: true })
-  const tree = mkdtempSync(join(context.tempRoot, `replay-${source.name}-`))
+  const tree = mkdtempSync(join(context.tempRoot, `${source.name}-`))
   const cli = join(context.checkoutRoot, 'src', 'cli.ts')
   const steps: StepResult[] = []
 

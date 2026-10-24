@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { basename, dirname, join, resolve } from 'node:path'
 import type { Command } from 'commander'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
 import {
@@ -27,8 +27,16 @@ import {
 } from '@/sandbox/expect'
 import { runHeadless } from '@/sandbox/headless/run'
 import { runSandbox } from '@/sandbox/provision'
+import {
+  checkoutRefusal,
+  hasFormatter,
+  listSnapshots,
+  replaySource,
+  type ReplayResult,
+  type ReplaySource,
+} from '@/sandbox/replay/run'
 import { listCategories, listScenarioFiles } from '@/sandbox/scenario'
-import { sandboxTree } from '@/sandbox/tree'
+import { assertSandboxDirSafe, sandboxRoots, sandboxTree } from '@/sandbox/tree'
 import {
   frameError,
   intro,
@@ -434,6 +442,109 @@ async function runEquivalence(
   process.exitCode = equivalenceExitCode(record)
 }
 
+interface ReplayOptions {
+  readonly json?: boolean
+}
+
+function refuseReplay(reason: string, message: string, json: boolean): void {
+  logError(message)
+  if (json)
+    process.stdout.write(`${JSON.stringify({ ok: false, reason, message })}\n`)
+  outro()
+  process.exitCode = 1
+}
+
+/**
+ * Replays each consumer through a sync with this checkout's CLI and judges
+ * the reads that follow. Bare, it replays the frozen snapshots, which is what
+ * the gate runs. Given paths, it copies each real checkout, the operator's
+ * step before a release. Every source is checked before any replay starts, so
+ * a refusal never arrives after half the runs.
+ */
+function runReplay(paths: string[], options: ReplayOptions): void {
+  if (reportAbsentScenarioTree()) return
+
+  intro('canon sandbox replay')
+  const json = options.json === true
+
+  if (!hasFormatter(PROJECT_ROOT)) {
+    refuseReplay(
+      'no-formatter',
+      'No oxfmt under node_modules, so the format step cannot run. Run bun install in this checkout.',
+      json,
+    )
+    return
+  }
+
+  let sources: ReplaySource[]
+  if (paths.length === 0) {
+    sources = listSnapshots(join(SANDBOX_DIR, 'fixtures', 'replay'))
+    if (sources.length === 0) {
+      refuseReplay(
+        'no-snapshots',
+        'No snapshot under sandbox/fixtures/replay/',
+        json,
+      )
+      return
+    }
+  } else {
+    sources = []
+    for (const raw of paths) {
+      const path = resolve(process.cwd(), raw)
+      const refusal = checkoutRefusal(path)
+      if (refusal !== undefined) {
+        refuseReplay(refusal.reason, refusal.message, json)
+        return
+      }
+      sources.push({ name: basename(path), path, kind: 'checkout' })
+    }
+  }
+
+  // Beside the provisioned tree rather than inside it, since `canon sandbox
+  // clean` wipes that one and a concurrent replay would lose its tree.
+  const tempRoot = join(dirname(sandboxTree()), 'replay')
+  const unsafe = assertSandboxDirSafe(
+    join(tempRoot, 'tree'),
+    sandboxRoots(PROJECT_ROOT),
+  )
+  if (unsafe !== undefined) {
+    refuseReplay('unsafe-root', unsafe, json)
+    return
+  }
+
+  const replays: ReplayResult[] = []
+  for (const source of sources) {
+    const result = replaySource(source, {
+      checkoutRoot: PROJECT_ROOT,
+      tempRoot,
+    })
+    replays.push(result)
+
+    logStep(`${result.name} (${result.kind})`)
+    for (const step of result.steps) {
+      if (step.verdict === 'ok') logInfo(`${step.step}, exit ${step.exit}`)
+      else
+        logError(`${result.name}: ${step.step} ${step.verdict}: ${step.detail}`)
+    }
+  }
+
+  const failed = replays
+    .flatMap((r) => r.steps)
+    .filter((s) => s.verdict !== 'ok')
+  logStep('Replay')
+  const summary = `${replays.length} replayed, ${failed.length} failed steps`
+  if (failed.length === 0) logInfo(summary)
+  else logWarn(summary)
+
+  if (json)
+    process.stdout.write(
+      `${JSON.stringify({ ok: true, failed: failed.length, replays })}\n`,
+    )
+
+  outro()
+  process.exitCode = failed.length === 0 ? 0 : 2
+}
+
 function runCheck(
   target: string,
   arm: string | undefined,
@@ -683,4 +794,37 @@ export function register(program: Command): void {
     .action((targets: string[], options: EquivalenceOptions) =>
       runEquivalence(targets, options),
     )
+
+  sandbox
+    .command('replay')
+    .description(
+      'Sync a copy of each consumer with this checkout and judge the reads that follow',
+    )
+    .argument(
+      '[paths...]',
+      'Consumer checkouts to copy, defaulting to every snapshot under sandbox/fixtures/replay/',
+    )
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Emit the record as JSON on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Examples:',
+        '  canon sandbox replay',
+        '  canon sandbox replay ../frameboard ../jobtriage --json',
+        '',
+        'Each replay copies the source to a temp tree outside the repository,',
+        'runs sync, then sync --check, context audit, markdown audit, and',
+        'migrate status, and checks what sync wrote with oxfmt. A finding or a',
+        'refusal from a read is the verb working. Only a crash, stdout a --json',
+        'caller cannot parse, or an unformatted write fails the run.',
+        'A named checkout with uncommitted changes is refused, never synced over.',
+        '',
+        'Exit codes: 0 clean, 1 refused, 2 when any step failed.',
+      ].join('\n'),
+    )
+    .action((paths: string[], options: ReplayOptions) => {
+      runReplay(paths, options)
+    })
 }

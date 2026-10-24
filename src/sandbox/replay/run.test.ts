@@ -12,7 +12,12 @@ import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gitEnv } from '@/git/env'
 import { PROJECT_ROOT } from '@/roots/project'
-import { copySource, replaySource } from '@/sandbox/replay/run'
+import {
+  checkoutRefusal,
+  copySource,
+  listSnapshots,
+  replaySource,
+} from '@/sandbox/replay/run'
 
 let scratch: string
 
@@ -66,6 +71,52 @@ describe('copySource', () => {
 
     expect(existsSync(join(tree, '.canon/tasks/index.md'))).toBe(true)
     expect(existsSync(join(tree, 'node_modules'))).toBe(false)
+  })
+})
+
+describe('checkoutRefusal', () => {
+  it('should refuse a checkout with uncommitted changes rather than sync over it', () => {
+    const checkout = join(scratch, 'consumer')
+    write(checkout, 'CLAUDE.md', '# Consumer\n')
+    git(checkout, 'init', '-q', '-b', 'main')
+    git(checkout, 'add', '-A')
+    git(checkout, 'commit', '-q', '-m', 'init')
+    write(checkout, 'CLAUDE.md', '# Edited\n')
+
+    expect(checkoutRefusal(checkout)?.reason).toBe('dirty')
+  })
+
+  it('should refuse a folder that is not a repository', () => {
+    const folder = join(scratch, 'plain')
+    write(folder, 'CLAUDE.md', '# Plain\n')
+
+    expect(checkoutRefusal(folder)?.reason).toBe('not-a-repo')
+  })
+
+  it('should accept a clean checkout', () => {
+    const checkout = join(scratch, 'consumer')
+    write(checkout, 'CLAUDE.md', '# Consumer\n')
+    git(checkout, 'init', '-q', '-b', 'main')
+    git(checkout, 'add', '-A')
+    git(checkout, 'commit', '-q', '-m', 'init')
+
+    expect(checkoutRefusal(checkout)).toBeUndefined()
+  })
+})
+
+describe('listSnapshots', () => {
+  it('should list each snapshot folder by name in sorted order', () => {
+    write(scratch, 'snapshots/zeta/CLAUDE.md.fixture', '')
+    write(scratch, 'snapshots/alpha/CLAUDE.md.fixture', '')
+
+    expect(listSnapshots(join(scratch, 'snapshots'))).toEqual([
+      {
+        name: 'alpha',
+        path: join(scratch, 'snapshots/alpha'),
+        kind: 'snapshot',
+      },
+      { name: 'zeta', path: join(scratch, 'snapshots/zeta'), kind: 'snapshot' },
+    ])
   })
 })
 
