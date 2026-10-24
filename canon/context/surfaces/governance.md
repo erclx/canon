@@ -87,6 +87,7 @@ A few more surfaces shape where a rule lands.
 
 - `.claude/rules/` is produced output, so a hand edit is deleted on the next `bun run check` and the change belongs in the source or the record
 - `governance/renames.toml` carries one entry per renamed shipped rule so `canon gov sync` moves a target across
+- `governance/splits.toml` maps a held rule to the partners its bullets moved to, so `canon gov sync` names each one a target lacks. A split is no rename entry, since its key is a live rule
 - `claude/skills/git-commit/references/versioning.md` governs no file, so skill instruction reaches it rather than a rule
 - A project holding `.cursor/rules/` from an older toolkit keeps those files, since sync never touches them
 

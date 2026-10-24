@@ -189,12 +189,10 @@ A web project's `e2e/screenshot.ts` is a config. It now loads `CASES` from a see
 
 ## Add the rules a split left behind, once
 
-The splits created `pointer` and `ux-controls` and trimmed `keyboard`. Sync refreshes only held rules, so a held rule loses bullets and the new file never arrives.
-
-Add the partner of each held rule: `pointer` for `keyboard.md`, `ux-controls` for `ux-completeness.md`, and all three for `a11y.md`, as below.
+The splits created `pointer` and `ux-controls`, and sync refreshes only held rules. `canon gov sync` now names the missing partner of `keyboard.md` and `ux-completeness.md` on every run and adds nothing itself. `a11y.md` gained two bullets and lost none, so it needs no partner.
 
 ```bash
-canon gov install --add keyboard,pointer,ux-controls --yes .
+canon gov install --add pointer,ux-controls --yes .
 ```
 
 ## Group a long paths section in `CLAUDE.md`, once
