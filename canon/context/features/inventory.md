@@ -33,5 +33,5 @@ The browser helpers and the step driver sit beside the walk.
 - A `:focus-visible` ring only shows in keyboard modality, so the walk presses Tab once per route and the reader blurs that focused element before it reads rest state
 - A subject reader is serialized to source and evaluated in the page, so a helper declared at module scope typechecks and then throws there
 - Only two of the three `keyboard.md` focus rules are measurable from computed style, since the 3:1 contrast rule needs a background source the walk does not have
-- The axe bundle sets `window.axe`, `doT`, and `_encodeHTML` as it loads, so the `axe` probe puts back every global it added or replaced once its run settles, and a default run leaves it out
+- The axe bundle sets `window.axe`, `doT`, and `_encodeHTML` as it loads, so the `axe` probe restores only what that load changed, and a default run leaves it out
 - A test for the server-unreachable refusal needs a port the kernel handed out and released, because a low reserved port fails in the engine first
