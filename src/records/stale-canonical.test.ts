@@ -193,6 +193,35 @@ describe('staleCanonical on the doc set', () => {
   })
 })
 
+describe('staleCanonical on the design record', () => {
+  it('should return the design record beside the requirements record', async () => {
+    writeDoc('canon/REQUIREMENTS.md')
+    writeDoc('canon/DESIGN.md', '2026-03-01')
+    release('v1.0.0', '2026-04-01')
+
+    const report = await read()
+
+    expect(report.docs.map((doc) => doc.path)).toEqual([
+      'canon/REQUIREMENTS.md',
+      'canon/DESIGN.md',
+    ])
+    expect(await readDoc('canon/DESIGN.md')).toMatchObject({
+      reviewed: '2026-03-01',
+      releasesSince: 1,
+    })
+  })
+
+  it('should return the design record alone when it is the only one', async () => {
+    writeDoc('canon/DESIGN.md', 'soon')
+
+    const report = await read()
+
+    expect(report.docs).toMatchObject([
+      { path: 'canon/DESIGN.md', reviewed: null, invalidReviewed: 'soon' },
+    ])
+  })
+})
+
 describe('staleCanonical with no tags', () => {
   it('should say the history carries no tags and still count zero', async () => {
     writeDoc('canon/REQUIREMENTS.md', '2026-03-01')

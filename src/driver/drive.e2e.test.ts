@@ -109,6 +109,41 @@ describe.skipIf(!hasBrowser)('drive against a served application', () => {
     expect(result.findings[0]?.detail).toContain('outside the viewport')
   }, 120_000)
 
+  it('should place each axe finding with its rule and gate', async () => {
+    const read = readDriverPlan(
+      JSON.stringify({
+        viewport: { width: 390, heights: [900] },
+        probes: ['axe'],
+        steps: [
+          { name: 'open the menu', kind: 'click', target: '#menu summary' },
+        ],
+      }),
+    )
+    if (read.kind !== 'read') return
+
+    const result = await drive({
+      url: `http://127.0.0.1:${server.port}/`,
+      plan: read.plan,
+    })
+
+    expect(result.status).toBe('driven')
+    if (result.status !== 'driven') return
+
+    // The fixture carries no `lang` and no `<title>`, and both are gate rules.
+    expect(result.findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          probe: 'axe',
+          rule: 'html-has-lang',
+          gate: true,
+          step: 'open the menu',
+          viewport: '390x900',
+        }),
+        expect.objectContaining({ rule: 'document-title', gate: true }),
+      ]),
+    )
+  }, 120_000)
+
   it('should refuse by naming the server rather than reporting no findings', async () => {
     const read = readDriverPlan(RUN)
     if (read.kind !== 'read') return

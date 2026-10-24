@@ -172,11 +172,19 @@ files = ["index.html", "*/index.html"]
 deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
 files = ["index.html", "*/index.html"]
 
+["pointer"]
+deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
+files = ["index.html", "*/index.html"]
+
 ["forms"]
 deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
 files = ["index.html", "*/index.html"]
 
 ["ux-completeness"]
+deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
+files = ["index.html", "*/index.html"]
+
+["ux-controls"]
 deps = ["react", "vue", "svelte", "astro", "next", "solid-js", "preact"]
 files = ["index.html", "*/index.html"]
 

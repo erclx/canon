@@ -14,6 +14,7 @@ Applies to `canon/DESIGN.md`. Captures visual intent and the decisions behind ho
 - [What goes in](#what-goes-in)
 - [What does not go in](#what-does-not-go-in)
 - [Format](#format)
+- [Frontmatter](#frontmatter)
 - [Prose budget](#prose-budget)
 - [Sections](#sections)
 - [The uncertainty tag](#the-uncertainty-tag)
@@ -55,6 +56,17 @@ Everything below applies to both shapes unless it names one.
 - Write every rule as a short bullet, one decision per line, within `## Prose budget`.
 - Plain English over technical notation. If a section could be removed and the developer would still build correctly from the stylesheet and code alone, remove it.
 - Keep table headers and role names intact so the parser can read the tables.
+
+## Frontmatter
+
+Both fields are optional, and a record without them audits as it always did. Frontmatter never counts toward the prose budget.
+
+- `themes:` lists each theme as the stylesheet prelude that opens it, such as `:root` or `@media (prefers-color-scheme: dark)`.
+- `canon design audit` checks every color property `## Colors` names against each theme, and reports a theme that omits one or opens no block.
+- `reviewed:` is the day the record was last read whole, as `YYYY-MM-DD`. `canon records stale canonical` returns it with the releases tagged since.
+- No skill step sets `reviewed:`, so whoever reads the record whole updates it.
+
+Quote style and spacing may differ between the record and the stylesheet. A declaration inside a declared media query counts for the query alone, and `:root` never matches `:root[data-theme='dark']` by containment. A values record renders `reviewed:` from its token module and declares no `themes:`.
 
 ## Prose budget
 
@@ -113,6 +125,13 @@ A prose section takes its uncertainty inline instead, in a sentence saying what 
 The template is the intent record. The column headers are read by exact key, so they stay verbatim. Row names are not, which leaves a project free to rename a role, add one, or drop one it has no use for.
 
 ```markdown
+---
+themes:
+  - ':root'
+  - ":root[data-theme='dark']"
+reviewed: YYYY-MM-DD
+---
+
 # Design
 
 Values live in `<path to the stylesheet>`. This record holds the intent behind them.

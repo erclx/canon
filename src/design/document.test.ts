@@ -37,6 +37,12 @@ describe('formatTable', () => {
 })
 
 describe('renderDesignDocument', () => {
+  it('opens with the review date in frontmatter', () => {
+    expect(renderDesignDocument()).toMatch(
+      /^---\nreviewed: \d{4}-\d{2}-\d{2}\n---\n\n# Design\n/,
+    )
+  })
+
   it('carries every section the design standard fixes', () => {
     const document = renderDesignDocument()
 

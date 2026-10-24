@@ -3,6 +3,7 @@ import { resolve } from 'node:path'
 import type { Command } from 'commander'
 import { INSTALL_BROWSER, isEngineMissing } from '@/browser/engine'
 import type { DriverRefusal } from '@/driver/drive'
+import { AXE_GATE_RULES } from '@/driver/probes/axe'
 import { describeViewport } from '@/driver/probes/viewport'
 import { PROBE_NAMES, readDriverPlan, type ProbeName } from '@/driver/steps'
 import type { PlanRefusal } from '@/driver/steps'
@@ -51,6 +52,8 @@ const PLAN_REFUSALS: Record<PlanRefusal, string> = {
 
 const DRIVE_REFUSALS: Record<DriverRefusal, string> = {
   'browser-missing': 'The browser binary is not installed in this project.',
+  'axe-missing':
+    'The axe engine did not resolve from canon, so no page was read with it.',
   'server-unreachable': 'Nothing answered at the URL, so no state was reached.',
   'drive-failed': 'The drive failed against a reachable page.',
 }
@@ -62,6 +65,7 @@ const PROBE_NOTES: Record<ProbeName, string> = {
   'diagram-geometry':
     'an SVG label outside its frame, covered by a fill, or on another label',
   'diagram-strokes': 'an SVG label a stroke crosses, in either paint order',
+  axe: 'axe-core on WCAG 2.2 A and AA, frames excluded, run only when named',
 }
 
 export function register(program: Command): void {
@@ -89,9 +93,10 @@ export function register(program: Command): void {
         'run, since nothing else there measures the page as it first painted.',
         '',
         'The run file carries the viewport, the default probe list, and the',
-        'steps. A step names its own probes to override the default. Viewport',
-        'heights are never defaulted: the heights a defect hides at are a',
-        'property of the layout rather than of this command.',
+        'steps. A step names its own probes to override the default, and a run',
+        'naming no list gets every probe but axe. Viewport heights are never',
+        'defaulted: the heights a defect hides at are a property of the layout',
+        'rather than of this command.',
         '',
         '  {',
         '    "viewport": { "width": 1440, "heights": [900, 1200, 1500] },',
@@ -116,6 +121,11 @@ export function register(program: Command): void {
           (name) => `  ${name.padEnd(18)}${PROBE_NOTES[name]}`,
         ),
         '',
+        'An axe finding carries rule, outcome, and gate. outcome is violation or',
+        'incomplete, the second being axe declining to decide. gate is true for',
+        'a violation of one of these rules, which a UI review holds open on:',
+        ...wrapRules(AXE_GATE_RULES),
+        '',
         'Reasons:',
         '  no-run-file         nothing readable at the run path',
         '  unreadable-plan     the run file is not valid JSON',
@@ -128,6 +138,7 @@ export function register(program: Command): void {
         '  no-heights          the viewport names no height, which is never defaulted',
         '  engine-missing      the browser engine is not installed in this project',
         '  browser-missing     the engine is installed and its browser binary is not',
+        '  axe-missing         the run names axe and its engine did not resolve',
         '  server-unreachable  nothing answered at the URL, so no state was reached',
         '  drive-failed        the drive failed against a reachable page',
         '',
@@ -151,6 +162,21 @@ export function register(program: Command): void {
     .action(async (url: string, run: string, opts: RunOptions) => {
       process.exitCode = await runDriver(url, run, opts)
     })
+}
+
+/** Lays the gate list out at the help text's width. */
+function wrapRules(rules: readonly string[]): string[] {
+  const lines: string[] = []
+  let line = ' '
+  for (const rule of rules) {
+    if (line.length + rule.length + 1 > 74) {
+      lines.push(line)
+      line = ' '
+    }
+    line += ` ${rule}`
+  }
+  lines.push(line)
+  return lines
 }
 
 async function runDriver(

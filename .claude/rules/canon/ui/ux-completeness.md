@@ -14,6 +14,7 @@ paths:
 
 - Confirm every user-initiated mutation, such as a save, delete, or import, inline on success, and show an inline error when it fails.
 - Auto-dismiss a success message only when its outcome stays visible elsewhere. Keep a message carrying the only copy of its information until dismissed (WCAG 2.2.1).
+- Pause a timed message while it has pointer hover or keyboard focus, and take no focus for it. A person finishes reading it, and a status message never interrupts typing (WCAG 4.1.3).
 - Show no optimistic status, such as a green dot or "connected", while unsaved edits are pending.
 
 ## Empty states
@@ -26,17 +27,8 @@ paths:
 - Show a progress indicator for any operation a person waits on for longer than about one second.
 - Mark previous content as updating while new content loads, rather than showing it unmarked as current.
 
-## Destructive actions
-
-- Confirm a destructive action, such as a delete, disconnect, or discard, before it runs, unless it can be undone afterward.
-
-## Element states
-
-- Give every interactive element distinct hover, active, focus, and disabled styles.
-- Never flash an intermediate state, such as a light frame before a dark theme or a layout jump before data arrives. Reserve the space or settle it first.
-
 ## Overflow
 
 - Truncate long text in a constrained container with an ellipsis rather than letting it overflow.
 - Expose truncated text through an expand control or full text on focus, never through a `title` tooltip alone.
-- Keep focus rings and interactive borders clear of a parent's `overflow` clipping, padding the edge items of a scrollable list.
+- Keep interactive borders clear of a parent's `overflow` clipping, padding the edge items of a scrollable list.

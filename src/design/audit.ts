@@ -3,6 +3,12 @@ import { join, resolve } from 'node:path'
 import { measureDesignProse } from '@/design/budget'
 import { parseDesignDoc } from '@/design/parse'
 import { DESIGN_DOCUMENT } from '@/design/regen'
+import {
+  checkThemes,
+  readThemes,
+  scanDeclarations,
+  type ThemeResult,
+} from '@/design/themes'
 
 /** The custom property a table row names, such as `--color-accent`. */
 const PROPERTY = /--[A-Za-z0-9_-]+/g
@@ -19,6 +25,8 @@ export type TokenCheck =
       readonly stylesheet: string
       readonly properties: number
       readonly missing: readonly string[]
+      /** One entry per theme the record declares, absent where it declares none. */
+      readonly themes?: readonly ThemeResult[]
     }
   | { readonly status: 'unchecked'; readonly reason: string }
   | { readonly status: 'not-applicable'; readonly reason: string }
@@ -53,7 +61,11 @@ export function auditDesign(root: string): DesignAudit {
   const clean =
     prose.length === 0 &&
     tokens.status !== 'unchecked' &&
-    (tokens.status !== 'checked' || tokens.missing.length === 0)
+    (tokens.status !== 'checked' ||
+      (tokens.missing.length === 0 &&
+        (tokens.themes ?? []).every(
+          (theme) => theme.matched && theme.missing.length === 0,
+        )))
 
   return { ok: true, record: DESIGN_DOCUMENT, prose, tokens, clean }
 }
@@ -100,10 +112,22 @@ function checkTokens(root: string, path: string, source: string): TokenCheck {
     ),
   ]
 
+  const themes = readThemes(source)
+  const colors = [
+    ...new Set(
+      doc.color.flatMap((row) =>
+        [...(row['Property']?.value.matchAll(PROPERTY) ?? [])].map((m) => m[0]),
+      ),
+    ),
+  ]
+
   return {
     status: 'checked',
     stylesheet: named,
     properties: properties.length,
     missing: properties.filter((property) => !declared.has(property)),
+    ...(themes.length > 0 && {
+      themes: checkThemes(themes, scanDeclarations(css), colors),
+    }),
   }
 }

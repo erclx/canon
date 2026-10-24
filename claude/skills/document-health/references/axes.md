@@ -89,6 +89,8 @@ The record is exempt from the length and placement verbs above, so this is the o
 - `tokens.status: "not-applicable"`: a values record, which carries `Value` where an intent record carries `Property`. Report it as not applicable with the `reason`.
 - `record: null`: the project holds no design record, so there is nothing to report
 
+`tokens.themes` is present only where the record declares `themes:`, with one cell per theme carrying its `selector`, `matched`, and `missing`. A cell with `matched: false` means no block opens that selector, and one with `missing` names the color properties that theme leaves out. Report either under its selector.
+
 **Routes to:** `design-record`, which owns the record's shape. `document-repair` rewrites a context folder and does not know the budget.
 
 ## Staleness
@@ -120,7 +122,7 @@ This record states what the project is and why, so it goes stale by the project 
 
 ### The review point
 
-The review point beside them is `measured`. `canon records stale canonical --json` returns the `reviewed` date from the record's frontmatter and `releasesSince`, the release tags merged into HEAD after that day.
+The review point beside them is `measured`, for the requirements record and the design record alike. `canon records stale canonical --json` returns the `reviewed` date from each record's frontmatter and `releasesSince`, the release tags merged into HEAD after that day.
 
 - A null `releasesSince` means the doc was never reviewed
 - `tagged: false` means no release tag exists to count, so a zero there measured nothing

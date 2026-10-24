@@ -1,20 +1,26 @@
 {
-  "recordedAt": "2026-08-20",
-  "commit": "bd2be81a7d79ff9e7d5e1a26cf61b8da62b4ac75",
+  "recordedAt": "2026-10-24",
+  "commit": "c78fe20eadc17792881a35862f836fea948e72c8",
   "checks": {
     "context": {
       "unresolvedCitations": 0,
-      "longEntries": 29,
+      "longEntries": 5,
       "missingSections": 0,
-      "indexDrift": 10,
-      "bareReferences": 0
+      "indexDrift": 5,
+      "bareReferences": 0,
+      "requirementsOverWords": 0
+    },
+    "placement": {
+      "keep": 136,
+      "rewrite": 1,
+      "move": 0
     },
     "markdown": {
       "bans": 0,
-      "heavyBullets": 50,
-      "heavyParagraphs": 60,
-      "filesPastDepth": 68,
-      "flatParagraphs": 163
+      "heavyBullets": 37,
+      "heavyParagraphs": 45,
+      "filesPastDepth": 13,
+      "flatParagraphs": 72
     },
     "skills": {
       "missingRequirement": 0,
@@ -25,16 +31,42 @@
       "folderName": 0,
       "requirementSections": 0
     },
+    "skills-reach": {
+      "unqualifiedCitations": 4
+    },
+    "skills-rank": {
+      "misses": 18,
+      "unmeasurable": 0
+    },
     "comments": {
-      "degradationHits": 7
+      "degradationHits": 2
     },
     "test-order": {
       "findings": 0,
-      "unclassified": 0
+      "unclassified": 1
+    },
+    "secrets": {
+      "findings": 0
+    },
+    "labels": {
+      "uncovered": 0
     },
     "restated": {
       "contradictions": 0,
-      "repetitions": 86
+      "repetitions": 63
+    },
+    "rules": {
+      "shapeRules": 0,
+      "missingLedgers": 0,
+      "ledgerMismatches": 0
+    },
+    "counts": {
+      "findings": 0
+    },
+    "census": {
+      "files": 2170,
+      "skipped": 84,
+      "lines": 245205
     }
   }
 }
