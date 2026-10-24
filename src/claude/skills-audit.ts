@@ -106,6 +106,7 @@ export interface BulletLedgerScope {
 export const BULLET_LEDGER_SKILLS: Readonly<Record<string, BulletLedgerScope>> =
   {
     [join(SHIPPED_CORPUS, 'ui-craft')]: { exempt: [], body: false },
+    [join(SHIPPED_CORPUS, 'api-design')]: { exempt: [], body: true },
     [join(SHIPPED_CORPUS, 'design-taste')]: {
       exempt: references('preflight', 'vocabulary'),
       body: false,
@@ -129,6 +130,16 @@ export const PRACTICE_SECTIONS: readonly string[] = [
   'Excuses and rebuttals',
   'Red flags',
   'Before handing over',
+]
+
+/**
+ * The H2s that end a listed body's concern groups. The closing sections
+ * restate the groups' rules as excuses, signs, and checks, and the delegates
+ * section routes, so neither states a rule of its own to source.
+ */
+export const BODY_CLOSERS: readonly string[] = [
+  ...PRACTICE_SECTIONS,
+  'What this delegates',
 ]
 
 /** The source ledger every practice skill carries beside its body. */
@@ -435,7 +446,7 @@ async function readReferenceLedgers(
       const ledgerPath = join(root, ledgerRel)
       const mismatches = existsSync(ledgerPath)
         ? compareLedger(
-            ledgerGroups(text),
+            ledgerGroups(text, path === 'SKILL.md'),
             countLedgerRows(await Bun.file(ledgerPath).text()),
           )
         : undefined
@@ -447,9 +458,11 @@ async function readReferenceLedgers(
 /**
  * Directives per H2, `null` for any above the first. A contents list repeats
  * the headings rather than stating a rule, so `## Contents` takes no rows. A
- * nested bullet elaborates its parent, so only a top-level line counts.
+ * nested bullet elaborates its parent, so only a top-level line counts. A body
+ * stops at its first closer, and a ledger table under one then reads as rows
+ * with no bullets rather than passing unread.
  */
-function ledgerGroups(text: string): HeadingCount[] {
+function ledgerGroups(text: string, isBody: boolean): HeadingCount[] {
   const counts = new Map<string | null, number>()
   let heading: string | null = null
 
@@ -457,6 +470,7 @@ function ledgerGroups(text: string): HeadingCount[] {
     if (line.fenced) continue
     const section = SECTION.exec(line.text)?.[1]
     if (section !== undefined) {
+      if (isBody && BODY_CLOSERS.includes(section)) break
       heading = section
       continue
     }

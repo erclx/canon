@@ -979,6 +979,71 @@ describe('auditSkills reference ledgers', () => {
   })
 })
 
+describe('auditSkills body ledgers', () => {
+  const [[bodyListed] = ['']] = Object.entries(BULLET_LEDGER_SKILLS).filter(
+    ([, scope]) => scope.body,
+  )
+  const name = basename(bodyListed)
+  const body = join(bodyListed, 'SKILL.md')
+
+  const TABLE = '| Bullet | Source |\n| --- | --- |\n'
+  const DELEGATES = '## What this delegates\n\n- Layout: `codebase-layout`\n'
+
+  function writeBody(groups: string): void {
+    practiceSkill([groups, ...CLOSING, DELEGATES], { name })
+  }
+
+  function writeLedger(text: string): void {
+    writeFileSync(join(root, skillLedgerPath(name, 'SKILL.md')), text)
+  }
+
+  beforeEach(() => {
+    listedPracticeSkillsExcept('')
+    writeBody('## Contract\n\n- One.\n- Two.\n')
+  })
+
+  it('should ask no rows of the closing sections or the delegates section', async () => {
+    writeLedger(`# Ledger\n\n## Contract\n\n${TABLE}| One | x |\n| Two | y |\n`)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+
+  it('should report a concern group one row short', async () => {
+    writeLedger(`# Ledger\n\n## Contract\n\n${TABLE}| One | x |\n`)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      { rel: body, detail: '## Contract: 2 bullets, 1 ledger row' },
+    ])
+  })
+
+  it('should report a table under a closing section', async () => {
+    writeLedger(
+      `# Ledger\n\n## Contract\n\n${TABLE}| One | x |\n| Two | y |\n\n## Red flags\n\n${TABLE}| Do | z |\n`,
+    )
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      { rel: body, detail: '## Red flags: 0 bullets, 1 ledger row' },
+    ])
+  })
+
+  it('should count a bullet under an H3 toward its H2', async () => {
+    writeBody('## Contract\n\n- One.\n\n### Errors\n\n- Two.\n- Three.\n')
+    writeLedger(`# Ledger\n\n## Contract\n\n${TABLE}| One | x |\n| Two | y |\n`)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      { rel: body, detail: '## Contract: 3 bullets, 2 ledger rows' },
+    ])
+  })
+})
+
 describe('skillLedgerPath', () => {
   it('should drop the references segment from a reference', () => {
     expect(
