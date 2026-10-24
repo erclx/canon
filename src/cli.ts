@@ -40,6 +40,7 @@ import { register as changelog } from '@/commands/changelog'
 import { readInstalled, UNKNOWN_LABEL } from '@/version/installed'
 import { renderHelp } from '@/cli/help'
 import { renderAll, routeHelp } from '@/cli/help-all'
+import { findRetired, retiredMessage } from '@/cli/retired'
 import { setQuiet } from '@/cli/ui'
 
 function showHelp(): void {
@@ -101,8 +102,13 @@ gate(program)
 upgrade(program)
 changelog(program)
 
-const route = routeHelp(program, process.argv.slice(2))
-if (route.kind === 'top') showHelp()
+const args = process.argv.slice(2)
+const retired = findRetired(args)
+const route = routeHelp(program, args)
+if (retired !== undefined) {
+  console.error(retiredMessage(retired))
+  process.exitCode = 1
+} else if (route.kind === 'top') showHelp()
 else if (route.kind === 'all') process.stdout.write(renderAll(route.command))
 else if (route.kind === 'unknown') {
   console.error(`error: unknown command '${route.name}'`)
