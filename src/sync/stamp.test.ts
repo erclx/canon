@@ -183,6 +183,63 @@ describe('readStamp', () => {
     ])
   })
 
+  it('should read a stamp naming retired domains without them', () => {
+    writeFixture(
+      stampPath(TARGET),
+      JSON.stringify({
+        covers: ['governance', 'design', 'standards'],
+        domains: {
+          governance: { syncedAt: 'now', files: {} },
+          design: { syncedAt: 'then', files: {} },
+          standards: { syncedAt: 'then', files: {} },
+        },
+      }),
+    )
+
+    const stamp = readStamp(TARGET)
+
+    expect(stamp?.covers).toEqual(['governance'])
+    expect(Object.keys(stamp?.domains ?? {})).toEqual(['governance'])
+  })
+
+  it('should read a stamp naming only a retired domain as empty rather than absent', () => {
+    writeFixture(
+      stampPath(TARGET),
+      JSON.stringify({
+        covers: ['design'],
+        domains: { design: { syncedAt: 'then', files: {} } },
+      }),
+    )
+
+    expect(readStamp(TARGET)).toEqual({ covers: [], domains: {} })
+  })
+
+  it('should read a stamp with no covers as an empty list', () => {
+    writeFixture(
+      stampPath(TARGET),
+      JSON.stringify({
+        domains: { governance: { syncedAt: 'now', files: {} } },
+      }),
+    )
+
+    expect(readStamp(TARGET)?.covers).toEqual([])
+  })
+
+  it('should ignore a malformed record under a retired domain', () => {
+    writeFixture(
+      stampPath(TARGET),
+      JSON.stringify({
+        covers: ['governance'],
+        domains: {
+          governance: { syncedAt: 'now', files: {} },
+          design: 'not-a-record',
+        },
+      }),
+    )
+
+    expect(readStamp(TARGET)?.covers).toEqual(['governance'])
+  })
+
   it('should return undefined when a chain entry is not a string', () => {
     writeFixture(
       stampPath(TARGET),
