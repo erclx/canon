@@ -14,6 +14,9 @@ import {
 } from '@/context/audit'
 import { IGNORE_MARKER } from '@/context/citations'
 import { resolveFolders } from '@/context/folders'
+import { densityFindings } from '@/markdown/density'
+import { bodyLines } from '@/markdown/scan'
+import { tableDensityFindings } from '@/markdown/tables'
 
 const FRONTMATTER = '---\ntitle: CI\ndescription: A domain\n---\n\n'
 
@@ -853,11 +856,27 @@ describe('shape', () => {
     ])
   })
 
-  it('should leave a folder H3 with a lead, a table, and bullets unreported', () => {
+  it('should leave a folder H3 with a lead, a table, a list lead, and bullets unreported', () => {
     const source =
-      '## Layout\n\n### `src/`\n\nA lead.\n\n| A | B |\n| - | - |\n| 1 | 2 |\n\n- One\n- Two\n'
+      '## Layout\n\n### `src/`\n\nA lead.\n\n| A | B |\n| - | - |\n| 1 | 2 |\n\nThe rest.\n\n- One\n- Two\n'
 
     expect(shapeOf(source)).toEqual([])
+  })
+
+  it('should read zero findings from both audits on a lead, table, list lead, and bullets', () => {
+    const source =
+      '## Layout\n\n### `src/`\n\nA lead.\n\n| A | B |\n| - | - |\n| 1 | 2 |\n\nThe rest.\n\n- One\n- Two\n'
+    const lines = bodyLines(source)
+
+    expect(shapeOf(source)).toEqual([])
+    expect(tableDensityFindings(lines)).toEqual([])
+    expect(densityFindings(lines)).toEqual([])
+  })
+
+  it('should still report a table under Gotchas as a paragraph', () => {
+    expect(kinds('## Gotchas\n\n| A |\n| - |\n| 1 |\n')).toEqual([
+      'gotcha-paragraph',
+    ])
   })
 
   it('should report a folder H3 with a table and two prose paragraphs', () => {

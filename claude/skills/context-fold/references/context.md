@@ -71,7 +71,7 @@ An entry carries three H2 sections and no other, being `Overview`, `Layout`, and
 
 Layout gives each folder doing real work its own H3, titled with the folder path in a code span, such as ``### `src/design/` ``.
 
-- Open the H3 with a one-paragraph lead stating what the folder does, then at most five bullets on what it does now. A table between them counts toward neither and never stands in for the lead
+- Open the H3 with a one-paragraph lead stating what the folder does, then at most five bullets on what it does now. A table after the lead counts toward neither, with one sentence to lead the bullets
 - Put every trivial folder under `### Other folders` as a one-line bullet in owns-X form
 - Name folders only, never files, and write no decisions and no history under any H3
 - Give each folder under the code roots one H3 or `Other folders` line, since a second entry may cite it but never claims it

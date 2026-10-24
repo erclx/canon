@@ -616,8 +616,16 @@ function shapeIssues(
   let inItem = false
   let inParagraph = false
   let afterBlank = false
+  let afterTable = false
+  let deferred = false
+
+  const settleDeferred = (): void => {
+    if (deferred && folder) folder.paragraphs++
+    deferred = false
+  }
 
   const closeFolder = (): void => {
+    settleDeferred()
     if (folder && !exempt.has(folder.text)) {
       if (folder.paragraphs > LAYOUT_PARAGRAPH_CAP) {
         issues.push({
@@ -661,6 +669,7 @@ function shapeIssues(
       inItem = false
       inParagraph = false
       afterBlank = false
+      afterTable = false
 
       if (level <= 2) {
         closeFolder()
@@ -697,15 +706,19 @@ function shapeIssues(
       inItem = true
       inParagraph = false
       afterBlank = false
+      afterTable = false
+      deferred = false
       if (gotchas) gotchas.bullets++
       if (folder) folder.bullets++
       continue
     }
 
-    if (TABLE_ROW.test(line.text)) {
+    if (folder && TABLE_ROW.test(line.text)) {
+      settleDeferred()
       inItem = false
       inParagraph = false
       afterBlank = false
+      afterTable = true
       continue
     }
 
@@ -724,7 +737,12 @@ function shapeIssues(
         text: line.text.trim(),
       })
     }
-    if (folder) folder.paragraphs++
+    if (folder) {
+      settleDeferred()
+      if (afterTable) deferred = true
+      else folder.paragraphs++
+    }
+    afterTable = false
   }
 
   closeFolder()
