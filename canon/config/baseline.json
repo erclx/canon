@@ -10,11 +10,6 @@
       "bareReferences": 0,
       "requirementsOverWords": 0
     },
-    "placement": {
-      "keep": 136,
-      "rewrite": 1,
-      "move": 0
-    },
     "markdown": {
       "bans": 0,
       "heavyBullets": 37,

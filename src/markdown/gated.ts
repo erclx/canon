@@ -120,7 +120,7 @@ export function appendGatedPrefix(
   return 'appended'
 }
 
-/** Written by hand rather than serialized, the way `classifier.toml` is. */
+/** Written by hand rather than serialized, so the list keeps its one-entry-per-line form. */
 function writeGatedList(root: string, prefixes: readonly string[]): void {
   const path = join(root, GATED_CONFIG_REL)
   const mode = existsSync(path) ? statSync(path).mode : undefined
