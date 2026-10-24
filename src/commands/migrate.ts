@@ -1056,7 +1056,7 @@ async function runStatus(opts: StatusOptions): Promise<number> {
   const mismatch = checkoutMismatchWarning(process.cwd())
   if (mismatch !== undefined) logWarn(mismatch)
 
-  const report = await readMigrationStatus(cliRunner(root))
+  const report = await readMigrationStatus(cliRunner(root), root)
 
   if (opts.json) {
     process.stdout.write(
@@ -1069,6 +1069,12 @@ async function runStatus(opts: StatusOptions): Promise<number> {
     if (entry.state === 'refused') {
       logError(`Refused: ${entry.verb}: ${entry.reason ?? 'no reason given'}`)
     }
+  }
+
+  for (const caller of report.retiredCallers) {
+    logWarn(
+      `Retired: ${caller.verb} at ${caller.file}:${caller.line}, retired in v${caller.release}, moved to ${caller.movedTo}`,
+    )
   }
 
   if (report.pending === 0 && report.refused === 0) {
