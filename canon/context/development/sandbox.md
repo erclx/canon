@@ -63,7 +63,7 @@ Owns `canon sandbox replay`, which syncs a copy of a consumer with this checkout
 
 - `run.ts` copies a source beside the provisioned tree, runs `sync .`, four `--json` health reads, and oxfmt over what sync wrote, then removes the copy
 - A named checkout is copied rather than cloned, since a clone drops the gitignored records the reads look for. One with uncommitted changes is refused.
-- `verdict.ts` reads a finding or a refusal as `ok`. A stack trace, a signal, unparsable `--json` stdout, or an unformatted write fails, and the verb exits 2.
+- `verdict.ts` reads a finding or a refusal as `ok` and carries each `!` line as a finding. A crash, unparsable `--json` stdout, or an unformatted write fails, and the verb exits 2.
 - The format step runs under `tooling/base/configs/.oxfmtrc.json`, since oxfmt's defaults double-quote frontmatter every consumer keeps single-quoted
 
 ### `sandbox/fixtures/replay/`

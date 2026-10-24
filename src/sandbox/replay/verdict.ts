@@ -61,6 +61,18 @@ export function judgeStep(output: StepOutput): Judgement {
   return { verdict: 'ok' }
 }
 
+/**
+ * The warnings a step printed, each line the CLI marks `!` on a stream that is
+ * not a terminal. They never fail the replay, and carrying them is what lets a
+ * reader see a finding the verdict passed, such as a seed sync calls missing.
+ */
+export function findingsOf(stderr: string): string[] {
+  return stderr
+    .split('\n')
+    .filter((line) => line.startsWith('! '))
+    .map((line) => line.slice(2).trim())
+}
+
 /** oxfmt lists each file it would change as `<path> (<n>ms)` under `--check`. */
 const OXFMT_FILE = /^(\S.*) \(\d+m?s\)$/
 

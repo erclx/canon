@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  findingsOf,
   judgeFormat,
   judgeStep,
   type StepOutput,
@@ -89,6 +90,29 @@ describe('judgeStep', () => {
     )
 
     expect(judged.verdict).toBe('ok')
+  })
+})
+
+describe('findingsOf', () => {
+  it('should collect each warning line a verb printed, without its mark', () => {
+    const findings = findingsOf(
+      [
+        'canon claude',
+        '✓ DESIGN.md',
+        '! REQUIREMENTS.md missing. Run `canon claude init`',
+        '! 2 gated entries breaking the shape',
+        '  canon/context/board/index.md  gated',
+      ].join('\n'),
+    )
+
+    expect(findings).toEqual([
+      'REQUIREMENTS.md missing. Run `canon claude init`',
+      '2 gated entries breaking the shape',
+    ])
+  })
+
+  it('should find nothing on a clean run', () => {
+    expect(findingsOf('✓ Everything up to date\n')).toEqual([])
   })
 })
 

@@ -446,6 +446,8 @@ interface ReplayOptions {
   readonly json?: boolean
 }
 
+const REPLAY_FINDINGS_SHOWN = 5
+
 function refuseReplay(reason: string, message: string, json: boolean): void {
   logError(message)
   if (json)
@@ -525,6 +527,14 @@ function runReplay(paths: string[], options: ReplayOptions): void {
       if (step.verdict === 'ok') logInfo(`${step.step}, exit ${step.exit}`)
       else
         logError(`${result.name}: ${step.step} ${step.verdict}: ${step.detail}`)
+      // A sync over an old layout prints a line per rule it moves, so the
+      // frame shows the first few and the record carries every one.
+      if (json) continue
+      for (const finding of step.findings.slice(0, REPLAY_FINDINGS_SHOWN))
+        logWarn(`${step.step}: ${finding}`)
+      const hidden = step.findings.length - REPLAY_FINDINGS_SHOWN
+      if (hidden > 0)
+        logWarn(`${step.step}: ${hidden} more, listed under --json`)
     }
   }
 

@@ -12,6 +12,7 @@ import {
 import { dirname, join, relative } from 'node:path'
 import { gitEnv } from '@/git/env'
 import {
+  findingsOf,
   judgeFormat,
   judgeStep,
   type ReplayVerdict,
@@ -43,6 +44,8 @@ export interface StepResult {
   readonly exit: number | null
   readonly verdict: ReplayVerdict
   readonly detail?: string
+  /** The `!` lines the step printed, reported whatever the verdict. */
+  readonly findings: readonly string[]
 }
 
 export interface ReplayResult {
@@ -257,6 +260,7 @@ export function replaySource(
         argv: ['canon', ...args],
         exit: output.status,
         ...judgeStep(output),
+        findings: findingsOf(output.stderr),
       })
     }
 
@@ -295,11 +299,17 @@ function formatStep(
   ]
   const argv = ['oxfmt', '--check', '<written>']
   if (written.length === 0)
-    return { step: 'format', argv, exit: 0, verdict: 'ok' }
+    return { step: 'format', argv, exit: 0, verdict: 'ok', findings: [] }
 
   const output = spawn(oxfmtBinary(checkoutRoot), args, tree, false)
 
-  return { step: 'format', argv, exit: output.status, ...judgeFormat(output) }
+  return {
+    step: 'format',
+    argv,
+    exit: output.status,
+    ...judgeFormat(output),
+    findings: [],
+  }
 }
 
 function oxfmtBinary(checkoutRoot: string): string {
