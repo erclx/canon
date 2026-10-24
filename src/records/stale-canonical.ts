@@ -5,7 +5,7 @@ import { relative } from 'node:path'
 import { gitEnv } from '@/git/env'
 import { surfaceDir } from '@/roots/surface'
 
-/** The record whose drift is identity rather than a stale path. */
+/** The records carrying a `reviewed:` review point, whose drift is how far the project moved since they were read whole. */
 const CANONICAL_DOCS = ['REQUIREMENTS.md', 'DESIGN.md'] as const
 
 export interface CanonicalDoc {

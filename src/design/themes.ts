@@ -1,6 +1,8 @@
 const RAW_FRONTMATTER = /^---\n([\s\S]*?)\n---/
 const THEMES_BLOCK = /^themes:[ \t]*\n((?:[ \t]+-[^\n]*\n?|[ \t]*\n)+)/m
 const LIST_ITEM = /^[ \t]*-[ \t]+(.*?)[ \t]*$/
+const FLOW_LIST = /^themes:[ \t]*\[(.*)\][ \t]*$/m
+const ENTRY = /\s*(?:'([^']*)'|"([^"]*)"|([^,#]*?))\s*(?:,|(?:#.*)?$)/y
 const DECLARATION = /^\s*(--[A-Za-z0-9_-]+)\s*:/
 
 /**
@@ -22,14 +24,36 @@ export interface ScannedDeclaration {
  */
 export function readThemes(source: string): string[] {
   const block = RAW_FRONTMATTER.exec(source.replaceAll('\r\n', '\n'))?.[1]
-  const list = block ? THEMES_BLOCK.exec(`${block}\n`)?.[1] : undefined
-  if (list === undefined) return []
+  if (!block) return []
 
-  return list
-    .split('\n')
-    .map((line) => LIST_ITEM.exec(line)?.[1])
-    .filter((item): item is string => item !== undefined && item !== '')
-    .map((item) => item.replace(/^(['"])(.*)\1$/, '$2').trim())
+  const flow = FLOW_LIST.exec(block)?.[1]
+  const list = THEMES_BLOCK.exec(`${block}\n`)?.[1]
+  const entries =
+    flow !== undefined
+      ? splitEntries(flow)
+      : (list ?? '')
+          .split('\n')
+          .map((line) => LIST_ITEM.exec(line)?.[1])
+          .filter((item): item is string => item !== undefined)
+          .flatMap((item) => splitEntries(item).slice(0, 1))
+
+  return entries.filter((entry) => entry !== '')
+}
+
+/**
+ * Splits a flow list or one block item into entries, honoring quotes and
+ * dropping a trailing ` #` comment, since a selector may carry a comma or a
+ * hash inside quotes.
+ */
+function splitEntries(text: string): string[] {
+  const out: string[] = []
+  ENTRY.lastIndex = 0
+  while (ENTRY.lastIndex < text.length) {
+    const match = ENTRY.exec(text)
+    if (match === null || match[0] === '') break
+    out.push((match[1] ?? match[2] ?? match[3] ?? '').trim())
+  }
+  return out
 }
 
 /**
@@ -127,11 +151,15 @@ export function checkThemes(
   const owned = new Map<string, Set<string>>()
 
   for (const { property, chain } of declarations) {
-    const owner = chain.flat().find((prelude) => declared.has(prelude))
-    if (owner === undefined) continue
-    const set = owned.get(owner) ?? new Set<string>()
-    set.add(property)
-    owned.set(owner, set)
+    const level = chain.find((alternatives) =>
+      alternatives.some((prelude) => declared.has(prelude)),
+    )
+    for (const prelude of level ?? []) {
+      if (!declared.has(prelude)) continue
+      const set = owned.get(prelude) ?? new Set<string>()
+      set.add(property)
+      owned.set(prelude, set)
+    }
   }
 
   return themes.map((selector) => {

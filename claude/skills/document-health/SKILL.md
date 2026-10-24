@@ -76,15 +76,15 @@ No verb answers whether a document still describes the tree it was written about
 
 Mark every staleness finding as a reading. It is this session's judgment rather than a measurement, and a report that sets it beside two verb-backed axes without marking it implies evidence the axis does not carry.
 
-### The requirements record
+### The review points
 
-When the scope reaches `canon/REQUIREMENTS.md`, read it for identity drift as well as for stale paths. Take the review point for it and for the design record from the verb:
+When the scope reaches `canon/REQUIREMENTS.md` or `canon/DESIGN.md`, take the review point for each record the scope reaches from the verb:
 
 ```bash
 canon records stale canonical --json
 ```
 
-Each doc in the record carries `reviewed` and `releasesSince`, the design record's too where the project holds one. `${CLAUDE_SKILL_DIR}/references/axes.md` holds the identity claim shapes to test and how the record reads. Skip both the read and the verb when the scope excludes the doc.
+Each doc in the record carries `reviewed` and `releasesSince`. Skip the verb when the scope reaches neither record. When the scope reaches the requirements record, also read it for identity drift as well as stale paths, with the claim shapes in `${CLAUDE_SKILL_DIR}/references/axes.md`.
 
 Nothing triggers this review but a request. A finished review hands the rewrite to the operator, and its last edit sets `reviewed:` in the doc's frontmatter to the day the operator's answers landed. This run writes neither.
 

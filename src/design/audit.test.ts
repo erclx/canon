@@ -176,6 +176,45 @@ describe('auditDesign', () => {
     })
   })
 
+  it('credits every declared member of one selector list', () => {
+    const css = ':root, .light { --color-accent: red; --color-ink: black; }'
+    const audit = auditDesign(project(themed(["':root'", "'.light'"]), css))
+
+    expect(audit.clean).toBe(true)
+    expect(audit.tokens).toMatchObject({
+      themes: [
+        { selector: ':root', matched: true },
+        { selector: '.light', matched: true },
+      ],
+    })
+  })
+
+  it('reads a flow-style themes list', () => {
+    const css = `${CSS}\n.dark { --color-accent: pink; }`
+    const source = `---\nthemes: [':root', ".dark"]\n---\n${record(LEAD)}`
+    const audit = auditDesign(project(source, css))
+
+    expect(audit.tokens).toMatchObject({
+      themes: [
+        { selector: ':root', matched: true, missing: [] },
+        { selector: '.dark', matched: true, missing: ['--color-ink'] },
+      ],
+    })
+  })
+
+  it('drops a trailing comment from a list item', () => {
+    const source = `---\nthemes:\n  - ':root' # light\n  - .dark # night\n---\n${record(LEAD)}`
+    const css = `${CSS}\n.dark { --color-accent: a; --color-ink: b; }`
+    const audit = auditDesign(project(source, css))
+
+    expect(audit.tokens).toMatchObject({
+      themes: [
+        { selector: ':root', matched: true },
+        { selector: '.dark', matched: true },
+      ],
+    })
+  })
+
   it('does not match a bare root to a root with an attribute', () => {
     const css = `:root[data-theme='dark'] { --color-accent: a; --color-ink: b; }`
     const audit = auditDesign(project(themed(["':root'"]), css))
