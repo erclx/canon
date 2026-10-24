@@ -19,7 +19,7 @@ Canon runs a UI feature through one loop. A plan cites the design, a worker buil
 
 The worker opens each cited reference, light and dark, before its first edit to that surface. It takes sizes, spacing, and colors from the frame HTML rather than the image, and reports a reference that does not resolve instead of building without it.
 
-- The ui rules fire on the files the worker edits. They cover design taste, the design reference, accessibility, input, motion, forms, copy, and links.
+- The ui rules fire as a family on the files the worker edits, and `governance/rules/ui/` holds the set.
 - The `surface-capture` rule has the worker capture the full page in every theme the surface ships, against a preview server and never a dev server.
 - It sets the widths too, being 320 plus each breakpoint in `canon/DESIGN.md` for a layout case, and one width for a state case.
 
@@ -65,7 +65,7 @@ Two kinds of result report without holding the review open.
 - A taste box needs eyes, so the pass captures both themes and leaves the call to you.
 - Every other probe result, and every axe `incomplete`, is a reading to confirm, since each probe carries a known class of false finding.
 
-The gated axe classes are contrast, target size, accessible names, labels, alt text, document title and language, valid ARIA, and nested interactive controls. The list moves when a rule produces a false finding, so this page names classes only. `canon drive --help` and the `review-ui` skill carry the current list.
+At the time of writing, the gated axe classes are contrast, target size, accessible names, labels, alt text, document title and language, valid ARIA, and nested interactive controls. A rule leaves the list on its first false finding, so `canon drive --help` and the `review-ui` skill carry the current one.
 
 A close posts as `## UI review closed`. The reviewers lift the draft mark on their close, and you merge.
 
