@@ -16,9 +16,10 @@ import { readInstalled } from '@/version/installed'
  *
  * A stamp written before the standards or snippets install channel closed
  * still carries a `standards` or `snippets` record, and one written before the
- * design install retired carries a `design` record. `isStamp` ignores the key
- * and `sortDomains` drops it on the next write, so the target loses a domain
- * nothing can refresh rather than losing the whole file.
+ * design install retired carries a `design` record. `isStamp` ignores the key,
+ * `readStamp` drops it from what it returns, and `sortDomains` drops it from
+ * the file on the next write, so the target loses a domain nothing can refresh
+ * rather than losing the whole file.
  */
 export const STAMP_DOMAINS = ['governance', 'tooling'] as const
 
@@ -183,10 +184,29 @@ function readStampFile(path: string): Stamp | undefined {
 
   try {
     const parsed: unknown = JSON.parse(readFileSync(path, 'utf8'))
-    return isStamp(parsed) ? parsed : undefined
+    return isStamp(parsed) ? withoutRetired(parsed) : undefined
   } catch {
     return undefined
   }
+}
+
+/**
+ * A stamp written before a domain retired still names it until the next write.
+ * Filtering here keeps a report on a target that has not synced since from
+ * listing a domain nothing can refresh. The file itself is left as it is.
+ */
+function withoutRetired(stamp: Stamp): Stamp {
+  const domains: Partial<Record<StampDomain, DomainStamp>> = {}
+  for (const domain of STAMP_DOMAINS) {
+    const record = stamp.domains[domain]
+    if (record !== undefined) domains[domain] = record
+  }
+
+  const covers = Array.isArray(stamp.covers)
+    ? stamp.covers.filter((domain) => STAMP_DOMAINS.includes(domain))
+    : []
+
+  return { covers, domains }
 }
 
 /** The newest canon release that has written this domain, when one was recorded. */

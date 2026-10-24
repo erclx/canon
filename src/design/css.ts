@@ -154,8 +154,6 @@ export function fontFaceBlock(
 }
 
 export interface CssOptions {
-  /** Prepended as a comment, naming what wrote the file and from where. */
-  readonly banner?: string
   /**
    * Component rules ride along by default; a token-only consumer opts out
    * with `false`. Pass an explicit list to emit those instead of the generic default.
@@ -173,8 +171,6 @@ export function buildDesignCss(
   tokens: DesignTokens = TOKENS,
   options: CssOptions = {},
 ): string {
-  const banner =
-    options.banner === undefined ? '' : `/* ${options.banner} */\n\n`
   const root = [':root {', ...tokenProperties(tokens), '}'].join('\n')
   const faces =
     options.embedFonts === true
@@ -193,5 +189,5 @@ export function buildDesignCss(
         : COMPONENTS
   if (components) parts.push(componentBlock(components))
 
-  return `${banner}${parts.join('\n\n')}\n`
+  return `${parts.join('\n\n')}\n`
 }
