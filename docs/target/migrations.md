@@ -77,6 +77,8 @@ The `memory` record kind left `canon records`, so `canon records validate memory
 
 Two held files run, `.husky/post-merge` and `.claude/hooks/pr-create-log.sh`, and a stale copy calls a missing binary or names a removed skill. Resync what the toolkit owns before sweeping what the project wrote, and run the second line once per stack.
 
+A tooling write holds a config it has no record of writing, so rerun it with the `--replace` command it prints when it holds the hook.
+
 ```bash
 canon gov sync
 canon tooling sync <stack> . --write
