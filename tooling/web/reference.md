@@ -45,6 +45,8 @@ The web layer covers the tooling shared across Vite + React, Astro, and Next.js.
 
 ## Screenshot cases
 
+The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project that has none and leaves it alone after, so grow it freely.
+
 - Edit the `CASES` in the seeded `e2e/capture/cases.ts`, one entry per output file naming a section, a theme, and a route, since sync overwrites the `e2e/screenshot.ts` harness
 - Move cases from `e2e/screenshot.ts` to `e2e/capture/cases.ts` before a sync, and set `EVIDENCE_ROOT = 'evidence'` to keep an existing baseline
 - Expect each case crossed with `VIEWPORTS`, written to `screenshots/<hostname>/<section>/<width>--<theme>.png`, so local and deployed runs stay apart

@@ -258,7 +258,7 @@ export function register(program: Command): void {
         'never overwrites one.',
         '',
         'Examples:',
-        '  canon tooling customize e2e/home.spec.ts',
+        '  canon tooling customize e2e/screenshot.ts',
         '',
       ].join('\n'),
     )
@@ -1014,6 +1014,9 @@ function reportPackage(result: ScanResult): void {
     logStep('Scanning dependencies')
     for (const entry of result.deps) {
       if (entry.state === 'present') logInfo(entry.name)
+      if (entry.state === 'ahead') {
+        logInfo(`${entry.name} ${entry.installed} (ahead of ${entry.spec})`)
+      }
     }
     for (const entry of result.deps) {
       if (entry.state === 'missing') logAdd(entry.spec)
