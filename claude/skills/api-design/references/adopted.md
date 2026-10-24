@@ -17,7 +17,7 @@ Adopted as the opening group, stated as design rules rather than as an observati
 
 ### One version per dependency
 
-[Software Engineering at Google, ch. 21](https://abseil.io/resources/swe-book/html/ch21.html) states the One-Version Rule, keeping one version of each dependency in a repository, so a change to it migrates every caller rather than leaving two versions live. Adopted under additive change for a caller that cannot pin, which is any module imported from inside one repository.
+[Software Engineering at Google, ch. 16](https://abseil.io/resources/swe-book/html/ch16.html) states the One-Version Rule, keeping one version of each dependency in a repository, so a change to it migrates every caller rather than leaving two versions live. Adopted under additive change for a caller that cannot pin, which is any module imported from inside one repository.
 
 ## Adopted from one external skill
 

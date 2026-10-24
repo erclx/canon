@@ -7,7 +7,7 @@ description: Sources for claude/skills/design-taste/SKILL.md, one row per bullet
 
 The field is visual design judgment. Jesse James Garrett's planes carry the layer order, the Nielsen Norman Group carries redesign strategy and tone, and Josh Comeau carries shadow lighting. The ten defaults are catalog observations, as in the `tells.md` ledger, recording model output and never cited as an authority. `## What this delegates` routes, so it takes no table.
 
-No outside authority takes a side on the four grey-box rules, two layer rules, the focus ring lock, or the greenfield mode. Each of those eight rows is a house choice naming the failure it prevents.
+No outside authority takes a side on the four grey-box rules, three layer rules, the focus ring lock, or the greenfield mode. Each of those nine rows is a house choice naming the failure it prevents.
 
 ## The defaults you are reaching past
 
@@ -29,7 +29,7 @@ No outside authority takes a side on the four grey-box rules, two layer rules, t
 | Bullet                                 | Source                                                                                                                                                                                                                         | Read       |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
 | A higher layer over a broken lower one | [Garrett, The Elements of User Experience, ch. 2](http://www.jjg.net/elements/pdf/elements_ch02.pdf): "the choices available to us on each plane are constrained by the decisions we make about issues on the planes below it" | 2026-10-24 |
-| A lower layer through a finished one   | [Garrett, The Elements of User Experience, ch. 2](http://www.jjg.net/elements/pdf/elements_ch02.pdf): decisions on one plane "can have a ripple effect in both directions"                                                     | 2026-10-24 |
+| A lower layer through a finished one   | House choice: a finished palette, type, and imagery hide a weak composition or layout, so the round judges the wrong layer and passes it                                                                                       | 2026-10-24 |
 | A round varies one layer               | House choice: a round varying several layers yields a pick that cannot say which difference decided it, so the next round repeats the question                                                                                 | 2026-10-24 |
 | Never settle a higher layer first      | [Garrett, The Elements of User Experience, ch. 2](http://www.jjg.net/elements/pdf/elements_ch02.pdf): "Each plane is dependent on the planes below it."                                                                        | 2026-10-24 |
 | Real copy before the composition sets  | House choice: a composition settled against stand-in copy breaks once real copy of another length and tone runs through it                                                                                                     | 2026-10-24 |
@@ -51,7 +51,7 @@ No outside authority takes a side on the four grey-box rules, two layer rules, t
 | One accent            | Catalog observation, [Redesign skill](https://github.com/nxpatterns/claude-taste-skill/blob/main/skills/redesign-skill/SKILL.md): "More than one accent color. Pick one. Remove the rest."                                                       | 2026-10-24 |
 | One radius system     | Catalog observation, [Taste-Skill tells](https://github.com/leonxlnx/taste-skill/blob/main/skills/taste-skill/references/tells.md): "One medium border radius (12–16px) on everything" is reached past with "Square or fully round, chosen once" | 2026-10-24 |
 | One theme             | Catalog observation, [Redesign skill](https://github.com/nxpatterns/claude-taste-skill/blob/main/skills/redesign-skill/SKILL.md): "A single dark-background section breaking an otherwise light page looks like a copy-paste accident."          | 2026-10-24 |
-| One copy register     | [NN/g, The Four Dimensions of Tone of Voice](https://www.nngroup.com/articles/tone-of-voice-dimensions/): "Keep your brand personality consistent, but vary the tone to fit the user's emotional state and the topic"                            | 2026-10-24 |
+| One copy register     | [NN/g, The Four Dimensions of Tone of Voice](https://www.nngroup.com/articles/tone-of-voice-dimensions/): "Keep your brand personality consistent", the part that backs one register per composition                                             | 2026-10-24 |
 | One light source      | [Comeau, Designing Beautiful Shadows in CSS](https://www.joshwcomeau.com/css/designing-shadows/): "we should decide on a single light source for all elements on the page", and black shadow "also desaturates it quite a bit"                   | 2026-10-24 |
 | One focus ring weight | House choice: a focus ring varying by component reads as several products on one surface. The `ui-craft` skill owns the visibility floor                                                                                                         | 2026-10-24 |
 

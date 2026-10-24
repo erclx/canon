@@ -52,8 +52,6 @@ The field is interface design across functions, flags, file formats, and endpoin
 | One live version for an unpinned caller   | [Software Engineering at Google, ch. 16](https://abseil.io/resources/swe-book/html/ch16.html): "Developers must never have a choice of "What version of this component should I depend upon?"", named the One-Version Rule       | 2026-10-24 |
 | Deprecation recorded where a caller looks | [RFC 9745](https://www.rfc-editor.org/rfc/rfc9745.html): a response signals "that the resource will be or has been deprecated" and links "to a resource that provides further information about planned or existing deprecation" | 2026-10-24 |
 
-The One-Version row cites chapter 16, which states the rule. The skill's `adopted.md` links chapter 21, whose text never names it.
-
 ## Make a retried write safe
 
 | Bullet                                 | Source                                                                                                                                                                                                                                   | Read       |
