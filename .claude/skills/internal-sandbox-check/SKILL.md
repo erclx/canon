@@ -81,13 +81,7 @@ For each changed script path, apply the first matching rule:
 | ---------------------------- | ------------------- |
 | `scripts/<domain>/*.sh`      | `infra/<domain>.ts` |
 | `scripts/manage-<domain>.sh` | `infra/<domain>.ts` |
-| `scripts/lib/<name>.sh`      | see lib rule below  |
 | `src/**`                     | unmapped, see below |
-
-For `scripts/lib/<name>.sh`:
-
-1. If `sandbox/infra/<name>.ts` exists, record that path as the scenario.
-2. Otherwise, grep `sandbox/**/*.ts` for an import of the TypeScript helper that took over `<name>` and record every matched scenario.
 
 For `src/**`, record no scenario. Mark the row `UNMAPPED` and append `Closest e2e: bun run check:install` to its hint.
 

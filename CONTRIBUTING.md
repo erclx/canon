@@ -6,7 +6,7 @@ What follows is the local loop for an invited contributor, and for anyone runnin
 
 ## Setup
 
-Bun runs the CLI and every script. The shell scripts need `zsh` or bash 4 or newer, so macOS needs `brew install bash` first. The [readme](README.md#development) covers the clone, install, and bootstrap path.
+Bun runs the CLI and every script. The [readme](README.md#development) covers the clone, install, and bootstrap path.
 
 ### The bootstrap step
 

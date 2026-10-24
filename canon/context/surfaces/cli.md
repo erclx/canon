@@ -145,7 +145,7 @@ Decides what the published package `@erclx/canon` carries.
 - `files` lists `src`, `scripts`, `governance`, `tooling`, `claude`, and `docs`, minus `scripts/eval` and every test file. `internal/`, `wiki/`, `sandbox/`, and `.claude/` stay out
 - `publishConfig.access` is `public`, since a scoped package defaults to restricted and a restricted publish only fails for everyone outside the scope
 - Release-please owns the version and writes the plugin manifest through `extra-files`
-- `scripts/core/install-check.sh` packs with `--ignore-scripts`, installs the tarball without development dependencies, and asserts an excluded path is absent from it
+- `scripts/core/install-check.ts` packs with `--ignore-scripts`, installs the tarball without development dependencies, and asserts an excluded path is absent from it
 
 ### Other folders
 
