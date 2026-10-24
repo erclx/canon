@@ -1,3 +1,6 @@
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { Command } from 'commander'
 import { describe, expect, it } from 'vitest'
 import { register } from '@/commands/migrate'
@@ -23,6 +26,36 @@ function runnerFor(byVerb: Record<string, Partial<CommandResult>>): {
   }
   return { run, calls }
 }
+
+describe('readMigrationStatus retiredCallers', () => {
+  it('should list a project call to a retired verb and keep the exit at 0', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'canon-status-'))
+    try {
+      await writeFile(
+        join(root, 'package.json'),
+        JSON.stringify({ scripts: { board: 'canon canvas serve' } }),
+      )
+      const { run } = runnerFor({})
+
+      const report = await readMigrationStatus(run, root)
+
+      expect(report.retiredCallers.map((c) => [c.file, c.verb])).toEqual([
+        ['package.json', 'canon canvas'],
+      ])
+      expect(statusExitCode(report)).toBe(0)
+    } finally {
+      await rm(root, { recursive: true })
+    }
+  })
+
+  it('should list no callers when no root is given', async () => {
+    const { run } = runnerFor({})
+
+    const report = await readMigrationStatus(run)
+
+    expect(report.retiredCallers).toEqual([])
+  })
+})
 
 describe('readMigrationStatus', () => {
   it('reads every migration clean when each exits 0', async () => {

@@ -94,6 +94,20 @@ export default scenario({
         `Expect:  the preview lists ${CUSTOMIZED_RULE} as customized and ${STALE_RULE} as stale under drift, names the worktree it will enter under Where it lands, and stops for the go-ahead, which the prompt carries. The sync runs in the worktree and ${CUSTOMIZED_RULE} still holds the project bullet afterward. No commit subject names a canon version. The shared checkout stays on main and the commits sit on the worktree's branch.`,
       )
     },
+    'retired-caller': (ctx) => {
+      ctx.write('scripts/board.sh', '#!/usr/bin/env bash\ncanon canvas serve\n')
+      ctx.git('add', '.')
+      ctx.commit('chore(scripts): add a script calling the retired canvas')
+
+      ctx.log.step(
+        'Scenario ready: update skill on a target calling a retired verb',
+      )
+      ctx.log.info('Context: scripts/board.sh calls canon canvas serve')
+      ctx.log.info('Action:  /canon:target-update')
+      ctx.log.info(
+        'Expect:  the preview lists scripts/board.sh:2 under Retired calls with the release that retired canvas and where it went, and writes nothing to the script.',
+      )
+    },
     declined: (ctx) => {
       stageBehind(ctx)
 
