@@ -19,6 +19,7 @@ paths:
 
 - Run the project's capture command against a preview server, never a dev server, after changing a surface. Report it when the project has none.
 - Capture every theme the surface ships, and again after fixing a defect a capture found.
+- Read your own capture against the `canon:ui-checklist` boxes before opening the pull request. Report it rather than proceeding silently when the skill does not resolve.
 
 ## What a capture covers
 

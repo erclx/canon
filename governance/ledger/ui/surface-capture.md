@@ -16,10 +16,11 @@ The rule states canon's own evidence procedure for a rendered change, so most ro
 
 ## When to capture
 
-| Bullet                  | Source                                                                                                                                                           | Read       |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Preview, not dev server | House choice: a dev server injects overlays and skips the production build's transforms, so its frame differs from what ships                                    | 2026-10-18 |
-| Every theme, and again  | House choice: a defect in the dark theme passes a light-only capture, and a repair inside a shared stylesheet can cancel a rule written earlier in the same file | 2026-10-18 |
+| Bullet                                   | Source                                                                                                                                                                                                                                                                                                                            | Read       |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Preview, not dev server                  | House choice: a dev server injects overlays and skips the production build's transforms, so its frame differs from what ships                                                                                                                                                                                                     | 2026-10-18 |
+| Every theme, and again                   | House choice: a defect in the dark theme passes a light-only capture, and a repair inside a shared stylesheet can cancel a rule written earlier in the same file                                                                                                                                                                  | 2026-10-18 |
+| Read the capture before the pull request | House choice: a defect visible in the worker's own capture, such as a 20px target under the 24px bullet in `keyboard.md`, reached review because nobody read the frame against the checklist first, and each review round re-runs both reviews. The skill ships with the plugin, so the bullet carries a report-if-missing clause | 2026-10-23 |
 
 ## What a capture covers
 
