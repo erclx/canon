@@ -20,7 +20,7 @@ Without this skill, the UI behavior practice reaches a session only as path rule
 
 - Reword a moved rule in the move, since a wording change is a separate change with its own ledger row
 - Restate the look, being layout, type, color, or the layer order
-- Be reached only by an author typing its name, since the `ui-craft` pointer rule and the planning, building, and reviewing skills are its callers
+- Be reached only by an author typing its name, since the `craft` pointer rule and the planning, building, and reviewing skills are its callers
 
 ## Out of scope
 
