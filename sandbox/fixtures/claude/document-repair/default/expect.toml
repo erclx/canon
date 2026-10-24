@@ -1,0 +1,31 @@
+# What a correct `/canon:document-repair` run leaves behind on the repair fixture.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block. A bare key below
+# one belongs to that table in TOML and silently asserts nothing.
+
+paths = ["docs/overview.md", "canon/config/markdown.toml"]
+
+write_scope = ["docs/**", "canon/config/markdown.toml"]
+
+manual = [
+  "docs/overview.md passes `canon markdown audit docs/` after the rewrite. Semantic: the exit status of a command the run made is not in the envelope.",
+  "The rewrite lists both folders through `canon markdown gated add` and never by hand. Unwired: how the file was written is not in the envelope.",
+  "The skill states no limit number. Unwired: an absence in the reply, and `reply` asserts positives only.",
+]
+
+# The gated list names both folders, the failing one after its rewrite and the
+# passing one with no rewrite.
+[[content]]
+path = "canon/config/markdown.toml"
+pattern = '^  "docs/",$'
+
+[[content]]
+path = "canon/config/markdown.toml"
+pattern = '^  "canon/context/",$'
+
+# The rewrite keeps the reason the scan caches, which is the seeded reason.
+[[content]]
+path = "docs/overview.md"
+pattern = 'cach'
