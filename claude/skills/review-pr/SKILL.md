@@ -78,7 +78,7 @@ Read these in parallel from the project root, skipping any that do not exist:
 - `.canon/tasks/priority.md`: where this feature sits on the board and what each neighbor waits on, resolved at the main root the way `session-worktree` does, since a linked worktree holds no copy
 - `.canon/plans/feature-<slug>.md` for the branch, when present: the intent the PR should satisfy, and its `**Review focus:**` section as the inputs this pass must confirm the diff handles
 
-Coding standards from `.claude/rules/` are auto-loaded by Claude Code.
+Coding standards from `.claude/rules/` are auto-loaded by Claude Code for the files a first pass reads. A path-scoped rule loads only when a session reads a matching file, so a later pass opens each changed file through the Read tool per `references/scope.md`, which loads the rules its trunk path matches and names the gap for an added file.
 
 ## Step 2: scope the read
 
