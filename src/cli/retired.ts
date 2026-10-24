@@ -9,6 +9,8 @@ export interface RetiredVerb {
 const DESIGN_MOVED =
   'the design values now live in the stylesheet your canon/DESIGN.md lead names'
 
+const CONTEXT_MOVED = '`canon context audit`, which reports placement findings'
+
 /**
  * Every verb a release dropped, with the release and where the work went. The
  * router reads this ahead of the parser, and `canon migrate status` reads it to
@@ -40,6 +42,12 @@ export const RETIRED_VERBS: readonly RetiredVerb[] = [
     path: ['demo'],
     release: '5.53.0',
     movedTo: 'a tool built for composed video',
+  },
+  { path: ['context', 'classify'], release: '5.64.0', movedTo: CONTEXT_MOVED },
+  {
+    path: ['context', 'classifier'],
+    release: '5.64.0',
+    movedTo: CONTEXT_MOVED,
   },
 ]
 
