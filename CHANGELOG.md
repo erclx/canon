@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.61.0](https://github.com/erclx/canon/compare/v5.60.0...v5.61.0) (2026-10-24)
+
+
+### Features
+
+* **design:** check themes and add a review point ([#2673](https://github.com/erclx/canon/issues/2673)) ([8cdaa5c](https://github.com/erclx/canon/commit/8cdaa5c001b2d783108c5ce6d70da0b6cca0719c))
+* **driver:** add an axe probe that gates the UI review ([#2672](https://github.com/erclx/canon/issues/2672)) ([785e474](https://github.com/erclx/canon/commit/785e474b76eae4f41a55fd588df0b3691756742d))
+* **migrate:** drop a covered ignore line from the records sweep ([#2668](https://github.com/erclx/canon/issues/2668)) ([188bee8](https://github.com/erclx/canon/commit/188bee8c0061045e46e660da50422b5d5673cf14))
+
+
+### Bug Fixes
+
+* **markdown:** measure a bullet without its list marker ([#2670](https://github.com/erclx/canon/issues/2670)) ([c7b9d70](https://github.com/erclx/canon/commit/c7b9d70fc522a91dc9b2b058481d1eb984abd3ad))
+
 ## [5.60.0](https://github.com/erclx/canon/compare/v5.59.0...v5.60.0) (2026-10-24)
 
 
