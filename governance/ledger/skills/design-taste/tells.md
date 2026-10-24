@@ -64,12 +64,12 @@ The main catalog is Taste-Skill's v2 experimental skill, which its author moved 
 
 ## Typography
 
-| Bullet                       | Source                                                                                                                                                                                                    | Read       |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Scale as the only hierarchy  | [Practical Typography, Headings](https://practicaltypography.com/headings.html): "It's fine to make the point size bigger, but just a little."                                                            | 2026-10-24 |
-| One family doing every job   | Catalog observation, [Taste-Skill tells](https://github.com/leonxlnx/taste-skill/blob/main/skills/taste-skill/references/tells.md): "The same typeface on every generated page" is a first-wave tell      | 2026-10-24 |
-| Unbounded measure            | [Practical Typography, Line length](https://practicaltypography.com/line-length.html): "Aim for an average line length of 45–90 characters, including spaces."                                            | 2026-10-24 |
-| Caps and tracking as texture | Catalog observation, [Taste-Skill tells](https://github.com/leonxlnx/taste-skill/blob/main/skills/taste-skill/references/tells.md): "Tiny uppercase letter-spaced captions scattered around the viewport" | 2026-10-24 |
+| Bullet                       | Source                                                                                                                                                                                                                                         | Read       |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Scale as the only hierarchy  | [Practical Typography, Headings](https://practicaltypography.com/headings.html): "It's fine to make the point size bigger, but just a little."                                                                                                 | 2026-10-24 |
+| One family doing every job   | Catalog observation, [Redesign skill](https://github.com/nxpatterns/claude-taste-skill/blob/main/skills/redesign-skill/SKILL.md): "Browser default fonts or Inter everywhere", reached past by pairing "a serif header with a sans-serif body" | 2026-10-24 |
+| Unbounded measure            | [Practical Typography, Line length](https://practicaltypography.com/line-length.html): "Aim for an average line length of 45–90 characters, including spaces."                                                                                 | 2026-10-24 |
+| Caps and tracking as texture | Catalog observation, [Taste-Skill tells](https://github.com/leonxlnx/taste-skill/blob/main/skills/taste-skill/references/tells.md): "Tiny uppercase letter-spaced captions scattered around the viewport"                                      | 2026-10-24 |
 
 ## Motion
 
