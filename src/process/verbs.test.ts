@@ -77,14 +77,23 @@ describe('gov sync', () => {
 })
 
 describe('tooling sync', () => {
-  it('should replace a local edit once --write is passed', () => {
+  it('should replace a local edit once --write --replace names it', () => {
     const path = join(target, '.oxfmtrc.json')
     writeFileSync(path, '# a project owns this line\n')
     seedPackage(target, 'base')
 
-    const run = runCli(['tooling', 'sync', 'base', target, '--write'], {
-      cwd: target,
-    })
+    const run = runCli(
+      [
+        'tooling',
+        'sync',
+        'base',
+        target,
+        '--write',
+        '--replace',
+        '.oxfmtrc.json',
+      ],
+      { cwd: target },
+    )
 
     expect(run.status).toBe(0)
     expect(readFileSync(path, 'utf8')).not.toBe('# a project owns this line\n')
