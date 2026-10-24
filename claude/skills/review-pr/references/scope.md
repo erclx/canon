@@ -117,3 +117,12 @@ Carry `<prior-heading>` into Step 4 and run Step 3 unchanged. This guard turns o
 ## The read
 
 Read each changed file in scope. Skip deleted files. Run reads in parallel.
+
+### Load the path-scoped rules on a later pass
+
+A path-scoped rule loads when a session uses the Read tool on a matching file, and a Bash call such as `git show` loads none. A later pass reads only `<prior-oid>..<headRefOid>`, so the head copy of each changed file has to reach the Read tool.
+
+- Write each changed, non-deleted file's head blob to `.canon/tmp/head-read/<path>`, keeping its relative path so a `**/*` glob matches, then open that copy with the Read tool
+- Take the blob from `git show <headRefOid>:<path>`, since the reviewer never checks the branch out and a Read of the trunk copy shows trunk content, or nothing for an added file
+- Read only files the range changed, never the whole tree, so the cost stays bounded by the range
+- A range whose only change is a deletion has no file to read, so skip it and carry on

@@ -38,7 +38,7 @@ Read these in parallel from the project root, skipping any that do not exist:
 
 Also read `canon/DESIGN.md` when the feature touches code or UI, for visual intent and component rules, with values read from the stylesheet its lead names. Skip it for prose, docs, catalog, or config-only changes. For a UI feature, read `canon/design/index.md` too, if it exists, for the surfaces with an accepted design.
 
-Coding standards live in `.claude/rules/`. Claude Code loads them automatically, and path-scoped rules apply to the files they match.
+Coding standards live in `.claude/rules/`. Claude Code loads them automatically, and path-scoped rules apply to the files they match. For a UI feature, load `canon:design-taste` whether or not `canon/DESIGN.md` exists.
 
 ### Read the domain's context entry
 
