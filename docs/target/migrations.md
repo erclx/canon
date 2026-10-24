@@ -75,9 +75,7 @@ The `memory` record kind left `canon records`, so `canon records validate memory
 - `canon repo metadata`, `canon autoship`, and the `120-bash` rule are gone, and `canon gov sync` removes the rule <!-- canon-keep-retired -->
 - `memory-capture`, the `603-memory` rule, and the `memory` standard are gone, so send a lesson to the context entry that owns the fact <!-- canon-keep-retired -->
 
-Two held files run, `.husky/post-merge` and `.claude/hooks/pr-create-log.sh`, and a stale copy calls a missing binary or names a removed skill. Resync what the toolkit owns before sweeping what the project wrote, and run the second line once per stack.
-
-A tooling write holds a config it has no record of writing, so rerun it with the `--replace` command it prints when it holds the hook.
+Two held files run, `.husky/post-merge` and `.claude/hooks/pr-create-log.sh`, and a stale copy calls a missing binary or names a removed skill. Resync what the toolkit owns before sweeping what the project wrote, and run the second line once per stack, naming a held hook with `--replace`.
 
 ```bash
 canon gov sync
