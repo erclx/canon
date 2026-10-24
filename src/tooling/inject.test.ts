@@ -12,6 +12,7 @@ import { basename, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { gitEnv } from '@/git/env'
 import { PROJECT_ROOT } from '@/roots/project'
+import { stampPath } from '@/sync/stamp'
 import {
   injectConfigs,
   injectGitignore,
@@ -175,6 +176,66 @@ describe('injectSeeds with the base stack in a subfolder', () => {
     await injectSeeds(resolveChain(PROJECT_ROOT, 'base'), sub)
 
     expect(existsSync(join(sub, '.github'))).toBe(false)
+  })
+})
+
+describe('inject with dispositions', () => {
+  const hold = (dispositions: Record<string, unknown>): void => {
+    mkdirSync(join(target, 'canon', 'config'), { recursive: true })
+    writeFileSync(
+      stampPath(target),
+      JSON.stringify({
+        covers: ['tooling'],
+        domains: {
+          tooling: {
+            syncedAt: 'then',
+            files: {},
+            chain: ['base'],
+            dispositions,
+          },
+        },
+      }),
+    )
+  }
+
+  it('should leave a declined config unwritten', async () => {
+    captureStderr()
+    hold({ '.oxfmtrc.json': { disposition: 'declined' } })
+
+    const applied = await injectConfigs(
+      resolveChain(PROJECT_ROOT, 'base'),
+      target,
+    )
+
+    expect(existsSync(join(target, '.oxfmtrc.json'))).toBe(false)
+    expect(applied).not.toContain('.oxfmtrc.json')
+    expect(applied).toContain('commitlint.config.js')
+  })
+
+  it('should keep a customized config byte for byte', async () => {
+    captureStderr()
+    const mine = '{ "printWidth": 100 }\n'
+    writeFileSync(join(target, '.oxfmtrc.json'), mine)
+    hold({
+      '.oxfmtrc.json': { disposition: 'customized', base: 'sha256:x' },
+    })
+
+    await injectConfigs(resolveChain(PROJECT_ROOT, 'base'), target)
+
+    expect(readFileSync(join(target, '.oxfmtrc.json'), 'utf8')).toBe(mine)
+  })
+
+  it('should leave a declined seed unwritten', async () => {
+    captureStderr()
+    hold({ '.lintstagedrc': { disposition: 'declined' } })
+
+    const applied = await injectSeeds(
+      resolveChain(PROJECT_ROOT, 'base'),
+      target,
+    )
+
+    expect(existsSync(join(target, '.lintstagedrc'))).toBe(false)
+    expect(applied).not.toContain('.lintstagedrc')
   })
 })
 

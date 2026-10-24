@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs'
 import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join, relative } from 'node:path'
 import { copyPreservingMode } from '@/sync/copy'
+import { readDispositions } from '@/tooling/disposition'
 import { type InstallResult, installDevDependencies } from '@/tooling/install'
 import { rewritesOnInstall, stripSeedMarker } from '@/tooling/seed-marker'
 import { resolveSurfacePath } from '@/roots/surface'
@@ -24,16 +25,22 @@ import {
 import { isSubfolderTarget, isWithheldInSubfolder } from '@/tooling/subfolder'
 import { logAdd, logRemove, logStep, logWarn } from '@/cli/ui'
 
+/**
+ * Skips every path the project declined or customized, which is what makes
+ * the record hold for `sync --write` and `inject` alike.
+ */
 export async function injectConfigs(
   chain: readonly Manifest[],
   target: string,
 ): Promise<string[]> {
   const applied: string[] = []
   const isSubfolder = isSubfolderTarget(target)
+  const held = readDispositions(target)
 
   for (const manifest of ancestorsFirst(chain)) {
     const files = configFiles(manifest).filter(
-      (rel) => !(isSubfolder && isWithheldInSubfolder(rel)),
+      (rel) =>
+        held[rel] === undefined && !(isSubfolder && isWithheldInSubfolder(rel)),
     )
     if (files.length === 0) continue
 
@@ -83,11 +90,14 @@ export async function injectSeeds(
   const applied: string[] = []
   const isSubfolder = isSubfolderTarget(target)
   const shadowed = configPaths(chain)
+  const held = readDispositions(target)
 
   for (const manifest of ancestorsFirst(chain)) {
     const files = seedFiles(manifest).filter(
       (rel) =>
-        !shadowed.has(rel) && !(isSubfolder && isWithheldInSubfolder(rel)),
+        !shadowed.has(rel) &&
+        held[rel] === undefined &&
+        !(isSubfolder && isWithheldInSubfolder(rel)),
     )
     if (files.length === 0) continue
 
