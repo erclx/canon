@@ -138,11 +138,25 @@ export function botKind(
 }
 
 /**
+ * Where a Dependabot body stops. A group body runs a table and then one
+ * `Updates ` line per package, and a single-package body has neither and goes
+ * from its `Bumps` lead straight to a `<details>` block, so either line ends
+ * the kept text. Neither match relies on the commands footer, which a truncated
+ * body lacks.
+ */
+function dependabotCut(lines: readonly string[]): number {
+  const cut = lines.findIndex(
+    (line) =>
+      line.startsWith('Updates ') || line.trim().startsWith('<details>'),
+  )
+  return cut >= 0 ? cut : lines.length
+}
+
+/**
  * The squash description of a bot pull request, from the bot's own body. A
  * release keeps its changelog without the robot line, the dividers, and the
- * footer. Dependabot keeps its lead and package table and cuts at the first
- * `Updates ` line, since the commands footer is gone from a truncated body. A
- * body with nothing left refuses `missing-summary`.
+ * footer. Dependabot keeps its lead and package table. A body with nothing left
+ * refuses `missing-summary`.
  */
 export function composeBotDescription(kind: BotKind, body: string): Composed {
   const lines = body.replaceAll('\r\n', '\n').split('\n')
@@ -156,12 +170,7 @@ export function composeBotDescription(kind: BotKind, body: string): Composed {
             !text.startsWith(RELEASE_FOOTER)
           )
         })
-      : lines.slice(
-          0,
-          lines.findIndex((line) => line.startsWith('Updates ')) >= 0
-            ? lines.findIndex((line) => line.startsWith('Updates '))
-            : lines.length,
-        )
+      : lines.slice(0, dependabotCut(lines))
   const description = kept.join('\n').trim()
   return description === ''
     ? { kind: 'refused', reason: 'missing-summary' }

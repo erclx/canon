@@ -316,10 +316,29 @@ describe('composeBotDescription for dependabot', () => {
     })
   })
 
-  it('should keep the whole body when no Updates line exists', () => {
+  it('should keep the whole body when neither an Updates line nor a details block exists', () => {
     expect(composeBotDescription('dependabot', DEPENDABOT_LEAD)).toEqual({
       kind: 'composed',
       description: DEPENDABOT_LEAD,
+    })
+  })
+
+  it('should cut a single-package body at its first details block', () => {
+    const lead =
+      'Bumps [actions/checkout](https://github.com/actions/checkout) from 4.2.1 to 4.2.2.'
+    const body = [
+      lead,
+      '<details>',
+      '<summary>Release notes</summary>',
+      '<p><em>Sourced from <a href="https://github.com/actions/checkout/releases">actions/checkout\'s releases</a>.</em></p>',
+      '</details>',
+      '',
+      'Dependabot will resolve any conflicts with this PR as long as you do not alter it yourself.',
+    ].join('\n')
+
+    expect(composeBotDescription('dependabot', body)).toEqual({
+      kind: 'composed',
+      description: lead,
     })
   })
 

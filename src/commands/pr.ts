@@ -959,7 +959,7 @@ export function register(program: Command): void {
         'branch, plus the release body opening or a bot author, and needs no',
         'flag. A release composes to its changelog without the robot line, the',
         'dividers, and the footer. Dependabot composes to its lead and package',
-        'table, cut at the first `Updates ` line. A bot body with nothing left',
+        'table, cut at the first `Updates ` line or `<details>` block. A bot body with nothing left',
         'refuses missing-summary.',
         '',
         'Refusals are read before the one write, which sends the head it read',
