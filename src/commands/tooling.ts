@@ -54,7 +54,12 @@ interface SyncOptions {
   readonly skip?: string
   readonly check?: boolean
   readonly write?: boolean
+  readonly replace?: readonly string[]
   readonly diff?: { readonly json: boolean }
+}
+
+function collect(value: string, previous: readonly string[]): string[] {
+  return [...previous, value]
 }
 
 interface DiffOptions {
@@ -111,6 +116,12 @@ export function register(program: Command): void {
       'Report what would change and write nothing, always exiting 0. Prefer `canon tooling diff`',
     )
     .option('--write', 'Apply every change without prompting')
+    .option(
+      '--replace <path>',
+      'Replace a held config with the golden copy (repeatable)',
+      collect,
+      [],
+    )
     .addHelpText(
       'after',
       [
@@ -119,6 +130,7 @@ export function register(program: Command): void {
         '  canon tooling sync base',
         '  canon tooling sync base --check',
         '  canon tooling sync base --write',
+        '  canon tooling sync base --write --replace .oxfmtrc.json',
         '  canon tooling sync vite-react web --skip base',
         '',
         'A target below its git root syncs as a subfolder. It withholds',
@@ -132,8 +144,13 @@ export function register(program: Command): void {
         'what `canon sync --check --exit-code` spells with a flag. Pass --check',
         'to report the same list and always exit 0.',
         '',
-        '--write replaces every golden config that differs from the stack.',
+        '--write replaces a golden config only when canon changed it and the',
+        'project did not, which the hash the last write recorded tells apart.',
+        'A config the project edited, or one written before hashes were',
+        'recorded, is held and listed. Name it with --replace to take the',
+        'golden copy, or run `canon tooling customize <path>` to keep yours.',
         'Seeds are copy-once, so a seed the target already holds is left alone.',
+        'A declined or customized path is never written.',
         '',
         'Exit codes:',
         '  0  synced, up to date, cancelled, or run with --check',
@@ -504,6 +521,20 @@ async function runSync(
 
   const result = scan(prepared.chain, prepared.target)
 
+  const replace = (opts.replace ?? []).map(
+    (input) => normalizeGoldenPath(input) ?? input,
+  )
+  const unknown = replace.filter(
+    (rel) => !result.configs.some((entry) => entry.rel === rel),
+  )
+  if (unknown.length > 0) {
+    return refuse(
+      opts.diff?.json,
+      'unknown-replace',
+      `--replace names no config this chain writes: ${unknown.join(', ')}`,
+    )
+  }
+
   report(result, prepared.target)
 
   if (opts.diff !== undefined) {
@@ -542,8 +573,9 @@ async function runSync(
     return decision === 'unauthorized' ? 1 : 0
   }
 
+  const held = heldConfigs(result, replace)
   if (result.configs.some((entry) => entry.state !== 'matching')) {
-    await injectConfigs(prepared.chain, prepared.target)
+    await injectConfigs(prepared.chain, prepared.target, new Set(held))
   }
 
   await injectSeeds(prepared.chain, prepared.target)
@@ -558,8 +590,54 @@ async function runSync(
 
   await stampChain(prepared.chain, prepared.target)
 
+  if (held.length > 0) {
+    reportHeld(held, selected, target, opts.skip)
+  }
+
   outroSuccess('Tooling sync complete')
   return 0
+}
+
+/**
+ * A drifted config the project edited, or one no write recorded, is held
+ * rather than replaced, since a write naming a stack is not consent to lose an
+ * edit inside it. Only a path `--replace` names is taken over.
+ */
+function heldConfigs(result: ScanResult, replace: readonly string[]): string[] {
+  return result.configs
+    .filter(
+      (entry) =>
+        entry.state === 'drifted' &&
+        entry.cause !== 'stale' &&
+        !replace.includes(entry.rel),
+    )
+    .map((entry) => entry.rel)
+}
+
+/**
+ * Names every held path in one copyable command, so taking the first run's
+ * unattributed holds costs one paste rather than one flag per path typed.
+ */
+function reportHeld(
+  held: readonly string[],
+  stack: string,
+  target: string,
+  skip: string | undefined,
+): void {
+  logStep('Held')
+  for (const rel of held) logWarn(rel)
+  logInfo(
+    'The project changed these, or no earlier write recorded them, so --write left them as they are. Keep one with `canon tooling customize <path>`, or take the golden copies with:',
+  )
+  const command = [
+    'canon tooling sync',
+    stack,
+    target,
+    ...(skip === undefined ? [] : ['--skip', skip]),
+    '--write',
+    ...held.flatMap((rel) => ['--replace', rel]),
+  ]
+  logInfo(command.join(' '))
 }
 
 /**
@@ -811,7 +889,11 @@ function report(result: ScanResult, target: string): void {
     if (entry.state === 'matching') logInfo(entry.rel)
   }
   for (const entry of result.configs) {
-    if (entry.state === 'drifted') logWarn(entry.rel)
+    if (entry.state === 'drifted') {
+      logWarn(
+        entry.cause === 'stale' ? entry.rel : `${entry.rel} (${entry.cause})`,
+      )
+    }
   }
   for (const entry of result.configs) {
     if (entry.state === 'new') logAdd(entry.rel)

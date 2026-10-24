@@ -27,11 +27,14 @@ import { logAdd, logRemove, logStep, logWarn } from '@/cli/ui'
 
 /**
  * Skips every path the project declined or customized, which is what makes
- * the record hold for `sync --write` and `inject` alike.
+ * the record hold for `sync --write` and `inject` alike. `hold` names the
+ * further paths a caller decided this write must leave, which `sync` derives
+ * from the scan and `inject`, writing without one, never passes.
  */
 export async function injectConfigs(
   chain: readonly Manifest[],
   target: string,
+  hold: ReadonlySet<string> = new Set(),
 ): Promise<string[]> {
   const applied: string[] = []
   const isSubfolder = isSubfolderTarget(target)
@@ -40,7 +43,9 @@ export async function injectConfigs(
   for (const manifest of ancestorsFirst(chain)) {
     const files = configFiles(manifest).filter(
       (rel) =>
-        held[rel] === undefined && !(isSubfolder && isWithheldInSubfolder(rel)),
+        held[rel] === undefined &&
+        !hold.has(rel) &&
+        !(isSubfolder && isWithheldInSubfolder(rel)),
     )
     if (files.length === 0) continue
 
