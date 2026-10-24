@@ -2,7 +2,11 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { longKeyPathsRuns, seededDirPath } from '@/commands/claude'
+import {
+  longKeyPathsRuns,
+  seededDirPath,
+  seededFilePath,
+} from '@/commands/claude'
 
 let root: string
 
@@ -33,6 +37,32 @@ describe('seededDirPath', () => {
     mkdirSync(join(root, '.canon', 'tasks'), { recursive: true })
 
     expect(seededDirPath(root, 'tasks')).toBe(join(root, '.canon', 'tasks'))
+  })
+})
+
+describe('seededFilePath', () => {
+  it('should resolve a record under canon/ for a migrated target', () => {
+    mkdirSync(join(root, 'canon'), { recursive: true })
+    writeFileSync(join(root, 'canon', 'REQUIREMENTS.md'), '# Requirements\n')
+
+    expect(seededFilePath(root, 'REQUIREMENTS.md')).toBe(
+      join(root, 'canon', 'REQUIREMENTS.md'),
+    )
+  })
+
+  it('should resolve a record under .claude/ for a target mid-migration', () => {
+    mkdirSync(join(root, '.claude'), { recursive: true })
+    writeFileSync(join(root, '.claude', 'DESIGN.md'), '# Design\n')
+
+    expect(seededFilePath(root, 'DESIGN.md')).toBe(
+      join(root, '.claude', 'DESIGN.md'),
+    )
+  })
+
+  it('should resolve to canon/ when the record is at neither root', () => {
+    expect(seededFilePath(root, 'DESIGN.md')).toBe(
+      join(root, 'canon', 'DESIGN.md'),
+    )
   })
 })
 
