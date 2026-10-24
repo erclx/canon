@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.57.0](https://github.com/erclx/canon/compare/v5.56.0...v5.57.0) (2026-10-24)
+
+
+### Features
+
+* **git-followup:** ship unpushed commits from a clean tree ([#2643](https://github.com/erclx/canon/issues/2643)) ([73bdfbd](https://github.com/erclx/canon/commit/73bdfbdb25ad0a8e76cfbaa57086c8fe058485fe))
+* **plan-feature:** run the existing surface before planning ([#2634](https://github.com/erclx/canon/issues/2634)) ([53c4b93](https://github.com/erclx/canon/commit/53c4b936ed89d42122e251f638e87791278ef883))
+* **pr:** claim root files named in Key changes code spans ([#2639](https://github.com/erclx/canon/issues/2639)) ([6d9e368](https://github.com/erclx/canon/commit/6d9e368d0b6dcda568c3140b1053206fd1038864))
+* **skills:** add run placement and binary rules to planner onboarding ([#2642](https://github.com/erclx/canon/issues/2642)) ([e211beb](https://github.com/erclx/canon/commit/e211bebbc35a709e907fb3dbb0eef75f1d791b42))
+* **skills:** run a repro during intake and triage ([#2638](https://github.com/erclx/canon/issues/2638)) ([82e1fb4](https://github.com/erclx/canon/commit/82e1fb4bdb54eefcea910cf745c80623a8f8368c))
+* **skills:** triage asks plan, ask, or decline ([#2641](https://github.com/erclx/canon/issues/2641)) ([2502248](https://github.com/erclx/canon/commit/2502248fe5ce4ad7dd11a4b27c8f4297ba654fa1))
+* **target-update:** write on a worktree or its own branch ([#2640](https://github.com/erclx/canon/issues/2640)) ([73f2603](https://github.com/erclx/canon/commit/73f2603e034f63397e1b878368aa69d8d4275aaf))
+* **tasks:** resolve closes from the checked-out branch ([#2637](https://github.com/erclx/canon/issues/2637)) ([873834c](https://github.com/erclx/canon/commit/873834c69b8de11efe16bbdaa06187b9328e9738))
+
 ## [5.56.0](https://github.com/erclx/canon/compare/v5.55.0...v5.56.0) (2026-10-23)
 
 
