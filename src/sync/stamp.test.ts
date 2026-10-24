@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process'
 import {
   chmodSync,
   mkdirSync,
@@ -496,6 +497,74 @@ describe('writeStamp', () => {
     await writeStamp(TARGET, GOVERNANCE, {}, NOW)
 
     expect(readFileSync(stampPath(TARGET), 'utf8').endsWith('}\n')).toBe(true)
+  })
+})
+
+describe('writeStamp shape without a formatter', () => {
+  const REPO_BIN = join(process.cwd(), 'node_modules', '.bin')
+
+  function check(tool: string): number | null {
+    return spawnSync(join(REPO_BIN, tool), ['--check', stampPath(TARGET)], {
+      cwd: TARGET,
+    }).status
+  }
+
+  it('should inline the covers array', async () => {
+    await writeStamp(TARGET, GOVERNANCE, { 'a.md': 'sha256:aa' }, NOW)
+
+    expect(readFileSync(stampPath(TARGET), 'utf8')).toContain(
+      '"covers": ["governance"],',
+    )
+  })
+
+  it('should pass oxfmt --check as written', async () => {
+    await writeStamp(TARGET, GOVERNANCE, { 'a.md': 'sha256:aa' }, NOW)
+    await writeStamp(TARGET, TOOLING, { 'b.md': 'sha256:bb' }, NOW)
+
+    expect(check('oxfmt')).toBe(0)
+  })
+
+  it('should pass prettier --check as written', async () => {
+    await writeStamp(TARGET, GOVERNANCE, { 'a.md': 'sha256:aa' }, NOW)
+    await writeStamp(TARGET, TOOLING, { 'b.md': 'sha256:bb' }, NOW)
+
+    expect(check('prettier')).toBe(0)
+  })
+
+  it('should pass both formatters with an empty files map', async () => {
+    await writeStamp(TARGET, GOVERNANCE, {}, NOW)
+
+    expect([check('oxfmt'), check('prettier')]).toEqual([0, 0])
+  })
+
+  it('should wrap a chain that passes 80 columns one element per line', async () => {
+    const chain = Array.from({ length: 12 }, (_, i) => `step-number-${i}`)
+    await writeChainStamp(TARGET, GOVERNANCE, chain, NOW)
+
+    expect(readFileSync(stampPath(TARGET), 'utf8')).toContain(
+      '"chain": [\n        "step-number-0",\n',
+    )
+    expect([check('oxfmt'), check('prettier')]).toEqual([0, 0])
+  })
+
+  it('should round trip three domains through readStamp unchanged', async () => {
+    await writeStamp(TARGET, GOVERNANCE, { 'a.md': 'sha256:aa' }, NOW)
+    await writeStamp(TARGET, TOOLING, { 'b.md': 'sha256:bb' }, NOW)
+    await writeChainStamp(TARGET, GOVERNANCE, ['x', 'y'], NOW)
+
+    const stamp = readStamp(TARGET)
+
+    expect(stamp?.covers).toEqual(['governance', 'tooling'])
+    expect(stamp?.domains.governance?.chain).toEqual(['x', 'y'])
+    expect(stamp?.domains.tooling?.files).toEqual({ 'b.md': 'sha256:bb' })
+  })
+
+  it('should write identical bytes on a second sync with no drift', async () => {
+    await writeStamp(TARGET, GOVERNANCE, { 'a.md': 'sha256:aa' }, NOW)
+    const first = readFileSync(stampPath(TARGET), 'utf8')
+    await writeStamp(TARGET, GOVERNANCE, { 'a.md': 'sha256:aa' }, NOW)
+
+    expect(readFileSync(stampPath(TARGET), 'utf8')).toBe(first)
   })
 })
 
