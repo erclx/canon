@@ -2,7 +2,12 @@ import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { isFamilyKey } from '@/claude/skills-families'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
-import { type BodyLine, bodyLines, maskDisplayed } from '@/markdown/scan'
+import {
+  type BodyLine,
+  bodyLines,
+  maskCodeSpans,
+  maskDisplayed,
+} from '@/markdown/scan'
 
 /** Returned when a skill folder carries no `REQUIREMENT.md`, the gating check. */
 export const EXIT_MISSING_REQUIREMENT = 2
@@ -80,6 +85,19 @@ export const PRACTICE_SECTIONS: readonly string[] = [
 
 /** The source ledger every practice skill carries beside its body. */
 export const PRACTICE_LEDGER = join('references', 'adopted.md')
+
+/**
+ * A ledger cites a source by linking a page outside the project, as an inline
+ * link or an autolink. A relative link points back into the skill and cites
+ * nothing a reader could check the rule against.
+ */
+const EXTERNAL_LINK = /\]\(\s*https?:\/\/|<https?:\/\//
+
+/**
+ * A table cell opening on the marker the governance ledgers already use for a
+ * rule the toolkit chose, so one check reads every ledger alike.
+ */
+const HOUSE_CHOICE = /\|\s*House choice\b/
 
 /**
  * The line count past which a reference opens with a contents list, from
@@ -166,7 +184,8 @@ interface SkillSource {
   readonly requirement: string | undefined
   /** Every H2 in `SKILL.md` outside a fence, for the practice shape. */
   readonly sections: readonly string[]
-  readonly hasLedger: boolean
+  /** Undefined when the folder carries no ledger at all. */
+  readonly ledger: string | undefined
   /**
    * `SKILL.md` and every reference below the folder, keyed by the path a
    * finding names. `REQUIREMENT.md` and `EVAL.md` are left out, since the
@@ -262,6 +281,7 @@ async function readSkill(
 ): Promise<SkillSource> {
   const skillDir = join(dir, folder)
   const requirementPath = join(skillDir, 'REQUIREMENT.md')
+  const ledgerPath = join(skillDir, PRACTICE_LEDGER)
 
   const references = [
     ...new Bun.Glob('references/**/*.md').scanSync({
@@ -270,10 +290,13 @@ async function readSkill(
     }),
   ].sort()
 
-  const [body, requirement, referenceTexts] = await Promise.all([
+  const [body, requirement, ledger, referenceTexts] = await Promise.all([
     Bun.file(join(skillDir, 'SKILL.md')).text(),
     existsSync(requirementPath)
       ? Bun.file(requirementPath).text()
+      : Promise.resolve(undefined),
+    existsSync(ledgerPath)
+      ? Bun.file(ledgerPath).text()
       : Promise.resolve(undefined),
     Promise.all(
       references.map((path) => Bun.file(join(skillDir, path)).text()),
@@ -294,7 +317,7 @@ async function readSkill(
       requirement === undefined ? undefined : headings(requirement),
     requirement,
     sections: sectionsOf(body),
-    hasLedger: existsSync(join(skillDir, PRACTICE_LEDGER)),
+    ledger,
     bodies: [
       { rel: join(skillRel, 'SKILL.md'), text: body, isReference: false },
       ...references.map((path, index) => ({
@@ -493,11 +516,30 @@ function practiceFindings(source: SkillSource): SkillFinding[] {
       rel: source.rel,
       detail: `missing section: ${section}`,
     }))
-  const ledger = source.hasLedger
-    ? []
-    : [{ rel: source.rel, detail: `missing ledger: ${PRACTICE_LEDGER}` }]
 
-  return [...sections, ...ledger]
+  return [...sections, ...ledgerFindings(source)]
+}
+
+/**
+ * A ledger present but citing nothing passed for as long as the check read the
+ * file's existence alone, so the contents are read too. A sample block shows a
+ * reader the shape of a row and cites nothing, so fences and code spans are
+ * left out.
+ */
+function ledgerFindings(source: SkillSource): SkillFinding[] {
+  if (source.ledger === undefined) {
+    return [{ rel: source.rel, detail: `missing ledger: ${PRACTICE_LEDGER}` }]
+  }
+
+  const cites = bodyLines(source.ledger)
+    .filter((line) => !line.fenced)
+    .map((line) => maskCodeSpans(line.text))
+    .some((text) => EXTERNAL_LINK.test(text) || HOUSE_CHOICE.test(text))
+  if (cites) return []
+
+  return [
+    { rel: source.rel, detail: `ledger cites nothing: ${PRACTICE_LEDGER}` },
+  ]
 }
 
 /**

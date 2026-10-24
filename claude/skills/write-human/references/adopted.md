@@ -5,7 +5,10 @@ description: Which external writing patterns this skill adopted, which it declin
 
 # Source material
 
-Two external writing skills were read as source material for this one. The first catalogs 31 patterns of machine-sounding prose. The second layers document mode, sentence construction, information density, and ambiguity prevention.
+Two external writing skills were read as source material for this one.
+
+- **[humanizer](https://github.com/blader/humanizer)** catalogs 31 patterns of machine-sounding prose
+- **An unidentified second skill** layers document mode, sentence construction, information density, and ambiguity prevention. No record of the read named it, so it carries no link.
 
 Neither was imported wholesale, and one measurement settles why. Read this before adding a rule from outside this corpus, and extend the position below rather than deriving a second one.
 

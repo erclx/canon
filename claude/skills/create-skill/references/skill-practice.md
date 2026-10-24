@@ -43,6 +43,7 @@ Follow every concern group with `## Excuses and rebuttals`, `## Red flags`, and 
 
 - Carry `references/adopted.md` in every practice skill, recording each external source the body draws on.
 - Link each source, or pin it to a commit, so a reader can open the version the body adopted.
+- Mark a threshold no source states as a table row whose source cell opens with `House choice`, since a ledger carrying neither a link nor one such row cites nothing and the audit fails it.
 - State what was adopted, what was declined, and why for each, so a later session extends the position rather than re-deriving it.
 - Draw first from the default shelf, [Software Engineering at Google](https://abseil.io/resources/swe-book/html/toc.html) and [Google's engineering practices](https://google.github.io/eng-practices/), and record a source from elsewhere the same way.
 

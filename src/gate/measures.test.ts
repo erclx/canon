@@ -1164,7 +1164,10 @@ describe('skillPracticeShape', () => {
       join(dir, 'SKILL.md'),
       `---\nname: ${basename(rel)}\ndescription: Applies a practice.\n---\n\n# Practice\n\n${body}`,
     )
-    writeFileSync(join(dir, 'references', 'adopted.md'), '# Adopted\n')
+    writeFileSync(
+      join(dir, 'references', 'adopted.md'),
+      '# Adopted\n\n[A source](https://example.com) states it.\n',
+    )
   }
 
   /**

@@ -384,7 +384,7 @@ export const skillProvenance: Measure = async (ctx) => {
 
 /**
  * Every listed practice skill against the closing sections, and every skill on
- * the wider ledger list against the ledger, both of which
+ * the wider ledger list against a ledger that cites something, both of which
  * `claude/skills/create-skill/references/skill-practice.md` requires.
  *
  * Read in-process for the reason `skillProvenance` is, so the verb keeps its
@@ -407,14 +407,14 @@ export const skillPracticeShape: Measure = async (ctx) => {
       .join(', ')
     return {
       emissions: [],
-      failure: `${plural(found.length, 'practice shape finding')}: ${where}. Add the closing H2 exactly as named to a practice skill, or the ledger at ${PRACTICE_LEDGER} to any skill on the ledger list.`,
+      failure: `${plural(found.length, 'practice shape finding')}: ${where}. Add the closing H2 exactly as named to a practice skill, or the ledger at ${PRACTICE_LEDGER} to any skill on the ledger list, citing one linked source or one House choice row.`,
     }
   }
 
   return {
     emissions: [
       info(
-        `${plural(PRACTICE_SKILLS.length, 'practice skill')} carry every closing section, and ${plural(LEDGER_SKILLS.length, 'listed skill')} carry a ledger`,
+        `${plural(PRACTICE_SKILLS.length, 'practice skill')} carry every closing section, and ${plural(LEDGER_SKILLS.length, 'listed skill')} carry a ledger citing a source`,
       ),
     ],
   }

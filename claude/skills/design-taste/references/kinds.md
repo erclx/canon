@@ -30,7 +30,13 @@ Dashboards, tools, admin surfaces, agentic and assistant interfaces. The reader 
 - **An agentic surface adds three states.** Work running with something to read, work that needs the person, and work finished with a result to inspect. Each rests visibly, never as a spinner.
 - **Chrome is persistent and quiet.** Navigation, status and context stay put and stay recessive, since they are read constantly and looked at rarely.
 - **Motion is feedback, not entrance.** A thing moving should be reporting that something changed.
+- **The visual direction lends four things.** Type, palette, density, and one signature move. Layout, the navigation model, and the controls stay the category's own.
+- **A borrowed interface lends the same four.** A direction taken from a terminal or an instrument panel gives only what transfers, and the working screen never dresses up as its source.
+- **Check each render against its category.** Cover the product name and ask whether the screen reads as a tool of its kind and whether the task can be done from it.
+- **A command shows its shortcut.** A menu row carries the keys at its right edge and a tooltip names them beside the command, in the platform's own spelling.
 - **Where a rule from another kind is wrong here:** generous whitespace, entrance animation on every panel, and hero-scale typography all read as a marketing page wearing a product's clothes.
+
+The direction limits and the category check restate [Impeccable](https://github.com/pbakaus/impeccable)'s guidance for app screens. The shortcut placement follows [NN/g](https://www.nngroup.com/articles/ui-copy/).
 
 ## Content and long-form
 
