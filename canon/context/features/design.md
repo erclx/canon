@@ -26,7 +26,7 @@ Owns the token module, the component layer, the renderers, the markdown parser, 
 The skills and docs around the module each own one slice.
 
 - `claude/skills/design-record/` owns the record's standard and the reference folder's, and the steps that land a pick in `canon/design/` and carry its values into the record
-- `claude/skills/design-taste/` owns the layer model, the coherence locks, and grey-boxing, and `governance/rules/ui/design-taste.md` routes rendered-surface and `canon/DESIGN.md` edits to it
+- `claude/skills/design-taste/` owns the layer model, the coherence locks, and grey-boxing, and `governance/rules/ui/craft.md` routes rendered-surface and `canon/DESIGN.md` edits to it
 - `assets/brand/mark.svg` is the one authored icon, and the path data in `src/design/render.ts` and the README `mark-accent` pair are static copies nothing compares
 - `examples/design/` owns an intent record for an invented project, with no committed capture
 - `canon design --help` owns the `canon design` flags, and `docs/workflow/visual-design-workflow.md` the plan, build, and review loop
@@ -36,5 +36,5 @@ The skills and docs around the module each own one slice.
 - `canon design regen` resolves outputs from `PROJECT_ROOT`, the installed package in a target, and refuses there rather than writing into `node_modules`
 - The Typography table cannot hold the type steps, since `table()` in `src/design/parse.ts` reads every pipe row of a section as one table
 - `web/src/styles/tokens.css` is written flat by `bun run web:tokens` and wrapped at 80 columns by oxfmt, so a value that renders past that width fails the `design` stage on drift
-- The `surface-capture` rule reads breakpoints from the record's `## Layout` as text, and the `capture widths` test in `src/design/css.test.ts` is its only check
+- The `ui-craft` capture reference reads breakpoints from the record's `## Layout` as text, and the `capture widths` test in `src/design/css.test.ts` is its only check
 - A code-span cell keeps its backticks in `design.css` and paints nothing, and a non-hex value such as `ANSI 33` emits no `style`, so write a color cell as a bare hex

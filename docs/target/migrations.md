@@ -187,12 +187,12 @@ A web project's `e2e/screenshot.ts` is a config. It now loads `CASES` from a see
 - Evidence now defaults to `e2e/evidence/`. Set `export const EVIDENCE_ROOT = 'evidence'` in `e2e/capture/cases.ts` to keep a committed baseline at the old path.
 - A run from a folder with no `e2e/capture/cases.ts` exits 1 and names the file.
 
-## Add the rules a split left behind, once
+## Fold the ui rules onto one pointer, once
 
-The splits created `pointer` and `ux-controls`, and sync refreshes only held rules. `canon gov sync` now names the missing partner of `keyboard.md` and `ux-completeness.md` on every run and adds nothing itself. `a11y.md` gained two bullets and lost none, so it needs no partner.
+Eleven ui rules moved unchanged into the `ui-craft` skill, being `a11y`, `keyboard`, `pointer`, `forms`, `motion`, `ux-controls`, `ux-completeness`, `surface-capture`, `copy`, `interface-casing`, and `link-behavior`. Update the plugin, then sync, which folds each one you hold and `design-taste.md` onto one `craft.md` pointer without local edits.
 
 ```bash
-canon gov install --add pointer,ux-controls --yes .
+canon gov sync .
 ```
 
 ## Group a long paths section in `CLAUDE.md`, once

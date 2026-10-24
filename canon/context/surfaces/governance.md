@@ -13,7 +13,7 @@ Owns the rules that steer AI agents working in a project. Source rules are `.md`
 
 ### `governance/rules/`
 
-Holds the source rules, one subfolder per audience, each at `<folder>/<slug>.md` with no number and a basename that is unique and never a folder name.
+Holds the source rules, one subfolder per audience, each at `<folder>/<slug>.md` with no number and a basename that is unique and never a folder name. `ui/` holds only the `craft` pointer and `design-reference`, since the ui practice lives in the `ui-craft` skill.
 
 - `code/`, `claude/`, `canon/`, `tooling/`, and `writing/` serve a project's code, session conduct, workflow, dev setup, and prose, and `lang/`, `framework/`, `lib/`, and `ui/` are opt-in
 - A rule with `paths:` loads when Claude reads or writes a matching file, one without always applies like `CLAUDE.md`, and the Cursor keys `globs`, `alwaysApply`, and `priority` must not appear
