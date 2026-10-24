@@ -422,6 +422,9 @@ export function longestRun(
  * continuing a bullet do fold in, so a heavy bullet cannot fall under the
  * checkpoint by being wrapped across two source lines. A fenced line closes the
  * open bullet, which keeps a bullet from absorbing the example below it.
+ *
+ * A bullet is measured without its list marker, the way the `bullet-length`
+ * gate measures it, so the count and the gate agree at the checkpoint.
  */
 export function heavyBullets(
   lines: readonly BodyLine[],
@@ -470,7 +473,7 @@ function foldBullets(
       close()
       open = {
         line: line.number,
-        characters: visibleText(text).length,
+        characters: visibleText(text.replace(LIST_ITEM, '')).length,
         text,
         indent: item[1].length,
       }
