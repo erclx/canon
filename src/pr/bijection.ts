@@ -150,6 +150,7 @@ function coversIgnoreAddition(
  * path written short from a path written wrong.
  */
 function covers(claim: PathClaim, path: string): boolean {
+  if (claim.bare) return path === claim.path
   if (claim.directory) {
     return claim.anchored
       ? path.startsWith(claim.path)
@@ -212,6 +213,8 @@ export function compareKeyChanges(input: BijectionInput): Bijection {
       continue
     }
 
+    if (claim.bare) continue
+
     if (claim.anchored && claim.leading && !evidenceUnread) unmet.push(claim)
     else unresolved.push(claim)
   }
@@ -240,9 +243,8 @@ export function compareKeyChanges(input: BijectionInput): Bijection {
  * and an unanchored claim never accuses, so the first branch to open one would
  * silently lose the graded direction.
  *
- * A path with no folder above it contributes nothing, since a claim carrying no
- * slash never reaches the extractor's output and no root would ever be read
- * against it.
+ * A path with no folder above it contributes nothing, since a bare claim is
+ * never anchored and no root would ever be read against it.
  */
 export function treeRoots(
   tracked: readonly string[],

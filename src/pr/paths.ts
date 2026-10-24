@@ -36,6 +36,16 @@ export interface PathClaim {
    * accuse with.
    */
   readonly leading: boolean
+  /**
+   * True when the span carried no slash, such as `README.md` or `bun`.
+   *
+   * A bare claim credits a changed file whose whole path is exactly that name
+   * and nothing else, so `package.json` never reaches `web/package.json`. It
+   * never accuses: nothing separates a bare file name from a word of prose, so
+   * one matching no changed file is reported nowhere. Same asymmetry as
+   * `anchored` and `leading`.
+   */
+  readonly bare: boolean
   /** The span exactly as the body wrote it, before the line suffix came off. */
   readonly span: string
   /** One-based index of the bullet inside the section. */
@@ -282,17 +292,22 @@ function splitBullets(section: string): string[] {
 interface ResolvedSpan {
   readonly path: string
   readonly directory: boolean
+  readonly bare: boolean
 }
 
 function resolveSpan(span: string): ResolvedSpan | undefined {
   if (span === '' || isNotRepositoryPath(span)) return undefined
 
-  // A bare name is the fourth observed false-positive class and it drops
-  // outright. Resolved as a sibling of a path earlier in the bullet it produced
-  // seven wrong paths across this corpus against two right ones, because a
-  // compound bullet names a sibling folder as often as a sibling file. Dropping
-  // it under-reports in the unnamed direction and never fires in the other.
-  if (!span.includes('/')) return undefined
+  // A bare name cannot be resolved as a sibling of a path earlier in the
+  // bullet: that produced seven wrong paths across this corpus against two right
+  // ones, because a compound bullet names a sibling folder as often as a sibling
+  // file. It resolves to itself as a root-level path and is marked bare, which
+  // keeps it from ever accusing.
+  if (!span.includes('/')) {
+    return isDottedNumber(span)
+      ? undefined
+      : { path: span, directory: false, bare: true }
+  }
 
   if (span.endsWith('/')) {
     // A single top-level folder is never a claim. Nobody reports having changed
@@ -300,10 +315,12 @@ function resolveSpan(span: string): ResolvedSpan | undefined {
     // something lives.
     return span.indexOf('/') === span.length - 1
       ? undefined
-      : { path: span, directory: true }
+      : { path: span, directory: true, bare: false }
   }
 
-  return isDottedNumber(span) ? undefined : { path: span, directory: false }
+  return isDottedNumber(span)
+    ? undefined
+    : { path: span, directory: false, bare: false }
 }
 
 /**
@@ -371,7 +388,9 @@ export function extractKeyChangePaths(
 
       const resolved = resolveSpan(bare)
       if (resolved === undefined) continue
-      claimed = true
+      // A bare span is no evidence a path claim came first, so it leaves the
+      // citation guard above reading only the claims it was written for.
+      if (!resolved.bare) claimed = true
       // First occurrence wins, across bullets as well as inside one. A path
       // named trailing here and leading three bullets later keeps the weaker
       // reading, which loses an accusation and can never add one.
@@ -381,8 +400,11 @@ export function extractKeyChangePaths(
       claims.push({
         path: resolved.path,
         directory: resolved.directory,
-        anchored: roots.has(resolved.path.slice(0, resolved.path.indexOf('/'))),
+        anchored:
+          !resolved.bare &&
+          roots.has(resolved.path.slice(0, resolved.path.indexOf('/'))),
         leading: match.start < accusesBefore,
+        bare: resolved.bare,
         span,
         bullet: index + 1,
         preview,
