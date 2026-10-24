@@ -113,6 +113,17 @@ export interface SyncPlan {
 }
 
 /**
+ * What an applied rule governs in the target. `paths` empty means the rule
+ * loads everywhere, and `files` unset means the target could not be listed.
+ */
+export interface RuleCoverage {
+  readonly rule: string
+  readonly paths: readonly string[]
+  readonly files: number | undefined
+  readonly ui: boolean
+}
+
+/**
  * What a headless run does once the plan has changes. Domains whose files the
  * toolkit owns apply them. Domains whose files a project is expected to edit
  * refuse, because an unattended overwrite of a customized file is data loss
