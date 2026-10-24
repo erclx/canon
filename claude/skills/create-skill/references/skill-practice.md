@@ -9,7 +9,7 @@ Applies to a practice skill, one carrying engineering judgment a session applies
 
 ## Scope
 
-Governs the closing sections of a practice skill's `skills/<name>/SKILL.md` and the source ledger at `skills/<name>/references/adopted.md` beside it.
+Governs the closing sections of a practice skill's `skills/<name>/SKILL.md`, the source ledger at `skills/<name>/references/adopted.md` beside it, and the per-bullet ledgers a listed skill carries.
 
 Does not govern:
 
@@ -46,6 +46,16 @@ Follow every concern group with `## Excuses and rebuttals`, `## Red flags`, and 
 - Mark a threshold no source states as a table row whose source cell opens with `House choice`, since a ledger carrying neither a link nor one such row cites nothing and the audit fails it.
 - State what was adopted, what was declined, and why for each, so a later session extends the position rather than re-deriving it.
 - Draw first from the default shelf, [Software Engineering at Google](https://abseil.io/resources/swe-book/html/toc.html) and [Google's engineering practices](https://google.github.io/eng-practices/), and record a source from elsewhere the same way.
+
+## Per-bullet ledgers
+
+A skill whose files list outside-practice directives one per bullet takes a ledger per such file beside `adopted.md`, with one table row per bullet under each H2, the way a governance rule's ledger does.
+
+- Name each directing file, a rule reference or a `SKILL.md`, on the per-bullet list `canon claude skills audit` keeps
+- The audit fails a listed file whose bullets and rows disagree in count under any heading, and a listed file the skill no longer carries
+- Leave off a checklist restating rules a ledgered file sources, which would cite each source twice, and a glossary, whose definitions direct nothing
+- Keep the rows outside the plugin, so a target pays nothing for them
+- Move a source out of `adopted.md` once its row lands in a ledger, since two copies drift on the first edit. `adopted.md` keeps the catalog-level record and the sources behind any unlisted file.
 
 ## Which skills are practice skills
 
