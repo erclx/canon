@@ -68,6 +68,7 @@ function unmeasuredTooling(): ToolingReport {
     chain: [],
     counts: {
       configs: 0,
+      customized: 0,
       seeds: 0,
       scripts: 0,
       deps: 0,
@@ -271,6 +272,36 @@ describe('buildToolingReport', () => {
 
     expect(report.counts.configs).toBe(0)
     expect(report.changes).toBe(0)
+  })
+
+  it('should count a customized config whose golden moved under customized', () => {
+    writeStack('base')
+    writeFileSync(join(TARGET, 'base.config.json'), 'mine\n')
+    mkdirSync(dirname(stampPath(TARGET)), { recursive: true })
+    writeFileSync(
+      stampPath(TARGET),
+      JSON.stringify({
+        covers: ['tooling'],
+        domains: {
+          tooling: {
+            syncedAt: 'then',
+            files: {},
+            chain: ['base'],
+            dispositions: {
+              'base.config.json': {
+                disposition: 'customized',
+                base: 'sha256:older',
+              },
+            },
+          },
+        },
+      }),
+    )
+
+    const report = buildToolingReport(TOOLKIT, TARGET, readStamp(TARGET))
+
+    expect(report.counts).toMatchObject({ configs: 0, customized: 1 })
+    expect(report.changes).toBe(1)
   })
 })
 
