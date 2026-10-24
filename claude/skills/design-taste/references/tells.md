@@ -77,7 +77,7 @@ The browser and the operating system draw some parts of every page, and a themed
 
 ## The countable limits
 
-These rules carry numbers, so they are checked by counting rather than by judging. Each number is a house choice made so the tell can be counted, and `adopted.md` records it as one.
+These rules carry numbers, so they are checked by counting rather than by judging. Each number is a house choice made so the tell can be counted, and its source row records it as one.
 
 - **A layout family appears once.** Once a section uses a shape, no other section on the surface uses it. Eight sections need at least four distinct families.
 - **Two consecutive splits, never three.** Alternating image sides reads as considered twice and as filler by the third. Break it with a full-width section, a vertical stack, or a grid.
@@ -96,4 +96,4 @@ These rules carry numbers, so they are checked by counting rather than by judgin
 
 ## Adopted, declined, and why
 
-Most items here are observations of what models draw unguided, gathered from community prompt skills rather than from a design authority. The record of which were adopted, which declined, and why sits in `adopted.md` beside this file, with the few an authority states and the links to the catalog behind the rest.
+Most items here are observations of what models draw unguided, gathered from community prompt skills rather than from a design authority. The record of which catalogs were read, which items were declined, and why sits in `adopted.md` beside this file, and it says where each item's own source row sits.
