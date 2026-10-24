@@ -1,0 +1,7 @@
+### What happened
+
+A webhook delivery that fails is dropped rather than retried, so a receiver that is down for a minute loses the event.
+
+### Expected
+
+A failed delivery retries with a backoff before it is given up.
