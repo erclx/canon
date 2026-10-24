@@ -56,12 +56,19 @@ export function destinationPath(entry: string): string {
  * shorter entry can claim its prefix, and each entry is escaped because two of
  * them carry a dot.
  */
+const ENTRY_ALTERNATION = [...MOVED_ENTRIES]
+  .sort((left, right) => right.length - left.length)
+  .map(escape)
+  .join('|')
+
 const CITATION = new RegExp(
-  `${escape(FROM_ROOT)}/(${[...MOVED_ENTRIES]
-    .sort((left, right) => right.length - left.length)
-    .map(escape)
-    .join('|')})(?![A-Za-z0-9._-])`,
+  `${escape(FROM_ROOT)}/(${ENTRY_ALTERNATION})(?![A-Za-z0-9._-])`,
   'g',
+)
+
+/** A gitignore line that is wholly an entry for one moved folder or file. */
+const IGNORE_ENTRY = new RegExp(
+  `^/?${escape(FROM_ROOT)}/(?:${ENTRY_ALTERNATION})/?$`,
 )
 
 function escape(value: string): string {
@@ -386,6 +393,30 @@ export function scanText(text: string): {
   return { rewritten, kept, globs, crossRepo, dated }
 }
 
+/**
+ * Deletes each live line that is wholly an entry for a moved folder, counting
+ * them. Only a root `.gitignore` that already ignores `.canon/` may be handed
+ * here, since the dropped line is redundant only under that entry. Splitting on
+ * `\n` and matching the trimmed line leaves CRLF endings and a missing final
+ * newline on the lines that stay.
+ */
+export function dropCoveredIgnoreLines(text: string): {
+  readonly text: string
+  readonly dropped: number
+} {
+  const lines = text.split('\n')
+  const frontmatterEndIndex = frontmatterEnd(lines)
+  const kept = lines.filter(
+    (line, index) =>
+      !(
+        IGNORE_ENTRY.test(line.trim()) &&
+        classifyLine(lines, index, frontmatterEndIndex) === 'live'
+      ),
+  )
+
+  return { text: kept.join('\n'), dropped: lines.length - kept.length }
+}
+
 /** Where a citation sits, so a reader can judge it before `--write` runs. */
 export interface CitationLine {
   readonly line: number
@@ -503,6 +534,7 @@ export interface CitationEntry {
   readonly text: string
   readonly rewritten: number
   readonly kept: number
+  readonly dropped: number
 }
 
 /** One file whose frontmatter `paths:` glob names a moved root, held rather than rewritten. */
@@ -533,6 +565,7 @@ export interface RecordsPlan {
   readonly crossRepoCitations: readonly CrossRepoCitationEntry[]
   readonly datedCitations: readonly DatedCitationEntry[]
   readonly rewritten: number
+  readonly dropped: number
   readonly kept: number
   readonly globs: number
   readonly crossRepo: number
@@ -578,7 +611,11 @@ export function planRecordsMove(
       continue
     }
 
-    const counts = scanText(source.text)
+    const swept =
+      source.path === '.gitignore' && ignoresDestination(source.text)
+        ? dropCoveredIgnoreLines(source.text)
+        : { text: source.text, dropped: 0 }
+    const counts = scanText(swept.text)
     kept += counts.kept
     globs += counts.globs
     crossRepo += counts.crossRepo
@@ -599,15 +636,16 @@ export function planRecordsMove(
     if (dates.length > 0)
       datedCitations.push({ path: source.path, lines: dates })
 
-    if (counts.rewritten === 0) continue
+    if (counts.rewritten === 0 && swept.dropped === 0) continue
 
     if (referencesExcluded(source.text)) coupled.push(source.path)
 
     entries.push({
       path: source.path,
-      text: rewriteText(source.text),
+      text: rewriteText(swept.text),
       rewritten: counts.rewritten,
       kept: counts.kept,
+      dropped: swept.dropped,
     })
   }
 
@@ -621,6 +659,7 @@ export function planRecordsMove(
     crossRepoCitations,
     datedCitations,
     rewritten: entries.reduce((sum, entry) => sum + entry.rewritten, 0),
+    dropped: entries.reduce((sum, entry) => sum + entry.dropped, 0),
     kept,
     globs,
     crossRepo,
