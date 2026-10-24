@@ -58,7 +58,7 @@ For each remaining issue, measure its claim against the tree during this pass, n
 
 Classify each against the toolkit's own surfaces:
 
-- **Direct fix.** One surface, one file, no architectural choice. A typo, a stale reference, a one-line correction.
+- **Direct fix.** A size, not an answer, so it suggests `plan` and `Fix:` says a short plan covers it. One surface, one file, no architectural choice. A typo, a stale reference, a one-line correction.
 - **Plan-worthy.** Multiple files, a new skill or rule, a behavior change, or a cross-surface move.
 - **Needs clarification.** The observed and expected behavior conflict or the surface is unnamed. The item asks the operator for the missing detail.
 
@@ -72,7 +72,7 @@ Write one item per issue in the intake item format, one cluster file per domain 
 
 - `Problem:` states what this pass measured, with the count, path, or commit behind it
 - `Fix:` states the class from Step 4 and the change it names
-- `Open:` reads `fix, plan, ask, or decline?` on every item
+- `Open:` reads `plan, ask, or decline?` on every item
 - `Suggested:` opens with exactly one of those tokens, then the reason
 - `You:` ships empty
 
@@ -85,14 +85,14 @@ Write `00-overview.md` last, per the intake standard, with the counts by token, 
 
 **Filed:** <N> issues across <N> clusters, measured against <sha>
 **Skipped:** <n> already carried
-**Suggested:** <n> fix, <n> plan, <n> ask, <n> decline
+**Suggested:** <n> plan, <n> ask, <n> decline
 
 Next: /canon:plan-intake-answer to answer the `You:` slots
 ```
 
-An answered fix or plan item promotes through `task-board` with an `Issue: #NNN` line, and the shipping pull request's `Closes #NNN` drains the queue. Closing a declined issue on GitHub stays the operator's act.
+An answered plan item promotes through `task-board` with an `Issue: #NNN` line, and the shipping pull request's `Closes #NNN` drains the queue. Closing a declined issue on GitHub stays the operator's act.
 
 ## Notes
 
 - The `feedback` label is what `canon feedback` and the `toolkit-feedback.yml` issue form both apply.
-- This skill files and never reimplements. `plan-intake-answer` owns the answers and `task-board` owns the task a fix becomes.
+- This skill files and never reimplements. `plan-intake-answer` owns the answers and `task-board` owns the task a plan item becomes.
