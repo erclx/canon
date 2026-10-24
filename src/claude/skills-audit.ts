@@ -5,8 +5,8 @@ import { plural } from '@/cli/ui'
 import {
   compareLedger,
   countLedgerRows,
+  type HeadingCount,
   type LedgerMismatch,
-  measureRule,
 } from '@/gov/audit'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import {
@@ -183,6 +183,12 @@ const ISO_DATE = /\b\d{4}-\d{2}-\d{2}\b/g
 const ISSUE_NUMBER = /(?<![\w&/#])#\d+\b/g
 
 const TOP_LEVEL_BULLET = /^(?:[-*+]|\d+[.)])\s/
+
+/**
+ * A line a skill ledger pairs with a row: a top-level `- ` bullet as a rule
+ * writes one, or a top-level ordered step, which states a directive as surely.
+ */
+const LEDGERED_LINE = /^(?:- |\d+[.)]\s)/
 
 const WORD = /\S*[\p{L}\p{N}]\S*/gu
 
@@ -414,8 +420,8 @@ async function readSkill(
 }
 
 /**
- * Pairs each ledgered file's bullets with its ledger's rows through the rule
- * audit's own comparison, so a skill file and a rule are held to one count.
+ * Pairs each ledgered file's directives with its ledger's rows through the rule
+ * audit's own comparison, so a skill file and a rule mismatch alike.
  */
 async function readReferenceLedgers(
   root: string,
@@ -429,13 +435,36 @@ async function readReferenceLedgers(
       const ledgerPath = join(root, ledgerRel)
       const mismatches = existsSync(ledgerPath)
         ? compareLedger(
-            measureRule(text).groups,
+            ledgerGroups(text),
             countLedgerRows(await Bun.file(ledgerPath).text()),
           )
         : undefined
       return { rel: join(skillRel, path), ledgerRel, mismatches }
     }),
   )
+}
+
+/**
+ * Directives per H2, `null` for any above the first. A contents list repeats
+ * the headings rather than stating a rule, so `## Contents` takes no rows. A
+ * nested bullet elaborates its parent, so only a top-level line counts.
+ */
+function ledgerGroups(text: string): HeadingCount[] {
+  const counts = new Map<string | null, number>()
+  let heading: string | null = null
+
+  for (const line of bodyLines(text)) {
+    if (line.fenced) continue
+    const section = SECTION.exec(line.text)?.[1]
+    if (section !== undefined) {
+      heading = section
+      continue
+    }
+    if (heading === CONTENTS_SECTION || !LEDGERED_LINE.test(line.text)) continue
+    counts.set(heading, (counts.get(heading) ?? 0) + 1)
+  }
+
+  return [...counts].map(([key, count]) => ({ heading: key, count }))
 }
 
 /**

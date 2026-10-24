@@ -903,6 +903,43 @@ describe('auditSkills reference ledgers', () => {
     expect(report.practiceShape).toEqual([])
   })
 
+  it('should ask no rows of a contents list', async () => {
+    writeReference(
+      '# Accessibility\n\n## Contents\n\n- [Semantics](#semantics)\n\n## Semantics\n\n- One.\n- Two.\n',
+    )
+    writeLedger(MATCHED)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+
+  it('should report an ordered step carrying no row', async () => {
+    writeReference(
+      '# Accessibility\n\n## Semantics\n\n- One.\n- Two.\n1. Three.\n',
+    )
+    writeLedger(MATCHED)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      { rel: reference, detail: '## Semantics: 3 bullets, 2 ledger rows' },
+    ])
+  })
+
+  it('should ask a table of a heading holding only ordered steps', async () => {
+    writeReference(
+      '# Accessibility\n\n## Semantics\n\n- One.\n- Two.\n\n## Steps\n\n1. Expand.\n   - A nested note.\n2. Contract.\n',
+    )
+    writeLedger(MATCHED)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      { rel: reference, detail: '## Steps: 2 bullets, 0 ledger rows' },
+    ])
+  })
+
   it('should ask no per-bullet ledger of the source record', async () => {
     writeLedger(MATCHED)
     writeFileSync(
