@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.60.0](https://github.com/erclx/canon/compare/v5.59.0...v5.60.0) (2026-10-24)
+
+
+### Features
+
+* **design:** add canon design audit verb ([#2661](https://github.com/erclx/canon/issues/2661)) ([303a52a](https://github.com/erclx/canon/commit/303a52ada294d9740205885336b6f1ce006ddbba))
+* **skills:** reach design-taste in planner and later review passes ([#2657](https://github.com/erclx/canon/issues/2657)) ([dedc351](https://github.com/erclx/canon/commit/dedc35132a57cf8f82e9a25603e6128e0c77d6ed))
+* **tooling:** bound the dev dependency install ([#2666](https://github.com/erclx/canon/issues/2666)) ([09017a6](https://github.com/erclx/canon/commit/09017a6bfcf11d3feffa1eccfa1ec99f8a0ff3ae))
+
+
+### Bug Fixes
+
+* **sync:** drop retired domains when reading the stamp ([#2664](https://github.com/erclx/canon/issues/2664)) ([21e0a1c](https://github.com/erclx/canon/commit/21e0a1cccfcab13dba5e50e3a55ea620d0d77907))
+
 ## [5.59.0](https://github.com/erclx/canon/compare/v5.58.0...v5.59.0) (2026-10-24)
 
 
