@@ -83,7 +83,8 @@ Read the doc each line names before running one of these. `canon docs install-an
 
 - `canon sync` runs every installed domain's sync, so it carries each risk below.
 - `canon gov sync` replaces a rule you edited and deletes a rule the toolkit retired, edited or not.
-- `canon tooling sync --write` replaces every golden config a stack ships. Seeds are copy-once. Nothing writes without the flag. See `canon docs sync`.
+- `canon tooling sync --write` replaces a golden config canon changed and holds one you edited until `--replace <path>` names it. Nothing writes without the flag. See `canon docs sync`.
+- `canon tooling inject` replaces every golden config a stack ships, skipping only a declined or customized path.
 
 ### Migrate and indexes
 
