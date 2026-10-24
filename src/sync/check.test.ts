@@ -248,6 +248,30 @@ describe('buildToolingReport', () => {
 
     expect(report.counts.configs).toBe(1)
   })
+
+  it('should drop a declined config from the counts', () => {
+    writeStack('base')
+    mkdirSync(dirname(stampPath(TARGET)), { recursive: true })
+    writeFileSync(
+      stampPath(TARGET),
+      JSON.stringify({
+        covers: ['tooling'],
+        domains: {
+          tooling: {
+            syncedAt: 'then',
+            files: {},
+            chain: ['base'],
+            dispositions: { 'base.config.json': { disposition: 'declined' } },
+          },
+        },
+      }),
+    )
+
+    const report = buildToolingReport(TOOLKIT, TARGET, readStamp(TARGET))
+
+    expect(report.counts.configs).toBe(0)
+    expect(report.changes).toBe(0)
+  })
 })
 
 describe('installedStampDomains', () => {
