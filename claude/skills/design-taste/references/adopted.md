@@ -48,7 +48,7 @@ Each rule below is stated by the type reference or the CSS property that impleme
 | Orphans             | [MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/text-wrap): `balance` suits "a short number of lines, such as headings, captions, and blockquotes"     |
 | Hanging punctuation | [MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/hanging-punctuation): "An opening bracket or quote at the start of the first formatted line" hangs     |
 
-Casing is the `interface-casing` rule's, which `craft.md` points at rather than restating.
+Casing is the `ui-craft` copy reference's, which `craft.md` points at rather than restating.
 
 ### Optical size, hierarchy, and unfinished work
 
@@ -129,7 +129,7 @@ Each threshold below is the toolkit's, chosen so a tell can be counted rather th
 | Four first-screen text items  | House choice: a label, a headline, a supporting line, and the actions, so a fifth is countable |
 | One layout family, five items | House choice: a repeated shape and a long run become counts a reviewer can check               |
 
-The uppercase label count belongs to the `interface-casing` rule, whose own ledger records it as a house choice.
+The uppercase label count belongs to the `ui-craft` copy reference, whose own ledger records it as a house choice.
 
 ### The focus ring's weight
 

@@ -39,7 +39,7 @@ Reaching for size is the first instinct and the weakest tool.
 - **Measure.** Body text running the full width of a wide container is unreadable however good the type is.
 - **Figures in columns.** Numbers that change, in a table, a price or a timer, need tabular figures or the column jitters.
 - **Tracking by size.** Large type wants tighter letter spacing, small uppercase labels want looser. Body text wants whatever the face was drawn with.
-- **Casing.** Sentence case for headings and labels. `interface-casing` states the rule and its exceptions.
+- **Casing.** Sentence case for headings and labels. The `ui-craft` copy reference states the rule and its exceptions.
 
 ## Depth and texture
 
