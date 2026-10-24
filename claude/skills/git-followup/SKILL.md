@@ -18,7 +18,8 @@ its own reply, so skip the comment in step 7. The push and body sync still run.
 - If `git branch --show-current` is empty, stop: `❌ Detached HEAD. Checkout the PR branch first.` This runs ahead of the next guard, which reads `@{u}`.
 - If `git status --porcelain` is empty and no commit is unpushed, stop: `❌ No changes to ship.`
   - A commit is unpushed when `git rev-list @{u}..HEAD` lists one
-  - Every commit is unpushed when `@{u}` does not resolve
+  - Count against `origin/<branch>` when `@{u}` does not resolve and that ref does
+  - Every commit is unpushed only when neither ref resolves
 - Resolve `<number>` once, here, through `canon pr head --json`, reading the record's `number`. Every later step names this `<number>` rather than resolving it again.
 - A record refusing with `ambiguous-pull` stops: `❌ Two open PRs on this branch. Name the one to update.`
 
