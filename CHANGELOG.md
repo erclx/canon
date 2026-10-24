@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.59.0](https://github.com/erclx/canon/compare/v5.58.0...v5.59.0) (2026-10-24)
+
+
+### Features
+
+* **cli:** name the release that retired a verb and find its callers ([#2662](https://github.com/erclx/canon/issues/2662)) ([32fddb5](https://github.com/erclx/canon/commit/32fddb5f8c363441fc18ffb4243c08a65a863a67))
+* **gov:** report rule coverage after gov sync ([#2660](https://github.com/erclx/canon/issues/2660)) ([c087965](https://github.com/erclx/canon/commit/c087965acd64249f8dfbe9ca1d98a7857621d380))
+* **pr:** compose bot pull request merge messages ([#2659](https://github.com/erclx/canon/issues/2659)) ([698991c](https://github.com/erclx/canon/commit/698991c71b6423279756f023c86cd2537ae46017))
+* **sandbox:** add a canon-feedback-triage anchor scenario ([#2656](https://github.com/erclx/canon/issues/2656)) ([ae45573](https://github.com/erclx/canon/commit/ae45573e2b385b97cdfbf300b4d1f9bb0f3db839))
+
+
+### Bug Fixes
+
+* **sync:** write the stamp in the formatter shape ([#2655](https://github.com/erclx/canon/issues/2655)) ([a34c5fb](https://github.com/erclx/canon/commit/a34c5fb2d18314ec31d83640be387057b68638a7))
+
 ## [5.58.0](https://github.com/erclx/canon/compare/v5.57.0...v5.58.0) (2026-10-24)
 
 
