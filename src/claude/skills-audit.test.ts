@@ -635,9 +635,17 @@ const CLOSING = PRACTICE_SECTIONS.map((section) => `## ${section}\n\n- Do\n`)
 
 const [varied = ''] = PRACTICE_SKILLS
 
+const LINKED_LEDGER =
+  '# Adopted\n\n[A source](https://example.com/source) states the rule.\n'
+
 function practiceSkill(
   sections: readonly string[],
-  { name = basename(varied), corpus = 'claude', hasLedger = true } = {},
+  {
+    name = basename(varied),
+    corpus = 'claude',
+    hasLedger = true,
+    ledger = LINKED_LEDGER,
+  } = {},
 ): string {
   const dir = conformingSkill(name, corpus)
   writeFileSync(
@@ -646,7 +654,7 @@ function practiceSkill(
   )
   if (hasLedger) {
     mkdirSync(join(dir, 'references'), { recursive: true })
-    writeFileSync(join(dir, 'references', 'adopted.md'), '# Adopted\n')
+    writeFileSync(join(dir, 'references', 'adopted.md'), ledger)
   }
   return dir
 }
@@ -812,6 +820,74 @@ describe('auditSkills practice shape', () => {
     const report = await auditSkills(root)
 
     expect(report.practiceShape).toEqual([])
+  })
+})
+
+describe('auditSkills ledger contents', () => {
+  const uncited = {
+    rel: varied,
+    detail: `ledger cites nothing: ${join('references', 'adopted.md')}`,
+  }
+
+  beforeEach(() => {
+    listedPracticeSkillsExcept(varied)
+  })
+
+  it('should report a ledger carrying no link and no house choice', async () => {
+    practiceSkill(CLOSING, { ledger: '# Adopted\n\nRead and filtered.\n' })
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([uncited])
+  })
+
+  it('should pass a ledger carrying one link', async () => {
+    practiceSkill(CLOSING, { ledger: LINKED_LEDGER })
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+
+  it('should pass a ledger whose only row is a house choice', async () => {
+    practiceSkill(CLOSING, {
+      ledger:
+        '# Adopted\n\n| Rule | Source |\n| --- | --- |\n| One ring | House choice: picked so it counts |\n',
+    })
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+
+  it('should read a link inside a fenced block as no citation', async () => {
+    practiceSkill(CLOSING, {
+      ledger: '# Adopted\n\n```markdown\n[A source](https://example.com)\n```\n',
+    })
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([uncited])
+  })
+
+  it('should read a house choice inside a fenced block as no citation', async () => {
+    practiceSkill(CLOSING, {
+      ledger: '# Adopted\n\n```markdown\n| One ring | House choice: x |\n```\n',
+    })
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([uncited])
+  })
+
+  it('should read a link inside a code span as no citation', async () => {
+    practiceSkill(CLOSING, {
+      ledger: '# Adopted\n\nWrite `[label](https://example.com)` as a row.\n',
+    })
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([uncited])
   })
 })
 
