@@ -75,6 +75,7 @@ The document opens with `# Feature: <short title>` and one paragraph stating wha
 | `## Current behavior`  | each command run against the thing being changed and what it showed         | When the change touches something that runs       |
 | `## Constraints`       | durable rules the work must respect                                         | When supplied                                     |
 | `## Files to touch`    | each file with a one-line reason                                            | Always                                            |
+| `## Verbatim`          | settled wording that lands unchanged in an existing file, one H3 per block  | When wording is settled                           |
 | `## Design references` | the tracked design folders the change builds against, each with its surface | When Files to touch names a rendered-surface file |
 | `## Verification`      | the test or command that proves each outcome                                | Always                                            |
 | `## Risks`             | conflicts, coupling, and the tricky spots                                   | Always                                            |
@@ -171,6 +172,15 @@ A batch in a fan-in set declares its side in a constraint bullet, ``Fan-in membe
 
 A constraint naming a `.canon/ready/` folder is a third shape beside the hold and the shared path. It makes that folder's files the verbatim source for the paths this plan's `## Files to touch` lists, per `ready.md`, so the executing session copies those paths rather than authoring them.
 
+### Verbatim
+
+A `## Verbatim` section carries wording someone settled, landing in an existing file exactly as written. Wording the planner only proposes stays a `- Suggested:` question, and a whole new file goes in the ready folder per `ready.md`, so the two never describe the same file.
+
+- Give each block an H3 naming it, then a lead sentence with the action, the full path, and the anchor, then a fenced `text` block holding the wording
+- Name the action as Add, Insert, or Replace. A Replace quotes the old line in the lead's code span.
+- Write the block as the project's formatter leaves it, since a formatter that re-pads a table row or rewraps a line makes the grep fail on correct text
+- Give each block one `## Verification` bullet running `grep -cF -e` on its whole first line against its file, so a reworded line fails a check the reviewer already runs.
+
 ### Design references
 
 A plan whose `## Files to touch` names a rendered-surface file (`.tsx`, `.jsx`, `.astro`, `.vue`, `.svelte`, `.html`, or `.css`) carries this section. It tells the building session which accepted design to open before it writes a line.
@@ -260,7 +270,7 @@ This contract inverts the one an intake folder keeps, where an empty slot means 
 
 Each H3 below shows where a section groups once it passes 5 bullets. A section of 5 or fewer drops its H3s and keeps its bullets flat, except `## Risks`, which takes an H3 per risk at any count.
 
-```markdown
+````markdown
 # Feature: <short title>
 
 <One paragraph on what is being built and why now.>
@@ -300,6 +310,16 @@ The files below share <the reason>.
 
 - `<path/to/file>`: <reason>
 
+## Verbatim
+
+### <Block name>
+
+Add as <where> in `<path/to/file>`, after <anchor>.
+
+```text
+<the wording, as the formatter leaves it>
+```
+
 ## Design references
 
 - `canon/design/<surface>/`: <the surface it governs>
@@ -335,4 +355,4 @@ The questions below decide <what>, numbered across the whole section.
 ## Sources
 
 - [<title>](url), backing <decision>: "<passage relied on>"
-```
+````
