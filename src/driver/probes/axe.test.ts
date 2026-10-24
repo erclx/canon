@@ -54,7 +54,7 @@ const COLLIDING = `<!doctype html>
   <head>
     <meta charset="utf-8" /><title>Colliding</title>
     <script>
-      window.axe = { run: () => 'the page' }
+      var axe = { run: () => 'the page' }
       var doT = 'the page'
     </script>
   </head>
