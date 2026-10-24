@@ -75,6 +75,29 @@ describe('the shell stage scope', () => {
   })
 })
 
+describe('the consumer replay stage scope', () => {
+  it('should fire on what a sync ships or reads and on a snapshot', () => {
+    const scope = scopeOf('consumer-replay')
+
+    expect(scope.test('src/sync/run.ts')).toBe(true)
+    expect(scope.test('governance/rules/canon/git.md')).toBe(true)
+    expect(scope.test('tooling/base/configs/.oxfmtrc.json')).toBe(true)
+    expect(
+      scope.test('sandbox/fixtures/replay/jobtriage/CLAUDE.md.fixture'),
+    ).toBe(true)
+  })
+
+  it('should skip a docs-only change and another scenario fixture', () => {
+    const scope = scopeOf('consumer-replay')
+
+    expect(scope.test('docs/agents/commands.md')).toBe(false)
+    expect(scope.test('canon/context/development/sandbox.md')).toBe(false)
+    expect(
+      scope.test('sandbox/fixtures/git/commit/small/create/a.ts.fixture'),
+    ).toBe(false)
+  })
+})
+
 describe('the tests stage scope', () => {
   it('should fire on the root commitlint config and its test', () => {
     const scope = scopeOf('tests')

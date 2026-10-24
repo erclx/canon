@@ -305,6 +305,29 @@ export const STAGES: readonly Stage[] = [
     checks: [{ kind: 'measure', measure: unreferencedRules }],
   },
   {
+    // A defect that only shows after a sync, such as a read crashing on a
+    // rule layout the sync just renamed, passes every unit test and every
+    // stage that reads this repository. Replaying the frozen consumer
+    // snapshots through this checkout's sync is what reaches it before a
+    // consumer does. Scoped to what a sync ships or reads, since a replay
+    // costs seconds a docs-only push should not pay.
+    id: 'consumer-replay',
+    label: 'Consumer replay',
+    scope:
+      /^src\/|^governance\/rules\/|^tooling\/|^sandbox\/fixtures\/replay\//,
+    skipped:
+      'No synced surface or snapshot changed, so no consumer was replayed',
+    checks: [
+      {
+        kind: 'cli',
+        argv: ['sandbox', 'replay'],
+        failure:
+          'A consumer replay crashed, printed unparsable JSON, or left an unformatted write. Run bun src/cli.ts sandbox replay.',
+      },
+    ],
+    success: 'Consumer replays clean',
+  },
+  {
     // The facts the audit can answer from the files gate: a cited path that
     // does not resolve, a required section an entry does not declare, an H2
     // outside the closed set of three, a shape break in an entry under a
