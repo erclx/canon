@@ -16,8 +16,7 @@ absent = [".canon/plans"]
 
 write_scope = [".canon/intake/**"]
 
-# The reply holds the folder and the `plan` token Issue A's suggestion opens with.
-reply = [".canon/intake/01-feedback-triage/", "plan"]
+reply = [".canon/intake/01-feedback-triage/"]
 
 manual = [
   "Issue A is suggested plan and never fix, since a stale reference is a size and v165.1 removed the fix token. Semantic: which cluster file holds the item is the run's call, so a negative pattern cannot anchor it to its row.",
@@ -30,6 +29,13 @@ manual = [
 [[content]]
 path = ".canon/intake/01-feedback-triage/00-overview.md"
 pattern = 'v01\.0'
+
+# The overview counts by token, and Issue A is the one item filed, so a nonzero
+# plan count shows its suggestion opened with `plan`. The reply cannot show it,
+# since the skill's own output prints the token.
+[[content]]
+path = ".canon/intake/01-feedback-triage/00-overview.md"
+pattern = '[1-9]\d* plan'
 
 # The index links a numbered cluster file, which proves the numbering and the
 # domain half of each filename together.
