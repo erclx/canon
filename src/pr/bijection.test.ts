@@ -229,6 +229,63 @@ describe('compareKeyChanges', () => {
   })
 })
 
+describe('compareKeyChanges root files', () => {
+  it('should credit root files named in code spans beside nested paths', () => {
+    const changed = ['README.md', '.gitignore', 'src/pr/paths.ts']
+    const result = read(
+      keyChanges(
+        '- Add `src/pr/paths.ts`.',
+        '- Document it in `README.md` and `.gitignore`.',
+      ),
+      changed,
+    )
+
+    expect(result.kind === 'measured' && result.unnamed).toEqual([])
+    expect(result.kind === 'measured' && result.unmet).toEqual([])
+    expect(
+      result.kind === 'measured' && result.claims.map((c) => c.path),
+    ).toEqual(['src/pr/paths.ts', 'README.md', '.gitignore'])
+  })
+
+  it('should raise nothing for a bare span matching no changed file', () => {
+    const result = read(
+      keyChanges('- Add `src/pr/paths.ts`, setting `true` and `bun` aside.'),
+      ['src/pr/paths.ts'],
+    )
+
+    expect(result.kind === 'measured' && result.unmet).toEqual([])
+    expect(result.kind === 'measured' && result.unresolved).toEqual([])
+  })
+
+  it('should raise nothing for a root file named but unchanged', () => {
+    const result = read(
+      keyChanges('- `README.md` gains a section.', '- Add `src/pr/paths.ts`.'),
+      ['src/pr/paths.ts'],
+    )
+
+    expect(result.kind === 'measured' && result.unmet).toEqual([])
+    expect(result.kind === 'measured' && result.unresolved).toEqual([])
+  })
+
+  it('should not let a root name claim the same file in a nested folder', () => {
+    const result = read(keyChanges('- Bump `package.json`.'), [
+      'web/package.json',
+    ])
+
+    expect(result.kind === 'measured' && result.unnamed).toEqual([
+      'web/package.json',
+    ])
+  })
+
+  it('should credit a root file cited with a line suffix', () => {
+    const result = read(keyChanges('- Fix the note at `README.md:12`.'), [
+      'README.md',
+    ])
+
+    expect(result.kind === 'measured' && result.unnamed).toEqual([])
+  })
+})
+
 describe('treeRoots', () => {
   it('should admit a top-level folder this branch created', () => {
     expect(

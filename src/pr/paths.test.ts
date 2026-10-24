@@ -35,9 +35,19 @@ function body(...bullets: string[]): string {
   ].join('\n')
 }
 
+/** The claims that name a path with a slash, which a bare span is not. */
 function pathsOf(...bullets: string[]): string[] {
   const read = extractKeyChangePaths(body(...bullets), ROOTS)
-  return read.kind === 'read' ? read.claims.map((claim) => claim.path) : []
+  return read.kind === 'read'
+    ? read.claims.filter((claim) => !claim.bare).map((claim) => claim.path)
+    : []
+}
+
+function bareOf(...bullets: string[]): string[] {
+  const read = extractKeyChangePaths(body(...bullets), ROOTS)
+  return read.kind === 'read'
+    ? read.claims.filter((claim) => claim.bare).map((claim) => claim.path)
+    : []
 }
 
 describe('readSection', () => {
@@ -381,6 +391,28 @@ describe('extractKeyChangePaths', () => {
       ROOTS,
     )
 
-    expect(read).toEqual({ kind: 'read', claims: [], bullets: 1 })
+    expect(read.kind === 'read' && read.claims).toMatchObject([
+      { path: 'auto-ship', bare: true, anchored: false },
+    ])
+  })
+
+  it('should read a slash-free span as a bare claim', () => {
+    expect(
+      bareOf('- Update `README.md` and `.gitignore` beside `src/pr/paths.ts`.'),
+    ).toEqual(['README.md', '.gitignore'])
+  })
+
+  it('should keep a path cited by line after a bare span in the same bullet', () => {
+    expect(
+      pathsOf('- Note `README.md`, then `src/pr/paths.ts:12` and `:40`.'),
+    ).toEqual(['src/pr/paths.ts'])
+  })
+
+  it('should strip a line suffix from a bare claim', () => {
+    expect(bareOf('- Fix the note at `README.md:12`.')).toEqual(['README.md'])
+  })
+
+  it('should drop a dotted number even when it carries no slash', () => {
+    expect(bareOf('- Bind `127.0.0.1` in `src/serve/static.ts`.')).toEqual([])
   })
 })
