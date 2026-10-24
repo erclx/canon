@@ -81,7 +81,9 @@ function installAliases(): void {
     return
   }
   if (/^alias clp=/m.test(existing)) {
-    logWarn(`An unmanaged clp alias is already in ${zshrc}. Leaving it untouched.`)
+    logWarn(
+      `An unmanaged clp alias is already in ${zshrc}. Leaving it untouched.`,
+    )
     logWarn('Remove it and re-run to switch to the managed block.')
     return
   }

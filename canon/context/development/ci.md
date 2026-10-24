@@ -51,7 +51,7 @@ The release configuration, the manifests, and the install check sit beside the w
 - The root owns `release-please-config.json`, whose `bootstrap-sha` stops a first run versioning every untagged commit and whose `include-component-in-tag: false` keeps tags `v<semver>`
 - `.claude-plugin/` and `claude/.claude-plugin/` hold the manifests release-please versions, and `.oxfmtrc.jsonc` ignores the files the tool writes
 - `scripts/ci/` owns the programs the long steps call, such as `publish-check.sh` and `refresh-frames-pr.sh`, and a step past five lines moves there
-- `scripts/core/` owns `install-check.sh`, run in CI after `check:ci` and kept out of the local gate because a cold pack-and-install is unmeasured
+- `scripts/core/` owns `install-check.ts`, run in CI after `check:ci` and kept out of the local gate because a cold pack-and-install is unmeasured
 - `package.json` pins `typescript` to the v5 line `@astrojs/check` expects, so `bun add -D typescript` selecting v7 is a compiler upgrade
 
 ## Gotchas

@@ -140,7 +140,7 @@ Bun, Git, and a shell are required, and the GitHub CLI is optional.
 - [Bun](https://bun.sh) for the CLI runtime and scripts
 - [Git](https://git-scm.com) with worktree support
 - [GitHub CLI](https://cli.github.com) (optional) for ship flows
-- Shell: `zsh` or bash 4+ (`brew install bash` on macOS).
+- Shell: `zsh`, since bootstrap appends its aliases to `~/.zshrc`.
 
 Clone the repo, then run the bootstrap script. It installs dependencies, links the CLI globally, and appends a marked block of Claude Code shell aliases to your `~/.zshrc`.
 

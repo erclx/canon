@@ -224,7 +224,7 @@ export function parseExpectation(source: string): Expectation {
 /**
  * `manual` is deliberately excluded. Counting it would let an arm declare five
  * prose lines, assert nothing, and still read green, which is the vacuous case
- * `scripts/core/install-check.sh` warns about in its own comment.
+ * `scripts/core/install-check.ts` warns about in its own comment.
  */
 export function countMechanicalAssertions(expectation: Expectation): number {
   return (

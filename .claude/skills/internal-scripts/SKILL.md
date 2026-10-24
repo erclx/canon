@@ -65,8 +65,8 @@ Read `canon/context/development/local-loop.md` before touching `.claude/hooks/` 
 
 ## Reference
 
-A new domain script is written in TypeScript on Bun. An existing domain script stays bash on `scripts/lib/ui.sh`, frame included, until it moves, and a shell file over 100 lines is edited in place without growing and flagged for a rewrite.
+A new domain script is written in TypeScript on Bun, on the `src/cli/ui.ts` frame. A shell file over 100 lines is edited in place without growing and flagged for a rewrite.
 
-- `canon/context/development/scripts.md`: structure, core scripts, lib responsibilities, and the timeline frame a bash script prints inside
+- `canon/context/development/scripts.md`: structure and core scripts
 - `docs/agents/output-shape.md`: output shape and stream contract for every CLI command
 - `canon/context/development/sandbox.md`: sandbox system, hook pattern, provisioning flow, scenario catalog
