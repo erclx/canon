@@ -17,6 +17,7 @@ The verbs report every fact, so the gap is the judgment between them. A session 
 - Read every fact from a `canon` verb, so a later release changes what the skill reports with no edit to its body
 - Stop and ask on a refused migration, a stranded file, an unattributed folder, and a rule the stack newly ships
 - Keep a customized file and a drifted seed as the project wrote them, naming the toolkit change each one skipped
+- Keep the shared checkout on its branch, writing on a worktree or a declined-worktree branch the preview names
 - End on a clean `target-check` or on named remainders, with nothing written when nothing is pending
 
 ## Must not

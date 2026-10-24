@@ -51,7 +51,23 @@ export default scenario({
       ctx.log.info(`Context: ${rule} carries a bullet the project wrote`)
       ctx.log.info('Action:  /canon:target-update')
       ctx.log.info(
-        `Expect:  the preview lists ${rule} as customized under drift and names keeping it as a call for the operator, then stops for the go-ahead. On approval the sync runs and ${rule} still holds the project bullet afterward, with the toolkit change reported as skipped. No commit subject names a canon version.`,
+        `Expect:  the preview lists ${rule} as customized under drift, names the worktree it will enter under Where it lands, and names keeping the file as a call for the operator, then stops for the go-ahead. On approval the sync runs and ${rule} still holds the project bullet afterward, with the toolkit change reported as skipped. No commit subject names a canon version. The shared checkout stays on main and the commits sit on the worktree's branch.`,
+      )
+    },
+    declined: (ctx) => {
+      const rule = firstRule(ctx)
+      ctx.append(
+        rule,
+        '\n- A project-written bullet the toolkit never shipped.\n',
+      )
+      ctx.git('add', '.')
+      ctx.commit('docs(rules): add a project bullet to an installed rule')
+
+      ctx.log.step('Scenario ready: update skill when the worktree is declined')
+      ctx.log.info(`Context: ${rule} carries a bullet the project wrote`)
+      ctx.log.info('Action:  /canon:target-update, then decline the worktree')
+      ctx.log.info(
+        'Expect:  the preview names a branch created in place under Where it lands. After the go-ahead the skill creates it through git-branch, and the commits sit on it with the checkout off main.',
       )
     },
   },
