@@ -134,8 +134,10 @@ describe('governance/rules/ui', () => {
       'keyboard',
       'link-behavior',
       'motion',
+      'pointer',
       'surface-capture',
       'ux-completeness',
+      'ux-controls',
     ])
   })
 })
