@@ -31,7 +31,7 @@ An element counts as stable once it "has maintained the same bounding box for at
 
 - Run with motion reduced unless the test asserts motion, and opt back in per test with `page.emulateMedia({ reducedMotion: 'no-preference' })`.
 - Set it once in the config's `use` block as `contextOptions: { reducedMotion: 'reduce' }`, since the option defaults to `'no-preference'` ([BrowserContext options](https://playwright.dev/docs/api/class-browser#browser-new-context)).
-- A top-level `use.reducedMotion` reaches no page and type-checks nowhere, so a spec asserting the media query is what catches it
+- From Playwright 1.50 a top-level `use: { reducedMotion: 'reduce' }` works too ([TestOptions](https://playwright.dev/docs/api/class-testoptions)). Before 1.50 it is no test option, so a spec asserting the media query catches it
 
 A site honoring the reduced preference then has nothing to wait out in any test that does not opt back in.
 
