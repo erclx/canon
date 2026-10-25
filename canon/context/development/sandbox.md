@@ -62,7 +62,7 @@ Owns the runner behind `canon sandbox run <cat:cmd> "<prompt>" [scenario]`.
 Owns `canon sandbox replay`, which syncs a copy of a consumer with this checkout's CLI and judges the reads that follow.
 
 - `run.ts` copies a source beside the provisioned tree, runs `sync .`, four `--json` health reads, and oxfmt over what sync wrote, then removes the copy
-- A named checkout is copied rather than cloned, since a clone drops the gitignored records the reads look for. One with uncommitted changes is refused.
+- A checkout is copied, not cloned, since a clone drops gitignored records. The copy retries on ENOENT, since git maintenance removes `.git/objects/maintenance.lock` mid-walk. Dirty trees are refused.
 - `verdict.ts` reads a finding or a refusal as `ok` and carries each `!` line as a finding. A crash, unparsable `--json` stdout, or an unformatted write fails, and the verb exits 2.
 - `expected.ts` fails a snapshot step as `drifted` when its exit or finding count leaves the `expected.json` beside it. A missing file fails every step, and a checkout is never compared.
 - The format step runs under `tooling/base/configs/.oxfmtrc.json`, since oxfmt's defaults double-quote frontmatter every consumer keeps single-quoted

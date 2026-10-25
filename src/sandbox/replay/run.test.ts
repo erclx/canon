@@ -1,5 +1,6 @@
 import { spawnSync } from 'node:child_process'
 import {
+  cpSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -14,8 +15,10 @@ import { gitEnv } from '@/git/env'
 import { PROJECT_ROOT } from '@/roots/project'
 import {
   checkoutRefusal,
+  copyCheckout,
   copySource,
   listSnapshots,
+  type ReplaySource,
   replaySource,
 } from '@/sandbox/replay/run'
 
@@ -82,6 +85,67 @@ describe('copySource', () => {
 
     expect(existsSync(join(tree, '.canon/tasks/index.md'))).toBe(true)
     expect(existsSync(join(tree, 'node_modules'))).toBe(false)
+  })
+})
+
+describe('copyCheckout', () => {
+  const checkout = (): ReplaySource => {
+    const path = join(scratch, 'consumer')
+    write(path, 'CLAUDE.md', '# Consumer\n')
+    return { name: 'consumer', path, kind: 'checkout' }
+  }
+
+  const vanish = (code: string): Error =>
+    Object.assign(new Error(`${code}: lstat maintenance.lock`), { code })
+
+  it('should retry after a file vanishes and leave nothing of the failed attempt', () => {
+    const source = checkout()
+    const tree = join(scratch, 'tree')
+    let calls = 0
+    const copy: typeof cpSync = (from, to, options) => {
+      calls += 1
+      if (calls === 1) {
+        write(to as string, 'half-written.txt', '')
+        throw vanish('ENOENT')
+      }
+      cpSync(from, to, options)
+    }
+
+    copyCheckout(source, tree, copy)
+
+    expect(calls).toBe(2)
+    expect(existsSync(join(tree, 'CLAUDE.md'))).toBe(true)
+    expect(existsSync(join(tree, 'half-written.txt'))).toBe(false)
+  })
+
+  it('should throw the original ENOENT after three attempts', () => {
+    const source = checkout()
+    const error = vanish('ENOENT')
+    let calls = 0
+    const copy: typeof cpSync = () => {
+      calls += 1
+      throw error
+    }
+
+    expect(() => copyCheckout(source, join(scratch, 'tree'), copy)).toThrow(
+      error,
+    )
+    expect(calls).toBe(3)
+  })
+
+  it('should not retry an error other than ENOENT', () => {
+    const source = checkout()
+    const error = vanish('EACCES')
+    let calls = 0
+    const copy: typeof cpSync = () => {
+      calls += 1
+      throw error
+    }
+
+    expect(() => copyCheckout(source, join(scratch, 'tree'), copy)).toThrow(
+      error,
+    )
+    expect(calls).toBe(1)
   })
 })
 
