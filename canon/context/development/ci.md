@@ -34,6 +34,8 @@ Runs `🛡️ Static Checks` on Linux and `🍎 macOS Unit Tests` beside it, nei
 
 Runs weekly and on dispatch, one matrix job per scaffoldable stack through `canon tooling verify`. Only its `report` job holds `issues: write`, keeping one open `stack-verify: <stack>` issue per red stack. A layer or an add-on never joins the matrix, since the verb refuses it.
 
+- The go job installs Go through `actions/setup-go`, because the runner image's Go can lag the 1.25 floor that the scaffold's `go mod edit -ignore` needs
+
 ### `src/labels/`
 
 `phase-label-gate.yml` runs `canon labels scan` on the event payload, since no gate stage sees a pull request body or a posted review. It needs `edited` on its trigger, so it sits outside `verify.yml`. It never passes `--closes`, which needs a task board. Body density fails the exit, and post density does not.
