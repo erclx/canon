@@ -95,19 +95,18 @@ async function run({
   logStep(`Scaffolding ${stack}`)
   // Manifests carry shell syntax (`&&`, `cd`, quoted globs), so the command
   // runs under a shell rather than as a split argv.
-  const scaffold = await shell(
-    manifest.scaffold.replaceAll('{{name}}', name),
-    runsDir,
-  )
+  const scaffoldCommand = manifest.scaffold.replaceAll('{{name}}', name)
+  const scaffold = await shell(scaffoldCommand, runsDir)
   if (scaffold.failed) {
     logWarn('Scaffold failed')
+    process.stderr.write(`$ ${scaffoldCommand}\n`)
     writeTail(scaffold.all)
-    state.isFailed = true
   }
 
   if (!existsSync(state.dir)) {
     return refuse(`Scaffold did not produce ${state.dir}`)
   }
+  record(state, 'Scaffold', !scaffold.failed)
 
   await shell(
     'git init -q && git add . && git commit -m "chore: verify scaffold" -q --no-verify --allow-empty',
