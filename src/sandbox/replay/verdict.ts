@@ -3,9 +3,15 @@
  * working, so it reads `ok`. Only a run that broke rather than answered fails:
  * a `crash` threw or died, an `unreadable` run answered in a shape a caller
  * cannot parse, and an `unformatted` tree holds a file sync wrote that the
- * formatter canon ships rejects.
+ * formatter canon ships rejects. A `drifted` read answered a frozen snapshot
+ * differently from the answer recorded beside it, which `judgeDrift` decides.
  */
-export type ReplayVerdict = 'ok' | 'crash' | 'unreadable' | 'unformatted'
+export type ReplayVerdict =
+  | 'ok'
+  | 'crash'
+  | 'unreadable'
+  | 'unformatted'
+  | 'drifted'
 
 export interface StepOutput {
   /** Null when the process ended on a signal, a timeout included. */
