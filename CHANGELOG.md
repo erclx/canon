@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.65.0](https://github.com/erclx/canon/compare/v5.64.0...v5.65.0) (2026-10-25)
+
+
+### Features
+
+* **sandbox:** fail the consumer replay when a snapshot read drifts ([#2709](https://github.com/erclx/canon/issues/2709)) ([68dc0b7](https://github.com/erclx/canon/commit/68dc0b7b55634ac9f7affca6da92cb523ed61754))
+* **sandbox:** replay consumer snapshots through sync in the gate ([#2703](https://github.com/erclx/canon/issues/2703)) ([3fd2934](https://github.com/erclx/canon/commit/3fd2934779b7f242a66ea273b3c53f79802e6494))
+* **skills:** ledger the review and teach craft sources ([#2702](https://github.com/erclx/canon/issues/2702)) ([877b660](https://github.com/erclx/canon/commit/877b66007e7e28c46c6de63d5a891083c19df6c1))
+* **skills:** source every test-craft and codebase-layout bullet ([#2704](https://github.com/erclx/canon/issues/2704)) ([44a23e9](https://github.com/erclx/canon/commit/44a23e936c62cab229a49f82a8775933e540460e))
+
 ## [5.64.0](https://github.com/erclx/canon/compare/v5.63.0...v5.64.0) (2026-10-24)
 
 
