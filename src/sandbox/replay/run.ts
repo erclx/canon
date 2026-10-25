@@ -82,17 +82,42 @@ function isCopied(rel: string): boolean {
 }
 
 /**
+ * Git's background maintenance creates and removes files such as
+ * `.git/objects/maintenance.lock` while a copy walks the checkout, and a file
+ * listed then gone throws ENOENT. A short bound covers every transient name
+ * git uses, where a filter on `*.lock` would cover one.
+ */
+const COPY_ATTEMPTS = 3
+
+export function copyCheckout(
+  source: ReplaySource,
+  tree: string,
+  copy: typeof cpSync = cpSync,
+): void {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      copy(source.path, tree, {
+        recursive: true,
+        verbatimSymlinks: true,
+        filter: (from) => isCopied(relative(source.path, from)),
+      })
+      return
+    } catch (error) {
+      const vanished = (error as NodeJS.ErrnoException).code === 'ENOENT'
+      if (!vanished || attempt === COPY_ATTEMPTS) throw error
+      rmSync(tree, { recursive: true, force: true })
+    }
+  }
+}
+
+/**
  * Copies a source into `tree`. A snapshot's files lose their `.fixture`
  * suffix and its recorded expectation stays behind, and a checkout copies whole rather than cloning, since a clone
  * drops the gitignored `.canon/` records a consumer's health verbs read.
  */
 export function copySource(source: ReplaySource, tree: string): void {
   if (source.kind === 'checkout') {
-    cpSync(source.path, tree, {
-      recursive: true,
-      verbatimSymlinks: true,
-      filter: (from) => isCopied(relative(source.path, from)),
-    })
+    copyCheckout(source, tree)
     return
   }
 
