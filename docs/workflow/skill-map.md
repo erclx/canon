@@ -80,6 +80,7 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 | `canon:git-followup`   | A small edit on a branch with an open PR      |
 | `canon:pr-evidence`    | A new head needs its screenshots re-posted    |
 | `canon:git-split`      | A branch carries unrelated commits            |
+| `canon:git-pr-close`   | A pull request closes without merging         |
 | `canon:git-issue`      | Something belongs on the tracker              |
 | `canon:git-worktree`   | After a merge, to reclaim worktrees           |
 

@@ -23,6 +23,10 @@ export const GIT_CASES: readonly SkillCase[] = [
     expect: 'git-issue',
   },
   {
+    prompt: 'Close #42 without merging, #57 supersedes it.',
+    expect: 'git-pr-close',
+  },
+  {
     prompt: 'Write the title and body for this pull request.',
     expect: 'git-pr',
   },

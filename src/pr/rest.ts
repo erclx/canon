@@ -15,8 +15,16 @@ export interface RestPull {
   readonly number?: number
   readonly title?: string
   readonly body?: string | null
-  readonly head?: { readonly ref?: string; readonly sha?: string }
-  readonly base?: { readonly ref?: string }
+  readonly head?: {
+    readonly ref?: string
+    readonly sha?: string
+    /** Null when the fork the head lived in was deleted. */
+    readonly repo?: { readonly full_name?: string } | null
+  }
+  readonly base?: {
+    readonly ref?: string
+    readonly repo?: { readonly full_name?: string }
+  }
   readonly mergeable_state?: string
   readonly state?: string
   readonly draft?: boolean
