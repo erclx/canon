@@ -1,0 +1,41 @@
+# Pull request domain labels.
+#
+# `git-pr` matches the paths a branch changed against the prefixes below and
+# applies every label that matches. The rows here cover what the toolkit
+# installs. Add a row per surface of your own, such as `app = ["src/"]`, and
+# `canon labels audit` names any changed path no row reaches.
+#
+# Each label has to exist on the remote before a pull request can carry it.
+# Run `canon labels sync` once to create the ones the remote lacks, and again
+# after adding a row.
+#
+# The matching rule and the `[declined]` table are described in the `git-pr`
+# skill's labels reference.
+
+[domains]
+tooling = [
+  ".github/",
+  ".husky/",
+  "scripts/",
+  ".gitignore",
+  ".lintstagedrc",
+  ".oxfmtrc.json",
+  ".prettierignore",
+  "commitlint.config.js",
+  "package.json",
+  "bun.lock",
+  "canon/config/",
+]
+claude = [".claude/", "CLAUDE.md"]
+docs = [
+  "README.md",
+  "docs/",
+  "canon/REQUIREMENTS.md",
+  "canon/DESIGN.md",
+  "canon/context/",
+]
+
+# Paths deliberately left unlabelled, keyed by the reason.
+[declined]
+# Release automation opens its own pull request and applies its own label.
+release-managed = ["CHANGELOG.md", ".release-please-manifest.json"]

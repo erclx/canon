@@ -29,6 +29,11 @@ describe('diffLabels', () => {
     expect(diff).toEqual({ owed: [], toAdd: [], missingOnRemote: [] })
   })
 
+  it('should match a label differing only in case on the remote and the pull request', () => {
+    expect(diffLabels(['docs'], [], ['Docs']).toAdd).toEqual(['docs'])
+    expect(diffLabels(['docs'], ['Docs'], ['Docs']).owed).toEqual([])
+  })
+
   it('should owe nothing when the set earns nothing', () => {
     const diff = diffLabels([], ['cli'], ['cli'])
 

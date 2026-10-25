@@ -608,3 +608,149 @@ describe('canon labels apply', { timeout: RUN_TIMEOUT_MS }, () => {
     expect(record.calls.some((call) => call.includes('-X POST'))).toBe(false)
   })
 })
+
+describe('canon labels sync', { timeout: RUN_TIMEOUT_MS }, () => {
+  interface SyncRecord {
+    readonly reason?: string
+    readonly labels?: string[]
+    readonly created?: string[]
+    readonly missing?: string[]
+    readonly failed?: string[]
+    readonly exitCode: number
+    readonly calls: string[]
+  }
+
+  interface Fake {
+    readonly remote?: string[]
+    readonly readFail?: boolean
+    readonly createFail?: boolean
+  }
+
+  let root: string
+  let logFile: string
+
+  async function writeMap(): Promise<void> {
+    await mkdir(join(root, 'canon', 'config'), { recursive: true })
+    await writeFile(
+      join(root, 'canon', 'config', 'pr-labels.toml'),
+      '[domains]\ncli = ["src/"]\ndocs = ["docs/"]\n',
+    )
+  }
+
+  async function runSync(args: string[], fake: Fake): Promise<SyncRecord> {
+    const bin = join(root, 'bin')
+    await mkdir(bin, { recursive: true })
+    await writeFile(
+      join(bin, 'gh'),
+      [
+        '#!/bin/sh',
+        'echo "$*" >> "$FAKE_LOG"',
+        'case "$*" in',
+        '  *"-X POST"*) [ -n "$FAKE_CREATE_FAIL" ] && exit 1; exit 0 ;;',
+        '  *repos/{owner}/{repo}/labels*) [ -n "$FAKE_READ_FAIL" ] && exit 1; printf \'%s\' "$FAKE_REMOTE" ;;',
+        '  *) exit 1 ;;',
+        'esac',
+        '',
+      ].join('\n'),
+      { mode: 0o755 },
+    )
+    const result = await execa(
+      process.execPath,
+      [CLI, 'labels', 'sync', '--json', ...args],
+      {
+        cwd: root,
+        reject: false,
+        timeout: RUN_TIMEOUT_MS,
+        extendEnv: false,
+        env: {
+          PATH: `${bin}:${process.env.PATH ?? ''}`,
+          HOME: process.env.HOME ?? root,
+          FAKE_LOG: logFile,
+          FAKE_REMOTE: (fake.remote ?? []).join('\n'),
+          FAKE_READ_FAIL: fake.readFail ? '1' : '',
+          FAKE_CREATE_FAIL: fake.createFail ? '1' : '',
+        },
+      },
+    )
+    const record = JSON.parse(result.stdout) as Omit<
+      SyncRecord,
+      'exitCode' | 'calls'
+    >
+    const calls = existsSync(logFile)
+      ? readFileSync(logFile, 'utf8').split('\n').filter(Boolean)
+      : []
+    return { ...record, exitCode: result.exitCode ?? -1, calls }
+  }
+
+  const posts = (record: SyncRecord): string[] =>
+    record.calls.filter((call) => call.includes('-X POST'))
+
+  beforeEach(async () => {
+    root = await mkdtemp(join(tmpdir(), 'canon-labels-sync-'))
+    logFile = join(root, 'gh.log')
+  })
+
+  afterEach(async () => {
+    await rm(root, { recursive: true, force: true })
+  })
+
+  it('should create each map label the remote lacks', async () => {
+    await writeMap()
+
+    const record = await runSync([], { remote: ['cli', 'by-hand'] })
+
+    expect(record.created).toEqual(['docs'])
+    expect(record.exitCode).toBe(0)
+    expect(posts(record)).toHaveLength(1)
+    expect(posts(record)[0]).toContain('name=docs')
+  })
+
+  it('should write nothing and exit 0 when the remote carries every label', async () => {
+    await writeMap()
+
+    const record = await runSync([], { remote: ['cli', 'docs'] })
+
+    expect(record.missing).toEqual([])
+    expect(record.exitCode).toBe(0)
+    expect(posts(record)).toEqual([])
+  })
+
+  it('should exit 2 under --check with missing labels and write nothing', async () => {
+    await writeMap()
+
+    const record = await runSync(['--check'], { remote: [] })
+
+    expect(record.missing).toEqual(['cli', 'docs'])
+    expect(record.exitCode).toBe(2)
+    expect(posts(record)).toEqual([])
+  })
+
+  it('should report a failed create and exit 2', async () => {
+    await writeMap()
+
+    const record = await runSync([], { remote: ['cli'], createFail: true })
+
+    expect(record.failed).toEqual(['docs'])
+    expect(record.missing).toEqual(['docs'])
+    expect(record.exitCode).toBe(2)
+  })
+
+  it('should refuse with gh-failed when the remote labels cannot be read', async () => {
+    await writeMap()
+
+    const record = await runSync([], { readFail: true })
+
+    expect(record.reason).toBe('gh-failed')
+    expect(record.exitCode).toBe(1)
+    expect(posts(record)).toEqual([])
+  })
+
+  it('should create nothing and exit 0 for a project with no map', async () => {
+    const record = await runSync([], {})
+
+    expect(record.reason).toBe('no-map')
+    expect(record.labels).toEqual([])
+    expect(record.exitCode).toBe(0)
+    expect(record.calls).toEqual([])
+  })
+})
