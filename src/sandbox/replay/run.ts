@@ -11,6 +11,7 @@ import {
 } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
 import { gitEnv } from '@/git/env'
+import { EXPECTED_FILE } from '@/sandbox/replay/expected'
 import {
   findingsOf,
   judgeFormat,
@@ -82,7 +83,7 @@ function isCopied(rel: string): boolean {
 
 /**
  * Copies a source into `tree`. A snapshot's files lose their `.fixture`
- * suffix, and a checkout copies whole rather than cloning, since a clone
+ * suffix and its recorded expectation stays behind, and a checkout copies whole rather than cloning, since a clone
  * drops the gitignored `.canon/` records a consumer's health verbs read.
  */
 export function copySource(source: ReplaySource, tree: string): void {
@@ -96,6 +97,7 @@ export function copySource(source: ReplaySource, tree: string): void {
   }
 
   for (const file of listFixtureFiles(source.path)) {
+    if (relative(source.path, file) === EXPECTED_FILE) continue
     if (!file.endsWith(FIXTURE_SUFFIX))
       throw new Error(
         `Snapshot file missing the ${FIXTURE_SUFFIX} suffix: ${file}`,
