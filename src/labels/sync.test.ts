@@ -13,6 +13,10 @@ describe('missingLabels', () => {
     expect(missingLabels(['cli'], ['cli', 'by-hand'])).toEqual([])
   })
 
+  it('should read a remote label differing only in case as present', () => {
+    expect(missingLabels(['docs', 'cli'], ['Docs'])).toEqual(['cli'])
+  })
+
   it('should never list a remote label the map does not name', () => {
     expect(missingLabels([], ['by-hand'])).toEqual([])
   })

@@ -20,20 +20,25 @@ export interface LabelDiff {
  * A label the remote lacks is separated from the addable set rather than
  * dropped, because the REST add endpoint creates any label it is handed and
  * that write to the repository settings is not the map's call.
+ *
+ * Names match regardless of case, as GitHub holds them, so this agrees with
+ * `missingLabels` on which labels the remote carries.
  */
 export function diffLabels(
   earned: readonly string[],
   present: readonly string[],
   remote: readonly string[],
 ): LabelDiff {
-  const has = new Set(present)
-  const carried = new Set(remote)
+  const fold = (labels: readonly string[]): Set<string> =>
+    new Set(labels.map((label) => label.toLowerCase()))
+  const has = fold(present)
+  const carried = fold(remote)
 
-  const owed = earned.filter((label) => !has.has(label))
+  const owed = earned.filter((label) => !has.has(label.toLowerCase()))
 
   return {
     owed,
-    toAdd: owed.filter((label) => carried.has(label)),
-    missingOnRemote: owed.filter((label) => !carried.has(label)),
+    toAdd: owed.filter((label) => carried.has(label.toLowerCase())),
+    missingOnRemote: owed.filter((label) => !carried.has(label.toLowerCase())),
   }
 }
