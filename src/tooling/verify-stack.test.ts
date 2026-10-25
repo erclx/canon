@@ -107,6 +107,7 @@ describe('verifyStack phases', () => {
     const outcome = await verifyStack({ root, stack: 'web' })
 
     expect(outcome.results.map((result) => result.name)).toEqual([
+      'Scaffold',
       'Sync',
       'lint:fix',
       'format',
@@ -124,6 +125,7 @@ describe('verifyStack phases', () => {
     const outcome = await verifyStack({ root, stack: 'lib' })
 
     expect(outcome.results.map((result) => result.name)).toEqual([
+      'Scaffold',
       'Sync',
       'lint:fix',
       'format',
@@ -139,7 +141,7 @@ describe('verifyStack phases', () => {
 
     const outcome = await verifyStack({ root, stack: 'prep', keep: true })
 
-    expect(outcome.results[0]).toEqual({ name: 'Prepare', passed: true })
+    expect(outcome.results[1]).toEqual({ name: 'Prepare', passed: true })
     expect(existsSync(join(tmpDir('prep'), 'prepared'))).toBe(true)
   })
 
@@ -150,6 +152,7 @@ describe('verifyStack phases', () => {
     const outcome = await verifyStack({ root, stack: 'web' })
 
     expect(outcome.results).toEqual([
+      { name: 'Scaffold', passed: true },
       { name: 'Sync', passed: true },
       { name: 'lint:fix', passed: true },
       { name: 'format', passed: true },
@@ -202,9 +205,13 @@ describe('verifyStack tmp dir', () => {
   it('should fail when the scaffold command fails', async () => {
     seedStack('broken', '[stack]\nscaffold = "mkdir -p {{name}} && false"\n')
 
+    const stderr = vi.mocked(process.stderr.write)
+
     const outcome = await verifyStack({ root, stack: 'broken' })
 
     expect(outcome.exitCode).toBe(1)
+    expect(outcome.results[0]).toEqual({ name: 'Scaffold', passed: false })
+    expect(stderr.mock.calls.join('')).toContain('mkdir -p verify-broken')
   })
 })
 
