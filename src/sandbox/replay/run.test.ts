@@ -56,6 +56,17 @@ describe('copySource', () => {
     expect(existsSync(join(tree, '.canon/tasks/index.md'))).toBe(true)
   })
 
+  it('should leave the recorded expectation out of the tree without throwing', () => {
+    const snapshot = join(scratch, 'snap')
+    write(snapshot, 'CLAUDE.md.fixture', '# Snap\n')
+    write(snapshot, 'expected.json', '{"steps":{}}\n')
+    const tree = join(scratch, 'tree')
+
+    copySource({ name: 'snap', path: snapshot, kind: 'snapshot' }, tree)
+
+    expect(readdirSync(tree)).toEqual(['CLAUDE.md'])
+  })
+
   it('should keep a gitignored record a clone of the checkout would drop', () => {
     const checkout = join(scratch, 'consumer')
     write(checkout, '.gitignore', '.canon/\nnode_modules/\n')

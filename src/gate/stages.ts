@@ -324,7 +324,7 @@ export const STAGES: readonly Stage[] = [
         kind: 'cli',
         argv: ['sandbox', 'replay'],
         failure:
-          'A consumer replay crashed, printed unparsable JSON, or left an unformatted write. Run bun src/cli.ts sandbox replay.',
+          'A consumer replay crashed, printed unparsable JSON, left an unformatted write, or drifted from its recorded answer. Run bun src/cli.ts sandbox replay, and when a drift is one the change meant, such as a governance rename moving a sync count, run it with --record and commit the expectations.',
       },
     ],
     success: 'Consumer replays clean',
