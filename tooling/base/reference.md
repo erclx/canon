@@ -39,6 +39,7 @@ Seeds live in `tooling/base/seeds/`. Sync drops each once on first install and n
 - `.github/workflows/verify.yml` runs on pull requests targeting `main` and on `workflow_dispatch`. A multi-root project adds its own jobs here.
 - `.github/pull_request_template.md` has `## Summary`, `## Key changes`, `## Technical context`, and `## Testing`. A project adds its own checklist lines.
 - `canon/context/development/` holds the `setup` and `ci` entries under a folder index. Extend them with project-specific commands and workflows, and keep canonical rationale here.
+- `canon/config/pr-labels.toml` is the starter pull request label map, with `tooling`, `claude`, and `docs` rows covering what the toolkit installs. A project adds a row per surface of its own, and `canon labels sync` creates the labels the remote lacks.
 
 ## Tool pairing
 
