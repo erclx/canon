@@ -2,27 +2,62 @@ import { belongsTo } from '@/listeners/belongs'
 import type { ListenerReader } from '@/listeners/machine'
 import { readAddresses } from '@/pr/evidence'
 
-export type LocalRefusal = 'no-server' | 'no-listener-reader'
+export type LocalRefusal = 'no-server' | 'no-listener-reader' | 'unhealthy'
 
-/** The listener reads a detection makes plus an HTML probe, injected so it can be driven without binding a socket. */
+/** The listener reads a detection makes plus two HTTP probes, injected so it can be driven without binding a socket. */
 export interface LocalRunner extends ListenerReader {
   /** Whether the port serves an HTML page at its root inside the runner's timeout. */
   probe(port: number): Promise<boolean>
+  /** The final status a path on the port answers after redirects, or null when nothing answers inside the timeout. */
+  check(port: number, path: string): Promise<number | null>
 }
 
 export type LocalResult =
   | { readonly kind: 'found'; readonly port: number; readonly url: string }
-  | { readonly kind: 'refused'; readonly reason: LocalRefusal }
+  | {
+      readonly kind: 'refused'
+      readonly reason: Exclude<LocalRefusal, 'unhealthy'>
+    }
+  | {
+      readonly kind: 'refused'
+      readonly reason: 'unhealthy'
+      readonly port: number
+      readonly path: string
+      readonly status: number | null
+    }
+
+interface HealthFailure {
+  readonly path: string
+  readonly status: number | null
+}
+
+async function firstFailingPath(
+  port: number,
+  healthPaths: readonly string[],
+  runner: LocalRunner,
+): Promise<HealthFailure | undefined> {
+  for (const path of healthPaths) {
+    const status = await runner.check(port, path)
+    if (status === null || status < 200 || status >= 300) {
+      return { path, status }
+    }
+  }
+  return undefined
+}
 
 /**
  * Finds the server this worktree is running: the lowest port whose listening
- * process runs inside the worktree and answers an HTTP probe. A port rather
- * than a process is the unit, since one dev server often holds a second
- * socket for its reload channel, and the lower one is the page by convention.
+ * process runs inside the worktree, answers an HTTP probe, and passes every
+ * declared health path. A port rather than a process is the unit, since one
+ * dev server often holds a second socket for its reload channel, and the
+ * lower one is the page by convention. Health is read on the page's own port,
+ * since that is the address a reviewer drives, and a page whose backend fails
+ * refuses as `unhealthy` naming the lowest page port's first failing path.
  */
 export async function findLocalServer(
   worktreeRoot: string,
   runner: LocalRunner,
+  healthPaths: readonly string[] = [],
 ): Promise<LocalResult> {
   const listeners = await runner.listListeners()
   if (listeners === undefined) {
@@ -37,12 +72,18 @@ export async function findLocalServer(
     if (cwd !== undefined && belongsTo(cwd, worktreeRoot)) ports.add(port)
   }
 
+  let unhealthy: (HealthFailure & { readonly port: number }) | undefined
   for (const port of [...ports].sort((a, b) => a - b)) {
-    if (await runner.probe(port)) {
+    if (!(await runner.probe(port))) continue
+    const failure = await firstFailingPath(port, healthPaths, runner)
+    if (failure === undefined) {
       return { kind: 'found', port, url: `http://localhost:${port}` }
     }
+    unhealthy ??= { port, ...failure }
   }
-  return { kind: 'refused', reason: 'no-server' }
+  return unhealthy === undefined
+    ? { kind: 'refused', reason: 'no-server' }
+    : { kind: 'refused', reason: 'unhealthy', ...unhealthy }
 }
 
 /**

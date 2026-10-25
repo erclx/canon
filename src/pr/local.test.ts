@@ -17,14 +17,24 @@ interface FakeServer {
   readonly pid: number
   readonly cwd: string
   readonly answers?: boolean
+  /** The status each health path answers, defaulting to 200 when unnamed. */
+  readonly health?: Readonly<Record<string, number | null>>
 }
 
-function fakeRunner(
-  servers: readonly FakeServer[] | undefined,
-): LocalRunner & { readonly probed: number[] } {
+interface HealthCheck {
+  readonly port: number
+  readonly path: string
+}
+
+function fakeRunner(servers: readonly FakeServer[] | undefined): LocalRunner & {
+  readonly probed: number[]
+  readonly checked: HealthCheck[]
+} {
   const probed: number[] = []
+  const checked: HealthCheck[] = []
   return {
     probed,
+    checked,
     async listListeners() {
       if (servers === undefined) return undefined
       return servers.map(({ port, pid }): Listener => ({ port, pid }))
@@ -35,6 +45,11 @@ function fakeRunner(
     async probe(port) {
       probed.push(port)
       return servers?.find((server) => server.port === port)?.answers ?? true
+    },
+    async check(port, path) {
+      checked.push({ port, path })
+      const health = servers?.find((server) => server.port === port)?.health
+      return health !== undefined && path in health ? health[path] : 200
     },
   }
 }
@@ -133,6 +148,107 @@ describe('findLocalServer', () => {
     await findLocalServer(LINKED, runner)
 
     expect(runner.probed).toEqual([5173])
+  })
+
+  it('should call no health check when no path is declared', async () => {
+    const runner = fakeRunner([{ port: 5173, pid: 10, cwd: LINKED }])
+
+    const result = await findLocalServer(LINKED, runner)
+
+    expect(result).toMatchObject({ kind: 'found', port: 5173 })
+    expect(runner.checked).toEqual([])
+  })
+
+  it('should report the page when every declared path answers 2xx', async () => {
+    const runner = fakeRunner([
+      { port: 5173, pid: 10, cwd: LINKED, health: { '/ready': 204 } },
+    ])
+
+    const result = await findLocalServer(LINKED, runner, [
+      '/api/health',
+      '/ready',
+    ])
+
+    expect(result).toEqual({
+      kind: 'found',
+      port: 5173,
+      url: 'http://localhost:5173',
+    })
+    expect(runner.checked).toEqual([
+      { port: 5173, path: '/api/health' },
+      { port: 5173, path: '/ready' },
+    ])
+  })
+
+  it.each([
+    ['a 502', 502],
+    ['a 404', 404],
+    ['a 3xx left after the redirect follow', 302],
+    ['a timeout', null],
+  ])(
+    'should refuse as unhealthy when a declared path answers %s',
+    async (_label, status) => {
+      const runner = fakeRunner([
+        {
+          port: 5173,
+          pid: 10,
+          cwd: LINKED,
+          health: { '/api/health': status },
+        },
+      ])
+
+      const result = await findLocalServer(LINKED, runner, ['/api/health'])
+
+      expect(result).toEqual({
+        kind: 'refused',
+        reason: 'unhealthy',
+        port: 5173,
+        path: '/api/health',
+        status,
+      })
+    },
+  )
+
+  it('should report a higher page port that passes past a lowest one that fails', async () => {
+    const runner = fakeRunner([
+      { port: 5173, pid: 10, cwd: LINKED, health: { '/api/health': 502 } },
+      { port: 5174, pid: 11, cwd: LINKED },
+    ])
+
+    const result = await findLocalServer(LINKED, runner, ['/api/health'])
+
+    expect(result).toMatchObject({ kind: 'found', port: 5174 })
+  })
+
+  it("should name the lowest page port's first failing path when every page fails", async () => {
+    const runner = fakeRunner([
+      { port: 5174, pid: 11, cwd: LINKED, health: { '/ready': 500 } },
+      { port: 5173, pid: 10, cwd: LINKED, health: { '/ready': 502 } },
+    ])
+
+    const result = await findLocalServer(LINKED, runner, [
+      '/api/health',
+      '/ready',
+    ])
+
+    expect(result).toEqual({
+      kind: 'refused',
+      reason: 'unhealthy',
+      port: 5173,
+      path: '/ready',
+      status: 502,
+    })
+  })
+
+  it('should check no health path on a port that serves no page', async () => {
+    const runner = fakeRunner([
+      { port: 3000, pid: 10, cwd: LINKED, answers: false },
+    ])
+
+    const result = await findLocalServer(LINKED, runner, ['/api/health'])
+
+    expect(result).toEqual({ kind: 'refused', reason: 'no-server' })
+    expect(runner.checked).toEqual([])
   })
 
   it('should refuse as no-listener-reader when no reader is available', async () => {

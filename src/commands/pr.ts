@@ -92,6 +92,7 @@ import {
 } from '@/pr/drive-copy'
 import { machineListenerReader } from '@/listeners/machine'
 import { loadPaintedPatterns } from '@/pr/painted'
+import { LOCAL_CONFIG_REL, readHealthPaths } from '@/pr/health'
 import {
   dropAddressLine,
   maskLocalAddress,
@@ -244,9 +245,15 @@ const AMBIGUOUS_PULL =
 /** How long the probe waits on a listener before reading it as not a server. */
 const LOCAL_PROBE_TIMEOUT_MS = 2_000
 
-const LOCAL_REFUSALS: Record<LocalRefusal | 'gh-failed', string> = {
+const LOCAL_REFUSALS: Record<
+  LocalRefusal | 'invalid-config' | 'gh-failed',
+  string
+> = {
   'no-server':
     'Nothing listening inside this worktree served an HTML page. Start the dev server here and re-run to get a link.',
+  unhealthy:
+    'A page answered inside this worktree, but a health path it declares failed. Start what the page reaches and re-run to get a link.',
+  'invalid-config': `${LOCAL_CONFIG_REL} cannot be read, so no health path was checked and no link is given. Fix or delete it and re-run.`,
   'no-listener-reader':
     'This machine offers neither lsof nor /proc, so no listening socket could be read. Nothing is posted.',
   'gh-failed':
@@ -1090,6 +1097,13 @@ export function register(program: Command): void {
         'port serving an HTML page is reported, which skips a test runner or a',
         'reload socket answering in the same tree.',
         '',
+        'A project can declare paths the page must also serve, in',
+        'canon/config/local.toml as health = ["/api/health"]. Each is requested',
+        "on the page's own port, redirects followed, and only a final 2xx",
+        'passes. A page failing one is skipped for the next page port, and the',
+        "refusal names the lowest page port's first failing path. An absent",
+        'file or an empty list checks the page alone.',
+        '',
         'A process in a sibling worktree, in the main checkout seen from a',
         'linked worktree, or in a linked worktree seen from the main checkout',
         'is never reported, since its server shows another branch. Sockets are',
@@ -1112,6 +1126,11 @@ export function register(program: Command): void {
         '  ok                  a page answered, with its address in `url`',
         '  no-server           nothing inside this worktree served a page',
         '  no-listener-reader  neither lsof nor /proc is available',
+        '  unhealthy           a page answered but a declared health path did',
+        '                      not, with `port`, `path`, and `status`, which',
+        '                      is null on a timeout',
+        '  invalid-config      canon/config/local.toml is not valid TOML, or',
+        '                      health is not a list of paths starting with /',
         '  removed             --remove dropped the line',
         '  no-comment          --remove found no marked comment, a no-op',
         '  no-line             --remove found no address line, a no-op',
@@ -3005,6 +3024,19 @@ function machineLocalRunner(): LocalRunner {
         return false
       }
     },
+    // The final status after redirects, so a login bounce ending on a 3xx or
+    // a 4xx fails rather than reading as the backend answering.
+    async check(port, path) {
+      try {
+        const response = await fetch(`http://localhost:${port}${path}`, {
+          signal: AbortSignal.timeout(LOCAL_PROBE_TIMEOUT_MS),
+        })
+        await response.body?.cancel()
+        return response.status
+      } catch {
+        return null
+      }
+    },
   }
 }
 
@@ -3025,7 +3057,35 @@ async function runLocal(opts: LocalOptions): Promise<number> {
   intro('canon pr local')
 
   const worktree = await resolveWorktreeRoot(root)
-  const result = await findLocalServer(worktree, machineLocalRunner())
+  const declaration = readHealthPaths(worktree)
+  if (declaration.kind === 'invalid') {
+    return refuseWith(
+      'invalid-config',
+      `${declaration.reason}. ${LOCAL_REFUSALS['invalid-config']}`,
+      emitJson,
+      root,
+    )
+  }
+
+  const result = await findLocalServer(
+    worktree,
+    machineLocalRunner(),
+    declaration.kind === 'paths' ? declaration.paths : [],
+  )
+  if (result.kind === 'refused' && result.reason === 'unhealthy') {
+    const { port, path, status } = result
+    const answer =
+      status === null
+        ? `gave no answer within ${LOCAL_PROBE_TIMEOUT_MS / 1000} seconds`
+        : `answered ${status}`
+    return refuseWith(
+      'unhealthy',
+      `${LOCAL_REFUSALS.unhealthy} ${path} on http://localhost:${port} ${answer}.`,
+      emitJson,
+      root,
+      { port, path, status },
+    )
+  }
   if (result.kind === 'refused') {
     return refuseWith(
       result.reason,
