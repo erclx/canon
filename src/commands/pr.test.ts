@@ -1429,6 +1429,79 @@ describe('canon pr local', () => {
     },
   )
 
+  /**
+   * Serves an HTML page at / from inside the worktree and answers the given
+   * status at /api/health, declared in the worktree's local.toml.
+   */
+  async function serveWithHealth(status: number): Promise<number> {
+    mkdirSync(join(repoRoot, 'canon', 'config'), { recursive: true })
+    writeFileSync(
+      join(repoRoot, 'canon', 'config', 'local.toml'),
+      'health = ["/api/health"]\n',
+    )
+    const script = [
+      'const s = Bun.serve({ port: 0, fetch: (req) => new URL(req.url).pathname === "/api/health"',
+      `  ? new Response('bad gateway', { status: ${status} })`,
+      "  : new Response('<p>', { headers: { 'content-type': 'text/html' } }) })",
+      'process.stdout.write(`${s.port}\\n`)',
+    ].join('\n')
+    const child = execa(process.execPath, ['-e', script], {
+      cwd: repoRoot,
+      reject: false,
+      timeout: RUN_TIMEOUT_MS,
+    })
+    server = child
+    const [chunk] = await Promise.race([
+      once(child.stdout, 'data'),
+      child.then(() => {
+        throw new Error('the server exited before printing its port')
+      }),
+    ])
+    return Number(String(chunk).trim())
+  }
+
+  it('should refuse as unhealthy when the page answers and a declared health path answers 502', async () => {
+    const port = await serveWithHealth(502)
+
+    const outcome = await runLocal([])
+
+    expect(outcome).toEqual({
+      record: expect.objectContaining({
+        reason: 'unhealthy',
+        port,
+        path: '/api/health',
+        status: 502,
+      }),
+      exit: 1,
+    })
+  })
+
+  it('should report the page when a declared health path answers 200', async () => {
+    const port = await serveWithHealth(200)
+
+    const outcome = await runLocal([])
+
+    expect(outcome).toEqual({
+      record: expect.objectContaining({
+        reason: 'ok',
+        url: `http://localhost:${port}`,
+      }),
+      exit: 0,
+    })
+  })
+
+  it('should refuse as invalid-config when local.toml is not valid TOML', async () => {
+    mkdirSync(join(repoRoot, 'canon', 'config'), { recursive: true })
+    writeFileSync(join(repoRoot, 'canon', 'config', 'local.toml'), 'health = [')
+
+    const outcome = await runLocal([])
+
+    expect(outcome).toEqual({
+      record: expect.objectContaining({ reason: 'invalid-config' }),
+      exit: 1,
+    })
+  })
+
   it('should refuse as no-server when nothing listens inside the worktree', async () => {
     const outcome = await runLocal([])
 
