@@ -109,10 +109,14 @@ Labelling runs whenever this skill runs and at no other time, recomputing over t
 Warn and continue rather than creating it, naming the command in the warning:
 
 ```bash
-gh label create <name> --description "<text>"
+canon labels sync
 ```
 
-Creating a label writes to the repository settings from a run invoked to open a pull request, and a label created from a map typo is harder to notice than a warning.
+It creates every label the map names that the remote lacks, and never edits or deletes one.
+
+- An installed `canon` predating the verb takes `gh label create <name>` per label instead
+- Creating a label writes to the repository settings, and a label created from a map typo is harder to notice than a warning
+- So the operator runs the sync on purpose after reading the map, and a run invoked to open a pull request never does
 
 The refusal names the label it rejected and applies none of the set, so an unseen warning leaves the run reading like one that labelled. Surface it beside the result line rather than letting the pull request URL stand alone.
 

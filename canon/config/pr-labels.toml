@@ -5,7 +5,7 @@
 # file gets no labels and no warning.
 #
 # Each label named here has to exist on the remote before the first run that
-# matches it. Create one with `gh label create <name> --description "<text>"`.
+# matches it. `canon labels sync` creates every one the remote lacks.
 #
 # Label count is worth watching rather than capping. A pull request needing
 # three domain labels is one `git-split` should have split. Two is normal for a
