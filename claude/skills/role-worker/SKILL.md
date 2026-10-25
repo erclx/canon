@@ -46,7 +46,7 @@ Open the task's `## Findings` line for an override with the bold source-and-date
 
 A painted pull request needs a server in this worktree for `canon pr local` to find, and this session is the one with a lifetime to own it. `auto-ship` Step 5 decides whether the diff is painted, so this body restates no file test.
 
-- Run `canon pr local --json` first, and start nothing on `ok` or on `unhealthy`, a page up behind a failing health path the announcement names
+- Run `canon pr local --json` first. Start nothing on `ok`, `unhealthy`, or `invalid-config`, and carry a refusal's `message` in the announcement
 - Otherwise start the stack's `dev` in the background from the worktree root before the pull request step, so a `review-address` fix shows on the same link.
 - Wait up to 60 seconds for the verb to read `ok`, then ship either way. A stack with no `dev` script gets no start, and `pr-evidence` reports `no-server`.
 - Never detach it with `nohup`, `setsid`, or `disown`, since the owning session is the stop. `canon worktrees reclaim` ends any listener left in a worktree it removes.
