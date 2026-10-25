@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.66.0](https://github.com/erclx/canon/compare/v5.65.0...v5.66.0) (2026-10-25)
+
+
+### Features
+
+* **labels:** seed a starter label map and create its labels ([#2715](https://github.com/erclx/canon/issues/2715)) ([82a11b1](https://github.com/erclx/canon/commit/82a11b13870960926f0844519a76e039afd0ed5c))
+* **pr:** close a pull request with a required reason ([#2718](https://github.com/erclx/canon/issues/2718)) ([963f784](https://github.com/erclx/canon/commit/963f784e46e25e3c42ea1f6027a7b04860ec544e))
+* **pr:** probe declared health paths before linking the local preview ([#2712](https://github.com/erclx/canon/issues/2712)) ([a16c3f9](https://github.com/erclx/canon/commit/a16c3f966211f5bd9b8af9f82720d42251ac41b9))
+
+
+### Bug Fixes
+
+* **sandbox:** retry the replay checkout copy on a vanished file ([#2720](https://github.com/erclx/canon/issues/2720)) ([64d964b](https://github.com/erclx/canon/commit/64d964bdae0e26f79ab5c0ddc0c1f0e80bc20e6b))
+* **tooling:** install Go for the go stack verify job ([#2717](https://github.com/erclx/canon/issues/2717)) ([e87d433](https://github.com/erclx/canon/commit/e87d433bdbf64945165923d1b6f7294e2d873b7b))
+
 ## [5.65.0](https://github.com/erclx/canon/compare/v5.64.0...v5.65.0) (2026-10-25)
 
 
