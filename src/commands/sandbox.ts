@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs'
-import { basename, dirname, join, resolve } from 'node:path'
+import { basename, dirname, join, relative, resolve } from 'node:path'
 import type { Command } from 'commander'
 import { checkoutMismatchWarning, PROJECT_ROOT } from '@/roots/project'
 import {
@@ -27,6 +27,14 @@ import {
 } from '@/sandbox/expect'
 import { runHeadless } from '@/sandbox/headless/run'
 import { runSandbox } from '@/sandbox/provision'
+import {
+  EXPECTED_FILE,
+  expectationOf,
+  judgeDrift,
+  readExpectation,
+  writeExpectation,
+  type ReplayExpectation,
+} from '@/sandbox/replay/expected'
 import {
   checkoutRefusal,
   hasFormatter,
@@ -444,6 +452,7 @@ async function runEquivalence(
 
 interface ReplayOptions {
   readonly json?: boolean
+  readonly record?: boolean
 }
 
 const REPLAY_FINDINGS_SHOWN = 5
@@ -461,13 +470,25 @@ function refuseReplay(reason: string, message: string, json: boolean): void {
  * the reads that follow. Bare, it replays the frozen snapshots, which is what
  * the gate runs. Given paths, it copies each real checkout, the operator's
  * step before a release. Every source is checked before any replay starts, so
- * a refusal never arrives after half the runs.
+ * a refusal never arrives after half the runs. A snapshot is judged against
+ * the answer recorded beside it, since a frozen tree answers the same on every
+ * push, and `--record` rewrites that answer from a run that broke nothing.
  */
 function runReplay(paths: string[], options: ReplayOptions): void {
   if (reportAbsentScenarioTree()) return
 
   intro('canon sandbox replay')
   const json = options.json === true
+  const record = options.record === true
+
+  if (record && paths.length > 0) {
+    refuseReplay(
+      'record-checkout',
+      'A named checkout moves between runs, so --record pins snapshots only. Drop the paths.',
+      json,
+    )
+    return
+  }
 
   if (!hasFormatter(PROJECT_ROOT)) {
     refuseReplay(
@@ -514,12 +535,31 @@ function runReplay(paths: string[], options: ReplayOptions): void {
     return
   }
 
+  const expectations = new Map<string, ReplayExpectation | undefined>()
+  if (!record)
+    for (const source of sources) {
+      if (source.kind !== 'snapshot') continue
+      try {
+        expectations.set(source.name, readExpectation(source.path))
+      } catch (error) {
+        refuseReplay('bad-expectation', (error as Error).message, json)
+        return
+      }
+    }
+
   const replays: ReplayResult[] = []
   for (const source of sources) {
-    const result = replaySource(source, {
+    const run = replaySource(source, {
       checkoutRoot: PROJECT_ROOT,
       tempRoot,
     })
+    const result: ReplayResult =
+      source.kind === 'snapshot' && !record
+        ? {
+            ...run,
+            steps: judgeDrift(run.steps, expectations.get(source.name)),
+          }
+        : run
     replays.push(result)
 
     logStep(`${result.name} (${result.kind})`)
@@ -541,6 +581,12 @@ function runReplay(paths: string[], options: ReplayOptions): void {
   const failed = replays
     .flatMap((r) => r.steps)
     .filter((s) => s.verdict !== 'ok')
+
+  if (record) {
+    recordReplays(sources, replays, failed.length, json)
+    return
+  }
+
   logStep('Replay')
   const summary = `${replays.length} replayed, ${failed.length} failed steps`
   if (failed.length === 0) logInfo(summary)
@@ -553,6 +599,43 @@ function runReplay(paths: string[], options: ReplayOptions): void {
 
   outro()
   process.exitCode = failed.length === 0 ? 0 : 2
+}
+
+/**
+ * Writes each snapshot's expectation from its run, or refuses and writes none
+ * when any step broke, since pinning a crash would make it the expected answer.
+ */
+function recordReplays(
+  sources: readonly ReplaySource[],
+  replays: readonly ReplayResult[],
+  broken: number,
+  json: boolean,
+): void {
+  if (broken > 0) {
+    refuseReplay(
+      'broken-run',
+      `${broken} steps broke, so nothing was recorded. Fix the run, then record it.`,
+      json,
+    )
+    return
+  }
+
+  logStep('Record')
+  const recorded: string[] = []
+  for (const [i, source] of sources.entries()) {
+    const replay = replays[i]
+    if (replay === undefined) continue
+    writeExpectation(source.path, expectationOf(replay.steps))
+    const path = relative(PROJECT_ROOT, join(source.path, EXPECTED_FILE))
+    recorded.push(path)
+    logInfo(path)
+  }
+
+  if (json)
+    process.stdout.write(`${JSON.stringify({ ok: true, recorded, replays })}\n`)
+
+  outro()
+  process.exitCode = 0
 }
 
 function runCheck(
@@ -816,12 +899,17 @@ export function register(program: Command): void {
     )
     .helpOption('-h, --help', 'Show this help message')
     .option('--json', 'Emit the record as JSON on stdout')
+    .option(
+      '--record',
+      `Write each snapshot's ${EXPECTED_FILE} from this run instead of judging against it`,
+    )
     .addHelpText(
       'after',
       [
         '',
         'Examples:',
         '  canon sandbox replay',
+        '  canon sandbox replay --record',
         '  canon sandbox replay ../frameboard ../jobtriage --json',
         '',
         'Each replay copies the source to a temp tree outside the repository,',
@@ -829,9 +917,12 @@ export function register(program: Command): void {
         'migrate status, and checks what sync wrote with oxfmt. A finding or a',
         'refusal from a read is the verb working. Only a crash, stdout a --json',
         'caller cannot parse, or an unformatted write fails the run.',
+        'A snapshot also fails a step whose exit or finding count drifted from',
+        `the ${EXPECTED_FILE} beside it, and fails every step when it has none.`,
+        '--record rewrites those files, refusing named paths and a broken run.',
         'A named checkout with uncommitted changes is refused, never synced over.',
         '',
-        'Exit codes: 0 clean, 1 refused, 2 when any step failed.',
+        'Exit codes: 0 clean or recorded, 1 refused, 2 when any step failed.',
       ].join('\n'),
     )
     .action((paths: string[], options: ReplayOptions) => {

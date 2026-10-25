@@ -1,0 +1,28 @@
+{
+  "steps": {
+    "sync": {
+      "exit": 0,
+      "findings": 0
+    },
+    "sync --check": {
+      "exit": 0,
+      "findings": 0
+    },
+    "context audit": {
+      "exit": 0,
+      "findings": 3
+    },
+    "markdown audit": {
+      "exit": 0,
+      "findings": 3
+    },
+    "migrate status": {
+      "exit": 0,
+      "findings": 0
+    },
+    "format": {
+      "exit": 0,
+      "findings": 0
+    }
+  }
+}
