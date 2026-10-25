@@ -64,6 +64,7 @@ Owns `canon sandbox replay`, which syncs a copy of a consumer with this checkout
 - `run.ts` copies a source beside the provisioned tree, runs `sync .`, four `--json` health reads, and oxfmt over what sync wrote, then removes the copy
 - A named checkout is copied rather than cloned, since a clone drops the gitignored records the reads look for. One with uncommitted changes is refused.
 - `verdict.ts` reads a finding or a refusal as `ok` and carries each `!` line as a finding. A crash, unparsable `--json` stdout, or an unformatted write fails, and the verb exits 2.
+- `expected.ts` fails a snapshot step as `drifted` when its exit or finding count leaves the `expected.json` beside it. A missing file fails every step, and a checkout is never compared.
 - The format step runs under `tooling/base/configs/.oxfmtrc.json`, since oxfmt's defaults double-quote frontmatter every consumer keeps single-quoted
 
 ### `sandbox/fixtures/replay/`
@@ -72,6 +73,8 @@ Owns the frozen consumers the bare verb replays, one folder each, holding the co
 
 - A snapshot tests the upgrade from the release it was cut at and misses a state only a newer consumer holds, which `sandbox replay <checkout>` covers before a release
 - Refresh one by hand. Copy the consumer's tracked managed paths over its folder with the `.fixture` suffix, keep the stub task index, and name the consumer commit in the message.
+- Re-record after a refresh with `bun src/cli.ts sandbox replay --record`, which refuses named paths and a run with a broken step, so a crash never becomes the answer
+- A governance rename moves jobtriage's `sync` count and drifts the stage. The drift is correct, and a `--record` in the same change settles it.
 - A `.canon/` file here needs `git add -f`, since the root ignore reaches it
 
 ### Other folders
