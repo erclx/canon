@@ -70,6 +70,18 @@ describe('checkReason', () => {
     expect(findings.density.map((f) => f.kind)).toContain('paragraph-length')
   })
 
+  it('should flag a banned character', () => {
+    const findings = checkReason('Closing unmerged — nothing replaces it.')
+
+    expect(findings.bannedCharacters).not.toEqual([])
+  })
+
+  it('should flag a phase label', () => {
+    const findings = checkReason('Closing unmerged. v167.2 replaces it.')
+
+    expect(findings.phaseLabels).not.toEqual([])
+  })
+
   it('should flag a session link', () => {
     const findings = checkReason(
       `${REASON} https://claude.ai/code/session_01ABCdefGHIjklMNOpqrSTU`,
