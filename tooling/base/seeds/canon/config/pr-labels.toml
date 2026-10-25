@@ -25,17 +25,55 @@ tooling = [
   "package.json",
   "bun.lock",
   "canon/config/",
+  # Configs and manifests the language and framework stacks install. A row
+  # naming a file this project lacks reaches nothing and costs nothing.
+  "tsconfig.json",
+  "vite.config.ts",
+  "vitest.config.ts",
+  "playwright.config.ts",
+  "astro.config.mjs",
+  "next.config.ts",
+  "card.config.mjs",
+  "card-src/",
+  ".oxlintrc.json",
+  "eslint.config.js",
+  ".prettierrc",
+  "ruff.toml",
+  "mypy.ini",
+  "pytest.ini",
+  ".coveragerc",
+  ".python-version",
+  "pyproject.toml",
+  "uv.lock",
+  ".golangci.yml",
+  "go.mod",
+  "go.sum",
+  "phpstan.neon",
+  "phpunit.xml",
+  ".php-cs-fixer.dist.php",
+  "composer.json",
+  ".editorconfig",
+  ".shellcheckrc",
 ]
 claude = [".claude/", "CLAUDE.md"]
+tests = ["e2e/", "tests/"]
 docs = [
   "README.md",
   "docs/",
+  "LICENSE",
+  "SECURITY.md",
+  "CONTRIBUTING.md",
   "canon/REQUIREMENTS.md",
   "canon/DESIGN.md",
   "canon/context/",
+  "canon/design/",
 ]
 
 # Paths deliberately left unlabelled, keyed by the reason.
 [declined]
 # Release automation opens its own pull request and applies its own label.
-release-managed = ["CHANGELOG.md", ".release-please-manifest.json"]
+release-managed = [
+  "CHANGELOG.md",
+  ".release-please-manifest.json",
+  "release-please-config.json",
+]
