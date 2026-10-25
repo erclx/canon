@@ -636,7 +636,10 @@ describe('auditSkills reference contents', () => {
 
 const CLOSING = PRACTICE_SECTIONS.map((section) => `## ${section}\n\n- Do\n`)
 
-const [varied = ''] = PRACTICE_SKILLS
+// A skill on the per-bullet list owes ledgers its fixture never writes, so the
+// varied skill is the first practice skill off that list.
+const varied =
+  PRACTICE_SKILLS.find((rel) => !(rel in BULLET_LEDGER_SKILLS)) ?? ''
 
 const LINKED_LEDGER =
   '# Adopted\n\n[A source](https://example.com/source) states the rule.\n'
