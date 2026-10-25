@@ -23,8 +23,8 @@ export default defineConfig({
     trace: 'on-first-retry',
     baseURL,
     // Nothing to wait out unless a test asserts motion. Opt back in per test with page.emulateMedia({ reducedMotion: 'no-preference' }).
-    // It is a context option rather than a top-level one, so written beside
-    // `baseURL` it type-checks nowhere and reaches no page.
+    // A top-level `use.reducedMotion` works from Playwright 1.50.
+    // `contextOptions` is the spelling that works on every version.
     contextOptions: { reducedMotion: 'reduce' },
   },
   projects: [
