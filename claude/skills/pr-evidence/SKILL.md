@@ -43,11 +43,11 @@ Collect only the lines below whose condition holds, and nothing when none does. 
 | A checklist posted alone                                  | `📋 Posted the UI checklist to <number>, on its own.`              |
 | The preview step returned an address                      | `🔗 Preview: <url>`                                                |
 | The evidence step posted the local link                   | `🖥️ Local preview: <url>`                                          |
-| The local step refused and evidence or a checklist posted | `🖥️ No local preview: <reason>`                                    |
+| The local step refused and evidence or a checklist posted | `🖥️ No local preview: <reason>: <message>`                         |
 | A git refusal or a preview refusal the reference reports  | `⚠️ <reason>: <message>`                                           |
 
 ### The no-local-preview line
 
-It fires when the local step refused as `no-server` or `no-listener-reader`, since that pull request changes a rendered surface and a reviewer could have used the link. A later run only carries a link forward, so it cannot add one the comment never had.
+It fires when the local step refused under any reason the reference holds, `unhealthy` included, since that pull request changes a rendered surface and a reviewer could have used the link. The `message` names what to fix, such as the failing health path. A later run only carries a link forward, so it cannot add one the comment never had.
 
 To add the link later, start the server and run this skill again, adding `--checklist` to the evidence call when one is still owed.
