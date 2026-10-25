@@ -14,9 +14,10 @@ import {
 } from '@/labels/density'
 import { resolveScanInput } from '@/labels/event'
 import { checkTitleFormat, type TitleFormatIssue } from '@/labels/format'
-import { MAP_REL } from '@/labels/map'
+import { MAP_REL, readLabelMap } from '@/labels/map'
 import { isReleasePullRequest, scanPhaseLabels } from '@/labels/phase'
 import { checkSections } from '@/labels/sections'
+import { missingLabels } from '@/labels/sync'
 import { BAN_SETS } from '@/markdown/bans'
 import { bodyLines, scanBans } from '@/markdown/scan'
 import { intro, logInfo, logStep, logWarn, outro, plural } from '@/cli/ui'
@@ -32,6 +33,12 @@ interface ApplyOptions extends AuditOptions {
 }
 
 type ApplyRefusal = 'bad-number' | 'no-branch' | 'gh-failed' | 'head-mismatch'
+
+interface SyncOptions {
+  readonly root?: string
+  readonly check?: boolean
+  readonly json?: boolean
+}
 
 const GH_TIMEOUT_MS = 30_000
 
@@ -185,6 +192,48 @@ export function register(program: Command): void {
     )
     .action(async (number: string, opts: ApplyOptions) => {
       process.exitCode = await runApply(number, opts)
+    })
+
+  labels
+    .command('sync')
+    .description(
+      'Create on the remote each label the map names that it lacks, never editing or deleting one',
+    )
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--root <path>', 'Repository to read, defaulting to the cwd')
+    .option('--check', 'Report the labels missing and write nothing')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        `Reads the label names under [domains] in ${MAP_REL}, reads the remote's`,
+        'labels over REST, and creates each one the remote lacks. A label already',
+        'on the remote is left as it is, and one the map does not name is never',
+        'touched. A project declaring no map creates nothing and exits 0.',
+        '',
+        'Run it once after installing a map and again after adding a row, so',
+        '`canon labels apply` finds every label it earns.',
+        '',
+        'Record: labels, present, created, missing, failed',
+        '',
+        'Exit codes:',
+        '  0  the remote carries every label the map names after the run',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '  2  labels are still missing, being any under --check, or a failed',
+        '     create otherwise',
+        '',
+        'Reasons:',
+        '  gh-failed  the remote labels could not be read, so nothing was written',
+        '',
+        'Examples:',
+        '  canon labels sync',
+        '  canon labels sync --check --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (opts: SyncOptions) => {
+      process.exitCode = await runSync(opts)
     })
 
   labels
@@ -544,9 +593,7 @@ async function runApply(number: string, opts: ApplyOptions): Promise<number> {
   }
 
   for (const label of diff.missingOnRemote) {
-    logWarn(
-      `${label} is not on the remote. Create it with: gh label create ${label}`,
-    )
+    logWarn(`${label} is not on the remote. Create it with: canon labels sync`)
   }
   for (const label of failed) logWarn(`Label apply failed: ${label}`)
 
@@ -575,6 +622,107 @@ async function runApply(number: string, opts: ApplyOptions): Promise<number> {
   }
 
   return owed.length === 0 ? 0 : 2
+}
+
+async function runSync(opts: SyncOptions): Promise<number> {
+  const root = resolve(opts.root ?? process.cwd())
+  const emitJson = opts.json ?? false
+  const isCheck = opts.check ?? false
+
+  intro('canon labels sync')
+
+  const map = readLabelMap(root)
+
+  if (map.kind === 'refused' && map.reason === 'no-map') {
+    logStep('Labels')
+    logInfo(REFUSALS['no-map'])
+    outro()
+    if (emitJson) {
+      process.stdout.write(
+        `${JSON.stringify({
+          reason: 'no-map',
+          labels: [],
+          present: [],
+          created: [],
+          missing: [],
+          failed: [],
+        })}\n`,
+      )
+    }
+    return 0
+  }
+
+  const refuse = (reason: LabelAuditRefusal | 'gh-failed'): number => {
+    const message =
+      reason === 'gh-failed'
+        ? 'gh could not read the remote labels, so nothing was written.'
+        : REFUSALS[reason]
+    logStep('Refused')
+    logWarn(message)
+    outro()
+    if (emitJson) {
+      process.stdout.write(`${JSON.stringify({ root, reason, message })}\n`)
+    }
+    return 1
+  }
+
+  if (map.kind === 'refused') return refuse(map.reason)
+
+  const remoteRaw = await gh(root, [
+    'api',
+    '--paginate',
+    'repos/{owner}/{repo}/labels',
+    '--jq',
+    '.[].name',
+  ])
+  if (remoteRaw === null) return refuse('gh-failed')
+
+  const labels = map.domains.map((row) => row.label)
+  const present = nonEmptyLines(remoteRaw)
+  const toCreate = missingLabels(labels, present)
+
+  const created: string[] = []
+  const failed: string[] = []
+
+  if (!isCheck) {
+    for (const label of toCreate) {
+      const wrote = await gh(root, [
+        'api',
+        '-X',
+        'POST',
+        'repos/{owner}/{repo}/labels',
+        '-f',
+        `name=${label}`,
+        '--silent',
+      ])
+      if (wrote === null) failed.push(label)
+      else created.push(label)
+    }
+  }
+
+  const missing = toCreate.filter((label) => !created.includes(label))
+
+  logStep('Labels')
+  logInfo(labels.join(', '))
+
+  if (isCheck) {
+    logStep(missing.length === 0 ? 'Nothing missing' : 'Missing')
+    for (const label of missing) logWarn(label)
+  } else {
+    logStep('Created')
+    logInfo(created.length === 0 ? 'no label was created' : created.join(', '))
+  }
+  for (const label of failed) logWarn(`Label create failed: ${label}`)
+
+  outro()
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({ labels, present, created, missing, failed })}\n`,
+    )
+  }
+
+  return missing.length === 0 ? 0 : 2
 }
 
 /**
