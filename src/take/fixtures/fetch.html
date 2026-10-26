@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fetch</title>
+    <!--
+      A button whose press starts a fetch the server answers slowly, the way
+      a page switch in an app loads what the next view shows. A take must keep
+      stepping frames while the fetch is in flight.
+    -->
+    <style>
+      body {
+        margin: 0;
+        background: #808080;
+      }
+
+      #go {
+        position: absolute;
+        left: 100px;
+        top: 100px;
+        width: 200px;
+        height: 60px;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="go">Load</button>
+    <p id="status">idle</p>
+    <script>
+      document.getElementById('go').addEventListener('click', () => {
+        document.getElementById('status').textContent = 'loading'
+        fetch('/slow').then(() => {
+          document.getElementById('status').textContent = 'loaded'
+        })
+      })
+    </script>
+  </body>
+</html>

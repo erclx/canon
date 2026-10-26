@@ -15,6 +15,7 @@ import { register as serve } from '@/commands/serve'
 import { register as inventory } from '@/commands/inventory'
 import { register as driver } from '@/commands/driver'
 import { register as browser } from '@/commands/browser'
+import { register as take } from '@/commands/take'
 import { register as feedback } from '@/commands/feedback'
 import { register as transcripts } from '@/commands/transcripts'
 import { register as tasks } from '@/commands/tasks'
@@ -80,6 +81,7 @@ serve(program)
 inventory(program)
 driver(program)
 browser(program)
+take(program)
 feedback(program)
 transcripts(program)
 tasks(program)

@@ -19,6 +19,7 @@ These skills serve a request rather than a moment. With the [skill map](skill-ma
 | `canon:draw-figure`     | A figure or architecture view inside a doc        |
 | `canon:ci-workflow`     | A GitHub Actions workflow file                    |
 | `canon:design-identity` | A logo mark and social card                       |
+| `canon:ui-record`       | Real footage of the app for a video               |
 
 ## Answer a question at any point
 

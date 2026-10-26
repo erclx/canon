@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fade</title>
+    <!--
+      A band that fades from black to white over exactly one second of page
+      time once the button is pressed, so its brightness frame by frame reads
+      how much page time each frame of a take advanced.
+    -->
+    <style>
+      body {
+        margin: 0;
+        background: #808080;
+      }
+
+      #go {
+        position: absolute;
+        left: 100px;
+        top: 100px;
+        width: 200px;
+        height: 60px;
+      }
+
+      #band {
+        position: absolute;
+        left: 0;
+        top: 300px;
+        width: 1920px;
+        height: 780px;
+        background-color: #000;
+        transition: background-color 1000ms linear;
+      }
+
+      #band.lit {
+        background-color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="go">Go</button>
+    <div id="band"></div>
+    <script>
+      document.getElementById('go').addEventListener('click', () => {
+        document.getElementById('band').classList.add('lit')
+      })
+    </script>
+  </body>
+</html>
