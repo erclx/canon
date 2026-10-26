@@ -1,5 +1,13 @@
 import { createHash } from 'node:crypto'
-import { cpSync, existsSync, readFileSync, rmSync, statSync } from 'node:fs'
+import {
+  cpSync,
+  existsSync,
+  lstatSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+} from 'node:fs'
 import { isAbsolute, join, relative, sep } from 'node:path'
 import { $ } from 'bun'
 import { gitEnv } from '@/git/env'
@@ -167,25 +175,55 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
 }
 
 /**
- * Replaces the copy root with a fresh copy of each declared path, so the last
- * pass's drives never reach the next one. A path the worktree does not hold
- * is named rather than failing the copy.
+ * Removes `target` except the `keep` paths at or below it, where `rel` is
+ * `target` relative to the root `keep` is read against. A folder holding a
+ * kept path is emptied around it rather than removed.
+ */
+function clearAround(
+  target: string,
+  rel: string,
+  keep: readonly string[],
+): void {
+  if (keep.includes(rel)) return
+  const stat = lstatSync(target, { throwIfNoEntry: false })
+  if (stat === undefined) return
+  if (!stat.isDirectory() || !keep.some((path) => isWithin(path, rel))) {
+    rmSync(target, { recursive: true, force: true })
+    return
+  }
+  for (const entry of readdirSync(target)) {
+    clearAround(join(target, entry), join(rel, entry), keep)
+  }
+}
+
+/**
+ * Resets each declared path in the copy from the worktree, so the last pass's
+ * drives never reach the next one, and leaves everything else under the copy
+ * root as it is. A `keep` path inside a declared path is neither cleared nor
+ * copied, since the server running on the copy owns it. A path the worktree
+ * does not hold has its stale copy removed and is named rather than failing
+ * the copy.
  */
 export function buildDriveCopy(
   worktree: string,
   copyRoot: string,
   writes: readonly string[],
+  keep: readonly string[] = [],
 ): { readonly copied: readonly string[]; readonly missing: readonly string[] } {
-  rmSync(copyRoot, { recursive: true, force: true })
+  const kept = keep.map((path) => relative(worktree, join(worktree, path)))
   const copied: string[] = []
   const missing: string[] = []
   for (const path of writes) {
     const source = join(worktree, path)
+    clearAround(join(copyRoot, path), relative(worktree, source), kept)
     if (!existsSync(source)) {
       missing.push(path)
       continue
     }
-    cpSync(source, join(copyRoot, path), { recursive: true })
+    cpSync(source, join(copyRoot, path), {
+      recursive: true,
+      filter: (item) => !kept.includes(relative(worktree, item)),
+    })
     copied.push(path)
   }
   return { copied, missing }

@@ -180,6 +180,100 @@ describe('buildDriveCopy', () => {
 
     expect(result).toEqual({ copied: ['board'], missing: ['gone'] })
   })
+
+  it('should leave a file at the copy root outside every declared path', () => {
+    buildDriveCopy(worktree, copyRoot, ['board'])
+    writeFileSync(join(copyRoot, 'server-state.json'), '{}')
+
+    buildDriveCopy(worktree, copyRoot, ['board'])
+
+    expect(existsSync(join(copyRoot, 'server-state.json'))).toBe(true)
+  })
+
+  it('should remove the copy of a declared path the worktree no longer holds', () => {
+    buildDriveCopy(worktree, copyRoot, ['board', 'gone'])
+    mkdirSync(join(copyRoot, 'gone'), { recursive: true })
+    writeFileSync(join(copyRoot, 'gone/stale.json'), '{}')
+
+    const result = buildDriveCopy(worktree, copyRoot, ['board', 'gone'])
+
+    expect(result.missing).toEqual(['gone'])
+    expect(existsSync(join(copyRoot, 'gone'))).toBe(false)
+  })
+
+  it('should end nested declared paths with the outer content and a fresh inner copy', () => {
+    buildDriveCopy(worktree, copyRoot, ['board', 'board/assets'])
+    writeFileSync(join(copyRoot, 'board/assets/dragged.png'), 'd')
+    writeFileSync(join(copyRoot, 'board/dragged.json'), '{}')
+
+    buildDriveCopy(worktree, copyRoot, ['board', 'board/assets'])
+
+    expect(existsSync(join(copyRoot, 'board/dragged.json'))).toBe(false)
+    expect(existsSync(join(copyRoot, 'board/assets/dragged.png'))).toBe(false)
+    expect(readFileSync(join(copyRoot, 'board/assets/a.png'), 'utf8')).toBe('a')
+  })
+
+  describe('with a keep path', () => {
+    it('should leave a keep path in the copy while resetting a dragged sibling', () => {
+      buildDriveCopy(worktree, copyRoot, ['board'])
+      mkdirSync(join(copyRoot, 'board/.run'), { recursive: true })
+      writeFileSync(join(copyRoot, 'board/.run/address.json'), '{"pid":1}')
+      writeFileSync(join(copyRoot, 'board/dragged.json'), '{}')
+
+      buildDriveCopy(worktree, copyRoot, ['board'], ['board/.run'])
+
+      expect(
+        readFileSync(join(copyRoot, 'board/.run/address.json'), 'utf8'),
+      ).toBe('{"pid":1}')
+      expect(existsSync(join(copyRoot, 'board/dragged.json'))).toBe(false)
+      expect(existsSync(join(copyRoot, 'board/frames.json'))).toBe(true)
+    })
+
+    it('should not copy a keep path the worktree holds, even into an empty root', () => {
+      write('board/.run/address.json', '{"pid":"stale"}')
+
+      buildDriveCopy(worktree, copyRoot, ['board'], ['board/.run'])
+
+      expect(existsSync(join(copyRoot, 'board/.run'))).toBe(false)
+      expect(existsSync(join(copyRoot, 'board/frames.json'))).toBe(true)
+    })
+
+    it('should not replace a kept file with the worktree copy of it', () => {
+      buildDriveCopy(worktree, copyRoot, ['board'])
+      mkdirSync(join(copyRoot, 'board/.run'), { recursive: true })
+      writeFileSync(join(copyRoot, 'board/.run/address.json'), '{"pid":1}')
+      write('board/.run/address.json', '{"pid":"stale"}')
+
+      buildDriveCopy(worktree, copyRoot, ['board'], ['board/.run'])
+
+      expect(
+        readFileSync(join(copyRoot, 'board/.run/address.json'), 'utf8'),
+      ).toBe('{"pid":1}')
+    })
+
+    it('should create nothing for a keep path the copy lacks', () => {
+      const result = buildDriveCopy(
+        worktree,
+        copyRoot,
+        ['board'],
+        ['board/.run'],
+      )
+
+      expect(result).toEqual({ copied: ['board'], missing: [] })
+      expect(existsSync(join(copyRoot, 'board/.run'))).toBe(false)
+    })
+
+    it('should keep state under a declared path the worktree no longer holds', () => {
+      mkdirSync(join(copyRoot, 'gone/.run'), { recursive: true })
+      writeFileSync(join(copyRoot, 'gone/.run/address.json'), '{"pid":1}')
+      writeFileSync(join(copyRoot, 'gone/stale.json'), '{}')
+
+      buildDriveCopy(worktree, copyRoot, ['gone'], ['gone/.run'])
+
+      expect(existsSync(join(copyRoot, 'gone/.run/address.json'))).toBe(true)
+      expect(existsSync(join(copyRoot, 'gone/stale.json'))).toBe(false)
+    })
+  })
 })
 
 describe('changedSince', () => {
