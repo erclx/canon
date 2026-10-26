@@ -143,4 +143,52 @@ describe('canon take', () => {
       })
     },
   )
+
+  it.skipIf(!hasFfmpeg || !hasShell())(
+    'should add the reel to the record when --reel is passed',
+    async () => {
+      const served = Bun.serve({
+        port: 0,
+        fetch: () =>
+          new Response('<button id="go">go</button>', {
+            headers: { 'content-type': 'text/html' },
+          }),
+      })
+      try {
+        const out = join(dir, 'reel-takes')
+        const reel = join(dir, 'reel.webp')
+        const result = await runTake([
+          `http://127.0.0.1:${served.port}/`,
+          plan,
+          '--out',
+          out,
+          '--reel',
+          reel,
+        ])
+
+        expect(result).toMatchObject({
+          exitCode: 0,
+          record: { reel: { file: reel, frames: expect.any(Number) } },
+        })
+
+        // A folder that does not exist leaves the encoder nowhere to write,
+        // so the beats stand and the reel alone refuses.
+        const missing = await runTake([
+          `http://127.0.0.1:${served.port}/`,
+          plan,
+          '--out',
+          out,
+          '--reel',
+          join(dir, 'absent', 'reel.webp'),
+        ])
+        expect(missing).toMatchObject({
+          exitCode: 1,
+          record: { reason: 'reel-failed', beats: [{ name: 'press go' }] },
+        })
+      } finally {
+        served.stop(true)
+      }
+    },
+    120_000,
+  )
 })
