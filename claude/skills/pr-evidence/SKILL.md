@@ -27,7 +27,7 @@ Read `reason` on the record rather than the exit code, since a shell function wr
 
 ## Post the evidence
 
-Read `${CLAUDE_SKILL_DIR}/references/evidence.md` and run its sections in order against the number, being the checklist, the local server, the evidence comparison, the checklist alone, and the preview address.
+Read `${CLAUDE_SKILL_DIR}/references/evidence.md` and run its sections in order against the number, being the checklist, the local server, the reel, the evidence comparison, the checklist alone, and the preview address.
 
 - Every post and edit goes through `gh api` over REST, since a cloud session's proxy refuses the GraphQL that `gh pr` runs on
 - Never judge from the diff whether an evidence image changed, since the verb answers `no-evidence` for a branch that changed none and a session cannot see an image it did not author
@@ -44,6 +44,8 @@ Collect only the lines below whose condition holds, and nothing when none does. 
 | The preview step returned an address                      | `🔗 Preview: <url>`                                                |
 | The evidence step posted the local link                   | `🖥️ Local preview: <url>`                                          |
 | The local step refused and evidence or a checklist posted | `🖥️ No local preview: <reason>: <message>`                         |
+| The reel step posted a reel                               | `🎞️ Reel: <link>`                                                  |
+| The reel step skipped with a reason                       | `🎞️ No reel: <reason>: <message>`                                  |
 | A git refusal or a preview refusal the reference reports  | `⚠️ <reason>: <message>`                                           |
 
 ### The no-local-preview line
