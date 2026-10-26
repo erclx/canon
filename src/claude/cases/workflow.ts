@@ -151,6 +151,16 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
+      'We just tagged the release. Spin up a copy of the build and use it with me as its users would, then file whatever breaks.',
+    expect: 'app-drive',
+  },
+  {
+    prompt:
+      'Before we plan the next wave, put the built app through every goal in the requirements with me and write up what we hit.',
+    expect: 'app-drive',
+  },
+  {
+    prompt:
       'I am building this branch for another session. What am I on the hook for, and what is off limits?',
     expect: 'role-worker',
   },

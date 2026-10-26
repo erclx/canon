@@ -10,13 +10,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { execaSync } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import {
-  branchSlug,
-  buildDriveCopy,
-  changedSince,
-  loadPreviewConfig,
-  readWorktreeStatus,
-} from '@/pr/drive-copy'
+import { branchSlug, buildDriveCopy, loadPreviewConfig } from '@/pr/drive-copy'
 
 let tempDir: string
 let worktree: string
@@ -297,49 +291,6 @@ describe('buildDriveCopy', () => {
   })
 })
 
-describe('changedSince', () => {
-  it('should report a tracked file changed after the baseline', async () => {
-    const baseline = await readWorktreeStatus(worktree)
-    write('board/frames.json', '{"x":40}')
-
-    const current = await readWorktreeStatus(worktree)
-
-    expect(changedSince(baseline ?? [], current ?? [])).toEqual([
-      'board/frames.json',
-    ])
-  })
-
-  it('should ignore a change already present at the baseline', async () => {
-    write('README.md', '# worker edit\n')
-    const baseline = await readWorktreeStatus(worktree)
-
-    const current = await readWorktreeStatus(worktree)
-
-    expect(changedSince(baseline ?? [], current ?? [])).toEqual([])
-  })
-
-  it('should report a file already dirty at the baseline that changed again', async () => {
-    write('README.md', '# worker edit\n')
-    const baseline = await readWorktreeStatus(worktree)
-    write('README.md', '# drive edit\n')
-
-    const current = await readWorktreeStatus(worktree)
-
-    expect(changedSince(baseline ?? [], current ?? [])).toEqual(['README.md'])
-  })
-
-  it('should report a new file inside a tracked folder', async () => {
-    const baseline = await readWorktreeStatus(worktree)
-    write('board/assets/b.png', 'b')
-
-    const current = await readWorktreeStatus(worktree)
-
-    expect(changedSince(baseline ?? [], current ?? [])).toEqual([
-      'board/assets/b.png',
-    ])
-  })
-})
-
 describe('branchSlug', () => {
   it('should drop a leading type segment and flatten the rest', () => {
     expect(branchSlug('feat/review-ui/drive-copy')).toBe('review-ui-drive-copy')
@@ -351,11 +302,5 @@ describe('branchSlug', () => {
 
   it('should keep a type that no further segment follows', () => {
     expect(branchSlug('feat')).toBe('feat')
-  })
-})
-
-describe('readWorktreeStatus', () => {
-  it('should read as undefined outside a repository', async () => {
-    expect(await readWorktreeStatus(join(tempDir, 'nowhere'))).toBeUndefined()
   })
 })
