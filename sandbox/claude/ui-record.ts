@@ -123,7 +123,7 @@ export default scenario({
         '         approval a plan and takes under .canon/tmp/ui-record/<slug>/, each beat',
       )
       ctx.log.info(
-        '         with clip.mp4, log.json, and camera.json, a still read per beat, no tracked',
+        '         with clip.mp4, log.json, camera.json, and the still.jpg the verb wrote, read per beat, no tracked',
       )
       ctx.log.info('         file changed, and the throwaway copy removed')
     },

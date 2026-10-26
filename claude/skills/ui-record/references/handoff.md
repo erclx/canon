@@ -9,13 +9,14 @@ Read at Step 5 of `ui-record`. Canon stops at the clip, and a HyperFrames compos
 
 ## What the takes folder holds
 
-`take.json` lists every beat in plan order, with the folder, the route that filmed it, and the frame count. Each beat's folder holds three files.
+`take.json` lists every beat in plan order, with the folder, the route that filmed it, and the frame count. Each beat's folder holds four files.
 
-| File          | Holds                                                                    |
-| ------------- | ------------------------------------------------------------------------ |
-| `clip.mp4`    | H.264 at 60 fps, 3840x2160 when frame stepped, 1920x1080 when screencast |
-| `log.json`    | Every move, click, typing burst, and scroll, with each target's box      |
-| `camera.json` | One camera per frame of the clip, with the cursor and the click ring     |
+| File          | Holds                                                                        |
+| ------------- | ---------------------------------------------------------------------------- |
+| `clip.mp4`    | H.264 at 60 fps, 3840x2160 when frame stepped, 1920x1080 when screencast     |
+| `log.json`    | Every move, click, typing burst, and scroll, with each target's box          |
+| `camera.json` | One camera per frame of the clip, with the cursor and the click ring         |
+| `still.jpg`   | The clip's closing frame, the check on each take, which no composition needs |
 
 Every coordinate in the log and the track is in CSS pixels of a 1920x1080 page, whatever size the clip is. Every time is in milliseconds on the clip's own clock, so frame `n` sits at `n * 1000 / 60`.
 

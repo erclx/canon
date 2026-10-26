@@ -57,6 +57,13 @@ A fallback films the beat again from a fresh load, replaying its setup and the s
 
 A screencast beat films in real time at 1920x1080, which goes soft at the 1.8x zoom. Tell the operator which beats ran that way.
 
+### Reading a take back
+
+Two rules hold once a beat is filmed.
+
+- A stepped still is 3840x2160 and opens at 2000 wide. Crop it for text too small to read there, with `ffmpeg -v error -y -i <dir>/still.jpg -vf crop=<w>:<h>:<x>:<y> <dir>/crop.png` on the still's own pixels.
+- Read when something happened from `log.json` and `camera.json`, both on the clip's clock, never from a clock printed in the page, which starts before the first kept frame
+
 ## Targets
 
 - Prefer a stable attribute, such as an `aria-label`, a `data-testid`, or an `id`, over a position like `:nth-child`
