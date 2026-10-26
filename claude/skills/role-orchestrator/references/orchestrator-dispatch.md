@@ -7,7 +7,6 @@ Run this at loop step 4, for a `## Up next` row whose plan is verified, in place
 
 ## Contents
 
-- [Wait on a row still in planning](#wait-on-a-row-still-in-planning)
 - [Derive the candidate](#derive-the-candidate)
 - [Check the plan waits on nobody](#check-the-plan-waits-on-nobody)
 - [Check the branch is unclaimed](#check-the-branch-is-unclaimed)
@@ -18,24 +17,6 @@ Run this at loop step 4, for a `## Up next` row whose plan is verified, in place
 - [Dispatch](#dispatch)
 - [Fall back to the human](#fall-back-to-the-human)
 - [Stop the loop](#stop-the-loop)
-
-## Wait on a row still in planning
-
-A row whose plan a planner is still writing has nothing to dispatch yet. Run the wait in the background rather than grepping the task file on a loop, and act on the wake:
-
-```bash
-canon tasks launchable <task> --wait --json
-```
-
-The verb resolves the task's `Plan:` line and runs the `plan-answers` gate on the plan it names, re-reading every 30 seconds for up to 1800 seconds by default. It keys on the line rather than the plan file. A planner links a plan only after it validates, so a half-written plan never wakes the loop.
-
-Branch on the record's `reason` rather than on the exit code.
-
-- `launchable`: the row has a plan that waits on nobody, so derive the candidate below and run every later check. The wait answers planning alone, never the branch or the conflict check.
-- `timeout`: read `plan` and `open` off the last reading. No `plan` means nothing was linked in time, and a non-empty `open` names the questions still holding the row for the operator.
-- A refusal such as `several-plans`, `archived`, or `no-match` means the row cannot launch as it stands, so name the reason and fall back to the human
-
-A one-shot read without `--wait` reports `reason: unlinked`, `open`, or `launchable` at once. It suits a pass that only needs the row's state now.
 
 ## Derive the candidate
 
