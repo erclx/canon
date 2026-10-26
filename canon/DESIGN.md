@@ -26,7 +26,7 @@ Warm neutrals under one rust accent, set in Geist. The page reads as prose, and 
 | text-body            | default body copy                                     | #aeada9          |
 | text-secondary       | labels, captions, supporting copy                     | #8c8b86          |
 | muted                | the faintest step, trailing notes                     | #7f7f7c          |
-| accent               | install command, mark, primary action                 | #c76b5f          |
+| accent               | install command, primary action                       | #c76b5f          |
 | success              | confirmations, rendered and in the terminal           | #61c454          |
 | warning              | terminal cautions                                     | ANSI 33          |
 | error                | terminal failures                                     | ANSI 31          |
@@ -95,4 +95,5 @@ Warm neutrals under one rust accent, set in Geist. The page reads as prose, and 
 ## Iconography
 
 - No icon library. `assets/brand/mark.svg` is the one authored icon.
+- The mark takes its own colors from `src/design/favicon.ts`, never the accent: the c in the text ink and the pip in a vermilion pair.
 - The terminal draws glyphs: `│ ├ ✓ ! ✗ + - ◆ ◇ ❯`.

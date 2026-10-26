@@ -155,7 +155,7 @@ export const TOKENS: DesignTokens = {
     },
     {
       role: 'accent',
-      intent: 'install command, mark, primary action',
+      intent: 'install command, primary action',
       value: '#c76b5f',
       grounds: DARK_GROUNDS,
     },
@@ -361,6 +361,7 @@ export const TOKENS: DesignTokens = {
 
   iconography: [
     'No icon library. `assets/brand/mark.svg` is the one authored icon.',
+    'The mark takes its own colors from `src/design/favicon.ts`, never the accent: the c in the text ink and the pip in a vermilion pair.',
     'The terminal draws glyphs: `│ ├ ✓ ! ✗ + - ◆ ◇ ❯`.',
   ],
 }
