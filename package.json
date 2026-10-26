@@ -25,9 +25,9 @@
     "access": "public"
   },
   "scripts": {
-    "format": "oxfmt . && prettier --write --log-level warn 'web/**/*.astro' && shfmt --write --indent 2 scripts/ tooling/ claude/",
-    "check:format": "oxfmt --check . && prettier --check --log-level warn 'web/**/*.astro' && shfmt --diff --indent 2 scripts/ tooling/ claude/",
-    "check:shell": "find scripts tooling claude .claude/hooks -name '*.sh' -exec shellcheck --severity=warning {} + && find .husky -maxdepth 1 -type f -exec shellcheck --severity=warning --shell=sh {} +",
+    "format": "oxfmt . && prettier --write --log-level warn 'web/**/*.astro' && shfmt --write --indent 2 scripts/ tooling/ claude/ src/",
+    "check:format": "oxfmt --check . && prettier --check --log-level warn 'web/**/*.astro' && shfmt --diff --indent 2 scripts/ tooling/ claude/ src/",
+    "check:shell": "find scripts tooling claude src .claude/hooks -name '*.sh' -exec shellcheck --severity=warning {} + && find .husky -maxdepth 1 -type f -exec shellcheck --severity=warning --shell=sh {} +",
     "check:lint": "oxlint --disable-nested-config --max-warnings 0",
     "check:types": "tsc --noEmit",
     "check:install": "bun scripts/core/install-check.ts",

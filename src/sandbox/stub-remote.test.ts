@@ -38,6 +38,14 @@ describe('the stub gh', () => {
     ])
   })
 
+  it('should print a pull request URL on the repository the anchor URL names', () => {
+    const created = gh('pr', 'create', '--title', 'one', '--head', 'feat/a')
+
+    expect(created.stdout.trim()).toBe(
+      `${STUB_ANCHOR_URL.replace(/\.git$/, '')}/pull/1`,
+    )
+  })
+
   it('should fail an unknown subcommand and log it', () => {
     const result = gh('release', 'create', 'v1')
 

@@ -122,6 +122,23 @@ describe('installDispatchShim', () => {
     expect(existsSync(join(root, 'delegated'))).toBe(true)
   })
 
+  it('should reach a real binary whose path holds a single quote and a space', () => {
+    const dir = join(root, "it's here")
+    mkdirSync(dir)
+    const real = join(dir, 'claude')
+    writeFileSync(real, '#!/usr/bin/env bash\necho "$@"\n', { mode: 0o755 })
+    const shimDir = join(root, 'shim')
+    mkdirSync(shimDir)
+    installDispatchShim(shimDir, real)
+
+    const run = spawnSync(join(shimDir, 'claude'), ['-p', 'two words'], {
+      encoding: 'utf8',
+    })
+
+    expect(run.status).toBe(0)
+    expect(run.stdout.trim()).toBe('-p two words')
+  })
+
   it('should name the layer that refused, so an arm can tell it from a broken harness', () => {
     const run = runShim(['--bg'])
 
