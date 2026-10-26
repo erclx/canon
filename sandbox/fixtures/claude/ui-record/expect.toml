@@ -13,16 +13,16 @@
 # is a correct run.
 
 paths = [
-  ".canon/tmp/ui-record/*/plan.json",
-  ".canon/tmp/ui-record/*/takes/take.json",
-  ".canon/tmp/ui-record/*/takes/01-*/clip.mp4",
-  ".canon/tmp/ui-record/*/takes/01-*/log.json",
-  ".canon/tmp/ui-record/*/takes/01-*/camera.json",
-  ".canon/tmp/ui-record/*/takes/02-*/clip.mp4",
-  ".canon/tmp/ui-record/*/takes/02-*/log.json",
-  ".canon/tmp/ui-record/*/takes/02-*/camera.json",
-  ".canon/tmp/ui-record/*/takes/01-*/still.jpg",
-  ".canon/tmp/ui-record/*/takes/02-*/still.jpg",
+  ".canon/video/*/plan.json",
+  ".canon/video/*/takes/take.json",
+  ".canon/video/*/takes/01-*/clip.mp4",
+  ".canon/video/*/takes/01-*/log.json",
+  ".canon/video/*/takes/01-*/camera.json",
+  ".canon/video/*/takes/02-*/clip.mp4",
+  ".canon/video/*/takes/02-*/log.json",
+  ".canon/video/*/takes/02-*/camera.json",
+  ".canon/video/*/takes/01-*/still.jpg",
+  ".canon/video/*/takes/02-*/still.jpg",
 ]
 
 # The throwaway copy Step 1 adds is gone. The copy itself sits under /tmp,
@@ -34,7 +34,7 @@ absent = [".git/worktrees/*/HEAD"]
 # Any write outside the skill's scratch fails, the stand-in for "no tracked file
 # changed". The seed's `src/index.html` and `canon/config/app-drive.toml` are
 # the files a run serving from the checkout or writing the config would touch.
-write_scope = [".canon/tmp/ui-record/**"]
+write_scope = [".canon/video/**"]
 
 escape_scope = []
 
@@ -52,33 +52,33 @@ manual = [
 
 # The plan holds both storyboard beats as steps the verb reads.
 [[content]]
-path = ".canon/tmp/ui-record/*/plan.json"
+path = ".canon/video/*/plan.json"
 pattern = '"kind":\s*"click"'
 
 [[content]]
-path = ".canon/tmp/ui-record/*/plan.json"
+path = ".canon/video/*/plan.json"
 pattern = '"kind":\s*"fill"'
 
 # The record lists both beats and the route that filmed each.
 [[content]]
-path = ".canon/tmp/ui-record/*/takes/take.json"
+path = ".canon/video/*/takes/take.json"
 pattern = '"dir":\s*"02-'
 
 [[content]]
-path = ".canon/tmp/ui-record/*/takes/take.json"
+path = ".canon/video/*/takes/take.json"
 pattern = '"route":\s*"(step|screencast)"'
 
 # The archive beat's log carries its click with the target's box.
 [[content]]
-path = ".canon/tmp/ui-record/*/takes/01-*/log.json"
+path = ".canon/video/*/takes/01-*/log.json"
 pattern = '"kind":\s*"click"'
 
 # The search beat's log carries the typing burst.
 [[content]]
-path = ".canon/tmp/ui-record/*/takes/02-*/log.json"
+path = ".canon/video/*/takes/02-*/log.json"
 pattern = '"kind":\s*"type"'
 
 # Each camera track carries its frames.
 [[content]]
-path = ".canon/tmp/ui-record/*/takes/01-*/camera.json"
+path = ".canon/video/*/takes/01-*/camera.json"
 pattern = '"frames":\s*\[\{'

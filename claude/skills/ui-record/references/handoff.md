@@ -31,6 +31,24 @@ Each frame carries `scale`, the view's top-left `x` and `y`, the `cursor`, and `
 
 The track is final. It already carries the easing, the spring, and the hold, so a composition sets each frame's values and never tweens between them.
 
+## Where the composition lives
+
+The HyperFrames project sits in the same workspace as the takes, so one folder holds everything a video is made from.
+
+```bash
+bunx -y hyperframes init .canon/video/<slug>/composition
+```
+
+- Use `bunx` when bun is available, falling back to `npx -y hyperframes init ...` otherwise
+- Prefix the path with the main worktree root when running from a linked worktree, as `ui-record`'s write scope states
+- Read each clip from `../takes/<dir>/clip.mp4`, relative to the project, rather than copying it in
+- Leave renders in the project's `renders/` folder, which `canon records push` skips along with `takes/`, `snapshots/`, `node_modules/`, and any video file
+- An image the composition adds under `assets/`, such as a logo, is backed up with the project's source
+
+Compose from a session started at the main worktree root. From a linked worktree or an isolated background session, `Write` and `Edit` refuse every file in `composition/` and redirect to a worktree copy no later session reads, so never take that redirect.
+
+Where composing from the main root is not possible, write each file whole through the route `${CLAUDE_SKILL_DIR}/../session-worktree/references/main-root-writes.md` states.
+
 ## Applying it in a composition
 
 Load `hyperframes-core` for placing the clip and `hyperframes-keyframes` for the wrapper's transform before writing the composition.

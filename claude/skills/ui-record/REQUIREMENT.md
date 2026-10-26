@@ -19,6 +19,8 @@ A session that does reach `canon take` writes the plan from its own reading of t
 - The session looks at a still of each take before handing it off or posting it as a pull request reel, and names a beat that fell back to the real-time route
 - HyperFrames receives the takes with what it needs to apply the camera and draw the cursor
 
+One video keeps its plan, takes, and composition in one workspace the operator can find, backed up without its media.
+
 ## Must not
 
 - Film before the operator approves, or with nobody there to approve, unless `pr-evidence` named pull request mode, whose still check stands in for the approval

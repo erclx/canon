@@ -120,7 +120,7 @@ export default scenario({
         'Expect:  two plain beats shown for approval before anything is filmed, then after',
       )
       ctx.log.info(
-        '         approval a plan and takes under .canon/tmp/ui-record/<slug>/, each beat',
+        '         approval a plan and takes under .canon/video/<slug>/, each beat',
       )
       ctx.log.info(
         '         with clip.mp4, log.json, camera.json, and the still.jpg the verb wrote, read per beat, no tracked',
