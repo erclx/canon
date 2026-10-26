@@ -100,7 +100,7 @@ Drive from `.canon/tmp/pr/review-ui/<number>/` at the main worktree root, resolv
 canon browser -s=<project>-<number> open <url>
 ```
 
-- Stop and post nothing when `canon` reports `browser` as an unknown command, telling whoever launched the pass to run `canon upgrade`, since the installed CLI predates the verb
+- Stop and post nothing when `open` exits with `unknown option '-s=...'` or `unknown command 'browser'`, since the CLI predates the verb, telling whoever launched the pass to run `canon upgrade`
 - Pass `--config=<path>` on `open` only when the launch names a CLI config path, which is how a machine's GPU recipe reaches the pass. Render in software otherwise.
 - Read the WebGL renderer once with an `eval` through the debug renderer extension and carry it into the comment, since a canvas page can paint differently in software
 - Before `open`, rebuild the drive copy and record the worktree's state per `${CLAUDE_SKILL_DIR}/references/drive-copy.md`
