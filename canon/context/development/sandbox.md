@@ -89,7 +89,7 @@ The state and the remote a run touches sit outside the repository.
 ## Gotchas
 
 - A green `bun run check` does not prove an `expect.toml` parses, and a bare key under a `[[content]]` header joins that table and never asserts
-- `canon sandbox check` mints a fresh run id and asserts nothing on a multi-arm scenario without an arm, so name the arm and pin `CANON_SANDBOX_DIR`
+- `canon sandbox check` mints a fresh run id and asserts nothing on a multi-arm scenario without an arm, so name the arm and pin `CANON_SANDBOX_DIR` outside `~/.claude/`, where every `Write` is refused
 - The driven session resolves `canon` from `PATH`, the published release, so an arm exercising a verb this branch adds meets a binary that refuses
-- Never point `CANON_SANDBOX_DIR` under `~/.claude/`, where the driven session has every `Write` refused as a sensitive path
+- A skill with a decline guard declines in a cold sandbox, which holds nothing git does not, so the arm's prompt states the reasoning to record as `claude:session-compact` does
 - A verdict covers the arm that ran, so read `unchecked` beside `asserted`, since `manual` entries carry what no substring reaches
