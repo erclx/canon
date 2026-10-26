@@ -7,7 +7,7 @@ import type { CameraTrack } from '@/take/camera'
 import type { TakeLog } from '@/take/log'
 import { readTakePlan } from '@/take/plan'
 import { findShell } from '@/take/shell'
-import { take } from '@/take/take'
+import { take } from '@/take/film'
 
 /**
  * Films one frame-stepped take of a static page and reads the clip back,

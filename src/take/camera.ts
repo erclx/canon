@@ -16,7 +16,7 @@ import {
   computeRegionStrength,
   easeConnectedPan,
   lerp,
-} from '@/take/zoom/zoom-region-utils'
+} from '@/take/zoom/region-utils'
 
 /**
  * Turns a take's log into one camera per frame, preset O4 from groundwork

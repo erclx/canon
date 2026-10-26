@@ -4,7 +4,7 @@ import type { Command } from 'commander'
 import { INSTALL_BROWSER, isEngineMissing } from '@/browser/engine'
 import { readTakePlan } from '@/take/plan'
 import type { TakePlanRefusal } from '@/take/plan'
-import type { TakeRefusal } from '@/take/take'
+import type { TakeRefusal } from '@/take/film'
 import {
   intro,
   logError,
@@ -20,7 +20,7 @@ import {
  * `src/cli.ts` imports this module at startup and resolving the engine there
  * would put a browser launch in front of every other command.
  */
-type Take = typeof import('@/take/take')
+type Take = typeof import('@/take/film')
 
 interface RunOptions {
   readonly out: string
@@ -254,7 +254,7 @@ function refuse(
 
 async function loadTake(): Promise<Take | undefined> {
   try {
-    return await import('@/take/take')
+    return await import('@/take/film')
   } catch (error) {
     if (isEngineMissing(error)) return undefined
     throw error
