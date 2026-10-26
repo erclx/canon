@@ -19,7 +19,10 @@
 
 paths = [".canon/intake/*/drive.json", ".canon/intake/*/evidence/*.png"]
 
-# The registration `git worktree list` reads. The worktree itself sits under
+# The registration `git worktree list` reads. The skill closes only on the
+# operator's word, and a headless run has no operator, so the Action carries
+# that word up front. Without it a correct run parks before the close and fails
+# here with the worktree still registered. The worktree itself sits under
 # /tmp, outside the tree the checker reads. A bare `.git/worktrees/*` matches
 # nothing even while a worktree is live, since the scan returns files only, so
 # name a file under it.

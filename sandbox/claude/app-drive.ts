@@ -120,7 +120,9 @@ export default scenario({
       ctx.log.info(
         '         and put a checkout canon carrying intake drive-check first on PATH',
       )
-      ctx.log.info('Action:  /canon:app-drive drive v0.1.0 of the board app')
+      ctx.log.info(
+        'Action:  /canon:app-drive drive v0.1.0 of the board app, and close the drive once the findings are filed, since no operator is present',
+      )
       ctx.log.info(
         'Expect:  a throwaway worktree outside the sandbox serving on 4530, findings filed in',
       )
