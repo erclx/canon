@@ -48,9 +48,8 @@ A plan holds the approved beats in order. Each beat names its setup, which runs 
 
 A step beat runs the page on a virtual clock, one frame per step. Most pages film this way, and some inputs are known to stall it.
 
-- Typing has stalled at about 15 s a frame on a canvas app. Keep `fill` text short, and expect the verb to fall back to a screencast for a beat whose frames stall past 2 s.
+- Typing films by stepping on a canvas board, though an earlier stepper stalled on it. Keep `fill` text short, and expect a fallback to the screencast for a beat whose frames stall past 2 s.
 - A scroll has not been proven under frame stepping, and a smooth scroll can jump. Give a scroll its own beat so a fallback costs that beat alone.
-- Virtual time waits on a fetch in flight, so a page polling the network nonstop stalls. Film it with `"route": "screencast"`.
 - An animated GIF can freeze, so expect one to hold its first frame
 - Set `"route": "screencast"` on a beat known to stall, rather than paying for the stall before the fallback
 
