@@ -180,8 +180,7 @@ describe('renderEvidenceBody', () => {
     expect(body).toContain(
       '<img src="https://github.com/erclx/annex/blob/bbbb111/web/evidence/dark/hero.png?raw=true" width="1000" alt="hero head">',
     )
-    expect(body).toContain('| Case | Base | Head |')
-    expect(body).toContain('| new-case | *(new)* |')
+    expect(body).toContain('**new-case** *(new)*')
     expect(body.trim().endsWith('<!-- pr-evidence: head=bbbb111 -->')).toBe(
       true,
     )
@@ -245,7 +244,62 @@ describe('renderEvidenceBody', () => {
     })
   })
 
-  it('should drop the Base column for a state whose cases are all added', () => {
+  describe('head first', () => {
+    const HEAD =
+      '<img src="https://github.com/o/r/blob/bbbb111/evidence/dark/a.png?raw=true" width="1000" alt="a head">'
+    const BASE =
+      '<img src="https://github.com/o/r/blob/aaaa000/evidence/dark/a.png?raw=true" width="1000" alt="a base">'
+
+    it('should show a modified case as its label, its head on its own line, and its base folded under it', () => {
+      const body = renderEvidenceBody(
+        [
+          {
+            state: 'dark',
+            items: [{ path: 'evidence/dark/a.png', stem: 'a', added: false }],
+          },
+        ],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+      )
+
+      expect(body).toContain(
+        [
+          '**a**',
+          '',
+          HEAD,
+          '',
+          '<details>',
+          '<summary>Base</summary>',
+          '',
+          BASE,
+          '',
+          '</details>',
+        ].join('\n'),
+      )
+      expect(body).not.toContain('| ')
+    })
+
+    it('should show an added case as its head alone with no fold beneath it', () => {
+      const body = renderEvidenceBody(
+        [
+          {
+            state: 'dark',
+            items: [{ path: 'evidence/dark/a.png', stem: 'a', added: true }],
+          },
+        ],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+      )
+
+      expect(body).toContain(`**a**\n\n${HEAD}\n\n</details>`)
+      expect(body).not.toContain('<summary>Base</summary>')
+      expect(body).not.toContain('alt="a base"')
+    })
+  })
+
+  it('should drop the new mark for a state whose cases are all added', () => {
     const body = renderEvidenceBody(
       [
         {
@@ -261,15 +315,12 @@ describe('renderEvidenceBody', () => {
       'bbbb111',
     )
 
-    expect(body).toContain('| Case | Head |\n| --- | --- |')
-    expect(body).toContain(
-      '| a | <img src="https://github.com/o/r/blob/bbbb111/evidence/dark/a.png?raw=true" width="1000" alt="a head"> |',
-    )
+    expect(body).toContain('**a**\n')
+    expect(body).toContain('**b**\n')
     expect(body).not.toContain('*(new)*')
-    expect(body).not.toContain('| Base |')
   })
 
-  it('should decide the columns per state, keeping new only in the added rows of a mixed one', () => {
+  it('should decide the new mark per state, keeping it only on the added cases of a mixed one', () => {
     const body = renderEvidenceBody(
       [
         {
@@ -289,12 +340,13 @@ describe('renderEvidenceBody', () => {
       'bbbb111',
     )
 
-    expect(body.match(/\| Case \| Base \| Head \|/g)).toHaveLength(1)
-    expect(body.match(/\| Case \| Head \|/g)).toHaveLength(1)
-    expect(body.match(/\*\(new\)\*/g)).toHaveLength(1)
+    expect(body.match(/^\*\*a\*\* \*\(new\)\*$/gm)).toHaveLength(1)
+    expect(body.match(/^\*\*b\*\*$/gm)).toHaveLength(1)
+    expect(body.match(/^\*\*a\*\*$/gm)).toHaveLength(1)
+    expect(body.match(/<summary>Base<\/summary>/g)).toHaveLength(1)
   })
 
-  it('should escape a stem carrying a pipe or an angle bracket in the row and the alt text', () => {
+  it('should escape a stem carrying a pipe or an angle bracket in the label and the alt text', () => {
     const body = renderEvidenceBody(
       [
         {
@@ -307,7 +359,7 @@ describe('renderEvidenceBody', () => {
       'bbbb111',
     )
 
-    expect(body).toContain('| a&#124;&lt;b&gt;&quot; | <img ')
+    expect(body).toContain('**a&#124;&lt;b&gt;&quot;**\n')
     expect(body).toContain('alt="a&#124;&lt;b&gt;&quot; head">')
     expect(countEvidenceCases(body)).toBe(1)
   })
@@ -487,27 +539,31 @@ describe('renderEvidenceBody', () => {
       }
     }
 
-    it('should open every state when the comment carries exactly six images', () => {
+    it('should open every state when the comment carries exactly six head images, leaving folded bases uncounted', () => {
       const body = renderEvidenceBody(
-        [stateOf('dark', 2, false), stateOf('light', 1, false)],
+        [stateOf('dark', 4, false), stateOf('light', 2, false)],
         'o/r',
         'aaaa000',
         'bbbb111',
       )
 
       expect(body.match(/^<details open>$/gm)).toHaveLength(2)
-      expect(body).not.toContain('<details>')
+      expect(
+        body.match(/^<details>\n<summary>Base<\/summary>$/gm),
+      ).toHaveLength(6)
     })
 
-    it('should close every state at seven images, counting an added row once', () => {
+    it('should close every state at seven head images', () => {
       const body = renderEvidenceBody(
-        [stateOf('dark', 3, false), stateOf('light', 1, true)],
+        [stateOf('dark', 4, false), stateOf('light', 3, true)],
         'o/r',
         'aaaa000',
         'bbbb111',
       )
 
-      expect(body.match(/^<details>$/gm)).toHaveLength(2)
+      expect(
+        body.match(/^<details>\n<summary>(dark|light) \(\d\)<\/summary>$/gm),
+      ).toHaveLength(2)
       expect(body).not.toContain('<details open>')
     })
 
@@ -541,27 +597,37 @@ describe('renderEvidenceBody', () => {
       return renderEvidenceBody([{ state, items }], 'o/r', 'aaaa000', 'bbbb111')
     }
 
-    it('should render eight view cases as one block with four width rows', () => {
+    function labels(body: string): string[] {
+      return [...body.matchAll(/^\*\*(\d+ · (?:dark|light))\*\*/gm)].map(
+        (match) => match[1] ?? '',
+      )
+    }
+
+    it('should render eight view cases as one block labeled by width and theme', () => {
       const body = render(viewItems('grid', true))
 
       expect(body.match(/<details/g)).toHaveLength(1)
       expect(body).toContain('<summary>grid (8)</summary>')
-      expect(body).toContain('| Width | Dark | Light |')
-      expect(body.match(/^\| (320|768|1024|1440) \|/gm)).toHaveLength(4)
+      expect(labels(body)).toHaveLength(8)
       expect(countEvidenceCases(body)).toBe(8)
     })
 
-    it('should place a width row dark then light and sort the widths numerically', () => {
+    it('should order the cases by width numerically and then dark before light', () => {
       const body = render(viewItems('grid', true))
 
-      const rows = body.split('\n').filter((line) => /^\| \d+ \|/.test(line))
-      expect(rows.map((row) => row.split(' | ')[0])).toEqual([
-        '| 320',
-        '| 768',
-        '| 1024',
-        '| 1440',
+      expect(labels(body)).toEqual([
+        '320 · dark',
+        '320 · light',
+        '768 · dark',
+        '768 · light',
+        '1024 · dark',
+        '1024 · light',
+        '1440 · dark',
+        '1440 · light',
       ])
-      expect(rows[0]).toMatch(/grid-dark-320 head.*grid-light-320 head/)
+      expect(body).toMatch(
+        /\*\*320 · dark\*\*\n\n<img [^>]*alt="grid-dark-320 head">/,
+      )
     })
 
     it('should split a view name that carries a hyphen at the theme rather than the first hyphen', () => {
@@ -574,20 +640,20 @@ describe('renderEvidenceBody', () => {
       ])
 
       expect(body).toContain('<summary>menu-open (1)</summary>')
-      expect(body).toContain('| Width | Light |')
+      expect(labels(body)).toEqual(['1440 · light'])
     })
 
-    it('should render four columns when a view already exists at the base', () => {
+    it('should fold a base under every case when a view already exists at the base', () => {
       const body = render(viewItems('grid', false))
 
-      expect(body).toContain(
-        '| Width | Dark base | Dark head | Light base | Light head |',
+      expect(body.match(/<summary>Base<\/summary>/g)).toHaveLength(8)
+      expect(body).toMatch(
+        /alt="grid-dark-320 head">\n\n<details>\n<summary>Base<\/summary>\n\n<img [^>]*alt="grid-dark-320 base">/,
       )
-      expect(body).toContain('alt="grid-dark-320 base"')
       expect(countEvidenceCases(body)).toBe(8)
     })
 
-    it('should show new in the base cell of the theme that is new and keep both base columns', () => {
+    it('should mark the theme that is new and fold a base only under the one that is not', () => {
       const body = render([
         {
           path: 'evidence/grid-dark-320.png',
@@ -601,23 +667,23 @@ describe('renderEvidenceBody', () => {
         },
       ])
 
-      expect(body).toContain(
-        '| Width | Dark base | Dark head | Light base | Light head |',
-      )
-      expect(body).toMatch(
-        /\| 320 \| <img [^>]*> \| <img [^>]*> \| \*\(new\)\* \| <img/,
-      )
+      expect(body).toContain('**320 · dark**\n')
+      expect(body).toContain('**320 · light** *(new)*\n')
+      expect(body.match(/<summary>Base<\/summary>/g)).toHaveLength(1)
+      expect(body).toContain('alt="grid-dark-320 base"')
+      expect(body).not.toContain('alt="grid-light-320 base"')
       expect(countEvidenceCases(body)).toBe(2)
     })
 
-    it('should leave a missing cell empty and still count three cases', () => {
+    it('should render nothing for a theme missing at a width and still count three cases', () => {
       const body = render([
         { path: 'e/g-dark-320.png', stem: 'g-dark-320', added: true },
         { path: 'e/g-dark-768.png', stem: 'g-dark-768', added: true },
         { path: 'e/g-light-320.png', stem: 'g-light-320', added: true },
       ])
 
-      expect(body).toMatch(/\| 768 \| <img [^>]*> \|  \|/)
+      expect(labels(body)).toEqual(['320 · dark', '320 · light', '768 · dark'])
+      expect(body).not.toContain('768 · light')
       expect(countEvidenceCases(body)).toBe(3)
     })
 
@@ -636,13 +702,15 @@ describe('renderEvidenceBody', () => {
       expect(body).toContain('<summary>before / grid (1)</summary>')
     })
 
-    it('should render a single case as a one row table', () => {
+    it('should render a single case as one label over its head', () => {
       const body = render([
         { path: 'e/g-dark-320.png', stem: 'g-dark-320', added: true },
       ])
 
-      expect(body).toContain('| Width | Dark |')
-      expect(body.match(/^\| 320 \|/gm)).toHaveLength(1)
+      expect(labels(body)).toEqual(['320 · dark'])
+      expect(body).toMatch(
+        /\*\*320 · dark\*\*\n\n<img [^>]*alt="g-dark-320 head">/,
+      )
     })
 
     it('should escape the view in the summary and the alt text', () => {
@@ -663,7 +731,7 @@ describe('renderEvidenceBody', () => {
 
       expect(body).toContain('<summary>grid (2)</summary>')
       expect(body).toContain('<summary>evidence (1)</summary>')
-      expect(body).toContain('| Case | Head |')
+      expect(body).toContain('**board**\n')
       expect(countEvidenceCases(body)).toBe(3)
     })
 
@@ -800,6 +868,28 @@ describe('the reel line', () => {
       '',
       '## What to look at',
     ])
+  })
+
+  it('should sit above the Base line and outside the case blocks, adding no case', () => {
+    const body = renderEvidenceBody(
+      states,
+      'o/r',
+      'aaaa000',
+      'bbbb111',
+      undefined,
+      undefined,
+      undefined,
+      { link: LINK, head: 'bbbb111' },
+    )
+    const lines = body.split('\n')
+    const reel = lines.findIndex((line) => line.startsWith('**Reel**'))
+    const base = lines.findIndex((line) => line.startsWith('**Base:**'))
+    const firstBlock = lines.findIndex((line) => line.startsWith('<details'))
+
+    expect(reel).toBeGreaterThan(-1)
+    expect(reel).toBeLessThan(base)
+    expect(base).toBeLessThan(firstBlock)
+    expect(countEvidenceCases(body)).toBe(1)
   })
 
   it('should leave a body without a reel exactly as before', () => {
@@ -1143,6 +1233,34 @@ describe('countEvidenceCases', () => {
     )
 
     expect(countEvidenceCases(body)).toBe(2)
+  })
+
+  it('should count a body with its head images on their own lines the same as the table of those cases', () => {
+    const table = [
+      '| Case | Base | Head |',
+      '| --- | --- | --- |',
+      '| a | *(new)* | <img src="h/a.png" width="1000" alt="a head"> |',
+      '| b | <img src="b/b.png" width="1000" alt="b base"> | <img src="h/b.png" width="1000" alt="b head"> |',
+    ].join('\n')
+    const stacked = [
+      '**a** *(new)*',
+      '',
+      '<img src="h/a.png" width="1000" alt="a head">',
+      '',
+      '**b**',
+      '',
+      '<img src="h/b.png" width="1000" alt="b head">',
+      '',
+      '<details>',
+      '<summary>Base</summary>',
+      '',
+      '<img src="b/b.png" width="1000" alt="b base">',
+      '',
+      '</details>',
+    ].join('\n')
+
+    expect(countEvidenceCases(stacked)).toBe(2)
+    expect(countEvidenceCases(stacked)).toBe(countEvidenceCases(table))
   })
 
   it('should count zero for a preview-only body', () => {

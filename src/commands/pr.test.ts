@@ -909,9 +909,9 @@ describe('canon pr evidence reads the pull request', () => {
 
     const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
 
-    expect(record.body).toContain('| hero | *(new)* |')
+    expect(record.body).toContain('**hero** *(new)*')
     expect(record.body).toContain(
-      '| nav | <img src="https://github.com/o/r/blob/cafe01/evidence/dark/nav.png?raw=true" width="1000" alt="nav base"> |',
+      '<summary>Base</summary>\n\n<img src="https://github.com/o/r/blob/cafe01/evidence/dark/nav.png?raw=true" width="1000" alt="nav base">',
     )
   })
 
@@ -993,8 +993,8 @@ describe('canon pr evidence reads the pull request', () => {
 
     const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
 
-    expect(record.body).toContain('| Case | Head |')
-    expect(record.body).toContain('| moved | <img ')
+    expect(record.body).toContain('**moved**\n\n<img ')
+    expect(record.body).not.toContain('alt="moved base"')
     expect(record.body).not.toContain('*(new)*')
   })
 
@@ -1003,13 +1003,40 @@ describe('canon pr evidence reads the pull request', () => {
 
     const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
 
-    expect(record.body).toContain('| Case | Head |')
-    expect(record.body).toContain('| dup | <img ')
+    expect(record.body).toContain('**dup**\n\n<img ')
+    expect(record.body).not.toContain('alt="dup base"')
     expect(record.body).not.toContain('*(new)*')
   })
 
   it('should refuse would-empty and print no body when a render holds no cases over a comment that does', async () => {
     writeComment(bodyWithCases())
+    writeFixture('files.tsv', 'modified\tdocs/guide.md\n')
+
+    const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+    expect(record.reason).toBe('would-empty')
+    expect(record).not.toHaveProperty('body')
+  })
+
+  it('should refuse would-empty over a comment posted in the table layout', async () => {
+    writeComment(
+      [
+        '## Evidence',
+        '',
+        '**Base:** [`base`](https://github.com/o/r/commit/base) · **Head:** [`abc123`](https://github.com/o/r/commit/abc123)',
+        '',
+        '<details open>',
+        '<summary>dark (1)</summary>',
+        '',
+        '| Case | Head |',
+        '| --- | --- |',
+        '| hero | <img src="https://github.com/o/r/blob/abc123/evidence/dark/hero.png?raw=true" width="1000" alt="hero head"> |',
+        '',
+        '</details>',
+        '',
+        '<!-- pr-evidence: head=abc123 -->',
+      ].join('\n'),
+    )
     writeFixture('files.tsv', 'modified\tdocs/guide.md\n')
 
     const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
