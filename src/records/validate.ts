@@ -4,6 +4,11 @@ import { join } from 'node:path'
 import { parseFrontmatter, readField } from '@/indexes/frontmatter'
 import { linesOutsideFences } from '@/markdown/scan'
 import {
+  isSessionMap,
+  measureSessionMap,
+  type SessionMapLength,
+} from '@/records/session-map'
+import {
   intakeStructure,
   type StructureEntry,
   structureFindings,
@@ -13,7 +18,12 @@ import {
   recordDirs as resolveRecordDirs,
 } from '@/roots/record'
 
-export const RECORD_KINDS = ['plans', 'groundwork', 'intake'] as const
+export const RECORD_KINDS = [
+  'plans',
+  'groundwork',
+  'intake',
+  'sessions',
+] as const
 
 export type RecordKind = (typeof RECORD_KINDS)[number]
 
@@ -79,6 +89,12 @@ export interface ValidateReport {
   readonly records: number
   readonly findings: readonly Finding[]
   readonly structure: readonly StructureFinding[]
+  /**
+   * Each session map's words against its cap, carried by the sessions kind
+   * alone. It never sets the exit, since a map refused near a compaction loses
+   * the reasoning it was written to save.
+   */
+  readonly length?: readonly SessionMapLength[]
 }
 
 export interface ValidateRefused {
@@ -89,9 +105,20 @@ export interface ValidateRefused {
 
 export type ValidateOutcome = ValidateReport | ValidateRefused
 
+/**
+ * The record folder each kind reads. Session maps sit on the task board beside
+ * the tasks rather than in a folder of their own.
+ */
+const KIND_FOLDER: Readonly<Record<RecordKind, string>> = {
+  plans: 'plans',
+  groundwork: 'groundwork',
+  intake: 'intake',
+  sessions: 'tasks',
+}
+
 /** Every folder a kind would accept, whether or not it is on disk. */
 export function recordDirs(root: string, kind: RecordKind): string[] {
-  return resolveRecordDirs(root, kind)
+  return resolveRecordDirs(root, KIND_FOLDER[kind])
 }
 
 /**
@@ -100,7 +127,7 @@ export function recordDirs(root: string, kind: RecordKind): string[] {
  * the location the kind would be written to.
  */
 export function recordsDir(root: string, kind: RecordKind): string {
-  return resolveRecordDir(root, kind)
+  return resolveRecordDir(root, KIND_FOLDER[kind])
 }
 
 export function isRecordKind(value: string): value is RecordKind {
@@ -758,7 +785,7 @@ async function checkDump(dir: string, slug: string): Promise<Finding[]> {
  */
 const FOLDER_CHECK: Readonly<
   Record<
-    Exclude<RecordKind, 'plans'>,
+    Exclude<RecordKind, 'plans' | 'sessions'>,
     (dir: string, slug: string) => Promise<Finding[]>
   >
 > = {
@@ -837,6 +864,37 @@ async function validateFiles(
 }
 
 /**
+ * The walk for session maps, which measures length alone. Their shape is not
+ * checked, so `findings` stays empty and the exit stays clean whatever the
+ * count reads.
+ */
+async function validateSessionMaps(
+  dir: string,
+  files: readonly string[],
+): Promise<ValidateReport> {
+  const length = await Promise.all(
+    files.map(async (file) =>
+      measureSessionMap(file, await readFile(join(dir, file), 'utf8')),
+    ),
+  )
+
+  return {
+    ok: true,
+    kind: 'sessions',
+    records: files.length,
+    findings: [],
+    structure: [],
+    length,
+  }
+}
+
+async function listRecords(dir: string, kind: RecordKind): Promise<string[]> {
+  if (kind === 'plans') return listMarkdown(dir)
+  if (kind === 'sessions') return (await listMarkdown(dir)).filter(isSessionMap)
+  return listFolders(dir)
+}
+
+/**
  * Narrows a listing to the one record a caller named, by a plan's stem or a
  * folder's slug, so a writing skill reads its own record and not every old one.
  */
@@ -867,16 +925,14 @@ export async function validateRecords(
     )
   }
 
-  const names = narrow(
-    kind === 'plans' ? await listMarkdown(dir) : await listFolders(dir),
-    record,
-  )
+  const names = narrow(await listRecords(dir, kind), record)
 
   if (record !== undefined && names.length === 0) {
     return refuse('no-record', `No ${kind} record named ${record} in ${dir}.`)
   }
 
   if (kind === 'plans') return validateFiles(dir, kind, names, checkPlan)
+  if (kind === 'sessions') return validateSessionMaps(dir, names)
 
   const check = FOLDER_CHECK[kind]
   const perFolder = await Promise.all(

@@ -99,6 +99,7 @@ describe('isRecordKind', () => {
     expect(isRecordKind('plans')).toBe(true)
     expect(isRecordKind('groundwork')).toBe(true)
     expect(isRecordKind('intake')).toBe(true)
+    expect(isRecordKind('sessions')).toBe(true)
     expect(isRecordKind('teach')).toBe(false)
     expect(isRecordKind('standards')).toBe(false)
     expect(isRecordKind('review')).toBe(false)
@@ -968,5 +969,81 @@ describe('validateRecords', () => {
     const outcome = await validateRecords(ROOT, 'intake')
 
     expect(outcome).toMatchObject({ ok: true, records: 2, findings: [] })
+  })
+})
+
+describe('validating session maps', () => {
+  async function seedBoard(files: Readonly<Record<string, string>>) {
+    const dir = recordsDir(ROOT, 'sessions')
+    mkdirSync(dir, { recursive: true })
+    await Promise.all(
+      Object.entries(files).map(([name, body]) =>
+        writeFile(join(dir, name), body),
+      ),
+    )
+  }
+
+  function mapOf(words: number): string {
+    const body = Array.from({ length: words }, () => 'word').join(' ')
+    return `---\ntitle: Session map\ndescription: x\n---\n\n# Session map\n\n${body}\n`
+  }
+
+  it('should read session maps from the task board', () => {
+    expect(recordsDir(ROOT, 'sessions')).toBe(join(ROOT, '.canon', 'tasks'))
+  })
+
+  it('should report a map over the cap without a finding', async () => {
+    await seedBoard({
+      'session-orchestrator.md': mapOf(639),
+      'v1.2-a-task.md': mapOf(900),
+      'session.md': mapOf(900),
+    })
+    const outcome = await validateRecords(ROOT, 'sessions')
+
+    expect(outcome).toEqual({
+      ok: true,
+      kind: 'sessions',
+      records: 1,
+      findings: [],
+      structure: [],
+      length: [
+        { record: 'session-orchestrator.md', words: 639, cap: 350, over: true },
+      ],
+    })
+  })
+
+  it('should narrow to the map a stem names', async () => {
+    await seedBoard({
+      'session-orchestrator.md': mapOf(10),
+      'session-worker.md': mapOf(20),
+    })
+    const outcome = await validateRecords(ROOT, 'sessions', 'session-worker')
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      length: [
+        { record: 'session-worker.md', words: 20, cap: 350, over: false },
+      ],
+    })
+  })
+
+  it('should refuse a stem with no map', async () => {
+    await seedBoard({ 'session-orchestrator.md': mapOf(10) })
+    const outcome = await validateRecords(ROOT, 'sessions', 'session-absent')
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'no-record' })
+  })
+
+  it('should refuse a project with no task board', async () => {
+    const outcome = await validateRecords(ROOT, 'sessions')
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'no-folder' })
+  })
+
+  it('should carry no length on another kind', async () => {
+    await seedPlan('feature-plan-standards.md', conformingPlan())
+    const outcome = await validateRecords(ROOT, 'plans')
+
+    expect(outcome).not.toHaveProperty('length')
   })
 })

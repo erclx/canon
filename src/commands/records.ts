@@ -34,6 +34,7 @@ import {
   type StructureFinding,
   validateRecords,
 } from '@/records/validate'
+import type { SessionMapLength } from '@/records/session-map'
 import {
   intro,
   logError,
@@ -92,7 +93,7 @@ export function register(program: Command): void {
     .argument('<kind>', `Record folder: ${RECORD_KINDS.join(', ')}`)
     .argument(
       '[record]',
-      'One plan stem or folder slug, narrowing both findings and structure to it',
+      'One plan stem, folder slug, or session map stem, narrowing the report to it',
     )
     .helpOption('-h, --help', 'Show this help message')
     .option('--json', 'Add a machine-readable record on stdout')
@@ -105,6 +106,7 @@ export function register(program: Command): void {
         '  plans       filename, required sections, and the suggested-and-answer contract',
         '  groundwork  README and current-state files, numbering, dating, and a half-closed track',
         '  intake      overview file, numbering, dating, and the four bullets every item carries',
+        "  sessions    each session map's words against its cap, under `length` and never in the exit",
         '',
         'Structure, under `structure` and never in the exit:',
         "  S1 to S5 from the plan standard, read on plans, a track's README and",
@@ -128,6 +130,7 @@ export function register(program: Command): void {
         '  canon records validate plans',
         '  canon records validate plans feature-records-by-heading',
         '  canon records validate intake --json',
+        '  canon records validate sessions session-orchestrator',
         '',
       ].join('\n'),
     )
@@ -828,6 +831,7 @@ function report(
         records: outcome.records,
         findings: outcome.findings,
         structure: outcome.structure,
+        ...(outcome.length && { length: outcome.length }),
       })}\n`,
     )
   } else {
@@ -846,6 +850,14 @@ function report(
       logStep('Structure, reported and never in the exit')
       for (const entry of outcome.structure) logInfo(describeStructure(entry))
     }
+
+    if (outcome.length) {
+      logStep('Length, reported and never in the exit')
+      for (const entry of outcome.length) {
+        const log = entry.over ? logWarn : logInfo
+        log(describeLength(entry))
+      }
+    }
     outro()
   }
 
@@ -855,6 +867,11 @@ function report(
 function describe(found: Finding): string {
   const scope = found.record === found.subject ? '' : `${found.record}: `
   return `${scope}${found.subject} ${found.message}`
+}
+
+function describeLength(entry: SessionMapLength): string {
+  const verdict = entry.over ? 'over the cap' : 'within the cap'
+  return `${entry.record}: ${entry.words} of ${entry.cap} words, ${verdict}`
 }
 
 function describeStructure(entry: StructureFinding): string {

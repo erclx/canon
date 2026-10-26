@@ -18,6 +18,7 @@ Applies to `.canon/tasks/session-<slug>.md`. A session writes one before a compa
 - [Filename and location](#filename-and-location)
 - [Frontmatter](#frontmatter)
 - [Sections](#sections)
+- [Length](#length)
 - [Writing one](#writing-one)
 - [Reading one back](#reading-one-back)
 - [Extending it](#extending-it)
@@ -68,6 +69,14 @@ Three sections form the core, in this order, and every session fills all three.
 
 Add a section only for content that fits none of the three and would otherwise be lost. Every section holds to the six criteria under `### Structure` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
 
+## Length
+
+A map holds at most 350 words, so the session resuming from it reads it in about a minute.
+
+- The count covers the body below the title. Frontmatter, the title line, and a `## Resume` section a role closes the file with stay out of it.
+- `canon records validate sessions` reports each map's count against the cap and never fails the run, since a write refused near a compaction loses the reasoning the map exists to hold
+- A map over the cap is cut at its next rewrite, starting with whatever another artifact already carries
+
 ## Writing one
 
 The `session-map` skill is the invocable route onto this procedure and holds no role, so a session reaching for a handoff without knowing this document exists still lands here. A session that arrives at this document directly follows the steps below unchanged.
@@ -77,6 +86,7 @@ The `session-map` skill is the invocable route onto this procedure and holds no 
 3. Write only what a compaction destroys and no other artifact already carries. The board holds the ordering, a task file its findings, and a measurement folder its track.
 4. Cite a commit, a task, or a file and line for every claim, so the next session can tell a read from a recall.
 5. Fill a section from reasoning the session actually holds.
+6. Run `canon records validate sessions session-<slug>` and report the count it names against the cap.
 
 Do not restate the board, and do not summarize the work that shipped, since version control already carries it.
 
