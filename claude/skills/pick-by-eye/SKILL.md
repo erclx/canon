@@ -150,7 +150,7 @@ A capture proves appearance and a measurement proves a relationship, so reach fo
 Cite these rather than restating them. A step reimplemented here rots against the skill that owns it.
 
 - `plan-feature` plans the work once the pick is made, and declares the pull request boundary that plan carries
-- `design-record` lands the winning frame in the reference folder and its values in the design document, and runs before item 6 deletes the page its sync reads
+- `design-record` lands the winning frame in the reference folder and its values in the design document, and runs before item 4's capture and item 6's deletes, which keep the picked page on named boards
 - `design-taste` carries the layer catalog, the ordering, grey-boxing, and the defaults an arm should reach past
 - `write-human` carries the voice for any copy an arm puts in front of a reader
 

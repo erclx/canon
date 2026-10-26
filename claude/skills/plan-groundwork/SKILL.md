@@ -37,7 +37,7 @@ Write only inside `.canon/groundwork/<nn>-<slug>/`. A feature plan, source chang
 
 What a spike produces stays inside the track, under `.canon/groundwork/<nn>-<slug>/evidence/`, which the first rule already permits. Mode detection matches only top-level entries, so a nested folder cannot be mistaken for a track, and scratch holds only what can be deleted without loss.
 
-A `pick-by-eye` run invoked from inside a live track follows its own branch for this. It writes its renders to `evidence/` here, and drafts its candidates as pages on the Frameboard board `pick-by-eye` resolves, where its close removes the round.
+A `pick-by-eye` run invoked from inside a live track follows its own branch for this. It writes its renders to `evidence/` here, and drafts its candidates as pages on the Frameboard board `pick-by-eye` resolves, where its close removes the round. On a board `canon/config/design.toml` names, the close keeps the picked page.
 
 ### Reading and backing
 
