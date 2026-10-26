@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.68.0](https://github.com/erclx/canon/compare/v5.67.0...v5.68.0) (2026-10-26)
+
+
+### Features
+
+* **pr:** fold evidence captures whose pixels match their base ([#2749](https://github.com/erclx/canon/issues/2749)) ([cb6bed5](https://github.com/erclx/canon/commit/cb6bed5e5357c777f8f08a0d1c01478efbbe2190))
+* **pr:** name painted paths a pull request changed with no capture ([#2748](https://github.com/erclx/canon/issues/2748)) ([7a167e7](https://github.com/erclx/canon/commit/7a167e7d108474d917db96933a84f336459da5ed))
+* **pr:** show each evidence head at full width with its base folded ([#2745](https://github.com/erclx/canon/issues/2745)) ([1fc207e](https://github.com/erclx/canon/commit/1fc207e3cefa3d9c1a0f2151d7d03867f98090df))
+* **records:** give each video its own record folder ([#2741](https://github.com/erclx/canon/issues/2741)) ([bebc159](https://github.com/erclx/canon/commit/bebc159adfa234728390eadd1e43f09514d20fd0))
+* **take:** post a pointer-drawn reel of a pull request's interactions ([#2742](https://github.com/erclx/canon/issues/2742)) ([84960ab](https://github.com/erclx/canon/commit/84960ab08a7b5dbef11641e931bf045eae3e1829))
+* **take:** write each beat's closing frame as still.jpg ([#2740](https://github.com/erclx/canon/issues/2740)) ([0dca9e8](https://github.com/erclx/canon/commit/0dca9e81a2443faf77148caa8e8721388cfd4ae1))
+
 ## [5.67.0](https://github.com/erclx/canon/compare/v5.66.0...v5.67.0) (2026-10-26)
 
 
