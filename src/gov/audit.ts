@@ -1,6 +1,6 @@
 import { existsSync, statSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
-import { join, relative, resolve, sep } from 'node:path'
+import { join, normalize, relative, resolve, sep } from 'node:path'
 import { listRuleFiles } from '@/gov/payload'
 
 /**
@@ -55,6 +55,19 @@ export const PRACTICE_FOLDERS: readonly string[] = [
   'framework',
   'ui',
   'tooling',
+]
+
+/**
+ * The folders whose rules record house decisions. Their ledger is checked
+ * wherever one exists and owed only by a rule the branch touched, since the
+ * reasoning behind an older bullet was never written down and no backfill
+ * recovers it.
+ */
+export const CORE_FOLDERS: readonly string[] = [
+  'canon',
+  'claude',
+  'code',
+  'writing',
 ]
 
 const SHIPPED_RULES = join('governance', 'rules')
@@ -316,29 +329,41 @@ export function compareLedger(
     .filter((entry) => entry.bullets !== entry.rows)
 }
 
-/** Where a rule's ledger lives, or nothing when its folder carries none. */
-function ledgerPath(file: string): string | undefined {
+/**
+ * Where a rule's ledger lives and whether its absence is a finding, or nothing
+ * when its folder carries none.
+ */
+function ledgerFor(
+  file: string,
+  touched: ReadonlySet<string>,
+): { path: string; owed: boolean } | undefined {
   const prefix = `${SHIPPED_RULES}${sep}`
   if (!file.startsWith(prefix)) return undefined
   const rest = file.slice(prefix.length)
   const folder = rest.split(sep)[0]
-  if (!PRACTICE_FOLDERS.includes(folder)) return undefined
-  return join(LEDGERS, rest)
+  const path = join(LEDGERS, rest)
+  if (PRACTICE_FOLDERS.includes(folder)) return { path, owed: true }
+  if (CORE_FOLDERS.includes(folder)) return { path, owed: touched.has(file) }
+  return undefined
 }
 
 async function readLedger(
   root: string,
   file: string,
   groups: readonly HeadingCount[],
+  touched: ReadonlySet<string>,
 ): Promise<LedgerReading> {
-  const path = ledgerPath(file)
-  if (path === undefined) return { status: 'not-required' }
+  const ledger = ledgerFor(file, touched)
+  if (ledger === undefined) return { status: 'not-required' }
+  const { path } = ledger
 
   let text: string
   try {
     text = await readFile(resolve(root, path), 'utf8')
   } catch {
-    return { status: 'missing', path }
+    return ledger.owed
+      ? { status: 'missing', path }
+      : { status: 'not-required' }
   }
 
   return {
@@ -352,14 +377,22 @@ async function readLedger(
  * Measures every rule this tree authors, or the files named.
  *
  * A tree holding `governance/rules/` is a canon checkout, read across both
- * authored corpora with a ledger asked of each outside-practice rule. Any
- * other tree is a target, read at `.claude/rules/project/` alone with no
+ * authored corpora with a ledger asked of each outside-practice rule and of
+ * each core rule in `touched`, and checked for any core rule carrying one.
+ * Any other tree is a target, read at `.claude/rules/project/` alone with no
  * ledger asked, since ledgers never ship.
+ *
+ * `touched` holds paths relative to the root, and leaving it out reads no core
+ * rule as touched.
  */
 export async function readRuleAudit(
   root: string,
   paths: readonly string[] = [],
+  options: { readonly touched?: readonly string[] } = {},
 ): Promise<RuleAuditReport> {
+  const touched = new Set(
+    (options.touched ?? []).map((path) => normalize(path)),
+  )
   const scope = existsSync(resolve(root, SHIPPED_RULES)) ? 'canon' : 'target'
   const corpus = scope === 'canon' ? CANON_CORPUS : TARGET_CORPUS
 
@@ -421,7 +454,11 @@ export async function readRuleAudit(
   for (const abs of files) {
     const file = relative(root, abs)
     const { groups, ...shape } = measureRule(await readFile(abs, 'utf8'))
-    rules.push({ file, ...shape, ledger: await readLedger(root, file, groups) })
+    rules.push({
+      file,
+      ...shape,
+      ledger: await readLedger(root, file, groups, touched),
+    })
   }
 
   return { kind: 'measured', scope, corpus, rules }

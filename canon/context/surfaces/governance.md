@@ -23,12 +23,12 @@ Holds the source rules, one subfolder per audience, each at `<folder>/<slug>.md`
 
 ### `governance/ledger/`
 
-Holds the source ledger for each outside-practice rule at the rule's own path, outside the installed tree so a ledger never loads or ships. Its `skills/<skill>/` folder holds one ledger per unexempted reference and listed `SKILL.md` of each skill on the per-bullet list, matched the same way by `canon claude skills audit`.
+Holds the ledger for each outside-practice rule and each core rule that carries one, at the rule's own path and outside the installed tree, so a ledger never loads or ships. Its `skills/<skill>/` folder holds one per unexempted reference and listed `SKILL.md` of each per-bullet skill, matched by `canon claude skills audit`.
 
 - `canon gov audit` matches a ledger's table rows to the rule's bullets by count under each H2 of the same name, so a row added or dropped without its bullet fails the folder
 - A cut bullet goes in a `## Declined` list rather than a table, since every table row under a heading counts as a bullet's row
-- Every `PRACTICE_FOLDERS` entry is gated, so a new outside-practice rule fails the push until its ledger lands, and `RULE_GATE_EXEMPT` names a rule only while a finding waits on its removal
-- A ledger whose rule names a version-bound API records the major in the `Read` column
+- A `PRACTICE_FOLDERS` rule fails the push until its ledger lands, and a `CORE_FOLDERS` rule only once `--touched` reads it in the branch's changed set
+- `Read` holds the date, plus the major for a version-bound API, and never a pull request number, which the Shipped references stage refuses under `governance/`
 - A `|` inside a code span still splits a table cell, so a glob such as `@(spec|test)` in a ledger row is written `@(spec\|test)`
 
 ### `governance/stacks/`
