@@ -56,7 +56,9 @@ import {
   LEGACY_FRAMES_BRANCH,
   pruneFramesWithLegacy,
   pushFrame,
+  REEL_MAX_BYTES,
   readFrame,
+  readReel,
   isDesignReference,
   referenceSlug,
   type TreeEntry,
@@ -272,6 +274,7 @@ interface FramesOptions extends ReadOptions {
   readonly head?: string
   readonly pass?: string
   readonly theme?: string
+  readonly reel?: string
   readonly drop?: boolean
   readonly prune?: string
 }
@@ -287,6 +290,8 @@ type FramesCommandRefusal =
   | 'bad-theme'
   | 'bad-days'
   | 'unreadable-frame'
+  | 'unreadable-reel'
+  | 'reel-too-large'
   | 'read-only'
   | 'gh-missing'
   | 'gh-failed'
@@ -294,22 +299,25 @@ type FramesCommandRefusal =
 
 const FRAMES_REFUSALS: Record<FramesCommandRefusal, string> = {
   'bad-mode':
-    'Pass exactly one of --add, --drop, or --prune. --prune reads every pull request on the branch, so it takes no number.',
+    'Pass exactly one of --add, --reel, --drop, or --prune. --prune reads every pull request on the branch, so it takes no number.',
   'no-number':
-    '--add and --drop write for one pull request, so name its number.',
+    '--add, --reel, and --drop write for one pull request, so name its number.',
   'bad-box':
-    '--add takes --box <n>, a positive whole number naming the checklist box, or --reference, as <page>/<frame> or a tracked canon/design/<surface>/<name> path, never both.',
+    '--add takes --box <n>, a positive whole number naming the checklist box, or --reference, as <page>/<frame> or a tracked canon/design/<surface>/<name> path, never both. --reel takes neither, since a pass has one reel.',
   'bad-reference':
     '--reference takes <page>/<frame> or a tracked canon/design/<surface>/<name> path, each half opening on a letter or digit and holding only letters, digits, dots, underscores, and dashes, with no `--` in either, so the capture files under a name that reads back as the frame.',
   'bad-head':
     '--head takes a commit sha, 7 to 40 lowercase hex characters. A branch name or a path would file the frame under a folder that names no commit.',
   'bad-pass':
-    '--add takes --pass <stamp>, the instant the pass started in compact UTC such as 20261002T154450Z, so a second pass never replaces an earlier one.',
+    '--add and --reel take --pass <stamp>, the instant the pass started in compact UTC such as 20261002T154450Z, so a second pass never replaces an earlier one.',
   'bad-theme':
     '--theme takes dark or light and goes with --add --box, so a second shot of one box never replaces the first.',
   'bad-days': '--prune takes a positive whole number of days.',
   'unreadable-frame':
     'The file named by --add is missing, empty, or not a PNG, so it would embed as a broken image. Nothing is pushed.',
+  'unreadable-reel':
+    'The file named by --reel is missing, empty, or not a WebP, so it would not play in the comment. Nothing is pushed.',
+  'reel-too-large': `The file named by --reel is past ${REEL_MAX_BYTES / 1_000_000} MB, the most GitHub renders as an image in a comment. Film fewer or shorter beats. Nothing is pushed.`,
   'read-only': `GitHub refused the write to ${FRAMES_BRANCH}. The token cannot write this repository, which is what a fork pull request's workflow token gets, so describe the frame in words instead.`,
   'gh-missing':
     'gh is not on the path, so the branch could not be read or written.',
@@ -1396,6 +1404,10 @@ export function register(program: Command): void {
       '--theme <theme>',
       'The theme the frame was shot at, dark or light, with --add, keeping two shots of one box apart',
     )
+    .option(
+      '--reel <file>',
+      "Push this animated WebP as the pass's reel, in place of --add",
+    )
     .option('--drop', "Rewrite the branch without this pull request's frames")
     .option(
       '--prune <days>',
@@ -1417,6 +1429,11 @@ export function register(program: Command): void {
         'segment keeps a second pass at one head and box from replacing an image',
         'an earlier comment shows. The first --add creates the branch.',
         '',
+        `--reel <file> pushes one animated WebP of at most ${REEL_MAX_BYTES / 1_000_000} MB to`,
+        'pr-<number>/<short-head>/<pass>/reel.webp beside the box frames, taking',
+        '--pass and --head the way --add does, and carries `reel: true` in place of',
+        'a box. A drop or a prune clears it with the rest of the folder.',
+        '',
         '--drop and --prune write one root commit and force-move the ref,',
         'since a delete commit would keep every image reachable through history.',
         'A rewrite that empties the branch deletes it. --prune keeps a pull',
@@ -1430,15 +1447,17 @@ export function register(program: Command): void {
         '',
         'Read `reason` on the JSON record:',
         '  ok                an add pushed, or a drop or prune finished',
-        '  bad-mode          not exactly one of --add, --drop, --prune',
-        '  no-number         --add or --drop named no pull request',
-        '  bad-box           --add with both --box and --reference, or neither',
+        '  bad-mode          not exactly one of --add, --reel, --drop, --prune',
+        '  no-number         --add, --reel, or --drop named no pull request',
+        '  bad-box           --add with both --box and --reference, or neither, or --reel with either',
         '  bad-reference     --reference is not <page>/<frame> or canon/design/<surface>/<name> in the safe name form, or the tracked path is no file',
         '  bad-head          --head is not 7 to 40 lowercase hex characters',
-        '  bad-pass          --add without a compact UTC --pass stamp',
+        '  bad-pass          --add or --reel without a compact UTC --pass stamp',
         '  bad-theme         --theme is not dark or light, or no --add, or rides a --reference',
         '  bad-days          --prune without a positive number of days',
         '  unreadable-frame  the --add file is missing, empty, or not a PNG',
+        '  unreadable-reel   the --reel file is missing, empty, or not a WebP',
+        `  reel-too-large    the --reel file is past ${REEL_MAX_BYTES / 1_000_000} MB`,
         '  read-only         GitHub refused the write, as on a fork token',
         '  unreadable-tip    the branch could not be read',
         '  push-failed       a write failed and the ref did not move',
@@ -1453,6 +1472,7 @@ export function register(program: Command): void {
         '',
         'Examples:',
         '  canon pr frames 1341 --add frames/3.png --box 3 --pass 20261002T154450Z --json',
+        '  canon pr frames 1341 --reel reel.webp --pass 20261002T154450Z --json',
         '  canon pr frames 1341 --drop --json',
         '  canon pr frames --prune 30 --json',
         '',
@@ -3672,6 +3692,7 @@ function framesArgumentRefusal(
 ): FramesCommandRefusal | undefined {
   const modes = [
     opts.add !== undefined,
+    opts.reel !== undefined,
     opts.drop === true,
     opts.prune !== undefined,
   ]
@@ -3681,6 +3702,12 @@ function framesArgumentRefusal(
     return POSITIVE_WHOLE.test(opts.prune) ? undefined : 'bad-days'
   }
   if (number === undefined || !POSITIVE_WHOLE.test(number)) return 'no-number'
+  if (
+    opts.reel !== undefined &&
+    (opts.box !== undefined || opts.reference !== undefined)
+  ) {
+    return 'bad-box'
+  }
   if (
     opts.add !== undefined &&
     (opts.box === undefined) === (opts.reference === undefined)
@@ -3697,7 +3724,7 @@ function framesArgumentRefusal(
   }
   if (opts.head !== undefined && !isFrameHead(opts.head)) return 'bad-head'
   if (
-    opts.add !== undefined &&
+    (opts.add !== undefined || opts.reel !== undefined) &&
     (opts.pass === undefined || !isFramePass(opts.pass))
   ) {
     return 'bad-pass'
@@ -3765,6 +3792,10 @@ async function runFrames(
   if (opts.add !== undefined && bytes === undefined) {
     return refuseFrames('unreadable-frame')
   }
+  const reel =
+    opts.reel === undefined ? undefined : await readReel(resolve(opts.reel))
+  if (reel?.kind === 'unreadable') return refuseFrames('unreadable-reel')
+  if (reel?.kind === 'too-large') return refuseFrames('reel-too-large')
 
   if (Bun.which('gh') === null) return refuseFrames('gh-missing')
   const runner = ghApiRunner(root)
@@ -3840,14 +3871,19 @@ async function runFrames(
     box,
     reference,
     theme,
-    bytes: bytes ?? new Uint8Array(),
+    reel: reel !== undefined,
+    bytes: reel?.bytes ?? bytes ?? new Uint8Array(),
   })
   if (result.kind === 'refused') return refuseWrite(result.reason)
   const link = frameLink(repo, result.path)
   return finish(
     {
       number: pull,
-      ...(box === undefined ? { reference } : { box }),
+      ...(reel !== undefined
+        ? { reel: true }
+        : box === undefined
+          ? { reference }
+          : { box }),
       ...(theme === undefined ? {} : { theme }),
       head,
       pass,

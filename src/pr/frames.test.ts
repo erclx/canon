@@ -16,7 +16,10 @@ import {
   pruneFrames,
   pruneFramesWithLegacy,
   pushFrame,
+  REEL_MAX_BYTES,
   readFrame,
+  readReel,
+  reelPath,
   referencePath,
   referenceSlug,
   type TreeEntry,
@@ -27,6 +30,10 @@ const NOW = new Date('2026-10-02T12:00:00Z')
 const HEAD = 'abcdef0123456789abcdef0123456789abcdef01'
 const PASS = '20261002T154450Z'
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1])
+/** `RIFF`, a little-endian size, then `WEBP`, the twelve bytes a WebP opens on. */
+const WEBP = new Uint8Array([
+  0x52, 0x49, 0x46, 0x46, 4, 0, 0, 0, 0x57, 0x45, 0x42, 0x50, 1,
+])
 
 interface FakeCommit {
   readonly tree: string
@@ -720,6 +727,101 @@ describe('pruneFramesWithLegacy', () => {
       kept: [2],
       unread: [],
     })
+  })
+})
+
+describe('pushFrame with a reel', () => {
+  const reel = (number = 12): FrameInput => ({
+    number,
+    head: HEAD,
+    pass: PASS,
+    reel: true,
+    bytes: WEBP,
+  })
+
+  it('should land the reel at reel.webp beside the box frames of one pass', async () => {
+    const fake = fakeApi()
+
+    await pushFrame(fake.api, frame(12, 1))
+    const result = await pushFrame(fake.api, reel())
+
+    expect({ result, files: fake.filesAtTip() }).toEqual({
+      result: expect.objectContaining({
+        kind: 'pushed',
+        path: `pr-12/abcdef0/${PASS}/reel.webp`,
+      }),
+      files: [
+        `pr-12/abcdef0/${PASS}/box-1.png`,
+        `pr-12/abcdef0/${PASS}/reel.webp`,
+      ],
+    })
+  })
+
+  it('should match the path reelPath names', () => {
+    expect(reelPath(12, HEAD, PASS)).toBe(`pr-12/abcdef0/${PASS}/reel.webp`)
+  })
+
+  it('should clear the reel when its pull request is dropped', async () => {
+    const fake = fakeApi()
+    await pushFrame(fake.api, reel(12))
+    await pushFrame(fake.api, frame(13, 1))
+
+    await dropFrames(fake.api, [12])
+
+    expect(fake.filesAtTip()).toEqual([`pr-13/abcdef0/${PASS}/box-1.png`])
+  })
+})
+
+describe('readReel', () => {
+  let dir: string
+
+  beforeEach(async () => {
+    dir = await mkdtemp(join(tmpdir(), 'canon-pr-reel-'))
+  })
+
+  afterEach(async () => {
+    await rm(dir, { recursive: true, force: true })
+  })
+
+  it('should return the bytes of a WebP', async () => {
+    await writeFile(join(dir, 'reel.webp'), WEBP)
+
+    const read = await readReel(join(dir, 'reel.webp'))
+
+    expect(read).toEqual({ kind: 'read', bytes: new Uint8Array(WEBP) })
+  })
+
+  it('should refuse a missing file, a PNG, and an MP4', async () => {
+    await writeFile(join(dir, 'reel.png'), PNG)
+    // An MP4 opens on a box size and `ftyp`, never on RIFF.
+    await writeFile(
+      join(dir, 'reel.mp4'),
+      new Uint8Array([
+        0, 0, 0, 0x20, 0x66, 0x74, 0x79, 0x70, 0x69, 0x73, 0x6f, 0x6d, 0,
+      ]),
+    )
+
+    const reads = await Promise.all(
+      ['absent.webp', 'reel.png', 'reel.mp4'].map((name) =>
+        readReel(join(dir, name)),
+      ),
+    )
+
+    expect(reads).toEqual([
+      { kind: 'unreadable' },
+      { kind: 'unreadable' },
+      { kind: 'unreadable' },
+    ])
+  })
+
+  it('should refuse a WebP past the cap with its size', async () => {
+    const big = new Uint8Array(REEL_MAX_BYTES + 1)
+    big.set(WEBP)
+    await writeFile(join(dir, 'reel.webp'), big)
+
+    const read = await readReel(join(dir, 'reel.webp'))
+
+    expect(read).toEqual({ kind: 'too-large', size: REEL_MAX_BYTES + 1 })
   })
 })
 
