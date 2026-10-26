@@ -79,7 +79,7 @@ An audit that finds no corpus reports `absent`, which moves neither the verdict 
 | `secrets`            | `canon secrets scan`                | Credential-shaped values in the shipped tree                                       | Gates          |
 | `labels`             | `canon labels audit`                | Changed paths no row of the label map reaches                                      | Reports        |
 | `restated`           | `canon gov restated`                | Instructions `CLAUDE.md` states that a second surface states too                   | Reports        |
-| `rules`              | `canon gov audit`                   | Rules past a shape limit, and here outside-practice rules short of a source ledger | Reports        |
+| `rules`              | `canon gov audit`                   | Rules past a shape limit, and here rules short of a ledger or out of step with one | Reports        |
 | `counts`             | `canon gov counts`                  | Sentences stating a closed catalog's size that disagree with the tree              | Reports        |
 | `census`             | `canon census`                      | File count, extension breakdown, and line total                                    | Reports        |
 | `deps`               | `canon deps audit`                  | Advisories against the resolved dependencies                                       | Reports        |
