@@ -88,8 +88,9 @@ const RENDER = [SCRATCH, 'render'] as const
  * Every move this migration makes, as record-relative paths.
  *
  * The first two rows are batch 2's. The rest are batch 3's, in the order the
- * intake's review-folder pass listed them. A later batch appends here rather
- * than adding a second table.
+ * intake's review-folder pass listed them, then the design board, moved to
+ * the `.canon/board` folder Frameboard names. A later batch appends here
+ * rather than adding a second table.
  */
 export const RECORD_LAYOUT_MOVES: readonly RecordLayoutMove[] = [
   { kind: 'folder', from: ['review', 'memory'], to: ['memory', 'review'] },
@@ -130,6 +131,7 @@ export const RECORD_LAYOUT_MOVES: readonly RecordLayoutMove[] = [
     picks: ['picks'],
     evidence: ['evidence'],
   },
+  { kind: 'folder', from: ['canvas'], to: ['board'] },
 ]
 
 function resolveRecord(root: string, segments: readonly string[]): string {
