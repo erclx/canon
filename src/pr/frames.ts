@@ -9,6 +9,16 @@ export const LEGACY_FRAMES_BRANCH = 'canon-frames'
 /** The eight bytes every PNG opens with. A frame that lacks them embeds as a broken image. */
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
 
+/** A WebP opens on `RIFF`, four bytes of size, then `WEBP`. */
+const RIFF = [0x52, 0x49, 0x46, 0x46]
+const WEBP = [0x57, 0x45, 0x42, 0x50]
+
+/**
+ * The largest reel an add takes, GitHub's cap on an image in a comment, so a
+ * reel that would not render is refused before it reaches the branch.
+ */
+export const REEL_MAX_BYTES = 10_000_000
+
 const SHORT_HEAD_LENGTH = 7
 
 const HEAD_PATTERN = /^[0-9a-f]{7,40}$/
@@ -86,8 +96,15 @@ export interface FrameInput {
   readonly box?: number
   readonly reference?: string
   readonly theme?: FrameTheme
+  /** The pass's reel, in place of a box or a reference. */
+  readonly reel?: boolean
   readonly bytes: Uint8Array
 }
+
+export type ReelRead =
+  | { readonly kind: 'read'; readonly bytes: Uint8Array }
+  | { readonly kind: 'unreadable' }
+  | { readonly kind: 'too-large'; readonly size: number }
 
 export type PushResult =
   | {
@@ -206,6 +223,25 @@ export function referencePath(
   return `pr-${number}/${head.slice(0, SHORT_HEAD_LENGTH)}/${pass}/ref-${slug}.png`
 }
 
+/** Where a pass's reel lands, one per pass beside its box frames. */
+export function reelPath(number: number, head: string, pass: string): string {
+  return `pr-${number}/${head.slice(0, SHORT_HEAD_LENGTH)}/${pass}/reel.webp`
+}
+
+/** The reel's bytes, refusing a file that is absent, not a WebP, or past the cap. */
+export async function readReel(path: string): Promise<ReelRead> {
+  const bytes = await readFile(path).catch(() => undefined)
+  if (bytes === undefined || bytes.length <= 12) return { kind: 'unreadable' }
+  const webp =
+    RIFF.every((byte, index) => bytes[index] === byte) &&
+    WEBP.every((byte, index) => bytes[index + 8] === byte)
+  if (!webp) return { kind: 'unreadable' }
+  if (bytes.length > REEL_MAX_BYTES) {
+    return { kind: 'too-large', size: bytes.length }
+  }
+  return { kind: 'read', bytes: new Uint8Array(bytes) }
+}
+
 /** The frame's bytes, or undefined when the file is absent, empty, or not a PNG. */
 export async function readFrame(path: string): Promise<Uint8Array | undefined> {
   const bytes = await readFile(path).catch(() => undefined)
@@ -227,8 +263,9 @@ export async function pushFrame(
   api: FramesApi,
   input: FrameInput,
 ): Promise<PushResult> {
-  const path =
-    input.reference === undefined
+  const path = input.reel
+    ? reelPath(input.number, input.head, input.pass)
+    : input.reference === undefined
       ? framePath(
           input.number,
           input.head,
@@ -241,8 +278,9 @@ export async function pushFrame(
   const blob = await api.createBlob(Buffer.from(input.bytes).toString('base64'))
   if (blob === undefined) return { kind: 'refused', reason: 'push-failed' }
   const entry: TreeEntry = { path, mode: '100644', type: 'blob', sha: blob }
-  const message =
-    input.reference === undefined
+  const message = input.reel
+    ? `chore(frames): add reel of #${input.number}`
+    : input.reference === undefined
       ? `chore(frames): add box ${input.box} of #${input.number}`
       : `chore(frames): add reference ${input.reference} of #${input.number}`
 

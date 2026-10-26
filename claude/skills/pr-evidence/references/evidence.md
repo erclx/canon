@@ -1,6 +1,6 @@
 ---
 title: Rendered-surface evidence
-description: How pr-evidence finds the UI checklist and the local server, posts the evidence comparison or the checklist alone as the fallback for a git refusal, and adds the preview address, for a change that touches a rendered surface
+description: How pr-evidence finds the UI checklist and the local server, films a reel of the checklist's interactions, posts the evidence comparison or the checklist alone as the fallback for a git refusal, and adds the preview address, for a change that touches a rendered surface
 ---
 
 # Rendered-surface evidence
@@ -11,6 +11,7 @@ The procedure of `pr-evidence`, run in order against one pull request number. It
 
 - [Find the UI checklist](#find-the-ui-checklist)
 - [Find the local server](#find-the-local-server)
+- [Film the reel](#film-the-reel)
 - [Post the evidence comparison](#post-the-evidence-comparison)
 - [Post the UI checklist alone](#post-the-ui-checklist-alone)
 - [Post the preview address](#post-the-preview-address)
@@ -48,12 +49,33 @@ Pass `--local` to the evidence step only on an `ok`. The binary answering `ok` i
 - A link with neither an evidence image nor a checklist still reports `no-evidence`, so a branch changing no rendered surface gets no comment holding a link alone
 - A seeded workflow drops the whole address line once the pull request closes, hosted and local together, so neither link outlives its branch
 
-## Post the evidence comparison
+## Film the reel
 
-Run the verb once against the pull request number. Pass `--checklist` when the checklist step found a file and `--local` when the step above returned `ok`, and leave each flag off otherwise:
+A screenshot cannot show an interaction move, so a pull request whose checklist asks a reviewer to click, fill, or scroll gets one short looping reel of it in the evidence comment. Run this step only on an `ok` from the local step, since the reel films the running server and this skill never starts one.
+
+Read what the comment already carries first, since a later head reaches this step with the handoff file deleted:
 
 ```bash
-canon pr evidence <number> --checklist <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md --local <url> --json
+canon pr evidence <number> --check --json
+```
+
+- Take the checklist from the handoff file when one exists, and from the record's `checklist` field otherwise
+- Skip filming when the record's `reel.head` is a prefix of the `tip` that `canon pr head <number> --json` reports, since the posted reel already shows this head
+- With no checklist from either source, skip silently, since nothing names an interaction to film
+
+Invoke `canon:ui-record` in pull request mode, passing the number, the local `url`, and the checklist. It films, checks each beat's closing still, pushes the reel to `canon/frames`, and hands back a `link` or a skip reason.
+
+Report it rather than proceeding silently when `canon:ui-record` does not resolve, and post the evidence without a reel.
+
+- Hold a `link` for the evidence step, which embeds it under the addresses
+- Hold a skip's reason and message for the closing report. A skip never stops the chain, and a reel already on the comment carries forward under the older head it names.
+
+## Post the evidence comparison
+
+Run the verb once against the pull request number. Pass `--checklist` when the checklist step found a file, `--local` when the local step returned `ok`, and `--reel` when the reel step returned a link, and leave each flag off otherwise:
+
+```bash
+canon pr evidence <number> --checklist <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md --local <url> --reel <link> --json
 ```
 
 One call answers both questions because a checklist decides `no-evidence`. A diff carrying a checklist and no evidence image renders `ok` with the checklist in a marked body, so the checklist lands in the one comment a later call finds and edits.

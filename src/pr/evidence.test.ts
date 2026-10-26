@@ -6,6 +6,8 @@ import {
   findEvidenceHead,
   findEvidenceLocal,
   findEvidencePreview,
+  findEvidenceReel,
+  nextEvidenceReel,
   groupEvidence,
   type EvidenceItem,
   type EvidenceState,
@@ -763,6 +765,127 @@ describe('renderEvidenceBody', () => {
       )
 
       expect(body).not.toContain('**Base:**')
+    })
+  })
+})
+
+describe('the reel line', () => {
+  const LINK =
+    'https://github.com/o/r/blob/canon/frames/pr-1/bbbb111/20261026T120000Z/reel.webp?raw=true'
+  const states: EvidenceState[] = [
+    {
+      state: '',
+      items: [{ path: 'evidence/hero.png', stem: 'hero', added: false }],
+    },
+  ]
+
+  it('should sit under the address line and name the head it was filmed at', () => {
+    const body = renderEvidenceBody(
+      [],
+      'o/r',
+      'aaaa000',
+      'bbbb111',
+      undefined,
+      '- [ ] the menu opens',
+      'http://localhost:5173',
+      { link: LINK, head: 'bbbb1112222' },
+    )
+
+    expect(body.split('\n').slice(0, 7)).toEqual([
+      '## Evidence',
+      '',
+      '**Local preview:** http://localhost:5173',
+      '',
+      `**Reel** filmed at \`bbbb111\`:<br><img src="${LINK}" width="960" alt="reel filmed at bbbb111">`,
+      '',
+      '## What to look at',
+    ])
+  })
+
+  it('should leave a body without a reel exactly as before', () => {
+    const args = [
+      states,
+      'o/r',
+      'aaaa000',
+      'bbbb111',
+      'https://x.dev',
+      '- [ ] look',
+      'http://localhost:5173',
+    ] as const
+
+    expect(renderEvidenceBody(...args, undefined)).toBe(
+      renderEvidenceBody(...args),
+    )
+    expect(renderEvidenceBody(...args)).not.toContain('**Reel**')
+  })
+
+  it('should read the reel back without disturbing the other fields', () => {
+    const body = renderEvidenceBody(
+      states,
+      'o/r',
+      'aaaa000',
+      'bbbb111',
+      'https://x.dev',
+      '- [ ] look',
+      'http://localhost:5173',
+      { link: LINK, head: 'bbbb111' },
+    )
+
+    const comments = [
+      { url: 'https://github.com/o/r/pull/1#issuecomment-9', body },
+    ]
+    expect(findEvidenceReel(comments)).toEqual({ link: LINK, head: 'bbbb111' })
+    expect(findEvidencePreview(comments)).toBe('https://x.dev')
+    expect(findEvidenceLocal(comments)).toBe('http://localhost:5173')
+    expect(findEvidenceChecklist(comments)).toBe('- [ ] look')
+    expect(countEvidenceCases(body)).toBe(1)
+  })
+
+  it('should read no reel off an unmarked comment or one without the line', () => {
+    expect(
+      findEvidenceReel([
+        { body: `**Reel** filmed at \`bbbb111\`:<br><img src="${LINK}">` },
+      ]),
+    ).toBeUndefined()
+    expect(
+      findEvidenceReel([
+        { body: '## Evidence\n\n<!-- pr-evidence: head=bbbb111 -->' },
+      ]),
+    ).toBeUndefined()
+  })
+
+  describe('nextEvidenceReel', () => {
+    const carried = [
+      {
+        body: renderEvidenceBody(
+          [],
+          'o/r',
+          'aaaa000',
+          'bbbb111',
+          undefined,
+          '- [ ] look',
+          undefined,
+          { link: LINK, head: 'bbbb111' },
+        ),
+      },
+    ]
+
+    it('should carry the posted reel forward under its old head when none is passed', () => {
+      expect(nextEvidenceReel(undefined, 'cccc222', carried)).toEqual({
+        link: LINK,
+        head: 'bbbb111',
+      })
+    })
+
+    it('should replace a carried reel with a passed one filmed at this head', () => {
+      expect(nextEvidenceReel('https://new.link', 'cccc222', carried)).toEqual({
+        link: 'https://new.link',
+        head: 'cccc222',
+      })
+    })
+
+    it('should give no reel when none is passed or posted', () => {
+      expect(nextEvidenceReel(undefined, 'cccc222', [])).toBeUndefined()
     })
   })
 })

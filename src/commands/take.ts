@@ -5,6 +5,7 @@ import { INSTALL_BROWSER, isEngineMissing } from '@/browser/engine'
 import { readTakePlan } from '@/take/plan'
 import type { TakePlanRefusal } from '@/take/plan'
 import type { TakeRefusal } from '@/take/film'
+import { renderReel } from '@/take/reel'
 import {
   intro,
   logError,
@@ -24,6 +25,7 @@ type Take = typeof import('@/take/film')
 
 interface RunOptions {
   readonly out: string
+  readonly reel?: string
   readonly json?: boolean
 }
 
@@ -60,6 +62,10 @@ export function register(program: Command): void {
     .argument('<plan>', 'JSON file naming the beats and their steps')
     .requiredOption('--out <dir>', 'Folder the clips, logs, and tracks land in')
     .helpOption('-h, --help', 'Show this help message')
+    .option(
+      '--reel <file>',
+      'Also join the beats into one animated WebP with the pointer drawn',
+    )
     .option('--json', 'Add a machine-readable record on stdout')
     .addHelpText(
       'after',
@@ -78,7 +84,13 @@ export function register(program: Command): void {
         '',
         'No cursor is drawn in a clip. The edit draws it from the log at a',
         'constant size, and the camera track carries the cursor and click ring',
-        'per frame beside the view. Canon renders nothing past the clip.',
+        'per frame beside the view. Canon renders nothing past the clip, save',
+        'the reel below.',
+        '',
+        '--reel <file> joins every beat in plan order into one looping animated',
+        'WebP at 960 wide and 20 fps, keeping every third frame, with the cursor',
+        'and click ring drawn from each camera track. It carries no zoom, so a',
+        "reviewer sees the whole page. clip.mp4 stays each beat's raw take.",
         '',
         '  {',
         '    "beats": [',
@@ -119,14 +131,16 @@ export function register(program: Command): void {
         '  server-unreachable  nothing answered at the URL',
         '  target-missing      a step names a target the page does not carry',
         '  take-failed         the take failed against a reachable page',
+        '  reel-failed         every beat was filmed and the reel did not encode',
         '',
         'Exit codes:',
-        '  0  every beat was filmed',
+        '  0  every beat was filmed, and the reel written when asked for',
         '  1  refused, with the reason on stderr or in the JSON record',
         '',
         'Examples:',
         '  canon take http://localhost:4173 plan.json --out .canon/tmp/demo/takes',
         '  canon take http://localhost:4173 plan.json --out takes --json',
+        '  canon take http://localhost:4173 plan.json --out takes --reel takes/reel.webp',
         '',
       ].join('\n'),
     )
@@ -223,16 +237,37 @@ async function runTake(
     )
     if (beat.fallback) logWarn(`  filmed by screencast: ${beat.fallback}`)
   }
-  outro()
 
-  emit(emitJson, {
+  const filmed = {
     url,
     plan: path,
     out: result.out,
     beats: result.beats,
     durationMs: result.durationMs,
-  })
-  return 0
+  }
+  if (!opts.reel) {
+    outro()
+    emit(emitJson, filmed)
+    return 0
+  }
+
+  logStep('Reel')
+  try {
+    const reel = await renderReel(result.out, result.beats, resolve(opts.reel))
+    logInfo(
+      `${reel.file}  ${plural(reel.frames, 'frame')}  ${reel.seconds} s  ${(reel.bytes / 1e6).toFixed(1)} MB`,
+    )
+    outro()
+    emit(emitJson, { ...filmed, reel })
+    return 0
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    logWarn('Every beat was filmed, and the reel did not encode.')
+    logWarn(message.split('\n')[0] ?? '')
+    outro()
+    emit(emitJson, { ...filmed, reason: 'reel-failed', message })
+    return 1
+  }
 }
 
 /**

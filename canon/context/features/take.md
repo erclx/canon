@@ -1,13 +1,13 @@
 ---
 title: Take
-description: The canon take verb that films a web app beat by beat by frame stepping, the click log and camera track it writes, and the begin-frame traps behind it
+description: The canon take verb that films a web app by frame stepping, its click log and camera track, the pull request reel with a drawn pointer, and the begin-frame traps
 ---
 
 # Take
 
 ## Overview
 
-Owns `canon take`, which films each beat of a take plan into a 4K, 60 fps clip with a click log and a per-frame camera track. Its boundary is the clip, and HyperFrames composes and renders everything past it.
+Owns `canon take`, which films each beat of a take plan into a 4K, 60 fps clip with a click log and a per-frame camera track. Its boundary is the clip, and HyperFrames composes and renders everything past it. The one exception is the pull request reel, which `--reel` joins from the clips with the pointer drawn on.
 
 The `ui-record` plugin skill drafts the beats and calls the verb, and `src/commands/take.ts` holds only the verb's wiring.
 
@@ -15,7 +15,7 @@ The `ui-record` plugin skill drafts the beats and calls the verb, and `src/comma
 
 ### `src/take/`
 
-Reads a take plan, films each beat from a fresh load, and writes the clip, the log, the camera track, and the clip's closing frame as `still.jpg` per beat, with `take.json` listing them.
+Reads a take plan, films each beat from a fresh load, and writes the clip, the log, the camera track, and the closing frame as `still.jpg` per beat, listed in `take.json`. With `--reel`, `reel.ts` joins every third frame into one 960-wide WebP and `pointer.ts` draws the cursor from the camera track, with no zoom, since that is HyperFrames' craft.
 
 - The stepper launches chrome-headless-shell under begin-frame control over raw CDP, since Playwright cannot ask for it on a page it opens, and screenshots each frame at device scale 2
 - A beat asking for `screencast`, or a stepped frame slower than 2 s, films through Playwright's screencast at 1920x1080 instead, and the beat's record names the route

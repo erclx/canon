@@ -506,7 +506,32 @@ describe('canon pr evidence --local', () => {
       '**Local preview:** http://localhost:5173',
     ])
   })
+
+  it('should still report no-evidence when only a reel is given', async () => {
+    const record = await runEvidenceCommand(['--reel', REEL_LINK])
+
+    expect(record.reason).toBe('no-evidence')
+  })
+
+  it('should embed a passed reel under the addresses at the head it renders', async () => {
+    const record = await runEvidenceCommand([
+      '--local',
+      'http://localhost:5173',
+      '--reel',
+      REEL_LINK,
+      '--checklist',
+      join(tempDir, 'checklist.md'),
+    ])
+
+    expect(record.reason).toBe('ok')
+    const line = record.body?.split('\n')[4]
+    expect(line).toMatch(/^\*\*Reel\*\* filmed at `[0-9a-f]{7}`:<br>/)
+    expect(line).toContain(`<img src="${REEL_LINK}"`)
+  })
 })
+
+const REEL_LINK =
+  'https://github.com/o/r/blob/canon/frames/pr-7/abc1234/20261026T120000Z/reel.webp?raw=true'
 
 /** A marked comment body carrying every field the record reports, in the shape `renderEvidenceBody` writes. */
 function markedCommentBody(): string {
@@ -586,6 +611,23 @@ describe('canon pr evidence reports the marked comment', () => {
       preview: 'https://feat-x.site.pages.dev',
       local: 'http://localhost:5173',
     })
+  })
+
+  it('should report the posted reel and carry it forward under its own head', async () => {
+    writeComments([
+      markedCommentBody().replace(
+        '## What to look at',
+        `**Reel** filmed at \`abc1234\`:<br><img src="${REEL_LINK}" width="960" alt="reel filmed at abc1234">\n\n## What to look at`,
+      ),
+    ])
+
+    const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' })
+
+    expect(record).toMatchObject({
+      reason: 'ok',
+      reel: { link: REEL_LINK, head: 'abc1234' },
+    })
+    expect(record.body).toContain('**Reel** filmed at `abc1234`')
   })
 
   describe('carried checklist', () => {
@@ -1302,6 +1344,7 @@ describe('canon pr evidence --check', () => {
     ['--preview', 'https://p.dev'],
     ['--local', 'http://localhost:5173'],
     ['--checklist', 'absent.md'],
+    ['--reel', 'https://github.com/o/r/blob/canon/frames/reel.webp?raw=true'],
   ])(
     'should refuse %s before any gh call and print no body',
     async (flag, value) => {
@@ -2342,6 +2385,99 @@ describe('canon pr frames', () => {
     expect(outcome.record.reason).toBe('read-only')
   })
 
+  describe('with --reel', () => {
+    const WEBP = new Uint8Array([
+      0x52, 0x49, 0x46, 0x46, 4, 0, 0, 0, 0x57, 0x45, 0x42, 0x50, 1,
+    ])
+
+    function reelArgs(file: string): string[] {
+      return [
+        '7',
+        '--reel',
+        join(tempDir, file),
+        '--head',
+        'abc1234',
+        '--pass',
+        '20261002T154450Z',
+      ]
+    }
+
+    it('should reach the write for a WebP reel', async () => {
+      writeFileSync(join(tempDir, 'reel.webp'), WEBP)
+
+      const outcome = await runFrames(reelArgs('reel.webp'))
+
+      // The fake gh refuses every write, so reaching it reads as read-only.
+      expect(outcome.record.reason).toBe('read-only')
+    })
+
+    it('should refuse as unreadable-reel without calling gh for a PNG or an MP4', async () => {
+      writeFileSync(
+        join(tempDir, 'reel.mp4'),
+        new Uint8Array([0, 0, 0, 0x20, 0x66, 0x74, 0x79, 0x70, 0x69, 0x73]),
+      )
+
+      const png = await runFrames(reelArgs('box-1.png'))
+      const mp4 = await runFrames(reelArgs('reel.mp4'))
+
+      expect({
+        reasons: [png.record.reason, mp4.record.reason],
+        calls: calls(),
+      }).toEqual({
+        reasons: ['unreadable-reel', 'unreadable-reel'],
+        calls: [],
+      })
+    })
+
+    it('should refuse as reel-too-large without calling gh past 10 MB', async () => {
+      const big = new Uint8Array(10_000_001)
+      big.set(WEBP)
+      writeFileSync(join(tempDir, 'big.webp'), big)
+
+      const outcome = await runFrames(reelArgs('big.webp'))
+
+      expect({ outcome, calls: calls() }).toEqual({
+        outcome: {
+          record: expect.objectContaining({ reason: 'reel-too-large' }),
+          exit: 1,
+        },
+        calls: [],
+      })
+    })
+
+    it('should refuse as bad-box when --reel rides a --box', async () => {
+      writeFileSync(join(tempDir, 'reel.webp'), WEBP)
+
+      const outcome = await runFrames([...reelArgs('reel.webp'), '--box', '1'])
+
+      expect(outcome.record.reason).toBe('bad-box')
+    })
+
+    it('should refuse as bad-mode when --reel and --add are both passed', async () => {
+      writeFileSync(join(tempDir, 'reel.webp'), WEBP)
+
+      const outcome = await runFrames([
+        ...reelArgs('reel.webp'),
+        '--add',
+        join(tempDir, 'box-1.png'),
+      ])
+
+      expect(outcome.record.reason).toBe('bad-mode')
+    })
+
+    it('should refuse as bad-pass when --reel carries no pass stamp', async () => {
+      writeFileSync(join(tempDir, 'reel.webp'), WEBP)
+
+      const outcome = await runFrames([
+        '7',
+        '--reel',
+        join(tempDir, 'reel.webp'),
+      ])
+
+      expect(outcome.record.reason).toBe('bad-pass')
+    })
+  })
+
   it('should list every refusal reason in the help text', async () => {
     const result = await execa(
       process.execPath,
@@ -2357,6 +2493,8 @@ describe('canon pr frames', () => {
         'bad-reference',
         'bad-days',
         'unreadable-frame',
+        'unreadable-reel',
+        'reel-too-large',
         'read-only',
         'unreadable-tip',
         'push-failed',
