@@ -1,6 +1,6 @@
 ---
 title: Intake reference
-description: Folder layout, ordinal naming, reserved index number, frontmatter and dating, the item template, the answer contract, and retrieval
+description: Folder layout, ordinal naming, reserved index number, the evidence folder, frontmatter and dating, the item template, the answer contract, and retrieval
 ---
 
 # Intake reference
@@ -29,7 +29,7 @@ The folder is gitignored. Where a records remote is configured, `canon records p
 
 ## Scope
 
-Governs an intake folder under `.canon/intake/<nn>-<slug>/`: folder layout, ordinal naming, the reserved index number, frontmatter and dating, the item format, the answer contract, and retrieval.
+Governs an intake folder under `.canon/intake/<nn>-<slug>/`: folder layout, ordinal naming, the reserved index number, the evidence folder, frontmatter and dating, the item format, the answer contract, and retrieval.
 
 Does not govern:
 
@@ -68,11 +68,21 @@ An intake failing these is non-conforming even when it satisfies every shape rul
 | `00-overview.md`     | Index: cluster table, verdicts, open questions              | Always   |
 | `NN-<domain>.md`     | One cluster of items, filed by the domain their fixes touch | Always   |
 | `99-next-session.md` | What a compaction destroys that no cluster file carries     | Optional |
+| `evidence/`          | Captures, logs, and records the items cite                  | Optional |
 
 `00` is the only reserved number. Everything else is read order, and the domain rides in the filename so a reader knows what `07-tooling.md` holds without opening it.
 
 - Do not reserve mid-range numbers, since clusters differ per dump and a contract over `06` would force every intake into one dump's shape
 - Let the file count follow the number of separable domains. A large dump with two domains is a small folder.
+
+### The evidence folder
+
+An item citing a capture, a log, or a machine record keeps the file in the folder's own `evidence/`, so the folder stays whole once scratch is wiped.
+
+- Move a file into `evidence/` before an item cites it, and cite it by its path relative to the folder, such as `evidence/04-export.png`
+- Never cite a file under `.canon/tmp/` or any other scratch folder, since a later reader opens the item after that folder is gone
+- Prefix each file with the number of the finding or item it backs, so the folder sorts in the order the evidence was taken
+- Keep `evidence/` flat, holding no cluster file. The item checks read the folder's own markdown alone.
 
 ## Frontmatter and dating
 
