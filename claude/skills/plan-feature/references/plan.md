@@ -77,6 +77,7 @@ The document opens with `# Feature: <short title>` and one paragraph stating wha
 | `## Files to touch`    | each file with a one-line reason                                            | Always                                            |
 | `## Verbatim`          | settled wording that lands unchanged in an existing file, one H3 per block  | When wording is settled                           |
 | `## Design references` | the tracked design folders the change builds against, each with its surface | When Files to touch names a rendered-surface file |
+| `## Reference images`  | the untracked images the plan was shaped against, each from the main root   | When an image shaped the plan                     |
 | `## Verification`      | the test or command that proves each outcome                                | Always                                            |
 | `## Risks`             | conflicts, coupling, and the tricky spots                                   | Always                                            |
 | `## Review focus`      | the inputs or states that would break the change, for the reviewer          | Always                                            |
@@ -190,6 +191,14 @@ A plan whose `## Files to touch` names a rendered-surface file (`.tsx`, `.jsx`, 
 - Write `None identified.` when the project has no `canon/design/` folder or no folder governs the change, so the section reads as considered
 - Cite a tracked folder only, since the building session opens its light and dark images and its frame HTML from the working tree
 - `canon records validate plans` reports `section-missing` for a plan that names a rendered-surface file and omits the section
+
+### Reference images
+
+A plan shaped against an image no tracked folder holds carries this section, such as drive evidence, an image in an intake item, or a design board frame. It tells the building session which images to open before its first edit, and it stays apart from `## Design references`, which cites tracked folders alone.
+
+- Give each entry an image path and what the image shows, as one bullet
+- Write each path from the main worktree root, since these images are gitignored and a linked worktree holds no copy. A path relative to a linked worktree resolves nowhere.
+- Leave the section out when no image shaped the plan. It is optional, and `canon records validate plans` reports nothing on a plan without it.
 
 ### Verification
 
@@ -324,6 +333,10 @@ Add as <where> in `<path/to/file>`, after <anchor>.
 ## Design references
 
 - `canon/design/<surface>/`: <the surface it governs>
+
+## Reference images
+
+- `.canon/intake/<nn>-<slug>/evidence/<name>.png`: <what the image shows>
 
 ## Verification
 
