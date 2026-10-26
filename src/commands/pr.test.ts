@@ -378,7 +378,8 @@ describe('canon pr evidence --checklist', () => {
  * The pull request's files, head, and merge base come from the repository's
  * own `main...HEAD` unless a fixture beside `apiLog` names them: `files.tsv`
  * holds `status<TAB>path` rows, `head` a sha, `merge-base` a sha, and
- * `files-fail` makes the files read fail. The rows become the files API's JSON
+ * `files-fail` makes the files read fail. `base-tree.json` answers the base
+ * branch's recursive tree read, which fails without it. The rows become the files API's JSON
  * array and pass through the `--jq` filter the caller sent, so a filter that
  * mangles its own output fails here as it would against GitHub. Every files
  * read appends its arguments to `files-calls.log`.
@@ -394,6 +395,7 @@ function writeFakeGh(bin: string, comments: string, apiLog: string): void {
     'case "$*" in',
     '  *graphql*|"pr "*|"repo view"*) exit 1 ;;',
     `  api*pulls/7/files*) echo "$*" >> "$fx/files-calls.log"; [ -f "$fx/files-fail" ] && exit 1; { if [ -f "$fx/files.tsv" ]; then cat "$fx/files.tsv"; else git diff --name-status --no-renames main...HEAD | sed -e 's/^A/added/' -e 's/^M/modified/' -e 's/^D/removed/'; fi; } | jq -Rn '[inputs | select(length > 0) | split("\\t") | {status: .[0], filename: .[1]}]' | jq -r "$f" ;;`,
+    `  api*git/trees/*) [ -f "$fx/base-tree.json" ] || exit 1; jq -r "$f" "$fx/base-tree.json" ;;`,
     `  api*contents/*) a="$*"; p=\${a##*contents/}; p=\${p%%\\?*}; r=\${a##*ref=}; [ -f "$fx/img/$r-$(basename "$p")" ] && cat "$fx/img/$r-$(basename "$p")" || exit 1 ;;`,
     '  api*compare/*) if [ -f "$fx/merge-base" ]; then cat "$fx/merge-base"; else git merge-base main HEAD; fi ;;',
     `  "api -X PUT repos/{owner}/{repo}/pulls/7/reviews/"*) id=\${4##*/}; echo "$id" >> "$fx/review-puts.log"; [ -f "$fx/review-put-fail-$id" ] && exit 1; printf '%s\\n' "\${@: -1}" >> "$fx/review-bodies.log"; echo "{}" ;;`,
@@ -1401,6 +1403,133 @@ describe('canon pr evidence --check', () => {
     const record = await runCheck()
 
     expect(record.reason).toBe('gh-failed')
+  })
+
+  describe('uncaptured', () => {
+    function writeBaseTree(truncated: boolean, paths: string[]): void {
+      writeFileSync(
+        join(tempDir, 'base-tree.json'),
+        JSON.stringify({
+          truncated,
+          tree: paths.map((path) => ({ path, type: 'blob' })),
+        }),
+      )
+    }
+
+    it('should name a painted change made with no capture in a project that keeps captures', async () => {
+      writeBaseTree(false, ['e2e/evidence/dark/board.png', 'src/app.tsx'])
+      writeFileSync(
+        join(tempDir, 'files.tsv'),
+        'modified\tsrc/client/styles.css\nadded\tcanon/design/board/claim.png\n',
+      )
+
+      const record = await runCheck()
+
+      expect(record).toMatchObject({
+        reason: 'settled',
+        uncaptured: ['src/client/styles.css'],
+      })
+    })
+
+    it('should report an empty list once an evidence image changed beside the stylesheet', async () => {
+      writeBaseTree(false, ['e2e/evidence/dark/board.png'])
+      writeFileSync(
+        join(tempDir, 'files.tsv'),
+        'modified\tsrc/client/styles.css\nmodified\te2e/evidence/dark/board.png\n',
+      )
+
+      const record = await runCheck()
+
+      expect(record.uncaptured).toEqual([])
+    })
+
+    it('should omit the field when the base keeps no capture', async () => {
+      writeBaseTree(false, ['src/app.tsx'])
+      writeFileSync(join(tempDir, 'files.tsv'), 'modified\tsrc/client/a.css\n')
+
+      const record = await runCheck()
+
+      expect(record).not.toHaveProperty('uncaptured')
+    })
+
+    it('should omit the field when the base tree cannot be read', async () => {
+      writeFileSync(join(tempDir, 'files.tsv'), 'modified\tsrc/client/a.css\n')
+
+      const record = await runCheck()
+
+      expect(record).toMatchObject({ reason: 'settled' })
+      expect(record).not.toHaveProperty('uncaptured')
+    })
+
+    it('should omit the field when a cut-short listing shows no capture', async () => {
+      writeBaseTree(true, ['src/app.tsx'])
+      writeFileSync(join(tempDir, 'files.tsv'), 'modified\tsrc/client/a.css\n')
+
+      const record = await runCheck()
+
+      expect(record).not.toHaveProperty('uncaptured')
+    })
+
+    it('should read a capture found before the listing was cut short', async () => {
+      writeBaseTree(true, ['e2e/evidence/dark/board.png'])
+      writeFileSync(join(tempDir, 'files.tsv'), 'modified\tsrc/client/a.css\n')
+
+      const record = await runCheck()
+
+      expect(record.uncaptured).toEqual(['src/client/a.css'])
+    })
+
+    it('should carry the field on the no-evidence render record', async () => {
+      writeBaseTree(false, ['e2e/evidence/dark/board.png'])
+      writeFileSync(join(tempDir, 'files.tsv'), 'modified\tsrc/client/a.css\n')
+
+      const result = await execa(
+        process.execPath,
+        [CLI, 'pr', 'evidence', '7', '--json', '--root', repoRoot],
+        {
+          cwd: repoRoot,
+          reject: false,
+          timeout: RUN_TIMEOUT_MS,
+          env: { PATH: `${join(tempDir, 'bin')}:${process.env.PATH}` },
+        },
+      )
+
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        reason: 'no-evidence',
+        uncaptured: ['src/client/a.css'],
+      })
+    })
+
+    it('should carry the field on the ok render record', async () => {
+      writeBaseTree(false, ['e2e/evidence/dark/board.png'])
+      writeFileSync(join(tempDir, 'files.tsv'), 'modified\tsrc/client/a.css\n')
+
+      const result = await execa(
+        process.execPath,
+        [
+          CLI,
+          'pr',
+          'evidence',
+          '7',
+          '--json',
+          '--root',
+          repoRoot,
+          '--preview',
+          'https://p.dev',
+        ],
+        {
+          cwd: repoRoot,
+          reject: false,
+          timeout: RUN_TIMEOUT_MS,
+          env: { PATH: `${join(tempDir, 'bin')}:${process.env.PATH}` },
+        },
+      )
+
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        reason: 'ok',
+        uncaptured: ['src/client/a.css'],
+      })
+    })
   })
 })
 
