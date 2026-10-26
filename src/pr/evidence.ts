@@ -490,18 +490,18 @@ export function renderEvidenceBody(
 
 /**
  * How many cases a rendered body carries. Every case has exactly one head
- * image, so a row counts the head images it holds, which is one in the flat
- * table and up to two in a view's row. A row from before the alt text named
- * its head image counts as one case when it matches the old row shape, so a
- * comment posted before the change still counts its cases and the
- * `would-empty` guard holds.
+ * image, so the count is the head images on any line, whether a table row
+ * holding one or two or a line of its own. A table row from before the alt
+ * text named its head image counts as one case when it matches the old row
+ * shape, so a comment posted in any earlier layout still counts its cases and
+ * the `would-empty` guard holds.
  */
 export function countEvidenceCases(body: string): number {
   let total = 0
   for (const line of body.split('\n')) {
-    if (!line.startsWith('| ')) continue
     const heads = line.match(HEAD_IMAGE_PATTERN)?.length ?? 0
-    total += heads > 0 ? heads : LEGACY_ROW_PATTERN.test(line) ? 1 : 0
+    if (heads > 0) total += heads
+    else if (line.startsWith('| ') && LEGACY_ROW_PATTERN.test(line)) total += 1
   }
   return total
 }

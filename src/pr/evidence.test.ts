@@ -1145,6 +1145,34 @@ describe('countEvidenceCases', () => {
     expect(countEvidenceCases(body)).toBe(2)
   })
 
+  it('should count a body with its head images on their own lines the same as the table of those cases', () => {
+    const table = [
+      '| Case | Base | Head |',
+      '| --- | --- | --- |',
+      '| a | *(new)* | <img src="h/a.png" width="1000" alt="a head"> |',
+      '| b | <img src="b/b.png" width="1000" alt="b base"> | <img src="h/b.png" width="1000" alt="b head"> |',
+    ].join('\n')
+    const stacked = [
+      '**a** *(new)*',
+      '',
+      '<img src="h/a.png" width="1000" alt="a head">',
+      '',
+      '**b**',
+      '',
+      '<img src="h/b.png" width="1000" alt="b head">',
+      '',
+      '<details>',
+      '<summary>Base</summary>',
+      '',
+      '<img src="b/b.png" width="1000" alt="b base">',
+      '',
+      '</details>',
+    ].join('\n')
+
+    expect(countEvidenceCases(stacked)).toBe(2)
+    expect(countEvidenceCases(stacked)).toBe(countEvidenceCases(table))
+  })
+
   it('should count zero for a preview-only body', () => {
     const body = renderEvidenceBody([], 'o/r', 'base', 'head', 'https://x.dev')
 
