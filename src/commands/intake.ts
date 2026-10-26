@@ -10,6 +10,14 @@ import {
   readFolder,
   type Selection,
 } from '@/intake/folder'
+import {
+  type BaselineOutcome,
+  type CheckOutcome,
+  checkDrive,
+  type DriveFindings,
+  type DriveRefused,
+  recordBaseline,
+} from '@/intake/drive-check'
 import { isUnread } from '@/intake/items'
 import {
   intro,
@@ -34,6 +42,12 @@ const SELECTION = /^(\d+[a-z]*)=([\s\S]*)$/i
 interface ListCommandOptions {
   readonly json?: boolean
   readonly unread?: boolean
+  readonly root?: string
+}
+
+interface DriveCheckCommandOptions {
+  readonly baseline?: boolean
+  readonly json?: boolean
   readonly root?: string
 }
 
@@ -142,6 +156,67 @@ export function register(program: Command): void {
     )
     .action(async (slug: string, opts: AnswerCommandOptions) => {
       process.exitCode = await runAnswer(slug, opts)
+    })
+
+  intake
+    .command('drive-check')
+    .description(
+      'Check an app drive against its goals, the checkout, and its evidence',
+    )
+    .argument('<slug>', 'Intake folder name, as in app-drive-1-0')
+    .helpOption('-h, --help', 'Show this help message')
+    .option(
+      '--baseline',
+      'Record the main checkout status before the drive, rather than check',
+    )
+    .option('--json', 'Emit a machine-readable record on stdout')
+    .option('--root <path>', 'Project root, defaulting to the main worktree')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'With --baseline it stores the main checkout status at',
+        '.canon/tmp/app-drive/<slug>/baseline.json, any ordinal dropped from',
+        'the slug, so it runs before the intake folder exists. Without it, it',
+        'reads drive.json in the intake folder and fails the drive on:',
+        '  unmapped         a ## Goals bullet the record carries no entry for',
+        '  unreasoned       a goal marked not-driven with no reason',
+        '  unknown          an entry naming no goal the requirements hold',
+        '  changed          a checkout path that differs from the baseline',
+        '  strayEvidence    an evidence path outside the folder evidence/',
+        '  missingEvidence  an evidence path that holds no file',
+        '  worktreeLeft     the drive worktree the record names, still on disk',
+        '',
+        'A goal matches by its text with any bold label and trailing period',
+        'dropped. A changed path is named and never reverted.',
+        '',
+        'Read `reason` off the record: `recorded` for a baseline, `clean` or',
+        '`failed` for a check, and a refusal otherwise.',
+        '',
+        'Refusals, read off `reason`:',
+        '  no-intake        the project holds no intake folder',
+        '  no-folder        no folder matches the slug',
+        '  ambiguous-slug   a bare slug matches more than one folder',
+        '  bad-input        the slug could leave the scratch folder',
+        '  no-record        the folder carries no drive.json',
+        '  bad-record       drive.json does not parse or breaks its shape',
+        '  no-requirements  the project carries no requirements record',
+        '  no-baseline      no baseline was recorded for the slug',
+        '  unreadable-tree  git cannot read the main checkout status',
+        '',
+        'Exit codes:',
+        '  0  the baseline was recorded, or the drive is clean',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '  2  the drive failed, with every finding in the record',
+        '',
+        'Examples:',
+        '  canon intake drive-check app-drive-1-0 --baseline --json',
+        '  canon intake drive-check app-drive-1-0 --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (slug: string, opts: DriveCheckCommandOptions) => {
+      process.exitCode = await runDriveCheck(slug, opts)
     })
 }
 
@@ -262,9 +337,23 @@ async function runAnswer(
   return reportAnswer(outcome, emitJson, root)
 }
 
+async function runDriveCheck(
+  slug: string,
+  opts: DriveCheckCommandOptions,
+): Promise<number> {
+  const emitJson = opts.json ?? false
+  const root = opts.root ?? (await mainWorktreeRoot())
+
+  if (opts.baseline) {
+    return reportBaseline(await recordBaseline(root, slug), emitJson, root)
+  }
+
+  return reportDriveCheck(await checkDrive(root, slug), emitJson, root)
+}
+
 function reportRefusal(
   title: string,
-  refused: IntakeRefused,
+  refused: IntakeRefused | DriveRefused,
   emitJson: boolean,
   root: string,
 ): number {
@@ -420,4 +509,95 @@ function reportAnswer(
   outro()
 
   return 0
+}
+
+function reportBaseline(
+  outcome: BaselineOutcome,
+  emitJson: boolean,
+  root: string,
+): number {
+  if (!outcome.ok) {
+    return reportRefusal('canon intake drive-check', outcome, emitJson, root)
+  }
+
+  const path = relative(root, outcome.path)
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({
+        ok: true,
+        root,
+        slug: outcome.slug,
+        reason: 'recorded',
+        baseline: path,
+        entries: outcome.entries,
+      })}\n`,
+    )
+    return 0
+  }
+
+  intro('canon intake drive-check')
+  logStep('Baseline')
+  logInfo(`Recorded ${outcome.entries} status line(s).`)
+  logAdd(path)
+  outro()
+
+  return 0
+}
+
+const FINDING_LABELS: Record<keyof DriveFindings, string> = {
+  unmapped: 'Goals with no entry',
+  unreasoned: 'Goals not driven, with no reason',
+  unknown: 'Entries naming no goal',
+  changed: 'Changed in the checkout',
+  strayEvidence: 'Evidence outside evidence/',
+  missingEvidence: 'Evidence holding no file',
+  worktreeLeft: 'Drive worktree still on disk',
+}
+
+function reportDriveCheck(
+  outcome: CheckOutcome,
+  emitJson: boolean,
+  root: string,
+): number {
+  if (!outcome.ok) {
+    return reportRefusal('canon intake drive-check', outcome, emitJson, root)
+  }
+
+  const code = outcome.reason === 'clean' ? 0 : 2
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({
+        ok: true,
+        root,
+        slug: outcome.slug,
+        reason: outcome.reason,
+        goals: outcome.goals,
+        findings: outcome.findings,
+      })}\n`,
+    )
+    return code
+  }
+
+  intro('canon intake drive-check')
+
+  if (outcome.reason === 'clean') {
+    logStep('Clean')
+    logInfo(
+      `${outcome.goals} goal(s) mapped, the checkout untouched, the evidence in place.`,
+    )
+    outro()
+    return code
+  }
+
+  for (const [key, label] of Object.entries(FINDING_LABELS)) {
+    const list = outcome.findings[key as keyof DriveFindings]
+    if (list.length === 0) continue
+    logStep(label)
+    for (const entry of list) logError(entry)
+  }
+  outro()
+
+  return code
 }

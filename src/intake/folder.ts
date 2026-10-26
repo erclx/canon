@@ -142,7 +142,7 @@ export function extractOrdinal(name: string): string {
   return /^\d{2,}-/.exec(name)?.[0].slice(0, -1) ?? ''
 }
 
-async function openFolder(
+export async function openFolder(
   root: string,
   slug: string,
 ): Promise<string | IntakeRefused> {
