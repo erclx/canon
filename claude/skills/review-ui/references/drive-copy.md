@@ -9,6 +9,10 @@ Steps 4 and 7 of `review-ui`. A preview that saves what the pass drives would ot
 
 A project names the folders its preview writes in `canon/config/preview.json`. The worker starts its server reading a copy of them, and the pass rebuilds that copy at every head so the last pass's drags never reach this one.
 
+- The rebuild resets each declared `writes` path from the worktree and leaves the rest of the copy root alone
+- A `keep` path inside a declared path is state the server owns, so the rebuild neither clears it nor copies the worktree's own
+- A page added only to the copy is wiped by design, so a box can open only a page the worker committed under a declared path
+
 ## Before the browser opens
 
 Rebuild the copy and record the worktree's state:

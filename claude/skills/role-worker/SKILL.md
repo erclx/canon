@@ -53,6 +53,8 @@ A painted pull request needs a server in this worktree for `canon pr local` to f
 
 Run `canon pr drive-copy --json` before starting `dev`. On `copied`, start it with `env` set to `copyRoot`, so the operator's address serves the copy. On `no-config`, start it as it is. On a refusal, start nothing and send the controller the `reason`, since a broken config would send drives into tracked folders.
 
+- Commit the fixture state a checklist needs in the worktree under a declared path, since the rebuild resets each declared path and wipes a page added only to the copy
+
 A hand-run `git-ship` or `git-pr` starts no server, since only a worker has a lifetime to own one.
 
 ### Building against a design reference
