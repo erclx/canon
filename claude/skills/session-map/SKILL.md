@@ -62,7 +62,8 @@ Follow items 3 through 6. Start from the board and the roster rather than the pr
 
 Item 6 runs `canon records validate sessions session-<slug>` once the file is written.
 
-- It reports the count and never fails, so a map over the cap is still written
+- It reports the count and never fails on length, so a map over the cap is still written
+- A refusal, such as `unknown-kind` from a CLI older than this plugin, takes the count line's place as its `reason`
 - The count it reports closes the output
 
 The file sits at the main worktree root and is written whole every time, so send it out as a heredoc, routed the way `session-worktree` states.
@@ -78,7 +79,7 @@ A session holding no role writes the core three and stops.
 ```plaintext
 ✅ Session map written: .canon/tasks/session-<slug>.md
 <what the drift verb named, or the boundary it refused at>
-<words> of <cap> words, as canon records validate sessions reported
+<words> of <cap> words, as canon records validate sessions reported, or the reason it refused
 ```
 
 A decline reports itself rather than falling silent, so a caller can tell it from a run that failed:

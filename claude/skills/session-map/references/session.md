@@ -76,6 +76,7 @@ A map holds at most 350 words, so the session resuming from it reads it in about
 - The count covers the body below the title. Frontmatter, the title line, and a `## Resume` section a role closes the file with stay out of it.
 - `canon records validate sessions` reports each map's count against the cap and never fails the run, since a write refused near a compaction loses the reasoning the map exists to hold
 - A map over the cap is cut at its next rewrite, starting with whatever another artifact already carries
+- A CLI older than the plugin refuses the kind as `unknown-kind`, and that refusal is the boundary the count line reports, never a reason to skip the step
 
 ## Writing one
 
@@ -86,7 +87,7 @@ The `session-map` skill is the invocable route onto this procedure and holds no 
 3. Write only what a compaction destroys and no other artifact already carries. The board holds the ordering, a task file its findings, and a measurement folder its track.
 4. Cite a commit, a task, or a file and line for every claim about the tree, so the next session can tell a read from a recall. A rule or a habit carries no citation.
 5. Fill a section from reasoning the session holds, starting from the board and the live roster `canon sessions list` reads rather than from the prior map.
-6. Run `canon records validate sessions session-<slug>` and report the count it names against the cap.
+6. Run `canon records validate sessions session-<slug>` and report the count it names against the cap, or its `reason` in one line when it refuses.
 
 Do not restate the board, and do not summarize the work that shipped, since version control already carries it.
 
