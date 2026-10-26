@@ -6,7 +6,7 @@ category: Agent surface
 
 # Target sync
 
-A target pulls toolkit changes per domain, through one catch-all and several targeted entry points. A project scaffolded before a layout move runs [target migrations](migrations.md) first. See [install and sync](../agents/install-and-sync.md) for what each verb writes.
+A target pulls toolkit changes per domain, through one catch-all and several targeted entry points. A project scaffolded before a layout move runs [target migrations](../migrations/index.md) first. See [install and sync](../agents/install-and-sync.md) for what each verb writes.
 
 ## Check first
 

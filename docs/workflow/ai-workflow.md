@@ -27,7 +27,7 @@ canon/
 └── tmp/             ← deletable scratch
 ```
 
-A project scaffolded before the move keeps its records under `.claude/`, and every command reads either root. See [target migrations](../target/migrations.md).
+A project scaffolded before the move keeps its records under `.claude/`, and every command reads either root. See [target migrations by verb](../migrations/by-verb.md).
 
 Context loads always (`CLAUDE.md` and `canon/REQUIREMENTS.md`), by path (`.claude/rules/` with a `paths:` glob), or on demand (`canon/context/`, found through its `index.md`). Run `canon init` to seed `.claude/`, `CLAUDE.md`, and the rules.
 

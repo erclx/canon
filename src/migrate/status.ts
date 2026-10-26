@@ -8,9 +8,9 @@ interface Migration {
 
 /**
  * Every `canon migrate` subcommand in the order a project runs them, records
- * first. This is the source for that order, and `docs/target/migrations.md`
- * cites the verb rather than keeping a second list. A new migration joins by
- * one line here.
+ * first. This is the source for that order, and
+ * `docs/migrations/by-verb.md` cites the verb rather than keeping a
+ * second list. A new migration joins by one line here.
  */
 export const MIGRATIONS: readonly Migration[] = [
   { name: 'records', flags: [] },
