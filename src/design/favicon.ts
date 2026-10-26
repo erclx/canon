@@ -95,11 +95,11 @@ export function renderMark(
   fills: { readonly c: string; readonly pip: string },
 ): string {
   const svg = mark.replace(/<!--[\s\S]*?-->/, '').trim()
-  const pip = svg.replace(
-    /(<[a-z]+ [^>]*class="pip"[^>]*?) fill="[^"]*"/,
-    `$1 fill="${fills.pip}"`,
-  )
-  if (pip === svg) throw new Error('the mark carries no filled .pip shape')
+  const pipFill = /(<[a-z]+ [^>]*class="pip"[^>]*?) fill="[^"]*"/
+  if (!pipFill.test(svg)) {
+    throw new Error('the mark carries no filled .pip shape')
+  }
+  const pip = svg.replace(pipFill, `$1 fill="${fills.pip}"`)
   return `${pip.replaceAll('currentColor', fills.c)}\n`
 }
 

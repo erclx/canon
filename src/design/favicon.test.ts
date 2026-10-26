@@ -77,6 +77,12 @@ describe('renderMark', () => {
     expect(svg).not.toContain('authoring note')
   })
 
+  it('should accept a pip color the source already carries', () => {
+    const svg = renderMark(buildMark(), { c: '#1f2328', pip: '#c2380e' })
+
+    expect(svg).toContain('<rect class="pip" fill="#c2380e"')
+  })
+
   it('should refuse a mark with no filled pip', () => {
     expect(() =>
       renderMark('<svg><path fill="currentColor" d="M0 0"/></svg>', {
