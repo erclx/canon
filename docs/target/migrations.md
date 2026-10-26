@@ -70,6 +70,8 @@ Replace a citation of a skill with no successor by hand, or delete the sentence.
 - `review-branch`, `seed-sync`, `restate-plainly`, `bash-cli-script`, `canon-operator`, and `canon-rollout` have no successor <!-- canon-keep-retired -->
 - `create-standard`, `markdown-propose`, `memory-review`, `project-commands`, `repo-metadata`, and `ux-walkthrough` have no successor <!-- canon-keep-retired -->
 
+`canon-feedback-triage` reads only the toolkit's own feedback queue, so it left the plugin with no successor in a target. Delete a citation of it. <!-- canon-keep-retired -->
+
 The `memory` record kind left `canon records`, so `canon records validate memory` refuses as an unknown kind and `canon records migrate` is gone.
 
 - `canon repo metadata`, `canon autoship`, and the `120-bash` rule are gone, and `canon gov sync` removes the rule <!-- canon-keep-retired -->
