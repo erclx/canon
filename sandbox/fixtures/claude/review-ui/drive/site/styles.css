@@ -31,3 +31,15 @@ main {
   padding: 8px 12px;
   border-bottom: 1px solid #d9d6cf;
 }
+
+@media (prefers-color-scheme: dark) {
+  body {
+    color: #ecebe8;
+    background: #1c1b19;
+  }
+
+  .plans td,
+  .plans th {
+    border-bottom-color: #3a3833;
+  }
+}
