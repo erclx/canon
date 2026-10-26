@@ -45,6 +45,10 @@ bunx -y hyperframes init .canon/video/<slug>/composition
 - Leave renders in the project's `renders/` folder, which `canon records push` skips along with `takes/`, `snapshots/`, `node_modules/`, and any video file
 - An image the composition adds under `assets/`, such as a logo, is backed up with the project's source
 
+Compose from a session started at the main worktree root. From a linked worktree or an isolated background session, `Write` and `Edit` refuse every file in `composition/` and redirect to a worktree copy no later session reads, so never take that redirect.
+
+Where composing from the main root is not possible, write each file whole through the route `${CLAUDE_SKILL_DIR}/../session-worktree/references/main-root-writes.md` states.
+
 ## Applying it in a composition
 
 Load `hyperframes-core` for placing the clip and `hyperframes-keyframes` for the wrapper's transform before writing the composition.
