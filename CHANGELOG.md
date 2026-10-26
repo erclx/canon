@@ -1,5 +1,24 @@
 # Changelog
 
+## [5.69.0](https://github.com/erclx/canon/compare/v5.68.0...v5.69.0) (2026-10-26)
+
+
+### Features
+
+* **app-drive:** keep pasted images as evidence and cite them in plans ([#2757](https://github.com/erclx/canon/issues/2757)) ([89939db](https://github.com/erclx/canon/commit/89939db9be70811f96613a294947efcac2c0ed91))
+* **claude:** retire the plan-ready skill ([#2760](https://github.com/erclx/canon/issues/2760)) ([808806d](https://github.com/erclx/canon/commit/808806d494dee9ae93ef348b1a48e5b50f777871))
+* **governance:** run slow commands in the background by default ([#2762](https://github.com/erclx/canon/issues/2762)) ([ffb86f3](https://github.com/erclx/canon/commit/ffb86f334d9cbd829a329d2576095416f45f0e8f))
+* **gov:** record why each core rule bullet exists in a ledger ([#2769](https://github.com/erclx/canon/issues/2769)) ([f8d4058](https://github.com/erclx/canon/commit/f8d40585f244a58afba0c34a576d52b39e2b93e0))
+* **skills:** draft pick rounds in the board record folder by default ([#2768](https://github.com/erclx/canon/issues/2768)) ([a3cc12a](https://github.com/erclx/canon/commit/a3cc12a80d6a6da60e205be5842f346f81dbe72f))
+* **skills:** draft pick rounds on the design board the project names ([#2759](https://github.com/erclx/canon/issues/2759)) ([6eff8ce](https://github.com/erclx/canon/commit/6eff8ce998e3007e5a2847934c6af4a6b49fba89))
+* **skills:** let a drive session plan the rows its intake produced ([#2758](https://github.com/erclx/canon/issues/2758)) ([0dd775d](https://github.com/erclx/canon/commit/0dd775d3507b094bad9f0c808516b3c288b4b500))
+* **tasks:** wait in the background for a row to become launchable ([#2764](https://github.com/erclx/canon/issues/2764)) ([b45a23a](https://github.com/erclx/canon/commit/b45a23af5301fadd8598afb4d8559c06d7b91354))
+
+
+### Bug Fixes
+
+* **take:** let a take request raise its stepped frame stall limit ([#2771](https://github.com/erclx/canon/issues/2771)) ([140aec3](https://github.com/erclx/canon/commit/140aec340b3e43c12bc67bd74fc96155661bd92b))
+
 ## [5.68.0](https://github.com/erclx/canon/compare/v5.67.0...v5.68.0) (2026-10-26)
 
 
