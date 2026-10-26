@@ -31,6 +31,17 @@ canon migrate record-tree --write --json
 
 It covers `diagrams`, `memory`, `plans`, `proposals`, `review`, `tasks`, and `teach`. Read the report before `--write`. The record tree is untracked, and a wrong rewrite has no undo.
 
+## Move the design board to `board/`, once
+
+A pick round with no board named now drafts in `.canon/board/`, the folder Frameboard reads, rather than `.canon/canvas/`. Stop any `frameboard serve` on the old folder first.
+
+```bash
+canon migrate record-layout --json
+canon migrate record-layout --write --json
+```
+
+A project holding both folders gets a collision, and neither moves. A `board` key in `design.toml` naming `.canon/canvas` stays as written, so update it by hand.
+
 ## Move rules off the flat layout, once
 
 Installed rules moved from `.claude/rules/<subdir>/` to `.claude/rules/canon/<subdir>/`. On the flat layout `canon gov sync` exits 0 reporting `No governance surfaces found in target`, and `canon gov install` lands a second copy.
