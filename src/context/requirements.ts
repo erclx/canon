@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { join, relative } from 'node:path'
-import { bodyLines } from '@/markdown/scan'
+import { bodyLines, wordCount } from '@/markdown/scan'
 import { surfaceDir } from '@/roots/surface'
 
 /**
@@ -9,16 +9,6 @@ import { surfaceDir } from '@/roots/surface'
  */
 export function requirementsRel(root: string): string {
   return relative(root, surfaceDir(root, 'REQUIREMENTS.md'))
-}
-
-/**
- * Counts whitespace-delimited tokens, the unit the record's word cap is stated
- * in. A code span counts as the tokens it holds, so a line citing a long path
- * pays for it the way a reader does. A caller gating on the count hands in
- * prose with fenced lines already dropped.
- */
-export function wordCount(text: string): number {
-  return text.match(/\S+/g)?.length ?? 0
 }
 
 export interface RequirementsReport {
