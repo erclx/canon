@@ -16,7 +16,7 @@ The checklist is its only statement of intent, so it tests the feature the way a
 - No open pull request resolves for the number named or the current branch: stop, `❌ No open PR to drive.`
 - The evidence record carries no `checklist`: stop and post nothing, `No checklist on PR #<number>, so there is nothing to drive.`
 - No address resolves under Step 3: stop and post nothing, `❌ No address to drive. PR #<number> carries no preview and no local preview, and the launch named none.`
-- The wrapper refuses to open the browser because its revision is absent: stop and post nothing, passing its install command to whoever launched the pass. Never install mid-pass.
+- `canon browser` refuses to open the browser because its revision is absent: stop and post nothing, passing its install command to whoever launched the pass. Never install mid-pass.
 
 ### Head and posting
 
@@ -97,9 +97,10 @@ An address that exists and does not answer differs from no address. When every r
 Drive from `.canon/tmp/pr/review-ui/<number>/` at the main worktree root, resolved the way `session-worktree` does, since the CLI writes snapshots under the folder it runs in. Name the browser session `<project>-<number>`, with `<project>` the main root's basename.
 
 ```bash
-${CLAUDE_SKILL_DIR}/scripts/pw.sh -s=<project>-<number> open <url>
+canon browser -s=<project>-<number> open <url>
 ```
 
+- Stop and post nothing when `open` exits with `unknown option '-s=...'` or `unknown command 'browser'`, since the CLI predates the verb, telling whoever launched the pass to run `canon upgrade`
 - Pass `--config=<path>` on `open` only when the launch names a CLI config path, which is how a machine's GPU recipe reaches the pass. Render in software otherwise.
 - Read the WebGL renderer once with an `eval` through the debug renderer extension and carry it into the comment, since a canvas page can paint differently in software
 - Before `open`, rebuild the drive copy and record the worktree's state per `${CLAUDE_SKILL_DIR}/references/drive-copy.md`
@@ -130,14 +131,14 @@ Push only a frame of the address this pass drove, since the branch is as public 
 
 Run four checks over every route the boxes reached, and nothing beyond them:
 
-- Console errors, through the wrapper's `console error` on each route.
+- Console errors, through `canon browser`'s `console error` on each route.
 - Sideways overflow at each width a box named, as `document.documentElement.scrollWidth` against `clientWidth`.
 - The `focus` and `details` probes, through `canon drive <url> <run> --json` with a run file in the scratch folder.
 - The `axe` probe, named in the same run file and read by each finding's `gate` rather than a copy of the CLI's rule list. On `axe-missing`, drop it and name the refusal as an unread check.
 
 The probes launch their own browser at a URL, so a state the boxes reached by clicks reaches them only as steps the run file repeats. Where a state needs a step kind `canon drive` lacks, probe the route on arrival and say so.
 
-A console error, an overflow, or an axe finding whose `gate` is true is a finding. Every other probe result is a reading to confirm, an `incomplete` axe outcome included, since each probe carries a known class of false finding. Close the browser with `${CLAUDE_SKILL_DIR}/scripts/pw.sh -s=<project>-<number> close` once the sweep ends.
+A console error, an overflow, or an axe finding whose `gate` is true is a finding. Every other probe result is a reading to confirm, an `incomplete` axe outcome included, since each probe carries a known class of false finding. Close the browser with `canon browser -s=<project>-<number> close` once the sweep ends.
 
 ## Step 7: post
 

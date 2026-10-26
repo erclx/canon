@@ -42,6 +42,7 @@ export const COMMAND_GROUPS: { title: string; rows: CommandRow[] }[] = [
       ['serve [dir]', 'Serve a directory on localhost, print the link'],
       ['inventory [subj]', 'Report one computed property across every route'],
       ['drive <url> <run>', 'Walk a page through interactions, measure each'],
+      ['browser [args]', 'Drive the pinned agent browser CLI'],
       ['transcripts <url>', 'Fetch a YouTube transcript with frontmatter'],
     ],
   },

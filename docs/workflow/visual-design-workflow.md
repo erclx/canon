@@ -43,8 +43,9 @@ Run `canon drive --help` for the step kinds and the run file shape.
 Two reviews run beside each other and finish on their own clocks.
 
 - `canon:review-pr` reads the code and the stills in the evidence comment, and posts under `## Review`.
-- `canon:review-ui` never reads the diff. It drives each checklist box in the running app through the pinned `@playwright/cli` and posts under `## UI review`.
+- `canon:review-ui` never reads the diff. It drives each checklist box in the running app through `canon browser`, which runs the pinned `@playwright/cli`, and posts under `## UI review`.
 - Every box gets one verdict, being pass, fail, needs eyes, or not driven.
+- The pass refuses rather than download a browser. Install it once per machine with `canon browser install-browser chromium`.
 
 After the boxes, `review-ui` sweeps every route they reached:
 
