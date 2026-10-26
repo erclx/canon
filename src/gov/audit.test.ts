@@ -187,7 +187,7 @@ describe('readRuleAudit in a canon checkout', () => {
     })
   })
 
-  it('should ask no ledger of a behavioral or internal rule', async () => {
+  it('should ask no ledger of an untouched core rule or an internal rule', async () => {
     write(join('governance', 'rules', 'canon', 'git.md'), rule(bullets(1)))
     write(join('internal', 'rules', 'core', 'cli.md'), rule(bullets(1)))
 
@@ -248,6 +248,69 @@ describe('readRuleAudit in a canon checkout', () => {
     expect(report.kind === 'unreadable' && report.message).toContain(
       join('governance', 'rules', 'empty'),
     )
+  })
+})
+
+describe('readRuleAudit on a core rule', () => {
+  const core = join('governance', 'rules', 'claude', 'background.md')
+  const ledger = join('governance', 'ledger', 'claude', 'background.md')
+
+  beforeEach(() => {
+    write(core, rule(['# Background', '## Waking', bullets(2)].join('\n')))
+  })
+
+  it('should pass a core ledger with one row per bullet', async () => {
+    write(
+      ledger,
+      '# L\n\n## Waking\n\n| B | S |\n| - | - |\n| a | b |\n| c | d |',
+    )
+
+    const report = measured(await readRuleAudit(ROOT))
+
+    expect(report.rules[0]?.ledger).toEqual({
+      status: 'present',
+      path: ledger,
+      mismatches: [],
+    })
+  })
+
+  it('should report a core ledger a row short even when the rule is untouched', async () => {
+    write(ledger, '# L\n\n## Waking\n\n| B | S |\n| - | - |\n| a | b |')
+
+    const report = measured(await readRuleAudit(ROOT))
+
+    expect(report.rules[0]?.ledger).toEqual({
+      status: 'present',
+      path: ledger,
+      mismatches: [{ heading: 'Waking', bullets: 2, rows: 1 }],
+    })
+  })
+
+  it('should report a touched core rule with no ledger as missing', async () => {
+    const report = measured(await readRuleAudit(ROOT, [], { touched: [core] }))
+
+    expect(report.rules[0]?.ledger).toEqual({ status: 'missing', path: ledger })
+  })
+
+  it('should ask no ledger of a core rule outside the touched set', async () => {
+    const report = measured(
+      await readRuleAudit(ROOT, [], {
+        touched: [join('governance', 'ledger', 'claude', 'background.md')],
+      }),
+    )
+
+    expect(report.rules[0]?.ledger).toEqual({ status: 'not-required' })
+  })
+
+  it('should ask no ledger of a touched internal rule', async () => {
+    const internal = join('internal', 'rules', 'core', 'cli.md')
+    write(internal, rule(bullets(1)))
+
+    const report = measured(
+      await readRuleAudit(ROOT, [internal], { touched: [internal] }),
+    )
+
+    expect(report.rules[0]?.ledger).toEqual({ status: 'not-required' })
   })
 })
 
