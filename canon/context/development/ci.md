@@ -46,13 +46,20 @@ Runs weekly and on dispatch, one matrix job per scaffoldable stack through `cano
 - `VERSION_SPAN` in `src/labels/phase.ts` reads a span holding only a version as a hit, so an author quoting a label alone in a span is still caught
 - The seeded copy under `tooling/base/configs/.github/workflows/` runs `bunx -y @erclx/canon labels scan` with no install step, since a `python` target has no lockfile
 
+### `scripts/ci/install-playwright-deps.sh`
+
+Every workflow installing the Playwright system packages calls this script, since a stalled `azure.archive.ubuntu.com` connection hangs rather than fails and a step bound alone only turns the hang red.
+
+- The script kills an attempt at 150 seconds and retries up to three times, running `dpkg --configure -a` before each retry
+- `src/gate/workflow-timeouts.test.ts` fails a direct `install-deps` or `--with-deps` call and a script step with no `timeout-minutes`
+
 ### Other folders
 
 The release configuration, the manifests, and the install check sit beside the workflows.
 
 - The root owns `release-please-config.json`, whose `bootstrap-sha` stops a first run versioning every untagged commit and whose `include-component-in-tag: false` keeps tags `v<semver>`
 - `.claude-plugin/` and `claude/.claude-plugin/` hold the manifests release-please versions, and `.oxfmtrc.jsonc` ignores the files the tool writes
-- `scripts/ci/` owns the programs the long steps call, such as `publish-check.sh` and `refresh-frames-pr.sh`, and a step past five lines moves there
+- `scripts/ci/` owns the programs the long steps call, such as `publish-check.sh`, `refresh-frames-pr.sh`, and `install-playwright-deps.sh`, and a step past five lines moves there
 - `scripts/core/` owns `install-check.ts`, run in CI after `check:ci` and kept out of the local gate because a cold pack-and-install is unmeasured
 - `package.json` pins `typescript` to the v5 line `@astrojs/check` expects, so `bun add -D typescript` selecting v7 is a compiler upgrade
 

@@ -49,7 +49,7 @@ jobs:
 
       - name: Install Playwright System Dependencies
         timeout-minutes: 10
-        run: bunx playwright install-deps chromium firefox webkit
+        run: scripts/ci/install-playwright-deps.sh chromium firefox webkit
 
       - name: Cache Playwright Browsers
         id: playwright-cache
@@ -98,7 +98,7 @@ jobs:
 
       - name: Install Playwright System Dependencies
         timeout-minutes: 10
-        run: bunx playwright install-deps chromium
+        run: scripts/ci/install-playwright-deps.sh chromium
 
       - name: Cache Playwright Browsers
         id: playwright-cache

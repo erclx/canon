@@ -55,7 +55,7 @@ jobs:
       - name: Install Playwright System Dependencies
         if: contains(fromJSON('["astro","nextjs","vite-react"]'), matrix.stack)
         timeout-minutes: 10
-        run: bunx playwright@latest install-deps chromium firefox webkit
+        run: scripts/ci/install-playwright-deps.sh --package playwright@latest chromium firefox webkit
 
       - name: Install Playwright Browsers
         if: contains(fromJSON('["astro","nextjs","vite-react"]'), matrix.stack)
