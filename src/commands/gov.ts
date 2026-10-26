@@ -34,6 +34,7 @@ import {
 } from '@/gov/restated'
 import {
   auditExit,
+  CORE_FOLDERS,
   hasFinding,
   PRACTICE_FOLDERS,
   readRuleAudit,
@@ -62,6 +63,11 @@ import {
   readTestOrder,
   type TestOrderReport,
 } from '@/gov/test-order'
+import {
+  type ChangedSet,
+  collectChangedFiles,
+  commandRunner,
+} from '@/gate/sequencer'
 import { recordStamp, runDomainSync } from '@/sync/engine'
 import { detectRules } from '@/gov/detect'
 import { writeChainStamp } from '@/sync/stamp'
@@ -138,6 +144,7 @@ interface AuditOptions {
   readonly root?: string
   readonly json?: boolean
   readonly gate?: boolean
+  readonly touched?: boolean
 }
 
 /** What a reader does about each way the sweep produced no reading. */
@@ -613,6 +620,10 @@ export function register(program: Command): void {
       '--gate',
       'Set 2 only for a finding in a gated folder, which the push stage reads',
     )
+    .option(
+      '--touched',
+      'Owe a ledger for each core rule the branch changed against origin/main',
+    )
     .addHelpText(
       'after',
       [
@@ -632,6 +643,9 @@ export function register(program: Command): void {
         `  asks a ledger of each rule under ${PRACTICE_FOLDERS.join(', ')}`,
         '  at governance/ledger/<folder>/<slug>.md, one table row per bullet',
         '  under a heading of the same name.',
+        `  A rule under ${CORE_FOLDERS.join(', ')} has its ledger checked where`,
+        '  one exists, and under --touched owes one once the branch changed it.',
+        '  With no baseline against main, --touched reads no rule as touched.',
         '  Any other tree reads .claude/rules/project/ alone and asks no ledger.',
         '  .claude/rules/canon/ is fixed at the toolkit source and never read',
         '  unless named. A named path resolves against --root and must sit',
@@ -654,6 +668,7 @@ export function register(program: Command): void {
         '  canon gov audit',
         '  canon gov audit .claude/rules/project/api.md',
         '  canon gov audit --json',
+        '  canon gov audit --gate --touched',
         '',
       ].join('\n'),
     )
@@ -672,7 +687,13 @@ async function runAudit(
   opts: AuditOptions,
 ): Promise<number> {
   const root = resolve(opts.root ?? process.cwd())
-  const report = await readRuleAudit(root, paths)
+  const changed = opts.touched
+    ? await collectChangedFiles(commandRunner(root))
+    : undefined
+  // An unscoped set lists nothing, and reading it as every file would owe a
+  // ledger of every core rule on a branch that touched none of them.
+  const touched = changed?.scoped ? changed.files : []
+  const report = await readRuleAudit(root, paths, { touched })
   const emitJson = opts.json ?? false
 
   if (report.kind === 'unreadable') {
@@ -690,7 +711,7 @@ async function runAudit(
     return 1
   }
 
-  reportAudit(report, root, paths.length > 0)
+  reportAudit(report, root, paths.length > 0, changed)
 
   if (emitJson) {
     process.stdout.write(
@@ -700,6 +721,9 @@ async function runAudit(
         limits: RULE_LIMITS,
         gated: RULE_GATED_FOLDERS,
         exempt: RULE_GATE_EXEMPT,
+        ...(changed === undefined
+          ? {}
+          : { touched: { scoped: changed.scoped } }),
         ...report,
       })}\n`,
     )
@@ -728,6 +752,7 @@ function reportAudit(
   report: Extract<RuleAuditReport, { kind: 'measured' }>,
   root: string,
   named: boolean,
+  changed: ChangedSet | undefined,
 ): void {
   intro('canon gov audit')
 
@@ -761,10 +786,15 @@ function reportAudit(
   }
 
   logStep('Ledgers')
+  if (changed !== undefined && !changed.scoped) {
+    logInfo(
+      'no baseline against main, so --touched reads no core rule as touched',
+    )
+  }
   if (report.scope === 'target') {
     logInfo('not read, since ledgers live in the toolkit and never ship')
   } else if (ledgers.length === 0) {
-    logInfo('every outside-practice rule has a ledger row per bullet')
+    logInfo('every rule owing a ledger has one, with a row per bullet')
   } else {
     for (const line of ledgers) logWarn(line)
   }

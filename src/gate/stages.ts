@@ -402,9 +402,9 @@ export const STAGES: readonly Stage[] = [
     checks: [
       {
         kind: 'cli',
-        argv: ['gov', 'audit', '--gate'],
+        argv: ['gov', 'audit', '--gate', '--touched'],
         failure:
-          'A rule in a gated folder is past a shape limit or short of its ledger. Run bun src/cli.ts gov audit.',
+          'A rule in a gated folder is past a shape limit or short of its ledger. Run bun src/cli.ts gov audit --touched.',
       },
     ],
   },

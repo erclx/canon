@@ -549,7 +549,7 @@ describe('the shipped stage table', () => {
     })
   })
 
-  it('should run the rule audit in gate mode right after the citations', () => {
+  it('should run the rule audit in gate mode over the touched core rules right after the citations', () => {
     const ids = STAGES.map((entry) => entry.id)
     const shape = STAGES.find((entry) => entry.id === 'rule-shape')
 
@@ -557,7 +557,7 @@ describe('the shipped stage table', () => {
     expect(shape?.checks).toEqual([
       expect.objectContaining({
         kind: 'cli',
-        argv: ['gov', 'audit', '--gate'],
+        argv: ['gov', 'audit', '--gate', '--touched'],
       }),
     ])
   })
