@@ -99,12 +99,24 @@ describe('renderDesignDoc', () => {
     )
   })
 
-  it('should declare a favicon in the head', () => {
+  it('should declare the favicon the caller passes in the head', () => {
+    const favicon = '<svg xmlns="http://www.w3.org/2000/svg"></svg>'
+    const { html } = render(
+      doc(colorTable(['| border | panel edges | #E4DCD0 |'])),
+      { favicon },
+    )
+
+    expect(html).toContain(
+      `<link rel="icon" href="data:image/svg+xml,${encodeURIComponent(favicon)}">`,
+    )
+  })
+
+  it('should declare no favicon when the caller passes none', () => {
     const { html } = render(
       doc(colorTable(['| border | panel edges | #E4DCD0 |'])),
     )
 
-    expect(html).toContain('rel="icon"')
+    expect(html).not.toContain('rel="icon"')
   })
 
   it('should show the marker beside the value rather than inside it', () => {
