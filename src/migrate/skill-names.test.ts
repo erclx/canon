@@ -8,7 +8,7 @@ import {
 
 describe('SKILL_NAME_MAP', () => {
   it('should carry one row for every renamed skill', () => {
-    expect(Object.keys(SKILL_NAME_MAP)).toHaveLength(43)
+    expect(Object.keys(SKILL_NAME_MAP)).toHaveLength(47)
   })
 
   it('should retire the prefix on every row', () => {
@@ -47,6 +47,8 @@ describe('SKILL_NAME_MAP', () => {
       ['claude-diagram', 'draft-diagram', 'draft-figure'],
       ['claude-docs', 'docs-fold'],
       ['claude-ui-test', 'ui-test'],
+      ['claude-ux-audit', 'ux-audit'],
+      ['claude-ux-measure', 'ux-measure'],
       ['canon-screencast', 'draft-screencast'],
       ['canon-slides-draft', 'draft-slides'],
       [
@@ -57,6 +59,7 @@ describe('SKILL_NAME_MAP', () => {
         'draft-wiki',
         'draft-doc',
       ],
+      ['draft-and-pick', 'pick-by-eye'],
     ])
   })
 
@@ -252,13 +255,33 @@ describe('renameText under the skill preset', () => {
     ['draft-figure', 'draw-figure'],
     ['draft-identity', 'design-identity'],
     ['draft-slides', 'make-deck'],
-    ['draft-and-pick', 'pick-by-eye'],
+    ['draft-and-pick', 'design-pick'],
     ['draft-ready', 'plan-ready'],
     ['draft-screencast', 'script-screencast'],
   ])('should rename %s for what it makes', (old, name) => {
     expect(renameText(`run canon:${old} now`, SKILL_NAME_RULES)).toBe(
       `run canon:${name} now`,
     )
+  })
+
+  it.each([
+    ['pick-by-eye', 'design-pick'],
+    ['ui-record', 'ui-film'],
+    ['ux-audit', 'ui-audit'],
+    ['ux-measure', 'ui-measure'],
+  ])('should move %s into the family its job belongs to', (old, name) => {
+    expect(renameText(`run canon:${old} now`, SKILL_NAME_RULES)).toBe(
+      `run canon:${name} now`,
+    )
+  })
+
+  it('should land every older key on a family name in one pass rather than on the name it replaced', () => {
+    expect(
+      renameText(
+        'canon:draft-and-pick, canon:claude-ux-audit, canon:claude-ux-measure',
+        SKILL_NAME_RULES,
+      ),
+    ).toBe('canon:design-pick, canon:ui-audit, canon:ui-measure')
   })
 
   it('should land the merged docs drafter on the new doc skill rather than on the retired draft-doc', () => {
@@ -362,6 +385,15 @@ describe('isExcludedPath under the skill preset', () => {
       expect(isExcludedPath(path, SKILL_NAME_RULES)).toBe(true)
     },
   )
+
+  it('should exclude a replay fixture, which records a real project tree as it was', () => {
+    expect(
+      isExcludedPath(
+        'sandbox/fixtures/replay/jobtriage/.claude/rules/canon/core/045-memory.md.fixture',
+        SKILL_NAME_RULES,
+      ),
+    ).toBe(true)
+  })
 
   it('should still move a reference left under an old draft- folder', () => {
     expect(
