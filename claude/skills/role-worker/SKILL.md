@@ -61,6 +61,7 @@ A plan carrying a `**Design references:**` section names the accepted design for
 - Take sizes, spacing, and colors from the frame HTML rather than from the image
 - Report a missing reference by its path rather than building without it
 - Leave `None identified.` as it stands and build without a reference
+- Open each `## Reference images` path from the main root before the first edit
 
 ## Scope after dispatch
 
