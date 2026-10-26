@@ -131,9 +131,9 @@ What a planning dispatch owes instead is the reverse reading, since a row planne
 
 ### One row per dispatch
 
-A session reused across a batch pays the context load once and ages its picture of the tree while it works, which is why the in-flight read sits on the task rather than the batch. One that compacts mid-batch loses the reasoning behind its earlier plans with nothing reporting it.
+A reused session pays the context load once and ages its picture of the tree, which is why the in-flight read sits on each row. One that compacts loses the reasoning behind its earlier plans unreported, so `role-planner` stops it when the operator ends it or a compaction nears.
 
-Cap a reused session where the saving is worth it and say what the cap was.
+Hold all planning of a row any talk session has said by message it is planning, a drive session included, whether by a launch or by `plan-feature` here, unless the operator asks for a cold planner. That session holds what the operator said about the row, and plans a filed row only once it is named back to it.
 
 ## Dispatch a talk session
 

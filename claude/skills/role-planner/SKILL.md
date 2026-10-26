@@ -86,10 +86,11 @@ Each finding in that file opens with the bold source-and-date label that `${CLAU
 
 ## The channel
 
-The controlling session cannot watch this one read, so two messages are owed and nothing else.
+The controlling session cannot watch this one read, so the messages below are owed and nothing else.
 
 - Announce the record as the file lands, carrying its path and what the task file got wrong. Write no summary beside it, which is a second account of a document the reader is about to open.
 - Send a block out as a message before it becomes an interactive prompt.
+- Name the handed rows still unplanned when a reused session stops under `## Lifetime`
 - Send nothing on progress, which rebuilds on this side the poll the announcement retires on the other
 
 ### Addressing
@@ -120,5 +121,6 @@ The operator being present is an assumption the launch carries. A talk planner w
 ## Lifetime
 
 - The role runs from the launch to the record landing, and the operator closes a talk session. A session handed a second row works it under the same role and reads the tree again for it.
-- A reused session's picture of the tree ages, and it nears a compaction that silently drops the reasoning behind its earlier records. Cap a reused session rather than letting it run the board.
+- A reused session's picture of the tree ages, and a compaction silently drops the reasoning behind its earlier records
+- Run the in-flight read again before each handed row, and stop when the operator ends the session or a compaction nears, telling the controller which rows are still unplanned
 - Treat this body as possibly older than the branch under it. A plugin skill loads from the marketplace cache rather than from the working tree.

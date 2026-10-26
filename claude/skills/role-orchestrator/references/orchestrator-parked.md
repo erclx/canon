@@ -95,7 +95,7 @@ A local formatter removing the shape on contact says nothing about a target runn
 
 ## The plan half
 
-Plan what the pass clears, and any `## Needs a plan` row whose only blocker is the missing plan. This pass runs while workers build and the session is idle, when planning costs the critical path nothing, and a row cleared with no plan is looked at again next pass.
+Plan what the pass clears, and any `## Needs a plan` row whose only blocker is the missing plan, skipping a row a talk session holds per `orchestrator-launch.md`. This pass runs while workers build and the session is idle, when planning costs the critical path nothing, and a row cleared with no plan is looked at again next pass.
 
 - Run `plan-feature` for each, carrying the constraint per in-flight track that `## The loop` in `role-orchestrator` requires
 - Verify each plan against the tree the way that step does, since several branches are already changing it
