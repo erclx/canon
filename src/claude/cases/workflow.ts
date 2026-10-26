@@ -161,6 +161,16 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
+      'I need real footage of the board import flow for the launch video. Film it from our app so HyperFrames can zoom in on the clicks.',
+    expect: 'ui-record',
+  },
+  {
+    prompt:
+      'Shoot the takes for the storyboard we wrote, one clip per beat of the app doing its thing.',
+    expect: 'ui-record',
+  },
+  {
+    prompt:
       'I am building this branch for another session. What am I on the hook for, and what is off limits?',
     expect: 'role-worker',
   },

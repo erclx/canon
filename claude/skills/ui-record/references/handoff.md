@@ -1,0 +1,48 @@
+---
+title: UI record handoff
+description: What HyperFrames receives from a take, the shape of the click log and camera track, and how a composition applies the camera and draws the cursor
+---
+
+# UI record handoff
+
+Read at Step 5 of `ui-record`. Canon stops at the clip, and a HyperFrames composition does the rest. This file states what the composition receives and how it uses each part, so a session composing later needs nothing from the session that filmed.
+
+## What the takes folder holds
+
+`take.json` lists every beat in plan order, with the folder, the route that filmed it, and the frame count. Each beat's folder holds three files.
+
+| File          | Holds                                                                    |
+| ------------- | ------------------------------------------------------------------------ |
+| `clip.mp4`    | H.264 at 60 fps, 3840x2160 when frame stepped, 1920x1080 when screencast |
+| `log.json`    | Every move, click, typing burst, and scroll, with each target's box      |
+| `camera.json` | One camera per frame of the clip, with the cursor and the click ring     |
+
+Every coordinate in the log and the track is in CSS pixels of a 1920x1080 page, whatever size the clip is. Every time is in milliseconds on the clip's own clock, so frame `n` sits at `n * 1000 / 60`.
+
+## The camera track
+
+Each frame carries `scale`, the view's top-left `x` and `y`, the `cursor`, and `ring`.
+
+- `scale` is 1 for the whole page and 1.8 at the deepest zoom
+- `x` and `y` place the view's corner on the page, so the view spans `1920 / scale` by `1080 / scale` from there
+- `cursor` is the pointer's position on the page
+- `ring` runs from 0 to 1 across the 450 ms after a click and is `null` otherwise
+
+The track is final. It already carries the easing, the spring, and the hold, so a composition sets each frame's values and never tweens between them.
+
+## Applying it in a composition
+
+Load `hyperframes-core` for placing the clip and `hyperframes-keyframes` for the wrapper's transform before writing the composition.
+
+1. Size a stage at 1920x1080 and place the clip inside a non-timed wrapper that fills it, with `transform-origin: 0 0`. Time the video, never the wrapper too.
+2. Drive the wrapper from the track on the composition's registered timeline, setting `scale(s) translate(-x px, -y px)` at each frame's time from the clip's start.
+3. Draw the cursor as its own element outside the wrapper, at a constant size, positioned at `(cursor.x - x) * s` and `(cursor.y - y) * s` on the stage.
+4. Draw the click ring the same way while `ring` is not null, growing and fading with its value.
+
+The cursor stays outside the wrapper because a cursor inside it would scale with the zoom, which is the reason no clip carries one.
+
+## What the composition still owns
+
+- The order and the cuts between takes, the captions, and any music or voice
+- Whether a take plays whole or trimmed. A trim keeps the track aligned only when it shifts the track by the same frames.
+- Motion blur stays off, by the operator's call on these takes
