@@ -83,14 +83,12 @@ import {
   type MergeRequest,
 } from '@/pr/merge'
 import { listWorktrees } from '@/git/worktree'
+import { branchSlug, buildDriveCopy, loadPreviewConfig } from '@/pr/drive-copy'
 import {
-  branchSlug,
-  buildDriveCopy,
   changedSince,
-  loadPreviewConfig,
   readWorktreeStatus,
   type StatusEntry,
-} from '@/pr/drive-copy'
+} from '@/git/status'
 import { machineListenerReader } from '@/listeners/machine'
 import { loadPaintedPatterns } from '@/pr/painted'
 import { LOCAL_CONFIG_REL, readHealthPaths } from '@/pr/health'
