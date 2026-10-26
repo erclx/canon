@@ -2891,6 +2891,27 @@ describe('canon pr drive-copy', () => {
     ).toBe('{"x":0}')
   })
 
+  it('should keep a declared keep path and a root-level file through a --baseline rebuild', async () => {
+    writeRepoFile(
+      'canon/config/preview.json',
+      '{"writes":["board"],"keep":["board/.run"]}',
+    )
+    const first = await runDriveCopy(['7', '--baseline'])
+    const copyRoot = String(first.record.copyRoot)
+    mkdirSync(join(copyRoot, 'board/.run'), { recursive: true })
+    writeFileSync(join(copyRoot, 'board/.run/address.json'), '{"pid":1}')
+    writeFileSync(join(copyRoot, 'server-state.json'), '{}')
+    writeFileSync(join(copyRoot, 'board/dragged.json'), '{}')
+
+    await runDriveCopy(['7', '--baseline'])
+
+    expect(
+      readFileSync(join(copyRoot, 'board/.run/address.json'), 'utf8'),
+    ).toBe('{"pid":1}')
+    expect(existsSync(join(copyRoot, 'server-state.json'))).toBe(true)
+    expect(existsSync(join(copyRoot, 'board/dragged.json'))).toBe(false)
+  })
+
   it('should land the worker, named by no number, on the copy the reviewer rebuilds', async () => {
     writeRepoFile('canon/config/preview.json', '{"writes":["board"]}')
 

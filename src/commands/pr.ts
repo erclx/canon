@@ -1306,10 +1306,16 @@ export function register(program: Command): void {
       [
         '',
         'A project names what its preview writes in',
-        '`canon/config/preview.json` as `{ "writes": [path], "env": "<NAME>" }`.',
+        '`canon/config/preview.json` as',
+        '`{ "writes": [path], "keep": [path], "env": "<NAME>" }`.',
         'Each `writes` path is relative to the worktree, and `env`, defaulting',
         'to `CANON_PREVIEW_ROOT`, is the variable the server reads for the copy',
         'root. The server resolves each declared path under that root.',
+        '',
+        'Each `keep` path sits inside a `writes` path and names state the',
+        'running server owns there, such as a run file. A rebuild leaves it in',
+        "the copy and never copies the worktree's own, so list it for a server",
+        'that writes under a declared path. The key is optional.',
         '',
         'The copy lives at `.canon/tmp/pr/review-ui/<slug>/board/` at the main',
         'worktree root, where `<slug>` is the branch with a leading type',
@@ -1317,7 +1323,10 @@ export function register(program: Command): void {
         "pull request's head, and without one it is the checkout's, so the",
         'worker starting its server before a pull request exists and the',
         'reviewer naming the number land on one copy. Every run but --check',
-        "rebuilds it from the worktree, dropping the last pass's drives.",
+        "resets each declared path from the worktree, dropping the last pass's",
+        'drives, and leaves the rest of the copy root and each `keep` path as',
+        'they are. A page added only to the copy, inside a declared path, is',
+        'wiped.',
         '',
         '--baseline records `git status` for the worktree under',
         '`.canon/tmp/pr/review-ui/<number>/`, and --check reports each path',
@@ -4485,6 +4494,7 @@ async function runDriveCopy(
       target.worktree,
       copyRoot,
       config.config.writes,
+      config.config.keep,
     )
     logStep('Copied')
     logInfo(`${config.config.env}=${copyRoot}`)
