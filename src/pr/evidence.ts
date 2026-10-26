@@ -16,6 +16,16 @@ const PREVIEW_PREFIX = '**Preview:**'
 /** How the address line names the branch's server on the operator's own machine, after any hosted segment. */
 const LOCAL_PREFIX = '**Local preview:**'
 
+/** How the reel line under the addresses opens. */
+const REEL_PREFIX = '**Reel** filmed at'
+
+/** The reel line as `renderEvidenceBody` writes it, read back for the link and the head label. */
+const REEL_LINE =
+  /^\*\*Reel\*\* filmed at `([0-9a-f]{7,40})`:<br><img src="([^"]+)"/
+
+/** The width a reel is filmed at, which it asks for in the comment. */
+const REEL_WIDTH = 960
+
 /** What joins the hosted and local segments on the one address line. */
 const ADDRESS_SEPARATOR = ' · '
 
@@ -387,6 +397,17 @@ function renderState(
   return blocks
 }
 
+/** A reel embedded in the comment, and the head it was filmed at. */
+export interface EvidenceReel {
+  readonly link: string
+  readonly head: string
+}
+
+function reelLine(reel: EvidenceReel): string {
+  const head = reel.head.slice(0, SHORT_SHA_LENGTH)
+  return `${REEL_PREFIX} \`${head}\`:<br><img src="${escapeCell(reel.link)}" width="${REEL_WIDTH}" alt="reel filmed at ${head}">`
+}
+
 export function evidenceMarker(head: string): string {
   return `${MARKER_PREFIX} head=${head} -->`
 }
@@ -412,6 +433,9 @@ export function evidenceMarker(head: string): string {
  *
  * A checklist closes the body, below the comparison it annotates, so one
  * comment carries the addresses, the screenshots, and what to look at.
+ *
+ * A reel sits on its own line under the addresses, labeled with the head it
+ * was filmed at, so a reel carried past a later push never reads as current.
  */
 export function renderEvidenceBody(
   states: readonly EvidenceState[],
@@ -421,6 +445,7 @@ export function renderEvidenceBody(
   preview?: string,
   checklist?: string,
   local?: string,
+  reel?: EvidenceReel,
 ): string {
   const segments = [
     ...(preview === undefined ? [] : [`${PREVIEW_PREFIX} ${preview}`]),
@@ -430,6 +455,7 @@ export function renderEvidenceBody(
     EVIDENCE_HEADING,
     '',
     ...(segments.length === 0 ? [] : [segments.join(ADDRESS_SEPARATOR), '']),
+    ...(reel === undefined ? [] : [reelLine(reel), '']),
   ]
   const closing =
     checklist === undefined
@@ -637,6 +663,34 @@ export function findEvidenceLocal(
 ): string | undefined {
   const marked = findMarked(comments)
   return marked === undefined ? undefined : readAddresses(marked.body).local
+}
+
+/** The reel the marked comment already embeds, with the head it was filmed at. */
+export function findEvidenceReel(
+  comments: readonly EvidenceComment[],
+): EvidenceReel | undefined {
+  const marked = findMarked(comments)
+  if (marked === undefined) return undefined
+  for (const line of marked.body.split('\n')) {
+    const match = REEL_LINE.exec(line.trim())
+    if (match?.[1] !== undefined && match[2] !== undefined) {
+      return { link: match[2].replaceAll('&amp;', '&'), head: match[1] }
+    }
+  }
+  return undefined
+}
+
+/**
+ * The reel a render embeds: a passed link, filmed at this head, replaces
+ * whatever the comment carries, and with none passed the posted reel carries
+ * forward under the head it was filmed at.
+ */
+export function nextEvidenceReel(
+  link: string | undefined,
+  head: string,
+  comments: readonly EvidenceComment[],
+): EvidenceReel | undefined {
+  return link === undefined ? findEvidenceReel(comments) : { link, head }
 }
 
 /**

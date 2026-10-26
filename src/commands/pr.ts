@@ -32,6 +32,7 @@ import {
   findEvidenceHead,
   findEvidenceLocal,
   findEvidencePreview,
+  findEvidenceReel,
   type EvidenceItem,
   type EvidenceReading,
   groupEvidence,
@@ -40,6 +41,7 @@ import {
   readChecklistBoxes,
   readOwed,
   readPngWidth,
+  nextEvidenceReel,
   renderEvidenceBody,
   settleChecklist,
 } from '@/pr/evidence'
@@ -164,6 +166,7 @@ interface EvidenceOptions extends ReadOptions {
   readonly preview?: string
   readonly checklist?: string
   readonly local?: string
+  readonly reel?: string
   readonly check?: boolean
 }
 
@@ -423,7 +426,7 @@ type EvidenceRefusal =
 
 const EVIDENCE_REFUSALS: Record<EvidenceRefusal, string> = {
   'check-writes':
-    '--check is a read and renders no body, so it takes none of --preview, --local, or --checklist. Run the check and the render as two calls.',
+    '--check is a read and renders no body, so it takes none of --preview, --local, --checklist, or --reel. Run the check and the render as two calls.',
   'gh-failed':
     'gh could not answer for this repository. Name the pull request number.',
   'unreadable-checklist':
@@ -761,6 +764,10 @@ export function register(program: Command): void {
       "Add this worktree's running server to the address line, from canon pr local",
     )
     .option(
+      '--reel <link>',
+      'Embed this reel under the address line, filmed at the head, from canon pr frames --reel',
+    )
+    .option(
       '--check',
       'Report which post-pull-request steps the thread is still owed, rendering nothing',
     )
@@ -819,6 +826,13 @@ export function register(program: Command): void {
         'comment. Together with --checklist the link and the checklist land in',
         'one comment.',
         '',
+        '--reel embeds an animated reel on its own line under the addresses,',
+        'labeled with the head this render describes as the one it was filmed',
+        'at. Without --reel, a reel the marked comment already embeds is carried',
+        'forward under the head it names, so a stale reel never reads as',
+        'current, and a passed one replaces it. Like --local it rides on a',
+        'checklist or a comparison and never opens a comment alone.',
+        '',
         "A render at a new head also resets the pull request body's UI pass",
         'line, the one `canon pr tick` writes under ## Testing, to unchecked',
         'naming that head. It touches no other body text, leaves a line already',
@@ -828,6 +842,7 @@ export function register(program: Command): void {
         'present only when that comment holds it:',
         '  preview    the hosted **Preview:** address the comment carries',
         '  local      the **Local preview:** address beside it',
+        '  reel       the embedded reel, as `link` and the `head` it was filmed at',
         '  checklist  the checklist between its delimiters, ticks included',
         '  boxes      each checklist box with its number, tick, stamp, and taste',
         '             mark, the numbering `canon pr tick` takes',
@@ -847,7 +862,7 @@ export function register(program: Command): void {
         'request changed, and the marked comment carries no **Preview:**',
         'address. A failed deploy reads the same as a skipped one.',
         'The record carries `owed` and the same marked fields. --check refuses',
-        'with --preview, --local, or --checklist as check-writes.',
+        'with --preview, --local, --checklist, or --reel as check-writes.',
         '',
         'Refusals, read off `reason`:',
         '  unreadable-checklist  --checklist named a path that could not be read,',
@@ -870,6 +885,7 @@ export function register(program: Command): void {
         '  canon pr evidence 1341 --preview https://feat-x.site.pages.dev --json',
         '  canon pr evidence 1341 --checklist .canon/tmp/handoff/ui-checklist/x.md --json',
         '  canon pr evidence 1341 --local http://localhost:5173 --json',
+        '  canon pr evidence 1341 --reel <link from canon pr frames --reel> --json',
         '  canon pr evidence 1341 --check --json',
         '',
       ].join('\n'),
@@ -2548,7 +2564,8 @@ async function runEvidence(
     isCheck &&
     (opts.preview !== undefined ||
       opts.local !== undefined ||
-      opts.checklist !== undefined)
+      opts.checklist !== undefined ||
+      opts.reel !== undefined)
   ) {
     return refuseWith(
       'check-writes',
@@ -2643,12 +2660,14 @@ async function runEvidence(
   carriedPreview = findEvidencePreview(comments)
   carriedChecklist = findEvidenceChecklist(comments)
   carriedLocal = findEvidenceLocal(comments)
+  const carriedReel = findEvidenceReel(comments)
 
   // What the marked comment already shows a reviewer, kept apart from the
   // flags this call passed so a reader learns what is posted.
   const carried = {
     ...(carriedPreview !== undefined && { preview: carriedPreview }),
     ...(carriedLocal !== undefined && { local: carriedLocal }),
+    ...(carriedReel !== undefined && { reel: carriedReel }),
     ...(carriedChecklist !== undefined && {
       checklist: carriedChecklist,
       boxes: readChecklistBoxes(carriedChecklist),
@@ -2737,6 +2756,7 @@ async function runEvidence(
 
   const preview = opts.preview ?? (isUnserved ? undefined : carriedPreview)
   const local = opts.local ?? carriedLocal
+  const reel = nextEvidenceReel(opts.reel, identity.head, comments)
   const unsettled = suppliedChecklist ?? carriedChecklist
   const checklist =
     unsettled === undefined
@@ -2752,6 +2772,7 @@ async function runEvidence(
     preview,
     checklist,
     local,
+    reel,
   )
 
   const caseCount = states.reduce((n, s) => n + s.items.length, 0)
@@ -2809,6 +2830,13 @@ async function runEvidence(
   }
   if (preview !== undefined) logInfo(`preview ${preview}`)
   if (local !== undefined) logInfo(`local preview ${local}`)
+  if (reel !== undefined) {
+    logInfo(
+      opts.reel === undefined
+        ? `reel carried forward, filmed at ${reel.head.slice(0, 7)}`
+        : 'reel embedded under the addresses',
+    )
+  }
   if (checklist !== undefined) {
     logInfo(
       suppliedChecklist === undefined
