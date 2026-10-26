@@ -12,4 +12,5 @@ rules = [
   "tasks",
   "plan",
   "markdown",
+  "background",
 ]
