@@ -269,7 +269,7 @@ export default scenario({
         '         leaving box 2 (failed) and box 3 (taste) empty on the evidence comment',
       )
       ctx.log.info(
-        'Needs:   bunx -y @playwright/cli@0.1.22 install-browser chromium, once per machine',
+        'Needs:   canon browser install-browser chromium, once per machine',
       )
       ctx.log.info(
         'Assert:  declared in fixtures/claude/review-ui/drive/expect.toml',

@@ -5,7 +5,7 @@ description: Step 5 of review-ui, which maps a checklist line to browser calls, 
 
 # Drive each box
 
-Step 5 of `review-ui`. The browser is open at the address Step 3 picked, under the session Step 4 named. Every call below goes through `${CLAUDE_SKILL_DIR}/scripts/pw.sh -s=<project>-<number>`, shortened here to `pw`.
+Step 5 of `review-ui`. The browser is open at the address Step 3 picked, under the session Step 4 named. Every call below goes through `canon browser -s=<project>-<number>`, shortened here to `pw`.
 
 ## Reading a line
 

@@ -188,7 +188,7 @@ Use `scripts/` for operations that must be deterministic or repetitive. First as
 - Use XML tags in script output for parsing: `<SECTION>content</SECTION>`
 - Guard a git or shell command a body runs inline with `2>/dev/null || echo "FALLBACK"`. A TypeScript script uses try and catch instead.
 
-The TypeScript rule governs a new script, so bash kept by decision is no breach and is not ported unasked. Examples are `review-ui`'s `scripts/pw.sh` as glue and the shell scripts the web tooling stacks ship, whose port was deferred.
+The TypeScript rule governs a new script, so bash kept by decision is no breach and is not ported unasked. An example is the shell scripts the web tooling stacks ship, whose port was deferred.
 
 ## Invocation
 

@@ -13,7 +13,7 @@
 # This arm runs by hand rather than in CI. It bills a session and needs the
 # pinned CLI's browser installed once per machine:
 #
-#   bunx -y @playwright/cli@0.1.22 install-browser chromium
+#   canon browser install-browser chromium
 
 paths = [".canon/tmp/pr/review-ui/body-*.md"]
 
