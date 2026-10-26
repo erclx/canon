@@ -7,7 +7,7 @@ metadata:
 
 # Canon feedback
 
-Format a `## Toolkit feedback` block from the current session, then open it as a GitHub issue on the toolkit repo, labeled `feedback` plus the domain label its surface type names. `canon-feedback-triage` reads that queue.
+Format a `## Toolkit feedback` block from the current session, then open it as a GitHub issue on the toolkit repo, labeled `feedback` plus the domain label its surface type names. The toolkit's maintainers triage that queue.
 
 ## Guards
 
