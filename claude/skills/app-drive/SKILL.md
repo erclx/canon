@@ -90,6 +90,15 @@ Close only on the operator's word, while the app stays up for as long as they ke
 4. Run `canon records validate intake <slug>` and fix each `structure` entry it names.
 5. Hand the operator the text of `canon/config/app-drive.toml` built from Step 1's answers, when the project carried none. Never write it, since a tracked file is the operator's or a worker's.
 
+### Planning the drive's rows
+
+Run this tail only when the operator, staying after the close, asks this session to plan the drive's rows. The session holds measurements and calls the intake records only as outcomes, so a drive the operator leaves at the close ends there.
+
+1. Answer the intake's `You:` slots with `plan-intake-answer` before any row is promoted from it.
+2. Send the controller the ready list and say this session is planning those rows, so it holds a cold planner for each.
+3. Wait for the controller to file the rows and name each back. Plan only a row named to this session, and write no task file.
+4. Plan each named row under `plan-feature`, then link it with `canon tasks plan-link` and announce it per `role-planner` before starting the next.
+
 ## Output
 
 Emit the full relative path of every file written, the drive-check `reason`, and the routing counts.
@@ -100,7 +109,7 @@ Emit the full relative path of every file written, the drive-check `reason`, and
 **Drive:** <N> goals across <P> personas, <F> findings (<B> bugs, <R> requirements conflicts, <T> taste)
 **Check:** drive-check clean, worktree removed
 
-Next: /plan-intake-answer to answer the You: slots from here, then /task-board to promote what is ready
+Next: /plan-intake-answer to answer the You: slots from here, then /task-board to promote what is ready, or ask this session to plan the rows per Planning the drive's rows
 ```
 
 ## What this delegates

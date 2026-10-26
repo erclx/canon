@@ -16,7 +16,7 @@ Nothing ties the drive to what the app is for, so a goal goes untried and nobody
 - The drive runs from a copy outside the project, and the copy is gone when the drive closes
 - Every requirements goal is driven per persona, or marked not driven with its reason
 - Every finding names its source and its severity, and carries its evidence inside the intake folder
-- The drive files one intake folder, each finding sorted as a bug, a requirements conflict, or a taste call
+- The drive files one intake folder, each finding sorted as a bug, a requirements conflict, or a taste call, and a session staying to plan its rows answers it before any row is promoted
 - `canon intake drive-check` fails a drive that skipped a goal, touched the checkout, or left evidence outside the folder
 
 ## Must not
