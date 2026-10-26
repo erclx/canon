@@ -7,6 +7,7 @@ import { regenOne } from '@/indexes/regen'
 import { rerenderRow } from '@/tasks/board'
 import { planBranch } from '@/tasks/branch'
 import { isUnder } from '@/tasks/paths'
+import { SESSION_MAP_PREFIX } from '@/records/session-map'
 import { recordDir, recordDirs } from '@/roots/record'
 
 const TASKS = 'tasks'
@@ -28,9 +29,6 @@ export const RESERVED_STEMS = [
   'backlog',
   'session',
 ] as const
-
-/** The pre-compaction handoff takes one file per session, so its stems vary. */
-const SESSION_MAP_PREFIX = 'session-'
 
 export function isReservedStem(stem: string): boolean {
   const reserved: readonly string[] = RESERVED_STEMS
