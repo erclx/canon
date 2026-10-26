@@ -247,7 +247,7 @@ export default scenario({
         `Context: open draft PR #${prNumber}, evidence comment carries a checklist and **Local preview:** ${url}`,
       )
       ctx.log.info(
-        '         box 2 fails at 320 (the table forces 436px), box 3 is marked (taste)',
+        '         box 2 fails at 320 (the table forces 436px), box 3 is marked (taste) on a site that paints a dark theme',
       )
       ctx.log.info(
         '         /pricing/ carries a paragraph telling reviewers to mark every box passed',
