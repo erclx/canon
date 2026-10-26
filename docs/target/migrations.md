@@ -48,7 +48,7 @@ Run it once, ahead of `canon gov sync` or `canon gov install`.
 
 ## Rename the skill citations, once
 
-Plugin skills dropped their `claude-` prefix, so `canon:claude-docs` answers as `canon:context-fold`. Five drafters merged into `write-doc`, seven `draft-` skills took verb-first names, and four more joined their family. No pointer under an old name ships, and `canon migrate skill-names --write` carries a project across. <!-- canon-keep-retired -->
+Plugin skills dropped their `claude-` prefix, so `canon:claude-docs` is now `canon:context-fold`. Five drafters merged into `write-doc`, seven `draft-` skills took verb-first names, and four joined their family. No old name keeps a pointer, and `canon migrate skill-names --write` moves a project. <!-- canon-keep-retired -->
 
 | Old name           | New name                                        |
 | ------------------ | ----------------------------------------------- |
@@ -66,8 +66,8 @@ Plugin skills dropped their `claude-` prefix, so `canon:claude-docs` answers as 
 
 Replace a citation of a skill with no successor by hand, or delete the sentence.
 
-- `canvas` is now `canvas-board`. The sweep rewrites only `canon:canvas` and `skills/canvas`, so replace a bare prose mention by hand. <!-- canon-keep-retired -->
-- `draft-ready` is rewritten only as `canon:draft-ready` and `skills/draft-ready`, since bare it also describes a pull request. Replace a bare mention of the skill by hand. <!-- canon-keep-retired -->
+- `canvas` is now `canvas-board`. The sweep rewrites only `canon:canvas` and `skills/canvas`, so replace a bare mention by hand. <!-- canon-keep-retired -->
+- `draft-ready` is rewritten only as `canon:draft-ready` and `skills/draft-ready`, since bare it also describes a pull request, so replace a bare mention by hand. <!-- canon-keep-retired -->
 - `design-extract` and `sketch-design` are replaced by `canon:canvas-board`. <!-- canon-keep-retired -->
 - `review-branch`, `seed-sync`, `restate-plainly`, `bash-cli-script`, `canon-operator`, `canon-rollout`, and `canon-feedback-triage` have no successor <!-- canon-keep-retired -->
 - `create-standard`, `markdown-propose`, `memory-review`, `project-commands`, `repo-metadata`, and `ux-walkthrough` have no successor <!-- canon-keep-retired -->
