@@ -7,8 +7,8 @@ import { GATED_CONFIG_REL, gateScopeRoots } from '@/markdown/gated'
 export type RunFactory = (args: readonly string[]) => () => Promise<boolean>
 
 /**
- * States the same fact as `docs/target/migrations.md`'s backup section in its
- * own words. Keep the two in step by hand; nothing compares them.
+ * States the same fact as `docs/target/migrations-by-hand.md`'s backup section
+ * in its own words. Keep the two in step by hand; nothing compares them.
  */
 const RECORDS_SETUP_NOTICE =
   "No private repository to push to yet. Run 'canon records push' once one exists to print the one-time setup command, or --skip records to silence this."

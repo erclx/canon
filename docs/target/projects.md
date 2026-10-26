@@ -84,7 +84,7 @@ Install one domain without re-running `canon init`.
 - A project-specific rule: invoke `canon:create-rule`, which writes into `.claude/rules/project/`. A rule under `.claude/rules/canon/` is deleted on the next sync.
 - An `index.md` system for a markdown-heavy folder: invoke `canon:target-setup indexes`
 
-For a leftover `.claude/snippets/` see [target migrations](migrations.md).
+For a leftover `.claude/snippets/` see [target migrations by hand](migrations-by-hand.md).
 
 ## Sync upstream drift
 
