@@ -6,6 +6,10 @@ Read before the first `frameboard` verb a `design-pick` run sends. It carries wh
 
 Resolve `<board>` and `<project>` from the `board` and `project` keys of `canon/config/design.toml`, read at the main worktree root per `${CLAUDE_SKILL_DIR}/references/design-config.md`. A missing file or key falls back to `.canon/board/` and `picks`.
 
+- Stop before starting a board when `<board>` came from that fallback, `.canon/board/` is absent, and `.canon/canvas/` exists
+- Report `❌ The board is still at .canon/canvas/. Run canon migrate record-layout --write, then re-run.` on that stop
+- A board started there drafts on an empty page set and leaves the migration a standing collision
+
 Resolve `<board>` against the main worktree root, the way `session-worktree` resolves it, since a linked worktree holds no copy of the gitignored folder.
 
 - Pass `--root <board> --project <project> --json` to every verb unless the step says otherwise, so no verb relies on the only-project default
