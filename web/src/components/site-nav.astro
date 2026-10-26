@@ -1,4 +1,6 @@
 ---
+import mark from '../../../assets/brand/mark.svg?raw'
+import { FAVICON_COLORS } from '../../../src/design/favicon'
 import { nav } from '../content/copy'
 import { isPublished, readSession } from '../lib/session'
 
@@ -13,29 +15,24 @@ import { isPublished, readSession } from '../lib/session'
  * registry's latest matches the version this build carries, and an
  * unreachable registry reads as unconfirmed rather than as a match.
  *
- * The mark is inlined rather than linked so it inherits `currentColor`, which
- * is the whole reason `assets/brand/mark.svg` keeps that fill.
+ * The mark is inlined from its source rather than linked, so the c inherits
+ * the bar's ink through `currentColor`, which is the whole reason
+ * `assets/brand/mark.svg` keeps that fill. The pip takes the mark's own pair
+ * rather than `--color-accent`, since identity is none of the accent's uses.
  */
+const glyph = mark.replace(/<!--[\s\S]*?-->/, '').trim()
 const { version } = readSession()
 const published = await isPublished(version)
 ---
 
 <header class="nav">
   <div class="bar">
-    <a href="#top" class="logo">
-      <svg
-        viewBox="15 15 70 70"
-        width="15"
-        height="15"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <path
-          d="M34,20 L15,28 L15,72 L34,80 Z M66,20 L85,28 L85,72 L66,80 Z"
-          fill="currentColor"></path>
-        <rect x="44" y="15" width="12" height="70" rx="2" fill="currentColor"
-        ></rect>
-      </svg>
+    <a
+      href="#top"
+      class="logo"
+      style={`--pip-dark: ${FAVICON_COLORS.pip.dark}; --pip-light: ${FAVICON_COLORS.pip.light}`}
+    >
+      <span class="glyph" aria-hidden="true" set:html={glyph} />
       <span>{nav.mark}</span>
     </a>
     <a
@@ -107,8 +104,21 @@ const published = await isPublished(version)
     text-decoration: none;
   }
 
-  .logo svg {
-    color: var(--mark);
+  .glyph {
+    display: flex;
+  }
+
+  .glyph :global(svg) {
+    width: 18px;
+    height: 18px;
+  }
+
+  .glyph :global(.pip) {
+    fill: var(--pip-dark);
+  }
+
+  :global([data-theme='light']) .glyph :global(.pip) {
+    fill: var(--pip-light);
   }
 
   .version {
