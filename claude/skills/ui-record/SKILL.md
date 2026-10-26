@@ -25,6 +25,7 @@ Write inside `.canon/video/<slug>/` at the main worktree root, where `<slug>` na
 - Prefix every `.canon/video/<slug>/` path below with that root when running from a linked worktree
 - Write `plan.json` through the whole-file route `${CLAUDE_SKILL_DIR}/../session-worktree/references/main-root-writes.md` states, since `Write` refuses a main-root path from a linked worktree
 - `canon records push` backs the workspace up without its media
+- Pull request mode writes to scratch instead, as `pr-clip.md` states
 
 The throwaway copy Step 1 may build sits outside the repository and is removed at the close.
 

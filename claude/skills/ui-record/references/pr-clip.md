@@ -25,7 +25,7 @@ The mode holds only while the caller names it. An ordinary run that finds a pull
 - Skip Step 1's throwaway copy. Film the address the caller passed, joined to the config's `access` value, and start no server.
 - Skip Step 2's approval. The beats come from a checklist a reviewer already reads, and the still check below is the guard against posting a wrong take.
 - Skip Step 5's handoff and its output block, since the reel is the product and HyperFrames composes nothing here
-- Keep the write scope, `.canon/tmp/ui-record/pr-<number>/` at the current worktree's root
+- Write inside `.canon/tmp/ui-record/pr-<number>/` at the current worktree's root in place of the video workspace, since a reel is thrown away once posted
 - Ask nothing at any step. Every stop below is a skip with a reason, since the ship chain runs this with nobody to answer.
 
 ## Choose the beats
