@@ -211,6 +211,23 @@ describe('splitPlanSections', () => {
     ])
   })
 
+  it('should open Reference images on its heading', () => {
+    const sections = splitPlanSections(
+      [
+        '## Reference images',
+        '',
+        '- `.canon/board/frames/empty.png`: the shaped frame',
+        '',
+      ].join('\n'),
+    )
+
+    expect(sections.get('Reference images')).toEqual([
+      '',
+      '- `.canon/board/frames/empty.png`: the shaped frame',
+      '',
+    ])
+  })
+
   it('should not open a section on a deeper heading of the same name', () => {
     const sections = splitPlanSections(
       ['## Summary', '', '### Risks', '', '- nested', ''].join('\n'),
@@ -446,27 +463,6 @@ describe('checkPlan', () => {
       )
 
       expect(checkPlan('feature-a-b.md', body)).toEqual([])
-    })
-
-    it('should key the heading so its bullets stay out of Files to touch', () => {
-      const sections = splitPlanSections(
-        [
-          '**Files to touch:**',
-          '',
-          '- `a.ts`: a reason',
-          '',
-          '## Reference images',
-          '',
-          '- `.canon/board/frames/empty.png`: the shaped frame',
-          '',
-        ].join('\n'),
-      )
-
-      expect(sections.get('Reference images')).toEqual([
-        '',
-        '- `.canon/board/frames/empty.png`: the shaped frame',
-        '',
-      ])
     })
   })
 
