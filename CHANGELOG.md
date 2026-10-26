@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.67.0](https://github.com/erclx/canon/compare/v5.66.0...v5.67.0) (2026-10-26)
+
+
+### Features
+
+* **browser:** add a canon browser verb over the pinned agent CLI ([#2728](https://github.com/erclx/canon/issues/2728)) ([623bbf6](https://github.com/erclx/canon/commit/623bbf6532ba52eabf546a4c36d39879c90018b9))
+* **claude:** add an app-drive skill with a drive-check verb ([#2733](https://github.com/erclx/canon/issues/2733)) ([9aa11d6](https://github.com/erclx/canon/commit/9aa11d695289a865f6feea86403d753ae0ecd9d5))
+* **pr:** reset the drive copy per path and keep server state ([#2732](https://github.com/erclx/canon/issues/2732)) ([8b3e055](https://github.com/erclx/canon/commit/8b3e055fdaff10a4d0bf9a137d5d17012cccb50f))
+* **records:** cap the session map and bound orchestrator decisions ([#2726](https://github.com/erclx/canon/issues/2726)) ([f03a567](https://github.com/erclx/canon/commit/f03a5673edbe89deb9c8cd769037405bf3c0301c))
+* **take:** film a web app with a click log and camera track ([#2737](https://github.com/erclx/canon/issues/2737)) ([0b2b572](https://github.com/erclx/canon/commit/0b2b572afb137859eec054df66462478b8b5ce4d))
+
 ## [5.66.0](https://github.com/erclx/canon/compare/v5.65.0...v5.66.0) (2026-10-25)
 
 
