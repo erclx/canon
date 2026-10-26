@@ -25,7 +25,7 @@ Reads the project's config, runs a subject's reader over each route in the brows
 
 The browser helpers and the step driver sit beside the walk.
 
-- `src/browser/` owns the engine helpers every browser-driving command needs
+- `src/browser/` owns the engine helpers every browser-driving command needs, and the pin and argument rewrite behind `canon browser`, the agent CLI `review-ui` drives through
 - `src/driver/` owns `canon drive`, which runs a plan of steps and probes against a running page for `pick-by-eye` and `review-ui`
 
 ## Gotchas
