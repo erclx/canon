@@ -20,6 +20,17 @@ Write the log to `evidence/drive-log.md` inside the intake folder, one line per 
 - `<result>` carries the number read off the page or the app when the claim has one, such as `scrollWidth 436 against clientWidth 320`
 - A goal tried and passed takes a line too, as `[pass] [goal]`, so the next drive can tell a goal checked from one skipped
 
+### Operator images
+
+Operator images count as evidence on arrival. One showing a finding takes that finding's number and is cited from that finding's line, while one no finding cites yet is a reference shot with a log line of its own.
+
+```plaintext
+- ref-<nn>. [operator] <what the image shows>. Evidence: evidence/ref-<nn>-<name>.png
+```
+
+- `ref-<nn>` numbers reference shots apart from findings, so a later finding citing one keeps the path it already has
+- Keep the pasted file's own extension when it is not a PNG
+
 ## Severity
 
 Each finding takes one level, judged by what the persona loses.
@@ -52,7 +63,7 @@ Write it to the intake folder root before the close. `canon intake drive-check` 
 
 - `goals` holds one entry per `## Goals` bullet, with the bullet's text. A bold label and a trailing period may stay or go, since the check strips both.
 - `status` is `driven` or `not-driven`, and a `not-driven` entry carries the `reason` the goal could not be reached
-- `evidence` lists every frame a finding cites, each a path under `evidence/` relative to the intake folder
+- `evidence` lists every frame a finding cites and every image the operator pasted, reference shots included, each a path under `evidence/` relative to the intake folder
 - `worktree` is the throwaway worktree's path, which the check fails on while it still exists
 
 ### What the check fails

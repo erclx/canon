@@ -53,9 +53,9 @@ Run `canon pr drive-copy --json` before starting `dev`. On `copied`, start it wi
 
 A hand-run `git-ship` or `git-pr` starts no server, since only a worker has a lifetime to own one.
 
-### Building against a design reference
+### Building against design references and images
 
-A plan carrying a `**Design references:**` section names the accepted design for the surface it changes. Open it before building, since the build matches it and a worker that reads the dark image alone ships a light theme nobody saw.
+A plan's `## Design references` names the accepted design per surface, and `## Reference images` names images it was shaped against by main-root path. Either can appear alone. Open both before building, since a worker reading the dark image alone ships a light theme nobody saw.
 
 - Open each cited folder's light and dark images and its frame HTML before the first edit to that surface
 - Take sizes, spacing, and colors from the frame HTML rather than from the image

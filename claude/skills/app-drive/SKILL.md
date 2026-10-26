@@ -61,6 +61,7 @@ A drive reaches the app the way its personas do, through the page or through the
 Append each finding to the drive log as it happens, never batched at the end, since a compaction drops what chat alone holds.
 
 - Move each frame a finding cites from scratch into the intake folder's `evidence/`, and cite it by that path
+- Copy each image the operator pastes into `evidence/` in the turn its message arrives, under its finding's number, or under a `ref-` prefix when no finding cites it yet
 - Keep the measured number beside the claim in the log, never only in chat
 - Write `drive.json` into the intake folder in the shape `drive-record.md` sets, with one entry per goal
 

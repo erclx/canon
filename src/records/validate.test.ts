@@ -185,6 +185,49 @@ describe('splitPlanSections', () => {
     ])
   })
 
+  it('should open Reference images on its bold label and close the section above', () => {
+    const sections = splitPlanSections(
+      [
+        '**Files to touch:**',
+        '',
+        '- `a.ts`: a reason',
+        '',
+        '**Reference images:**',
+        '',
+        '- `.canon/intake/01-drive/evidence/ref-01.png`: the empty state',
+        '',
+      ].join('\n'),
+    )
+
+    expect(sections.get('Files to touch')).toEqual([
+      '',
+      '- `a.ts`: a reason',
+      '',
+    ])
+    expect(sections.get('Reference images')).toEqual([
+      '',
+      '- `.canon/intake/01-drive/evidence/ref-01.png`: the empty state',
+      '',
+    ])
+  })
+
+  it('should open Reference images on its heading', () => {
+    const sections = splitPlanSections(
+      [
+        '## Reference images',
+        '',
+        '- `.canon/board/frames/empty.png`: the shaped frame',
+        '',
+      ].join('\n'),
+    )
+
+    expect(sections.get('Reference images')).toEqual([
+      '',
+      '- `.canon/board/frames/empty.png`: the shaped frame',
+      '',
+    ])
+  })
+
   it('should not open a section on a deeper heading of the same name', () => {
     const sections = splitPlanSections(
       ['## Summary', '', '### Risks', '', '- nested', ''].join('\n'),
@@ -403,6 +446,23 @@ describe('checkPlan', () => {
       expect(bullets('Current behavior')).toEqual([
         '- `canon indexes list --json`: lists every context entry',
       ])
+    })
+  })
+
+  describe('Reference images', () => {
+    it('should pass a plan carrying the section as a heading', () => {
+      const body = conformingPlan().replace(
+        '**Verification:**',
+        [
+          '## Reference images',
+          '',
+          '- `.canon/intake/01-drive/evidence/ref-01.png`: the empty state',
+          '',
+          '**Verification:**',
+        ].join('\n'),
+      )
+
+      expect(checkPlan('feature-a-b.md', body)).toEqual([])
     })
   })
 
