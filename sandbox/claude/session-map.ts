@@ -66,7 +66,35 @@ export default scenario({
         'arm names one, since routing is settled and the steps are not.',
       )
       ctx.log.info('')
-      ctx.log.info('Action:  /canon:session-map')
+      ctx.log.info(
+        'The prompt states the reasoning, since a cold sandbox holds none of its',
+      )
+      ctx.log.info(
+        "own and the skill's decline guard answers a session that holds nothing",
+      )
+      ctx.log.info(
+        'git does not. It carries one mistake and one caution and no tree fact,',
+      )
+      ctx.log.info(
+        'so the export.ts block still proves the session read the tree.',
+      )
+      ctx.log.info('')
+      ctx.log.info(
+        'Action:  /canon:session-map we are about to compact. I lost twenty minutes',
+      )
+      ctx.log.info(
+        '         checking the export with curl against port 3000, which serves the',
+      )
+      ctx.log.info(
+        "         main checkout rather than this branch, so start this branch's server",
+      )
+      ctx.log.info(
+        '         on its own port first. bun run check is lint and typecheck only, so',
+      )
+      ctx.log.info(
+        '         a green check says nothing about whether a quoted title survives',
+      )
+      ctx.log.info('         toCsv.')
       ctx.log.info(
         'Expect:  declared in fixtures/claude/session-map/expect.toml',
       )
