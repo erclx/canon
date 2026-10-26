@@ -95,7 +95,7 @@ Close only on the operator's word, while the app stays up for as long as they ke
 Run this tail only when the operator, staying after the close, asks this session to plan the drive's rows. The session holds measurements and calls the intake records only as outcomes, so a drive the operator leaves at the close ends there.
 
 1. Answer the intake's `You:` slots with `plan-intake-answer` before any row is promoted from it.
-2. Send the controller the ready list and say this session is planning those rows, so it holds a cold planner for each.
+2. Send the controller the ready list, naming no item whose `You:` slot is still open, and say this session is planning those rows, so it holds a cold planner for each.
 3. Wait for the controller to file the rows and name each back. Plan only a row named to this session, and write no task file.
 4. Plan each named row under `plan-feature`, then link it with `canon tasks plan-link` and announce it per `role-planner` before starting the next.
 
