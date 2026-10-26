@@ -133,7 +133,7 @@ What a planning dispatch owes instead is the reverse reading, since a row planne
 
 A reused session pays the context load once and ages its picture of the tree, which is why the in-flight read sits on each row. One that compacts loses the reasoning behind its earlier plans unreported, so `role-planner` stops it when the operator ends it or a compaction nears.
 
-Hold the planning launch for a row any talk session has said by message it is planning, a drive session included, unless the operator asks for a cold planner. That session holds what the operator said about the row, and plans a filed row only once it is named back to it.
+Hold all planning of a row any talk session has said by message it is planning, a drive session included, whether by a launch or by `plan-feature` here, unless the operator asks for a cold planner. That session holds what the operator said about the row, and plans a filed row only once it is named back to it.
 
 ## Dispatch a talk session
 
