@@ -1,3 +1,4 @@
+import { FAVICON_COLORS, renderFavicon } from '@/design/favicon'
 import type { GovCatalog } from '@/gov/list'
 import type { StackSummary } from '@/tooling/list'
 
@@ -156,18 +157,15 @@ function lightTokens(tokenCss: string): string {
   ].join('\n')
 }
 
-function faviconUri(markSvg: string, tokenCss: string): string {
-  const accent = tokenCss.match(/--color-accent:\s*(#[0-9a-fA-F]{3,8})/)
-  if (!accent) {
+/** The favicon the web page serves, so the hero's tab matches it rather than the accent. */
+function faviconUri(markSvg: string): string {
+  try {
+    return `data:image/svg+xml,${encodeURIComponent(renderFavicon(markSvg, FAVICON_COLORS))}`
+  } catch (error) {
     throw new FrameError(
-      'token css carries no --color-accent value, refusing to write a colorless favicon',
+      `assets/brand/mark.svg cannot be drawn as a favicon: ${error instanceof Error ? error.message : String(error)}`,
     )
   }
-  const svg = markSvg
-    .replace(/<!--[\s\S]*?-->/, '')
-    .trim()
-    .replaceAll('currentColor', accent[1])
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`
 }
 
 /**
@@ -278,7 +276,8 @@ export function buildFrameValues(catalogs: FrameCatalogs): FrameValues {
     TOOLING_STACK_COUNT: String(toolingStacks.length),
     COMMAND_COUNT: String(catalogs.commandCount),
     MARK_SVG: markSvg,
-    FAVICON: faviconUri(markSvg, tokenCss),
+    MARK_PIP: FAVICON_COLORS.pip.dark,
+    FAVICON: faviconUri(markSvg),
     SKILL_ENTRIES: markup(featured(skills, FEATURED_SKILLS)),
     RULE_ENTRIES: markup(sample(deliveredRules)),
     SKILL_MORE: remaining(skills),

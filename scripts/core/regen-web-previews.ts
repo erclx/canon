@@ -8,6 +8,7 @@
  * `<main>`.
  */
 import { readFileSync } from 'node:fs'
+import { FAVICON_COLORS, renderFavicon } from '@/design/favicon'
 import { DESIGN_DOCUMENT } from '@/design/regen'
 import { renderDesignDoc } from '@/design/render'
 
@@ -16,7 +17,13 @@ const root = new URL('../..', import.meta.url).pathname
 const { cssPath } = renderDesignDoc(
   `${root}${DESIGN_DOCUMENT}`,
   `${root}web/public/previews/design-tokens`,
-  { embedFonts: true },
+  {
+    embedFonts: true,
+    favicon: renderFavicon(
+      readFileSync(`${root}assets/brand/mark.svg`, 'utf8'),
+      FAVICON_COLORS,
+    ),
+  },
 )
 
 const css = readFileSync(cssPath, 'utf8')

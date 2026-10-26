@@ -1,8 +1,8 @@
 <div align="center">
 
 <picture>
- <source media="(prefers-color-scheme: dark)" srcset="assets/brand/mark-accent.svg">
- <img src="assets/brand/mark-accent-light.svg" alt="canon" width="56" height="56">
+ <source media="(prefers-color-scheme: dark)" srcset="assets/brand/mark-color.svg">
+ <img src="assets/brand/mark-color-light.svg" alt="canon" width="56" height="56">
 </picture>
 
 # canon

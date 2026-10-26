@@ -9,6 +9,7 @@ import {
   fillTemplate,
   sample,
 } from '@/capture/frame-values'
+import { FAVICON_COLORS } from '@/design/favicon'
 
 const TOKEN_CSS = [
   ':root {',
@@ -18,7 +19,8 @@ const TOKEN_CSS = [
   '}',
 ].join('\n')
 
-const MARK = '<svg><!-- note --><path fill="currentColor"/></svg>'
+const MARK =
+  '<svg viewBox="0 0 110 110"><!-- note --><path fill="currentColor"/><rect class="pip" fill="#c2380e"/></svg>'
 
 const names = (count: number): string[] =>
   Array.from({ length: count }, (_, i) => `name-${String(i).padStart(2, '0')}`)
@@ -119,10 +121,24 @@ describe('buildFrameValues', () => {
     ])
   })
 
-  it('should paint the favicon with the accent', () => {
+  it('should paint the favicon in the mark pairs rather than the accent', () => {
     const { values } = buildFrameValues(makeCatalogs())
 
-    expect(decodeURIComponent(values.FAVICON)).toContain('fill="#abcdef"')
+    const svg = decodeURIComponent(values.FAVICON)
+    expect(svg).toContain(`.pip { fill: ${FAVICON_COLORS.pip.dark}; }`)
+    expect(svg).not.toContain('#abcdef')
+  })
+
+  it('should hand the hero the dark pip, since the hero stays dark', () => {
+    const { values } = buildFrameValues(makeCatalogs())
+
+    expect(values.MARK_PIP).toBe(FAVICON_COLORS.pip.dark)
+  })
+
+  it('should refuse a mark the favicon cannot be drawn from', () => {
+    expect(() =>
+      buildFrameValues(makeCatalogs({ markSvg: '<svg><path/></svg>' })),
+    ).toThrow(FrameError)
   })
 })
 

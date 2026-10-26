@@ -52,7 +52,8 @@ Holds the two workflows that build and check the page.
 Two folders outside `web/` shape what the page renders and captures.
 
 - `src/design/` owns the tokens `web/` reads, and `canon/context/features/design.md` covers it
-- `scripts/core/regen-web-favicon.ts` writes `web/public/favicon.svg` from the mark, and does not symlink it since a favicon loads with no CSS context and `currentColor` paints black
+- `scripts/core/regen-web-favicon.ts` writes `web/public/favicon.svg`, the mark on a tile, and the README `mark-color` pair, since an image has no CSS context and `currentColor` paints black
+- The nav and the card inline the mark and color its pip from `FAVICON_COLORS`, never `--color-accent`
 - `tooling/web/configs/e2e/` owns the screenshot harness, which creates its context with reduced motion and scrolls each section into view before it shoots
 
 ## Gotchas
