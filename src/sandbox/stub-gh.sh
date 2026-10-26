@@ -13,7 +13,7 @@ pr)
     count="$(cat "$dir/pr-count" 2>/dev/null || echo 0)"
     count=$((count + 1))
     echo "$count" >"$dir/pr-count"
-    echo "https://github.com/stub-org/canon-sandbox/pull/$count"
+    echo "https://github.com/$GITHUB_ORG/$STUB_GH_REPO/pull/$count"
     exit 0
     ;;
   close | list) exit 0 ;;
