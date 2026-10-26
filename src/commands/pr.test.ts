@@ -11,6 +11,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { execa, execaSync, type ResultPromise } from 'execa'
+import { PNG } from 'pngjs'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { countEvidenceCases, renderEvidenceBody } from '@/pr/evidence'
 
@@ -974,6 +975,61 @@ describe('canon pr evidence reads the pull request', () => {
 
       expect(record.body).toContain('width="1000" alt="photo head"')
       expect(record).not.toHaveProperty('widthUnread')
+    })
+  })
+
+  describe('pixel comparison', () => {
+    function writePng(ref: string, name: string, gray: number): void {
+      const image = new PNG({ width: 32, height: 32 })
+      image.data.fill(gray)
+      mkdirSync(join(tempDir, 'img'), { recursive: true })
+      writeFileSync(
+        join(tempDir, 'img', `${ref}-${name}`),
+        PNG.sync.write(image),
+      )
+    }
+
+    function firstItem(record: Record<string, unknown>): unknown {
+      const states = record.states as { items: unknown[] }[]
+      return states[0]?.items[0]
+    }
+
+    it('should fold a modified pair whose pixels match', async () => {
+      writeFixture('files.tsv', 'modified\tevidence/dark/nav.png\n')
+      writeFixture('head', 'deadbeef')
+      writeFixture('merge-base', 'cafe01')
+      writePng('cafe01', 'nav.png', 255)
+      writePng('deadbeef', 'nav.png', 255)
+
+      const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+      expect(firstItem(record)).toMatchObject({ withinTolerance: true })
+      expect(record.body).toContain('<summary>Within tolerance (1)</summary>')
+    })
+
+    it('should leave a modified pair whose pixels moved open', async () => {
+      writeFixture('files.tsv', 'modified\tevidence/dark/nav.png\n')
+      writeFixture('head', 'deadbeef')
+      writeFixture('merge-base', 'cafe01')
+      writePng('cafe01', 'nav.png', 255)
+      writePng('deadbeef', 'nav.png', 0)
+
+      const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+      expect(firstItem(record)).toMatchObject({ withinTolerance: false })
+      expect(record.body).not.toContain('Within tolerance')
+    })
+
+    it('should omit the verdict when the base read fails', async () => {
+      writeFixture('files.tsv', 'modified\tevidence/dark/nav.png\n')
+      writeFixture('head', 'deadbeef')
+      writeFixture('merge-base', 'cafe01')
+      writePng('deadbeef', 'nav.png', 255)
+
+      const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+      expect(firstItem(record)).not.toHaveProperty('withinTolerance')
+      expect(record.widthUnread).toEqual(['base:evidence/dark/nav.png'])
     })
   })
 
