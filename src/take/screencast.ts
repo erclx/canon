@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { chromium } from 'playwright-core'
-import { probeFrames, transcode } from '@/take/encode'
+import { lastFrame, probeFrames, transcode } from '@/take/encode'
 import { FPS, type LogEvent, START, VIEWPORT } from '@/take/log'
 import { type PointerInput, type Stage, performSteps } from '@/take/perform'
 import type { Beat } from '@/take/plan'
@@ -22,6 +22,8 @@ const SETTLE_MS = 2500
 export interface ScreencastTake {
   readonly frames: number
   readonly events: readonly LogEvent[]
+  /** The clip's closing frame as a JPEG. */
+  readonly still: Buffer
 }
 
 export async function filmScreencast(request: {
@@ -71,7 +73,8 @@ export async function filmScreencast(request: {
     await page.screencast.stop()
 
     await transcode(webm, request.clip, FPS)
-    return { frames: await probeFrames(request.clip), events }
+    const frames = await probeFrames(request.clip)
+    return { frames, events, still: await lastFrame(request.clip, frames) }
   } finally {
     await browser.close()
     rmSync(scratch, { recursive: true, force: true })

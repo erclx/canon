@@ -46,6 +46,8 @@ export class StepperStalled extends Error {
 export interface SteppedTake {
   readonly frames: number
   readonly events: readonly LogEvent[]
+  /** The last frame encoded, as the JPEG the shell returned. */
+  readonly still: Buffer
 }
 
 export interface SteppedRequest {
@@ -140,7 +142,8 @@ export async function filmStepped(
     await recording.hold(HOLD_MS)
 
     await encoder.close()
-    return { frames, events }
+    if (!last) throw new Error('the take encoded no frame')
+    return { frames, events, still: last }
   } catch (error) {
     encoder.abort()
     throw error

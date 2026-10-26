@@ -154,6 +154,43 @@ export async function probeFrames(clip: string): Promise<number> {
   return frames
 }
 
+/**
+ * Reads the clip's closing frame as one JPEG. It selects the frame by index
+ * rather than seeking from the end, since a seek lands on whichever frame
+ * the container's timing puts nearest, which was measured missing the last.
+ */
+export async function lastFrame(clip: string, frames: number): Promise<Buffer> {
+  const proc = spawn(
+    'ffmpeg',
+    [
+      '-v',
+      'error',
+      '-i',
+      clip,
+      '-vf',
+      `select=eq(n\\,${frames - 1})`,
+      '-frames:v',
+      '1',
+      '-q:v',
+      '2',
+      '-f',
+      'image2pipe',
+      '-c:v',
+      'mjpeg',
+      '-',
+    ],
+    { stdio: ['ignore', 'pipe', 'pipe'] },
+  )
+  const chunks: Buffer[] = []
+  proc.stdout?.on('data', (chunk: Buffer) => chunks.push(chunk))
+  await finished(proc)
+  const jpeg = Buffer.concat(chunks)
+  if (jpeg.length === 0) {
+    throw new Error(`ffmpeg read no frame ${frames - 1} from ${clip}`)
+  }
+  return jpeg
+}
+
 function finished(proc: ChildProcess): Promise<void> {
   let stderr = ''
   proc.stderr?.on('data', (chunk: Buffer) => {

@@ -21,8 +21,8 @@ paths = [
   ".canon/tmp/ui-record/*/takes/02-*/clip.mp4",
   ".canon/tmp/ui-record/*/takes/02-*/log.json",
   ".canon/tmp/ui-record/*/takes/02-*/camera.json",
-  ".canon/tmp/ui-record/*/stills/01-*.png",
-  ".canon/tmp/ui-record/*/stills/02-*.png",
+  ".canon/tmp/ui-record/*/takes/01-*/still.jpg",
+  ".canon/tmp/ui-record/*/takes/02-*/still.jpg",
 ]
 
 # The throwaway copy Step 1 adds is gone. The copy itself sits under /tmp,
