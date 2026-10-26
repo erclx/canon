@@ -581,6 +581,135 @@ describe('renderEvidenceBody', () => {
     })
   })
 
+  describe('within tolerance', () => {
+    function folded(path: string, stem: string): EvidenceItem {
+      return { path, stem, added: false, withinTolerance: true }
+    }
+
+    function moved(path: string, stem: string): EvidenceItem {
+      return { path, stem, added: false, withinTolerance: false }
+    }
+
+    it('should fold matched cases into one closed block after every state and before the checklist', () => {
+      const body = renderEvidenceBody(
+        [
+          {
+            state: 'dark',
+            items: [
+              folded('evidence/dark/a.png', 'a'),
+              moved('evidence/dark/b.png', 'b'),
+            ],
+          },
+          {
+            state: 'light',
+            items: [folded('evidence/light/a.png', 'a')],
+          },
+        ],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+        undefined,
+        '- [ ] look',
+      )
+
+      const lightBlock = body.indexOf('<summary>light')
+      const foldBlock = body.indexOf(
+        '<details>\n<summary>Within tolerance (2)</summary>',
+      )
+      const checklist = body.indexOf('## What to look at')
+      expect(body).toContain('<summary>dark (1)</summary>')
+      expect(lightBlock).toBe(-1)
+      expect(foldBlock).toBeGreaterThan(body.indexOf('<summary>dark (1)'))
+      expect(checklist).toBeGreaterThan(foldBlock)
+    })
+
+    it('should label each folded case by its state and view', () => {
+      const body = renderEvidenceBody(
+        [
+          {
+            state: 'dark',
+            items: [
+              folded('evidence/dark/home-light-1280.png', 'home-light-1280'),
+              folded('evidence/dark/stray.png', 'stray'),
+            ],
+          },
+          { state: '', items: [folded('evidence/root.png', 'root')] },
+        ],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+      )
+
+      expect(body).toContain('**dark / home · 1280 · light**')
+      expect(body).toContain('**dark / stray**')
+      expect(body).toContain('**root**')
+    })
+
+    it('should keep the head and folded base of a matched case', () => {
+      const body = renderEvidenceBody(
+        [{ state: 'dark', items: [folded('evidence/dark/a.png', 'a')] }],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+      )
+
+      expect(body).toContain('alt="a head"')
+      expect(body).toContain('alt="a base"')
+    })
+
+    it('should leave a compared case that moved in its state block', () => {
+      const body = renderEvidenceBody(
+        [{ state: 'dark', items: [moved('evidence/dark/a.png', 'a')] }],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+      )
+
+      expect(body).toContain('<summary>dark (1)</summary>')
+      expect(body).not.toContain('Within tolerance')
+    })
+
+    it('should open six moved cases beside forty folded ones', () => {
+      const body = renderEvidenceBody(
+        [
+          {
+            state: 'dark',
+            items: Array.from({ length: 6 }, (_, index) =>
+              moved(`evidence/dark/m-${index}.png`, `m-${index}`),
+            ),
+          },
+          {
+            state: 'light',
+            items: Array.from({ length: 40 }, (_, index) =>
+              folded(`evidence/light/f-${index}.png`, `f-${index}`),
+            ),
+          },
+        ],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+      )
+
+      expect(body).toContain('<details open>\n<summary>dark (6)</summary>')
+      expect(body).toContain(
+        '<details>\n<summary>Within tolerance (40)</summary>',
+      )
+    })
+
+    it('should render the folded block alone when every case folds', () => {
+      const body = renderEvidenceBody(
+        [{ state: 'dark', items: [folded('evidence/dark/a.png', 'a')] }],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+      )
+
+      expect(body).toContain('**Base:**')
+      expect(body).toContain('<summary>Within tolerance (1)</summary>')
+      expect(body).not.toContain('<summary>dark')
+    })
+  })
+
   describe('view grouping', () => {
     const THEMES = ['dark', 'light'] as const
     const WIDTHS = [320, 768, 1024, 1440]
@@ -1186,6 +1315,35 @@ describe('countEvidenceCases', () => {
     )
 
     expect(countEvidenceCases(body)).toBe(3)
+  })
+
+  it('should count the head images folded as within tolerance', () => {
+    const body = renderEvidenceBody(
+      [
+        {
+          state: 'dark',
+          items: [
+            {
+              path: 'evidence/dark/a.png',
+              stem: 'a',
+              added: false,
+              withinTolerance: true,
+            },
+            {
+              path: 'evidence/dark/b.png',
+              stem: 'b',
+              added: false,
+              withinTolerance: true,
+            },
+          ],
+        },
+      ],
+      'o/r',
+      'base',
+      'head',
+    )
+
+    expect(countEvidenceCases(body)).toBe(2)
   })
 
   it('should count the rows of a body posted in the three-column markdown image shape', () => {

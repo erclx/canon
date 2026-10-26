@@ -31,6 +31,9 @@ const REEL_WIDTH = 960
 /** What joins the hosted and local segments on the one address line. */
 const ADDRESS_SEPARATOR = ' · '
 
+/** The summary of the block holding every case whose pixels matched its base. */
+const FOLDED_SUMMARY = 'Within tolerance'
+
 /** The heading every body opens with. */
 const EVIDENCE_HEADING = '## Evidence'
 
@@ -73,6 +76,8 @@ export interface EvidenceItem {
   readonly width?: number
   /** Pixel width of the base image, absent for an added case or an unread header. */
   readonly baseWidth?: number
+  /** Whether the head differs from its base by no more than sub-visual noise. Absent when the pair was not compared. */
+  readonly withinTolerance?: boolean
 }
 
 export interface EvidenceState {
@@ -408,6 +413,31 @@ function renderState(
   return blocks
 }
 
+/** A folded case's label, naming its state and view, since the block gathers cases from every state. */
+function foldedLabel(state: string, item: EvidenceItem): string {
+  const name = readCaseName(item.stem)
+  const caseLabel =
+    name === undefined
+      ? escapeCell(item.stem)
+      : `${escapeCell(name.view)} · ${name.width} · ${name.theme}`
+  return state === '' ? caseLabel : `${escapeCell(state)} / ${caseLabel}`
+}
+
+/** One closed block for every case whose pixels matched its base, so the open blocks hold only what visibly moved. */
+function renderFolded(
+  states: readonly EvidenceState[],
+  repo: string,
+  base: string,
+  head: string,
+): string {
+  const cases = states.flatMap((entry) =>
+    entry.items.map((item) =>
+      caseLines(foldedLabel(entry.state, item), item, false, repo, base, head),
+    ),
+  )
+  return block('<details>', `${FOLDED_SUMMARY} (${cases.length})`, cases)
+}
+
 /** A reel embedded in the comment, and the head it was filmed at. */
 export interface EvidenceReel {
   readonly link: string
@@ -431,7 +461,9 @@ export function evidenceMarker(head: string): string {
  * split the column between the two and shrank both to a quarter of their size.
  * Every state opens while the comment carries at most `EVIDENCE_OPEN_LIMIT`
  * head images, and every state closes past it, so a comment is never half
- * open. A folded base takes no room until opened, so it is not counted. A visible line under
+ * open. A folded base takes no room until opened, so it is not counted. A case
+ * whose pixels matched its base moves to one closed `Within tolerance` block
+ * after the states, still named and embedded, and is not counted either. A visible line under
  * `## Evidence` names the base and head as short shas, each linking its commit. Every image URL is
  * pinned to a commit sha rather than a branch, so the comment keeps showing
  * what it claimed even after the branch moves.
@@ -477,16 +509,21 @@ export function renderEvidenceBody(
     return [...opening, ...closing, evidenceMarker(head)].join('\n')
   }
 
-  const headCount = states.reduce(
-    (total, entry) => total + entry.items.length,
-    0,
-  )
+  const split = (keep: (item: EvidenceItem) => boolean): EvidenceState[] =>
+    states
+      .map((entry) => ({ ...entry, items: entry.items.filter(keep) }))
+      .filter((entry) => entry.items.length > 0)
+  const open = split((item) => item.withinTolerance !== true)
+  const folded = split((item) => item.withinTolerance === true)
+
+  const headCount = open.reduce((total, entry) => total + entry.items.length, 0)
   const opener =
     headCount <= EVIDENCE_OPEN_LIMIT ? '<details open>' : '<details>'
 
-  const sections = states.flatMap((entry) =>
-    renderState(entry, repo, base, head, opener),
-  )
+  const sections = [
+    ...open.flatMap((entry) => renderState(entry, repo, base, head, opener)),
+    ...(folded.length === 0 ? [] : [renderFolded(folded, repo, base, head)]),
+  ]
 
   return [
     ...opening,

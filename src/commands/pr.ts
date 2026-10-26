@@ -47,6 +47,7 @@ import {
   renderEvidenceBody,
   settleChecklist,
 } from '@/pr/evidence'
+import { isWithinTolerance } from '@/pr/pixels'
 import {
   dropFramesWithLegacy,
   FRAMES_BRANCH,
@@ -803,6 +804,14 @@ export function register(program: Command): void {
         'label, with its base folded beneath in a <details> block, and an',
         'added case shows its head alone. Every state opens while the comment',
         'carries at most six head images and closes past that.',
+        '',
+        'Each modified PNG is compared with its base pixel by pixel. A case',
+        'whose densest 16px square holds 6 or fewer differing pixels moves to',
+        'one closed "Within tolerance" block after the states, still named and',
+        'embedded, and stops counting toward the six. Its item on the record',
+        'carries `withinTolerance`, which is absent for an added case, a',
+        'format other than PNG, or a pair with a failed read. None of those',
+        'folds, and neither does a pair that differs in size or will not decode.',
         '',
         '--preview puts the hosted address on that line. With no evidence in',
         'the diff, the body is the heading, that line, and the marker alone,',
@@ -2464,25 +2473,30 @@ async function readPullMergeBase(
   return sha === null || sha.trim() === '' ? undefined : sha.trim()
 }
 
-/** How many width reads run at once, since each downloads a whole image. */
-const WIDTH_READ_CONCURRENCY = 4
+/** How many cases are read at once. Each reads its images one after another, so this bounds both the downloads in flight and the pairs held for comparison. */
+const IMAGE_READ_CONCURRENCY = 4
 
-type WidthRead =
-  | { readonly kind: 'read'; readonly width?: number }
+type ImageRead =
+  | {
+      readonly kind: 'read'
+      readonly width?: number
+      readonly bytes?: Uint8Array
+    }
   | { readonly kind: 'failed' }
 
 /**
- * The pixel width of a PNG at `sha`, read over the contents API like every
- * other evidence read. The endpoint ignores a `Range` header, so the whole
- * file arrives and only its first bytes are read. A format other than PNG
- * reads without a width, and a refused or timed-out call reads as failed, so
- * the caller can keep the ceiling width and still report the cause.
+ * A PNG at `sha`, read over the contents API like every other evidence read,
+ * with its pixel width from the header. The endpoint ignores a `Range` header,
+ * so the whole file arrives, and its bytes are kept for the pixel comparison.
+ * A format other than PNG reads with neither, and a refused or timed-out call
+ * reads as failed, so the caller can keep the ceiling width and still report
+ * the cause.
  */
-async function readImageWidth(
+async function readImage(
   cwd: string,
   path: string,
   sha: string,
-): Promise<WidthRead> {
+): Promise<ImageRead> {
   if (!/\.png$/i.test(path)) return { kind: 'read' }
   try {
     const result = await execa(
@@ -2501,8 +2515,11 @@ async function readImageWidth(
         encoding: 'buffer',
       },
     )
-    const width = readPngWidth(result.stdout.subarray(0, PNG_HEADER_BYTES))
-    return width === undefined ? { kind: 'read' } : { kind: 'read', width }
+    const bytes = result.stdout
+    const width = readPngWidth(bytes.subarray(0, PNG_HEADER_BYTES))
+    return width === undefined
+      ? { kind: 'read', bytes }
+      : { kind: 'read', width, bytes }
   } catch {
     return { kind: 'failed' }
   }
@@ -2530,66 +2547,79 @@ async function mapPool<T, R>(
 
 interface SizedEvidence {
   readonly reading: EvidenceReading
-  /** Each image whose width read failed, as `head:<path>` or `base:<path>`, which rendered at the ceiling. */
+  /** Each image whose read failed, as `head:<path>` or `base:<path>`, which rendered at the ceiling and left its case uncompared. */
   readonly unread: readonly string[]
 }
 
-/** Each item with the pixel width of its head image and, when it has one, its base image. */
-async function withImageWidths(
+interface MeasuredItem {
+  readonly item: EvidenceItem
+  readonly unread: readonly string[]
+}
+
+/**
+ * One case with the pixel width of its head image and, when it has one, its
+ * base image, and whether the two match within tolerance. The pair is compared
+ * as soon as both reads land, so its bytes are dropped before the pool takes
+ * the next case. A case missing either PNG carries no verdict.
+ */
+async function measureItem(
+  cwd: string,
+  item: EvidenceItem,
+  base: string | undefined,
+  head: string,
+): Promise<MeasuredItem> {
+  const headRead = await readImage(cwd, item.path, head)
+  const baseRead =
+    item.added || base === undefined
+      ? undefined
+      : await readImage(cwd, item.path, base)
+  const unread = [
+    ...(headRead.kind === 'failed' ? [`head:${item.path}`] : []),
+    ...(baseRead?.kind === 'failed' ? [`base:${item.path}`] : []),
+  ]
+  const headBytes = headRead.kind === 'read' ? headRead.bytes : undefined
+  const baseBytes = baseRead?.kind === 'read' ? baseRead.bytes : undefined
+  return {
+    item: {
+      ...item,
+      ...(headRead.kind === 'read' &&
+        headRead.width !== undefined && { width: headRead.width }),
+      ...(baseRead?.kind === 'read' &&
+        baseRead.width !== undefined && { baseWidth: baseRead.width }),
+      ...(headBytes !== undefined &&
+        baseBytes !== undefined && {
+          withinTolerance: isWithinTolerance(baseBytes, headBytes),
+        }),
+    },
+    unread,
+  }
+}
+
+/** Each item measured by `measureItem`, in the reading's order. */
+async function withImageReads(
   cwd: string,
   reading: EvidenceReading,
   base: string | undefined,
   head: string,
 ): Promise<SizedEvidence> {
   if (reading.kind === 'refused') return { reading, unread: [] }
-  const jobs = reading.states.flatMap((entry, stateIndex) =>
-    entry.items.flatMap((item, itemIndex) => [
-      {
-        stateIndex,
-        itemIndex,
-        side: 'head' as const,
-        path: item.path,
-        sha: head,
-      },
-      ...(item.added || base === undefined
-        ? []
-        : [
-            {
-              stateIndex,
-              itemIndex,
-              side: 'base' as const,
-              path: item.path,
-              sha: base,
-            },
-          ]),
-    ]),
+  const measured = await mapPool(
+    reading.states.flatMap((entry) => entry.items),
+    IMAGE_READ_CONCURRENCY,
+    (item) => measureItem(cwd, item, base, head),
   )
-  const reads = await mapPool(jobs, WIDTH_READ_CONCURRENCY, (job) =>
-    readImageWidth(cwd, job.path, job.sha),
-  )
-  const unread: string[] = []
-  const states = reading.states.map((entry, stateIndex) => ({
-    ...entry,
-    items: entry.items.map((item, itemIndex): EvidenceItem => {
-      const widths: { width?: number; baseWidth?: number } = {}
-      jobs.forEach((job, index) => {
-        const read = reads[index]
-        if (
-          job.stateIndex !== stateIndex ||
-          job.itemIndex !== itemIndex ||
-          read === undefined
-        ) {
-          return
-        }
-        if (read.kind === 'failed') unread.push(`${job.side}:${job.path}`)
-        else if (read.width !== undefined) {
-          widths[job.side === 'head' ? 'width' : 'baseWidth'] = read.width
-        }
-      })
-      return { ...item, ...widths }
-    }),
-  }))
-  return { reading: { kind: 'read', states }, unread }
+  let offset = 0
+  const states = reading.states.map((entry) => {
+    const items = measured
+      .slice(offset, offset + entry.items.length)
+      .map((read) => read.item)
+    offset += entry.items.length
+    return { ...entry, items }
+  })
+  return {
+    reading: { kind: 'read', states },
+    unread: measured.flatMap((entry) => entry.unread),
+  }
 }
 
 async function runEvidence(
@@ -2824,7 +2854,7 @@ async function runEvidence(
     unsettled === undefined
       ? undefined
       : settleChecklist(unsettled, identity.head, findEvidenceHead(comments))
-  const sized = await withImageWidths(root, grouped, base, identity.head)
+  const sized = await withImageReads(root, grouped, base, identity.head)
   const states = sized.reading.kind === 'read' ? sized.reading.states : []
   const body = renderEvidenceBody(
     states,
