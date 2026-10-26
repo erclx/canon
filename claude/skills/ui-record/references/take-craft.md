@@ -54,6 +54,8 @@ A step beat runs the page on a virtual clock, one frame per step. Most pages fil
 - An animated GIF can freeze, so expect one to hold its first frame
 - Set `"route": "screencast"` on a beat known to stall, rather than paying for the stall before the fallback
 
+A fallback films the beat again from a fresh load, replaying its setup and the steps the stepper already ran. A beat whose steps persist in the app, such as a fill that renames something, would then start from the changed state, so set `"route": "screencast"` on it when it risks a stall.
+
 A screencast beat films in real time at 1920x1080, which goes soft at the 1.8x zoom. Tell the operator which beats ran that way.
 
 ## Targets
@@ -84,7 +86,7 @@ The camera track already carries the zoom, so these rules decide what to film fo
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Zoom on a click            | Screen Studio's [auto zoom guide](https://screen.studio/guide/auto-zoom) keys its zoom on click positions                                                |
 | The 1 s ceiling            | Material Design 3's [duration tokens](https://m3.material.io/styles/motion/easing-and-duration/tokens-specs) end at 1000 ms, the top of the ambient band |
-| The 633 ms push            | Twelve moves in a Screen Studio clip reached 90% in a median of 667 ms, measured frame by frame when the camera was tuned                                |
+| The 633 ms push            | Twelve moves in a Screen Studio clip reached 90% in a median of 667 ms, measured when the camera was tuned                                               |
 | The typing and scroll risk | Takes of a canvas design board filmed while the stepper was built                                                                                        |
 | Jumping scrolls and GIFs   | [hasuwini77/demo-reel#28](https://github.com/hasuwini77/demo-reel/pull/28), read through a search summary rather than the page                           |
 
