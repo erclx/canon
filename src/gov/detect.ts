@@ -253,7 +253,7 @@ function isLiteral(pattern: string): boolean {
 
 /**
  * A literal pattern is also tested on disk, since evidence such as
- * `.canon/canvas` sits in a folder a target's own `.gitignore` excludes, and
+ * `.canon/board` sits in a folder a target's own `.gitignore` excludes, and
  * the git listing never carries it.
  */
 function matchEntry(

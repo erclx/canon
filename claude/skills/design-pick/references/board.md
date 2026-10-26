@@ -4,7 +4,7 @@ Read before the first `frameboard` verb a `design-pick` run sends. It carries wh
 
 ## Reaching the board
 
-Resolve `<board>` and `<project>` from the `board` and `project` keys of `canon/config/design.toml`, read at the main worktree root per `${CLAUDE_SKILL_DIR}/references/design-config.md`. A missing file or key falls back to `.canon/canvas/` and `picks`.
+Resolve `<board>` and `<project>` from the `board` and `project` keys of `canon/config/design.toml`, read at the main worktree root per `${CLAUDE_SKILL_DIR}/references/design-config.md`. A missing file or key falls back to `.canon/board/` and `picks`.
 
 Resolve `<board>` against the main worktree root, the way `session-worktree` resolves it, since a linked worktree holds no copy of the gitignored folder.
 

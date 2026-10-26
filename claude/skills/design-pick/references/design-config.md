@@ -14,10 +14,10 @@ project = "picks"
 
 ## Keys
 
-| Key       | Holds                                                   | Default          |
-| --------- | ------------------------------------------------------- | ---------------- |
-| `board`   | The board folder a round drafts on, under the main root | `.canon/canvas/` |
-| `project` | The Frameboard project a round's pages go in            | `picks`          |
+| Key       | Holds                                                   | Default         |
+| --------- | ------------------------------------------------------- | --------------- |
+| `board`   | The board folder a round drafts on, under the main root | `.canon/board/` |
+| `project` | The Frameboard project a round's pages go in            | `picks`         |
 
 Each key falls back on its own, so a file naming `board` alone moves the board and keeps the project at `picks`.
 
@@ -28,6 +28,6 @@ Each key falls back on its own, so a file naming `board` alone moves the board a
 
 ## When the file is absent
 
-The run drafts on `.canon/canvas/` in `picks`, the board every project used before the file existed, and asks nothing.
+The run drafts on `.canon/board/` in `picks`, the folder Frameboard keeps its design board in, and asks nothing.
 
-Set the file when the project's design sync reads a board other than `.canon/canvas/`. A round drafted there lands through `design-record` without a redraw, and Step 6 of the skill body keeps the winning page for the sync's mapping.
+Set the file when the project's design sync reads a board other than `.canon/board/`. A round drafted there lands through `design-record` without a redraw, and Step 6 of the skill body keeps the winning page for the sync's mapping.
