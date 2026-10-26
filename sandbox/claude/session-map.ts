@@ -94,7 +94,7 @@ export default scenario({
       ctx.log.info(
         '         a green check says nothing about whether a quoted title survives',
       )
-      ctx.log.info('         toCsv.')
+      ctx.log.info('         the CSV writer.')
       ctx.log.info(
         'Expect:  declared in fixtures/claude/session-map/expect.toml',
       )
