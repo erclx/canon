@@ -54,10 +54,11 @@ function markView(mark: string): [number, number, number, number] {
 const round = (n: number): number => Math.round(n * 100) / 100
 
 /**
- * The mark on its tile. Dark is the default branch, since `prefers-color-scheme`
- * follows the OS rather than the browser theme and only the dark tile keeps
- * the c readable on a dark tab bar under a light OS. Every fill is a rule
- * rather than an attribute so the light branch can flip them all.
+ * The mark on its tile. The base rules draw the dark set, which a renderer
+ * ignoring the media query shows, and a light preference swaps in the light
+ * set. A browser reports light when no scheme is set, so a tab there shows the
+ * light tile. Every fill is a rule rather than an attribute so the light branch
+ * can flip them all.
  */
 export function renderFavicon(mark: string, colors: FaviconColors): string {
   const [x, y, width, height] = markView(mark)
