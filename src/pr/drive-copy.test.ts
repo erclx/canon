@@ -105,6 +105,27 @@ describe('loadPreviewConfig', () => {
     })
   })
 
+  it('should refuse a keep equal to a declared path', () => {
+    write('canon/config/preview.json', '{"writes":["board"],"keep":["board"]}')
+
+    expect(loadPreviewConfig(worktree)).toMatchObject({
+      kind: 'refused',
+      reason: 'bad-config',
+    })
+  })
+
+  it('should refuse a keep equal to a nested declared path', () => {
+    write(
+      'canon/config/preview.json',
+      '{"writes":["board","board/assets"],"keep":["board/assets"]}',
+    )
+
+    expect(loadPreviewConfig(worktree)).toMatchObject({
+      kind: 'refused',
+      reason: 'bad-config',
+    })
+  })
+
   it('should refuse a keep climbing out of the worktree', () => {
     write(
       'canon/config/preview.json',

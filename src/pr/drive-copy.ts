@@ -95,7 +95,8 @@ function isWithin(path: string, parent: string): boolean {
  * copy. A `writes` or `keep` path that is absolute or climbs with `..`
  * refuses, so the copy never reads or writes outside its two roots, and a
  * `keep` path outside every `writes` path refuses, since the rebuild would
- * never reach it.
+ * never reach it, and so does one equal to a `writes` path, which would be
+ * declared both reset and kept.
  */
 export function loadPreviewConfig(worktree: string): PreviewConfigRead {
   const path = join(worktree, PREVIEW_CONFIG_REL)
@@ -165,6 +166,17 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
       kind: 'refused',
       reason: 'bad-config',
       detail: `${PREVIEW_CONFIG_REL} keeps "${stray}", which no "writes" path holds.`,
+    }
+  }
+
+  const clash = keep.find((item) =>
+    writes.some((path) => isWithin(item, path) && isWithin(path, item)),
+  )
+  if (clash !== undefined) {
+    return {
+      kind: 'refused',
+      reason: 'bad-config',
+      detail: `${PREVIEW_CONFIG_REL} keeps "${clash}", which is also a "writes" path, so the rebuild would never reset it.`,
     }
   }
 
