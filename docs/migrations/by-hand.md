@@ -6,7 +6,7 @@ category: Agent surface
 
 # Target migrations by hand
 
-Each section is a move a project scaffolded before the change it names makes by hand, since no `canon migrate` verb runs it and `canon migrate status` never lists it. The moves a verb runs, and the order to run them in, are in [target migrations](migrations.md).
+Each section is a move a project scaffolded before the change it names makes by hand, since no `canon migrate` verb runs it and `canon migrate status` never lists it. The moves a verb runs, and the order to run them in, are in [target migrations by verb](by-verb.md).
 
 ## Back records up off this machine, once
 

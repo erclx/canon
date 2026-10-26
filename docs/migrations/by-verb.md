@@ -1,14 +1,14 @@
 ---
-title: Target migrations
-description: One-time moves a project scaffolded under an older toolkit runs before its next sync
+title: Target migrations by verb
+description: One-time moves a canon migrate verb runs, for a project scaffolded under an older toolkit, in the order canon migrate status lists them
 category: Agent surface
 ---
 
-# Target migrations
+# Target migrations by verb
 
-Each section is a move a project runs once, when it was scaffolded before the change it names. Run `canon upgrade` first, then `canon migrate status --json` to list the moves a project still needs in the order to run them. The recurring sync that follows is in [target sync](sync.md).
+Each section is a move a `canon migrate` verb runs once, for a project scaffolded before the change it names. Run `canon upgrade` first, then `canon migrate status --json` to list the moves still pending in the order to run them. A pending verb with no section here, such as `scratch-evidence` or `rename`, is in [migrate](../agents/migrate.md).
 
-`canon:target-update` is the guided path through both. It runs the moves in that order once you approve its preview. This page holds only the moves a `canon migrate` verb runs, and the ones a person makes by hand are in [target migrations by hand](migrations-by-hand.md).
+`canon:target-update` is the guided path through both, running the moves in that order once you approve its preview. The moves no verb runs are in [target migrations by hand](by-hand.md), and the recurring sync that follows is in [target sync](../target/sync.md).
 
 ## Move the records first, once
 
