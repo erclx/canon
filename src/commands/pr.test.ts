@@ -371,10 +371,13 @@ describe('canon pr evidence --checklist', () => {
   })
 })
 
+const FAKE_GH = join(import.meta.dirname, 'fixtures', 'gh.sh')
+
 /**
  * A `gh` stand-in that answers the reads `pr evidence` and `pr local` make and
  * records the body of any `gh api` write, so the command surface runs end to
- * end without a network.
+ * end without a network. The program is `fixtures/gh.sh`, and the `gh` written
+ * here is a wrapper exporting the three paths it reads.
  *
  * The pull request's files, head, and merge base come from the repository's
  * own `main...HEAD` unless a fixture beside `apiLog` names them: `files.tsv`
@@ -387,30 +390,16 @@ describe('canon pr evidence --checklist', () => {
  */
 function writeFakeGh(bin: string, comments: string, apiLog: string): void {
   mkdirSync(bin, { recursive: true })
-  const fx = dirname(apiLog)
-  const script = [
+  const quote = (value: string): string => `'${value.replaceAll("'", `'\\''`)}'`
+  const wrapper = [
     '#!/usr/bin/env bash',
-    'set -o pipefail',
-    `fx='${fx}'`,
-    'f=.; p=; for a in "$@"; do [ "$p" = --jq ] && f=$a; p=$a; done',
-    'case "$*" in',
-    '  *graphql*|"pr "*|"repo view"*) exit 1 ;;',
-    `  api*pulls/7/files*) echo "$*" >> "$fx/files-calls.log"; [ -f "$fx/files-fail" ] && exit 1; { if [ -f "$fx/files.tsv" ]; then cat "$fx/files.tsv"; else git diff --name-status --no-renames main...HEAD | sed -e 's/^A/added/' -e 's/^M/modified/' -e 's/^D/removed/'; fi; } | jq -Rn '[inputs | select(length > 0) | split("\\t") | {status: .[0], filename: .[1]}]' | jq -r "$f" ;;`,
-    `  api*git/trees/*) [ -f "$fx/base-tree.json" ] || exit 1; jq -r "$f" "$fx/base-tree.json" ;;`,
-    `  api*contents/*) a="$*"; p=\${a##*contents/}; p=\${p%%\\?*}; r=\${a##*ref=}; [ -f "$fx/img/$r-$(basename "$p")" ] && cat "$fx/img/$r-$(basename "$p")" || exit 1 ;;`,
-    '  api*compare/*) if [ -f "$fx/merge-base" ]; then cat "$fx/merge-base"; else git merge-base main HEAD; fi ;;',
-    `  "api -X PUT repos/{owner}/{repo}/pulls/7/reviews/"*) id=\${4##*/}; echo "$id" >> "$fx/review-puts.log"; [ -f "$fx/review-put-fail-$id" ] && exit 1; printf '%s\\n' "\${@: -1}" >> "$fx/review-bodies.log"; echo "{}" ;;`,
-    `  api*pulls/7/reviews*) [ -f "$fx/ui-reviews.json" ] && jq -r "$f" "$fx/ui-reviews.json" ;;`,
-    `  api*issues/7/comments*) jq '[.comments[] | {html_url: .url, body}]' '${comments}' | jq -r "$f" ;;`,
-    '  "api -X PATCH repos/{owner}/{repo}/pulls/7 "*) [ -f "$fx/body-fail" ] && exit 1; printf \'%s\' "${@: -1}" > "$fx/body-write.log"; echo "{}" ;;',
-    '  "api repos/{owner}/{repo}/pulls/7") if [ -f "$fx/head" ]; then h=$(cat "$fx/head"); else h=$(git rev-parse HEAD); fi; b=; [ -f "$fx/pr-body" ] && b=$(cat "$fx/pr-body"); jq -n --arg h "$h" --arg b "$b" \'{number:7,head:{ref:"feat/x",sha:$h},base:{ref:"main"},mergeable_state:"clean",body:$b}\' ;;',
-    '  "api repos/{owner}/{repo}") echo "{\\"full_name\\":\\"o/r\\"}" ;;',
-    `  api*) printf '%s' "\${@: -1}" > '${apiLog}'; echo "{}" ;;`,
-    '  *) exit 1 ;;',
-    'esac',
+    `export FAKE_GH_FX=${quote(dirname(apiLog))}`,
+    `export FAKE_GH_COMMENTS=${quote(comments)}`,
+    `export FAKE_GH_API_LOG=${quote(apiLog)}`,
+    `exec bash ${quote(FAKE_GH)} "$@"`,
     '',
   ].join('\n')
-  writeFileSync(join(bin, 'gh'), script, { mode: 0o755 })
+  writeFileSync(join(bin, 'gh'), wrapper, { mode: 0o755 })
 }
 
 function initBranchRepo(root: string, files: Record<string, string>): void {
