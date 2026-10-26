@@ -51,11 +51,11 @@ paths = ["index.html", "canon/DESIGN.md"]
 #
 # `.canon/picks/**` is the third write step 6 directs: the per-frame capture of
 # the picked round's arms lands there as the durable revert record, before the
-# round pages are deleted from the board at `.canon/canvas/`. The composite
+# round pages are deleted from the board at `.canon/board/`. The composite
 # render taken at step 3 lands in the board's own `.run/captures/`, which the
 # board entry admits, and `.canon/tmp/**` admits any scratch the run keeps.
 write_scope = [
-  ".canon/canvas/**",
+  ".canon/board/**",
   ".canon/tmp/**",
   ".canon/picks/**",
   "index.html",

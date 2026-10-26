@@ -237,6 +237,49 @@ describe('planRecordLayout', () => {
     })
   })
 
+  it('should move the design board from canvas to board and rewrite its citation', async () => {
+    write('.canon/canvas/board.json', '{}\n')
+    write(
+      '.canon/plans/feature-look.md',
+      'Drafted on `.canon/canvas/picks/round-1/`.\n',
+    )
+
+    const plan = await planFrom(root)
+
+    expect(movesTo(plan)).toContainEqual({
+      from: '.canon/canvas',
+      to: '.canon/board',
+      classified: undefined,
+    })
+    expect(entryFor(plan, 'feature-look.md')).toContain(
+      '`.canon/board/picks/round-1/`',
+    )
+  })
+
+  it('should move a canvas folder holding no board.json', async () => {
+    write('.canon/canvas/picks/round-1/index.html', '<h1>arm</h1>\n')
+
+    const plan = await planFrom(root)
+
+    expect(movesTo(plan)).toContainEqual({
+      from: '.canon/canvas',
+      to: '.canon/board',
+      classified: undefined,
+    })
+  })
+
+  it('should refuse the board move when canvas and board both exist', async () => {
+    write('.canon/canvas/untitled/index.html', '<h1>stale</h1>\n')
+    write('.canon/board/board.json', '{}\n')
+
+    const plan = await planFrom(root)
+
+    expect(movesTo(plan).some((move) => move.from === '.canon/canvas')).toBe(
+      false,
+    )
+    expect(plan.collisions).toContain(join(root, '.canon/board'))
+  })
+
   it('should flatten a branch report beside the audits and rewrite its citation', async () => {
     write('.canon/review/branch/review-user-batch.md', 'a report\n')
     write(
