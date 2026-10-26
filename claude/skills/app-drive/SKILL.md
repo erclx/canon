@@ -88,7 +88,7 @@ Close only on the operator's word, while the app stays up for as long as they ke
 2. Run `canon intake drive-check <slug> --json`, and on `failed` fix what each finding list names in the folder and re-run.
 3. Report each path under `changed` to the operator and never revert it, since only they know which to keep.
 4. Run `canon records validate intake <slug>` and fix each `structure` entry it names.
-5. Offer to write `canon/config/app-drive.toml` from the answers Step 1 collected, when the project carried none. Writing it is the operator's call, since it is a tracked file.
+5. Hand the operator the text of `canon/config/app-drive.toml` built from Step 1's answers, when the project carried none. Never write it, since a tracked file is the operator's or a worker's.
 
 ## Output
 

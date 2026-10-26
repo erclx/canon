@@ -35,4 +35,4 @@ Ask the operator for `launch`, `data`, and `personas` once, before the copy is b
 
 - Propose the manifest's own build and preview scripts as `launch`
 - Propose the requirements record's named users as `personas`
-- Offer at the close to write the file from the answers, since the first drive in a project is where the config gets found. The operator decides, because the file is tracked.
+- Hand the operator the file's text at the close, since the first drive in a project is where the config gets found. The drive never writes it, because the file is tracked.
