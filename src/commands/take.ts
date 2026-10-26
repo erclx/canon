@@ -1,0 +1,266 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import type { Command } from 'commander'
+import { INSTALL_BROWSER, isEngineMissing } from '@/browser/engine'
+import { readTakePlan } from '@/take/plan'
+import type { TakePlanRefusal } from '@/take/plan'
+import type { TakeRefusal } from '@/take/take'
+import {
+  intro,
+  logError,
+  logInfo,
+  logStep,
+  logWarn,
+  outro,
+  plural,
+} from '@/cli/ui'
+
+/**
+ * Holds wiring only. Every browser reference sits behind `loadTake`, because
+ * `src/cli.ts` imports this module at startup and resolving the engine there
+ * would put a browser launch in front of every other command.
+ */
+type Take = typeof import('@/take/take')
+
+interface RunOptions {
+  readonly out: string
+  readonly json?: boolean
+}
+
+const INSTALL_FFMPEG =
+  'install FFmpeg from your package manager, such as apt install ffmpeg or brew install ffmpeg'
+
+/** What a reader does about each way the plan produced no take. */
+const PLAN_REFUSALS: Record<TakePlanRefusal, string> = {
+  'unreadable-plan':
+    'The plan file is not valid JSON, so no beat could be read.',
+  'no-beats': 'The plan names no beat, so there is nothing to film.',
+  'bad-beat':
+    'A beat is missing its name or carries a setup that is not a list.',
+  'no-steps': 'A beat names no step, so its take would film nothing.',
+  'unknown-route': 'A beat names a route this build does not record on.',
+  'bad-step': 'A step is missing something the take needs to perform it.',
+}
+
+const TAKE_REFUSALS: Record<TakeRefusal, string> = {
+  'ffmpeg-missing': 'FFmpeg is not installed, so no clip could be encoded.',
+  'browser-missing': 'The headless shell is not installed in this project.',
+  'server-unreachable': 'Nothing answered at the URL, so no beat was filmed.',
+  'target-missing': 'A step names a target the page does not carry.',
+  'take-failed': 'The take failed against a reachable page.',
+}
+
+export function register(program: Command): void {
+  program
+    .command('take')
+    .description(
+      'Film a web app beat by beat with a click log and camera track',
+    )
+    .argument('<url>', 'Address to film')
+    .argument('<plan>', 'JSON file naming the beats and their steps')
+    .requiredOption('--out <dir>', 'Folder the clips, logs, and tracks land in')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Films each beat from a fresh load of the page into its own folder under',
+        '--out, numbered in plan order: clip.mp4, log.json, and camera.json.',
+        'take.json beside them lists every beat and the route that filmed it.',
+        '',
+        'A step beat is filmed by frame stepping in chrome-headless-shell, at',
+        '3840x2160 and exactly 60 fps, with the page clock advancing one frame',
+        'per step. A frame slower than 2 s falls back to a real-time screencast',
+        'at 1920x1080 for that beat, and the record says so. A screencast beat',
+        'skips the stepper.',
+        '',
+        'No cursor is drawn in a clip. The edit draws it from the log at a',
+        'constant size, and the camera track carries the cursor and click ring',
+        'per frame beside the view. Canon renders nothing past the clip.',
+        '',
+        '  {',
+        '    "beats": [',
+        '      { "name": "open the kit",',
+        '        "setup": [{ "kind": "click", "target": "text=Design" }],',
+        '        "steps": [',
+        '          { "kind": "click", "target": "#kit" },',
+        '          { "kind": "wait", "ms": 400 }',
+        '        ] }',
+        '    ]',
+        '  }',
+        '',
+        'Step kinds:',
+        '  move <target>|<x,y>    glide the pointer to a target or a point',
+        '  click <target>         glide to the target and press it',
+        '  fill <target> <text>   press the target and type the text',
+        '  scroll <target> <dy>   glide to the target and wheel dy pixels',
+        '  wait <ms>              hold, for a state the page reaches on its own',
+        '',
+        'A target is a CSS selector, or text=<words> for the innermost element',
+        'whose whole text is those words. Setup steps run before the first kept',
+        'frame. Every beat opens and closes on a 0.6 s hold.',
+        '',
+        'Needs a reachable page, FFmpeg, and the headless shell. Install with:',
+        `  ${INSTALL_BROWSER}`,
+        '',
+        'Reasons:',
+        '  no-plan-file        nothing readable at the plan path',
+        '  unreadable-plan     the plan file is not valid JSON',
+        '  no-beats            the plan names no beat',
+        '  bad-beat            a beat has no name or a setup that is not a list',
+        '  no-steps            a beat names no step',
+        '  unknown-route       a beat names a route other than step or screencast',
+        '  bad-step            a step is missing what the take needs to perform it',
+        '  engine-missing      the browser engine is not installed in this project',
+        '  ffmpeg-missing      FFmpeg is not on the PATH',
+        '  browser-missing     the headless shell or browser binary is not installed',
+        '  server-unreachable  nothing answered at the URL',
+        '  target-missing      a step names a target the page does not carry',
+        '  take-failed         the take failed against a reachable page',
+        '',
+        'Exit codes:',
+        '  0  every beat was filmed',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '',
+        'Examples:',
+        '  canon take http://localhost:4173 plan.json --out .canon/tmp/demo/takes',
+        '  canon take http://localhost:4173 plan.json --out takes --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (url: string, plan: string, opts: RunOptions) => {
+      process.exitCode = await runTake(url, plan, opts)
+    })
+}
+
+async function runTake(
+  url: string,
+  planPath: string,
+  opts: RunOptions,
+): Promise<number> {
+  const emitJson = opts.json ?? false
+  const path = resolve(planPath)
+
+  intro(`canon take ${url}`)
+
+  let source: string
+  try {
+    source = readFileSync(path, 'utf8')
+  } catch (error) {
+    return refuse(
+      emitJson,
+      url,
+      'no-plan-file',
+      `No plan file at ${path}. ${error instanceof Error ? error.message : String(error)}`,
+    )
+  }
+
+  const read = readTakePlan(source)
+  if (read.kind === 'refused') {
+    return refuse(
+      emitJson,
+      url,
+      read.reason,
+      `${PLAN_REFUSALS[read.reason]} ${read.detail}`,
+    )
+  }
+
+  const { plan } = read
+  logStep('Scope')
+  logInfo(
+    `${plural(plan.beats.length, 'beat')} into ${resolve(opts.out)}: ${plan.beats.map((beat) => beat.name).join(', ')}`,
+  )
+
+  const taker = await loadTake()
+  if (!taker) {
+    logStep('Browser')
+    logError('the browser engine is not installed in this project')
+    logWarn(`Install it with: ${INSTALL_BROWSER}`)
+    outro()
+    emit(emitJson, {
+      url,
+      plan: path,
+      reason: 'engine-missing',
+      install: INSTALL_BROWSER,
+    })
+    return 1
+  }
+
+  logStep('Filming')
+  const result = await taker.take({ url, plan, out: opts.out })
+
+  if (result.status === 'failed') {
+    logStep('Refused')
+    logWarn(TAKE_REFUSALS[result.reason])
+    if (result.beat) logWarn(`in beat ${result.beat}`)
+    if (result.reason === 'server-unreachable') {
+      logWarn(`Start whatever serves ${url}, then run this again.`)
+    }
+    if (result.reason === 'browser-missing') {
+      logWarn(`Install the headless shell with: ${INSTALL_BROWSER}`)
+    }
+    if (result.reason === 'ffmpeg-missing') logWarn(`Then ${INSTALL_FFMPEG}.`)
+    logWarn(result.message.split('\n')[0] ?? '')
+    outro()
+    emit(emitJson, {
+      url,
+      plan: path,
+      reason: result.reason,
+      message: result.message,
+      ...(result.beat ? { beat: result.beat } : {}),
+      ...(result.reason === 'browser-missing'
+        ? { install: INSTALL_BROWSER }
+        : {}),
+    })
+    return 1
+  }
+
+  for (const beat of result.beats) {
+    logInfo(
+      `${beat.dir}  ${beat.route}  ${plural(beat.frames, 'frame')}  ${beat.seconds} s`,
+    )
+    if (beat.fallback) logWarn(`  filmed by screencast: ${beat.fallback}`)
+  }
+  outro()
+
+  emit(emitJson, {
+    url,
+    plan: path,
+    out: result.out,
+    beats: result.beats,
+    durationMs: result.durationMs,
+  })
+  return 0
+}
+
+/**
+ * Frames a refusal on stderr and puts the record on stdout, so an operator
+ * reading the terminal sees the reason rather than a command that appeared to
+ * do nothing.
+ */
+function refuse(
+  emitJson: boolean,
+  url: string,
+  reason: string,
+  message: string,
+): number {
+  logStep('Refused')
+  logWarn(message)
+  outro()
+  emit(emitJson, { url, reason, message })
+  return 1
+}
+
+async function loadTake(): Promise<Take | undefined> {
+  try {
+    return await import('@/take/take')
+  } catch (error) {
+    if (isEngineMissing(error)) return undefined
+    throw error
+  }
+}
+
+function emit(json: boolean, record: unknown): void {
+  if (json) process.stdout.write(`${JSON.stringify(record)}\n`)
+}
