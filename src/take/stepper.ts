@@ -1,0 +1,251 @@
+import { openFrameEncoder } from '@/take/encode'
+import { FPS, type LogEvent, START, VIEWPORT } from '@/take/log'
+import { type PointerInput, type Stage, performSteps } from '@/take/perform'
+import type { Beat } from '@/take/plan'
+import { type ShellPage, openShell } from '@/take/shell'
+
+/**
+ * Films a beat by frame stepping. The page's clock is virtual and advances one
+ * 60 fps frame per step, so every transition, animation, and timer moves
+ * exactly one frame between screenshots however long a frame takes to render,
+ * and each screenshot comes back at twice the viewport, 3840x2160.
+ *
+ * Three orderings hold a take together, and each one broken deadlocks or
+ * freezes it rather than failing loudly:
+ *
+ * - An input is sent, a frame is stepped, and only then is the input awaited,
+ *   since under begin-frame control an input is acknowledged by a frame
+ * - Frame time continues Chromium's monotonic clock, since a frame stamped on
+ *   any other base leaves every CSS animation at its first frame
+ * - No frame is begun before the load event, since one sent mid-navigation can
+ *   go unanswered, and each loading frame is capped so a lost one cannot hang
+ */
+
+const FRAME_MS = 1000 / FPS
+
+/** Budgets of 17, 17, and 16 ms average one 60 fps frame exactly. */
+const BUDGETS = [17, 17, 16] as const
+
+/** A frame slower than this means the page will not step, so the beat falls back. */
+export const STALL_MS = 2000
+
+/** The still the edit can cut on, before the beat's first action and after its last. */
+export const HOLD_MS = 600
+
+const LOAD_CAP_MS = 15_000
+const SETTLE_MS = 2500
+const LOADING_FRAME_CAP_MS = 250
+
+/** A frame that took longer than `STALL_MS`, so the beat is filmed another way. */
+export class StepperStalled extends Error {
+  constructor(readonly frame: number) {
+    super(`frame ${frame} took over ${STALL_MS / 1000} s under frame stepping`)
+  }
+}
+
+export interface SteppedTake {
+  readonly frames: number
+  readonly events: readonly LogEvent[]
+}
+
+export interface SteppedRequest {
+  readonly executable: string
+  readonly url: string
+  readonly beat: Beat
+  readonly clip: string
+}
+
+export async function filmStepped(
+  request: SteppedRequest,
+): Promise<SteppedTake> {
+  const page = await openShell(request.executable, VIEWPORT)
+  const encoder = openFrameEncoder(request.clip, FPS)
+  try {
+    let ticks = await load(page, request.url)
+    const beginFrame = (screenshot: boolean) =>
+      page.send<{ screenshotData?: string }>(
+        'HeadlessExperimental.beginFrame',
+        {
+          frameTimeTicks: (ticks += FRAME_MS),
+          interval: FRAME_MS,
+          ...(screenshot
+            ? { screenshot: { format: 'jpeg', quality: 95 } }
+            : {}),
+        },
+      )
+    await pump(beginFrame, SETTLE_MS)
+
+    const live = liveStage(page, beginFrame)
+    await performSteps(live, request.beat.setup, { pointer: START })
+    if (request.beat.setup.length > 0) await live.hold(1000)
+    await live.pointer({ type: 'move', ...START })
+
+    await page.send('Emulation.setVirtualTimePolicy', { policy: 'pause' })
+
+    const events: LogEvent[] = []
+    let frames = 0
+    let budget = 0
+    let last: Buffer | undefined
+    const expired: (() => void)[] = []
+    page.on('Emulation.virtualTimeBudgetExpired', () => expired.shift()?.())
+
+    const frame = async (): Promise<void> => {
+      const advanced = new Promise<void>((done) => expired.push(done))
+      // Virtual time waits on a fetch in flight, so a field typing into a
+      // search advances only once the page has what it asked for.
+      // A refused advance never expires its budget, which the stall reports.
+      page
+        .send('Emulation.setVirtualTimePolicy', {
+          policy: 'pauseIfNetworkFetchesPending',
+          budget: BUDGETS[budget++ % BUDGETS.length],
+        })
+        .catch(() => {})
+      const reply = await withinStall(
+        advanced.then(() => beginFrame(true)),
+        frames,
+      )
+      const data = reply.screenshotData
+        ? Buffer.from(reply.screenshotData, 'base64')
+        : last
+      if (!data) throw new Error('the first frame carried no screenshot')
+      last = data
+      await encoder.write(data)
+      frames += 1
+    }
+
+    const recording: Stage = {
+      now: () => frames * FRAME_MS,
+      hold: async (ms) => {
+        for (let i = 0; i < Math.round(ms / FRAME_MS); i += 1) await frame()
+      },
+      pointer: async (input) => {
+        const sent = page.send('Input.dispatchMouseEvent', mouseEvent(input))
+        await frame()
+        await sent
+      },
+      key: async (text) => {
+        const sent = page.send('Input.insertText', { text })
+        await frame()
+        await sent
+      },
+      evaluate: (expression) => page.evaluate(expression),
+    }
+
+    await recording.hold(HOLD_MS)
+    await performSteps(recording, request.beat.steps, {
+      pointer: START,
+      log: events,
+    })
+    await recording.hold(HOLD_MS)
+
+    await encoder.close()
+    return { frames, events }
+  } catch (error) {
+    encoder.abort()
+    throw error
+  } finally {
+    page.close()
+  }
+}
+
+/**
+ * Navigates and resolves with Chromium's monotonic clock in milliseconds, read
+ * off the load event's own timestamp. The runtime's clock cannot stand in for
+ * it: Node's `hrtime` shares the base on Linux, Bun's counts from its own
+ * start, and a frame stamped on the wrong base freezes every animation.
+ */
+async function load(page: ShellPage, url: string): Promise<number> {
+  const loaded = new Promise<number>((done) =>
+    page.on('Page.loadEventFired', ({ timestamp }) => {
+      if (typeof timestamp === 'number') done(timestamp * 1000)
+    }),
+  )
+  const navigated = await page.send<{ errorText?: string }>('Page.navigate', {
+    url,
+  })
+  if (navigated.errorText) {
+    throw new Error(`${navigated.errorText} at ${url}`)
+  }
+  const timestamp = await Promise.race([loaded, sleep(LOAD_CAP_MS)])
+  if (typeof timestamp !== 'number') {
+    throw new Error(
+      `${url} fired no load event within ${LOAD_CAP_MS / 1000} s, so no frame clock could be read`,
+    )
+  }
+  return timestamp
+}
+
+/** Begins frames in real time so loading, fonts, and layout settle. */
+async function pump(
+  beginFrame: (screenshot: boolean) => Promise<unknown>,
+  ms: number,
+): Promise<void> {
+  const end = Date.now() + ms
+  while (Date.now() < end) {
+    await Promise.race([
+      beginFrame(false).catch(() => {}),
+      sleep(LOADING_FRAME_CAP_MS),
+    ])
+    await sleep(12)
+  }
+}
+
+/**
+ * The stage setup runs on, before virtual time is paused. Its frames are begun
+ * without screenshots, since nothing before the first held frame is kept.
+ */
+function liveStage(
+  page: ShellPage,
+  beginFrame: (screenshot: boolean) => Promise<unknown>,
+): Stage {
+  const started = Date.now()
+  return {
+    now: () => Date.now() - started,
+    hold: (ms) => pump(beginFrame, ms),
+    pointer: (input) => {
+      const sent = page.send('Input.dispatchMouseEvent', mouseEvent(input))
+      return withinStall(
+        beginFrame(false).then(() => sent),
+        0,
+      ).then(() => {})
+    },
+    key: (text) => {
+      const sent = page.send('Input.insertText', { text })
+      return withinStall(
+        beginFrame(false).then(() => sent),
+        0,
+      ).then(() => {})
+    },
+    evaluate: (expression) => page.evaluate(expression),
+  }
+}
+
+function mouseEvent(input: PointerInput): Record<string, unknown> {
+  const at = { x: input.x, y: input.y }
+  switch (input.type) {
+    case 'move':
+      return { type: 'mouseMoved', ...at, button: 'none' }
+    case 'down':
+      return { type: 'mousePressed', ...at, button: 'left', clickCount: 1 }
+    case 'up':
+      return { type: 'mouseReleased', ...at, button: 'left', clickCount: 1 }
+    case 'wheel':
+      return { type: 'mouseWheel', ...at, deltaX: 0, deltaY: input.dy }
+  }
+}
+
+async function withinStall<T>(work: Promise<T>, frame: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const stalled = new Promise<never>((_, fail) => {
+    timer = setTimeout(() => fail(new StepperStalled(frame)), STALL_MS)
+  })
+  try {
+    return await Promise.race([work, stalled])
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((done) => setTimeout(done, ms))
+}

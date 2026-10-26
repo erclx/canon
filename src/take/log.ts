@@ -1,0 +1,109 @@
+import type { Route } from '@/take/plan'
+
+/**
+ * The click log a take writes beside its clip, and the pointer path both
+ * capture routes move along and the camera reads back. Every coordinate is in
+ * CSS pixels of the page, and every time is in milliseconds on the clip's own
+ * clock, so frame `n` sits at `n * 1000 / FPS` whatever route filmed it.
+ *
+ * The path lives here rather than in a capture route because the edit draws the
+ * cursor from this log, so the route moving the real pointer and the reader
+ * redrawing it have to agree on one curve.
+ */
+
+export const LOG_VERSION = 1
+
+export const FPS = 60
+
+/** The page a take films, in CSS pixels. The stepper renders it at twice this. */
+export const VIEWPORT = { width: 1920, height: 1080 } as const
+
+export interface Point {
+  readonly x: number
+  readonly y: number
+}
+
+export interface Box {
+  readonly x: number
+  readonly y: number
+  readonly width: number
+  readonly height: number
+}
+
+export type LogEvent =
+  | {
+      readonly t: number
+      readonly kind: 'move'
+      readonly from: Point
+      readonly to: Point
+      readonly ms: number
+    }
+  | {
+      readonly t: number
+      readonly kind: 'click'
+      readonly at: Point
+      readonly box: Box
+    }
+  | {
+      readonly t: number
+      readonly kind: 'type'
+      readonly at: Point
+      readonly box: Box
+      readonly chars: number
+      /** From the first key to the last, so the camera holds for the burst. */
+      readonly ms: number
+    }
+  | {
+      readonly t: number
+      readonly kind: 'scroll'
+      readonly at: Point
+      readonly dx: number
+      readonly dy: number
+      readonly ms: number
+    }
+
+export interface TakeLog {
+  readonly version: typeof LOG_VERSION
+  readonly viewport: { readonly width: number; readonly height: number }
+  readonly fps: number
+  /** The route that filmed the clip, which can differ from the one asked for. */
+  readonly route: Route
+  readonly frames: number
+  readonly events: readonly LogEvent[]
+}
+
+/** Where the pointer rests before a take's first move. */
+export const START: Point = { x: VIEWPORT.width / 2, y: VIEWPORT.height / 2 }
+
+/**
+ * How long the pointer takes to travel, slower for longer reaches and never so
+ * quick that a viewer loses it. Carried over from the groundwork takes the
+ * camera presets were judged on.
+ */
+export function travelMs(from: Point, to: Point): number {
+  return Math.min(
+    1200,
+    Math.max(300, Math.hypot(to.x - from.x, to.y - from.y) * 0.9),
+  )
+}
+
+export function easeInOutCubic(t: number): number {
+  const x = Math.max(0, Math.min(1, t))
+  return x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2
+}
+
+export function along(from: Point, to: Point, progress: number): Point {
+  const k = easeInOutCubic(progress)
+  return { x: from.x + (to.x - from.x) * k, y: from.y + (to.y - from.y) * k }
+}
+
+/** The pointer's position at a time on the clip's clock, read off the moves. */
+export function cursorAt(events: readonly LogEvent[], ms: number): Point {
+  let position = START
+  for (const event of events) {
+    if (event.kind !== 'move') continue
+    if (ms < event.t) break
+    position = along(event.from, event.to, (ms - event.t) / event.ms)
+  }
+  return position
+}
