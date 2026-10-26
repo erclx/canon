@@ -9,7 +9,7 @@ description: Why a decision settled by looking needs its own surface, and where 
 
 Without this skill, a session facing a decision settled by looking describes the options in prose or ships one answer to a taste call. The operator never sees what they chose between. A drafted set varies several properties or the wrong layer, sits in the real surface, and mixes themes and widths, so no pick names what decided it.
 
-The evidence fails as well. Arms get reported without being rendered or judged, a driver finding reads as a verdict, and the pick question arrives with no address to look at. Renders land in scratch, each round overwrites the last, and the losing arms vanish with the run's pages.
+The evidence fails as well. Arms get reported unrendered or unjudged, a driver finding reads as a verdict, and the pick question arrives with no address to look at. Renders land in scratch, each round overwrites the last, and the losing arms vanish with the run's pages. Rounds drafted off the synced board need redrawing.
 
 ## Must
 
@@ -17,7 +17,7 @@ The evidence fails as well. Arms get reported without being rendered or judged, 
 - Each round is one Frameboard page of frames at their judged widths, themed by the board toggle and captured once as a composite, with the link ahead of the first pick question
 - Every arm is rendered and judged against a stated bar before handover, and a missing browser or a board that will not start is reported as a refusal
 - The pick comes through the structured question surface with the recommendation first and every option's cost, and the winner lands in one change
-- Every round stays openable on its own page until the pick, and the picked round's arms are captured into the citing record at the main root before the run's pages go
+- Rounds sit on the board the design config names, each openable until the pick, and the picked arms are archived at the main root before the run's pages go
 
 ## Must not
 

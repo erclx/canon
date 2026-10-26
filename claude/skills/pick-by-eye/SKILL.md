@@ -9,7 +9,7 @@ metadata:
 
 Some decisions are settled by looking rather than by reasoning, and no draft is wrong until one is picked. Every step here puts several candidates in front of the operator and keeps the real surface untouched until they have chosen.
 
-The candidates live on a Frameboard board at `.canon/canvas/`, in a project named `picks` so rounds never mix with an operator's project. Read `${CLAUDE_SKILL_DIR}/references/board.md` before the first `frameboard` verb, for the flags every verb carries and how a selection resolves.
+The candidates live on the Frameboard board the project names, in a project of their own so rounds never mix with the operator's frames. Read `${CLAUDE_SKILL_DIR}/references/board.md` before the first `frameboard` verb, for how `<board>` and `<project>` resolve, the flags every verb carries, and how a selection resolves.
 
 ## Guards
 
@@ -34,7 +34,7 @@ Inside a live `plan-groundwork` track, renders land in the track's own `evidence
 Every arm of a round sits as one frame on one board page, side by side. The operator judges that page, never a set of separate images compared from memory.
 
 1. Start the board the way `references/board.md` states, unless this run already has. Note whether this run started the server, read off `reused`, since Step 6 ends only a server this run started.
-2. Read `frameboard list --root <board> --json` with no `--project`, so it lists every project. Run `frameboard project add picks --root <board> --json` when it lists no `picks`.
+2. Read `frameboard list --root <board> --json` with no `--project`, so it lists every project. Run `frameboard project add <project> --root <board> --json` when it lists no `<project>`.
 3. Add the round's page with `frameboard page add <page>` and record its `ref` on the run's list of pages. A `name-taken` refusal means the name is somebody else's, so take the next free suffix.
 4. Add each arm with `frameboard frame add <page>/arm-<id> --width <px> --height <px> --x <px> --y <px>`, placing the frames in one row in arm order. Step 6's archive keys on the `arm-<id>` names.
 5. Write each arm's whole document to the `path` the add verb reported. From a linked worktree, take the heredoc route `session-worktree` gives for a main-root write.
@@ -72,7 +72,7 @@ Vary one property across the arms, since a pick cannot say which of three differ
 Render the page and look at what came back before handing anything over:
 
 ```bash
-frameboard capture --page <page> --composite --root <board> --project picks --json
+frameboard capture --page <page> --composite --root <board> --project <project> --json
 ```
 
 - Point `--out` at `evidence/<slug>/renders/` inside a live track, and leave the board's default elsewhere. Step 6 archives the picked round alone.
@@ -118,14 +118,22 @@ Read the selection when the answer points at the board, such as "the selected on
 2. Close out any document stating the decision as open, in the same change, naming the winner and the arms that stayed defensible. Skip this where nothing stated the decision.
 3. Hand the winning frame's ref to `canon:design-record`, which lands it in the project's design record. Report it rather than proceeding silently when that skill does not resolve.
 4. Capture the picked round's frames with `frameboard capture --page <page> --out <canon-dir>`, keeping the losing arms as a revert record. Report each image's `path` off the record.
-5. Resolve `<canon-dir>` as `.canon/` against the main worktree root, since shared session scratch resolves there. Frameboard appends the project and page, so the archive lands at `.canon/picks/<page>/`.
-6. Delete every page on the run's list with `frameboard page delete <page>`. Touch no page the run did not add, whatever its name, and never remove a page folder by hand.
+5. Resolve `<canon-dir>` as `.canon/` against the main worktree root, where shared session scratch resolves. Frameboard appends the project and page, so the archive lands at `.canon/<project>/<page>/`.
+6. Delete every page on the run's list with `frameboard page delete <page>`, except a picked page on a named board. Touch no page the run did not add, and never remove a page folder by hand.
 7. End the serve command if this run started it, since Frameboard carries no stop verb. Leave a server the operator started running.
 8. Leave the renders in a live track's `evidence/<slug>/renders/`, since `plan-groundwork` treats evidence as durable.
-9. Report each page whose delete is refused, naming its `ref` and the `error.code`. The pick is applied either way.
+9. Report each page or frame whose delete is refused, naming its `ref` and the `error.code`. The pick is applied either way.
 10. Report every surface that changed, each on its own line, name the winning arm by its id and its cost, and report the archive path.
 
 The picked round is the final one unless Step 4 resolved a revert. Archiving any other page lets item 6 delete the winning arm with nothing kept, and a variant left on the board is a second design nobody maintains.
+
+### On a named board
+
+A board `canon/config/design.toml` names is the one the project's design sync reads, and once `design-record` lands the pick, the sync's mapping points at the winning frame. Deleting that page leaves a later redraw nothing to read.
+
+- Keep the picked round's page and its winning frame
+- Delete each losing arm on it with `frameboard frame delete <page>/arm-<id>`, after item 4's capture has archived it
+- Delete every other page on the run's list as item 6 states
 
 ## Reading a measurement
 
@@ -142,7 +150,7 @@ A capture proves appearance and a measurement proves a relationship, so reach fo
 Cite these rather than restating them. A step reimplemented here rots against the skill that owns it.
 
 - `plan-feature` plans the work once the pick is made, and declares the pull request boundary that plan carries
-- `design-record` lands the winning frame in the reference folder and its values in the design document, and runs before item 6 deletes the page its sync reads
+- `design-record` lands the winning frame in the reference folder and its values in the design document, and runs before item 4's capture and item 6's deletes, which keep the picked page on named boards
 - `design-taste` carries the layer catalog, the ordering, grey-boxing, and the defaults an arm should reach past
 - `write-human` carries the voice for any copy an arm puts in front of a reader
 

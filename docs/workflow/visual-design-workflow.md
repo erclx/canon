@@ -74,6 +74,11 @@ A close posts as `## UI review closed`. The reviewers lift the draft mark on the
 
 Most projects author design in the loop above and need nothing more. Start with `canon:pick-by-eye`, which drafts candidates as frames on a [Frameboard](https://www.npmjs.com/package/frameboard) board and takes your pick, then record the pick with `canon:design-record`. `canon:design-identity` drafts a logo mark and social card the same way.
 
+A pick round drafts on `.canon/canvas/` unless the project names another board in `canon/config/design.toml`.
+
+- Set `board` when your design sync reads another Frameboard board, so the picked frame lands without a redraw.
+- Leave `project` unset to keep rounds in their own `picks` project on that board.
+
 A graphical tool earns its place when design is the product, a designer owns it, and it changes more often than code. Then the tool is the source of truth, and `canon/DESIGN.md` carries a top note naming the upstream project.
 
 - Figma with the official [Figma Dev Mode MCP](https://www.figma.com/blog/introducing-claude-code-to-figma/), for a team already on Figma. It syncs both ways and captures a running UI into editable frames.
