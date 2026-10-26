@@ -114,7 +114,7 @@ export default scenario({
         '         have FFmpeg on PATH, and put a checkout canon carrying take first on PATH',
       )
       ctx.log.info(
-        'Action:  /canon:ui-record film the beats in video/STORYBOARD.md',
+        'Action:  /canon:ui-record film the beats in video/STORYBOARD.md. No operator is present, so treat the beats as approved once shown and film them',
       )
       ctx.log.info(
         'Expect:  two plain beats shown for approval before anything is filmed, then after',
