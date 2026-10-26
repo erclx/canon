@@ -55,6 +55,7 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 | `canon:document-health` | Documents must answer for length and staleness |
 | `canon:ux-audit`        | To read UI source for missing states           |
 | `canon:ux-measure`      | To measure paint, processor, and layout cost   |
+| `canon:app-drive`       | To drive a built app with the operator         |
 
 ## Ship it
 
