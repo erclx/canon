@@ -28,6 +28,8 @@ access = "/write?token=demo"
 - An absent `access` opens the served root
 - `personas` and `proposals` belong to `app-drive`, and a take reads neither
 
+Every beat opens the address fresh in its own browser, so a link the app honors once, such as a single-use edit ticket, serves one beat alone. Mint a fresh link and run `canon take` once per beat for such an app, or a later beat opens the page without the access the first one spent.
+
 ## When the file is absent
 
 Ask the operator for `launch`, `data`, and `access` once, before the copy is built, putting each through the structured question surface with a proposed default.
