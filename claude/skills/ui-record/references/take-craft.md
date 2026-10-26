@@ -86,6 +86,6 @@ The camera track already carries the zoom, so these rules decide what to film fo
 | The 1 s ceiling            | Material Design 3's [duration tokens](https://m3.material.io/styles/motion/easing-and-duration/tokens-specs) end at 1000 ms, the top of the ambient band |
 | The 633 ms push            | Twelve moves in a Screen Studio clip reached 90% in a median of 667 ms, measured frame by frame when the camera was tuned                                |
 | The typing and scroll risk | Takes of a canvas design board filmed while the stepper was built                                                                                        |
-| Jumping scrolls and GIFs   | [demo-reel PR #28](https://github.com/hasuwini77/demo-reel/pull/28), read through a search summary rather than the page                                  |
+| Jumping scrolls and GIFs   | [hasuwini77/demo-reel#28](https://github.com/hasuwini77/demo-reel/pull/28), read through a search summary rather than the page                           |
 
 The pointer rules carry no number. One pointer and a click inside its box follow from the log recording each target's box.
