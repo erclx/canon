@@ -29,6 +29,6 @@ Asked to report, a session also starts diagnosing, which spends the context the 
 ## Out of scope
 
 - Fixing the defect, which happens in the toolkit repository against its own source
-- Draining the queue this fills, which `canon-feedback-triage` owns
+- Draining the queue this fills, which the toolkit's maintainers do in its own repository
 - Filing an issue against the current project, which `git-issue` owns
 - Complaints about tooling the toolkit does not own

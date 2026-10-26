@@ -1,15 +1,13 @@
 ---
-name: canon-feedback-triage
+name: internal-feedback-triage
 description: Files every open GitHub issue labeled `feedback` on the toolkit repo into an intake folder as one measured item each, skipping any issue the board already carries. Use when asked to "triage toolkit feedback", "work through the feedback issues", "process feedback issues", or "what feedback is open". Do NOT use to file new feedback (that is `canon-feedback`), to answer the filed items (that is `plan-intake-answer`), or for general GitHub issue triage unrelated to toolkit feedback.
-metadata:
-  family: upkeep
 ---
 
-# Canon feedback triage
+# Internal feedback triage
 
 Consume the feedback queue that `canon feedback` fills. Each open `feedback` issue is measured against the tree and filed as one item for the operator, who answers it before anything is built.
 
-The record is an ordinary intake folder at `.canon/intake/<nn>-feedback-triage/`. Read `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md` before writing any file in it, since it holds the item format, the frontmatter, the index shape, and the answer contract this skill is bound by.
+The record is an ordinary intake folder at `.canon/intake/<nn>-feedback-triage/`. Read `claude/skills/plan-intake/references/intake.md` before writing any file in it, since it holds the item format, the frontmatter, the index shape, and the answer contract this skill is bound by.
 
 - Run from the toolkit repo root
 - Read GitHub issues and write only inside the claimed folder, posting no comment, close, or label to GitHub

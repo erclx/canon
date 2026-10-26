@@ -97,7 +97,7 @@ Fix the feedback CLI so it applies the `feedback` label.
 
 ## Details
 
-`canon feedback` opens an issue with no label, so `canon-feedback-triage` never lists it.
+`canon feedback` opens an issue with no label, so the toolkit's triage never lists it.
 
 ## Context
 

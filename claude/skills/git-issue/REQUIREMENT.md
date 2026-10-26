@@ -28,5 +28,5 @@ Prose bans hold on files the hook watches and not on text leaving through `gh`, 
 ## Out of scope
 
 - Reporting a toolkit defect from a target project, which `canon-feedback` owns
-- Triaging issues already filed, which `canon-feedback-triage` owns
+- Triaging the toolkit's feedback issues, which its maintainers do in its own repository
 - Opening a pull request, which `git-pr` owns

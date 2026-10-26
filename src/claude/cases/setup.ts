@@ -54,11 +54,6 @@ export const SETUP_CASES: readonly SkillCase[] = [
       "Whatever the right toolkit command is, get this project's rules installed.",
     expect: 'target-setup',
   },
-  {
-    prompt:
-      'File the open feedback issues on the toolkit repo into an intake folder.',
-    expect: 'canon-feedback-triage',
-  },
   // This answers one fixed question across a fixed domain list and repairs
   // nothing, which is what separates it from the setup skill above.
   {
