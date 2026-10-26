@@ -53,19 +53,32 @@ Write the pre-compaction handoff as orchestrator. Invoke `canon:session-map` for
 
 Settle all three steps below before the door writes, so one write carries the core and the extension together. The door's success line ends the generic half rather than this runbook, so a session stopping there ships a map missing everything this section adds.
 
-1. Add `## Decisions taken under delegated authority` directly after `## State`, holding each decision and why it went that way, so nobody re-proposes it.
+1. Add `## Decisions taken under delegated authority` directly after `## State`, holding only the rules and holds this session set that die with the wave.
+   - End each with `(until <event>)`, naming what retires it, so the next session re-tests it rather than obeying it
+   - Write `None.` when nothing is still in force
    - It sits there because a decision is read against the state it was taken in
 2. Add `## Talk sessions held open` directly after that, one line per open talk session giving its name, its `sessionId`, and its row, or `None.`.
    - The next session reads it to know which sessions it must not retire on a delivery
-3. Close the file with the block below, resolving each runbook path to an absolute one as you write it.
+3. Close the file with the block below under a `## Resume` heading, resolving each runbook path to an absolute one as you write it.
+   - The heading is what keeps the block out of the map's word count
    - Paste `${CLAUDE_SKILL_DIR}/references/orchestrator-resume.md` resolved in place of `<RESUME_RUNBOOK>`
    - Paste `${CLAUDE_SKILL_DIR}/references/orchestrator-poll.md` resolved in place of `<POLL_RUNBOOK>`
 
 ```markdown
+## Resume
+
 Resume by loading the orchestrator skill and asking it to resume after a compaction. This repository spells that `/canon:role-orchestrator` followed by the request. Following <RESUME_RUNBOOK> reaches the same place with no skill loaded at all.
 
 That resume reads the board and stops. It restarts nothing, so the review poll is a second thing owed here, and <POLL_RUNBOOK> holds the prompt and the condition. Do not reach for `session-resume`, which reads tracked work and reports the newest map without restarting this loop.
 ```
+
+### What the decisions section leaves out
+
+A decision is in force or it is history, and only the first changes what the next session does.
+
+- Drop a finished act, such as a merge taken, a session retired, or a row placed. Version control, the board, and the roster already carry it.
+- Route a rule that outlives the wave per `## Where a lesson goes` below, since a standing rule left in the map is obeyed after its reason is gone
+- Keep a hold this session placed on a row or a session, with the event that lifts it
 
 ### Why these sections are the orchestrator's
 

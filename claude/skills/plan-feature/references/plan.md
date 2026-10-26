@@ -94,7 +94,7 @@ Four rules govern how a section is written:
 
 ### Structure
 
-Every hand-written record under `.canon/` holds to six criteria, being a plan, a groundwork file, an intake item, a task, a session map, and a compact note. None caps length, since a record follows the change it describes and is disposable once it ships.
+Every hand-written record under `.canon/` holds to six criteria, being a plan, a groundwork file, an intake item, a task, a session map, and a compact note. None caps length but the session map, since a record follows the change it describes and is disposable once it ships. A map is read cold after every compaction, so it carries its own cap.
 
 | ID   | Criterion                                                                    |
 | ---- | ---------------------------------------------------------------------------- |
