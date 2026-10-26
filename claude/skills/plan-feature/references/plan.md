@@ -75,7 +75,7 @@ The document opens with `# Feature: <short title>` and one paragraph stating wha
 | `## Current behavior`  | each command run against the thing being changed and what it showed         | When the change touches something that runs       |
 | `## Constraints`       | durable rules the work must respect                                         | When supplied                                     |
 | `## Files to touch`    | each file with a one-line reason                                            | Always                                            |
-| `## Verbatim`          | settled wording that lands unchanged in an existing file, one H3 per block  | When wording is settled                           |
+| `## Verbatim`          | settled wording that lands unchanged in a file, one H3 per block            | When wording is settled                           |
 | `## Design references` | the tracked design folders the change builds against, each with its surface | When Files to touch names a rendered-surface file |
 | `## Reference images`  | the untracked images the plan was shaped against, each from the main root   | When an image shaped the plan                     |
 | `## Verification`      | the test or command that proves each outcome                                | Always                                            |
