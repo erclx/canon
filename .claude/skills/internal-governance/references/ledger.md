@@ -44,7 +44,7 @@ Each row names the bullet and the one thing behind it.
 
 - **Sourced:** a link to the primary source, with the line it says, such as the framework's own docs or the language spec
 - **House choice:** the bug class the bullet prevents, when no outside source takes a side
-- **Core decision:** a house choice naming what the bullet prevents and the option it beat, with the date and an `owner/repo#123` pull request in `Read`
+- **Core decision:** a house choice naming what the bullet prevents and the option it beat, with the decision date alone in `Read`
 - **Core, reason lost:** `House choice: Unknown` where nobody remembers why a touched bullet exists, which marks it for `internal-rule-audit`
 - Cut an outside-practice bullet that has neither a source nor a bug class, rather than writing a row that says so
 
@@ -67,9 +67,9 @@ description: Sources for governance/rules/framework/react.md, one row per bullet
 A core row reads the same way, with the decision in `Read`:
 
 ```markdown
-| Bullet                            | Source                                                                                                                                     | Read                         |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------- |
-| Keep a seconds command foreground | House choice: each wake costs a turn, so backgrounding a quick command spends two turns where one did. It beat backgrounding every command | 2026-10-26, erclx/canon#2762 |
+| Bullet                            | Source                                                                                                                                     | Read       |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| Keep a seconds command foreground | House choice: each wake costs a turn, so backgrounding a quick command spends two turns where one did. It beat backgrounding every command | 2026-10-26 |
 ```
 
 The worked ledgers from groundwork 158 showed both kinds of row, and each pass changed the rule it recorded, so write the ledger and the rule's rewrite together.
