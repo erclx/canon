@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { isBrowserMissing, isServerUnreachable } from '@/browser/engine'
+import { cameraTrack } from '@/take/camera'
 import { FfmpegMissing, requireFfmpeg } from '@/take/encode'
 import {
   FPS,
@@ -42,6 +43,7 @@ export interface FilmedBeat {
   readonly seconds: number
   readonly clip: string
   readonly log: string
+  readonly camera: string
 }
 
 export type TakeResult =
@@ -149,6 +151,9 @@ async function filmBeat(
   }
   const logPath = join(dir, 'log.json')
   writeFileSync(join(out, logPath), `${JSON.stringify(log, null, 2)}\n`)
+  // One line, since it carries a row per frame and nobody reads it by eye.
+  const cameraPath = join(dir, 'camera.json')
+  writeFileSync(join(out, cameraPath), `${JSON.stringify(cameraTrack(log))}\n`)
 
   return {
     name: beat.name,
@@ -160,6 +165,7 @@ async function filmBeat(
     seconds: Number((filmed.frames / FPS).toFixed(2)),
     clip,
     log: logPath,
+    camera: cameraPath,
   }
 }
 

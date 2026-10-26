@@ -3,6 +3,7 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import type { CameraTrack } from '@/take/camera'
 import type { TakeLog } from '@/take/log'
 import { readTakePlan } from '@/take/plan'
 import { findShell } from '@/take/shell'
@@ -158,6 +159,11 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
         box: { x: 100, y: 100, width: 200, height: 60 },
       }),
     ])
+
+    const camera = JSON.parse(
+      readFileSync(join(out, beat.camera), 'utf8'),
+    ) as CameraTrack
+    expect(camera.frames).toHaveLength(beat.frames)
   }, 180_000)
 
   it('should film a screencast beat at the viewport size and the same rate', async () => {
