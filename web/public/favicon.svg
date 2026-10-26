@@ -1,8 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 10 80 80">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20.97 -25.62 151.25 151.25">
   <style>
-    path, rect { fill: #c42938; }
-    @media (prefers-color-scheme: dark) { path, rect { fill: #e54e40; } }
+    .tile { fill: #1b1a18; stroke: #1b1a18; }
+    .c { fill: #d9d7d4; }
+    .pip { fill: #ff6b42; }
+    @media (prefers-color-scheme: light) {
+      .tile { fill: #fbfaf8; stroke: #dcdad6; }
+      .c { fill: #2c2c29; }
+      .pip { fill: #c2380e; }
+    }
   </style>
-  <path d="M34,20 L15,28 L15,72 L34,80 Z M66,20 L85,28 L85,72 L66,80 Z" />
-  <rect x="44" y="15" width="12" height="70" rx="2" />
+  <rect class="tile" x="-18.97" y="-23.62" width="147.25" height="147.25" rx="40.35" stroke-width="4" />
+  <g class="c">
+  <path d="M82.28,32 A30,30 0 0 0 54,12 H38 A30,30 0 0 0 8,42 V58 A30,30 0 0 0 38,88 H54 A30,30 0 0 0 82.28,68 H38 A10,10 0 0 1 28,58 V42 A10,10 0 0 1 38,32 Z" />
+  <rect class="pip" x="81.3" y="40" width="20" height="20" rx="3.8" fill="#c2380e" />
+  </g>
 </svg>

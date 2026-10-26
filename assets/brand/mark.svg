@@ -1,10 +1,18 @@
-<!-- A bound ledger: two pages fanned open around a spine, drawn as three
-     solid masses rather than thin strokes, so the shape survives being
-     rendered at favicon size instead of averaging into grey. The 10-unit
-     gap between each page and the spine, against an 80-unit frame, is what
-     keeps the split a visible channel at 16px; a first draft at half that
-     gap closed into an unreadable blob at the same size. -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 10 80 80">
-  <path d="M34,20 L15,28 L15,72 L34,80 Z M66,20 L85,28 L85,72 L66,80 Z" fill="currentColor" />
-  <rect x="44" y="15" width="12" height="70" rx="2" fill="currentColor" />
+<!-- A squarish bold c with one pip just past its mouth, in a 100 unit grid.
+     The body is a 76 square at (8, 12) with corner radius 30, stroked 20, so
+     the counter is a 36 square at (28, 32) with corner radius 10. The mouth is
+     cut from x 46 to the right edge level with the counter, so the inside runs
+     straight out of its curve, and the arm ends fall where that cut meets the
+     outer corners. The pip is one stroke wide, a 20 square at (81.3, 40) with
+     corner radius 3.8, on the center line. The view is centered on the bounds
+     so the pip does not clip.
+
+     The c is one outline rather than a masked square, and nothing carries an
+     id, since the nav, the hero, and the card inline this file and two inlined
+     copies sharing an id collide. The c fills currentColor so an inlining
+     surface hands it the text ink, and the pip carries its own fill under a
+     class a CSS rule overrides with the brand pair. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-0.35 -5 110 110">
+  <path d="M82.28,32 A30,30 0 0 0 54,12 H38 A30,30 0 0 0 8,42 V58 A30,30 0 0 0 38,88 H54 A30,30 0 0 0 82.28,68 H38 A10,10 0 0 1 28,58 V42 A10,10 0 0 1 38,32 Z" fill="currentColor" />
+  <rect class="pip" x="81.3" y="40" width="20" height="20" rx="3.8" fill="#c2380e" />
 </svg>
