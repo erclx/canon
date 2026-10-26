@@ -49,6 +49,7 @@ Each verb here has a skill that owns the job. Load the skill rather than driving
 | Serve a directory and print the link         | `canon serve`       | none                        |
 | Report one computed property across routes   | `canon inventory`   | `canon:target-check`        |
 | Walk a page through interactions and measure | `canon drive`       | `canon:ux-measure`          |
+| Drive the pinned agent browser               | `canon browser`     | `canon:review-ui`           |
 | Fetch a YouTube transcript                   | `canon transcripts` | `canon:youtube-transcripts` |
 
 The design board is Frameboard, a separate CLI outside canon, so a board job runs a `frameboard` verb rather than a `canon` one.
