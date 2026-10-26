@@ -31,6 +31,18 @@ Each frame carries `scale`, the view's top-left `x` and `y`, the `cursor`, and `
 
 The track is final. It already carries the easing, the spring, and the hold, so a composition sets each frame's values and never tweens between them.
 
+## Where the composition lives
+
+The HyperFrames project sits in the same workspace as the takes, so one folder holds everything a video is made from.
+
+```bash
+npx hyperframes init .canon/video/<slug>/composition
+```
+
+- Read each clip from `../takes/<dir>/clip.mp4`, relative to the project, rather than copying it in
+- Leave renders in the project's `renders/` folder, which `canon records push` skips along with `takes/`, `snapshots/`, `node_modules/`, and any video file
+- An image the composition adds under `assets/`, such as a logo, is backed up with the project's source
+
 ## Applying it in a composition
 
 Load `hyperframes-core` for placing the clip and `hyperframes-keyframes` for the wrapper's transform before writing the composition.
