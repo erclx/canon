@@ -274,9 +274,9 @@ describe('planRecordLayout', () => {
 
     const plan = await planFrom(root)
 
-    expect(
-      movesTo(plan).some((move) => move.from === '.canon/canvas'),
-    ).toBe(false)
+    expect(movesTo(plan).some((move) => move.from === '.canon/canvas')).toBe(
+      false,
+    )
     expect(plan.collisions).toContain(join(root, '.canon/board'))
   })
 
