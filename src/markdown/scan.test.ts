@@ -6,6 +6,7 @@ import {
   maskDisplayed,
   scanBans,
   visibleText,
+  wordCount,
 } from '@/markdown/scan'
 
 const BANS: BanSets = {
@@ -199,5 +200,19 @@ describe('scanBans', () => {
       [1, ';'],
       [3, ';'],
     ])
+  })
+})
+
+describe('wordCount', () => {
+  it('should count whitespace-delimited tokens across lines', () => {
+    expect(wordCount('one two\n\n  three\tfour ')).toBe(4)
+  })
+
+  it('should count a code span as the tokens it holds', () => {
+    expect(wordCount('see `src/a.ts` and `b c`')).toBe(5)
+  })
+
+  it('should count nothing in blank text', () => {
+    expect(wordCount(' \n\t')).toBe(0)
   })
 })

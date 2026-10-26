@@ -123,6 +123,16 @@ export function bodyLines(source: string): BodyLine[] {
 }
 
 /**
+ * Counts whitespace-delimited tokens, the unit a record's word cap is stated
+ * in. A code span counts as the tokens it holds, so a line citing a long path
+ * pays for it the way a reader does. A caller gating on the count hands in
+ * prose with fenced lines already dropped.
+ */
+export function wordCount(text: string): number {
+  return text.match(/\S+/g)?.length ?? 0
+}
+
+/**
  * Drops every fenced block from raw text, frontmatter included as content.
  *
  * The record validators read whole files whose frontmatter is part of what they

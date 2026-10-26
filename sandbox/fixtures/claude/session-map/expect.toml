@@ -48,7 +48,9 @@ write_scope = [".canon/tasks/**"]
 
 # The path comes off the skill's own Output block. The fixture fixes the branch,
 # so this reads back off provisioning rather than off how one run worded a line.
-reply = [".canon/tasks/session-csv-export.md"]
+# The cap closes that block, and a run reaches it only by running the length
+# check, since the count beside it moves with what the run wrote.
+reply = [".canon/tasks/session-csv-export.md", "of 350 words"]
 
 manual = [
   "The map reports what each step actually returned rather than what the session expected it to. Semantic: a prediction and a result read alike in the written text, so the blocks below catch a map silent about a step and not a map that guessed.",

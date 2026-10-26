@@ -14,7 +14,7 @@ The drift step reads a start commit nothing on the machine records, so naming th
 ## Must
 
 - An orchestrating session, or a request naming the session map or the board, reaches the write without the skill asserting a role the session does not hold
-- The filename, frontmatter, sections, numbered steps, and citation rule come from the standard by citation, never restated
+- The filename, frontmatter, sections, numbered steps, citation rule, and length cap come from the standard by citation, and the output closes on the count the check reported
 - The drift step runs, its start ref is recovered from how long the session has run, and what the verb names or refuses is recorded as the boundary of what it read
 - The file lands whole at the main worktree root, through the shell where the editing tools refuse that root, under the branchless filename when the slug is empty
 - Model invocation stays enabled, so a session that has dropped its routing still reaches the write by description

@@ -58,4 +58,5 @@ Branch on `reason` in the `--json` record, not the exit code.
 
 - `canon records ordinal <kind> <slug> --claim`: reserve the next intake or groundwork ordinal
 - `canon records validate <kind> [record] --help`: where a record disagrees with its standard, plus a `structure` report that never sets the exit
+- `canon records validate sessions [stem]`: each session map's words against its cap, under a `length` report that never sets the exit
 - `canon records stale --help`: when the requirements and design records were last reviewed

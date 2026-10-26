@@ -288,4 +288,68 @@ describe('canon records validate plans', () => {
       reason: 'no-record',
     })
   })
+
+  it('should carry no length field on the plans record', async () => {
+    const result = await runCli([
+      'records',
+      'validate',
+      'plans',
+      '--json',
+      '--root',
+      root,
+    ])
+
+    expect(JSON.parse(result.stdout)).not.toHaveProperty('length')
+  })
+})
+
+describe('canon records validate sessions', () => {
+  let root: string
+
+  beforeEach(async () => {
+    root = await mkdtemp(join(tmpdir(), 'canon-records-validate-sessions-'))
+    await mkdir(join(root, '.canon', 'tasks'), { recursive: true })
+    await writeFile(
+      join(root, '.canon', 'tasks', 'session-orchestrator.md'),
+      `# Session map\n\n${Array.from({ length: 400 }, () => 'word').join(' ')}\n`,
+    )
+  })
+
+  afterEach(async () => {
+    await rm(root, { recursive: true, force: true })
+  })
+
+  it('should exit 0 on a map over the cap and carry its count', async () => {
+    const result = await runCli([
+      'records',
+      'validate',
+      'sessions',
+      '--json',
+      '--root',
+      root,
+    ])
+
+    expect(result.exitCode).toBe(0)
+    expect(JSON.parse(result.stdout)).toMatchObject({
+      ok: true,
+      kind: 'sessions',
+      findings: [],
+      length: [
+        { record: 'session-orchestrator.md', words: 400, cap: 350, over: true },
+      ],
+    })
+  })
+
+  it('should name the count against the cap in the human report', async () => {
+    const result = await runCli([
+      'records',
+      'validate',
+      'sessions',
+      '--root',
+      root,
+    ])
+
+    expect(result.exitCode).toBe(0)
+    expect(result.stderr).toContain('session-orchestrator.md: 400 of 350 words')
+  })
 })

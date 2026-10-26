@@ -18,6 +18,7 @@ Applies to `.canon/tasks/session-<slug>.md`. A session writes one before a compa
 - [Filename and location](#filename-and-location)
 - [Frontmatter](#frontmatter)
 - [Sections](#sections)
+- [Length](#length)
 - [Writing one](#writing-one)
 - [Reading one back](#reading-one-back)
 - [Extending it](#extending-it)
@@ -63,20 +64,30 @@ A session map failing these is non-conforming even when it satisfies every shape
 Three sections form the core, in this order, and every session fills all three.
 
 - `## State`: what is clean, what is running, what is open, and any untracked file that needs committing
-- `## Mistakes worth not repeating`: what went wrong and the rule it yields
+- `## Mistakes worth not repeating`: one line per mistake, written as the habit it yields
 - `## Standing cautions`: commands that lie, tools that measure the wrong tree, and anything unbacked
 
 Add a section only for content that fits none of the three and would otherwise be lost. Every section holds to the six criteria under `### Structure` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
+
+## Length
+
+A map holds at most 350 words, so the session resuming from it reads it in about a minute.
+
+- The count covers the body below the title. Frontmatter, the title line, and a `## Resume` section a role closes the file with stay out of it.
+- `canon records validate sessions` reports each map's count against the cap and never fails the run, since a write refused near a compaction loses the reasoning the map exists to hold
+- A map over the cap is cut at its next rewrite, starting with whatever another artifact already carries
+- A CLI older than the plugin refuses the kind as `unknown-kind`, and that refusal is the boundary the count line reports, never a reason to skip the step
 
 ## Writing one
 
 The `session-map` skill is the invocable route onto this procedure and holds no role, so a session reaching for a handoff without knowing this document exists still lands here. A session that arrives at this document directly follows the steps below unchanged.
 
-1. Run `canon claude skills drift <the commit this session started from>` and record what it names under `## Standing cautions`.
+1. Run `canon claude skills drift <the commit this session started from>` and record what it names under `## Standing cautions`, in one line when it refuses.
 2. Recover that commit with `git log -1 --format=%H --before='<duration> ago'`, rounding the session's running time up rather than down.
 3. Write only what a compaction destroys and no other artifact already carries. The board holds the ordering, a task file its findings, and a measurement folder its track.
-4. Cite a commit, a task, or a file and line for every claim, so the next session can tell a read from a recall.
-5. Fill a section from reasoning the session actually holds.
+4. Cite a commit, a task, or a file and line for every claim about the tree, so the next session can tell a read from a recall. A rule or a habit carries no citation.
+5. Fill a section from reasoning the session holds, starting from the board and the live roster `canon sessions list` reads rather than from the prior map.
+6. Run `canon records validate sessions session-<slug>` and report the count it names against the cap, or its `reason` in one line when it refuses.
 
 Do not restate the board, and do not summarize the work that shipped, since version control already carries it.
 
@@ -86,6 +97,7 @@ A skill body enters a session once, and re-invoking the skill does not re-read t
 
 - Recording a name is not acting on it, and the verb misses a body this session edited and has not committed
 - The step belongs to session length rather than any role, so every writer runs it. A refusal names the boundary of what the verb can read rather than a fault.
+- One line holds a refusal, naming the boundary it reported. Every consumer repository refuses, so a paragraph explaining why repeats the same words in every map.
 
 ### Recovering the start commit
 
@@ -96,6 +108,8 @@ An empty result means no commit predates the window. Take the oldest commit the 
 ### Filling from what the session holds
 
 A session with no cross-feature picture that fills `## State` from git has written a summary of the tree. The reader produces that faster than they can read it.
+
+A writer that opens the prior map edits it rather than rewriting it, and every entry it carries survives one more compaction whether or not it is still true. The board and the roster show what is live now, so a line the prior map held returns only when this session still holds its reason.
 
 ## Reading one back
 
@@ -129,7 +143,7 @@ description: <what the board cannot show, and the date it was written>
 
 ## Mistakes worth not repeating
 
-<what went wrong and the rule it yields>
+<one line per mistake, written as the habit it yields>
 
 ## Standing cautions
 
