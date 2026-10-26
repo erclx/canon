@@ -90,8 +90,12 @@ export async function take(request: TakeRequest): Promise<TakeResult> {
     }
   }
 
+  // Probes the origin rather than the address, since an address can carry a
+  // single-use ticket that a probe would spend before the browser opens it.
   try {
-    await fetch(request.url, { signal: AbortSignal.timeout(REACH_TIMEOUT_MS) })
+    await fetch(new URL(request.url).origin, {
+      signal: AbortSignal.timeout(REACH_TIMEOUT_MS),
+    })
   } catch (error) {
     return failed('server-unreachable', error)
   }

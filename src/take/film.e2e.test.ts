@@ -116,6 +116,9 @@ const ONE_BEAT = JSON.stringify({
 describe.skipIf(!available())('a frame-stepped take of a served page', () => {
   let server: { url: string; stop: () => void }
   let out: string
+  // Counts each open of the single-use address, the way an app redeems a
+  // ticket in its access link.
+  let onceHits = 0
 
   beforeAll(() => {
     const served = Bun.serve({
@@ -127,6 +130,7 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
           await Bun.sleep(SLOW_MS)
           return new Response('ok')
         }
+        if (pathname === '/once') onceHits += 1
         return html(PAGE)
       },
     })
@@ -260,5 +264,19 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       status: 'filmed',
       beats: [{ name: 'load', route: 'step' }],
     })
+  }, 180_000)
+
+  it('should open the address once, so a single-use link reaches the page unspent', async () => {
+    const read = readTakePlan(
+      JSON.stringify({
+        beats: [{ name: 'open', steps: [{ kind: 'wait', ms: 100 }] }],
+      }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+    onceHits = 0
+
+    await take({ url: new URL('/once', server.url).href, plan: read.plan, out })
+
+    expect(onceHits).toBe(1)
   }, 180_000)
 })
