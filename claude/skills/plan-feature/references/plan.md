@@ -181,7 +181,9 @@ A `## Verbatim` section carries wording someone settled, landing in a file exact
 - Name the outcome in a grep bullet and put a command past 200 characters in a fenced `bash` block under it, since `S4` reports a longer bullet
 - Give each block one `## Verification` bullet running `grep -cF -e` on its whole first line against its file, so a reworded line fails a check the reviewer already runs.
 
-A Create block makes a new file, so its lead names a path that does not exist yet and no anchor. Keep it to 80 lines. A longer new file goes in `## Files to touch` for the executing session to write, since a plan carrying a whole skill body costs every session that reads it.
+A Create block makes a new file, so its lead names a path that does not exist yet and no anchor. Its grep bullet takes the first distinctive line, such as the `title:` line or the H1, since a markdown file opens on `---` and that line matches any file with frontmatter.
+
+Keep a Create block to 80 lines. A longer new file goes in `## Files to touch` for the executing session to write, since a plan carrying a whole skill body costs every session that reads it.
 
 ### Design references
 
