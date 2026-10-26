@@ -24,6 +24,18 @@ const PAGE = readFileSync(
   'utf8',
 )
 
+const FETCH_PAGE = readFileSync(
+  new URL('./fixtures/fetch.html', import.meta.url),
+  'utf8',
+)
+
+/** Longer than the stall limit, so a stepper waiting on it falls back. */
+const SLOW_MS = 3000
+
+function html(body: string): Response {
+  return new Response(body, { headers: { 'content-type': 'text/html' } })
+}
+
 function available(): boolean {
   try {
     findShell()
@@ -108,8 +120,15 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
   beforeAll(() => {
     const served = Bun.serve({
       port: 0,
-      fetch: () =>
-        new Response(PAGE, { headers: { 'content-type': 'text/html' } }),
+      fetch: async (request) => {
+        const { pathname } = new URL(request.url)
+        if (pathname === '/fetch') return html(FETCH_PAGE)
+        if (pathname === '/slow') {
+          await Bun.sleep(SLOW_MS)
+          return new Response('ok')
+        }
+        return html(PAGE)
+      },
     })
     server = {
       url: `http://127.0.0.1:${served.port}/`,
@@ -212,6 +231,34 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       status: 'failed',
       reason: 'target-missing',
       beat: 'miss',
+    })
+  }, 180_000)
+
+  it('should keep stepping while a fetch the page started is in flight', async () => {
+    const read = readTakePlan(
+      JSON.stringify({
+        beats: [
+          {
+            name: 'load',
+            steps: [
+              { kind: 'click', target: '#go' },
+              { kind: 'wait', ms: 600 },
+            ],
+          },
+        ],
+      }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+
+    const result = await take({
+      url: new URL('/fetch', server.url).href,
+      plan: read.plan,
+      out,
+    })
+
+    expect(result).toMatchObject({
+      status: 'filmed',
+      beats: [{ name: 'load', route: 'step' }],
     })
   }, 180_000)
 })

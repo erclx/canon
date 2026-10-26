@@ -91,12 +91,13 @@ export async function filmStepped(
 
     const frame = async (): Promise<void> => {
       const advanced = new Promise<void>((done) => expired.push(done))
-      // Virtual time waits on a fetch in flight, so a field typing into a
-      // search advances only once the page has what it asked for.
-      // A refused advance never expires its budget, which the stall reports.
+      // Plain advance rather than pausing on pending fetches, which held the
+      // clock through every page switch that loads its view, past the stall
+      // limit. A refused advance never expires its budget, which the stall
+      // reports.
       page
         .send('Emulation.setVirtualTimePolicy', {
-          policy: 'pauseIfNetworkFetchesPending',
+          policy: 'advance',
           budget: BUDGETS[budget++ % BUDGETS.length],
         })
         .catch(() => {})
