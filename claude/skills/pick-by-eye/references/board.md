@@ -4,9 +4,11 @@ Read before the first `frameboard` verb a `pick-by-eye` run sends. It carries wh
 
 ## Reaching the board
 
-Resolve `<board>` as `.canon/canvas/` against the main worktree root, the way `session-worktree` resolves it, since a linked worktree holds no copy of the gitignored folder.
+Resolve `<board>` and `<project>` from the `board` and `project` keys of `canon/config/design.toml`, read at the main worktree root per `${CLAUDE_SKILL_DIR}/references/design-config.md`. A missing file or key falls back to `.canon/canvas/` and `picks`.
 
-- Pass `--root <board> --project picks --json` to every verb unless the step says otherwise, so no verb relies on the only-project default
+Resolve `<board>` against the main worktree root, the way `session-worktree` resolves it, since a linked worktree holds no copy of the gitignored folder.
+
+- Pass `--root <board> --project <project> --json` to every verb unless the step says otherwise, so no verb relies on the only-project default
 - Where `frameboard` is not on PATH, run every verb as `bunx -y frameboard@0.6 <verb>`. Say so once and keep that form for the run.
 - The pin holds the minor, since record shapes move across a pre-1.0 minor
 
@@ -30,13 +32,13 @@ frameboard serve --root <board> --no-open --tokens <stylesheet> --json
 
 Read `frameboard selection --root <board> --json` when the operator's answer points at the board, such as "the selected one". Resolve it against the record's `project` and `page` as well as its `frames`, since every round reuses the `arm-<id>` names.
 
-| Selection                                                     | Reading                                                  |
-| ------------------------------------------------------------- | -------------------------------------------------------- |
-| One frame in `frames`, on the current round's page in `picks` | The pick                                                 |
-| One frame in `frames`, on an earlier round's page             | A revert, so name the round back before acting           |
-| An `element` inside a picked frame                            | A correction the loop carries by its `index` and `hash`  |
-| Several entries in `frames`                                   | Ask which one rather than taking the first               |
-| Empty `frames`, another project, or a page the run never made | No answer, so ask again rather than guess                |
-| `tabs: 0`, or a `server-not-running` refusal                  | No board is open, so hand the address over and ask again |
+| Selection                                                         | Reading                                                  |
+| ----------------------------------------------------------------- | -------------------------------------------------------- |
+| One frame in `frames`, on the current round's page in `<project>` | The pick                                                 |
+| One frame in `frames`, on an earlier round's page                 | A revert, so name the round back before acting           |
+| An `element` inside a picked frame                                | A correction the loop carries by its `index` and `hash`  |
+| Several entries in `frames`                                       | Ask which one rather than taking the first               |
+| Empty `frames`, another project, or a page the run never made     | No answer, so ask again rather than guess                |
+| `tabs: 0`, or a `server-not-running` refusal                      | No board is open, so hand the address over and ask again |
 
 Pass the element's `hash` to `frameboard edit --hash` with its `index`. A frame rewritten since the operator picked refuses with `stale-address` rather than landing on another element, so ask for the pick again on that refusal.
