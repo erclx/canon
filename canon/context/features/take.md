@@ -15,7 +15,7 @@ The `ui-record` plugin skill drafts the beats and calls the verb, and `src/comma
 
 ### `src/take/`
 
-Reads a take plan, films each beat from a fresh load, and writes the clip, the log, and the camera track per beat, with `take.json` listing them.
+Reads a take plan, films each beat from a fresh load, and writes the clip, the log, the camera track, and the clip's closing frame as `still.jpg` per beat, with `take.json` listing them.
 
 - The stepper launches chrome-headless-shell under begin-frame control over raw CDP, since Playwright cannot ask for it on a page it opens, and screenshots each frame at device scale 2
 - A beat asking for `screencast`, or a stepped frame slower than 2 s, films through Playwright's screencast at 1920x1080 instead, and the beat's record names the route
