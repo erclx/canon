@@ -37,7 +37,8 @@ canon pr evidence <number> --check --json
 Read the record's `uncaptured` field, never the exit code.
 
 - It lists paths: the project keeps captures and this change skipped them. File a finding against the pull request naming each path.
-- It is empty: an evidence image changed, so the capture exists and the comment fails to show it. File that as a finding too.
+- An empty list beside a changed `evidence/` image means the capture exists and the comment fails to show it. File that as a finding too.
+- An empty list with no changed `evidence/` image means the painting file sits outside the painted set, such as a token file. Raise a question naming the path.
 - It is absent: the base keeps no capture, or its tree went unread. Raise a question with no severity, since a project with no capture harness would otherwise take the flag on every styling change.
 - The record refuses: it decides nothing, so take the tree test under the last section instead
 
