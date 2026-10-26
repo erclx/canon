@@ -129,6 +129,9 @@ export function cameraTrack(log: TakeLog): CameraTrack {
     .sort((a, b) => a.t - b.t)
 
   const scrolls = log.events.filter((event) => event.kind === 'scroll')
+  // Read off every click rather than off the aims, which drop a click too large
+  // to zoom and add a typing burst that is no press.
+  const clicks = log.events.filter((event) => event.kind === 'click')
   const windows = zoomWindows(aims, scrolls)
 
   const targetAt = (ms: number) => {
@@ -193,7 +196,9 @@ export function cameraTrack(log: TakeLog): CameraTrack {
       cursor.y + half.y * EDGE,
     )
 
-    const ring = aims.find((aim) => ms >= aim.t && ms - aim.t <= RING_MS)
+    const ring = clicks.find(
+      (click) => ms >= click.t && ms - click.t <= RING_MS,
+    )
     frames.push({
       ms: round(ms, 2),
       scale: round(scale, 4),

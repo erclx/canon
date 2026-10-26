@@ -195,4 +195,13 @@ describe('cameraTrack', () => {
     expect(at(frames, 2225).ring).toBeCloseTo(0.5, 1)
     expect(at(frames, 2500).ring).toBeNull()
   })
+
+  it('should draw a ring for a click whose target is too large to zoom', () => {
+    const { frames } = cameraTrack(
+      takeOf([{ t: 2000, at: { x: 960, y: 540 }, size: { x: 1200, y: 900 } }]),
+    )
+
+    expect(at(frames, 2000).ring).toBe(0)
+    expect(at(frames, 2225).ring).toBeCloseTo(0.5, 1)
+  })
 })
