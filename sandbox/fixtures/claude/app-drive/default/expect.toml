@@ -1,0 +1,70 @@
+# What a correct `/canon:app-drive` run leaves behind on the seeded board app.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block. A bare key below
+# one belongs to that table in TOML, so an array written at the bottom parses
+# clean and silently asserts nothing.
+#
+# The skill closes on `canon intake drive-check`, and the checker cannot run a
+# command, so this arm asserts the axes that verb reads rather than its verdict.
+# The checkout is untouched, the worktree registration is gone, and the record
+# maps every goal. The verdict itself sits under `manual`, as does the
+# `unreasoned` axis, since both live where no pattern reaches.
+#
+# Every pattern below matches a pretty-printed `drive.json` and a compact one
+# alike. The first billed run wrote the record indented and a hand-staged tree
+# wrote it on one line, so the formatting varies by writer and a pattern
+# anchored on whitespace fails a correct run.
+
+paths = [".canon/intake/*/drive.json", ".canon/intake/*/evidence/*.png"]
+
+# The registration `git worktree list` reads. The worktree itself sits under
+# /tmp, outside the tree the checker reads. A bare `.git/worktrees/*` matches
+# nothing even while a worktree is live, since the scan returns files only, so
+# name a file under it.
+absent = [".git/worktrees/*/HEAD"]
+
+# Any write to `boards/`, `dist/`, or another tracked path fails, the stand-in
+# for the check's `changed` axis. `.canon/picks` is the config's proposals
+# folder, where Step 4 sends a taste item's frames. The first run found no taste
+# item, so a scope without it passes that run and fails a correct one that does.
+write_scope = [".canon/intake/**", ".canon/tmp/app-drive/**", ".canon/picks/**"]
+
+escape_scope = []
+
+# Observed at 22 turns and 0.31 dollars on 2026-10-26, from one run. Declared at
+# the cap rather than tightened from a single observation, and never above it.
+# A truncated run reports one turn past the cap, so a declaration above it goes
+# green on exactly the truncation the assertion exists to catch.
+max_turns = 30
+
+manual = [
+  "The run's own `canon intake drive-check <slug> --json` returned clean. Unwired: a command's exit is not in the envelope, and the reply renders the word inside a code span, so a reply substring is brittle.",
+  "A not-driven goal carries a reason. Unwired: the Export goal may be driven as a finding or marked not-driven, and `content` matches positives only.",
+  "No goal entry names a goal the requirements lack. Unwired: an absence inside a file.",
+  "Each finding was sorted as a bug, a requirements conflict, or a taste call. Semantic: the kind is a judgment over the item's text.",
+  "The close removed the /tmp folder as well as the registration. Unwired: the checker reads the sandbox alone.",
+]
+
+# The seed is untouched, which a drive served from the checkout would break.
+# Byte-exact against the seed in `sandbox/claude/app-drive.ts`, so a scenario
+# edit reformatting that seed moves this pattern in the same commit.
+[[content]]
+path = "boards/board.json"
+pattern = '^\{"frames":\["frame 1"\]\}$'
+
+# Both goals are mapped. Matched on the goal text, so a kept bold label or a
+# dropped period still matches.
+[[content]]
+path = ".canon/intake/*/drive.json"
+pattern = 'adds a frame to the board and sees it saved'
+
+[[content]]
+path = ".canon/intake/*/drive.json"
+pattern = 'exports the board to PNG'
+
+# The field that arms the check's worktreeLeft axis is present.
+[[content]]
+path = ".canon/intake/*/drive.json"
+pattern = '"worktree":\s*"/'
