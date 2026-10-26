@@ -37,10 +37,12 @@ import {
   type EvidenceReading,
   groupEvidence,
   hasMarkedEvidenceComment,
+  isEvidencePath,
   PNG_HEADER_BYTES,
   readChecklistBoxes,
   readOwed,
   readPngWidth,
+  readUncaptured,
   nextEvidenceReel,
   renderEvidenceBody,
   settleChecklist,
@@ -856,6 +858,16 @@ export function register(program: Command): void {
         'carries no marker, so the record reports none of the three for it. An',
         'unread thread refuses as gh-failed on both reasons rather than',
         'reporting the fields absent.',
+        '',
+        'The ok, no-evidence, and --check records carry `uncaptured`, the',
+        'painted paths the pull request changed while no evidence image did, in',
+        "a project whose base branch's tree holds one. Painted is the set",
+        '`canon/config/painted.json` tunes, minus any path under an evidence/',
+        'segment or canon/design/, and any changed evidence image empties the',
+        'list. The field is absent when the base tree holds no capture or could',
+        'not be read, a cut-short listing showing none included, so absent means',
+        'unchecked rather than clean. It never adds to `owed`, since no step of',
+        'the ship chain can take a capture.',
         '',
         '--check reads the same changed set and thread, renders no body, and',
         'reports what the ship chain still owes the pull request:',
@@ -2408,6 +2420,31 @@ function everyChangedPath(files: PullFiles): string[] {
 }
 
 /**
+ * Whether the base branch's tree holds an evidence image, read recursively
+ * over the API so the answer is the same from any checkout. GitHub cuts a
+ * large listing short, and a cut listing proves captures only when one
+ * arrived before the cut, so it reads as unread otherwise. Undefined on any
+ * failed read.
+ */
+async function readBaseKeepsCaptures(
+  cwd: string,
+  baseRef: string | undefined,
+): Promise<boolean | undefined> {
+  if (baseRef === undefined || baseRef === '') return undefined
+  const stdout = await gh(cwd, [
+    'api',
+    `repos/{owner}/{repo}/git/trees/${baseRef}?recursive=1`,
+    '--jq',
+    '.truncated, (.tree[] | select(.type == "blob") | .path)',
+  ])
+  if (stdout === null) return undefined
+  const [truncated, ...paths] = stdout.split('\n').filter(Boolean)
+  if (truncated !== 'true' && truncated !== 'false') return undefined
+  if (paths.some(isEvidencePath)) return true
+  return truncated === 'true' ? undefined : false
+}
+
+/**
  * The commit the pull request diverged from its base at, from the compare
  * endpoint, since a checkout on another branch resolves its own trunk tip
  * instead and the base image links would then describe the wrong commit.
@@ -2623,9 +2660,10 @@ async function runEvidence(
 
   // The check never reads the merge base, so it skips the compare call and
   // a failed one cannot hold a draft lift for a reason the check never had.
-  const [pullFiles, base] = await Promise.all([
+  const [pullFiles, base, keepsCaptures] = await Promise.all([
     listPullFiles(root, identity.number),
     isCheck ? undefined : readPullMergeBase(root, identity.base, identity.head),
+    readBaseKeepsCaptures(root, identity.base),
   ])
   if (pullFiles === undefined) {
     return refuseWith(
@@ -2639,6 +2677,11 @@ async function runEvidence(
   const grouped = await groupEvidence(
     [...pullFiles.present.keys()],
     async (path) => pullFiles.present.get(path) === false,
+  )
+  const uncaptured = readUncaptured(
+    everyChangedPath(pullFiles),
+    loadPaintedPatterns(root),
+    keepsCaptures,
   )
 
   let existingCases = 0
@@ -2687,6 +2730,16 @@ async function runEvidence(
     servesChange(deploy.filter, everyChangedPath(pullFiles))
   const isUnserved = deploy.kind === 'found' && !deployServesChange
 
+  // Reported on every record that read the changed set, and never owed,
+  // since no step of the ship chain can take the capture a skip left out.
+  const uncapturedField = uncaptured !== undefined && { uncaptured }
+  const warnUncaptured = (): void => {
+    if (uncaptured === undefined || uncaptured.length === 0) return
+    logWarn(
+      `${plural(uncaptured.length, 'painted path')} changed with no evidence capture: ${uncaptured.join(', ')}`,
+    )
+  }
+
   if (isCheck) {
     const owed = readOwed({
       hasEvidenceChange: grouped.kind === 'read',
@@ -2700,6 +2753,7 @@ async function runEvidence(
         ? 'Nothing the ship chain posts after the pull request is missing.'
         : `missing ${owed.join(', ')}`,
     )
+    warnUncaptured()
     outro()
     if (emitJson) {
       process.stdout.write(
@@ -2708,6 +2762,7 @@ async function runEvidence(
           number: identity.number,
           reason: owed.length === 0 ? 'settled' : 'owed',
           owed,
+          ...uncapturedField,
           ...(commentId !== undefined && { commentId }),
           ...carried,
         })}\n`,
@@ -2735,6 +2790,7 @@ async function runEvidence(
     logInfo(
       'No changed path carries an evidence/ segment, so there is nothing to post.',
     )
+    warnUncaptured()
     outro()
     if (emitJson) {
       process.stdout.write(
@@ -2742,6 +2798,7 @@ async function runEvidence(
           root,
           ...(identity.number !== undefined && { number: identity.number }),
           reason: 'no-evidence',
+          ...uncapturedField,
           ...carried,
         })}\n`,
       )
@@ -2849,6 +2906,7 @@ async function runEvidence(
         : 'checklist folded in below the comparison',
     )
   }
+  warnUncaptured()
 
   outro()
 
@@ -2864,6 +2922,7 @@ async function runEvidence(
         states,
         ...(sized.unread.length > 0 && { widthUnread: sized.unread }),
         ...(uiPass !== undefined && { uiPass }),
+        ...uncapturedField,
         ...(commentId !== undefined && { commentId }),
         ...carried,
       })}\n`,

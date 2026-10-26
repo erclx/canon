@@ -26,14 +26,23 @@ Flag the change as shipping no screenshot when it paints and the pull request ca
 - A marked comment with no comparison, meaning no `**Base:**` line and no `<details>` block
 - Only a checklist posted alone, since `## Evidence` opens every marked comment and the heading alone never means screenshots are present
 
-Then decide how to raise it by whether the project keeps captures, the same test `canon pr evidence` applies:
+### Raising the flag
+
+Decide how to raise it from the evidence verb, which reads the base branch's tree for a capture and names each painted path the pull request changed without one:
 
 ```bash
-git ls-tree -r --name-only <base> | grep -E '(^|/)evidence/.*\.(png|jpe?g|gif|webp|avif|svg)$' | head -1
+canon pr evidence <number> --check --json
 ```
 
-- A path prints: the project keeps captures and this change skipped them. File it as a finding against the pull request.
-- Nothing prints: raise it as a question with no severity, since a project with no capture harness would otherwise take the flag on every styling change.
+Read the record's `uncaptured` field, never the exit code.
+
+- It lists paths: the project keeps captures and this change skipped them. File a finding against the pull request naming each path.
+- An empty list beside a changed `evidence/` image means the capture exists and the comment fails to show it. File that as a finding too.
+- An empty list with no changed `evidence/` image means the painting file sits outside the painted set, such as a token file. Raise a question naming the path.
+- It is absent: the base keeps no capture, or its tree went unread. Raise a question with no severity, since a project with no capture harness would otherwise take the flag on every styling change.
+- The record refuses: it decides nothing, so take the tree test under the last section instead
+
+A recapture under `canon/design/` redraws the accepted design rather than the built app, so it never stands in for an evidence capture. The verb leaves those paths out of `uncaptured`, and a pass clears a painted change on the evidence comment alone, however many design references beside it were redrawn.
 
 Stop reading this reference once the flag is raised, since there is nothing to open. Otherwise continue with the comment in hand.
 
@@ -93,4 +102,13 @@ A local review has no comment to read, so it reads the tree.
 
 - Read each changed image under an `evidence/` path segment from the working tree, and its base side with `git show <base>:<path>`
 - Read the checklist handoff at `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root when it exists
-- A painting change with no changed evidence image takes the flag from the first section, decided by the same `git ls-tree` test
+- A painting change with no changed evidence image takes the flag from the first section, decided by the test below in place of the verb
+
+The tree test asks the base the question the verb asks over the API, being whether the project keeps captures:
+
+```bash
+git ls-tree -r --name-only <base> | grep -E '(^|/)evidence/.*\.(png|jpe?g|gif|webp|avif|svg)$' | head -1
+```
+
+- A path prints: the project keeps captures and this change skipped them. File it as a finding.
+- Nothing prints: raise it as a question with no severity, for the same reason an absent `uncaptured` field takes one

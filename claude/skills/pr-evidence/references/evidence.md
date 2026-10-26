@@ -105,6 +105,14 @@ gh api -X PATCH repos/{owner}/{repo}/issues/comments/<commentId> -F body=@<main-
 
 Delete the handoff file and the tmp body once that call reports success, per the cleanup below, since the checklist now lives on the pull request.
 
+### Painted paths with no capture
+
+An `ok` or `no-evidence` record can carry `uncaptured`, the painted paths this pull request changed while no evidence image did, in a project whose base branch keeps captures. Hold a non-empty list for the closing report and keep going, since no step of this skill or the ship chain can take a capture.
+
+- The fix is a recapture by the session that built the change, pushed as a follow-up, after which this skill renders the comparison on the new head
+- An empty list or an absent field adds no report line. An absent field means the base keeps no capture or its tree went unread, which the review weighs on its own.
+- A redraw under `canon/design/` never empties the list, since a design reference shows the accepted design rather than the built app
+
 ### Git refusals
 
 Any other `reason` is a mirrored git refusal, being `gh-missing`, `gh-failed`, `no-base`, `unreadable-changes`, or `would-empty`. Report it and move on without stopping the chain, since a branch that rarely carries evidence images should not fail on a transient read.
