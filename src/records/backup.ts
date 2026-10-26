@@ -110,9 +110,9 @@ export const MEDIA_PATHSPECS = [
   ':(exclude,glob)video/**/renders/**',
   ':(exclude,glob)video/**/snapshots/**',
   ':(exclude,glob)video/**/node_modules/**',
-  ':(exclude,glob)video/**/*.mp4',
-  ':(exclude,glob)video/**/*.webm',
-  ':(exclude,glob)video/**/*.mov',
+  ':(exclude,glob,icase)video/**/*.mp4',
+  ':(exclude,glob,icase)video/**/*.webm',
+  ':(exclude,glob,icase)video/**/*.mov',
 ] as const
 
 /**

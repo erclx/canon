@@ -477,6 +477,7 @@ describe('pushRecords', () => {
       'video/demo/composition/assets/intro.mp4': 'mp4\n',
       'video/demo/composition/assets/intro.webm': 'webm\n',
       'video/demo/composition/assets/intro.mov': 'mov\n',
+      'video/demo/composition/assets/IMG_0001.MOV': 'mov\n',
     })
 
     const outcome = await pushRecords(canonRoot)
