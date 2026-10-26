@@ -1,14 +1,15 @@
 import { execFileSync } from 'node:child_process'
 import {
   chmodSync,
+  copyFileSync,
   existsSync,
   mkdirSync,
   readdirSync,
   readFileSync,
   rmSync,
-  writeFileSync,
 } from 'node:fs'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const STUB_ORG = 'stub-org'
 const ANCHOR_REPO = 'canon-sandbox'
@@ -26,34 +27,9 @@ const PINNED_DATE = '2026-01-01T00:00:00Z'
  * Answers the `gh` calls the git scenarios make and fails on any other, so a new
  * call reaches a reader as a red arm rather than a silent pass. Every call is
  * logged as one line, quoted so an argument holding a space stays one argument.
+ * The pull request URL it prints spells `STUB_ORG` and `ANCHOR_REPO` out.
  */
-const STUB_GH = `#!/usr/bin/env bash
-# stub gh
-dir="$STUB_GH_DIR"
-line="$(printf '%q ' "$@")"
-line="\${line% }"
-printf '%s\\n' "$line" >>"$dir/gh.log"
-
-case "$1" in
-api) exit 0 ;;
-pr)
-  case "$2" in
-  create)
-    count="$(cat "$dir/pr-count" 2>/dev/null || echo 0)"
-    count=$((count + 1))
-    echo "$count" >"$dir/pr-count"
-    echo "https://github.com/${STUB_ORG}/${ANCHOR_REPO}/pull/$count"
-    exit 0
-    ;;
-  close | list) exit 0 ;;
-  esac
-  ;;
-esac
-
-printf '%s\\n' "$line" >>"$dir/gh-unknown.log"
-echo "stub gh: unknown call: $line" >&2
-exit 1
-`
+const STUB_GH = fileURLToPath(new URL('stub-gh.sh', import.meta.url))
 
 /**
  * Builds a local bare repository and a stub `gh` under `stubDir` and returns the
@@ -75,7 +51,7 @@ export function createStubRemote(stubDir: string): Record<string, string> {
   )
 
   const gh = join(bin, 'gh')
-  writeFileSync(gh, STUB_GH)
+  copyFileSync(STUB_GH, gh)
   chmodSync(gh, 0o755)
 
   return {
