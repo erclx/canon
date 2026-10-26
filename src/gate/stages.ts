@@ -248,6 +248,12 @@ export const STAGES: readonly Stage[] = [
         failure:
           'The tab icon drifted from the token source. Run bun run check and commit web/public/favicon.svg.',
       },
+      {
+        kind: 'drift',
+        pathspec: 'assets/brand/mark-color*.svg',
+        failure:
+          'The README mark pair drifted from the mark source. Run bun run check and commit assets/brand/mark-color.svg and assets/brand/mark-color-light.svg.',
+      },
       { kind: 'measure', measure: designProse },
     ],
     success: 'Design source clean',

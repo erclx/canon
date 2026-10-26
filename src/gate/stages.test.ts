@@ -199,6 +199,29 @@ describe('the client-command-citations stage', () => {
   })
 })
 
+describe('the design stage', () => {
+  it('should assert drift on every file the favicon regen writes', () => {
+    const checks =
+      STAGES.find((candidate) => candidate.id === 'design')?.checks ?? []
+    const regen = checks.findIndex(
+      (check) =>
+        check.kind === 'command' &&
+        check.argv.join(' ') === 'bun run web:favicon',
+    )
+    const drifted = checks
+      .slice(regen + 1)
+      .flatMap((check) => (check.kind === 'drift' ? [check.pathspec] : []))
+
+    expect(regen).toBeGreaterThan(-1)
+    expect(drifted).toEqual(
+      expect.arrayContaining([
+        'web/public/favicon.svg',
+        'assets/brand/mark-color*.svg',
+      ]),
+    )
+  })
+})
+
 describe('the hero stage', () => {
   const heroChecks = () =>
     STAGES.find((candidate) => candidate.id === 'hero')?.checks ?? []
