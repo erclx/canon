@@ -102,6 +102,7 @@ A bullet claiming outside practice, such as a language idiom or a library's corr
 - Cite the source in the commit that adds the rule, naming a primary page or the bug class the bullet prevents
 - Cut a bullet that has neither a source nor a bug class behind it
 - The toolkit holds its outside-practice rules to a source ledger kept outside the installed tree, so the citation costs no load
+- The toolkit records a core rule's reasons in the same ledger, one house-choice row per bullet with its decision date, written in the change that creates or edits the rule
 - A bullet resting on how Claude Code behaves ends with a `Revisit when` sentence, per `### Phrasing`
 
 ## Location

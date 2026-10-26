@@ -53,7 +53,8 @@ After writing or revising a rule, or on "audit this rule" or "review the governa
 
 - Read `claude/skills/create-rule/references/checklist.md` for the criteria and output shape. It ships with `canon:create-rule`, so a target runs the same checklist.
 - A toolkit rule under `lang/`, `lib/`, `framework/`, `ui/`, or `tooling/` carries a source ledger at `governance/ledger/<folder>/<slug>.md`, shaped per `references/ledger.md`.
-- Run `bun src/cli.ts gov audit <path>` on the rule, and fix every shape and ledger finding before reporting.
+- A core rule under `canon/`, `claude/`, `code/`, or `writing/` created or touched on the branch carries a decision ledger at the same path, written in that change.
+- Run `bun src/cli.ts gov audit --touched <path>` on the rule, and fix every shape and ledger finding before reporting.
 - A verdict on whether a whole rule earns its place, where it loads, and whom it reaches is `internal-rule-audit`.
 
 ## Reference
