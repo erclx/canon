@@ -48,9 +48,7 @@ Run it once, ahead of `canon gov sync` or `canon gov install`.
 
 ## Rename the skill citations, once
 
-Plugin skills dropped their `claude-` prefix, so `canon:claude-docs` answers as `canon:context-fold` and `canon:claude-tasks` as `canon:task-board`. The five per-kind drafters merged into `write-doc`, and no pointer under an old name ships. <!-- canon-keep-retired -->
-
-The seven `draft-` skills took verb-first names for what each makes. `canon migrate skill-names --write` carries a project across, and a pointer under each old name answers a typed invocation until it retires.
+Plugin skills dropped their `claude-` prefix, so `canon:claude-docs` answers as `canon:context-fold`. Five drafters merged into `write-doc`, seven `draft-` skills took verb-first names, and four more joined their family. No pointer under an old name ships, and `canon migrate skill-names --write` carries a project across. <!-- canon-keep-retired -->
 
 | Old name           | New name                                        |
 | ------------------ | ----------------------------------------------- |
@@ -58,9 +56,13 @@ The seven `draft-` skills took verb-first names for what each makes. `canon migr
 | `draft-figure`     | `draw-figure` <!-- canon-keep-retired -->       |
 | `draft-identity`   | `design-identity` <!-- canon-keep-retired -->   |
 | `draft-slides`     | `make-deck` <!-- canon-keep-retired -->         |
-| `draft-and-pick`   | `pick-by-eye` <!-- canon-keep-retired -->       |
+| `draft-and-pick`   | `design-pick` <!-- canon-keep-retired -->       |
 | `draft-ready`      | `plan-ready` <!-- canon-keep-retired -->        |
 | `draft-screencast` | `script-screencast` <!-- canon-keep-retired --> |
+| `pick-by-eye`      | `design-pick` <!-- canon-keep-retired -->       |
+| `ui-record`        | `ui-film` <!-- canon-keep-retired -->           |
+| `ux-audit`         | `ui-audit` <!-- canon-keep-retired -->          |
+| `ux-measure`       | `ui-measure` <!-- canon-keep-retired -->        |
 
 Replace a citation of a skill with no successor by hand, or delete the sentence.
 
@@ -160,7 +162,7 @@ A reference to a retired skill takes a hand edit.
 
 - Replace a `canon:teach-workspace` reference with `canon:teach-craft` by hand, since `canon migrate skill-names` does not rewrite it <!-- canon-keep-retired -->
 - Delete a `canon:make-deck`, `canon:script-screencast`, `canon:record-screencast`, `canon:read-frames`, or `canon:video-craft` reference, since none has a successor <!-- canon-keep-retired -->
-- Delete a `canon:canvas-board` reference too. Frameboard, which `canon:pick-by-eye` drives, reads each `.canon/canvas/` folder as a project, so move a kept page under one <!-- canon-keep-retired -->
+- Delete a `canon:canvas-board` reference too. Frameboard, which `canon:design-pick` drives, reads each `.canon/canvas/` folder as a project, so move a kept page under one <!-- canon-keep-retired -->
 
 ## Move decisions out of a held architecture record, once
 
