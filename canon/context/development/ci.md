@@ -51,6 +51,7 @@ Runs weekly and on dispatch, one matrix job per scaffoldable stack through `cano
 Every workflow installing the Playwright system packages calls this script, since a stalled `azure.archive.ubuntu.com` connection hangs rather than fails and a step bound alone only turns the hang red.
 
 - The script kills an attempt at 150 seconds and retries up to three times, running `dpkg --configure -a` before each retry
+- A signal from the runner user never reaches the root `apt-get` that `sudo` spawns, so the script kills any left behind with `sudo pkill` before that
 - `src/gate/workflow-timeouts.test.ts` fails a direct `install-deps` or `--with-deps` call and a script step with no `timeout-minutes`
 
 ### Other folders

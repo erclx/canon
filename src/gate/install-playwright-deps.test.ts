@@ -98,6 +98,7 @@ describe.skipIf(!hasTimeout)('install-playwright-deps.sh', () => {
     expect(result.stderr).toContain('attempt 1/3 failed with exit 124')
     expect(readLog()).toEqual([
       'bunx playwright install-deps chromium firefox',
+      'sudo pkill -KILL -x apt-get|dpkg',
       'sudo dpkg --configure -a',
       'bunx playwright install-deps chromium firefox',
     ])

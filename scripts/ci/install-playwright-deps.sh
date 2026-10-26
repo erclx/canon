@@ -31,13 +31,16 @@ apt-config dump | grep -E '^Acquire::(Retries|http::Timeout) ' || true
 status=0
 for attempt in $(seq 1 "$attempts"); do
   if [ "$attempt" -gt 1 ]; then
+    # timeout runs as the runner user, and Linux drops its signal to the root
+    # apt-get playwright spawns through sudo. sudo relays it only to its own
+    # child shell, so a root apt-get or dpkg can outlive the kill and hold the
+    # lock the next attempt needs.
+    sudo pkill -KILL -x 'apt-get|dpkg' || true
     # A kill during unpack leaves dpkg interrupted, which refuses the next
     # install. Its own failure must not end the loop.
     sudo dpkg --configure -a || echo "dpkg --configure -a failed before attempt ${attempt}" >&2
   fi
 
-  # timeout signals its whole process group, so the root apt-get that
-  # playwright spawns through sudo dies with bunx rather than holding the lock
   status=0
   timeout --kill-after=10 "$bound" bunx "$package" install-deps "$@" || status=$?
   if [ "$status" -eq 0 ]; then
