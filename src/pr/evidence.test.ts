@@ -870,6 +870,28 @@ describe('the reel line', () => {
     ])
   })
 
+  it('should sit above the Base line and outside the case blocks, adding no case', () => {
+    const body = renderEvidenceBody(
+      states,
+      'o/r',
+      'aaaa000',
+      'bbbb111',
+      undefined,
+      undefined,
+      undefined,
+      { link: LINK, head: 'bbbb111' },
+    )
+    const lines = body.split('\n')
+    const reel = lines.findIndex((line) => line.startsWith('**Reel**'))
+    const base = lines.findIndex((line) => line.startsWith('**Base:**'))
+    const firstBlock = lines.findIndex((line) => line.startsWith('<details'))
+
+    expect(reel).toBeGreaterThan(-1)
+    expect(reel).toBeLessThan(base)
+    expect(base).toBeLessThan(firstBlock)
+    expect(countEvidenceCases(body)).toBe(1)
+  })
+
   it('should leave a body without a reel exactly as before', () => {
     const args = [
       states,
