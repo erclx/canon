@@ -545,7 +545,7 @@ function reportCoverage(coverage: readonly RuleCoverage[]): void {
   for (const entry of coverage) {
     logInfo(describeCoverage(entry))
     if (entry.ui) {
-      logInfo('  Audit those files with /canon:ux-audit.')
+      logInfo('  Audit those files with /canon:ui-audit.')
     }
   }
 }

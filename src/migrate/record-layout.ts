@@ -346,7 +346,7 @@ function entriesOf(dir: string, isDirectory: boolean): string[] {
 }
 
 /**
- * What `pick-by-eye` Step 6 writes into the folder it archives a choice to:
+ * What `design-pick` Step 6 writes into the folder it archives a choice to:
  * a capture per canvas frame, named `arm-<id>`. A design handoff marks a pick
  * folder an earlier skill wrote. A folder carrying neither is evidence.
  */

@@ -15,7 +15,7 @@ The files in this folder carry the zoom timing of [OpenScreen](https://github.co
 - The file names are kebab-case, as this repository names every TypeScript file, and the code is reformatted to its style
 - `math-utils.ts` keeps `clamp01`, `cubicBezier`, and `easeOutScreenStudio`, and drops the easings nothing here calls
 - `region-utils.ts` keeps `computeRegionStrength`, the connected-pan easing, and the window and gap constants. It drops the dominant-region search, its cache, the 3D rotation, and the cursor-follow focus, since the camera here aims at clicks and holds its focus by its own rule.
-- The zoom-out window is 700 ms rather than 1015.05 ms, and the connected pan runs 600 ms rather than 1000 ms, both on the operator's eye in groundwork track `193-ui-record`. The zoom-in window keeps OpenScreen's 1522.575 ms.
+- The zoom-out window is 700 ms rather than 1015.05 ms, and the connected pan runs 600 ms rather than 1000 ms, both on the operator's eye in groundwork track `193-ui-record`. <!-- canon-keep-retired --> The zoom-in window keeps OpenScreen's 1522.575 ms.
 - `spring.ts` keeps the zoom spring's stiffness 320, damping 40, mass 0.92, its rest thresholds, the delta clamp, and the overshoot clamp from `stepAxis`. OpenScreen steps that spring through the `motion` package, and this solves it in closed form instead, so no dependency comes with it.
 
 ## License

@@ -38,7 +38,7 @@ export default scenario({
         'Action: /canon:design-identity draft a logo mark and social card, and take arm 1 when you put the pick to me',
       )
       ctx.log.info(
-        "        The pick is pre-supplied in the prompt, the same shape pick-by-eye's own sandbox arm",
+        "        The pick is pre-supplied in the prompt, the same shape design-pick's own sandbox arm",
       )
       ctx.log.info(
         '        uses, since a headless run has nobody to answer the question and would stall on it otherwise.',
@@ -70,7 +70,7 @@ export default scenario({
         "Not reached: whether the mark itself reads well. That is a person's call, the same ceiling",
       )
       ctx.log.info(
-        "        pick-by-eye's own sandbox arm accepts for its loop-and-pick half.",
+        "        design-pick's own sandbox arm accepts for its loop-and-pick half.",
       )
     },
   },

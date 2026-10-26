@@ -1,6 +1,6 @@
 ---
 name: design-taste
-description: Carries the layer model that decides which design decision settles first, the rules that keep a surface coherent across sections, and the catalog of defaults a model reaches for when nothing states a direction. Use when drafting or judging an interface, a page, or any rendered surface, when output reads generic or templated, when redesigning something that already exists, or when asked to "make this look designed", "why does this look like AI made it", "give it taste", "what layer is this decision at", or "grey-box this first". Do NOT use for accessibility, forms, or state coverage, which `ui-craft` carries, for the shape of the project's design document, which `design.md` governs, or to run the candidate loop, which is `pick-by-eye`.
+description: Carries the layer model that decides which design decision settles first, the rules that keep a surface coherent across sections, and the catalog of defaults a model reaches for when nothing states a direction. Use when drafting or judging an interface, a page, or any rendered surface, when output reads generic or templated, when redesigning something that already exists, or when asked to "make this look designed", "why does this look like AI made it", "give it taste", "what layer is this decision at", or "grey-box this first". Do NOT use for accessibility, forms, or state coverage, which `ui-craft` carries, for the shape of the project's design document, which `design.md` governs, or to run the candidate loop, which is `design-pick`.
 metadata:
   family: build
 ---
@@ -157,8 +157,8 @@ Run `${CLAUDE_SKILL_DIR}/references/preflight.md` against the output. It is the 
 
 Five neighbors own the rest.
 
-- The candidate loop, the arm set, the render, and the pick: `pick-by-eye`
+- The candidate loop, the arm set, the render, and the pick: `design-pick`
 - The shape of the project's design document and where its values live: `${CLAUDE_SKILL_DIR}/../design-record/references/design.md`
 - The folder holding the accepted designs and how a reference lands in it: `${CLAUDE_SKILL_DIR}/../design-record/references/folder.md`
-- Reading source for roughness: `ux-audit`. Measuring what a running interface costs to paint: `ux-measure`
+- Reading source for roughness: `ui-audit`. Measuring what a running interface costs to paint: `ui-measure`
 - Prose on the surface being designed: the `write-human` skill

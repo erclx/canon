@@ -28,7 +28,7 @@ A file under a gitignored folder is unreadable to a pull request reviewer, and a
 
 ## Out of scope
 
-- Judging whether the UI is any good, which `ux-audit` owns
+- Judging whether the UI is any good, which `ui-audit` owns
 - The rules for choosing a test layer, which `test-craft` owns
 - Writing the test itself, which `test-first` owns
 - Posting the checklist, which `pr-evidence` owns as the sole consumer of the handoff file

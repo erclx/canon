@@ -18,7 +18,7 @@ For each `canon/context/<name>.md` token:
 - **Fine.** The sentence tells a target session to consult its own project's copy, or illustrates the path shape a target's tree would take, and names no fact only this checkout holds
 - **Fails.** The sentence names a fact true of this repository alone, such as a documented decision or a domain narrative a target reader cannot open
 
-`ux-measure/SKILL.md`'s `canon/context/development/local-loop.md`: the documented run commands and the port each serves is Fine, read as "check your own project's entry." `canon-cli/SKILL.md`'s prior citation of the tooling entry as "the toolkit's" Failed.
+`ui-measure/SKILL.md`'s `canon/context/development/local-loop.md`: the documented run commands and the port each serves is Fine, read as "check your own project's entry." `canon-cli/SKILL.md`'s prior citation of the tooling entry as "the toolkit's" Failed.
 
 ### Branches and seeds
 

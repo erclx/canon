@@ -1,6 +1,6 @@
 ---
 name: app-drive
-description: Drives a throwaway copy of a built app with the operator, tries every requirements goal per persona, re-checks the last drive's findings, measures each operator ask, sorts each finding as a bug, a requirements conflict, or a taste call, and files the lot as an intake folder that `canon intake drive-check` holds. Use when asked to "drive the app", "kick the tires", "run an app drive", or "drive the build with me", typically after a release or a wave and before planning the next. Do NOT use to read source for UI roughness, which is `ux-audit`, to drive one pull request's checklist, which is `review-ui`, to measure paint or layout cost, which is `ux-measure`, or to fix anything the drive finds.
+description: Drives a throwaway copy of a built app with the operator, tries every requirements goal per persona, re-checks the last drive's findings, measures each operator ask, sorts each finding as a bug, a requirements conflict, or a taste call, and files the lot as an intake folder that `canon intake drive-check` holds. Use when asked to "drive the app", "kick the tires", "run an app drive", or "drive the build with me", typically after a release or a wave and before planning the next. Do NOT use to read source for UI roughness, which is `ui-audit`, to drive one pull request's checklist, which is `review-ui`, to measure paint or layout cost, which is `ui-measure`, or to fix anything the drive finds.
 metadata:
   family: check
 ---
@@ -71,7 +71,7 @@ Give every finding one kind, and keep the severity it was logged with.
 
 - **Bug.** The app breaks a goal or its own contract. It becomes an item whose fix a worker can build, with the repro and the evidence path. `systematic-debugging` owns finding its cause.
 - **Requirements conflict.** The app does what the record says and the operator wants otherwise, or the record contradicts itself. The item carries the drafted diff as text, and the operator decides.
-- **Taste.** The call is settled by looking. The item carries a now frame and a fix frame for a `pick-by-eye` pass, written to the config's `proposals` folder.
+- **Taste.** The call is settled by looking. The item carries a now frame and a fix frame for a `design-pick` pass, written to the config's `proposals` folder.
 
 ## Step 5: file
 
@@ -118,5 +118,5 @@ Next: /plan-intake-answer to answer the You: slots from here, then /task-board t
 - The controller messages, the talk clause, and the session's end: `role-planner`
 - The intake folder's shape and its routing test: `plan-intake`
 - The cause of a bug: `systematic-debugging`
-- The pick between a now frame and a fix frame: `pick-by-eye`
+- The pick between a now frame and a fix frame: `design-pick`
 - The voice of every recorded passage: `write-human`
