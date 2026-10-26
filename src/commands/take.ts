@@ -66,8 +66,9 @@ export function register(program: Command): void {
       [
         '',
         'Films each beat from a fresh load of the page into its own folder under',
-        '--out, numbered in plan order: clip.mp4, log.json, and camera.json.',
-        'take.json beside them lists every beat and the route that filmed it.',
+        '--out, numbered in plan order: clip.mp4, log.json, camera.json, and',
+        "still.jpg, the clip's closing frame. take.json beside them lists every",
+        'beat and the route that filmed it.',
         '',
         'A step beat is filmed by frame stepping in chrome-headless-shell, at',
         '3840x2160 and exactly 60 fps, with the page clock advancing one frame',

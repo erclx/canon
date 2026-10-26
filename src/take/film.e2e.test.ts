@@ -79,14 +79,14 @@ function probe(clip: string): { width: number; height: number; rate: string } {
  * white. Read raw rather than converted to gray, since that conversion
  * stretches the range and clips the first and last steps of the fade.
  */
-function bandLuma(clip: string): number[] {
+function bandLuma(media: string): number[] {
   const raw = spawnSync(
     'ffmpeg',
     [
       '-v',
       'error',
       '-i',
-      clip,
+      media,
       '-vf',
       'crop=16:16:200:1000,scale=2:2:flags=area',
       '-pix_fmt',
@@ -174,6 +174,14 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
     const rises = ramp.slice(1).map((value, i) => value - (ramp[i] ?? 0))
     expect(Math.min(...rises)).toBeGreaterThan(0)
 
+    // The still is the clip's closing frame, so the band has finished its
+    // fade to white in both.
+    const still = join(out, beat.still)
+    expect(probe(still)).toMatchObject({ width: 3840, height: 2160 })
+    const [stillLuma = 0] = bandLuma(still)
+    expect(stillLuma).toBeGreaterThan(230)
+    expect(Math.abs(stillLuma - (luma.at(-1) ?? 0))).toBeLessThanOrEqual(3)
+
     const log = JSON.parse(readFileSync(join(out, beat.log), 'utf8')) as TakeLog
     expect(log.frames).toBe(beat.frames)
     expect(log.events.filter((event) => event.kind === 'click')).toEqual([
@@ -216,6 +224,10 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       width: 1920,
       height: 1080,
       rate: '60/1',
+    })
+    expect(probe(join(out, beat.still))).toMatchObject({
+      width: 1920,
+      height: 1080,
     })
   }, 180_000)
 

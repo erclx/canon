@@ -44,6 +44,8 @@ export interface FilmedBeat {
   readonly clip: string
   readonly log: string
   readonly camera: string
+  /** The clip's closing frame, as a JPEG. */
+  readonly still: string
 }
 
 export type TakeResult =
@@ -131,7 +133,7 @@ async function filmBeat(
 
   let route: Route = beat.route
   let fallback: string | undefined
-  let filmed: { frames: number; events: readonly LogEvent[] }
+  let filmed: { frames: number; events: readonly LogEvent[]; still: Buffer }
   if (beat.route === 'step') {
     try {
       filmed = await filmStepped({ executable, url, beat, clip: target })
@@ -158,6 +160,8 @@ async function filmBeat(
   // One line, since it carries a row per frame and nobody reads it by eye.
   const cameraPath = join(dir, 'camera.json')
   writeFileSync(join(out, cameraPath), `${JSON.stringify(cameraTrack(log))}\n`)
+  const stillPath = join(dir, 'still.jpg')
+  writeFileSync(join(out, stillPath), filmed.still)
 
   return {
     name: beat.name,
@@ -170,6 +174,7 @@ async function filmBeat(
     clip,
     log: logPath,
     camera: cameraPath,
+    still: stillPath,
   }
 }
 
