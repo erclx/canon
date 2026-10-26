@@ -23,7 +23,7 @@ kind: reference
 
 `record-tree` follows citations in `diagrams`, `memory`, `plans`, `proposals`, `review`, `tasks`, and `teach`. `session-defaults` denies `Agent`, `Task`, and both merge commands, and turns auto memory off. The bullets below add detail per verb.
 
-- `skill-names` takes no `--scope`, and skips the changelog, eval transcripts, and the pointer each renamed `draft-` skill leaves at its old name
+- `skill-names` takes no `--scope`, and skips the changelog, eval transcripts, replay fixtures, and the pointer each renamed `draft-` skill leaves at its old name
 - `surface-roots` moves `context/`, `wireframes/`, `ARCHITECTURE.md`, `REQUIREMENTS.md`, `DESIGN.md`, and the stamp folder, and leaves `rules/`, `skills/`, `hooks/`, and `settings.json` in place
 - `rule-layout` classifies each flat file against the stamp as clean, edited, or unclaimed. Clean and edited files move untouched, and an unclaimed name stays.
 - `record-layout` labels each evidence folder `(pick)` or `(evidence)` in the dry run
