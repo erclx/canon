@@ -67,6 +67,8 @@ export interface TakeRequest {
   readonly plan: TakePlan
   readonly out: string
   readonly env?: NodeJS.ProcessEnv
+  /** How long one stepped frame may take before its beat falls back to a screencast. */
+  readonly stallMs?: number
 }
 
 const REACH_TIMEOUT_MS = 5000
@@ -108,7 +110,16 @@ export async function take(request: TakeRequest): Promise<TakeResult> {
     const dir = `${String(index + 1).padStart(2, '0')}-${slug(beat.name)}`
     mkdirSync(join(out, dir), { recursive: true })
     try {
-      beats.push(await filmBeat(request.url, beat, out, dir, executable))
+      beats.push(
+        await filmBeat(
+          request.url,
+          beat,
+          out,
+          dir,
+          executable,
+          request.stallMs,
+        ),
+      )
     } catch (error) {
       return failed(classify(error), error, beat.name)
     }
@@ -127,6 +138,7 @@ async function filmBeat(
   out: string,
   dir: string,
   executable: string,
+  stallMs: number | undefined,
 ): Promise<FilmedBeat> {
   const clip = join(dir, 'clip.mp4')
   const target = join(out, clip)
@@ -136,7 +148,13 @@ async function filmBeat(
   let filmed: { frames: number; events: readonly LogEvent[]; still: Buffer }
   if (beat.route === 'step') {
     try {
-      filmed = await filmStepped({ executable, url, beat, clip: target })
+      filmed = await filmStepped({
+        executable,
+        url,
+        beat,
+        clip: target,
+        stallMs,
+      })
     } catch (error) {
       if (!(error instanceof StepperStalled)) throw error
       route = 'screencast'
