@@ -23,7 +23,7 @@ Take the comment whose body carries a `<!-- pr-evidence: head=<sha> -->` marker.
 Flag the change as shipping no screenshot when it paints and the pull request carries any of three comment shapes.
 
 - No marked comment at all
-- A marked comment with no comparison, meaning no `**Base:**` line and no `<details>` table
+- A marked comment with no comparison, meaning no `**Base:**` line and no `<details>` block
 - Only a checklist posted alone, since `## Evidence` opens every marked comment and the heading alone never means screenshots are present
 
 Then decide how to raise it by whether the project keeps captures, the same test `canon pr evidence` applies:
@@ -43,7 +43,7 @@ Compare the marker's head with `headRefOid`. When it trails, the images describe
 
 ## Opening the images
 
-Each row embeds `github.com/<repo>/blob/<sha>/<path>?raw=true`. A session cannot fetch that address from a private repository, so never follow it and never report an image you did not open. Fetch the head instead:
+Each image embeds `github.com/<repo>/blob/<sha>/<path>?raw=true`. A session cannot fetch that address from a private repository, so never follow it and never report an image you did not open. Fetch the head instead:
 
 ```bash
 git fetch -q origin pull/<number>/head
@@ -51,11 +51,13 @@ mkdir -p .canon/tmp/pr/review/evidence/<number>
 git show <sha>:<path> > .canon/tmp/pr/review/evidence/<number>/<side>-<name>.png
 ```
 
-Take the sha from the row, so the base and head sides are exactly what the comment shows. Then open each file with the file-reading tool.
+Take the sha from the image's URL, so the base and head sides are exactly what the comment shows. Then open each file with the file-reading tool.
 
 - Read the URL out of the `src=` of each `<img>`, or out of `![](` in a comment posted before the embed changed
-- A `*(new)*` base cell has no before image, and a view or flat block whose cases are all added has no base column at all
-- A view row holds one case per theme cell, so a width row names two images where a flat row names one
+- Each case is a bold label over its head image, with its base folded under it in a `<details>` block titled `Base`
+- An added case has no base and no fold, and its label carries `*(new)*` when its block also holds cases that existed at the base
+- A view labels each case by width and theme, such as `1280 · dark`, where a flat block labels it by name
+- A comment posted before the layout changed sets base and head side by side in a table, where a `*(new)*` cell has no before image and a view row holds one case per theme cell
 
 ## How many to open
 
