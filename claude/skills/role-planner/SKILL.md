@@ -120,5 +120,6 @@ The operator being present is an assumption the launch carries. A talk planner w
 ## Lifetime
 
 - The role runs from the launch to the record landing, and the operator closes a talk session. A session handed a second row works it under the same role and reads the tree again for it.
-- A reused session's picture of the tree ages, and it nears a compaction that silently drops the reasoning behind its earlier records. Cap a reused session rather than letting it run the board.
+- A reused session's picture of the tree ages, and a compaction silently drops the reasoning behind its earlier records.
+- Run the in-flight read again before each handed row, and stop when the operator ends the session or a compaction nears, telling the controller which rows are still unplanned
 - Treat this body as possibly older than the branch under it. A plugin skill loads from the marketplace cache rather than from the working tree.

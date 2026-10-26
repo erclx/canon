@@ -133,7 +133,7 @@ What a planning dispatch owes instead is the reverse reading, since a row planne
 
 A session reused across a batch pays the context load once and ages its picture of the tree while it works, which is why the in-flight read sits on the task rather than the batch. One that compacts mid-batch loses the reasoning behind its earlier plans with nothing reporting it.
 
-Cap a reused session where the saving is worth it and say what the cap was.
+Reuse a session where the saving is worth it. `role-planner` holds where it stops, being a fresh in-flight read before each row and a stop when the operator ends it or a compaction nears.
 
 ## Dispatch a talk session
 
