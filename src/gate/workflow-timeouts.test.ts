@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
@@ -13,36 +13,61 @@ interface WorkflowJob {
   steps?: WorkflowStep[]
 }
 
-const WORKFLOW_PATH = join(
-  import.meta.dirname,
-  '../../.github/workflows/pr-visual-checks.yml',
-)
+const WORKFLOWS_DIR = join(import.meta.dirname, '../../.github/workflows')
 
-const readJobs = (): Record<string, WorkflowJob> => {
-  const parsed = Bun.YAML.parse(readFileSync(WORKFLOW_PATH, 'utf8')) as {
-    jobs: Record<string, WorkflowJob>
-  }
+const INSTALL_SCRIPT = 'scripts/ci/install-playwright-deps.sh'
+
+const readJobs = (file: string): Record<string, WorkflowJob> => {
+  const parsed = Bun.YAML.parse(
+    readFileSync(join(WORKFLOWS_DIR, file), 'utf8'),
+  ) as { jobs: Record<string, WorkflowJob> }
   return parsed.jobs
 }
 
-describe('pr-visual-checks.yml', () => {
-  it('should bound every job with a timeout', () => {
-    const unbounded = Object.entries(readJobs())
-      .filter(([, job]) => typeof job['timeout-minutes'] !== 'number')
-      .map(([id]) => id)
+const workflowFiles = readdirSync(WORKFLOWS_DIR).filter((file) =>
+  /\.ya?ml$/.test(file),
+)
 
-    expect(unbounded).toEqual([])
+const allSteps = (): { file: string; step: WorkflowStep }[] =>
+  workflowFiles.flatMap((file) =>
+    Object.values(readJobs(file)).flatMap((job) =>
+      (job.steps ?? []).map((step) => ({ file, step })),
+    ),
+  )
+
+describe.each(['pr-visual-checks.yml', 'refresh-capture-frames.yml'])(
+  '%s',
+  (file) => {
+    it('should bound every job with a timeout', () => {
+      const unbounded = Object.entries(readJobs(file))
+        .filter(([, job]) => typeof job['timeout-minutes'] !== 'number')
+        .map(([id]) => id)
+
+      expect(unbounded).toEqual([])
+    })
+  },
+)
+
+describe('every workflow', () => {
+  // A direct call reaches apt with no retry, so one stalled mirror
+  // connection reddens the job
+  it('should install playwright system packages only through the retry script', () => {
+    const direct = allSteps()
+      .filter(({ step }) => /install-deps|--with-deps/.test(step.run ?? ''))
+      .map(({ file, step }) => `${file}: ${step.name}`)
+
+    expect(direct).toEqual([])
   })
 
-  it('should bound every playwright install-deps step with a timeout', () => {
-    const steps = Object.values(readJobs())
-      .flatMap((job) => job.steps ?? [])
-      .filter((step) => step.run?.includes('playwright install-deps'))
+  it('should bound every retry script step with a timeout', () => {
+    const steps = allSteps().filter(({ step }) =>
+      step.run?.includes(INSTALL_SCRIPT),
+    )
     const unbounded = steps
-      .filter((step) => typeof step['timeout-minutes'] !== 'number')
-      .map((step) => step.name)
+      .filter(({ step }) => typeof step['timeout-minutes'] !== 'number')
+      .map(({ file, step }) => `${file}: ${step.name}`)
 
-    expect(steps.length).toBeGreaterThan(0)
+    expect(steps).toHaveLength(4)
     expect(unbounded).toEqual([])
   })
 })
