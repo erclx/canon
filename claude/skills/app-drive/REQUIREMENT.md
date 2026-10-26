@@ -28,8 +28,8 @@ Nothing ties the drive to what the app is for, so a goal goes untried and nobody
 
 ## Out of scope
 
-- Reading source for roughness, which `ux-audit` owns
+- Reading source for roughness, which `ui-audit` owns
 - Driving one pull request's checklist, which `review-ui` owns
-- Measuring paint and layout cost, which `ux-measure` owns
-- Picking between a now frame and a fix frame, which `pick-by-eye` owns
+- Measuring paint and layout cost, which `ui-measure` owns
+- Picking between a now frame and a fix frame, which `design-pick` owns
 - Messaging the controller and ending the session, which `role-planner` owns

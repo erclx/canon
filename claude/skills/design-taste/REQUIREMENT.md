@@ -25,12 +25,12 @@ The output has no standard of quality either. A model with no stated direction d
 - Admit a rule an unguided model already gets right, another surface owns, a threshold settles, or no single line could violate
 - Restate the correctness floor or the banned characters, or trade accessibility and the state set against an aesthetic preference
 - Express intensity as a numeric scale, or claim a round follows these rules when nothing measures it
-- Be reached only by an author typing its name, since `pick-by-eye`'s declared read is the intended caller
+- Be reached only by an author typing its name, since `design-pick`'s declared read is the intended caller
 
 ## Out of scope
 
 - Accessibility, keyboard interaction, state coverage, forms, and rendered copy, which `ui-craft` owns
 - The focus ring's floors, which `ui-craft` owns, though its weight is this skill's
-- The candidate loop and the pick, which `pick-by-eye` owns
+- The candidate loop and the pick, which `design-pick` owns
 - The shape of the project's design document, which `design-record`'s design reference governs
 - Prose on the surface being designed, which `write-human` and `markdown-craft` own

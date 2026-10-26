@@ -1,6 +1,6 @@
 ---
 name: design-identity
-description: Drafts a project's logo mark through pick-by-eye's render-and-pick loop, then composes the picked mark into an icon sequence and a 1200x630 social card. Use when asked to "make a logo", "design a logo mark", "create a favicon", "build the icon set", "generate a social card", "make an og:image", or "draft the logo and social card together". Do NOT use to mutate an existing logo file directly, which is a plain edit, or to record the mark's construction rules in DESIGN.md, which is out of scope.
+description: Drafts a project's logo mark through design-pick's render-and-pick loop, then composes the picked mark into an icon sequence and a 1200x630 social card. Use when asked to "make a logo", "design a logo mark", "create a favicon", "build the icon set", "generate a social card", "make an og:image", or "draft the logo and social card together". Do NOT use to mutate an existing logo file directly, which is a plain edit, or to record the mark's construction rules in DESIGN.md, which is out of scope.
 metadata:
   family: generate
 ---
@@ -60,7 +60,7 @@ Announce which tier decided, naming the tier rather than the path alone, so the 
 
 ## Step 4: name the decision and the arms
 
-Follow `${CLAUDE_SKILL_DIR}/../pick-by-eye/SKILL.md` Step 1, with the decision fixed rather than derived: "the project's logo mark and its composition into the social card." Vary the mark's shape or style across arms, keeping the card's type and layout fixed, per that skill's one-property rule.
+Follow `${CLAUDE_SKILL_DIR}/../design-pick/SKILL.md` Step 1, with the decision fixed rather than derived: "the project's logo mark and its composition into the social card." Vary the mark's shape or style across arms, keeping the card's type and layout fixed, per that skill's one-property rule.
 
 - Draft each arm inside the 1200x630 card frame, mark and type together, and add it with `frameboard frame add <page>/arm-<id> --width 1200 --height 630`, so one pick settles shape and composition
 - Arm 0 is the current mark when the Step 3 folder already holds a logo file (`favicon.svg`, `favicon.ico`, `logo.svg`, or similar). Arms start at 1 otherwise.
@@ -68,13 +68,13 @@ Follow `${CLAUDE_SKILL_DIR}/../pick-by-eye/SKILL.md` Step 1, with the decision f
 
 ## Step 5: draft, render, pick, and loop
 
-Follow `${CLAUDE_SKILL_DIR}/../pick-by-eye/SKILL.md` Steps 2 through 5 against the arms from Step 4: draft the arms as frames on a Frameboard page, render and hand off, take the pick, and loop on it.
+Follow `${CLAUDE_SKILL_DIR}/../design-pick/SKILL.md` Steps 2 through 5 against the arms from Step 4: draft the arms as frames on a Frameboard page, render and hand off, take the pick, and loop on it.
 
-The final icon and card renders below are not arms, so they stay off the board. Call the folder they render from `<dest>`, being `.canon/tmp/<slug>/` under the slug `pick-by-eye` Step 1 derived, which is where this project puts every temporary write.
+The final icon and card renders below are not arms, so they stay off the board. Call the folder they render from `<dest>`, being `.canon/tmp/<slug>/` under the slug `design-pick` Step 1 derived, which is where this project puts every temporary write.
 
 ## Step 6: finalize the mark and the icons
 
-This step and Step 7 replace `pick-by-eye`'s own Step 6 items 1 and 2, since the pick here produces several final files rather than one applied surface. Its archive capture, its page delete, and its server stop still run, after Step 7.
+This step and Step 7 replace `design-pick`'s own Step 6 items 1 and 2, since the pick here produces several final files rather than one applied surface. Its archive capture, its page delete, and its server stop still run, after Step 7.
 
 1. Extract the picked arm's `.mark` markup as the final vector source. Write it to `<write-folder>/favicon.svg`.
 2. Under `<dest>/render/`, write one `icon-<w>x<h>.html` page per Step 2 size, carrying the picked `.mark` markup in an element with the shared class `.render`.
@@ -112,7 +112,7 @@ It takes its own call because Step 6's batch is already captured by the time thi
 
 ### Closing the scratch folder and the board
 
-Delete `<dest>` once both captures land, then close the board through `pick-by-eye` Step 6 items 3 to 8, which archive every arm and delete the pages the run added. The route is not a leftover variant, since it holds the arm the operator picked.
+Delete `<dest>` once both captures land, then close the board through `design-pick` Step 6 items 3 to 8, which archive every arm and delete the pages the run added. The route is not a leftover variant, since it holds the arm the operator picked.
 
 A project whose card was generated before this route existed keeps its PNG. Say so rather than regenerating it, since the pick loop spends attention on a file nobody complained about, and the next real edit picks up the route.
 
@@ -132,7 +132,7 @@ Card source: <the route, captured through the card server|a scratch page, since 
 
 Cite these rather than restating them.
 
-- `pick-by-eye` owns Steps 1 through 5 of the render-and-pick loop, cited above
+- `design-pick` owns Steps 1 through 5 of the render-and-pick loop, cited above
 - `canon:design-record` carries a picked direction into `canon/DESIGN.md`. This skill only reads it.
 - `canon capture` owns the render mechanics, its font refusal, its fixed 2x scale, and its reported dimensions. It reads an `http(s)://` source, where `--out` names the PNG.
 - The `astro` tooling stack owns the card route's scaffold, its second config, and the exclusion check, read with `canon tooling reference astro`. This skill writes into the route and never reshapes it.

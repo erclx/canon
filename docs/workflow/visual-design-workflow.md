@@ -72,7 +72,7 @@ A close posts as `## UI review closed`. The reviewers lift the draft mark on the
 
 ## Design authoring
 
-Most projects author design in the loop above and need nothing more. Start with `canon:pick-by-eye`, which drafts candidates as frames on a [Frameboard](https://www.npmjs.com/package/frameboard) board and takes your pick, then record the pick with `canon:design-record`. `canon:design-identity` drafts a logo mark and social card the same way.
+Most projects author design in the loop above and need nothing more. Start with `canon:design-pick`, which drafts candidates as frames on a [Frameboard](https://www.npmjs.com/package/frameboard) board and takes your pick, then record the pick with `canon:design-record`. `canon:design-identity` drafts a logo mark and social card the same way.
 
 A pick round drafts on `.canon/canvas/` unless the project names another board in `canon/config/design.toml`.
 

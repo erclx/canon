@@ -28,4 +28,4 @@ It ships a page change without `bun run web:build`, the only typecheck `web/` ge
 
 - `docs/`, which `internal-docs` owns
 - `src/` and the regeneration scripts, which `internal-scripts` owns
-- Deciding how a surface should look, which `pick-by-eye` owns
+- Deciding how a surface should look, which `design-pick` owns

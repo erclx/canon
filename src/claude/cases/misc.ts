@@ -10,7 +10,7 @@ export const MISC_CASES: readonly SkillCase[] = [
   {
     prompt:
       'Show me a few different treatments for this callout so I can pick one by looking.',
-    expect: 'pick-by-eye',
+    expect: 'design-pick',
   },
   {
     prompt:

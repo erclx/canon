@@ -24,10 +24,10 @@ Each project invents its own grouping, and its index restates the file tree rath
 - Write, copy, or delete a reference file by hand, or capture frames in place of a missing sync
 - Land a candidate the operator has not picked
 - Restate when a pick lands against the build, which the design-reference rule states
-- Be reached only by the author typing its name, since a pick from `pick-by-eye` should hand off to it
+- Be reached only by the author typing its name, since a pick from `design-pick` should hand off to it
 
 ## Out of scope
 
-- Drafting candidates and taking the pick, which `pick-by-eye` owns
+- Drafting candidates and taking the pick, which `design-pick` owns
 - Drawing, selecting, and capturing frames on a board, which Frameboard owns
 - Judging whether a design is good, which `design-taste` owns

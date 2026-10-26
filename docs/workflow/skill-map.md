@@ -24,7 +24,7 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 | `canon:backlog-triage`     | The backlog needs pruning                          |
 | `canon:plan-groundwork`    | The state is unmeasured and approaches compete     |
 | `canon:decision-escalate`  | Open decisions turn on your preference             |
-| `canon:pick-by-eye`        | The call is taste, wanting candidates side by side |
+| `canon:design-pick`        | The call is taste, wanting candidates side by side |
 | `canon:task-board`         | A decided item needs a file on the board           |
 | `canon:plan-feature`       | The approach is settled and needs a plan           |
 | `canon:codebase-layout`    | A change adds a file and needs a folder            |
@@ -53,8 +53,8 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 | Skill                   | When to use                                    |
 | ----------------------- | ---------------------------------------------- |
 | `canon:document-health` | Documents must answer for length and staleness |
-| `canon:ux-audit`        | To read UI source for missing states           |
-| `canon:ux-measure`      | To measure paint, processor, and layout cost   |
+| `canon:ui-audit`        | To read UI source for missing states           |
+| `canon:ui-measure`      | To measure paint, processor, and layout cost   |
 | `canon:app-drive`       | To drive a built app with the operator         |
 
 ## Ship it

@@ -54,6 +54,15 @@ import { defineRenameRules, type RenameRules } from '@/migrate/rename'
  * target on the oldest spelling lands in one pass rather than two.
  * `draft-ready` alone keys on its namespaced forms below rather than here.
  *
+ * Four skills then moved into the family their job belongs to. `pick-by-eye`
+ * was the one step of the design flow without the `design-` prefix, so it
+ * became `design-pick`. `ui-record` filmed footage while "record" already
+ * named the design record, so it became `ui-film`. `ux-audit` and
+ * `ux-measure` were the only `ux-` skills beside the `ui-` ones, so they
+ * became `ui-audit` and `ui-measure`. `draft-and-pick`, `claude-ux-audit`,
+ * and `claude-ux-measure` are retargeted onto the new names for the same
+ * reason `claude-ui-test` was.
+ *
  * Every name takes two words. Ten of these would have landed as a bare single
  * word under a plain strip, and a bare word such as `review` or `docs` is a
  * substring of ordinary prose with no token left for a later sweep to find.
@@ -92,8 +101,10 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
   'claude-teach': 'teach-workspace',
   'claude-ui-test': 'ui-checklist',
   'ui-test': 'ui-checklist',
-  'claude-ux-audit': 'ux-audit',
-  'claude-ux-measure': 'ux-measure',
+  'claude-ux-audit': 'ui-audit',
+  'claude-ux-measure': 'ui-measure',
+  'ux-audit': 'ui-audit',
+  'ux-measure': 'ui-measure',
   'claude-worker': 'role-worker',
   'claude-worktree': 'session-worktree',
   'canon-screencast': 'script-screencast',
@@ -110,8 +121,10 @@ export const SKILL_NAME_MAP: Readonly<Record<string, string>> = {
   'draft-figure': 'draw-figure',
   'draft-identity': 'design-identity',
   'draft-slides': 'make-deck',
-  'draft-and-pick': 'pick-by-eye',
+  'draft-and-pick': 'design-pick',
   'draft-screencast': 'script-screencast',
+  'pick-by-eye': 'design-pick',
+  'ui-record': 'ui-film',
 }
 
 /**
@@ -190,6 +203,10 @@ export const RENAMED_DRAFT_POINTERS: readonly string[] = [
  * what shipped or what a session ran under whatever name was current then, so
  * rewriting one makes it testify to a release or a run that never happened.
  *
+ * A replay fixture is excluded on the same argument. It records a real
+ * project's tree as that project held it, so a rewrite changes what the replay
+ * proves.
+ *
  * The record archives need no entry here. They are gitignored, so the tracked
  * listing every sweep reads never reaches them.
  */
@@ -197,7 +214,7 @@ export const SKILL_NAME_RULES: RenameRules = defineRenameRules({
   replacements: { ...SKILL_NAME_MAP, ...SKILL_CITATION_MAP },
   keepMarker: 'canon-keep-retired',
   wholeToken: true,
-  excludedPrefixes: ['scripts/eval/result-'],
+  excludedPrefixes: ['scripts/eval/result-', 'sandbox/fixtures/replay/'],
   excludedPaths: [
     'CHANGELOG.md',
     'src/migrate/skill-names.ts',

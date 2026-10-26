@@ -75,7 +75,7 @@ Each domain has a canonical source in this repo and a thin install or sync CLI o
 | Transcripts    | A YouTube transcript with metadata frontmatter                                                        | `canon transcripts <url>` writes it into any repo               |
 | Sandbox        | Scenario scaffolds that provision an isolated project state for verifying each domain flow            | `canon sandbox`                                                 |
 
-The design board lives outside canon in [Frameboard](https://www.npmjs.com/package/frameboard), which `canon:pick-by-eye` drives for each round of candidates.
+The design board lives outside canon in [Frameboard](https://www.npmjs.com/package/frameboard), which `canon:design-pick` drives for each round of candidates.
 
 ### How domains reach you
 

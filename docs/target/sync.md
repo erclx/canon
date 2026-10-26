@@ -48,7 +48,7 @@ Add `--json` for a machine-readable report and `--exit-code` to fail CI when a t
 - Tooling dependencies: a dependency on a later major than the stack pins reads as `ahead`, and sync leaves it
 - Index regeneration: `canon indexes regen`
 
-After `canon gov sync` applies, it lists each rule it copied with its globs and how many project files match. A `ui/` rule adds a pointer to `/canon:ux-audit`. `--json` writes `{ "coverage": [{ "rule", "paths", "files", "ui" }] }` to stdout, empty when nothing was copied, with `files` null outside git. The report never changes the exit code.
+After `canon gov sync` applies, it lists each rule it copied with its globs and how many project files match. A `ui/` rule adds a pointer to `/canon:ui-audit`. `--json` writes `{ "coverage": [{ "rule", "paths", "files", "ui" }] }` to stdout, empty when nothing was copied, with `files` null outside git. The report never changes the exit code.
 
 Try a scenario from [sandbox](../../canon/context/development/sandbox.md) before syncing a real project.
 

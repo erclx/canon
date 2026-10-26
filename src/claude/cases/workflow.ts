@@ -143,11 +143,11 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   {
     prompt:
       'Look over the interface and tell me what feels unfinished or confusing.',
-    expect: 'ux-audit',
+    expect: 'ui-audit',
   },
   {
     prompt: 'Tell me the paint and layout cost of this page right now.',
-    expect: 'ux-measure',
+    expect: 'ui-measure',
   },
   {
     prompt:
@@ -162,12 +162,12 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   {
     prompt:
       'I need real footage of the board import flow for the launch video. Film it from our app so HyperFrames can zoom in on the clicks.',
-    expect: 'ui-record',
+    expect: 'ui-film',
   },
   {
     prompt:
       'Shoot the takes for the storyboard we wrote, one clip per beat of the app doing its thing.',
-    expect: 'ui-record',
+    expect: 'ui-film',
   },
   {
     prompt:
@@ -216,10 +216,10 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
   },
   {
     prompt: 'Find the rough, unfinished-feeling spots in this interface.',
-    expect: 'ux-audit',
+    expect: 'ui-audit',
   },
   {
     prompt: 'Tell me the render cost of this page in the browser.',
-    expect: 'ux-measure',
+    expect: 'ui-measure',
   },
 ]

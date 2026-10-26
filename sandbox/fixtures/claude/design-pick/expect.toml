@@ -1,0 +1,107 @@
+# What a correct `/canon:design-pick` run leaves behind on the seeded page. Read
+# by `canon sandbox check`. Patterns use TOML literal strings so a regex needs no
+# backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block. A bare key below
+# one belongs to that table in TOML, so an array written at the bottom parses
+# clean and silently asserts nothing.
+#
+# This arm asserts the closed state, which is the one a headless run reaches. The
+# body stops its loop on the operator saying the pick is right and on nothing
+# else, and a headless session has no operator to hear that from, so waiting
+# would spend turns to the cap and closing is the only terminal behavior
+# available. A pre-supplied pick therefore carries the run through step 6 rather
+# than parking it at the hand-off. Measured 2026-09-02 at 99 seconds, before the
+# arms moved onto the canvas: the run drafted four arms with the shipping wash as
+# arm 0, applied the ground shift, recorded the decision in the design note, and
+# removed its working files.
+#
+# So what is asserted is the blast radius and the scope of the edit, not the
+# loop. `write_scope` is the load-bearing entry: it admits the two surfaces a
+# close legitimately reaches and nothing else, so a run that edited a third file
+# fails. The `content` pins are the other half, holding the four lines of the
+# seeded page a treatment change must leave alone, which is what separates a
+# scoped edit from a rewrite.
+#
+# What no assertion here reaches is the loop itself, the pick, and the hand-off.
+# That is a property of the harness rather than a gap to close later: the stop
+# condition is a person, and no fixture supplies one. Reading a green verdict as
+# coverage of the loop is the mistake this paragraph exists to prevent.
+#
+# Two earlier premises were wrong and are recorded so neither is re-derived. The
+# arm first asserted a render refusal, read off the arm then named `ui-test` (canon-keep-retired)
+# failing in a
+# sandbox, which fails because it resolves `@playwright/test` out of a
+# `node_modules` nobody installed, where `canon capture` resolves
+# `playwright-core` through the installed `canon` and renders. It then asserted
+# its working files still standing, on the reading that a pick is not permission
+# to close, which is true of the body and untestable without an operator.
+
+paths = ["index.html", "canon/DESIGN.md"]
+
+# The two surfaces a close reaches, and the board it works on. `index.html`
+# carries the applied arm and the design note carries the decision, and step 6
+# directs both writes, so this entry admits exactly what the body sends a run to
+# touch. That correspondence is the point rather than a convenience: an entry
+# admitting a surface the body never directs is a bound that permits whatever it
+# was written to catch. The measured run wrote the note by replacing its own
+# Unresolved section before step 2 existed, and the step was added rather than
+# the path dropped, since a pick that records nothing about why is the loss the
+# note exists to prevent.
+#
+# `.canon/picks/**` is the third write step 6 directs: the per-frame capture of
+# the picked round's arms lands there as the durable revert record, before the
+# round pages are deleted from the board at `.canon/canvas/`. The composite
+# render taken at step 3 lands in the board's own `.run/captures/`, which the
+# board entry admits, and `.canon/tmp/**` admits any scratch the run keeps.
+write_scope = [
+  ".canon/canvas/**",
+  ".canon/tmp/**",
+  ".canon/picks/**",
+  "index.html",
+  "canon/DESIGN.md",
+]
+
+# Declared at the runner default rather than at the observation. One run bounds
+# nothing here, since the cost follows how many arms the run drafts and how much
+# markup each takes. The measured run took 99 seconds and its turn count sits in
+# the record beside this file. Correct it downward from the widest of several.
+#
+# Never raise it above the cap of 30: a truncated run reports one turn past the
+# cap, so a declaration above it goes green on exactly the truncation the
+# assertion exists to catch.
+max_turns = 30
+
+manual = [
+  "The arms differ in a way worth choosing between. Semantic: this is the whole judgment the skill exists to serve, and a fixture with the answer pre-supplied proves the run reached a pick rather than that the candidates were worth choosing between.",
+  "Three to five arms were drafted as frames on one Frameboard page, each labeled with its id and its cost, with the shipping state among them. Unwired: step 6 deletes the round pages, so the page the claim is about is gone by the time anything reads the tree. The archive under .canon/picks/ holds one arm-<id> image per arm, which is evidence rather than an assertion.",
+  "The arms varied one property. Semantic: the seeded decision names a border, a ground shift, and a rule down one edge, and whether a run held everything else fixed is read off markup that no longer exists once the run closes.",
+  "Every frame declared a font stack the machine resolves. Unwired: the frames are deleted by the close, and the render it gates is a property of the machine rather than of the run.",
+  "The applied treatment is the arm the prompt picked rather than another. Semantic: which arm is second is a property of the order the run authored, so no pattern can tie the pick to the treatment without fixing the arms the run is meant to invent.",
+  "The pick was put through the structured question surface with the recommendation ranked first and marked. Unwired: the harness captures no tool calls, and a headless session has no operator to put a question to, so this arm cannot reach it at all.",
+  "The loop narrowed to the picked arm and handed off before closing. Unwired: the loop stops on a person saying the pick is right and no fixture supplies one, so a headless run closes on the pick and a green verdict here is not coverage of the loop.",
+  "The board was served and its link emitted ahead of the pick question. Unwired: the harness captures no tool calls and cannot assert ordering, and step 6 ends the server it started and deletes the round pages before anything reads the tree.",
+  "The close deleted only the round pages the run added and left no other board page touched. Unwired: the fixture seeds no operator page beside the run's, so nothing here separates a delete by recorded name from a delete by prefix.",
+  "The design note names the arm that won and the ones that stayed defensible, rather than merely being touched. Judgment: step 6 now directs the write and write_scope admits it, so what nothing asserts is whether the record says anything useful, and any pattern over it would match wording the run chooses.",
+]
+
+# Four lines of the seeded page a treatment change must leave alone. `content`
+# matches positively, so a run that rewrote the page rather than its callout
+# pushes or replaces these and fails. Together they bound the edit to the
+# treatment without asserting which treatment won, which the manual entry above
+# explains cannot be pinned.
+[[content]]
+path = "index.html"
+pattern = '<h1>Release notes</h1>'
+
+[[content]]
+path = "index.html"
+pattern = 'font: 16px/1\.5 system-ui, sans-serif;'
+
+[[content]]
+path = "index.html"
+pattern = '<p>Upgrading from 3\.x needs one manual step\. Read the migration note first\.</p>'
+
+[[content]]
+path = "index.html"
+pattern = '<p>Nothing else on this page has an unresolved treatment\.</p>'

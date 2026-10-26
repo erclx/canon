@@ -427,13 +427,13 @@ describe('referencesIn', () => {
     it('should report a rule path that resolves against the checkout', () => {
       expect(
         referencesIn(
-          'claude/skills/pick-by-eye/SKILL.md',
+          'claude/skills/design-pick/SKILL.md',
           "Write scratch to `.claude/rules/canon/canon/scratch.md`'s location.",
           root,
         ),
       ).toEqual([
         {
-          file: 'claude/skills/pick-by-eye/SKILL.md',
+          file: 'claude/skills/design-pick/SKILL.md',
           line: 1,
           kind: 'rule-path',
           text: '.claude/rules/canon/canon/scratch.md',

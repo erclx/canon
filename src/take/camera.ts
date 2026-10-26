@@ -20,8 +20,8 @@ import {
 
 /**
  * Turns a take's log into one camera per frame, preset O4 from groundwork
- * track `193-ui-record`: OpenScreen's timing aimed at each click, a fixed
- * depth, a focus that holds still until a click leaves the inner part of the
+ * track `193-ui-record`, a folder name kept as written (canon-keep-retired).
+ * The preset is OpenScreen's timing aimed at each click, a fixed depth, a focus that holds still until a click leaves the inner part of the
  * view, and a dead zone that keeps the cursor in frame. HyperFrames renders the
  * track as it stands, so it carries no curve a renderer would have to agree on.
  */

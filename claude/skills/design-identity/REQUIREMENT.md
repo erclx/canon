@@ -15,7 +15,7 @@ A session building this alone restates the render-and-pick loop from scratch, wh
 
 - The icon size sequence and the write folder come from the project's own head, manifest, or static-asset convention before a stated default, and the run names which one decided
 - Every arm is drafted inside the card frame, so one pick settles the mark's shape and its composition together
-- The render, hand-off, pick, and loop follow `pick-by-eye` rather than a copy of it
+- The render, hand-off, pick, and loop follow `design-pick` rather than a copy of it
 - The final mark lands as its own SVG source, not only baked into a raster
 - Every final size and the card render in one capture call, each landing at its literal target size
 
@@ -23,12 +23,12 @@ A session building this alone restates the render-and-pick loop from scratch, wh
 
 - Draft a mark the operator did not ask for, or mutate an existing logo file, which is a plain edit
 - Add a logo section to the design document's fixed section set, which its parser reads as a fixed key set
-- Modify `pick-by-eye` or `canon capture`, which this skill composes
+- Modify `design-pick` or `canon capture`, which this skill composes
 - Be taken as reached by more than an operator typing its name, which a later review reads back rather than assumes
 
 ## Out of scope
 
-- The render, hand-off, pick, and loop mechanics, which `pick-by-eye` owns
+- The render, hand-off, pick, and loop mechanics, which `design-pick` owns
 - Carrying a picked direction into the design document, which `design-record` owns
-- Auditing an implemented UI against its tokens, which `ux-audit` owns
+- Auditing an implemented UI against its tokens, which `ui-audit` owns
 - Wiring the produced files into the project's head or manifest, which the operator owns

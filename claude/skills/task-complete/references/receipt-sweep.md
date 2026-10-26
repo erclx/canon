@@ -37,7 +37,7 @@ A branch report is read once, by the session addressing it. The durable record i
 
 ### What stays
 
-Do not sweep `ux-audit-*.md` or `ux-measure-*.md`, which are standalone deliverables. They sit at `.canon/review/` itself rather than under a producer folder, so the glob never reaches them.
+Do not sweep `ui-audit-*.md` or `ui-measure-*.md`, which are standalone deliverables. They sit at `.canon/review/` itself rather than under a producer folder, so the glob never reaches them.
 
 Output one line per file swept:
 

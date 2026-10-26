@@ -40,5 +40,5 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 - How a surface looks, being the layer order, the coherence locks, and the defaults a model reaches for: `design-taste`
 - The accepted designs under the design folder and how a reference lands there: `design-record`
 - The visual checklist a reviewer reads beside the screenshots: `ui-checklist`
-- Reading source for roughness a rule does not state: `ux-audit`
+- Reading source for roughness a rule does not state: `ui-audit`
 - Prose on the surface beyond its interface copy: the `write-human` skill

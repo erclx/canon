@@ -1389,8 +1389,11 @@ export function register(program: Command): void {
         `It also carries ${Object.keys(SKILL_CITATION_MAP).length} namespaced-only rows for a skill renamed from a single word.`,
         'The seven draft- skills move onto verb-first names, such as',
         // The old spellings below are the rename itself. canon-keep-retired
-        'draft-doc to write-doc and draft-and-pick to pick-by-eye, and a',
-        'pointer left under each old name is never moved.',
+        'draft-doc to write-doc and draft-slides to make-deck, and a',
+        'pointer left under each old name is never moved. Four skills then',
+        'moved into the family their job belongs to, such as',
+        // canon-keep-retired
+        'ux-audit to ui-audit and pick-by-eye to design-pick.',
         'It takes no scope. The skill folders it moves are authored in the',
         'toolkit and no target holds a copy of that catalog, so in a target it',
         'rewrites citations of a renamed skill and moves nothing.',

@@ -2,7 +2,8 @@ import type { Point } from '@/take/log'
 
 /**
  * Draws the cursor arrow and the click ring onto one decoded frame, in the
- * shape groundwork track `193-ui-record` rendered them: a dark arrow outlined
+ * shape groundwork track `193-ui-record` rendered them (canon-keep-retired):
+ * a dark arrow outlined
  * in white, and a blue ring that grows from its tip and fades out. Both stay
  * one size whatever the frame shows, so the pointer reads the same in every
  * beat of a reel. Drawn in TypeScript rather than a browser, so the reel needs
