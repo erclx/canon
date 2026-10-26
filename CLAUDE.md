@@ -12,17 +12,17 @@ A CLI and Claude Code plugin. What it is for, its goals, and its constraints are
 
 Each rule or fact lives in one surface. Others point at it. `canon/context/context-model.md` carries the test that sorts a fact between surfaces.
 
-| Kind of content                                                             | Owner                                                                     |
-| --------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Identity, goals, non-goals, constraints                                     | `canon/REQUIREMENTS.md`                                                   |
-| Behavior every session needs                                                | `CLAUDE.md`                                                               |
-| A path-scoped pointer to a skill, or a floor no skill carries               | `governance/rules/`, or `internal/rules/` for this repository alone       |
-| Practice a session applies when building or reviewing in a domain           | the owning plugin skill's `references/`                                   |
-| Sources behind an outside-practice rule or skill reference                  | `governance/ledger/`                                                      |
-| Shape of an artifact many sessions edit                                     | the owning skill's `references/`                                          |
-| What a session needs when editing domain X                                  | `.claude/skills/internal-<X>/SKILL.md`                                    |
-| What a domain does, where it lives, and the traps a session would hit in it | `canon/context/<X>/`                                                      |
-| Consumer-facing guides and the reference for verbs run by hand              | `docs/`, with a skill-only verb covered by its calling skill and `--help` |
+| Kind of content                                                                 | Owner                                                                     |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Identity, goals, non-goals, constraints                                         | `canon/REQUIREMENTS.md`                                                   |
+| Behavior every session needs                                                    | `CLAUDE.md`                                                               |
+| A path-scoped pointer to a skill, or a floor no skill carries                   | `governance/rules/`, or `internal/rules/` for this repository alone       |
+| Practice a session applies when building or reviewing in a domain               | the owning plugin skill's `references/`                                   |
+| Sources or decisions behind a toolkit rule, or sources behind a skill reference | `governance/ledger/`                                                      |
+| Shape of an artifact many sessions edit                                         | the owning skill's `references/`                                          |
+| What a session needs when editing domain X                                      | `.claude/skills/internal-<X>/SKILL.md`                                    |
+| What a domain does, where it lives, and the traps a session would hit in it     | `canon/context/<X>/`                                                      |
+| Consumer-facing guides and the reference for verbs run by hand                  | `docs/`, with a skill-only verb covered by its calling skill and `--help` |
 
 A fact more than one domain reads is canonical. A fact one domain reads belongs to that domain, however important.
 
