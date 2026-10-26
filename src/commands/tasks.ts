@@ -4,6 +4,13 @@ import { execa } from 'execa'
 import { gitEnv } from '@/git/env'
 import { type AnswersOutcome, planAnswers } from '@/tasks/answers'
 import {
+  DEFAULT_LAUNCH_WAIT_SECONDS,
+  type LaunchOutcome,
+  type LaunchWait,
+  readLaunchable,
+  waitForLaunchable,
+} from '@/tasks/launch-wait'
+import {
   type BoardOutcome,
   type BoardRefused,
   blockTask,
@@ -110,6 +117,12 @@ interface CitationsCommandOptions {
 interface AnswersCommandOptions {
   readonly json?: boolean
   readonly root?: string
+}
+
+interface LaunchableCommandOptions {
+  readonly json?: boolean
+  readonly root?: string
+  readonly wait?: string | true
 }
 
 interface BranchCommandOptions {
@@ -412,6 +425,72 @@ export function register(program: Command): void {
     )
     .action(async (plan: string, opts: AnswersCommandOptions) => {
       process.exitCode = await runAnswers(plan, opts)
+    })
+
+  tasks
+    .command('launchable')
+    .description(
+      'Report whether a row has a linked plan the dispatch may launch',
+    )
+    .argument('<task>', 'Task filename stem, as in v28.1-trigger-escalation')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Emit a machine-readable record on stdout')
+    .option('--root <path>', 'Board root, defaulting to the main worktree')
+    .option(
+      '--wait [seconds]',
+      `Hold until the row is launchable, default ${DEFAULT_LAUNCH_WAIT_SECONDS}`,
+    )
+    .addHelpText(
+      'after',
+      [
+        '',
+        "Resolves the task's Plan: line and runs the plan-answers gate on the",
+        'plan it names, in one read. It keys on the line rather than on the',
+        'plan file, since a planner links a plan only after it validates, so a',
+        'plan still being written never reads as landed. It answers planning',
+        'alone: the branch and claim checks stay in the dispatch runbook.',
+        '',
+        'The record carries task, plan, launchable, and open, the last three',
+        'named as plan-answers names them. Read `reason`:',
+        '  unlinked    the task carries no Plan: line yet',
+        '  open        the plan still holds a question for the operator',
+        '  launchable  the plan waits on nobody',
+        '',
+        '`--wait [seconds]` re-reads every 30 seconds until the row is',
+        'launchable or the deadline passes. `reason` then reads `launchable`',
+        'or `timeout`, the record carries the last reading, and',
+        '`waitedSeconds` is added. A refusal ends the wait at once. A wait',
+        'past 600 seconds outlasts a foreground shell call, so run it in the',
+        'background and act on the wake.',
+        '',
+        'Refusals, read off `reason`:',
+        '  no-board       the project carries no .canon/tasks/',
+        '  no-match       no task carries that stem exactly',
+        '  ambiguous      several tasks start with the name, so pass one in full',
+        '  several-plans  the Plan: line links more than one plan',
+        '  no-plan        the Plan: line names no file',
+        '  archived       the Plan: line points into the plans archive',
+        '  bad-input      the Plan: line carries an empty target',
+        '  bad-wait       --wait takes a whole number of seconds above zero',
+        '',
+        'Exit codes:',
+        '  0  the row is launchable',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '  2  the row is unlinked or open, or the wait reached its deadline',
+        '',
+        'It reports and never writes. Branch on `reason` rather than on the',
+        'exit code, which a shell function wrapping canon can flatten to zero.',
+        '',
+        'Examples:',
+        '  canon tasks launchable v28.1-trigger-escalation',
+        '  canon tasks launchable v28.1-trigger-escalation --json',
+        '  canon tasks launchable v28.1-trigger-escalation --wait --json',
+        '  canon tasks launchable v28.1-trigger-escalation --wait 900 --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (task: string, opts: LaunchableCommandOptions) => {
+      process.exitCode = await runLaunchable(task, opts)
     })
 
   tasks
@@ -1825,6 +1904,110 @@ function reportAnswers(
   outro()
 
   return EXIT_FINDINGS
+}
+
+const BAD_WAIT = '--wait takes a whole number of seconds above zero.'
+
+interface BadWait {
+  readonly ok: false
+  readonly reason: 'bad-wait'
+  readonly message: string
+}
+
+async function runLaunchable(
+  task: string,
+  opts: LaunchableCommandOptions,
+): Promise<number> {
+  const emitJson = opts.json ?? false
+  const root = opts.root ?? (await mainWorktreeRoot())
+
+  let waitSeconds: number | undefined
+  if (opts.wait === true) {
+    waitSeconds = DEFAULT_LAUNCH_WAIT_SECONDS
+  } else if (opts.wait !== undefined) {
+    if (!/^\d+$/.test(opts.wait) || Number(opts.wait) === 0) {
+      const refused: BadWait = {
+        ok: false,
+        reason: 'bad-wait',
+        message: BAD_WAIT,
+      }
+      return reportLaunchable(refused, emitJson, root)
+    }
+    waitSeconds = Number(opts.wait)
+  }
+
+  const outcome =
+    waitSeconds === undefined
+      ? await readLaunchable(root, task)
+      : await waitForLaunchable(root, task, {
+          waitSeconds,
+          clock: {
+            now: () => Date.now(),
+            sleep: (ms) => new Promise((done) => setTimeout(done, ms)),
+          },
+        })
+
+  return reportLaunchable(outcome, emitJson, root)
+}
+
+function reportLaunchable(
+  outcome: LaunchOutcome | LaunchWait | BadWait,
+  emitJson: boolean,
+  root: string,
+): number {
+  if (!outcome.ok) {
+    intro('canon tasks launchable')
+    logStep('Refused')
+    logError(outcome.message)
+    outro()
+
+    if (emitJson) {
+      process.stdout.write(
+        `${JSON.stringify({
+          ok: false,
+          reason: outcome.reason,
+          message: outcome.message,
+          ...('waitedSeconds' in outcome && {
+            waitedSeconds: outcome.waitedSeconds,
+          }),
+          root,
+        })}\n`,
+      )
+    }
+    return 1
+  }
+
+  const code = outcome.launchable ? 0 : EXIT_FINDINGS
+
+  if (emitJson) {
+    process.stdout.write(`${JSON.stringify({ ...outcome, root })}\n`)
+    return code
+  }
+
+  intro('canon tasks launchable')
+  logStep(outcome.task)
+
+  if (outcome.plan === undefined) {
+    logWarn('carries no Plan: line yet, so no plan has landed.')
+  } else if (outcome.launchable) {
+    logInfo(`${outcome.plan} waits on nobody, so the dispatch may launch it.`)
+  } else {
+    for (const question of outcome.open) {
+      logWarn(`${question.label} ${question.why}`)
+    }
+    logError(`${outcome.plan} still waits on the operator.`)
+  }
+
+  if ('waitedSeconds' in outcome) {
+    logInfo(
+      outcome.reason === 'timeout'
+        ? `not launchable within ${outcome.waitedSeconds}s`
+        : `launchable after ${outcome.waitedSeconds}s`,
+    )
+  }
+
+  outro()
+  return code
 }
 
 async function runBranch(
