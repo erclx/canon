@@ -19,9 +19,14 @@ A take is real footage of the app doing one thing, filmed so the edit can zoom i
 
 ## Write scope
 
-Write inside `.canon/video/<slug>/` at the current worktree's root, where `<slug>` names the video or the feature, such as `launch-board-import`. That folder is the video's workspace, holding `plan.json`, `takes/`, `stills/`, and the HyperFrames project in `composition/`.
+Write inside `.canon/video/<slug>/` at the main worktree root, where `<slug>` names the video or the feature, such as `launch-board-import`. That folder is the video's workspace, holding `plan.json`, `takes/`, `stills/`, and the HyperFrames project in `composition/`.
 
-`canon records push` backs the workspace up without its media. The throwaway copy Step 1 may build sits outside the repository and is removed at the close.
+- Resolve the main root the way `session-worktree` does, since a linked worktree's own `.canon/` is never read by `canon records push` and is deleted with the worktree
+- Prefix every `.canon/video/<slug>/` path below with that root when running from a linked worktree
+- Write `plan.json` through the whole-file route `${CLAUDE_SKILL_DIR}/../session-worktree/references/main-root-writes.md` states, since `Write` refuses a main-root path from a linked worktree
+- `canon records push` backs the workspace up without its media
+
+The throwaway copy Step 1 may build sits outside the repository and is removed at the close.
 
 ## Pull request mode
 
