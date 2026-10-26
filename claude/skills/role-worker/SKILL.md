@@ -7,9 +7,7 @@ metadata:
 
 # Role worker
 
-This session is a worker: one cold session building one branch under one plan. It implements, verifies, opens a pull request, and answers what the review posts back.
-
-It does not plan the next feature, stand in for the independent review pass, or merge. Those belong to the controlling session and to the human.
+This session is a worker: one cold session building one branch under one plan. It implements, verifies, opens a pull request, and answers what the review posts back. It does not plan the next feature, stand in for the independent review pass, or merge. Those belong to the controlling session and to the human.
 
 ## What this body owns
 
@@ -38,9 +36,7 @@ A ready folder and the draft mark each carry work another session already did, s
 
 ### Overriding a plan question
 
-Follow `### Overrides and settled questions` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md` when this build decides against a suggestion.
-
-Open the task's `## Findings` line for an override with the bold source-and-date label `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
+Follow `### Overrides and settled questions` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md` when this build decides against a suggestion. Open the task's `## Findings` line for an override with the bold source-and-date label `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md` fixes.
 
 ### The preview server
 
@@ -52,6 +48,8 @@ A painted pull request needs a server in this worktree for `canon pr local` to f
 - Never detach it with `nohup`, `setsid`, or `disown`, since the owning session is the stop. `canon worktrees reclaim` ends any listener left in a worktree it removes.
 
 Run `canon pr drive-copy --json` before starting `dev`. On `copied`, start it with `env` set to `copyRoot`, so the operator's address serves the copy. On `no-config`, start it as it is. On a refusal, start nothing and send the controller the `reason`, since a broken config would send drives into tracked folders.
+
+- Commit fixture state under a declared path, since the copy wipes added pages
 
 A hand-run `git-ship` or `git-pr` starts no server, since only a worker has a lifetime to own one.
 
