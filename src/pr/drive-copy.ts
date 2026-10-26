@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { cpSync, existsSync, readFileSync, rmSync, statSync } from 'node:fs'
-import { isAbsolute, join } from 'node:path'
+import { isAbsolute, join, relative, sep } from 'node:path'
 import { $ } from 'bun'
 import { gitEnv } from '@/git/env'
 
@@ -28,6 +28,8 @@ const BRANCH_TYPES = new Set([
 export interface PreviewConfig {
   readonly writes: readonly string[]
   readonly env: string
+  /** Paths inside a declared path that a rebuild leaves as the server wrote them. */
+  readonly keep: readonly string[]
 }
 
 export type PreviewConfigRead =
@@ -68,12 +70,24 @@ function isContained(path: string): boolean {
   )
 }
 
+/** Whether `path` is `parent` or stands below it, both relative to one root. */
+function isWithin(path: string, parent: string): boolean {
+  const rel = relative(join('/', parent), join('/', path))
+  return (
+    rel === '' ||
+    (rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel))
+  )
+}
+
 /**
- * Reads `canon/config/preview.json` as `{ "writes": [...], "env": "<NAME>" }`.
+ * Reads `canon/config/preview.json` as
+ * `{ "writes": [...], "keep": [...], "env": "<NAME>" }`.
  * A file that does not parse refuses rather than reading as absent, since a
  * typo there would otherwise drive the real folders while the pass reports a
- * copy. A `writes` path that is absolute or climbs with `..` refuses, so the
- * copy never reads or writes outside its two roots.
+ * copy. A `writes` or `keep` path that is absolute or climbs with `..`
+ * refuses, so the copy never reads or writes outside its two roots, and a
+ * `keep` path outside every `writes` path refuses, since the rebuild would
+ * never reach it.
  */
 export function loadPreviewConfig(worktree: string): PreviewConfigRead {
   const path = join(worktree, PREVIEW_CONFIG_REL)
@@ -97,7 +111,7 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
     }
   }
 
-  const { writes, env } = parsed as Record<string, unknown>
+  const { writes, env, keep = [] } = parsed as Record<string, unknown>
   if (
     !Array.isArray(writes) ||
     !writes.every((item): item is string => typeof item === 'string')
@@ -108,6 +122,16 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
       detail: `${PREVIEW_CONFIG_REL} carries no "writes" list of paths.`,
     }
   }
+  if (
+    !Array.isArray(keep) ||
+    !keep.every((item): item is string => typeof item === 'string')
+  ) {
+    return {
+      kind: 'refused',
+      reason: 'bad-config',
+      detail: `${PREVIEW_CONFIG_REL} names a "keep" that is not a list of paths.`,
+    }
+  }
   if (env !== undefined && (typeof env !== 'string' || env === '')) {
     return {
       kind: 'refused',
@@ -116,7 +140,7 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
     }
   }
 
-  const unsafe = writes.find((item) => !isContained(item))
+  const unsafe = [...writes, ...keep].find((item) => !isContained(item))
   if (unsafe !== undefined) {
     return {
       kind: 'refused',
@@ -125,9 +149,20 @@ export function loadPreviewConfig(worktree: string): PreviewConfigRead {
     }
   }
 
+  const stray = keep.find(
+    (item) => !writes.some((path) => isWithin(item, path)),
+  )
+  if (stray !== undefined) {
+    return {
+      kind: 'refused',
+      reason: 'bad-config',
+      detail: `${PREVIEW_CONFIG_REL} keeps "${stray}", which no "writes" path holds.`,
+    }
+  }
+
   return {
     kind: 'read',
-    config: { writes, env: env ?? DEFAULT_PREVIEW_ENV },
+    config: { writes, env: env ?? DEFAULT_PREVIEW_ENV, keep },
   }
 }
 

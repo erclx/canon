@@ -65,7 +65,55 @@ describe('loadPreviewConfig', () => {
 
     expect(loadPreviewConfig(worktree)).toEqual({
       kind: 'read',
-      config: { writes: ['board'], env: 'CANON_PREVIEW_ROOT' },
+      config: { writes: ['board'], env: 'CANON_PREVIEW_ROOT', keep: [] },
+    })
+  })
+
+  it('should read the keep paths a declared path holds', () => {
+    write(
+      'canon/config/preview.json',
+      '{"writes":["board"],"keep":["board/.run"]}',
+    )
+
+    expect(loadPreviewConfig(worktree)).toMatchObject({
+      kind: 'read',
+      config: { keep: ['board/.run'] },
+    })
+  })
+
+  it('should refuse a keep that is not a list of paths', () => {
+    write(
+      'canon/config/preview.json',
+      '{"writes":["board"],"keep":"board/.run"}',
+    )
+
+    expect(loadPreviewConfig(worktree)).toMatchObject({
+      kind: 'refused',
+      reason: 'bad-config',
+    })
+  })
+
+  it('should refuse a keep outside every declared path', () => {
+    write(
+      'canon/config/preview.json',
+      '{"writes":["board"],"keep":["elsewhere/.run"]}',
+    )
+
+    expect(loadPreviewConfig(worktree)).toMatchObject({
+      kind: 'refused',
+      reason: 'bad-config',
+    })
+  })
+
+  it('should refuse a keep climbing out of the worktree', () => {
+    write(
+      'canon/config/preview.json',
+      '{"writes":["board"],"keep":["board/../../etc"]}',
+    )
+
+    expect(loadPreviewConfig(worktree)).toMatchObject({
+      kind: 'refused',
+      reason: 'unsafe-path',
     })
   })
 
