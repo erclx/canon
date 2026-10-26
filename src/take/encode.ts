@@ -191,7 +191,7 @@ export async function lastFrame(clip: string, frames: number): Promise<Buffer> {
   return jpeg
 }
 
-function finished(proc: ChildProcess): Promise<void> {
+export function finished(proc: ChildProcess): Promise<void> {
   let stderr = ''
   proc.stderr?.on('data', (chunk: Buffer) => {
     stderr += chunk.toString()
