@@ -451,7 +451,11 @@ function testOrderCounts(record: unknown): Record<string, number> | undefined {
   })
 }
 
-/** The record kinds `canon records validate` takes, and the corpus each reads. */
+/**
+ * The record kinds whose findings the aggregate counts, and the corpus each
+ * reads. `sessions` is left out because it reports length alone and never a
+ * finding, so a row for it would always count zero.
+ */
 const RECORD_KINDS: readonly (readonly [string, Corpus])[] = [
   ['plans', 'per-machine'],
   ['groundwork', 'per-machine'],
