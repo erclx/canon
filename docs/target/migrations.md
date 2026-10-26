@@ -136,7 +136,7 @@ From the registry the walk reports `historyUnavailable`, so check both paths by 
 | `plan-groundwork` | `groundwork`, `groundwork-spikes`                             |
 | `plan-intake`     | `intake`                                                      |
 | `plan-feature`    | `plan`, `plan-lifecycle`                                      |
-| `plan-ready`      | `ready`                                                       |
+| `plan-ready`      | `ready` <!-- canon-keep-retired -->                           |
 | `write-doc`       | `requirements`, `wiki`                                        |
 | `session-map`     | `session`                                                     |
 
