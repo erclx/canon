@@ -29,8 +29,14 @@ const FETCH_PAGE = readFileSync(
   'utf8',
 )
 
+/**
+ * The stall limit the stepped takes run under, four times the product's, since
+ * a 4K frame on a loaded suite can pass 2 s on a page that steps fine.
+ */
+const LOADED_STALL_MS = 8000
+
 /** Longer than the stall limit, so a stepper waiting on it falls back. */
-const SLOW_MS = 3000
+const SLOW_MS = LOADED_STALL_MS + 1000
 
 function html(body: string): Response {
   return new Response(body, { headers: { 'content-type': 'text/html' } })
@@ -150,8 +156,15 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
     const read = readTakePlan(ONE_BEAT)
     if (read.kind !== 'read') throw new Error(read.detail)
 
-    const result = await take({ url: server.url, plan: read.plan, out })
+    const result = await take({
+      url: server.url,
+      plan: read.plan,
+      out,
+      stallMs: LOADED_STALL_MS,
+    })
 
+    // Ahead of the route, so a fall back prints the frame that stalled.
+    expect(result).not.toHaveProperty('beats.0.fallback')
     expect(result).toMatchObject({
       status: 'filmed',
       beats: [{ name: 'light the band', route: 'step' }],
@@ -278,8 +291,10 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       url: new URL('/fetch', server.url).href,
       plan: read.plan,
       out,
+      stallMs: LOADED_STALL_MS,
     })
 
+    expect(result).not.toHaveProperty('beats.0.fallback')
     expect(result).toMatchObject({
       status: 'filmed',
       beats: [{ name: 'load', route: 'step' }],

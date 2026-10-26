@@ -38,8 +38,11 @@ const LOADING_FRAME_CAP_MS = 250
 
 /** A frame that took longer than `STALL_MS`, so the beat is filmed another way. */
 export class StepperStalled extends Error {
-  constructor(readonly frame: number) {
-    super(`frame ${frame} took over ${STALL_MS / 1000} s under frame stepping`)
+  constructor(
+    readonly frame: number,
+    stallMs: number,
+  ) {
+    super(`frame ${frame} took over ${stallMs / 1000} s under frame stepping`)
   }
 }
 
@@ -55,6 +58,8 @@ export interface SteppedRequest {
   readonly url: string
   readonly beat: Beat
   readonly clip: string
+  /** How long one frame may take before the beat falls back, `STALL_MS` by default. */
+  readonly stallMs?: number
 }
 
 export async function filmStepped(
@@ -62,6 +67,7 @@ export async function filmStepped(
 ): Promise<SteppedTake> {
   const page = await openShell(request.executable, VIEWPORT)
   const encoder = openFrameEncoder(request.clip, FPS)
+  const stallMs = request.stallMs ?? STALL_MS
   try {
     let ticks = await load(page, request.url)
     const beginFrame = (screenshot: boolean) =>
@@ -77,7 +83,7 @@ export async function filmStepped(
       )
     await pump(beginFrame, SETTLE_MS)
 
-    const live = liveStage(page, beginFrame)
+    const live = liveStage(page, beginFrame, stallMs)
     await performSteps(live, request.beat.setup, { pointer: START })
     if (request.beat.setup.length > 0) await live.hold(1000)
     await live.pointer({ type: 'move', ...START })
@@ -106,6 +112,7 @@ export async function filmStepped(
       const reply = await withinStall(
         advanced.then(() => beginFrame(true)),
         frames,
+        stallMs,
       )
       const data = reply.screenshotData
         ? Buffer.from(reply.screenshotData, 'base64')
@@ -201,6 +208,7 @@ async function pump(
 function liveStage(
   page: ShellPage,
   beginFrame: (screenshot: boolean) => Promise<unknown>,
+  stallMs: number,
 ): Stage {
   const started = Date.now()
   return {
@@ -211,6 +219,7 @@ function liveStage(
       return withinStall(
         beginFrame(false).then(() => sent),
         0,
+        stallMs,
       ).then(() => {})
     },
     key: (text) => {
@@ -218,6 +227,7 @@ function liveStage(
       return withinStall(
         beginFrame(false).then(() => sent),
         0,
+        stallMs,
       ).then(() => {})
     },
     evaluate: (expression) => page.evaluate(expression),
@@ -238,10 +248,14 @@ function mouseEvent(input: PointerInput): Record<string, unknown> {
   }
 }
 
-async function withinStall<T>(work: Promise<T>, frame: number): Promise<T> {
+async function withinStall<T>(
+  work: Promise<T>,
+  frame: number,
+  stallMs: number,
+): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined
   const stalled = new Promise<never>((_, fail) => {
-    timer = setTimeout(() => fail(new StepperStalled(frame)), STALL_MS)
+    timer = setTimeout(() => fail(new StepperStalled(frame, stallMs)), stallMs)
   })
   try {
     return await Promise.race([work, stalled])
