@@ -67,10 +67,8 @@ Replace a citation of a skill with no successor by hand, or delete the sentence.
 - `canvas` is now `canvas-board`. The sweep rewrites only `canon:canvas` and `skills/canvas`, so replace a bare prose mention by hand. <!-- canon-keep-retired -->
 - `draft-ready` is rewritten only as `canon:draft-ready` and `skills/draft-ready`, since bare it also describes a pull request. Replace a bare mention of the skill by hand. <!-- canon-keep-retired -->
 - `design-extract` and `sketch-design` are replaced by `canon:canvas-board`. <!-- canon-keep-retired -->
-- `review-branch`, `seed-sync`, `restate-plainly`, `bash-cli-script`, `canon-operator`, and `canon-rollout` have no successor <!-- canon-keep-retired -->
+- `review-branch`, `seed-sync`, `restate-plainly`, `bash-cli-script`, `canon-operator`, `canon-rollout`, and `canon-feedback-triage` have no successor <!-- canon-keep-retired -->
 - `create-standard`, `markdown-propose`, `memory-review`, `project-commands`, `repo-metadata`, and `ux-walkthrough` have no successor <!-- canon-keep-retired -->
-
-`canon-feedback-triage` reads only the toolkit's own feedback queue, so it left the plugin with no successor in a target. Delete a citation of it. <!-- canon-keep-retired -->
 
 The `memory` record kind left `canon records`, so `canon records validate memory` refuses as an unknown kind and `canon records migrate` is gone.
 
