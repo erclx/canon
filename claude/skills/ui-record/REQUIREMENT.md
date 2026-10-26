@@ -13,7 +13,7 @@ A session that does reach `canon take` writes the plan from its own reading of t
 
 ## Must
 
-- The operator approves the beats in plain words before anything is filmed
+- The operator approves the beats in plain words before anything is filmed, except in the pull request mode `pr-evidence` names, where each beat's closing still stands in for the approval
 - Each beat films one action from a fresh start state, with a hold before and after it
 - Every take carries its clip, its click log, and its camera track, and no clip carries a drawn cursor
 - The session looks at a still of each take before handing it off or posting it as a pull request reel, and names a beat that fell back to the real-time route
