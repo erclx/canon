@@ -1,3 +1,5 @@
+import { isPainted, type PaintedPatterns } from '@/pr/painted'
+
 /** The path segment that marks an image as evidence a pull request should compare. */
 const EVIDENCE_SEGMENT = 'evidence'
 
@@ -562,6 +564,34 @@ export function readOwed(input: OwedInput): OwedStep[] {
     owed.push('preview')
   }
   return owed
+}
+
+/**
+ * Design references are redrawn rather than captured, so recapturing them
+ * neither owes nor stands in for an evidence capture.
+ */
+const DESIGN_FOLDER = 'canon/design/'
+
+/**
+ * The painted paths a pull request changed while no evidence image did, in a
+ * project whose base keeps captures. Undefined when the base keeps none or
+ * was not read, since an empty list reads as checked and clean. Any changed
+ * evidence image clears the list, since this names a skipped capture rather
+ * than judging which views a capture covered.
+ */
+export function readUncaptured(
+  changed: readonly string[],
+  patterns: PaintedPatterns,
+  keepsCaptures: boolean | undefined,
+): string[] | undefined {
+  if (keepsCaptures !== true) return undefined
+  if (changed.some(isEvidencePath)) return []
+  return changed.filter(
+    (path) =>
+      evidencePosition(path) === -1 &&
+      !path.startsWith(DESIGN_FOLDER) &&
+      isPainted(path, patterns),
+  )
 }
 
 /**

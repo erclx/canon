@@ -16,9 +16,11 @@ import {
   readChecklistBoxes,
   readOwed,
   readPngWidth,
+  readUncaptured,
   renderEvidenceBody,
   settleChecklist,
 } from '@/pr/evidence'
+import { DEFAULT_PAINTED } from '@/pr/painted'
 
 describe('readPngWidth', () => {
   function header(width: number): Uint8Array {
@@ -1361,6 +1363,72 @@ describe('readOwed', () => {
     const owed = readOwed(owedInput({ deployServesChange: true }))
 
     expect(owed).toEqual([])
+  })
+})
+
+describe('readUncaptured', () => {
+  const frameboard117 = [
+    'canon/design/board/claim-dark.png',
+    'canon/design/board/claim-light.png',
+    'src/client/styles.css',
+    'src/client/board.test.ts',
+    'src/test/contrast.ts',
+  ]
+
+  it('should name the stylesheet a pull request changed with no evidence image beside it', () => {
+    expect(readUncaptured(frameboard117, DEFAULT_PAINTED, true)).toEqual([
+      'src/client/styles.css',
+    ])
+  })
+
+  it('should name nothing for a change confined to design references', () => {
+    const designOnly = [
+      'canon/design/board/claim-dark.png',
+      'canon/design/board/claim.html',
+    ]
+
+    expect(readUncaptured(designOnly, DEFAULT_PAINTED, true)).toEqual([])
+  })
+
+  it('should name nothing once any evidence image changed beside the stylesheet', () => {
+    const recaptured = [...frameboard117, 'e2e/evidence/dark/board.png']
+
+    expect(readUncaptured(recaptured, DEFAULT_PAINTED, true)).toEqual([])
+  })
+
+  it('should name nothing for a change confined to tests', () => {
+    const testOnly = ['src/client/board.test.tsx', 'src/test/contrast.ts']
+
+    expect(readUncaptured(testOnly, DEFAULT_PAINTED, true)).toEqual([])
+  })
+
+  it('should not count a file kept beside the captures as uncaptured', () => {
+    const besideCaptures = ['e2e/evidence/report.html']
+
+    expect(readUncaptured(besideCaptures, DEFAULT_PAINTED, true)).toEqual([])
+  })
+
+  it('should honor a path a project adds to the painted set', () => {
+    const patterns = {
+      painted: [...DEFAULT_PAINTED.painted, 'src/theme/**'],
+      unpainted: DEFAULT_PAINTED.unpainted,
+    }
+
+    expect(readUncaptured(['src/theme/tokens.ts'], patterns, true)).toEqual([
+      'src/theme/tokens.ts',
+    ])
+  })
+
+  it('should answer nothing when the base keeps no capture', () => {
+    expect(
+      readUncaptured(frameboard117, DEFAULT_PAINTED, false),
+    ).toBeUndefined()
+  })
+
+  it('should answer nothing when the base tree was not read', () => {
+    expect(
+      readUncaptured(frameboard117, DEFAULT_PAINTED, undefined),
+    ).toBeUndefined()
   })
 })
 
