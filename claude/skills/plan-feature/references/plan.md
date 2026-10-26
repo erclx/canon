@@ -75,7 +75,7 @@ The document opens with `# Feature: <short title>` and one paragraph stating wha
 | `## Current behavior`  | each command run against the thing being changed and what it showed         | When the change touches something that runs       |
 | `## Constraints`       | durable rules the work must respect                                         | When supplied                                     |
 | `## Files to touch`    | each file with a one-line reason                                            | Always                                            |
-| `## Verbatim`          | settled wording that lands unchanged in an existing file, one H3 per block  | When wording is settled                           |
+| `## Verbatim`          | settled wording that lands unchanged in a file, one H3 per block            | When wording is settled                           |
 | `## Design references` | the tracked design folders the change builds against, each with its surface | When Files to touch names a rendered-surface file |
 | `## Reference images`  | the untracked images the plan was shaped against, each from the main root   | When an image shaped the plan                     |
 | `## Verification`      | the test or command that proves each outcome                                | Always                                            |
@@ -167,21 +167,23 @@ Re-test a stamped constraint before honoring it, fetching and scoping the log in
 git fetch origin main --quiet && git log <commit>..origin/main --oneline -- <the paths the constraint names>
 ```
 
-### Fan-in and ready constraints
+### Fan-in constraints
 
 A batch in a fan-in set declares its side in a constraint bullet, ``Fan-in member of `feature-<integrator>` `` on a member and ``Fans in `feature-<a>`, `feature-<b>` `` on the integrator. `batches.md` holds when to fan in, and `canon records validate plans` reports `fan-in-unmatched` for a set whose two sides disagree.
 
-A constraint naming a `.canon/ready/` folder is a third shape beside the hold and the shared path. It makes that folder's files the verbatim source for the paths this plan's `## Files to touch` lists, per `ready.md`, so the executing session copies those paths rather than authoring them.
-
 ### Verbatim
 
-A `## Verbatim` section carries wording someone settled, landing in an existing file exactly as written. Wording the planner only proposes stays a `- Suggested:` question, and a whole new file goes in the ready folder per `ready.md`, so the two never describe the same file.
+A `## Verbatim` section carries wording someone settled, landing in a file exactly as written. Wording the planner only proposes stays a `- Suggested:` question, so the two never describe the same file.
 
 - Give each block an H3 naming it, then a lead sentence with the action, the full path, and the anchor, then a fenced `text` block holding the wording
-- Name the action as Add, Insert, or Replace. A Replace quotes the old line in the lead's code span.
+- Name the action as Add, Insert, Replace, or Create. A Replace quotes the old line in the lead's code span.
 - Write the block as the project's formatter leaves it, since a formatter that re-pads a table row or rewraps a line makes the grep fail on correct text
 - Name the outcome in a grep bullet and put a command past 200 characters in a fenced `bash` block under it, since `S4` reports a longer bullet
 - Give each block one `## Verification` bullet running `grep -cF -e` on its whole first line against its file, so a reworded line fails a check the reviewer already runs.
+
+A Create block makes a new file, so its lead names a path that does not exist yet and no anchor. Its grep bullet takes the first distinctive line, such as the `title:` line or the H1, since a markdown file opens on `---` and that line matches any file with frontmatter.
+
+Keep a Create block to 80 lines. A longer new file goes in `## Files to touch` for the executing session to write, since a plan carrying a whole skill body costs every session that reads it.
 
 ### Design references
 

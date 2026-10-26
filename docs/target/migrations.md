@@ -70,7 +70,7 @@ Replace a citation of a skill with no successor by hand, or delete the sentence.
 - `draft-ready` is rewritten only as `canon:draft-ready` and `skills/draft-ready`, since bare it also describes a pull request, so replace a bare mention by hand. <!-- canon-keep-retired -->
 - `design-extract` and `sketch-design` are replaced by `canon:canvas-board`. <!-- canon-keep-retired -->
 - `review-branch`, `seed-sync`, `restate-plainly`, `bash-cli-script`, `canon-operator`, `canon-rollout`, and `canon-feedback-triage` have no successor <!-- canon-keep-retired -->
-- `create-standard`, `markdown-propose`, `memory-review`, `project-commands`, `repo-metadata`, and `ux-walkthrough` have no successor <!-- canon-keep-retired -->
+- `create-standard`, `markdown-propose`, `memory-review`, `project-commands`, `repo-metadata`, `ux-walkthrough`, and `plan-ready` have no successor <!-- canon-keep-retired -->
 
 The `memory` record kind left `canon records`, so `canon records validate memory` refuses as an unknown kind and `canon records migrate` is gone.
 
@@ -136,7 +136,7 @@ From the registry the walk reports `historyUnavailable`, so check both paths by 
 | `plan-groundwork` | `groundwork`, `groundwork-spikes`                             |
 | `plan-intake`     | `intake`                                                      |
 | `plan-feature`    | `plan`, `plan-lifecycle`                                      |
-| `plan-ready`      | `ready`                                                       |
+| `plan-ready`      | `ready` <!-- canon-keep-retired -->                           |
 | `write-doc`       | `requirements`, `wiki`                                        |
 | `session-map`     | `session`                                                     |
 

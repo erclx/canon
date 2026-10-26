@@ -26,8 +26,8 @@ export const AUTHORING_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
-      'I already wrote the finished skill files, package them as a ready folder with a plan and a task for a worker to copy.',
-    expect: 'plan-ready',
+      'I already wrote the finished wording for a small new reference file, put it in a plan so a worker lands it exactly as written.',
+    expect: 'plan-feature',
   },
   {
     prompt: 'This project has no README.md at all, write one from scratch.',
