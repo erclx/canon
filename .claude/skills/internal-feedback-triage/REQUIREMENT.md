@@ -1,9 +1,9 @@
 ---
-name: canon-feedback-triage
+name: internal-feedback-triage
 description: Why the feedback queue is read from GitHub rather than local scratch, and why triage files measured items instead of routing or implementing
 ---
 
-# Canon feedback triage requirement
+# Internal feedback triage requirement
 
 ## Gap
 
