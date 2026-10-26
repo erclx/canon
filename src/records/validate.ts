@@ -250,6 +250,7 @@ const PLAN_SECTIONS = [
   'Constraints',
   'Files to touch',
   'Design references',
+  'Reference images',
   'Verification',
   'Risks',
   'Review focus',
