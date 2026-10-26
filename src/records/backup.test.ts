@@ -465,6 +465,44 @@ describe('pushRecords', () => {
     expect(second.changed).toBe(0)
   })
 
+  it('should carry a video workspace source and skip every media path under it', async () => {
+    const canonRoot = await makeCanonProject({
+      'video/demo/plan.json': '{}\n',
+      'video/demo/composition/index.html': '<html></html>\n',
+      'video/demo/composition/assets/logo.png': 'png\n',
+      'video/demo/takes/01/take.json': '{}\n',
+      'video/demo/composition/renders/final.txt': 'render\n',
+      'video/demo/composition/snapshots/frame.png': 'png\n',
+      'video/demo/composition/node_modules/pkg/index.js': 'js\n',
+      'video/demo/composition/assets/intro.mp4': 'mp4\n',
+      'video/demo/composition/assets/intro.webm': 'webm\n',
+      'video/demo/composition/assets/intro.mov': 'mov\n',
+    })
+
+    const outcome = await pushRecords(canonRoot)
+
+    expect(outcome.ok).toBe(true)
+    expect((await trackedOnOrigin(canonRoot)).split('\n').sort()).toEqual([
+      'video/demo/composition/assets/logo.png',
+      'video/demo/composition/index.html',
+      'video/demo/plan.json',
+    ])
+  })
+
+  it('should not refuse a push over a skipped video file past the size cap', async () => {
+    const canonRoot = await makeCanonProject({
+      'video/demo/plan.json': '{}\n',
+    })
+    const render = join(canonRoot, '.canon', 'video', 'demo', 'final.mp4')
+    writeFileSync(render, '')
+    truncateSync(render, MAX_RECORD_BYTES + 1)
+
+    const outcome = await pushRecords(canonRoot)
+
+    expect(outcome.ok).toBe(true)
+    expect(await trackedOnOrigin(canonRoot)).toBe('video/demo/plan.json')
+  })
+
   it('should name a new file under a tracked folder as added, not first seen', async () => {
     const canonRoot = await makeCanonProject({
       'tasks/entry.md': '# tasks\n',
@@ -655,6 +693,18 @@ describe('pullRecords', () => {
     expect(
       readFileSync(join(ROOT, '.claude', 'tasks', 'unpushed.md'), 'utf8'),
     ).toBe('local only\n')
+  })
+
+  it('should not read a skipped video file as a local change', async () => {
+    const canonRoot = await makeCanonProject({
+      'video/demo/plan.json': '{}\n',
+    })
+    await pushRecords(canonRoot)
+    writeCanonRecord(canonRoot, 'video/demo/takes/01/take.webm', 'webm\n')
+
+    const outcome = await pullRecords(canonRoot)
+
+    expect(outcome.ok).toBe(true)
   })
 
   it('should refuse when a local commit has not reached the records origin', async () => {

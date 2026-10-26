@@ -104,6 +104,17 @@ export const EXCLUDED_ENTRIES = [
   RECORDS_GIT_NAME,
 ] as const
 
+/** Media under a video workspace, remade from its plan and composition, so never backed up. */
+export const MEDIA_PATHSPECS = [
+  ':(exclude,glob)video/*/takes/**',
+  ':(exclude,glob)video/**/renders/**',
+  ':(exclude,glob)video/**/snapshots/**',
+  ':(exclude,glob)video/**/node_modules/**',
+  ':(exclude,glob)video/**/*.mp4',
+  ':(exclude,glob)video/**/*.webm',
+  ':(exclude,glob)video/**/*.mov',
+] as const
+
 /**
  * Whether a top-level name stays out of every push, at either root.
  *
@@ -598,8 +609,8 @@ async function pendingFiles(
   if (scope.length === 0) return { added: [], pending: [] }
 
   const [others, modified] = await Promise.all([
-    records(root, ['ls-files', '-z', '-o', '--', ...scope]),
-    records(root, ['ls-files', '-z', '-m', '--', ...scope]),
+    records(root, ['ls-files', '-z', '-o', '--', ...scope, ...MEDIA_PATHSPECS]),
+    records(root, ['ls-files', '-z', '-m', '--', ...scope, ...MEDIA_PATHSPECS]),
   ])
   if (!others.ok) return failed('ls-files', others)
   if (!modified.ok) return failed('ls-files', modified)
@@ -699,7 +710,14 @@ export async function pushRecords(root: string): Promise<PushOutcome> {
     // enclosing repository, and the pathspecs are the whole list, so nothing
     // outside them can enter the index however the ignore rules read. An
     // excluded name never reaches the list, whatever the records index holds.
-    const staged = await records(root, ['add', '-A', '-f', '--', ...scope])
+    const staged = await records(root, [
+      'add',
+      '-A',
+      '-f',
+      '--',
+      ...scope,
+      ...MEDIA_PATHSPECS,
+    ])
     if (!staged.ok) return failed('add', staged)
   }
 
@@ -837,7 +855,13 @@ export async function pullRecords(root: string): Promise<PullOutcome> {
   const { scope } = await scopedFolders(root)
 
   if (scope.length > 0) {
-    const dirty = await records(root, ['status', '--porcelain', '--', ...scope])
+    const dirty = await records(root, [
+      'status',
+      '--porcelain',
+      '--',
+      ...scope,
+      ...MEDIA_PATHSPECS,
+    ])
     if (!dirty.ok) return failed('status', dirty)
 
     if (dirty.text.length > 0) {
