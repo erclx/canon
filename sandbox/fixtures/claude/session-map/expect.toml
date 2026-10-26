@@ -14,6 +14,12 @@
 # map says about it is a wording the run chooses rather than a token the fixture
 # fixes, so it sits in `manual` under `Judgment:` and a reader carries it.
 
+# The prompt carries reasoning because the skill declines a session that holds
+# nothing git does not, and a cold sandbox holds none. The arm states one mistake
+# and one caution, as the `session-compact` arm does, so the run takes the write
+# branch. Neither is a tree fact, so the untracked-file block below still proves
+# a read of the tree.
+
 # Every top-level key sits above the first `[[content]]` block. A bare key below
 # one belongs to that table in TOML, so a `manual` array written at the bottom
 # parses clean and asserts nothing.
@@ -49,7 +55,10 @@ write_scope = [".canon/tasks/**"]
 # The path comes off the skill's own Output block. The fixture fixes the branch,
 # so this reads back off provisioning rather than off how one run worded a line.
 # The cap closes that block, and a run reaches it only by running the length
-# check, since the count beside it moves with what the run wrote.
+# check, since the count beside it moves with what the run wrote. The closing
+# line reads `of 350 words` only on a CLI carrying the `sessions` kind, which
+# 5.67.0 ships. An older one refuses the kind, so the entry fails there for the
+# CLI and not for the map.
 reply = [".canon/tasks/session-csv-export.md", "of 350 words"]
 
 manual = [
@@ -99,3 +108,10 @@ pattern = 'shipped skill corpus'
 [[content]]
 path = ".canon/tasks/session-csv-export.md"
 pattern = 'export\.ts'
+
+# The mistake the prompt states. The port appears nowhere in the fixture tree, so
+# a map filled from git alone cannot carry it, and one that recorded the prompt's
+# reasoning does.
+[[content]]
+path = ".canon/tasks/session-csv-export.md"
+pattern = '3000'
