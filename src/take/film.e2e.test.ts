@@ -79,7 +79,7 @@ function probe(clip: string): { width: number; height: number; rate: string } {
  * white. Read raw rather than converted to gray, since that conversion
  * stretches the range and clips the first and last steps of the fade.
  */
-function bandLuma(media: string): number[] {
+function bandLuma(media: string, crop = '16:16:200:1000'): number[] {
   const raw = spawnSync(
     'ffmpeg',
     [
@@ -88,7 +88,7 @@ function bandLuma(media: string): number[] {
       '-i',
       media,
       '-vf',
-      'crop=16:16:200:1000,scale=2:2:flags=area',
+      `crop=${crop},scale=2:2:flags=area`,
       '-pix_fmt',
       'yuv420p',
       '-f',
@@ -204,7 +204,10 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
           {
             name: 'cast',
             route: 'screencast',
-            steps: [{ kind: 'click', target: '#go' }],
+            steps: [
+              { kind: 'click', target: '#go' },
+              { kind: 'wait', ms: 1200 },
+            ],
           },
         ],
       }),
@@ -225,10 +228,15 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       height: 1080,
       rate: '60/1',
     })
-    expect(probe(join(out, beat.still))).toMatchObject({
-      width: 1920,
-      height: 1080,
-    })
+    const still = join(out, beat.still)
+    expect(probe(still)).toMatchObject({ width: 1920, height: 1080 })
+
+    // The band opens black and ends white, so a still read off the wrong end
+    // of the clip fails both checks. The crop is the stepped one at half size.
+    const luma = bandLuma(join(out, beat.clip), '8:8:100:500')
+    const [stillLuma = 0] = bandLuma(still, '8:8:100:500')
+    expect(stillLuma).toBeGreaterThan(230)
+    expect(Math.abs(stillLuma - (luma.at(-1) ?? 0))).toBeLessThanOrEqual(3)
   }, 180_000)
 
   it('should refuse a target the page does not carry rather than film a guess', async () => {
