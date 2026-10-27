@@ -2,46 +2,42 @@
 @import './tokens.css';
 
 /*
- * The page is one session read top to bottom, built against the reference
- * build `.canon/groundwork/95-visual-direction/evidence/system-15/` locked on
- * 2026-09-19. That build inlined its own values, and this sheet reads every
- * one from `tokens.css` instead, which is generated from `src/design/tokens.ts`.
+ * The page follows one change through six steps, built against the board
+ * preview `landing/landing-preview` picked on 2026-10-27. Every value is read
+ * from `tokens.css`, which is generated from `src/design/tokens.ts`, bar
+ * `--pip`, which `base.astro` sets from the mark's own `FAVICON_COLORS`.
  *
  * Tailwind v4 generates its utility classes inside `@layer utilities`, and an
  * unlayered rule always wins over a layered one regardless of specificity, so
- * everything here sits in `@layer base` where the shared panel primitives can
- * still override it with a utility.
+ * everything here sits in `@layer base`.
  */
 @layer base {
   /*
-   * The reference named its surfaces by role rather than by token, and five of
-   * its roles map onto tokens directly. Two do not. A figure card sits one step
-   * above whatever ground it lands on, which is the background in light and the
-   * chrome step in dark, since the dark ladder climbs where the light one
-   * descends. The shadow is a variable because one alpha reads as depth on the
-   * dark ground and as grime on the light one.
+   * Role names over tokens. Ink carries every action and link, and the pip is
+   * the page's one hue, so the page carries no `--color-accent` at all. Muted
+   * text reads `--color-text-secondary` on every ground, since the muted token
+   * falls under 4.5:1 on the surface at the sizes a figure sets.
    */
   :root {
     --ground: var(--color-background);
     --tint: var(--color-surface);
+    --chrome: var(--color-chrome);
     --ring: var(--color-border);
-    --card: var(--color-chrome);
     --ink: var(--color-text);
     --ink-body: var(--color-text-body);
     --ink-soft: var(--color-text-secondary);
     --ink-faint: var(--color-muted);
-    --ink-off: color-mix(in srgb, var(--color-muted) 62%, transparent);
-    --mark: var(--color-accent);
-    --ok: var(--color-success);
-    --shadow: rgb(0 0 0 / 0.35);
+    /* The bright ink a filled action takes, a step past the text ink toward the page's far end. */
+    --hi: color-mix(in srgb, var(--color-text) 30%, white);
+    --hi-ink: var(--color-background);
     --ease: cubic-bezier(0.4, 0, 0.2, 1);
-    --bin: 1040px;
+    --bin: 1088px;
+    --mono: var(--type-code-family);
     color-scheme: dark;
   }
 
   [data-theme='light'] {
-    --card: var(--color-background);
-    --shadow: rgb(15 23 42 / 0.03);
+    --hi: color-mix(in srgb, var(--color-text) 62%, black);
     color-scheme: light;
   }
 
@@ -54,125 +50,69 @@
     scroll-padding-top: calc(var(--nav-height, 64px) + var(--space-md));
   }
 
-  /*
-   * Body leading is set once. The reference measured 331 elements rendering at
-   * the browser's own normal before this existed, so one size painted three
-   * leadings depending on where it sat.
-   */
   body {
     margin: 0;
     background: var(--ground);
     color: var(--ink-body);
     font-family: var(--type-body-family);
+    font-size: 1.125rem;
     -webkit-font-smoothing: antialiased;
-    line-height: 1.5;
+    line-height: 1.55;
   }
 
-  /*
-   * Monospace is retired as a role on this page, so a bare code element falling
-   * back to the browser's own monospace is always a defect here. At the root the
-   * guard cannot be escaped by a new wrapper.
-   */
   code,
   kbd,
   samp,
   pre {
-    font-family: inherit;
+    font-family: var(--mono);
   }
 
   h1 {
     font-size: var(--t0);
-    line-height: 1.1;
-    letter-spacing: -0.04em;
-    font-weight: 500;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    font-weight: 600;
     text-wrap: balance;
     color: var(--ink);
-    margin: 0 0 var(--space-md);
+    margin: 0;
+    max-width: 18em;
   }
 
-  h2,
-  .head {
-    font-size: var(--t1);
-    line-height: 1.1;
-    letter-spacing: -0.04em;
-    font-weight: 500;
+  h2 {
+    font-size: 2.125rem;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    font-weight: 600;
     color: var(--ink);
     margin: 0 0 var(--space-md);
-    max-width: 30ch;
-    text-wrap: balance;
-  }
-
-  .turn-head {
-    font-size: var(--t2);
-    line-height: 1.26;
-    letter-spacing: -0.025em;
-    font-weight: 500;
-    color: var(--ink);
-    margin: 0 0 var(--space-sm);
-    max-width: 44ch;
     text-wrap: balance;
   }
 
   .lead {
     font-size: var(--t2);
-    line-height: 1.26;
-    letter-spacing: -0.025em;
-    color: var(--ink-soft);
-    margin: 0 0 var(--space-xl);
-    max-width: 44ch;
-  }
-
-  .cap {
-    font-size: var(--t3);
     line-height: 1.45;
-    letter-spacing: -0.01em;
+    color: var(--ink-body);
+    margin: var(--space-lg) 0 0;
+    max-width: 38em;
+  }
+
+  .sub {
+    margin: 0;
+    max-width: 29em;
+  }
+
+  .sub + .sub {
+    margin-top: var(--space-md);
+  }
+
+  .mono {
+    font-family: var(--mono);
+    font-size: var(--t4);
+    color: var(--ink);
+  }
+
+  .dim {
     color: var(--ink-soft);
-    margin: 0 0 var(--space-lg);
-    max-width: 54ch;
-  }
-
-  .eyebrow {
-    font-size: var(--t5);
-    margin: 0 0 var(--space-md);
-    color: var(--ink-soft);
-  }
-
-  .eyebrow i {
-    font-style: normal;
-    color: var(--ink-faint);
-    margin-left: var(--space-md);
-  }
-
-  /* The display steps come down with the viewport. */
-  @media (max-width: 1100px) {
-    h1 {
-      font-size: 2.75rem;
-    }
-    h2,
-    .head {
-      font-size: 2rem;
-    }
-  }
-
-  @media (max-width: 640px) {
-    h1 {
-      font-size: 2.25rem;
-    }
-    h2,
-    .head {
-      font-size: 1.75rem;
-      max-width: none;
-    }
-  }
-
-  @media (max-width: 430px) {
-    h1 {
-      font-size: 2rem;
-    }
-    h2,
-    .head {
-      font-size: 1.5rem;
-    }
   }
 
   a:focus-visible,
@@ -198,66 +138,6 @@
     left: 0;
   }
 
-  /*
-   * Actions. Every control answers hover, press and focus in 160ms, which
-   * closed a real defect in the reference rather than adding polish: before it,
-   * every control changed state instantly.
-   */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 36px;
-    min-width: 92px;
-    padding: 0 var(--space-lg);
-    border-radius: var(--radius-pill);
-    font-size: var(--t5);
-    font-weight: 500;
-    line-height: 1;
-    text-decoration: none;
-    transition:
-      color 0.16s var(--ease),
-      background-color 0.16s var(--ease),
-      box-shadow 0.16s var(--ease),
-      transform 0.16s var(--ease);
-  }
-
-  .btn-primary {
-    background: var(--ink);
-    color: var(--ground);
-  }
-
-  .btn-ghost {
-    color: var(--ink);
-    box-shadow: inset 0 0 0 1px var(--ring);
-  }
-
-  .btn:hover {
-    transform: translateY(-1px);
-    box-shadow:
-      0 4px 14px var(--shadow),
-      0 1px 3px rgb(0 0 0 / 0.06);
-  }
-
-  .btn:active {
-    transform: translateY(0);
-    box-shadow: none;
-  }
-
-  .cta {
-    display: flex;
-    gap: var(--space-sm);
-    margin: 0;
-  }
-
-  @media (max-width: 640px) {
-    .cta {
-      flex-direction: column;
-      align-items: stretch;
-    }
-  }
-
-  /* The container every band shares. */
   .bin {
     max-width: var(--bin);
     margin: 0 auto;
@@ -265,221 +145,546 @@
   }
 
   /*
-   * Section families. The structural rule is the tint alternation: a tinted
-   * band fades in from the ground and back out, so two neighboring sections
-   * never meet on a hard edge.
+   * Actions, from the board's `landing-buttons/arm-1`: a primary filled in
+   * bright ink with an arrow, and a secondary that reads as a link rather than
+   * a second button of equal weight. Every control answers hover, press and
+   * focus in 160ms.
    */
-  .grp,
-  .arc {
-    padding: var(--space-3xl) 0;
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 22px;
+    border-radius: var(--radius-panel);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    color: var(--ink);
+    text-decoration: none;
+    transition:
+      opacity 0.16s var(--ease),
+      color 0.16s var(--ease);
   }
 
-  .tint {
-    background: linear-gradient(
-      var(--ground) 0,
-      var(--tint) 12%,
-      var(--tint) 88%,
-      var(--ground) 100%
-    );
+  .btn-primary {
+    background: var(--hi);
+    color: var(--hi-ink);
+    box-shadow: 0 1px 0 rgb(0 0 0 / 0.08);
   }
 
-  /* A turn is something a participant said, and a band is the mechanism that answered it. */
-  .turn + .turn {
-    margin-top: var(--space-2xl);
+  .btn-primary::after {
+    content: '→';
+    margin-left: 10px;
   }
 
-  .turn + .band {
-    margin-top: var(--space-2xl);
+  .btn-primary:hover {
+    opacity: 0.88;
   }
 
-  /* A figure ending and a new speaker starting is the larger change of register. */
-  .band + .turn {
-    margin-top: var(--space-3xl);
+  .btn-text {
+    padding-left: 8px;
   }
 
-  .band .head,
-  .band .cap {
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
+  .btn-text::after {
+    content: '↓';
+    margin-left: 8px;
+    color: var(--ink-soft);
   }
 
-  .band .head {
-    max-width: 28ch;
+  .btn-text.btn-out::after {
+    content: '→';
   }
 
-  .band .cap {
-    max-width: 52ch;
-    margin-bottom: var(--space-xl);
+  .btn-text:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
   }
 
-  /*
-   * The machine beats take a family of their own rather than a fifth and sixth
-   * grp: the band heading sits left over a rule instead of centred, which is
-   * the one structural difference a reader notices without being told.
-   */
-  .arc .band .head,
-  .arc .band .cap {
-    margin-left: 0;
-    margin-right: 0;
-    max-width: 52ch;
-    text-align: left;
+  .btn-small {
+    min-height: 34px;
+    padding: 0 14px;
+    border-radius: var(--radius-action);
+    font-size: var(--t4);
   }
 
-  .arc .band + .band {
-    margin-top: var(--space-3xl);
-    padding-top: var(--space-2xl);
+  .btn-small::after {
+    content: none;
+  }
+
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: var(--space-xl) 0 0;
+  }
+
+  .cmd {
+    margin: var(--space-xl) 0 0;
+    padding: 14px 20px;
+    background: var(--tint);
+    border-radius: var(--radius-panel);
+    box-shadow: inset 0 0 0 1px var(--ring);
+    font-size: var(--t4);
+    line-height: 1.8;
+    color: var(--ink);
+    font-family: var(--mono);
+    overflow-wrap: anywhere;
+  }
+
+  /* The fold's box fits its two commands, and the quick start's fills its column. */
+  .fold .cmd {
+    display: inline-block;
+    max-width: 100%;
+  }
+
+  .cmd code {
+    display: block;
+  }
+
+  .cmd code span {
+    color: var(--ink-soft);
+  }
+
+  /* Sections. Each step is divided from the next by a rule, and the review band takes the surface. */
+  main > section {
+    padding: 80px 0;
     box-shadow: inset 0 1px 0 var(--ring);
   }
 
-  @media (max-width: 900px) {
-    .turn {
-      padding: var(--space-2xl) 0;
-    }
+  main > section.fold {
+    padding-top: 56px;
+    box-shadow: none;
   }
 
-  /*
-   * Figure primitives several beats share. A figure carries no card of its
-   * own: the artifact inside it takes the one surface, so a card never nests
-   * inside a card.
-   */
-  .fig {
+  main > section.bridge {
+    padding: 56px 0;
+  }
+
+  .bridge .lead {
+    margin: 0;
+  }
+
+  section.band {
+    background: var(--tint);
+  }
+
+  .split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 56px;
+    align-items: center;
+  }
+
+  .split.top {
+    align-items: start;
+  }
+
+  .split.rev > :first-child {
+    order: 2;
+  }
+
+  .wide .step-text {
+    max-width: 640px;
+    margin-bottom: 32px;
+  }
+
+  .wide .step-figs {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  .wide .step-figs.lead {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  }
+
+  /* The step's name, marked by the pip as the result its figure ends on. */
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 10px;
+    font-family: var(--mono);
+    font-size: var(--t4);
+    color: var(--ink-soft);
+  }
+
+  .kicker i {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background: var(--pip);
+  }
+
+  .stack {
+    margin: 0;
     padding: 0;
-    font-size: var(--t5);
+    list-style: none;
+  }
+
+  .stack > * + * {
+    margin-top: 14px;
+  }
+
+  /* Figures. A panel with a chrome header strip, and marked rows inside it. */
+  .fig {
+    background: var(--tint);
+    border-radius: var(--radius-frame);
+    box-shadow: inset 0 0 0 1px var(--ring);
+    overflow: hidden;
+  }
+
+  .band .fig {
+    background: var(--ground);
   }
 
   .fig-head {
     display: flex;
-    align-items: baseline;
-    gap: var(--space-md);
     flex-wrap: wrap;
-    margin: 0 0 var(--space-lg);
-    padding-bottom: var(--space-md);
+    justify-content: space-between;
+    gap: 2px 12px;
+    padding: 12px 20px;
+    background: var(--chrome);
     box-shadow: inset 0 -1px 0 var(--ring);
-  }
-
-  .fig-head code {
+    font-family: var(--mono);
     font-size: var(--t4);
     color: var(--ink);
   }
 
-  .aside {
-    color: var(--ink-faint);
+  .fig-aside {
+    color: var(--ink-soft);
   }
 
-  .footnote {
-    margin: var(--space-lg) 0 0;
-    padding-top: var(--space-md);
-    box-shadow: inset 0 1px 0 var(--ring);
-    font-size: var(--t5);
-    color: var(--ink-faint);
+  .fig-body {
+    padding: 20px;
   }
 
-  .footnote b {
-    font-weight: 500;
-    color: var(--ink-body);
+  .fig-body.tight {
+    padding: 8px 20px;
   }
 
-  /*
-   * A trigger and its consequences, which the merge beat and nothing else draws.
-   * The rail is drawn once, by each row, rather than by the list as well.
-   */
-  .fan {
+  .rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .rows li {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 9px 0;
+    font-size: 1rem;
   }
 
-  .trigger {
-    align-self: flex-start;
-    padding: var(--space-md) var(--space-lg);
+  .rows em {
+    margin-left: auto;
+    font-style: normal;
+    font-size: var(--t4);
+    color: var(--ink-soft);
+    text-align: right;
+  }
+
+  .strong {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .struck s {
+    color: var(--ink-soft);
+  }
+
+  /* A finished row is a filled square, an open one a ring, and the step's one result the pip. */
+  .m {
+    flex: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    background: var(--ink-faint);
+  }
+
+  .m-open {
+    background: transparent;
+    border: 2px solid var(--ink-faint);
+    border-radius: 50%;
+  }
+
+  .m-result {
+    background: var(--pip);
+  }
+
+  .num {
+    margin: 0;
+    font-size: 4.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--ink);
+  }
+
+  .num-cap {
+    margin: 8px 0 0;
+    font-size: 1rem;
+    color: var(--ink-soft);
+  }
+
+  .ledger {
+    margin: 24px 0 0;
+    padding: 0;
+    list-style: none;
+    box-shadow: inset 0 1px 0 var(--ring);
+  }
+
+  .ledger li {
+    padding: 12px 0;
+    box-shadow: inset 0 -1px 0 var(--ring);
+    font-size: 1rem;
+  }
+
+  .ledger b {
+    margin-right: 10px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .decision {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 16px 0 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .dated {
+    margin: 16px 0 0;
+    font-size: var(--t5);
+    color: var(--ink-soft);
+  }
+
+  .plan-outline {
+    margin: 0;
+  }
+
+  .plan-outline dd {
+    margin: 4px 0 14px 16px;
+  }
+
+  .chip {
+    display: inline-block;
+    margin: 6px 0;
+    padding: 3px 10px;
+    border-radius: var(--radius-action);
+    box-shadow: inset 0 0 0 1px var(--ring);
+    font-family: var(--mono);
+    font-size: var(--t5);
+    color: var(--ink-soft);
+  }
+
+  .code {
+    margin: 10px 0;
+    font-size: var(--t4);
+    line-height: 1.9;
+    color: var(--ink);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .msg {
+    padding: 14px 18px;
+    background: var(--ground);
     border-radius: var(--radius-frame);
-    background: var(--card);
+    box-shadow: inset 0 0 0 1px var(--ring);
+    font-size: 1rem;
+    color: var(--ink);
+  }
+
+  .msg small {
+    display: block;
+    margin-bottom: 2px;
+    font-size: var(--t5);
+    color: var(--ink-soft);
+  }
+
+  .prompt {
+    display: flex;
+    gap: 14px;
+    margin: 9px 0 0;
+  }
+
+  .prompt span {
+    color: var(--ink-soft);
+  }
+
+  /* The film, framed like a figure, with its two controls over it. */
+  .film {
+    position: relative;
+    margin: 44px 0 0;
+    border-radius: var(--radius-frame);
+    box-shadow: inset 0 0 0 1px var(--ring);
+    overflow: hidden;
+    background: var(--ground);
+  }
+
+  .film video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+  }
+
+  [data-theme='dark'] .film-light,
+  [data-theme='light'] .film-dark {
+    display: none;
+  }
+
+  .film-play {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--ink);
+    color: var(--ground);
+    font: inherit;
+    font-size: var(--t4);
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgb(0 0 0 / 0.25);
+  }
+
+  .tri {
+    border-left: 11px solid currentColor;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+  }
+
+  .film-pause {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    min-height: 32px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: var(--radius-action);
+    background: var(--chrome);
+    color: var(--ink);
+    font: inherit;
+    font-size: var(--t5);
+    cursor: pointer;
     box-shadow: inset 0 0 0 1px var(--ring);
   }
 
-  .trigger b,
-  .effects b {
-    display: block;
-    font-size: var(--t4);
-    font-weight: 500;
-    color: var(--ink);
+  [data-state='playing'] .film-play,
+  [data-state='poster'] .film-pause {
+    display: none;
   }
 
-  .trigger span,
-  .effects code {
-    display: block;
-    color: var(--ink-faint);
+  /* The display steps come down with the viewport, and every grid stacks below 900. */
+  @media (max-width: 1100px) {
+    h1 {
+      font-size: 2.75rem;
+    }
   }
 
-  .effects {
-    list-style: none;
-    margin: 0;
-    padding: 0 0 0 var(--space-xl);
+  @media (max-width: 900px) {
+    .split,
+    .wide .step-figs,
+    .wide .step-figs.lead {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 24px;
+    }
+
+    .split.rev > :first-child {
+      order: 0;
+    }
   }
 
-  .effects li {
-    position: relative;
-    padding: var(--space-md) 0 var(--space-md) var(--space-lg);
-  }
+  @media (max-width: 640px) {
+    body {
+      font-size: 1rem;
+    }
 
-  .effects li::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 1px;
-    background: var(--ring);
-  }
+    h1 {
+      font-size: 2rem;
+      line-height: 1.15;
+    }
 
-  .effects li:last-child::before {
-    height: 1.7rem;
-  }
+    h2 {
+      font-size: 1.5625rem;
+    }
 
-  .effects li::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 1.7rem;
-    width: var(--space-lg);
-    height: 1px;
-    background: var(--ring);
-  }
+    .lead {
+      font-size: 1.0625rem;
+    }
 
-  /*
-   * The build. The merge figure and the provenance ledger are the only two
-   * figures whose shape is a cause and its consequences, so they are the only
-   * two that assemble: the node, then each consequence 90ms after its cause.
-   * The delay is on the lit state alone, so the reveal staggers and nothing
-   * resets. Bands do not rise, since a page partly invisible until scrolled is
-   * the shape that once returned a whole-page capture of ten thousand blank
-   * pixels.
-   */
-  [data-build] {
-    opacity: 0;
-    transform: translateY(8px);
-    transition:
-      opacity 0.45s var(--ease),
-      transform 0.45s var(--ease);
-  }
+    .bin {
+      padding: 0 var(--space-md);
+    }
 
-  [data-build].is-built {
-    opacity: 1;
-    transform: none;
-    transition-delay: calc(140ms + var(--build-index, 0) * 90ms);
-  }
+    main > section {
+      padding: 48px 0;
+    }
 
-  /*
-   * A still needs the end state. A full-page screenshot captures beyond the
-   * viewport without scrolling, so the observer never fires, measured at 0 of 9
-   * revealed before this existed. Two escapes, and a capture only has to take
-   * one: asking for reduced motion, or appending ?still for a tool that cannot
-   * set the emulation.
-   */
-  .still [data-build] {
-    opacity: 1;
-    transform: none;
-    transition: none;
+    main > section.fold {
+      padding-top: 28px;
+    }
+
+    .cmd {
+      padding: 12px 14px;
+      font-size: 0.75rem;
+    }
+
+    .film {
+      margin-top: 28px;
+    }
+
+    .num {
+      font-size: 3.125rem;
+    }
+
+    .fig-head {
+      padding: 10px 14px;
+      font-size: 0.75rem;
+    }
+
+    .fig-aside {
+      flex-basis: 100%;
+    }
+
+    .fig-body {
+      padding: 14px;
+    }
+
+    .fig-body.tight {
+      padding: 6px 14px;
+    }
+
+    .rows li {
+      font-size: 0.875rem;
+      gap: 10px;
+    }
+
+    .rows em {
+      font-size: 0.75rem;
+    }
+
+    .mono,
+    .code {
+      font-size: 0.75rem;
+      overflow-wrap: anywhere;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -489,11 +694,6 @@
       animation: none !important;
       transition: none !important;
       scroll-behavior: auto !important;
-    }
-
-    [data-build] {
-      opacity: 1;
-      transform: none;
     }
   }
 }

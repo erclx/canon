@@ -1,0 +1,60 @@
+---
+import type { Row } from '../content/trail'
+
+/**
+ * One panel a step figure draws: an optional header strip naming the artifact
+ * and where it lives, then whatever the slot holds, then marked rows. Each
+ * row's marker says whether it is finished, still open, or the step's result,
+ * and only the result takes the pip, so a step never marks two outcomes.
+ */
+interface Props {
+  title?: string
+  aside?: string
+  rows?: readonly Row[]
+  tight?: boolean
+}
+
+const { title, aside, rows = [], tight = false } = Astro.props
+const markLabel = { done: 'done', open: 'open', result: 'result' } as const
+---
+
+<div class="fig">
+  {
+    title && (
+      <div class="fig-head">
+        <span>{title}</span>
+        {aside && <span class="fig-aside">{aside}</span>}
+      </div>
+    )
+  }
+  <div class:list={['fig-body', { tight }]}>
+    <slot />
+    {
+      rows.length > 0 && (
+        <ul class="rows">
+          {rows.map((row) => (
+            <li>
+              {row.mark && (
+                <span
+                  class={`m m-${row.mark}`}
+                  role="img"
+                  aria-label={markLabel[row.mark]}
+                />
+              )}
+              <span
+                class:list={{
+                  mono: row.mono,
+                  strong: row.strong,
+                  struck: row.struck,
+                }}
+              >
+                {row.struck ? <s>{row.text}</s> : row.text}
+              </span>
+              {row.note && <em>{row.note}</em>}
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</div>

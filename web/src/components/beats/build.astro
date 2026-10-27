@@ -1,0 +1,15 @@
+---
+import { steps } from '../../content/copy'
+import { build } from '../../content/trail'
+import Figure from '../figure.astro'
+import Group from '../sections/group.astro'
+---
+
+<Group id="build" layout="wide" {...steps.build}>
+  <Figure title={build.file.name} aside={build.file.where}>
+    <p class="chip">{build.rules.before}</p>
+    <pre class="code">{build.code.lines.join('\n')}</pre>
+    <p class="chip">{build.rules.after}</p>
+  </Figure>
+  <Figure title={build.gate.title} rows={build.stages} tight />
+</Group>

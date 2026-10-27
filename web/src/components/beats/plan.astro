@@ -1,6 +1,24 @@
 ---
-import { turns } from '../../content/copy'
-import Turn from './turn.astro'
+import { steps } from '../../content/copy'
+import { plan } from '../../content/trail'
+import Figure from '../figure.astro'
+import Group from '../sections/group.astro'
 ---
 
-<Turn id="plan" {...turns.plan} />
+<Group id="plan" layout="split-rev" {...steps.plan}>
+  <div class="stack">
+    <Figure title={plan.file.name} aside={plan.file.where}>
+      <dl class="plan-outline">
+        {
+          plan.sections.map((section) => (
+            <>
+              <dt class="mono">{section.heading}</dt>
+              {'line' in section && <dd class="mono dim">{section.line}</dd>}
+            </>
+          ))
+        }
+      </dl>
+    </Figure>
+    <Figure rows={[plan.question, plan.suggestion]} tight />
+  </div>
+</Group>

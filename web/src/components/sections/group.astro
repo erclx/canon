@@ -1,20 +1,48 @@
 ---
 /**
- * One narrative beat group: what was said, then the mechanism that answered
- * it. The family decides the layout, and `tint` alternates the ground, which is
- * the structural rule the whole page reads by. `arc` is the family the two
- * machine beats take, so they do not become a fifth and sixth `grp`.
+ * One step of the change: its name as a kicker the pip marks, a heading and
+ * one line, then the figures it left behind. The layout follows the board's
+ * `landing-rhythm/arm-2`, where a decision sits split beside its text and
+ * machine output runs wide under it, and `band` puts the review step on the
+ * surface so the cards inside it read against a different ground.
  */
 interface Props {
-  family: 'grp' | 'arc'
-  tint?: boolean
+  id: string
+  kicker: string
+  head: string
+  line: string
+  layout: 'split' | 'split-rev' | 'wide'
+  band?: boolean
+  /** A wide step whose first figure is the narrower lead-in to the second. */
+  lead?: boolean
 }
 
-const { family, tint = false } = Astro.props
+const {
+  id,
+  kicker,
+  head,
+  line,
+  layout,
+  band = false,
+  lead = false,
+} = Astro.props
 ---
 
-<section class:list={[family, { tint }]}>
-  <div class="bin">
-    <slot />
+<section class:list={['step', { band }]} id={id}>
+  <div
+    class:list={[
+      'bin',
+      layout === 'wide' ? 'wide' : 'split',
+      { rev: layout === 'split-rev' },
+    ]}
+  >
+    <div class="step-text">
+      <p class="kicker"><i aria-hidden="true"></i>{kicker}</p>
+      <h2>{head}</h2>
+      <p class="sub">{line}</p>
+    </div>
+    <div class:list={['step-figs', { lead }]}>
+      <slot />
+    </div>
   </div>
 </section>

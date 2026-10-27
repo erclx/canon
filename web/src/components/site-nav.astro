@@ -1,56 +1,28 @@
 ---
 import mark from '../../../assets/brand/mark.svg?raw'
-import { FAVICON_COLORS } from '../../../src/design/favicon'
 import { nav } from '../content/copy'
-import { isPublished, readSession } from '../lib/session'
 
 /**
- * A sticky flat bar carrying the mark, the published version, one link per
- * named beat of the session, the theme toggle and the install action. A
- * floating pill was drafted and rejected: it floats over a centred headline
- * and reads wrong there. The bar takes the ground as its own surface, since
- * the bands alternate tints and a sticky bar crosses a boundary at every one.
- *
- * The version dot is state rather than decoration: it lights only when the
- * registry's latest matches the version this build carries, and an
- * unreachable registry reads as unconfirmed rather than as a match.
+ * A sticky flat bar carrying the mark, one in-page link and two outward ones,
+ * the theme toggle, and the install action filled in bright ink. The bar takes
+ * the ground as its own surface, since the review band crosses under it.
  *
  * The mark is inlined from its source rather than linked, so the c inherits
  * the bar's ink through `currentColor`, which is the whole reason
- * `assets/brand/mark.svg` keeps that fill. The pip takes the mark's own pair
- * rather than `--color-accent`, since identity is none of the accent's uses.
+ * `assets/brand/mark.svg` keeps that fill. The pip takes `--pip`, the mark's
+ * own pair, rather than any action color.
  */
 const glyph = mark.replace(/<!--[\s\S]*?-->/, '').trim()
-const { version } = readSession()
-const published = await isPublished(version)
 ---
 
 <header class="nav">
   <div class="bar">
-    <a
-      href="#top"
-      class="logo"
-      style={`--pip-dark: ${FAVICON_COLORS.pip.dark}; --pip-light: ${FAVICON_COLORS.pip.light}`}
-    >
+    <a href="#top" class="logo">
       <span class="glyph" aria-hidden="true" set:html={glyph} />
       <span>{nav.mark}</span>
     </a>
-    <a
-      class="version"
-      href={nav.npm}
-      title={published ? nav.version.live : nav.version.unconfirmed}
-      data-published={String(published)}
-    >
-      <i class="dot" aria-hidden="true"></i>v{version}
-    </a>
-    <nav aria-label="Sections">
-      {
-        nav.links.map((link) => (
-          <a href={`#${link.id}`} data-spy={link.id}>
-            {link.label}
-          </a>
-        ))
-      }
+    <nav aria-label="Site">
+      {nav.links.map((link) => <a href={link.href}>{link.label}</a>)}
     </nav>
     <button
       type="button"
@@ -73,7 +45,9 @@ const published = await isPublished(version)
         ></path>
       </svg>
     </button>
-    <a class="btn btn-primary" href={nav.install.href}>{nav.install.label}</a>
+    <a class="btn btn-primary btn-small" href={nav.install.href}
+      >{nav.install.label}</a
+    >
   </div>
 </header>
 
@@ -100,8 +74,10 @@ const published = await isPublished(version)
     align-items: center;
     gap: var(--space-sm);
     font-size: var(--t4);
+    font-weight: 600;
     color: var(--ink);
     text-decoration: none;
+    margin-right: auto;
   }
 
   .glyph {
@@ -109,44 +85,17 @@ const published = await isPublished(version)
   }
 
   .glyph :global(svg) {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
   }
 
   .glyph :global(.pip) {
-    fill: var(--pip-dark);
-  }
-
-  :global([data-theme='light']) .glyph :global(.pip) {
-    fill: var(--pip-light);
-  }
-
-  .version {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-xs);
-    font-size: var(--t6);
-    color: var(--ink-soft);
-    text-decoration: none;
-    border-radius: var(--radius-pill);
-  }
-
-  .dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--ink-faint);
-  }
-
-  .version[data-published='true'] .dot {
-    background: var(--ok);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ok) 18%, transparent);
+    fill: var(--pip);
   }
 
   nav {
     display: flex;
     gap: var(--space-xs);
-    margin: 0 auto;
   }
 
   nav a {
@@ -154,15 +103,10 @@ const published = await isPublished(version)
     align-items: center;
     min-height: 34px;
     padding: 0 var(--space-md);
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-action);
     font-size: var(--t4);
-    color: var(--ink-soft);
+    color: var(--ink-body);
     text-decoration: none;
-  }
-
-  nav a[aria-current='true'] {
-    color: var(--ink);
-    background: var(--tint);
   }
 
   .theme-toggle {
@@ -188,51 +132,26 @@ const published = await isPublished(version)
   }
 
   nav a,
-  .theme-toggle,
-  .version {
+  .theme-toggle {
     transition:
       color 0.16s var(--ease),
       background-color 0.16s var(--ease);
   }
 
   nav a:hover,
-  .theme-toggle:hover,
-  .version:hover {
+  .theme-toggle:hover {
     color: var(--ink);
     background: var(--tint);
   }
 
-  /*
-   * The links go below 900. The nav's own auto margins held the two ends of
-   * the bar apart, so the first control takes the auto margin instead.
-   */
-  @media (max-width: 900px) {
+  /* The links go below 640, and the mark keeps the auto margin that holds the two ends apart. */
+  @media (max-width: 640px) {
     nav {
       display: none;
     }
 
-    .theme-toggle {
-      margin-left: auto;
-    }
-  }
-
-  /*
-   * The bar runs out of room before anything else does. The version goes
-   * first, since the footer states it again, and the action drops the minimum
-   * width that reserved a wider box than its own label needs.
-   */
-  @media (max-width: 430px) {
     .bar {
       gap: var(--space-md);
-    }
-
-    .version {
-      display: none;
-    }
-
-    .btn {
-      min-width: 0;
-      padding: 0 var(--space-md);
     }
   }
 </style>
@@ -273,29 +192,5 @@ const published = await isPublished(version)
     }
     publish()
     new ResizeObserver(publish).observe(bar)
-  }
-
-  /**
-   * Which beat the reader is on. A beat counts once its top crosses a line just
-   * under the bar, and the band below 40% of the viewport is ignored, so the
-   * link that lights is the beat being read rather than the one arriving.
-   */
-  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-spy]')]
-  const byId = new Map(links.map((link) => [link.dataset.spy ?? '', link]))
-  const spy = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue
-        const current = byId.get(entry.target.id)
-        if (!current) continue
-        for (const link of links) link.removeAttribute('aria-current')
-        current.setAttribute('aria-current', 'true')
-      }
-    },
-    { rootMargin: '-64px 0px -60% 0px' },
-  )
-  for (const id of byId.keys()) {
-    const target = document.getElementById(id)
-    if (target) spy.observe(target)
   }
 </script>
