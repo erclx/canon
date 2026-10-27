@@ -24,7 +24,7 @@ Every coordinate in the log and the track is in CSS pixels of a 1920x1080 page, 
 
 Each frame carries `scale`, the view's top-left `x` and `y`, the `cursor`, and `ring`.
 
-- `scale` is 1 for the whole page and 1.8 at the deepest zoom
+- `scale` is 1 for the whole page and 1.8 at the deepest zoom, or about 1.35 on a screencast beat, and holds at 1 on a beat whose plan set `push: false`
 - `x` and `y` place the view's corner on the page, so the view spans `1920 / scale` by `1080 / scale` from there
 - `cursor` is the pointer's position on the page
 - `ring` runs from 0 to 1 across the 450 ms after a click and is `null` otherwise

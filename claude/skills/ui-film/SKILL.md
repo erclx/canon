@@ -71,12 +71,15 @@ canon take <url> .canon/video/<slug>/plan.json --out .canon/video/<slug>/takes -
 
 Branch on the record's `reason`, never on the exit code, which a shell function wrapping `canon` can flatten to zero.
 
-| Record               | Route                                                                                   |
-| -------------------- | --------------------------------------------------------------------------------------- |
-| No `reason`          | Continue to the stills                                                                  |
-| `target-missing`     | Find the target the record's `beat` names on the page, fix the plan, and film once more |
-| `server-unreachable` | Restart the server from Step 1 and film once more                                       |
-| Any other `reason`   | Report the `reason` and `message` to the operator and stop, since each is a setup step  |
+| Record                           | Route                                                                                                              |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| No `reason`                      | Continue to the stills                                                                                             |
+| `target-missing` with `fallback` | Check the access before the selector, per the note below the table                                                 |
+| `target-missing`                 | Open the record's `still`, find the target the record's `beat` names on the page, fix the plan, and film once more |
+| `server-unreachable`             | Restart the server from Step 1 and film once more                                                                  |
+| Any other `reason`               | Report the `reason` and `message` to the operator and stop, since each is a setup step                             |
+
+A refusal carrying `fallback` means the screencast opened the address a second time, so a single-use link was spent before the step ran. Read `${CLAUDE_SKILL_DIR}/references/config.md` for the access the take opens with, and fix that before touching the target.
 
 A second refusal of the same kind stops the run and reports both records.
 
@@ -85,7 +88,7 @@ A second refusal of the same kind stops the run and reports both records.
 Open each beat's `takes/<dir>/still.jpg` before handing off, since a clip can film the wrong state cleanly. The verb writes it from the clip's closing frame, where the action's result shows.
 
 - Say what each still shows beside the beat it belongs to
-- Report a beat the record marks with `fallback` as filmed in real time at 1080p, which goes soft under a zoom, and offer to re-film it with the beat's input simplified
+- Report a beat the record marks with `fallback` as filmed in real time at 1080p, whose zoom stops near 1.35x rather than 1.8x, and offer to re-film it with the beat's input simplified
 
 ## Step 5: hand off
 

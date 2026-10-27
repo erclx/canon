@@ -52,10 +52,11 @@ A step beat runs the page on a virtual clock, one frame per step. Most pages fil
 - A scroll has not been proven under frame stepping, and a smooth scroll can jump. Give a scroll its own beat so a fallback costs that beat alone.
 - An animated GIF can freeze, so expect one to hold its first frame
 - Set `"route": "screencast"` on a beat known to stall, rather than paying for the stall before the fallback
+- Set a top-level `"route": "screencast"` on a plan whose page stalls on every beat, and a beat naming its own `route` keeps it
 
 A fallback films the beat again from a fresh load, replaying its setup and the steps the stepper already ran. A beat whose steps persist in the app, such as a fill that renames something, would then start from the changed state, so set `"route": "screencast"` on it when it risks a stall.
 
-A screencast beat films in real time at 1920x1080, which goes soft at the 1.8x zoom. Tell the operator which beats ran that way.
+A screencast beat films in real time at 1920x1080, so its camera zooms only to about 1.35x before it would go soft. Tell the operator which beats ran that way.
 
 ### Reading a take back
 
@@ -85,6 +86,14 @@ The camera track already carries the zoom, so these rules decide what to film fo
 - Expect a scroll to end a zoom, since the content moves under the camera
 - Expect a target filling most of the view to get less zoom, and one filling the page to get none
 - The push reaches 90% of its depth in about 633 ms, inside the 1 s ceiling a push onto an action keeps
+
+### Depth, opt-out, and speed
+
+Three controls change the push itself.
+
+- Expect a screencast beat's zoom to stop near 1.35x, since its clip has one pixel per page pixel, and a stepped beat's to reach 1.8x
+- Set `"push": false` on a beat the edit holds wide, such as one showing a whole layout change. Its track keeps the cursor and the click ring and drops the zoom.
+- Rebuild a beat's track with `canon take camera <dir>/log.json --rate <n> --out <file>` for a clip the edit plays `n` times faster, so the zoom settles on the clock a viewer sees
 
 ## Sources
 
