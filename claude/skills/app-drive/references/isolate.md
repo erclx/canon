@@ -13,7 +13,7 @@ Run each command from the main worktree root.
 
 1. Run `git worktree prune` first, which drops the registration a crashed drive left behind once its folder is gone.
 2. Make a folder with `mktemp -d`, outside the repository, and add the worktree with `git worktree add --detach <dir>/app <commit>`. The commit is the tag or sha the operator names, or the trunk's tip.
-3. Record the commit, the folder, and the launch command as the first lines of the drive log.
+3. Record the commit, the folder, and the launch command as rows of the drive log's setup table, in the shape `drive-record.md` sets.
 4. Put the worktree's path in `drive.json` as `worktree`, so the check fails a drive whose close never removed it.
 
 A folder under the repository is the wrong home. The parent repository becomes the app's repository root, and a walk-up search for config or a lockfile finds the project instead of the copy.

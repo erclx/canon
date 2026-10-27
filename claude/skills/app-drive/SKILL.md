@@ -36,7 +36,7 @@ Read `${CLAUDE_SKILL_DIR}/references/config.md` for `canon/config/app-drive.toml
 
 ## Step 2: drive
 
-Read `${CLAUDE_SKILL_DIR}/references/drive-record.md` before the first finding, for the log line, the severity scale, and the record the check reads.
+Read `${CLAUDE_SKILL_DIR}/references/drive-record.md` before the first finding, for the drive log's shape, the severity scale, and the record the check reads.
 
 Work through three sources in this order, and name the source on every finding:
 
@@ -63,6 +63,7 @@ Append each finding to the drive log as it happens, never batched at the end, si
 - Move each frame a finding cites from scratch into the intake folder's `evidence/`, and cite it by that path
 - Copy each image the operator pastes into `evidence/` in the turn its message arrives, under its finding's number, or under a `ref-` prefix when no finding cites it yet
 - Keep the measured number beside the claim in the log, never only in chat
+- Write an operator's decision under the finding it settles, even when later findings already sit below it, since it is the one edit above the end of the log
 - Write `drive.json` into the intake folder in the shape `drive-record.md` sets, with one entry per goal
 
 ## Step 4: sort
