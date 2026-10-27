@@ -17,13 +17,16 @@ function readJson(path: string) {
   }
 }
 
+/** The README's opening sentence as the hero says it, after "canon is ". */
 function readmeOpening(): string {
   const line = readText('README.md')
     .split('\n')
-    .find((candidate) => candidate.startsWith('canon is '))
+    .find((candidate) => candidate.startsWith('A CLI and Claude Code plugin '))
   if (line === undefined)
-    throw new Error('README.md has no line opening "canon is "')
-  return line
+    throw new Error(
+      'README.md has no line opening "A CLI and Claude Code plugin "',
+    )
+  return `canon is a${line.slice(1)}`
 }
 
 describe('public positioning', () => {
