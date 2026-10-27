@@ -1926,6 +1926,16 @@ describe('canon pr tick', () => {
     return { record: JSON.parse(result.stdout), exit: result.exitCode ?? -1 }
   }
 
+  /** Commits one file on the branch and pushes it, returning the new tip. */
+  function pushCommit(path: string): string {
+    mkdirSync(join(repoRoot, dirname(path)), { recursive: true })
+    writeFileSync(join(repoRoot, path), `${path}\n`)
+    execaSync('git', ['-C', repoRoot, 'add', path])
+    execaSync('git', ['-C', repoRoot, 'commit', '-q', '-m', `add ${path}`])
+    execaSync('git', ['-C', repoRoot, 'push', '-q', '-f', 'origin', 'feat/x'])
+    return execaSync('git', ['-C', repoRoot, 'rev-parse', 'HEAD']).stdout
+  }
+
   function writeMarkedComment(checklist: string | undefined): void {
     const body = renderEvidenceBody(
       [],
@@ -2047,6 +2057,18 @@ describe('canon pr tick', () => {
       })
     })
 
+    it('should run the count check on a verdict carried to the tip', async () => {
+      const driven = tip
+      postVerdict(verdict(TWO_PASSED, driven))
+      pushCommit('src/hero.test.ts')
+
+      const outcome = await runTick(['--boxes', '1,2', '--head', driven])
+
+      expect(outcome.record).toEqual(
+        expect.objectContaining({ reason: 'ticked', countCheck: 'matched' }),
+      )
+    })
+
     it('should read a verdict that covers an older head as unchecked', async () => {
       postVerdict(verdict(TWO_PASSED, 'a'.repeat(40)))
 
@@ -2143,6 +2165,59 @@ describe('canon pr tick', () => {
       await runTick(['--boxes', '1,3', '--head', tip])
 
       expect(existsSync(join(tempDir, 'body-write.log'))).toBe(false)
+    })
+  })
+
+  describe('carry', () => {
+    it('should stamp the boxes at the tip across a push no box observes', async () => {
+      const driven = tip
+      const pushed = pushCommit('src/hero.test.ts')
+
+      const outcome = await runTick(['--boxes', '1', '--head', driven])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({
+          reason: 'ticked',
+          head: pushed,
+          carriedFrom: driven,
+        }),
+        exit: 0,
+      })
+      expect(readFileSync(apiLog, 'utf8')).toContain(
+        `- [x] the hero settles · passed at \`${pushed.slice(0, 7)}\`\n`,
+      )
+    })
+
+    it('should refuse redrive-owed across a push to a source file and write nothing', async () => {
+      const driven = tip.slice(0, 7)
+      const pushed = pushCommit('src/hero.ts')
+
+      const outcome = await runTick(['--boxes', '1', '--head', driven])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({
+          reason: 'redrive-owed',
+          driven,
+          head: pushed,
+          drivenPaths: ['src/hero.ts'],
+        }),
+        exit: 1,
+      })
+      expect(existsSync(apiLog)).toBe(false)
+    })
+
+    it('should refuse stale-head when the driven head was rewritten away', async () => {
+      const driven = pushCommit('src/hero.test.ts')
+      execaSync('git', ['-C', repoRoot, 'commit', '-q', '--amend', '-m', 'x'])
+      execaSync('git', ['-C', repoRoot, 'push', '-q', '-f', 'origin', 'feat/x'])
+
+      const outcome = await runTick(['--boxes', '1', '--head', driven])
+
+      expect(outcome).toEqual({
+        record: expect.objectContaining({ reason: 'stale-head' }),
+        exit: 1,
+      })
+      expect(existsSync(apiLog)).toBe(false)
     })
   })
 
