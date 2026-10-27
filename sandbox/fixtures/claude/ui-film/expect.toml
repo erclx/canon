@@ -14,6 +14,7 @@
 
 paths = [
   ".canon/video/*/plan.json",
+  ".canon/video/*/README.md",
   ".canon/video/*/takes/take.json",
   ".canon/video/*/takes/01-*/clip.mp4",
   ".canon/video/*/takes/01-*/log.json",
@@ -58,6 +59,11 @@ pattern = '"kind":\s*"click"'
 [[content]]
 path = ".canon/video/*/plan.json"
 pattern = '"kind":\s*"fill"'
+
+# The workspace README carries the command that re-films the takes.
+[[content]]
+path = ".canon/video/*/README.md"
+pattern = 'canon take '
 
 # The record lists both beats and the route that filmed each.
 [[content]]

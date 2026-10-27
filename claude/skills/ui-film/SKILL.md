@@ -96,12 +96,21 @@ Read `${CLAUDE_SKILL_DIR}/references/handoff.md` on reaching this step, for what
 
 Close the throwaway copy per `isolate.md` when Step 1 built one, after the stills are read.
 
+### Write the workspace README
+
+Write the filming half of `.canon/video/<slug>/README.md`, so a later session can re-film without this one. The composing session adds the re-render half under its own heading, as `compose-craft.md` states.
+
+- Hold the approved beats, the `canon take` command that films them, and the config keys the take read, with `access` described rather than copied when it carries a token
+- Write the file whole through the main-root route when none exists
+- Add a `## Filming` section when a README is already there, reading the file and writing it back whole, and never overwrite what another session wrote
+- Replace an existing `## Filming` section in place on a re-film, since the commands in it changed
+
 ## Output
 
 Emit the takes folder, one line per beat, and the next step.
 
 ```plaintext
-🎬 Filmed .canon/video/<slug>/takes/
+🎬 Filmed .canon/video/<slug>/takes/, re-film notes in .canon/video/<slug>/README.md
 
 01-open-the-kit  step  4.2 s  the board's first page with its frames filled in
 02-search-for-color  screencast (fallback)  3.8 s  the page list narrowed to two results
