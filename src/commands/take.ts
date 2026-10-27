@@ -134,6 +134,13 @@ export function register(program: Command): void {
         '  take-failed         the take failed against a reachable page',
         '  reel-failed         every beat was filmed and the reel did not encode',
         '',
+        'A refusal in a beat carries beat. target-missing carries still when the',
+        "page answered a capture, the beat folder's still.jpg as the step met it. A",
+        'beat that fell back to the screencast before refusing carries fallback,',
+        'the reason it fell back. The screencast opens the address a second time,',
+        'so a single-use link is spent by then: check the access before the',
+        'selector.',
+        '',
         'Exit codes:',
         '  0  every beat was filmed, and the reel written when asked for',
         '  1  refused, with the reason on stderr or in the JSON record',
@@ -210,6 +217,11 @@ async function runTake(
     logStep('Refused')
     logWarn(TAKE_REFUSALS[result.reason])
     if (result.beat) logWarn(`in beat ${result.beat}`)
+    if (result.fallback) {
+      logWarn(
+        `after falling back to a screencast, which opened the address again: ${result.fallback}`,
+      )
+    }
     if (result.reason === 'server-unreachable') {
       logWarn(`Start whatever serves ${url}, then run this again.`)
     }
@@ -225,6 +237,8 @@ async function runTake(
       reason: result.reason,
       message: result.message,
       ...(result.beat ? { beat: result.beat } : {}),
+      ...(result.fallback ? { fallback: result.fallback } : {}),
+      ...(result.still ? { still: result.still } : {}),
       ...(result.reason === 'browser-missing'
         ? { install: INSTALL_BROWSER }
         : {}),

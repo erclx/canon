@@ -4,7 +4,12 @@ import { join } from 'node:path'
 import { chromium } from 'playwright-core'
 import { lastFrame, probeFrames, transcode } from '@/take/encode'
 import { FPS, type LogEvent, START, VIEWPORT } from '@/take/log'
-import { type PointerInput, type Stage, performSteps } from '@/take/perform'
+import {
+  type PointerInput,
+  type Stage,
+  TargetMissing,
+  performSteps,
+} from '@/take/perform'
 import type { Beat } from '@/take/plan'
 import { HOLD_MS } from '@/take/stepper'
 
@@ -18,6 +23,9 @@ import { HOLD_MS } from '@/take/stepper'
 const FRAME_MS = 1000 / FPS
 
 const SETTLE_MS = 2500
+
+/** How long a refusal waits on the screenshot it shows. */
+const STILL_CAP_MS = 2000
 
 export interface ScreencastTake {
   readonly frames: number
@@ -33,8 +41,15 @@ export async function filmScreencast(request: {
 }): Promise<ScreencastTake> {
   const scratch = mkdtempSync(join(tmpdir(), 'canon-take-cast-'))
   const browser = await chromium.launch()
+  let still: (() => Promise<Buffer | undefined>) | undefined
   try {
     const page = await browser.newPage({ viewport: VIEWPORT })
+    // Best effort, so a closed or crashed page leaves the refusal standing
+    // without a still rather than replacing it.
+    still = () =>
+      page
+        .screenshot({ type: 'jpeg', quality: 95, timeout: STILL_CAP_MS })
+        .catch(() => undefined)
     await page.goto(request.url, { waitUntil: 'load' })
     await page.waitForTimeout(SETTLE_MS)
 
@@ -75,6 +90,9 @@ export async function filmScreencast(request: {
     await transcode(webm, request.clip, FPS)
     const frames = await probeFrames(request.clip)
     return { frames, events, still: await lastFrame(request.clip, frames) }
+  } catch (error) {
+    if (error instanceof TargetMissing && still) error.still = await still()
+    throw error
   } finally {
     await browser.close()
     rmSync(scratch, { recursive: true, force: true })

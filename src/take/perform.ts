@@ -51,6 +51,9 @@ export interface Stage {
 
 /** A target that resolved to nothing, which refuses rather than films a guess. */
 export class TargetMissing extends Error {
+  /** The page as it stood when the lookup failed, as a JPEG, when the route caught one. */
+  still?: Buffer
+
   constructor(readonly target: string) {
     super(`nothing on the page matches ${target}`)
   }

@@ -60,6 +60,10 @@ export type TakeResult =
       readonly reason: TakeRefusal
       readonly message: string
       readonly beat?: string
+      /** Why the refused beat had fallen back to a screencast, when it had. */
+      readonly fallback?: string
+      /** The page as the failing step met it, relative to the take's folder. */
+      readonly still?: string
     }
 
 export interface TakeRequest {
@@ -121,7 +125,15 @@ export async function take(request: TakeRequest): Promise<TakeResult> {
         ),
       )
     } catch (error) {
-      return failed(classify(error), error, beat.name)
+      const cause = error instanceof FellBack ? error.error : error
+      const shot = cause instanceof TargetMissing ? cause.still : undefined
+      const still = shot ? join(dir, 'still.jpg') : undefined
+      if (shot && still) writeFileSync(join(out, still), shot)
+      return {
+        ...failed(classify(cause), cause, beat.name),
+        ...(error instanceof FellBack ? { fallback: error.fallback } : {}),
+        ...(still ? { still } : {}),
+      }
     }
   }
 
@@ -159,7 +171,11 @@ async function filmBeat(
       if (!(error instanceof StepperStalled)) throw error
       route = 'screencast'
       fallback = error.message
-      filmed = await filmScreencast({ url, beat, clip: target })
+      try {
+        filmed = await filmScreencast({ url, beat, clip: target })
+      } catch (cause) {
+        throw new FellBack(cause, fallback)
+      }
     }
   } else {
     filmed = await filmScreencast({ url, beat, clip: target })
@@ -193,6 +209,20 @@ async function filmBeat(
     log: logPath,
     camera: cameraPath,
     still: stillPath,
+  }
+}
+
+/**
+ * A beat that failed in the screencast it fell back to, carrying why it fell
+ * back, since the fallback loads the page a second time and a single-use link
+ * is spent by then.
+ */
+class FellBack extends Error {
+  constructor(
+    readonly error: unknown,
+    readonly fallback: string,
+  ) {
+    super(error instanceof Error ? error.message : String(error))
   }
 }
 
