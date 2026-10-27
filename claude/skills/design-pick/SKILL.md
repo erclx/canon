@@ -48,6 +48,7 @@ Each frame carries its own label and follows the board theme, so the set reads a
 - Label each arm inside its frame with its id and its cost, since the composite capture draws no captions
 - Theme every arm off the `data-theme` attribute the board sets on each frame's root, so the theme toggle sets the whole set at once. A set spanning both themes cannot be compared.
 - Give no arm a script that stores a theme and reapplies it on load. It overwrites the toggle, and a fresh browser profile hides the fault.
+- Write each frame's headings, labels, and captions by `${CLAUDE_SKILL_DIR}/../ui-craft/references/copy.md`, since a candidate's copy is often the first draft of the shipped page's
 
 ### Default path and live app
 
