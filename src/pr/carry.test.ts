@@ -18,6 +18,10 @@ describe('isInert', () => {
     'src/__snapshots__/card.snap',
     'README.md',
     'docs/guide.md',
+    'docs/board.md',
+    'canon/context/board/shell.md',
+    '.claude/skills/internal-docs/SKILL.md',
+    '.github/PULL_REQUEST_TEMPLATE.md',
     'evidence/board/light.png',
     'canon/design/board/frame.html',
   ])('should classify %s as inert', (path) => {
@@ -29,6 +33,11 @@ describe('isInert', () => {
     'src/App.tsx',
     'src/data/boards.json',
     'docs/page.mdx',
+    'src/pages/about.md',
+    'src/pages/about.mdx',
+    'src/content/blog/a.md',
+    'content/blog/post.md',
+    'web/README.md',
     'vite.config.ts',
     'evidence/capture.ts',
   ])('should classify %s as driven', (path) => {

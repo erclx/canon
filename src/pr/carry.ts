@@ -5,13 +5,18 @@ import { coversHead } from '@/pr/review-scope'
 
 /**
  * The globs no checklist box can observe: tests, stories, snapshots, and
- * markdown. The rule lists what is inert rather than what is driven, so a kind
- * nobody listed, such as a `.json` data file, fails closed. `.mdx` stays
- * driven, since it renders.
+ * markdown where a project keeps docs. The rule lists what is inert rather than
+ * what is driven, so a kind nobody listed, such as a `.json` data file, fails
+ * closed. Markdown elsewhere, such as an Astro page or content entry, renders,
+ * so it is driven like `.mdx`.
  */
 export const DEFAULT_INERT: readonly string[] = [
   ...DEFAULT_PAINTED.unpainted,
-  '**/*.md',
+  '*.md',
+  'canon/**/*.md',
+  '.claude/**/*.md',
+  '.github/**/*.md',
+  'docs/**/*.md',
 ]
 
 /**
