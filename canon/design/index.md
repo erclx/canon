@@ -12,7 +12,7 @@ Each group holds accepted frames a build matches, light and dark. The `design-re
 
 One row per group. List no files, since the tree answers what exists.
 
-| Group     | What the user sees                                    | Code                                    | States                                                                        |
-| --------- | ----------------------------------------------------- | --------------------------------------- | ----------------------------------------------------------------------------- |
-| `landing` | The public page at canon.erclx.dev, desktop and phone | `web/src/`, `web/src/styles/global.css` | Light and dark at 1440 and 390, every section, the film as a poster on phones |
-| `readme`  | The repository README on GitHub                       | `README.md`, `assets/loops/`            | Light and dark, the mark, claim, hero loop slot, and quick start              |
+| Group     | What the user sees                                    | Code                                    | States                                                                           |
+| --------- | ----------------------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------- |
+| `landing` | The public page at canon.erclx.dev, desktop and phone | `web/src/`, `web/src/styles/global.css` | Light and dark at 1440 and 390, every section, the film as a poster on phones    |
+| `readme`  | The repository README on GitHub                       | `README.md`, `assets/loops/`            | Light and dark, the mark, claim, the hero slot as a placeholder, and quick start |
