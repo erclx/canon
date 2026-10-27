@@ -46,8 +46,8 @@ Read the box's text for the negative. A box asserting an unchanged result, such 
 
 A group is the bold feature-area label above at most five boxes, as `ui-checklist` defines it.
 
-1. Take one beat per group in checklist order, from the first filmable box of each group, up to three beats.
-2. When beats remain after every group has one, take a second pass in checklist order over the boxes left, up to three beats in all.
+1. Take one beat per group in checklist order, from the highest-ranked filmable box of each group, up to three beats.
+2. When beats remain after every group has one, take a second pass in checklist order over the boxes left, highest-ranked first within each group, up to three beats in all.
 
 A checklist with one group gives up to three beats from it. A checklist with four groups gives three beats, one from each of the first three.
 
@@ -58,7 +58,7 @@ Write one plan entry for each beat chosen, then skip when none was.
 - Name each beat after its box's text, cut to the action
 - Write the plan per `${CLAUDE_SKILL_DIR}/references/take-craft.md`, finding each target on the served page rather than guessing it
 - With no interactive box, skip as `no-interactive-box` and film nothing
-- With interactive boxes that are all negative or static, skip as `no-visible-change` and film nothing
+- With interactive boxes that the filter removed, whether negative, static, or marked `(taste)`, skip as `no-visible-change` and film nothing
 
 The negative test is a judgment over the box's text. A misread box costs a weaker reel and never a wrong pass, since the still check below guards the footage and the UI reviewer drives every box regardless.
 
