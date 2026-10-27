@@ -1,6 +1,8 @@
 import { openFrameEncoder } from '@/take/encode'
+import { describeKey, modifierBits } from '@/take/keys'
 import { FPS, type LogEvent, START, VIEWPORT } from '@/take/log'
 import {
+  type KeyInput,
   type PointerInput,
   type Stage,
   TargetMissing,
@@ -144,6 +146,8 @@ export async function filmStepped(
           frame,
         ),
       key: (text) => stepThen(page.send('Input.insertText', { text }), frame),
+      press: (input) =>
+        stepThen(page.send('Input.dispatchKeyEvent', keyEvent(input)), frame),
       evaluate: (expression) => page.evaluate(expression),
     }
 
@@ -255,22 +259,75 @@ function liveStage(
         stallMs,
       ).then(() => {})
     },
+    press: (input) => {
+      const sent = page.send('Input.dispatchKeyEvent', keyEvent(input))
+      return withinStall(
+        Promise.all([beginFrame(false), sent]),
+        0,
+        stallMs,
+      ).then(() => {})
+    },
     evaluate: (expression) => page.evaluate(expression),
   }
 }
 
+/**
+ * A pointer input as CDP takes it. `buttons` carries the held button through a
+ * drag's moves, or the page reads them as a hover, and `modifiers` carries the
+ * held keys as a bit field beside the key events that pressed them.
+ */
 function mouseEvent(input: PointerInput): Record<string, unknown> {
   const at = { x: input.x, y: input.y }
+  if (input.type === 'wheel') {
+    return { type: 'mouseWheel', ...at, deltaX: 0, deltaY: input.dy }
+  }
+  const modifiers = modifierBits(input.modifiers ?? [])
   switch (input.type) {
     case 'move':
-      return { type: 'mouseMoved', ...at, button: 'none' }
+      return input.held
+        ? { type: 'mouseMoved', ...at, button: 'left', buttons: 1, modifiers }
+        : { type: 'mouseMoved', ...at, button: 'none', buttons: 0, modifiers }
     case 'down':
-      return { type: 'mousePressed', ...at, button: 'left', clickCount: 1 }
     case 'up':
-      return { type: 'mouseReleased', ...at, button: 'left', clickCount: 1 }
-    case 'wheel':
-      return { type: 'mouseWheel', ...at, deltaX: 0, deltaY: input.dy }
+      return {
+        type: input.type === 'down' ? 'mousePressed' : 'mouseReleased',
+        ...at,
+        button: 'left',
+        buttons: input.type === 'down' ? 1 : 0,
+        clickCount: input.clickCount,
+        modifiers,
+      }
   }
+}
+
+/**
+ * A key input as CDP takes it. A key that types sends `keyDown` with its text
+ * only when no modifier but Shift is held, as Chromium's own keyboard does, so
+ * `Control+K` in a focused field inserts no K.
+ */
+function keyEvent(input: KeyInput): Record<string, unknown> {
+  const descriptor = describeKey(input.key)
+  if (!descriptor) throw new Error(`no key descriptor for ${input.key}`)
+  const event = {
+    key: descriptor.key,
+    code: descriptor.code,
+    windowsVirtualKeyCode: descriptor.keyCode,
+    nativeVirtualKeyCode: descriptor.keyCode,
+    location: descriptor.location,
+    modifiers: modifierBits(input.modifiers),
+  }
+  if (input.type === 'up') return { type: 'keyUp', ...event }
+  const types =
+    descriptor.text !== undefined &&
+    input.modifiers.every((modifier) => modifier === 'Shift')
+  return types
+    ? {
+        type: 'keyDown',
+        ...event,
+        text: descriptor.text,
+        unmodifiedText: descriptor.text,
+      }
+    : { type: 'rawKeyDown', ...event }
 }
 
 /**
