@@ -68,8 +68,24 @@ export interface TakeLog {
   readonly fps: number
   /** The route that filmed the clip, which can differ from the one asked for. */
   readonly route: Route
+  /**
+   * The clip's size in pixels, which sets how deep the camera may zoom before
+   * the clip goes soft. A log written before this field read it off `route`.
+   */
+  readonly clip?: { readonly width: number; readonly height: number }
+  /** False when the beat turned the camera's zoom off. */
+  readonly push?: false
   readonly frames: number
   readonly events: readonly LogEvent[]
+}
+
+/** The size each route films at, the stepper at twice the viewport. */
+export const CLIP_SIZES: Record<
+  Route,
+  { readonly width: number; readonly height: number }
+> = {
+  step: { width: VIEWPORT.width * 2, height: VIEWPORT.height * 2 },
+  screencast: VIEWPORT,
 }
 
 /** Where the pointer rests before a take's first move. */

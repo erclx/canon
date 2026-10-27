@@ -4,6 +4,7 @@ import { isBrowserMissing, isServerUnreachable } from '@/browser/engine'
 import { cameraTrack } from '@/take/camera'
 import { FfmpegMissing, requireFfmpeg } from '@/take/encode'
 import {
+  CLIP_SIZES,
   FPS,
   LOG_VERSION,
   type LogEvent,
@@ -186,6 +187,8 @@ async function filmBeat(
     viewport: VIEWPORT,
     fps: FPS,
     route,
+    clip: CLIP_SIZES[route],
+    ...(beat.push === false ? { push: false as const } : {}),
     frames: filmed.frames,
     events: filmed.events,
   }

@@ -204,4 +204,58 @@ describe('cameraTrack', () => {
     expect(at(frames, 2000).ring).toBe(0)
     expect(at(frames, 2225).ring).toBeCloseTo(0.5, 1)
   })
+
+  describe('depth by resolution', () => {
+    it('should cap the zoom at about 1.35x for a 1920-wide clip', () => {
+      const log = {
+        ...takeOf([{ t: 3000, at: { x: 400, y: 300 } }]),
+        clip: { width: 1920, height: 1080 },
+      }
+
+      const peak = Math.max(...cameraTrack(log).frames.map((f) => f.scale))
+
+      expect(peak).toBeGreaterThan(1.33)
+      expect(peak).toBeLessThanOrEqual(1.35)
+    })
+
+    it('should keep the full 1.8x depth for a 3840-wide clip', () => {
+      const log = {
+        ...takeOf([{ t: 3000, at: { x: 400, y: 300 } }]),
+        clip: { width: 3840, height: 2160 },
+      }
+
+      const peak = Math.max(...cameraTrack(log).frames.map((f) => f.scale))
+
+      expect(peak).toBeGreaterThan(1.78)
+      expect(peak).toBeLessThanOrEqual(1.8)
+    })
+
+    it('should read an older log with no clip off its screencast route', () => {
+      const log: TakeLog = {
+        ...takeOf([{ t: 3000, at: { x: 400, y: 300 } }]),
+        route: 'screencast',
+      }
+
+      const peak = Math.max(...cameraTrack(log).frames.map((f) => f.scale))
+
+      expect(peak).toBeLessThanOrEqual(1.35)
+    })
+  })
+
+  describe('push off', () => {
+    it('should hold the whole page and still carry the cursor and ring', () => {
+      const log: TakeLog = {
+        ...takeOf([{ t: 2000, at: { x: 400, y: 300 } }]),
+        push: false,
+      }
+
+      const { frames } = cameraTrack(log)
+
+      expect(new Set(frames.map((f) => `${f.scale} ${f.x} ${f.y}`))).toEqual(
+        new Set(['1 0 0']),
+      )
+      expect(at(frames, 2000).cursor).toEqual({ x: 400, y: 300 })
+      expect(at(frames, 2000).ring).toBe(0)
+    })
+  })
 })
