@@ -51,6 +51,104 @@ describe('findColons', () => {
     expect(colonsIn('- `src/`: description')).toEqual([])
   })
 
+  it('should not report a file entry naming several paths at any length', () => {
+    const entry =
+      '- `a/one.ts`, `a/two.ts`, `a/three.ts`, `a/four.ts`, `a/five.ts`, and `a/six.ts`: the change'
+
+    expect(colonsIn(entry)).toEqual([])
+  })
+
+  it('should not report a rename entry joining two paths with to', () => {
+    expect(colonsIn('- `old.ts` to `new.ts`: move it')).toEqual([])
+  })
+
+  it('should not report a lead of links and commas', () => {
+    expect(colonsIn('- [one](a.md), [two](b.md): sources')).toEqual([])
+  })
+
+  it('should report a long prose lead in a list item', () => {
+    const found = colonsIn('- One more long lead of plain words: the text')
+
+    expect(found.map((hit) => hit.lead)).toEqual(['words'])
+  })
+
+  it('should not report the lead of every item in a uniform list', () => {
+    const source = [
+      '- Open at the tip when it is stale: fix it',
+      '- Closed when nothing is left to address: reply',
+      '- Pending until the reviewer posts again: wait',
+    ].join('\n')
+
+    expect(colonsIn(source)).toEqual([])
+  })
+
+  it('should report the colon items of a list where one item lacks a colon', () => {
+    const source = [
+      '- Open at the tip when it is stale: fix it',
+      '- Closed when nothing is left to address',
+      '- Pending until the reviewer posts again: wait',
+    ].join('\n')
+
+    expect(colonsIn(source).map((hit) => hit.line)).toEqual([1, 3])
+  })
+
+  it('should report a lone prose bullet among colon-less siblings', () => {
+    const source = [
+      '- First sibling without one',
+      '- Second sibling holds a long lead here: the text',
+      '- Third sibling without one',
+    ].join('\n')
+
+    expect(colonsIn(source).map((hit) => hit.line)).toEqual([2])
+  })
+
+  it('should report a second colon inside a label item', () => {
+    const source = [
+      '- A long lead for the first item: one: two',
+      '- A long lead for the second item: three',
+    ].join('\n')
+
+    expect(colonsIn(source).map((hit) => hit.column)).toEqual([37])
+  })
+
+  it('should judge each side of a blank line as its own list', () => {
+    const source = [
+      '- A long lead for the first item: one',
+      '',
+      '- A long lead for the second item: two',
+    ].join('\n')
+
+    expect(colonsIn(source).map((hit) => hit.line)).toEqual([1, 3])
+  })
+
+  it('should let a nested child neither join nor break its parent list', () => {
+    const source = [
+      '- A long lead for the first item: one',
+      '  - A child without a colon',
+      '- A long lead for the second item: two',
+    ].join('\n')
+
+    expect(colonsIn(source)).toEqual([])
+  })
+
+  it('should group a list inside a block quote', () => {
+    const source = [
+      '> - A long lead for the first item: one',
+      '> - A long lead for the second item: two',
+    ].join('\n')
+
+    expect(colonsIn(source)).toEqual([])
+  })
+
+  it('should count an item whose only colon sits in a code span as carrying none', () => {
+    const source = [
+      '- A long lead for the first item: one',
+      '- A long lead for the second `item: two`',
+    ].join('\n')
+
+    expect(colonsIn(source).map((hit) => hit.line)).toEqual([1])
+  })
+
   it('should not report a line-final colon', () => {
     expect(colonsIn('Run these in order:')).toEqual([])
   })
