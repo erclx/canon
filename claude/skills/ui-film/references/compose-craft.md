@@ -33,19 +33,18 @@ HyperFrames' caption guide places a landscape caption 80 to 120 px from the bott
 Cut a square or vertical version only when the operator asks for one. A film with one shape needs nothing from this section, and the vertical caption band and safe boxes stay with HyperFrames' frame presets.
 
 - Start each shape as its own HyperFrames project, as `hyperframes-studio` states for a different aspect, in the workspace folder `handoff.md` names for it
-- Crop a window of the 1920x1080 page around each beat's action rather than letterboxing the page, since a page shrunk into a square leaves the action too small to read
-- Size the window to the action's region rather than to a fixed number. Frameboard's square cut used a 1080x1080 window.
-- Aim the window at the region the camera track already zooms toward, and drive it from the same track, so the crop and the zoom agree on where the action is
-- Expect a screencast take to hold only at 1x in a cropped window, since its clip has one pixel per page pixel. A stepped take is 4K, so the same window still has room to zoom.
+- Frame the shape by cropping a window of the page at 1x, never by scaling the 16:9 frame into it, since a page shrunk into a square leaves the action too small to read
+- Pan the window along the camera track's view center, so it follows the action the zoom would have aimed at. Frameboard's square cut used a 1080x1080 window.
+- Expect a screencast take to hold at 1x from a softer 1080p source, while a stepped take gives the same window two clip pixels per page pixel
 
 ## The README loop
 
 A README hero plays inline and silently, so it is a short loop rather than a cut of the film.
 
-- Compose it as its own project in the workspace folder `handoff.md` names for it, from one or two takes showing the app's core action
-- Keep it under about 2 MB, since a larger file loads slowly or not at all where a README renders. Frameboard's loop played inline at 1.72 MB.
-- Carry no caption the loop depends on and no sound, since a README plays it muted with no controls
-- Match the loop's last frame to its first, so the seam reads as a cut back to the start rather than a jump
+- Cut it from the raw take showing the app's core action, rather than from a render, in the workspace folder `handoff.md` names for it
+- Crop it to the canvas, so no browser margin or page chrome outside the app shows
+- End it on the finished state, held long enough to read before the loop restarts
+- Export an animated WebP under about 2 MB, since a README renders one inline where a video needs a player. Frameboard's loop played inline at 1.72 MB.
 
 ## Sped-up clips
 
@@ -57,7 +56,7 @@ A clip the edit plays faster runs its zoom faster too, so a push that settled in
 
 ## Storyboard headings
 
-- Write each frame heading in the form HyperFrames' `storyboard-format.md` parses, since a heading in any other form drops the frame from the parsed manifest with only a warning
+- Write each frame heading as `## Frame N: title`, which HyperFrames' storyboard parser reads and the markdown audit passes, where the dash form in its `storyboard-format.md` example fails the audit
 - Title each frame as the beat the operator approved, so the frame, the take's folder, and the caption share one name a reader can follow across all three
 
 ## The workspace README
@@ -75,7 +74,7 @@ Step 5 writes the filming half of `.canon/video/<slug>/README.md`. The composing
 | Caption placement and scrim | HyperFrames' `captions.md`, adjusted for footage with chrome along its bottom edge               |
 | A new project per shape     | `hyperframes-studio`'s brief step, which starts a new project for a different aspect             |
 | The 1080x1080 window        | Frameboard's launch film, cut square from stepped takes                                          |
-| The 2 MB loop               | Frameboard's README hero, which played inline at 1.72 MB                                         |
+| The 2 MB WebP loop          | Frameboard's README hero, an animated WebP cut from a raw take, which played inline at 1.72 MB   |
 | Rebuilding a sped-up track  | `canon take camera --help`, whose `--rate` divides every time in the log                         |
-| Storyboard heading form     | HyperFrames' `storyboard-format.md`, whose parser records an unmatched heading as a warning      |
+| Storyboard heading form     | HyperFrames' `storyboard-format.md`, read beside the markdown audit's character bans             |
 | The README's two halves     | Frameboard's workspace, whose README recorded how to re-film and re-render after a session ended |
