@@ -29,6 +29,12 @@ const FETCH_PAGE = readFileSync(
   'utf8',
 )
 
+/** The same page with a hidden copy of the button's text ahead of it. */
+const HIDDEN_PAGE = PAGE.replace(
+  '<body>',
+  '<body>\n    <div hidden><span>Go</span></div>',
+)
+
 /**
  * The stall limit the stepped takes run under, four times the product's, since
  * a 4K frame on a loaded suite can pass 2 s on a page that steps fine.
@@ -132,6 +138,7 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       fetch: async (request) => {
         const { pathname } = new URL(request.url)
         if (pathname === '/fetch') return html(FETCH_PAGE)
+        if (pathname === '/hidden') return html(HIDDEN_PAGE)
         if (pathname === '/slow') {
           await Bun.sleep(SLOW_MS)
           return new Response('ok')
@@ -269,6 +276,38 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       reason: 'target-missing',
       beat: 'miss',
     })
+  }, 180_000)
+
+  it('should click the visible text match behind a hidden duplicate', async () => {
+    const read = readTakePlan(
+      JSON.stringify({
+        beats: [
+          {
+            name: 'hidden',
+            route: 'screencast',
+            steps: [{ kind: 'click', target: 'text=Go' }],
+          },
+        ],
+      }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+
+    const result = await take({
+      url: new URL('/hidden', server.url).href,
+      plan: read.plan,
+      out,
+    })
+
+    expect(result).toMatchObject({ status: 'filmed' })
+    if (result.status !== 'filmed') return
+    const [beat] = result.beats
+    if (!beat) return
+    const log = JSON.parse(readFileSync(join(out, beat.log), 'utf8')) as TakeLog
+    expect(log.events.filter((event) => event.kind === 'click')).toEqual([
+      expect.objectContaining({
+        box: { x: 100, y: 100, width: 200, height: 60 },
+      }),
+    ])
   }, 180_000)
 
   it('should keep stepping while a fetch the page started is in flight', async () => {
