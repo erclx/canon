@@ -15,7 +15,7 @@ Triage then fails three ways. An issue routes to a fix from a paragraph, which s
 
 - Read the durable queue through the `gh` CLI rather than local session scratch, and stop when it is absent or unauthenticated
 - File one measured item per open issue into an intake folder, headed so an answer finds its issue, and name each skipped issue with its carrier
-- Measure each claim against the tree rather than carrying the issue's figures forward
+- Measure each claim in an issue's body and comments against the tree rather than carrying the issue's figures forward
 - Claim the folder through the CLI rather than picking an ordinal by hand
 - Report an empty queue as nothing open rather than widening the label to find work
 
