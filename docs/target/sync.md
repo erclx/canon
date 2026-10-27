@@ -1,6 +1,6 @@
 ---
 title: Target sync
-description: Check what drifted in a toolkit-managed project and pull it in, per domain or all at once
+description: Check what drifted in a toolkit-managed project and pull it in, per domain or all at once, and update canon itself
 category: Agent surface
 ---
 
