@@ -174,7 +174,27 @@ describe('readReviewState', () => {
     })
   })
 
-  it('should carry a UI close forward across a push that paints nothing', async () => {
+  it('should carry a UI close forward across a push of tests and markdown', async () => {
+    const { api } = makeApi({
+      tips: [PUSHED],
+      reviews: [
+        [
+          codePass('## Review closed', PUSHED),
+          uiPass('## UI review closed', HEAD),
+        ],
+      ],
+      changed: { isAncestor: true, paths: ['src/cli.test.ts', 'README.md'] },
+    })
+
+    const result = await readReviewState(api)
+
+    expect(result).toMatchObject({
+      kind: 'read',
+      record: { ui: { carriedFrom: HEAD, isCovered: true } },
+    })
+  })
+
+  it('should not cover the tip with a UI close behind a source push', async () => {
     const { api } = makeApi({
       tips: [PUSHED],
       reviews: [
@@ -190,7 +210,13 @@ describe('readReviewState', () => {
 
     expect(result).toMatchObject({
       kind: 'read',
-      record: { ui: { carriedFrom: HEAD, isCovered: true } },
+      record: {
+        ui: {
+          reason: 'ui-behind',
+          isCovered: false,
+          drivenPaths: ['src/cli.ts'],
+        },
+      },
     })
   })
 })
@@ -343,24 +369,51 @@ describe('waitForReviews', () => {
 })
 
 describe('agrees with lift', () => {
-  const cases: readonly (readonly [string, readonly ReviewRow[]])[] = [
-    ['no pass', []],
-    ['an open code pass', [codePass('## Review', HEAD)]],
-    ['a code pass behind', [codePass('## Review closed', PUSHED)]],
+  const cases: readonly (readonly [string, Fixture])[] = [
+    ['no pass', { reviews: [[]] }],
+    ['an open code pass', { reviews: [[codePass('## Review', HEAD)]] }],
+    [
+      'a code pass behind',
+      { reviews: [[codePass('## Review closed', PUSHED)]] },
+    ],
     [
       'an open UI pass',
-      [codePass('## Review closed', HEAD), uiPass('## UI review', HEAD)],
+      {
+        reviews: [
+          [codePass('## Review closed', HEAD), uiPass('## UI review', HEAD)],
+        ],
+      },
     ],
     [
       'both closed at the head',
-      [codePass('## Review closed', HEAD), uiPass('## UI review closed', HEAD)],
+      {
+        reviews: [
+          [
+            codePass('## Review closed', HEAD),
+            uiPass('## UI review closed', HEAD),
+          ],
+        ],
+      },
+    ],
+    [
+      'a UI close behind a source push',
+      {
+        tips: [PUSHED],
+        reviews: [
+          [
+            codePass('## Review closed', PUSHED),
+            uiPass('## UI review closed', HEAD),
+          ],
+        ],
+        changed: { isAncestor: true, paths: ['src/cli.ts'] },
+      },
     ],
   ]
 
   it.each(cases)(
     'should give the lift reason for each family on %s',
-    async (_name, rows) => {
-      const { api } = makeApi({ reviews: [rows] })
+    async (_name, fixture) => {
+      const { api } = makeApi(fixture)
       const passing: ChecksGate = { state: 'passing', isConflicted: false }
       const liftApi: LiftApi = {
         ...api,
