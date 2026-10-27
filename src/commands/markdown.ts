@@ -167,7 +167,9 @@ export function register(program: Command): void {
         '',
         'A mid-sentence colon and a heading with a capital after its first word',
         'report the same way. A proper noun is the one case the second cannot',
-        'tell from title case, and the first is sometimes right.',
+        'tell from title case, and the first is sometimes right. A list whose',
+        'every item opens on a lead and a colon reads each lead as a label, and so',
+        'does a lead made only of code spans, links, commas, and and, or, to.',
         '',
         'Length reports a whole document past the ceiling and never exits 2.',
         'The Document ceiling gate stage owns that verdict, since this audit also',
@@ -841,6 +843,9 @@ function reportColons(reports: readonly FileReport[]): void {
   logStep('Colons')
   logInfo(
     'A colon followed by more text in a prose line, outside a label, a code span, and a link.',
+  )
+  logInfo(
+    'A list where every item opens on a lead and a colon reads each lead as a label.',
   )
   logInfo(
     'A heading, a table row, a fenced block, and a line-final colon are excluded. This never fails a run.',
