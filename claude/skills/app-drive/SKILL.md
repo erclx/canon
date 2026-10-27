@@ -32,7 +32,7 @@ Read `${CLAUDE_SKILL_DIR}/references/config.md` for `canon/config/app-drive.toml
 1. Derive `<slug>` from the build being driven, such as `app-drive-0-12-0` for a tag. Claim the folder with `canon records ordinal intake <slug> --claim`.
 2. Record the baseline with `canon intake drive-check <slug> --baseline --json` from the main root, before the first build step. Stop on any `reason` other than `recorded`.
 3. Make the throwaway worktree, build it, and serve it per `${CLAUDE_SKILL_DIR}/references/isolate.md`, which also carries the close and the recovery after a crash.
-4. Confirm the address with `canon pr local --root <worktree> --json` and hand it to the operator before driving.
+4. Confirm the address with `canon pr local --root <worktree> --json`, write it as the drive log's `Address` row, and hand it to the operator before driving.
 
 ## Step 2: drive
 

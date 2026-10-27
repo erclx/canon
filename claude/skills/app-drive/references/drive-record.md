@@ -38,6 +38,14 @@ Write the log to `evidence/drive-log.md` inside the intake folder. It opens on a
 - The meta line holds the severity, the source, and the persona, in that order. The source is `goal`, `last-drive`, or `operator`, and a finding naming none sorts as taste.
 - A `last-drive` finding adds `fixed`, `still open`, or `changed` to its meta line
 
+### Setup rows
+
+The setup table is written once, before the first finding, and every row stays even when its value is empty.
+
+- `Commit`, `Copy`, and `Launch` come from making the copy, per `isolate.md`
+- `Address` is the `url` that `canon pr local --root <worktree> --json` confirmed in Step 1
+- `In flight` names each open branch or live plan holding a path the drive covers, as `canon:role-planner` reads what is in flight, and reads `none` when nothing is
+
 ### Fields
 
 The fields under the meta line carry the drive itself, one fact to a line.
@@ -45,6 +53,7 @@ The fields under the meta line carry the drive itself, one fact to a line.
 - `Saw` carries the number read off the page or the app when the claim has one, such as `scrollWidth 436 against clientWidth 320`
 - `Cause` is optional, and says whether it was measured or read from code
 - Write the operator's call as `Decision (operator)` under the finding it settles, even when it arrives after later findings
+- A decision settling two findings sits under the first, and the second carries `Decision (operator):` naming that finding's number, such as `see 02`
 - Keep each field to one line. A field that runs long splits into a second field rather than growing.
 
 ### Passed goals
