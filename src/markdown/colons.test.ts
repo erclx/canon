@@ -131,6 +131,15 @@ describe('findColons', () => {
     expect(colonsIn(source)).toEqual([])
   })
 
+  it('should count a colon followed only by a code span as a label colon', () => {
+    const source = [
+      '- The six-path file entry draws no finding: `bun --bun vitest run`',
+      '- A long lead for the second item: text after it',
+    ].join('\n')
+
+    expect(colonsIn(source)).toEqual([])
+  })
+
   it('should group a list inside a block quote', () => {
     const source = [
       '> - A long lead for the first item: one',

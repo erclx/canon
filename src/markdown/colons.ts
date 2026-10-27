@@ -22,6 +22,9 @@ const QUOTE_MARKER = /^(?:\s*>\s?)+/
 /** A colon followed by whitespace and more text, ruling out `10:30` and a scheme. */
 const COLON = /:(?=\s+\S)/g
 
+/** A colon followed by whitespace, which a masked code span leaves behind. */
+const LABEL_COLON = /:\s/
+
 const BOLD_LABEL = /^(\*\*|__)[^*_]+\1$/
 
 /** What may stand in a lead once its code spans and links are masked. */
@@ -59,6 +62,8 @@ interface Entry {
   readonly isItem: boolean
   /** Matches at or past the content start, the only ones a line can report. */
   readonly colons: readonly RegExpExecArray[]
+  /** A colon stands past the content start, even with only a masked span after it. */
+  readonly labelColon: boolean
   /** Items sharing one list at one indent, shared by reference. */
   group?: Entry[]
 }
@@ -99,7 +104,7 @@ function uniform(entry: Entry): boolean {
   return (
     group !== undefined &&
     group.length >= 2 &&
-    group.every((item) => item.colons.length > 0)
+    group.every((item) => item.labelColon)
   )
 }
 
@@ -128,6 +133,7 @@ export function findColons(lines: readonly BodyLine[]): ColonFinding[] {
       indent: quote.length + marker.length - marker.trimStart().length,
       quote: quote.replace(/\s/g, ''),
       isItem: !skipped && marker !== '',
+      labelColon: !skipped && LABEL_COLON.test(masked.slice(start)),
       colons: skipped
         ? []
         : [...masked.matchAll(COLON)].filter((match) => match.index >= start),

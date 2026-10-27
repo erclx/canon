@@ -134,7 +134,7 @@ A bullet's punctuation follows its sentence count, and a list opens unannounced.
 
 - Do not use em dashes (`—`) or semicolons (`;`). Rewrite or restructure the sentence to avoid them. A colon or a comma standing where the dash was is the same sentence, so split it or rewrite it.
 - Do not use a colon to join two clauses in the middle of a sentence. A colon belongs after a label or at the end of a line introducing a list.
-- A list where every item carries a colon reads each lead as a label.
+- The check misses a clause colon in a list of colon items, but it is wrong.
 - Do not use parenthetical asides in prose (`the config (which is optional) controls...`). Split into its own sentence or drop it. Parentheses in rule definitions for grouping examples are fine.
 
 ## Language
