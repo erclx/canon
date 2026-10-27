@@ -33,9 +33,8 @@ write_scope = ["docs/**"]
 # run failing on a count. Correct it downward from the widest of several runs
 # rather than from this one.
 #
-# Never raise this above the runner's cap of 30. A truncated run reports one
-# turn past the cap, so a declaration above it goes green on exactly the
-# truncation the assertion exists to catch.
+# Raised to the runner's cap of 30 or above, it would compare nothing, since
+# the cap then holds it and fails a truncated run by its subtype.
 max_turns = 20
 
 manual = [
