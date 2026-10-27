@@ -1,0 +1,171 @@
+/* Palette round: the picked stacked fold and one section, with canon's tokens from canon/DESIGN.md.
+   Only the hue varies between arms, through --act and --act-ink. */
+:root {
+  --ground: #fbfaf8;
+  --surface: #f1f1ee;
+  --chrome: #e9e8e5;
+  --line: #d5d4d1;
+  --ink: #2c2c29;
+  --body: #4b4947;
+  --muted: #666561;
+  --pip: #c2380e;
+}
+:root[data-theme="dark"] {
+  --ground: #0f0e0c;
+  --surface: #151412;
+  --chrome: #1b1a18;
+  --line: #2a2926;
+  --ink: #d9d7d4;
+  --body: #aeada9;
+  --muted: #8c8b86;
+  --pip: #ff6b42;
+}
+body.rust { --act: #ad4a4b; --act-ink: #fbfaf8; }
+:root[data-theme="dark"] body.rust { --act: #c76b5f; --act-ink: #0f0e0c; }
+body.ink { --act: var(--ink); --act-ink: var(--ground); }
+body.verm { --act: #c2380e; --act-ink: #fbfaf8; }
+:root[data-theme="dark"] body.verm { --act: #ff6b42; --act-ink: #0f0e0c; }
+* { box-sizing: border-box; margin: 0; }
+body { width: 1440px; background: var(--ground); color: var(--body); font-family: Geist, sans-serif; font-size: 18px; line-height: 1.55; padding-bottom: 72px; }
+.arm { padding: 18px 40px; border-bottom: 1px solid var(--line); font-family: "Geist Mono", monospace; font-size: 15px; color: var(--muted); }
+.arm b { color: var(--ink); }
+.wrap { width: 1040px; margin: 0 auto; }
+nav { display: flex; align-items: center; gap: 28px; height: 68px; font-size: 15px; color: var(--body); }
+nav .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--ink); margin-right: auto; }
+nav .brand img { width: 26px; height: 26px; }
+nav a { color: var(--body); text-decoration: none; }
+nav .btn { padding: 7px 14px; font-size: 14px; }
+.dark-only { display: none; }
+:root[data-theme="dark"] .dark-only { display: block; }
+:root[data-theme="dark"] .light-only { display: none; }
+h1 { color: var(--ink); font-size: 50px; line-height: 1.12; font-weight: 600; letter-spacing: -0.02em; max-width: 900px; }
+h2 { color: var(--ink); font-size: 34px; line-height: 1.2; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 12px; }
+.lead { font-size: 22px; max-width: 820px; margin-top: 20px; }
+.cmd { display: inline-block; margin-top: 28px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 20px; font-family: "Geist Mono", monospace; font-size: 15px; line-height: 1.8; color: var(--ink); }
+.cmd span { color: var(--muted); }
+.btns { display: flex; gap: 12px; margin-top: 28px; }
+.btn { display: inline-block; padding: 12px 22px; border: 1px solid var(--line); border-radius: 8px; font-size: 16px; font-weight: 600; color: var(--ink); text-decoration: none; }
+.btn.primary { background: var(--act); border-color: var(--act); color: var(--act-ink); }
+.film { margin-top: 44px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.film img { display: block; width: 100%; }
+section { padding: 80px 0; border-top: 1px solid var(--line); }
+section.fold { border-top: 0; padding-top: 56px; }
+.split { display: grid; grid-template-columns: 1fr 1.2fr; gap: 56px; align-items: center; }
+.kicker { display: flex; align-items: center; gap: 10px; font-family: "Geist Mono", monospace; font-size: 14px; color: var(--muted); margin-bottom: 10px; }
+.kicker i { display: none; width: 10px; height: 10px; border-radius: 2px; background: var(--pip); }
+body.ink .kicker i { display: inline-block; }
+.sub { max-width: 460px; }
+a.link { color: var(--act); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+body.ink a.link { color: var(--ink); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 32px; }
+.card .num { font-size: 72px; font-weight: 600; color: var(--ink); letter-spacing: -0.02em; line-height: 1; }
+.card .cap { color: var(--muted); font-size: 16px; margin-top: 8px; }
+.card ul { list-style: none; padding: 0; margin-top: 24px; border-top: 1px solid var(--line); }
+.card li { padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 16px; }
+.card li b { color: var(--ink); font-weight: 600; margin-right: 10px; }
+.decision { margin-top: 20px; font-weight: 600; color: var(--ink); }
+:root:not([data-theme="dark"]) .dark-only { display: none !important; }
+:root[data-theme="dark"] .light-only { display: none !important; }
+/* Full-page preview: the figures each beat carries, drawn from #2418's real record. */
+.fig { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.fig .head { display: flex; justify-content: space-between; padding: 12px 20px; background: var(--chrome); border-bottom: 1px solid var(--line); font-family: "Geist Mono", monospace; font-size: 14px; color: var(--ink); }
+.fig .head span { color: var(--muted); }
+.fig .body { padding: 20px; }
+.row { display: flex; align-items: center; gap: 14px; padding: 9px 0; font-size: 16px; color: var(--body); }
+.row b { color: var(--ink); font-weight: 600; }
+.row .m { flex: none; width: 12px; height: 12px; border-radius: 3px; background: var(--muted); }
+.row .m.o { background: transparent; border: 2px solid var(--muted); border-radius: 50%; }
+.row .m.p { background: var(--pip); }
+.row em { margin-left: auto; font-style: normal; font-size: 14px; color: var(--muted); }
+.mono { font-family: "Geist Mono", monospace; font-size: 15px; color: var(--ink); }
+.mono.dim { color: var(--muted); }
+.chip { display: inline-block; margin: 6px 0; padding: 3px 10px; border: 1px solid var(--line); border-radius: 6px; font-family: "Geist Mono", monospace; font-size: 13px; color: var(--muted); }
+.struck { text-decoration: line-through; color: var(--muted); }
+.msg { padding: 14px 18px; background: var(--ground); border: 1px solid var(--line); border-radius: 12px; font-size: 16px; color: var(--ink); }
+.msg small { display: block; font-size: 13px; color: var(--muted); margin-bottom: 2px; }
+.stack > * + * { margin-top: 14px; }
+.kicker i.on { display: inline-block; }
+section.tail { border-top: 1px solid var(--line); }
+footer { display: flex; gap: 28px; padding-top: 32px; border-top: 1px solid var(--line); font-size: 15px; color: var(--muted); }
+footer .brand { display: flex; align-items: center; gap: 8px; color: var(--ink); font-weight: 600; margin-right: auto; }
+footer img { width: 20px; height: 20px; }
+/* Rhythm round: layouts the six beat sections take. */
+.split.rev > :first-child { order: 2; }
+.wide-head { max-width: 640px; margin-bottom: 32px; }
+.wide-figs { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+.wide-figs.lead-left { grid-template-columns: 0.8fr 1.2fr; }
+section.band { background: var(--surface); }
+section.band .fig, section.band .card { background: var(--ground); }
+.spine { position: relative; padding-left: 88px; }
+.spine::before { content: ""; position: absolute; left: 27px; top: 8px; bottom: 8px; width: 2px; background: var(--line); }
+.stop { position: relative; padding: 0 0 88px; }
+.stop:last-child { padding-bottom: 0; }
+.stop .dot { position: absolute; left: -88px; top: 0; width: 56px; height: 56px; border-radius: 14px; background: var(--ground); border: 2px solid var(--line); display: flex; align-items: center; justify-content: center; font-family: "Geist Mono", monospace; font-size: 18px; color: var(--ink); }
+.stop .dot i { position: absolute; right: -6px; top: 20px; width: 12px; height: 12px; border-radius: 3px; background: var(--pip); }
+.stop .txt { max-width: 640px; margin-bottom: 24px; }
+.stop .figs { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; max-width: 952px; }
+.stop .figs.one { grid-template-columns: 1fr; max-width: 640px; }
+/* Phone width: one column, the same content and order as the desktop preview. */
+body.phone { width: 390px; font-size: 16px; padding-bottom: 48px; }
+body.phone .arm { padding: 12px 20px; font-size: 12px; }
+body.phone .wrap { width: auto; padding: 0 20px; }
+body.phone nav { height: 60px; }
+body.phone nav a:not(.btn) { display: none; }
+body.phone h1 { font-size: 32px; line-height: 1.15; }
+body.phone h2 { font-size: 25px; }
+body.phone .lead { font-size: 17px; }
+body.phone .cmd { display: block; font-size: 12px; padding: 12px 14px; overflow-wrap: anywhere; }
+body.phone .btns { flex-wrap: wrap; }
+body.phone .btn { font-size: 15px; padding: 11px 18px; }
+body.phone .film { margin-top: 28px; border-radius: 10px; }
+body.phone section { padding: 48px 0; }
+body.phone section.fold { padding-top: 28px; }
+body.phone .split, body.phone .wide-figs, body.phone .wide-figs.lead-left { grid-template-columns: 1fr; gap: 24px; }
+body.phone .split.rev > :first-child { order: 0; }
+body.phone .wide-head { margin-bottom: 24px; }
+body.phone .card { padding: 20px; }
+body.phone .card .num { font-size: 50px; }
+body.phone .fig .head { padding: 10px 14px; font-size: 12px; }
+body.phone .fig .body { padding: 14px; }
+body.phone .row { font-size: 14px; gap: 10px; }
+body.phone .row em { font-size: 12px; }
+body.phone .mono { font-size: 12px; overflow-wrap: anywhere; }
+body.phone .chip { font-size: 11px; }
+body.phone .msg { font-size: 15px; }
+body.phone footer { flex-wrap: wrap; gap: 14px 20px; font-size: 14px; }
+body.phone footer .brand { width: 100%; }
+body.phone .fig .head { flex-wrap: wrap; gap: 2px 12px; }
+body.phone .fig .head span { flex-basis: 100%; }
+/* Picked buttons (landing-buttons/arm-1), scoped to the preview so earlier rounds keep their state. */
+body.final { --hi: #1d1c1a; --hi-ink: #fbfaf8; }
+:root[data-theme="dark"] body.final { --hi: #f4f2ef; --hi-ink: #0f0e0c; }
+body.final .btn { border-radius: 10px; padding: 13px 22px; letter-spacing: -0.01em; }
+body.final .btn.primary { background: var(--hi); border-color: var(--hi); color: var(--hi-ink); box-shadow: 0 1px 0 rgba(0,0,0,.08); }
+body.final .btn.primary::after { content: "→"; margin-left: 10px; }
+body.final .btns .btn:not(.primary) { border-color: transparent; padding-left: 8px; }
+body.final .btns .btn:not(.primary)::after { content: "↓"; margin-left: 8px; color: var(--muted); }
+body.final nav .btn { padding: 7px 14px; font-size: 14px; border-radius: 8px; background: var(--hi); border-color: var(--hi); color: var(--hi-ink); }
+body.final .btns .btn.docs::after { content: "→"; }
+/* Phone film round: the film slot on the phone fold. */
+.slot { position: relative; margin-top: 28px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.slot img { display: block; width: 100%; }
+.slot .play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 10px; padding: 11px 18px; border-radius: 999px; background: var(--ink); color: var(--ground); font-size: 15px; font-weight: 600; box-shadow: 0 6px 24px rgba(0,0,0,.25); }
+.slot .play::before { content: ""; border-left: 11px solid var(--ground); border-top: 7px solid transparent; border-bottom: 7px solid transparent; }
+.slotcap { margin-top: 10px; font-size: 13px; color: var(--muted); }
+.cut { aspect-ratio: 4 / 5; background: var(--ground); padding: 26px 22px; display: flex; flex-direction: column; }
+.cut .k { font-family: "Geist Mono", monospace; font-size: 12px; color: var(--muted); }
+.cut .t { margin-top: 8px; font-size: 24px; line-height: 1.15; font-weight: 600; color: var(--ink); letter-spacing: -0.01em; }
+.cut .n { margin-top: auto; font-size: 58px; font-weight: 600; color: var(--ink); letter-spacing: -0.02em; line-height: 1; }
+.cut .c { margin-top: 6px; font-size: 15px; color: var(--muted); }
+.cut .d { display: flex; align-items: center; gap: 10px; margin-top: 22px; font-size: 16px; font-weight: 600; color: var(--ink); }
+.cut .d i { width: 11px; height: 11px; border-radius: 2px; background: var(--pip); }
+.cut .dots { display: flex; gap: 6px; margin-top: 22px; }
+.cut .dots b { width: 18px; height: 3px; border-radius: 2px; background: var(--line); }
+.cut .dots b.on { background: var(--ink); }
+.loop { aspect-ratio: 16 / 10; display: flex; align-items: center; justify-content: center; background: var(--ground); }
+.loop img { width: 112px !important; height: 112px; }
+body.land { width: 844px; height: 390px; overflow: hidden; padding: 0; background: #000; }
+body.land img { display: block; width: 844px; height: 390px; object-fit: contain; background: var(--ground); }
+.slot .play { white-space: nowrap; }
+body.foldmark { position: relative; }
+body.foldmark::after { content: "fold, 844 px"; position: absolute; left: 0; right: 0; top: 844px; border-top: 2px dashed var(--pip); font-family: "Geist Mono", monospace; font-size: 11px; color: var(--pip); text-align: right; padding: 2px 8px 0 0; }

@@ -1,0 +1,7 @@
+{
+  "frames": {
+    "landing/page": "landing/landing-preview/page",
+    "landing/page-phone": "landing/landing-preview/page-phone",
+    "readme/page": "readme/final/readme"
+  }
+}
