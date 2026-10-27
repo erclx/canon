@@ -565,7 +565,8 @@ export function declineLine(reason: string, by: string, date: string): string {
 /**
  * Lines a `Declined:` line anchors after, mirroring `record.ts`'s
  * `ORIGIN_PREFIXES` with `Pull request:` folded in, since a decline can follow
- * a pull request that never merged.
+ * a pull request that never merged. `Sessions:` joins them, since the sessions
+ * that worked a task sit above whatever ended it.
  */
 const DECLINE_ANCHOR_PREFIXES = [
   'Plan:',
@@ -573,6 +574,7 @@ const DECLINE_ANCHOR_PREFIXES = [
   'Intake:',
   'Issue:',
   'Pull request:',
+  SESSIONS_PREFIX,
 ] as const
 
 function lastAnchorLine(lines: readonly string[]): number | undefined {

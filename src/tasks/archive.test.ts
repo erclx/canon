@@ -1843,6 +1843,29 @@ describe('declineTask', () => {
     )
   })
 
+  it('should write the Declined: line below the Sessions: line', async () => {
+    const stem = await seedTask()
+    const path = join(tasksDir(ROOT), `${stem}.md`)
+    const text = await readFile(path, 'utf8')
+    await writeFile(
+      path,
+      text.replace(
+        '# v28.1: A task\n',
+        '# v28.1: A task\n\nSessions: worker-canon-a (0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0)\n',
+      ),
+    )
+
+    await declineTask(ROOT, stem, 'superseded by v30.2', 'Alex')
+
+    const declined = await readFile(
+      join(declinedDir(ROOT), `${stem}.md`),
+      'utf8',
+    )
+    expect(declined).toMatch(
+      /^Sessions: worker-canon-a \(0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0\)\nDeclined: superseded by v30\.2, Alex on \d{4}-\d{2}-\d{2}$/m,
+    )
+  })
+
   it('should refuse a stem that is not on the board', async () => {
     await seedTask()
 
