@@ -13,6 +13,7 @@ import {
   reelFrames,
   renderReel,
 } from '@/take/reel'
+import { RING_RADIUS } from '@/take/pointer'
 import { findShell } from '@/take/shell'
 
 /**
@@ -187,5 +188,76 @@ describe.skipIf(!available())('a reel joined from a two-route take', () => {
     expect(reel.bytes).toBeGreaterThan(0)
     // Printed rather than asserted, since it is the figure the plan estimated.
     console.info(`reel of ${expected} frames in ${Date.now() - started} ms`)
+  }, 120_000)
+})
+
+const INPUT_PAGE = readFileSync(
+  new URL('./fixtures/input.html', import.meta.url),
+  'utf8',
+)
+
+describe.skipIf(!available())('a reel of a drag', () => {
+  let server: { url: string; stop: () => void }
+  let out: string
+  let beats: readonly FilmedBeat[] = []
+
+  beforeAll(async () => {
+    const served = Bun.serve({
+      port: 0,
+      fetch: () =>
+        new Response(INPUT_PAGE, { headers: { 'content-type': 'text/html' } }),
+    })
+    server = {
+      url: `http://127.0.0.1:${served.port}/`,
+      stop: () => served.stop(true),
+    }
+    out = mkdtempSync(join(tmpdir(), 'canon-reel-drag-e2e-'))
+
+    const read = readTakePlan(
+      JSON.stringify({
+        beats: [
+          {
+            name: 'drag',
+            steps: [{ kind: 'drag', from: '#handle', to: '#lane' }],
+          },
+        ],
+      }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+    const result = await take({ url: server.url, plan: read.plan, out })
+    if (result.status !== 'filmed') throw new Error(result.message)
+    beats = result.beats
+  }, 240_000)
+
+  afterAll(() => {
+    server.stop()
+    rmSync(out, { recursive: true, force: true })
+  })
+
+  it('should draw the held ring around the pointer through the drag', async () => {
+    const [beat] = beats
+    if (!beat) throw new Error('no drag beat')
+    const camera = JSON.parse(
+      readFileSync(join(out, beat.camera), 'utf8'),
+    ) as CameraTrack
+    // The held ring is 0.7 of its full size, so its stroke centers about 12
+    // reel pixels from the tip. Left of the tip, the arrow never covers it.
+    const radius = RING_RADIUS * 0.7 - 0.7
+
+    const held: boolean[] = []
+    for await (const frame of reelFrames(out, beats)) {
+      const at = camera.frames[frame.index * REEL_EVERY]
+      if (at?.ring !== 0.3) continue
+      // Less half a pixel, since the ring's coverage is read at pixel centers.
+      const [r = 0, , b = 0] = pixel(
+        frame,
+        at.cursor.x / 2 - radius - 0.5,
+        at.cursor.y / 2 - 0.5,
+      )
+      held.push(b > r + 40)
+    }
+
+    expect(held.length).toBeGreaterThan(5)
+    expect(held.every(Boolean)).toBe(true)
   }, 120_000)
 })
