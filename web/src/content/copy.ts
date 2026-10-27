@@ -155,7 +155,7 @@ export const rules = {
   }),
 }
 
-// README.md: canon-allow-readme-paraphrase: "Every command runs without a prompt, and data on stdout pipes clean" restated as what a skill does with it.
+// README.md: canon-allow-readme-paraphrase: skills calling the CLI, which the README does not state.
 export const skills = {
   head: (total: number) => `One skill loaded, out of ${total} in the catalog`,
   cap: 'Skills call the CLI and never reimplement it.',
