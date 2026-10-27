@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Input</title>
+    <!--
+      One target per input a take performs, each posting what the page saw to
+      /report with a sequence number, so a test reads the inputs in the order
+      the page received them after the take has closed the browser.
+
+      - #handle follows a pointer-event drag and reports where it dropped and
+        how many of its moves carried the held button
+      - #frame reports each dblclick
+      - #layer reports pointerdown, pointerup, and click with the Shift flag
+      - #field takes focus for key steps, and every keyup reports its value
+    -->
+    <style>
+      body {
+        margin: 0;
+        background: #f4f4f4;
+        font: 24px sans-serif;
+      }
+
+      #handle {
+        position: absolute;
+        left: 200px;
+        top: 200px;
+        width: 80px;
+        height: 80px;
+        /* Neutral, so the reel's blue ring reads over it at any alpha. */
+        background: #444;
+        touch-action: none;
+      }
+
+      #lane {
+        position: absolute;
+        left: 700px;
+        top: 160px;
+        width: 300px;
+        height: 160px;
+        border: 2px dashed #555;
+        box-sizing: border-box;
+      }
+
+      #frame,
+      #layer {
+        position: absolute;
+        top: 500px;
+        width: 200px;
+        height: 100px;
+        background: #ddd;
+        user-select: none;
+      }
+
+      #frame {
+        left: 200px;
+      }
+
+      #layer {
+        left: 700px;
+      }
+
+      #field {
+        position: absolute;
+        left: 200px;
+        top: 750px;
+        width: 400px;
+        height: 48px;
+        font: inherit;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="lane"></div>
+    <div id="handle"></div>
+    <div id="frame">Frame</div>
+    <div id="layer">Layer</div>
+    <input id="field" />
+    <script>
+      let seq = 0
+      const report = (entry) =>
+        fetch('/report', {
+          method: 'POST',
+          body: JSON.stringify({ seq: (seq += 1), ...entry }),
+          keepalive: true,
+        })
+
+      const handle = document.getElementById('handle')
+      const lane = document.getElementById('lane')
+      let drag = null
+      handle.addEventListener('pointerdown', (event) => {
+        handle.setPointerCapture(event.pointerId)
+        drag = { held: 0, hover: 0 }
+      })
+      handle.addEventListener('pointermove', (event) => {
+        if (!drag) return
+        if (event.buttons === 1) drag.held += 1
+        else drag.hover += 1
+        handle.style.left = `${event.clientX - 40}px`
+        handle.style.top = `${event.clientY - 40}px`
+      })
+      handle.addEventListener('pointerup', (event) => {
+        if (!drag) return
+        const box = lane.getBoundingClientRect()
+        const onTarget =
+          event.clientX >= box.left &&
+          event.clientX <= box.right &&
+          event.clientY >= box.top &&
+          event.clientY <= box.bottom
+        report({ type: 'drop', ...drag, onTarget, altKey: event.altKey })
+        drag = null
+      })
+
+      document
+        .getElementById('frame')
+        .addEventListener('dblclick', () => report({ type: 'dblclick' }))
+
+      const layer = document.getElementById('layer')
+      for (const type of ['pointerdown', 'pointerup', 'click']) {
+        layer.addEventListener(type, (event) =>
+          report({ type, shiftKey: event.shiftKey }),
+        )
+      }
+
+      const field = document.getElementById('field')
+      document.addEventListener('keydown', (event) =>
+        report({
+          type: 'keydown',
+          key: event.key,
+          ctrlKey: event.ctrlKey,
+        }),
+      )
+      document.addEventListener('keyup', (event) =>
+        report({ type: 'keyup', key: event.key, value: field.value }),
+      )
+    </script>
+  </body>
+</html>

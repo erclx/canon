@@ -1,3 +1,4 @@
+import type { Modifier } from '@/take/keys'
 import { ROUTES, type Route } from '@/take/plan'
 
 /**
@@ -43,6 +44,33 @@ export type LogEvent =
       readonly kind: 'click'
       readonly at: Point
       readonly box: Box
+      /** The keys held through the press, absent when none is. */
+      readonly modifiers?: readonly Modifier[]
+      /** 2 for a double click, absent for a single one. */
+      readonly count?: number
+    }
+  | {
+      readonly t: number
+      readonly kind: 'drag'
+      /** Where the button went down and where it came up. */
+      readonly from: Point
+      readonly to: Point
+      /** The box pressed and the box it was dropped on. */
+      readonly box: Box
+      readonly drop: Box
+      readonly modifiers?: readonly Modifier[]
+      /**
+       * From press to release. The travel between is logged as `move` events,
+       * which the cursor is read off.
+       */
+      readonly ms: number
+    }
+  | {
+      readonly t: number
+      readonly kind: 'key'
+      /** The combination as the plan wrote it, such as `Control+K`. */
+      readonly keys: string
+      readonly ms: number
     }
   | {
       readonly t: number

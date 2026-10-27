@@ -277,6 +277,109 @@ describe('cameraTrack', () => {
   })
 })
 
+/**
+ * Builds a log the way a take writes a drag: a glide to the source, a press,
+ * a held glide to the target, and the release `ms` after the press.
+ */
+function dragOf(press: number, from: Point, to: Point, travel = 900): TakeLog {
+  const glide = travelMs(START, from)
+  const box = { x: from.x - 20, y: from.y - 10, width: 40, height: 20 }
+  const drop = { x: to.x - 40, y: to.y - 30, width: 80, height: 60 }
+  return {
+    ...takeOf([]),
+    events: [
+      { t: press - glide, kind: 'move', from: START, to: from, ms: glide },
+      { t: press + 150, kind: 'move', from, to, ms: travel },
+      {
+        t: press,
+        kind: 'drag',
+        from,
+        to,
+        box,
+        drop,
+        ms: 150 + travel,
+      },
+    ],
+  }
+}
+
+describe('cameraTrack input steps', () => {
+  const FROM = { x: 400, y: 300 }
+  const TO = { x: 560, y: 380 }
+
+  it('should grow the ring to a partial value and hold it until release', () => {
+    const { frames } = cameraTrack(dragOf(2000, FROM, TO))
+
+    expect(at(frames, 2000).ring).toBe(0)
+    expect(at(frames, 2500).ring).toBe(0.3)
+    expect(at(frames, 3000).ring).toBe(0.3)
+  })
+
+  it('should run the ring from the held value to 1 after release', () => {
+    const { frames } = cameraTrack(dragOf(2000, FROM, TO))
+
+    expect(at(frames, 3050 + 157.5).ring).toBeCloseTo(0.65, 1)
+    expect(at(frames, 3050 + 400).ring).toBeNull()
+  })
+
+  it('should never let a drag ring fall back or leave 0 to 1', () => {
+    const { frames } = cameraTrack(dragOf(2000, FROM, TO))
+
+    const rings = frames
+      .map((frame) => frame.ring)
+      .filter((ring): ring is number => ring !== null)
+    expect(rings.every((ring, i) => ring >= (rings[i - 1] ?? 0))).toBe(true)
+    expect(Math.min(...rings)).toBe(0)
+    expect(Math.max(...rings)).toBeLessThanOrEqual(1)
+  })
+
+  it('should hold the zoom on both ends of a drag until release', () => {
+    const { frames } = cameraTrack(dragOf(2000, FROM, TO))
+
+    const nearRelease = at(frames, 3000)
+    expect(nearRelease.scale).toBeGreaterThan(1.3)
+    expect(inView(nearRelease, FROM)).toBe(true)
+    expect(inView(nearRelease, TO)).toBe(true)
+  })
+
+  it('should build a double click into the track of one click', () => {
+    const single = takeOf([{ t: 2000, at: FROM }])
+    const double: TakeLog = {
+      ...single,
+      events: single.events.map((event) =>
+        event.kind === 'click' ? { ...event, count: 2 } : event,
+      ),
+    }
+
+    expect(cameraTrack(double)).toEqual(cameraTrack(single))
+  })
+
+  it('should leave the track as it was for a key pressed mid-zoom', () => {
+    const plain = takeOf([{ t: 2000, at: FROM }])
+    const keyed: TakeLog = {
+      ...plain,
+      events: [
+        ...plain.events,
+        { t: 2100, kind: 'key', keys: 'Control+K', ms: 66.67 },
+      ],
+    }
+
+    expect(cameraTrack(keyed)).toEqual(cameraTrack(plain))
+  })
+
+  it('should neither zoom nor ring on a key alone', () => {
+    const log: TakeLog = {
+      ...takeOf([]),
+      events: [{ t: 2000, kind: 'key', keys: 'Escape', ms: 33.33 }],
+    }
+
+    const { frames } = cameraTrack(log)
+
+    expect(frames.every((frame) => frame.scale === 1)).toBe(true)
+    expect(frames.every((frame) => frame.ring === null)).toBe(true)
+  })
+})
+
 describe('readRate', () => {
   it('should read a positive number', () => {
     expect(readRate('1.5')).toBe(1.5)

@@ -6,18 +6,43 @@
  * keyboard leaves nothing in the log to draw.
  */
 
+import { MODIFIERS, type Modifier, isModifier, parseKeys } from '@/take/keys'
+
 /** How a beat is filmed: frame stepping, or Playwright's real-time screencast. */
 export const ROUTES = ['step', 'screencast'] as const
 
 export type Route = (typeof ROUTES)[number]
 
+/** The keys held through a press, absent when none is. */
+interface Held {
+  readonly modifiers?: readonly Modifier[]
+}
+
 export type TakeStep =
   | { readonly kind: 'move'; readonly target: string }
   | { readonly kind: 'move'; readonly x: number; readonly y: number }
-  | { readonly kind: 'click'; readonly target: string }
+  | ({ readonly kind: 'click'; readonly target: string } & Held)
+  | ({ readonly kind: 'dblclick'; readonly target: string } & Held)
+  | ({
+      readonly kind: 'drag'
+      readonly from: string
+      readonly to: string
+    } & Held)
+  | { readonly kind: 'key'; readonly keys: string }
   | { readonly kind: 'fill'; readonly target: string; readonly text: string }
   | { readonly kind: 'scroll'; readonly target: string; readonly dy: number }
   | { readonly kind: 'wait'; readonly ms: number }
+
+const KINDS = [
+  'move',
+  'click',
+  'dblclick',
+  'drag',
+  'key',
+  'fill',
+  'scroll',
+  'wait',
+] as const
 
 export interface Beat {
   readonly name: string
@@ -181,7 +206,35 @@ function readStep(entry: unknown, at: string): TakeStep {
         `${at} is a move with neither a target nor an x and y`,
       )
     case 'click':
-      return { kind: 'click', target: needTarget() }
+    case 'dblclick':
+      return {
+        kind: entry.kind,
+        target: needTarget(),
+        ...readModifiers(entry.modifiers, at),
+      }
+    case 'drag':
+      if (typeof entry.from !== 'string' || !entry.from) {
+        throw new Refusal('bad-step', `${at} is a drag with no from target`)
+      }
+      if (typeof entry.to !== 'string' || !entry.to) {
+        throw new Refusal('bad-step', `${at} is a drag with no to target`)
+      }
+      return {
+        kind: 'drag',
+        from: entry.from,
+        to: entry.to,
+        ...readModifiers(entry.modifiers, at),
+      }
+    case 'key': {
+      if (typeof entry.keys !== 'string') {
+        throw new Refusal('bad-step', `${at} is a key with no keys to press`)
+      }
+      const read = parseKeys(entry.keys)
+      if (read.kind === 'refused') {
+        throw new Refusal('bad-step', `${at} is a key where ${read.detail}`)
+      }
+      return { kind: 'key', keys: entry.keys }
+    }
     case 'fill':
       if (typeof entry.text !== 'string') {
         throw new Refusal('bad-step', `${at} is a fill with no text`)
@@ -200,9 +253,30 @@ function readStep(entry: unknown, at: string): TakeStep {
     default:
       throw new Refusal(
         'bad-step',
-        `${at} names kind ${String(entry.kind)}, which is not move, click, fill, scroll, or wait`,
+        `${at} names kind ${String(entry.kind)}, which is not ${KINDS.join(', ')}`,
       )
   }
+}
+
+function readModifiers(value: unknown, at: string): Held {
+  if (value === undefined) return {}
+  if (!Array.isArray(value)) {
+    throw new Refusal('bad-step', `${at} carries modifiers that are not a list`)
+  }
+  const modifiers: Modifier[] = []
+  for (const name of value) {
+    if (!isModifier(name)) {
+      throw new Refusal(
+        'bad-step',
+        `${at} holds ${String(name)}, which is not ${MODIFIERS.join(', ')}`,
+      )
+    }
+    if (modifiers.includes(name)) {
+      throw new Refusal('bad-step', `${at} holds ${name} twice`)
+    }
+    modifiers.push(name)
+  }
+  return modifiers.length > 0 ? { modifiers } : {}
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

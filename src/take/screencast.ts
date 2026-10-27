@@ -66,6 +66,13 @@ export async function filmScreencast(request: {
         await page.keyboard.insertText(text)
         await page.waitForTimeout(FRAME_MS)
       },
+      // Playwright's mouse reads the modifiers its keyboard holds, so a press
+      // here is all a modified click or drag needs on this route.
+      press: async (input) => {
+        if (input.type === 'down') await page.keyboard.down(input.key)
+        else await page.keyboard.up(input.key)
+        await page.waitForTimeout(FRAME_MS)
+      },
       evaluate: (expression) => page.evaluate(expression),
     })
 
@@ -106,9 +113,9 @@ async function send(mouse: Mouse, input: PointerInput): Promise<void> {
     case 'move':
       return mouse.move(input.x, input.y)
     case 'down':
-      return mouse.down()
+      return mouse.down({ clickCount: input.clickCount })
     case 'up':
-      return mouse.up()
+      return mouse.up({ clickCount: input.clickCount })
     case 'wheel':
       return mouse.wheel(0, input.dy)
   }

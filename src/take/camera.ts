@@ -65,6 +65,13 @@ const EDGE = 0.9
 /** How long the click ring the edit draws takes to expand. */
 const RING_MS = 450
 
+/**
+ * How far a drag's ring grows before it holds for the drag, then runs on to 1
+ * from the release. A held value keeps the ring's one field, so every reader
+ * drawing a growing ring draws a held press with no change.
+ */
+const GRAB_RING = 0.3
+
 export interface CameraFrame {
   readonly ms: number
   /** How far the view is zoomed, 1 being the whole page. */
@@ -134,6 +141,19 @@ export function cameraTrack(
           },
         ]
       }
+      if (event.kind === 'drag') {
+        // One aim over both ends, held to the release, so a short drag stays
+        // framed whole and a long one asks for a depth under MIN_ZOOM.
+        const box = union(event.box, event.drop)
+        return [
+          {
+            t: event.t,
+            until: event.t + event.ms,
+            at: { x: box.x + box.width / 2, y: box.y + box.height / 2 },
+            depth: depthFor(box),
+          },
+        ]
+      }
       if (event.kind === 'type') {
         const box = event.box
         return [
@@ -151,9 +171,26 @@ export function cameraTrack(
     .sort((a, b) => a.t - b.t)
 
   const scrolls = log.events.filter((event) => event.kind === 'scroll')
-  // Read off every click rather than off the aims, which drop a click too large
+  // Read off every press rather than off the aims, which drop a click too large
   // to zoom and add a typing burst that is no press.
-  const clicks = log.events.filter((event) => event.kind === 'click')
+  const presses = log.events.flatMap((event) =>
+    event.kind === 'click'
+      ? [{ t: event.t, release: event.t }]
+      : event.kind === 'drag'
+        ? [{ t: event.t, release: event.t + event.ms }]
+        : [],
+  )
+  const ringAt = (ms: number): number | null => {
+    for (const press of presses) {
+      if (ms < press.t) continue
+      const grown = (ms - press.t) / RING_MS
+      if (ms <= press.release) return Math.min(GRAB_RING, grown)
+      const held = Math.min(GRAB_RING, (press.release - press.t) / RING_MS)
+      const ring = held + (ms - press.release) / RING_MS
+      if (ring <= 1) return ring
+    }
+    return null
+  }
   const windows = zoomWindows(aims, scrolls)
 
   const targetAt = (ms: number) => {
@@ -218,16 +255,14 @@ export function cameraTrack(
       cursor.y + half.y * EDGE,
     )
 
-    const ring = clicks.find(
-      (click) => ms >= click.t && ms - click.t <= RING_MS,
-    )
+    const ring = ringAt(ms)
     frames.push({
       ms: round(ms, 2),
       scale: round(scale, 4),
       x: round(clamp(springs.x.value, half.x, width - half.x) - half.x, 2),
       y: round(clamp(springs.y.value, half.y, height - half.y) - half.y, 2),
       cursor: roundPoint(cursor),
-      ring: ring ? round((ms - ring.t) / RING_MS, 3) : null,
+      ring: ring === null ? null : round(ring, 3),
     })
   }
 
@@ -336,6 +371,17 @@ function focusAt(
     }
   }
   return focus
+}
+
+function union(a: Box, b: Box): Box {
+  const x = Math.min(a.x, b.x)
+  const y = Math.min(a.y, b.y)
+  return {
+    x,
+    y,
+    width: Math.max(a.x + a.width, b.x + b.width) - x,
+    height: Math.max(a.y + a.height, b.y + b.height) - y,
+  }
 }
 
 function clamp(value: number, low: number, high: number): number {
