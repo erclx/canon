@@ -96,7 +96,7 @@ Write `00-overview.md` last, per the intake standard, with the counts by token, 
 Next: /canon:plan-intake-answer to answer the `You:` slots
 ```
 
-An answered plan item promotes through `task-board` with an `Issue: #NNN` line, and the shipping pull request's `Closes #NNN` drains the queue. Closing a declined issue on GitHub stays the operator's act.
+An answered plan item promotes through `task-board` with an `Issue: #NNN` line, and the shipping pull request's `Closes #NNN` drains the queue. This skill still closes nothing. `plan-intake-answer` offers the close of a declined issue when the decline is answered, and the operator's yes posts it.
 
 ## Notes
 

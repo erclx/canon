@@ -15,15 +15,16 @@ The write fails where no prose rule catches it. A worker's file-editing tools re
 
 - Offer every item with an empty slot, batched by cluster in the folder's numbering and capped at four items, so a stop leaves whole clusters unread
 - Open each question with a lead-in an operator who has not opened the file can follow, then rank the item's own suggestion first and give every option its cost
-- Land each selection through a verb that resolves the root in-process and rewrites the whole line, one cluster per call
-- Pass the cluster and the label exactly as the heading spells them, letter suffix included
+- Land each selection through a verb that resolves the root in-process and rewrites the whole line, one cluster per call, with the label as the heading spells it
 - Report what stays unread by count after each cluster, and stop when there is no folder or no unread item
+- Offer to close the issue an item headed `(#NNN)` names once its answer begins `decline`, with the drafted comment shown first, so closing takes one word
 
 ## Must not
 
 - Fill a slot the operator did not answer, or infer an answer from the conversation having happened
 - Overwrite a slot already carrying an answer
-- Write anywhere but an item's answer slot, the index included
+- Write anywhere but an item's answer slot, the index included, bar one exception, which is closing a declined item's issue on GitHub after a yes given for that issue in the turn its draft was shown
+- Close an issue on a bare decline of the offer, no answer, or a yes carried over from another issue
 
 ## Out of scope
 
