@@ -21,7 +21,7 @@ Read `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md` before writing an
 - If the named folder has no unread item, stop: `❌ Every item in <slug> carries an answer. Nothing to ask.`
 - Never fill a slot the operator did not answer. An abandoned batch leaves every unreached item unread, which is what the empty slot already means.
 - Never infer an answer from the conversation having happened. A selection reaches the file through the verb or not at all.
-- Do not promote an item, edit a verdict, or write outside the answer slots. Promoting runs through `task-board` after the answers land.
+- Do not promote an item, edit a verdict, or write outside the answer slots, bar the close Step 5 offers on an explicit yes. Promoting runs through `task-board` after the answers land.
 
 ## Step 1: pick the folder
 
@@ -72,7 +72,37 @@ canon intake answer <slug> --cluster <file> --set <label>=<answer> --set <label>
 
 The verb refuses the whole batch when any item in it already carries an answer, since a filled slot is a decision already made. On that refusal, drop the named item and send the rest.
 
-## Step 5: continue or stop
+## Step 5: offer to close declined issues
+
+Run this after Step 4 lands a cluster, over the items that batch just answered. Closing is a public write, so each close waits on a yes given for that issue.
+
+An item qualifies when both hold:
+
+- The answer's first word is `decline`. Whatever follows it, as in `decline, but ask frameboard first`, stays on the item and still qualifies.
+- The title ends in `(#NNN)`. Read that trailing number alone, so a title naming two issues, or a number sitting in prose, gets no offer.
+
+Skip the whole step and say why when `gh auth status` fails or `gh` is absent. The answers already landed stay.
+
+For each qualifying item:
+
+1. Run `gh issue view <NNN> --json state --jq .state`. When it reads `CLOSED`, name the issue as already closed and offer nothing.
+2. Draft the comment as one or two sentences condensed from the item's `problem` and `fix`, giving the reason and a pointer to what covers it.
+3. Run the scan in `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md` against the draft, since nothing else checks text on its way to the remote.
+4. Show the draft and ask for a yes or no on that issue in the same turn, through the question surface Step 3 used.
+5. On a yes, close with the draft passed through a quoted heredoc. On a no, or no answer, leave the issue open.
+
+```bash
+gh issue close <NNN> --reason "not planned" --comment "$(cat <<'EOF'
+<comment>
+EOF
+)"
+```
+
+The quoted heredoc matters because `problem` and `fix` carry file paths in code spans. Inside a double-quoted argument the shell would run each backtick pair as a command and post a comment with the paths missing.
+
+Never carry a yes from one issue or one turn to another.
+
+## Step 6: continue or stop
 
 After each cluster, state how many clusters still carry unread items and continue to the next. Stop when the operator says to stop, and report what is left rather than pressing on.
 
@@ -85,9 +115,12 @@ Report per cluster as it lands, then close with the folder's state:
 ```plaintext
 ✅ <N> answered in <file>
 <label>. <answer>
+🔒 Closed #<NNN>, or left open: #<NNN>
 
 📋 <N> cluster(s) still carrying unread items in <slug>
 ```
+
+Omit the 🔒 line for a cluster that offered no close.
 
 Close the run with the path so the reader can open what changed:
 
