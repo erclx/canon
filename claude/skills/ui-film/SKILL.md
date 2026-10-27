@@ -102,7 +102,7 @@ Write the filming half of `.canon/video/<slug>/README.md`, so a later session ca
 
 - Name what was filmed, beat by beat, and how to re-film each one with `canon take`
 - Say where each folder came from, being the plan, the takes, and the config keys the take read, with `access` described rather than copied when it carries a token
-- Write the file whole through the main-root route when none exists
+- Write the file whole through the main-root route when none exists, with the filming half under a `## Filming` heading
 - Add a `## Filming` section when a README is already there, reading the file and writing it back whole, and never overwrite what another session wrote
 - Replace an existing `## Filming` section in place on a re-film, since the commands in it changed
 

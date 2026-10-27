@@ -39,7 +39,7 @@ Cut a square or vertical version only when the operator asks for one. A film wit
 
 ## The README loop
 
-A README hero plays inline and silently, so it is a short loop rather than a cut of the film.
+Cut a README loop only when the operator asks for one. A README hero plays inline and silently, so it is a short loop rather than a cut of the film.
 
 - Cut it from the raw take showing the app's core action, rather than from a render, in the workspace folder `handoff.md` names for it
 - Crop it to the canvas, so no browser margin or page chrome outside the app shows
@@ -56,25 +56,26 @@ A clip the edit plays faster runs its zoom faster too, so a push that settled in
 
 ## Storyboard headings
 
-- Write each frame heading as `## Frame N: title`, which HyperFrames' storyboard parser reads and the markdown audit passes, where the dash form in its `storyboard-format.md` example fails the audit
+- Write each frame heading as `## Frame N: title`, since the dash form in HyperFrames' `storyboard-format.md` example fails the markdown audit
+- Treat the parser's read of the colon form as assumed, since its lenient parse was not confirmed against its source
 - Title each frame as the beat the operator approved, so the frame, the take's folder, and the caption share one name a reader can follow across all three
 
 ## The workspace README
 
 Step 5 writes the filming half of `.canon/video/<slug>/README.md`. The composing session adds its own half under its own heading.
 
-- Add how to re-render each shape and the loop, naming each project folder and the render command it runs
+- Add how to re-render each project the workspace holds, naming its folder and the render command it runs
 - Name any track rebuilt with `--rate`, with the command that rebuilt it, since a re-film overwrites `camera.json` and leaves a rebuilt track stale
 - Leave the filming half as Step 5 wrote it, so the next session can re-film without reading the composition
 
 ## Sources
 
-| Rule                        | Source                                                                                           |
-| --------------------------- | ------------------------------------------------------------------------------------------------ |
-| Caption placement and scrim | HyperFrames' `captions.md`, adjusted for footage with chrome along its bottom edge               |
-| A new project per shape     | `hyperframes-studio`'s brief step, which starts a new project for a different aspect             |
-| The 1080x1080 window        | Frameboard's launch film, cut square from stepped takes                                          |
-| The 2 MB WebP loop          | Frameboard's README hero, an animated WebP cut from a raw take, which played inline at 1.72 MB   |
-| Rebuilding a sped-up track  | `canon take camera --help`, whose `--rate` divides every time in the log                         |
-| Storyboard heading form     | HyperFrames' `storyboard-format.md`, read beside the markdown audit's character bans             |
-| The README's two halves     | Frameboard's workspace, whose README recorded how to re-film and re-render after a session ended |
+| Rule                        | Source                                                                                                   |
+| --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Caption placement and scrim | HyperFrames' `captions.md`, adjusted for footage with chrome along its bottom edge                       |
+| A new project per shape     | `hyperframes-studio`'s brief step, which starts a new project for a different aspect                     |
+| The 1080x1080 window        | Frameboard's launch film, cut square from stepped takes                                                  |
+| The 2 MB WebP loop          | Frameboard's README hero, an animated WebP cut from a raw take, which played inline at 1.72 MB           |
+| Rebuilding a sped-up track  | `canon take camera --help`, whose `--rate` divides every time in the log                                 |
+| Storyboard heading form     | HyperFrames' `storyboard-format.md` and the markdown audit's character bans, with the colon read assumed |
+| The README's two halves     | Frameboard's workspace, whose README recorded how to re-film and re-render after a session ended         |
