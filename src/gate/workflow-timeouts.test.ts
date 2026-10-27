@@ -70,4 +70,15 @@ describe('every workflow', () => {
     expect(steps).toHaveLength(4)
     expect(unbounded).toEqual([])
   })
+
+  // Without the flag apt fetches every archive from the mirror, whose
+  // trickle outlasts each attempt's bound
+  it('should point every retry script step at the archive cache', () => {
+    const uncached = allSteps()
+      .filter(({ step }) => step.run?.includes(INSTALL_SCRIPT))
+      .filter(({ step }) => !step.run?.includes('--archives'))
+      .map(({ file, step }) => `${file}: ${step.name}`)
+
+    expect(uncached).toEqual([])
+  })
 })
