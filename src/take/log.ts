@@ -1,4 +1,4 @@
-import type { Route } from '@/take/plan'
+import { ROUTES, type Route } from '@/take/plan'
 
 /**
  * The click log a take writes beside its clip, and the pointer path both
@@ -68,8 +68,73 @@ export interface TakeLog {
   readonly fps: number
   /** The route that filmed the clip, which can differ from the one asked for. */
   readonly route: Route
+  /**
+   * The clip's size in pixels, which sets how deep the camera may zoom before
+   * the clip goes soft. A log written before this field read it off `route`.
+   */
+  readonly clip?: { readonly width: number; readonly height: number }
+  /** False when the beat turned the camera's zoom off. */
+  readonly push?: false
   readonly frames: number
   readonly events: readonly LogEvent[]
+}
+
+/** The size each route films at, the stepper at twice the viewport. */
+export const CLIP_SIZES: Record<
+  Route,
+  { readonly width: number; readonly height: number }
+> = {
+  step: { width: VIEWPORT.width * 2, height: VIEWPORT.height * 2 },
+  screencast: VIEWPORT,
+}
+
+export type TakeLogRead =
+  | { readonly kind: 'read'; readonly log: TakeLog }
+  | { readonly kind: 'refused'; readonly detail: string }
+
+/**
+ * Reads a log back off disk, checking the fields the camera builds on rather
+ * than every event, since a take wrote the events and a reader only ever
+ * points at the wrong file.
+ */
+export function readTakeLog(source: string): TakeLogRead {
+  let document: unknown
+  try {
+    document = JSON.parse(source)
+  } catch (error) {
+    return {
+      kind: 'refused',
+      detail: error instanceof Error ? error.message : String(error),
+    }
+  }
+  if (typeof document !== 'object' || document === null) {
+    return { kind: 'refused', detail: 'the document is not an object' }
+  }
+  const log = document as Partial<Record<keyof TakeLog, unknown>>
+  const missing = [
+    isSize(log.viewport) ? '' : 'viewport',
+    isCount(log.fps) && log.fps > 0 ? '' : 'fps',
+    ROUTES.includes(log.route as Route) ? '' : 'route',
+    isCount(log.frames) ? '' : 'frames',
+    Array.isArray(log.events) ? '' : 'events',
+  ].filter(Boolean)
+  if (missing.length > 0) {
+    return {
+      kind: 'refused',
+      detail: `the document carries no valid ${missing.join(', ')}, so it is not a take's log.json`,
+    }
+  }
+  return { kind: 'read', log: document as TakeLog }
+}
+
+function isCount(value: unknown): value is number {
+  return Number.isInteger(value) && (value as number) >= 0
+}
+
+function isSize(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false
+  const { width, height } = value as Record<string, unknown>
+  return isCount(width) && isCount(height)
 }
 
 /** Where the pointer rests before a take's first move. */

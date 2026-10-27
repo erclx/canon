@@ -1,6 +1,11 @@
 import { openFrameEncoder } from '@/take/encode'
 import { FPS, type LogEvent, START, VIEWPORT } from '@/take/log'
-import { type PointerInput, type Stage, performSteps } from '@/take/perform'
+import {
+  type PointerInput,
+  type Stage,
+  TargetMissing,
+  performSteps,
+} from '@/take/perform'
 import type { Beat } from '@/take/plan'
 import { type ShellPage, openShell } from '@/take/shell'
 
@@ -36,6 +41,9 @@ const LOAD_CAP_MS = 15_000
 const SETTLE_MS = 2500
 const LOADING_FRAME_CAP_MS = 250
 
+/** How long a refusal waits on the frame it shows, since the page may be wedged. */
+const STILL_CAP_MS = 2000
+
 /** A frame that took longer than `STALL_MS`, so the beat is filmed another way. */
 export class StepperStalled extends Error {
   constructor(
@@ -68,6 +76,7 @@ export async function filmStepped(
   const page = await openShell(request.executable, VIEWPORT)
   const encoder = openFrameEncoder(request.clip, FPS)
   const stallMs = request.stallMs ?? STALL_MS
+  let still: (() => Promise<Buffer | undefined>) | undefined
   try {
     let ticks = await load(page, request.url)
     const beginFrame = (screenshot: boolean) =>
@@ -81,6 +90,7 @@ export async function filmStepped(
             : {}),
         },
       )
+    still = () => frameStill(beginFrame)
     await pump(beginFrame, SETTLE_MS)
 
     const live = liveStage(page, beginFrame, stallMs)
@@ -128,16 +138,12 @@ export async function filmStepped(
       hold: async (ms) => {
         for (let i = 0; i < Math.round(ms / FRAME_MS); i += 1) await frame()
       },
-      pointer: async (input) => {
-        const sent = page.send('Input.dispatchMouseEvent', mouseEvent(input))
-        await frame()
-        await sent
-      },
-      key: async (text) => {
-        const sent = page.send('Input.insertText', { text })
-        await frame()
-        await sent
-      },
+      pointer: (input) =>
+        stepThen(
+          page.send('Input.dispatchMouseEvent', mouseEvent(input)),
+          frame,
+        ),
+      key: (text) => stepThen(page.send('Input.insertText', { text }), frame),
       evaluate: (expression) => page.evaluate(expression),
     }
 
@@ -153,10 +159,29 @@ export async function filmStepped(
     return { frames, events, still: last }
   } catch (error) {
     encoder.abort()
+    if (error instanceof TargetMissing && still) error.still = await still()
     throw error
   } finally {
     page.close()
   }
+}
+
+/**
+ * Begins one frame with a screenshot for a refusal to show, through the same
+ * begin-frame call every kept frame uses, since a separate capture call can
+ * wait on a frame that never begins. Best effort, so a page that answers with
+ * nothing leaves the refusal standing without a still.
+ */
+async function frameStill(
+  beginFrame: (screenshot: boolean) => Promise<{ screenshotData?: string }>,
+): Promise<Buffer | undefined> {
+  const reply = await Promise.race([
+    beginFrame(true).catch(() => undefined),
+    sleep(STILL_CAP_MS),
+  ])
+  return reply?.screenshotData
+    ? Buffer.from(reply.screenshotData, 'base64')
+    : undefined
 }
 
 /**
@@ -217,7 +242,7 @@ function liveStage(
     pointer: (input) => {
       const sent = page.send('Input.dispatchMouseEvent', mouseEvent(input))
       return withinStall(
-        beginFrame(false).then(() => sent),
+        Promise.all([beginFrame(false), sent]),
         0,
         stallMs,
       ).then(() => {})
@@ -225,7 +250,7 @@ function liveStage(
     key: (text) => {
       const sent = page.send('Input.insertText', { text })
       return withinStall(
-        beginFrame(false).then(() => sent),
+        Promise.all([beginFrame(false), sent]),
         0,
         stallMs,
       ).then(() => {})
@@ -248,6 +273,24 @@ function mouseEvent(input: PointerInput): Record<string, unknown> {
   }
 }
 
+/**
+ * Steps a frame, then awaits the input sent ahead of it. When the step fails,
+ * the input is left settling against a shell about to close, so its rejection
+ * is handled here rather than surfacing as an unhandled one.
+ */
+async function stepThen(
+  sent: Promise<unknown>,
+  step: () => Promise<void>,
+): Promise<void> {
+  try {
+    await step()
+  } catch (error) {
+    sent.catch(() => {})
+    throw error
+  }
+  await sent
+}
+
 async function withinStall<T>(
   work: Promise<T>,
   frame: number,
@@ -257,6 +300,8 @@ async function withinStall<T>(
   const stalled = new Promise<never>((_, fail) => {
     timer = setTimeout(() => fail(new StepperStalled(frame, stallMs)), stallMs)
   })
+  // A stall leaves the work pending until the shell closes and rejects it.
+  work.catch(() => {})
   try {
     return await Promise.race([work, stalled])
   } finally {

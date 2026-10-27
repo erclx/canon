@@ -1,5 +1,6 @@
 import {
   type Box,
+  CLIP_SIZES,
   type LogEvent,
   type Point,
   type TakeLog,
@@ -21,7 +22,7 @@ import {
 /**
  * Turns a take's log into one camera per frame, preset O4 from groundwork
  * track `193-ui-record`, a folder name kept as written (canon-keep-retired).
- * The preset is OpenScreen's timing aimed at each click, a fixed depth, a focus that holds still until a click leaves the inner part of the
+ * The preset is OpenScreen's timing aimed at each click, a fixed depth the clip's resolution caps, a focus that holds still until a click leaves the inner part of the
  * view, and a dead zone that keeps the cursor in frame. HyperFrames renders the
  * track as it stands, so it carries no curve a renderer would have to agree on.
  */
@@ -30,6 +31,13 @@ export const CAMERA_VERSION = 1
 
 /** The depth every click zooms to, unless its target already fills the view. */
 const DEPTH = 1.8
+
+/**
+ * How far a clip with one pixel per CSS pixel zooms before it goes soft, which
+ * caps a screencast's depth well under `DEPTH` and leaves the stepper's 4K
+ * clip at it.
+ */
+const SHARP_DEPTH = 1.35
 
 /** How much of the zoomed view a target may fill, which caps the depth for a big one. */
 const FILL = 0.8
@@ -91,16 +99,30 @@ interface Window {
   readonly aims: Aim[]
 }
 
-export function cameraTrack(log: TakeLog): CameraTrack {
+export interface CameraOptions {
+  /**
+   * How much faster the edit plays the clip, so the track is built on the
+   * playback clock and a zoom settles at the speed a viewer sees. 1 by default.
+   */
+  readonly rate?: number
+}
+
+export function cameraTrack(
+  source: TakeLog,
+  options: CameraOptions = {},
+): CameraTrack {
+  const log = atRate(source, options.rate ?? 1)
   const { width, height } = log.viewport
+  const clip = log.clip ?? CLIP_SIZES[log.route]
+  const deepest = Math.min(DEPTH, (SHARP_DEPTH * clip.width) / width)
   const depthFor = (box: Box): number =>
     Math.min(
-      DEPTH,
+      deepest,
       (width * FILL) / Math.max(box.width, 1),
       (height * FILL) / Math.max(box.height, 1),
     )
 
-  const aims: Aim[] = log.events
+  const aims: Aim[] = (log.push === false ? [] : log.events)
     .flatMap((event): Aim[] => {
       if (event.kind === 'click') {
         return [
@@ -214,6 +236,27 @@ export function cameraTrack(log: TakeLog): CameraTrack {
     viewport: log.viewport,
     fps: log.fps,
     frames,
+  }
+}
+
+/** Reads a playback rate off a flag, which has to be a positive number. */
+export function readRate(value: string): number | undefined {
+  const rate = Number(value)
+  return Number.isFinite(rate) && rate > 0 ? rate : undefined
+}
+
+/** The log as a clip played `rate` times faster shows it, every time divided. */
+function atRate(log: TakeLog, rate: number): TakeLog {
+  if (rate === 1) return log
+  return {
+    ...log,
+    frames: Math.round(log.frames / rate),
+    events: log.events.map((event): LogEvent => {
+      const t = event.t / rate
+      return 'ms' in event
+        ? { ...event, t, ms: event.ms / rate }
+        : { ...event, t }
+    }),
   }
 }
 

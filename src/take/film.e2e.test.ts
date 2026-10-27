@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -28,6 +28,30 @@ const FETCH_PAGE = readFileSync(
   new URL('./fixtures/fetch.html', import.meta.url),
   'utf8',
 )
+
+/** The same page with a hidden copy of the button's text ahead of it. */
+const HIDDEN_PAGE = PAGE.replace(
+  '<body>',
+  '<body>\n    <div hidden><span>Go</span></div>',
+)
+
+/**
+ * A single-use link, the way an app trades a ticket for a session: the first
+ * open serves a button whose press busies the page past the stall limit, and
+ * every later open serves the spent page with no button.
+ */
+function ticketPage(fresh: boolean): string {
+  if (!fresh) return '<!doctype html><body><p>This link has expired.</p></body>'
+  return `<!doctype html><body style="margin:0">
+    <button id="open" style="position:absolute;left:100px;top:100px;width:200px;height:60px">Open</button>
+    <script>
+      document.getElementById('open').addEventListener('click', () => {
+        const start = Date.now()
+        while (Date.now() - start < 4000) {}
+      })
+    </script>
+  </body>`
+}
 
 /**
  * The stall limit the stepped takes run under, four times the product's, since
@@ -125,6 +149,7 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
   // Counts each open of the single-use address, the way an app redeems a
   // ticket in its access link.
   let onceHits = 0
+  let ticketOpens = 0
 
   beforeAll(() => {
     const served = Bun.serve({
@@ -132,11 +157,16 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       fetch: async (request) => {
         const { pathname } = new URL(request.url)
         if (pathname === '/fetch') return html(FETCH_PAGE)
+        if (pathname === '/hidden') return html(HIDDEN_PAGE)
         if (pathname === '/slow') {
           await Bun.sleep(SLOW_MS)
           return new Response('ok')
         }
         if (pathname === '/once') onceHits += 1
+        if (pathname === '/ticket') {
+          ticketOpens += 1
+          return html(ticketPage(ticketOpens === 1))
+        }
         return html(PAGE)
       },
     })
@@ -262,13 +292,92 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
     )
     if (read.kind !== 'read') throw new Error(read.detail)
 
-    const result = await take({ url: server.url, plan: read.plan, out })
+    const result = await take({
+      url: server.url,
+      plan: read.plan,
+      out,
+      stallMs: LOADED_STALL_MS,
+    })
 
     expect(result).toMatchObject({
       status: 'failed',
       reason: 'target-missing',
       beat: 'miss',
     })
+    expect(result).not.toHaveProperty('fallback')
+    if (result.status !== 'failed' || !result.still) {
+      throw new Error('the refusal carried no still')
+    }
+    expect(probe(join(out, result.still))).toMatchObject({
+      width: 3840,
+      height: 2160,
+    })
+  }, 180_000)
+
+  it('should say a refused beat fell back first, with a still of the spent page', async () => {
+    const read = readTakePlan(
+      JSON.stringify({
+        beats: [
+          {
+            name: 'spent',
+            steps: [
+              { kind: 'click', target: '#open' },
+              { kind: 'wait', ms: 200 },
+            ],
+          },
+        ],
+      }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+    ticketOpens = 0
+
+    const result = await take({
+      url: new URL('/ticket', server.url).href,
+      plan: read.plan,
+      out,
+    })
+
+    expect(result).toMatchObject({
+      status: 'failed',
+      reason: 'target-missing',
+      beat: 'spent',
+      fallback: expect.stringContaining('under frame stepping'),
+      still: '01-spent/still.jpg',
+    })
+    expect(ticketOpens).toBe(2)
+    expect(existsSync(join(out, '01-spent/still.jpg'))).toBe(true)
+  }, 180_000)
+
+  it('should click the visible text match behind a hidden duplicate', async () => {
+    const read = readTakePlan(
+      JSON.stringify({
+        beats: [
+          {
+            name: 'hidden',
+            route: 'screencast',
+            steps: [{ kind: 'click', target: 'text=Go' }],
+          },
+        ],
+      }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+
+    const result = await take({
+      url: new URL('/hidden', server.url).href,
+      plan: read.plan,
+      out,
+    })
+
+    expect(result).toMatchObject({ status: 'filmed' })
+    if (result.status !== 'filmed') return
+    const [beat] = result.beats
+    if (!beat) return
+    const log = JSON.parse(readFileSync(join(out, beat.log), 'utf8')) as TakeLog
+    expect(log.events.filter((event) => event.kind === 'click')).toEqual([
+      expect.objectContaining({
+        box: { x: 100, y: 100, width: 200, height: 60 },
+      }),
+    ])
   }, 180_000)
 
   it('should keep stepping while a fetch the page started is in flight', async () => {
@@ -310,7 +419,12 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
     if (read.kind !== 'read') throw new Error(read.detail)
     onceHits = 0
 
-    await take({ url: new URL('/once', server.url).href, plan: read.plan, out })
+    await take({
+      url: new URL('/once', server.url).href,
+      plan: read.plan,
+      out,
+      stallMs: LOADED_STALL_MS,
+    })
 
     expect(onceHits).toBe(1)
   }, 180_000)

@@ -51,6 +51,9 @@ export interface Stage {
 
 /** A target that resolved to nothing, which refuses rather than films a guess. */
 export class TargetMissing extends Error {
+  /** The page as it stood when the lookup failed, as a JPEG, when the route caught one. */
+  still?: Buffer
+
   constructor(readonly target: string) {
     super(`nothing on the page matches ${target}`)
   }
@@ -173,8 +176,10 @@ async function boxOf(stage: Stage, target: string): Promise<Box> {
 }
 
 /**
- * Finds a target's box in CSS pixels, reading `text=<words>` as the innermost
- * element whose whole text is those words and anything else as a CSS selector.
+ * Finds a target's box in CSS pixels, reading `text=<words>` as the first
+ * innermost element with a size whose whole text is those words, so a hidden
+ * copy earlier in the page cannot shadow a visible one, and anything else as a
+ * CSS selector.
  * It runs inside the page so both routes resolve a target the same way, and a
  * match with no size counts as missing, since a click on it would land on
  * whatever sits behind.
@@ -188,7 +193,11 @@ export function boxExpression(target: string): string {
       const matches = [...document.querySelectorAll('body *')].filter(
         (node) => node.textContent.trim() === want,
       )
-      element = matches.find((node) => !matches.some((other) => other !== node && node.contains(other))) ?? null
+      const innermost = matches.filter((node) => !matches.some((other) => other !== node && node.contains(other)))
+      element = innermost.find((node) => {
+        const rect = node.getBoundingClientRect()
+        return rect.width > 0 && rect.height > 0
+      }) ?? null
     } else {
       element = document.querySelector(target)
     }

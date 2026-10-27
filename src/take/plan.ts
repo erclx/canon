@@ -26,6 +26,11 @@ export interface Beat {
    * back to `screencast` on its own, and the take's record says which ran.
    */
   readonly route: Route
+  /**
+   * False turns the camera's zoom off for this beat, while its track still
+   * carries the cursor and the click ring. Absent means the zoom runs.
+   */
+  readonly push?: false
   /** Runs after the page loads and before the first frame is kept. */
   readonly setup: readonly TakeStep[]
   readonly steps: readonly TakeStep[]
@@ -89,16 +94,25 @@ function readPlan(document: unknown): TakePlan {
     throw new Refusal('unreadable-plan', 'the document is not an object')
   }
   const { beats } = document
+  const route = document.route ?? 'step'
+  if (!ROUTES.includes(route as Route)) {
+    throw new Refusal(
+      'unknown-route',
+      `the plan names route ${String(route)}. This build records on: ${ROUTES.join(', ')}.`,
+    )
+  }
   if (!Array.isArray(beats) || beats.length === 0) {
     throw new Refusal(
       'no-beats',
       'beats carries no entry, so nothing is filmed',
     )
   }
-  return { beats: beats.map((entry, index) => readBeat(entry, index)) }
+  return {
+    beats: beats.map((entry, index) => readBeat(entry, index, route as Route)),
+  }
 }
 
-function readBeat(entry: unknown, index: number): Beat {
+function readBeat(entry: unknown, index: number, fallback: Route): Beat {
   const at = `beat ${index + 1}`
   if (!isRecord(entry)) throw new Refusal('bad-beat', `${at} is not an object`)
 
@@ -110,7 +124,7 @@ function readBeat(entry: unknown, index: number): Beat {
     )
   }
 
-  const route = entry.route ?? 'step'
+  const route = entry.route ?? fallback
   if (!ROUTES.includes(route as Route)) {
     throw new Refusal(
       'unknown-route',
@@ -127,10 +141,17 @@ function readBeat(entry: unknown, index: number): Beat {
   if (entry.setup !== undefined && !Array.isArray(entry.setup)) {
     throw new Refusal('bad-beat', `${name} carries a setup that is not a list`)
   }
+  if (entry.push !== undefined && typeof entry.push !== 'boolean') {
+    throw new Refusal(
+      'bad-beat',
+      `${name} carries a push that is not true or false`,
+    )
+  }
 
   return {
     name,
     route: route as Route,
+    ...(entry.push === false ? { push: false as const } : {}),
     setup: (entry.setup ?? []).map((step: unknown, i: number) =>
       readStep(step, `${name}, setup step ${i + 1}`),
     ),

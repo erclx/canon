@@ -1,7 +1,9 @@
-import { readFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type { Command } from 'commander'
 import { INSTALL_BROWSER, isEngineMissing } from '@/browser/engine'
+import { cameraTrack, readRate } from '@/take/camera'
+import { readTakeLog } from '@/take/log'
 import { readTakePlan } from '@/take/plan'
 import type { TakePlanRefusal } from '@/take/plan'
 import type { TakeRefusal } from '@/take/film'
@@ -24,8 +26,14 @@ import {
 type Take = typeof import('@/take/film')
 
 interface RunOptions {
-  readonly out: string
+  readonly out?: string
   readonly reel?: string
+  readonly json?: boolean
+}
+
+interface CameraOptions {
+  readonly out?: string
+  readonly rate?: string
   readonly json?: boolean
 }
 
@@ -40,7 +48,8 @@ const PLAN_REFUSALS: Record<TakePlanRefusal, string> = {
   'bad-beat':
     'A beat is missing its name or carries a setup that is not a list.',
   'no-steps': 'A beat names no step, so its take would film nothing.',
-  'unknown-route': 'A beat names a route this build does not record on.',
+  'unknown-route':
+    'The plan or a beat names a route this build does not record on.',
   'bad-step': 'A step is missing something the take needs to perform it.',
 }
 
@@ -53,14 +62,19 @@ const TAKE_REFUSALS: Record<TakeRefusal, string> = {
 }
 
 export function register(program: Command): void {
-  program
+  const take = program
     .command('take')
     .description(
       'Film a web app beat by beat with a click log and camera track',
     )
     .argument('<url>', 'Address to film')
     .argument('<plan>', 'JSON file naming the beats and their steps')
-    .requiredOption('--out <dir>', 'Folder the clips, logs, and tracks land in')
+    // Checked in the action rather than required here, since commander checks
+    // a parent's required options on every subcommand, `camera` included.
+    .option('--out <dir>', 'Folder the clips, logs, and tracks land in')
+    // Keeps this command's options ahead of `camera`, which reuses --out and
+    // --json for its own.
+    .enablePositionalOptions()
     .helpOption('-h, --help', 'Show this help message')
     .option(
       '--reel <file>',
@@ -110,8 +124,15 @@ export function register(program: Command): void {
         '  scroll <target> <dy>   glide to the target and wheel dy pixels',
         '  wait <ms>              hold, for a state the page reaches on its own',
         '',
-        'A target is a CSS selector, or text=<words> for the innermost element',
-        'whose whole text is those words. Setup steps run before the first kept',
+        'A top-level route sets the route of every beat that names none of its',
+        'own. A beat carrying push: false keeps its camera on the whole page,',
+        'with the cursor and click ring still in the track, and its log.json',
+        'records push: false. Each log.json carries clip, the clip size in',
+        'pixels, which caps the zoom depth so a 1920-wide screencast stays sharp.',
+        '',
+        'A target is a CSS selector, or text=<words> for the first innermost',
+        'element with a size whose whole text is those words, so a hidden copy',
+        'earlier in the page is skipped. Setup steps run before the first kept',
         'frame. Every beat opens and closes on a 0.6 s hold.',
         '',
         'Needs a reachable page, FFmpeg, and the headless shell. Install with:',
@@ -123,7 +144,8 @@ export function register(program: Command): void {
         '  no-beats            the plan names no beat',
         '  bad-beat            a beat has no name or a setup that is not a list',
         '  no-steps            a beat names no step',
-        '  unknown-route       a beat names a route other than step or screencast',
+        '  unknown-route       the plan or a beat names a route other than step or',
+        '                      screencast',
         '  bad-step            a step is missing what the take needs to perform it',
         '  engine-missing      the browser engine is not installed in this project',
         '  ffmpeg-missing      FFmpeg is not on the PATH',
@@ -132,6 +154,13 @@ export function register(program: Command): void {
         '  target-missing      a step names a target the page does not carry',
         '  take-failed         the take failed against a reachable page',
         '  reel-failed         every beat was filmed and the reel did not encode',
+        '',
+        'A refusal in a beat carries beat. target-missing carries still when the',
+        "page answered a capture, the beat folder's still.jpg as the step met it. A",
+        'beat that fell back to the screencast before refusing carries fallback,',
+        'the reason it fell back. The screencast opens the address a second time,',
+        'so a single-use link is spent by then: check the access before the',
+        'selector.',
         '',
         'Exit codes:',
         '  0  every beat was filmed, and the reel written when asked for',
@@ -144,15 +173,113 @@ export function register(program: Command): void {
         '',
       ].join('\n'),
     )
-    .action(async (url: string, plan: string, opts: RunOptions) => {
-      process.exitCode = await runTake(url, plan, opts)
+    .action(
+      async (url: string, plan: string, opts: RunOptions, command: Command) => {
+        if (!opts.out)
+          command.error("error: required option '--out <dir>' not specified")
+        process.exitCode = await runTake(url, plan, { ...opts, out: opts.out })
+      },
+    )
+
+  take
+    .command('camera')
+    .description("Build a camera track from a take's log.json")
+    .argument('<log>', "A beat's log.json, as a take wrote it")
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--out <file>', 'Write the track to a file rather than stdout')
+    .option(
+      '--rate <n>',
+      'How many times faster the edit plays the clip, 1 by default',
+    )
+    .option('--json', 'Add a machine-readable record on stdout with --out')
+    .addHelpText(
+      'after',
+      [
+        '',
+        "Builds the same camera track a take writes beside each beat's clip, from",
+        'the log alone, so a track can be rebuilt for a clip the edit plays at',
+        'another speed. With no --out the track is the data on stdout, one line,',
+        'and a refusal under --json is the record there instead.',
+        '',
+        '--rate <n> builds the track on the playback clock of a clip sped up n',
+        'times, dividing every time in the log by n, so a zoom settles at the',
+        'speed a viewer sees rather than pumping several times a beat.',
+        '',
+        "The zoom depth is capped by the clip's resolution, read from the log's",
+        'clip field, or from its route on a log written before that field. A log',
+        'carrying push: false holds the whole page with the cursor and ring.',
+        '',
+        'Reasons:',
+        '  no-log-file     nothing readable at the log path',
+        "  unreadable-log  the file is not a take's log.json",
+        '  bad-rate        --rate is not a positive number',
+        '',
+        'Exit codes:',
+        '  0  the track was written',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '',
+        'Examples:',
+        "  canon take camera takes/01-open/log.json | jq '.frames | length'",
+        '  canon take camera takes/01-open/log.json --rate 2 --out camera-2x.json',
+        '',
+      ].join('\n'),
+    )
+    .action((log: string, opts: CameraOptions) => {
+      process.exitCode = runCamera(log, opts)
     })
+}
+
+function runCamera(logPath: string, opts: CameraOptions): number {
+  const emitJson = opts.json ?? false
+  const path = resolve(logPath)
+  const refuseCamera = (reason: string, message: string): number => {
+    logWarn(message)
+    emit(emitJson, { log: path, reason, message })
+    return 1
+  }
+
+  const rate = opts.rate === undefined ? 1 : readRate(opts.rate)
+  if (rate === undefined) {
+    return refuseCamera(
+      'bad-rate',
+      `--rate ${opts.rate} is not a positive number, such as 1.5 or 2.`,
+    )
+  }
+
+  let source: string
+  try {
+    source = readFileSync(path, 'utf8')
+  } catch (error) {
+    return refuseCamera(
+      'no-log-file',
+      `No log file at ${path}. ${error instanceof Error ? error.message : String(error)}`,
+    )
+  }
+  const read = readTakeLog(source)
+  if (read.kind === 'refused') {
+    return refuseCamera(
+      'unreadable-log',
+      `${path} is not a take's log.json, being the file beside a beat's clip.mp4. ${read.detail}`,
+    )
+  }
+
+  const track = cameraTrack(read.log, { rate })
+  const line = `${JSON.stringify(track)}\n`
+  if (!opts.out) {
+    process.stdout.write(line)
+    return 0
+  }
+  const out = resolve(opts.out)
+  writeFileSync(out, line)
+  logInfo(`${out}  ${plural(track.frames.length, 'frame')}  rate ${rate}`)
+  emit(emitJson, { log: path, out, frames: track.frames.length, rate })
+  return 0
 }
 
 async function runTake(
   url: string,
   planPath: string,
-  opts: RunOptions,
+  opts: RunOptions & { readonly out: string },
 ): Promise<number> {
   const emitJson = opts.json ?? false
   const path = resolve(planPath)
@@ -209,6 +336,11 @@ async function runTake(
     logStep('Refused')
     logWarn(TAKE_REFUSALS[result.reason])
     if (result.beat) logWarn(`in beat ${result.beat}`)
+    if (result.fallback) {
+      logWarn(
+        `after falling back to a screencast, which opened the address again: ${result.fallback}`,
+      )
+    }
     if (result.reason === 'server-unreachable') {
       logWarn(`Start whatever serves ${url}, then run this again.`)
     }
@@ -224,6 +356,8 @@ async function runTake(
       reason: result.reason,
       message: result.message,
       ...(result.beat ? { beat: result.beat } : {}),
+      ...(result.fallback ? { fallback: result.fallback } : {}),
+      ...(result.still ? { still: result.still } : {}),
       ...(result.reason === 'browser-missing'
         ? { install: INSTALL_BROWSER }
         : {}),

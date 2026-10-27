@@ -93,6 +93,68 @@ describe('readTakePlan', () => {
     })
   })
 
+  it('should give every beat the route the plan names', () => {
+    const read = readTakePlan(
+      JSON.stringify({
+        route: 'screencast',
+        beats: [beat([{ kind: 'wait', ms: 100 }])],
+      }),
+    )
+
+    expect(read).toMatchObject({
+      kind: 'read',
+      plan: { beats: [{ route: 'screencast' }] },
+    })
+  })
+
+  it("should keep a beat's own route over the plan's", () => {
+    const read = readTakePlan(
+      JSON.stringify({
+        route: 'screencast',
+        beats: [beat([{ kind: 'wait', ms: 100 }], { route: 'step' })],
+      }),
+    )
+
+    expect(read).toMatchObject({
+      kind: 'read',
+      plan: { beats: [{ route: 'step' }] },
+    })
+  })
+
+  it('should refuse a plan-level route this build does not record on, naming the plan', () => {
+    const read = readTakePlan(
+      JSON.stringify({
+        route: 'obs',
+        beats: [beat([{ kind: 'wait', ms: 100 }])],
+      }),
+    )
+
+    expect(read).toMatchObject({
+      kind: 'refused',
+      reason: 'unknown-route',
+      detail: expect.stringMatching(/^the plan names route obs/),
+    })
+  })
+
+  it('should read a beat that turns the push off', () => {
+    const read = readTakePlan(
+      planSource([beat([{ kind: 'wait', ms: 100 }], { push: false })]),
+    )
+
+    expect(read).toMatchObject({
+      kind: 'read',
+      plan: { beats: [{ push: false }] },
+    })
+  })
+
+  it('should refuse a push that is not a boolean', () => {
+    const read = readTakePlan(
+      planSource([beat([{ kind: 'wait', ms: 100 }], { push: 'no' })]),
+    )
+
+    expect(read).toMatchObject({ kind: 'refused', reason: 'bad-beat' })
+  })
+
   it('should read the setup steps a beat runs before recording', () => {
     const read = readTakePlan(
       planSource([
