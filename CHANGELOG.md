@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.70.0](https://github.com/erclx/canon/compare/v5.69.0...v5.70.0) (2026-10-27)
+
+
+### Features
+
+* **app-drive:** give each drive log finding a heading and fields ([#2791](https://github.com/erclx/canon/issues/2791)) ([f853659](https://github.com/erclx/canon/commit/f853659f5d7793c1af820fcbf55d56fd2f71b981))
+* **brand:** replace the ledger with the ink c and vermilion pip mark ([#2775](https://github.com/erclx/canon/issues/2775)) ([2b7d71e](https://github.com/erclx/canon/commit/2b7d71e329dbaa2ca828dba749ec8c236dc6676b))
+* **design:** land board frames in canon/design through a design sync ([#2792](https://github.com/erclx/canon/issues/2792)) ([b635a33](https://github.com/erclx/canon/commit/b635a33f722a51606b51e1d8539e322233206e39))
+* **design:** land the brand mark sheet as the foundations reference ([#2796](https://github.com/erclx/canon/issues/2796)) ([116caec](https://github.com/erclx/canon/commit/116caec1b233ae58dec8060ada8020381c9722b8))
+* **readme:** open on the mark, claim, launch loop, and install ([#2783](https://github.com/erclx/canon/issues/2783)) ([c86fa26](https://github.com/erclx/canon/commit/c86fa264421cada9ad58c90dd46cf39224330c0f))
+* **sandbox:** read the runner cap from the envelope subtype ([#2794](https://github.com/erclx/canon/issues/2794)) ([4fc750e](https://github.com/erclx/canon/commit/4fc750edc03c302fbfd098c4bf237d745d3124d1))
+* **take:** film drags, key presses, double clicks, and modified clicks ([#2795](https://github.com/erclx/canon/issues/2795)) ([52926e3](https://github.com/erclx/canon/commit/52926e3714a07e13d2efb535c2b8771ea204548d))
+* **take:** name the fallback on a refused beat and add camera controls ([#2789](https://github.com/erclx/canon/issues/2789)) ([6ce5be6](https://github.com/erclx/canon/commit/6ce5be646601274c4b7203527bd6b6cd5e005be8))
+* **ui-craft:** bar the trailing period on every short rendered string ([#2788](https://github.com/erclx/canon/issues/2788)) ([1fc3b4b](https://github.com/erclx/canon/commit/1fc3b4bdd1921a39c21bee225905a138d7422cc5))
+* **ui-film:** add footage guidance for composing takes ([#2793](https://github.com/erclx/canon/issues/2793)) ([dc98a98](https://github.com/erclx/canon/commit/dc98a981bae97921d796e1412a36fb89844e3bba))
+* **web:** rebuild the landing page around one change, plan to merge ([#2787](https://github.com/erclx/canon/issues/2787)) ([c6fdf16](https://github.com/erclx/canon/commit/c6fdf160f7e5140a8066f9370a5703d6d021c2e1))
+
 ## [5.69.0](https://github.com/erclx/canon/compare/v5.68.0...v5.69.0) (2026-10-26)
 
 
