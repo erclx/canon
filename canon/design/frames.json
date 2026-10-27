@@ -2,6 +2,7 @@
   "frames": {
     "landing/page": "landing/landing-preview/page",
     "landing/page-phone": "landing/landing-preview/page-phone",
-    "readme/page": "readme/final/readme"
+    "readme/page": "readme/final/readme",
+    "foundations/mark": "brand/brand-mark-final/mark"
   }
 }
