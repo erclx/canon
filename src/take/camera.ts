@@ -99,7 +99,19 @@ interface Window {
   readonly aims: Aim[]
 }
 
-export function cameraTrack(log: TakeLog): CameraTrack {
+export interface CameraOptions {
+  /**
+   * How much faster the edit plays the clip, so the track is built on the
+   * playback clock and a zoom settles at the speed a viewer sees. 1 by default.
+   */
+  readonly rate?: number
+}
+
+export function cameraTrack(
+  source: TakeLog,
+  options: CameraOptions = {},
+): CameraTrack {
+  const log = atRate(source, options.rate ?? 1)
   const { width, height } = log.viewport
   const clip = log.clip ?? CLIP_SIZES[log.route]
   const deepest = Math.min(DEPTH, (SHARP_DEPTH * clip.width) / width)
@@ -224,6 +236,27 @@ export function cameraTrack(log: TakeLog): CameraTrack {
     viewport: log.viewport,
     fps: log.fps,
     frames,
+  }
+}
+
+/** Reads a playback rate off a flag, which has to be a positive number. */
+export function readRate(value: string): number | undefined {
+  const rate = Number(value)
+  return Number.isFinite(rate) && rate > 0 ? rate : undefined
+}
+
+/** The log as a clip played `rate` times faster shows it, every time divided. */
+function atRate(log: TakeLog, rate: number): TakeLog {
+  if (rate === 1) return log
+  return {
+    ...log,
+    frames: Math.round(log.frames / rate),
+    events: log.events.map((event): LogEvent => {
+      const t = event.t / rate
+      return 'ms' in event
+        ? { ...event, t, ms: event.ms / rate }
+        : { ...event, t }
+    }),
   }
 }
 

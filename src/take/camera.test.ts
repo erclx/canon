@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { type CameraFrame, cameraTrack } from '@/take/camera'
+import { type CameraFrame, cameraTrack, readRate } from '@/take/camera'
 import {
   FPS,
   LOG_VERSION,
@@ -258,4 +258,34 @@ describe('cameraTrack', () => {
       expect(at(frames, 2000).ring).toBe(0)
     })
   })
+
+  describe('playback rate', () => {
+    const log = takeOf([{ t: 4000, at: { x: 400, y: 300 } }])
+
+    it('should build the track on the clock of a clip played twice as fast', () => {
+      const { frames } = cameraTrack(log, { rate: 2 })
+
+      expect(frames).toHaveLength(360)
+      expect(at(frames, 1950).ring).toBeNull()
+      expect(at(frames, 2000).ring).toBe(0)
+      expect(at(frames, 2000).cursor).toEqual({ x: 400, y: 300 })
+    })
+
+    it('should build the same track at rate 1 as with no rate', () => {
+      expect(cameraTrack(log, { rate: 1 })).toEqual(cameraTrack(log))
+    })
+  })
+})
+
+describe('readRate', () => {
+  it('should read a positive number', () => {
+    expect(readRate('1.5')).toBe(1.5)
+  })
+
+  it.each(['0', '-2', 'fast', 'Infinity', ''])(
+    'should refuse %j as a rate',
+    (value) => {
+      expect(readRate(value)).toBeUndefined()
+    },
+  )
 })
