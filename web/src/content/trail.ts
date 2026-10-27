@@ -50,7 +50,7 @@ export const groundwork = {
     value: '218,865',
     caption: 'words of context, up from 16,109 in July',
     source: {
-      kind: 'quoted',
+      kind: 'reconstructed',
       from: `${GROUNDWORK}, 06-decision.md`,
     },
   },
@@ -102,7 +102,10 @@ export const plan = {
     },
     { heading: '## Risks' },
   ],
-  sectionsSource: { kind: 'quoted', from: PLAN },
+  sectionsSource: {
+    kind: 'reconstructed',
+    from: `${PLAN}, its bold section labels drawn as headings`,
+  },
   question: {
     text: '1. Should a gotcha carry its own length limit?',
     strong: true,
@@ -241,7 +244,10 @@ export const review = {
   fix: {
     text: 'review-address: fixed at f64e35a',
     mono: true,
-    source: { kind: 'quoted', from: `${PR}, commit f64e35a` },
+    source: {
+      kind: 'reconstructed',
+      from: `${PR}, commit f64e35a, whose sha alone is quoted`,
+    },
   },
   close: {
     text: '## Review closed',
