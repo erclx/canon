@@ -625,6 +625,24 @@ describe('archiveTask', () => {
     ).toContain('Groundwork: [g](../../groundwork/01-g/)')
   })
 
+  it('should keep the Sessions line as written', async () => {
+    const stem = await seedTask()
+    const path = join(tasksDir(ROOT), `${stem}.md`)
+    const text = await readFile(path, 'utf8')
+    const line =
+      'Sessions: worker-canon-a (0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0), cloud-a (session_01AbC)'
+    await writeFile(
+      path,
+      text.replace('# v28.1: A task\n', `# v28.1: A task\n\n${line}\n`),
+    )
+
+    await archiveTask(ROOT, { kind: 'stem', stem })
+
+    expect(
+      await readFile(join(archiveDir(ROOT), `${stem}.md`), 'utf8'),
+    ).toContain(`${line}\n`)
+  })
+
   it('should keep a moved plan on its retargeted line after rebasing', async () => {
     await seedPlan()
     const stem = await seedTask({ plan: '../plans/feature-trigger.md' })
