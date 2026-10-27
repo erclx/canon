@@ -17,7 +17,11 @@
 # wrote it on one line, so the formatting varies by writer and a pattern
 # anchored on whitespace fails a correct run.
 
-paths = [".canon/intake/*/drive.json", ".canon/intake/*/evidence/*.png"]
+paths = [
+  ".canon/intake/*/drive.json",
+  ".canon/intake/*/evidence/*.png",
+  ".canon/intake/*/evidence/drive-log.md",
+]
 
 # The registration `git worktree list` reads. The skill closes only on the
 # operator's word, and a headless run has no operator, so the Action carries
@@ -71,3 +75,9 @@ pattern = 'exports the board to PNG'
 [[content]]
 path = ".canon/intake/*/drive.json"
 pattern = '"worktree":\s*"/'
+
+# The drive log opens on its setup table, which every run writes. A run can
+# find no finding at all, so a finding heading is never asserted.
+[[content]]
+path = ".canon/intake/*/evidence/drive-log.md"
+pattern = '^\| Commit\s'
