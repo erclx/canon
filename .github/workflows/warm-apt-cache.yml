@@ -1,0 +1,84 @@
+name: Warm Apt Cache
+# canon-no-seed: warms the archive cache this repository's Playwright jobs restore. A target has none of those jobs and no install script to warm.
+
+# A pull request's cache is scoped to its merge ref, so only a run on main
+# writes the archives every other run restores
+on:
+  push:
+    branches:
+      - main
+    # The key carries the image alone, so a lockfile or script change hits the
+    # same key and could not refresh the cache. Only this file's first landing
+    # needs a run before the daily one.
+    paths:
+      - '.github/workflows/warm-apt-cache.yml'
+  schedule:
+    # Daily, so a new runner image gets its key before the 7-day eviction
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: warm-apt-cache
+  cancel-in-progress: false
+
+jobs:
+  warm:
+    name: 🔥 Warm Apt Archives
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Read Runner Image
+        id: image
+        run: |
+          echo "os=${ImageOS}" >> "$GITHUB_OUTPUT"
+          echo "key=playwright-apt-${ImageOS}-${ImageVersion}" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Apt Archives
+        id: restore
+        uses: actions/cache/restore@v6
+        with:
+          path: ~/.cache/apt-archives
+          key: ${{ steps.image.outputs.key }}
+          restore-keys: playwright-apt-${{ steps.image.outputs.os }}-
+
+      # The one run allowed to wait out a trickling mirror, so each attempt gets ten minutes
+      - name: Install Playwright System Dependencies
+        timeout-minutes: 35
+        env:
+          INSTALL_ATTEMPT_SECONDS: '600'
+        run: scripts/ci/install-playwright-deps.sh --archives "$HOME/.cache/apt-archives" chromium firefox webkit
+
+      # The frame font refresh-capture-frames.yml installs, read through the same drop-in
+      - name: Install Frame Font
+        timeout-minutes: 15
+        run: sudo apt-get install -y --no-install-recommends fonts-noto-mono
+
+      # apt writes the lock and partial files as root, which the save's tar cannot read,
+      # and autoclean drops the versions a previous image's key carried in
+      - name: Prepare Archives for Save
+        if: steps.restore.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get autoclean
+          sudo chown -R "$(id -u):$(id -g)" "$HOME/.cache/apt-archives"
+
+      - name: Save Apt Archives
+        if: steps.restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ~/.cache/apt-archives
+          key: ${{ steps.image.outputs.key }}

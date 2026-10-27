@@ -48,11 +48,21 @@ Runs weekly and on dispatch, one matrix job per scaffoldable stack through `cano
 
 ### `scripts/ci/install-playwright-deps.sh`
 
-Every workflow installing the Playwright system packages calls this script, since a stalled `azure.archive.ubuntu.com` connection hangs rather than fails and a step bound alone only turns the hang red.
+Every workflow installing the Playwright system packages calls this script. A degraded `azure.archive.ubuntu.com` trickles bytes at about 45 KB/s rather than failing, so apt's own timeout never fires and no retry finishes the 119 MB download.
 
 - The script kills an attempt at 150 seconds and retries up to three times, running `dpkg --configure -a` before each retry
 - A signal from the runner user never reaches the root `apt-get` that `sudo` spawns, so the script kills any left behind with `sudo pkill` before that
-- `src/gate/workflow-timeouts.test.ts` fails a direct `install-deps` or `--with-deps` call and a script step with no `timeout-minutes`
+- `--archives <dir>` writes an `apt.conf.d` drop-in pointing apt's download cache at `<dir>`, and the drop-in stays for the rest of the job, so a later `apt-get` there fills the same folder
+- `src/gate/workflow-timeouts.test.ts` fails a direct `install-deps` or `--with-deps` call, a script step with no `timeout-minutes`, and a script step with no `--archives`
+
+### `.github/workflows/warm-apt-cache.yml`
+
+Each caller restores `~/.cache/apt-archives` from a `playwright-apt-<ImageOS>-<ImageVersion>` key before the install, falling back to the newest key for the same OS, so the mirror serves only the changed packages.
+
+- This workflow is the one writer, since a pull request's cache is scoped to its merge ref. It runs on `main` daily, by hand, and on a push to itself.
+- It gives each attempt 600 seconds, saves only on an exact-key miss after a passing install, and runs `apt-get autoclean` first so a previous image's versions drop out
+- A miss on a pull request still installs from the mirror, so a new runner image is exposed until the next warm run
+- The key carries the image alone, so packages a new Playwright version adds stay uncached until the next image key
 
 ### Other folders
 
