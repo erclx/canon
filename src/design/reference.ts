@@ -11,8 +11,10 @@ export class MappingError extends Error {}
 
 const REFERENCE = /^[a-z0-9]+(-[a-z0-9]+)*\/[a-z0-9]+(-[a-z0-9]+)*$/
 const BOARD_REF = /^[^/\s]+\/[^/\s]+\/[^/\s]+$/
-const BOARD_ASSETS = '../assets/'
-const BOARD_ASSET = /\.\.\/assets\/([^"'()\s]+)/g
+// A link starts at a quote or `url(`, so `../../assets/` is left alone, and a
+// file name stops at `#` or `?`, which address a part of the file.
+const BOARD_LINK = /(["'(]\s*)\.\.\/assets\//g
+const BOARD_ASSET = /["'(]\s*\.\.\/assets\/([^"'()\s#?]+)/g
 
 /**
  * Reads `frames.json`, mapping each reference, `<group>/<name>`, to the
@@ -60,7 +62,7 @@ export function missingFrames(
  * its one writer.
  */
 export function toReference(html: string, project: string): string {
-  return html.replaceAll(BOARD_ASSETS, `../kit/${project}/assets/`)
+  return html.replaceAll(BOARD_LINK, `$1../kit/${project}/assets/`)
 }
 
 /** The project assets a frame loads, by their path under `assets/`, each once. */

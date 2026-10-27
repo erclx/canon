@@ -77,6 +77,21 @@ describe('toReference', () => {
 
     expect(toReference(html, 'readme')).toBe(html)
   })
+
+  it('should leave a link holding the project assets mid-path untouched', () => {
+    const html = '<img src="../../assets/x.png">'
+
+    expect(toReference(html, 'landing')).toBe(html)
+  })
+
+  it('should keep the fragment and query on a rewritten link', () => {
+    const html =
+      '<use href="../assets/sprite.svg#icon"><img src="../assets/a.png?v=2">'
+
+    expect(toReference(html, 'landing')).toBe(
+      '<use href="../kit/landing/assets/sprite.svg#icon"><img src="../kit/landing/assets/a.png?v=2">',
+    )
+  })
 })
 
 describe('boardAssets', () => {
@@ -89,6 +104,17 @@ describe('boardAssets', () => {
       'film-dark.png',
       'grain.png',
     ])
+  })
+
+  it('should list an asset by its file, without a fragment or query', () => {
+    const html =
+      '<use href="../assets/sprite.svg#icon"><img src="../assets/a.png?v=2">'
+
+    expect(boardAssets(html)).toEqual(['sprite.svg', 'a.png'])
+  })
+
+  it('should list nothing for a link holding the project assets mid-path', () => {
+    expect(boardAssets('<img src="../../assets/x.png">')).toEqual([])
   })
 
   it('should list nothing for a frame loading no project asset', () => {
