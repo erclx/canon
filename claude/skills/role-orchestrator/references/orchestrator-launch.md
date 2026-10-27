@@ -79,6 +79,10 @@ The prompt carries pointers and standing context, and stops there. The branch an
 
 Report the dispatch as loudly as the human-launch line it replaces, naming the branch, the model, the task, and the session name, so a person reading the transcript can follow what fired without watching it happen.
 
+### Record the worker on its task
+
+Once a build or review-address launch returns, run `canon tasks session <worker-id> <task> --json` with the sessionId the launch output carries. On `no-name`, the worker already exited, so rerun with `--name` and the name passed to `-n`.
+
 ## Dispatch to a cloud worker
 
 Read `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md` when `orchestrator-dispatch.md` picked cloud for the row. It holds the prompt that carries the plan as text and announces over GitHub, the create under `script`, and the readout that refuses to record a missing session id.

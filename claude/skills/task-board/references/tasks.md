@@ -112,6 +112,7 @@ Groundwork: [<slug>](../groundwork/<slug>/)
 Intake: [<slug>](../intake/<slug>/)
 Issue: #NNN
 Pull request: #NNN
+Sessions: <name> (<sessionId>)
 
 Why this task exists and what it depends on.
 
@@ -174,6 +175,13 @@ The line lets a merge close its own task. `canon tasks archive --pull-request <n
 - One pull request, one task. Two tasks naming the same number refuse to archive rather than both moving.
 - `Pending branch: <branch>` holds that merge back while a branch that ticked an outcome waits on its own number
 - `canon tasks outcome` writes that line, skipping it when the branch's pull request is already listed, and `canon tasks pull-request` clears it
+
+### The `Sessions:` line
+
+`Sessions:` names each session that built or reviewed the task by roster name and full sessionId, so `canon sessions export <sessionId>` reaches its transcript. It is not an origin, so a task without one is well-formed.
+
+- `canon tasks session <sessionId> <task>` writes it, keyed on the id, so a repeat call for a listed session changes nothing
+- The dispatcher records each session it launches, and `git-pr` records the one opening the pull request, which covers a hand launch
 
 ## What goes in
 

@@ -86,6 +86,7 @@ The readout is the text `Created cloud session: <title>`, unanchored since a ter
 - On a failed create, report the typescript's last lines and fall back to the human-launch line in `orchestrator-dispatch.md`
 - The wrapper is a stopgap any change to the interactive create screen breaks, which is why the readout fails loudly instead of guessing
 - Record `session` beside the row's branch in this pass's launched record, since that and the pull request list are the only readings that know it exists
+- Name it on the row's task with `canon tasks session "$session" <task> --name cloud-<project>-<slug> --json`, since a cloud worker has no board and the roster never lists it
 - Report the dispatch as the local shape does, naming the row, the plan, the repository, and the session id in place of a session name
 
 ## Recognize the pull request
