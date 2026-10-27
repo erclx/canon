@@ -94,6 +94,46 @@ describe('describeKey', () => {
     expect(describeKey('/')).toMatchObject({ code: 'Slash', keyCode: 191 })
   })
 
+  it('should give a letter its capital under Shift, as Playwright types it', () => {
+    expect(describeKey('a', { shift: true })).toEqual({
+      key: 'A',
+      code: 'KeyA',
+      keyCode: 65,
+      text: 'A',
+      location: 0,
+    })
+  })
+
+  it('should give a digit its shifted symbol under Shift', () => {
+    expect(describeKey('1', { shift: true })).toMatchObject({
+      key: '!',
+      code: 'Digit1',
+      text: '!',
+    })
+  })
+
+  it('should give punctuation its shifted twin under Shift', () => {
+    expect(describeKey('/', { shift: true })).toMatchObject({
+      key: '?',
+      code: 'Slash',
+      text: '?',
+    })
+  })
+
+  it('should leave a shifted character as written under Shift', () => {
+    expect(describeKey('?', { shift: true })).toMatchObject({
+      key: '?',
+      text: '?',
+    })
+  })
+
+  it('should leave a named key as it is under Shift', () => {
+    expect(describeKey('Enter', { shift: true })).toMatchObject({
+      key: 'Enter',
+      text: '\r',
+    })
+  })
+
   it('should give nothing for a key outside the vocabulary', () => {
     expect(describeKey('Hyper')).toBeUndefined()
   })

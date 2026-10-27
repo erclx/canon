@@ -306,7 +306,9 @@ function mouseEvent(input: PointerInput): Record<string, unknown> {
  * `Control+K` in a focused field inserts no K.
  */
 function keyEvent(input: KeyInput): Record<string, unknown> {
-  const descriptor = describeKey(input.key)
+  const descriptor = describeKey(input.key, {
+    shift: input.modifiers.includes('Shift'),
+  })
   if (!descriptor) throw new Error(`no key descriptor for ${input.key}`)
   const event = {
     key: descriptor.key,

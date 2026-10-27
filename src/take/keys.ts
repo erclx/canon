@@ -81,7 +81,26 @@ const PUNCTUATION: readonly (readonly [string, string, string, number])[] = [
 
 const SHIFTED_DIGITS = ')!@#$%^&*('
 
-export function describeKey(key: string): KeyDescriptor | undefined {
+/**
+ * With `shift` set, a printable key types its shifted twin, as Playwright's
+ * keyboard swaps to it while Shift is held, so `Shift+a` types `A` on both
+ * routes.
+ */
+export function describeKey(
+  key: string,
+  options: { readonly shift?: boolean } = {},
+): KeyDescriptor | undefined {
+  return describeTyped(options.shift ? shiftedTwin(key) : key)
+}
+
+function shiftedTwin(key: string): string {
+  if (/^[a-z]$/.test(key)) return key.toUpperCase()
+  if (/^[0-9]$/.test(key)) return SHIFTED_DIGITS[Number(key)] ?? key
+  const row = PUNCTUATION.find(([plain]) => key === plain)
+  return row ? row[1] : key
+}
+
+function describeTyped(key: string): KeyDescriptor | undefined {
   if (isModifier(key)) {
     return {
       key,
