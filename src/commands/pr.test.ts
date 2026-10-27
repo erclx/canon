@@ -1926,12 +1926,26 @@ describe('canon pr tick', () => {
     return { record: JSON.parse(result.stdout), exit: result.exitCode ?? -1 }
   }
 
+  /** A CI runner carries no git identity, so every commit here names one. */
+  const IDENTITY = {
+    env: {
+      GIT_AUTHOR_NAME: 't',
+      GIT_AUTHOR_EMAIL: 't@t',
+      GIT_COMMITTER_NAME: 't',
+      GIT_COMMITTER_EMAIL: 't@t',
+    },
+  }
+
   /** Commits one file on the branch and pushes it, returning the new tip. */
   function pushCommit(path: string): string {
     mkdirSync(join(repoRoot, dirname(path)), { recursive: true })
     writeFileSync(join(repoRoot, path), `${path}\n`)
     execaSync('git', ['-C', repoRoot, 'add', path])
-    execaSync('git', ['-C', repoRoot, 'commit', '-q', '-m', `add ${path}`])
+    execaSync(
+      'git',
+      ['-C', repoRoot, 'commit', '-q', '-m', `add ${path}`],
+      IDENTITY,
+    )
     execaSync('git', ['-C', repoRoot, 'push', '-q', '-f', 'origin', 'feat/x'])
     return execaSync('git', ['-C', repoRoot, 'rev-parse', 'HEAD']).stdout
   }
@@ -2208,7 +2222,11 @@ describe('canon pr tick', () => {
 
     it('should refuse stale-head when the driven head was rewritten away', async () => {
       const driven = pushCommit('src/hero.test.ts')
-      execaSync('git', ['-C', repoRoot, 'commit', '-q', '--amend', '-m', 'x'])
+      execaSync(
+        'git',
+        ['-C', repoRoot, 'commit', '-q', '--amend', '-m', 'x'],
+        IDENTITY,
+      )
       execaSync('git', ['-C', repoRoot, 'push', '-q', '-f', 'origin', 'feat/x'])
 
       const outcome = await runTick(['--boxes', '1', '--head', driven])
