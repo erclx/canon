@@ -1,0 +1,71 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    /* A 28 px square centred on its x and y, so every position in SPEC.md is the pip's centre. */
+    #pip-dot {
+      position: absolute;
+      left: -14px;
+      top: -14px;
+      width: 28px;
+      height: 28px;
+      border-radius: 5px;
+      background: var(--pip);
+    }
+  </style>
+  <div id="root" data-composition-id="pip" data-width="1920" data-height="1200">
+    <div id="pip-mover" class="clip" data-start="0" data-duration="42.9">
+      <div id="pip-dot"></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const dot = "#pip-dot";
+    // Each beat's start on the film's clock, matching the hosts in index.html. A scene's build plays
+    // 1.3 times slower than it was written, so a stop timed to a line it prints is scaled by S.
+    const B = { groundwork: 1.2, plan: 7.6, dispatch: 14.2, build: 21.8, review: 29.0, merge: 36.0, close: 41.4 };
+    const S = 1.3;
+    const carry = (at, to, duration) => {
+      tl.to(dot, { ...to, duration, ease: "power3.inOut" }, at);
+      tl.to(dot, { filter: "blur(6px)", duration: duration / 2, ease: "power2.in" }, at);
+      tl.to(dot, { filter: "blur(0px)", duration: duration / 2, ease: "power2.out" }, at + duration / 2);
+    };
+
+    // In the mouth, held still for 12 frames, then out of it and on into the Search row.
+    tl.fromTo(dot, { x: 1120, y: 600, scale: 3.118, filter: "blur(0px)" }, { x: 1120, y: 600, scale: 3.118, duration: 0.4 }, 0);
+    tl.to(dot, { x: 1240, scale: 2, duration: 0.45, ease: "power3.in" }, 0.4);
+    carry(0.85, { x: 182, y: 580, scale: 1 }, 0.95);
+
+    // Groundwork: down the rows, then across to the decision.
+    tl.to(dot, { y: 710, duration: 0.3 * S, ease: "power3.inOut" }, B.groundwork + 0.9 * S);
+    tl.to(dot, { y: 840, duration: 0.3 * S, ease: "power3.inOut" }, B.groundwork + 1.5 * S);
+    carry(B.groundwork + 2.4 * S, { x: 1274, y: 890 }, 0.5 * S);
+
+    // Plan: into the file's header, then onto the suggestion.
+    carry(B.plan, { x: 166, y: 452 }, 0.5);
+    carry(B.plan + 2.1 * S, { x: 1054, y: 630 }, 0.5 * S);
+
+    // Dispatch: onto the pinned orchestrator, then onto the first worker once it has climbed.
+    carry(B.dispatch + 0.4 * S, { x: 882, y: 556 }, 0.5 * S);
+    tl.to(dot, { y: 640, duration: 0.4, ease: "power3.inOut" }, B.dispatch + 6.0);
+
+    // Build: into the file under edit, then onto the gate's result.
+    carry(B.build, { x: 166, y: 452 }, 0.5);
+    carry(B.build + 2.8 * S, { x: 1262, y: 820 }, 0.5 * S);
+
+    // Review: into the pull request's header, then down to the closed review.
+    carry(B.review, { x: 166, y: 452 }, 0.5);
+    tl.to(dot, { x: 182, y: 820, duration: 0.5 * S, ease: "power3.inOut" }, B.review + 2.6 * S);
+
+    // Merge: up onto the merged line, as the merge prints.
+    tl.to(dot, { y: 640, duration: 0.45 * S, ease: "power3.inOut" }, B.merge + 0.05);
+
+    // Close: home into the mark's mouth, growing back to mark size, then still to the loop point.
+    carry(B.close - 0.2, { x: 1120, y: 600, scale: 3.118 }, 0.6);
+
+    window.__timelines["pip"] = tl;
+  </script>
+</template>

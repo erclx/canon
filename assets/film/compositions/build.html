@@ -1,0 +1,249 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Geist";
+      src: url("fonts/Geist-Regular.woff2") format("woff2");
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: "Geist";
+      src: url("fonts/Geist-SemiBold.woff2") format("woff2");
+      font-weight: 600;
+    }
+    @font-face {
+      font-family: "Geist Mono";
+      src: url("fonts/GeistMono-Regular.woff2") format("woff2");
+      font-weight: 400;
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      font-family: "Geist", sans-serif;
+      color: var(--body);
+    }
+    #bd-title {
+      position: absolute;
+      left: 120px;
+      top: 228px;
+      display: flex;
+      align-items: baseline;
+      gap: 28px;
+    }
+    #bd-title h1 {
+      font-size: 80px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    #bd-title p {
+      font-size: 40px;
+      color: var(--muted);
+    }
+    .bd-word {
+      display: inline-block;
+    }
+    .bd-panel {
+      position: absolute;
+      top: 410px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      overflow: hidden;
+    }
+    .bd-head {
+      height: 84px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      background: var(--chrome);
+      border-bottom: 1px solid var(--line);
+      font-size: 40px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .bd-head span {
+      margin-left: auto;
+      font-family: "Geist Mono", monospace;
+      font-size: 32px;
+      font-weight: 400;
+      color: var(--muted);
+    }
+    /* The editor's header leaves a slot at its left: the pip marks the file under edit at (166, 452). */
+    #bd-editor {
+      left: 120px;
+      width: 1000px;
+      height: 560px;
+    }
+    #bd-editor .bd-head {
+      padding-left: 80px;
+      font-family: "Geist Mono", monospace;
+      font-size: 32px;
+      font-weight: 400;
+    }
+    .bd-code {
+      position: absolute;
+      left: 48px;
+      font-family: "Geist Mono", monospace;
+      font-size: 32px;
+      color: var(--ink);
+    }
+    .bd-bar {
+      position: absolute;
+      left: 96px;
+      height: 14px;
+      border-radius: 7px;
+      background: var(--line);
+    }
+    .bd-rule {
+      position: absolute;
+      left: 48px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 20px;
+      border: 2px solid var(--ink);
+      border-radius: 12px;
+      font-size: 34px;
+      color: var(--ink);
+    }
+    .bd-rule span {
+      color: var(--muted);
+    }
+    /* The gate's last row leaves its marker slot empty: the pip lands there at (1262, 820). */
+    #bd-gate {
+      left: 1200px;
+      width: 600px;
+      height: 540px;
+    }
+    .bd-row {
+      position: absolute;
+      left: 48px;
+      right: 40px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 34px;
+      font-size: 44px;
+      color: var(--ink);
+    }
+    .bd-row em {
+      font-style: normal;
+      font-size: 36px;
+      color: var(--muted);
+    }
+    .bd-note {
+      position: absolute;
+      left: 110px;
+      font-size: 36px;
+      color: var(--muted);
+    }
+    .bd-tick,
+    .bd-slot {
+      flex: none;
+      width: 28px;
+      height: 28px;
+    }
+    .bd-tick {
+      position: relative;
+      border-radius: 5px;
+      border: 3px solid var(--muted);
+    }
+    .bd-fill {
+      position: absolute;
+      inset: -3px;
+      border-radius: 5px;
+      background: var(--muted);
+    }
+  </style>
+  <div id="root" data-composition-id="build" data-width="1920" data-height="1200">
+    <div id="bd-title" class="clip" data-start="0" data-duration="7.2">
+      <h1><span class="bd-word" id="bd-w1">Build</span></h1>
+      <p>
+        <span class="bd-word" id="bd-w2">Each</span>
+        <span class="bd-word" id="bd-w3">worker</span>
+        <span class="bd-word" id="bd-w4">in</span>
+        <span class="bd-word" id="bd-w5">its</span>
+        <span class="bd-word" id="bd-w6">own</span>
+        <span class="bd-word" id="bd-w7">worktree,</span>
+        <span class="bd-word" id="bd-w8">held</span>
+        <span class="bd-word" id="bd-w9">to</span>
+        <span class="bd-word" id="bd-w10">the</span>
+        <span class="bd-word" id="bd-w11">rules</span>
+      </p>
+    </div>
+    <div id="bd-editor" class="bd-panel clip" data-start="0" data-duration="7.2">
+      <div class="bd-head">src/context/audit.ts<span>worktree</span></div>
+      <div class="bd-rule" id="bd-rule1" style="top: 116px">rule loaded <span>→</span> code-craft</div>
+      <div class="bd-code" id="bd-c1" style="top: 204px">export const GOTCHA_CAP = 5</div>
+      <div class="bd-bar" id="bd-b1" style="top: 268px; width: 620px; visibility: hidden"></div>
+      <div class="bd-bar" id="bd-b2" style="top: 308px; left: 48px; width: 760px"></div>
+      <div class="bd-bar" id="bd-b3" style="top: 348px; width: 560px; visibility: hidden"></div>
+      <div class="bd-code" id="bd-c2" style="top: 384px">export const LAYOUT_BULLET_CAP = 5</div>
+      <div class="bd-rule" id="bd-rule2" style="top: 462px">rule loaded <span>→</span> test-craft</div>
+    </div>
+    <div id="bd-gate" class="bd-panel clip" data-start="0" data-duration="7.2">
+      <div class="bd-head">canon gate run</div>
+      <div class="bd-row" id="bd-g1" style="top: 114px"><span class="bd-tick"><span class="bd-fill" id="bd-f1"></span></span>context-citations</div>
+      <div class="bd-row" id="bd-g2" style="top: 198px"><span class="bd-tick"><span class="bd-fill" id="bd-f2"></span></span>types</div>
+      <div class="bd-row" id="bd-g3" style="top: 282px"><span class="bd-tick"><span class="bd-fill" id="bd-f3"></span></span>tests</div>
+      <div class="bd-row" id="bd-g4" style="top: 378px"><span class="bd-slot"></span><b style="font-weight: 600">passed</b></div>
+      <div class="bd-note" id="bd-g5" style="top: 446px">pull request opened</div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // The build, written at its first pace and played 1.3 times slower so each line has time to read.
+    const build = gsap.timeline();
+    const blurIn = { opacity: 1, filter: "blur(0px)", duration: 0.13, ease: "power4.out" };
+    const hidden = { opacity: 0, filter: "blur(6px)" };
+    const lineIn = { clipPath: "inset(0 0% 0 0)", duration: 0.3, ease: "power2.out" };
+    const lineOut = { clipPath: "inset(0 100% 0 0)" };
+    const panelIn = { clipPath: "inset(0 0% 0 0 round 24px)", duration: 0.5, ease: "expo.out" };
+    const panelOut = { clipPath: "inset(0 100% 0 0 round 24px)" };
+
+    // Title, per word.
+    ["#bd-w1", "#bd-w2", "#bd-w3", "#bd-w4", "#bd-w5", "#bd-w6", "#bd-w7", "#bd-w8", "#bd-w9", "#bd-w10", "#bd-w11"].forEach((id, i) => {
+      build.fromTo(id, hidden, blurIn, 0.05 + i * 0.067);
+    });
+
+    // The editor prints, the first line writes, and the rule for it loads above it.
+    build.fromTo("#bd-editor", panelOut, panelIn, 0.1);
+    build.fromTo("#bd-c1", lineOut, lineIn, 0.6);
+    build.fromTo("#bd-rule1", lineOut, lineIn, 0.85);
+
+    // The body writes, then the test's rule loads.
+    build.fromTo("#bd-b1", lineOut, lineIn, 1.15);
+    build.fromTo("#bd-b2", lineOut, lineIn, 1.3);
+    build.fromTo("#bd-b3", lineOut, lineIn, 1.45);
+    build.fromTo("#bd-c2", lineOut, lineIn, 1.6);
+    build.fromTo("#bd-rule2", lineOut, lineIn, 1.7);
+
+    // The gate prints and its checks tick in turn.
+    build.fromTo("#bd-gate", panelOut, panelIn, 1.8);
+    ["#bd-g1", "#bd-g2", "#bd-g3"].forEach((id, i) => {
+      build.fromTo(id, lineOut, lineIn, 2.05 + i * 0.15);
+    });
+    const fillIn = { scale: 1, opacity: 1, duration: 0.12, ease: "power2.out" };
+    const fillOut = { scale: 0.4, opacity: 0 };
+    ["#bd-f1", "#bd-f2", "#bd-f3"].forEach((id, i) => {
+      build.fromTo(id, fillOut, fillIn, 2.3 + i * 0.2);
+    });
+
+    // The result prints as the pip lands on it.
+    build.fromTo("#bd-g4", lineOut, lineIn, 3.15);
+    build.fromTo("#bd-g5", lineOut, lineIn, 3.35);
+
+    build.timeScale(1 / 1.3);
+    tl.add(build, 0);
+
+    // Blur swap out, so the pip is the one thing that carries into the review.
+    tl.to(
+      ["#bd-title h1", "#bd-title p", "#bd-editor", "#bd-gate"],
+      { opacity: 0, filter: "blur(8px)", duration: 0.18, ease: "power3.in" },
+      7,
+    );
+
+    window.__timelines["build"] = tl;
+  </script>
+</template>

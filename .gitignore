@@ -23,3 +23,8 @@ web/evidence/
 # Claude
 .canon/
 .claude/worktrees/
+
+# Film
+assets/film/renders/
+assets/film/.hyperframes/
+assets/film/.thumbnails/
