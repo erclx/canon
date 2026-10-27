@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.71.0](https://github.com/erclx/canon/compare/v5.70.0...v5.71.0) (2026-10-27)
+
+
+### Features
+
+* **markdown:** read colon lists as labels ([#2797](https://github.com/erclx/canon/issues/2797)) ([f733a5f](https://github.com/erclx/canon/commit/f733a5f8d74e63cf5e257557a4d227b3478ca04a))
+* **tasks:** name the sessions behind a task on a Sessions line ([#2799](https://github.com/erclx/canon/issues/2799)) ([acf80c4](https://github.com/erclx/canon/commit/acf80c4ce9d2c1adbc3e1ea2dfde433a08d46b4e))
+
 ## [5.70.0](https://github.com/erclx/canon/compare/v5.69.0...v5.70.0) (2026-10-27)
 
 
