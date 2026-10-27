@@ -5,43 +5,20 @@
 # hang into a red check and never recovers it, while a fresh attempt usually
 # lands on a healthy backend.
 #
-# Usage: install-playwright-deps.sh [--package <spec>] [--archives <dir>] <browser>...
-# --archives points apt's download cache at <dir> for the rest of the job, so a
-# restored cache supplies the archives and the mirror serves only the delta.
+# Usage: install-playwright-deps.sh [--package <spec>] <browser>...
 # Exits 0 on the first success, 2 when no browser is named, and the last
 # attempt's code when every attempt fails.
 set -e
 
-usage="Usage: install-playwright-deps.sh [--package <spec>] [--archives <dir>] <browser>..."
-
 package=playwright
-archives=
-while [ $# -gt 0 ]; do
-  case "$1" in
-  --package)
-    package=$2
-    shift 2
-    ;;
-  --archives)
-    archives=$2
-    shift 2
-    ;;
-  *) break ;;
-  esac
-done
-
-if [ $# -eq 0 ]; then
-  echo "$usage" >&2
-  exit 2
+if [ "$1" = "--package" ]; then
+  package=$2
+  shift 2
 fi
 
-if [ -n "$archives" ]; then
-  mkdir -p "${archives}/partial"
-  # The drop-in outlives the script, so a later apt-get in the same job reads
-  # and fills the same folder. Keep-Downloaded-Packages holds the archives
-  # past the install whatever the image sets.
-  printf 'Dir::Cache::Archives "%s/";\nAPT::Keep-Downloaded-Packages "true";\n' "$archives" |
-    sudo tee /etc/apt/apt.conf.d/99playwright-archives >/dev/null
+if [ $# -eq 0 ]; then
+  echo "Usage: install-playwright-deps.sh [--package <spec>] <browser>..." >&2
+  exit 2
 fi
 
 attempts=3
