@@ -31,7 +31,7 @@ Holds OpenScreen's zoom timing at `ca8104c` under its MIT license, trimmed to th
 
 One folder here does no work of its own.
 
-- `src/take/fixtures/` owns the static page the end to end take films
+- `src/take/fixtures/` owns the static pages the end to end takes film, one of which posts each input it receives back to the test's server
 
 ## Gotchas
 
