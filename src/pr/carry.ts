@@ -1,9 +1,10 @@
+import { DESIGN_FOLDER, isEvidencePath } from '@/pr/evidence'
 import type { ChangedRead } from '@/pr/lift'
 import { DEFAULT_PAINTED } from '@/pr/painted'
 import { coversHead } from '@/pr/review-scope'
 
 /**
- * The paths no checklist box can observe: tests, stories, snapshots, and
+ * The globs no checklist box can observe: tests, stories, snapshots, and
  * markdown. The rule lists what is inert rather than what is driven, so a kind
  * nobody listed, such as a `.json` data file, fails closed. `.mdx` stays
  * driven, since it renders.
@@ -13,8 +14,17 @@ export const DEFAULT_INERT: readonly string[] = [
   '**/*.md',
 ]
 
+/**
+ * An evidence capture and a design record are inert too, the two paths
+ * `readUncaptured` skips, since a recapture or a design note changes no
+ * behavior a box drives.
+ */
 export function isInert(path: string): boolean {
-  return DEFAULT_INERT.some((glob) => new Bun.Glob(glob).match(path))
+  return (
+    isEvidencePath(path) ||
+    path.startsWith(DESIGN_FOLDER) ||
+    DEFAULT_INERT.some((glob) => new Bun.Glob(glob).match(path))
+  )
 }
 
 /** Whether a UI verdict at one commit still holds at a later one. */

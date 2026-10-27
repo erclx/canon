@@ -489,6 +489,22 @@ describe('lift', () => {
         expect(record.carriedFrom).toBeUndefined()
       })
 
+      it('should carry a close across a push of evidence captures alone', async () => {
+        const { api } = makeApi({
+          evidence: withChecklist,
+          reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
+          changed: {
+            isAncestor: true,
+            paths: ['evidence/board/light.png', 'evidence/board/dark.png'],
+          },
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('lifted')
+        expect(record.carriedFrom).toBe(MOVED)
+      })
+
       it('should refuse ui-behind and name the source path of a gap that paints nothing', async () => {
         const { api } = makeApi({
           evidence: withChecklist,

@@ -18,6 +18,8 @@ describe('isInert', () => {
     'src/__snapshots__/card.snap',
     'README.md',
     'docs/guide.md',
+    'evidence/board/light.png',
+    'canon/design/board/frame.html',
   ])('should classify %s as inert', (path) => {
     expect(isInert(path)).toBe(true)
   })
@@ -28,6 +30,7 @@ describe('isInert', () => {
     'src/data/boards.json',
     'docs/page.mdx',
     'vite.config.ts',
+    'evidence/capture.ts',
   ])('should classify %s as driven', (path) => {
     expect(isInert(path)).toBe(false)
   })
@@ -48,6 +51,17 @@ describe('readCarry', () => {
     const read = changedRead({
       isAncestor: true,
       paths: ['src/gesture.test.ts', 'README.md'],
+    })
+
+    const carry = await readCarry(read, DRIVEN, TIP)
+
+    expect(carry).toEqual({ kind: 'carried', carriedFrom: DRIVEN })
+  })
+
+  it('should carry across a gap of evidence captures alone', async () => {
+    const read = changedRead({
+      isAncestor: true,
+      paths: ['evidence/board/light.png', 'evidence/board/dark.png'],
     })
 
     const carry = await readCarry(read, DRIVEN, TIP)
