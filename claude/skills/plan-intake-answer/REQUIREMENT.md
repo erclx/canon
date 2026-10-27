@@ -24,7 +24,7 @@ The write fails where no prose rule catches it. A worker's file-editing tools re
 - Fill a slot the operator did not answer, or infer an answer from the conversation having happened
 - Overwrite a slot already carrying an answer
 - Write anywhere but an item's answer slot, the index included, bar one exception, which is closing a declined item's issue on GitHub after a yes given for that issue in the turn its draft was shown
-- Close an issue on a bare decline of the offer, no answer, or a yes carried over from another issue
+- Close an issue when the operator says no to the offer, gives no answer, or when the only yes came from another issue
 
 ## Out of scope
 

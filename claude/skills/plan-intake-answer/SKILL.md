@@ -89,7 +89,16 @@ For each qualifying item:
 2. Draft the comment as one or two sentences condensed from the item's `problem` and `fix`, giving the reason and a pointer to what covers it.
 3. Run the scan in `${CLAUDE_SKILL_DIR}/../git-pr/references/publish.md` against the draft, since nothing else checks text on its way to the remote.
 4. Show the draft and ask for a yes or no on that issue in the same turn, through the question surface Step 3 used.
-5. On a yes, run `gh issue close <NNN> --reason "not planned" --comment "<comment>"`. On a no, or no answer, leave the issue open.
+5. On a yes, close with the draft passed through a quoted heredoc. On a no, or no answer, leave the issue open.
+
+```bash
+gh issue close <NNN> --reason "not planned" --comment "$(cat <<'EOF'
+<comment>
+EOF
+)"
+```
+
+The quoted heredoc matters because `problem` and `fix` carry file paths in code spans. Inside a double-quoted argument the shell would run each backtick pair as a command and post a comment with the paths missing.
 
 Never carry a yes from one issue or one turn to another.
 
