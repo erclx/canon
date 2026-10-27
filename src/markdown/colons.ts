@@ -82,7 +82,7 @@ function groupItems(entries: readonly Entry[]): void {
     quote = entry.quote
     if (!entry.isItem) continue
 
-    for (const level of [...open.keys()]) {
+    for (const level of open.keys()) {
       if (level > entry.indent) open.delete(level)
     }
 
