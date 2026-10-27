@@ -98,6 +98,7 @@ import {
 } from '@/git/status'
 import { machineListenerReader } from '@/listeners/machine'
 import { loadPaintedPatterns } from '@/pr/painted'
+import { readCarry } from '@/pr/carry'
 import { LOCAL_CONFIG_REL, readHealthPaths } from '@/pr/health'
 import {
   dropAddressLine,
@@ -228,6 +229,7 @@ type TickReason =
   | TickRefusal
   | 'count-mismatch'
   | 'stale-head'
+  | 'redrive-owed'
   | 'bad-boxes'
   | 'no-comment'
   | 'body-refused'
@@ -236,7 +238,9 @@ const TICK_REFUSALS: Record<TickReason | 'gh-failed', string> = {
   'body-refused':
     'The boxes are ticked on the evidence comment, but gh could not edit the pull request body, so its UI pass line still shows the earlier result. Re-run the tick to retry the body.',
   'stale-head':
-    'The head named is not the branch tip on the remote, so a tick would claim a pass on a commit that is no longer the pull request. Re-drive the checklist at the tip.',
+    'The head named is not the branch tip on the remote, and the tip does not descend from it or the gap could not be read, so a tick would claim a pass on a commit that is no longer the pull request. Re-drive the checklist at the tip.',
+  'redrive-owed':
+    'A push since the driven head changed a path a box can observe, so the pass does not carry to the tip. Nothing was written. Re-drive the checklist at the tip rather than retrying the tick there.',
   'bad-boxes':
     '--boxes takes box numbers as a comma-separated list of positive whole numbers, such as 1,3, and --head takes the commit that was driven.',
   'count-mismatch':
@@ -700,8 +704,9 @@ export function register(program: Command): void {
         '',
         '`ui` also carries the newest `## UI review` pass (`heading`, `state`,',
         '`commit`, `source`), `isBound`, which is whether the evidence comment',
-        'carries a checklist, and `carriedFrom` or `paintedPaths` when the lift',
-        'carried a close forward or refused to. An unbound family reads covered.',
+        'carries a checklist, and `carriedFrom` when the lift carried a close',
+        'forward, or `drivenPaths` and the painted subset `paintedPaths` when it',
+        'refused to. An unbound family reads covered.',
         '',
         'Both families post as pull request reviews, so this reads',
         '`pulls/<n>/reviews` alone, as the lift does. Issue comments are not',
@@ -944,11 +949,14 @@ export function register(program: Command): void {
         '  ui        the newest `## UI review` is closed at the head, bound only',
         '            where `canon pr evidence --check` carries a checklist. A close',
         '            on an earlier commit still holds when it is an ancestor of the',
-        '            head and no painted path changed since, and the record names',
-        '            it as `carriedFrom`. A painted change refuses `ui-behind` and',
-        '            lists the paths as `paintedPaths`. A close whose count line',
-        '            shows boxes not driven and none passed, failed, or needing',
-        '            eyes refuses `ui-undriven`, carried or not',
+        '            head and every path changed since is one no box can observe,',
+        '            being tests, stories, snapshots, markdown, evidence captures,',
+        '            and `canon/design/`, and the record names it as `carriedFrom`.',
+        '            Any other change refuses `ui-behind`, listing the paths as',
+        '            `drivenPaths` and the painted subset as `paintedPaths`, since',
+        '            a box drives behavior a `.ts` file holds too. A close whose',
+        '            count line shows boxes not driven and none passed, failed,',
+        '            or needing eyes refuses `ui-undriven`, carried or not',
         '  evidence  the evidence check reads settled',
         '  standing  the head is fresh against the base, not stale or conflicted',
         '  ci        every check run on the tip passed, waited on up to --wait',
@@ -1295,14 +1303,22 @@ export function register(program: Command): void {
         'driver can run is ticked, counts taste boxes apart, and is the only',
         'body text this verb writes, so hand edits elsewhere survive.',
         '',
-        'Before writing it reads the newest UI verdict. One that covers the tip',
-        'and carries a count line must match the ticks this call leaves at the',
-        'tip, so a re-drive passes every box that passed, since a new head',
-        'clears the older ticks. Any other verdict leaves the check unrun.',
+        'A --head behind the remote tip carries to the tip when every path',
+        'changed since is one no box can observe, being tests, stories,',
+        'snapshots, markdown, evidence captures, and `canon/design/`. The boxes',
+        'are then stamped at the tip and the record names `carriedFrom`. Any',
+        'other changed path owes a re-drive.',
+        '',
+        'Before writing it reads the newest UI verdict. One that covers the tip,',
+        'or the driven head on a carry, and carries a count line must match the',
+        'ticks this call leaves at the tip, so a re-drive passes every box that',
+        'passed, since a new head clears the older ticks. Any other verdict',
+        'leaves the check unrun.',
         '',
         'Read `reason` on the JSON record:',
         '  ticked       the boxes were ticked and the body line written, with the',
-        '               tip in `head` and `countCheck` as matched or unchecked',
+        '               tip in `head`, `countCheck` as matched or unchecked, and',
+        '               `carriedFrom` when --head was carried to the tip',
         '  count-mismatch the verdict passed a different number of boxes than',
         '               this call leaves ticked at the tip, nothing written,',
         '               `passed` and `ticked` carry the two counts. Fewer ticks',
@@ -1310,7 +1326,10 @@ export function register(program: Command): void {
         '               operator an untick of a box that has since failed',
         '  body-refused the comment is ticked but gh could not edit the body,',
         '               exit 1 with `commentTicked`. Re-run to retry the body.',
-        '  stale-head   --head is not the remote branch tip, nothing written',
+        '  redrive-owed a push since --head changed a path a box can observe,',
+        '               nothing written, with `driven`, `head`, and `drivenPaths`',
+        '  stale-head   --head is behind the tip with no readable linear gap,',
+        '               as a force-push or a rebase leaves, nothing written',
         '  taste-box    a named box ends in (taste), nothing written',
         '  no-box       a named number is past the checklist, nothing written',
         '  no-checklist the evidence comment carries no checklist',
@@ -3475,9 +3494,9 @@ const POSITIVE_WHOLE = /^[1-9]\d*$/
 const MIN_TICK_HEAD_LENGTH = 7
 
 /**
- * Ticks the named boxes on the marked comment. It refuses a head that is not
- * the remote tip and a taste box before writing, so both rules hold as checks
- * rather than as prose a driver can talk itself out of.
+ * Ticks the named boxes on the marked comment. It refuses a head the tip moved
+ * past in a way a box can observe, and a taste box, before writing, so both
+ * rules hold as checks rather than as prose a driver can talk itself out of.
  */
 async function runTick(
   number: string | undefined,
@@ -3518,7 +3537,26 @@ async function runTick(
       root,
     )
   }
-  if (!reading.tip.startsWith(head)) return refuseTick('stale-head')
+  const carry = await readCarry(
+    (from, to) => readChangedPaths(gitRunner(root), from, to),
+    head,
+    reading.tip,
+  )
+  if (carry.kind === 'moved') {
+    return refuseWith(
+      'redrive-owed',
+      TICK_REFUSALS['redrive-owed'],
+      emitJson,
+      root,
+      { driven: head, head: reading.tip, drivenPaths: carry.drivenPaths },
+    )
+  }
+  // A gap that could not be read refuses as a rewrite does, which is what the
+  // verb answered for every moved tip before the carry.
+  if (carry.kind === 'not-ancestor' || carry.kind === 'failed') {
+    return refuseTick('stale-head')
+  }
+  const carriedFrom = carry.kind === 'carried' ? carry.carriedFrom : undefined
 
   const comments = await listComments(root, String(identity.number))
   if (comments === undefined) return refuseTick('gh-failed')
@@ -3534,8 +3572,9 @@ async function runTick(
   if (result.kind === 'refused') return refuseTick(result.reason)
 
   // Read ahead of the write so a short list refuses before it leaves the
-  // comment half ticked. A verdict that does not cover the tip, carries no
-  // count line, or cannot be read leaves the check unrun and says so.
+  // comment half ticked. A verdict that covers neither the tip nor the head a
+  // carry came from, carries no count line, or cannot be read leaves the check
+  // unrun and says so.
   const ticked = countTicksAtHead(
     readChecklistBoxes(findEvidenceChecklist([{ body: result.body }]) ?? ''),
     reading.tip,
@@ -3547,7 +3586,10 @@ async function runTick(
   const isCounted =
     verdict.counts !== undefined &&
     verdict.commit !== undefined &&
-    coversHead(verdict.commit, reading.tip)
+    (coversHead(verdict.commit, reading.tip) ||
+      (carriedFrom !== undefined &&
+        (coversHead(verdict.commit, carriedFrom) ||
+          coversHead(carriedFrom, verdict.commit))))
   if (isCounted && verdict.counts.passed !== ticked) {
     return refuseWith(
       'count-mismatch',
@@ -3622,6 +3664,7 @@ async function runTick(
         reason: 'ticked',
         countCheck,
         head: reading.tip,
+        ...(carriedFrom !== undefined && { carriedFrom }),
         boxes: numbers.map(Number),
         commentId,
       })}\n`,

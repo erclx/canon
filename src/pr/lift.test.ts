@@ -444,7 +444,7 @@ describe('lift', () => {
     })
 
     describe('carried forward', () => {
-      it('should carry a close across a push touching no painted path', async () => {
+      it('should carry a close across a push of tests and markdown', async () => {
         const { api, calls } = makeApi({
           evidence: withChecklist,
           reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
@@ -487,6 +487,58 @@ describe('lift', () => {
           paintedPaths: ['src/App.tsx'],
         })
         expect(record.carriedFrom).toBeUndefined()
+      })
+
+      it('should carry a close across a push of evidence captures alone', async () => {
+        const { api } = makeApi({
+          evidence: withChecklist,
+          reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
+          changed: {
+            isAncestor: true,
+            paths: ['evidence/board/light.png', 'evidence/board/dark.png'],
+          },
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('lifted')
+        expect(record.carriedFrom).toBe(MOVED)
+      })
+
+      it('should refuse ui-behind and name the source path of a gap that paints nothing', async () => {
+        const { api } = makeApi({
+          evidence: withChecklist,
+          reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
+          changed: {
+            isAncestor: true,
+            paths: ['src/gesture.ts', 'src/gesture.test.ts'],
+          },
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record).toMatchObject({
+          reason: 'ui-behind',
+          drivenPaths: ['src/gesture.ts'],
+        })
+        expect(record.paintedPaths).toBeUndefined()
+        expect(record.carriedFrom).toBeUndefined()
+      })
+
+      it('should name a painted path in both lists', async () => {
+        const { api } = makeApi({
+          evidence: withChecklist,
+          reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
+          changed: { isAncestor: true, paths: ['src/Card.tsx'] },
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record).toMatchObject({
+          reason: 'ui-behind',
+          paintedPaths: ['src/Card.tsx'],
+          drivenPaths: ['src/Card.tsx'],
+        })
       })
 
       it('should refuse ui-behind and carry nothing when the close is not an ancestor', async () => {

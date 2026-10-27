@@ -607,7 +607,7 @@ export function readOwed(input: OwedInput): OwedStep[] {
  * Design references are redrawn rather than captured, so recapturing them
  * neither owes nor stands in for an evidence capture.
  */
-const DESIGN_FOLDER = 'canon/design/'
+export const DESIGN_FOLDER = 'canon/design/'
 
 /**
  * The painted paths a pull request changed while no evidence image did, in a

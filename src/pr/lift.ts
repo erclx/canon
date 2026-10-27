@@ -6,6 +6,7 @@ import {
   resolveUiScope,
   type UiCounts,
 } from '@/pr/review-scope'
+import { readCarry } from '@/pr/carry'
 import { DEFAULT_PAINTED, isPainted, type PaintedPatterns } from '@/pr/painted'
 
 /** How long `--wait` holds for a pending CI run, in seconds, when none is named. */
@@ -49,6 +50,8 @@ export interface GateResult {
   readonly carriedFrom?: string
   /** The painted paths that kept a UI close from carrying forward. */
   readonly paintedPaths?: readonly string[]
+  /** Every path a box can observe that kept a UI close from carrying forward. */
+  readonly drivenPaths?: readonly string[]
 }
 
 /** How an earlier commit sits against the head, and what changed since. */
@@ -125,6 +128,7 @@ export interface LiftRecord {
   readonly failed?: LiftRefusal
   readonly carriedFrom?: string
   readonly paintedPaths?: readonly string[]
+  readonly drivenPaths?: readonly string[]
   readonly isLifted: boolean
   /** Whether the caller can treat the pull request as ready afterwards. */
   readonly isOk: boolean
@@ -164,11 +168,13 @@ export function reviewGate(
 function carried(gates: readonly GateResult[]): {
   carriedFrom?: string
   paintedPaths?: readonly string[]
+  drivenPaths?: readonly string[]
 } {
   const ui = gates.find((gate) => gate.gate === 'ui')
   return {
     ...(ui?.carriedFrom !== undefined && { carriedFrom: ui.carriedFrom }),
     ...(ui?.paintedPaths !== undefined && { paintedPaths: ui.paintedPaths }),
+    ...(ui?.drivenPaths !== undefined && { drivenPaths: ui.drivenPaths }),
   }
 }
 
@@ -189,10 +195,11 @@ function droveNothing(counts: UiCounts | undefined): boolean {
 /**
  * Binds only where the evidence record carries a checklist to drive.
  *
- * A close behind the head still holds when it is an ancestor of the head and
- * no painted path changed since, since a push that paints nothing leaves the
- * checklist the reviewer drove as true as it was. A close that is not an
- * ancestor, which a force-push or a rebase leaves, never carries.
+ * A close behind the head still holds across the gap `readCarry` carries,
+ * one changing no path a box can observe. A box drives behavior, so a push to
+ * a non-painted source file moves the verdict too, and `drivenPaths` names
+ * every such path while `paintedPaths` keeps the painted subset. A close that
+ * is not an ancestor, which a force-push or a rebase leaves, never carries.
  */
 export async function uiGate(
   api: Pick<LiftApi, 'readChanged'>,
@@ -211,17 +218,27 @@ export async function uiGate(
   // Ahead of the head test so a close carried across commits is refused too.
   // A verdict whose count line did not parse reads as unchecked and goes on.
   if (droveNothing(scope.counts)) return fail('ui', 'ui-undriven')
-  if (coversHead(scope.commit, head)) return pass('ui')
 
-  const changed = await api.readChanged(scope.commit, head)
-  if (changed === undefined) return fail('ui', 'gh-failed')
-  if (!changed.isAncestor) return fail('ui', 'ui-behind')
-
-  const paintedPaths = changed.paths.filter((path) => isPainted(path, painted))
-  if (paintedPaths.length > 0) {
-    return { ...fail('ui', 'ui-behind'), paintedPaths }
+  const carry = await readCarry(
+    (from, to) => api.readChanged(from, to),
+    scope.commit,
+    head,
+  )
+  if (carry.kind === 'covered') return pass('ui')
+  if (carry.kind === 'failed') return fail('ui', 'gh-failed')
+  if (carry.kind === 'not-ancestor') return fail('ui', 'ui-behind')
+  if (carry.kind === 'carried') {
+    return { ...pass('ui'), carriedFrom: carry.carriedFrom }
   }
-  return { ...pass('ui'), carriedFrom: scope.commit }
+
+  const paintedPaths = carry.drivenPaths.filter((path) =>
+    isPainted(path, painted),
+  )
+  return {
+    ...fail('ui', 'ui-behind'),
+    ...(paintedPaths.length > 0 && { paintedPaths }),
+    drivenPaths: carry.drivenPaths,
+  }
 }
 
 function standingGate(standing: Standing): GateResult {

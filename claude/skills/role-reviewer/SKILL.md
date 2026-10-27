@@ -74,6 +74,10 @@ Run `canon pr lift <number> --json` after posting `## Review closed` or `## UI r
 
 Skip that message when the reason names the other review as open or missing, since the other reviewer's close runs the verb again.
 
+### A re-drive owed
+
+Message the controller when `canon pr tick` refuses `redrive-owed`, naming the driven commit, the tip in `head`, and the `drivenPaths`. A push the boxes can observe landed after the pass drove, so the next UI pass is a dispatch only the controller orders.
+
 ### Every other message
 
 The rest of the channel is what this session never sends.

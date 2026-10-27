@@ -26,7 +26,7 @@ A pass stops rather than repeat a verdict that already covers the head.
 - An open verdict at the head stops the same way, unless a `## Review response` or `## Post-review findings` comment is newer, the launch names an address, or it drove no box, as `post.md` defines
 - The hosted preview was not built from the head: stop and post nothing, naming `built`, `tip`, and `canon pr preview <number> --json` for the dispatcher
 - Post, then run `canon pr lift <number>` on a close. Never merge or ready the PR by hand, and edit the evidence comment only through `canon pr tick`.
-- A push after a close owes a re-drive only when it changed a painted path, since the lift carries the close across the rest.
+- A push after a close owes a re-drive unless every path it changed is inert, the list `references/tick.md` gives, since the lift carries the close across those alone.
 
 ## Step 1: resolve the pull request
 

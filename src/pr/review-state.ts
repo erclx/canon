@@ -47,6 +47,7 @@ export interface UiState extends UiScope, FamilyState {
   readonly isBound: boolean
   readonly carriedFrom?: string
   readonly paintedPaths?: readonly string[]
+  readonly drivenPaths?: readonly string[]
 }
 
 export interface ReviewStateRecord {
@@ -119,6 +120,7 @@ async function readAt(
         isBound: hasChecklist,
         ...(ui.carriedFrom !== undefined && { carriedFrom: ui.carriedFrom }),
         ...(ui.paintedPaths !== undefined && { paintedPaths: ui.paintedPaths }),
+        ...(ui.drivenPaths !== undefined && { drivenPaths: ui.drivenPaths }),
       },
     },
   }
