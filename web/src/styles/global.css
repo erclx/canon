@@ -14,7 +14,7 @@
 @layer base {
   /*
    * Role names over tokens. Ink carries every action and link, and the pip is
-   * the page's one hue, so the page carries no `--color-accent` at all. Muted
+   * the page's one hue, so the page reads no accent token at all. Muted
    * text reads `--color-text-secondary` on every ground, since the muted token
    * falls under 4.5:1 on the surface at the sizes a figure sets.
    */
