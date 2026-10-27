@@ -36,6 +36,26 @@ Attribution reads `canon/config/config.json`, falling back to `.claude/canon/con
 
 Add `--json` for a machine-readable report and `--exit-code` to fail CI when a target falls behind. Project-authored files, superseded artifacts, seed drift, tooling, and `reverse` never count toward that code, and an unmigrated domain does.
 
+## Update canon itself
+
+Nothing refreshes on its own. Claude Code ships auto-update off for third-party marketplaces, so an installed copy serves whatever version it was installed at until you refresh it.
+
+```bash
+claude plugin marketplace update canon
+claude plugin update canon@canon
+canon upgrade
+```
+
+The first two update the skills, the third updates the CLI, and they move independently. Restart Claude Code, or run `/reload-plugins`, to pick the skills up.
+
+`canon upgrade` reads the package manager off its own install path and reinstalls with that one. It names what it detected before it runs anything, and it refuses a source checkout rather than reinstalling over your clone.
+
+### Checking for drift
+
+`canon sync --check` and `canon claude skills drift` both report the installed version against the newest published one, and neither changes its exit code over it, so an offline machine reads unknown rather than red.
+
+To stop doing this by hand, turn auto-update on once under `/plugin` in the Marketplaces tab. Confirm what you are running with `canon --version` and `claude plugin list`.
+
 ## Catch-all
 
 `canon sync <path>` runs every installed domain's sync and never touches user-owned seeds.
