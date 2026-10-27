@@ -29,6 +29,19 @@ The verb resolves the board at the main worktree root in-process, the root `sess
 - A line already reading as a list of `#NNN` entries takes the new number appended, reported as `appended`, so a task shipped in slices keeps every pull request
 - The same write drops this branch from the `Pending branch:` line `canon tasks outcome` wrote, which lets the merge-time archive close the task
 
+## Record the session
+
+Beside the number, name this session on the same task's `Sessions:` line. It is the one record that covers a hand-launched worker, which no dispatcher saw start. Read the id from the roster's own row for the caller, then hand it to the verb under the same plan:
+
+```bash
+id=$(canon sessions list --self --json | jq -r '.sessions[0].sessionId // empty')
+[ -n "$id" ] && canon tasks session "$id" --plan feature-<slug> --json
+```
+
+- A dispatched worker is already listed, since its dispatcher recorded it at launch, and the verb reports `unchanged` rather than writing it twice
+- An empty `id` means the roster could not name the caller, so skip the write and report that no session was recorded
+- Skip the same three refusals as the number below, and report `bad-input` or `no-name`, since either is a defect in this call
+
 ## Refusals
 
 Skip silently when the record is `ok: false` and `reason` is `no-board`, `no-match`, or `ambiguous`, meaning no board, no task naming the plan, or more than one. A guessed write would compound each, since a wrong match archives the wrong task unattended once the branch merges. Report any other refusal rather than swallowing it.

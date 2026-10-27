@@ -10,7 +10,9 @@ import {
   readPendingBranches,
   readPlanTargets,
   readPullRequest,
+  readSessions,
   resolveLivePlan,
+  SESSIONS_PREFIX,
   tasksDir,
 } from '@/tasks/archive'
 import {
@@ -66,6 +68,7 @@ export const FINDING_KINDS = [
   'blocker-settled',
   'blocker-unresolved',
   'blocker-declined',
+  'sessions-misshapen',
 ] as const
 
 export type FindingKind = (typeof FINDING_KINDS)[number]
@@ -839,6 +842,39 @@ async function planDisagreement(
         ? `is rowed against ${row.plan} and cites ${targets[0]} in its own Plan: line. One task names one plan.`
         : `is rowed against ${row.plan}, which is none of the links on its own Plan: line (${targets.join(', ')}).`,
   }
+}
+
+/**
+ * Reports a `Sessions:` line that does not parse as name and id pairs, since
+ * the reader takes such a line as naming nobody and a retro would find the
+ * sessions gone. A row whose task file is gone is left to `task-unresolved`.
+ */
+async function checkSessions(
+  rows: readonly BoardRow[],
+  dir: string,
+): Promise<Finding[]> {
+  const found = await Promise.all(
+    rows.map(async (row): Promise<Finding | undefined> => {
+      if (!row.stem) return undefined
+      const file = join(dir, `${row.stem}.md`)
+      if (!existsSync(file)) return undefined
+
+      const text = await readFile(file, 'utf8')
+      const line = text
+        .split('\n')
+        .find((entry) => entry.startsWith(SESSIONS_PREFIX))
+      if (line === undefined || readSessions(text).length > 0) return undefined
+
+      return {
+        kind: 'sessions-misshapen',
+        group: row.group,
+        subject: row.stem,
+        message: `carries "${line}", which does not read as name (sessionId) pairs, so no session it names can be recovered. Rewrite it through canon tasks session.`,
+      }
+    }),
+  )
+
+  return found.filter((finding): finding is Finding => finding !== undefined)
 }
 
 /**
@@ -1638,6 +1674,7 @@ export async function validateBoard(
     ...checkMapping(rows, backlog, dir),
     ...(await groupRuleFindings(rows, root)),
     ...(await checkPlanAgreement(rows, dir, root)),
+    ...(await checkSessions(rows, dir)),
     ...(await checkStaleTouches(rows, root)),
     ...checkCellWidth(rows),
     ...checkOrdering(rows),

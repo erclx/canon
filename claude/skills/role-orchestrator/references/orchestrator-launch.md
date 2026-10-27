@@ -1,6 +1,6 @@
 ---
 title: Orchestrator launch runbook
-description: The launch every dispatch kind shares, being the build, cloud build, review-address, planning, and talk templates, the session name and controller id each carries, why the command sits at position zero, and what the brief may carry
+description: The launch every dispatch kind shares, being the build, cloud build, review-address, and planning templates with a pointer to the talk variant, the session name and controller id each carries, why the command sits at position zero, and what the brief may carry
 ---
 
 Run this once `orchestrator-dispatch.md` has cleared a row, or from its planning or review-address shape below when that runbook's checks do not bind. The model each template names comes from `## Pick the model` in that runbook.
@@ -79,6 +79,10 @@ The prompt carries pointers and standing context, and stops there. The branch an
 
 Report the dispatch as loudly as the human-launch line it replaces, naming the branch, the model, the task, and the session name, so a person reading the transcript can follow what fired without watching it happen.
 
+### Record the worker on its task
+
+Once a build or review-address launch returns, run `canon tasks session <worker-id> <task> --json` with the sessionId the launch output carries. On `no-name`, the worker already exited, so rerun with `--name` and the name passed to `-n`.
+
 ## Dispatch to a cloud worker
 
 Read `${CLAUDE_SKILL_DIR}/references/orchestrator-cloud-launch.md` when `orchestrator-dispatch.md` picked cloud for the row. It holds the prompt that carries the plan as text and announces over GitHub, the create under `script`, and the readout that refuses to record a missing session id.
@@ -137,25 +141,7 @@ Hold all planning of a row any talk session has said by message it is planning, 
 
 ## Dispatch a talk session
 
-A planner or worker the operator will talk with takes the same launch as its cold shape above, with a `-talk` suffix on its name and one sentence added to its brief. A cold session works alone and reports back, and a talk session stays open after its plan or pull request lands so the operator can keep shaping the row.
-
-```bash
-claude --bg --model <model> -n "planner-<project>-<slug>-talk" "Run /canon:role-planner, then /canon:plan-feature <task>. This is a talk session: the operator will talk with you here, so run your role's talk clause, and message your controller when the operator ends the conversation. Your controller is the session whose sessionId is <dispatcher-id>. ..."
-claude --bg --model <model> -n "worker-<project>-<slug>-talk" "/canon:auto-ship <plan>
-This is a talk session: the operator will talk with you here, so run your role's talk clause, and message your controller when the operator ends the conversation. Your controller is the session whose sessionId is <dispatcher-id>. ..."
-```
-
-The ellipsis stands for the rest of the cold template's message clauses, unchanged. The build variant keeps `/canon:auto-ship <plan>` at position zero with nothing before it, per the rule above.
-
-- Keep the role prefix and add the suffix, since `orchestrator-handoff.md` separates dispatched sessions by `worker-` and `planner-` and a new prefix reads as a hand launch
-- A talk session is retired only on the operator's word, stated once in `orchestrator-handoff.md`, so do not restate it in a launch report
-- Reviewers get no talk shape, since a reviewer's pass holds no operator dialogue
-
-### Recording the talk session
-
-Read the session's `sessionId` off the launch output, carry it in this session's own context, and write it into the map's `## Talk sessions held open` at the next handoff. The client can rename a session and drop the suffix, so the id is the durable marker and the suffix is only for display.
-
-The map exists only once the handoff writes it, so this session's own launches, read with the prior map, are what the first wind-down reads talk sessions from.
+Read `${CLAUDE_SKILL_DIR}/references/orchestrator-talk-launch.md` when the operator will talk with a planner or worker rather than leave it to report back. It states the `-talk` name suffix, the one sentence the brief adds, and where the session's id is kept for the handoff.
 
 ## Hand launch
 

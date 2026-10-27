@@ -21,6 +21,16 @@ claude --bg --model <model> -n "reviewer-<project>-<number>" "Run /canon:role-re
 - Append the cross-branch facts after the controller clause, per `### What the brief may carry` in `orchestrator-launch.md`
 - Check `canon sessions list --json` for a live `reviewer-<project>-<number>` before launching, and message it instead when one holds the pull request
 
+### Record the reviewer on the task
+
+A reviewer writes no task file, so this session names it on the task the pull request closes, through the sessionId the launch output carries:
+
+```bash
+canon tasks session <reviewer-id> <task> --json
+```
+
+Record the UI reviewer below the same way after its launch. A `no-name` refusal means the reviewer exited before the read, so rerun with `--name` and the name the launch passed to `-n`.
+
 ### The channel clauses
 
 The channel clauses restate what `role-reviewer` holds, so a reviewer whose plugin cache predates that body still sends the dispatch itself. The worker reads the reviewer's sessionId off that message and sends its re-review request back to it, since a reviewer holds the trunk branch and no branch lookup finds it.

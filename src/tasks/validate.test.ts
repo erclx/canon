@@ -509,6 +509,32 @@ describe('validateBoard', () => {
     expect(outcome.ok && kinds(outcome.findings)).toEqual(['plan-uncited'])
   })
 
+  it('should report a rowed task whose Sessions line carries a short id', async () => {
+    await seedPlanLine(
+      'v1.0-first',
+      'Plan: [feature-v1.0-first](../plans/feature-v1.0-first.md)\nSessions: worker-canon-a (0b1c2d3e)',
+    )
+    await seedPlan('v1.0-first')
+    await seedBoard(boardBody([readyTable([{ stem: 'v1.0-first' }])]))
+
+    const outcome = await validateBoard(ROOT)
+
+    expect(outcome.ok && kinds(outcome.findings)).toEqual([
+      'sessions-misshapen',
+    ])
+  })
+
+  it('should pass a rowed task whose Sessions line names full ids', async () => {
+    await seedPlanLine(
+      'v1.0-first',
+      'Plan: [feature-v1.0-first](../plans/feature-v1.0-first.md)\nSessions: worker-canon-a (0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0), cloud-a (session_01AbC)',
+    )
+    await seedPlan('v1.0-first')
+    await seedBoard(boardBody([readyTable([{ stem: 'v1.0-first' }])]))
+
+    expect(await validateBoard(ROOT)).toMatchObject({ ok: true, findings: [] })
+  })
+
   it('should read a sliced run now row naming one of the links as agreeing', async () => {
     await seedPlanLine('v1.0-first', SEVERAL_PLANS('v1.0-first'))
     await seedPlan('v1.0-first')
