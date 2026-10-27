@@ -30,13 +30,37 @@ The mode holds only while the caller names it. An ordinary run that finds a pull
 
 ## Choose the beats
 
-Take a beat from each checklist box that asks the reviewer to click, fill, or scroll something, in checklist order, up to three beats.
+Film where motion is the claim. Filter the boxes first, then spend the three beats so each feature area shows its change once before any area shows two.
+
+### Filter the boxes
+
+A box is filmable when it asks the reviewer to click, fill, or scroll something and its result is a visible change.
 
 - Skip a box ending in `(taste)`, since no driver judges it
 - Skip a box that asks only to look at a state the page opens on, since a screenshot already shows it
+- Skip a negative box, one asserting that something does not happen, such as "no drop line draws", since footage of nothing shows nothing
+
+Read the box's text for the negative. A box asserting an unchanged result, such as "the board goes to all projects as before", is not negative, since the action still produces a visible change. Rank it behind a box in the same group that names new behavior.
+
+### Order the beats
+
+A group is the bold feature-area label above at most five boxes, as `ui-checklist` defines it.
+
+1. Take one beat per group in checklist order, from the first filmable box of each group, up to three beats.
+2. When beats remain after every group has one, take a second pass in checklist order over the boxes left, up to three beats in all.
+
+A checklist with one group gives up to three beats from it. A checklist with four groups gives three beats, one from each of the first three.
+
+### Plan the beats
+
+Write one plan entry for each beat chosen, then skip when none was.
+
 - Name each beat after its box's text, cut to the action
 - Write the plan per `${CLAUDE_SKILL_DIR}/references/take-craft.md`, finding each target on the served page rather than guessing it
-- With no box left, skip as `no-interactive-box` and film nothing
+- With no interactive box, skip as `no-interactive-box` and film nothing
+- With interactive boxes that are all negative or static, skip as `no-visible-change` and film nothing
+
+The negative test is a judgment over the box's text. A misread box costs a weaker reel and never a wrong pass, since the still check below guards the footage and the UI reviewer drives every box regardless.
 
 Keep the whole reel at or under 12 seconds. Each beat opens and closes on a 0.6 s hold, so give each action's `wait` only what its result needs to settle.
 
