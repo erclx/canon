@@ -58,7 +58,7 @@ interface Entry {
   readonly quote: string
   readonly isItem: boolean
   /** Matches at or past the content start, the only ones a line can report. */
-  readonly colons: readonly RegExpMatchArray[]
+  readonly colons: readonly RegExpExecArray[]
   /** Items sharing one list at one indent, shared by reference. */
   group?: Entry[]
 }
