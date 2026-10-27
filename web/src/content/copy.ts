@@ -69,8 +69,8 @@ export const fold = {
       'One change running through canon, from the groundwork that measured it through its plan, dispatch, build, and review to the merge',
     /** The poster's action, with the length read off the rendered film. */
     play: (seconds: number) => `Play the film · ${Math.round(seconds)} s`,
+    /** A toggle's label stays fixed while `aria-pressed` carries its state, per the WAI-ARIA button pattern. */
     pause: 'Pause the film',
-    resume: 'Play the film',
   },
 }
 

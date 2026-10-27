@@ -111,15 +111,16 @@ test.describe('the film at desktop width', () => {
     await page.emulateMedia({ reducedMotion: 'no-preference' })
     await page.goto('/')
     const { shown } = await films(page)
+    const control = page.locator('[data-film-pause]')
     await expect(shown).toHaveJSProperty('paused', false, SETTLE)
+    const name = await control.textContent()
 
-    await page.locator('[data-film-pause]').click()
+    await control.click()
 
     await expect(shown).toHaveJSProperty('paused', true, SETTLE)
-    await expect(page.locator('[data-film-pause]')).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    )
+    await expect(control).toHaveAttribute('aria-pressed', 'true')
+    // A toggle carries its state in aria-pressed alone, so its name holds.
+    await expect(control).toHaveText(name ?? '')
   })
 
   test('waits on its poster with a play control under reduced motion', async ({

@@ -71,8 +71,6 @@ const films = [
         class="film-pause"
         data-film-pause
         aria-pressed="false"
-        data-pause={fold.film.pause}
-        data-resume={fold.film.resume}
       >
         {fold.film.pause}
       </button>
@@ -142,7 +140,6 @@ const films = [
       if (!film) return
       paused = false
       pause?.setAttribute('aria-pressed', 'false')
-      if (pause) pause.textContent = pause.dataset.pause ?? ''
       if (!wide.matches) {
         film.controls = true
         const enter =
@@ -162,8 +159,6 @@ const films = [
       if (!film) return
       paused = !paused
       pause.setAttribute('aria-pressed', String(paused))
-      pause.textContent =
-        (paused ? pause.dataset.resume : pause.dataset.pause) ?? ''
       if (paused) film.pause()
       else start(film)
     })
