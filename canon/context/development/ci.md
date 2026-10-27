@@ -55,11 +55,11 @@ Every workflow installing the Playwright system packages calls this script. A de
 - `--archives <dir>` writes an `apt.conf.d` drop-in pointing apt's download cache at `<dir>`, and the drop-in stays for the rest of the job, so a later `apt-get` there fills the same folder
 - `src/gate/workflow-timeouts.test.ts` fails a direct `install-deps` or `--with-deps` call, a script step with no `timeout-minutes`, and a script step with no `--archives`
 
-### The apt archive cache
+### `.github/workflows/warm-apt-cache.yml`
 
 Each caller restores `~/.cache/apt-archives` from a `playwright-apt-<ImageOS>-<ImageVersion>` key before the install, falling back to the newest key for the same OS, so the mirror serves only the changed packages.
 
-- `warm-apt-cache.yml` is the one writer, since a pull request's cache is scoped to its merge ref. It runs on `main` on a push to the script or `bun.lock`, daily, and by hand.
+- This workflow is the one writer, since a pull request's cache is scoped to its merge ref. It runs on `main` on a push to the script or `bun.lock`, daily, and by hand.
 - It gives each attempt 600 seconds, saves only on an exact-key miss after a passing install, and runs `apt-get autoclean` first so a previous image's versions drop out
 - A miss on a pull request still installs from the mirror, so a new runner image is exposed until the next warm run
 
