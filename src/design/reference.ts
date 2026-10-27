@@ -2,8 +2,8 @@
  * The pure half of `scripts/core/design-sync.ts`, ported from Frameboard's
  * own sync. Frameboard frames load a shared kit, while this board's frames
  * load their project's `../assets/`, so each project's assets land under
- * `kit/<project>/` in `canon/design/` and no two projects can overwrite one
- * another's files of the same name.
+ * `kit/<project>/assets/` in `canon/design/`, mirroring the board, and no two
+ * projects can overwrite one another's files of the same name.
  */
 
 /** A `frames.json` entry the sync cannot capture, named so the file can be fixed. */
@@ -60,7 +60,7 @@ export function missingFrames(
  * its one writer.
  */
 export function toReference(html: string, project: string): string {
-  return html.replaceAll(BOARD_ASSETS, `../kit/${project}/`)
+  return html.replaceAll(BOARD_ASSETS, `../kit/${project}/assets/`)
 }
 
 /** The project assets a frame loads, by their path under `assets/`, each once. */

@@ -67,7 +67,7 @@ describe('toReference', () => {
     const reference = toReference(html, 'landing')
 
     expect(reference).toBe(
-      '<link href="../kit/landing/palette.css"><img src="../kit/landing/mark-dark.svg">',
+      '<link href="../kit/landing/assets/palette.css"><img src="../kit/landing/assets/mark-dark.svg">',
     )
   })
 

@@ -3,8 +3,8 @@
  * canon/design/frames.json maps, as its HTML beside a PNG per theme, captured
  * through Frameboard's own `capture` verb from the design board at the main
  * worktree's .canon/board, plus a copy of every project asset those frames
- * load under kit/<project>/. `--check` writes nothing and exits 1 when the
- * folder differs from what a sync would write.
+ * load under kit/<project>/assets/. `--check` writes nothing and exits 1
+ * when the folder differs from what a sync would write.
  *
  * Ported from Frameboard's own scripts/design-sync.ts. Its frames load a
  * shared kit and it formats each HTML through oxfmt, while this board's frames
@@ -142,7 +142,7 @@ function run(check: boolean): number {
       output.set(`${reference}.html`, toReference(html, project))
       for (const asset of boardAssets(html)) {
         output.set(
-          join('kit', project, asset),
+          join('kit', project, 'assets', asset),
           readAsset(board, project, asset),
         )
       }

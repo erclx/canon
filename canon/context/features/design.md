@@ -26,7 +26,7 @@ Owns the token module, the component layer, the renderers, the markdown parser, 
 Holds the accepted frames a build matches. `bun run design:sync` writes them from the board at the main worktree root through `scripts/core/design-sync.ts`, a port of Frameboard's own sync whose pure half sits in `src/design/reference.ts`.
 
 - `frames.json` maps each `<group>/<name>` to a board frame as `<project>/<page>/<frame>`, and it and `index.md` are the only files written by hand
-- Each frame's `../assets/` links point at `kit/<project>/` in the record, so two projects loading an asset of the same name land apart
+- Each frame's `../assets/` links point at `kit/<project>/assets/` in the record, mirroring the board, so two projects loading an asset of the same name land apart
 - The sync removes a file no mapping writes, and `--check` names it as stray, while a PNG whose bytes alone differ only warns
 - CI never runs the check, since `.canon/board/` is gitignored and CI holds no copy, so drift between board and record surfaces only when a session runs the sync
 
