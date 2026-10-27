@@ -73,10 +73,14 @@ ci = [
 # `assets/brand/` rides here rather than under `generated` or `rides-with-generated`,
 # since a mark under it is hand-authored source `canon/DESIGN.md`'s own
 # iconography field names, not a mechanical derivative of anything.
+# `canon/design/` rides beside `canon/DESIGN.md` as the record's other half,
+# its synced PNGs and kit included, rather than as `[declined]` generated
+# output, since its index is hand-written and an unlisted path reads as a gap.
 context = [
   "canon/context/",
   "canon/REQUIREMENTS.md",
   "canon/DESIGN.md",
+  "canon/design/",
   "CLAUDE.md",
   "assets/brand/",
 ]

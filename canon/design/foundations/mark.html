@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>mark</title>
+    <style>
+      :root{--tile:#fbfaf8;--tile-edge:#dcdad6;--bg:#fbfaf8;--surface:#f1f1ee;--line:#dcdad6;--ink:#2c2c29;--body:#4b4947;--muted:#666561;--hue:#c2380e;--note:#8250df;--note-bg:#fbefff}
+      [data-theme='dark']{--tile:#1b1a18;--tile-edge:transparent;--bg:#0f0e0c;--surface:#151412;--line:#2a2926;--ink:#d9d7d4;--body:#aeada9;--muted:#8c8b86;--hue:#ff6b42;--note:#b88cff;--note-bg:#231a35}
+      *{box-sizing:border-box}
+      body{margin:0;background:var(--bg);color:var(--body);font-family:Geist,sans-serif;font-size:14px;line-height:1.5}
+      .tag{display:flex;justify-content:space-between;align-items:baseline;gap:24px;background:var(--note-bg);color:var(--note);padding:12px 32px}
+      .tag b{font-size:16px;font-weight:600}
+      .sheet{padding:28px 32px 32px;display:grid;gap:24px}
+      h2{margin:0 0 10px;font-size:14px;font-weight:500;color:var(--muted)}
+      .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+      .cell{display:grid;gap:8px}
+      .box{display:grid;place-items:center;height:220px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+      .cell span{font-size:13px;color:var(--muted)}
+      .tone{--c-fill:var(--ink);--p-fill:var(--hue)}
+      .mono{--c-fill:var(--ink);--p-fill:var(--ink)}
+      .onhue{--c-fill:var(--ink);--p-fill:var(--hue)}
+      .tile{display:grid;place-items:center;width:132px;height:132px;border-radius:37px;background:var(--tile);box-shadow:inset 0 0 0 1px var(--tile-edge)}
+      .sizes{display:flex;align-items:flex-end;gap:32px;padding:20px 24px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+      .s{display:grid;justify-items:center;gap:6px}
+      .s span{font-size:12px;color:var(--muted)}
+      .spec{display:grid;grid-template-columns:auto 1fr;gap:4px 20px;margin:0;padding:16px 20px;border:1px solid var(--line);border-radius:10px}
+      .spec dt{color:var(--ink);font-weight:500}
+      .spec dd{margin:0}
+      code{font-family:'Geist Mono',monospace;font-size:13px}
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <defs>
+        <mask id="c-final" maskUnits="userSpaceOnUse" x="-20" y="-20" width="160" height="140">
+          <rect x="-20" y="-20" width="160" height="140" fill="white" />
+          <rect x="28" y="32" width="36" height="36" rx="10" fill="black" />
+          <rect x="46" y="32" width="80" height="36" fill="black" />
+        </mask>
+      </defs>
+      <symbol id="final" viewBox="-0.35 -5 110 110">
+        <rect x="8" y="12" width="76" height="76" rx="30" fill="var(--c-fill)" mask="url(#c-final)" />
+        <rect x="81.3" y="40" width="20" height="20" rx="3.8" fill="var(--p-fill)" />
+      </symbol>
+    </svg>
+    <div class="tag" data-name="Sheet tag"><b>The canon mark</b><span>Picked 2026-10-26. Ink c, vermilion pip.</span></div>
+    <div class="sheet">
+      <section data-name="Versions">
+        <h2>Versions</h2>
+        <div class="grid">
+          <div class="cell"><div class="box"><svg class="tone" width="132" height="132" aria-hidden="true"><use href="#final" /></svg></div><span>Primary: ink c, vermilion pip</span></div>
+          <div class="cell"><div class="box"><svg class="mono" width="132" height="132" aria-hidden="true"><use href="#final" /></svg></div><span>One color, where only one ink is allowed</span></div>
+          <div class="cell"><div class="box"><span class="tile"><svg class="onhue" width="96" height="96" aria-hidden="true"><use href="#final" /></svg></span></div><span>App tile: follows the theme, dark by default</span></div>
+        </div>
+      </section>
+      <section data-name="Sizes">
+        <h2>Sizes</h2>
+        <div class="sizes">
+          <div class="s"><svg class="tone" width="16" height="16" aria-hidden="true"><use href="#final" /></svg><span>16</span></div>
+          <div class="s"><svg class="tone" width="24" height="24" aria-hidden="true"><use href="#final" /></svg><span>24</span></div>
+          <div class="s"><svg class="tone" width="32" height="32" aria-hidden="true"><use href="#final" /></svg><span>32</span></div>
+          <div class="s"><svg class="tone" width="56" height="56" aria-hidden="true"><use href="#final" /></svg><span>56</span></div>
+          <div class="s"><svg class="tone" width="96" height="96" aria-hidden="true"><use href="#final" /></svg><span>96</span></div>
+        </div>
+      </section>
+      <section data-name="Construction">
+        <h2>Construction, in a 100 unit grid</h2>
+        <dl class="spec">
+          <dt>Body</dt><dd>A rounded square, 76 wide at <code>(8, 12)</code>, corner radius 30</dd>
+          <dt>Stroke</dt><dd>20, so the counter is a 36 square at <code>(28, 32)</code> with corner radius 10</dd>
+          <dt>Mouth</dt><dd>Cut from x 46 to the right edge, from y 32 to 68, level with the counter so the inside runs straight out</dd>
+          <dt>Pip</dt><dd>A 20 square at <code>(81.3, 40)</code>, corner radius 3.8: one stroke wide, on the center line, just past the arm ends</dd>
+          <dt>View</dt><dd><code>-0.35 -5 110 110</code>, centered on the bounds so nothing clips</dd>
+          <dt>Color</dt><dd>Pip <code>#c2380e</code> on light and <code>#ff6b42</code> on dark, both over 5:1. The c takes the text ink.</dd>
+          <dt>Tile</dt><dd>Dark by default, <code>#1b1a18</code> with no edge, for avatars and anywhere no theme applies. On light, <code>#fbfaf8</code> with a 1 px <code>#dcdad6</code> edge. Never a vermilion fill.</dd>
+        </dl>
+      </section>
+    </div>
+  </body>
+</html>
