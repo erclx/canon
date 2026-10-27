@@ -94,6 +94,56 @@ export function missingFieldMessage(field: string): string {
   return `Feedback report is missing its "### ${field}" section. Every report needs ${REQUIRED_FIELDS.map((name) => `### ${name}`).join(', ')}.`
 }
 
+/**
+ * The fields a follow-up comment carries. A follow-up reports what happened
+ * after filing, so it names no surface and proposes no fix of its own. It says
+ * whether the body's fix still stands, since triage reads the body as the
+ * request and a silent overturn leaves it acting on the old one.
+ */
+export const FOLLOW_UP_FIELDS = [
+  'Observed',
+  'Changes the fix',
+  'Links',
+] as const
+
+const YES_OR_NO = /^(?:yes|no)\b/i
+
+/**
+ * A URL, or an issue reference such as `#2801`, `frameboard#156`, or
+ * `erclx/canon#2801`. A bare name is what the hand-written follow-up carried,
+ * and nothing a reader can open from it.
+ */
+const REFERENCE = /https?:\/\/\S+|(?:^|[\s(])(?:[\w.-]+\/)?[\w.-]*#\d+\b/
+
+export function missingFollowUpField(body: string): string | undefined {
+  const sections = parseSections(body)
+  for (const field of FOLLOW_UP_FIELDS) {
+    const value = sections.get(field.toLowerCase())
+    if (!value) return field
+  }
+  return undefined
+}
+
+/**
+ * The sentence a refused follow-up reads, or `undefined` when it carries every
+ * field in a checkable shape. One problem at a time, as `missingField` does.
+ */
+export function followUpProblem(body: string): string | undefined {
+  const absent = missingFollowUpField(body)
+  if (absent) {
+    return `Follow-up is missing its "### ${absent}" section. Every follow-up needs ${FOLLOW_UP_FIELDS.map((name) => `### ${name}`).join(', ')}.`
+  }
+  const changes = readField(body, 'Changes the fix') ?? ''
+  if (!YES_OR_NO.test(changes)) {
+    return 'Follow-up "### Changes the fix" must open with yes or no, so triage can tell whether the issue body still holds.'
+  }
+  const links = readField(body, 'Links') ?? ''
+  if (!REFERENCE.test(links)) {
+    return 'Follow-up "### Links" carries no URL or issue reference. Write each as a URL or as owner/repo#number.'
+  }
+  return undefined
+}
+
 function surfaceField(body: string): string | undefined {
   return readField(body, 'Surface')?.split('\n')[0]?.trim()
 }
