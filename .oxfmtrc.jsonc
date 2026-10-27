@@ -34,10 +34,12 @@
     // web/public/evidence/ and the hand-authored web sources keep their format gate.
     "/web/public/previews/",
 
-    // design-sync.ts writes these as the board frame holds them, and its --check
-    // compares the bytes. Formatting them too gives each file two writers, and
-    // the check then fails for whichever committed last.
+    // design-sync.ts writes these as the board holds them, the frame HTML and the
+    // assets it copies under kit/, and its --check compares the bytes. Formatting
+    // them too gives each file two writers, and the check then fails for whichever
+    // committed last.
     "/canon/design/**/*.html",
+    "/canon/design/kit/",
 
     // The launch film's HyperFrames source, copied byte for byte from the project
     // that rendered the README loops. Reflowing its markup can move whitespace the
