@@ -6,13 +6,43 @@ What follows is the local loop for an invited contributor, and for anyone runnin
 
 ## Setup
 
-Bun runs the CLI and every script. The [readme](README.md#development) covers the clone, install, and bootstrap path.
+Working on the toolkit starts from a clone. Running the CLI doesn't, since it installs from the registry. A clone needs these on the path:
+
+- [Bun](https://bun.sh) for the CLI runtime and scripts
+- [Git](https://git-scm.com) with worktree support
+- [GitHub CLI](https://cli.github.com) (optional) for ship flows
+- `zsh`, since bootstrap appends its aliases to `~/.zshrc`
+
+Clone the repo, then run the bootstrap script. It installs dependencies, links the CLI globally, and appends a marked block of Claude Code shell aliases to your `~/.zshrc`.
+
+```bash
+git clone https://github.com/erclx/canon.git
+cd canon
+bun install
+bun run bootstrap
+```
+
+The script is idempotent, so re-run it after pulling upstream changes without duplicating anything. Its last step resolves `canon --help` to confirm the install.
+
+With the CLI linked, scaffold a fresh project to try a change against.
+
+```bash
+mkdir ~/my-project && cd ~/my-project
+git init
+canon init
+```
+
+`canon init` lays down the base tooling configs, the Claude seeds, and the `base` governance rules in one pass.
+
+- Pass `--stack <name>` for a language stack such as `node` or `python`, or `--skip governance` to leave rules out.
+- Run `canon tooling list --json` to see the catalog.
+- [Target projects](docs/target/projects.md) follows a project from scaffold through adding a domain to syncing upstream drift.
 
 ### The bootstrap step
 
 `bun run bootstrap` writes one file outside the repository. It appends a block of Claude Code shell aliases to `~/.zshrc`, wrapped in `# >>> canon aliases >>>` and `# <<< canon aliases <<<` markers.
 
-- A re-run recognizes its own block by the markers and skips, so the script never appends a second copy.
+- A re-run recognizes its own block by the markers and skips, so the script never appends a second copy. An alias added upstream reaches you only once you delete the block and re-run.
 - Deleting the block between the markers removes the aliases.
 - To skip the step, run `bun install` and `bun link` yourself instead.
 - The [zshrc aliases](docs/workflow/zshrc-aliases.md) doc lists what the block defines.
@@ -39,3 +69,14 @@ Conventional commits are enforced. The `commit-msg` hook runs commitlint against
 The repository is agent-first. Every command has a non-interactive path and a JSON catalog, and each domain carries a skill an agent loads before editing that domain.
 
 `CLAUDE.md` is the entry point for that layer. A pull request meets the same hooks and checks whether a person or an agent wrote it.
+
+## Internal narrative
+
+Each domain carries an entry written for someone maintaining the toolkit rather than installing it. These paths resolve in a clone only, since the published package ships `docs` and not `canon/context`.
+
+- [Claude Code plugin](canon/context/surfaces/plugin.md)
+- [Governance rules](canon/context/surfaces/governance.md)
+- [Tooling stacks](canon/context/surfaces/tooling.md)
+- [Design system](canon/context/features/design.md)
+- [Transcripts](canon/context/features/transcripts.md)
+- [Sandbox](canon/context/development/sandbox.md)

@@ -1,0 +1,242 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Geist";
+      src: url("fonts/Geist-Regular.woff2") format("woff2");
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: "Geist";
+      src: url("fonts/Geist-SemiBold.woff2") format("woff2");
+      font-weight: 600;
+    }
+    @font-face {
+      font-family: "Geist Mono";
+      src: url("fonts/GeistMono-Regular.woff2") format("woff2");
+      font-weight: 400;
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      font-family: "Geist", sans-serif;
+      color: var(--body);
+    }
+    #gw-title {
+      position: absolute;
+      left: 120px;
+      top: 228px;
+      display: flex;
+      align-items: baseline;
+      gap: 28px;
+    }
+    #gw-title h1 {
+      font-size: 80px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    #gw-title p {
+      font-size: 40px;
+      color: var(--muted);
+    }
+    .gw-word {
+      display: inline-block;
+    }
+    #gw-panel {
+      position: absolute;
+      left: 120px;
+      top: 410px;
+      width: 1040px;
+      height: 560px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      overflow: hidden;
+    }
+    .gw-head {
+      height: 84px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      background: var(--chrome);
+      border-bottom: 1px solid var(--line);
+      font-size: 40px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .gw-head span {
+      margin-left: auto;
+      font-family: "Geist Mono", monospace;
+      font-size: 32px;
+      font-weight: 400;
+      color: var(--muted);
+    }
+    /* Rows sit at canvas y 580, 710, and 840, the pip's stops in SPEC.md. */
+    .gw-row {
+      position: absolute;
+      left: 0;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      gap: 34px;
+      padding-left: 48px;
+      font-size: 44px;
+    }
+    .gw-row b {
+      font-weight: 600;
+      color: var(--ink);
+      margin-right: 18px;
+    }
+    .gw-tick {
+      flex: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 5px;
+      border: 3px solid var(--muted);
+      position: relative;
+    }
+    .gw-fill {
+      position: absolute;
+      inset: -3px;
+      border-radius: 5px;
+      background: var(--muted);
+    }
+    #gw-number {
+      position: absolute;
+      left: 1260px;
+      top: 440px;
+      font-size: 136px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: var(--ink);
+    }
+    #gw-number-label {
+      position: absolute;
+      left: 1264px;
+      top: 610px;
+      width: 540px;
+      line-height: 1.3;
+      font-size: 40px;
+      color: var(--muted);
+    }
+    /* The decision's first line leaves its marker slot empty: the pip lands there at canvas (1274, 890). */
+    #gw-decision {
+      position: absolute;
+      left: 1320px;
+      top: 860px;
+      font-size: 48px;
+      color: var(--ink);
+    }
+    .gw-dline {
+      height: 60px;
+      display: flex;
+      align-items: center;
+    }
+    .gw-dbody {
+      font-size: 44px;
+    }
+    #gw-decision b {
+      font-weight: 600;
+      margin-right: 16px;
+    }
+  </style>
+  <div id="root" data-composition-id="groundwork" data-width="1920" data-height="1200">
+    <div id="gw-title" class="clip" data-start="0" data-duration="6.4">
+      <h1><span class="gw-word" id="gw-w1">Groundwork</span></h1>
+      <p>
+        <span class="gw-word" id="gw-w2">Measured</span>
+        <span class="gw-word" id="gw-w3">before</span>
+        <span class="gw-word" id="gw-w4">anyone</span>
+        <span class="gw-word" id="gw-w5">plans</span>
+        <span class="gw-word" id="gw-w6">it</span>
+      </p>
+    </div>
+    <div id="gw-panel" class="clip" data-start="0" data-duration="6.4">
+      <div class="gw-head">Context token budget<span>.canon/groundwork</span></div>
+      <div class="gw-row" id="gw-row1" style="top: 130px">
+        <span class="gw-tick"><span class="gw-fill" id="gw-fill1"></span></span>
+        <span><b>Search</b>3 sources, all quoted</span>
+      </div>
+      <div class="gw-row" id="gw-row2" style="top: 260px">
+        <span class="gw-tick"><span class="gw-fill" id="gw-fill2"></span></span>
+        <span><b>Measure</b>the whole corpus, by word</span>
+      </div>
+      <div class="gw-row" id="gw-row3" style="top: 390px">
+        <span class="gw-tick"><span class="gw-fill" id="gw-fill3"></span></span>
+        <span><b>Spike</b>one entry, 741 words to 93</span>
+      </div>
+    </div>
+    <div id="gw-number" class="clip" data-start="0" data-duration="6.4">16,109</div>
+    <div id="gw-number-label" class="clip" data-start="0" data-duration="6.4">words of context, up from 16,109 in July</div>
+    <div id="gw-decision" class="clip" data-start="0" data-duration="6.4">
+      <div class="gw-dline"><b class="gw-word" id="gw-d1">Decision:</b></div>
+      <div class="gw-dbody"><span class="gw-word" id="gw-d2">three</span> <span class="gw-word" id="gw-d3">sections</span> <span class="gw-word" id="gw-d4">per</span> <span class="gw-word" id="gw-d5">entry</span></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // The build, written at its first pace and played 1.3 times slower so each line has time to read.
+    const build = gsap.timeline();
+    const blurIn = { opacity: 1, filter: "blur(0px)", duration: 0.13, ease: "power4.out" };
+    const hidden = { opacity: 0, filter: "blur(6px)" };
+
+    // Title, per word.
+    ["#gw-w1", "#gw-w2", "#gw-w3", "#gw-w4", "#gw-w5", "#gw-w6"].forEach((id, i) => {
+      build.fromTo(id, hidden, blurIn, 0.05 + i * 0.067);
+    });
+
+    // The panel prints top to bottom.
+    build.fromTo("#gw-panel", { clipPath: "inset(0 0 100% 0 round 24px)" }, { clipPath: "inset(0 0 0% 0 round 24px)", duration: 0.5, ease: "expo.out" }, 0.2);
+
+    // Each row prints left to right as the pip arrives at it.
+    const rowIn = { clipPath: "inset(0 0% 0 0)", duration: 0.3, ease: "power2.out" };
+    const rowOut = { clipPath: "inset(0 100% 0 0)" };
+    build.fromTo("#gw-row1", rowOut, rowIn, 0.5);
+    build.fromTo("#gw-row2", rowOut, rowIn, 1.1);
+    build.fromTo("#gw-row3", rowOut, rowIn, 1.7);
+
+    // Each tick fills as the pip leaves its row.
+    const fillIn = { scale: 1, opacity: 1, duration: 0.12, ease: "power2.out" };
+    const fillOut = { scale: 0.4, opacity: 0 };
+    build.fromTo("#gw-fill1", fillOut, fillIn, 0.95);
+    build.fromTo("#gw-fill2", fillOut, fillIn, 1.55);
+    build.fromTo("#gw-fill3", fillOut, fillIn, 2.45);
+
+    // The number counts up from July's corpus to the one the track measured, then holds still.
+    const count = { v: 16109 };
+    const numberEl = document.querySelector("#gw-number");
+    build.fromTo("#gw-number", { opacity: 0 }, { opacity: 1, duration: 0.15 }, 1.15);
+    build.fromTo(
+      count,
+      { v: 16109 },
+      {
+        v: 218865,
+        duration: 1.0,
+        ease: "expo.out",
+        onUpdate: () => {
+          numberEl.textContent = Math.round(count.v).toLocaleString("en-US");
+        },
+      },
+      1.15,
+    );
+    build.fromTo("#gw-number-label", rowOut, rowIn, 1.4);
+
+    // The decision prints beside the pip as it lands.
+    ["#gw-d1", "#gw-d2", "#gw-d3", "#gw-d4", "#gw-d5"].forEach((id, i) => {
+      build.fromTo(id, hidden, blurIn, 2.8 + i * 0.067);
+    });
+
+    build.timeScale(1 / 1.3);
+    tl.add(build, 0);
+
+    // Blur swap out, so the pip is the one thing that carries into the plan.
+    tl.to(
+      ["#gw-title h1", "#gw-title p", "#gw-panel", "#gw-number", "#gw-number-label", "#gw-decision > *"],
+      { opacity: 0, filter: "blur(8px)", duration: 0.18, ease: "power3.in" },
+      6.2,
+    );
+
+    window.__timelines["groundwork"] = tl;
+  </script>
+</template>

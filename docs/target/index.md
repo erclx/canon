@@ -12,4 +12,4 @@ Scaffold, sync, and migrate a toolkit-managed project, with worked setups for th
 
 - [Target projects](projects.md): Scaffold, add domains later, and sync upstream drift in a toolkit-managed project
 - [Target scenarios](scenarios.md): Worked setups for a markdown-heavy project, a web application, and a monorepo
-- [Target sync](sync.md): Check what drifted in a toolkit-managed project and pull it in, per domain or all at once
+- [Target sync](sync.md): Check what drifted in a toolkit-managed project and pull it in, per domain or all at once, and update canon itself

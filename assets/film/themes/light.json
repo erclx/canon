@@ -1,0 +1,10 @@
+{
+  "ground": "#fbfaf8",
+  "panel": "#f1f1ee",
+  "chrome": "#e9e8e5",
+  "line": "#dcdad6",
+  "ink": "#2c2c29",
+  "body": "#4b4947",
+  "muted": "#666561",
+  "pip": "#c2380e"
+}

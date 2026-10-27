@@ -34,6 +34,11 @@
     // web/public/evidence/ and the hand-authored web sources keep their format gate.
     "/web/public/previews/",
 
+    // The launch film's HyperFrames source, copied byte for byte from the project
+    // that rendered the README loops. Reflowing its markup can move whitespace the
+    // compositions lay out, so the tracked source stays the rendered source.
+    "/assets/film/",
+
     // Prettier formats these with prettier-plugin-astro, since oxfmt loads no
     // Prettier plugin. One formatter per file keeps the two from fighting.
     "**/*.astro",

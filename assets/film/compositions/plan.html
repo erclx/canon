@@ -1,0 +1,213 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Geist";
+      src: url("fonts/Geist-Regular.woff2") format("woff2");
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: "Geist";
+      src: url("fonts/Geist-SemiBold.woff2") format("woff2");
+      font-weight: 600;
+    }
+    @font-face {
+      font-family: "Geist Mono";
+      src: url("fonts/GeistMono-Regular.woff2") format("woff2");
+      font-weight: 400;
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      font-family: "Geist", sans-serif;
+      color: var(--body);
+    }
+    #pl-title {
+      position: absolute;
+      left: 120px;
+      top: 228px;
+      display: flex;
+      align-items: baseline;
+      gap: 28px;
+    }
+    #pl-title h1 {
+      font-size: 80px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    #pl-title p {
+      font-size: 40px;
+      color: var(--muted);
+    }
+    .pl-word {
+      display: inline-block;
+    }
+    /* The header leaves a slot at its left: the pip sits at canvas (166, 452) while the file is written. */
+    #pl-doc {
+      position: absolute;
+      left: 120px;
+      top: 410px;
+      width: 820px;
+      height: 560px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      overflow: hidden;
+    }
+    .pl-head {
+      height: 84px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px 0 80px;
+      background: var(--chrome);
+      border-bottom: 1px solid var(--line);
+      font-family: "Geist Mono", monospace;
+      font-size: 32px;
+      color: var(--ink);
+    }
+    .pl-head span {
+      margin-left: auto;
+      color: var(--muted);
+    }
+    .pl-line {
+      position: absolute;
+      left: 48px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+    }
+    .pl-h {
+      font-size: 44px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .pl-path {
+      left: 96px;
+      font-family: "Geist Mono", monospace;
+      font-size: 32px;
+      color: var(--body);
+    }
+    /* The suggestion row leaves its marker slot empty: the pip lands at canvas (1054, 630). */
+    #pl-card {
+      position: absolute;
+      left: 1000px;
+      top: 410px;
+      width: 800px;
+      height: 400px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      overflow: hidden;
+    }
+    .pl-q {
+      position: absolute;
+      left: 40px;
+      right: 40px;
+      font-size: 44px;
+    }
+    #pl-question {
+      top: 40px;
+      line-height: 1.3;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    #pl-suggested {
+      top: 190px;
+      left: 94px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      color: var(--ink);
+    }
+    #pl-blank {
+      top: 290px;
+      font-size: 40px;
+      line-height: 1.25;
+      color: var(--muted);
+    }
+  </style>
+  <div id="root" data-composition-id="plan" data-width="1920" data-height="1200">
+    <div id="pl-title" class="clip" data-start="0" data-duration="6.6">
+      <h1><span class="pl-word" id="pl-w1">Plan</span></h1>
+      <p>
+        <span class="pl-word" id="pl-w2">One</span>
+        <span class="pl-word" id="pl-w3">plan,</span>
+        <span class="pl-word" id="pl-w4">every</span>
+        <span class="pl-word" id="pl-w5">question</span>
+        <span class="pl-word" id="pl-w6">already</span>
+        <span class="pl-word" id="pl-w7">answered</span>
+      </p>
+    </div>
+    <div id="pl-doc" class="clip" data-start="0" data-duration="6.6">
+      <div class="pl-head">feature-context-entry-shape.md</div>
+      <div class="pl-line pl-h" id="pl-l1" style="top: 120px">## Files to touch</div>
+      <div class="pl-line pl-path" id="pl-l2" style="top: 186px">src/context/audit.ts</div>
+      <div class="pl-line pl-h" id="pl-l3" style="top: 272px">## Verification</div>
+      <div class="pl-line pl-path" id="pl-l4" style="top: 338px">bun test src/context/audit.test.ts</div>
+      <div class="pl-line pl-h" id="pl-l5" style="top: 424px">## Risks</div>
+    </div>
+    <div id="pl-card" class="clip" data-start="0" data-duration="6.6">
+      <div class="pl-q" id="pl-question">
+        <span class="pl-word" id="pl-q1">1.</span>
+        <span class="pl-word" id="pl-q2">Should</span>
+        <span class="pl-word" id="pl-q3">a</span>
+        <span class="pl-word" id="pl-q4">gotcha</span>
+        <span class="pl-word" id="pl-q5">carry</span>
+        <span class="pl-word" id="pl-q6">its</span>
+        <span class="pl-word" id="pl-q7">own</span>
+        <span class="pl-word" id="pl-q8">length</span>
+        <span class="pl-word" id="pl-q9">limit?</span>
+      </div>
+      <div class="pl-q" id="pl-suggested">
+        <span class="pl-word" id="pl-s1">Suggested:</span>&nbsp;<span class="pl-word" id="pl-s2">no,</span>&nbsp;<span class="pl-word" id="pl-s3">one&nbsp;line</span>&nbsp;<span class="pl-word" id="pl-s4">is&nbsp;enough</span>
+      </div>
+      <div class="pl-q" id="pl-blank">A blank answer takes the suggestion</div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // The build, written at its first pace and played 1.3 times slower so each line has time to read.
+    const build = gsap.timeline();
+    const blurIn = { opacity: 1, filter: "blur(0px)", duration: 0.13, ease: "power4.out" };
+    const hidden = { opacity: 0, filter: "blur(6px)" };
+    const lineIn = { clipPath: "inset(0 0% 0 0)", duration: 0.3, ease: "power2.out" };
+    const lineOut = { clipPath: "inset(0 100% 0 0)" };
+    const panelIn = { clipPath: "inset(0 0% 0 0 round 24px)", duration: 0.5, ease: "expo.out" };
+    const panelOut = { clipPath: "inset(0 100% 0 0 round 24px)" };
+
+    // Title, per word from faint to ink, without blur.
+    ["#pl-w1", "#pl-w2", "#pl-w3", "#pl-w4", "#pl-w5", "#pl-w6", "#pl-w7"].forEach((id, i) => {
+      build.fromTo(id, { opacity: 0.15 }, { opacity: 1, duration: 0.1, ease: "power2.out" }, 0.05 + i * 0.085);
+    });
+
+    // The plan file prints, then each line writes in, 0.25 s apart, while the pip marks the header.
+    build.fromTo("#pl-doc", panelOut, panelIn, 0.1);
+    ["#pl-l1", "#pl-l2", "#pl-l3", "#pl-l4", "#pl-l5"].forEach((id, i) => {
+      build.fromTo(id, lineOut, lineIn, 0.6 + i * 0.25);
+    });
+
+    // The question card prints beside it.
+    build.fromTo("#pl-card", panelOut, panelIn, 1.7);
+    ["#pl-q1", "#pl-q2", "#pl-q3", "#pl-q4", "#pl-q5", "#pl-q6", "#pl-q7", "#pl-q8", "#pl-q9"].forEach((id, i) => {
+      build.fromTo(id, hidden, blurIn, 1.9 + i * 0.06);
+    });
+
+    // The suggestion prints as the pip lands in its slot.
+    ["#pl-s1", "#pl-s2", "#pl-s3", "#pl-s4"].forEach((id, i) => {
+      build.fromTo(id, hidden, blurIn, 2.5 + i * 0.067);
+    });
+    build.fromTo("#pl-blank", lineOut, lineIn, 2.9);
+
+    build.timeScale(1 / 1.3);
+    tl.add(build, 0);
+
+    // Blur swap out, so the pip is the one thing that carries into dispatch.
+    tl.to(
+      ["#pl-title h1", "#pl-title p", "#pl-doc", "#pl-card"],
+      { opacity: 0, filter: "blur(8px)", duration: 0.18, ease: "power3.in" },
+      6.4,
+    );
+
+    window.__timelines["plan"] = tl;
+  </script>
+</template>

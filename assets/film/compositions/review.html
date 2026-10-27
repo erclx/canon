@@ -1,0 +1,262 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Geist";
+      src: url("fonts/Geist-Regular.woff2") format("woff2");
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: "Geist";
+      src: url("fonts/Geist-SemiBold.woff2") format("woff2");
+      font-weight: 600;
+    }
+    @font-face {
+      font-family: "Geist Mono";
+      src: url("fonts/GeistMono-Regular.woff2") format("woff2");
+      font-weight: 400;
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      font-family: "Geist", sans-serif;
+      color: var(--body);
+    }
+    #rv-title {
+      position: absolute;
+      left: 120px;
+      top: 228px;
+      display: flex;
+      align-items: baseline;
+      gap: 28px;
+    }
+    #rv-title h1 {
+      font-size: 80px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    #rv-title p {
+      font-size: 40px;
+      color: var(--muted);
+    }
+    .rv-word {
+      display: inline-block;
+    }
+    .rv-panel {
+      position: absolute;
+      top: 410px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      overflow: hidden;
+    }
+    .rv-head {
+      height: 84px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      background: var(--chrome);
+      border-bottom: 1px solid var(--line);
+      font-size: 40px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .rv-head span {
+      margin-left: auto;
+      font-family: "Geist Mono", monospace;
+      font-size: 32px;
+      font-weight: 400;
+      color: var(--muted);
+    }
+    /* The header leaves a slot at its left for the pip at (166, 452), and the closed row
+       leaves its marker slot empty for the pip at (182, 820). */
+    #rv-review {
+      left: 120px;
+      width: 1000px;
+      height: 560px;
+    }
+    #rv-review .rv-head {
+      padding-left: 80px;
+    }
+    .rv-row {
+      position: absolute;
+      left: 48px;
+      right: 40px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 34px;
+      font-size: 44px;
+      color: var(--ink);
+    }
+    .rv-dot,
+    .rv-slot {
+      flex: none;
+      width: 28px;
+      height: 28px;
+    }
+    .rv-dot {
+      position: relative;
+      border-radius: 50%;
+      border: 3px solid var(--muted);
+    }
+    .rv-fill {
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+    .rv-text {
+      position: relative;
+      display: inline-block;
+    }
+    .rv-strike {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 52%;
+      height: 3px;
+      background: var(--ink);
+      transform-origin: left center;
+    }
+    .rv-fix {
+      position: absolute;
+      left: 110px;
+      font-family: "Geist Mono", monospace;
+      font-size: 32px;
+      color: var(--muted);
+    }
+    .rv-note {
+      position: absolute;
+      left: 110px;
+      font-size: 36px;
+      color: var(--muted);
+    }
+    #rv-evidence {
+      left: 1200px;
+      width: 600px;
+      height: 490px;
+    }
+    /* The reviewer's own checks from the first pass, each confirmed against the tests. */
+    .rv-conf {
+      position: absolute;
+      left: 40px;
+      right: 40px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-size: 36px;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+    .rv-tick {
+      flex: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 5px;
+      background: var(--muted);
+    }
+    #rv-caption {
+      position: absolute;
+      left: 40px;
+      top: 416px;
+      font-size: 36px;
+      color: var(--muted);
+    }
+  </style>
+  <div id="root" data-composition-id="review" data-width="1920" data-height="1200">
+    <div id="rv-title" class="clip" data-start="0" data-duration="7">
+      <h1><span class="rv-word" id="rv-w1">Review</span></h1>
+      <p>
+        <span class="rv-word" id="rv-w2">A</span>
+        <span class="rv-word" id="rv-w3">fresh</span>
+        <span class="rv-word" id="rv-w4">session</span>
+        <span class="rv-word" id="rv-w5">reviews,</span>
+        <span class="rv-word" id="rv-w6">until</span>
+        <span class="rv-word" id="rv-w7">nothing</span>
+        <span class="rv-word" id="rv-w8">is</span>
+        <span class="rv-word" id="rv-w9">open</span>
+      </p>
+    </div>
+    <div id="rv-review" class="rv-panel clip" data-start="0" data-duration="7">
+      <div class="rv-head">Review on #2418<span>review-pr</span></div>
+      <div class="rv-row" id="rv-f1" style="top: 114px">
+        <span class="rv-dot"><span class="rv-fill" id="rv-ff1"></span></span>
+        <span class="rv-text">the fold still says to write decisions<span class="rv-strike" id="rv-s1"></span></span>
+      </div>
+      <div class="rv-row" id="rv-f2" style="top: 198px">
+        <span class="rv-dot"><span class="rv-fill" id="rv-ff2"></span></span>
+        <span class="rv-text">internal-docs puts decisions back<span class="rv-strike" id="rv-s2"></span></span>
+      </div>
+      <div class="rv-fix" id="rv-fix" style="top: 290px">review-address: fixed at f64e35a</div>
+      <div class="rv-row" id="rv-closed" style="top: 378px">
+        <span class="rv-slot"></span><b style="font-weight: 600">## Review closed</b>
+      </div>
+      <div class="rv-note" id="rv-note" style="top: 446px">Prior findings addressed. Re-reviewed f64e35a.</div>
+    </div>
+    <div id="rv-evidence" class="rv-panel clip" data-start="0" data-duration="7">
+      <div class="rv-head">For the reviewer<span>checked</span></div>
+      <div class="rv-conf" id="rv-base" style="top: 124px"><span class="rv-tick"></span>ungated entry reports, exit 0</div>
+      <div class="rv-conf" id="rv-head" style="top: 200px"><span class="rv-tick"></span>six gotchas count as six</div>
+      <div class="rv-conf" id="rv-c3" style="top: 276px"><span class="rv-tick"></span>seed tree gates by prefix</div>
+      <div id="rv-caption">0 critical, 3 should-fix, 2 minor</div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // The build, written at its first pace and played 1.3 times slower so each line has time to read.
+    const build = gsap.timeline();
+    const blurIn = { opacity: 1, filter: "blur(0px)", duration: 0.13, ease: "power4.out" };
+    const hidden = { opacity: 0, filter: "blur(6px)" };
+    const lineIn = { clipPath: "inset(0 0% 0 0)", duration: 0.3, ease: "power2.out" };
+    const lineOut = { clipPath: "inset(0 100% 0 0)" };
+    const panelIn = { clipPath: "inset(0 0 0% 0 round 24px)", duration: 0.5, ease: "expo.out" };
+    const panelOut = { clipPath: "inset(0 0 100% 0 round 24px)" };
+
+    // Title, per word from faint to ink, without blur.
+    ["#rv-w1", "#rv-w2", "#rv-w3", "#rv-w4", "#rv-w5", "#rv-w6", "#rv-w7", "#rv-w8", "#rv-w9"].forEach((id, i) => {
+      build.fromTo(id, { opacity: 0.15 }, { opacity: 1, duration: 0.1, ease: "power2.out" }, 0.05 + i * 0.085);
+    });
+
+    // The review prints with its two findings, open.
+    build.fromTo("#rv-review", panelOut, panelIn, 0.1);
+    build.fromTo("#rv-f1", lineOut, lineIn, 0.6);
+    build.fromTo("#rv-f2", lineOut, lineIn, 0.85);
+
+    // The reviewer's own checks print beside it.
+    build.fromTo("#rv-evidence", panelOut, panelIn, 0.9);
+    build.fromTo("#rv-base", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 1.15);
+    build.fromTo("#rv-head", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 1.25);
+    build.fromTo("#rv-c3", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 1.35);
+    build.fromTo("#rv-caption", lineOut, lineIn, 1.45);
+
+    // The worker's fix prints, then each finding is struck through and its marker fills.
+    build.fromTo("#rv-fix", lineOut, lineIn, 1.5);
+    const strikeIn = { scaleX: 1, duration: 0.3, ease: "power2.out" };
+    const fillIn = { scale: 1, opacity: 1, duration: 0.12, ease: "power2.out" };
+    const fillOut = { scale: 0.4, opacity: 0 };
+    build.fromTo("#rv-s1", { scaleX: 0 }, strikeIn, 1.9);
+    build.fromTo("#rv-ff1", fillOut, fillIn, 2.1);
+    build.fromTo("#rv-f1 .rv-text", { opacity: 1 }, { opacity: 0.5, duration: 0.2 }, 2.1);
+    build.fromTo("#rv-s2", { scaleX: 0 }, strikeIn, 2.2);
+    build.fromTo("#rv-ff2", fillOut, fillIn, 2.4);
+    build.fromTo("#rv-f2 .rv-text", { opacity: 1 }, { opacity: 0.5, duration: 0.2 }, 2.4);
+
+    // The review closes as the pip lands on it.
+    build.fromTo("#rv-closed", lineOut, lineIn, 3.0);
+    build.fromTo("#rv-note", lineOut, lineIn, 3.2);
+
+    build.timeScale(1 / 1.3);
+    tl.add(build, 0);
+
+    // Blur swap out, so the pip is the one thing that carries into the merge.
+    tl.to(
+      ["#rv-title h1", "#rv-title p", "#rv-review", "#rv-evidence"],
+      { opacity: 0, filter: "blur(8px)", duration: 0.18, ease: "power3.in" },
+      6.8,
+    );
+
+    window.__timelines["review"] = tl;
+  </script>
+</template>

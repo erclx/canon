@@ -131,8 +131,9 @@ const indentTokens = (css: string): string =>
     .join('\n')
 
 /**
- * The frames a README serves in both themes. The hero is a landing-page frame
- * no README shows, so it stays dark.
+ * The frames rendered in both themes. No README shows the install pair now,
+ * and it stays for the landing page redesign to pick from. The hero is a
+ * landing-page frame, so it stays dark.
  */
 const LIGHT_TEMPLATES = new Set(['install.html.tmpl'])
 

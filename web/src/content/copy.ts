@@ -50,7 +50,7 @@ export const nav = {
     { id: 'merge', label: 'Merge' },
   ],
   toggleLabel: 'Switch between light and dark',
-  install: { label: 'Install', href: `${REPO}#install` },
+  install: { label: 'Install', href: `${REPO}#quick-start` },
   npm: NPM,
   version: {
     live: 'The published version on npm',
@@ -60,11 +60,11 @@ export const nav = {
 
 export const fold = {
   headline: ['Watch it run.', 'That is the documentation'],
-  // README.md: canon-allow-readme-paraphrase: "canon is a CLI and Claude Code plugin that runs your agent's work from plan to merge" "runs on itself"
-  lead: "canon is a CLI and Claude Code plugin that runs your agent's work from plan to merge, holds it to the practices that make code worth keeping, and installs the same setup in every repository. Below is one real session it ran on itself.",
-  primary: { label: 'Install canon', href: `${REPO}#install` },
+  // README.md: canon-allow-readme-paraphrase: "Claude Code plugin that runs your agent's work from plan to merge, holds it to established engineering practice, and installs the same setup in every repo." after the product name, followed by a sentence naming the session the page narrates.
+  lead: "canon is a CLI and Claude Code plugin that runs your agent's work from plan to merge, holds it to established engineering practice, and installs the same setup in every repo. Below is one real session it ran on itself.",
+  primary: { label: 'Install canon', href: `${REPO}#quick-start` },
   secondary: { label: 'Read the session', href: '#ask' },
-  // README.md: canon-allow-readme-paraphrase: "Every AI coding setup accumulates the same assets" condensed to what a project holds before an install.
+  // README.md: canon-allow-readme-paraphrase: what a project holds before an install, which the README does not state.
   before: {
     title: 'your project today',
     sub: 'whatever each repo happened to grow',
@@ -76,7 +76,7 @@ export const fold = {
   },
   // README.md: "canon init"
   command: 'canon init',
-  // README.md: canon-allow-readme-paraphrase: "installs base tooling configs, Claude seeds, and governance rules in one pass" split into its three steps.
+  // README.md: canon-allow-readme-paraphrase: "lays down its rules, seeds, and configs" split into its three steps.
   after: {
     title: 'after one command',
     sub: 'in this order',
@@ -96,7 +96,7 @@ export const fold = {
       detail: '.claude/rules/canon/, from the stack you name',
     },
   },
-  // README.md: canon-allow-readme-paraphrase: "some are never copied at all"
+  // README.md: canon-allow-readme-paraphrase: "Loaded live from the plugin, so there is no copy to drift"
   never: {
     title: 'and one it never copies',
     skills: {
@@ -107,7 +107,7 @@ export const fold = {
   },
 }
 
-// README.md: canon-allow-readme-paraphrase: "this repo is the authoritative copy" "Your projects install and sync on demand"
+// README.md: canon-allow-readme-paraphrase: "installs the same setup in every repo" restated from the side of the one repository it installs from.
 export const proof =
   'One repository is the authoritative copy. Every other project installs it.'
 
@@ -143,7 +143,7 @@ export const turns = {
 export const rules = {
   head: (matched: number, total: number) =>
     `${matched} of ${total} rules match this path`,
-  // README.md: canon-allow-readme-paraphrase: "load into a Claude session when a matching path is edited"
+  // README.md: canon-allow-readme-paraphrase: "that load when you edit a matching path"
   cap: 'A rule installs as a file the project owns, and it loads into a Claude session when a matching path is edited, and not before.',
   edited: 'edited',
   matched: 'matched',
@@ -155,7 +155,7 @@ export const rules = {
   }),
 }
 
-// README.md: canon-allow-readme-paraphrase: "every command has a non-interactive path and a JSON catalog" restated as what a skill does with it.
+// README.md: canon-allow-readme-paraphrase: skills calling the CLI, which the README does not state.
 export const skills = {
   head: (total: number) => `One skill loaded, out of ${total} in the catalog`,
   cap: 'Skills call the CLI and never reimplement it.',
@@ -205,7 +205,7 @@ export const dispatch = {
  * footer says so, which is the label `canon/context/development/web.md` names as the
  * repair for an authored figure.
  */
-// README.md: canon-allow-readme-paraphrase: "each in its own git worktree on its own branch, and each opens its own pull request"
+// README.md: canon-allow-readme-paraphrase: "Each session works in its own worktree, so several changes run at once"
 export const workers = {
   head: 'Three workers and a planner, on disjoint file sets',
   cap: 'Each takes its own worktree, its own branch and its own pull request. No fixed number caps the tracks.',
@@ -349,7 +349,6 @@ export const merge = {
     'canon worktrees reclaim': 'the worktree the merged branch was built in',
   } as Record<string, string>,
   foot: 'A tick is a claim a session makes. A merge is a fact the trunk shows, and only the second fires this.',
-  // README.md: "a `DESIGN.md` intent format"
   tokens: {
     title: 'The tokens that merge landed, as this page renders them',
     note: 'Rendered from canon/DESIGN.md by bun run web:previews at build time, and embedded live rather than captured.',
@@ -392,20 +391,20 @@ export const provenance = {
 }
 
 export const install = {
-  // README.md: canon-allow-readme-paraphrase: three steps the Install and Development sections spread across two headings.
+  // README.md: canon-allow-readme-paraphrase: the Quick start block and the init line below it, split into three titled steps.
   head: 'Three steps to put it in a project',
   cap: 'The CLI and the plugin install once per machine. The third step writes files your repository owns from then on.',
   steps: [
     {
       title: 'Install the CLI',
-      // README.md: "Several skills call the `canon` CLI to read catalogs and run installs"
-      body: 'Several skills call the canon CLI to read catalogs and run installs.',
+      // README.md: "the CLI needs Bun on your path"
+      body: 'The plugin skills call it, and the CLI needs Bun on your path.',
       // README.md: "bun install --global @erclx/canon"
       commands: ['bun install --global @erclx/canon'],
     },
     {
       title: 'Add the plugin',
-      // README.md: "Add the marketplace, then install the Claude Code plugin."
+      // README.md: canon-allow-readme-paraphrase: the README lists the two plugin commands with no sentence naming them.
       body: 'Add the marketplace, then install the Claude Code plugin.',
       // README.md: "claude plugin marketplace add https://github.com/erclx/canon" "claude plugin install canon@canon"
       commands: [
@@ -415,7 +414,7 @@ export const install = {
     },
     {
       title: 'Scaffold a project',
-      // README.md: "installs base tooling configs, Claude seeds, and governance rules in one pass"
+      // README.md: canon-allow-readme-paraphrase: "lays down its rules, seeds, and configs" spelled out as the three things it installs.
       body: 'canon init installs base tooling configs, Claude seeds, and governance rules in one pass.',
       // README.md: "canon init"
       commands: ['canon init'],
@@ -457,9 +456,9 @@ export const field = {
 
 export const close = {
   head: 'None of that was configured for that session',
-  // README.md: canon-allow-readme-paraphrase: "copied into your project and become yours to edit" "some are never copied at all"
+  // README.md: canon-allow-readme-paraphrase: "Real files you own" "Loaded live from the plugin, so there is no copy to drift"
   lead: 'The rules and the tooling are copied into your project and become yours to edit. The skills are never copied at all, so a fix reaches every project at once and cannot drift.',
-  primary: { label: 'Install canon', href: `${REPO}#install` },
+  primary: { label: 'Install canon', href: `${REPO}#quick-start` },
   secondary: { label: 'Read the source', href: REPO },
 }
 

@@ -1,0 +1,166 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"ground","type":"color","label":"Ground","default":"#0f0e0c"},
+    {"id":"panel","type":"color","label":"Panel","default":"#151412"},
+    {"id":"chrome","type":"color","label":"Panel header","default":"#1b1a18"},
+    {"id":"line","type":"color","label":"Line","default":"#2a2926"},
+    {"id":"ink","type":"color","label":"Ink","default":"#d9d7d4"},
+    {"id":"body","type":"color","label":"Body text","default":"#aeada9"},
+    {"id":"muted","type":"color","label":"Muted text","default":"#8c8b86"},
+    {"id":"pip","type":"color","label":"Pip","default":"#ff6b42"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1200" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      /* Dark is the default render. The light render overrides these through the variables. */
+      :root {
+        --ground: #0f0e0c;
+        --panel: #151412;
+        --chrome: #1b1a18;
+        --line: #2a2926;
+        --ink: #d9d7d4;
+        --body: #aeada9;
+        --muted: #8c8b86;
+        --pip: #ff6b42;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1200px;
+        overflow: hidden;
+        background: var(--ground);
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="42.9"
+      data-width="1920"
+      data-height="1200"
+    >
+      <div
+        id="open"
+        data-composition-id="open"
+        data-composition-src="compositions/open.html"
+        data-start="0"
+        data-duration="1.2"
+        data-track-index="1"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1200"
+      ></div>
+      <div
+        id="groundwork"
+        data-composition-id="groundwork"
+        data-composition-src="compositions/groundwork.html"
+        data-start="1.2"
+        data-duration="6.4"
+        data-track-index="2"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1200"
+      ></div>
+      <div
+        id="plan"
+        data-composition-id="plan"
+        data-composition-src="compositions/plan.html"
+        data-start="7.6"
+        data-duration="6.6"
+        data-track-index="2"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1200"
+      ></div>
+      <div
+        id="dispatch"
+        data-composition-id="dispatch"
+        data-composition-src="compositions/dispatch.html"
+        data-start="14.2"
+        data-duration="7.6"
+        data-track-index="2"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1200"
+      ></div>
+      <div
+        id="build"
+        data-composition-id="build"
+        data-composition-src="compositions/build.html"
+        data-start="21.8"
+        data-duration="7.2"
+        data-track-index="2"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1200"
+      ></div>
+      <div
+        id="review"
+        data-composition-id="review"
+        data-composition-src="compositions/review.html"
+        data-start="29"
+        data-duration="7"
+        data-track-index="2"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1200"
+      ></div>
+      <div
+        id="merge"
+        data-composition-id="merge"
+        data-composition-src="compositions/merge.html"
+        data-start="36"
+        data-duration="5.4"
+        data-track-index="2"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1200"
+      ></div>
+      <div
+        id="close"
+        data-composition-id="close"
+        data-composition-src="compositions/close.html"
+        data-start="41.4"
+        data-duration="1.5"
+        data-track-index="1"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1200"
+      ></div>
+      <div
+        id="pip"
+        data-composition-id="pip"
+        data-composition-src="compositions/pip.html"
+        data-start="0"
+        data-duration="42.9"
+        data-track-index="3"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1200"
+        style="z-index: 10"
+      ></div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>

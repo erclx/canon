@@ -1,0 +1,211 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Geist";
+      src: url("fonts/Geist-Regular.woff2") format("woff2");
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: "Geist";
+      src: url("fonts/Geist-SemiBold.woff2") format("woff2");
+      font-weight: 600;
+    }
+    @font-face {
+      font-family: "Geist Mono";
+      src: url("fonts/GeistMono-Regular.woff2") format("woff2");
+      font-weight: 400;
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      font-family: "Geist", sans-serif;
+      color: var(--body);
+    }
+    #mg-title {
+      position: absolute;
+      left: 120px;
+      top: 228px;
+      display: flex;
+      align-items: baseline;
+      gap: 28px;
+    }
+    #mg-title h1 {
+      font-size: 80px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    #mg-title p {
+      font-size: 40px;
+      color: var(--muted);
+    }
+    .mg-word {
+      display: inline-block;
+    }
+    .mg-panel {
+      position: absolute;
+      top: 410px;
+      height: 400px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      overflow: hidden;
+    }
+    .mg-head {
+      height: 84px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      background: var(--chrome);
+      border-bottom: 1px solid var(--line);
+      font-size: 40px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .mg-head span {
+      margin-left: auto;
+      font-family: "Geist Mono", monospace;
+      font-size: 32px;
+      font-weight: 400;
+      color: var(--muted);
+    }
+    /* The merged line leaves its marker slot empty: the pip lands there at (182, 640). */
+    #mg-term {
+      left: 120px;
+      width: 1000px;
+    }
+    #mg-board {
+      left: 1200px;
+      width: 600px;
+    }
+    .mg-row {
+      position: absolute;
+      left: 48px;
+      right: 40px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 34px;
+      font-size: 44px;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+    .mg-cmd {
+      font-family: "Geist Mono", monospace;
+      font-size: 36px;
+    }
+    .mg-cmd span {
+      color: var(--muted);
+    }
+    .mg-row em {
+      font-style: normal;
+      font-size: 36px;
+      color: var(--muted);
+    }
+    .mg-slot,
+    .mg-mark {
+      flex: none;
+      width: 28px;
+      height: 28px;
+      position: relative;
+    }
+    .mg-dot {
+      border-radius: 50%;
+      border: 3px solid var(--muted);
+    }
+    .mg-square {
+      border-radius: 5px;
+      background: var(--muted);
+    }
+    .mg-fill {
+      position: absolute;
+      inset: -3px;
+      border-radius: 5px;
+      background: var(--ink);
+    }
+    .mg-text {
+      position: relative;
+      display: inline-block;
+    }
+    .mg-strike {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 52%;
+      height: 3px;
+      background: var(--ink);
+      transform-origin: left center;
+    }
+  </style>
+  <div id="root" data-composition-id="merge" data-width="1920" data-height="1200">
+    <div id="mg-title" class="clip" data-start="0" data-duration="5.4">
+      <h1><span class="mg-word" id="mg-w1">Merge</span></h1>
+      <p>
+        <span class="mg-word" id="mg-w2">You</span>
+        <span class="mg-word" id="mg-w3">merge,</span>
+        <span class="mg-word" id="mg-w4">and&nbsp;the</span>
+        <span class="mg-word" id="mg-w5">next</span>
+        <span class="mg-word" id="mg-w6">wave</span>
+        <span class="mg-word" id="mg-w7">starts</span>
+      </p>
+    </div>
+    <div id="mg-term" class="mg-panel clip" data-start="0" data-duration="5.4">
+      <div class="mg-head">terminal<span>main</span></div>
+      <div class="mg-row mg-cmd" id="mg-c1" style="top: 114px"><span>$</span>canon pr merge 2418</div>
+      <div class="mg-row" id="mg-c2" style="top: 198px"><span class="mg-slot"></span><b style="font-weight: 600">merged into main</b></div>
+      <div class="mg-row" id="mg-c3" style="top: 282px"><span class="mg-mark mg-square"></span><em>task archived with its plan</em></div>
+    </div>
+    <div id="mg-board" class="mg-panel clip" data-start="0" data-duration="5.4">
+      <div class="mg-head">Board<span>priority.md</span></div>
+      <div class="mg-row" id="mg-b1" style="top: 114px">
+        <span class="mg-mark mg-square"></span><span class="mg-text" id="mg-b1t">v152.3 entry shape<span class="mg-strike" id="mg-s1"></span></span>
+      </div>
+      <div class="mg-row" id="mg-b2" style="top: 198px">
+        <span class="mg-mark mg-dot"><span class="mg-fill" id="mg-f2"></span></span><b style="font-weight: 600">v152.4 rebuild</b><em id="mg-run">next</em>
+      </div>
+      <div class="mg-row" id="mg-b3" style="top: 282px"><span class="mg-mark mg-dot"></span>v152.6 docs rebuild</div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // The build, written at its first pace and played 1.3 times slower so each line has time to read.
+    const build = gsap.timeline();
+    const blurIn = { opacity: 1, filter: "blur(0px)", duration: 0.13, ease: "power4.out" };
+    const hidden = { opacity: 0, filter: "blur(6px)" };
+    const lineIn = { clipPath: "inset(0 0% 0 0)", duration: 0.3, ease: "power2.out" };
+    const lineOut = { clipPath: "inset(0 100% 0 0)" };
+    const panelIn = { clipPath: "inset(0 0% 0 0 round 24px)", duration: 0.5, ease: "expo.out" };
+    const panelOut = { clipPath: "inset(0 100% 0 0 round 24px)" };
+
+    // Title, the whole line blurring in at once.
+    build.fromTo("#mg-title h1, #mg-title p", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 0.05);
+
+    // The terminal prints with the command, then the merge prints as the pip lands on it.
+    build.fromTo("#mg-term", panelOut, panelIn, 0.1);
+    build.fromTo("#mg-c1", lineOut, lineIn, 0.45);
+    build.fromTo("#mg-c2", lineOut, lineIn, 0.95);
+    build.fromTo("#mg-c3", lineOut, lineIn, 1.2);
+
+    // The board prints, the merged row strikes through, and the next row lights.
+    build.fromTo("#mg-board", panelOut, panelIn, 1.1);
+    ["#mg-b1", "#mg-b2", "#mg-b3"].forEach((id, i) => {
+      build.fromTo(id, lineOut, lineIn, 1.35 + i * 0.15);
+    });
+    build.fromTo("#mg-s1", { scaleX: 0 }, { scaleX: 1, duration: 0.3, ease: "power2.out" }, 1.9);
+    build.fromTo("#mg-b1t", { opacity: 1 }, { opacity: 0.5, duration: 0.2 }, 2.1);
+    build.fromTo("#mg-f2", { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.12, ease: "power2.out" }, 2.2);
+    build.fromTo("#mg-run", hidden, blurIn, 2.25);
+
+    build.timeScale(1 / 1.3);
+    tl.add(build, 0);
+
+    // Blur swap out, so the pip is the one thing that carries into the close.
+    tl.to(
+      ["#mg-title h1", "#mg-title p", "#mg-term", "#mg-board"],
+      { opacity: 0, filter: "blur(8px)", duration: 0.18, ease: "power3.in" },
+      5.2,
+    );
+
+    window.__timelines["merge"] = tl;
+  </script>
+</template>

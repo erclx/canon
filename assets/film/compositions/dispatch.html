@@ -1,0 +1,238 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Geist";
+      src: url("fonts/Geist-Regular.woff2") format("woff2");
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: "Geist";
+      src: url("fonts/Geist-SemiBold.woff2") format("woff2");
+      font-weight: 600;
+    }
+    @font-face {
+      font-family: "Geist Mono";
+      src: url("fonts/GeistMono-Regular.woff2") format("woff2");
+      font-weight: 400;
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      font-family: "Geist", sans-serif;
+      color: var(--body);
+    }
+    #dp-title {
+      position: absolute;
+      left: 120px;
+      top: 228px;
+      display: flex;
+      align-items: baseline;
+      gap: 28px;
+    }
+    #dp-title h1 {
+      font-size: 80px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    #dp-title p {
+      font-size: 40px;
+      color: var(--muted);
+    }
+    .dp-word {
+      display: inline-block;
+    }
+    /* The operator's side of the conversation, left of the agent view. */
+    #dp-ask {
+      position: absolute;
+      left: 120px;
+      top: 430px;
+      width: 600px;
+      padding: 24px 30px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      font-size: 44px;
+      color: var(--ink);
+    }
+    #dp-ask small {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 32px;
+      color: var(--muted);
+    }
+    #dp-reply {
+      position: absolute;
+      left: 150px;
+      top: 690px;
+      width: 570px;
+      font-size: 40px;
+      line-height: 1.35;
+      color: var(--body);
+    }
+    #dp-reply small {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 32px;
+      color: var(--muted);
+    }
+    /* Rows sit at canvas y 556 to 892, 84 apart. The orchestrator's marker and the first worker's,
+       once it climbs to the second row at y 640, are the pip's stops in SPEC.md, at x 882. */
+    #dp-view {
+      position: absolute;
+      left: 820px;
+      top: 410px;
+      width: 980px;
+      height: 476px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      overflow: hidden;
+    }
+    .dp-head {
+      height: 84px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      background: var(--chrome);
+      border-bottom: 1px solid var(--line);
+      font-size: 40px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .dp-head span {
+      margin-left: auto;
+      font-family: "Geist Mono", monospace;
+      font-size: 32px;
+      font-weight: 400;
+      color: var(--muted);
+    }
+    .dp-row {
+      position: absolute;
+      left: 48px;
+      right: 40px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 34px;
+      font-family: "Geist Mono", monospace;
+      font-size: 34px;
+      color: var(--ink);
+      background: var(--panel);
+    }
+    /* A climbing row draws over the one it passes, so a re-sort never shows two rows of text at once. */
+    #dp-r3 {
+      z-index: 3;
+    }
+    #dp-r4 {
+      z-index: 2;
+    }
+    .dp-row em {
+      position: relative;
+      margin-left: auto;
+      font-family: "Geist", sans-serif;
+      font-style: normal;
+      font-size: 32px;
+      color: var(--muted);
+    }
+    .dp-swap {
+      position: absolute;
+      right: 0;
+      top: 0;
+      white-space: nowrap;
+    }
+    .dp-slot,
+    .dp-dot {
+      flex: none;
+      width: 28px;
+      height: 28px;
+    }
+    #dp-pinned {
+      border-radius: 5px;
+      background: var(--muted);
+    }
+    .dp-dot {
+      border-radius: 50%;
+      border: 3px solid var(--muted);
+    }
+  </style>
+  <div id="root" data-composition-id="dispatch" data-width="1920" data-height="1200">
+    <div id="dp-title" class="clip" data-start="0" data-duration="7.6">
+      <h1><span class="dp-word" id="dp-w1">Dispatch</span></h1>
+      <p>
+        <span class="dp-word" id="dp-w2">You</span>
+        <span class="dp-word" id="dp-w3">talk</span>
+        <span class="dp-word" id="dp-w4">to</span>
+        <span class="dp-word" id="dp-w5">one</span>
+        <span class="dp-word" id="dp-w6">session,</span>
+        <span class="dp-word" id="dp-w7">and&nbsp;it</span>
+        <span class="dp-word" id="dp-w8">launches</span>
+        <span class="dp-word" id="dp-w9">the</span>
+        <span class="dp-word" id="dp-w10">rest</span>
+      </p>
+    </div>
+    <div id="dp-ask" class="clip" data-start="0" data-duration="7.6">
+      <small>planner</small>Two plans landed, linked to their tasks.
+    </div>
+    <div id="dp-reply" class="clip" data-start="0" data-duration="7.6">
+      <small>orchestrator</small>Both standards plans are in, and I've dispatched their workers on Opus.
+    </div>
+    <div id="dp-view" class="clip" data-start="0" data-duration="7.6">
+      <div class="dp-head">Agent view<span>working</span></div>
+      <div class="dp-row" id="dp-r1" style="top: 114px"><span class="dp-slot" id="dp-pinned"></span>orchestrator-canon<em>pinned</em></div>
+      <div class="dp-row" id="dp-r2" style="top: 198px"><span class="dp-dot"></span>Documentation density…<em>plans linked</em></div>
+      <div class="dp-row" id="dp-r3" style="top: 282px"><span class="dp-dot"></span>feat/context-entry-shape<em><span id="dp-s3a">entered worktree</span><span class="dp-swap" id="dp-s3b">editing audit.ts</span></em></div>
+      <div class="dp-row" id="dp-r4" style="top: 366px"><span class="dp-dot"></span>feat/docs-page-shape<em>entered worktree</em></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // The build, written at its first pace and played 1.3 times slower so each line has time to read.
+    const build = gsap.timeline();
+    const blurIn = { opacity: 1, filter: "blur(0px)", duration: 0.13, ease: "power4.out" };
+    const hidden = { opacity: 0, filter: "blur(6px)" };
+    const lineIn = { clipPath: "inset(0 0% 0 0)", duration: 0.3, ease: "power2.out" };
+    const lineOut = { clipPath: "inset(0 100% 0 0)" };
+    const panelIn = { clipPath: "inset(0 0 0% 0 round 24px)", duration: 0.5, ease: "expo.out" };
+    const panelOut = { clipPath: "inset(0 0 100% 0 round 24px)" };
+
+    // Title, the whole line blurring in at once.
+    build.fromTo("#dp-title h1, #dp-title p", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 0.05);
+
+    // The operator's message lands, then the agent view prints with the orchestrator pinned.
+    build.fromTo("#dp-ask", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 0.3);
+    build.fromTo("#dp-view", panelOut, panelIn, 0.5);
+    build.fromTo("#dp-r1", lineOut, lineIn, 0.9);
+
+    // The orchestrator answers, then the sessions it launched print one by one.
+    build.fromTo("#dp-reply", lineOut, { ...lineIn, duration: 0.5 }, 1.2);
+    ["#dp-r2", "#dp-r3", "#dp-r4"].forEach((id, i) => {
+      build.fromTo(id, lineOut, lineIn, 1.7 + i * 0.25);
+    });
+
+    build.timeScale(1 / 1.3);
+    tl.add(build, 0);
+
+    // The agent view re-sorts as sessions change, the way the real one does. The first worker
+    // starts editing and climbs above the planner, then the planner, its plans linked, sinks below the second worker.
+    const move = { duration: 0.5, ease: "power3.inOut" };
+    tl.to("#dp-r3", { y: -84, ...move }, 4.0);
+    tl.to("#dp-r2", { y: 84, ...move }, 4.0);
+    tl.fromTo("#dp-s3a", { opacity: 1 }, { opacity: 0, duration: 0.15 }, 4.1);
+    tl.fromTo("#dp-s3b", { opacity: 0 }, { opacity: 1, duration: 0.2 }, 4.2);
+    tl.to("#dp-r4", { y: -84, ...move }, 5.0);
+    tl.to("#dp-r2", { y: 168, ...move }, 5.0);
+
+    // The orchestrator keeps a pinned marker once the pip moves on to the first worker.
+    tl.fromTo("#dp-pinned", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.12, ease: "power2.out" }, 6.05);
+
+    // Blur swap out, so the pip is the one thing that carries into the build.
+    tl.to(
+      ["#dp-title h1", "#dp-title p", "#dp-ask", "#dp-reply", "#dp-view"],
+      { opacity: 0, filter: "blur(8px)", duration: 0.18, ease: "power3.in" },
+      7.4,
+    );
+
+    window.__timelines["dispatch"] = tl;
+  </script>
+</template>

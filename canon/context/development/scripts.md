@@ -30,6 +30,7 @@ Holds the scripts run by `bun run` name or fired by a gate stage or workflow, an
 - `bootstrap.ts` installs dependencies, links the CLI globally, and appends the alias block to `~/.zshrc`. A re-run stops at the marker, so a grown block reaches no one until they delete the old one.
 - `regen-hero.ts` fills each `assets/captures/*.html.tmpl`, reading every catalog in-process, and a placeholder nothing fills fails the run. Its pure half sits in `src/capture/frame-values.ts`.
 - `FEATURED_SKILLS` in that module is a hand-chosen list of exactly `LISTED` names, so renaming or retiring a shipped skill fails the Hero stage until the list is updated
+- `render-film.ts` renders `assets/film/` once per theme at a pinned `hyperframes` and derives each README GIF with ffmpeg, copying both into `assets/loops/` only after both succeed
 - The command count greps `import { register as ` lines in `src/cli.ts`, so a command registered in another shape leaves the frame low and nothing reports it
 
 ### `scripts/ci/`
