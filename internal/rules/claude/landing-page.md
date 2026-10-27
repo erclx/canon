@@ -8,10 +8,9 @@ paths:
 
 ## Every count is read, never typed
 
-- Read a count at build time from the source that holds it, the way `web/src/lib/film.ts` reads the film's length off its render. Never write a literal.
+- Read a count at build time from the source that holds it, as `web/src/lib/film.ts` reads the film's length. Never write a literal.
 - Never add a fallback literal behind a failed read, since nothing downstream can tell a stale number from a fresh one.
-- Quote a number from a dated record no build re-reads, such as a closed groundwork track or a merged pull request, only with its source and date beside it on the page.
-- State on the page where a rendered number came from, as `footer.note` in `web/src/content/copy.ts` and `measured` in `web/src/content/trail.ts` do.
+- Quote a number from a dated record no build re-reads only with its source and date beside it on the page, as `measured` in `web/src/content/trail.ts` does.
 
 ## Every image is generated, never a screenshot pasted in
 
@@ -27,4 +26,4 @@ paths:
 - Mark a string paraphrasing `README.md` with `canon-allow-readme-paraphrase: <reason>` rather than forcing a distorted quote.
 - Write a citation with more than one phrase as `// README.md: "<phrase>" "<phrase>"` on the one anchor line, never split across two comments.
 - Put a borrowed quote on the same line as `canon-allow-readme-paraphrase`, since the marker exempts only the unquoted part and `readmeCitations` still checks the quote.
-- Give every line in `web/src/content/trail.ts` the record it came from and whether it is quoted or reconstructed, and never mark a line quoted that the record does not carry word for word.
+- Give every line in `web/src/content/trail.ts` its record, and mark it quoted only where the record carries it word for word.
