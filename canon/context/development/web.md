@@ -7,7 +7,7 @@ description: The canon.erclx.dev landing page, its composition and build-time re
 
 ## Overview
 
-Owns `web/`, the Astro app behind the `canon.erclx.dev` landing page, and the images the page and the README carry. The page is one route of eleven beats. It ships to no target, so the application-code non-goal in `canon/REQUIREMENTS.md` does not reach it. Its figures derive from build-time reads, bar the three the footer calls drawn.
+Owns `web/`, the Astro app behind the `canon.erclx.dev` landing page, and the images the page and the README carry. The page is one route of nine sections, which open on the launch film and follow erclx/canon#2418 through six steps to quick start. It ships to no target, so the application-code non-goal in `canon/REQUIREMENTS.md` does not reach it.
 
 ## Layout
 
@@ -15,10 +15,10 @@ Owns `web/`, the Astro app behind the `canon.erclx.dev` landing page, and the im
 
 Holds the page, built from components that read their figures through `lib/`.
 
-- `pages/` assembles the one route, and `components/beats/` holds the eleven beats, one component each, so two builds on different beats touch different files
-- `components/sections/` holds the fold, proof band, beat group, provenance ledger, install steps, field, and close
-- `content/copy.ts` holds the page copy, each string cited to `README.md` or marked as a paraphrase, which `readmeCitations` in `src/gate/measures.ts` gates
-- `lib/derive.ts` holds every read rule as a pure function, refusing a skill with no skill-map row and a row naming none, and `session.ts` spawns the CLI and reads files for it
+- `pages/` assembles the one route, and `components/beats/` holds the six steps, one component each, so two builds on different steps touch different files
+- `components/sections/` holds the fold, the step wrapper `group.astro`, and quick start, and `components/figure.astro` draws every step's panels
+- `content/copy.ts` holds the copy, each string cited to `README.md` or marked as a paraphrase, gated by `readmeCitations`, and `content/trail.ts` cites each figure line to the #2418 record
+- `lib/film.ts` reads the film's length off the MP4's movie header, so the poster's label states a measured duration
 - `styles/global.css` maps role names onto the generated `tokens.css` inside `@layer base`, and `base.astro` embeds Geist
 
 ### `web/`
@@ -28,7 +28,7 @@ Beside `src/`, holds the tests, the social card route, and the files served as t
 - `e2e/` owns the Playwright suite, which runs on all three browsers
 - `card-src/` owns the social card route, served by `card.config.mjs` as `bun run web:card` on 4421 plus `WORKTREE_PORT_OFFSET`
 - `web:card:check` fails a build carrying `og-card-marker` or any `*og-card*` file, which is why the published card is `social-card.png`
-- `public/assets/social-card.png` is a symlink into `assets/frames/`, and `public/evidence/` holds two fixed captures of one merged pull request
+- `public/assets/` holds symlinks only, the social card into `assets/frames/` and the film's MP4s and posters into `assets/loops/`
 - `public/previews/` holds committed renders written only by `scripts/core/regen-web-previews.ts`, and `.oxfmtrc.jsonc` ignores the folder
 
 ### `assets/`
@@ -37,6 +37,7 @@ This repository's self-portrait for a visitor who never opens the source, where 
 
 - `evidence/home/` is the committed baseline of the page, one folder per section holding a frame per theme at 320 and 1280 pixels
 - `frames/` and `captures/` hold the card and hero images, and a render gates only where `captureStamps` makes something committed depend on it
+- `loops/` holds the launch film's README GIFs and the page's silent MP4s and posters, all written by `bun run film:render`
 - `merge/` and the whole-page frames come from a `workflow_dispatch` artifact on `main`, since a local capture falls back to another font
 - Every README image ships as a `<name>` and `<name>-light` pair behind a `<picture>`
 
