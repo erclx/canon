@@ -16,7 +16,7 @@ Write the log to `evidence/drive-log.md` inside the intake folder. It opens on a
 
 | Setup     | Value                                             |
 | --------- | ------------------------------------------------- |
-| Commit    | `5898e3f`                                         |
+| Commit    | `v0.13.138`                                       |
 | Copy      | `/tmp/tmp.Xy12/app`                               |
 | Launch    | `bun install && bun run build && bun run preview` |
 | Address   | `http://127.0.0.1:4530`                           |
