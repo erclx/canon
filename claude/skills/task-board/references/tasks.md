@@ -29,6 +29,7 @@ Governs the task files under `.canon/tasks/`: folder layout, filenames, frontmat
 Does not govern:
 
 - **`tasks-decline.md`**: the declined folder, the `Declined:` line, and what declining does to a plan and a board row
+- **`tasks-record-lines.md`**: the `Pull request:`, `Pending branch:`, and `Sessions:` lines a verb writes below the origin lines
 - **`board.md`**: execution order, readiness groups, the backlog, and the generated index beside the tasks
 - **`plan.md`**: the plan file a task cites, its sections, and its answer contract
 - **`versioning.md`**: phase-label format and which surfaces a label may appear on
@@ -166,22 +167,9 @@ Three rules cover the line itself:
 - Use `Intake:` rather than `Groundwork:` for an intake pass, so the line records which kind of pass produced the task
 - `Intake:` names the folder rather than an item, and item numbers belong in the task's `## Findings`
 
-### The `Pull request:` line
+### The lines a verb writes
 
-`Pull request:` lists every pull request that shipped part of the task as bare numbers, oldest first and comma-separated, as in `Pull request: #NNN, #NNN`. It is not an origin, so a task without one is well-formed, and `git-pr` appends to it when a pull request opens.
-
-The line lets a merge close its own task. `canon tasks archive --pull-request <n>` finds the task by any listed number and archives it only on the last.
-
-- One pull request, one task. Two tasks naming the same number refuse to archive rather than both moving.
-- `Pending branch: <branch>` holds that merge back while a branch that ticked an outcome waits on its own number
-- `canon tasks outcome` writes that line, skipping it when the branch's pull request is already listed, and `canon tasks pull-request` clears it
-
-### The `Sessions:` line
-
-`Sessions:` names each session that built or reviewed the task by roster name and full sessionId, so `canon sessions export <sessionId>` reaches its transcript. It is not an origin, so a task without one is well-formed.
-
-- `canon tasks session <sessionId> <task>` writes it, keyed on the id, so a repeat call for a listed session changes nothing
-- The dispatcher records each session it launches, and `git-pr` records the one opening the pull request, which covers a hand launch
+`Pull request:` and `Sessions:` are not origins, so a task without them is well-formed. A verb writes each, and `${CLAUDE_SKILL_DIR}/references/tasks-record-lines.md` fixes what they mean and who calls the verb.
 
 ## What goes in
 
