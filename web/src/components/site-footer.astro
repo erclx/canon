@@ -1,97 +1,72 @@
 ---
+import mark from '../../../assets/brand/mark.svg?raw'
 import { footer, nav } from '../content/copy'
-import { readSession } from '../lib/session'
 
-/** A brand block over three columns of real destinations, each a path that resolves in the repository. */
-const { version } = readSession()
+/** One row of real destinations under the mark, then where the six steps' lines come from. */
+const glyph = mark.replace(/<!--[\s\S]*?-->/, '').trim()
 ---
 
 <footer class="foot">
-  <div class="top">
-    <div class="brand">
-      <span class="logo">{nav.mark}</span>
-      <p>{footer.line}</p>
-      <a class="version" href={nav.npm}>v{version}</a>
-    </div>
-    <nav class="columns" aria-label="Elsewhere">
-      {
-        footer.columns.map((column) => (
-          <div>
-            <p class="title">{column.title}</p>
-            <ul>
-              {column.links.map((link) => (
-                <li>
-                  <a href={link.href}>{link.label}</a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))
-      }
+  <div class="row-top">
+    <span class="brand">
+      <span class="glyph" aria-hidden="true" set:html={glyph} />
+      {nav.mark}
+    </span>
+    <nav aria-label="Elsewhere">
+      {footer.links.map((link) => <a href={link.href}>{link.label}</a>)}
+      <a href={footer.license.href}>{footer.license.label}</a>
     </nav>
   </div>
-  <div class="bottom">
-    <a href={footer.license.href}>{footer.license.label}</a>
-    <span>{footer.note}</span>
-  </div>
+  <p class="note">{footer.note}</p>
 </footer>
 
 <style>
   .foot {
-    box-shadow: inset 0 1px 0 var(--ring);
-  }
-
-  .top {
-    display: grid;
-    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
-    gap: var(--space-2xl);
     max-width: var(--bin);
     margin: 0 auto;
-    padding: var(--space-2xl) var(--space-lg) var(--space-xl);
+    padding: 0 var(--space-lg) var(--space-2xl);
+  }
+
+  .row-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-md) var(--space-lg);
+    padding-top: var(--space-xl);
+    box-shadow: inset 0 1px 0 var(--ring);
   }
 
   .brand {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-md);
-  }
-
-  .logo {
-    font-size: var(--t4);
-    color: var(--ink);
-  }
-
-  .brand p {
-    margin: 0;
-    font-size: var(--t5);
-    color: var(--ink-faint);
-    max-width: 30ch;
-  }
-
-  .columns {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-lg);
-  }
-
-  .title {
-    margin: 0 0 var(--space-md);
-    font-size: var(--t4);
-    font-weight: 500;
-    color: var(--ink);
-  }
-
-  ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
+    align-items: center;
     gap: var(--space-sm);
+    margin-right: auto;
+    font-size: var(--t4);
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .glyph {
+    display: flex;
+  }
+
+  .glyph :global(svg) {
+    width: 18px;
+    height: 18px;
+  }
+
+  .glyph :global(.pip) {
+    fill: var(--pip);
+  }
+
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm) var(--space-lg);
   }
 
   a {
-    font-size: var(--t5);
+    font-size: var(--t4);
     color: var(--ink-soft);
     text-decoration: none;
     transition: color 0.16s var(--ease);
@@ -99,36 +74,20 @@ const { version } = readSession()
 
   a:hover {
     color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
-  .version {
-    font-size: var(--t6);
-  }
-
-  .bottom {
-    max-width: var(--bin);
-    margin: 0 auto;
-    padding: var(--space-md) var(--space-lg) var(--space-xl);
-    display: flex;
-    gap: var(--space-lg);
-    justify-content: space-between;
+  .note {
+    margin: var(--space-lg) 0 0;
+    max-width: 60ch;
     font-size: var(--t5);
-    color: var(--ink-faint);
-  }
-
-  .bottom a {
-    color: var(--ink-faint);
+    color: var(--ink-soft);
   }
 
   @media (max-width: 640px) {
-    .top {
-      grid-template-columns: 1fr;
-      gap: var(--space-xl);
-    }
-
-    .bottom {
-      flex-direction: column;
-      gap: var(--space-sm);
+    .brand {
+      width: 100%;
     }
   }
 </style>

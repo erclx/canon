@@ -112,9 +112,9 @@ Holds the `*.html.tmpl` frame templates that `scripts/core/regen-hero.ts` fills 
 
 ### `assets/film/`
 
-Holds the HyperFrames source of the launch film, which `scripts/core/render-film.ts` renders into the README loops under `assets/loops/`.
+Holds the HyperFrames source of the launch film, which `scripts/core/render-film.ts` renders into the README loops and the landing page's silent MP4s and posters under `assets/loops/`.
 
-- No gate renders it, so an edit to the source leaves the committed loops stale until someone runs `bun run film:render` and commits the pair
+- No gate renders it, so an edit to the source leaves the committed outputs stale until someone runs `bun run film:render` and commits them
 - `.oxfmtrc.jsonc` ignores the folder, since reflowing the markup can move whitespace the compositions lay out
 - `package.json` ships neither folder, and `.gitignore` drops the `renders/`, `.hyperframes/`, and `.thumbnails/` a render or preview writes
 

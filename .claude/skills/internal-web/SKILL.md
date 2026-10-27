@@ -36,7 +36,7 @@ Before shipping any change under `web/`:
 
 - `canon/context/development/web.md`: structure, the Astro build, decisions, and the CI and layout gaps
 - `internal/rules/claude/landing-page.md`: where the page's counts, images, and citations come from, each failing silently
-- `internal/rules/claude/landing-style.md`: the page's motion test and closed accent set, each failing silently
+- `internal/rules/claude/landing-style.md`: the page's motion test and its one hue, each failing silently
 - `references/citation-anchors.md`: how a string in `copy.ts` anchors to `README.md` and what the gate reads
 
 ### Neighboring entries

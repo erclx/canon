@@ -17,7 +17,7 @@ function readJson(path: string) {
   }
 }
 
-/** The README's opening sentence as the hero says it, after "canon is ". */
+/** The README's opening sentence, the line under the title. */
 function readmeOpening(): string {
   const line = readText('README.md')
     .split('\n')
@@ -26,7 +26,7 @@ function readmeOpening(): string {
     throw new Error(
       'README.md has no line opening "A CLI and Claude Code plugin "',
     )
-  return `canon is a${line.slice(1)}`
+  return line
 }
 
 describe('public positioning', () => {
@@ -44,7 +44,13 @@ describe('public positioning', () => {
     expect(new Set(surfaces).size).toBe(1)
   })
 
-  it('should open the hero lead with the README opening sentence', () => {
-    expect(fold.lead.startsWith(readmeOpening())).toBe(true)
+  it('should take the headline claim from the README opening sentence', () => {
+    expect(readmeOpening()).toContain(fold.headline.replace(/^canon /, ''))
+  })
+
+  it('should end the hero lead on the README opening sentence', () => {
+    const tail = fold.lead.slice(fold.lead.indexOf('established'))
+
+    expect(readmeOpening().endsWith(tail)).toBe(true)
   })
 })

@@ -100,7 +100,7 @@ export const REVIEWED = '2026-10-24'
 
 export const TOKENS: DesignTokens = {
   personality:
-    'Warm neutrals under one rust accent, set in Geist. The page reads as prose, and monospace appears only where a surface shows what a shell printed. One accent carries every count, link, and primary action.',
+    'Warm neutrals with actions in ink, set in Geist. The page reads as prose, and monospace appears only where a surface shows a path, a command, or what a shell printed. The rust accent marks a status the surface it shows would color, and the landing page carries none, leaving the vermilion pip of the mark as its one hue.',
 
   colorRules: [
     'One accent. Never promote a second color into a structural role.',
@@ -155,7 +155,7 @@ export const TOKENS: DesignTokens = {
     },
     {
       role: 'accent',
-      intent: 'install command, primary action',
+      intent: 'a status the surface would color, such as an open pull request',
       value: '#c76b5f',
       grounds: DARK_GROUNDS,
     },
@@ -208,7 +208,7 @@ export const TOKENS: DesignTokens = {
     },
     {
       role: 'light-accent',
-      intent: 'links and primary action on light',
+      intent: 'a status the surface would color, on light',
       value: '#ad4a4b',
       grounds: LIGHT_GROUNDS,
     },

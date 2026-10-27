@@ -1,0 +1,28 @@
+---
+import { steps } from '../../content/copy'
+import { groundwork } from '../../content/trail'
+import Figure from '../figure.astro'
+import Group from '../sections/group.astro'
+---
+
+<Group id="groundwork" layout="split" {...steps.groundwork}>
+  <Figure>
+    <p class="num">{groundwork.number.value}</p>
+    <p class="num-cap">{groundwork.number.caption}</p>
+    <ul class="ledger">
+      {
+        groundwork.rows.map((row) => (
+          <li>
+            <b>{row.text}</b>
+            {row.note}
+          </li>
+        ))
+      }
+    </ul>
+    <p class="decision">
+      <span class="m m-result" role="img" aria-label="result"></span>
+      {groundwork.decision.text}
+    </p>
+    <p class="dated">{groundwork.measured}</p>
+  </Figure>
+</Group>

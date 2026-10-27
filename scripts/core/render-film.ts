@@ -1,13 +1,18 @@
 /**
  * Renders the launch film in assets/film/ once per theme and writes the
- * README loops to assets/loops/launch.gif and launch-light.gif.
+ * README loops to assets/loops/launch.gif and launch-light.gif, and beside
+ * them the landing page's web MP4 and poster PNG per theme.
  *
  * Each theme renders to an MP4 at the canvas size under assets/film/renders/,
  * which git ignores, and the GIF comes from that MP4 through the ffmpeg pass
  * `assets/film/SPEC.md` gives, since no render preset scales below the canvas.
- * Both GIFs are written to the renders folder first and copied into
- * assets/loops/ only once both exist, so a failed theme leaves the committed
- * pair as it was rather than a half set.
+ * Every output is written to the renders folder first and copied into
+ * assets/loops/ only once both themes exist, so a failed theme leaves the
+ * committed set as it was rather than a half set.
+ *
+ * The web MP4 drops every audio stream with `-an` whatever the source
+ * carries, since the repository is public and no music track's terms are
+ * cleared for use outside the tool that made it.
  *
  * Run by hand, not by the gate. The film shows one merged change, so no
  * catalog edit makes it stale, and a render costs minutes of chromium.
@@ -24,9 +29,39 @@ const HYPERFRAMES = 'hyperframes@0.8.206'
 const GIF_FILTER =
   'fps=12,scale=960:600:flags=lanczos,split[a][b];[a]palettegen=max_colors=64:stats_mode=diff[p];[b][p]paletteuse=dither=none:diff_mode=rectangle'
 
+/** The landing page pass: 1280 wide, silent, and playable before it finishes downloading. */
+const WEB_ARGS = [
+  '-an',
+  '-vf',
+  'scale=1280:-2:flags=lanczos',
+  '-c:v',
+  'libx264',
+  '-pix_fmt',
+  'yuv420p',
+  '-crf',
+  '24',
+  '-preset',
+  'slow',
+  '-movflags',
+  '+faststart',
+]
+
+/** The poster frame: the mark centered before its pip leaves. */
+const POSTER_AT = '0.6'
+
 const THEMES = [
-  { theme: 'dark', loop: 'launch.gif' },
-  { theme: 'light', loop: 'launch-light.gif' },
+  {
+    theme: 'dark',
+    loop: 'launch.gif',
+    web: 'launch.mp4',
+    poster: 'launch-poster.png',
+  },
+  {
+    theme: 'light',
+    loop: 'launch-light.gif',
+    web: 'launch-light.mp4',
+    poster: 'launch-poster-light.png',
+  },
 ] as const
 
 const root = new URL('../..', import.meta.url).pathname
@@ -98,12 +133,47 @@ for (const { theme } of THEMES) {
     ],
     filmDir,
   )
+  run(
+    [
+      ffmpeg,
+      '-y',
+      '-loglevel',
+      'error',
+      '-i',
+      mp4,
+      ...WEB_ARGS,
+      join(renderDir, `web-${theme}.mp4`),
+    ],
+    filmDir,
+  )
+  run(
+    [
+      ffmpeg,
+      '-y',
+      '-loglevel',
+      'error',
+      '-ss',
+      POSTER_AT,
+      '-i',
+      mp4,
+      '-frames:v',
+      '1',
+      '-vf',
+      'scale=1280:-2:flags=lanczos',
+      join(renderDir, `poster-${theme}.png`),
+    ],
+    filmDir,
+  )
 }
 
 mkdirSync(loopDir, { recursive: true })
-for (const { theme, loop } of THEMES) {
+const written: string[] = []
+for (const { theme, loop, web, poster } of THEMES) {
   copyFileSync(join(renderDir, `readme-${theme}.gif`), join(loopDir, loop))
+  copyFileSync(join(renderDir, `web-${theme}.mp4`), join(loopDir, web))
+  copyFileSync(join(renderDir, `poster-${theme}.png`), join(loopDir, poster))
+  written.push(loop, web, poster)
 }
 console.log(
-  `render-film: wrote assets/loops/${THEMES.map((entry) => entry.loop).join(' and assets/loops/')}`,
+  `render-film: wrote assets/loops/${written.join(', assets/loops/')}`,
 )

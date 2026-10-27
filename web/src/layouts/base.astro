@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css'
+import { FAVICON_COLORS } from '../../../src/design/favicon'
 import { FONT_FACES } from '../../../src/design/fonts'
 import SiteFooter from '../components/site-footer.astro'
 import SiteNav from '../components/site-nav.astro'
@@ -32,10 +33,27 @@ const cardAlt = `${site.name}: ${site.tagline}`
  * once here with `font-display: block`, which is what the reference was judged
  * in, rather than fetched as a second request that paints the fallback first.
  */
-const geist = FONT_FACES.find((face) => face.family === 'Geist Variable')
+const face = (family: string, weight: string) => {
+  const found = FONT_FACES.find(
+    (entry) => entry.family === family && entry.weight === weight,
+  )
+  if (!found)
+    throw new Error(`src/design/fonts.ts carries no ${family} ${weight} face`)
+  return `@font-face{font-family:'${found.family}';font-weight:${found.weight};font-display:block;src:url(data:font/woff2;base64,${found.base64}) format('woff2');}`
+}
+const geist = FONT_FACES.find((entry) => entry.family === 'Geist Variable')
 if (!geist)
   throw new Error('src/design/fonts.ts carries no Geist Variable face')
-const fontFace = `@font-face{font-family:'${geist.family}';font-weight:${geist.weight};font-display:block;src:url(data:font/woff2;base64,${geist.base64}) format('woff2');}`
+const fontFace = [
+  face(geist.family, geist.weight),
+  face('Noto Sans Mono', '400'),
+].join('')
+
+/**
+ * The pip is the mark's own pair rather than a design token, so the page's one
+ * hue comes from the same `FAVICON_COLORS` the favicon and the card read.
+ */
+const pip = `:root{--pip:${FAVICON_COLORS.pip.dark}}[data-theme='light']{--pip:${FAVICON_COLORS.pip.light}}`
 ---
 
 <!doctype html>
@@ -64,12 +82,12 @@ const fontFace = `@font-face{font-family:'${geist.family}';font-weight:${geist.w
     <meta name="twitter:image" content={cardImage} />
 
     <style is:inline set:html={fontFace}></style>
+    <style is:inline set:html={pip}></style>
 
     <script is:inline>
       /**
        * Runs before first paint, so a stored or preferred theme never flashes
-       * the other ground, and so a still asked for with ?still lands every
-       * figure at its end state before the first frame rather than after it.
+       * the other ground.
        */
       const stored = (() => {
         try {
@@ -84,46 +102,14 @@ const fontFace = `@font-face{font-family:'${geist.family}';font-weight:${geist.w
         : 'dark'
       const theme = stored === 'light' || stored === 'dark' ? stored : preferred
       document.documentElement.setAttribute('data-theme', theme)
-      if (new URLSearchParams(location.search).has('still')) {
-        document.documentElement.classList.add('still')
-      }
     </script>
   </head>
   <body>
-    <a class="skip" href="#ask">{skipLink}</a>
+    <a class="skip" href="#how">{skipLink}</a>
     <SiteNav />
     <main>
       <slot />
     </main>
     <SiteFooter />
-
-    <script>
-      /**
-       * The figure build. Each `[data-build]` element lands once as it enters
-       * the viewport, staggered by its place among its siblings, and is then
-       * unobserved, since a reveal that replays on every pass is looping motion.
-       * The class is added whatever the motion preference: the stylesheet
-       * decides whether it animates, so a reader who prefers no motion still
-       * reaches the end state rather than an empty figure.
-       */
-      const pieces = [...document.querySelectorAll<HTMLElement>('[data-build]')]
-      for (const piece of pieces) {
-        const siblings = piece.parentElement?.children
-        const index = siblings ? [...siblings].indexOf(piece) : 0
-        piece.style.setProperty('--build-index', String(index))
-      }
-
-      const builder = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            if (!entry.isIntersecting) continue
-            entry.target.classList.add('is-built')
-            builder.unobserve(entry.target)
-          }
-        },
-        { threshold: 0.15, rootMargin: '0px 0px -6% 0px' },
-      )
-      for (const piece of pieces) builder.observe(piece)
-    </script>
   </body>
 </html>

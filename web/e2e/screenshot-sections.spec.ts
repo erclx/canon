@@ -10,10 +10,7 @@ import { expect, test } from '@playwright/test'
 
 const run = promisify(execFile)
 
-/** Every settle on an observer or a transition is bounded explicitly. */
-const SETTLE = { timeout: 5_000 }
-
-/** The capture itself launches a browser and shoots seventeen frames. */
+/** The capture itself launches a browser and shoots ten frames. */
 const CAPTURE_TIMEOUT = 180_000
 
 const HARNESS = fileURLToPath(
@@ -39,21 +36,14 @@ const FILTER = 'home/1280--dark'
  */
 const SECTIONS = [
   'top',
-  'proof',
-  'ask',
-  'rules',
-  'skills',
+  'how',
+  'groundwork',
   'plan',
   'dispatch',
-  'workers',
-  'gate',
-  'evidence',
-  'loop',
+  'build',
+  'review',
   'merge',
-  'provenance',
   'start',
-  'field',
-  'close',
 ] as const
 
 interface Size {
@@ -80,37 +70,6 @@ async function measurePng(file: string): Promise<Size> {
   return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) }
 }
 
-/** Playwright's default `maskColor`, which the harness leaves in place so a masked region reads as deliberate. */
-const MASK_FILL = [255, 0, 255] as const
-
-/**
- * Reads one pixel's RGB out of a PNG by decoding it in the page's own canvas,
- * which keeps an image decoder out of the dependencies for one assertion.
- */
-async function readPixel(
-  page: Page,
-  file: string,
-  x: number,
-  y: number,
-): Promise<number[]> {
-  const source = `data:image/png;base64,${(await readFile(file)).toString('base64')}`
-  return page.evaluate(
-    async ({ source, x, y }) => {
-      const image = new Image()
-      image.src = source
-      await image.decode()
-      const canvas = document.createElement('canvas')
-      canvas.width = image.naturalWidth
-      canvas.height = image.naturalHeight
-      const context = canvas.getContext('2d')
-      if (context === null) throw new Error('no 2d context to decode into')
-      context.drawImage(image, 0, 0)
-      return Array.from(context.getImageData(x, y, 1, 1).data.slice(0, 3))
-    },
-    { source, x, y },
-  )
-}
-
 async function measureSection(page: Page, name: string): Promise<Size> {
   const box = await page.locator(`#${name}`).boundingBox()
   if (box === null) {
@@ -123,8 +82,8 @@ async function measureSection(page: Page, name: string): Promise<Size> {
 
 /**
  * Brings the page to the state the harness shoots from. Its own settle scrolls
- * every named section into view, which is what fires the observer behind a
- * build and loads a frame marked lazy, then returns to the top.
+ * every named section into view, which loads anything marked lazy, then
+ * returns to the top.
  */
 async function settle(page: Page): Promise<void> {
   for (const name of SECTIONS) {
@@ -175,7 +134,7 @@ test.describe('the section capture', () => {
     // Read what the run wrote before measuring what was asked for. The list
     // below is a copy of the harness's own, so a section dropped from the
     // harness fails the measurement loudly while one added to it would fail
-    // nothing, and the seventeenth frame would reach the committed baseline
+    // nothing, and the tenth frame would reach the committed baseline
     // with nothing having checked where it was cut from.
     const written = await readdir(home, { withFileTypes: true })
     expect(
@@ -211,44 +170,5 @@ test.describe('the section capture', () => {
     const whole = await measurePng(path.join(home, '1280--dark.png'))
     expect(whole.width).toBe(VIEWPORT.width)
     expect(whole.height).toBeGreaterThan(VIEWPORT.height)
-
-    // The version moves on every release with no code change, so the case
-    // masks it. The settle leaves the page at the top, so the footer badge's
-    // box reads in the same coordinates the whole-page frame is laid out in.
-    const badge = await page.locator('footer .version').boundingBox()
-    if (badge === null) throw new Error('footer .version renders no box')
-    const pixel = await readPixel(
-      page,
-      path.join(home, '1280--dark.png'),
-      Math.round(badge.x + badge.width / 2),
-      Math.round(badge.y + badge.height / 2),
-    )
-    expect(pixel).toEqual([...MASK_FILL])
-  })
-
-  test('shoots a figure that builds on arrival at its end state', async ({
-    page,
-  }) => {
-    await page.goto('/')
-    const pieces = page.locator('#merge [data-build]')
-    await expect(pieces.first()).toBeAttached(SETTLE)
-    const count = await pieces.count()
-
-    await settle(page)
-
-    await expect
-      .poll(
-        async () =>
-          pieces.evaluateAll(
-            (nodes) =>
-              nodes.filter((node) => getComputedStyle(node).opacity === '1')
-                .length,
-          ),
-        SETTLE,
-      )
-      .toBe(count)
-    await expect(
-      page.frameLocator('#fig-tokens iframe').locator('table').first(),
-    ).toBeVisible(SETTLE)
   })
 })

@@ -1,0 +1,21 @@
+---
+import { steps } from '../../content/copy'
+import { review } from '../../content/trail'
+import Figure from '../figure.astro'
+import Group from '../sections/group.astro'
+---
+
+<Group id="review" layout="wide" band {...steps.review}>
+  <Figure
+    title={review.head.title}
+    aside={review.head.tally}
+    rows={[...review.findings, review.fix, review.close]}
+    tight
+  />
+  <Figure
+    title={review.checks.title}
+    aside={review.checks.state}
+    rows={review.checks.rows}
+    tight
+  />
+</Group>

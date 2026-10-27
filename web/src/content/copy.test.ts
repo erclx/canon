@@ -24,10 +24,9 @@ describe('copy', () => {
   const strings = collectStrings(copy)
 
   it('should read every exported string, including those built from counts', () => {
-    expect(strings).toContain(copy.rules.head(7, 7))
-    expect(strings).toContain(copy.skills.head(7))
-    expect(strings).toContain(copy.field.commands(7, 7).used)
-    expect(strings).toContain(copy.footer.columns[0]?.title)
+    expect(strings).toContain(copy.fold.film.play(7))
+    expect(strings).toContain(copy.steps.review.line)
+    expect(strings).toContain(copy.footer.links[0]?.label)
   })
 
   it('should carry no em dash in any string', () => {

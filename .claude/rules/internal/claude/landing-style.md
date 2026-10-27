@@ -1,5 +1,5 @@
 ---
-description: Hold the landing page's motion test and its closed accent set, each of which fails silently when broken
+description: Hold the landing page's motion test and its one hue, each of which fails silently when broken
 paths:
   - 'web/**'
 ---
@@ -14,12 +14,11 @@ paths:
 - Treat a reveal that plays the same on every section as an entrance, and hold a section tuning its own arrival to the test above.
 - Give every animation a `prefers-reduced-motion: reduce` branch that still lands the state change, carried by a class rather than the motion alone.
 
-## The accent is closed to three uses, and identity is none of them
+## The page carries no accent, and the pip is its one hue
 
-- Hold `--color-accent` to structure, action, and status, and argue a new use into one of the three or leave the accent out.
-- Never open a fourth category, since each arrives with a reason as good as the last and the set holds only while closed.
-- Use the accent for status only on a state the surface it shows would color, such as a pull request's open state.
+- Draw every action and link in ink, and leave `--color-accent` off the page, since a second hue beside the pip splits the one signal the page carries.
+- Read the pip as `--pip`, which `base.astro` sets from `FAVICON_COLORS` so the page, the favicon, and the card share one pair.
+- Use the pip outside the mark only for status, to mark the one result a step's figure ends on and the kicker naming that step.
+- Never give the pip a second use, since each arrives with a reason as good as the last and the hue holds only while it marks one thing.
 - Reach for `--color-success` or a surface and border token for any other state.
-- Leave identity outside the set, since the brand mark drawn in the accent marks no structure, action, or status.
-- Name the token `--color-accent` in a rule or a comment, never the `--mark` alias `global.css` gives it inside the page.
-- Keep the accent out of persistent chrome, as the nav does by marking the active beat with a tinted pill in ink.
+- Keep the pip out of persistent chrome bar the mark itself, so the nav and the footer stay ink.

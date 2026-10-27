@@ -1,0 +1,35 @@
+---
+import { start } from '../../content/copy'
+
+/** The README's Quick start as the README writes it: the three commands and the two setup sentences. */
+---
+
+<section class="start" id="start">
+  <div class="bin split top">
+    <div class="step-text">
+      <h2>{start.head}</h2>
+      <p class="sub">{start.setup}</p>
+      <p class="sub">{start.init}</p>
+    </div>
+    <div>
+      <div class="cmd">
+        {
+          start.commands.map((command) => (
+            <code>
+              <span aria-hidden="true">$ </span>
+              {command}
+            </code>
+          ))
+        }
+      </div>
+      <p class="cta">
+        <a class="btn btn-primary" href={start.primary.href}
+          >{start.primary.label}</a
+        >
+        <a class="btn btn-text btn-out" href={start.secondary.href}
+          >{start.secondary.label}</a
+        >
+      </p>
+    </div>
+  </div>
+</section>

@@ -8,7 +8,7 @@ Authoring guidance: `claude/skills/design-record/references/design.md`. Rendered
 
 ## Overview
 
-Warm neutrals under one rust accent, set in Geist. The page reads as prose, and monospace appears only where a surface shows what a shell printed. One accent carries every count, link, and primary action.
+Warm neutrals with actions in ink, set in Geist. The page reads as prose, and monospace appears only where a surface shows a path, a command, or what a shell printed. The rust accent marks a status the surface it shows would color, and the landing page carries none, leaving the vermilion pip of the mark as its one hue.
 
 ## Colors
 
@@ -16,30 +16,30 @@ Warm neutrals under one rust accent, set in Geist. The page reads as prose, and 
 - Every text role clears WCAG AA at 4.5:1 against each ground it is drawn on.
 - `warning` and `error` exist only in the terminal, as ANSI codes.
 
-| Role                 | Intent                                                | Value            |
-| -------------------- | ----------------------------------------------------- | ---------------- |
-| background           | page canvas                                           | #0f0e0c          |
-| surface              | cards, panels, raised blocks                          | #151412          |
-| chrome               | the window titlebar, one step above the canvas        | #1b1a18          |
-| border               | every rule and panel edge                             | #2a2926          |
-| text                 | headings, counts, emphasized runs                     | #d9d7d4          |
-| text-body            | default body copy                                     | #aeada9          |
-| text-secondary       | labels, captions, supporting copy                     | #8c8b86          |
-| muted                | the faintest step, trailing notes                     | #7f7f7c          |
-| accent               | install command, primary action                       | #c76b5f          |
-| success              | confirmations, rendered and in the terminal           | #61c454          |
-| warning              | terminal cautions                                     | ANSI 33          |
-| error                | terminal failures                                     | ANSI 31          |
-| light-background     | page canvas on a light ground                         | #fbfaf8          |
-| light-surface        | cards and panels on a light ground                    | #f1f1ee          |
-| light-chrome         | the window titlebar, one step above the canvas        | #e9e8e5          |
-| light-text           | primary text on a light ground                        | #2c2c29          |
-| light-text-body      | default body copy on a light ground                   | #4b4947          |
-| light-text-secondary | labels, captions, supporting copy on a light ground   | #666561          |
-| light-muted          | secondary text on a light ground                      | #6e6d6c          |
-| light-accent         | links and primary action on light                     | #ad4a4b          |
-| light-success        | confirmations, rendered and in the terminal, on light | #2d6b22          |
-| light-border         | rules and panel edges on light                        | #d5d4d1 ? verify |
+| Role                 | Intent                                                         | Value            |
+| -------------------- | -------------------------------------------------------------- | ---------------- |
+| background           | page canvas                                                    | #0f0e0c          |
+| surface              | cards, panels, raised blocks                                   | #151412          |
+| chrome               | the window titlebar, one step above the canvas                 | #1b1a18          |
+| border               | every rule and panel edge                                      | #2a2926          |
+| text                 | headings, counts, emphasized runs                              | #d9d7d4          |
+| text-body            | default body copy                                              | #aeada9          |
+| text-secondary       | labels, captions, supporting copy                              | #8c8b86          |
+| muted                | the faintest step, trailing notes                              | #7f7f7c          |
+| accent               | a status the surface would color, such as an open pull request | #c76b5f          |
+| success              | confirmations, rendered and in the terminal                    | #61c454          |
+| warning              | terminal cautions                                              | ANSI 33          |
+| error                | terminal failures                                              | ANSI 31          |
+| light-background     | page canvas on a light ground                                  | #fbfaf8          |
+| light-surface        | cards and panels on a light ground                             | #f1f1ee          |
+| light-chrome         | the window titlebar, one step above the canvas                 | #e9e8e5          |
+| light-text           | primary text on a light ground                                 | #2c2c29          |
+| light-text-body      | default body copy on a light ground                            | #4b4947          |
+| light-text-secondary | labels, captions, supporting copy on a light ground            | #666561          |
+| light-muted          | secondary text on a light ground                               | #6e6d6c          |
+| light-accent         | a status the surface would color, on light                     | #ad4a4b          |
+| light-success        | confirmations, rendered and in the terminal, on light          | #2d6b22          |
+| light-border         | rules and panel edges on light                                 | #d5d4d1 ? verify |
 
 ## Typography
 
