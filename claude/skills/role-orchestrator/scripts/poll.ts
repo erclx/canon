@@ -200,7 +200,7 @@ export const scopeFallback = (payload: Payload, now: number): Scope => {
 
 /**
  * Reads the UI family off the verb's record, so the poll and the lift agree on
- * which head a close covers, a close carried across unpainted pushes included.
+ * which head a close covers, a close carried across inert pushes included.
  * A record carrying no `ui` object is a refusal or a CLI predating the field,
  * and reads as unread, which leaves the baseline's value standing.
  */
