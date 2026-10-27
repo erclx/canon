@@ -37,6 +37,61 @@ export function buildIssueArgs(opts: CreateIssueOptions): string[] {
   return args
 }
 
+export function buildCommentArgs(issue: number, body: string): string[] {
+  return ['issue', 'comment', String(issue), '--body', body, '--repo', REPO]
+}
+
+export function buildIssueReadArgs(issue: number): string[] {
+  return [
+    'issue',
+    'view',
+    String(issue),
+    '--json',
+    'state,labels',
+    '--repo',
+    REPO,
+  ]
+}
+
+export interface IssueRead {
+  readonly ok: true
+  readonly state: string
+  readonly labels: readonly string[]
+}
+
+/**
+ * Reads the `gh issue view --json state,labels` record. A record of any other
+ * shape is a failed read rather than an issue with no labels, since the caller
+ * refuses on a missing label and that refusal would then name the wrong cause.
+ */
+export function parseIssueRead(stdout: string): IssueRead | IssueFailure {
+  let record: unknown
+  try {
+    record = JSON.parse(stdout)
+  } catch {
+    return {
+      ok: false,
+      reason: 'command-failed',
+      detail: 'gh printed no JSON issue record',
+    }
+  }
+  const { state, labels } = (record ?? {}) as {
+    state?: unknown
+    labels?: unknown
+  }
+  if (typeof state !== 'string' || !Array.isArray(labels)) {
+    return {
+      ok: false,
+      reason: 'command-failed',
+      detail: 'gh printed an issue record with no state or labels',
+    }
+  }
+  const names = labels
+    .map((label: unknown) => (label as { name?: unknown } | null)?.name)
+    .filter((name): name is string => typeof name === 'string')
+  return { ok: true, state, labels: names }
+}
+
 /**
  * Collapses to one line. Both callers write the detail inside a framed error or
  * a colored warning, and a newline in the middle of either breaks the frame and
@@ -74,4 +129,15 @@ export function issueFailureMessage(failure: IssueFailure): string {
     return `gh is not installed, so no issue was filed. Install gh, or file it at ${ISSUE_URL}`
   }
   return `gh could not file the issue: ${failure.detail ?? 'no diagnostic on stderr'}. File it manually at ${ISSUE_URL} instead.`
+}
+
+export function commentFailureMessage(
+  failure: IssueFailure,
+  issue: number,
+): string {
+  const target = `https://github.com/${REPO}/issues/${issue}`
+  if (failure.reason === 'missing-binary') {
+    return `gh is not installed, so no follow-up was posted. Install gh, or comment at ${target}`
+  }
+  return `gh could not post the follow-up: ${failure.detail ?? 'no diagnostic on stderr'}. Comment manually at ${target} instead.`
 }
