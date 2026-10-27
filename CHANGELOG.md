@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.72.0](https://github.com/erclx/canon/compare/v5.71.0...v5.72.0) (2026-10-27)
+
+
+### Features
+
+* **feedback:** post a checked follow-up on an open feedback issue ([#2805](https://github.com/erclx/canon/issues/2805)) ([b014d5e](https://github.com/erclx/canon/commit/b014d5ed5a5501b0902aa4adf794dd50d715d7aa))
+* **feedback:** read each issue's comments in triage ([#2802](https://github.com/erclx/canon/issues/2802)) ([ab2c761](https://github.com/erclx/canon/commit/ab2c7616c094ba43f4045c48f9fdbbe7bfb5b976))
+* **intake:** offer to close an issue when its item is declined ([#2807](https://github.com/erclx/canon/issues/2807)) ([95df7da](https://github.com/erclx/canon/commit/95df7da6e6769b240e2565e24b12dc35f9233993))
+* **pr:** carry a UI close only across pushes no box can observe ([#2804](https://github.com/erclx/canon/issues/2804)) ([c5102ea](https://github.com/erclx/canon/commit/c5102eaf5e6367b7335b8b66650ad03ca06dad41))
+* **ui-film:** film one beat per group and skip negative boxes ([#2806](https://github.com/erclx/canon/issues/2806)) ([fb24ed3](https://github.com/erclx/canon/commit/fb24ed36c23e1e3bcb5c34b3d89c2321707873cd))
+
+
+### Bug Fixes
+
+* **pr:** drive rendered markdown outside doc folders in carry rule ([#2808](https://github.com/erclx/canon/issues/2808)) ([c1f1582](https://github.com/erclx/canon/commit/c1f1582b284eb25ed359915223e52182af073d97))
+
 ## [5.71.0](https://github.com/erclx/canon/compare/v5.70.0...v5.71.0) (2026-10-27)
 
 
