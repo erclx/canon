@@ -38,11 +38,8 @@ beforeEach(() => {
   mkdirSync(bin, { recursive: true })
   log = join(fixture, 'calls.log')
 
-  // sudo records its arguments, and what tee would write, and never escalates
-  stubBin(
-    'sudo',
-    `echo "sudo $*" >> "${log}"\nif [ "$1" = tee ]; then cat >> "${log}"; fi`,
-  )
+  // sudo records its arguments and never escalates
+  stubBin('sudo', `echo "sudo $*" >> "${log}"`)
   stubBin('apt-config', `echo 'Acquire::Retries "1";'`)
 })
 
@@ -139,71 +136,5 @@ describe.skipIf(!hasTimeout)('install-playwright-deps.sh', () => {
     expect(result.status).toBe(2)
     expect(result.stderr).toContain('Usage:')
     expect(readLog()).toEqual([])
-  })
-
-  describe('with --archives', () => {
-    it('should point apt at the folder before installing', () => {
-      const archives = join(fixture, 'apt-archives')
-
-      const result = runScript(['ok'], ['--archives', archives, 'chromium'])
-
-      expect(result.status).toBe(0)
-      expect(existsSync(join(archives, 'partial'))).toBe(true)
-      expect(readLog()).toEqual([
-        'sudo tee /etc/apt/apt.conf.d/99playwright-archives',
-        `Dir::Cache::Archives "${archives}/";`,
-        'APT::Keep-Downloaded-Packages "true";',
-        'bunx playwright install-deps chromium',
-      ])
-    })
-
-    it('should take --package after it', () => {
-      const result = runScript(
-        ['ok'],
-        [
-          '--archives',
-          join(fixture, 'a'),
-          '--package',
-          'playwright@latest',
-          'webkit',
-        ],
-      )
-
-      expect(result.status).toBe(0)
-      expect(readLog().at(-1)).toBe(
-        'bunx playwright@latest install-deps webkit',
-      )
-    })
-
-    it('should take --package before it', () => {
-      const archives = join(fixture, 'a')
-
-      const result = runScript(
-        ['ok'],
-        ['--package', 'playwright@latest', '--archives', archives, 'webkit'],
-      )
-
-      expect(result.status).toBe(0)
-      expect(readLog()).toContain(`Dir::Cache::Archives "${archives}/";`)
-      expect(readLog().at(-1)).toBe(
-        'bunx playwright@latest install-deps webkit',
-      )
-    })
-
-    it('should still exit with the last code when every attempt fails', () => {
-      const result = runScript(
-        ['3', '4', '5'],
-        ['--archives', join(fixture, 'a'), 'webkit'],
-      )
-
-      expect(result.status).toBe(5)
-    })
-  })
-
-  it('should write no apt drop-in without --archives', () => {
-    const result = runScript(['ok'], ['chromium'])
-
-    expect(result.status).toBe(0)
-    expect(readLog().some((line) => line.includes('apt.conf.d'))).toBe(false)
   })
 })

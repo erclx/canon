@@ -72,23 +72,9 @@ jobs:
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
-      - name: Read Runner Image
-        id: image
-        run: |
-          echo "os=${ImageOS}" >> "$GITHUB_OUTPUT"
-          echo "key=playwright-apt-${ImageOS}-${ImageVersion}" >> "$GITHUB_OUTPUT"
-
-      # Only warm-apt-cache.yml saves, since a pull request's cache is scoped to its merge ref
-      - name: Restore Apt Archives
-        uses: actions/cache/restore@v6
-        with:
-          path: ~/.cache/apt-archives
-          key: ${{ steps.image.outputs.key }}
-          restore-keys: playwright-apt-${{ steps.image.outputs.os }}-
-
       - name: Install Playwright System Dependencies
         timeout-minutes: 10
-        run: scripts/ci/install-playwright-deps.sh --archives "$HOME/.cache/apt-archives" chromium
+        run: scripts/ci/install-playwright-deps.sh chromium
 
       - name: Install Playwright Chromium
         run: bunx playwright install chromium
