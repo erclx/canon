@@ -100,7 +100,8 @@ Close the throwaway copy per `isolate.md` when Step 1 built one, after the still
 
 Write the filming half of `.canon/video/<slug>/README.md`, so a later session can re-film without this one. The composing session adds the re-render half under its own heading, as `compose-craft.md` states.
 
-- Hold the approved beats, the `canon take` command that films them, and the config keys the take read, with `access` described rather than copied when it carries a token
+- Name what was filmed, beat by beat, and how to re-film each one with `canon take`
+- Say where each folder came from, being the plan, the takes, and the config keys the take read, with `access` described rather than copied when it carries a token
 - Write the file whole through the main-root route when none exists
 - Add a `## Filming` section when a README is already there, reading the file and writing it back whole, and never overwrite what another session wrote
 - Replace an existing `## Filming` section in place on a re-film, since the commands in it changed
