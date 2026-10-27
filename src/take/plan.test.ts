@@ -253,3 +253,107 @@ describe('readTakePlan', () => {
     })
   })
 })
+
+describe('readTakePlan input steps', () => {
+  function onlyStep(step: unknown) {
+    const read = readTakePlan(planSource([beat([step])]))
+    return read.kind === 'read' ? read.plan.beats[0]?.steps[0] : read
+  }
+
+  it('should read a drag from one target to another', () => {
+    expect(onlyStep({ kind: 'drag', from: '#card', to: '#lane' })).toEqual({
+      kind: 'drag',
+      from: '#card',
+      to: '#lane',
+    })
+  })
+
+  it('should read a key combination as written', () => {
+    expect(onlyStep({ kind: 'key', keys: 'Control+K' })).toEqual({
+      kind: 'key',
+      keys: 'Control+K',
+    })
+  })
+
+  it('should read a double click on a target', () => {
+    expect(onlyStep({ kind: 'dblclick', target: '#frame' })).toEqual({
+      kind: 'dblclick',
+      target: '#frame',
+    })
+  })
+
+  it('should keep the modifiers a click holds', () => {
+    expect(
+      onlyStep({ kind: 'click', target: '#layer', modifiers: ['Meta'] }),
+    ).toEqual({ kind: 'click', target: '#layer', modifiers: ['Meta'] })
+  })
+
+  it('should keep the modifiers a drag holds', () => {
+    expect(
+      onlyStep({ kind: 'drag', from: '#a', to: '#b', modifiers: ['Alt'] }),
+    ).toEqual({ kind: 'drag', from: '#a', to: '#b', modifiers: ['Alt'] })
+  })
+
+  it('should leave out a modifiers list that holds nothing', () => {
+    expect(
+      onlyStep({ kind: 'click', target: '#layer', modifiers: [] }),
+    ).toEqual({ kind: 'click', target: '#layer' })
+  })
+
+  it('should refuse a drag with no drop target', () => {
+    expect(onlyStep({ kind: 'drag', from: '#card' })).toMatchObject({
+      kind: 'refused',
+      reason: 'bad-step',
+    })
+  })
+
+  it('should refuse a drag to a point, which takes targets only', () => {
+    expect(
+      onlyStep({ kind: 'drag', from: '#card', to: { x: 4, y: 9 } }),
+    ).toMatchObject({ kind: 'refused', reason: 'bad-step' })
+  })
+
+  it('should refuse a key with no combination', () => {
+    expect(onlyStep({ kind: 'key' })).toMatchObject({
+      kind: 'refused',
+      reason: 'bad-step',
+    })
+  })
+
+  it('should refuse a key outside the vocabulary, naming the key', () => {
+    expect(onlyStep({ kind: 'key', keys: 'Control+Hyper' })).toMatchObject({
+      kind: 'refused',
+      reason: 'bad-step',
+      detail: expect.stringContaining('Hyper'),
+    })
+  })
+
+  it('should refuse a double click with no target', () => {
+    expect(onlyStep({ kind: 'dblclick' })).toMatchObject({
+      kind: 'refused',
+      reason: 'bad-step',
+    })
+  })
+
+  it('should refuse a modifier Playwright does not name', () => {
+    expect(
+      onlyStep({ kind: 'click', target: '#layer', modifiers: ['Ctrl'] }),
+    ).toMatchObject({ kind: 'refused', reason: 'bad-step' })
+  })
+
+  it('should refuse a modifier named twice', () => {
+    expect(
+      onlyStep({
+        kind: 'click',
+        target: '#layer',
+        modifiers: ['Shift', 'Shift'],
+      }),
+    ).toMatchObject({ kind: 'refused', reason: 'bad-step' })
+  })
+
+  it('should refuse modifiers that are not a list', () => {
+    expect(
+      onlyStep({ kind: 'dblclick', target: '#layer', modifiers: 'Shift' }),
+    ).toMatchObject({ kind: 'refused', reason: 'bad-step' })
+  })
+})
