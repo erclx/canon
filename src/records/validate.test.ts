@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { linesOutsideFences } from '@/markdown/scan'
 import {
@@ -84,9 +84,10 @@ async function seedFolder(
   mkdirSync(dir, { recursive: true })
 
   await Promise.all(
-    Object.entries(files).map(([name, body]) =>
-      writeFile(join(dir, name), body),
-    ),
+    Object.entries(files).map(async ([name, body]) => {
+      mkdirSync(dirname(join(dir, name)), { recursive: true })
+      await writeFile(join(dir, name), body)
+    }),
   )
 }
 
@@ -1012,6 +1013,78 @@ describe('validateRecords', () => {
     expect(outcome.findings[0]).toMatchObject({
       kind: 'item-incomplete',
       record: 'overview',
+    })
+  })
+
+  describe('drive log', () => {
+    const overview = frontmatter(
+      'title: Drive\ndescription: One line\ndate: 2026-10-27',
+    )
+
+    function driveLog(...finding: string[]): string {
+      return [
+        '# Drive log',
+        '',
+        '| Setup  | Value     |',
+        '| ------ | --------- |',
+        '| Commit | `5898e3f` |',
+        '',
+        '## 01. Layers click leaves a half-hidden frame in place',
+        '',
+        '`minor` · operator · developer',
+        '',
+        ...finding,
+        '',
+      ].join('\n')
+    }
+
+    it('should report a long drive log bullet under its subject', async () => {
+      await seedFolder('intake', 'drive', {
+        '00-overview.md': overview,
+        'evidence/drive-log.md': driveLog(`- **Saw:** ${'a'.repeat(300)}`),
+      })
+      const outcome = await validateRecords(ROOT, 'intake', 'drive')
+
+      expect(outcome.ok).toBe(true)
+      if (!outcome.ok) return
+      expect(outcome.findings).toEqual([])
+      expect(outcome.structure).toMatchObject([
+        {
+          criterion: 'S4',
+          record: 'drive',
+          subject: 'evidence/drive-log.md',
+          line: 11,
+        },
+      ])
+    })
+
+    it('should report nothing on a log in the finding shape', async () => {
+      await seedFolder('intake', 'drive', {
+        '00-overview.md': overview,
+        'evidence/drive-log.md': driveLog(
+          '- **Did:** clicked the frame in Layers',
+          '- **Saw:** the view stayed put, with 64% of the frame under the panel edge',
+          '- **Cause:** from code, the reveal acts only when the box is wholly outside the view',
+          '- **Evidence:** `evidence/01-partial-no-pan.png`',
+          '- **Decision (operator):** center the frame unless it is wholly visible',
+        ),
+      })
+
+      expect(await validateRecords(ROOT, 'intake', 'drive')).toMatchObject({
+        ok: true,
+        findings: [],
+        structure: [],
+      })
+    })
+
+    it('should read an intake folder with no drive log as before', async () => {
+      await seedFolder('intake', 'drive', { '00-overview.md': overview })
+
+      expect(await validateRecords(ROOT, 'intake', 'drive')).toMatchObject({
+        ok: true,
+        findings: [],
+        structure: [],
+      })
     })
   })
 

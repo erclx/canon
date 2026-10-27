@@ -807,6 +807,13 @@ const STRUCTURE_FILES: Readonly<
   intake: (file) => file !== INTAKE_INDEX && file !== INTAKE_HANDOFF,
 }
 
+/**
+ * An app drive's log, which sits under an intake folder's `evidence/` and
+ * holds findings as headings and fields rather than items, so it reads on the
+ * plain criteria rather than the cluster exemptions.
+ */
+const DRIVE_LOG = 'evidence/drive-log.md'
+
 async function folderStructure(
   dir: string,
   kind: RecordKind,
@@ -817,9 +824,14 @@ async function folderStructure(
 
   const report = kind === 'intake' ? intakeStructure : structureFindings
   const files = (await listMarkdown(dir)).filter(reads)
+  const reports = files.map((file) => ({ file, read: report }))
+  if (kind === 'intake' && existsSync(join(dir, DRIVE_LOG))) {
+    reports.push({ file: DRIVE_LOG, read: structureFindings })
+  }
+
   const perFile = await Promise.all(
-    files.map(async (file) =>
-      report(await readFile(join(dir, file), 'utf8')).map((entry) => ({
+    reports.map(async ({ file, read }) =>
+      read(await readFile(join(dir, file), 'utf8')).map((entry) => ({
         ...entry,
         record: slug,
         subject: file,

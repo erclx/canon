@@ -32,11 +32,11 @@ Read `${CLAUDE_SKILL_DIR}/references/config.md` for `canon/config/app-drive.toml
 1. Derive `<slug>` from the build being driven, such as `app-drive-0-12-0` for a tag. Claim the folder with `canon records ordinal intake <slug> --claim`.
 2. Record the baseline with `canon intake drive-check <slug> --baseline --json` from the main root, before the first build step. Stop on any `reason` other than `recorded`.
 3. Make the throwaway worktree, build it, and serve it per `${CLAUDE_SKILL_DIR}/references/isolate.md`, which also carries the close and the recovery after a crash.
-4. Confirm the address with `canon pr local --root <worktree> --json` and hand it to the operator before driving.
+4. Confirm the address with `canon pr local --root <worktree> --json`, write it as the drive log's `Address` row, and hand it to the operator before driving.
 
 ## Step 2: drive
 
-Read `${CLAUDE_SKILL_DIR}/references/drive-record.md` before the first finding, for the log line, the severity scale, and the record the check reads.
+Read `${CLAUDE_SKILL_DIR}/references/drive-record.md` before the first finding, for the drive log's shape, the severity scale, and the record the check reads.
 
 Work through three sources in this order, and name the source on every finding:
 
@@ -63,6 +63,7 @@ Append each finding to the drive log as it happens, never batched at the end, si
 - Move each frame a finding cites from scratch into the intake folder's `evidence/`, and cite it by that path
 - Copy each image the operator pastes into `evidence/` in the turn its message arrives, under its finding's number, or under a `ref-` prefix when no finding cites it yet
 - Keep the measured number beside the claim in the log, never only in chat
+- Write an operator's decision under the finding it settles, even when later findings already sit below it, since it is the one edit above the end of the log
 - Write `drive.json` into the intake folder in the shape `drive-record.md` sets, with one entry per goal
 
 ## Step 4: sort

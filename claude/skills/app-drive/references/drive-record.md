@@ -1,6 +1,6 @@
 ---
 title: Drive record
-description: The drive log line, the severity scale, the finding sources, and the drive.json shape that canon intake drive-check reads
+description: The drive log, the severity scale, the finding sources, and the drive.json shape that canon intake drive-check reads
 ---
 
 # Drive record
@@ -9,23 +9,65 @@ Read before the first finding of `app-drive`. A drive leaves two records in its 
 
 ## The drive log
 
-Write the log to `evidence/drive-log.md` inside the intake folder, one line per finding, appended as the finding happens.
+Write the log to `evidence/drive-log.md` inside the intake folder. It opens on a setup table, then takes one heading per finding, appended as the finding happens.
 
-```plaintext
-- <nn>. [<severity>] [<source>] <persona>: did <action>, saw <result>. Evidence: evidence/<nn>-<name>.png
+```markdown
+# Drive log
+
+| Setup     | Value                                             |
+| --------- | ------------------------------------------------- |
+| Commit    | `v0.13.138`                                       |
+| Copy      | `/tmp/tmp.Xy12/app`                               |
+| Launch    | `bun install && bun run build && bun run preview` |
+| Address   | `http://127.0.0.1:4530`                           |
+| In flight | `feat/landing-page` holds `web/`                  |
+
+## 02. Layers click leaves a half-hidden frame in place
+
+`minor` · operator · developer
+
+- **Did:** clicked the frame in Layers
+- **Saw:** the view stayed put, with 64% of the frame under the panel edge
+- **Cause:** from code, the reveal acts only when the box is wholly outside the view
+- **Evidence:** `evidence/02-partial-no-pan.png`
+- **Decision (operator):** center the frame unless it is wholly visible
 ```
 
 - `<nn>` numbers findings in the order they were found, and the frame carries the same number
-- `<source>` is `goal`, `last-drive`, or `operator`. A finding naming none sorts as taste.
-- `<result>` carries the number read off the page or the app when the claim has one, such as `scrollWidth 436 against clientWidth 320`
-- A goal tried and passed takes a line too, as `[pass] [goal]`, so the next drive can tell a goal checked from one skipped
+- The title names what the persona met, in sentence case with no trailing period
+- The meta line holds the severity, the source, and the persona, in that order. The source is `goal`, `last-drive`, or `operator`, and a finding naming none sorts as taste.
+- A `last-drive` finding adds `fixed`, `still open`, or `changed` to its meta line
+
+### Setup rows
+
+The setup table is written once, before the first finding, and every row stays even when its value is empty.
+
+- `Commit`, `Copy`, and `Launch` come from making the copy, per `isolate.md`
+- `Address` is the `url` that `canon pr local --root <worktree> --json` confirmed in Step 1
+- `In flight` names each open branch or live plan holding a path the drive covers, as `canon:role-planner` reads what is in flight, and reads `none` when nothing is
+
+### Fields
+
+The fields under the meta line carry the drive itself, one fact to a line.
+
+- `Saw` carries the number read off the page or the app when the claim has one, such as `scrollWidth 436 against clientWidth 320`
+- `Cause` is optional, and says whether it was measured or read from code
+- Write the operator's call as `Decision (operator)` under the finding it settles, even when it arrives after later findings
+- A decision settling two findings sits under the first, and the second carries `Decision (operator):` naming that finding's number, such as `see 02`
+- Keep each field to one line. A field that runs long splits into a second field rather than growing.
+
+### Passed goals
+
+A goal tried and passed takes a heading too, so the next drive can tell a goal checked from one skipped. Its meta line reads `pass` · goal · persona, and it carries `Did` and `Evidence` alone.
 
 ### Operator images
 
-Operator images count as evidence on arrival. One showing a finding takes that finding's number and is cited from that finding's line, while one no finding cites yet is a reference shot with a log line of its own.
+Operator images count as evidence on arrival. One showing a finding takes that finding's number and is cited from its `Evidence` field. One no finding cites yet is a reference shot with a heading of its own.
 
-```plaintext
-- ref-<nn>. [operator] <what the image shows>. Evidence: evidence/ref-<nn>-<name>.png
+```markdown
+## ref-01. The operator's Figma typography panel
+
+- **Evidence:** `evidence/ref-01-figma-typography.png`
 ```
 
 - `ref-<nn>` numbers reference shots apart from findings, so a later finding citing one keeps the path it already has
