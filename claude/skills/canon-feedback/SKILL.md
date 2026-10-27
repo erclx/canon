@@ -119,5 +119,5 @@ If `canon` is not on PATH, fall back: print the block in chat and tell the user 
 A report that was not filed reads one of two ways on stdout, and stderr carries the reason in both:
 
 - Empty stdout, with a named missing field on stderr. Add that heading with a real value or its stated fallback, then re-run. Do not report the defect as filed.
-- Empty stdout on a follow-up naming a malformed field, a closed issue, or a missing label. Repair the field and re-run, or file a new issue when the issue is closed or not a feedback report.
+- Empty stdout on a follow-up naming a field, an unreadable number, a closed issue, or a missing label. Repair the field or number, or file a new issue for a closed or unlabeled one.
 - The block on stdout, with `gh` absent or its call failed on stderr, which names which, since the two repairs differ. Show the block in chat with the reason and the paste line from Step 2.

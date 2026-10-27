@@ -141,3 +141,14 @@ export function commentFailureMessage(
   }
   return `gh could not post the follow-up: ${failure.detail ?? 'no diagnostic on stderr'}. Comment manually at ${target} instead.`
 }
+
+/**
+ * A read that `gh` ran and failed is most often a number naming no issue, so
+ * the sentence asks for the number rather than pointing a paste at it.
+ */
+export function issueReadFailureMessage(
+  failure: IssueFailure,
+  issue: number,
+): string {
+  return `gh could not read issue #${issue}: ${failure.detail ?? 'no diagnostic on stderr'}. Check the number and re-run.`
+}

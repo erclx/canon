@@ -6,6 +6,7 @@ import {
   commentFailureMessage,
   failureDetail,
   issueFailureMessage,
+  issueReadFailureMessage,
   parseIssueRead,
 } from '@/feedback/github-format'
 
@@ -129,6 +130,24 @@ describe('commentFailureMessage', () => {
 
     expect(message).toContain('HTTP 404')
     expect(message).not.toContain('issues/new')
+  })
+})
+
+describe('issueReadFailureMessage', () => {
+  it('should name the issue and ask for the number rather than a hand comment', () => {
+    const message = issueReadFailureMessage(
+      {
+        ok: false,
+        reason: 'command-failed',
+        detail: 'Could not resolve to an issue or pull request',
+      },
+      999999,
+    )
+
+    expect(message).toContain('#999999')
+    expect(message).toContain('Could not resolve to an issue')
+    expect(message).toContain('Check the number')
+    expect(message).not.toContain('Comment manually')
   })
 })
 

@@ -14,6 +14,7 @@ import {
 import {
   commentFailureMessage,
   issueFailureMessage,
+  issueReadFailureMessage,
 } from '@/feedback/github-format'
 import { frameError, frameSuccess } from '@/cli/ui'
 
@@ -41,10 +42,17 @@ async function postFollowUp(issue: number, body: string): Promise<void> {
     return
   }
 
+  // An absent gh can post nothing, so the block goes out for a hand paste. A
+  // failed read is a refusal to repair, since the number may name no issue.
   const read = await readFeedbackIssue(issue)
-  if (!read.ok) {
+  if (!read.ok && read.reason === 'missing-binary') {
     frameError(commentFailureMessage(read, issue))
     process.stdout.write(`${body}\n`)
+    process.exitCode = 1
+    return
+  }
+  if (!read.ok) {
+    frameError(issueReadFailureMessage(read, issue))
     process.exitCode = 1
     return
   }
