@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=390" />
+<link rel="stylesheet" href="../kit/landing/palette.css" />
+</head>
+<body class="ink phone final">
+<div class="arm"><b>preview · phone, 390 px</b> · the same page in one column</div>
+
+<div class="wrap"><nav><span class="brand"><img class="light-only" src="../kit/landing/mark-light.svg" alt="" /><img class="dark-only" src="../kit/landing/mark-dark.svg" alt="" />canon</span><a>How it runs</a><a>Docs</a><a>GitHub</a><a class="btn">Install</a></nav></div>
+
+<section class="fold"><div class="wrap">
+<h1>canon runs your agent's work from plan to merge</h1>
+<p class="lead">A CLI and Claude Code plugin that holds the work to established engineering practice, and installs the same setup in every repo.</p>
+<div class="cmd"><span>$</span> claude plugin marketplace add https://github.com/erclx/canon<br><span>$</span> claude plugin install canon@canon</div>
+<div class="btns"><a class="btn primary">Install canon</a><a class="btn">Follow the change</a></div>
+<div class="slot"><img class="light-only" src="../kit/landing/film-full-light.png" alt="The launch film" /><img class="dark-only" src="../kit/landing/film-full-dark.png" alt="The launch film" /><span class="play">Play the film · 43 s</span></div>
+</div></section>
+
+<section style="padding:56px 0"><div class="wrap"><p class="lead" style="margin:0">The film follows one real change, from the question that started it to its merge as erclx/canon#2418. Here is each step, with what it left behind.</p></div></section>
+
+<section><div class="wrap split">
+<div><div class="kicker"><i></i>1 · groundwork</div><h2>Measured before anyone plans it</h2><p class="sub">Context had grown from 16,109 words to 218,865. The track searched, measured, and spiked before it decided anything.</p></div>
+<div class="card"><div class="num">218,865</div><div class="cap">words of context, up from 16,109 in July</div><ul><li><b>Search</b>3 sources, all quoted</li><li><b>Measure</b>the whole corpus, by word</li><li><b>Spike</b>one entry, 741 words to 93</li></ul><div class="row" style="margin-top:12px"><span class="m p"></span><b>Decision: three sections per entry</b></div></div>
+</div></section>
+<section><div class="wrap split rev">
+<div><div class="kicker"><i></i>2 · plan</div><h2>One plan, every question already answered</h2><p class="sub">The plan names the files it touches and the test that proves them. Each open question carries a suggested answer, so a blank reply still moves.</p></div>
+<div class="stack"><div class="fig"><div class="head">feature-context-entry-shape.md<span>.canon/plans</span></div><div class="body"><div class="mono">## Files to touch</div><div class="mono dim" style="margin:4px 0 14px 16px">src/context/audit.ts</div><div class="mono">## Verification</div><div class="mono dim" style="margin:4px 0 14px 16px">bun test src/context/audit.test.ts</div><div class="mono">## Risks</div></div></div>
+<div class="fig"><div class="body"><div class="row" style="padding-top:0"><b>1. Should a gotcha carry its own length limit?</b></div><div class="row"><span class="m p"></span>Suggested: no, one line is enough</div></div></div></div>
+</div></section>
+<section><div class="wrap"><div class="wide-head"><div class="kicker"><i></i>3 · dispatch</div><h2>You talk to one session, and it launches the rest</h2><p class="sub">An orchestrator places each plan on the board and starts a worker per change, each in its own worktree.</p></div><div class="wide-figs lead-left"><div class="stack"><div class="msg"><small>planner</small>Two plans landed, linked to their tasks.</div><div class="msg"><small>orchestrator</small>Both standards plans are in, and I've dispatched their workers on Opus.</div></div><div class="fig"><div class="head">Agent view<span>working</span></div><div class="body" style="padding:8px 20px"><div class="row"><span class="m"></span><span class="mono">orchestrator-canon</span><em>pinned</em></div><div class="row"><span class="m p"></span><span class="mono">feat/context-entry-shape</span><em>editing audit.ts</em></div><div class="row"><span class="m o"></span><span class="mono">feat/docs-page-shape</span><em>entered worktree</em></div><div class="row"><span class="m o"></span><span class="mono">Documentation density…</span><em>plans linked</em></div></div></div></div></div></section>
+<section><div class="wrap"><div class="wide-head"><div class="kicker"><i></i>4 · build</div><h2>Each worker in its own worktree, held to the rules</h2><p class="sub">Rules load on the path being edited, and the gate runs every stage before the pull request opens.</p></div><div class="wide-figs "><div class="stack"><div class="fig"><div class="head">src/context/audit.ts<span>worktree</span></div><div class="body"><span class="chip">rule loaded → code-craft</span><div class="mono" style="margin:10px 0">export const GOTCHA_CAP = 5</div><div class="mono">export const LAYOUT_BULLET_CAP = 5</div><span class="chip" style="margin-top:12px">rule loaded → test-craft</span></div></div></div><div class="stack"><div class="fig"><div class="head">canon gate run<span></span></div><div class="body" style="padding:8px 20px"><div class="row"><span class="m"></span>context-citations</div><div class="row"><span class="m"></span>types</div><div class="row"><span class="m"></span>tests</div><div class="row"><span class="m p"></span><b>passed</b><em>pull request opened</em></div></div></div></div></div></div></section>
+<section class="band"><div class="wrap"><div class="wide-head"><div class="kicker"><i></i>5 · review</div><h2>A fresh session reviews, until nothing is open</h2><p class="sub">A session that did not write the change reads it against the plan. The worker fixes what it finds, and the review closes only when nothing is left.</p></div><div class="wide-figs "><div class="stack"><div class="fig"><div class="head">Review on #2418<span>0 critical, 3 should-fix, 2 minor</span></div><div class="body" style="padding:8px 20px"><div class="row"><span class="m"></span><span class="struck">the fold still says to write decisions</span></div><div class="row"><span class="m"></span><span class="struck">internal-docs puts decisions back</span></div><div class="row"><span class="mono dim" style="margin-left:26px">review-address: fixed at f64e35a</span></div><div class="row"><span class="m p"></span><b>## Review closed</b><em>re-reviewed f64e35a</em></div></div></div></div><div class="stack"><div class="fig"><div class="head">For the reviewer<span>checked</span></div><div class="body" style="padding:8px 20px"><div class="row"><span class="m"></span>ungated entry reports, exit 0</div><div class="row"><span class="m"></span>six gotchas count as six</div><div class="row"><span class="m"></span>seed tree gates by prefix</div></div></div></div></div></div></section>
+<section><div class="wrap split">
+<div><div class="kicker"><i></i>6 · merge</div><h2>You merge, and the next wave starts</h2><p class="sub">The task archives with its plan, and the board moves to the next row.</p></div>
+<div class="stack"><div class="fig"><div class="head">terminal<span>main</span></div><div class="body" style="padding:8px 20px"><div class="row"><span class="mono dim">$</span><span class="mono">canon pr merge 2418</span></div><div class="row"><span class="m p"></span><b>merged into main</b></div><div class="row"><span class="m"></span>task archived with its plan</div></div></div>
+<div class="fig"><div class="head">Board<span>priority.md</span></div><div class="body" style="padding:8px 20px"><div class="row"><span class="m"></span><span class="struck">v152.3 entry shape</span></div><div class="row"><span class="m o"></span><b>v152.4 rebuild</b><em>next</em></div><div class="row"><span class="m o"></span>v152.6 docs rebuild</div></div></div></div>
+</div></section>
+<section><div class="wrap split" style="align-items:start">
+<div><h2>Quick start</h2><p class="sub">The skills land as /canon:&lt;name&gt;, and the CLI needs Bun on your path. canon runs on Linux and macOS.</p><p class="sub" style="margin-top:12px">Set up a repository with canon init, which lays down its rules, seeds, and configs.</p></div>
+<div><div class="cmd" style="margin-top:0;display:block"><span>$</span> claude plugin marketplace add https://github.com/erclx/canon<br><span>$</span> claude plugin install canon@canon<br><span>$</span> bun install --global @erclx/canon</div><div class="btns"><a class="btn primary">Install canon</a><a class="btn docs">Read the docs</a></div></div>
+</div></section>
+
+<div class="wrap"><footer><span class="brand"><img class="light-only" src="../kit/landing/mark-light.svg" alt="" /><img class="dark-only" src="../kit/landing/mark-dark.svg" alt="" />canon</span><span>Docs</span><span>Skill map</span><span>GitHub</span><span>npm</span><span>MIT licensed</span></footer></div>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>readme</title>
+    <link rel="stylesheet" href="../kit/readme/readme.css" />
+  </head>
+  <body>
+    <div class="tag" data-name="Candidate tag"><b>Final · README</b><span>About 60 lines. The loop structure with the agent's half, copy checked against the CLI.</span></div>
+    <div class="header" data-name="Header">
+      <svg class="logo" width="64" height="64" viewBox="-0.35 -5 110 110" aria-hidden="true"><defs><mask id="c" maskUnits="userSpaceOnUse" x="-20" y="-20" width="160" height="140"><rect x="-20" y="-20" width="160" height="140" fill="white" /><rect x="28" y="32" width="36" height="36" rx="10" fill="black" /><rect x="46" y="32" width="80" height="36" fill="black" /></mask></defs><rect class="c" x="8" y="12" width="76" height="76" rx="30" mask="url(#c)" /><rect class="pip" x="81.3" y="40" width="20" height="20" rx="3.8" /></svg>
+      <h1>canon</h1>
+      <p>A CLI and Claude Code plugin that runs your agent's work from plan to merge, holds it to established engineering practice, and installs the same setup in every repo.</p>
+      <div class="badges"><i>npm</i><i>CI</i><i>license</i></div>
+    </div>
+    <div class="sheet">
+      <div class="picture" data-name="Hero picture"><b>Hero</b><span>A still or a silent loop, decided in the hero round.</span></div>
+      <h2 data-name="Quick start heading">Quick start</h2>
+      <pre data-name="Install commands">claude plugin marketplace add https://github.com/erclx/canon
+claude plugin install canon@canon
+bun install --global @erclx/canon</pre>
+      <p data-name="Install line">The skills land as <code>/canon:&lt;name&gt;</code>, and the CLI needs <a>Bun</a> on your path. canon runs on Linux and macOS.</p>
+      <p data-name="Init line">Set up a repository with <code>canon init</code>, which lays down its rules, seeds, and configs.</p>
+      <h2 data-name="Loop heading">How a change runs</h2>
+      <table data-name="Loop">
+        <tbody>
+          <tr><th>1. Plan</th><th>2. Build</th><th>3. Review</th><th>4. Merge</th></tr>
+          <tr><td>A planner reads the code and writes one plan you approve</td><td>A worker builds it on its own branch, held to the rules</td><td>A fresh session reviews the pull request and posts findings</td><td>You read the review and merge</td></tr>
+        </tbody>
+      </table>
+      <p data-name="Loop line">Each session works in its own worktree, so several changes run at once.</p>
+      <h2 data-name="Installs heading">What lands in your repo</h2>
+      <table data-name="Installs">
+        <tbody>
+          <tr><th>Part</th><th>How it reaches you</th></tr>
+          <tr><td>Skills</td><td>Loaded live from the plugin, so there is no copy to drift</td></tr>
+          <tr><td>Rules</td><td>Files under <code>.claude/rules/</code> that load when you edit a matching path</td></tr>
+          <tr><td>Configs and seeds</td><td>Real files you own, laid down by <code>canon init</code> and kept current by <code>canon sync</code></td></tr>
+        </tbody>
+      </table>
+      <h2 data-name="Agent heading">For your agent</h2>
+      <ul data-name="Agent list">
+        <li>Every command runs without a prompt, and data on stdout pipes clean</li>
+        <li><code>canon &lt;command&gt; --help</code> prints each command's flags, exit codes, and examples</li>
+        <li>Rules load by path, so the agent gets the rule for the file it is editing</li>
+      </ul>
+      <h2 data-name="Docs heading">Docs</h2>
+      <ul data-name="Docs list">
+        <li><a>AI workflow</a>, the loop a feature runs</li>
+        <li><a>Operating model</a>, planners, workers, and reviewers in parallel</li>
+        <li><a>Skill map</a>, every skill by the moment you reach for it</li>
+        <li><a>Agents</a>, flags, exit codes, and output shapes</li>
+      </ul>
+      <h2 data-name="Contributing heading">Contributing</h2>
+      <p data-name="Contributing line">Issues are welcome. Pull requests are by invitation, so read the <a>contributing guide</a> before you open one. Released under the <a>MIT license</a>.</p>
+    </div>
+  </body>
+</html>
