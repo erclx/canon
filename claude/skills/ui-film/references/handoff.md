@@ -14,7 +14,7 @@ Read at Step 5 of `ui-film`. Canon stops at the clip, and a HyperFrames composit
 | File          | Holds                                                                        |
 | ------------- | ---------------------------------------------------------------------------- |
 | `clip.mp4`    | H.264 at 60 fps, 3840x2160 when frame stepped, 1920x1080 when screencast     |
-| `log.json`    | Every move, click, typing burst, and scroll, with each target's box          |
+| `log.json`    | Every move, click, drag, key press, typing burst, and scroll, with its boxes |
 | `camera.json` | One camera per frame of the clip, with the cursor and the click ring         |
 | `still.jpg`   | The clip's closing frame, the check on each take, which no composition needs |
 
@@ -27,7 +27,7 @@ Each frame carries `scale`, the view's top-left `x` and `y`, the `cursor`, and `
 - `scale` is 1 for the whole page and 1.8 at the deepest zoom, or about 1.35 on a screencast beat, and holds at 1 on a beat whose plan set `push: false`
 - `x` and `y` place the view's corner on the page, so the view spans `1920 / scale` by `1080 / scale` from there
 - `cursor` is the pointer's position on the page
-- `ring` runs from 0 to 1 across the 450 ms after a click and is `null` otherwise
+- `ring` runs from 0 to 1 across the 450 ms after a click and is `null` otherwise. On a drag it grows to 0.3, holds there from press to release, and runs on to 1 from the release.
 
 The track is final. It already carries the easing, the spring, and the hold, so a composition sets each frame's values and never tweens between them.
 
