@@ -59,9 +59,10 @@ Every workflow installing the Playwright system packages calls this script. A de
 
 Each caller restores `~/.cache/apt-archives` from a `playwright-apt-<ImageOS>-<ImageVersion>` key before the install, falling back to the newest key for the same OS, so the mirror serves only the changed packages.
 
-- This workflow is the one writer, since a pull request's cache is scoped to its merge ref. It runs on `main` on a push to the script or `bun.lock`, daily, and by hand.
+- This workflow is the one writer, since a pull request's cache is scoped to its merge ref. It runs on `main` daily, by hand, and on a push to itself.
 - It gives each attempt 600 seconds, saves only on an exact-key miss after a passing install, and runs `apt-get autoclean` first so a previous image's versions drop out
 - A miss on a pull request still installs from the mirror, so a new runner image is exposed until the next warm run
+- The key carries the image alone, so packages a new Playwright version adds stay uncached until the next image key
 
 ### Other folders
 

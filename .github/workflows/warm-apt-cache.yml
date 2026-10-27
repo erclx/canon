@@ -7,9 +7,10 @@ on:
   push:
     branches:
       - main
+    # The key carries the image alone, so a lockfile or script change hits the
+    # same key and could not refresh the cache. Only this file's first landing
+    # needs a run before the daily one.
     paths:
-      - 'scripts/ci/install-playwright-deps.sh'
-      - 'bun.lock'
       - '.github/workflows/warm-apt-cache.yml'
   schedule:
     # Daily, so a new runner image gets its key before the 7-day eviction
