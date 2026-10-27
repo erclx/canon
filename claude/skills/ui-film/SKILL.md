@@ -92,26 +92,36 @@ Open each beat's `takes/<dir>/still.jpg` before handing off, since a clip can fi
 
 ## Step 5: hand off
 
-Read `${CLAUDE_SKILL_DIR}/references/handoff.md` on reaching this step. It sets what HyperFrames receives and how a composition applies the camera track and draws the cursor.
+Read `${CLAUDE_SKILL_DIR}/references/handoff.md` on reaching this step, for what HyperFrames receives, where each composition lives, and how one applies the camera track and draws the cursor. Read `${CLAUDE_SKILL_DIR}/references/compose-craft.md` beside it, for the footage rules the HyperFrames skills lack.
 
 Close the throwaway copy per `isolate.md` when Step 1 built one, after the stills are read.
+
+### Write the workspace README
+
+Write the filming half of `.canon/video/<slug>/README.md`, so a later session can re-film without this one. The composing session adds the re-render half under its own heading, as `compose-craft.md` states.
+
+- Name what was filmed, beat by beat, and how to re-film each one with `canon take`
+- Say where each folder came from, being the plan, the takes, and the config keys the take read, with `access` described rather than copied when it carries a token
+- Write the file whole through the main-root route when none exists, with the filming half under a `## Filming` heading
+- Add a `## Filming` section when a README is already there, reading the file and writing it back whole, and never overwrite what another session wrote
+- Replace an existing `## Filming` section in place on a re-film, since the commands in it changed
 
 ## Output
 
 Emit the takes folder, one line per beat, and the next step.
 
 ```plaintext
-🎬 Filmed .canon/video/<slug>/takes/
+🎬 Filmed .canon/video/<slug>/takes/, re-film notes in .canon/video/<slug>/README.md
 
 01-open-the-kit  step  4.2 s  the board's first page with its frames filled in
 02-search-for-color  screencast (fallback)  3.8 s  the page list narrowed to two results
 
-Next: load hyperframes to compose, reading takes/take.json and the handoff notes
+Next: load hyperframes to compose, reading takes/take.json, handoff.md, and compose-craft.md
 ```
 
 ## What this delegates
 
 - `app-drive`'s `isolate.md` owns the throwaway copy and its close
 - `hyperframes-creative`'s story spine owns what a beat says to a viewer
-- `hyperframes` and its sibling skills own composing, captioning, and rendering the video
+- `hyperframes` and its sibling skills own composing, captioning, and rendering the video, and `compose-craft.md` adds only what app footage changes about their advice
 - `review-ui` owns driving a pull request's checklist

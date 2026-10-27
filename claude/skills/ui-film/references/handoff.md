@@ -45,6 +45,14 @@ bunx -y hyperframes init .canon/video/<slug>/composition
 - Leave renders in the project's `renders/` folder, which `canon records push` skips along with `takes/`, `snapshots/`, `node_modules/`, and any video file
 - An image the composition adds under `assets/`, such as a logo, is backed up with the project's source
 
+A cut in another shape and the README loop are each a project of their own beside `composition/`, so one shape's edit never reflows another's. Each reads the takes from `../takes/` the same way.
+
+| Project                | Holds                                            |
+| ---------------------- | ------------------------------------------------ |
+| `composition/`         | The main cut, in the takes' 16:9 shape           |
+| `composition-<shape>/` | One other shape, such as `composition-square/`   |
+| `readme-loop/`         | The short silent loop a README plays as its hero |
+
 Compose from a session started at the main worktree root. From a linked worktree or an isolated background session, `Write` and `Edit` refuse every file in `composition/` and redirect to a worktree copy no later session reads, so never take that redirect.
 
 Where composing from the main root is not possible, write each file whole through the route `${CLAUDE_SKILL_DIR}/../session-worktree/references/main-root-writes.md` states.
@@ -61,6 +69,8 @@ Load `hyperframes-core` for placing the clip and `hyperframes-keyframes` for the
 The cursor stays outside the wrapper because a cursor inside it would scale with the zoom, which is the reason no clip carries one.
 
 ## What the composition still owns
+
+Read `${CLAUDE_SKILL_DIR}/references/compose-craft.md` for the captions, the other shapes, the loop, and a sped-up clip, where app footage changes what HyperFrames advises.
 
 - The order and the cuts between takes, the captions, and any music or voice
 - Whether a take plays whole or trimmed. A trim keeps the track aligned only when it shifts the track by the same frames.

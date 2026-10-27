@@ -28,7 +28,12 @@ access = "/write?token=demo"
 - An absent `access` opens the served root
 - `personas` and `proposals` belong to `app-drive`, and a take reads neither
 
-Every beat opens the address fresh in its own browser, so a link the app honors once, such as a single-use edit ticket, serves one beat alone. Mint a fresh link and run `canon take` once per beat for such an app, or a later beat opens the page without the access the first one spent.
+### Single-use access
+
+Every beat opens the address fresh in its own browser, so a link the app honors once, such as a single-use edit ticket, serves one beat alone. A beat that falls back to the screencast opens the address a second time, so the fallback spends the link too, even within one beat.
+
+- Point `access` at a local redirect minting a fresh link per request, so each open gets its own, the one pattern that held across beats and fallbacks alike
+- Run `canon take` once per beat with a freshly minted link only where no redirect can be served, with `"route": "screencast"` on each so no fallback reopens it
 
 ## When the file is absent
 

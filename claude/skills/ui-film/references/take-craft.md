@@ -15,6 +15,7 @@ Read at Step 3 of `ui-film`, before writing the first beat. `canon take --help` 
 - [Targets](#targets)
 - [The pointer](#the-pointer)
 - [The zoom](#the-zoom)
+- [The harness route](#the-harness-route)
 - [Sources](#sources)
 
 ## The plan
@@ -44,6 +45,13 @@ A plan holds the approved beats in order. Each beat names its setup, which runs 
 - Reach the beat's start state through `setup`, since every beat opens the page fresh and nothing a setup step does is filmed
 - Write the beat's `name` as the operator approved it, since it names the clip's folder
 
+### Server state
+
+Every beat reloads the page, never the server. An app holding its state in server memory keeps a change one beat made, so the next beat opens on it.
+
+- Undo the change in the next beat's `setup`, or order the beats so each one's result is the next one's start
+- Restart the server between beats only when neither works, since a restart costs the served address its warm start
+
 ## Frame-stepping limits
 
 A step beat runs the page on a virtual clock, one frame per step. Most pages film this way, and some inputs are known to stall it.
@@ -69,6 +77,7 @@ Two rules hold once a beat is filmed.
 
 - Prefer a stable attribute, such as an `aria-label`, a `data-testid`, or an `id`, over a position like `:nth-child`
 - Use `text=<words>` for a control whose only stable handle is its label
+- Target a control with no visible text, such as an icon button, by its `aria-label`, since `text=` finds nothing on it
 - Use a `move` to a point only for a target the page reveals on hover, and follow it with the click
 - Read each target off the served page before writing it. The verb refuses `target-missing` rather than filming a guess, and a refusal costs a reload.
 
@@ -94,6 +103,14 @@ Three controls change the push itself.
 - Expect a screencast beat's zoom to stop near 1.35x, since its clip has one pixel per page pixel, and a stepped beat's to reach 1.8x
 - Set `"push": false` on a beat the edit holds wide, such as one showing a whole layout change. Its track keeps the cursor and the click ring and drops the zoom.
 - Rebuild a beat's track with `canon take camera <dir>/log.json --rate <n> --out <file>` for a clip the edit plays `n` times faster, so the zoom settles on the clock a viewer sees
+
+## The harness route
+
+A beat driven from outside the page, such as a drag between two windows or an input the step kinds lack, cannot run as `canon take` steps. Until the verb can run an outside script itself, film it through a harness.
+
+- Drive the beat from a Playwright script that records the page and writes a log in the shape of a take's `log.json`
+- Build its camera track from that log with `canon take camera <log> --out <file>`, so the composition applies it like any other take
+- Tell the operator which beats ran this way, since their clips carry the harness's resolution rather than the stepper's
 
 ## Sources
 
