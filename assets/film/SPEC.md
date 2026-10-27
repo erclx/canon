@@ -5,7 +5,8 @@ The director's brief for `BRIEF.md`, with a number wherever the brief has an adj
 ```text
 GOAL:    a developer watches one change go from groundwork to merge under canon, and wants to install it
 OUTPUT:  HyperFrames, 1920 x 1200 (16:10), 30 fps, one render per theme
-         README: 960 x 600 at 12 fps, GIF or animated WebP. Landing page: 1920 x 1200 MP4 at 30 fps
+         README: 960 x 600 at 12 fps, GIF or animated WebP. Landing page: 1280 x 800 MP4 at 30 fps,
+         silent, with a poster PNG at 0.6 s
 TIME:    42.9 s x 30 = 1287 frames, no music
          open 0-1.2, groundwork 1.2-7.6, plan 7.6-14.2, dispatch 14.2-21.8,
          build 21.8-29.0, review 29.0-36.0, merge 36.0-41.4, close 41.4-42.9
@@ -112,6 +113,13 @@ The README loop comes from each theme's MP4, since no render preset scales below
 ```bash
 ffmpeg -i renders/launch-dark.mp4 -vf "fps=12,scale=960:600:flags=lanczos,split[a][b];[a]palettegen=max_colors=64:stats_mode=diff[p];[b][p]paletteuse=dither=none:diff_mode=rectangle" -loop 0 renders/readme-dark.gif
 ffmpeg -i renders/launch-dark.mp4 -vf "fps=12,scale=960:600:flags=lanczos" -c:v libwebp_anim -lossless 0 -quality 80 -loop 0 renders/readme-dark.webp
+```
+
+The landing page plays the same render at 1280 wide, with every audio stream dropped, and shows a poster cut at 0.6 s while the film waits. `bun run film:render` writes both beside the GIFs as `assets/loops/launch.mp4` and `launch-poster.png`, with a `-light` pair for the light theme.
+
+```bash
+ffmpeg -i renders/launch-dark.mp4 -an -vf scale=1280:-2:flags=lanczos -c:v libx264 -pix_fmt yuv420p -crf 24 -preset slow -movflags +faststart renders/web-dark.mp4
+ffmpeg -ss 0.6 -i renders/launch-dark.mp4 -frames:v 1 -vf scale=1280:-2:flags=lanczos renders/poster-dark.png
 ```
 
 ## Positions the pip layer shares
