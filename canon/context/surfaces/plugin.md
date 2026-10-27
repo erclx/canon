@@ -70,7 +70,7 @@ The skills and rules around the plugin each own one slice.
 - `docs/workflow/` owns the skill map a coverage claim is measured against, one row per skill
 - `.claude/skills/` owns the toolkit-internal `internal-*` skills, covered in `canon/context/workflow/internal-skills.md`
 - `sandbox/claude/` owns the per-skill scenarios that provision a seeded project for a headless run
-- `src/labels/` and `src/feedback/` own the verbs `git-pr` and `git-issue` call, labelling from `canon/config/pr-labels.toml` and filing a toolkit issue from a feedback block
+- `src/labels/` and `src/feedback/` own the verbs `git-pr`, `git-issue`, and `canon-feedback` call, labelling from `canon/config/pr-labels.toml` and filing or following up on a toolkit issue
 
 ## Gotchas
 

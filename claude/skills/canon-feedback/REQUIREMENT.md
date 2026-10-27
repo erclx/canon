@@ -14,7 +14,7 @@ Asked to report, a session also starts diagnosing, which spends the context the 
 ## Must
 
 - Build the report from what the session already holds, name the surface and its type, and write the stated fallback for a field it cannot fill
-- Carry the whole request in the issue body alone, since a body and a comment that differ leave triage choosing
+- Carry the whole request in the issue body, and what came after filing in a follow-up the CLI checks for links and for whether the fix still holds, never a hand-written comment
 - Open a GitHub issue on the toolkit repository through the CLI and print the returned URL on its own line
 - Surface the block and the reason when the issue call fails or the CLI is absent, so the report still exists
 - Hold a report the operator marks sensitive, since the issue is public

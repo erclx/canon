@@ -2,11 +2,20 @@ import { Option, type Command } from 'commander'
 import {
   deriveDomainLabels,
   deriveTitle,
+  followUpProblem,
   missingField,
   missingFieldMessage,
 } from '@/feedback/body'
-import { createGithubIssue } from '@/feedback/github'
-import { issueFailureMessage } from '@/feedback/github-format'
+import {
+  createGithubIssue,
+  postIssueComment,
+  readFeedbackIssue,
+} from '@/feedback/github'
+import {
+  commentFailureMessage,
+  issueFailureMessage,
+  issueReadFailureMessage,
+} from '@/feedback/github-format'
 import { frameError, frameSuccess } from '@/cli/ui'
 
 function readStdin(): Promise<string> {
@@ -20,6 +29,61 @@ function readStdin(): Promise<string> {
   })
 }
 
+/**
+ * Triage lists open `feedback` issues only, so a comment anywhere else is
+ * never read. Both checks run before the post, since a public comment cannot
+ * be taken back by a later refusal.
+ */
+async function postFollowUp(issue: number, body: string): Promise<void> {
+  const problem = followUpProblem(body)
+  if (problem) {
+    frameError(problem)
+    process.exitCode = 1
+    return
+  }
+
+  // An absent gh can post nothing, so the block goes out for a hand paste. A
+  // failed read is a refusal to repair, since the number may name no issue.
+  const read = await readFeedbackIssue(issue)
+  if (!read.ok && read.reason === 'missing-binary') {
+    frameError(commentFailureMessage(read, issue))
+    process.stdout.write(`${body}\n`)
+    process.exitCode = 1
+    return
+  }
+  if (!read.ok) {
+    frameError(issueReadFailureMessage(read, issue))
+    process.exitCode = 1
+    return
+  }
+  if (read.state !== 'OPEN') {
+    frameError(
+      `Issue #${issue} is ${read.state.toLowerCase()}, and triage reads open feedback issues only. File a new report instead.`,
+    )
+    process.exitCode = 1
+    return
+  }
+  if (!read.labels.includes('feedback')) {
+    frameError(
+      `Issue #${issue} carries no feedback label, so it is not a toolkit feedback report. Check the number and re-run.`,
+    )
+    process.exitCode = 1
+    return
+  }
+
+  const result = await postIssueComment(issue, body)
+  if (result.ok) {
+    frameSuccess('canon feedback', result.url)
+    process.stdout.write(`${result.url}\n`)
+    return
+  }
+  frameError(commentFailureMessage(result, issue))
+  process.stdout.write(`${body}\n`)
+  process.exitCode = 1
+}
+
+const ISSUE_NUMBER = /^[1-9]\d*$/
+
 export function register(program: Command): void {
   program
     .command('feedback')
@@ -27,10 +91,21 @@ export function register(program: Command): void {
     .description(
       'Open a GitHub issue on the toolkit repo from a feedback block on stdin',
     )
+    .option(
+      '--on <issue>',
+      'Post a follow-up block as a comment on an open feedback issue instead',
+    )
     // A cached plugin still pipes `--github`, and commander rejects an unknown
     // option, so the flag stays accepted and hidden for one release.
     .addOption(new Option('--github').hideHelp())
-    .action(async () => {
+    .action(async (opts: { on?: string }) => {
+      if (opts.on !== undefined && !ISSUE_NUMBER.test(opts.on)) {
+        frameError(
+          `--on takes an issue number, such as --on 2801, not "${opts.on}".`,
+        )
+        process.exitCode = 1
+        return
+      }
       if (process.stdin.isTTY) {
         frameError(
           'No feedback on stdin. Pipe a markdown block: pbpaste | canon feedback',
@@ -42,6 +117,11 @@ export function register(program: Command): void {
       if (!body) {
         frameError('Empty feedback body. Provide a markdown block on stdin.')
         process.exitCode = 1
+        return
+      }
+
+      if (opts.on !== undefined) {
+        await postFollowUp(Number(opts.on), body)
         return
       }
 

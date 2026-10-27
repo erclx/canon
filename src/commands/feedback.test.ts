@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
+  FOLLOW_UP_FIELDS,
   REQUIRED_FIELDS,
   deriveDomainLabels,
   deriveTitle,
+  followUpProblem,
   missingField,
   missingFieldMessage,
+  missingFollowUpField,
   parseSections,
   readField,
 } from '@/feedback/body'
@@ -233,5 +236,84 @@ describe('deriveDomainLabels', () => {
 
   it('should return no labels when no Surface field is present', () => {
     expect(deriveDomainLabels('no surface here')).toEqual([])
+  })
+})
+
+function followUp(overrides: Record<string, string> = {}): string {
+  const fields: Record<string, string> = {
+    Observed: 'the painted rule caught the case',
+    'Changes the fix': 'No, the proposed fix stands',
+    Links: 'https://github.com/erclx/frameboard/issues/156',
+    ...overrides,
+  }
+  const sections = Object.entries(fields)
+    .filter(([, value]) => value !== '')
+    .map(([heading, value]) => `### ${heading}\n\n${value}`)
+    .join('\n\n')
+  return `## Toolkit feedback follow-up\n\n${sections}\n`
+}
+
+describe('missingFollowUpField', () => {
+  it('should find nothing missing in a follow-up carrying every field', () => {
+    expect(missingFollowUpField(followUp())).toBeUndefined()
+  })
+
+  it.each(FOLLOW_UP_FIELDS)(
+    'should name %s when its section is absent',
+    (field) => {
+      expect(missingFollowUpField(followUp({ [field]: '' }))).toBe(field)
+    },
+  )
+})
+
+describe('followUpProblem', () => {
+  it('should accept a well-formed follow-up', () => {
+    expect(followUpProblem(followUp())).toBeUndefined()
+  })
+
+  it('should name the missing field', () => {
+    expect(followUpProblem(followUp({ Links: '' }))).toContain('### Links')
+  })
+
+  it('should refuse a Changes the fix not opening on yes or no', () => {
+    const body = followUp({ 'Changes the fix': 'Probably, the rule moved' })
+
+    expect(followUpProblem(body)).toContain('### Changes the fix')
+  })
+
+  it('should refuse a Changes the fix opening on a word starting with yes', () => {
+    const body = followUp({ 'Changes the fix': 'yesterday it moved' })
+
+    expect(followUpProblem(body)).toContain('### Changes the fix')
+  })
+
+  it('should accept a Changes the fix opening on yes in any case', () => {
+    const body = followUp({ 'Changes the fix': 'Yes, the painted rule moved' })
+
+    expect(followUpProblem(body)).toBeUndefined()
+  })
+
+  it('should accept a Links holding only a cross-repo issue reference', () => {
+    expect(
+      followUpProblem(followUp({ Links: 'frameboard#156' })),
+    ).toBeUndefined()
+  })
+
+  it('should accept a Links holding an owner/repo issue reference', () => {
+    expect(
+      followUpProblem(followUp({ Links: 'erclx/canon#2801' })),
+    ).toBeUndefined()
+  })
+
+  it('should refuse a Links holding only bare names', () => {
+    const body = followUp({ Links: 'frameboard issue, commit abc123' })
+
+    expect(followUpProblem(body)).toContain('### Links')
+  })
+
+  it('should refuse a Links whose # carries no number', () => {
+    const body = followUp({ Links: 'frameboard#next' })
+
+    expect(followUpProblem(body)).toContain('### Links')
   })
 })
