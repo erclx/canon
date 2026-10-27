@@ -29,16 +29,22 @@ Two more guards hold through every step.
 ## Step 1: list the queue
 
 ```bash
-gh issue list --label feedback --state open --limit 1000 --json number,title,body,labels
+gh issue list --label feedback --state open --limit 1000 --json number,title,body,labels,comments
 ```
 
-Take every issue. An issue without the `feedback` label does not surface here by design.
+Take every issue, reading its comments with its body, since a follow-up posted as a comment is part of the report. An issue without the `feedback` label does not surface here by design.
 
 ## Step 2: drop what the board already carries
 
 An issue is carried when its number appears in a live or archived task's `Issue:` line under `.canon/tasks/`, or in an item heading of an existing `.canon/intake/` folder, written `(#NNN)`. Search both at the main root.
 
-Set each carried issue aside with its carrier, a task path or a folder and item. Name every one in the overview, so a re-run while an earlier folder sits unanswered files nothing twice. When every issue is carried, stop: `✅ Every open feedback issue is already on the board.`
+Set each carried issue aside with its carrier, a task path or a folder and item.
+
+- Name every one in the overview, so a re-run while an earlier folder sits unanswered files nothing twice
+- Name the issue's comment count and newest comment date beside its carrier when it has any, so a follow-up posted after the carrier was filed is seen
+- File no item for a comment on a carried issue, since an item would file the issue twice against a live task
+
+When every issue is carried, stop: `✅ Every open feedback issue is already on the board.`
 
 ## Step 3: claim the folder
 
@@ -47,6 +53,8 @@ Run `canon records ordinal intake feedback-triage --claim --json` and take its `
 ## Step 4: measure each issue
 
 For each remaining issue, measure its claim against the tree during this pass, never carrying a figure from the issue forward, since it states what was true when filed.
+
+Measure each comment's claim the same way, whoever posted it, and fold it into the issue's one item rather than filing a second. When a comment contradicts the body, measure the later claim and name the comment as the source on `Problem:`.
 
 - Grep for the construct its defect names and count the sites
 - Check whether the behavior it asks for exists
