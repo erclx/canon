@@ -1,6 +1,6 @@
 ---
 title: Orchestrator launch runbook
-description: The launch every dispatch kind shares, being the build, cloud build, review-address, planning, and talk templates, the session name and controller id each carries, why the command sits at position zero, and what the brief may carry
+description: The launch every dispatch kind shares, being the build, cloud build, review-address, and planning templates with a pointer to the talk variant, the session name and controller id each carries, why the command sits at position zero, and what the brief may carry
 ---
 
 Run this once `orchestrator-dispatch.md` has cleared a row, or from its planning or review-address shape below when that runbook's checks do not bind. The model each template names comes from `## Pick the model` in that runbook.
