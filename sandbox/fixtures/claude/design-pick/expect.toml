@@ -67,9 +67,8 @@ write_scope = [
 # markup each takes. The measured run took 99 seconds and its turn count sits in
 # the record beside this file. Correct it downward from the widest of several.
 #
-# Never raise it above the cap of 30: a truncated run reports one turn past the
-# cap, so a declaration above it goes green on exactly the truncation the
-# assertion exists to catch.
+# At the cap of 30 the cap holds it, failing a truncated run by its subtype, so
+# lowering it is the only change that makes it compare turns.
 max_turns = 30
 
 manual = [

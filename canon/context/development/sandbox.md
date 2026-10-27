@@ -54,7 +54,7 @@ Owns the runner behind `canon sandbox run <cat:cmd> "<prompt>" [scenario]`.
 - `run.ts` provisions, snapshots the tree, and spawns `claude -p --plugin-dir` on `sonnet` under `bypassPermissions`, since `acceptEdits` denies writes under `.claude/`
 - The envelope carries `is_error`, `result`, `num_turns`, `total_cost_usd`, and a `verdict`. Read the verdict from `.canon/tmp/runs/sandbox/`, since a later `sandbox check` finds no sandbox.
 - Pass the prompt whole as `/canon:<skill> <args>`. Four `CANON_SKILL_TEST_*` variables override the defaults. `_TOOLS` restricts nothing under `bypassPermissions`.
-- The cap of 30 turns is the only budget, and an arm's `max_turns` above it goes green on a truncated run. An arm that must never reach a shell uses `dontAsk`, as `claude:deploy-app` does.
+- The cap of 30 turns is the only budget. A run it truncates fails by `subtype`, and a `max_turns` at or above it compares nothing. A no-shell arm uses `dontAsk`, as `claude:deploy-app` does.
 - `watch.ts` flags writes to `.canon/plans`, `.canon/review`, `.canon/memory`, and `.canon/tasks` as escapes and sees nothing else. `dispatch.ts` bounds a nested `claude --bg` by shim and reap.
 
 ### `src/sandbox/replay/`

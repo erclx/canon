@@ -41,9 +41,8 @@ write_scope = [".canon/intake/**", ".canon/tmp/app-drive/**", ".canon/picks/**"]
 escape_scope = []
 
 # Observed at 22 turns and 0.31 dollars on 2026-10-26, from one run. Declared at
-# the cap rather than tightened from a single observation, and never above it.
-# A truncated run reports one turn past the cap, so a declaration above it goes
-# green on exactly the truncation the assertion exists to catch.
+# the cap rather than tightened from a single observation, so the cap holds it
+# and a truncated run fails by its subtype rather than by this count.
 max_turns = 30
 
 manual = [

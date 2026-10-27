@@ -45,9 +45,12 @@ import {
  *
  * `maxTurns` is the only budget. `max_turns` in an arm's `expect.toml` is a
  * ceiling asserted after the run, not a cap enforced during it, so a
- * declaration cannot raise what it runs under. An arm needing more than this
- * truncates, and a truncated run fails the same assertions a reasoning miss
- * does with nothing to separate them.
+ * declaration cannot raise what it runs under. A truncated run exits 1 with
+ * `subtype` `error_max_turns`, which `canon sandbox check` fails by name.
+ * `num_turns` counts more than this cap does, so a ceiling at or above it is
+ * held by the cap and compares nothing. The check reads the cap from its own
+ * environment, so a run under a raised cap, checked later by hand without the
+ * variable, reads the default.
  *
  * `bypassPermissions` is the only mode that lets a run write under `.claude/`,
  * which most arms need. The scoping the permission layer would have given
