@@ -292,7 +292,12 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
     )
     if (read.kind !== 'read') throw new Error(read.detail)
 
-    const result = await take({ url: server.url, plan: read.plan, out })
+    const result = await take({
+      url: server.url,
+      plan: read.plan,
+      out,
+      stallMs: LOADED_STALL_MS,
+    })
 
     expect(result).toMatchObject({
       status: 'failed',
