@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.72.1](https://github.com/erclx/canon/compare/v5.72.0...v5.72.1) (2026-10-27)
+
+
+### Reverts
+
+* **playwright:** drop the apt archive cache from [#2809](https://github.com/erclx/canon/issues/2809) ([#2810](https://github.com/erclx/canon/issues/2810)) ([2833270](https://github.com/erclx/canon/commit/2833270559d3afbd098caecbfcc395b7082f4570))
+
 ## [5.72.0](https://github.com/erclx/canon/compare/v5.71.0...v5.72.0) (2026-10-27)
 
 
