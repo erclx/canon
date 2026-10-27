@@ -17,6 +17,19 @@ Format a `## Toolkit feedback` block from the current session, then open it as a
 
 ## Step 1: build the block
 
+### A follow-up or a new issue
+
+Pick the form before filling any field, from what the session already holds.
+
+- A follow-up, when the session cites an open feedback issue and the new case sits on its surface, such as a fix landing elsewhere, a second instance, or a finding that overturns the proposed fix
+- A new issue, when no feedback issue is cited or the case sits on a different surface
+
+For a follow-up, fill the `## Toolkit feedback follow-up` block in `${CLAUDE_SKILL_DIR}/references/template.md` and go to Step 2. For a new issue, build the report below.
+
+A follow-up carries `### Observed`, `### Changes the fix`, and `### Links`, and the CLI refuses one missing any of them. `### Changes the fix` opens with yes or no, since a yes tells triage the body's fix no longer stands. `### Links` holds at least one URL or issue reference such as `frameboard#156`, never a bare name.
+
+### The report fields
+
 From the conversation so far, identify:
 
 - Target project name or kind, never its path, which names one machine's folder and nothing triage routes on. Name a private project by kind, such as `a Next.js app`, since reports leave the machine.
@@ -56,7 +69,7 @@ Keep Observed and Expected to one or two lines each, so the report scans. Length
 
 A GitHub issue form renders a submitted field as `### <label>`, so one shape reaches the toolkit whichever route a report takes, and the CLI parses both with one parser. The retired `**Surface:**` form is refused, so a block carrying it has to be rewritten.
 
-The issue body is the request. Put everything the toolkit needs to act on it there, since a comment is easy to miss and a body and a comment that differ leave triage choosing. A comment carries only what happens after filing.
+The issue body is the request. Put everything the toolkit needs to act on it there, since a comment is easy to miss and a body and a comment that differ leave triage choosing. A comment carries only what happens after filing, and goes out as a follow-up through `canon feedback --on`, never a hand-written `gh issue comment`.
 
 ## Step 2: ship to the toolkit
 
@@ -78,14 +91,25 @@ cat <<'EOF' | canon feedback
 EOF
 ```
 
+A follow-up pipes the same way with the issue number, and the CLI refuses a closed issue or one without the `feedback` label before posting anything:
+
+```bash
+cat <<'EOF' | canon feedback --on <issue>
+## Toolkit feedback follow-up
+
+...
+EOF
+```
+
 The CLI opens a GitHub issue on the toolkit repo, labeled `feedback` and each domain label the surface type names, such as `skills` for a plugin skill, and prints the issue URL for this skill to report on its own line. It needs `gh` authenticated, and `git-issue` is not the route, since it files on the current repository.
 
 ### Reading the outcome
 
 Read the outcome off stdout, never off the exit code, since a shell wrapper can flatten it. Stdout takes one of three shapes:
 
-- A line opening with `https://` is the filed issue. Report the URL.
+- A line opening with `https://` is the filed issue, or the posted comment for a follow-up. Report the URL.
 - A block opening with `## Toolkit feedback` is a failed call. Show it in chat with the stderr reason and `📋 Paste this into an issue at https://github.com/erclx/canon/issues/new`.
+- The same block on a follow-up is a failed comment. Show it the same way, pointing the paste line at the issue's own URL.
 - Empty stdout is a refusal. Step 3 says how to repair it from stderr.
 
 If `canon` is not on PATH, fall back: print the block in chat and tell the user `📋 Copy the block above into a toolkit-repo session.`
@@ -95,4 +119,5 @@ If `canon` is not on PATH, fall back: print the block in chat and tell the user 
 A report that was not filed reads one of two ways on stdout, and stderr carries the reason in both:
 
 - Empty stdout, with a named missing field on stderr. Add that heading with a real value or its stated fallback, then re-run. Do not report the defect as filed.
+- Empty stdout on a follow-up naming a malformed field, a closed issue, or a missing label. Repair the field and re-run, or file a new issue when the issue is closed or not a feedback report.
 - The block on stdout, with `gh` absent or its call failed on stderr, which names which, since the two repairs differ. Show the block in chat with the reason and the paste line from Step 2.
