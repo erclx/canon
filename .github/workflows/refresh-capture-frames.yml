@@ -26,17 +26,15 @@ on:
       - 'scripts/core/regen-hero.ts'
       - 'src/capture/frame-values.ts'
       # The inputs to the home render the hero frames do not share. The page is
-      # built from web/ and reads its counts from the audit catalog under
-      # src/audits/. assets/** stays off the list, since it holds the outputs
-      # this job writes and would start a run from its own merge.
+      # built from web/ and shows the film's poster from assets/loops/, which
+      # `bun run film:render` writes. The rest of assets/** stays off the list,
+      # since it holds the outputs this job writes and would start a run from
+      # its own merge.
       - 'web/**'
-      - 'src/audits/**'
+      - 'assets/loops/**'
       - 'scripts/core/capture-home.sh'
-      # The version canon --version reads into the footer and nav of the home
-      # page, so a release merge moves the baseline.
-      - 'package.json'
-      # GOV_STACK_COUNT in regen-hero.ts and the stacks web/src/lib/session.ts
-      # reads, so a stack-only merge moves both renders.
+      # GOV_STACK_COUNT in regen-hero.ts reads the stacks, so a stack-only
+      # merge moves the hero frames.
       - 'governance/stacks/**'
   workflow_dispatch:
 
