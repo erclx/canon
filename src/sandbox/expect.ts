@@ -44,7 +44,15 @@ export interface AssertionResult {
  */
 export interface RunEnvelope {
   readonly isError: boolean
+  /** The runner cap ended the run, read from `subtype` rather than `turns`. */
+  readonly isTruncated: boolean
   readonly turns: number
+  /**
+   * The cap the run ran under. `num_turns` counts more than the cap does, so
+   * an untruncated run can report past it, and a ceiling at or above the cap
+   * is held by `isTruncated` instead. A non-finite value reads as absent.
+   */
+  readonly turnCap?: number
   readonly denials: number
   readonly reply?: string
 }
@@ -487,6 +495,23 @@ function checkReply(
   }
 }
 
+function isFiniteCap(turnCap: number | undefined): turnCap is number {
+  return turnCap !== undefined && Number.isFinite(turnCap)
+}
+
+function capped(turnCap: number | undefined): string {
+  return isFiniteCap(turnCap) ? ` of ${turnCap} turns` : ''
+}
+
+/**
+ * A ceiling below the cap was declared in `num_turns` and is compared in it. One
+ * at or above the cap skips with no result, since emitting a pass would let the
+ * envelope pass a run.
+ */
+function isBelowCap(maxTurns: number, turnCap: number | undefined): boolean {
+  return !isFiniteCap(turnCap) || maxTurns < turnCap
+}
+
 /**
  * The envelope never determines a pass. It can only fail a run the expectations
  * would otherwise have passed. Under `bypassPermissions` the denial count is
@@ -516,8 +541,15 @@ function checkEnvelope(
       message: `envelope: ${envelope.denials} permission denials`,
     })
   }
+  if (envelope.isTruncated) {
+    results.push({
+      ok: false,
+      message: `envelope: truncated by the runner cap${capped(envelope.turnCap)}`,
+    })
+  }
   if (
     expectation.maxTurns !== undefined &&
+    isBelowCap(expectation.maxTurns, envelope.turnCap) &&
     envelope.turns > expectation.maxTurns
   ) {
     results.push({

@@ -25,7 +25,7 @@ import {
   type RunEnvelope,
   type Verdict,
 } from '@/sandbox/expect'
-import { runHeadless } from '@/sandbox/headless/run'
+import { runHeadless, runSettings } from '@/sandbox/headless/run'
 import { runSandbox } from '@/sandbox/provision'
 import {
   EXPECTED_FILE,
@@ -120,7 +120,12 @@ function showProvisionHelp(): void {
 }
 
 /** A run that reported nothing counts as clean, so only real signals fail. */
-const CLEAN_ENVELOPE: RunEnvelope = { isError: false, turns: 0, denials: 0 }
+const CLEAN_ENVELOPE: RunEnvelope = {
+  isError: false,
+  isTruncated: false,
+  turns: 0,
+  denials: 0,
+}
 
 interface CheckOptions {
   readonly envelope?: string
@@ -190,6 +195,8 @@ function readEnvelope(path: string | undefined): RunEnvelope | undefined {
 
     return {
       isError: parsed.is_error === true,
+      isTruncated: parsed.subtype === 'error_max_turns',
+      turnCap: Number(runSettings(process.env).maxTurns),
       turns: typeof parsed.num_turns === 'number' ? parsed.num_turns : 0,
       denials: Array.isArray(denials) ? denials.length : 0,
       reply: typeof parsed.result === 'string' ? parsed.result : undefined,

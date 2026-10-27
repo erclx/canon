@@ -28,7 +28,12 @@ const PLANS_LIVE = '.claude/plans/feature-postgres-migration.md'
 const PLANS_DECOY = '.claude/plans/feature-some-old-plan.md'
 const TASKS = '.claude/tasks/v01.0-postgres.md'
 
-const CLEAN_ENVELOPE: RunEnvelope = { isError: false, turns: 12, denials: 0 }
+const CLEAN_ENVELOPE: RunEnvelope = {
+  isError: false,
+  isTruncated: false,
+  turns: 12,
+  denials: 0,
+}
 
 let sandbox: string
 
@@ -263,11 +268,60 @@ describe('checkExpectation', () => {
     it('should fail a run over the declared turn ceiling', () => {
       seedCorrectTree()
 
-      const verdict = runDrift({ envelope: { ...CLEAN_ENVELOPE, turns: 99 } })
+      const verdict = runDrift({
+        envelope: { ...CLEAN_ENVELOPE, turns: 99, turnCap: 30 },
+      })
 
       expect(verdict.results).toContainEqual({
         ok: false,
         message: 'envelope: 99 turns over ceiling of 20',
+      })
+    })
+
+    it('should leave a ceiling at the runner cap to the cap', () => {
+      seedCorrectTree()
+
+      const verdict = checkExpectation(
+        { ...driftExpectation(), maxTurns: 30 },
+        checkInput({
+          envelope: { ...CLEAN_ENVELOPE, turns: 33, turnCap: 30 },
+        }),
+      )
+
+      expect(verdict.state).toBe('pass')
+      expect(verdict.results).not.toContainEqual({
+        ok: false,
+        message: 'envelope: 33 turns over ceiling of 30',
+      })
+    })
+
+    it('should fail a run the runner cap truncated', () => {
+      seedCorrectTree()
+
+      const verdict = runDrift({
+        envelope: { ...CLEAN_ENVELOPE, isTruncated: true, turnCap: 30 },
+      })
+
+      expect(verdict.state).toBe('fail')
+      expect(verdict.results).toContainEqual({
+        ok: false,
+        message: 'envelope: truncated by the runner cap of 30 turns',
+      })
+    })
+
+    it('should compare the ceiling when the runner cap is not a number', () => {
+      seedCorrectTree()
+
+      const verdict = checkExpectation(
+        { ...driftExpectation(), maxTurns: 30 },
+        checkInput({
+          envelope: { ...CLEAN_ENVELOPE, turns: 33, turnCap: Number.NaN },
+        }),
+      )
+
+      expect(verdict.results).toContainEqual({
+        ok: false,
+        message: 'envelope: 33 turns over ceiling of 30',
       })
     })
 
