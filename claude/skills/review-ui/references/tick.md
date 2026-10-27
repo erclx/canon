@@ -17,7 +17,11 @@ Number the boxes off the `boxes` field Step 2 kept. Leave a box that failed, nee
 
 ## When the tip moved
 
-A push that landed while this pass drove carries the ticks to the tip when it changed only paths no box observes, being tests, stories, snapshots, markdown, evidence captures, and `canon/design/`. The record then reads `ticked` with the head it came from in `carriedFrom`.
+A push that landed while this pass drove carries the ticks to the tip when it changed only paths no box observes. The record then reads `ticked` with the head it came from in `carriedFrom`.
+
+- Tests, stories, snapshots, evidence captures, and `canon/design/` carry.
+- Markdown carries only in the root and under `canon/`, `.claude/`, `.github/`, and `docs/`.
+- Markdown anywhere else, such as a page a stack renders, is driven.
 
 The verb refuses a taste box and a head the tip moved past in any other way, writing nothing in either case. Branch on the record's `reason`.
 
