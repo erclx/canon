@@ -36,14 +36,7 @@ One folder here does no work of its own.
 ## Gotchas
 
 - Frame time continues Chromium's monotonic clock, read off the load event's timestamp, since Bun's `process.hrtime` counts from its own start and a frame stamped on it freezes every animation
-- Send an input, step a frame, then await the input, since under begin-frame control an input is acknowledged by a frame and awaiting it first deadlocks
+- Send an input, step a frame, then await the input, since under begin-frame control a frame acknowledges it and awaiting first deadlocks. A stall leaves the send pending, so it carries a handler.
 - A JPEG frame is full range and H.264 is read as TV range, so the encoder scales between them, and a test reading luma through FFmpeg's `format=gray` stretches it again and clips both ends
 - The stepper advances virtual time plainly, since pausing on a fetch held the clock into the stall fallback. The tests raise that limit to 8 s, so the fetch test's reply has to outlast it.
 - The shell's path is rebuilt from `playwright-core`'s `browsers.json` and cache layout, so a Playwright upgrade that moves the layout reads as `browser-missing`
-
-### Stalls and the fallback
-
-Two traps sit on the path from a stalled frame to the screencast.
-
-- A stall leaves the stepper's sends pending until the shell closes and rejects them, so each one carries a handler, or the take dies on an unhandled rejection after it already refused
-- The screencast fallback opens the address a second time, so a single-use link is spent before its steps run, and the refusal carries `fallback` rather than blaming the target alone
