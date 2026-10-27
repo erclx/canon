@@ -57,7 +57,10 @@ import {
   type RecordRefused,
   type RecordSelector,
   recordPullRequest,
+  recordSession,
+  type SessionOutcome,
 } from '@/tasks/record'
+import { resolveSessions } from '@/sessions/resolve'
 import {
   type BoardGroup,
   type Finding,
@@ -139,6 +142,13 @@ interface ReachCommandOptions {
 interface PullRequestCommandOptions {
   readonly json?: boolean
   readonly plan?: string
+  readonly root?: string
+}
+
+interface SessionCommandOptions {
+  readonly json?: boolean
+  readonly plan?: string
+  readonly name?: string
   readonly root?: string
 }
 
@@ -614,6 +624,63 @@ export function register(program: Command): void {
         opts: PullRequestCommandOptions,
       ) => {
         process.exitCode = await runPullRequest(number, task, opts)
+      },
+    )
+
+  tasks
+    .command('session')
+    .description('Record a session that worked a task on its Sessions: line')
+    .argument(
+      '<sessionId>',
+      'Full sessionId, as canon sessions list --json carries it',
+    )
+    .argument('[task]', 'Task filename stem, as in v28.1-trigger-escalation')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--plan <slug>', 'Select the task whose Plan line names this plan')
+    .option(
+      '--name <name>',
+      'Name to record, read off the live roster when omitted',
+    )
+    .option('--json', 'Emit a machine-readable record on stdout')
+    .option('--root <path>', 'Board root, defaulting to the main worktree')
+    .addHelpText(
+      'after',
+      [
+        '',
+        'Refusals, read off `reason`:',
+        '  no-board   the repository holds no `.canon/tasks/` board',
+        '  no-match   no task matches the selector',
+        '  ambiguous  more than one task matches the selector',
+        '  bad-input  an id that is not a full sessionId, or an empty name',
+        '  no-name    the roster lists no live session with the id, and no',
+        '             --name was passed',
+        '',
+        'Exit codes:',
+        '  0  the session was added, appended, or already listed',
+        '  1  refused, with the reason on stderr or in the JSON record',
+        '',
+        'It writes Sessions: <name> (<sessionId>) below the origin, Pull',
+        'request:, and Pending branch: lines, and appends to the line when one',
+        'exists. The id is the key, so a session already listed is reported',
+        'unchanged under the name it was first recorded with. A cloud',
+        'session_ id is accepted, and takes --name since the roster never',
+        'lists it. Safe from a linked worktree, since it resolves the board',
+        'root in-process.',
+        '',
+        'Examples:',
+        '  canon tasks session 0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0 v28.1-trigger-escalation',
+        '  canon tasks session 0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0 --plan task-sessions-line --json',
+        '  canon tasks session session_01AbC v28.1-trigger-escalation --name cloud-canon-a',
+        '',
+      ].join('\n'),
+    )
+    .action(
+      async (
+        sessionId: string,
+        task: string | undefined,
+        opts: SessionCommandOptions,
+      ) => {
+        process.exitCode = await runSession(sessionId, task, opts)
       },
     )
 
@@ -1257,6 +1324,72 @@ async function runPullRequest(
   )
 
   return reportPullRequest(outcome, emitJson, root)
+}
+
+async function runSession(
+  sessionId: string,
+  task: string | undefined,
+  opts: SessionCommandOptions,
+): Promise<number> {
+  const emitJson = opts.json ?? false
+  const selector = selectorFor(task, opts.plan)
+
+  if ('ok' in selector) {
+    return reportRecord(
+      'canon tasks session',
+      selector,
+      emitJson,
+      process.cwd(),
+    )
+  }
+
+  const root = opts.root ?? (await mainWorktreeRoot())
+  const name = opts.name ?? (await rosterName(sessionId))
+  const outcome = await recordSession(root, selector, sessionId, name)
+
+  return reportSession(outcome, emitJson, root)
+}
+
+/** The live roster's name for an id, or undefined once the session has exited. */
+async function rosterName(sessionId: string): Promise<string | undefined> {
+  const report = await resolveSessions()
+  if (report.kind === 'absent') return undefined
+
+  return report.sessions.find((session) => session.sessionId === sessionId)
+    ?.name
+}
+
+function reportSession(
+  outcome: SessionOutcome,
+  emitJson: boolean,
+  root: string,
+): number {
+  if (!outcome.ok) {
+    return reportRecord('canon tasks session', outcome, emitJson, root)
+  }
+
+  if (emitJson) {
+    process.stdout.write(
+      `${JSON.stringify({
+        ok: true,
+        root,
+        task: outcome.stem,
+        path: relative(root, outcome.path),
+        sessionId: outcome.sessionId,
+        name: outcome.name,
+        action: outcome.action,
+      })}\n`,
+    )
+    return 0
+  }
+
+  intro('canon tasks session')
+  logStep(outcome.action === 'unchanged' ? 'Already recorded' : 'Recorded')
+  logInfo(`${outcome.stem} names ${outcome.name} (${outcome.sessionId})`)
+  if (outcome.action !== 'unchanged') logAdd(relative(root, outcome.path))
+  outro()
+
+  return 0
 }
 
 const RENAME_PATTERN = /^Branch: renamed refs\/heads\/(.+) to refs\/heads\//

@@ -4,16 +4,18 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { recordDir } from '@/roots/record'
-import { tasksDir } from '@/tasks/archive'
+import { readSessions, tasksDir } from '@/tasks/archive'
 import {
   closeOutcomeLines,
   closeOutcomes,
   recordPlan,
   clearPendingBranch,
   recordPullRequest,
+  recordSession,
   writePendingBranch,
   writePlanLine,
   writePullRequestLine,
+  writeSessionsLine,
 } from '@/tasks/record'
 
 let ROOT: string
@@ -917,5 +919,184 @@ describe('closeOutcomes', () => {
     await expect(readTask(stem)).resolves.toContain(
       'Pending branch: feat/a, feat/b\n',
     )
+  })
+})
+
+const WORKER_ID = '0b1c2d3e-4f50-6172-8394-a5b6c7d8e9f0'
+const REVIEWER_ID = 'f0e9d8c7-b6a5-4938-8271-605f4e3d2c1b'
+
+describe('writeSessionsLine', () => {
+  it('should add the line below the pull request and pending branch lines', () => {
+    const text =
+      '# A task\n\nPlan: [p](../plans/p.md)\nPull request: #673\nPending branch: feat/a\n\n## Outcomes\n'
+
+    const { text: written, action } = writeSessionsLine(
+      text,
+      'worker-canon-a',
+      WORKER_ID,
+    )
+
+    expect(action).toBe('added')
+    expect(written).toBe(
+      `# A task\n\nPlan: [p](../plans/p.md)\nPull request: #673\nPending branch: feat/a\nSessions: worker-canon-a (${WORKER_ID})\n\n## Outcomes\n`,
+    )
+  })
+
+  it('should add the line under the heading when the task carries no origin line', () => {
+    const { text: written } = writeSessionsLine(
+      '# A task\n\n## Outcomes\n',
+      'worker-canon-a',
+      WORKER_ID,
+    )
+
+    expect(written).toBe(
+      `# A task\n\nSessions: worker-canon-a (${WORKER_ID})\n\n## Outcomes\n`,
+    )
+  })
+
+  it('should append a second session comma-separated', () => {
+    const text = `# A task\n\nSessions: worker-canon-a (${WORKER_ID})\n`
+
+    const { text: written, action } = writeSessionsLine(
+      text,
+      'reviewer-canon-12',
+      REVIEWER_ID,
+    )
+
+    expect(action).toBe('appended')
+    expect(written).toBe(
+      `# A task\n\nSessions: worker-canon-a (${WORKER_ID}), reviewer-canon-12 (${REVIEWER_ID})\n`,
+    )
+  })
+
+  it('should leave the text untouched for an id already listed under another name', () => {
+    const text = `# A task\n\nSessions: worker-canon-a (${WORKER_ID})\n`
+
+    const result = writeSessionsLine(text, 'renamed-worker', WORKER_ID)
+
+    expect(result).toEqual({ text, action: 'unchanged' })
+  })
+
+  it('should keep the sessions line below a pull request recorded after it', () => {
+    const text = `# A task\n\nPlan: [p](../plans/p.md)\nSessions: worker-canon-a (${WORKER_ID})\n\n## Outcomes\n`
+
+    const { text: written } = writePullRequestLine(text, 673)
+
+    expect(written).toBe(
+      `# A task\n\nPlan: [p](../plans/p.md)\nPull request: #673\nSessions: worker-canon-a (${WORKER_ID})\n\n## Outcomes\n`,
+    )
+  })
+})
+
+describe('readSessions', () => {
+  it('should key each entry on its trailing id when a name carries a comma and parentheses', () => {
+    const text = `Sessions: fix (draft), take two (${WORKER_ID}), cloud-a (session_01AbC)\n`
+
+    expect(readSessions(text)).toEqual([
+      { name: 'fix (draft), take two', sessionId: WORKER_ID },
+      { name: 'cloud-a', sessionId: 'session_01AbC' },
+    ])
+  })
+
+  it('should read a line carrying a short id as naming nobody', () => {
+    expect(readSessions('Sessions: worker-canon-a (0b1c2d3e)\n')).toEqual([])
+  })
+})
+
+describe('recordSession', () => {
+  it('should write the session onto a task selected by its plan', async () => {
+    const stem = await seedTask({ plan: 'feature-task-sessions-line' })
+
+    const outcome = await recordSession(
+      ROOT,
+      { kind: 'plan', plan: 'task-sessions-line' },
+      WORKER_ID,
+      'worker-canon-a',
+    )
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      stem,
+      sessionId: WORKER_ID,
+      name: 'worker-canon-a',
+      action: 'added',
+    })
+    await expect(readTask(stem)).resolves.toContain(
+      `Sessions: worker-canon-a (${WORKER_ID})\n`,
+    )
+  })
+
+  it('should report the first name and leave the file alone on a repeat under a new name', async () => {
+    const stem = await seedTask({ plan: 'feature-task-sessions-line' })
+    await recordSession(ROOT, { kind: 'stem', stem }, WORKER_ID, 'first')
+    const before = await readTask(stem)
+
+    const outcome = await recordSession(
+      ROOT,
+      { kind: 'stem', stem },
+      WORKER_ID,
+      'second',
+    )
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      name: 'first',
+      action: 'unchanged',
+    })
+    await expect(readTask(stem)).resolves.toBe(before)
+  })
+
+  it('should refuse a short id as bad input and write nothing', async () => {
+    const stem = await seedTask({ plan: 'feature-task-sessions-line' })
+    const before = await readTask(stem)
+
+    const outcome = await recordSession(
+      ROOT,
+      { kind: 'stem', stem },
+      '0b1c2d3e',
+      'worker-canon-a',
+    )
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'bad-input' })
+    await expect(readTask(stem)).resolves.toBe(before)
+  })
+
+  it('should refuse an id with no name as no-name and write nothing', async () => {
+    const stem = await seedTask({ plan: 'feature-task-sessions-line' })
+    const before = await readTask(stem)
+
+    const outcome = await recordSession(
+      ROOT,
+      { kind: 'stem', stem },
+      WORKER_ID,
+      undefined,
+    )
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'no-name' })
+    await expect(readTask(stem)).resolves.toBe(before)
+  })
+
+  it('should refuse a name spanning two lines as bad input', async () => {
+    const stem = await seedTask({ plan: 'feature-task-sessions-line' })
+
+    const outcome = await recordSession(
+      ROOT,
+      { kind: 'stem', stem },
+      WORKER_ID,
+      'worker\nPlan: [x](x.md)',
+    )
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'bad-input' })
+  })
+
+  it('should refuse no-board when the root holds no board', async () => {
+    const outcome = await recordSession(
+      ROOT,
+      { kind: 'stem', stem: 'v28.1-trigger-escalation' },
+      WORKER_ID,
+      'worker-canon-a',
+    )
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'no-board' })
   })
 })

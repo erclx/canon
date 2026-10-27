@@ -15,6 +15,9 @@ import {
   readPendingBranches,
   readPlanTargets,
   readPullRequest,
+  readSessions,
+  SESSION_ID_PATTERN,
+  SESSIONS_PREFIX,
   tasksDir,
 } from '@/tasks/archive'
 import { checkWaiting, type LinkPromotion, promoteOnLink } from '@/tasks/board'
@@ -34,6 +37,9 @@ const ORIGIN_PREFIXES = ['Plan:', 'Groundwork:', 'Intake:', 'Issue:'] as const
  *
  * `several-plans` answers a `Plan:` line that already links more than one plan.
  * `plan-link` cannot know which link to drop, so it writes nothing.
+ *
+ * `no-name` answers a session id the roster no longer lists, called with no
+ * name, since an id written alone reads as nobody to the next reader.
  */
 export const RECORD_REFUSALS = [
   'no-board',
@@ -44,6 +50,7 @@ export const RECORD_REFUSALS = [
   'no-plan',
   'several-plans',
   'bad-input',
+  'no-name',
 ] as const
 
 export type RecordRefusal = (typeof RECORD_REFUSALS)[number]
@@ -87,6 +94,18 @@ export interface PlanRecorded {
 }
 
 export type PlanOutcome = PlanRecorded | RecordRefused
+
+export interface SessionRecorded {
+  readonly ok: true
+  readonly stem: string
+  readonly path: string
+  readonly sessionId: string
+  /** The name the line carries for the id, which a repeat call never renames. */
+  readonly name: string
+  readonly action: Exclude<LineAction, 'corrected'>
+}
+
+export type SessionOutcome = SessionRecorded | RecordRefused
 
 export interface OutcomesClosed {
   readonly ok: true
@@ -226,6 +245,47 @@ export function clearPendingBranch(
   }
 
   return { text: lines.join('\n'), changed: true }
+}
+
+/**
+ * Names a session on the `Sessions:` line, keyed on the id, so a dispatcher
+ * and `git-pr` recording the same worker write it once. The line sits below
+ * every other line a task carries above its outcomes, so a pull request
+ * recorded later lands above it.
+ */
+export function writeSessionsLine(
+  text: string,
+  name: string,
+  sessionId: string,
+): { readonly text: string; readonly action: SessionRecorded['action'] } {
+  const entry = `${name} (${sessionId})`
+  const lines = text.split('\n')
+  const existing = lines.findIndex((line) => line.startsWith(SESSIONS_PREFIX))
+
+  if (existing !== -1) {
+    if (lines[existing].includes(`(${sessionId})`)) {
+      return { text, action: 'unchanged' }
+    }
+    lines[existing] = `${lines[existing].trimEnd()}, ${entry}`
+    return { text: lines.join('\n'), action: 'appended' }
+  }
+
+  const line = `${SESSIONS_PREFIX} ${entry}`
+  const anchor = lastOriginLine(lines, [
+    ...ORIGIN_PREFIXES,
+    'Pull request:',
+    PENDING_PREFIX,
+  ])
+  if (anchor !== undefined) {
+    lines.splice(anchor + 1, 0, line)
+    return { text: lines.join('\n'), action: 'added' }
+  }
+
+  const heading = lines.findIndex((entry) => entry.startsWith('# '))
+  if (heading === -1) return { text: `${line}\n${text}`, action: 'added' }
+
+  lines.splice(heading + 1, 0, '', line)
+  return { text: lines.join('\n'), action: 'added' }
 }
 
 export type PlanLineWrite =
@@ -563,6 +623,64 @@ export async function recordPlan(
     action,
     replaced,
     board,
+  }
+}
+
+/**
+ * Records a session that worked a task on its `Sessions:` line. The caller
+ * resolves `name` from the roster or takes it from `--name`, and an undefined
+ * name refuses rather than writing a bare id. The id is checked first, since a
+ * malformed one is a caller defect and every later check would hide it.
+ */
+export async function recordSession(
+  root: string,
+  selector: RecordSelector,
+  sessionId: string,
+  name: string | undefined,
+): Promise<SessionOutcome> {
+  if (!SESSION_ID_PATTERN.test(sessionId)) {
+    return refuse(
+      'bad-input',
+      `Not a full sessionId: ${sessionId}. Pass the whole id canon sessions list --json carries.`,
+      [sessionId],
+    )
+  }
+
+  if (name === undefined) {
+    return refuse(
+      'no-name',
+      `No live session carries ${sessionId}, so its name cannot be read. Pass --name.`,
+      [sessionId],
+    )
+  }
+
+  const trimmed = name.trim()
+  if (trimmed.length === 0 || /[\r\n]/.test(trimmed)) {
+    return refuse('bad-input', 'A session name is one non-empty line.', [name])
+  }
+
+  const opened = await openTask(root, selector)
+  if ('ok' in opened) return opened
+
+  const { stem, path } = opened
+  const written = writeSessionsLine(
+    await readFile(path, 'utf8'),
+    trimmed,
+    sessionId,
+  )
+  if (written.action !== 'unchanged') await writeFile(path, written.text)
+
+  const listed = readSessions(written.text).find(
+    (entry) => entry.sessionId === sessionId,
+  )
+
+  return {
+    ok: true,
+    stem,
+    path,
+    sessionId,
+    name: listed?.name ?? trimmed,
+    action: written.action,
   }
 }
 

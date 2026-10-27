@@ -325,6 +325,57 @@ export function readPendingBranches(text: string): readonly string[] {
     .filter((entry) => entry.length > 0)
 }
 
+/**
+ * A local session's full sessionId, or the `session_` id a cloud create reads
+ * out. Only the full form reaches `canon sessions export`, so a short prefix is
+ * refused rather than written.
+ */
+const SESSION_ID_SOURCE =
+  '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|session_[A-Za-z0-9]+'
+
+export const SESSION_ID_PATTERN = new RegExp(`^(?:${SESSION_ID_SOURCE})$`)
+
+export const SESSIONS_PREFIX = 'Sessions:'
+
+/**
+ * One entry is a name and its parenthesized id, and the parse keys on that
+ * trailing id, so a roster name carrying a comma or its own parentheses still
+ * reads as one entry.
+ */
+const SESSION_ENTRY_PATTERN = new RegExp(
+  `(.+?) \\((${SESSION_ID_SOURCE})\\)(?:, |$)`,
+  'y',
+)
+
+export interface SessionEntry {
+  readonly name: string
+  readonly sessionId: string
+}
+
+/**
+ * Reads the `Sessions:` line `canon tasks session` writes. A line that does not
+ * parse whole reads as naming none, the way `readPullRequest` reads a line
+ * carrying anything besides its list.
+ */
+export function readSessions(text: string): readonly SessionEntry[] {
+  const line = text
+    .split('\n')
+    .find((entry) => entry.startsWith(SESSIONS_PREFIX))
+  if (line === undefined) return []
+
+  const body = line.slice(SESSIONS_PREFIX.length).trim()
+  const entries: SessionEntry[] = []
+  const pattern = new RegExp(SESSION_ENTRY_PATTERN)
+
+  while (pattern.lastIndex < body.length) {
+    const match = pattern.exec(body)
+    if (!match) return []
+    entries.push({ name: match[1], sessionId: match[2] })
+  }
+
+  return entries
+}
+
 /** A markdown link on a `Plan:` line, its target captured. */
 const PLAN_LINK_PATTERN = /\[[^\]]*\]\(([^)]+)\)/g
 
