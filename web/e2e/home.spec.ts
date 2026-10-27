@@ -152,6 +152,38 @@ test.describe('the film on a 390 pixel phone', () => {
   })
 })
 
+test.describe('the film on a 390 pixel phone, played', () => {
+  test.use({ viewport: { width: 390, height: 844 } })
+
+  // Full screen and H.264 playback are reliable headless only on Chromium.
+  test('returns to its poster once full screen ends', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName !== 'chromium', 'H.264 playback is Chromium only')
+    await page.goto('/')
+    const { shown } = await films(page)
+    await page.locator('[data-film-play]').click()
+    await expect(shown).toHaveJSProperty('paused', false, SETTLE)
+    await expect
+      .poll(
+        () => shown.evaluate((v: HTMLVideoElement) => v.currentTime),
+        SETTLE,
+      )
+      .toBeGreaterThan(0)
+
+    await page.evaluate(() => document.exitFullscreen())
+
+    await expect(page.locator('[data-film]')).toHaveAttribute(
+      'data-state',
+      'poster',
+      SETTLE,
+    )
+    await expect(shown).toHaveJSProperty('currentTime', 0, SETTLE)
+    await expect(page.locator('[data-film-play]')).toBeVisible()
+  })
+})
+
 test.describe('at the 320 pixel floor', () => {
   for (const theme of ['light', 'dark'] as const) {
     test(`the ${theme} page scrolls no wider than the viewport`, async ({

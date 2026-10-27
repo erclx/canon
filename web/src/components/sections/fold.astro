@@ -163,15 +163,26 @@ const films = [
       else start(film)
     })
 
-    /** Leaving full screen on a phone returns the film to its poster. */
-    document.addEventListener('fullscreenchange', () => {
+    /**
+     * Leaving full screen on a phone returns the film to its poster. A paused
+     * video keeps showing the frame it stopped on, so `load()` resets it, and
+     * with `preload="none"` the reset shows the poster and fetches nothing.
+     * iOS full screen ends with `webkitendfullscreen` on the video rather than
+     * `fullscreenchange` on the document.
+     */
+    const toPoster = () => {
       if (document.fullscreenElement || wide.matches) return
       for (const film of films) {
         film.controls = false
         film.pause()
+        film.load()
       }
       setState('poster')
-    })
+    }
+    document.addEventListener('fullscreenchange', toPoster)
+    for (const film of films) {
+      film.addEventListener('webkitendfullscreen', toPoster)
+    }
 
     new MutationObserver(sync).observe(root, {
       attributes: true,
