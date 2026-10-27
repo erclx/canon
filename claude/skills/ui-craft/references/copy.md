@@ -3,7 +3,9 @@
 ## Punctuation
 
 - Write no em dash (`—`) or semicolon in rendered copy. Use a comma or a period, or restructure the sentence.
-- Add no trailing punctuation to a button label or a short action string.
+- Add no trailing period to a heading, label, button, nav item, caption, status, or one-sentence tagline.
+- Rewrite a two-sentence tagline as one sentence rather than keeping a period inside it.
+- Keep end punctuation on body copy, messages, and quoted text, which a reader reads as prose.
 
 ## Button copy
 

@@ -13,10 +13,12 @@ The four casing sections rest on the GOV.UK style guide, which sets sentence cas
 
 ## Punctuation
 
-| Bullet                        | Source                                                                                                                                                                  | Read       |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| No em dash or semicolon       | House choice: both read as generated copy in an interface, and a comma, a period, or a split sentence carries the same meaning in a shorter line                        | 2026-10-18 |
-| No trailing label punctuation | [Button](https://design-system.service.gov.uk/components/button/): every example label, such as "Start now", "Sign in", and "Continue", carries no trailing punctuation | 2026-10-18 |
+| Bullet                      | Source                                                                                                                                                                                                                                                                                                                                                           | Read       |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| No em dash or semicolon     | House choice: both read as generated copy in an interface, and a comma, a period, or a split sentence carries the same meaning in a shorter line                                                                                                                                                                                                                 | 2026-10-18 |
+| No period on a short string | [A to Z of GOV.UK style](https://www.gov.uk/guidance/style-guide/a-to-z-of-gov-uk-style): page titles should "not have a full stop at the end", and [Button](https://design-system.service.gov.uk/components/button/) labels such as "Start now" and "Continue" carry none. Reaching captions, statuses, and taglines is a house choice by analogy to the title. | 2026-10-27 |
+| One-sentence tagline        | House choice: a period inside a tagline makes it prose, which the short-string rule then has to end with a period, so one sentence keeps it a title-like string                                                                                                                                                                                                  | 2026-10-27 |
+| Prose keeps its period      | [A to Z of GOV.UK style](https://www.gov.uk/guidance/style-guide/a-to-z-of-gov-uk-style): summaries should "end with a full stop", the prose counterpart to the title rule                                                                                                                                                                                       | 2026-10-27 |
 
 ## Button copy
 
@@ -86,6 +88,7 @@ Every bullet the rewrite removed or reshaped, grouped by why.
 
 ### Merged or reworded
 
+- Widened the button-label punctuation bullet to every short rendered string, since board frames shipped tagline periods under the narrower wording.
 - Merged the imperative verb and padded phrasing bullets. The `Save` over `Save changes` example went, since GOV.UK adds words "to better describe the action".
 - Merged "keep messages short and actionable" and "one sentence maximum" into the plain language bullet.
 - Reworded the error example to `Enter an email address`, the instruction form GOV.UK prefers over a description.
