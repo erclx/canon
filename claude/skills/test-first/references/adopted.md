@@ -7,7 +7,7 @@ description: Which external sources the test-first loop draws on, which parts it
 
 The loop predates this ledger, so this file records the sources it matches rather than the ones it was drafted from. Each was opened before it was cited. A later session extending the skill adds to this file rather than re-arguing an item settled here.
 
-The source behind each step and bullet of the body sits in `governance/ledger/skills/test-first/SKILL.md`, which `canon claude skills audit` checks row by row. This file keeps the position at the source level.
+In the toolkit's own checkout, the source behind each step and bullet of the body sits in a per-bullet ledger that `canon claude skills audit` checks row by row, at `governance/ledger/skills/test-first/SKILL.md`. That ledger never ships, so this file keeps the position at the source level for every reader. <!-- canon-allow-reference: the ledger path is read only in the toolkit checkout, which this sentence scopes it to -->
 
 ## Adopted
 
