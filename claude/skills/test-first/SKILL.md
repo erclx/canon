@@ -29,7 +29,7 @@ metadata:
 
 Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidance or arguing against a rule in it. It records which external sources the loop matches, which parts were declined, and which rules no source states.
 
-## What this skill does not cover
+## What this delegates
 
 - Which layer a test belongs at and what makes it a good one. `canon:test-craft` owns that judgment, and step 1 loads it.
 - A failure with no known cause. Route through `canon:systematic-debugging`, whose fix phase writes the reproducing test. This skill starts once the fix's shape is decided.
