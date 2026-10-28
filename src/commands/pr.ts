@@ -33,6 +33,7 @@ import {
   findEvidenceLocal,
   findEvidencePreview,
   findEvidenceReel,
+  findEvidenceSkips,
   type EvidenceItem,
   type EvidenceReading,
   groupEvidence,
@@ -171,6 +172,8 @@ interface EvidenceOptions extends ReadOptions {
   readonly checklist?: string
   readonly local?: string
   readonly reel?: string
+  readonly localSkip?: string
+  readonly reelSkip?: string
   readonly check?: boolean
 }
 
@@ -433,7 +436,7 @@ type EvidenceRefusal =
 
 const EVIDENCE_REFUSALS: Record<EvidenceRefusal, string> = {
   'check-writes':
-    '--check is a read and renders no body, so it takes none of --preview, --local, --checklist, or --reel. Run the check and the render as two calls.',
+    '--check is a read and renders no body, so it takes none of --preview, --local, --checklist, --reel, --local-skip, or --reel-skip. Run the check and the render as two calls.',
   'gh-failed':
     'gh could not answer for this repository. Name the pull request number.',
   'unreadable-checklist':
@@ -776,6 +779,14 @@ export function register(program: Command): void {
       'Embed this reel under the address line, filmed at the head, from canon pr frames --reel',
     )
     .option(
+      '--local-skip <reason>',
+      'Name why no local address is posted, from the reason pr-evidence holds for canon pr local',
+    )
+    .option(
+      '--reel-skip <reason>',
+      'Name why no reel is embedded, from the reason pr-evidence holds for canon pr frames --reel',
+    )
+    .option(
       '--check',
       'Report which post-pull-request steps the thread is still owed, rendering nothing',
     )
@@ -854,6 +865,14 @@ export function register(program: Command): void {
         'current, and a passed one replaces it. Like --local it rides on a',
         'checklist or a comparison and never opens a comment alone.',
         '',
+        '--local-skip and --reel-skip each put one line under the addresses,',
+        '**No local preview:** or **No reel:** followed by the text passed, a',
+        'reason code and any one-line message joined to it, folded onto one',
+        'line. Without the flag, a skip line the marked comment already carries',
+        'is carried forward. A skip line is dropped whenever its address or',
+        'reel renders, passed or carried, so a later run that posts the link or',
+        'films the reel replaces it. Like --local, neither opens a comment alone.',
+        '',
         "A render at a new head also resets the pull request body's UI pass",
         'line, the one `canon pr tick` writes under ## Testing, to unchecked',
         'naming that head. It touches no other body text, leaves a line already',
@@ -893,7 +912,8 @@ export function register(program: Command): void {
         'request changed, and the marked comment carries no **Preview:**',
         'address. A failed deploy reads the same as a skipped one.',
         'The record carries `owed` and the same marked fields. --check refuses',
-        'with --preview, --local, --checklist, or --reel as check-writes.',
+        'with --preview, --local, --checklist, --reel, --local-skip, or',
+        '--reel-skip as check-writes.',
         '',
         'Refusals, read off `reason`:',
         '  unreadable-checklist  --checklist named a path that could not be read,',
@@ -917,6 +937,7 @@ export function register(program: Command): void {
         '  canon pr evidence 1341 --checklist .canon/tmp/handoff/ui-checklist/x.md --json',
         '  canon pr evidence 1341 --local http://localhost:5173 --json',
         '  canon pr evidence 1341 --reel <link from canon pr frames --reel> --json',
+        "  canon pr evidence 1341 --reel-skip 'no-server: <message>' --json",
         '  canon pr evidence 1341 --check --json',
         '',
       ].join('\n'),
@@ -2658,7 +2679,9 @@ async function runEvidence(
     (opts.preview !== undefined ||
       opts.local !== undefined ||
       opts.checklist !== undefined ||
-      opts.reel !== undefined)
+      opts.reel !== undefined ||
+      opts.localSkip !== undefined ||
+      opts.reelSkip !== undefined)
   ) {
     return refuseWith(
       'check-writes',
@@ -2870,6 +2893,11 @@ async function runEvidence(
   const preview = opts.preview ?? (isUnserved ? undefined : carriedPreview)
   const local = opts.local ?? carriedLocal
   const reel = nextEvidenceReel(opts.reel, identity.head, comments)
+  const carriedSkips = findEvidenceSkips(comments)
+  const skips = {
+    local: opts.localSkip ?? carriedSkips.local,
+    reel: opts.reelSkip ?? carriedSkips.reel,
+  }
   const unsettled = suppliedChecklist ?? carriedChecklist
   const checklist =
     unsettled === undefined
@@ -2886,6 +2914,7 @@ async function runEvidence(
     checklist,
     local,
     reel,
+    skips,
   )
 
   const caseCount = states.reduce((n, s) => n + s.items.length, 0)

@@ -622,6 +622,82 @@ describe('canon pr evidence reports the marked comment', () => {
     expect(record.body).toContain('**Reel** filmed at `abc1234`')
   })
 
+  describe('skip reasons', () => {
+    function withoutAddresses(extra: string[] = []): string {
+      return markedCommentBody().replace(
+        '**Preview:** https://feat-x.site.pages.dev · **Local preview:** http://localhost:5173\n',
+        extra.map((line) => `${line}\n\n`).join(''),
+      )
+    }
+
+    it('should render each passed skip under the heading', async () => {
+      writeComments([withoutAddresses()])
+
+      const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' }, [
+        '--local-skip',
+        'no-server: nothing listens on this worktree',
+        '--reel-skip',
+        'no-server',
+      ])
+
+      expect(record.reason).toBe('ok')
+      expect(String(record.body).split('\n').slice(0, 6)).toEqual([
+        '## Evidence',
+        '',
+        '**No local preview:** no-server: nothing listens on this worktree',
+        '',
+        '**No reel:** no-server',
+        '',
+      ])
+    })
+
+    it('should carry posted skips forward when no flag is passed', async () => {
+      writeComments([
+        withoutAddresses([
+          '**No local preview:** no-server',
+          '**No reel:** no-checklist',
+        ]),
+      ])
+
+      const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' })
+
+      expect(record.body).toContain('**No local preview:** no-server')
+      expect(record.body).toContain('**No reel:** no-checklist')
+    })
+
+    it('should replace a posted skip with the address and reel a later run passes', async () => {
+      writeComments([
+        withoutAddresses([
+          '**No local preview:** no-server',
+          '**No reel:** no-server',
+        ]),
+      ])
+
+      const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' }, [
+        '--local',
+        'http://localhost:5173',
+        '--reel',
+        REEL_LINK,
+      ])
+
+      expect(record.body).toContain('**Local preview:** http://localhost:5173')
+      expect(record.body).toContain('**Reel** filmed at')
+      expect(record.body).not.toContain('**No ')
+    })
+
+    it('should refuse a skip flag beside --check as check-writes', async () => {
+      writeComments([withoutAddresses()])
+
+      const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' }, [
+        '--check',
+        '--reel-skip',
+        'no-server',
+      ])
+
+      expect(record.reason).toBe('check-writes')
+    })
+  })
+
   describe('carried checklist', () => {
     it('should render a checklist-only branch rather than report no-evidence', async () => {
       writeComments([markedCommentBody()])
