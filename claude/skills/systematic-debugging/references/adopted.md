@@ -7,6 +7,8 @@ description: Which external debugging patterns this skill adopted, which it decl
 
 External sources were read and filtered rather than imported. This file is the record. A later session extending the skill adds to it rather than re-arguing an item already settled here.
 
+The source behind each step of the body sits in the canon repository at `governance/ledger/skills/systematic-debugging/SKILL.md`, which stays out of the plugin. This file keeps the adopted and declined position at the source level.
+
 ## Adopted
 
 ### The four phases
