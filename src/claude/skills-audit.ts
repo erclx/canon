@@ -119,6 +119,7 @@ export const BULLET_LEDGER_SKILLS: Readonly<Record<string, BulletLedgerScope>> =
     },
     [join(SHIPPED_CORPUS, 'teach-craft')]: { exempt: [], body: true },
     [join(SHIPPED_CORPUS, 'test-craft')]: { exempt: [], body: true },
+    [join(SHIPPED_CORPUS, 'test-first')]: { exempt: [], body: true },
     [join(SHIPPED_CORPUS, 'codebase-layout')]: { exempt: [], body: true },
   }
 
