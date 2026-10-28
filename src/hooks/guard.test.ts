@@ -1999,6 +1999,26 @@ describe('plan-guard.sh firing conditions', () => {
     message: { content: '<command-name>/canon:plan-feature</command-name>' },
     type: 'user',
   })
+  const autoShipCall = (args: string): string =>
+    JSON.stringify({
+      message: {
+        content: [
+          {
+            input: { args, skill: 'canon:auto-ship' },
+            name: 'Skill',
+            type: 'tool_use',
+          },
+        ],
+      },
+      type: 'assistant',
+    })
+  const autoShipTyped = (args: string): string =>
+    JSON.stringify({
+      message: {
+        content: `<command-name>/auto-ship</command-name>\n<command-args>${args}</command-args>`,
+      },
+      type: 'user',
+    })
 
   let count = 0
   const planProject = (
@@ -2095,6 +2115,88 @@ describe('plan-guard.sh firing conditions', () => {
         )
 
         expect(result.code).toBe(0)
+      })
+
+      // A PreToolUse pass is not a landed write, so the retry after a refused
+      // heredoc and the main-root `cp` after a worktree `Write` both reach the
+      // guard a second time for one plan.
+      it('should pass a second write onto the plan an invocation already licensed', async () => {
+        const project = planProject(`${SKILL_CALL}\n`)
+        await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
+
+        const result = await run(
+          hook,
+          shellIn(
+            project,
+            "printf '%s\\n' '# Plan' > .canon/plans/feature-a.md",
+          ),
+        )
+
+        expect(result.code).toBe(0)
+      })
+
+      it('should pass the main-root cp after a worktree Write of the same plan', async () => {
+        const project = planProject(`${SKILL_CALL}\n`)
+        await run(
+          hook,
+          payloadFor({
+            cwd: project.root,
+            session_id: 'plan-guard-session',
+            tool_input: {
+              file_path: join(fixture, 'elsewhere/.canon/plans/feature-a.md'),
+            },
+            tool_name: 'Write',
+            transcript_path: project.transcript,
+          }),
+        )
+
+        const result = await run(
+          hook,
+          shellIn(
+            project,
+            'cp /wt/.canon/plans/feature-a.md .canon/plans/feature-a.md',
+          ),
+        )
+
+        expect(result.code).toBe(0)
+      })
+
+      it.each([
+        [
+          'an auto-ship Skill call',
+          autoShipCall('.canon/plans/feature-new.md'),
+        ],
+        [
+          'a typed auto-ship command',
+          autoShipTyped(
+            '.canon/plans/feature-new.md\nWrite the plan below verbatim',
+          ),
+        ],
+      ])(
+        'should pass the plan %s names with no plan-feature invocation',
+        async (_, line) => {
+          const project = planProject(`${line}\n`)
+
+          const result = await run(
+            hook,
+            shellIn(project, heredoc('.canon/plans/feature-new.md')),
+          )
+
+          expect(result.code).toBe(0)
+        },
+      )
+
+      it('should block a plan other than the one auto-ship names', async () => {
+        const project = planProject(
+          `${autoShipCall('.canon/plans/feature-new.md')}\n`,
+        )
+
+        const result = await run(
+          hook,
+          shellIn(project, heredoc('.canon/plans/feature-other.md')),
+        )
+
+        expect(result.code).toBe(2)
       })
 
       it.each([

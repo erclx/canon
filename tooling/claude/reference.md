@@ -76,7 +76,7 @@ A project installed before the board became a folder still holds `.claude/TASKS.
 
 The seed's deny list also holds `Bash(canon pr merge:*)` and `Bash(gh pr merge:*)`, so the operator alone merges. An existing target gets both from `canon migrate session-defaults --write`, and `canon claude sync` warns while either is absent. Neither covers more than the form an agent writes by default.
 
-The PostToolUse entry pairs with `standards-audit.sh`. `plan-guard.sh` blocks a new file under `.canon/plans/` until the session invokes `canon:plan-feature`, once per new plan, since a heredoc write never loads the path-scoped plan rule.
+`plan-guard.sh` blocks a new file under `.canon/plans/` until the session invokes `canon:plan-feature`, once per new plan, since a heredoc write never loads the path-scoped plan rule. A plan an `auto-ship` invocation names by path passes, since a cloud worker writes that plan verbatim.
 
 ## User settings
 

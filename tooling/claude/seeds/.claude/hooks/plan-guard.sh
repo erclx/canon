@@ -4,7 +4,8 @@
 # heredoc onto `.canon/plans/` is none of them, so the plan rule never reaches
 # the session writing most plans. This guard is the check behind that rule: a
 # new plan passes only when the transcript shows a `canon:plan-feature`
-# invocation this session has not already spent on an earlier new plan. It
+# invocation this session has not already spent on an earlier new plan, or an
+# `auto-ship` invocation naming that plan's path. It
 # backs the rule up rather than replacing it, since a hook fails open on a
 # timeout and on anything below it cannot read.
 IFS= read -r -d '' -t 2 input
@@ -140,29 +141,57 @@ transcript=${meta#*$'\t'}
 [ -n "$session" ] && [ -n "$transcript" ] && [ -r "$transcript" ] || exit 0
 
 # An invocation is a Skill tool call naming the skill, or the operator typing
-# its slash command, whose user line carries the command-name tag. The line
-# number orders it against the invocation the last new plan spent.
-latest=$(grep -n 'plan-feature' "$transcript" 2>/dev/null | jq -Rr '
+# its slash command, whose user line carries the command-name tag. Each one
+# prints as `P <line>`, the line ordering it against the invocation the last
+# new plan spent. An `auto-ship` invocation prints as `A <its arguments>`,
+# since a cloud worker writes the approved plan that launch names verbatim and
+# never plans it, so a write onto the path those arguments name passes.
+invocations=$(grep -n -e 'plan-feature' -e 'auto-ship' "$transcript" 2>/dev/null | jq -Rr '
+  def text: if type == "string" then . else (map(select(.type == "text") | .text) | join("\n")) end;
+  def skill($name): .type == "tool_use" and .name == "Skill"
+    and ((.input.skill // "") | test("^(canon:)?" + $name + "$"));
+  def typed($name): test("<command-name>/?(canon:)?" + $name + "</command-name>");
   capture("^(?<n>[0-9]+):(?<j>.*)$") as $l
   | ($l.j | fromjson? // empty) as $o
-  | select(
-      ($o.type == "assistant" and any($o.message.content[]?;
-        .type == "tool_use" and .name == "Skill"
-        and ((.input.skill // "") | test("^(canon:)?plan-feature$"))))
-      or ($o.type == "user" and (($o.message.content // "")
-        | if type == "string" then . else (map(select(.type == "text") | .text) | join("\n")) end
-        | test("<command-name>/?(canon:)?plan-feature</command-name>"))))
-  | $l.n' 2>/dev/null | tail -n 1)
+  | if $o.type == "assistant" then
+      ($o.message.content[]? | select(type == "object")
+        | if skill("plan-feature") then "P \($l.n)"
+          elif skill("auto-ship") then "A \(.input.args // "" | tostring)"
+          else empty end)
+    elif $o.type == "user" then
+      (($o.message.content // "") | text)
+      | if typed("plan-feature") then "P \($l.n)"
+        elif typed("auto-ship") then "A \(gsub("\n"; " "))"
+        else empty end
+    else empty end' 2>/dev/null)
 
+rest=${new#.canon/plans/}
+while IFS= read -r line; do
+  case "$line" in
+  "A "*".canon/plans/$rest"*) exit 0 ;;
+  esac
+done <<EOF
+$invocations
+EOF
+latest=$(printf '%s\n' "$invocations" | awk '/^P /{n = $2} END {if (n != "") print n}')
+
+# The marker holds the line of the spent invocation and the plan it licensed.
+# A PreToolUse pass is not a landed write, so a retry after a refused heredoc,
+# or the `cp` that follows a worktree `Write`, lands on the same plan and
+# passes on the invocation it already spent.
 key=$(printf '%s' "$session" | tr -c 'A-Za-z0-9' '_')
 marker_dir="$root/.canon/tmp/hooks/plan-guard"
 marker="$marker_dir/$key"
 spent=0
-[ -f "$marker" ] && spent=$(cat "$marker" 2>/dev/null)
+spent_plan=""
+if [ -f "$marker" ]; then
+  IFS=' ' read -r spent spent_plan <"$marker" 2>/dev/null
+fi
 case "$spent" in '' | *[!0-9]*) spent=0 ;; esac
 
+[ "$spent" -gt 0 ] && [ "$spent_plan" = "$rest" ] && exit 0
 if [ -n "$latest" ] && [ "$latest" -gt "$spent" ]; then
-  mkdir -p "$marker_dir" 2>/dev/null && printf '%s\n' "$latest" >"$marker" 2>/dev/null
+  mkdir -p "$marker_dir" 2>/dev/null && printf '%s %s\n' "$latest" "$rest" >"$marker" 2>/dev/null
   exit 0
 fi
 
