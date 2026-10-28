@@ -13,7 +13,7 @@ In the toolkit's checkout, `governance/ledger/skills/test-first/SKILL.md` source
 
 ### The loop itself
 
-Kent Beck's [Canon TDD](https://newsletter.kentbeck.com/p/canon-tdd) states it as turning one item into "an actual, concrete, runnable test", changing the code "to make the test (& all previous tests) pass", then refactoring. Adopted as steps 2, 4, 5, and 6, with the whole suite run after the pass rather than the new test alone.
+Kent Beck's Canon TDD states it as turning one item into "an actual, concrete, runnable test", changing the code "to make the test (& all previous tests) pass", then refactoring. Adopted as steps 2, 4, 5, and 6, with the whole suite run after the pass rather than the new test alone.
 
 ### Making it pass without designing
 
@@ -25,11 +25,11 @@ The same post lists deleting assertions "so the test pretends to pass" and "copy
 
 ### Refactoring is a step, not an option
 
-Martin Fowler's [TestDrivenDevelopment](https://martinfowler.com/bliki/TestDrivenDevelopment.html) names "neglecting the third step" as the most common way to get the practice wrong. Adopted as step 6 being mandatory where Canon TDD writes "optionally refactor".
+Martin Fowler's TestDrivenDevelopment names "neglecting the third step" as the most common way to get the practice wrong. Adopted as step 6 being mandatory where Canon TDD writes "optionally refactor".
 
 ### Watching the failure
 
-`obra/superpowers`' [Test-Driven Development](https://github.com/obra/superpowers/blob/5bf4e78/skills/test-driven-development/SKILL.md) skill makes the red run mandatory and has it confirm the test "Fails because feature missing (not typos)". On a pass it says "You're testing existing behavior. Fix test." Adopted as step 3 and as both rules under extending existing behavior, which this file first recorded as stated by no source.
+`obra/superpowers`' Test-Driven Development skill makes the red run mandatory and has it confirm the test "Fails because feature missing (not typos)". On a pass it says "You're testing existing behavior. Fix test." Adopted as step 3 and as both rules under extending existing behavior, which this file first recorded as stated by no source.
 
 ## Declined
 
