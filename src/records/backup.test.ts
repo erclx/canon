@@ -478,6 +478,9 @@ describe('pushRecords', () => {
       'video/demo/composition/assets/intro.webm': 'webm\n',
       'video/demo/composition/assets/intro.mov': 'mov\n',
       'video/demo/composition/assets/IMG_0001.MOV': 'mov\n',
+      'video/demo/scratch/music-candidate.mp3': 'mp3\n',
+      'video/demo/scratch/dry-run/notes.txt': 'notes\n',
+      'video/demo/composition/assets/theme.mp3': 'mp3\n',
     })
 
     const outcome = await pushRecords(canonRoot)
@@ -485,6 +488,7 @@ describe('pushRecords', () => {
     expect(outcome.ok).toBe(true)
     expect((await trackedOnOrigin(canonRoot)).split('\n').sort()).toEqual([
       'video/demo/composition/assets/logo.png',
+      'video/demo/composition/assets/theme.mp3',
       'video/demo/composition/index.html',
       'video/demo/plan.json',
     ])
