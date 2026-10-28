@@ -30,6 +30,15 @@ Runs `🛡️ Static Checks` on Linux and `🍎 macOS Unit Tests` beside it, nei
 - A test assuming `shellcheck`, `shfmt`, `claude`, or `/proc` skips on macOS without it, and the job never gains an install step
 - A macOS temp root under `/var` is a symlink to `/private/var`, so a test comparing it with a path git or a child reports wraps `mkdtempSync` in `realpathSync`
 
+### `scripts/ci/docs-only.sh`
+
+A pull request changing only `.md` files skips `🍎 macOS Unit Tests`, which is the slowest check. The `🔍 Changes` job runs `scripts/ci/docs-only.sh` against the pull request's base and outputs `code=false` only when every changed file ends in `.md`.
+
+- The skip lives in the job's `if:` rather than a path filter, since the ruleset requires the check and a skipped workflow never reports, while a job skipped by its condition reports success
+- `!cancelled()` keeps the job running when `🔍 Changes` is skipped on a push or fails, so only a detector that succeeded can skip the tests
+- The script splits renames and treats an empty or failed diff as code, so a `.ts` file renamed to `.md` still runs the tests
+- Every push to `main` runs the job, so a Markdown file a macOS test reads is caught at most one merge late, and `🛡️ Static Checks` runs the full suite on every pull request
+
 ### `stack-verify.yml`
 
 Runs weekly and on dispatch, one matrix job per scaffoldable stack through `canon tooling verify`. Only its `report` job holds `issues: write`, keeping one open `stack-verify: <stack>` issue per red stack. A layer or an add-on never joins the matrix, since the verb refuses it.
