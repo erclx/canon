@@ -1,13 +1,13 @@
 ---
 title: Adopted and declined
-description: Which comparable research skills this skill was read against, what it took from them, what it declined, and which of its rules rest on measurement rather than a source
+description: Which comparable research skills this skill was read against, what it took from them, what it declined, and which of its rules no comparable skill states
 ---
 
 # Adopted and declined
 
-Three third-party research skills were read before this one was written. None of them was imported, and most of the body rests on paired open and scoped searches run against this skill's own question rather than on any of them. A later session extending the skill adds to this file rather than re-arguing an item settled here.
+Three third-party research skills were read before this one was written, and none was imported. Most of the body rests on library-science and search-tool sources cited per bullet, with paired open and scoped searches as supporting evidence.
 
-A source a bullet rests on is linked once, in that bullet's row of the toolkit's per-bullet ledger at `governance/ledger/skills/search-craft/`, which ships outside the plugin. This file names those sources without the link and keeps the catalog-level adopted and declined record, linking only a source no row cites.
+Each source is linked once, in its bullet's row of the toolkit's per-bullet ledger at `governance/ledger/skills/search-craft/`, which ships outside the plugin. This file keeps the adopted and declined record, linking only a source no row cites, and a later session adds to it rather than re-arguing an item settled here.
 
 ## Adopted
 
@@ -37,8 +37,8 @@ None of the three is one, and each earns its keep on access and cost instead. A 
 
 [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill) is a Python engine with its own test suite and paid aggregators behind it. Declined because a skill here ships no code, and access a session needs repeatedly becomes a `canon` verb.
 
-## Stated by no source
+## Stated by no comparable skill
 
-**Naming the field and deriving its authorities.** No comparable skill takes a thinking step before searching. The step rests on paired open and scoped searches, where the scoped run returned primary sources and caught a wrong version number the open run carried.
+**Naming the field and deriving its authorities.** No comparable skill takes a thinking step before searching. The ledger cites the ACRL framework for both halves. Paired open and scoped searches support it, where the scoped run returned primary sources and caught a wrong version number the open run carried.
 
-**Preferring a public API over a fetched page.** It rests on the same probes, where the scholarly and reference APIs returned the dates, authors, and identifiers a citation needs and a fetched page returned a summary.
+**Preferring a public API over a fetched page.** The ledger cites Crossref's REST API docs for it. The same probes support it, where the scholarly and reference APIs returned the dates, authors, and identifiers a citation needs and a fetched page returned a summary.

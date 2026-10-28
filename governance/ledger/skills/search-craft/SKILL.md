@@ -9,7 +9,7 @@ The field is information literacy and research methods. ACRL's framework carries
 
 The closing sections and `## What this delegates` restate these rules or route, so they take no table.
 
-The access note records refusals, so its rows are measurements re-run on the date in `Read` rather than citations.
+The access note's Reddit and X rows record refusals, so they are measurements re-run on the date in `Read` rather than citations. Its last row cites a source like any other.
 
 ## Name the field
 
