@@ -1,6 +1,6 @@
 ---
 name: role-reviewer
-description: Asserts the reviewer role for a session dispatched to review one pull request another session built, holding what it may write, what it reads and never reads, the messages it owes the worker and the controller, the lift it runs on a close, and the acts it refuses. Use when asked to "be the reviewer", "you are a reviewer session", at the start of a dispatched or hand-launched review of one pull request, or when a reviewing session needs to know what it may not write or who it answers to. Do NOT use to run the pass itself, which is `review-pr` for the code and `review-ui` for the running app, or to make the cross-branch call across a wave.
+description: Asserts the reviewer role for a session dispatched to review one pull request another session built, or a batch of small ones, holding what it may write, what it reads and never reads, the messages it owes the worker and the controller, the lift it runs on a close, and the acts it refuses. Use when asked to "be the reviewer", "you are a reviewer session", at the start of a dispatched or hand-launched review of one pull request or a batch, or when a reviewing session needs to know what it may not write or who it answers to. Do NOT use to run the pass itself, which is `review-pr` for the code and `review-ui` for the running app, or to make the cross-branch call across a wave.
 metadata:
   family: parallel
 ---
@@ -33,7 +33,17 @@ The rules below close off everything else.
 
 Keep a task list from launch, one item per step of the pass, and tick each as it completes. Skip it on a host that offers no list tool, since the list is for the operator watching and not a gate.
 
-Review the pull request the launch named. Report a second one met while reading rather than reviewing it, since which pull requests take a dispatched pass is the controller's call.
+### The pull requests the launch named
+
+Review each pull request the launch named and no other. Report one met while reading rather than reviewing it, since which pull requests take a dispatched pass is the controller's call.
+
+A batch launch names several small pull requests, and each still takes a pass of its own. The batch shares this session and nothing the poll reads.
+
+- Run the pass once per number, in the launch's order, and post each verdict on its own pull request. A summary across the set is a second verdict the poll cannot route.
+- Run `canon pr lift <number>` on each close alone, so a closed pull request lifts while another in the batch stays open
+- Re-run the pass only for the number a re-review request names, since every other pull request in the batch keeps its own head
+- Skip a pull request whose evidence record carries no checklist as a UI reviewer, and drive the rest
+- Report a batched pull request found touching a contract another track consumes to the controller and leave it unreviewed, since the diff overturned the reading that admitted it
 
 ## What to read and what to leave
 
@@ -102,6 +112,7 @@ One rung stays here because it differs between roles. A reviewer holds no featur
 
 ## Lifetime
 
-- The role runs from the launch to the merge of the pull request it reviewed, across every pass. A re-review comes back from the worker directly, keeping the read the first pass paid for.
+- The role runs from the launch to the merge of each pull request it reviewed, across every pass. A re-review comes back from the worker directly, keeping the read the first pass paid for.
 - A session handed a second pull request is a new reviewer under a new launch, since the first one's reading of the change is exactly what the second must not carry.
+- A batch launch is the one exception. The controller names its pull requests at launch, and the batch test keeps them small and contract-free, so a reading carried across them costs little.
 - Treat this body as possibly older than the branch under review. A plugin skill loads from the marketplace cache rather than from the working tree.
