@@ -46,7 +46,9 @@ export interface ChecksReading {
  * rulesets or a refused read returns, so the caller falls back to every check.
  * Classic branch protection is not read, and falls back the same way.
  */
-export function requiredChecks(rules: unknown): ReadonlySet<string> | undefined {
+export function requiredChecks(
+  rules: unknown,
+): ReadonlySet<string> | undefined {
   if (!Array.isArray(rules)) return undefined
 
   const names = new Set<string>()

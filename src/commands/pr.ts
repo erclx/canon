@@ -4290,7 +4290,10 @@ async function readRequiredChecks(
   base: string | undefined,
 ): Promise<ReadonlySet<string> | undefined> {
   if (base === undefined || base === '') return undefined
-  const rules = await gh(root, ['api', `repos/{owner}/{repo}/rules/branches/${base}`])
+  const rules = await gh(root, [
+    'api',
+    `repos/{owner}/{repo}/rules/branches/${base}`,
+  ])
   if (rules === null) return undefined
   try {
     return requiredChecks(JSON.parse(rules))

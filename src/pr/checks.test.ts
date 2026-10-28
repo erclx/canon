@@ -354,7 +354,12 @@ describe('collapseChecks over a required set', () => {
     const reading = collapseChecks(TIP, {
       total_count: 1,
       check_runs: [
-        { head_sha: TIP, name: MAC, status: 'completed', conclusion: 'failure' },
+        {
+          head_sha: TIP,
+          name: MAC,
+          status: 'completed',
+          conclusion: 'failure',
+        },
       ],
     })
 
