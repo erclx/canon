@@ -45,6 +45,12 @@ export type Check =
   | {
       readonly kind: 'command'
       readonly argv: readonly string[]
+      /**
+       * Builds the argv from the changed set when scoping is on. `argv` runs
+       * where it is off, so `--all` and every widening fallback keep the full
+       * command.
+       */
+      readonly changedArgv?: (changed: readonly string[]) => readonly string[]
       readonly failure: string
     }
   /** This checkout's own CLI, so a worktree gate never reads the main tree. */
