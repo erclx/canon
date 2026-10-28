@@ -7,7 +7,7 @@ description: The reel pr-evidence films for an evidence comment with no operator
 
 Read by the reel step of `evidence.md`, passing the pull request number, the `url` its `canon pr local` read returned, and the checklist text.
 
-This file films a short reel of what the checklist asks a reviewer to try, hosts it on `canon/frames`, and hands back the link or the reason it skipped. The filming rules are `ui-film`'s, in `${CLAUDE_SKILL_DIR}/../ui-film/references/take-craft.md`.
+This file films a short reel of what the checklist asks a reviewer to try, hosts it on `canon/frames`, and hands back the link or the reason it skipped. The filming rules are `ui-film`'s, in `${CLAUDE_SKILL_DIR}/../ui-film/references/take-craft.md`, and so is the config's `access` value, in `${CLAUDE_SKILL_DIR}/../ui-film/references/config.md`.
 
 ## Contents
 
@@ -86,7 +86,7 @@ Open each beat's `still.jpg`, the closing frame the record names in its `still` 
 
 - A still showing the wrong state skips the reel as `wrong-state`, naming the beat and what the still shows
 - A record whose beats carry no `still` field comes from a `canon` predating the still, so skip as `no-still` rather than posting a reel nothing checked
-- Read `fallback` on each beat the way `ui-film` does. A beat filmed by screencast still joins the reel, since the reel shrinks every beat to one width.
+- Read `fallback` on each beat. A beat filmed by screencast still joins the reel, since the reel shrinks every beat to one width.
 
 ## Push the reel
 
