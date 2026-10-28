@@ -22,7 +22,7 @@ Read the board in parallel, resolving the paths at the main worktree root the wa
 - `.canon/plans/*.md`: features already planned and ready to hand off
 - open PRs via `gh pr list --json number,title,headRefName,isDraft`
 
-Then output the state of play so the human knows what to launch, review, and merge.
+Then output the state of play, naming what to launch, review, and merge.
 
 ### Reading the order
 
@@ -164,6 +164,7 @@ Two tracks sharing a file both build, and the one merging second rebases and res
 
 - Merge the branch with the smallest shared-file footprint first, so the rebases spread across the wave
 - Merge a branch touching `CLAUDE.md`, a Claude context entry, or a regenerated `index.md` last
+- Merge a review batch back to back in least-rebase order as each pass closes
 - Have every sibling the merged diff touches rebase on the new `main` before the next merge
 - Two workers running a server take a port apiece, derived from the worktree by `scripts/worktree-port.sh`. Read it, and set `WORKTREE_PORT_OFFSET` only when two worktrees derive the same one.
 
@@ -171,4 +172,4 @@ Two tracks sharing a file both build, and the one merging second rebases and res
 
 Review splits by what each side can see. A reviewer dispatched under `role-reviewer` takes every pull request's read but a release one's, first pass included, and this session reviews none in place.
 
-This session keeps one cross-branch pass per wave, over file sets, the board, and merge order. Read `${CLAUDE_SKILL_DIR}/references/orchestrator-review-dispatch.md` on every first pass for the model pick, the UI reviewer, and how that pass reaches each brief.
+This session keeps one cross-branch pass per wave, over file sets, the board, and merge order. Read `${CLAUDE_SKILL_DIR}/references/orchestrator-review-dispatch.md` on every first pass for the model pick, the UI reviewer, the batch, and how that pass reaches each brief.

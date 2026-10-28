@@ -50,7 +50,10 @@ A reviewer reports that `canon sessions list --branch` returned no session or an
 
 A worker reports that the reviewer's sessionId resolved to no live session, or sends a re-review request with no reviewer named in its dispatch. Launch a fresh reviewer through the reviewer shape in `orchestrator-reviewer-launch.md`, never a pass in place, rather than messaging a name that no longer answers.
 
-A re-review this session sends goes to the reviewer that took the first pass. Find a live `reviewer-<project>-<number>` through `canon sessions list --json` by name and message it to re-run `review-pr`, launching a fresh one only when none is live.
+A re-review this session sends goes to the reviewer that took the first pass. Message it to re-run `review-pr` for that number alone, and launch a fresh one only when none is live.
+
+- Find it through `canon sessions list --json` by a `reviewer-<project>-` name whose trailing numbers include the pull request's number
+- Match among the trailing numbers rather than the whole name, since a batch reviewer's name lists every number it holds
 
 ### When no session is live
 

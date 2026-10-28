@@ -1,6 +1,6 @@
 ---
 title: Orchestrator reviewer launch runbook
-description: The launch shapes that start a reviewer rather than a builder, being the code reviewer, the cloud reviewer, and the UI reviewer driving a pull request's checklist
+description: The launch shapes that start a reviewer rather than a builder, being the code reviewer, the cloud reviewer, the UI reviewer driving a pull request's checklist, and the batch shapes holding several small pull requests
 ---
 
 Run this once `orchestrator-review-dispatch.md` has sent a pull request to a dispatched reviewer. The build, review-address, and planning shapes, and the rules every launch shares, stay in `orchestrator-launch.md`.
@@ -19,7 +19,7 @@ claude --bg --model <model> -n "reviewer-<project>-<number>" "Run /canon:role-re
 - `<model>` comes from `## Pick the model` in `orchestrator-dispatch.md`, which states the test for a reviewer as for every other role
 - `<dispatcher-id>` and `<project>` resolve the same way they do in `orchestrator-launch.md`
 - Append the cross-branch facts after the controller clause, per `### What the brief may carry` in `orchestrator-launch.md`
-- Check `canon sessions list --json` for a live `reviewer-<project>-<number>` before launching, and message it instead when one holds the pull request
+- Check `canon sessions list --json` before launching for a live `reviewer-<project>-` session whose trailing numbers include `<number>`, and message it instead when one holds the pull request
 
 ### Record the reviewer on the task
 
@@ -29,7 +29,7 @@ A reviewer writes no task file, so this session names it on the task the pull re
 canon tasks session <reviewer-id> <task> --json
 ```
 
-Record the UI reviewer below the same way after its launch. A `no-name` refusal means the reviewer exited before the read, so rerun with `--name` and the name the launch passed to `-n`.
+Record the UI reviewer below the same way after its launch, and a batch reviewer on every task its batch closes, one call per task. A `no-name` refusal means the reviewer exited before the read, so rerun with `--name` and the name the launch passed to `-n`.
 
 ### The channel clauses
 
@@ -57,3 +57,22 @@ The model is `sonnet`, always, as the UI reviewer line in `## Pick the model` in
 Name an address only when the evidence record carries no `preview` and no `local` field, as `Drive <url>.` after the controller clause. An address the record holds is the one the pass reads first, and a second in the brief is a second source for one fact.
 
 Name a CLI config path the same way when the operator keeps a GPU recipe for this machine, since the pass renders in software otherwise.
+
+## Dispatch a batch to one reviewer
+
+`orchestrator-review-dispatch.md` decides when small pull requests share a reviewer pair. The batch shapes run the single shapes above once per number, in the order the name lists them.
+
+```bash
+claude --bg --model <model> -n "reviewer-<project>-<n1>-<n2>" "Run /canon:role-reviewer, then run /canon:review-pr once for each of <n1> <n2>, in that order, posting each verdict on its own pull request and never one comment across the set. Your controller is the session whose sessionId is <dispatcher-id>. Resolve its current name from that id through canon sessions list --json, which carries sessionId per row, at the moment you send, and never resolve an addressee by name prefix. When a pass posts under ## Review, message the worker holding that pull request's branch to run review-address, carrying your own sessionId and the number, and send it to the controller instead when no worker resolves. When a pass posts ## Review closed, run canon pr lift <that number> --json and message the controller with the number, the heading, the count line, and the reason the verb returned, unless that reason names the UI review as still open or missing. A re-review request names one number, so re-run that pass alone. Message the controller again if you stop on a question."
+```
+
+- The name lists every number, so the live check and the handback match a number among the trailing ones
+- `canon pr lift` runs once per number on that number's close, so a closed pull request lifts while another in the batch stays open
+- Append each pull request's cross-branch facts after the controller clause, prefixed with its number
+
+### The UI batch shape
+
+The UI reviewer takes `reviewer-ui-<project>-<n1>-<n2>` and `review-ui` once per number, with the code shape's clauses for that family. Name only the pull requests whose evidence record carries a checklist, since a pass on one without a checklist stops on arrival.
+
+- The model is `sonnet`, as for the single UI shape
+- `canon pr lift` runs once per number on that number's `## UI review closed`, unless the reason names the code review as still open or missing
