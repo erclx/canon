@@ -7,13 +7,13 @@ description: Which external debugging patterns this skill adopted, which it decl
 
 External sources were read and filtered rather than imported. This file is the record. A later session extending the skill adds to it rather than re-arguing an item already settled here.
 
-The source behind each step of the body sits in the canon repository at `governance/ledger/skills/systematic-debugging/SKILL.md`, which stays out of the plugin. This file keeps the adopted and declined position at the source level.
+A source a bullet rests on is linked once, in that bullet's row of the toolkit's per-bullet ledger at `governance/ledger/skills/systematic-debugging/`, which ships outside the plugin. This file names those sources without the link and keeps the catalog-level adopted and declined record, linking only a source no row cites.
 
 ## Adopted
 
 ### The four phases
 
-**Investigate, find the pattern, hypothesize, fix.** From `obra/superpowers@8ca22db`, [`skills/systematic-debugging/SKILL.md`](https://github.com/obra/superpowers/blob/8ca22dba9a94f28898bbce59f2537ff4d87c747d/skills/systematic-debugging/SKILL.md), 283 lines at that commit.
+**Investigate, find the pattern, hypothesize, fix.** From `obra/superpowers@8ca22db`, `skills/systematic-debugging/SKILL.md`, 283 lines at that commit.
 
 - The four-phase spine, the no-fix-before-investigation rule, and the three-attempt stop come from it, restated in a fraction of the length
 - Nothing records the commit the original port read, so this pin names the one read when the ledger was written rather than the one the port used
@@ -30,7 +30,7 @@ Each excuse rebuts a reason a session gives to skip the investigation rather tha
 
 ## The investigation lifts
 
-Each from `addyosmani/agent-skills@2686b620`, [`skills/debugging-and-error-recovery/SKILL.md`](https://github.com/addyosmani/agent-skills/blob/2686b620fc1fed2e8f60c704839c766b8594c6b6/skills/debugging-and-error-recovery/SKILL.md), 300 lines at that commit.
+Each from `addyosmani/agent-skills@2686b620`, `skills/debugging-and-error-recovery/SKILL.md`, 300 lines at that commit.
 
 ### Bisect for a regression
 
