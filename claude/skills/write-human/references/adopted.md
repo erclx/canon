@@ -49,8 +49,11 @@ The source material treats repetition of a noun as a defect. This skill treats i
 
 The source material also prefers shorter sentences without bound. This skill measures the spread instead, since a passage of uniformly short sentences is the reported failure rather than the fix for it.
 
-## The industry-guide record
+## Where the rows sit
 
-The cadence rules and the bans they pair with trace to three industry style guides, being Google's developer documentation style guide, Microsoft's writing style guide, and Apple's style guide.
+Each bullet and ordered step in the skill body and in `density.md` has its own source row in a ledger outside the plugin, one ledger per file and one row per bullet under the H2 the bullet sits under.
 
-The authoring toolkit keeps the per-rule attributions and the dates each guide was read. No install carries that record, so this file is the position a target reads.
+- The toolkit's skill audit fails a ledgered file whose bullets and rows disagree in count under any heading, and a target never carries the rows
+- The rows cite government plain-language guidance, Google's and Microsoft's developer style guides, and Purdue OWL, and mark the rest as house choices
+- `machine-tells.md` holds its tells as prose, so its ledger sources each tell in a list rather than a table
+- This record keeps the adopted and declined position above, which no row restates
