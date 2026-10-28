@@ -42,7 +42,7 @@ Its reduce step strips code, config, and input until only the failure remains. A
 
 Its timing, environment, state, and truly-random branches, each with first moves. Adopted in phase 1 step 2 with the runtime names stripped.
 
-The random branch hands off to the no-root-cause section rather than to its alerting advice, since setting up an alert is a production concern outside a debugging session.
+The random branch hands off to the external-cause section rather than to its alerting advice, since setting up an alert is a production concern outside a debugging session.
 
 ### Error output as untrusted data
 
@@ -62,6 +62,6 @@ This is a measured case rather than an outside source. When a CI job failed on a
 Each item below stays out of the body for the reason given.
 
 - **The stop-the-line rule.** A six-step stop, preserve, diagnose, fix, guard, resume sequence. The rule atop the body and the three-attempt stop carry it, and a second sequence would compete.
-- **Safe fallback patterns.** The no-root-cause section carries the handling choice, and a fallback written under time pressure is the symptom fix phase 1 prevents.
+- **Safe fallback patterns.** The external-cause section carries the handling choice, and a fallback written under time pressure is the symptom fix phase 1 prevents.
 - **Per-error triage trees.** The source's test, build, and runtime trees and its layer table name runtimes, browsers, and package managers. Declined as stack-specific.
 - **The six-step spine.** The source orders reproduce, localize, reduce, fix, guard, verify. Other skills cite "phase 1" and the three-attempt stop by name, so the four phases stay.

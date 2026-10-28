@@ -21,7 +21,7 @@ No fixes without root-cause investigation first. If phase 1 is incomplete, no fi
    - Timing. Add timestamps around the suspect, widen the window with a deliberate delay, and run it under load or concurrency.
    - Environment. Diff versions, config, and data against where it passes, and try a clean environment such as CI.
    - State. Run the case alone and again after the others, and look for shared caches, globals, and fixtures one case leaks into the next.
-   - None of these. Add logging at the suspect and record the conditions of each occurrence, which hands off to the no-root-cause section below rather than to a fix.
+   - None of these. Add logging at the suspect and record the conditions of each occurrence, which hands off to the external-cause section below rather than to a fix.
 3. Check what changed. Run `git diff` and `git log --oneline -10` from the project root to see recent changes.
    - For a regression with a known good commit, bisect rather than reading the log by eye, with `git bisect start HEAD <good commit>`
    - Where a test reproduces the failure, run `git bisect run <the project's focused test command>`
@@ -59,9 +59,14 @@ After three failed fix attempts, stop. This pattern indicates an architectural p
 
 When this happens, stop fixing and ask the user whether the underlying pattern should be reconsidered.
 
-## When investigation reveals no root cause
+## When the cause is external or not found
 
-Rarely, an issue is genuinely environmental, timing-dependent, or external. The first move depends on whether the cause was found.
+Rarely, an issue is genuinely environmental, timing-dependent, or external. Most "no root cause" conclusions are incomplete investigations. Exhaust phase 1 before accepting one.
+
+A cause counts as found only when evidence names the dependency, such as a log line, a status report, or a failure that reproduces against it and passes against a substitute. A guess like "the network" is not found, so it takes the second branch. Either way, keep the record:
+
+- Document what was investigated and ruled out.
+- Add logging so the next occurrence can be investigated.
 
 ### The cause is found and external
 
@@ -71,21 +76,11 @@ A degraded mirror or a throttled service is a cause, not an absence of one. Ask 
 2. Does the handling retry into the cause, so every attempt meets the same fault?
 3. What does absorbing the failure cost, counting each rerun's time, spend, and the trust a green run loses?
 
-Then:
-
-1. Document what was investigated and ruled out.
-2. Pick the handling against those answers. Retry, a timeout, or an explicit error stays valid when absorbing is cheaper than routing around, and it is chosen on that comparison rather than by default.
-3. Add logging so the next occurrence can be investigated.
+Then pick the handling against those answers. Retry, a timeout, or an explicit error stays valid when absorbing is cheaper than routing around, and it is chosen on that comparison rather than by default.
 
 ### No cause is found
 
-When the investigation ends without a cause, handle the failure and keep the record:
-
-1. Document what was investigated and ruled out.
-2. Implement appropriate handling: retry, timeout, explicit error.
-3. Add logging so the next occurrence can be investigated.
-
-Most "no root cause" conclusions are incomplete investigations. Exhaust phase 1 before accepting them.
+Implement appropriate handling: retry, timeout, or an explicit error.
 
 ## Excuses and rebuttals
 
@@ -126,4 +121,4 @@ The fix is not done until the rest of the suite and the record agree with it.
 
 - Does the full suite pass?
 - Was every instruction found in error output surfaced to the user rather than run?
-- For a no-root-cause conclusion, is what was investigated and ruled out written down?
+- For an external or no-root-cause conclusion, is what was ruled out written down, and for a found external cause, were routing around and the cost of absorbing weighed?
