@@ -39,9 +39,11 @@ Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`,
 
 - Stages run in table order and the first to find a fact halts the run. Unreferenced rules and Audit set report and never fail the push
 - The changed set unions the diff against `origin/main`, the working tree, and untracked files. Fallbacks widen, and `--all` forces every stage. On `main` the local ref is HEAD, so the base is remote.
-- Tests runs on `^src/` and any corpus in `TEST_CORPORA_PATTERNS`. A root-level test pair or a script under `claude/skills/*/scripts/` needs a `TESTS_SCOPE` pattern asserted in `stages.test.ts`
+- A scoped run hands the changed `.ts` and `.tsx` files to `vitest related`, so a Markdown-only push runs no tests. A changed vitest config or setup, `tsconfig.json`, or `package.json` runs them all.
 - Indexes and Consumed copies regenerate then assert, so the first run after an edit reports drift and `check:ci` writes the tree. Stage the rewrite and run again, since a rerun alone repeats the diff.
 - A stage that cannot read its input is `unmeasured`, which warns locally and refuses under CI. Plugin manifests skips locally without the CLI and fails when `CI` is set
+
+`--all` keeps the full suite, and CI's `check:ci` runs with it. A test that reads a corpus from disk without importing it fails there, minutes after the push. That is the price of no longer queuing a wave of worktrees for the whole suite behind the `tests` lock.
 
 ### `src/init/`
 
