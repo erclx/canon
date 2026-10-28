@@ -170,9 +170,24 @@ invocations=$(grep -n -e 'plan-feature' -e 'auto-ship' "$transcript" 2>/dev/null
     else empty end' 2>/dev/null)
 
 rest=${new#.canon/plans/}
+key=$(printf '%s' "$session" | tr -c 'A-Za-z0-9' '_')
+marker_dir="$root/.canon/tmp/hooks/plan-guard"
+
+# One line per new plan judged, so the blocks can be counted against the passes
+# before the guard is seeded. A failed write never changes the decision.
+log_decision() {
+  mkdir -p "$marker_dir" 2>/dev/null &&
+    printf '%s %s %s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$1" "$key" "$rest" \
+      >>"$marker_dir/decisions.log" 2>/dev/null
+  return 0
+}
+
 while IFS= read -r line; do
   case "$line" in
-  "A "*".canon/plans/$rest"*) exit 0 ;;
+  "A "*".canon/plans/$rest"*)
+    log_decision pass
+    exit 0
+    ;;
   esac
 done <<EOF
 $invocations
@@ -183,8 +198,6 @@ latest=$(printf '%s\n' "$invocations" | awk '/^P /{n = $2} END {if (n != "") pri
 # A PreToolUse pass is not a landed write, so a retry after a refused heredoc,
 # or the `cp` that follows a worktree `Write`, lands on the same plan and
 # passes on the invocation it already spent.
-key=$(printf '%s' "$session" | tr -c 'A-Za-z0-9' '_')
-marker_dir="$root/.canon/tmp/hooks/plan-guard"
 marker="$marker_dir/$key"
 spent=0
 spent_plan=""
@@ -193,9 +206,13 @@ if [ -f "$marker" ]; then
 fi
 case "$spent" in '' | *[!0-9]*) spent=0 ;; esac
 
-[ "$spent" -gt 0 ] && [ "$spent_plan" = "$rest" ] && exit 0
+if [ "$spent" -gt 0 ] && [ "$spent_plan" = "$rest" ]; then
+  log_decision pass
+  exit 0
+fi
 if [ -n "$latest" ] && [ "$latest" -gt "$spent" ]; then
   mkdir -p "$marker_dir" 2>/dev/null && printf '%s %s\n' "$latest" "$rest" >"$marker" 2>/dev/null
+  log_decision pass
   exit 0
 fi
 
@@ -204,5 +221,6 @@ if [ "$spent" -gt 0 ]; then
 else
   why='This session has not invoked canon:plan-feature'
 fi
+log_decision block
 printf '%s, so %s would be written outside the skill that owns its shape. Invoke the canon:plan-feature skill for this plan, then resend the write.\n' "$why" "$new" >&2
 exit 2

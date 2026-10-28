@@ -2307,6 +2307,101 @@ describe('plan-guard.sh firing conditions', () => {
     expect(result.code).toBe(0)
   })
 
+  describe('decision log', () => {
+    const logLines = (root: string): string[] => {
+      const log = join(root, '.canon/tmp/hooks/plan-guard/decisions.log')
+      return existsSync(log)
+        ? readFileSync(log, 'utf8').trimEnd().split('\n')
+        : []
+    }
+    const LINE = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ (pass|block) \S+ (.+)$/
+
+    it('should log a pass with the session key and the plan path', async () => {
+      const project = planProject(`${SKILL_CALL}\n`)
+
+      await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
+
+      const lines = logLines(project.root)
+      expect(lines).toHaveLength(1)
+      expect(lines[0]).toMatch(LINE)
+      expect(lines[0]).toContain(' pass plan_guard_session feature-a.md')
+    })
+
+    it('should log a block with the session key and the plan path', async () => {
+      const project = planProject()
+
+      await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
+
+      const lines = logLines(project.root)
+      expect(lines).toHaveLength(1)
+      expect(lines[0]).toContain(' block plan_guard_session feature-a.md')
+    })
+
+    it('should log a block and then a pass for a plan resent after an invocation', async () => {
+      const project = planProject()
+      await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
+      writeFileSync(project.transcript, `${SKILL_CALL}\n`)
+
+      await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
+
+      const verdicts = logLines(project.root).map((l) => l.split(' ')[1])
+      expect(verdicts).toEqual(['block', 'pass'])
+    })
+
+    it('should log a block for a second new plan on a spent invocation', async () => {
+      const project = planProject(`${SKILL_CALL}\n`)
+      await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
+
+      await run(hook, shellIn(project, heredoc('.canon/plans/feature-b.md')))
+
+      const lines = logLines(project.root)
+      expect(lines).toHaveLength(2)
+      expect(lines[1]).toContain(' block plan_guard_session feature-b.md')
+    })
+
+    it('should log a pass for the plan an auto-ship launch names', async () => {
+      const project = planProject(
+        `${autoShipCall('.canon/plans/feature-new.md')}\n`,
+      )
+
+      await run(hook, shellIn(project, heredoc('.canon/plans/feature-new.md')))
+
+      expect(logLines(project.root)).toHaveLength(1)
+      expect(logLines(project.root)[0]).toContain(' pass ')
+    })
+
+    it.each([
+      ['an edit of an existing plan', heredoc('.canon/plans/feature-old.md')],
+      ['a read of an existing plan', 'cat .canon/plans/feature-old.md'],
+      ['a command naming no plan', 'echo x > notes.md'],
+    ])('should write no line for %s', async (_, command) => {
+      const project = planProject()
+
+      await run(hook, shellIn(project, command))
+
+      expect(logLines(project.root)).toEqual([])
+    })
+
+    it.each([
+      ['a pass', `${SKILL_CALL}\n`, 0],
+      ['a block', '', 2],
+    ])(
+      'should still decide %s when the log folder cannot be created',
+      async (_, transcript, code) => {
+        const project = planProject(transcript)
+        mkdirSync(join(project.root, '.canon'), { recursive: true })
+        writeFileSync(join(project.root, '.canon/tmp'), 'not a folder')
+
+        const result = await run(
+          hook,
+          shellIn(project, heredoc('.canon/plans/feature-a.md')),
+        )
+
+        expect(result.code).toBe(code)
+      },
+    )
+  })
+
   it('should dismiss a command naming no plan path without spawning jq', async () => {
     const project = planProject()
 
