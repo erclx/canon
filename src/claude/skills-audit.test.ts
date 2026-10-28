@@ -6,7 +6,7 @@ import {
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { basename, dirname, join } from 'node:path'
+import { basename, dirname, join, relative } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   auditExitCode,
@@ -636,10 +636,12 @@ describe('auditSkills reference contents', () => {
 
 const CLOSING = PRACTICE_SECTIONS.map((section) => `## ${section}\n\n- Do\n`)
 
-// A skill on the per-bullet list owes ledgers its fixture never writes, so the
-// varied skill is the first practice skill off that list.
+// An exempted reference is a file the fixture never writes, so the varied
+// skill is the first practice skill exempting none, listed or not.
 const varied =
-  PRACTICE_SKILLS.find((rel) => !(rel in BULLET_LEDGER_SKILLS)) ?? ''
+  PRACTICE_SKILLS.find(
+    (rel) => (BULLET_LEDGER_SKILLS[rel]?.exempt.length ?? 0) === 0,
+  ) ?? ''
 
 const LINKED_LEDGER =
   '# Adopted\n\n[A source](https://example.com/source) states the rule.\n'
@@ -662,14 +664,18 @@ function practiceSkill(
     mkdirSync(join(dir, 'references'), { recursive: true })
     writeFileSync(join(dir, 'references', 'adopted.md'), ledger)
   }
+  if (BULLET_LEDGER_SKILLS[relative(root, dir)]?.body) {
+    const bodyLedger = join(root, skillLedgerPath(name, 'SKILL.md'))
+    mkdirSync(dirname(bodyLedger), { recursive: true })
+    writeFileSync(bodyLedger, '# Ledger\n')
+  }
   return dir
 }
 
 /**
  * Writes a conforming fixture for every listed skill but the one a test
  * varies, so an append to the list needs no edit here. Each exempted reference
- * is written so its exemption names a real file, and a listed body gets a
- * row-free ledger.
+ * is written so its exemption names a real file.
  */
 function listedPracticeSkillsExcept(omitted: string): void {
   for (const rel of LEDGER_SKILLS.filter((rel) => rel !== omitted)) {
@@ -679,11 +685,6 @@ function listedPracticeSkillsExcept(omitted: string): void {
     for (const file of scope?.exempt ?? []) {
       mkdirSync(dirname(join(dir, file)), { recursive: true })
       writeFileSync(join(dir, file), '# Reference\n')
-    }
-    if (scope?.body) {
-      const ledger = join(root, skillLedgerPath(name, 'SKILL.md'))
-      mkdirSync(dirname(ledger), { recursive: true })
-      writeFileSync(ledger, '# Ledger\n')
     }
   }
 }
@@ -1344,7 +1345,9 @@ describe('auditExitCode', () => {
 
     const report = await auditSkills(root)
 
-    expect(report.practiceShape).toHaveLength(PRACTICE_SECTIONS.length + 1)
+    // Each closing section, the source ledger, and the body ledger the
+    // per-bullet list owes, since every practice skill sits on that list.
+    expect(report.practiceShape).toHaveLength(PRACTICE_SECTIONS.length + 2)
     expect(auditExitCode(report)).toBe(0)
   })
 

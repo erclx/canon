@@ -124,6 +124,7 @@ export const BULLET_LEDGER_SKILLS: Readonly<Record<string, BulletLedgerScope>> =
     [join(SHIPPED_CORPUS, 'search-craft')]: { exempt: [], body: true },
     [join(SHIPPED_CORPUS, 'write-human')]: { exempt: [], body: true },
     [join(SHIPPED_CORPUS, 'systematic-debugging')]: { exempt: [], body: true },
+    [join(SHIPPED_CORPUS, 'build-in-slices')]: { exempt: [], body: true },
   }
 
 /** Where a per-bullet ledger lives, as `<skill>/<file>.md` below it. */

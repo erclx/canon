@@ -7,17 +7,19 @@ description: Which external sources on incremental building this skill adopted, 
 
 External sources were read and filtered rather than imported. This file is the record, and a later session extending the skill adds to it rather than re-arguing an item settled here.
 
+A source a bullet rests on is linked once, in that bullet's row of the toolkit's per-bullet ledger at `governance/ledger/skills/build-in-slices/`, which ships outside the plugin. This file names those sources without the link and keeps the catalog-level adopted and declined record, linking only a source no row cites.
+
 ## Adopted from the default shelf
 
 ### Small changes
 
-[Small CLs](https://google.github.io/eng-practices/review/developer/small-cls.html), from Google's engineering practices, keeps a change self-contained and about one thing, puts a refactor in a change apart from the feature needing it, and puts a test in the same change as its code.
+Small CLs, from Google's engineering practices, keeps a change self-contained and about one thing, puts a refactor in a change apart from the feature needing it, and puts a test in the same change as its code.
 
 Adopted as the rule that each commit carries one logical change, the refactor excuse row, and the rule that a slice's test never lands after its code.
 
 ## Adopted for the increment cycle
 
-Addy Osmani's `agent-skills`, pinned at addyosmani/agent-skills@2686b620, [`skills/incremental-implementation/SKILL.md`](https://github.com/addyosmani/agent-skills/blob/2686b620/skills/incremental-implementation/SKILL.md), supplies the cycle and most of the rules.
+Addy Osmani's `agent-skills`, pinned at addyosmani/agent-skills@2686b620, `skills/incremental-implementation/SKILL.md`, supplies the cycle and most of the rules.
 
 ### The cycle and its rules
 
