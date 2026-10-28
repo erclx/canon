@@ -16,6 +16,9 @@ export const DRIVE_RECORD = 'drive.json'
 /** The one folder inside an intake folder that evidence may live in. */
 export const EVIDENCE_DIR = 'evidence'
 
+/** The log a person reads, which the `undrawn` axis parses by its labels. */
+export const DRIVE_LOG = join(EVIDENCE_DIR, 'drive-log.md')
+
 const SCRATCH = join('.canon', 'tmp', 'app-drive')
 
 /**
@@ -63,6 +66,15 @@ export interface DriveFindings {
   readonly missingEvidence: readonly string[]
   /** The drive's worktree, when the record names one still on disk. */
   readonly worktreeLeft: readonly string[]
+  /** Logged findings the operator decided with no drawn outcome. */
+  readonly undrawn: readonly string[]
+}
+
+export interface DrawnReading {
+  /** Each decided finding's heading, as `<nn>. <title>`, with nothing drawn. */
+  readonly undrawn: readonly string[]
+  /** Every path a `Drawn` field cites, for the evidence tests. */
+  readonly paths: readonly string[]
 }
 
 export interface DriveChecked {
@@ -157,6 +169,55 @@ export function readGoals(source: string): string[] {
   close()
 
   return goals
+}
+
+const FINDING_HEADING = /^##\s+(\d+\.\s.*?)\s*$/
+const LOG_FIELD = /^[-*]\s+\*\*([^*]+):\*\*\s*(.*)$/
+const DECISION_LABEL = 'Decision (operator)'
+const DRAWN_LABEL = 'Drawn'
+
+/**
+ * Reads the drive log's numbered findings for a decision with nothing drawn.
+ * A decision reading `see <nn>` was drawn under the finding it names, and a
+ * `ref-<nn>` heading or a finding with no decision carries nothing to draw. A
+ * `Drawn` field passes when it cites a path in a code span or reads
+ * `skipped, <reason>`, so a bare `skipped` still lists the finding.
+ */
+export function readDrawn(source: string): DrawnReading {
+  const undrawn: string[] = []
+  const paths: string[] = []
+  let finding: string | undefined
+  let decision: string | undefined
+  let drawn: string | undefined
+
+  const close = () => {
+    if (finding !== undefined && decision && !/^see\s+\d+/i.test(decision)) {
+      const cited = [...(drawn ?? '').matchAll(/`([^`]+)`/g)].map(
+        (match) => match[1],
+      )
+      paths.push(...cited)
+      if (cited.length === 0 && !/^skipped\s*,\s*\S/i.test(drawn ?? '')) {
+        undrawn.push(finding)
+      }
+    }
+    finding = decision = drawn = undefined
+  }
+
+  for (const line of bodyLines(source)) {
+    if (line.fenced) continue
+    if (/^#{1,2}\s/.test(line.text)) {
+      close()
+      finding = FINDING_HEADING.exec(line.text)?.[1]
+      continue
+    }
+    const field = LOG_FIELD.exec(line.text)
+    if (finding === undefined || !field) continue
+    if (field[1] === DECISION_LABEL) decision = field[2].trim()
+    if (field[1] === DRAWN_LABEL) drawn = field[2].trim()
+  }
+  close()
+
+  return { undrawn, paths }
 }
 
 function parseRecord(raw: string): DriveRecord | string {
@@ -271,8 +332,9 @@ export async function recordBaseline(
 /**
  * Checks a finished drive against its intake folder's `drive.json`: every
  * goal mapped or skipped with a reason, the main checkout unchanged since the
- * baseline, the evidence inside the folder's `evidence/`, and the drive's
- * worktree gone. It reports what failed and never reverts a changed path,
+ * baseline, the evidence inside the folder's `evidence/`, every decision in
+ * the drive log drawn, and the drive's worktree gone. A folder with no log
+ * reads as nothing undrawn. It reports what failed and never reverts a changed path,
  * since only the operator knows which of them to keep.
  */
 export async function checkDrive(
@@ -318,6 +380,12 @@ export async function checkDrive(
     return refuse('unreadable-tree', `git cannot read the status of ${root}.`)
   }
 
+  const logPath = join(folder, DRIVE_LOG)
+  const drawn: DrawnReading = existsSync(logPath)
+    ? readDrawn(await readFile(logPath, 'utf8'))
+    : { undrawn: [], paths: [] }
+  const evidence = [...new Set([...record.evidence, ...drawn.paths])]
+
   const entries = new Map(
     record.goals.map((entry) => [normalizeGoal(entry.goal), entry]),
   )
@@ -334,14 +402,15 @@ export async function checkDrive(
       .filter((entry) => !known.has(normalizeGoal(entry.goal)))
       .map((entry) => entry.goal),
     changed: changedSince(baseline, current),
-    strayEvidence: record.evidence.filter((path) => !isEvidencePath(path)),
-    missingEvidence: record.evidence.filter(
+    strayEvidence: evidence.filter((path) => !isEvidencePath(path)),
+    missingEvidence: evidence.filter(
       (path) => isEvidencePath(path) && !existsSync(join(folder, path)),
     ),
     worktreeLeft:
       record.worktree !== undefined && existsSync(record.worktree)
         ? [record.worktree]
         : [],
+    undrawn: drawn.undrawn,
   }
   const failed = Object.values(findings).some((list) => list.length > 0)
 

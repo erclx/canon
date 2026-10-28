@@ -186,6 +186,8 @@ export function register(program: Command): void {
         '  strayEvidence    an evidence path outside the folder evidence/',
         '  missingEvidence  an evidence path that holds no file',
         '  worktreeLeft     the drive worktree the record names, still on disk',
+        '  undrawn          a decision in evidence/drive-log.md with no Drawn',
+        '                   path and no skipped reason',
         '',
         'A goal matches by its text with any bold label and trailing period',
         'dropped. A changed path is named and never reverted.',
@@ -553,6 +555,7 @@ const FINDING_LABELS: Record<keyof DriveFindings, string> = {
   strayEvidence: 'Evidence outside evidence/',
   missingEvidence: 'Evidence holding no file',
   worktreeLeft: 'Drive worktree still on disk',
+  undrawn: 'Decisions with nothing drawn',
 }
 
 function reportDriveCheck(
@@ -585,7 +588,7 @@ function reportDriveCheck(
   if (outcome.reason === 'clean') {
     logStep('Clean')
     logInfo(
-      `${outcome.goals} goal(s) mapped, the checkout untouched, the evidence in place.`,
+      `${outcome.goals} goal(s) mapped, the checkout untouched, the evidence in place, every decision drawn.`,
     )
     outro()
     return code
