@@ -1,5 +1,28 @@
 # Changelog
 
+## [5.74.0](https://github.com/erclx/canon/compare/v5.73.0...v5.74.0) (2026-10-28)
+
+
+### Features
+
+* **claude:** fail a source linked in both adopted.md and a ledger ([#2831](https://github.com/erclx/canon/issues/2831)) ([f5bd7bc](https://github.com/erclx/canon/commit/f5bd7bc7a42c628d9725d8559678556821b2d4ef))
+* **gate:** run only related tests on a scoped push ([#2838](https://github.com/erclx/canon/issues/2838)) ([0918616](https://github.com/erclx/canon/commit/0918616ec6b0dcf9dea5c09da2761ca8bf0a0188))
+* **hooks:** log each plan-guard decision to a file ([#2829](https://github.com/erclx/canon/issues/2829)) ([87da825](https://github.com/erclx/canon/commit/87da825f23163c3dca64d17f959489fba41544f8))
+* **pr:** gate lift and merge on the base's required checks ([#2840](https://github.com/erclx/canon/issues/2840)) ([7758c02](https://github.com/erclx/canon/commit/7758c02389a0ace567ac753c59bb9baaf1c9e51d))
+* **pr:** show why a local link or reel is missing on evidence ([#2836](https://github.com/erclx/canon/issues/2836)) ([370f0de](https://github.com/erclx/canon/commit/370f0de3dd5f2bf2c79a0b91d4173bc0ed5c1a7a))
+* **skills:** add proposal-critique to question a proposal before build ([#2824](https://github.com/erclx/canon/issues/2824)) ([dd6e28d](https://github.com/erclx/canon/commit/dd6e28d4accde639ac5c1d7653069c44f71176ad))
+* **skills:** audit search-craft bullets against a source ledger ([#2832](https://github.com/erclx/canon/issues/2832)) ([acd3cea](https://github.com/erclx/canon/commit/acd3ceaacf5747e2f5e78963e4cf3267ee56cb9b))
+* **skills:** audit write-human bullets against a source ledger ([#2833](https://github.com/erclx/canon/issues/2833)) ([e78d299](https://github.com/erclx/canon/commit/e78d299f01ea470b26c61cb3ddb3246ab882502b))
+* **skills:** check outside tools and add a canon-media bundle ([#2837](https://github.com/erclx/canon/issues/2837)) ([f32e7c3](https://github.com/erclx/canon/commit/f32e7c3ea636d6b8e84debc70d6afe1f40430536))
+* **skills:** ledger every systematic-debugging step against a source ([#2835](https://github.com/erclx/canon/issues/2835)) ([e225b98](https://github.com/erclx/canon/commit/e225b9810d830e49276b9049d1c26f05feaac1f0))
+* **skills:** source each build-in-slices bullet in a ledger ([#2841](https://github.com/erclx/canon/issues/2841)) ([8651b8e](https://github.com/erclx/canon/commit/8651b8ef1e2a0517c7dad0792090dab5cafbfe91))
+* **skills:** source test-first bullets in a per-bullet ledger ([#2830](https://github.com/erclx/canon/issues/2830)) ([8d61a40](https://github.com/erclx/canon/commit/8d61a40d9e0a5faf70c3e9c753b965cea1f245d0))
+
+
+### Bug Fixes
+
+* **hooks:** track plan-guard.sh as executable and test hook modes ([#2826](https://github.com/erclx/canon/issues/2826)) ([d1ac3f5](https://github.com/erclx/canon/commit/d1ac3f543c7b1cad038871f5acaa71cb9889085c))
+
 ## [5.73.0](https://github.com/erclx/canon/compare/v5.72.1...v5.73.0) (2026-10-28)
 
 
