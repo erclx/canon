@@ -61,7 +61,25 @@ When this happens, stop fixing and ask the user whether the underlying pattern s
 
 ## When investigation reveals no root cause
 
-Rarely, an issue is genuinely environmental, timing-dependent, or external. In that case:
+Rarely, an issue is genuinely environmental, timing-dependent, or external. The first move depends on whether the cause was found.
+
+### The cause is found and external
+
+A degraded mirror or a throttled service is a cause, not an absence of one. Ask three questions before naming any handling:
+
+1. Can the handling route around the dependency, such as through another source or by dropping the call?
+2. Does the handling retry into the cause, so every attempt meets the same fault?
+3. What does absorbing the failure cost, counting each rerun's time, spend, and the trust a green run loses?
+
+Then:
+
+1. Document what was investigated and ruled out.
+2. Pick the handling against those answers. Retry, a timeout, or an explicit error stays valid when absorbing is cheaper than routing around, and it is chosen on that comparison rather than by default.
+3. Add logging so the next occurrence can be investigated.
+
+### No cause is found
+
+When the investigation ends without a cause, handle the failure and keep the record:
 
 1. Document what was investigated and ruled out.
 2. Implement appropriate handling: retry, timeout, explicit error.
