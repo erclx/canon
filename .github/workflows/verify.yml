@@ -52,12 +52,41 @@ jobs:
       - name: Verify install
         run: bun run check:install
 
+  changes:
+    name: 🔍 Changes
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.detect.outputs.code }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          # The merge commit and its parents, so the base sha resolves.
+          fetch-depth: 2
+
+      - name: Detect Code Changes
+        id: detect
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: bash scripts/ci/docs-only.sh "$BASE_SHA"
+
   # The unit suite alone, since lint, types, format, shell, build, and browser
   # results do not differ by platform. Reason in canon/context/development/ci.md
   macos-unit-tests:
     name: 🍎 macOS Unit Tests
     runs-on: macos-latest
-    if: github.event_name != 'schedule'
+    needs: changes
+    # The ruleset requires this check, so a Markdown-only pull request skips it
+    # by condition, which reports success, rather than by a path filter, which
+    # never reports. !cancelled() lets it run when changes is skipped on a push
+    # or fails, so only a detector that succeeded can skip the tests.
+    if: >-
+      !cancelled() && github.event_name != 'schedule' &&
+      !(github.event_name == 'pull_request' &&
+      needs.changes.result == 'success' &&
+      needs.changes.outputs.code == 'false')
     steps:
       - name: Checkout
         uses: actions/checkout@v7
