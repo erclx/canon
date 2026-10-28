@@ -1137,6 +1137,26 @@ function findBash4Constructs(dir: string): string[] {
     )
 }
 
+// A hook committed as 100644 prints a PreToolUse permission error on every
+// call and never runs, and no test above notices because they invoke the file
+// through bash. The index is the record, since a checkout can mask the mode.
+describe('hook file modes', () => {
+  it.each(TREES)('should track every hook in $label as executable', ({ label }) => {
+    const entries = execFileSync('git', ['ls-files', '-s', '--', `${label}/*.sh`], {
+      cwd: ROOT,
+      encoding: 'utf8',
+    })
+      .split('\n')
+      .filter(Boolean)
+    const notExecutable = entries
+      .filter((line) => !line.startsWith('100755 '))
+      .map((line) => line.split('\t')[1])
+
+    expect(entries.length).toBeGreaterThan(0)
+    expect(notExecutable).toEqual([])
+  })
+})
+
 describe('bash 3.2 compatibility', () => {
   it.each(TREES)('should use no bash-4-only construct in $label', ({ dir }) => {
     expect(findBash4Constructs(dir)).toEqual([])
