@@ -126,6 +126,9 @@ export default scenario({
         '         with clip.mp4, log.json, camera.json, and the still.jpg the verb wrote, read per beat, no tracked',
       )
       ctx.log.info('         file changed, and the throwaway copy removed')
+      ctx.log.info(
+        '         Any dry run lands in scratch/ and nothing composed reads from it',
+      )
     },
   },
 })
