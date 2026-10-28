@@ -2047,259 +2047,251 @@ describe('plan-guard.sh firing conditions', () => {
 
   const heredoc = (path: string): string => `cat > ${path} <<'EOF'\n# Plan\nEOF`
 
-  for (const tree of TREES) {
-    const hook = join(tree.dir, 'plan-guard.sh')
+  // The hook lives in this repository alone, as memory-guard.sh does, so the
+  // seed tree carries no copy to drive.
+  const hook = join(ROOT, '.claude/hooks/plan-guard.sh')
 
-    describe(tree.label, () => {
-      it.each([
-        ['a heredoc', heredoc('.canon/plans/feature-new.md')],
-        ['a tee', 'echo x | tee -a .canon/plans/feature-new.md'],
-        ['a cp', 'cp /tmp/draft.md .canon/plans/feature-new.md'],
-        [
-          'a heredoc onto a main-root variable',
-          heredoc('"$root/.canon/plans/feature-new.md"'),
-        ],
-      ])(
-        'should block a new plan written by %s with no invocation',
-        async (_, command) => {
-          const project = planProject()
+  it.each([
+    ['a heredoc', heredoc('.canon/plans/feature-new.md')],
+    ['a tee', 'echo x | tee -a .canon/plans/feature-new.md'],
+    ['a cp', 'cp /tmp/draft.md .canon/plans/feature-new.md'],
+    [
+      'a heredoc onto a main-root variable',
+      heredoc('"$root/.canon/plans/feature-new.md"'),
+    ],
+  ])(
+    'should block a new plan written by %s with no invocation',
+    async (_, command) => {
+      const project = planProject()
 
-          const result = await run(hook, shellIn(project, command))
+      const result = await run(hook, shellIn(project, command))
 
-          expect(result.stderr).toContain('.canon/plans/feature-new.md')
-          expect(result.stderr).toContain('Invoke the canon:plan-feature skill')
-          expect(result.code).toBe(2)
+      expect(result.stderr).toContain('.canon/plans/feature-new.md')
+      expect(result.stderr).toContain('Invoke the canon:plan-feature skill')
+      expect(result.code).toBe(2)
+    },
+  )
+
+  it('should block a Write creating a new plan with no invocation', async () => {
+    const project = planProject()
+
+    const result = await run(
+      hook,
+      payloadFor({
+        cwd: project.root,
+        session_id: 'plan-guard-session',
+        tool_input: {
+          file_path: join(project.root, '.canon/plans/feature-new.md'),
         },
+        tool_name: 'Write',
+        transcript_path: project.transcript,
+      }),
+    )
+
+    expect(result.code).toBe(2)
+  })
+
+  it('should block a second new plan on one invocation', async () => {
+    const project = planProject(`${SKILL_CALL}\n`)
+    await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
+
+    const result = await run(
+      hook,
+      shellIn(project, heredoc('.canon/plans/feature-b.md')),
+    )
+
+    expect(result.stderr).toContain('spent on an earlier new plan')
+    expect(result.code).toBe(2)
+  })
+
+  it('should pass the second new plan once a second invocation follows', async () => {
+    const project = planProject(`${SKILL_CALL}\n`)
+    await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
+    writeFileSync(project.transcript, `${SKILL_CALL}\n${SKILL_CALL}\n`)
+
+    const result = await run(
+      hook,
+      shellIn(project, heredoc('.canon/plans/feature-b.md')),
+    )
+
+    expect(result.code).toBe(0)
+  })
+
+  // A PreToolUse pass is not a landed write, so the retry after a refused
+  // heredoc and the main-root `cp` after a worktree `Write` both reach the
+  // guard a second time for one plan.
+  it('should pass a second write onto the plan an invocation already licensed', async () => {
+    const project = planProject(`${SKILL_CALL}\n`)
+    await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
+
+    const result = await run(
+      hook,
+      shellIn(project, "printf '%s\\n' '# Plan' > .canon/plans/feature-a.md"),
+    )
+
+    expect(result.code).toBe(0)
+  })
+
+  it('should pass the main-root cp after a worktree Write of the same plan', async () => {
+    const project = planProject(`${SKILL_CALL}\n`)
+    await run(
+      hook,
+      payloadFor({
+        cwd: project.root,
+        session_id: 'plan-guard-session',
+        tool_input: {
+          file_path: join(fixture, 'elsewhere/.canon/plans/feature-a.md'),
+        },
+        tool_name: 'Write',
+        transcript_path: project.transcript,
+      }),
+    )
+
+    const result = await run(
+      hook,
+      shellIn(
+        project,
+        'cp /wt/.canon/plans/feature-a.md .canon/plans/feature-a.md',
+      ),
+    )
+
+    expect(result.code).toBe(0)
+  })
+
+  it.each([
+    ['an auto-ship Skill call', autoShipCall('.canon/plans/feature-new.md')],
+    [
+      'a typed auto-ship command',
+      autoShipTyped(
+        '.canon/plans/feature-new.md\nWrite the plan below verbatim',
+      ),
+    ],
+  ])(
+    'should pass the plan %s names with no plan-feature invocation',
+    async (_, line) => {
+      const project = planProject(`${line}\n`)
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-new.md')),
       )
 
-      it('should block a Write creating a new plan with no invocation', async () => {
-        const project = planProject()
+      expect(result.code).toBe(0)
+    },
+  )
 
-        const result = await run(
-          hook,
-          payloadFor({
-            cwd: project.root,
-            session_id: 'plan-guard-session',
-            tool_input: {
-              file_path: join(project.root, '.canon/plans/feature-new.md'),
-            },
-            tool_name: 'Write',
-            transcript_path: project.transcript,
-          }),
-        )
+  it('should block a plan other than the one auto-ship names', async () => {
+    const project = planProject(
+      `${autoShipCall('.canon/plans/feature-new.md')}\n`,
+    )
 
-        expect(result.code).toBe(2)
-      })
+    const result = await run(
+      hook,
+      shellIn(project, heredoc('.canon/plans/feature-other.md')),
+    )
 
-      it('should block a second new plan on one invocation', async () => {
-        const project = planProject(`${SKILL_CALL}\n`)
-        await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
+    expect(result.code).toBe(2)
+  })
 
-        const result = await run(
-          hook,
-          shellIn(project, heredoc('.canon/plans/feature-b.md')),
-        )
+  it.each([
+    ['a Skill tool call', SKILL_CALL],
+    ['a typed slash command', SLASH_COMMAND],
+  ])('should pass a new plan after %s', async (_, line) => {
+    const project = planProject(`${line}\n`)
 
-        expect(result.stderr).toContain('spent on an earlier new plan')
-        expect(result.code).toBe(2)
-      })
+    const result = await run(
+      hook,
+      shellIn(project, heredoc('.canon/plans/feature-new.md')),
+    )
 
-      it('should pass the second new plan once a second invocation follows', async () => {
-        const project = planProject(`${SKILL_CALL}\n`)
-        await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
-        writeFileSync(project.transcript, `${SKILL_CALL}\n${SKILL_CALL}\n`)
+    expect(result.stderr).toBe('')
+    expect(result.code).toBe(0)
+  })
 
-        const result = await run(
-          hook,
-          shellIn(project, heredoc('.canon/plans/feature-b.md')),
-        )
+  it.each([
+    [
+      'a heredoc overwrite of an existing plan',
+      heredoc('.canon/plans/feature-old.md'),
+    ],
+    ['a read of an existing plan', 'cat .canon/plans/feature-old.md'],
+    [
+      'an archive move',
+      'mv .canon/plans/feature-old.md .canon/plans/archive/feature-old.md',
+    ],
+    [
+      'a write under the archive',
+      heredoc('.canon/plans/archive/feature-new.md'),
+    ],
+    [
+      'a verb naming a new plan',
+      'canon tasks plan-link .canon/plans/feature-new.md',
+    ],
+    [
+      'a heredoc body quoting a plan path',
+      "cat > notes.md <<'EOF'\nsee > .canon/plans/feature-new.md\nEOF",
+    ],
+    [
+      'a redirect inside a quoted argument',
+      'git commit -m "write > .canon/plans/feature-new.md"',
+    ],
+  ])('should pass %s with no invocation', async (_, command) => {
+    const project = planProject()
 
-        expect(result.code).toBe(0)
-      })
+    const result = await run(hook, shellIn(project, command))
 
-      // A PreToolUse pass is not a landed write, so the retry after a refused
-      // heredoc and the main-root `cp` after a worktree `Write` both reach the
-      // guard a second time for one plan.
-      it('should pass a second write onto the plan an invocation already licensed', async () => {
-        const project = planProject(`${SKILL_CALL}\n`)
-        await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
+    expect(result.stderr).toBe('')
+    expect(result.code).toBe(0)
+  })
 
-        const result = await run(
-          hook,
-          shellIn(
-            project,
-            "printf '%s\\n' '# Plan' > .canon/plans/feature-a.md",
-          ),
-        )
+  it('should pass an Edit of an existing plan with no invocation', async () => {
+    const project = planProject()
 
-        expect(result.code).toBe(0)
-      })
-
-      it('should pass the main-root cp after a worktree Write of the same plan', async () => {
-        const project = planProject(`${SKILL_CALL}\n`)
-        await run(
-          hook,
-          payloadFor({
-            cwd: project.root,
-            session_id: 'plan-guard-session',
-            tool_input: {
-              file_path: join(fixture, 'elsewhere/.canon/plans/feature-a.md'),
-            },
-            tool_name: 'Write',
-            transcript_path: project.transcript,
-          }),
-        )
-
-        const result = await run(
-          hook,
-          shellIn(
-            project,
-            'cp /wt/.canon/plans/feature-a.md .canon/plans/feature-a.md',
-          ),
-        )
-
-        expect(result.code).toBe(0)
-      })
-
-      it.each([
-        [
-          'an auto-ship Skill call',
-          autoShipCall('.canon/plans/feature-new.md'),
-        ],
-        [
-          'a typed auto-ship command',
-          autoShipTyped(
-            '.canon/plans/feature-new.md\nWrite the plan below verbatim',
-          ),
-        ],
-      ])(
-        'should pass the plan %s names with no plan-feature invocation',
-        async (_, line) => {
-          const project = planProject(`${line}\n`)
-
-          const result = await run(
-            hook,
-            shellIn(project, heredoc('.canon/plans/feature-new.md')),
-          )
-
-          expect(result.code).toBe(0)
+    const result = await run(
+      hook,
+      payloadFor({
+        cwd: project.root,
+        session_id: 'plan-guard-session',
+        tool_input: {
+          file_path: join(project.root, '.canon/plans/feature-old.md'),
         },
-      )
+        tool_name: 'Edit',
+        transcript_path: project.transcript,
+      }),
+    )
 
-      it('should block a plan other than the one auto-ship names', async () => {
-        const project = planProject(
-          `${autoShipCall('.canon/plans/feature-new.md')}\n`,
-        )
+    expect(result.code).toBe(0)
+  })
 
-        const result = await run(
-          hook,
-          shellIn(project, heredoc('.canon/plans/feature-other.md')),
-        )
+  it.each([
+    ['no session id', { session_id: undefined }],
+    ['no transcript path', { transcript_path: undefined }],
+    ['an unreadable transcript', { transcript_path: '/nowhere/t.jsonl' }],
+  ])('should fail open on %s', async (_, override) => {
+    const project = planProject()
+    const fields = {
+      ...(JSON.parse(
+        shellIn(project, heredoc('.canon/plans/feature-new.md')),
+      ) as Record<string, unknown>),
+      ...override,
+    }
 
-        expect(result.code).toBe(2)
-      })
+    const result = await run(hook, payloadFor(fields))
 
-      it.each([
-        ['a Skill tool call', SKILL_CALL],
-        ['a typed slash command', SLASH_COMMAND],
-      ])('should pass a new plan after %s', async (_, line) => {
-        const project = planProject(`${line}\n`)
+    expect(result.code).toBe(0)
+  })
 
-        const result = await run(
-          hook,
-          shellIn(project, heredoc('.canon/plans/feature-new.md')),
-        )
+  it('should dismiss a command naming no plan path without spawning jq', async () => {
+    const project = planProject()
 
-        expect(result.stderr).toBe('')
-        expect(result.code).toBe(0)
-      })
+    const result = await run(
+      hook,
+      shellIn(project, 'echo x > notes.md'),
+      join(fixture, 'bin-jq-trap'),
+    )
 
-      it.each([
-        [
-          'a heredoc overwrite of an existing plan',
-          heredoc('.canon/plans/feature-old.md'),
-        ],
-        ['a read of an existing plan', 'cat .canon/plans/feature-old.md'],
-        [
-          'an archive move',
-          'mv .canon/plans/feature-old.md .canon/plans/archive/feature-old.md',
-        ],
-        [
-          'a write under the archive',
-          heredoc('.canon/plans/archive/feature-new.md'),
-        ],
-        [
-          'a verb naming a new plan',
-          'canon tasks plan-link .canon/plans/feature-new.md',
-        ],
-        [
-          'a heredoc body quoting a plan path',
-          "cat > notes.md <<'EOF'\nsee > .canon/plans/feature-new.md\nEOF",
-        ],
-        [
-          'a redirect inside a quoted argument',
-          'git commit -m "write > .canon/plans/feature-new.md"',
-        ],
-      ])('should pass %s with no invocation', async (_, command) => {
-        const project = planProject()
-
-        const result = await run(hook, shellIn(project, command))
-
-        expect(result.stderr).toBe('')
-        expect(result.code).toBe(0)
-      })
-
-      it('should pass an Edit of an existing plan with no invocation', async () => {
-        const project = planProject()
-
-        const result = await run(
-          hook,
-          payloadFor({
-            cwd: project.root,
-            session_id: 'plan-guard-session',
-            tool_input: {
-              file_path: join(project.root, '.canon/plans/feature-old.md'),
-            },
-            tool_name: 'Edit',
-            transcript_path: project.transcript,
-          }),
-        )
-
-        expect(result.code).toBe(0)
-      })
-
-      it.each([
-        ['no session id', { session_id: undefined }],
-        ['no transcript path', { transcript_path: undefined }],
-        ['an unreadable transcript', { transcript_path: '/nowhere/t.jsonl' }],
-      ])('should fail open on %s', async (_, override) => {
-        const project = planProject()
-        const fields = {
-          ...(JSON.parse(
-            shellIn(project, heredoc('.canon/plans/feature-new.md')),
-          ) as Record<string, unknown>),
-          ...override,
-        }
-
-        const result = await run(hook, payloadFor(fields))
-
-        expect(result.code).toBe(0)
-      })
-
-      it('should dismiss a command naming no plan path without spawning jq', async () => {
-        const project = planProject()
-
-        const result = await run(
-          hook,
-          shellIn(project, 'echo x > notes.md'),
-          join(fixture, 'bin-jq-trap'),
-        )
-
-        expect(result.stderr).toBe('')
-        expect(result.code).toBe(0)
-      })
-    })
-  }
+    expect(result.stderr).toBe('')
+    expect(result.code).toBe(0)
+  })
 })
 
 // Each trigger reaches the session by a different channel, so the cases
