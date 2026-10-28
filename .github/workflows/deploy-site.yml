@@ -1,23 +1,20 @@
 name: Deploy Site
-# canon-no-seed: builds the landing page from this checkout's own catalogs and publishes it to this project's Cloudflare Pages site at canon.erclx.dev. Seeding it as-is would have a target deploy this repository's page under this repository's domain.
+# canon-no-seed: builds the landing page from this checkout and publishes it to this project's Cloudflare Pages site at canon.erclx.dev. Seeding it as-is would have a target deploy this repository's page under this repository's domain.
 
 on:
   push:
     branches:
       - main
     paths:
-      # A page whose numbers are read at build time goes stale when a catalog
-      # moves, not only when web/ is edited, so the catalogs it reads are on
-      # this list beside the page itself.
+      # The page builds from web/, assets/, and src/design/ alone and reads no
+      # catalog, so an edit to the skills, rules, or their index changes no
+      # byte of it. Add a path back in the change that makes the page read a
+      # file outside these globs.
       - 'web/**'
       - 'assets/**'
       # Pull request screenshots, which the page never reads.
       - '!assets/evidence/**'
       - 'src/design/**'
-      - 'governance/rules/**'
-      - 'standards/**'
-      - 'claude/skills/**'
-      - 'docs/workflow/skill-map*.md'
       - '.github/workflows/deploy-site.yml'
   workflow_dispatch:
   # A closed pull request runs only the cleanup job below, which deletes the

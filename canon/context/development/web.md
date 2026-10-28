@@ -46,7 +46,9 @@ This repository's self-portrait for a visitor who never opens the source, where 
 Holds the two workflows that build and check the page.
 
 - `deploy-site.yml` publishes the page, and `pr-visual-checks.yml` runs the e2e job and a capture job that reports into the job summary and commits nothing
-- The two files carry literal copies of the same nine path globs, which the `visual-path-globs` stage compares, and the visual copy adds `tooling/web/configs/e2e/**` through `VISUAL_ONLY_GLOBS`
+- The two files carry literal copies of the same path globs, which the `visual-path-globs` stage compares, and the visual copy adds `tooling/web/configs/e2e/**` through `VISUAL_ONLY_GLOBS`
+- Both lists hold `web/**`, `assets/**` minus `assets/evidence/**`, `src/design/**`, and the deploy workflow file
+- The catalogs (`claude/skills/`, `governance/rules/`, the skill map) are out of both lists because the page reads none at build time, so add one back in the change that makes it read one
 
 ### Other folders
 

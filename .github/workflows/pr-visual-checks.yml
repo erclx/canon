@@ -6,11 +6,12 @@ name: PR Visual Checks
 on:
   pull_request:
     paths:
-      # Mirrors deploy-site.yml's own list. A page whose numbers are read at
-      # build time goes stale when a catalog moves, not only when web/ is
-      # edited, so the catalogs it reads are on this list beside the page
-      # itself. Question 2 in .canon/plans/archive/feature-render-visibility.md
-      # names the two literal copies rather than a single shared source.
+      # Mirrors deploy-site.yml's own list. The page builds from web/, assets/,
+      # and src/design/ alone and reads no catalog, so an edit to the skills,
+      # rules, or their index changes no byte of it. Add a path back in the
+      # change that makes the page read a file outside these globs. Question 2
+      # in .canon/plans/archive/feature-render-visibility.md names
+      # the two literal copies rather than a single shared source.
       # The e2e harness entry has no deploy counterpart: a harness edit changes
       # no byte of the built site, so it reports the capture and never deploys.
       # VISUAL_ONLY_GLOBS in src/gate/measures.ts declares it to the gate.
@@ -19,10 +20,6 @@ on:
       # Pull request screenshots, which the page never reads.
       - '!assets/evidence/**'
       - 'src/design/**'
-      - 'governance/rules/**'
-      - 'standards/**'
-      - 'claude/skills/**'
-      - 'docs/workflow/skill-map*.md'
       - '.github/workflows/deploy-site.yml'
       - 'tooling/web/configs/e2e/**'
   workflow_dispatch:
