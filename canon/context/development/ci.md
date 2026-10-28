@@ -25,9 +25,9 @@ Owns the workflows in `.github/workflows/` that verify a pull request, scan its 
 
 Runs `🛡️ Static Checks` on Linux and `🍎 macOS Unit Tests` beside it, neither on the weekly cron. The macOS job runs `bun run test` alone, since lint, types, format, shell, build, and browser results do not differ by platform.
 
+- The macOS job never blocks a merge, since the ruleset requires `🛡️ Static Checks` alone and `canon pr lift` and `canon pr merge` gate by the required checks, naming a failing macOS run `advisory`
 - A new push to a pull request cancels its older run. Every other event keys its group on the commit, so `main`, `merge_group`, and the cron never cancel.
-- The Pin Stock Bash step links `/bin/bash` 3.2 first on `PATH`, so every test spawning `bash` runs on what a Mac ships
-- The next step fails the job when `bash` reports a major version other than 3, so a missed pin cannot pass on Homebrew bash
+- The Pin Stock Bash step links `/bin/bash` 3.2 first on `PATH`, and the next step fails on any other major version, so every test spawning `bash` runs on what a Mac ships
 - A test assuming `shellcheck`, `shfmt`, `claude`, or `/proc` skips on macOS without it, and the job never gains an install step
 - A macOS temp root under `/var` is a symlink to `/private/var`, so a test comparing it with a path git or a child reports wraps `mkdtempSync` in `realpathSync`
 
@@ -35,7 +35,7 @@ Runs `🛡️ Static Checks` on Linux and `🍎 macOS Unit Tests` beside it, nei
 
 A pull request changing only `.md` files skips `🍎 macOS Unit Tests`, which is the slowest check. The `🔍 Changes` job runs `scripts/ci/docs-only.sh` against the pull request's base and outputs `code=false` only when every changed file ends in `.md`.
 
-- The skip lives in the job's `if:` rather than a path filter, since the ruleset requires the check and a skipped workflow never reports, while a job skipped by its condition reports success
+- The skip lives in the job's `if:` rather than a path filter, since a job skipped by its condition reports success and a skipped workflow never reports, which would strand a required check
 - `!cancelled()` keeps the job running when `🔍 Changes` is skipped on a push or fails, so only a detector that succeeded can skip the tests
 - The script splits renames and treats an empty or failed diff as code, so a `.ts` file renamed to `.md` still runs the tests
 - Every push to `main` runs the job, so a Markdown file a macOS test reads is caught at most one merge late, and `🛡️ Static Checks` runs the full suite on every pull request
@@ -78,6 +78,6 @@ The release configuration, the manifests, and the install check sit beside the w
 
 - `no checks reported on the '<branch>' branch` usually means a merge conflict, since such a branch has no merge ref to run on. Read `gh pr view --json mergeable,mergeStateStatus` and rebase.
 - A green `🛡️ Static Checks` tested `refs/pull/<n>/merge` as of the last push. No merge queue exists, so a sibling merge leaves it stale until the poll reads `STALE`.
-- The ruleset requires `🛡️ Static Checks` and `🍎 macOS Unit Tests` by name, so renaming either strands branch protection
+- The ruleset requires `🛡️ Static Checks` by name, so renaming it strands branch protection and leaves lift and merge waiting on a check no run reports
 - The runner installs no browser, so each `*.e2e.test.ts` skips itself and a green run does not show it ran. Verify those locally.
 - The `merge_group` trigger is inert, since a `merge_queue` rule returns `422` on a user-owned repository until a move to an organization

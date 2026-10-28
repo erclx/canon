@@ -1,4 +1,4 @@
-import type { ChecksGate } from '@/pr/lift'
+import { advisoryOf, type ChecksGate } from '@/pr/lift'
 import { readSection } from '@/pr/paths'
 import { UI_PASS_MARKER } from '@/pr/tick'
 
@@ -67,6 +67,8 @@ export interface MergeRecord {
   readonly description?: string
   /** The squash commit, present only on a merge. */
   readonly sha?: string
+  /** Failing checks the base does not require, which the merge went past. */
+  readonly advisory?: readonly string[]
 }
 
 export type Composed =
@@ -230,8 +232,15 @@ export async function merge(
     )
   }
 
-  if (opts.isDryRun)
-    return { reason: 'dry-run', isOk: true, number, ...message }
+  if (opts.isDryRun) {
+    return {
+      reason: 'dry-run',
+      isOk: true,
+      number,
+      ...message,
+      ...advisoryOf(checks),
+    }
+  }
 
   const outcome = await api.putMerge({ ...message, sha: pull.head })
   if (outcome.kind === 'merged') {
@@ -241,6 +250,7 @@ export async function merge(
       number,
       ...message,
       sha: outcome.sha,
+      ...advisoryOf(checks),
     }
   }
   return refused(

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { collapseChecks, withMergeState } from '@/pr/checks'
+import { collapseChecks, requiredChecks, withMergeState } from '@/pr/checks'
 
 const TIP = 'a0cf1a39aa1d0d510e16360e98a18129a8fddc78'
 const PRIOR = '5653721cbb1d0d510e16360e98a18129a8fddc78'
@@ -278,5 +278,190 @@ describe('withMergeState', () => {
     )
 
     expect(reading).toMatchObject({ state: 'pending', conflicted: true })
+  })
+})
+
+describe('collapseChecks over a required set', () => {
+  const STATIC = '🛡️ Static Checks'
+  const MAC = '🍎 macOS Unit Tests'
+  const required = new Set([STATIC])
+  const staticPassed = {
+    head_sha: TIP,
+    name: STATIC,
+    status: 'completed',
+    conclusion: 'success',
+  }
+
+  it('should read passing while an advisory run on the tip is still going', () => {
+    const reading = collapseChecks(
+      TIP,
+      {
+        total_count: 2,
+        check_runs: [
+          staticPassed,
+          { head_sha: TIP, name: MAC, status: 'in_progress', conclusion: null },
+        ],
+      },
+      required,
+    )
+
+    expect(reading).toMatchObject({ state: 'passing', advisory: [] })
+  })
+
+  it('should name a failing advisory run without failing the tip', () => {
+    const reading = collapseChecks(
+      TIP,
+      {
+        total_count: 2,
+        check_runs: [
+          staticPassed,
+          {
+            head_sha: TIP,
+            name: MAC,
+            status: 'completed',
+            conclusion: 'failure',
+          },
+        ],
+      },
+      required,
+    )
+
+    expect(reading).toMatchObject({ state: 'passing', advisory: [MAC] })
+  })
+
+  it('should keep the foreign-run guard ahead of the required set', () => {
+    const reading = collapseChecks(
+      TIP,
+      {
+        total_count: 2,
+        check_runs: [
+          staticPassed,
+          {
+            head_sha: PRIOR,
+            name: MAC,
+            status: 'completed',
+            conclusion: 'success',
+          },
+        ],
+      },
+      required,
+    )
+
+    expect(reading).toMatchObject({ state: 'pending', advisory: [] })
+  })
+
+  it('should carry no advisory field when no required set was read', () => {
+    const reading = collapseChecks(TIP, {
+      total_count: 1,
+      check_runs: [
+        {
+          head_sha: TIP,
+          name: MAC,
+          status: 'completed',
+          conclusion: 'failure',
+        },
+      ],
+    })
+
+    expect(reading.state).toBe('failing')
+    expect(reading).not.toHaveProperty('advisory')
+  })
+})
+
+describe('collapseChecks over a required commit status', () => {
+  const STATIC = '🛡️ Static Checks'
+  const DEPLOY = 'vercel'
+  const required = new Set([STATIC, DEPLOY])
+  const listing = {
+    total_count: 1,
+    check_runs: [
+      {
+        head_sha: TIP,
+        name: STATIC,
+        status: 'completed',
+        conclusion: 'success',
+      },
+    ],
+  }
+
+  it('should read passing when the required status succeeded beside the run', () => {
+    const reading = collapseChecks(TIP, listing, required, [
+      { context: DEPLOY, state: 'success' },
+    ])
+
+    expect(reading.state).toBe('passing')
+  })
+
+  it('should read pending while the required status is pending', () => {
+    const reading = collapseChecks(TIP, listing, required, [
+      { context: DEPLOY, state: 'pending' },
+    ])
+
+    expect(reading.state).toBe('pending')
+  })
+
+  it('should read failing when the required status errored', () => {
+    const reading = collapseChecks(TIP, listing, required, [
+      { context: DEPLOY, state: 'error' },
+    ])
+
+    expect(reading.state).toBe('failing')
+  })
+
+  it('should read passing off statuses alone when the tip has no check run', () => {
+    const reading = collapseChecks(
+      TIP,
+      { total_count: 0, check_runs: [] },
+      new Set([DEPLOY]),
+      [{ context: DEPLOY, state: 'success' }],
+    )
+
+    expect(reading.state).toBe('passing')
+  })
+
+  // The fallback is the verbs' behavior before the rules were read, which
+  // never saw a commit status, so a status cannot start failing it.
+  it('should leave statuses out when no required set was read', () => {
+    const reading = collapseChecks(TIP, listing, undefined, [
+      { context: DEPLOY, state: 'failure' },
+    ])
+
+    expect(reading.state).toBe('passing')
+  })
+
+  // A repository with no rulesets answers an empty rule list, which is the
+  // same fallback as an unread one, so an optional status still stays out.
+  it('should leave statuses out when the rules require nothing', () => {
+    const reading = collapseChecks(TIP, listing, new Set(), [
+      { context: 'codecov/patch', state: 'failure' },
+    ])
+
+    expect(reading.state).toBe('passing')
+  })
+})
+
+describe('requiredChecks', () => {
+  it('should read the contexts of every required status checks rule', () => {
+    const rules = [
+      { type: 'deletion' },
+      {
+        type: 'required_status_checks',
+        parameters: {
+          required_status_checks: [
+            { context: '🛡️ Static Checks', integration_id: 15368 },
+          ],
+        },
+      },
+    ]
+
+    expect(requiredChecks(rules)).toEqual(new Set(['🛡️ Static Checks']))
+  })
+
+  it('should read an empty set when no rule requires a check', () => {
+    expect(requiredChecks([{ type: 'deletion' }])).toEqual(new Set())
+  })
+
+  it('should read undefined when the answer is not a rule list', () => {
+    expect(requiredChecks({ message: 'Not Found' })).toBeUndefined()
   })
 })
