@@ -20,7 +20,7 @@ A drive puts a built app in front of the operator and the session together, and 
 
 ## Write scope
 
-- Write inside `.canon/intake/<nn>-<slug>/` and the scratch folder `.canon/tmp/app-drive/<slug>/` at the main worktree root, resolved the way `session-worktree` does
+- Write inside `.canon/intake/<nn>-<slug>/`, the scratch folder `.canon/tmp/app-drive/<slug>/`, and the config's `proposals` folder at the main worktree root, resolved the way `session-worktree` does
 - The one exception is the throwaway worktree outside the repository, which Step 1 adds and the close removes. It is not entered with `EnterWorktree`, and no branch is created.
 - Never write `canon/REQUIREMENTS.md`, a fixture, or any other tracked file, a requirements diff included. Draft that diff as text inside the intake item.
 - Send each intake file out as a heredoc, the main-root route `session-worktree` states
@@ -66,13 +66,28 @@ Append each finding to the drive log as it happens, never batched at the end, si
 - Write an operator's decision under the finding it settles, even when later findings already sit below it, since it is the one edit above the end of the log
 - Write `drive.json` into the intake folder in the shape `drive-record.md` sets, with one entry per goal
 
+### Drawing a decided finding
+
+Draw every finding the operator decides before writing its `Decision (operator)` line, whether it is a bug fix, a new feature, or a taste call. A planner reading one line of text cannot see what the operator saw, and drawing the options settles questions the text hides.
+
+1. Draw a now frame and one fix frame per option inside the throwaway copy, on a canvas the app offers or a scratch route added to it. Name frames by the log's finding number, per `drive-record.md`.
+2. Screenshot the frames side by side to `evidence/<nn>-options.png` and open it. Put the options to the operator through the structured question surface, shaped as `design-pick`'s Step 4 shapes a pick.
+3. Copy the mock source into `evidence/mocks/<surface>/`, then write `Drawn` citing both paths and record the pick as the decision.
+
+A few cases bend those steps without lifting them.
+
+- When the copy cannot host a mock, lift the frames into standalone HTML in the config's `proposals` folder, and still copy the source into `evidence/mocks/`, since the check reads `evidence/` alone
+- Write `Drawn: skipped, <reason>` only for a change with nothing visible, such as an exit code or a file format
+- Never write a mock into a tracked path, the project's design board, or `canon/design/`. An accepted design reaches the board through `design-pick` or `design-record` once its fix ships.
+- Leave an undecided taste finding undrawn here, since Step 4 hands it to `design-pick`
+
 ## Step 4: sort
 
 Give every finding one kind, and keep the severity it was logged with.
 
 - **Bug.** The app breaks a goal or its own contract. It becomes an item whose fix a worker can build, with the repro and the evidence path. `systematic-debugging` owns finding its cause.
 - **Requirements conflict.** The app does what the record says and the operator wants otherwise, or the record contradicts itself. The item carries the drafted diff as text, and the operator decides.
-- **Taste.** The call is settled by looking. The item carries a now frame and a fix frame for a `design-pick` pass, written to the config's `proposals` folder.
+- **Taste.** The call is settled by looking. An undecided one carries a now frame and a fix frame for a `design-pick` pass in the config's `proposals` folder. A decided one carries what Step 3 drew.
 
 ## Step 5: file
 
@@ -86,7 +101,7 @@ Read `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md` before writing a 
 
 Close only on the operator's word, while the app stays up for as long as they keep talking.
 
-1. Stop the server and remove the worktree per `isolate.md`.
+1. Confirm every drawn finding's mock source sits under `evidence/mocks/`, then stop the server and remove the worktree per `isolate.md`.
 2. Run `canon intake drive-check <slug> --json`, and on `failed` fix what each finding list names in the folder and re-run.
 3. Report each path under `changed` to the operator and never revert it, since only they know which to keep.
 4. Run `canon records validate intake <slug>` and fix each `structure` entry it names.
@@ -119,5 +134,5 @@ Next: /plan-intake-answer to answer the You: slots from here, then /task-board t
 - The controller messages, the talk clause, and the session's end: `role-planner`
 - The intake folder's shape and its routing test: `plan-intake`
 - The cause of a bug: `systematic-debugging`
-- The pick between a now frame and a fix frame: `design-pick`
+- The pick between a now frame and a fix frame for an undecided taste finding: `design-pick`
 - The voice of every recorded passage: `write-human`
