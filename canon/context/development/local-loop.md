@@ -43,8 +43,6 @@ Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`,
 - Indexes and Consumed copies regenerate then assert, so the first run after an edit reports drift and `check:ci` writes the tree. Stage the rewrite and run again, since a rerun alone repeats the diff.
 - A stage that cannot read its input is `unmeasured`, which warns locally and refuses under CI. Plugin manifests skips locally without the CLI and fails when `CI` is set
 
-`--all` keeps the full suite, and CI's `check:ci` runs with it. A test that reads a corpus from disk without importing it fails there, minutes after the push. That is the price of no longer queuing a wave of worktrees for the whole suite behind the `tests` lock.
-
 ### `src/init/`
 
 Installs each domain `canon init` runs, as the steps `runDomains` walks in `run.ts`.
@@ -133,6 +131,6 @@ Smaller folders the loop touches.
 
 - `check:lint` passes `--disable-nested-config` to skip the golden configs under `tooling/*/configs/`, and `check:types` needs `typescript` in `devDependencies`, not hoisted from an astro peer
 - `canon gov regen` defaults `--root` to wherever the binary is installed, so from a worktree pass `--root <literal-path>`
-- A prose edit can break a test no stage in the push runs, as with the markdown checkpoints, literals in `src/markdown/` that `structure.test.ts` asserts against themselves
+- A push runs no test that reads a corpus from disk rather than importing it, so a skill or rule edit that breaks one fails in CI's `--all` run instead. That trade keeps pushes off the `tests` queue
 - A file whose name ends in `index.md`, staged or untracked, trips the Indexes stage even under `auto: false`
 - A line number cited into a file the entry does not own goes stale with nothing comparing it, so cite a named identifier
