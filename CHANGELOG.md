@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.73.0](https://github.com/erclx/canon/compare/v5.72.1...v5.73.0) (2026-10-28)
+
+
+### Features
+
+* **app-drive:** draw every decided finding and check the drawing ([#2815](https://github.com/erclx/canon/issues/2815)) ([3f73075](https://github.com/erclx/canon/commit/3f73075fe2be2a2b156877e807563cf8eb3b367c))
+* **hooks:** block a new plan written without a plan-feature invocation ([#2822](https://github.com/erclx/canon/issues/2822)) ([21cca3f](https://github.com/erclx/canon/commit/21cca3f04ced7da7755a33827677df02a1cd97aa))
+* **plan:** bundle shared-file fixes into one row with an H3 per item ([#2819](https://github.com/erclx/canon/issues/2819)) ([041ecac](https://github.com/erclx/canon/commit/041ecac364a52eec56240c6350683ec582bc35c6))
+* **reviewer:** batch the review of small contract-free pull requests ([#2820](https://github.com/erclx/canon/issues/2820)) ([e2422c6](https://github.com/erclx/canon/commit/e2422c6e4b4e268929ade28bc7553c2be23e5e93))
+* **ui-film:** add scratch and harness folders to the film workspace ([#2823](https://github.com/erclx/canon/issues/2823)) ([7698171](https://github.com/erclx/canon/commit/76981718e7021dc02312f652b298d3a69e184ba5))
+
+
+### Bug Fixes
+
+* **debugging:** ask about routing around an external cause before retry ([#2821](https://github.com/erclx/canon/issues/2821)) ([77f36c1](https://github.com/erclx/canon/commit/77f36c1169ffe51f59d14dd2fa08c8f26bd8a3f5))
+* **planner:** invoke plan-feature from the planning tail ([#2816](https://github.com/erclx/canon/issues/2816)) ([15d238b](https://github.com/erclx/canon/commit/15d238bc54b0343377f10068cc7fe733c7e953a7))
+
 ## [5.72.1](https://github.com/erclx/canon/compare/v5.72.0...v5.72.1) (2026-10-27)
 
 
