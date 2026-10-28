@@ -871,7 +871,10 @@ export function register(program: Command): void {
         'line. Without the flag, a skip line the marked comment already carries',
         'is carried forward. A skip line is dropped whenever its address or',
         'reel renders, passed or carried, so a later run that posts the link or',
-        'films the reel replaces it. Like --local, neither opens a comment alone.',
+        'films the reel replaces it. A passed --local-skip drops a carried',
+        'local address, since that line names no head and would read as live,',
+        'while a carried reel names its head and stays beside --reel-skip. Like',
+        '--local, neither opens a comment alone.',
         '',
         "A render at a new head also resets the pull request body's UI pass",
         'line, the one `canon pr tick` writes under ## Testing, to unchecked',
@@ -2891,7 +2894,11 @@ async function runEvidence(
   }
 
   const preview = opts.preview ?? (isUnserved ? undefined : carriedPreview)
-  const local = opts.local ?? carriedLocal
+  // A carried local line names no head and reads as live, so a passed skip
+  // drops it the way a passed address replaces it. A carried reel names the
+  // head it was filmed at, so it stays beside a passed skip.
+  const local =
+    opts.local ?? (opts.localSkip === undefined ? carriedLocal : undefined)
   const reel = nextEvidenceReel(opts.reel, identity.head, comments)
   const carriedSkips = findEvidenceSkips(comments)
   const skips = {

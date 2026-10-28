@@ -685,6 +685,21 @@ describe('canon pr evidence reports the marked comment', () => {
       expect(record.body).not.toContain('**No ')
     })
 
+    it('should drop a carried local address when a local skip is passed', async () => {
+      writeComments([markedCommentBody()])
+
+      const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' }, [
+        '--local-skip',
+        'no-server',
+      ])
+
+      expect(record.body).toContain('**No local preview:** no-server')
+      expect(record.body).not.toContain('http://localhost:5173')
+      expect(record.body).toContain(
+        '**Preview:** https://feat-x.site.pages.dev',
+      )
+    })
+
     it('should refuse a skip flag beside --check as check-writes', async () => {
       writeComments([withoutAddresses()])
 
