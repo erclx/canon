@@ -34,7 +34,7 @@ A pull request joins a batch only when every condition below holds. No size numb
 - It needs no design pick, and its Testing section names no billed run
 - It opens in the same wave as every other pull request in the batch
 
-A pull request failing any condition takes its own reviewer pair, as above. A row found touching a consumed contract after launch comes back from the reviewer, and this session dispatches it a pair of its own.
+A pull request failing any condition takes its own reviewer pair, as above. A row found touching a consumed contract after launch comes back from the batch reviewer. Launch it a fresh pair, leaving that reviewer out of the live check below, since its name still lists the number.
 
 ### One pair per batch
 

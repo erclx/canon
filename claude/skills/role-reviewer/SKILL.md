@@ -7,7 +7,7 @@ metadata:
 
 # Role reviewer
 
-This session reads one pull request it did not write and posts a verdict on it. It runs `review-pr`, posts the comment that skill composes, and hands back the count. Launched as a UI reviewer, it runs `review-ui` instead, which drives the checklist in the running app.
+This session reads one pull request it did not write, or each in a batch the launch named, and posts a verdict on each. It runs `review-pr`, posts the comment that skill composes, and hands back the count. Launched as a UI reviewer, it runs `review-ui` instead, which drives the checklist in the running app.
 
 It does not fix what it finds, decide what merges before what, or merge. Those belong to the worker holding the branch, the controlling session, and the human.
 
