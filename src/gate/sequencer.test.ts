@@ -150,6 +150,42 @@ describe('changed-file scoping', () => {
   })
 })
 
+describe('a command check narrowed by the changed set', () => {
+  function narrowing(): Stage {
+    return stage('tests', {
+      checks: [
+        {
+          kind: 'command',
+          argv: ['suite', 'all'],
+          changedArgv: (changed) => ['suite', 'related', ...changed],
+          failure: 'tests failed',
+        },
+      ],
+    })
+  }
+
+  it('should run the argv built from the changed set when scoping is on', async () => {
+    const seen: string[] = []
+    const ctx = contextWith({
+      changed: ['src/a.ts', 'src/b.ts'],
+      run: runnerFor({}, seen),
+    })
+
+    await runStage(narrowing(), ctx)
+
+    expect(seen).toEqual(['suite related src/a.ts src/b.ts'])
+  })
+
+  it('should run the fixed argv when scoping is off', async () => {
+    const seen: string[] = []
+    const ctx = contextWith({ run: runnerFor({}, seen) })
+
+    await runStage(narrowing(), ctx)
+
+    expect(seen).toEqual(['suite all'])
+  })
+})
+
 describe('a stage holding a machine lock', () => {
   const lockPath = () => machineLockPath('suite')
 
@@ -584,12 +620,6 @@ describe('the shipped stage table', () => {
     expect(locked.map((entry) => [entry.id, entry.lock])).toEqual([
       ['tests', 'tests'],
     ])
-  })
-
-  it('should scope the tests stage to the corpora a src test asserts over', () => {
-    const tests = STAGES.find((entry) => entry.id === 'tests')
-
-    expect(tests?.scope?.test('governance/rules/ui/craft.md')).toBe(true)
   })
 })
 

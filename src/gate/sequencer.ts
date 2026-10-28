@@ -386,7 +386,13 @@ async function runCheck(
   }
 
   const run = check.kind === 'cli' ? ctx.cli : ctx.run
-  const result = await run(check.argv, env)
+  const argv =
+    check.kind === 'command' &&
+    check.changedArgv !== undefined &&
+    ctx.changed !== undefined
+      ? check.changedArgv(ctx.changed)
+      : check.argv
+  const result = await run(argv, env)
   return {
     emissions: [{ kind: 'output', text: result.all }],
     failure: result.exitCode === 0 ? undefined : check.failure,
