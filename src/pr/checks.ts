@@ -1,4 +1,8 @@
-import { type ChecksState, type RawCheck, rollup } from '@/targets/pulls'
+import {
+  type ChecksState,
+  type RawCheck,
+  rollupRequired,
+} from '@/targets/pulls'
 
 /** One row of `repos/{owner}/{repo}/commits/<sha>/check-runs`. */
 export interface RawCheckRun {
@@ -27,6 +31,39 @@ export interface ChecksReading {
   readonly reported: number
   /** Runs `matched` carried for a check name this reading already kept a newer run for. */
   readonly collapsed: number
+  /**
+   * Failing checks outside the required set, present only when a required set
+   * was read, so a reading over every check keeps its old shape.
+   */
+  readonly advisory?: readonly string[]
+}
+
+/**
+ * Reads the check names a base branch's rules require, from
+ * `repos/{owner}/{repo}/rules/branches/<base>`.
+ *
+ * Undefined when the answer is not a rule list, which a repository without
+ * rulesets or a refused read returns, so the caller falls back to every check.
+ * Classic branch protection is not read, and falls back the same way.
+ */
+export function requiredChecks(rules: unknown): ReadonlySet<string> | undefined {
+  if (!Array.isArray(rules)) return undefined
+
+  const names = new Set<string>()
+  for (const rule of rules as readonly RequiredRule[]) {
+    if (rule?.type !== 'required_status_checks') continue
+    for (const check of rule.parameters?.required_status_checks ?? []) {
+      if (typeof check.context === 'string') names.add(check.context)
+    }
+  }
+  return names
+}
+
+interface RequiredRule {
+  readonly type?: string
+  readonly parameters?: {
+    readonly required_status_checks?: readonly { readonly context?: unknown }[]
+  }
 }
 
 export interface ConflictedReading extends ChecksReading {
@@ -68,6 +105,7 @@ export function withMergeState(
  */
 function adapt(run: RawCheckRun): RawCheck {
   return {
+    ...(run.name !== undefined && { name: run.name }),
     ...(run.status !== undefined && { status: run.status.toUpperCase() }),
     ...(run.conclusion !== undefined &&
       run.conclusion !== null && {
@@ -125,10 +163,15 @@ function newestPerCheck(runs: readonly RawCheckRun[]): {
  * rolls up from `newestPerCheck`'s kept rows rather than from `matched`
  * directly, so a stale failing run left behind by a rerun no longer outvotes
  * the passing run beside it.
+ *
+ * A required set narrows only that last rollup. The foreign and partial
+ * listing guards still read every run, since either says the set in hand is
+ * incomplete whichever checks gate.
  */
 export function collapseChecks(
   tip: string,
   listing: CheckRunListing,
+  required?: ReadonlySet<string>,
 ): ChecksReading {
   const runs = listing.check_runs ?? []
   const matched = runs.filter((run) => run.head_sha === tip)
@@ -139,6 +182,7 @@ export function collapseChecks(
     foreign: runs.length - matched.length,
     reported: listing.total_count ?? runs.length,
     collapsed,
+    ...(required !== undefined && { advisory: [] }),
   }
 
   if (reading.foreign > 0) return { ...reading, state: 'pending' }
@@ -151,5 +195,10 @@ export function collapseChecks(
 
   if (matched.length === 0) return { ...reading, state: 'pending' }
 
-  return { ...reading, state: rollup(kept.map(adapt)) ?? 'pending' }
+  const { state, advisory } = rollupRequired(kept.map(adapt), required)
+  return {
+    ...reading,
+    state: state ?? 'pending',
+    ...(required !== undefined && { advisory }),
+  }
 }
