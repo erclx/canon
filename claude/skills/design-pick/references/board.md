@@ -13,8 +13,8 @@ Resolve `<board>` and `<project>` from the `board` and `project` keys of `canon/
 Resolve `<board>` against the main worktree root, the way `session-worktree` resolves it, since a linked worktree holds no copy of the gitignored folder.
 
 - Pass `--root <board> --project <project> --json` to every verb unless the step says otherwise, so no verb relies on the only-project default
-- Where `frameboard` is not on PATH, run every verb as `bunx -y frameboard@0.6 <verb>`. Say so once and keep that form for the run.
-- The pin holds the minor, since record shapes move across a pre-1.0 minor
+- Where `frameboard` is not on PATH, run every verb as `bunx -y frameboard <verb>`. Say so once and keep that form for the run.
+- The fallback takes the latest release unpinned, since the verbs and record shapes come from `frameboard docs --json` each run and a renamed verb surfaces as a refusal
 
 Run `frameboard docs --json` before writing the first frame. Its `contentFormat` fixes what a frame may hold and link, and its `exitCodes` name every refusal a verb can return.
 
