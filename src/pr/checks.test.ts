@@ -428,6 +428,16 @@ describe('collapseChecks over a required commit status', () => {
 
     expect(reading.state).toBe('passing')
   })
+
+  // A repository with no rulesets answers an empty rule list, which is the
+  // same fallback as an unread one, so an optional status still stays out.
+  it('should leave statuses out when the rules require nothing', () => {
+    const reading = collapseChecks(TIP, listing, new Set(), [
+      { context: 'codecov/patch', state: 'failure' },
+    ])
+
+    expect(reading.state).toBe('passing')
+  })
 })
 
 describe('requiredChecks', () => {

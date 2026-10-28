@@ -177,9 +177,10 @@ function newestPerCheck(runs: readonly RawCheckRun[]): {
  * incomplete whichever checks gate.
  *
  * A ruleset can require a commit status, which the check-run listing never
- * carries, so the statuses join the rollup by `context` once a required set
- * was read. Without one they stay out, since the every-check fallback is the
- * reading these verbs gave before rules were read and it saw no status.
+ * carries, so the statuses join the rollup by `context` once a non-empty
+ * required set was read. An unread or empty set keeps them out, since the
+ * every-check fallback is the reading these verbs gave before rules were read
+ * and it saw no status.
  */
 export function collapseChecks(
   tip: string,
@@ -208,7 +209,7 @@ export function collapseChecks(
   if (reading.reported > runs.length) return { ...reading, state: 'pending' }
 
   const statusRows: RawCheck[] =
-    required === undefined
+    required === undefined || required.size === 0
       ? []
       : statuses.map((status) => ({
           ...(status.context !== undefined && { name: status.context }),
