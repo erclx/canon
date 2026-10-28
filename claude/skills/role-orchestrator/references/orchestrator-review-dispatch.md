@@ -43,7 +43,7 @@ Launch one code reviewer for the whole batch, and one UI reviewer beside it when
 - Each pull request still takes its own pass, its own verdict comment, and its own `canon pr lift`, since the poll routes on each comment's heading
 - Never ask for one summary comment across the set, since a second comment is a second verdict the poll cannot route
 - Name the batch and the test it passed in the dispatch report, so the operator can split it before the first pass posts
-- The skill body's `### Merge order and ports` states how a batch merges
+- The skill body's `### Merge order and ports` states how a batch merges, and a pull request whose pass stays open waits for its own re-review while the rest merge
 
 ## The cross-branch pass
 
