@@ -54,6 +54,15 @@ A plan failing these is non-conforming even when it satisfies every shape rule b
 - Derive the slug from the concern rather than from a branch, because the plan is written before the branch exists.
 - Give the executing branch the same slug, since a later surface finds the plan from the branch name and finds nothing when the spellings differ
 
+### Bundle rows
+
+A bundle row is the one exception to a concern per file. It is a set of small fixes whose changes share a file, and the operator agreed to bundle them, since one plan drops per-item revert.
+
+- Write one file and one branch for the row, named for the shared surface
+- Give each item its own H3 under `## Files to touch`, with every path it writes and the reason
+- Give each item its own `## Verification` bullet, so a dropped item is cut by the strike form and the rest ship as one pull request
+- Never bundle fixes with no file in common, and never bundle on the planner's own judgment
+
 A plan carries no frontmatter. Its filename is the whole of its identity, so a folder of plans is read by name rather than by a generated catalog.
 
 ### Staged batches

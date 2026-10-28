@@ -17,6 +17,14 @@ A filed row carries what this seat saw and nothing it did not measure.
 - A finding placed in another task's `## Findings` is filing under a second name and takes the same rule
 - An unverified cause costs more than an unverified count. A count fails loudly at re-measurement, while an unchecked mechanism sends real work the wrong way.
 
+## Filing a bundle
+
+A ready list can name a bundle row, items whose fixes share a file. File an agreed bundle as one task with an outcome per item, one plan, and one branch.
+
+- Ask the operator before filing one when a ready list reaches this seat with no bundle agreed, since a bundle drops per-item revert and that is the operator's call
+- Leave a small fix with no shared file as its own row
+- Cut a dropped item with the strike form, and the rest close as one pull request
+
 ## Which measurements stay here
 
 What the measurement decides is the test. One deciding whether a row can start stays in this seat, and one deciding how big the row is goes to the planner, since only a sizing count commits a plan to a scope this seat cannot see whole.
