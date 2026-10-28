@@ -689,10 +689,15 @@ function listedPracticeSkillsExcept(omitted: string): void {
 }
 
 describe('auditSkills ledger list', () => {
+  // A per-bullet scope with no body and no exemption owes no ledger a bare
+  // fixture lacks, so it varies as cleanly as an unlisted skill once every
+  // ledger-only skill has moved onto the per-bullet list.
   const ledgerOnly =
-    LEDGER_SKILLS.find(
-      (rel) => !PRACTICE_SKILLS.includes(rel) && !(rel in BULLET_LEDGER_SKILLS),
-    ) ?? ''
+    LEDGER_SKILLS.find((rel) => {
+      if (PRACTICE_SKILLS.includes(rel)) return false
+      const scope = BULLET_LEDGER_SKILLS[rel]
+      return scope === undefined || (!scope.body && scope.exempt.length === 0)
+    }) ?? ''
 
   beforeEach(() => {
     listedPracticeSkillsExcept(ledgerOnly)
