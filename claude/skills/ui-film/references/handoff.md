@@ -33,10 +33,8 @@ The track is final. It already carries the easing, the spring, and the hold, so 
 
 ## Where the composition lives
 
-The HyperFrames project sits in the same workspace as the takes, so one folder holds everything a video is made from.
+The HyperFrames project sits in the same workspace as the takes, so one folder holds everything a video is made from. Create it at `.canon/video/<slug>/composition` with the new-project command the `hyperframes` skill names, run the way that skill says for its install, since a plugin install routes the CLI through its own launcher.
 
-- Create the project at `.canon/video/<slug>/composition` with the new-project command the `hyperframes` skill names
-- Run that command the way the skill says for its install, since a plugin install routes the CLI through its own launcher
 - Prefix the path with the main worktree root when running from a linked worktree, as `ui-film`'s write scope states
 - Read each clip from `../takes/<dir>/clip.mp4`, relative to the project, rather than copying it in
 - Leave renders in the project's `renders/` folder, which `canon records push` skips along with `takes/`, `scratch/`, `snapshots/`, `node_modules/`, and any video file
