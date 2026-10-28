@@ -7,6 +7,7 @@ import {
   findEvidenceLocal,
   findEvidencePreview,
   findEvidenceReel,
+  findEvidenceSkips,
   nextEvidenceReel,
   groupEvidence,
   type EvidenceItem,
@@ -1452,6 +1453,176 @@ describe('hasMarkedEvidenceComment', () => {
 
   it('should not read a checklist posted on its own as marked', () => {
     expect(hasMarkedEvidenceComment([{ body: '- [ ] look' }])).toBe(false)
+  })
+})
+
+describe('the skip lines', () => {
+  const LINK = 'https://github.com/o/r/blob/canon/frames/reel.webp?raw=true'
+  const states: EvidenceState[] = [
+    {
+      state: '',
+      items: [{ path: 'evidence/hero.png', stem: 'hero', added: false }],
+    },
+  ]
+
+  function marked(body: string): { url: string; body: string }[] {
+    return [{ url: 'https://github.com/o/r/pull/1#issuecomment-9', body }]
+  }
+
+  it('should render each skip on its own line under the addresses, local first', () => {
+    const body = renderEvidenceBody(
+      [],
+      'o/r',
+      'aaaa000',
+      'bbbb111',
+      'https://x.dev',
+      '- [ ] look',
+      undefined,
+      undefined,
+      { local: 'no-server: nothing listens', reel: 'no-server' },
+    )
+
+    expect(body.split('\n').slice(0, 9)).toEqual([
+      '## Evidence',
+      '',
+      '**Preview:** https://x.dev',
+      '',
+      '**No local preview:** no-server: nothing listens',
+      '',
+      '**No reel:** no-server',
+      '',
+      '## What to look at',
+    ])
+  })
+
+  it('should drop the local skip when a local address renders beside it', () => {
+    const body = renderEvidenceBody(
+      [],
+      'o/r',
+      'aaaa000',
+      'bbbb111',
+      undefined,
+      '- [ ] look',
+      'http://localhost:5173',
+      undefined,
+      { local: 'no-server' },
+    )
+
+    expect(body).toContain('**Local preview:** http://localhost:5173')
+    expect(body).not.toContain('No local preview')
+  })
+
+  it('should drop the reel skip when a reel renders beside it', () => {
+    const body = renderEvidenceBody(
+      [],
+      'o/r',
+      'aaaa000',
+      'cccc222',
+      undefined,
+      '- [ ] look',
+      undefined,
+      { link: LINK, head: 'bbbb111' },
+      { reel: 'no-checklist' },
+    )
+
+    expect(body).toContain('**Reel** filmed at `bbbb111`')
+    expect(body).not.toContain('No reel')
+  })
+
+  it('should fold a multi-line reason onto one escaped line', () => {
+    const body = renderEvidenceBody(
+      [],
+      'o/r',
+      'aaaa000',
+      'bbbb111',
+      undefined,
+      '- [ ] look',
+      undefined,
+      undefined,
+      { reel: 'film-failed: exit 1\n  <stderr> | tail' },
+    )
+
+    expect(body).toContain(
+      '**No reel:** film-failed: exit 1 &lt;stderr&gt; &#124; tail',
+    )
+  })
+
+  it('should leave a body with no skips exactly as before', () => {
+    const args = [
+      states,
+      'o/r',
+      'aaaa000',
+      'bbbb111',
+      'https://x.dev',
+      '- [ ] look',
+      'http://localhost:5173',
+      { link: LINK, head: 'bbbb111' },
+    ] as const
+
+    expect(renderEvidenceBody(...args, {})).toBe(renderEvidenceBody(...args))
+  })
+
+  it('should read both skips back, unescaped, without disturbing the other fields', () => {
+    const comments = marked(
+      renderEvidenceBody(
+        states,
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+        'https://x.dev',
+        '- [ ] look',
+        undefined,
+        undefined,
+        { local: 'no-server: a <b> | c', reel: 'no-server' },
+      ),
+    )
+
+    expect(findEvidenceSkips(comments)).toEqual({
+      local: 'no-server: a <b> | c',
+      reel: 'no-server',
+    })
+    expect(findEvidencePreview(comments)).toBe('https://x.dev')
+    expect(findEvidenceLocal(comments)).toBeUndefined()
+    expect(findEvidenceReel(comments)).toBeUndefined()
+    expect(findEvidenceChecklist(comments)).toBe('- [ ] look')
+    expect(countEvidenceCases(comments[0]?.body ?? '')).toBe(1)
+  })
+
+  it('should read no skips off an unmarked comment or one below the addresses', () => {
+    expect(findEvidenceSkips([{ body: '**No reel:** no-server' }])).toEqual({})
+    expect(
+      findEvidenceSkips(
+        marked(
+          '## Evidence\n\n## What to look at\n\n**No reel:** quoted\n\n<!-- pr-evidence: head=bbbb111 -->',
+        ),
+      ),
+    ).toEqual({})
+  })
+
+  it('should not count a skip-only body as owing evidence once it is marked', () => {
+    const comments = marked(
+      renderEvidenceBody(
+        [],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+        undefined,
+        '- [ ] look',
+        undefined,
+        undefined,
+        { local: 'no-server', reel: 'no-server' },
+      ),
+    )
+
+    expect(hasMarkedEvidenceComment(comments)).toBe(true)
+    expect(
+      readOwed({
+        hasEvidenceChange: true,
+        hasMarkedComment: hasMarkedEvidenceComment(comments),
+        carriedPreview: findEvidencePreview(comments) !== undefined,
+        deployServesChange: false,
+      }),
+    ).toEqual([])
   })
 })
 
