@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# canon-no-seed: the guard reads Claude Code's transcript format, so a change
+# to it could block every plan in every synced project. It runs here until it
+# has blocked no valid plan, and seeding it is a later row.
+
 # A path-scoped rule loads on a Read, Write, or Edit of a matching file, and a
 # heredoc onto `.canon/plans/` is none of them, so the plan rule never reaches
 # the session writing most plans. This guard is the check behind that rule: a
