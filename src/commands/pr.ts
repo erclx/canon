@@ -23,6 +23,7 @@ import {
 import {
   type CheckRunListing,
   collapseChecks,
+  type RawStatus,
   requiredChecks,
   withMergeState,
 } from '@/pr/checks'
@@ -4255,20 +4256,36 @@ async function readChecksGate(
   number: string,
   tip: string,
 ): Promise<ChecksGate | undefined> {
-  const [listed, pulled] = await Promise.all([
+  // A status read that fails leaves a required status context unseen, which
+  // reads pending rather than passing, so it needs no refusal of its own.
+  const [listed, pulled, combined] = await Promise.all([
     gh(root, [
       'api',
       `repos/{owner}/{repo}/commits/${tip}/check-runs?per_page=100`,
     ]),
     gh(root, ['api', `repos/{owner}/{repo}/pulls/${number}`]),
+    gh(root, [
+      'api',
+      `repos/{owner}/{repo}/commits/${tip}/status?per_page=100`,
+    ]),
   ])
   if (listed === null) return undefined
   try {
     const row = pulled === null ? undefined : (JSON.parse(pulled) as RestPull)
     const required = await readRequiredChecks(root, row?.base?.ref)
+    const statuses =
+      combined === null
+        ? []
+        : ((JSON.parse(combined) as { statuses?: readonly RawStatus[] })
+            .statuses ?? [])
     const reading = withMergeState(
       mergeStateOf(row?.mergeable_state),
-      collapseChecks(tip, JSON.parse(listed) as CheckRunListing, required),
+      collapseChecks(
+        tip,
+        JSON.parse(listed) as CheckRunListing,
+        required,
+        statuses,
+      ),
     )
     return {
       state: reading.state,

@@ -13,6 +13,12 @@ export interface RawCheckRun {
   readonly id?: number
 }
 
+/** One row of `repos/{owner}/{repo}/commits/<sha>/status`, newest per context already. */
+export interface RawStatus {
+  readonly context?: string
+  readonly state?: string
+}
+
 /** What that endpoint returns, count and rows apart. */
 export interface CheckRunListing {
   readonly total_count?: number
@@ -169,11 +175,17 @@ function newestPerCheck(runs: readonly RawCheckRun[]): {
  * A required set narrows only that last rollup. The foreign and partial
  * listing guards still read every run, since either says the set in hand is
  * incomplete whichever checks gate.
+ *
+ * A ruleset can require a commit status, which the check-run listing never
+ * carries, so the statuses join the rollup by `context` once a required set
+ * was read. Without one they stay out, since the every-check fallback is the
+ * reading these verbs gave before rules were read and it saw no status.
  */
 export function collapseChecks(
   tip: string,
   listing: CheckRunListing,
   required?: ReadonlySet<string>,
+  statuses: readonly RawStatus[] = [],
 ): ChecksReading {
   const runs = listing.check_runs ?? []
   const matched = runs.filter((run) => run.head_sha === tip)
@@ -195,9 +207,17 @@ export function collapseChecks(
   // sitting outside of, which is the false green keyed on a sha alone.
   if (reading.reported > runs.length) return { ...reading, state: 'pending' }
 
-  if (matched.length === 0) return { ...reading, state: 'pending' }
+  const statusRows: RawCheck[] =
+    required === undefined
+      ? []
+      : statuses.map((status) => ({
+          ...(status.context !== undefined && { name: status.context }),
+          state: (status.state ?? '').toUpperCase(),
+        }))
+  const rows = [...kept.map(adapt), ...statusRows]
+  if (rows.length === 0) return { ...reading, state: 'pending' }
 
-  const { state, advisory } = rollupRequired(kept.map(adapt), required)
+  const { state, advisory } = rollupRequired(rows, required)
   return {
     ...reading,
     state: state ?? 'pending',

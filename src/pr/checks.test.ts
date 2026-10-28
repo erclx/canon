@@ -368,6 +368,68 @@ describe('collapseChecks over a required set', () => {
   })
 })
 
+describe('collapseChecks over a required commit status', () => {
+  const STATIC = '🛡️ Static Checks'
+  const DEPLOY = 'vercel'
+  const required = new Set([STATIC, DEPLOY])
+  const listing = {
+    total_count: 1,
+    check_runs: [
+      {
+        head_sha: TIP,
+        name: STATIC,
+        status: 'completed',
+        conclusion: 'success',
+      },
+    ],
+  }
+
+  it('should read passing when the required status succeeded beside the run', () => {
+    const reading = collapseChecks(TIP, listing, required, [
+      { context: DEPLOY, state: 'success' },
+    ])
+
+    expect(reading.state).toBe('passing')
+  })
+
+  it('should read pending while the required status is pending', () => {
+    const reading = collapseChecks(TIP, listing, required, [
+      { context: DEPLOY, state: 'pending' },
+    ])
+
+    expect(reading.state).toBe('pending')
+  })
+
+  it('should read failing when the required status errored', () => {
+    const reading = collapseChecks(TIP, listing, required, [
+      { context: DEPLOY, state: 'error' },
+    ])
+
+    expect(reading.state).toBe('failing')
+  })
+
+  it('should read passing off statuses alone when the tip has no check run', () => {
+    const reading = collapseChecks(
+      TIP,
+      { total_count: 0, check_runs: [] },
+      new Set([DEPLOY]),
+      [{ context: DEPLOY, state: 'success' }],
+    )
+
+    expect(reading.state).toBe('passing')
+  })
+
+  // The fallback is the verbs' behavior before the rules were read, which
+  // never saw a commit status, so a status cannot start failing it.
+  it('should leave statuses out when no required set was read', () => {
+    const reading = collapseChecks(TIP, listing, undefined, [
+      { context: DEPLOY, state: 'failure' },
+    ])
+
+    expect(reading.state).toBe('passing')
+  })
+})
+
 describe('requiredChecks', () => {
   it('should read the contexts of every required status checks rule', () => {
     const rules = [
