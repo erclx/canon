@@ -9,6 +9,8 @@
 # Usage: docs-only.sh <base>
 # Writes to $GITHUB_OUTPUT, or stdout outside Actions, and always exits 0.
 
+set -e
+
 out=${GITHUB_OUTPUT:-/dev/stdout}
 code=true
 
