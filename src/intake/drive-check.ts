@@ -181,7 +181,8 @@ const DRAWN_LABEL = 'Drawn'
  * A decision reading `see <nn>` was drawn under the finding it names, and a
  * `ref-<nn>` heading or a finding with no decision carries nothing to draw. A
  * `Drawn` field passes when it cites a path in a code span or reads
- * `skipped, <reason>`, so a bare `skipped` still lists the finding.
+ * `skipped, <reason>`, so a bare `skipped` still lists the finding. A skip
+ * cites no path, since its reason may code-span a flag or a format.
  */
 export function readDrawn(source: string): DrawnReading {
   const undrawn: string[] = []
@@ -192,12 +193,13 @@ export function readDrawn(source: string): DrawnReading {
 
   const close = () => {
     if (finding !== undefined && decision && !/^see\s+\d+/i.test(decision)) {
-      const cited = [...(drawn ?? '').matchAll(/`([^`]+)`/g)].map(
-        (match) => match[1],
-      )
-      paths.push(...cited)
-      if (cited.length === 0 && !/^skipped\s*,\s*\S/i.test(drawn ?? '')) {
-        undrawn.push(finding)
+      const field = drawn ?? ''
+      if (/^skipped\b/i.test(field)) {
+        if (!/^skipped\s*,\s*\S/i.test(field)) undrawn.push(finding)
+      } else {
+        const cited = [...field.matchAll(/`([^`]+)`/g)].map((match) => match[1])
+        paths.push(...cited)
+        if (cited.length === 0) undrawn.push(finding)
       }
     }
     finding = decision = drawn = undefined

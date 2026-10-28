@@ -161,6 +161,17 @@ describe('readDrawn', () => {
     ])
   })
 
+  it('should read no path out of a skip reason that backticks a term', () => {
+    const log = [
+      '## 03. Export prints no record',
+      '',
+      '- **Drawn:** skipped, the fix changes only the `--json` record',
+      '- **Decision (operator):** print the record on stdout',
+    ].join('\n')
+
+    expect(readDrawn(log)).toEqual({ undrawn: [], paths: [] })
+  })
+
   it('should pass a skipped drawing that gives its reason', () => {
     const log = [
       '## 03. Export drops the alpha channel',
