@@ -46,7 +46,8 @@ Each item below is something a record needed and a launch string did not carry.
 Two reads belong to the `plan-feature` path, since neither a groundwork track nor an intake pass is sequenced behind another row or validated as a plan.
 
 - The plan of any row this one is sequenced behind, including one moved to `.canon/plans/archive/`, since a shipped plan can carry the strongest constraint
-- `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md` for the shape, then `canon records validate plans` and `canon markdown audit <the plan file>` once it is written
+- `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md` for the shape, read through the `plan-feature` invocation rather than in its place
+- `canon records validate plans` and `canon markdown audit <the plan file>` once it is written
 
 Nothing else opens a plan, since `.canon/plans/` is gitignored and the audit's default path set is what git lists. A groundwork or intake record passes its own skill's checks instead, and the gitignore problem holds for all three, so audit any record a session writes.
 
@@ -121,6 +122,7 @@ The operator being present is an assumption the launch carries. A talk planner w
 ## Lifetime
 
 - The role runs from the launch to the record landing, and the operator closes a talk session. A session handed a second row works it under the same role and reads the tree again for it.
+- Invoke that record's skill again for a second row, being `plan-feature`, `plan-groundwork`, or `plan-intake`, rather than writing from the reference of the one run before
 - A reused session's picture of the tree ages, and a compaction silently drops the reasoning behind its earlier records
 - Run the in-flight read again before each handed row, and stop when the operator ends the session or a compaction nears, telling the controller which rows are still unplanned
 - Treat this body as possibly older than the branch under it. A plugin skill loads from the marketplace cache rather than from the working tree.
