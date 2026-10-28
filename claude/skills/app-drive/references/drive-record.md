@@ -30,10 +30,12 @@ Write the log to `evidence/drive-log.md` inside the intake folder. It opens on a
 - **Saw:** the view stayed put, with 64% of the frame under the panel edge
 - **Cause:** from code, the reveal acts only when the box is wholly outside the view
 - **Evidence:** `evidence/02-partial-no-pan.png`
+- **Drawn:** `evidence/02-options.png`, `evidence/mocks/layers/`
 - **Decision (operator):** center the frame unless it is wholly visible
 ```
 
 - `<nn>` numbers findings in the order they were found, and the frame carries the same number
+- A drive frame is named `frames/<nn>-<name>.png`. A drawn frame is named `<nn>-now`, `<nn>-fix`, or `<nn>-fix-<variant>` by the log's finding number, for a bug fix and a new feature alike.
 - The title names what the persona met, in sentence case with no trailing period
 - The meta line holds the severity, the source, and the persona, in that order. The source is `goal`, `last-drive`, or `operator`, and a finding naming none sorts as taste.
 - A `last-drive` finding adds `fixed`, `still open`, or `changed` to its meta line
@@ -55,6 +57,16 @@ The fields under the meta line carry the drive itself, one fact to a line.
 - Write the operator's call as `Decision (operator)` under the finding it settles, even when it arrives after later findings
 - A decision settling two findings sits under the first, and the second carries `Decision (operator):` naming that finding's number, such as `see 02`
 - Keep each field to one line. A field that runs long splits into a second field rather than growing.
+
+### Drawn outcomes
+
+The check reads `Drawn` and `Decision (operator)` off the log by those exact labels, so a reworded label turns the check off without failing it.
+
+- Put the options screenshot at `evidence/<nn>-options.png`, showing the now frame beside every fix frame
+- Copy the mock source into `evidence/mocks/<surface>/`, where `<surface>` names the screen or panel drawn on
+- Write `Drawn` above the decision, citing paths under `evidence/` the way `Evidence` does, or `skipped, <reason>` when the change has nothing visible
+- A bare `skipped` with no reason counts as undrawn, since the next reader cannot tell a choice from an omission
+- A decision reading `see <nn>` was drawn under the finding it names and carries no `Drawn` of its own
 
 ### Passed goals
 
@@ -120,4 +132,5 @@ A failed check names each finding by list, and an empty list is a clean axis.
 | `changed`         | a main checkout path that moved since the baseline |
 | `strayEvidence`   | an evidence path outside `evidence/`               |
 | `missingEvidence` | an evidence path holding no file                   |
+| `undrawn`         | a logged decision with no drawn outcome or reason  |
 | `worktreeLeft`    | the `worktree` path still on disk                  |

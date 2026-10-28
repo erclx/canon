@@ -21,13 +21,14 @@ proposals = ".canon/picks"
 | `launch`    | The shell command that installs, builds, and serves the app in a worktree |
 | `data`      | A fixture path inside the worktree to load before serving, if any         |
 | `personas`  | Who uses the app, each driven through every goal                          |
-| `proposals` | The folder a taste finding's now frame and fix frame go to                |
+| `proposals` | The folder for an undecided taste finding's frames and a fallback mock    |
 
 Three of the keys carry a reading the table cannot hold.
 
 - `launch` runs from the worktree root and names the port it serves on, so `canon pr local --root` finds it
 - `personas` covers an agent or API caller as well as a person in the UI, when the app has one
 - An absent `data` means the app starts empty, and an absent `proposals` means the frames stay in the intake folder's `evidence/`
+- A fallback mock is the standalone HTML a decided finding's frames are lifted into when the copy cannot host them
 
 ## When the file is absent
 

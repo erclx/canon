@@ -1,9 +1,20 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { execaSync } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { checkDrive, readGoals, recordBaseline } from '@/intake/drive-check'
+import {
+  checkDrive,
+  readDrawn,
+  readGoals,
+  recordBaseline,
+} from '@/intake/drive-check'
 
 let ROOT: string
 
@@ -42,6 +53,27 @@ function write(path: string, text: string): void {
 function writeRecord(record: unknown): void {
   write(`${FOLDER}/drive.json`, JSON.stringify(record))
 }
+
+function writeLog(...findings: string[]): void {
+  write(
+    `${FOLDER}/evidence/drive-log.md`,
+    ['# Drive log', ...findings].join('\n\n'),
+  )
+}
+
+/** The log example `drive-record.md` carries, which the check must read clean. */
+const REFERENCE_LOG = (() => {
+  const reference = readFileSync(
+    join(
+      import.meta.dirname,
+      '../../claude/skills/app-drive/references/drive-record.md',
+    ),
+    'utf8',
+  )
+  const block = /```markdown\n(# Drive log[\s\S]*?)```/.exec(reference)
+  if (!block) throw new Error('drive-record.md carries no drive log example')
+  return block[1]
+})()
 
 const BOTH_DRIVEN = [
   { goal: 'A designer lays out frames on one board', status: 'driven' },
@@ -110,6 +142,84 @@ describe('readGoals', () => {
     expect(readGoals('# Requirements\n\n## Constraints\n\n- Local.\n')).toEqual(
       [],
     )
+  })
+})
+
+describe('readDrawn', () => {
+  it('should read the reference example as drawn, citing its paths', () => {
+    expect(readDrawn(REFERENCE_LOG)).toEqual({
+      undrawn: [],
+      paths: ['evidence/02-options.png', 'evidence/mocks/layers/'],
+    })
+  })
+
+  it('should list a decision whose finding carries no Drawn field', () => {
+    const log = REFERENCE_LOG.replace(/^- \*\*Drawn:\*\*.*\n/m, '')
+
+    expect(readDrawn(log).undrawn).toEqual([
+      '02. Layers click leaves a half-hidden frame in place',
+    ])
+  })
+
+  it('should read no path out of a skip reason that backticks a term', () => {
+    const log = [
+      '## 03. Export prints no record',
+      '',
+      '- **Drawn:** skipped, the fix changes only the `--json` record',
+      '- **Decision (operator):** print the record on stdout',
+    ].join('\n')
+
+    expect(readDrawn(log)).toEqual({ undrawn: [], paths: [] })
+  })
+
+  it('should pass a skipped drawing that gives its reason', () => {
+    const log = [
+      '## 03. Export drops the alpha channel',
+      '',
+      '- **Drawn:** skipped, the fix changes no pixel the persona sees',
+      '- **Decision (operator):** keep alpha in PNG export',
+    ].join('\n')
+
+    expect(readDrawn(log)).toEqual({ undrawn: [], paths: [] })
+  })
+
+  it('should list a bare skipped drawing as undrawn', () => {
+    const log = [
+      '## 03. Export drops the alpha channel',
+      '',
+      '- **Drawn:** skipped',
+      '- **Decision (operator):** keep alpha in PNG export',
+    ].join('\n')
+
+    expect(readDrawn(log).undrawn).toEqual([
+      '03. Export drops the alpha channel',
+    ])
+  })
+
+  it('should pass a decision pointing back at the finding that drew it', () => {
+    const log = [
+      '## 04. Layers click on a nested frame',
+      '',
+      '- **Decision (operator):** see 02',
+    ].join('\n')
+
+    expect(readDrawn(log).undrawn).toEqual([])
+  })
+
+  it('should ignore a reference shot and a finding with no decision', () => {
+    const log = [
+      '## ref-01. The operator Figma panel',
+      '',
+      '- **Decision (operator):** match this panel',
+      '',
+      '## 05. Export to PNG',
+      '',
+      '`pass` · goal · designer',
+      '',
+      '- **Did:** exported the board',
+    ].join('\n')
+
+    expect(readDrawn(log).undrawn).toEqual([])
   })
 })
 
@@ -273,6 +383,73 @@ describe('checkDrive', () => {
     expect(outcome).toMatchObject({
       reason: 'failed',
       findings: { worktreeLeft: [copy] },
+    })
+  })
+
+  it('should pass a drive whose folder carries no drive log', async () => {
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeRecord({ goals: BOTH_DRIVEN })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'clean',
+      findings: { undrawn: [] },
+    })
+  })
+
+  it('should fail a logged decision with no drawn outcome', async () => {
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeLog(
+      '## 02. Layers click leaves a frame half hidden',
+      '- **Decision (operator):** center the frame',
+    )
+    writeRecord({ goals: BOTH_DRIVEN })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'failed',
+      findings: { undrawn: ['02. Layers click leaves a frame half hidden'] },
+    })
+  })
+
+  it('should pass a drawn decision whose paths hold files', async () => {
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    write(`${FOLDER}/evidence/02-options.png`, 'png')
+    write(`${FOLDER}/evidence/mocks/layers/02-fix.html`, '<div></div>')
+    writeLog(REFERENCE_LOG.replace(/^# Drive log\n/, ''))
+    writeRecord({ goals: BOTH_DRIVEN })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'clean',
+    })
+  })
+
+  it('should fail a drawn path holding no file', async () => {
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    writeLog(
+      '## 02. Layers click leaves a frame half hidden',
+      '- **Drawn:** `evidence/02-options.png`',
+      '- **Decision (operator):** center the frame',
+    )
+    writeRecord({ goals: BOTH_DRIVEN })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'failed',
+      findings: { undrawn: [], missingEvidence: ['evidence/02-options.png'] },
+    })
+  })
+
+  it('should fail a drawn path outside the evidence folder', async () => {
+    await recordBaseline(ROOT, 'app-drive-1-0')
+    write('.canon/picks/02-fix.png', 'png')
+    writeLog(
+      '## 02. Layers click leaves a frame half hidden',
+      '- **Drawn:** `../../picks/02-fix.png`',
+      '- **Decision (operator):** center the frame',
+    )
+    writeRecord({ goals: BOTH_DRIVEN })
+
+    expect(await checkDrive(ROOT, 'app-drive-1-0')).toMatchObject({
+      reason: 'failed',
+      findings: { strayEvidence: ['../../picks/02-fix.png'] },
     })
   })
 

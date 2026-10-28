@@ -37,7 +37,7 @@ A target whose build cannot run outside its repository, such as one linking sibl
 
 ## Close
 
-Close only after every cited frame sits in the intake folder's `evidence/`, since the removal deletes whatever scratch the worktree held.
+Close only after every cited frame sits in the intake folder's `evidence/`, and every drawn finding's mock source in `evidence/mocks/`, since the removal deletes whatever scratch the worktree held.
 
 1. Stop the server this session started.
 2. Run `git worktree remove --force <dir>/app`, then remove `<dir>`.
