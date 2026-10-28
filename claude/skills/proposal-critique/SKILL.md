@@ -35,8 +35,7 @@ Rate the proposal on two axes before asking anything, and let the rating set how
 | Rating                        | Groups to ask                                         |
 | ----------------------------- | ----------------------------------------------------- |
 | Two-way and local             | Real problem only, its first two questions, then stop |
-| Two-way and shipped           | Real problem, worth it, cheapest probe                |
-| One-way, local or shipped     | Every group                                           |
+| One-way, or shipped           | Every group                                           |
 | A fix for an unverified cause | Every group, whatever the rating, starting with cause |
 
 State the rating and its reason in one line. Never run the full set on a two-way local change to look thorough.
@@ -103,7 +102,7 @@ Pick one of four, and name the questions that decided it.
 - **Absorb**: the cost of doing nothing is smaller than the fix, so live with the problem and record why
 - **Stop**: the problem is not shown, the cause is not ours, or the proposal crosses a non-goal
 
-Never give two verdicts or a verdict with a condition attached. A condition is a probe, so the verdict is probe first.
+On a two-way local change, go rests on the two real-problem answers alone, since a revert undoes a wrong go. Never give two verdicts or a verdict with a condition attached. A condition is a probe, so the verdict is probe first.
 
 ## Output
 

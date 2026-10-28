@@ -14,7 +14,7 @@ When a session does question a proposal, it asks the same long list of a one-lin
 ## Must
 
 - Ask whether the proposal does too much and whether it is too cautious
-- Scale the question count by reversibility and reach, two questions for a two-way local change and every group for a one-way change or a fix whose cause is unverified
+- Scale the question count by reversibility and reach, two questions for a two-way local change and every group for a one-way or shipped change or an unverified cause
 - Answer each question from evidence in the tree, the history, or the record, and put a preference question through the question surface
 - End on exactly one verdict of go, probe first, absorb, or stop, naming the questions that decided it
 - Say where the proposal was read from, and say when this session wrote it
