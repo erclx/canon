@@ -1047,6 +1047,107 @@ describe('auditSkills body ledgers', () => {
   })
 })
 
+describe('auditSkills duplicate sources', () => {
+  const [[bulletLedgered] = ['']] = Object.entries(BULLET_LEDGER_SKILLS)
+  const name = basename(bulletLedgered)
+  const added = join('references', 'added-later.md')
+  const ledgerRel = skillLedgerPath(name, added)
+  const adopted = join(bulletLedgered, 'references', 'adopted.md')
+
+  const TABLE = '| Bullet | Source |\n| --- | --- |\n'
+
+  function writeLedger(source: string): void {
+    mkdirSync(join(root, SKILL_LEDGERS, name), { recursive: true })
+    writeFileSync(
+      join(root, ledgerRel),
+      `# Ledger\n\n## Semantics\n\n${TABLE}| One | ${source} |\n`,
+    )
+  }
+
+  function writeAdopted(text: string): void {
+    writeFileSync(join(root, adopted), text)
+  }
+
+  beforeEach(() => {
+    listedPracticeSkillsExcept('')
+    const path = join(root, bulletLedgered, added)
+    writeFileSync(path, '# Reference\n\n## Semantics\n\n- One.\n')
+  })
+
+  it('should report a source both the record and a ledger link', async () => {
+    writeLedger('[A source](https://example.com/source)')
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      {
+        rel: adopted,
+        detail: `duplicate source: https://example.com/source in ${ledgerRel}`,
+      },
+    ])
+  })
+
+  it('should read a trailing slash and an anchor as the same source', async () => {
+    writeLedger('[A source](https://example.com/source/#rule)')
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      {
+        rel: adopted,
+        detail: `duplicate source: https://example.com/source in ${ledgerRel}`,
+      },
+    ])
+  })
+
+  it('should read two commit pins as two sources', async () => {
+    writeAdopted('# Adopted\n\n[Pinned](https://example.com/blob/aaa/a.md).\n')
+    writeLedger('[Pinned](https://example.com/blob/bbb/a.md)')
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+
+  it('should pass a declined source no ledger cites', async () => {
+    writeAdopted(
+      '# Adopted\n\n## Declined\n\n[Declined](https://example.com/declined) was read and left out.\n',
+    )
+    writeLedger('[A source](https://example.com/source)')
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+
+  it('should pass a deduped record pointing at its ledger folder', async () => {
+    writeAdopted(
+      `# Adopted\n\nPer-bullet sources sit in \`${join(SKILL_LEDGERS, name)}/\`.\n`,
+    )
+    writeLedger('[A source](https://example.com/source)')
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+
+  it('should report a deduped record pointing at another skill’s ledger', async () => {
+    writeAdopted(
+      `# Adopted\n\nPer-bullet sources sit in \`${join(SKILL_LEDGERS, 'other-skill')}/\`.\n`,
+    )
+    writeLedger('[A source](https://example.com/source)')
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      {
+        rel: bulletLedgered,
+        detail: `ledger cites nothing: ${join('references', 'adopted.md')}`,
+      },
+    ])
+  })
+})
+
 describe('skillLedgerPath', () => {
   it('should drop the references segment from a reference', () => {
     expect(

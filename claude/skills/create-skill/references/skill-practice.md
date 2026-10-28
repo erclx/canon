@@ -56,6 +56,8 @@ A skill whose files list outside-practice directives one per bullet takes a ledg
 - Mark the skill's `SKILL.md` for a ledger too when the body carries directives of its own
 - Keep the rows outside the plugin, so a target pays nothing for them
 - Move a source out of `adopted.md` once its row lands in a ledger, since two copies drift on the first edit. `adopted.md` keeps the catalog-level record and the sources behind any unledgered file.
+- Expect the audit to fail a link in both `adopted.md` and one of the skill's ledgers. It reads an anchor or a trailing slash as the same page and two commit pins as two pages.
+- Name the ledger folder in `adopted.md` once every link has moved out, since a record with no link and no `House choice` row otherwise reads as citing nothing
 
 The audit counts a few lines in a ledgered file apart from a rule's.
 
