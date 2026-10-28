@@ -151,6 +151,48 @@ describe('lift', () => {
     expect(calls.marks).toEqual(['PR_node'])
   })
 
+  describe('advisory checks', () => {
+    const advisoryFailing: ChecksGate = {
+      state: 'passing',
+      isConflicted: false,
+      advisory: ['🍎 macOS Unit Tests'],
+    }
+
+    it('should lift past a failing advisory check and name it in the record', async () => {
+      const { api, calls } = makeApi({ checks: [advisoryFailing] })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record).toMatchObject({
+        reason: 'lifted',
+        isOk: true,
+        advisory: ['🍎 macOS Unit Tests'],
+      })
+      expect(calls.marks).toEqual(['PR_node'])
+    })
+
+    it('should read clear under --check and name the failing advisory check', async () => {
+      const { api } = makeApi({ checks: [advisoryFailing] })
+
+      const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+      expect(record).toMatchObject({
+        reason: 'clear',
+        advisory: ['🍎 macOS Unit Tests'],
+      })
+    })
+
+    it('should carry no advisory field when none failed', async () => {
+      const { api } = makeApi({
+        checks: [{ state: 'passing', isConflicted: false, advisory: [] }],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record).not.toHaveProperty('advisory')
+    })
+  })
+
   describe('ready pull request', () => {
     const ready = { pull: { isDraft: false } }
 

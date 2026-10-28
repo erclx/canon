@@ -409,6 +409,24 @@ describe('merge', () => {
     ])
   })
 
+  it('should merge past a failing advisory check and name it in the record', async () => {
+    const { api, puts } = harness({
+      checks: {
+        state: 'passing',
+        isConflicted: false,
+        advisory: ['🍎 macOS Unit Tests'],
+      },
+    })
+
+    const record = await merge(api, { number: 2544, isDryRun: false })
+
+    expect(record).toMatchObject({
+      reason: 'merged',
+      advisory: ['🍎 macOS Unit Tests'],
+    })
+    expect(puts).toHaveLength(1)
+  })
+
   it('should report the title and description on a dry run and call no merge', async () => {
     const { api, puts } = harness()
 

@@ -83,8 +83,19 @@ export interface EvidenceGate {
 }
 
 export interface ChecksGate {
+  /** The state over the checks the base requires, or every check when none were read. */
   readonly state: ChecksState
   readonly isConflicted: boolean
+  /** Failing checks outside the required set, which are reported and never gate. */
+  readonly advisory?: readonly string[]
+}
+
+/** The advisory field a record carries, absent when no advisory check failed. */
+export function advisoryOf(reading: ChecksGate): {
+  advisory?: readonly string[]
+} {
+  const advisory = reading.advisory ?? []
+  return advisory.length > 0 ? { advisory } : {}
 }
 
 /**
@@ -129,6 +140,8 @@ export interface LiftRecord {
   readonly carriedFrom?: string
   readonly paintedPaths?: readonly string[]
   readonly drivenPaths?: readonly string[]
+  /** Failing checks the base does not require, named so a reader sees them before merging. */
+  readonly advisory?: readonly string[]
   readonly isLifted: boolean
   /** Whether the caller can treat the pull request as ready afterwards. */
   readonly isOk: boolean
@@ -247,7 +260,11 @@ function standingGate(standing: Standing): GateResult {
 }
 
 type CiOutcome =
-  | { readonly kind: 'passing'; readonly waited: number }
+  | {
+      readonly kind: 'passing'
+      readonly waited: number
+      readonly reading: ChecksGate
+    }
   | {
       readonly kind: 'refused'
       readonly reason: LiftRefusal
@@ -274,7 +291,9 @@ async function waitForChecks(
     if (reading === undefined) {
       return { kind: 'refused', reason: 'gh-failed', waited }
     }
-    if (reading.state === 'passing') return { kind: 'passing', waited }
+    if (reading.state === 'passing') {
+      return { kind: 'passing', waited, reading }
+    }
     if (reading.state === 'failing') {
       return { kind: 'refused', reason: 'ci-failing', waited }
     }
@@ -422,6 +441,7 @@ export async function lift(
       gates: all,
       waitedSeconds: 0,
       ...carried(all),
+      ...advisoryOf(reading),
     }
   }
 
@@ -485,6 +505,7 @@ export async function lift(
     gates: cleared,
     waitedSeconds: ci.waited,
     ...carried(cleared),
+    ...advisoryOf(ci.reading),
   }
 }
 
