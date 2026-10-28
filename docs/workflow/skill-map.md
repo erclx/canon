@@ -24,6 +24,7 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 | `canon:backlog-triage`     | The backlog needs pruning                          |
 | `canon:plan-groundwork`    | The state is unmeasured and approaches compete     |
 | `canon:decision-escalate`  | Open decisions turn on your preference             |
+| `canon:proposal-critique`  | A proposal needs questioning before it is built    |
 | `canon:design-pick`        | The call is taste, wanting candidates side by side |
 | `canon:task-board`         | A decided item needs a file on the board           |
 | `canon:plan-feature`       | The approach is settled and needs a plan           |

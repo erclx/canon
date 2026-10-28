@@ -8,6 +8,20 @@ export const MISC_CASES: readonly SkillCase[] = [
     expect: 'decision-escalate',
   },
   {
+    prompt: 'What do you need me to decide before you keep going?',
+    expect: 'decision-escalate',
+  },
+  {
+    prompt:
+      'Poke holes in this plan before we build it. Is the problem even real?',
+    expect: 'proposal-critique',
+  },
+  {
+    prompt:
+      'CI keeps failing on the install step and the plan is to add a retry. Is the cause actually ours, and is this fix worth it?',
+    expect: 'proposal-critique',
+  },
+  {
     prompt:
       'Show me a few different treatments for this callout so I can pick one by looking.',
     expect: 'design-pick',
