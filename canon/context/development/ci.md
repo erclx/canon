@@ -25,7 +25,7 @@ Owns the workflows in `.github/workflows/` that verify a pull request, scan its 
 
 Runs `🛡️ Static Checks` on Linux and `🍎 macOS Unit Tests` beside it, neither on the weekly cron. The macOS job runs `bun run test` alone, since lint, types, format, shell, build, and browser results do not differ by platform.
 
-The macOS job runs on every code pull request and never blocks a merge. The ruleset requires `🛡️ Static Checks` alone, and `canon pr lift` and `canon pr merge` gate by the checks the base's rules list. A failing macOS run shows in both records as `advisory`, and a macOS-only break that merges fails the next `main` run.
+- The macOS job never blocks a merge, since the ruleset requires `🛡️ Static Checks` alone and `canon pr lift` and `canon pr merge` gate by the required checks, naming a failing macOS run `advisory`
 
 - A new push to a pull request cancels its older run. Every other event keys its group on the commit, so `main`, `merge_group`, and the cron never cancel.
 - The Pin Stock Bash step links `/bin/bash` 3.2 first on `PATH`, so every test spawning `bash` runs on what a Mac ships
