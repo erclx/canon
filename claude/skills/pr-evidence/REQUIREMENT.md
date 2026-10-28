@@ -16,7 +16,7 @@ A session judging from the diff whether an evidence image changed cannot see a r
 - The evidence verb runs on every pull request it is given and `no-evidence` is the skip, so an unseen image never ships with no comment
 - It runs alone against an open pull request, resolving the number from the branch when none is passed, and edits the one marked comment in place, so a re-post never duplicates the thread
 - A pull request changing a rendered surface gets a preview address when the project's deploy can mint one, and the wait is bounded so a timeout finishes without the link
-- The worktree's running local server is linked, and the link drops when the pull request closes. A checklist naming an interaction is filmed against it into one short reel.
+- The worktree's running local server is linked, and the link drops when the pull request closes. A checklist naming an interaction is filmed against it into one short reel, whose steps live here and whose filming rules are `ui-film`'s.
 - The skill is invoked by `git-pr`, `git-followup`, or `git-ship`, and a catalog review drops it when none does
 
 ## Must not

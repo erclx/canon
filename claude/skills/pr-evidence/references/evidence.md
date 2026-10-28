@@ -63,9 +63,9 @@ canon pr evidence <number> --check --json
 - Skip filming when the record's `reel.head` is a prefix of the `tip` that `canon pr head <number> --json` reports, since the posted reel already shows this head
 - With no checklist from either source, skip silently, since nothing names an interaction to film
 
-Invoke `canon:ui-film` in pull request mode, passing the number, the local `url`, and the checklist. It films, checks each beat's closing still, pushes the reel to `canon/frames`, and hands back a `link` or a skip reason.
+Read `${CLAUDE_SKILL_DIR}/references/reel.md` and run it with the number, the local `url`, and the checklist. It films, checks each beat's closing still, pushes the reel to `canon/frames`, and hands back a `link` or a skip reason.
 
-Report it rather than proceeding silently when `canon:ui-film` does not resolve, and post the evidence without a reel.
+It reads the filming rules in `ui-film`. Report it rather than proceeding silently when `canon:ui-film` does not resolve, and post the evidence without a reel.
 
 - Hold a `link` for the evidence step, which embeds it under the addresses
 - Hold a skip's reason and message for the closing report. A skip never stops the chain, and a reel already on the comment carries forward under the older head it names.
