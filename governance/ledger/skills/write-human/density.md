@@ -9,13 +9,13 @@ The field is plain-language writing and technical editing. The Google and Micros
 
 ## What to cut
 
-| Bullet                             | Source                                                                                                                                                                                                                    | Read       |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| A restatement at another altitude  | [Microsoft, Top 10 tips](https://learn.microsoft.com/en-us/style-guide/top-10-tips-style-voice): "Give customers just enough information to make decisions confidently. Prune every excess word"                          | 2026-10-28 |
-| A setup clause naming the subject  | [Microsoft, Top 10 tips](https://learn.microsoft.com/en-us/style-guide/top-10-tips-style-voice): "Edit out you can when it isn't necessary. Avoid weak phrasing like there is, there are, and there were"                 | 2026-10-28 |
-| A qualifier changing no truth      | [Microsoft Learn style quick start](https://learn.microsoft.com/en-us/contribute/content/style-quick-start): "Be affirmative and don't use extra words or lots of qualifiers"                                             | 2026-10-28 |
-| An example repeating the one above | House choice: a second example teaching what the first taught doubles the reading for no new case, and the reader goes looking for the difference                                                                         | 2026-10-28 |
-| A transition naming the relation   | [Google style guide, Word list](https://developers.google.com/style/word-list): "Usually, just is a filler word that you can delete without affecting your meaning", the test a transition the sentences carry also fails | 2026-10-28 |
+| Bullet                             | Source                                                                                                                                                                                                    | Read       |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| A restatement at another altitude  | [Microsoft, Top 10 tips](https://learn.microsoft.com/en-us/style-guide/top-10-tips-style-voice): "Give customers just enough information to make decisions confidently. Prune every excess word"          | 2026-10-28 |
+| A setup clause naming the subject  | [Microsoft, Top 10 tips](https://learn.microsoft.com/en-us/style-guide/top-10-tips-style-voice): "Edit out you can when it isn't necessary. Avoid weak phrasing like there is, there are, and there were" | 2026-10-28 |
+| A qualifier changing no truth      | [Microsoft Learn style quick start](https://learn.microsoft.com/en-us/contribute/content/style-quick-start): "Be affirmative and don't use extra words or lots of qualifiers"                             | 2026-10-28 |
+| An example repeating the one above | House choice: a second example teaching what the first taught doubles the reading for no new case, and the reader goes looking for the difference                                                         | 2026-10-28 |
+| A transition naming the relation   | House choice: a transition such as `Additionally` before an addition restates the relation the sentence order already shows, so it adds a word and no claim                                               | 2026-10-28 |
 
 ## What never to cut
 

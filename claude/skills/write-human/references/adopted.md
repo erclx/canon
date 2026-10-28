@@ -56,6 +56,6 @@ The source material also prefers shorter sentences without bound. This skill mea
 Each bullet and ordered step in the skill body and in `density.md` has its own source row in a ledger outside the plugin, one ledger per file and one row per bullet under the H2 the bullet sits under.
 
 - The toolkit's skill audit fails a ledgered file whose bullets and rows disagree in count under any heading, and a target never carries the rows
-- The rows cite government plain-language guidance, Google's and Microsoft's developer style guides, and Purdue OWL, and mark the rest as house choices
+- The rows cite plain-language guidance, the Google and Microsoft style guides, Nielsen Norman Group, Purdue OWL, and Signs of AI writing, and mark the rest as house choices
 - `machine-tells.md` holds its tells as prose, so its ledger sources each tell in a list rather than a table
 - This record keeps the adopted and declined position above, which no row restates
