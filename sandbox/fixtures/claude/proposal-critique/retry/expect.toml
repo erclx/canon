@@ -1,0 +1,30 @@
+# What a correct `/canon:proposal-critique` run leaves behind on the retry arm.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block, since a bare key
+# below one binds to that table and asserts nothing.
+#
+# PLAN.md retries an install whose failures bunch on three days, hit another
+# repository on the same days, and clear on a rerun, and it ships to every
+# repository copying the workflow. The cause is upstream and the plan is
+# shipped, so a correct critique runs every group and ends on probe first or
+# stop. The prompt names neither the cause nor the verdict.
+
+# The verdict goes to chat, so the run writes nothing.
+write_scope = []
+
+# The output block's fixed verdict label, which no run rewords.
+reply = ["Verdict:"]
+
+manual = [
+  "The verdict is probe first or stop, never go. Semantic: the reply names one of four words, and a substring match cannot exclude the wrong two.",
+  "The cause group cites the failures bunched by day, the `docs-site` failures on the same days, or both, as evidence the cause is upstream.",
+  "The worth-it group names the cache that never saved as a mechanism that has not worked once.",
+  "The rating reads one-way or shipped, since the plan ships to every repository copying the template.",
+]
+
+# The plan is left as written, since the skill writes no section into it.
+[[content]]
+path = "PLAN.md"
+pattern = 'Retry `bunx playwright install'

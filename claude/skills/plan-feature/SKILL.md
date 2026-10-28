@@ -77,7 +77,8 @@ What this skill adds on top of the standard:
 - Record each command Step 2 ran and what it showed, or the not-run reason, under `## Current behavior`, and omit the section when nothing ran
 - Reframe a vague ask as success criteria before `## Files to touch`, each an observable result and its check, which becomes one `## Verification` bullet. "Make it faster" names none.
 - Confirm a concrete project or use case drives the feature, and lift patterns from it where precedent exists. A feature with no named user is a guess.
-- Prefer one layout that serves both a new and a grown project over a dual-mode toggle or a migration shim. Two modes double what every later change has to hold.
+- Prefer one layout that serves both a new and a grown project over a dual-mode toggle or a migration shim. Two modes double what every later change holds.
+- Name `proposal-critique` for a one-way change or an unverified cause
 
 ### Suggestions and sections
 

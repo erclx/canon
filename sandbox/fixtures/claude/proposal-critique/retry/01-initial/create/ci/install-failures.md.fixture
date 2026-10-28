@@ -1,0 +1,19 @@
+# Browser install failures, last 30 days
+
+Copied from the CI history of the `e2e` job. Every failure is at the install step.
+
+| Date       | Run  | Error                                                       |
+| ---------- | ---- | ----------------------------------------------------------- |
+| 2026-10-03 | 4411 | `E: Failed to fetch ... 503 Service Unavailable` (apt mirror) |
+| 2026-10-03 | 4413 | `E: Failed to fetch ... 503 Service Unavailable` (apt mirror) |
+| 2026-10-03 | 4415 | `E: Failed to fetch ... 503 Service Unavailable` (apt mirror) |
+| 2026-10-14 | 4502 | `E: Failed to fetch ... Connection timed out` (apt mirror)    |
+| 2026-10-14 | 4503 | `E: Failed to fetch ... Connection timed out` (apt mirror)    |
+| 2026-10-22 | 4580 | `E: Failed to fetch ... 503 Service Unavailable` (apt mirror) |
+| 2026-10-22 | 4584 | `E: Failed to fetch ... 503 Service Unavailable` (apt mirror) |
+
+The other 212 runs in the window passed. A rerun of each failed job passed within the hour.
+
+The `docs-site` repository, which uses a different workflow, failed at its own apt step on 2026-10-03 and 2026-10-22.
+
+The browser archive cache from an earlier attempt never saved. Its post step logged `Cache not saved: path does not exist` on every run.

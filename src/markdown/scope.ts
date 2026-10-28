@@ -280,6 +280,8 @@ export const GATED_PATHS: readonly string[] = [
   'claude/skills/pr-evidence/REQUIREMENT.md',
   'claude/skills/pr-evidence/SKILL.md',
   'claude/skills/pr-evidence/references/evidence.md',
+  'claude/skills/proposal-critique/REQUIREMENT.md',
+  'claude/skills/proposal-critique/SKILL.md',
   'claude/skills/review-address/REQUIREMENT.md',
   'claude/skills/review-address/SKILL.md',
   'claude/skills/review-address/references/post-review-findings.md',

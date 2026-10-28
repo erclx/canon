@@ -1,0 +1,10 @@
+# Plan: retry the browser install in CI
+
+The `e2e` job fails at the browser install step a few times a week. Wrap the install in a retry so the job passes on its own.
+
+1. Retry `bunx playwright install --with-deps chromium` up to three times, waiting 30 seconds between attempts.
+2. Cache the downloaded browser archive between runs so a retry has less to fetch.
+
+Files to touch: `.github/workflows/e2e.yml`.
+
+Ships to: every repository that copies this workflow from the shared template.
