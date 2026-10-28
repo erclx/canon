@@ -65,7 +65,7 @@ canon pr evidence <number> --check --json
 
 Read `${CLAUDE_SKILL_DIR}/references/reel.md` and run it with the number, the local `url`, and the checklist. It films, checks each beat's closing still, pushes the reel to `canon/frames`, and hands back a `link` or a skip reason.
 
-It reads the filming rules in `ui-film`. Report it rather than proceeding silently when `canon:ui-film` does not resolve, and post the evidence without a reel.
+It reads the filming rules in `ui-film`. Report it rather than proceeding silently when the `ui-film` skill does not resolve, and post the evidence without a reel.
 
 - Hold a `link` for the evidence step, which embeds it under the addresses
 - Hold a skip's reason and message for the closing report. A skip never stops the chain, and a reel already on the comment carries forward under the older head it names.
