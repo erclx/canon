@@ -30,7 +30,7 @@ Runs `🛡️ Static Checks` on Linux and `🍎 macOS Unit Tests` beside it, nei
 - A test assuming `shellcheck`, `shfmt`, `claude`, or `/proc` skips on macOS without it, and the job never gains an install step
 - A macOS temp root under `/var` is a symlink to `/private/var`, so a test comparing it with a path git or a child reports wraps `mkdtempSync` in `realpathSync`
 
-### The macOS skip on a docs-only change
+### `scripts/ci/docs-only.sh`
 
 A pull request changing only `.md` files skips `🍎 macOS Unit Tests`, which is the slowest check. The `🔍 Changes` job runs `scripts/ci/docs-only.sh` against the pull request's base and outputs `code=false` only when every changed file ends in `.md`.
 
