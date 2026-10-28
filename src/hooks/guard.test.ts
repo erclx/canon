@@ -2001,7 +2001,9 @@ describe('plan-guard.sh firing conditions', () => {
   })
 
   let count = 0
-  const planProject = (transcript = ''): { root: string; transcript: string } => {
+  const planProject = (
+    transcript = '',
+  ): { root: string; transcript: string } => {
     count++
     const root = join(fixture, `plan-guard-project-${count}`)
     mkdirSync(join(root, '.canon/plans'), { recursive: true })
@@ -2023,8 +2025,7 @@ describe('plan-guard.sh firing conditions', () => {
       transcript_path: project.transcript,
     })
 
-  const heredoc = (path: string): string =>
-    `cat > ${path} <<'EOF'\n# Plan\nEOF`
+  const heredoc = (path: string): string => `cat > ${path} <<'EOF'\n# Plan\nEOF`
 
   for (const tree of TREES) {
     const hook = join(tree.dir, 'plan-guard.sh')
@@ -2038,15 +2039,18 @@ describe('plan-guard.sh firing conditions', () => {
           'a heredoc onto a main-root variable',
           heredoc('"$root/.canon/plans/feature-new.md"'),
         ],
-      ])('should block a new plan written by %s with no invocation', async (_, command) => {
-        const project = planProject()
+      ])(
+        'should block a new plan written by %s with no invocation',
+        async (_, command) => {
+          const project = planProject()
 
-        const result = await run(hook, shellIn(project, command))
+          const result = await run(hook, shellIn(project, command))
 
-        expect(result.stderr).toContain('.canon/plans/feature-new.md')
-        expect(result.stderr).toContain('Invoke the canon:plan-feature skill')
-        expect(result.code).toBe(2)
-      })
+          expect(result.stderr).toContain('.canon/plans/feature-new.md')
+          expect(result.stderr).toContain('Invoke the canon:plan-feature skill')
+          expect(result.code).toBe(2)
+        },
+      )
 
       it('should block a Write creating a new plan with no invocation', async () => {
         const project = planProject()
@@ -2109,14 +2113,23 @@ describe('plan-guard.sh firing conditions', () => {
       })
 
       it.each([
-        ['a heredoc overwrite of an existing plan', heredoc('.canon/plans/feature-old.md')],
+        [
+          'a heredoc overwrite of an existing plan',
+          heredoc('.canon/plans/feature-old.md'),
+        ],
         ['a read of an existing plan', 'cat .canon/plans/feature-old.md'],
         [
           'an archive move',
           'mv .canon/plans/feature-old.md .canon/plans/archive/feature-old.md',
         ],
-        ['a write under the archive', heredoc('.canon/plans/archive/feature-new.md')],
-        ['a verb naming a new plan', 'canon tasks plan-link .canon/plans/feature-new.md'],
+        [
+          'a write under the archive',
+          heredoc('.canon/plans/archive/feature-new.md'),
+        ],
+        [
+          'a verb naming a new plan',
+          'canon tasks plan-link .canon/plans/feature-new.md',
+        ],
         [
           'a heredoc body quoting a plan path',
           "cat > notes.md <<'EOF'\nsee > .canon/plans/feature-new.md\nEOF",
