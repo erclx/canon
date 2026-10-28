@@ -98,32 +98,35 @@ export interface Stage {
 }
 
 /**
- * Corpora a `src/` test asserts over from outside `src/`. Nothing compares
- * this list to the tests reading those paths, so a test that starts reading a
- * new corpus joins it here in the same change, or a branch touching only that
- * corpus skips the Tests stage. The first four are directory prefixes because
- * their tests walk the tree whole, which is what reaches a rule or a skill a
- * branch adds rather than edits.
+ * Files a scoped run hands to `vitest related`, which follows imports from
+ * them to the tests that reach them. A corpus a test reads from disk is not
+ * among them, so a Markdown-only push runs no tests locally and CI's full run
+ * is what catches a broken corpus reader.
  */
-export const TEST_CORPORA_PATTERNS = [
-  '^claude/skills/',
-  '^governance/rules/',
-  '^\\.claude/hooks/',
-  '^tooling/claude/seeds/\\.claude/hooks/',
-  '^tooling/base/reference\\.md$',
-  '^tooling/web/configs/scripts/worktree-port\\.sh$',
-]
+const RELATED_SOURCES = /\.tsx?$|^commitlint\.config\.js$/
+
+/** Files every test depends on without importing, so no related run sees them. */
+const FULL_SUITE_TRIGGERS =
+  /^vitest\.(config|setup|global-setup)\.ts$|^tsconfig\.json$|^package\.json$/
 
 const TESTS_SCOPE = new RegExp(
-  [
-    '^src/',
-    '^vitest\\.config\\.ts$',
-    '^tsconfig\\.json$',
-    '^package\\.json$',
-    '^commitlint\\.config\\.(js|test\\.ts)$',
-    ...TEST_CORPORA_PATTERNS,
-  ].join('|'),
+  `${RELATED_SOURCES.source}|${FULL_SUITE_TRIGGERS.source}`,
 )
+
+const FULL_SUITE = ['bun', 'run', 'test']
+
+function relatedTests(changed: readonly string[]): readonly string[] {
+  if (changed.some((file) => FULL_SUITE_TRIGGERS.test(file))) return FULL_SUITE
+  return [
+    'bun',
+    '--bun',
+    'vitest',
+    'related',
+    '--run',
+    '--passWithNoTests',
+    ...changed.filter((file) => RELATED_SOURCES.test(file)),
+  ]
+}
 
 /**
  * Every stage the gate runs, in the order it runs them.
@@ -596,14 +599,17 @@ export const STAGES: readonly Stage[] = [
     id: 'tests',
     label: 'Tests',
     scope: TESTS_SCOPE,
-    skipped: 'Skipped, no TypeScript or asserted-corpus changes',
+    skipped: 'Skipped, no TypeScript or test config changes',
     // Concurrent suites from a wave of worktrees starve each other's spawn
     // and browser tests past their timeouts, so the box runs one at a time.
+    // A related run can still reach a spawn or browser test, so it holds the
+    // lock too.
     lock: 'tests',
     checks: [
       {
         kind: 'command',
-        argv: ['bun', 'run', 'test'],
+        argv: FULL_SUITE,
+        changedArgv: relatedTests,
         failure: 'Tests failed',
       },
     ],

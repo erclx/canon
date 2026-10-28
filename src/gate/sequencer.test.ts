@@ -621,12 +621,6 @@ describe('the shipped stage table', () => {
       ['tests', 'tests'],
     ])
   })
-
-  it('should scope the tests stage to the corpora a src test asserts over', () => {
-    const tests = STAGES.find((entry) => entry.id === 'tests')
-
-    expect(tests?.scope?.test('governance/rules/ui/craft.md')).toBe(true)
-  })
 })
 
 describe('seedEntryCount', () => {
