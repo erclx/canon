@@ -2400,6 +2400,30 @@ describe('plan-guard.sh firing conditions', () => {
         expect(result.code).toBe(code)
       },
     )
+
+    it.each([
+      ['a pass', `${SKILL_CALL}\n`, 0],
+      ['a block', '', 2],
+    ])(
+      'should decide %s with no shell error when decisions.log cannot be opened',
+      async (_, transcript, code) => {
+        const project = planProject(transcript)
+        mkdirSync(
+          join(project.root, '.canon/tmp/hooks/plan-guard/decisions.log'),
+          {
+            recursive: true,
+          },
+        )
+
+        const result = await run(
+          hook,
+          shellIn(project, heredoc('.canon/plans/feature-a.md')),
+        )
+
+        expect(result.code).toBe(code)
+        expect(result.stderr).not.toContain('decisions.log')
+      },
+    )
   })
 
   it('should dismiss a command naming no plan path without spawning jq', async () => {

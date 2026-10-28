@@ -176,9 +176,12 @@ marker_dir="$root/.canon/tmp/hooks/plan-guard"
 # One line per new plan judged, so the blocks can be counted against the passes
 # before the guard is seeded. A failed write never changes the decision.
 log_decision() {
-  mkdir -p "$marker_dir" 2>/dev/null &&
+  # The group takes the redirect's own error, which a `2>/dev/null` after the
+  # `>>` would miss because the shell opens the file first.
+  mkdir -p "$marker_dir" 2>/dev/null && {
     printf '%s %s %s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$1" "$key" "$rest" \
-      >>"$marker_dir/decisions.log" 2>/dev/null
+      >>"$marker_dir/decisions.log"
+  } 2>/dev/null
   return 0
 }
 
