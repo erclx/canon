@@ -7,7 +7,7 @@ description: Which external review patterns this skill adopted, which it decline
 
 External sources were read and filtered rather than imported. This file is the record. A later session extending the skill adds to it rather than re-arguing an item already settled here.
 
-The `addyosmani/agent-skills` citations below all pin commit `addyosmani/agent-skills@2686b620`.
+A bullet's source is linked in its row of the toolkit's per-bullet ledger at `governance/ledger/skills/review-craft/`, outside the plugin, and this file links only a source no row cites. The `addyosmani/agent-skills` citations below all pin commit `addyosmani/agent-skills@2686b620`.
 
 ## Adopted
 
@@ -19,9 +19,9 @@ The `addyosmani/agent-skills` citations below all pin commit `addyosmani/agent-s
   - Backs asking what each unit hides, and flagging a unit that passes its arguments straight through
 - Parnas's criterion that a boundary hides a decision likely to change, [On the Criteria To Be Used in Decomposing Systems into Modules](https://dl.acm.org/doi/10.1145/361598.361623)
   - Backs the opening step, naming the next likely change and counting what it touches
-- Beck's design rules as Fowler records them, especially no duplication and fewest elements, [BeckDesignRules](https://martinfowler.com/bliki/BeckDesignRules.html)
+- Beck's design rules as Fowler records them, especially no duplication and fewest elements, BeckDesignRules
   - Backs the one-place step, and matching each pattern to a problem the code has today
-- Google's reviewer guide on design, complexity, and over-engineering, [What to look for in a code review](https://google.github.io/eng-practices/review/reviewer/looking-for.html)
+- Google's reviewer guide on design, complexity, and over-engineering, What to look for in a code review
   - Backs the frame for the whole walk, and the reason a speculative abstraction is a finding
 
 The procedure stays in the body rather than a reference, since every review reads the design axis and a reference would cost a read on every run.
@@ -30,7 +30,7 @@ The procedure stays in the body rather than a reference, since every review read
 
 Three scope checks come from outside sources, each adopted as one check.
 
-- **Change sizing as a split.** Google's [small CLs](https://google.github.io/eng-practices/review/developer/small-cls.html) and `skills/code-review-and-quality/SKILL.md` ask for one self-contained change, so the check names a split when two concerns could land apart.
+- **Change sizing as a split.** Google's small CLs and `skills/code-review-and-quality/SKILL.md` ask for one self-contained change, so the check names a split when two concerns could land apart.
 - **Relocate versus reduce.** The same `code-review-and-quality` skill counts the concepts a reader holds before and after a refactor, so moved complexity reports as moved.
 - **Chesterton's Fence.** `skills/code-simplification/SKILL.md` reads why code exists before removing it, so the check reads `git blame` and the adding commit before calling a path dead.
 

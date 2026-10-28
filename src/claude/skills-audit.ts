@@ -165,6 +165,9 @@ export const PRACTICE_LEDGER = join('references', 'adopted.md')
  */
 const EXTERNAL_LINK = /\]\(\s*https?:\/\/|<https?:\/\//
 
+/** The address an inline link or an autolink cites, captured for comparison. */
+const EXTERNAL_ADDRESS = /\]\(\s*(https?:\/\/[^)\s]+)|<(https?:\/\/[^>\s]+)>/g
+
 /**
  * A table cell opening on the marker the governance ledgers already use for a
  * rule the toolkit chose, so one check reads every ledger alike.
@@ -281,6 +284,8 @@ interface ReferenceLedger {
   readonly ledgerRel: string
   /** Undefined when the ledger file is absent. */
   readonly mismatches: readonly LedgerMismatch[] | undefined
+  /** Every source the ledger links, normalized by `sourceKey`. */
+  readonly sources: readonly string[]
 }
 
 interface SkillText {
@@ -457,13 +462,22 @@ async function readReferenceLedgers(
     files.map(async ({ path, text }) => {
       const ledgerRel = skillLedgerPath(folder, path)
       const ledgerPath = join(root, ledgerRel)
-      const mismatches = existsSync(ledgerPath)
-        ? compareLedger(
-            ledgerGroups(text, path === 'SKILL.md'),
-            countLedgerRows(await Bun.file(ledgerPath).text()),
-          )
+      const ledger = existsSync(ledgerPath)
+        ? await Bun.file(ledgerPath).text()
         : undefined
-      return { rel: join(skillRel, path), ledgerRel, mismatches }
+      const mismatches =
+        ledger === undefined
+          ? undefined
+          : compareLedger(
+              ledgerGroups(text, path === 'SKILL.md'),
+              countLedgerRows(ledger),
+            )
+      return {
+        rel: join(skillRel, path),
+        ledgerRel,
+        mismatches,
+        sources: ledger === undefined ? [] : linkedSources(ledger),
+      }
     }),
   )
 }
@@ -685,6 +699,7 @@ function practiceFindings(source: SkillSource): SkillFinding[] {
   return [
     ...sections,
     ...ledgerFindings(source),
+    ...duplicateFindings(source),
     ...source.referenceLedgers.flatMap(referenceLedgerFindings),
     ...source.staleExemptions.map((rel) => ({
       rel,
@@ -714,15 +729,76 @@ function ledgerFindings(source: SkillSource): SkillFinding[] {
     return [{ rel: source.rel, detail: `missing ledger: ${PRACTICE_LEDGER}` }]
   }
 
-  const cites = bodyLines(source.ledger)
-    .filter((line) => !line.fenced)
+  const lines = bodyLines(source.ledger).filter((line) => !line.fenced)
+  const cites = lines
     .map((line) => maskCodeSpans(line.text))
     .some((text) => EXTERNAL_LINK.test(text) || HOUSE_CHOICE.test(text))
   if (cites) return []
+  if (pointsAtLedgers(source, lines)) return []
 
   return [
     { rel: source.rel, detail: `ledger cites nothing: ${PRACTICE_LEDGER}` },
   ]
+}
+
+/**
+ * A skill on the per-bullet list cites its sources in its ledger folder, so a
+ * record whose every link moved there is left pointing at the folder instead.
+ * A skill off the list has nowhere else for a source to live.
+ */
+function pointsAtLedgers(
+  source: SkillSource,
+  lines: readonly { text: string }[],
+): boolean {
+  if (BULLET_LEDGER_SKILLS[source.rel] === undefined) return false
+  const folder = `${join(SKILL_LEDGERS, source.folder)}/`
+  return lines.some((line) => line.text.includes(folder))
+}
+
+/**
+ * The source record keeps a source no ledger row cites, so a link in both
+ * places is a second copy that drifts on the first edit to either.
+ */
+function duplicateFindings(source: SkillSource): SkillFinding[] {
+  if (source.ledger === undefined) return []
+  if (BULLET_LEDGER_SKILLS[source.rel] === undefined) return []
+
+  const ledgered = new Map<string, string>()
+  for (const entry of source.referenceLedgers) {
+    for (const key of entry.sources) {
+      if (!ledgered.has(key)) ledgered.set(key, entry.ledgerRel)
+    }
+  }
+
+  return [...new Set(linkedSources(source.ledger))].flatMap((key) => {
+    const ledgerRel = ledgered.get(key)
+    if (ledgerRel === undefined) return []
+    return [
+      {
+        rel: join(source.rel, PRACTICE_LEDGER),
+        detail: `duplicate source: ${key} in ${ledgerRel}`,
+      },
+    ]
+  })
+}
+
+/** Every external address a text links outside fences and code spans. */
+function linkedSources(text: string): string[] {
+  return bodyLines(text)
+    .filter((line) => !line.fenced)
+    .flatMap((line) =>
+      [...maskCodeSpans(line.text).matchAll(EXTERNAL_ADDRESS)].map((match) =>
+        sourceKey(match[1] ?? match[2] ?? ''),
+      ),
+    )
+}
+
+/**
+ * An anchor and a trailing slash reach the same page, so both drop. A commit
+ * pin names a different version, so the path stays as written.
+ */
+function sourceKey(address: string): string {
+  return address.replace(/#.*$/, '').replace(/\/+$/, '')
 }
 
 /**

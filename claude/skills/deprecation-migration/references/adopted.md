@@ -7,11 +7,13 @@ description: Which external sources on deprecation and migration this skill adop
 
 External sources were read and filtered rather than imported. This file is the record, and a later session extending the skill adds to it rather than re-arguing an item settled here.
 
+A source a bullet rests on is linked once, in that bullet's row of the toolkit's per-bullet ledger at `governance/ledger/skills/deprecation-migration/`, which ships outside the plugin. This file names those sources without the link and keeps the catalog-level adopted and declined record, linking only a source no row cites.
+
 ## Adopted from the default shelf
 
 ### Deprecation
 
-[Software Engineering at Google, chapter 15](https://abseil.io/resources/swe-book/html/ch15.html) supplies four positions the body states.
+Software Engineering at Google, chapter 15 supplies four positions the body states.
 
 - **Two types.** Advisory and compulsory, the second carrying a removal date. The body allows compulsory only once a replacement ships, which the chapter implies and the four questions make explicit.
 - **Actionable, relevant warnings.** A warning names what the caller does, and surfaces where the caller uses the old surface.
@@ -20,13 +22,13 @@ External sources were read and filtered rather than imported. This file is the r
 
 ### Migrating callers yourself
 
-[Software Engineering at Google, chapter 1](https://abseil.io/resources/swe-book/html/ch01.html), under "Policies That Don't Scale", has infrastructure teams move their internal users to new versions themselves, or update in place in a backward-compatible way.
+Software Engineering at Google, chapter 1, under "Policies That Don't Scale", has infrastructure teams move their internal users to new versions themselves, or update in place in a backward-compatible way.
 
 Adopted as the group on migrating callers yourself, with the backward-compatible path kept for callers the owner cannot edit.
 
 ## Adopted for the decision and the bridges
 
-Addy Osmani's `agent-skills`, pinned at addyosmani/agent-skills@2686b620, [`skills/deprecation-and-migration/SKILL.md`](https://github.com/addyosmani/agent-skills/blob/2686b620/skills/deprecation-and-migration/SKILL.md), supplies the decision and the bridge patterns.
+Addy Osmani's `agent-skills`, pinned at addyosmani/agent-skills@2686b620, `skills/deprecation-and-migration/SKILL.md`, supplies the decision and the bridge patterns.
 
 ### The decision
 

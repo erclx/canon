@@ -7,11 +7,13 @@ description: Which external software design sources this skill adopted, which it
 
 External sources were read and filtered rather than imported. This file is the record, and a later session extending the skill adds to it rather than re-arguing an item settled here.
 
+A source a bullet rests on is linked once, in that bullet's row of the toolkit's per-bullet ledger at `governance/ledger/skills/code-craft/`, which ships outside the plugin. This file names those sources without the link and keeps the catalog-level adopted and declined record, linking only a source no row cites.
+
 ## Adopted from the default shelf
 
 ### What to look for in a code review
 
-[Google's engineering practices](https://google.github.io/eng-practices/review/reviewer/looking-for.html) say to solve the problem known to need solving now rather than one speculated about, and to read "too complex" as "cannot be understood quickly by a reader".
+Google's engineering practices say to solve the problem known to need solving now rather than one speculated about, and to read "too complex" as "cannot be understood quickly by a reader".
 
 Adopted as the writing-time half of the same judgment, behind the change test and the ban on building for an unnamed case. The review procedure itself stays with `review-craft`.
 
@@ -29,25 +31,25 @@ Adopted as the opening of the depth group and the pass-through flag. `api-design
 
 ### The design book exchange
 
-In [John Ousterhout and Robert Martin's discussion](https://github.com/johnousterhout/aposd-vs-clean-code), Martin argues for very small methods and Ousterhout for fewer, deeper ones a reader need not stitch together.
+In John Ousterhout and Robert Martin's discussion, Martin argues for very small methods and Ousterhout for fewer, deeper ones a reader need not stitch together.
 
 Adopted as the third tension, stated as when each side wins rather than as a verdict, plus the depth bullet preferring one function a reader follows top to bottom.
 
 ### Reducing coupling
 
-Martin Fowler, [Reducing Coupling](https://martinfowler.com/ieeeSoftware/coupling.pdf), IEEE Software, 2001, holds that a change in one module should not ripple into others. Adopted behind the rule that a decision stays in one unit and the red flag on a third file opened to adjust one rule.
+Martin Fowler, Reducing Coupling, IEEE Software, 2001, holds that a change in one module should not ripple into others. Adopted behind the rule that a decision stays in one unit and the red flag on a third file opened to adjust one rule.
 
 ## Adopted for the tensions
 
 ### DRY as knowledge
 
-Andy Hunt and Dave Thomas, [Orthogonality and the DRY Principle](https://www.artima.com/articles/orthogonality-and-the-dry-principle), give every piece of knowledge one authoritative representation, which is broader than and different from avoiding repeated text.
+Andy Hunt and Dave Thomas, Orthogonality and the DRY Principle, give every piece of knowledge one authoritative representation, which is broader than and different from avoiding repeated text.
 
 Adopted as the first tension, with its other side stated. Two blocks that only look alike and change for different reasons stay apart.
 
 ### Yagni and its carve-out
 
-Ron Jeffries, [You're NOT Gonna Need It](https://ronjeffries.com/xprog/articles/practices/pracnotneed/), and Martin Fowler, [Yagni](https://martinfowler.com/bliki/Yagni.html), build no capability for a presumptive feature, though Yagni "does not apply to effort to make the software easier to modify".
+Ron Jeffries, [You're NOT Gonna Need It](https://ronjeffries.com/xprog/articles/practices/pracnotneed/), and Martin Fowler, Yagni, build no capability for a presumptive feature, though Yagni "does not apply to effort to make the software easier to modify".
 
 Adopted as the second tension, with Fowler's carve-out as the side that wins for a refactor, a test, or a parameter serving the asked-for code.
 
@@ -63,11 +65,11 @@ Martin Fowler, [Beck Design Rules](https://martinfowler.com/bliki/BeckDesignRule
 
 ### Injection
 
-Martin Fowler, [Inversion of Control Containers and the Dependency Injection pattern](https://martinfowler.com/articles/injection.html), hands a component what it depends on rather than letting it find it. Adopted as the hidden-inputs rule for the clock, the environment, randomness, and globals, without any container.
+Martin Fowler, Inversion of Control Containers and the Dependency Injection pattern, hands a component what it depends on rather than letting it find it. Adopted as the hidden-inputs rule for the clock, the environment, randomness, and globals, without any container.
 
 ## Adopted for agent failure modes
 
-Birgitta Böckeler, [The role of developer skills in agentic coding](https://martinfowler.com/articles/exploring-gen-ai/13-role-of-developer-skills.html), 2025, and [How far can we push AI autonomy in code generation?](https://martinfowler.com/articles/pushing-ai-autonomy.html), 2025.
+Birgitta Böckeler, The role of developer skills in agentic coding, 2025, and How far can we push AI autonomy in code generation?, 2025.
 
 - Together they record a lack of reuse and modularity, overeagerness that builds unrequested features, assumptions filled in for silent requirements, and brute-force fixes
 - Adopted as the closing concern group, worded as checks on the session's own diff
