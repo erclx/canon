@@ -70,6 +70,8 @@ Append each finding to the drive log as it happens, never batched at the end, si
 
 Draw every finding the operator decides before writing its `Decision (operator)` line, whether it is a bug fix, a new feature, or a taste call. A planner reading one line of text cannot see what the operator saw, and drawing the options settles questions the text hides.
 
+Load `canon:ui-craft` and `canon:design-taste` before the first fix frame of a rendered surface, as `design-pick` does before drafting. The picked frame is what a worker builds against, so it has to cover states such as popover dismissal and focus return.
+
 1. Draw a now frame and one fix frame per option inside the throwaway copy, on a canvas the app offers or a scratch route added to it. Name frames by the log's finding number, per `drive-record.md`.
 2. Screenshot the frames side by side to `evidence/<nn>-options.png` and open it. Put the options to the operator through the structured question surface, shaped as `design-pick`'s Step 4 shapes a pick.
 3. Copy the mock source into `evidence/mocks/<surface>/`, then write `Drawn` citing both paths and record the pick as the decision.
