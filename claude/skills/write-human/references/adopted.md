@@ -12,6 +12,8 @@ Two external writing skills were read as source material for this one.
 
 Neither was imported wholesale, and one measurement settles why. Read this before adding a rule from outside this corpus, and extend the position below rather than deriving a second one.
 
+A source a bullet rests on is linked once, in that bullet's row of the toolkit's per-bullet ledger at `governance/ledger/skills/write-human/`, which ships outside the plugin. This file names those sources without the link and keeps the catalog-level adopted and declined record, linking only a source no row cites.
+
 ## What was adopted
 
 Roughly half the pattern catalog had no counterpart in this corpus. Six of those patterns are now in `machine-tells.md`, each a shape rather than a token, which kept it out of a ban list that matches words.
