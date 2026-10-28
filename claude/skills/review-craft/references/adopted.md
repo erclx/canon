@@ -7,9 +7,7 @@ description: Which external review patterns this skill adopted, which it decline
 
 External sources were read and filtered rather than imported. This file is the record. A later session extending the skill adds to it rather than re-arguing an item already settled here.
 
-A source a bullet rests on is linked once, in that bullet's row of the toolkit's per-bullet ledger at `governance/ledger/skills/review-craft/`, which ships outside the plugin. This file names those sources without the link and keeps the catalog-level adopted and declined record, linking only a source no row cites.
-
-The `addyosmani/agent-skills` citations below all pin commit `addyosmani/agent-skills@2686b620`.
+A bullet's source is linked in its row of the toolkit's per-bullet ledger at `governance/ledger/skills/review-craft/`, outside the plugin, and this file links only a source no row cites. The `addyosmani/agent-skills` citations below all pin commit `addyosmani/agent-skills@2686b620`.
 
 ## Adopted
 
