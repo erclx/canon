@@ -25,6 +25,12 @@ const REEL_PREFIX = '**Reel** filmed at'
 const REEL_LINE =
   /^\*\*Reel\*\* filmed at `([0-9a-f]{7,40})`:<br><img src="([^"]+)"/
 
+/** How the line naming why no local address was posted opens. */
+const LOCAL_SKIP_PREFIX = '**No local preview:**'
+
+/** How the line naming why no reel was filmed opens. */
+const REEL_SKIP_PREFIX = '**No reel:**'
+
 /** The width a reel is filmed at, which it asks for in the comment. */
 const REEL_WIDTH = 960
 
@@ -196,6 +202,15 @@ function escapeCell(text: string): string {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll('|', '&#124;')
+}
+
+function unescapeCell(text: string): string {
+  return text
+    .replaceAll('&#124;', '|')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&gt;', '>')
+    .replaceAll('&lt;', '<')
+    .replaceAll('&amp;', '&')
 }
 
 function evidenceImage(url: string, alt: string, width?: number): string {
@@ -449,6 +464,18 @@ function reelLine(reel: EvidenceReel): string {
   return `${REEL_PREFIX} \`${head}\`:<br><img src="${escapeCell(reel.link)}" width="${REEL_WIDTH}" alt="reel filmed at ${head}">`
 }
 
+/** Why a render carries no local address or no reel, each a reason code and any one-line message the caller joined to it. */
+export interface EvidenceSkips {
+  readonly local?: string
+  readonly reel?: string
+}
+
+/** A skip line, or nothing for an empty reason. A reason is folded onto one line, since a line break would end the address region early. */
+function skipLines(prefix: string, reason: string | undefined): string[] {
+  const text = reason?.replace(/\s+/g, ' ').trim() ?? ''
+  return text === '' ? [] : [`${prefix} ${escapeCell(text)}`, '']
+}
+
 export function evidenceMarker(head: string): string {
   return `${MARKER_PREFIX} head=${head} -->`
 }
@@ -480,6 +507,10 @@ export function evidenceMarker(head: string): string {
  *
  * A reel sits on its own line under the addresses, labeled with the head it
  * was filmed at, so a reel carried past a later push never reads as current.
+ *
+ * A skip names why the local address or the reel is missing, on its own line
+ * where that address or reel would sit. Each is dropped whenever its address
+ * or reel renders, carried or passed, so a skip never outlives its cause.
  */
 export function renderEvidenceBody(
   states: readonly EvidenceState[],
@@ -490,6 +521,7 @@ export function renderEvidenceBody(
   checklist?: string,
   local?: string,
   reel?: EvidenceReel,
+  skips: EvidenceSkips = {},
 ): string {
   const segments = [
     ...(preview === undefined ? [] : [`${PREVIEW_PREFIX} ${preview}`]),
@@ -499,7 +531,10 @@ export function renderEvidenceBody(
     EVIDENCE_HEADING,
     '',
     ...(segments.length === 0 ? [] : [segments.join(ADDRESS_SEPARATOR), '']),
-    ...(reel === undefined ? [] : [reelLine(reel), '']),
+    ...(local === undefined ? skipLines(LOCAL_SKIP_PREFIX, skips.local) : []),
+    ...(reel === undefined
+      ? skipLines(REEL_SKIP_PREFIX, skips.reel)
+      : [reelLine(reel), '']),
   ]
   const closing =
     checklist === undefined
@@ -754,6 +789,32 @@ export function findEvidenceReel(
     }
   }
   return undefined
+}
+
+/**
+ * The skips the marked comment already carries, read from the address region
+ * only, so a line quoted in a checklist is never taken for one. A re-render
+ * passing no skip carries these forward the way it carries an address.
+ */
+export function findEvidenceSkips(
+  comments: readonly EvidenceComment[],
+): EvidenceSkips {
+  const marked = findMarked(comments)
+  if (marked === undefined) return {}
+  let local: string | undefined
+  let reel: string | undefined
+  for (const raw of marked.body.split('\n')) {
+    const line = raw.trim()
+    if (REGION_ENDS.some((end) => line.startsWith(end))) break
+    const ownSkip = readSegment(line, LOCAL_SKIP_PREFIX)
+    const reelSkip = readSegment(line, REEL_SKIP_PREFIX)
+    if (ownSkip !== undefined) local ??= unescapeCell(ownSkip)
+    if (reelSkip !== undefined) reel ??= unescapeCell(reelSkip)
+  }
+  return {
+    ...(local !== undefined && { local }),
+    ...(reel !== undefined && { reel }),
+  }
 }
 
 /**

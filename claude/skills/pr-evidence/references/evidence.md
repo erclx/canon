@@ -36,7 +36,7 @@ canon pr local --json
 The verb reports the lowest port serving an HTML page whose process runs inside this worktree, never one in another worktree or the main checkout, which shows a different branch. `canon pr local --help` states the contract. Read `reason` on the record rather than the exit code.
 
 - `ok`: hold the record's `url` for the evidence step below.
-- `no-server`, `no-listener-reader`, `unhealthy`, or `invalid-config`: hold the reason and the record's `message` for the closing report, and pass no link.
+- `no-server`, `no-listener-reader`, `unhealthy`, or `invalid-config`: hold the reason and the record's `message` for the closing report and for the evidence step's `--local-skip`, and pass no link.
 - `unhealthy` means a page answered but a health path declared in `canon/config/local.toml` failed. `invalid-config` means that file cannot be read, so nothing was checked.
 - Never start a server here, since the ship chain cannot own one. A worker starts one under `role-worker`.
 - Anything else, including no record or an older binary's unknown-subcommand error: move on silently, as a skip rather than a stop.
@@ -68,7 +68,9 @@ Read `${CLAUDE_SKILL_DIR}/references/reel.md` and run it with the number, the lo
 It reads the filming rules in `ui-film`. Report it rather than proceeding silently when the `ui-film` skill does not resolve, and post the evidence without a reel.
 
 - Hold a `link` for the evidence step, which embeds it under the addresses
-- Hold a skip's reason and message for the closing report. A skip never stops the chain, and a reel already on the comment carries forward under the older head it names.
+- Hold a skip's reason and message for the closing report and for the evidence step's `--reel-skip`
+- A skip never stops the chain, and a reel already on the comment carries forward under the older head it names
+- A silent skip holds no reason, so it passes no `--reel-skip`
 
 ## Post the evidence comparison
 
@@ -77,6 +79,11 @@ Run the verb once against the pull request number. Pass `--checklist` when the c
 ```bash
 canon pr evidence <number> --checklist <main-root>/.canon/tmp/handoff/ui-checklist/<slug>.md --local <url> --reel <link> --json
 ```
+
+Pass `--local-skip '<reason>: <message>'` in place of `--local` when the local step held a refusal, and `--reel-skip '<reason>: <message>'` in place of `--reel` when the reel step held a skip. Each puts the line the closing report prints onto the comment as well, so a reader of the pull request sees why the link or the reel is missing.
+
+- Pass the same text the closing report carries, so the comment and the report agree
+- A later run that posts the link or films the reel drops the line, and one passing neither flag carries it forward
 
 One call answers both questions because a checklist decides `no-evidence`. A diff carrying a checklist and no evidence image renders `ok` with the checklist in a marked body, so the checklist lands in the one comment a later call finds and edits.
 
