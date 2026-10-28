@@ -1111,7 +1111,7 @@ const VISUAL_ONLY_GLOBS: readonly string[] = ['tooling/web/configs/e2e/**']
 
 /**
  * `deploy-site.yml` and `pr-visual-checks.yml` each carry their own literal
- * copy of the eight path globs a landing-page change should trigger on, plus
+ * copy of the five path globs a landing-page change should trigger on, plus
  * the `VISUAL_ONLY_GLOBS` the visual workflow adds for itself, per
  * Question 2 in `.canon/plans/archive/feature-render-visibility.md`. A YAML
  * anchor cannot cross files here, so the two copies are read live and compared
