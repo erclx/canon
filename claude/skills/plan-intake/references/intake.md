@@ -103,7 +103,7 @@ The index. It points at items and answers nothing itself.
 - The answer contract stated out loud, since it inverts the plan file's
 - A cluster table of file, what it holds, item count, and open count
 - The verdict counts across the folder
-- A ready list with one row per fix, grouped by what shipping one actually costs, and a named bundle row listing the items whose fixes share a file
+- A ready list with one row per fix, grouped by what shipping one actually costs, and a named bundle row that stands in for the rows of the items whose fixes share a file
 - The open questions, each a labeled markdown link to its owning item's heading anchor
 
 The index carries no answer slot. One question in two answerable places has no rule for which wins, and retrieval walks item headings, so an answer typed into the index is found by nothing and lost silently.
@@ -236,7 +236,7 @@ date: <YYYY-MM-DD>
 ## Ready
 
 - <item, grouped by what shipping it costs>
-- Bundle <name>: <item>, <item>, sharing <file>
+- Bundle <name>: <item>, <item>, sharing <file>, standing in for those items' own rows
 
 ## Open questions
 
