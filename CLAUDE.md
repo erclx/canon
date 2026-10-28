@@ -30,14 +30,14 @@ A fact more than one domain reads is canonical. A fact one domain reads belongs 
 
 Load the skill before editing anything in its domain.
 
-| Task type                                               | Skill                 |
-| ------------------------------------------------------- | --------------------- |
-| `src/`, `scripts/`, `sandbox/`                          | `internal-scripts`    |
-| `tooling/`, manifests, golden configs, seeds            | `internal-tooling`    |
-| `docs/`, `canon/context/`                               | `internal-docs`       |
-| `governance/rules/`, `governance/stacks/`               | `internal-governance` |
-| `claude/skills/`, `claude/README.md`, `.claude/skills/` | `internal-claude`     |
-| `web/`, `assets/`, the landing page                     | `internal-web`        |
+| Task type                                                           | Skill                 |
+| ------------------------------------------------------------------- | --------------------- |
+| `src/`, `scripts/`, `sandbox/`                                      | `internal-scripts`    |
+| `tooling/`, manifests, golden configs, seeds                        | `internal-tooling`    |
+| `docs/`, `canon/context/`                                           | `internal-docs`       |
+| `governance/rules/`, `governance/stacks/`                           | `internal-governance` |
+| `claude/skills/`, `claude/README.md`, `.claude/skills/`, `plugins/` | `internal-claude`     |
+| `web/`, `assets/`, the landing page                                 | `internal-web`        |
 
 @canon/REQUIREMENTS.md
 @canon/context/index.md
@@ -52,6 +52,7 @@ What install and sync carry into a target, beside the rules that never leave.
 - `internal/`: toolkit-only rules, outside every installable surface
 - `tooling/`: golden configs, references, and manifests per stack
 - `claude/skills/`: plugin skills installable in target projects
+- `plugins/`: opt-in bundle plugins the marketplace lists beside canon, outside every canon install's cache
 
 ### Code
 

@@ -33,13 +33,8 @@ The track is final. It already carries the easing, the spring, and the hold, so 
 
 ## Where the composition lives
 
-The HyperFrames project sits in the same workspace as the takes, so one folder holds everything a video is made from.
+The HyperFrames project sits in the same workspace as the takes, so one folder holds everything a video is made from. Create it at `.canon/video/<slug>/composition` with the new-project command the `hyperframes` skill names, run the way that skill says for its install, since a plugin install routes the CLI through its own launcher.
 
-```bash
-bunx -y hyperframes init .canon/video/<slug>/composition
-```
-
-- Use `bunx` when bun is available, falling back to `npx -y hyperframes init ...` otherwise
 - Prefix the path with the main worktree root when running from a linked worktree, as `ui-film`'s write scope states
 - Read each clip from `../takes/<dir>/clip.mp4`, relative to the project, rather than copying it in
 - Leave renders in the project's `renders/` folder, which `canon records push` skips along with `takes/`, `scratch/`, `snapshots/`, `node_modules/`, and any video file
@@ -68,7 +63,7 @@ Where composing from the main root is not possible, write each file whole throug
 
 ## Applying it in a composition
 
-Load `hyperframes-core` for placing the clip and `hyperframes-keyframes` for the wrapper's transform before writing the composition.
+Read the `hyperframes` skill's `references/format.md` for placing the clip and `references/motion.md` for the wrapper's transform before writing the composition.
 
 1. Size a stage at 1920x1080 and place the clip inside a non-timed wrapper that fills it, with `transform-origin: 0 0`. Time the video, never the wrapper too.
 2. Drive the wrapper from the track on the composition's registered timeline, setting `scale(s) translate(-x px, -y px)` at each frame's time from the clip's start.

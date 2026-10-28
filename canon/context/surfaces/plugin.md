@@ -35,12 +35,20 @@ Owns the plugin skills, one flat kebab-case folder each with a `SKILL.md`. Disco
 
 ### `.claude-plugin/`
 
-Holds `marketplace.json`, the catalog an installer adds. Its one entry names the plugin and sets `source` to `./claude`, resolved against the folder holding `.claude-plugin/`.
+Holds `marketplace.json`, the catalog an installer adds. Its `canon` entry sets `source` to `./claude`, resolved against the folder holding `.claude-plugin/`, and its `canon-media` entry sets `./plugins/canon-media`.
 
-- The entry carries no version, since the manifest overrides it and a second copy would drift with nothing reporting it
+- The entries carry no version, since the manifest overrides it and a second copy would drift with nothing reporting it
 - A root source exposes no skills and copies `.claude/` and the internal skills into each cache, since discovery reads `<plugin-root>/skills/`
 - `**/.claude-plugin/*.json` is excluded from oxfmt because `release-please` serializes the manifest its own way, and the marketplace file is re-included because nothing else writes it
 - `claude plugin validate --strict` accepts a manifest whose `source` points at nothing, so an install is the only proof of a shape
+
+### `plugins/canon-media/`
+
+Holds the opt-in bundle, a manifest with no skills that depends on `canon`, `hyperframes@hyperframes`, and `frameboard@frameboard`. Installing it installs all three, and plain `canon` gains no dependency.
+
+- It sits outside `claude/` because everything there reaches every canon install's cache
+- `release-please` writes its `version` beside canon's, since `--strict` validation fails a manifest with none
+- The marketplace's `allowCrossMarketplaceDependenciesOn` lists `hyperframes` and `frameboard`, and an install still resolves them only after the user adds both marketplaces
 
 ### `src/claude/`
 

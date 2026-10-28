@@ -5,11 +5,17 @@
     "name": "Eric Le",
     "url": "https://github.com/erclx"
   },
+  "allowCrossMarketplaceDependenciesOn": ["hyperframes", "frameboard"],
   "plugins": [
     {
       "name": "canon",
       "source": "./claude",
       "description": "Runs your agent's work and keeps its code good, on one setup for every repo."
+    },
+    {
+      "name": "canon-media",
+      "source": "./plugins/canon-media",
+      "description": "Installs canon with HyperFrames and Frameboard, the outside tools ui-film and design-pick reach."
     }
   ]
 }

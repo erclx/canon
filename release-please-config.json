@@ -12,6 +12,11 @@
           "type": "json",
           "path": "claude/.claude-plugin/plugin.json",
           "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "plugins/canon-media/.claude-plugin/plugin.json",
+          "jsonpath": "$.version"
         }
       ]
     }

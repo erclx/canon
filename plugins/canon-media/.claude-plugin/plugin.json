@@ -1,0 +1,13 @@
+{
+  "name": "canon-media",
+  "description": "Installs canon with the two outside tools its media skills reach, HyperFrames and Frameboard.",
+  "version": "5.73.0",
+  "author": {
+    "name": "Eric Le",
+    "url": "https://github.com/erclx"
+  },
+  "homepage": "https://github.com/erclx/canon",
+  "repository": "https://github.com/erclx/canon",
+  "license": "MIT",
+  "dependencies": ["canon", "hyperframes@hyperframes", "frameboard@frameboard"]
+}

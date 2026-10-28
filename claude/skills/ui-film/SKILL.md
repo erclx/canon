@@ -44,7 +44,7 @@ Read `${CLAUDE_SKILL_DIR}/references/config.md` for what `canon/config/app-drive
 
 ## Step 2: draft the beats and get approval
 
-Draft the beat list from a HyperFrames storyboard when the ask carries one, then from a `ui-checklist`, and from the ask itself only when it carries neither. What each beat says to a viewer follows `hyperframes-creative`'s `references/story-spine.md` when that skill is installed.
+Draft the beat list from a HyperFrames storyboard when the ask carries one, then from a `ui-checklist`, and from the ask itself only when it carries neither. What each beat says to a viewer follows the `hyperframes` skill's `references/story.md` when that skill is installed.
 
 Show the list in plain words, one line per beat naming the one action and what the viewer sees change. Never show selectors, timings, or JSON, since the operator approves what the video shows and never reads the plan.
 
@@ -91,6 +91,15 @@ Open each beat's `takes/<dir>/still.jpg` before handing off, since a clip can fi
 
 ## Step 5: hand off
 
+Check that the `hyperframes` skill resolves before handing anything to it, as `hyperframes:hyperframes` from its plugin or `hyperframes` installed alone. Canon never installs or updates it, since the plugin manager owns both.
+
+- When neither resolves, close the throwaway copy, write the workspace README below, and stop on the line after this list
+- Leave the takes as filmed on that stop, since a session composing after the install needs no second filming
+
+```plaintext
+❌ HyperFrames is not installed, so nothing can compose .canon/video/<slug>/takes/. Run /plugin install canon-media@canon, or install hyperframes@hyperframes alone, then load hyperframes to compose.
+```
+
 Read `${CLAUDE_SKILL_DIR}/references/handoff.md` on reaching this step, for what HyperFrames receives, where each composition lives, and how one applies the camera track and draws the cursor. Read `${CLAUDE_SKILL_DIR}/references/compose-craft.md` beside it, for the footage rules the HyperFrames skills lack.
 
 Close the throwaway copy per `isolate.md` when Step 1 built one, after the stills are read.
@@ -121,6 +130,6 @@ Next: load hyperframes to compose, reading takes/take.json, handoff.md, and comp
 ## What this delegates
 
 - `app-drive`'s `isolate.md` owns the throwaway copy and its close
-- `hyperframes-creative`'s story spine owns what a beat says to a viewer
+- The `hyperframes` skill's `story.md` owns what a beat says to a viewer
 - `hyperframes` and its sibling skills own composing, captioning, and rendering the video, and `compose-craft.md` adds only what app footage changes about their advice
 - `review-ui` owns driving a pull request's checklist
