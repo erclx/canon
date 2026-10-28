@@ -78,6 +78,7 @@ What this skill adds on top of the standard:
 - Reframe a vague ask as success criteria before `## Files to touch`, each an observable result and its check, which becomes one `## Verification` bullet. "Make it faster" names none.
 - Confirm a concrete project or use case drives the feature, and lift patterns from it where precedent exists. A feature with no named user is a guess.
 - Prefer one layout that serves both a new and a grown project over a dual-mode toggle or a migration shim. Two modes double what every later change has to hold.
+- Name `proposal-critique` in the chat output for a one-way change or a fix whose cause is unverified, and never invoke it from here
 
 ### Suggestions and sections
 

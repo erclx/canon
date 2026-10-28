@@ -134,6 +134,8 @@ The standard sets the open question format inside a topic file and in `00-scope.
 
 Aside from an experiment fixture, Steps 4 and 5 are the only ways close mode reaches outside the folder. Do not close while an open question quietly fails an outcome. Resolve it, or record it in `06-decision.md` as knowingly accepted.
 
+Name `proposal-critique` in the close report when the decision is a one-way change or a fix whose cause is unverified, and never invoke it from here.
+
 ## Check the folder
 
 Run `canon records validate groundwork <nn>-<slug>` on the folder this run wrote, in every mode, before reporting. Fix each entry its `structure` array names, against `### Structure` in `${CLAUDE_SKILL_DIR}/../plan-feature/references/plan.md`.
