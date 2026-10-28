@@ -5,7 +5,7 @@ description: Filename and slug, the required sections, and the suggested-and-ans
 
 # Plan reference
 
-Applies to a feature plan at `.canon/plans/feature-<slug>.md`. One file holds one concern, written before implementation starts and read by whatever executes it, so it has to carry the scope without the conversation that produced it.
+Applies to a feature plan at `.canon/plans/feature-<slug>.md`. One file holds one concern, except a bundle row, written before implementation starts and read by whatever executes it, so it has to carry the scope without the conversation that produced it.
 
 The folder is gitignored, and backed by `canon records push` wherever a records remote is configured. Nothing backs a plan deleted before a push, which is why the archive step is a move rather than a cleanup.
 
@@ -50,11 +50,21 @@ A plan failing these is non-conforming even when it satisfies every shape rule b
 ## Filename and slug
 
 - Name the file `feature-<slug>.md`, with `<slug>` two to four kebab-case words naming the concern.
-- Write one concern per file, since a plan bundling two cannot be executed by two sessions or abandoned by half
+- Write one concern per file, except a bundle row below, since a plan bundling two cannot be executed by two sessions or abandoned by half
 - Derive the slug from the concern rather than from a branch, because the plan is written before the branch exists.
 - Give the executing branch the same slug, since a later surface finds the plan from the branch name and finds nothing when the spellings differ
 
 A plan carries no frontmatter. Its filename is the whole of its identity, so a folder of plans is read by name rather than by a generated catalog.
+
+### Bundle rows
+
+A bundle row is the one exception to a concern per file. It is a set of small fixes whose changes share a file, and the operator agreed to bundle them, since one plan drops per-item revert.
+
+- Write one file and one branch for the row, named for the shared surface
+- Give each item its own H3 under `## Files to touch`, holding the usual backticked-path bullets, since the parsers read the bullet and never the heading
+- Give each item its own `## Verification` bullet, so a dropped item is struck on the task file as `- ~~<outcome>~~ <reason>` and the rest ship as one pull request
+- Record the operator's agreement as an answered question in `## Questions`, and never bundle without one
+- Never bundle fixes with no file in common
 
 ### Staged batches
 

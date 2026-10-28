@@ -11,7 +11,7 @@ metadata:
 
 - If no feature description is provided, stop: `❌ No feature description. Describe what you want to add.`
 - Do not implement anything. Output the plan and stop.
-- When the feature description spans two or more independent concerns, write one plan file per concern. Do not bundle them under a single slug.
+- When the feature description spans two or more independent concerns, write one plan file per concern. Bundle them under one slug only as an agreed bundle row.
 
 ## Write scope
 

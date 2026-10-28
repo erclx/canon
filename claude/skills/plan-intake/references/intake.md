@@ -103,12 +103,12 @@ The index. It points at items and answers nothing itself.
 - The answer contract stated out loud, since it inverts the plan file's
 - A cluster table of file, what it holds, item count, and open count
 - The verdict counts across the folder
-- A ready list, grouped by what shipping one actually costs
+- A ready list with one row per fix, grouped by what shipping one actually costs, and a named bundle row that stands in for the rows of the items whose fixes share a file
 - The open questions, each a labeled markdown link to its owning item's heading anchor
 
 The index carries no answer slot. One question in two answerable places has no rule for which wins, and retrieval walks item headings, so an answer typed into the index is found by nothing and lost silently.
 
-Where an item touches a task already on the board, say so in the index rather than only inside the item. A reader deciding what to promote reads the index first.
+Only a shared file bundles, since separate branches on one file rebase on each other anyway. A small fix with nothing in common stays its own row, and a bundle has no cap on items. Where an item touches a task already on the board, say so in the index rather than only inside the item. A reader deciding what to promote reads the index first.
 
 ## Repro versus groundwork
 
@@ -236,6 +236,7 @@ date: <YYYY-MM-DD>
 ## Ready
 
 - <item, grouped by what shipping it costs>
+- Bundle <name>: <item>, <item>, sharing <file>, standing in for those items' own rows
 
 ## Open questions
 
