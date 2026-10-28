@@ -48,6 +48,8 @@ Collect only the lines below whose condition holds, and nothing when none does. 
 | The reel step skipped with a reason                       | `🎞️ No reel: <reason>: <message>`                                  |
 | A git refusal or a preview refusal the reference reports  | `⚠️ <reason>: <message>`                                           |
 
+The no-local-preview and no-reel lines also land on the evidence comment, through the evidence call's `--local-skip` and `--reel-skip`, so the pull request shows why a link or a reel is missing after the session's report scrolls away.
+
 ### The uncaptured line
 
 Collect `📸 <N> painted paths changed with no evidence capture. Recapture and push.` when the evidence record lists `uncaptured` paths, with `<N>` its count. The line never stops the run, since no step here can take a capture, and the review raises the same paths as a finding until a recapture lands.
