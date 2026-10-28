@@ -7,6 +7,8 @@ description: Which external sources the test-first loop draws on, which parts it
 
 The loop predates this ledger, so this file records the sources it matches rather than the ones it was drafted from. Each was opened before it was cited. A later session extending the skill adds to this file rather than re-arguing an item settled here.
 
+The source behind each step and bullet of the body sits in `governance/ledger/skills/test-first/SKILL.md`, which `canon claude skills audit` checks row by row. This file keeps the position at the source level.
+
 ## Adopted
 
 ### The loop itself
@@ -25,6 +27,10 @@ The same post lists deleting assertions "so the test pretends to pass" and "copy
 
 Martin Fowler's [TestDrivenDevelopment](https://martinfowler.com/bliki/TestDrivenDevelopment.html) names "neglecting the third step" as the most common way to get the practice wrong. Adopted as step 6 being mandatory where Canon TDD writes "optionally refactor".
 
+### Watching the failure
+
+`obra/superpowers`' [Test-Driven Development](https://github.com/obra/superpowers/blob/5bf4e78/skills/test-driven-development/SKILL.md) skill makes the red run mandatory and has it confirm the test "Fails because feature missing (not typos)". On a pass it says "You're testing existing behavior. Fix test." Adopted as step 3 and as both rules under extending existing behavior, which this file first recorded as stated by no source.
+
 ## Declined
 
 **The test list.** Canon TDD opens by listing every expected variant of the new behavior before writing a test. Declined because a plan already names the behaviors a build covers, and `canon:build-in-slices` owns the order they land in, so a second list here would hold a second copy of the scope.
@@ -39,6 +45,4 @@ Martin Fowler's [TestDrivenDevelopment](https://martinfowler.com/bliki/TestDrive
 
 ## Stated by no source
 
-**Confirming the failure is the right one.** Step 3's rule, that a test failing for a typo or a wrong signature is a defect in the test, comes from the failure recorded in this skill's `REQUIREMENT.md` under `Gap` rather than from any source above.
-
-**Extending existing behavior.** The rule that a changed assertion must fail against the code as it stands today is the same failure applied to an edit, and carries no external source.
+**Loading the sibling skills.** Steps 1 and 4 load `canon:test-craft` and `canon:code-craft`. No source routes between skills, so those clauses rest on the split each sibling's own description draws.
