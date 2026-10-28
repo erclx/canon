@@ -50,7 +50,8 @@ bunx -y hyperframes init .canon/video/<slug>/composition
 The workspace holds what a re-film and a re-render need, and the rest clears.
 
 - Keep one render per delivered cut in `renders/`, so a 16:9 and a square cut hold one render each
-- Keep dry runs, debug passes, and candidate media in `scratch/` beside `takes/`, and harness scripts in `harness/`
+- Keep harness scripts in `harness/` beside `takes/`
+- Hold dry runs, debug passes, and candidate media in `scratch/` only until the take or pick they served lands, then clear them
 - Promote a dry run to `takes/` before a composition reads it, since `scratch/` clears
 
 A cut in another shape and the README loop are each a project of their own beside `composition/`, so one shape's edit never reflows another's. Each reads the takes from `../takes/` the same way.
