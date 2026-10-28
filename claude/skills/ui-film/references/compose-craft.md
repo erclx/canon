@@ -32,7 +32,7 @@ HyperFrames' caption guide places a landscape caption 80 to 120 px from the bott
 
 Cut a square or vertical version only when the operator asks for one. A film with one shape needs nothing from this section, and the vertical caption band and safe boxes stay with HyperFrames' frame presets.
 
-- Start each shape as its own HyperFrames project, as `hyperframes-studio` states for a different aspect, in the workspace folder `handoff.md` names for it
+- Start each shape as its own HyperFrames project, in the workspace folder `handoff.md` names for it. The `hyperframes` skill's `types/vertical.md` recomposes a vertical film rather than squeezing one.
 - Frame the shape by cropping a window of the page at 1x, never by scaling the 16:9 frame into it, since a page shrunk into a square leaves the action too small to read
 - Pan the window along the camera track's view center, so it follows the action the zoom would have aimed at. Frameboard's square cut used a 1080x1080 window.
 - Expect a screencast take to hold at 1x from a softer 1080p source, while a stepped take gives the same window two clip pixels per page pixel
@@ -74,7 +74,7 @@ Step 5 writes the filming half of `.canon/video/<slug>/README.md`. The composing
 | Rule                        | Source                                                                                                   |
 | --------------------------- | -------------------------------------------------------------------------------------------------------- |
 | Caption placement and scrim | HyperFrames' `captions.md`, adjusted for footage with chrome along its bottom edge                       |
-| A new project per shape     | `hyperframes-studio`'s brief step, which starts a new project for a different aspect                     |
+| A new project per shape     | The `hyperframes` skill's `types/vertical.md`, which recomposes a vertical film rather than squeezing it |
 | The 1080x1080 window        | Frameboard's launch film, cut square from stepped takes                                                  |
 | The 2 MB WebP loop          | Frameboard's README hero, an animated WebP cut from a raw take, which played inline at 1.72 MB           |
 | Rebuilding a sped-up track  | `canon take camera --help`, whose `--rate` divides every time in the log                                 |
