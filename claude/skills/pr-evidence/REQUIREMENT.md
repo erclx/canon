@@ -32,3 +32,4 @@ A session judging from the diff whether an evidence image changed cannot see a r
 - The title, body, labels, and pre-publish scan, which `git-pr` owns
 - Writing the checklist, which `ui-checklist` owns, leaving this skill to consume the handoff file and remove it after posting
 - Driving the checklist in the running app, which `review-ui` owns
+- The filming rules the reel follows, which `ui-film` owns

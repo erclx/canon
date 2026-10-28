@@ -39,7 +39,7 @@ Owns the stage table in `stages.ts`, the scoping and run loop in `sequencer.ts`,
 
 - Stages run in table order and the first to find a fact halts the run. Unreferenced rules and Audit set report and never fail the push
 - The changed set unions the diff against `origin/main`, the working tree, and untracked files. Fallbacks widen, and `--all` forces every stage. On `main` the local ref is HEAD, so the base is remote.
-- Tests runs on `^src/` and any corpus in `TEST_CORPORA_PATTERNS`. A root-level test pair or a script under `claude/skills/*/scripts/` needs a `TESTS_SCOPE` pattern asserted in `stages.test.ts`
+- A scoped run hands the changed `.ts` and `.tsx` files to `vitest related`, so a push with none runs no tests. A changed vitest config or setup, `tsconfig.json`, or `package.json` runs them all.
 - Indexes and Consumed copies regenerate then assert, so the first run after an edit reports drift and `check:ci` writes the tree. Stage the rewrite and run again, since a rerun alone repeats the diff.
 - A stage that cannot read its input is `unmeasured`, which warns locally and refuses under CI. Plugin manifests skips locally without the CLI and fails when `CI` is set
 
@@ -131,6 +131,6 @@ Smaller folders the loop touches.
 
 - `check:lint` passes `--disable-nested-config` to skip the golden configs under `tooling/*/configs/`, and `check:types` needs `typescript` in `devDependencies`, not hoisted from an astro peer
 - `canon gov regen` defaults `--root` to wherever the binary is installed, so from a worktree pass `--root <literal-path>`
-- A prose edit can break a test no stage in the push runs, as with the markdown checkpoints, literals in `src/markdown/` that `structure.test.ts` asserts against themselves
+- A push runs no test that reads a file from disk rather than importing it, so a skill, rule, or hook script edit that breaks one fails in CI's `--all` run instead. That trade keeps pushes unqueued
 - A file whose name ends in `index.md`, staged or untracked, trips the Indexes stage even under `auto: false`
 - A line number cited into a file the entry does not own goes stale with nothing comparing it, so cite a named identifier

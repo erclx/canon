@@ -110,6 +110,78 @@ describe('the tests stage scope', () => {
     expect(scope.test('commitlint.config.js')).toBe(true)
     expect(scope.test('commitlint.config.test.ts')).toBe(true)
   })
+
+  it('should fire on a TypeScript file inside or outside src', () => {
+    const scope = scopeOf('tests')
+
+    expect(scope.test('src/gate/stages.ts')).toBe(true)
+    expect(scope.test('web/src/components/hero.tsx')).toBe(true)
+  })
+
+  it('should fire on a config every test reads without importing it', () => {
+    const scope = scopeOf('tests')
+
+    expect(scope.test('vitest.config.ts')).toBe(true)
+    expect(scope.test('tsconfig.json')).toBe(true)
+    expect(scope.test('package.json')).toBe(true)
+  })
+
+  it('should not fire on a Markdown-only change to a corpus a test reads', () => {
+    const scope = scopeOf('tests')
+
+    expect(scope.test('claude/skills/git-pr/SKILL.md')).toBe(false)
+    expect(scope.test('governance/rules/core/005-behavior.md')).toBe(false)
+  })
+})
+
+describe('the tests stage command', () => {
+  function testsCheck() {
+    const check = STAGES.find((candidate) => candidate.id === 'tests')
+      ?.checks[0]
+    if (check?.kind !== 'command') throw new Error('no tests command')
+    return check
+  }
+
+  it('should run the full suite when scoping is off', () => {
+    expect(testsCheck().argv).toEqual(['bun', 'run', 'test'])
+  })
+
+  it('should run only the tests related to the changed code files', () => {
+    const argv = testsCheck().changedArgv?.([
+      'claude/skills/git-pr/SKILL.md',
+      'src/gate/stages.ts',
+      'web/src/components/hero.tsx',
+    ])
+
+    expect(argv).toEqual([
+      'bun',
+      '--bun',
+      'vitest',
+      'related',
+      '--run',
+      '--passWithNoTests',
+      'src/gate/stages.ts',
+      'web/src/components/hero.tsx',
+    ])
+  })
+
+  it('should pass the root commitlint config to the related run', () => {
+    const argv = testsCheck().changedArgv?.(['commitlint.config.js'])
+
+    expect(argv?.at(-1)).toBe('commitlint.config.js')
+  })
+
+  it.each([
+    'vitest.config.ts',
+    'vitest.setup.ts',
+    'vitest.global-setup.ts',
+    'tsconfig.json',
+    'package.json',
+  ])('should run the full suite when %s changes', (file) => {
+    const argv = testsCheck().changedArgv?.(['src/gate/stages.ts', file])
+
+    expect(argv).toEqual(['bun', 'run', 'test'])
+  })
 })
 
 describe('the shipped-references stage scope', () => {
