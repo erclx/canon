@@ -94,6 +94,8 @@ interface RawPull {
  * rather than writing a second collapse beside `rollup`.
  */
 export interface RawCheck {
+  /** The check-run name, which a ruleset's required context matches. */
+  readonly name?: string
   readonly status?: string
   readonly conclusion?: string
   readonly state?: string
@@ -135,6 +137,46 @@ export function rollup(checks: readonly RawCheck[]): ChecksState | null {
   )
 
   return running ? 'pending' : 'passing'
+}
+
+/** A head's state over the checks the base requires, with failing others named apart. */
+export interface RequiredRollup {
+  readonly state: ChecksState | null
+  /** Names of checks outside the required set that failed, which never gate. */
+  readonly advisory: readonly string[]
+}
+
+/**
+ * Collapses a head's checks over the set the base branch's rules require.
+ *
+ * An unread or empty set gates by every check, which is `rollup` itself and
+ * the safe default for a repository whose rules list nothing. A required name
+ * with no run on the head reads pending rather than passing, since a run not
+ * yet created has not cleared anything.
+ */
+export function rollupRequired(
+  checks: readonly RawCheck[],
+  required: ReadonlySet<string> | undefined,
+): RequiredRollup {
+  if (required === undefined || required.size === 0) {
+    return { state: rollup(checks), advisory: [] }
+  }
+
+  const isRequired = (check: RawCheck): boolean =>
+    check.name !== undefined && required.has(check.name)
+  const gating = checks.filter(isRequired)
+  const advisory = checks
+    .filter((check) => !isRequired(check) && rollup([check]) === 'failing')
+    .map((check) => check.name ?? '')
+
+  const state = rollup(gating)
+  const isMissing = [...required].some(
+    (name) => !gating.some((check) => check.name === name),
+  )
+  return {
+    state: state !== 'failing' && isMissing ? 'pending' : state,
+    advisory,
+  }
 }
 
 /**

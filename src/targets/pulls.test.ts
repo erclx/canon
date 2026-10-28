@@ -8,6 +8,7 @@ import {
   readPullsAcross,
   readTargetPulls,
   rollup,
+  rollupRequired,
 } from '@/targets/pulls'
 
 let ROOT: string
@@ -77,6 +78,82 @@ describe('rollup', () => {
     expect(rollup([{ status: 'COMPLETED', conclusion: 'TIMED_OUT' }])).toBe(
       'failing',
     )
+  })
+})
+
+const STATIC = '🛡️ Static Checks'
+const MAC = '🍎 macOS Unit Tests'
+
+describe('rollupRequired', () => {
+  it('should read passing while an advisory check is still running', () => {
+    expect(
+      rollupRequired(
+        [
+          { name: STATIC, status: 'COMPLETED', conclusion: 'SUCCESS' },
+          { name: MAC, status: 'IN_PROGRESS' },
+        ],
+        new Set([STATIC]),
+      ),
+    ).toEqual({ state: 'passing', advisory: [] })
+  })
+
+  it('should report a failing advisory check apart without failing the head', () => {
+    expect(
+      rollupRequired(
+        [
+          { name: STATIC, status: 'COMPLETED', conclusion: 'SUCCESS' },
+          { name: MAC, status: 'COMPLETED', conclusion: 'FAILURE' },
+        ],
+        new Set([STATIC]),
+      ),
+    ).toEqual({ state: 'passing', advisory: [MAC] })
+  })
+
+  it('should read failing when a required check failed', () => {
+    expect(
+      rollupRequired(
+        [
+          { name: STATIC, status: 'COMPLETED', conclusion: 'FAILURE' },
+          { name: MAC, status: 'COMPLETED', conclusion: 'SUCCESS' },
+        ],
+        new Set([STATIC]),
+      ),
+    ).toEqual({ state: 'failing', advisory: [] })
+  })
+
+  // A required check whose run has not been created yet is not a pass, or a
+  // head where only macOS reported would read green before Static Checks ran.
+  it('should read pending when a required check has no run on the head yet', () => {
+    expect(
+      rollupRequired(
+        [{ name: MAC, status: 'COMPLETED', conclusion: 'SUCCESS' }],
+        new Set([STATIC]),
+      ),
+    ).toEqual({ state: 'pending', advisory: [] })
+  })
+
+  it('should gate by every check when no required set was read', () => {
+    expect(
+      rollupRequired(
+        [
+          { name: STATIC, status: 'COMPLETED', conclusion: 'SUCCESS' },
+          { name: MAC, status: 'IN_PROGRESS' },
+        ],
+        undefined,
+      ),
+    ).toEqual({ state: 'pending', advisory: [] })
+  })
+
+  it('should gate by every check when the rules require none', () => {
+    expect(
+      rollupRequired(
+        [
+          { name: STATIC, status: 'COMPLETED', conclusion: 'SUCCESS' },
+          { name: MAC, status: 'COMPLETED', conclusion: 'FAILURE' },
+        ],
+        new Set(),
+      ),
+    ).toEqual({ state: 'failing', advisory: [] })
   })
 })
 
