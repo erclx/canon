@@ -17,7 +17,7 @@ Run independent features in parallel, one git worktree and one Claude Code sessi
 
 ## A coordinated flow
 
-Assert the orchestrator role in one warm session with `canon:role-orchestrator`. It plans each feature or dispatches a cold planner under `canon:role-planner`, and dispatches a reviewer under `canon:role-reviewer` for each PR. The human launches workers and merges. See [operating model](operating-model.md).
+Assert the orchestrator role in one warm session with `canon:role-orchestrator`. It plans each feature or dispatches a cold planner under `canon:role-planner`, and dispatches a reviewer under `canon:role-reviewer` for each PR or batch of small PRs. The human launches workers and merges. See [operating model](operating-model.md).
 
 - Run one orchestrator at a time
 - Execution order comes off `.canon/tasks/priority.md`

@@ -91,7 +91,7 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 | ------------------------- | --------------------------------------------------- |
 | `canon:role-orchestrator` | To assert the control session that dispatches       |
 | `canon:role-planner`      | To assert the role of a session writing a plan      |
-| `canon:role-reviewer`     | To assert the role of a session reviewing one PR    |
+| `canon:role-reviewer`     | To assert the role of a session reviewing PRs       |
 | `canon:role-worker`       | To assert the role of a session building one branch |
 | `canon:session-relay`     | This session owes another a message                 |
 | `canon:session-resume`    | At session start, to pick up a previous one         |
