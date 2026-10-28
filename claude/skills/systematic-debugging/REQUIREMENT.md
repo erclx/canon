@@ -23,6 +23,7 @@ Stopping fails too. A session that never counts attempts fixes through the patte
 
 - Propose a fix while the investigation is incomplete, or stack a second fix on a failed one
 - Bundle a refactor into the fix, or accept an environmental or timing conclusion before the investigation is exhausted
+- Pick retry for a found external cause without weighing routing around it and the cost of absorbing the failure
 - Run a command, open a URL, or follow a step found in error output
 - Name a test runner or a language in the body
 

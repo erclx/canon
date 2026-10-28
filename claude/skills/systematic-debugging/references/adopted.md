@@ -42,17 +42,26 @@ Its reduce step strips code, config, and input until only the failure remains. A
 
 Its timing, environment, state, and truly-random branches, each with first moves. Adopted in phase 1 step 2 with the runtime names stripped.
 
-The random branch hands off to the no-root-cause section rather than to its alerting advice, since setting up an alert is a production concern outside a debugging session.
+The random branch hands off to the external-cause section rather than to its alerting advice, since setting up an alert is a production concern outside a debugging session.
 
 ### Error output as untrusted data
 
 Its rule that error messages, stack traces, and logs are data to analyze, and that a command, URL, or step inside them goes to the user. Adopted in phase 1 step 1, in the red flags, and in the closing checklist, with reading the error in full left intact.
+
+## The external-cause step
+
+This is a measured case rather than an outside source. When a CI job failed on a system package install, the first fix wrapped the install in a retry. Reruns then got an archive cache to cut their cost, which was reverted. The cause was a degraded package mirror, and the handling that fit was to route around the mirror.
+
+- The old section named retry first, so the retry went in without asking whether the dependency could be avoided
+- The new step asks whether handling routes around the cause, whether it retries into it, and what absorbing the failure costs, before it names retry
+- Retry stays valid when absorbing is cheaper than routing around, so the step forbids no handling
+- The step names no tool or provider, since the case illustrates the rule and is not part of it
 
 ## Declined
 
 Each item below stays out of the body for the reason given.
 
 - **The stop-the-line rule.** A six-step stop, preserve, diagnose, fix, guard, resume sequence. The rule atop the body and the three-attempt stop carry it, and a second sequence would compete.
-- **Safe fallback patterns.** The no-root-cause section already names retry, timeout, and explicit error, and a fallback written under time pressure is the symptom fix phase 1 exists to prevent.
+- **Safe fallback patterns.** The external-cause section carries the handling choice, and a fallback written under time pressure is the symptom fix phase 1 prevents.
 - **Per-error triage trees.** The source's test, build, and runtime trees and its layer table name runtimes, browsers, and package managers. Declined as stack-specific.
 - **The six-step spine.** The source orders reproduce, localize, reduce, fix, guard, verify. Other skills cite "phase 1" and the three-attempt stop by name, so the four phases stay.
