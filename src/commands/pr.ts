@@ -23,6 +23,7 @@ import {
 import {
   type CheckRunListing,
   collapseChecks,
+  requiredChecks,
   withMergeState,
 } from '@/pr/checks'
 import {
@@ -984,7 +985,12 @@ export function register(program: Command): void {
         '            or needing eyes refuses `ui-undriven`, carried or not',
         '  evidence  the evidence check reads settled',
         '  standing  the head is fresh against the base, not stale or conflicted',
-        '  ci        every check run on the tip passed, waited on up to --wait',
+        '  ci        every required check run on the tip passed, waited on up to --wait',
+        '',
+        "The required checks are the ones the base branch's rules list. A",
+        'check outside them is waited on by nobody, and one that failed is',
+        'named in the record as `advisory` without blocking. Rules that do not',
+        'read, or that list no check, gate by every check run on the tip.',
         '',
         'Review state, UI state, evidence, and standing are read before the CI',
         'wait, so a reviewer whose partner is still driving refuses at once. The',
@@ -1062,6 +1068,10 @@ export function register(program: Command): void {
         'verb reads the draft flag and not the reviews, since a ready pull',
         'request already passed `canon pr lift`. It does not wait on checks or',
         'delete the branch.',
+        '',
+        "The checks gate by the ones the base branch's rules require, the way",
+        '`canon pr lift` reads them. A failing check outside that set is named',
+        'in the record as `advisory` and does not refuse the merge.',
         '',
         'Reasons:',
         '  merged, dry-run (--dry-run)',
@@ -4254,15 +4264,36 @@ async function readChecksGate(
   ])
   if (listed === null) return undefined
   try {
-    const mergeState =
-      pulled === null
-        ? undefined
-        : mergeStateOf((JSON.parse(pulled) as RestPull).mergeable_state)
+    const row = pulled === null ? undefined : (JSON.parse(pulled) as RestPull)
+    const required = await readRequiredChecks(root, row?.base?.ref)
     const reading = withMergeState(
-      mergeState,
-      collapseChecks(tip, JSON.parse(listed) as CheckRunListing),
+      mergeStateOf(row?.mergeable_state),
+      collapseChecks(tip, JSON.parse(listed) as CheckRunListing, required),
     )
-    return { state: reading.state, isConflicted: reading.conflicted }
+    return {
+      state: reading.state,
+      isConflicted: reading.conflicted,
+      ...(reading.advisory !== undefined && { advisory: reading.advisory }),
+    }
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * The checks the base branch's rules require, so a check they leave out runs
+ * without holding the gate. Undefined on any read that fails, which gates by
+ * every check as the verbs did before the rules were read.
+ */
+async function readRequiredChecks(
+  root: string,
+  base: string | undefined,
+): Promise<ReadonlySet<string> | undefined> {
+  if (base === undefined || base === '') return undefined
+  const rules = await gh(root, ['api', `repos/{owner}/{repo}/rules/branches/${base}`])
+  if (rules === null) return undefined
+  try {
+    return requiredChecks(JSON.parse(rules))
   } catch {
     return undefined
   }
@@ -4396,6 +4427,7 @@ async function runLift(
   for (const gate of record.gates) {
     if (!gate.isOk) logWarn(`${gate.gate}: ${gate.reason ?? 'not clear'}`)
   }
+  warnAdvisory(record.advisory)
   outro()
 
   if (emitJson) {
@@ -4405,6 +4437,14 @@ async function runLift(
   }
 
   return record.isOk ? 0 : 1
+}
+
+function warnAdvisory(advisory: readonly string[] | undefined): void {
+  for (const name of advisory ?? []) {
+    logWarn(
+      `advisory: ${name} failed, which the base's rules do not require, so it did not block`,
+    )
+  }
 }
 
 const MERGE_REFUSALS: Record<MergeRefusal | 'gh-missing', string> = {
@@ -4552,6 +4592,7 @@ async function runMerge(
         ? `#${record.number} would merge with the message below`
         : MERGE_REFUSALS[record.reason],
   )
+  warnAdvisory(record.advisory)
   outro()
 
   if (emitJson) {
