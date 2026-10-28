@@ -68,7 +68,8 @@ A project installed before the board became a folder still holds `.claude/TASKS.
 
 ## settings.json
 
-- Pair the seed's three PreToolUse hooks with `index-reminder.sh`, `search-reminder.sh`, and `scratch-guard.sh`, and its PostToolUse hook with `standards-audit.sh`, all under `.claude/hooks/`
+- Pair the seed's PreToolUse hooks with `index-reminder.sh`, `search-reminder.sh`, `scratch-guard.sh`, `review-post-scan.sh`, and `plan-guard.sh`, and its PostToolUse hook with `standards-audit.sh`, all under `.claude/hooks/`
+- Expect `plan-guard.sh` to block a new file under `.canon/plans/` until the session invokes `canon:plan-feature`, once per new plan, since a heredoc write never loads the path-scoped plan rule
 - Keep only what is project-specific in the project file, since project settings layer over user settings
 - Expect `permissions.deny` to hold `Agent` and `Task`, so no session spawns a subagent and parallel work runs as separate background sessions
 - Expect `autoMemoryEnabled` to be `false`. A person turns it back on for themselves in `settings.local.json`.
