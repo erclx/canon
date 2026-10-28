@@ -18,6 +18,12 @@ on:
 permissions:
   contents: read
 
+# A pull request's older run is cancelled on a new push. Every other event
+# keys on the commit and never cancels, so main stays fully proven.
+concurrency:
+  group: verify-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   static-checks:
     # The ruleset requires this name, so renaming it strands branch protection
