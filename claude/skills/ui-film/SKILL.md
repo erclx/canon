@@ -19,13 +19,20 @@ A take is real footage of the app doing one thing, filmed so the edit can zoom i
 
 ## Write scope
 
-Write inside `.canon/video/<slug>/` at the main worktree root, where `<slug>` names the video or the feature, such as `launch-board-import`. That folder is the video's workspace, holding `plan.json`, `takes/`, and the HyperFrames project in `composition/`.
+Write inside `.canon/video/<slug>/` at the main worktree root, where `<slug>` names the video or the feature, such as `launch-board-import`. That folder is the video's workspace, holding `plan.json`, `takes/`, the scripts of the harness route in `harness/`, and the HyperFrames project in `composition/`.
 
 - Resolve the main root the way `session-worktree` does, since a linked worktree's own `.canon/` is never read by `canon records push` and is deleted with the worktree
 - Prefix every `.canon/video/<slug>/` path below with that root when running from a linked worktree
 - Write `plan.json` through the whole-file route `${CLAUDE_SKILL_DIR}/../session-worktree/references/main-root-writes.md` states, since `Write` refuses a main-root path from a linked worktree
 - `canon records push` backs the workspace up without its media
 - Pull request mode writes to scratch instead, as `pr-clip.md` states
+
+### Scratch in the workspace
+
+Dry runs, debug passes, and candidate media such as music go in the workspace's `scratch/`, which `canon records push` skips.
+
+- Promote a dry run to `takes/` before anything reads it, since nothing composed may point into `scratch/`
+- Clear `scratch/` when the take or pick it served lands, by the session that made it, so passes nobody owns do not pile up
 
 The throwaway copy Step 1 may build sits outside the repository and is removed at the close.
 
@@ -102,9 +109,9 @@ Write the filming half of `.canon/video/<slug>/README.md`, so a later session ca
 
 - Name what was filmed, beat by beat, and how to re-film each one with `canon take`
 - Say where each folder came from, being the plan, the takes, and the config keys the take read, with `access` described rather than copied when it carries a token
+- List every content source a take reads on camera, and each copy generated from it, so a change to the content names what to regenerate before a re-film
 - Write the file whole through the main-root route when none exists, with the filming half under a `## Filming` heading
-- Add a `## Filming` section when a README is already there, reading the file and writing it back whole, and never overwrite what another session wrote
-- Replace an existing `## Filming` section in place on a re-film, since the commands in it changed
+- Add or replace the `## Filming` section of an existing README in place, writing the file back whole without overwriting another session's text
 
 ## Output
 

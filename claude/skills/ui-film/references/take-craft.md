@@ -15,6 +15,7 @@ Read at Step 3 of `ui-film`, before writing the first beat. `canon take --help` 
 - [Targets](#targets)
 - [The pointer](#the-pointer)
 - [The zoom](#the-zoom)
+- [One source for on-camera content](#one-source-for-on-camera-content)
 - [The harness route](#the-harness-route)
 - [Sources](#sources)
 
@@ -104,10 +105,19 @@ Three controls change the push itself.
 - Set `"push": false` on a beat the edit holds wide, such as one showing a whole layout change. Its track keeps the cursor and the click ring and drops the zoom.
 - Rebuild a beat's track with `canon take camera <dir>/log.json --rate <n> --out <file>` for a clip the edit plays `n` times faster, so the zoom settles on the clock a viewer sees
 
+## One source for on-camera content
+
+A take shows content the app loads or a script writes, such as a fixture, a snapshot, or copy typed into a field. Keep one source for it, naming whatever the take reads on camera.
+
+- Generate every derived copy from that source rather than keeping it by hand, since a hand copy goes stale and a reshoot films the old content
+- List the source and each generated copy in the README's `## Filming` section, with the command that regenerates them
+- Regenerate the copies before a re-film after the source changes
+
 ## The harness route
 
 A beat driven from outside the page, such as a drag between two windows or an input the step kinds lack, cannot run as `canon take` steps. Until the verb can run an outside script itself, film it through a harness.
 
+- Keep each script in the workspace's `harness/` folder and write its output into the take's own folder, never at the workspace root
 - Drive the beat from a Playwright script that records the page and writes a log in the shape of a take's `log.json`
 - Build its camera track from that log with `canon take camera <log> --out <file>`, so the composition applies it like any other take
 - Tell the operator which beats ran this way, since their clips carry the harness's resolution rather than the stepper's

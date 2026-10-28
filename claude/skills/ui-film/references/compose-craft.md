@@ -66,6 +66,7 @@ Step 5 writes the filming half of `.canon/video/<slug>/README.md`. The composing
 
 - Add how to re-render each project the workspace holds, naming its folder and the render command it runs
 - Name any track rebuilt with `--rate`, with the command that rebuilt it, since a re-film overwrites `camera.json` and leaves a rebuilt track stale
+- Delete the pass renders once the delivery render is approved, and name the one render kept for each delivered cut
 - Leave the filming half as Step 5 wrote it, so the next session can re-film without reading the composition
 
 ## Sources

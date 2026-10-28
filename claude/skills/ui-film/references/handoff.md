@@ -42,8 +42,17 @@ bunx -y hyperframes init .canon/video/<slug>/composition
 - Use `bunx` when bun is available, falling back to `npx -y hyperframes init ...` otherwise
 - Prefix the path with the main worktree root when running from a linked worktree, as `ui-film`'s write scope states
 - Read each clip from `../takes/<dir>/clip.mp4`, relative to the project, rather than copying it in
-- Leave renders in the project's `renders/` folder, which `canon records push` skips along with `takes/`, `snapshots/`, `node_modules/`, and any video file
+- Leave renders in the project's `renders/` folder, which `canon records push` skips along with `takes/`, `scratch/`, `snapshots/`, `node_modules/`, and any video file
 - An image the composition adds under `assets/`, such as a logo, is backed up with the project's source
+
+### What the workspace keeps
+
+The workspace holds what a re-film and a re-render need, and the rest clears.
+
+- Keep one render per delivered cut in `renders/`, so a 16:9 and a square cut hold one render each
+- Keep harness scripts in `harness/` beside `takes/`
+- Hold dry runs, debug passes, and candidate media in `scratch/` only until the take or pick they served lands, then clear them
+- Promote a dry run to `takes/` before a composition reads it, since `scratch/` clears
 
 A cut in another shape and the README loop are each a project of their own beside `composition/`, so one shape's edit never reflows another's. Each reads the takes from `../takes/` the same way.
 

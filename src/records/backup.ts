@@ -107,6 +107,7 @@ export const EXCLUDED_ENTRIES = [
 /** Media under a video workspace, remade from its plan and composition, so never backed up. */
 export const MEDIA_PATHSPECS = [
   ':(exclude,glob)video/*/takes/**',
+  ':(exclude,glob)video/*/scratch/**',
   ':(exclude,glob)video/**/renders/**',
   ':(exclude,glob)video/**/snapshots/**',
   ':(exclude,glob)video/**/node_modules/**',

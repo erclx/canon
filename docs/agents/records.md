@@ -28,7 +28,7 @@ printf '.canon/\n' >> .gitignore
 ```
 
 - `push` commits every top-level folder under `.canon/` except `tmp`, `ordinal-locks`, and `.records.git`, then pushes. New folders list under `added`.
-- `push` backs up a video workspace under `video/` without its media, skipping `takes/`, `renders/`, `snapshots/`, `node_modules/`, and any `.mp4`, `.webm`, or `.mov` file.
+- `push` backs up a video workspace under `video/` without its media, skipping `takes/`, `scratch/`, `renders/`, `snapshots/`, `node_modules/`, and any `.mp4`, `.webm`, or `.mov` file.
 - `pull` restores the folders on a new machine after the setup above. It refuses rather than overwrite records the history lacks.
 - `size` reports one row per folder, heaviest first, with file count, bytes, and growth over 7 and 30 days. After a `pull` every file reads as new.
 - `prune-tmp` lists scratch untouched for 14 days and deletes it only with `--write`. It never offers `tmp/handoff/` or `tmp/pr/poll/`.

@@ -19,7 +19,7 @@ A session that does reach `canon take` writes the plan from its own reading of t
 - The session looks at a still of each take before handing it off or posting it as a pull request reel, and names a beat that fell back to the real-time route
 - HyperFrames receives the takes with what it needs to apply the camera and draw the cursor
 
-One video keeps its plan, takes, and composition in one workspace the operator can find, backed up without its media. A README there records how to re-film the takes, and the composing session adds how to re-render.
+One video keeps its plan, takes, and composition in one workspace the operator can find, backed up without its media. A README there records how to re-film the takes, and the composing session adds how to re-render. It keeps what a re-film and a re-render need and clears the rest.
 
 A session composing the takes finds the footage guidance HyperFrames lacks, being captions over app UI, other shapes, a README loop, and sped-up clips.
 
