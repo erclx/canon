@@ -34,7 +34,7 @@ export default scenario({
         '         Frameboard board with frameboard serve and captures through frameboard capture,',
       )
       ctx.log.info(
-        '         reached as bunx -y frameboard@0.6 where no binary is on PATH. The render works',
+        '         reached as bunx -y frameboard where no binary is on PATH. The render works',
       )
       ctx.log.info(
         '         wherever bunx playwright install chromium has run once, and capture refuses with',
