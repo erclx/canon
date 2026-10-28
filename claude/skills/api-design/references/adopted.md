@@ -7,21 +7,23 @@ description: Which external API design sources this skill adopted, which it decl
 
 External sources were read and filtered rather than imported. This file is the record, and a later session extending the skill adds to it rather than re-arguing an item settled here.
 
+A source a bullet rests on is linked once, in that bullet's row of the toolkit's per-bullet ledger at `governance/ledger/skills/api-design/`, which ships outside the plugin. This file names those sources without the link and keeps the catalog-level adopted and declined record, linking only a source no row cites.
+
 ## Adopted from the default shelf
 
 ### Observable behavior
 
-[Software Engineering at Google, ch. 1](https://abseil.io/resources/swe-book/html/ch01.html) states Hyrum's Law, that with enough users, every observable behavior of a system is depended on by somebody, whatever the contract promises.
+Software Engineering at Google, ch. 1 states Hyrum's Law, that with enough users, every observable behavior of a system is depended on by somebody, whatever the contract promises.
 
 Adopted as the opening group, stated as design rules rather than as an observation, so a session decides what is observable before a caller decides it for them. Ordering and timing are named because the chapter's own examples are hash iteration order and timing.
 
 ### One version per dependency
 
-[Software Engineering at Google, ch. 16](https://abseil.io/resources/swe-book/html/ch16.html) states the One-Version Rule, keeping one version of each dependency in a repository, so a change to it migrates every caller rather than leaving two versions live. Adopted under additive change for a caller that cannot pin, which is any module imported from inside one repository.
+Software Engineering at Google, ch. 16 states the One-Version Rule, keeping one version of each dependency in a repository, so a change to it migrates every caller rather than leaving two versions live. Adopted under additive change for a caller that cannot pin, which is any module imported from inside one repository.
 
 ## Adopted from one external skill
 
-From `addyosmani/agent-skills@2686b620`, [`skills/api-and-interface-design/SKILL.md`](https://github.com/addyosmani/agent-skills/blob/2686b620fc1fed2e8f60c704839c766b8594c6b6/skills/api-and-interface-design/SKILL.md).
+From `addyosmani/agent-skills@2686b620`, `skills/api-and-interface-design/SKILL.md`.
 
 ### Contract and errors
 

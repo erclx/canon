@@ -7,39 +7,41 @@ description: Which external layout patterns this skill adopted, which it decline
 
 External sources were read and filtered rather than imported. This file is the record, and a later session extending the skill adds to it rather than re-arguing an item settled here.
 
+A source a bullet rests on is linked once, in that bullet's row of the toolkit's per-bullet ledger at `governance/ledger/skills/codebase-layout/`, which ships outside the plugin. This file names those sources without the link and keeps the catalog-level adopted and declined record, linking only a source no row cites.
+
 ## Adopted for placing files
 
 ### Group what changes together
 
-Robert Martin's restatement of the single responsibility principle reads "Gather together the things that change for the same reasons. Separate those things that change for different reasons" ([The Single Responsibility Principle](https://blog.cleancoder.com/uncle-bob/2014/05/08/SingleReponsibilityPrinciple.html)).
+Robert Martin's restatement of the single responsibility principle reads "Gather together the things that change for the same reasons. Separate those things that change for different reasons" (The Single Responsibility Principle).
 
 It gives "split by role" a test a planner can apply to a folder, which is whether these files would change together.
 
 ### Name folders for the domain rather than the framework
 
-Martin's [Screaming Architecture](https://blog.cleancoder.com/uncle-bob/2011/09/30/Screaming-Architecture.html) argues the top level should tell readers "about the system, not about the frameworks you used in your system". It is the root of naming a folder for what it holds rather than its technical kind.
+Martin's Screaming Architecture argues the top level should tell readers "about the system, not about the frameworks you used in your system". It is the root of naming a folder for what it holds rather than its technical kind.
 
 ### Feature folders, no cross-feature imports, one-way flow
 
-bulletproof-react puts most code under per-feature folders holding only the subfolders each needs, forbids one feature importing another, and enforces a shared, then features, then app direction with an import-path lint rule ([project structure](https://github.com/alan2207/bulletproof-react/blob/master/docs/project-structure.md)).
+bulletproof-react puts most code under per-feature folders holding only the subfolders each needs, forbids one feature importing another, and enforces a shared, then features, then app direction with an import-path lint rule (project structure).
 
 Adopted as the direction rule in the body and the feature-folder guidance in `frontend.md`, without the mandate.
 
 ### Grow in levels and promote on the second consumer
 
-Robin Wieruch grows a project from one file to feature folders, each level triggered by a named event rather than a count, and moves a helper to the shared layer once two or more features need it ([React folder structure](https://www.robinwieruch.de/react-folder-structure/)).
+Robin Wieruch grows a project from one file to feature folders, each level triggered by a named event rather than a count, and moves a helper to the shared layer once two or more features need it (React folder structure).
 
 Adopted as the promotion rule in the body and the levels in `frontend.md`.
 
 ### Consistency over any one strategy
 
-The Next.js docs call the framework unopinionated about organization, list three strategies, and ask a project to "choose a strategy that works for you and your team and be consistent across the project" ([project structure](https://nextjs.org/docs/app/getting-started/project-structure)).
+The Next.js docs call the framework unopinionated about organization, list three strategies, and ask a project to "choose a strategy that works for you and your team and be consistent across the project" (project structure).
 
 Adopted as the body's first section, reading and keeping the project's own strategy.
 
 ### Fixtures in modules, page objects on their own
 
-Playwright defines fixtures in dedicated modules that extend the base test, merges them into one module the specs import, and keeps page objects as their own modules ([fixtures](https://playwright.dev/docs/test-fixtures)). Adopted in `tests.md` as the split between specs and support.
+Playwright defines fixtures in dedicated modules that extend the base test, merges them into one module the specs import, and keeps page objects as their own modules (fixtures). Adopted in `tests.md` as the split between specs and support.
 
 ## Adopted for closing the body
 

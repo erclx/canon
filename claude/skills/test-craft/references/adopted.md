@@ -7,17 +7,19 @@ description: Which external testing patterns this skill adopted, which it declin
 
 External sources were read and filtered rather than imported. This file is the record. A later session extending the skill adds to it rather than re-arguing an item already settled here.
 
+A source a bullet rests on is linked once, in that bullet's row of the toolkit's per-bullet ledger at `governance/ledger/skills/test-craft/`, which ships outside the plugin. This file names those sources without the link and keeps the catalog-level adopted and declined record, linking only a source no row cites.
+
 ## Adopted
 
 ### Choosing the layer
 
 Three sources settle which layer a test belongs at and how the decision table reads.
 
-| Adopted                                | Source                                                                                                                                                                          |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The smallest-layer rule                | Fowler, "push your tests as far down the test pyramid as you can" ([Practical Test Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html))                     |
-| Sizing by what a test touches          | Google's small, medium, and large sizes ([Software Engineering at Google, ch. 11](https://abseil.io/resources/swe-book/html/ch11.html))                                         |
-| The component layer carrying UI weight | Kent C. Dodds's trophy ([Write tests](https://kentcdodds.com/blog/write-tests)) and Testing Library's [guiding principles](https://testing-library.com/docs/guiding-principles) |
+| Adopted                                | Source                                                                                     |
+| -------------------------------------- | ------------------------------------------------------------------------------------------ |
+| The smallest-layer rule                | Fowler, "push your tests as far down the test pyramid as you can" (Practical Test Pyramid) |
+| Sizing by what a test touches          | Google's small, medium, and large sizes (Software Engineering at Google, ch. 11)           |
+| The component layer carrying UI weight | Kent C. Dodds's trophy (Write tests) and Testing Library's guiding principles              |
 
 Each source below is read for what it settles.
 
@@ -40,7 +42,7 @@ From `addyosmani/agent-skills@c004a74`, `skills/test-driven-development/SKILL.md
 
 ### Kent Beck's desiderata
 
-The twelve properties at [testdesiderata.com](https://testdesiderata.com/) trade against each other and serve as background. "Behavioral" and "structure-insensitive" together are the whole of "test behavior, not implementation", which is why the body states that pair as asserting through the public surface.
+The twelve properties at testdesiderata.com trade against each other and serve as background. "Behavioral" and "structure-insensitive" together are the whole of "test behavior, not implementation", which is why the body states that pair as asserting through the public surface.
 
 ### Excuses, red flags, and a closing checklist
 
@@ -52,10 +54,10 @@ This reverses an earlier decline of the excuses table, which objected to argumen
 
 Each layer reference takes its rules from the tool's own guidance.
 
-| Reference      | Adopted                                                                                                    | Source                                                                                                                                                                                                      |
-| -------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `component.md` | Role queries first, user events over synthetic ones, one assertion per wait, no side effects inside a wait | [Common mistakes](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library)                                                                                                                   |
-| `e2e.md`       | Web-first assertions, actionability, config-wide reduced motion, sharding                                  | Playwright's [best practices](https://playwright.dev/docs/best-practices), [actionability](https://playwright.dev/docs/actionability), and [TestOptions](https://playwright.dev/docs/api/class-testoptions) |
+| Reference      | Adopted                                                                                                    | Source                                                      |
+| -------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `component.md` | Role queries first, user events over synthetic ones, one assertion per wait, no side effects inside a wait | Common mistakes                                             |
+| `e2e.md`       | Web-first assertions, actionability, config-wide reduced motion, sharding                                  | Playwright's best practices, actionability, and TestOptions |
 
 `component.md` states its rules with the library names removed. `e2e.md` names the runner, since the reference is the per-layer home for runner specifics.
 
@@ -65,9 +67,9 @@ Each item below stays out of the skill for the reason given.
 
 ### A numeric mix
 
-Google targets roughly 80% unit, 15% integration, 5% end to end ([same chapter](https://abseil.io/resources/swe-book/html/ch11.html)). A ratio is a codebase-wide target a session writing one test cannot act on.
+Google targets roughly 80% unit, 15% integration, 5% end to end (same chapter). A ratio is a codebase-wide target a session writing one test cannot act on.
 
-web.dev's point that the shape "should fit your architecture" ([Pyramid or Crab](https://web.dev/articles/ta-strategies)) is what a motion-heavy static site needs, so the body states the rule and the budget in words instead.
+web.dev's point that the shape "should fit your architecture" (Pyramid or Crab) is what a motion-heavy static site needs, so the body states the rule and the budget in words instead.
 
 ### Delete the code written before its test
 

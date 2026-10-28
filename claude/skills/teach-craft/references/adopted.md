@@ -7,6 +7,8 @@ description: Which learning-science sources this skill's rules rest on, the pass
 
 The field is learning science and cognitive psychology, with educational measurement for quiz construction. Every source below was opened, the papers through the PubMed API and the practice guide as a PDF. Each entry quotes the passage relied on, and a later session extends this file rather than re-arguing an item settled here.
 
+A source a bullet rests on is linked once, in that bullet's row of the toolkit's per-bullet ledger at `governance/ledger/skills/teach-craft/`, which ships outside the plugin. This file names those sources without the link and keeps the catalog-level adopted and declined record, linking only a source no row cites.
+
 ## Contents
 
 - [Adopted](#adopted)
@@ -17,7 +19,7 @@ The field is learning science and cognitive psychology, with educational measure
 
 ### Retrieval over restudy, and fluency against retention
 
-[Roediger and Karpicke 2006, Test-enhanced learning](https://pubmed.ncbi.nlm.nih.gov/16507066/) backs testing before reviewing, and the rule that confidence says nothing about retention.
+Roediger and Karpicke 2006, Test-enhanced learning backs testing before reviewing, and the rule that confidence says nothing about retention.
 
 - Passage: "prior testing produced substantially greater retention than studying, even though repeated studying increased students' confidence in their ability to remember the material"
 - The same abstract: "When the final test was given after 5 min, repeated studying improved recall relative to repeated testing"
@@ -25,7 +27,7 @@ The field is learning science and cognitive psychology, with educational measure
 
 ### Failing an attempt before the answer
 
-[Kornell, Hays and Bjork 2009, Unsuccessful retrieval attempts enhance subsequent learning](https://pubmed.ncbi.nlm.nih.gov/19586265/) backs asking before telling and letting the learner fail first.
+Kornell, Hays and Bjork 2009, Unsuccessful retrieval attempts enhance subsequent learning backs asking before telling and letting the learner fail first.
 
 - Passage: in the test condition "participants attempted to answer the question before being shown the answer", and "Unsuccessful retrieval attempts enhanced learning with both types of materials"
 - The read-only condition it beat is "the question and answer were presented together"
@@ -38,7 +40,7 @@ The field is learning science and cognitive psychology, with educational measure
 - Passage: "the ISI producing maximal retention increased as retention interval increased"
 - Adopted as the spacing section's principle. It names no schedule and reports no result for expanding gaps, so the ladder is house judgment.
 
-[Pashler et al. 2007, IES practice guide NCER 2007-2004](https://ies.ed.gov/ncee/wwc/Docs/PracticeGuide/20072004.pdf) backs the same at classroom scale, and its panel rates the evidence moderate.
+Pashler et al. 2007, IES practice guide NCER 2007-2004 backs the same at classroom scale, and its panel rates the evidence moderate.
 
 - Passage: key concepts seen on at least two occasions, "separated by a period of several weeks to several months"
 - Adopted as the rule to revisit once forgetting has begun rather than while the material is fresh
@@ -59,7 +61,7 @@ The IES guide's Recommendation 2 backs worked examples for a learner taking on a
 
 ### Interleaving exemplars
 
-[Kornell and Bjork 2008, Learning concepts and categories](https://pubmed.ncbi.nlm.nih.gov/18578849/) backs mixing related items within a session, and names the fluency trap of blocked practice.
+Kornell and Bjork 2008, Learning concepts and categories backs mixing related items within a session, and names the fluency trap of blocked practice.
 
 - Passage: paintings "presented consecutively (massed) or interleaved with other artists' paintings (spaced)", and induction profited from the interleaved order
 - The same abstract: "Participants rated massing as more effective than spacing"
@@ -67,7 +69,7 @@ The IES guide's Recommendation 2 backs worked examples for a learner taking on a
 
 ### Feedback on a quiz
 
-[Butler and Roediger 2008, Feedback and multiple-choice testing](https://pubmed.ncbi.nlm.nih.gov/18491500/) backs giving feedback on a multiple-choice quiz.
+Butler and Roediger 2008, Feedback and multiple-choice testing backs giving feedback on a multiple-choice quiz.
 
 - Passage: "The selection of lures can lead students to acquire false knowledge", and feedback "reduced the proportion of intrusions"
 - Adopted as the rule to write feedback for every question. It tests feedback against none, not where distractors come from or how feedback explains them.
@@ -75,7 +77,7 @@ The IES guide's Recommendation 2 backs worked examples for a learner taking on a
 
 ### The teach-back
 
-[Nestojko et al. 2014, Expecting to teach](https://pubmed.ncbi.nlm.nih.gov/24845756/) backs asking the learner to explain to an audience.
+Nestojko et al. 2014, Expecting to teach backs asking the learner to explain to an audience.
 
 - Passage: "Participants expecting to teach produced more complete and better organized free recall of the passage"
 - Adopted as the teach-back block and its named audience
