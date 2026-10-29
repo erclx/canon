@@ -70,7 +70,7 @@ ci = [
   ".claude/settings.json",
 ]
 # Internal narrative and the always-loaded record, which `docs` does not reach.
-# `assets/brand/` rides here rather than under `generated` or `rides-with-generated`,
+# `assets/brand/` rides here rather than under `generated`,
 # since a mark under it is hand-authored source `canon/DESIGN.md`'s own
 # iconography field names, not a mechanical derivative of anything.
 # `canon/design/` rides beside `canon/DESIGN.md` as the record's other half,
@@ -130,23 +130,9 @@ release-managed = [
 # row over any of them adds a second label to a mechanical edit. An `assets/`
 # entry is a stem, so it covers the light sibling and the stamp.
 generated = [
-  "assets/frames/hero",
-  "assets/frames/install",
   "assets/evidence/catalog",
-  "assets/frames/arrival",
   "assets/evidence/home/",
   "canon/config/baseline.json",
-]
-# Each is a reason of its own rather than another generated file, since a reader
-# reviews the markup where the image and the stamp are mechanical. Giving either
-# `docs` would spuriously label every commit that regenerated its image
-# alongside an unrelated surface. The match is a prefix, so each entry covers
-# the `.tmpl` beside it, which travels in the same commit for the same reason.
-# Each entry is a stem, so it also covers the light sibling.
-rides-with-generated = [
-  "assets/captures/hero",
-  "assets/captures/install",
-  "assets/captures/catalog",
 ]
 # Formatting configuration nobody reviews for behavior, and no row above owns
 # its subject.

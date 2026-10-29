@@ -36,7 +36,7 @@ Beside `src/`, holds the tests, the social card route, and the files served as t
 This repository's self-portrait for a visitor who never opens the source, where `examples/` is sample input for a reader about to copy and run it.
 
 - `evidence/home/` is the committed baseline of the page, one folder per section holding a frame per theme at 320 and 1280 pixels
-- `frames/` and `captures/` hold the card and hero images, and a render gates only where `captureStamps` makes something committed depend on it
+- `frames/` holds the social card and its stamp, the one image the site's link preview shows
 - `loops/` holds the launch film's README GIFs and the page's silent MP4s and posters, all written by `bun run film:render`
 - `merge/` and the whole-page frames come from a `workflow_dispatch` artifact on `main`, since a local capture falls back to another font
 - Every README image ships as a `<name>` and `<name>-light` pair behind a `<picture>`

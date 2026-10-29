@@ -25,13 +25,10 @@ Traps for any bash script edited under this folder, each a failure that passed a
 
 ### `scripts/core/`
 
-Holds the scripts run by `bun run` name or fired by a gate stage or workflow, and none is a `canon` verb. `capture-home.sh` builds the landing page for `pr-visual-checks.yml` and the frame refresh, `regen-web-*.ts` write the committed previews and favicon, and `design-sync.ts` lands board frames in `canon/design/`, which the design entry describes.
+Holds the scripts run by `bun run` name or fired by a gate stage or workflow, and none is a `canon` verb. `capture-home.sh` builds the landing page for `pr-visual-checks.yml` and the baseline refresh, `regen-web-*.ts` write the committed previews and favicon, and `design-sync.ts` lands board frames in `canon/design/`.
 
 - `bootstrap.ts` installs dependencies, links the CLI globally, and appends the alias block to `~/.zshrc`. A re-run stops at the marker, so a grown block reaches no one until they delete the old one.
-- `regen-hero.ts` fills each `assets/captures/*.html.tmpl`, reading every catalog in-process, and a placeholder nothing fills fails the run. Its pure half sits in `src/capture/frame-values.ts`.
-- `FEATURED_SKILLS` in that module is a hand-chosen list of exactly `LISTED` names, so renaming or retiring a shipped skill fails the Hero stage until the list is updated
 - `render-film.ts` renders `assets/film/` once per theme at a pinned `hyperframes` and derives the README GIF, web MP4, and poster with ffmpeg, copying them into `assets/loops/` once both themes succeed
-- The command count greps `import { register as ` lines in `src/cli.ts`, so a command registered in another shape leaves the frame low and nothing reports it
 
 ### `scripts/ci/`
 

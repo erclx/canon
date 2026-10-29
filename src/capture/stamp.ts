@@ -6,13 +6,11 @@ const STAMP_EXTENSION = '.stamp'
 
 /**
  * Provenance for one rendered PNG: the markup it came from and a digest over
- * each side of the pair. `assertStampField` in `src/gate/measures.ts` reads both
- * digests back off the first whitespace-separated token, so the field names, the
- * colon, and the space after it are a contract between the writer and the gate
- * rather than formatting.
+ * each side of the pair. Nothing reads the digests back today, so no check
+ * fails when either side moves.
  *
  * Both sides are recorded because either can move alone. The markup digest
- * catches an edit committed with no capture, and the image digest catches a PNG
+ * would show an edit committed with no capture, and the image digest a PNG
  * replaced under markup that never changed.
  */
 export interface CaptureStamp {

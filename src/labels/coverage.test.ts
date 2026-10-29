@@ -158,14 +158,13 @@ describe("resolveCoverage against the repository's own map", () => {
 
   it('should decline a light sibling, its stamp, and a home frame the real config names by stem', () => {
     const coverage = resolveCoverage(repositoryMap(), [
-      'assets/frames/hero-light.png',
-      'assets/frames/hero-light.stamp',
-      'assets/captures/hero-light.html',
+      'assets/evidence/catalog-light.png',
+      'assets/evidence/catalog-light.stamp',
       'assets/evidence/home/frame-1.png',
     ])
 
     expect(coverage.uncovered).toEqual([])
-    expect(coverage.declined).toHaveLength(4)
+    expect(coverage.declined).toHaveLength(3)
   })
 })
 
@@ -177,32 +176,21 @@ docs = ["docs/"]
 
 [declined]
 generated = ["assets/evidence/hero", "assets/evidence/home/"]
-rides-with-generated = ["assets/captures/hero"]
 `)
     if (map.kind !== 'map') throw new Error('stem map did not parse')
     return map
   }
 
-  it('should decline a light sibling of a declared frame, its stamp, and its capture', () => {
+  it('should decline a light sibling of a declared frame and its stamp', () => {
     const coverage = resolveCoverage(stemMap(), [
       'assets/evidence/hero-light.png',
       'assets/evidence/hero-light.stamp',
-      'assets/captures/hero-light.html',
-      'assets/captures/hero.html.tmpl',
     ])
 
     expect(coverage.uncovered).toEqual([])
     expect(coverage.declined).toEqual([
       { path: 'assets/evidence/hero-light.png', reason: 'generated' },
       { path: 'assets/evidence/hero-light.stamp', reason: 'generated' },
-      {
-        path: 'assets/captures/hero-light.html',
-        reason: 'rides-with-generated',
-      },
-      {
-        path: 'assets/captures/hero.html.tmpl',
-        reason: 'rides-with-generated',
-      },
     ])
   })
 

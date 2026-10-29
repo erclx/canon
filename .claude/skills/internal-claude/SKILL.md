@@ -71,22 +71,20 @@ When editing any file under `.claude/` here, check `tooling/claude/seeds/` for a
 
 ## Sync checklist
 
-Adding a skill touches the catalog, the skill map, the family key, a scenario, a routing case, and the hero.
+Adding a skill touches the catalog, the skill map, the family key, a scenario, and a routing case.
 
 - Create the skill folder and `SKILL.md` in `claude/skills/`
 - An internal skill needs no catalog edit, since `canon/context/workflow/internal-skills.md` describes the folder. A plugin skill takes a `skill-*` entry only for reasoning no existing child covers.
 - Add a row to the skill's group in `docs/workflow/skill-map.md`, or in `skill-map-on-request.md` beside it for the artifact and question groups. Every listed name takes exactly one row across the two.
 - Set `metadata.family` to the group's key from `canon claude skills list --json`. The Skill family gate stage fails a skill without one, and the web build refuses a row under another group.
 
-### Scenario, routing, and hero
+### Scenario and routing
 
 Draft a `sandbox/<category>/<skill>.ts` scenario beside `SKILL.md`, even for judgment-driven output, since the seeded input is the point. Skip it, and list no follow-up, only for a skill whose body forbids probing, listing, grepping, or reading project surfaces.
 
 - `canon sandbox run <cat:cmd> "<prompt>"` drives the arm through `claude -p`, so the sandbox can drive Claude
 - The operator authorizes the spend and the session performs it, per `canon/context/development/scripts.md`
 - `src/claude/cases/all.test.ts` fails `bun run check` until a routing case for the new skill lands in one of `src/claude/cases/*.ts`
-- A changed skill count fails the Hero gate stage until `bun scripts/core/regen-hero.ts` runs and `canon capture assets/captures --selector .window --out assets/frames` re-renders the frame
-- Commit the hero markup, the image, and the stamp together
 
 `canon/context/surfaces/plugin.md` lists both gates under its `claude/skills/` layout.
 

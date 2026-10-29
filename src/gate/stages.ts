@@ -8,7 +8,6 @@ import {
 import {
   canonicalRecords,
   auditSet,
-  captureStamps,
   clientCommandCitations,
   designProse,
   documentCeiling,
@@ -190,28 +189,6 @@ export const STAGES: readonly Stage[] = [
       },
     ],
     success: 'Consumed copies clean',
-  },
-  {
-    // Only the markup is asserted for drift. The image beside it is a chromium
-    // render whose bytes move with the browser version, so a drift check over it
-    // would fail on a machine whose chromium differs rather than on a stale
-    // count. The stamp measure below is what covers the image instead.
-    //
-    // The stage covers every frame under `assets/captures/` and keeps the
-    // narrower name, because the label is spelled across the context entries and
-    // the CI table and renaming it buys nothing the pathspec below does not
-    // already say.
-    id: 'hero',
-    label: 'Hero',
-    checks: [
-      {
-        kind: 'command',
-        argv: ['bun', 'scripts/core/regen-hero.ts', '--check'],
-        failure: 'Hero regen health check failed',
-      },
-      { kind: 'measure', measure: captureStamps },
-    ],
-    success: 'Hero clean',
   },
   {
     // `canon/DESIGN.md`, the web stylesheet, and the tab icon are written

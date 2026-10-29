@@ -1,6 +1,6 @@
 ---
 title: Development
-description: The local dev loop, the run command table, how bun run check sequences and scopes its stages, the hooks, session scratch, record folders, and the evidence and hero folders
+description: The local dev loop, the run command table, how bun run check sequences and scopes its stages, the hooks, session scratch, record folders, and the evidence folders
 ---
 
 # Development
@@ -99,17 +99,7 @@ Holds the dev regression baselines, one subfolder per area. Dev evidence is what
 - `assets/evidence/home/` is the site baseline
 - `web/public/evidence/` is prod and hand-placed, while `.gitignore` ignores `web/evidence/` on purpose, since the site's flagged captures commit under `assets/evidence/home/`
 - `.canon/evidence/` and a groundwork track's `evidence/` are gitignored proof a record cites, and `canon migrate scratch-evidence` moves a cited folder out of `tmp/`
-- Design commits no dev baseline yet, and the marketing images in `assets/frames/` are neither kind
-
-### `assets/captures/`
-
-Holds the `*.html.tmpl` frame templates that `scripts/core/regen-hero.ts` fills and the Hero stage gates.
-
-- The script fills the templates from committed catalogs and the design CSS, writes the `.html` beside each, and asserts no drift. It reads this folder flat, so a nested template is skipped silently.
-- The assert covers the HTML and not the PNG, so `canon capture` writes a `.stamp` of markup and image digests that `captureStamps` compares
-- Regenerate, capture, and stage all three files in one step, since the assert reads the index and repeats its message until they are staged
-- A branch commits no frame of its own, and `.github/workflows/refresh-capture-frames.yml` refreshes them from `main`
-- Run a verb reading data the branch authors through `bun src/cli.ts`, since the global binary is the last release, as with `canon capture --selector`
+- Design commits no dev baseline yet, and the social card in `assets/frames/` is neither kind
 
 ### `assets/film/`
 

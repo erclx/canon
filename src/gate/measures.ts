@@ -1,5 +1,4 @@
-import { createHash } from 'node:crypto'
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import {
   CLIENT_COMMAND_MARKER,
@@ -143,9 +142,6 @@ export const SANDBOX_ASSERTED_FLOOR = 26
 export function auditsBaselineRel(root: string): string {
   return relative(root, surfaceDir(root, 'canon', 'baseline.json'))
 }
-
-export const CAPTURE_STAMP_FAILURE =
-  'A capture set disagrees with the stamp written when its image was captured. Run canon capture assets/captures --selector .window --out assets/frames and commit each frame with its image and its stamp.'
 
 function parseJson(payload: string): unknown {
   try {
@@ -1477,143 +1473,4 @@ async function collectPluginManifests(ctx: MeasureContext): Promise<string[]> {
       .filter((line) => line !== ''),
   )
   return [...seen].sort()
-}
-
-/**
- * A capture set spans two folders. The markup and the template beside it are
- * the authored half and sit under `assets/captures/`, while the image a
- * document points at and the stamp answering for it sit under
- * `assets/frames/`, which is where `--out assets/frames` sends them. They sit
- * outside `assets/evidence/` so a changed marketing image is not read as dev
- * evidence.
- */
-const CAPTURE_MARKUP_DIR = 'assets/captures'
-const CAPTURE_OUTPUT_DIR = 'assets/frames'
-
-/**
- * Every capture under `assets/captures/`, named by the base its three files
- * share.
- *
- * Read off the folder rather than listed, and off the markup specifically,
- * because that is how `resolveCaptureSources` decides what `canon capture
- * assets/captures` renders. A list would fail open on the frame somebody adds
- * next, which is the one nobody thinks to add here, and driving off the PNGs
- * instead would report a missing set for any image in `assets/` that is not a
- * capture.
- */
-function captureBases(root: string): string[] {
-  const dir = join(root, CAPTURE_MARKUP_DIR)
-  if (!existsSync(dir)) return []
-
-  return readdirSync(dir)
-    .filter((name) => name.endsWith('.html'))
-    .map((name) => name.slice(0, -'.html'.length))
-    .sort()
-}
-
-/**
- * The drift assert on the Hero stage covers the markup because the image beside
- * it is a chromium render whose bytes move with the browser. That leaves the
- * artifact a visitor actually sees asserted nowhere, so a branch regenerating
- * the markup and never running the capture would pass every stage while
- * shipping an image with the old counts.
- *
- * `canon capture` records a digest of the markup it rendered and one of the image
- * it wrote, so this reads provenance rather than timing. Comparing the commit
- * that last touched each file passes any pair that moved together whatever the
- * two files hold, which is what a binary conflict resolved by taking either
- * side produces.
- *
- * Both digests are checked because either file can move alone. The markup side
- * catches an edit committed with no capture, and the image side catches an
- * image replaced under markup that never changed. A tree carrying no markup
- * under `assets/captures/` has no set to read and passes, which is correct.
- */
-export const captureStamps: Measure = async (ctx) => {
-  const lines = captureBases(ctx.root).flatMap((base) =>
-    readCaptureSet(ctx.root, base),
-  )
-  if (lines.length === 0) return { emissions: [] }
-
-  return {
-    emissions: [output(lines.join('\n'))],
-    failure: CAPTURE_STAMP_FAILURE,
-  }
-}
-
-/**
- * One capture set, as the lines it has to report and none where it agrees.
- *
- * The markup resolves against the source folder and the two files a render
- * writes resolve against the output folder, so the set spans both rather than
- * hanging off one base directory. Sending any of the three to the wrong folder
- * reports it as missing rather than failing loudly, since a missing file reads
- * the same way whether the path is wrong or the file is.
- */
-function readCaptureSet(root: string, base: string): string[] {
-  const set = [
-    `${CAPTURE_MARKUP_DIR}/${base}.html`,
-    `${CAPTURE_OUTPUT_DIR}/${base}.png`,
-    `${CAPTURE_OUTPUT_DIR}/${base}.stamp`,
-  ]
-
-  const missing = set.filter((rel) => !existsSync(join(root, rel)))
-  if (missing.length > 0) {
-    return [`Missing from the ${base} set: ${missing.join(' ')}`]
-  }
-
-  const [html, png, stamp] = set.map((rel) => join(root, rel))
-  return [
-    ...assertStampField(root, stamp, 'source-sha256', html),
-    ...assertStampField(root, stamp, 'image-sha256', png),
-  ]
-}
-
-/**
- * One digest the stamp recorded against the file it was taken over, returning
- * the lines to report and nothing when the two agree.
- *
- * An absent field reports itself rather than comparing against an empty string,
- * so a stamp predating the current format is distinguishable from a file that
- * moved. Both names in the message come off the paths rather than from
- * arguments, which is what keeps a name from disagreeing with the file it
- * labels once a second capture source calls this.
- */
-export function assertStampField(
-  root: string,
-  stamp: string,
-  field: string,
-  file: string,
-): string[] {
-  const stampLabel = relativeTo(root, stamp)
-  const fileLabel = relativeTo(root, file)
-
-  const recorded = readStampField(stamp, field)
-  if (recorded === undefined) {
-    return [
-      `${stampLabel} carries no ${field} line, so it predates the capture that writes one.`,
-    ]
-  }
-
-  const actual = createHash('sha256').update(readFileSync(file)).digest('hex')
-  if (recorded !== actual) {
-    return [
-      `${stampLabel} records ${field} ${recorded}`,
-      `${fileLabel} hashes to ${actual}`,
-    ]
-  }
-
-  return []
-}
-
-function readStampField(stamp: string, field: string): string | undefined {
-  for (const line of readFileSync(stamp, 'utf8').split('\n')) {
-    const [key, value] = line.trim().split(/\s+/)
-    if (key === `${field}:` && value !== undefined) return value
-  }
-  return undefined
-}
-
-function relativeTo(root: string, path: string): string {
-  return path.startsWith(`${root}/`) ? path.slice(root.length + 1) : path
 }
