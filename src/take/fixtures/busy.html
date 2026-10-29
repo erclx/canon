@@ -7,6 +7,9 @@
       A hero canvas that redraws every frame and spends busy=<ms> of main
       thread work on each, so a frame takes about that long to render. A card
       sits about 2900px down, below the window, and the rail link scrolls to it.
+      With timed=1 each frame spins on performance.now() instead, as the
+      groundwork page did, which never ends once the stepper pauses virtual
+      time.
     -->
     <style>
       html {
@@ -62,14 +65,38 @@
     <section id="cards"><div class="card" id="card">card</div></section>
     <section>four</section>
     <script>
-      const busy = Number(new URLSearchParams(location.search).get('busy') || 0)
+      const params = new URLSearchParams(location.search)
+      const busy = Number(params.get('busy') || 0)
+      const timed = params.get('timed') === '1'
       const hero = document.getElementById('hero')
       hero.width = innerWidth
       hero.height = innerHeight
       const context = hero.getContext('2d')
-      const draw = (time) => {
+      // The work is a count calibrated in real time on load, since a loop
+      // timed by performance.now() never ends under a paused virtual clock.
+      let sink = 0
+      const spin = (count) => {
+        for (let i = 0; i < count; i += 1) sink += Math.sqrt(i)
+      }
+      const measure = (ms) => {
+        let count = 0
         const start = performance.now()
-        while (performance.now() - start < busy) {}
+        while (performance.now() - start < ms) {
+          spin(10000)
+          count += 10000
+        }
+        return count / ms
+      }
+      // Warmed first, so the count matches the optimized loop a frame runs.
+      measure(100)
+      const work = Math.round(busy * measure(200))
+      const draw = (time) => {
+        if (timed) {
+          const start = performance.now()
+          while (performance.now() - start < busy) {}
+        } else {
+          spin(work)
+        }
         context.fillStyle = `hsl(${(time / 10) % 360}, 60%, 50%)`
         context.fillRect(0, 0, hero.width, hero.height)
         requestAnimationFrame(draw)

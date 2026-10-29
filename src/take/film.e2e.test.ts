@@ -475,8 +475,10 @@ describe.skipIf(!available())('a take of a page whose frames run slow', () => {
     )
     if (read.kind !== 'read') throw new Error(read.detail)
 
+    // The clock-timed page, which refused as a pending frame before the
+    // stepper waited on each one.
     const result = await take({
-      url: `${server.url}?busy=400`,
+      url: `${server.url}?busy=400&timed=1`,
       plan: read.plan,
       out,
       stallMs: LOADED_STALL_MS,
@@ -485,6 +487,37 @@ describe.skipIf(!available())('a take of a page whose frames run slow', () => {
     // Ahead of the status, so a refusal prints its message.
     expect(result).not.toHaveProperty('message')
     expect(result).toMatchObject({ status: 'filmed' })
+  }, 180_000)
+
+  it('should keep frame stepping on 400 ms frames under the stall limit', async () => {
+    const read = readTakePlan(
+      JSON.stringify({
+        beats: [
+          {
+            name: 'slow',
+            setup: TO_THE_CARDS,
+            steps: [{ kind: 'wait', ms: 300 }],
+          },
+        ],
+      }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+
+    const result = await take({
+      url: `${server.url}?busy=400`,
+      plan: read.plan,
+      out,
+      stallMs: LOADED_STALL_MS,
+    })
+
+    // Ahead of the route, so a refusal prints its message and a fall back
+    // prints the frame that stalled.
+    expect(result).not.toHaveProperty('message')
+    expect(result).not.toHaveProperty('beats.0.fallback')
+    expect(result).toMatchObject({
+      status: 'filmed',
+      beats: [{ name: 'slow', route: 'step' }],
+    })
   }, 180_000)
 
   it('should glide on 200 ms frames near its plan and log when it landed', async () => {
