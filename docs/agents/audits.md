@@ -63,30 +63,30 @@ An audit that finds no corpus reports `absent`, which moves neither the verdict 
 
 `canon audits list` reports the first 18 rows. The rows marked `outside` run by hand or from a skill and sit beside the aggregate.
 
-| Id                   | Verb                                | Measures                                                                           | Finding        |
-| -------------------- | ----------------------------------- | ---------------------------------------------------------------------------------- | -------------- |
-| `context`            | `canon context audit`               | Context folder structure, citations, and the requirements record's word cap        | Gates          |
-| `markdown`           | `canon markdown audit`              | Bans, dead links, density, and reference shape                                     | Gates          |
-| `skills`             | `canon claude skills audit`         | Both skill corpora against the skill standards                                     | Gates          |
-| `skills-reach`       | `canon claude skills reach`         | Skill bodies citing a path no target receives                                      | Reports        |
-| `skills-rank`        | `canon claude skills rank`          | Whether skill descriptions separate against a routing case corpus                  | Reports        |
-| `tasks`              | `canon tasks validate`              | Board rows nothing resolves                                                        | Reports        |
-| `records-plans`      | `canon records validate plans`      | Plan records against their shape                                                   | Reports        |
-| `records-groundwork` | `canon records validate groundwork` | Groundwork folders against their shape                                             | Reports        |
-| `records-intake`     | `canon records validate intake`     | Intake folders against their shape                                                 | Reports        |
-| `comments`           | `canon comments scan`               | Comment density by language and kind, and `TODO`, `FIXME`, `HACK`, `XXX`           | Reports        |
-| `test-order`         | `canon gov test-order`              | Implementations that reached branch history before their test                      | Reports        |
-| `secrets`            | `canon secrets scan`                | Credential-shaped values in the shipped tree                                       | Gates          |
-| `labels`             | `canon labels audit`                | Changed paths no row of the label map reaches                                      | Reports        |
-| `restated`           | `canon gov restated`                | Instructions `CLAUDE.md` states that a second surface states too                   | Reports        |
-| `rules`              | `canon gov audit`                   | Rules past a shape limit, and here rules short of a ledger or out of step with one | Reports        |
-| `counts`             | `canon gov counts`                  | Sentences stating a closed catalog's size that disagree with the tree              | Reports        |
-| `census`             | `canon census`                      | File count, extension breakdown, and line total                                    | Reports        |
-| `deps`               | `canon deps audit`                  | Advisories against the resolved dependencies                                       | Reports        |
-| `outside`            | `canon gov citations`               | Rule citations and internal frontmatter globs reaching nothing                     | Gates in check |
-| `outside`            | `canon gov superseded <old> <new>`  | Where the tree still asserts a value a changed convention no longer produces       | Reports        |
-| `outside`            | `canon claude skills drift <ref>`   | Shipped skill bodies rewritten since a ref                                         | Reports        |
-| `outside`            | `canon claude routing`              | Per `CLAUDE.md` section, how many bullets name a path and whether a rule covers it | Reports        |
+| Id                   | Verb                                | Measures                                                                                    | Finding        |
+| -------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------- | -------------- |
+| `context`            | `canon context audit`               | Context folder structure, citations, and the requirements record's word cap                 | Gates          |
+| `markdown`           | `canon markdown audit`              | Bans, dead links, density, and reference shape                                              | Gates          |
+| `skills`             | `canon claude skills audit`         | Both skill corpora against the skill standards, and any ledger under `canon/ledger/skills/` | Gates          |
+| `skills-reach`       | `canon claude skills reach`         | Skill bodies citing a path no target receives                                               | Reports        |
+| `skills-rank`        | `canon claude skills rank`          | Whether skill descriptions separate against a routing case corpus                           | Reports        |
+| `tasks`              | `canon tasks validate`              | Board rows nothing resolves                                                                 | Reports        |
+| `records-plans`      | `canon records validate plans`      | Plan records against their shape                                                            | Reports        |
+| `records-groundwork` | `canon records validate groundwork` | Groundwork folders against their shape                                                      | Reports        |
+| `records-intake`     | `canon records validate intake`     | Intake folders against their shape                                                          | Reports        |
+| `comments`           | `canon comments scan`               | Comment density by language and kind, and `TODO`, `FIXME`, `HACK`, `XXX`                    | Reports        |
+| `test-order`         | `canon gov test-order`              | Implementations that reached branch history before their test                               | Reports        |
+| `secrets`            | `canon secrets scan`                | Credential-shaped values in the shipped tree                                                | Gates          |
+| `labels`             | `canon labels audit`                | Changed paths no row of the label map reaches                                               | Reports        |
+| `restated`           | `canon gov restated`                | Instructions `CLAUDE.md` states that a second surface states too                            | Reports        |
+| `rules`              | `canon gov audit`                   | Rules past a shape limit or out of step with a ledger, and here rules short of one          | Reports        |
+| `counts`             | `canon gov counts`                  | Sentences stating a closed catalog's size that disagree with the tree                       | Reports        |
+| `census`             | `canon census`                      | File count, extension breakdown, and line total                                             | Reports        |
+| `deps`               | `canon deps audit`                  | Advisories against the resolved dependencies                                                | Reports        |
+| `outside`            | `canon gov citations`               | Rule citations and internal frontmatter globs reaching nothing                              | Gates in check |
+| `outside`            | `canon gov superseded <old> <new>`  | Where the tree still asserts a value a changed convention no longer produces                | Reports        |
+| `outside`            | `canon claude skills drift <ref>`   | Shipped skill bodies rewritten since a ref                                                  | Reports        |
+| `outside`            | `canon claude routing`              | Per `CLAUDE.md` section, how many bullets name a path and whether a rule covers it          | Reports        |
 
 A deliberate secret takes a `canon-allow-secret: <reason>` marker. A deliberate citation takes `canon-allow-citation: <reason>` and a deliberate superseded value takes `canon-allow-superseded: <reason>`, each on its own line or the one above. Run any verb with `--help` for its flags and refusal reasons.
 
