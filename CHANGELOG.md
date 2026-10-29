@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.75.0](https://github.com/erclx/canon/compare/v5.74.0...v5.75.0) (2026-10-29)
+
+
+### Features
+
+* **claude:** audit proposal-critique against its ledger ([#2845](https://github.com/erclx/canon/issues/2845)) ([397699b](https://github.com/erclx/canon/commit/397699bdeb7da47a39fb210d2850e8502d503a1f))
+* **claude:** seed the plan guard and wire installed projects ([#2851](https://github.com/erclx/canon/issues/2851)) ([e312aab](https://github.com/erclx/canon/commit/e312aabaa69941ce01f656a635b98ef9e01680f1))
+* **gov:** check a project's ledgers under canon/ledger/ ([#2848](https://github.com/erclx/canon/issues/2848)) ([65fb0e6](https://github.com/erclx/canon/commit/65fb0e6e60ef22c16a7743964865fc62d6b55ed8))
+* **governance:** route a rule edit to create-rule ([#2847](https://github.com/erclx/canon/issues/2847)) ([010b639](https://github.com/erclx/canon/commit/010b63970a874905ec9ee3db520b7cb5f96db778))
+* **take:** refuse a take past --max-seconds as over-cap ([#2855](https://github.com/erclx/canon/issues/2855)) ([d9d6424](https://github.com/erclx/canon/commit/d9d642434d082f9f7d4b1508723576044e55f6a4))
+
+
+### Bug Fixes
+
+* **take:** cut a screencast clip at the stage clock ([#2853](https://github.com/erclx/canon/issues/2853)) ([3588832](https://github.com/erclx/canon/commit/3588832a8263079ff8340b2cf7af3c492bf4cc66))
+* **take:** hold canon take steady on a page whose frames run slow ([#2852](https://github.com/erclx/canon/issues/2852)) ([f2b55f9](https://github.com/erclx/canon/commit/f2b55f9a2f948c46fb4c84720da7596df31107a5))
+* **take:** scroll a target taller than the window ([#2854](https://github.com/erclx/canon/issues/2854)) ([976b85d](https://github.com/erclx/canon/commit/976b85d27391106d2cb7e03072451de5a128d2fd))
+
 ## [5.74.0](https://github.com/erclx/canon/compare/v5.73.0...v5.74.0) (2026-10-28)
 
 
