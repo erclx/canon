@@ -1,6 +1,6 @@
 ---
 title: Development
-description: The local dev loop, the run command table, how bun run check sequences and scopes its stages, the hooks, session scratch, record folders, and the evidence and hero folders
+description: The local dev loop, the run command table, how bun run check sequences and scopes its stages, the hooks, session scratch, record folders, and the evidence folders
 ---
 
 # Development

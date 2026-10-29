@@ -20,7 +20,6 @@ Read `canon/context/development/web.md` for structure, the Astro build, and the 
 Point an image at a file some script writes. `canon capture` writes a `.stamp` beside each PNG carrying a digest over the markup it read and the image it wrote.
 
 - Never hand-edit a generated frame. The next regeneration overwrites it.
-- A design-token change can move the capture markup and stamps while the PNGs stay byte-identical, per `canon/context/development/web.md`
 
 ## Sync checklist
 

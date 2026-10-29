@@ -30,7 +30,7 @@ Owns the plugin skills, one flat kebab-case folder each with a `SKILL.md`. Disco
 - `REQUIREMENT.md` beside `SKILL.md` holds the skill's gap statement. A body change tests against it, and a `## Must` line moves in the same change as the body line implementing it.
 - `references/` holds each artifact's shape reference, cited by a sibling as `${CLAUDE_SKILL_DIR}/../<owner>/references/<name>.md`, and a path resolving only here fails the Skill paths stage
 - `role-orchestrator/scripts/` holds `poll.ts` and `watch.ts`, the one executable code the plugin carries, run in a target by that machine's `bun` and `gh`
-- A new skill needs `metadata.family`, a routing case in `src/claude/cases/`, and a regenerated hero frame, per the Sync checklist in `.claude/skills/internal-claude/SKILL.md`
+- A new skill needs `metadata.family` and a routing case in `src/claude/cases/`, per the Sync checklist in `.claude/skills/internal-claude/SKILL.md`
 - A body writing shared scratch at the main worktree root names its route per `claude/skills/session-worktree/references/main-root-writes.md`, since `Edit` and `Write` refuse it from a linked worktree
 
 ### `.claude-plugin/`
