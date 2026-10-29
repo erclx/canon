@@ -187,6 +187,21 @@ describe('readRuleAudit in a canon checkout', () => {
     })
   })
 
+  it('should read governance/ledger/ and never canon/ledger/', async () => {
+    write(ledger, `# Go ledger\n\n## Errors\n\n${table(2)}`)
+    write(join('canon', 'ledger', 'rules', 'lang', 'go.md'), table(1))
+    write(join('canon', 'ledger', 'rules', 'gone.md'), table(1))
+
+    const report = measured(await readRuleAudit(ROOT))
+
+    expect(report.rules[0]?.ledger).toEqual({
+      status: 'present',
+      path: ledger,
+      mismatches: [],
+    })
+    expect(report.orphans).toEqual([])
+  })
+
   it('should ask no ledger of an untouched core rule or an internal rule', async () => {
     write(join('governance', 'rules', 'canon', 'git.md'), rule(bullets(1)))
     write(join('internal', 'rules', 'core', 'cli.md'), rule(bullets(1)))
@@ -315,7 +330,103 @@ describe('readRuleAudit on a core rule', () => {
 })
 
 describe('readRuleAudit in a target', () => {
-  it('should read .claude/rules/project/ alone and ask no ledger', async () => {
+  const api = join('.claude', 'rules', 'project', 'code', 'api.md')
+  const apiLedger = join('canon', 'ledger', 'rules', 'code', 'api.md')
+
+  function apiRule(): string {
+    return rule(['# API', '## Errors', bullets(2)].join('\n'))
+  }
+
+  function ledgerTable(rows: number): string {
+    return [
+      '# API ledger',
+      '',
+      '## Errors',
+      '',
+      '| Bullet | Source |',
+      '| ------ | ------ |',
+      ...Array.from({ length: rows }, (_, i) => `| b${i} | House choice |`),
+    ].join('\n')
+  }
+
+  it('should pass a project ledger with one row per bullet', async () => {
+    write(api, apiRule())
+    write(apiLedger, ledgerTable(2))
+
+    const report = measured(await readRuleAudit(ROOT))
+
+    expect(report.rules[0]?.ledger).toEqual({
+      status: 'present',
+      path: apiLedger,
+      mismatches: [],
+    })
+  })
+
+  it('should report a project ledger a row short and exit 2', async () => {
+    write(api, apiRule())
+    write(apiLedger, ledgerTable(1))
+
+    const report = measured(await readRuleAudit(ROOT))
+
+    expect(report.rules[0]?.ledger).toEqual({
+      status: 'present',
+      path: apiLedger,
+      mismatches: [{ heading: 'Errors', bullets: 2, rows: 1 }],
+    })
+    expect(auditExit(report, { gate: false, gated: [] })).toBe(2)
+  })
+
+  it('should owe no ledger of a project rule with none', async () => {
+    write(api, apiRule())
+
+    const report = measured(await readRuleAudit(ROOT))
+
+    expect(report.rules[0]?.ledger).toEqual({ status: 'not-required' })
+    expect(auditExit(report, { gate: false, gated: [] })).toBe(0)
+  })
+
+  it('should not count rows inside a fenced sample table', async () => {
+    write(api, apiRule())
+    write(
+      apiLedger,
+      [
+        ledgerTable(2),
+        '',
+        '```markdown',
+        '| a | b |',
+        '| - | - |',
+        '| c | d |',
+        '```',
+      ].join('\n'),
+    )
+
+    const report = measured(await readRuleAudit(ROOT))
+
+    expect(report.rules[0]?.ledger).toMatchObject({ mismatches: [] })
+  })
+
+  it('should report a project ledger whose rule is gone and exit 2', async () => {
+    write(api, apiRule())
+    write(join('canon', 'ledger', 'rules', 'code', 'moved.md'), ledgerTable(1))
+
+    const report = measured(await readRuleAudit(ROOT))
+
+    expect(report.orphans).toEqual([
+      join('canon', 'ledger', 'rules', 'code', 'moved.md'),
+    ])
+    expect(auditExit(report, { gate: false, gated: [] })).toBe(2)
+  })
+
+  it('should read no orphan on a named path', async () => {
+    write(api, apiRule())
+    write(join('canon', 'ledger', 'rules', 'code', 'moved.md'), ledgerTable(1))
+
+    const report = measured(await readRuleAudit(ROOT, [api]))
+
+    expect(report.orphans).toEqual([])
+  })
+
+  it('should read .claude/rules/project/ alone', async () => {
     write(join('.claude', 'rules', 'project', 'api.md'), rule(bullets(16)))
     write(join('.claude', 'rules', 'canon', 'git.md'), rule(bullets(16)))
 
