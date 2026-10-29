@@ -16,7 +16,7 @@
 # `python` is added because sessions here write Python for groundwork
 # spikes and occasional skill scripts, and the `node` stack alone never loads it.
 
-# `skill` and the `tooling` rules are added because base names its rules one
+# `skill`, `rule`, and the `tooling` rules are added because base names its rules one
 # by one and none of them is among the ten, while this repository edits
 # skills, workflows, configs, and code.
 
@@ -33,4 +33,5 @@ add = [
   "config-comments",
   "code-comments",
   "skill",
+  "rule",
 ]
