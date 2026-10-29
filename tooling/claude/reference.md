@@ -72,7 +72,7 @@ A project installed before the board became a folder still holds `.claude/TASKS.
 - Keep only what is project-specific in the project file, since project settings layer over user settings
 - Expect `permissions.deny` to hold `Agent` and `Task`, so no session spawns a subagent and parallel work runs as separate background sessions
 - Expect `autoMemoryEnabled` to be `false`. A person turns it back on for themselves in `settings.local.json`.
-- Run `canon migrate session-defaults` on a target seeded before those two defaults or before the merge entries below, since sync never rewrites an existing settings file
+- Run `canon migrate session-defaults` on a target seeded before those defaults, the merge entries, or the plan guard below, since sync never rewrites an existing settings file
 
 The seed's deny list also holds `Bash(canon pr merge:*)` and `Bash(gh pr merge:*)`, so the operator alone merges. An existing target gets both from `canon migrate session-defaults --write`, and `canon claude sync` warns while either is absent. Neither covers more than the form an agent writes by default.
 
