@@ -15,7 +15,7 @@ Each item names the design that stays out, the reason, and what would bring it b
 
 ### A default call from every planning skill
 
-An authoring session questioning its own plan is the weak form the independence source warns against. A default on every plan also adds ceremony that an earlier cleanup showed already costs most of a plan's run. The planning skills name the critique in one line for a one-way change or a fix with an unverified cause, and never call it.
+An authoring session questioning its own plan is the weak form Kahneman, Lovallo, and Sibony warn against when they ask for reviewers independent of the team that made the recommendation. The planning skills name the critique in one line for a one-way change or a fix with an unverified cause, and never call it.
 
 Revisit when a replay finds a case where the on-demand form would not have been invoked in time.
 
@@ -27,7 +27,7 @@ Revisit when critique passes show every question turning out to be preference.
 
 ### Running it as a forked subagent
 
-A fork reads cold, which is the independence the source asks for. It also loses the conversation, and a background fork loses the tools the operator questions need.
+A fork reads cold, which is the independence Kahneman, Lovallo, and Sibony ask for. It also loses the conversation, and a background fork loses the tools the operator questions need.
 
 Revisit when a critique keeps agreeing with the session that wrote the proposal.
 
@@ -36,10 +36,6 @@ Revisit when a critique keeps agreeing with the session that wrote the proposal.
 A plan already carries `## Risks` and `## Questions`, and its validator owns the sections. The verdict goes to chat, and the operator decides what moves into a record.
 
 Revisit when critiques are lost to compaction before anyone acts on them.
-
-### Changing `systematic-debugging` in this track
-
-Its external-cause branch names retry first and never asks whether the handling routes around the cause. That is a change to a shipped skill, so it routes through `plan-intake` per the groundwork standard.
 
 ## Revisit the whole design when
 
