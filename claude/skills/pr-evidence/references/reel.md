@@ -62,24 +62,23 @@ Write one plan entry for each beat chosen, then skip when none was.
 
 The negative test is a judgment over the box's text. A misread box costs a weaker reel and never a wrong pass, since the still check below guards the footage and the UI reviewer drives every box regardless.
 
-Keep the whole reel at or under 12 seconds. Each beat opens and closes on a 0.6 s hold, so give each action's `wait` only what its result needs to settle.
+Keep the whole reel at or under 12 seconds, which the take below enforces. Each beat opens and closes on a 0.6 s hold, so give each action's `wait` only what its result needs to settle.
 
 ## Film the reel
 
 ```bash
-canon take <url> .canon/tmp/pr/reel/<number>/plan.json --out .canon/tmp/pr/reel/<number>/takes --reel .canon/tmp/pr/reel/<number>/reel.webp --json
+canon take <url> .canon/tmp/pr/reel/<number>/plan.json --out .canon/tmp/pr/reel/<number>/takes --reel .canon/tmp/pr/reel/<number>/reel.webp --max-seconds 12 --json
 ```
 
 Branch on the record's `reason`, never on the exit code.
 
 | Record             | Route                                                                                                                                                                                                                                                              |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| No `reason`        | Sum the beats' `seconds` and continue to the stills                                                                                                                                                                                                                |
+| No `reason`        | Continue to the stills                                                                                                                                                                                                                                             |
 | `reel-failed`      | Skip as `reel-failed` with the record's `message`                                                                                                                                                                                                                  |
 | `target-offscreen` | Add a setup step that brings the target into the window, being a scroll over an element already inside it, such as a fixed header, with `dy` covering the distance, or a click on a link to it, and film once more. Skip as `target-offscreen` on a second refusal |
+| `over-cap`         | Drop `beat` and each beat after it, then film once more. Skip as `over-cap` if `beat` is first or it refuses again                                                                                                                                                 |
 | Any other value    | Skip under that `reason`, such as `target-missing` with its `beat`                                                                                                                                                                                                 |
-
-When the beats sum past 12 seconds, drop the last beat from the plan and film once more. A second run past the cap skips as `over-cap`.
 
 ## Check each still
 

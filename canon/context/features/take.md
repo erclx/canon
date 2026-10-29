@@ -9,7 +9,7 @@ description: The canon take verb that films a web app by frame stepping, its cli
 
 Owns `canon take`, which films each beat of a take plan into a 4K, 60 fps clip with a click log and a per-frame camera track. Its boundary is the clip, and HyperFrames composes and renders everything past it. The one exception is the pull request reel, which `--reel` joins from the clips with the pointer drawn on.
 
-The `ui-film` plugin skill drafts the beats and calls the verb for a launch video, and `pr-evidence` calls it with `--reel` for the pull request reel, reading `ui-film`'s filming rules. The file `src/commands/take.ts` holds only the verb's wiring, including `canon take camera`, which rebuilds a track from a log at a playback rate.
+The `ui-film` plugin skill drafts the beats and calls the verb for a launch video. `pr-evidence` films the pull request reel with `--reel` and `--max-seconds 12`, which refuses as `over-cap` past 12 s of clips. `src/commands/take.ts` holds only the wiring, including `canon take camera`, which rebuilds a track at a playback rate.
 
 ## Layout
 

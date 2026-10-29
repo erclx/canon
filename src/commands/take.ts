@@ -28,6 +28,7 @@ type Take = typeof import('@/take/film')
 interface RunOptions {
   readonly out?: string
   readonly reel?: string
+  readonly maxSeconds?: string
   readonly json?: boolean
 }
 
@@ -60,6 +61,8 @@ const TAKE_REFUSALS: Record<TakeRefusal, string> = {
   'target-missing': 'A step names a target the page does not carry.',
   'target-offscreen':
     'A step names a target outside the window, so a setup step must bring it into view first.',
+  'over-cap':
+    'The filmed beats ran past --max-seconds, so the take stopped at the beat that crossed it.',
   'take-failed': 'The take failed against a reachable page.',
 }
 
@@ -81,6 +84,10 @@ export function register(program: Command): void {
     .option(
       '--reel <file>',
       'Also join the beats into one animated WebP with the pointer drawn',
+    )
+    .option(
+      '--max-seconds <n>',
+      'Refuse once the filmed beats run past n seconds in total',
     )
     .option('--json', 'Add a machine-readable record on stdout')
     .addHelpText(
@@ -155,6 +162,7 @@ export function register(program: Command): void {
         `  ${INSTALL_BROWSER}`,
         '',
         'Reasons:',
+        '  bad-max-seconds     --max-seconds is not a positive number',
         '  no-plan-file        nothing readable at the plan path',
         '  unreadable-plan     the plan file is not valid JSON',
         '  no-beats            the plan names no beat',
@@ -169,6 +177,8 @@ export function register(program: Command): void {
         '  server-unreachable  nothing answered at the URL',
         '  target-missing      a step names a target the page does not carry',
         '  target-offscreen    a step names a target outside the window, so a setup step must bring it into view first',
+        '  over-cap            the filmed beats ran past --max-seconds, naming the',
+        '                      beat that crossed it',
         '  take-failed         the take failed against a reachable page',
         '  reel-failed         every beat was filmed and the reel did not encode',
         '',
@@ -303,6 +313,17 @@ async function runTake(
 
   intro(`canon take ${url}`)
 
+  const maxSeconds =
+    opts.maxSeconds === undefined ? undefined : readRate(opts.maxSeconds)
+  if (opts.maxSeconds !== undefined && maxSeconds === undefined) {
+    return refuse(
+      emitJson,
+      url,
+      'bad-max-seconds',
+      `--max-seconds ${opts.maxSeconds} is not a positive number, such as 12 or 7.5.`,
+    )
+  }
+
   let source: string
   try {
     source = readFileSync(path, 'utf8')
@@ -347,7 +368,12 @@ async function runTake(
   }
 
   logStep('Filming')
-  const result = await taker.take({ url, plan, out: opts.out })
+  const result = await taker.take({
+    url,
+    plan,
+    out: opts.out,
+    ...(maxSeconds === undefined ? {} : { maxSeconds }),
+  })
 
   if (result.status === 'failed') {
     logStep('Refused')

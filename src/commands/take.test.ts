@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { execa } from 'execa'
@@ -94,6 +94,25 @@ describe('canon take', () => {
     })
   })
 
+  it.each(['0', 'abc'])(
+    'should refuse bad-max-seconds for --max-seconds %s before filming',
+    async (value) => {
+      const result = await runTake([
+        'http://127.0.0.1:9/',
+        plan,
+        '--out',
+        dir,
+        '--max-seconds',
+        value,
+      ])
+
+      expect(result).toMatchObject({
+        exitCode: 1,
+        record: { reason: 'bad-max-seconds' },
+      })
+    },
+  )
+
   it('should refuse ffmpeg-missing when FFmpeg is not on the PATH', async () => {
     const result = await runTake(['http://127.0.0.1:9/', plan, '--out', dir], {
       PATH: join(dir, 'no-bin'),
@@ -142,6 +161,87 @@ describe('canon take', () => {
         record: { reason: 'server-unreachable' },
       })
     },
+  )
+
+  it.skipIf(!hasFfmpeg || !hasShell())(
+    'should refuse over-cap on the beat that crossed and film no later one',
+    async () => {
+      const served = Bun.serve({
+        port: 0,
+        fetch: () =>
+          new Response('<button id="go">go</button>', {
+            headers: { 'content-type': 'text/html' },
+          }),
+      })
+      try {
+        const twoBeats = join(dir, 'two-beats.json')
+        writeFileSync(
+          twoBeats,
+          JSON.stringify({
+            beats: [
+              { name: 'press go', steps: [{ kind: 'click', target: '#go' }] },
+              {
+                name: 'press again',
+                steps: [{ kind: 'click', target: '#go' }],
+              },
+            ],
+          }),
+        )
+        const out = join(dir, 'capped-takes')
+
+        // The beat's two 0.6 s holds alone pass a 0.5 s cap, so load on the
+        // machine cannot move this case across it.
+        const result = await runTake([
+          `http://127.0.0.1:${served.port}/`,
+          twoBeats,
+          '--out',
+          out,
+          '--max-seconds',
+          '0.5',
+        ])
+
+        expect(result).toMatchObject({
+          exitCode: 1,
+          record: { reason: 'over-cap', beat: 'press go' },
+        })
+        expect(existsSync(join(out, '02-press-again'))).toBe(false)
+        expect(existsSync(join(out, 'take.json'))).toBe(false)
+      } finally {
+        served.stop(true)
+      }
+    },
+    120_000,
+  )
+
+  it.skipIf(!hasFfmpeg || !hasShell())(
+    'should film every beat when they stay under --max-seconds',
+    async () => {
+      const served = Bun.serve({
+        port: 0,
+        fetch: () =>
+          new Response('<button id="go">go</button>', {
+            headers: { 'content-type': 'text/html' },
+          }),
+      })
+      try {
+        const result = await runTake([
+          `http://127.0.0.1:${served.port}/`,
+          plan,
+          '--out',
+          join(dir, 'uncapped-takes'),
+          '--max-seconds',
+          '60',
+        ])
+
+        expect(result).toMatchObject({
+          exitCode: 0,
+          record: { beats: [{ name: 'press go' }] },
+        })
+      } finally {
+        served.stop(true)
+      }
+    },
+    120_000,
   )
 
   it.skipIf(!hasFfmpeg || !hasShell())(
