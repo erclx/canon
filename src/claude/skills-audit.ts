@@ -141,6 +141,15 @@ export function skillLedgerPath(folder: string, file: string): string {
   return join(SKILL_LEDGERS, folder, inside.startsWith('..') ? file : inside)
 }
 
+/**
+ * Where a target keeps the ledgers behind its own skills, as `<skill>/<file>.md`
+ * below it. A tree holding `governance/rules/` is the toolkit, which keeps its
+ * ledgers at `SKILL_LEDGERS`, so this folder is never read there.
+ */
+export const PROJECT_SKILL_LEDGERS = join('canon', 'ledger', 'skills')
+
+const TOOLKIT_MARKER = join('governance', 'rules')
+
 /** The closing H2s a practice skill carries, matched exactly outside fences. */
 export const PRACTICE_SECTIONS: readonly string[] = [
   'Excuses and rebuttals',
@@ -314,6 +323,9 @@ export async function auditSkills(root: string): Promise<SkillsAudit> {
     present.map((corpus) => readCorpus(root, corpus.rel, corpus.dir)),
   )
   const sources = perCorpus.flat()
+  const projectLedgers = existsSync(join(root, TOOLKIT_MARKER))
+    ? []
+    : await readProjectLedgers(root, sources)
 
   return {
     corpora: present.map((corpus, index) => ({
@@ -346,6 +358,7 @@ export async function auditSkills(root: string): Promise<SkillsAudit> {
         sources,
       ),
       ...sources.flatMap(practiceFindings),
+      ...projectLedgers,
     ],
     referenceContents: sources.flatMap((source) =>
       source.bodies.flatMap(contentsFindings),
@@ -483,6 +496,56 @@ async function readReferenceLedgers(
       }
     }),
   )
+}
+
+/**
+ * Pairs each file a target wrote under `PROJECT_SKILL_LEDGERS` with the skill
+ * file of that name, `SKILL.md` with the body and any other with the reference
+ * at `references/<file>`. Nothing is owed, since a project has no list to owe a
+ * ledger against, so only a ledger that exists is read, and one naming a skill
+ * or a file that is gone is reported rather than skipped.
+ */
+async function readProjectLedgers(
+  root: string,
+  sources: readonly SkillSource[],
+): Promise<SkillFinding[]> {
+  const dir = join(root, PROJECT_SKILL_LEDGERS)
+  if (!existsSync(dir)) return []
+  const paths = [
+    ...new Bun.Glob('**/*.md').scanSync({ cwd: dir, onlyFiles: true }),
+  ].sort()
+
+  const perLedger = await Promise.all(
+    paths.map(async (path): Promise<SkillFinding[]> => {
+      const ledgerRel = join(PROJECT_SKILL_LEDGERS, path)
+      const [folder, ...rest] = path.split('/')
+      const owners = sources.filter((source) => source.folder === folder)
+      if (rest.length === 0 || owners.length === 0) {
+        return [{ rel: ledgerRel, detail: `missing skill: ${folder}` }]
+      }
+      const file = rest.join('/')
+      const target = file === 'SKILL.md' ? file : join('references', file)
+      const rows = countLedgerRows(await Bun.file(join(dir, path)).text())
+
+      return owners.flatMap((owner) => {
+        const rel = join(owner.rel, target)
+        const body = owner.bodies.find((entry) => entry.rel === rel)
+        if (body === undefined) {
+          return [{ rel: ledgerRel, detail: `missing file: ${rel}` }]
+        }
+        return referenceLedgerFindings({
+          rel,
+          ledgerRel,
+          mismatches: compareLedger(
+            ledgerGroups(body.text, target === 'SKILL.md'),
+            rows,
+          ),
+          sources: [],
+        })
+      })
+    }),
+  )
+  return perLedger.flat()
 }
 
 /**
