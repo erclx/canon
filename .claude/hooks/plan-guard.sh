@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-# canon-no-seed: the guard reads Claude Code's transcript format, so a change
-# to it could block every plan in every synced project. It runs here until it
-# has blocked no valid plan, and seeding it is a later row.
-
 # A path-scoped rule loads on a Read, Write, or Edit of a matching file, and a
 # heredoc onto `.canon/plans/` is none of them, so the plan rule never reaches
 # the session writing most plans. This guard is the check behind that rule: a
@@ -173,8 +169,8 @@ rest=${new#.canon/plans/}
 key=$(printf '%s' "$session" | tr -c 'A-Za-z0-9' '_')
 marker_dir="$root/.canon/tmp/hooks/plan-guard"
 
-# One line per new plan judged, so the blocks can be counted against the passes
-# before the guard is seeded. A failed write never changes the decision.
+# One line per new plan judged, so a wrong block in any project shows up beside
+# the passes and the unread ones. A failed write never changes the decision.
 log_decision() {
   # The group takes the redirect's own error, which a `2>/dev/null` after the
   # `>>` would miss because the shell opens the file first.

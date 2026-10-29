@@ -2019,7 +2019,17 @@ describe('memory-guard.sh boundaries', () => {
 // carries an invocation no earlier new plan spent. Each project below is its
 // own root holding one existing plan, so a marker one case writes never
 // licenses or blocks another.
-describe('plan-guard.sh firing conditions', () => {
+// Every synced project inherits the seed copy, so a fix landing in this tree
+// alone would leave each of them blocking on the bug it fixed.
+it('should keep the two plan-guard.sh copies byte-identical', () => {
+  const [local, seed] = TREES.map((tree) =>
+    readFileSync(join(tree.dir, 'plan-guard.sh'), 'utf8'),
+  )
+
+  expect(seed).toBe(local)
+})
+
+describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
   // The line shapes the guard reads an invocation from, pinned here because the
   // transcript format is Claude Code's rather than canon's.
   const SKILL_CALL = JSON.stringify({
@@ -2072,7 +2082,10 @@ describe('plan-guard.sh firing conditions', () => {
     transcript = '',
   ): { root: string; transcript: string } => {
     count++
-    const root = join(fixture, `plan-guard-project-${count}`)
+    const root = join(
+      fixture,
+      `plan-guard-project-${tree.label.replace(/\W/g, '-')}-${count}`,
+    )
     mkdirSync(join(root, '.canon/plans'), { recursive: true })
     writeFileSync(join(root, '.canon/plans/feature-old.md'), '# Old\n')
     const transcriptPath = join(root, 'transcript.jsonl')
@@ -2094,9 +2107,7 @@ describe('plan-guard.sh firing conditions', () => {
 
   const heredoc = (path: string): string => `cat > ${path} <<'EOF'\n# Plan\nEOF`
 
-  // The hook lives in this repository alone, as memory-guard.sh does, so the
-  // seed tree carries no copy to drive.
-  const hook = join(ROOT, '.claude/hooks/plan-guard.sh')
+  const hook = join(tree.dir, 'plan-guard.sh')
 
   it.each([
     ['a heredoc', heredoc('.canon/plans/feature-new.md')],
