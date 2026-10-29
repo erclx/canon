@@ -34,6 +34,7 @@ import {
   SKILL_LEDGERS,
   PRACTICE_SECTIONS,
   PRACTICE_SKILLS,
+  PROJECT_SKILL_LEDGERS,
   REQUIREMENT_LIMITS,
   REQUIREMENT_SECTIONS,
   RETIRED_REQUIREMENT_SECTION,
@@ -1772,7 +1773,7 @@ function reportProvenance(report: SkillsAudit): void {
 /**
  * Reports without failing the run for the reason provenance does. The list
  * names shipped folders alone, which the step says so a target reading a pass
- * knows its own skills were never in scope.
+ * knows its own skills were read only against a ledger it wrote.
  */
 function reportPracticeShape(report: SkillsAudit): void {
   logStep('Practice shape')
@@ -1783,7 +1784,10 @@ function reportPracticeShape(report: SkillsAudit): void {
     `A skill on the per-bullet list, ${plural(Object.keys(BULLET_LEDGER_SKILLS).length, 'skill')} here, also matches each reference it does not exempt, and a listed body, to a ledger under ${SKILL_LEDGERS}, one row per bullet under each H2.`,
   )
   logInfo(
-    `Both lists are kept here and name ${plural(PRACTICE_SKILLS.length, 'practice skill')} and ${plural(LEDGER_SKILLS.length, 'ledger skill')}, so a skill outside ${SHIPPED_CORPUS} is never read.`,
+    `Both lists are kept here and name ${plural(PRACTICE_SKILLS.length, 'practice skill')} and ${plural(LEDGER_SKILLS.length, 'ledger skill')}, so a skill outside ${SHIPPED_CORPUS} is never read against them.`,
+  )
+  logInfo(
+    `A tree with no governance/rules/ has each file under ${PROJECT_SKILL_LEDGERS} matched to the skill file of its name, one row per bullet under each H2, and owes none.`,
   )
 
   if (report.practiceShape.length === 0) {

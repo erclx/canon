@@ -72,6 +72,13 @@ export const CORE_FOLDERS: readonly string[] = [
 
 const SHIPPED_RULES = join('governance', 'rules')
 const LEDGERS = join('governance', 'ledger')
+const TARGET_RULES = join('.claude', 'rules', 'project')
+
+/**
+ * Where a target keeps the ledgers behind its own rules. It sits outside
+ * `.claude/rules/`, where every `.md` loads as a rule, and nothing loads it.
+ */
+export const TARGET_RULE_LEDGERS = join('canon', 'ledger', 'rules')
 
 /** Both corpora authored here, read when the tree is a canon checkout. */
 const CANON_CORPUS: readonly string[] = [
@@ -83,7 +90,7 @@ const CANON_CORPUS: readonly string[] = [
  * What a target authors. `.claude/rules/canon/` is installed from the toolkit
  * and fixed at its source, so a finding there is one the target cannot act on.
  */
-const TARGET_CORPUS: readonly string[] = [join('.claude', 'rules', 'project')]
+const TARGET_CORPUS: readonly string[] = [TARGET_RULES]
 
 export interface ShapeFinding {
   readonly limit: RuleLimit
@@ -135,10 +142,18 @@ export type RuleAuditRefusal = 'no-rules' | 'no-path' | 'outside-root'
 export type RuleAuditReport =
   | {
       readonly kind: 'measured'
-      /** `canon` reads both authored corpora and ledgers, `target` neither. */
+      /**
+       * `canon` reads both authored corpora and the toolkit's ledgers,
+       * `target` its project rules and any ledger the project wrote.
+       */
       readonly scope: 'canon' | 'target'
       readonly corpus: readonly string[]
       readonly rules: readonly RuleReading[]
+      /**
+       * Target ledgers whose rule is gone, read on a whole-corpus read alone,
+       * since a named path scopes the read to the files named.
+       */
+      readonly orphans: readonly string[]
     }
   | {
       readonly kind: 'unreadable'
@@ -336,7 +351,18 @@ export function compareLedger(
 function ledgerFor(
   file: string,
   touched: ReadonlySet<string>,
+  scope: 'canon' | 'target',
 ): { path: string; owed: boolean } | undefined {
+  // A project has no practice-folder list to owe a ledger against, so its
+  // ledger is checked where it exists and never owed.
+  if (scope === 'target') {
+    const prefix = `${TARGET_RULES}${sep}`
+    if (!file.startsWith(prefix)) return undefined
+    return {
+      path: join(TARGET_RULE_LEDGERS, file.slice(prefix.length)),
+      owed: false,
+    }
+  }
   const prefix = `${SHIPPED_RULES}${sep}`
   if (!file.startsWith(prefix)) return undefined
   const rest = file.slice(prefix.length)
@@ -352,8 +378,9 @@ async function readLedger(
   file: string,
   groups: readonly HeadingCount[],
   touched: ReadonlySet<string>,
+  scope: 'canon' | 'target',
 ): Promise<LedgerReading> {
-  const ledger = ledgerFor(file, touched)
+  const ledger = ledgerFor(file, touched, scope)
   if (ledger === undefined) return { status: 'not-required' }
   const { path } = ledger
 
@@ -374,13 +401,28 @@ async function readLedger(
 }
 
 /**
+ * Target ledgers with no rule at the matching `.claude/rules/project/` path,
+ * so a rule moved or renamed away from its ledger is reported rather than
+ * dropping its check silently.
+ */
+function findOrphanLedgers(root: string): string[] {
+  const dir = resolve(root, TARGET_RULE_LEDGERS)
+  if (!existsSync(dir)) return []
+  return listRuleFiles(dir)
+    .map((abs) => relative(dir, abs))
+    .filter((rest) => !existsSync(resolve(root, TARGET_RULES, rest)))
+    .map((rest) => join(TARGET_RULE_LEDGERS, rest))
+}
+
+/**
  * Measures every rule this tree authors, or the files named.
  *
  * A tree holding `governance/rules/` is a canon checkout, read across both
  * authored corpora with a ledger asked of each outside-practice rule and of
  * each core rule in `touched`, and checked for any core rule carrying one.
- * Any other tree is a target, read at `.claude/rules/project/` alone with no
- * ledger asked, since ledgers never ship.
+ * Any other tree is a target, read at `.claude/rules/project/` alone, with
+ * each rule's ledger under `canon/ledger/rules/` checked where one exists and
+ * none owed, since the toolkit's ledgers never ship.
  *
  * `touched` holds paths relative to the root, and leaving it out reads no core
  * rule as touched.
@@ -457,11 +499,14 @@ export async function readRuleAudit(
     rules.push({
       file,
       ...shape,
-      ledger: await readLedger(root, file, groups, touched),
+      ledger: await readLedger(root, file, groups, touched, scope),
     })
   }
 
-  return { kind: 'measured', scope, corpus, rules }
+  const orphans =
+    scope === 'target' && paths.length === 0 ? findOrphanLedgers(root) : []
+
+  return { kind: 'measured', scope, corpus, rules, orphans }
 }
 
 export function hasFinding(reading: RuleReading): boolean {
@@ -487,12 +532,13 @@ export function auditExit(
     readonly exempt?: readonly string[]
   },
 ): number {
+  const counts = (file: string) =>
+    !options.gate ||
+    (options.gated.some((prefix) => file.startsWith(prefix)) &&
+      !options.exempt?.includes(file))
   const failing = report.rules.filter(
-    (reading) =>
-      hasFinding(reading) &&
-      (!options.gate ||
-        (options.gated.some((prefix) => reading.file.startsWith(prefix)) &&
-          !options.exempt?.includes(reading.file))),
+    (reading) => hasFinding(reading) && counts(reading.file),
   )
-  return failing.length > 0 ? 2 : 0
+  const orphaned = report.orphans.filter(counts)
+  return failing.length + orphaned.length > 0 ? 2 : 0
 }

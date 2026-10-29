@@ -646,7 +646,9 @@ export function register(program: Command): void {
         `  A rule under ${CORE_FOLDERS.join(', ')} has its ledger checked where`,
         '  one exists, and under --touched owes one once the branch changed it.',
         '  With no baseline against main, --touched reads no rule as touched.',
-        '  Any other tree reads .claude/rules/project/ alone and asks no ledger.',
+        '  Any other tree reads .claude/rules/project/ and checks the ledger of',
+        '  each rule that has one at canon/ledger/rules/<subfolder>/<slug>.md.',
+        '  A ledger there with no rule is a finding on a whole-corpus read.',
         '  .claude/rules/canon/ is fixed at the toolkit source and never read',
         '  unless named. A named path resolves against --root and must sit',
         '  inside it.',
@@ -757,7 +759,10 @@ function reportAudit(
   intro('canon gov audit')
 
   const shaped = report.rules.filter((reading) => reading.findings.length > 0)
-  const ledgers = report.rules.flatMap(describeLedger)
+  const ledgers = [
+    ...report.rules.flatMap(describeLedger),
+    ...report.orphans.map((path) => `${path}: no rule for this ledger`),
+  ]
 
   logStep('Corpus')
   logInfo(
@@ -791,12 +796,12 @@ function reportAudit(
       'no baseline against main, so --touched reads no core rule as touched',
     )
   }
-  if (report.scope === 'target') {
-    logInfo('not read, since ledgers live in the toolkit and never ship')
-  } else if (ledgers.length === 0) {
-    logInfo('every rule owing a ledger has one, with a row per bullet')
-  } else {
+  if (ledgers.length > 0) {
     for (const line of ledgers) logWarn(line)
+  } else if (report.scope === 'target') {
+    logInfo('every project ledger has its rule and a row per bullet')
+  } else {
+    logInfo('every rule owing a ledger has one, with a row per bullet')
   }
 
   const failing = report.rules.filter(hasFinding).length

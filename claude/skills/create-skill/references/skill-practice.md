@@ -73,4 +73,4 @@ The audit counts a few lines in a ledgered file apart from a rule's.
 - It keeps a wider ledger list beside it, adding the skills that teach a craft drawn from outside sources without a practice's closing shape
 - A skill on the wider list alone owes the ledger and none of the three sections
 - Never mark a skill as a practice skill in its own frontmatter, since a self-declared kind lets a skill exempt itself.
-- Both lists name this toolkit's shipped skills alone, so a project's own practice skill takes this shape with no check behind it.
+- Both lists name this toolkit's shipped skills alone. A project's own skill owes no ledger, and one it writes is checked per `${CLAUDE_SKILL_DIR}/../create-rule/references/ledger.md`.

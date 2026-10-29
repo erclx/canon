@@ -101,7 +101,7 @@ A bullet claiming outside practice, such as a language idiom or a library's corr
 
 - Cite the source in the commit that adds the rule, naming a primary page or the bug class the bullet prevents
 - Cut a bullet that has neither a source nor a bug class behind it
-- The toolkit holds its outside-practice rules to a source ledger kept outside the installed tree, so the citation costs no load
+- A project can hold its rules to a source ledger kept outside the installed tree, so the citation costs no load, laid out in `${CLAUDE_SKILL_DIR}/references/ledger.md`
 - A bullet resting on how Claude Code behaves ends with a `Revisit when` sentence, per `### Phrasing`
 
 ## Location

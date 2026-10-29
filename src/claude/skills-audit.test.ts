@@ -1154,6 +1154,125 @@ describe('auditSkills duplicate sources', () => {
   })
 })
 
+describe('auditSkills project ledgers', () => {
+  const ledgerDir = () => join(root, 'canon', 'ledger', 'skills', 'deploy')
+
+  function projectSkill(body: string): string {
+    const dir = conformingSkill('deploy', '.claude')
+    writeFileSync(
+      join(dir, 'SKILL.md'),
+      `${frontmatter('deploy', 'Deploys')}\n## Steps\n\n${body}\n`,
+    )
+    return dir
+  }
+
+  function writeLedger(file: string, rows: number): void {
+    mkdirSync(ledgerDir(), { recursive: true })
+    writeFileSync(
+      join(ledgerDir(), file),
+      [
+        '# Ledger',
+        '',
+        '## Steps',
+        '',
+        '| Bullet | Source |',
+        '| ------ | ------ |',
+        ...Array.from({ length: rows }, (_, i) => `| b${i} | House choice |`),
+        '',
+      ].join('\n'),
+    )
+  }
+
+  it('should pass a body ledger with one row per bullet', async () => {
+    projectSkill('- Build.\n- Push.')
+    writeLedger('SKILL.md', 2)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+
+  it('should report a body ledger a row short without failing the exit', async () => {
+    projectSkill('- Build.\n- Push.')
+    writeLedger('SKILL.md', 1)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      {
+        rel: join('.claude', 'skills', 'deploy', 'SKILL.md'),
+        detail: '## Steps: 2 bullets, 1 ledger row',
+      },
+    ])
+    expect(auditExitCode(report)).toBe(0)
+  })
+
+  it('should pair a reference ledger with references/<file>', async () => {
+    const dir = projectSkill('- Build.')
+    mkdirSync(join(dir, 'references'))
+    writeFileSync(
+      join(dir, 'references', 'rollout.md'),
+      '# Rollout\n\n## Steps\n\n- Canary.\n- Widen.\n',
+    )
+    writeLedger('rollout.md', 1)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      {
+        rel: join('.claude', 'skills', 'deploy', 'references', 'rollout.md'),
+        detail: '## Steps: 2 bullets, 1 ledger row',
+      },
+    ])
+  })
+
+  it('should report a ledger naming a reference that does not exist', async () => {
+    projectSkill('- Build.')
+    writeLedger('gone.md', 1)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      {
+        rel: join('canon', 'ledger', 'skills', 'deploy', 'gone.md'),
+        detail: `missing file: ${join('.claude', 'skills', 'deploy', 'references', 'gone.md')}`,
+      },
+    ])
+  })
+
+  it('should report a ledger folder whose skill is gone', async () => {
+    conformingSkill('other', '.claude')
+    writeLedger('SKILL.md', 1)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([
+      {
+        rel: join('canon', 'ledger', 'skills', 'deploy', 'SKILL.md'),
+        detail: 'missing skill: deploy',
+      },
+    ])
+  })
+
+  it('should owe no ledger of a project skill with none', async () => {
+    projectSkill('- Build.')
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+
+  it('should never read canon/ledger/ in a tree holding governance/rules/', async () => {
+    mkdirSync(join(root, 'governance', 'rules'), { recursive: true })
+    projectSkill('- Build.\n- Push.')
+    writeLedger('SKILL.md', 1)
+
+    const report = await auditSkills(root)
+
+    expect(report.practiceShape).toEqual([])
+  })
+})
+
 describe('skillLedgerPath', () => {
   it('should drop the references segment from a reference', () => {
     expect(
