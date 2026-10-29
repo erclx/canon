@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import {
   applySessionDefaults,
   MERGE_DENIED,
+  PLAN_GUARD_COMMAND,
   planSessionDefaults,
   readSessionDefaults,
   type SessionDefaultsRead,
@@ -12,15 +13,29 @@ import {
 
 const dirs: string[] = []
 
-async function makeTarget(settings?: string): Promise<string> {
+async function makeTarget(
+  settings?: string,
+  { planGuard = false } = {},
+): Promise<string> {
   const dir = await mkdtemp(join(tmpdir(), 'canon-session-defaults-'))
   dirs.push(dir)
   if (settings !== undefined) {
     await mkdir(join(dir, '.claude'), { recursive: true })
     await writeFile(join(dir, '.claude', 'settings.json'), settings)
   }
+  if (planGuard) {
+    await mkdir(join(dir, '.claude', 'hooks'), { recursive: true })
+    await writeFile(join(dir, '.claude', 'hooks', 'plan-guard.sh'), '')
+  }
   return dir
 }
+
+const DEFAULTS = {
+  autoMemoryEnabled: false,
+  permissions: { deny: ['Agent', 'Task', ...MERGE_DENIED] },
+}
+
+const guardEntry = { type: 'command', command: PLAN_GUARD_COMMAND }
 
 async function readPlanned(
   dir: string,
@@ -168,7 +183,183 @@ describe('planSessionDefaults', () => {
   })
 })
 
+describe('planSessionDefaults with the plan guard installed', () => {
+  it('should wire the guard into a settings file holding no hooks', () => {
+    const plan = planSessionDefaults(DEFAULTS, { planGuard: true })
+
+    expect(plan.next.hooks).toEqual({
+      PreToolUse: [
+        { matcher: 'Bash', hooks: [guardEntry] },
+        { matcher: 'Write|Edit', hooks: [guardEntry] },
+      ],
+    })
+    expect(plan.keys).toContainEqual({
+      label: 'hooks.PreToolUse',
+      changed: true,
+    })
+    expect(plan.changed).toBe(true)
+  })
+
+  it('should append the guard to the seeded groups without reordering them', () => {
+    const scratch = { type: 'command', command: 'scratch-guard.sh' }
+    const scan = { type: 'command', command: 'review-post-scan.sh' }
+    const plan = planSessionDefaults(
+      {
+        ...DEFAULTS,
+        hooks: {
+          PreToolUse: [
+            { matcher: 'Write|Edit', hooks: [scratch] },
+            { matcher: 'Bash', hooks: [scan] },
+          ],
+          Stop: [],
+        },
+      },
+      { planGuard: true },
+    )
+
+    expect(plan.next.hooks).toEqual({
+      PreToolUse: [
+        { matcher: 'Write|Edit', hooks: [scratch, guardEntry] },
+        { matcher: 'Bash', hooks: [scan, guardEntry] },
+      ],
+      Stop: [],
+    })
+  })
+
+  it('should add nothing to a file already holding both entries', () => {
+    const plan = planSessionDefaults(
+      {
+        ...DEFAULTS,
+        hooks: {
+          PreToolUse: [
+            { matcher: 'Bash', hooks: [guardEntry] },
+            { matcher: 'Write|Edit', hooks: [guardEntry] },
+          ],
+        },
+      },
+      { planGuard: true },
+    )
+
+    expect(plan.changed).toBe(false)
+  })
+
+  it('should leave a guard wired by hand under another matcher alone', () => {
+    const byHand = {
+      type: 'command',
+      command: 'bash .claude/hooks/plan-guard.sh',
+    }
+    const hooks = {
+      PreToolUse: [
+        { matcher: 'Write|Edit|MultiEdit', hooks: [byHand] },
+        { matcher: '.*', hooks: [byHand] },
+      ],
+    }
+
+    const plan = planSessionDefaults(
+      { ...DEFAULTS, hooks },
+      { planGuard: true },
+    )
+
+    expect(plan.next.hooks).toEqual(hooks)
+    expect(plan.changed).toBe(false)
+  })
+
+  it.each([
+    ['a comma list', 'Bash, Write'],
+    ['an unanchored pattern', '^(Bas|Writ)'],
+  ])('should leave a guard wired by hand under %s alone', (_, matcher) => {
+    const hooks = {
+      PreToolUse: [
+        {
+          matcher,
+          hooks: [{ type: 'command', command: '.claude/hooks/plan-guard.sh' }],
+        },
+      ],
+    }
+
+    const plan = planSessionDefaults(
+      { ...DEFAULTS, hooks },
+      { planGuard: true },
+    )
+
+    expect(plan.changed).toBe(false)
+  })
+
+  it('should not read an exact name as covering a longer tool name', () => {
+    const plan = planSessionDefaults(
+      {
+        ...DEFAULTS,
+        hooks: {
+          PreToolUse: [
+            { matcher: 'Bash', hooks: [guardEntry] },
+            { matcher: 'Writ', hooks: [guardEntry] },
+          ],
+        },
+      },
+      { planGuard: true },
+    )
+
+    expect(plan.changed).toBe(true)
+  })
+
+  it('should add only the entry a hand wiring lacks', () => {
+    const plan = planSessionDefaults(
+      {
+        ...DEFAULTS,
+        hooks: { PreToolUse: [{ matcher: 'Bash', hooks: [guardEntry] }] },
+      },
+      { planGuard: true },
+    )
+
+    expect(plan.next.hooks).toEqual({
+      PreToolUse: [
+        { matcher: 'Bash', hooks: [guardEntry] },
+        { matcher: 'Write|Edit', hooks: [guardEntry] },
+      ],
+    })
+  })
+
+  it('should wire nothing when the project holds no guard script', () => {
+    const plan = planSessionDefaults(DEFAULTS)
+
+    expect(plan.next.hooks).toBeUndefined()
+    expect(plan.changed).toBe(false)
+  })
+})
+
 describe('readSessionDefaults', () => {
+  it('should plan the guard wiring where the guard script is installed', async () => {
+    const dir = await makeTarget(JSON.stringify(DEFAULTS), {
+      planGuard: true,
+    })
+
+    const read = await readPlanned(dir)
+
+    expect(read.plan.changed).toBe(true)
+  })
+
+  it('should plan no wiring where the guard script is absent', async () => {
+    const dir = await makeTarget(JSON.stringify(DEFAULTS))
+
+    const read = await readPlanned(dir)
+
+    expect(read.plan.changed).toBe(false)
+  })
+
+  it('should refuse a PreToolUse that is not a list rather than replace it', async () => {
+    const dir = await makeTarget(
+      JSON.stringify({ ...DEFAULTS, hooks: { PreToolUse: {} } }),
+      { planGuard: true },
+    )
+
+    const read = await readSessionDefaults(dir, '/toolkit')
+
+    expect(read).toMatchObject({
+      kind: 'refused',
+      reason: expect.stringContaining('hooks.PreToolUse'),
+    })
+  })
+
   it('should refuse the toolkit root', async () => {
     const dir = await makeTarget('{}\n')
 
@@ -218,7 +409,7 @@ describe('applySessionDefaults', () => {
   })
 
   it('should change nothing on a second run', async () => {
-    const dir = await makeTarget('{}\n')
+    const dir = await makeTarget('{}\n', { planGuard: true })
     await applySessionDefaults(await readPlanned(dir))
 
     const second = await readSessionDefaults(dir, '/toolkit')

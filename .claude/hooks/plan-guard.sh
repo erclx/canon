@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-# canon-no-seed: the guard reads Claude Code's transcript format, so a change
-# to it could block every plan in every synced project. It runs here until it
-# has blocked no valid plan, and seeding it is a later row.
-
 # A path-scoped rule loads on a Read, Write, or Edit of a matching file, and a
 # heredoc onto `.canon/plans/` is none of them, so the plan rule never reaches
 # the session writing most plans. This guard is the check behind that rule: a
@@ -173,8 +169,8 @@ rest=${new#.canon/plans/}
 key=$(printf '%s' "$session" | tr -c 'A-Za-z0-9' '_')
 marker_dir="$root/.canon/tmp/hooks/plan-guard"
 
-# One line per new plan judged, so the blocks can be counted against the passes
-# before the guard is seeded. A failed write never changes the decision.
+# One line per new plan judged, so a wrong block in any project shows up beside
+# the passes and the unread ones. A failed write never changes the decision.
 log_decision() {
   # The group takes the redirect's own error, which a `2>/dev/null` after the
   # `>>` would miss because the shell opens the file first.
@@ -216,6 +212,20 @@ fi
 if [ -n "$latest" ] && [ "$latest" -gt "$spent" ]; then
   mkdir -p "$marker_dir" 2>/dev/null && printf '%s %s\n' "$latest" "$rest" >"$marker" 2>/dev/null
   log_decision pass
+  exit 0
+fi
+
+# A transcript holding no assistant `tool_use` line means Claude Code changed
+# its message format rather than that the session skipped the skill, and
+# blocking on that would stop every plan, so pass and log it apart. A change
+# confined to the Skill call's input or the typed command tag leaves other
+# tool calls readable, so this does not catch it and the guard still blocks.
+calls=$(grep -F '"tool_use"' "$transcript" 2>/dev/null | jq -Rrn '
+  first(inputs | fromjson? | select(type == "object" and .type == "assistant")
+    | .message.content[]? | select(type == "object" and .type == "tool_use"
+      and (.name | type) == "string") | "read") // empty' 2>/dev/null)
+if [ -z "$calls" ]; then
+  log_decision unread
   exit 0
 fi
 

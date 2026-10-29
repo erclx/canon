@@ -431,7 +431,19 @@ beforeAll(() => {
       payload: (nonce) => {
         const key = nonce.replace(/[^A-Za-z0-9_.-]/g, '_')
         const transcriptPath = join(fixture, `plan-guard-${key}.jsonl`)
-        writeFileSync(transcriptPath, '')
+        // A transcript holding no tool call reads as a changed format and
+        // passes, so the acting case carries one in today's shape.
+        writeFileSync(
+          transcriptPath,
+          `${JSON.stringify({
+            message: {
+              content: [
+                { input: { command: 'ls' }, name: 'Bash', type: 'tool_use' },
+              ],
+            },
+            type: 'assistant',
+          })}\n`,
+        )
         return payloadFor({
           cwd: project,
           session_id: nonce,
@@ -2007,7 +2019,17 @@ describe('memory-guard.sh boundaries', () => {
 // carries an invocation no earlier new plan spent. Each project below is its
 // own root holding one existing plan, so a marker one case writes never
 // licenses or blocks another.
-describe('plan-guard.sh firing conditions', () => {
+// Every synced project inherits the seed copy, so a fix landing in this tree
+// alone would leave each of them blocking on the bug it fixed.
+it('should keep the two plan-guard.sh copies byte-identical', () => {
+  const [local, seed] = TREES.map((tree) =>
+    readFileSync(join(tree.dir, 'plan-guard.sh'), 'utf8'),
+  )
+
+  expect(seed).toBe(local)
+})
+
+describe.each(TREES)('plan-guard.sh firing conditions in $label', (tree) => {
   // The line shapes the guard reads an invocation from, pinned here because the
   // transcript format is Claude Code's rather than canon's.
   const SKILL_CALL = JSON.stringify({
@@ -2025,6 +2047,14 @@ describe('plan-guard.sh firing conditions', () => {
   const SLASH_COMMAND = JSON.stringify({
     message: { content: '<command-name>/canon:plan-feature</command-name>' },
     type: 'user',
+  })
+  // A tool call naming no plan skill, so a transcript carrying it reads as
+  // today's format with no invocation rather than as an unread one.
+  const OTHER_CALL = JSON.stringify({
+    message: {
+      content: [{ input: { command: 'ls' }, name: 'Bash', type: 'tool_use' }],
+    },
+    type: 'assistant',
   })
   const autoShipCall = (args: string): string =>
     JSON.stringify({
@@ -2052,11 +2082,14 @@ describe('plan-guard.sh firing conditions', () => {
     transcript = '',
   ): { root: string; transcript: string } => {
     count++
-    const root = join(fixture, `plan-guard-project-${count}`)
+    const root = join(
+      fixture,
+      `plan-guard-project-${tree.label.replace(/\W/g, '-')}-${count}`,
+    )
     mkdirSync(join(root, '.canon/plans'), { recursive: true })
     writeFileSync(join(root, '.canon/plans/feature-old.md'), '# Old\n')
     const transcriptPath = join(root, 'transcript.jsonl')
-    writeFileSync(transcriptPath, transcript)
+    writeFileSync(transcriptPath, `${OTHER_CALL}\n${transcript}`)
     return { root, transcript: transcriptPath }
   }
 
@@ -2074,9 +2107,7 @@ describe('plan-guard.sh firing conditions', () => {
 
   const heredoc = (path: string): string => `cat > ${path} <<'EOF'\n# Plan\nEOF`
 
-  // The hook lives in this repository alone, as memory-guard.sh does, so the
-  // seed tree carries no copy to drive.
-  const hook = join(ROOT, '.claude/hooks/plan-guard.sh')
+  const hook = join(tree.dir, 'plan-guard.sh')
 
   it.each([
     ['a heredoc', heredoc('.canon/plans/feature-new.md')],
@@ -2134,7 +2165,10 @@ describe('plan-guard.sh firing conditions', () => {
   it('should pass the second new plan once a second invocation follows', async () => {
     const project = planProject(`${SKILL_CALL}\n`)
     await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
-    writeFileSync(project.transcript, `${SKILL_CALL}\n${SKILL_CALL}\n`)
+    writeFileSync(
+      project.transcript,
+      `${OTHER_CALL}\n${SKILL_CALL}\n${SKILL_CALL}\n`,
+    )
 
     const result = await run(
       hook,
@@ -2307,6 +2341,47 @@ describe('plan-guard.sh firing conditions', () => {
     expect(result.code).toBe(0)
   })
 
+  describe('transcript format', () => {
+    // The Skill call the guard reads, moved under a key Claude Code might
+    // rename it to, so no line parses as a tool call in today's shape.
+    const RESHAPED_CALL = JSON.stringify({
+      message: {
+        content: [
+          {
+            input: { skill: 'canon:plan-feature' },
+            name: 'Skill',
+            type: 'tool_call',
+          },
+        ],
+      },
+      type: 'assistant',
+    })
+
+    it('should pass a new plan when no line parses as a tool call', async () => {
+      const project = planProject()
+      writeFileSync(project.transcript, `${RESHAPED_CALL}\n`)
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-new.md')),
+      )
+
+      expect(result.stderr).toBe('')
+      expect(result.code).toBe(0)
+    })
+
+    it('should still block a new plan when tool calls parse but none invokes the skill', async () => {
+      const project = planProject(`${OTHER_CALL}\n`)
+
+      const result = await run(
+        hook,
+        shellIn(project, heredoc('.canon/plans/feature-new.md')),
+      )
+
+      expect(result.code).toBe(2)
+    })
+  })
+
   describe('decision log', () => {
     const logLines = (root: string): string[] => {
       const log = join(root, '.canon/tmp/hooks/plan-guard/decisions.log')
@@ -2314,7 +2389,8 @@ describe('plan-guard.sh firing conditions', () => {
         ? readFileSync(log, 'utf8').trimEnd().split('\n')
         : []
     }
-    const LINE = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ (pass|block) \S+ (.+)$/
+    const LINE =
+      /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ (pass|block|unread) \S+ (.+)$/
 
     it('should log a pass with the session key and the plan path', async () => {
       const project = planProject(`${SKILL_CALL}\n`)
@@ -2368,6 +2444,18 @@ describe('plan-guard.sh firing conditions', () => {
 
       expect(logLines(project.root)).toHaveLength(1)
       expect(logLines(project.root)[0]).toContain(' pass ')
+    })
+
+    it('should log unread for a new plan when no line parses as a tool call', async () => {
+      const project = planProject()
+      writeFileSync(project.transcript, '')
+
+      await run(hook, shellIn(project, heredoc('.canon/plans/feature-a.md')))
+
+      const lines = logLines(project.root)
+      expect(lines).toHaveLength(1)
+      expect(lines[0]).toMatch(LINE)
+      expect(lines[0]).toContain(' unread plan_guard_session feature-a.md')
     })
 
     it.each([
