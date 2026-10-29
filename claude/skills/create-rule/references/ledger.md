@@ -54,12 +54,12 @@ Each row names the bullet and the one thing behind it.
 
 ## Example
 
-A rule at `.claude/rules/project/framework/react.md` with two bullets under `## Component patterns` takes this ledger at `canon/ledger/rules/framework/react.md`:
+A project React rule in the `framework/` subdir, with two bullets under `## Component patterns`, takes this ledger at `canon/ledger/rules/framework/react.md`:
 
 ```markdown
 ---
 title: React rule ledger
-description: Sources for .claude/rules/project/framework/react.md, one row per bullet
+description: Sources for the project React rule, one row per bullet
 ---
 
 # React rule ledger
