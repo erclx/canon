@@ -20,6 +20,10 @@
 deps = []
 files = [".claude/skills", "claude/skills"]
 
+["rule"]
+deps = []
+files = [".claude/rules/project"]
+
 ["ci-workflow"]
 deps = []
 files = [".github/workflows"]
