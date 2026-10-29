@@ -68,7 +68,7 @@ A project installed before the board became a folder still holds `.claude/TASKS.
 
 ## settings.json
 
-- Pair the seed's PreToolUse hooks with `index-reminder.sh`, `search-reminder.sh`, `scratch-guard.sh`, and `plan-guard.sh`, and its PostToolUse hook with `standards-audit.sh`, all under `.claude/hooks/`
+- Pair the seed's PreToolUse hooks with `index-reminder.sh`, `search-reminder.sh`, `scratch-guard.sh`, `review-post-scan.sh`, and `plan-guard.sh`, and its PostToolUse hook with `standards-audit.sh`
 - Keep only what is project-specific in the project file, since project settings layer over user settings
 - Expect `permissions.deny` to hold `Agent` and `Task`, so no session spawns a subagent and parallel work runs as separate background sessions
 - Expect `autoMemoryEnabled` to be `false`. A person turns it back on for themselves in `settings.local.json`.
@@ -76,7 +76,7 @@ A project installed before the board became a folder still holds `.claude/TASKS.
 
 The seed's deny list also holds `Bash(canon pr merge:*)` and `Bash(gh pr merge:*)`, so the operator alone merges. An existing target gets both from `canon migrate session-defaults --write`, and `canon claude sync` warns while either is absent. Neither covers more than the form an agent writes by default.
 
-`plan-guard.sh` blocks a new plan under `.canon/plans/` until `plan-feature` is invoked for it, since a heredoc never loads the plan rule. It passes when the transcript holds no tool call it can read, and logs each decision under `.canon/tmp/hooks/plan-guard/`.
+`plan-guard.sh` blocks a new plan under `.canon/plans/` until `plan-feature` is invoked for it, since a heredoc never loads the plan rule. It passes when the transcript holds no assistant tool call it can parse, though a format change confined to the Skill call still blocks. It logs each decision under `.canon/tmp/hooks/plan-guard/`.
 
 ## User settings
 
