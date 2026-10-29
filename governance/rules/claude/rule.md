@@ -2,8 +2,6 @@
 description: Route edits to a rule file to the create-rule skill for its shape and checklist
 paths:
   - '.claude/rules/project/**/*.md'
-  - 'governance/rules/**/*.md'
-  - 'internal/rules/**/*.md'
 ---
 
 # Rule standards
