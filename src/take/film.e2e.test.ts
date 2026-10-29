@@ -4,10 +4,12 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { CameraTrack } from '@/take/camera'
-import type { TakeLog } from '@/take/log'
+import { FPS, type TakeLog, travelMs } from '@/take/log'
 import { readTakePlan } from '@/take/plan'
 import { findShell } from '@/take/shell'
 import { take } from '@/take/film'
+
+const FRAME_MS = 1000 / FPS
 
 /**
  * Films one frame-stepped take of a static page and reads the clip back,
@@ -483,6 +485,51 @@ describe.skipIf(!available())('a take of a page whose frames run slow', () => {
     // Ahead of the status, so a refusal prints its message.
     expect(result).not.toHaveProperty('message')
     expect(result).toMatchObject({ status: 'filmed' })
+  }, 180_000)
+
+  it('should glide on 200 ms frames near its plan and log when it landed', async () => {
+    const read = readTakePlan(
+      JSON.stringify({
+        beats: [
+          {
+            name: 'glide',
+            route: 'screencast',
+            setup: TO_THE_CARDS,
+            steps: [
+              { kind: 'move', target: '#card' },
+              { kind: 'wait', ms: 2500 },
+            ],
+          },
+        ],
+      }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+
+    const result = await take({
+      url: `${server.url}?busy=200`,
+      plan: read.plan,
+      out,
+    })
+
+    expect(result).not.toHaveProperty('message')
+    if (result.status !== 'filmed') return
+    const [beat] = result.beats
+    if (!beat) return
+    const log = JSON.parse(readFileSync(join(out, beat.log), 'utf8')) as TakeLog
+    const move = log.events.find((event) => event.kind === 'move')
+    if (move?.kind !== 'move') throw new Error('the take logged no move')
+    const glideMs =
+      Math.round(travelMs(move.from, move.to) / FRAME_MS) * FRAME_MS
+    // The card turns from #ddd to #f60 once the pointer lands on it, which
+    // the clip shows at the frame its stored luma drops below 170.
+    const card = bandLuma(join(out, beat.clip), '200:100:100:100')
+    const landedMs = card.findIndex((value) => value < 170) * FRAME_MS
+
+    // Within a second of its plan, where the unpaced glide ran about 15 times
+    // over, and landing in the clip within a few slow frames of the log.
+    expect(Math.abs(move.ms - glideMs)).toBeLessThan(1000)
+    expect(landedMs).toBeGreaterThan(0)
+    expect(Math.abs(landedMs - (move.t + move.ms))).toBeLessThan(500)
   }, 180_000)
 })
 

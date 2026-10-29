@@ -158,16 +158,9 @@ export async function performSteps(
         const at = center(await boxOf(stage, step.target))
         await moveTo(stage, state, at)
         const frames = Math.round(SCROLL_MS / FRAME_MS)
-        state.log?.push({
-          t: stage.now(),
-          kind: 'scroll',
-          at,
-          dx: 0,
-          dy: step.dy,
-          ms: frames * FRAME_MS,
-        })
+        const start = stage.now()
         let sent = 0
-        for (let frame = 1; frame <= frames; frame += 1) {
+        await paced(stage, frames, async (frame) => {
           const want = along(
             { x: 0, y: 0 },
             { x: 0, y: step.dy },
@@ -175,7 +168,15 @@ export async function performSteps(
           ).y
           await stage.pointer({ type: 'wheel', ...at, dy: want - sent })
           sent = want
-        }
+        })
+        state.log?.push({
+          t: start,
+          kind: 'scroll',
+          at,
+          dx: 0,
+          dy: step.dy,
+          ms: stage.now() - start,
+        })
         break
       }
       case 'wait':
@@ -194,21 +195,35 @@ async function moveTo(
   const from = state.pointer
   if (Math.hypot(to.x - from.x, to.y - from.y) < 1) return
   const frames = Math.max(1, Math.round(travelMs(from, to) / FRAME_MS))
-  state.log?.push({
-    t: stage.now(),
-    kind: 'move',
-    from,
-    to,
-    ms: frames * FRAME_MS,
-  })
   const pressed = held
     ? { held: true as const, ...withModifiers(held.modifiers) }
     : {}
-  for (let frame = 1; frame <= frames; frame += 1) {
+  const start = stage.now()
+  await paced(stage, frames, async (frame) => {
     state.pointer = along(from, to, frame / frames)
     await stage.pointer({ type: 'move', ...state.pointer, ...pressed })
-  }
+  })
   state.pointer = to
+  state.log?.push({ t: start, kind: 'move', from, to, ms: stage.now() - start })
+}
+
+/**
+ * Runs a motion planned as `frames` inputs, sending each at the frame the
+ * stage's clock has reached, so a page slower than a frame per input skips the
+ * points it is behind on and the motion still ends near its planned length. A
+ * clock advancing one frame per input, as the stepper's does, gets every frame.
+ */
+async function paced(
+  stage: Stage,
+  frames: number,
+  input: (frame: number) => Promise<void>,
+): Promise<void> {
+  const start = stage.now()
+  for (let frame = 0; frame < frames;) {
+    const reached = Math.round((stage.now() - start) / FRAME_MS)
+    frame = Math.min(frames, Math.max(frame + 1, reached + 1))
+    await input(frame)
+  }
 }
 
 async function click(
