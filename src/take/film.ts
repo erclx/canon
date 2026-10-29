@@ -31,6 +31,7 @@ export type TakeRefusal =
   | 'server-unreachable'
   | 'target-missing'
   | 'target-offscreen'
+  | 'over-cap'
   | 'take-failed'
 
 export interface FilmedBeat {
@@ -75,6 +76,8 @@ export interface TakeRequest {
   readonly env?: NodeJS.ProcessEnv
   /** How long one stepped frame may take before its beat falls back to a screencast. */
   readonly stallMs?: number
+  /** The filmed seconds the beats may sum to, past which the take refuses. */
+  readonly maxSeconds?: number
 }
 
 const REACH_TIMEOUT_MS = 5000
@@ -136,6 +139,16 @@ export async function take(request: TakeRequest): Promise<TakeResult> {
         ...(error instanceof FellBack ? { fallback: error.fallback } : {}),
         ...(still ? { still } : {}),
       }
+    }
+    // Checked after each beat rather than once at the end, so a take refused
+    // on its first beat films nothing past it.
+    const frames = beats.reduce((sum, filmed) => sum + filmed.frames, 0)
+    if (request.maxSeconds !== undefined && frames > request.maxSeconds * FPS) {
+      return failed(
+        'over-cap',
+        `the beats through ${beat.name} run ${(frames / FPS).toFixed(2)} s, past the ${request.maxSeconds} s cap`,
+        beat.name,
+      )
     }
   }
 

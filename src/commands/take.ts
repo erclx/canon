@@ -61,6 +61,8 @@ const TAKE_REFUSALS: Record<TakeRefusal, string> = {
   'target-missing': 'A step names a target the page does not carry.',
   'target-offscreen':
     'A step names a target outside the window, so a setup step must bring it into view first.',
+  'over-cap':
+    'The filmed beats ran past --max-seconds, so the take stopped at the beat that crossed it.',
   'take-failed': 'The take failed against a reachable page.',
 }
 
@@ -175,6 +177,8 @@ export function register(program: Command): void {
         '  server-unreachable  nothing answered at the URL',
         '  target-missing      a step names a target the page does not carry',
         '  target-offscreen    a step names a target outside the window, so a setup step must bring it into view first',
+        '  over-cap            the filmed beats ran past --max-seconds, naming the',
+        '                      beat that crossed it',
         '  take-failed         the take failed against a reachable page',
         '  reel-failed         every beat was filmed and the reel did not encode',
         '',
@@ -364,7 +368,12 @@ async function runTake(
   }
 
   logStep('Filming')
-  const result = await taker.take({ url, plan, out: opts.out })
+  const result = await taker.take({
+    url,
+    plan,
+    out: opts.out,
+    ...(maxSeconds === undefined ? {} : { maxSeconds }),
+  })
 
   if (result.status === 'failed') {
     logStep('Refused')
