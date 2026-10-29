@@ -565,6 +565,39 @@ describe.skipIf(!available())('a take of a page whose frames run slow', () => {
     expect(Math.abs(landedMs - (move.t + move.ms))).toBeLessThan(500)
   }, 180_000)
 
+  it('should end a screencast clip at the stage clock rather than past it', async () => {
+    const read = readTakePlan(
+      JSON.stringify({
+        beats: [
+          {
+            name: 'hover',
+            route: 'screencast',
+            setup: TO_THE_CARDS,
+            steps: [
+              { kind: 'move', target: '#card' },
+              { kind: 'wait', ms: 2500 },
+            ],
+          },
+        ],
+      }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+
+    const result = await take({
+      url: `${server.url}?busy=0`,
+      plan: read.plan,
+      out,
+    })
+
+    // The plan is the two 600 ms holds, the paced glide to the card, and the
+    // 2500 ms wait, 4.43 s, which Playwright's recorder padded to 5.47 s.
+    expect(result).not.toHaveProperty('message')
+    expect(result).toMatchObject({ status: 'filmed' })
+    if (result.status !== 'filmed') return
+    const seconds = result.beats[0]?.seconds ?? 0
+    expect(Math.abs(seconds - 4.43)).toBeLessThan(0.1)
+  }, 180_000)
+
   it('should refuse a move to a card below the window with no scroll to it', async () => {
     const read = readTakePlan(
       JSON.stringify({

@@ -92,9 +92,10 @@ export async function filmScreencast(request: {
       log: events,
     })
     await recording.hold(HOLD_MS)
+    const filmedMs = recording.now()
     await page.screencast.stop()
 
-    await transcode(webm, request.clip, FPS)
+    await transcode(webm, request.clip, FPS, filmedMs)
     const frames = await probeFrames(request.clip)
     return { frames, events, still: await lastFrame(request.clip, frames) }
   } catch (error) {
