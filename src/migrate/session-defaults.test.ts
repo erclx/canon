@@ -264,6 +264,44 @@ describe('planSessionDefaults with the plan guard installed', () => {
     expect(plan.changed).toBe(false)
   })
 
+  it.each([
+    ['a comma list', 'Bash, Write'],
+    ['an unanchored pattern', '^(Bas|Writ)'],
+  ])('should leave a guard wired by hand under %s alone', (_, matcher) => {
+    const hooks = {
+      PreToolUse: [
+        {
+          matcher,
+          hooks: [{ type: 'command', command: '.claude/hooks/plan-guard.sh' }],
+        },
+      ],
+    }
+
+    const plan = planSessionDefaults(
+      { ...DEFAULTS, hooks },
+      { planGuard: true },
+    )
+
+    expect(plan.changed).toBe(false)
+  })
+
+  it('should not read an exact name as covering a longer tool name', () => {
+    const plan = planSessionDefaults(
+      {
+        ...DEFAULTS,
+        hooks: {
+          PreToolUse: [
+            { matcher: 'Bash', hooks: [guardEntry] },
+            { matcher: 'Writ', hooks: [guardEntry] },
+          ],
+        },
+      },
+      { planGuard: true },
+    )
+
+    expect(plan.changed).toBe(true)
+  })
+
   it('should add only the entry a hand wiring lacks', () => {
     const plan = planSessionDefaults(
       {

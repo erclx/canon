@@ -127,16 +127,20 @@ export function planSessionDefaults(
 }
 
 /**
- * Claude Code reads an absent, empty, or `*` matcher as every tool, and any
- * other as a pattern the whole tool name must match.
+ * Claude Code reads an absent, empty, or `*` matcher as every tool, one of
+ * only name characters as exact names split on `|` or `,`, and any other as
+ * an unanchored regular expression, per its hooks reference.
  */
 function matcherCovers(matcher: unknown, tool: string): boolean {
   if (matcher === undefined || matcher === '' || matcher === '*') return true
   if (typeof matcher !== 'string') return false
+  if (/^[\w\s,|-]+$/.test(matcher)) {
+    return matcher.split(/[|,]/).some((name) => name.trim() === tool)
+  }
   try {
-    return new RegExp(`^(?:${matcher})$`).test(tool)
+    return new RegExp(matcher).test(tool)
   } catch {
-    return matcher === tool
+    return false
   }
 }
 
