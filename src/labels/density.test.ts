@@ -503,10 +503,10 @@ const REBASE_BEFORE = body(
 const REBASE_AFTER = body(
   '## Rebase',
   '',
-  'Rebased onto main at `8af11ce78`, because #2513 retired the wiki install and capture refreshes regenerated the hero.',
+  'Rebased onto main at `8af11ce78`, because #2513 retired the wiki install and capture refreshes recaptured the home baseline.',
   '',
   '- Resolved by hand: `src/init/steps.ts` and its test. The Wiki step is gone, and Markdown gating runs right after Governance.',
-  '- Rebuilt by the regen: `assets/captures/hero.html`, `assets/frames/hero.png`, and `assets/frames/hero.stamp`',
+  '- Rebuilt by the regen: `assets/evidence/home/frame-1.png` and `assets/evidence/home/frame-1.stamp`',
   '- Replayed with no conflict: `docs/target/projects.md`',
   '',
   '🤖 Addressed by Claude Code',

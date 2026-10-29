@@ -15,18 +15,6 @@
     // hand-authored, no tool writes it, so it keeps its format gate
     "!.claude-plugin/marketplace.json",
 
-    // regen-hero.ts writes these and serializes them its own way. Formatting them
-    // too gives each file two writers that disagree, and the Hero stage then
-    // fails for whichever of them committed last rather than for a stale count.
-    // The templates beside them are hand-edited and keep their format gate, which
-    // the glob leaves alone because a template ends in .tmpl rather than .html.
-    //
-    // The glob covers the folder rather than naming each frame, since the script
-    // loops over whatever templates the folder holds and a frame added later would
-    // otherwise arrive with two writers and no sign of it until their output first
-    // disagreed.
-    "/assets/captures/*.html",
-
     // regen-web-previews.ts writes these and serializes them its own way, the raw
     // render. bun run format runs oxfmt over the same files and would rewrite
     // them, so web:build and format each leave a file the other disagrees with.

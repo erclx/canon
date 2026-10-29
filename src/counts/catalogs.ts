@@ -24,12 +24,10 @@ const REGISTER_IMPORT = /^import \{ register as /gm
 /**
  * Every top-level `canon` command, read off the CLI entry point rather than a
  * catalog verb, because a command carries no `--json` listing of its own
- * siblings. `regen-hero.ts` imports this reader for its `COMMAND_COUNT`
- * rather than a second regex on `src/cli.ts`, so this is the one place that
- * pattern is written.
+ * siblings. Callers import this reader rather than a second regex on
+ * `src/cli.ts`, so this is the one place that pattern is written.
  *
- * This is the one catalog with no meaning outside this repository, the way
- * `regen-hero.ts` documents itself as clone-only for the same reason.
+ * This is the one catalog with no meaning outside this repository.
  */
 export function countCommands(root: string): number | undefined {
   const cli = join(root, 'src', 'cli.ts')

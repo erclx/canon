@@ -294,23 +294,6 @@ describe('the design stage', () => {
   })
 })
 
-describe('the hero stage', () => {
-  const heroChecks = () =>
-    STAGES.find((candidate) => candidate.id === 'hero')?.checks ?? []
-
-  it('should not assert the frames against the trunk, so a branch commits none', () => {
-    expect(heroChecks().some((check) => check.kind === 'drift')).toBe(false)
-  })
-
-  it('should run the regen health check rather than a writing regen', () => {
-    const commands = heroChecks().flatMap((check) =>
-      check.kind === 'command' ? [check.argv] : [],
-    )
-
-    expect(commands).toEqual([['bun', 'scripts/core/regen-hero.ts', '--check']])
-  })
-})
-
 describe('the markdown stage', () => {
   it('should replace the retired length stages with one audit reading', () => {
     const ids = STAGES.map((stage) => stage.id)

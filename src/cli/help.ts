@@ -99,7 +99,7 @@ const EXAMPLES = [
   'canon indexes regen --dry-run --json',
   'canon docs list --json',
   'canon docs agents',
-  'canon capture assets/captures/install.html --selector .window --out assets/frames',
+  'canon capture web/public/previews/design-tokens/index.html --selector body --out assets/evidence',
   'canon inventory focus --json',
   'canon drive http://localhost:4173 run.json --json',
   'canon take http://localhost:4173 plan.json --out takes --json',

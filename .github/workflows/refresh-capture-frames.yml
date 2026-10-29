@@ -1,41 +1,19 @@
-name: Refresh Capture Frames
-# canon-no-seed: regenerates this checkout's own landing-page frames from its
-# own catalogs. Seeding it as-is would have a target regenerate frames it does
-# not carry.
+name: Refresh Home Baseline
+# canon-no-seed: recaptures this checkout's own home page baseline. Seeding it
+# as-is would have a target capture a page it does not carry.
 
 on:
   push:
     branches:
       - main
     paths:
-      # The count and token inputs regen-hero.ts reads. The frames themselves
-      # are not listed, so the refresh pull request merging does not start
-      # another run.
-      - 'src/design/**'
-      - 'src/cli.ts'
-      # The command count comes from the registered set, and a module here is
-      # what registers one, so a branch adding a command moves the frame
-      # without touching src/cli.ts.
-      - 'src/commands/**'
-      - 'governance/rules/**'
-      - 'standards/**'
-      - 'claude/skills/**'
-      - 'tooling/**'
-      - 'assets/brand/mark.svg'
-      - 'assets/captures/*.tmpl'
-      - 'scripts/core/regen-hero.ts'
-      - 'src/capture/frame-values.ts'
-      # The inputs to the home render the hero frames do not share. The page is
-      # built from web/ and shows the film's poster from assets/loops/, which
-      # `bun run film:render` writes. The rest of assets/** stays off the list,
-      # since it holds the outputs this job writes and would start a run from
-      # its own merge.
+      # The inputs to the home render. The page is built from web/ and shows the
+      # film's poster from assets/loops/, which `bun run film:render` writes. The
+      # rest of assets/** stays off the list, since it holds the output this job
+      # writes and would start a run from its own merge.
       - 'web/**'
       - 'assets/loops/**'
       - 'scripts/core/capture-home.sh'
-      # GOV_STACK_COUNT in regen-hero.ts reads the stacks, so a stack-only
-      # merge moves the hero frames.
-      - 'governance/stacks/**'
   workflow_dispatch:
 
 permissions:
@@ -44,14 +22,14 @@ permissions:
 
 # One refresh at a time, and a newer merge supersedes an older run. A run renders
 # from the commit that started it rather than main HEAD, so its push step moves
-# the frames onto main as fetched at push time before force-updating the branch.
+# the baseline onto main as fetched at push time before force-updating the branch.
 concurrency:
   group: refresh-capture-frames
   cancel-in-progress: true
 
 jobs:
   refresh:
-    name: 🖼️ Refresh Frames
+    name: 🖼️ Refresh Home Baseline
     # A dispatch on any other ref would force-push that ref's whole diff into
     # the open refresh pull request under a chore title.
     if: github.ref == 'refs/heads/main'
@@ -79,41 +57,11 @@ jobs:
       - name: Install Playwright Chromium
         run: bunx playwright install chromium
 
-      # The frames declare Noto Sans Mono, which the runner lacks, and the capture guard refuses a fallback render
-      - name: Install Frame Font
-        timeout-minutes: 5
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends fonts-noto-mono
-
-      # Family from src/design/tokens.ts MONO, checked by name so a missing face fails here
-      - name: Check Frame Font
-        run: |
-          family="Noto Sans Mono"
-          if ! fc-list "$family" | grep -q .; then
-            echo "::error::Font family '$family' does not resolve on this runner."
-            exit 1
-          fi
-
-      - name: Regenerate Frame Markup
-        run: bun scripts/core/regen-hero.ts
-
-      # Only when the markup moved. A capture rewrites every image and stamp, and
-      # a runner's chromium bytes differ from the committed ones, so capturing
-      # unconditionally would open a pull request on every push to main.
-      - name: Capture Frames
-        run: |
-          if [ -z "$(git status --porcelain assets/captures)" ]; then
-            echo "Markup is current, nothing to capture."
-            exit 0
-          fi
-          bun src/cli.ts capture assets/captures --selector .window --out assets/frames
-
       # The home baseline `canon pr evidence` compares a page change against.
       # pr-visual-checks.yml runs the same script and reports whether its frames
       # match, so a merge that moves the render leaves a reviewed pull request
       # behind it instead of a stale baseline. It writes under assets/evidence,
-      # which the status check and the add below already cover.
+      # which the status check and the add in the script below cover.
       - name: Capture Home Baseline
         run: bash scripts/core/capture-home.sh
 

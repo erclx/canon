@@ -17,11 +17,10 @@ Read `canon/context/development/web.md` for structure, the Astro build, and the 
 
 ## Images are generated
 
-Point an image at a file some script writes. `canon capture` writes a `.stamp` beside each PNG carrying a digest over the markup it read and the image it wrote, and `bun run check` fails when either moves.
+Point an image at a file some script writes. `canon capture` writes a `.stamp` beside each PNG carrying a digest over the markup it read and the image it wrote.
 
-- Never hand-edit a generated frame. The next regeneration overwrites it and the gate reports nothing until the digests disagree.
+- Never hand-edit a generated frame. The next regeneration overwrites it.
 - A design-token change can move the capture markup and stamps while the PNGs stay byte-identical, per `canon/context/development/web.md`
-- The Hero stage failing until the regenerated frames are committed is that stage working rather than a defect
 
 ## Sync checklist
 
@@ -41,9 +40,8 @@ Before shipping any change under `web/`:
 
 ### Neighboring entries
 
-Four entries outside `canon/context/development/web.md` bear on this surface.
+Three entries outside `canon/context/development/web.md` bear on this surface.
 
 - `canon/context/features/design.md`: the token values this surface reads and does not own
-- `canon/context/development/local-loop.md`: the Hero section, before touching `assets/captures/` or `assets/frames/`
 - `canon/context/development/web.md`: why `assets/` and `examples/` are separate folders, decided on who each addresses
 - `canon/context/development/local-loop.md`: which `evidence` folders are dev baselines and which are prod captures, before adding or moving an image under one

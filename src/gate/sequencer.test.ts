@@ -1,18 +1,14 @@
-import { createHash } from 'node:crypto'
 import {
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readFileSync,
   rmSync,
   unlinkSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
-import { dirname, join } from 'node:path'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { dirname } from 'node:path'
+import { afterEach, describe, expect, it } from 'vitest'
 import {
-  assertStampField,
   type CommandResult,
   type Measure,
   type RunCommand,
@@ -598,16 +594,6 @@ describe('the shipped stage table', () => {
     ])
   })
 
-  it('should health check the hero regen without writing a frame', () => {
-    const hero = STAGES.find((entry) => entry.id === 'hero')
-
-    expect(hero?.checks[0]).toEqual({
-      kind: 'command',
-      argv: ['bun', 'scripts/core/regen-hero.ts', '--check'],
-      failure: 'Hero regen health check failed',
-    })
-  })
-
   it('should give every stage an id no other stage carries', () => {
     const ids = STAGES.map((entry) => entry.id)
 
@@ -638,47 +624,6 @@ describe('seedEntryCount', () => {
 
   it('should read a payload that does not parse as nothing measured', () => {
     expect(seedEntryCount('not json')).toBe(0)
-  })
-})
-
-describe('assertStampField', () => {
-  let root: string
-  let source: string
-  let stamp: string
-
-  beforeEach(() => {
-    root = mkdtempSync(join(tmpdir(), 'canon-gate-stamp-'))
-    source = join(root, 'hero.html')
-    stamp = join(root, 'hero.stamp')
-    writeFileSync(source, '<p>frame</p>')
-  })
-
-  afterEach(() => {
-    rmSync(root, { recursive: true, force: true })
-  })
-
-  it('should report nothing when the recorded digest matches the file', () => {
-    const digest = createHash('sha256').update('<p>frame</p>').digest('hex')
-    writeFileSync(stamp, `source-sha256: ${digest}\n`)
-
-    expect(assertStampField(root, stamp, 'source-sha256', source)).toEqual([])
-  })
-
-  it('should name both sides when the recorded digest disagrees', () => {
-    writeFileSync(stamp, 'source-sha256: 0000\n')
-
-    expect(assertStampField(root, stamp, 'source-sha256', source)).toEqual([
-      'hero.stamp records source-sha256 0000',
-      'hero.html hashes to 748ac6ab9a71d21a35ab438202674fade54b0031f5357bbeb64e704174ea5c26',
-    ])
-  })
-
-  it('should report a stamp predating the field rather than comparing to nothing', () => {
-    writeFileSync(stamp, 'source: hero.html\n')
-
-    expect(assertStampField(root, stamp, 'source-sha256', source)).toEqual([
-      'hero.stamp carries no source-sha256 line, so it predates the capture that writes one.',
-    ])
   })
 })
 
