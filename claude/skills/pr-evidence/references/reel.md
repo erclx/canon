@@ -72,11 +72,12 @@ canon take <url> .canon/tmp/pr/reel/<number>/plan.json --out .canon/tmp/pr/reel/
 
 Branch on the record's `reason`, never on the exit code.
 
-| Record          | Route                                                              |
-| --------------- | ------------------------------------------------------------------ |
-| No `reason`     | Sum the beats' `seconds` and continue to the stills                |
-| `reel-failed`   | Skip as `reel-failed` with the record's `message`                  |
-| Any other value | Skip under that `reason`, such as `target-missing` with its `beat` |
+| Record             | Route                                                                    |
+| ------------------ | ------------------------------------------------------------------------ |
+| No `reason`        | Sum the beats' `seconds` and continue to the stills                      |
+| `reel-failed`      | Skip as `reel-failed` with the record's `message`                        |
+| `target-offscreen` | Add a `scroll` step to the target in the beat's setup and film once more |
+| Any other value    | Skip under that `reason`, such as `target-missing` with its `beat`       |
 
 When the beats sum past 12 seconds, drop the last beat from the plan and film once more. A second run past the cap skips as `over-cap`.
 

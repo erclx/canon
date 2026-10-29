@@ -75,6 +75,7 @@ Branch on the record's `reason`, never on the exit code, which a shell function 
 | No `reason`                      | Continue to the stills                                                                                             |
 | `target-missing` with `fallback` | Check the access before the selector, per the note below the table                                                 |
 | `target-missing`                 | Open the record's `still`, find the target the record's `beat` names on the page, fix the plan, and film once more |
+| `target-offscreen`               | Add a `scroll` step to the target in the beat's setup and film once more                                           |
 | `server-unreachable`             | Restart the server from Step 1 and film once more                                                                  |
 | Any other `reason`               | Report the `reason` and `message` to the operator and stop, since each is a setup step                             |
 
