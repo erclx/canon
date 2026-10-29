@@ -63,7 +63,7 @@ Spawns `src/cli.ts` as a real process against a temporary directory, so a case a
 
 ### `.claude/hooks/`
 
-Holds this repository's Claude Code hooks, wired through `.claude/settings.json`. Each seeded hook has a twin in `tooling/claude/seeds/.claude/hooks/` maintained by hand with nothing comparing the trees, and nine of the eleven shared names stay byte-identical.
+Holds this repository's Claude Code hooks, wired through `.claude/settings.json`. Each seeded hook has a twin in `tooling/claude/seeds/.claude/hooks/` maintained by hand, and ten of the twelve shared names stay byte-identical. Only `plan-guard.sh` has a test comparing its two copies, in `src/hooks/guard.test.ts`.
 
 - `standards-audit.sh` and `reply-links.sh` differ on purpose, since the seeded copy resolves an installed `canon` alone and this copy prefers the checkout's `src/cli.ts`
 - Every hook reading a payload opens with `IFS= read -r -d '' -t 2 input`, never `cat`, as `src/hooks/guard.test.ts` holds. The bound is canon's own, and `scratch-guard.sh` fails open on it
