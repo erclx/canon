@@ -158,6 +158,7 @@ export const GATED_PATHS: readonly string[] = [
   'claude/skills/context-fold/references/unusable-baseline.md',
   'claude/skills/create-rule/REQUIREMENT.md',
   'claude/skills/create-rule/SKILL.md',
+  'claude/skills/create-rule/references/ledger.md',
   'claude/skills/create-rule/references/rule.md',
   'claude/skills/create-skill/REQUIREMENT.md',
   'claude/skills/create-skill/SKILL.md',

@@ -24,47 +24,14 @@ Coverage grows only as core rules are touched, since nobody wrote down the reaso
 - `canon gov audit --touched` owes a ledger for each core rule the branch changed against `origin/main`, and the push gate runs it that way
 - Move or delete a core rule's ledger in the same change as the rule, since a ledger left at the old path reads as missing for the moved rule
 
-## Shape
+## Shape and rows
 
-`canon gov audit` matches rows to bullets by count under a heading of the same name, so the shape is fixed and the content is a review judgment.
+The shipped `claude/skills/create-rule/references/ledger.md` owns the row shape both audits check, one table per H2 and one row per bullet, and the sourced and house-choice rows. Only that copy reaches a project, so this file adds the toolkit's paths above and the two row kinds a core rule takes below.
 
-- One `## <heading>` per rule H2, spelled as the rule spells it
-- One table under each heading, with one row per bullet in the rule's order
-- A rule with no H2 takes one table under the title
-- Write no table elsewhere in the file, since every table row under a heading counts
-
-A skill ledger counts a few lines differently from a rule's.
-
-- Give each top-level ordered step a row, the way a bullet takes one, and give `## Contents` no table
-- Stop a listed `SKILL.md`'s tables at its first closing section or `## What this delegates`, since a table under either fails as rows with no bullets
-
-## Rows
-
-Each row names the bullet and the one thing behind it.
-
-- **Sourced:** a link to the primary source, with the line it says, such as the framework's own docs or the language spec
-- **House choice:** the bug class the bullet prevents, when no outside source takes a side
 - **Core decision:** a house choice naming what the bullet prevents and the option it beat, with the decision date alone in `Read`
 - **Core, reason lost:** `House choice: Unknown` where nobody remembers why a touched bullet exists, which marks it for `internal-rule-audit`
-- Cut an outside-practice bullet that has neither a source nor a bug class, rather than writing a row that says so
 
-```markdown
----
-title: React rule ledger
-description: Sources for governance/rules/framework/react.md, one row per bullet
----
-
-# React rule ledger
-
-## Component patterns
-
-| Bullet                       | Source                                                                                        |
-| ---------------------------- | --------------------------------------------------------------------------------------------- |
-| Stable keys over array index | [Rendering lists](https://react.dev/learn/rendering-lists): index keys cause subtle bugs      |
-| Named exports                | House choice: a default export renamed at import drifts from the component's name in a search |
-```
-
-A core row reads the same way, with the decision in `Read`:
+A core row reads this way:
 
 ```markdown
 | Bullet                            | Source                                                                                                                                     | Read       |

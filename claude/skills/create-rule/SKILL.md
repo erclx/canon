@@ -86,6 +86,10 @@ Read `${CLAUDE_SKILL_DIR}/references/checklist.md` and run every bullet of the w
 
 ## After writing
 
-Emit the full path on its own line: `.claude/rules/project/<subdir>/<slug>.md`. Remind the user that Claude Code loads path-scoped rules when it reads or writes a matching file, and always-on rules every session. When a bullet claims outside practice, tell them to cite its source in the commit that adds the rule.
+Emit the full path on its own line: `.claude/rules/project/<subdir>/<slug>.md`. Remind the user that Claude Code loads path-scoped rules when it reads or writes a matching file, and always-on rules every session. When a bullet claims outside practice, tell them to cite its source, in a ledger or in the commit that adds the rule.
 
 Show the new rule as a diff in chat and commit nothing until the operator says OK.
+
+### When a bullet cites outside practice
+
+Offer to record each source in a ledger at `canon/ledger/rules/<subdir>/<slug>.md`, which `canon gov audit` checks row for bullet. Read `${CLAUDE_SKILL_DIR}/references/ledger.md` for the layout and the row shape before writing one.
