@@ -59,7 +59,7 @@ const TAKE_REFUSALS: Record<TakeRefusal, string> = {
   'server-unreachable': 'Nothing answered at the URL, so no beat was filmed.',
   'target-missing': 'A step names a target the page does not carry.',
   'target-offscreen':
-    'A step names a target outside the window, so a scroll step must reach it first.',
+    'A step names a target outside the window, so a setup step must bring it into view first.',
   'take-failed': 'The take failed against a reachable page.',
 }
 
@@ -168,7 +168,7 @@ export function register(program: Command): void {
         '  browser-missing     the headless shell or browser binary is not installed',
         '  server-unreachable  nothing answered at the URL',
         '  target-missing      a step names a target the page does not carry',
-        '  target-offscreen    a step names a target outside the window, so a scroll step must reach it first',
+        '  target-offscreen    a step names a target outside the window, so a setup step must bring it into view first',
         '  take-failed         the take failed against a reachable page',
         '  reel-failed         every beat was filmed and the reel did not encode',
         '',

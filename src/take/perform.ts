@@ -97,7 +97,7 @@ export class TargetMissing extends TargetRefused {
 
 /**
  * A target whose center lies outside the window, so the pointer would aim at
- * a point the clip never shows. A plan reaches it with a scroll step first.
+ * a point the clip never shows. A setup step brings it into view first.
  */
 export class TargetOffscreen extends TargetRefused {
   constructor(
@@ -106,7 +106,7 @@ export class TargetOffscreen extends TargetRefused {
   ) {
     super(
       target,
-      `${target} is centered at (${Math.round(at.x)}, ${Math.round(at.y)}), outside the ${VIEWPORT.width}x${VIEWPORT.height} window, so a scroll step must reach it first`,
+      `${target} is centered at (${Math.round(at.x)}, ${Math.round(at.y)}), outside the ${VIEWPORT.width}x${VIEWPORT.height} window, so a setup step must bring it into view first`,
     )
   }
 }
