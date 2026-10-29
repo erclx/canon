@@ -3,6 +3,7 @@ import {
   FPS,
   type LogEvent,
   type Point,
+  VIEWPORT,
   along,
   travelMs,
 } from '@/take/log'
@@ -74,13 +75,39 @@ export interface Stage {
   evaluate<T>(expression: string): Promise<T>
 }
 
-/** A target that resolved to nothing, which refuses rather than films a guess. */
-export class TargetMissing extends Error {
+/** A target the pointer cannot reach, which refuses rather than films a guess. */
+export class TargetRefused extends Error {
   /** The page as it stood when the lookup failed, as a JPEG, when the route caught one. */
   still?: Buffer
 
-  constructor(readonly target: string) {
-    super(`nothing on the page matches ${target}`)
+  constructor(
+    readonly target: string,
+    message: string,
+  ) {
+    super(message)
+  }
+}
+
+/** A target that resolved to nothing. */
+export class TargetMissing extends TargetRefused {
+  constructor(target: string) {
+    super(target, `nothing on the page matches ${target}`)
+  }
+}
+
+/**
+ * A target whose center lies outside the window, so the pointer would aim at
+ * a point the clip never shows. A setup step brings it into view first.
+ */
+export class TargetOffscreen extends TargetRefused {
+  constructor(
+    target: string,
+    readonly at: Point,
+  ) {
+    super(
+      target,
+      `${target} is centered at (${Math.round(at.x)}, ${Math.round(at.y)}), outside the ${VIEWPORT.width}x${VIEWPORT.height} window, so a setup step must bring it into view first`,
+    )
   }
 }
 
@@ -158,16 +185,9 @@ export async function performSteps(
         const at = center(await boxOf(stage, step.target))
         await moveTo(stage, state, at)
         const frames = Math.round(SCROLL_MS / FRAME_MS)
-        state.log?.push({
-          t: stage.now(),
-          kind: 'scroll',
-          at,
-          dx: 0,
-          dy: step.dy,
-          ms: frames * FRAME_MS,
-        })
+        const start = stage.now()
         let sent = 0
-        for (let frame = 1; frame <= frames; frame += 1) {
+        await paced(stage, frames, async (frame) => {
           const want = along(
             { x: 0, y: 0 },
             { x: 0, y: step.dy },
@@ -175,7 +195,15 @@ export async function performSteps(
           ).y
           await stage.pointer({ type: 'wheel', ...at, dy: want - sent })
           sent = want
-        }
+        })
+        state.log?.push({
+          t: start,
+          kind: 'scroll',
+          at,
+          dx: 0,
+          dy: step.dy,
+          ms: stage.now() - start,
+        })
         break
       }
       case 'wait':
@@ -194,21 +222,35 @@ async function moveTo(
   const from = state.pointer
   if (Math.hypot(to.x - from.x, to.y - from.y) < 1) return
   const frames = Math.max(1, Math.round(travelMs(from, to) / FRAME_MS))
-  state.log?.push({
-    t: stage.now(),
-    kind: 'move',
-    from,
-    to,
-    ms: frames * FRAME_MS,
-  })
   const pressed = held
     ? { held: true as const, ...withModifiers(held.modifiers) }
     : {}
-  for (let frame = 1; frame <= frames; frame += 1) {
+  const start = stage.now()
+  await paced(stage, frames, async (frame) => {
     state.pointer = along(from, to, frame / frames)
     await stage.pointer({ type: 'move', ...state.pointer, ...pressed })
-  }
+  })
   state.pointer = to
+  state.log?.push({ t: start, kind: 'move', from, to, ms: stage.now() - start })
+}
+
+/**
+ * Runs a motion planned as `frames` inputs, sending each at the frame the
+ * stage's clock has reached, so a page slower than a frame per input skips the
+ * points it is behind on and the motion still ends near its planned length. A
+ * clock advancing one frame per input, as the stepper's does, gets every frame.
+ */
+async function paced(
+  stage: Stage,
+  frames: number,
+  input: (frame: number) => Promise<void>,
+): Promise<void> {
+  const start = stage.now()
+  for (let frame = 0; frame < frames;) {
+    const reached = Math.round((stage.now() - start) / FRAME_MS)
+    frame = Math.min(frames, Math.max(frame + 1, reached + 1))
+    await input(frame)
+  }
 }
 
 async function click(
@@ -318,6 +360,10 @@ function center(box: Box): Point {
 async function boxOf(stage: Stage, target: string): Promise<Box> {
   const box = await stage.evaluate<Box | null>(boxExpression(target))
   if (!box) throw new TargetMissing(target)
+  const at = center(box)
+  if (at.x < 0 || at.x > VIEWPORT.width || at.y < 0 || at.y > VIEWPORT.height) {
+    throw new TargetOffscreen(target, at)
+  }
   return box
 }
 

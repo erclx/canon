@@ -5,7 +5,7 @@ import {
   type KeyInput,
   type PointerInput,
   type Stage,
-  TargetMissing,
+  TargetRefused,
   performSteps,
 } from '@/take/perform'
 import type { Beat } from '@/take/plan'
@@ -25,7 +25,10 @@ import { type ShellPage, openShell } from '@/take/shell'
  * - Frame time continues Chromium's monotonic clock, since a frame stamped on
  *   any other base leaves every CSS animation at its first frame
  * - No frame is begun before the load event, since one sent mid-navigation can
- *   go unanswered, and each loading frame is capped so a lost one cannot hang
+ *   go unanswered
+ * - A frame is begun only once the one before it settles, since Chromium
+ *   refuses a second while one is pending, and a frame left pending past the
+ *   stall limit falls the beat back rather than hanging it
  */
 
 const FRAME_MS = 1000 / FPS
@@ -41,7 +44,6 @@ export const HOLD_MS = 600
 
 const LOAD_CAP_MS = 15_000
 const SETTLE_MS = 2500
-const LOADING_FRAME_CAP_MS = 250
 
 /** How long a refusal waits on the frame it shows, since the page may be wedged. */
 const STILL_CAP_MS = 2000
@@ -81,19 +83,25 @@ export async function filmStepped(
   let still: (() => Promise<Buffer | undefined>) | undefined
   try {
     let ticks = await load(page, request.url)
-    const beginFrame = (screenshot: boolean) =>
-      page.send<{ screenshotData?: string }>(
-        'HeadlessExperimental.beginFrame',
-        {
-          frameTimeTicks: (ticks += FRAME_MS),
-          interval: FRAME_MS,
-          ...(screenshot
-            ? { screenshot: { format: 'jpeg', quality: 95 } }
-            : {}),
-        },
+    let outstanding: Promise<unknown> = Promise.resolve()
+    const beginFrame = (screenshot: boolean) => {
+      const reply = outstanding.then(() =>
+        page.send<{ screenshotData?: string }>(
+          'HeadlessExperimental.beginFrame',
+          {
+            frameTimeTicks: (ticks += FRAME_MS),
+            interval: FRAME_MS,
+            ...(screenshot
+              ? { screenshot: { format: 'jpeg', quality: 95 } }
+              : {}),
+          },
+        ),
       )
+      outstanding = reply.catch(() => {})
+      return reply
+    }
     still = () => frameStill(beginFrame)
-    await pump(beginFrame, SETTLE_MS)
+    await pump(beginFrame, SETTLE_MS, stallMs)
 
     const live = liveStage(page, beginFrame, stallMs)
     await performSteps(live, request.beat.setup, { pointer: START })
@@ -163,7 +171,7 @@ export async function filmStepped(
     return { frames, events, still: last }
   } catch (error) {
     encoder.abort()
-    if (error instanceof TargetMissing && still) error.still = await still()
+    if (error instanceof TargetRefused && still) error.still = await still()
     throw error
   } finally {
     page.close()
@@ -215,17 +223,22 @@ async function load(page: ShellPage, url: string): Promise<number> {
   return timestamp
 }
 
-/** Begins frames in real time so loading, fonts, and layout settle. */
+/**
+ * Begins frames in real time so loading, fonts, and layout settle. Each frame
+ * is awaited, so a slow page stretches the settle rather than overlapping it.
+ */
 async function pump(
   beginFrame: (screenshot: boolean) => Promise<unknown>,
   ms: number,
+  stallMs: number,
 ): Promise<void> {
   const end = Date.now() + ms
   while (Date.now() < end) {
-    await Promise.race([
+    await withinStall(
       beginFrame(false).catch(() => {}),
-      sleep(LOADING_FRAME_CAP_MS),
-    ])
+      0,
+      stallMs,
+    )
     await sleep(12)
   }
 }
@@ -242,7 +255,7 @@ function liveStage(
   const started = Date.now()
   return {
     now: () => Date.now() - started,
-    hold: (ms) => pump(beginFrame, ms),
+    hold: (ms) => pump(beginFrame, ms, stallMs),
     pointer: (input) => {
       const sent = page.send('Input.dispatchMouseEvent', mouseEvent(input))
       return withinStall(
