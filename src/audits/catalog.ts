@@ -379,7 +379,8 @@ function restatedCounts(record: unknown): Record<string, number> | undefined {
  * a short one are fixed by different passes.
  */
 function ruleCounts(record: unknown): Record<string, number> | undefined {
-  const rules = asObject(record)?.rules
+  const root = asObject(record)
+  const rules = root?.rules
   if (!Array.isArray(rules)) return undefined
 
   let shapeRules = 0
@@ -397,7 +398,11 @@ function ruleCounts(record: unknown): Record<string, number> | undefined {
     if ((lengthOf(ledger.mismatches) ?? 0) > 0) ledgerMismatches += 1
   }
 
-  return { shapeRules, missingLedgers, ledgerMismatches }
+  // A target ledger with no rule sits beside `rules` rather than in it. A
+  // binary predating it carries no `orphans` key, which reads as none.
+  const orphanLedgers = lengthOf(root?.orphans) ?? 0
+
+  return { shapeRules, missingLedgers, ledgerMismatches, orphanLedgers }
 }
 
 function findingsOnly(record: unknown): Record<string, number> | undefined {

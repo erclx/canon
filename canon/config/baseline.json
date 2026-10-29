@@ -53,7 +53,8 @@
     "rules": {
       "shapeRules": 0,
       "missingLedgers": 0,
-      "ledgerMismatches": 0
+      "ledgerMismatches": 0,
+      "orphanLedgers": 0
     },
     "counts": {
       "findings": 0

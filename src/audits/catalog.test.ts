@@ -623,6 +623,21 @@ describe('the rules audit', () => {
       shapeRules: 2,
       missingLedgers: 1,
       ledgerMismatches: 1,
+      orphanLedgers: 0,
+    })
+  })
+
+  it('should count a ledger whose rule is gone in an otherwise clean record', () => {
+    const record = {
+      rules: [{ findings: [], ledger: { status: 'not-required' } }],
+      orphans: ['canon/ledger/rules/code/moved.md'],
+    }
+
+    expect(countsFor(rules(), record)).toEqual({
+      shapeRules: 0,
+      missingLedgers: 0,
+      ledgerMismatches: 0,
+      orphanLedgers: 1,
     })
   })
 
