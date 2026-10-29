@@ -94,6 +94,25 @@ describe('canon take', () => {
     })
   })
 
+  it.each(['0', 'abc'])(
+    'should refuse bad-max-seconds for --max-seconds %s before filming',
+    async (value) => {
+      const result = await runTake([
+        'http://127.0.0.1:9/',
+        plan,
+        '--out',
+        dir,
+        '--max-seconds',
+        value,
+      ])
+
+      expect(result).toMatchObject({
+        exitCode: 1,
+        record: { reason: 'bad-max-seconds' },
+      })
+    },
+  )
+
   it('should refuse ffmpeg-missing when FFmpeg is not on the PATH', async () => {
     const result = await runTake(['http://127.0.0.1:9/', plan, '--out', dir], {
       PATH: join(dir, 'no-bin'),

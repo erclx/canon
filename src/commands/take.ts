@@ -28,6 +28,7 @@ type Take = typeof import('@/take/film')
 interface RunOptions {
   readonly out?: string
   readonly reel?: string
+  readonly maxSeconds?: string
   readonly json?: boolean
 }
 
@@ -81,6 +82,10 @@ export function register(program: Command): void {
     .option(
       '--reel <file>',
       'Also join the beats into one animated WebP with the pointer drawn',
+    )
+    .option(
+      '--max-seconds <n>',
+      'Refuse once the filmed beats run past n seconds in total',
     )
     .option('--json', 'Add a machine-readable record on stdout')
     .addHelpText(
@@ -155,6 +160,7 @@ export function register(program: Command): void {
         `  ${INSTALL_BROWSER}`,
         '',
         'Reasons:',
+        '  bad-max-seconds     --max-seconds is not a positive number',
         '  no-plan-file        nothing readable at the plan path',
         '  unreadable-plan     the plan file is not valid JSON',
         '  no-beats            the plan names no beat',
@@ -302,6 +308,17 @@ async function runTake(
   const path = resolve(planPath)
 
   intro(`canon take ${url}`)
+
+  const maxSeconds =
+    opts.maxSeconds === undefined ? undefined : readRate(opts.maxSeconds)
+  if (opts.maxSeconds !== undefined && maxSeconds === undefined) {
+    return refuse(
+      emitJson,
+      url,
+      'bad-max-seconds',
+      `--max-seconds ${opts.maxSeconds} is not a positive number, such as 12 or 7.5.`,
+    )
+  }
 
   let source: string
   try {
