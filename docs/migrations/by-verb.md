@@ -108,6 +108,8 @@ It moves each surface with `git mv` and repoints every tracked citation. No othe
 
 The seeded `.claude/settings.json` now denies the `Agent` and `Task` tools and both merge commands, and sets `autoMemoryEnabled` to `false`. `canon claude sync` never rewrites a settings file you hold, so it warns while the file holds no default or lacks a merge entry. Removing `Agent` and `Task` later draws no warning.
 
+Where the project holds `.claude/hooks/plan-guard.sh`, the verb below also wires it into `hooks.PreToolUse` for `Bash` and `Write|Edit`, since a sync adds the script and never rewrites `settings.json`. A tool whose matcher already runs the guard is left alone.
+
 ```bash
 canon migrate session-defaults --json
 canon migrate session-defaults --write --json
