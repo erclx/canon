@@ -23,7 +23,7 @@ Holds the source rules, one subfolder per audience, each at `<folder>/<slug>.md`
 
 ### `governance/ledger/`
 
-Holds the ledger for each outside-practice rule and each core rule that carries one, at the rule's own path and outside the installed tree, so a ledger never loads or ships. Its `skills/<skill>/` folder holds one per unexempted reference and listed `SKILL.md` of each per-bullet skill, matched by `canon claude skills audit`.
+Holds the ledger of each rule that carries one at the rule's own path, never loaded or shipped, and in `skills/<skill>/` those of each per-bullet skill. A target keeps its own under `canon/ledger/`, which both audits read only in a tree with no `governance/rules/`, so one under this repository's `canon/` is never read.
 
 - `canon gov audit` matches a ledger's table rows to the rule's bullets by count under each H2 of the same name, so a row added or dropped without its bullet fails the folder
 - A cut bullet goes in a `## Declined` list rather than a table, since every table row under a heading counts as a bullet's row
