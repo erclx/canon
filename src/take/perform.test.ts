@@ -331,6 +331,16 @@ const BELOW: Box = { x: 100, y: 3083, width: 400, height: 240 }
 /** A card cut by the window's bottom edge with its center still inside. */
 const STRADDLING: Box = { x: 100, y: 1000, width: 400, height: 140 }
 
+/** A page-tall element spanning the window, its center far below it. */
+const TALL: Box = { x: 0, y: -500, width: 1920, height: 5000 }
+
+/** A card showing only its top 5 px at the window's bottom edge. */
+const SLIVER: Box = { x: 100, y: 1075, width: 400, height: 240 }
+
+function wheels(sent: readonly Sent[]) {
+  return sent.filter((input) => input.type === 'wheel')
+}
+
 describe('performSteps targets outside the window', () => {
   it('should refuse a move to a target whose center is below the window', async () => {
     const run = perform({ '#card': BELOW }, [{ kind: 'move', target: '#card' }])
@@ -363,5 +373,66 @@ describe('performSteps targets outside the window', () => {
     ])
 
     await expect(run).rejects.toMatchObject({ target: '#lane' })
+  })
+
+  it('should wheel a target taller than the window at the window center', async () => {
+    const { sent } = await perform({ body: TALL }, [
+      { kind: 'scroll', target: 'body', dy: 700 },
+    ])
+
+    expect(wheels(sent).length).toBeGreaterThan(0)
+    for (const wheel of wheels(sent)) {
+      expect(wheel).toMatchObject({ x: 960, y: 540 })
+    }
+  })
+
+  it('should log a tall target scroll at the point it wheeled', async () => {
+    const { log } = await perform({ body: TALL }, [
+      { kind: 'scroll', target: 'body', dy: 700 },
+    ])
+
+    expect(log.find((event) => event.kind === 'scroll')).toMatchObject({
+      at: { x: 960, y: 540 },
+    })
+  })
+
+  it('should wheel inside the part of a target the window shows', async () => {
+    const { sent } = await perform({ '#card': SLIVER }, [
+      { kind: 'scroll', target: '#card', dy: 300 },
+    ])
+
+    expect(wheels(sent)[0]).toMatchObject({ x: 300, y: 1077.5 })
+  })
+
+  it('should wheel at the true center of a target cut by the edge whose center is inside', async () => {
+    const { sent } = await perform({ '#card': STRADDLING }, [
+      { kind: 'scroll', target: '#card', dy: 300 },
+    ])
+
+    expect(wheels(sent)[0]).toMatchObject({ x: 300, y: 1070 })
+  })
+
+  it('should refuse a scroll on a target wholly outside the window', async () => {
+    const run = perform({ '#card': BELOW }, [
+      { kind: 'scroll', target: '#card', dy: 300 },
+    ])
+
+    await expect(run).rejects.toThrow(TargetOffscreen)
+  })
+
+  it('should send no input toward a scroll target wholly outside the window', async () => {
+    const { stage, sent } = recordingStage({ '#card': BELOW })
+
+    await performSteps(stage, [{ kind: 'scroll', target: '#card', dy: 300 }], {
+      pointer: START,
+    }).catch(() => {})
+
+    expect(sent).toEqual([])
+  })
+
+  it('should refuse a move to a target taller than the window', async () => {
+    const run = perform({ body: TALL }, [{ kind: 'move', target: 'body' }])
+
+    await expect(run).rejects.toThrow(TargetOffscreen)
   })
 })

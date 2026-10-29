@@ -19,7 +19,7 @@ Reads a take plan, films each beat from a fresh load, and writes the clip, the l
 
 - The stepper launches chrome-headless-shell under begin-frame control over raw CDP, since Playwright cannot ask for it on a page it opens, and screenshots each frame at device scale 2
 - A beat asking for `screencast`, or a stepped frame slower than 2 s, films through Playwright's screencast at 1920x1080, cut at the stage clock past the recorder's 1 s pad, its record naming the route
-- One choreography performs every step through a stage each route supplies, so the pointer moves on the same curve in both routes and in the log the edit redraws it from
+- One choreography performs every step through each route's stage on one pointer curve, aiming a scroll at the part of its target inside the window, since a page-tall `body` is centered below it
 - The camera turns a log into one view per frame on preset O4 at a depth the clip's resolution caps, and pushes the view with the cursor at its outer 10% when the spring lags a long reach
 - Frames stream into the system FFmpeg rather than landing on disk, and FFmpeg's absence refuses before any browser launches
 

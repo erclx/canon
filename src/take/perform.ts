@@ -97,7 +97,8 @@ export class TargetMissing extends TargetRefused {
 
 /**
  * A target whose center lies outside the window, so the pointer would aim at
- * a point the clip never shows. A setup step brings it into view first.
+ * a point the clip never shows, or for a scroll, a target with no part inside
+ * it. A setup step brings it into view first.
  */
 export class TargetOffscreen extends TargetRefused {
   constructor(
@@ -182,7 +183,7 @@ export async function performSteps(
         break
       }
       case 'scroll': {
-        const at = center(await boxOf(stage, step.target))
+        const at = await scrollPoint(stage, step.target)
         await moveTo(stage, state, at)
         const frames = Math.round(SCROLL_MS / FRAME_MS)
         const start = stage.now()
@@ -357,14 +358,41 @@ function center(box: Box): Point {
   return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
 }
 
-async function boxOf(stage: Stage, target: string): Promise<Box> {
+function inWindow(at: Point): boolean {
+  return (
+    at.x >= 0 && at.x <= VIEWPORT.width && at.y >= 0 && at.y <= VIEWPORT.height
+  )
+}
+
+async function foundBox(stage: Stage, target: string): Promise<Box> {
   const box = await stage.evaluate<Box | null>(boxExpression(target))
   if (!box) throw new TargetMissing(target)
-  const at = center(box)
-  if (at.x < 0 || at.x > VIEWPORT.width || at.y < 0 || at.y > VIEWPORT.height) {
-    throw new TargetOffscreen(target, at)
-  }
   return box
+}
+
+async function boxOf(stage: Stage, target: string): Promise<Box> {
+  const box = await foundBox(stage, target)
+  const at = center(box)
+  if (!inWindow(at)) throw new TargetOffscreen(target, at)
+  return box
+}
+
+/**
+ * Aims a wheel at the target's center, or, when that lies outside the window,
+ * at the center of the part the window shows. A wheel scrolls whatever sits
+ * under it, so any visible point of the target serves, and a page-tall element
+ * such as `body` has a center no setup step can bring into view.
+ */
+async function scrollPoint(stage: Stage, target: string): Promise<Point> {
+  const box = await foundBox(stage, target)
+  const at = center(box)
+  if (inWindow(at)) return at
+  const left = Math.max(box.x, 0)
+  const right = Math.min(box.x + box.width, VIEWPORT.width)
+  const top = Math.max(box.y, 0)
+  const bottom = Math.min(box.y + box.height, VIEWPORT.height)
+  if (right <= left || bottom <= top) throw new TargetOffscreen(target, at)
+  return { x: (left + right) / 2, y: (top + bottom) / 2 }
 }
 
 /**
