@@ -215,9 +215,11 @@ if [ -n "$latest" ] && [ "$latest" -gt "$spent" ]; then
   exit 0
 fi
 
-# A transcript holding no line in the tool-call shape read above means Claude
-# Code changed its format rather than that the session skipped the skill, and
-# blocking on that would stop every plan, so pass and log it apart.
+# A transcript holding no assistant `tool_use` line means Claude Code changed
+# its message format rather than that the session skipped the skill, and
+# blocking on that would stop every plan, so pass and log it apart. A change
+# confined to the Skill call's input or the typed command tag leaves other
+# tool calls readable, so this does not catch it and the guard still blocks.
 calls=$(grep -F '"tool_use"' "$transcript" 2>/dev/null | jq -Rrn '
   first(inputs | fromjson? | select(type == "object" and .type == "assistant")
     | .message.content[]? | select(type == "object" and .type == "tool_use"
