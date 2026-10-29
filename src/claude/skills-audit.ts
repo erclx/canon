@@ -82,6 +82,7 @@ export const LEDGER_SKILLS: readonly string[] = [
   join(SHIPPED_CORPUS, 'write-human'),
   join(SHIPPED_CORPUS, 'test-first'),
   join(SHIPPED_CORPUS, 'ui-craft'),
+  join(SHIPPED_CORPUS, 'proposal-critique'),
 ]
 
 function references(...names: string[]): string[] {
@@ -125,6 +126,7 @@ export const BULLET_LEDGER_SKILLS: Readonly<Record<string, BulletLedgerScope>> =
     [join(SHIPPED_CORPUS, 'write-human')]: { exempt: [], body: true },
     [join(SHIPPED_CORPUS, 'systematic-debugging')]: { exempt: [], body: true },
     [join(SHIPPED_CORPUS, 'build-in-slices')]: { exempt: [], body: true },
+    [join(SHIPPED_CORPUS, 'proposal-critique')]: { exempt: [], body: true },
   }
 
 /** Where a per-bullet ledger lives, as `<skill>/<file>.md` below it. */
