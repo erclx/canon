@@ -11,7 +11,7 @@ import {
   type TakeLog,
   VIEWPORT,
 } from '@/take/log'
-import { TargetMissing } from '@/take/perform'
+import { TargetMissing, TargetOffscreen, TargetRefused } from '@/take/perform'
 import type { Beat, Route, TakePlan } from '@/take/plan'
 import { filmScreencast } from '@/take/screencast'
 import { ShellMissing, findShell } from '@/take/shell'
@@ -30,6 +30,7 @@ export type TakeRefusal =
   | 'browser-missing'
   | 'server-unreachable'
   | 'target-missing'
+  | 'target-offscreen'
   | 'take-failed'
 
 export interface FilmedBeat {
@@ -127,7 +128,7 @@ export async function take(request: TakeRequest): Promise<TakeResult> {
       )
     } catch (error) {
       const cause = error instanceof FellBack ? error.error : error
-      const shot = cause instanceof TargetMissing ? cause.still : undefined
+      const shot = cause instanceof TargetRefused ? cause.still : undefined
       const still = shot ? join(dir, 'still.jpg') : undefined
       if (shot && still) writeFileSync(join(out, still), shot)
       return {
@@ -231,6 +232,7 @@ class FellBack extends Error {
 
 function classify(error: unknown): TakeRefusal {
   if (error instanceof TargetMissing) return 'target-missing'
+  if (error instanceof TargetOffscreen) return 'target-offscreen'
   if (error instanceof ShellMissing || isBrowserMissing(error)) {
     return 'browser-missing'
   }

@@ -7,7 +7,7 @@ import { FPS, type LogEvent, START, VIEWPORT } from '@/take/log'
 import {
   type PointerInput,
   type Stage,
-  TargetMissing,
+  TargetRefused,
   performSteps,
 } from '@/take/perform'
 import type { Beat } from '@/take/plan'
@@ -98,7 +98,7 @@ export async function filmScreencast(request: {
     const frames = await probeFrames(request.clip)
     return { frames, events, still: await lastFrame(request.clip, frames) }
   } catch (error) {
-    if (error instanceof TargetMissing && still) error.still = await still()
+    if (error instanceof TargetRefused && still) error.still = await still()
     throw error
   } finally {
     await browser.close()

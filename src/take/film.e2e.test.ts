@@ -531,6 +531,38 @@ describe.skipIf(!available())('a take of a page whose frames run slow', () => {
     expect(landedMs).toBeGreaterThan(0)
     expect(Math.abs(landedMs - (move.t + move.ms))).toBeLessThan(500)
   }, 180_000)
+
+  it('should refuse a move to a card below the window with no scroll to it', async () => {
+    const read = readTakePlan(
+      JSON.stringify({
+        beats: [
+          {
+            name: 'below',
+            steps: [
+              { kind: 'move', target: '#card' },
+              { kind: 'wait', ms: 500 },
+            ],
+          },
+        ],
+      }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+
+    const result = await take({
+      url: server.url,
+      plan: read.plan,
+      out,
+      stallMs: LOADED_STALL_MS,
+    })
+
+    expect(result).toMatchObject({
+      status: 'failed',
+      reason: 'target-offscreen',
+      beat: 'below',
+      still: '01-below/still.jpg',
+    })
+    expect(existsSync(join(out, '01-below/still.jpg'))).toBe(true)
+  }, 180_000)
 })
 
 const INPUT_PAGE = readFileSync(

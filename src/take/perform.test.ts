@@ -4,6 +4,7 @@ import {
   type KeyInput,
   type PointerInput,
   type Stage,
+  TargetOffscreen,
   performSteps,
 } from '@/take/perform'
 import type { TakeStep } from '@/take/plan'
@@ -321,5 +322,46 @@ describe('performSteps pacing', () => {
     expect(log.find((event) => event.kind === 'scroll')).toMatchObject({
       ms: wheels.length * SLOW_MS,
     })
+  })
+})
+
+/** A card below the 1080-tall window, as a page lays out one further down. */
+const BELOW: Box = { x: 100, y: 3083, width: 400, height: 240 }
+
+/** A card cut by the window's bottom edge with its center still inside. */
+const STRADDLING: Box = { x: 100, y: 1000, width: 400, height: 140 }
+
+describe('performSteps targets outside the window', () => {
+  it('should refuse a move to a target whose center is below the window', async () => {
+    const run = perform({ '#card': BELOW }, [{ kind: 'move', target: '#card' }])
+
+    await expect(run).rejects.toThrow(TargetOffscreen)
+    await expect(run).rejects.toMatchObject({ target: '#card' })
+  })
+
+  it('should send no input toward a target outside the window', async () => {
+    const { stage, sent } = recordingStage({ '#card': BELOW })
+
+    await performSteps(stage, [{ kind: 'click', target: '#card' }], {
+      pointer: START,
+    }).catch(() => {})
+
+    expect(sent).toEqual([])
+  })
+
+  it('should move to a target cut by the edge whose center is inside', async () => {
+    const { sent } = await perform({ '#card': STRADDLING }, [
+      { kind: 'move', target: '#card' },
+    ])
+
+    expect(sent.at(-1)).toMatchObject({ x: 300, y: 1070 })
+  })
+
+  it('should refuse a drag whose drop target is outside the window', async () => {
+    const run = perform({ '#card': CARD, '#lane': BELOW }, [
+      { kind: 'drag', from: '#card', to: '#lane' },
+    ])
+
+    await expect(run).rejects.toMatchObject({ target: '#lane' })
   })
 })

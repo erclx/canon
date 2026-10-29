@@ -3,6 +3,7 @@ import {
   FPS,
   type LogEvent,
   type Point,
+  VIEWPORT,
   along,
   travelMs,
 } from '@/take/log'
@@ -74,13 +75,39 @@ export interface Stage {
   evaluate<T>(expression: string): Promise<T>
 }
 
-/** A target that resolved to nothing, which refuses rather than films a guess. */
-export class TargetMissing extends Error {
+/** A target the pointer cannot reach, which refuses rather than films a guess. */
+export class TargetRefused extends Error {
   /** The page as it stood when the lookup failed, as a JPEG, when the route caught one. */
   still?: Buffer
 
-  constructor(readonly target: string) {
-    super(`nothing on the page matches ${target}`)
+  constructor(
+    readonly target: string,
+    message: string,
+  ) {
+    super(message)
+  }
+}
+
+/** A target that resolved to nothing. */
+export class TargetMissing extends TargetRefused {
+  constructor(target: string) {
+    super(target, `nothing on the page matches ${target}`)
+  }
+}
+
+/**
+ * A target whose center lies outside the window, so the pointer would aim at
+ * a point the clip never shows. A plan reaches it with a scroll step first.
+ */
+export class TargetOffscreen extends TargetRefused {
+  constructor(
+    target: string,
+    readonly at: Point,
+  ) {
+    super(
+      target,
+      `${target} is centered at (${Math.round(at.x)}, ${Math.round(at.y)}), outside the ${VIEWPORT.width}x${VIEWPORT.height} window, so a scroll step must reach it first`,
+    )
   }
 }
 
@@ -333,6 +360,10 @@ function center(box: Box): Point {
 async function boxOf(stage: Stage, target: string): Promise<Box> {
   const box = await stage.evaluate<Box | null>(boxExpression(target))
   if (!box) throw new TargetMissing(target)
+  const at = center(box)
+  if (at.x < 0 || at.x > VIEWPORT.width || at.y < 0 || at.y > VIEWPORT.height) {
+    throw new TargetOffscreen(target, at)
+  }
   return box
 }
 

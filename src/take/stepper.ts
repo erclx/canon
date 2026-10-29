@@ -5,7 +5,7 @@ import {
   type KeyInput,
   type PointerInput,
   type Stage,
-  TargetMissing,
+  TargetRefused,
   performSteps,
 } from '@/take/perform'
 import type { Beat } from '@/take/plan'
@@ -171,7 +171,7 @@ export async function filmStepped(
     return { frames, events, still: last }
   } catch (error) {
     encoder.abort()
-    if (error instanceof TargetMissing && still) error.still = await still()
+    if (error instanceof TargetRefused && still) error.still = await still()
     throw error
   } finally {
     page.close()
