@@ -219,6 +219,18 @@ if [ -n "$latest" ] && [ "$latest" -gt "$spent" ]; then
   exit 0
 fi
 
+# A transcript holding no line in the tool-call shape read above means Claude
+# Code changed its format rather than that the session skipped the skill, and
+# blocking on that would stop every plan, so pass and log it apart.
+calls=$(grep -F '"tool_use"' "$transcript" 2>/dev/null | jq -Rrn '
+  first(inputs | fromjson? | select(type == "object" and .type == "assistant")
+    | .message.content[]? | select(type == "object" and .type == "tool_use"
+      and (.name | type) == "string") | "read") // empty' 2>/dev/null)
+if [ -z "$calls" ]; then
+  log_decision unread
+  exit 0
+fi
+
 if [ "$spent" -gt 0 ]; then
   why='The last canon:plan-feature invocation in this session was spent on an earlier new plan'
 else
