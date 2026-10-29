@@ -430,6 +430,62 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
   }, 180_000)
 })
 
+const BUSY_PAGE = readFileSync(
+  new URL('./fixtures/busy.html', import.meta.url),
+  'utf8',
+)
+
+/** Scrolls the card into the window in setup, as a plan reaching it would. */
+const TO_THE_CARDS = [
+  { kind: 'click', target: '#rail' },
+  { kind: 'wait', ms: 1200 },
+]
+
+describe.skipIf(!available())('a take of a page whose frames run slow', () => {
+  let server: { url: string; stop: () => void }
+  let out: string
+
+  beforeAll(() => {
+    const served = Bun.serve({ port: 0, fetch: () => html(BUSY_PAGE) })
+    server = {
+      url: `http://127.0.0.1:${served.port}/`,
+      stop: () => served.stop(true),
+    }
+    out = mkdtempSync(join(tmpdir(), 'canon-take-busy-e2e-'))
+  })
+
+  afterAll(() => {
+    server.stop()
+    rmSync(out, { recursive: true, force: true })
+  })
+
+  it('should film 400 ms frames without overlapping its own frame requests', async () => {
+    const read = readTakePlan(
+      JSON.stringify({
+        beats: [
+          {
+            name: 'slow',
+            setup: TO_THE_CARDS,
+            steps: [{ kind: 'wait', ms: 300 }],
+          },
+        ],
+      }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+
+    const result = await take({
+      url: `${server.url}?busy=400`,
+      plan: read.plan,
+      out,
+      stallMs: LOADED_STALL_MS,
+    })
+
+    // Ahead of the status, so a refusal prints its message.
+    expect(result).not.toHaveProperty('message')
+    expect(result).toMatchObject({ status: 'filmed' })
+  }, 180_000)
+})
+
 const INPUT_PAGE = readFileSync(
   new URL('./fixtures/input.html', import.meta.url),
   'utf8',

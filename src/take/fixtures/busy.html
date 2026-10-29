@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Busy</title>
+    <!--
+      A hero canvas that redraws every frame and spends busy=<ms> of main
+      thread work on each, so a frame takes about that long to render. A card
+      sits about 2900px down, below the window, and the rail link scrolls to it.
+    -->
+    <style>
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: sans-serif;
+      }
+
+      nav {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 2;
+      }
+
+      nav a {
+        display: block;
+        padding: 12px 20px;
+        background: #fff;
+      }
+
+      canvas {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      section {
+        height: 900px;
+        border-top: 1px solid #ccc;
+        padding: 40px;
+      }
+
+      .card {
+        width: 400px;
+        height: 240px;
+        background: #ddd;
+      }
+
+      .card:hover {
+        background: #f60;
+      }
+    </style>
+  </head>
+  <body>
+    <nav><a id="rail" href="#cards">Cards</a></nav>
+    <canvas id="hero"></canvas>
+    <section>one</section>
+    <section>two</section>
+    <section id="cards"><div class="card" id="card">card</div></section>
+    <section>four</section>
+    <script>
+      const busy = Number(new URLSearchParams(location.search).get('busy') || 0)
+      const hero = document.getElementById('hero')
+      hero.width = innerWidth
+      hero.height = innerHeight
+      const context = hero.getContext('2d')
+      const draw = (time) => {
+        const start = performance.now()
+        while (performance.now() - start < busy) {}
+        context.fillStyle = `hsl(${(time / 10) % 360}, 60%, 50%)`
+        context.fillRect(0, 0, hero.width, hero.height)
+        requestAnimationFrame(draw)
+      }
+      requestAnimationFrame(draw)
+    </script>
+  </body>
+</html>
