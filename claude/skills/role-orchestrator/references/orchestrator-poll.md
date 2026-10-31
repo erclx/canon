@@ -23,28 +23,32 @@ The script reads pull requests and a building worker has none, so every interval
 
 ### Who starts and stops it
 
-A session holding a recurring-prompt scheduler starts the loop on that condition and cancels it on the same test, without waiting for the operator. A runbook stating only the start leaves the always-on failure unaddressed on the side that causes it.
+The orchestrator starts the poll on that condition and stops re-arming it on the same test, without waiting for the operator. A runbook stating only the start leaves the always-on failure unaddressed on the side that causes it.
 
-- Nothing enforces this. No hook starts the poll and no check stops it, so the condition holds only while the loop's holder applies it.
-- Left always-on, it fires into an empty board through every gap between a dispatch and its push
-- The poll is session-scoped and dies with its session, so restart it after a compaction, taking the prompt from this file rather than a transcript
+- Nothing enforces this. No hook starts the poll and no check stops it, so the condition holds only while the session holding it applies it.
+- Stop it at once by stopping that background command, or let the running wait end and start no other
+- The poll is session-scoped and dies with its session, so restart it after a compaction, taking the routing from this file rather than a transcript
 
-### Editing the prompt
+### Editing the routing
 
-A running loop holds whatever wording it was started with, and a scheduled prompt cannot be edited, so every routing fix is a cancel and a re-create. Three fixes made inside one session once reached the running loop and none reached this file.
-
-Edit the block here first and re-create the loop from what this file then says. Rewriting the block from memory drops what the shipped one covered, which is how a `SEEN` report once fell through to no rule at all.
+The block below is read on every wake, so an edit here reaches the next wake with no restart. Edit it here rather than carrying a fix in conversation, since a block rewritten from memory once let a `SEEN` report fall through to no rule.
 
 ## The prompt
 
-The requirement is a recurring prompt at roughly three minutes carrying the block below. `/loop 3m <the block>` is this repository's mechanism and one example among the schedulers a client may hold, so a client without it schedules whatever recurring prompt it can.
+Start the poll in the background, act on what it prints when it exits by the block below, then start it again. It reads every 180 seconds by itself and exits on movement, so an idle board costs no turn and no message queues behind a run.
 
-- The interval belongs to the schedule, since one run is a six-second snapshot, and relaunching on completion once fired every few seconds for 35 minutes
-- Paste the absolute path of `${CLAUDE_SKILL_DIR}/scripts/poll.ts` in place of `<POLL_SCRIPT>` below
-- The variable expands while this runbook renders and not in a standalone loop turn, so a block carrying it reaches the session as a literal and the run improvises
+```bash
+bun <POLL_SCRIPT> --wait 1200
+```
+
+- Run it with the client's background option, `run_in_background` here, and start the next one as the last step of every wake, a `No movement.` at the cap included
+- A pull request whose own reads fail does not end the wait, so its `poll:` lines arrive with the next exit rather than spinning the restart
+- Paste the absolute path of `${CLAUDE_SKILL_DIR}/scripts/poll.ts` for `<POLL_SCRIPT>`, since the variable expands only while this runbook renders
+- Add `--no-record` to time or inspect a run without writing the baseline, so the next real run still reports what that one saw
+- A client with no background command schedules a plain `bun <POLL_SCRIPT>` every three minutes carrying the block instead
 
 ```plaintext
-Poll GitHub for pull request movement by running `bun <POLL_SCRIPT>`, then act on what it reports.
+Act on what the poll printed when it exited, then start it again.
 
 - A release pull request, whatever state follows it: report it and stop. Its sweep carries no findings, so no pass is owed. Test this before any rule below, since a release pull request is reported OPENED like any other and would otherwise match that rule first.
 - MOVED or RESPONSE on a pull request already reviewed: when a live local reviewer holds it, report it and stop, since the worker asks that reviewer for the re-review directly. When none does, which a cloud reviewer always leaves, launch a fresh reviewer under the review dispatch runbook of the canon:role-orchestrator skill. Never run the canon:review-pr skill here. Re-reviews read prior..head and gain nothing from waiting.

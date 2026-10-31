@@ -97,9 +97,9 @@ Owns the orchestrator body and requirement, which state the dispatch policy.
 
 ### `claude/skills/role-orchestrator/scripts/`
 
-Holds `poll.ts`, `watch.ts`, and the `repo.ts` they share. Tests sit in `src/claude/orchestrate-poll.test.ts` and `orchestrate-watch.test.ts`.
+Holds `poll.ts`, `watch.ts`, and the `repo.ts` they share. Tests sit in `src/claude/orchestrate-poll.test.ts` and `orchestrate-watch.test.ts`. `poll.ts --wait` runs in the background and exits only on movement or its cap.
 
-- `poll.ts` keeps its baseline at `.canon/tmp/pr/poll/baseline.txt` under the main worktree root, read as the first ten space-separated fields
+- `poll.ts` keeps its baseline at `.canon/tmp/pr/poll/baseline.txt` under the main worktree root, read as the first ten space-separated fields, and `--no-record` skips the write
 - `RESPONSE` needs a new reply count and a reply newer than the last pass, and `canon pr review-state` is the only parser of the `review-pr` and `review-ui` markers
 - `STALE` and `OVERLAP` read the base from the pull request's diff against `git merge-base`, and `OVERLAP` merges only pairs sharing a written path
 - `poll.ts --check <number>` rereads base and head without writing, since the draft lift cannot trust a baseline as old as the last run

@@ -69,7 +69,7 @@ Settle all three steps below before the door writes, so one write carries the co
 
 Resume by loading the orchestrator skill and asking it to resume after a compaction. This repository spells that `/canon:role-orchestrator` followed by the request. Following <RESUME_RUNBOOK> reaches the same place with no skill loaded at all.
 
-That resume reads the board and stops. It restarts nothing, so the review poll is a second thing owed here, and <POLL_RUNBOOK> holds the prompt and the condition. Do not reach for `session-resume`, which reads tracked work and reports the newest map without restarting this loop.
+That resume reads the board and stops. It restarts nothing, so the review poll is a second thing owed here, and <POLL_RUNBOOK> holds the background start and the condition. Do not reach for `session-resume`, which reads tracked work and reports the newest map without restarting this poll.
 ```
 
 ### What the decisions section leaves out
