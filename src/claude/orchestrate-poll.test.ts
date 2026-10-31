@@ -38,6 +38,10 @@ const CLOSE_OUT = '2026-08-20T02:03:52Z'
 
 let root: string
 
+// Ends a wait child a test spawned, so a test that times out leaves no loop
+// polling a root that afterEach has already removed.
+let stopWaiter: (() => Promise<unknown>) | undefined
+
 // A git hook exports GIT_DIR, so a run under pre-push would resolve the fixture
 // against the toolkit's own repository and every case would answer for the
 // wrong tree.
@@ -263,7 +267,9 @@ beforeEach(() => {
   chmodSync(canon, 0o755)
 })
 
-afterEach(() => {
+afterEach(async () => {
+  await stopWaiter?.()
+  stopWaiter = undefined
   rmSync(root, { force: true, recursive: true })
 })
 
@@ -525,6 +531,11 @@ describe('poll', () => {
         resolve(code)
       }),
     )
+
+    stopWaiter = () => {
+      child.kill()
+      return exited
+    }
 
     // The reply lands only once the first pass has finished. That pass rewrites
     // the baseline as its last act, after every thread read, so the exit can
