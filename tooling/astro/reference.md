@@ -67,11 +67,13 @@ The astro stack covers Astro + TypeScript projects, being content sites, marketi
 - Expect `canon:design-identity` to write the picked composition into the route and capture it through the card server
 - `card.config.mjs` is a second Astro config whose `srcDir` points at `./card-src`, which the main page router never reads, so the published build excludes the card structurally
 - It serves on base port `4421` plus `WORKTREE_PORT_OFFSET`, outside the band `astro.config.mjs` serves from, so a worktree's card and dev servers never contend
+- The card server runs with Astro's dev toolbar off, since `canon capture` shoots the viewport and the toolbar would paint over the card
 - `bun run card:dev` serves the route and `bun run card:check` runs the exclusion check, which base's `scripts/verify.ts` also runs after its build stage
 
 ## Card exclusion and size
 
 - `scripts/check-card-exclusion.sh` fails when the route's `<meta name="og-card-marker">` tag reaches `dist/`, and when the route dropped the tag the leak test reads
+- The filename test reads built HTML pages only, under an `og-card` path in either build format, so an image or font may carry the route's name
 - Keep the exclusion a check rather than a convention, since the card server and the capture read the route and the published build must not carry it
 - Declare `.card` at 600x315, half the 1200x630 target, since `canon capture` shoots at a fixed 2x device scale and 1200x630 would capture at 2400x1260
 
