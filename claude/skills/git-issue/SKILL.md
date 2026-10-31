@@ -37,7 +37,7 @@ Search the open issues before composing anything, since a duplicate costs the re
 gh issue list --state open --search "<keywords> in:title,body" --limit 5 --json number,title,url
 ```
 
-- Take the keywords from the defect's distinctive terms, such as a command, a path, or an error string, never a common word alone
+- Take keywords from the defect's distinctive terms, such as a command or a path, and quote one holding a colon, since the search reads `word:` as a qualifier
 - Keep a candidate only when it describes the same defect, reading its body with `gh issue view <NNN> --json body` when the title leaves it open
 - With none kept, go to the preview and file a new issue
 - With one or more kept, ask once whether to add the findings to one of them as a comment or file a new issue, naming each by number and title
