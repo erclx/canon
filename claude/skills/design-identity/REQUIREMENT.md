@@ -17,7 +17,7 @@ A session building this alone restates the render-and-pick loop from scratch, wh
 - Every arm is drafted inside the card frame, so one pick settles the mark's shape and its composition together
 - The render, hand-off, pick, and loop follow `design-pick` rather than a copy of it
 - The final mark lands as its own SVG source, not only baked into a raster
-- Every final size and the card render in one capture call, each landing at its literal target size
+- Every final icon size renders in one capture call and the card renders once per theme, each landing at its literal target size
 
 ## Must not
 
