@@ -6,6 +6,8 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
+  statSync,
+  utimesSync,
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -495,6 +497,18 @@ describe('poll', () => {
   it('should keep reading until a later run reports movement', async () => {
     writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
     poll()
+    const reads = join(root, 'fixtures', 'list-reads')
+    const baseline = join(
+      root,
+      'repo',
+      '.canon',
+      'tmp',
+      'pr',
+      'poll',
+      'baseline.txt',
+    )
+    rmSync(reads, { force: true })
+    utimesSync(baseline, 0, 0)
     const child = spawn('bun', [SCRIPT, '--wait', '30', '--every', '1'], {
       cwd: join(root, 'repo'),
       env: buildEnv(),
@@ -508,11 +522,10 @@ describe('poll', () => {
       child.on('close', resolve),
     )
 
-    // The reply lands only once the wait has made a quiet read, so the exit
-    // can only come from a later read, however slow the runner starts.
-    const reads = join(root, 'fixtures', 'list-reads')
-    rmSync(reads, { force: true })
-    while (readCount(reads) < 1) {
+    // The reply lands only once the first pass has finished. That pass rewrites
+    // the baseline as its last act, after every thread read, so the exit can
+    // only come from a later read, however slow the runner starts.
+    while (statSync(baseline).mtimeMs <= 0) {
       await new Promise((resolve) => setTimeout(resolve, 50))
     }
     writeThread(
