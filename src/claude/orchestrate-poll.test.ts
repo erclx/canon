@@ -518,14 +518,19 @@ describe('poll', () => {
     child.stdout.on('data', (chunk: string) => {
       stdout += chunk
     })
+    let closed = false
     const exited = new Promise<null | number>((resolve) =>
-      child.on('close', resolve),
+      child.on('close', (code) => {
+        closed = true
+        resolve(code)
+      }),
     )
 
     // The reply lands only once the first pass has finished. That pass rewrites
     // the baseline as its last act, after every thread read, so the exit can
-    // only come from a later read, however slow the runner starts.
-    while (statSync(baseline).mtimeMs <= 0) {
+    // only come from a later read, however slow the runner starts. A child that
+    // exits first ends the loop, and the exit assertion below reports it.
+    while (!closed && statSync(baseline).mtimeMs <= 0) {
       await new Promise((resolve) => setTimeout(resolve, 50))
     }
     writeThread(
