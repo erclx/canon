@@ -17,7 +17,7 @@ Holds the `internal-*` skills, each loaded before editing one toolkit domain and
 
 - Every skill carries a `REQUIREMENT.md`, so the corpus can be read for whether a skill should exist at all
 - `governance/rules/claude/skill.md` gates edits to `SKILL.md` and `REQUIREMENT.md` in both corpora
-- `internal-feedback-triage` files this repository's open `feedback` issues into an intake folder, and stays internal since a target has no queue to read
+- `internal-feedback-triage` runs the plugin's `issue-triage` over this repository's `feedback` label, read from the tree, and adds the rules for a report describing another project
 - `internal-sandbox-check` verifies one arm per run through `canon sandbox run` and prints the rest as a command
 - `internal-upstream-digest` runs by hand in the operator's session and calls `bun src/cli.ts`, since the global binary lacks the verb until a release
 
