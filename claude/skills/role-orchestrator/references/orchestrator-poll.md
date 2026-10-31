@@ -29,23 +29,19 @@ The orchestrator starts the poll on that condition and stops re-arming it on the
 - Stop it at once by stopping that background command, or let the running wait end and start no other
 - The poll is session-scoped and dies with its session, so restart it after a compaction, taking the routing from this file rather than a transcript
 
-### Editing the routing
-
-The block below is read on every wake, so an edit here reaches the next wake with no restart. Edit it here rather than carrying a fix in conversation, since a block rewritten from memory once let a `SEEN` report fall through to no rule.
-
 ## The prompt
 
-Start the poll in the background, act on what it prints when it exits by the block below, then start it again. It reads every 180 seconds by itself and exits on movement, so an idle board costs no turn and no message queues behind a run.
+Start the poll in the background, act on what it prints when it exits by the block below, then start it again. It reads every 180 seconds by itself and exits on movement, so an idle board costs no turn and no message queues behind a run. The block is read on every wake, so edit it here and never from memory.
 
 ```bash
 bun <POLL_SCRIPT> --wait 1200
 ```
 
 - Run it with the client's background option, `run_in_background` here, and start the next one as the last step of every wake, a `No movement.` at the cap included
-- A pull request whose own reads fail does not end the wait, so its `poll:` lines arrive with the next exit rather than spinning the restart
+- A failed read, of one pull request or the open list, holds to the cap with its `poll:` lines rather than spinning the restart
+- Start with `--wait 180` while a cloud reviewer holds a pull request, since the rule below reads its pass once per wake
 - Paste the absolute path of `${CLAUDE_SKILL_DIR}/scripts/poll.ts` for `<POLL_SCRIPT>`, since the variable expands only while this runbook renders
-- Add `--no-record` to time or inspect a run without writing the baseline, so the next real run still reports what that one saw
-- A client with no background command schedules a plain `bun <POLL_SCRIPT>` every three minutes carrying the block instead
+- Add `--no-record` to time or inspect a run without writing the baseline, and a client with no background command schedules a plain run every three minutes instead
 
 ```plaintext
 Act on what the poll printed when it exited, then start it again.
