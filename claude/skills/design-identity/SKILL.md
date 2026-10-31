@@ -97,7 +97,7 @@ A card captured from a page this run deletes leaves a PNG and nothing that produ
 
 Both paths write two cards, each captured with `--color-scheme` set to its theme. An `og:image` tag names one URL that every viewer sees whatever their own theme, so only one is wired:
 
-- `og-image-light.png` goes into `og:image`
+- `og-image.png`, the light card, goes into `og:image`, keeping the name an existing tag already points at
 - `og-image-dark.png` stays beside it, so a later switch is a meta tag edit rather than another pick loop
 
 This is Astro-shaped for now, because Astro is the one web stack whose config gives a route a structural build exclusion. A project already holding the card route scaffold takes the route path, and everything else takes the page path. Say which one decided, since the two leave the project different things.
@@ -108,10 +108,10 @@ Read `${CLAUDE_SKILL_DIR}/references/card-route.md` on reaching this path, for t
 
 ### The page path
 
-Where the project holds no route to write into, write the picked composition into `<dest>/card/` twice, as `og-image-light.html` and `og-image-dark.html`, each with its `.render` wrapper sized 600x315. A file source names its PNG after the page, so the two names are what land the two cards. Capture each page in its own theme:
+Where the project holds no route to write into, write the picked composition into `<dest>/card/` twice, as `og-image.html` and `og-image-dark.html`, each with its `.render` wrapper sized 600x315. A file source names its PNG after the page, so the two names are what land the two cards. Capture each page in its own theme:
 
 ```bash
-canon capture <dest>/card/og-image-light.html --selector .render --color-scheme light --out <write-folder>
+canon capture <dest>/card/og-image.html --selector .render --color-scheme light --out <write-folder>
 canon capture <dest>/card/og-image-dark.html --selector .render --color-scheme dark --out <write-folder>
 ```
 
@@ -129,12 +129,12 @@ A project whose card was generated before this route existed keeps its PNG. Say 
 📝 Wrote <write-folder>/favicon.svg
 📝 Wrote <write-folder>/icon-16x16.png (16x16)
 📝 Wrote card-src/pages/og-card.astro (route path only)
-📝 Wrote <write-folder>/og-image-light.png (1200x630)
+📝 Wrote <write-folder>/og-image.png (1200x630)
 📝 Wrote <write-folder>/og-image-dark.png (1200x630)
 
 Write folder: <tier that decided>. Move the files if this project's own convention differs.
 Card source: <the route, captured through the card server|a scratch page, since this project holds no card route>.
-Wire og-image-light.png into og:image. The dark card stays beside it for a later switch.
+Wire og-image.png into og:image. The dark card stays beside it for a later switch.
 ```
 
 ## What this delegates

@@ -36,7 +36,7 @@ Never run that sync to obtain the route, since it writes the stack's configs bes
 5. Stop the server. Report the dimensions `canon capture` printed for both cards, confirming 1200x630.
 
 ```bash
-canon capture http://localhost:<port>/og-card --selector .card --color-scheme light --out <write-folder>/og-image-light.png
+canon capture http://localhost:<port>/og-card --selector .card --color-scheme light --out <write-folder>/og-image.png
 canon capture http://localhost:<port>/og-card --selector .card --color-scheme dark --out <write-folder>/og-image-dark.png
 ```
 
