@@ -34,10 +34,13 @@ const FONT_PROBE_SIZE = 72
 const FONT_PROBE_TEXT = 'canon capture 0123456789'
 const ABSENT_FAMILY = '__canon_absent_family__'
 
+export type ColorScheme = 'light' | 'dark'
+
 export interface CaptureOptions {
   selector: string
   outDir?: string
   width?: number
+  colorScheme?: ColorScheme
 }
 
 export type CaptureResult =
@@ -60,9 +63,7 @@ export async function captureSources(
   const browser = await chromium.launch()
   try {
     return await Promise.all(
-      sources.map((source) =>
-        captureOne(browser, source, options.selector, options.width),
-      ),
+      sources.map((source) => captureOne(browser, source, options)),
     )
   } finally {
     await browser.close()
@@ -76,8 +77,7 @@ export async function captureSources(
 async function captureOne(
   browser: Browser,
   source: CaptureSource,
-  selector: string,
-  width: number | undefined,
+  { selector, width, colorScheme }: CaptureOptions,
 ): Promise<CaptureResult> {
   /**
    * A viewport rather than a wrapper, since a media query answers to the
@@ -90,11 +90,13 @@ async function captureOne(
     ...(width === undefined
       ? {}
       : { viewport: { width, height: DEFAULT_VIEWPORT_HEIGHT } }),
+    ...(colorScheme === undefined ? {} : { colorScheme }),
   })
   try {
     await page.goto(
       source.kind === 'url' ? source.url : pathToFileURL(source.htmlPath).href,
     )
+    if (colorScheme !== undefined) await applyColorScheme(page, colorScheme)
     const element = page.locator(selector).first()
     if ((await element.count()) === 0) {
       return failed(source, `no element matched ${selector}`)
@@ -175,6 +177,29 @@ function writeStamp(source: CaptureSource, png: Uint8Array): void {
  */
 function sourceIdentifier(source: CaptureSource): string {
   return source.kind === 'url' ? source.url : source.htmlPath
+}
+
+/**
+ * Writes the theme the three switches a stylesheet reads, being the media
+ * query, a `data-theme` attribute, and a `light` or `dark` class on the root,
+ * which is the set Frameboard's theme toggle writes on every frame. The media
+ * query alone leaves a stylesheet keyed on the attribute in its default set,
+ * which is dark for one `canon design css` emits.
+ *
+ * Written after the load event, so a page script restoring a stored theme on
+ * load has already run and cannot overwrite it.
+ */
+async function applyColorScheme(
+  page: Page,
+  scheme: ColorScheme,
+): Promise<void> {
+  await page.evaluate((theme) => {
+    const root = document.documentElement
+    root.setAttribute('data-theme', theme)
+    root.style.colorScheme = theme
+    root.classList.remove('light', 'dark')
+    root.classList.add(theme)
+  }, scheme)
 }
 
 function failed(source: CaptureSource, reason: string): CaptureResult {
