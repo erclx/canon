@@ -60,6 +60,8 @@ Linux stays the default. A job leaves it only for a layer whose result differs b
 - Use `oven-sh/setup-bun@v2` with `bun-version: latest`.
 - Install with `bun install --frozen-lockfile`.
 - Cache Playwright browsers keyed on the Playwright version string, never a static key.
+- Bound each Playwright install step, 10 minutes on the system packages and 5 on the browser. A stalled apt mirror hangs rather than fails, and an unbounded job waits out the six-hour default.
+- Install the system packages through a script that kills and retries a stalled attempt, never a direct `install-deps` or `--with-deps`, since a bound alone turns the hang red.
 
 ## Commit-back
 
@@ -106,3 +108,4 @@ Before responding, also verify:
 Before responding, also verify:
 
 - No `run:` step passes five lines or carries more than one exit-or-output guard, a loop, a trap, or a function. A step that does calls a script, with its inputs as arguments or `env`.
+- Every Playwright install step carries `timeout-minutes`, and the system packages install through a retried script.
