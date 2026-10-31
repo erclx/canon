@@ -22,6 +22,7 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 | `canon:plan-intake`        | The input is a pile of findings                    |
 | `canon:plan-intake-answer` | An intake folder holds unread slots                |
 | `canon:backlog-triage`     | The backlog needs pruning                          |
+| `canon:issue-triage`       | Open GitHub issues need measuring before planning  |
 | `canon:plan-groundwork`    | The state is unmeasured and approaches compete     |
 | `canon:decision-escalate`  | Open decisions turn on your preference             |
 | `canon:proposal-critique`  | A proposal needs questioning before it is built    |
