@@ -16,6 +16,13 @@ const SCRIPT = join(
   '../../scripts/ci/install-playwright-deps.sh',
 )
 
+// The web stack ships its own copy, so a fix landing in one copy alone
+// reaches canon's workflows or every target's but never both
+const SHIPPED_SCRIPT = join(
+  import.meta.dirname,
+  '../../tooling/web/configs/scripts/install-playwright-deps.sh',
+)
+
 // The script bounds each attempt with GNU timeout, which a stock Mac lacks
 const hasTimeout = spawnSync('timeout', ['--version']).status === 0
 
@@ -79,6 +86,16 @@ const runScript = (
     timeout: 20_000,
   })
 }
+
+describe('install-playwright-deps.sh shipped copy', () => {
+  it('should match canon copy byte for byte', () => {
+    const shipped = readFileSync(SHIPPED_SCRIPT)
+
+    const canon = readFileSync(SCRIPT)
+
+    expect(shipped.equals(canon)).toBe(true)
+  })
+})
 
 describe.skipIf(!hasTimeout)('install-playwright-deps.sh', () => {
   it('should install once and exit 0 when the first attempt succeeds', () => {
