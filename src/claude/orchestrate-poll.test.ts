@@ -6,6 +6,8 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
+  statSync,
+  utimesSync,
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -35,6 +37,10 @@ const RESPONSE_AT = '2026-08-20T02:02:16Z'
 const CLOSE_OUT = '2026-08-20T02:03:52Z'
 
 let root: string
+
+// Ends a wait child a test spawned, so a test that times out leaves no loop
+// polling a root that afterEach has already removed.
+let stopWaiter: (() => Promise<unknown>) | undefined
 
 // A git hook exports GIT_DIR, so a run under pre-push would resolve the fixture
 // against the toolkit's own repository and every case would answer for the
@@ -261,7 +267,9 @@ beforeEach(() => {
   chmodSync(canon, 0o755)
 })
 
-afterEach(() => {
+afterEach(async () => {
+  await stopWaiter?.()
+  stopWaiter = undefined
   rmSync(root, { force: true, recursive: true })
 })
 
@@ -495,6 +503,18 @@ describe('poll', () => {
   it('should keep reading until a later run reports movement', async () => {
     writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
     poll()
+    const reads = join(root, 'fixtures', 'list-reads')
+    const baseline = join(
+      root,
+      'repo',
+      '.canon',
+      'tmp',
+      'pr',
+      'poll',
+      'baseline.txt',
+    )
+    rmSync(reads, { force: true })
+    utimesSync(baseline, 0, 0)
     const child = spawn('bun', [SCRIPT, '--wait', '30', '--every', '1'], {
       cwd: join(root, 'repo'),
       env: buildEnv(),
@@ -504,15 +524,24 @@ describe('poll', () => {
     child.stdout.on('data', (chunk: string) => {
       stdout += chunk
     })
+    let closed = false
     const exited = new Promise<null | number>((resolve) =>
-      child.on('close', resolve),
+      child.on('close', (code) => {
+        closed = true
+        resolve(code)
+      }),
     )
 
-    // The reply lands only once the wait has made a quiet read, so the exit
-    // can only come from a later read, however slow the runner starts.
-    const reads = join(root, 'fixtures', 'list-reads')
-    rmSync(reads, { force: true })
-    while (readCount(reads) < 1) {
+    stopWaiter = () => {
+      child.kill()
+      return exited
+    }
+
+    // The reply lands only once the first pass has finished. That pass rewrites
+    // the baseline as its last act, after every thread read, so the exit can
+    // only come from a later read, however slow the runner starts. A child that
+    // exits first ends the loop, and the exit assertion below reports it.
+    while (!closed && statSync(baseline).mtimeMs <= 0) {
       await new Promise((resolve) => setTimeout(resolve, 50))
     }
     writeThread(
