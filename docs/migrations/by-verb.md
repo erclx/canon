@@ -115,6 +115,10 @@ canon migrate session-defaults --json
 canon migrate session-defaults --write --json
 ```
 
-The verb only adds a key that is absent. A person who wants auto memory back sets it in their own `.claude/settings.local.json`.
+The verb only adds a key or entry that is absent, so a project migrated before an entry runs `--write` once more.
 
-The verb adds `Bash(canon pr merge:*)` and `Bash(gh pr merge:*)` so a session cannot merge. A project migrated before them runs `--write` once more, which also restores `Agent` and `Task` for a person who removed them to allow subagents, so remove them again after.
+- A person who wants auto memory back sets it in their own `.claude/settings.local.json`
+- `Bash(canon pr merge:*)` and `Bash(gh pr merge:*)` stop a session merging
+- A rerun restores `Agent` and `Task` for a person who removed them to allow subagents, so remove them again after
+- `git push --force-with-lease` and its `origin HEAD` form are allowed exactly, so a worker pushes after a rebase without waiting
+- Any other lease push still goes through auto mode's review, and `canon claude sync` warns while either entry is missing
