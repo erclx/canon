@@ -468,6 +468,19 @@ describe('poll', () => {
     expect(readFileSync(baseline, 'utf8')).toBe(settled)
   })
 
+  // An interval as long as the cap once ended the wait after its first read, so
+  // a re-arm under a cloud reviewer spun every few seconds.
+  it('should hold a quiet wait to its cap when the interval matches it', () => {
+    writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+    poll()
+    const started = Date.now()
+
+    const waited = poll('--wait', '2', '--every', '2')
+
+    expect(waited.stdout).toBe('No movement.')
+    expect(Date.now() - started).toBeGreaterThanOrEqual(2000)
+  })
+
   it('should exit on the first run that reports movement', () => {
     writeThread([{ heading: '## Review', submittedAt: FIRST_PASS }], [])
     const started = Date.now()

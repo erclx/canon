@@ -1122,14 +1122,19 @@ const main = async (args: string[]): Promise<number> => {
 
       return 0
     }
-    if (Date.now() + every * 1000 > deadline) {
+    // A quiet wait never ends before its cap, whatever `--every` says, since an
+    // early exit is a re-arm the orchestrator spends a turn on.
+    const left = deadline - Date.now()
+    if (left <= 0) {
       for (const line of failed) console.error(line)
       if (result.status !== 0) return result.status
       console.log('No movement.')
 
       return 0
     }
-    await new Promise((resolve) => setTimeout(resolve, every * 1000))
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.min(every * 1000, left)),
+    )
   }
 }
 
