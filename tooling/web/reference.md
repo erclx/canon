@@ -88,6 +88,11 @@ The starter `e2e/home.spec.ts` is seeded once. Sync copies it into a project tha
 - `.github/workflows/verify.yml` runs `static-checks`, `unit-tests`, `build-verify`, and `e2e-tests`. `unit-tests` installs Chromium and runs `test:browser` only when the project defines that script.
 - Read `governance/rules/tooling/ci-workflow.md` for when a workflow's commit-back is right and when a report is
 
+## Playwright installs in CI
+
+- Both workflows install Playwright's system packages through `scripts/install-playwright-deps.sh`, which sits beside `worktree-port.sh` and retries an attempt a stalled apt mirror hangs
+- Expect each system install bounded at 10 minutes and each browser download at 5, while the jobs carry no bound, since test and build time differs per project
+
 ## Design references
 
 - Expect a seeded `canon/design/index.md` stub carrying `auto: false`, copied only when missing, so a project's own index is never replaced
