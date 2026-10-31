@@ -8,7 +8,8 @@ const FIXTURE = ['claude', 'git-issue', 'duplicate'] as const
  */
 const LABEL = 'dedupe-fixture'
 
-const TITLE = 'README names a start script package.json does not define'
+/** A defect no other anchor scenario files, so the search finds this issue alone. */
+const TITLE = 'README names a fmt:write script package.json does not define'
 
 function repo(ctx: StageContext): string {
   return `${ctx.env.GITHUB_ORG}/${ctx.env.ANCHOR_REPO}`
@@ -97,11 +98,11 @@ export default scenario({
 
       ctx.log.step('Scenario ready: one open issue already covers the defect')
       ctx.log.info(
-        `Context: #${open} reports that the README names a script package.json lacks`,
+        `Context: #${open} reports that the README names a fmt:write script package.json lacks`,
       )
       ctx.log.info('')
       ctx.log.info(
-        'Action:  /canon:git-issue The README says to run bun run start:dev, and package.json defines no such script.',
+        'Action:  /canon:git-issue The README says to run bun run fmt:write, and package.json defines no such script.',
       )
       ctx.log.info(
         'Expect:  declared in fixtures/claude/git-issue/duplicate/expect.toml',

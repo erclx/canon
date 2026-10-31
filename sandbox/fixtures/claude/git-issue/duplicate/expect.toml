@@ -16,6 +16,6 @@ write_scope = [".canon/tmp/issue/**"]
 reply = ["Not filed", "Possible duplicate"]
 
 manual = [
-  "No second issue is open on the anchor under the seeded title. Unwired: `gh issue list --search 'start:dev in:title,body' --state open` lists the seeded issue alone when it holds.",
+  "No second issue is open on the anchor for the seeded defect. Unwired: `gh issue list --search '\"fmt:write\" in:title,body' --state open` lists the seeded issue alone when it holds, and `--label dedupe-fixture` scopes it to this arm.",
   "The seeded issue carries no new comment. Unwired: `gh issue view <seeded> --json comments` reports none when it holds.",
 ]

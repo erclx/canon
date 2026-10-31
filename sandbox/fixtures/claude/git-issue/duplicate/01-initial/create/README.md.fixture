@@ -5,11 +5,11 @@ A small service whose README drifted from its scripts.
 ## Run
 
 ```bash
-bun run start:dev
+bun run dev
 ```
 
-## Check
+## Format
 
 ```bash
-bun run check
+bun run fmt:write
 ```
