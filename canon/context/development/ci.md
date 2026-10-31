@@ -62,7 +62,8 @@ Every workflow installing the Playwright system packages calls this script, sinc
 
 - The script kills an attempt at 150 seconds and retries up to three times, running `dpkg --configure -a` before each retry
 - A signal from the runner user never reaches the root `apt-get` that `sudo` spawns, so the script kills any left behind with `sudo pkill` before that
-- `src/gate/workflow-timeouts.test.ts` fails a direct `install-deps` or `--with-deps` call and a script step with no `timeout-minutes`
+- `src/gate/workflow-timeouts.test.ts` fails a direct `install-deps` or `--with-deps` call and an unbounded script step, in `.github/workflows/` and every `tooling/*/configs/.github/workflows/`
+- The web stack ships a copy at `tooling/web/configs/scripts/install-playwright-deps.sh`, and a case in `src/gate/install-playwright-deps.test.ts` fails when its bytes drift from this one
 
 ### Other folders
 

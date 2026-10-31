@@ -1,5 +1,5 @@
-import { readdirSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { join, relative } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 interface WorkflowStep {
@@ -13,25 +13,43 @@ interface WorkflowJob {
   steps?: WorkflowStep[]
 }
 
-const WORKFLOWS_DIR = join(import.meta.dirname, '../../.github/workflows')
+const REPO_ROOT = join(import.meta.dirname, '../..')
 
-const INSTALL_SCRIPT = 'scripts/ci/install-playwright-deps.sh'
+const WORKFLOWS_DIR = join(REPO_ROOT, '.github/workflows')
 
-const readJobs = (file: string): Record<string, WorkflowJob> => {
-  const parsed = Bun.YAML.parse(
-    readFileSync(join(WORKFLOWS_DIR, file), 'utf8'),
-  ) as { jobs: Record<string, WorkflowJob> }
+const TOOLING_DIR = join(REPO_ROOT, 'tooling')
+
+// Canon calls the script under scripts/ci/ and a target under scripts/, so
+// the basename is what names both
+const INSTALL_SCRIPT = 'install-playwright-deps.sh'
+
+// A stack's workflows reach every target that installs it, so the gate reads
+// them beside canon's own
+const shippedWorkflowDirs = readdirSync(TOOLING_DIR, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => join(TOOLING_DIR, entry.name, 'configs/.github/workflows'))
+  .filter((dir) => existsSync(dir))
+
+const readJobs = (path: string): Record<string, WorkflowJob> => {
+  const parsed = Bun.YAML.parse(readFileSync(path, 'utf8')) as {
+    jobs: Record<string, WorkflowJob>
+  }
   return parsed.jobs
 }
 
-const workflowFiles = readdirSync(WORKFLOWS_DIR).filter((file) =>
-  /\.ya?ml$/.test(file),
+const workflowFiles = [WORKFLOWS_DIR, ...shippedWorkflowDirs].flatMap((dir) =>
+  readdirSync(dir)
+    .filter((file) => /\.ya?ml$/.test(file))
+    .map((file) => join(dir, file)),
 )
 
 const allSteps = (): { file: string; step: WorkflowStep }[] =>
-  workflowFiles.flatMap((file) =>
-    Object.values(readJobs(file)).flatMap((job) =>
-      (job.steps ?? []).map((step) => ({ file, step })),
+  workflowFiles.flatMap((path) =>
+    Object.values(readJobs(path)).flatMap((job) =>
+      (job.steps ?? []).map((step) => ({
+        file: relative(REPO_ROOT, path),
+        step,
+      })),
     ),
   )
 
@@ -39,7 +57,7 @@ describe.each(['pr-visual-checks.yml', 'refresh-capture-frames.yml'])(
   '%s',
   (file) => {
     it('should bound every job with a timeout', () => {
-      const unbounded = Object.entries(readJobs(file))
+      const unbounded = Object.entries(readJobs(join(WORKFLOWS_DIR, file)))
         .filter(([, job]) => typeof job['timeout-minutes'] !== 'number')
         .map(([id]) => id)
 
@@ -67,7 +85,7 @@ describe('every workflow', () => {
       .filter(({ step }) => typeof step['timeout-minutes'] !== 'number')
       .map(({ file, step }) => `${file}: ${step.name}`)
 
-    expect(steps).toHaveLength(4)
+    expect(steps).toHaveLength(7)
     expect(unbounded).toEqual([])
   })
 })
