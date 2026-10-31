@@ -1,0 +1,44 @@
+# What a correct `/issue-triage triage-fixture` run leaves behind on the file
+# arm. Read by `canon sandbox check`. Patterns use TOML literal strings so a
+# regex needs no backslash escaping.
+
+# Every top-level key sits above the first `[[content]]` block, since a bare key
+# below one belongs to that table in TOML.
+
+max_turns = 40
+
+# The seeded tree opens with no `.canon/intake/`, so the claimed ordinal can
+# only be `01`, and the label the arm passes fixes the slug.
+paths = [".canon/intake/01-triage-fixture-triage/00-overview.md"]
+
+# The skill plans and files nothing else, so a plan means it started building.
+absent = [".canon/plans"]
+
+write_scope = [".canon/intake/**"]
+
+reply = [".canon/intake/01-triage-fixture-triage/"]
+
+manual = [
+  "Issue A is suggested plan and never fix, since a stale reference is a size. Semantic: which cluster file holds the item is the run's call, so a negative pattern cannot anchor it to its row.",
+  "Issue B is named as skipped with its carrier, the retry task. Semantic: the overview's wording of the carrier is the run's call beyond the `v01.0` token.",
+  "Every problem line carries a count, a path, or a commit measured this pass. Semantic: any digit in the file would satisfy a pattern.",
+  "No `You:` slot is filled. Unwired: `canon intake list 01-triage-fixture-triage --unread --json` reports one unread item when it holds.",
+]
+
+# The skipped issue is named with its carrier, the task the arm wrote.
+[[content]]
+path = ".canon/intake/01-triage-fixture-triage/00-overview.md"
+pattern = 'v01\.0'
+
+# The overview counts by token, and Issue A is the one item filed, so a nonzero
+# plan count shows its suggestion opened with `plan`. The reply cannot show it,
+# since the skill's own output prints the token.
+[[content]]
+path = ".canon/intake/01-triage-fixture-triage/00-overview.md"
+pattern = '[1-9]\d* plan'
+
+# The index links a numbered cluster file, which proves the numbering and the
+# domain half of each filename together.
+[[content]]
+path = ".canon/intake/01-triage-fixture-triage/00-overview.md"
+pattern = '\]\((?!00-)\d\d-[a-z][a-z0-9-]*\.md'

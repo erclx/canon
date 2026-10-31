@@ -96,6 +96,10 @@ export const WORKFLOW_CASES: readonly SkillCase[] = [
       'Our backlog only ever grows, measure each row and suggest which to decline.',
     expect: 'backlog-triage',
   },
+  {
+    prompt: 'File the open issues on this repo into an intake folder.',
+    expect: 'issue-triage',
+  },
   // Rot across documents nobody changed is what this reads, rather than a
   // stated rule broken on a given line. It is also not `target-check`, which
   // asks whether a document exists and holds its sections rather than whether

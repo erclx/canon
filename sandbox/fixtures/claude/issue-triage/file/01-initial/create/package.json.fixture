@@ -1,0 +1,10 @@
+{
+  "name": "sandbox-issue-triage",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun src/index.ts",
+    "check": "echo check ok"
+  }
+}

@@ -41,7 +41,7 @@ See [target projects](../target/projects.md).
 
 Plan and build in session 1, then review and ship in a fresh session 2 when you want a cold reviewer on the diff.
 
-- For a pile of findings, invoke `canon:plan-intake`, and for a grown backlog `canon:backlog-triage`
+- For a pile of findings, invoke `canon:plan-intake`, for a grown backlog `canon:backlog-triage`, and for open GitHub issues `canon:issue-triage`
 - For an unmeasured state with live approaches, invoke `canon:plan-groundwork`
 - Invoke `canon:plan-feature`, implement, and run the `CLAUDE.md` commands until they pass
 - For UI changes, invoke `canon:ui-checklist`

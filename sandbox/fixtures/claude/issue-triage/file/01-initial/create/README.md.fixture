@@ -1,0 +1,15 @@
+# Sandbox issue app
+
+A small service whose README drifted from its scripts.
+
+## Run
+
+```bash
+bun run start:dev
+```
+
+## Check
+
+```bash
+bun run check
+```
