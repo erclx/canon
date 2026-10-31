@@ -1064,6 +1064,18 @@ const pollOnce = async (
   return { err, isChanged, out, status: 0 }
 }
 
+/** The gap between reads in a wait, the interval the scheduled prompt used. */
+const DEFAULT_EVERY_S = 180
+
+/** A flag's value in seconds, null when absent and NaN when not positive. */
+const seconds = (args: string[], flag: string): null | number => {
+  const at = args.indexOf(flag)
+  if (at === -1) return null
+  const value = Number(args[at + 1])
+
+  return Number.isFinite(value) && value > 0 ? value : Number.NaN
+}
+
 const print = (result: PollRun): void => {
   for (const line of result.err) console.error(line)
   for (const line of result.out) console.log(line)
@@ -1080,11 +1092,43 @@ const main = async (args: string[]): Promise<number> => {
   if (args[0] === '--check') return check(args[1] ?? '')
 
   const record = !args.includes('--no-record')
-  const result = await pollOnce(root, { record })
-  print(result)
-  if (result.status === 0 && !result.isChanged) console.log('No movement.')
+  const wait = seconds(args, '--wait')
+  const every = seconds(args, '--every') ?? DEFAULT_EVERY_S
+  if (Number.isNaN(wait) || Number.isNaN(every)) {
+    console.error('poll: --wait and --every take a positive number of seconds')
 
-  return result.status
+    return 1
+  }
+
+  if (wait === null) {
+    const result = await pollOnce(root, { record })
+    print(result)
+    if (result.status === 0 && !result.isChanged) console.log('No movement.')
+
+    return result.status
+  }
+
+  // Movement or an unreadable open list ends the wait. A pull request whose own
+  // reads fail does not, since one that fails every run would end each wait at
+  // once and the re-arm would spin, so its lines ride along with the exit.
+  const deadline = Date.now() + wait * 1000
+  const failed = new Set<string>()
+  for (;;) {
+    const result = await pollOnce(root, { record })
+    for (const line of result.err) failed.add(line)
+    if (result.status !== 0 || result.isChanged) {
+      print({ ...result, err: [...failed] })
+
+      return result.status
+    }
+    if (Date.now() + every * 1000 > deadline) {
+      for (const line of failed) console.error(line)
+      console.log('No movement.')
+
+      return 0
+    }
+    await new Promise((resolve) => setTimeout(resolve, every * 1000))
+  }
 }
 
 if (import.meta.main) process.exitCode = await main(process.argv.slice(2))

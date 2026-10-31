@@ -1,4 +1,4 @@
-import { execFileSync, spawnSync } from 'node:child_process'
+import { execFileSync, spawn, spawnSync } from 'node:child_process'
 import {
   chmodSync,
   existsSync,
@@ -432,6 +432,86 @@ describe('poll', () => {
     expect(inspected.stdout).toContain('#7')
     expect(existsSync(join(baseline, 'baseline.txt'))).toBe(false)
     expect(poll().stdout).toBe(inspected.stdout)
+  })
+
+  // A background wait costs the orchestrator nothing until it exits, so a still
+  // board must hold it to the cap and leave the baseline as a plain run did.
+  it('should print one No movement line at the wait cap and record nothing new', () => {
+    writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+    poll()
+    const baseline = join(
+      root,
+      'repo',
+      '.canon',
+      'tmp',
+      'pr',
+      'poll',
+      'baseline.txt',
+    )
+    const settled = readFileSync(baseline, 'utf8')
+
+    const waited = poll('--wait', '1', '--every', '60')
+
+    expect(waited.status).toBe(0)
+    expect(waited.stdout).toBe('No movement.')
+    expect(readFileSync(baseline, 'utf8')).toBe(settled)
+  })
+
+  it('should exit on the first run that reports movement', () => {
+    writeThread([{ heading: '## Review', submittedAt: FIRST_PASS }], [])
+    const started = Date.now()
+
+    const waited = poll('--wait', '60', '--every', '30')
+
+    expect(waited.stdout).toContain('#7')
+    expect(waited.stdout).not.toContain('No movement.')
+    expect(Date.now() - started).toBeLessThan(20_000)
+  })
+
+  it('should keep reading until a later run reports movement', async () => {
+    writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+    poll()
+    const child = spawn('bun', [SCRIPT, '--wait', '30', '--every', '1'], {
+      cwd: join(root, 'repo'),
+      env: buildEnv(),
+    })
+    let stdout = ''
+    child.stdout.setEncoding('utf8')
+    child.stdout.on('data', (chunk: string) => {
+      stdout += chunk
+    })
+    const exited = new Promise<null | number>((resolve) =>
+      child.on('close', resolve),
+    )
+
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+    writeThread(
+      [{ heading: '## Review closed', submittedAt: CLOSE_OUT }],
+      [{ createdAt: '2026-08-20T03:00:00Z', heading: '## Review response' }],
+    )
+
+    expect(await exited).toBe(0)
+    expect(stdout).toContain('RESPONSE  #7')
+  })
+
+  it('should hold a wait past a pull request that fails every read', () => {
+    writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+    poll()
+    breakView()
+
+    const waited = poll('--wait', '1', '--every', '60')
+
+    expect(waited.stdout).toBe('No movement.')
+    expect(waited.stderr).toContain('#7 could not be read')
+  })
+
+  it('should refuse a wait that is not a positive number of seconds', () => {
+    writeThread([], [])
+
+    const refused = poll('--wait', 'soon')
+
+    expect(refused.status).toBe(1)
+    expect(refused.stderr).toContain('--wait')
   })
 
   // Two reads feed one payload. A comments read that fails beside a reviews
