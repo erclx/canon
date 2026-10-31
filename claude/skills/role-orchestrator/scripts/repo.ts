@@ -8,20 +8,35 @@ export interface RunResult {
   stdout: string
 }
 
+/**
+ * How long one command may run before it is killed and read as failed. A
+ * background wait has no caller to cut a hung `git fetch` or `gh api` off, so
+ * without this bound one stalled read would hold the wait past its cap.
+ */
+export const RUN_TIMEOUT_MS = 60_000
+
 /** Runs a command to completion. A command that cannot start reads as failed. */
 export const run = (command: string, args: string[]): RunResult => {
   const result = spawnSync(command, args, {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'ignore'],
+    timeout: RUN_TIMEOUT_MS,
   })
 
   return { isOk: result.status === 0, stdout: result.stdout ?? '' }
 }
 
 /** `run` without blocking, so reads for several pull requests overlap. */
-export const runAsync = (command: string, args: string[]): Promise<RunResult> =>
+export const runAsync = (
+  command: string,
+  args: string[],
+  timeoutMs = RUN_TIMEOUT_MS,
+): Promise<RunResult> =>
   new Promise((resolve) => {
-    const child = spawn(command, args, { stdio: ['ignore', 'pipe', 'ignore'] })
+    const child = spawn(command, args, {
+      stdio: ['ignore', 'pipe', 'ignore'],
+      timeout: timeoutMs,
+    })
     let stdout = ''
     child.stdout.setEncoding('utf8')
     child.stdout.on('data', (chunk: string) => {

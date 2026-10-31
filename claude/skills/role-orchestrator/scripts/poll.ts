@@ -1108,21 +1108,23 @@ const main = async (args: string[]): Promise<number> => {
     return result.status
   }
 
-  // Movement or an unreadable open list ends the wait. A pull request whose own
-  // reads fail does not, since one that fails every run would end each wait at
-  // once and the re-arm would spin, so its lines ride along with the exit.
+  // Only movement ends the wait early. A failed read, of one pull request or of
+  // the whole open list, holds to the cap, since one failing every run would end
+  // each wait at once and the re-arm would spin. Its lines ride with the exit,
+  // and a list still unreadable at the cap exits 1.
   const deadline = Date.now() + wait * 1000
   const failed = new Set<string>()
   for (;;) {
     const result = await pollOnce(root, { record })
     for (const line of result.err) failed.add(line)
-    if (result.status !== 0 || result.isChanged) {
+    if (result.status === 0 && result.isChanged) {
       print({ ...result, err: [...failed] })
 
-      return result.status
+      return 0
     }
     if (Date.now() + every * 1000 > deadline) {
       for (const line of failed) console.error(line)
+      if (result.status !== 0) return result.status
       console.log('No movement.')
 
       return 0

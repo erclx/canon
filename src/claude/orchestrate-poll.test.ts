@@ -11,6 +11,7 @@ import {
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { runAsync } from '../../claude/skills/role-orchestrator/scripts/repo'
 
 const SCRIPT = join(
   import.meta.dirname,
@@ -174,6 +175,14 @@ const poll = (...args: string[]): PollResult => {
   return { status: run.status, stderr: run.stderr, stdout: run.stdout.trim() }
 }
 
+/** How many open-list reads the stub has answered since the file was last cleared. */
+const readCount = (path: string): number =>
+  existsSync(path)
+    ? readFileSync(path, 'utf8')
+        .split('\n')
+        .filter((line) => line !== '').length
+    : 0
+
 // The stub refuses the reviews and comments reads while this file exists, which
 // is how a run reaches the carry-forward path without needing the network to
 // fail.
@@ -211,6 +220,8 @@ beforeEach(() => {
       '  case "$arg" in',
       '    graphql) exit 1 ;;',
       '    "repos/{owner}/{repo}/pulls?state=open"*)',
+      `      echo read >> "${fixtures}/list-reads"`,
+      `      if [ -f "${fixtures}/list-unreadable" ]; then exit 1; fi`,
       `      if [ -f "${fixtures}/open.txt" ]; then cat "${fixtures}/open.txt"; else echo 7; fi; exit 0 ;;`,
       '    "$pulls"*/reviews*)',
       '      n=${arg#"$pulls"}; n=${n%%/*}',
@@ -484,7 +495,13 @@ describe('poll', () => {
       child.on('close', resolve),
     )
 
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    // The reply lands only once the wait has made a quiet read, so the exit
+    // can only come from a later read, however slow the runner starts.
+    const reads = join(root, 'fixtures', 'list-reads')
+    rmSync(reads, { force: true })
+    while (readCount(reads) < 1) {
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    }
     writeThread(
       [{ heading: '## Review closed', submittedAt: CLOSE_OUT }],
       [{ createdAt: '2026-08-20T03:00:00Z', heading: '## Review response' }],
@@ -492,6 +509,31 @@ describe('poll', () => {
 
     expect(await exited).toBe(0)
     expect(stdout).toContain('RESPONSE  #7')
+    expect(readCount(reads)).toBeGreaterThanOrEqual(2)
+  })
+
+  it('should hold a wait past an open list that fails every read', () => {
+    writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+    writeFileSync(join(root, 'fixtures', 'list-unreadable'), '')
+    const reads = join(root, 'fixtures', 'list-reads')
+    rmSync(reads, { force: true })
+    const started = Date.now()
+
+    const waited = poll('--wait', '3', '--every', '1')
+
+    expect(waited.status).toBe(1)
+    expect(waited.stderr).toContain('open pull request list could not be read')
+    expect(readCount(reads)).toBeGreaterThanOrEqual(2)
+    expect(Date.now() - started).toBeGreaterThanOrEqual(2000)
+  })
+
+  it('should read a hung command as failed once its timeout passes', async () => {
+    const started = Date.now()
+
+    const result = await runAsync('sleep', ['5'], 200)
+
+    expect(result.isOk).toBe(false)
+    expect(Date.now() - started).toBeLessThan(3000)
   })
 
   it('should hold a wait past a pull request that fails every read', () => {
