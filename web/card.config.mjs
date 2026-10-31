@@ -14,10 +14,6 @@ const portOffset = Number(process.env.WORKTREE_PORT_OFFSET) || 0
 // The base port sits outside the band `astro.config.mjs` serves from, so a card
 // server and a dev server of one worktree never contend, and two worktrees
 // separate here the way they separate there.
-//
-// This copy departs from `tooling/astro/configs/card.config.mjs` in one line:
-// the dev toolbar is off, since this server exists to be captured and the
-// toolbar paints over the viewport the capture cuts the card from.
 export default defineConfig({
   devToolbar: { enabled: false },
   srcDir: './card-src',
