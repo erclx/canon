@@ -66,7 +66,7 @@ Holds the one engine `gov` installs and syncs through, the workflow `canon sync`
 
 Owns the machine-level index of target projects, kept under `stateDir()`.
 
-- `registry.ts` records a target as `putDomain` stamps it. A failed write is dropped, since the stamp is the authoritative record
+- `registry.ts` records a target as `putDomain` stamps it, refuses a scratch path, and drops gone or scratch rows. A failed write is dropped
 - `sweep.ts` finds installs that predate the index. It descends into a stamped folder, which can hold others, and skips `.claude` so a worktree's stamp copy counts nothing
 - `resolve.ts` groups by origin so a target in two clones counts once, and `pulls.ts` reads each target's open pull requests
 - `validate.ts` holds `resolveTarget`, the install-directory check under every verb that takes a target
