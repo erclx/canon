@@ -457,23 +457,37 @@ describe('isLegacyStamped', () => {
   })
 })
 
-// The machine-level index is what lets a rollout enumerate the projects the
-// toolkit installed into. Writing it from here is what keeps it in step without
-// each install command remembering to, so the coupling is asserted rather than
-// left to the comment that explains it.
+// The machine-level index lists the projects the toolkit installed into, and
+// every fixture here stamps a folder under the OS temp folder. A row for each
+// is how the index reached thousands of dead paths, so a stamp into scratch
+// must leave the index without it. `src/targets/registry.test.ts` proves a
+// real folder still records.
 describe('the machine-level target index', () => {
-  it('should gain the target on any stamp write', async () => {
+  const SETUP_TMPDIR = process.env.TMPDIR
+
+  afterEach(() => {
+    if (SETUP_TMPDIR === undefined) delete process.env.TMPDIR
+    else process.env.TMPDIR = SETUP_TMPDIR
+  })
+
+  // The fixture sits under the OS temp folder, so pointing that folder
+  // elsewhere for the case is what lets the stamp reach a recordable target.
+  // Without it, an absent row reads the same whether the call was made or not.
+  it('should gain a target outside every scratch root on a stamp write', async () => {
+    process.env.TMPDIR = join(TARGET, 'elsewhere')
+
     await writeStamp(TARGET, GOVERNANCE, { 'a.md': 'sha256:aa' }, NOW)
 
     const registry = readTargetRegistry()
 
-    expect(registry.kind).toBe('read')
     expect(
       registry.kind === 'read' ? registry.targets.map((row) => row.path) : [],
     ).toContain(TARGET)
   })
 
-  it('should gain the target on a chain stamp that records no files', async () => {
+  it('should gain a target outside every scratch root on a chain stamp', async () => {
+    process.env.TMPDIR = join(TARGET, 'elsewhere')
+
     await writeChainStamp(TARGET, TOOLING, ['next'], NOW)
 
     const registry = readTargetRegistry()
@@ -481,6 +495,26 @@ describe('the machine-level target index', () => {
     expect(
       registry.kind === 'read' ? registry.targets.map((row) => row.path) : [],
     ).toContain(TARGET)
+  })
+
+  it('should leave out a scratch target on a stamp write', async () => {
+    await writeStamp(TARGET, GOVERNANCE, { 'a.md': 'sha256:aa' }, NOW)
+
+    const registry = readTargetRegistry()
+
+    expect(
+      registry.kind === 'read' ? registry.targets.map((row) => row.path) : [],
+    ).not.toContain(TARGET)
+  })
+
+  it('should leave out a scratch target on a chain stamp', async () => {
+    await writeChainStamp(TARGET, TOOLING, ['next'], NOW)
+
+    const registry = readTargetRegistry()
+
+    expect(
+      registry.kind === 'read' ? registry.targets.map((row) => row.path) : [],
+    ).not.toContain(TARGET)
   })
 })
 

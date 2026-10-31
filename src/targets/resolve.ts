@@ -45,6 +45,8 @@ export interface ResolveTargetsOptions extends SweepOptions {
   /** Roots to walk, supplementing the record rather than replacing it. */
   readonly sweep?: readonly string[]
   readonly registryFile?: string
+  /** Folders whose recorded rows are left out, defaulting to `scratchRoots()`. */
+  readonly scratchRoots?: readonly string[]
 }
 
 /**
@@ -71,7 +73,7 @@ export async function resolveTargets(
   }
 
   const file = opts.registryFile ?? registryPath()
-  const registry = readTargetRegistry(file)
+  const registry = readTargetRegistry(file, opts.scratchRoots)
 
   const recorded: KnownTarget[] =
     registry.kind === 'read'

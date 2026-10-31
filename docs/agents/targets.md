@@ -9,7 +9,9 @@ kind: reference
 `canon targets list` reports the projects this toolkit installed into. `canon targets pulls [paths…]` reports each target's open pull requests, or every target's when none is named. Both take `--json`. Read the record's fields, since a wrapping shell function can flatten the exit.
 
 - `list` takes `--sweep <path…>`, `--depth <n>` (default 4), and `--record`, which seeds the index from swept stamps and needs `--sweep`
-- Each stamping sync records its target in `$XDG_STATE_HOME/canon/targets.json`, and no row is removed
+- Each stamping sync records its target in `$XDG_STATE_HOME/canon/targets.json`, except a folder under the OS temp folder, the state folder, `~/.claude/jobs/`, or any `.canon/tmp/`
+- Every write drops a row whose folder is gone or sits under one of those, and `list` leaves the same rows out. A target on an unmounted drive drops until its next sync records it again.
+- `--record` counts a swept checkout under one of those folders as skipped, not failed
 - A sweep finds installs the index never held
 
 `canon changelog` prints the releases a target has not seen, from the `CHANGELOG.md` the installed package ships. It reads no registry and needs no `gh`.
