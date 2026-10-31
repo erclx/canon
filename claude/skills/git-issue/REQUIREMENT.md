@@ -17,16 +17,18 @@ Prose bans hold on files the hook watches and not on text leaving through `gh`, 
 - Each issue carries exactly one label mapped from its type, asked once when the type is ambiguous between a bug and a task
 - A remote and an authenticated `gh` are confirmed before any body is composed
 - The body passes through a file that is removed afterward
+- Open issues are searched for the same defect before a body is composed, and a match is offered as a comment in place of a new issue
 
 ## Must not
 
 - Invent an issue from a thin session
 - File anywhere other than the current origin
 - Open a pull request
-- Emit anything after the result line
+- Emit anything after the result lines
+- Comment on an existing issue without a yes given for that issue
 
 ## Out of scope
 
 - Reporting a toolkit defect from a target project, which `canon-feedback` owns
-- Triaging the toolkit's feedback issues, which its maintainers do in its own repository
+- Triaging a repository's open issues, which `issue-triage` owns
 - Opening a pull request, which `git-pr` owns

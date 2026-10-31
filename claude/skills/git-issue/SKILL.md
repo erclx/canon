@@ -27,7 +27,34 @@ Then gather repo context in parallel:
 - If nothing in session context describes a concrete bug or task, stop: `❌ No issue in session context. Describe the bug or task, then re-invoke.`
 - If `git remote get-url origin` returns `NO_REMOTE`, stop: `❌ No GitHub remote. gh issue create needs an origin.`
 - If `gh auth status` returns `NO_AUTH`, stop: `❌ gh is not authenticated. Run gh auth login.`
-- If the type is ambiguous between a bug and a task, ask one line before formatting.
+- If the type is ambiguous between a bug and a task, ask one line before formatting, after the duplicate question below.
+
+## Duplicate check
+
+Search the open issues before composing anything, since a duplicate costs the repository's triage a second item and a second answer.
+
+```bash
+gh issue list --state open --search "<keywords> in:title,body" --limit 5 --json number,title,url
+```
+
+- Take the keywords from the defect's distinctive terms, such as a command, a path, or an error string, never a common word alone
+- Keep a candidate only when it describes the same defect, reading its body with `gh issue view <NNN> --json body` when the title leaves it open
+- With none kept, go to the preview and file a new issue
+- With one or more kept, ask once whether to add the findings to one of them as a comment or file a new issue, naming each by number and title
+- With no one to answer, as in a headless run, file a new issue and name each kept candidate in the result
+
+### Comment on the match
+
+On a yes for an issue, write the comment in the `### Follow-up` shape `${CLAUDE_SKILL_DIR}/references/issue.md` gives, run the pre-publish scan below over it, then post it in place of the final command. Post nothing on any issue the answer did not name.
+
+```bash
+mkdir -p .canon/tmp/issue
+cat <<'BODY' > .canon/tmp/issue/comment.md
+<comment following the Follow-up section>
+BODY
+gh api -X POST 'repos/{owner}/{repo}/issues/<NNN>/comments' -F body=@.canon/tmp/issue/comment.md --jq .html_url
+rm -rf .canon/tmp/issue
+```
 
 ## Response format
 
@@ -63,6 +90,9 @@ rm -rf .canon/tmp/issue
 
 ## After execution
 
-Respond with exactly one line and add no other text:
+Respond with the one line for what was posted:
 
-`✅ Issue: <url>`
+- A new issue: `✅ Issue: <url>`
+- A comment on a match: `✅ Commented: <url>`
+
+After a new issue filed with candidates kept and nobody asked, add one line per candidate, `Possible duplicate: #<NNN> <title>`, and nothing else.
