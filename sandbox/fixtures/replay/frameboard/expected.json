@@ -2,7 +2,7 @@
   "steps": {
     "sync": {
       "exit": 0,
-      "findings": 3
+      "findings": 4
     },
     "sync --check": {
       "exit": 0,
