@@ -463,6 +463,40 @@ describe('isLegacyStamped', () => {
 // must leave the index without it. `src/targets/registry.test.ts` proves a
 // real folder still records.
 describe('the machine-level target index', () => {
+  const SETUP_TMPDIR = process.env.TMPDIR
+
+  afterEach(() => {
+    if (SETUP_TMPDIR === undefined) delete process.env.TMPDIR
+    else process.env.TMPDIR = SETUP_TMPDIR
+  })
+
+  // The fixture sits under the OS temp folder, so pointing that folder
+  // elsewhere for the case is what lets the stamp reach a recordable target.
+  // Without it, an absent row reads the same whether the call was made or not.
+  it('should gain a target outside every scratch root on a stamp write', async () => {
+    process.env.TMPDIR = join(TARGET, 'elsewhere')
+
+    await writeStamp(TARGET, GOVERNANCE, { 'a.md': 'sha256:aa' }, NOW)
+
+    const registry = readTargetRegistry()
+
+    expect(
+      registry.kind === 'read' ? registry.targets.map((row) => row.path) : [],
+    ).toContain(TARGET)
+  })
+
+  it('should gain a target outside every scratch root on a chain stamp', async () => {
+    process.env.TMPDIR = join(TARGET, 'elsewhere')
+
+    await writeChainStamp(TARGET, TOOLING, ['next'], NOW)
+
+    const registry = readTargetRegistry()
+
+    expect(
+      registry.kind === 'read' ? registry.targets.map((row) => row.path) : [],
+    ).toContain(TARGET)
+  })
+
   it('should leave out a scratch target on a stamp write', async () => {
     await writeStamp(TARGET, GOVERNANCE, { 'a.md': 'sha256:aa' }, NOW)
 
