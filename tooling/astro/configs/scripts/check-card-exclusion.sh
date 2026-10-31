@@ -50,8 +50,13 @@ if grep -rl "$MARKER" "$DIST" >/dev/null 2>&1; then
   exit 1
 fi
 
-if find "$DIST" -iname '*og-card*' | grep -q .; then
-  echo "A file named for the card route reached $DIST. See card.config.mjs's srcDir." >&2
+# Built pages only, since an image or font may carry the route's name without
+# being the route. The path test covers both formats Astro emits, being
+# og-card/index.html under build.format 'directory' and og-card.html under
+# 'file'. The search runs from inside dist so a project checked out under a
+# directory like blog-card-site cannot match on its own prefix.
+if (cd "$DIST" && find . -ipath '*og-card*' -name '*.html' | grep -q .); then
+  echo "A page named for the card route reached $DIST. See card.config.mjs's srcDir." >&2
   exit 1
 fi
 
