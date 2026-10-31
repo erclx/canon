@@ -55,6 +55,13 @@ A bug or task body carries up to four `##` sections, in this order.
 - `## Context`: for a bug, repro steps or commands. For a task, the driving reason, or `none`.
 - `## Proposed` (optional): one line naming a fix or approach. Omit when open.
 
+### Follow-up
+
+A comment on an open issue carries what the session adds and nothing the issue already says.
+
+- `## Follow-up`: one line naming what is new, such as a second instance, a repro, or a narrowed cause.
+- `## Details`: the observed behavior and the command or path that shows it.
+
 ### Feedback
 
 One `## Toolkit feedback` wrapper holds every field as a nested `###` heading. A flat `##` field is not recognized.

@@ -1,0 +1,21 @@
+# What a correct headless `/git-issue` run leaves behind on the duplicate arm.
+# Read by `canon sandbox check`. Patterns use TOML literal strings so a regex
+# needs no backslash escaping.
+
+# Every top-level key sits above the first `[[content]]` block, since a bare key
+# below one belongs to that table in TOML.
+
+max_turns = 20
+
+# The body and comment files go through `.canon/tmp/issue/`, which the skill
+# removes, and a headless match files nothing, so the folder never stays.
+absent = [".canon/tmp/issue"]
+
+write_scope = [".canon/tmp/issue/**"]
+
+reply = ["Not filed", "Possible duplicate"]
+
+manual = [
+  "No second issue is open on the anchor for the seeded defect. Unwired: `gh issue list --search 'fmt:write in:title,body' --state open` lists the seeded issue alone when it holds, and `--label dedupe-fixture` scopes it to this arm.",
+  "The seeded issue carries no new comment. Unwired: `gh issue view <seeded> --json comments` reports none when it holds.",
+]

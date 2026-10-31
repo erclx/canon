@@ -1,0 +1,14 @@
+### What happened
+
+The README tells a reader to run `bun run fmt:write`, and `package.json` has no such script. It defines only `dev` and `check`.
+
+### Repro
+
+```bash
+grep -n "fmt:write" README.md
+grep -n '"scripts"' -A 3 package.json
+```
+
+### Expected
+
+The README names a format script `package.json` defines, or the script exists.

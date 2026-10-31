@@ -23,6 +23,11 @@ export const GIT_CASES: readonly SkillCase[] = [
     expect: 'git-issue',
   },
   {
+    prompt:
+      'Log this bug, but add it to the open issue if one already covers it.',
+    expect: 'git-issue',
+  },
+  {
     prompt: 'Close #42 without merging, #57 supersedes it.',
     expect: 'git-pr-close',
   },
