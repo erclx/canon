@@ -64,6 +64,36 @@ function fileIssue(ctx: StageContext, bodyFile: string): string {
   return number
 }
 
+/**
+ * GitHub indexes a new issue for search after a delay, and the skill finds the
+ * seeded issue only through search, so a run started before then files the
+ * duplicate this arm exists to catch.
+ */
+async function waitForSearch(ctx: StageContext, number: string): Promise<void> {
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const found = ctx
+      .read('gh', [
+        'issue',
+        'list',
+        '--repo',
+        repo(ctx),
+        '--state',
+        'open',
+        '--search',
+        'fmt:write in:title,body',
+        '--json',
+        'number',
+        '--jq',
+        '.[].number',
+      ])
+      .split('\n')
+    if (found.includes(number)) return
+    await new Promise((resolve) => setTimeout(resolve, 3000))
+  }
+
+  ctx.fail(`Search never listed #${number}, so a run would not find it`)
+}
+
 export default scenario({
   config: {
     SANDBOX_SKIP_AUTO_COMMIT: 'true',
@@ -71,7 +101,7 @@ export default scenario({
   },
   anchor: true,
   arms: {
-    duplicate: (ctx) => {
+    duplicate: async (ctx) => {
       ctx.log.step(`Filing one ${LABEL} issue on ${repo(ctx)}`)
 
       ctx.anchorRemote()
@@ -95,6 +125,7 @@ export default scenario({
 
       ctx.fixtures(...FIXTURE, '02-issue')
       const open = fileIssue(ctx, '.canon/tmp/issues/open.md')
+      await waitForSearch(ctx, open)
 
       ctx.log.step('Scenario ready: one open issue already covers the defect')
       ctx.log.info(
