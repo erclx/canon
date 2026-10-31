@@ -18,7 +18,8 @@ The record is an ordinary intake folder at `.canon/intake/<nn>-<slug>-triage/`. 
 
 Both are optional and come in either order.
 
-- A label narrows the queue to issues carrying it, and names the folder `<label>-triage`. With none, every open issue is in the queue and the folder is `issue-triage`.
+- A label narrows the queue to issues carrying it. With none, every open issue is in the queue and the slug is `issue`.
+- A label sets the slug too, lowercased with each run of other characters made one hyphen, so `good first issue` gives `good-first-issue`. Pass the raw label, quoted, to `--label`.
 - A number sets the cap, the most issues one pass files. With none, the cap is 25, about what one answering session gets through.
 
 ## Guards
@@ -39,10 +40,12 @@ Two more guards hold through every step.
 ## Step 1: list the queue
 
 ```bash
-gh issue list --state open --limit 1000 --json number,title,body,labels,comments
+gh issue list --state open --limit 1000 --search "sort:created-asc" --json number,title
 ```
 
-Add `--label <label>` when one was given, and name that label in the empty-queue stop. Read each issue's comments with its body, since a follow-up posted as a comment is part of the report.
+Add `--label "<label>"` when one was given, and name that label in the empty-queue stop. The list carries no bodies, so a large queue costs a line per issue rather than its whole text.
+
+Sorting by creation keeps the oldest issues when the queue passes the limit. When the list returns 1000 rows, the queue may hold more, so Step 3 writes its left-over count as a floor.
 
 ## Step 2: drop what the board already carries
 
@@ -51,16 +54,23 @@ An issue is carried when its number appears in a live or archived task's `Issue:
 Set each carried issue aside with its carrier, a task path or a folder and item.
 
 - Name every one in the overview, so a re-run while an earlier folder sits unanswered files nothing twice
-- Name the issue's comment count and newest comment date beside its carrier when it has any, so a follow-up posted after the carrier was filed is seen
+- Read its comments with `gh issue view <NNN> --json comments`, and name their count and newest date beside its carrier, so a follow-up posted after the carrier was filed is seen
 - File no item for a comment on a carried issue, since an item would file the issue twice against a live task
 
 When every issue is carried, stop: `✅ Every open issue is already on the board.`
 
 ## Step 3: apply the cap
 
-Sort the remaining issues by number, oldest first, and keep the first issues up to the cap. Oldest first drains the reports that have waited longest.
+Sort the remaining issues by number, oldest first, and keep the first issues up to the cap, so the reports that waited longest drain first. Count the issues past the cap as left over, and name them in the overview and the output.
 
-Count the issues past the cap as left over. Name the count and the lowest number left over in the overview and the output, so a drained queue and a capped one never read the same.
+- Give the count and the lowest number left over, so a drained queue and a capped one never read the same
+- Write the count as `at least <n>` when Step 1 hit its limit
+
+Then read each kept issue whole, since a follow-up posted as a comment is part of the report:
+
+```bash
+gh issue view <NNN> --json number,title,body,labels,comments
+```
 
 ## Step 4: claim the folder
 

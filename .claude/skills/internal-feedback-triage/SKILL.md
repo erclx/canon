@@ -10,6 +10,7 @@ Consume the feedback queue that `canon feedback` fills. The pass is `issue-triag
 - Run from the toolkit repo root
 - Read `claude/skills/issue-triage/SKILL.md` from the project root and follow it with the label `feedback`, so the folder is `.canon/intake/<nn>-feedback-triage/`
 - Read that body from the tree rather than through the installed plugin, whose cached copy can trail this checkout
+- Read `${CLAUDE_SKILL_DIR}` in that body as `claude/skills/issue-triage`, so the intake standard it cites is `claude/skills/plan-intake/references/intake.md`
 
 ## What feedback adds
 
@@ -17,7 +18,7 @@ Apply these during the plugin body's measuring and writing steps.
 
 - Classify each item against the toolkit's own surfaces, being its rules, skills, seeds, verbs, and docs
 - Strip the reporting project's filenames, frameworks, deploy targets, and label values from the fix, since it serves every project that installs the toolkit
-- Mark the item `not reproduced here` when the repro names another project's paths, per `## Repro versus groundwork` in the intake standard
+- Mark the item `not reproduced here` when the repro names another project's paths, per `## Repro versus groundwork` in `claude/skills/plan-intake/references/intake.md`
 
 ## Notes
 
