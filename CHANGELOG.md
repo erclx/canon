@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.77.0](https://github.com/erclx/canon/compare/v5.76.0...v5.77.0) (2026-10-31)
+
+
+### Features
+
+* **targets:** keep only real projects in the target index ([#2867](https://github.com/erclx/canon/issues/2867)) ([340cbff](https://github.com/erclx/canon/commit/340cbff8edda3987af6d4933aa27391e07b312a2))
+* **tooling:** bound and retry the shipped playwright installs ([#2865](https://github.com/erclx/canon/issues/2865)) ([842d5f9](https://github.com/erclx/canon/commit/842d5f957602136d8bbbdfba524fbba1340df76a))
+
+
+### Bug Fixes
+
+* **tooling:** turn off the card toolbar and narrow the exclusion check ([#2864](https://github.com/erclx/canon/issues/2864)) ([188c1e9](https://github.com/erclx/canon/commit/188c1e950c83cd00ad22e07c43d5232bf01e6ad8))
+
 ## [5.76.0](https://github.com/erclx/canon/compare/v5.75.0...v5.76.0) (2026-10-31)
 
 
