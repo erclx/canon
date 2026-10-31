@@ -457,30 +457,30 @@ describe('isLegacyStamped', () => {
   })
 })
 
-// The machine-level index is what lets a rollout enumerate the projects the
-// toolkit installed into. Writing it from here is what keeps it in step without
-// each install command remembering to, so the coupling is asserted rather than
-// left to the comment that explains it.
+// The machine-level index lists the projects the toolkit installed into, and
+// every fixture here stamps a folder under the OS temp folder. A row for each
+// is how the index reached thousands of dead paths, so a stamp into scratch
+// must leave the index without it. `src/targets/registry.test.ts` proves a
+// real folder still records.
 describe('the machine-level target index', () => {
-  it('should gain the target on any stamp write', async () => {
+  it('should leave out a scratch target on a stamp write', async () => {
     await writeStamp(TARGET, GOVERNANCE, { 'a.md': 'sha256:aa' }, NOW)
 
     const registry = readTargetRegistry()
 
-    expect(registry.kind).toBe('read')
     expect(
       registry.kind === 'read' ? registry.targets.map((row) => row.path) : [],
-    ).toContain(TARGET)
+    ).not.toContain(TARGET)
   })
 
-  it('should gain the target on a chain stamp that records no files', async () => {
+  it('should leave out a scratch target on a chain stamp', async () => {
     await writeChainStamp(TARGET, TOOLING, ['next'], NOW)
 
     const registry = readTargetRegistry()
 
     expect(
       registry.kind === 'read' ? registry.targets.map((row) => row.path) : [],
-    ).toContain(TARGET)
+    ).not.toContain(TARGET)
   })
 })
 

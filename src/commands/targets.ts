@@ -267,6 +267,8 @@ function refuseDepth(opts: ListOptions): number {
 interface BackfillSummary {
   readonly recorded: number
   readonly skipped: number
+  /** Skipped too, but for sitting under a scratch root, so its line names that cause. */
+  readonly scratch: number
   readonly failed: number
 }
 
@@ -285,16 +287,18 @@ async function runBackfill(
 
   let recorded = 0
   let skipped = 0
+  let scratch = 0
   let failed = 0
 
   for (const path of paths) {
     const outcome = backfillTarget({ path, stampedAt: stampedAtOf(path) })
     if (outcome === 'recorded') recorded++
     else if (outcome === 'no-stamp') skipped++
+    else if (outcome === 'scratch') scratch++
     else failed++
   }
 
-  return { recorded, skipped, failed }
+  return { recorded, skipped, scratch, failed }
 }
 
 /**
@@ -337,6 +341,12 @@ function reportBackfill(summary: BackfillSummary): void {
   if (summary.skipped > 0) {
     logWarn(
       `${plural(summary.skipped, 'target')} skipped, carrying no readable stamp to date the row by.`,
+    )
+  }
+
+  if (summary.scratch > 0) {
+    logWarn(
+      `${plural(summary.scratch, 'target')} skipped, sitting under a scratch folder the index never records.`,
     )
   }
 

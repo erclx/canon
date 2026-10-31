@@ -26,6 +26,12 @@ function stampLegacy(...segments: string[]): string {
 
 const noOrigin = async (): Promise<string | null> => null
 
+/**
+ * Every fixture sits under the OS temp folder, which the index refuses, so
+ * these cases name no scratch roots to let a recorded fixture stay listed.
+ */
+const NO_ROOTS: readonly string[] = []
+
 beforeEach(() => {
   ROOT = mkdtempSync(join(tmpdir(), 'canon-resolve-'))
   FILE = join(ROOT, 'targets.json')
@@ -40,6 +46,7 @@ describe('resolveTargets', () => {
     const report = await resolveTargets({
       paths: [join(ROOT, 'caret')],
       registryFile: FILE,
+      scratchRoots: NO_ROOTS,
     })
 
     expect(report.targets).toHaveLength(1)
@@ -49,10 +56,13 @@ describe('resolveTargets', () => {
   })
 
   it('should report every target the record holds', async () => {
-    recordTarget(join(ROOT, 'caret'), new Date('2026-08-30'), FILE)
-    recordTarget(join(ROOT, 'stackr'), new Date('2026-08-30'), FILE)
+    recordTarget(stamp('caret'), new Date('2026-08-30'), FILE, NO_ROOTS)
+    recordTarget(stamp('stackr'), new Date('2026-08-30'), FILE, NO_ROOTS)
 
-    const report = await resolveTargets({ registryFile: FILE })
+    const report = await resolveTargets({
+      registryFile: FILE,
+      scratchRoots: NO_ROOTS,
+    })
 
     expect(report.targets.map((target) => target.source)).toEqual([
       'record',
@@ -63,16 +73,22 @@ describe('resolveTargets', () => {
   // A machine no sync has run on answers "unknown" rather than "none", and the
   // caller has to be able to tell those apart before reporting a population.
   it('should carry an absent record through rather than reporting no targets', async () => {
-    const report = await resolveTargets({ registryFile: FILE })
+    const report = await resolveTargets({
+      registryFile: FILE,
+      scratchRoots: NO_ROOTS,
+    })
 
     expect(report.registry?.kind).toBe('absent')
     expect(report.targets).toEqual([])
   })
 
   it('should run no sweep when the caller names no roots', async () => {
-    recordTarget(join(ROOT, 'caret'), new Date('2026-08-30'), FILE)
+    recordTarget(join(ROOT, 'caret'), new Date('2026-08-30'), FILE, NO_ROOTS)
 
-    const report = await resolveTargets({ registryFile: FILE })
+    const report = await resolveTargets({
+      registryFile: FILE,
+      scratchRoots: NO_ROOTS,
+    })
 
     expect(report.bound).toBeNull()
   })
@@ -82,6 +98,7 @@ describe('resolveTargets', () => {
 
     const report = await resolveTargets({
       registryFile: FILE,
+      scratchRoots: NO_ROOTS,
       sweep: [ROOT],
       originOf: noOrigin,
     })
@@ -93,10 +110,11 @@ describe('resolveTargets', () => {
 
   it('should not report a target twice when both sources hold it', async () => {
     const caret = stamp('caret')
-    recordTarget(caret, new Date('2026-08-30'), FILE)
+    recordTarget(caret, new Date('2026-08-30'), FILE, NO_ROOTS)
 
     const report = await resolveTargets({
       registryFile: FILE,
+      scratchRoots: NO_ROOTS,
       sweep: [ROOT],
       originOf: noOrigin,
     })
@@ -111,10 +129,11 @@ describe('resolveTargets', () => {
   it('should fold a recorded clone into the sweep row that found its sibling', async () => {
     const first = stamp('public', 'caret')
     const second = stamp('extensions', 'caret')
-    recordTarget(first, new Date('2026-08-30'), FILE)
+    recordTarget(first, new Date('2026-08-30'), FILE, NO_ROOTS)
 
     const report = await resolveTargets({
       registryFile: FILE,
+      scratchRoots: NO_ROOTS,
       sweep: [ROOT],
       originOf: async () => 'github.com/erclx/caret',
     })
@@ -134,10 +153,11 @@ describe('resolveTargets', () => {
     stamp('aaa-first-by-sort', 'caret')
 
     const recorded = stamp('zzz-last-by-sort', 'caret')
-    recordTarget(recorded, new Date('2026-08-30'), FILE)
+    recordTarget(recorded, new Date('2026-08-30'), FILE, NO_ROOTS)
 
     const report = await resolveTargets({
       registryFile: FILE,
+      scratchRoots: NO_ROOTS,
       sweep: [ROOT],
       originOf: async () => 'github.com/erclx/caret',
     })
@@ -152,10 +172,11 @@ describe('resolveTargets', () => {
   it('should re-derive legacy paths against the merged row rather than the sweep order', async () => {
     const recordedLegacy = stampLegacy('public', 'caret')
     const foundLegacy = stampLegacy('extensions', 'caret')
-    recordTarget(recordedLegacy, new Date('2026-08-30'), FILE)
+    recordTarget(recordedLegacy, new Date('2026-08-30'), FILE, NO_ROOTS)
 
     const report = await resolveTargets({
       registryFile: FILE,
+      scratchRoots: NO_ROOTS,
       sweep: [ROOT],
       originOf: async () => 'github.com/erclx/caret',
     })
@@ -169,16 +190,19 @@ describe('resolveTargets', () => {
   })
 
   it('should keep a recorded target the sweep could not reach', async () => {
-    recordTarget('/elsewhere/diction', new Date('2026-08-30'), FILE)
+    const elsewhere = join(ROOT, 'elsewhere', 'diction')
+    const swept = join(ROOT, 'swept')
+    mkdirSync(elsewhere, { recursive: true })
+    mkdirSync(swept, { recursive: true })
+    recordTarget(elsewhere, new Date('2026-08-30'), FILE, NO_ROOTS)
 
     const report = await resolveTargets({
       registryFile: FILE,
-      sweep: [ROOT],
+      scratchRoots: NO_ROOTS,
+      sweep: [swept],
       originOf: noOrigin,
     })
 
-    expect(report.targets.map((target) => target.paths[0])).toEqual([
-      '/elsewhere/diction',
-    ])
+    expect(report.targets.map((target) => target.paths[0])).toEqual([elsewhere])
   })
 })
