@@ -1,8 +1,8 @@
 /**
  * Adds the session defaults the seeded `.claude/settings.json` carries to a
  * target that was seeded before them: the subagent deny, the memory default,
- * the merge deny entries, the lease push allow and its asks, and the plan
- * guard's PreToolUse wiring where the project holds the guard script.
+ * the merge deny entries, the lease push allow entries, and the plan guard's
+ * PreToolUse wiring where the project holds the guard script.
  *
  * `canon claude init` copies a seed only when the file is absent, so a target
  * holding its own settings never sees a later seed change. This verb adds each
@@ -30,19 +30,14 @@ export const MERGE_DENIED: readonly string[] = [
 ]
 
 /**
- * The lease push a worker runs after rebasing onto a merged pull request. An
- * allow rule resolves before auto mode's classifier, which otherwise blocks a
- * push whose rebased history it cannot attribute to the session. The trailing
- * ` *` also matches the bare command, and covers `origin HEAD`.
+ * The two lease pushes a worker runs after rebasing onto a merged pull request,
+ * each pushing the current branch to its own name. An allow rule resolves
+ * before auto mode's classifier, so each entry is exact: a wildcard would also
+ * approve a refspec, a remote, or a flag that reaches the default branch.
  */
 export const PUSH_ALLOWED: readonly string[] = [
-  'Bash(git push --force-with-lease *)',
-]
-
-/** Ask rules win over the allow above, so a lease push naming main prompts. */
-export const PUSH_ASKED: readonly string[] = [
-  'Bash(git push --force-with-lease origin main*)',
-  'Bash(git push --force-with-lease origin master*)',
+  'Bash(git push --force-with-lease)',
+  'Bash(git push --force-with-lease origin HEAD)',
 ]
 
 /** The command the seed wires, as the seeded settings spell it. */
@@ -77,7 +72,7 @@ export interface SessionDefaultsPlan {
   readonly predates: boolean
   /** True when the deny list lacks any merge entry, whatever else it holds. */
   readonly lacksMergeDeny: boolean
-  /** True when the allow list lacks the lease push entry. */
+  /** True when the allow list lacks any lease push entry. */
   readonly lacksPushAllow: boolean
 }
 
@@ -111,21 +106,18 @@ export function planSessionDefaults(
   const permissions = isRecord(current.permissions) ? current.permissions : {}
   const deny = Array.isArray(permissions.deny) ? permissions.deny : []
   const allow = Array.isArray(permissions.allow) ? permissions.allow : []
-  const ask = Array.isArray(permissions.ask) ? permissions.ask : []
 
   const subagentsMissing = DENIED_TOOLS.filter((tool) => !deny.includes(tool))
   const mergeMissing = MERGE_DENIED.filter((entry) => !deny.includes(entry))
   const missing = [...subagentsMissing, ...mergeMissing]
   const allowMissing = PUSH_ALLOWED.filter((entry) => !allow.includes(entry))
-  const askMissing = PUSH_ASKED.filter((entry) => !ask.includes(entry))
 
   const nextPermissions: SettingsRecord = { ...permissions }
   if (missing.length > 0) nextPermissions.deny = [...deny, ...missing]
   if (allowMissing.length > 0) {
     nextPermissions.allow = [...allow, ...allowMissing]
   }
-  if (askMissing.length > 0) nextPermissions.ask = [...ask, ...askMissing]
-  if (missing.length + allowMissing.length + askMissing.length > 0) {
+  if (missing.length + allowMissing.length > 0) {
     next.permissions = nextPermissions
   }
 
@@ -141,7 +133,6 @@ export function planSessionDefaults(
   const keys: SettingsKey[] = [
     { label: 'permissions.deny', changed: missing.length > 0 },
     { label: 'permissions.allow', changed: allowMissing.length > 0 },
-    { label: 'permissions.ask', changed: askMissing.length > 0 },
     { label: 'autoMemoryEnabled', changed: memoryAbsent },
     { label: 'hooks.PreToolUse', changed: preToolUse !== undefined },
   ]
@@ -254,7 +245,7 @@ export async function readSessionDefaults(
   if (permissions !== undefined && !isRecord(permissions)) {
     return { kind: 'refused', reason: `${path}: permissions is not an object` }
   }
-  for (const list of ['deny', 'allow', 'ask'] as const) {
+  for (const list of ['deny', 'allow'] as const) {
     if (
       permissions?.[list] !== undefined &&
       !Array.isArray(permissions[list])

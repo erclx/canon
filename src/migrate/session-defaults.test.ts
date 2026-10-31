@@ -7,7 +7,6 @@ import {
   MERGE_DENIED,
   PLAN_GUARD_COMMAND,
   PUSH_ALLOWED,
-  PUSH_ASKED,
   planSessionDefaults,
   readSessionDefaults,
   type SessionDefaultsRead,
@@ -36,7 +35,6 @@ const DEFAULTS = {
   autoMemoryEnabled: false,
   permissions: {
     allow: PUSH_ALLOWED,
-    ask: PUSH_ASKED,
     deny: ['Agent', 'Task', ...MERGE_DENIED],
   },
 }
@@ -69,7 +67,6 @@ describe('planSessionDefaults', () => {
     expect(plan.next).toEqual({
       permissions: {
         allow: PUSH_ALLOWED,
-        ask: PUSH_ASKED,
         deny: ['Agent', 'Task', ...MERGE_DENIED],
       },
       autoMemoryEnabled: false,
@@ -84,7 +81,6 @@ describe('planSessionDefaults', () => {
 
     expect(plan.next.permissions).toEqual({
       allow: ['Bash(ls)', ...PUSH_ALLOWED],
-      ask: PUSH_ASKED,
       deny: ['Read(**/.env)', 'Task', 'Agent', ...MERGE_DENIED],
     })
   })
@@ -99,7 +95,6 @@ describe('planSessionDefaults', () => {
 
     expect(plan.next.permissions).toEqual({
       allow: PUSH_ALLOWED,
-      ask: PUSH_ASKED,
       deny: [
         'Read(**/.env)',
         'Bash(gh pr merge:*)',
@@ -120,7 +115,6 @@ describe('planSessionDefaults', () => {
       autoMemoryEnabled: true,
       permissions: {
         allow: PUSH_ALLOWED,
-        ask: PUSH_ASKED,
         deny: ['Agent', 'Task', ...MERGE_DENIED],
       },
     })
@@ -195,7 +189,6 @@ describe('planSessionDefaults', () => {
       autoMemoryEnabled: false,
       permissions: {
         allow: PUSH_ALLOWED,
-        ask: PUSH_ASKED,
         deny: ['Task', 'Agent', ...MERGE_DENIED],
       },
     })
@@ -203,48 +196,47 @@ describe('planSessionDefaults', () => {
     expect(plan.changed).toBe(false)
   })
 
-  it('should add the push allow and asks to a file migrated before them', () => {
+  it('should add the push allow entries to a file migrated before them', () => {
     const plan = planSessionDefaults({
       autoMemoryEnabled: false,
       permissions: {
         allow: ['Bash(ls)'],
-        ask: ['Bash(rm *)'],
         deny: ['Agent', 'Task', ...MERGE_DENIED],
       },
     })
 
     expect(plan.next.permissions).toEqual({
       allow: ['Bash(ls)', ...PUSH_ALLOWED],
-      ask: ['Bash(rm *)', ...PUSH_ASKED],
       deny: ['Agent', 'Task', ...MERGE_DENIED],
     })
     expect(plan.lacksPushAllow).toBe(true)
     expect(plan.predates).toBe(false)
   })
 
-  it('should add only the push asks when the allow is already there', () => {
+  it('should add only the push form a hand-added allow list lacks', () => {
     const plan = planSessionDefaults({
       autoMemoryEnabled: false,
       permissions: {
-        allow: PUSH_ALLOWED,
+        allow: ['Bash(git push --force-with-lease)'],
         deny: ['Agent', 'Task', ...MERGE_DENIED],
       },
     })
 
     expect(plan.next.permissions).toMatchObject({
-      allow: PUSH_ALLOWED,
-      ask: PUSH_ASKED,
+      allow: [
+        'Bash(git push --force-with-lease)',
+        'Bash(git push --force-with-lease origin HEAD)',
+      ],
     })
-    expect(plan.lacksPushAllow).toBe(false)
-    expect(plan.changed).toBe(true)
+    expect(plan.lacksPushAllow).toBe(true)
   })
 
-  it('should cover the lease push forms workers run and ask before main', () => {
-    expect(PUSH_ALLOWED).toEqual(['Bash(git push --force-with-lease *)'])
-    expect(PUSH_ASKED).toEqual([
-      'Bash(git push --force-with-lease origin main*)',
-      'Bash(git push --force-with-lease origin master*)',
+  it('should allow only exact push forms, never a wildcard that reaches main', () => {
+    expect(PUSH_ALLOWED).toEqual([
+      'Bash(git push --force-with-lease)',
+      'Bash(git push --force-with-lease origin HEAD)',
     ])
+    expect(PUSH_ALLOWED.some((entry) => entry.includes('*'))).toBe(false)
   })
 })
 
@@ -460,12 +452,12 @@ describe('readSessionDefaults', () => {
     expect(read.kind).toBe('refused')
   })
 
-  it('should refuse an allow or ask that is not a list rather than replace it', async () => {
-    const allow = await makeTarget('{ "permissions": { "allow": "Bash" } }\n')
-    const ask = await makeTarget('{ "permissions": { "ask": {} } }\n')
+  it('should refuse an allow that is not a list rather than replace it', async () => {
+    const dir = await makeTarget('{ "permissions": { "allow": "Bash" } }\n')
 
-    expect((await readSessionDefaults(allow, '/toolkit')).kind).toBe('refused')
-    expect((await readSessionDefaults(ask, '/toolkit')).kind).toBe('refused')
+    const read = await readSessionDefaults(dir, '/toolkit')
+
+    expect(read.kind).toBe('refused')
   })
 })
 
@@ -477,7 +469,7 @@ describe('applySessionDefaults', () => {
     await applySessionDefaults(read)
 
     expect(await readTargetSettings(dir)).toBe(
-      '{\n    "model": "opus",\n    "permissions": {\n        "deny": [\n            "Agent",\n            "Task",\n            "Bash(canon pr merge:*)",\n            "Bash(gh pr merge:*)"\n        ],\n        "allow": [\n            "Bash(git push --force-with-lease *)"\n        ],\n        "ask": [\n            "Bash(git push --force-with-lease origin main*)",\n            "Bash(git push --force-with-lease origin master*)"\n        ]\n    },\n    "autoMemoryEnabled": false\n}\n',
+      '{\n    "model": "opus",\n    "permissions": {\n        "deny": [\n            "Agent",\n            "Task",\n            "Bash(canon pr merge:*)",\n            "Bash(gh pr merge:*)"\n        ],\n        "allow": [\n            "Bash(git push --force-with-lease)",\n            "Bash(git push --force-with-lease origin HEAD)"\n        ]\n    },\n    "autoMemoryEnabled": false\n}\n',
     )
   })
 
