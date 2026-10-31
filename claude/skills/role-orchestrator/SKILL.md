@@ -48,7 +48,7 @@ The human asks for each side of a compaction, and this skill reads the runbook.
 
 ### The poll and the parked rows
 
-The review trigger takes the same shape. `references/orchestrator-poll.md` holds the loop prompt and its condition, and `scripts/poll.ts` is what the prompt invokes. No hook starts or cancels that loop, so the condition holds only while whoever holds it applies it.
+The review trigger takes the same shape. `references/orchestrator-poll.md` holds the background start, the routing, and the condition, and `scripts/poll.ts --wait` is the command it runs. No hook starts or stops that poll, so the condition holds only while whoever holds it applies it.
 
 A board that is not moving is a third such moment. On a request to re-test the parked rows, follow `${CLAUDE_SKILL_DIR}/references/orchestrator-parked.md`, which re-tests every blocker and backlog row against the tree and plans what it clears. The refill sweep fires on a merge instead.
 

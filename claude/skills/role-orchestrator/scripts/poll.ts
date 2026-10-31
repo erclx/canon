@@ -2,10 +2,10 @@
 //
 // Run as `bun poll.ts`. The pure pieces are exported so a test drives the code
 // a loop runs, and `main` runs only when this file is the entry point.
-import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { baseBranch, baseRef, mainRoot, run } from './repo'
+import { baseBranch, baseRef, mainRoot, mapPool, run, runAsync } from './repo'
 
 interface Comment {
   body?: null | string
@@ -499,11 +499,11 @@ const parseJson = (text: string): unknown => {
  * line that does not parse both return null, so neither reads as a thread with
  * nothing on it.
  */
-const readRows = (
+const readRows = async (
   path: string,
   fields: string,
-): null | Record<string, unknown>[] => {
-  const read = run('gh', [
+): Promise<null | Record<string, unknown>[]> => {
+  const read = await runAsync('gh', [
     'api',
     '--paginate',
     `repos/{owner}/{repo}/${path}`,
@@ -546,15 +546,14 @@ export const toComment = (row: Record<string, unknown>): Comment => ({
  * Two reads feed one payload, so either failing makes the pull request
  * unreadable rather than a thread missing half its rows.
  */
-const readPayload = (number: string): null | Payload => {
-  const reviews = readRows(
-    `pulls/${number}/reviews?per_page=100`,
-    'body, commit_id, submitted_at',
-  )
-  const comments = readRows(
-    `issues/${number}/comments?per_page=100`,
-    'body, created_at',
-  )
+const readPayload = async (number: string): Promise<null | Payload> => {
+  const [reviews, comments] = await Promise.all([
+    readRows(
+      `pulls/${number}/reviews?per_page=100`,
+      'body, commit_id, submitted_at',
+    ),
+    readRows(`issues/${number}/comments?per_page=100`, 'body, created_at'),
+  ])
   if (reviews === null || comments === null) return null
 
   return { comments: comments.map(toComment), reviews: reviews.map(toReview) }
@@ -562,14 +561,17 @@ const readPayload = (number: string): null | Payload => {
 
 type Snapshot = { baseline: Baseline } | { row: Row }
 
+/** What one pull request's reads produced, before the baseline is consulted. */
+type Collected = { number: string; reason: string } | { row: Row }
+
 const nowSeconds = (): number => Math.floor(Date.now() / 1000)
 
-const readHead = (number: string): string => {
+const readHead = async (number: string): Promise<string> => {
   // The tip is the authority for the head, not the pull request object, which
   // lags the ref by up to a minute after a push. The object's head is the
   // fallback for a target on an older binary with no `pr head` verb.
   const record = parseJson(
-    run('canon', ['pr', 'head', number, '--json']).stdout,
+    (await runAsync('canon', ['pr', 'head', number, '--json'])).stdout,
   )
   const tip =
     typeof record === 'object' && record !== null
@@ -578,7 +580,7 @@ const readHead = (number: string): string => {
 
   if (typeof tip === 'string' && tip !== '') return tip
 
-  const pull = run('gh', [
+  const pull = await runAsync('gh', [
     'api',
     `repos/{owner}/{repo}/pulls/${number}`,
     '--jq',
@@ -594,16 +596,26 @@ const readHead = (number: string): string => {
  * against the base this machine has. It exits non-zero on a ref it cannot
  * resolve as well as on a real conflict, so both sides are checked first.
  */
-const readMerges = (number: string, head: string, ref: string): string => {
-  run('git', ['fetch', '-q', 'origin', `pull/${number}/head`])
-  if (
-    !run('git', ['cat-file', '-e', `${head}^{commit}`]).isOk ||
-    !run('git', ['rev-parse', '--verify', '-q', ref]).isOk
-  ) {
-    return 'unknown'
-  }
+const readMerges = async (
+  number: string,
+  head: string,
+  ref: string,
+): Promise<string> => {
+  // Concurrent fetches would each rewrite FETCH_HEAD, which nothing here reads.
+  await runAsync('git', [
+    'fetch',
+    '-q',
+    '--no-write-fetch-head',
+    'origin',
+    `pull/${number}/head`,
+  ])
+  const [commit, base] = await Promise.all([
+    runAsync('git', ['cat-file', '-e', `${head}^{commit}`]),
+    runAsync('git', ['rev-parse', '--verify', '-q', ref]),
+  ])
+  if (!commit.isOk || !base.isOk) return 'unknown'
 
-  return run('git', ['merge-tree', '--write-tree', ref, head]).isOk
+  return (await runAsync('git', ['merge-tree', '--write-tree', ref, head])).isOk
     ? 'clean'
     : 'conflict'
 }
@@ -622,11 +634,20 @@ const nonEmptyLines = (output: string): string[] =>
  * the base to either one is a change under the branch. A head or base that does
  * not resolve, which a fork or a deleted head leaves, reads as null.
  */
-const readWritten = (head: string, ref: string): null | Written => {
-  const forkPoint = run('git', ['merge-base', ref, head])
+const readWritten = async (
+  head: string,
+  ref: string,
+): Promise<null | Written> => {
+  const forkPoint = await runAsync('git', ['merge-base', ref, head])
   if (!forkPoint.isOk) return null
   const point = forkPoint.stdout.trim()
-  const diff = run('git', ['diff', '--name-only', '--no-renames', point, head])
+  const diff = await runAsync('git', [
+    'diff',
+    '--name-only',
+    '--no-renames',
+    point,
+    head,
+  ])
   if (!diff.isOk) return null
 
   return { forkPoint: point, paths: nonEmptyLines(diff.stdout) }
@@ -638,14 +659,14 @@ const readWritten = (head: string, ref: string): null | Written => {
  * net diff rather than the log is read, so a change the base made and then
  * reverted moves nothing.
  */
-const readStale = (
+const readStale = async (
   written: null | Written,
   ref: string,
-): { files: string[]; stale: Staleness } => {
+): Promise<{ files: string[]; stale: Staleness }> => {
   if (written === null) return { files: [], stale: 'unknown' }
   if (written.paths.length === 0) return { files: [], stale: 'fresh' }
 
-  const moved = run('git', [
+  const moved = await runAsync('git', [
     '--literal-pathspecs',
     'diff',
     '--name-only',
@@ -754,22 +775,23 @@ const readOverlap = (first: string, second: string): null | string[] => {
   return [...new Set(lines.slice(1))]
 }
 
-const buildRow = (
+const buildRow = async (
   number: string,
   payload: Payload,
   head: string,
   ref: string,
-): Row => {
+): Promise<Row> => {
   const now = nowSeconds()
   const replies = replyState(payload.comments ?? [])
   const unmatched = unmatchedState(payload.comments ?? [])
-  const record = parseJson(
-    run('canon', ['pr', 'review-state', number, '--json']).stdout,
-  )
+  const [state, merges] = await Promise.all([
+    runAsync('canon', ['pr', 'review-state', number, '--json']),
+    readMerges(number, head, ref),
+  ])
+  const record = parseJson(state.stdout)
   const scope = scopeFromVerb(record, now) ?? scopeFallback(payload, now)
-  const merges = readMerges(number, head, ref)
-  const written = merges === 'unknown' ? null : readWritten(head, ref)
-  const stale = readStale(written, ref)
+  const written = merges === 'unknown' ? null : await readWritten(head, ref)
+  const stale = await readStale(written, ref)
 
   return {
     age: scope.age,
@@ -845,7 +867,7 @@ export const standingFromLift = (
  * after it would leave a stored reading claiming clear. The lift verb's reading
  * comes first, and the read below stays as the fallback for an older binary.
  */
-const check = (number: string): number => {
+const check = async (number: string): Promise<number> => {
   // The verb exits 1 on any refused gate and still prints its record, so the
   // exit says nothing about whether the standing was read.
   const lifted = standingFromLift(
@@ -858,7 +880,7 @@ const check = (number: string): number => {
   }
   const ref = baseRef()
   run('git', ['fetch', '-q', 'origin', baseBranch(ref)])
-  const head = readHead(number)
+  const head = await readHead(number)
   if (head === '') {
     console.error(
       `poll: #${number} returned no head, so nothing is known about it`,
@@ -866,43 +888,57 @@ const check = (number: string): number => {
 
     return 1
   }
-  const merges = readMerges(number, head, ref)
-  const written = merges === 'unknown' ? null : readWritten(head, ref)
+  const merges = await readMerges(number, head, ref)
+  const written = merges === 'unknown' ? null : await readWritten(head, ref)
   console.log(
     standingLine({
       head,
       merges,
       number,
-      stale: readStale(written, ref).stale,
+      stale: (await readStale(written, ref)).stale,
     }),
   )
 
   return 0
 }
 
-const main = (args: string[]): number => {
-  const root = mainRoot()
-  if (root === null) {
-    console.error('poll: not a git repository, so nothing is classified')
+/** Pull requests read at once, which keeps a wave under GitHub's burst limit. */
+const READ_POOL = 4
 
-    return 1
-  }
+interface PollRun {
+  /** Lines for stdout, the state lines and the closing `No movement.` */
+  readonly out: string[]
+  /** `poll:` lines for stderr, each a read that failed. */
+  readonly err: string[]
+  readonly isChanged: boolean
+  readonly status: number
+}
+
+/**
+ * One classification pass. It writes the baseline only when `record` holds,
+ * so a run made to time or inspect the board leaves the next run's view intact.
+ */
+const pollOnce = async (
+  root: string,
+  { record }: { record: boolean },
+): Promise<PollRun> => {
+  const out: string[] = []
+  const err: string[] = []
 
   // The baseline is per-machine mutable state, so it stays in gitignored
   // scratch even though the script is tracked.
-  if (args[0] === '--check') return check(args[1] ?? '')
   const stateDir = join(root, '.canon', 'tmp', 'pr', 'poll')
-  mkdirSync(stateDir, { recursive: true })
   const statePath = join(stateDir, 'baseline.txt')
-  appendFileSync(statePath, '')
+  const previous = (
+    existsSync(statePath) ? readFileSync(statePath, 'utf8') : ''
+  )
+    .split('\n')
+    .filter((line) => line !== '')
+    .map(parseBaseline)
 
   const ref = baseRef()
   const base = baseBranch(ref)
   const known = new Map<string, Baseline>()
-  const previous = readFileSync(statePath, 'utf8')
-    .split('\n')
-    .filter((line) => line !== '')
-    .map(parseBaseline)
   for (const entry of previous) {
     if (!known.has(entry.number)) known.set(entry.number, entry)
   }
@@ -920,47 +956,50 @@ const main = (args: string[]): number => {
     '.[].number',
   ])
   if (!listed.isOk) {
-    console.error('poll: the open pull request list could not be read')
-    console.error(
+    err.push(
+      'poll: the open pull request list could not be read',
       'poll: nothing is classified this run and the baseline is unchanged',
     )
 
-    return 1
+    return { err, isChanged: false, out, status: 1 }
   }
 
+  const numbers = listed.stdout.split(/\s+/).filter((n) => n !== '')
+  const collected = await mapPool(
+    numbers,
+    READ_POOL,
+    async (number): Promise<Collected> => {
+      // A read that failed and a pull request with no reviews both arrive as an
+      // empty result, so each read returns null on failure and the payload gives
+      // the failure a single place to surface.
+      const [payload, head] = await Promise.all([
+        readPayload(number),
+        readHead(number),
+      ])
+      if (payload === null) return { number, reason: 'could not be read' }
+      if (head === '') return { number, reason: 'returned no head' }
+
+      return { row: await buildRow(number, payload, head, ref) }
+    },
+  )
+
   const snapshots: Snapshot[] = []
-  for (const number of listed.stdout.split(/\s+/).filter((n) => n !== '')) {
-    // A read that failed and a pull request with no reviews both arrive as an
-    // empty result, so each read returns null on failure and the payload gives
-    // the failure a single place to surface.
-    const payload = readPayload(number)
-    const old = known.get(number)
-    const unreadable = (reason: string): void => {
-      if (old === undefined) {
-        console.error(
-          `poll: #${number} ${reason}, and it has no last known state, so it goes unclassified`,
-        )
-
-        return
-      }
-      console.error(
-        `poll: #${number} ${reason}, so it keeps its last known state and goes unclassified`,
+  for (const item of collected) {
+    if ('row' in item) {
+      snapshots.push({ row: item.row })
+      continue
+    }
+    const old = known.get(item.number)
+    if (old === undefined) {
+      err.push(
+        `poll: #${item.number} ${item.reason}, and it has no last known state, so it goes unclassified`,
       )
-      snapshots.push({ baseline: carryForward(old) })
-    }
-
-    if (payload === null) {
-      unreadable('could not be read')
       continue
     }
-
-    const head = readHead(number)
-    if (head === '') {
-      unreadable('returned no head')
-      continue
-    }
-
-    snapshots.push({ row: buildRow(number, payload, head, ref) })
+    err.push(
+      `poll: #${item.number} ${item.reason}, so it keeps its last known state and goes unclassified`,
+    )
+    snapshots.push({ baseline: carryForward(old) })
   }
 
   const rows = snapshots.flatMap((snapshot) =>
@@ -996,7 +1035,7 @@ const main = (args: string[]): number => {
       base,
       countSince: countSince(row.number),
     })
-    for (const line of result.lines) console.log(line)
+    out.push(...result.lines)
     if (result.isChanged) isChanged = true
     final.push(
       formatBaseline({
@@ -1007,20 +1046,96 @@ const main = (args: string[]): number => {
   }
 
   for (const line of overlapLines(overlaps, known)) {
-    console.log(line)
+    out.push(line)
     isChanged = true
   }
 
   for (const entry of previous) {
     if (seen.has(entry.number)) continue
-    console.log(`GONE      #${entry.number} merged or closed`)
+    out.push(`GONE      #${entry.number} merged or closed`)
     isChanged = true
   }
 
-  if (!isChanged) console.log('No movement.')
-  writeFileSync(statePath, final.map((line) => `${line}\n`).join(''))
+  if (record) {
+    mkdirSync(stateDir, { recursive: true })
+    writeFileSync(statePath, final.map((line) => `${line}\n`).join(''))
+  }
 
-  return 0
+  return { err, isChanged, out, status: 0 }
 }
 
-if (import.meta.main) process.exitCode = main(process.argv.slice(2))
+/** The gap between reads in a wait, the interval the scheduled prompt used. */
+const DEFAULT_EVERY_S = 180
+
+/** A flag's value in seconds, null when absent and NaN when not positive. */
+const seconds = (args: string[], flag: string): null | number => {
+  const at = args.indexOf(flag)
+  if (at === -1) return null
+  const value = Number(args[at + 1])
+
+  return Number.isFinite(value) && value > 0 ? value : Number.NaN
+}
+
+const print = (result: PollRun): void => {
+  for (const line of result.err) console.error(line)
+  for (const line of result.out) console.log(line)
+}
+
+const main = async (args: string[]): Promise<number> => {
+  const root = mainRoot()
+  if (root === null) {
+    console.error('poll: not a git repository, so nothing is classified')
+
+    return 1
+  }
+
+  if (args[0] === '--check') return check(args[1] ?? '')
+
+  const record = !args.includes('--no-record')
+  const wait = seconds(args, '--wait')
+  const every = seconds(args, '--every') ?? DEFAULT_EVERY_S
+  if (Number.isNaN(wait) || Number.isNaN(every)) {
+    console.error('poll: --wait and --every take a positive number of seconds')
+
+    return 1
+  }
+
+  if (wait === null) {
+    const result = await pollOnce(root, { record })
+    print(result)
+    if (result.status === 0 && !result.isChanged) console.log('No movement.')
+
+    return result.status
+  }
+
+  // Only movement ends the wait early. A failed read, of one pull request or of
+  // the whole open list, holds to the cap, since one failing every run would end
+  // each wait at once and the re-arm would spin. Its lines ride with the exit,
+  // and a list still unreadable at the cap exits 1.
+  const deadline = Date.now() + wait * 1000
+  const failed = new Set<string>()
+  for (;;) {
+    const result = await pollOnce(root, { record })
+    for (const line of result.err) failed.add(line)
+    if (result.status === 0 && result.isChanged) {
+      print({ ...result, err: [...failed] })
+
+      return 0
+    }
+    // A quiet wait never ends before its cap, whatever `--every` says, since an
+    // early exit is a re-arm the orchestrator spends a turn on.
+    const left = deadline - Date.now()
+    if (left <= 0) {
+      for (const line of failed) console.error(line)
+      if (result.status !== 0) return result.status
+      console.log('No movement.')
+
+      return 0
+    }
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.min(every * 1000, left)),
+    )
+  }
+}
+
+if (import.meta.main) process.exitCode = await main(process.argv.slice(2))

@@ -1,6 +1,7 @@
-import { execFileSync, spawnSync } from 'node:child_process'
+import { execFileSync, spawn, spawnSync } from 'node:child_process'
 import {
   chmodSync,
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -10,6 +11,7 @@ import {
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { runAsync } from '../../claude/skills/role-orchestrator/scripts/repo'
 
 const SCRIPT = join(
   import.meta.dirname,
@@ -163,8 +165,8 @@ interface PollResult {
   stdout: string
 }
 
-const poll = (): PollResult => {
-  const run = spawnSync('bun', [SCRIPT], {
+const poll = (...args: string[]): PollResult => {
+  const run = spawnSync('bun', [SCRIPT, ...args], {
     cwd: join(root, 'repo'),
     encoding: 'utf8',
     env: buildEnv(),
@@ -172,6 +174,14 @@ const poll = (): PollResult => {
 
   return { status: run.status, stderr: run.stderr, stdout: run.stdout.trim() }
 }
+
+/** How many open-list reads the stub has answered since the file was last cleared. */
+const readCount = (path: string): number =>
+  existsSync(path)
+    ? readFileSync(path, 'utf8')
+        .split('\n')
+        .filter((line) => line !== '').length
+    : 0
 
 // The stub refuses the reviews and comments reads while this file exists, which
 // is how a run reaches the carry-forward path without needing the network to
@@ -210,6 +220,8 @@ beforeEach(() => {
       '  case "$arg" in',
       '    graphql) exit 1 ;;',
       '    "repos/{owner}/{repo}/pulls?state=open"*)',
+      `      echo read >> "${fixtures}/list-reads"`,
+      `      if [ -f "${fixtures}/list-unreadable" ]; then exit 1; fi`,
       `      if [ -f "${fixtures}/open.txt" ]; then cat "${fixtures}/open.txt"; else echo 7; fi; exit 0 ;;`,
       '    "$pulls"*/reviews*)',
       '      n=${arg#"$pulls"}; n=${n%%/*}',
@@ -418,6 +430,143 @@ describe('poll', () => {
     )
 
     expect(poll().stdout).toBe('No movement.')
+  })
+
+  // A run made to time or inspect the board must leave the movement it saw for
+  // the next real run, rather than swallowing it into the baseline.
+  it('should report movement without recording it under --no-record', () => {
+    writeThread([{ heading: '## Review', submittedAt: FIRST_PASS }], [])
+    const baseline = join(root, 'repo', '.canon', 'tmp', 'pr', 'poll')
+
+    const inspected = poll('--no-record')
+
+    expect(inspected.stdout).toContain('#7')
+    expect(existsSync(join(baseline, 'baseline.txt'))).toBe(false)
+    expect(poll().stdout).toBe(inspected.stdout)
+  })
+
+  // A background wait costs the orchestrator nothing until it exits, so a still
+  // board must hold it to the cap and leave the baseline as a plain run did.
+  it('should print one No movement line at the wait cap and record nothing new', () => {
+    writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+    poll()
+    const baseline = join(
+      root,
+      'repo',
+      '.canon',
+      'tmp',
+      'pr',
+      'poll',
+      'baseline.txt',
+    )
+    const settled = readFileSync(baseline, 'utf8')
+
+    const waited = poll('--wait', '1', '--every', '60')
+
+    expect(waited.status).toBe(0)
+    expect(waited.stdout).toBe('No movement.')
+    expect(readFileSync(baseline, 'utf8')).toBe(settled)
+  })
+
+  // An interval as long as the cap once ended the wait after its first read, so
+  // a re-arm under a cloud reviewer spun every few seconds.
+  it('should hold a quiet wait to its cap when the interval matches it', () => {
+    writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+    poll()
+    const started = Date.now()
+
+    const waited = poll('--wait', '2', '--every', '2')
+
+    expect(waited.stdout).toBe('No movement.')
+    expect(Date.now() - started).toBeGreaterThanOrEqual(2000)
+  })
+
+  it('should exit on the first run that reports movement', () => {
+    writeThread([{ heading: '## Review', submittedAt: FIRST_PASS }], [])
+    const started = Date.now()
+
+    const waited = poll('--wait', '60', '--every', '30')
+
+    expect(waited.stdout).toContain('#7')
+    expect(waited.stdout).not.toContain('No movement.')
+    expect(Date.now() - started).toBeLessThan(20_000)
+  })
+
+  it('should keep reading until a later run reports movement', async () => {
+    writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+    poll()
+    const child = spawn('bun', [SCRIPT, '--wait', '30', '--every', '1'], {
+      cwd: join(root, 'repo'),
+      env: buildEnv(),
+    })
+    let stdout = ''
+    child.stdout.setEncoding('utf8')
+    child.stdout.on('data', (chunk: string) => {
+      stdout += chunk
+    })
+    const exited = new Promise<null | number>((resolve) =>
+      child.on('close', resolve),
+    )
+
+    // The reply lands only once the wait has made a quiet read, so the exit
+    // can only come from a later read, however slow the runner starts.
+    const reads = join(root, 'fixtures', 'list-reads')
+    rmSync(reads, { force: true })
+    while (readCount(reads) < 1) {
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    }
+    writeThread(
+      [{ heading: '## Review closed', submittedAt: CLOSE_OUT }],
+      [{ createdAt: '2026-08-20T03:00:00Z', heading: '## Review response' }],
+    )
+
+    expect(await exited).toBe(0)
+    expect(stdout).toContain('RESPONSE  #7')
+    expect(readCount(reads)).toBeGreaterThanOrEqual(2)
+  })
+
+  it('should hold a wait past an open list that fails every read', () => {
+    writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+    writeFileSync(join(root, 'fixtures', 'list-unreadable'), '')
+    const reads = join(root, 'fixtures', 'list-reads')
+    rmSync(reads, { force: true })
+    const started = Date.now()
+
+    const waited = poll('--wait', '3', '--every', '1')
+
+    expect(waited.status).toBe(1)
+    expect(waited.stderr).toContain('open pull request list could not be read')
+    expect(readCount(reads)).toBeGreaterThanOrEqual(2)
+    expect(Date.now() - started).toBeGreaterThanOrEqual(2000)
+  })
+
+  it('should read a hung command as failed once its timeout passes', async () => {
+    const started = Date.now()
+
+    const result = await runAsync('sleep', ['5'], 200)
+
+    expect(result.isOk).toBe(false)
+    expect(Date.now() - started).toBeLessThan(3000)
+  })
+
+  it('should hold a wait past a pull request that fails every read', () => {
+    writeThread([{ heading: '## Review closed', submittedAt: CLOSE_OUT }], [])
+    poll()
+    breakView()
+
+    const waited = poll('--wait', '1', '--every', '60')
+
+    expect(waited.stdout).toBe('No movement.')
+    expect(waited.stderr).toContain('#7 could not be read')
+  })
+
+  it('should refuse a wait that is not a positive number of seconds', () => {
+    writeThread([], [])
+
+    const refused = poll('--wait', 'soon')
+
+    expect(refused.status).toBe(1)
+    expect(refused.stderr).toContain('--wait')
   })
 
   // Two reads feed one payload. A comments read that fails beside a reviews
@@ -688,6 +837,23 @@ describe('poll', () => {
         'STALE     #7 main changed 1 file(s) it writes since its base: a.txt',
       )
       expect(poll().stdout).toBe('No movement.')
+    })
+
+    // More pull requests than the read pool holds, so a run finishing reads out
+    // of order would print its lines out of order too.
+    it('should report pull requests in list order however their reads finish', () => {
+      const numbers = ['3', '5', '7', '9', '11']
+      for (const number of numbers) {
+        openPull(number, commit(base, `pr${number}`, { 'a.txt': number }))
+      }
+      listOpen(...numbers)
+
+      const opened = poll()
+        .stdout.split('\n')
+        .filter((line) => line.startsWith('OPENED'))
+        .map((line) => /#(\d+)/.exec(line)?.[1])
+
+      expect(opened).toEqual(numbers)
     })
 
     it('should not report a branch main moved under only on paths it does not write', () => {
