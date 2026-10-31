@@ -1,6 +1,10 @@
 {
   "autoMemoryEnabled": false,
   "permissions": {
+    "allow": [
+      "Bash(git push --force-with-lease)",
+      "Bash(git push --force-with-lease origin HEAD)"
+    ],
     "deny": ["Agent", "Task", "Bash(canon pr merge:*)", "Bash(gh pr merge:*)"]
   },
   "hooks": {
