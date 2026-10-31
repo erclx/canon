@@ -17,7 +17,7 @@
       "findings": 3
     },
     "migrate status": {
-      "exit": 0,
+      "exit": 2,
       "findings": 0
     },
     "format": {

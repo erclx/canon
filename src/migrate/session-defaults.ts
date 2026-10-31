@@ -1,8 +1,8 @@
 /**
  * Adds the session defaults the seeded `.claude/settings.json` carries to a
  * target that was seeded before them: the subagent deny, the memory default,
- * the merge deny entries, and the plan guard's PreToolUse wiring where the
- * project holds the guard script.
+ * the merge deny entries, the lease push allow and its asks, and the plan
+ * guard's PreToolUse wiring where the project holds the guard script.
  *
  * `canon claude init` copies a seed only when the file is absent, so a target
  * holding its own settings never sees a later seed change. This verb adds each
@@ -27,6 +27,22 @@ export const DENIED_TOOLS: readonly string[] = ['Agent', 'Task']
 export const MERGE_DENIED: readonly string[] = [
   'Bash(canon pr merge:*)',
   'Bash(gh pr merge:*)',
+]
+
+/**
+ * The lease push a worker runs after rebasing onto a merged pull request. An
+ * allow rule resolves before auto mode's classifier, which otherwise blocks a
+ * push whose rebased history it cannot attribute to the session. The trailing
+ * ` *` also matches the bare command, and covers `origin HEAD`.
+ */
+export const PUSH_ALLOWED: readonly string[] = [
+  'Bash(git push --force-with-lease *)',
+]
+
+/** Ask rules win over the allow above, so a lease push naming main prompts. */
+export const PUSH_ASKED: readonly string[] = [
+  'Bash(git push --force-with-lease origin main*)',
+  'Bash(git push --force-with-lease origin master*)',
 ]
 
 /** The command the seed wires, as the seeded settings spell it. */
@@ -61,6 +77,8 @@ export interface SessionDefaultsPlan {
   readonly predates: boolean
   /** True when the deny list lacks any merge entry, whatever else it holds. */
   readonly lacksMergeDeny: boolean
+  /** True when the allow list lacks the lease push entry. */
+  readonly lacksPushAllow: boolean
 }
 
 export type SessionDefaultsRead =
@@ -92,12 +110,23 @@ export function planSessionDefaults(
   const next: SettingsRecord = { ...current }
   const permissions = isRecord(current.permissions) ? current.permissions : {}
   const deny = Array.isArray(permissions.deny) ? permissions.deny : []
+  const allow = Array.isArray(permissions.allow) ? permissions.allow : []
+  const ask = Array.isArray(permissions.ask) ? permissions.ask : []
 
   const subagentsMissing = DENIED_TOOLS.filter((tool) => !deny.includes(tool))
   const mergeMissing = MERGE_DENIED.filter((entry) => !deny.includes(entry))
   const missing = [...subagentsMissing, ...mergeMissing]
-  if (missing.length > 0) {
-    next.permissions = { ...permissions, deny: [...deny, ...missing] }
+  const allowMissing = PUSH_ALLOWED.filter((entry) => !allow.includes(entry))
+  const askMissing = PUSH_ASKED.filter((entry) => !ask.includes(entry))
+
+  const nextPermissions: SettingsRecord = { ...permissions }
+  if (missing.length > 0) nextPermissions.deny = [...deny, ...missing]
+  if (allowMissing.length > 0) {
+    nextPermissions.allow = [...allow, ...allowMissing]
+  }
+  if (askMissing.length > 0) nextPermissions.ask = [...ask, ...askMissing]
+  if (missing.length + allowMissing.length + askMissing.length > 0) {
+    next.permissions = nextPermissions
   }
 
   const memoryAbsent = !('autoMemoryEnabled' in current)
@@ -111,6 +140,8 @@ export function planSessionDefaults(
 
   const keys: SettingsKey[] = [
     { label: 'permissions.deny', changed: missing.length > 0 },
+    { label: 'permissions.allow', changed: allowMissing.length > 0 },
+    { label: 'permissions.ask', changed: askMissing.length > 0 },
     { label: 'autoMemoryEnabled', changed: memoryAbsent },
     { label: 'hooks.PreToolUse', changed: preToolUse !== undefined },
   ]
@@ -123,6 +154,7 @@ export function planSessionDefaults(
       subagentsMissing.length === DENIED_TOOLS.length &&
       mergeMissing.length === MERGE_DENIED.length,
     lacksMergeDeny: mergeMissing.length > 0,
+    lacksPushAllow: allowMissing.length > 0,
   }
 }
 
@@ -222,10 +254,15 @@ export async function readSessionDefaults(
   if (permissions !== undefined && !isRecord(permissions)) {
     return { kind: 'refused', reason: `${path}: permissions is not an object` }
   }
-  if (permissions?.deny !== undefined && !Array.isArray(permissions.deny)) {
-    return {
-      kind: 'refused',
-      reason: `${path}: permissions.deny is not a list`,
+  for (const list of ['deny', 'allow', 'ask'] as const) {
+    if (
+      permissions?.[list] !== undefined &&
+      !Array.isArray(permissions[list])
+    ) {
+      return {
+        kind: 'refused',
+        reason: `${path}: permissions.${list} is not a list`,
+      }
     }
   }
 
