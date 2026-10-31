@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.76.0](https://github.com/erclx/canon/compare/v5.75.0...v5.76.0) (2026-10-31)
+
+
+### Features
+
+* **capture:** render light and dark social cards in design-identity ([#2861](https://github.com/erclx/canon/issues/2861)) ([de990f5](https://github.com/erclx/canon/commit/de990f543f7970c04548aa4f793766db5d87b68a))
+* **claude:** allow the exact lease push forms in seeded settings ([#2859](https://github.com/erclx/canon/issues/2859)) ([2f5a6e8](https://github.com/erclx/canon/commit/2f5a6e801e51cefef98f46a7b33b1cd6df7717a3))
+* **orchestrate:** run the review poll in the background until movement ([#2860](https://github.com/erclx/canon/issues/2860)) ([28101da](https://github.com/erclx/canon/commit/28101da96a8ad19e8ded474fad0de15344f4ac41))
+* **skills:** add issue-triage for a repository's open GitHub issues ([#2856](https://github.com/erclx/canon/issues/2856)) ([910372f](https://github.com/erclx/canon/commit/910372fe7026b9e3f5e2b17648a86dd685081acf))
+* **skills:** offer a follow-up on a duplicate issue before filing ([#2857](https://github.com/erclx/canon/issues/2857)) ([ddcbf69](https://github.com/erclx/canon/commit/ddcbf69d5c7cb60242b3d7b0bfb23ffbd4fd858e))
+
 ## [5.75.0](https://github.com/erclx/canon/compare/v5.74.0...v5.75.0) (2026-10-29)
 
 
