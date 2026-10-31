@@ -27,7 +27,7 @@ Beside `src/`, holds the tests, the social card route, and the files served as t
 
 - `e2e/` owns the Playwright suite, which runs on all three browsers
 - `card-src/` owns the social card route, served by `card.config.mjs` as `bun run web:card` on 4421 plus `WORKTREE_PORT_OFFSET`
-- `web:card:check` fails a build carrying `og-card-marker` or any `*og-card*` file, which is why the published card is `social-card.png`
+- `web:card:check` runs the shipped exclusion check, which fails a build carrying `og-card-marker` or a built page under an `og-card` path and passes an image of that name
 - `public/assets/` holds symlinks only, the social card into `assets/frames/` and the film's MP4s and posters into `assets/loops/`
 - `public/previews/` holds committed renders written only by `scripts/core/regen-web-previews.ts`, and `.oxfmtrc.jsonc` ignores the folder
 
