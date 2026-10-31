@@ -41,7 +41,7 @@ gh issue list --state open --search "<keywords> in:title,body" --limit 5 --json 
 - Keep a candidate only when it describes the same defect, reading its body with `gh issue view <NNN> --json body` when the title leaves it open
 - With none kept, go to the preview and file a new issue
 - With one or more kept, ask once whether to add the findings to one of them as a comment or file a new issue, naming each by number and title
-- With no one to answer, as in a headless run, file a new issue and name each kept candidate in the result
+- With no one to answer, as in a headless run, file nothing and name each kept candidate, since a new issue there is the duplicate this check exists to stop
 
 ### Comment on the match
 
@@ -94,5 +94,4 @@ Respond with the one line for what was posted:
 
 - A new issue: `✅ Issue: <url>`
 - A comment on a match: `✅ Commented: <url>`
-
-After a new issue filed with candidates kept and nobody asked, add one line per candidate, `Possible duplicate: #<NNN> <title>`, and nothing else.
+- Nothing, with candidates kept and nobody to ask: `⏸️ Not filed. Possible duplicate:`, then one line per candidate as `#<NNN> <title>`
