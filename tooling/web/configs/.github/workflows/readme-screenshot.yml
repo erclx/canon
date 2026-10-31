@@ -74,10 +74,12 @@ jobs:
         # Unconditional: the cache holds browser binaries and nothing apt
         # wrote, so gating this on a cache hit leaves a warm run launching
         # chromium without the libraries it needs.
-        run: bunx playwright install-deps chromium
+        timeout-minutes: 10
+        run: bash scripts/install-playwright-deps.sh chromium
 
       - name: Install Playwright Browser
         if: steps.playwright-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 5
         run: bunx playwright install chromium
 
       - name: Capture README Screenshot
