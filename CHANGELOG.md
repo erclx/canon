@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.76.0](https://github.com/erclx/canon/compare/v5.75.0...v5.76.0) (2026-10-31)
+
+
+### Features
+
+* **skills:** add issue-triage for a repository's open GitHub issues ([#2856](https://github.com/erclx/canon/issues/2856)) ([910372f](https://github.com/erclx/canon/commit/910372fe7026b9e3f5e2b17648a86dd685081acf))
+* **skills:** offer a follow-up on a duplicate issue before filing ([#2857](https://github.com/erclx/canon/issues/2857)) ([ddcbf69](https://github.com/erclx/canon/commit/ddcbf69d5c7cb60242b3d7b0bfb23ffbd4fd858e))
+
 ## [5.75.0](https://github.com/erclx/canon/compare/v5.74.0...v5.75.0) (2026-10-29)
 
 
