@@ -29,15 +29,22 @@ Never run that sync to obtain the route, since it writes the stack's configs bes
 
 ## Writing and capturing the route
 
-1. Write the picked arm's `.card` markup into the route's `.card` element, leaving the marker, the stylesheet import, and the surrounding document alone.
+1. Write the arm's `.card` markup into the route's `.card` and its `[data-theme]` rules into the route's `<style>`, leaving the rest of the route alone.
 2. Keep the element at 600x315, half the 1200x630 target, since the capture's 2x scale factor is fixed and a 1200x630 element captures at 2400x1260.
 3. Start the card server in the background with `bun run card:dev` and read the port off its own output.
-4. Capture the route, naming the destination PNG rather than a directory, which is what a URL source takes for `--out`.
-5. Stop the server. Report the dimensions `canon capture` printed, confirming 1200x630.
+4. Capture the route twice while the server is up, once per theme, naming each destination PNG rather than a directory, which is what a URL source takes for `--out`.
+5. Stop the server. Report the dimensions `canon capture` printed for both cards, confirming 1200x630.
 
 ```bash
-canon capture http://localhost:<port>/og-card --selector .card --out <write-folder>/og-image.png
+canon capture http://localhost:<port>/og-card --selector .card --color-scheme light --out <write-folder>/og-image.png
+canon capture http://localhost:<port>/og-card --selector .card --color-scheme dark --out <write-folder>/og-image-dark.png
 ```
+
+The two captures differ only where something keys a second theme:
+
+- The scaffold's `.card` reads two color properties a stylesheet may set for one theme only, so the arm's rules from step 1 give the dark capture its dark set
+- `--color-scheme` writes the theme onto the route's root after it loads, so rules keyed on `data-theme`, a class, or the media query all answer to it
+- With no second set in the arm or the stylesheet, the PNGs match. Compare the image digests in their `.stamp` files, and on a match say the project got one card twice.
 
 ### Port and font refusals
 

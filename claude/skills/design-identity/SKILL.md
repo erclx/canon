@@ -65,6 +65,7 @@ Follow `${CLAUDE_SKILL_DIR}/../design-pick/SKILL.md` Step 1, with the decision f
 - Draft each arm inside the 1200x630 card frame, mark and type together, and add it with `frameboard frame add <page>/arm-<id> --width 1200 --height 630`, so one pick settles shape and composition
 - Arm 0 is the current mark when the Step 3 folder already holds a logo file (`favicon.svg`, `favicon.ico`, `logo.svg`, or similar). Arms start at 1 otherwise.
 - Structure every arm as a `.mark` element, the inline SVG alone, nested inside a `.card` element, the full composition, so Step 6 can address either
+- Give every arm a light and a dark set keyed on the `data-theme` attribute, as `design-pick` themes any arm. Step 7 captures the picked card once per theme.
 
 ## Step 5: draft, render, pick, and loop
 
@@ -94,6 +95,11 @@ The card leaves this batch and takes Step 7 instead. An icon is the mark alone a
 
 A card captured from a page this run deletes leaves a PNG and nothing that produced it, so renaming the project means another pick loop to move one string. Write the composition into a route the project keeps, and capture it through a running server so it reads the real stylesheet, tokens, and fonts.
 
+Both paths write two cards, each captured with `--color-scheme` set to its theme. An `og:image` tag names one URL that every viewer sees whatever their own theme, so only one is wired:
+
+- `og-image.png`, the light card, goes into `og:image`, keeping the name an existing tag already points at
+- `og-image-dark.png` stays beside it, so a later switch is a meta tag edit rather than another pick loop
+
 This is Astro-shaped for now, because Astro is the one web stack whose config gives a route a structural build exclusion. A project already holding the card route scaffold takes the route path, and everything else takes the page path. Say which one decided, since the two leave the project different things.
 
 ### The route path
@@ -102,17 +108,18 @@ Read `${CLAUDE_SKILL_DIR}/references/card-route.md` on reaching this path, for t
 
 ### The page path
 
-Where the project holds no route to write into, write `og-image.html` into `<dest>/render/` with its `.render` wrapper sized 600x315, then capture that one page:
+Where the project holds no route to write into, write the picked composition into `<dest>/card/` twice, as `og-image.html` and `og-image-dark.html`, each with its `.render` wrapper sized 600x315. A file source names its PNG after the page, so the two names are what land the two cards. Capture each page in its own theme:
 
 ```bash
-canon capture <dest>/render/og-image.html --selector .render --out <write-folder>
+canon capture <dest>/card/og-image.html --selector .render --color-scheme light --out <write-folder>
+canon capture <dest>/card/og-image-dark.html --selector .render --color-scheme dark --out <write-folder>
 ```
 
-It takes its own call because Step 6's batch is already captured by the time this step picks a path. Say that the card shipped as a PNG with no source, and that the project gains one when it grows a route to hold the composition.
+These take their own calls because Step 6's batch is already captured by the time this step picks a path, and one call renders one scheme. Say that the card shipped as a PNG with no source, and that the project gains one when it grows a route to hold the composition.
 
 ### Closing the scratch folder and the board
 
-Delete `<dest>` once both captures land, then close the board through `design-pick` Step 6 items 3 to 8, which archive every arm and delete the pages the run added. The route is not a leftover variant, since it holds the arm the operator picked.
+Delete `<dest>` once the icon and card captures land, then close the board through `design-pick` Step 6 items 3 to 8, which archive every arm and delete the pages the run added. The route is not a leftover variant, since it holds the arm the operator picked.
 
 A project whose card was generated before this route existed keeps its PNG. Say so rather than regenerating it, since the pick loop spends attention on a file nobody complained about, and the next real edit picks up the route.
 
@@ -123,9 +130,11 @@ A project whose card was generated before this route existed keeps its PNG. Say 
 📝 Wrote <write-folder>/icon-16x16.png (16x16)
 📝 Wrote card-src/pages/og-card.astro (route path only)
 📝 Wrote <write-folder>/og-image.png (1200x630)
+📝 Wrote <write-folder>/og-image-dark.png (1200x630)
 
 Write folder: <tier that decided>. Move the files if this project's own convention differs.
 Card source: <the route, captured through the card server|a scratch page, since this project holds no card route>.
+Wire og-image.png into og:image. The dark card stays beside it for a later switch.
 ```
 
 ## What this delegates

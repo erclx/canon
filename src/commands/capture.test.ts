@@ -177,6 +177,108 @@ describe('canon capture', () => {
     },
   )
 
+  it.each(['blue', 'Dark', ''])(
+    'should refuse --color-scheme %j ahead of any browser launch',
+    async (scheme) => {
+      const result = await runCapture([
+        '--selector',
+        '.t',
+        '--color-scheme',
+        scheme,
+      ])
+
+      expect(result.exitCode).toBe(1)
+      expect(result.stderr).toContain('--color-scheme')
+    },
+  )
+
+  describe('with a color scheme', () => {
+    /**
+     * Each theme sets a different width, so the PNG's width reads which theme
+     * the capture rendered without decoding a pixel.
+     */
+    async function captureWidth(
+      css: string,
+      args: readonly string[],
+    ): Promise<number> {
+      const dir = mkdtempSync(join(tmpdir(), 'canon-capture-scheme-'))
+      const page = join(dir, 'page.html')
+      writeFileSync(
+        page,
+        `<style>.t{height:20px;font-family:"DejaVu Sans Mono"}${css}</style><div class="t">hi</div>`,
+      )
+      const result = await runCapture([
+        page,
+        '--selector',
+        '.t',
+        '--out',
+        dir,
+        ...args,
+      ])
+      expect(result.exitCode, result.stderr).toBe(0)
+      return pngWidth(join(dir, 'page.png'))
+    }
+
+    const ATTRIBUTE_THEMED =
+      ".t{width:500px}[data-theme='light'] .t{width:100px}"
+    const MEDIA_THEMED =
+      '.t{width:500px}@media (prefers-color-scheme:dark){.t{width:200px}}'
+    const CLASS_THEMED = '.t{width:500px}.dark .t{width:300px}'
+
+    it.skipIf(!hasBrowser)(
+      'should render a data-theme light set under light',
+      { timeout: RUN_TIMEOUT_MS },
+      async () => {
+        expect(
+          await captureWidth(ATTRIBUTE_THEMED, ['--color-scheme', 'light']),
+        ).toBe(200)
+      },
+    )
+
+    it.skipIf(!hasBrowser)(
+      'should keep a data-theme default set under dark',
+      { timeout: RUN_TIMEOUT_MS },
+      async () => {
+        expect(
+          await captureWidth(ATTRIBUTE_THEMED, ['--color-scheme', 'dark']),
+        ).toBe(1000)
+      },
+    )
+
+    it.skipIf(!hasBrowser)(
+      'should resolve a prefers-color-scheme query under dark',
+      { timeout: RUN_TIMEOUT_MS },
+      async () => {
+        expect(
+          await captureWidth(MEDIA_THEMED, ['--color-scheme', 'dark']),
+        ).toBe(400)
+      },
+    )
+
+    it.skipIf(!hasBrowser)(
+      'should add the dark class to the root under dark',
+      { timeout: RUN_TIMEOUT_MS },
+      async () => {
+        expect(
+          await captureWidth(CLASS_THEMED, ['--color-scheme', 'dark']),
+        ).toBe(600)
+      },
+    )
+
+    it.skipIf(!hasBrowser)(
+      'should write no theme onto the page without the flag',
+      { timeout: RUN_TIMEOUT_MS },
+      async () => {
+        expect(
+          await captureWidth(
+            '.t{width:500px}[data-theme] .t,.light .t,.dark .t{width:100px}',
+            [],
+          ),
+        ).toBe(1000)
+      },
+    )
+  })
+
   it('should refuse a URL source with no --out destination', async () => {
     const result = await runCapture([
       'http://127.0.0.1:1',

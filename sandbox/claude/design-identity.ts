@@ -61,7 +61,7 @@ export default scenario({
         '        route scaffold is installed, and the skill must not run a tooling sync to get one.',
       )
       ctx.log.info(
-        'Expect: favicon.svg, one PNG per default size, and og-image.png (1200x630) written at the project root',
+        'Expect: favicon.svg, one PNG per default size, and og-image.png (light) and og-image-dark.png (1200x630) at the project root',
       )
       ctx.log.info(
         "Expect: canon capture's own stdout reports each PNG's rendered width and height",

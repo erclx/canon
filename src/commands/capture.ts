@@ -31,6 +31,9 @@ const DEFAULT_SOURCE = 'assets'
  */
 type Renderer = typeof import('@/capture/render')
 type CaptureResult = Awaited<ReturnType<Renderer['captureSources']>>[number]
+type ColorScheme = import('@/capture/render').ColorScheme
+
+const COLOR_SCHEMES: readonly ColorScheme[] = ['light', 'dark']
 
 /**
  * Holds wiring only. Every browser reference sits behind a dynamic import,
@@ -58,6 +61,10 @@ export function register(program: Command): void {
       '--width <px>',
       'Viewport width in pixels, so a media query resolves at that width',
     )
+    .option(
+      '--color-scheme <scheme>',
+      'Theme to render in, light or dark; defaults to whichever theme the page renders unset',
+    )
     .addHelpText(
       'after',
       [
@@ -70,12 +77,21 @@ export function register(program: Command): void {
         'font-family. --width takes one whole number and sets the viewport, so',
         'run it once per breakpoint with its own --out.',
         '',
+        '--color-scheme sets prefers-color-scheme, a data-theme attribute, and',
+        'a light or dark class on the root, so a stylesheet keyed on any of the',
+        'three renders that theme. Run it once per scheme with its own --out.',
+        '',
       ].join('\n'),
     )
     .action(
       async (
         source: string,
-        opts: { out?: string; selector?: string; width?: string },
+        opts: {
+          out?: string
+          selector?: string
+          width?: string
+          colorScheme?: string
+        },
       ): Promise<void> => {
         /**
          * Refused rather than defaulted, and refused ahead of every other
@@ -102,6 +118,15 @@ export function register(program: Command): void {
           return
         }
 
+        const colorScheme = parseColorScheme(opts.colorScheme)
+        if (colorScheme === null) {
+          frameError(
+            `--color-scheme takes ${COLOR_SCHEMES.join(' or ')}, got ${JSON.stringify(opts.colorScheme)}.`,
+          )
+          process.exitCode = 1
+          return
+        }
+
         const isUrl = isUrlSource(source)
         const sourcePath = isUrl ? source : resolve(process.cwd(), source)
         if (!isUrl && !existsSync(sourcePath)) {
@@ -117,6 +142,7 @@ export function register(program: Command): void {
           results = await renderer.captureSources(sourcePath, {
             selector,
             width,
+            colorScheme,
             outDir: opts.out ? resolve(process.cwd(), opts.out) : undefined,
           })
         } catch (error) {
@@ -158,6 +184,17 @@ function parseWidth(raw: string | undefined): number | undefined {
   if (raw === undefined) return undefined
   const value = Number(raw)
   return Number.isInteger(value) && value >= 1 ? value : Number.NaN
+}
+
+/**
+ * Undefined for an absent flag and `null` for a value naming no scheme, so the
+ * caller can tell no scheme from a bad one.
+ */
+function parseColorScheme(
+  raw: string | undefined,
+): ColorScheme | undefined | null {
+  if (raw === undefined) return undefined
+  return COLOR_SCHEMES.find((scheme) => scheme === raw) ?? null
 }
 
 /**
