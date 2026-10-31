@@ -1,7 +1,7 @@
 // Shared by the poll and the watch. Imports are `node:` builtins only, since
 // the plugin ships `claude/` alone and a cached plugin root carries no
 // `node_modules`.
-import { spawnSync } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 
 export interface RunResult {
   isOk: boolean
@@ -16,6 +16,43 @@ export const run = (command: string, args: string[]): RunResult => {
   })
 
   return { isOk: result.status === 0, stdout: result.stdout ?? '' }
+}
+
+/** `run` without blocking, so reads for several pull requests overlap. */
+export const runAsync = (command: string, args: string[]): Promise<RunResult> =>
+  new Promise((resolve) => {
+    const child = spawn(command, args, { stdio: ['ignore', 'pipe', 'ignore'] })
+    let stdout = ''
+    child.stdout.setEncoding('utf8')
+    child.stdout.on('data', (chunk: string) => {
+      stdout += chunk
+    })
+    child.on('error', () => resolve({ isOk: false, stdout: '' }))
+    child.on('close', (status) => resolve({ isOk: status === 0, stdout }))
+  })
+
+/**
+ * Maps every item with at most `limit` in flight, keeping results in input
+ * order, so output stays stable however the reads finish.
+ */
+export const mapPool = async <T, R>(
+  items: readonly T[],
+  limit: number,
+  map: (item: T) => Promise<R>,
+): Promise<R[]> => {
+  const results: R[] = Array.from({ length: items.length })
+  let next = 0
+  const worker = async (): Promise<void> => {
+    while (next < items.length) {
+      const index = next++
+      results[index] = await map(items[index] as T)
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, worker),
+  )
+
+  return results
 }
 
 /**

@@ -1,6 +1,7 @@
 import { execFileSync, spawnSync } from 'node:child_process'
 import {
   chmodSync,
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -163,8 +164,8 @@ interface PollResult {
   stdout: string
 }
 
-const poll = (): PollResult => {
-  const run = spawnSync('bun', [SCRIPT], {
+const poll = (...args: string[]): PollResult => {
+  const run = spawnSync('bun', [SCRIPT, ...args], {
     cwd: join(root, 'repo'),
     encoding: 'utf8',
     env: buildEnv(),
@@ -418,6 +419,19 @@ describe('poll', () => {
     )
 
     expect(poll().stdout).toBe('No movement.')
+  })
+
+  // A run made to time or inspect the board must leave the movement it saw for
+  // the next real run, rather than swallowing it into the baseline.
+  it('should report movement without recording it under --no-record', () => {
+    writeThread([{ heading: '## Review', submittedAt: FIRST_PASS }], [])
+    const baseline = join(root, 'repo', '.canon', 'tmp', 'pr', 'poll')
+
+    const inspected = poll('--no-record')
+
+    expect(inspected.stdout).toContain('#7')
+    expect(existsSync(join(baseline, 'baseline.txt'))).toBe(false)
+    expect(poll().stdout).toBe(inspected.stdout)
   })
 
   // Two reads feed one payload. A comments read that fails beside a reviews
@@ -688,6 +702,23 @@ describe('poll', () => {
         'STALE     #7 main changed 1 file(s) it writes since its base: a.txt',
       )
       expect(poll().stdout).toBe('No movement.')
+    })
+
+    // More pull requests than the read pool holds, so a run finishing reads out
+    // of order would print its lines out of order too.
+    it('should report pull requests in list order however their reads finish', () => {
+      const numbers = ['3', '5', '7', '9', '11']
+      for (const number of numbers) {
+        openPull(number, commit(base, `pr${number}`, { 'a.txt': number }))
+      }
+      listOpen(...numbers)
+
+      const opened = poll()
+        .stdout.split('\n')
+        .filter((line) => line.startsWith('OPENED'))
+        .map((line) => /#(\d+)/.exec(line)?.[1])
+
+      expect(opened).toEqual(numbers)
     })
 
     it('should not report a branch main moved under only on paths it does not write', () => {
