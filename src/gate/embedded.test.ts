@@ -1,0 +1,153 @@
+import { describe, expect, it } from 'vitest'
+
+import { embeddedBlocksIn } from '@/gate/embedded'
+
+const page = (rows: number): string =>
+  [
+    '<main>',
+    ...Array.from({ length: rows - 2 }, (_, n) => `  <p>${n}</p>`),
+    '</main>',
+  ].join('\n')
+
+const template = (body: string): string => `const html = \`${body}\`\n`
+
+describe('embeddedBlocksIn', () => {
+  describe('pages', () => {
+    it('should report a six-line static page', () => {
+      const source = template(page(6))
+
+      expect(embeddedBlocksIn('a.ts', source)).toEqual([
+        { file: 'a.ts', line: 1, kind: 'page', lines: 6, branches: false },
+      ])
+    })
+
+    it('should pass a four-line static page', () => {
+      expect(embeddedBlocksIn('a.ts', template(page(4)))).toEqual([])
+    })
+
+    it('should pass a five-line static page', () => {
+      expect(embeddedBlocksIn('a.ts', template(page(5)))).toEqual([])
+    })
+
+    it('should report a long page carrying one interpolation', () => {
+      const source = template(`${page(8)}\n<p>\${title}</p>`)
+
+      expect(embeddedBlocksIn('a.ts', source)).toHaveLength(1)
+    })
+
+    it('should pass a template whose lines are built from data', () => {
+      const body = [
+        '<ul>',
+        ...Array.from({ length: 8 }, (_, n) => `<li>\${row${n}}</li>`),
+        '</ul>',
+      ].join('\n')
+
+      expect(embeddedBlocksIn('a.ts', template(body))).toEqual([])
+    })
+
+    it('should report a page written as one quoted string with escaped newlines', () => {
+      const source = `const html = '${page(7).replaceAll('\n', '\\n')}'\n`
+
+      expect(embeddedBlocksIn('a.ts', source)).toHaveLength(1)
+    })
+
+    it('should pass markup in a format that is not HTML', () => {
+      const source = template(
+        '<rule name="a">\n# A\n</rule>\n<rule name="b">\n# B\n</rule>\n<rule>\n</rule>',
+      )
+
+      expect(embeddedBlocksIn('a.ts', source)).toEqual([])
+    })
+  })
+
+  describe('stylesheets', () => {
+    it('should report a static stylesheet past the limit', () => {
+      const source = template(
+        // canon-allow-embedded: the stage's own input under test
+        '.a {\n  color: red;\n  top: 0;\n}\n.b {\n  left: 0;\n}',
+      )
+
+      expect(embeddedBlocksIn('a.ts', source)).toEqual([
+        {
+          file: 'a.ts',
+          line: 1,
+          kind: 'stylesheet',
+          lines: 7,
+          branches: false,
+        },
+      ])
+    })
+  })
+
+  describe('scripts', () => {
+    it('should report a one-line script that branches', () => {
+      const source = `const stub = 'if [ "$1" = api ]; then exit 1; fi'\n`
+
+      expect(embeddedBlocksIn('a.ts', source)).toEqual([
+        { file: 'a.ts', line: 1, kind: 'script', lines: 1, branches: true },
+      ])
+    })
+
+    it('should report a straight-line script with a shebang past the limit', () => {
+      const body = ['#!/usr/bin/env bash', 'a', 'b', 'c', 'd', 'e'].join('\n')
+
+      expect(embeddedBlocksIn('a.ts', template(body))).toEqual([
+        { file: 'a.ts', line: 1, kind: 'script', lines: 6, branches: false },
+      ])
+    })
+
+    it('should pass a short straight-line script with a shebang', () => {
+      const source = template('#!/bin/sh\nexit 0')
+
+      expect(embeddedBlocksIn('a.ts', source)).toEqual([])
+    })
+
+    it('should pass a doc comment saying if, then, and done', () => {
+      const source = [
+        '/**',
+        ' * `if` the run is green `then` the stage is done, and the loop',
+        ' * for each file ends at `fi` or `done`.',
+        ' */',
+        '// if x; then y; fi',
+        'export const a = 1',
+        '',
+      ].join('\n')
+
+      expect(embeddedBlocksIn('a.ts', source)).toEqual([])
+    })
+
+    it('should read past a regular expression holding a backtick', () => {
+      const source = [
+        'const tick = /`/g',
+        `const stub = 'if [ -f x ]; then exit 1; fi'`,
+        '',
+      ].join('\n')
+
+      expect(embeddedBlocksIn('a.ts', source)).toEqual([
+        { file: 'a.ts', line: 2, kind: 'script', lines: 1, branches: true },
+      ])
+    })
+  })
+
+  describe('the marker', () => {
+    it('should pass a block whose opening line carries the marker with a reason', () => {
+      const source = `// canon-allow-embedded: the scanner's input under test\n${template(page(8))}`
+
+      expect(embeddedBlocksIn('a.ts', source)).toEqual([])
+    })
+
+    it('should report a block whose marker carries no reason', () => {
+      const source = `// canon-allow-embedded:\n${template(page(8))}`
+
+      expect(embeddedBlocksIn('a.ts', source)).toHaveLength(1)
+    })
+  })
+
+  it('should report the line a block opens on', () => {
+    const source = `const a = 1\nconst b = \`x \${a}\`\n${template(page(8))}`
+
+    expect(embeddedBlocksIn('a.ts', source)).toEqual([
+      expect.objectContaining({ line: 3, kind: 'page' }),
+    ])
+  })
+})
