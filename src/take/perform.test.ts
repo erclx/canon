@@ -255,6 +255,92 @@ describe('performSteps key', () => {
   })
 })
 
+/** The end of a logged event that runs for a length, or its time when none. */
+function endOf(event: LogEvent | undefined): number {
+  if (!event) return Number.NaN
+  return 'ms' in event ? event.t + event.ms : event.t
+}
+
+const NOTE: Box = { x: 300, y: 600, width: 200, height: 40 }
+
+describe('performSteps pacing around a press', () => {
+  it('should rest on the target 300 ms between the glide and the press', async () => {
+    const { log } = await perform({ '#card': CARD }, [
+      { kind: 'click', target: '#card' },
+    ])
+
+    const [glide, press] = log
+    expect(press?.kind).toBe('click')
+    expect((press?.t ?? 0) - endOf(glide)).toBeCloseTo(300, 5)
+  })
+
+  it('should hold 500 ms on the result before the next glide sets off', async () => {
+    const { log } = await perform({ '#card': CARD, '#lane': LANE }, [
+      { kind: 'click', target: '#card' },
+      { kind: 'click', target: '#lane' },
+    ])
+
+    const [, press, next] = log
+    // The press itself sends a down and an up, a frame each.
+    expect(next?.kind).toBe('move')
+    expect((next?.t ?? 0) - (press?.t ?? 0)).toBeCloseTo(
+      2 * FRAME_MS + 500,
+      5,
+    )
+  })
+
+  it('should rest and hold around a drag the way it does around a click', async () => {
+    const { log } = await perform({ '#card': CARD, '#lane': LANE }, [
+      { kind: 'drag', from: '#card', to: '#lane' },
+      { kind: 'key', keys: 'Escape' },
+    ])
+
+    const [glide, , drag, key] = log
+    expect((drag?.t ?? 0) - endOf(glide)).toBeCloseTo(300, 5)
+    expect((key?.t ?? 0) - endOf(drag)).toBeCloseTo(500, 5)
+  })
+
+  it('should wait 400 ms between the field click and the first key', async () => {
+    const { log } = await perform({ '#note': NOTE }, [
+      { kind: 'fill', target: '#note', text: 'hi' },
+    ])
+
+    const [, press, typed] = log
+    expect(typed?.kind).toBe('type')
+    expect((typed?.t ?? 0) - (press?.t ?? 0)).toBeCloseTo(2 * FRAME_MS + 400, 5)
+  })
+
+  it('should hold 500 ms on the typed field once the last key lands', async () => {
+    const { log } = await perform({ '#note': NOTE }, [
+      { kind: 'fill', target: '#note', text: 'hi' },
+      { kind: 'key', keys: 'Escape' },
+    ])
+
+    const [, , typed, key] = log
+    expect((key?.t ?? 0) - endOf(typed)).toBeCloseTo(500, 5)
+  })
+
+  it('should add no pause to setup steps, which run before the clip', async () => {
+    const { stage, sent } = recordingStage({ '#card': CARD })
+
+    await performSteps(stage, [{ kind: 'click', target: '#card' }], {
+      pointer: { x: 120, y: 110 },
+    })
+
+    expect(sent).toHaveLength(2)
+    expect(stage.now()).toBeCloseTo(2 * FRAME_MS, 5)
+  })
+
+  it('should leave a key with no pointer press unpaced', async () => {
+    const { log } = await perform({}, [
+      { kind: 'key', keys: 'Escape' },
+      { kind: 'key', keys: 'Escape' },
+    ])
+
+    expect(log.map((event) => event.t)).toEqual([0, 2 * FRAME_MS])
+  })
+})
+
 describe('performSteps move hold', () => {
   it('should let the hold pass at the glide end and log it on the move', async () => {
     const { log } = await perform({ '#card': CARD }, [

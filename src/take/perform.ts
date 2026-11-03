@@ -29,6 +29,16 @@ const SCROLL_MS = 900
 /** How long a drag holds still after its press, so the viewer sees the grab land. */
 const GRAB_MS = 150
 
+/**
+ * The pacing the operator settled by eye in groundwork track
+ * `210-film-craft-and-soundtrack`: a rest on the target before a press, a hold
+ * on its result before the pointer leaves, and a pause between clicking a
+ * field and its first key, so the camera lands before anything changes.
+ */
+const REST_MS = 300
+const RESULT_MS = 500
+const TYPE_MS = 400
+
 export type PointerInput =
   | {
       readonly type: 'move'
@@ -151,6 +161,7 @@ export async function performSteps(
           step.modifiers ?? [],
           step.kind === 'dblclick' ? 2 : 1,
         )
+        await pause(stage, state, RESULT_MS)
         break
       case 'drag':
         await drag(
@@ -177,6 +188,7 @@ export async function performSteps(
       case 'fill': {
         const box = await boxOf(stage, step.target)
         await click(stage, state, box, [], 1)
+        await pause(stage, state, TYPE_MS)
         const start = stage.now()
         for (const character of step.text) {
           await stage.key(character)
@@ -190,6 +202,7 @@ export async function performSteps(
           chars: step.text.length,
           ms: stage.now() - start,
         })
+        await pause(stage, state, RESULT_MS)
         break
       }
       case 'scroll': {
@@ -300,6 +313,7 @@ async function click(
 ): Promise<void> {
   const at = center(box)
   await moveTo(stage, state, at)
+  await pause(stage, state, REST_MS)
   await holding(stage, modifiers, async () => {
     state.log?.push({
       t: stage.now(),
@@ -318,6 +332,18 @@ async function click(
 }
 
 /**
+ * Lets `ms` of clip time pass while a beat is filmed, and none in setup, which
+ * no viewer sees.
+ */
+async function pause(
+  stage: Stage,
+  state: Performance,
+  ms: number,
+): Promise<void> {
+  if (state.log) await stage.hold(ms)
+}
+
+/**
  * Presses on the source, holds a moment so the page reads a grab rather than
  * a click, glides held to the target, and releases there. The drop target is
  * read before the press, so a page that moves it once a drag starts is
@@ -333,6 +359,7 @@ async function drag(
   const from = center(box)
   const to = center(drop)
   await moveTo(stage, state, from)
+  await pause(stage, state, REST_MS)
   await holding(stage, modifiers, async () => {
     const start = stage.now()
     const press = { clickCount: 1, ...withModifiers(modifiers) }
@@ -351,6 +378,7 @@ async function drag(
       ms: stage.now() - start,
     })
   })
+  await pause(stage, state, RESULT_MS)
 }
 
 /**
