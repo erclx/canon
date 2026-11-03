@@ -53,8 +53,13 @@ const REGEX_KEYWORDS =
  * published CLI, so a lexer tracking comment, string, regex, and template
  * state stands in for it.
  */
-export function literalsIn(source: string): Literal[] {
+function lex(source: string): {
+  readonly literals: Literal[]
+  /** Each comment's start, keyed by the end of its text. */
+  readonly comments: ReadonlyMap<number, number>
+} {
   const literals: Literal[] = []
+  const comments = new Map<number, number>()
   // One entry per open template expression, holding its brace depth.
   const expressions: number[] = []
   // One entry per open template, holding its start line and static text.
@@ -148,13 +153,16 @@ export function literalsIn(source: string): Literal[] {
       continue
     }
     if (char === '/' && next === '/') {
+      const start = i
       while (i < source.length && source[i] !== '\n') i++
+      comments.set(start + source.slice(start, i).trimEnd().length, start)
       continue
     }
     if (char === '/' && next === '*') {
       const end = source.indexOf('*/', i + 2)
       const stop = end === -1 ? source.length : end + 2
       for (let k = i; k < stop; k++) if (source[k] === '\n') line++
+      comments.set(stop, i)
       i = stop
       continue
     }
@@ -197,7 +205,7 @@ export function literalsIn(source: string): Literal[] {
     i++
   }
 
-  return literals
+  return { literals, comments }
 }
 
 const PAGE_OPENER = /^\s*<(?:!doctype|html|head|body)\b/i
@@ -277,14 +285,29 @@ function skipTrivia(source: string, from: number): number {
  * each of its literals alone reads as nothing. An array holding anything but
  * literals stays as its separate literals.
  */
-function blocksOf(source: string, literals: readonly Literal[]): Literal[] {
+function blocksOf(
+  source: string,
+  literals: readonly Literal[],
+  comments: ReadonlyMap<number, number>,
+): Literal[] {
+  // The offset of the last token before `from`, past whitespace and comments.
+  const tokenBefore = (from: number): number => {
+    let at = from
+    for (;;) {
+      while (at > 0 && /\s/.test(source[at - 1] ?? '')) at--
+      const start = comments.get(at)
+      if (start === undefined) return at - 1
+      at = start
+    }
+  }
+
   const byStart = new Map(literals.map((literal) => [literal.start, literal]))
   const merged = new Set<Literal>()
   const blocks: Literal[] = []
 
   for (const first of literals) {
     if (merged.has(first)) continue
-    const bracket = source.slice(0, first.start).trimEnd().length - 1
+    const bracket = tokenBefore(first.start)
     if (source[bracket] !== '[') continue
 
     const run: Literal[] = []
@@ -328,7 +351,8 @@ export function embeddedBlocksIn(
 ): EmbeddedBlock[] {
   const sourceLines = source.split('\n')
   const blocks: EmbeddedBlock[] = []
-  for (const literal of blocksOf(source, literalsIn(source))) {
+  const { literals, comments } = lex(source)
+  for (const literal of blocksOf(source, literals, comments)) {
     const found = kindOf(literal.text.replaceAll(INTERPOLATION, ''))
     if (found === undefined) continue
     const lines = staticLines(literal.text)

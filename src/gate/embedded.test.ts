@@ -215,6 +215,24 @@ describe('embeddedBlocksIn', () => {
       expect(embeddedBlocksIn('a.ts', source)).toHaveLength(1)
     })
 
+    it.each([
+      ['on its own line', '[\n  // the fake\n  \'case "$1" in\','],
+      ['on the bracket line', '[ // the fake\n  \'case "$1" in\','],
+      ['as a block', '[\n  /* the fake */\n  \'case "$1" in\','],
+    ])('should read past a comment above its first line, %s', (_, opening) => {
+      const source = `const stub = ${opening}\n  '  a) exit 0 ;;',\n  'esac',\n].join('\\n')\n`
+
+      expect(embeddedBlocksIn('a.ts', source)).toEqual([
+        { file: 'a.ts', line: 1, kind: 'script', lines: 3, branches: true },
+      ])
+    })
+
+    it('should not read a comment holding a bracket as the array', () => {
+      const source = `const a = 1 // [\nconst text = '<p>x</p>'\n`
+
+      expect(embeddedBlocksIn('a.ts', source)).toEqual([])
+    })
+
     it('should pass an array joined with another separator', () => {
       const source = joined(page(7).split('\n'), "' '")
 
