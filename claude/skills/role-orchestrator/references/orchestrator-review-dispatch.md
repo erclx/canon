@@ -1,9 +1,38 @@
 ---
 title: Orchestrator review dispatch runbook
-description: Which pull requests take a reviewer dispatched under role-reviewer, the model it runs on, when a UI reviewer goes beside it, when small pull requests share one reviewer pair, and how the cross-branch pass per wave reaches each brief
+description: The painted-proof check every pull request clears before a reviewer launches, which pull requests take a reviewer dispatched under role-reviewer, the model it runs on, when a UI reviewer goes beside it, when small pull requests share one reviewer pair, and how the cross-branch pass per wave reaches each brief
 ---
 
 Run this on every first pass, from `### The review dispatch` in the skill body. Review splits by what each side can see rather than by pass number. A dispatched reviewer holds one pull request and reads it deeper than this session can while holding a wave, and this session holds the wave and reads what no single pull request shows.
+
+## Proof before any reviewer
+
+A painted pull request missing proof goes back to its worker before any reviewer launches. Read it on every first pass, ahead of every launch below, and on every `MOVED` the poll routes here:
+
+```bash
+canon pr evidence <number> --check --json
+```
+
+Branch on the record's fields rather than on the exit code, and never derive the painted set from `gh pr diff` against a test written here, since the verb already reads it.
+
+| Record                         | Route                                                                                      |
+| ------------------------------ | ------------------------------------------------------------------------------------------ |
+| `uncaptured` lists paths       | Send it back for a capture and `pr-evidence`, naming each path as the record spells it     |
+| `owed` holds `evidence`        | Send it back to run `pr-evidence`, since an evidence image changed and no comment shows it |
+| `settled`, `uncaptured` empty  | Proof stands, so launch the reviewers below                                                |
+| `uncaptured` absent            | The base keeps no captures, so route on `owed` alone and never send it back for a capture  |
+| A refusal, such as `gh-failed` | Report the `reason`, launch the reviewers, and name the check unread in each brief         |
+
+`owed` holding only `preview` is the ship chain's deploy wait rather than missing proof, so it holds no reviewer.
+
+### Sending it back
+
+Message the session holding the branch, resolved the way `## Sending the handback` in `orchestrator-handback.md` resolves it, with the paths and the skill to run. Hold both reviewers until a re-read reads proof, since a code review on a head about to gain captures runs twice.
+
+- A worker reporting that no capture can be taken, such as a state no fixture reaches, releases the hold, so launch the reviewers
+- Carry the uncaptured paths as a fact in the code reviewer's brief then, since only a review pass may write the waiver `canon pr lift` reads
+- Re-read the check on the worker's reply or the next `MOVED`, never on a timer
+- A refusal never reads as proof. `canon pr lift` reads the same record and holds the mark on its own gate, so a launch past an unread check costs no merge.
 
 ## Every pull request takes a reviewer
 
@@ -19,6 +48,7 @@ Dispatch every pull request's review to a reviewer under `role-reviewer`, first 
 A pull request whose evidence record carries a checklist takes a second reviewer, a UI reviewer under `review-ui`, dispatched beside the code reviewer so the two passes run at once. Read the record with `canon pr evidence <number> --json` and branch on its `checklist` field rather than on the exit code.
 
 - A record carrying no checklist dispatches no UI reviewer, since the pass would stop on arrival
+- A pull request that gains a checklist in review takes its UI reviewer then, on the `MOVED` that brought it, since a first pass that read none launched nobody
 - The UI reviewer reads no diff and never hears the code verdict, so neither brief carries the other's result
 - Each posts its own family and runs `canon pr lift` on its close, and the verb lifts the draft mark only once both read closed at the head
 
