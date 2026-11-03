@@ -31,6 +31,11 @@ export interface Box {
   readonly height: number
 }
 
+/** A position the page was sent, at the clip time it was sent. */
+export interface SentPoint extends Point {
+  readonly t: number
+}
+
 export type LogEvent =
   | {
       readonly t: number
@@ -38,6 +43,15 @@ export type LogEvent =
       readonly from: Point
       readonly to: Point
       readonly ms: number
+      /**
+       * Every position the glide sent, in order. A reader draws the cursor off
+       * these rather than off the eased curve, since a page slower than a frame
+       * skips points the curve would still draw. Absent in a log written
+       * before the field and in a harness log, where the curve stands in.
+       */
+      readonly points?: readonly SentPoint[]
+      /** How long the camera holds aimed at `to` once the glide ends. */
+      readonly hold?: number
     }
   | {
       readonly t: number
@@ -190,13 +204,34 @@ export function along(from: Point, to: Point, progress: number): Point {
   return { x: from.x + (to.x - from.x) * k, y: from.y + (to.y - from.y) * k }
 }
 
-/** The pointer's position at a time on the clip's clock, read off the moves. */
+/**
+ * The pointer's position at a time on the clip's clock, read off the points
+ * each move sent, or off its eased curve when it carries none.
+ */
 export function cursorAt(events: readonly LogEvent[], ms: number): Point {
   let position = START
   for (const event of events) {
     if (event.kind !== 'move') continue
     if (ms < event.t) break
-    position = along(event.from, event.to, (ms - event.t) / event.ms)
+    position = event.points?.length
+      ? sentAt(event.from, event.points, ms)
+      : along(event.from, event.to, (ms - event.t) / event.ms)
   }
   return position
+}
+
+function sentAt(from: Point, points: readonly SentPoint[], ms: number): Point {
+  let before: SentPoint | undefined
+  for (const point of points) {
+    if (point.t > ms) {
+      if (!before) return from
+      const k = (ms - before.t) / (point.t - before.t)
+      return {
+        x: before.x + (point.x - before.x) * k,
+        y: before.y + (point.y - before.y) * k,
+      }
+    }
+    before = point
+  }
+  return before ? { x: before.x, y: before.y } : from
 }
