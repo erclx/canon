@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="{{left}} {{top}} {{side}} {{side}}">
+  <style>
+    .tile { fill: {{tileDark}}; stroke: {{tileDark}}; }
+    .c { fill: {{cDark}}; }
+    .pip { fill: {{pipDark}}; }
+    @media (prefers-color-scheme: light) {
+      .tile { fill: {{tileLight}}; stroke: {{edge}}; }
+      .c { fill: {{cLight}}; }
+      .pip { fill: {{pipLight}}; }
+    }
+  </style>
+  <rect class="tile" x="{{tileX}}" y="{{tileY}}" width="{{tileSide}}" height="{{tileSide}}" rx="{{tileRadius}}" stroke-width="{{edgeWidth}}" />
+  <g class="c">
+  {{shapes}}
+  </g>
+</svg>
+

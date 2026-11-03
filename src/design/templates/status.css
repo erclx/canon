@@ -1,0 +1,24 @@
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: var(--radius-marker);
+  background: var(--color-border);
+}
+
+.status.is-done::before {
+  background: var(--color-accent);
+}

@@ -6,6 +6,7 @@ import { fontFaceBlock } from '@/design/css'
 import { faviconLink } from '@/design/favicon'
 import type { FontFace } from '@/design/fonts'
 import { FONT_FACES } from '@/design/fonts'
+import { fillTemplate, readTemplate } from '@/design/template'
 import { colorValue } from '@/design/tokens'
 
 export interface RenderResult {
@@ -239,34 +240,14 @@ function buildHtml(
   const summary = tagged
     ? `\n<p class="note">${total - tagged} of ${total} cells are anchored to a source. The other ${tagged} ${verb} <code>? verify</code>, so nothing anchors them yet.</p>`
     : ''
-  // canon-allow-embedded: generated output, moved by v178.0
-  return `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">${favicon === undefined ? '' : `\n${faviconLink(favicon)}`}
-<title>Design tokens</title>
-<link rel="stylesheet" href="design.css">
-<style>
-${previewChrome()}
-  body { font-family: ${bodyStack}; margin: 2rem; max-width: 960px; color: var(--preview-ink); background: var(--preview-paper); }
-  h1 { margin-top: 0; }
-  h2 { margin-top: 2rem; border-bottom: 1px solid var(--preview-rule); padding-bottom: 0.25rem; }
-  table { border-collapse: collapse; width: 100%; margin-top: 0.5rem; }
-  th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--preview-rule); font-size: 14px; }
-  th { background: var(--preview-panel); font-weight: 600; }
-  .swatch { display: inline-block; width: 1.5rem; height: 1.5rem; border-radius: 4px; border: 1px solid var(--preview-rule); vertical-align: middle; margin-right: 0.5rem; }
-  .bar { display: inline-block; height: 1rem; background: var(--preview-muted); border-radius: 2px; vertical-align: middle; }
-  .note { color: var(--preview-muted); font-size: 13px; margin-top: 0.5rem; }
-  .empty { color: var(--preview-muted); font-style: italic; }${verifyStyle}
-</style>
-</head>
-<body>
-<h1>Design tokens</h1>
-<p class="note">Generated from <code>canon/DESIGN.md</code> by <code>bun run web:previews</code>. Token preview only, not a screen mock.</p>${summary}
-${sections.join('\n')}
-</body>
-</html>
-`
+  return fillTemplate(readTemplate('preview.html'), {
+    favicon: favicon === undefined ? '' : `\n${faviconLink(favicon)}`,
+    chrome: previewChrome(),
+    bodyStack,
+    verifyStyle,
+    summary,
+    sections: sections.join('\n'),
+  })
 }
 
 function sectionPersonality(text: string): string {
