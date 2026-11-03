@@ -940,6 +940,7 @@ describe.skipIf(!available())(
   () => {
     let server: { url: string; stop: () => void }
     const offsets: number[] = []
+    const lags: unknown[] = []
 
     beforeAll(async () => {
       const served = Bun.serve({ port: 0, fetch: () => html(PAINT_PAGE) })
@@ -956,6 +957,8 @@ describe.skipIf(!available())(
           if (result.status !== 'filmed') throw new Error(result.message)
           const [beat] = result.beats
           if (!beat) throw new Error('no drag beat')
+          const log = readFileSync(join(out, beat.log), 'utf8')
+          lags.push((JSON.parse(log) as TakeLog).lag)
           const offset = dragOffset(out, beat)
           if (offset !== undefined) offsets.push(offset)
         } finally {
@@ -976,6 +979,14 @@ describe.skipIf(!available())(
     it('should land two identical runs within 3 px of each other', () => {
       const [first = 0, second = Infinity] = offsets
       expect(Math.abs(first - second)).toBeLessThanOrEqual(3)
+    })
+
+    it('should record the lag each take shifted its log by', () => {
+      expect(lags.length).toBeGreaterThan(0)
+      for (const lag of lags) {
+        expect(lag).toBeGreaterThanOrEqual(FRAME_MS)
+        expect(lag).toBeLessThan(10 * FRAME_MS)
+      }
     })
   },
 )

@@ -172,7 +172,12 @@ async function filmBeat(
 
   let route: Route = beat.route
   let fallback: string | undefined
-  let filmed: { frames: number; events: readonly LogEvent[]; still: Buffer }
+  let filmed: {
+    frames: number
+    events: readonly LogEvent[]
+    lag?: number
+    still: Buffer
+  }
   if (beat.route === 'step') {
     try {
       filmed = await filmStepped({
@@ -203,6 +208,7 @@ async function filmBeat(
     route,
     clip: CLIP_SIZES[route],
     ...(beat.push === false ? { push: false as const } : {}),
+    ...(filmed.lag === undefined ? {} : { lag: filmed.lag }),
     frames: filmed.frames,
     events: filmed.events,
   }

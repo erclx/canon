@@ -40,6 +40,8 @@ const CALIBRATE_CAP_MS = 500
 export interface ScreencastTake {
   readonly frames: number
   readonly events: readonly LogEvent[]
+  /** What `events` were shifted by, absent when the page gave no frame to read. */
+  readonly lag?: number
   /** The clip's closing frame as a JPEG. */
   readonly still: Buffer
 }
@@ -111,10 +113,13 @@ export async function filmScreencast(request: {
 
     await transcode(webm, request.clip, FPS, filmedMs)
     const frames = await probeFrames(request.clip)
+    const closing = await lastFrame(request.clip, frames)
+    if (lag === undefined) return { frames, events, still: closing }
     return {
       frames,
-      events: lag === undefined ? events : events.map((e) => shifted(e, lag)),
-      still: await lastFrame(request.clip, frames),
+      events: events.map((event) => shifted(event, lag)),
+      lag: Number(lag.toFixed(1)),
+      still: closing,
     }
   } catch (error) {
     if (error instanceof TargetRefused && still) error.still = await still()
