@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { groupByTreatment } from '@/inventory/group'
 import { findSubject } from '@/inventory/subjects'
@@ -17,39 +18,11 @@ const QUERY = 'button, a[href]'
 
 /** Two rings and one element with no treatment at all, spread over two routes. */
 const PAGES: Record<string, string> = {
-  '/': `<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Home</title>
-    <style>
-      button { outline: none; }
-      button:focus-visible { outline: 2px solid rgb(37, 99, 235); outline-offset: 2px; }
-      a { outline: none; }
-      a:focus-visible { outline: 2px solid rgb(37, 99, 235); outline-offset: 2px; }
-      .bare, .bare:focus-visible { outline: none; outline-offset: 0; }
-    </style>
-  </head>
-  <body>
-    <button id="save">Save</button>
-    <a id="docs" href="/pricing">Pricing</a>
-    <button id="quiet" class="bare">Quiet</button>
-  </body>
-</html>`,
-  '/pricing': `<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Pricing</title>
-    <style>
-      button { outline: none; }
-      button:focus-visible { outline: 2px solid rgb(37, 99, 235); outline-offset: 2px; }
-    </style>
-  </head>
-  <body>
-    <button id="buy">Buy</button>
-  </body>
-</html>`,
+  '/': readFileSync(new URL('./fixtures/home.html', import.meta.url), 'utf8'),
+  '/pricing': readFileSync(
+    new URL('./fixtures/pricing.html', import.meta.url),
+    'utf8',
+  ),
 }
 
 async function browserAvailable(): Promise<boolean> {

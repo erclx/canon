@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { Browser } from 'playwright-core'
 import { probeDetails } from '@/driver/probes/details'
@@ -26,30 +27,10 @@ const PHONE = { width: 390, height: 800 }
  * layout box for its contents, so a fixture that merely hid the panel would
  * still measure it shut and prove nothing about which state was read.
  */
-const PAGE = `<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <style>
-      body { margin: 0; font: 14px/1.4 system-ui, sans-serif; }
-      details { display: inline-block; }
-      summary { width: 13px; list-style: none; }
-      .panel { margin-left: 0; width: 125px; }
-      details[open] .panel { margin-left: 300px; }
-      .panel a { display: block; height: 32px; line-height: 32px; }
-    </style>
-  </head>
-  <body>
-    <details id="menu">
-      <summary>=</summary>
-      <div class="panel">
-        <a href="#one">One</a>
-        <a href="#two">Two</a>
-        <a href="#three">Three</a>
-      </div>
-    </details>
-  </body>
-</html>`
+const PAGE = readFileSync(
+  new URL('./fixtures/details.html', import.meta.url),
+  'utf8',
+)
 
 async function browserAvailable(): Promise<boolean> {
   const { chromium } = await import('playwright-core')

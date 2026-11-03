@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { Browser, Page } from 'playwright-core'
 import {
@@ -20,53 +21,11 @@ import {
  * than failing, which means a green pipeline is not evidence this passed.
  */
 
-/** How far apart `#authored` places its two labels before anything renders. */
-const AUTHORED_GAP = 60
+const PAGE = readFileSync(
+  new URL('./fixtures/diagram.html', import.meta.url),
 
-const PAGE = `<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <style>
-      body { margin: 0; }
-      svg { display: block; overflow: visible; }
-      svg text { font-family: system-ui, sans-serif; font-size: 24px; }
-    </style>
-  </head>
-  <body>
-    <svg id="connector" width="300" height="80" viewBox="0 0 300 80">
-      <line x1="20" y1="30" x2="280" y2="30" stroke="#333" stroke-width="2" />
-      <text x="100" y="36">Latency</text>
-    </svg>
-
-    <svg id="border" width="300" height="80" viewBox="0 0 300 80">
-      <rect x="10" y="10" width="180" height="60" fill="none" stroke="#333" />
-      <text x="60" y="46">Ingest queue</text>
-    </svg>
-
-    <svg id="authored" width="300" height="80" viewBox="0 0 300 80">
-      <text x="20" y="46">Reader</text>
-      <text x="${20 + AUTHORED_GAP}" y="46">Writer</text>
-    </svg>
-
-    <svg id="touching" width="300" height="120" viewBox="0 0 300 120">
-      <text x="20" y="40">Upper</text>
-      <text x="20" y="68">Lower</text>
-    </svg>
-
-    <svg id="outside" width="300" height="80" viewBox="0 0 300 80">
-      <rect x="0" y="0" width="300" height="80" fill="#eee" />
-      <text x="340" y="46">Escaped</text>
-    </svg>
-
-    <svg id="grouped" width="400" height="200" viewBox="0 0 400 200">
-      <g transform="translate(0, 100)">
-        <line x1="20" y1="30" x2="380" y2="30" stroke="#333" stroke-width="2" />
-        <text x="100" y="36">Throughput</text>
-      </g>
-    </svg>
-  </body>
-</html>`
+  'utf8',
+)
 
 async function browserAvailable(): Promise<boolean> {
   const { chromium } = await import('playwright-core')

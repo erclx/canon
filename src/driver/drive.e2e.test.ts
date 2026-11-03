@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { drive } from '@/driver/drive'
 import { readDriverPlan } from '@/driver/steps'
@@ -19,32 +20,10 @@ import { readDriverPlan } from '@/driver/steps'
  * reflows below a height breakpoint is ordinary, and the defect it hides is the
  * scroll rail that passed at one height and failed at two others.
  */
-const PAGE = `<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <style>
-      body { margin: 0; font: 14px/1.4 system-ui, sans-serif; }
-      details { display: inline-block; }
-      summary { width: 13px; list-style: none; }
-      .panel { margin-left: 0; width: 125px; }
-      .panel a { display: block; height: 32px; line-height: 32px; }
-      @media (max-height: 950px) {
-        details[open] .panel { margin-left: 300px; }
-      }
-    </style>
-  </head>
-  <body>
-    <details id="menu">
-      <summary>=</summary>
-      <div class="panel">
-        <a href="#one">One</a>
-        <a href="#two">Two</a>
-        <a href="#three">Three</a>
-      </div>
-    </details>
-  </body>
-</html>`
+const PAGE = readFileSync(
+  new URL('./fixtures/reflow.html', import.meta.url),
+  'utf8',
+)
 
 const RUN = JSON.stringify({
   viewport: { width: 390, heights: [900, 1200] },
