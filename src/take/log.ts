@@ -117,6 +117,12 @@ export interface TakeLog {
   readonly clip?: { readonly width: number; readonly height: number }
   /** False when the beat turned the camera's zoom off. */
   readonly push?: false
+  /**
+   * Milliseconds a screencast take shifted every event by, being how long a
+   * move took to show in the clip. Absent on the stepped route, which needs
+   * no shift, and where the page gave no frame to calibrate on.
+   */
+  readonly lag?: number
   readonly frames: number
   readonly events: readonly LogEvent[]
 }

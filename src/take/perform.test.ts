@@ -567,3 +567,53 @@ describe('performSteps targets outside the window', () => {
     await expect(run).rejects.toThrow(TargetOffscreen)
   })
 })
+
+describe('performSteps align', () => {
+  /** A stage whose `align` lets 4 ms pass, noting the clock it ends on. */
+  function aligningStage() {
+    const { stage } = recordingStage({ '#card': CARD })
+    const aligned: number[] = []
+    let skew = 0
+    const aligning: Stage = {
+      ...stage,
+      now: () => stage.now() + skew,
+      align: async () => {
+        skew += 4
+        aligned.push(aligning.now())
+      },
+    }
+    return { stage: aligning, aligned }
+  }
+
+  function gliding(log: readonly LogEvent[]) {
+    return log.flatMap((event) =>
+      event.kind === 'move' ? (event.points ?? []) : [],
+    )
+  }
+
+  it('should stamp each glide point at the clock its alignment ends on', async () => {
+    const { stage, aligned } = aligningStage()
+    const log: LogEvent[] = []
+
+    await performSteps(stage, [{ kind: 'move', target: '#card' }], {
+      pointer: START,
+      log,
+    })
+
+    const points = gliding(log)
+    expect(points.length).toBeGreaterThan(1)
+    expect(points.map((point) => point.t)).toEqual(aligned)
+  })
+
+  it('should stamp a glide one frame apart when the stage has no align', async () => {
+    const { log } = await perform({ '#card': CARD }, [
+      { kind: 'move', target: '#card' },
+    ])
+
+    const points = gliding(log)
+    expect(points.length).toBeGreaterThan(1)
+    points.forEach((point, index) => {
+      expect(point.t).toBeCloseTo(index * FRAME_MS, 5)
+    })
+  })
+})

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Drag paint</title>
+    <!--
+      A red box that follows a drag on the animation frame after each move, the
+      painter the screencast route drifted furthest from before it aligned. A
+      test reads the box's center off the clip and compares it with the drawn
+      cursor, so the box is the only red on the page.
+    -->
+    <style>
+      body {
+        margin: 0;
+        background: #fff;
+      }
+
+      #box,
+      #drop {
+        position: absolute;
+        top: 300px;
+        width: 120px;
+        height: 120px;
+      }
+
+      #box {
+        left: 300px;
+        background: #f00;
+        touch-action: none;
+      }
+
+      #drop {
+        left: 1300px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="box"></div>
+    <div id="drop"></div>
+    <script>
+      const box = document.getElementById('box')
+      let grab = null
+      let pending = null
+      box.addEventListener('pointerdown', (e) => {
+        grab = { dx: e.clientX - box.offsetLeft, dy: e.clientY - box.offsetTop }
+        box.setPointerCapture(e.pointerId)
+      })
+      box.addEventListener('pointermove', (e) => {
+        if (!grab) return
+        pending = { x: e.clientX - grab.dx, y: e.clientY - grab.dy }
+        requestAnimationFrame(() => {
+          if (!pending) return
+          box.style.left = pending.x + 'px'
+          box.style.top = pending.y + 'px'
+          pending = null
+        })
+      })
+      box.addEventListener('pointerup', () => {
+        grab = null
+      })
+    </script>
+  </body>
+</html>
