@@ -809,34 +809,10 @@ describe.skipIf(!available())('input steps on both routes', () => {
   })
 })
 
-/**
- * A red box that follows a drag on the animation frame after each move, the
- * painter the screencast route drifted furthest from before it aligned.
- */
-const PAINT_PAGE = `<!doctype html><body style="margin:0;background:#fff">
-  <div id="box" style="position:absolute;left:300px;top:300px;width:120px;height:120px;background:#f00;touch-action:none"></div>
-  <div id="drop" style="position:absolute;left:1300px;top:300px;width:120px;height:120px"></div>
-  <script>
-    const box = document.getElementById('box')
-    let grab = null
-    let pending = null
-    box.addEventListener('pointerdown', (e) => {
-      grab = { dx: e.clientX - box.offsetLeft, dy: e.clientY - box.offsetTop }
-      box.setPointerCapture(e.pointerId)
-    })
-    box.addEventListener('pointermove', (e) => {
-      if (!grab) return
-      pending = { x: e.clientX - grab.dx, y: e.clientY - grab.dy }
-      requestAnimationFrame(() => {
-        if (!pending) return
-        box.style.left = pending.x + 'px'
-        box.style.top = pending.y + 'px'
-        pending = null
-      })
-    })
-    box.addEventListener('pointerup', () => { grab = null })
-  </script>
-</body>`
+const PAINT_PAGE = readFileSync(
+  new URL('./fixtures/drag-paint.html', import.meta.url),
+  'utf8',
+)
 
 const PAINT_DRAG = JSON.stringify({
   beats: [
