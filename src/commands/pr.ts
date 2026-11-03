@@ -43,6 +43,8 @@ import {
   isEvidencePath,
   PNG_HEADER_BYTES,
   readChecklistBoxes,
+  countDrivable,
+  type ChecklistBox,
   readOwed,
   readPngWidth,
   readUncaptured,
@@ -171,7 +173,8 @@ interface ReadOptions {
 
 interface EvidenceOptions extends ReadOptions {
   readonly preview?: string
-  readonly checklist?: string
+  /** A path to fold in, or false from `--no-checklist` to drop the carried one. */
+  readonly checklist?: string | false
   readonly local?: string
   readonly reel?: string
   readonly localSkip?: string
@@ -438,7 +441,7 @@ type EvidenceRefusal =
 
 const EVIDENCE_REFUSALS: Record<EvidenceRefusal, string> = {
   'check-writes':
-    '--check is a read and renders no body, so it takes none of --preview, --local, --checklist, --reel, --local-skip, or --reel-skip. Run the check and the render as two calls.',
+    '--check is a read and renders no body, so it takes none of --preview, --local, --checklist, --no-checklist, --reel, --local-skip, or --reel-skip. Run the check and the render as two calls.',
   'gh-failed':
     'gh could not answer for this repository. Name the pull request number.',
   'unreadable-checklist':
@@ -773,6 +776,10 @@ export function register(program: Command): void {
       'Close the body with this visual checklist file, from canon:ui-checklist',
     )
     .option(
+      '--no-checklist',
+      'Drop the checklist the marked comment carries, rendering the body without it',
+    )
+    .option(
       '--local <url>',
       "Add this worktree's running server to the address line, from canon pr local",
     )
@@ -854,6 +861,12 @@ export function register(program: Command): void {
         'branch with a checklist and no evidence image renders a marked body',
         'holding the checklist, so a later call finds and edits that comment.',
         '',
+        '--no-checklist drops the checklist the marked comment carries, so the',
+        'body renders without it and the record reports no checklist fields.',
+        'A marked comment holding a checklist still renders as ok rather than',
+        'no-evidence, so the comment is edited rather than left showing it.',
+        'Of --checklist and --no-checklist, the last one passed wins.',
+        '',
         '--local adds a **Local preview:** segment after any hosted one on the',
         'address line, or carries the line alone, and is carried forward the',
         'same way. It does not by itself turn no-evidence into ok, so a',
@@ -892,9 +905,13 @@ export function register(program: Command): void {
         '  checklist  the checklist between its delimiters, ticks included',
         '  boxes      each checklist box with its number, tick, stamp, and taste',
         '             mark, the numbering `canon pr tick` takes',
+        '  drivable   how many boxes a driver can run, every box but one whose',
+        '             trailing markers hold (taste), in any order. Zero binds no',
+        '             UI review, so `canon pr lift` and `review-state` leave the',
+        '             UI family unbound',
         'These come from the comment already posted, never from the flags this',
         'call passed. A checklist the caller posted raw after a refused render',
-        'carries no marker, so the record reports none of the three for it. An',
+        'carries no marker, so the record reports none of these for it. An',
         'unread thread refuses as gh-failed on both reasons rather than',
         'reporting the fields absent.',
         '',
@@ -926,8 +943,8 @@ export function register(program: Command): void {
         'request changed, and the marked comment carries no **Preview:**',
         'address. A failed deploy reads the same as a skipped one.',
         'The record carries `owed` and the same marked fields. --check refuses',
-        'with --preview, --local, --checklist, --reel, --local-skip, or',
-        '--reel-skip as check-writes.',
+        'with --preview, --local, --checklist, --no-checklist, --reel,',
+        '--local-skip, or --reel-skip as check-writes.',
         '',
         'Refusals, read off `reason`:',
         '  unreadable-checklist  --checklist named a path that could not be read,',
@@ -2730,7 +2747,7 @@ async function runEvidence(
   // Read ahead of anything else, so a bad path refuses before a `gh` round
   // trip rather than after one.
   let suppliedChecklist: string | undefined
-  if (opts.checklist !== undefined) {
+  if (typeof opts.checklist === 'string') {
     suppliedChecklist = await readFile(resolve(root, opts.checklist), 'utf8')
       .then((text) => text.trim() || undefined)
       .catch(() => undefined)
@@ -2816,7 +2833,10 @@ async function runEvidence(
   commentId = findEvidenceCommentId(comments)
   existingCases = findEvidenceCaseCount(comments)
   carriedPreview = findEvidencePreview(comments)
-  carriedChecklist = findEvidenceChecklist(comments)
+  // A dropped checklist is not carried, so neither the record nor the render
+  // shows it, while the marked comment holding it still counts below.
+  const postedChecklist = findEvidenceChecklist(comments)
+  carriedChecklist = opts.checklist === false ? undefined : postedChecklist
   carriedLocal = findEvidenceLocal(comments)
   const carriedReel = findEvidenceReel(comments)
 
@@ -2826,10 +2846,7 @@ async function runEvidence(
     ...(carriedPreview !== undefined && { preview: carriedPreview }),
     ...(carriedLocal !== undefined && { local: carriedLocal }),
     ...(carriedReel !== undefined && { reel: carriedReel }),
-    ...(carriedChecklist !== undefined && {
-      checklist: carriedChecklist,
-      boxes: readChecklistBoxes(carriedChecklist),
-    }),
+    ...(carriedChecklist !== undefined && checklistFields(carriedChecklist)),
   }
 
   // A deploy that resolves and does not build from any changed path makes a
@@ -2890,8 +2907,10 @@ async function runEvidence(
   // hosted preview and never opens one alone, so a docs-only branch with a
   // server up posts nothing. An uncaptured painted path opens one too, so the
   // gap the lift refuses on shows on the thread.
+  // A dropped checklist still opens a render, so the marked comment holding
+  // it is edited without the block rather than left showing it.
   const hasChecklist =
-    suppliedChecklist !== undefined || carriedChecklist !== undefined
+    suppliedChecklist !== undefined || postedChecklist !== undefined
   const hasUncaptured = uncaptured !== undefined && uncaptured.length > 0
   if (
     grouped.kind === 'refused' &&
@@ -3054,6 +3073,16 @@ async function runEvidence(
   }
 
   return 0
+}
+
+/** The record fields a checklist carries, with `drivable` counting the boxes a driver can run. */
+function checklistFields(checklist: string): {
+  checklist: string
+  boxes: ChecklistBox[]
+  drivable: number
+} {
+  const boxes = readChecklistBoxes(checklist)
+  return { checklist, boxes, drivable: countDrivable(boxes) }
 }
 
 async function readWorkflows(root: string): Promise<WorkflowFile[]> {
