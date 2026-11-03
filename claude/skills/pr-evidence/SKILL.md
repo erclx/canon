@@ -52,7 +52,12 @@ The no-local-preview and no-reel lines also land on the evidence comment, throug
 
 ### The uncaptured line
 
-Collect `📸 <N> painted paths changed with no evidence capture. Recapture and push.` when the evidence record lists `uncaptured` paths, with `<N>` its count. The line never stops the run, since no step here can take a capture, and the review raises the same paths as a finding until a recapture lands.
+Collect `📸 <N> painted paths changed with no evidence capture. Recapture and push.` when the evidence record lists `uncaptured` paths, with `<N>` its count. It never stops the run. No step here can take a capture, so the gap reaches the thread and the lift by other routes:
+
+- The evidence call writes an `**Uncaptured:**` line naming each path on the marked comment, posting it even on a head with no other news
+- The line drops on the first render after a capture lands or a reel filmed at the head renders beside it
+- `canon pr lift` refuses `painted-uncaptured` until a capture, a reel at the head, or a review's waiver covers every listed path
+- A worker never writes the waiver, since a review is the one surface a worker never posts
 
 ### The no-local-preview line
 
