@@ -809,8 +809,9 @@ export function register(program: Command): void {
         'Read `reason` on the JSON record before posting anything:',
         '  ok           a body was rendered, with `commentId` set when a marked',
         '               comment already exists and should be edited in place',
-        '  no-evidence  nothing in the diff carries an evidence/ segment, which',
-        '               is an ordinary, silent no-op rather than a refusal',
+        '  no-evidence  nothing in the diff carries an evidence/ segment and no',
+        '               painted path is uncaptured, which is an ordinary,',
+        '               silent no-op rather than a refusal',
         '  would-empty  the render holds no cases and the marked comment holds',
         '               some, so no body is printed and a person edits the comment',
         '',
@@ -906,6 +907,14 @@ export function register(program: Command): void {
         'not be read, a cut-short listing showing none included, so absent means',
         'unchecked rather than clean. It never adds to `owed`, since no step of',
         'the ship chain can take a capture.',
+        '',
+        'A rendered body carries the list as an **Uncaptured:** line under the',
+        'addresses, each path in a code span. A non-empty list opens a comment',
+        'the way a checklist does, so a head whose only news is an uncaptured',
+        'path reports ok rather than no-evidence. The line is computed on every',
+        'render and never carried, so it drops once a capture empties the list',
+        'or a reel filmed at the head renders beside it. `canon pr lift`',
+        'refuses `painted-uncaptured` on the same list.',
         '',
         '--check reads the same changed set and thread, renders no body, and',
         'reports what the ship chain still owes the pull request:',
@@ -2875,13 +2884,16 @@ async function runEvidence(
   // A checklist opens a comment on its own, so it always lands in the marked
   // comment a later call edits. A local address rides on a checklist or a
   // hosted preview and never opens one alone, so a docs-only branch with a
-  // server up posts nothing.
+  // server up posts nothing. An uncaptured painted path opens one too, so the
+  // gap the lift refuses on shows on the thread.
   const hasChecklist =
     suppliedChecklist !== undefined || carriedChecklist !== undefined
+  const hasUncaptured = uncaptured !== undefined && uncaptured.length > 0
   if (
     grouped.kind === 'refused' &&
     opts.preview === undefined &&
-    !hasChecklist
+    !hasChecklist &&
+    !hasUncaptured
   ) {
     logStep('Skipped')
     logInfo(
@@ -2942,6 +2954,7 @@ async function runEvidence(
     local,
     reel,
     skips,
+    uncaptured,
   )
 
   const caseCount = states.reduce((n, s) => n + s.items.length, 0)

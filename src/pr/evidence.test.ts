@@ -1626,6 +1626,72 @@ describe('the skip lines', () => {
   })
 })
 
+describe('the uncaptured line', () => {
+  const LINK = 'https://github.com/o/r/blob/canon/frames/reel.webp?raw=true'
+  const HEAD = 'bbbb111bbbb111bbbb111bbbb111bbbb111bbbb1'
+  const LATER = 'cccc222cccc222cccc222cccc222cccc222cccc2'
+
+  function render(
+    head: string,
+    uncaptured: readonly string[],
+    reel?: { link: string; head: string },
+  ): string {
+    return renderEvidenceBody(
+      [],
+      'o/r',
+      'aaaa000',
+      head,
+      'https://x.dev',
+      undefined,
+      undefined,
+      reel,
+      {},
+      uncaptured,
+    )
+  }
+
+  it('should list each uncaptured path on one line under the addresses', () => {
+    const body = render(HEAD, ['src/app.css', 'src/board.tsx'])
+
+    expect(body.split('\n').slice(0, 5)).toEqual([
+      '## Evidence',
+      '',
+      '**Preview:** https://x.dev',
+      '',
+      '**Uncaptured:** `src/app.css`, `src/board.tsx`',
+    ])
+  })
+
+  it('should render the line again at a later head while the paths stay uncaptured', () => {
+    const body = render(LATER, ['src/board.tsx'])
+
+    expect(body).toContain('**Uncaptured:** `src/board.tsx`')
+    expect(body).toContain('<!-- pr-evidence: head=cccc222')
+  })
+
+  it('should drop the line once a capture empties the list', () => {
+    expect(render(HEAD, [])).not.toContain('Uncaptured')
+  })
+
+  it('should drop the line beside a reel filmed at the head', () => {
+    const body = render(HEAD, ['src/board.tsx'], { link: LINK, head: HEAD })
+
+    expect(body).not.toContain('Uncaptured')
+  })
+
+  it('should keep the line beside a reel filmed at an earlier head', () => {
+    const body = render(LATER, ['src/board.tsx'], { link: LINK, head: HEAD })
+
+    expect(body).toContain('**Uncaptured:** `src/board.tsx`')
+  })
+
+  it('should leave the carried preview readable beside the line', () => {
+    const body = render(HEAD, ['src/board.tsx'])
+
+    expect(findEvidencePreview([{ body }])).toBe('https://x.dev')
+  })
+})
+
 describe('readOwed', () => {
   function owedInput(overrides: Partial<OwedInput> = {}): OwedInput {
     return {
