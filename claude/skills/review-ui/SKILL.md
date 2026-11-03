@@ -84,7 +84,7 @@ Take the first rung that answers, testing each with `curl -s -o /dev/null -w '%{
 2. The `local` address off the record.
 3. An address the launch names.
 
-When the hosted rung answers, read `${CLAUDE_SKILL_DIR}/references/hosted-preview.md` to check it was built from the head before driving. A pass on the local rung or a launch-named address skips it.
+When the hosted rung answers, read `${CLAUDE_SKILL_DIR}/references/hosted-preview.md` to check it was built from the head before driving. A pass on the local rung or a launch-named address skips that check, and every rung then takes the config's `access` per `## The access join` in `${CLAUDE_SKILL_DIR}/references/driving.md`.
 
 ### Unverified and unanswered addresses
 

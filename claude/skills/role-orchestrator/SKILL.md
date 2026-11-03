@@ -101,9 +101,9 @@ Learning that a PR moved is the mechanical half. Read `${CLAUDE_SKILL_DIR}/refer
 A pass posting anything owed reaches the session holding the branch from the reviewer directly, and the re-review request goes straight back to that reviewer, per `role-reviewer` and `role-worker`. Read `${CLAUDE_SKILL_DIR}/references/orchestrator-handback.md` on reaching this step.
 
 - This session sends either leg only where a cloud reviewer posted the pass or one side reports the other unreachable
-- Each reviewer runs `canon pr lift` on its close. The verb lifts the draft once both reviews read closed at the head, the evidence settled, the head current, and CI passed.
+- Each reviewer's close runs `canon pr lift`, lifting the draft once both reviews close at the head, the evidence settles, the head is fresh, and CI passes
 - Run it yourself when a close message reports a refusal other than the other review being open, or when a cloud reviewer's close posts, per Boundaries below
-- Then the human merges. After each merge, tell each trailing worker whose files the merged diff touches to run `review-address`, which rebases it where needed.
+- Then the human merges from a line naming its proof, per `${CLAUDE_SKILL_DIR}/references/orchestrator-output.md`. Tell each trailing worker the merged diff touches to run `review-address`.
 
 The handback runbook holds how the message is addressed and worded, what to do when no live session holds the branch, and where a worker's reply goes.
 

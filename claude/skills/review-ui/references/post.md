@@ -107,6 +107,7 @@ A loopback address has `localhost`, `127.0.0.1`, `0.0.0.0`, or `[::1]` as its ho
 
 - The cause line of a pass that drove no box, and every Not driven entry, name a loopback address it tried as a local preview with its port, such as `a local preview on port 4211`
 - A hosted address posts as written, since it outlives the session, and the close drops it from the evidence comment
+- `<address>` is always the rung before the access join, followed by `behind the config's access` when one was joined, per `## The access join` in `${CLAUDE_SKILL_DIR}/references/driving.md`
 - The evidence comment carries the local link while the pull request is open, for an operator on the same machine
 - `canon pr local --remove` masks a loopback address left on a review's `Driven at` line when the pull request closes
 

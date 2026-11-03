@@ -1,6 +1,6 @@
 ---
 title: Orchestrator output formats
-description: The invocation block with its four sections, the three-slot shape every later report opens with, and the rule against a shape for a correction
+description: The invocation block with its four sections, the three-slot shape every later report opens with, the proof a merge line names, and the rule against a shape for a correction
 ---
 
 Read this on invocation, before reporting the state of play, and again before any later report.
@@ -69,5 +69,28 @@ Keep the detail below the block and keep it skippable. A decision reached at the
   - A bare id tells the operator nothing about which session it is
   - A rename leaves the launch name matching nothing, so read the current name off `canon sessions list --json` when the line is written
   - `claude rm` takes the id alone, so that line carries the id
+
+## The merge line
+
+A pull request recommended for merge names the proof its evidence comment carries, beside the merge command, since a lift's `ok` says the gates held and nothing about what anyone could look at.
+
+```plaintext
+PR #<n> <title>  proof: <screenshots|reel|screenshots and reel|waived|none>
+  → canon pr merge <n>
+```
+
+Read the slot off `canon pr evidence <number> --json` at the moment the line is written, branching on the record rather than the exit code.
+
+- `screenshots` when the record carries `states`, and `reel` when it carries `reel`
+- `waived` when neither is carried and `canon pr lift <number> --check --json` names every listed path under `waived`, quoting no token from the reason
+- `none` otherwise, and a pull request with no painted path takes no slot at all
+
+### An unproven painted pull request
+
+A painted pull request whose slot reads `none` is unproven. Report it as unproven, never as ready, whatever the lift returned, and put the missing proof to the operator as a decision.
+
+- Painted means the record carries a `checklist`, or the check record lists `uncaptured` paths
+- A project whose base keeps no captures reads `uncaptured` absent, so a checklist with no stills and no reel is still unproven there
+- Send the branch's session back to run `pr-evidence` under the proof check in `orchestrator-review-dispatch.md`, rather than recommending the merge
 
 Write no shape for a correction. A correction is a sentence, and a format for admitting error invites ceremony where plainness is the whole value.
