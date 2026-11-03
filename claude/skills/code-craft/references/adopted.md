@@ -67,6 +67,14 @@ Martin Fowler, [Beck Design Rules](https://martinfowler.com/bliki/BeckDesignRule
 
 Martin Fowler, Inversion of Control Containers and the Dependency Injection pattern, hands a component what it depends on rather than letting it find it. Adopted as the hidden-inputs rule for the clock, the environment, randomness, and globals, without any container.
 
+## Adopted for embedded languages
+
+### Inline resource
+
+Gerard Meszaros, xUnit Test Patterns, names putting a file's contents into a string in the test as Inline Resource and recommends it over the Mystery Guest a separate file creates. The same page warns that a large resource signals an Eager Test.
+
+Adopted as both sides of the embedded-file rule. A short input under test stays inline, and a long page, stylesheet, or script leaves for its own file. The five-line threshold mirrors the limit the `ci-workflow` skill sets on an inline `run:` step, so one number covers both.
+
 ## Adopted for agent failure modes
 
 Birgitta Böckeler, The role of developer skills in agentic coding, 2025, and How far can we push AI autonomy in code generation?, 2025.
