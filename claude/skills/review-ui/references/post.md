@@ -13,7 +13,7 @@ The heading reports whether the branch owes anything, the way the code review's 
 
 - `## UI review` when a box failed, the sweep raised a finding Step 6 names, the worktree check read `changed`, a box was not driven for a cause the branch holds, or the pass drove no box at all.
 
-A missing fixture state opens the heading because a commit settles it, being the state the building session adds. The pass then reaches `review-address` like a failed box, with the state to add named in the box's Not driven entry.
+A missing fixture state opens the heading because a commit settles it, being the state the building session adds. A state no fixture file can hold, which `driving.md` names, is a cause off the branch and leaves the review closed. The pass then reaches `review-address` like a failed box, with the state to add named in the box's Not driven entry.
 
 - `## UI review closed` otherwise.
 

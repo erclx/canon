@@ -41,7 +41,7 @@ Write each box so a session driving the running app can run it without guessing,
 - **Verb.** An action a driver performs, such as "scroll to", "click", "resize to", or "tab to". Never "read" or "look at", which name no action.
 - **Taste.** End the line with `(taste)` when the result is a judgment of look or feel. A driver reports such a box as needing a person's eyes rather than passing it.
 - **Setup.** State inline the setup the page does not open in and the fixture state it needs. End with `(local only)` when a hosted preview cannot reach it, such as a stopped service.
-- **Fixture.** End with `(needs fixture)` when the drive fixture lacks the state. The builder adds it before the pull request opens, or with no `canon/config/app-drive.toml` states the setup inline.
+- **Fixture.** End with `(needs fixture)` when the drive fixture lacks the state. The builder adds it, or with no `canon/config/app-drive.toml` writes the setup inline and drops the marker.
 
 When the plan cites `canon/design/<surface>/` under `**Design references:**`, name the reference as the comparison on each box for that surface, such as "→ matches `canon/design/<surface>/` in light and dark". The reviewer then judges the build against the accepted design instead of against taste.
 

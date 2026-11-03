@@ -18,7 +18,7 @@
 Only a change with no visible result in any reachable state is exempt, such as a keyboard order that moves no ring. A capture costs one command and a missing one costs a review round, so the worker never judges the exemption alone.
 
 - State it in the pull request body as a line naming the path and why nothing shows.
-- A reviewer accepts it by writing a `- **Waived capture:** `<path>`: <reason>` line in a review.
+- A reviewer accepts it by writing a ``- **Waived capture:** `<path>`: <reason>`` line in a review.
 - A painted path with neither a case nor that line keeps the pull request in draft.
 
 ## When the fixture cannot reach a state

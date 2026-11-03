@@ -84,7 +84,8 @@ Branch on the record's `reason`, never on the exit code.
 
 A skip whose cause is a state the drive fixture lacks, such as `target-missing` on a control only that state renders, is work the building session owes.
 
-- Report it as owed, naming the state, the selector, or the setup step the beat needed
+- Film a beat from a box carrying `(needs fixture)` only if the state answers, and otherwise skip it as owed
+- Report the owed skip on the evidence comment's `--reel-skip` line and in the closing report, naming the state, the selector, or the setup step the beat needed
 - Never report it as a plain skip, since the next pull request meets the same fixture and skips again
 
 ## Check each still

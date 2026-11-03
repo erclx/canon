@@ -66,6 +66,7 @@ A box the pass could not drive because the drive fixture holds no such state is 
 - Name the cause as a missing fixture state, with the state to add and the selector or setup step the box needs
 - Count it as not driven, and never as a fail, since the page may be right
 - An address that did not answer stays a cause off the branch, and a `(local only)` box on a hosted address does too
+- A state no fixture file can hold is the exit, such as one a project with no `canon/config/app-drive.toml` cannot reach inline. Name it a cause off the branch, so the review stays closed.
 
 ### Which image a verdict carries
 
