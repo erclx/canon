@@ -43,6 +43,7 @@ const STATUS: Component = {
     '--color-muted',
     '--radius-marker',
   ],
+  // canon-allow-embedded: generated output, moved by v178.0
   rules: `.status {
   display: inline-flex;
   align-items: center;
@@ -84,6 +85,7 @@ const SCROLLBAR: Component = {
     'so the two engines cannot drift apart.',
   ].join('\n   '),
   reads: ['--color-border', '--color-muted', '--color-background'],
+  // canon-allow-embedded: generated output, moved by v178.0
   rules: `* {
   scrollbar-width: thin;
   scrollbar-color: var(--color-border) transparent;
@@ -130,6 +132,7 @@ const HAND_DRAWN_FIGURE: Component = {
     'reading measure and cleared past an outline rail on a wide viewport.',
   ].join('\n   '),
   reads: ['--color-muted', '--figure-hand', '--figure-wide'],
+  // canon-allow-embedded: generated output, moved by v178.0
   rules: `/* ---- Figures: hand-drawn, and wider than the measure ---- */
 
 :root {

@@ -239,6 +239,7 @@ function buildHtml(
   const summary = tagged
     ? `\n<p class="note">${total - tagged} of ${total} cells are anchored to a source. The other ${tagged} ${verb} <code>? verify</code>, so nothing anchors them yet.</p>`
     : ''
+  // canon-allow-embedded: generated output, moved by v178.0
   return `<!doctype html>
 <html lang="en">
 <head>

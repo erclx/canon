@@ -68,6 +68,7 @@ export function renderFavicon(mark: string, colors: FaviconColors): string {
   const inset = EDGE_WIDTH / 2
   const shapes = markShapes(mark)
 
+  // canon-allow-embedded: generated output, moved by v178.0
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${left} ${top} ${round(side)} ${round(side)}">
   <style>
     .tile { fill: ${colors.tile.dark}; stroke: ${colors.tile.dark}; }
