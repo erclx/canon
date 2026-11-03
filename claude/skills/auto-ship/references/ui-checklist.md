@@ -14,7 +14,7 @@ The chain continues to Step 6 here in every run, dispatched or hand-run, since t
 Count two things in `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main worktree root:
 
 - `<N>`, the `- [ ]` lines
-- `<M>`, how many of those end in `(taste)`
+- `<M>`, how many of those carry `(taste)` among their trailing markers
 
 Hold both until the Output block. `pr-evidence` removes the file once it posts the evidence comment, so a count taken after Step 6 reads nothing.
 

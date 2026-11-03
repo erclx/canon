@@ -98,7 +98,7 @@ The post takes the length limits alone, with a box's reason under 350 characters
 The body opens on its count line, in that order, so the operator reads what they owe before anything else. The second line carries the address, the head, and the renderer, and says the address was driven unverified when it came from the local rung or the launch.
 
 - Drop each section holding no box, along with its heading. The order is fixed as Failed, Changed in the worktree, Needs your eyes, Not driven, then the folded blocks.
-- A box takes exactly one section by its verdict, so a box that fails and also ends in `(taste)` appears once, under Failed
+- A box takes exactly one section by its verdict, so a box that fails and also carries `(taste)` appears once, under Failed
 - Quote page text in backticks as content, never as the pass's own words
 
 ### A loopback address

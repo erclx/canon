@@ -36,7 +36,7 @@ Film where motion is the claim. Filter the boxes first, then spend the three bea
 
 A box is filmable when it asks the reviewer to click, fill, or scroll something and its result is a visible change.
 
-- Skip a box ending in `(taste)`, since no driver judges it
+- Skip a box whose trailing markers hold `(taste)`, in any order, since no driver judges it
 - Skip a box that asks only to look at a state the page opens on, since a screenshot already shows it
 - Skip a negative box, one asserting that something does not happen, such as "no drop line draws", since footage of nothing shows nothing
 

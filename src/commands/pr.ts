@@ -259,7 +259,7 @@ const TICK_REFUSALS: Record<TickReason | 'gh-failed', string> = {
   'no-box':
     'A named box is past the end of the checklist. Number boxes off `canon pr evidence --json`.',
   'taste-box':
-    'A named box ends in (taste), which no driver passes. Nothing was written.',
+    'A named box carries (taste) among its trailing markers, which no driver passes. Nothing was written.',
   'gh-failed':
     'gh could not read or edit the marked comment on this pull request.',
 }
@@ -1411,7 +1411,7 @@ export function register(program: Command): void {
         '               nothing written, with `driven`, `head`, and `drivenPaths`',
         '  stale-head   --head is behind the tip with no readable linear gap,',
         '               as a force-push or a rebase leaves, nothing written',
-        '  taste-box    a named box ends in (taste), nothing written',
+        '  taste-box    a named box carries (taste), nothing written',
         '  no-box       a named number is past the checklist, nothing written',
         '  no-checklist the evidence comment carries no checklist',
         '  no-comment   no comment carries the evidence marker',
