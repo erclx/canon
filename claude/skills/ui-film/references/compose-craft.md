@@ -98,7 +98,7 @@ Stills at beat midpoints pass a cut whose motion is wrong, as they passed every 
 
 ## Music
 
-HyperFrames owns the soundtrack, so score the film by its `sound.md` and `film.md`, and listen hardest to the first 2 s and the last 10 s, where Frameboard's film hid its silent lead and a drop that landed early.
+HyperFrames owns the soundtrack, so score the film by its `sound.md` and `film.md`. On Frameboard's launch film the music faults hid in the first 2 s and the last 10 s, being a silent lead and a drop that landed early, which is one film's case rather than a rule.
 
 ## Storyboard headings
 

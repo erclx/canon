@@ -42,7 +42,7 @@ A plan holds the approved beats in order. Each beat names its setup, which runs 
 ## One action per take
 
 - Film one action per beat, such as one click, one fill, or one scroll, so the edit can cut, reorder, or drop a beat without re-filming its neighbors
-- Keep a take as long as its beat. The verb opens and closes each one on a 0.6 s hold, which gives the edit a still to cut on, so add no hold of your own around the action.
+- Keep a take as long as its beat. The verb holds still at each end and paces each press and its result, at the timings `canon take --help` prints, so add no hold of your own around the action.
 - Add a `wait` after an action whose result animates, loads, or settles, long enough for the result to finish on screen
 - Reach the beat's start state through `setup`, since every beat opens the page fresh and nothing a setup step does is filmed
 - Write the beat's `name` as the operator approved it, since it names the clip's folder
