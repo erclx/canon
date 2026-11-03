@@ -59,6 +59,8 @@ Wait for the operator's approval or edits before Step 3. Read silence as no appr
 
 Read `${CLAUDE_SKILL_DIR}/references/take-craft.md` before writing the first beat. It holds the filming rules and the plan's step kinds.
 
+Read `${CLAUDE_SKILL_DIR}/references/harness.md` beside it when a beat takes the harness route, since a harness fault films as a flaky take and a refilm on a guess repeats it.
+
 - Write one beat per approved line to `.canon/video/<slug>/plan.json`, named as the operator approved it
 - Find each target on the served page before writing it, through `canon browser` or the source, rather than guessing a selector
 
@@ -101,7 +103,10 @@ Check that the `hyperframes` skill resolves before handing anything to it, as `h
 ❌ HyperFrames is not installed, so nothing can compose .canon/video/<slug>/takes/. Run /plugin install canon-media@canon, or install hyperframes@hyperframes alone, then load hyperframes to compose.
 ```
 
-Read `${CLAUDE_SKILL_DIR}/references/handoff.md` on reaching this step, for what HyperFrames receives, where each composition lives, and how one applies the camera track and draws the cursor. Read `${CLAUDE_SKILL_DIR}/references/compose-craft.md` beside it, for the footage rules the HyperFrames skills lack.
+Read `${CLAUDE_SKILL_DIR}/references/handoff.md` on reaching this step, for what HyperFrames receives, where each composition lives, and how one applies the camera track and draws the cursor.
+
+- Read `${CLAUDE_SKILL_DIR}/references/compose-craft.md` beside it, for the footage rules the HyperFrames skills lack
+- Hold each cut to its motion review before the operator sees it, since a still at a beat's midpoint passes a cut whose motion is wrong
 
 Close the throwaway copy per `isolate.md` when Step 1 built one, after the stills are read.
 
