@@ -288,6 +288,22 @@ function atRate(log: TakeLog, rate: number): TakeLog {
     frames: Math.round(log.frames / rate),
     events: log.events.map((event): LogEvent => {
       const t = event.t / rate
+      if (event.kind === 'move') {
+        return {
+          ...event,
+          t,
+          ms: event.ms / rate,
+          ...(event.points
+            ? {
+                points: event.points.map((point) => ({
+                  ...point,
+                  t: point.t / rate,
+                })),
+              }
+            : {}),
+          ...(event.hold !== undefined ? { hold: event.hold / rate } : {}),
+        }
+      }
       return 'ms' in event
         ? { ...event, t, ms: event.ms / rate }
         : { ...event, t }

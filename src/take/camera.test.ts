@@ -271,6 +271,29 @@ describe('cameraTrack', () => {
       expect(at(frames, 2000).cursor).toEqual({ x: 400, y: 300 })
     })
 
+    it('should read the sent points of a move on the faster clock', () => {
+      const glide: TakeLog = {
+        ...takeOf([]),
+        events: [
+          {
+            t: 1000,
+            kind: 'move',
+            from: START,
+            to: { x: 400, y: 300 },
+            ms: 400,
+            points: [
+              { t: 1000, x: 900, y: 500 },
+              { t: 1400, x: 400, y: 300 },
+            ],
+          },
+        ],
+      }
+
+      const { frames } = cameraTrack(glide, { rate: 2 })
+
+      expect(at(frames, 700).cursor).toEqual({ x: 400, y: 300 })
+    })
+
     it('should build the same track at rate 1 as with no rate', () => {
       expect(cameraTrack(log, { rate: 1 })).toEqual(cameraTrack(log))
     })
