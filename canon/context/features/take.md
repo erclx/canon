@@ -19,19 +19,17 @@ Reads a take plan, films each beat from a fresh load, and writes the clip, the l
 
 - The stepper launches chrome-headless-shell under begin-frame control over raw CDP, since Playwright cannot ask for it on a page it opens, and screenshots each frame at device scale 2
 - A beat asking for `screencast`, or a stepped frame slower than 2 s, films through Playwright's screencast at 1920x1080, cut at the stage clock past the recorder's 1 s pad, its record naming the route
-- One choreography performs every step through each route's stage on one pointer curve, aiming a scroll at the part of its target inside the window, since a page-tall `body` is centered below it
-- The camera turns a log into one view per frame on preset O4 at a depth the clip's resolution caps, and pushes the view with the cursor at its outer 10% when the spring lags a long reach
+- One choreography performs every step through each route's stage, logging each point a glide sends for the drawn cursor and resting 300 ms before a press, 500 ms after, and 400 ms before a fill types
+- The camera zooms in over the glide reaching a target and out over the glide leaving it, scaling about the target, at a depth the clip's resolution caps, and pans only at a steady scale
 - Frames stream into the system FFmpeg rather than landing on disk, and FFmpeg's absence refuses before any browser launches
 
-### `src/take/zoom/`
+### `src/take/fixtures/`
 
-Holds OpenScreen's zoom timing at `ca8104c` under its MIT license, trimmed to the region strength, the connected-pan easing, and the spring. `NOTICE.md` lists what changed, including the spring solved in closed form rather than through the `motion` package.
+Owns the static pages the end to end takes film, two of which post each input they receive back to the test's server.
 
-### Other folders
-
-One folder here does no work of its own.
-
-- `src/take/fixtures/` owns the static pages the end to end takes film, one of which posts each input it receives back to the test's server
+- `motion.html` is the release-checklist page every motion rule is measured on, and `motion-server.ts` serves it with canon's token sheet and Geist from where they live
+- `motion.html` reports the animation frame each input paints in, since a stepped page's `performance.now()` runs ahead of the clip while inputs are dispatched
+- `watch.ts` films `motion.json` on that page and renders each beat with its zoom and cursor burned in, for judging a camera change by eye
 
 ## Gotchas
 

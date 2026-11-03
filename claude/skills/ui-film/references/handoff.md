@@ -29,7 +29,7 @@ Each frame carries `scale`, the view's top-left `x` and `y`, the `cursor`, and `
 - `cursor` is the pointer's position on the page
 - `ring` runs from 0 to 1 across the 450 ms after a click and is `null` otherwise. On a drag it grows to 0.3, holds there from press to release, and runs on to 1 from the release.
 
-The track is final. It already carries the easing, the spring, and the hold, so a composition sets each frame's values and never tweens between them.
+The track is final. It already carries the easing and the hold, so a composition sets each frame's values and never tweens between them.
 
 ## Where the composition lives
 
