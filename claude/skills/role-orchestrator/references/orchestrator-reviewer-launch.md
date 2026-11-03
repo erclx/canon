@@ -72,7 +72,7 @@ claude --bg --model <model> -n "reviewer-<project>-<n1>-<n2>" "Run /canon:role-r
 
 ### The UI batch shape
 
-The UI reviewer takes `reviewer-ui-<project>-<n1>-<n2>` and `review-ui` once per number, with the code shape's clauses for that family. Name only the pull requests whose evidence record carries a checklist, since a pass on one without a checklist stops on arrival.
+The UI reviewer takes `reviewer-ui-<project>-<n1>-<n2>` and `review-ui` once per number, with the code shape's clauses for that family. Name only the pull requests whose evidence record carries a `drivable` count above zero, since a pass on one without a checklist stops on arrival and one holding only taste boxes binds no UI gate.
 
 - The model is `sonnet`, as for the single UI shape
 - `canon pr lift` runs once per number on that number's `## UI review closed`, unless the reason names the code review as still open or missing

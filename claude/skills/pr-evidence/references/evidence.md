@@ -150,6 +150,7 @@ rmdir <main-root>/.canon/tmp/handoff/ui-checklist 2>/dev/null || true
 
 - The `rmdir` is a no-op while another branch's pending checklist sits in the folder, so this step never deletes a handoff not its own
 - `git-followup` re-runs `canon pr evidence` with no `--checklist`, and the verb carries the checklist forward out of the comment it edits
+- To drop a checklist the marked comment carries, re-run `canon pr evidence <number> --no-checklist --json` and post the `ok` body it returns. Never edit the comment over REST by hand, since the next render carries the old checklist back.
 - A tick survives a render at the head its stamp names and is cleared by one at a newer head, so the next UI pass earns it again
 
 ## Post the preview address

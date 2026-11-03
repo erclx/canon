@@ -47,9 +47,9 @@ bun <POLL_SCRIPT> --wait 1200
 Act on what the poll printed when it exited, then start it again.
 
 - A release pull request, whatever state follows it: report it and stop. Its sweep carries no findings, so no pass is owed. Test this before any rule below, since a release pull request is reported OPENED like any other and would otherwise match that rule first.
-- MOVED, before the rule below: run the review dispatch runbook's proof check on the new head. A head first carrying an uncaptured path, or owing evidence, goes back to its worker and holds the re-review. One first carrying a checklist with no UI reviewer launched takes one now.
+- MOVED, before the rule below: run the review dispatch runbook's proof check on the new head. A head first carrying an uncaptured path, or owing evidence, goes back to its worker and holds the re-review. One first carrying a `drivable` box with no UI reviewer launched takes one now.
 - MOVED or RESPONSE on a pull request already reviewed: when a live local reviewer holds it, report it and stop, since the worker asks that reviewer for the re-review directly. When none does, which a cloud reviewer always leaves, launch a fresh reviewer under the review dispatch runbook of the canon:role-orchestrator skill. Never run the canon:review-pr skill here. Re-reviews read prior..head and gain nothing from waiting.
-- OPENED, or a pull request with no prior review pass: once that runbook's proof check reads proof, launch its reviewer under the review dispatch runbook of the canon:role-orchestrator skill, and its UI reviewer beside it when the evidence record carries a checklist. Never run the first pass here. A draft counts, since every pull request here opens as one and skipping drafts skips everything.
+- OPENED, or a pull request with no prior review pass: once that runbook's proof check reads proof, launch its reviewer under the review dispatch runbook of the canon:role-orchestrator skill, and its UI reviewer beside it when the evidence record counts a `drivable` box. Never run the first pass here. A draft counts, since every pull request here opens as one and skipping drafts skips everything.
 - SEEN: report it and stop. A pass already covers that head, whether it arrived out of band or before the poll first saw the pull request, so no review follows.
 - STALLED: read the last pass and report what it carried. The pass has sat open for hours with nothing following it, so a worker mid-task is already ruled out and the dispatch either never went out or the session holding it is gone. Confirm and re-send it under the dispatch rule below, whatever grades the pass carried. Do not re-run a review to correct the heading, since a pass on an unchanged head with no response behind it stops by design.
 - CONFLICT or STALE: send the session holding that branch the rebase handback in the canon:role-orchestrator skill's handback runbook, resolving it the way the handback rule below does. The branch owner rebases, not this session. The poll prints one of the two for a pull request, never both, so it earns one message. The canon pr lift verb refuses on either standing itself, since the green run tested a main that no longer exists, so nothing here lifts the mark.
@@ -81,7 +81,7 @@ The eight headings the script knows are written by `review-pr`, `review-address`
 - The reply family matches by a filter in `poll.ts`, so a project posting it under different headings edits that
 - The review and UI families match inside `canon pr review-state`, which the script and `review-pr` both read, so renaming one changes the verb
 - The `UI-` states report the newest UI pass on its transition, and `UI-STALE` fires beside the `MOVED` of a push that left its marker behind
-- A first sighting reports no `UI-` state at no cost to the mark, since `canon pr lift` reads the UI review itself and holds the mark on a `canon pr evidence` checklist until a UI close names the head
+- A first sighting reports no `UI-` state at no cost to the mark, since `canon pr lift` reads the UI review itself and holds the mark on a drivable checklist until a UI close names the head
 
 ### UNMATCHED and RESPONSE
 
