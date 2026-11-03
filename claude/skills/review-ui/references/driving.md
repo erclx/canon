@@ -1,11 +1,21 @@
 ---
 title: Drive each box
-description: Step 5 of review-ui, which maps a checklist line to browser calls, reads each value off the page, and gives the box one of four verdicts with the evidence that verdict carries
+description: The access join Step 3 of review-ui makes, then Step 5, which maps a checklist line to browser calls, reads each value off the page, and gives the box one of four verdicts with the evidence that verdict carries
 ---
 
 # Drive each box
 
 Step 5 of `review-ui`. The browser is open at the address Step 3 picked, under the session Step 4 named. Every call below goes through `canon browser -s=<project>-<number>`, shortened here to `pw`.
+
+## The access join
+
+Step 3 reads this section once a rung answers. Read `access` from `canon/config/app-drive.toml` at the main worktree root, since a page needing a write link, a signed-in route, or a demo token shows its start state only behind it.
+
+- Join a value starting with `/` to the rung, and take a full address as it stands. Step 4 opens the joined address.
+- Test the rung bare in Step 3, so the `curl` spends no single-use link before the drive
+- An absent file or an absent key opens the rung as it stands
+- Take no second address from the launch brief, since the config is the one source
+- Never print the joined address in a post, a frame, or a message, since `access` may carry a token. Name the rung and say the config's `access` was joined.
 
 ## Reading a line
 
@@ -67,6 +77,14 @@ A box the pass could not drive because the drive fixture holds no such state is 
 - Count it as not driven, and never as a fail, since the page may be right
 - An address that did not answer stays a cause off the branch, and a `(local only)` box on a hosted address does too
 - A state no fixture file can hold is the exit, such as one a project with no `canon/config/app-drive.toml` cannot reach inline. Name it a cause off the branch, so the review stays closed.
+
+### A refused address
+
+A permission rule or a classifier that denies the call opening or driving an address leaves the box not driven, for a cause off the branch. Name the refusal as the host worded it and the call it denied.
+
+- Never retry through another route, being a second address, a different browser call, or a direct fetch, since the refusal is a decision about this pass rather than a fault to work around
+- A refused opening call drives no box, so the pass posts open with the refusal as its cause line, per `${CLAUDE_SKILL_DIR}/references/post.md`
+- Name the address by its rung and never print the joined `access`, which may carry a token
 
 ### Which image a verdict carries
 

@@ -1,6 +1,6 @@
 ---
 title: UI film config
-description: What a take reads from canon/config/app-drive.toml, the access key it adds, and what to ask when the file is absent
+description: What a take reads from canon/config/app-drive.toml, the access key it shares with review-ui, and what to ask when the file is absent
 ---
 
 # UI film config
@@ -21,7 +21,7 @@ access = "/write?token=demo"
 | `data`   | A fixture path inside the worktree to load before serving, if any      |
 | `access` | The path or address that opens the app in the state a take starts from |
 
-`access` is optional and belongs to the take alone. A drive ignores it.
+`access` is optional. A take joins it, and so does a `review-ui` pass, which opens its chosen address behind it. `app-drive` ignores it.
 
 - Join a path value, one starting with `/`, to the served address. Take a full address as it stands.
 - Use it for whatever the app needs before its start state shows, such as a write link, a signed-in route, or a demo token
