@@ -63,6 +63,8 @@ A pass carrying nothing at all takes `## Review closed` and a short body, with t
 - A prior finding this pass withdrew leaves the count, and its line names the fact that settled it rather than a fix, per the withdrawal rule below
 - A closing remark that fits no prior finding, such as a ticked Testing box, takes one line of its own after them
 
+Each capture waiver this pass still accepts takes its `- **Waived capture:**` line last, unfenced. The lift reads waivers from the newest pass alone, so a close-out that drops one withdraws it.
+
 ### Only minors
 
 A pass carrying only minors is an ordinary finding-carrying pass, so it takes the open heading and the full shape, since neither short line reports the minors. A pass carrying only Testing questions or only an unanswered reviewer request takes the same route. Keep whichever scope sentence the pass owes on the summary line:

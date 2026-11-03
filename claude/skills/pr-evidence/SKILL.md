@@ -56,7 +56,7 @@ Collect `📸 <N> painted paths changed with no evidence capture. Recapture and 
 
 - The evidence call writes an `**Uncaptured:**` line naming each path on the marked comment, posting it even on a head with no other news
 - The line drops on the first render after a capture lands or a reel filmed at the head renders beside it
-- `canon pr lift` refuses `painted-uncaptured` until a capture, a reel at the head, or a review's waiver covers every listed path
+- `canon pr lift` refuses `painted-uncaptured` until a capture, a reel at the head, or a waiver in the newest review pass covers every listed path
 - A worker never writes the waiver, since a review is the one surface a worker never posts
 
 ### The no-local-preview line

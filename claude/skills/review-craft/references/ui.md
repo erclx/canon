@@ -50,7 +50,7 @@ A worker may state why a listed path needs no capture, such as a change to keybo
 - Keep it outside any code fence, since the lift skips a fenced line as a quoted sample
 - Copy the path from the record, since the lift matches it only as `uncaptured` spells it
 - Write the reason after the colon, since a line with none waives nothing
-- Post it in a review and never a reply, since the lift reads review bodies alone
+- Restate it in every later pass, a close-out included, since the lift reads only the newest marked pass of each family and never a reply
 
 ### A recapture of the design
 

@@ -19,6 +19,8 @@ gh api --paginate 'repos/{owner}/{repo}/pulls/<number>/reviews?per_page=100' --j
 
 Write the replacement body to `<body-file>`, the name `post.md` already derived at the top of Step 4. Keep the heading and the footer, and name what this pass covered on the scope line in place of what the old one covered.
 
+Carry every `- **Waived capture:**` line the standing close-out holds into the replacement when this pass still accepts it. The lift reads waivers from the newest pass alone, so a rewrite that drops one withdraws it and the lift refuses `painted-uncaptured` again.
+
 - Derive that name the same way whichever path reached here, since the guard reads `<prior-heading>` alone and a repeated head resolves the third segment as usual
 - The folder then gains a record of every covered head rather than losing the one the standing comment named
 
