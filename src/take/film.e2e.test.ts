@@ -51,15 +51,10 @@ const HIDDEN_PAGE = PAGE.replace(
  */
 function ticketPage(fresh: boolean): string {
   if (!fresh) return '<!doctype html><body><p>This link has expired.</p></body>'
-  return `<!doctype html><body style="margin:0">
-    <button id="open" style="position:absolute;left:100px;top:100px;width:200px;height:60px">Open</button>
-    <script>
-      document.getElementById('open').addEventListener('click', () => {
-        const start = Date.now()
-        while (Date.now() - start < 4000) {}
-      })
-    </script>
-  </body>`
+  return readFileSync(
+    new URL('./fixtures/ticket.html', import.meta.url),
+    'utf8',
+  )
 }
 
 /**

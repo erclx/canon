@@ -1,0 +1,21 @@
+<!doctype html>
+<body style="margin: 0">
+  <button
+    id="open"
+    style="
+      position: absolute;
+      left: 100px;
+      top: 100px;
+      width: 200px;
+      height: 60px;
+    "
+  >
+    Open
+  </button>
+  <script>
+    document.getElementById('open').addEventListener('click', () => {
+      const start = Date.now()
+      while (Date.now() - start < 4000) {}
+    })
+  </script>
+</body>
