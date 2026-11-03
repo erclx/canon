@@ -1,6 +1,6 @@
 ---
 title: Compose craft
-description: The footage rules a session composing ui-film takes follows where the HyperFrames skills say nothing, being captions over app UI, other shapes, the README loop, sped-up clips, storyboard headings, and the workspace README
+description: The footage rules a session composing ui-film takes follows where the HyperFrames skills say nothing, being captions over app UI, other shapes, the README loop, pacing, sped-up clips, transitions, reviewing a cut, music, storyboard headings, and the workspace README
 ---
 
 # Compose craft
@@ -14,7 +14,11 @@ Each rule states the principle. Where a number appears, it is the case measured 
 - [Captions over app footage](#captions-over-app-footage)
 - [Other shapes](#other-shapes)
 - [The README loop](#the-readme-loop)
+- [Pacing](#pacing)
 - [Sped-up clips](#sped-up-clips)
+- [Transitions](#transitions)
+- [Reviewing a cut](#reviewing-a-cut)
+- [Music](#music)
 - [Storyboard headings](#storyboard-headings)
 - [The workspace README](#the-workspace-readme)
 - [Sources](#sources)
@@ -46,6 +50,30 @@ Cut a README loop only when the operator asks for one. A README hero plays inlin
 - End it on the finished state, held long enough to read before the loop restarts
 - Export an animated WebP under about 2 MB, since a README renders one inline where a video needs a player. Frameboard's loop played inline at 1.72 MB.
 
+## Pacing
+
+A cut paced at one rate throughout reads rushed where the viewer reads and slow where an agent works. Frameboard's launch film read rushed with hand actions at 1.25x to 1.42x, read slow at about 1x everywhere, and landed at about 78 s with the rates split by beat kind.
+
+### Rates by beat kind
+
+Set each beat's playback rate by what the viewer does during it.
+
+- Play an agent replay montage faster than a hand action, since the viewer follows its result rather than each step. Frameboard's ran up to about 2x.
+- Play hand actions and anything read near real time, as Frameboard's did at about 1.0x to 1.2x
+- Hold a typing beat to the rate `## Sped-up clips` gives, whatever rate the rest of its scene takes
+
+### Holds
+
+Every result and every line of text holds still long enough to land before the cut.
+
+- Hold each result on screen before the cut, such as a recolored button or an agent's reply. About 1 to 2 s fit Frameboard's film.
+- Hold text by its length, with HyperFrames' `line_unread` warning as the floor. One short terminal line fit at about 1.5 s on Frameboard's film, where 0.75 s was missed and 2.9 s dragged.
+- Pause after a mode switch, such as arming a tool, before the next action, or the switch does not register. About 1 s fit Frameboard's film.
+
+### Windows from marks
+
+Read each scene's window off the take's `log.json`, from its first event less a lead to its last result plus that result's hold, then set the rate from the scene's length. Reusing an old cut's offsets against a new take lands the camera on moments that moved.
+
 ## Sped-up clips
 
 A clip the edit plays faster runs its zoom faster too, so a push that settled in real time pumps several times a beat.
@@ -53,6 +81,24 @@ A clip the edit plays faster runs its zoom faster too, so a push that settled in
 - Rebuild the beat's track for the playback rate with `canon take camera <dir>/log.json --rate <n> --out <file>`, and drive the wrapper from that file rather than from `camera.json`
 - Never scale `camera.json`'s times by hand, since the rebuilt track also times each push to its glide on the new clock
 - Keep a typing beat at a rate where each word still reads, since a viewer cannot read a fill that finishes in a few frames
+
+## Transitions
+
+HyperFrames owns transitions in general. App footage changes one thing, since only canon's camera zooms the footage under a dissolve.
+
+- Settle a zoomed scene back to the whole page before a dissolve into another shot of the same app, so the dissolve blends two matching wide shots rather than ghosting one app at two scales
+- Ease the camera wrapper out over the scene's last stretch rather than cutting its scale, as Frameboard's film did over about 0.8 s ahead of a 0.45 s dissolve
+
+## Reviewing a cut
+
+Stills at beat midpoints pass a cut whose motion is wrong, as they passed every cut on Frameboard's film that the operator then rejected for its motion. Review motion before showing the cut, beside the review HyperFrames' `review.md` runs.
+
+- Step a dense frame strip with `snapshot --range START,END --frames 8` around every take's action and every transition, rather than only the hero move `review.md` names
+- Check the drawn cursor against the element it acts on in each strip, since the cursor is drawn from the log and nothing but a look shows it leaving what the page moved
+
+## Music
+
+HyperFrames owns the soundtrack, so score the film by its `sound.md` and `film.md`, and listen hardest to the first 2 s and the last 10 s, where Frameboard's film hid its silent lead and a drop that landed early.
 
 ## Storyboard headings
 
@@ -71,12 +117,23 @@ Step 5 writes the filming half of `.canon/video/<slug>/README.md`. The composing
 
 ## Sources
 
-| Rule                        | Source                                                                                                   |
-| --------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Caption placement and scrim | HyperFrames' `captions.md`, adjusted for footage with chrome along its bottom edge                       |
-| A new project per shape     | The `hyperframes` skill's `types/vertical.md`, which recomposes a vertical film rather than squeezing it |
-| The 1080x1080 window        | Frameboard's launch film, cut square from stepped takes                                                  |
-| The 2 MB WebP loop          | Frameboard's README hero, an animated WebP cut from a raw take, which played inline at 1.72 MB           |
-| Rebuilding a sped-up track  | `canon take camera --help`, whose `--rate` divides every time in the log                                 |
-| Storyboard heading form     | HyperFrames' `storyboard-format.md` and the markdown audit's character bans, with the colon read assumed |
-| The README's two halves     | Frameboard's workspace, whose README recorded how to re-film and re-render after a session ended         |
+The rules measured on Frameboard's launch film carry its case beside them rather than a default.
+
+| Rule                      | Source                                                                                              |
+| ------------------------- | --------------------------------------------------------------------------------------------------- |
+| The 1080x1080 window      | Frameboard's launch film, cut square from stepped takes                                             |
+| Rates, holds, and windows | Frameboard's launch film, cut at three paces before about 78 s landed                               |
+| Settling wide             | Frameboard's launch film, whose dissolves ghosted two boards at different scales until each settled |
+| Where music faults hide   | Frameboard's launch film, which opened silent and ended over near silence                           |
+
+The rest come from HyperFrames, the verb, or Frameboard's other deliverables.
+
+| Rule                        | Source                                                                                                    |
+| --------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Caption placement and scrim | HyperFrames' `captions.md`, adjusted for footage with chrome along its bottom edge                        |
+| A new project per shape     | The `hyperframes` skill's `types/vertical.md`, which recomposes a vertical film rather than squeezing it  |
+| The 2 MB WebP loop          | Frameboard's README hero, an animated WebP cut from a raw take, which played inline at 1.72 MB            |
+| Reviewing motion            | HyperFrames' `review.md`, widened to every action after midpoint stills passed cuts the operator rejected |
+| Rebuilding a sped-up track  | `canon take camera --help`, whose `--rate` divides every time in the log                                  |
+| Storyboard heading form     | HyperFrames' `storyboard-format.md` and the markdown audit's character bans, with the colon read assumed  |
+| The README's two halves     | Frameboard's workspace, whose README recorded how to re-film and re-render after a session ended          |
