@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises'
+import { REEL_MAX_BYTES } from '@/take/reel'
 
 /** The branch holding review frames. It never merges into a branch anyone checks out. */
 export const FRAMES_BRANCH = 'canon/frames'
@@ -12,12 +13,6 @@ const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
 /** A WebP opens on `RIFF`, four bytes of size, then `WEBP`. */
 const RIFF = [0x52, 0x49, 0x46, 0x46]
 const WEBP = [0x57, 0x45, 0x42, 0x50]
-
-/**
- * The largest reel an add takes, GitHub's cap on an image in a comment, so a
- * reel that would not render is refused before it reaches the branch.
- */
-export const REEL_MAX_BYTES = 10_000_000
 
 const SHORT_HEAD_LENGTH = 7
 

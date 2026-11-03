@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Popover</title>
+    <!--
+      A popover that a button opens and closes with a short opacity fade, over
+      a flat ground. Once it has closed the page is the ground again, so any
+      trace of the popover left in a reel is an encoder that skipped the
+      frames of the fade. The popover sits above the bar, clear of the pointer
+      and its ring.
+    -->
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #ecebee;
+        font:
+          14px system-ui,
+          sans-serif;
+        overflow: hidden;
+      }
+
+      .bar {
+        position: absolute;
+        left: 760px;
+        top: 900px;
+        width: 400px;
+        height: 44px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 10px;
+      }
+
+      .bar button {
+        height: 30px;
+        padding: 0 10px;
+        border: 0;
+        border-radius: 6px;
+        background: #2f6fe4;
+        color: #fff;
+      }
+
+      #pop {
+        position: absolute;
+        left: 760px;
+        top: 760px;
+        width: 220px;
+        height: 80px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.14);
+        border: 1px solid #e3e2e6;
+        opacity: 1;
+        transition: opacity 150ms;
+      }
+
+      #pop.closed {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      #pop div {
+        padding: 10px 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="pop" class="closed">
+      <div>Move</div>
+      <div>Hand</div>
+    </div>
+    <div class="bar">
+      <button id="tool" aria-label="Tool">Tool</button><span>Auto</span
+      ><span>Flow</span>
+    </div>
+    <script>
+      document.getElementById('tool').addEventListener('click', () => {
+        document.getElementById('pop').classList.toggle('closed')
+      })
+    </script>
+  </body>
+</html>

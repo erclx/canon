@@ -22,8 +22,15 @@ export const REEL_EVERY = 3
 
 export const REEL_FPS = FPS / REEL_EVERY
 
-/** WebP quality, measured at about 1.4 MB for a 9 s reel at this width. */
-const QUALITY = 60
+/** The most GitHub renders inline as an image in a comment. */
+export const REEL_MAX_BYTES = 10_000_000
+
+/**
+ * Quality of the lossy fallback, measured at about 1.4 MB for a 9 s reel at
+ * this width. It skips frames whose change is faint, so a fade-out can leave a
+ * ghost, and the fallback exists only to keep a long reel under the cap.
+ */
+const LOSSY_QUALITY = 60
 
 export interface ReelFrame extends Frame {
   /** Which beat of the take, in plan order. */
@@ -37,6 +44,8 @@ export interface Reel {
   readonly frames: number
   readonly seconds: number
   readonly bytes: number
+  /** False when the reel passed the cap lossless and was encoded again lossy. */
+  readonly lossless?: boolean
 }
 
 /**
@@ -75,11 +84,28 @@ export async function* reelFrames(
   }
 }
 
-/** Renders the reel of a filmed take to `file`, an animated WebP. */
+/**
+ * Renders the reel of a filmed take to `file`, an animated WebP. It encodes
+ * lossless, since the lossy encoder skips a frame whose change is faint and
+ * never repaints the last copy of an element that faded out. A reel past
+ * `maxBytes` is encoded again lossy so a long reel still posts.
+ */
 export async function renderReel(
   out: string,
   beats: readonly FilmedBeat[],
   file: string,
+  maxBytes: number = REEL_MAX_BYTES,
+): Promise<Reel> {
+  const lossless = await encode(out, beats, file, true)
+  if (lossless.bytes <= maxBytes) return { ...lossless, lossless: true }
+  return { ...(await encode(out, beats, file, false)), lossless: false }
+}
+
+async function encode(
+  out: string,
+  beats: readonly FilmedBeat[],
+  file: string,
+  lossless: boolean,
 ): Promise<Reel> {
   const first = beats[0]
   if (!first) throw new Error('a reel needs at least one filmed beat')
@@ -105,8 +131,7 @@ export async function renderReel(
       '-',
       '-c:v',
       'libwebp_anim',
-      '-quality',
-      String(QUALITY),
+      ...(lossless ? ['-lossless', '1'] : ['-quality', String(LOSSY_QUALITY)]),
       '-loop',
       '0',
       '-f',

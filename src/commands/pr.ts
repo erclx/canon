@@ -53,6 +53,7 @@ import {
   settleChecklist,
 } from '@/pr/evidence'
 import { isWithinTolerance } from '@/pr/pixels'
+import { REEL_MAX_BYTES } from '@/take/reel'
 import {
   dropFramesWithLegacy,
   FRAMES_BRANCH,
@@ -66,7 +67,6 @@ import {
   LEGACY_FRAMES_BRANCH,
   pruneFramesWithLegacy,
   pushFrame,
-  REEL_MAX_BYTES,
   readFrame,
   readReel,
   isDesignReference,
