@@ -39,6 +39,7 @@ export interface RestReview {
   readonly body?: string | null
   readonly commit_id?: string | null
   readonly submitted_at?: string | null
+  readonly state?: string | null
 }
 
 /** One row of `repos/{owner}/{repo}/issues/<n>/comments`. */
@@ -117,6 +118,7 @@ export function reviewRowOf(review: RestReview): ReviewRow {
         ? null
         : { oid: review.commit_id },
     submittedAt: review.submitted_at ?? null,
+    ...(typeof review.state === 'string' && { state: review.state }),
   }
 }
 

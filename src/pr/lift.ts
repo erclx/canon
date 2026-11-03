@@ -4,6 +4,7 @@ import {
   type ReviewRow,
   resolveReviewScope,
   resolveUiScope,
+  standingPasses,
   type UiCounts,
 } from '@/pr/review-scope'
 import { readCarry } from '@/pr/carry'
@@ -270,8 +271,10 @@ export async function uiGate(
 /**
  * The evidence gate. An owed step refuses first. Then every painted path the
  * pull request changed with no capture refuses, unless a reel filmed at the
- * head shows it or a review waived it by the path as the list spells it. A reel
- * at an earlier head clears nothing, since a later push may add the path.
+ * head shows it or a standing pass waived it by the path as the list spells it.
+ * A reel at an earlier head clears nothing, since a later push may add the
+ * path, and for the same reason a waiver counts only while the newest pass of
+ * its family restates it.
  */
 export function evidenceGate(
   evidence: EvidenceGate,
@@ -283,7 +286,9 @@ export function evidenceGate(
   const isFilmed =
     evidence.reelHead !== undefined && coversHead(evidence.reelHead, head)
   const listed = isFilmed ? [] : (evidence.uncaptured ?? [])
-  const named = new Set(readWaivers(reviews).map((waiver) => waiver.path))
+  const named = new Set(
+    readWaivers(standingPasses(reviews)).map((waiver) => waiver.path),
+  )
   const waived = listed.filter((path) => named.has(path)).toSorted()
   const uncaptured = listed.filter((path) => !named.has(path)).toSorted()
 

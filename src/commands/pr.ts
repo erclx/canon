@@ -996,9 +996,13 @@ export function register(program: Command): void {
         '  evidence  the evidence check reads settled, and every painted path',
         '            it lists as `uncaptured` is covered. A reel the marked',
         '            comment embeds at the head covers every path, and a',
-        '            `- **Waived capture:** `<path>`: <reason>` line in a review',
-        '            body, outside a code fence, covers the path it names as the',
-        '            list spells it. Any other path refuses `painted-uncaptured`,',
+        '            `- **Waived capture:** `<path>`: <reason>` line outside a code',
+        '            fence covers the path it names as the list spells it. Only',
+        '            the newest `## Review` and the newest `## UI review` count,',
+        '            each closed by its own marker and not dismissed, so a pass',
+        '            must restate a waiver for it to hold on a later head. A',
+        '            review with no pass heading waives nothing. Any other path',
+        '            refuses `painted-uncaptured`,',
         '            the gate entry naming what is left as `uncaptured` and what',
         '            a review waived as `waived`, each sorted. An absent list,',
         '            in a project whose base keeps no captures, passes',
@@ -2083,7 +2087,7 @@ async function listReviews(cwd: string, number: string) {
   return listPages<RestReview>(
     cwd,
     `repos/{owner}/{repo}/pulls/${number}/reviews`,
-    'id, body, commit_id, submitted_at',
+    'id, body, commit_id, submitted_at, state',
   )
 }
 

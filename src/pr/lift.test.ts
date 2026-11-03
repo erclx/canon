@@ -732,6 +732,63 @@ describe('lift', () => {
         ).not.toHaveProperty('waived')
       })
 
+      it('should drop a waiver the newest pass of its family no longer restates', async () => {
+        const { api } = makeApi({
+          evidence: { uncaptured: ['src/b.tsx'] },
+          reviews: [CODE_CLOSED, waiver('src/b.tsx'), UI_CLOSED],
+        })
+
+        const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+        expect(record.reason).toBe('painted-uncaptured')
+      })
+
+      it('should read a waiver from the newest code pass beside a UI close', async () => {
+        const codeWaiver: ReviewRow = {
+          body: `## Review closed\n\n- **Waived capture:** \`src/b.tsx\`: focus order only\n<!-- review-pr: commit=${HEAD} read-at=${READ_AT} -->`,
+        }
+        const { api } = makeApi({
+          evidence: { uncaptured: ['src/b.tsx'] },
+          reviews: [codeWaiver, UI_CLOSED],
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('lifted')
+      })
+
+      it.each([
+        [
+          'a review with no pass heading',
+          { body: '- **Waived capture:** `src/b.tsx`: focus order only' },
+        ],
+        [
+          'a pass with no marker',
+          {
+            body: '## UI review closed\n\n- **Waived capture:** `src/b.tsx`: focus order only',
+          },
+        ],
+        [
+          'a dismissed pass',
+          {
+            ...waiver('src/b.tsx'),
+            state: 'DISMISSED',
+          },
+        ],
+      ] as const)(
+        'should clear nothing for a waiver in %s',
+        async (_, row: ReviewRow) => {
+          const { api } = makeApi({
+            evidence: { uncaptured: ['src/b.tsx'] },
+            reviews: [CODE_CLOSED, row],
+          })
+
+          const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+          expect(record.reason).toBe('painted-uncaptured')
+        },
+      )
+
       it('should clear the list with a reel filmed at the head', async () => {
         const { api } = makeApi({
           evidence: { uncaptured: ['src/b.tsx'], reelHead: HEAD.slice(0, 7) },
