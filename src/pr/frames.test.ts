@@ -2,6 +2,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { REEL_MAX_BYTES } from '@/take/reel'
 import {
   dropFrames,
   dropFramesWithLegacy,
@@ -16,7 +17,6 @@ import {
   pruneFrames,
   pruneFramesWithLegacy,
   pushFrame,
-  REEL_MAX_BYTES,
   readFrame,
   readReel,
   reelPath,

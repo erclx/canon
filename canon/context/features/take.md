@@ -17,6 +17,8 @@ The `ui-film` plugin skill drafts the beats and calls the verb for a launch vide
 
 Reads a take plan, films each beat from a fresh load, and writes the clip, the log, the camera track, and the closing frame as `still.jpg` per beat, listed in `take.json`. With `--reel`, `reel.ts` joins every third frame into one 960-wide WebP and `pointer.ts` draws the cursor from the camera track, with no zoom, since that is HyperFrames' craft.
 
+The reel encodes lossless, since lossy WebP skips a frame whose change is faint and leaves a faded element's last copy on screen. Past `REEL_MAX_BYTES`, which `reel.ts` holds for `canon pr frames` too, it encodes again at quality 60, and the record's `lossless` says which ran.
+
 - The stepper launches chrome-headless-shell under begin-frame control over raw CDP, since Playwright cannot ask for it on a page it opens, and screenshots each frame at device scale 2
 - A beat asking for `screencast`, or a stepped frame slower than 2 s, films through Playwright's screencast at 1920x1080, cut at the stage clock past the recorder's 1 s pad, its record naming the route
 - One choreography performs every step through each route's stage, logging each point a glide sends for the drawn cursor and resting 300 ms before a press, 500 ms after, and 400 ms before a fill types
