@@ -54,33 +54,6 @@ Bun.serve({
 console.log(\`http://localhost:\${port}\`)
 `
 
-const PAGE = `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Board</title>
-  </head>
-  <body>
-    <h1>Board</h1>
-    <ul id="frames"></ul>
-    <button id="add">Add frame</button>
-    <script>
-      const list = document.getElementById('frames')
-      let frames = []
-      fetch('/board').then((r) => r.json()).then((b) => {
-        frames = b.frames
-        frames.forEach((f) => list.append(Object.assign(document.createElement('li'), { textContent: f })))
-      })
-      document.getElementById('add').onclick = () => {
-        frames.push('frame ' + (frames.length + 1))
-        list.append(Object.assign(document.createElement('li'), { textContent: frames.at(-1) }))
-        fetch('/save', { method: 'POST', body: JSON.stringify({ frames }) })
-      }
-    </script>
-  </body>
-</html>
-`
-
 export default scenario({
   config: {
     SANDBOX_SKIP_AUTO_COMMIT: 'true',
@@ -92,7 +65,7 @@ export default scenario({
       ctx.write('canon/config/app-drive.toml', CONFIG)
       ctx.write('package.json', PACKAGE)
       ctx.write('server.ts', SERVER)
-      ctx.write('src/index.html', PAGE)
+      ctx.fixtures('claude', 'app-drive', 'default', '01-initial')
       ctx.write('boards/board.json', '{"frames":["frame 1"]}\n')
       ctx.write('.gitignore', '.canon/\ndist/\n')
 

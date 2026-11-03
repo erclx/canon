@@ -1,0 +1,46 @@
+<!doctype html>
+<!-- The archive control is small and sits in a corner, so the camera has to
+     zoom for the result to read, and the search filters as the viewer types. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Inbox</title>
+    <style>
+      body { margin: 0; font: 16px/1.5 system-ui, sans-serif; background: #f6f6f4; }
+      header { display: flex; gap: 12px; align-items: center; padding: 16px 24px; background: #fff; }
+      main { padding: 24px; }
+      li { display: flex; justify-content: space-between; padding: 12px 16px; margin-bottom: 8px;
+        background: #fff; border-radius: 8px; transition: opacity 300ms ease, transform 300ms ease; }
+      li.gone { opacity: 0; transform: translateX(40px); }
+      li[hidden] { display: none; }
+      button { font: inherit; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <strong>Inbox</strong>
+      <input id="search" aria-label="Search messages" placeholder="Search" />
+    </header>
+    <main>
+      <ul id="list">
+        <li><span>Invoice for October</span><button aria-label="Archive Invoice for October">Archive</button></li>
+        <li><span>Team offsite plan</span><button aria-label="Archive Team offsite plan">Archive</button></li>
+        <li><span>Design review notes</span><button aria-label="Archive Design review notes">Archive</button></li>
+      </ul>
+    </main>
+    <script>
+      document.getElementById('list').addEventListener('click', (event) => {
+        const row = event.target.closest('button') && event.target.closest('li')
+        if (!row) return
+        row.classList.add('gone')
+        setTimeout(() => row.remove(), 300)
+      })
+      document.getElementById('search').addEventListener('input', (event) => {
+        const want = event.target.value.toLowerCase()
+        for (const row of document.querySelectorAll('#list li')) {
+          row.hidden = !row.textContent.toLowerCase().includes(want)
+        }
+      })
+    </script>
+  </body>
+</html>
