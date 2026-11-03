@@ -89,6 +89,8 @@ interface Aim {
   readonly t: number
   readonly until: number
   readonly at: Point
+  /** What the view has to keep in frame, being both ends of a drag. */
+  readonly box: Box
   readonly depth: number
 }
 
@@ -203,6 +205,7 @@ function aimsOf(
           t: event.t,
           until: event.t,
           at: event.at,
+          box: event.box,
           depth: depthFor(event.box),
         },
       ]
@@ -215,6 +218,7 @@ function aimsOf(
           t: event.t,
           until: event.t + event.ms,
           at: centerOf(box),
+          box,
           depth: depthFor(box),
         },
       ]
@@ -225,6 +229,7 @@ function aimsOf(
           t: event.t,
           until: event.t + event.ms,
           at: centerOf(event.box),
+          box: event.box,
           depth: depthFor(event.box),
         },
       ]
@@ -237,6 +242,7 @@ function aimsOf(
           t: arrived,
           until: arrived + event.hold,
           at: event.to,
+          box: { ...event.to, width: 0, height: 0 },
           depth: deepest,
         },
       ]
@@ -295,13 +301,18 @@ function zoomsOf(
       end: first.t,
     }
 
-    const stops = [{ at: first.at, pan: { start: into.end, end: into.end } }]
+    const stops = [
+      {
+        at: framed(first, depth, page),
+        pan: { start: into.end, end: into.end },
+      },
+    ]
     let previous = first
     for (const aim of group.slice(1)) {
       const stop = stops.at(-1) ?? stops[0]
-      if (stop && !inside(aim.at, stop.at, depth, page)) {
+      if (stop && !inside(aim, stop.at, depth, page)) {
         stops.push({
-          at: aim.at,
+          at: framed(aim, depth, page),
           pan: arriving(glides, aim.t, previous.until) ?? {
             start: Math.max(previous.until, aim.t - EASE_MS),
             end: aim.t,
@@ -338,26 +349,65 @@ function arriving(
 }
 
 /**
- * Whether a point lies near enough the stop, and far enough inside the view
- * anchored on it, that the view can stay where it is.
+ * Whether an aim lies near enough the stop, with its whole box far enough
+ * inside the view anchored on it, that the view can stay where it is.
  */
 function inside(
-  point: Point,
+  aim: Aim,
   stop: Point,
   depth: number,
   page: { readonly width: number; readonly height: number },
 ): boolean {
-  const near = (value: number, anchor: number, size: number) => {
+  const near = (
+    value: number,
+    low: number,
+    high: number,
+    anchor: number,
+    size: number,
+  ) => {
     const span = size / depth
     const origin = originFor(anchor, depth, size)
     const margin = span * MARGIN
     return (
       Math.abs(value - anchor) < (span / 2) * STICKY &&
-      value > origin + margin &&
-      value < origin + span - margin
+      low > origin + margin &&
+      high < origin + span - margin
     )
   }
-  return near(point.x, stop.x, page.width) && near(point.y, stop.y, page.height)
+  const { box } = aim
+  return (
+    near(aim.at.x, box.x, box.x + box.width, stop.x, page.width) &&
+    near(aim.at.y, box.y, box.y + box.height, stop.y, page.height)
+  )
+}
+
+/**
+ * The point a zoom onto `aim` scales about: its own point where the view
+ * anchored there keeps the aim's box in frame, and otherwise the nearest point
+ * that does, so both ends of a drag near the page's edge stay in view.
+ */
+function framed(
+  aim: Aim,
+  depth: number,
+  page: { readonly width: number; readonly height: number },
+): Point {
+  const axis = (at: number, low: number, high: number, size: number) => {
+    const span = size / depth
+    const k = 1 - 1 / depth
+    const margin = Math.min(
+      span * MARGIN,
+      Math.max(0, (span - (high - low)) / 2),
+    )
+    const least = (high + margin - span) / k
+    const most = (low - margin) / k
+    if (least > most) return ((low + high) / 2 - span / 2) / k
+    return clamp(at, least, most)
+  }
+  const { box } = aim
+  return {
+    x: axis(aim.at.x, box.x, box.x + box.width, page.width),
+    y: axis(aim.at.y, box.y, box.y + box.height, page.height),
+  }
 }
 
 /**

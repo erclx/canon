@@ -493,6 +493,44 @@ describe('cameraTrack input steps', () => {
     expect(inView(nearRelease, TO)).toBe(true)
   })
 
+  it('should keep both ends of a drag near the edge in view through the release', () => {
+    const from = { x: 1560, y: 540 }
+    const to = { x: 1860, y: 540 }
+    const { frames } = cameraTrack(dragOf(2000, from, to))
+
+    const held = frames.filter((f) => f.ms >= 2000 && f.ms <= 3050)
+    expect(held.every((frame) => frame.scale > 1.3)).toBe(true)
+    expect(held.filter((frame) => !inView(frame, to))).toEqual([])
+    expect(held.filter((frame) => !inView(frame, from))).toEqual([])
+  })
+
+  it('should keep the drop in view when a drag chains onto a click', () => {
+    const click = { x: 960, y: 540 }
+    const from = { x: 760, y: 540 }
+    const to = { x: 1560, y: 540 }
+    const log = takeOf([{ t: 1500, at: click }])
+    const reach: LogEvent = {
+      t: 2000,
+      kind: 'move',
+      from: click,
+      to: from,
+      ms: 300,
+    }
+    const drag = dragOf(2300, from, to)
+    const chained: TakeLog = {
+      ...log,
+      events: [...log.events, reach, ...drag.events.slice(1)].sort(
+        (a, b) => a.t - b.t,
+      ),
+    }
+
+    const { frames } = cameraTrack(chained)
+
+    const held = frames.filter((f) => f.ms >= 2300 && f.ms <= 3350)
+    expect(held.every((frame) => frame.scale > 1)).toBe(true)
+    expect(held.filter((frame) => !inView(frame, to))).toEqual([])
+  })
+
   it('should build a double click into the track of one click', () => {
     const single = takeOf([{ t: 2000, at: FROM }])
     const double: TakeLog = {
