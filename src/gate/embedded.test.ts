@@ -95,6 +95,7 @@ describe('embeddedBlocksIn', () => {
     })
 
     it('should report a straight-line script with a shebang past the limit', () => {
+      // canon-allow-embedded: the stage's own input under test
       const body = ['#!/usr/bin/env bash', 'a', 'b', 'c', 'd', 'e'].join('\n')
 
       expect(embeddedBlocksIn('a.ts', template(body))).toEqual([
@@ -122,6 +123,47 @@ describe('embeddedBlocksIn', () => {
       expect(embeddedBlocksIn('a.ts', source)).toEqual([])
     })
 
+    it('should report a one-line branching script carrying an interpolation', () => {
+      const source = 'const stub = `if [ "$a" = "${b}" ]; then exit 1; fi`\n'
+
+      expect(embeddedBlocksIn('a.ts', source)).toEqual([
+        expect.objectContaining({ kind: 'script', branches: true }),
+      ])
+    })
+
+    it.each([
+      [
+        'a closing word',
+        '# Notes\n\nA run walks\nfor each file and stops when done\n',
+      ],
+      ['an if and a done', 'if you read this, you are done'],
+      ['an if and a then', 'if it passes then the stage is done'],
+    ])('should pass prose holding %s', (_, prose) => {
+      const source = `const text = ${JSON.stringify(prose)}\n`
+
+      expect(embeddedBlocksIn('a.ts', source)).toEqual([])
+    })
+
+    it.each([
+      // canon-allow-embedded: the stage's own input under test
+      ['an if', 'if [ -f x ]; then\n  exit 1\nfi'],
+      // canon-allow-embedded: the stage's own input under test
+      ['an indented if', '  if [ -f x ]; then\n    exit 1\n  fi'],
+      // canon-allow-embedded: the stage's own input under test
+      ['a for', 'for a in "$@"; do\n  echo "$a"\ndone'],
+      [
+        'a while reading a file',
+        // canon-allow-embedded: the stage's own input under test
+        'while read -r a; do\n  echo "$a"\ndone <list',
+      ],
+      // canon-allow-embedded: the stage's own input under test
+      ['a case', 'case "$1" in\n  a) exit 0 ;;\nesac'],
+    ])('should report %s', (_, script) => {
+      expect(embeddedBlocksIn('a.ts', template(script))).toEqual([
+        expect.objectContaining({ kind: 'script', branches: true }),
+      ])
+    })
+
     it('should read past a regular expression holding a backtick', () => {
       const source = [
         'const tick = /`/g',
@@ -132,6 +174,63 @@ describe('embeddedBlocksIn', () => {
       expect(embeddedBlocksIn('a.ts', source)).toEqual([
         { file: 'a.ts', line: 2, kind: 'script', lines: 1, branches: true },
       ])
+    })
+  })
+
+  describe('an array of lines closed by a newline join', () => {
+    const joined = (lines: readonly string[], separator = "'\\n'"): string =>
+      `const stub = [\n${lines.map((line) => `  ${JSON.stringify(line)},`).join('\n')}\n].join(${separator})\n`
+
+    it('should read a branching script split across literals as one block', () => {
+      const source = joined(['case "$1" in', '  a) exit 0 ;;', 'esac'])
+
+      expect(embeddedBlocksIn('a.ts', source)).toEqual([
+        { file: 'a.ts', line: 1, kind: 'script', lines: 3, branches: true },
+      ])
+    })
+
+    it('should report a page past the limit', () => {
+      const source = joined(page(7).split('\n'))
+
+      expect(embeddedBlocksIn('a.ts', source)).toEqual([
+        expect.objectContaining({ line: 1, kind: 'page', lines: 7 }),
+      ])
+    })
+
+    it('should report one block when several of its lines branch alone', () => {
+      const source = joined([
+        // canon-allow-embedded: the stage's own input under test
+        'if [ -f a ]; then exit 1; fi',
+        // canon-allow-embedded: the stage's own input under test
+        'if [ -f b ]; then exit 2; fi',
+      ])
+
+      expect(embeddedBlocksIn('a.ts', source)).toHaveLength(1)
+    })
+
+    it('should read past a comment between its lines', () => {
+      const source =
+        "const stub = [\n  'case \"$1\" in',\n  // a comment\n  '  a) exit 0 ;;',\n  'esac',\n].join('\\n')\n"
+
+      expect(embeddedBlocksIn('a.ts', source)).toHaveLength(1)
+    })
+
+    it('should pass an array joined with another separator', () => {
+      const source = joined(page(7).split('\n'), "' '")
+
+      expect(embeddedBlocksIn('a.ts', source)).toEqual([])
+    })
+
+    it('should pass an array that is never joined', () => {
+      const source = `const lines = ${JSON.stringify(page(7).split('\n'))}\n`
+
+      expect(embeddedBlocksIn('a.ts', source)).toEqual([])
+    })
+
+    it('should honor a marker above the opening bracket', () => {
+      const source = `// canon-allow-embedded: the input under test\n${joined(page(7).split('\n'))}`
+
+      expect(embeddedBlocksIn('a.ts', source)).toEqual([])
     })
   })
 
