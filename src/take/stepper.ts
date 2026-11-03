@@ -187,10 +187,10 @@ export async function filmStepped(
 async function frameStill(
   beginFrame: (screenshot: boolean) => Promise<{ screenshotData?: string }>,
 ): Promise<Buffer | undefined> {
-  const reply = await Promise.race([
+  const reply = await withinCap(
     beginFrame(true).catch(() => undefined),
-    sleep(STILL_CAP_MS),
-  ])
+    STILL_CAP_MS,
+  )
   return reply?.screenshotData
     ? Buffer.from(reply.screenshotData, 'base64')
     : undefined
@@ -214,7 +214,7 @@ async function load(page: ShellPage, url: string): Promise<number> {
   if (navigated.errorText) {
     throw new Error(`${navigated.errorText} at ${url}`)
   }
-  const timestamp = await Promise.race([loaded, sleep(LOAD_CAP_MS)])
+  const timestamp = await withinCap(loaded, LOAD_CAP_MS)
   if (typeof timestamp !== 'number') {
     throw new Error(
       `${url} fired no load event within ${LOAD_CAP_MS / 1000} s, so no frame clock could be read`,
@@ -376,6 +376,26 @@ async function withinStall<T>(
   work.catch(() => {})
   try {
     return await Promise.race([work, stalled])
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+/**
+ * Races `work` against a cap and resolves empty when the cap wins. The timer
+ * is cleared once the race settles, since a pending one keeps the process alive
+ * for the whole cap after filming ends.
+ */
+export async function withinCap<T>(
+  work: Promise<T>,
+  ms: number,
+): Promise<T | undefined> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const capped = new Promise<undefined>((done) => {
+    timer = setTimeout(() => done(undefined), ms)
+  })
+  try {
+    return await Promise.race([work, capped])
   } finally {
     clearTimeout(timer)
   }
