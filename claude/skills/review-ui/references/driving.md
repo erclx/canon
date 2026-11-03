@@ -9,12 +9,12 @@ Step 5 of `review-ui`. The browser is open at the address Step 3 picked, under t
 
 ## The access join
 
-Step 3 reads this section once a rung answers. Read `access` from `canon/config/app-drive.toml` at the main worktree root, since a page needing a write link, a signed-in route, or a demo token shows its start state only behind it.
+Step 3 reads this section once a rung answers. Read `access` from `canon/config/app-drive.toml` at the main worktree root, since a page needing a write link, a signed-in route, or a demo token shows its start state only behind it. An absent file or key opens the rung as it stands.
 
-- Join a value starting with `/` to the rung, and take a full address as it stands. Step 4 opens the joined address.
+- Join a value starting with `/` to the rung, and take a full address as it stands. Step 4 opens the joined address alone.
+- Every later route joins to the bare rung, never the joined address, since an `access` holding a query would swallow the path
 - Test the rung bare in Step 3, so the `curl` spends no single-use link before the drive
-- An absent file or an absent key opens the rung as it stands
-- Take no second address from the launch brief, since the config is the one source
+- Take no `access` value from the launch brief, since the config is the one source
 - Never print the joined address in a post, a frame, or a message, since `access` may carry a token. Name the rung and say the config's `access` was joined.
 
 ## Reading a line
@@ -25,7 +25,7 @@ A box written to the drivable format reads:
 - [ ] <route>[, <width>]: <verb> <target> → <expected result>[ (taste)][ (local only)][ (needs fixture)]
 ```
 
-- **Route.** A path goes through `pw goto <address><path>`. A control name, or "from the page the app opens on", is reached by clicking from the opened address.
+- **Route.** A path goes through `pw goto <rung><path>`, the rung before the access join. A control name, or "from the page the app opens on", is reached by clicking from the opened address.
 - **Width.** `pw resize <width> 900` before acting. A box naming no width is driven at 1440.
 - **Verb.** The action the driver performs: `click`, `fill`, `press`, `hover`, a scroll through `eval` of `scrollIntoView`, or a resize.
 - **`(taste)`.** The result is a judgment of look or feel. Capture, never judge.

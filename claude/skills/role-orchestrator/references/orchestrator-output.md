@@ -76,7 +76,7 @@ A pull request recommended for merge names the proof its evidence comment carrie
 
 ```plaintext
 PR #<n> <title>  proof: <screenshots|reel|screenshots and reel|waived|none>
-  → gh pr merge <n>
+  → canon pr merge <n>
 ```
 
 Read the slot off `canon pr evidence <number> --json` at the moment the line is written, branching on the record rather than the exit code.
