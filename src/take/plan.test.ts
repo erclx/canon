@@ -57,6 +57,41 @@ describe('readTakePlan', () => {
     })
   })
 
+  it('should read a move carrying a hold that aims the camera at its end', () => {
+    const read = readTakePlan(
+      planSource([beat([{ kind: 'move', target: '#btn', hold: 800 }])]),
+    )
+
+    expect(read).toMatchObject({
+      kind: 'read',
+      plan: {
+        beats: [{ steps: [{ kind: 'move', target: '#btn', hold: 800 }] }],
+      },
+    })
+  })
+
+  it('should read a move to a point carrying a hold of zero', () => {
+    const read = readTakePlan(
+      planSource([beat([{ kind: 'move', x: 592, y: 314, hold: 0 }])]),
+    )
+
+    expect(read).toMatchObject({
+      kind: 'read',
+      plan: { beats: [{ steps: [{ kind: 'move', x: 592, y: 314, hold: 0 }] }] },
+    })
+  })
+
+  it.each([-1, '800', Number.POSITIVE_INFINITY, null])(
+    'should refuse a move whose hold is %j',
+    (hold) => {
+      const read = readTakePlan(
+        planSource([beat([{ kind: 'move', target: '#btn', hold }])]),
+      )
+
+      expect(read).toMatchObject({ kind: 'refused', reason: 'bad-step' })
+    },
+  )
+
   it('should read a fill and a scroll with what each performs', () => {
     const read = readTakePlan(
       planSource([

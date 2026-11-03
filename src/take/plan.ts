@@ -18,9 +18,17 @@ interface Held {
   readonly modifiers?: readonly Modifier[]
 }
 
+/**
+ * A move's milliseconds at its end with the camera aimed there, absent when the
+ * move aims the camera nowhere.
+ */
+interface Aimed {
+  readonly hold?: number
+}
+
 export type TakeStep =
-  | { readonly kind: 'move'; readonly target: string }
-  | { readonly kind: 'move'; readonly x: number; readonly y: number }
+  | ({ readonly kind: 'move'; readonly target: string } & Aimed)
+  | ({ readonly kind: 'move'; readonly x: number; readonly y: number } & Aimed)
   | ({ readonly kind: 'click'; readonly target: string } & Held)
   | ({ readonly kind: 'dblclick'; readonly target: string } & Held)
   | ({
@@ -196,15 +204,17 @@ function readStep(entry: unknown, at: string): TakeStep {
   }
 
   switch (entry.kind) {
-    case 'move':
-      if (target) return { kind: 'move', target }
+    case 'move': {
+      const aimed = readHold(entry, at)
+      if (target) return { kind: 'move', target, ...aimed }
       if (isNumber(entry.x) && isNumber(entry.y)) {
-        return { kind: 'move', x: entry.x, y: entry.y }
+        return { kind: 'move', x: entry.x, y: entry.y, ...aimed }
       }
       throw new Refusal(
         'bad-step',
         `${at} is a move with neither a target nor an x and y`,
       )
+    }
     case 'click':
     case 'dblclick':
       return {
@@ -256,6 +266,17 @@ function readStep(entry: unknown, at: string): TakeStep {
         `${at} names kind ${String(entry.kind)}, which is not ${KINDS.join(', ')}`,
       )
   }
+}
+
+function readHold(entry: Record<string, unknown>, at: string): Aimed {
+  if (!('hold' in entry)) return {}
+  if (!isNumber(entry.hold) || entry.hold < 0) {
+    throw new Refusal(
+      'bad-step',
+      `${at} is a move whose hold is not a non-negative number of ms`,
+    )
+  }
+  return { hold: entry.hold }
 }
 
 function readModifiers(value: unknown, at: string): Held {
