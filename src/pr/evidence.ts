@@ -62,8 +62,11 @@ const BOX_LINE = /^(\s*[-*+] \[)([ xX])(\] )(.*)$/
 /** The trailing segment a tick carries, naming the commit the box passed at. Matched only at the end of a line, so a box whose own text says `passed at` is left alone. */
 const STAMP = / · passed at `([0-9a-f]{7,40})`$/
 
-/** What ends the text of a box that a person has to judge by eye. */
-const TASTE_SUFFIX = '(taste)'
+/** The marker a box a person has to judge by eye carries among its trailing markers. */
+const TASTE_MARKER = '(taste)'
+
+/** The run of parenthesized markers that ends a box, such as `(taste) (local only)`, in any order. */
+const TRAILING_MARKERS = /(?:\s*\([^()]*\))+$/
 
 /** A `#issuecomment-<id>` suffix, which is the REST comment id `gh pr view` never returns directly. */
 const ISSUE_COMMENT_ID = /#issuecomment-(\d+)$/
@@ -884,7 +887,7 @@ export interface ChecklistBox {
   readonly isTicked: boolean
   /** The short sha a tick names, absent on an empty box or a tick nothing stamped. */
   readonly stamp?: string
-  /** Whether the box ends in `(taste)`, which no driver ticks. */
+  /** Whether the box's trailing marker run holds `(taste)`, which no driver ticks. */
   readonly isTaste: boolean
 }
 
@@ -931,10 +934,21 @@ export function readChecklistBoxes(checklist: string): ChecklistBox[] {
       text: parsed.text,
       isTicked: parsed.isTicked,
       ...(parsed.stamp !== undefined && { stamp: parsed.stamp }),
-      isTaste: parsed.text.endsWith(TASTE_SUFFIX),
+      isTaste: hasTasteMarker(parsed.text),
     })
   })
   return boxes
+}
+
+function hasTasteMarker(text: string): boolean {
+  const run = TRAILING_MARKERS.exec(text)?.[0] ?? ''
+  const markers: readonly string[] = run.match(/\([^()]*\)/g) ?? []
+  return markers.includes(TASTE_MARKER)
+}
+
+/** The boxes a driver can run, being every box but a taste one. */
+export function countDrivable(boxes: readonly ChecklistBox[]): number {
+  return boxes.filter((box) => !box.isTaste).length
 }
 
 /** The head the marked comment's trailing marker names. */

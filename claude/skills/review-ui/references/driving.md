@@ -62,7 +62,7 @@ Each box takes exactly one, keyed here by the state it answers.
   - The evidence is the value read, quoted, such as `scrollWidth 436 against clientWidth 320`.
 - **pass or fail, frame.** The result has a stated criterion only an image settles.
   - The evidence is the matching evidence stem or the pushed frame's link, inline under the failed box's heading, and what the frame shows, in words.
-- **needs eyes.** The box ends in `(taste)`.
+- **needs eyes.** The box's trailing markers hold `(taste)`, in any order.
   - The evidence is the dark and the light shot as a pair, each the matching evidence stem or a pushed frame's link, and what the frames showed, with nothing about whether it looks right.
 - **not driven.** The state could not be reached.
   - The evidence is the reason, such as an unreachable address, a `(local only)` box on a hosted preview, or a target the snapshot does not hold.

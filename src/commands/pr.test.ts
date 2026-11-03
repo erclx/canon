@@ -795,6 +795,33 @@ describe('canon pr evidence reports the marked comment', () => {
       ])
     })
 
+    it('should drop the carried checklist under --no-checklist rather than skip', async () => {
+      writeComments([markedCommentBody()])
+
+      const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' }, [
+        '--no-checklist',
+      ])
+
+      expect(record.reason).toBe('ok')
+      expect(record.commentId).toBe(100)
+      expect(record.body).not.toContain('<!-- pr-checklist:start -->')
+      expect(record).not.toHaveProperty('checklist')
+      expect(record).not.toHaveProperty('drivable')
+    })
+
+    it('should let the last of --checklist and --no-checklist win', async () => {
+      writeComments([markedCommentBody()])
+      writeFileSync(join(tempDir, 'checklist.md'), '- [ ] the nav wraps\n')
+
+      const record = await runEvidenceRecord({ 'docs/guide.md': '# guide\n' }, [
+        '--no-checklist',
+        '--checklist',
+        join(tempDir, 'checklist.md'),
+      ])
+
+      expect(record.body).toContain('- [ ] the nav wraps')
+    })
+
     it('should number the boxes the posted checklist carries', async () => {
       writeComments([markedCommentBody()])
 
@@ -819,6 +846,7 @@ describe('canon pr evidence reports the marked comment', () => {
       preview: 'https://feat-x.site.pages.dev',
       local: 'http://localhost:5173',
       checklist: '- [x] the hero settles\n- [ ] the footer wraps',
+      drivable: 2,
     })
   })
 
@@ -1482,6 +1510,7 @@ describe('canon pr evidence --check', () => {
       preview: 'https://feat-x.site.pages.dev',
       local: 'http://localhost:5173',
       checklist: '- [x] the hero settles\n- [ ] the footer wraps',
+      drivable: 2,
     })
   })
 
@@ -1520,6 +1549,13 @@ describe('canon pr evidence --check', () => {
       expect(existsSync(join(tempDir, 'files-calls.log'))).toBe(false)
     },
   )
+
+  it('should refuse --no-checklist before any gh call', async () => {
+    const record = await runCheck(['--no-checklist'])
+
+    expect(record).toMatchObject({ reason: 'check-writes' })
+    expect(existsSync(join(tempDir, 'files-calls.log'))).toBe(false)
+  })
 
   it('should check without the merge base the render needs', async () => {
     writeFileSync(

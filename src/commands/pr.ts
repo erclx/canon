@@ -43,6 +43,8 @@ import {
   isEvidencePath,
   PNG_HEADER_BYTES,
   readChecklistBoxes,
+  countDrivable,
+  type ChecklistBox,
   readOwed,
   readPngWidth,
   readUncaptured,
@@ -83,6 +85,7 @@ import {
   type PullState,
   readBaseStanding,
   readChangedPaths,
+  readsDrivableBox,
 } from '@/pr/lift'
 import { close, type CloseApi, type CloseRefusal } from '@/pr/close'
 import {
@@ -171,7 +174,8 @@ interface ReadOptions {
 
 interface EvidenceOptions extends ReadOptions {
   readonly preview?: string
-  readonly checklist?: string
+  /** A path to fold in, or false from `--no-checklist` to drop the carried one. */
+  readonly checklist?: string | false
   readonly local?: string
   readonly reel?: string
   readonly localSkip?: string
@@ -255,7 +259,7 @@ const TICK_REFUSALS: Record<TickReason | 'gh-failed', string> = {
   'no-box':
     'A named box is past the end of the checklist. Number boxes off `canon pr evidence --json`.',
   'taste-box':
-    'A named box ends in (taste), which no driver passes. Nothing was written.',
+    'A named box carries (taste) among its trailing markers, which no driver passes. Nothing was written.',
   'gh-failed':
     'gh could not read or edit the marked comment on this pull request.',
 }
@@ -438,7 +442,7 @@ type EvidenceRefusal =
 
 const EVIDENCE_REFUSALS: Record<EvidenceRefusal, string> = {
   'check-writes':
-    '--check is a read and renders no body, so it takes none of --preview, --local, --checklist, --reel, --local-skip, or --reel-skip. Run the check and the render as two calls.',
+    '--check is a read and renders no body, so it takes none of --preview, --local, --checklist, --no-checklist, --reel, --local-skip, or --reel-skip. Run the check and the render as two calls.',
   'gh-failed':
     'gh could not answer for this repository. Name the pull request number.',
   'unreadable-checklist':
@@ -709,9 +713,11 @@ export function register(program: Command): void {
         '',
         '`ui` also carries the newest `## UI review` pass (`heading`, `state`,',
         '`commit`, `source`), `isBound`, which is whether the evidence comment',
-        'carries a checklist, and `carriedFrom` when the lift carried a close',
-        'forward, or `drivenPaths` and the painted subset `paintedPaths` when it',
-        'refused to. An unbound family reads covered.',
+        'carries a checklist holding a box a driver can run or the newest UI',
+        'pass is open, so a checklist of taste boxes alone binds nothing until',
+        'a pass opens, and `carriedFrom` when the lift carried a close',
+        'forward, or `drivenPaths` and the painted subset `paintedPaths` when',
+        'it refused to. An unbound family reads covered.',
         '',
         'Both families post as pull request reviews, so this reads',
         '`pulls/<n>/reviews` alone, as the lift does. Issue comments are not',
@@ -771,6 +777,10 @@ export function register(program: Command): void {
     .option(
       '--checklist <path>',
       'Close the body with this visual checklist file, from canon:ui-checklist',
+    )
+    .option(
+      '--no-checklist',
+      'Drop the checklist the marked comment carries, rendering the body without it',
     )
     .option(
       '--local <url>',
@@ -854,6 +864,12 @@ export function register(program: Command): void {
         'branch with a checklist and no evidence image renders a marked body',
         'holding the checklist, so a later call finds and edits that comment.',
         '',
+        '--no-checklist drops the checklist the marked comment carries, so the',
+        'body renders without it and the record reports no checklist fields.',
+        'A marked comment holding a checklist still renders as ok rather than',
+        'no-evidence, so the comment is edited rather than left showing it.',
+        'Of --checklist and --no-checklist, the last one passed wins.',
+        '',
         '--local adds a **Local preview:** segment after any hosted one on the',
         'address line, or carries the line alone, and is carried forward the',
         'same way. It does not by itself turn no-evidence into ok, so a',
@@ -892,9 +908,13 @@ export function register(program: Command): void {
         '  checklist  the checklist between its delimiters, ticks included',
         '  boxes      each checklist box with its number, tick, stamp, and taste',
         '             mark, the numbering `canon pr tick` takes',
+        '  drivable   how many boxes a driver can run, every box but one whose',
+        '             trailing markers hold (taste), in any order. Zero binds no',
+        '             UI review, so `canon pr lift` and `review-state` leave the',
+        '             UI family unbound',
         'These come from the comment already posted, never from the flags this',
         'call passed. A checklist the caller posted raw after a refused render',
-        'carries no marker, so the record reports none of the three for it. An',
+        'carries no marker, so the record reports none of these for it. An',
         'unread thread refuses as gh-failed on both reasons rather than',
         'reporting the fields absent.',
         '',
@@ -926,8 +946,8 @@ export function register(program: Command): void {
         'request changed, and the marked comment carries no **Preview:**',
         'address. A failed deploy reads the same as a skipped one.',
         'The record carries `owed` and the same marked fields. --check refuses',
-        'with --preview, --local, --checklist, --reel, --local-skip, or',
-        '--reel-skip as check-writes.',
+        'with --preview, --local, --checklist, --no-checklist, --reel,',
+        '--local-skip, or --reel-skip as check-writes.',
         '',
         'Refusals, read off `reason`:',
         '  unreadable-checklist  --checklist named a path that could not be read,',
@@ -982,7 +1002,9 @@ export function register(program: Command): void {
         'they are read:',
         '  review    the newest `## Review` is closed at the head, off its marker',
         '  ui        the newest `## UI review` is closed at the head, bound only',
-        '            where `canon pr evidence --check` carries a checklist. A close',
+        '            where `canon pr evidence --check` carries a checklist whose',
+        '            `drivable` count is not zero, a missing count binding. An',
+        '            open UI review refuses `ui-open` whatever the count. A close',
         '            on an earlier commit still holds when it is an ancestor of the',
         '            head and every path changed since is one no box can observe,',
         '            being tests, stories, snapshots, markdown in the root and in',
@@ -1389,7 +1411,7 @@ export function register(program: Command): void {
         '               nothing written, with `driven`, `head`, and `drivenPaths`',
         '  stale-head   --head is behind the tip with no readable linear gap,',
         '               as a force-push or a rebase leaves, nothing written',
-        '  taste-box    a named box ends in (taste), nothing written',
+        '  taste-box    a named box carries (taste), nothing written',
         '  no-box       a named number is past the checklist, nothing written',
         '  no-checklist the evidence comment carries no checklist',
         '  no-comment   no comment carries the evidence marker',
@@ -2461,7 +2483,9 @@ function logReviewState(number: number, record: ReviewStateRecord): void {
     else logWarn(line)
   }
   if (!record.ui.isBound) {
-    logInfo('ui: the evidence carries no checklist, so the family is unbound')
+    logInfo(
+      'ui: the evidence carries no box a driver can run, so the family is unbound',
+    )
   }
 }
 
@@ -2730,7 +2754,7 @@ async function runEvidence(
   // Read ahead of anything else, so a bad path refuses before a `gh` round
   // trip rather than after one.
   let suppliedChecklist: string | undefined
-  if (opts.checklist !== undefined) {
+  if (typeof opts.checklist === 'string') {
     suppliedChecklist = await readFile(resolve(root, opts.checklist), 'utf8')
       .then((text) => text.trim() || undefined)
       .catch(() => undefined)
@@ -2816,7 +2840,10 @@ async function runEvidence(
   commentId = findEvidenceCommentId(comments)
   existingCases = findEvidenceCaseCount(comments)
   carriedPreview = findEvidencePreview(comments)
-  carriedChecklist = findEvidenceChecklist(comments)
+  // A dropped checklist is not carried, so neither the record nor the render
+  // shows it, while the marked comment holding it still counts below.
+  const postedChecklist = findEvidenceChecklist(comments)
+  carriedChecklist = opts.checklist === false ? undefined : postedChecklist
   carriedLocal = findEvidenceLocal(comments)
   const carriedReel = findEvidenceReel(comments)
 
@@ -2826,10 +2853,7 @@ async function runEvidence(
     ...(carriedPreview !== undefined && { preview: carriedPreview }),
     ...(carriedLocal !== undefined && { local: carriedLocal }),
     ...(carriedReel !== undefined && { reel: carriedReel }),
-    ...(carriedChecklist !== undefined && {
-      checklist: carriedChecklist,
-      boxes: readChecklistBoxes(carriedChecklist),
-    }),
+    ...(carriedChecklist !== undefined && checklistFields(carriedChecklist)),
   }
 
   // A deploy that resolves and does not build from any changed path makes a
@@ -2890,8 +2914,10 @@ async function runEvidence(
   // hosted preview and never opens one alone, so a docs-only branch with a
   // server up posts nothing. An uncaptured painted path opens one too, so the
   // gap the lift refuses on shows on the thread.
+  // A dropped checklist still opens a render, so the marked comment holding
+  // it is edited without the block rather than left showing it.
   const hasChecklist =
-    suppliedChecklist !== undefined || carriedChecklist !== undefined
+    suppliedChecklist !== undefined || postedChecklist !== undefined
   const hasUncaptured = uncaptured !== undefined && uncaptured.length > 0
   if (
     grouped.kind === 'refused' &&
@@ -3054,6 +3080,16 @@ async function runEvidence(
   }
 
   return 0
+}
+
+/** The record fields a checklist carries, with `drivable` counting the boxes a driver can run. */
+function checklistFields(checklist: string): {
+  checklist: string
+  boxes: ChecklistBox[]
+  drivable: number
+} {
+  const boxes = readChecklistBoxes(checklist)
+  return { checklist, boxes, drivable: countDrivable(boxes) }
 }
 
 async function readWorkflows(root: string): Promise<WorkflowFile[]> {
@@ -4148,7 +4184,7 @@ const LIFT_REFUSALS: Record<LiftRefusal | 'bad-wait' | 'gh-missing', string> = {
   'review-behind':
     'The newest code review closed on an earlier commit than the head.',
   'ui-missing':
-    'The evidence comment carries a checklist and no UI review has been posted.',
+    'The evidence comment carries a checklist holding a box a driver can run, and no UI review has been posted.',
   'ui-open': 'The newest UI review is open, so a box still owes a fix.',
   'ui-unmarked':
     'The newest UI review carries no head marker, so the commit it covers is a GitHub stamp this gate does not trust.',
@@ -4267,6 +4303,7 @@ async function readEvidenceGate(
     reason?: unknown
     owed?: unknown
     checklist?: unknown
+    drivable?: unknown
     uncaptured?: unknown
     reel?: unknown
   }
@@ -4281,8 +4318,7 @@ async function readEvidenceGate(
   return {
     isSettled: record.reason === 'settled',
     owed: Array.isArray(record.owed) ? record.owed.map(String) : [],
-    hasChecklist:
-      typeof record.checklist === 'string' && record.checklist !== '',
+    hasDrivableBox: readsDrivableBox(record),
     // Absent stays absent, since it means the base keeps no captures and
     // the gate passes as it did before the list existed.
     ...(Array.isArray(record.uncaptured) && {

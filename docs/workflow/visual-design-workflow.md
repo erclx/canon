@@ -64,7 +64,7 @@ A UI review stays open while the branch owes a fix. Three things owe one:
 
 Two kinds of result report without holding the review open.
 
-- A taste box needs eyes, so the pass captures both themes and leaves the call to you.
+- A taste box needs eyes, so the pass captures both themes and leaves the call to you. A checklist holding only taste boxes gets no UI reviewer at all, and the lift does not wait for one.
 - Every other probe result, and every axe `incomplete`, is a reading to confirm, since each probe carries a known class of false finding.
 
 At the time of writing, the gated axe classes are contrast, target size, accessible names, labels, alt text, document title and language, valid ARIA, and nested interactive controls. A rule leaves the list on its first false finding, so `canon drive --help` and the `review-ui` skill carry the current one.

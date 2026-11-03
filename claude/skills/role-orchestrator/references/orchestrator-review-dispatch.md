@@ -45,10 +45,11 @@ Dispatch every pull request's review to a reviewer under `role-reviewer`, first 
 
 ## The UI reviewer
 
-A pull request whose evidence record carries a checklist takes a second reviewer, a UI reviewer under `review-ui`, dispatched beside the code reviewer so the two passes run at once. Read the record with `canon pr evidence <number> --json` and branch on its `checklist` field rather than on the exit code.
+A pull request whose evidence record counts a drivable box takes a second reviewer, a UI reviewer under `review-ui`, dispatched beside the code reviewer so the two passes run at once. Read the record with `canon pr evidence <number> --json` and branch on `drivable` above zero rather than on the exit code.
 
 - A record carrying no checklist dispatches no UI reviewer, since the pass would stop on arrival
-- A pull request that gains a checklist in review takes its UI reviewer then, on the `MOVED` that brought it, since a first pass that read none launched nobody
+- A record whose `drivable` reads zero, every box being `(taste)`, dispatches none either, while a `checklist` with no readable `drivable` dispatches one, as the lift binds on it
+- A pull request that gains a drivable box in review takes its UI reviewer then, on the `MOVED` that brought it, since a first pass that read none launched nobody
 - The UI reviewer reads no diff and never hears the code verdict, so neither brief carries the other's result
 - Each posts its own family and runs `canon pr lift` on its close, and the verb lifts the draft mark only once both read closed at the head
 
@@ -68,7 +69,7 @@ A pull request failing any condition takes its own reviewer pair, as above. A ro
 
 ### One pair per batch
 
-Launch one code reviewer for the whole batch, and one UI reviewer beside it when any batched evidence record carries a checklist. `orchestrator-reviewer-launch.md` carries both batch shapes.
+Launch one code reviewer for the whole batch, and one UI reviewer beside it when any batched evidence record carries a `drivable` count above zero. `orchestrator-reviewer-launch.md` carries both batch shapes.
 
 - Each pull request still takes its own pass, its own verdict comment, and its own `canon pr lift`, since the poll routes on each comment's heading
 - Never ask for one summary comment across the set, since a second comment is a second verdict the poll cannot route
@@ -94,7 +95,7 @@ A pull request whose Testing section names a billed run waits on the operator's 
 
 ## Launching the reviewer
 
-Take the reviewer shape in `orchestrator-reviewer-launch.md`, or its UI reviewer shape for a pull request carrying a checklist.
+Take the reviewer shape in `orchestrator-reviewer-launch.md`, or its UI reviewer shape for a pull request whose `drivable` count is above zero.
 
 - Check `canon sessions list --json` first for a live `reviewer-<project>-` or `reviewer-ui-<project>-` session whose trailing numbers include `<number>`, and message it instead of launching
 - Match a number among the trailing ones rather than the whole name, since a batch reviewer's name lists every pull request it holds
