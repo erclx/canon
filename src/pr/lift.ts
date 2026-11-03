@@ -7,6 +7,7 @@ import {
   type UiCounts,
 } from '@/pr/review-scope'
 import { readCarry } from '@/pr/carry'
+import { readWaivers } from '@/pr/waiver'
 import { DEFAULT_PAINTED, isPainted, type PaintedPatterns } from '@/pr/painted'
 
 /** How long `--wait` holds for a pending CI run, in seconds, when none is named. */
@@ -28,6 +29,7 @@ export type LiftRefusal =
   | 'ui-behind'
   | 'ui-undriven'
   | 'evidence-owed'
+  | 'painted-uncaptured'
   | 'standing-stale'
   | 'standing-conflict'
   | 'standing-unknown'
@@ -52,6 +54,10 @@ export interface GateResult {
   readonly paintedPaths?: readonly string[]
   /** Every path a box can observe that kept a UI close from carrying forward. */
   readonly drivenPaths?: readonly string[]
+  /** The painted paths changed with no capture, reel at the head, or waiver, sorted. */
+  readonly uncaptured?: readonly string[]
+  /** The uncaptured paths a review waived, sorted. */
+  readonly waived?: readonly string[]
 }
 
 /** How an earlier commit sits against the head, and what changed since. */
@@ -80,6 +86,13 @@ export interface EvidenceGate {
   readonly owed: readonly string[]
   /** Whether the marked comment carries a visual checklist, which binds the UI gate. */
   readonly hasChecklist: boolean
+  /**
+   * The painted paths changed while no evidence image did, absent where the
+   * base keeps no captures, which reads as unchecked and passes.
+   */
+  readonly uncaptured?: readonly string[]
+  /** The head the marked comment's reel was filmed at, when it embeds one. */
+  readonly reelHead?: string
 }
 
 export interface ChecksGate {
@@ -254,6 +267,35 @@ export async function uiGate(
   }
 }
 
+/**
+ * The evidence gate. An owed step refuses first. Then every painted path the
+ * pull request changed with no capture refuses, unless a reel filmed at the
+ * head shows it or a review waived it by the path as the list spells it. A reel
+ * at an earlier head clears nothing, since a later push may add the path.
+ */
+export function evidenceGate(
+  evidence: EvidenceGate,
+  reviews: readonly ReviewRow[],
+  head: string,
+): GateResult {
+  if (!evidence.isSettled) return fail('evidence', 'evidence-owed')
+
+  const isFilmed =
+    evidence.reelHead !== undefined && coversHead(evidence.reelHead, head)
+  const listed = isFilmed ? [] : (evidence.uncaptured ?? [])
+  const named = new Set(readWaivers(reviews).map((waiver) => waiver.path))
+  const waived = listed.filter((path) => named.has(path)).toSorted()
+  const uncaptured = listed.filter((path) => !named.has(path)).toSorted()
+
+  const lists = {
+    ...(uncaptured.length > 0 && { uncaptured }),
+    ...(waived.length > 0 && { waived }),
+  }
+  return uncaptured.length > 0
+    ? { ...fail('evidence', 'painted-uncaptured'), ...lists }
+    : { ...pass('evidence'), ...lists }
+}
+
 function standingGate(standing: Standing): GateResult {
   if (standing === 'fresh') return pass('standing')
   return fail('standing', `standing-${standing}`)
@@ -410,7 +452,7 @@ export async function lift(
   const gates: GateResult[] = [
     reviewGate(reviews, tip),
     await uiGate(api, painted, reviews, tip, evidence.hasChecklist),
-    evidence.isSettled ? pass('evidence') : fail('evidence', 'evidence-owed'),
+    evidenceGate(evidence, reviews, tip),
     standingGate(standing),
   ]
   if (!pull.isDraft) return settleReady(api, opts, pull, tip, gates)

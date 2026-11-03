@@ -984,7 +984,15 @@ export function register(program: Command): void {
         '            a box drives behavior a `.ts` file holds too. A close whose',
         '            count line shows boxes not driven and none passed, failed,',
         '            or needing eyes refuses `ui-undriven`, carried or not',
-        '  evidence  the evidence check reads settled',
+        '  evidence  the evidence check reads settled, and every painted path',
+        '            it lists as `uncaptured` is covered. A reel the marked',
+        '            comment embeds at the head covers every path, and a',
+        '            `- **Waived capture:** `<path>`: <reason>` line in a review',
+        '            body, outside a code fence, covers the path it names as the',
+        '            list spells it. Any other path refuses `painted-uncaptured`,',
+        '            the gate entry naming what is left as `uncaptured` and what',
+        '            a review waived as `waived`, each sorted. An absent list,',
+        '            in a project whose base keeps no captures, passes',
         '  standing  the head is fresh against the base, not stale or conflicted',
         '  ci        every required check run on the tip passed, waited on up to --wait',
         '',
@@ -1014,7 +1022,8 @@ export function register(program: Command): void {
         '  lifted, already-ready, redrafted, clear (--check)',
         '  pull-closed, review-missing, review-open, review-unmarked,',
         '  review-behind, ui-missing, ui-open, ui-unmarked, ui-behind,',
-        '  ui-undriven, evidence-owed, standing-stale, standing-conflict, standing-unknown,',
+        '  ui-undriven, evidence-owed, painted-uncaptured, standing-stale,',
+        '  standing-conflict, standing-unknown,',
         '  ci-pending (--check), ci-failing, ci-conflicted, ci-timeout,',
         '  head-moved, gh-failed',
         '',
@@ -4132,6 +4141,8 @@ const LIFT_REFUSALS: Record<LiftRefusal | 'bad-wait' | 'gh-missing', string> = {
     'The newest UI review closed having driven no box, so it looked at nothing. Re-drive the checklist on an address that answers.',
   'evidence-owed':
     'The evidence check reads owed, so the ship chain left a step undone.',
+  'painted-uncaptured':
+    'A painted path changed with no capture, no reel at the head, and no waiver in a review. Capture it, or have a review waive it.',
   'standing-stale':
     'The base moved under a path this branch writes since it branched, so CI measured a tree that is gone.',
   'standing-conflict': 'The head does not merge cleanly into the base.',
@@ -4235,7 +4246,13 @@ async function readEvidenceGate(
     .at(-1)
   if (last === undefined) return undefined
 
-  let record: { reason?: unknown; owed?: unknown; checklist?: unknown }
+  let record: {
+    reason?: unknown
+    owed?: unknown
+    checklist?: unknown
+    uncaptured?: unknown
+    reel?: unknown
+  }
   try {
     record = JSON.parse(last)
   } catch {
@@ -4243,12 +4260,28 @@ async function readEvidenceGate(
   }
   if (record.reason !== 'settled' && record.reason !== 'owed') return undefined
 
+  const reelHead = readReelHead(record.reel)
   return {
     isSettled: record.reason === 'settled',
     owed: Array.isArray(record.owed) ? record.owed.map(String) : [],
     hasChecklist:
       typeof record.checklist === 'string' && record.checklist !== '',
+    // Absent stays absent, since it means the base keeps no captures and
+    // the gate passes as it did before the list existed.
+    ...(Array.isArray(record.uncaptured) && {
+      uncaptured: record.uncaptured.map(String),
+    }),
+    ...(reelHead !== undefined && { reelHead }),
   }
+}
+
+function readReelHead(reel: unknown): string | undefined {
+  if (typeof reel !== 'object' || reel === null || !('head' in reel)) {
+    return undefined
+  }
+  return typeof reel.head === 'string' && reel.head !== ''
+    ? reel.head
+    : undefined
 }
 
 async function readChecksGate(
