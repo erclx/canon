@@ -84,6 +84,12 @@ export interface Stage {
   press(input: KeyInput): Promise<void>
   /** Evaluates an expression in the page. */
   evaluate<T>(expression: string): Promise<T>
+  /**
+   * Waits for the page's next frame before a glide stamps a point, on a route
+   * whose clock runs apart from the page's frames. A stage that steps those
+   * frames itself leaves it out.
+   */
+  align?(): Promise<void>
 }
 
 /** A target the pointer cannot reach, which refuses rather than films a guess. */
@@ -263,6 +269,7 @@ async function moveTo(
   const points: SentPoint[] = []
   await paced(stage, frames, async (frame) => {
     state.pointer = along(from, to, frame / frames)
+    await stage.align?.()
     points.push({ t: stage.now(), ...state.pointer })
     await stage.pointer({ type: 'move', ...state.pointer, ...pressed })
   })
