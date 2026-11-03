@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  countDrivable,
   countEvidenceCases,
   findEvidenceChecklist,
   findEvidenceCommentId,
@@ -1852,6 +1853,38 @@ describe('checklist boxes', () => {
       [1, true],
       [2, false],
     ])
+  })
+
+  it('should read taste in any order within the trailing marker run', () => {
+    const boxes = readChecklistBoxes(
+      [
+        '- [ ] reel paces (local only) (taste)',
+        '- [ ] reel paces (taste) (local only)',
+        '- [ ] reel paces (taste) (needs fixture)',
+        '- [ ] the (taste) toggle → opens',
+        '- [ ] the toggle opens (local only)',
+      ].join('\n'),
+    )
+
+    expect(boxes.map((box) => box.isTaste)).toEqual([
+      true,
+      true,
+      true,
+      false,
+      false,
+    ])
+  })
+
+  it('should count the boxes a driver can run apart from taste ones', () => {
+    const mixed = readChecklistBoxes(
+      '- [ ] opens\n- [ ] calm (taste)\n- [ ] paces (taste) (local only)',
+    )
+    const allTaste = readChecklistBoxes(
+      '- [ ] calm (taste)\n- [ ] paces (local only) (taste)',
+    )
+
+    expect(countDrivable(mixed)).toBe(1)
+    expect(countDrivable(allTaste)).toBe(0)
   })
 
   it('should read a stamp only as the trailing segment of a line', () => {
