@@ -255,6 +255,28 @@ describe('performSteps key', () => {
   })
 })
 
+describe('performSteps move hold', () => {
+  it('should let the hold pass at the glide end and log it on the move', async () => {
+    const { log } = await perform({ '#card': CARD }, [
+      { kind: 'move', target: '#card', hold: 600 },
+      { kind: 'key', keys: 'Escape' },
+    ])
+
+    const [glide, key] = log
+    expect(glide).toMatchObject({ kind: 'move', hold: 600 })
+    const end = glide && 'ms' in glide ? glide.t + glide.ms : Infinity
+    expect(key?.t).toBeCloseTo(end + 600, 5)
+  })
+
+  it('should log no hold on a move that carries none', async () => {
+    const { log } = await perform({ '#card': CARD }, [
+      { kind: 'move', target: '#card' },
+    ])
+
+    expect(log[0]).not.toHaveProperty('hold')
+  })
+})
+
 /** How long each pointer input takes on a page painting every 200 ms. */
 const SLOW_MS = 200
 
@@ -295,6 +317,32 @@ describe('performSteps pacing', () => {
         ms: moves.length * SLOW_MS,
       }),
     ])
+  })
+
+  it('should log every point a glide sent, in the order it sent them', async () => {
+    const { sent, log } = await perform({ '#card': CARD }, [
+      { kind: 'move', target: '#card' },
+    ])
+
+    const moves = sent.filter((input) => input.type === 'move')
+    const [glide] = log
+    const points = glide?.kind === 'move' ? (glide.points ?? []) : []
+    expect(points.map(({ x, y }) => ({ x, y }))).toEqual(
+      moves.map(({ x, y }) => ({ x, y })),
+    )
+  })
+
+  it('should stamp each point a slow page took with the time it was sent', async () => {
+    const { log } = await perform(
+      { '#card': CARD },
+      [{ kind: 'move', target: '#card' }],
+      SLOW_MS,
+    )
+
+    const [glide] = log
+    const points = glide?.kind === 'move' ? (glide.points ?? []) : []
+    expect(points.slice(0, 3).map((point) => point.t)).toEqual([0, 200, 400])
+    expect(points.at(-1)).toMatchObject({ x: 120, y: 110 })
   })
 
   it('should wheel the whole scroll in fewer inputs when the page is slow', async () => {

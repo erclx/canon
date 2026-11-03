@@ -3,6 +3,7 @@ import {
   FPS,
   type LogEvent,
   type Point,
+  type SentPoint,
   VIEWPORT,
   along,
   travelMs,
@@ -125,13 +126,22 @@ export async function performSteps(
 ): Promise<void> {
   for (const step of steps) {
     switch (step.kind) {
-      case 'move':
-        await moveTo(
-          stage,
-          state,
-          'target' in step ? center(await boxOf(stage, step.target)) : step,
-        )
+      case 'move': {
+        const to =
+          'target' in step
+            ? center(await boxOf(stage, step.target))
+            : { x: step.x, y: step.y }
+        if (step.hold === undefined) {
+          await moveTo(stage, state, to)
+          break
+        }
+        const glide =
+          (await moveTo(stage, state, to, { unlogged: true })) ??
+          stillAt(stage, state.pointer)
+        await stage.hold(step.hold)
+        state.log?.push({ ...glide, hold: step.hold })
         break
+      }
       case 'click':
       case 'dblclick':
         await click(
@@ -214,25 +224,52 @@ export async function performSteps(
   }
 }
 
+type Glide = Extract<LogEvent, { kind: 'move' }>
+
+/**
+ * Glides the pointer to `to` and returns the glide, or undefined when the
+ * pointer is already there. The glide is logged unless `unlogged`, which a
+ * caller sets to log it with more fields itself.
+ */
 async function moveTo(
   stage: Stage,
   state: Performance,
   to: Point,
-  held?: { readonly modifiers: readonly Modifier[] },
-): Promise<void> {
+  options: {
+    readonly held?: { readonly modifiers: readonly Modifier[] }
+    readonly unlogged?: true
+  } = {},
+): Promise<Glide | undefined> {
   const from = state.pointer
-  if (Math.hypot(to.x - from.x, to.y - from.y) < 1) return
+  if (Math.hypot(to.x - from.x, to.y - from.y) < 1) return undefined
   const frames = Math.max(1, Math.round(travelMs(from, to) / FRAME_MS))
-  const pressed = held
-    ? { held: true as const, ...withModifiers(held.modifiers) }
+  const pressed = options.held
+    ? { held: true as const, ...withModifiers(options.held.modifiers) }
     : {}
   const start = stage.now()
+  const points: SentPoint[] = []
   await paced(stage, frames, async (frame) => {
     state.pointer = along(from, to, frame / frames)
+    points.push({ t: stage.now(), ...state.pointer })
     await stage.pointer({ type: 'move', ...state.pointer, ...pressed })
   })
   state.pointer = to
-  state.log?.push({ t: start, kind: 'move', from, to, ms: stage.now() - start })
+  const glide: Glide = {
+    t: start,
+    kind: 'move',
+    from,
+    to,
+    ms: stage.now() - start,
+    points,
+  }
+  if (!options.unlogged) state.log?.push(glide)
+  return glide
+}
+
+/** A glide of no length, for a hold aimed where the pointer already rests. */
+function stillAt(stage: Stage, at: Point): Glide {
+  const t = stage.now()
+  return { t, kind: 'move', from: at, to: at, ms: 0, points: [{ t, ...at }] }
 }
 
 /**
@@ -301,7 +338,7 @@ async function drag(
     const press = { clickCount: 1, ...withModifiers(modifiers) }
     await stage.pointer({ type: 'down', ...from, ...press })
     await stage.hold(GRAB_MS)
-    await moveTo(stage, state, to, { modifiers })
+    await moveTo(stage, state, to, { held: { modifiers } })
     await stage.pointer({ type: 'up', ...to, ...press })
     state.log?.push({
       t: start,
