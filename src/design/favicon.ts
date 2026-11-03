@@ -1,4 +1,5 @@
-import { fillTemplate, readTemplate } from '@/design/template'
+// Relative, since web/ bundles this module for FAVICON_COLORS and its `@` means web/src.
+import { fillTemplate, readTemplate } from './template'
 
 export interface ThemePair {
   readonly light: string
