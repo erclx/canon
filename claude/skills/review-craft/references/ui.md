@@ -36,11 +36,23 @@ canon pr evidence <number> --check --json
 
 Read the record's `uncaptured` field, never the exit code.
 
-- It lists paths: the project keeps captures and this change skipped them. File a finding against the pull request naming each path.
+- It lists paths: the project keeps captures and this change skipped them. File a should-fix naming each path, since `canon pr lift` refuses `painted-uncaptured` until each one is covered.
 - An empty list beside a changed `evidence/` image means the capture exists and the comment fails to show it. File that as a finding too.
 - An empty list with no changed `evidence/` image means the painting file sits outside the painted set, such as a token file. Raise a question naming the path.
 - It is absent: the base keeps no capture, or its tree went unread. Raise a question with no severity, since a project with no capture harness would otherwise take the flag on every styling change.
 - The record refuses: it decides nothing, so take the tree test under the last section instead
+
+### Waiving a capture
+
+A worker may state why a listed path needs no capture, such as a change to keyboard focus order that no reachable state shows. Accept the exemption only when the diff bears it out, and leave the should-fix standing otherwise.
+
+- Write the waiver line in this pass's body, in the form `${CLAUDE_SKILL_DIR}/../review-pr/references/post.md` gives, one line per path
+- Keep it outside any code fence, since the lift skips a fenced line as a quoted sample
+- Copy the path from the record, since the lift matches it only as `uncaptured` spells it
+- Write the reason after the colon, since a line with none waives nothing
+- Restate it in every later pass, a close-out included, since the lift reads only the newest marked pass of each family and never a reply
+
+### A recapture of the design
 
 A recapture under `canon/design/` redraws the accepted design rather than the built app, so it never stands in for an evidence capture. The verb leaves those paths out of `uncaptured`, and a pass clears a painted change on the evidence comment alone, however many design references beside it were redrawn.
 

@@ -1615,7 +1615,7 @@ describe('canon pr evidence --check', () => {
       expect(record.uncaptured).toEqual(['src/client/a.css'])
     })
 
-    it('should carry the field on the no-evidence render record', async () => {
+    it('should open the comment on an uncaptured path with no other evidence news', async () => {
       writeBaseTree(false, ['e2e/evidence/dark/board.png'])
       writeFileSync(join(tempDir, 'files.tsv'), 'modified\tsrc/client/a.css\n')
 
@@ -1630,10 +1630,32 @@ describe('canon pr evidence --check', () => {
         },
       )
 
-      expect(JSON.parse(result.stdout)).toMatchObject({
-        reason: 'no-evidence',
+      const record = JSON.parse(result.stdout)
+      expect(record).toMatchObject({
+        reason: 'ok',
         uncaptured: ['src/client/a.css'],
       })
+      expect(record.body).toContain('**Uncaptured:** `src/client/a.css`')
+    })
+
+    it('should still skip as no-evidence when the base keeps no capture', async () => {
+      writeBaseTree(false, ['src/app.tsx'])
+      writeFileSync(join(tempDir, 'files.tsv'), 'modified\tsrc/client/a.css\n')
+
+      const result = await execa(
+        process.execPath,
+        [CLI, 'pr', 'evidence', '7', '--json', '--root', repoRoot],
+        {
+          cwd: repoRoot,
+          reject: false,
+          timeout: RUN_TIMEOUT_MS,
+          env: { PATH: `${join(tempDir, 'bin')}:${process.env.PATH}` },
+        },
+      )
+
+      const record = JSON.parse(result.stdout)
+      expect(record.reason).toBe('no-evidence')
+      expect(record).not.toHaveProperty('uncaptured')
     })
 
     it('should carry the field on the ok render record', async () => {

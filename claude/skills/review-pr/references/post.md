@@ -65,6 +65,7 @@ X critical, Y should-fix, Z minor. Reviewed against project docs and the board.
   - Fix: the change
 - **minor** ([lines 30-34](<repo-url>/blob/<headRefOid>/path/to/file.ext#L30-L34)): what breaks, in one sentence.
   - Fix: the change
+- **Waived capture:** `src/client/board/overlay.tsx`: keyboard focus order only, no visible change in any reachable state
 
 <details>
 <summary>Review focus, N checked</summary>

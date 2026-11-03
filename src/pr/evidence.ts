@@ -31,6 +31,9 @@ const LOCAL_SKIP_PREFIX = '**No local preview:**'
 /** How the line naming why no reel was filmed opens. */
 const REEL_SKIP_PREFIX = '**No reel:**'
 
+/** How the line naming the painted paths changed with no capture opens. */
+const UNCAPTURED_PREFIX = '**Uncaptured:**'
+
 /** The width a reel is filmed at, which it asks for in the comment. */
 const REEL_WIDTH = 960
 
@@ -476,6 +479,22 @@ function skipLines(prefix: string, reason: string | undefined): string[] {
   return text === '' ? [] : [`${prefix} ${escapeCell(text)}`, '']
 }
 
+/**
+ * The uncaptured line, or nothing once the list is empty or a reel filmed at
+ * this head shows the change. A reel at an earlier head leaves it, since a
+ * later push may have added the path.
+ */
+function uncapturedLines(
+  uncaptured: readonly string[],
+  head: string,
+  reel: EvidenceReel | undefined,
+): string[] {
+  if (uncaptured.length === 0) return []
+  if (reel !== undefined && head.startsWith(reel.head)) return []
+  const paths = uncaptured.map((path) => `\`${path}\``).join(', ')
+  return [`${UNCAPTURED_PREFIX} ${paths}`, '']
+}
+
 export function evidenceMarker(head: string): string {
   return `${MARKER_PREFIX} head=${head} -->`
 }
@@ -511,6 +530,10 @@ export function evidenceMarker(head: string): string {
  * A skip names why the local address or the reel is missing, on its own line
  * where that address or reel would sit. Each is dropped whenever its address
  * or reel renders, carried or passed, so a skip never outlives its cause.
+ *
+ * The uncaptured line names each painted path changed with no capture, under
+ * the reel, and is computed fresh on every render rather than carried, so it
+ * drops on the first render after a capture or a reel at the head lands.
  */
 export function renderEvidenceBody(
   states: readonly EvidenceState[],
@@ -522,6 +545,7 @@ export function renderEvidenceBody(
   local?: string,
   reel?: EvidenceReel,
   skips: EvidenceSkips = {},
+  uncaptured: readonly string[] = [],
 ): string {
   const segments = [
     ...(preview === undefined ? [] : [`${PREVIEW_PREFIX} ${preview}`]),
@@ -535,6 +559,7 @@ export function renderEvidenceBody(
     ...(reel === undefined
       ? skipLines(REEL_SKIP_PREFIX, skips.reel)
       : [reelLine(reel), '']),
+    ...uncapturedLines(uncaptured, head, reel),
   ]
   const closing =
     checklist === undefined

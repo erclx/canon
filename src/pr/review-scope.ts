@@ -47,6 +47,8 @@ export interface ReviewRow {
   readonly body?: string
   readonly commit?: { readonly oid?: string } | null
   readonly submittedAt?: string | null
+  /** GitHub's review state, `DISMISSED` once the operator withdrew the pass. */
+  readonly state?: string | null
 }
 
 /**
@@ -236,6 +238,32 @@ export function resolveUiScope(listing: ReviewListing): UiScope {
     ...counted,
     source: 'fallback',
   }
+}
+
+/**
+ * The newest code pass and the newest UI pass, each only when its own marker
+ * closes it, skipping any pass the operator dismissed. A body with no pass
+ * heading never stands, and neither does an older pass a newer one replaced,
+ * so a pass speaks only for the head it read.
+ */
+export function standingPasses(reviews: readonly ReviewRow[]): ReviewRow[] {
+  let code: ReviewRow | undefined
+  let ui: ReviewRow | undefined
+  for (const row of reviews) {
+    if (row.state === 'DISMISSED') continue
+    const body = row.body ?? ''
+    if (headingOf(body) !== undefined) code = row
+    else if (resolveUiScope({ reviews: [row] }).state !== 'none') ui = row
+  }
+
+  const passes: ReviewRow[] = []
+  if (code !== undefined && markerOf(code.body ?? '') !== undefined) {
+    passes.push(code)
+  }
+  if (ui !== undefined && UI_MARKER.test(lastLine(ui.body ?? '') ?? '')) {
+    passes.push(ui)
+  }
+  return passes
 }
 
 /**
