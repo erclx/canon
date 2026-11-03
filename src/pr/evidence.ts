@@ -942,7 +942,8 @@ export function readChecklistBoxes(checklist: string): ChecklistBox[] {
 
 function hasTasteMarker(text: string): boolean {
   const run = TRAILING_MARKERS.exec(text)?.[0] ?? ''
-  return (run.match(/\([^()]*\)/g) ?? []).includes(TASTE_MARKER)
+  const markers: readonly string[] = run.match(/\([^()]*\)/g) ?? []
+  return markers.includes(TASTE_MARKER)
 }
 
 /** The boxes a driver can run, being every box but a taste one. */
