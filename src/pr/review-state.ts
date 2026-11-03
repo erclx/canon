@@ -117,7 +117,7 @@ async function readAt(
       ui: {
         ...uiScope,
         ...familyOf(ui, uiScope.commit, tip),
-        isBound: hasDrivableBox,
+        isBound: hasDrivableBox || uiScope.state === 'open',
         ...(ui.carriedFrom !== undefined && { carriedFrom: ui.carriedFrom }),
         ...(ui.paintedPaths !== undefined && { paintedPaths: ui.paintedPaths }),
         ...(ui.drivenPaths !== undefined && { drivenPaths: ui.drivenPaths }),

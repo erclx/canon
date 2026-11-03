@@ -255,11 +255,12 @@ export async function uiGate(
   head: string,
   hasDrivableBox: boolean,
 ): Promise<GateResult> {
-  if (!hasDrivableBox) return pass('ui')
-
   const scope = resolveUiScope({ reviews })
-  if (scope.state === 'none') return fail('ui', 'ui-missing')
+  // An open verdict holds the gate even once no drivable box remains, so
+  // dropping the checklist or marking a failed box taste never clears it.
   if (scope.state === 'open') return fail('ui', 'ui-open')
+  if (!hasDrivableBox) return pass('ui')
+  if (scope.state === 'none') return fail('ui', 'ui-missing')
   if (scope.source !== 'marker') return fail('ui', 'ui-unmarked')
   if (scope.commit === undefined) return fail('ui', 'ui-behind')
   // Ahead of the head test so a close carried across commits is refused too.

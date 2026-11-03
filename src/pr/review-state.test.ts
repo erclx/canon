@@ -166,6 +166,22 @@ describe('readReviewState', () => {
     })
   })
 
+  it('should keep the UI family bound while its newest pass is open, drivable box or not', async () => {
+    const { api } = makeApi({
+      reviews: [
+        [codePass('## Review closed', HEAD), uiPass('## UI review', HEAD)],
+      ],
+      evidence: { hasDrivableBox: false },
+    })
+
+    const result = await readReviewState(api)
+
+    expect(result).toMatchObject({
+      kind: 'read',
+      record: { ui: { isBound: true, reason: 'ui-open' } },
+    })
+  })
+
   it('should count an unmarked pass at the tip as covered and report it unmarked', async () => {
     const { api } = makeApi({
       reviews: [[{ body: '## Review closed\n\nclean', commit: { oid: HEAD } }]],

@@ -28,6 +28,9 @@ const UI_CLOSED: ReviewRow = {
   body: `## UI review closed\n\nall boxes\n<!-- review-ui: head=${HEAD} -->`,
 }
 const UNDRIVEN_LINE = '0 failed · 0 need your eyes · 0 passed · 10 not driven'
+const UI_OPEN: ReviewRow = {
+  body: `## UI review\n\n1 failed\n<!-- review-ui: head=${HEAD} -->`,
+}
 const UI_CLOSED_UNDRIVEN: ReviewRow = {
   body: `## UI review closed\n\n${UNDRIVEN_LINE}\n<!-- review-ui: head=${HEAD} -->`,
 }
@@ -360,6 +363,17 @@ describe('lift', () => {
 
   describe('UI gate', () => {
     const withDrivable = { hasDrivableBox: true }
+
+    it('should still refuse ui-open when the checklist holds no drivable box', async () => {
+      const { api } = makeApi({
+        evidence: { hasDrivableBox: false },
+        reviews: [CODE_CLOSED, UI_OPEN],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('ui-open')
+    })
 
     it('should pass with no UI review on a checklist holding only taste boxes', async () => {
       const { api } = makeApi({
