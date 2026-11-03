@@ -1,6 +1,12 @@
-import { describe, expect, it } from 'vitest'
+import { execaSync } from 'execa'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { dirname, join } from 'node:path'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { embeddedBlocksIn } from '@/gate/embedded'
+import { embeddedBlocksIn, embeddedPrograms } from '@/gate/embedded'
+import type { MeasureContext } from '@/gate/measures'
+import { gitEnv } from '@/git/env'
 
 const page = (rows: number): string =>
   [
@@ -149,5 +155,84 @@ describe('embeddedBlocksIn', () => {
     expect(embeddedBlocksIn('a.ts', source)).toEqual([
       expect.objectContaining({ line: 3, kind: 'page' }),
     ])
+  })
+})
+
+describe('embeddedPrograms', () => {
+  let root: string
+
+  const refuse = () => {
+    throw new Error('embeddedPrograms reads tracked files and runs nothing')
+  }
+
+  const context = (): MeasureContext => ({
+    root,
+    ci: false,
+    run: refuse,
+    cli: refuse,
+  })
+
+  const git = (...args: string[]): string =>
+    execaSync('git', ['-C', root, ...args], {
+      env: gitEnv(),
+      extendEnv: false,
+    }).stdout
+
+  const commit = (path: string, content: string): void => {
+    const full = join(root, path)
+    mkdirSync(dirname(full), { recursive: true })
+    writeFileSync(full, content)
+    git('add', '--all')
+    git('commit', '-m', `add ${path}`)
+  }
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'canon-embedded-'))
+  })
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  describe('in a repository', () => {
+    beforeEach(() => {
+      git('init', '--initial-branch=main')
+      git('config', 'user.email', 'test@example.com')
+      git('config', 'user.name', 'Test')
+    })
+
+    it('should pass a tree whose sources embed nothing past the limit', async () => {
+      commit('src/a.ts', template(page(4)))
+
+      const report = await embeddedPrograms(context())
+
+      expect(report.failure).toBeUndefined()
+      expect(report.emissions[0]?.text).toContain('1 source file')
+    })
+
+    it('should fail naming the file and line of an embedded page', async () => {
+      commit('src/a.ts', template(page(8)))
+
+      const report = await embeddedPrograms(context())
+
+      expect(report.failure).toBeDefined()
+      expect(report.emissions[0]?.text).toContain('src/a.ts:1')
+    })
+
+    it('should not read a file that is not TypeScript', async () => {
+      commit('src/page.js', template(page(8)))
+
+      const report = await embeddedPrograms(context())
+
+      expect(report.failure).toBeUndefined()
+    })
+  })
+
+  it('should read a tree git cannot list as unmeasured', async () => {
+    writeFileSync(join(root, 'a.ts'), template(page(8)))
+
+    const report = await embeddedPrograms(context())
+
+    expect(report.unmeasured).toBeDefined()
   })
 })

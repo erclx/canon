@@ -5,6 +5,7 @@ import {
   seedIndependence,
   skillPaths,
 } from '@/gate/boundaries'
+import { embeddedPrograms } from '@/gate/embedded'
 import {
   canonicalRecords,
   auditSet,
@@ -365,6 +366,13 @@ export const STAGES: readonly Stage[] = [
     id: 'folder-echoed-names',
     label: 'Folder-echoed filenames',
     checks: [{ kind: 'measure', measure: folderEchoedNames }],
+  },
+  {
+    // Unscoped, since a block one branch embeds stays embedded on every later
+    // branch, and reading every tracked source costs well under a second.
+    id: 'embedded-programs',
+    label: 'Embedded programs',
+    checks: [{ kind: 'measure', measure: embeddedPrograms }],
   },
   {
     // A rule citing a file that moved fails silently. The consumed-copy drift
