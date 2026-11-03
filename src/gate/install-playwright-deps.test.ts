@@ -1,5 +1,7 @@
 import { type SpawnSyncReturns, spawnSync } from 'node:child_process'
 import {
+  chmodSync,
+  copyFileSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -54,26 +56,19 @@ afterEach(() => {
   rmSync(fixture, { force: true, recursive: true })
 })
 
-// Each line of outcomes answers one bunx call in order: `hang` outlives the
-// bound, `ok` succeeds, and a number exits with that code
+// Each line of outcomes answers one bunx call in order, read by the fake in
+// `fixtures/bunx-outcomes.sh`
 const runScript = (
   outcomes: string[],
   args: string[],
 ): SpawnSyncReturns<string> => {
   const outcomesFile = join(fixture, 'outcomes')
   writeFileSync(outcomesFile, `${outcomes.join('\n')}\n`)
-  stubBin(
-    'bunx',
-    [
-      `echo "bunx $*" >> "${log}"`,
-      `outcome=$(head -n 1 "${outcomesFile}")`,
-      `tail -n +2 "${outcomesFile}" > "${outcomesFile}.next"`,
-      `mv "${outcomesFile}.next" "${outcomesFile}"`,
-      'if [ "$outcome" = hang ]; then exec sleep 30; fi',
-      'if [ "$outcome" = ok ]; then exit 0; fi',
-      'exit "$outcome"',
-    ].join('\n'),
+  copyFileSync(
+    new URL('./fixtures/bunx-outcomes.sh', import.meta.url),
+    join(bin, 'bunx'),
   )
+  chmodSync(join(bin, 'bunx'), 0o755)
 
   return spawnSync('bash', [SCRIPT, ...args], {
     cwd: fixture,
@@ -81,6 +76,8 @@ const runScript = (
     env: {
       ...process.env,
       INSTALL_ATTEMPT_SECONDS: '1',
+      FAKE_LOG: log,
+      FAKE_OUTCOMES: outcomesFile,
       PATH: `${bin}:${process.env.PATH}`,
     },
     timeout: 20_000,

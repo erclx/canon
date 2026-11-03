@@ -1,6 +1,7 @@
 import { execFileSync, spawn, spawnSync } from 'node:child_process'
 import {
   chmodSync,
+  copyFileSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -58,6 +59,7 @@ const buildEnv = (): NodeJS.ProcessEnv => ({
   GIT_COMMITTER_NAME: 'test',
   GIT_CONFIG_GLOBAL: '/dev/null',
   GIT_CONFIG_SYSTEM: '/dev/null',
+  FAKE_FIXTURES: join(root, 'fixtures'),
   PATH: `${join(root, 'bin')}:${process.env.PATH}`,
 })
 
@@ -214,39 +216,7 @@ beforeEach(() => {
   // open list is #7 alone unless a case writes `open.txt`, and every per-pull
   // read answers from the fixture files carrying that number.
   const stub = join(root, 'bin', 'gh')
-  const fixtures = join(root, 'fixtures')
-  writeFileSync(
-    stub,
-    [
-      '#!/usr/bin/env bash',
-      'if [ "$1" != "api" ]; then exit 1; fi',
-      "pulls='repos/{owner}/{repo}/pulls/'",
-      "issues='repos/{owner}/{repo}/issues/'",
-      'for arg in "$@"; do',
-      '  case "$arg" in',
-      '    graphql) exit 1 ;;',
-      '    "repos/{owner}/{repo}/pulls?state=open"*)',
-      `      echo read >> "${fixtures}/list-reads"`,
-      `      if [ -f "${fixtures}/list-unreadable" ]; then exit 1; fi`,
-      `      if [ -f "${fixtures}/open.txt" ]; then cat "${fixtures}/open.txt"; else echo 7; fi; exit 0 ;;`,
-      '    "$pulls"*/reviews*)',
-      '      n=${arg#"$pulls"}; n=${n%%/*}',
-      `      if [ -f "${fixtures}/unreadable" ]; then exit 1; fi`,
-      `      cat "${fixtures}/reviews-$n.jsonl"; exit 0 ;;`,
-      '    "$issues"*/comments*)',
-      '      n=${arg#"$issues"}; n=${n%%/*}',
-      `      if [ -f "${fixtures}/unreadable" ] || [ -f "${fixtures}/comments-unreadable" ]; then exit 1; fi`,
-      `      cat "${fixtures}/comments-$n.jsonl"; exit 0 ;;`,
-      '    "$pulls"*)',
-      '      n=${arg#"$pulls"}',
-      `      cat "${fixtures}/head-$n.txt"; exit 0 ;;`,
-      '    "repos/{owner}/{repo}") echo main; exit 0 ;;',
-      '  esac',
-      'done',
-      'exit 1',
-      '',
-    ].join('\n'),
-  )
+  copyFileSync(new URL('./fixtures/gh-poll.sh', import.meta.url), stub)
   chmodSync(stub, 0o755)
 
   // `pr review-state` answers from the fixture the thread was written with, and
@@ -254,16 +224,7 @@ beforeEach(() => {
   // produced without a stub, since it has no remote for `git ls-remote` to
   // reach, so the head still falls back to the pull read.
   const canon = join(root, 'bin', 'canon')
-  writeFileSync(
-    canon,
-    [
-      '#!/usr/bin/env bash',
-      `if [ "$1 $2" = "pr review-state" ]; then cat "${join(root, 'fixtures')}/scope-$3.json"; exit 0; fi`,
-      `if [ "$1 $2" = "pr lift" ] && [ -f "${join(root, 'fixtures')}/lift-$3.json" ]; then cat "${join(root, 'fixtures')}/lift-$3.json"; exit 1; fi`,
-      'exit 1',
-      '',
-    ].join('\n'),
-  )
+  copyFileSync(new URL('./fixtures/canon-poll.sh', import.meta.url), canon)
   chmodSync(canon, 0o755)
 })
 
