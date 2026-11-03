@@ -283,10 +283,7 @@ describe('performSteps pacing around a press', () => {
     const [, press, next] = log
     // The press itself sends a down and an up, a frame each.
     expect(next?.kind).toBe('move')
-    expect((next?.t ?? 0) - (press?.t ?? 0)).toBeCloseTo(
-      2 * FRAME_MS + 500,
-      5,
-    )
+    expect((next?.t ?? 0) - (press?.t ?? 0)).toBeCloseTo(2 * FRAME_MS + 500, 5)
   })
 
   it('should rest and hold around a drag the way it does around a click', async () => {

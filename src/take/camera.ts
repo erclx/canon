@@ -199,7 +199,12 @@ function aimsOf(
   switch (event.kind) {
     case 'click':
       return [
-        { t: event.t, until: event.t, at: event.at, depth: depthFor(event.box) },
+        {
+          t: event.t,
+          until: event.t,
+          at: event.at,
+          depth: depthFor(event.box),
+        },
       ]
     case 'drag': {
       // One aim over both ends, held to the release, so a short drag stays
@@ -228,7 +233,12 @@ function aimsOf(
       // A move logs no box, so a hold aims at the full depth.
       const arrived = event.t + event.ms
       return [
-        { t: arrived, until: arrived + event.hold, at: event.to, depth: deepest },
+        {
+          t: arrived,
+          until: arrived + event.hold,
+          at: event.to,
+          depth: deepest,
+        },
       ]
     }
     default:
@@ -347,9 +357,7 @@ function inside(
       value < origin + span - margin
     )
   }
-  return (
-    near(point.x, stop.x, page.width) && near(point.y, stop.y, page.height)
-  )
+  return near(point.x, stop.x, page.width) && near(point.y, stop.y, page.height)
 }
 
 /**
