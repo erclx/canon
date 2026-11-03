@@ -155,15 +155,28 @@ const PAINTED = '__canonTakePainted'
  * How long a move takes to show in the clip, measured by sending one aligned
  * move to `START` and reading the animation frame after its handler against
  * the frame it was aligned to. Both readings are page time, so no clock mapping
- * is needed. The recorder captures a frame once it is presented, one frame
- * after that frame begins, so the lag counts one frame past the readings,
- * which held a dragged box within 7 px on every run where the readings alone
- * left 10 to 15. Undefined when the page gives no frame to read, and the
- * pointer rests on `START` either way.
+ * is needed. The recorder captures a frame once it is presented, one page
+ * frame after that frame begins, so the lag counts one page frame past the
+ * readings, read off two consecutive animation frames rather than assumed from
+ * the clip's rate. That held a dragged box within 7 px on every run where the
+ * readings alone left 10 to 15. Undefined when the page gives no frame to read,
+ * and the pointer rests on `START` either way.
  */
 async function calibrate(page: Page): Promise<number | undefined> {
   await page.mouse.move(START.x - 1, START.y)
-  await nextFrame(page, ALIGN_CAP_MS)
+  const interval = await withinCap(
+    page
+      .evaluate(
+        () =>
+          new Promise<number>((done) =>
+            requestAnimationFrame((first) =>
+              requestAnimationFrame((second) => done(second - first)),
+            ),
+          ),
+      )
+      .catch(() => undefined),
+    2 * ALIGN_CAP_MS,
+  )
   await page.evaluate((key) => {
     const slot = window as unknown as Record<string, unknown>
     slot[key] = new Promise<number>((done) => {
@@ -186,8 +199,9 @@ async function calibrate(page: Page): Promise<number | undefined> {
       .catch(() => undefined),
     CALIBRATE_CAP_MS,
   )
-  if (aligned === undefined || painted === undefined) return undefined
-  return Math.max(0, painted - aligned) + FRAME_MS
+  if (interval === undefined || aligned === undefined) return undefined
+  if (painted === undefined) return undefined
+  return Math.max(0, painted - aligned) + interval
 }
 
 /** An event moved `lag` later on the clip, with every point it sent. */
