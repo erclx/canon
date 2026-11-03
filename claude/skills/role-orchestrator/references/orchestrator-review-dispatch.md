@@ -45,11 +45,10 @@ Dispatch every pull request's review to a reviewer under `role-reviewer`, first 
 
 ## The UI reviewer
 
-A pull request whose evidence record carries a checklist with a drivable box takes a second reviewer, a UI reviewer under `review-ui`, dispatched beside the code reviewer so the two passes run at once. Read the record with `canon pr evidence <number> --json` and branch on its `drivable` count above zero rather than on the exit code or the bare `checklist` field.
+A pull request whose evidence record counts a drivable box takes a second reviewer, a UI reviewer under `review-ui`, dispatched beside the code reviewer so the two passes run at once. Read the record with `canon pr evidence <number> --json` and branch on `drivable` above zero rather than on the exit code.
 
 - A record carrying no checklist dispatches no UI reviewer, since the pass would stop on arrival
-- A record whose `drivable` reads zero, every box being `(taste)`, dispatches none either, since no driver can tick a box and the lift leaves the UI family unbound
-- A record carrying a `checklist` with no readable `drivable` dispatches one, the way the lift binds on it
+- A record whose `drivable` reads zero, every box being `(taste)`, dispatches none either, while a `checklist` with no readable `drivable` dispatches one, as the lift binds on it
 - A pull request that gains a drivable box in review takes its UI reviewer then, on the `MOVED` that brought it, since a first pass that read none launched nobody
 - The UI reviewer reads no diff and never hears the code verdict, so neither brief carries the other's result
 - Each posts its own family and runs `canon pr lift` on its close, and the verb lifts the draft mark only once both read closed at the head
