@@ -1,6 +1,6 @@
 ---
 title: Take craft
-description: The filming rules a take plan follows, the frame-stepping limits, and the pointer and zoom rules the camera relies on, each with its source
+description: The filming rules a take plan follows, the frame-stepping limits, the pointer and zoom rules the camera relies on, and how a beat is framed, each with its source
 ---
 
 # Take craft
@@ -15,6 +15,7 @@ Read at Step 3 of `ui-film`, before writing the first beat. `canon take --help` 
 - [Targets](#targets)
 - [The pointer](#the-pointer)
 - [The zoom](#the-zoom)
+- [Framing](#framing)
 - [One source for on-camera content](#one-source-for-on-camera-content)
 - [The harness route](#the-harness-route)
 - [Sources](#sources)
@@ -41,7 +42,7 @@ A plan holds the approved beats in order. Each beat names its setup, which runs 
 ## One action per take
 
 - Film one action per beat, such as one click, one fill, or one scroll, so the edit can cut, reorder, or drop a beat without re-filming its neighbors
-- Keep a take as long as its beat. The verb opens and closes each one on a 0.6 s hold, which gives the edit a still to cut on, so add no hold of your own around the action.
+- Keep a take as long as its beat. The verb holds still at each end and paces each press and its result, at the timings `canon take --help` prints, so add no hold of your own around the action.
 - Add a `wait` after an action whose result animates, loads, or settles, long enough for the result to finish on screen
 - Reach the beat's start state through `setup`, since every beat opens the page fresh and nothing a setup step does is filmed
 - Write the beat's `name` as the operator approved it, since it names the clip's folder
@@ -106,6 +107,32 @@ Three controls change the push itself.
 - Set `"push": false` on a beat the edit holds wide, such as one showing a whole layout change. Its track keeps the cursor and the click ring and drops the zoom.
 - Rebuild a beat's track with `canon take camera <dir>/log.json --rate <n> --out <file>` for a clip the edit plays `n` times faster, so the zoom settles on the clock a viewer sees
 
+### The cursor leads the camera
+
+The viewer follows the cursor, so the camera zooms where the cursor acts and never anywhere the cursor is not.
+
+- Film a look-back at a changed element as a `move` to it carrying `hold`, so the cursor glides there and the camera holds on its arrival
+- Never aim the camera at a point the cursor left behind, since a push onto a button while the drawn cursor sits elsewhere reads as broken
+- End a hold when the cursor leaves. A glide onto the next target plus about 1 s of hold fit Frameboard's launch film, where a 3.2 s camera-only hold read as too long.
+
+### One track per take
+
+A camera track is read off one take's log and is true of that take alone.
+
+- Rebuild every camera track from the new log after a re-film, each `--rate` track included, since a track left from the old take aims at moments that no longer happen
+- Never hand-tune a track, since the next re-film overwrites the log under it and leaves the tuning aimed at the old clock
+
+## Framing
+
+A beat's view is part of what it shows, so set it before filming rather than letting the app move it.
+
+- Film a beat that builds several elements into one fixed view fitted to its end state, so each element lands where it finishes and the next beat opens on the same view
+- Reach that view by opening the page on the finished state, letting the app fit to it, then emptying it in `setup`, rather than following the app's own view as each element lands
+- Film the selection a hand edit acts on, since `setup` is never filmed and a viewer who missed the selection cannot tell what changed
+- End a hand edit on the edited element rather than a wide view, where neighbors that already looked the same suggest several things changed
+
+Frameboard's launch film followed the board's own view in its first cut, which centered each frame as it landed and left a tall frame cut off below a short one.
+
 ## One source for on-camera content
 
 A take shows content the app loads or a script writes, such as a fixture, a snapshot, or copy typed into a field. Keep one source for it, naming whatever the take reads on camera.
@@ -116,20 +143,18 @@ A take shows content the app loads or a script writes, such as a fixture, a snap
 
 ## The harness route
 
-A beat driven from outside the page, such as a drag between two windows or an input the step kinds lack, cannot run as `canon take` steps. Until the verb can run an outside script itself, film it through a harness.
-
-- Keep each script in the workspace's `harness/` folder and write its output into the take's own folder, never at the workspace root
-- Drive the beat from a Playwright script that records the page and writes a log in the shape of a take's `log.json`
-- Build its camera track from that log with `canon take camera <log> --out <file>`, so the composition applies it like any other take
-- Tell the operator which beats ran this way, since their clips carry the harness's resolution rather than the stepper's
+A beat driven from outside the page, such as a drag between two windows or an input the step kinds lack, runs through a Playwright harness rather than as `canon take` steps. Read `harness.md` beside this file before writing one, since it holds the route and the faults that cost a reshoot most of its refilms.
 
 ## Sources
 
-| Rule                       | Source                                                                                                                         |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Zoom on a click            | Screen Studio's [auto zoom guide](https://screen.studio/guide/auto-zoom) keys its zoom on click positions                      |
-| The push riding the glide  | The operator judged renders of a fixture page by eye and kept a zoom landing with the cursor over one leading it               |
-| The typing and scroll risk | Takes of a canvas design board filmed while the stepper was built                                                              |
-| Jumping scrolls and GIFs   | [hasuwini77/demo-reel#28](https://github.com/hasuwini77/demo-reel/pull/28), read through a search summary rather than the page |
+| Rule                          | Source                                                                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Zoom on a click               | Screen Studio's [auto zoom guide](https://screen.studio/guide/auto-zoom) keys its zoom on click positions                      |
+| The push riding the glide     | The operator judged renders of a fixture page by eye and kept a zoom landing with the cursor over one leading it               |
+| The typing and scroll risk    | Takes of a canvas design board filmed while the stepper was built                                                              |
+| The cursor leading the camera | Frameboard's launch film, whose operator flagged every push the drawn cursor did not lead                                      |
+| One track per take            | Frameboard's launch film, where tracks left from an earlier take drove two beats off sync                                      |
+| Framing                       | Frameboard's launch film, refilmed into a fixed view fitted to its finished frames                                             |
+| Jumping scrolls and GIFs      | [hasuwini77/demo-reel#28](https://github.com/hasuwini77/demo-reel/pull/28), read through a search summary rather than the page |
 
 The pointer rules carry no number. One pointer and a click inside its box follow from the log recording each target's box.
