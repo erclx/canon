@@ -80,6 +80,14 @@ Branch on the record's `reason`, never on the exit code.
 | `over-cap`         | Drop `beat` and each beat after it, then film once more. Skip as `over-cap` if `beat` is first or it refuses again                                                                                                                                                 |
 | Any other value    | Skip under that `reason`, such as `target-missing` with its `beat`                                                                                                                                                                                                 |
 
+### A skip for a state the fixture lacks
+
+A skip whose cause is a state the drive fixture lacks, such as `target-missing` on a control only that state renders, is work the building session owes.
+
+- Film a beat from a box carrying `(needs fixture)` only if the state answers, and otherwise skip it as owed
+- Report the owed skip on the evidence comment's `--reel-skip` line and in the closing report, naming the state, the selector, or the setup step the beat needed
+- Never report it as a plain skip, since the next pull request meets the same fixture and skips again
+
 ## Check each still
 
 Open each beat's `still.jpg`, the closing frame the record names in its `still` field, and confirm it shows the state the beat's box describes. This check replaces the operator's approval, so it runs on every reel.

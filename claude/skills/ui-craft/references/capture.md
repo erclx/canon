@@ -9,7 +9,23 @@
 
 - Run the project's capture command against a preview server, never a dev server, after changing a surface. Report a project with none.
 - Capture every theme the surface ships, and again after fixing a defect found.
+- Add a case for every rendered state the change adds or alters, on a new surface or an already captured one. Proof is the default.
+- Count a focus ring, an outline, a toast, a tooltip, a size change from server-written markup, and a state reachable only by interaction as visible states.
 - Read your capture against the `canon:ui-checklist` boxes before opening the pull request, reporting a skill that does not resolve.
+
+### The exemption
+
+Only a change with no visible result in any reachable state is exempt, such as a keyboard order that moves no ring. A capture costs one command and a missing one costs a review round, so the worker never judges the exemption alone.
+
+- State it in the pull request body as a line naming the path and why nothing shows.
+- A reviewer accepts it by writing a ``- **Waived capture:** `<path>`: <reason>`` line in a review.
+- A painted path with neither a case nor that line keeps the pull request in draft.
+
+## When the fixture cannot reach a state
+
+- Extend the drive fixture in the same branch when a box or a case needs a state it lacks, and commit the added state under a path the fixture declares, since the throwaway copy wipes anything else.
+- Never record the missing state as a skip, since the next pull request meets the same fixture and skips again.
+- State the setup inline when the project has no `canon/config/app-drive.toml`, since the drive there starts from the served root and a fixture file is not owed.
 
 ## What a capture covers
 

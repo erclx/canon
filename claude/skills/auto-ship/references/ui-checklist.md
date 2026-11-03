@@ -18,6 +18,14 @@ Count two things in `.canon/tmp/handoff/ui-checklist/<slug>.md` at the main work
 
 Hold both until the Output block. `pr-evidence` removes the file once it posts the evidence comment, so a count taken after Step 6 reads nothing.
 
+## Owed fixture states
+
+Settle each state the checklist names before Step 6, since a box the driver cannot reach opens the UI review.
+
+- Add the state to the drive fixture for each box ending in `(needs fixture)`, then drop the marker from the box
+- Confirm every state the checklist names has a capture case, per the `canon:ui-craft` capture reference, and add the missing ones
+- A project with no `canon/config/app-drive.toml` takes the setup inline on the box instead of a fixture file
+
 ## Reading the counts into the closing block
 
 The Output block's second line takes both counts. When every box is a taste box, `<N>` and `<M>` match and the boxes are owed to the operator alone, so say the operator and drop the UI reviewer clause.
