@@ -9,6 +9,7 @@ import {
   type PullState,
   readBaseStanding,
   readChangedPaths,
+  readsDrivableBox,
   type Standing,
 } from '@/pr/lift'
 import type { ReviewRow } from '@/pr/review-scope'
@@ -101,7 +102,7 @@ function makeApi(fixture: Fixture = {}): Harness {
   const evidence: EvidenceGate = {
     isSettled: true,
     owed: [],
-    hasChecklist: false,
+    hasDrivableBox: false,
     ...fixture.evidence,
   }
 
@@ -213,7 +214,7 @@ describe('lift', () => {
       ['painted-uncaptured', { evidence: { uncaptured: ['src/App.tsx'] } }],
       [
         'ui-missing',
-        { evidence: { hasChecklist: true }, reviews: [CODE_CLOSED] },
+        { evidence: { hasDrivableBox: true }, reviews: [CODE_CLOSED] },
       ],
     ] as const)('should return to draft naming %s', async (failed, fixture) => {
       const { api, calls } = makeApi({ ...ready, ...fixture })
@@ -231,7 +232,7 @@ describe('lift', () => {
     it('should return to draft on a painted push after a UI close', async () => {
       const { api, calls } = makeApi({
         ...ready,
-        evidence: { hasChecklist: true },
+        evidence: { hasDrivableBox: true },
         reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
         changed: { isAncestor: true, paths: ['src/App.tsx'] },
       })
@@ -249,7 +250,7 @@ describe('lift', () => {
     it('should stay ready on a test-only push after a UI close', async () => {
       const { api, calls } = makeApi({
         ...ready,
-        evidence: { hasChecklist: true },
+        evidence: { hasDrivableBox: true },
         reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
         changed: { isAncestor: true, paths: ['src/App.test.tsx'] },
       })
@@ -358,7 +359,39 @@ describe('lift', () => {
   })
 
   describe('UI gate', () => {
-    const withChecklist = { hasChecklist: true }
+    const withDrivable = { hasDrivableBox: true }
+
+    it('should pass with no UI review on a checklist holding only taste boxes', async () => {
+      const { api } = makeApi({
+        evidence: {
+          hasDrivableBox: readsDrivableBox({
+            checklist: '- [ ] calm (taste)',
+            drivable: 0,
+          }),
+        },
+        reviews: [CODE_CLOSED],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('lifted')
+    })
+
+    it('should refuse ui-missing on a checklist holding one drivable box beside taste ones', async () => {
+      const { api } = makeApi({
+        evidence: {
+          hasDrivableBox: readsDrivableBox({
+            checklist: '- [ ] opens\n- [ ] calm (taste)\n- [ ] paces (taste)',
+            drivable: 1,
+          }),
+        },
+        reviews: [CODE_CLOSED],
+      })
+
+      const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+      expect(record.reason).toBe('ui-missing')
+    })
 
     it('should not bind when the evidence record carries no checklist', async () => {
       const { api } = makeApi({ reviews: [CODE_CLOSED] })
@@ -370,7 +403,7 @@ describe('lift', () => {
 
     it('should pass when the UI verdict is closed at the head', async () => {
       const { api } = makeApi({
-        evidence: withChecklist,
+        evidence: withDrivable,
         reviews: [CODE_CLOSED, UI_CLOSED],
       })
 
@@ -381,7 +414,7 @@ describe('lift', () => {
 
     it('should pass on a UI close rewritten in place to the head', async () => {
       const { api, calls } = makeApi({
-        evidence: withChecklist,
+        evidence: withDrivable,
         reviews: [CODE_CLOSED, UI_CLOSED_EDITED],
       })
 
@@ -393,7 +426,7 @@ describe('lift', () => {
 
     it('should refuse ui-behind on a rewritten close whose marker names an older head', async () => {
       const { api } = makeApi({
-        evidence: withChecklist,
+        evidence: withDrivable,
         reviews: [
           CODE_CLOSED,
           { body: UI_CLOSED_AT_MOVED.body, commit: { oid: HEAD } },
@@ -407,7 +440,7 @@ describe('lift', () => {
     })
 
     it('should refuse ui-missing when a checklist exists and no verdict does', async () => {
-      const { api } = makeApi({ evidence: withChecklist })
+      const { api } = makeApi({ evidence: withDrivable })
 
       const record = await lift(api, { isCheck: false, waitSeconds: 60 })
 
@@ -416,7 +449,7 @@ describe('lift', () => {
 
     it('should refuse ui-open on an open verdict', async () => {
       const { api } = makeApi({
-        evidence: withChecklist,
+        evidence: withDrivable,
         reviews: [
           CODE_CLOSED,
           { body: `## UI review\n<!-- review-ui: head=${HEAD} -->` },
@@ -430,7 +463,7 @@ describe('lift', () => {
 
     it('should refuse ui-behind on a close behind the head', async () => {
       const { api } = makeApi({
-        evidence: withChecklist,
+        evidence: withDrivable,
         reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
         changed: { isAncestor: false, paths: [] },
       })
@@ -442,7 +475,7 @@ describe('lift', () => {
 
     it('should refuse ui-undriven on a close that drove no box at the head', async () => {
       const { api } = makeApi({
-        evidence: withChecklist,
+        evidence: withDrivable,
         reviews: [CODE_CLOSED, UI_CLOSED_UNDRIVEN],
       })
 
@@ -453,7 +486,7 @@ describe('lift', () => {
 
     it('should refuse ui-undriven on a close carried from an older head', async () => {
       const { api, calls } = makeApi({
-        evidence: withChecklist,
+        evidence: withDrivable,
         reviews: [CODE_CLOSED, UI_CLOSED_UNDRIVEN_AT_MOVED],
         changed: { isAncestor: true, paths: ['README.md'] },
       })
@@ -466,7 +499,7 @@ describe('lift', () => {
 
     it('should lift on a close holding only needs-eyes boxes', async () => {
       const { api } = makeApi({
-        evidence: withChecklist,
+        evidence: withDrivable,
         reviews: [CODE_CLOSED, UI_CLOSED_EYES_ONLY],
       })
 
@@ -477,7 +510,7 @@ describe('lift', () => {
 
     it('should not read an empty pass as undriven', async () => {
       const { api } = makeApi({
-        evidence: withChecklist,
+        evidence: withDrivable,
         reviews: [CODE_CLOSED, UI_CLOSED_EMPTY],
       })
 
@@ -489,7 +522,7 @@ describe('lift', () => {
     describe('carried forward', () => {
       it('should carry a close across a push of tests and markdown', async () => {
         const { api, calls } = makeApi({
-          evidence: withChecklist,
+          evidence: withDrivable,
           reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
           changed: { isAncestor: true, paths: ['src/a.test.ts', 'README.md'] },
         })
@@ -503,7 +536,7 @@ describe('lift', () => {
 
       it('should read a close covering the head without a diff', async () => {
         const { api, calls } = makeApi({
-          evidence: withChecklist,
+          evidence: withDrivable,
           reviews: [CODE_CLOSED, UI_CLOSED],
         })
 
@@ -515,7 +548,7 @@ describe('lift', () => {
 
       it('should refuse ui-behind and name only the painted path of a mixed push', async () => {
         const { api } = makeApi({
-          evidence: withChecklist,
+          evidence: withDrivable,
           reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
           changed: {
             isAncestor: true,
@@ -534,7 +567,7 @@ describe('lift', () => {
 
       it('should carry a close across a push of evidence captures alone', async () => {
         const { api } = makeApi({
-          evidence: withChecklist,
+          evidence: withDrivable,
           reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
           changed: {
             isAncestor: true,
@@ -550,7 +583,7 @@ describe('lift', () => {
 
       it('should refuse ui-behind and name the source path of a gap that paints nothing', async () => {
         const { api } = makeApi({
-          evidence: withChecklist,
+          evidence: withDrivable,
           reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
           changed: {
             isAncestor: true,
@@ -570,7 +603,7 @@ describe('lift', () => {
 
       it('should name a painted path in both lists', async () => {
         const { api } = makeApi({
-          evidence: withChecklist,
+          evidence: withDrivable,
           reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
           changed: { isAncestor: true, paths: ['src/Card.tsx'] },
         })
@@ -586,7 +619,7 @@ describe('lift', () => {
 
       it('should refuse ui-behind and carry nothing when the close is not an ancestor', async () => {
         const { api } = makeApi({
-          evidence: withChecklist,
+          evidence: withDrivable,
           reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
           changed: { isAncestor: false, paths: [] },
         })
@@ -599,7 +632,7 @@ describe('lift', () => {
 
       it('should refuse gh-failed when the diff read fails', async () => {
         const { api } = makeApi({
-          evidence: withChecklist,
+          evidence: withDrivable,
           reviews: [CODE_CLOSED, UI_CLOSED_AT_MOVED],
           changed: null,
         })
@@ -611,7 +644,7 @@ describe('lift', () => {
 
       it('should never carry an open verdict', async () => {
         const { api } = makeApi({
-          evidence: withChecklist,
+          evidence: withDrivable,
           reviews: [
             CODE_CLOSED,
             UI_CLOSED_AT_MOVED,
@@ -626,7 +659,7 @@ describe('lift', () => {
 
       it('should never carry a close with no marker', async () => {
         const { api } = makeApi({
-          evidence: withChecklist,
+          evidence: withDrivable,
           reviews: [
             CODE_CLOSED,
             { body: '## UI review closed', commit: { oid: MOVED } },
@@ -641,7 +674,7 @@ describe('lift', () => {
 
     it('should refuse ui-unmarked on a verdict stamped at the head with no marker', async () => {
       const { api } = makeApi({
-        evidence: withChecklist,
+        evidence: withDrivable,
         reviews: [
           CODE_CLOSED,
           { body: '## UI review closed\n\nall boxes', commit: { oid: HEAD } },
@@ -1141,5 +1174,19 @@ describe('readBaseStanding', () => {
     }
 
     expect(await readBaseStanding(git, 1, HEAD, 'origin/main')).toBe('stale')
+  })
+})
+
+describe('readsDrivableBox', () => {
+  it.each([
+    [{}, false],
+    [{ checklist: '' }, false],
+    [{ checklist: '- [ ] calm (taste)', drivable: 0 }, false],
+    [{ checklist: '- [ ] opens', drivable: 1 }, true],
+    [{ checklist: '- [ ] opens' }, true],
+    [{ checklist: '- [ ] opens', drivable: '0' }, true],
+    [{ checklist: '- [ ] opens', drivable: -1 }, true],
+  ])('should read %j as binding %s', (record, expected) => {
+    expect(readsDrivableBox(record)).toBe(expected)
   })
 })

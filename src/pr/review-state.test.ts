@@ -5,6 +5,7 @@ import {
   type EvidenceGate,
   lift,
   type LiftApi,
+  readsDrivableBox,
 } from '@/pr/lift'
 import type { ReviewRow } from '@/pr/review-scope'
 import {
@@ -67,7 +68,7 @@ function makeApi(fixture: Fixture = {}): Harness {
       return {
         isSettled: true,
         owed: [],
-        hasChecklist: true,
+        hasDrivableBox: true,
         ...fixture.evidence,
       }
     },
@@ -134,7 +135,7 @@ describe('readReviewState', () => {
   it('should pass an unbound UI family when the evidence carries no checklist', async () => {
     const { api } = makeApi({
       reviews: [[codePass('## Review closed', HEAD)]],
-      evidence: { hasChecklist: false },
+      evidence: { hasDrivableBox: false },
     })
 
     const result = await readReviewState(api)
@@ -146,10 +147,29 @@ describe('readReviewState', () => {
     expect(result.kind === 'read' && result.record.ui.reason).toBeUndefined()
   })
 
+  it('should leave the UI family unbound and covered on a checklist holding only taste boxes', async () => {
+    const { api } = makeApi({
+      reviews: [[codePass('## Review closed', HEAD)]],
+      evidence: {
+        hasDrivableBox: readsDrivableBox({
+          checklist: '- [ ] calm (taste)\n- [ ] paces (taste) (local only)',
+          drivable: 0,
+        }),
+      },
+    })
+
+    const result = await readReviewState(api)
+
+    expect(result).toMatchObject({
+      kind: 'read',
+      record: { ui: { isBound: false, isCovered: true } },
+    })
+  })
+
   it('should count an unmarked pass at the tip as covered and report it unmarked', async () => {
     const { api } = makeApi({
       reviews: [[{ body: '## Review closed\n\nclean', commit: { oid: HEAD } }]],
-      evidence: { hasChecklist: false },
+      evidence: { hasDrivableBox: false },
     })
 
     const result = await readReviewState(api)
@@ -163,7 +183,7 @@ describe('readReviewState', () => {
   it('should cover the tip through a short-sha marker', async () => {
     const { api } = makeApi({
       reviews: [[codePass('## Review closed', HEAD.slice(0, 7))]],
-      evidence: { hasChecklist: false },
+      evidence: { hasDrivableBox: false },
     })
 
     const result = await readReviewState(api)
@@ -308,7 +328,7 @@ describe('waitForReviews', () => {
     const { api } = makeApi({
       tips: [PUSHED],
       reviews: [[codePass('## Review', HEAD)]],
-      evidence: { hasChecklist: false },
+      evidence: { hasDrivableBox: false },
     })
 
     const result = await waitForReviews(api, { waitSeconds: 2, pollMs: 1000 })
@@ -347,7 +367,7 @@ describe('waitForReviews', () => {
         [codePass('## Review closed', HEAD)],
         [codePass('## Review closed', PUSHED)],
       ],
-      evidence: { hasChecklist: false },
+      evidence: { hasDrivableBox: false },
     })
 
     const result = await waitForReviews(api, { waitSeconds: 600, pollMs: 1000 })

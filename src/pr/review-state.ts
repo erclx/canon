@@ -94,7 +94,7 @@ function familyOf(gate: GateResult, commit: string | undefined, tip: string) {
  */
 async function readAt(
   api: ReviewStateApi,
-  hasChecklist: boolean,
+  hasDrivableBox: boolean,
   painted: PaintedPatterns,
 ): Promise<ReviewStateRead> {
   const [tip, reviews] = await Promise.all([api.readTip(), api.readReviews()])
@@ -105,7 +105,7 @@ async function readAt(
   const listing: { reviews: readonly ReviewRow[] } = { reviews }
   const scope = resolveReviewScope(listing)
   const uiScope = resolveUiScope(listing)
-  const ui = await uiGate(api, painted, reviews, tip, hasChecklist)
+  const ui = await uiGate(api, painted, reviews, tip, hasDrivableBox)
   if (ui.reason === 'gh-failed') return { kind: 'refused', reason: 'gh-failed' }
 
   return {
@@ -117,7 +117,7 @@ async function readAt(
       ui: {
         ...uiScope,
         ...familyOf(ui, uiScope.commit, tip),
-        isBound: hasChecklist,
+        isBound: hasDrivableBox,
         ...(ui.carriedFrom !== undefined && { carriedFrom: ui.carriedFrom }),
         ...(ui.paintedPaths !== undefined && { paintedPaths: ui.paintedPaths }),
         ...(ui.drivenPaths !== undefined && { drivenPaths: ui.drivenPaths }),
@@ -132,7 +132,7 @@ export async function readReviewState(
 ): Promise<ReviewStateRead> {
   const evidence = await api.readEvidence()
   if (evidence === undefined) return { kind: 'refused', reason: 'gh-failed' }
-  return readAt(api, evidence.hasChecklist, painted)
+  return readAt(api, evidence.hasDrivableBox, painted)
 }
 
 /**
@@ -158,7 +158,7 @@ export async function waitForReviews(
   }
 
   for (;;) {
-    const read = await readAt(api, evidence.hasChecklist, painted)
+    const read = await readAt(api, evidence.hasDrivableBox, painted)
     if (read.kind === 'refused') {
       return { ...read, waitedSeconds: waited() }
     }

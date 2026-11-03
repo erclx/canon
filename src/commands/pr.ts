@@ -85,6 +85,7 @@ import {
   type PullState,
   readBaseStanding,
   readChangedPaths,
+  readsDrivableBox,
 } from '@/pr/lift'
 import { close, type CloseApi, type CloseRefusal } from '@/pr/close'
 import {
@@ -712,9 +713,10 @@ export function register(program: Command): void {
         '',
         '`ui` also carries the newest `## UI review` pass (`heading`, `state`,',
         '`commit`, `source`), `isBound`, which is whether the evidence comment',
-        'carries a checklist, and `carriedFrom` when the lift carried a close',
-        'forward, or `drivenPaths` and the painted subset `paintedPaths` when it',
-        'refused to. An unbound family reads covered.',
+        'carries a checklist holding a box a driver can run, so a checklist',
+        'of taste boxes alone binds nothing, and `carriedFrom` when the lift',
+        'carried a close forward, or `drivenPaths` and the painted subset',
+        '`paintedPaths` when it refused to. An unbound family reads covered.',
         '',
         'Both families post as pull request reviews, so this reads',
         '`pulls/<n>/reviews` alone, as the lift does. Issue comments are not',
@@ -999,7 +1001,8 @@ export function register(program: Command): void {
         'they are read:',
         '  review    the newest `## Review` is closed at the head, off its marker',
         '  ui        the newest `## UI review` is closed at the head, bound only',
-        '            where `canon pr evidence --check` carries a checklist. A close',
+        '            where `canon pr evidence --check` carries a checklist whose',
+        '            `drivable` count is not zero, a missing count binding. A close',
         '            on an earlier commit still holds when it is an ancestor of the',
         '            head and every path changed since is one no box can observe,',
         '            being tests, stories, snapshots, markdown in the root and in',
@@ -2478,7 +2481,9 @@ function logReviewState(number: number, record: ReviewStateRecord): void {
     else logWarn(line)
   }
   if (!record.ui.isBound) {
-    logInfo('ui: the evidence carries no checklist, so the family is unbound')
+    logInfo(
+      'ui: the evidence carries no box a driver can run, so the family is unbound',
+    )
   }
 }
 
@@ -4177,7 +4182,7 @@ const LIFT_REFUSALS: Record<LiftRefusal | 'bad-wait' | 'gh-missing', string> = {
   'review-behind':
     'The newest code review closed on an earlier commit than the head.',
   'ui-missing':
-    'The evidence comment carries a checklist and no UI review has been posted.',
+    'The evidence comment carries a checklist holding a box a driver can run, and no UI review has been posted.',
   'ui-open': 'The newest UI review is open, so a box still owes a fix.',
   'ui-unmarked':
     'The newest UI review carries no head marker, so the commit it covers is a GitHub stamp this gate does not trust.',
@@ -4296,6 +4301,7 @@ async function readEvidenceGate(
     reason?: unknown
     owed?: unknown
     checklist?: unknown
+    drivable?: unknown
     uncaptured?: unknown
     reel?: unknown
   }
@@ -4310,8 +4316,7 @@ async function readEvidenceGate(
   return {
     isSettled: record.reason === 'settled',
     owed: Array.isArray(record.owed) ? record.owed.map(String) : [],
-    hasChecklist:
-      typeof record.checklist === 'string' && record.checklist !== '',
+    hasDrivableBox: readsDrivableBox(record),
     // Absent stays absent, since it means the base keeps no captures and
     // the gate passes as it did before the list existed.
     ...(Array.isArray(record.uncaptured) && {

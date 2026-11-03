@@ -85,8 +85,8 @@ export interface PullState {
 export interface EvidenceGate {
   readonly isSettled: boolean
   readonly owed: readonly string[]
-  /** Whether the marked comment carries a visual checklist, which binds the UI gate. */
-  readonly hasChecklist: boolean
+  /** Whether the marked comment's checklist holds a box a driver can run, which binds the UI gate. */
+  readonly hasDrivableBox: boolean
   /**
    * The painted paths changed while no evidence image did, absent where the
    * base keeps no captures, which reads as unchecked and passes.
@@ -94,6 +94,26 @@ export interface EvidenceGate {
   readonly uncaptured?: readonly string[]
   /** The head the marked comment's reel was filmed at, when it embeds one. */
   readonly reelHead?: string
+}
+
+/**
+ * Whether an evidence record binds the UI family. A checklist binds unless
+ * the record counts zero drivable boxes, so a missing or unreadable count
+ * fails closed rather than reading as unbound.
+ */
+export function readsDrivableBox(record: {
+  readonly checklist?: unknown
+  readonly drivable?: unknown
+}): boolean {
+  if (typeof record.checklist !== 'string' || record.checklist === '') {
+    return false
+  }
+  const { drivable } = record
+  return !(
+    typeof drivable === 'number' &&
+    Number.isInteger(drivable) &&
+    drivable === 0
+  )
 }
 
 export interface ChecksGate {
@@ -233,9 +253,9 @@ export async function uiGate(
   painted: PaintedPatterns,
   reviews: readonly ReviewRow[],
   head: string,
-  hasChecklist: boolean,
+  hasDrivableBox: boolean,
 ): Promise<GateResult> {
-  if (!hasChecklist) return pass('ui')
+  if (!hasDrivableBox) return pass('ui')
 
   const scope = resolveUiScope({ reviews })
   if (scope.state === 'none') return fail('ui', 'ui-missing')
@@ -456,7 +476,7 @@ export async function lift(
 
   const gates: GateResult[] = [
     reviewGate(reviews, tip),
-    await uiGate(api, painted, reviews, tip, evidence.hasChecklist),
+    await uiGate(api, painted, reviews, tip, evidence.hasDrivableBox),
     evidenceGate(evidence, reviews, tip),
     standingGate(standing),
   ]
@@ -528,7 +548,7 @@ export async function lift(
 
   const reread = [
     reviewGate(nowReviews, nowTip),
-    await uiGate(api, painted, nowReviews, nowTip, evidence.hasChecklist),
+    await uiGate(api, painted, nowReviews, nowTip, evidence.hasDrivableBox),
   ].find((gate) => !gate.isOk)
   if (reread?.reason !== undefined) {
     return refused(reread.reason, cleared, nowTip, ci.waited)
