@@ -5,26 +5,17 @@ import {
   type Point,
   type TakeLog,
   cursorAt,
+  easeInOutCubic,
 } from '@/take/log'
-import {
-  type SpringState,
-  createSpringState,
-  stepSpring,
-} from '@/take/zoom/spring'
-import {
-  CHAINED_ZOOM_PAN_GAP_MS,
-  CONNECTED_ZOOM_PAN_DURATION_MS,
-  computeRegionStrength,
-  easeConnectedPan,
-  lerp,
-} from '@/take/zoom/region-utils'
 
 /**
- * Turns a take's log into one camera per frame, preset O4 from groundwork
- * track `193-ui-record`, a folder name kept as written (canon-keep-retired).
- * The preset is OpenScreen's timing aimed at each click, a fixed depth the clip's resolution caps, a focus that holds still until a click leaves the inner part of the
- * view, and a dead zone that keeps the cursor in frame. HyperFrames renders the
- * track as it stands, so it carries no curve a renderer would have to agree on.
+ * Turns a take's log into one camera per frame, on the motion the operator
+ * settled by eye in groundwork track `210-film-craft-and-soundtrack`. A zoom in
+ * rides the glide that reaches its target and lands as the cursor arrives, a
+ * zoom out rides the glide that leaves it, and the view scales about the
+ * target so it holds still on screen. The view pans only at a steady scale,
+ * along the glide between two targets. HyperFrames renders the track as it
+ * stands, so it carries no curve a renderer would have to agree on.
  */
 
 export const CAMERA_VERSION = 1
@@ -45,22 +36,20 @@ const FILL = 0.8
 /** A click whose depth comes out under this zooms nowhere, being nearly the whole page. */
 const MIN_ZOOM = 1.05
 
-/** How long a zoom holds past its last click or keystroke. */
-const HOLD_MS = 300
-
-/** A click inside this share of the current view keeps the focus where it is. */
-const STICKY = 0.7
-
-/** The cursor stays inside this share of the zoomed view. */
-const SAFE = 0.75
+/** How long a zoom or a pan runs when no glide carries it. */
+const EASE_MS = 600
 
 /**
- * The cursor never passes this share of the rendered view. The dead zone above
- * aims the camera, and the spring chasing it lags a long fast reach by more
- * than the dead zone's margin, so the rendered view is pushed along with the
- * cursor at this edge rather than letting it leave the frame.
+ * How long a zoom holds past its last aim when no glide leaves it, matching
+ * the hold a take films on a press's result.
  */
-const EDGE = 0.9
+const HOLD_MS = 500
+
+/** An aim inside this share of the held view around its stop keeps the view where it is. */
+const STICKY = 0.7
+
+/** And it stays at least this share of the view clear of the view's edge. */
+const MARGIN = 0.05
 
 /** How long the click ring the edit draws takes to expand. */
 const RING_MS = 450
@@ -92,18 +81,34 @@ export interface CameraTrack {
   readonly frames: readonly CameraFrame[]
 }
 
-/** A click, or a typing burst read as a click on its field held to the last key. */
+/**
+ * What the camera frames: a press, a typing burst, or a move's hold, from the
+ * moment it starts to the moment the pointer may leave.
+ */
 interface Aim {
   readonly t: number
   readonly until: number
   readonly at: Point
+  /** What the view has to keep in frame, being both ends of a drag. */
+  readonly box: Box
   readonly depth: number
 }
 
-interface Window {
-  start: number
-  end: number
-  readonly aims: Aim[]
+/** A stretch of clip time, eased from its start to its end. */
+interface Span {
+  readonly start: number
+  readonly end: number
+}
+
+/**
+ * One zoom: in onto its first stop, a pan at its depth to each later stop,
+ * and out from its last.
+ */
+interface Zoom {
+  readonly depth: number
+  readonly into: Span
+  readonly stops: readonly { readonly at: Point; readonly pan: Span }[]
+  readonly out: Span
 }
 
 export interface CameraOptions {
@@ -129,48 +134,14 @@ export function cameraTrack(
       (height * FILL) / Math.max(box.height, 1),
     )
 
-  const aims: Aim[] = (log.push === false ? [] : log.events)
-    .flatMap((event): Aim[] => {
-      if (event.kind === 'click') {
-        return [
-          {
-            t: event.t,
-            until: event.t,
-            at: event.at,
-            depth: depthFor(event.box),
-          },
-        ]
-      }
-      if (event.kind === 'drag') {
-        // One aim over both ends, held to the release, so a short drag stays
-        // framed whole and a long one asks for a depth under MIN_ZOOM.
-        const box = union(event.box, event.drop)
-        return [
-          {
-            t: event.t,
-            until: event.t + event.ms,
-            at: { x: box.x + box.width / 2, y: box.y + box.height / 2 },
-            depth: depthFor(box),
-          },
-        ]
-      }
-      if (event.kind === 'type') {
-        const box = event.box
-        return [
-          {
-            t: event.t,
-            until: event.t + event.ms,
-            at: { x: box.x + box.width / 2, y: box.y + box.height / 2 },
-            depth: depthFor(box),
-          },
-        ]
-      }
-      return []
-    })
+  const aims = (log.push === false ? [] : log.events)
+    .flatMap((event): Aim[] => aimsOf(event, depthFor, deepest))
     .filter((aim) => aim.depth >= MIN_ZOOM)
     .sort((a, b) => a.t - b.t)
 
-  const scrolls = log.events.filter((event) => event.kind === 'scroll')
+  const end = (log.frames * 1000) / log.fps
+  const zooms = zoomsOf(aims, log.events, { width, height }, end)
+
   // Read off every press rather than off the aims, which drop a click too large
   // to zoom and add a typing burst that is no press.
   const presses = log.events.flatMap((event) =>
@@ -191,77 +162,19 @@ export function cameraTrack(
     }
     return null
   }
-  const windows = zoomWindows(aims, scrolls)
-
-  const targetAt = (ms: number) => {
-    let best = { strength: 0, scale: 1, x: width / 2, y: height / 2 }
-    for (const window of windows) {
-      const strength = computeRegionStrength(
-        { startMs: window.aims[0]?.t ?? window.start, endMs: window.end },
-        ms,
-      )
-      if (strength <= best.strength) continue
-
-      const focus = focusAt(window.aims, ms, width, height)
-      const half = {
-        x: width / (2 * focus.depth),
-        y: height / (2 * focus.depth),
-      }
-      const cursor = cursorAt(log.events, ms)
-      const x = clamp(
-        focus.x,
-        cursor.x - half.x * SAFE,
-        cursor.x + half.x * SAFE,
-      )
-      const y = clamp(
-        focus.y,
-        cursor.y - half.y * SAFE,
-        cursor.y + half.y * SAFE,
-      )
-
-      best = {
-        strength,
-        scale: lerp(1, focus.depth, strength),
-        x: lerp(width / 2, x, strength),
-        y: lerp(height / 2, y, strength),
-      }
-    }
-    return best
-  }
 
   const frameMs = 1000 / log.fps
-  const springs: Record<'scale' | 'x' | 'y', SpringState> = {
-    scale: createSpringState(1),
-    x: createSpringState(width / 2),
-    y: createSpringState(height / 2),
-  }
-
   const frames: CameraFrame[] = []
   for (let index = 0; index < log.frames; index += 1) {
     const ms = index * frameMs
-    const target = targetAt(ms)
-    const scale = Math.max(1, stepSpring(springs.scale, target.scale, frameMs))
-    const half = { x: width / (2 * scale), y: height / (2 * scale) }
-    const cursor = cursorAt(log.events, ms)
-    // Written back so the spring carries on from where the view was pushed.
-    springs.x.value = clamp(
-      stepSpring(springs.x, target.x, frameMs),
-      cursor.x - half.x * EDGE,
-      cursor.x + half.x * EDGE,
-    )
-    springs.y.value = clamp(
-      stepSpring(springs.y, target.y, frameMs),
-      cursor.y - half.y * EDGE,
-      cursor.y + half.y * EDGE,
-    )
-
+    const { scale, anchor } = viewAt(zooms, ms)
     const ring = ringAt(ms)
     frames.push({
       ms: round(ms, 2),
       scale: round(scale, 4),
-      x: round(clamp(springs.x.value, half.x, width - half.x) - half.x, 2),
-      y: round(clamp(springs.y.value, half.y, height - half.y) - half.y, 2),
-      cursor: roundPoint(cursor),
+      x: round(originFor(anchor.x, scale, width), 2),
+      y: round(originFor(anchor.y, scale, height), 2),
+      cursor: roundPoint(cursorAt(log.events, ms)),
       ring: ring === null ? null : round(ring, 3),
     })
   }
@@ -280,6 +193,280 @@ export function readRate(value: string): number | undefined {
   return Number.isFinite(rate) && rate > 0 ? rate : undefined
 }
 
+function aimsOf(
+  event: LogEvent,
+  depthFor: (box: Box) => number,
+  deepest: number,
+): Aim[] {
+  switch (event.kind) {
+    case 'click':
+      return [
+        {
+          t: event.t,
+          until: event.t,
+          at: event.at,
+          box: event.box,
+          depth: depthFor(event.box),
+        },
+      ]
+    case 'drag': {
+      // One aim over both ends, held to the release, so a short drag stays
+      // framed whole and a long one asks for a depth under MIN_ZOOM.
+      const box = union(event.box, event.drop)
+      return [
+        {
+          t: event.t,
+          until: event.t + event.ms,
+          at: centerOf(box),
+          box,
+          depth: depthFor(box),
+        },
+      ]
+    }
+    case 'type':
+      return [
+        {
+          t: event.t,
+          until: event.t + event.ms,
+          at: centerOf(event.box),
+          box: event.box,
+          depth: depthFor(event.box),
+        },
+      ]
+    case 'move': {
+      if (event.hold === undefined) return []
+      // A move logs no box, so a hold aims at the full depth.
+      const arrived = event.t + event.ms
+      return [
+        {
+          t: arrived,
+          until: arrived + event.hold,
+          at: event.to,
+          box: { ...event.to, width: 0, height: 0 },
+          depth: deepest,
+        },
+      ]
+    }
+    default:
+      return []
+  }
+}
+
+/**
+ * Groups aims into zooms and times each one off the glides around it. The next
+ * aim joins a zoom while at most one glide and no scroll lies between them,
+ * since that glide then both leaves one target and reaches the other, and the
+ * view pans along it rather than pulling back and pushing in at once.
+ */
+function zoomsOf(
+  aims: readonly Aim[],
+  events: readonly LogEvent[],
+  page: { readonly width: number; readonly height: number },
+  end: number,
+): Zoom[] {
+  const glides = events.flatMap((event): Span[] =>
+    event.kind === 'move' && event.ms > 0
+      ? [{ start: event.t, end: event.t + event.ms }]
+      : [],
+  )
+  const scrolls = events
+    .filter((event) => event.kind === 'scroll')
+    .map((event) => event.t)
+  const glidesIn = (from: number, to: number) =>
+    glides.filter((glide) => glide.start >= from && glide.end <= to)
+
+  const groups: Aim[][] = []
+  for (const aim of aims) {
+    const group = groups.at(-1)
+    const last = group?.at(-1)
+    const joins =
+      group !== undefined &&
+      last !== undefined &&
+      glidesIn(last.until, aim.t).length <= 1 &&
+      !scrolls.some((t) => t >= last.until && t <= aim.t)
+    if (joins) group.push(aim)
+    else groups.push([aim])
+  }
+
+  const zooms: Zoom[] = []
+  for (const group of groups) {
+    const first = group[0]
+    const last = group.at(-1)
+    if (!first || !last) continue
+    const depth = Math.min(...group.map((aim) => aim.depth))
+    const floor = zooms.at(-1)?.out.end ?? 0
+
+    const into = arriving(glides, first.t, floor) ?? {
+      start: Math.max(floor, first.t - EASE_MS),
+      end: first.t,
+    }
+
+    const stops = [
+      {
+        at: framed(first, depth, page),
+        pan: { start: into.end, end: into.end },
+      },
+    ]
+    let previous = first
+    for (const aim of group.slice(1)) {
+      const stop = stops.at(-1) ?? stops[0]
+      if (stop && !inside(aim, stop.at, depth, page)) {
+        stops.push({
+          at: framed(aim, depth, page),
+          pan: arriving(glides, aim.t, previous.until) ?? {
+            start: Math.max(previous.until, aim.t - EASE_MS),
+            end: aim.t,
+          },
+        })
+      }
+      previous = aim
+    }
+
+    const leave = glides.find((glide) => glide.start >= last.until)
+    const cut = scrolls.find((t) => t >= last.until)
+    const out =
+      leave && (cut === undefined || leave.start <= cut)
+        ? leave
+        : {
+            start: Math.min(cut ?? Infinity, last.until + HOLD_MS, end),
+            end: Math.min(cut ?? Infinity, last.until + HOLD_MS, end) + EASE_MS,
+          }
+
+    zooms.push({ depth, into, stops, out })
+  }
+  return zooms
+}
+
+/** The glide ending as an aim starts, when one does after `floor`. */
+function arriving(
+  glides: readonly Span[],
+  t: number,
+  floor: number,
+): Span | undefined {
+  return glides.findLast(
+    (glide) => glide.start >= floor && glide.end <= t + 0.5,
+  )
+}
+
+/**
+ * Whether an aim lies near enough the stop, with its whole box far enough
+ * inside the view anchored on it, that the view can stay where it is.
+ */
+function inside(
+  aim: Aim,
+  stop: Point,
+  depth: number,
+  page: { readonly width: number; readonly height: number },
+): boolean {
+  const near = (
+    value: number,
+    low: number,
+    high: number,
+    anchor: number,
+    size: number,
+  ) => {
+    const span = size / depth
+    const origin = originFor(anchor, depth, size)
+    const margin = span * MARGIN
+    return (
+      Math.abs(value - anchor) < (span / 2) * STICKY &&
+      low > origin + margin &&
+      high < origin + span - margin
+    )
+  }
+  const { box } = aim
+  return (
+    near(aim.at.x, box.x, box.x + box.width, stop.x, page.width) &&
+    near(aim.at.y, box.y, box.y + box.height, stop.y, page.height)
+  )
+}
+
+/**
+ * The point a zoom onto `aim` scales about: its own point where the view
+ * anchored there keeps the aim's box in frame, and otherwise the nearest point
+ * that does, so both ends of a drag near the page's edge stay in view.
+ */
+function framed(
+  aim: Aim,
+  depth: number,
+  page: { readonly width: number; readonly height: number },
+): Point {
+  const axis = (at: number, low: number, high: number, size: number) => {
+    const span = size / depth
+    const k = 1 - 1 / depth
+    const margin = Math.min(
+      span * MARGIN,
+      Math.max(0, (span - (high - low)) / 2),
+    )
+    const least = (high + margin - span) / k
+    const most = (low - margin) / k
+    if (least > most) return ((low + high) / 2 - span / 2) / k
+    return clamp(at, least, most)
+  }
+  const { box } = aim
+  return {
+    x: axis(aim.at.x, box.x, box.x + box.width, page.width),
+    y: axis(aim.at.y, box.y, box.y + box.height, page.height),
+  }
+}
+
+/**
+ * The scale and the page point held still on screen at `ms`. Inside a zoom
+ * the anchor is a stop while the scale changes and slides between stops only
+ * while it holds, so the view never pans and scales at once.
+ */
+function viewAt(
+  zooms: readonly Zoom[],
+  ms: number,
+): { scale: number; anchor: Point } {
+  const rest = { scale: 1, anchor: { x: 0, y: 0 } }
+  const zoom = zooms.findLast((each) => ms >= each.into.start)
+  if (!zoom || ms > zoom.out.end) return rest
+
+  const first = zoom.stops[0]
+  const last = zoom.stops.at(-1)
+  if (!first || !last) return rest
+  const lift = zoom.depth - 1
+
+  if (ms < zoom.into.end) {
+    return {
+      scale: 1 + lift * easeInOutCubic(progress(zoom.into, ms)),
+      anchor: first.at,
+    }
+  }
+  if (ms >= zoom.out.start) {
+    return {
+      scale: 1 + lift * (1 - easeInOutCubic(progress(zoom.out, ms))),
+      anchor: last.at,
+    }
+  }
+
+  let anchor = first.at
+  for (const [i, stop] of zoom.stops.entries()) {
+    if (i === 0 || ms < stop.pan.start) continue
+    const from = zoom.stops[i - 1]?.at ?? first.at
+    const k = easeInOutCubic(progress(stop.pan, ms))
+    anchor = {
+      x: from.x + (stop.at.x - from.x) * k,
+      y: from.y + (stop.at.y - from.y) * k,
+    }
+  }
+  return { scale: zoom.depth, anchor }
+}
+
+function progress(span: Span, ms: number): number {
+  return span.end > span.start ? (ms - span.start) / (span.end - span.start) : 1
+}
+
+/**
+ * The view's top-left along one axis when it is zoomed `scale` about `anchor`,
+ * which leaves the anchor where it sits on the unzoomed page.
+ */
+function originFor(anchor: number, scale: number, size: number): number {
+  const origin = anchor * (1 - 1 / scale)
+  return clamp(origin, 0, size - size / scale)
+}
+
 /** The log as a clip played `rate` times faster shows it, every time divided. */
 function atRate(log: TakeLog, rate: number): TakeLog {
   if (rate === 1) return log
@@ -288,6 +475,22 @@ function atRate(log: TakeLog, rate: number): TakeLog {
     frames: Math.round(log.frames / rate),
     events: log.events.map((event): LogEvent => {
       const t = event.t / rate
+      if (event.kind === 'move') {
+        return {
+          ...event,
+          t,
+          ms: event.ms / rate,
+          ...(event.points
+            ? {
+                points: event.points.map((point) => ({
+                  ...point,
+                  t: point.t / rate,
+                })),
+              }
+            : {}),
+          ...(event.hold !== undefined ? { hold: event.hold / rate } : {}),
+        }
+      }
       return 'ms' in event
         ? { ...event, t, ms: event.ms / rate }
         : { ...event, t }
@@ -295,82 +498,8 @@ function atRate(log: TakeLog, rate: number): TakeLog {
   }
 }
 
-/**
- * Groups aims into zooms. One holds from its first aim to the last plus the
- * hold, a scroll ends it since the content moves under the camera, and the next
- * aim joins it while the gap stays under OpenScreen's chained-pan gap.
- */
-function zoomWindows(
-  aims: readonly Aim[],
-  scrolls: readonly LogEvent[],
-): Window[] {
-  const windows: Window[] = []
-  for (const aim of aims) {
-    let end = aim.until + HOLD_MS
-    const cut = scrolls.find((scroll) => scroll.t > aim.t && scroll.t < end)
-    if (cut) end = cut.t
-
-    const last = windows.at(-1)
-    const scrolledBetween =
-      last !== undefined &&
-      scrolls.some((scroll) => scroll.t >= last.end && scroll.t <= aim.t)
-    if (
-      last &&
-      !scrolledBetween &&
-      aim.t - last.end < CHAINED_ZOOM_PAN_GAP_MS
-    ) {
-      last.end = end
-      last.aims.push(aim)
-    } else {
-      windows.push({ start: aim.t, end, aims: [aim] })
-    }
-  }
-  return windows
-}
-
-/**
- * Where a zoom aims at `ms`. The focus stays on a stop until an aim leaves the
- * inner `STICKY` share of the view around it, which becomes the next stop, and
- * it pans to each stop on OpenScreen's connected-pan curve, arriving as the
- * click lands.
- */
-function focusAt(
-  aims: readonly Aim[],
-  ms: number,
-  width: number,
-  height: number,
-): Point & { depth: number } {
-  const [first, ...rest] = aims
-  if (!first) return { x: width / 2, y: height / 2, depth: 1 }
-
-  const stops = [first]
-  for (const aim of rest) {
-    const stop = stops.at(-1) ?? first
-    const inside =
-      Math.abs(aim.at.x - stop.at.x) < (width / (2 * stop.depth)) * STICKY &&
-      Math.abs(aim.at.y - stop.at.y) < (height / (2 * stop.depth)) * STICKY
-    if (!inside) stops.push(aim)
-  }
-
-  let focus = { x: first.at.x, y: first.at.y, depth: first.depth }
-  for (let i = 1; i < stops.length; i += 1) {
-    const from = stops[i - 1] ?? first
-    const to = stops[i] ?? first
-    const panStart = to.t - CONNECTED_ZOOM_PAN_DURATION_MS
-    if (ms >= to.t) {
-      focus = { x: to.at.x, y: to.at.y, depth: to.depth }
-    } else if (ms > panStart) {
-      const k = easeConnectedPan(
-        (ms - panStart) / CONNECTED_ZOOM_PAN_DURATION_MS,
-      )
-      focus = {
-        x: lerp(from.at.x, to.at.x, k),
-        y: lerp(from.at.y, to.at.y, k),
-        depth: lerp(from.depth, to.depth, k),
-      }
-    }
-  }
-  return focus
+function centerOf(box: Box): Point {
+  return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
 }
 
 function union(a: Box, b: Box): Box {

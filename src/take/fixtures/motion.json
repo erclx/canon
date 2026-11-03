@@ -1,0 +1,26 @@
+{
+  "beats": [
+    {
+      "name": "drag the changelog card",
+      "steps": [{ "kind": "drag", "from": "#box", "to": "#drop1" }]
+    },
+    {
+      "name": "drag the tag card",
+      "steps": [{ "kind": "drag", "from": "#rafbox", "to": "#drop2" }]
+    },
+    {
+      "name": "publish the release",
+      "steps": [{ "kind": "click", "target": "#btn" }]
+    },
+    {
+      "name": "write the release note",
+      "steps": [
+        {
+          "kind": "fill",
+          "target": "#note",
+          "text": "Fixes the drag lag and paces each press."
+        }
+      ]
+    }
+  ]
+}

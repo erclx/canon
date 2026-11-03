@@ -92,10 +92,11 @@ Two rules hold once a beat is filmed.
 
 The camera track already carries the zoom, so these rules decide what to film for it to aim at.
 
-- Earn a zoom with an action. The camera aims only at clicks and typing, and a wait, a move, or a scroll aims nowhere, so a result too small to read needs a click on it.
+- Earn a zoom with an action. The camera aims at a press, typing, and a `move` carrying `hold`, so a result too small to read needs one of those on it.
+- Expect a wait, a plain move, or a scroll to aim nowhere
 - Expect a scroll to end a zoom, since the content moves under the camera
 - Expect a target filling most of the view to get less zoom, and one filling the page to get none
-- The push reaches 90% of its depth in about 633 ms, inside the 1 s ceiling a push onto an action keeps
+- The push rides the glide onto its target and lands as the cursor arrives, so it lasts as long as that glide, between 300 ms and 1.2 s
 
 ### Depth, opt-out, and speed
 
@@ -124,12 +125,11 @@ A beat driven from outside the page, such as a drag between two windows or an in
 
 ## Sources
 
-| Rule                       | Source                                                                                                                                                   |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Zoom on a click            | Screen Studio's [auto zoom guide](https://screen.studio/guide/auto-zoom) keys its zoom on click positions                                                |
-| The 1 s ceiling            | Material Design 3's [duration tokens](https://m3.material.io/styles/motion/easing-and-duration/tokens-specs) end at 1000 ms, the top of the ambient band |
-| The 633 ms push            | Twelve moves in a Screen Studio clip reached 90% in a median of 667 ms, measured when the camera was tuned                                               |
-| The typing and scroll risk | Takes of a canvas design board filmed while the stepper was built                                                                                        |
-| Jumping scrolls and GIFs   | [hasuwini77/demo-reel#28](https://github.com/hasuwini77/demo-reel/pull/28), read through a search summary rather than the page                           |
+| Rule                       | Source                                                                                                                         |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Zoom on a click            | Screen Studio's [auto zoom guide](https://screen.studio/guide/auto-zoom) keys its zoom on click positions                      |
+| The push riding the glide  | The operator judged renders of a fixture page by eye and kept a zoom landing with the cursor over one leading it               |
+| The typing and scroll risk | Takes of a canvas design board filmed while the stepper was built                                                              |
+| Jumping scrolls and GIFs   | [hasuwini77/demo-reel#28](https://github.com/hasuwini77/demo-reel/pull/28), read through a search summary rather than the page |
 
 The pointer rules carry no number. One pointer and a click inside its box follow from the log recording each target's box.

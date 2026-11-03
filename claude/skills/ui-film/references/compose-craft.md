@@ -51,7 +51,7 @@ Cut a README loop only when the operator asks for one. A README hero plays inlin
 A clip the edit plays faster runs its zoom faster too, so a push that settled in real time pumps several times a beat.
 
 - Rebuild the beat's track for the playback rate with `canon take camera <dir>/log.json --rate <n> --out <file>`, and drive the wrapper from that file rather than from `camera.json`
-- Never scale `camera.json`'s times by hand, since the rebuilt track also keeps each push inside the 1 s ceiling at the new speed
+- Never scale `camera.json`'s times by hand, since the rebuilt track also times each push to its glide on the new clock
 - Keep a typing beat at a rate where each word still reads, since a viewer cannot read a fill that finishes in a few frames
 
 ## Storyboard headings

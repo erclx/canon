@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <title>Release checklist</title>
+    <!--
+      The page every motion rule of canon take is measured and watched on, the
+      release-checklist frame the operator accepted. The server beside it
+      serves canon's token sheet at /tokens.css and Geist under /fonts/ from
+      where they live, so the page follows a token change.
+
+      - #box follows a pointer-event drag at once, and #rafbox through
+        requestAnimationFrame, the way a canvas board defers its paint
+      - #btn toggles the release between draft and published
+      - #note takes the release note a fill types
+      - Every move, press, and key posts to /report with the animation frame
+        it paints in, and each card posts where its center sits every time it
+        moves, so a test compares the page with the cursor a take draws
+    -->
+    <link rel="stylesheet" href="/tokens.css" />
+    <style>
+      @font-face {
+        font-family: 'Geist Variable';
+        src: url('/fonts/Geist-Regular.woff2') format('woff2');
+        font-weight: 400;
+      }
+      @font-face {
+        font-family: 'Geist Variable';
+        src: url('/fonts/Geist-Medium.woff2') format('woff2');
+        font-weight: 500;
+      }
+      @font-face {
+        font-family: 'Geist Variable';
+        src: url('/fonts/Geist-SemiBold.woff2') format('woff2');
+        font-weight: 600 700;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--color-background);
+        color: var(--color-text-body);
+        font-family: var(--type-body-family);
+        font-size: var(--type-body-size);
+        line-height: var(--type-body-lh);
+        cursor: none;
+      }
+      header {
+        height: 72px;
+        display: flex;
+        align-items: center;
+        gap: var(--space-md);
+        padding: 0 48px;
+        background: var(--color-chrome);
+        border-bottom: 1px solid var(--color-border);
+      }
+      header h1 {
+        margin: 0;
+        font-size: var(--type-heading-size);
+        line-height: var(--type-heading-lh);
+        font-weight: 700;
+        color: var(--color-text);
+      }
+      header .meta {
+        color: var(--color-text-secondary);
+        font-size: var(--type-label-size);
+      }
+      .col {
+        position: absolute;
+        top: 120px;
+        width: 560px;
+        height: 880px;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-panel);
+        padding: var(--space-lg) 20px;
+      }
+      .col h2,
+      label {
+        display: block;
+        margin: 0;
+        font-size: var(--type-label-size);
+        line-height: var(--type-label-lh);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        font-weight: 500;
+        color: var(--color-text-secondary);
+      }
+      #todo {
+        left: 48px;
+      }
+      #done {
+        left: 640px;
+      }
+      .slot {
+        position: absolute;
+        width: 520px;
+        height: 120px;
+        border: 1px dashed var(--color-border);
+        border-radius: var(--radius-panel);
+      }
+      #drop1 {
+        top: 180px;
+        left: 660px;
+      }
+      #drop2 {
+        top: 340px;
+        left: 660px;
+      }
+      .card {
+        position: absolute;
+        left: 68px;
+        width: 520px;
+        height: 120px;
+        background: var(--color-background);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-panel);
+        padding: 20px var(--space-lg);
+        touch-action: none;
+      }
+      .card .title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--color-text);
+      }
+      .card .sub {
+        margin-top: var(--space-xs);
+        color: var(--color-text-secondary);
+      }
+      .card .tag {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        font-size: var(--type-label-size);
+        padding: 2px 10px;
+        border-radius: var(--radius-pill);
+        border: 1px solid var(--color-border);
+        color: var(--color-text-secondary);
+      }
+      #box {
+        top: 180px;
+      }
+      #rafbox {
+        top: 340px;
+      }
+      .card.done {
+        left: 660px;
+        background: transparent;
+      }
+      .card.done .title {
+        color: var(--color-muted);
+      }
+      .card.done .title::before {
+        content: '✓ ';
+        color: var(--color-success);
+      }
+      #done1 {
+        top: 520px;
+      }
+      #done2 {
+        top: 680px;
+      }
+      aside {
+        position: absolute;
+        top: 120px;
+        left: 1232px;
+        width: 640px;
+        height: 500px;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-panel);
+        padding: 32px;
+      }
+      aside h2 {
+        margin: 0;
+        font-size: var(--type-heading-size);
+        line-height: var(--type-heading-lh);
+        font-weight: 700;
+        color: var(--color-text);
+      }
+      aside p {
+        margin: var(--space-xs) 0 var(--space-lg);
+        color: var(--color-text-secondary);
+      }
+      label {
+        margin-bottom: var(--space-sm);
+      }
+      #note {
+        position: absolute;
+        left: 32px;
+        top: 160px;
+        width: 576px;
+        height: 200px;
+        font: inherit;
+        font-size: 1.0625rem;
+        color: var(--color-text);
+        padding: var(--space-md) var(--space-md);
+        background: var(--color-background);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-action);
+        resize: none;
+        outline: none;
+      }
+      #note:focus {
+        border-color: var(--color-text-secondary);
+      }
+      #btn {
+        position: absolute;
+        left: 32px;
+        top: 396px;
+        height: 52px;
+        padding: 0 var(--space-lg);
+        font: inherit;
+        font-weight: 600;
+        font-size: 1rem;
+        color: var(--color-background);
+        background: var(--color-text);
+        border: 0;
+        border-radius: var(--radius-action);
+      }
+      #btn.on {
+        background: transparent;
+        color: var(--color-text);
+        border: 1px solid var(--color-border);
+      }
+      .status-pill {
+        position: absolute;
+        left: 220px;
+        top: 410px;
+        font-size: var(--type-label-size);
+        color: var(--color-accent);
+        border: 1px solid var(--color-accent);
+        border-radius: var(--radius-pill);
+        padding: 2px 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Release 4.2</h1>
+      <span class="meta">Checklist · 2 of 4 done</span>
+    </header>
+    <section class="col" id="todo"><h2>To do</h2></section>
+    <section class="col" id="done"><h2>Done</h2></section>
+    <div class="slot" id="drop1"></div>
+    <div class="slot" id="drop2"></div>
+    <div class="card" id="box">
+      <div class="title">Update the changelog</div>
+      <div class="sub">Summarize the fixes since 4.1</div>
+      <span class="tag">Docs</span>
+    </div>
+    <div class="card" id="rafbox">
+      <div class="title">Tag the build</div>
+      <div class="sub">Push v4.2.0 to the release branch</div>
+      <span class="tag">Build</span>
+    </div>
+    <div class="card done" id="done1">
+      <div class="title">Run the test suite</div>
+      <div class="sub">All 1,284 checks passed</div>
+      <span class="tag">QA</span>
+    </div>
+    <div class="card done" id="done2">
+      <div class="title">Bump the version</div>
+      <div class="sub">package.json now reads 4.2.0</div>
+      <span class="tag">Build</span>
+    </div>
+    <aside>
+      <h2>Publish</h2>
+      <p>Write the note readers see on the release page.</p>
+      <label for="note">Release note</label>
+      <textarea id="note" aria-label="Note"></textarea>
+      <button id="btn" aria-label="Toggle">Publish release</button>
+      <span class="status-pill" id="status">Draft</span>
+    </aside>
+    <script>
+      // A frame count rather than performance.now(), which under frame
+      // stepping runs ahead of the frames while inputs are dispatched. Every
+      // report carries the frame it paints in: an input handler runs ahead of
+      // that frame's animation callbacks, so it reports from one, and a change
+      // made inside an animation callback reports at once.
+      let frame = 0
+      let painting = false
+      const tick = () => {
+        frame += 1
+        requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+
+      let seq = 0
+      const post = (entry) =>
+        fetch('/report', {
+          method: 'POST',
+          body: JSON.stringify(entry),
+          keepalive: true,
+        })
+      const report = (entry) => {
+        const order = (seq += 1)
+        if (painting) return post({ seq: order, frame, ...entry })
+        requestAnimationFrame(() => post({ seq: order, frame, ...entry }))
+      }
+
+      for (const type of ['pointermove', 'pointerdown', 'pointerup']) {
+        document.addEventListener(
+          type,
+          (event) => report({ type, x: event.clientX, y: event.clientY }),
+          true,
+        )
+      }
+      document.addEventListener('keydown', (event) =>
+        report({ type: 'keydown', key: event.key }),
+      )
+      document.addEventListener('input', () => report({ type: 'input' }))
+
+      function draggable(card, deferred) {
+        let grab = null
+        let pending = null
+        const place = (left, top) => {
+          card.style.left = `${left}px`
+          card.style.top = `${top}px`
+          report({
+            type: 'place',
+            id: card.id,
+            x: left + card.offsetWidth / 2,
+            y: top + card.offsetHeight / 2,
+          })
+        }
+        card.addEventListener('pointerdown', (event) => {
+          grab = {
+            dx: event.clientX - card.offsetLeft,
+            dy: event.clientY - card.offsetTop,
+          }
+          card.setPointerCapture(event.pointerId)
+        })
+        card.addEventListener('pointermove', (event) => {
+          if (!grab) return
+          const left = event.clientX - grab.dx
+          const top = event.clientY - grab.dy
+          if (!deferred) return place(left, top)
+          pending = { left, top }
+          requestAnimationFrame(() => {
+            if (!pending) return
+            painting = true
+            place(pending.left, pending.top)
+            painting = false
+            pending = null
+          })
+        })
+        card.addEventListener('pointerup', () => {
+          grab = null
+        })
+      }
+      draggable(document.getElementById('box'), false)
+      draggable(document.getElementById('rafbox'), true)
+
+      const button = document.getElementById('btn')
+      button.addEventListener('click', () => {
+        const on = button.classList.toggle('on')
+        document.getElementById('status').textContent = on
+          ? 'Published'
+          : 'Draft'
+      })
+    </script>
+  </body>
+</html>

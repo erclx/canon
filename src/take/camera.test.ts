@@ -70,6 +70,14 @@ function viewCenter(frame: CameraFrame): Point {
   }
 }
 
+/** Where a page point sits on the rendered frame, in CSS pixels of the view. */
+function screenOf(frame: CameraFrame, point: Point): Point {
+  return {
+    x: (point.x - frame.x) * frame.scale,
+    y: (point.y - frame.y) * frame.scale,
+  }
+}
+
 function inView(frame: CameraFrame, point: Point): boolean {
   return (
     point.x >= frame.x &&
@@ -89,18 +97,109 @@ describe('cameraTrack', () => {
     expect(track.frames[299]?.ms).toBeCloseTo(299 * FRAME_MS, 1)
   })
 
-  it('should reach 90% of a zoom from rest in about 633 ms', () => {
-    const { frames } = cameraTrack(
-      takeOf([{ t: 3000, at: { x: 400, y: 300 } }]),
-    )
+  describe('zoom timing', () => {
+    // From the page center to (400, 300) is 609 px, a 548 ms glide.
+    const TARGET = { x: 400, y: 300 }
+    const GLIDE = travelMs(START, TARGET)
 
-    const rise = frames.findIndex((frame) => frame.scale > 1.005)
-    const settled = frames.findIndex((frame) => frame.scale >= 1 + 0.9 * 0.8)
-    const ms = (settled - rise) * FRAME_MS
+    it('should hold the whole page until the glide toward the target sets off', () => {
+      const { frames } = cameraTrack(takeOf([{ t: 3000, at: TARGET }]))
 
-    expect(ms).toBeGreaterThan(560)
-    expect(ms).toBeLessThan(700)
-    expect(at(frames, 3000).scale).toBeGreaterThan(1.78)
+      expect(at(frames, 3000 - GLIDE - 50).scale).toBe(1)
+    })
+
+    it('should land the push at full depth as the glide arrives', () => {
+      const { frames } = cameraTrack(takeOf([{ t: 3000, at: TARGET }]))
+
+      expect(at(frames, 3000 - GLIDE / 2).scale).toBeCloseTo(1.4, 1)
+      expect(at(frames, 3000).scale).toBe(1.8)
+    })
+
+    it('should hold the target still on screen while the scale changes', () => {
+      const { frames } = cameraTrack(takeOf([{ t: 3000, at: TARGET }]))
+
+      const scaling = frames.filter((f) => f.scale > 1 && f.scale < 1.8)
+      expect(scaling.length).toBeGreaterThan(10)
+      for (const frame of scaling) {
+        expect(screenOf(frame, TARGET).x).toBeCloseTo(TARGET.x, 0)
+        expect(screenOf(frame, TARGET).y).toBeCloseTo(TARGET.y, 0)
+      }
+    })
+
+    it('should pull back over the glide that leaves the target', () => {
+      const away = { x: 1500, y: 800 }
+      const leave: LogEvent = {
+        t: 3500,
+        kind: 'move',
+        from: TARGET,
+        to: away,
+        ms: 900,
+      }
+      const { frames } = cameraTrack(takeOf([{ t: 3000, at: TARGET }], [leave]))
+
+      expect(at(frames, 3500).scale).toBe(1.8)
+      expect(at(frames, 3950).scale).toBeCloseTo(1.4, 1)
+      expect(screenOf(at(frames, 3950), TARGET).x).toBeCloseTo(TARGET.x, 0)
+      expect(at(frames, 4400).scale).toBe(1)
+    })
+
+    it('should pull back on a fixed ease when no glide leaves the target', () => {
+      const { frames } = cameraTrack(takeOf([{ t: 3000, at: TARGET }]))
+
+      expect(at(frames, 3450).scale).toBe(1.8)
+      expect(at(frames, 3800).scale).toBeCloseTo(1.4, 1)
+      expect(at(frames, 4150).scale).toBe(1)
+    })
+
+    it('should land the push by the press of a click with no glide before it', () => {
+      const log: TakeLog = {
+        ...takeOf([]),
+        events: [
+          {
+            t: 300,
+            kind: 'click',
+            at: START,
+            box: { x: START.x - 12, y: START.y - 12, width: 24, height: 24 },
+          },
+        ],
+      }
+
+      const { frames } = cameraTrack(log)
+
+      expect(at(frames, 0).scale).toBe(1)
+      expect(at(frames, 300).scale).toBe(1.8)
+    })
+  })
+
+  describe('a move with a hold', () => {
+    const TO = { x: 500, y: 400 }
+    const aimed = (hold?: number): TakeLog => ({
+      ...takeOf([]),
+      events: [
+        {
+          t: 1000,
+          kind: 'move',
+          from: START,
+          to: TO,
+          ms: 600,
+          ...(hold === undefined ? {} : { hold }),
+        },
+      ],
+    })
+
+    it('should zoom onto the end of the glide and hold through the hold', () => {
+      const { frames } = cameraTrack(aimed(800))
+
+      expect(at(frames, 1600).scale).toBe(1.8)
+      expect(at(frames, 2400).scale).toBe(1.8)
+      expect(screenOf(at(frames, 1300), TO).x).toBeCloseTo(TO.x, 0)
+    })
+
+    it('should aim nowhere on a move that carries no hold', () => {
+      const { frames } = cameraTrack(aimed())
+
+      expect(frames.every((frame) => frame.scale === 1)).toBe(true)
+    })
   })
 
   it('should hold the view still across nearby clicks down a panel', () => {
@@ -132,21 +231,50 @@ describe('cameraTrack', () => {
     expect(inView(landing, far)).toBe(true)
   })
 
-  it('should keep the cursor in frame through every zoomed frame', () => {
-    const { frames } = cameraTrack(
-      takeOf([
-        { t: 2000, at: { x: 120, y: 192 } },
-        { t: 3500, at: { x: 1800, y: 140 } },
-        { t: 4700, at: { x: 600, y: 1000 } },
-        { t: 6000, at: { x: 1500, y: 700 } },
-      ]),
-    )
+  describe('chained clicks', () => {
+    const CHAIN = [
+      { t: 2000, at: { x: 120, y: 192 } },
+      { t: 3500, at: { x: 1800, y: 140 } },
+      { t: 4700, at: { x: 600, y: 1000 } },
+      { t: 6000, at: { x: 1500, y: 700 } },
+    ]
 
-    const outside = frames.filter(
-      (frame) => frame.scale > 1.05 && !inView(frame, frame.cursor),
-    )
+    it('should keep the cursor in frame through every frame at full depth', () => {
+      const { frames } = cameraTrack(takeOf(CHAIN))
 
-    expect(outside).toEqual([])
+      const outside = frames.filter(
+        (frame) => frame.scale === 1.8 && !inView(frame, frame.cursor),
+      )
+
+      expect(frames.some((frame) => frame.scale === 1.8)).toBe(true)
+      expect(outside).toEqual([])
+    })
+
+    it('should pan between two clicks at full depth', () => {
+      const { frames } = cameraTrack(takeOf(CHAIN.slice(0, 2)))
+
+      const glide = frames.filter((f) => f.ms > 2400 && f.ms < 3400)
+      expect(glide.every((frame) => frame.scale === 1.8)).toBe(true)
+      expect(glide.at(-1)?.x).toBeGreaterThan((glide[0]?.x ?? 0) + 300)
+    })
+
+    it('should never pan while the scale changes', () => {
+      const { frames } = cameraTrack(takeOf(CHAIN))
+
+      const stops = CHAIN.map((click) => click.at)
+      const scaling = frames.filter((f, i) => {
+        const before = frames[i - 1]
+        return before !== undefined && before.scale !== f.scale
+      })
+      for (const frame of scaling) {
+        const anchored = stops.some(
+          (stop) =>
+            Math.abs(screenOf(frame, stop).x - stop.x) < 1 &&
+            Math.abs(screenOf(frame, stop).y - stop.y) < 1,
+        )
+        expect(anchored).toBe(true)
+      }
+    })
   })
 
   it('should not zoom on a click whose target fills the page', () => {
@@ -271,6 +399,29 @@ describe('cameraTrack', () => {
       expect(at(frames, 2000).cursor).toEqual({ x: 400, y: 300 })
     })
 
+    it('should read the sent points of a move on the faster clock', () => {
+      const glide: TakeLog = {
+        ...takeOf([]),
+        events: [
+          {
+            t: 1000,
+            kind: 'move',
+            from: START,
+            to: { x: 400, y: 300 },
+            ms: 400,
+            points: [
+              { t: 1000, x: 900, y: 500 },
+              { t: 1400, x: 400, y: 300 },
+            ],
+          },
+        ],
+      }
+
+      const { frames } = cameraTrack(glide, { rate: 2 })
+
+      expect(at(frames, 700).cursor).toEqual({ x: 400, y: 300 })
+    })
+
     it('should build the same track at rate 1 as with no rate', () => {
       expect(cameraTrack(log, { rate: 1 })).toEqual(cameraTrack(log))
     })
@@ -340,6 +491,44 @@ describe('cameraTrack input steps', () => {
     expect(nearRelease.scale).toBeGreaterThan(1.3)
     expect(inView(nearRelease, FROM)).toBe(true)
     expect(inView(nearRelease, TO)).toBe(true)
+  })
+
+  it('should keep both ends of a drag near the edge in view through the release', () => {
+    const from = { x: 1560, y: 540 }
+    const to = { x: 1860, y: 540 }
+    const { frames } = cameraTrack(dragOf(2000, from, to))
+
+    const held = frames.filter((f) => f.ms >= 2000 && f.ms <= 3050)
+    expect(held.every((frame) => frame.scale > 1.3)).toBe(true)
+    expect(held.filter((frame) => !inView(frame, to))).toEqual([])
+    expect(held.filter((frame) => !inView(frame, from))).toEqual([])
+  })
+
+  it('should keep the drop in view when a drag chains onto a click', () => {
+    const click = { x: 960, y: 540 }
+    const from = { x: 760, y: 540 }
+    const to = { x: 1560, y: 540 }
+    const log = takeOf([{ t: 1500, at: click }])
+    const reach: LogEvent = {
+      t: 2000,
+      kind: 'move',
+      from: click,
+      to: from,
+      ms: 300,
+    }
+    const drag = dragOf(2300, from, to)
+    const chained: TakeLog = {
+      ...log,
+      events: [...log.events, reach, ...drag.events.slice(1)].sort(
+        (a, b) => a.t - b.t,
+      ),
+    }
+
+    const { frames } = cameraTrack(chained)
+
+    const held = frames.filter((f) => f.ms >= 2300 && f.ms <= 3350)
+    expect(held.every((frame) => frame.scale > 1)).toBe(true)
+    expect(held.filter((frame) => !inView(frame, to))).toEqual([])
   })
 
   it('should build a double click into the track of one click', () => {

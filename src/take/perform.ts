@@ -3,6 +3,7 @@ import {
   FPS,
   type LogEvent,
   type Point,
+  type SentPoint,
   VIEWPORT,
   along,
   travelMs,
@@ -27,6 +28,16 @@ const SCROLL_MS = 900
 
 /** How long a drag holds still after its press, so the viewer sees the grab land. */
 const GRAB_MS = 150
+
+/**
+ * The pacing the operator settled by eye in groundwork track
+ * `210-film-craft-and-soundtrack`: a rest on the target before a press, a hold
+ * on its result before the pointer leaves, and a pause between clicking a
+ * field and its first key, so the camera lands before anything changes.
+ */
+const REST_MS = 300
+const RESULT_MS = 500
+const TYPE_MS = 400
 
 export type PointerInput =
   | {
@@ -125,13 +136,22 @@ export async function performSteps(
 ): Promise<void> {
   for (const step of steps) {
     switch (step.kind) {
-      case 'move':
-        await moveTo(
-          stage,
-          state,
-          'target' in step ? center(await boxOf(stage, step.target)) : step,
-        )
+      case 'move': {
+        const to =
+          'target' in step
+            ? center(await boxOf(stage, step.target))
+            : { x: step.x, y: step.y }
+        if (step.hold === undefined) {
+          await moveTo(stage, state, to)
+          break
+        }
+        const glide =
+          (await moveTo(stage, state, to, { unlogged: true })) ??
+          stillAt(stage, state.pointer)
+        await stage.hold(step.hold)
+        state.log?.push({ ...glide, hold: step.hold })
         break
+      }
       case 'click':
       case 'dblclick':
         await click(
@@ -141,6 +161,7 @@ export async function performSteps(
           step.modifiers ?? [],
           step.kind === 'dblclick' ? 2 : 1,
         )
+        await pause(stage, state, RESULT_MS)
         break
       case 'drag':
         await drag(
@@ -167,6 +188,7 @@ export async function performSteps(
       case 'fill': {
         const box = await boxOf(stage, step.target)
         await click(stage, state, box, [], 1)
+        await pause(stage, state, TYPE_MS)
         const start = stage.now()
         for (const character of step.text) {
           await stage.key(character)
@@ -180,6 +202,7 @@ export async function performSteps(
           chars: step.text.length,
           ms: stage.now() - start,
         })
+        await pause(stage, state, RESULT_MS)
         break
       }
       case 'scroll': {
@@ -214,25 +237,52 @@ export async function performSteps(
   }
 }
 
+type Glide = Extract<LogEvent, { kind: 'move' }>
+
+/**
+ * Glides the pointer to `to` and returns the glide, or undefined when the
+ * pointer is already there. The glide is logged unless `unlogged`, which a
+ * caller sets to log it with more fields itself.
+ */
 async function moveTo(
   stage: Stage,
   state: Performance,
   to: Point,
-  held?: { readonly modifiers: readonly Modifier[] },
-): Promise<void> {
+  options: {
+    readonly held?: { readonly modifiers: readonly Modifier[] }
+    readonly unlogged?: true
+  } = {},
+): Promise<Glide | undefined> {
   const from = state.pointer
-  if (Math.hypot(to.x - from.x, to.y - from.y) < 1) return
+  if (Math.hypot(to.x - from.x, to.y - from.y) < 1) return undefined
   const frames = Math.max(1, Math.round(travelMs(from, to) / FRAME_MS))
-  const pressed = held
-    ? { held: true as const, ...withModifiers(held.modifiers) }
+  const pressed = options.held
+    ? { held: true as const, ...withModifiers(options.held.modifiers) }
     : {}
   const start = stage.now()
+  const points: SentPoint[] = []
   await paced(stage, frames, async (frame) => {
     state.pointer = along(from, to, frame / frames)
+    points.push({ t: stage.now(), ...state.pointer })
     await stage.pointer({ type: 'move', ...state.pointer, ...pressed })
   })
   state.pointer = to
-  state.log?.push({ t: start, kind: 'move', from, to, ms: stage.now() - start })
+  const glide: Glide = {
+    t: start,
+    kind: 'move',
+    from,
+    to,
+    ms: stage.now() - start,
+    points,
+  }
+  if (!options.unlogged) state.log?.push(glide)
+  return glide
+}
+
+/** A glide of no length, for a hold aimed where the pointer already rests. */
+function stillAt(stage: Stage, at: Point): Glide {
+  const t = stage.now()
+  return { t, kind: 'move', from: at, to: at, ms: 0, points: [{ t, ...at }] }
 }
 
 /**
@@ -263,6 +313,7 @@ async function click(
 ): Promise<void> {
   const at = center(box)
   await moveTo(stage, state, at)
+  await pause(stage, state, REST_MS)
   await holding(stage, modifiers, async () => {
     state.log?.push({
       t: stage.now(),
@@ -281,6 +332,18 @@ async function click(
 }
 
 /**
+ * Lets `ms` of clip time pass while a beat is filmed, and none in setup, which
+ * no viewer sees.
+ */
+async function pause(
+  stage: Stage,
+  state: Performance,
+  ms: number,
+): Promise<void> {
+  if (state.log) await stage.hold(ms)
+}
+
+/**
  * Presses on the source, holds a moment so the page reads a grab rather than
  * a click, glides held to the target, and releases there. The drop target is
  * read before the press, so a page that moves it once a drag starts is
@@ -296,12 +359,13 @@ async function drag(
   const from = center(box)
   const to = center(drop)
   await moveTo(stage, state, from)
+  await pause(stage, state, REST_MS)
   await holding(stage, modifiers, async () => {
     const start = stage.now()
     const press = { clickCount: 1, ...withModifiers(modifiers) }
     await stage.pointer({ type: 'down', ...from, ...press })
     await stage.hold(GRAB_MS)
-    await moveTo(stage, state, to, { modifiers })
+    await moveTo(stage, state, to, { held: { modifiers } })
     await stage.pointer({ type: 'up', ...to, ...press })
     state.log?.push({
       t: start,
@@ -314,6 +378,7 @@ async function drag(
       ms: stage.now() - start,
     })
   })
+  await pause(stage, state, RESULT_MS)
 }
 
 /**
