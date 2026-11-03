@@ -210,6 +210,7 @@ describe('lift', () => {
       ['review-open', { reviews: [CODE_OPEN] }],
       ['review-missing', { reviews: [] }],
       ['evidence-owed', { evidence: { isSettled: false } }],
+      ['painted-uncaptured', { evidence: { uncaptured: ['src/App.tsx'] } }],
       [
         'ui-missing',
         { evidence: { hasChecklist: true }, reviews: [CODE_CLOSED] },
@@ -662,6 +663,173 @@ describe('lift', () => {
       const record = await lift(api, { isCheck: false, waitSeconds: 60 })
 
       expect(record.reason).toBe('evidence-owed')
+    })
+
+    describe('painted paths with no capture', () => {
+      const waiver = (path: string): ReviewRow => ({
+        body: `## UI review closed\n\n- **Waived capture:** \`${path}\`: focus order only\n<!-- review-ui: head=${HEAD} -->`,
+      })
+
+      it('should refuse painted-uncaptured, listing the paths sorted', async () => {
+        const { api, calls } = makeApi({
+          evidence: { uncaptured: ['src/b.tsx', 'src/a.css'] },
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('painted-uncaptured')
+        expect(record.gates.find((gate) => gate.gate === 'evidence')).toEqual({
+          gate: 'evidence',
+          isOk: false,
+          reason: 'painted-uncaptured',
+          uncaptured: ['src/a.css', 'src/b.tsx'],
+        })
+        expect(calls.marks).toEqual([])
+      })
+
+      it('should clear only the path a waiver names', async () => {
+        const { api } = makeApi({
+          evidence: { uncaptured: ['src/b.tsx', 'src/a.css'] },
+          reviews: [CODE_CLOSED, waiver('src/b.tsx')],
+        })
+
+        const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+        expect(record.reason).toBe('painted-uncaptured')
+        expect(
+          record.gates.find((gate) => gate.gate === 'evidence'),
+        ).toMatchObject({ uncaptured: ['src/a.css'], waived: ['src/b.tsx'] })
+      })
+
+      it('should lift once a waiver covers every path, reporting the waived', async () => {
+        const { api, calls } = makeApi({
+          evidence: { uncaptured: ['src/b.tsx'] },
+          reviews: [CODE_CLOSED, waiver('src/b.tsx')],
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('lifted')
+        expect(record.gates.find((gate) => gate.gate === 'evidence')).toEqual({
+          gate: 'evidence',
+          isOk: true,
+          waived: ['src/b.tsx'],
+        })
+        expect(calls.marks).toEqual(['PR_node'])
+      })
+
+      it('should clear nothing for a waiver naming a path the list does not hold', async () => {
+        const { api } = makeApi({
+          evidence: { uncaptured: ['src/b.tsx'] },
+          reviews: [CODE_CLOSED, waiver('./src/b.tsx'), waiver('src/c.tsx')],
+        })
+
+        const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+        expect(record.reason).toBe('painted-uncaptured')
+        expect(
+          record.gates.find((gate) => gate.gate === 'evidence'),
+        ).not.toHaveProperty('waived')
+      })
+
+      it('should drop a waiver the newest pass of its family no longer restates', async () => {
+        const { api } = makeApi({
+          evidence: { uncaptured: ['src/b.tsx'] },
+          reviews: [CODE_CLOSED, waiver('src/b.tsx'), UI_CLOSED],
+        })
+
+        const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+        expect(record.reason).toBe('painted-uncaptured')
+      })
+
+      it('should read a waiver from the newest code pass beside a UI close', async () => {
+        const codeWaiver: ReviewRow = {
+          body: `## Review closed\n\n- **Waived capture:** \`src/b.tsx\`: focus order only\n<!-- review-pr: commit=${HEAD} read-at=${READ_AT} -->`,
+        }
+        const { api } = makeApi({
+          evidence: { uncaptured: ['src/b.tsx'] },
+          reviews: [codeWaiver, UI_CLOSED],
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('lifted')
+      })
+
+      it.each([
+        [
+          'a review with no pass heading',
+          { body: '- **Waived capture:** `src/b.tsx`: focus order only' },
+        ],
+        [
+          'a pass with no marker',
+          {
+            body: '## UI review closed\n\n- **Waived capture:** `src/b.tsx`: focus order only',
+          },
+        ],
+        [
+          'a dismissed pass',
+          {
+            ...waiver('src/b.tsx'),
+            state: 'DISMISSED',
+          },
+        ],
+      ] as const)(
+        'should clear nothing for a waiver in %s',
+        async (_, row: ReviewRow) => {
+          const { api } = makeApi({
+            evidence: { uncaptured: ['src/b.tsx'] },
+            reviews: [CODE_CLOSED, row],
+          })
+
+          const record = await lift(api, { isCheck: true, waitSeconds: 60 })
+
+          expect(record.reason).toBe('painted-uncaptured')
+        },
+      )
+
+      it('should clear the list with a reel filmed at the head', async () => {
+        const { api } = makeApi({
+          evidence: { uncaptured: ['src/b.tsx'], reelHead: HEAD.slice(0, 7) },
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('lifted')
+      })
+
+      it('should not clear the list with a reel filmed at an earlier head', async () => {
+        const { api } = makeApi({
+          evidence: { uncaptured: ['src/b.tsx'], reelHead: MOVED },
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('painted-uncaptured')
+      })
+
+      it('should pass as today when the record carries no uncaptured list', async () => {
+        const { api } = makeApi({ evidence: { uncaptured: undefined } })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('lifted')
+        expect(record.gates.find((gate) => gate.gate === 'evidence')).toEqual({
+          gate: 'evidence',
+          isOk: true,
+        })
+      })
+
+      it('should refuse evidence-owed ahead of painted-uncaptured', async () => {
+        const { api } = makeApi({
+          evidence: { isSettled: false, uncaptured: ['src/b.tsx'] },
+        })
+
+        const record = await lift(api, { isCheck: false, waitSeconds: 60 })
+
+        expect(record.reason).toBe('evidence-owed')
+      })
     })
 
     it.each(['stale', 'conflict', 'unknown'] as const)(
