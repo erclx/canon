@@ -917,6 +917,7 @@ describe.skipIf(!available())(
     let server: { url: string; stop: () => void }
     const offsets: number[] = []
     const lags: unknown[] = []
+    let frozen = 0
 
     beforeAll(async () => {
       const served = Bun.serve({ port: 0, fetch: () => html(PAINT_PAGE) })
@@ -936,7 +937,8 @@ describe.skipIf(!available())(
           const log = readFileSync(join(out, beat.log), 'utf8')
           lags.push((JSON.parse(log) as TakeLog).lag)
           const offset = dragOffset(out, beat)
-          if (offset !== undefined) offsets.push(offset)
+          if (offset === undefined) frozen += 1
+          else offsets.push(offset)
         } finally {
           rmSync(out, { recursive: true, force: true })
         }
@@ -948,7 +950,10 @@ describe.skipIf(!available())(
     })
 
     it('should keep the drawn cursor within 10 px of the box on average', () => {
-      expect(offsets).toHaveLength(2)
+      expect(
+        offsets,
+        `${frozen} of ${frozen + offsets.length} takes froze on their opening frames and were discarded`,
+      ).toHaveLength(2)
       for (const offset of offsets) expect(offset).toBeLessThan(10)
     })
 
