@@ -11,7 +11,10 @@ Step 7 of `review-ui`.
 
 The heading reports whether the branch owes anything, the way the code review's does.
 
-- `## UI review` when a box failed, the sweep raised a finding Step 6 names, the worktree check read `changed`, a box was not driven for a cause on the page, or the pass drove no box at all.
+- `## UI review` when a box failed, the sweep raised a finding Step 6 names, the worktree check read `changed`, a box was not driven for a cause the branch holds, or the pass drove no box at all.
+
+A missing fixture state opens the heading because a commit settles it, being the state the building session adds. The pass then reaches `review-address` like a failed box, with the state to add named in the box's Not driven entry.
+
 - `## UI review closed` otherwise.
 
 A needs-eyes box leaves the review closed, and so does a box not driven for a cause off the page, such as an address that did not answer or a `(local only)` box on a hosted preview, as long as something else was driven.

@@ -12,7 +12,7 @@ Step 5 of `review-ui`. The browser is open at the address Step 3 picked, under t
 A box written to the drivable format reads:
 
 ```plaintext
-- [ ] <route>[, <width>]: <verb> <target> → <expected result>[ (taste)][ (local only)]
+- [ ] <route>[, <width>]: <verb> <target> → <expected result>[ (taste)][ (local only)][ (needs fixture)]
 ```
 
 - **Route.** A path goes through `pw goto <address><path>`. A control name, or "from the page the app opens on", is reached by clicking from the opened address.
@@ -20,6 +20,7 @@ A box written to the drivable format reads:
 - **Verb.** The action the driver performs: `click`, `fill`, `press`, `hover`, a scroll through `eval` of `scrollIntoView`, or a resize.
 - **`(taste)`.** The result is a judgment of look or feel. Capture, never judge.
 - **`(local only)`.** The state needs something a hosted preview cannot reach. On a hosted address the box is not driven, naming the marker as the reason.
+- **`(needs fixture)`.** The drive fixture lacks the state. Drive the box if the state now answers, and otherwise it is not driven for a cause on the branch, as the verdicts below state.
 
 A box written before that format may carry no route, no width, and a verb such as "read" or "look at". Drive it anyway: take the opened address as the route and 1440 as the width, turn the verb into the nearest action, and name each guess in the verdict's evidence.
 
@@ -57,6 +58,14 @@ Each box takes exactly one, keyed here by the state it answers.
   - The evidence is the reason, such as an unreachable address, a `(local only)` box on a hosted preview, or a target the snapshot does not hold.
 
 A fail names what was expected beside what was read. A not driven never reads as a fail, since it says the pass could not look rather than that the page is wrong. Its reason says whether the cause sits on the page or off it, since only a cause on the page opens the heading Step 7 picks.
+
+### A state the fixture lacks
+
+A box the pass could not drive because the drive fixture holds no such state is a cause on the branch, never a skip. The building session owes the state, and no other session can add it.
+
+- Name the cause as a missing fixture state, with the state to add and the selector or setup step the box needs
+- Count it as not driven, and never as a fail, since the page may be right
+- An address that did not answer stays a cause off the branch, and a `(local only)` box on a hosted address does too
 
 ### Which image a verdict carries
 

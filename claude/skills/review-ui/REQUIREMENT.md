@@ -16,6 +16,7 @@ A model asked to drive a checklist also drifts. It judges a taste box the operat
 - Every checklist box is driven in the running app and gets one verdict, pass or fail with the value quoted, needs eyes for a taste box, or not driven with the reason
 - The checklist and address come from the evidence record rather than the diff, and only a build of the head the verdict names is driven
 - An unreachable address reports not driven rather than fail, a box no commit can settle leaves the review closed, and a pass that drove no box never reads as closed
+- A box not driven for a state the drive fixture lacks opens the review, since the building session can add that state
 - The review posts as its own pull request review under `## UI review` while anything is owed and `## UI review closed` once nothing is, ending on a marker naming the head it drove
 - The pass drives a pinned browser under its own named session and sweeps only console errors, overflow, and the focus, details, and axe probes, opening on an axe finding the CLI marks as gating
 
