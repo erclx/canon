@@ -2443,17 +2443,10 @@ describe('canon pr frames', () => {
     mkdirSync(bin, { recursive: true })
     writeFileSync(
       join(bin, 'gh'),
-      [
-        '#!/usr/bin/env bash',
-        `echo "$*" >> '${callLog}'`,
-        'case "$*" in',
-        '  "api repos/{owner}/{repo}") echo \'{"full_name":"o/r"}\' ;;',
-        '  "api -X GET "*) echo "gh: Not Found (HTTP 404)" >&2; exit 1 ;;',
-        '  "api -X "*) echo "gh: Resource not accessible by integration (HTTP 403)" >&2; exit 1 ;;',
-        '  *) exit 1 ;;',
-        'esac',
-        '',
-      ].join('\n'),
+      readFileSync(
+        new URL('./fixtures/gh-read-only.sh', import.meta.url),
+        'utf8',
+      ),
       { mode: 0o755 },
     )
   }
@@ -2468,7 +2461,7 @@ describe('canon pr frames', () => {
         cwd: tempDir,
         reject: false,
         timeout: RUN_TIMEOUT_MS,
-        env: { PATH: `${bin}:${process.env.PATH}` },
+        env: { FAKE_LOG: callLog, PATH: `${bin}:${process.env.PATH}` },
       },
     )
     return { record: JSON.parse(result.stdout), exit: result.exitCode ?? -1 }
