@@ -1,5 +1,25 @@
 # Changelog
 
+## [5.78.0](https://github.com/erclx/canon/compare/v5.77.0...v5.78.0) (2026-11-04)
+
+
+### Features
+
+* **capture:** owe a case for every added or altered rendered state ([#2876](https://github.com/erclx/canon/issues/2876)) ([e13daa2](https://github.com/erclx/canon/commit/e13daa25182da60b0654725326fd14d07f56c69d))
+* **gate:** keep long pages, stylesheets, and scripts out of strings ([#2883](https://github.com/erclx/canon/issues/2883)) ([44ca538](https://github.com/erclx/canon/commit/44ca538cbcb982bc10b0964807e8ea319df5dc17))
+* **orchestrate:** check painted pull requests for proof before review ([#2877](https://github.com/erclx/canon/issues/2877)) ([403a80d](https://github.com/erclx/canon/commit/403a80dd0ada3913f4bb7dac1336fc483b53c6e1))
+* **pr:** bind the UI review only on a drivable checklist box ([#2880](https://github.com/erclx/canon/issues/2880)) ([3027274](https://github.com/erclx/canon/commit/3027274a1d97ec0c8016157f7278fc8ff30b4916))
+* **pr:** refuse a lift on a painted path with no capture or waiver ([#2873](https://github.com/erclx/canon/issues/2873)) ([c05036e](https://github.com/erclx/canon/commit/c05036e2929572cd680a9ddc62e4d7e408b55b3a))
+* **take:** align screencast moves to frames and calibrate the lag ([#2882](https://github.com/erclx/canon/issues/2882)) ([5f274b8](https://github.com/erclx/canon/commit/5f274b877a84496831f3db19917b0127aca3ad94))
+* **take:** pace each press and time every zoom to a glide ([#2875](https://github.com/erclx/canon/issues/2875)) ([6319458](https://github.com/erclx/canon/commit/63194586f6e8e0a5566df872a5fbe4197ef7c09a))
+* **ui-film:** add the film craft a launch film reshoot needed ([#2878](https://github.com/erclx/canon/issues/2878)) ([94ac7fc](https://github.com/erclx/canon/commit/94ac7fc2b8e6a3cdf2da67d13dc7d76fb850bc1d))
+
+
+### Bug Fixes
+
+* **take:** clear the cap timers so the command exits with filming ([#2879](https://github.com/erclx/canon/issues/2879)) ([8fefa21](https://github.com/erclx/canon/commit/8fefa21dbf357ab32c688a4dcc2e1c688c25cab2))
+* **take:** encode the reel lossless so a fade leaves no ghost ([#2881](https://github.com/erclx/canon/issues/2881)) ([5cede29](https://github.com/erclx/canon/commit/5cede2913953c3dd041f2fe505565a036c0bb15b))
+
 ## [5.77.0](https://github.com/erclx/canon/compare/v5.76.0...v5.77.0) (2026-10-31)
 
 
