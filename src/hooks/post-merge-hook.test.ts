@@ -1,6 +1,7 @@
 import { execaSync } from 'execa'
 import {
   chmodSync,
+  copyFileSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -36,23 +37,16 @@ let bin: string
  * test reads which binary the hook handed the verb to.
  */
 function stub(name: string, usage: string): void {
-  const log = join(root, `${name}.log`)
-  writeFileSync(
+  copyFileSync(
+    new URL('./fixtures/usage-stub.sh', import.meta.url),
     join(bin, name),
-    [
-      '#!/bin/sh',
-      'for arg in "$@"; do',
-      `  if [ "$arg" = "--help" ]; then echo '${usage}'; exit 0; fi`,
-      'done',
-      `echo "$*" >> '${log}'`,
-      '',
-    ].join('\n'),
   )
   chmodSync(join(bin, name), 0o755)
+  writeFileSync(join(bin, `${name}.usage`), `${usage}\n`)
 }
 
 function calls(name: string): string {
-  const log = join(root, `${name}.log`)
+  const log = join(bin, `${name}.log`)
   return existsSync(log) ? readFileSync(log, 'utf8') : ''
 }
 

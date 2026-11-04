@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { Browser, Page } from 'playwright-core'
 import { probeFocus } from '@/driver/probes/focus'
@@ -23,24 +24,10 @@ import { probeFocus } from '@/driver/probes/focus'
  */
 
 /** One ring written the way a stylesheet writes one, and one control with none. */
-const PAGE = `<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <style>
-      button { outline: none; border: 1px solid #999; background: #fff; }
-      button:focus-visible { outline: 2px solid rgb(37, 99, 235); outline-offset: 2px; }
-      #quiet, #quiet:focus-visible { outline: none; }
-      #pinned { position: fixed; top: 10px; right: 10px; }
-      #pinned, #pinned:focus-visible { outline: none; }
-    </style>
-  </head>
-  <body>
-    <button id="ring">Save</button>
-    <button id="quiet">Quiet</button>
-    <button id="pinned">Pinned</button>
-  </body>
-</html>`
+const PAGE = readFileSync(
+  new URL('./fixtures/focus.html', import.meta.url),
+  'utf8',
+)
 
 /**
  * The implementation this probe replaced: focus each element and compare its

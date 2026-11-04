@@ -42,6 +42,15 @@ Parnas's paper refused a read at its ACM DOI, `10.1145/361598.361623`, so the ro
 | Rules free of transport and storage       | [Cockburn, Hexagonal Architecture](https://alistair.cockburn.us/hexagonal-architecture/): an application "developed and tested in isolation from its eventual run-time devices and databases"                                                                           | 2026-10-24 |
 | No ports and adapters for record CRUD     | [Microsoft, Design a DDD-oriented microservice](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/ddd-oriented-microservice): "Simpler responsibilities, like a CRUD service, can be managed with simpler approaches." | 2026-10-24 |
 
+## Give another language its own file
+
+| Bullet                                  | Source                                                                                                                                                                                        | Read       |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| A long page, stylesheet, or script out  | [Meszaros, Inline Resource](http://xunitpatterns.com/Inline%20Resource.html): "If the contents of the resource are large, chances are high that you are also suffering from Eager Test"       | 2026-11-03 |
+| A branching script out at any length    | House choice: the `ci-workflow` skill already moves a `run:` step past one guard to a script, and a fake that branches is shared by many tests, so no test reads it as its own input          | 2026-11-03 |
+| An interpolating template stays in code | House choice: a template built from data is code generating output, and a file holding it would carry placeholders no linter for its language reads either                                    | 2026-11-03 |
+| Short input under test stays inline     | [Meszaros, Obscure Test](http://xunitpatterns.com/Obscure%20Test.html): with a Mystery Guest "the test reader is not able to see the cause and effect between fixture and verification logic" | 2026-11-03 |
+
 ## Check your own diff
 
 | Bullet                                  | Source                                                                                                                                                                                                                                                        | Read       |

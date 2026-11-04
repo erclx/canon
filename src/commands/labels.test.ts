@@ -412,19 +412,10 @@ describe('canon labels apply', { timeout: RUN_TIMEOUT_MS }, () => {
     await mkdir(bin, { recursive: true })
     await writeFile(
       join(bin, 'gh'),
-      [
-        '#!/bin/sh',
-        'echo "$*" >> "$FAKE_LOG"',
-        'case "$*" in',
-        '  *"-X POST"*) exit 0 ;;',
-        '  *pulls/7/files*) [ -n "$FAKE_FILES_FAIL" ] && exit 1; printf \'%s\' "$FAKE_FILES" ;;',
-        '  *pulls/7*) printf \'%s\\n\' "$FAKE_TARGET" ;;',
-        '  *issues/7/labels*) printf \'%s\' "$FAKE_PRESENT" ;;',
-        '  *repos/{owner}/{repo}/labels*) printf \'%s\' "$FAKE_REMOTE" ;;',
-        '  *) exit 1 ;;',
-        'esac',
-        '',
-      ].join('\n'),
+      readFileSync(
+        new URL('./fixtures/gh-labels-apply.sh', import.meta.url),
+        'utf8',
+      ),
       { mode: 0o755 },
     )
     return bin
@@ -642,16 +633,10 @@ describe('canon labels sync', { timeout: RUN_TIMEOUT_MS }, () => {
     await mkdir(bin, { recursive: true })
     await writeFile(
       join(bin, 'gh'),
-      [
-        '#!/bin/sh',
-        'echo "$*" >> "$FAKE_LOG"',
-        'case "$*" in',
-        '  *"-X POST"*) [ -n "$FAKE_CREATE_FAIL" ] && exit 1; exit 0 ;;',
-        '  *repos/{owner}/{repo}/labels*) [ -n "$FAKE_READ_FAIL" ] && exit 1; printf \'%s\' "$FAKE_REMOTE" ;;',
-        '  *) exit 1 ;;',
-        'esac',
-        '',
-      ].join('\n'),
+      readFileSync(
+        new URL('./fixtures/gh-labels-sync.sh', import.meta.url),
+        'utf8',
+      ),
       { mode: 0o755 },
     )
     const result = await execa(

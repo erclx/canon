@@ -181,14 +181,10 @@ describe('canon pr preview', () => {
       )
       await writeFile(
         join(binDir, 'gh'),
-        `#!/bin/sh
-echo "$*" >> "$FAKE_LOG"
-case "$1 $2" in
-  "api repos/{owner}/{repo}/pulls/1") printf '{"number":1,"head":{"ref":"feat/x","sha":"%s"}}' "$FAKE_TIP" ;;
-  "run list") printf '[{"databaseId":7,"status":"completed","conclusion":"success","headSha":"%s","createdAt":"2026-10-02T10:00:00Z"}]' "$FAKE_TIP" ;;
-  *) exit 0 ;;
-esac
-`,
+        readFileSync(
+          new URL('./fixtures/gh-preview-check.sh', import.meta.url),
+          'utf8',
+        ),
         { mode: 0o755 },
       )
       git('init', '--initial-branch=feat/x')
@@ -2447,17 +2443,10 @@ describe('canon pr frames', () => {
     mkdirSync(bin, { recursive: true })
     writeFileSync(
       join(bin, 'gh'),
-      [
-        '#!/usr/bin/env bash',
-        `echo "$*" >> '${callLog}'`,
-        'case "$*" in',
-        '  "api repos/{owner}/{repo}") echo \'{"full_name":"o/r"}\' ;;',
-        '  "api -X GET "*) echo "gh: Not Found (HTTP 404)" >&2; exit 1 ;;',
-        '  "api -X "*) echo "gh: Resource not accessible by integration (HTTP 403)" >&2; exit 1 ;;',
-        '  *) exit 1 ;;',
-        'esac',
-        '',
-      ].join('\n'),
+      readFileSync(
+        new URL('./fixtures/gh-read-only.sh', import.meta.url),
+        'utf8',
+      ),
       { mode: 0o755 },
     )
   }
@@ -2472,7 +2461,7 @@ describe('canon pr frames', () => {
         cwd: tempDir,
         reject: false,
         timeout: RUN_TIMEOUT_MS,
-        env: { PATH: `${bin}:${process.env.PATH}` },
+        env: { FAKE_LOG: callLog, PATH: `${bin}:${process.env.PATH}` },
       },
     )
     return { record: JSON.parse(result.stdout), exit: result.exitCode ?? -1 }
@@ -2961,24 +2950,10 @@ describe('canon pr frames', () => {
  * `merge-409` makes the REST merge answer a moved head, as gh reports it.
  * The caller's `--jq` filter runs over each answer, as gh runs it.
  */
-const PROXY_GH = `#!/usr/bin/env bash
-set -o pipefail
-fx="$FAKE_DIR"
-echo "$*" >> "$fx/gh.log"
-f=.; p=; for a in "$@"; do [ "$p" = --jq ] && f=$a; p=$a; done
-case "$*" in
-  *"/pulls/7/merge"*) [ -f "$fx/merge-409" ] && { echo '{"message":"Head branch was modified. Review and try the merge again."}'; echo "gh: Head branch was modified. Review and try the merge again. (HTTP 409)" >&2; exit 1; }; echo '{"sha":"c0ffee0000000000000000000000000000000000","merged":true,"message":"Pull Request successfully merged"}' ;;
-  *markPullRequestReadyForReview*) [ -f "$fx/mutation-fail" ] && { echo "gh: blocked by proxy (HTTP 403)" >&2; exit 1; }; echo '{"data":{"markPullRequestReadyForReview":{"pullRequest":{"isDraft":false}}}}' ;;
-  *graphql*|"pr "*|"repo view"*) echo "gh: blocked by proxy (HTTP 403)" >&2; exit 1 ;;
-  *"/pulls?head="*) jq -r "$f" "$fx/listing.json" ;;
-  *"/issues/7/comments"*) [ -f "$fx/comments.json" ] && jq -r "$f" "$fx/comments.json" || echo "[]" | jq -r "$f" ;;
-  *"/pulls/7/reviews"*) [ -f "$fx/reviews-fail" ] && { echo "gh: (HTTP 403)" >&2; exit 1; }; jq -r "$f" "$fx/reviews.json" ;;
-  *"/pulls/7/files"*) echo '[{"filename":"src/a.ts","status":"added"}]' | jq -r "$f" ;;
-  *"/check-runs"*) [ -f "$fx/checks.json" ] && cat "$fx/checks.json" || echo '{"total_count":0,"check_runs":[]}' ;;
-  *"/pulls/7") jq -r "$f" "$fx/pull.json" ;;
-  *) exit 1 ;;
-esac
-`
+const PROXY_GH = readFileSync(
+  new URL('./fixtures/gh-proxy.sh', import.meta.url),
+  'utf8',
+)
 
 describe('canon pr reads through REST alone', () => {
   let tempDir: string
@@ -3575,16 +3550,7 @@ describe('canon pr close', () => {
     mkdirSync(bin, { recursive: true })
     writeFileSync(
       join(bin, 'gh'),
-      `#!/bin/sh
-echo "$*" >> "$FAKE_LOG"
-case "$*" in
-  *"-X POST"*) printf 'https://example.test/c/1' ;;
-  *"-X PATCH"*) exit 0 ;;
-  *"-X DELETE"*) exit 0 ;;
-  *pulls/7*) printf '{"number":7,"state":"open","head":{"ref":"%s","repo":{"full_name":"o/r"}},"base":{"repo":{"full_name":"o/r"}}}' "$FAKE_HEAD" ;;
-  *) exit 1 ;;
-esac
-`,
+      readFileSync(new URL('./fixtures/gh-close.sh', import.meta.url), 'utf8'),
       { mode: 0o755 },
     )
     const result = await execa(

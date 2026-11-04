@@ -51,6 +51,7 @@ Four rules govern how a session reads the table.
 - Build test data through a factory or builder rather than an inline object literal repeated across tests
 - Assert through the public surface a caller uses, never on a private function or internal state directly. A test reaching into internals breaks on every refactor and catches nothing a caller sees.
 - Prefer a real collaborator, then a fake, then a stub, and a mock last. A mock asserts how the code is built rather than what it does.
+- Read a fixture page or script past five lines, or a fake that branches, from its own file in the test's fixtures folder, per `code-craft`. Keep a shorter input inline beside its assertion.
 
 ## Hold the structure floors
 

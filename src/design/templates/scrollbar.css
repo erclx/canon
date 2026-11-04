@@ -1,0 +1,29 @@
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: var(--radius-marker);
+  background: var(--color-border);
+  /* Inset by painting a border in the page color, which is what keeps the
+     thumb off the edges without a second element. */
+  border: 3px solid var(--color-background);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}

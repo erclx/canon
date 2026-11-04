@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { Browser } from 'playwright-core'
 import { AxeEngineMissing, probeAxe, readAxeEngine } from '@/driver/probes/axe'
@@ -12,16 +13,10 @@ import { AxeEngineMissing, probeAxe, readAxeEngine } from '@/driver/probes/axe'
  */
 
 /** Low-contrast text, a button with no name, and no `lang`, with a title so only three fire. */
-const SEEDED = `<!doctype html>
-<html>
-  <head><meta charset="utf-8" /><title>Seeded</title></head>
-  <body>
-    <main>
-      <p style="color: #bbb; background: #fff">Faint text nobody can read</p>
-      <button></button>
-    </main>
-  </body>
-</html>`
+const SEEDED = readFileSync(
+  new URL('./fixtures/axe-seeded.html', import.meta.url),
+  'utf8',
+)
 
 /** The review-focus case: nothing wrong but the document itself. */
 const BARE = `<!doctype html>
@@ -38,48 +33,26 @@ const MISMATCH = `<!doctype html>
 </html>`
 
 /** Text over a gradient, whose contrast axe declines to compute. */
-const UNDECIDED = `<!doctype html>
-<html lang="en">
-  <head><meta charset="utf-8" /><title>Undecided</title></head>
-  <body>
-    <main>
-      <p style="color: #777; background-image: linear-gradient(#fff, #000)">Over a gradient</p>
-    </main>
-  </body>
-</html>`
+const UNDECIDED = readFileSync(
+  new URL('./fixtures/axe-undecided.html', import.meta.url),
+  'utf8',
+)
 
 /** A page that owns globals named the way the engine names its own. */
-const COLLIDING = `<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" /><title>Colliding</title>
-    <script>
-      var axe = { run: () => 'the page' }
-      var doT = 'the page'
-    </script>
-  </head>
-  <body><main><p>Readable text</p></main></body>
-</html>`
+const COLLIDING = readFileSync(
+  new URL('./fixtures/axe-colliding.html', import.meta.url),
+  'utf8',
+)
 
 /**
  * A page that sets a global of its own while the engine runs, the way a
  * script a step lazy-loaded would. The engine calls `getComputedStyle` during
  * the run and never while loading, so the global appears only mid-run.
  */
-const LATE_GLOBAL = `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" /><title>Late global</title>
-    <script>
-      const read = window.getComputedStyle.bind(window)
-      window.getComputedStyle = (...args) => {
-        window.lateGlobal = 'the page'
-        return read(...args)
-      }
-    </script>
-  </head>
-  <body><main><p>Readable text</p></main></body>
-</html>`
+const LATE_GLOBAL = readFileSync(
+  new URL('./fixtures/axe-late-global.html', import.meta.url),
+  'utf8',
+)
 
 async function browserAvailable(): Promise<boolean> {
   const { chromium } = await import('playwright-core')

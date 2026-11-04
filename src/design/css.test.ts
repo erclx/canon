@@ -45,6 +45,7 @@ describe('declarationsOf', () => {
 
   it('should read a rule with a comment line above its selector', () => {
     const css =
+      // canon-allow-embedded: the parser's input under test
       '/* why */\n.a {\n  color: red;\n}\n@media (x) {\n  /* in */\n  .b {\n    top: 0;\n  }\n}'
 
     expect(declarationsOf(css, '.a')).toContain('color: red')

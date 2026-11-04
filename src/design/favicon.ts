@@ -1,3 +1,6 @@
+// Relative, since web/ bundles this module for FAVICON_COLORS and its `@` means web/src.
+import { fillTemplate, readTemplate } from './template'
+
 export interface ThemePair {
   readonly light: string
   readonly dark: string
@@ -68,23 +71,24 @@ export function renderFavicon(mark: string, colors: FaviconColors): string {
   const inset = EDGE_WIDTH / 2
   const shapes = markShapes(mark)
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${left} ${top} ${round(side)} ${round(side)}">
-  <style>
-    .tile { fill: ${colors.tile.dark}; stroke: ${colors.tile.dark}; }
-    .c { fill: ${colors.c.dark}; }
-    .pip { fill: ${colors.pip.dark}; }
-    @media (prefers-color-scheme: light) {
-      .tile { fill: ${colors.tile.light}; stroke: ${colors.edge}; }
-      .c { fill: ${colors.c.light}; }
-      .pip { fill: ${colors.pip.light}; }
-    }
-  </style>
-  <rect class="tile" x="${round(left + inset)}" y="${round(top + inset)}" width="${round(side - EDGE_WIDTH)}" height="${round(side - EDGE_WIDTH)}" rx="${round(side * TILE_RADIUS - inset)}" stroke-width="${EDGE_WIDTH}" />
-  <g class="c">
-  ${shapes.replace(/\n\s*/g, '\n  ')}
-  </g>
-</svg>
-`
+  return fillTemplate(readTemplate('favicon.svg'), {
+    left: String(left),
+    top: String(top),
+    side: String(round(side)),
+    tileX: String(round(left + inset)),
+    tileY: String(round(top + inset)),
+    tileSide: String(round(side - EDGE_WIDTH)),
+    tileRadius: String(round(side * TILE_RADIUS - inset)),
+    edgeWidth: String(EDGE_WIDTH),
+    tileDark: colors.tile.dark,
+    tileLight: colors.tile.light,
+    edge: colors.edge,
+    cDark: colors.c.dark,
+    cLight: colors.c.light,
+    pipDark: colors.pip.dark,
+    pipLight: colors.pip.light,
+    shapes: shapes.replace(/\n\s*/g, '\n  '),
+  })
 }
 
 /**

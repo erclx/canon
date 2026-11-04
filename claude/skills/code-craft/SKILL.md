@@ -55,6 +55,13 @@ A pattern earns its indirection only when the problem it solves is present now. 
 - Keep business rules free of transport and storage code, so a rule can be read and tested without a request or a database.
 - Skip ports and adapters for an application that only reads and writes records. The layers cost more than the change they protect against.
 
+## Give another language its own file
+
+- Put a page, a stylesheet, or a script past five lines in its own file with its language's extension. A string reaches no formatter or linter, and the next session copies it from its neighbor.
+- Put a script that branches in its own file at any length, since a branch is logic no test reads as its own input.
+- Keep a template that interpolates data in code, since it is code generating output. Count only its static lines, so one interpolation cannot exempt a long page.
+- Keep a short string inline when it is the input under test, so a reader sees it beside the assertion that reads it.
+
 ## Check your own diff
 
 Agents fail at writing time in recorded ways. Read the diff for each before calling it done.

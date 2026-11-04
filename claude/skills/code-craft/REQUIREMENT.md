@@ -16,7 +16,7 @@ Agents fail there in recorded ways. They copy where reuse belonged, spread one c
 - Open with the change test, naming the change most likely to come next and counting what it would touch before choosing a shape
 - State depth as rules a session can act on, covering a unit's interface being simpler than its work, inlined pass-throughs, and splitting by the decision hidden
 - State each tension as when one side wins, such as one place for knowledge against coupling two things that only look alike
-- State hidden inputs: pass in the clock, environment, and randomness, and keep business rules free of transport and storage code
+- State what a unit keeps out of itself, being the clock, environment, and randomness, transport and storage code in a business rule, and a long page, stylesheet, or script held in a string
 - Close with the agent failure modes as checks on the session's own diff, with excuses, red flags, a checklist, and the external sources adopted and declined with the reason for each
 
 ## Must not

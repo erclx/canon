@@ -37,7 +37,9 @@ function file(path: string, text: string): SourceFile {
  * is a markdown heading in fixture data, and counting them is what turned a
  * measured 112 comment lines into 427.
  */
-const HEREDOC_SCENARIO = `#!/usr/bin/env bash
+const HEREDOC_SCENARIO =
+  // canon-allow-embedded: the scanner's input under test
+  `#!/usr/bin/env bash
 set -e
 
 # Provision the fixture tree

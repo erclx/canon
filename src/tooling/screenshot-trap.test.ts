@@ -1,5 +1,12 @@
 import { type SpawnSyncReturns, spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  chmodSync,
+  copyFileSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { createServer } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -33,6 +40,14 @@ const stubBin = (name: string, body: string): void => {
   })
 }
 
+const copyStub = (name: string, fixture: string): void => {
+  copyFileSync(
+    new URL(`./fixtures/${fixture}`, import.meta.url),
+    join(bin, name),
+  )
+  chmodSync(join(bin, name), 0o755)
+}
+
 beforeEach(async () => {
   previewPort = await freePort()
   fixture = mkdtempSync(join(tmpdir(), 'screenshot-trap-'))
@@ -54,26 +69,17 @@ afterEach(() => {
 // readiness marker, then exits itself immediately, so $! is already gone
 // by the time the EXIT trap runs.
 const runScript = (captureExitCode: number): SpawnSyncReturns<string> => {
-  stubBin(
-    'bun',
-    [
-      'if [[ "$1 $2" == "run build" ]]; then exit 0; fi',
-      'if [[ "$1 $2" == "run preview" ]]; then',
-      `  ( sleep 0.05; touch "${readyMarker}" ) &`,
-      '  exit 0',
-      'fi',
-      `if [[ "$1" == "e2e/screenshot.ts" ]]; then exit ${captureExitCode}; fi`,
-      'exit 1',
-    ].join('\n'),
-  )
+  copyStub('bun', 'bun-forking-preview.sh')
 
   return spawnSync('bash', [SCRIPT], {
     cwd: fixture,
     encoding: 'utf8',
     env: {
       ...process.env,
+      FAKE_CAPTURE_EXIT: String(captureExitCode),
       PATH: `${bin}:${process.env.PATH}`,
       PREVIEW_PORT: previewPort,
+      READY_MARKER: readyMarker,
     },
     timeout: 10_000,
   })
@@ -100,31 +106,19 @@ describe('screenshot.sh EXIT trap', () => {
     }
 
     const port = previewPort
-    // macOS ships no setsid, so the stub detaches the listener into its own
-    // session from node, which both platforms carry.
     const listener = join(fixture, 'listener.js')
     writeFileSync(
       listener,
       "require('net').createServer((c) => c.end()).listen(process.env.PREVIEW_PORT, () => require('fs').writeFileSync(process.env.READY_MARKER, ''))",
     )
-    stubBin(
-      'bun',
-      [
-        'if [[ "$1 $2" == "run build" ]]; then exit 0; fi',
-        'if [[ "$1 $2" == "run preview" ]]; then',
-        `  node -e "require('child_process').spawn(process.execPath, ['${listener}'], { detached: true, stdio: 'ignore' }).unref()"`,
-        '  exit 0',
-        'fi',
-        'if [[ "$1" == "e2e/screenshot.ts" ]]; then exit 0; fi',
-        'exit 1',
-      ].join('\n'),
-    )
+    copyStub('bun', 'bun-detached-preview.sh')
 
     const result = spawnSync('bash', [SCRIPT], {
       cwd: fixture,
       encoding: 'utf8',
       env: {
         ...process.env,
+        FAKE_LISTENER: listener,
         PATH: `${bin}:${process.env.PATH}`,
         PREVIEW_PORT: port,
         READY_MARKER: readyMarker,

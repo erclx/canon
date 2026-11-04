@@ -44,6 +44,7 @@ The field is software testing practice. Software Engineering at Google carries t
 | Test data through a factory or builder  | [Pryce, Test Data Builders](http://www.natpryce.com/articles/000714.html): "For each class you want to use in a test, create a Builder for that class", one that "Initialises its instance variables to commonly used or safe values"                | 2026-10-24 |
 | Assert through the public surface       | [Software Engineering at Google, ch. 12](https://abseil.io/resources/swe-book/html/ch12.html): tests should "make calls against its public API rather than its implementation details"                                                               | 2026-10-24 |
 | Real, then fake, then stub, mock last   | [addyosmani/agent-skills, Test-Driven Development](https://github.com/addyosmani/agent-skills/blob/c004a74/skills/test-driven-development/SKILL.md): "Preference order (most to least preferred): 1. Real implementation", then fake, stub, and mock | 2026-10-24 |
+| A long fixture in its own file          | [Meszaros, Inline Resource](http://xunitpatterns.com/Inline%20Resource.html): "If the contents of the resource are large, chances are high that you are also suffering from Eager Test"                                                              | 2026-11-03 |
 
 ## Hold the structure floors
 

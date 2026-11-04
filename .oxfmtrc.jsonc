@@ -29,6 +29,11 @@
     "/canon/design/**/*.html",
     "/canon/design/kit/",
 
+    // The design generators emit these byte for byte with their {{slots}} filled,
+    // and the previews and favicon built from them are committed. Reflowing a
+    // template changes every generated file, so the templates keep their bytes.
+    "/src/design/templates/",
+
     // The launch film's HyperFrames source, copied byte for byte from the project
     // that rendered the README loops. Reflowing its markup can move whitespace the
     // compositions lay out, so the tracked source stays the rendered source.

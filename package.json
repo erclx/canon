@@ -18,6 +18,7 @@
     "tsconfig.json",
     "assets/brand/mark.svg",
     "!scripts/eval",
+    "!src/**/fixtures/**",
     "!**/*.test.ts",
     "!**/*.test.tsx"
   ],

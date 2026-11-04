@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        font:
+          14px/1.4 system-ui,
+          sans-serif;
+      }
+      details {
+        display: inline-block;
+      }
+      summary {
+        width: 13px;
+        list-style: none;
+      }
+      .panel {
+        margin-left: 0;
+        width: 125px;
+      }
+      details[open] .panel {
+        margin-left: 300px;
+      }
+      .panel a {
+        display: block;
+        height: 32px;
+        line-height: 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <details id="menu">
+      <summary>=</summary>
+      <div class="panel">
+        <a href="#one">One</a>
+        <a href="#two">Two</a>
+        <a href="#three">Three</a>
+      </div>
+    </details>
+  </body>
+</html>

@@ -15,6 +15,8 @@
  * names out of that record and says they live in code, which is here.
  */
 
+import { readTemplate } from '@/design/template'
+
 export interface Component {
   readonly name: string
   /** Why the component exists, carried into the emitted stylesheet as a comment. */
@@ -43,30 +45,7 @@ const STATUS: Component = {
     '--color-muted',
     '--radius-marker',
   ],
-  rules: `.status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.42rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--color-muted);
-  white-space: nowrap;
-}
-
-.status::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  flex: none;
-  border-radius: var(--radius-marker);
-  background: var(--color-border);
-}
-
-.status.is-done::before {
-  background: var(--color-accent);
-}`,
+  rules: readTemplate('status.css'),
 }
 
 /**
@@ -84,35 +63,7 @@ const SCROLLBAR: Component = {
     'so the two engines cannot drift apart.',
   ].join('\n   '),
   reads: ['--color-border', '--color-muted', '--color-background'],
-  rules: `* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border) transparent;
-}
-
-*::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-*::-webkit-scrollbar-thumb {
-  border-radius: var(--radius-marker);
-  background: var(--color-border);
-  /* Inset by painting a border in the page color, which is what keeps the
-     thumb off the edges without a second element. */
-  border: 3px solid var(--color-background);
-}
-
-*::-webkit-scrollbar-thumb:hover {
-  background: var(--color-muted);
-}
-
-*::-webkit-scrollbar-corner {
-  background: transparent;
-}`,
+  rules: readTemplate('scrollbar.css'),
 }
 
 /**
@@ -130,60 +81,7 @@ const HAND_DRAWN_FIGURE: Component = {
     'reading measure and cleared past an outline rail on a wide viewport.',
   ].join('\n   '),
   reads: ['--color-muted', '--figure-hand', '--figure-wide'],
-  rules: `/* ---- Figures: hand-drawn, and wider than the measure ---- */
-
-:root {
-  --figure-hand: 'Virgil', 'Excalifont', cursive;
-  --figure-wide: 64rem;
-}
-
-figure {
-  margin: 2.75rem 0;
-  width: var(--figure-wide);
-  max-width: 92vw;
-  margin-left: 50%;
-  transform: translateX(-50%);
-}
-
-figure svg {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* CSS beats an SVG presentation attribute, so the diagrams pick up the
-   hand face without editing a single lesson. */
-figure svg text {
-  font-family: var(--figure-hand);
-}
-
-figcaption {
-  font-family: var(--figure-hand);
-  font-size: 1rem;
-  color: var(--color-muted);
-  margin: 1rem auto 0;
-  line-height: 1.5;
-  max-width: 52rem;
-}
-
-/* A figure breaks the measure and must still clear an outline rail. Deriving
-   the ceiling from the viewport does not hold, since a rail positioned from
-   the centre keeps overlapping as the window widens, so the ceiling is fixed
-   instead. */
-@media (min-width: 1421px) {
-  figure {
-    max-width: 54rem;
-  }
-}
-
-@media (max-width: 640px) {
-  figure {
-    width: 100%;
-    max-width: 100%;
-    margin-left: 0;
-    transform: none;
-  }
-}`,
+  rules: readTemplate('hand-drawn-figure.css'),
 }
 
 export const COMPONENTS: readonly Component[] = [
