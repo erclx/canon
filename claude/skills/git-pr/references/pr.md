@@ -54,7 +54,7 @@ A body describes the new behavior and nothing the diff or the commits already sa
 
 - `## Summary`: one paragraph following `<Action Verb> <Direct Object> to <Result>`, then the closing lines
 - `## Key changes`: bullets only, one change each, naming actual files, functions, or modules (e.g., `AuthService.verify()` not "auth handler")
-- Name every changed path in a Key changes bullet. A trim may cut a clause and never a path, since `canon pr key-changes` reports a path no bullet claims. Write it as a bare code span, which the final command links to its diff.
+- Name each changed path in Key changes as a bare code span, which gets linked. A trim cuts a clause, never a path, since `canon pr key-changes` flags it.
 
 ### Key changes groups
 
