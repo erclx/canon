@@ -18,7 +18,7 @@ Read the threshold off `review-pr`, which states it once and governs the heading
 
 Read the pull request's own draft flag rather than the state a worker reports, and report what the read returned and when rather than the state alone. `canon pr head --help` states why a reported field can lag and say nothing about it.
 
-A chain's create drafts at once, so its pull request reads draft from the first read. A ready read means the create missed and the fallback mark has yet to run or has failed, so report it as that rather than as a settled state.
+A chain's create drafts at once, so its pull request reads draft from the first read. Before a lift or a person readies it, a ready read means the create missed and the fallback mark has yet to run or has failed, so report it as that rather than as a settled state.
 
 ## The rebase handback
 
