@@ -21,6 +21,7 @@ A drive puts a built app in front of the operator and the session together, and 
 ## Write scope
 
 - Write inside `.canon/intake/<nn>-<slug>/`, the scratch folder `.canon/tmp/app-drive/<slug>/`, and the config's `proposals` folder at the main worktree root, resolved the way `session-worktree` does
+- Write frames into the drive's own board project, and into no other project on that board
 - The one exception is the throwaway worktree outside the repository, which Step 1 adds and the close removes. It is not entered with `EnterWorktree`, and no branch is created.
 - Never write `canon/REQUIREMENTS.md`, a fixture, or any other tracked file, a requirements diff included. Draft that diff as text inside the intake item.
 - Send each intake file out as a heredoc, the main-root route `session-worktree` states
@@ -32,7 +33,21 @@ Read `${CLAUDE_SKILL_DIR}/references/config.md` for `canon/config/app-drive.toml
 1. Derive `<slug>` from the build being driven, such as `app-drive-0-12-0` for a tag. Claim the folder with `canon records ordinal intake <slug> --claim`.
 2. Record the baseline with `canon intake drive-check <slug> --baseline --json` from the main root, before the first build step. Stop on any `reason` other than `recorded`.
 3. Make the throwaway worktree, build it, and serve it per `${CLAUDE_SKILL_DIR}/references/isolate.md`, which also carries the close and the recovery after a crash.
-4. Confirm the address with `canon pr local --root <worktree> --json`, write it as the drive log's `Address` row, and hand it to the operator before driving.
+4. Confirm the address with `canon pr local --root <worktree> --json` and write it as the drive log's `Address` row.
+5. Start the board per the section below when the drive will draw on it, and write its address and project as the `Board` row. Leave the row empty otherwise.
+6. Hand the operator the app's address and the board's together before driving.
+
+### Starting the board
+
+A drive will draw on the board when the config names `board-project`, `canon/config/design.toml` exists, or `.canon/board/` exists at the main root. With none of the three, the drive starts no server and draws as Step 3's cases state.
+
+Read `${CLAUDE_SKILL_DIR}/../design-pick/references/board.md` for how the board is reached and started, and `design-config.md` beside it for the `board` key. Three things differ from a `design-pick` run.
+
+- `<project>` is the config's `board-project` with `<nn>` filled in, never the `project` key of `design.toml`, so a drive's pages stay apart from pick rounds and accepted frames
+- Test the root with `git check-ignore -q <board>/` before serving, slash kept for a folder not made yet. The write scope forbids an unignored root, and `drive-check` reports its frames under `changed`.
+- That test, a stop either reference names, or no `frameboard` and no `bunx` on PATH ends the board rather than the drive. Report why, leave the row empty, and draw as a project with no board does.
+
+Note `reused` off the serve record, since the close ends only a server this run started.
 
 ## Step 2: drive
 
@@ -72,16 +87,33 @@ Draw every finding the operator decides before writing its `Decision (operator)`
 
 Load `canon:ui-craft` and `canon:design-taste` before the first fix frame of a rendered surface, as `design-pick` does before drafting. The picked frame is what a worker builds against, so it has to cover states such as popover dismissal and focus return.
 
-1. Draw a now frame and one fix frame per option inside the throwaway copy, on a canvas the app offers or a scratch route added to it. Name frames by the log's finding number, per `drive-record.md`.
+1. Draw a now frame and one fix frame per option on the board, per the next section, or with no board inside the copy, on a canvas the app offers or a scratch route. Name them per `drive-record.md`.
 2. Screenshot the frames side by side to `evidence/<nn>-options.png` and open it. Put the options to the operator through the structured question surface, shaped as `design-pick`'s Step 4 shapes a pick.
 3. Copy the mock source into `evidence/mocks/<surface>/`, then write `Drawn` citing both paths and record the pick as the decision.
 
 A few cases bend those steps without lifting them.
 
-- When the copy cannot host a mock, lift the frames into standalone HTML in the config's `proposals` folder, and still copy the source into `evidence/mocks/`, since the check reads `evidence/` alone
+- When the copy cannot host a mock and the drive draws no board, lift the frames into standalone HTML in the config's `proposals` folder
+- Copy a mock's source into `evidence/mocks/` wherever it was drawn, since the board can change after the close and the check reads `evidence/` alone
 - Write `Drawn: skipped, <reason>` only for a change with nothing visible, such as an exit code or a file format
-- Never write a mock into a tracked path, the project's design board, or `canon/design/`. An accepted design reaches the board through `design-pick` or `design-record` once its fix ships.
+- Never write a mock into a tracked path, `canon/design/`, or a page holding the accepted design. An accepted design reaches those through `design-pick` or `design-record` once its fix ships.
 - Leave an undecided taste finding undrawn here, since Step 4 hands it to `design-pick`
+
+### Drawing on the board
+
+The drive's board project holds one page per topic, named by the same `<surface>` as `evidence/mocks/<surface>/`, so a second finding on a surface adds a row to its page.
+
+Read `frameboard list --root <board> --json` with no `--project`, since naming one refuses before it exists. Run `frameboard project add` when the list lacks it, and `frameboard page add` on each new topic.
+
+- Add each frame with `frameboard frame add <page>/<nn>-now`, and take the rest of a frame's shape from `design-pick`'s Step 2
+- Lift the copy's rendered markup per `${CLAUDE_SKILL_DIR}/../design-pick/references/live-arms.md`, since the board cannot reach a stylesheet inside the copy
+- Capture with `frameboard capture --page <page> --composite --theme <theme> --out <scratch>`, in the theme the board is judged in, and copy that image to `evidence/<nn>-options.png`
+- Hide an earlier finding's frames with `frameboard frame hide` for that capture, and clear them with `--off`
+- State the board's address and the page in the turn's text before the pick question, and repeat both inside it, since the surface can hide what the turn said
+
+Repair a `font-missing` capture as `design-pick`'s Step 3 does. Answer a refusal `board.md` reads, such as `server-not-running`, as it states.
+
+A `browser-not-found` capture, or any refusal neither reference gives a reading for, ends the board the way Step 1 does, so redraw the finding's frames in the copy and take `evidence/<nn>-options.png` from there. On `browser-not-found`, name `bunx playwright install chromium` to the operator as the repair.
 
 ## Step 4: sort
 
@@ -104,10 +136,11 @@ Read `${CLAUDE_SKILL_DIR}/../plan-intake/references/intake.md` before writing a 
 Close only on the operator's word, while the app stays up for as long as they keep talking.
 
 1. Confirm every drawn finding's mock source sits under `evidence/mocks/`, then stop the server and remove the worktree per `isolate.md`.
-2. Run `canon intake drive-check <slug> --json`, and on `failed` fix what each finding list names in the folder and re-run.
-3. Report each path under `changed` to the operator and never revert it, since only they know which to keep.
-4. Run `canon records validate intake <slug>` and fix each `structure` entry it names.
-5. Hand the operator the text of `canon/config/app-drive.toml` built from Step 1's answers, when the project carried none. Never write it, since a tracked file is the operator's or a worker's.
+2. End the board's serve command only when `reused` read false, and keep the drive's board project, since the operator looks back at past drives there.
+3. Run `canon intake drive-check <slug> --json`, and on `failed` fix what each finding list names in the folder and re-run.
+4. Report each path under `changed` to the operator and never revert it, since only they know which to keep.
+5. Run `canon records validate intake <slug>` and fix each `structure` entry it names.
+6. Hand the operator the text of `canon/config/app-drive.toml` built from Step 1's answers, when the project carried none. Never write it, since a tracked file is the operator's or a worker's.
 
 ### Planning the drive's rows
 
@@ -127,9 +160,12 @@ Emit the full relative path of every file written, the drive-check `reason`, and
 
 **Drive:** <N> goals across <P> personas, <F> findings (<B> bugs, <R> requirements conflicts, <T> taste)
 **Check:** drive-check clean, worktree removed
+**Board:** project <board-project> kept on <board>
 
 Next: /plan-intake-answer to answer the You: slots from here, then /task-board to promote what is ready, or ask this session to plan the rows per Planning the drive's rows
 ```
+
+Omit the `Board` line when the drive drew no board.
 
 ## What this delegates
 

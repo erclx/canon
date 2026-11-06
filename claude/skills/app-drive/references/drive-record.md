@@ -20,6 +20,7 @@ Write the log to `evidence/drive-log.md` inside the intake folder. It opens on a
 | Copy      | `/tmp/tmp.Xy12/app`                               |
 | Launch    | `bun install && bun run build && bun run preview` |
 | Address   | `http://127.0.0.1:4530`                           |
+| Board     | `http://127.0.0.1:4173`, project `drive-13`       |
 | In flight | `feat/landing-page` holds `web/`                  |
 
 ## 02. Layers click leaves a half-hidden frame in place
@@ -46,6 +47,7 @@ The setup table is written once, before the first finding, and every row stays e
 
 - `Commit`, `Copy`, and `Launch` come from making the copy, per `isolate.md`
 - `Address` is the `url` that `canon pr local --root <worktree> --json` confirmed in Step 1
+- `Board` is the `url` the board's serve record returned in Step 1 and the drive's board project, and stays empty when the drive draws no board
 - `In flight` names each open branch or live plan holding a path the drive covers, as `canon:role-planner` reads what is in flight, and reads `none` when nothing is
 
 ### Fields
@@ -67,6 +69,8 @@ The check reads `Drawn` and `Decision (operator)` off the log by those exact lab
 - Write `Drawn` above the decision, citing paths under `evidence/` the way `Evidence` does, or `skipped, <reason>` when the change has nothing visible
 - A bare `skipped` with no reason counts as undrawn, since the next reader cannot tell a choice from an omission
 - A decision reading `see <nn>` was drawn under the finding it names and carries no `Drawn` of its own
+
+Leave a board page out of `Drawn`, since the check reads every code span there as an evidence path and fails a ref outside `evidence/`. The `Board` setup row already names the project.
 
 ### Passed goals
 

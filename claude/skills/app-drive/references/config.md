@@ -1,6 +1,6 @@
 ---
 title: App drive config
-description: The canon/config/app-drive.toml keys launch, data, personas, and proposals, and what a drive does when the file is absent
+description: The canon/config/app-drive.toml keys launch, data, personas, proposals, and board-project, and what a drive does when the file is absent
 ---
 
 # App drive config
@@ -12,23 +12,33 @@ launch = "bun install --frozen-lockfile && bun run build && PREVIEW_PORT=4530 bu
 data = "fixtures/demo-board"
 personas = ["a designer laying out a board", "an agent calling the CLI"]
 proposals = ".canon/picks"
+board-project = "drive-<nn>"
 ```
 
 ## Keys
 
-| Key         | Holds                                                                     |
-| ----------- | ------------------------------------------------------------------------- |
-| `launch`    | The shell command that installs, builds, and serves the app in a worktree |
-| `data`      | A fixture path inside the worktree to load before serving, if any         |
-| `personas`  | Who uses the app, each driven through every goal                          |
-| `proposals` | The folder for an undecided taste finding's frames and a fallback mock    |
+| Key             | Holds                                                                     |
+| --------------- | ------------------------------------------------------------------------- |
+| `launch`        | The shell command that installs, builds, and serves the app in a worktree |
+| `data`          | A fixture path inside the worktree to load before serving, if any         |
+| `personas`      | Who uses the app, each driven through every goal                          |
+| `proposals`     | The folder for an undecided taste finding's frames and a fallback mock    |
+| `board-project` | The board project a drive draws in, where `<nn>` is the intake ordinal    |
 
-Three of the keys carry a reading the table cannot hold.
+Some of the keys carry a reading the table cannot hold.
 
 - `launch` runs from the worktree root and names the port it serves on, so `canon pr local --root` finds it
 - `personas` covers an agent or API caller as well as a person in the UI, when the app has one
 - An absent `data` means the app starts empty, and an absent `proposals` means the frames stay in the intake folder's `evidence/`
 - A fallback mock is the standalone HTML a decided finding's frames are lifted into when the copy cannot host them
+
+### The board key
+
+`board-project` is optional and defaults to `drive-<nn>`, so a drive never asks for it.
+
+- Naming the key opts the project in, even with no board yet, while omitting it leaves the call to `canon/config/design.toml` or `.canon/board/`
+- Keep `<nn>` in a value you set, since one project across drives loses which frames came from which
+- The board's root comes from `canon/config/design.toml` and never from this file, since a second root setting would let `app-drive` and `design-pick` disagree on which board they draw on
 
 ## When the file is absent
 

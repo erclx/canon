@@ -1,4 +1,4 @@
-import { scenario } from '@/sandbox/scenario'
+import { type StageContext, scenario } from '@/sandbox/scenario'
 
 const REQUIREMENTS = `# Requirements
 
@@ -54,6 +54,22 @@ Bun.serve({
 console.log(\`http://localhost:\${port}\`)
 `
 
+function seedApp(ctx: StageContext) {
+  ctx.write('canon/REQUIREMENTS.md', REQUIREMENTS)
+  ctx.write('canon/config/app-drive.toml', CONFIG)
+  ctx.write('package.json', PACKAGE)
+  ctx.write('server.ts', SERVER)
+  ctx.fixtures('claude', 'app-drive', 'default', '01-initial')
+  ctx.write('boards/board.json', '{"frames":["frame 1"]}\n')
+  ctx.write('.gitignore', '.canon/\ndist/\n')
+}
+
+function commitApp(ctx: StageContext) {
+  ctx.git('add', '.')
+  ctx.commit('feat(board): board app with a save endpoint')
+  ctx.git('tag', 'v0.1.0')
+}
+
 export default scenario({
   config: {
     SANDBOX_SKIP_AUTO_COMMIT: 'true',
@@ -61,17 +77,8 @@ export default scenario({
   },
   arms: {
     default: (ctx) => {
-      ctx.write('canon/REQUIREMENTS.md', REQUIREMENTS)
-      ctx.write('canon/config/app-drive.toml', CONFIG)
-      ctx.write('package.json', PACKAGE)
-      ctx.write('server.ts', SERVER)
-      ctx.fixtures('claude', 'app-drive', 'default', '01-initial')
-      ctx.write('boards/board.json', '{"frames":["frame 1"]}\n')
-      ctx.write('.gitignore', '.canon/\ndist/\n')
-
-      ctx.git('add', '.')
-      ctx.commit('feat(board): board app with a save endpoint')
-      ctx.git('tag', 'v0.1.0')
+      seedApp(ctx)
+      commitApp(ctx)
 
       ctx.log.step('Scenario ready: app drive of a tagged board app')
       ctx.log.info(
@@ -104,6 +111,31 @@ export default scenario({
       )
       ctx.log.info(
         '         unchanged in the sandbox, drive-check clean, and the worktree removed',
+      )
+      ctx.log.info(
+        '         With no board configured, the Board row stays empty and no board server starts',
+      )
+    },
+    board: (ctx) => {
+      seedApp(ctx)
+      ctx.write('canon/config/design.toml', 'board = ".canon/board"\n')
+      commitApp(ctx)
+
+      ctx.log.step('Scenario ready: app drive of a project with a board')
+      ctx.log.info(
+        'Before:  the default arm applies, with frameboard or bunx on PATH as well',
+      )
+      ctx.log.info(
+        'Action:  /canon:app-drive drive v0.1.0 of the board app, decide one finding, and close the drive, since no operator is present',
+      )
+      ctx.log.info(
+        'Expect:  both addresses handed before driving, a Board row in the log, frames on a page in',
+      )
+      ctx.log.info(
+        '         project drive-<nn>, the address inside the pick question, the mock source under',
+      )
+      ctx.log.info(
+        '         evidence/mocks/, the board server ended, and the project still on the board',
       )
     },
   },
