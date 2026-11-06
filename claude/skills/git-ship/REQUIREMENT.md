@@ -16,7 +16,7 @@ The sequence also reaches the remote on work nothing re-checked. This skill is w
 - The project's verify commands run before the sequence and a failure stops it, and a project naming none is said so rather than read as passing
 - Each step runs through the Skill tool in the stated order, with staging after the sync skills write, and the chain reaches the pull request on a branch already committed
 - No text appears between steps beyond a stop report and the background watch line, and the body names the one point a wrapping caller may act at and when the closing block is not emitted
-- CI is watched to a terminal state in the background, and a failure stops the chain naming the check
+- CI is watched to a terminal state in the background, and a failure stops the chain naming the check, except a failure whose runs were all cancelled, which reruns once first
 - Done is reported only once `canon pr evidence <number> --check --json` reads `settled`, re-read once after running what it owed, and a binary lacking `--check` reads as unread
 
 ## Must not

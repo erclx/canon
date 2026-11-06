@@ -74,14 +74,14 @@ Emit `⏳ Watching CI on #<number> in the background` and end the turn, printing
 
 ### Reading the wake
 
-Branch on the final record's fields rather than on the exit. Do not auto-fix any reading, and the watch line and a stop report are the two exceptions to the no-text-between-steps rule.
+Branch on the final record's fields rather than on the exit. Do not auto-fix any reading except by the one cancelled-run rerun `ci-watch.md` states. The watch line and a stop report are the two exceptions to the no-text-between-steps rule.
 
-| Record                                  | Route                                                                                              |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `state: passing`                        | Settle the evidence thread below, then continue to After completion on `settled`                   |
-| `state: failing`                        | Read the cancelled-run rerun in `ci-watch.md`, then stop and report the failing check with its URL |
-| `conflicted: true`                      | Stop and report the branch conflicts with its base, since no run will start. Rebase.               |
-| A `reason` and no `state`, or a timeout | Read `${CLAUDE_SKILL_DIR}/references/ci-watch.md` for the refused and unsettled reads              |
+| Record                                  | Route                                                                                                 |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `state: passing`                        | Settle the evidence thread below, then continue to After completion on `settled`                      |
+| `state: failing`                        | Read the cancelled-run section of `${CLAUDE_SKILL_DIR}/references/ci-watch.md`, which reruns or stops |
+| `conflicted: true`                      | Stop and report the branch conflicts with its base, since no run will start. Rebase.                  |
+| A `reason` and no `state`, or a timeout | Read `${CLAUDE_SKILL_DIR}/references/ci-watch.md` for the refused and unsettled reads                 |
 
 ### Settling the evidence thread
 

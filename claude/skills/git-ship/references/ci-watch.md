@@ -41,12 +41,15 @@ Do not auto-fix any of these. A stop report is one of the two exceptions to the 
 
 ## A failing record with only cancelled runs
 
-A run cancelled by a runner or a superseded workflow reads as `failing`, and a reviewer reads it as a real failure. Before the stop, list the failed checks and print each run id when every one of them was cancelled:
+A run cancelled by a runner or a superseded workflow reads as `failing`, and a reviewer reads it as a real failure. This section decides whether a `failing` wake reruns or stops, and the rerun is the one exception to the no-auto-fix rule.
+
+List the failed check runs on the record's `tip` and print each run id when every one of them was cancelled. The read goes through REST, since `gh pr checks` runs on GraphQL and a cloud session's proxy refuses it:
 
 ```bash
-gh pr checks <number> --json bucket,link --jq '[.[] | select(.bucket == "fail" or .bucket == "cancel")] | if length > 0 and all(.bucket == "cancel") then [.[].link | capture("/runs/(?<id>[0-9]+)").id] | unique | .[] else empty end'
+gh api "repos/{owner}/{repo}/commits/<tip>/check-runs?per_page=100" --jq '[.check_runs[] | select(.conclusion | IN("failure", "timed_out", "cancelled", "action_required", "startup_failure"))] | if length > 0 and all(.conclusion == "cancelled") then [.[].details_url | capture("/runs/(?<id>[0-9]+)").id] | unique | .[] else empty end'
 ```
 
-- An empty print means at least one check really failed, so stop and report it with its URL
+- A non-zero exit means the read was refused, so stop and report the refusal rather than reading it as a real failure
+- An empty print on a zero exit means at least one check really failed, so stop and report it with its URL
 - Otherwise run `gh run rerun <id> --failed` once per printed id, then start the watch again from `### Watching CI`
 - Rerun once per ship. A second `failing` wake on the same cancelled runs stops and reports them as cancelled, naming each URL.
