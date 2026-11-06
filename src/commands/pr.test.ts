@@ -3195,6 +3195,69 @@ describe('canon pr reads through REST alone', () => {
     expect(record).toMatchObject({ unmet: [] })
   })
 
+  describe('key-changes links', () => {
+    const A_ANCHOR =
+      'diff-072fc23b941d05af2383888f292b78e406e0e82a4a3f8ee698113dd9bcc79e5f'
+    const B_ANCHOR =
+      'diff-363f5941f4d8df68d4bd5a6a9fa72f57f452e7ea9880d3a622cdaae065f1b5fb'
+    const FILES = 'https://github.com/acme/widgets/pull/7/files'
+
+    async function runRaw(args: string[]) {
+      return execa(process.execPath, [CLI, 'pr', 'key-changes', ...args], {
+        cwd: repoRoot,
+        reject: false,
+        timeout: RUN_TIMEOUT_MS,
+        env: {
+          PATH: `${join(tempDir, 'bin')}:${process.env.PATH}`,
+          FAKE_DIR: tempDir,
+        },
+      })
+    }
+
+    it('should print the body with a changed path linked to its diff', async () => {
+      const result = await runRaw(['7', '--link', '--root', repoRoot])
+
+      expect(result.stdout).toContain(
+        `- Add [\`src/a.ts\`](${FILES}#${A_ANCHOR}).`,
+      )
+    })
+
+    it('should rewrite a link whose anchor opens another file', async () => {
+      writeFixture(
+        'pull.json',
+        pullRow({
+          body: `## Key changes\n\n- Add [\`src/a.ts\`](${FILES}#${B_ANCHOR}).\n`,
+        }),
+      )
+
+      const result = await runRaw(['7', '--link', '--root', repoRoot])
+
+      expect(result.stdout).toContain(`(${FILES}#${A_ANCHOR})`)
+    })
+
+    it('should report a mislinked path and exit 2', async () => {
+      writeFixture(
+        'pull.json',
+        pullRow({
+          body: `## Key changes\n\n- Add [\`src/a.ts\`](${FILES}#${B_ANCHOR}).\n`,
+        }),
+      )
+
+      const result = await runRaw(['7', '--json', '--root', repoRoot])
+
+      expect(result.exitCode).toBe(2)
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        mislinked: [{ path: 'src/a.ts', anchor: B_ANCHOR }],
+      })
+    })
+
+    it('should refuse --link beside --json', async () => {
+      const result = await runRaw(['7', '--link', '--json', '--root', repoRoot])
+
+      expect(JSON.parse(result.stdout)).toMatchObject({ reason: 'link-json' })
+    })
+  })
+
   describe('lift', () => {
     function stageClearPull(): void {
       git('push', '-q', 'origin', 'feat/x:main')

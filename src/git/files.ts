@@ -56,15 +56,18 @@ export async function listChangedFiles(
   root: string,
   base: string,
 ): Promise<string[] | undefined> {
-  const changed = await git(root, ['diff', '--name-only', base])
+  // NUL-separated, since newline output C-quotes a path holding a quote or a
+  // non-ASCII character and the quoted spelling names no file.
+  const changed = await git(root, ['diff', '--name-only', '-z', base])
   const untracked = await git(root, [
     'ls-files',
+    '-z',
     '--others',
     '--exclude-standard',
   ])
   if (changed === undefined || untracked === undefined) return undefined
 
-  const paths = [...changed.split('\n'), ...untracked.split('\n')]
+  const paths = [...changed.split('\0'), ...untracked.split('\0')]
   return [...new Set(paths.filter(Boolean))].sort()
 }
 

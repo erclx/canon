@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { compareKeyChanges, treeRoots } from '@/pr/bijection'
+import { diffAnchor } from '@/pr/links'
 
 const TRACKED = [
   '.claude/rules/core/005-behavior.md',
@@ -283,6 +284,41 @@ describe('compareKeyChanges root files', () => {
     ])
 
     expect(result.kind === 'measured' && result.unnamed).toEqual([])
+  })
+})
+
+describe('compareKeyChanges linked bullets', () => {
+  const FILES = 'https://github.com/acme/widgets/pull/7/files'
+
+  it('should still claim the path of a code span inside a link label', () => {
+    const result = read(
+      keyChanges(
+        `- Fix [\`src/cli.ts\`](${FILES}#${diffAnchor('src/cli.ts')}).`,
+      ),
+      ['src/cli.ts'],
+    )
+
+    expect(result.kind === 'measured' && result.unnamed).toEqual([])
+    expect(result.kind === 'measured' && result.mislinked).toEqual([])
+  })
+
+  it('should report a link whose anchor hashes a different path', () => {
+    const result = read(
+      keyChanges(
+        `- Fix [\`src/cli.ts\`](${FILES}#${diffAnchor('src/other.ts')}).`,
+      ),
+      ['src/cli.ts'],
+    )
+
+    expect(result.kind === 'measured' && result.mislinked).toEqual([
+      { path: 'src/cli.ts', anchor: diffAnchor('src/other.ts') },
+    ])
+  })
+
+  it('should report no mislink for a bare bullet', () => {
+    const result = read(keyChanges('- Fix `src/cli.ts`.'), ['src/cli.ts'])
+
+    expect(result.kind === 'measured' && result.mislinked).toEqual([])
   })
 })
 
