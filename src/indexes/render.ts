@@ -1,5 +1,9 @@
 import { basename, dirname, resolve } from 'node:path'
-import { readField, readFrontmatter } from '@/indexes/frontmatter'
+import {
+  readField,
+  readFrontmatter,
+  readFrontmatterSource,
+} from '@/indexes/frontmatter'
 import { INDEX_FILE, listIndexes } from '@/indexes/walk'
 
 export interface IndexEntry {
@@ -81,8 +85,19 @@ export async function collectEntries(
   const entries: IndexEntry[] = []
   const errors: string[] = []
 
+  let invalid = 0
+
   for (const path of paths) {
-    const frontmatter = await readFrontmatter(path)
+    const reading = readFrontmatterSource(await Bun.file(path).text())
+    if (reading.kind === 'invalid') {
+      invalid += 1
+      errors.push(
+        `frontmatter is not valid YAML in ${path}: ${reading.message}`,
+      )
+      continue
+    }
+    const frontmatter =
+      reading.kind === 'parsed' ? reading.frontmatter : undefined
     const title = readField(frontmatter, 'title')
     const description = readField(frontmatter, 'description')
 
@@ -101,7 +116,10 @@ export async function collectEntries(
   }
 
   if (errors.length > 0) {
-    errors.push(`${errors.length} missing frontmatter field(s) in ${dir}`)
+    const missing = errors.length - invalid
+    if (missing > 0) {
+      errors.push(`${missing} missing frontmatter field(s) in ${dir}`)
+    }
     return { ok: false, errors }
   }
 
