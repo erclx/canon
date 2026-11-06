@@ -130,13 +130,13 @@ Holds the reads of which process listens on a port, shared by `canon pr local` a
 
 ### `src/sessions/`
 
-Holds the live-session roster and the branch claim, split by what a stub has to replace. `transfer/` moves a session between machines and treats a transcript as opaque bytes, and `transcript.ts` holds the location code it shares with `stop.ts`.
+Holds the live-session roster and the branch claim, split by what a stub has to replace. `transfer/` moves a session between machines and treats a transcript as opaque bytes.
 
 - `registry.ts` reads one JSON file per session under `claudeConfigDir()`. No published contract describes it, so an absent registry refuses rather than reporting an empty roster
 - `live.ts` matches a record to its stamped start time, and marks it unverified where it can only probe a signal or, across pid namespaces, a socket file. `liveness()` stays synchronous for the gate
 - `resolve.ts` joins a session to its branch, scoping `--branch` to the shared directory, and confirms a row `via: 'listener'` when its socket accepts, since macOS has no process filesystem
 - `claim.ts` composes `claimed` from the roster, worktrees, and `branchRefs()`, which misses a branch pushed since the last fetch. Two readable flags stay apart so a failed read never reads unclaimed
-- `stop.ts` reads a usage-limit stop off a transcript's last 1 MiB in `runList`, so claim readers pay nothing. No contract describes the entry, so a limit-worded one of another shape reads `unknown`
+- `stop.ts` reads a usage-limit stop off a transcript's last 1 MiB. No contract describes the entry, so a limit-worded one of another shape reads `unknown`
 
 ### `package.json`
 
