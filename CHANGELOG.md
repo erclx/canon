@@ -1,5 +1,28 @@
 # Changelog
 
+## [5.79.0](https://github.com/erclx/canon/compare/v5.78.0...v5.79.0) (2026-11-06)
+
+
+### Features
+
+* **indexes:** report frontmatter that will not parse as invalid YAML ([#2901](https://github.com/erclx/canon/issues/2901)) ([0a66e87](https://github.com/erclx/canon/commit/0a66e87caf83c713be5355c1bd2058938cfe62ea))
+* **markdown:** read task template lines as labels in the audit ([#2899](https://github.com/erclx/canon/issues/2899)) ([7509814](https://github.com/erclx/canon/commit/7509814229ed820f754756695653cf5ef0648132))
+* **plan:** require one command per verification line ([#2907](https://github.com/erclx/canon/issues/2907)) ([1606c80](https://github.com/erclx/canon/commit/1606c8050c43aac3ee412d0413ea877a75833e9e))
+* **pr:** link Key changes paths to their diff ([#2910](https://github.com/erclx/canon/issues/2910)) ([ae54485](https://github.com/erclx/canon/commit/ae54485c255cea0041a660bfebd853eed58d7986))
+* **pr:** open a worker's pull request as a draft ([#2911](https://github.com/erclx/canon/issues/2911)) ([36ba42d](https://github.com/erclx/canon/commit/36ba42d30f4f1bb8362e5bec745382dd001d66bd))
+* **pr:** pair a renamed evidence image with its base ([#2905](https://github.com/erclx/canon/issues/2905)) ([84a0999](https://github.com/erclx/canon/commit/84a09991585f2d4bc7bcb67e8c50eb748b0ce5da))
+* **pr:** skip the health probe for listeners under page-only folders ([#2903](https://github.com/erclx/canon/issues/2903)) ([f5ce1b9](https://github.com/erclx/canon/commit/f5ce1b95b32fde725c13592c813e3b5ae15e2739))
+* **sessions:** name usage-limit stopped sessions and resume them ([#2912](https://github.com/erclx/canon/issues/2912)) ([7ddbd96](https://github.com/erclx/canon/commit/7ddbd9692911eeac6c8a454130517b821d8108bc))
+* **ship:** keep the ship chain alive through transient GitHub reads ([#2900](https://github.com/erclx/canon/issues/2900)) ([e94ae0f](https://github.com/erclx/canon/commit/e94ae0f834b4afa81c32103deaea0c1e2a3ac793))
+* **skills:** draw app-drive frames on the board in a per-drive project ([#2908](https://github.com/erclx/canon/issues/2908)) ([41aebb6](https://github.com/erclx/canon/commit/41aebb66fb14cdc7d3783c105d92e81caae42d26))
+* **tasks:** report held rows outside Run now behind validate --live ([#2909](https://github.com/erclx/canon/issues/2909)) ([a4d2f18](https://github.com/erclx/canon/commit/a4d2f18073706916f91cf9fdd3bb718c93803eaf))
+
+
+### Bug Fixes
+
+* **sandbox:** match the proxy address in the stub remote test ([#2904](https://github.com/erclx/canon/issues/2904)) ([02add33](https://github.com/erclx/canon/commit/02add332eccd6d2687d55b05fea6714381a9fe07))
+* **take:** keep screencast frames on the monotonic clock ([#2913](https://github.com/erclx/canon/issues/2913)) ([dcaf16a](https://github.com/erclx/canon/commit/dcaf16a4742c487232a3bcd7a54245b6092acd05))
+
 ## [5.78.0](https://github.com/erclx/canon/compare/v5.77.0...v5.78.0) (2026-11-04)
 
 
