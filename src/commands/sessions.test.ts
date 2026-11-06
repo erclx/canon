@@ -12,7 +12,7 @@ import { $ } from 'bun'
 import { execa } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gitEnv } from '@/git/env'
-import { encodeProjectPath } from '@/sessions/transfer/transcript'
+import { encodeProjectPath } from '@/sessions/transcript'
 
 const REPO_ROOT = join(import.meta.dirname, '..', '..')
 const CLI = join(REPO_ROOT, 'src', 'cli.ts')
