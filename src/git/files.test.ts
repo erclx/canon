@@ -128,6 +128,16 @@ describe('listChangedFiles', () => {
 
     expect(changed).toEqual(['src/draft.ts', 'src/parser.ts'])
   })
+
+  it('should report a non-ASCII or quoted path as spelled', async () => {
+    const base = git('rev-parse', 'HEAD').trim()
+    commit('docs: add pages', { 'docs/café.md': 'a', 'docs/q"uote.md': 'b' })
+    write('docs/naïve.md', 'c')
+
+    const changed = await listChangedFiles(ROOT, base)
+
+    expect(changed).toEqual(['docs/café.md', 'docs/naïve.md', 'docs/q"uote.md'])
+  })
 })
 
 describe('listRenames', () => {
