@@ -4,9 +4,10 @@ import { locateTranscript, projectsDir } from '@/sessions/transcript'
 
 export interface StopReading {
   /**
-   * `usage-limit` means the last assistant entry is a limit stop. `unknown`
-   * means the read failed or found a limit-worded entry of another shape, so
-   * the row may be stopped and nothing here can say.
+   * `usage-limit` means the last assistant entry is a limit stop, passing over
+   * a `<synthetic>` entry with no error, such as the one a client restart
+   * writes. `unknown` means the read failed or found a limit-worded entry of
+   * another shape, so the row may be stopped and nothing here can say.
    */
   readonly stopped: 'usage-limit' | 'unknown' | null
   readonly stopResets: string | null
