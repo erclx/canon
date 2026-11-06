@@ -44,7 +44,7 @@ A drive will draw on the board when the config names `board-project`, `canon/con
 Read `${CLAUDE_SKILL_DIR}/../design-pick/references/board.md` for how the board is reached and started, and `design-config.md` beside it for the `board` key. Three things differ from a `design-pick` run.
 
 - `<project>` is the config's `board-project` with `<nn>` filled in, never the `project` key of `design.toml`, so a drive's pages stay apart from pick rounds and accepted frames
-- Test the root with `git check-ignore -q <board>` before serving. A root git does not ignore is tracked ground the write scope forbids, and `drive-check` would report each frame under `changed`.
+- Test the root with `git check-ignore -q <board>/` before serving, slash kept for a folder not made yet. The write scope forbids an unignored root, and `drive-check` reports its frames under `changed`.
 - That test, a stop either reference names, or no `frameboard` and no `bunx` on PATH ends the board rather than the drive. Report why, leave the row empty, and draw as a project with no board does.
 
 Note `reused` off the serve record, since the close ends only a server this run started.
@@ -101,13 +101,17 @@ A few cases bend those steps without lifting them.
 
 ### Drawing on the board
 
-The drive's board project holds one page per topic, named by the same `<surface>` as `evidence/mocks/<surface>/`, so a second finding on a surface adds a row to its page. Run `frameboard project add` when `frameboard list` shows no such project, and `frameboard page add` on each new topic.
+The drive's board project holds one page per topic, named by the same `<surface>` as `evidence/mocks/<surface>/`, so a second finding on a surface adds a row to its page.
+
+Read `frameboard list --root <board> --json` with no `--project`, since naming one refuses before it exists. Run `frameboard project add` when the list lacks it, and `frameboard page add` on each new topic.
 
 - Add each frame with `frameboard frame add <page>/<nn>-now`, and take the rest of a frame's shape from `design-pick`'s Step 2
 - Lift the copy's rendered markup per `${CLAUDE_SKILL_DIR}/../design-pick/references/live-arms.md`, since the board cannot reach a stylesheet inside the copy
-- Capture with `frameboard capture --page <page> --composite --out <scratch>`, and copy the image the record names to `evidence/<nn>-options.png`
+- Capture with `frameboard capture --page <page> --composite --theme <theme> --out <scratch>`, in the theme the board is judged in, and copy that image to `evidence/<nn>-options.png`
 - Hide an earlier finding's frames with `frameboard frame hide` for that capture, and clear them with `--off`
 - State the board's address and the page in the turn's text before the pick question, and repeat both inside it, since the surface can hide what the turn said
+
+Repair a `font-missing` capture as `design-pick`'s Step 3 does. Any other refusal after the board starts ends the board the way Step 1 does, so redraw the finding's frames in the copy and take `evidence/<nn>-options.png` from there.
 
 ## Step 4: sort
 

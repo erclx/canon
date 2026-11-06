@@ -36,6 +36,7 @@ Some of the keys carry a reading the table cannot hold.
 
 `board-project` is optional and defaults to `drive-<nn>`, so a drive never asks for it.
 
+- Naming the key opts the project in, even with no board yet, while omitting it leaves the call to `canon/config/design.toml` or `.canon/board/`
 - Keep `<nn>` in a value you set, since one project across drives loses which frames came from which
 - The board's root comes from `canon/config/design.toml` and never from this file, since a second root setting would let `app-drive` and `design-pick` disagree on which board they draw on
 
