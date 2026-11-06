@@ -1,8 +1,26 @@
-import { spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { spawn, spawnSync } from 'node:child_process'
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import {
+  afterAll,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  onTestFinished,
+  vi,
+} from 'vitest'
 import type { CameraTrack } from '@/take/camera'
 import {
   FPS,
@@ -285,6 +303,110 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
     expect(stillLuma).toBeGreaterThan(230)
     expect(Math.abs(stillLuma - (luma.at(-1) ?? 0))).toBeLessThanOrEqual(3)
   }, 180_000)
+
+  it('should clear the spool a killed take left beside the clip', async () => {
+    const read = readTakePlan(
+      JSON.stringify({
+        beats: [
+          {
+            name: 'cast',
+            route: 'screencast',
+            steps: [{ kind: 'wait', ms: 200 }],
+          },
+        ],
+      }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+    const own = mkdtempSync(join(tmpdir(), 'canon-take-spool-e2e-'))
+    const stale = join(own, '01-cast/spool/0.jpg')
+    mkdirSync(dirname(stale), { recursive: true })
+    writeFileSync(stale, 'left by a killed take')
+
+    try {
+      const result = await take({ url: server.url, plan: read.plan, out: own })
+
+      expect(result).toMatchObject({ status: 'filmed' })
+      expect(existsSync(dirname(stale))).toBe(false)
+    } finally {
+      rmSync(own, { recursive: true, force: true })
+    }
+  }, 180_000)
+
+  it('should remove the spool when the take is interrupted', async () => {
+    const own = mkdtempSync(join(tmpdir(), 'canon-take-spool-e2e-'))
+    const plan = join(own, 'plan.json')
+    writeFileSync(
+      plan,
+      JSON.stringify({
+        beats: [
+          {
+            name: 'cast',
+            route: 'screencast',
+            steps: [{ kind: 'wait', ms: 60_000 }],
+          },
+        ],
+      }),
+    )
+    const spool = join(own, 'takes/01-cast/spool')
+    const cli = fileURLToPath(new URL('../cli.ts', import.meta.url))
+    const running = spawn(
+      'bun',
+      [cli, 'take', server.url, plan, '--out', join(own, 'takes')],
+      { stdio: 'ignore' },
+    )
+    const exited = new Promise((done) => running.once('close', done))
+
+    try {
+      await vi.waitFor(() => expect(readdirSync(spool)).not.toHaveLength(0), {
+        timeout: 60_000,
+        interval: 100,
+      })
+      running.kill('SIGINT')
+      await exited
+
+      expect(existsSync(spool)).toBe(false)
+    } finally {
+      running.kill('SIGKILL')
+      rmSync(own, { recursive: true, force: true })
+    }
+  }, 180_000)
+
+  it('should exit on its refusal when the beat folder refuses the spool', async () => {
+    const own = mkdtempSync(join(tmpdir(), 'canon-take-spool-e2e-'))
+    const plan = join(own, 'plan.json')
+    writeFileSync(
+      plan,
+      JSON.stringify({
+        beats: [
+          {
+            name: 'cast',
+            route: 'screencast',
+            steps: [{ kind: 'wait', ms: 200 }],
+          },
+        ],
+      }),
+    )
+    const beat = join(own, 'takes/01-cast')
+    mkdirSync(beat, { recursive: true })
+    chmodSync(beat, 0o555)
+    const cli = fileURLToPath(new URL('../cli.ts', import.meta.url))
+    const running = spawn(
+      'bun',
+      [cli, 'take', server.url, plan, '--out', join(own, 'takes')],
+      { stdio: 'ignore' },
+    )
+    // Registered here rather than in a `finally`, which a process that never
+    // exits would hold past the timeout.
+    onTestFinished(() => {
+      running.kill('SIGKILL')
+      chmodSync(beat, 0o755)
+      rmSync(own, { recursive: true, force: true })
+    })
+
+    const code = await new Promise((done) => running.once('close', done))
+
+    expect(code).toBe(1)
+  }, 30_000)
 
   it('should refuse a target the page does not carry rather than film a guess', async () => {
     const read = readTakePlan(
@@ -592,7 +714,7 @@ describe.skipIf(!available())('a take of a page whose frames run slow', () => {
     })
 
     // The plan is the two 600 ms holds, the paced glide to the card, and the
-    // 2500 ms wait, 4.43 s, which Playwright's recorder padded to 5.47 s.
+    // 2500 ms wait, 4.43 s.
     expect(result).not.toHaveProperty('message')
     expect(result).toMatchObject({ status: 'filmed' })
     if (result.status !== 'filmed') return
@@ -877,22 +999,17 @@ function redCenters(clip: string): (Point | undefined)[] {
 }
 
 /**
- * The mean distance from the drawn cursor to the box it drags, in CSS pixels,
- * or undefined when the clip never shows the box leaving its start. The page
- * moves it on every run, but the recorder freezes on its opening frames in
- * about one take in seven, on `main` as on this route, and that clip carries
- * no drag to measure.
+ * The mean distance from the drawn cursor to the box it drags, in CSS pixels.
+ * Throws when the clip never shows the box reaching its drop, since the page
+ * moves it on every run and a clip without that lost the action it filmed.
  */
-function dragOffset(
-  out: string,
-  beat: { clip: string; log: string },
-): number | undefined {
+function dragOffset(out: string, beat: { clip: string; log: string }): number {
   const log = JSON.parse(readFileSync(join(out, beat.log), 'utf8')) as TakeLog
   const drag = log.events.find((event) => event.kind === 'drag')
   if (!drag || drag.kind !== 'drag') throw new Error('no drag logged')
   const centers = redCenters(join(out, beat.clip))
   if (!centers.some((center) => center && center.x > drag.to.x - 100)) {
-    return undefined
+    throw new Error('the clip never shows the box reaching its drop')
   }
   const distances = centers.flatMap((center, i) => {
     const t = i * FRAME_MS
@@ -903,16 +1020,12 @@ function dragOffset(
   return distances.reduce((sum, d) => sum + d, 0) / distances.length
 }
 
-/** Enough takes that two reach the end of the drag past a frozen recorder. */
-const PAINT_TAKES = 4
-
 describe.skipIf(!available())(
   'a screencast drag on a page that paints on the next frame',
   () => {
     let server: { url: string; stop: () => void }
     const offsets: number[] = []
     const lags: unknown[] = []
-    let frozen = 0
 
     beforeAll(async () => {
       const served = Bun.serve({ port: 0, fetch: () => html(PAINT_PAGE) })
@@ -922,7 +1035,7 @@ describe.skipIf(!available())(
       }
       const read = readTakePlan(PAINT_DRAG)
       if (read.kind !== 'read') throw new Error(read.detail)
-      for (let run = 0; run < PAINT_TAKES && offsets.length < 2; run += 1) {
+      for (let run = 0; run < 2; run += 1) {
         const out = mkdtempSync(join(tmpdir(), 'canon-take-paint-e2e-'))
         try {
           const result = await take({ url: server.url, plan: read.plan, out })
@@ -931,9 +1044,7 @@ describe.skipIf(!available())(
           if (!beat) throw new Error('no drag beat')
           const log = readFileSync(join(out, beat.log), 'utf8')
           lags.push((JSON.parse(log) as TakeLog).lag)
-          const offset = dragOffset(out, beat)
-          if (offset === undefined) frozen += 1
-          else offsets.push(offset)
+          offsets.push(dragOffset(out, beat))
         } finally {
           rmSync(out, { recursive: true, force: true })
         }
@@ -945,10 +1056,7 @@ describe.skipIf(!available())(
     })
 
     it('should keep the drawn cursor within 10 px of the box on average', () => {
-      expect(
-        offsets,
-        `${frozen} of ${frozen + offsets.length} takes froze on their opening frames and were discarded`,
-      ).toHaveLength(2)
+      expect(offsets).toHaveLength(2)
       for (const offset of offsets) expect(offset).toBeLessThan(10)
     })
 

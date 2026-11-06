@@ -1,8 +1,8 @@
-import { mkdtempSync, rmSync } from 'node:fs'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import { chromium } from 'playwright-core'
-import { lastFrame, probeFrames, transcode } from '@/take/encode'
+import { lastFrame, openFrameEncoder, probeFrames } from '@/take/encode'
+import { frameStamp, slotFrames } from '@/take/frame-clock'
 import { FPS, type LogEvent, START, VIEWPORT } from '@/take/log'
 import {
   type PointerInput,
@@ -51,8 +51,13 @@ export async function filmScreencast(request: {
   readonly beat: Beat
   readonly clip: string
 }): Promise<ScreencastTake> {
-  const scratch = mkdtempSync(join(tmpdir(), 'canon-take-cast-'))
-  const browser = await chromium.launch()
+  // Ahead of the launch, so a folder that refuses leaves no browser holding the
+  // process open past its refusal.
+  const scratch = openSpool(request.clip)
+  const browser = await chromium.launch().catch((error: unknown) => {
+    scratch.remove()
+    throw error
+  })
   let still: (() => Promise<Buffer | undefined>) | undefined
   try {
     const page = await browser.newPage({ viewport: VIEWPORT })
@@ -97,9 +102,33 @@ export async function filmScreencast(request: {
     if (request.beat.setup.length > 0) await live.hold(1000)
     const lag = await calibrate(page)
 
-    const webm = join(scratch, 'take.webm')
     const events: LogEvent[] = []
-    await page.screencast.start({ path: webm, size: VIEWPORT, fps: FPS })
+    const spool: SpooledFrame[] = []
+    let spoolFailure: unknown
+    await page.screencast.start({
+      size: VIEWPORT,
+      // The docs tie this to `path`, but 1.64.1 still reads it here, where it
+      // doubles the frames Chromium may hold unacknowledged.
+      fps: FPS,
+      // Spooled rather than held, since a busy page sends about 19 MB a second.
+      // The write stays synchronous, so the acknowledgement Chromium paces its
+      // frames on waits for no encoder. Playwright calls this from a listener
+      // nothing awaits, so a throw here would surface as an unhandled rejection.
+      onFrame: ({ data, timestamp }) => {
+        const stamp = frameStamp({
+          presentedWall: timestamp,
+          wallNow: Date.now(),
+          monoNow: performance.now(),
+        })
+        const path = join(scratch.folder, `${spool.length}.jpg`)
+        try {
+          writeFileSync(path, data)
+          spool.push({ path, stamp })
+        } catch (error) {
+          spoolFailure ??= error
+        }
+      },
+    })
     const started = performance.now()
     const recording = stageOn(() => performance.now() - started)
     await recording.hold(HOLD_MS)
@@ -110,8 +139,9 @@ export async function filmScreencast(request: {
     await recording.hold(HOLD_MS)
     const filmedMs = recording.now()
     await page.screencast.stop()
+    if (spoolFailure !== undefined) throw spoolFailure
 
-    await transcode(webm, request.clip, FPS, filmedMs)
+    await encodeSpool(spool, request.clip, started, filmedMs)
     const frames = await probeFrames(request.clip)
     const closing = await lastFrame(request.clip, frames)
     if (lag === undefined) return { frames, events, still: closing }
@@ -126,12 +156,85 @@ export async function filmScreencast(request: {
     throw error
   } finally {
     await browser.close()
-    rmSync(scratch, { recursive: true, force: true })
+    scratch.remove()
   }
 }
 
 type Page = import('playwright-core').Page
 type Mouse = import('playwright-core').Mouse
+
+interface SpooledFrame {
+  readonly path: string
+  /** When the frame was presented, on the monotonic clock. */
+  readonly stamp: number
+}
+
+/**
+ * Opens the folder holding one take's frames, beside its clip rather than in a
+ * temp folder nothing sweeps, since a 34 s beat on a busy page spools about
+ * 650 MB. A take killed outright runs no handler, so it leaves the folder where
+ * its owner looks, and the next take of that beat clears it.
+ */
+function openSpool(clip: string): { folder: string; remove: () => void } {
+  const folder = join(dirname(clip), 'spool')
+  rmSync(folder, { recursive: true, force: true })
+  mkdirSync(folder, { recursive: true })
+  const remove = (): void => {
+    process.off('exit', remove)
+    process.off('SIGINT', interrupt)
+    process.off('SIGTERM', interrupt)
+    rmSync(folder, { recursive: true, force: true })
+  }
+  // A signal skips the exit event, so it removes the folder and then re-raises
+  // itself with this handler gone, ending the process as it would have.
+  const interrupt = (signal: NodeJS.Signals): void => {
+    remove()
+    process.kill(process.pid, signal)
+  }
+  process.on('exit', remove)
+  process.once('SIGINT', interrupt)
+  process.once('SIGTERM', interrupt)
+  return { folder, remove }
+}
+
+/**
+ * Writes the clip from the spool, one frame per slot of the stage clock, so its
+ * length is the take's rather than whatever the frames span. Refuses when no
+ * frame arrived, since there is nothing true to show.
+ */
+async function encodeSpool(
+  spool: readonly SpooledFrame[],
+  clip: string,
+  startMs: number,
+  lengthMs: number,
+): Promise<void> {
+  const slots = slotFrames(
+    spool.map((frame) => frame.stamp),
+    { startMs, lengthMs, frameMs: FRAME_MS },
+  )
+  if (slots.length === 0) {
+    throw new Error(
+      `the screencast delivered no frame in ${(lengthMs / 1000).toFixed(2)} s of filming`,
+    )
+  }
+  const encoder = openFrameEncoder(clip, FPS)
+  try {
+    let shown = -1
+    let jpeg = Buffer.alloc(0)
+    for (const index of slots) {
+      const frame = spool[index]
+      if (frame && index !== shown) {
+        jpeg = readFileSync(frame.path)
+        shown = index
+      }
+      await encoder.write(jpeg)
+    }
+    await encoder.close()
+  } catch (error) {
+    encoder.abort()
+    throw error
+  }
+}
 
 /**
  * The page time of its next animation frame, or undefined when none comes
@@ -155,7 +258,7 @@ const PAINTED = '__canonTakePainted'
  * How long a move takes to show in the clip, measured by sending one aligned
  * move to `START` and reading the animation frame after its handler against
  * the frame it was aligned to. Both readings are page time, so no clock mapping
- * is needed. The recorder captures a frame once it is presented, one page
+ * is needed. The screencast captures a frame once it is presented, one page
  * frame after that frame begins, so the lag counts one page frame past the
  * readings, read off two consecutive animation frames rather than assumed from
  * the clip's rate. That held a dragged box within 7 px on every run where the

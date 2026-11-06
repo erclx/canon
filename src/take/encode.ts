@@ -75,18 +75,24 @@ export function openFrameEncoder(out: string, fps: number): FrameEncoder {
   // Held so a failure while frames are still being written surfaces at close
   // rather than as an unhandled rejection.
   done.catch(() => {})
+  // Rejects once FFmpeg is gone, since a full pipe with no reader never drains.
+  const stopped = done.then(() => {
+    throw new Error('ffmpeg stopped reading frames')
+  })
+  stopped.catch(() => {})
+  // A write to the dead process's pipe fails here, and `stopped` reports it.
+  proc.stdin?.on('error', () => {})
 
   return {
-    write: (jpeg) =>
-      new Promise((resolve, reject) => {
-        const stdin = proc.stdin
-        if (!stdin || stdin.destroyed) {
-          reject(new Error('ffmpeg stopped reading frames'))
-          return
-        }
-        if (stdin.write(jpeg)) resolve()
-        else stdin.once('drain', resolve)
-      }),
+    write: async (jpeg) => {
+      const stdin = proc.stdin
+      if (!stdin || stdin.destroyed) return stopped
+      if (stdin.write(jpeg)) return
+      await Promise.race([
+        new Promise<void>((resolve) => stdin.once('drain', resolve)),
+        stopped,
+      ])
+    },
     close: async () => {
       proc.stdin?.end()
       await done
@@ -95,38 +101,6 @@ export function openFrameEncoder(out: string, fps: number): FrameEncoder {
       proc.kill('SIGKILL')
     },
   }
-}
-
-/**
- * Re-encodes a recorded clip to the same H.264 output at a constant `fps`, cut
- * at `ms`. Playwright's recorder pads its webm past the last frame by at least
- * a second, so the cut is what ends the clip where the take's clock stopped.
- * A shorter input stays as it is, since `-t` never extends one.
- */
-export async function transcode(
-  input: string,
-  out: string,
-  fps: number,
-  ms: number,
-): Promise<void> {
-  const proc = spawn(
-    'ffmpeg',
-    [
-      '-y',
-      '-loglevel',
-      'error',
-      '-i',
-      input,
-      '-t',
-      (ms / 1000).toFixed(3),
-      '-r',
-      String(fps),
-      ...OUTPUT,
-      out,
-    ],
-    { stdio: ['ignore', 'ignore', 'pipe'] },
-  )
-  await finished(proc)
 }
 
 /**
