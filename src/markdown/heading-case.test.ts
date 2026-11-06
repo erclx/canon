@@ -39,6 +39,35 @@ describe('findHeadingCase', () => {
     expect(findHeadingCase('## 1. Summary\n')).toEqual([])
   })
 
+  it('should check sentence case from the word after a phase label', () => {
+    expect(findHeadingCase('# v171.8: The colon check\n')).toEqual([])
+    expect(
+      findHeadingCase('---\ntitle: v171.8: The colon check\n---\n\nBody.\n'),
+    ).toEqual([])
+  })
+
+  it('should report a title case heading after a phase label', () => {
+    const found = findHeadingCase('# v171.8: The Colon Check\n')
+
+    expect(found).toEqual([
+      {
+        line: 1,
+        text: 'v171.8: The Colon Check',
+        words: ['Colon', 'Check'],
+      },
+    ])
+  })
+
+  it('should not read a version without a dot as a phase label', () => {
+    const found = findHeadingCase('## v2 support: Notes\n')
+
+    expect(found.map((hit) => hit.words)).toEqual([['Notes']])
+  })
+
+  it('should leave a heading with no label as it was', () => {
+    expect(findHeadingCase('## The colon check\n')).toEqual([])
+  })
+
   it('should not report a heading inside a fence', () => {
     expect(findHeadingCase('```md\n## Key Changes\n```\n')).toEqual([])
   })

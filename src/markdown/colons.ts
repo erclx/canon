@@ -30,6 +30,12 @@ const BOLD_LABEL = /^(\*\*|__)[^*_]+\1$/
 /** What may stand in a lead once its code spans and links are masked. */
 const CONNECTIVE = /\b(?:and|or|to)\b|,/g
 
+/** Words and apostrophes or hyphens between them, with no sentence punctuation. */
+const PLAIN_LEAD = /^[\p{L}\p{N}][\p{L}\p{N}'’ -]*$/u
+
+/** The longest plain lead a line may open on and still read as a label. */
+const LEAD_WORDS = 3
+
 /** Blanks a span while holding its width, so a column stays where it was. */
 function blank(match: string): string {
   return ' '.repeat(match.length)
@@ -38,16 +44,20 @@ function blank(match: string): string {
 /**
  * Whether the text before a line's first colon is a label rather than a
  * clause: the lead of a list item, or a prefix that is only emphasis and a
- * masked code span. A list item's lead also reads as a label at any length
- * when only code spans, links, commas, and `and`, `or`, or `to` stand in it,
- * which is a file entry naming several paths.
+ * masked code span. A line, after any quote marker, also reads as a label when
+ * its lead is at most three plain words, such as `Issue` or `Test strategy`.
+ * A list item's lead also reads as a label at any length when only code spans,
+ * links, commas, and `and`, `or`, or `to` stand in it, which is a file entry
+ * naming several paths.
  */
 function isLabel(prefix: string, listItem: boolean): boolean {
   if (BOLD_LABEL.test(prefix.trim())) return true
 
   const words = prefix.replace(/[*_]/g, ' ').trim()
   if (words === '') return true
-  if (!listItem) return false
+  if (!listItem) {
+    return PLAIN_LEAD.test(words) && words.split(/\s+/).length <= LEAD_WORDS
+  }
   if (words.replace(CONNECTIVE, ' ').trim() === '') return true
   return words.split(/\s+/).length <= 4
 }

@@ -15,9 +15,20 @@ if [ "${target% *}" != "$(git branch --show-current) open" ]; then
   printf '❌ #%s reads "%s", not "%s open". The draft mark was not written.\n' "<number>" "${target% *}" "$(git branch --show-current)" >&2
   exit 1
 fi
-gh api graphql -f query='mutation($id: ID!) { convertPullRequestToDraft(input: {pullRequestId: $id}) { clientMutationId } }' -f id="${target##* }" --silent
+for attempt in 1 2 3; do
+  gh api graphql -f query='mutation($id: ID!) { convertPullRequestToDraft(input: {pullRequestId: $id}) { clientMutationId } }' -f id="${target##* }" --silent && break
+  [ "$attempt" -lt 3 ] && sleep 5
+done
 gh api repos/{owner}/{repo}/pulls/<number> --jq '{isDraft: .draft}'
 ```
+
+## The retry
+
+The loop wraps the mutation alone. The target check runs once ahead of it and its refusal exits the command, so a refused target never reaches the mark or a second check.
+
+- A mutation exiting non-zero runs again after five seconds, up to three tries, which clears a transient server error
+- The read-back runs once after the loop, whichever try succeeded or none did
+- A cloud session's blocked GraphQL fails every try, so the cloud case costs ten seconds of waiting before the same `false` read
 
 ## Why the mark is local-only
 
@@ -45,8 +56,10 @@ The comparison sits in the shell rather than in the session's reading of a print
 Report what the read returned rather than what the command printed, since the exit says the call ran and says nothing about the state.
 
 - A `true` reports a draft
-- A `false` reports the pull request as opened ready and unsupervised, and the chain stops there
+- A `false` reports the pull request as opened ready and unsupervised, and the chain stops there. The retry already ran, so the read is final.
 - Never re-issue the mark on a disagreeing read, which fights whoever readied it instead of guarding anything
+
+Open a stop report on a `false` read with the pull request number and `ready, not a draft`, ahead of anything else, such as `❌ #<number> is ready, not a draft. The mark failed after three tries.` A reader skimming the stop then learns first that a pull request sits open with no review hold.
 
 ## Why the mark sits ahead of the watch
 

@@ -14,15 +14,22 @@ const TITLE = /^title:\s*(["']?)(.*?)\1\s*$/
 const CODE_SPAN = /(`+)(?:(?!\1).)*\1/g
 const CAPITALIZED = /^[A-Z][a-z]/
 
+/** A task's phase label, `v` and dotted digits, which the template fixes. */
+const PHASE_LABEL = /^v\d+\.\d+:\s+/
+
 /**
  * The words of `text` that break sentence case.
  *
  * A code span stands for one lowercase word, so a heading opening on one
  * counts that span as its first word. The first word with a letter in it is
- * exempt, which keeps a leading numeral from promoting the next word.
+ * exempt, which keeps a leading numeral from promoting the next word. A
+ * leading phase label is not a word of the heading, so the first word is the
+ * one after it.
  */
 function capitalizedAfterFirst(text: string): string[] {
-  const masked = maskDisplayed(text.replace(CODE_SPAN, 'code'))
+  const masked = maskDisplayed(
+    text.replace(PHASE_LABEL, '').replace(CODE_SPAN, 'code'),
+  )
     .replace(/\s+/g, ' ')
     .trim()
   const words = masked === '' ? [] : masked.split(' ')
