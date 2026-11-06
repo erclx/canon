@@ -218,6 +218,8 @@ Every outcome reaches the review with its proof named.
 
 - Name, for each outcome, the test or the command that proves it, as one bullet leading with the outcome and ending on the command in backticks.
 - Write a command a later session can run as given, from the project root. A description of what would be checked leaves the executing session to invent the check.
+- Write each command as one command, with no pipe, `&&`, `;`, or command substitution.
+- A permission mode can refuse a compound form, and a substituted check no longer matches the plan, so reach a filter through a verb's own argument or flag, or name a test that holds it.
 - Name the visual check where no test reaches, and say it is visual, so a reader can tell a proof from a look.
 
 ### Risks
