@@ -111,7 +111,7 @@ Read `frameboard list --root <board> --json` with no `--project`, since naming o
 - Hide an earlier finding's frames with `frameboard frame hide` for that capture, and clear them with `--off`
 - State the board's address and the page in the turn's text before the pick question, and repeat both inside it, since the surface can hide what the turn said
 
-Repair a `font-missing` capture as `design-pick`'s Step 3 does. Any other refusal after the board starts ends the board the way Step 1 does, so redraw the finding's frames in the copy and take `evidence/<nn>-options.png` from there.
+Repair a `font-missing` capture as `design-pick`'s Step 3 does. Answer a refusal `board.md` reads, such as `server-not-running`, as it states. Any refusal neither gives a reading for ends the board the way Step 1 does, so redraw the finding's frames in the copy and take `evidence/<nn>-options.png` from there.
 
 ## Step 4: sort
 
