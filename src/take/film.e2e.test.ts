@@ -592,7 +592,7 @@ describe.skipIf(!available())('a take of a page whose frames run slow', () => {
     })
 
     // The plan is the two 600 ms holds, the paced glide to the card, and the
-    // 2500 ms wait, 4.43 s, which Playwright's recorder padded to 5.47 s.
+    // 2500 ms wait, 4.43 s.
     expect(result).not.toHaveProperty('message')
     expect(result).toMatchObject({ status: 'filmed' })
     if (result.status !== 'filmed') return
@@ -877,22 +877,17 @@ function redCenters(clip: string): (Point | undefined)[] {
 }
 
 /**
- * The mean distance from the drawn cursor to the box it drags, in CSS pixels,
- * or undefined when the clip never shows the box leaving its start. The page
- * moves it on every run, but the recorder freezes on its opening frames in
- * about one take in seven, on `main` as on this route, and that clip carries
- * no drag to measure.
+ * The mean distance from the drawn cursor to the box it drags, in CSS pixels.
+ * Throws when the clip never shows the box reaching its drop, since the page
+ * moves it on every run and a clip without that lost the action it filmed.
  */
-function dragOffset(
-  out: string,
-  beat: { clip: string; log: string },
-): number | undefined {
+function dragOffset(out: string, beat: { clip: string; log: string }): number {
   const log = JSON.parse(readFileSync(join(out, beat.log), 'utf8')) as TakeLog
   const drag = log.events.find((event) => event.kind === 'drag')
   if (!drag || drag.kind !== 'drag') throw new Error('no drag logged')
   const centers = redCenters(join(out, beat.clip))
   if (!centers.some((center) => center && center.x > drag.to.x - 100)) {
-    return undefined
+    throw new Error('the clip never shows the box reaching its drop')
   }
   const distances = centers.flatMap((center, i) => {
     const t = i * FRAME_MS
@@ -903,16 +898,12 @@ function dragOffset(
   return distances.reduce((sum, d) => sum + d, 0) / distances.length
 }
 
-/** Enough takes that two reach the end of the drag past a frozen recorder. */
-const PAINT_TAKES = 4
-
 describe.skipIf(!available())(
   'a screencast drag on a page that paints on the next frame',
   () => {
     let server: { url: string; stop: () => void }
     const offsets: number[] = []
     const lags: unknown[] = []
-    let frozen = 0
 
     beforeAll(async () => {
       const served = Bun.serve({ port: 0, fetch: () => html(PAINT_PAGE) })
@@ -922,7 +913,7 @@ describe.skipIf(!available())(
       }
       const read = readTakePlan(PAINT_DRAG)
       if (read.kind !== 'read') throw new Error(read.detail)
-      for (let run = 0; run < PAINT_TAKES && offsets.length < 2; run += 1) {
+      for (let run = 0; run < 2; run += 1) {
         const out = mkdtempSync(join(tmpdir(), 'canon-take-paint-e2e-'))
         try {
           const result = await take({ url: server.url, plan: read.plan, out })
@@ -931,9 +922,7 @@ describe.skipIf(!available())(
           if (!beat) throw new Error('no drag beat')
           const log = readFileSync(join(out, beat.log), 'utf8')
           lags.push((JSON.parse(log) as TakeLog).lag)
-          const offset = dragOffset(out, beat)
-          if (offset === undefined) frozen += 1
-          else offsets.push(offset)
+          offsets.push(dragOffset(out, beat))
         } finally {
           rmSync(out, { recursive: true, force: true })
         }
@@ -945,10 +934,7 @@ describe.skipIf(!available())(
     })
 
     it('should keep the drawn cursor within 10 px of the box on average', () => {
-      expect(
-        offsets,
-        `${frozen} of ${frozen + offsets.length} takes froze on their opening frames and were discarded`,
-      ).toHaveLength(2)
+      expect(offsets).toHaveLength(2)
       for (const offset of offsets) expect(offset).toBeLessThan(10)
     })
 
