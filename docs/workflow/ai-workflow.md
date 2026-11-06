@@ -57,7 +57,7 @@ Run independent features in parallel, one worktree and one session each. See [pa
 
 On a mature stack, approve the plan and invoke `canon:auto-ship` to implement, verify, and ship in one session.
 
-- It stops on a verify failure after one fix attempt, or on a hook failure, and you resume with `/git-ship`
+- It stops on a verify failure after one fix attempt, or on a hook failure, and you resume with `/git-ship --draft`, which keeps the pull request a draft
 - Skip it for auth, migrations, security-sensitive changes, or an uncertain plan
 
 ### Review

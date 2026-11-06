@@ -13,7 +13,7 @@ Do not output any text between steps and do not wait for user input. Tool permis
 
 ## Verify
 
-Run the verify commands `CLAUDE.md` names (lint, typecheck, tests) before the sequence starts. On a failure, stop: `❌ Verify failed. Fix the reported errors and run /git-ship again.` Make no fix attempt, since this skill is the resume point and the user is already making the fix.
+Run the verify commands `CLAUDE.md` names (lint, typecheck, tests) before the sequence starts. On a failure, stop: `❌ Verify failed. Fix the reported errors and run /git-ship again with the same arguments.` Make no fix attempt, since this skill is the resume point and the user is already making the fix.
 
 When `CLAUDE.md` names no verify command, say so on one line and continue. A project with no suite is not a project with a failing one.
 
