@@ -14,6 +14,8 @@ Edit the open pull request on the current head in place when one exists, and cre
 Labels apply after either path converges, against a pull request that already exists, so one step covers both. `canon labels apply` resolves the earned set and reads the remote's labels first. It reports a missing label rather than creating it, since the REST label endpoint creates any label it is handed.
 
 - The body is `.canon/tmp/pr/body.md`, which the skill body's pre-publish scan already wrote, and nothing here writes it again
+- Key changes paths are linked to their diff by `canon pr key-changes <number> --link`, which needs the number, so a first create sends the body unlinked and a second write sends the linked one
+- The linked copy is `.canon/tmp/pr/linked.md`. A run where the verb refuses sends `body.md` as written, since an unlinked path loses nothing.
 - A harness can append a session link to the live pull request after that scan, so the command reads the live body back and scans it with the same verb
 - On a hit it deletes every line carrying the link and writes the body back, deleting rather than rewriting for the reason the scan's finding states
 
@@ -37,15 +39,26 @@ assert_own_pr() {
   fi
 }
 opened=false
+body_file=.canon/tmp/pr/body.md
+link_body() {
+  if canon pr key-changes "$1" --link --body .canon/tmp/pr/body.md --base "origin/$base_branch" >.canon/tmp/pr/linked.md 2>/dev/null && [ -s .canon/tmp/pr/linked.md ]; then
+    body_file=.canon/tmp/pr/linked.md
+  fi
+}
 pr_number=$(gh api "repos/{owner}/{repo}/pulls?head=$owner:$head_branch&base=$base_branch&state=open" --jq '.[0].number // empty') || exit 1
 if [ -n "$pr_number" ]; then
   assert_own_pr "$pr_number"
-  pr_url=$(gh api -X PATCH "repos/{owner}/{repo}/pulls/$pr_number" -f title="<title>" -F body=@.canon/tmp/pr/body.md --jq .html_url) || exit 1
+  link_body "$pr_number"
+  pr_url=$(gh api -X PATCH "repos/{owner}/{repo}/pulls/$pr_number" -f title="<title>" -F body=@"$body_file" --jq .html_url) || exit 1
 else
   pr_url=$(gh api -X POST 'repos/{owner}/{repo}/pulls' -f title="<title>" -f head="$head_branch" -f base="$base_branch" -F body=@.canon/tmp/pr/body.md --jq .html_url) || exit 1
   pr_number=${pr_url##*/}
   assert_own_pr "$pr_number"
   opened=true
+  link_body "$pr_number"
+  if [ "$body_file" != .canon/tmp/pr/body.md ]; then
+    gh api -X PATCH "repos/{owner}/{repo}/pulls/$pr_number" -F body=@"$body_file" --silent || exit 1
+  fi
 fi
 gh api "repos/{owner}/{repo}/pulls/$pr_number" --jq .body >.canon/tmp/pr/live.md || exit 1
 links=$(canon labels scan --title "<title>" --body-file .canon/tmp/pr/live.md --head "$head_branch" --json 2>/dev/null | tail -n 1 | jq -r '.sessionLinks | length')
