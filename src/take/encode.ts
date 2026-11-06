@@ -98,38 +98,6 @@ export function openFrameEncoder(out: string, fps: number): FrameEncoder {
 }
 
 /**
- * Re-encodes a recorded clip to the same H.264 output at a constant `fps`, cut
- * at `ms`. Playwright's recorder pads its webm past the last frame by at least
- * a second, so the cut is what ends the clip where the take's clock stopped.
- * A shorter input stays as it is, since `-t` never extends one.
- */
-export async function transcode(
-  input: string,
-  out: string,
-  fps: number,
-  ms: number,
-): Promise<void> {
-  const proc = spawn(
-    'ffmpeg',
-    [
-      '-y',
-      '-loglevel',
-      'error',
-      '-i',
-      input,
-      '-t',
-      (ms / 1000).toFixed(3),
-      '-r',
-      String(fps),
-      ...OUTPUT,
-      out,
-    ],
-    { stdio: ['ignore', 'ignore', 'pipe'] },
-  )
-  await finished(proc)
-}
-
-/**
  * Counts a clip's frames, which a real-time take cannot know in advance and a
  * camera track has to match one for one.
  */
