@@ -43,10 +43,10 @@ Do not auto-fix any of these. A stop report is one of the two exceptions to the 
 
 A run cancelled by a runner or a superseded workflow reads as `failing`, and a reviewer reads it as a real failure. This section decides whether a `failing` wake reruns or stops, and the rerun is the one exception to the no-auto-fix rule.
 
-List the failed check runs on the record's `tip` and print each run id when every one of them was cancelled. The read goes through REST, since `gh pr checks` runs on GraphQL and a cloud session's proxy refuses it:
+List the failed check runs on the record's `tip`, keeping the newest run per check name as `canon pr checks` does, and print each run id when every one of them was cancelled. The read goes through REST, since `gh pr checks` runs on GraphQL and a cloud session's proxy refuses it:
 
 ```bash
-gh api "repos/{owner}/{repo}/commits/<tip>/check-runs?per_page=100" --jq '[.check_runs[] | select(.conclusion | IN("failure", "timed_out", "cancelled", "action_required", "startup_failure"))] | if length > 0 and all(.conclusion == "cancelled") then [.[].details_url | capture("/runs/(?<id>[0-9]+)").id] | unique | .[] else empty end'
+gh api "repos/{owner}/{repo}/commits/<tip>/check-runs?per_page=100" --jq '[.check_runs | group_by(.name)[] | max_by(.id) | select(.conclusion | IN("failure", "timed_out", "cancelled", "action_required", "startup_failure"))] | if length > 0 and all(.conclusion == "cancelled") then [.[].details_url | capture("/runs/(?<id>[0-9]+)").id] | unique | .[] else empty end'
 ```
 
 - A non-zero exit means the read was refused, so stop and report the refusal rather than reading it as a real failure
