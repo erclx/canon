@@ -2062,6 +2062,126 @@ describe('validateBoard verb-written shape', () => {
   })
 })
 
+describe('validateBoard held rows', () => {
+  const STEM = 'v3.0-third'
+  const BRANCH = `feat/${STEM}`
+
+  function readers(
+    sessions: ReadonlyMap<string, string> | undefined,
+    pulls: ReadonlyMap<string, string> | undefined,
+  ): ValidateOptions {
+    return {
+      live: { sessions: async () => sessions, pulls: async () => pulls },
+    }
+  }
+
+  const NOBODY = new Map<string, string>()
+  const OPEN_PULL = new Map([[BRANCH, 'pull request #12']])
+  const LIVE_SESSION = new Map([[BRANCH, 'session worker-a']])
+
+  async function seedPlan(): Promise<void> {
+    const plans = recordDir(ROOT, 'plans')
+    mkdirSync(plans, { recursive: true })
+    await writeFile(join(plans, `feature-${STEM}.md`), `# ${STEM}\n`)
+  }
+
+  async function seedUpNext(): Promise<void> {
+    await seedPlan()
+    await seedTask(STEM)
+    await seedBoard(
+      boardBody([
+        parkedTable([`| [${STEM}](${STEM}.md) | \`src/a.ts\` | x |`]),
+      ]),
+    )
+  }
+
+  async function heldFindings(options: ValidateOptions): Promise<Finding[]> {
+    const outcome = await validateBoard(ROOT, options)
+    if (!outcome.ok) throw new Error(outcome.message)
+    return outcome.findings.filter((finding) => finding.kind === 'row-held')
+  }
+
+  it('should report an Up next row an open pull request holds', async () => {
+    await seedUpNext()
+
+    const held = await heldFindings(readers(NOBODY, OPEN_PULL))
+
+    expect(held).toMatchObject([{ group: 'Up next', subject: STEM }])
+    expect(held[0]?.message).toContain('pull request #12')
+  })
+
+  it('should report an Up next row a live session holds', async () => {
+    await seedUpNext()
+
+    const held = await heldFindings(readers(LIVE_SESSION, NOBODY))
+
+    expect(held).toMatchObject([{ group: 'Up next', subject: STEM }])
+  })
+
+  it('should report a Needs a plan row a holder reaches', async () => {
+    await seedPlan()
+    await seedTask(STEM)
+    await seedBoard(needsPlanBoard('nothing. First here'))
+
+    const held = await heldFindings(readers(NOBODY, OPEN_PULL))
+
+    expect(held).toMatchObject([{ group: 'Needs a plan', subject: STEM }])
+  })
+
+  it('should not report a held row under Run now', async () => {
+    await seedPlan()
+    await seedTask(STEM)
+    await seedBoard(boardBody([readyTable([{ stem: STEM }])]))
+
+    expect(await heldFindings(readers(LIVE_SESSION, OPEN_PULL))).toEqual([])
+  })
+
+  it('should not report a row nothing holds', async () => {
+    await seedUpNext()
+
+    const other = new Map([['main', 'session orchestrator']])
+
+    expect(await heldFindings(readers(other, NOBODY))).toEqual([])
+  })
+
+  it('should not tie a row to the branch of an archived plan', async () => {
+    await seedTask(STEM, '', undefined, `../plans/archive/feature-${STEM}.md`)
+    await seedBoard(needsPlanBoard('nothing. First here'))
+
+    expect(await heldFindings(readers(LIVE_SESSION, OPEN_PULL))).toEqual([])
+  })
+
+  it('should read an unreachable gh as unread, not clean', async () => {
+    await seedUpNext()
+
+    const outcome = await validateBoard(ROOT, readers(NOBODY, undefined))
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      live: { sessions: 'read', pulls: 'unread' },
+    })
+  })
+
+  it('should still report from the source that read when the other failed', async () => {
+    await seedUpNext()
+
+    const held = await heldFindings(readers(LIVE_SESSION, undefined))
+
+    expect(held).toMatchObject([{ subject: STEM }])
+  })
+
+  it('should read neither source when the run did not ask', async () => {
+    await seedUpNext()
+
+    const outcome = await validateBoard(ROOT)
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      live: { sessions: 'not-asked', pulls: 'not-asked' },
+    })
+  })
+})
+
 describe('checkWideTokens', () => {
   const wideSpan = `\`${'a'.repeat(74)}.md\``
   const fitSpan = `\`${'a'.repeat(50)}.md\``

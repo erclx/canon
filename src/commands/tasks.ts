@@ -72,6 +72,7 @@ import {
   type ValidateOutcome,
   validateBoard,
 } from '@/tasks/validate'
+import { liveReaders } from '@/tasks/holders'
 import {
   intro,
   logAdd,
@@ -110,6 +111,7 @@ interface DeclineCommandOptions {
 interface ValidateCommandOptions {
   readonly json?: boolean
   readonly root?: string
+  readonly live?: boolean
 }
 
 interface CitationsCommandOptions {
@@ -323,6 +325,10 @@ export function register(program: Command): void {
     .helpOption('-h, --help', 'Show this help message')
     .option('--json', 'Add a machine-readable record on stdout')
     .option('--root <path>', 'Board root, defaulting to the main worktree')
+    .option(
+      '--live',
+      'Also read the session roster and open pull requests for held rows',
+    )
     .addHelpText(
       'after',
       [
@@ -338,6 +344,12 @@ export function register(program: Command): void {
         `  no Waiting on cell renders past ${WAITING_LIMIT} characters`,
         '  a blocker citing a bare vNNN.N label settles like a linked one',
         '  a file two Run now rows share is listed, never failed',
+        '  with --live, no Up next or Needs a plan row is held by a live session',
+        "  or an open pull request on its plan's branch",
+        '',
+        'The `live` field states each --live source as read, unread, or not-asked.',
+        'A source that fails reads as unread and moves no exit code, so read that',
+        'field rather than taking exit 0 as clean. A run without --live reads neither.',
         '',
         'Refusals, read off `reason`:',
         '  no-board     the repository holds no `.canon/tasks/` board',
@@ -356,6 +368,7 @@ export function register(program: Command): void {
         'Examples:',
         '  canon tasks validate',
         '  canon tasks validate --json',
+        '  canon tasks validate --live --json',
         '',
       ].join('\n'),
     )
@@ -1911,7 +1924,10 @@ function reportNextLabel(
 
 async function runValidate(opts: ValidateCommandOptions): Promise<number> {
   const root = opts.root ?? (await mainWorktreeRoot())
-  const outcome = await validateBoard(root)
+  const outcome = await validateBoard(
+    root,
+    opts.live ? { live: liveReaders(root) } : {},
+  )
 
   return reportValidation(outcome, opts.json ?? false, root)
 }
@@ -2390,8 +2406,28 @@ function reportValidation(
     } else {
       for (const task of outcome.unplaced) logWarn(describeUnplaced(task))
     }
-    outro()
+
+    if (outcome.live.sessions !== 'not-asked') {
+      logStep('Held rows')
+      if (
+        outcome.live.sessions === 'read' &&
+        outcome.live.pulls === 'read' &&
+        !outcome.findings.some((finding) => finding.kind === 'row-held')
+      ) {
+        logInfo('no row outside run now is held by a session or a pull request')
+      }
+    }
   }
+
+  // Unread is a warning in both modes, since diagnostics reach stderr with --json too.
+  if (outcome.live.sessions === 'unread') {
+    logWarn('the session roster could not be read, so no session was checked')
+  }
+  if (outcome.live.pulls === 'unread') {
+    logWarn('open pull requests could not be read, so none was checked')
+  }
+
+  if (!emitJson) outro()
 
   if (emitJson) {
     process.stdout.write(
@@ -2408,6 +2444,7 @@ function reportValidation(
         shared: outcome.shared,
         wide: outcome.wide,
         unplaced: outcome.unplaced,
+        live: outcome.live,
       })}\n`,
     )
   }
