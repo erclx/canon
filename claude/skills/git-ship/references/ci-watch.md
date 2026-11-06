@@ -5,7 +5,7 @@ description: What the git-ship CI watch does when the installed CLI predates the
 
 # CI watch fallback and refusals
 
-Applies to step 9 of `git-ship` once the watch wakes on anything but a `state` of `passing` or `failing` or a `conflicted: true` record, and to a target whose CLI carries no `canon pr checks`.
+Applies to step 9 of `git-ship` once the watch wakes on anything but a `state` of `passing` or `failing` or a `conflicted: true` record, to a `failing` record whose failed runs were all cancelled, and to a target whose CLI carries no `canon pr checks`.
 
 ## The fallback watch
 
@@ -23,9 +23,33 @@ Empty output stops rather than waits, since `no checks reported on the '<branch>
 
 ## Refused and unsettled reads
 
-Neither of these is a pass, and neither emits `✅ Shipped`.
+None of these is a pass, and none emits `✅ Shipped`. A `reason` and no `state` means the read was refused, and the watch sorts refusals into two kinds.
 
-- A `reason` and no `state` means the read was refused, such as `no-remote-branch` for a branch deleted on the remote. Stop and report that `reason`.
-- A watch that hit its timeout and printed no final record is CI unsettled after 60 minutes, so report it that way
+| Kind      | Reasons                                                      | What the watch did                                               |
+| --------- | ------------------------------------------------------------ | ---------------------------------------------------------------- |
+| Permanent | `no-remote-branch`, `ambiguous-pull`, `no-branch`            | Exited on the first one, since no amount of waiting changes them |
+| Transient | Every other reason, such as `gh-failed` or `runs-unreadable` | Kept polling, since the next read can clear                      |
+
+The set lives in the watch command rather than in the verb, so a refusal `canon pr checks` adds later defaults to transient and waits, which is the safe side.
+
+- A permanent refusal ends the sequence. Stop and report that `reason`, such as `no-remote-branch` for a branch deleted on the remote.
+- A transient refusal in the final record came from the read after the loop, since the loop never exits on one. Read `canon pr checks <number> --json` once more and route on that.
+- A second refusal on that read stops the sequence with its `reason`
+- A watch that hit its timeout and printed no final record is CI unsettled after 60 minutes, so report it that way. A transient refusal that never cleared ends here too.
 
 Do not auto-fix any of these. A stop report is one of the two exceptions to the no-text-between-steps rule.
+
+## A failing record with only cancelled runs
+
+A run cancelled by a runner or a superseded workflow reads as `failing`, and a reviewer reads it as a real failure. This section decides whether a `failing` wake reruns or stops, and the rerun is the one exception to the no-auto-fix rule.
+
+List the failed check runs on the record's `tip`, keeping the newest run per check name as `canon pr checks` does, and print each run id when every one of them was cancelled. The read goes through REST, since `gh pr checks` runs on GraphQL and a cloud session's proxy refuses it:
+
+```bash
+gh api "repos/{owner}/{repo}/commits/<tip>/check-runs?per_page=100" --jq '[.check_runs | group_by(.name)[] | max_by(.id) | select(.conclusion | IN("failure", "timed_out", "cancelled", "action_required", "startup_failure"))] | if length > 0 and all(.conclusion == "cancelled") then [.[].details_url | capture("/runs/(?<id>[0-9]+)").id] | unique | .[] else empty end'
+```
+
+- A non-zero exit means the read was refused, so stop and report the refusal rather than reading it as a real failure
+- An empty print on a zero exit means at least one check really failed, so stop and report it with its URL
+- Otherwise run `gh run rerun <id> --failed` once per printed id, then start the watch again from `### Watching CI`
+- Rerun once per ship. A second `failing` wake on the same cancelled runs stops and reports them as cancelled, naming each URL.

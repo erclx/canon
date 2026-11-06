@@ -62,21 +62,26 @@ The verb ships with the CLI and this body with the plugin, so an older binary me
 Run `canon pr checks <number> --json` once in the foreground. When no record comes back at all, the CLI predates the verb, so read `${CLAUDE_SKILL_DIR}/references/ci-watch.md` for the fallback watch. Otherwise start this loop through the Bash tool with `run_in_background` and a 60-minute timeout:
 
 ```bash
-until canon pr checks <number> --json | jq -e '.state != "pending" or .conflicted == true' >/dev/null; do sleep 30; done; canon pr checks <number> --json
+until canon pr checks <number> --json | jq -e '.conflicted == true or (.state | IN("passing", "failing")) or (.reason | IN("no-remote-branch", "ambiguous-pull", "no-branch"))' >/dev/null; do sleep 30; done; canon pr checks <number> --json
 ```
+
+The loop exits on a terminal state, a conflict, or one of the three permanent refusals, and polls through anything else. One failed GitHub call such as `gh-failed` never ends the watch while CI runs.
+
+- A record carrying neither field, or an empty line from a crashed binary, waits for the next read too
+- A refusal that never clears waits out the timeout rather than stopping at once
 
 Emit `⏳ Watching CI on #<number> in the background` and end the turn, printing nothing more while the watch runs. The wake resumes this step rather than restarting at step 1, and a wake landing inside another skill, such as a `review-address` pass, goes to whichever step is waiting on CI.
 
 ### Reading the wake
 
-Branch on the final record's fields rather than on the exit. Do not auto-fix any reading, and the watch line and a stop report are the two exceptions to the no-text-between-steps rule.
+Branch on the final record's fields rather than on the exit. Do not auto-fix any reading except by the one cancelled-run rerun `ci-watch.md` states. The watch line and a stop report are the two exceptions to the no-text-between-steps rule.
 
-| Record                                  | Route                                                                                 |
-| --------------------------------------- | ------------------------------------------------------------------------------------- |
-| `state: passing`                        | Settle the evidence thread below, then continue to After completion on `settled`      |
-| `state: failing`                        | Stop the sequence and report the failing check with its URL                           |
-| `conflicted: true`                      | Stop and report the branch conflicts with its base, since no run will start. Rebase.  |
-| A `reason` and no `state`, or a timeout | Read `${CLAUDE_SKILL_DIR}/references/ci-watch.md` for the refused and unsettled reads |
+| Record                                  | Route                                                                                                 |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `state: passing`                        | Settle the evidence thread below, then continue to After completion on `settled`                      |
+| `state: failing`                        | Read the cancelled-run section of `${CLAUDE_SKILL_DIR}/references/ci-watch.md`, which reruns or stops |
+| `conflicted: true`                      | Stop and report the branch conflicts with its base, since no run will start. Rebase.                  |
+| A `reason` and no `state`, or a timeout | Read `${CLAUDE_SKILL_DIR}/references/ci-watch.md` for the refused and unsettled reads                 |
 
 ### Settling the evidence thread
 
