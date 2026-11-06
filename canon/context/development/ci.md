@@ -25,7 +25,7 @@ Owns the workflows in `.github/workflows/` that verify a pull request, scan its 
 
 Runs `🛡️ Static Checks` on Linux and `🍎 macOS Unit Tests` beside it, neither on the weekly cron. The macOS job runs `bun run test` alone, since lint, types, format, shell, build, and browser results do not differ by platform.
 
-- The macOS job never blocks a merge, since the ruleset requires `🛡️ Static Checks` alone and `canon pr lift` and `canon pr merge` gate by the required checks, naming a failing macOS run `advisory`
+- The macOS job blocks a merge, since the ruleset requires it beside `🛡️ Static Checks` as of 2026-11-06, and `canon pr lift` and `canon pr merge` gate by the required checks
 - A new push to a pull request cancels its older run. Every other event keys its group on the commit, so `main`, `merge_group`, and the cron never cancel.
 - The Pin Stock Bash step links `/bin/bash` 3.2 first on `PATH`, and the next step fails on any other major version, so every test spawning `bash` runs on what a Mac ships
 - A test assuming `shellcheck`, `shfmt`, `claude`, or `/proc` skips on macOS without it, and the job never gains an install step
@@ -79,6 +79,6 @@ The release configuration, the manifests, and the install check sit beside the w
 
 - `no checks reported on the '<branch>' branch` usually means a merge conflict, since such a branch has no merge ref to run on. Read `gh pr view --json mergeable,mergeStateStatus` and rebase.
 - A green `🛡️ Static Checks` tested `refs/pull/<n>/merge` as of the last push. No merge queue exists, so a sibling merge leaves it stale until the poll reads `STALE`.
-- The ruleset requires `🛡️ Static Checks` by name, so renaming it strands branch protection and leaves lift and merge waiting on a check no run reports
+- The ruleset requires `🛡️ Static Checks` and `🍎 macOS Unit Tests` by name, so renaming either strands branch protection and leaves lift and merge waiting on a check no run reports
 - The runner installs no browser, so each `*.e2e.test.ts` skips itself and a green run does not show it ran. Verify those locally.
 - The `merge_group` trigger is inert, since a `merge_queue` rule returns `422` on a user-owned repository until a move to an organization
