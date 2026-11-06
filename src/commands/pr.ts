@@ -2494,14 +2494,18 @@ interface PullFiles {
   readonly present: ReadonlyMap<string, boolean>
   /** Each path the pull request removed, which a deploy's push filter still counts. */
   readonly removed: readonly string[]
+  /** Each renamed path mapped to the path it sat at before the pull request. */
+  readonly renamedFrom: ReadonlyMap<string, string>
 }
 
 /**
  * The paths a pull request changed, read through the paginated files endpoint
  * so the set is the same from any checkout and never capped at the first
- * view. `renamed` and `copied` count as added, since the new path has no
- * counterpart at the merge base. Returns undefined when the read fails, which
- * refuses rather than rendering a short set.
+ * view. `copied` counts as added, since a copy leaves its source in place and
+ * has no single base. `renamed` counts as added in `present` too, so the
+ * changed set stays the same, and `renamedFrom` carries the old path of each
+ * rename for a reader that compares against the base. Returns undefined when
+ * the read fails, which refuses rather than rendering a short set.
  */
 async function listPullFiles(
   cwd: string,
@@ -2512,18 +2516,22 @@ async function listPullFiles(
     '--paginate',
     `repos/{owner}/{repo}/pulls/${number}/files`,
     '--jq',
-    '.[] | [.status, .filename] | @tsv',
+    '.[] | [.status, .filename, (.previous_filename // "")] | @tsv',
   ])
   if (stdout === null) return undefined
   const present = new Map<string, boolean>()
   const removed: string[] = []
+  const renamedFrom = new Map<string, string>()
   for (const line of stdout.split('\n').filter(Boolean)) {
-    const [status, path] = line.split('\t')
+    const [status, path, previous] = line.split('\t')
     if (status === undefined || path === undefined) continue
     if (status === 'removed') removed.push(path)
     else present.set(path, status !== 'modified' && status !== 'changed')
+    if (status === 'renamed' && previous !== undefined && previous !== '') {
+      renamedFrom.set(path, previous)
+    }
   }
-  return { present, removed }
+  return { present, removed, renamedFrom }
 }
 
 function everyChangedPath(files: PullFiles): string[] {
@@ -2671,13 +2679,14 @@ async function measureItem(
   head: string,
 ): Promise<MeasuredItem> {
   const headRead = await readImage(cwd, item.path, head)
+  const basePath = item.basePath ?? item.path
   const baseRead =
     item.added || base === undefined
       ? undefined
-      : await readImage(cwd, item.path, base)
+      : await readImage(cwd, basePath, base)
   const unread = [
     ...(headRead.kind === 'failed' ? [`head:${item.path}`] : []),
-    ...(baseRead?.kind === 'failed' ? [`base:${item.path}`] : []),
+    ...(baseRead?.kind === 'failed' ? [`base:${basePath}`] : []),
   ]
   const headBytes = headRead.kind === 'read' ? headRead.bytes : undefined
   const baseBytes = baseRead?.kind === 'read' ? baseRead.bytes : undefined
@@ -2811,6 +2820,7 @@ async function runEvidence(
   const grouped = await groupEvidence(
     [...pullFiles.present.keys()],
     async (path) => pullFiles.present.get(path) === false,
+    pullFiles.renamedFrom,
   )
   const uncaptured = readUncaptured(
     everyChangedPath(pullFiles),
