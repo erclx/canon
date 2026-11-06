@@ -77,7 +77,7 @@ const HEADING = /^(#{1,6})\s+(.+?)\s*$/
  * A `file.ts:42` or `file.ts:42-58` suffix, which is a reader's click target
  * rather than part of the name.
  */
-const LINE_SUFFIX = /:\d+(?:-\d+)?$/
+export const LINE_SUFFIX = /:\d+(?:-\d+)?$/
 
 /**
  * A span that carries a line suffix and nothing else, such as `:642` beside
