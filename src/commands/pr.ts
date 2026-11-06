@@ -113,6 +113,7 @@ import {
   type LocalRefusal,
   type LocalRunner,
 } from '@/pr/local'
+import { linkKeyChanges } from '@/pr/links'
 import { KEY_CHANGES } from '@/pr/paths'
 import {
   findDeployWorkflow,
@@ -161,6 +162,7 @@ const GH_TIMEOUT_MS = 30_000
 const UNNAMED_PRINT_LIMIT = 10
 
 interface KeyChangesOptions {
+  readonly link?: boolean
   readonly body?: string
   readonly base?: string
   readonly root?: string
@@ -510,6 +512,10 @@ export function register(program: Command): void {
       'Far side of the range when --body supplies the body',
     )
     .option('--root <path>', 'Repository to read, defaulting to the cwd')
+    .option(
+      '--link',
+      `Print the body with each ## ${KEY_CHANGES} path linked to its diff, needing a number`,
+    )
     .option('--json', 'Add a machine-readable record on stdout')
     .addHelpText(
       'after',
@@ -538,6 +544,12 @@ export function register(program: Command): void {
         'points the change at a locative the path does not name. Read the bullet on',
         "the record's preview before filing an unmet path as a stale claim.",
         '',
+        '--link prints the body and nothing else, with every path the section',
+        'names that the diff changes written as a link to its row in the Files',
+        'tab. The anchor is `diff-` and the SHA-256 of the path. Pass the pull',
+        'request number, since the link needs it. A plain run also reports a',
+        "link whose anchor hashes another path than its label's, as mislinked.",
+        '',
         'Refusals, read off `reason`:',
         '  no-section          the body carries no `## Key changes` heading, so it',
         '                      claims nothing',
@@ -555,14 +567,17 @@ export function register(program: Command): void {
         '  gh-missing          `gh` is not on the path, so no pull request could be',
         '                      resolved',
         '  gh-failed           `gh` could not answer for this repository or branch',
+        '  no-number           --link was given with no pull request number',
+        '  no-repo-url         --link could not read the repository address',
         '',
         'Exit codes:',
-        '  0  every claimed path is in the diff',
+        '  0  every claimed path is in the diff, and every link opens its own file',
         '  1  refused, with the reason on stderr or in the JSON record',
-        '  2  at least one claimed path is absent from the diff',
+        '  2  a claimed path is absent from the diff, or a link opens another file',
         '',
         'Examples:',
         '  canon pr key-changes',
+        '  canon pr key-changes 1265 --link --body .canon/tmp/body.md',
         '  canon pr key-changes 1265 --json',
         '  canon pr key-changes --body .canon/tmp/body.md --base origin/main',
         '',
@@ -1875,6 +1890,8 @@ async function runKeyChanges(
   const root = resolve(opts.root ?? process.cwd())
   const emitJson = opts.json ?? false
 
+  if (opts.link === true) return runKeyChangesLink(number, opts, root)
+
   intro('canon pr key-changes')
 
   const source =
@@ -1959,6 +1976,14 @@ async function runKeyChanges(
     for (const claim of report.unresolved) logInfo(claim.path)
   }
 
+  if (report.mislinked.length > 0) {
+    logStep('Mislinked')
+    logWarn(
+      `${plural(report.mislinked.length, 'link')} open another file's diff than the path they name. Re-run with --link to rewrite them.`,
+    )
+    for (const link of report.mislinked) logWarn(link.path)
+  }
+
   outro()
 
   if (emitJson) {
@@ -1976,11 +2001,62 @@ async function runKeyChanges(
         incidental: report.incidental,
         unresolved: report.unresolved,
         evidenceUnread: report.evidenceUnread,
+        mislinked: report.mislinked,
       })}\n`,
     )
   }
 
-  return report.unmet.length === 0 ? 0 : 2
+  return report.unmet.length === 0 && report.mislinked.length === 0 ? 0 : 2
+}
+
+/**
+ * Prints the body with each changed path in `## Key changes` linked to its
+ * diff, and nothing else, so stdout pipes straight into a body file.
+ *
+ * Skips the frame `intro` opens, which would land in the piped body. Refusals
+ * keep the framed shape on stdout like every other mode.
+ */
+async function runKeyChangesLink(
+  number: string | undefined,
+  opts: KeyChangesOptions,
+  root: string,
+): Promise<number> {
+  const emitJson = opts.json ?? false
+
+  const source =
+    opts.body === undefined
+      ? await readFromApi(root, number)
+      : await readFromFile(root, process.cwd(), opts.body, opts.base)
+  if (source.kind === 'refused') return refuse(source.reason, emitJson, root)
+
+  const pull = number ?? source.source.number?.toString()
+  if (pull === undefined) {
+    return refuseWith(
+      'no-number',
+      'The link needs the pull request number, so pass it as the argument.',
+      emitJson,
+      root,
+    )
+  }
+
+  const url = await gh(root, ['repo', 'view', '--json', 'url', '-q', '.url'])
+  if (url === null || url.trim() === '') {
+    return refuseWith(
+      'no-repo-url',
+      'gh could not read the repository address, so no link was built.',
+      emitJson,
+      root,
+    )
+  }
+
+  process.stdout.write(
+    linkKeyChanges(
+      source.source.body,
+      source.source.changed,
+      `${url.trim()}/pull/${pull}/files`,
+    ),
+  )
+  return 0
 }
 
 type IdentityRead =

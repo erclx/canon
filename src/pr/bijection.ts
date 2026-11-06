@@ -1,4 +1,5 @@
 import type { RenamePair } from '@/git/files'
+import { findMislinked, type Mislinked } from '@/pr/links'
 import { extractKeyChangePaths, KEY_CHANGES, type PathClaim } from '@/pr/paths'
 
 /**
@@ -62,6 +63,12 @@ export interface BijectionReport {
    * comparison has no way to tell a stale claim from one it could not check.
    */
   readonly evidenceUnread: boolean
+  /**
+   * Links in the section whose anchor hashes a path other than the one their
+   * label names, which open the wrong file's diff. Empty for a body that links
+   * nothing, since an unlinked path is the ordinary form.
+   */
+  readonly mislinked: readonly Mislinked[]
 }
 
 export type Bijection =
@@ -231,6 +238,7 @@ export function compareKeyChanges(input: BijectionInput): Bijection {
     unnamed: reached.filter((path) => !owesNoBullet(path)),
     incidental: reached.filter(owesNoBullet),
     evidenceUnread,
+    mislinked: findMislinked(input.body),
   }
 }
 
