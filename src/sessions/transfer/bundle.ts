@@ -21,7 +21,7 @@ import {
   readSideFolder,
   readTranscript,
   transcriptFacts,
-} from '@/sessions/transfer/transcript'
+} from '@/sessions/transcript'
 
 /** Bumped when a field changes meaning, so an older import refuses a newer bundle. */
 export const BUNDLE_FORMAT = 1

@@ -9,7 +9,7 @@ description: What the one warm control session owns, why it plans and dispatches
 
 Without this skill, the control session builds or merges, and the cross-feature picture goes with it. Plans go out unread against each other and a moved tree, the queue empties or fills with whatever is oldest, a parked row's blocker is never re-tested, and a second orchestrator writes a board neither can read.
 
-The channel fails at every hand-off. A finding or a reply stays in a thread nobody re-reads, a dispatch launches a branch other than the one the check cleared, a wave's cost grows unweighed, a report buries the human's decision, and a compaction loses the way back in.
+The channel fails at every hand-off. A finding or a reply stays in a thread nobody re-reads, a dispatch launches a branch other than the one the check cleared, a wave's cost grows unweighed, a report buries the human's decision, a compaction loses the way back in, and a wave a usage limit stopped reads as finished.
 
 ## Must
 

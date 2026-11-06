@@ -18,7 +18,7 @@ import {
   importSession,
   type ImportOutcome,
 } from '@/sessions/transfer/bundle'
-import { encodeProjectPath } from '@/sessions/transfer/transcript'
+import { encodeProjectPath } from '@/sessions/transcript'
 
 const ID = '2cb831b1-b32c-4d57-80a8-d23cbc5ef81e'
 const STARTED = '2026-09-01T08:00:00.000Z'

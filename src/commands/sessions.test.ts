@@ -12,7 +12,7 @@ import { $ } from 'bun'
 import { execa } from 'execa'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gitEnv } from '@/git/env'
-import { encodeProjectPath } from '@/sessions/transfer/transcript'
+import { encodeProjectPath } from '@/sessions/transcript'
 
 const REPO_ROOT = join(import.meta.dirname, '..', '..')
 const CLI = join(REPO_ROOT, 'src', 'cli.ts')
@@ -267,4 +267,193 @@ describe('canon sessions list from another pid namespace', () => {
       expect(result.stderr).not.toContain('messaging socket existing alone')
     },
   )
+})
+
+describe('canon sessions list and usage-limit stops', () => {
+  const STOP_ID = 'id-stopped'
+  const OTHER_ID = 'id-other'
+
+  function seedRow(pid: number, sessionId: string, name: string): void {
+    const registry = join(CONFIG, 'sessions')
+    mkdirSync(registry, { recursive: true })
+    writeFileSync(
+      join(registry, `${pid}.json`),
+      JSON.stringify({
+        pid,
+        sessionId,
+        cwd: REPO,
+        name,
+        kind: 'interactive',
+        status: 'idle',
+        startedAt: 1,
+      }),
+    )
+  }
+
+  function seedTranscript(sessionId: string, entry: object): void {
+    writeFileSync(
+      join(CONFIG, 'projects', '-machine-a-repo', `${sessionId}.jsonl`),
+      `${JSON.stringify(entry)}\n`,
+    )
+  }
+
+  const LIMIT = {
+    type: 'assistant',
+    isSidechain: false,
+    error: 'rate_limit',
+    message: {
+      model: '<synthetic>',
+      content: [
+        { type: 'text', text: "You've hit your session limit · resets 9pm" },
+      ],
+    },
+  }
+
+  const ANSWERED = {
+    type: 'assistant',
+    isSidechain: false,
+    message: {
+      model: 'claude-opus-5-5',
+      content: [{ type: 'text', text: 'Done.' }],
+    },
+  }
+
+  it('should add the stop fields to every row and keep the rows', async () => {
+    seedRow(process.pid, STOP_ID, 'stopped-row')
+    seedRow(process.ppid, OTHER_ID, 'answered-row')
+    seedTranscript(STOP_ID, LIMIT)
+    seedTranscript(OTHER_ID, ANSWERED)
+
+    const record = JSON.parse((await runSessions(['list', '--json'])).stdout)
+
+    expect(record.stopsUnread).toBe(0)
+    expect(record.sessions).toHaveLength(2)
+    expect(record.sessions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'stopped-row',
+          stopped: 'usage-limit',
+          stopResets: '9pm',
+        }),
+        expect.objectContaining({
+          name: 'answered-row',
+          stopped: null,
+          stopResets: null,
+        }),
+      ]),
+    )
+  })
+
+  it('should keep only the usage-limit rows under --stopped and count the unread', async () => {
+    seedRow(process.pid, STOP_ID, 'stopped-row')
+    seedRow(process.ppid, OTHER_ID, 'unread-row')
+    seedTranscript(STOP_ID, LIMIT)
+
+    const record = JSON.parse(
+      (await runSessions(['list', '--stopped', '--json'])).stdout,
+    )
+
+    expect(record.stopsUnread).toBe(1)
+    expect(record.sessions).toEqual([
+      expect.objectContaining({ name: 'stopped-row' }),
+    ])
+  })
+
+  it('should exit 0 on an empty --stopped result and warn about the unread', async () => {
+    seedRow(process.pid, OTHER_ID, 'unread-row')
+
+    const result = await runSessions(['list', '--stopped', '--json'])
+
+    expect(result.exitCode).toBe(0)
+    expect(JSON.parse(result.stdout)).toMatchObject({
+      stopsUnread: 1,
+      sessions: [],
+    })
+    expect(result.stderr).toContain('may be stopped')
+  })
+
+  it('should say no session is stopped only when every session was read', async () => {
+    seedRow(process.pid, OTHER_ID, 'answered-row')
+    seedTranscript(OTHER_ID, ANSWERED)
+
+    const result = await runSessions(['list', '--stopped'])
+
+    expect(result.exitCode).toBe(0)
+    expect(result.stderr).toContain('No session is stopped.')
+    expect(result.stderr).not.toContain('may be stopped')
+  })
+
+  it('should not claim no session is stopped beside an unread row', async () => {
+    seedRow(process.pid, OTHER_ID, 'unread-row')
+
+    const result = await runSessions(['list', '--stopped'])
+
+    expect(result.stderr).toContain('could check')
+    expect(result.stderr).not.toContain('No session is stopped.')
+  })
+
+  it('should scope an empty --branch result to that branch', async () => {
+    seedRow(process.pid, OTHER_ID, 'answered-row')
+    seedTranscript(OTHER_ID, ANSWERED)
+
+    const result = await runSessions(['list', '--stopped', '--branch', 'main'])
+
+    expect(result.stderr).toContain('No session holding main is stopped.')
+  })
+
+  it.skipIf(!existsSync('/proc/self/ns/pid'))(
+    'should not claim no session is stopped when a foreign record went unchecked',
+    async () => {
+      const registry = join(CONFIG, 'sessions')
+      mkdirSync(registry, { recursive: true })
+      writeFileSync(
+        join(registry, '4242.json'),
+        JSON.stringify({
+          pid: 4242,
+          sessionId: 'id-4242',
+          cwd: REPO,
+          name: 'canon-4242',
+          kind: 'interactive',
+          status: 'idle',
+          startedAt: 1,
+          procStart: '1',
+          pidDomain: 'linux:test:pid:[1]',
+          messagingSocketPath: join(DIR, 'gone.sock'),
+        }),
+      )
+
+      const result = await runSessions(['list', '--stopped'])
+
+      expect(result.exitCode).toBe(0)
+      expect(result.stderr).toContain('could check')
+      expect(result.stderr).not.toContain('No session is stopped.')
+      expect(result.stderr).toContain('may be missing')
+    },
+  )
+
+  it('should keep the claim reading the whole roster under --stopped', async () => {
+    seedRow(process.pid, OTHER_ID, 'answered-row')
+    seedTranscript(OTHER_ID, ANSWERED)
+
+    const record = JSON.parse(
+      (await runSessions(['list', '--stopped', '--branch', 'main', '--json']))
+        .stdout,
+    )
+
+    expect(record.sessions).toEqual([])
+    expect(record.claimed).toBe(true)
+  })
+
+  it('should frame the stop beside the row and nothing for a row not stopped', async () => {
+    seedRow(process.pid, STOP_ID, 'stopped-row')
+    seedRow(process.ppid, OTHER_ID, 'answered-row')
+    seedTranscript(STOP_ID, LIMIT)
+    seedTranscript(OTHER_ID, ANSWERED)
+
+    const result = await runSessions(['list'])
+    const framed = `${result.stdout}\n${result.stderr}`
+
+    expect(framed).toContain('stopped: usage-limit, resets 9pm')
+    expect(framed.match(/stopped: /g)).toHaveLength(1)
+  })
 })

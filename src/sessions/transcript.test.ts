@@ -9,7 +9,7 @@ import {
   readSideFolder,
   readTranscript,
   transcriptFacts,
-} from '@/sessions/transfer/transcript'
+} from '@/sessions/transcript'
 
 const ID = '2cb831b1-b32c-4d57-80a8-d23cbc5ef81e'
 
