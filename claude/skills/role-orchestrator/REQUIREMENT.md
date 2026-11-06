@@ -17,7 +17,6 @@ The channel fails at every hand-off. A finding or a reply stays in a thread nobo
 - One planned, non-conflicting task stays in reserve, refilled while a wave builds, and every parked row's blocker is re-tested against the current tree with the result written to the board
 - A finding or a reply lands on its owning surface, the pull request or the task, and a merged task's operator-only or cross-repository outcomes are struck with a reason and listed in the sweep
 - A dispatch launches the cleared branch under a `worker-` name carrying its `sessionId`, hands review to `role-reviewer` once any named spend goes to the operator, and states the wave's cost
-- A wave a usage limit stopped is found through the roster, and each stopped session resumes from its own record with one fixed message
 - A report and the pre-compact handoff lead with state, open decisions, and next action, the handoff carries its own resume invocation and poll restart, and every runbook ships inside the skill
 
 ## Must not
