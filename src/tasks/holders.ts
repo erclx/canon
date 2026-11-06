@@ -39,8 +39,9 @@ export interface SessionHolderOptions {
 /**
  * Reads the roster scoped to `root`'s repository, since a branch name says
  * nothing across a machine and another project's worker on the same name holds
- * nothing here. A foreign record whose socket is gone may be a live session this
- * reader could not check, so the roster reads as unread rather than complete.
+ * nothing here. Two rows leave the liveness undecided, a foreign record whose
+ * socket is gone and a row resting only on a socket file a crash can leave, so
+ * either reads the whole roster as unread rather than as a hold or as clear.
  */
 export function sessionHolders(
   root: string,
@@ -52,7 +53,12 @@ export function sessionHolders(
   return async () => {
     try {
       const [report, repo] = await Promise.all([resolve(), repository(root)])
-      if (report.kind !== 'resolved' || report.foreignDead > 0 || !repo) {
+      if (
+        report.kind !== 'resolved' ||
+        report.foreignDead > 0 ||
+        report.sessions.some((session) => session.via === 'socket') ||
+        !repo
+      ) {
         return undefined
       }
 

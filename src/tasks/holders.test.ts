@@ -83,6 +83,20 @@ describe('sessionHolders', () => {
     expect(held).toBeUndefined()
   })
 
+  it('should read as unread when a row rests on a leftover socket', async () => {
+    const held = await readSessions(
+      roster([session({ via: 'socket', confidence: 'unverified' })]),
+    )
+
+    expect(held).toBeUndefined()
+  })
+
+  it('should take a row a listener confirmed as a hold', async () => {
+    const held = await readSessions(roster([session({ via: 'listener' })]))
+
+    expect(held?.get('feat/a')).toBe('session worker-a')
+  })
+
   it('should read as unread when the root is no repository', async () => {
     const held = await readSessions(roster([session({})]), null)
 
