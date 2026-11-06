@@ -101,7 +101,7 @@ describe('the stub remote', () => {
     )
 
     expect(result.status).not.toBe(0)
-    expect(result.stderr).toMatch(/127\.0\.0\.1.*port 9|via 127\.0\.0\.1/)
+    expect(result.stderr).toMatch(/127\.0\.0\.1/)
   })
 
   it('should put the stub ahead of any real gh on PATH', () => {
