@@ -173,8 +173,8 @@ When frontmatter carries a `title` or `description` used for catalog display:
 ## Links and file references
 
 - Use descriptive anchor text for links. Avoid `click here` or `read more`.
-- Wrap file references in backticks by default. Never repeat the path verbatim as a link label.
-- Use a labeled markdown link (`[label](path)`) only on human-read surfaces (`README.md`, `docs/`), an index file, and a pull request body's Key changes paths
+- Wrap file references in backticks by default. Never repeat the path verbatim as a link label, bar a Key changes code span.
+- Use a labeled markdown link (`[label](path)`) only on human-read surfaces (`README.md`, `docs/`), an index file, and a pull request body's Key changes
 - A relative link resolves against the filesystem over the corpus the ban scan reads, and one carrying a placeholder in angle brackets, such as `<slug>`, is an exempt illustration
 
 ## Examples

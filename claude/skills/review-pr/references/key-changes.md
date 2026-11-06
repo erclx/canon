@@ -16,11 +16,12 @@ Branch on the record rather than on the exit code, which a shell function wrappi
 | Field        | Reading                                                                                |
 | ------------ | -------------------------------------------------------------------------------------- |
 | `unmet`      | a `should-fix` finding under the `**PR body**` block the stale box takes, one per path |
+| `mislinked`  | a `should-fix` finding under the same block, one per link, since it opens another file |
 | `unnamed`    | read for yourself and raise nothing off the count                                      |
 | `unresolved` | reported nowhere, since it was judged in neither direction                             |
 | `incidental` | reported nowhere, since it owes no bullet                                              |
 
-Each `unmet` finding quotes the `preview` bullet and the `head`.
+Each `unmet` finding quotes the `preview` bullet and the `head`. The exit is 2 for a `mislinked` entry too, so a body exiting 2 with `unmet` empty is not clean.
 
 ### Before filing an unmet path
 

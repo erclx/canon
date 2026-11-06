@@ -63,6 +63,7 @@ Steps 1 to 3 run only when the tree is dirty. A clean tree carrying unpushed com
 7. Sync the body and title on every invocation, before the routing below decides on the reply.
    - Read the live title and body with `gh api repos/{owner}/{repo}/pulls/<number> --jq '{html_url, title, body}'`
    - Update the body with `gh api -X PATCH repos/{owner}/{repo}/pulls/<number> -F body=@<file> --silent` when the new commit changes scope, writing the new body to `<file>` first
+   - Link its Key changes paths first with `canon pr key-changes <number> --link --body <file> --base origin/<default>`, and send that output, or `<file>` on a refusal
    - Update the title with `gh api -X PATCH repos/{owner}/{repo}/pulls/<number> -f title="<title>" --silent` when the scope shifted enough to make it inaccurate
    - A fix commit answering a review changes what shipped exactly as much as an ordinary followup does, so the sync cannot wait on the invocation or the comment count below.
    - Judge a body a person edited by hand against the tree like any other, since a hand-edit the fix commit made stale is the drift this sync closes.
