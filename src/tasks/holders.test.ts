@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { ResolvedSession, SessionReport } from '@/sessions/resolve'
-import { pullHolders, sessionHolders } from '@/tasks/holders'
+import { mergedBranches, pullHolders, sessionHolders } from '@/tasks/holders'
 
 const REPOSITORY = '/work/canon/.git'
 
@@ -118,6 +118,45 @@ describe('sessionHolders', () => {
 function pull(number: number, headRefName: string, fork = false) {
   return { number, headRefName, isCrossRepository: fork }
 }
+
+describe('mergedBranches', () => {
+  it('should answer true when a merged pull request names the branch', async () => {
+    const merged = await mergedBranches('/work/canon', async () =>
+      JSON.stringify([pull(12, 'feat/a')]),
+    )('feat/a')
+
+    expect(merged).toBe(true)
+  })
+
+  it('should answer false when none does', async () => {
+    const merged = await mergedBranches(
+      '/work/canon',
+      async () => '[]',
+    )('feat/a')
+
+    expect(merged).toBe(false)
+  })
+
+  it('should ignore a merged fork head spelled like the branch', async () => {
+    const merged = await mergedBranches('/work/canon', async () =>
+      JSON.stringify([pull(12, 'feat/a', true)]),
+    )('feat/a')
+
+    expect(merged).toBe(false)
+  })
+
+  it.each([undefined, 'not json'])(
+    'should answer undefined when gh returns %s',
+    async (stdout) => {
+      const merged = await mergedBranches(
+        '/work/canon',
+        async () => stdout,
+      )('feat/a')
+
+      expect(merged).toBeUndefined()
+    },
+  )
+})
 
 describe('pullHolders', () => {
   it('should name the open pull request holding a branch', async () => {

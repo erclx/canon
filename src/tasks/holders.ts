@@ -26,9 +26,13 @@ export type HolderReader = () => Promise<
   ReadonlyMap<string, string> | undefined
 >
 
+/** Whether a merged pull request names a branch, `undefined` when GitHub could not say. */
+export type MergedReader = (branch: string) => Promise<boolean | undefined>
+
 export interface LiveReaders {
   readonly sessions: HolderReader
   readonly pulls: HolderReader
+  readonly merged: MergedReader
 }
 
 export interface SessionHolderOptions {
@@ -98,13 +102,13 @@ const runGh: GhRunner = async (cwd, args) => {
   }
 }
 
-interface OpenPull {
+interface ListedPull {
   readonly number: number
   readonly headRefName: string
   readonly isCrossRepository: boolean
 }
 
-function isOpenPull(value: unknown): value is OpenPull {
+function isListedPull(value: unknown): value is ListedPull {
   if (typeof value !== 'object' || value === null) return false
   const pull = value as Record<string, unknown>
 
@@ -115,10 +119,10 @@ function isOpenPull(value: unknown): value is OpenPull {
   )
 }
 
-function parsePulls(stdout: string): readonly OpenPull[] | undefined {
+function parsePulls(stdout: string): readonly ListedPull[] | undefined {
   try {
     const parsed: unknown = JSON.parse(stdout)
-    return Array.isArray(parsed) && parsed.every(isOpenPull)
+    return Array.isArray(parsed) && parsed.every(isListedPull)
       ? parsed
       : undefined
   } catch {
@@ -156,6 +160,39 @@ export function pullHolders(root: string, run: GhRunner = runGh): HolderReader {
   }
 }
 
+/**
+ * Asks about one branch at a time rather than listing merged pull requests,
+ * since a list long enough to reach an old merge costs every run, and only a
+ * branch a session already holds against a row takes this read.
+ */
+export function mergedBranches(
+  root: string,
+  run: GhRunner = runGh,
+): MergedReader {
+  return async (branch) => {
+    const stdout = await run(root, [
+      'pr',
+      'list',
+      '--state',
+      'merged',
+      '--head',
+      branch,
+      '--limit',
+      String(PULL_LIMIT),
+      '--json',
+      'number,headRefName,isCrossRepository',
+    ])
+    if (stdout === undefined) return undefined
+
+    const pulls = parsePulls(stdout)
+    return pulls?.some((pull) => !pull.isCrossRepository)
+  }
+}
+
 export function liveReaders(root: string): LiveReaders {
-  return { sessions: sessionHolders(root), pulls: pullHolders(root) }
+  return {
+    sessions: sessionHolders(root),
+    pulls: pullHolders(root),
+    merged: mergedBranches(root),
+  }
 }

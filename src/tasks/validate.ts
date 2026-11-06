@@ -23,7 +23,7 @@ import {
   WAITING_LIMIT,
 } from '@/tasks/board'
 import { branchOfPlan } from '@/tasks/branch'
-import type { HolderReader, LiveReaders } from '@/tasks/holders'
+import type { HolderReader, LiveReaders, MergedReader } from '@/tasks/holders'
 import { gitTrunkReader, type TrunkReader } from '@/tasks/trunk'
 
 const ORDERING_FILE = 'priority.md'
@@ -1662,31 +1662,41 @@ export async function groupRuleFindings(
  * request holds, tied through the branch each live plan on its `Plan:` line
  * derives. A row whose worker renamed its branch has nothing to match, and an
  * archived plan's branch is finished work, so neither is reported.
+ *
+ * A session outlives its merge, so a session still on a branch a merged pull
+ * request names is finished work too, until the merge reaches this clone and the
+ * hook archives the row. A merged read that fails leaves the hold standing, since
+ * the failed read is reported and the session is still there.
  */
 async function checkHeld(
   rows: readonly BoardRow[],
-  holders: readonly ReadonlyMap<string, string>[],
+  live: LiveRead,
   dir: string,
   root: string,
 ): Promise<Finding[]> {
+  const holdersOf = async (branch: string): Promise<string[]> => {
+    const session = live.sessions?.get(branch)
+    const finished = session ? (await live.merged?.(branch)) === true : false
+
+    return [session && !finished ? session : undefined, live.pulls?.get(branch)]
+      .filter((name): name is string => name !== undefined)
+      .map((name) => `${name} on ${branch}`)
+  }
+
   const found = await Promise.all(
     rows.map(async (row): Promise<Finding | undefined> => {
       if (row.group === 'Run now' || !row.stem) return undefined
       const file = join(dir, `${row.stem}.md`)
       if (!existsSync(file)) return undefined
 
-      const held = readPlanTargets(await readFile(file, 'utf8')).flatMap(
-        (target) => {
-          const path = target.split('#')[0] || target
-          if (resolveLivePlan(path, dir, root) === undefined) return []
-
-          const branch = branchOfPlan(path)
-          return holders.flatMap((holder) => {
-            const name = holder.get(branch)
-            return name ? [`${name} on ${branch}`] : []
-          })
-        },
-      )
+      const targets = readPlanTargets(await readFile(file, 'utf8'))
+      const branches = targets.flatMap((target) => {
+        const path = target.split('#')[0] || target
+        return resolveLivePlan(path, dir, root) === undefined
+          ? []
+          : [branchOfPlan(path)]
+      })
+      const held = (await Promise.all(branches.map(holdersOf))).flat()
       if (held.length === 0) return undefined
 
       return {
@@ -1701,16 +1711,18 @@ async function checkHeld(
   return found.filter((finding): finding is Finding => finding !== undefined)
 }
 
-/** Takes each source once, since a failed read answers undefined rather than throws. */
-async function readLive(live: LiveReaders | undefined): Promise<{
+/** What each source answered, `undefined` where it was not asked or failed. */
+interface LiveRead {
   readonly reading: LiveReading
-  readonly holders: readonly ReadonlyMap<string, string>[]
-}> {
+  readonly sessions?: Awaited<ReturnType<HolderReader>>
+  readonly pulls?: Awaited<ReturnType<HolderReader>>
+  readonly merged?: MergedReader
+}
+
+/** Takes each source once, since a failed read answers undefined rather than throws. */
+async function readLive(live: LiveReaders | undefined): Promise<LiveRead> {
   if (!live) {
-    return {
-      reading: { sessions: 'not-asked', pulls: 'not-asked' },
-      holders: [],
-    }
+    return { reading: { sessions: 'not-asked', pulls: 'not-asked' } }
   }
 
   const stateOf = (read: Awaited<ReturnType<HolderReader>>): LiveState =>
@@ -1719,7 +1731,9 @@ async function readLive(live: LiveReaders | undefined): Promise<{
 
   return {
     reading: { sessions: stateOf(sessions), pulls: stateOf(pulls) },
-    holders: [sessions, pulls].flatMap((read) => (read ? [read] : [])),
+    sessions,
+    pulls,
+    merged: live.merged,
   }
 }
 
@@ -1799,7 +1813,7 @@ export async function validateBoard(
     ...checkCellWidth(rows),
     ...checkOrdering(rows),
     ...parked.findings,
-    ...(await checkHeld(rows, live.holders, dir, root)),
+    ...(await checkHeld(rows, live, dir, root)),
   ]
 
   return {

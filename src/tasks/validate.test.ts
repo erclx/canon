@@ -2069,9 +2069,14 @@ describe('validateBoard held rows', () => {
   function readers(
     sessions: ReadonlyMap<string, string> | undefined,
     pulls: ReadonlyMap<string, string> | undefined,
+    merged: boolean | undefined = false,
   ): ValidateOptions {
     return {
-      live: { sessions: async () => sessions, pulls: async () => pulls },
+      live: {
+        sessions: async () => sessions,
+        pulls: async () => pulls,
+        merged: async () => merged,
+      },
     }
   }
 
@@ -2116,6 +2121,20 @@ describe('validateBoard held rows', () => {
     const held = await heldFindings(readers(LIVE_SESSION, NOBODY))
 
     expect(held).toMatchObject([{ group: 'Up next', subject: STEM }])
+  })
+
+  it('should not report a session still on a merged branch', async () => {
+    await seedUpNext()
+
+    expect(await heldFindings(readers(LIVE_SESSION, NOBODY, true))).toEqual([])
+  })
+
+  it('should keep a session hold when the merged read fails', async () => {
+    await seedUpNext()
+
+    const held = await heldFindings(readers(LIVE_SESSION, NOBODY, undefined))
+
+    expect(held).toMatchObject([{ subject: STEM }])
   })
 
   it('should report a Needs a plan row a holder reaches', async () => {
