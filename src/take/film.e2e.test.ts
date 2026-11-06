@@ -1,8 +1,17 @@
-import { spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { spawn, spawnSync } from 'node:child_process'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import type { CameraTrack } from '@/take/camera'
 import {
   FPS,
@@ -284,6 +293,73 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
     const [stillLuma = 0] = bandLuma(still, '8:8:100:500')
     expect(stillLuma).toBeGreaterThan(230)
     expect(Math.abs(stillLuma - (luma.at(-1) ?? 0))).toBeLessThanOrEqual(3)
+  }, 180_000)
+
+  it('should clear the spool a killed take left beside the clip', async () => {
+    const read = readTakePlan(
+      JSON.stringify({
+        beats: [
+          {
+            name: 'cast',
+            route: 'screencast',
+            steps: [{ kind: 'wait', ms: 200 }],
+          },
+        ],
+      }),
+    )
+    if (read.kind !== 'read') throw new Error(read.detail)
+    const own = mkdtempSync(join(tmpdir(), 'canon-take-spool-e2e-'))
+    const stale = join(own, '01-cast/spool/0.jpg')
+    mkdirSync(dirname(stale), { recursive: true })
+    writeFileSync(stale, 'left by a killed take')
+
+    try {
+      const result = await take({ url: server.url, plan: read.plan, out: own })
+
+      expect(result).toMatchObject({ status: 'filmed' })
+      expect(existsSync(dirname(stale))).toBe(false)
+    } finally {
+      rmSync(own, { recursive: true, force: true })
+    }
+  }, 180_000)
+
+  it('should remove the spool when the take is interrupted', async () => {
+    const own = mkdtempSync(join(tmpdir(), 'canon-take-spool-e2e-'))
+    const plan = join(own, 'plan.json')
+    writeFileSync(
+      plan,
+      JSON.stringify({
+        beats: [
+          {
+            name: 'cast',
+            route: 'screencast',
+            steps: [{ kind: 'wait', ms: 60_000 }],
+          },
+        ],
+      }),
+    )
+    const spool = join(own, 'takes/01-cast/spool')
+    const cli = fileURLToPath(new URL('../cli.ts', import.meta.url))
+    const running = spawn(
+      'bun',
+      [cli, 'take', server.url, plan, '--out', join(own, 'takes')],
+      { stdio: 'ignore' },
+    )
+    const exited = new Promise((done) => running.once('close', done))
+
+    try {
+      await vi.waitFor(() => expect(readdirSync(spool)).not.toHaveLength(0), {
+        timeout: 60_000,
+        interval: 100,
+      })
+      running.kill('SIGINT')
+      await exited
+
+      expect(existsSync(spool)).toBe(false)
+    } finally {
+      running.kill('SIGKILL')
+      rmSync(own, { recursive: true, force: true })
+    }
   }, 180_000)
 
   it('should refuse a target the page does not carry rather than film a guess', async () => {

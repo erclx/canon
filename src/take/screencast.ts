@@ -1,6 +1,5 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import { chromium } from 'playwright-core'
 import { lastFrame, openFrameEncoder, probeFrames } from '@/take/encode'
 import { frameStamp, slotFrames } from '@/take/frame-clock'
@@ -52,8 +51,8 @@ export async function filmScreencast(request: {
   readonly beat: Beat
   readonly clip: string
 }): Promise<ScreencastTake> {
-  const scratch = mkdtempSync(join(tmpdir(), 'canon-take-cast-'))
   const browser = await chromium.launch()
+  const scratch = openSpool(request.clip)
   let still: (() => Promise<Buffer | undefined>) | undefined
   try {
     const page = await browser.newPage({ viewport: VIEWPORT })
@@ -116,7 +115,7 @@ export async function filmScreencast(request: {
           wallNow: Date.now(),
           monoNow: performance.now(),
         })
-        const path = join(scratch, `${spool.length}.jpg`)
+        const path = join(scratch.folder, `${spool.length}.jpg`)
         try {
           writeFileSync(path, data)
           spool.push({ path, stamp })
@@ -152,7 +151,7 @@ export async function filmScreencast(request: {
     throw error
   } finally {
     await browser.close()
-    rmSync(scratch, { recursive: true, force: true })
+    scratch.remove()
   }
 }
 
@@ -163,6 +162,34 @@ interface SpooledFrame {
   readonly path: string
   /** When the frame was presented, on the monotonic clock. */
   readonly stamp: number
+}
+
+/**
+ * Opens the folder holding one take's frames, beside its clip rather than in a
+ * temp folder nothing sweeps, since a 34 s beat on a busy page spools about
+ * 650 MB. A take killed outright runs no handler, so it leaves the folder where
+ * its owner looks, and the next take of that beat clears it.
+ */
+function openSpool(clip: string): { folder: string; remove: () => void } {
+  const folder = join(dirname(clip), 'spool')
+  rmSync(folder, { recursive: true, force: true })
+  mkdirSync(folder, { recursive: true })
+  const remove = (): void => {
+    process.off('exit', remove)
+    process.off('SIGINT', interrupt)
+    process.off('SIGTERM', interrupt)
+    rmSync(folder, { recursive: true, force: true })
+  }
+  // A signal skips the exit event, so it removes the folder and then re-raises
+  // itself with this handler gone, ending the process as it would have.
+  const interrupt = (signal: NodeJS.Signals): void => {
+    remove()
+    process.kill(process.pid, signal)
+  }
+  process.on('exit', remove)
+  process.once('SIGINT', interrupt)
+  process.once('SIGTERM', interrupt)
+  return { folder, remove }
 }
 
 /**

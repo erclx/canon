@@ -21,7 +21,7 @@ Reads a take plan, films each beat from a fresh load, and writes the clip, the l
 - A `screencast` beat, or a stepped frame past 2 s, films through Playwright at 1920x1080, its record naming the route, and `frame-clock.ts` moves each wall-time frame stamp onto the stage clock
 - One choreography performs every step through each route's stage, logging each point a glide sends for the drawn cursor and resting 300 ms before a press, 500 ms after, and 400 ms before a fill types
 - The camera zooms in over the glide reaching a target and out over the glide leaving it, scaling about the target, at a depth the clip's resolution caps, and pans only at a steady scale
-- Stepped frames stream into the system FFmpeg, screencast frames spool to the scratch folder until the stop, and FFmpeg's absence refuses before any browser launches
+- Stepped frames stream into the system FFmpeg, screencast frames spool beside the clip until the stop, and FFmpeg's absence refuses before any browser launches
 
 ### `src/take/fixtures/`
 
