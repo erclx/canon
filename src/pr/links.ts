@@ -42,7 +42,13 @@ function maskSpans(text: string): string {
   return out
 }
 
-const LINK = /\[[^\]]*\]\(([^)\s]*)\)/g
+/**
+ * An inline link: a destination bare or in angle brackets, then an optional
+ * quoted title. A form this misses reads as no link, and a span inside it then
+ * gets a second link nested in the first.
+ */
+const LINK =
+  /\[[^\]]*\]\(\s*(<[^>]*>|[^)\s]*)(?:\s+(?:"[^"]*"|'[^']*'))?\s*\)/dg
 const DIFF_DESTINATION = /#diff-[0-9a-f]{64}$/
 
 interface Edit {
@@ -80,6 +86,7 @@ export function linkKeyChanges(
     start: match.index ?? 0,
     end: (match.index ?? 0) + match[0].length,
     destination: match[1] ?? '',
+    destinationStart: match.indices?.[1]?.[0] ?? 0,
   }))
 
   const edits: Edit[] = []
@@ -101,8 +108,11 @@ export function linkKeyChanges(
     const wholeLabel =
       span.start === link.start + 1 && text.startsWith('](', span.end)
     if (!wholeLabel || !DIFF_DESTINATION.test(link.destination)) continue
-    const from = link.end - 1 - link.destination.length
-    edits.push({ start: from, end: link.end - 1, text: target })
+    edits.push({
+      start: link.destinationStart,
+      end: link.destinationStart + link.destination.length,
+      text: target,
+    })
   }
 
   let out = ''

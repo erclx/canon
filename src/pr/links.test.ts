@@ -85,6 +85,28 @@ describe('linkKeyChanges', () => {
     expect(linkKeyChanges(input, ['src/a.ts'], FILES)).toBe(input)
   })
 
+  it('should not nest a link inside a link carrying a title', () => {
+    const input = body(
+      '- See [`src/a.ts`](https://example.com/a "a title") here.',
+    )
+    expect(linkKeyChanges(input, ['src/a.ts'], FILES)).toBe(input)
+  })
+
+  it('should not nest a link inside a link with an angle-bracket destination', () => {
+    const input = body('- See [`src/a.ts`](<https://example.com/a b>) here.')
+    expect(linkKeyChanges(input, ['src/a.ts'], FILES)).toBe(input)
+  })
+
+  it('should rewrite the anchor of a diff link that carries a title', () => {
+    const wrong = body(
+      `- Edit [\`src/a.ts\`](${FILES}#${diffAnchor('src/b.ts')} "diff") now.`,
+    )
+    const out = linkKeyChanges(wrong, ['src/a.ts'], FILES)
+    expect(out).toContain(
+      `[\`src/a.ts\`](${FILES}#${diffAnchor('src/a.ts')} "diff")`,
+    )
+  })
+
   it('should link the Key changes section when an earlier block repeats it', () => {
     const bullet = '- Edit `src/a.ts`.'
     const input = [
