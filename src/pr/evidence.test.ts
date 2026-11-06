@@ -754,17 +754,20 @@ describe('renderEvidenceBody', () => {
   })
 
   describe('a renamed image', () => {
-    const renamed = (withinTolerance?: boolean): EvidenceItem => ({
+    const renamed = (
+      verdict: 'identical' | 'near' | 'changed',
+    ): EvidenceItem => ({
       path: 'evidence/dark/a.png',
       stem: 'a',
       added: false,
       basePath: 'evidence/a-dark.png',
-      ...(withinTolerance !== undefined && { withinTolerance }),
+      withinTolerance: verdict !== 'changed',
+      identical: verdict === 'identical',
     })
 
-    it('should drop an unchanged rename from the listing and count it on one line', () => {
+    it('should drop a byte-identical rename from the listing and count it on one line', () => {
       const body = renderEvidenceBody(
-        [{ state: 'dark', items: [renamed(true)] }],
+        [{ state: 'dark', items: [renamed('identical')] }],
         'o/r',
         'aaaa000',
         'bbbb111',
@@ -781,8 +784,12 @@ describe('renderEvidenceBody', () => {
           {
             state: 'dark',
             items: [
-              renamed(true),
-              { ...renamed(true), path: 'evidence/dark/b.png', stem: 'b' },
+              renamed('identical'),
+              {
+                ...renamed('identical'),
+                path: 'evidence/dark/b.png',
+                stem: 'b',
+              },
             ],
           },
         ],
@@ -796,7 +803,7 @@ describe('renderEvidenceBody', () => {
 
     it('should render a rename with edits as head over a base read from the old path, with no new mark', () => {
       const body = renderEvidenceBody(
-        [{ state: 'dark', items: [renamed(false)] }],
+        [{ state: 'dark', items: [renamed('changed')] }],
         'o/r',
         'aaaa000',
         'bbbb111',
@@ -805,6 +812,19 @@ describe('renderEvidenceBody', () => {
       expect(body).toContain('/blob/bbbb111/evidence/dark/a.png?raw=true')
       expect(body).toContain('/blob/aaaa000/evidence/a-dark.png?raw=true')
       expect(body).not.toContain('*(new)*')
+      expect(body).not.toContain('Moved unchanged')
+    })
+
+    it('should fold a rename within tolerance but not byte-identical, keeping both images', () => {
+      const body = renderEvidenceBody(
+        [{ state: 'dark', items: [renamed('near')] }],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+      )
+
+      expect(body).toContain('<summary>Within tolerance (1)</summary>')
+      expect(body).toContain('/blob/aaaa000/evidence/a-dark.png?raw=true')
       expect(body).not.toContain('Moved unchanged')
     })
 

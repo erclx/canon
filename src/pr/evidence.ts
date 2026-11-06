@@ -95,6 +95,8 @@ export interface EvidenceItem {
   readonly baseWidth?: number
   /** Whether the head differs from its base by no more than sub-visual noise. Absent when the pair was not compared. */
   readonly withinTolerance?: boolean
+  /** Whether the head and base files hold the same bytes. Read only for a renamed image, where it alone lets the listing drop the pair, since a small edit also passes the tolerance. */
+  readonly identical?: boolean
 }
 
 export interface EvidenceState {
@@ -590,7 +592,7 @@ export function renderEvidenceBody(
       .map((entry) => ({ ...entry, items: entry.items.filter(keep) }))
       .filter((entry) => entry.items.length > 0)
   const isMoved = (item: EvidenceItem): boolean =>
-    item.basePath !== undefined && item.withinTolerance === true
+    item.basePath !== undefined && item.identical === true
   const open = split((item) => !isMoved(item) && item.withinTolerance !== true)
   const folded = split(
     (item) => !isMoved(item) && item.withinTolerance === true,

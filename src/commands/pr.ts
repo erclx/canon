@@ -2700,6 +2700,9 @@ async function measureItem(
       ...(headBytes !== undefined &&
         baseBytes !== undefined && {
           withinTolerance: isWithinTolerance(baseBytes, headBytes),
+          ...(item.basePath !== undefined && {
+            identical: Buffer.from(baseBytes).equals(headBytes),
+          }),
         }),
     },
     unread,
