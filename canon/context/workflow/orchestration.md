@@ -18,7 +18,7 @@ Holds one task file per task, the board surfaces `priority.md` and `backlog.md`,
 - `priority.md` groups rows under `## Run now`, `## Up next`, and `## Needs a plan`, and `backlog.md` holds decided work nobody has scheduled, which is no fourth group
 - `canon tasks validate` reads and never writes, since a validator repairing a row asserts the claim it tests, and lists `## Run now` overlaps in `shared` without moving an exit code
 - A blocker cell is prose, and `src/tasks/trunk.ts` settles a cited task only when a commit naming its `Pull request:` number sits on `origin/main`
-- A blocker resting on judgment goes to the `untested` array, so the check never claims more than it settled
+- A blocker resting on judgment goes to the `untested` array and a failed `--live` read to `live` as `unread`, so the check never claims more than it settled
 - A worker files no task, because `task-board` stops it before `canon tasks next-label --claim` and placing the row is the controller's call
 
 ### `.canon/plans/`

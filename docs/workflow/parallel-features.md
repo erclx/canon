@@ -56,7 +56,7 @@ Merge order matters only when two branches touch the same file. Expect to rebase
 - A row's cell count must match its header, and a `## Needs a plan` row stating its position is checked against where it sits
 - Every plan pointer resolves, every task file is named once, and every ready row names its files
 - A task file whose frontmatter block will not parse as YAML is reported with the parser's message, as with a lone apostrophe inside the single-quoted title
-- A parked row is reported when its cited task reached the trunk, whether the cell links it or names its bare label
+- A parked row is reported when its cited task reached the trunk, whether the cell links it or names its bare label, and with `--live` when a live session or an open pull request holds it
 - A group header must be the columns the group owns, a `Touches` cell must match its plan, and a `Waiting on` cell renders at most 120 characters
 
 `canon:task-board` creates a task file, and `canon:task-complete` marks outcomes. The `post-merge` hook archives the task a merged pull request closed, with its plan, and a `post-rewrite` hook does the same for a rebase pull. Both archive a closed task whose merge carried a PR number, and a slice merged before then moves only its own plan.
