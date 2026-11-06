@@ -24,6 +24,8 @@ The `Controller:` line replaces the background template's message clauses, which
 
 The first wave carries the worker. The wave after its pull request opens carries the reviewer alone.
 
+Once the operator confirms a worker launched, run `canon tasks promote <stem>`, the same call a background launch makes. Nothing else moves a hand-launched row out of `## Up next`.
+
 ````markdown
 # Dispatch prompts
 

@@ -22,6 +22,8 @@ import {
   renderedLength,
   WAITING_LIMIT,
 } from '@/tasks/board'
+import { branchOfPlan } from '@/tasks/branch'
+import type { HolderReader, LiveReaders, MergedReader } from '@/tasks/holders'
 import { gitTrunkReader, type TrunkReader } from '@/tasks/trunk'
 
 const ORDERING_FILE = 'priority.md'
@@ -62,6 +64,7 @@ export const FINDING_KINDS = [
   'row-untabled',
   'row-misordered',
   'row-unranked',
+  'row-held',
   'touches-unstated',
   'touches-stale',
   'columns-mismatched',
@@ -179,6 +182,18 @@ export interface BoardRow {
   readonly cells: readonly string[]
 }
 
+/**
+ * What each source behind the held-row check answered. `unread` is a source the
+ * run asked and could not read, so a board carrying no `row-held` finding beside
+ * it is untested rather than clean. `not-asked` is a run without the live read.
+ */
+export type LiveState = 'read' | 'unread' | 'not-asked'
+
+export interface LiveReading {
+  readonly sessions: LiveState
+  readonly pulls: LiveState
+}
+
 export interface ValidateReport {
   readonly ok: true
   readonly rows: number
@@ -191,6 +206,7 @@ export interface ValidateReport {
   readonly shared: readonly SharedFiles[]
   readonly wide: readonly WideToken[]
   readonly unplaced: readonly Unplaced[]
+  readonly live: LiveReading
 }
 
 export interface ValidateRefused {
@@ -1641,6 +1657,95 @@ export async function groupRuleFindings(
   ]
 }
 
+/**
+ * Reports a row outside `## Run now` whose task a live session or an open pull
+ * request holds, tied through the branch each live plan on its `Plan:` line
+ * derives. A row whose worker renamed its branch has nothing to match, and an
+ * archived plan's branch is finished work, so neither is reported.
+ *
+ * A session outlives its merge, so a session still on a branch a merged pull
+ * request names is finished work too, until the merge reaches this clone and the
+ * hook archives the row. A merged read that fails leaves the hold standing, since
+ * the session is still there, and reads `pulls` as unread, since that hold may be
+ * finished work the open list could not rule out.
+ */
+async function checkHeld(
+  rows: readonly BoardRow[],
+  live: LiveRead,
+  dir: string,
+  root: string,
+): Promise<{ readonly findings: Finding[]; readonly mergedUnread: boolean }> {
+  let mergedUnread = false
+
+  const holdersOf = async (branch: string): Promise<string[]> => {
+    const session = live.sessions?.get(branch)
+    const merged = session ? await live.merged?.(branch) : false
+    if (merged === undefined) mergedUnread = true
+
+    return [session && !merged ? session : undefined, live.pulls?.get(branch)]
+      .filter((name): name is string => name !== undefined)
+      .map((name) => `${name} on ${branch}`)
+  }
+
+  const found = await Promise.all(
+    rows.map(async (row): Promise<Finding | undefined> => {
+      if (row.group === 'Run now' || !row.stem) return undefined
+      const file = join(dir, `${row.stem}.md`)
+      if (!existsSync(file)) return undefined
+
+      const targets = readPlanTargets(await readFile(file, 'utf8'))
+      const branches = targets.flatMap((target) => {
+        const path = target.split('#')[0] || target
+        return resolveLivePlan(path, dir, root) === undefined
+          ? []
+          : [branchOfPlan(path)]
+      })
+      const held = (await Promise.all(branches.map(holdersOf))).flat()
+      if (held.length === 0) return undefined
+
+      return {
+        kind: 'row-held',
+        group: row.group,
+        subject: row.stem,
+        message: `sits under ${row.group} and is held by ${held.join(' and ')}. A row with a worker belongs under Run now.`,
+      }
+    }),
+  )
+
+  return {
+    findings: found.filter(
+      (finding): finding is Finding => finding !== undefined,
+    ),
+    mergedUnread,
+  }
+}
+
+/** What each source answered, `undefined` where it was not asked or failed. */
+interface LiveRead {
+  readonly reading: LiveReading
+  readonly sessions?: Awaited<ReturnType<HolderReader>>
+  readonly pulls?: Awaited<ReturnType<HolderReader>>
+  readonly merged?: MergedReader
+}
+
+/** Takes each source once, since a failed read answers undefined rather than throws. */
+async function readLive(live: LiveReaders | undefined): Promise<LiveRead> {
+  if (!live) {
+    return { reading: { sessions: 'not-asked', pulls: 'not-asked' } }
+  }
+
+  const stateOf = (read: Awaited<ReturnType<HolderReader>>): LiveState =>
+    read ? 'read' : 'unread'
+  const [sessions, pulls] = await Promise.all([live.sessions(), live.pulls()])
+
+  return {
+    reading: { sessions: stateOf(sessions), pulls: stateOf(pulls) },
+    sessions,
+    pulls,
+    merged: live.merged,
+  }
+}
+
 function refuse(reason: ValidateRefusal, message: string): ValidateRefused {
   return { ok: false, reason, message }
 }
@@ -1648,6 +1753,12 @@ function refuse(reason: ValidateRefusal, message: string): ValidateRefused {
 export interface ValidateOptions {
   /** Overridden by tests, which supply the trunk rather than reaching for git. */
   readonly trunk?: TrunkReader
+  /**
+   * The roster and GitHub reads behind the held-row check. Absent by default,
+   * since the board's write hook runs this on every edit and a network read
+   * there costs every write.
+   */
+  readonly live?: LiveReaders
 }
 
 /**
@@ -1698,6 +1809,8 @@ export async function validateBoard(
     ? await listTaskStems(declinedPath)
     : []
   const parked = await checkParked(rows, root, trunk)
+  const live = await readLive(options.live)
+  const held = await checkHeld(rows, live, dir, root)
 
   const findings = [
     ...shapeFindings,
@@ -1710,6 +1823,7 @@ export async function validateBoard(
     ...checkCellWidth(rows),
     ...checkOrdering(rows),
     ...parked.findings,
+    ...held.findings,
   ]
 
   return {
@@ -1724,5 +1838,8 @@ export async function validateBoard(
     shared: checkSharedFiles(rows),
     wide: checkWideTokens(rows),
     unplaced: checkUnplaced(rows, backlog, stems),
+    live: held.mergedUnread
+      ? { ...live.reading, pulls: 'unread' }
+      : live.reading,
   }
 }

@@ -26,6 +26,55 @@ async function runCloses(
   return JSON.parse(result.stdout || result.stderr) as Record<string, unknown>
 }
 
+describe('canon tasks validate --live', () => {
+  let root: string
+
+  /** An empty PATH reaches neither `gh` nor `git`, which is the offline run. */
+  async function runValidate(args: string[]) {
+    const result = await execa(
+      process.execPath,
+      [CLI, 'tasks', 'validate', '--json', '--root', root, ...args],
+      {
+        cwd: root,
+        reject: false,
+        timeout: RUN_TIMEOUT_MS,
+        env: { PATH: join(root, 'no-such-bin'), HOME: root },
+        extendEnv: false,
+      },
+    )
+
+    return {
+      exitCode: result.exitCode,
+      stderr: result.stderr,
+      record: JSON.parse(result.stdout) as Record<string, unknown>,
+    }
+  }
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'tasks-validate-'))
+    mkdirSync(join(root, '.canon', 'tasks'), { recursive: true })
+    writeFileSync(join(root, '.canon', 'tasks', 'priority.md'), '## Run now\n')
+  })
+
+  afterEach(() => rmSync(root, { recursive: true, force: true }))
+
+  it('should carry an unread source on the record and warn, exiting 0', async () => {
+    const { exitCode, record, stderr } = await runValidate(['--live'])
+
+    expect(exitCode).toBe(0)
+    expect(record.live).toEqual({ sessions: 'unread', pulls: 'unread' })
+    expect(stderr).toContain('could not be read')
+  })
+
+  it('should read neither source and warn about neither without the flag', async () => {
+    const { exitCode, record, stderr } = await runValidate([])
+
+    expect(exitCode).toBe(0)
+    expect(record.live).toEqual({ sessions: 'not-asked', pulls: 'not-asked' })
+    expect(stderr).not.toContain('could not be read')
+  })
+})
+
 describe('canon tasks closes with no task or plan named', () => {
   let root: string
 
