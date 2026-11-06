@@ -21,7 +21,7 @@ function writeDeclaration(toml: string): void {
 
 describe('readHealthPaths', () => {
   it('should read no declaration when the file is absent', () => {
-    expect(readHealthPaths(ROOT)).toEqual({ kind: 'none' })
+    expect(readHealthPaths(ROOT)).toEqual({ kind: 'none', pageOnly: [] })
   })
 
   it('should read a declared list of paths in order', () => {
@@ -30,13 +30,14 @@ describe('readHealthPaths', () => {
     expect(readHealthPaths(ROOT)).toEqual({
       kind: 'paths',
       paths: ['/api/health', '/ready'],
+      pageOnly: [],
     })
   })
 
   it('should read an empty list as no declaration', () => {
     writeDeclaration('health = []\n')
 
-    expect(readHealthPaths(ROOT)).toEqual({ kind: 'none' })
+    expect(readHealthPaths(ROOT)).toEqual({ kind: 'none', pageOnly: [] })
   })
 
   it('should report a file that is not valid TOML as invalid', () => {
@@ -62,6 +63,43 @@ describe('readHealthPaths', () => {
       kind: 'invalid',
       reason:
         'canon/config/local.toml needs health as a list of paths, each starting with a single /',
+    })
+  })
+
+  it('should read page-only folders beside health', () => {
+    writeDeclaration(
+      'health = ["/api/health"]\npage-only = ["web", "./docs/"]\n',
+    )
+
+    expect(readHealthPaths(ROOT)).toEqual({
+      kind: 'paths',
+      paths: ['/api/health'],
+      pageOnly: ['web', 'docs'],
+    })
+  })
+
+  it('should read a file holding only page-only as no health paths', () => {
+    writeDeclaration('page-only = ["web"]\n')
+
+    expect(readHealthPaths(ROOT)).toEqual({ kind: 'none', pageOnly: ['web'] })
+  })
+
+  it.each([
+    ['an absolute folder', 'page-only = ["/web"]\n'],
+    ['a folder holding ..', 'page-only = ["web/../api"]\n'],
+    ['a parent folder', 'page-only = [".."]\n'],
+    ['a drive letter', 'page-only = ["C:/web"]\n'],
+    ['an empty entry', 'page-only = [""]\n'],
+    ['the repository root alone', 'page-only = ["."]\n'],
+    ['a non-string entry', 'page-only = ["web", 3]\n'],
+    ['a string in place of a list', 'page-only = "web"\n'],
+  ])('should report page-only with %s as invalid', (_label, toml) => {
+    writeDeclaration(`health = ["/api/health"]\n${toml}`)
+
+    expect(readHealthPaths(ROOT)).toEqual({
+      kind: 'invalid',
+      reason:
+        'canon/config/local.toml needs page-only as a list of folders relative to the repository, with no leading / and no ..',
     })
   })
 })

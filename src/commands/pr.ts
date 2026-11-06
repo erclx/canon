@@ -279,7 +279,7 @@ const LOCAL_REFUSALS: Record<
     'Nothing listening inside this worktree served an HTML page. Start the dev server here and re-run to get a link.',
   unhealthy:
     'A page answered inside this worktree, but a health path it declares failed. Start what the page reaches and re-run to get a link.',
-  'invalid-config': `${LOCAL_CONFIG_REL} cannot be read, so no health path was checked and no link is given. Fix or delete it and re-run.`,
+  'invalid-config': `${LOCAL_CONFIG_REL} cannot be read, so no health path was checked and no link is given. Fix or delete it and re-run. health takes paths starting with /, and page-only takes folders relative to the repository.`,
   'no-listener-reader':
     'This machine offers neither lsof nor /proc, so no listening socket could be read. Nothing is posted.',
   'gh-failed':
@@ -1301,6 +1301,15 @@ export function register(program: Command): void {
         "refusal names the lowest page port's first failing path. An absent",
         'file or an empty list checks the page alone.',
         '',
+        'A page served by a static server answers none of those paths, so',
+        'page-only = ["web"] lists repository-relative folders whose',
+        'listeners skip them and are found on the page probe alone. The match',
+        "reads the listener's working directory on whole path segments, so web",
+        'does not cover webapp, and a server started from the root with a',
+        'working-directory flag still takes the health check. Keep health',
+        'beside page-only until the binary a project runs carries this key,',
+        'since an older one refuses a file holding page-only alone.',
+        '',
         'A process in a sibling worktree, in the main checkout seen from a',
         'linked worktree, or in a linked worktree seen from the main checkout',
         'is never reported, since its server shows another branch. Sockets are',
@@ -1326,8 +1335,9 @@ export function register(program: Command): void {
         '  unhealthy           a page answered but a declared health path did',
         '                      not, with `port`, `path`, and `status`, which',
         '                      is null on a timeout',
-        '  invalid-config      canon/config/local.toml is not valid TOML, or',
-        '                      health is not a list of paths starting with /',
+        '  invalid-config      canon/config/local.toml is not valid TOML,',
+        '                      health is not a list of paths starting with /,',
+        '                      or page-only is not a list of relative folders',
         '  removed             --remove dropped the line',
         '  no-comment          --remove found no marked comment, a no-op',
         '  no-line             --remove found no address line, a no-op',
@@ -3412,6 +3422,7 @@ async function runLocal(opts: LocalOptions): Promise<number> {
     worktree,
     machineLocalRunner(),
     declaration.kind === 'paths' ? declaration.paths : [],
+    declaration.pageOnly,
   )
   if (result.kind === 'refused' && result.reason === 'unhealthy') {
     const { port, path, status } = result
