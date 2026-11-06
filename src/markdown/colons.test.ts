@@ -8,16 +8,44 @@ function colonsIn(source: string) {
 
 describe('findColons', () => {
   it('should report a colon joining two clauses in a prose sentence', () => {
-    const found = colonsIn('Prose sentence: another clause.')
+    const found = colonsIn('The fix is simple: split it.')
 
     expect(found).toEqual([
       {
         line: 1,
-        column: 14,
-        text: 'Prose sentence: another clause.',
-        lead: 'sentence',
+        column: 17,
+        text: 'The fix is simple: split it.',
+        lead: 'simple',
       },
     ])
+  })
+
+  it('should not report a short plain lead opening a line as a label', () => {
+    expect(colonsIn('Issue: #1')).toEqual([])
+    expect(colonsIn('Pull request: #2')).toEqual([])
+  })
+
+  it('should not report a short plain lead after a block quote marker', () => {
+    expect(colonsIn('> Test strategy: unit')).toEqual([])
+    expect(colonsIn('> > Test strategy: unit')).toEqual([])
+  })
+
+  it('should report a four-word lead that is no longer a label', () => {
+    const found = colonsIn('> Test strategy for this: unit')
+
+    expect(found.map((hit) => hit.lead)).toEqual(['this'])
+  })
+
+  it('should report a colon in the middle of a sentence', () => {
+    const found = colonsIn('Short lead, then a clause: and the rest.')
+
+    expect(found.map((hit) => hit.lead)).toEqual(['clause'])
+  })
+
+  it('should report the second colon of a line opening on a short lead', () => {
+    const found = colonsIn('Issue: the fix is simple: split it.')
+
+    expect(found.map((hit) => hit.column)).toEqual([24])
   })
 
   it('should name the word before the colon after an emoji', () => {
