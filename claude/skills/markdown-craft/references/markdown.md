@@ -41,7 +41,7 @@ Does not govern:
 ## Headings
 
 - H1 for document title, H2 for main sections, H3 for subsections, and no H4
-- Use sentence case for every heading. The audit reports a heading or a frontmatter `title` with a capitalized word after the first.
+- Use sentence case for every heading. The audit reports a heading or `title` with a capital after the first word, past any task phase label.
 - Proper nouns and product names keep their casing, whatever the audit reports
 - Shape a record as H2 per section and H3 per item a reader looks up by name. Use a table only for a fixed-shape set.
 
@@ -133,7 +133,7 @@ A bullet's punctuation follows its sentence count, and a list opens unannounced.
 ## Punctuation
 
 - Do not use em dashes (`—`) or semicolons (`;`). Rewrite or restructure the sentence to avoid them. A colon or a comma standing where the dash was is the same sentence, so split it or rewrite it.
-- Do not use a colon to join two clauses in the middle of a sentence. A colon belongs after a label or at the end of a line introducing a list.
+- Do not use a colon to join two clauses in a sentence. A colon follows a label of three words or fewer, or ends a line introducing a list.
 - The check misses a clause colon in a list of colon items, but it is wrong.
 - Do not use parenthetical asides in prose (`the config (which is optional) controls...`). Split into its own sentence or drop it. Parentheses in rule definitions for grouping examples are fine.
 
