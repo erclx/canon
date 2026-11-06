@@ -154,6 +154,47 @@ describe('groupEvidence', () => {
     expect(items.find((i) => i.stem === 'hero')?.added).toBe(false)
     expect(items.find((i) => i.stem === 'new-case')?.added).toBe(true)
   })
+
+  it('should read a renamed path as not added and keep its old path as the base', async () => {
+    const reading = await groupEvidence(
+      ['web/evidence/dark/hero.png'],
+      async () => false,
+      new Map([['web/evidence/dark/hero.png', 'web/evidence/hero-dark.png']]),
+    )
+
+    expect(reading).toEqual({
+      kind: 'read',
+      states: [
+        {
+          state: 'dark',
+          items: [
+            {
+              path: 'web/evidence/dark/hero.png',
+              stem: 'hero',
+              added: false,
+              basePath: 'web/evidence/hero-dark.png',
+            },
+          ],
+        },
+      ],
+    })
+  })
+
+  it('should still mark a copied path added, since it has no entry in the rename map', async () => {
+    const reading = await groupEvidence(
+      ['web/evidence/dark/copy.png'],
+      async () => false,
+      new Map(),
+    )
+
+    expect(reading.kind).toBe('read')
+    if (reading.kind !== 'read') return
+    expect(reading.states[0]?.items[0]).toEqual({
+      path: 'web/evidence/dark/copy.png',
+      stem: 'copy',
+      added: true,
+    })
+  })
 })
 
 describe('renderEvidenceBody', () => {
@@ -709,6 +750,102 @@ describe('renderEvidenceBody', () => {
       expect(body).toContain('**Base:**')
       expect(body).toContain('<summary>Within tolerance (1)</summary>')
       expect(body).not.toContain('<summary>dark')
+    })
+  })
+
+  describe('a renamed image', () => {
+    const renamed = (
+      verdict: 'identical' | 'near' | 'changed',
+    ): EvidenceItem => ({
+      path: 'evidence/dark/a.png',
+      stem: 'a',
+      added: false,
+      basePath: 'evidence/a-dark.png',
+      withinTolerance: verdict !== 'changed',
+      identical: verdict === 'identical',
+    })
+
+    it('should drop a byte-identical rename from the listing and count it on one line', () => {
+      const body = renderEvidenceBody(
+        [{ state: 'dark', items: [renamed('identical')] }],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+      )
+
+      expect(body).toContain('**Moved unchanged:** 1 image')
+      expect(body).not.toContain('<summary>')
+      expect(body).not.toContain('alt="a head"')
+    })
+
+    it('should count several unchanged renames in the plural', () => {
+      const body = renderEvidenceBody(
+        [
+          {
+            state: 'dark',
+            items: [
+              renamed('identical'),
+              {
+                ...renamed('identical'),
+                path: 'evidence/dark/b.png',
+                stem: 'b',
+              },
+            ],
+          },
+        ],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+      )
+
+      expect(body).toContain('**Moved unchanged:** 2 images')
+    })
+
+    it('should render a rename with edits as head over a base read from the old path, with no new mark', () => {
+      const body = renderEvidenceBody(
+        [{ state: 'dark', items: [renamed('changed')] }],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+      )
+
+      expect(body).toContain('/blob/bbbb111/evidence/dark/a.png?raw=true')
+      expect(body).toContain('/blob/aaaa000/evidence/a-dark.png?raw=true')
+      expect(body).not.toContain('*(new)*')
+      expect(body).not.toContain('Moved unchanged')
+    })
+
+    it('should fold a rename within tolerance but not byte-identical, keeping both images', () => {
+      const body = renderEvidenceBody(
+        [{ state: 'dark', items: [renamed('near')] }],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+      )
+
+      expect(body).toContain('<summary>Within tolerance (1)</summary>')
+      expect(body).toContain('/blob/aaaa000/evidence/a-dark.png?raw=true')
+      expect(body).not.toContain('Moved unchanged')
+    })
+
+    it('should render a copy as added, with its head alone', () => {
+      const body = renderEvidenceBody(
+        [
+          {
+            state: 'dark',
+            items: [
+              { path: 'evidence/dark/a.png', stem: 'a', added: true },
+              { path: 'evidence/dark/b.png', stem: 'b', added: false },
+            ],
+          },
+        ],
+        'o/r',
+        'aaaa000',
+        'bbbb111',
+      )
+
+      expect(body).toContain('**a** *(new)*')
+      expect(body).not.toContain('alt="a base"')
     })
   })
 

@@ -1126,6 +1126,57 @@ describe('canon pr evidence reads the pull request', () => {
       expect(record.body).not.toContain('Within tolerance')
     })
 
+    describe('a renamed image', () => {
+      function writeRename(baseGray: number, headGray: number): void {
+        writeFixture(
+          'files.tsv',
+          'renamed\tevidence/dark/moved.png\tevidence/moved-dark.png\n',
+        )
+        writeFixture('head', 'deadbeef')
+        writeFixture('merge-base', 'cafe01')
+        writePng('cafe01', 'moved-dark.png', baseGray)
+        writePng('deadbeef', 'moved.png', headGray)
+      }
+
+      it('should count a byte-identical rename on one line and list no case for it', async () => {
+        writeRename(255, 255)
+
+        const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+        expect(firstItem(record)).toMatchObject({
+          basePath: 'evidence/moved-dark.png',
+          identical: true,
+        })
+        expect(record.body).toContain('**Moved unchanged:** 1 image')
+        expect(countEvidenceCases(String(record.body))).toBe(0)
+      })
+
+      it('should fold a rename whose bytes differ within tolerance, with its base from the old path', async () => {
+        writeRename(255, 254)
+
+        const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+        expect(firstItem(record)).toMatchObject({
+          withinTolerance: true,
+          identical: false,
+        })
+        expect(record.body).toContain('<summary>Within tolerance (1)</summary>')
+        expect(record.body).toContain('/blob/cafe01/evidence/moved-dark.png')
+        expect(record.body).not.toContain('Moved unchanged')
+      })
+
+      it('should leave a rename with edits open, pairing head with the old path', async () => {
+        writeRename(255, 0)
+
+        const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
+
+        expect(firstItem(record)).toMatchObject({ withinTolerance: false })
+        expect(record.body).toContain('<summary>dark (1)</summary>')
+        expect(record.body).toContain('/blob/cafe01/evidence/moved-dark.png')
+        expect(record.body).not.toContain('*(new)*')
+      })
+    })
+
     it('should omit the verdict when the base read fails', async () => {
       writeFixture('files.tsv', 'modified\tevidence/dark/nav.png\n')
       writeFixture('head', 'deadbeef')
@@ -1150,8 +1201,8 @@ describe('canon pr evidence reads the pull request', () => {
     expect(countEvidenceCases(String(record.body))).toBe(1)
   })
 
-  it('should render a renamed path as new', async () => {
-    writeFixture('files.tsv', 'renamed\tevidence/dark/moved.png\n')
+  it('should render a renamed path with an empty previous filename as new', async () => {
+    writeFixture('files.tsv', 'renamed\tevidence/dark/moved.png\t\n')
 
     const record = await runEvidenceRecord(['--preview', 'https://p.dev'])
 

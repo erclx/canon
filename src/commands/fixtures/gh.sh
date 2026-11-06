@@ -19,7 +19,7 @@ api*pulls/7/files*)
     else
       git diff --name-status --no-renames main...HEAD | sed -e 's/^A/added/' -e 's/^M/modified/' -e 's/^D/removed/'
     fi
-  } | jq -Rn '[inputs | select(length > 0) | split("\t") | {status: .[0], filename: .[1]}]' | jq -r "$f"
+  } | jq -Rn '[inputs | select(length > 0) | split("\t") | {status: .[0], filename: .[1]} + (if (.[2] // "") != "" then {previous_filename: .[2]} else {} end)]' | jq -r "$f"
   ;;
 api*git/trees/*)
   [ -f "$fx/base-tree.json" ] || exit 1

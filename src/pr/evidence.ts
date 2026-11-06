@@ -46,6 +46,9 @@ const FOLDED_SUMMARY = 'Within tolerance'
 /** The heading every body opens with. */
 const EVIDENCE_HEADING = '## Evidence'
 
+/** How the line counting renamed images whose pixels did not change opens. */
+const MOVED_PREFIX = '**Moved unchanged:**'
+
 /** How the visible commit line opens. */
 const BASE_PREFIX = '**Base:**'
 
@@ -82,14 +85,18 @@ const IMAGE_EXTENSION = /\.(png|jpe?g|gif|webp|avif|svg)$/i
 export interface EvidenceItem {
   readonly path: string
   readonly stem: string
-  /** True when `path` did not exist at the comparison's base commit. */
+  /** True when `path` did not exist at the comparison's base commit and was not renamed from a path that did. */
   readonly added: boolean
+  /** Where a renamed image sat at the base, which its before image reads from. Absent for any image that was not renamed. */
+  readonly basePath?: string
   /** Pixel width of the head image, read from its PNG header. Absent when unread. */
   readonly width?: number
   /** Pixel width of the base image, absent for an added case or an unread header. */
   readonly baseWidth?: number
   /** Whether the head differs from its base by no more than sub-visual noise. Absent when the pair was not compared. */
   readonly withinTolerance?: boolean
+  /** Whether the head and base files hold the same bytes. Read only for a renamed image, where it alone lets the listing drop the pair, since a small edit also passes the tolerance. */
+  readonly identical?: boolean
 }
 
 export interface EvidenceState {
@@ -131,11 +138,13 @@ function splitEvidencePath(path: string): {
 /**
  * Groups every evidence path in `changed` by its state, keying each entry
  * inside a state by filename stem so a before/after pair sharing a name
- * across two states can be read as one case.
+ * across two states can be read as one case. A path in `renamedFrom` was moved
+ * from the path it maps to, so it is not added and its base reads from there.
  */
 export async function groupEvidence(
   changed: readonly string[],
   existsAtBase: ExistsAtBase,
+  renamedFrom: ReadonlyMap<string, string> = new Map(),
 ): Promise<EvidenceReading> {
   const paths = changed.filter(isEvidencePath)
   if (paths.length === 0) return { kind: 'refused', reason: 'no-evidence' }
@@ -143,14 +152,20 @@ export async function groupEvidence(
   const resolved = await Promise.all(
     paths.map(async (path) => {
       const { state, stem } = splitEvidencePath(path)
-      const added = !(await existsAtBase(path))
-      return { path, state, stem, added }
+      const basePath = renamedFrom.get(path)
+      const added = basePath === undefined && !(await existsAtBase(path))
+      return { path, state, stem, added, basePath }
     }),
   )
 
   const byState = new Map<string, EvidenceItem[]>()
-  for (const { path, state, stem, added } of resolved) {
-    const item: EvidenceItem = { path, stem, added }
+  for (const { path, state, stem, added, basePath } of resolved) {
+    const item: EvidenceItem = {
+      path,
+      stem,
+      added,
+      ...(basePath !== undefined && { basePath }),
+    }
     const items = byState.get(state)
     if (items === undefined) byState.set(state, [item])
     else items.push(item)
@@ -283,7 +298,7 @@ function baseFold(item: EvidenceItem, repo: string, base: string): string[] {
     '<summary>Base</summary>',
     '',
     evidenceImage(
-      rawUrl(repo, base, item.path),
+      rawUrl(repo, base, item.basePath ?? item.path),
       `${escapeCell(item.stem)} base`,
       item.baseWidth,
     ),
@@ -576,8 +591,16 @@ export function renderEvidenceBody(
     states
       .map((entry) => ({ ...entry, items: entry.items.filter(keep) }))
       .filter((entry) => entry.items.length > 0)
-  const open = split((item) => item.withinTolerance !== true)
-  const folded = split((item) => item.withinTolerance === true)
+  const isMoved = (item: EvidenceItem): boolean =>
+    item.basePath !== undefined && item.identical === true
+  const open = split((item) => !isMoved(item) && item.withinTolerance !== true)
+  const folded = split(
+    (item) => !isMoved(item) && item.withinTolerance === true,
+  )
+  const movedCount = states.reduce(
+    (total, entry) => total + entry.items.filter(isMoved).length,
+    0,
+  )
 
   const headCount = open.reduce((total, entry) => total + entry.items.length, 0)
   const opener =
@@ -592,6 +615,12 @@ export function renderEvidenceBody(
     ...opening,
     `${BASE_PREFIX} ${commitLink(repo, base)} · **Head:** ${commitLink(repo, head)}`,
     '',
+    ...(movedCount === 0
+      ? []
+      : [
+          `${MOVED_PREFIX} ${movedCount} ${movedCount === 1 ? 'image' : 'images'}`,
+          '',
+        ]),
     ...sections,
     '',
     ...closing,
