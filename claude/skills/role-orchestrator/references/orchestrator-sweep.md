@@ -18,9 +18,11 @@ Sweep the board as orchestrator after merging. Run this once per batch of merges
 
 Run `canon worktrees list` after the pull, the first point at which the merges this sweep followed are readable. It owns the reclaim rule and removes nothing, so read its rows and act on the ones you mean to. Never substitute a git ancestry check for it.
 
-Run `canon tasks validate` once the board is rewritten and before reporting it. It reports and never writes, so fix each row it names and run it again.
+Run `canon tasks validate --live` once the board is rewritten and before reporting it. It reports and never writes, so fix each row it names and run it again.
 
 - It resolves every plan pointer and accounts every task file against the board and the backlog both
+- `--live` reports a row outside `## Run now` that a live session or an open pull request holds, so run `canon tasks promote <stem>` on it
+- Report a source the record's `live` field reads as `unread`, since that half of the check did not run
 - It reports the paths `## Run now` rows share as a candidate list for the conflict check, and re-takes the two blocker kinds a command can settle
 - A finding it reports is a board defect rather than a task finding, so it goes nowhere but the board
 
