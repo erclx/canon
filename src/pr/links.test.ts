@@ -67,7 +67,40 @@ describe('linkKeyChanges', () => {
   it('should hash the raw path when it holds a space or bracket', () => {
     const path = 'docs/a [draft] b.md'
     const out = linkKeyChanges(body(`- Edit \`${path}\`.`), [path], FILES)
-    expect(out).toContain(`[\`${path}\`](${FILES}#${diffAnchor(path)})`)
+    expect(out).toContain(
+      `[\`${path}\`](${FILES}#diff-fb8e522ac138700823ce269fa7734ad6b51440ff229783fd79710d4c10c922f8)`,
+    )
+  })
+
+  it('should rewrite the anchor of a diff link that opens another file', () => {
+    const wrong = body(
+      `- Edit [\`src/a.ts\`](${FILES}#${diffAnchor('src/b.ts')}).`,
+    )
+    const out = linkKeyChanges(wrong, ['src/a.ts', 'src/b.ts'], FILES)
+    expect(out).toContain(`[\`src/a.ts\`](${FILES}#${diffAnchor('src/a.ts')})`)
+  })
+
+  it('should not nest a link inside the label of a longer link', () => {
+    const input = body('- See [the `src/a.ts` file](https://example.com/a).')
+    expect(linkKeyChanges(input, ['src/a.ts'], FILES)).toBe(input)
+  })
+
+  it('should link the Key changes section when an earlier block repeats it', () => {
+    const bullet = '- Edit `src/a.ts`.'
+    const input = [
+      '## Summary',
+      '',
+      bullet,
+      '',
+      '## Key changes',
+      '',
+      bullet,
+    ].join('\n')
+    const out = linkKeyChanges(input, ['src/a.ts'], FILES)
+    expect(out.startsWith(`## Summary\n\n${bullet}\n\n## Key changes`)).toBe(
+      true,
+    )
+    expect(out).toContain(`[\`src/a.ts\`](${FILES}#${diffAnchor('src/a.ts')})`)
   })
 })
 
@@ -76,7 +109,7 @@ describe('findMislinked', () => {
     const input = body(
       `- Edit [\`src/a.ts\`](${FILES}#${diffAnchor('src/b.ts')}).`,
     )
-    expect(findMislinked(input)).toEqual([
+    expect(findMislinked(input, ['src/a.ts'])).toEqual([
       { path: 'src/a.ts', anchor: diffAnchor('src/b.ts') },
     ])
   })
@@ -85,10 +118,17 @@ describe('findMislinked', () => {
     const input = body(
       `- Edit [\`src/a.ts\`](${FILES}#${diffAnchor('src/a.ts')}).`,
     )
-    expect(findMislinked(input)).toEqual([])
+    expect(findMislinked(input, ['src/a.ts'])).toEqual([])
   })
 
   it('should report nothing for a bare bullet', () => {
-    expect(findMislinked(body('- Edit `src/a.ts`.'))).toEqual([])
+    expect(findMislinked(body('- Edit `src/a.ts`.'), ['src/a.ts'])).toEqual([])
+  })
+
+  it('should leave a label that is no changed path unjudged', () => {
+    const input = body(
+      `- Edit [\`new.ts\`](${FILES}#${diffAnchor('src/new.ts')}) and [\`verify()\`](${FILES}#${diffAnchor('src/new.ts')}).`,
+    )
+    expect(findMislinked(input, ['src/new.ts'])).toEqual([])
   })
 })

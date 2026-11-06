@@ -214,6 +214,21 @@ function disclaimsChange(bullet: string): boolean {
  * reports rather than reading as an empty section.
  */
 export function readSection(body: string, title: string): string | undefined {
+  return readSectionAt(body, title)?.text
+}
+
+/**
+ * The section's text and the character offset it starts at, counted in the body
+ * with its line endings normalized to `\n`.
+ *
+ * The offset is what lets a caller rewrite the section in place. Searching the
+ * body for the text instead finds the first copy, so an identical block above
+ * the heading would take the edit.
+ */
+export function readSectionAt(
+  body: string,
+  title: string,
+): { readonly text: string; readonly offset: number } | undefined {
   const lines = body.replace(/\r\n/g, '\n').split('\n')
   const wanted = title.toLowerCase()
 
@@ -246,7 +261,10 @@ export function readSection(body: string, title: string): string | undefined {
     out.push(line)
   }
 
-  return out.join('\n')
+  const offset = lines
+    .slice(0, start)
+    .reduce((sum, line) => sum + line.length + 1, 0)
+  return { text: out.join('\n'), offset }
 }
 
 /**

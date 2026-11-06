@@ -238,7 +238,7 @@ export function compareKeyChanges(input: BijectionInput): Bijection {
     unnamed: reached.filter((path) => !owesNoBullet(path)),
     incidental: reached.filter(owesNoBullet),
     evidenceUnread,
-    mislinked: findMislinked(input.body),
+    mislinked: findMislinked(input.body, input.changed),
   }
 }
 
