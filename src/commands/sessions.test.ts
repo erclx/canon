@@ -372,15 +372,64 @@ describe('canon sessions list and usage-limit stops', () => {
     expect(result.stderr).toContain('may be stopped')
   })
 
-  it('should not warn on an empty --stopped result with nothing unread', async () => {
+  it('should say no session is stopped only when every session was read', async () => {
     seedRow(process.pid, OTHER_ID, 'answered-row')
     seedTranscript(OTHER_ID, ANSWERED)
 
-    const result = await runSessions(['list', '--stopped', '--json'])
+    const result = await runSessions(['list', '--stopped'])
 
     expect(result.exitCode).toBe(0)
+    expect(result.stderr).toContain('No session is stopped.')
     expect(result.stderr).not.toContain('may be stopped')
   })
+
+  it('should not claim no session is stopped beside an unread row', async () => {
+    seedRow(process.pid, OTHER_ID, 'unread-row')
+
+    const result = await runSessions(['list', '--stopped'])
+
+    expect(result.stderr).toContain('could check')
+    expect(result.stderr).not.toContain('No session is stopped.')
+  })
+
+  it('should scope an empty --branch result to that branch', async () => {
+    seedRow(process.pid, OTHER_ID, 'answered-row')
+    seedTranscript(OTHER_ID, ANSWERED)
+
+    const result = await runSessions(['list', '--stopped', '--branch', 'main'])
+
+    expect(result.stderr).toContain('No session holding main is stopped.')
+  })
+
+  it.skipIf(!existsSync('/proc/self/ns/pid'))(
+    'should not claim no session is stopped when a foreign record went unchecked',
+    async () => {
+      const registry = join(CONFIG, 'sessions')
+      mkdirSync(registry, { recursive: true })
+      writeFileSync(
+        join(registry, '4242.json'),
+        JSON.stringify({
+          pid: 4242,
+          sessionId: 'id-4242',
+          cwd: REPO,
+          name: 'canon-4242',
+          kind: 'interactive',
+          status: 'idle',
+          startedAt: 1,
+          procStart: '1',
+          pidDomain: 'linux:test:pid:[1]',
+          messagingSocketPath: join(DIR, 'gone.sock'),
+        }),
+      )
+
+      const result = await runSessions(['list', '--stopped'])
+
+      expect(result.exitCode).toBe(0)
+      expect(result.stderr).toContain('could check')
+      expect(result.stderr).not.toContain('No session is stopped.')
+      expect(result.stderr).toContain('may be missing')
+    },
+  )
 
   it('should keep the claim reading the whole roster under --stopped', async () => {
     seedRow(process.pid, OTHER_ID, 'answered-row')

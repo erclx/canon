@@ -177,6 +177,8 @@ export function register(program: Command): void {
         '--stopped keeps the "usage-limit" rows after --branch and --self apply.',
         'It drops "unknown" rows, and "stopsUnread" counts them before it does,',
         'so a count above zero means a row here may be stopped and is not listed.',
+        '"foreignDead" above zero leaves the same doubt about a session this',
+        'reader could not check, and an empty result says so on stderr.',
         'An empty result exits 0. "claimed" still reads the whole roster.',
         '',
         'Examples:',
@@ -515,11 +517,16 @@ async function runList(opts: ListCommandOptions): Promise<number> {
     repository,
     own !== null,
     report.foreignDead,
-    opts.stopped === true,
+    opts.stopped ? stopsUnread : null,
   )
   if (opts.stopped && stopsUnread > 0) {
     logWarn(
       `${plural(stopsUnread, 'row')} could not be read and may be stopped, so this list can be short.`,
+    )
+  }
+  if (opts.stopped && own === null && report.foreignDead > 0) {
+    logWarn(
+      `${report.foreignDead} records from another pid namespace have no answering socket, so a stopped session may be missing from this list.`,
     )
   }
   if (claim) reportClaim(claim)
@@ -620,7 +627,7 @@ function reportSessions(
   repository: string | null,
   scoped: boolean,
   foreignDead: number,
-  stoppedOnly: boolean,
+  stopsUnread: number | null,
 ): void {
   logStep('Sessions')
 
@@ -634,8 +641,8 @@ function reportSessions(
   // was narrowed to one row before the branch filter ran. Reporting the wider
   // answer there would claim a reading this run never took.
   if (sessions.length === 0) {
-    if (stoppedOnly) {
-      logInfo('No session is stopped.')
+    if (stopsUnread !== null) {
+      logInfo(noneStopped(branch, scoped, foreignDead, stopsUnread))
       return
     }
 
@@ -681,6 +688,26 @@ function reportSessions(
       })
       .join('\n'),
   )
+}
+
+/**
+ * Words an empty `--stopped` result by what was read, since "no session is
+ * stopped" is a claim about the machine that a row this run could not read, or
+ * a record it could not check, leaves open.
+ */
+function noneStopped(
+  branch: string | undefined,
+  scoped: boolean,
+  foreignDead: number,
+  stopsUnread: number,
+): string {
+  if (stopsUnread > 0 || (!scoped && foreignDead > 0)) {
+    return 'No session this reader could check is stopped.'
+  }
+  if (scoped) return 'This session is not stopped.'
+  return branch
+    ? `No session holding ${branch} is stopped.`
+    : 'No session is stopped.'
 }
 
 function stopLine(session: StopReading): string[] {
