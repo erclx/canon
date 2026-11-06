@@ -14,7 +14,7 @@ A pull request opened ready stays mergeable through its CI run, and a draft mark
 ## Must
 
 - The approved plan is the scope, built in tested slices through `build-in-slices`, and every step stops with the code on the branch and the recovery for that stop named
-- The ship sequence is delegated to `git-ship`, and the pull request is marked a draft before the CI watch, after proving its head is this branch and its state is open
+- `git-ship` runs the ship sequence, the pull request opens as a draft, and a fallback mark before the CI watch repairs a ready one after proving its head is this branch and its state is open
 - A test-order finding between verify and ship is reported without gating, and a produced UI checklist is reported in the closing block without stopping
 - A fan-in member stops after verify with a push and a done message, and an integrator opens its build by merging the member branches
 - On a launch naming a controller, both review families are awaited through `canon pr review-state --wait`, and a timeout hands the record to the controller

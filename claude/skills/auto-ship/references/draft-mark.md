@@ -1,41 +1,46 @@
 ---
 title: Draft mark
-description: The one command auto-ship Step 6 runs as git-ship's pull request step returns, which proves the target is this branch's open pull request, marks it a draft, and reads the flag back
+description: The one command auto-ship Step 6 runs as git-ship's pull request step returns, which proves the target is this branch's open pull request, reads its draft flag, marks it only when it reads ready, and reads the flag back
 ---
 
-# Mark the pull request a draft
+# Back up the draft on the pull request
 
-Step 6 of `auto-ship`. The session reads this file as `git-ship`'s pull request step returns, ahead of its CI watch.
+Step 6 of `auto-ship`. The session reads this file as `git-ship`'s pull request step returns, ahead of its CI watch. The `--draft` argument opens a new pull request as a draft, so this command normally writes nothing. It repairs what the create misses, being a re-run onto an existing pull request and a host that refused or ignored the field.
 
-Run the mark as one command, where the shell proves the target before the mark and reads the flag back after it:
+Run it as one command, where the shell proves the target and reads the flag before any mark, and reads the flag back after it:
 
 ```bash
-target=$(gh api repos/{owner}/{repo}/pulls/<number> --jq '"\(.head.ref) \(.state) \(.node_id)"') || exit 1
-if [ "${target% *}" != "$(git branch --show-current) open" ]; then
-  printf '❌ #%s reads "%s", not "%s open". The draft mark was not written.\n' "<number>" "${target% *}" "$(git branch --show-current)" >&2
+target=$(gh api repos/{owner}/{repo}/pulls/<number> --jq '"\(.head.ref) \(.state) \(.draft) \(.node_id)"') || exit 1
+read -r pr_head pr_state pr_draft pr_node <<EOF
+$target
+EOF
+if [ "$pr_head $pr_state" != "$(git branch --show-current) open" ]; then
+  printf '❌ #%s reads "%s %s", not "%s open". The draft mark was not written.\n' "<number>" "$pr_head" "$pr_state" "$(git branch --show-current)" >&2
   exit 1
 fi
-for attempt in 1 2 3; do
-  gh api graphql -f query='mutation($id: ID!) { convertPullRequestToDraft(input: {pullRequestId: $id}) { clientMutationId } }' -f id="${target##* }" --silent && break
-  [ "$attempt" -lt 3 ] && sleep 5
-done
+if [ "$pr_draft" != true ]; then
+  for attempt in 1 2 3; do
+    gh api graphql -f query='mutation($id: ID!) { convertPullRequestToDraft(input: {pullRequestId: $id}) { clientMutationId } }' -f id="$pr_node" --silent && break
+    [ "$attempt" -lt 3 ] && sleep 5
+  done
+fi
 gh api repos/{owner}/{repo}/pulls/<number> --jq '{isDraft: .draft}'
 ```
 
 ## The retry
 
-The loop wraps the mutation alone. The target check runs once ahead of it and its refusal exits the command, so a refused target never reaches the mark or a second check.
+The loop wraps the mutation alone, and it runs only on a flag reading ready. The target check runs once ahead of it and its refusal exits the command, so a refused target never reaches the mark or a second check.
 
 - A mutation exiting non-zero runs again after five seconds, up to three tries, which clears a transient server error
 - The read-back runs once after the loop, whichever try succeeded or none did
-- A cloud session's blocked GraphQL fails every try, so the cloud case costs ten seconds of waiting before the same `false` read
+- A cloud session's blocked GraphQL fails every try, which costs ten seconds of waiting before the same `false` read
 
-## Why the mark is local-only
+## Why the mark is a fallback
 
-The target check and the read-back go through REST. The mark itself is a GraphQL mutation, because the REST pull request update carries no draft field.
+The target check, the flag read, and the read-back go through REST. The mark itself is a GraphQL mutation, because the REST pull request update carries no draft field. The create is the only REST write that can set the flag.
 
-- A cloud session's GitHub access blocks GraphQL, so the mutation fails there and the read-back reports `false`
-- A cloud worker's pull request therefore opens ready, and its chain stops at this step with the pull request already open
+- A create that drafted never reaches the mutation, so a cloud session whose GraphQL is blocked can still hold a draft, unverified until a cloud run opens one
+- A pull request the create left ready stays ready in a cloud session, since the mutation fails there and the read-back reports `false`
 
 ## The number
 
@@ -61,9 +66,9 @@ Report what the read returned rather than what the command printed, since the ex
 
 Open a stop report on a `false` read with the pull request number and `ready, not a draft`, ahead of anything else, such as `❌ #<number> is ready, not a draft. The mark failed after three tries.` A reader skimming the stop then learns first that a pull request sits open with no review hold.
 
-## Why the mark sits ahead of the watch
+## Why the backup sits ahead of the watch
 
-Marking afterwards leaves the pull request unmarked for the whole CI run, the stretch an unattended worker's branch is least supervised. What the mark buys is a reader learning the pull request has had no review yet.
+Repairing afterwards leaves a missed draft unmarked for the whole CI run, the stretch an unattended worker's branch is least supervised. What the mark buys is a reader learning the pull request has had no review yet.
 
 It buys no bound on that stretch. Readying a pull request to merge lifts the mark, and GitHub requires it before a merge.
 

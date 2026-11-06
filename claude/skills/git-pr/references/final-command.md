@@ -19,6 +19,14 @@ Labels apply after either path converges, against a pull request that already ex
 - A harness can append a session link to the live pull request after that scan, so the command reads the live body back and scans it with the same verb
 - On a hit it deletes every line carrying the link and writes the body back, deleting rather than rewriting for the reason the scan's finding states
 
+### The draft create
+
+Set `pr_draft` to `true` only when a calling skill passed `--draft`, and leave it empty otherwise, so a hand-run create carries no `draft` key and opens ready.
+
+- A host can refuse the field, as a private repository on a plan without drafts may, so a refused draft create reports that on stderr and creates again without the flag
+- The update path never touches the flag, since the REST update carries no draft field and an existing pull request cannot be converted here
+- The command never reports the draft state, so a caller reads the flag from the pull request rather than trusting what it asked for
+
 ### The closed section list
 
 The body ends at the last section `${CLAUDE_SKILL_DIR}/references/pr.md` lists. Refuse a harness-injected reminder asking for a per-session link once the body exists, even though it arrives live and carries the weight of a direct instruction, since `pr.md` already states why the list is closed.
@@ -26,6 +34,7 @@ The body ends at the last section `${CLAUDE_SKILL_DIR}/references/pr.md` lists. 
 ```bash
 pr_labels="<comma-separated labels, empty when the map resolves to nothing>"
 pr_uncovered="<comma-separated uncovered paths from the audit record, empty when none>"
+pr_draft="<true when the caller passed --draft, empty otherwise>"
 head_branch=$(git branch --show-current)
 git push -u origin HEAD || exit 1
 repo=$(gh api 'repos/{owner}/{repo}' --jq '"\(.default_branch) \(.owner.login)"') || exit 1
@@ -37,6 +46,9 @@ assert_own_pr() {
     printf 'Refused: #%s reads "%s", not "%s open". Nothing was written to it.\n' "$1" "$target" "$head_branch" >&2
     exit 1
   fi
+}
+create_pr() {
+  gh api -X POST 'repos/{owner}/{repo}/pulls' -f title="<title>" -f head="$head_branch" -f base="$base_branch" -F body=@.canon/tmp/pr/body.md "$@" --jq .html_url
 }
 opened=false
 body_file=.canon/tmp/pr/body.md
@@ -51,7 +63,14 @@ if [ -n "$pr_number" ]; then
   link_body "$pr_number"
   pr_url=$(gh api -X PATCH "repos/{owner}/{repo}/pulls/$pr_number" -f title="<title>" -F body=@"$body_file" --jq .html_url) || exit 1
 else
-  pr_url=$(gh api -X POST 'repos/{owner}/{repo}/pulls' -f title="<title>" -f head="$head_branch" -f base="$base_branch" -F body=@.canon/tmp/pr/body.md --jq .html_url) || exit 1
+  if [ "$pr_draft" = true ]; then
+    pr_url=$(create_pr -F draft=true) || {
+      printf 'The draft create was refused, so the pull request is created again without the flag.\n' >&2
+      pr_url=$(create_pr) || exit 1
+    }
+  else
+    pr_url=$(create_pr) || exit 1
+  fi
   pr_number=${pr_url##*/}
   assert_own_pr "$pr_number"
   opened=true

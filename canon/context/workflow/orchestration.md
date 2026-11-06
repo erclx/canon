@@ -120,7 +120,7 @@ The remaining surfaces each own one slice.
 - `.canon/ready/` holds only archived folders under `archive/`, which `canon tasks archive` still moves and retargets for an older task's `Ready:` line
 - A posted finding reaches the worker as a message from the reviewer, who receives the re-review request directly, so the controller hears only a close, a refusal, or a block
 - The controller falls back as sender for a cloud reviewer or an unreachable side, as `orchestrator-handback.md` states, and the poll's after-finding rule skips a pass a live reviewer sent on
-- A cloud worker has no GraphQL, so its draft mark reads ready and `git-pr` deletes the session link the harness appends
+- A cloud worker has no GraphQL, so only the create can draft its pull request, and `git-pr` deletes the session link the harness appends
 - `crossSessionInbound` stays unset, since `hold` and `refuse` break the worker handback and `accept` bounds nothing
 
 ## Gotchas

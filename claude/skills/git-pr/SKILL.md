@@ -143,6 +143,8 @@ Read `${CLAUDE_SKILL_DIR}/references/final-command.md` on reaching this step, fo
 
 That command re-scans the live body for a session link, applies the labels through `canon labels apply`, and prints `number=`, `url=`, `head=`, `owed=`, `missingOnRemote=`, and `uncovered=`.
 
+- A calling skill states a draft by passing the exact argument `--draft`, and any other text states nothing, so a hand-run opens the pull request ready
+
 ### Record the number on the task
 
 Write the `number` the final command printed onto the task the branch is closing, through `canon tasks pull-request`, and never resolve it again. Skip it when the final command refused on a head mismatch and printed no number.

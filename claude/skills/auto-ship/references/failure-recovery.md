@@ -32,8 +32,10 @@ A task's `Plan:` pointer can also fail after it is read:
 
 These stops come after the plan reads:
 
-- Verify fails. Read logs, fix manually, run `/git-ship`.
-- git-ship fails. Inspect the hook or remote error, then run again.
+- Verify fails. Read logs, fix manually, run `/git-ship --draft`, then run `${CLAUDE_SKILL_DIR}/references/draft-mark.md` as its pull request step returns.
+- git-ship fails. Inspect the hook or remote error, then run `/git-ship --draft` and the same mark.
+
+A resume typed bare opens the pull request ready, and only this chain runs the mark, so a resume carries both.
 
 ## Draft mark and review wait
 

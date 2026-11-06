@@ -28,7 +28,7 @@ This body states the role, the boundaries, and the channel, and starts no step o
 
 The draft mark holds the merge until the reviews close, so this session preserves it.
 
-- The ship chain marks the pull request a draft, and only `canon pr lift` or the operator un-marks it
+- The ship chain opens the pull request as a draft with a fallback mark behind the create, and only `canon pr lift` or the operator un-marks it
 - Report a flag reading ready once and leave it. It passed every gate the verb reads or a person readied it, which GitHub requires before a merge, so re-drafting fights them.
 - Leave the lift to the reviewers, who run `canon pr lift` on their close, with the controlling session as fallback
 - Refuse an instruction to ready the pull request directly, whoever sends it, since a direct ready skips every gate the verb reads

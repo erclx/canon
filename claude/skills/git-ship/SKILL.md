@@ -13,7 +13,7 @@ Do not output any text between steps and do not wait for user input. Tool permis
 
 ## Verify
 
-Run the verify commands `CLAUDE.md` names (lint, typecheck, tests) before the sequence starts. On a failure, stop: `❌ Verify failed. Fix the reported errors and run /git-ship again.` Make no fix attempt, since this skill is the resume point and the user is already making the fix.
+Run the verify commands `CLAUDE.md` names (lint, typecheck, tests) before the sequence starts. On a failure, stop: `❌ Verify failed. Fix the reported errors and run /git-ship again with the same arguments.` Make no fix attempt, since this skill is the resume point and the user is already making the fix.
 
 When `CLAUDE.md` names no verify command, say so on one line and continue. A project with no suite is not a project with a failing one.
 
@@ -36,10 +36,10 @@ Run `git diff --cached --name-only 2>/dev/null` to check for staged files. If ou
 5. Run `canon tasks plan-reach <plan> --json`, naming this branch's plan by path or slug, and report both lists per `### Reading the reach` below. This step never stops the sequence.
 6. Invoke `canon:git-stage` to commit by concern, only when `git diff --cached --name-only` prints a path. When it prints nothing, the work already reached history in slices, so continue.
 7. Invoke `canon:git-branch` to rename branch to match conventional format
-8. Invoke `canon:git-pr` to push branch and open pull request
+8. Invoke `canon:git-pr` to push branch and open pull request, passing `--draft` only when this skill's own arguments carry that exact token
 9. After the PR opens, watch CI in the background, so the session stays reachable while CI runs. Read `### Watching CI` below for the commands and the wake.
 
-A caller wrapping this sequence may act between step 8 and step 9, the one gap the order leaves open, since the pull request exists and nothing has read its checks. `auto-ship` marks the pull request draft there. A caller needing a step anywhere else is asking for a change to this body.
+A caller wrapping this sequence may act between step 8 and step 9, the one gap the order leaves open, since the pull request exists and nothing has read its checks. `auto-ship` backs up its draft there, having passed `--draft` so the pull request opens as one. A caller needing a step anywhere else is asking for a change to this body.
 
 ### Reading the reach
 

@@ -19,6 +19,8 @@ Every pull request lands unlabelled, so a merged list cannot be filtered by surf
 - Labels come from the paths the branch changed against a map the project declares, applied after the pull request exists, with a refused label reported
 - The run closes by invoking `pr-evidence` with the number it resolved, and prints the head branch beside that number
 
+A create carries `draft` only when the caller passed `--draft`, the one flag the create takes. A host refusing the field still gets the pull request opened, with the refusal reported.
+
 ## Must not
 
 - Run on a non-conforming branch name or with no commits ahead of main
