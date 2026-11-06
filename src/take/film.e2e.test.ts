@@ -1,5 +1,6 @@
 import { spawn, spawnSync } from 'node:child_process'
 import {
+  chmodSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -11,7 +12,15 @@ import {
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import {
+  afterAll,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  onTestFinished,
+  vi,
+} from 'vitest'
 import type { CameraTrack } from '@/take/camera'
 import {
   FPS,
@@ -361,6 +370,43 @@ describe.skipIf(!available())('a frame-stepped take of a served page', () => {
       rmSync(own, { recursive: true, force: true })
     }
   }, 180_000)
+
+  it('should exit on its refusal when the beat folder refuses the spool', async () => {
+    const own = mkdtempSync(join(tmpdir(), 'canon-take-spool-e2e-'))
+    const plan = join(own, 'plan.json')
+    writeFileSync(
+      plan,
+      JSON.stringify({
+        beats: [
+          {
+            name: 'cast',
+            route: 'screencast',
+            steps: [{ kind: 'wait', ms: 200 }],
+          },
+        ],
+      }),
+    )
+    const beat = join(own, 'takes/01-cast')
+    mkdirSync(beat, { recursive: true })
+    chmodSync(beat, 0o555)
+    const cli = fileURLToPath(new URL('../cli.ts', import.meta.url))
+    const running = spawn(
+      'bun',
+      [cli, 'take', server.url, plan, '--out', join(own, 'takes')],
+      { stdio: 'ignore' },
+    )
+    // Registered here rather than in a `finally`, which a process that never
+    // exits would hold past the timeout.
+    onTestFinished(() => {
+      running.kill('SIGKILL')
+      chmodSync(beat, 0o755)
+      rmSync(own, { recursive: true, force: true })
+    })
+
+    const code = await new Promise((done) => running.once('close', done))
+
+    expect(code).toBe(1)
+  }, 30_000)
 
   it('should refuse a target the page does not carry rather than film a guess', async () => {
     const read = readTakePlan(

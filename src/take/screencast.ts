@@ -51,8 +51,13 @@ export async function filmScreencast(request: {
   readonly beat: Beat
   readonly clip: string
 }): Promise<ScreencastTake> {
-  const browser = await chromium.launch()
+  // Ahead of the launch, so a folder that refuses leaves no browser holding the
+  // process open past its refusal.
   const scratch = openSpool(request.clip)
+  const browser = await chromium.launch().catch((error: unknown) => {
+    scratch.remove()
+    throw error
+  })
   let still: (() => Promise<Buffer | undefined>) | undefined
   try {
     const page = await browser.newPage({ viewport: VIEWPORT })
