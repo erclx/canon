@@ -110,13 +110,13 @@ When it produces a checklist, read `${CLAUDE_SKILL_DIR}/references/ui-checklist.
 
 ## Step 6: ship
 
-Invoke `canon:git-ship`. That body owns the sequence, being the verify gate, both doc syncs, staging, the commit grouping, the branch rename, the pull request, and the CI watch, along with the reason each step sits where it does. Read the order there and never here.
+Invoke `canon:git-ship` with the argument `--draft`. That body owns the sequence, being the verify gate, both doc syncs, staging, the commit grouping, the branch rename, the pull request, and the CI watch, along with the reason each step sits where it does. Read the order there and never here.
 
 ### The draft mark
 
-This chain adds one thing. Mark the pull request as a draft as soon as `git-ship`'s pull request step returns, ahead of its CI watch, naming the number that step returned rather than one resolved by branch.
+This chain adds two things. The `--draft` argument opens the pull request as a draft, with no ready window. As soon as `git-ship`'s pull request step returns, ahead of its CI watch, the fallback mark repairs a pull request that still reads ready, naming the number that step returned rather than one resolved by branch.
 
-- Read `${CLAUDE_SKILL_DIR}/references/draft-mark.md` on reaching that point for the one command that proves the target, marks it, and reads the flag back
+- Read `${CLAUDE_SKILL_DIR}/references/draft-mark.md` on reaching that point for the one command that proves the target, marks it only when it reads ready, and reads the flag back
 - A `false` read stops the chain after the command's own retry already ran, so never re-issue the mark on it
 - Open that stop report on the pull request number and `ready, not a draft`, ahead of any other line
 - Act on the wake after the CI watch exits on `passing`, not when the turn ends on its watch line, moving to Step 7 under a named controller and to the Output block otherwise
