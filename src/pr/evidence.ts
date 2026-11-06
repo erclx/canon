@@ -591,10 +591,10 @@ export function renderEvidenceBody(
       .filter((entry) => entry.items.length > 0)
   const isMoved = (item: EvidenceItem): boolean =>
     item.basePath !== undefined && item.withinTolerance === true
-  const open = split(
-    (item) => !isMoved(item) && item.withinTolerance !== true,
+  const open = split((item) => !isMoved(item) && item.withinTolerance !== true)
+  const folded = split(
+    (item) => !isMoved(item) && item.withinTolerance === true,
   )
-  const folded = split((item) => !isMoved(item) && item.withinTolerance === true)
   const movedCount = states.reduce(
     (total, entry) => total + entry.items.filter(isMoved).length,
     0,
