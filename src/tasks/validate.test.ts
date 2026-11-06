@@ -2069,13 +2069,13 @@ describe('validateBoard held rows', () => {
   function readers(
     sessions: ReadonlyMap<string, string> | undefined,
     pulls: ReadonlyMap<string, string> | undefined,
-    merged: boolean | undefined = false,
+    merged: boolean | 'unreadable' = false,
   ): ValidateOptions {
     return {
       live: {
         sessions: async () => sessions,
         pulls: async () => pulls,
-        merged: async () => merged,
+        merged: async () => (merged === 'unreadable' ? undefined : merged),
       },
     }
   }
@@ -2132,9 +2132,37 @@ describe('validateBoard held rows', () => {
   it('should keep a session hold when the merged read fails', async () => {
     await seedUpNext()
 
-    const held = await heldFindings(readers(LIVE_SESSION, NOBODY, undefined))
+    const held = await heldFindings(readers(LIVE_SESSION, NOBODY, 'unreadable'))
 
     expect(held).toMatchObject([{ subject: STEM }])
+  })
+
+  it('should read pulls as unread when only the merged read fails', async () => {
+    await seedUpNext()
+
+    const outcome = await validateBoard(
+      ROOT,
+      readers(LIVE_SESSION, NOBODY, 'unreadable'),
+    )
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      live: { sessions: 'read', pulls: 'unread' },
+    })
+  })
+
+  it('should keep pulls as read when the merged read answers', async () => {
+    await seedUpNext()
+
+    const outcome = await validateBoard(
+      ROOT,
+      readers(LIVE_SESSION, NOBODY, true),
+    )
+
+    expect(outcome).toMatchObject({
+      ok: true,
+      live: { sessions: 'read', pulls: 'read' },
+    })
   })
 
   it('should report a Needs a plan row a holder reaches', async () => {

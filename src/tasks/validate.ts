@@ -1666,19 +1666,23 @@ export async function groupRuleFindings(
  * A session outlives its merge, so a session still on a branch a merged pull
  * request names is finished work too, until the merge reaches this clone and the
  * hook archives the row. A merged read that fails leaves the hold standing, since
- * the failed read is reported and the session is still there.
+ * the session is still there, and reads `pulls` as unread, since that hold may be
+ * finished work the open list could not rule out.
  */
 async function checkHeld(
   rows: readonly BoardRow[],
   live: LiveRead,
   dir: string,
   root: string,
-): Promise<Finding[]> {
+): Promise<{ readonly findings: Finding[]; readonly mergedUnread: boolean }> {
+  let mergedUnread = false
+
   const holdersOf = async (branch: string): Promise<string[]> => {
     const session = live.sessions?.get(branch)
-    const finished = session ? (await live.merged?.(branch)) === true : false
+    const merged = session ? await live.merged?.(branch) : false
+    if (merged === undefined) mergedUnread = true
 
-    return [session && !finished ? session : undefined, live.pulls?.get(branch)]
+    return [session && !merged ? session : undefined, live.pulls?.get(branch)]
       .filter((name): name is string => name !== undefined)
       .map((name) => `${name} on ${branch}`)
   }
@@ -1708,7 +1712,12 @@ async function checkHeld(
     }),
   )
 
-  return found.filter((finding): finding is Finding => finding !== undefined)
+  return {
+    findings: found.filter(
+      (finding): finding is Finding => finding !== undefined,
+    ),
+    mergedUnread,
+  }
 }
 
 /** What each source answered, `undefined` where it was not asked or failed. */
@@ -1801,6 +1810,7 @@ export async function validateBoard(
     : []
   const parked = await checkParked(rows, root, trunk)
   const live = await readLive(options.live)
+  const held = await checkHeld(rows, live, dir, root)
 
   const findings = [
     ...shapeFindings,
@@ -1813,7 +1823,7 @@ export async function validateBoard(
     ...checkCellWidth(rows),
     ...checkOrdering(rows),
     ...parked.findings,
-    ...(await checkHeld(rows, live, dir, root)),
+    ...held.findings,
   ]
 
   return {
@@ -1828,6 +1838,8 @@ export async function validateBoard(
     shared: checkSharedFiles(rows),
     wide: checkWideTokens(rows),
     unplaced: checkUnplaced(rows, backlog, stems),
-    live: live.reading,
+    live: held.mergedUnread
+      ? { ...live.reading, pulls: 'unread' }
+      : live.reading,
   }
 }

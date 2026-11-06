@@ -2424,7 +2424,9 @@ function reportValidation(
     logWarn('the session roster could not be read, so no session was checked')
   }
   if (outcome.live.pulls === 'unread') {
-    logWarn('open pull requests could not be read, so none was checked')
+    logWarn(
+      'pull requests could not be read, so a hold may be missed or already merged',
+    )
   }
 
   if (!emitJson) outro()
