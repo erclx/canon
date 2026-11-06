@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { parseFrontmatter, readField } from '@/indexes/frontmatter'
+import {
+  parseFrontmatter,
+  readField,
+  readFrontmatterSource,
+} from '@/indexes/frontmatter'
 
 function buildSource(block: string, body = 'body\n'): string {
   return `---\n${block}\n---\n\n${body}`
@@ -30,6 +34,40 @@ describe('parseFrontmatter', () => {
     expect(parseFrontmatter(source)?.raw).toContain(
       '# note\nb: second\na: first',
     )
+  })
+})
+
+describe('readFrontmatterSource', () => {
+  it('should read a source with no block as absent', () => {
+    expect(readFrontmatterSource('# Heading\n\nbody\n')).toEqual({
+      kind: 'absent',
+    })
+  })
+
+  it('should read a block that will not parse as invalid with the parser message', () => {
+    const reading = readFrontmatterSource(
+      buildSource("title: 'Trim the Board's ad page'\ndescription: Demo"),
+    )
+    expect(reading.kind).toBe('invalid')
+    if (reading.kind === 'invalid') expect(reading.message).not.toBe('')
+  })
+
+  it('should read a block that is a list as invalid', () => {
+    expect(readFrontmatterSource(buildSource('- one\n- two')).kind).toBe(
+      'invalid',
+    )
+  })
+
+  it('should read a doubled-quote apostrophe back as one apostrophe', () => {
+    const reading = readFrontmatterSource(
+      buildSource("title: 'Trim the Board''s ad page'\ndescription: Demo"),
+    )
+    expect(reading.kind).toBe('parsed')
+    if (reading.kind === 'parsed') {
+      expect(readField(reading.frontmatter, 'title')).toBe(
+        "Trim the Board's ad page",
+      )
+    }
   })
 })
 

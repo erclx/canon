@@ -55,6 +55,7 @@ Merge order matters only when two branches touch the same file. Expect to rebase
 
 - A row's cell count must match its header, and a `## Needs a plan` row stating its position is checked against where it sits
 - Every plan pointer resolves, every task file is named once, and every ready row names its files
+- A task file whose frontmatter block will not parse as YAML is reported with the parser's message, as with a lone apostrophe inside the single-quoted title
 - A parked row is reported when its cited task reached the trunk, whether the cell links it or names its bare label
 - A group header must be the columns the group owns, a `Touches` cell must match its plan, and a `Waiting on` cell renders at most 120 characters
 

@@ -65,6 +65,7 @@ Run `canon tasks next-label --claim --json` and take its `label` field. The verb
 
 Write `.canon/tasks/vXX.Y-<slug>.md` under the claimed label, reading the file first if a session ever stubbed it, following the format in `${CLAUDE_SKILL_DIR}/references/tasks.md`. Write it immediately, since Claude Code's tool permission dialog is the confirmation gate.
 
+- Double any apostrophe in the title before writing it inside the single-quoted `title:` value, since a lone one fails the YAML parse
 - Include a link line only when the file or folder it names exists, since a link to an unwritten plan is the broken pointer the archive rules prevent
 - Write `Plan:`, `Groundwork:`, and `Intake:` as markdown links relative to `.canon/tasks/`, as in `Plan: [feature-<slug>](../plans/feature-<slug>.md)`
 - Leave `Issue:` a bare `#NNN`. The older bare-path form still parses, but it leaves the board in two shapes for every later reader.

@@ -524,6 +524,34 @@ describe('validateBoard', () => {
     ])
   })
 
+  it('should report a task file whose frontmatter will not parse', async () => {
+    await seedTask('v1.0-first')
+    await writeFile(
+      join(tasksDir(ROOT), 'v1.0-first.md'),
+      "---\ntitle: 'v1.0: Trim the Board's ad page'\ndescription: Demo\n---\n\n# v1.0: Trim\n\nPlan: [feature-v1.0-first](../plans/feature-v1.0-first.md)\n",
+    )
+    await seedPlan('v1.0-first')
+    await seedBoard(boardBody([readyTable([{ stem: 'v1.0-first' }])]))
+
+    const outcome = await validateBoard(ROOT)
+
+    expect(outcome.ok && kinds(outcome.findings)).toEqual([
+      'frontmatter-invalid',
+    ])
+  })
+
+  it('should pass a task file whose title doubles its apostrophe', async () => {
+    await seedTask('v1.0-first')
+    await writeFile(
+      join(tasksDir(ROOT), 'v1.0-first.md'),
+      "---\ntitle: 'v1.0: Trim the Board''s ad page'\ndescription: Demo\n---\n\n# v1.0: Trim\n\nPlan: [feature-v1.0-first](../plans/feature-v1.0-first.md)\n",
+    )
+    await seedPlan('v1.0-first')
+    await seedBoard(boardBody([readyTable([{ stem: 'v1.0-first' }])]))
+
+    expect(await validateBoard(ROOT)).toMatchObject({ ok: true, findings: [] })
+  })
+
   it('should pass a rowed task whose Sessions line names full ids', async () => {
     await seedPlanLine(
       'v1.0-first',

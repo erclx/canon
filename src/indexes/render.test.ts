@@ -34,6 +34,37 @@ afterEach(() => {
 })
 
 describe('computeIndex', () => {
+  it('should report invalid YAML and no missing field for a block that will not parse', async () => {
+    writeIndex(root, 'Tasks', 'One line each')
+    writeEntry(root, 'bad.md', {
+      title: "'Trim the Board's ad page'",
+      description: 'Demo',
+    })
+
+    const result = await computeIndex(root)
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.errors).toHaveLength(1)
+    expect(result.errors[0]).toContain(
+      `frontmatter is not valid YAML in ${join(root, 'bad.md')}: `,
+    )
+  })
+
+  it('should still report the missing fields for a file with no block', async () => {
+    writeIndex(root, 'Tasks', 'One line each')
+    writeFileSync(join(root, 'bare.md'), '# Heading\n')
+
+    const result = await computeIndex(root)
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.errors.join('\n')).toContain(
+      'missing frontmatter field "title"',
+    )
+    expect(result.errors.join('\n')).not.toContain('not valid YAML')
+  })
+
   it('should render a flat list when no sibling declares a category', async () => {
     writeIndex(root, 'Wiki', 'Reference pages')
     writeEntry(root, 'alpha.md', { title: 'Alpha', description: 'First page' })
