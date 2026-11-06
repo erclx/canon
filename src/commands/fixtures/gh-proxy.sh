@@ -41,5 +41,6 @@ case "$*" in
 *"/pulls/7/files"*) echo '[{"filename":"src/a.ts","status":"added"}]' | jq -r "$f" ;;
 *"/check-runs"*) [ -f "$fx/checks.json" ] && cat "$fx/checks.json" || echo '{"total_count":0,"check_runs":[]}' ;;
 *"/pulls/7") jq -r "$f" "$fx/pull.json" ;;
+"api repos/{owner}/{repo}") echo '{"full_name":"acme/widgets","html_url":"https://github.com/acme/widgets"}' ;;
 *) exit 1 ;;
 esac

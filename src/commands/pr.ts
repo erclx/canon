@@ -505,7 +505,7 @@ export function register(program: Command): void {
     .helpOption('-h, --help', 'Show this help message')
     .option(
       '--body <path>',
-      'Read the body from a file rather than the API, ignoring any number',
+      'Read the body from a file rather than the API, ignoring any number except the one --link needs',
     )
     .option(
       '--base <ref>',
@@ -547,8 +547,9 @@ export function register(program: Command): void {
         '--link prints the body and nothing else, with every path the section',
         'names that the diff changes written as a link to its row in the Files',
         'tab. The anchor is `diff-` and the SHA-256 of the path. Pass the pull',
-        'request number, since the link needs it. A plain run also reports a',
-        "link whose anchor hashes another path than its label's, as mislinked.",
+        'request number, since the link needs it. It also rewrites the anchor',
+        'of a link opening another file, and a plain run reports that link as',
+        "mislinked when its label is a changed path and its anchor hashes another's.",
         '',
         'Refusals, read off `reason`:',
         '  no-section          the body carries no `## Key changes` heading, so it',
@@ -569,6 +570,7 @@ export function register(program: Command): void {
         '  gh-failed           `gh` could not answer for this repository or branch',
         '  no-number           --link was given with no pull request number',
         '  no-repo-url         --link could not read the repository address',
+        '  link-json           --link was given with --json, though it prints the body',
         '',
         'Exit codes:',
         '  0  every claimed path is in the diff, and every link opens its own file',
@@ -1979,7 +1981,7 @@ async function runKeyChanges(
   if (report.mislinked.length > 0) {
     logStep('Mislinked')
     logWarn(
-      `${plural(report.mislinked.length, 'link')} open another file's diff than the path they name. Re-run with --link to rewrite them.`,
+      `${plural(report.mislinked.length, 'link')} open another file's diff than the path they name. Re-run with --link to print the body with them corrected.`,
     )
     for (const link of report.mislinked) logWarn(link.path)
   }
@@ -2023,6 +2025,15 @@ async function runKeyChangesLink(
 ): Promise<number> {
   const emitJson = opts.json ?? false
 
+  if (emitJson) {
+    return refuseWith(
+      'link-json',
+      '--link prints the body itself, so it takes no --json record.',
+      emitJson,
+      root,
+    )
+  }
+
   const source =
     opts.body === undefined
       ? await readFromApi(root, number)
@@ -2039,8 +2050,8 @@ async function runKeyChangesLink(
     )
   }
 
-  const url = await gh(root, ['repo', 'view', '--json', 'url', '-q', '.url'])
-  if (url === null || url.trim() === '') {
+  const url = await readRepoUrl(root)
+  if (url === undefined) {
     return refuseWith(
       'no-repo-url',
       'gh could not read the repository address, so no link was built.',
@@ -2053,7 +2064,7 @@ async function runKeyChangesLink(
     linkKeyChanges(
       source.source.body,
       source.source.changed,
-      `${url.trim()}/pull/${pull}/files`,
+      `${url}/pull/${pull}/files`,
     ),
   )
   return 0
@@ -4123,6 +4134,18 @@ async function readRepoName(root: string): Promise<string | undefined> {
   try {
     const name = (JSON.parse(row) as { full_name?: unknown }).full_name
     return typeof name === 'string' ? name : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/** The repository's web address off the REST repository read, for the same reason as `readRepoName`. */
+async function readRepoUrl(root: string): Promise<string | undefined> {
+  const row = await gh(root, ['api', 'repos/{owner}/{repo}'])
+  if (row === null) return undefined
+  try {
+    const url = (JSON.parse(row) as { html_url?: unknown }).html_url
+    return typeof url === 'string' && url !== '' ? url : undefined
   } catch {
     return undefined
   }
