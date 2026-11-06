@@ -117,7 +117,8 @@ Invoke `canon:git-ship`. That body owns the sequence, being the verify gate, bot
 This chain adds one thing. Mark the pull request as a draft as soon as `git-ship`'s pull request step returns, ahead of its CI watch, naming the number that step returned rather than one resolved by branch.
 
 - Read `${CLAUDE_SKILL_DIR}/references/draft-mark.md` on reaching that point for the one command that proves the target, marks it, and reads the flag back
-- A `false` read stops the chain, and never re-issue the mark on it
+- A `false` read stops the chain after the command's own retry already ran, so never re-issue the mark on it
+- Open that stop report on the pull request number and `ready, not a draft`, ahead of any other line
 - Act on the wake after the CI watch exits on `passing`, not when the turn ends on its watch line, moving to Step 7 under a named controller and to the Output block otherwise
 - Keep `git-ship`'s own verify gate, which repeats Step 3 on a clean run, since a resumed run enters at that gate
 
