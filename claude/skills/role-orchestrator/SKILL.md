@@ -45,6 +45,7 @@ The human asks for each side of a compaction, and this skill reads the runbook.
 - Hand launch: `${CLAUDE_SKILL_DIR}/references/orchestrator-hand-launch.md`
 - A lesson about how to work goes to the owning task's Findings, as a bold-labeled line per `${CLAUDE_SKILL_DIR}/../task-board/references/tasks.md`
 - On a request to resume after a compaction, read `${CLAUDE_SKILL_DIR}/references/orchestrator-resume.md`, which reads that file back with the board and the groundwork behind the live work
+- On a request to resume the sessions a usage limit stopped, or on this session's own first turn after a limit stop, follow `${CLAUDE_SKILL_DIR}/references/orchestrator-limit-stops.md`
 
 ### The poll and the parked rows
 
