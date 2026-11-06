@@ -11,6 +11,7 @@ import {
   type SessionReport,
   selfOf,
 } from '@/sessions/resolve'
+import { readStop, type StopReading } from '@/sessions/stop'
 import {
   type Behind,
   exportSession,
@@ -32,7 +33,10 @@ interface ListCommandOptions {
   readonly branch?: string
   readonly repository?: string
   readonly self?: boolean
+  readonly stopped?: boolean
 }
+
+type ListedSession = ResolvedSession & StopReading
 
 const REASONS: Record<string, string> = {
   'not-a-repository': 'working outside any git repository',
@@ -67,6 +71,7 @@ export function register(program: Command): void {
       '--self',
       "Report the caller's own row, and refuse where the roster holds none",
     )
+    .option('--stopped', 'Report only the sessions a usage limit stopped')
     .addHelpText(
       'after',
       [
@@ -161,12 +166,26 @@ export function register(program: Command): void {
         'framed listing renders the same dwell beside the status, at the',
         'coarsest unit that keeps it a whole number.',
         '',
+        'Each row also carries "stopped" and "stopResets", read from the tail of',
+        'the session transcript. "stopped" is "usage-limit" when the last',
+        'assistant entry is a limit stop, with "stopResets" holding the text the',
+        'client wrote after "resets", or null when it wrote none. It is "unknown"',
+        'when the transcript could not be read or a limit-worded entry has another',
+        'shape, so the row may be stopped, and null otherwise. A "busy" row reads',
+        'null without opening its transcript, since a turn is running.',
+        '',
+        '--stopped keeps the "usage-limit" rows after --branch and --self apply.',
+        'It drops "unknown" rows, and "stopsUnread" counts them before it does,',
+        'so a count above zero means a row here may be stopped and is not listed.',
+        'An empty result exits 0. "claimed" still reads the whole roster.',
+        '',
         'Examples:',
         '  canon sessions list',
         '  canon sessions list --json',
         '  canon sessions list --branch feat/parser --json',
         '  canon sessions list --branch chore/agents --repository ../caret --json',
         '  canon sessions list --self --json',
+        '  canon sessions list --stopped --json',
         '',
       ].join('\n'),
     )
@@ -477,15 +496,32 @@ async function runList(opts: ListCommandOptions): Promise<number> {
     ? await checkClaim(opts.branch, { cwd: at, resolve: async () => report })
     : null
 
+  const read: readonly ListedSession[] = shown.map((session) => ({
+    ...session,
+    ...readStop(session),
+  }))
+  const stopsUnread = read.filter(
+    (session) => session.stopped === 'unknown',
+  ).length
+  const listed = opts.stopped
+    ? read.filter((session) => session.stopped === 'usage-limit')
+    : read
+
   intro('canon sessions list')
-  reportConfidence(shown, report)
+  reportConfidence(listed, report)
   reportSessions(
-    shown,
+    listed,
     opts.branch,
     repository,
     own !== null,
     report.foreignDead,
+    opts.stopped === true,
   )
+  if (opts.stopped && stopsUnread > 0) {
+    logWarn(
+      `${plural(stopsUnread, 'row')} could not be read and may be stopped, so this list can be short.`,
+    )
+  }
   if (claim) reportClaim(claim)
   outro()
 
@@ -494,8 +530,9 @@ async function runList(opts: ListCommandOptions): Promise<number> {
       `${JSON.stringify({
         dir: report.dir,
         // Over the rows shown, so an unrelated row --branch dropped cannot weaken it.
-        confidence: confidenceOf(shown),
+        confidence: confidenceOf(listed),
         foreignDead: report.foreignDead,
+        stopsUnread,
         branch: opts.branch ?? null,
         repository,
         worktree: claim?.worktree ?? null,
@@ -503,7 +540,7 @@ async function runList(opts: ListCommandOptions): Promise<number> {
         claimed: claim?.claimed ?? null,
         sessionsReadable: claim?.sessionsReadable ?? null,
         refsReadable: claim?.refsReadable ?? null,
-        sessions: shown,
+        sessions: listed,
       })}\n`,
     )
   }
@@ -578,11 +615,12 @@ function reportConfidence(
 }
 
 function reportSessions(
-  sessions: readonly ResolvedSession[],
+  sessions: readonly ListedSession[],
   branch: string | undefined,
   repository: string | null,
   scoped: boolean,
   foreignDead: number,
+  stoppedOnly: boolean,
 ): void {
   logStep('Sessions')
 
@@ -596,6 +634,11 @@ function reportSessions(
   // was narrowed to one row before the branch filter ran. Reporting the wider
   // answer there would claim a reading this run never took.
   if (sessions.length === 0) {
+    if (stoppedOnly) {
+      logInfo('No session is stopped.')
+      return
+    }
+
     if (branch) {
       logInfo(
         scoped
@@ -630,10 +673,20 @@ function reportSessions(
           `unresolved: ${REASONS[session.unresolved ?? ''] ?? 'unknown'}`
         const dwell = formatDwell(session.statusDwellMs)
         const status = dwell ? `${session.status} ${dwell}` : session.status
-        return `${session.name}  ${status}  ${held}\n  ${session.cwd}`
+        return [
+          `${session.name}  ${status}  ${held}`,
+          `  ${session.cwd}`,
+          ...stopLine(session),
+        ].join('\n')
       })
       .join('\n'),
   )
+}
+
+function stopLine(session: StopReading): string[] {
+  if (session.stopped === null) return []
+  const resets = session.stopResets ? `, resets ${session.stopResets}` : ''
+  return [`  stopped: ${session.stopped}${resets}`]
 }
 
 /**

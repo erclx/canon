@@ -268,3 +268,143 @@ describe('canon sessions list from another pid namespace', () => {
     },
   )
 })
+
+describe('canon sessions list and usage-limit stops', () => {
+  const STOP_ID = 'id-stopped'
+  const OTHER_ID = 'id-other'
+
+  function seedRow(pid: number, sessionId: string, name: string): void {
+    const registry = join(CONFIG, 'sessions')
+    mkdirSync(registry, { recursive: true })
+    writeFileSync(
+      join(registry, `${pid}.json`),
+      JSON.stringify({
+        pid,
+        sessionId,
+        cwd: REPO,
+        name,
+        kind: 'interactive',
+        status: 'idle',
+        startedAt: 1,
+      }),
+    )
+  }
+
+  function seedTranscript(sessionId: string, entry: object): void {
+    writeFileSync(
+      join(CONFIG, 'projects', '-machine-a-repo', `${sessionId}.jsonl`),
+      `${JSON.stringify(entry)}\n`,
+    )
+  }
+
+  const LIMIT = {
+    type: 'assistant',
+    isSidechain: false,
+    error: 'rate_limit',
+    message: {
+      model: '<synthetic>',
+      content: [
+        { type: 'text', text: "You've hit your session limit · resets 9pm" },
+      ],
+    },
+  }
+
+  const ANSWERED = {
+    type: 'assistant',
+    isSidechain: false,
+    message: {
+      model: 'claude-opus-5-5',
+      content: [{ type: 'text', text: 'Done.' }],
+    },
+  }
+
+  it('should add the stop fields to every row and keep the rows', async () => {
+    seedRow(process.pid, STOP_ID, 'stopped-row')
+    seedRow(process.ppid, OTHER_ID, 'answered-row')
+    seedTranscript(STOP_ID, LIMIT)
+    seedTranscript(OTHER_ID, ANSWERED)
+
+    const record = JSON.parse((await runSessions(['list', '--json'])).stdout)
+
+    expect(record.stopsUnread).toBe(0)
+    expect(record.sessions).toHaveLength(2)
+    expect(record.sessions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'stopped-row',
+          stopped: 'usage-limit',
+          stopResets: '9pm',
+        }),
+        expect.objectContaining({
+          name: 'answered-row',
+          stopped: null,
+          stopResets: null,
+        }),
+      ]),
+    )
+  })
+
+  it('should keep only the usage-limit rows under --stopped and count the unread', async () => {
+    seedRow(process.pid, STOP_ID, 'stopped-row')
+    seedRow(process.ppid, OTHER_ID, 'unread-row')
+    seedTranscript(STOP_ID, LIMIT)
+
+    const record = JSON.parse(
+      (await runSessions(['list', '--stopped', '--json'])).stdout,
+    )
+
+    expect(record.stopsUnread).toBe(1)
+    expect(record.sessions).toEqual([
+      expect.objectContaining({ name: 'stopped-row' }),
+    ])
+  })
+
+  it('should exit 0 on an empty --stopped result and warn about the unread', async () => {
+    seedRow(process.pid, OTHER_ID, 'unread-row')
+
+    const result = await runSessions(['list', '--stopped', '--json'])
+
+    expect(result.exitCode).toBe(0)
+    expect(JSON.parse(result.stdout)).toMatchObject({
+      stopsUnread: 1,
+      sessions: [],
+    })
+    expect(result.stderr).toContain('may be stopped')
+  })
+
+  it('should not warn on an empty --stopped result with nothing unread', async () => {
+    seedRow(process.pid, OTHER_ID, 'answered-row')
+    seedTranscript(OTHER_ID, ANSWERED)
+
+    const result = await runSessions(['list', '--stopped', '--json'])
+
+    expect(result.exitCode).toBe(0)
+    expect(result.stderr).not.toContain('may be stopped')
+  })
+
+  it('should keep the claim reading the whole roster under --stopped', async () => {
+    seedRow(process.pid, OTHER_ID, 'answered-row')
+    seedTranscript(OTHER_ID, ANSWERED)
+
+    const record = JSON.parse(
+      (await runSessions(['list', '--stopped', '--branch', 'main', '--json']))
+        .stdout,
+    )
+
+    expect(record.sessions).toEqual([])
+    expect(record.claimed).toBe(true)
+  })
+
+  it('should frame the stop beside the row and nothing for a row not stopped', async () => {
+    seedRow(process.pid, STOP_ID, 'stopped-row')
+    seedRow(process.ppid, OTHER_ID, 'answered-row')
+    seedTranscript(STOP_ID, LIMIT)
+    seedTranscript(OTHER_ID, ANSWERED)
+
+    const result = await runSessions(['list'])
+    const framed = `${result.stdout}\n${result.stderr}`
+
+    expect(framed).toContain('stopped: usage-limit, resets 9pm')
+    expect(framed.match(/stopped: /g)).toHaveLength(1)
+  })
+})
