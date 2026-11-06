@@ -258,6 +258,79 @@ describe('findLocalServer', () => {
 
     expect(result).toEqual({ kind: 'refused', reason: 'no-listener-reader' })
   })
+
+  describe('page-only folders', () => {
+    const HEALTH = ['/api/health']
+    const down = { '/api/health': 404 }
+
+    it('should find a listener under a listed folder without checking health', async () => {
+      const runner = fakeRunner([
+        { port: 4321, pid: 10, cwd: `${LINKED}/web`, health: down },
+      ])
+
+      const result = await findLocalServer(LINKED, runner, HEALTH, ['web'])
+
+      expect(result).toMatchObject({ kind: 'found', port: 4321 })
+      expect(runner.checked).toEqual([])
+    })
+
+    it('should still check a listener at the root', async () => {
+      const runner = fakeRunner([
+        { port: 5173, pid: 10, cwd: LINKED, health: down },
+      ])
+
+      const result = await findLocalServer(LINKED, runner, HEALTH, ['web'])
+
+      expect(result).toMatchObject({ kind: 'refused', reason: 'unhealthy' })
+    })
+
+    it('should match on whole path segments, so webapp keeps the check', async () => {
+      const runner = fakeRunner([
+        { port: 4321, pid: 10, cwd: `${LINKED}/webapp`, health: down },
+      ])
+
+      const result = await findLocalServer(LINKED, runner, HEALTH, ['web'])
+
+      expect(result).toMatchObject({ kind: 'refused', reason: 'unhealthy' })
+    })
+
+    it('should find the lower page server when a board with its backend down runs beside it', async () => {
+      const runner = fakeRunner([
+        { port: 4321, pid: 10, cwd: `${LINKED}/web`, health: down },
+        { port: 5173, pid: 11, cwd: LINKED, health: down },
+      ])
+
+      const result = await findLocalServer(LINKED, runner, HEALTH, ['web'])
+
+      expect(result).toMatchObject({ kind: 'found', port: 4321 })
+    })
+
+    it('should find a healthy board on the lower port over a page server above it', async () => {
+      const runner = fakeRunner([
+        { port: 4321, pid: 10, cwd: LINKED },
+        { port: 5173, pid: 11, cwd: `${LINKED}/web`, health: down },
+      ])
+
+      const result = await findLocalServer(LINKED, runner, HEALTH, ['web'])
+
+      expect(result).toMatchObject({ kind: 'found', port: 4321 })
+    })
+
+    it('should refuse unhealthy for a down board when the page server does not answer', async () => {
+      const runner = fakeRunner([
+        { port: 4321, pid: 10, cwd: `${LINKED}/web`, answers: false },
+        { port: 5173, pid: 11, cwd: LINKED, health: down },
+      ])
+
+      const result = await findLocalServer(LINKED, runner, HEALTH, ['web'])
+
+      expect(result).toMatchObject({
+        kind: 'refused',
+        reason: 'unhealthy',
+        port: 5173,
+      })
+    })
+  })
 })
 
 describe('dropAddressLine', () => {

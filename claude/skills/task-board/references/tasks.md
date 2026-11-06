@@ -76,6 +76,7 @@ description: Record what a target installed and report the delta against the too
 ```
 
 - `title`: the phase label and the task title, matching the H1. Quote it, since a leading `vX.Y:` reads as a key to a YAML parser.
+- Double any apostrophe inside the single quotes, as in `'vX.Y: Trim the Board''s ad page'`. A lone one fails the parse, which `canon tasks validate` reports as `frontmatter-invalid`.
 - `description`: what the task achieves, in one line. A session reads this in the index to decide whether to open the file.
 
 ## File format

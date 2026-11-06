@@ -1,6 +1,7 @@
 import { existsSync, statSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
+import { readFrontmatterSource } from '@/indexes/frontmatter'
 import { codeSpans, unbrokenRun } from '@/markdown/tables'
 import {
   archiveDir,
@@ -69,6 +70,7 @@ export const FINDING_KINDS = [
   'blocker-unresolved',
   'blocker-declined',
   'sessions-misshapen',
+  'frontmatter-invalid',
 ] as const
 
 export type FindingKind = (typeof FINDING_KINDS)[number]
@@ -878,6 +880,34 @@ async function checkSessions(
 }
 
 /**
+ * Reports a task file whose frontmatter block will not parse, which the index
+ * regeneration would otherwise surface only after the row was placed. A file
+ * with no block is left alone, since the index walker owns that report.
+ */
+async function checkFrontmatter(
+  stems: readonly string[],
+  dir: string,
+): Promise<Finding[]> {
+  const found = await Promise.all(
+    stems.map(async (stem): Promise<Finding | undefined> => {
+      const reading = readFrontmatterSource(
+        await readFile(join(dir, `${stem}.md`), 'utf8'),
+      )
+      if (reading.kind !== 'invalid') return undefined
+
+      return {
+        kind: 'frontmatter-invalid',
+        group: undefined,
+        subject: stem,
+        message: `frontmatter is not valid YAML: ${reading.message}. Double any apostrophe inside the single-quoted title.`,
+      }
+    }),
+  )
+
+  return found.filter((finding): finding is Finding => finding !== undefined)
+}
+
+/**
  * Tests the claim a group name makes about a plan. `## Needs a plan` says none
  * is live and `## Up next` says one is written, and neither group has a `Plan`
  * column, so the task file's own `Plan:` line is the only place either claim
@@ -1675,6 +1705,7 @@ export async function validateBoard(
     ...(await groupRuleFindings(rows, root)),
     ...(await checkPlanAgreement(rows, dir, root)),
     ...(await checkSessions(rows, dir)),
+    ...(await checkFrontmatter(stems, dir)),
     ...(await checkStaleTouches(rows, root)),
     ...checkCellWidth(rows),
     ...checkOrdering(rows),

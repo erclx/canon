@@ -17,22 +17,43 @@ export interface Frontmatter {
  * missing block instead of ending the caller's whole run.
  */
 export function parseFrontmatter(source: string): Frontmatter | undefined {
+  const reading = readFrontmatterSource(source)
+  return reading.kind === 'parsed' ? reading.frontmatter : undefined
+}
+
+export type FrontmatterReading =
+  | { readonly kind: 'absent' }
+  | { readonly kind: 'invalid'; readonly message: string }
+  | { readonly kind: 'parsed'; readonly frontmatter: Frontmatter }
+
+/**
+ * Tells a source with no block from one whose block failed to parse, which
+ * `parseFrontmatter` folds into one undefined. A block that parses to a list
+ * or a scalar reads as invalid, since no field can be read off it.
+ */
+export function readFrontmatterSource(source: string): FrontmatterReading {
   const match = source.match(FRONTMATTER)
-  if (!match) return undefined
+  if (!match) return { kind: 'absent' }
 
   let parsed: unknown
   try {
     parsed = Bun.YAML.parse(match[1])
-  } catch {
-    return undefined
+  } catch (error) {
+    return {
+      kind: 'invalid',
+      message: error instanceof Error ? error.message : String(error),
+    }
   }
   if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-    return undefined
+    return { kind: 'invalid', message: 'frontmatter is not a mapping' }
   }
 
   return {
-    raw: match[0],
-    fields: parsed as Record<string, unknown>,
+    kind: 'parsed',
+    frontmatter: {
+      raw: match[0],
+      fields: parsed as Record<string, unknown>,
+    },
   }
 }
 

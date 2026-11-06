@@ -45,6 +45,11 @@ async function firstFailingPath(
   return undefined
 }
 
+/** Whether `cwd` is `folder` or inside it, compared on whole path segments. */
+function isUnder(cwd: string, folder: string): boolean {
+  return cwd === folder || cwd.startsWith(`${folder}/`)
+}
+
 /**
  * Finds the server this worktree is running: the lowest port whose listening
  * process runs inside the worktree, answers an HTTP probe, and passes every
@@ -53,11 +58,14 @@ async function firstFailingPath(
  * lower one is the page by convention. Health is read on the page's own port,
  * since that is the address a reviewer drives, and a page whose backend fails
  * refuses as `unhealthy` naming the lowest page port's first failing path.
+ * A port whose listener runs under a `pageOnly` folder, matched on whole
+ * segments, is found on the page probe alone.
  */
 export async function findLocalServer(
   worktreeRoot: string,
   runner: LocalRunner,
   healthPaths: readonly string[] = [],
+  pageOnly: readonly string[] = [],
 ): Promise<LocalResult> {
   const listeners = await runner.listListeners()
   if (listeners === undefined) {
@@ -65,17 +73,22 @@ export async function findLocalServer(
   }
 
   const cwdByPid = new Map<number, string | undefined>()
-  const ports = new Set<number>()
+  const ports = new Map<number, boolean>()
+  const folders = pageOnly.map((folder) => `${worktreeRoot}/${folder}`)
   for (const { pid, port } of listeners) {
     if (!cwdByPid.has(pid)) cwdByPid.set(pid, await runner.cwdOf(pid))
     const cwd = cwdByPid.get(pid)
-    if (cwd !== undefined && belongsTo(cwd, worktreeRoot)) ports.add(port)
+    if (cwd === undefined || !belongsTo(cwd, worktreeRoot)) continue
+    const skipsHealth = folders.some((folder) => isUnder(cwd, folder))
+    ports.set(port, (ports.get(port) ?? false) || skipsHealth)
   }
 
   let unhealthy: (HealthFailure & { readonly port: number }) | undefined
-  for (const port of [...ports].sort((a, b) => a - b)) {
+  for (const [port, skipsHealth] of [...ports].sort(([a], [b]) => a - b)) {
     if (!(await runner.probe(port))) continue
-    const failure = await firstFailingPath(port, healthPaths, runner)
+    const failure = skipsHealth
+      ? undefined
+      : await firstFailingPath(port, healthPaths, runner)
     if (failure === undefined) {
       return { kind: 'found', port, url: `http://localhost:${port}` }
     }
