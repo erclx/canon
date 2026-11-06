@@ -98,6 +98,46 @@ describe('readStop over a whole transcript', () => {
     expect(read().stopped).toBeNull()
   })
 
+  it('should stay stopped through the entries a client restart appends', () => {
+    seed(
+      lines(
+        STOP,
+        {
+          type: 'user',
+          message: {
+            role: 'user',
+            content: 'Continue from where you left off.',
+          },
+        },
+        {
+          type: 'assistant',
+          isSidechain: false,
+          message: {
+            model: '<synthetic>',
+            content: [{ type: 'text', text: 'No response requested.' }],
+          },
+        },
+      ),
+    )
+
+    expect(read().stopped).toBe('usage-limit')
+  })
+
+  it('should read null when only a restart entry stands in the file', () => {
+    seed(
+      lines({
+        type: 'assistant',
+        isSidechain: false,
+        message: {
+          model: '<synthetic>',
+          content: [{ type: 'text', text: 'No response requested.' }],
+        },
+      }),
+    )
+
+    expect(read().stopped).toBeNull()
+  })
+
   it('should skip a line that does not parse', () => {
     seed(`${lines(STOP)}{"type":"assistant","isSide`)
 
@@ -144,8 +184,15 @@ describe('readStop when the entry moved shape', () => {
         },
       }),
     ],
+    ['a stop entry whose type moved', stopEntry(MOVED, { type: 'error' })],
   ])('should read unknown for %s', (_name, entry) => {
     seed(lines(entry))
+
+    expect(read()).toEqual({ stopped: 'unknown', stopResets: null })
+  })
+
+  it('should read unknown for a moved-type stop after an answered turn', () => {
+    seed(lines(IDLE, stopEntry(MOVED, { type: 'error' })))
 
     expect(read()).toEqual({ stopped: 'unknown', stopResets: null })
   })

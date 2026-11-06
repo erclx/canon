@@ -58,23 +58,6 @@ function parseEntry(line: string): Record<string, unknown> | null {
   }
 }
 
-function lastAssistantEntry(
-  text: string,
-  cut: boolean,
-): Record<string, unknown> | null {
-  const lines = text.split('\n')
-  // The first line of a cut window usually starts mid-entry, and one that
-  // happens to parse cannot be told apart from it.
-  const first = cut ? 1 : 0
-
-  for (let index = lines.length - 1; index >= first; index -= 1) {
-    const entry = parseEntry(lines[index] ?? '')
-    if (entry?.type === 'assistant' && entry.isSidechain !== true) return entry
-  }
-
-  return null
-}
-
 function entryText(message: Record<string, unknown>): string {
   if (!Array.isArray(message.content)) return ''
   return message.content
@@ -85,29 +68,54 @@ function entryText(message: Record<string, unknown>): string {
 }
 
 /**
- * No published contract describes the stop entry, so the two branches below
- * rest on a measured shape: `error: "rate_limit"`, a `<synthetic>` model,
- * `isApiErrorMessage`, and text naming the limit and its reset. The second
- * branch exists for a release that renames the field, which still parses
- * cleanly and would otherwise read as a session that never stopped.
+ * Walks back to the entry that decides the row. No published contract describes
+ * the stop entry, so this rests on a measured shape: `error: "rate_limit"`, a
+ * `<synthetic>` model, `isApiErrorMessage`, and text naming the limit and its
+ * reset.
+ *
+ * A generated entry with limit wording and any other shape reads `unknown`,
+ * since a release renaming the field or the type still parses cleanly and would
+ * otherwise read as a session that never stopped. A `<synthetic>` entry with no
+ * error and no limit wording is passed over, since a client restart writes one
+ * reading `No response requested.` with no model turn behind it.
  */
-function classify(entry: Record<string, unknown>): StopReading {
-  const message =
-    typeof entry.message === 'object' && entry.message !== null
-      ? (entry.message as Record<string, unknown>)
-      : {}
-  const text = entryText(message)
+function readEntries(text: string, cut: boolean): StopReading {
+  const lines = text.split('\n')
+  // The first line of a cut window usually starts mid-entry, and one that
+  // happens to parse cannot be told apart from it.
+  const first = cut ? 1 : 0
 
-  if (entry.error === 'rate_limit') {
-    return {
-      stopped: 'usage-limit',
-      stopResets: /resets (.+)/.exec(text)?.[1]?.trim() ?? null,
+  for (let index = lines.length - 1; index >= first; index -= 1) {
+    const entry = parseEntry(lines[index] ?? '')
+    if (entry === null || entry.isSidechain === true) continue
+
+    const message =
+      typeof entry.message === 'object' && entry.message !== null
+        ? (entry.message as Record<string, unknown>)
+        : {}
+    const synthetic = message.model === '<synthetic>'
+    const generated = synthetic || entry.isApiErrorMessage === true
+    const entryWords = generated ? entryText(message) : ''
+    const worded = /hit your .* limit/.test(entryWords)
+
+    if (entry.type !== 'assistant') {
+      if (worded) return UNREADABLE
+      continue
     }
+
+    if (entry.error === 'rate_limit') {
+      return {
+        stopped: 'usage-limit',
+        stopResets: /resets (.+)/.exec(entryText(message))?.[1]?.trim() ?? null,
+      }
+    }
+    if (worded) return UNREADABLE
+    if (synthetic && entry.error === undefined) continue
+
+    return NOT_STOPPED
   }
 
-  const generated =
-    message.model === '<synthetic>' || entry.isApiErrorMessage === true
-  return generated && /hit your .* limit/.test(text) ? UNREADABLE : NOT_STOPPED
+  return cut ? UNREADABLE : NOT_STOPPED
 }
 
 /**
@@ -132,8 +140,5 @@ export function readStop(
     return UNREADABLE
   }
 
-  const entry = lastAssistantEntry(tail.text, tail.cut)
-  if (entry === null) return tail.cut ? UNREADABLE : NOT_STOPPED
-
-  return classify(entry)
+  return readEntries(tail.text, tail.cut)
 }
