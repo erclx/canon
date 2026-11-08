@@ -32,12 +32,16 @@
         margin: 0;
         padding: 0 16px;
       }
-      /* The caption shows on hover where the pointer can hover, and always
-         where it cannot, so a touch session reads it with no hover. */
+      /* The caption stays hidden until the slide is tapped, and shows on hover
+         where the pointer can hover, so a touch session reads it only after a
+         tap and a tap that does nothing leaves it hidden. */
+      .caption {
+        visibility: hidden;
+      }
+      .slide.shown .caption {
+        visibility: visible;
+      }
       @media (hover: hover) {
-        .caption {
-          visibility: hidden;
-        }
         .slide:hover .caption {
           visibility: visible;
         }
@@ -60,6 +64,10 @@
         slide.innerHTML = `<h2>Slide ${i}</h2><p class="caption">Deploy ${i} landed on time</p>`
         main.appendChild(slide)
       }
+      main.addEventListener('click', (event) => {
+        const slide = event.target.closest('.slide')
+        if (slide) slide.classList.add('shown')
+      })
     </script>
   </body>
 </html>
