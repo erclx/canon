@@ -13,6 +13,7 @@ Landing pages, campaign pages, portfolios. The reader has never used the thing a
 
 - **Optimizes for** comprehension in the first screen, then one clear next action.
 - **Composition carries the weight.** A marketing page is judged on section order and variation first, so a palette round against a flat composition changes nothing a reader notices.
+- **The story carries an arc.** It states the order a stranger meets the claims in, settled before any composition, so section order follows the argument rather than a template.
 - **Vary the section shape.** Alternate alignment, container width and the ratio between sections. Every section a centered heading over centered body reads as a template whatever its values.
 - **Low density.** Whitespace is the argument that the thing is considered. This is the one kind where less information on screen is usually better.
 - **Every claim names a real thing.** A page asserting what a tool does, illustrated by something the tool did not produce, breaks its own thesis in the place it is making it.

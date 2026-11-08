@@ -36,7 +36,11 @@ Each bullet in the skill body's concern groups and in `craft.md`, `kinds.md`, `s
 
 The body's layer order subdivides the five planes of Jesse James Garrett's [The Elements of User Experience](http://www.jjg.net/elements/). Its second chapter states the dependency the order rests on, that "Each plane is dependent on the planes below it."
 
-The same passage gives the constraint running the other way, that "the choices available to us on each plane are constrained by the decisions we make about issues on the planes below it". The nine layers and the grey-box stage are the skill's own subdivision of those planes.
+The same passage gives the constraint running the other way, that "the choices available to us on each plane are constrained by the decisions we make about issues on the planes below it". The ten layers and the grey-box stage are the skill's own subdivision of those planes.
+
+### Story at order 0
+
+Story stands for the strategy and scope planes. Strategy holds "what the users want to get out of the site as well", and scope "takes the form of content requirements", which the body settles as one content card per section. Order 0 rather than a renumbered table keeps every reference to a layer by number true.
 
 ## The catalog
 

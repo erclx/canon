@@ -11,6 +11,17 @@ Skip nothing on the ground that it is obviously fine. A rule is on this list bec
 
 ## The read
 
+### Story and cards
+
+Both settle in words before any arm is drawn.
+
+- [ ] The story is stated once in the output, naming purpose, reader, voice and omissions, with an arc on a marketing page
+- [ ] A content card in words alone names what each section mentions and shows, written before any composition was drawn
+
+### Read and layer
+
+The declared read fixes what the round may vary.
+
 - [ ] The read is stated in the output, naming kind, audience, overriding constraint and layer
 - [ ] The arms or the change vary the layer the read named, not a cheaper one
 - [ ] Every layer below the one under judgment is settled
