@@ -35,6 +35,13 @@ export const SETUP_CASES: readonly SkillCase[] = [
       'Check that the dev server actually starts and the end-to-end suite passes against the scaffold.',
     expect: 'target-setup',
   },
+  // An empty folder has no files for setup's detection to read, which is what
+  // separates starting a project from bootstrapping one that already exists.
+  {
+    prompt:
+      'This folder is empty, start a new astro project in it and get it on the toolkit.',
+    expect: 'target-scaffold',
+  },
   {
     prompt:
       "Before I run this sync, tell me exactly what it's going to overwrite.",
