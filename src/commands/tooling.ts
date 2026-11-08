@@ -37,6 +37,7 @@ import {
 import { scan, type ScanResult } from '@/tooling/scan'
 import { recordToolingChain } from '@/tooling/stamp'
 import { subfolderPath } from '@/tooling/subfolder'
+import { scaffoldStack } from '@/tooling/scaffold'
 import { verifyStack } from '@/tooling/verify-stack'
 import {
   intro,
@@ -377,6 +378,77 @@ export function register(program: Command): void {
       })
       process.exitCode = outcome.exitCode
     })
+
+  tooling
+    .command('scaffold')
+    .description("Run a stack's starter command into an empty folder")
+    .argument('<stack>', 'Tooling stack name (e.g. vite-react, astro)')
+    .argument('[target]', 'Target directory, created when missing', '.')
+    .helpOption('-h, --help', 'Show this help message')
+    .option('--json', 'Add a machine-readable record on stdout')
+    .addHelpText(
+      'after',
+      [
+        '',
+        "Runs the stack's manifest scaffold in a scratch folder, with the",
+        "target's folder name as the project name, then moves the result into",
+        'the target. A target holding anything but .git is refused, and a',
+        'failed command moves nothing and leaves the scratch folder named.',
+        'Run `canon init` or the target-setup skill afterward to sync tooling.',
+        '',
+        'Exit codes:',
+        '  0  scaffolded',
+        '  1  refused: excluded, no-manifest, no-scaffold, not-empty, bad-name,',
+        '     scaffold-failed, or no-output',
+        '',
+        'Examples:',
+        '  canon tooling scaffold vite-react',
+        '  canon tooling scaffold astro my-site --json',
+        '',
+      ].join('\n'),
+    )
+    .action(async (stack: string, target: string, opts: ListOptions) => {
+      process.exitCode = await runScaffold(stack, target, opts)
+    })
+}
+
+/**
+ * A `--json` run writes no frame, so a skill reads the record alone, and a
+ * refusal carries its reason on stdout beside the exit 1.
+ */
+async function runScaffold(
+  stack: string,
+  target: string,
+  opts: ListOptions,
+): Promise<number> {
+  const json = opts.json === true
+  if (!json) intro(`canon tooling scaffold ${stack}`)
+
+  const result = await scaffoldStack({ root: PROJECT_ROOT, stack, target })
+
+  if (!result.ok) {
+    logError(result.message)
+    if (result.scratch !== undefined) {
+      if (result.output !== undefined && result.output !== '') {
+        process.stderr.write(
+          `${result.output.split('\n').slice(-20).join('\n')}\n`,
+        )
+      }
+      logInfo(`Kept ${result.scratch}`)
+    }
+    if (json) process.stdout.write(`${JSON.stringify(result)}\n`)
+    else outro()
+    return 1
+  }
+
+  if (json) {
+    process.stdout.write(`${JSON.stringify(result)}\n`)
+    return 0
+  }
+  logStep(`Scaffolded ${result.target}`)
+  for (const file of result.files) logAdd(file)
+  outroSuccess('Scaffolded', `Next: canon init ${target}`)
+  return 0
 }
 
 /**
