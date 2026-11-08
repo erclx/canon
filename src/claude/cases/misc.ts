@@ -28,6 +28,11 @@ export const MISC_CASES: readonly SkillCase[] = [
   },
   {
     prompt:
+      'Before we draft the landing page, pull references from linear.app so the round has a real site to look at.',
+    expect: 'design-references',
+  },
+  {
+    prompt:
       'Which layer of this landing page should I settle first, and what has to stay constant across it?',
     expect: 'design-taste',
   },

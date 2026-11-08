@@ -1,6 +1,6 @@
 ---
 title: Design config
-description: The canon/config/design.toml keys board and project, their defaults, and how a design-pick run resolves the board it drafts on
+description: The canon/config/design.toml keys board, project, and references, their defaults, and how a design-pick run resolves the board it drafts on
 ---
 
 # Design config
@@ -10,20 +10,23 @@ Read before the first `frameboard` verb a `design-pick` run sends. A project nam
 ```toml
 board = ".canon/board"
 project = "picks"
+references = ["https://linear.app/", "https://docs.stripe.com/"]
 ```
 
 ## Keys
 
-| Key       | Holds                                                   | Default         |
-| --------- | ------------------------------------------------------- | --------------- |
-| `board`   | The board folder a round drafts on, under the main root | `.canon/board/` |
-| `project` | The Frameboard project a round's pages go in            | `picks`         |
+| Key          | Holds                                                                                                  | Default                   |
+| ------------ | ------------------------------------------------------------------------------------------------------ | ------------------------- |
+| `board`      | The board folder a round drafts on, under the main root                                                | `.canon/board/`           |
+| `project`    | The Frameboard project a round's pages go in                                                           | `picks`                   |
+| `references` | Site addresses a `design-references` run captures when the ask names none, never read by `design-pick` | That skill's default list |
 
 Each key falls back on its own, so a file naming `board` alone moves the board and keeps the project at `picks`.
 
 - Resolve `board` against the main worktree root even when the run sits in a linked worktree, since the board folder is gitignored and a linked worktree holds no copy of it
 - Leave `project` at `picks` on a named board unless the operator wants otherwise, so rounds sit on the board the sync reads and stay apart from the accepted frames
-- Stop on a file that does not parse or a key that is not a string, naming the file's path. Falling back there would draft the round where the sync never looks.
+- Stop on a file that does not parse or a `board` or `project` that is not a string, naming the file's path. Falling back there would draft the round where the sync never looks.
+- Stop a `design-references` run alone on a `references` that is not an array of strings, naming the file's path, since a pick round never reads the key
 - The archive lands at `.canon/<project>/<page>/`, so it follows `project`. Stop on a `project` naming a `.canon/` folder another record owns, such as `plans` or `tasks`.
 
 ## When the file is absent

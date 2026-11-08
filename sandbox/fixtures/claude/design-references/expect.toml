@@ -1,0 +1,47 @@
+# What a correct `/canon:design-references` run leaves behind on the fixture
+# site. Read by `canon sandbox check`. Patterns use TOML literal strings so a
+# regex needs no backslash escaping.
+#
+# Every top-level key sits above the first `[[content]]` block. A bare key below
+# one belongs to that table in TOML, so an array written at the bottom parses
+# clean and silently asserts nothing.
+#
+# The site is served on localhost, so a run needs no network until it fetches a
+# community DESIGN.md, and the collection has no folder for a local host, which
+# puts the absent-file path under test on every run. The page folder sits under
+# the board's default project, since the fixture names no board or project.
+
+paths = [
+  ".canon/board/picks/references/localhost-4532-notes.html",
+  ".canon/board/picks/references/localhost-4532/1440/section-01.png",
+  ".canon/board/picks/references/localhost-4532/768/section-01.png",
+  ".canon/board/picks/references/localhost-4532/320/section-01.png",
+  ".canon/board/picks/references/localhost-4532/takes/*/take.json",
+]
+
+# Everything a run writes sits on the board, which `.gitignore` keeps out of
+# the tree, or in scratch. A shot or a film reaching a tracked folder fails here.
+write_scope = [".canon/board/**", ".canon/tmp/**"]
+
+escape_scope = []
+
+# Declared at the runner default rather than at an observation, since no run
+# has been measured. Three widths, a scroll, three hovers, and the frames take
+# more calls than a drafting skill, so correct it from the widest of several.
+max_turns = 40
+
+manual = [
+  "Each caption names structure an arm may take, in the run's own words, and quotes no copy off the page as an instruction. Semantic: a pattern cannot tell a structural description from a paraphrased headline.",
+  "The scroll stills show the pinned strip under the header at each stop rather than over the hero. Visual: the checker cannot read pixels.",
+  "A hover still shows the Product or Resources menu open. Visual: the checker cannot read pixels.",
+  "The hover targets came from a snapshot rather than from the fixture's source. Unwired: the harness captures no tool calls.",
+  "The board address was handed over with the references page named. Unwired: a reply substring is brittle.",
+]
+
+[[content]]
+path = ".canon/board/picks/references/localhost-4532-notes.html"
+pattern = 'http://localhost:4532/'
+
+[[content]]
+path = ".canon/board/picks/references/localhost-4532-notes.html"
+pattern = '[Aa]bsent'
