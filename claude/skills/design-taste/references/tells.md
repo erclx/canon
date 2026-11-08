@@ -40,6 +40,7 @@ The five restate the calibration list in Anthropic's [frontend-design](https://g
 - **Decorative status dots.** A colored dot before every nav item, list row or badge. Keep it only where it reports genuine state, and then sparingly.
 - **Filler verbs.** A verb chosen for warmth rather than for what it reports, such as `elevate`, `unleash`, `empower` or `next-generation`. Name the thing the surface does.
 - **Placeholder that reads as placeholder.** Generic names, egg avatars, `Acme`-family companies, one portrait for several people, every item dated alike. Real collections are uneven and specific.
+- **A template token in a mock view.** A tab reading `<nn>-<slug>` over real file names, or a real id copied in. Fill each slot with an invented value the rest of the view agrees with.
 - **Invented precision.** A figure like 4.1x or 48k came from real data, is marked as sample, or does not appear. An invented number gets shipped, because it reads as confidence.
 - **The fake screenshot built from boxes.** A product UI simulated out of styled rectangles inside a hero. Show the real thing, a real capture, or nothing.
 - **Copy nobody re-read.** Read every visible string once as a reader rather than its author before handing over. Plain beats clever and wrong, which is what a model drafting copy produces by default.

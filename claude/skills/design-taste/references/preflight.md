@@ -83,7 +83,7 @@ The detail boxes come from `craft.md`.
 
 - [ ] Every visible string re-read in one pass, with anything broken, unclear or performatively clever rewritten
 - [ ] Every number either real, labeled as sample, or removed
-- [ ] No placeholder that reads as placeholder: generic names, generic company names, reused portraits, identical dates
+- [ ] No placeholder that reads as placeholder: generic names, generic company names, reused portraits, identical dates, template tokens or copied real ids in a mock view
 
 ### Wording
 
