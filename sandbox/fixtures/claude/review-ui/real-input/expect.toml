@@ -8,8 +8,9 @@
 # proximity: `scrollIntoView` and six notches sent 50 ms apart both reach 522,
 # while six notches sent one CLI call apart leave `scrollY` at 0, so the box
 # fails on the spaced pace and a pass that scrolled by script passes it. Box 2
-# taps a slide whose caption is hidden behind `(hover: hover)` and always shown
-# where the pointer cannot hover, so it passes in a `--mobile` session.
+# taps a slide whose caption stays hidden until a tap (or a hover where the
+# pointer can hover), so it passes in a `--mobile` session only when the tap
+# changes the caption.
 #
 # This arm runs by hand rather than in CI. It bills a session and needs the
 # pinned CLI's browser installed once per machine:
@@ -23,6 +24,8 @@ write_scope = [".canon/tmp/pr/review-ui/**"]
 manual = [
   "Box 1's evidence quotes a read after each spaced notch and the burst's read, rather than one position where the page ended.",
   "Box 2 was driven in a second session opened with `--mobile`, and the desktop session was not resized to stand in for it.",
+  "The mobile session's width was read at open (360) and again after the resize to the box's 390, so the pass stated the width it drove at.",
+  "Box 2's evidence reads slide 2's caption hidden before the tap and visible after it, rather than visible from the start.",
   "The comment reached the pull request as a review rather than an issue comment, so the poll's UI read sees it. The thread is remote state, and no assertion kind reads it.",
 ]
 

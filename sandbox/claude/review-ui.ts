@@ -33,7 +33,7 @@ const DRIVE_CHECKLIST = `**What to verify visually:**
 
 // Two boxes on a moving surface: a wheel box on a proximity-snap gallery that
 // a scripted scroll and a fast burst both move and spaced notches leave at 0,
-// and a tap box whose caption shows only where the pointer cannot hover.
+// and a tap box whose caption stays hidden until a tap.
 const REAL_INPUT_CHECKLIST = `**Gallery**
 
 - [ ] /gallery/, 1280: wheel down six notches from the top → the page leaves slide 1 and comes to rest on a later slide
@@ -312,14 +312,14 @@ export default scenario({
         '         /gallery/ snaps by proximity, so scrollIntoView and a fast burst move it while spaced notches stay at 0',
       )
       ctx.log.info(
-        '         the slide captions show on hover where hover exists, and always where it does not',
+        '         the slide captions stay hidden until a tap, and show on hover where hover exists',
       )
       ctx.log.info(`Action:  /canon:review-ui ${prNumber}`)
       ctx.log.info(
         'Expect:  box 1 fails, naming the spaced pace as stuck and quoting both paces read after each notch',
       )
       ctx.log.info(
-        '         box 2 passes in a --mobile session that reads (hover: hover) as false',
+        '         box 2 passes in a --mobile session that reads (hover: hover) as false and the caption hidden before the tap',
       )
       ctx.log.info(
         'Needs:   canon browser install-browser chromium, once per machine',
