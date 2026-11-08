@@ -23,7 +23,7 @@ Read every reference on the always row for any rendered change, then each row th
 | An animation, transition, autoplay, or carousel                    | `motion.md`                           |
 | A destructive action, an edit cancel, or a hover or disabled state | `controls.md`                         |
 | A rendered string, heading, label, or link                         | `copy.md`                             |
-| A rendered surface has changed and is about to be handed over      | `capture.md`                          |
+| A changed surface is handed over, or a change scrolls or snaps     | `capture.md`                          |
 
 Each name sits under `${CLAUDE_SKILL_DIR}/references/`. A row's reference is read whole, since its sections name the cases a change reaches without saying so.
 

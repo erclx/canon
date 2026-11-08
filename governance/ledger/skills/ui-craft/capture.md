@@ -45,6 +45,16 @@ The rule states canon's own evidence procedure for a rendered change, so most ro
 | State case at one width, driven | House choice: a case driving a menu open tests the state, and repeating it at every layout width multiplies the evidence with no layout to compare, and an initial render reports nothing about a menu that opens, an answer that is chosen, or a rail that tracks scrolling | 2026-10-18           |
 | Case lives with the surface     | House choice: a surface with no case ships uncaptured, and a case left after its surface goes fails every later capture run                                                                                                                                                  | 2026-10-18           |
 
+## What a moving change owes
+
+| Bullet                        | Source                                                                                                                                                                                                                           | Read                 |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| Real input at each width      | House choice: on a proximity-snap page, `scrollIntoView` reached section 3 while six spaced wheel notches left `scrollY` at 0, so a scripted scroll passed a page a wheel could not move                                         | 2026-11-08           |
+| Notches at two paces          | House choice: on the same page, six notches one call apart stayed at 0 and six notches 50 ms apart reached 522, so each pace catches a stall the other misses                                                                    | 2026-11-08           |
+| Keyboard through the same     | [Understanding Keyboard](https://www.w3.org/WAI/WCAG22/Understanding/keyboard.html): "all functionality of the content is operable through a keyboard interface". Arrow keys and Page Down reached 783 and 1566 on the snap page | 2026-11-08, WCAG 2.2 |
+| Sample at fixed steps         | House choice: a read taken only at the end reports where the page settled and hides a notch that moved nothing, which a read after each notch shows                                                                              | 2026-11-08           |
+| Touch and hover in touch mode | House choice: a desktop session refused a tap and kept `(hover: hover)` true when resized, while a mobile session reported hover false and took the tap                                                                          | 2026-11-08           |
+
 ## Sharing a capture
 
 | Bullet                    | Source                                                                                                                                                                                                        | Read       |

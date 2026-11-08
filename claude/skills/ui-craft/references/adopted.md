@@ -16,7 +16,7 @@ Each field below names the source its references cite, and a house choice covers
 - **Native targets.** Apple's and Android's platform guidelines back the native touch target figures in `pointer.md`.
 - **Forms and copy.** The [GOV.UK Design System](https://design-system.service.gov.uk/) and its style guide back `forms.md` and the copy and casing sections of `copy.md`.
 - **Usability research.** The [Nielsen Norman Group](https://www.nngroup.com/articles/) backs most of `states.md`, part of `controls.md`, and the link sections of `copy.md`.
-- **Capture.** `capture.md` is a house procedure, with its reflow width taken from the WCAG reflow criterion `a11y.md` cites.
+- **Capture.** `capture.md` is a house procedure, with its reflow width taken from the WCAG reflow criterion `a11y.md` cites. Its keyboard pass for a change that moves rests on WCAG 2.1.1 Keyboard.
 
 ## Where the rows sit
 
