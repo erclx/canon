@@ -85,6 +85,6 @@ A refusal names its `reason` and its `beat`. Report it on the site's notes frame
 | ----------------------------------------------------- | ------------------------------------------------------------------ |
 | `target-missing` on a hover                           | Every other hover and the scroll. The record's `still` shows why.  |
 | `target-offscreen` on a hover                         | The same, since a nav target off screen at desktop is not a hover  |
-| `over-cap` on the scroll                              | The stops filmed before the cap, read off `take.json` beside them  |
+| `over-cap` on the scroll                              | Each `<nn>-<beat>/still.jpg` up to the beat the refusal names      |
 | `server-unreachable`                                  | Every shot, since the site answered the capture and not the film   |
 | `ffmpeg-missing`, `browser-missing`, `engine-missing` | Every shot, and no film for any site, so say the films did not run |

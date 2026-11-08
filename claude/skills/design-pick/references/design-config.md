@@ -25,7 +25,8 @@ Each key falls back on its own, so a file naming `board` alone moves the board a
 
 - Resolve `board` against the main worktree root even when the run sits in a linked worktree, since the board folder is gitignored and a linked worktree holds no copy of it
 - Leave `project` at `picks` on a named board unless the operator wants otherwise, so rounds sit on the board the sync reads and stay apart from the accepted frames
-- Stop on a file that does not parse, a `board` or `project` that is not a string, or a `references` that is not an array of strings, naming the file's path. Falling back there would draft the round where the sync never looks.
+- Stop on a file that does not parse or a `board` or `project` that is not a string, naming the file's path. Falling back there would draft the round where the sync never looks.
+- Stop a `design-references` run alone on a `references` that is not an array of strings, naming the file's path, since a pick round never reads the key
 - The archive lands at `.canon/<project>/<page>/`, so it follows `project`. Stop on a `project` naming a `.canon/` folder another record owns, such as `plans` or `tasks`.
 
 ## When the file is absent
