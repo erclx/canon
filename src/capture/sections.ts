@@ -166,6 +166,10 @@ export function mergeBlocks(
   for (const block of blocks) {
     const last = sections.at(-1)
     if (last === undefined) {
+      if (leading.length && spanOf([...leading, block]).height > maxHeight) {
+        sections.push(spanOf(leading))
+        leading = []
+      }
       leading.push(block)
       const span = spanOf(leading)
       if (span.height >= minHeight) {

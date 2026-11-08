@@ -52,6 +52,19 @@ describe('mergeBlocks', () => {
     ])
   })
 
+  it('should keep a short first block apart when joining would pass the cap', () => {
+    const sections = mergeBlocks(
+      [block(0, 0, 200), block(1, 200, 2300)],
+      400,
+      2400,
+    )
+
+    expect(sections).toEqual([
+      { blocks: [0], top: 0, height: 200 },
+      { blocks: [1], top: 200, height: 2300 },
+    ])
+  })
+
   it('should keep a page of nothing but short blocks as one section', () => {
     const sections = mergeBlocks(
       [block(0, 0, 100), block(1, 100, 100)],
