@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gallery · Harbor</title>
+    <link rel="icon" href="data:," />
+    <style>
+      /* The planted defect: proximity snap on 261px slides pulls each spaced
+         100px wheel notch back to the slide it left, so a slow wheel never
+         leaves slide 1, while scrollIntoView and a fast burst both move. */
+      html {
+        scroll-snap-type: y proximity;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        color: #1c1b19;
+        background: #fbfaf8;
+      }
+      .slide {
+        height: 260px;
+        scroll-snap-align: start;
+        border-bottom: 1px solid #d9d6cf;
+      }
+      .slide h1,
+      .slide h2 {
+        margin: 0;
+        padding: 16px;
+      }
+      .caption {
+        margin: 0;
+        padding: 0 16px;
+      }
+      /* The caption shows on hover where the pointer can hover, and always
+         where it cannot, so a touch session reads it with no hover. */
+      @media (hover: hover) {
+        .caption {
+          visibility: hidden;
+        }
+        .slide:hover .caption {
+          visibility: visible;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="slide" id="slide-1">
+        <h1>Deploy gallery</h1>
+        <p class="caption">Every deploy this week, one slide each</p>
+      </section>
+    </main>
+    <script>
+      const main = document.querySelector('main')
+      for (let i = 2; i <= 12; i++) {
+        const slide = document.createElement('section')
+        slide.className = 'slide'
+        slide.id = `slide-${i}`
+        slide.innerHTML = `<h2>Slide ${i}</h2><p class="caption">Deploy ${i} landed on time</p>`
+        main.appendChild(slide)
+      }
+    </script>
+  </body>
+</html>
