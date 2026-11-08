@@ -60,6 +60,14 @@ export async function preparePage(page: Page): Promise<void> {
   }
   await page.evaluate(() => window.scrollTo(0, 0))
   await page.waitForTimeout(SETTLE_MS)
+  await hideFixedLayers(page)
+}
+
+/**
+ * Runs again before every shot as well as once in preparation, since a consent
+ * banner commonly mounts on a timer after load and a single pass misses it.
+ */
+async function hideFixedLayers(page: Page): Promise<void> {
   await page.evaluate(() => {
     for (const element of document.querySelectorAll<HTMLElement>('body *')) {
       const position = getComputedStyle(element).position
@@ -206,6 +214,7 @@ export async function revealSection(
     .scrollIntoViewIfNeeded()
     .catch(() => undefined)
   await page.waitForTimeout(SETTLE_MS)
+  await hideFixedLayers(page)
   return page.evaluate(
     ({ attribute, blocks, cap }) => {
       const rects = blocks

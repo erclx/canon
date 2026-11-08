@@ -147,6 +147,27 @@ describe.skipIf(!hasBrowser)('captureSections', () => {
   )
 
   it(
+    'should leave out a banner that mounts after the page prepared',
+    async () => {
+      const page = source(
+        'late-banner',
+        pageWith(
+          '',
+          `<main>${band(800).repeat(4)}</main>`,
+          "setTimeout(() => { const banner = document.createElement('div'); banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;height:120px;background:#f00'; document.body.append(banner) }, 1800)",
+        ),
+      )
+      const outDir = join(dir, 'late-banner')
+
+      const result = await captureSections(page, { outDir, width: WIDTH })
+
+      expect(result).toMatchObject({ status: 'captured', failed: [] })
+      expect(paints(join(outDir, 'section-04.png'), [255, 0, 0])).toBe(false)
+    },
+    TIMEOUT_MS,
+  )
+
+  it(
     'should paint a reveal-on-view block in its shot',
     async () => {
       const page = source(
