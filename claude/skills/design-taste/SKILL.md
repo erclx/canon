@@ -79,12 +79,12 @@ Work at the lowest layer the complaint reaches. A complaint is voiced at the lay
 
 - A round varies one layer and says which. Varying three answers nothing, because the pick cannot say which difference decided it.
 - Never settle a higher layer before the one below it. Imagery and palette settle together, since a real photograph sets a ground rather than accepting one.
-- Story leads and content follows, both written in words and never drawn as arms. Draft against real copy where it exists, and treat the composition as unsettled until real copy runs through it.
-- Name the layer the complaint sits at, then check the layers below are settled. Where one is not, that is the round, and say so rather than drafting the requested one.
+- Story leads and content follows. Both settle in words inside the requested round, and a read never names either as the layer its arms vary.
+- Name the layer the complaint sits at, then check the layers below are settled. Where one from composition up is not, that is the round, and say so rather than drafting the requested one.
 
 ### Story and content settle in words
 
-The story is the floor every section stands on, and a change to it reaches all of them. Write it and the cards into the round's output beside the declared read, before any arm is drawn.
+The story is the floor every section stands on, and a change to it reaches all of them. Where the story or a card is missing, write it into the round's output beside the declared read, then draw the requested arms against it. Draft against real copy where it exists, and treat the composition as unsettled until real copy runs through it.
 
 - Settle the story once per page, stating its purpose, its reader, its voice, and what it leaves out. It names the voice, while every wording rule stays with `write-human` and `ui-craft`.
 - Write an arc, the order a stranger meets the claims in, only where the kind requires one. `kinds.md` requires it on marketing, and every other kind may leave it out.
