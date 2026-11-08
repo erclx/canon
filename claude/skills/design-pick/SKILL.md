@@ -115,11 +115,11 @@ Read the selection when the answer points at the board, such as "the selected on
 
 ### Before the pick joins the page
 
-A round never sees its neighbors, so run this before Step 6 item 1 wherever the pick joins a page holding other sections. Elsewhere, such as a first section or a `design-identity` logo, say in one line that it was skipped.
+A round never sees its neighbors, so run this before Step 6 item 1 where the pick joins a page of other sections. Elsewhere, as on a first section or a logo, say in one line that it was skipped.
 
-- List each section's pickers, containers, and motion models beside the pick's, against the `design-taste` locks, judging a container by its radius, theme, and the card kit tell
-- Report the list and draw nothing when the pick brings no style the page lacks
-- Draw a flagged difference as two frames, the pick as it stands and restyled to the page, on a new page added to the run's list, and ask as Step 4 does
+- List each section's pickers, containers, and motion models beside the pick's against the `design-taste` locks, and judge a container by radius, theme, and the card kit tell
+- Report the list and draw nothing when the pick brings no new style
+- Else draw `arm-as-is` and `arm-restyled` on a new page on the run's list and ask as Step 4 does. That page is Step 6's picked round only if the restyle wins.
 
 ## Step 6: close
 
