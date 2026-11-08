@@ -37,7 +37,7 @@ Holds the capture harness, the served port, and a stub design index. Its `verify
 - Every manifest script calling the helper guards it with `&& export VAR &&`, because an assignment prefix discards the substitution's exit status
 - A case flagged `evidence: true` lands under `EVIDENCE_ROOT` (default `e2e/evidence`), and the toolkit's own `web/e2e/capture/cases.ts` feeds `capture-home.sh`
 - `configs/scripts/screenshot.sh` builds, previews, and polls, and its `EXIT` trap kills the preview by pid and by port, as `src/tooling/screenshot-trap.test.ts` exercises
-- `bun run screenshot` shoots the running app, where `canon capture` in `src/capture/render.ts` drives Chromium over static HTML files
+- `bun run screenshot` shoots the running app, where `canon capture` shoots one element of an HTML file or URL, or one PNG per section under `--sections`
 
 ### `tooling/base/configs/`
 
