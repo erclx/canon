@@ -473,9 +473,11 @@ async function scrollPoint(stage: Stage, target: string): Promise<Point> {
  * copy earlier in the page cannot shadow a visible one, and anything else as a
  * CSS selector.
  * The document is searched first and every open shadow root after it in tree
- * order, so a document-tree match wins. A selector matches within one root and
- * never across a shadow boundary, and innermost reads containment through a
- * shadow root to its host. A closed root and a frame stay unreachable.
+ * order, so a document-tree match wins, except that innermost reads containment
+ * through a shadow root to its host and a `text=` match holding a sized match
+ * inside its subtree's roots gives way to it. A selector matches within one
+ * root and never across a shadow boundary. A closed root and a frame stay
+ * unreachable.
  * It runs inside the page so both routes resolve a target the same way, and a
  * match with no size counts as missing, since a click on it would land on
  * whatever sits behind.
