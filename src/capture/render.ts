@@ -1,11 +1,18 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { basename, dirname } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { chromium } from 'playwright-core'
 import type { Browser, Locator, Page } from 'playwright-core'
+import {
+  mergeBlocks,
+  preparePage,
+  revealSection,
+  splitBlocks,
+} from '@/capture/sections'
 import type { CaptureSource } from '@/capture/sources'
 import {
   isGenericFamily,
+  isUrlSource,
   resolveCaptureSources,
   textFamilies,
 } from '@/capture/sources'
@@ -141,6 +148,142 @@ async function captureOne(
   }
 }
 
+export interface SectionOptions {
+  outDir: string
+  root?: string
+  width?: number
+  colorScheme?: ColorScheme
+}
+
+export interface SectionShot {
+  readonly index: number
+  readonly path: string
+  readonly top: number
+  readonly height: number
+}
+
+/**
+ * Families the page draws text in that a shot cannot promise to reproduce,
+ * recorded rather than refused, since a reference shows a site as a browser
+ * draws it and most outside sites declare a generic family somewhere.
+ */
+export interface SectionFonts {
+  readonly generic: readonly string[]
+  readonly missing: readonly string[]
+}
+
+export type SectionsResult =
+  | {
+      status: 'captured'
+      source: string
+      sections: SectionShot[]
+      failed: { index: number; reason: string }[]
+      fonts: SectionFonts
+    }
+  | { status: 'failed'; source: string; reason: string }
+
+/**
+ * Shoots one page as one PNG per section, in page order, each with its stamp.
+ * A section that fails to shoot is reported beside the rest rather than
+ * dropping them, and a page that never loads or names no root fails whole.
+ *
+ * Each shot is a document-coordinate clip rather than an element shot, since a
+ * merged section spans several elements and one element cannot frame them.
+ */
+export async function captureSections(
+  sourcePath: string,
+  { outDir, root, width, colorScheme }: SectionOptions,
+): Promise<SectionsResult> {
+  const pageSource: CaptureSource = isUrlSource(sourcePath)
+    ? { kind: 'url', url: sourcePath, pngPath: outDir }
+    : { kind: 'file', htmlPath: sourcePath, pngPath: outDir }
+  const browser = await chromium.launch()
+  try {
+    const page = await browser.newPage({
+      deviceScaleFactor: DEVICE_SCALE_FACTOR,
+      ...(width === undefined
+        ? {}
+        : { viewport: { width, height: DEFAULT_VIEWPORT_HEIGHT } }),
+      ...(colorScheme === undefined ? {} : { colorScheme }),
+    })
+    await page.goto(
+      pageSource.kind === 'url'
+        ? pageSource.url
+        : pathToFileURL(pageSource.htmlPath).href,
+    )
+    if (colorScheme !== undefined) await applyColorScheme(page, colorScheme)
+    await page.evaluate(() => document.fonts.ready.then(() => undefined))
+    await preparePage(page)
+
+    const blocks = await splitBlocks(page, root)
+    if (blocks === null) {
+      return failed(pageSource, `no element matched ${root}`)
+    }
+    const fonts = await unresolvedFonts(page)
+
+    mkdirSync(outDir, { recursive: true })
+    const shots: SectionShot[] = []
+    const misses: { index: number; reason: string }[] = []
+    for (const [offset, section] of mergeBlocks(blocks).entries()) {
+      const index = offset + 1
+      const pngPath = join(
+        outDir,
+        `section-${String(index).padStart(2, '0')}.png`,
+      )
+      try {
+        const clip = await revealSection(page, section)
+        if (clip === null) {
+          misses.push({ index, reason: 'the section drew no box' })
+          continue
+        }
+        const png = await page.screenshot({ clip, fullPage: true })
+        writeFileSync(pngPath, png)
+        writeStamp({ ...pageSource, pngPath }, png)
+        shots.push({ index, path: pngPath, top: clip.y, height: clip.height })
+      } catch (error) {
+        misses.push({
+          index,
+          reason: error instanceof Error ? error.message : String(error),
+        })
+      }
+    }
+    return {
+      status: 'captured',
+      source: sourceIdentifier(pageSource),
+      sections: shots,
+      failed: misses,
+      fonts,
+    }
+  } catch (error) {
+    return failed(
+      pageSource,
+      error instanceof Error ? error.message : String(error),
+    )
+  } finally {
+    await browser.close()
+  }
+}
+
+/**
+ * The generic and the absent families among those the page's text draws in,
+ * read once over the whole body, which is the probe single-element capture
+ * refuses on, turned into a record.
+ */
+async function unresolvedFonts(page: Page): Promise<SectionFonts> {
+  const declarations = await renderedTextFamilies(page.locator('body'))
+  const generic = textFamilies(declarations.filter(isGenericFamily))
+  const named = textFamilies(
+    declarations.filter((declaration) => !isGenericFamily(declaration)),
+  )
+  const resolved = await Promise.all(
+    named.map((family) => resolvesFont(page, family)),
+  )
+  return {
+    generic,
+    missing: named.filter((_, index) => !resolved[index]),
+  }
+}
+
 /**
  * Runs inside the render rather than in a wrapper around it, so a capture
  * cannot succeed and leave the provenance unrecorded. A throw here reaches the
@@ -202,7 +345,10 @@ async function applyColorScheme(
   }, scheme)
 }
 
-function failed(source: CaptureSource, reason: string): CaptureResult {
+function failed(
+  source: CaptureSource,
+  reason: string,
+): Extract<CaptureResult, { status: 'failed' }> {
   return { status: 'failed', source: sourceIdentifier(source), reason }
 }
 
