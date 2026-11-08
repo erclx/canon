@@ -219,6 +219,12 @@ export async function captureSections(
     if (blocks === null) {
       return failed(pageSource, `no element matched ${root}`)
     }
+    if (blocks.length === 0) {
+      return failed(
+        pageSource,
+        `${root ?? 'main, or body without one,'} drew no box to split into sections`,
+      )
+    }
     const fonts = await unresolvedFonts(page)
 
     mkdirSync(outDir, { recursive: true })

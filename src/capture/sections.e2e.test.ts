@@ -304,6 +304,28 @@ describe.skipIf(!hasBrowser)('captureSections', () => {
   )
 
   it(
+    'should fail with a reason when the root draws no box',
+    async () => {
+      const page = source(
+        'boxless',
+        pageWith('main{display:contents}', `<main></main>`),
+      )
+
+      const result = await captureSections(page, {
+        outDir: join(dir, 'boxless'),
+        root: 'main',
+        width: WIDTH,
+      })
+
+      expect(result).toMatchObject({
+        status: 'failed',
+        reason: expect.stringContaining('drew no box'),
+      })
+    },
+    TIMEOUT_MS,
+  )
+
+  it(
     'should fail a page whose named root matches nothing',
     async () => {
       const page = source('rootless', pageWith('', band(800)))
