@@ -62,6 +62,7 @@ The model is Jesse James Garrett's five planes from [The Elements of User Experi
 
 | Order | Layer       | The question it answers                                                    |
 | ----- | ----------- | -------------------------------------------------------------------------- |
+| 0     | Story       | What the page is for, who reads it, its voice, its arc, what it omits      |
 | 1     | Content     | What is actually here, and what does it say                                |
 | 2     | Composition | Which sections exist, in what order, carrying what relative weight         |
 | 3     | Layout      | How a section divides its space: grid, columns, alignment, container width |
@@ -78,8 +79,17 @@ Work at the lowest layer the complaint reaches. A complaint is voiced at the lay
 
 - A round varies one layer and says which. Varying three answers nothing, because the pick cannot say which difference decided it.
 - Never settle a higher layer before the one below it. Imagery and palette settle together, since a real photograph sets a ground rather than accepting one.
-- Content leads the order and is often absent at the start. Draft against real copy where it exists, stand in where it does not, and treat the composition as unsettled until real copy runs through it.
+- Story leads and content follows, both written in words and never drawn as arms. Draft against real copy where it exists, and treat the composition as unsettled until real copy runs through it.
 - Name the layer the complaint sits at, then check the layers below are settled. Where one is not, that is the round, and say so rather than drafting the requested one.
+
+### Story and content settle in words
+
+The story is the floor every section stands on, and a change to it reaches all of them. Write it and the cards into the round's output beside the declared read, before any arm is drawn.
+
+- Settle the story once per page, stating its purpose, its reader, its voice, and what it leaves out. It names the voice, while every wording rule stays with `write-human` and `ui-craft`.
+- Write an arc, the order a stranger meets the claims in, only where the kind requires one. `kinds.md` requires it on marketing, and every other kind may leave it out.
+- Sort a fact by deleting its section in thought. A fact still true with the section gone belongs to the story, so the page voice is stated there once and never repeated in a card.
+- Settle content as one content card per section, in words alone, naming what the section mentions and what it shows. A card names no layout, block, or kicker, since each is a composition decision.
 
 ## Grey-box when judging layers 1 to 4
 
