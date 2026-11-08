@@ -43,6 +43,7 @@ The grid and the first screen are shaped to the content counted.
 - [ ] Lists over five items use something other than a longer list
 - [ ] The first screen carries the point and the primary action without scrolling
 - [ ] The first screen carries at most four text elements
+- [ ] No figure repeats one shape where its parts carry different data
 
 ## Systems
 
