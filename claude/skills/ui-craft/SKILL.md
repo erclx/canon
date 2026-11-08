@@ -15,15 +15,15 @@ Load this before building rather than after, since a missing state or a trapped 
 
 Read every reference on the always row for any rendered change, then each row the change matches.
 
-| The change                                                         | Read                                  |
-| ------------------------------------------------------------------ | ------------------------------------- |
-| Any rendered change                                                | `a11y.md`, `keyboard.md`, `states.md` |
-| A click, press, drag, gesture, or popover dismissal                | `pointer.md`                          |
-| A form, a field, validation, or a sign-in step                     | `forms.md`                            |
-| An animation, transition, autoplay, or carousel                    | `motion.md`                           |
-| A destructive action, an edit cancel, or a hover or disabled state | `controls.md`                         |
-| A rendered string, heading, label, or link                         | `copy.md`                             |
-| A changed surface is handed over, or a change scrolls or snaps     | `capture.md`                          |
+| The change                                                                                           | Read                                  |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| Any rendered change                                                                                  | `a11y.md`, `keyboard.md`, `states.md` |
+| A click, press, drag, gesture, or popover dismissal                                                  | `pointer.md`                          |
+| A form, a field, validation, or a sign-in step                                                       | `forms.md`                            |
+| An animation, transition, autoplay, or carousel                                                      | `motion.md`                           |
+| A destructive action, an edit cancel, a hover or disabled state, or chrome that looks like a control | `controls.md`                         |
+| A rendered string, heading, label, or link                                                           | `copy.md`                             |
+| A rendered surface has changed and is about to be handed over, or a change scrolls or snaps          | `capture.md`                          |
 
 Each name sits under `${CLAUDE_SKILL_DIR}/references/`. A row's reference is read whole, since its sections name the cases a change reaches without saying so.
 

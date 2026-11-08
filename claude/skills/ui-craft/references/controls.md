@@ -12,7 +12,13 @@
 - Say why a control is disabled, in text beside it or a tooltip, and keep it focusable through `aria-disabled` when the reason matters.
 - Declare `color-scheme` on `:root` to match each theme, so scrollbars and form controls follow the theme instead of staying light.
 
+## Signifiers
+
+- Give nothing a control's look, such as a button fill or a tab underline, unless it acts, since the look promises a response.
+- Keep the default cursor on decorative chrome, such as a mock tab bar, a status pill, or an address bar.
+
 ## Hover and focus effects
 
 - Keep content shown on hover or focus dismissible without moving the pointer, hoverable, and visible until the trigger leaves or the person dismisses it (WCAG 1.4.13).
 - Change no context, such as navigating, submitting, or moving focus, when a control gains focus or changes value, unless the person was told first (WCAG 3.2.1, 3.2.2).
+- Put hover styles behind `@media (hover: hover)`, since a touch screen keeps the last tapped element in hover.
