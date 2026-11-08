@@ -17,7 +17,7 @@ Holds one stack, always with a `manifest.toml` and a `reference.md`, plus `confi
 
 - Adding a stack means copying the closest one from `canon tooling list`, filling its manifest and reference, adding configs and seeds, and running `canon tooling verify <name>`
 - A manifest block injects one thing. `[dependencies.dev]` and `[scripts]` add only what is missing, `[gitignore]` adds a group, and `[verify] prepare` runs between scaffold and sync.
-- `runtime` is reserved and read by nothing, and `scaffold` is read only by `sandbox/tooling/upstream.ts`, never by `canon tooling sync`
+- `runtime` is reserved and read by nothing. `scaffold` is read by `canon tooling verify`, `canon tooling scaffold`, `canon tooling list`, and `sandbox/tooling/upstream.ts`.
 - `python`, `go`, and `php` extend `base` directly and run on `uv`, `go`, and `composer`, so their scaffolds write no `package.json` and `[verify] prepare` runs `bun init -y`
 - A script changes only through `[scripts.override]`, as `vite-react` forces `--max-warnings 0` onto the scaffold's oxlint, and the drift scan reads a stale override as `drifted`
 
@@ -102,6 +102,15 @@ Runs `canon tooling verify <stack>` by scaffolding into `.canon/tmp/runs/verify-
 - `web` has no scaffold command, so a change to `tooling/web/configs/` is verified through `vite-react` and `astro`
 - Run it after any change to `tooling/<stack>/configs/`, a manifest, or `src/tooling/`
 - Install Playwright browsers from the scaffold's `node_modules/.bin/`, since `web` leaves `@playwright/test` unpinned and a scaffold can resolve a newer release than this checkout's
+
+### `src/tooling/scaffold.ts`
+
+Runs `canon tooling scaffold <stack> [target]` for the `target-scaffold` skill. The command runs in a temp folder with `{{name}}` set to the target's basename, so `mkdir {{name}} && cd` still works, and the result moves into the target afterward.
+
+- A target holding anything but `.git` refuses, and a target's own `.git` wins over one the scaffolder wrote, as `uv init` does
+- A basename a package manager rejects refuses as `bad-name` with a `suggested` name, never a silent rename
+- A failed command moves nothing and keeps the scratch folder, named in the record
+- It runs no `[verify] prepare`, so a `python`, `go`, or `php` starter reaches `target-setup` with no `package.json`
 
 ### Other folders
 
