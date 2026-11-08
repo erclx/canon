@@ -28,7 +28,7 @@ The rest of the ten sit in the details and the copy.
 - A colored dot before every navigation item, row or badge.
 - A glow standing in for elevation, on a pure black or pure white ground.
 - A product screenshot built out of styled rectangles.
-- Placeholder that announces itself: `Acme`, a stock person name, 99.9%, one portrait used twice.
+- Placeholder that announces itself: `Acme`, a stock person name, 99.9%, one portrait used twice, a template token such as `<slug>` in a mock view.
 - Verbs chosen for warmth rather than for meaning, of the `elevate` and `unleash` family.
 
 Reaching past a default means choosing something else on purpose, not avoiding the word. A brief that genuinely calls for one of these gets it, and the difference is that somebody decided.
@@ -161,4 +161,4 @@ Five neighbors own the rest.
 - The shape of the project's design document and where its values live: `${CLAUDE_SKILL_DIR}/../design-record/references/design.md`
 - The folder holding the accepted designs and how a reference lands in it: `${CLAUDE_SKILL_DIR}/../design-record/references/folder.md`
 - Reading source for roughness: `ui-audit`. Measuring what a running interface costs to paint: `ui-measure`
-- Prose on the surface being designed: the `write-human` skill
+- Prose on the surface being designed: the `write-human` skill, with a quote on it sourced through `search-craft`

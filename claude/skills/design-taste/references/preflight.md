@@ -43,6 +43,7 @@ The grid and the first screen are shaped to the content counted.
 - [ ] Lists over five items use something other than a longer list
 - [ ] The first screen carries the point and the primary action without scrolling
 - [ ] The first screen carries at most four text elements
+- [ ] No figure repeats one shape where its parts carry different data
 
 ## Systems
 
@@ -83,7 +84,7 @@ The detail boxes come from `craft.md`.
 
 - [ ] Every visible string re-read in one pass, with anything broken, unclear or performatively clever rewritten
 - [ ] Every number either real, labeled as sample, or removed
-- [ ] No placeholder that reads as placeholder: generic names, generic company names, reused portraits, identical dates
+- [ ] No placeholder that reads as placeholder: generic names, generic company names, reused portraits, identical dates, template tokens or copied real ids in a mock view
 
 ### Wording
 
