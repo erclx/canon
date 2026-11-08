@@ -6,6 +6,14 @@ The cloudflare stack ships one parameterized GitHub Actions workflow that deploy
 
 It ships one script, `scripts/delete-previews.sh`, which the cleanup job calls and which overwrites a project's own file of that name on every sync.
 
+## Scaffold
+
+The manifest's scaffold starts a new project as a TypeScript Worker from the `hello-world` template, through `npm create cloudflare@latest` with deploy and git both off. `canon tooling scaffold cloudflare` runs it in an empty folder.
+
+- The starter installs its own dependencies, since `create-cloudflare` runs the install itself.
+- A project already on `astro` or `vite-react` never takes this scaffold. It syncs the stack onto the framework it has.
+- The stack extends nothing and ships no scripts, so `canon tooling verify cloudflare` passes Scaffold and Sync and stops at `lint:fix`. Run `canon init` on the starter to bring in the base scripts.
+
 ## Deploy workflow
 
 ### Job shape
