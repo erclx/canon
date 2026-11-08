@@ -88,7 +88,7 @@ The story is the floor every section stands on, and a change to it reaches all o
 
 - Settle the story once per page, stating its purpose, its reader, its voice, and what it leaves out. It names the voice, while every wording rule stays with `write-human` and `ui-craft`.
 - Write an arc, the order a stranger meets the claims in, only where the kind requires one. `kinds.md` requires it on marketing, and every other kind may leave it out.
-- Sort a fact by deleting its section in thought. A fact still true with the section gone belongs to the story, so the page voice is stated there once and never repeated in a card.
+- Sort a fact by the section it sits in. A fact still true after that section is deleted belongs to the story, so the page voice is stated there once and never repeated in a card.
 - Settle content as one content card per section, in words alone, naming what the section mentions and what it shows. A card names no layout, block, or kicker, since each is a composition decision.
 
 ## Grey-box when judging layers 1 to 4
