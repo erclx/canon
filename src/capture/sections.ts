@@ -66,15 +66,23 @@ export async function preparePage(page: Page): Promise<void> {
 /**
  * Runs again before every shot as well as once in preparation, since a consent
  * banner commonly mounts on a timer after load and a single pass misses it.
+ * Starts at the root element rather than the body, since a consent manager
+ * can attach its host straight to `<html>`, and walks into open shadow roots,
+ * where such widgets mount and a document-level query never reaches. A closed
+ * root stays out of reach.
  */
 async function hideFixedLayers(page: Page): Promise<void> {
   await page.evaluate(() => {
-    for (const element of document.querySelectorAll<HTMLElement>('body *')) {
-      const position = getComputedStyle(element).position
-      if (position === 'fixed' || position === 'sticky') {
-        element.style.setProperty('visibility', 'hidden', 'important')
+    const hide = (root: ParentNode): void => {
+      for (const element of root.querySelectorAll<HTMLElement>('*')) {
+        const position = getComputedStyle(element).position
+        if (position === 'fixed' || position === 'sticky') {
+          element.style.setProperty('visibility', 'hidden', 'important')
+        }
+        if (element.shadowRoot) hide(element.shadowRoot)
       }
     }
+    hide(document.documentElement)
   })
 }
 

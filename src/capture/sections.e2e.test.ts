@@ -168,6 +168,27 @@ describe.skipIf(!hasBrowser)('captureSections', () => {
   )
 
   it(
+    'should leave out a fixed banner in a shadow root hosted outside the body',
+    async () => {
+      const page = source(
+        'shadow-banner',
+        pageWith(
+          '',
+          `<main>${band(800).repeat(2)}</main>`,
+          "const host = document.createElement('div'); document.documentElement.append(host); host.attachShadow({ mode: 'open' }).innerHTML = '<div style=\"position:fixed;bottom:0;left:0;right:0;height:120px;background:#f00\"></div>'",
+        ),
+      )
+      const outDir = join(dir, 'shadow-banner')
+
+      const result = await captureSections(page, { outDir, width: WIDTH })
+
+      expect(result).toMatchObject({ status: 'captured', failed: [] })
+      expect(paints(join(outDir, 'section-01.png'), [255, 0, 0])).toBe(false)
+    },
+    TIMEOUT_MS,
+  )
+
+  it(
     'should paint a reveal-on-view block in its shot',
     async () => {
       const page = source(
