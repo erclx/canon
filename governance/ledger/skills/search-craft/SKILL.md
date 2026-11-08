@@ -45,6 +45,12 @@ The access note's Reddit and X rows record refusals, so they are measurements re
 | A public API over a summarized page   | [Crossref REST API](https://www.crossref.org/documentation/retrieve-metadata/rest-api/): "Our publicly available REST API exposes the scholarly metadata that members and trusted sources deposit with Crossref" | 2026-10-28 |
 | A plain request rather than a wrapper | [claude-research-stack](https://github.com/aghori3004/claude-research-stack): "The skill talks to the CLIs and MCPs directly, on purpose", listing "No wrapper scripts" among what it leaves out                 | 2026-10-28 |
 
+## Quote what was read
+
+| Bullet                   | Source                                                                                                                                                                                    | Read       |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Quote only what was read | [Caulfield, SIFT (The Four Moves)](https://hapgood.us/2019/06/19/sift-the-four-moves/): "trace the claim, quote, or media back to the source, so you can see it in it's original context" | 2026-11-08 |
+
 ## Access note
 
 | Bullet                          | Source                                                                                                                                                                                                       | Read       |

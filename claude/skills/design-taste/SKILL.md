@@ -161,4 +161,4 @@ Five neighbors own the rest.
 - The shape of the project's design document and where its values live: `${CLAUDE_SKILL_DIR}/../design-record/references/design.md`
 - The folder holding the accepted designs and how a reference lands in it: `${CLAUDE_SKILL_DIR}/../design-record/references/folder.md`
 - Reading source for roughness: `ui-audit`. Measuring what a running interface costs to paint: `ui-measure`
-- Prose on the surface being designed: the `write-human` skill
+- Prose on the surface being designed: the `write-human` skill, with a quote on it sourced through `search-craft`
