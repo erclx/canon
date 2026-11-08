@@ -18,11 +18,25 @@ Skip nothing on the ground that it is obviously fine. A rule is on this list bec
 
 ## Coherence
 
+Each box here is a lock from the body, checked across every section rather than one at a time.
+
+### Ground and voice
+
+The surface reads as one product from top to bottom.
+
 - [ ] One accent across every section
 - [ ] One radius system, or a stated rule applied everywhere
 - [ ] One theme, with no inverted section between its neighbors
 - [ ] One copy register
 - [ ] Every shadow falls the same way and is tinted toward its ground
+
+### Controls and motion
+
+What the reader operates or watches behaves alike wherever it appears.
+
+- [ ] Every control doing one job takes one style across the surface
+- [ ] Every moving section names its model, and sections of one kind share it
+- [ ] The focus ring draws at one weight on every control
 
 ## Composition
 
