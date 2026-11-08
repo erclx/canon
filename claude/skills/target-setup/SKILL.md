@@ -55,7 +55,11 @@ else. Do not pause for a separate confirmation beyond the extras question.
 
 ## Declined states
 
-Three states reach this skill that the chain does not serve. Name the destination for each, so the refusal routes rather than ends.
+Four states reach this skill that the chain does not serve. Name the destination for each, so the refusal routes rather than ends.
+
+### An empty folder
+
+Stop before `detect` when the target holds nothing but `.git`, and hand off to `target-scaffold`. Detection reads a stack from files a project carries, so an empty folder resolves to `base` and installs tooling onto no project. That skill starts the project and hands it back here.
 
 ### An existing project
 
