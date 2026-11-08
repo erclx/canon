@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.80.0](https://github.com/erclx/canon/compare/v5.79.0...v5.80.0) (2026-11-08)
+
+
+### Features
+
+* **capture:** shoot a page section by section with --sections ([#2932](https://github.com/erclx/canon/issues/2932)) ([f19d385](https://github.com/erclx/canon/commit/f19d385e2a9e722e4ce8c6ccde04ed0f6e24794a))
+* **design:** lock control style and motion model across a page ([#2926](https://github.com/erclx/canon/issues/2926)) ([1d84ed3](https://github.com/erclx/canon/commit/1d84ed32cddc46ca08375475f931a2b5f60aa31b))
+* **design:** open the layer model on a story stage and content cards ([#2930](https://github.com/erclx/canon/issues/2930)) ([9189b6c](https://github.com/erclx/canon/commit/9189b6ca65e54acb43be27300cefcfce5183adb9))
+* **skills:** check moving surfaces with real input in UI review ([#2929](https://github.com/erclx/canon/issues/2929)) ([7559d17](https://github.com/erclx/canon/commit/7559d172331b6b9a783be909b60c76d1431a2f51))
+* **skills:** gather design references from live sites ([#2934](https://github.com/erclx/canon/issues/2934)) ([982f232](https://github.com/erclx/canon/commit/982f232b3f36e53d2e1d7f3e13ec0e72ddcfd3eb))
+* **skills:** name template tokens and identical figures as tells ([#2927](https://github.com/erclx/canon/issues/2927)) ([64d15eb](https://github.com/erclx/canon/commit/64d15eb9b920e6c0e48d292b5d3d8c2ca2045981))
+* **skills:** state the touch width and make the tap box fail ([#2933](https://github.com/erclx/canon/issues/2933)) ([8722f0a](https://github.com/erclx/canon/commit/8722f0aa1946057a7bc7c1d8929139076f2168dc))
+* **take:** reach targets inside open shadow roots ([#2931](https://github.com/erclx/canon/issues/2931)) ([3a7a80f](https://github.com/erclx/canon/commit/3a7a80fc121531c7a6c9104faa1d9febc7c6b8f8))
+* **tooling:** start a project from an empty folder ([#2935](https://github.com/erclx/canon/issues/2935)) ([4f76478](https://github.com/erclx/canon/commit/4f7647847d39615cca731613196860658c560754))
+* **ui-craft:** add a motion section for reader-paced motion ([#2925](https://github.com/erclx/canon/issues/2925)) ([55e817d](https://github.com/erclx/canon/commit/55e817d0687ca76832e74839d6c0773a82eddf67))
+* **ui-craft:** keep decorative chrome from looking like a control ([#2924](https://github.com/erclx/canon/issues/2924)) ([bf2b526](https://github.com/erclx/canon/commit/bf2b526bef56a4cd32b10e227f361ee2d43d3202))
+
 ## [5.79.0](https://github.com/erclx/canon/compare/v5.78.0...v5.79.0) (2026-11-06)
 
 
