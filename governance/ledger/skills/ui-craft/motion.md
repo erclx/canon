@@ -5,7 +5,7 @@ description: Sources for claude/skills/ui-craft/references/motion.md, one row pe
 
 # Motion reference ledger
 
-The field is web accessibility, and the authorities are the W3C, through WCAG 2.2 and the ARIA Authoring Practices Guide, and MDN for the media feature.
+The fields are web accessibility, interaction design, and web performance. The W3C, through WCAG 2.2 and the ARIA Authoring Practices Guide, and MDN for the media feature back the accessibility rows. Shneiderman's direct manipulation paper and Material's motion system back reader-paced motion, and web.dev backs the held size.
 
 ## Moving content
 
@@ -14,6 +14,14 @@ The field is web accessibility, and the authorities are the W3C, through WCAG 2.
 | Pause past five seconds         | [Understanding Pause, Stop, Hide](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html): moving information that "starts automatically", "lasts more than five seconds", and sits beside other content needs "a mechanism for the user to pause , stop, or hide it" | 2026-10-18, WCAG 2.2 |
 | Halt rotation on focus or hover | [Carousel pattern](https://www.w3.org/WAI/ARIA/apg/patterns/carousel/): a rotating carousel "Stops rotating when keyboard focus enters the carousel" and "whenever the mouse is hovering over the carousel"                                                                     | 2026-10-18, APG      |
 | Three flashes                   | [Understanding Three Flashes or Below Threshold](https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold.html): pages "do not contain anything that flashes more than three times in any one second period"                                                | 2026-10-18, WCAG 2.2 |
+
+## Motion the reader drives
+
+| Bullet              | Source                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Read                           |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| Follow the input    | [Shneiderman, Direct Manipulation, IEEE Computer 1983](https://www.cs.umd.edu/~ben/papers/Shneiderman1983Direct.pdf): direct manipulation rests on "Rapid, incremental, reversible operations whose impact on the object of interest is immediately visible."                                                                                                                                                                                                                                 | 2026-11-08, IEEE Computer 1983 |
+| Swap at a threshold | [Material Components Android, Motion](https://github.com/material-components/material-components-android/blob/master/docs/theming/Motion.md): the fade through variant will "sequentially fade out and in the outgoing and incoming views, respectively, in order to minimize the visual overlap of these views". Ruling out a blank frame is a House choice: a fade through dips both views toward zero at the seam, so a swap at the threshold keeps one text fully legible at every moment | 2026-11-08, Material           |
+| Hold the outer size | [Cumulative Layout Shift](https://web.dev/articles/cls): to animate without shifting layout, "Instead of changing the height and width properties, use transform: scale()"                                                                                                                                                                                                                                                                                                                    | 2026-11-08, web.dev            |
 
 ## Reduced motion
 
