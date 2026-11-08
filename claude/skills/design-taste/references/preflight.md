@@ -18,11 +18,25 @@ Skip nothing on the ground that it is obviously fine. A rule is on this list bec
 
 ## Coherence
 
+Each box here is a lock from the body, checked across every section rather than one at a time.
+
+### Ground and voice
+
+The surface reads as one product from top to bottom.
+
 - [ ] One accent across every section
 - [ ] One radius system, or a stated rule applied everywhere
 - [ ] One theme, with no inverted section between its neighbors
 - [ ] One copy register
 - [ ] Every shadow falls the same way and is tinted toward its ground
+
+### Controls and motion
+
+What the reader operates or watches behaves alike wherever it appears.
+
+- [ ] Every control doing one job takes one style across the surface
+- [ ] Every moving section names its model, and sections of one kind share it
+- [ ] The focus ring draws at one weight on every control
 
 ## Composition
 
@@ -43,6 +57,7 @@ The grid and the first screen are shaped to the content counted.
 - [ ] Lists over five items use something other than a longer list
 - [ ] The first screen carries the point and the primary action without scrolling
 - [ ] The first screen carries at most four text elements
+- [ ] No figure repeats one shape where its parts carry different data
 
 ## Systems
 
@@ -83,7 +98,7 @@ The detail boxes come from `craft.md`.
 
 - [ ] Every visible string re-read in one pass, with anything broken, unclear or performatively clever rewritten
 - [ ] Every number either real, labeled as sample, or removed
-- [ ] No placeholder that reads as placeholder: generic names, generic company names, reused portraits, identical dates
+- [ ] No placeholder that reads as placeholder: generic names, generic company names, reused portraits, identical dates, template tokens or copied real ids in a mock view
 
 ### Wording
 

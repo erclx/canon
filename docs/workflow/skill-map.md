@@ -44,7 +44,7 @@ Groups run in the order a project meets them. Every name `canon claude skills li
 | `canon:deprecation-migration` | Deleting or replacing code something may call      |
 | `canon:code-craft`            | Before writing a function, class, or module        |
 | `canon:review-craft`          | Reviewing a change                                 |
-| `canon:search-craft`          | Before searching outside the project               |
+| `canon:search-craft`          | Before searching outside or quoting a source       |
 | `canon:systematic-debugging`  | A test fails or a bug surfaces                     |
 | `canon:design-taste`          | Drafting or judging an interface                   |
 | `canon:ui-craft`              | Building or judging a component's behavior         |

@@ -1,6 +1,6 @@
 ---
 name: search-craft
-description: Carries the thinking step a session takes before it searches outside the project, naming the field, deriving who that field treats as authoritative, and running a search scoped to those sources beside an open one, plus a dated note on which sites refuse access. Use before any outside search for evidence, papers, documentation, statistics, or opinion, when a procedure loads it at its sourcing step, or when asked "find me the strongest evidence on X", "where should I look for this", "what does the research say", "find papers on", "look up the docs for", or "what are people saying about". Do NOT use to format a citation, which belongs to the surface writing it, to source a Claude Code subject, which is a direct fetch of Anthropic's docs index, or to generate an image, which is not search.
+description: Carries the thinking step a session takes before it searches outside the project, naming the field, deriving who that field treats as authoritative, and running a search scoped to those sources beside an open one, plus a dated note on which sites refuse access and the rule that a quote comes from a page read rather than recall. Use before any outside search for evidence, papers, documentation, statistics, or opinion, before quoting a source on any surface, when a procedure loads it at its sourcing step, or when asked "find me the strongest evidence on X", "where should I look for this", "what does the research say", "find papers on", "look up the docs for", or "what are people saying about". Do NOT use to format a citation, which belongs to the surface writing it, to source a Claude Code subject, which is a direct fetch of Anthropic's docs index, or to generate an image, which is not search.
 metadata:
   family: build
 ---
@@ -42,6 +42,10 @@ This skill carries the step before the search. Work out where the field's author
 - Prefer a source's public API over a fetched and summarized HTML page where one exists. An API returns the dates, authors, and identifiers a citation needs, which a summary can drop.
 - Reach the API with a plain request when it needs no key, rather than writing a wrapper for one search.
 
+## Quote what was read
+
+- Quote a source only from a page or a ledger row read in this session, never from recall, since a remembered quote reads as exact while its wording or attribution has drifted.
+
 ## Access note
 
 Each line is a claim measured once, and the commit that adds it carries the date. Sites change their blocking without notice, so re-check a line before relying on it. Add a line only for a failure a session actually hit.
@@ -65,6 +69,7 @@ Read `${CLAUDE_SKILL_DIR}/references/adopted.md` only when extending this guidan
 - You are about to write a query and have not named the field.
 - Every source you are about to cite came from one open search.
 - You named an authority because it is a site you remember, not because it is the kind of body the field trusts.
+- You are about to quote a source you have not opened in this session.
 
 ### Results and access
 
@@ -81,6 +86,12 @@ These flags fire after the search has run.
 - The query ran scoped and open, and every disagreement between them is stated with the side kept.
 - Every cited source's domain was checked, and a fact the summaries disagreed on was confirmed on the page itself.
 - No paid, logged-in, or scraped route was taken without the operator's answer.
+
+### Quotes
+
+A quote carries its own check, since it can reach a surface with no search run.
+
+- Every quote was copied from a page or a ledger row read in this session.
 
 ## What this delegates
 

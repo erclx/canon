@@ -113,6 +113,14 @@ Read the selection when the answer points at the board, such as "the selected on
 4. Repeat until the operator says it is right. A run stopping because the arms stopped differing has stopped early.
 5. Hold the real surface untouched across every iteration. Nothing outside the run's own board pages changes until the pick is final.
 
+### Before the pick joins the page
+
+A round never sees its neighbors, so run this before Step 6 item 1 where the pick joins a page of other sections. Elsewhere, as on a first section or a logo, say in one line that it was skipped.
+
+- List each section's pickers, containers, and motion models beside the pick's against the `design-taste` locks, and judge a container by radius, theme, and the card kit tell
+- Report the list and draw nothing when the pick brings no new style
+- Else draw `arm-as-is` and `arm-restyled` on a new page on the run's list and ask as Step 4 does. That page is Step 6's picked round only if the restyle wins.
+
 ## Step 6: close
 
 1. Apply the winning arm to the real surface, in one change.
