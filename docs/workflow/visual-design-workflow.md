@@ -75,10 +75,14 @@ A close posts as `## UI review closed`. The reviewers lift the draft mark on the
 
 Most projects author design in the loop above and need nothing more. Start with `canon:design-pick`, which drafts candidates as frames on a [Frameboard](https://www.npmjs.com/package/frameboard) board and takes your pick, then record the pick with `canon:design-record`. `canon:design-identity` drafts a logo mark and social card the same way.
 
+- Run `canon:design-references` first when a round has nothing real to look at, with a site address or bare to capture the project's list and then a default one.
+- It fills a `references` page on the same board with section shots at each width, a filmed scroll, and a few hovers, each frame naming its source.
+
 A pick round drafts on `.canon/board/` unless the project names another board in `canon/config/design.toml`.
 
 - Set `board` when your design sync reads another Frameboard board, so the picked frame lands without a redraw.
 - Leave `project` unset to keep rounds in their own `picks` project on that board.
+- Set `references` to an array of site addresses to replace the default list `canon:design-references` captures when you name no site.
 
 A graphical tool earns its place when design is the product, a designer owns it, and it changes more often than code. Then the tool is the source of truth, and `canon/DESIGN.md` carries a top note naming the upstream project.
 
