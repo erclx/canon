@@ -33,12 +33,16 @@ The evidence comment already heads the list with `## What to look at`, so the fi
 - [ ] <route>[, <width>]: <verb> <target> → <expected visual result>
 ```
 
+### The parts of a box
+
 Write each box so a session driving the running app can run it without guessing, with one rule for each part:
 
 - **Route.** A path or the control that reaches it. A box naming none is driven from the address the driver opens.
   - Write "from the page the app opens on" for a state reached by a sequence.
 - **Width.** Only when the change can differ by width, such as layout, spacing, or anything responsive. Copy, color, or a state rendering the same everywhere leaves it off.
-- **Verb.** An action a driver performs, such as "scroll to", "click", "resize to", or "tab to". Never "read" or "look at", which name no action.
+- **Verb.** An action a driver performs, such as "scroll to", "click", "resize to", "tab to", "wheel", "press", or "tap". Never "read" or "look at", which name no action.
+  - A changed surface that scrolls, snaps, or tracks the scroll takes "wheel" or "press" with the key, never "scroll to", which a scripted scroll passes on a page the wheel cannot move.
+  - A touch or hover behavior takes "tap" or "hover" at a phone width. A change that moves nothing takes no wheel box.
 - **Taste.** End the line with `(taste)` when the result is a judgment of look or feel. A driver reports such a box as needing a person's eyes rather than passing it.
 - **Setup.** State inline the setup the page does not open in and the fixture state it needs. End with `(local only)` when a hosted preview cannot reach it, such as a stopped service.
 - **Fixture.** End with `(needs fixture)` when the drive fixture lacks the state. The builder adds it, or with no `canon/config/app-drive.toml` writes the setup inline and drops the marker.
