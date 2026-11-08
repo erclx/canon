@@ -102,6 +102,8 @@ Coherence is a property of the whole and every one of these is broken one sectio
 - **One copy register.** Technical, editorial and promotional voices do not mix in one composition unless the brand states that they do.
 - **One light source.** Every shadow on the surface falls the same way, and a shadow is tinted toward the ground rather than pure black.
 - **One focus ring weight.** Chosen once and drawn the same on every control. The `ui-craft` skill owns its visibility, contrast, and floor, and this lock sets the weight above them.
+- **One control style per job.** Every control doing one job, such as picking a view, takes one style across the surface, so tabs in one section are tabs in the next.
+- **One motion model per kind.** Each moving section names its model, being a loop the reader can take over, scroll-driven, play once, or one the project names, and sections of one kind share one model.
 
 ## Working on something that already exists
 
