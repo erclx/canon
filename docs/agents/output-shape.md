@@ -46,7 +46,7 @@ Discover names at runtime rather than hardcoding them.
 
 | Command                           | Returns                                                          |
 | --------------------------------- | ---------------------------------------------------------------- |
-| `canon tooling list --json`       | Stacks, extends chain, dep and script counts                     |
+| `canon tooling list --json`       | Stacks, extends chain, dep and script counts, scaffold flag      |
 | `canon gov list --json`           | Governance stacks, rule sets, evidence, and unreferenced rules   |
 | `canon gov detect --json`         | Opt-in rules a target's dependencies and paths propose           |
 | `canon claude seeds list --json`  | Seed doc sources with content                                    |
@@ -75,6 +75,7 @@ canon tooling sync astro /path/to/project --write
 canon tooling inject base /path/to/project --configs --seeds
 canon tooling prune-gitignore base /path/to/project
 canon tooling verify vite-react
+canon tooling scaffold astro /path/to/empty-folder --json
 canon audits run --json
 canon secrets scan --json
 canon deps audit --json
