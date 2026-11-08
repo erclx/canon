@@ -6,6 +6,8 @@ export interface StackSummary {
   readonly devDeps: number
   readonly scripts: number
   readonly gitignoreGroups: number
+  /** Whether `canon tooling scaffold` can start a project on this stack. */
+  readonly scaffold: boolean
 }
 
 /**
@@ -26,6 +28,7 @@ export function buildStackSummaries(root: string): StackSummary[] {
       devDeps: manifest.devPackages.length,
       scripts: Object.keys(manifest.scripts).length,
       gitignoreGroups: manifest.gitignore.length,
+      scaffold: manifest.scaffold !== undefined,
     })
   }
 

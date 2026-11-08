@@ -48,8 +48,15 @@ describe('buildStackSummaries', () => {
         devDeps: 2,
         scripts: 2,
         gitignoreGroups: 1,
+        scaffold: false,
       },
     ])
+  })
+
+  it('should report a stack carrying a scaffold command as scaffoldable', () => {
+    seedStack('go', '[stack]\nname = "go"\nscaffold = "go mod init {{name}}"\n')
+
+    expect(buildStackSummaries(root)[0].scaffold).toBe(true)
   })
 
   it('should report extends as null when the stack has no parent', () => {
@@ -99,6 +106,7 @@ describe('describeStack', () => {
       devDeps: 5,
       scripts: 8,
       gitignoreGroups: 3,
+      scaffold: false,
     })
 
     expect(line).toBe('base (5 dev deps, 8 scripts, 3 gitignore groups)')
@@ -111,6 +119,7 @@ describe('describeStack', () => {
       devDeps: 6,
       scripts: 6,
       gitignoreGroups: 1,
+      scaffold: false,
     })
 
     expect(line).toBe(
