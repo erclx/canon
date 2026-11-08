@@ -27,12 +27,43 @@ A box written to the drivable format reads:
 
 - **Route.** A path goes through `pw goto <rung><path>`, the rung before the access join. A control name, or "from the page the app opens on", is reached by clicking from the opened address.
 - **Width.** `pw resize <width> 900` before acting. A box naming no width is driven at 1440.
-- **Verb.** The action the driver performs: `click`, `fill`, `press`, `hover`, a scroll through `eval` of `scrollIntoView`, or a resize.
+- **Verb.** The action the driver performs: `click`, `fill`, `press`, `hover`, a resize, or the real input `## A box that moves` sets for a wheel, a key, a tap, or a hover at a phone width.
+  - An `eval` of `scrollIntoView` brings a target into view before another verb acts, and never stands as the scroll a box checks.
 - **`(taste)`.** The result is a judgment of look or feel. Capture, never judge.
 - **`(local only)`.** The state needs something a hosted preview cannot reach. On a hosted address the box is not driven, naming the marker as the reason.
 - **`(needs fixture)`.** The drive fixture lacks the state. Drive the box if the state now answers, and otherwise it is not driven for a cause on the branch, as the verdicts below state.
 
 A box written before that format may carry no route, no width, and a verb such as "read" or "look at". Drive it anyway: take the opened address as the route and 1440 as the width, turn the verb into the nearest action, and name each guess in the verdict's evidence.
+
+## A box that moves
+
+A scripted scroll lands where it is told, so it passes a snap or scroll-linked page that a wheel cannot move. A box naming a wheel, a key, a tap, or a hover on a phone is driven with that input, and its verdict rests on reads taken after each step.
+
+### Wheel at two paces
+
+Start each pace from the top, resetting with `pw --raw eval "scrollTo(0, 0)"`, and read `scrollY`, or the `scrollTop` of the container the box names, after each step.
+
+- **Spaced.** Six `pw mousewheel 0 100` calls, one notch a call, reading after each.
+- **Burst.** One `pw run-code` sending the same six notches 50 ms apart, reading once it settles, as the block below sends them.
+- The box fails when either pace leaves the surface short of the result it names, and the fail names the pace that stuck.
+- The evidence quotes both paces' reads, such as `spaced 0, 0, 0, 0, 0, 0, burst 522`.
+
+```bash
+pw run-code "async page => { for (let i = 0; i < 6; i++) { await page.mouse.wheel(0, 100); await page.waitForTimeout(50) } await page.waitForTimeout(800) }"
+```
+
+### Keys
+
+A box naming a key sends it through `pw press <key>`, such as `ArrowDown` or `PageDown`, and reads the position after each press the way the wheel does.
+
+### Touch and hover
+
+A box naming a tap, a swipe, or a hover at a phone width opens a second session, `canon browser -s=<project>-<number>-mobile open <address> --mobile`, since a resized desktop session keeps hover on and refuses a tap.
+
+- Read `matchMedia('(hover: hover)').matches` first and quote it, since a pass that never saw it false proves nothing about a hover query
+- Tap through `pw run-code` with `page.touchscreen.tap(<x>, <y>)` at the target's center, taken from `getBoundingClientRect()`
+- Close the mobile session once its boxes land
+- A phone-width box naming no touch or hover stays a resize of the desktop session, with no second session
 
 ## Finding the element
 
