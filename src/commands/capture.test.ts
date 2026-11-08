@@ -18,6 +18,7 @@ const RUN_TIMEOUT_MS = 30_000
  */
 async function runCapture(args: string[]): Promise<{
   readonly exitCode: number
+  readonly stdout: string
   readonly stderr: string
 }> {
   const result = await execa(process.execPath, [CLI, 'capture', ...args], {
@@ -25,7 +26,11 @@ async function runCapture(args: string[]): Promise<{
     reject: false,
     timeout: RUN_TIMEOUT_MS,
   })
-  return { exitCode: result.exitCode ?? 1, stderr: result.stderr }
+  return {
+    exitCode: result.exitCode ?? 1,
+    stdout: result.stdout,
+    stderr: result.stderr,
+  }
 }
 
 /**
@@ -275,6 +280,82 @@ describe('canon capture', () => {
             [],
           ),
         ).toBe(1000)
+      },
+    )
+  })
+
+  describe('with --sections', () => {
+    it('should refuse a run with no --out folder', async () => {
+      const result = await runCapture(['http://127.0.0.1:1', '--sections'])
+
+      expect(result.exitCode).toBe(1)
+      expect(result.stderr).toContain('--out')
+    })
+
+    it('should not ask for a selector', async () => {
+      const result = await runCapture(['http://127.0.0.1:1', '--sections'])
+
+      expect(result.stderr).not.toContain('--selector')
+    })
+
+    it('should refuse a directory source', async () => {
+      const dir = mkdtempSync(join(tmpdir(), 'canon-capture-sections-dir-'))
+
+      const result = await runCapture([dir, '--sections', '--out', dir])
+
+      expect(result.exitCode).toBe(1)
+      expect(result.stderr).toContain('directory')
+    })
+
+    it('should refuse --json without --sections', async () => {
+      const result = await runCapture(['--selector', '.t', '--json'])
+
+      expect(result.exitCode).toBe(1)
+      expect(result.stderr).toContain('--sections')
+    })
+
+    it.skipIf(!hasBrowser)(
+      'should print one record listing each section in page order',
+      { timeout: RUN_TIMEOUT_MS },
+      async () => {
+        const dir = mkdtempSync(join(tmpdir(), 'canon-capture-sections-'))
+        const page = join(dir, 'page.html')
+        writeFileSync(
+          page,
+          '<style>body{margin:0}section{height:800px}</style><main><section></section><section></section></main>',
+        )
+        const outDir = join(dir, 'shots')
+
+        const result = await runCapture([
+          page,
+          '--sections',
+          '--out',
+          outDir,
+          '--width',
+          '800',
+          '--json',
+        ])
+
+        expect(result.exitCode, result.stderr).toBe(0)
+        expect(JSON.parse(result.stdout)).toEqual({
+          source: page,
+          sections: [
+            {
+              index: 1,
+              path: join(outDir, 'section-01.png'),
+              top: 0,
+              height: 800,
+            },
+            {
+              index: 2,
+              path: join(outDir, 'section-02.png'),
+              top: 800,
+              height: 800,
+            },
+          ],
+          failed: [],
+          fonts: { generic: [], missing: [] },
+        })
       },
     )
   })
