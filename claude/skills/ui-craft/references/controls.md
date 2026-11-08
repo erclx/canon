@@ -21,3 +21,4 @@
 
 - Keep content shown on hover or focus dismissible without moving the pointer, hoverable, and visible until the trigger leaves or the person dismisses it (WCAG 1.4.13).
 - Change no context, such as navigating, submitting, or moving focus, when a control gains focus or changes value, unless the person was told first (WCAG 3.2.1, 3.2.2).
+- Put hover styles behind `@media (hover: hover)`, since a touch screen keeps the last tapped element in hover.
