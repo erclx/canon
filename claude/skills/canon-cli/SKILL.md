@@ -42,16 +42,19 @@ Consult to pick the `canon` verb for a job, and before running a verb that write
 
 Each verb here has a skill that owns the job. Load the skill rather than driving the verb by hand.
 
-| Job                                          | Verb                | Skill                       |
-| -------------------------------------------- | ------------------- | --------------------------- |
-| Render the design system                     | `canon design`      | `canon:draw-figure`         |
-| Render an HTML source to a PNG               | `canon capture`     | `canon:design-identity`     |
-| Serve a directory and print the link         | `canon serve`       | none                        |
-| Report one computed property across routes   | `canon inventory`   | `canon:target-check`        |
-| Walk a page through interactions and measure | `canon drive`       | `canon:ui-measure`          |
-| Drive the pinned agent browser               | `canon browser`     | `canon:review-ui`           |
-| Film a web app with a click log and camera   | `canon take`        | `canon:ui-film`             |
-| Fetch a YouTube transcript                   | `canon transcripts` | `canon:youtube-transcripts` |
+| Job                                          | Verb                       | Skill                       |
+| -------------------------------------------- | -------------------------- | --------------------------- |
+| Render the design system                     | `canon design`             | `canon:draw-figure`         |
+| Render an HTML source to a PNG               | `canon capture`            | `canon:design-identity`     |
+| Shoot a page as one PNG per section          | `canon capture --sections` | none                        |
+| Serve a directory and print the link         | `canon serve`              | none                        |
+| Report one computed property across routes   | `canon inventory`          | `canon:target-check`        |
+| Walk a page through interactions and measure | `canon drive`              | `canon:ui-measure`          |
+| Drive the pinned agent browser               | `canon browser`            | `canon:review-ui`           |
+| Film a web app with a click log and camera   | `canon take`               | `canon:ui-film`             |
+| Fetch a YouTube transcript                   | `canon transcripts`        | `canon:youtube-transcripts` |
+
+Section mode takes one HTML file or URL and a folder, as in `canon capture <source> --sections --out <dir> --json`, which prints each shot's path, top, and height in page order.
 
 The design board is Frameboard, a separate CLI outside canon, so a board job runs a `frameboard` verb rather than a `canon` one.
 
